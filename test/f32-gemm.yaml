@@ -125,3 +125,28 @@
 - name: xnn_f32_gemm_ukernel_7x4v__rvv
   pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
+# Hexagon
+- name: xnn_f32_gemm_ukernel_1x32__hvx_broadcast
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_gemm_ukernel_8x32__hvx_broadcast
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_gemm_ukernel_16x32__hvx_broadcast
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_gemm_ukernel_1x64__hvx_broadcast
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_gemm_ukernel_4x64__hvx_broadcast
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_gemm_ukernel_7x64__hvx_broadcast
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_gemm_ukernel_1x128__hvx_broadcast
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_gemm_ukernel_2x128__hvx_broadcast
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1

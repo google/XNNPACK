@@ -33,6 +33,8 @@ void xnn_f32_gemm_minmax_ukernel_2x128__hvx_broadcast(
   assert(w != NULL);
   assert(c != NULL);
 
+  XNN_SIMD_CONST_F32(vmin, params->scalar.min);
+  XNN_SIMD_CONST_F32(vmax, params->scalar.max);
   const float* a0 = a;
   float* c0 = c;
   const float* a1 = (const float*) ((uintptr_t) a0 + a_stride);
@@ -55,15 +57,15 @@ void xnn_f32_gemm_minmax_ukernel_2x128__hvx_broadcast(
 
     size_t k = kc;
     do {
-      XNN_SIMD_CONST_F32(va0, (*(uint32_t *)a0));
+      XNN_SIMD_CONST_F32(va0, *(uint32_t *)a0);
       a0 += 1;
-      XNN_SIMD_CONST_F32(va1, (*(uint32_t *)a1));
+      XNN_SIMD_CONST_F32(va1, *(uint32_t *)a1);
       a1 += 1;
 
       const HVX_Vector vb0 = *((const HVX_Vector *)(w));
-      XNN_SIMD_CONST_F32(vb1, *((const HVX_Vector *)(w + 32)));
-      XNN_SIMD_CONST_F32(vb2, *((const HVX_Vector *)(w + 64)));
-      XNN_SIMD_CONST_F32(vb3, *((const HVX_Vector *)(w + 96)));
+      const HVX_Vector vb1 = *((const HVX_Vector *)(w + 32));
+      const HVX_Vector vb2 = *((const HVX_Vector *)(w + 64));
+      const HVX_Vector vb3 = *((const HVX_Vector *)(w + 96));
       w += 128;
 
       vacc0x0 = xnn_fmadd_qf32(va0, vb0, vacc0x0);
@@ -78,7 +80,7 @@ void xnn_f32_gemm_minmax_ukernel_2x128__hvx_broadcast(
       k -= sizeof(float);
     } while (k != 0);
 
-    XNN_SIMD_CONST_F32(vmin, params->scalar.min);
+    // clamp results with min & max
     vacc0x0 = Q6_Vw_vmax_VwVw(vmin, vacc0x0);
     vacc1x0 = Q6_Vw_vmax_VwVw(vmin, vacc1x0);
     vacc0x1 = Q6_Vw_vmax_VwVw(vmin, vacc0x1);
@@ -88,7 +90,6 @@ void xnn_f32_gemm_minmax_ukernel_2x128__hvx_broadcast(
     vacc0x3 = Q6_Vw_vmax_VwVw(vmin, vacc0x3);
     vacc1x3 = Q6_Vw_vmax_VwVw(vmin, vacc1x3);
 
-    XNN_SIMD_CONST_F32(vmax, params->scalar.max);
     vacc0x0 = Q6_Vw_vmin_VwVw(vmax, vacc0x0);
     vacc1x0 = Q6_Vw_vmin_VwVw(vmax, vacc1x0);
     vacc0x1 = Q6_Vw_vmin_VwVw(vmax, vacc0x1);
@@ -97,7 +98,6 @@ void xnn_f32_gemm_minmax_ukernel_2x128__hvx_broadcast(
     vacc1x2 = Q6_Vw_vmin_VwVw(vmax, vacc1x2);
     vacc0x3 = Q6_Vw_vmin_VwVw(vmax, vacc0x3);
     vacc1x3 = Q6_Vw_vmin_VwVw(vmax, vacc1x3);
-
     if XNN_LIKELY(nc >= 128) {
       *((HVX_UVector *)c0) = vacc0x0;
       *((HVX_UVector *)(c0 + 32)) = vacc0x1;

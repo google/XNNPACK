@@ -12,7 +12,7 @@
 
 #include "xnnpack/gemm.h"
 
-void xnn_f32_gemm_minmax_ukernel_1x32__hvx_broadcast(
+void xnn_f32_gemm_ukernel_1x32__hvx_broadcast(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -22,7 +22,7 @@ void xnn_f32_gemm_minmax_ukernel_1x32__hvx_broadcast(
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= 1);
@@ -33,8 +33,6 @@ void xnn_f32_gemm_minmax_ukernel_1x32__hvx_broadcast(
   assert(w != NULL);
   assert(c != NULL);
 
-  XNN_SIMD_CONST_F32(vmin, params->scalar.min);
-  XNN_SIMD_CONST_F32(vmax, params->scalar.max);
   const float* a0 = a;
   float* c0 = c;
 
@@ -55,10 +53,6 @@ void xnn_f32_gemm_minmax_ukernel_1x32__hvx_broadcast(
       k -= sizeof(float);
     } while (k != 0);
 
-    // clamp results with min & max
-    vacc0x0 = Q6_Vw_vmax_VwVw(vmin, vacc0x0);
-
-    vacc0x0 = Q6_Vw_vmin_VwVw(vmax, vacc0x0);
     if XNN_LIKELY(nc >= 32) {
       *((HVX_UVector *)c0) = vacc0x0;
       c0 = (float*) ((uintptr_t) c0 + cn_stride);

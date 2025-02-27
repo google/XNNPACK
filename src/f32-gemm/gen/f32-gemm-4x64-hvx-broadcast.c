@@ -12,7 +12,7 @@
 
 #include "xnnpack/gemm.h"
 
-void xnn_f32_gemm_minmax_ukernel_4x64__hvx_broadcast(
+void xnn_f32_gemm_ukernel_4x64__hvx_broadcast(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -22,7 +22,7 @@ void xnn_f32_gemm_minmax_ukernel_4x64__hvx_broadcast(
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= 4);
@@ -33,8 +33,6 @@ void xnn_f32_gemm_minmax_ukernel_4x64__hvx_broadcast(
   assert(w != NULL);
   assert(c != NULL);
 
-  XNN_SIMD_CONST_F32(vmin, params->scalar.min);
-  XNN_SIMD_CONST_F32(vmax, params->scalar.max);
   const float* a0 = a;
   float* c0 = c;
   const float* a1 = (const float*) ((uintptr_t) a0 + a_stride);
@@ -94,24 +92,6 @@ void xnn_f32_gemm_minmax_ukernel_4x64__hvx_broadcast(
       k -= sizeof(float);
     } while (k != 0);
 
-    // clamp results with min & max
-    vacc0x0 = Q6_Vw_vmax_VwVw(vmin, vacc0x0);
-    vacc1x0 = Q6_Vw_vmax_VwVw(vmin, vacc1x0);
-    vacc2x0 = Q6_Vw_vmax_VwVw(vmin, vacc2x0);
-    vacc3x0 = Q6_Vw_vmax_VwVw(vmin, vacc3x0);
-    vacc0x1 = Q6_Vw_vmax_VwVw(vmin, vacc0x1);
-    vacc1x1 = Q6_Vw_vmax_VwVw(vmin, vacc1x1);
-    vacc2x1 = Q6_Vw_vmax_VwVw(vmin, vacc2x1);
-    vacc3x1 = Q6_Vw_vmax_VwVw(vmin, vacc3x1);
-
-    vacc0x0 = Q6_Vw_vmin_VwVw(vmax, vacc0x0);
-    vacc1x0 = Q6_Vw_vmin_VwVw(vmax, vacc1x0);
-    vacc2x0 = Q6_Vw_vmin_VwVw(vmax, vacc2x0);
-    vacc3x0 = Q6_Vw_vmin_VwVw(vmax, vacc3x0);
-    vacc0x1 = Q6_Vw_vmin_VwVw(vmax, vacc0x1);
-    vacc1x1 = Q6_Vw_vmin_VwVw(vmax, vacc1x1);
-    vacc2x1 = Q6_Vw_vmin_VwVw(vmax, vacc2x1);
-    vacc3x1 = Q6_Vw_vmin_VwVw(vmax, vacc3x1);
     if XNN_LIKELY(nc >= 64) {
       *((HVX_UVector *)c0) = vacc0x0;
       *((HVX_UVector *)(c0 + 32)) = vacc0x1;
