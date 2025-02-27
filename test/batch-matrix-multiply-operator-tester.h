@@ -297,6 +297,91 @@ class BatchMatMulOperatorTester {
     }
   }
 
+  void TestBF16F32() const {
+    ASSERT_EQ(batch_dims_a().size(), batch_dims_b().size());
+    const size_t num_batch_dims = batch_dims_a().size();
+
+    xnnpack::ReplicableRandomDevice rng;
+    std::uniform_real_distribution<float> f32dist(0.1f, 1.f);
+
+    size_t batch_size_a = 1;
+    for (int k = 0; k < num_batch_dims; k++) {
+      batch_size_a *= batch_dims_a()[k];
+    }
+    size_t batch_size_b = 1;
+    for (int k = 0; k < num_batch_dims; k++) {
+      batch_size_b *= batch_dims_b()[k];
+    }
+    std::vector<size_t> batch_dims_output(num_batch_dims);
+    size_t batch_size_output = 1;
+    for (int k = 0; k < num_batch_dims; k++) {
+      batch_dims_output[k] = std::max(batch_dims_a()[k], batch_dims_b()[k]);
+      batch_size_output *= batch_dims_output[k];
+    }
+
+    xnnpack::Buffer<xnn_bfloat16> input_a(
+        XNN_EXTRA_BYTES / sizeof(xnn_bfloat16) + batch_size_a * m() * k());
+    xnnpack::Buffer<xnn_bfloat16> input_b(
+        XNN_EXTRA_BYTES / sizeof(xnn_bfloat16) + batch_size_b * k() * n());
+    xnnpack::Buffer<float> output(batch_size_output * m() * n());
+    xnnpack::Buffer<float> output_ref(batch_size_output * m() * n());
+
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
+      std::generate(input_a.begin(), input_a.end(),
+                    [&]() { return f32dist(rng); });
+      std::generate(input_b.begin(), input_b.end(),
+                    [&]() { return f32dist(rng); });
+
+      // Compute reference results.
+      ComputeReference(batch_dims_output, input_a.data(), input_b.data(),
+                       output_ref.data(), ComputeRef<xnn_bfloat16>);
+
+      // Create, setup, run, and destroy Fully Connected operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t batch_matrix_multiply_op = nullptr;
+
+      const xnn_status status = xnn_create_batch_matrix_multiply_nc_bf16_f32(
+          flags(), &batch_matrix_multiply_op);
+      if (status == xnn_status_unsupported_hardware) {
+        GTEST_SKIP();
+      }
+      ASSERT_EQ(xnn_status_success, status);
+      ASSERT_NE(nullptr, batch_matrix_multiply_op);
+
+      // Smart pointer to automatically delete batch_matrix_multiply_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+          auto_batch_matrix_multiply_op(batch_matrix_multiply_op,
+                                        xnn_delete_operator);
+
+      size_t workspace_size = 0;
+      size_t workspace_alignment = 0;
+      ASSERT_EQ(expected_status_reshape(),
+                xnn_reshape_batch_matrix_multiply_nc_bf16_f32(
+                    batch_matrix_multiply_op, num_batch_dims,
+                    batch_dims_a().data(), batch_dims_b().data(), m(), k(), n(),
+                    &workspace_size, &workspace_alignment,
+                    /*threadpool=*/nullptr));
+      if (expected_status_reshape() != xnn_status_success) {
+        return;
+      }
+      ASSERT_NE(workspace_size, 0);
+      ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
+      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
+      // TODO(b/372731180): This should probably be initialized by the operator.
+      std::fill(workspace.begin(), workspace.end(), 0);
+
+      ASSERT_EQ(xnn_status_success,
+                xnn_setup_batch_matrix_multiply_nc_bf16_f32(
+                    batch_matrix_multiply_op, workspace.data(), input_a.data(),
+                    input_b.data(), output.data()));
+
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(batch_matrix_multiply_op,
+                                                     /*threadpool=*/nullptr));
+
+      VerifyF32(output, output_ref);
+    }
+  }
+
   void TestF32() const {
     ASSERT_EQ(batch_dims_a().size(), batch_dims_b().size());
     const size_t num_batch_dims = batch_dims_a().size();

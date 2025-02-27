@@ -15,6 +15,8 @@ XNN_ENUM_ITEM(xnn_operator_type_average_pooling_nhwc_f32, "Average Pooling (NHWC
 XNN_ENUM_ITEM(xnn_operator_type_batch_matrix_multiply_nc_f16, "Batch Matrix Multiply (NC, F16)")
 XNN_ENUM_ITEM(xnn_operator_type_batch_matrix_multiply_nc_pf16,
               "Batch Matrix Multiply (NC, PF16)")
+XNN_ENUM_ITEM(xnn_operator_type_batch_matrix_multiply_nc_bf16_f32,
+              "Batch Matrix Multiply (NC, BF16_F32)")
 XNN_ENUM_ITEM(xnn_operator_type_batch_matrix_multiply_nc_f32, "Batch Matrix Multiply (NC, F32)")
 XNN_ENUM_ITEM(xnn_operator_type_batch_matrix_multiply_nc_pf32,
               "Batch Matrix Multiply (NC, PF32)")
