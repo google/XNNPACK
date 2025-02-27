@@ -373,6 +373,10 @@ BEGIN_FUNCTION {function_name}.dfsan
       ret
 END_FUNCTION {function_name}.dfsan
 #endif
+
+#ifdef __ELF__
+.section .note.GNU-stack, "", @progbits
+#endif  // __ELF__
 """.format(function_name=self.function_name(), sizeof_c=4)
     return restore_stack
 

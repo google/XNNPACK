@@ -149,3 +149,7 @@ BEGIN_FUNCTION xnn_bf16_f32_gemm_minmax_ukernel_1x32c2__asm_amd64_avx512bf16_bro
       ret
 END_FUNCTION xnn_bf16_f32_gemm_minmax_ukernel_1x32c2__asm_amd64_avx512bf16_broadcast.dfsan
       #endif
+
+      #ifdef __ELF__
+      .section .note.GNU-stack, "", @progbits
+      #endif  // __ELF__
