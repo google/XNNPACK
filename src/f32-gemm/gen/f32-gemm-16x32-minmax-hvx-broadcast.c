@@ -8,12 +8,9 @@
 // LICENSE file in the root directory of this source tree.
 
 
-#include <assert.h>
-#include <hexagon_types.h>
-#include <hexagon_protos.h>
-#include <hvx_hexagon_protos.h>
+#include "xnnpack/simd/f32-hvx.h"
+
 #include "xnnpack/gemm.h"
-#include "xnnpack/intrinsics-polyfill.h"
 
 void xnn_f32_gemm_minmax_ukernel_16x32__hvx_broadcast(
     size_t mr,
@@ -130,7 +127,7 @@ void xnn_f32_gemm_minmax_ukernel_16x32__hvx_broadcast(
   }
 
   do {
-    HVX_Vector vacc0x0 = *((HVX_Vector *)(w + 0));
+    HVX_Vector vacc0x0 = xnn_load_f32(w + 0);
     HVX_Vector vacc1x0 = vacc0x0;
     HVX_Vector vacc2x0 = vacc0x0;
     HVX_Vector vacc3x0 = vacc0x0;
@@ -150,63 +147,63 @@ void xnn_f32_gemm_minmax_ukernel_16x32__hvx_broadcast(
 
     size_t k = kc;
     do {
-      const HVX_Vector va0 = Q6_V_vsplat_R(*(uint32_t *)a0);
+      XNN_SIMD_CONST_F32(va0, (*(uint32_t *)a0));
       a0 += 1;
-      const HVX_Vector va1 = Q6_V_vsplat_R(*(uint32_t *)a1);
+      XNN_SIMD_CONST_F32(va1, (*(uint32_t *)a1));
       a1 += 1;
-      const HVX_Vector va2 = Q6_V_vsplat_R(*(uint32_t *)a2);
+      XNN_SIMD_CONST_F32(va2, (*(uint32_t *)a2));
       a2 += 1;
-      const HVX_Vector va3 = Q6_V_vsplat_R(*(uint32_t *)a3);
+      XNN_SIMD_CONST_F32(va3, (*(uint32_t *)a3));
       a3 += 1;
-      const HVX_Vector va4 = Q6_V_vsplat_R(*(uint32_t *)a4);
+      XNN_SIMD_CONST_F32(va4, (*(uint32_t *)a4));
       a4 += 1;
-      const HVX_Vector va5 = Q6_V_vsplat_R(*(uint32_t *)a5);
+      XNN_SIMD_CONST_F32(va5, (*(uint32_t *)a5));
       a5 += 1;
-      const HVX_Vector va6 = Q6_V_vsplat_R(*(uint32_t *)a6);
+      XNN_SIMD_CONST_F32(va6, (*(uint32_t *)a6));
       a6 += 1;
-      const HVX_Vector va7 = Q6_V_vsplat_R(*(uint32_t *)a7);
+      XNN_SIMD_CONST_F32(va7, (*(uint32_t *)a7));
       a7 += 1;
-      const HVX_Vector va8 = Q6_V_vsplat_R(*(uint32_t *)a8);
+      XNN_SIMD_CONST_F32(va8, (*(uint32_t *)a8));
       a8 += 1;
-      const HVX_Vector va9 = Q6_V_vsplat_R(*(uint32_t *)a9);
+      XNN_SIMD_CONST_F32(va9, (*(uint32_t *)a9));
       a9 += 1;
-      const HVX_Vector va10 = Q6_V_vsplat_R(*(uint32_t *)a10);
+      XNN_SIMD_CONST_F32(va10, (*(uint32_t *)a10));
       a10 += 1;
-      const HVX_Vector va11 = Q6_V_vsplat_R(*(uint32_t *)a11);
+      XNN_SIMD_CONST_F32(va11, (*(uint32_t *)a11));
       a11 += 1;
-      const HVX_Vector va12 = Q6_V_vsplat_R(*(uint32_t *)a12);
+      XNN_SIMD_CONST_F32(va12, (*(uint32_t *)a12));
       a12 += 1;
-      const HVX_Vector va13 = Q6_V_vsplat_R(*(uint32_t *)a13);
+      XNN_SIMD_CONST_F32(va13, (*(uint32_t *)a13));
       a13 += 1;
-      const HVX_Vector va14 = Q6_V_vsplat_R(*(uint32_t *)a14);
+      XNN_SIMD_CONST_F32(va14, (*(uint32_t *)a14));
       a14 += 1;
-      const HVX_Vector va15 = Q6_V_vsplat_R(*(uint32_t *)a15);
+      XNN_SIMD_CONST_F32(va15, (*(uint32_t *)a15));
       a15 += 1;
 
       const HVX_Vector vb0 = *((const HVX_Vector *)(w));
       w += 32;
 
-      vacc0x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va0, vb0),vacc0x0));
-      vacc1x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va1, vb0),vacc1x0));
-      vacc2x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va2, vb0),vacc2x0));
-      vacc3x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va3, vb0),vacc3x0));
-      vacc4x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va4, vb0),vacc4x0));
-      vacc5x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va5, vb0),vacc5x0));
-      vacc6x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va6, vb0),vacc6x0));
-      vacc7x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va7, vb0),vacc7x0));
-      vacc8x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va8, vb0),vacc8x0));
-      vacc9x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va9, vb0),vacc9x0));
-      vacc10x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va10, vb0),vacc10x0));
-      vacc11x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va11, vb0),vacc11x0));
-      vacc12x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va12, vb0),vacc12x0));
-      vacc13x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va13, vb0),vacc13x0));
-      vacc14x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va14, vb0),vacc14x0));
-      vacc15x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va15, vb0),vacc15x0));
+      vacc0x0 = xnn_fmadd_qf32(va0, vb0, vacc0x0);
+      vacc1x0 = xnn_fmadd_qf32(va1, vb0, vacc1x0);
+      vacc2x0 = xnn_fmadd_qf32(va2, vb0, vacc2x0);
+      vacc3x0 = xnn_fmadd_qf32(va3, vb0, vacc3x0);
+      vacc4x0 = xnn_fmadd_qf32(va4, vb0, vacc4x0);
+      vacc5x0 = xnn_fmadd_qf32(va5, vb0, vacc5x0);
+      vacc6x0 = xnn_fmadd_qf32(va6, vb0, vacc6x0);
+      vacc7x0 = xnn_fmadd_qf32(va7, vb0, vacc7x0);
+      vacc8x0 = xnn_fmadd_qf32(va8, vb0, vacc8x0);
+      vacc9x0 = xnn_fmadd_qf32(va9, vb0, vacc9x0);
+      vacc10x0 = xnn_fmadd_qf32(va10, vb0, vacc10x0);
+      vacc11x0 = xnn_fmadd_qf32(va11, vb0, vacc11x0);
+      vacc12x0 = xnn_fmadd_qf32(va12, vb0, vacc12x0);
+      vacc13x0 = xnn_fmadd_qf32(va13, vb0, vacc13x0);
+      vacc14x0 = xnn_fmadd_qf32(va14, vb0, vacc14x0);
+      vacc15x0 = xnn_fmadd_qf32(va15, vb0, vacc15x0);
 
       k -= sizeof(float);
     } while (k != 0);
 
-    const HVX_Vector vmin = Q6_V_vsplat_R(params->scalar.min);
+    XNN_SIMD_CONST_F32(vmin, params->scalar.min);
     vacc0x0 = Q6_Vw_vmax_VwVw(vmin, vacc0x0);
     vacc1x0 = Q6_Vw_vmax_VwVw(vmin, vacc1x0);
     vacc2x0 = Q6_Vw_vmax_VwVw(vmin, vacc2x0);
@@ -224,7 +221,7 @@ void xnn_f32_gemm_minmax_ukernel_16x32__hvx_broadcast(
     vacc14x0 = Q6_Vw_vmax_VwVw(vmin, vacc14x0);
     vacc15x0 = Q6_Vw_vmax_VwVw(vmin, vacc15x0);
 
-    const HVX_Vector vmax = Q6_V_vsplat_R(params->scalar.max);
+    XNN_SIMD_CONST_F32(vmax, params->scalar.max);
     vacc0x0 = Q6_Vw_vmin_VwVw(vmax, vacc0x0);
     vacc1x0 = Q6_Vw_vmin_VwVw(vmax, vacc1x0);
     vacc2x0 = Q6_Vw_vmin_VwVw(vmax, vacc2x0);
@@ -295,22 +292,22 @@ void xnn_f32_gemm_minmax_ukernel_16x32__hvx_broadcast(
 
       nc -= 32;
     } else {
-      vstu_variable_scalar((char*)c0, nc*sizeof(float), vacc0x0);
-      vstu_variable_scalar((char*)c1, nc*sizeof(float), vacc1x0);
-      vstu_variable_scalar((char*)c2, nc*sizeof(float), vacc2x0);
-      vstu_variable_scalar((char*)c3, nc*sizeof(float), vacc3x0);
-      vstu_variable_scalar((char*)c4, nc*sizeof(float), vacc4x0);
-      vstu_variable_scalar((char*)c5, nc*sizeof(float), vacc5x0);
-      vstu_variable_scalar((char*)c6, nc*sizeof(float), vacc6x0);
-      vstu_variable_scalar((char*)c7, nc*sizeof(float), vacc7x0);
-      vstu_variable_scalar((char*)c8, nc*sizeof(float), vacc8x0);
-      vstu_variable_scalar((char*)c9, nc*sizeof(float), vacc9x0);
-      vstu_variable_scalar((char*)c10, nc*sizeof(float), vacc10x0);
-      vstu_variable_scalar((char*)c11, nc*sizeof(float), vacc11x0);
-      vstu_variable_scalar((char*)c12, nc*sizeof(float), vacc12x0);
-      vstu_variable_scalar((char*)c13, nc*sizeof(float), vacc13x0);
-      vstu_variable_scalar((char*)c14, nc*sizeof(float), vacc14x0);
-      vstu_variable_scalar((char*)c15, nc*sizeof(float), vacc15x0);
+      xnn_store_tail_f32(c0, vacc0x0, nc);
+      xnn_store_tail_f32(c1, vacc1x0, nc);
+      xnn_store_tail_f32(c2, vacc2x0, nc);
+      xnn_store_tail_f32(c3, vacc3x0, nc);
+      xnn_store_tail_f32(c4, vacc4x0, nc);
+      xnn_store_tail_f32(c5, vacc5x0, nc);
+      xnn_store_tail_f32(c6, vacc6x0, nc);
+      xnn_store_tail_f32(c7, vacc7x0, nc);
+      xnn_store_tail_f32(c8, vacc8x0, nc);
+      xnn_store_tail_f32(c9, vacc9x0, nc);
+      xnn_store_tail_f32(c10, vacc10x0, nc);
+      xnn_store_tail_f32(c11, vacc11x0, nc);
+      xnn_store_tail_f32(c12, vacc12x0, nc);
+      xnn_store_tail_f32(c13, vacc13x0, nc);
+      xnn_store_tail_f32(c14, vacc14x0, nc);
+      xnn_store_tail_f32(c15, vacc15x0, nc);
       nc = 0;
     }
   } while (nc != 0);
