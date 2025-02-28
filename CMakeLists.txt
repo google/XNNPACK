@@ -1388,15 +1388,13 @@ IF(XNNPACK_BUILD_TESTS)
         batch-matrix-multiply
         binary
         buffer
-        concatenate2
-        concatenate3
-        concatenate4
-        concatenate5
+        concatenate
         copy
         depth-to-space-2d
         even-split2
         even-split3
         even-split4
+        even-split
         fully-connected
         global-average-pooling-1d
         global-average-pooling-2d
