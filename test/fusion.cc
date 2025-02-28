@@ -705,7 +705,7 @@ TEST(COPY, fused_upstream_with_multiple_outputs) {
   EXPECT_EQ(unoptimized_output, optimized_output);
 
   const xnn_node* split_node = tester.Node(0);
-  ASSERT_EQ(split_node->type, xnn_node_type_even_split2);
+  ASSERT_EQ(split_node->type, xnn_node_type_even_split);
   EXPECT_EQ(split_node->inputs[0], input_id);
   ASSERT_EQ(split_node->num_outputs, 2);
   EXPECT_EQ(split_node->outputs[0], copy_out1);

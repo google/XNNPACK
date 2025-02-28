@@ -1394,6 +1394,7 @@ IF(XNNPACK_BUILD_TESTS)
         even-split2
         even-split3
         even-split4
+        even-split
         fully-connected
         global-average-pooling-1d
         global-average-pooling-2d
