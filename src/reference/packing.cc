@@ -262,7 +262,6 @@ void xnn_pack_f32_to_f16_gemm_goi_w(size_t g, size_t nc, size_t kc, size_t nr,
   } while (--g != 0);
 }
 
-XNN_DISABLE_ALIGNMENT_SAN
 void xnn_pack_qu8_gemm_goi_w(size_t g, size_t nc, size_t kc, size_t nr,
                              size_t kr, size_t sr, const uint8_t* k,
                              const int32_t* b, const void* scale,
@@ -311,7 +310,6 @@ void xnn_pack_qu8_gemm_goi_w(size_t g, size_t nc, size_t kc, size_t nr,
   } while (--g != 0);
 }
 
-XNN_DISABLE_ALIGNMENT_SAN
 void xnn_pack_qs8_gemm_goi_w(size_t g, size_t nc, size_t kc, size_t nr,
                              size_t kr, size_t sr, const int8_t* k,
                              const int32_t* b, const float* scale,
@@ -407,7 +405,6 @@ void xnn_pack_qs8_to_qu8_gemm_goi_w(
 
 static int8_t sign_extend_int4(int8_t value) { return (value ^ 0x8) - 8; }
 
-XNN_DISABLE_ALIGNMENT_SAN
 void xnn_pack_qs8_qc4w_gemm_goi_w(
     size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
     const uint8_t* k, const int32_t* b, const float* scale,
@@ -2629,7 +2626,6 @@ void xnn_pack_qs8_to_qu8_conv_goki_w(
   } while (--g != 0);
 }
 
-XNN_DISABLE_ALIGNMENT_SAN
 void xnn_pack_qs8_conv_goki_w(size_t g, size_t nc, size_t ks, size_t kc,
                               size_t nr, size_t kr, size_t sr, const int8_t* k,
                               const int32_t* b, const float* scale,
@@ -3559,7 +3555,6 @@ void xnn_pack_qu8_dwconv_ghw_w(size_t primary_tile, size_t h, size_t w,
   }
 }
 
-XNN_DISABLE_ALIGNMENT_SAN
 void xnn_pack_qs8_dwconv_ghw_w(size_t primary_tile, size_t h, size_t w,
                                size_t c, size_t channel_tile,
                                size_t channel_subtile, size_t channel_round,
@@ -3990,7 +3985,6 @@ void xnn_pack_qu8_dwconv_hwg_w(size_t primary_tile, size_t h, size_t w,
   }
 }
 
-XNN_DISABLE_ALIGNMENT_SAN
 void xnn_pack_qs8_dwconv_hwg_w(size_t primary_tile, size_t h, size_t w,
                                size_t c, size_t channel_tile,
                                size_t channel_subtile, size_t channel_round,
