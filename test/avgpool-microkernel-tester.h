@@ -237,7 +237,7 @@ class AvgPoolMicrokernelTester {
         reinterpret_cast<const xnn_float16**>(indirect_input.data()), input_offset() * sizeof(xnn_float16), zero.data(),
         output.data(),
         step() * sizeof(void*),
-        (output_stride() - channels()) * sizeof(xnn_float16),
+        (output_stride()) * sizeof(xnn_float16),
         &params);
 
       // Verify results.
@@ -324,7 +324,7 @@ class AvgPoolMicrokernelTester {
         indirect_input.data(), input_offset() * sizeof(float), zero.data(),
         output.data(),
         step() * sizeof(void*),
-        (output_stride() - channels()) * sizeof(float),
+        (output_stride()) * sizeof(float),
         &params);
 
       // Verify results.
@@ -418,7 +418,7 @@ class AvgPoolMicrokernelTester {
         reinterpret_cast<const xnn_float16**>(indirect_input.data()), input_offset() * sizeof(xnn_float16), zero.data(),
         multiplier.data(), output.data(),
         step() * sizeof(void*),
-        (output_stride() - channels()) * sizeof(xnn_float16),
+        (output_stride()) * sizeof(xnn_float16),
         &params);
 
       // Verify results.
@@ -508,7 +508,7 @@ class AvgPoolMicrokernelTester {
         indirect_input.data(), input_offset() * sizeof(float), zero.data(),
         multiplier.data(), output.data(),
         step() * sizeof(void*),
-        (output_stride() - channels()) * sizeof(float),
+        (output_stride()) * sizeof(float),
         &params);
 
       // Verify results.

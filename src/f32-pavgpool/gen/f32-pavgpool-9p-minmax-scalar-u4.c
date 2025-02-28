@@ -170,6 +170,7 @@ void xnn_f32_pavgpool_minmax_ukernel_9p__scalar_u1(
     }
 
     xnn_simd_f32_t vscale = xnn_set1_f32(*multiplier++);
+    float* o = output;
     size_t c = channels;
     for (; c >= 1; c -= 1) {
       const xnn_simd_f32_t vi0 = xnn_loadu_f32(i0); i0 += 1;
@@ -198,7 +199,7 @@ void xnn_f32_pavgpool_minmax_ukernel_9p__scalar_u1(
       vacc = xnn_max_f32(vacc, vmin);
       vacc = xnn_min_f32(vacc, vmax);
 
-      xnn_storeu_f32(output, vacc); output += 1;
+      xnn_storeu_f32(o, vacc); o += 1;
     }
 
     input = (const float**) ((uintptr_t) input + input_increment);

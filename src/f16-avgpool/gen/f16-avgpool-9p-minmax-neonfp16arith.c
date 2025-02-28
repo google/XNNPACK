@@ -193,6 +193,7 @@ void xnn_f16_avgpool_minmax_ukernel_9p__neonfp16arith_u8(
       i8 = (const xnn_float16*) ((uintptr_t) i8 + input_offset);
     }
 
+    xnn_float16* o = output;
     size_t c = channels;
     for (; c >= 8; c -= 8) {
       const xnn_simd_f16_t vi0 = xnn_loadu_f16(i0); i0 += 8;
@@ -221,7 +222,7 @@ void xnn_f16_avgpool_minmax_ukernel_9p__neonfp16arith_u8(
       vacc = xnn_max_f16(vacc, vmin);
       vacc = xnn_min_f16(vacc, vmax);
 
-      xnn_storeu_f16(output, vacc); output += 8;
+      xnn_storeu_f16(o, vacc); o += 8;
     }
     if (c > 0) {
       const xnn_simd_f16_t vi0 = xnn_load_tail_f16(i0, c);
@@ -250,7 +251,7 @@ void xnn_f16_avgpool_minmax_ukernel_9p__neonfp16arith_u8(
       vacc = xnn_max_f16(vacc, vmin);
       vacc = xnn_min_f16(vacc, vmax);
 
-      xnn_store_tail_f16(output, vacc, c); output += c;
+      xnn_store_tail_f16(o, vacc, c); o += c;
     }
 
     input = (const xnn_float16**) ((uintptr_t) input + input_increment);

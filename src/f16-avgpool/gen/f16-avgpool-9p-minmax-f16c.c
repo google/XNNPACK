@@ -232,6 +232,7 @@ void xnn_f16_avgpool_minmax_ukernel_9p__f16c_u8(
       i8 = (const uint16_t*) ((uintptr_t) i8 + input_offset);
     }
 
+    uint16_t* o = (uint16_t*) output;
     size_t c = channels;
     for (; c >= 8; c -= 8) {
       const __m256 vi0 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i0)); i0 += 8;
@@ -260,7 +261,7 @@ void xnn_f16_avgpool_minmax_ukernel_9p__f16c_u8(
       vacc = _mm256_max_ps(vacc, vmin);
       vacc = _mm256_min_ps(vacc, vmax);
 
-      _mm_storeu_si128((__m128i*) output, _mm256_cvtps_ph(vacc, _MM_FROUND_TO_NEAREST_INT)); output += 8;
+      _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vacc, _MM_FROUND_TO_NEAREST_INT)); o += 8;
     }
     if (c > 0) {
       const __m256 vi0 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i0));
@@ -289,7 +290,7 @@ void xnn_f16_avgpool_minmax_ukernel_9p__f16c_u8(
       vacc = _mm256_max_ps(vacc, vmin);
       vacc = _mm256_min_ps(vacc, vmax);
 
-      xnn_store_tail_f16((uint16_t*) output, _mm256_cvtps_ph(vacc, _MM_FROUND_TO_NEAREST_INT), c); output += c;
+      xnn_store_tail_f16((uint16_t*) o, _mm256_cvtps_ph(vacc, _MM_FROUND_TO_NEAREST_INT), c); o += c;
     }
 
     input = (const xnn_float16**) ((uintptr_t) input + input_increment);

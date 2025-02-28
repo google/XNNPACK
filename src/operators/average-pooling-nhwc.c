@@ -513,7 +513,7 @@ static enum xnn_status reshape_average_pooling2d(
       .channels = channels,
       .zero = average_pooling_op->zero_buffer,
       .input_increment = (pooling_height * step_width) * sizeof(void*),
-      .output_increment = output_width_stride - (channels << log2_data_element_size),
+      .output_increment = output_width_stride,
     };
     memcpy(&average_pooling_op->context.pixelwise_average_pooling.params, params, params_size);
     average_pooling_op->context.pixelwise_average_pooling.unipass_ukernel = pavgpool->unipass;
@@ -538,7 +538,7 @@ static enum xnn_status reshape_average_pooling2d(
       .channels = channels,
       .zero = average_pooling_op->zero_buffer,
       .input_increment = (pooling_height * step_width) * sizeof(void*),
-      .output_increment = output_width_stride - (channels << log2_data_element_size),
+      .output_increment = output_width_stride,
       .params.f32 = average_pooling_op->params.f32_scaleminmax,
     };
 

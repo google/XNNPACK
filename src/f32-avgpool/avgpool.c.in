@@ -105,6 +105,7 @@ void xnn_${DATATYPE}_${"p" if PIXELWISE else ""}avgpool_minmax_ukernel_9p__${ARC
 
     $if PIXELWISE:
       xnn_simd_${DATATYPE}_t vscale = xnn_set1_${DATATYPE}(*multiplier++);
+    ${CTYPE}* o = output;
     size_t c = channels;
     for (; c >= ${SIMD_SIZE}; c -= ${SIMD_SIZE}) {
       $for K in range(9):
@@ -126,7 +127,7 @@ void xnn_${DATATYPE}_${"p" if PIXELWISE else ""}avgpool_minmax_ukernel_9p__${ARC
       vacc = xnn_max_${DATATYPE}(vacc, vmin);
       vacc = xnn_min_${DATATYPE}(vacc, vmax);
 
-      xnn_storeu_${DATATYPE}(output, vacc); output += ${SIMD_SIZE};
+      xnn_storeu_${DATATYPE}(o, vacc); o += ${SIMD_SIZE};
     }
     $if SIMD_SIZE > 1:
       if (c > 0) {
@@ -149,7 +150,7 @@ void xnn_${DATATYPE}_${"p" if PIXELWISE else ""}avgpool_minmax_ukernel_9p__${ARC
         vacc = xnn_max_${DATATYPE}(vacc, vmin);
         vacc = xnn_min_${DATATYPE}(vacc, vmax);
 
-        xnn_store_tail_${DATATYPE}(output, vacc, c); output += c;
+        xnn_store_tail_${DATATYPE}(o, vacc, c); o += c;
       }
 
     input = (const ${CTYPE}**) ((uintptr_t) input + input_increment);

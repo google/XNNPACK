@@ -193,6 +193,7 @@ void xnn_f32_avgpool_minmax_ukernel_9p__wasmsimd_u4(
       i8 = (const float*) ((uintptr_t) i8 + input_offset);
     }
 
+    float* o = output;
     size_t c = channels;
     for (; c >= 4; c -= 4) {
       const xnn_simd_f32_t vi0 = xnn_loadu_f32(i0); i0 += 4;
@@ -221,7 +222,7 @@ void xnn_f32_avgpool_minmax_ukernel_9p__wasmsimd_u4(
       vacc = xnn_max_f32(vacc, vmin);
       vacc = xnn_min_f32(vacc, vmax);
 
-      xnn_storeu_f32(output, vacc); output += 4;
+      xnn_storeu_f32(o, vacc); o += 4;
     }
     if (c > 0) {
       const xnn_simd_f32_t vi0 = xnn_load_tail_f32(i0, c);
@@ -250,7 +251,7 @@ void xnn_f32_avgpool_minmax_ukernel_9p__wasmsimd_u4(
       vacc = xnn_max_f32(vacc, vmin);
       vacc = xnn_min_f32(vacc, vmax);
 
-      xnn_store_tail_f32(output, vacc, c); output += c;
+      xnn_store_tail_f32(o, vacc, c); o += c;
     }
 
     input = (const float**) ((uintptr_t) input + input_increment);
