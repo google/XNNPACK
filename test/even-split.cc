@@ -151,13 +151,13 @@ TEST_F(EvenSplitNTestQS8, define)
     ASSERT_NE(output_id[i], XNN_INVALID_NODE_ID);
   }
   int32_t split_dim = axis;
-  uint32_t output_ddds[num_outputs];
+  std::vector<uint32_t> output_ddds(num_outputs);
   for (int i = 0; i < num_outputs; i++) {
     output_ddds[i] = output_id[i];
   }
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_even_split(subgraph, split_dim, input_id, num_outputs, output_ddds, /*flags=*/0));
+    xnn_define_even_split(subgraph, split_dim, input_id, num_outputs, output_ddds.data(), /*flags=*/0));
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_even_split);
@@ -193,13 +193,13 @@ TEST_F(EvenSplitNTestQU8, define)
                             /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id[i]));
     ASSERT_NE(output_id[i], XNN_INVALID_NODE_ID);
   }
-  uint32_t output_ddds[num_outputs];
+  std::vector<uint32_t> output_ddds(num_outputs);
   for (int i = 0; i < num_outputs; i++) {
     output_ddds[i] = output_id[i];
   }
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_even_split(subgraph, axis, input_id, num_outputs, output_ddds, /*flags=*/0));
+    xnn_define_even_split(subgraph, axis, input_id, num_outputs, output_ddds.data(), /*flags=*/0));
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_even_split);
@@ -235,13 +235,13 @@ TEST_F(EvenSplitNTestF16, define)
                             /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id[i]));
     ASSERT_NE(output_id[i], XNN_INVALID_NODE_ID);
   }
-  uint32_t output_ddds[num_outputs];
+  std::vector<uint32_t> output_ddds(num_outputs);
   for (int i = 0; i < num_outputs; i++) {
     output_ddds[i] = output_id[i];
   }
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_even_split(subgraph, axis, input_id, num_outputs, output_ddds, /*flags=*/0));
+    xnn_define_even_split(subgraph, axis, input_id, num_outputs, output_ddds.data(), /*flags=*/0));
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
@@ -278,13 +278,13 @@ TEST_F(EvenSplitNTestF32, define)
                             /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id[i]));
     ASSERT_NE(output_id[i], XNN_INVALID_NODE_ID);
   }
-  uint32_t output_ddds[num_outputs];
+  std::vector<uint32_t> output_ddds(num_outputs);
   for (int i = 0; i < num_outputs; i++) {
     output_ddds[i] = output_id[i];
   }
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_even_split(subgraph, axis, input_id, num_outputs, output_ddds, /*flags=*/0));
+    xnn_define_even_split(subgraph, axis, input_id, num_outputs, output_ddds.data(), /*flags=*/0));
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
@@ -345,7 +345,7 @@ TEST_F(EvenSplitNTestQS8, matches_operator_api)
       subgraph, xnn_datatype_qint8, signed_zero_point, scale, input_dims.size(), input_dims.data(), nullptr, 0,
       /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
   ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-  uint32_t output_ddds[num_outputs];
+  std::vector<uint32_t> output_ddds(num_outputs);
   for (int i = 0; i < num_outputs; i++) {
     output_ddds[i] = output_id[i];
   }
@@ -362,7 +362,7 @@ TEST_F(EvenSplitNTestQS8, matches_operator_api)
 
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_even_split(subgraph, axis, input_id, num_outputs, output_ddds, /*flags=*/0));
+    xnn_define_even_split(subgraph, axis, input_id, num_outputs, output_ddds.data(), /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
@@ -428,7 +428,7 @@ TEST_F(EvenSplitNTestQU8, matches_operator_api)
       subgraph, xnn_datatype_quint8, unsigned_zero_point, scale, input_dims.size(), input_dims.data(), nullptr, 0,
       /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
   ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-  uint32_t output_ddds[num_outputs];
+  std::vector<uint32_t> output_ddds(num_outputs);
   for (int i = 0; i < num_outputs; i++) {
     output_ddds[i] = output_id[i];
   }
@@ -445,7 +445,7 @@ TEST_F(EvenSplitNTestQU8, matches_operator_api)
 
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_even_split(subgraph, axis, input_id, num_outputs, output_ddds, /*flags=*/0));
+    xnn_define_even_split(subgraph, axis, input_id, num_outputs, output_ddds.data(), /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
@@ -514,7 +514,7 @@ TEST_F(EvenSplitNTestF16, matches_operator_api)
                           /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
   ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
 
-  uint32_t output_ddds[num_outputs];
+  std::vector<uint32_t> output_ddds(num_outputs);
   for (int i = 0; i < num_outputs; i++) {
     output_ddds[i] = output_id[i];
   }
@@ -529,7 +529,7 @@ TEST_F(EvenSplitNTestF16, matches_operator_api)
 
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_even_split(subgraph, axis, input_id, num_outputs, output_ddds, /*flags=*/0));
+    xnn_define_even_split(subgraph, axis, input_id, num_outputs, output_ddds.data(), /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
@@ -597,7 +597,7 @@ TEST_F(EvenSplitNTestF32, matches_operator_api)
                           /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
   ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
 
-  uint32_t output_ddds[num_outputs];
+  std::vector<uint32_t> output_ddds(num_outputs);
   for (int i = 0; i < num_outputs; i++) {
     output_ddds[i] = output_id[i];
   }
@@ -612,7 +612,7 @@ TEST_F(EvenSplitNTestF32, matches_operator_api)
 
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_even_split(subgraph, axis, input_id, num_outputs, output_ddds, /*flags=*/0));
+    xnn_define_even_split(subgraph, axis, input_id, num_outputs, output_ddds.data(), /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
@@ -652,7 +652,7 @@ TEST_F(EvenSplitNTestF32, reshape_output)
                           /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
   ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
 
-  uint32_t output_ddds[num_outputs];
+  std::vector<uint32_t> output_ddds(num_outputs);
   for (int i = 0; i < num_outputs; i++) {
     output_ddds[i] = output_id[i];
   }
@@ -667,7 +667,7 @@ TEST_F(EvenSplitNTestF32, reshape_output)
 
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_even_split(subgraph, axis, input_id, num_outputs, output_ddds, /*flags=*/0));
+    xnn_define_even_split(subgraph, axis, input_id, num_outputs, output_ddds.data(), /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
