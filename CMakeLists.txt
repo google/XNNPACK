@@ -2054,6 +2054,11 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   FOREACH(BENCH ${MICROKERNEL_BENCHMARKS})
     ADD_EXECUTABLE(${BENCH}-bench bench/${BENCH}.cc)
     TARGET_INCLUDE_DIRECTORIES(${BENCH}-bench PRIVATE include src)
+    IF(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+      # Attempt to work around slow compilation/linking of benchmarks with a lot of functions
+      TARGET_COMPILE_OPTIONS(${BENCH}-bench PRIVATE "-fno-function-sections")
+      TARGET_COMPILE_OPTIONS(${BENCH}-bench PRIVATE "-Os")
+    ENDIF()
     TARGET_LINK_LIBRARIES(${BENCH}-bench PRIVATE
       bench-utils
       benchmark::benchmark
