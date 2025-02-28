@@ -203,12 +203,6 @@ struct xnn_maxpool_config {
     xnn_init_f32_minmax_params_fn f32;
     xnn_init_f16_minmax_params_fn f16;
   } init;
-  // Number of elements in a tile for the first pass.
-  uint8_t first_pass_tile_size;
-  // Number of elements in a tile for the remainder pass. If the pooling size is less than or equals to
-  // first_pass_tile_size, remainder passes are not run. We run as many remainder passes as required to cover the entire
-  // pooling window.
-  uint8_t remainder_pass_tile_size;
 };
 
 struct xnn_zip_config {

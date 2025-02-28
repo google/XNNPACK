@@ -87,6 +87,11 @@ xnn_load_tail_s16(const int16_t* input, size_t num_elements) XNN_OOB_READS {
   return _mm256_maskload_epi32((const int32_t*) input, vmask);
 }
 
+static XNN_INLINE xnn_simd_s16_t
+xnn_load_tail_safe_s16(const int16_t* input, size_t num_elements) {
+  return xnn_load_tail_s16(input, num_elements);
+}
+
 static XNN_INLINE void xnn_store_tail_s16(int16_t* output, xnn_simd_s16_t v,
                                           size_t num_elements) {
   assert(num_elements > 0);

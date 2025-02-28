@@ -8,12 +8,12 @@
 #define __XNNPACK_SRC_XNNPACK_SIMD_U8_SSE2_H_
 
 #include <assert.h>
-#include <smmintrin.h>
+#include <emmintrin.h>
 #include <stddef.h>
 #include <stdint.h>
 
 #include "xnnpack/common.h"
-#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/unaligned.h"
 
 // SIMD vector type for u8 using SSE41.
 typedef __m128i xnn_simd_u8_t;
@@ -81,6 +81,33 @@ xnn_load_tail_u8(const uint8_t* input, size_t num_elements) XNN_OOB_READS {
   return _mm_loadu_si128((const __m128i*)input);
 }
 
+static XNN_INLINE xnn_simd_u8_t xnn_load_tail_safe_u8(const uint8_t* input,
+                                                      size_t num_elements) {
+  assert(num_elements > 0);
+  assert(num_elements < xnn_simd_size_u8);
+
+  XNN_ALIGN(16) uint8_t padded[16];
+  uint8_t* d = &padded[0];
+  switch (num_elements) {
+  case 15: *d++ = *input++;
+  case 14: *d++ = *input++;
+  case 13: *d++ = *input++;
+  case 12: *d++ = *input++;
+  case 11: *d++ = *input++;
+  case 10: *d++ = *input++;
+  case 9: *d++ = *input++;
+  case 8: *d++ = *input++;
+  case 7: *d++ = *input++;
+  case 6: *d++ = *input++;
+  case 5: *d++ = *input++;
+  case 4: *d++ = *input++;
+  case 3: *d++ = *input++;
+  case 2: *d++ = *input++;
+  case 1: *d++ = *input++;
+  }
+  return _mm_load_si128((const __m128i*)&padded[0]);
+}
+
 static XNN_INLINE void xnn_store_tail_u8(uint8_t* output, xnn_simd_u8_t v,
                                          size_t num_elements) {
   assert(num_elements > 0);
@@ -92,12 +119,12 @@ static XNN_INLINE void xnn_store_tail_u8(uint8_t* output, xnn_simd_u8_t v,
     output += 8;
   }
   if (num_elements & (4 * sizeof(uint8_t))) {
-    _mm_storeu_si32(output, v);
+    unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(v));
     v = _mm_srli_epi64(v, 32);
     output += 4;
   }
   if (num_elements & (2 * sizeof(uint8_t))) {
-    _mm_storeu_si16(output, v);
+    unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(v, 0));
     v = _mm_srli_epi32(v, 16);
     output += 2;
   }

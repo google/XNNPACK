@@ -75,6 +75,25 @@ xnn_load_tail_s16(const int16_t* input, size_t num_elements) XNN_OOB_READS {
   return wasm_v128_load(input);
 }
 
+static XNN_INLINE xnn_simd_s16_t
+xnn_load_tail_safe_s16(const int16_t* input, size_t num_elements) {
+  assert(num_elements > 0);
+  assert(num_elements < xnn_simd_size_s16);
+
+  XNN_ALIGN(16) int16_t padded[8];
+  int16_t* d = &padded[0];
+  switch (num_elements) {
+  case 7: *d++ = *input++;
+  case 6: *d++ = *input++;
+  case 5: *d++ = *input++;
+  case 4: *d++ = *input++;
+  case 3: *d++ = *input++;
+  case 2: *d++ = *input++;
+  case 1: *d++ = *input++;
+  }
+  return wasm_v128_load(&padded[0]);
+}
+
 static XNN_INLINE void xnn_store_tail_s16(int16_t* output, xnn_simd_s16_t v,
                                           size_t num_elements) {
   assert(num_elements > 0);

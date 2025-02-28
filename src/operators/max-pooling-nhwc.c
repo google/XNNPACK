@@ -479,7 +479,6 @@ static enum xnn_status reshape_max_pooling2d_nhwc(
   const size_t pooling_size = pooling_height * pooling_width;
   const size_t output_height = max_pooling_op->output_height;
   const size_t output_width = max_pooling_op->output_width;
-  const uint32_t first_pass_tile_size = maxpool->first_pass_tile_size;
 
   const size_t step_width =
     max_pooling_op->dilation_width > 1 ? pooling_width : min(max_pooling_op->stride_width, pooling_width);
@@ -488,8 +487,7 @@ static enum xnn_status reshape_max_pooling2d_nhwc(
   if (input_height != max_pooling_op->last_input_height ||
       input_width != max_pooling_op->last_input_width)
   {
-    // Micro-kernel may read up to (first_pass_tile_size - 1) elements after the end of indirection buffer.
-    const size_t indirection_buffer_size = sizeof(void*) * ((first_pass_tile_size - 1) + output_height * step_height);
+    const size_t indirection_buffer_size = sizeof(void*) * ((pooling_size - 1) + output_height * step_height);
     const void** indirection_buffer =
       (const void**) xnn_reallocate_memory(max_pooling_op->indirection_buffer, indirection_buffer_size);
     if (indirection_buffer == NULL) {
@@ -523,12 +521,9 @@ static enum xnn_status reshape_max_pooling2d_nhwc(
     max_pooling_op->last_input_width = input_width;
   }
 
-  const uint32_t remainder_pass_tile_size = maxpool->remainder_pass_tile_size;
-
   const size_t indirect_input_height_stride = step_height * sizeof(void*);
   const size_t output_width_stride = max_pooling_op->output_pixel_stride << log2_output_element_size;
   const size_t output_height_stride = output_width * output_width_stride;
-  const size_t multipass_adjustment = round_up(doz(pooling_size, first_pass_tile_size), remainder_pass_tile_size) + first_pass_tile_size;
 
   max_pooling_op->context.max_pooling = (struct max_pooling_context) {
     .indirect_input = max_pooling_op->indirection_buffer,
@@ -539,8 +534,8 @@ static enum xnn_status reshape_max_pooling2d_nhwc(
     .output_width = output_width,
     .pooling_size = pooling_size,
     .channels = channels,
-    .input_increment = (pooling_height * step_width - multipass_adjustment) * sizeof(void*),
-    .output_increment = output_width_stride - (channels << log2_output_element_size),
+    .input_increment = (pooling_height * step_width) * sizeof(void*),
+    .output_increment = output_width_stride,
     .ukernel = maxpool->ukernel,
   };
   memcpy(&max_pooling_op->context.max_pooling.params, params, params_size);
