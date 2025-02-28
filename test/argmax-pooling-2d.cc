@@ -157,8 +157,6 @@ TEST_F(ArgmaxPoolingTestF32, matches_operator_api)
   ASSERT_NE(nullptr, op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
-  size_t workspace_size = 0;
-  size_t workspace_alignment = 0;
   ASSERT_EQ(
     xnn_status_success,
     xnn_reshape_argmax_pooling2d_nhwc_f32(
@@ -166,14 +164,12 @@ TEST_F(ArgmaxPoolingTestF32, matches_operator_api)
       /*channels=*/channels,
       /*input_pixel_stride=*/channels,
       /*output_pixel_stride=*/channels,
-      &workspace_size, &workspace_alignment,
       /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-      /*threadpool=*/nullptr));
+    /*threadpool=*/nullptr));
 
-  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
   ASSERT_EQ(
     xnn_status_success, xnn_setup_argmax_pooling2d_nhwc_f32(
-                          op, workspace.data(), input.data(), operator_output.data(), operator_output_index.data()));
+                          op, input.data(), operator_output.data(), operator_output_index.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 

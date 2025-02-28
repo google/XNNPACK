@@ -1175,7 +1175,7 @@ void xnn_compute_dwconv2d_chw(
     &context->params);
 }
 
-void xnn_compute_argmax_pooling_unipass(
+void xnn_compute_argmax_pooling(
     const struct argmax_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index,
     size_t output_y)
@@ -1188,58 +1188,9 @@ void xnn_compute_argmax_pooling_unipass(
   uint32_t* index = (uint32_t*) ((uintptr_t) context->index +
     batch_index * context->index_batch_stride + output_y * context->index_height_stride);
 
-  context->unipass_ukernel(
+  context->ukernel(
     context->output_width, context->pooling_size, context->channels,
     indirect_input, input_offset, output, index,
-    context->input_increment, context->output_increment);
-}
-
-void xnn_compute_argmax_pooling_multipass(
-    const struct argmax_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index,
-    size_t output_y)
-{
-  const void** indirect_input = (const void**) ((uintptr_t) context->indirect_input +
-    output_y * context->indirect_input_height_stride);
-  const size_t input_offset = context->input_offset + batch_index * context->input_batch_stride;
-  void* output = (void*) ((uintptr_t) context->output +
-    batch_index * context->output_batch_stride + output_y * context->output_height_stride);
-  uint32_t* index = (uint32_t*) ((uintptr_t) context->index +
-    batch_index * context->index_batch_stride + output_y * context->index_height_stride);
-
-  void* multipass_accumulation_buffer =
-    (void*) ((uintptr_t) context->multipass_buffer + (batch_index * context->output_height + output_y) *
-      context->accumulation_and_index_buffer_size);
-  void* multipass_index_buffer =
-    (void*) ((uintptr_t) multipass_accumulation_buffer + context->accumulation_buffer_size);
-
-  context->multipass_ukernel(
-    context->output_width, context->pooling_size, context->channels,
-    indirect_input, input_offset, multipass_accumulation_buffer, multipass_index_buffer, output, index,
-    context->input_increment, context->output_increment);
-}
-
-void xnn_compute_argmax_pooling_multipass_with_thread(
-    const struct argmax_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t thread_index,
-    size_t batch_index,
-    size_t output_y)
-{
-  const void** indirect_input = (const void**) ((uintptr_t) context->indirect_input +
-    output_y * context->indirect_input_height_stride);
-  const size_t input_offset = context->input_offset + batch_index * context->input_batch_stride;
-  void* output = (void*) ((uintptr_t) context->output +
-    batch_index * context->output_batch_stride + output_y * context->output_height_stride);
-  uint32_t* index = (uint32_t*) ((uintptr_t) context->index +
-    batch_index * context->index_batch_stride + output_y * context->index_height_stride);
-
-  void* multipass_accumulation_buffer = (void*) (
-    (uintptr_t) context->multipass_buffer + thread_index * context->accumulation_and_index_buffer_size);
-  void* multipass_index_buffer = (void*) ((uintptr_t) multipass_accumulation_buffer + context->accumulation_buffer_size);
-
-  context->multipass_ukernel(
-    context->output_width, context->pooling_size, context->channels,
-    indirect_input, input_offset, multipass_accumulation_buffer, multipass_index_buffer, output, index,
     context->input_increment, context->output_increment);
 }
 

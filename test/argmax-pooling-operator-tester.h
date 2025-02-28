@@ -413,25 +413,17 @@ class ArgmaxPoolingOperatorTester {
       // Smart pointer to automatically delete argmax_pooling_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_argmax_pooling_op(argmax_pooling_op, xnn_delete_operator);
 
-      size_t workspace_size = SIZE_MAX;
-      size_t workspace_alignment = SIZE_MAX;
       ASSERT_EQ(xnn_status_success,
         xnn_reshape_argmax_pooling2d_nhwc_f32(
           argmax_pooling_op,
           batch_size(), input_height(), input_width(),
           channels(), input_pixel_stride(), output_pixel_stride(),
-          &workspace_size, &workspace_alignment,
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           auto_threadpool.get()));
-
-      ASSERT_NE(workspace_size, SIZE_MAX);
-      ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
-      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_argmax_pooling2d_nhwc_f32(
           argmax_pooling_op,
-          workspace.data(),
           input.data(), output.data(), index.data()));
 
       ASSERT_EQ(xnn_status_success,
@@ -442,10 +434,10 @@ class ArgmaxPoolingOperatorTester {
         for (size_t y = 0; y < output_height(); y++) {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              EXPECT_EQ(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
+              ASSERT_EQ(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
                 output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
-              EXPECT_EQ(index_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
+              ASSERT_EQ(index_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
                 index[((i * output_height() + y) * output_width() + x) * channels() + c]) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
             }
@@ -526,25 +518,17 @@ class ArgmaxPoolingOperatorTester {
           0, &argmax_pooling_op));
       ASSERT_NE(nullptr, argmax_pooling_op);
 
-      size_t workspace_size = SIZE_MAX;
-      size_t workspace_alignment = SIZE_MAX;
       ASSERT_EQ(xnn_status_success,
         xnn_reshape_argmax_pooling2d_nhwc_f32(
           argmax_pooling_op,
           batch_size(), input_height(), input_width(),
           channels(), input_pixel_stride(), output_pixel_stride(),
-          &workspace_size, &workspace_alignment,
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           auto_threadpool.get()));
-
-      ASSERT_NE(workspace_size, SIZE_MAX);
-      ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
-      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_argmax_pooling2d_nhwc_f32(
           argmax_pooling_op,
-          workspace.data(),
           input.data(), output.data(), index.data()));
 
       ASSERT_EQ(xnn_status_success,
@@ -555,10 +539,10 @@ class ArgmaxPoolingOperatorTester {
         for (size_t y = 0; y < output_height(); y++) {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              EXPECT_EQ(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
+              ASSERT_EQ(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
                         output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c])
                 << "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
-              EXPECT_EQ(index_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
+              ASSERT_EQ(index_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
                         index[((i * output_height() + y) * output_width() + x) * channels() + c])
                 << "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
             }
@@ -599,27 +583,18 @@ class ArgmaxPoolingOperatorTester {
         }
       }
 
-      size_t next_workspace_size = SIZE_MAX;
-      size_t next_workspace_alignment = SIZE_MAX;
       ASSERT_EQ(xnn_status_success,
         xnn_reshape_argmax_pooling2d_nhwc_f32(
           argmax_pooling_op,
           next_batch_size(), next_input_height(), next_input_width(),
           channels(), input_pixel_stride(), output_pixel_stride(),
-          &next_workspace_size, &next_workspace_alignment,
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           auto_threadpool.get()));
-
-      ASSERT_NE(workspace_size, SIZE_MAX);
-      ASSERT_LE(next_workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
-      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> next_workspace(
-          next_workspace_size);
 
       // Setup and run Argmax Pooling operator the second time, and destroy the operator.
       ASSERT_EQ(xnn_status_success,
         xnn_setup_argmax_pooling2d_nhwc_f32(
           argmax_pooling_op,
-          next_workspace.data(),
           input.data(), output.data(), index.data()));
 
       ASSERT_EQ(xnn_status_success,
@@ -634,11 +609,11 @@ class ArgmaxPoolingOperatorTester {
         for (size_t y = 0; y < next_output_height(); y++) {
           for (size_t x = 0; x < next_output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              EXPECT_EQ(
+              ASSERT_EQ(
                   next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * channels() + c],
                   output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c])
                 << "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
-              EXPECT_EQ(
+              ASSERT_EQ(
                   next_index_ref[((i * next_output_height() + y) * next_output_width() + x) * channels() + c],
                   index[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c])
                 << "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;

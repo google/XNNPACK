@@ -955,34 +955,6 @@ typedef void (*xnn_f32_argmaxpool_unipass_ukernel_fn)(
     size_t input_increment,
     size_t output_increment);
 
-// ARGMAXPOOL: ARG MAX POOLing multi-pass
-
-typedef void (*xnn_argmaxpool_multipass_ukernel_fn)(
-    size_t output_pixels,
-    size_t kernel_elements,
-    size_t channels,
-    const void** input,
-    size_t input_offset,
-    void* accumulation_buffer,
-    uint32_t* index_buffer,
-    void* output,
-    uint32_t* index,
-    size_t input_increment,
-    size_t output_increment);
-
-typedef void (*xnn_f32_argmaxpool_multipass_ukernel_fn)(
-    size_t output_pixels,
-    size_t kernel_elements,
-    size_t channels,
-    const float** input,
-    size_t input_offset,
-    float* accumulation_buffer,
-    uint32_t* index_buffer,
-    float* output,
-    uint32_t* index,
-    size_t input_increment,
-    size_t output_increment);
-
 // UNPOOL: UNPOOLing
 
 typedef void (*xnn_unpool_ukernel_fn)(

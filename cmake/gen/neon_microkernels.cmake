@@ -11,9 +11,7 @@
 
 SET(PROD_NEON_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-neon-int16-u16.c
-  src/f32-argmaxpool/f32-argmaxpool-4x-neon-c4.c
   src/f32-argmaxpool/f32-argmaxpool-9p8x-neon-c4.c
-  src/f32-argmaxpool/f32-argmaxpool-9x-neon-c4.c
   src/f32-avgpool/gen/f32-avgpool-9p-minmax-neon-u4.c
   src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-neon-2x2.c
   src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-neon.c

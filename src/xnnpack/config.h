@@ -298,8 +298,6 @@ XNN_INTERNAL const struct xnn_vmulcaddc_config* xnn_init_f32_vmulcaddc_config();
 XNN_INTERNAL const struct xnn_raddstoreexpminusmax_config* xnn_init_f16_raddstoreexpminusmax_config();
 XNN_INTERNAL const struct xnn_raddstoreexpminusmax_config* xnn_init_f32_raddstoreexpminusmax_config();
 
-#define XNN_MAX_F32_ARGMAXPOOL_UKERNELS 3
-
 XNN_INTERNAL const struct xnn_argmaxpool_config* xnn_init_f32_argmaxpool_config();
 
 XNN_INTERNAL const struct xnn_lut32norm_config* xnn_init_u8_lut32norm_config();

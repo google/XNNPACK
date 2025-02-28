@@ -6,9 +6,7 @@ Auto-generated file. Do not edit!
 """
 
 PROD_RVV_MICROKERNEL_SRCS = [
-    "src/f32-argmaxpool/f32-argmaxpool-4x-rvv-u1v.c",
     "src/f32-argmaxpool/f32-argmaxpool-9p8x-rvv-u1v.c",
-    "src/f32-argmaxpool/f32-argmaxpool-9x-rvv-u1v.c",
     "src/f32-gemm/gen/f32-gemm-1x4v-minmax-rvv.c",
     "src/f32-gemm/gen/f32-gemm-7x4v-minmax-rvv.c",
     "src/f32-igemm/gen/f32-igemm-1x4v-minmax-rvv.c",
