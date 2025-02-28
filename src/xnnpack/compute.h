@@ -971,41 +971,6 @@ struct average_pooling_context {
   size_t indirect_top_height;  // Number of output rows that form the top section of indirection buffer.
   size_t indirect_bot_start;  // Smallest output row y for the bottom section of indirection buffer.
 
-  void* output;
-  size_t output_batch_stride;
-  size_t output_height_stride;
-  size_t output_width;
-  size_t pooling_size;
-  size_t channels;
-  const void* zero;
-  size_t input_increment;
-  size_t output_increment;
-  union {
-    struct xnn_f16_scaleminmax_params f16;
-    struct xnn_f32_scaleminmax_params f32;
-  } params;
-  xnn_avgpool_unipass_ukernel_fn unipass_ukernel;
-};
-
-#ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_average_pooling_unipass(
-      const struct average_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index,
-      size_t output_y);
-#endif
-
-struct pixelwise_average_pooling_context {
-  const void** indirect_input;
-  size_t indirect_input_height_stride;
-  size_t input_offset;
-  size_t input_batch_stride;
-
-  // Stride to get to the next y of input. Used when we have compressed indirection buffers (i.e. indirection buffers
-  // contain only pointers to the first row of input).
-  size_t input_y_stride;
-  size_t indirect_top_height;  // Number of output rows that form the top section of indirection buffer.
-  size_t indirect_bot_start;  // Smallest output row y for the bottom section of indirection buffer.
-
   const void* pixelwise_buffer;
   size_t pixelwise_buffer_height_stride;
   void* output;
@@ -1021,12 +986,12 @@ struct pixelwise_average_pooling_context {
     struct xnn_f16_scaleminmax_params f16;
     struct xnn_f32_scaleminmax_params f32;
   } params;
-  xnn_pavgpool_unipass_ukernel_fn unipass_ukernel;
+  xnn_avgpool_ukernel_fn ukernel;
 };
 
 #ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_pixelwise_average_pooling_unipass(
-      const struct pixelwise_average_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
+  XNN_PRIVATE void xnn_compute_average_pooling(
+      const struct average_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index,
       size_t output_y);
 #endif

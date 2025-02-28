@@ -78,7 +78,6 @@ SET(PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-5x8-relu-wasmsimd-splat.c
   src/f32-igemm/gen/f32-igemm-5x8-wasmsimd-splat.c
   src/f32-maxpool/gen/f32-maxpool-9p-minmax-wasmsimd-u4.c
-  src/f32-pavgpool/gen/f32-pavgpool-9p-minmax-wasmsimd-u4.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmsimd-arm-splat.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmsimd-x86-splat.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-relu-wasmsimd-splat.c

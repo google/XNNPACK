@@ -274,7 +274,6 @@ struct xnn_operator {
     const struct xnn_argmaxpool_config* argmaxpool_config;
     struct {
       const struct xnn_avgpool_config* avgpool_config;
-      const struct xnn_pavgpool_config* pavgpool_config;
       const struct xnn_reduce_config* rdsum_config;
       const struct xnn_reduce_config* rsum_config;
       const struct xnn_unary_elementwise_config* cvt_config;
@@ -352,7 +351,6 @@ struct xnn_operator {
     struct lut_strided_context lut_strided;
     struct max_pooling_context max_pooling;
     struct pad_context pad;
-    struct pixelwise_average_pooling_context pixelwise_average_pooling;
     struct reduce_context reduce;
     struct {
       struct resize_bilinear_context resize_bilinear;

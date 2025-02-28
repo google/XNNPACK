@@ -533,7 +533,6 @@ SET(XNNPACK_SRCS
   src/configs/ibilinear-config.c
   src/configs/lut32norm-config.c
   src/configs/maxpool-config.c
-  src/configs/pavgpool-config.c
   src/configs/pack-lh-config.c
   src/configs/raddstoreexpminusmax-config.c
   src/configs/reduce-config.c

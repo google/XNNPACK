@@ -469,10 +469,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "avgpool_minmax_test",
-    srcs = [
-        "avgpool-microkernel-tester.h",
-        "avgpool-minmax.cc",
-    ],
+    srcs = ["avgpool-minmax.cc"],
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS,
 )

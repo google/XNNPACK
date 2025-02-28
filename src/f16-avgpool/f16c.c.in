@@ -48,15 +48,14 @@ static __m128i xnn_load_tail_safe_f16(const uint16_t* i, size_t c) {
   return _mm_load_si128((const __m128i*) padded);
 }
 
-void xnn_f16_${"p" if PIXELWISE else ""}avgpool_minmax_ukernel_9p__f16c_u${SIMD_SIZE}(
+void xnn_f16_avgpool_minmax_ukernel_9p__f16c_u${SIMD_SIZE}(
     size_t output_pixels,
     size_t kernel_elements,
     size_t channels,
     const xnn_float16** input,
     size_t input_offset,
     const xnn_float16* zero,
-    $if PIXELWISE:
-      const xnn_float16* multiplier,
+    const xnn_float16* multiplier,
     xnn_float16* output,
     size_t input_increment,
     size_t output_increment,
@@ -69,9 +68,8 @@ void xnn_f16_${"p" if PIXELWISE else ""}avgpool_minmax_ukernel_9p__f16c_u${SIMD_
   const __m256 vmax = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.max));
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
-  $if not PIXELWISE:
-    const __m256 vscale = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.scale));
-    XNN_FORCE_REALIZATION(vscale);
+
+  __m256 vscale = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.scale));
 
   do {
     // Start with the previous output as the zero buffer.
@@ -141,8 +139,9 @@ void xnn_f16_${"p" if PIXELWISE else ""}avgpool_minmax_ukernel_9p__f16c_u${SIMD_
         i${K} = (const uint16_t*) ((uintptr_t) i${K} + input_offset);
       }
 
-    $if PIXELWISE:
-      __m256 vscale = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) (multiplier++)));
+    if (multiplier) {
+      vscale = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) (multiplier++)));
+    }
     uint16_t* o = (uint16_t*) output;
     size_t c = channels;
     for (; c >= ${SIMD_SIZE}; c -= ${SIMD_SIZE}) {

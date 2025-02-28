@@ -797,45 +797,7 @@ typedef void (*xnn_bilinear_ukernel_fn)(
 
 // AVGPOOL: AVeraGe POOLing single-pass
 
-typedef void (*xnn_avgpool_unipass_ukernel_fn)(
-    size_t output_pixels,
-    size_t kernel_elements,
-    size_t channels,
-    const void** input,
-    size_t input_offset,
-    const void* zero,
-    void* output,
-    size_t input_increment,
-    size_t output_increment,
-    const void* params);
-
-typedef void (*xnn_f16_avgpool_minmax_unipass_ukernel_fn)(
-    size_t output_pixels,
-    size_t kernel_elements,
-    size_t channels,
-    const xnn_float16** input,
-    size_t input_offset,
-    const xnn_float16* zero,
-    xnn_float16* output,
-    size_t input_increment,
-    size_t output_increment,
-    const struct xnn_f16_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_avgpool_minmax_unipass_ukernel_fn)(
-    size_t output_pixels,
-    size_t kernel_elements,
-    size_t channels,
-    const float** input,
-    size_t input_offset,
-    const float* zero,
-    float* output,
-    size_t input_increment,
-    size_t output_increment,
-    const struct xnn_f32_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// PAVGPOOL: Pixelwise AVeraGe POOLing single-pass
-
-typedef void (*xnn_pavgpool_unipass_ukernel_fn)(
+typedef void (*xnn_avgpool_ukernel_fn)(
     size_t output_pixels,
     size_t kernel_elements,
     size_t channels,
@@ -848,7 +810,7 @@ typedef void (*xnn_pavgpool_unipass_ukernel_fn)(
     size_t output_increment,
     const void* params);
 
-typedef void (*xnn_f16_pavgpool_minmax_unipass_ukernel_fn)(
+typedef void (*xnn_f16_avgpool_ukernel_fn)(
     size_t output_pixels,
     size_t kernel_elements,
     size_t channels,
@@ -861,7 +823,7 @@ typedef void (*xnn_f16_pavgpool_minmax_unipass_ukernel_fn)(
     size_t output_increment,
     const struct xnn_f16_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-typedef void (*xnn_f32_pavgpool_minmax_unipass_ukernel_fn)(
+typedef void (*xnn_f32_avgpool_ukernel_fn)(
     size_t output_pixels,
     size_t kernel_elements,
     size_t channels,

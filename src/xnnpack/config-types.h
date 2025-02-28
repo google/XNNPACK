@@ -77,7 +77,7 @@ struct xnn_xx_pad_config {
 };
 
 struct xnn_avgpool_config {
-  xnn_avgpool_unipass_ukernel_fn unipass;
+  xnn_avgpool_ukernel_fn ukernel;
   union {
     xnn_init_f16_scaleminmax_params_fn f16;
     xnn_init_f32_scaleminmax_params_fn f32;
@@ -94,20 +94,6 @@ struct xnn_pack_lh_config {
   xnn_pack_lh_ukernel_fn ukernel;
   xnn_pack_lh_size_fn size_fn;
   xnn_pack_lh_offset_fn offset_fn;
-};
-
-struct xnn_pavgpool_config {
-  xnn_pavgpool_unipass_ukernel_fn unipass;
-  union {
-    xnn_init_f16_scaleminmax_params_fn f16;
-    xnn_init_f32_scaleminmax_params_fn f32;
-  } init;
-  // Number of rows in a primary tile.
-  // TODO: Only used by tests, it should be removed.
-  uint8_t primary_tile;
-  // Number of channels in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
-  uint16_t channel_tile;
 };
 
 union xnn_dwconv_ukernel {

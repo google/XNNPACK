@@ -14,15 +14,14 @@ $assert(SIMD_SIZE > 0)
 #include "xnnpack/microparams.h"
 
 $CTYPE = {"f32": "float", "f16": "xnn_float16"}[DATATYPE]
-void xnn_${DATATYPE}_${"p" if PIXELWISE else ""}avgpool_minmax_ukernel_9p__${ARCH}_u${SIMD_SIZE}(
+void xnn_${DATATYPE}_avgpool_minmax_ukernel_9p__${ARCH}_u${SIMD_SIZE}(
     size_t output_pixels,
     size_t kernel_elements,
     size_t channels,
     const ${CTYPE}** input,
     size_t input_offset,
     const ${CTYPE}* zero,
-    $if PIXELWISE:
-      const ${CTYPE}* multiplier,
+    const ${CTYPE}* multiplier,
     ${CTYPE}* output,
     size_t input_increment,
     size_t output_increment,
@@ -35,9 +34,8 @@ void xnn_${DATATYPE}_${"p" if PIXELWISE else ""}avgpool_minmax_ukernel_9p__${ARC
   const xnn_simd_${DATATYPE}_t vmax = xnn_set1_${DATATYPE}(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
-  $if not PIXELWISE:
-    const xnn_simd_${DATATYPE}_t vscale = xnn_set1_${DATATYPE}(params->scalar.scale);
-    XNN_FORCE_REALIZATION(vscale);
+
+  xnn_simd_${DATATYPE}_t vscale = xnn_set1_${DATATYPE}(params->scalar.scale);
 
   do {
     // Start with the previous output as the zero buffer.
@@ -103,8 +101,9 @@ void xnn_${DATATYPE}_${"p" if PIXELWISE else ""}avgpool_minmax_ukernel_9p__${ARC
         i${K} = (const ${CTYPE}*) ((uintptr_t) i${K} + input_offset);
       }
 
-    $if PIXELWISE:
-      xnn_simd_${DATATYPE}_t vscale = xnn_set1_${DATATYPE}(*multiplier++);
+    if (multiplier != NULL) {
+      vscale = xnn_set1_${DATATYPE}(*multiplier++);
+    }
     ${CTYPE}* o = output;
     size_t c = channels;
     for (; c >= ${SIMD_SIZE}; c -= ${SIMD_SIZE}) {

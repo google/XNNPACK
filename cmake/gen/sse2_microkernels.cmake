@@ -17,7 +17,6 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/f32-avgpool/gen/f32-avgpool-9p-minmax-sse2-u4.c
   src/f32-f16-vcvt/gen/f32-f16-vcvt-sse2-u16.c
   src/f32-maxpool/gen/f32-maxpool-9p-minmax-sse2-u4.c
-  src/f32-pavgpool/gen/f32-pavgpool-9p-minmax-sse2-u4.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-sse2-u32.c
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-sse2-u32.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-sse2-rr2-p5-u16-acc2.c

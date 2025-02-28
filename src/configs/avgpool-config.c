@@ -24,7 +24,7 @@ static void init_f16_avgpool_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
-      f16_avgpool_config.unipass = (xnn_avgpool_unipass_ukernel_fn) xnn_f16_avgpool_minmax_ukernel_9p__neonfp16arith_u8;
+      f16_avgpool_config.ukernel = (xnn_avgpool_ukernel_fn) xnn_f16_avgpool_minmax_ukernel_9p__neonfp16arith_u8;
       f16_avgpool_config.init.f16 = xnn_init_f16_scaleminmax_scalar_params;
       f16_avgpool_config.primary_tile = 9;
       f16_avgpool_config.channel_tile = 8;
@@ -33,7 +33,7 @@ static void init_f16_avgpool_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_f16c) {
-      f16_avgpool_config.unipass = (xnn_avgpool_unipass_ukernel_fn) xnn_f16_avgpool_minmax_ukernel_9p__f16c_u8;
+      f16_avgpool_config.ukernel = (xnn_avgpool_ukernel_fn) xnn_f16_avgpool_minmax_ukernel_9p__f16c_u8;
       f16_avgpool_config.init.f16 = xnn_init_f16_scaleminmax_scalar_params;
       f16_avgpool_config.primary_tile = 9;
       f16_avgpool_config.channel_tile = 8;
@@ -46,33 +46,33 @@ static void init_f32_avgpool_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon) {
-      f32_avgpool_config.unipass = (xnn_avgpool_unipass_ukernel_fn) xnn_f32_avgpool_minmax_ukernel_9p__neon_u4;
+      f32_avgpool_config.ukernel = (xnn_avgpool_ukernel_fn) xnn_f32_avgpool_minmax_ukernel_9p__neon_u4;
       f32_avgpool_config.init.f32 = xnn_init_f32_scaleminmax_scalar_params;
       f32_avgpool_config.primary_tile = 9;
       f32_avgpool_config.channel_tile = 4;
     } else if (!XNN_PLATFORM_MOBILE) {
-      f32_avgpool_config.unipass = (xnn_avgpool_unipass_ukernel_fn) xnn_f32_avgpool_minmax_ukernel_9p__scalar_u1;
+      f32_avgpool_config.ukernel = (xnn_avgpool_ukernel_fn) xnn_f32_avgpool_minmax_ukernel_9p__scalar_u1;
       f32_avgpool_config.init.f32 = xnn_init_f32_scaleminmax_scalar_params;
       f32_avgpool_config.primary_tile = 9;
       f32_avgpool_config.channel_tile = 1;
     }
   #elif XNN_ARCH_ARM64
-    f32_avgpool_config.unipass = (xnn_avgpool_unipass_ukernel_fn) xnn_f32_avgpool_minmax_ukernel_9p__neon_u4;
+    f32_avgpool_config.ukernel = (xnn_avgpool_ukernel_fn) xnn_f32_avgpool_minmax_ukernel_9p__neon_u4;
     f32_avgpool_config.init.f32 = xnn_init_f32_scaleminmax_scalar_params;
     f32_avgpool_config.primary_tile = 9;
     f32_avgpool_config.channel_tile = 4;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    f32_avgpool_config.unipass = (xnn_avgpool_unipass_ukernel_fn) xnn_f32_avgpool_minmax_ukernel_9p__sse2_u4;
+    f32_avgpool_config.ukernel = (xnn_avgpool_ukernel_fn) xnn_f32_avgpool_minmax_ukernel_9p__sse2_u4;
     f32_avgpool_config.init.f32 = xnn_init_f32_scaleminmax_scalar_params;
     f32_avgpool_config.primary_tile = 9;
     f32_avgpool_config.channel_tile = 4;
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-    f32_avgpool_config.unipass = (xnn_avgpool_unipass_ukernel_fn) xnn_f32_avgpool_minmax_ukernel_9p__wasmsimd_u4;
+    f32_avgpool_config.ukernel = (xnn_avgpool_ukernel_fn) xnn_f32_avgpool_minmax_ukernel_9p__wasmsimd_u4;
     f32_avgpool_config.init.f32 = xnn_init_f32_scaleminmax_scalar_params;
     f32_avgpool_config.primary_tile = 9;
     f32_avgpool_config.channel_tile = 4;
   #else
-    f32_avgpool_config.unipass = (xnn_avgpool_unipass_ukernel_fn) xnn_f32_avgpool_minmax_ukernel_9p__scalar_u1;
+    f32_avgpool_config.ukernel = (xnn_avgpool_ukernel_fn) xnn_f32_avgpool_minmax_ukernel_9p__scalar_u1;
     f32_avgpool_config.init.f32 = xnn_init_f32_scaleminmax_scalar_params;
     f32_avgpool_config.primary_tile = 9;
     f32_avgpool_config.channel_tile = 1;

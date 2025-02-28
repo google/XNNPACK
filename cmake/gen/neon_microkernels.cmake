@@ -32,7 +32,6 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-4x2-minmax-neon-lane-ld64.c
   src/f32-igemm/gen/f32-igemm-4x8-minmax-neon-lane-ld128.c
   src/f32-maxpool/gen/f32-maxpool-9p-minmax-neon-u4.c
-  src/f32-pavgpool/gen/f32-pavgpool-9p-minmax-neon-u4.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x8-minmax-neon-lane-ld64.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x8-minmax-neon-lane-ld64.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-neon-lane-ld64.c

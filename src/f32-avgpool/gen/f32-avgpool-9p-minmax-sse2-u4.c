@@ -23,6 +23,7 @@ void xnn_f32_avgpool_minmax_ukernel_9p__sse2_u4(
     const float** input,
     size_t input_offset,
     const float* zero,
+    const float* multiplier,
     float* output,
     size_t input_increment,
     size_t output_increment,
@@ -35,8 +36,8 @@ void xnn_f32_avgpool_minmax_ukernel_9p__sse2_u4(
   const xnn_simd_f32_t vmax = xnn_set1_f32(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
-  const xnn_simd_f32_t vscale = xnn_set1_f32(params->scalar.scale);
-  XNN_FORCE_REALIZATION(vscale);
+
+  xnn_simd_f32_t vscale = xnn_set1_f32(params->scalar.scale);
 
   do {
     // Start with the previous output as the zero buffer.
@@ -193,6 +194,9 @@ void xnn_f32_avgpool_minmax_ukernel_9p__sse2_u4(
       i8 = (const float*) ((uintptr_t) i8 + input_offset);
     }
 
+    if (multiplier != NULL) {
+      vscale = xnn_set1_f32(*multiplier++);
+    }
     float* o = output;
     size_t c = channels;
     for (; c >= 4; c -= 4) {

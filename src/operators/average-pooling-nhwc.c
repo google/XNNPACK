@@ -175,14 +175,6 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f16(
   }
   average_pooling_op->avgpool_config = avgpool_config;
 
-  const struct xnn_pavgpool_config* pavgpool_config = xnn_init_f16_pavgpool_config();
-  if (pavgpool_config == NULL) {
-    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
-                  xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f16));
-    goto error;
-  }
-  average_pooling_op->pavgpool_config = pavgpool_config;
-
   const uint32_t pooling_size = pooling_height * pooling_width;
   avgpool_config->init.f16(&average_pooling_op->params.f16_scaleminmax,
     xnn_float16_from_float(1.0f / (float) (int32_t) pooling_size), fp16_output_min, fp16_output_max);
@@ -247,14 +239,6 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f32(
   }
   average_pooling_op->avgpool_config = avgpool_config;
 
-  const struct xnn_pavgpool_config* pavgpool_config = xnn_init_f32_pavgpool_config();
-  if (pavgpool_config == NULL) {
-    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
-                  xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f32));
-    goto error;
-  }
-  average_pooling_op->pavgpool_config = pavgpool_config;
-
   const uint32_t pooling_size = pooling_height * pooling_width;
   avgpool_config->init.f32(&average_pooling_op->params.f32_scaleminmax,
     1.0f / (float) (int32_t) pooling_size, output_min, output_max);
@@ -289,7 +273,6 @@ static enum xnn_status reshape_average_pooling2d(
   uint32_t log2_accumulator_element_size,
   xnn_indirection_init_pavgpool2d_fn indirection_init_pavgpool2d,
   const struct xnn_avgpool_config avgpool[restrict XNN_MIN_ELEMENTS(1)],
-  const struct xnn_pavgpool_config pavgpool[restrict 1],
   const void* params,
   size_t params_size,
   size_t* output_height_out,
@@ -344,7 +327,7 @@ static enum xnn_status reshape_average_pooling2d(
   average_pooling_op->input_pixel_stride = input_pixel_stride;
   average_pooling_op->output_pixel_stride = output_pixel_stride;
 
-  assert(!is_pixelwise || (pavgpool != NULL && indirection_init_pavgpool2d != NULL));
+  assert(!is_pixelwise || (indirection_init_pavgpool2d != NULL));
 
   average_pooling_op->state = xnn_run_state_invalid;
 
@@ -494,59 +477,35 @@ static enum xnn_status reshape_average_pooling2d(
         average_pooling_op->padding_top, average_pooling_op->padding_left,
         pixelwise_buffer);
     }
-
-    average_pooling_op->context.pixelwise_average_pooling = (struct pixelwise_average_pooling_context) {
-      .indirect_input = average_pooling_op->indirection_buffer,
-      .indirect_input_height_stride = indirect_input_height_stride,
-      .indirect_top_height = indirect_top_height,
-      .indirect_bot_start = average_pooling_op->output_height - indirect_bot_height,
-      .input_batch_stride = input_height * input_width * average_pooling_op->input_pixel_stride << log2_data_element_size,
-      .input_y_stride =
-          average_pooling_op->stride_height * input_width * average_pooling_op->input_pixel_stride
-          << log2_data_element_size,
-      .pixelwise_buffer = average_pooling_op->pixelwise_buffer,
-      .pixelwise_buffer_height_stride = output_width << log2_data_element_size,
-      .output_batch_stride = output_height * output_height_stride,
-      .output_height_stride = output_height_stride,
-      .output_width = output_width,
-      .pooling_size = pooling_size,
-      .channels = channels,
-      .zero = average_pooling_op->zero_buffer,
-      .input_increment = (pooling_height * step_width) * sizeof(void*),
-      .output_increment = output_width_stride,
-    };
-    memcpy(&average_pooling_op->context.pixelwise_average_pooling.params, params, params_size);
-    average_pooling_op->context.pixelwise_average_pooling.unipass_ukernel = pavgpool->unipass;
-    average_pooling_op->compute[0].type = xnn_parallelization_type_2d;
-    average_pooling_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_pixelwise_average_pooling_unipass;
   } else {
     // Not pixelwise.
     average_pooling_op->ukernel.subtype = xnn_microkernel_type_average_pooling;
-    average_pooling_op->context.average_pooling = (struct average_pooling_context) {
-      .indirect_input = average_pooling_op->indirection_buffer,
-      .indirect_input_height_stride = indirect_input_height_stride,
-      .indirect_top_height = indirect_top_height,
-      .indirect_bot_start = average_pooling_op->output_height - indirect_bot_height,
-      .input_batch_stride = input_height * input_width * average_pooling_op->input_pixel_stride << log2_data_element_size,
-      .input_y_stride =
-          average_pooling_op->stride_height * input_width * average_pooling_op->input_pixel_stride
-          << log2_data_element_size,
-      .output_batch_stride = output_height * output_height_stride,
-      .output_height_stride = output_height_stride,
-      .output_width = output_width,
-      .pooling_size = pooling_size,
-      .channels = channels,
-      .zero = average_pooling_op->zero_buffer,
-      .input_increment = (pooling_height * step_width) * sizeof(void*),
-      .output_increment = output_width_stride,
-      .params.f32 = average_pooling_op->params.f32_scaleminmax,
-    };
-
-    memcpy(&average_pooling_op->context.average_pooling.params, params, params_size);
-    average_pooling_op->compute[0].type = xnn_parallelization_type_2d;
-    average_pooling_op->context.average_pooling.unipass_ukernel = avgpool->unipass;
-    average_pooling_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_average_pooling_unipass;
   }
+
+  average_pooling_op->context.average_pooling = (struct average_pooling_context) {
+    .indirect_input = average_pooling_op->indirection_buffer,
+    .indirect_input_height_stride = indirect_input_height_stride,
+    .indirect_top_height = indirect_top_height,
+    .indirect_bot_start = average_pooling_op->output_height - indirect_bot_height,
+    .input_batch_stride = input_height * input_width * average_pooling_op->input_pixel_stride << log2_data_element_size,
+    .input_y_stride =
+        average_pooling_op->stride_height * input_width * average_pooling_op->input_pixel_stride
+        << log2_data_element_size,
+    .pixelwise_buffer = average_pooling_op->pixelwise_buffer,
+    .pixelwise_buffer_height_stride = output_width << log2_data_element_size,
+    .output_batch_stride = output_height * output_height_stride,
+    .output_height_stride = output_height_stride,
+    .output_width = output_width,
+    .pooling_size = pooling_size,
+    .channels = channels,
+    .zero = average_pooling_op->zero_buffer,
+    .input_increment = (pooling_height * step_width) * sizeof(void*),
+    .output_increment = output_width_stride,
+  };
+  memcpy(&average_pooling_op->context.average_pooling.params, params, params_size);
+  average_pooling_op->context.average_pooling.ukernel = avgpool->ukernel;
+  average_pooling_op->compute[0].type = xnn_parallelization_type_2d;
+  average_pooling_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_average_pooling;
   average_pooling_op->compute[0].range[0] = batch_size;
   average_pooling_op->compute[0].range[1] = output_height;
   average_pooling_op->state = xnn_run_state_needs_setup;
@@ -589,7 +548,7 @@ enum xnn_status xnn_reshape_average_pooling2d_nhwc_f16(
     /*log2_weight_element_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_HALF,
     (xnn_indirection_init_pavgpool2d_fn) xnn_indirection_init_pavgpool2d_f16,
-    average_pooling_op->avgpool_config, average_pooling_op->pavgpool_config,
+    average_pooling_op->avgpool_config,
     pooling_params, pooling_params_size,
     output_height_out, output_width_out,
     threadpool,
@@ -632,7 +591,7 @@ enum xnn_status xnn_reshape_average_pooling2d_nhwc_f32(
     /*log2_weight_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     (xnn_indirection_init_pavgpool2d_fn) xnn_indirection_init_pavgpool2d_f32,
-    average_pooling_op->avgpool_config, average_pooling_op->pavgpool_config,
+    average_pooling_op->avgpool_config,
     pooling_params, pooling_params_size,
     output_height_out, output_width_out,
     threadpool,
@@ -662,16 +621,9 @@ static enum xnn_status setup_average_pooling2d(
 
   average_pooling_op->output = output;
 
-  if (average_pooling_op->ukernel.subtype == xnn_microkernel_type_pixelwise_average_pooling) {
-    average_pooling_op->context.pixelwise_average_pooling.input_offset =
-      (size_t) ((uintptr_t) input - (uintptr_t) average_pooling_op->last_input);
-    average_pooling_op->context.pixelwise_average_pooling.output = output;
-  } else {
-    assert(average_pooling_op->ukernel.subtype == xnn_microkernel_type_average_pooling);
-    average_pooling_op->context.average_pooling.input_offset =
-      (size_t) ((uintptr_t) input - (uintptr_t) average_pooling_op->last_input);
-    average_pooling_op->context.average_pooling.output = output;
-  }
+  average_pooling_op->context.average_pooling.input_offset =
+    (size_t) ((uintptr_t) input - (uintptr_t) average_pooling_op->last_input);
+  average_pooling_op->context.average_pooling.output = output;
   average_pooling_op->state = xnn_run_state_ready;
 
   return xnn_status_success;

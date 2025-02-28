@@ -1232,57 +1232,25 @@ void xnn_compute_unpooling(
     input, index, indirect_output);
 }
 
-void xnn_compute_average_pooling_unipass(
+void xnn_compute_average_pooling(
     const struct average_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index,
     size_t output_y)
 {
-  // Min to clamp the large output y to indirect_top_height:
-  // - top section will have indirect_y be the original output_y
-  // - compressed and bottom section indirect_y will be indirect_top_height (i.e. y of compressed section)
-  // doz calculates the additional y values needed for bottom section:
-  // - top and compressed section will be 0, since their output_y + 1 will be <= indirect_bot_start.
-  // - bottom section will start at 1 (since output_y == indirect_bot_start).
-  // Since we only have 1 compressed row, adding these 2 values will give us the corrected indirect_y for all sections.
-  const size_t indirect_y = min(output_y, context->indirect_top_height) + doz(output_y + 1, context->indirect_bot_start);
-  const void** indirect_input = (void*) ((uintptr_t) context->indirect_input + indirect_y * context->indirect_input_height_stride);
-
-  // For top section, output_y == indirect_y (since there is no compression), so the first term is 0 (no input offset).
-  // For bottom section, output_y >= indirect_bot_start, so the second term becomes 0 (no input offset).
-  // For the middle section, output_y - indirect_y is the y of the row within the compressed section (i.e. first
-  // compressed row will be 0, second will be 1). Second term is 1 since output_y < indirect_bot_start.
-  const size_t input_offset_for_compressed_section =
-      (output_y - indirect_y) * (output_y < context->indirect_bot_start) * context->input_y_stride;
-  const size_t input_offset = context->input_offset + batch_index * context->input_batch_stride + input_offset_for_compressed_section;
-
-  void* output = (void*) ((uintptr_t) context->output +
-    batch_index * context->output_batch_stride + output_y * context->output_height_stride);
-
-  context->unipass_ukernel(
-    context->output_width, context->pooling_size, context->channels,
-    indirect_input, input_offset, context->zero, output,
-    context->input_increment, context->output_increment,
-    &context->params);
-}
-
-void xnn_compute_pixelwise_average_pooling_unipass(
-    const struct pixelwise_average_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index,
-    size_t output_y)
-{
-  // Refer to xnn_compute_average_pooling_unipass for documentation on these terms.
+  // Refer to xnn_compute_average_pooling for documentation on these terms.
   const size_t indirect_y = min(output_y, context->indirect_top_height) + doz(output_y + 1, context->indirect_bot_start);
   const void** indirect_input = (void*) ((uintptr_t) context->indirect_input + indirect_y * context->indirect_input_height_stride);
   const size_t input_offset_for_compressed_section =
       (output_y - indirect_y) * (output_y < context->indirect_bot_start) * context->input_y_stride;
   const size_t input_offset = context->input_offset + batch_index * context->input_batch_stride + input_offset_for_compressed_section;
 
-  const void* pixelwise_buffer =
-    (const void*) ((uintptr_t) context->pixelwise_buffer + output_y * context->pixelwise_buffer_height_stride);
+  const void* pixelwise_buffer = context->pixelwise_buffer
+      ? (const void*) ((uintptr_t) context->pixelwise_buffer + output_y * context->pixelwise_buffer_height_stride)
+      : NULL;
   void* output = (void*) ((uintptr_t) context->output +
     batch_index * context->output_batch_stride + output_y * context->output_height_stride);
 
-  context->unipass_ukernel(
+  context->ukernel(
     context->output_width, context->pooling_size, context->channels,
     indirect_input, input_offset, context->zero, pixelwise_buffer, output,
     context->input_increment, context->output_increment,

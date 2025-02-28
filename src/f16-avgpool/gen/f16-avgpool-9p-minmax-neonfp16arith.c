@@ -23,6 +23,7 @@ void xnn_f16_avgpool_minmax_ukernel_9p__neonfp16arith_u8(
     const xnn_float16** input,
     size_t input_offset,
     const xnn_float16* zero,
+    const xnn_float16* multiplier,
     xnn_float16* output,
     size_t input_increment,
     size_t output_increment,
@@ -35,8 +36,8 @@ void xnn_f16_avgpool_minmax_ukernel_9p__neonfp16arith_u8(
   const xnn_simd_f16_t vmax = xnn_set1_f16(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
-  const xnn_simd_f16_t vscale = xnn_set1_f16(params->scalar.scale);
-  XNN_FORCE_REALIZATION(vscale);
+
+  xnn_simd_f16_t vscale = xnn_set1_f16(params->scalar.scale);
 
   do {
     // Start with the previous output as the zero buffer.
@@ -193,6 +194,9 @@ void xnn_f16_avgpool_minmax_ukernel_9p__neonfp16arith_u8(
       i8 = (const xnn_float16*) ((uintptr_t) i8 + input_offset);
     }
 
+    if (multiplier != NULL) {
+      vscale = xnn_set1_f16(*multiplier++);
+    }
     xnn_float16* o = output;
     size_t c = channels;
     for (; c >= 8; c -= 8) {

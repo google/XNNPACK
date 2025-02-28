@@ -58,6 +58,7 @@ void xnn_f16_avgpool_minmax_ukernel_9p__f16c_u8(
     const xnn_float16** input,
     size_t input_offset,
     const xnn_float16* zero,
+    const xnn_float16* multiplier,
     xnn_float16* output,
     size_t input_increment,
     size_t output_increment,
@@ -70,8 +71,8 @@ void xnn_f16_avgpool_minmax_ukernel_9p__f16c_u8(
   const __m256 vmax = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.max));
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
-  const __m256 vscale = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.scale));
-  XNN_FORCE_REALIZATION(vscale);
+
+  __m256 vscale = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.scale));
 
   do {
     // Start with the previous output as the zero buffer.
@@ -232,6 +233,9 @@ void xnn_f16_avgpool_minmax_ukernel_9p__f16c_u8(
       i8 = (const uint16_t*) ((uintptr_t) i8 + input_offset);
     }
 
+    if (multiplier) {
+      vscale = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) (multiplier++)));
+    }
     uint16_t* o = (uint16_t*) output;
     size_t c = channels;
     for (; c >= 8; c -= 8) {
