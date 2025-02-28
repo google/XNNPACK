@@ -101,10 +101,11 @@ class BatchMatMulOperatorTester {
     return expected_status_reshape_;
   }
 
-  static void ComputeRefF32(size_t m, size_t k, size_t n, bool transpose_b,
-                            const float* input_a, const float* input_b,
-                            float* output_ref) {
-    std::fill(output_ref, output_ref + m * n, 0.0f);
+  template <class T>
+  static void ComputeRef(size_t m, size_t k, size_t n, bool transpose_b,
+                         const T* input_a, const T* input_b,
+                         float* output_ref) {
+    std::fill(output_ref, output_ref + m * n, static_cast<T>(0));
 
     if (transpose_b) {
       // lhs is B*M*K, rhs is B*N*K.
@@ -112,7 +113,8 @@ class BatchMatMulOperatorTester {
         for (size_t ni = 0; ni < n; ni++) {
           for (size_t ki = 0; ki < k; ki++) {
             output_ref[mi * n + ni] +=
-                input_a[mi * k + ki] * input_b[ni * k + ki];
+                static_cast<float>(input_a[mi * k + ki]) * 
+                static_cast<float>(input_b[ni * k + ki]);
           }
         }
       }
@@ -122,35 +124,8 @@ class BatchMatMulOperatorTester {
         for (size_t ni = 0; ni < n; ni++) {
           for (size_t ki = 0; ki < k; ki++) {
             output_ref[mi * n + ni] +=
-                input_a[mi * k + ki] * input_b[ki * n + ni];
-          }
-        }
-      }
-    }
-  }
-
-  static void ComputeRefF16(size_t m, size_t k, size_t n, bool transpose_b,
-                            const xnn_float16* input_a,
-                            const xnn_float16* input_b, float* output_ref) {
-    std::fill(output_ref, output_ref + m * n, 0.0f);
-
-    if (transpose_b) {
-      // lhs is B*M*K, rhs is B*N*K.
-      for (size_t mi = 0; mi < m; mi++) {
-        for (size_t ni = 0; ni < n; ni++) {
-          for (size_t ki = 0; ki < k; ki++) {
-            output_ref[mi * n + ni] +=
-                input_a[mi * k + ki] * input_b[ni * k + ki];
-          }
-        }
-      }
-    } else {
-      // lhs is B*M*K, rhs is B*K*N.
-      for (size_t mi = 0; mi < m; mi++) {
-        for (size_t ni = 0; ni < n; ni++) {
-          for (size_t ki = 0; ki < k; ki++) {
-            output_ref[mi * n + ni] +=
-                input_a[mi * k + ki] * input_b[ki * n + ni];
+                static_cast<float>(input_a[mi * k + ki]) * 
+                static_cast<float>(input_b[ki * n + ni]);
           }
         }
       }
@@ -274,7 +249,7 @@ class BatchMatMulOperatorTester {
 
       // Compute reference results.
       ComputeReference(batch_dims_output, input_a.data(), input_b.data(),
-                       output_ref.data(), ComputeRefF16);
+                       output_ref.data(), ComputeRef<xnn_float16>);
 
       // Create, setup, run, and destroy Fully Connected operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -360,7 +335,7 @@ class BatchMatMulOperatorTester {
 
         // Compute reference results.
         ComputeReference(batch_dims_output, input_a.data(), input_b.data(),
-                         output_ref.data(), ComputeRefF32);
+                         output_ref.data(), ComputeRef<float>);
 
         // Create, setup, run, and destroy Fully Connected operator.
         ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -540,7 +515,7 @@ class BatchMatMulOperatorTester {
                                          channelwise_scale_b);
       // Compute reference results.
       ComputeReference(batch_dims_output, input_a.data(), input_b.data(),
-                       output_ref.data(), ComputeRefF32);
+                       output_ref.data(), ComputeRef<float>);
 
       // Create, setup, run, and destroy Fully Connected operator.
       xnn_operator_t batch_matrix_multiply_op = nullptr;
@@ -658,7 +633,7 @@ class BatchMatMulOperatorTester {
 
       // Compute reference results.
       ComputeReference(batch_dims_output, input_a.data(), input_b.data(),
-                       output_ref.data(), ComputeRefF32);
+                       output_ref.data(), ComputeRef<float>);
 
       // Create, setup, run, and destroy Fully Connected operator.
       xnn_operator_t batch_matrix_multiply_op = nullptr;
