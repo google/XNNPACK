@@ -4,16 +4,13 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert NR % 32 == 0
-$assert ACTIVATION in ["LINEAR", "RELU", "MINMAX"]
 
 #include "xnnpack/simd/f32-hvx.h"
 
 #include "xnnpack/gemm.h"
 
 $RANGE_MR = list(range(MR))
-$SUFFIX = {"LINEAR": "", "RELU": "_relu", "MINMAX": "_minmax"}[ACTIVATION]
-$PARAMS = {"LINEAR": "struct xnn_f32_default_params", "RELU": "struct xnn_f32_relu_params", "MINMAX": "struct xnn_f32_minmax_params"}[ACTIVATION]
-void xnn_f32_gemm${SUFFIX}_ukernel_${MR}x${NR}__hvx_broadcast(
+void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -23,7 +20,7 @@ void xnn_f32_gemm${SUFFIX}_ukernel_${MR}x${NR}__hvx_broadcast(
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= ${MR});
@@ -34,11 +31,6 @@ void xnn_f32_gemm${SUFFIX}_ukernel_${MR}x${NR}__hvx_broadcast(
   assert(w != NULL);
   assert(c != NULL);
 
-  $if ACTIVATION == "MINMAX":
-    XNN_SIMD_CONST_F32(vmin, params->scalar.min);
-    XNN_SIMD_CONST_F32(vmax, params->scalar.max);
-  $elif ACTIVATION == "RELU":
-    XNN_SMID_CONST_F32(vmin, 0.0f);
   const float* a0 = a;
   float* c0 = c;
   $for M in range(1, MR):
@@ -86,21 +78,6 @@ void xnn_f32_gemm${SUFFIX}_ukernel_${MR}x${NR}__hvx_broadcast(
       k -= sizeof(float);
     } while (k != 0);
 
-    $if ACTIVATION == "MINMAX":
-      // clamp results with min & max
-      $for N in range(0, NR, 32):
-        $for M in range(MR):
-          vacc${M}x${N//32} = Q6_Vw_vmax_VwVw(vmin, vacc${M}x${N//32});
-
-      $for N in range(0, NR, 32):
-        $for M in range(MR):
-          vacc${M}x${N//32} = Q6_Vw_vmin_VwVw(vmax, vacc${M}x${N//32});
-    $elif ACTIVATION == "RELU":
-      // apply ReLU to results
-      $for N in range(0, NR, 32):
-        $for M in range(MR):
-          vacc${M}x${N//32} = Q6_Vw_vmax_VwVw(vmin, vacc${M}x${N//32});
-      
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in RANGE_MR:
         *((HVX_UVector *)c${M}) = vacc${M}x0;
