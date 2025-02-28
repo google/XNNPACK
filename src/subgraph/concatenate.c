@@ -361,7 +361,7 @@ enum xnn_status xnn_define_concatenate_impl(
   return xnn_status_success;
 }
 
-inline enum xnn_status xnn_define_concatenate(
+enum xnn_status xnn_define_concatenate(
   xnn_subgraph_t subgraph,
   int32_t axis,
   uint32_t num_inputs,
