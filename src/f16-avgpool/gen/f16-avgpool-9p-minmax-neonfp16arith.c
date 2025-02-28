@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f16-avgpool/avgpool.c.in
+//   Template: src/f32-avgpool/avgpool.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2025 Google LLC
