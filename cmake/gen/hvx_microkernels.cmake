@@ -12,21 +12,14 @@
 SET(PROD_HVX_MICROKERNEL_SRCS)
 
 SET(NON_PROD_HVX_MICROKERNEL_SRCS
-  src/f32-gemm/gen/f32-gemm-1x32-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-1x32-minmax-hvx-broadcast.c
-  src/f32-gemm/gen/f32-gemm-1x64-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-1x64-minmax-hvx-broadcast.c
-  src/f32-gemm/gen/f32-gemm-1x128-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-1x128-minmax-hvx-broadcast.c
-  src/f32-gemm/gen/f32-gemm-2x128-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-2x128-minmax-hvx-broadcast.c
-  src/f32-gemm/gen/f32-gemm-4x64-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-4x64-minmax-hvx-broadcast.c
-  src/f32-gemm/gen/f32-gemm-7x64-hvx-broadcast.c
+  src/f32-gemm/gen/f32-gemm-7x32-minmax-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-7x64-minmax-hvx-broadcast.c
-  src/f32-gemm/gen/f32-gemm-8x32-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-8x32-minmax-hvx-broadcast.c
-  src/f32-gemm/gen/f32-gemm-16x32-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-16x32-minmax-hvx-broadcast.c
   src/f32-igemm/gen/f32-igemm-1x32-minmax-hvx-broadcast.c
   src/f32-igemm/gen/f32-igemm-1x64-minmax-hvx-broadcast.c

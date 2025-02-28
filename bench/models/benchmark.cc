@@ -214,14 +214,14 @@ static void FP32LayerNorm(benchmark::State& state) {
 static void AttentionArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"T", "H", "N", "S"});
   b->Args({16, 25, 24, 4});
-  b->Args({1536, 128, 12, 18});
-  b->Args({1024, 256, 4, 46});
-  b->Args({1792, 256, 8, 36});
-  b->Args({1536, 256, 6, 22});
-  b->Args({2048, 256, 8, 18});
-  b->Args({3072, 256, 16, 28});
-  b->Args({2304, 256, 8, 26});
-  b->Args({2048, 64, 32, 24});
+//  b->Args({1536, 128, 12, 18});
+//  b->Args({1024, 256, 4, 46});
+//  b->Args({1792, 256, 8, 36});
+//  b->Args({1536, 256, 6, 22});
+//  b->Args({2048, 256, 8, 18});
+//  b->Args({3072, 256, 16, 28});
+//  b->Args({2304, 256, 8, 26});
+//  b->Args({2048, 64, 32, 24});
 }
 
 static void LayerNormArguments(benchmark::internal::Benchmark* b) {
@@ -236,7 +236,7 @@ BENCHMARK(FP32Attention)
     ->UseRealTime()
     ->Apply(AttentionArguments);
 
-BENCHMARK(FP16Attention)
+/* BENCHMARK(FP16Attention)
     ->Unit(benchmark::kMicrosecond)
     ->UseRealTime()
     ->Apply(AttentionArguments);
@@ -267,5 +267,5 @@ BENCHMARK(FP32LayerNorm)
     ->Unit(benchmark::kMicrosecond)
     ->UseRealTime()
     ->Apply(LayerNormArguments);
-
+*/
 XNN_BENCHMARK_MAIN();

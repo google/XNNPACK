@@ -33,8 +33,6 @@ void xnn_f32_gemm_minmax_ukernel_1x64__hvx_broadcast(
   assert(w != NULL);
   assert(c != NULL);
 
-  XNN_SIMD_CONST_F32(vmin, params->scalar.min);
-  XNN_SIMD_CONST_F32(vmax, params->scalar.max);
   const float* a0 = a;
   float* c0 = c;
 
@@ -58,12 +56,6 @@ void xnn_f32_gemm_minmax_ukernel_1x64__hvx_broadcast(
       k -= sizeof(float);
     } while (k != 0);
 
-    // clamp results with min & max
-    vacc0x0 = Q6_Vw_vmax_VwVw(vmin, vacc0x0);
-    vacc0x1 = Q6_Vw_vmax_VwVw(vmin, vacc0x1);
-
-    vacc0x0 = Q6_Vw_vmin_VwVw(vmax, vacc0x0);
-    vacc0x1 = Q6_Vw_vmin_VwVw(vmax, vacc0x1);
     if XNN_LIKELY(nc >= 64) {
       *((HVX_UVector *)c0) = vacc0x0;
       *((HVX_UVector *)(c0 + 32)) = vacc0x1;
