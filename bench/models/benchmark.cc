@@ -236,7 +236,7 @@ BENCHMARK(FP32Attention)
     ->UseRealTime()
     ->Apply(AttentionArguments);
 
- BENCHMARK(FP16Attention)
+BENCHMARK(FP16Attention)
     ->Unit(benchmark::kMicrosecond)
     ->UseRealTime()
     ->Apply(AttentionArguments);
