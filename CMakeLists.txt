@@ -1388,10 +1388,7 @@ IF(XNNPACK_BUILD_TESTS)
         batch-matrix-multiply
         binary
         buffer
-        concatenate2
-        concatenate3
-        concatenate4
-        concatenate5
+        concatenate
         copy
         depth-to-space-2d
         even-split2
