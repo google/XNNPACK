@@ -1347,6 +1347,12 @@ typedef void (*xnn_f32_reduce_ukernel_fn)(
     float* output,
     const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+typedef void (*xnn_s8_reduce_ukernel_fn)(
+    size_t batch,
+    const int8_t* input,
+    int8_t* output,
+    const void* params);
+
 typedef void (*xnn_u8_reduce_ukernel_fn)(
     size_t batch,
     const uint8_t* input,
