@@ -74,7 +74,6 @@ PROD_SSE2_MICROKERNEL_SRCS = [
     "src/qu8-vmul/gen/qu8-vmul-minmax-fp32-sse2-mul16-ld64-u8.c",
     "src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-sse2-mul16-ld64-u8.c",
     "src/s8-ibilinear/gen/s8-ibilinear-sse2-c8.c",
-    "src/s8-maxpool/gen/s8-maxpool-9p-minmax-sse2-u16.c",
     "src/s8-vclamp/s8-vclamp-sse2-u64.c",
     "src/u8-ibilinear/gen/u8-ibilinear-sse2-c8.c",
     "src/u8-maxpool/gen/u8-maxpool-9p-minmax-sse2-u16.c",

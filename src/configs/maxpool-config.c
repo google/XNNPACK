@@ -104,7 +104,7 @@ static void init_s8_maxpool_config(void) {
       s8_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_s8_maxpool_minmax_ukernel_9p__sse41_u16;
       s8_maxpool_config.init.s8 = xnn_init_s8_minmax_scalar_params;
     } else {
-      s8_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_s8_maxpool_minmax_ukernel_9p__sse2_u16;
+      s8_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_s8_maxpool_minmax_ukernel_9p__scalar_u1;
       s8_maxpool_config.init.s8 = xnn_init_s8_minmax_scalar_params;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
