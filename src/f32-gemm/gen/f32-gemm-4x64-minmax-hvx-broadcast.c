@@ -67,13 +67,13 @@ void xnn_f32_gemm_minmax_ukernel_4x64__hvx_broadcast(
 
     size_t k = kc;
     do {
-      XNN_SIMD_CONST_F32(va0, *(uint32_t *)a0);
+      const HVX_Vector va0 = xnn_set1_f32(*a0);
       a0 += 1;
-      XNN_SIMD_CONST_F32(va1, *(uint32_t *)a1);
+      const HVX_Vector va1 = xnn_set1_f32(*a1);
       a1 += 1;
-      XNN_SIMD_CONST_F32(va2, *(uint32_t *)a2);
+      const HVX_Vector va2 = xnn_set1_f32(*a2);
       a2 += 1;
-      XNN_SIMD_CONST_F32(va3, *(uint32_t *)a3);
+      const HVX_Vector va3 = xnn_set1_f32(*a3);
       a3 += 1;
 
       const HVX_Vector vb0 = *((const HVX_Vector *)(w));
