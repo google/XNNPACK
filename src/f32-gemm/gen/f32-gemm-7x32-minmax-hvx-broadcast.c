@@ -12,7 +12,7 @@
 
 #include "xnnpack/gemm.h"
 
-void xnn_f32_gemm_minmax_ukernel_7x64__hvx_broadcast(
+void xnn_f32_gemm_minmax_ukernel_7x32__hvx_broadcast(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -74,20 +74,13 @@ void xnn_f32_gemm_minmax_ukernel_7x64__hvx_broadcast(
 
   do {
     HVX_Vector vacc0x0 = xnn_load_f32(w + 0);
-    HVX_Vector vacc0x1 = xnn_load_f32(w + 32);
     HVX_Vector vacc1x0 = vacc0x0;
-    HVX_Vector vacc1x1 = vacc0x1;
     HVX_Vector vacc2x0 = vacc0x0;
-    HVX_Vector vacc2x1 = vacc0x1;
     HVX_Vector vacc3x0 = vacc0x0;
-    HVX_Vector vacc3x1 = vacc0x1;
     HVX_Vector vacc4x0 = vacc0x0;
-    HVX_Vector vacc4x1 = vacc0x1;
     HVX_Vector vacc5x0 = vacc0x0;
-    HVX_Vector vacc5x1 = vacc0x1;
     HVX_Vector vacc6x0 = vacc0x0;
-    HVX_Vector vacc6x1 = vacc0x1;
-    w += 64;
+    w += 32;
 
     size_t k = kc;
     do {
@@ -107,8 +100,7 @@ void xnn_f32_gemm_minmax_ukernel_7x64__hvx_broadcast(
       a6 += 1;
 
       const HVX_Vector vb0 = *((const HVX_Vector *)(w));
-      const HVX_Vector vb1 = *((const HVX_Vector *)(w + 32));
-      w += 64;
+      w += 32;
 
       vacc0x0 = xnn_fmadd_qf32(va0, vb0, vacc0x0);
       vacc1x0 = xnn_fmadd_qf32(va1, vb0, vacc1x0);
@@ -117,13 +109,6 @@ void xnn_f32_gemm_minmax_ukernel_7x64__hvx_broadcast(
       vacc4x0 = xnn_fmadd_qf32(va4, vb0, vacc4x0);
       vacc5x0 = xnn_fmadd_qf32(va5, vb0, vacc5x0);
       vacc6x0 = xnn_fmadd_qf32(va6, vb0, vacc6x0);
-      vacc0x1 = xnn_fmadd_qf32(va0, vb1, vacc0x1);
-      vacc1x1 = xnn_fmadd_qf32(va1, vb1, vacc1x1);
-      vacc2x1 = xnn_fmadd_qf32(va2, vb1, vacc2x1);
-      vacc3x1 = xnn_fmadd_qf32(va3, vb1, vacc3x1);
-      vacc4x1 = xnn_fmadd_qf32(va4, vb1, vacc4x1);
-      vacc5x1 = xnn_fmadd_qf32(va5, vb1, vacc5x1);
-      vacc6x1 = xnn_fmadd_qf32(va6, vb1, vacc6x1);
 
       k -= sizeof(float);
     } while (k != 0);
@@ -136,13 +121,6 @@ void xnn_f32_gemm_minmax_ukernel_7x64__hvx_broadcast(
     vacc4x0 = xnn_max_f32(vmin, vacc4x0);
     vacc5x0 = xnn_max_f32(vmin, vacc5x0);
     vacc6x0 = xnn_max_f32(vmin, vacc6x0);
-    vacc0x1 = xnn_max_f32(vmin, vacc0x1);
-    vacc1x1 = xnn_max_f32(vmin, vacc1x1);
-    vacc2x1 = xnn_max_f32(vmin, vacc2x1);
-    vacc3x1 = xnn_max_f32(vmin, vacc3x1);
-    vacc4x1 = xnn_max_f32(vmin, vacc4x1);
-    vacc5x1 = xnn_max_f32(vmin, vacc5x1);
-    vacc6x1 = xnn_max_f32(vmin, vacc6x1);
 
     XNN_SIMD_CONST_F32(vmax, params->scalar.max);
     vacc0x0 = xnn_min_f32(vmax, vacc0x0);
@@ -152,35 +130,21 @@ void xnn_f32_gemm_minmax_ukernel_7x64__hvx_broadcast(
     vacc4x0 = xnn_min_f32(vmax, vacc4x0);
     vacc5x0 = xnn_min_f32(vmax, vacc5x0);
     vacc6x0 = xnn_min_f32(vmax, vacc6x0);
-    vacc0x1 = xnn_min_f32(vmax, vacc0x1);
-    vacc1x1 = xnn_min_f32(vmax, vacc1x1);
-    vacc2x1 = xnn_min_f32(vmax, vacc2x1);
-    vacc3x1 = xnn_min_f32(vmax, vacc3x1);
-    vacc4x1 = xnn_min_f32(vmax, vacc4x1);
-    vacc5x1 = xnn_min_f32(vmax, vacc5x1);
-    vacc6x1 = xnn_min_f32(vmax, vacc6x1);
 
-    if XNN_LIKELY(nc >= 64) {
+    if XNN_LIKELY(nc >= 32) {
       *((HVX_UVector *)c0) = vacc0x0;
-      *((HVX_UVector *)(c0 + 32)) = vacc0x1;
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
       *((HVX_UVector *)c1) = vacc1x0;
-      *((HVX_UVector *)(c1 + 32)) = vacc1x1;
       c1 = (float*) ((uintptr_t) c1 + cn_stride);
       *((HVX_UVector *)c2) = vacc2x0;
-      *((HVX_UVector *)(c2 + 32)) = vacc2x1;
       c2 = (float*) ((uintptr_t) c2 + cn_stride);
       *((HVX_UVector *)c3) = vacc3x0;
-      *((HVX_UVector *)(c3 + 32)) = vacc3x1;
       c3 = (float*) ((uintptr_t) c3 + cn_stride);
       *((HVX_UVector *)c4) = vacc4x0;
-      *((HVX_UVector *)(c4 + 32)) = vacc4x1;
       c4 = (float*) ((uintptr_t) c4 + cn_stride);
       *((HVX_UVector *)c5) = vacc5x0;
-      *((HVX_UVector *)(c5 + 32)) = vacc5x1;
       c5 = (float*) ((uintptr_t) c5 + cn_stride);
       *((HVX_UVector *)c6) = vacc6x0;
-      *((HVX_UVector *)(c6 + 32)) = vacc6x1;
       c6 = (float*) ((uintptr_t) c6 + cn_stride);
 
       a0 = (const float*) ((uintptr_t) a0 - kc);
@@ -191,34 +155,8 @@ void xnn_f32_gemm_minmax_ukernel_7x64__hvx_broadcast(
       a5 = (const float*) ((uintptr_t) a5 - kc);
       a6 = (const float*) ((uintptr_t) a6 - kc);
 
-      nc -= 64;
+      nc -= 32;
     } else {
-      if (nc & 32) {
-        *((HVX_UVector *)c0) = vacc0x0;
-        *((HVX_UVector *)c1) = vacc1x0;
-        *((HVX_UVector *)c2) = vacc2x0;
-        *((HVX_UVector *)c3) = vacc3x0;
-        *((HVX_UVector *)c4) = vacc4x0;
-        *((HVX_UVector *)c5) = vacc5x0;
-        *((HVX_UVector *)c6) = vacc6x0;
-
-        vacc0x0 = vacc0x1;
-        vacc1x0 = vacc1x1;
-        vacc2x0 = vacc2x1;
-        vacc3x0 = vacc3x1;
-        vacc4x0 = vacc4x1;
-        vacc5x0 = vacc5x1;
-        vacc6x0 = vacc6x1;
-
-        c0 += 32;
-        c1 += 32;
-        c2 += 32;
-        c3 += 32;
-        c4 += 32;
-        c5 += 32;
-        c6 += 32;
-        nc ^= 32;
-      }
       xnn_store_tail_f32(c0, vacc0x0, nc);
       xnn_store_tail_f32(c1, vacc1x0, nc);
       xnn_store_tail_f32(c2, vacc2x0, nc);

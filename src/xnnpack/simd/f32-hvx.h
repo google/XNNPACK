@@ -166,7 +166,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_loadu_f32(const float* ptr) {
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_load_f32(const float* ptr) {
-  return *((HVX_UVector*) ptr);
+  return *((HVX_Vector*) ptr);
 }
 
 static XNN_INLINE void xnn_storeu_f32(float* ptr, xnn_simd_f32_t v) {
