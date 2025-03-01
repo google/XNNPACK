@@ -81,12 +81,12 @@ void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
     XNN_SIMD_CONST_F32(vmin, params->scalar.min);
     $for N in range(0, NR, 32):
       $for M in range(MR):
-        vacc${M}x${N//32} = Q6_Vw_vmax_VwVw(vmin, vacc${M}x${N//32});
+        vacc${M}x${N//32} = xnn_max_f32(vmin, vacc${M}x${N//32});
 
     XNN_SIMD_CONST_F32(vmax, params->scalar.max);
     $for N in range(0, NR, 32):
       $for M in range(MR):
-        vacc${M}x${N//32} = Q6_Vw_vmin_VwVw(vmax, vacc${M}x${N//32});
+        vacc${M}x${N//32} = xnn_min_f32(vmax, vacc${M}x${N//32});
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in RANGE_MR:
