@@ -62,6 +62,18 @@ void xnn_f32_gemm_minmax_ukernel_1x128__hvx_broadcast(
       k -= sizeof(float);
     } while (k != 0);
 
+    XNN_SIMD_CONST_F32(vmin, params->scalar.min);
+    vacc0x0 = Q6_Vw_vmax_VwVw(vmin, vacc0x0);
+    vacc0x1 = Q6_Vw_vmax_VwVw(vmin, vacc0x1);
+    vacc0x2 = Q6_Vw_vmax_VwVw(vmin, vacc0x2);
+    vacc0x3 = Q6_Vw_vmax_VwVw(vmin, vacc0x3);
+
+    XNN_SIMD_CONST_F32(vmax, params->scalar.max);
+    vacc0x0 = Q6_Vw_vmin_VwVw(vmax, vacc0x0);
+    vacc0x1 = Q6_Vw_vmin_VwVw(vmax, vacc0x1);
+    vacc0x2 = Q6_Vw_vmin_VwVw(vmax, vacc0x2);
+    vacc0x3 = Q6_Vw_vmin_VwVw(vmax, vacc0x3);
+
     if XNN_LIKELY(nc >= 128) {
       *((HVX_UVector *)c0) = vacc0x0;
       *((HVX_UVector *)(c0 + 32)) = vacc0x1;
