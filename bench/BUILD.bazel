@@ -303,6 +303,7 @@ xnnpack_benchmark(
     "f32_vscaleextexp",
     "f16_vcmul",
     "f32_vcmul",
+    "s8_rminmax",
     "x8_lut",
 ]]
 

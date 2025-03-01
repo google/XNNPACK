@@ -37,6 +37,14 @@ static XNN_INLINE xnn_simd_s8_t xnn_min_s8(xnn_simd_s8_t a, xnn_simd_s8_t b) {
   return vminq_s8(a, b);
 }
 
+static XNN_INLINE int8_t xnn_horizontal_max_s8(xnn_simd_s8_t a) {
+  return vmaxvq_s8(a, b);
+}
+
+static XNN_INLINE int8_t xnn_horizontal_min_s8(xnn_simd_s8_t a) {
+  return vminvq_s8(a, b);
+}
+
 static XNN_INLINE xnn_simd_s8_t xnn_xor_s8(xnn_simd_s8_t a, xnn_simd_s8_t b) {
   return veorq_s8(a, b);
 }
