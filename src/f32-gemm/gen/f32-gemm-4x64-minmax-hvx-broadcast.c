@@ -93,24 +93,24 @@ void xnn_f32_gemm_minmax_ukernel_4x64__hvx_broadcast(
     } while (k != 0);
 
     XNN_SIMD_CONST_F32(vmin, params->scalar.min);
-    vacc0x0 = Q6_Vw_vmax_VwVw(vmin, vacc0x0);
-    vacc1x0 = Q6_Vw_vmax_VwVw(vmin, vacc1x0);
-    vacc2x0 = Q6_Vw_vmax_VwVw(vmin, vacc2x0);
-    vacc3x0 = Q6_Vw_vmax_VwVw(vmin, vacc3x0);
-    vacc0x1 = Q6_Vw_vmax_VwVw(vmin, vacc0x1);
-    vacc1x1 = Q6_Vw_vmax_VwVw(vmin, vacc1x1);
-    vacc2x1 = Q6_Vw_vmax_VwVw(vmin, vacc2x1);
-    vacc3x1 = Q6_Vw_vmax_VwVw(vmin, vacc3x1);
+    vacc0x0 = xnn_max_f32(vmin, vacc0x0);
+    vacc1x0 = xnn_max_f32(vmin, vacc1x0);
+    vacc2x0 = xnn_max_f32(vmin, vacc2x0);
+    vacc3x0 = xnn_max_f32(vmin, vacc3x0);
+    vacc0x1 = xnn_max_f32(vmin, vacc0x1);
+    vacc1x1 = xnn_max_f32(vmin, vacc1x1);
+    vacc2x1 = xnn_max_f32(vmin, vacc2x1);
+    vacc3x1 = xnn_max_f32(vmin, vacc3x1);
 
     XNN_SIMD_CONST_F32(vmax, params->scalar.max);
-    vacc0x0 = Q6_Vw_vmin_VwVw(vmax, vacc0x0);
-    vacc1x0 = Q6_Vw_vmin_VwVw(vmax, vacc1x0);
-    vacc2x0 = Q6_Vw_vmin_VwVw(vmax, vacc2x0);
-    vacc3x0 = Q6_Vw_vmin_VwVw(vmax, vacc3x0);
-    vacc0x1 = Q6_Vw_vmin_VwVw(vmax, vacc0x1);
-    vacc1x1 = Q6_Vw_vmin_VwVw(vmax, vacc1x1);
-    vacc2x1 = Q6_Vw_vmin_VwVw(vmax, vacc2x1);
-    vacc3x1 = Q6_Vw_vmin_VwVw(vmax, vacc3x1);
+    vacc0x0 = xnn_min_f32(vmax, vacc0x0);
+    vacc1x0 = xnn_min_f32(vmax, vacc1x0);
+    vacc2x0 = xnn_min_f32(vmax, vacc2x0);
+    vacc3x0 = xnn_min_f32(vmax, vacc3x0);
+    vacc0x1 = xnn_min_f32(vmax, vacc0x1);
+    vacc1x1 = xnn_min_f32(vmax, vacc1x1);
+    vacc2x1 = xnn_min_f32(vmax, vacc2x1);
+    vacc3x1 = xnn_min_f32(vmax, vacc3x1);
 
     if XNN_LIKELY(nc >= 64) {
       *((HVX_UVector *)c0) = vacc0x0;
