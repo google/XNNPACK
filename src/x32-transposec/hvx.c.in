@@ -53,7 +53,7 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_HEIGHT}x${TILE_WIDTH}_${IN_PTRS.low
     const uint${SIZE}_t* i0 = input;
   $if OUT_PTRS == "MULTI":
     uint${SIZE}_t* o0 = (uint${SIZE}_t*) output;
-    $for N in range(1, TILE_HEIGHT):
+    $for N in range(1, TILE_SIZE):
       uint${SIZE}_t* o${N} = (uint${SIZE}_t*) ((uintptr_t) o${N-1} + output_stride);
   $elif OUT_PTRS == "SWITCH":
     uint${SIZE}_t* o = (uint${SIZE}_t*) output;
@@ -165,72 +165,73 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_HEIGHT}x${TILE_WIDTH}_${IN_PTRS.low
 
     if (bh != 0){
       // This is a scalar implementation. This tail code is for the case where TILE_SIZE==32.
-      // TODO: 1. Add simple heuristic to choose scalar or vector implementation for tail code.
       uint${SIZE}_t* i = (uint${SIZE}_t *)i0;
+      uint${SIZE}_t* o = (uint${SIZE}_t *) o0;
       size_t tail_bw = min(block_width, tile_width);
       if (bh & 16){
         for(size_t bw = 0; bw < tail_bw; bw++){
           const size_t oN_offset = output_stride * bw;
-          *((uint${SIZE}_t *) ((uintptr_t) o0 + oN_offset)) = *(i + bw);
-          *((uint${SIZE}_t *) ((uintptr_t) o0 + oN_offset) + 1) = *((uint${SIZE}_t *) ((uintptr_t) i + input_stride) + bw);
+          *((uint${SIZE}_t *) ((uintptr_t) o + oN_offset)) = *(i + bw);
+          *((uint${SIZE}_t *) ((uintptr_t) o + oN_offset) + 1) = *((uint${SIZE}_t *) ((uintptr_t) i + input_stride) + bw);
           $for N in range(2, 16):
-            *((uint${SIZE}_t *) ((uintptr_t) o0 + oN_offset) + ${N}) = *((uint${SIZE}_t *) ((uintptr_t) i + input_stride * ${N}) + bw);
+            *((uint${SIZE}_t *) ((uintptr_t) o + oN_offset) + ${N}) = *((uint${SIZE}_t *) ((uintptr_t) i + input_stride * ${N}) + bw);
         }
-        o0 += 16;
+        o += 16;
         i = (uint${SIZE}_t *)((uintptr_t) i + input_stride * 16);
       }
       if (bh & 8){
         for(size_t bw = 0; bw < tail_bw; bw++){
           const size_t oN_offset = output_stride * bw;
-          *((uint${SIZE}_t *) ((uintptr_t) o0 + oN_offset)) = *(i + bw);
-          *((uint${SIZE}_t *) ((uintptr_t) o0 + oN_offset) + 1) = *((uint${SIZE}_t *) ((uintptr_t) i + input_stride) + bw);
+          *((uint${SIZE}_t *) ((uintptr_t) o + oN_offset)) = *(i + bw);
+          *((uint${SIZE}_t *) ((uintptr_t) o + oN_offset) + 1) = *((uint${SIZE}_t *) ((uintptr_t) i + input_stride) + bw);
           $for N in range(2, 8):
-            *((uint${SIZE}_t *) ((uintptr_t) o0 + oN_offset) + ${N}) = *((uint${SIZE}_t *) ((uintptr_t) i + input_stride * ${N}) + bw);
+            *((uint${SIZE}_t *) ((uintptr_t) o + oN_offset) + ${N}) = *((uint${SIZE}_t *) ((uintptr_t) i + input_stride * ${N}) + bw);
         }
-        o0 += 8;
+        o += 8;
         i = (uint${SIZE}_t *)((uintptr_t) i + input_stride * 8);
       }
       if (bh & 4){
         for(size_t bw = 0; bw < tail_bw; bw++){
           const size_t oN_offset = output_stride * bw;
-          *((uint${SIZE}_t *) ((uintptr_t) o0 + oN_offset)) = *(i + bw);
-          *((uint${SIZE}_t *) ((uintptr_t) o0 + oN_offset) + 1) = *((uint${SIZE}_t *) ((uintptr_t) i + input_stride) + bw);
+          *((uint${SIZE}_t *) ((uintptr_t) o + oN_offset)) = *(i + bw);
+          *((uint${SIZE}_t *) ((uintptr_t) o + oN_offset) + 1) = *((uint${SIZE}_t *) ((uintptr_t) i + input_stride) + bw);
           $for N in range(2, 4):
-            *((uint${SIZE}_t *) ((uintptr_t) o0 + oN_offset) + ${N}) = *((uint${SIZE}_t *) ((uintptr_t) i + input_stride * ${N}) + bw);
+            *((uint${SIZE}_t *) ((uintptr_t) o + oN_offset) + ${N}) = *((uint${SIZE}_t *) ((uintptr_t) i + input_stride * ${N}) + bw);
         }
-        o0 += 4;
+        o += 4;
         i = (uint${SIZE}_t *)((uintptr_t) i + input_stride * 4);
       }
       if (bh & 2){
         for(size_t bw = 0; bw < tail_bw; bw++){
           const size_t oN_offset = output_stride * bw;
-          *((uint${SIZE}_t *) ((uintptr_t) o0 + oN_offset)) = *(i + bw);
-          *((uint${SIZE}_t *) ((uintptr_t) o0 + oN_offset) + 1) = *((uint${SIZE}_t *) ((uintptr_t) i + input_stride) + bw);
+          *((uint${SIZE}_t *) ((uintptr_t) o + oN_offset)) = *(i + bw);
+          *((uint${SIZE}_t *) ((uintptr_t) o + oN_offset) + 1) = *((uint${SIZE}_t *) ((uintptr_t) i + input_stride) + bw);
         }
-        o0 += 2;
+        o += 2;
         i = (uint${SIZE}_t *)((uintptr_t) i + input_stride * 2);
       }
       if (bh & 1){
         for(size_t bw = 0; bw < block_width; bw++){
-          *((uint${SIZE}_t *) ((uintptr_t) o0 + output_stride * bw)) = *(i + bw);
+          *((uint${SIZE}_t *) ((uintptr_t) o + output_stride * bw)) = *(i + bw);
         }
       }
+      o0 = o;
     }
 
-    $if IN_PTRS == "MULTI":
-      i0 = (const uint${SIZE}_t*) ((uintptr_t) i0 + input_reset);
-      $for N in range(1, TILE_HEIGHT):
-        i${N} = (const uint${SIZE}_t*) ((uintptr_t) i${N-1} + input_stride);
-    $else:
-      i0 = (const uint${SIZE}_t*) ((uintptr_t) i0 + input_reset);
-    $if OUT_PTRS == "MULTI":
-      o0 = (uint${SIZE}_t*) ((uintptr_t) o0 + output_reset);
-      $for N in range(1, TILE_HEIGHT):
-        o${N} = (uint${SIZE}_t*) ((uintptr_t) o${N-1} + output_stride);
-    $else:
-      o = (uint${SIZE}_t*) ((uintptr_t) o + output_reset);
+    if (block_width > tile_width){
+      $if IN_PTRS == "MULTI":
+        i0 = (const uint${SIZE}_t*) ((uintptr_t) i0 + input_reset);
+        $for N in range(1, TILE_HEIGHT):
+          i${N} = (const uint${SIZE}_t*) ((uintptr_t) i${N-1} + input_stride);
+      $else:
+        i0 = (const uint${SIZE}_t*) ((uintptr_t) i0 + input_reset);
+      $if OUT_PTRS == "MULTI":
+        o0 = (uint${SIZE}_t*) ((uintptr_t) o0 + output_reset);
+        $for N in range(1, TILE_HEIGHT):
+          o${N} = (uint${SIZE}_t*) ((uintptr_t) o${N-1} + output_stride);
+      $else:
+        o = (uint${SIZE}_t*) ((uintptr_t) o + output_reset);
+    }
     block_width = doz(block_width, tile_width);
   } while (block_width != 0);
 }
-
-
