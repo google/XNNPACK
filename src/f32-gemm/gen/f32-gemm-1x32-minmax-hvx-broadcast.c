@@ -53,6 +53,12 @@ void xnn_f32_gemm_minmax_ukernel_1x32__hvx_broadcast(
       k -= sizeof(float);
     } while (k != 0);
 
+    XNN_SIMD_CONST_F32(vmin, params->scalar.min);
+    vacc0x0 = Q6_Vw_vmax_VwVw(vmin, vacc0x0);
+
+    XNN_SIMD_CONST_F32(vmax, params->scalar.max);
+    vacc0x0 = Q6_Vw_vmin_VwVw(vmax, vacc0x0);
+
     if XNN_LIKELY(nc >= 32) {
       *((HVX_UVector *)c0) = vacc0x0;
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
