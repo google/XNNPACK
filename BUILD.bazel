@@ -61,6 +61,7 @@ exports_files(["preamble.js.lds"])
 MICROKERNEL_DEFS = [
     "src/f16-avgpool/f16-avgpool-minmax.h",
     "src/f16-dwconv/f16-dwconv-minmax-unipass.h",
+    "src/f16-dwconv2d-chw/f16-dwconv2d-chw.h",
     "src/f16-f32-vcvt/f16-f32-vcvt.h",
     "src/f16-maxpool/f16-maxpool-minmax.h",
     "src/f16-pavgpool/f16-pavgpool-minmax.h",
@@ -107,6 +108,7 @@ MICROKERNEL_DEFS = [
     "src/f32-avgpool/f32-avgpool-minmax.h",
     "src/f32-dwconv/f32-dwconv-minmax-unipass.h",
     "src/f32-dwconv/f32-dwconv-unipass.h",
+    "src/f32-dwconv2d-chw/f32-dwconv2d-chw.h",
     "src/f32-f16-vcvt/f32-f16-vcvt.h",
     "src/f32-maxpool/f32-maxpool-minmax.h",
     "src/f32-pavgpool/f32-pavgpool-minmax.h",
