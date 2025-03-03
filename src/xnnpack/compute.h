@@ -1100,17 +1100,23 @@ struct elementwise_binary_context {
       const struct elementwise_binary_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t offset, size_t tile);
   XNN_PRIVATE void xnn_compute_elementwise_binary_1d(
-      const struct elementwise_binary_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t i);
+      const struct elementwise_binary_context
+          context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t offset, size_t count);
   XNN_PRIVATE void xnn_compute_elementwise_binary_2d(
-      const struct elementwise_binary_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t i, size_t j);
+      const struct elementwise_binary_context
+          context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t i, size_t offset, size_t count);
   XNN_PRIVATE void xnn_compute_elementwise_binary_3d(
-      const struct elementwise_binary_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t i, size_t j, size_t k);
+      const struct elementwise_binary_context
+          context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t i, size_t offset_j, size_t offset_k, size_t count_j,
+      size_t count_k);
   XNN_PRIVATE void xnn_compute_elementwise_binary_4d(
-      const struct elementwise_binary_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t i, size_t j, size_t k, size_t l);
+      const struct elementwise_binary_context
+          context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t i, size_t j, size_t offset_k, size_t offset_l, size_t count_k,
+      size_t count_l);
   XNN_PRIVATE void xnn_compute_elementwise_binary_5d(
       const struct elementwise_binary_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t i, size_t j, size_t k, size_t l, size_t m);
@@ -1127,9 +1133,9 @@ struct lut_strided_context {
 };
 
 #ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_lut_strided(
-      const struct lut_strided_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index);
+XNN_PRIVATE void xnn_compute_lut_strided(
+    const struct lut_strided_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_offset, size_t batch_range);
 #endif
 
 struct lut_contiguous_context {
@@ -1330,26 +1336,25 @@ struct f32_qd8_convert_context {
 };
 
 #ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_f16_qd8_convert(
-      const struct f16_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index);
+XNN_PRIVATE void xnn_compute_f16_qd8_convert(
+    const struct f16_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_offset, size_t batch_range);
 
-  XNN_PRIVATE void xnn_compute_f16_qdu8_convert(
-      const struct f16_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index);
+XNN_PRIVATE void xnn_compute_f16_qdu8_convert(
+    const struct f16_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_offset, size_t batch_range);
 
-  XNN_PRIVATE void xnn_compute_f32_qd8_convert(
-      const struct f32_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index);
+XNN_PRIVATE void xnn_compute_f32_qd8_convert(
+    const struct f32_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_offset, size_t batch_range);
 
-  XNN_PRIVATE void xnn_compute_f32_qdu8_convert(
-      const struct f32_qd8_convert_context
-          context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index);
+XNN_PRIVATE void xnn_compute_f32_qdu8_convert(
+    const struct f32_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_offset, size_t batch_range);
 
-  XNN_PRIVATE void xnn_compute_pad_qd8_params(
-      const struct f32_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index);
+XNN_PRIVATE void xnn_compute_pad_qd8_params(
+    const struct f32_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_index);
 #endif
 
   struct pack_lh_context {
