@@ -212,17 +212,17 @@ tools/generate-conv-hwc2chw-test.py --spec test/f16-conv-hwc2chw.yaml --output t
 tools/generate-conv-hwc2chw-test.py --spec test/f32-conv-hwc2chw.yaml --output test/f32-conv-hwc2chw.cc &
 
 ### Tests for DWConv micro-kernels
-tools/generate-dwconv-unipass-test.py --ukernel f16-dwconv-minmax-unipass --output test/f16-dwconv-minmax-unipass.cc &
+tools/generate-dwconv-test.py --ukernel f16-dwconv-minmax --output test/f16-dwconv-minmax.cc &
 
-tools/generate-dwconv-unipass-test.py --ukernel f32-dwconv-unipass --output test/f32-dwconv-unipass.cc &
-tools/generate-dwconv-unipass-test.py --ukernel f32-dwconv-minmax-unipass --output test/f32-dwconv-minmax-unipass.cc &
+tools/generate-dwconv-test.py --ukernel f32-dwconv --output test/f32-dwconv.cc &
+tools/generate-dwconv-test.py --ukernel f32-dwconv-minmax --output test/f32-dwconv-minmax.cc &
 
-tools/generate-dwconv-unipass-test.py --ukernel qs8-qc8w-dwconv-minmax-unipass-fp32 --output test/qs8-qc8w-dwconv-minmax-unipass-fp32.cc &
-tools/generate-dwconv-unipass-test.py --ukernel qs8-dwconv-minmax-unipass-fp32 --output test/qs8-dwconv-minmax-unipass-fp32.cc &
-tools/generate-dwconv-unipass-test.py --ukernel qu8-dwconv-minmax-unipass-fp32 --output test/qu8-dwconv-minmax-unipass-fp32.cc &
+tools/generate-dwconv-test.py --ukernel qs8-qc8w-dwconv-minmax-fp32 --output test/qs8-qc8w-dwconv-minmax-fp32.cc &
+tools/generate-dwconv-test.py --ukernel qs8-dwconv-minmax-fp32 --output test/qs8-dwconv-minmax-fp32.cc &
+tools/generate-dwconv-test.py --ukernel qu8-dwconv-minmax-fp32 --output test/qu8-dwconv-minmax-fp32.cc &
 
-tools/generate-dwconv-unipass-test.py --ukernel qs8-dwconv-minmax-unipass-rndnu --output test/qs8-dwconv-minmax-unipass-rndnu.cc &
-tools/generate-dwconv-unipass-test.py --ukernel qu8-dwconv-minmax-unipass-rndnu --output test/qu8-dwconv-minmax-unipass-rndnu.cc &
+tools/generate-dwconv-test.py --ukernel qs8-dwconv-minmax-rndnu --output test/qs8-dwconv-minmax-rndnu.cc &
+tools/generate-dwconv-test.py --ukernel qu8-dwconv-minmax-rndnu --output test/qu8-dwconv-minmax-rndnu.cc &
 
 ### Tests for DWConv CHW layout micro-kernels
 tools/generate-dwconv2d-chw-test.py --spec test/f16-dwconv2d-chw.yaml --output test/f16-dwconv2d-chw.cc &

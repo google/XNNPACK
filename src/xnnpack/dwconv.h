@@ -19,7 +19,7 @@ extern "C" {
 #endif
 
 
-#define XNN_DWCONV_UNIPASS(arch_flags, fn_name, c_block, adj_c_block, cr, kr, datatype, weights_type, params_type, init_fn) \
+#define XNN_UKERNEL(arch_flags, fn_name, c_block, adj_c_block, cr, kr, datatype, weights_type, params_type, init_fn) \
   XNN_INTERNAL void fn_name(                                 \
     size_t channels,                                         \
     size_t output_width,                                     \
@@ -31,15 +31,15 @@ extern "C" {
     size_t input_offset,                                     \
     const datatype* zero,                                       \
     const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-#include "f16-dwconv/f16-dwconv-minmax-unipass.h"
-#include "f32-dwconv/f32-dwconv-minmax-unipass.h"
-#include "f32-dwconv/f32-dwconv-unipass.h"
-#include "qs8-dwconv/qs8-dwconv-minmax-unipass-fp32.h"
-#include "qs8-dwconv/qs8-dwconv-minmax-unipass-rndnu.h"
-#include "qs8-qc8w-dwconv/qs8-qc8w-dwconv-minmax-unipass-fp32.h"
-#include "qu8-dwconv/qu8-dwconv-minmax-unipass-fp32.h"
-#include "qu8-dwconv/qu8-dwconv-minmax-unipass-rndnu.h"
-#undef XNN_DWCONV_UNIPASS
+#include "f16-dwconv/f16-dwconv-minmax.h"
+#include "f32-dwconv/f32-dwconv-minmax.h"
+#include "f32-dwconv/f32-dwconv.h"
+#include "qs8-dwconv/qs8-dwconv-minmax-fp32.h"
+#include "qs8-dwconv/qs8-dwconv-minmax-rndnu.h"
+#include "qs8-qc8w-dwconv/qs8-qc8w-dwconv-minmax-fp32.h"
+#include "qu8-dwconv/qu8-dwconv-minmax-fp32.h"
+#include "qu8-dwconv/qu8-dwconv-minmax-rndnu.h"
+#undef XNN_UKERNEL
 
 #define DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                                      \

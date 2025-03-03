@@ -834,9 +834,7 @@ struct dwconv_context {
     struct xnn_f16_minmax_params f16;
     struct xnn_f32_minmax_params f32;
   } params;
-  union {
-    xnn_dwconv_unipass_ukernel_fn unipass_ukernel;
-  };
+  xnn_dwconv_ukernel_fn ukernel;
 };
 
 #ifndef __cplusplus

@@ -7,8 +7,8 @@
 // LICENSE file in the root directory of this source tree.
 //
 // Auto-generated file. Do not edit!
-//   Microkernel: f16-dwconv-minmax-unipass
-//   Generator: tools/generate-dwconv-unipass-test.py
+//   Microkernel: f32-dwconv
+//   Generator: tools/generate-dwconv-test.py
 
 
 #include <algorithm>
@@ -65,23 +65,6 @@ std::vector<DWConvTestParams> CreateTests(
         , test_func)
         .loop_channels(adj_c_block + c_block, cr * 16 - 1, cr * 3));
 
-    tests.push_back(DWConvTestParams(
-        "c_div_" + cbs + "_with_qmin",
-        DWConvMicrokernelTester()
-            .channel_tile(cr)
-            .kernel_tile(kr)
-            .qmin(128)
-        , test_func)
-        .loop_channels(adj_c_block + c_block, cr * 16 - 1, cr * 3));
-
-    tests.push_back(DWConvTestParams(
-        "c_div_" + cbs + "_with_qmax",
-        DWConvMicrokernelTester()
-            .channel_tile(cr)
-            .kernel_tile(kr)
-            .qmax(128)
-        , test_func)
-        .loop_channels(adj_c_block + c_block, cr * 16 - 1, cr * 3));
 
     tests.push_back(DWConvTestParams(
         "c_lt_" + acbs,
@@ -100,23 +83,6 @@ std::vector<DWConvTestParams> CreateTests(
       , test_func)
       .loop_channels(adj_c_block + 1, (c_block == 1 ? 10 : adj_c_block + c_block) - 1));
 
-  tests.push_back(DWConvTestParams(
-      "c_gt_" + acbs + "_with_qmin",
-      DWConvMicrokernelTester()
-          .channel_tile(cr)
-          .kernel_tile(kr)
-          .qmin(128)
-      , test_func)
-      .loop_channels(adj_c_block + 1, (c_block == 1 ? 10 : adj_c_block + c_block) - 1));
-
-  tests.push_back(DWConvTestParams(
-      "c_gt_" + acbs + "_with_qmax",
-      DWConvMicrokernelTester()
-          .channel_tile(cr)
-          .kernel_tile(kr)
-          .qmax(128)
-      , test_func)
-      .loop_channels(adj_c_block + 1, (c_block == 1 ? 10 : adj_c_block + c_block) - 1));
 
   tests.push_back(DWConvTestParams(
       "multipixel",
@@ -147,25 +113,6 @@ std::vector<DWConvTestParams> CreateTests(
       , test_func)
       .loop_channels(1, c_block * 5, std::max(size_t(1), c_block - 1)));
 
-  tests.push_back(DWConvTestParams(
-      "multipixel_with_qmin",
-      DWConvMicrokernelTester()
-          .channel_tile(cr)
-          .kernel_tile(kr)
-          .width(3)
-          .qmin(128)
-      , test_func)
-    .loop_channels(1, c_block * 5, std::max(size_t(1), c_block - 1)));
-
-  tests.push_back(DWConvTestParams(
-      "multipixel_with_qmax",
-      DWConvMicrokernelTester()
-          .channel_tile(cr)
-          .kernel_tile(kr)
-          .width(3)
-          .qmax(128)
-      , test_func)
-      .loop_channels(1, c_block * 5, std::max(size_t(1), c_block - 1)));
 
 
   tests.push_back(DWConvTestParams(
@@ -192,17 +139,17 @@ std::vector<DWConvTestParams> CreateTests(
 
 }  // namespace
 
-#define XNN_DWCONV_UNIPASS(arch_flags, ukernel, c_block, is_pipelined, cr, kr, datatype, weights_type, params_type, init_params)\
-INSTANTIATE_TEST_SUITE_P(                                                                                                       \
-    ukernel, DWConvTest,                                                                                                        \
-    testing::ValuesIn(CreateTests(                                                                                              \
-        c_block, is_pipelined, cr, kr,                                                                                          \
-        [](DWConvMicrokernelTester& tester) {                                                                                   \
-          TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                                 \
-          tester.Test(ukernel, init_params);                                                                                    \
-        })),                                                                                                                    \
-    [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {                                                             \
-      return info.param.test_name;                                                                                              \
+#define XNN_UKERNEL(arch_flags, ukernel, c_block, is_pipelined, cr, kr, datatype, weights_type, params_type, init_params)\
+INSTANTIATE_TEST_SUITE_P(                                                                                                \
+    ukernel, DWConvTest,                                                                                                 \
+    testing::ValuesIn(CreateTests(                                                                                       \
+        c_block, is_pipelined, cr, kr,                                                                                   \
+        [](DWConvMicrokernelTester& tester) {                                                                            \
+          TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                          \
+          tester.Test(ukernel, init_params);                                                                             \
+        })),                                                                                                             \
+    [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {                                                      \
+      return info.param.test_name;                                                                                       \
     });
-#include "f16-dwconv/f16-dwconv-minmax-unipass.h"
+#include "f32-dwconv/f32-dwconv.h"
 #undef XNN_UKERNEL_WITH_PARAMS

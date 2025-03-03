@@ -7,8 +7,8 @@
 // LICENSE file in the root directory of this source tree.
 //
 // Auto-generated file. Do not edit!
-//   Microkernel: qu8-dwconv-minmax-unipass-fp32
-//   Generator: tools/generate-dwconv-unipass-test.py
+//   Microkernel: qs8-dwconv-minmax-rndnu
+//   Generator: tools/generate-dwconv-test.py
 
 
 #include <algorithm>
@@ -167,27 +167,6 @@ std::vector<DWConvTestParams> CreateTests(
       , test_func)
       .loop_channels(1, c_block * 5, std::max(size_t(1), c_block - 1)));
 
-  tests.push_back(DWConvTestParams(
-      "input_zero_point_only",
-      DWConvMicrokernelTester()
-          .channel_tile(cr)
-          .kernel_tile(kr)
-          .width(3)
-          .input_zero_point(255)
-          .kernel_zero_point(0)
-      , test_func)
-      .loop_channels(1, c_block * 5, std::max(size_t(1), c_block - 1)));
-
-  tests.push_back(DWConvTestParams(
-      "kernel_zero_point_only",
-      DWConvMicrokernelTester()
-          .channel_tile(cr)
-          .kernel_tile(kr)
-          .width(3)
-          .input_zero_point(0)
-          .kernel_zero_point(255)
-      , test_func)
-      .loop_channels(1, c_block * 5, std::max(size_t(1), c_block - 1)));
 
   tests.push_back(DWConvTestParams(
       "input_offset",
@@ -213,17 +192,17 @@ std::vector<DWConvTestParams> CreateTests(
 
 }  // namespace
 
-#define XNN_DWCONV_UNIPASS(arch_flags, ukernel, c_block, is_pipelined, cr, kr, datatype, weights_type, params_type, init_params)\
-INSTANTIATE_TEST_SUITE_P(                                                                                                       \
-    ukernel, DWConvTest,                                                                                                        \
-    testing::ValuesIn(CreateTests(                                                                                              \
-        c_block, is_pipelined, cr, kr,                                                                                          \
-        [](DWConvMicrokernelTester& tester) {                                                                                   \
-          TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                                 \
-          tester.Test(ukernel, init_params, xnn_qu8_requantize_fp32);                                                           \
-        })),                                                                                                                    \
-    [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {                                                             \
-      return info.param.test_name;                                                                                              \
+#define XNN_UKERNEL(arch_flags, ukernel, c_block, is_pipelined, cr, kr, datatype, weights_type, params_type, init_params)\
+INSTANTIATE_TEST_SUITE_P(                                                                                                \
+    ukernel, DWConvTest,                                                                                                 \
+    testing::ValuesIn(CreateTests(                                                                                       \
+        c_block, is_pipelined, cr, kr,                                                                                   \
+        [](DWConvMicrokernelTester& tester) {                                                                            \
+          TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                          \
+          tester.Test(ukernel, init_params, xnn_qs8_requantize_rndnu);                                                   \
+        })),                                                                                                             \
+    [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {                                                      \
+      return info.param.test_name;                                                                                       \
     });
-#include "qu8-dwconv/qu8-dwconv-minmax-unipass-fp32.h"
+#include "qs8-dwconv/qs8-dwconv-minmax-rndnu.h"
 #undef XNN_UKERNEL_WITH_PARAMS

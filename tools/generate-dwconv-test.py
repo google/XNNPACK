@@ -31,7 +31,7 @@ def split_ukernel_name(name):
   common_parts = common_name.split("_")
   param_spec = common_parts[-1]
 
-  # New transitional naming convention for unipass microkernels.
+  # New transitional naming convention for microkernels.
   m = re.search(r'(\d+)p(\d+)c', param_spec);
   assert(m)
   primary_tile = 0;
@@ -236,7 +236,7 @@ std::vector<DWConvTestParams> CreateTests(
 """
 
 TEST_TEMPLATE = """\
-#define XNN_DWCONV_UNIPASS(arch_flags, ukernel, c_block, is_pipelined, cr, kr, datatype, weights_type, params_type, init_params)
+#define XNN_UKERNEL(arch_flags, ukernel, c_block, is_pipelined, cr, kr, datatype, weights_type, params_type, init_params)
 INSTANTIATE_TEST_SUITE_P(
     ukernel, DWConvTest,
     testing::ValuesIn(CreateTests(
@@ -294,11 +294,9 @@ def main(args):
     folder = datatype + "-qc8w-dwconv"
     parts.pop(1)
   activation = "minmax" if "minmax" in parts else "linear"
-  ukernel_type = "unipass" if "unipass" in parts else "multipass"
   requantization = "fp32" if "fp32" in parts else "rndnu" if "rndnu" in parts else None
 
   create_tests_args = {
-      "UKERNEL_TYPE": ukernel_type.upper(),
       "DATATYPE": datatype,
       "ACTIVATION": activation.upper(),
   }

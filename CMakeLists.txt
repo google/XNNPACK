@@ -1556,16 +1556,16 @@ IF(XNNPACK_BUILD_TESTS)
   ENDIF()
 
   SET(MICROKERNEL_DWCONV_UNIT_TESTS
-      f16-dwconv-minmax-unipass
+      f16-dwconv-minmax
       f16-dwconv2d-chw
-      f32-dwconv-minmax-unipass
-      f32-dwconv-unipass
+      f32-dwconv-minmax
+      f32-dwconv
       f32-dwconv2d-chw
-      qs8-dwconv-minmax-unipass-fp32
-      qs8-dwconv-minmax-unipass-rndnu
-      qs8-qc8w-dwconv-minmax-unipass-fp32
-      qu8-dwconv-minmax-unipass-fp32
-      qu8-dwconv-minmax-unipass-rndnu)
+      qs8-dwconv-minmax-fp32
+      qs8-dwconv-minmax-rndnu
+      qs8-qc8w-dwconv-minmax-fp32
+      qu8-dwconv-minmax-fp32
+      qu8-dwconv-minmax-rndnu)
   FOREACH(TEST ${MICROKERNEL_DWCONV_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
@@ -1583,8 +1583,8 @@ IF(XNNPACK_BUILD_TESTS)
     ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
   ENDFOREACH()
-  SHARD_TEST(qs8-dwconv-minmax-unipass-fp32-test 10)
-  SHARD_TEST(qs8-qc8w-dwconv-minmax-unipass-fp32-test 10)
+  SHARD_TEST(qs8-dwconv-minmax-fp32-test 10)
+  SHARD_TEST(qs8-qc8w-dwconv-minmax-fp32-test 10)
 
   SET(MICROKERNEL_GEMM_UNIT_TESTS
       bf16-gemm-minmax

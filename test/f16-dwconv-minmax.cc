@@ -7,8 +7,8 @@
 // LICENSE file in the root directory of this source tree.
 //
 // Auto-generated file. Do not edit!
-//   Microkernel: qs8-dwconv-minmax-unipass-fp32
-//   Generator: tools/generate-dwconv-unipass-test.py
+//   Microkernel: f16-dwconv-minmax
+//   Generator: tools/generate-dwconv-test.py
 
 
 #include <algorithm>
@@ -192,17 +192,17 @@ std::vector<DWConvTestParams> CreateTests(
 
 }  // namespace
 
-#define XNN_DWCONV_UNIPASS(arch_flags, ukernel, c_block, is_pipelined, cr, kr, datatype, weights_type, params_type, init_params)\
-INSTANTIATE_TEST_SUITE_P(                                                                                                       \
-    ukernel, DWConvTest,                                                                                                        \
-    testing::ValuesIn(CreateTests(                                                                                              \
-        c_block, is_pipelined, cr, kr,                                                                                          \
-        [](DWConvMicrokernelTester& tester) {                                                                                   \
-          TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                                 \
-          tester.Test(ukernel, init_params, xnn_qs8_requantize_fp32);                                                           \
-        })),                                                                                                                    \
-    [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {                                                             \
-      return info.param.test_name;                                                                                              \
+#define XNN_UKERNEL(arch_flags, ukernel, c_block, is_pipelined, cr, kr, datatype, weights_type, params_type, init_params)\
+INSTANTIATE_TEST_SUITE_P(                                                                                                \
+    ukernel, DWConvTest,                                                                                                 \
+    testing::ValuesIn(CreateTests(                                                                                       \
+        c_block, is_pipelined, cr, kr,                                                                                   \
+        [](DWConvMicrokernelTester& tester) {                                                                            \
+          TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                          \
+          tester.Test(ukernel, init_params);                                                                             \
+        })),                                                                                                             \
+    [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {                                                      \
+      return info.param.test_name;                                                                                       \
     });
-#include "qs8-dwconv/qs8-dwconv-minmax-unipass-fp32.h"
+#include "f16-dwconv/f16-dwconv-minmax.h"
 #undef XNN_UKERNEL_WITH_PARAMS

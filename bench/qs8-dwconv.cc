@@ -26,7 +26,7 @@
 #include <benchmark/benchmark.h>
 
 static void bench_impl(uint64_t arch_flags, benchmark::State& state,
-                       xnn_qs8_dwconv_minmax_unipass_ukernel_fn dwconv,
+                       xnn_qs8_dwconv_minmax_ukernel_fn dwconv,
                        xnn_init_qs8_conv_minmax_params_fn init_params,
                        uint32_t channel_tile, uint32_t primary_tile) {
   if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
@@ -174,15 +174,15 @@ static void bench_impl(uint64_t arch_flags, benchmark::State& state,
       benchmark::Counter::kIsRate);
 }
 
-#define XNN_DWCONV_UNIPASS(arch_flags, ukernel, c_block, is_pipelined, cr, kr, \
+#define XNN_UKERNEL(arch_flags, ukernel, c_block, is_pipelined, cr, kr, \
                            datatype, weights_type, params_type, init_params)   \
   static void BM_##ukernel(benchmark::State& state, const char* net) {         \
     bench_impl(arch_flags, state, ukernel, init_params, cr, kr);               \
   }                                                                            \
   BENCHMARK_DWCONV(BM_##ukernel);
 
-#include "qs8-dwconv/qs8-dwconv-minmax-unipass-fp32.h"
-#include "qs8-dwconv/qs8-dwconv-minmax-unipass-rndnu.h"
+#include "qs8-dwconv/qs8-dwconv-minmax-fp32.h"
+#include "qs8-dwconv/qs8-dwconv-minmax-rndnu.h"
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();

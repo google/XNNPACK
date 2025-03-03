@@ -181,24 +181,24 @@ class DWConvMicrokernelTester {
 
   size_t last_pass_tile() const { return this->last_pass_tile_; }
 
-  void Test(xnn_qu8_dwconv_minmax_unipass_ukernel_fn dwconv_minmax,
+  void Test(xnn_qu8_dwconv_minmax_ukernel_fn dwconv_minmax,
             xnn_init_qu8_conv_minmax_params_fn init_params,
             xnn_qu8_requantize_fn requantize) const;
 
-  void Test(xnn_qs8_qc8w_dwconv_minmax_unipass_ukernel_fn dwconv_minmax,
+  void Test(xnn_qs8_qc8w_dwconv_minmax_ukernel_fn dwconv_minmax,
             xnn_init_qs8_qc8w_conv_minmax_params_fn init_params,
             xnn_qs8_requantize_fn requantize) const;
 
-  void Test(xnn_qs8_dwconv_minmax_unipass_ukernel_fn dwconv_minmax,
+  void Test(xnn_qs8_dwconv_minmax_ukernel_fn dwconv_minmax,
             xnn_init_qs8_conv_minmax_params_fn init_params,
             xnn_qs8_requantize_fn requantize) const;
 
-  void Test(xnn_f16_dwconv_minmax_unipass_ukernel_fn dwconv_minmax,
+  void Test(xnn_f16_dwconv_minmax_ukernel_fn dwconv_minmax,
             xnn_init_f16_minmax_params_fn init_params) const;
 
   void Test(xnn_f32_dwconv_unipass_ukernel_fn dwconv, const void* = nullptr) const;
 
-  void Test(xnn_f32_dwconv_minmax_unipass_ukernel_fn dwconv_minmax,
+  void Test(xnn_f32_dwconv_minmax_ukernel_fn dwconv_minmax,
             xnn_init_f32_minmax_params_fn init_params) const;
 
  private:

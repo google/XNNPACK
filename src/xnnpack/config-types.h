@@ -96,13 +96,9 @@ struct xnn_pack_lh_config {
   xnn_pack_lh_offset_fn offset_fn;
 };
 
-union xnn_dwconv_ukernel {
-  xnn_dwconv_unipass_ukernel_fn unipass;
-};
-
 struct xnn_dwconv_config {
-  union xnn_dwconv_ukernel minmax;
-  union xnn_dwconv_ukernel linear;
+  xnn_dwconv_ukernel_fn minmax;
+  xnn_dwconv_ukernel_fn linear;
   union {
     xnn_init_qs8_conv_minmax_params_fn qs8;
     xnn_init_qs8_qc8w_conv_minmax_params_fn qs8_qc8w;

@@ -427,14 +427,14 @@ SIMD_TEST_DEPS = [
         ":dwconv_microkernel_tester",
     ],
 ) for (kernel, shard_count) in [
-    ("f16_dwconv_minmax_unipass", 5),
-    ("f32_dwconv_unipass", 1),
-    ("f32_dwconv_minmax_unipass", 5),
-    ("qs8_qc8w_dwconv_minmax_unipass_fp32", 10),
-    ("qs8_dwconv_minmax_unipass_fp32", 10),
-    ("qs8_dwconv_minmax_unipass_rndnu", 1),
-    ("qu8_dwconv_minmax_unipass_fp32", 5),
-    ("qu8_dwconv_minmax_unipass_rndnu", 1),
+    ("f16_dwconv_minmax", 5),
+    ("f32_dwconv", 1),
+    ("f32_dwconv_minmax", 5),
+    ("qs8_qc8w_dwconv_minmax_fp32", 10),
+    ("qs8_dwconv_minmax_fp32", 10),
+    ("qs8_dwconv_minmax_rndnu", 1),
+    ("qu8_dwconv_minmax_fp32", 5),
+    ("qu8_dwconv_minmax_rndnu", 1),
 ]]
 
 xnnpack_unit_test(

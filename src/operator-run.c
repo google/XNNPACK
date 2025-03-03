@@ -1151,7 +1151,7 @@ void xnn_compute_dwconv_unipass(
   void* weights = (void*) ((uintptr_t) context->packed_weights + output_c_start * context->weights_channel_stride);
   const size_t output_increment = context->output_pixel_stride - output_c_tile * context->output_channel_stride;
 
-  context->unipass_ukernel(
+  context->ukernel(
     output_c_tile, context->output_width,
     indirect_input, weights, output,
     context->indirect_input_width_stride, output_increment,
