@@ -104,7 +104,7 @@ size_t xnn_gemm_best_tile_size(size_t num_groups, size_t m, size_t n,
 
   // Restrict the resulting `nc` to `n`.
   nc = min(nc, n);
-  xnn_log_info(
+  xnn_log_debug(
       "Tile size for GEMM with num_groups=%zi, m=%zu, n=%zu and mr=%zu, nr=%zu "
       "set to [%zu, %zu] (%zu tiles)",
       num_groups, m, n, mr, nr, mr, nc, best_num_tiles);
