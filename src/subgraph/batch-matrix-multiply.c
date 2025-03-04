@@ -410,6 +410,11 @@ static inline bool validate_datatypes(
   enum xnn_datatype output_datatype)
 {
   switch (input2_datatype) {
+    case xnn_datatype_bf16:
+      if (input1_datatype == xnn_datatype_bf16 && output_datatype == xnn_datatype_fp32) {
+        return true;
+      }
+      break;
     case xnn_datatype_fp16:
       if (input1_datatype == xnn_datatype_fp16 && output_datatype == xnn_datatype_fp16) {
         return true;
@@ -466,6 +471,7 @@ enum xnn_status xnn_define_batch_matrix_multiply(
   }
 
   switch (input1_value->datatype) {
+    case xnn_datatype_bf16:
     case xnn_datatype_fp16:
     case xnn_datatype_fp32:
       break;
@@ -503,6 +509,7 @@ enum xnn_status xnn_define_batch_matrix_multiply(
 
   switch (input2_value->datatype) {
     case xnn_datatype_fp16:
+    case xnn_datatype_bf16:
     case xnn_datatype_fp32:
       break;
     case xnn_datatype_qcint8:
