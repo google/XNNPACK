@@ -94,7 +94,7 @@ http_archive(
 http_archive(
     name = "KleidiAI",
     sha256 = "cb6af19d3ef21a0c683bd0c7c5b455c386dee0b7d0d4bc2cc0e14503019ff1e8",
-    strip_prefix = "kleidiai-v1.4.0",
+    strip_prefix = "kleidiai-1.4.0",
     urls = [
         "https://github.com/ARM-software/kleidiai/archive/refs/tags/v1.4.0.zip",
     ],
