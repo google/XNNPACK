@@ -1075,9 +1075,9 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qb4w(
     &packing_params,
     /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/0,
-    /*init_scale_params=*/NULL, 
+    /*init_scale_params=*/NULL,
     /*scale_params=*/NULL,
-    /*init_kernel_scale_params=*/NULL, 
+    /*init_kernel_scale_params=*/NULL,
     /*kernel_scale_params=*/NULL,
     &params, sizeof(params),
     gemm_config, gemm_ukernels,
@@ -1664,6 +1664,18 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
                   xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f32));
     return xnn_status_unsupported_hardware;
   }
+
+// Only test on x86/x64 for now.
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config->use_x86_fma3 && gemm_config->mr == 5 && gemm_config->nr == 16) {
+    const struct xnn_gemm_config* gemm_tile_10x8_config = xnn_init_f32_gemm_tile_10x8_config();
+    if (gemm_tile_10x8_config != NULL && (output_channels % gemm_config->nr != 0) &&
+        (output_channels % gemm_tile_10x8_config->nr == 0)) {
+      gemm_config = gemm_tile_10x8_config;
+    }
+  }
+#endif
 
   const struct xnn_gemm_config* gemm_nr2_config = xnn_init_f32_gemm_nr2_config();
   if (gemm_config->nr > output_channels) {
