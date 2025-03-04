@@ -33,12 +33,11 @@ void xnn_f32_dwconv${SUFFIX}_ukernel_${KERNEL_TILE}p${LMUL}vc__rvv(
     const float vmin = params->scalar.min;
     const float vmax = params->scalar.max;
   do {
-    const float* i[${KERNEL_TILE}];
     $for K in range(KERNEL_TILE):
-      i[${K}] = input[${K}];
-      assert(i[${K}] != NULL);
-      if XNN_UNPREDICTABLE(i[${K}] != zero) {
-        i[${K}] = (const float*) ((uintptr_t) i[${K}] + input_offset);
+      const float* i${K} = input[${K}];
+      assert(i${K} != NULL);
+      if XNN_UNPREDICTABLE(i${K} != zero) {
+        i${K} = (const float*) ((uintptr_t) i${K} + input_offset);
       }
     input = (const float**) ((uintptr_t) input + input_stride);
 
@@ -55,13 +54,12 @@ void xnn_f32_dwconv${SUFFIX}_ukernel_${KERNEL_TILE}p${LMUL}vc__rvv(
 
       vfloat32m${LMUL}_t va;
       vfloat32m${LMUL}_t vb;
-      for (int k=0; k<${KERNEL_TILE}; k++) {
-        va = __riscv_vle32_v_f32m${LMUL}_tu(va, i[k], vl);
+      $for K in range(KERNEL_TILE):
+        va = __riscv_vle32_v_f32m${LMUL}_tu(va, i${K}, vl);
         vb = __riscv_vle32_v_f32m${LMUL}_tu(vb, w, vl);
         w  += vlmax;
-        i[k] += vlmax;
+        i${K} += vlmax;
         vAcc = __riscv_vfmacc_vv_f32m${LMUL}_tu(vAcc, va, vb, vl);
-      }
 
       $if ACTIVATION == "MINMAX":
         vAcc = __riscv_vfmax_vf_f32m${LMUL}_tu(vAcc, vAcc, vmin, vl);

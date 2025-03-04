@@ -30,26 +30,25 @@ void xnn_f32_dwconv_minmax_ukernel_4p4vc__rvv(
   const float vmin = params->scalar.min;
   const float vmax = params->scalar.max;
   do {
-    const float* i[4];
-    i[0] = input[0];
-    assert(i[0] != NULL);
-    if XNN_UNPREDICTABLE(i[0] != zero) {
-      i[0] = (const float*) ((uintptr_t) i[0] + input_offset);
+    const float* i0 = input[0];
+    assert(i0 != NULL);
+    if XNN_UNPREDICTABLE(i0 != zero) {
+      i0 = (const float*) ((uintptr_t) i0 + input_offset);
     }
-    i[1] = input[1];
-    assert(i[1] != NULL);
-    if XNN_UNPREDICTABLE(i[1] != zero) {
-      i[1] = (const float*) ((uintptr_t) i[1] + input_offset);
+    const float* i1 = input[1];
+    assert(i1 != NULL);
+    if XNN_UNPREDICTABLE(i1 != zero) {
+      i1 = (const float*) ((uintptr_t) i1 + input_offset);
     }
-    i[2] = input[2];
-    assert(i[2] != NULL);
-    if XNN_UNPREDICTABLE(i[2] != zero) {
-      i[2] = (const float*) ((uintptr_t) i[2] + input_offset);
+    const float* i2 = input[2];
+    assert(i2 != NULL);
+    if XNN_UNPREDICTABLE(i2 != zero) {
+      i2 = (const float*) ((uintptr_t) i2 + input_offset);
     }
-    i[3] = input[3];
-    assert(i[3] != NULL);
-    if XNN_UNPREDICTABLE(i[3] != zero) {
-      i[3] = (const float*) ((uintptr_t) i[3] + input_offset);
+    const float* i3 = input[3];
+    assert(i3 != NULL);
+    if XNN_UNPREDICTABLE(i3 != zero) {
+      i3 = (const float*) ((uintptr_t) i3 + input_offset);
     }
     input = (const float**) ((uintptr_t) input + input_stride);
 
@@ -66,13 +65,26 @@ void xnn_f32_dwconv_minmax_ukernel_4p4vc__rvv(
 
       vfloat32m4_t va;
       vfloat32m4_t vb;
-      for (int k=0; k<4; k++) {
-        va = __riscv_vle32_v_f32m4_tu(va, i[k], vl);
-        vb = __riscv_vle32_v_f32m4_tu(vb, w, vl);
-        w  += vlmax;
-        i[k] += vlmax;
-        vAcc = __riscv_vfmacc_vv_f32m4_tu(vAcc, va, vb, vl);
-      }
+      va = __riscv_vle32_v_f32m4_tu(va, i0, vl);
+      vb = __riscv_vle32_v_f32m4_tu(vb, w, vl);
+      w  += vlmax;
+      i0 += vlmax;
+      vAcc = __riscv_vfmacc_vv_f32m4_tu(vAcc, va, vb, vl);
+      va = __riscv_vle32_v_f32m4_tu(va, i1, vl);
+      vb = __riscv_vle32_v_f32m4_tu(vb, w, vl);
+      w  += vlmax;
+      i1 += vlmax;
+      vAcc = __riscv_vfmacc_vv_f32m4_tu(vAcc, va, vb, vl);
+      va = __riscv_vle32_v_f32m4_tu(va, i2, vl);
+      vb = __riscv_vle32_v_f32m4_tu(vb, w, vl);
+      w  += vlmax;
+      i2 += vlmax;
+      vAcc = __riscv_vfmacc_vv_f32m4_tu(vAcc, va, vb, vl);
+      va = __riscv_vle32_v_f32m4_tu(va, i3, vl);
+      vb = __riscv_vle32_v_f32m4_tu(vb, w, vl);
+      w  += vlmax;
+      i3 += vlmax;
+      vAcc = __riscv_vfmacc_vv_f32m4_tu(vAcc, va, vb, vl);
 
       vAcc = __riscv_vfmax_vf_f32m4_tu(vAcc, vAcc, vmin, vl);
       vAcc = __riscv_vfmin_vf_f32m4_tu(vAcc, vAcc, vmax, vl);
