@@ -32,8 +32,8 @@ static XNN_INLINE xnn_simd_f16_t xnn_srl_f16(xnn_simd_f16_t a, uint8_t b);
 static XNN_INLINE xnn_simd_f16_t xnn_generic_getexp_f16(xnn_simd_f16_t a) {
   // Some useful constants.
   XNN_SIMD_CONST_F16_FROM_INT16(exp_mask, 0x7c00);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(bias_32, 32.0f);
-  XNN_SIMD_CONST_F16_FROM_FLOAT(bias_47, 47.0f);
+  XNN_SIMD_CONST_F16_FROM_INT16(bias_32, 0x5000);  // 32
+  XNN_SIMD_CONST_F16_FROM_INT16(bias_47, 0x51E0);  // 47
 
   // The bits of IEE754 half-precision floating-point format are:
   //
