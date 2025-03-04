@@ -16,7 +16,7 @@
 #if XNN_ENABLE_KLEIDIAI
   // Keep this line indented to avoid it being pulled out of the #ifdef when the
   // sources are amalgamated.
-  #include "kai/ukernels/matmul/pack/kai_lhs_quant_pack_qai8dxp_f32.h"
+  #include "kai/ukernels/matmul/pack/kai_lhs_quant_pack_qsi8d32p_f32_neon.h"
 #endif  // XNN_ENABLE_KLEIDIAI
 
 
@@ -30,7 +30,7 @@ void xnn_x8_packq_f32qp8_ukernel__aarch64_neon_u2(size_t m, size_t k, size_t mr,
                                           size_t lhs_stride,
                                           void* XNN_RESTRICT lhs_packed) {
 #if XNN_ENABLE_KLEIDIAI
-  kai_run_lhs_quant_pack_qai8dxp_f32(m, k, mr, kr, sr, m_idx_start, lhs,
+  kai_run_lhs_quant_pack_qsi8d32p_f32_neon(m, k, k, mr, kr, sr, m_idx_start, lhs,
                                      lhs_stride, lhs_packed);
 #else
   assert("Not compiled with XNN_ENABLE_KLEIDIAI" && 0);
