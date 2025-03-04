@@ -187,7 +187,7 @@ TEST_F(EvenSplit4TestQS8, define)
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_even_split4);
+  ASSERT_EQ(node->type, xnn_node_type_even_split);
   ASSERT_EQ(node->params.even_split.axis, axis);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);
@@ -253,7 +253,7 @@ TEST_F(EvenSplit4TestQU8, define)
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_even_split4);
+  ASSERT_EQ(node->type, xnn_node_type_even_split);
   ASSERT_EQ(node->params.even_split.axis, axis);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);
@@ -314,7 +314,7 @@ TEST_F(EvenSplit4TestF16, define)
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_even_split4);
+  ASSERT_EQ(node->type, xnn_node_type_even_split);
   ASSERT_EQ(node->params.even_split.axis, axis);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);
@@ -375,7 +375,7 @@ TEST_F(EvenSplit4TestF32, define)
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_even_split4);
+  ASSERT_EQ(node->type, xnn_node_type_even_split);
   ASSERT_EQ(node->params.even_split.axis, axis);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);

@@ -376,8 +376,9 @@ class SubgraphTester {
   }
 
   SubgraphTester& AddConcatenate2(size_t axis, uint32_t input1_id, uint32_t input2_id, uint32_t output_id) {
-    const xnn_status status = xnn_define_concatenate2(
-        subgraph_.get(), axis, input1_id, input2_id, output_id, 0 /* flags */);
+    const uint32_t input_ids[] = {input1_id, input2_id}; // Create an array of input IDs
+    const xnn_status status = xnn_define_concatenate(
+        subgraph_.get(), axis, 2 /* num_inputs */, input_ids, output_id, 0 /* flags */);
     EXPECT_EQ(status, xnn_status_success);
     return *this;
   }
@@ -565,8 +566,17 @@ class SubgraphTester {
   }
 
   SubgraphTester& AddEvenSplit2(size_t split_dim, uint32_t input_id, uint32_t output1_id, uint32_t output2_id) {
-    const xnn_status status = xnn_define_even_split2(
-        subgraph_.get(), split_dim, input_id, output1_id, output2_id, 0 /* flags */);
+    const uint32_t output_ids[] = {output1_id, output2_id};
+    const xnn_status status =
+      xnn_define_even_split(subgraph_.get(), split_dim, input_id, 2, output_ids, 0 /* flags */);
+    EXPECT_EQ(status, xnn_status_success);
+    return *this;
+  }
+
+  SubgraphTester& AddEvenSplit3(size_t split_dim, uint32_t input_id, uint32_t output1_id, uint32_t output2_id, uint32_t output3_id) {
+    const uint32_t output_ids[] = {output1_id, output2_id, output3_id};
+    const xnn_status status =
+      xnn_define_even_split(subgraph_.get(), split_dim, input_id, 3, output_ids, 0 /* flags */);
     EXPECT_EQ(status, xnn_status_success);
     return *this;
   }
@@ -605,8 +615,9 @@ class SubgraphTester {
   }
 
   SubgraphTester& AddEvenSplit3(uint32_t input_id, uint32_t output_id0, uint32_t output_id1, uint32_t output_id2) {
-    const xnn_status status = xnn_define_even_split3(
-        subgraph_.get(), 0, input_id, output_id0, output_id1, output_id2, 0 /*flags */);
+    const uint32_t output_id[3] = {output_id0, output_id1, output_id2};
+    const xnn_status status =
+      xnn_define_even_split(subgraph_.get(), 0, input_id, 3, output_id, 0 /*flags */);
     EXPECT_EQ(status, xnn_status_success);
 
     return *this;

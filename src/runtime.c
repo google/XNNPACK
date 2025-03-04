@@ -475,14 +475,9 @@ void propagate_rank(
       case xnn_node_type_binary_elementwise:
         output_value->shape.num_dims = max(input_value->shape.num_dims, input_value_b->shape.num_dims);
         break;
-      case xnn_node_type_concatenate2:
-      case xnn_node_type_concatenate3:
-      case xnn_node_type_concatenate4:
-      case xnn_node_type_concatenate5:
+      case xnn_node_type_concatenate:
       case xnn_node_type_copy:
-      case xnn_node_type_even_split2:
-      case xnn_node_type_even_split3:
-      case xnn_node_type_even_split4:
+      case xnn_node_type_even_split:
       case xnn_node_type_unary_elementwise:
       case xnn_node_type_convert:
       case xnn_node_type_pack_lh:
