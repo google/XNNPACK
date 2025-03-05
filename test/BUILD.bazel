@@ -1529,23 +1529,6 @@ xnnpack_cxx_library(
 )
 
 xnnpack_cxx_library(
-    name = "subgraph_unary_tester",
-    testonly = True,
-    hdrs = [
-        "subgraph-unary-tester.h",
-    ],
-    deps = xnnpack_test_deps_for_library() + [
-        ":replicable_random_device",
-        "//:buffer",
-        "//:node_type",
-        "//:operators",
-        "//:requantization",
-        "//:subgraph",
-        "//:xnnpack_h",
-    ],
-)
-
-xnnpack_cxx_library(
     name = "subgraph_tester",
     testonly = True,
     hdrs = [
@@ -1600,7 +1583,6 @@ xnnpack_unit_test(
         ":replicable_random_device",
         ":runtime_flags",
         ":subgraph_tester",
-        ":subgraph_unary_tester",
         "//:XNNPACK",
         "//:buffer",
         "//:datatype",
@@ -1615,29 +1597,12 @@ xnnpack_unit_test(
     ("softmax", 1),
     ("space_to_depth_2d", 1),
     ("depth_to_space_2d", 1),
-    ("static_constant_pad", 5),
-    ("static_expand_dims", 5),
-    ("static_reshape", 5),
+    ("static_constant_pad", 1),
+    ("static_expand_dims", 1),
+    ("static_reshape", 1),
     ("static_slice", 5),
     ("static_transpose", 5),
 ]]
-
-xnnpack_cxx_library(
-    name = "subgraph_binary_tester",
-    testonly = True,
-    hdrs = [
-        "subgraph-binary-tester.h",
-    ],
-    deps = xnnpack_test_deps_for_library() + [
-        ":replicable_random_device",
-        "//:buffer",
-        "//:node_type",
-        "//:operators",
-        "//:requantization",
-        "//:subgraph",
-        "//:xnnpack_h",
-    ],
-)
 
 xnnpack_unit_test(
     name = "workspace_test",

@@ -3,272 +3,97 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>
-#include <array>
+#include <cassert>
 #include <cmath>
 #include <cstddef>
-#include <cstdint>
-#include <memory>
-#include <random>
+#include <vector>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "xnnpack.h"
+#include "xnnpack/buffer.h"
+#include "xnnpack/datatype.h"
 #include "xnnpack/math.h"
-#include "xnnpack/node-type.h"
-#include "xnnpack/operator.h"
-#include "xnnpack/subgraph.h"
-#include "subgraph-unary-tester.h"
-#include "runtime-flags.h"
+#include "replicable_random_device.h"
+#include "subgraph-tester.h"
 
-using SoftmaxTestF16 =
-  UnaryTest<xnn_float16, /*OutputType=*/xnn_float16, /*min_dim=*/1, /*max_dim=*/XNN_MAX_TENSOR_DIMS, /*pad_output=*/true>;
-using SoftmaxTestF32 =
-  UnaryTest<float, /*OutputType=*/float, /*min_dim=*/1, /*max_dim=*/XNN_MAX_TENSOR_DIMS, /*pad_output=*/true>;
+namespace xnnpack {
 
-TEST_F(SoftmaxTestF16, define)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, dims.size(), dims.data(), nullptr, 0,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, dims.size(), dims.data(), nullptr, 1,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(xnn_status_success, xnn_define_softmax(subgraph, input_id, output_id, /*flags=*/0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_softmax);
-  ASSERT_EQ(node->num_inputs, 1);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
+template <typename T>
+Tensor<T> softmax(Tensor<T> x) {
+  Tensor<T> y(x.extents());
+  std::vector<size_t> batch_dims = x.extents();
+  size_t channels = x.extents().back();
+  batch_dims.pop_back();
+  for (std::vector<size_t> i : EnumerateIndices(batch_dims)) {
+    i.push_back(0);
+    const T* x_i = &x(i);
+    T* y_i = &y(i);
+    double sum_exp = 0.0;
+    for (size_t c = 0; c < channels; c++) {
+      sum_exp += std::exp(static_cast<double>(x_i[c]));
+    }
+    for (size_t c = 0; c < channels; c++) {
+      y_i[c] = std::exp(static_cast<double>(x_i[c])) / sum_exp;
+    }
+  }
+  return y;
 }
 
-TEST_F(SoftmaxTestF32, define)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+template <typename T>
+void TestImpl(size_t rank) {
+  ReplicableRandomDevice rng;
 
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
-  input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, dims.size(), dims.data(), nullptr, 0,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, dims.size(), dims.data(), nullptr, 1,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(xnn_status_success, xnn_define_softmax(subgraph, input_id, output_id, /*flags=*/0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_softmax);
-  ASSERT_EQ(node->num_inputs, 1);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-}
-
-TEST_F(SoftmaxTestF16, matches_operator_api)
-{
-  // Choose such range that expf(x[i]) overflows, but expf(x[i] - x_max) doesn't.
-  // However, the range is still narrow enough that single-precision exp doesn't overflow.
-  std::uniform_real_distribution<float> f32dist(90.0f, 100.0f);
-  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  // Call operator API.
-  xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_softmax_nc_f16(/*flags=*/0, &op);
+  // Define subgraph
+  SubgraphTester subgraph(2);
+  subgraph.AddInputTensor(rank, xnn_datatype_of<T>(), 0)
+      .AddOutputTensor(rank, xnn_datatype_of<T>(), 1)
+      .AddSoftmax(0, 1);
+  xnn_status status = subgraph.CreateRuntime();
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
+    return;
   }
 
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
+  for (int reshape = 0; reshape < 100; ++reshape) {
+    std::vector<size_t> shape = random_shape(rng, rank);
 
-  ASSERT_EQ(xnn_status_success, xnn_reshape_softmax_nc_f16(op, channels, channels, channels, batch_size, /*threadpool=*/nullptr));
+    Tensor<T> input(shape, PaddingBytes{XNN_EXTRA_BYTES});
+    DatatypeGenerator<T> generator;
+    input.generate([&]() { return generator(rng); });
 
-  ASSERT_EQ(xnn_status_success, xnn_setup_softmax_nc_f16(op, input.data(), operator_output.data()));
+    Tensor<T> expected = softmax(input);
 
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
+    // Check reshaped shape is correct
+    subgraph.ReshapeExternalTensor(shape, input.base(), 0).ReshapeRuntime();
+    ASSERT_EQ(subgraph.GetExternalTensorShape(1), expected.extents());
 
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-  input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, dims.size(), dims.data(), nullptr, /*external_id=*/0,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
+    // Run subgraph
+    // Softmax reads from the output assuming XNN_EXTRA_BYTES exist.
+    Tensor<T> output(expected.extents(), PaddingBytes{XNN_EXTRA_BYTES});
+    subgraph.SetupExternalTensor(output.base(), 1)
+        .SetupRuntime()
+        .InvokeRuntime();
 
-  output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, dims.size(), dims.data(), nullptr, /*external_id=*/1,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_define_softmax(subgraph, input_id, output_id, /*flags=*/0));
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  for (size_t i = 0; i < num_output_elements; i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]) << "element " << i << " / " << num_output_elements;
+    // Verify results.
+    ASSERT_THAT(output,
+                testing::Pointwise(testing::FloatNear(1e-3f), expected));
   }
 }
 
-TEST_F(SoftmaxTestF32, matches_operator_api)
-{
-  // Choose such range that expf(x[i]) overflows, but expf(x[i] - x_max) doesn't.
-  // However, the range is still narrow enough that single-precision exp doesn't overflow.
-  std::uniform_real_distribution<float> f32dist(90.0f, 100.0f);
-  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+template <typename T>
+class Softmax : public ::testing::TestWithParam<int> {};
 
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+using SoftmaxF16 = Softmax<xnn_float16>;
+using SoftmaxF32 = Softmax<float>;
 
-  // Call operator API.
-  xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_softmax_nc_f32(/*flags=*/0, &op);
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
-  }
+TEST_P(SoftmaxF16, test) { TestImpl<xnn_float16>(GetParam()); }
+TEST_P(SoftmaxF32, test) { TestImpl<float>(GetParam()); }
 
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
+auto rank_params = testing::Range(1, XNN_MAX_TENSOR_DIMS);
+INSTANTIATE_TEST_SUITE_P(Softmax, SoftmaxF16, rank_params);
+INSTANTIATE_TEST_SUITE_P(Softmax, SoftmaxF32, rank_params);
 
-  ASSERT_EQ(xnn_status_success, xnn_reshape_softmax_nc_f32(op, channels, channels, channels, batch_size, /*threadpool=*/nullptr));
-
-  ASSERT_EQ(xnn_status_success, xnn_setup_softmax_nc_f32(op, input.data(), operator_output.data()));
-
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-  input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, dims.size(), dims.data(), nullptr, /*external_id=*/0,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, dims.size(), dims.data(), nullptr, /*external_id=*/1,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_define_softmax(subgraph, input_id, output_id, /*flags=*/0));
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  for (size_t i = 0; i < num_output_elements; i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]) << "element " << i << " / " << num_output_elements;
-  }
-}
-
-TEST_F(SoftmaxTestF32, reshape_output)
-{
-  // Choose such range that expf(x[i]) overflows, but expf(x[i] - x_max) doesn't.
-  // However, the range is still narrow enough that single-precision exp doesn't overflow.
-  std::uniform_real_distribution<float> f32dist(90.0f, 100.0f);
-  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, dims.size(), dims.data(), nullptr, 0,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, dims.size(), dims.data(), nullptr, 1,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(xnn_status_success, xnn_define_softmax(subgraph, input_id, output_id, /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-
-  const std::array<xnn_external_value, 2> external{{
-    xnn_external_value{input_id, input.data()},
-    xnn_external_value{output_id, subgraph_output.data()}
-  }};
-
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  dims[0] += 4;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, dims.size(), dims.data()));
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
-  const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
-  for (size_t i = 0; i < dims.size(); ++i) {
-    ASSERT_EQ(dims[i], output_shape->dim[i]);
-  }
-
-  dims[0] -= 4;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, dims.size(), dims.data()));
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_success);
-  output_shape = &runtime->values[node->outputs[0]].shape;
-  for (size_t i = 0; i < dims.size(); ++i) {
-    ASSERT_EQ(dims[i], output_shape->dim[i]);
-  }
-}
+}  // namespace xnnpack

@@ -440,6 +440,15 @@ class SubgraphTester {
     return *this;
   }
 
+  SubgraphTester& AddReshape(const std::vector<size_t>& new_dims,
+                                uint32_t input_id, uint32_t output_id) {
+    const xnn_status status = xnn_define_static_reshape(
+        subgraph_.get(), new_dims.size(), new_dims.data(), input_id, output_id,
+        /*flags=*/0);
+    EXPECT_EQ(status, xnn_status_success);
+    return *this;
+  }
+
   SubgraphTester& AddSpaceToDepth2D(size_t block_size, uint32_t input_id,
                                     uint32_t output_id) {
     const xnn_status status = xnn_define_space_to_depth_2d(

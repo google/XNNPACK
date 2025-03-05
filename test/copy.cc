@@ -3,383 +3,82 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>  // For std::generate.
-#include <array>      // For std::array.
-#include <cmath>
-#include <cstddef>  // For size_t.
+#include <cassert>
+#include <cstddef>
 #include <cstdint>
-#include <memory>  // For std::unique_ptr.
+#include <vector>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "xnnpack.h"
+#include "xnnpack/buffer.h"
+#include "xnnpack/datatype.h"
 #include "xnnpack/math.h"
-#include "xnnpack/node-type.h"
-#include "xnnpack/operator.h"
-#include "xnnpack/subgraph.h"
-#include "subgraph-unary-tester.h"
-#include "runtime-flags.h"
+#include "replicable_random_device.h"
+#include "subgraph-tester.h"
 
-using CopyTestQS8 = UnaryTest<int8_t>;
-using CopyTestQU8 = UnaryTest<uint8_t>;
-using CopyTestF16 = UnaryTest<xnn_float16>;
-using CopyTestF32 = UnaryTest<float>;
+namespace xnnpack {
 
-TEST_F(CopyTestQS8, define)
-{
-  const int32_t zero_point = i8dist(rng);
-  const float scale = scale_dist(rng);
+template <typename T>
+void TestImpl(size_t rank) {
+  ReplicableRandomDevice rng;
 
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+  for (int rep = 0; rep < 100; ++rep) {
+    xnn_quantization_params quantization =
+        random_quantization(xnn_datatype_of<T>(), rng);
 
-  input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_qint8, zero_point, scale, dims.size(), dims.data(),
-                          nullptr, 0, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
+    // Define subgraph
+    SubgraphTester subgraph(2);
+    subgraph.AddInputTensor(rank, xnn_datatype_of<T>(), quantization, 0)
+        .AddOutputTensor(rank, xnn_datatype_of<T>(), quantization, 1)
+        .AddCopy(0, 1)
+        .CreateRuntime();
 
-  output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_qint8, zero_point, scale, dims.size(), dims.data(),
-                          nullptr, 1, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
+    for (int reshape = 0; reshape < 2; ++reshape) {
+      std::vector<size_t> shape = random_shape(rng, rank);
 
-  ASSERT_EQ(xnn_status_success, xnn_define_copy(subgraph, input_id, output_id, /*flags=*/0));
+      Tensor<T> input(shape, PaddingBytes{XNN_EXTRA_BYTES});
+      DatatypeGenerator<T> generator(quantization);
+      input.generate([&]() { return generator(rng); });
 
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_copy);
-  ASSERT_EQ(node->num_inputs, 1);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-}
+      // Check reshaped shape is correct
+      subgraph.ReshapeExternalTensor(shape, input.base(), 0).ReshapeRuntime();
+      ASSERT_EQ(subgraph.GetExternalTensorShape(1), input.extents());
 
-TEST_F(CopyTestQU8, define)
-{
-  const int32_t zero_point = u8dist(rng);
-  const float scale = scale_dist(rng);
+      // Run subgraph
+      Tensor<T> output(input.extents());
+      subgraph.SetupExternalTensor(output.base(), 1)
+          .SetupRuntime()
+          .InvokeRuntime();
 
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_quint8, zero_point, scale, dims.size(), dims.data(),
-                          nullptr, 0, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_quint8, zero_point, scale, dims.size(), dims.data(),
-                          nullptr, 1, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(xnn_status_success, xnn_define_copy(subgraph, input_id, output_id, /*flags=*/0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_copy);
-  ASSERT_EQ(node->num_inputs, 1);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-}
-
-TEST_F(CopyTestF16, define)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(0, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp16, dims.size(), dims.data(), nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp16, dims.size(), dims.data(), nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(xnn_status_success, xnn_define_copy(subgraph, input_id, output_id, 0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_copy);
-  ASSERT_EQ(node->num_inputs, 1);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-}
-
-TEST_F(CopyTestF32, define)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(0, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, dims.size(), dims.data(), nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, dims.size(), dims.data(), nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(xnn_status_success, xnn_define_copy(subgraph, input_id, output_id, 0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_copy);
-  ASSERT_EQ(node->num_inputs, 1);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-}
-
-TEST_F(CopyTestQS8, matches_operator_api)
-{
-  const int32_t zero_point = i8dist(rng);
-  const float scale = scale_dist(rng);
-  std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  // Call operator API.
-  xnn_operator_t op = nullptr;
-  const xnn_status status =
-    xnn_create_copy_nc_x8(/*flags=*/0, &op);
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
+      // Verify results.
+      ASSERT_THAT(output, testing::ElementsAreArray(input));
+    }
   }
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
-
-  size_t batch_size = NumElements(dims);
-  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x8(op, batch_size, 1, 1, 1, /*threadpool=*/nullptr));
-  ASSERT_EQ(xnn_status_success, xnn_setup_copy_nc_x8(op, input.data(), operator_output.data()));
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-  input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_qint8, zero_point, scale, dims.size(), dims.data(),
-                          nullptr, /*external_id=*/0, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_qint8, zero_point, scale, dims.size(), dims.data(),
-                          nullptr, /*external_id=*/1, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(xnn_status_success, xnn_define_copy(subgraph, input_id, output_id, /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  ASSERT_EQ(subgraph_output, operator_output);
 }
 
-TEST_F(CopyTestQU8, matches_operator_api)
-{
-  const int32_t zero_point = u8dist(rng);
-  const float scale = scale_dist(rng);
-  std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
+template <typename T>
+class Copy : public ::testing::TestWithParam<int> {};
 
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+using CopyQS8 = Copy<quantized<int8_t>>;
+using CopyQU8 = Copy<quantized<uint8_t>>;
+using CopyBF16 = Copy<xnn_bfloat16>;
+using CopyF16 = Copy<xnn_float16>;
+using CopyF32 = Copy<float>;
 
-  // Call operator API.
-  xnn_operator_t op = nullptr;
-  const xnn_status status =
-    xnn_create_copy_nc_x8(/*flags=*/0, &op);
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
-  }
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
+TEST_P(CopyQS8, test) { TestImpl<quantized<int8_t>>(GetParam()); }
+TEST_P(CopyQU8, test) { TestImpl<quantized<uint8_t>>(GetParam()); }
+TEST_P(CopyBF16, test) { TestImpl<xnn_bfloat16>(GetParam()); }
+TEST_P(CopyF16, test) { TestImpl<xnn_float16>(GetParam()); }
+TEST_P(CopyF32, test) { TestImpl<float>(GetParam()); }
 
-  size_t batch_size = NumElements(dims);
-  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x8(op, batch_size, 1, 1, 1, /*threadpool=*/nullptr));
-  ASSERT_EQ(xnn_status_success, xnn_setup_copy_nc_x8(op, input.data(), operator_output.data()));
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
+auto rank_params = testing::Range(1, XNN_MAX_TENSOR_DIMS);
+INSTANTIATE_TEST_SUITE_P(Copy, CopyQS8, rank_params);
+INSTANTIATE_TEST_SUITE_P(Copy, CopyQU8, rank_params);
+INSTANTIATE_TEST_SUITE_P(Copy, CopyBF16, rank_params);
+INSTANTIATE_TEST_SUITE_P(Copy, CopyF16, rank_params);
+INSTANTIATE_TEST_SUITE_P(Copy, CopyF32, rank_params);
 
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-  input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_quint8, zero_point, scale, dims.size(), dims.data(),
-                          nullptr, /*external_id=*/0, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_quint8, zero_point, scale, dims.size(), dims.data(),
-                          nullptr, /*external_id=*/1, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(xnn_status_success, xnn_define_copy(subgraph, input_id, output_id, /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  ASSERT_EQ(subgraph_output, operator_output);
-}
-
-TEST_F(CopyTestF16, matches_operator_api)
-{
-  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  // Call operator API.
-  xnn_operator_t op = nullptr;
-  xnn_status status = xnn_create_copy_nc_x16(/*flags=*/0, &op);
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
-  }
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
-  size_t batch_size = NumElements(dims);
-  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x16(op, batch_size, 1, 1, 1, /*threadpool=*/nullptr));
-  ASSERT_EQ(xnn_status_success, xnn_setup_copy_nc_x16(op, input.data(), operator_output.data()));
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
-  ASSERT_NE(nullptr, subgraph);
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, dims.size(), dims.data(), nullptr, /*external_id=*/0,
-                          XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, dims.size(), dims.data(), nullptr,
-                          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_copy(subgraph, input_id, output_id, /*flags=*/0));
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  ASSERT_EQ(subgraph_output, operator_output);
-}
-
-TEST_F(CopyTestF32, matches_operator_api)
-{
-  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  // Call operator API.
-  xnn_operator_t op = nullptr;
-  xnn_status status = xnn_create_copy_nc_x32(/*flags=*/0, &op);
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
-  }
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
-  size_t batch_size = NumElements(dims);
-  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x32(op, batch_size, 1, 1, 1, /*threadpool=*/nullptr));
-  ASSERT_EQ(xnn_status_success, xnn_setup_copy_nc_x32(op, input.data(), operator_output.data()));
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
-  ASSERT_NE(nullptr, subgraph);
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, dims.size(), dims.data(), nullptr, /*external_id=*/0,
-                          XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, dims.size(), dims.data(), nullptr,
-                          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_copy(subgraph, input_id, output_id, /*flags=*/0));
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  ASSERT_EQ(subgraph_output, operator_output);
-}
+}  // namespace xnnpack
