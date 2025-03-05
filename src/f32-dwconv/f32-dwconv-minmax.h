@@ -222,13 +222,9 @@ XNN_UKERNEL(0, xnn_f32_dwconv_minmax_ukernel_25p2c__wasm_acc2, 2, false, 2, 25, 
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
-XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_dwconv_minmax_ukernel_3p4vc__rvv, 4 * (xnn_init_hardware_config()->vlenb / sizeof(float)), false, 4 * (xnn_init_hardware_config()->vlenb / sizeof(float)), 3, float, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_dwconv_minmax_ukernel_3p8vc__rvv, 8 * (xnn_init_hardware_config()->vlenb / sizeof(float)), false, 8 * (xnn_init_hardware_config()->vlenb / sizeof(float)), 3, float, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
-XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_dwconv_minmax_ukernel_4p4vc__rvv, 4 * (xnn_init_hardware_config()->vlenb / sizeof(float)), false, 4 * (xnn_init_hardware_config()->vlenb / sizeof(float)), 4, float, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_dwconv_minmax_ukernel_4p8vc__rvv, 8 * (xnn_init_hardware_config()->vlenb / sizeof(float)), false, 8 * (xnn_init_hardware_config()->vlenb / sizeof(float)), 4, float, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
-XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_dwconv_minmax_ukernel_9p4vc__rvv, 4 * (xnn_init_hardware_config()->vlenb / sizeof(float)), false, 4 * (xnn_init_hardware_config()->vlenb / sizeof(float)), 9, float, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_dwconv_minmax_ukernel_9p8vc__rvv, 8 * (xnn_init_hardware_config()->vlenb / sizeof(float)), false, 8 * (xnn_init_hardware_config()->vlenb / sizeof(float)), 9, float, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
-XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_dwconv_minmax_ukernel_25p4vc__rvv, 4 * (xnn_init_hardware_config()->vlenb / sizeof(float)), false, 4 * (xnn_init_hardware_config()->vlenb / sizeof(float)), 25, float, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_dwconv_minmax_ukernel_25p8vc__rvv, 8 * (xnn_init_hardware_config()->vlenb / sizeof(float)), false, 8 * (xnn_init_hardware_config()->vlenb / sizeof(float)), 25, float, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 #endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 

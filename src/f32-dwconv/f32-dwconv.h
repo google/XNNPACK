@@ -31,13 +31,9 @@ XNN_UKERNEL(0, xnn_f32_dwconv_ukernel_25p8c__wasmrelaxedsimd_fma, 8, false, 8, 2
 #endif  // XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
-XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_dwconv_ukernel_3p4vc__rvv, 4 * (xnn_init_hardware_config()->vlenb / sizeof(float)), false, 4 * (xnn_init_hardware_config()->vlenb / sizeof(float)), 3, float, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_dwconv_ukernel_3p8vc__rvv, 8 * (xnn_init_hardware_config()->vlenb / sizeof(float)), false, 8 * (xnn_init_hardware_config()->vlenb / sizeof(float)), 3, float, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_dwconv_ukernel_4p4vc__rvv, 4 * (xnn_init_hardware_config()->vlenb / sizeof(float)), false, 4 * (xnn_init_hardware_config()->vlenb / sizeof(float)), 4, float, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_dwconv_ukernel_4p8vc__rvv, 8 * (xnn_init_hardware_config()->vlenb / sizeof(float)), false, 8 * (xnn_init_hardware_config()->vlenb / sizeof(float)), 4, float, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_dwconv_ukernel_9p4vc__rvv, 4 * (xnn_init_hardware_config()->vlenb / sizeof(float)), false, 4 * (xnn_init_hardware_config()->vlenb / sizeof(float)), 9, float, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_dwconv_ukernel_9p8vc__rvv, 8 * (xnn_init_hardware_config()->vlenb / sizeof(float)), false, 8 * (xnn_init_hardware_config()->vlenb / sizeof(float)), 9, float, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_dwconv_ukernel_25p4vc__rvv, 4 * (xnn_init_hardware_config()->vlenb / sizeof(float)), false, 4 * (xnn_init_hardware_config()->vlenb / sizeof(float)), 25, float, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_dwconv_ukernel_25p8vc__rvv, 8 * (xnn_init_hardware_config()->vlenb / sizeof(float)), false, 8 * (xnn_init_hardware_config()->vlenb / sizeof(float)), 25, float, float, struct xnn_f32_default_params, NULL)
 #endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 
