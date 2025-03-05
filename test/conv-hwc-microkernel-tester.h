@@ -43,7 +43,7 @@ class ConvHWCMicrokernelTester {
     return *this;
   }
 
-  ConvHWCMicrokernelTester& set_padding(uint32_t padding_left, uint32_t padding_right) {
+  ConvHWCMicrokernelTester& padding(uint32_t padding_left, uint32_t padding_right) {
   this->padding_left_ = padding_left;
   this->padding_right_ = padding_right;
 
