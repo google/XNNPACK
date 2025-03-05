@@ -43,6 +43,19 @@ class ConvHWCMicrokernelTester {
     return *this;
   }
 
+  ConvHWCMicrokernelTester& set_padding(uint32_t padding_left, uint32_t padding_right) {
+  this->padding_left_ = padding_left;
+  this->padding_right_ = padding_right;
+
+  if (padding_left_ == 1 && padding_right_ == 1) {
+    this->padding_width(padding_right_);
+  } else if (padding_left_ == 0 && padding_right_ == 1) {
+    this->padding_right(padding_right_);
+  }
+  return *this;
+ }
+
+
   ConvHWCMicrokernelTester& padding_height(uint32_t padding_height) {
     this->padding_top_ = padding_height;
     this->padding_bottom_ = padding_height;
@@ -280,7 +293,7 @@ class ConvHWCMicrokernelTester {
     ASSERT_LT(output_y_start(), output_height());
     ASSERT_LE(output_y_end(), output_height());
     ASSERT_GT(output_y_end(), output_y_start());
-    // ASSERT_GE(output_width(), 1);
+    ASSERT_GE(output_width(), 1);
     ASSERT_GE(output_height(), 1);
 
     xnnpack::ReplicableRandomDevice rng;
