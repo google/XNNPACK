@@ -49,7 +49,7 @@ TEST_P(XnnTest, input_width_eq)
     .output_channels(GetParam().output_channels_tile)
     .input_width(GetParam().input_widths)
     .input_height(GetParam().kernel_size)
-    .set_padding(GetParam().padding_left, GetParam().padding_right)
+    .padding(GetParam().padding_left, GetParam().padding_right)
     .Test(GetParam().kernel);
 }
 
@@ -69,7 +69,7 @@ TEST_P(XnnTest, input_width_div)
       .output_channels(GetParam().output_channels_tile)
       .input_width(input_width)
       .input_height(GetParam().kernel_size)
-      .set_padding(GetParam().padding_left, GetParam().padding_right)
+      .padding(GetParam().padding_left, GetParam().padding_right)
       .Test(GetParam().kernel);
   }
 }
@@ -87,7 +87,7 @@ TEST_P(XnnTest, input_width_lt)
       .output_channels(GetParam().output_channels_tile)
       .input_width(input_width)
       .input_height(GetParam().kernel_size)
-      .set_padding(GetParam().padding_left, GetParam().padding_right)
+      .padding(GetParam().padding_left, GetParam().padding_right)
       .Test(GetParam().kernel);
   }
 }
@@ -105,7 +105,7 @@ TEST_P(XnnTest, input_width_gt)
       .output_channels(GetParam().output_channels_tile)
       .input_width(input_width)
       .input_height(GetParam().kernel_size)
-      .set_padding(GetParam().padding_left, GetParam().padding_right)
+      .padding(GetParam().padding_left, GetParam().padding_right)
       .Test(GetParam().kernel);
   }
 }
@@ -126,7 +126,7 @@ TEST_P(XnnTest, output_channels_lt)
         .output_channels(output_channels)
         .input_width(input_width)
         .input_height(GetParam().kernel_size)
-        .set_padding(GetParam().padding_left, GetParam().padding_right)
+        .padding(GetParam().padding_left, GetParam().padding_right)
         .Test(GetParam().kernel);
     }
   }
@@ -150,7 +150,7 @@ TEST_P(XnnTest, output_channels_div)
         .output_channels(output_channels)
         .input_width(input_width)
         .input_height(GetParam().kernel_size)
-        .set_padding(GetParam().padding_left, GetParam().padding_right)
+        .padding(GetParam().padding_left, GetParam().padding_right)
         .Test(GetParam().kernel);
     }
   }
@@ -174,7 +174,7 @@ TEST_P(XnnTest, output_channels_gt)
         .output_channels(output_channels)
         .input_width(input_width)
         .input_height(GetParam().kernel_size)
-        .set_padding(GetParam().padding_left, GetParam().padding_right)
+        .padding(GetParam().padding_left, GetParam().padding_right)
         .Test(GetParam().kernel);
     }
   }
@@ -224,7 +224,7 @@ TEST_P(XnnTest, input_height_gt)
           .output_channels(output_channels)
           .input_width(input_widths_)
           .input_height(input_heights)
-          .set_padding(GetParam().padding_left, GetParam().padding_right)
+          .padding(GetParam().padding_left, GetParam().padding_right)
           .Test(GetParam().kernel);
       }
     }
@@ -247,7 +247,7 @@ TEST_P(XnnTest, padding_top)
           .output_channels(output_channels)
           .input_width(input_widths_)
           .input_height(9)
-          .set_padding(GetParam().padding_left, GetParam().padding_right)
+          .padding(GetParam().padding_left, GetParam().padding_right)
           .padding_top(padding_tops)
           .Test(GetParam().kernel);
       }
@@ -271,7 +271,7 @@ TEST_P(XnnTest, padding_bottom)
           .output_channels(output_channels)
           .input_width(input_widths_)
           .input_height(9)
-          .set_padding(GetParam().padding_left, GetParam().padding_right)
+          .padding(GetParam().padding_left, GetParam().padding_right)
           .padding_bottom(padding_bottoms)
           .Test(GetParam().kernel);
       }
@@ -296,7 +296,7 @@ TEST_P(XnnTest, output_y_start)
           .input_width(input_widths_)
           .input_height(9)
           .output_y_start(output_y_starts)
-          .set_padding(GetParam().padding_left, GetParam().padding_right)
+          .padding(GetParam().padding_left, GetParam().padding_right)
           .Test(GetParam().kernel);
       }
     }
@@ -320,7 +320,7 @@ TEST_P(XnnTest, output_y_end)
           .input_width(input_widths_)
           .input_height(9)
           .output_y_end(output_y_ends)
-          .set_padding(GetParam().padding_left, GetParam().padding_right)
+          .padding(GetParam().padding_left, GetParam().padding_right)
           .Test(GetParam().kernel);
       }
     }
@@ -343,7 +343,7 @@ TEST_P(XnnTest, qmin)
         .input_width(input_widths_)
         .input_height(6)
         .qmin(128)
-        .set_padding(GetParam().padding_left, GetParam().padding_right)
+        .padding(GetParam().padding_left, GetParam().padding_right)
         .Test(GetParam().kernel);
     }
   }
@@ -365,7 +365,7 @@ TEST_P(XnnTest, qmax)
         .input_width(input_widths_)
         .input_height(6)
         .qmax(128)
-        .set_padding(GetParam().padding_left, GetParam().padding_right)
+        .padding(GetParam().padding_left, GetParam().padding_right)
         .Test(GetParam().kernel);
     }
   }
