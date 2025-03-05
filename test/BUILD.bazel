@@ -1595,7 +1595,7 @@ xnnpack_unit_test(
     srcs = [
         "%s.cc" % operator.replace("_", "-"),
     ],
-    shard_count = 5,
+    shard_count = shard_count,
     deps = [
         ":replicable_random_device",
         ":runtime_flags",
@@ -1610,15 +1610,16 @@ xnnpack_unit_test(
         "//:requantization",
         "//:subgraph",
     ],
-) for operator in [
-    "copy",
-    "softmax",
-    "space_to_depth_2d",
-    "static_constant_pad",
-    "static_expand_dims",
-    "static_reshape",
-    "static_slice",
-    "static_transpose",
+) for operator, shard_count in [
+    ("copy", 1),
+    ("softmax", 1),
+    ("space_to_depth_2d", 1),
+    ("depth_to_space_2d", 1),
+    ("static_constant_pad", 5),
+    ("static_expand_dims", 5),
+    ("static_reshape", 5),
+    ("static_slice", 5),
+    ("static_transpose", 5),
 ]]
 
 xnnpack_cxx_library(
@@ -1801,23 +1802,6 @@ xnnpack_unit_test(
         "//:operator_utils",
         "//:operators",
         "//:requantization",
-        "//:subgraph",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "depth_to_space_2d_test",
-    srcs = [
-        "depth-to-space-2d.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        ":runtime_flags",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:math",
-        "//:node_type",
-        "//:operators",
         "//:subgraph",
     ],
 )

@@ -89,7 +89,7 @@ class SubgraphTester {
     EXPECT_EQ(status, xnn_status_success);
 
     xnn_subgraph_t subgraph_ptr = nullptr;
-    status = xnn_create_subgraph(external_value_ids, 0 /* flags */, &subgraph_ptr);
+    status = xnn_create_subgraph(external_value_ids, /*flags=*/0, &subgraph_ptr);
     EXPECT_EQ(status, xnn_status_success);
     subgraph_.reset(subgraph_ptr);
   }
@@ -393,7 +393,7 @@ class SubgraphTester {
 
   SubgraphTester& AddConcatenate2(size_t axis, uint32_t input1_id, uint32_t input2_id, uint32_t output_id) {
     const xnn_status status = xnn_define_concatenate2(
-        subgraph_.get(), axis, input1_id, input2_id, output_id, 0 /* flags */);
+        subgraph_.get(), axis, input1_id, input2_id, output_id, /*flags=*/0);
     EXPECT_EQ(status, xnn_status_success);
     return *this;
   }
@@ -403,7 +403,7 @@ class SubgraphTester {
       float padding_value, uint32_t input_id, uint32_t output_id) {
     const xnn_status status = xnn_define_static_constant_pad(
         subgraph_.get(), pre_paddings, post_paddings, padding_value, input_id,
-        output_id, 0 /* flags */);
+        output_id, /*flags=*/0);
     EXPECT_EQ(status, xnn_status_success);
     return *this;
   }
@@ -426,7 +426,32 @@ class SubgraphTester {
                                uint32_t input_id, uint32_t output_id) {
     const xnn_status status =
         xnn_define_static_transpose(subgraph_.get(), perm.size(), perm.data(),
-                                    input_id, output_id, 0 /* flags */);
+                                    input_id, output_id, /*flags=*/0);
+    EXPECT_EQ(status, xnn_status_success);
+    return *this;
+  }
+
+  SubgraphTester& AddExpandDims(const std::vector<size_t>& new_axes,
+                                uint32_t input_id, uint32_t output_id) {
+    const xnn_status status = xnn_define_static_expand_dims(
+        subgraph_.get(), new_axes.size(), new_axes.data(), input_id, output_id,
+        /*flags=*/0);
+    EXPECT_EQ(status, xnn_status_success);
+    return *this;
+  }
+
+  SubgraphTester& AddSpaceToDepth2D(size_t block_size, uint32_t input_id,
+                                    uint32_t output_id) {
+    const xnn_status status = xnn_define_space_to_depth_2d(
+        subgraph_.get(), block_size, input_id, output_id, /*flags=*/0);
+    EXPECT_EQ(status, xnn_status_success);
+    return *this;
+  }
+
+  SubgraphTester& AddDepthToSpace2D(size_t block_size, uint32_t input_id,
+                                    uint32_t output_id) {
+    const xnn_status status = xnn_define_depth_to_space_2d(
+        subgraph_.get(), block_size, input_id, output_id, /*flags=*/0);
     EXPECT_EQ(status, xnn_status_success);
     return *this;
   }
@@ -437,14 +462,14 @@ class SubgraphTester {
                            uint32_t input_id, uint32_t output_id) {
     const xnn_status status = xnn_define_static_slice_v3(
         subgraph_.get(), begins.size(), begins.data(), ends.data(),
-        strides.data(), input_id, output_id, 0 /* flags */);
+        strides.data(), input_id, output_id, /*flags=*/0);
     EXPECT_EQ(status, xnn_status_success);
     return *this;
   }
 
   SubgraphTester& AddConvert(uint32_t input_id, uint32_t output_id) {
     const xnn_status status = xnn_define_unary(
-        subgraph_.get(), xnn_unary_convert, /*params=*/nullptr, input_id, output_id, 0 /* flags */);
+        subgraph_.get(), xnn_unary_convert, /*params=*/nullptr, input_id, output_id, /*flags=*/0);
     EXPECT_EQ(status, xnn_status_success);
     return *this;
   }
@@ -460,7 +485,7 @@ class SubgraphTester {
         params.groups, params.group_input_channels, params.group_output_channels,
         -std::numeric_limits<float>::infinity(),
         std::numeric_limits<float>::infinity(), input_id, filter_id, bias_id,
-        output_id, 0 /* flags */);
+        output_id, /*flags=*/0);
     EXPECT_EQ(status, xnn_status_success);
 
     return *this;
@@ -468,7 +493,7 @@ class SubgraphTester {
 
   SubgraphTester& AddCopy(uint32_t input_id, uint32_t output_id) {
     const xnn_status status = xnn_define_copy(
-        subgraph_.get(), input_id, output_id, 0 /* flags */);
+        subgraph_.get(), input_id, output_id, /*flags=*/0);
     EXPECT_EQ(status, xnn_status_success);
     return *this;
   }
@@ -483,7 +508,7 @@ class SubgraphTester {
         params.depth_multiplier, params.input_channels,
         -std::numeric_limits<float>::infinity(),
         std::numeric_limits<float>::infinity(), input_id, filter_id, bias_id,
-        output_id, 0 /* flags */);
+        output_id, /*flags=*/0);
     EXPECT_EQ(status, xnn_status_success);
 
     return *this;
@@ -494,7 +519,7 @@ class SubgraphTester {
                                        std::numeric_limits<float>::infinity()};
     const xnn_status status =
         xnn_define_binary(subgraph_.get(), xnn_binary_add, &params, input_id1,
-                        input_id2, output_id, 0 /* flags */);
+                        input_id2, output_id, /*flags=*/0);
     EXPECT_EQ(status, xnn_status_success);
 
     return *this;
@@ -510,7 +535,7 @@ class SubgraphTester {
         input_padding_bottom, input_padding_left, pooling_height, pooling_width,
         stride_height, stride_width, -std::numeric_limits<float>::infinity(),
         std::numeric_limits<float>::infinity(), input_id, output_id,
-        0 /* flags */);
+        /*flags=*/0);
     EXPECT_EQ(status, xnn_status_success);
 
     return *this;
@@ -521,7 +546,7 @@ class SubgraphTester {
     params.clamp.min = output_min;
     params.clamp.max = output_max;
     const xnn_status status =
-        xnn_define_unary(subgraph_.get(), xnn_unary_clamp, &params, input_id, output_id, 0 /* flags */);
+        xnn_define_unary(subgraph_.get(), xnn_unary_clamp, &params, input_id, output_id, /*flags=*/0);
     EXPECT_EQ(status, xnn_status_success);
 
     return *this;
@@ -545,7 +570,7 @@ class SubgraphTester {
         group_input_channels, group_output_channels,
         -std::numeric_limits<float>::infinity(),
         std::numeric_limits<float>::infinity(), input_id, filter_id, bias_id,
-        output_id, 0 /* flags */);
+        output_id, /*flags=*/0);
     EXPECT_EQ(status, xnn_status_success);
 
     return *this;
@@ -563,7 +588,7 @@ class SubgraphTester {
         params.group_input_channels, params.group_output_channels,
         -std::numeric_limits<float>::infinity(),
         std::numeric_limits<float>::infinity(), input_id, filter_id, bias_id,
-        output_id, 0 /* flags */);
+        output_id, /*flags=*/0);
     EXPECT_EQ(status, xnn_status_success);
 
     return *this;
@@ -574,7 +599,7 @@ class SubgraphTester {
                                        std::numeric_limits<float>::infinity()};
     const xnn_status status =
         xnn_define_binary(subgraph_.get(), xnn_binary_divide, &params, input_id1,
-                        input_id2, output_id, 0 /* flags */);
+                        input_id2, output_id, /*flags=*/0);
     EXPECT_EQ(status, xnn_status_success);
 
     return *this;
@@ -582,7 +607,7 @@ class SubgraphTester {
 
   SubgraphTester& AddEvenSplit2(size_t split_dim, uint32_t input_id, uint32_t output1_id, uint32_t output2_id) {
     const xnn_status status = xnn_define_even_split2(
-        subgraph_.get(), split_dim, input_id, output1_id, output2_id, 0 /* flags */);
+        subgraph_.get(), split_dim, input_id, output1_id, output2_id, /*flags=*/0);
     EXPECT_EQ(status, xnn_status_success);
     return *this;
   }
@@ -614,7 +639,7 @@ class SubgraphTester {
     int64_t reduction_axes[2] = {1, 2};
     const xnn_status status = xnn_define_static_reduce_v2(
         subgraph_.get(), xnn_reduce_mean, 2, &reduction_axes[0], input_id,
-        output_id, 0 /* flags */);
+        output_id, /*flags=*/0);
     EXPECT_EQ(status, xnn_status_success);
 
     return *this;
@@ -630,7 +655,7 @@ class SubgraphTester {
 
   SubgraphTester& AddHardSwish(uint32_t input_id, uint32_t output_id) {
     const xnn_status status =
-        xnn_define_unary(subgraph_.get(), xnn_unary_hardswish, nullptr, input_id, output_id, 0 /* flags */);
+        xnn_define_unary(subgraph_.get(), xnn_unary_hardswish, nullptr, input_id, output_id, /*flags=*/0);
     EXPECT_EQ(status, xnn_status_success);
 
     return *this;
@@ -640,7 +665,7 @@ class SubgraphTester {
     xnn_unary_params params;
     params.leaky_relu.negative_slope = negative_slope;
     const xnn_status status =
-        xnn_define_unary(subgraph_.get(), xnn_unary_leaky_relu, &params, input_id, output_id, 0 /* flags */);
+        xnn_define_unary(subgraph_.get(), xnn_unary_leaky_relu, &params, input_id, output_id, /*flags=*/0);
     EXPECT_EQ(status, xnn_status_success);
 
     return *this;
@@ -656,7 +681,7 @@ class SubgraphTester {
         input_padding_bottom, input_padding_left, pooling_height, pooling_width,
         stride_height, stride_width, dilation_height, dilation_width, -std::numeric_limits<float>::infinity(),
         std::numeric_limits<float>::infinity(), input_id, output_id,
-        0 /* flags */);
+        /*flags=*/0);
     EXPECT_EQ(status, xnn_status_success);
 
     return *this;
@@ -667,7 +692,7 @@ class SubgraphTester {
                                        std::numeric_limits<float>::infinity()};
     const xnn_status status =
         xnn_define_binary(subgraph_.get(), xnn_binary_multiply, &params, input_id1,
-                        input_id2, output_id, 0 /* flags */);
+                        input_id2, output_id, /*flags=*/0);
     EXPECT_EQ(status, xnn_status_success);
 
     return *this;
@@ -685,7 +710,7 @@ class SubgraphTester {
                                        std::numeric_limits<float>::infinity()};
     const xnn_status status =
         xnn_define_binary(subgraph_.get(), xnn_binary_subtract, &params, input_id1,
-                        input_id2, output_id, 0 /* flags */);
+                        input_id2, output_id, /*flags=*/0);
     EXPECT_EQ(status, xnn_status_success);
 
     return *this;
@@ -702,8 +727,16 @@ class SubgraphTester {
     return *this;
   }
 
+  SubgraphTester& AddSoftmax(uint32_t input_id, uint32_t output_id,
+                             uint32_t flags = 0) {
+    const xnn_status status =
+        xnn_define_softmax(subgraph_.get(), input_id, output_id, flags);
+    EXPECT_EQ(status, xnn_status_success);
+    return *this;
+  }
+
   SubgraphTester& Optimize() {
-    const xnn_status status = xnn_subgraph_optimize(subgraph_.get(), 0 /* flags */);
+    const xnn_status status = xnn_subgraph_optimize(subgraph_.get(), /*flags=*/0);
     EXPECT_EQ(status, xnn_status_success);
 
     return *this;

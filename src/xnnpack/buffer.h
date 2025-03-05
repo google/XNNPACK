@@ -324,6 +324,43 @@ class Tensor {
     return result;
   }
 
+  // Reshape such that the shape has extent 1 dimensions at `new_axes`
+  // positions.
+  Tensor<T, Alignment> expand_dims(const std::vector<size_t>& new_axes) const {
+    Tensor<T, Alignment> result(*this);
+    size_t new_rank = rank() + new_axes.size();
+    result.extents_.resize(new_rank);
+    result.strides_.resize(new_rank);
+    size_t i = 0;
+    for (size_t j = 0; j < new_rank; ++j) {
+      if (std::find(new_axes.begin(), new_axes.end(), j) != new_axes.end()) {
+        result.extents_[j] = 1;
+        result.strides_[j] = 0;
+      } else {
+        result.extents_[j] = extents_[i];
+        result.strides_[j] = strides_[i];
+        ++i;
+      }
+    }
+    return result;
+  }
+
+  // Reshape the tensor to the given extents, assuming that the tensor is
+  // contiguous, and produces a tensor with contiguous strides.
+  Tensor<T, Alignment> reshape(const std::vector<size_t>& new_extents) const {
+    assert(is_contiguous());
+    Tensor<T, Alignment> result(*this);
+    result.extents_ = new_extents;
+    size_t stride = 1;
+    result.strides_.resize(new_extents.size());
+    for (size_t i = new_extents.size(); i > 0; --i) {
+      result.strides_[i - 1] = stride;
+      stride *= new_extents[i - 1];
+    }
+    assert(stride == size());
+    return result;
+  }
+
   // This uses the same rules for indexing as numpy, i.e. negative numbers are
   // offset are added to the extents.
   Tensor<T, Alignment> slice(const std::vector<int64_t>& begins,
@@ -552,7 +589,6 @@ class DatatypeGenerator {
       : dist_(min, max) {}
   explicit DatatypeGenerator(const xnn_quantization_params& = {})
       : dist_(-1.0f, 1.0f) {}
-  DatatypeGenerator() : dist_(-1.0f, 1.0f) {}
 
   template <typename Rng>
   T operator()(Rng& rng) {
