@@ -159,6 +159,57 @@ class ReduceMicrokernelTester {
     }
   }
 
+    void Test(xnn_s8_reduce_ukernel_fn reduce, OpType op_type) const {
+    xnnpack::ReplicableRandomDevice rng;
+    std::uniform_int_distribution<int32_t> i8dist(
+      std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+
+    xnnpack::Buffer<int8_t> input(batch_size() +
+                                  XNN_EXTRA_BYTES / sizeof(int8_t));
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate_n(input.data(), batch_size(), [&]() { return i8dist(rng); });
+
+      // Compute reference results.
+      xnnpack::Buffer<int8_t>::iterator min, max;
+      std::tie(min, max) = std::minmax_element(input.begin(),
+                                               input.begin() + batch_size());
+
+      // Call optimized micro-kernel.
+      int8_t output[2];
+      switch (op_type) {
+        case OpType::Max:
+          output[0] = std::numeric_limits<int8_t>::min();
+          break;
+        case OpType::Min:
+          output[0] = std::numeric_limits<int8_t>::max();
+          break;
+        case OpType::MinMax:
+          output[0] = std::numeric_limits<int8_t>::max();
+          output[1] = std::numeric_limits<int8_t>::min();
+          break;
+      }
+      reduce(batch_size() * sizeof(int8_t), input.data(), output, nullptr);
+
+      // Verify results.
+      switch (op_type) {
+        case OpType::Max:
+          EXPECT_EQ(output[0], *max)
+              << "with batch " << batch_size();
+          break;
+        case OpType::Min:
+          EXPECT_EQ(output[0], *min)
+              << "with batch " << batch_size();
+          break;
+        case OpType::MinMax:
+          EXPECT_EQ(output[0], *min)
+              << "with batch " << batch_size();
+          EXPECT_EQ(output[1], *max)
+              << "with batch " << batch_size();
+          break;
+      }
+    }
+  }
+
   void Test(xnn_u8_reduce_ukernel_fn reduce, OpType op_type) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> u8dist(

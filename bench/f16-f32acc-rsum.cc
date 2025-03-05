@@ -5,7 +5,7 @@
 //
 // Auto-generated file. Do not edit!
 //   Specification: test/f16-f32acc-rsum.yaml
-//   Generator: tools/generate-rdsum-benchmark.py
+//   Generator: tools/generate-reduce-discontiguous-benchmark.py
 
 #include "rsum-benchmark.h"
 #include "utils.h"

@@ -718,6 +718,21 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-scalar-u2.c
   src/s8-ibilinear/gen/s8-ibilinear-scalar-c2.c
   src/s8-ibilinear/gen/s8-ibilinear-scalar-c4.c
+  src/s8-rminmax/gen/s8-rmax-scalar-u1.c
+  src/s8-rminmax/gen/s8-rmax-scalar-u2-acc2.c
+  src/s8-rminmax/gen/s8-rmax-scalar-u3-acc3.c
+  src/s8-rminmax/gen/s8-rmax-scalar-u4-acc2.c
+  src/s8-rminmax/gen/s8-rmax-scalar-u4-acc4.c
+  src/s8-rminmax/gen/s8-rmin-scalar-u1.c
+  src/s8-rminmax/gen/s8-rmin-scalar-u2-acc2.c
+  src/s8-rminmax/gen/s8-rmin-scalar-u3-acc3.c
+  src/s8-rminmax/gen/s8-rmin-scalar-u4-acc2.c
+  src/s8-rminmax/gen/s8-rmin-scalar-u4-acc4.c
+  src/s8-rminmax/gen/s8-rminmax-scalar-u1.c
+  src/s8-rminmax/gen/s8-rminmax-scalar-u2-acc2.c
+  src/s8-rminmax/gen/s8-rminmax-scalar-u3-acc3.c
+  src/s8-rminmax/gen/s8-rminmax-scalar-u4-acc2.c
+  src/s8-rminmax/gen/s8-rminmax-scalar-u4-acc4.c
   src/u8-ibilinear/gen/u8-ibilinear-scalar-c2.c
   src/u8-ibilinear/gen/u8-ibilinear-scalar-c4.c
   src/x8-lut/gen/x8-lut-scalar-u1.c

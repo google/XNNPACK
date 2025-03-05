@@ -675,6 +675,21 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/qu8-vmulc/gen/qu8-vmulc-minmax-rndnu-neon-ld128-u16.c
   src/s8-maxpool/gen/s8-maxpool-2p-minmax-neon-u16.c
   src/s8-maxpool/gen/s8-maxpool-4p-minmax-neon-u16.c
+  src/s8-rminmax/gen/s8-rmax-neon-u16.c
+  src/s8-rminmax/gen/s8-rmax-neon-u32-acc2.c
+  src/s8-rminmax/gen/s8-rmax-neon-u48-acc3.c
+  src/s8-rminmax/gen/s8-rmax-neon-u64-acc2.c
+  src/s8-rminmax/gen/s8-rmax-neon-u64-acc4.c
+  src/s8-rminmax/gen/s8-rmin-neon-u16.c
+  src/s8-rminmax/gen/s8-rmin-neon-u32-acc2.c
+  src/s8-rminmax/gen/s8-rmin-neon-u48-acc3.c
+  src/s8-rminmax/gen/s8-rmin-neon-u64-acc2.c
+  src/s8-rminmax/gen/s8-rmin-neon-u64-acc4.c
+  src/s8-rminmax/gen/s8-rminmax-neon-u16.c
+  src/s8-rminmax/gen/s8-rminmax-neon-u32-acc2.c
+  src/s8-rminmax/gen/s8-rminmax-neon-u48-acc3.c
+  src/s8-rminmax/gen/s8-rminmax-neon-u64-acc2.c
+  src/s8-rminmax/gen/s8-rminmax-neon-u64-acc4.c
   src/x8-transposec/gen/x8-transposec-8x8-multi-dec-zip-neon.c
   src/x8-transposec/gen/x8-transposec-8x8-multi-mov-zip-neon.c
   src/x8-transposec/gen/x8-transposec-8x8-multi-switch-zip-neon.c
