@@ -50,11 +50,14 @@ void TestImpl(size_t rank) {
       for (size_t i = 0; i < rank; ++i) {
         output_shape[i] += pre_padding[i] + post_padding[i];
       }
-      Tensor<T> output(output_shape);
 
-      subgraph.ReshapeExternalTensor(shape, input.data(), 0)
-          .ReshapeExternalTensor(output_shape, output.data(), 1)
-          .ReshapeRuntime()
+      // Check reshape is correct
+      subgraph.ReshapeExternalTensor(shape, input.base(), 0).ReshapeRuntime();
+      ASSERT_EQ(subgraph.GetExternalTensorShape(1), output_shape);
+
+      // Run subgraph
+      Tensor<T> output(output_shape);
+      subgraph.SetupExternalTensor(output.base(), 1)
           .SetupRuntime()
           .InvokeRuntime();
 
