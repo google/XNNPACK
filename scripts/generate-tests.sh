@@ -194,10 +194,12 @@ tools/generate-reduce-test.py --tester RSumMicrokernelTester --spec test/qs8-rsu
 tools/generate-reduce-test.py --tester RSumMicrokernelTester --spec test/qu8-rsum.yaml --output test/qu8-rsum.cc &
 tools/generate-reduce-test.py --tester RSumMicrokernelTester --spec test/f32-rsum.yaml --output test/f32-rsum.cc &
 
-tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/u8-rmax.yaml --output test/u8-rmax.cc &
 tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/s8-rmin.yaml --output test/s8-rmin.cc &
 tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/s8-rmax.yaml --output test/s8-rmax.cc &
 tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/s8-rminmax.yaml --output test/s8-rminmax.cc &
+tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/u8-rmin.yaml --output test/u8-rmin.cc &
+tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/u8-rmax.yaml --output test/u8-rmax.cc &
+tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/u8-rminmax.yaml --output test/u8-rminmax.cc &
 
 tools/generate-rdsum-test.py --spec test/f16-f32acc-rdsum.yaml --output test/f16-f32acc-rdsum.cc &
 tools/generate-rdsum-test.py --spec test/f32-rdsum.yaml --output test/f32-rdsum.cc &

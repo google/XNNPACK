@@ -159,7 +159,7 @@ class ReduceMicrokernelTester {
     }
   }
 
-    void Test(xnn_s8_reduce_ukernel_fn reduce, OpType op_type) const {
+  void Test(xnn_s8_reduce_ukernel_fn reduce, OpType op_type) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());

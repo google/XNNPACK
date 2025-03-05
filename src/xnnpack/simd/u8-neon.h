@@ -33,6 +33,24 @@ static XNN_INLINE xnn_simd_u8_t xnn_max_u8(xnn_simd_u8_t a, xnn_simd_u8_t b) {
   return vmaxq_u8(a, b);
 }
 
+static XNN_INLINE uint8_t xnn_horizontal_max_u8(xnn_simd_u8_t a) {
+  uint8x8_t max0 = vpmax_u8(vget_low_u8(a), vget_high_u8(a));
+  max0 = vpmax_u8(max0, max0);
+  max0 = vpmax_u8(max0, max0);
+  max0 = vpmax_u8(max0, max0);
+
+  return vget_lane_u8(max0, 0);
+}
+
+static XNN_INLINE uint8_t xnn_horizontal_min_u8(xnn_simd_u8_t a) {
+  uint8x8_t min0 = vpmin_u8(vget_low_u8(a), vget_high_u8(a));
+  min0 = vpmin_u8(min0, min0);
+  min0 = vpmin_u8(min0, min0);
+  min0 = vpmin_u8(min0, min0);
+
+  return vget_lane_u8(min0, 0);
+}
+
 static XNN_INLINE xnn_simd_u8_t xnn_min_u8(xnn_simd_u8_t a, xnn_simd_u8_t b) {
   return vminq_u8(a, b);
 }

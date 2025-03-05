@@ -386,6 +386,9 @@ SIMD_TEST_DEPS = [
     "s8_rmin",
     "s8_rmax",
     "s8_rminmax",
+    "u8_rmin",
+    "u8_rmax",
+    "u8_rminmax",
 ]]
 
 [xnnpack_unit_test(
@@ -1078,15 +1081,6 @@ xnnpack_unit_test(
     srcs = [
         "lut-norm-microkernel-tester.h",
         "u8-lut32norm.cc",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "u8_rmax_test",
-    srcs = [
-        "reduce-microkernel-tester.h",
-        "u8-rmax.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )

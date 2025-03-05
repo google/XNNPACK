@@ -101,16 +101,16 @@ static void init_u8_rmax_config(void) {
     if (hardware_config->use_arm_neon) {
       u8_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_u8_rmax_ukernel__neon_u16;
     } else if (!XNN_PLATFORM_MOBILE) {
-      u8_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_u8_rmax_ukernel__scalar_u2;
+      u8_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_u8_rmax_ukernel__scalar_u2_acc2;
     }
   #elif XNN_ARCH_ARM64
     u8_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_u8_rmax_ukernel__neon_u16;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     u8_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_u8_rmax_ukernel__sse2_u16;
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-    u8_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_u8_rmax_ukernel__scalar_u2;
+    u8_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_u8_rmax_ukernel__scalar_u2_acc2;
   #else
-    u8_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_u8_rmax_ukernel__scalar_u2;
+    u8_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_u8_rmax_ukernel__scalar_u2_acc2;
   #endif
 
 }
