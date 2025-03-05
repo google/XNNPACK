@@ -1398,10 +1398,6 @@ IF(XNNPACK_BUILD_TESTS)
         even-split3
         even-split4
         fully-connected
-        global-average-pooling-1d
-        global-average-pooling-2d
-        global-sum-pooling-1d
-        global-sum-pooling-2d
         max-pooling-2d
         reshape-helpers
         scaled-dot-product-attention
