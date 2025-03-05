@@ -147,6 +147,22 @@ class SubgraphTester {
     return *this;
   }
 
+  template <typename T>
+  inline SubgraphTester& SetupExternalTensor(T* data, uint32_t external_id) {
+    external_tensors_[external_id] = data;
+    return *this;
+  }
+
+  inline std::vector<size_t> GetExternalTensorShape(uint32_t external_id) {
+    std::vector<size_t> shape(XNN_MAX_TENSOR_DIMS);
+    size_t rank = 0;
+    const xnn_status status = xnn_get_external_value_shape(
+        runtime_.get(), external_id, &rank, shape.data());
+    EXPECT_EQ(status, xnn_status_success);
+    shape.resize(rank);
+    return shape;
+  }
+
   inline SubgraphTester& AddDynamicTensorF32(const std::vector<size_t>& dims,
                                              uint32_t external_id,
                                              uint32_t flags = 0) {
@@ -675,6 +691,17 @@ class SubgraphTester {
     return *this;
   }
 
+  SubgraphTester& AddReduce(xnn_reduce_operator reduce_operator,
+                            const std::vector<int64_t>& reduction_axes,
+                            uint32_t input_id, uint32_t output_id,
+                            uint32_t flags = 0) {
+    const xnn_status status = xnn_define_static_reduce_v2(
+        subgraph_.get(), reduce_operator, reduction_axes.size(),
+        reduction_axes.data(), input_id, output_id, flags);
+    EXPECT_EQ(status, xnn_status_success);
+    return *this;
+  }
+
   SubgraphTester& Optimize() {
     const xnn_status status = xnn_subgraph_optimize(subgraph_.get(), 0 /* flags */);
     EXPECT_EQ(status, xnn_status_success);
@@ -700,16 +727,15 @@ class SubgraphTester {
     return *this;
   }
 
-  SubgraphTester& CreateRuntime(xnn_weights_cache_t weights_cache,
-                                xnn_workspace_t workspace,
-                                pthreadpool_t threadpool, uint32_t flags) {
+  xnn_status CreateRuntime(xnn_weights_cache_t weights_cache,
+                           xnn_workspace_t workspace, pthreadpool_t threadpool,
+                           uint32_t flags) {
     EXPECT_EQ(runtime_, nullptr);
     xnn_runtime_t runtime = nullptr;
     const xnn_status status = xnn_create_runtime_v4(
         subgraph_.get(), weights_cache, workspace, threadpool, flags, &runtime);
-    EXPECT_EQ(status, xnn_status_success);
     runtime_.reset(runtime);
-    return *this;
+    return status;
   }
 
   SubgraphTester& ReshapeRuntime() {
@@ -730,8 +756,8 @@ class SubgraphTester {
     return *this;
   }
 
-  SubgraphTester& CreateRuntime(pthreadpool_t threadpool = nullptr,
-                                uint32_t flags = xnn_test_runtime_flags()) {
+  xnn_status CreateRuntime(pthreadpool_t threadpool = nullptr,
+                           uint32_t flags = xnn_test_runtime_flags()) {
     return CreateRuntime(nullptr, nullptr, threadpool, flags);
   }
 

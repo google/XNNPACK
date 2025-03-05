@@ -62,15 +62,6 @@ double ComputeTolerance(xnn_datatype datatype, double output_ref) {
   }
 }
 
-template <typename T>
-void BroadcastExtent1(Tensor<T>& tensor) {
-  std::vector<size_t> strides = tensor.strides();
-  for (size_t i = 0; i < tensor.rank(); i++) {
-    strides[i] = tensor.extent(i) == 1 ? 0 : strides[i];
-  }
-  tensor.set_shape(tensor.extents(), std::move(strides));
-}
-
 struct MinMaxLow {
   double min, max, low;
 };
@@ -326,8 +317,8 @@ class BinaryElementwiseOperatorTester {
 
     Tensor<T> input1(input1_shape(), {XNN_EXTRA_BYTES});
     Tensor<T> input2(input2_shape(), {XNN_EXTRA_BYTES});
-    BroadcastExtent1(input1);
-    BroadcastExtent1(input2);
+    broadcast_extent_1(input1);
+    broadcast_extent_1(input2);
     Tensor<T> output(output_dims);
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {

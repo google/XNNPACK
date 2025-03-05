@@ -348,7 +348,7 @@ class Tensor {
   // Remove `pre` elements from the beginning of each dimension, and `post`
   // elements from the end of each dimension.
   Tensor<T, Alignment> crop_padding(const index_type& pre,
-                                    const index_type& post) {
+                                    const index_type& post) const {
     assert(rank() == pre.size());
     assert(rank() == post.size());
 
@@ -485,6 +485,23 @@ std::vector<size_t> random_shape(Rng& rng) {
   return random_shape(rng, 1, 9);
 }
 
+// Like numpy.squeeze, remove dims of extent 1 from shape.
+inline std::vector<size_t> squeeze(std::vector<size_t> shape) {
+  shape.erase(std::remove_if(shape.begin(), shape.end(),
+                             [](size_t x) { return x == 1; }),
+              shape.end());
+  return shape;
+}
+
+template <typename T>
+void broadcast_extent_1(Tensor<T>& tensor) {
+  std::vector<size_t> strides = tensor.strides();
+  for (size_t i = 0; i < tensor.rank(); i++) {
+    strides[i] = tensor.extent(i) == 1 ? 0 : strides[i];
+  }
+  tensor.set_shape(tensor.extents(), std::move(strides));
+}
+
 // Generate random quantization parameters for a given datatype.
 template <typename Rng>
 xnn_quantization_params random_quantization(xnn_datatype datatype, Rng& rng) {
@@ -521,7 +538,7 @@ inline float fake_quantize(float value, const xnn_quantization_params& params) {
 
 template <typename T>
 float dequantize(T x, xnn_quantization_params params) {
-  return dequantize(x, params.scale, params.zero_point);
+  return (static_cast<float>(x) - params.zero_point) * params.scale;
 }
 
 // Make a generator of random values of a datatype T, suitable for use with

@@ -3,16 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>
-#include <array>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
-#include <limits>
-#include <memory>
-#include <numeric>
-#include <random>
 #include <sstream>
 #include <string>
 #include <tuple>
@@ -23,20 +16,19 @@
 #include "xnnpack/buffer.h"
 #include "xnnpack/common.h"
 #include "xnnpack/datatype.h"
-#include "xnnpack/log.h"
 #include "xnnpack/math.h"
-#include "xnnpack/operator.h"
-#include "xnnpack/subgraph.h"
 #include "replicable_random_device.h"
-#include "runtime-flags.h"
+#include "subgraph-tester.h"
+
+namespace xnnpack {
 
 struct Param {
-  using TupleT = std::tuple<xnn_datatype, xnn_reduce_operator, bool, bool>;
+  using TupleT = std::tuple<xnn_reduce_operator, bool, bool, int>;
   explicit Param(TupleT p)
-      : datatype(std::get<0>(p)),
-        reduce_operator(std::get<1>(p)),
-        keep_dims(std::get<2>(p)),
-        use_neg_axes(std::get<3>(p)) {}
+      : reduce_operator(std::get<0>(p)),
+        keep_dims(std::get<1>(p)),
+        use_neg_axes(std::get<2>(p)),
+        rank(std::get<3>(p)) {}
 
   std::string Name() const {
     std::stringstream sstr;
@@ -51,528 +43,195 @@ struct Param {
         sstr << "invalid";
         break;
     }
-    sstr << "_" << xnn_datatype_to_string(datatype);
     if (keep_dims) {
       sstr << "_keep_dims";
     }
     if (use_neg_axes) {
       sstr << "_use_neg_axes";
     }
+    sstr << "_" << rank;
     return sstr.str();
   }
 
-  xnn_datatype datatype;
   xnn_reduce_operator reduce_operator;
   bool keep_dims;
   bool use_neg_axes;
+  int rank;
 };
 
-namespace xnnpack {
-template <class T>
-class ReduceTestBase : public ::testing::TestWithParam<Param> {
- protected:
-  void SetUp() override {
-    const Param p = GetParam();
-    auto num_input_dim_dist =
-        std::uniform_int_distribution<size_t>(2, XNN_MAX_TENSOR_DIMS);
-    const size_t num_input_dims = num_input_dim_dist(rng);
-    auto num_reduction_axes_dist =
-        std::uniform_int_distribution<size_t>(1, num_input_dims);
-    const size_t num_reduction_axes = num_reduction_axes_dist(rng);
-
-    auto axes_dist =
-        std::uniform_int_distribution<size_t>(0, num_input_dims - 1);
-    reduction_axes.resize(num_reduction_axes);
-    std::generate(reduction_axes.begin(), reduction_axes.end(),
-                  [&]() { return axes_dist(rng); });
-    std::sort(reduction_axes.begin(), reduction_axes.end());
-    auto end = std::unique(reduction_axes.begin(), reduction_axes.end());
-    reduction_axes.erase(end, reduction_axes.end());
-
-    auto shape_dist = std::uniform_int_distribution<size_t>(2, 15);
-    input_shape.resize(num_input_dims);
-    std::generate(input_shape.begin(), input_shape.end(),
-                  [&]() { return shape_dist(rng); });
-    num_input_elements =
-        std::accumulate(input_shape.cbegin(), input_shape.cend(), size_t(1),
-                        std::multiplies<size_t>());
-
-    output_shape = input_shape;
-    for (size_t axis : reduction_axes) {
-      output_shape[axis] = 1;
+std::vector<int64_t> mask_to_axes(uint32_t mask) {
+  std::vector<int64_t> axes;
+  for (uint32_t i = 0; i < XNN_MAX_TENSOR_DIMS; ++i) {
+    if (mask & (1 << i)) {
+      axes.push_back(i);
     }
-    num_output_elements =
-        std::accumulate(output_shape.cbegin(), output_shape.cend(), size_t(1),
-                        std::multiplies<size_t>());
+  }
+  return axes;
+}
+
+void negate_axes(int64_t rank, std::vector<int64_t>& axes) {
+  for (int64_t& axis : axes) {
+    axis = axis - rank;
+  }
+}
+
+template <typename T>
+std::string to_string(const std::vector<T>& v) {
+  std::stringstream sstr;
+  sstr << "{";
+  for (const T& t : v) {
+    sstr << t;
+    if (&t != &v.back()) {
+      sstr << ", ";
+    }
+  }
+  sstr << "}";
+  return sstr.str();
+}
+
+auto get_reference_op(xnn_reduce_operator op) {
+  switch (op) {
+    case xnn_reduce_sum:
+    case xnn_reduce_mean:
+      return [](float& output, float input) { output += input; };
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
+template <typename T, typename Accum>
+void TestImpl(const Param& p) {
+  xnn_datatype datatype = xnn_datatype_of<T>();
+
+  ReplicableRandomDevice rng;
+
+  auto reference_op = get_reference_op(p.reduce_operator);
+
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  for (uint32_t mask = 1; mask < (1 << p.rank); ++mask) {
+    std::vector<int64_t> reduction_axes = mask_to_axes(mask);
     if (p.use_neg_axes) {
-      for (int i = 0; i < reduction_axes.size(); i++) {
-        reduction_axes[i] = reduction_axes[i] - num_input_dims;
+      negate_axes(p.rank, reduction_axes);
+    }
+
+    xnn_quantization_params input_quantization =
+        random_quantization(datatype, rng);
+    xnn_quantization_params output_quantization =
+        random_quantization(datatype, rng);
+
+    // Create a runtime with the reduce op in it.
+    SubgraphTester tester(2);
+    tester.AddInputTensor(p.rank, datatype, input_quantization, 0)
+        .AddOutputTensor(p.keep_dims ? p.rank : p.rank - reduction_axes.size(),
+                         datatype, output_quantization, 1)
+        .AddReduce(p.reduce_operator, reduction_axes, 0, 1,
+                   p.keep_dims ? XNN_FLAG_KEEP_DIMS : 0);
+
+    xnn_status status = tester.CreateRuntime();
+    if (status == xnn_status_unsupported_hardware) {
+      GTEST_SKIP();
+      return;
+    }
+
+    // Run several times, with different shapes.
+    for (int reshape = 0; reshape < 2; ++reshape) {
+      std::vector<size_t> input_shape = random_shape(rng, p.rank);
+      std::vector<size_t> output_shape = input_shape;
+      size_t reduced_elements = 1;
+      for (size_t i = 0; i < p.rank; ++i) {
+        if (mask & (1 << i)) {
+          reduced_elements *= input_shape[i];
+          output_shape[i] = 1;
+        }
+      }
+
+      if (std::is_integral<Accum>::value &&
+          (p.reduce_operator == xnn_reduce_mean ||
+           p.reduce_operator == xnn_reduce_sum)) {
+        // Skip reduction tests that might overflow.
+        if (reduced_elements >= std::log2(sizeof(Accum) - sizeof(T)) * 8) {
+          continue;
+        }
+      }
+
+      Tensor<T> input(input_shape, PaddingBytes{XNN_EXTRA_BYTES});
+      // Don't let the data be zero-mean, to avoid numerical issues with sums
+      // near 0.
+      DatatypeGenerator<T> generator(0.0f, 1.0f, input_quantization);
+      input.generate([&]() { return generator(rng); });
+
+      Tensor<T> output(output_shape);
+
+      tester.ReshapeExternalTensor(input_shape, input.data(), 0)
+          .ReshapeRuntime()
+          .SetupExternalTensor(output.data(), 1)
+          .SetupRuntime();
+
+      if (p.keep_dims) {
+        ASSERT_EQ(tester.GetExternalTensorShape(1), output_shape);
+      } else {
+        ASSERT_EQ(squeeze(tester.GetExternalTensorShape(1)),
+                  squeeze(output_shape));
+      }
+
+      tester.InvokeRuntime();
+
+      // Compute reference results.
+      Tensor<float> expected(output_shape);
+      expected.fill(0.0f);
+      broadcast_extent_1(expected);
+      for (const auto& i : EnumerateIndices(input.extents())) {
+        reference_op(expected(i), dequantize(input(i), input_quantization));
+      }
+      const float scale =
+          p.reduce_operator == xnn_reduce_mean ? 1.0f / reduced_elements : 1.0f;
+
+      // Verify the output matches the reference.
+      for (const auto& i : EnumerateIndices(output.extents())) {
+        const float reference = expected(i) * scale;
+        if (xnn_datatype_is_quantized(datatype)) {
+          ASSERT_NEAR(output(i), quantize<T>(reference, output_quantization), 1)
+              << "input_shape=" << to_string(input_shape)
+              << ", reduction_axes=" << to_string(reduction_axes);
+        } else {
+          ASSERT_NEAR(output(i), reference, 1e-3f * std::abs(reference) + 1e-3f)
+              << "input_shape=" << to_string(input_shape)
+              << ", reduction_axes=" << to_string(reduction_axes);
+        }
       }
     }
-
-    input = xnnpack::Buffer<char>(XNN_EXTRA_BYTES / sizeof(char) +
-                                  num_input_elements * xnn_datatype_size_bytes(p.datatype));
-    operator_output =
-        xnnpack::Buffer<char>(num_output_elements * xnn_datatype_size_bytes(p.datatype));
-    subgraph_output =
-        xnnpack::Buffer<char>(num_output_elements * xnn_datatype_size_bytes(p.datatype));
   }
+}
 
-  struct QuantizationParams {
-    xnn_quantization_params input;
-    xnn_quantization_params output;
+template <typename T>
+class Reduce : public ::testing::TestWithParam<Param> {};
 
-    constexpr bool IsQuantized() const { return input.scale != 0; }
-  };
+using ReduceQS8 = Reduce<quantized<int8_t>>;
+using ReduceQU8 = Reduce<quantized<uint8_t>>;
+using ReduceF16 = Reduce<xnn_float16>;
+using ReduceF32 = Reduce<float>;
 
-  QuantizationParams RandomQuantizationParams(xnn_datatype t) {
-    QuantizationParams qp;
-    switch (t) {
-      case xnn_datatype_qint8:
-        qp.input.scale = scale_dist(rng);
-        qp.output.scale = scale_dist(rng);
-        qp.input.zero_point = i8dist(rng);
-        qp.output.zero_point = i8dist(rng);
-        break;
-      case xnn_datatype_quint8:
-        qp.input.scale = scale_dist(rng);
-        qp.output.scale = scale_dist(rng);
-        qp.input.zero_point = u8dist(rng);
-        qp.output.zero_point = u8dist(rng);
-        break;
-      default:
-        qp.input.scale = 0;
-        qp.output.scale = 0;
-        qp.input.zero_point = 0;
-        qp.output.zero_point = 0;
-    }
-    return qp;
-  }
-
-  void SetUpInputOutput(xnn_subgraph_t subgraph, const QuantizationParams& qp,
-                        uint32_t& input_id, uint32_t& output_id) {
-    const Param p = GetParam();
-    if (qp.IsQuantized()) {
-      ASSERT_EQ(xnn_status_success,
-                xnn_define_quantized_tensor_value(
-                    subgraph, p.datatype, qp.input.zero_point, qp.input.scale,
-                    input_shape.size(), input_shape.data(), nullptr,
-                    /*external_id=*/0,
-                    /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-      ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-      ASSERT_EQ(xnn_status_success,
-                xnn_define_quantized_tensor_value(
-                    subgraph, p.datatype, qp.output.zero_point, qp.output.scale,
-                    output_shape.size(), output_shape.data(), nullptr,
-                    /*external_id=*/1,
-                    /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-      ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-    } else {
-      ASSERT_EQ(xnn_status_success,
-                xnn_define_tensor_value(
-                    subgraph, p.datatype, input_shape.size(),
-                    input_shape.data(), nullptr,
-                    /*external_id=*/0, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT,
-                    &input_id));
-      ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-      ASSERT_EQ(xnn_status_success,
-                xnn_define_tensor_value(
-                    subgraph, p.datatype, output_shape.size(),
-                    output_shape.data(), nullptr, /*external_id=*/1,
-                    /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-      ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-    }
-  }
-
-  template <class Datatype, class Dist>
-  void GenerateRandomInput(Dist& dist) {
-    Datatype* beg = reinterpret_cast<Datatype*>(input.data());
-    Datatype* end = reinterpret_cast<Datatype*>(input.data() + input.size());
-    std::generate(beg, end, [&]() { return dist(rng); });
-  }
-
-  void GenerateRandomInput(xnn_datatype t) {
-    switch (t) {
-      case xnn_datatype_fp16:
-        GenerateRandomInput<xnn_float16>(f32dist);
-        break;
-      case xnn_datatype_fp32:
-        GenerateRandomInput<float>(f32dist);
-        break;
-      case xnn_datatype_qint8:
-        GenerateRandomInput<int8_t>(i8dist);
-        break;
-      case xnn_datatype_quint8:
-        GenerateRandomInput<uint8_t>(u8dist);
-        break;
-      default:
-        XNN_UNREACHABLE;
-    }
-  }
-
-  template <class Datatype>
-  void CompareOutputsImpl() {
-    const Datatype* subgraph_out_ptr =
-        reinterpret_cast<const Datatype*>(subgraph_output.data());
-    const Datatype* operator_out_ptr =
-        reinterpret_cast<const Datatype*>(operator_output.data());
-    const size_t output_size = subgraph_output.size() / sizeof(Datatype);
-    for (size_t i = 0; i < output_size;
-         i++, ++subgraph_out_ptr, ++operator_out_ptr) {
-      const Datatype sub_out = *subgraph_out_ptr;
-      const Datatype op_out = *operator_out_ptr;
-      ASSERT_NEAR(sub_out, op_out, std::abs(0.05f * std::min(sub_out, op_out)));
-    }
-  }
-
-  void CompareOutputs(xnn_datatype t) {
-    switch (t) {
-      case xnn_datatype_fp16:
-        CompareOutputsImpl<xnn_float16>();
-        break;
-      case xnn_datatype_fp32:
-        CompareOutputsImpl<float>();
-        break;
-      case xnn_datatype_qint8:
-        CompareOutputsImpl<int8_t>();
-        break;
-      case xnn_datatype_quint8:
-        CompareOutputsImpl<uint8_t>();
-        break;
-      default:
-        XNN_UNREACHABLE;
-    }
-  }
-
-  xnnpack::ReplicableRandomDevice rng;
-  std::uniform_real_distribution<float> scale_dist =
-      std::uniform_real_distribution<float>(0.0f, 1.0f);
-  std::uniform_real_distribution<float> f32dist =
-      std::uniform_real_distribution<float>(-1.0f, 1.0f);
-  std::uniform_int_distribution<int32_t> i8dist =
-      std::uniform_int_distribution<int32_t>(
-          std::numeric_limits<int8_t>::min(),
-          std::numeric_limits<int8_t>::max());
-  std::uniform_int_distribution<int32_t> u8dist =
-      std::uniform_int_distribution<int32_t>(
-          std::numeric_limits<uint8_t>::min(),
-          std::numeric_limits<uint8_t>::max());
-
-  std::vector<int64_t> reduction_axes;
-  std::vector<size_t> input_shape;
-  size_t num_input_elements;
-  std::vector<size_t> output_shape;
-  size_t num_output_elements;
-
-  xnnpack::Buffer<char> input;
-  xnnpack::Buffer<char> operator_output;
-  xnnpack::Buffer<char> subgraph_output;
-};
-
-using ReduceTest = ReduceTestBase<void>;
-
-using ReduceTestF16 = ReduceTestBase<xnn_float16>;
-using ReduceTestF32 = ReduceTestBase<float>;
-using ReduceTestQS8 = ReduceTestBase<int8_t>;
-using ReduceTestQU8 = ReduceTestBase<uint8_t>;
+TEST_P(ReduceQS8, test) { TestImpl<quantized<int8_t>, int32_t>(GetParam()); }
+TEST_P(ReduceQU8, test) { TestImpl<quantized<uint8_t>, int32_t>(GetParam()); }
+TEST_P(ReduceF16, test) { TestImpl<xnn_float16, float>(GetParam()); }
+TEST_P(ReduceF32, test) { TestImpl<float, float>(GetParam()); }
 
 using ::testing::Bool;
 using ::testing::Combine;
+using ::testing::Range;
 using ::testing::Values;
 
-INSTANTIATE_TEST_SUITE_P(ReduceTest, ReduceTest,
-                         testing::ConvertGenerator<Param::TupleT>(Combine(
-                             Values(xnn_datatype_fp16, xnn_datatype_fp32,
-                                    xnn_datatype_qint8, xnn_datatype_quint8),
-                             Values(xnn_reduce_sum, xnn_reduce_mean), Bool(),
-                             Bool())),
+auto params = testing::ConvertGenerator<Param::TupleT>(
+    Combine(Values(xnn_reduce_sum, xnn_reduce_mean), Bool(), Bool(),
+            Range(0, XNN_MAX_TENSOR_DIMS)));
+INSTANTIATE_TEST_SUITE_P(Reduce, ReduceQS8, params,
                          [](auto p) { return p.param.Name(); });
-
-TEST_P(ReduceTest, define) {
-  const Param p = GetParam();
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
-      subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-
-  SetUpInputOutput(subgraph, RandomQuantizationParams(p.datatype), input_id,
-                   output_id);
-
-  ASSERT_EQ(xnn_status_success,
-            xnn_define_static_reduce_v2(
-                subgraph, p.reduce_operator, reduction_axes.size(),
-                reduction_axes.data(), input_id, output_id,
-                /*flags=*/p.keep_dims ? XNN_FLAG_KEEP_DIMS : 0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_reduce_operator_to_node_type(p.reduce_operator));
-  ASSERT_EQ(node->params.reduce.num_reduction_axes, reduction_axes.size());
-  for (size_t i = 0; i < reduction_axes.size(); i++) {
-    ASSERT_EQ(node->params.reduce.reduction_axes[i], reduction_axes[i]);
-  }
-  ASSERT_EQ(node->num_inputs, 1);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, p.keep_dims ? XNN_FLAG_KEEP_DIMS : 0);
-}
-
-TEST_P(ReduceTest, matches_operator_api) {
-  const Param p = GetParam();
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_operator_t op = nullptr;
-
-  GenerateRandomInput(p.datatype);
-
-  const uint32_t flags = p.keep_dims ? XNN_FLAG_KEEP_DIMS : 0;
-  const QuantizationParams qp = RandomQuantizationParams(p.datatype);
-  // Call operator API.
-  const xnn_status status = xnn_create_reduce_nd(
-      p.reduce_operator, p.datatype, &qp.input, &qp.output, flags, &op);
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
-  }
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
-      op, xnn_delete_operator);
-
-  size_t workspace_size = SIZE_MAX;
-  size_t workspace_alignment = SIZE_MAX;
-  ASSERT_EQ(xnn_status_success,
-            xnn_reshape_reduce_nd(op, reduction_axes.size(),
-                                  reduction_axes.data(), input_shape.size(),
-                                  input_shape.data(), &workspace_size,
-                                  &workspace_alignment,
-                                  /*threadpool=*/nullptr));
-
-  ASSERT_NE(workspace_size, SIZE_MAX);
-  ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
-  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace;
-  void* workspace_ptr = nullptr;
-  if (p.datatype != xnn_datatype_fp32) {
-    workspace = xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT>(workspace_size);
-    workspace_ptr = workspace.data();
-  }
-  ASSERT_EQ(xnn_status_success,
-            xnn_setup_reduce_nd(op, workspace_ptr, input.data(),
-                                operator_output.data()));
-
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
-      subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-
-  int output_num_dims = input_shape.size();
-  if (!p.keep_dims) {
-    output_num_dims -= reduction_axes.size();
-  }
-  if (qp.IsQuantized()) {
-    ASSERT_EQ(xnn_status_success,
-              xnn_define_quantized_tensor_value(
-                  subgraph, p.datatype, qp.input.zero_point, qp.input.scale,
-                  input_shape.size(), input_shape.data(), nullptr,
-                  /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-    ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-    ASSERT_EQ(
-        xnn_status_success,
-        xnn_define_quantized_tensor_value(
-            subgraph, p.datatype, qp.output.zero_point, qp.output.scale,
-            output_shape.size(), output_shape.data(), nullptr,
-            /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-    ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-  } else {
-    ASSERT_EQ(
-        xnn_status_success,
-        xnn_define_tensor_value(subgraph, p.datatype, input_shape.size(),
-                                input_shape.data(), nullptr, /*external_id=*/0,
-                                XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-    ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-    ASSERT_EQ(
-        xnn_status_success,
-        xnn_define_tensor_value(subgraph, p.datatype, output_num_dims,
-                                output_shape.data(), nullptr, /*external_id=*/1,
-                                XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-    ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-  }
-
-  ASSERT_EQ(xnn_status_success,
-            xnn_define_static_reduce_v2(
-                subgraph, p.reduce_operator, reduction_axes.size(),
-                reduction_axes.data(), input_id, output_id, flags));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(
-      xnn_status_success,
-      xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
-      runtime, xnn_delete_runtime);
-
-  const std::array<xnn_external_value, 2> external = {
-      xnn_external_value{input_id, input.data()},
-      xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success,
-            xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  // Check outputs match.
-  CompareOutputs(p.datatype);
-}
-
-TEST_P(ReduceTest, reshape) {
-  const Param p = GetParam();
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  GenerateRandomInput(p.datatype);
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
-      subgraph, xnn_delete_subgraph);
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  QuantizationParams qp = RandomQuantizationParams(p.datatype);
-  const int output_num_dims = p.keep_dims
-                                  ? output_shape.size()
-                                  : input_shape.size() - reduction_axes.size();
-  if (qp.IsQuantized()) {
-    ASSERT_EQ(xnn_status_success,
-              xnn_define_quantized_tensor_value(
-                  subgraph, p.datatype, qp.input.zero_point, qp.input.scale,
-                  input_shape.size(), input_shape.data(), nullptr,
-                  /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-    ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-    ASSERT_EQ(
-        xnn_status_success,
-        xnn_define_quantized_tensor_value(
-            subgraph, p.datatype, qp.output.zero_point, qp.output.scale,
-            output_num_dims, output_shape.data(), nullptr, /*external_id=*/1,
-            XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-    ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-  } else {
-    ASSERT_EQ(
-        xnn_status_success,
-        xnn_define_tensor_value(subgraph, p.datatype, input_shape.size(),
-                                input_shape.data(), nullptr, /*external_id=*/0,
-                                XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-    ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-    ASSERT_EQ(
-        xnn_status_success,
-        xnn_define_tensor_value(subgraph, p.datatype, output_num_dims,
-                                output_shape.data(), nullptr, /*external_id=*/1,
-                                XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-    ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-  }
-
-  ASSERT_EQ(xnn_define_static_reduce_v2(
-                subgraph, p.reduce_operator, reduction_axes.size(),
-                reduction_axes.data(), input_id, output_id,
-                /*flags=*/p.keep_dims ? XNN_FLAG_KEEP_DIMS : 0),
-            xnn_status_success);
-
-  xnn_runtime_t runtime = nullptr;
-  xnn_status status =
-      xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime);
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
-  }
-  ASSERT_EQ(status, xnn_status_success);
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
-      runtime, xnn_delete_runtime);
-
-  const std::array<xnn_external_value, 2> external = {
-      xnn_external_value{input_id, input.data()},
-      xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success,
-            xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  input_shape[0] += 2;
-  input_shape[1] += 4;
-  ASSERT_EQ(xnn_status_success,
-            xnn_reshape_external_value(runtime, input_id, input_shape.size(),
-                                       input_shape.data()));
-  const struct xnn_node* node = &subgraph->nodes[0];
-  std::vector<int64_t> unique_reduction_axes = reduction_axes;
-  for (int i = 0; i < unique_reduction_axes.size(); i++) {
-    if (unique_reduction_axes[i] < 0) {
-      unique_reduction_axes[i] = input_shape.size() + unique_reduction_axes[i];
-    }
-  }
-  std::sort(unique_reduction_axes.begin(), unique_reduction_axes.end());
-  auto end =
-      std::unique(unique_reduction_axes.begin(), unique_reduction_axes.end());
-  unique_reduction_axes.erase(end, unique_reduction_axes.end());
-  // There are too many parameters which influence the workspace size so
-  // knowing if reallocation is required or not is messy.
-  node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values,
-                /*threadpool=*/nullptr);
-  const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
-  size_t current_axes = 0;
-  size_t current_dim = 0;
-  for (size_t i = 0; i < input_shape.size(); ++i) {
-    if (unique_reduction_axes[current_axes] == i) {
-      if (p.keep_dims) {
-        ASSERT_EQ(output_shape->dim[current_dim], 1);
-        ++current_dim;
-      }
-      ++current_axes;
-      if (current_axes == unique_reduction_axes.size()) {
-        break;
-      }
-    } else {
-      ASSERT_EQ(output_shape->dim[current_dim], input_shape[i]);
-      ++current_dim;
-    }
-  }
-
-  input_shape[0] -= 1;
-  ASSERT_EQ(xnn_status_success,
-            xnn_reshape_external_value(runtime, input_id, input_shape.size(),
-                                       input_shape.data()));
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values,
-                          runtime->num_values, /*threadpool=*/nullptr),
-            xnn_status_success);
-  current_axes = 0;
-  current_dim = 0;
-  for (size_t i = 0; i < input_shape.size(); ++i) {
-    if (unique_reduction_axes[current_axes] == i) {
-      if (p.keep_dims) {
-        ASSERT_EQ(output_shape->dim[current_dim], 1);
-        ++current_dim;
-      }
-      ++current_axes;
-      if (current_axes == unique_reduction_axes.size()) {
-        break;
-      }
-    } else {
-      ASSERT_EQ(output_shape->dim[current_dim], input_shape[i]);
-      ++current_dim;
-    }
-  }
-}
+INSTANTIATE_TEST_SUITE_P(Reduce, ReduceQU8, params,
+                         [](auto p) { return p.param.Name(); });
+INSTANTIATE_TEST_SUITE_P(Reduce, ReduceF16, params,
+                         [](auto p) { return p.param.Name(); });
+INSTANTIATE_TEST_SUITE_P(Reduce, ReduceF32, params,
+                         [](auto p) { return p.param.Name(); });
 
 }  // namespace xnnpack
