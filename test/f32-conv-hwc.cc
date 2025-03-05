@@ -48,192 +48,143 @@ const XnnTestParam xnn_test_params[] = {
 TEST_P(XnnTest, input_width_eq)
 {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
-  auto tester = ConvHWCMicrokernelTester()
+  ConvHWCMicrokernelTester()
     .kernel_size(GetParam().kernel_size)
     .subsampling(GetParam().subsampling)
     .input_channels(GetParam().input_channels)
     .output_channels_tile(GetParam().output_channels_tile)
     .output_channels(GetParam().output_channels_tile)
     .input_width(GetParam().input_widths)
-    .input_height(GetParam().kernel_size);
-    if (GetParam().padding_left == 1 && GetParam().padding_right == 1) {                                                                 
-      tester.padding_width(GetParam().padding_right);                                                                            
-    }                                                                                                                  
-    else if (GetParam().padding_left == 0 && GetParam().padding_right == 1) {                                                              
-      tester.padding_right(GetParam().padding_right);                                                                            
-    }
-    tester.Test(GetParam().kernel);
+    .input_height(GetParam().kernel_size)
+    .set_padding(GetParam().padding_left, GetParam().padding_right)
+    .Test(GetParam().kernel);
 }
 
-TEST_P(XnnTest, input_width_div)  
-{ 
+TEST_P(XnnTest, input_width_div)
+{
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   if (GetParam().input_widths <= 1) {
     GTEST_SKIP();
-  }  
-  for (size_t input_width = GetParam().input_widths * 2; input_width < (GetParam().input_widths * 8);  
-       input_width += GetParam().input_widths * 3) {  
-    auto tester = ConvHWCMicrokernelTester()  
-                    .kernel_size(GetParam().kernel_size)  
-                    .subsampling(GetParam().subsampling)  
-                    .input_channels(GetParam().input_channels)  
-                    .output_channels_tile(GetParam().output_channels_tile)  
-                    .output_channels(GetParam().output_channels_tile)  
-                    .input_width(input_width)  
-                    .input_height(GetParam().kernel_size);  
-
-    if (GetParam().padding_left == 1 && GetParam().padding_right == 1) {  
-      tester.padding_width(GetParam().padding_right);  
-    }  
-    else if (GetParam().padding_left == 0 && GetParam().padding_right == 1) {  
-      tester.padding_right(GetParam().padding_right);  
-    }  
-
-    tester.Test(GetParam().kernel);  
-  }  
+  }
+  for (size_t input_width = GetParam().input_widths * 2; input_width < (GetParam().input_widths * 8);
+       input_width += GetParam().input_widths * 3) {
+    ConvHWCMicrokernelTester()
+      .kernel_size(GetParam().kernel_size)
+      .subsampling(GetParam().subsampling)
+      .input_channels(GetParam().input_channels)
+      .output_channels_tile(GetParam().output_channels_tile)
+      .output_channels(GetParam().output_channels_tile)
+      .input_width(input_width)
+      .input_height(GetParam().kernel_size)
+      .set_padding(GetParam().padding_left, GetParam().padding_right)
+      .Test(GetParam().kernel);
+  }
 }
 
-TEST_P(XnnTest, input_width_lt)  
-{  
-  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);  
-  
-  for (size_t input_width = (GetParam().padding_left ? 1 : 2); input_width < GetParam().input_widths; input_width++) {  
-    auto tester = ConvHWCMicrokernelTester()  
-                    .kernel_size(GetParam().kernel_size)  
-                    .subsampling(GetParam().subsampling)  
-                    .input_channels(GetParam().input_channels)  
-                    .output_channels_tile(GetParam().output_channels_tile)  
-                    .output_channels(GetParam().output_channels_tile)  
-                    .input_width(input_width)  
-                    .input_height(GetParam().kernel_size);  
+TEST_P(XnnTest, input_width_lt)
+{
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
 
-    if (GetParam().padding_left == 1 && GetParam().padding_right == 1) {  
-      tester.padding_width(GetParam().padding_right);  
-    }  
-    else if (GetParam().padding_left == 0 && GetParam().padding_right == 1) {  
-      tester.padding_right(GetParam().padding_right);  
-    }  
-
-    tester.Test(GetParam().kernel);  
-  }  
+  for (size_t input_width = (GetParam().padding_left ? 1 : 2); input_width < GetParam().input_widths; input_width++) {
+    ConvHWCMicrokernelTester()
+      .kernel_size(GetParam().kernel_size)
+      .subsampling(GetParam().subsampling)
+      .input_channels(GetParam().input_channels)
+      .output_channels_tile(GetParam().output_channels_tile)
+      .output_channels(GetParam().output_channels_tile)
+      .input_width(input_width)
+      .input_height(GetParam().kernel_size)
+      .set_padding(GetParam().padding_left, GetParam().padding_right)
+      .Test(GetParam().kernel);
+  }
 }
 
-TEST_P(XnnTest, input_width_gt)  
-{  
-  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);  
+TEST_P(XnnTest, input_width_gt)
+{
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
 
-  for (size_t input_width = GetParam().input_widths + 1; input_width < GetParam().input_widths * 2; input_width++) {  
-    auto tester = ConvHWCMicrokernelTester()  
-                    .kernel_size(GetParam().kernel_size)  
-                    .subsampling(GetParam().subsampling)  
-                    .input_channels(GetParam().input_channels)  
-                    .output_channels_tile(GetParam().output_channels_tile)  
-                    .output_channels(GetParam().output_channels_tile)  
-                    .input_width(input_width)  
-                    .input_height(GetParam().kernel_size);  
-
-    if (GetParam().padding_left == 1 && GetParam().padding_right == 1) {  
-      tester.padding_width(GetParam().padding_right);  
-    }  
-    else if (GetParam().padding_left == 0 && GetParam().padding_right == 1) {  
-      tester.padding_right(GetParam().padding_right);  
-    }  
-
-    tester.Test(GetParam().kernel);  
-  }  
+  for (size_t input_width = GetParam().input_widths + 1; input_width < GetParam().input_widths * 2; input_width++) {
+    ConvHWCMicrokernelTester()
+      .kernel_size(GetParam().kernel_size)
+      .subsampling(GetParam().subsampling)
+      .input_channels(GetParam().input_channels)
+      .output_channels_tile(GetParam().output_channels_tile)
+      .output_channels(GetParam().output_channels_tile)
+      .input_width(input_width)
+      .input_height(GetParam().kernel_size)
+      .set_padding(GetParam().padding_left, GetParam().padding_right)
+      .Test(GetParam().kernel);
+  }
 }
 
-TEST_P(XnnTest, output_channels_lt)  
-{  
-  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);  
+TEST_P(XnnTest, output_channels_lt)
+{
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
 
-  for (size_t output_channels = 1; output_channels < GetParam().output_channels_tile; output_channels++) {  
-    for (size_t input_width = (GetParam().padding_left ? 1 : 2); input_width < GetParam().input_widths * 8;  
-         input_width += (GetParam().input_widths * 2 - 1)) {  
+  for (size_t output_channels = 1; output_channels < GetParam().output_channels_tile; output_channels++) {
+    for (size_t input_width = (GetParam().padding_left ? 1 : 2); input_width < GetParam().input_widths * 8;
+         input_width += (GetParam().input_widths * 2 - 1)) {
 
-      auto tester = ConvHWCMicrokernelTester()  
-                      .kernel_size(GetParam().kernel_size)  
-                      .subsampling(GetParam().subsampling)  
-                      .input_channels(GetParam().input_channels)  
-                      .output_channels_tile(GetParam().output_channels_tile)  
-                      .output_channels(output_channels)  
-                      .input_width(input_width)  
-                      .input_height(GetParam().kernel_size);  
-
-      if (GetParam().padding_left == 1 && GetParam().padding_right == 1) {  
-        tester.padding_width(GetParam().padding_right);  
-      }  
-      else if (GetParam().padding_left == 0 && GetParam().padding_right == 1) {  
-        tester.padding_right(GetParam().padding_right);  
-      }  
-
-      tester.Test(GetParam().kernel);  
-    }  
-  }  
+      ConvHWCMicrokernelTester()
+        .kernel_size(GetParam().kernel_size)
+        .subsampling(GetParam().subsampling)
+        .input_channels(GetParam().input_channels)
+        .output_channels_tile(GetParam().output_channels_tile)
+        .output_channels(output_channels)
+        .input_width(input_width)
+        .input_height(GetParam().kernel_size)
+        .set_padding(GetParam().padding_left, GetParam().padding_right)
+        .Test(GetParam().kernel);
+    }
+  }
 }
 
-TEST_P(XnnTest, output_channels_div)  
-{  
-  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);  
+TEST_P(XnnTest, output_channels_div)
+{
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
 
-  for (size_t output_channels = GetParam().output_channels_tile * 2;  
-       output_channels <= GetParam().output_channels_tile * 4;  
-       output_channels += GetParam().output_channels_tile) {  
+  for (size_t output_channels = GetParam().output_channels_tile * 2;
+       output_channels <= GetParam().output_channels_tile * 4; output_channels += GetParam().output_channels_tile) {
 
-    for (size_t input_width = (GetParam().padding_left ? 1 : 2); input_width < GetParam().input_widths * 8;  
-         input_width += (GetParam().input_widths * 2 - 1)) {  
+    for (size_t input_width = (GetParam().padding_left ? 1 : 2); input_width < GetParam().input_widths * 8;
+         input_width += (GetParam().input_widths * 2 - 1)) {
 
-      auto tester = ConvHWCMicrokernelTester()  
-                      .kernel_size(GetParam().kernel_size)  
-                      .subsampling(GetParam().subsampling)  
-                      .input_channels(GetParam().input_channels)  
-                      .output_channels_tile(GetParam().output_channels_tile)  
-                      .output_channels(output_channels)  
-                      .input_width(input_width)  
-                      .input_height(GetParam().kernel_size);  
-
-      if (GetParam().padding_left == 1 && GetParam().padding_right == 1) {  
-        tester.padding_width(GetParam().padding_right);  
-      }  
-      else if (GetParam().padding_left == 0 && GetParam().padding_right == 1) {  
-        tester.padding_right(GetParam().padding_right);  
-      }  
-
-      tester.Test(GetParam().kernel);  
-    }  
-  }  
+      ConvHWCMicrokernelTester()
+        .kernel_size(GetParam().kernel_size)
+        .subsampling(GetParam().subsampling)
+        .input_channels(GetParam().input_channels)
+        .output_channels_tile(GetParam().output_channels_tile)
+        .output_channels(output_channels)
+        .input_width(input_width)
+        .input_height(GetParam().kernel_size)
+        .set_padding(GetParam().padding_left, GetParam().padding_right)
+        .Test(GetParam().kernel);
+    }
+  }
 }
 
-TEST_P(XnnTest, output_channels_gt)  
-{  
-  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);  
+TEST_P(XnnTest, output_channels_gt)
+{
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
 
-  for (size_t output_channels = GetParam().output_channels_tile + 1;  
-       output_channels < GetParam().output_channels_tile * 2;  
-       output_channels++) {  
+  for (size_t output_channels = GetParam().output_channels_tile + 1;
+       output_channels < GetParam().output_channels_tile * 2; output_channels++) {
 
-    for (size_t input_width = (GetParam().padding_left ? 1 : 2); input_width < GetParam().input_widths * 8;  
-         input_width += (GetParam().input_widths * 2 - 1)) {  
+    for (size_t input_width = (GetParam().padding_left ? 1 : 2); input_width < GetParam().input_widths * 8;
+         input_width += (GetParam().input_widths * 2 - 1)) {
 
-      auto tester = ConvHWCMicrokernelTester()  
-                      .kernel_size(GetParam().kernel_size)  
-                      .subsampling(GetParam().subsampling)  
-                      .input_channels(GetParam().input_channels)  
-                      .output_channels_tile(GetParam().output_channels_tile)  
-                      .output_channels(output_channels)  
-                      .input_width(input_width)  
-                      .input_height(GetParam().kernel_size);  
-
-      if (GetParam().padding_left == 1 && GetParam().padding_right == 1) {  
-        tester.padding_width(GetParam().padding_right);  
-      }  
-      else if (GetParam().padding_left == 0 && GetParam().padding_right == 1) {  
-        tester.padding_right(GetParam().padding_right);  
-      }  
-
-      tester.Test(GetParam().kernel);  
-    }  
-  }  
+      ConvHWCMicrokernelTester()
+        .kernel_size(GetParam().kernel_size)
+        .subsampling(GetParam().subsampling)
+        .input_channels(GetParam().input_channels)
+        .output_channels_tile(GetParam().output_channels_tile)
+        .output_channels(output_channels)
+        .input_width(input_width)
+        .input_height(GetParam().kernel_size)
+        .set_padding(GetParam().padding_left, GetParam().padding_right)
+        .Test(GetParam().kernel);
+    }
+  }
 }
 
 TEST_P(XnnTest, input_height_lt)
@@ -272,20 +223,16 @@ TEST_P(XnnTest, input_height_gt)
          output_channels += GetParam().output_channels_tile - 1) {
       for (size_t input_widths_ = (GetParam().padding_left ? 1 : 2); input_widths_ < GetParam().input_widths * 8;
            input_widths_ += (GetParam().input_widths * 2 - 1)) {
-        auto tester = ConvHWCMicrokernelTester()
+        ConvHWCMicrokernelTester()
           .kernel_size(GetParam().kernel_size)
           .subsampling(GetParam().subsampling)
           .input_channels(GetParam().input_channels)
           .output_channels_tile(GetParam().output_channels_tile)
           .output_channels(output_channels)
           .input_width(input_widths_)
-          .input_height(input_heights);
-        if (GetParam().padding_left == 1 && GetParam().padding_right == 1) {
-          tester.padding_width(GetParam().padding_right);
-        } else if (GetParam().padding_left == 0 && GetParam().padding_right == 1) {
-          tester.padding_right(GetParam().padding_right);
-        }
-        tester.Test(GetParam().kernel);
+          .input_height(input_heights)
+          .set_padding(GetParam().padding_left, GetParam().padding_right)
+          .Test(GetParam().kernel);
       }
     }
   }
@@ -299,20 +246,17 @@ TEST_P(XnnTest, padding_top)
          output_channels += GetParam().output_channels_tile - 1) {
       for (size_t input_widths_ = (GetParam().padding_left ? 1 : 2); input_widths_ < GetParam().input_widths * 8;
            input_widths_ += (GetParam().input_widths * 2 - 1)) {
-        auto tester = ConvHWCMicrokernelTester()
+        ConvHWCMicrokernelTester()
           .kernel_size(GetParam().kernel_size)
           .subsampling(GetParam().subsampling)
           .input_channels(GetParam().input_channels)
           .output_channels_tile(GetParam().output_channels_tile)
           .output_channels(output_channels)
           .input_width(input_widths_)
-          .input_height(9);
-        if (GetParam().padding_left == 1 && GetParam().padding_right == 1) {
-          tester.padding_width(GetParam().padding_right);
-        } else if (GetParam().padding_left == 0 && GetParam().padding_right == 1) {
-          tester.padding_right(GetParam().padding_right);
-        }
-        tester.padding_top(padding_tops).Test(GetParam().kernel);
+          .input_height(9)
+          .set_padding(GetParam().padding_left, GetParam().padding_right)
+          .padding_top(padding_tops)
+          .Test(GetParam().kernel);
       }
     }
   }
@@ -326,20 +270,17 @@ TEST_P(XnnTest, padding_bottom)
          output_channels += GetParam().output_channels_tile - 1) {
       for (size_t input_widths_ = (GetParam().padding_left ? 1 : 2); input_widths_ < GetParam().input_widths * 8;
            input_widths_ += (GetParam().input_widths * 2 - 1)) {
-        auto tester = ConvHWCMicrokernelTester()
+        ConvHWCMicrokernelTester()
           .kernel_size(GetParam().kernel_size)
           .subsampling(GetParam().subsampling)
           .input_channels(GetParam().input_channels)
           .output_channels_tile(GetParam().output_channels_tile)
           .output_channels(output_channels)
           .input_width(input_widths_)
-          .input_height(9);
-        if (GetParam().padding_left == 1 && GetParam().padding_right == 1) {
-          tester.padding_width(GetParam().padding_right);
-        } else if (GetParam().padding_left == 0 && GetParam().padding_right == 1) {
-          tester.padding_right(GetParam().padding_right);
-        }
-        tester.padding_bottom(padding_bottoms).Test(GetParam().kernel);
+          .input_height(9)
+          .set_padding(GetParam().padding_left, GetParam().padding_right)
+          .padding_bottom(padding_bottoms)
+          .Test(GetParam().kernel);
       }
     }
   }
@@ -353,21 +294,17 @@ TEST_P(XnnTest, output_y_start)
          output_channels += GetParam().output_channels_tile - 1) {
       for (size_t input_widths_ = (GetParam().padding_left ? 1 : 2); input_widths_ < GetParam().input_widths * 8;
            input_widths_ += (GetParam().input_widths * 2 - 1)) {
-        auto tester = ConvHWCMicrokernelTester()
-                          .kernel_size(GetParam().kernel_size)
-                          .subsampling(GetParam().subsampling)
-                          .input_channels(GetParam().input_channels)
-                          .output_channels_tile(GetParam().output_channels_tile)
-                          .output_channels(output_channels)
-                          .input_width(input_widths_)
-                          .input_height(9)
-                          .output_y_start(output_y_starts);
-        if (GetParam().padding_left == 1 && GetParam().padding_right == 1) {
-          tester.padding_width(GetParam().padding_right);
-        } else if (GetParam().padding_left == 0 && GetParam().padding_right == 1) {
-          tester.padding_right(GetParam().padding_right);
-        }
-        tester.Test(GetParam().kernel);
+        ConvHWCMicrokernelTester()
+          .kernel_size(GetParam().kernel_size)
+          .subsampling(GetParam().subsampling)
+          .input_channels(GetParam().input_channels)
+          .output_channels_tile(GetParam().output_channels_tile)
+          .output_channels(output_channels)
+          .input_width(input_widths_)
+          .input_height(9)
+          .output_y_start(output_y_starts)
+          .set_padding(GetParam().padding_left, GetParam().padding_right)
+          .Test(GetParam().kernel);
       }
     }
   }
@@ -381,21 +318,17 @@ TEST_P(XnnTest, output_y_end)
          output_channels += GetParam().output_channels_tile - 1) {
       for (size_t input_widths_ = (GetParam().padding_left ? 1 : 2); input_widths_ < GetParam().input_widths * 8;
            input_widths_ += (GetParam().input_widths * 2 - 1)) {
-        auto tester = ConvHWCMicrokernelTester()
-                          .kernel_size(GetParam().kernel_size)
-                          .subsampling(GetParam().subsampling)
-                          .input_channels(GetParam().input_channels)
-                          .output_channels_tile(GetParam().output_channels_tile)
-                          .output_channels(output_channels)
-                          .input_width(input_widths_)
-                          .input_height(9)
-                          .output_y_end(output_y_ends);
-        if (GetParam().padding_left == 1 && GetParam().padding_right == 1) {
-          tester.padding_width(GetParam().padding_right);
-        } else if (GetParam().padding_left == 0 && GetParam().padding_right == 1) {
-          tester.padding_right(GetParam().padding_right);
-        }
-        tester.Test(GetParam().kernel);
+        ConvHWCMicrokernelTester()
+          .kernel_size(GetParam().kernel_size)
+          .subsampling(GetParam().subsampling)
+          .input_channels(GetParam().input_channels)
+          .output_channels_tile(GetParam().output_channels_tile)
+          .output_channels(output_channels)
+          .input_width(input_widths_)
+          .input_height(9)
+          .output_y_end(output_y_ends)
+          .set_padding(GetParam().padding_left, GetParam().padding_right)
+          .Test(GetParam().kernel);
       }
     }
   }
@@ -408,21 +341,17 @@ TEST_P(XnnTest, qmin)
        output_channels += GetParam().output_channels_tile - 1) {
     for (size_t input_widths_ = (GetParam().padding_left ? 1 : 2); input_widths_ < GetParam().input_widths * 8;
          input_widths_ += (GetParam().input_widths * 2 - 1)) {
-      auto tester = ConvHWCMicrokernelTester()
-                        .kernel_size(GetParam().kernel_size)
-                        .subsampling(GetParam().subsampling)
-                        .input_channels(GetParam().input_channels)
-                        .output_channels_tile(GetParam().output_channels_tile)
-                        .output_channels(output_channels)
-                        .input_width(input_widths_)
-                        .input_height(6)
-                        .qmin(128);
-      if (GetParam().padding_left == 1 && GetParam().padding_right == 1) {
-        tester.padding_width(GetParam().padding_right);
-      } else if (GetParam().padding_left == 0 && GetParam().padding_right == 1) {
-        tester.padding_right(GetParam().padding_right);
-      }
-      tester.Test(GetParam().kernel);
+      ConvHWCMicrokernelTester()
+        .kernel_size(GetParam().kernel_size)
+        .subsampling(GetParam().subsampling)
+        .input_channels(GetParam().input_channels)
+        .output_channels_tile(GetParam().output_channels_tile)
+        .output_channels(output_channels)
+        .input_width(input_widths_)
+        .input_height(6)
+        .qmin(128)
+        .set_padding(GetParam().padding_left, GetParam().padding_right)
+        .Test(GetParam().kernel);
     }
   }
 }
@@ -434,21 +363,17 @@ TEST_P(XnnTest, qmax)
        output_channels += GetParam().output_channels_tile - 1) {
     for (size_t input_widths_ = (GetParam().padding_left ? 1 : 2); input_widths_ < GetParam().input_widths * 8;
          input_widths_ += (GetParam().input_widths * 2 - 1)) {
-      auto tester = ConvHWCMicrokernelTester()
-                        .kernel_size(GetParam().kernel_size)
-                        .subsampling(GetParam().subsampling)
-                        .input_channels(GetParam().input_channels)
-                        .output_channels_tile(GetParam().output_channels_tile)
-                        .output_channels(output_channels)
-                        .input_width(input_widths_)
-                        .input_height(6)
-                        .qmax(128);
-      if (GetParam().padding_left == 1 && GetParam().padding_right == 1) {
-        tester.padding_width(GetParam().padding_right);
-      } else if (GetParam().padding_left == 0 && GetParam().padding_right == 1) {
-        tester.padding_right(GetParam().padding_right);
-      }
-      tester.Test(GetParam().kernel);
+      ConvHWCMicrokernelTester()
+        .kernel_size(GetParam().kernel_size)
+        .subsampling(GetParam().subsampling)
+        .input_channels(GetParam().input_channels)
+        .output_channels_tile(GetParam().output_channels_tile)
+        .output_channels(output_channels)
+        .input_width(input_widths_)
+        .input_height(6)
+        .qmax(128)
+        .set_padding(GetParam().padding_left, GetParam().padding_right)
+        .Test(GetParam().kernel);
     }
   }
 }
