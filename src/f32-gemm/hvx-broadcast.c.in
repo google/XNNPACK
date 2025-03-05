@@ -78,12 +78,12 @@ void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
       k -= sizeof(float);
     } while (k != 0);
 
-    XNN_SIMD_CONST_F32(vmin, params->scalar.min);
+    HVX_Vector vmin = xnn_set1_f32(params->scalar.min);
     $for N in range(0, NR, 32):
       $for M in range(MR):
         vacc${M}x${N//32} = xnn_max_f32(vmin, vacc${M}x${N//32});
 
-    XNN_SIMD_CONST_F32(vmax, params->scalar.max);
+    HVX_Vector vmax = xnn_set1_f32(params->scalar.max);
     $for N in range(0, NR, 32):
       $for M in range(MR):
         vacc${M}x${N//32} = xnn_min_f32(vmax, vacc${M}x${N//32});

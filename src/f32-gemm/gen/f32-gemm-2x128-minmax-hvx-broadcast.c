@@ -78,7 +78,7 @@ void xnn_f32_gemm_minmax_ukernel_2x128__hvx_broadcast(
       k -= sizeof(float);
     } while (k != 0);
 
-    XNN_SIMD_CONST_F32(vmin, params->scalar.min);
+    HVX_Vector vmin = xnn_set1_f32(params->scalar.min);
     vacc0x0 = xnn_max_f32(vmin, vacc0x0);
     vacc1x0 = xnn_max_f32(vmin, vacc1x0);
     vacc0x1 = xnn_max_f32(vmin, vacc0x1);
@@ -88,7 +88,7 @@ void xnn_f32_gemm_minmax_ukernel_2x128__hvx_broadcast(
     vacc0x3 = xnn_max_f32(vmin, vacc0x3);
     vacc1x3 = xnn_max_f32(vmin, vacc1x3);
 
-    XNN_SIMD_CONST_F32(vmax, params->scalar.max);
+    HVX_Vector vmax = xnn_set1_f32(params->scalar.max);
     vacc0x0 = xnn_min_f32(vmax, vacc0x0);
     vacc1x0 = xnn_min_f32(vmax, vacc1x0);
     vacc0x1 = xnn_min_f32(vmax, vacc0x1);
