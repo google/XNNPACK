@@ -333,3 +333,54 @@ class Avx512Vnni(avx512f_template.Avx512F):
     return self._inner_loop_small_M_N(self._c // 4 * self.n, tail)
 
 
+class Avx512VnniQc4w(Avx512Vnni):
+
+  def function_name(self):
+    c = self._c
+    return (
+        f'xnn_qd8_f32_qc4w_gemm_minmax_ukernel_{self.m}x{self.n * self.n_step()}'
+        + f'c{c}__asm_amd64_{self.isa()}'
+    )
+  def weights_asm(self):
+    w_asm = {
+        'loop': [],
+        'loop_2': ["""vmovaps {W_1}, [{W_ptr} + {offset}]
+               vpslld {W}, {W_1}, 4
+               vpandd {W}, {W}, z{mask}
+               vpandd {W_1}, {W_1}, z{mask}\n"""],
+        'after': ['add {W}, {w_step}\n'],
+    }
+    return w_asm
+
+  def outer_loop_prepare(self):
+    res = super().outer_loop_prepare()
+    res += """
+    mov {quantization_params_reg}, [rsp + 88]
+    # Load 0xF0 for masking the weights
+    vbroadcastsd  z{mask}, qword ptr [rip + .MASK]\n
+    """.format(
+        quantization_params_reg=self.quantization_params_register(),
+        mask=self.mask_register(),
+    )
+    return res
+
+  def convert_to_float(self):
+    accumulators = self.acc_registers()
+    ret = ''
+    ret += '\n# Convert from int32 to float.\n'
+    for nr in range(0, self.n):
+      for mr in range(0, self.m):
+        reg_ofset = self.accumulator_reg_offset(self.m, nr)
+        other_reg = accumulators[self.m * nr + mr + reg_ofset]
+        ACC = accumulators[self.m * nr + mr]
+        ret += f'vpsrad z{other_reg}, z{other_reg}, 4\n'
+        ret += f'vcvtdq2ps z{ACC}, z{other_reg}\n'
+    return ret
+
+  def pre_header(self):
+    asm_string = super().pre_header()
+    return asm_string + """.MASK:
+        .quad   -1085102592571150096\n"""
+
+  def w_register_bytes(self):
+    return self.register_bytes() // 2
