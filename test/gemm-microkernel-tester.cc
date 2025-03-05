@@ -995,8 +995,6 @@ void GemmMicrokernelTester::Test(
   xnn_init_f32_minmax_params_fn init_params,
   xnn_pack_qs8_gemm_fn pack) const
 {
-  if (m() > mr()) return;
-  if (a_stride() < k()) return;
   ASSERT_LE(m(), mr());
 
   xnnpack::ReplicableRandomDevice rng;
