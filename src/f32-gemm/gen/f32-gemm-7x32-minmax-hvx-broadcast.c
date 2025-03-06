@@ -12,7 +12,7 @@
 
 #include "xnnpack/gemm.h"
 
-void xnn_f32_gemm_minmax_ukernel_8x32__hvx_broadcast(
+void xnn_f32_gemm_minmax_ukernel_7x32__hvx_broadcast(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -25,7 +25,7 @@ void xnn_f32_gemm_minmax_ukernel_8x32__hvx_broadcast(
     const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
-  assert(mr <= 8);
+  assert(mr <= 7);
   assert(nc != 0);
   assert(kc != 0);
   assert(kc % sizeof(float) == 0);
@@ -71,12 +71,6 @@ void xnn_f32_gemm_minmax_ukernel_8x32__hvx_broadcast(
     a6 = a5;
     c6 = c5;
   }
-  const float* a7 = (const float*) ((uintptr_t) a6 + a_stride);
-  float* c7 = (float*) ((uintptr_t) c6 + cm_stride);
-  if XNN_UNPREDICTABLE(mr != 8) {
-    a7 = a6;
-    c7 = c6;
-  }
 
   do {
     HVX_Vector vacc0x0 = xnn_load_f32(w + 0);
@@ -86,7 +80,6 @@ void xnn_f32_gemm_minmax_ukernel_8x32__hvx_broadcast(
     HVX_Vector vacc4x0 = vacc0x0;
     HVX_Vector vacc5x0 = vacc0x0;
     HVX_Vector vacc6x0 = vacc0x0;
-    HVX_Vector vacc7x0 = vacc0x0;
     w += 32;
 
     size_t k = kc;
@@ -105,8 +98,6 @@ void xnn_f32_gemm_minmax_ukernel_8x32__hvx_broadcast(
       a5 += 1;
       const HVX_Vector va6 = xnn_set1_f32(*a6);
       a6 += 1;
-      const HVX_Vector va7 = xnn_set1_f32(*a7);
-      a7 += 1;
 
       const HVX_Vector vb0 = *((const HVX_Vector *)(w));
       w += 32;
@@ -118,7 +109,6 @@ void xnn_f32_gemm_minmax_ukernel_8x32__hvx_broadcast(
       vacc4x0 = xnn_fmadd_qf32(va4, vb0, vacc4x0);
       vacc5x0 = xnn_fmadd_qf32(va5, vb0, vacc5x0);
       vacc6x0 = xnn_fmadd_qf32(va6, vb0, vacc6x0);
-      vacc7x0 = xnn_fmadd_qf32(va7, vb0, vacc7x0);
 
       k -= sizeof(float);
     } while (k != 0);
@@ -131,7 +121,6 @@ void xnn_f32_gemm_minmax_ukernel_8x32__hvx_broadcast(
     vacc4x0 = xnn_max_f32(vmin, vacc4x0);
     vacc5x0 = xnn_max_f32(vmin, vacc5x0);
     vacc6x0 = xnn_max_f32(vmin, vacc6x0);
-    vacc7x0 = xnn_max_f32(vmin, vacc7x0);
 
     HVX_Vector vmax = xnn_set1_f32(params->scalar.max);
     vacc0x0 = xnn_min_f32(vmax, vacc0x0);
@@ -141,7 +130,6 @@ void xnn_f32_gemm_minmax_ukernel_8x32__hvx_broadcast(
     vacc4x0 = xnn_min_f32(vmax, vacc4x0);
     vacc5x0 = xnn_min_f32(vmax, vacc5x0);
     vacc6x0 = xnn_min_f32(vmax, vacc6x0);
-    vacc7x0 = xnn_min_f32(vmax, vacc7x0);
 
     if XNN_LIKELY(nc >= 32) {
       *((HVX_UVector *)c0) = vacc0x0;
@@ -158,8 +146,6 @@ void xnn_f32_gemm_minmax_ukernel_8x32__hvx_broadcast(
       c5 = (float*) ((uintptr_t) c5 + cn_stride);
       *((HVX_UVector *)c6) = vacc6x0;
       c6 = (float*) ((uintptr_t) c6 + cn_stride);
-      *((HVX_UVector *)c7) = vacc7x0;
-      c7 = (float*) ((uintptr_t) c7 + cn_stride);
 
       a0 = (const float*) ((uintptr_t) a0 - kc);
       a1 = (const float*) ((uintptr_t) a1 - kc);
@@ -168,7 +154,6 @@ void xnn_f32_gemm_minmax_ukernel_8x32__hvx_broadcast(
       a4 = (const float*) ((uintptr_t) a4 - kc);
       a5 = (const float*) ((uintptr_t) a5 - kc);
       a6 = (const float*) ((uintptr_t) a6 - kc);
-      a7 = (const float*) ((uintptr_t) a7 - kc);
 
       nc -= 32;
     } else {
@@ -179,7 +164,6 @@ void xnn_f32_gemm_minmax_ukernel_8x32__hvx_broadcast(
       xnn_store_tail_f32(c4, vacc4x0, nc);
       xnn_store_tail_f32(c5, vacc5x0, nc);
       xnn_store_tail_f32(c6, vacc6x0, nc);
-      xnn_store_tail_f32(c7, vacc7x0, nc);
       nc = 0;
     }
   } while (nc != 0);
