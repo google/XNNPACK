@@ -33,10 +33,6 @@
 #include "xnnpack/params.h"
 #include "pthreadpool.h"
 
-#ifndef XNN_ENABLE_GEMM_M_SPECIALIZATION
-#error "XNN_ENABLE_GEMM_M_SPECIALIZATION is not defined"
-#endif
-
 static enum xnn_status create_deconvolution2d_nhwc(
     uint32_t output_padding_top,
     uint32_t output_padding_right,
@@ -1491,12 +1487,9 @@ static enum xnn_status reshape_subconv2d_path(
 
   const size_t groups = deconvolution_op->groups;
   const size_t output_size = output_height * output_width;
-  uint32_t mr = deconvolution_op->ukernel.igemm.mr;
   const uint32_t nr = deconvolution_op->ukernel.igemm.nr;
-  #if XNN_ENABLE_GEMM_M_SPECIALIZATION
-  mr = xnn_get_heuristic_mr_igemm(
-      batch_size, mr, nr, deconvolution_op->ukernel.igemm.igemm_cases);
-  #endif
+  const uint32_t mr = xnn_get_heuristic_mr_igemm(
+      batch_size, deconvolution_op->ukernel.igemm.mr, nr, deconvolution_op->ukernel.igemm.igemm_cases);
 
   const size_t input_pixel_stride = deconvolution_op->input_pixel_stride << log2_input_element_size;
   const size_t output_pixel_stride = deconvolution_op->output_pixel_stride << log2_output_element_size;

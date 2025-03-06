@@ -36,10 +36,6 @@
 #include "xnnpack/params.h"
 #include "pthreadpool.h"
 
-#ifndef XNN_ENABLE_GEMM_M_SPECIALIZATION
-#error "XNN_ENABLE_GEMM_M_SPECIALIZATION is not defined"
-#endif
-
 static inline size_t compute_output_dimension_with_tf_same_padding(
     size_t input_dimension,
     size_t subsampling_dimension)
@@ -1924,17 +1920,10 @@ static enum xnn_status reshape_igemm(
   const size_t output_width = convolution_op->output_width;
   const size_t output_size = output_height * output_width;
 
-  uint32_t mr = convolution_op->ukernel.igemm.mr;
   const uint32_t nr = convolution_op->ukernel.igemm.nr;
   struct xnn_hmp_igemm_ukernel* igemm_cases = convolution_op->ukernel.igemm.igemm_cases;
-
-  #if XNN_ENABLE_GEMM_M_SPECIALIZATION
-    mr = xnn_get_heuristic_mr_igemm(output_size, mr, nr, igemm_cases);
-  #else
-    if (output_size == 1 && igemm_cases[0].function[XNN_UARCH_DEFAULT] != NULL) {
-      mr = 1;
-    }
-  #endif
+  const uint32_t mr =
+      xnn_get_heuristic_mr_igemm(output_size, convolution_op->ukernel.igemm.mr, nr, igemm_cases);
 
   struct xnn_hmp_igemm_ukernel igemm_ukernel = igemm_cases[mr - 1];
 

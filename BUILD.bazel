@@ -990,7 +990,6 @@ xnnpack_cc_library(
         ":cache",
         ":common",
         ":datatype",
-        ":fp16",
         ":hardware_config",
         ":indirection",
         ":internal",
@@ -1001,7 +1000,6 @@ xnnpack_cc_library(
         ":microkernel_utils",
         ":microkernels_h",
         ":microparams_init",
-        ":node_type",
         ":normalization",
         ":operator_type",
         ":operator_utils",
@@ -1542,18 +1540,6 @@ config_setting(
 config_setting(
     name = "slinky_enabled",
     define_values = {"xnn_use_slinky": "true"},
-)
-
-# Enables usage of mr heuristic to select microkernels.
-config_setting(
-    name = "xnn_enable_gemm_m_specialization_explicit_true",
-    define_values = {"xnn_enable_gemm_m_specialization": "true"},
-)
-
-# Disables usage of mr heuristic to select microkernels.
-config_setting(
-    name = "xnn_enable_gemm_m_specialization_explicit_false",
-    define_values = {"xnn_enable_gemm_m_specialization": "false"},
 )
 
 # Enables usage of WASM SIMD AVX-256 revectorization kernels.
@@ -2109,22 +2095,6 @@ alias(
         ":xnn_enable_memopt_explicit_true": ":xnn_enable_memopt_explicit_true",
         ":xnn_enable_memopt_explicit_false": ":xnn_enable_memopt_explicit_true",
         "//conditions:default": ":memopt_enabled_by_default",
-    }),
-)
-
-selects.config_setting_group(
-    name = "gemm_m_specialization_enabled_by_default",
-    match_any = [
-        "//conditions:default",
-    ],
-)
-
-alias(
-    name = "gemm_m_specialization_enabled",
-    actual = select({
-        ":xnn_enable_gemm_m_specialization_explicit_true": ":xnn_enable_gemm_m_specialization_explicit_true",
-        ":xnn_enable_gemm_m_specialization_explicit_false": ":xnn_enable_gemm_m_specialization_explicit_true",
-        "//conditions:default": ":gemm_m_specialization_enabled_by_default",
     }),
 )
 
