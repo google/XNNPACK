@@ -11,7 +11,7 @@
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/igemm.h"
+#include "src/xnnpack/igemm.h"
 
 
 void xnn_f32_igemm_minmax_ukernel_1x8__wasmsimd_x86_loadsplat(

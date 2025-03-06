@@ -7,7 +7,7 @@ $TESTNAME = f"F32Simd{ARCH.upper()}Test"
 
 $if ARCH_MACRO:
   // This header needs to go first for the arch test macros.
-  #include "xnnpack/common.h"
+  #include "src/xnnpack/common.h"
 
   #if ${ARCH_MACRO}
 
@@ -21,9 +21,9 @@ $if ARCH_MACRO:
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/simd/f32-${ARCH}.h"
-#include "replicable_random_device.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/simd/f32-${ARCH}.h"
+#include "test/replicable_random_device.h"
 
 namespace xnnpack {
 

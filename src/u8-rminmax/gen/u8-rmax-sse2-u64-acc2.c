@@ -9,10 +9,10 @@
 
 #include <assert.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
 
-#include "xnnpack/simd/u8-sse2.h"
+#include "src/xnnpack/simd/u8-sse2.h"
 
 void xnn_u8_rmax_ukernel__sse2_u64_acc2(
     size_t batch,

@@ -11,8 +11,8 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/ibilinear.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/ibilinear.h"
 
 
 void xnn_f32_ibilinear_ukernel__neon_c4(

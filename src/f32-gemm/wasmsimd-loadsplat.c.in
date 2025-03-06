@@ -15,7 +15,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/gemm.h"
+#include "src/xnnpack/gemm.h"
 
 
 $RANGE_MR = list(reversed(range(MR))) if INC else list(range(MR))

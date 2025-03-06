@@ -9,7 +9,7 @@
 #pragma once
 
 #include <benchmark/benchmark.h>
-#include "xnnpack/math.h"
+#include "src/xnnpack/math.h"
 
 #include <cstdint>
 #include <initializer_list>

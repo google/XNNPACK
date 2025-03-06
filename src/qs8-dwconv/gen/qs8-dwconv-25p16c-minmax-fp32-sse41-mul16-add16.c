@@ -11,8 +11,8 @@
 
 #include <smmintrin.h>
 
-#include "xnnpack/dwconv.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/unaligned.h"
 
 
 void xnn_qs8_dwconv_minmax_fp32_ukernel_25p16c__sse41_mul16_add16(

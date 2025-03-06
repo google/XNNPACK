@@ -11,9 +11,9 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_f32_vrndd_ukernel__neon_u4(

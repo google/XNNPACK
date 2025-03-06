@@ -3,15 +3,15 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack/microkernel-utils.h"
+#include "src/xnnpack/microkernel-utils.h"
 
 #include <cstddef>
 #include <random>
 
 #include <gtest/gtest.h>
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "replicable_random_device.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "test/replicable_random_device.h"
 
 TEST(GEMM_BEST_TILE_SIZE, min_tiles_per_thread) {
   xnnpack::ReplicableRandomDevice rnd;

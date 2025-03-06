@@ -14,7 +14,7 @@
 
 #include <emmintrin.h>
 
-#include "xnnpack/packw.h"
+#include "src/xnnpack/packw.h"
 
 void xnn_x32_packw_gemm_goi_ukernel_x16__sse2_u8(
   size_t g,

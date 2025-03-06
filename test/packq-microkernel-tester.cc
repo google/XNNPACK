@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "packq-microkernel-tester.h"
+#include "test/packq-microkernel-tester.h"
 
 #include <algorithm>
 #include <cassert>
@@ -14,11 +14,11 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/packq.h"
-#include "xnnpack/buffer.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/packq.h"
+#include "src/xnnpack/buffer.h"
 
 namespace xnnpack {
 

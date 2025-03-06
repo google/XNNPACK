@@ -11,9 +11,9 @@
 
 #include <riscv_vector.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/raddstoreexpminusmax.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/raddstoreexpminusmax.h"
 
 
 static inline vfloat32m2_t eval_poly_horner(vfloat32m2_t x,

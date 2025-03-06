@@ -18,15 +18,15 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/common.h"
-#include "xnnpack/config-types.h"
-#include "xnnpack/config.h"
-#include "xnnpack/internal.h"
-#include "xnnpack/math.h"
-#include "xnnpack/packq.h"
-#include "replicable_random_device.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/config.h"
+#include "src/xnnpack/internal.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/packq.h"
+#include "test/replicable_random_device.h"
 
 constexpr int kIterations = 1;
 

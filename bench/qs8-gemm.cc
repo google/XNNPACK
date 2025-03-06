@@ -14,17 +14,17 @@
 #include <vector>
 
 #include <benchmark/benchmark.h>
-#include "gemm-benchmark.h"
-#include "utils.h"
+#include "bench/gemm-benchmark.h"
+#include "bench/utils.h"
 #ifdef BENCHMARK_RUY
-#include "ruy/ruy.h"
+#include <ruy/ruy.h>
 #endif  // BENCHMARK_RUY
 
-#include "xnnpack/buffer.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/gemm.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
 
 
 #ifdef BENCHMARK_RUY

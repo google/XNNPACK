@@ -9,7 +9,7 @@
 
 #include <assert.h>
 #include <riscv_vector.h>
-#include "xnnpack/vbinary.h"
+#include "src/xnnpack/vbinary.h"
 
 
 void xnn_qs8_vmul_minmax_fp32_ukernel__rvv_u2v(

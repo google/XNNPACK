@@ -11,18 +11,18 @@
 #include <random>
 #include <vector>
 
-#include "dwconv.h"
-#include "utils.h"
-#include "xnnpack.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/common.h"
-#include "xnnpack/dwconv.h"
-#include "xnnpack/hardware-config.h"
-#include "xnnpack/indirection.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microkernel-utils.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/pack.h"
+#include "bench/dwconv.h"
+#include "bench/utils.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/hardware-config.h"
+#include "src/xnnpack/indirection.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microkernel-utils.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/pack.h"
 #include <benchmark/benchmark.h>
 
 static void bench_impl(uint64_t arch_flags, benchmark::State& state,
@@ -152,8 +152,8 @@ static void bench_impl(uint64_t arch_flags, benchmark::State& state,
   }                                                                            \
   BENCHMARK_DWCONV(BM_##ukernel);
 
-// #include "f32-dwconv/f32-dwconv.h"
-#include "f32-dwconv/f32-dwconv-minmax.h"
+// #include "src/f32-dwconv/f32-dwconv.h"
+#include "src/f32-dwconv/f32-dwconv-minmax.h"
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();

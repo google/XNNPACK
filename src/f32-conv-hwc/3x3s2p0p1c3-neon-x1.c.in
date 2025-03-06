@@ -12,8 +12,8 @@ $VMULADDQ_LANE_F32 = "vfmaq_lane_f32" if FMA else "vmlaq_lane_f32"
 
 #include <arm_neon.h>
 
-#include "xnnpack/conv.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/conv.h"
+#include "src/xnnpack/math.h"
 
 
 void xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x${CHANNEL_TILE}__${"aarch64_neonfma" if FMA else "neon"}_${HEIGHT_TILE}x1(

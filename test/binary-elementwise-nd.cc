@@ -16,15 +16,15 @@
 #include <utility>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/common.h"
-#include "xnnpack/datatype.h"
-#include "xnnpack/math.h"
-#include "xnnpack/operator-utils.h"
-#include "xnnpack/reference-utils.h"
-#include "operator-test-utils.h"
-#include "replicable_random_device.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/datatype.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/operator-utils.h"
+#include "src/xnnpack/reference-utils.h"
+#include "test/operator-test-utils.h"
+#include "test/replicable_random_device.h"
 
 using ::testing::Combine;
 using ::testing::Values;

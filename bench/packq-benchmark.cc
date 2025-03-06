@@ -3,18 +3,18 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "packq-benchmark.h"
+#include "bench/packq-benchmark.h"
 
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <random>
 
-#include "utils.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/common.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/packq.h"
+#include "bench/utils.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/packq.h"
 #include <benchmark/benchmark.h>
 
 void x8_packq(benchmark::State& state, xnn_x8_packq_f32qp8_ukernel_fn packq,

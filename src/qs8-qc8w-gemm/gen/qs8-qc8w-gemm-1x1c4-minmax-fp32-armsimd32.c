@@ -11,10 +11,10 @@
 
 #include <arm_acle.h>
 
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/math.h"
-#include "xnnpack/gemm.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/unaligned.h"
 
 
 void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x1c4__armsimd32(

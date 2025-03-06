@@ -9,8 +9,8 @@
 
 #include <assert.h>
 
-#include "xnnpack/math.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_qu8_vlrelu_ukernel__scalar_andxor_u2(

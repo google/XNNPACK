@@ -10,7 +10,7 @@
 #include <cstdint>
 
 #include <gtest/gtest.h>
-#include "softmax-operator-tester.h"
+#include "test/softmax-operator-tester.h"
 
 #ifndef XNN_EXCLUDE_F16_TESTS
 TEST(SOFTMAX_NC_F16, single_class) {

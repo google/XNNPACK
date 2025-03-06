@@ -11,8 +11,8 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
 
 
 void xnn_f32_rminmax_ukernel__avx512f_u32_acc2(

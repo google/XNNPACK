@@ -9,8 +9,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/operator.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/operator.h"
 
 static inline bool use_weights_cache(struct xnn_operator* op) {
   return op->weights_cache != NULL;

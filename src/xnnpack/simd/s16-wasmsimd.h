@@ -12,7 +12,7 @@
 #include <stdint.h>
 #include <wasm_simd128.h>
 
-#include "xnnpack/common.h"
+#include "src/xnnpack/common.h"
 
 // SIMD vector type for s16 using WASMSIMD.
 typedef v128_t xnn_simd_s16_t;

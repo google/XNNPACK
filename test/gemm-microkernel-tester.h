@@ -17,11 +17,11 @@
 #include <string>
 
 #include <gtest/gtest.h>
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/pack.h"
-#include "xnnpack/requantization.h"
-#include "next_prime.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/pack.h"
+#include "src/xnnpack/requantization.h"
+#include "test/next_prime.h"
 
 class GemmMicrokernelTester {
  public:

@@ -24,22 +24,22 @@
 #include <time.h>
 #endif
 
-#include "xnnpack.h"
-#include "xnnpack/allocation-type.h"
-#include "xnnpack/allocator.h"
-#include "xnnpack/cache.h"
-#include "xnnpack/common.h"
-#include "xnnpack/internal.h"
-#include "xnnpack/log.h"
-#include "xnnpack/memory-planner.h"
-#include "xnnpack/memory.h"
-#include "xnnpack/microkernel-type.h"
-#include "xnnpack/node-type.h"
-#include "xnnpack/operator-utils.h"
-#include "xnnpack/operator.h"
-#include "xnnpack/params.h"
-#include "xnnpack/subgraph.h"
-#include "pthreadpool.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/allocation-type.h"
+#include "src/xnnpack/allocator.h"
+#include "src/xnnpack/cache.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/internal.h"
+#include "src/xnnpack/log.h"
+#include "src/xnnpack/memory-planner.h"
+#include "src/xnnpack/memory.h"
+#include "src/xnnpack/microkernel-type.h"
+#include "src/xnnpack/node-type.h"
+#include "src/xnnpack/operator-utils.h"
+#include "src/xnnpack/operator.h"
+#include "src/xnnpack/params.h"
+#include "src/xnnpack/subgraph.h"
+#include <pthreadpool.h>
 
 enum xnn_status xnn_reshape_external_value(
     xnn_runtime_t runtime,

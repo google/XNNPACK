@@ -11,11 +11,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/dwconv.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/unaligned.h"
 
 void xnn_qu8_dwconv_minmax_rndnu_ukernel_9p1c__scalar(
     size_t channels,

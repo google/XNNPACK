@@ -3,14 +3,14 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "convolution-test-helpers.h"
+#include "test/convolution-test-helpers.h"
 
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <vector>
 
-#include "xnnpack/microparams.h"
+#include "src/xnnpack/microparams.h"
 
 namespace xnnpack {
 

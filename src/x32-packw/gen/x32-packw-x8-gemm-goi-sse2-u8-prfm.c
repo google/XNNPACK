@@ -14,8 +14,8 @@
 
 #include <emmintrin.h>
 
-#include "xnnpack/packw.h"
-#include "xnnpack/prefetch.h"
+#include "src/xnnpack/packw.h"
+#include "src/xnnpack/prefetch.h"
 
 void xnn_x32_packw_gemm_goi_ukernel_x8__sse2_u8_prfm(
   size_t g,

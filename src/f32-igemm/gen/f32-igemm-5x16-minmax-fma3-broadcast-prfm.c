@@ -11,8 +11,8 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/igemm.h"
-#include "xnnpack/prefetch.h"
+#include "src/xnnpack/igemm.h"
+#include "src/xnnpack/prefetch.h"
 
 
 void xnn_f32_igemm_minmax_ukernel_5x16__fma3_broadcast_prfm(

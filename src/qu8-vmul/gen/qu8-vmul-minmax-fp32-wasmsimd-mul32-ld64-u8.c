@@ -11,9 +11,9 @@
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/vbinary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vbinary.h"
 
 
 void xnn_qu8_vmul_minmax_fp32_ukernel__wasmsimd_mul32_ld64_u8(

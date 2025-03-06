@@ -9,12 +9,12 @@
 #include <random>
 #include <vector>
 
-#include "utils.h"
-#include "xnnpack.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/common.h"
-#include "xnnpack/datatype.h"
-#include "xnnpack/math.h"
+#include "bench/utils.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/datatype.h"
+#include "src/xnnpack/math.h"
 #include <benchmark/benchmark.h>
 
 template <typename T>

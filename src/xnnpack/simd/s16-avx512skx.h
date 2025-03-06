@@ -12,7 +12,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
+#include "src/xnnpack/common.h"
 
 // SIMD vector type for s16 using AVX512SKX.
 typedef __m512i xnn_simd_s16_t;

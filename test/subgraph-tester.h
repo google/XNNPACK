@@ -20,12 +20,12 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/datatype.h"
-#include "xnnpack/subgraph.h"
-#include "replicable_random_device.h"
-#include "runtime-flags.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/datatype.h"
+#include "src/xnnpack/subgraph.h"
+#include "test/replicable_random_device.h"
+#include "test/runtime-flags.h"
 
 namespace xnnpack {
 

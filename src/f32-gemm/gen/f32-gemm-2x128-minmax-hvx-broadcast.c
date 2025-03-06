@@ -12,8 +12,8 @@
 #include <hexagon_types.h>
 #include <hexagon_protos.h>
 #include <hvx_hexagon_protos.h>
-#include "xnnpack/gemm.h"
-#include "xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
 
 void xnn_f32_gemm_minmax_ukernel_2x128__hvx_broadcast(
     size_t mr,

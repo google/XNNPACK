@@ -9,8 +9,8 @@
 
 #include <assert.h>
 
-#include "xnnpack/math.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_qs8_vlrelu_ukernel__scalar_select_u4(

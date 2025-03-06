@@ -12,7 +12,7 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/gemm.h"
+#include "src/xnnpack/gemm.h"
 
 
 void xnn_bf16_gemm_minmax_ukernel_4x8c2__neonbf16_bfdot_lane_ld128(

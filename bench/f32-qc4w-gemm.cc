@@ -12,18 +12,18 @@
 #include <random>
 #include <vector>
 
-#include "gemm.h"
-#include "utils.h"
-#include "xnnpack/allocator.h"
-#include "xnnpack/common.h"
-#include "xnnpack/gemm.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/pack.h"
-#include "xnnpack/packx.h"
-#include "xnnpack/ppmm.h"
-#include "xnnpack/buffer.h"
+#include "bench/gemm.h"
+#include "bench/utils.h"
+#include "src/xnnpack/allocator.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/pack.h"
+#include "src/xnnpack/packx.h"
+#include "src/xnnpack/ppmm.h"
+#include "src/xnnpack/buffer.h"
 #include <benchmark/benchmark.h>
 
 static void GEMMBenchmark(benchmark::State& state,

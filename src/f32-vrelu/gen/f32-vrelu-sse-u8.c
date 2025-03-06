@@ -11,8 +11,8 @@
 
 #include <xmmintrin.h>
 
-#include "xnnpack/vunary.h"
-#include "xnnpack/common.h"
+#include "src/xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
 
 
 void xnn_f32_vrelu_ukernel__sse_u8(

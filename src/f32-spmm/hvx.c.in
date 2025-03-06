@@ -10,10 +10,10 @@ $assert MR % 32 == 0
 #include <hexagon_protos.h>
 #include <hexagon_types.h>
 
-#include "xnnpack/simd/f32-hvx.h"
+#include "src/xnnpack/simd/f32-hvx.h"
 
-#include "xnnpack/prefetch.h"
-#include "xnnpack/spmm.h"
+#include "src/xnnpack/prefetch.h"
+#include "src/xnnpack/spmm.h"
 
 void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__hvx${"_x" + str(UNROLL) if UNROLL > 1 else ""}(
     size_t mc,

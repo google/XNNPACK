@@ -453,11 +453,11 @@ def main(args):
 
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/reduce.h"
-#include "rdsum-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/reduce.h"
+#include "test/rdsum-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
     for ukernel_spec in spec_yaml:

@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <gtest/gtest.h>
-#include "dynamic-fully-connected-operator-tester.h"
+#include "test/dynamic-fully-connected-operator-tester.h"
 
 
 TEST(DYNAMIC_FULLY_CONNECTED_NC_F16, unit_batch) {

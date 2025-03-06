@@ -11,8 +11,8 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/gemm.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/gemm.h"
 
 
 void xnn_qu8_gemm_minmax_rndnu_ukernel_3x16__neon_mlal_lane(

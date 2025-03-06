@@ -9,11 +9,11 @@
 
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/vmulcaddc.h"
-#include "xnnpack/microparams-init.h"
-#include "vmulcaddc-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/vmulcaddc.h"
+#include "src/xnnpack/microparams-init.h"
+#include "test/vmulcaddc-microkernel-tester.h"
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, row_tile, channel_tile, datatype, params_type, init_params) XNN_TEST_VMULCADDC_ROW_DIV(ukernel, arch_flags, row_tile, channel_tile, datatype, params_type, init_params);\
 XNN_TEST_VMULCADDC_ROW_LT(ukernel, arch_flags, row_tile, channel_tile, datatype, params_type, init_params);                                                                                                                 \
 XNN_TEST_VMULCADDC_ROW_GT(ukernel, arch_flags, row_tile, channel_tile, datatype, params_type, init_params);                                                                                                                 \
@@ -26,5 +26,5 @@ XNN_TEST_VMULCADDC_OUTPUT_STRIDE(ukernel, arch_flags, row_tile, channel_tile, da
 XNN_TEST_VMULCADDC_INPLACE(ukernel, arch_flags, row_tile, channel_tile, datatype, params_type, init_params);                                                                                                                \
 XNN_TEST_VMULCADDC_QMAX(ukernel, arch_flags, row_tile, channel_tile, datatype, params_type, init_params);                                                                                                                   \
 XNN_TEST_VMULCADDC_QMIN(ukernel, arch_flags, row_tile, channel_tile, datatype, params_type, init_params);
-#include "f16-vmulcaddc/f16-vmulcaddc.h"
+#include "src/f16-vmulcaddc/f16-vmulcaddc.h"
 #undef XNN_UKERNEL_WITH_PARAMS

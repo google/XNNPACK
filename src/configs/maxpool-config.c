@@ -6,12 +6,12 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/config.h"
-#include "xnnpack/init-once.h"
-#include "xnnpack/maxpool.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/config.h"
+#include "src/xnnpack/init-once.h"
+#include "src/xnnpack/maxpool.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
 
 static struct xnn_maxpool_config f16_maxpool_config = {0};
 static struct xnn_maxpool_config f32_maxpool_config = {0};

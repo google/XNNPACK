@@ -9,10 +9,10 @@
 
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/raddexpminusmax.h"
-#include "raddexpminusmax-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/raddexpminusmax.h"
+#include "test/raddexpminusmax-microkernel-tester.h"
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64

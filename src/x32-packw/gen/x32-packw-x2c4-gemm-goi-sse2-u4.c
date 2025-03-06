@@ -14,7 +14,7 @@
 
 #include <emmintrin.h>
 
-#include "xnnpack/packw.h"
+#include "src/xnnpack/packw.h"
 
 
 void xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_u4(

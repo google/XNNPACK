@@ -9,8 +9,8 @@
 
 #include <assert.h>
 
-#include "xnnpack/igemm.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/igemm.h"
+#include "src/xnnpack/math.h"
 
 
 void xnn_f32_igemm_ukernel_4x4__scalar(

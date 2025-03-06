@@ -10,8 +10,8 @@
 #include <assert.h>
 #include <math.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vunary.h"
 
 #ifndef M_SQRT1_2
 #define M_SQRT1_2 0.7071067811865475244

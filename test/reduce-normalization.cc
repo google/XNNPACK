@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "reduce-normalization-tester.h"
+#include "test/reduce-normalization-tester.h"
 
 
 TEST(REDUCE_NORMALIZATION_TEST, normalize_5D_reduce_all) {

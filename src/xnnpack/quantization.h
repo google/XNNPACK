@@ -9,8 +9,8 @@
 #include <math.h>
 #include <stdint.h>
 
-#include "xnnpack/math.h"
-#include "xnnpack/microparams.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
 
 static inline struct xnn_qd8_quantization_params xnn_qd8_asymmetric_quantization_params(
     float min, float max)

@@ -9,12 +9,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/config-types.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams.h"
-#include "pthreadpool.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams.h"
+#include <pthreadpool.h>
 
 enum xnn_parallelization_type {
   xnn_parallelization_type_invalid = 0,

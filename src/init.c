@@ -21,12 +21,12 @@
   #include <intrin.h>
 #endif
 
-#include "xnnpack.h"
-#include "xnnpack/allocator.h"
-#include "xnnpack/hardware-config.h"
-#include "xnnpack/init-once.h"
-#include "xnnpack/log.h"
-#include "xnnpack/params.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/allocator.h"
+#include "src/xnnpack/hardware-config.h"
+#include "src/xnnpack/init-once.h"
+#include "src/xnnpack/log.h"
+#include "src/xnnpack/params.h"
 
 #if XNN_ENABLE_KLEIDIAI
 #include <stdio.h>

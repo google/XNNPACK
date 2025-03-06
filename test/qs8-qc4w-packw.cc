@@ -7,11 +7,11 @@
 #include <string>
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/packw.h"
-#include "next_prime.h"
-#include "packw-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/packw.h"
+#include "test/next_prime.h"
+#include "test/packw-microkernel-tester.h"
 
 namespace {
 
@@ -33,7 +33,7 @@ std::string GetTestName(const testing::TestParamInfo<XnnTest::ParamType>& info) 
   { #ukernel, ukernel, arch_flags, nr, kr, sr, kblock, nr_scale},
 
 const XnnTestParam xnn_test_qs8_qc4w_params[] = {
-#include "qs8-qc4w-packw/qs8-qc4w-packw.h"
+#include "src/qs8-qc4w-packw/qs8-qc4w-packw.h"
 };
 
 #undef XNN_UKERNEL

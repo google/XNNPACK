@@ -12,7 +12,7 @@
 #include <stdint.h>
 #include <wasm_simd128.h>
 
-#include "xnnpack/common.h"
+#include "src/xnnpack/common.h"
 
 // SIMD vector type for u8 using wasm.
 typedef v128_t xnn_simd_u8_t;

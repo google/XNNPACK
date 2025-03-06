@@ -11,7 +11,7 @@
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/gemm.h"
+#include "src/xnnpack/gemm.h"
 
 
 void xnn_f32_qc8w_gemm_minmax_ukernel_5x8__wasmsimd_x86_loadsplat(

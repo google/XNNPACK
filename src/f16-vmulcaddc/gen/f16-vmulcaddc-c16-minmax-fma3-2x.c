@@ -11,9 +11,9 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/math.h"
-#include "xnnpack/vmulcaddc.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vmulcaddc.h"
 
 
 void xnn_f16_vmulcaddc_minmax_ukernel_c16__fma3_2x(

@@ -14,8 +14,8 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/packw.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/packw.h"
+#include "src/xnnpack/unaligned.h"
 // AVXVNNI replacement that uses vpmaddubsw.
 // u7 is vone.  s8 is int8 weights.
 static XNN_INTRINSIC

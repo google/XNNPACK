@@ -12,10 +12,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/simd/s32-neon.h"
+#include "src/xnnpack/simd/s32-neon.h"
 
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/packw.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/packw.h"
 
 static XNN_INLINE xnn_simd_s32_t
 xnn_load_tail_no_oob_s32(const int32_t* input, size_t num_elements) {

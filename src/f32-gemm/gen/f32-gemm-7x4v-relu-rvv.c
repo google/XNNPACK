@@ -11,7 +11,7 @@
 
 #include <riscv_vector.h>
 
-#include "xnnpack/gemm.h"
+#include "src/xnnpack/gemm.h"
 
 
 void xnn_f32_gemm_relu_ukernel_7x4v__rvv(

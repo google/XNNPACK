@@ -7,16 +7,16 @@
 //   Specification: test/qu8-rdsum.yaml
 //   Generator: tools/generate-reduce-discontiguous-benchmark.py
 
-#include "rsum-benchmark.h"
-#include "utils.h"
+#include "bench/rsum-benchmark.h"
+#include "bench/utils.h"
 #include <benchmark/benchmark.h>
 
-#include "xnnpack.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
 
 
 BENCHMARK_CAPTURE(qu8_rdsum, scalar_c4,

@@ -17,14 +17,14 @@
 #include <vector>   // For std::vector.
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/node-type.h"
-#include "xnnpack/subgraph.h"
-#include "replicable_random_device.h"
-#include "runtime-flags.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/aligned-allocator.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/node-type.h"
+#include "src/xnnpack/subgraph.h"
+#include "test/replicable_random_device.h"
+#include "test/runtime-flags.h"
 
 template <class T>
 class ScaledDotProductAttentionTestBase : public ::testing::Test {

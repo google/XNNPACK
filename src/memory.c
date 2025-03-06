@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 // Include first for the platform detection macros.
-#include "xnnpack/common.h"
+#include "src/xnnpack/common.h"
 
 #if XNN_PLATFORM_WEB
 #include <emscripten/emscripten.h>
@@ -33,7 +33,7 @@
 #endif  // XNN_PLATFORM_WINDOWS
 
 #if XNN_PLATFORM_QURT
-#include "qurt/qurt_alloc.h"  // NOLINT - header provided by Hexagon toolchain
+#include <qurt/qurt_alloc.h>  // NOLINT - header provided by Hexagon toolchain
 #endif
 
 #include <assert.h>
@@ -41,10 +41,10 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "xnnpack.h"
-#include "xnnpack/log.h"
-#include "xnnpack/math.h"
-#include "xnnpack/memory.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/memory.h"
 
 // Helpers to allocate/mmap and release memory used by both code and weights cache.
 

@@ -9,11 +9,11 @@
 
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/conv.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microparams-init.h"
-#include "conv-hwc2chw-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/conv.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microparams-init.h"
+#include "test/conv-hwc2chw-microkernel-tester.h"
 
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)

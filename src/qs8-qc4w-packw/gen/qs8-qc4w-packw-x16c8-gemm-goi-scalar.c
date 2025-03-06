@@ -12,7 +12,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/packw.h"
+#include "src/xnnpack/packw.h"
 
 
 static int8_t sign_extend_int4(int8_t value) {

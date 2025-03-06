@@ -12,7 +12,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <immintrin.h>
 
-#include "xnnpack/raddextexp.h"
+#include "src/xnnpack/raddextexp.h"
 
 
 void xnn_f32_raddextexp_ukernel__avx2_p5_u${BATCH_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(

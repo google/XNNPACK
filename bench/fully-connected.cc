@@ -16,11 +16,11 @@
 #include <utility>
 #include <vector>
 
-#include "xnnpack.h"
+#include "include/xnnpack.h"
 
 #include <benchmark/benchmark.h>
-#include "utils.h"
-#include "xnnpack/buffer.h"
+#include "bench/utils.h"
+#include "src/xnnpack/buffer.h"
 
 #define XNN_INVALID_NODE_ID UINT32_MAX
 void xnnpack_fully_connected_qd8_f32_qc4w(benchmark::State& state, const char* net) {

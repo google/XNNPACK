@@ -12,9 +12,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/math.h"
-#include "xnnpack/packw.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/packw.h"
+#include "src/xnnpack/unaligned.h"
 
 void xnn_x8_packw_gemm_goi_ukernel_x16__scalar_u2(
   size_t g,

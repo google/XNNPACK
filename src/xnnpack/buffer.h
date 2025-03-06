@@ -22,10 +22,10 @@
 #include <utility>
 #include <vector>
 
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/datatype.h"
-#include "xnnpack/math.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/datatype.h"
+#include "src/xnnpack/math.h"
 
 namespace xnnpack {
 

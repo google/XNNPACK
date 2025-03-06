@@ -11,9 +11,9 @@
 
 #include <emmintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/unaligned.h"
-#include "xnnpack/vcvt.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/unaligned.h"
+#include "src/xnnpack/vcvt.h"
 
 
 void xnn_f32_f16_vcvt_ukernel__sse2_u8(

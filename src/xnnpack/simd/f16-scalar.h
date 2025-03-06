@@ -11,8 +11,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
 
 // SIMD vector type for f16 using SCALAR.
 typedef xnn_float16 xnn_simd_f16_t;

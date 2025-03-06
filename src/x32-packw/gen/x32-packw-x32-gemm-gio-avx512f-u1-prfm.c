@@ -14,9 +14,9 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/packw.h"
-#include "xnnpack/prefetch.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/packw.h"
+#include "src/xnnpack/prefetch.h"
 
 
 // Pack pre-transposed weights (GIO) for use by f32-gemm

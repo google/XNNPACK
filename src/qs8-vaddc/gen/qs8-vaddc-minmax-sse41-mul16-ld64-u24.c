@@ -11,9 +11,9 @@
 
 #include <smmintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/unaligned.h"
-#include "xnnpack/vbinary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/unaligned.h"
+#include "src/xnnpack/vbinary.h"
 
 
 void xnn_qs8_vaddc_minmax_ukernel__sse41_mul16_ld64_u24(

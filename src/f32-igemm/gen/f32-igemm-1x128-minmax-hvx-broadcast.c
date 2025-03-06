@@ -12,8 +12,8 @@
 #include <hexagon_protos.h>
 #include <hvx_hexagon_protos.h>
 
-#include "xnnpack/igemm.h"
-#include "xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/igemm.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
 
 void xnn_f32_igemm_minmax_ukernel_1x128__hvx_broadcast(
     size_t mr,

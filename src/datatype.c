@@ -3,9 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack/datatype.h"
+#include "src/xnnpack/datatype.h"
 
-#include "xnnpack.h"
+#include "include/xnnpack.h"
 
 bool xnn_datatype_is_real(enum xnn_datatype t) {
   switch (t) {

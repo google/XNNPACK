@@ -11,13 +11,13 @@
 #include <string>
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/math.h"
-#include "xnnpack/maxpool.h"
-#include "xnnpack/microparams-init.h"
-#include "maxpool-microkernel-tester.h"
-#include "next_prime.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/maxpool.h"
+#include "src/xnnpack/microparams-init.h"
+#include "test/maxpool-microkernel-tester.h"
+#include "test/next_prime.h"
 
 namespace {
 
@@ -39,10 +39,10 @@ std::string GetTestName(const testing::TestParamInfo<XnnTest::ParamType>& info) 
   { #ukernel, MaxPoolMicrokernelTester::Kernel{ukernel, init_params}, arch_flags, channel_tile, primary_tile },
 
 const XnnTestParam xnn_test_params[] = {
-#include "f16-maxpool/f16-maxpool-minmax.h"
-#include "f32-maxpool/f32-maxpool-minmax.h"
-#include "s8-maxpool/s8-maxpool-minmax.h"
-#include "u8-maxpool/u8-maxpool-minmax.h"
+#include "src/f16-maxpool/f16-maxpool-minmax.h"
+#include "src/f32-maxpool/f32-maxpool-minmax.h"
+#include "src/s8-maxpool/s8-maxpool-minmax.h"
+#include "src/u8-maxpool/u8-maxpool-minmax.h"
 };
 
 #undef XNN_UKERNEL_WITH_PARAMS

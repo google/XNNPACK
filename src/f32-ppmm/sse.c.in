@@ -10,7 +10,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <xmmintrin.h>
 
-#include "xnnpack/ppmm.h"
+#include "src/xnnpack/ppmm.h"
 
 
 void xnn_f32_ppmm_minmax_ukernel_${MR}x${NR}__sse(

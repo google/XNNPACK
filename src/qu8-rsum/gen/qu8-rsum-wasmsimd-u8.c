@@ -12,8 +12,8 @@
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
 
 void xnn_qu8_rsum_ukernel__wasmsimd_u8(
     size_t batch,

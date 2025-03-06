@@ -11,8 +11,8 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
 
 
 void xnn_f32_rmin_ukernel__avx_u24_acc3(

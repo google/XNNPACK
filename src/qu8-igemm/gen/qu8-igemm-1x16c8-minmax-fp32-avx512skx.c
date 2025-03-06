@@ -11,10 +11,10 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/igemm.h"
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/igemm.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
 
 
 void xnn_qu8_igemm_minmax_fp32_ukernel_1x16c8__avx512skx(

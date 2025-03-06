@@ -11,9 +11,9 @@
 
 #include <emmintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/vcvt.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/vcvt.h"
 
 
 void xnn_qs8_f32_vcvt_ukernel__sse2_u24(

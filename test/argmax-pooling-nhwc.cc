@@ -8,9 +8,9 @@
 #include <cstdint>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/config.h"
-#include "argmax-pooling-operator-tester.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/config.h"
+#include "test/argmax-pooling-operator-tester.h"
 
 constexpr size_t max_pooling_size = 25;
 

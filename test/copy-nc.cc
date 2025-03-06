@@ -6,7 +6,7 @@
 #include <cstddef>
 
 #include <gtest/gtest.h>
-#include "copy-operator-tester.h"
+#include "test/copy-operator-tester.h"
 
 TEST(COPY_NC_X8, unit_batch) {
   for (size_t channels = 1; channels < 100; channels++) {

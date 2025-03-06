@@ -10,9 +10,9 @@
 #include <assert.h>
 #include <math.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vunary.h"
 
 
 // Note redefine as uint32[] to avoid redundant bitcasts.

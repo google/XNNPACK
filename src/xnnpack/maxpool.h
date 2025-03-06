@@ -11,8 +11,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/microparams.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,10 +31,10 @@ extern "C" {
       size_t output_increment,                                                                                          \
       const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-#include "f16-maxpool/f16-maxpool-minmax.h"
-#include "f32-maxpool/f32-maxpool-minmax.h"
-#include "u8-maxpool/u8-maxpool-minmax.h"
-#include "s8-maxpool/s8-maxpool-minmax.h"
+#include "src/f16-maxpool/f16-maxpool-minmax.h"
+#include "src/f32-maxpool/f32-maxpool-minmax.h"
+#include "src/u8-maxpool/u8-maxpool-minmax.h"
+#include "src/s8-maxpool/s8-maxpool-minmax.h"
 
 #undef XNN_UKERNEL_WITH_PARAMS
 

@@ -9,10 +9,10 @@
 
 #include <assert.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
 
-#include "xnnpack/simd/u8-scalar.h"
+#include "src/xnnpack/simd/u8-scalar.h"
 
 void xnn_u8_rmax_ukernel__scalar_u3_acc3(
     size_t batch,

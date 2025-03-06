@@ -15,8 +15,8 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "batch-matrix-multiply-operator-tester.h"
+#include "include/xnnpack.h"
+#include "test/batch-matrix-multiply-operator-tester.h"
 
 struct BatchMatMulTesterParams {
   std::string name;

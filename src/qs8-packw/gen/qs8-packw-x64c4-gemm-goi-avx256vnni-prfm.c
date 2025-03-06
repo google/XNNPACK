@@ -14,9 +14,9 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/packw.h"
-#include "xnnpack/unaligned.h"
-#include "xnnpack/prefetch.h"
+#include "src/xnnpack/packw.h"
+#include "src/xnnpack/unaligned.h"
+#include "src/xnnpack/prefetch.h"
 
 XNN_INLINE static uint32_t safe_load_u32(const void* src, size_t k) {
   uint32_t value = 0;

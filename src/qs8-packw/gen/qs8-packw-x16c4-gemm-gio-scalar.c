@@ -12,7 +12,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/packw.h"
+#include "src/xnnpack/packw.h"
 
 void xnn_qs8_packw_gemm_gio_ukernel_x16c4__scalar(
   size_t g,

@@ -13,8 +13,8 @@
 #include <hvx_hexagon_protos.h>
 #include <hexagon_protos.h>
 #include <hexagon_types.h>
-#include "xnnpack/common.h"
-#include "xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
 
 // SIMD vector type for s32 using NEON.
 typedef HVX_Vector xnn_simd_s32_t;

@@ -276,13 +276,13 @@ def main(args):
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/dwconv.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/requantization.h"
-#include "dwconv-microkernel-tester.h"
-#include "next_prime.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/requantization.h"
+#include "test/dwconv-microkernel-tester.h"
+#include "test/next_prime.h"
 """.format(ukernel=ukernel, generator=sys.argv[0])
 
   test_cases = ""
@@ -323,7 +323,7 @@ def main(args):
       },
   ))
 
-  tests += f'#include "{xnncommon.xnnpack_src()}{folder}/{options.ukernel}.h"\n'
+  tests += f'#include "src/{folder}/{options.ukernel}.h"\n'
   tests += "#undef XNN_UKERNEL_WITH_PARAMS\n"
 
   xnncommon.overwrite_if_changed(options.output, tests)

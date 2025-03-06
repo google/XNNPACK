@@ -15,10 +15,10 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/subgraph.h"
-#include "subgraph-tester.h"
-#include "runtime-flags.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/subgraph.h"
+#include "test/subgraph-tester.h"
+#include "test/runtime-flags.h"
 
 namespace xnnpack {
 

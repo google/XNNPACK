@@ -12,8 +12,8 @@
 #include <stdint.h>
 #include <wasm_simd128.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/unaligned.h"
 
 // SIMD vector type for s32 using WASMSIMD.
 typedef v128_t xnn_simd_s32_t;

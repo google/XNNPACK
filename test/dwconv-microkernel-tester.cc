@@ -6,7 +6,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "dwconv-microkernel-tester.h"
+#include "test/dwconv-microkernel-tester.h"
 
 #include <stdint.h>
 
@@ -21,17 +21,17 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microkernel-utils.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/pack.h"
-#include "xnnpack/requantization.h"
-#include "xnnpack/buffer.h"
-#include "replicable_random_device.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microkernel-utils.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/pack.h"
+#include "src/xnnpack/requantization.h"
+#include "src/xnnpack/buffer.h"
+#include "test/replicable_random_device.h"
 
 TEST_P(DWConvTest, Test) {
   const DWConvTestParams& params = GetParam();

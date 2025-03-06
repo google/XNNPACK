@@ -12,9 +12,9 @@
 #include <utility>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/config.h"
-#include "average-pooling-operator-tester.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/config.h"
+#include "test/average-pooling-operator-tester.h"
 
 static std::pair<size_t, size_t> SmallPoolSize(size_t max_elements) {
   const size_t small_side = size_t(std::floor(std::sqrt(double(max_elements))));

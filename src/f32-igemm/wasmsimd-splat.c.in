@@ -11,7 +11,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/igemm.h"
+#include "src/xnnpack/igemm.h"
 
 
 $assert ACTIVATION in ["LINEAR", "RELU", "MINMAX"]

@@ -15,9 +15,9 @@
 #include <random>
 #include <vector>
 
-#include "utils.h"
-#include "xnnpack.h"
-#include "xnnpack/buffer.h"
+#include "bench/utils.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
 #include <benchmark/benchmark.h>
 
 void max_pooling_u8(benchmark::State& state, const char* net) {

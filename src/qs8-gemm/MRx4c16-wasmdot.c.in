@@ -13,8 +13,8 @@ $assert (SDOT == 0 and (DATATYPE in ["QC8", "QD8"])) or SDOT == 1
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/gemm.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/math.h"
 
 $ABC = "012345678"
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8": "qd8_f32_qc8w", "QS8": "qs8"}[DATATYPE]

@@ -15,8 +15,8 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack/buffer.h"
-#include "xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "include/xnnpack.h"
 
 class SpaceToDepthOperatorTester {
  public:

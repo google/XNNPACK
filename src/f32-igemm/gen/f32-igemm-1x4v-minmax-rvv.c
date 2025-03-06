@@ -11,7 +11,7 @@
 
 #include <riscv_vector.h>
 
-#include "xnnpack/igemm.h"
+#include "src/xnnpack/igemm.h"
 
 
 void xnn_f32_igemm_minmax_ukernel_1x4v__rvv(

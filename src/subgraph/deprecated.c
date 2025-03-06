@@ -2,8 +2,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack.h"
-#include "xnnpack/subgraph.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/subgraph.h"
 
 enum xnn_status xnn_define_add2(xnn_subgraph_t subgraph, float output_min,
                                 float output_max, uint32_t input1_id,

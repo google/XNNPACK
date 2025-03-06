@@ -9,7 +9,7 @@
 
 
 // This header needs to go first for the arch test macros.
-#include "xnnpack/common.h"
+#include "src/xnnpack/common.h"
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 
@@ -23,9 +23,9 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/simd/s8-neon.h"
-#include "replicable_random_device.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/simd/s8-neon.h"
+#include "test/replicable_random_device.h"
 
 namespace xnnpack {
 

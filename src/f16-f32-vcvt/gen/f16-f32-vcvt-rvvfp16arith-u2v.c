@@ -11,7 +11,7 @@
 
 #include <riscv_vector.h>
 
-#include "xnnpack/vcvt.h"
+#include "src/xnnpack/vcvt.h"
 
 
 void xnn_f16_f32_vcvt_ukernel__rvvfp16arith_u2v(

@@ -4,9 +4,9 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <gtest/gtest.h>
-#include "xnnpack/node-type.h"
-#include "xnnpack/subgraph.h"
-#include "subgraph-tester.h"
+#include "src/xnnpack/node-type.h"
+#include "src/xnnpack/subgraph.h"
+#include "test/subgraph-tester.h"
 
 namespace xnnpack {
 

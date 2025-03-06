@@ -8,7 +8,7 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "transpose-operator-tester.h"
+#include "test/transpose-operator-tester.h"
 
 TEST(TRANSPOSE_ND_X8, Run1D) {
   TransposeOperatorTester()

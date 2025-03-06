@@ -11,9 +11,9 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <immintrin.h>
 
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/math.h"
-#include "xnnpack/vmulcaddc.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vmulcaddc.h"
 
 
 void xnn_f16_vmulcaddc_minmax_ukernel_c${CHANNEL_TILE}__fma3_${ROW_TILE}x(

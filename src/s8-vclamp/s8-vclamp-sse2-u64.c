@@ -9,10 +9,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/unaligned.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/unaligned.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_s8_vclamp_ukernel__sse2_u64(

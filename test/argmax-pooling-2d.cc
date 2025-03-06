@@ -13,14 +13,14 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/node-type.h"
-#include "xnnpack/operator.h"
-#include "xnnpack/subgraph.h"
-#include "xnnpack/buffer.h"
-#include "replicable_random_device.h"
-#include "runtime-flags.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/node-type.h"
+#include "src/xnnpack/operator.h"
+#include "src/xnnpack/subgraph.h"
+#include "src/xnnpack/buffer.h"
+#include "test/replicable_random_device.h"
+#include "test/runtime-flags.h"
 
 namespace {
 inline size_t compute_output_dimension(size_t padded_input_dimension, size_t kernel_dimension)

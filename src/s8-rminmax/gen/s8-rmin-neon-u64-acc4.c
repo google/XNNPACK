@@ -9,10 +9,10 @@
 
 #include <assert.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
 
-#include "xnnpack/simd/s8-neon.h"
+#include "src/xnnpack/simd/s8-neon.h"
 
 void xnn_s8_rmin_ukernel__neon_u64_acc4(
     size_t batch,

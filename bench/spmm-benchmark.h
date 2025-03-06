@@ -5,16 +5,16 @@
 
 #pragma once
 
-#include "spmm.h"
-#include "utils.h"
+#include "bench/spmm.h"
+#include "bench/utils.h"
 
-#include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/spmm.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/aligned-allocator.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/spmm.h"
 
 #include <functional>
 #include <random>

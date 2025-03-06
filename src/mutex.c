@@ -5,10 +5,10 @@
 
 #include <string.h>
 
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/log.h"
-#include "xnnpack/mutex.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/log.h"
+#include "src/xnnpack/mutex.h"
 
 #if XNN_PLATFORM_WINDOWS
 #include <inttypes.h>

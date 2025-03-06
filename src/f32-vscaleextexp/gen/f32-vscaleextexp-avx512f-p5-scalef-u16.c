@@ -11,9 +11,9 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/vscaleextexp.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/vscaleextexp.h"
 
 
 void xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_u16(

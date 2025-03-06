@@ -11,10 +11,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/simd/f32-neon.h"
+#include "src/xnnpack/simd/f32-neon.h"
 
-#include "xnnpack/common.h"
-#include "xnnpack/microparams.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
 
 void xnn_f32_avgpool_minmax_ukernel_9p__neon_u4(
     size_t output_pixels,

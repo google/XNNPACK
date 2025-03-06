@@ -6,8 +6,8 @@
 #include <cstddef>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "convolution-operator-tester.h"
+#include "include/xnnpack.h"
+#include "test/convolution-operator-tester.h"
 
 /**************************** SPMM path ****************************/
 

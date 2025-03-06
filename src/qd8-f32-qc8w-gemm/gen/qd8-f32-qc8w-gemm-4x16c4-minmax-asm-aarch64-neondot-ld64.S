@@ -8,7 +8,7 @@
 // LICENSE file in the root directory of this source tree.
 
 
-#include "xnnpack/assembly.h"
+#include "src/xnnpack/assembly.h"
 
 # void xnn_qd8_f32_qc8w_gemm_minmax__ukernel_4x16c4__asm_aarch64_neondot_ld64(
 #     size_t mr,                 x0

@@ -7,7 +7,7 @@ $assert REQUANTIZATION in ["FP32", "RNDNU"]
 $assert DATATYPE in ["QC8", "QS8", "QU8"]
 $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 
-#include "xnnpack/assembly.h"
+#include "src/xnnpack/assembly.h"
 
 .syntax unified
 

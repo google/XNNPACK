@@ -8,7 +8,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
+#include "src/xnnpack/common.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,7 +23,7 @@ extern "C" {
       size_t x_stride,                               \
       uint32_t* y);
 
-#include "x32-packx/x32-packx.h"
+#include "src/x32-packx/x32-packx.h"
 
 #undef XNN_UKERNEL
 

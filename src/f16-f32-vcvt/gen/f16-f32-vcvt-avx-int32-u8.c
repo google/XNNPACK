@@ -11,8 +11,8 @@
 
 #include <smmintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/vcvt.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vcvt.h"
 
 
 void xnn_f16_f32_vcvt_ukernel__avx_int32_u8(

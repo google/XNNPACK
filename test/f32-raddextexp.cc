@@ -15,13 +15,13 @@
 
 #include <gtest/gtest.h>
 
-#include "replicable_random_device.h"
-#include "xnnpack.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/raddextexp.h"
+#include "test/replicable_random_device.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/raddextexp.h"
 
 class RAddExtExpMicrokernelTester {
  public:
@@ -113,5 +113,5 @@ class RAddExtExpMicrokernelTester {
   XNN_TEST_RADDEXTEXP_ELEMENT_DIV(ukernel, arch_flags, element_tile, init_params);                                     \
   XNN_TEST_RADDEXTEXP_ELEMENT_LT(ukernel, arch_flags, element_tile, init_params);                                      \
   XNN_TEST_RADDEXTEXP_ELEMENT_GT(ukernel, arch_flags, element_tile, init_params);
-#include "f32-raddextexp/f32-raddextexp.h"
+#include "src/f32-raddextexp/f32-raddextexp.h"
 #undef XNN_UKERNEL_WITH_PARAMS

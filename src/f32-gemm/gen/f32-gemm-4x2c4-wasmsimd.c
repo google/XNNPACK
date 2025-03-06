@@ -11,7 +11,7 @@
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/gemm.h"
+#include "src/xnnpack/gemm.h"
 
 
 void xnn_f32_gemm_ukernel_4x2c4__wasmsimd(

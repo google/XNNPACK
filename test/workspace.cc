@@ -14,14 +14,14 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/allocation-type.h"
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/subgraph.h"
-#include "xnnpack/buffer.h"
-#include "replicable_random_device.h"
-#include "runtime-flags.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/allocation-type.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/subgraph.h"
+#include "src/xnnpack/buffer.h"
+#include "test/replicable_random_device.h"
+#include "test/runtime-flags.h"
 
 namespace {
 void DefineGraphWithoutInternalTensors(xnn_subgraph_t* subgraph, std::array<size_t, 4> dims)

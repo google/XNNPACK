@@ -14,7 +14,7 @@
 
 #include <riscv_vector.h>
 
-#include "xnnpack/packw.h"
+#include "src/xnnpack/packw.h"
 
 void xnn_x32_packw_gemm_goi_ukernel_x1v__rvv_u2(
   size_t g,

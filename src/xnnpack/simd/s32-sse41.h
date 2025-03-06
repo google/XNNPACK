@@ -12,8 +12,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/unaligned.h"
 
 // SIMD vector type for s32 using SSE41.
 typedef __m128i xnn_simd_s32_t;

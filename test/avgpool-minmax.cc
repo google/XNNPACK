@@ -19,18 +19,18 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/avgpool.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/requantization.h"
-#include "next_prime.h"
-#include "replicable_random_device.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/avgpool.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/requantization.h"
+#include "test/next_prime.h"
+#include "test/replicable_random_device.h"
 
 namespace {
 
@@ -440,8 +440,8 @@ const XnnTestParam xnn_test_params[] = {
   {#ukernel, Tester::Kernel{ukernel, init_params}, arch_flags, channel_tile, primary_tile, true}, \
   {#ukernel, Tester::Kernel{ukernel, init_params}, arch_flags, channel_tile, primary_tile, false},
 
-#include "f16-avgpool/f16-avgpool-minmax.h"
-#include "f32-avgpool/f32-avgpool-minmax.h"
+#include "src/f16-avgpool/f16-avgpool-minmax.h"
+#include "src/f32-avgpool/f32-avgpool-minmax.h"
 
 #undef XNN_UKERNEL
 

@@ -15,9 +15,9 @@ $assert KERNEL_TILE >= 2
 
 #include <arm_neon.h>
 
-#include "xnnpack/dwconv.h"
+#include "src/xnnpack/dwconv.h"
 $if REQUANTIZATION == "FP32" and ARMV8:
-  #include "xnnpack/intrinsics-polyfill.h"
+  #include "src/xnnpack/intrinsics-polyfill.h"
 
 
 $DATATYPE_SPEC = {"QS8": "qs8", "QC8": "qs8_qc8w"}[DATATYPE]

@@ -11,8 +11,8 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/gemm.h"
-#include "xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
 
 
 void xnn_f32_qc4w_gemm_minmax_ukernel_4x32__avx512skx_broadcast(

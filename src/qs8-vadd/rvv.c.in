@@ -7,7 +7,7 @@ $assert DATATYPE in ["QS8", "QU8"]
 $assert LMUL in [1, 2]
 #include <assert.h>
 #include <riscv_vector.h>
-#include "xnnpack/vbinary.h"
+#include "src/xnnpack/vbinary.h"
 
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 

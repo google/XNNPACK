@@ -8,7 +8,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-#include "xnnpack/maxpool.h"
+#include "src/xnnpack/maxpool.h"
 #include <riscv_vector.h>
 
 void xnn_f32_maxpool_minmax_ukernel_9p__rvv_u2v(

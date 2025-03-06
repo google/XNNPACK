@@ -109,9 +109,9 @@ def main(args):
 //   Generator: {generator}
 
 
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/vbinary.h"
-#include "{tester_header}"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/vbinary.h"
+#include "test/{tester_header}"
 
 """.format(
       microkernel=options.ukernel,
@@ -146,7 +146,7 @@ def main(args):
   ))
 
   folder = datatype + "-" + ("vbinary" if datatype.startswith("f") else op)
-  tests += f'#include "{xnncommon.xnnpack_src()}{folder}/{options.ukernel}.h"\n'
+  tests += f'#include "src/{folder}/{options.ukernel}.h"\n'
   tests += "#undef XNN_UKERNEL_WITH_PARAMS\n"
   tests = tests.replace("s32-vmulc/s32-vmulc.h", "s32-vmul/s32-vmulc.h")
 

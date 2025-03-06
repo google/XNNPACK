@@ -8,7 +8,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
+#include "src/xnnpack/common.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,7 +25,7 @@ extern "C" {
   XNN_INTERNAL size_t packed_offset_fn(size_t m, size_t k, size_t mr,      \
                                        size_t kr, size_t sr);
 
-#include "x32-pack-lh/x32-pack-lh.h"
+#include "src/x32-pack-lh/x32-pack-lh.h"
 
 #undef XNN_UKERNEL
 
@@ -40,7 +40,7 @@ extern "C" {
   XNN_INTERNAL size_t packed_offset_fn(size_t m, size_t k, size_t mr,        \
                                        size_t kr, size_t sr);
 
-#include "x16-pack-lh/x16-pack-lh.h"
+#include "src/x16-pack-lh/x16-pack-lh.h"
 
 #undef XNN_UKERNEL
 
@@ -55,7 +55,7 @@ extern "C" {
   XNN_INTERNAL size_t packed_offset_fn(size_t m, size_t k, size_t mr,       \
                                        size_t kr, size_t sr);
 
-#include "x8-pack-lh/x8-pack-lh.h"
+#include "src/x8-pack-lh/x8-pack-lh.h"
 
 #undef XNN_UKERNEL
 

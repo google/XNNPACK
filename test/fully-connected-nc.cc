@@ -9,8 +9,8 @@
 #include <cstdint>
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "fully-connected-operator-tester.h"
+#include "src/xnnpack/common.h"
+#include "test/fully-connected-operator-tester.h"
 
 TEST(FULLY_CONNECTED_NC_QS8, unit_batch) {
   FullyConnectedOperatorTester()

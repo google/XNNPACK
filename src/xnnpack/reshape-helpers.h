@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "xnnpack.h"
-#include "xnnpack/subgraph.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/subgraph.h"
 
 enum xnn_status resize_unary_elementwise_output_tensor(
   const struct xnn_operator_data* opdata,

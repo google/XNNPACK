@@ -15,10 +15,10 @@
   #include <x86intrin.h>
 #endif
 
-#include "xnnpack/common.h"
-#include "xnnpack/gemm.h"
-#include "xnnpack/math.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/unaligned.h"
 
 
 void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_3x4c8__avx_ld128(

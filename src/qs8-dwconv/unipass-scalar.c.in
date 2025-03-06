@@ -13,12 +13,12 @@ $if VARIANT == "LRINTF":
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/dwconv.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microparams.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
 $if CHANNEL_TILE % 4 != 0:
-  #include "xnnpack/unaligned.h"
+  #include "src/xnnpack/unaligned.h"
 
 $DATATYPE_SPEC = {"QS8": "qs8", "QC8": "qs8_qc8w", "QU8": "qu8"}[DATATYPE]
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar"

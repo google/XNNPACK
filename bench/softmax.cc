@@ -14,21 +14,21 @@
 #include <random>
 #include <vector>
 
-#include "utils.h"
-#include "xnnpack.h"
-#include "xnnpack/math.h"
-#include "xnnpack/buffer.h"
+#include "bench/utils.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/buffer.h"
 #include <benchmark/benchmark.h>
 
 #ifdef BENCHMARK_TENSORFLOW_LITE
-#include "flatbuffers/include/flatbuffers/buffer.h"
-#include "flatbuffers/include/flatbuffers/flatbuffer_builder.h"
-#include "flatbuffers/include/flatbuffers/string.h"
-#include "tensorflow/lite/core/interpreter_builder.h"
-#include "tensorflow/lite/interpreter.h"
-#include "tensorflow/lite/kernels/register.h"
-#include "tensorflow/lite/schema/schema_generated.h"
-#include "tensorflow/lite/version.h"
+#include <flatbuffers/include/flatbuffers/buffer.h>
+#include <flatbuffers/include/flatbuffers/flatbuffer_builder.h>
+#include <flatbuffers/include/flatbuffers/string.h>
+#include <tensorflow/lite/core/interpreter_builder.h>
+#include <tensorflow/lite/interpreter.h>
+#include <tensorflow/lite/kernels/register.h>
+#include <tensorflow/lite/schema/schema_generated.h>
+#include <tensorflow/lite/version.h>
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
 static void xnnpack_softmax_qu8(benchmark::State& state) {

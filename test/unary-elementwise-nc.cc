@@ -17,14 +17,14 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/datatype.h"
-#include "xnnpack/math.h"
-#include "xnnpack/operator-utils.h"
-#include "xnnpack/operator.h"
-#include "replicable_random_device.h"
-#include "unary-ops.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/datatype.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/operator-utils.h"
+#include "src/xnnpack/operator.h"
+#include "test/replicable_random_device.h"
+#include "test/unary-ops.h"
 
 enum class RunMode {
   kCreateReshapeRun,

@@ -6,8 +6,8 @@
 #include <cstddef>
 
 #include <gtest/gtest.h>
-#include "xnnpack/config.h"
-#include "xnnpack/operator-utils.h"
+#include "src/xnnpack/config.h"
+#include "src/xnnpack/operator-utils.h"
 
 TEST(COMPUTE_CONVOLUTION_OUTPUT_DIMENSION, compute) {
   ASSERT_EQ(xnn_compute_convolution_output_dimension(5, 3, 1, 1), 3);

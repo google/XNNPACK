@@ -9,8 +9,8 @@
 
 #include <assert.h>
 
-#include "xnnpack/math.h"
-#include "xnnpack/gemm.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/gemm.h"
 
 
 void xnn_qu8_igemm_minmax_rndnu_ukernel_2x4__scalar(

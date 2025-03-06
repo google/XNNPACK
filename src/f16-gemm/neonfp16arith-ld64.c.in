@@ -9,10 +9,10 @@ $assert NR % 8 == 0
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
+#include "src/xnnpack/common.h"
 
-#include "xnnpack/gemm.h"
-#include "xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
 
 
 void xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__neonfp16arith_ld64(

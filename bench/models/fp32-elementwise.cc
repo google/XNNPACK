@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack.h"
+#include "include/xnnpack.h"
 
 #include <algorithm>
 #include <array>
@@ -14,7 +14,7 @@
 #include <limits>
 #include <random>
 
-#include "xnnpack.h"
+#include "include/xnnpack.h"
 
 namespace models {
 

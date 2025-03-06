@@ -9,7 +9,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <immintrin.h>
 
-#include "xnnpack/spmm.h"
+#include "src/xnnpack/spmm.h"
 
 
 void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__sse${"_x" + str(UNROLL) if UNROLL > 1 else ""}(

@@ -6,7 +6,7 @@
 #include <assert.h>
 #include <math.h>
 
-#include "xnnpack/argmaxpool.h"
+#include "src/xnnpack/argmaxpool.h"
 
 
 void xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1(

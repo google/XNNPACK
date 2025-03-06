@@ -12,14 +12,14 @@
 #include <numeric>
 #include <vector>
 
-#include "rsum-benchmark.h"
-#include "utils.h"
-#include "xnnpack.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/reduce.h"
+#include "bench/rsum-benchmark.h"
+#include "bench/utils.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/reduce.h"
 #include <benchmark/benchmark.h>
 
 namespace {

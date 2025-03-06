@@ -5,10 +5,10 @@
 
 #include <assert.h>
 
-#include "xnnpack/simd/f32-hvx.h"
+#include "src/xnnpack/simd/f32-hvx.h"
 
-#include "xnnpack/math.h"
-#include "xnnpack/vbinary.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vbinary.h"
 
 void xnn_f32_vsqrdiff_ukernel__hvx_u128(
     size_t batch,

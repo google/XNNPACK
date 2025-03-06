@@ -8,10 +8,10 @@
 #include <stddef.h>          // For size_t.
 #include <stdint.h>          // For uint32_t.
 
-#include "xnnpack.h"         // For xnn_status.
-#include "xnnpack/common.h"  // For XNN_INLINE.
-#include "xnnpack/memory.h"
-#include "xnnpack/mutex.h"   // For xnn_mutex.
+#include "include/xnnpack.h"         // For xnn_status.
+#include "src/xnnpack/common.h"  // For XNN_INLINE.
+#include "src/xnnpack/memory.h"
+#include "src/xnnpack/mutex.h"   // For xnn_mutex.
 
 #ifdef __cplusplus
 extern "C" {

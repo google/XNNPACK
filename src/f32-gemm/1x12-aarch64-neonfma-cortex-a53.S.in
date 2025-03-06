@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack/assembly.h"
+#include "src/xnnpack/assembly.h"
 
 # void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_1x12__asm_aarch64_neonfma_cortex_a53(
 #     size_t mr,                (x0) - unused.  mr = 1

@@ -11,9 +11,9 @@
 
 #include <emmintrin.h>
 
-#include "xnnpack/gemm.h"
-#include "xnnpack/math.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/unaligned.h"
 
 
 

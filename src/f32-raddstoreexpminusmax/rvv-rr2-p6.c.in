@@ -9,9 +9,9 @@ $LMUL_HALF = {2: "1", 4: "2"}[LMUL]
 
 #include <riscv_vector.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/raddstoreexpminusmax.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/raddstoreexpminusmax.h"
 
 
 static inline vfloat32m${LMUL}_t eval_poly_horner(vfloat32m${LMUL}_t x,

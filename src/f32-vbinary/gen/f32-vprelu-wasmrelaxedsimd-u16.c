@@ -11,8 +11,8 @@
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/vbinary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vbinary.h"
 
 
 void xnn_f32_vprelu_ukernel__wasmrelaxedsimd_u16(

@@ -11,8 +11,8 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/math.h"
-#include "xnnpack/vbinary.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vbinary.h"
 
 
 void xnn_f32_prelu_ukernel__avx_2x16(

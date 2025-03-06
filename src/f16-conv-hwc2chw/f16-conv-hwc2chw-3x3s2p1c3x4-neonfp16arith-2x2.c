@@ -7,9 +7,9 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/conv.h"
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/conv.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
 
 
 void xnn_f16_conv_hwc2chw_ukernel_3x3s2p1c3x4__neonfp16arith_2x2(

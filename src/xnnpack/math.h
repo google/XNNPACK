@@ -19,8 +19,8 @@
   #include <stdlib.h> // For _rotl.
 #endif
 
-#include "xnnpack/common.h"
-#include "xnnpack/fp16.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/fp16.h"
 
 // stdlib.h from Windows 10 SDK defines min & max macros.
 // Undefine them before defining the corresponding functions.

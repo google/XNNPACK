@@ -7,7 +7,7 @@
 #include <cstdint>
 
 #include <gtest/gtest.h>
-#include "depth-to-space-operator-tester.h"
+#include "test/depth-to-space-operator-tester.h"
 
 TEST(DEPTH_TO_SPACE_NHWC_X8, one_pixel) {
   DepthToSpaceOperatorTester()

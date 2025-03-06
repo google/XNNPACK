@@ -14,8 +14,8 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/packw.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/packw.h"
+#include "src/xnnpack/unaligned.h"
 
 XNN_INLINE static uint64_t safe_load_u64(const void* src, size_t n) {
   uint64_t value = 0;

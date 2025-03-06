@@ -13,9 +13,9 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/packw.h"
-#include "xnnpack/prefetch.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/packw.h"
+#include "src/xnnpack/prefetch.h"
 
 
 void xnn_x32_packw_gemm_gio_ukernel_x16__avx_u8_prfm(

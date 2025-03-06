@@ -11,8 +11,8 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_qu8_vlrelu_ukernel__neon_u8(

@@ -13,9 +13,9 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/gemm.h"
-#include "xnnpack/microparams.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/microparams.h"
 
 
 void xnn_f32_gemm_minmax_ukernel_7x8__fma3_broadcast(

@@ -5,7 +5,7 @@
 
 
 #include <gtest/gtest.h>
-#include "scaled-dot-product-attention-operator-tester.h"
+#include "test/scaled-dot-product-attention-operator-tester.h"
 
 
 TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, unit_batch) {

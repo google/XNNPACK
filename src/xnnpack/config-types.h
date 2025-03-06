@@ -9,8 +9,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/hardware-config.h"
-#include "xnnpack/microfnptr.h"
+#include "src/xnnpack/hardware-config.h"
+#include "src/xnnpack/microfnptr.h"
 
 #ifdef __cplusplus
 extern "C" {

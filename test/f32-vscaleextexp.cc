@@ -14,13 +14,13 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "replicable_random_device.h"
-#include "xnnpack.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/vscaleextexp.h"
+#include "test/replicable_random_device.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/vscaleextexp.h"
 
 class VScaleExtExpMicrokernelTester {
  public:
@@ -124,5 +124,5 @@ class VScaleExtExpMicrokernelTester {
   XNN_TEST_VSCALEEXTEXP_ELEMENT_DIV(ukernel, arch_flags, element_tile, init_params);                                   \
   XNN_TEST_VSCALEEXTEXP_ELEMENT_LT(ukernel, arch_flags, element_tile, init_params);                                    \
   XNN_TEST_VSCALEEXTEXP_ELEMENT_GT(ukernel, arch_flags, element_tile, init_params);
-#include "f32-vscaleextexp/f32-vscaleextexp.h"
+#include "src/f32-vscaleextexp/f32-vscaleextexp.h"
 #undef XNN_UKERNEL_WITH_PARAMS

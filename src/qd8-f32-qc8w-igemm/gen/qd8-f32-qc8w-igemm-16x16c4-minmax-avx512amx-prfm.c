@@ -16,11 +16,11 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/gemm.h"
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/math.h"
-#include "xnnpack/unaligned.h"
-#include "xnnpack/prefetch.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/unaligned.h"
+#include "src/xnnpack/prefetch.h"
 
 
 void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_16x16c4__avx512amx_prfm(

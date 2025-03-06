@@ -12,11 +12,11 @@
 #include <random>
 #include <vector>
 
-#include "xnnpack.h"
+#include "include/xnnpack.h"
 
 #include <benchmark/benchmark.h>
-#include "utils.h"
-#include "xnnpack/buffer.h"
+#include "bench/utils.h"
+#include "src/xnnpack/buffer.h"
 
 void xnnpack_multihead_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::State& state, const char* net) {
   const size_t batch_size = state.range(0);

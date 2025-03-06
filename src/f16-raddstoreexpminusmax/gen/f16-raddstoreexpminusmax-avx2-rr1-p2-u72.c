@@ -11,8 +11,8 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/raddstoreexpminusmax.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/raddstoreexpminusmax.h"
 
 
 void xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u72(

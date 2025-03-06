@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack/assembly.h"
+#include "src/xnnpack/assembly.h"
 
 BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x8c4__asm_aarch64_neondot_ld32_2
 

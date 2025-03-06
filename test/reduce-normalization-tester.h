@@ -10,8 +10,8 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/normalization.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/normalization.h"
 
 class ReduceNormalizationTester {
  public:

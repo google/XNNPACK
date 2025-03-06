@@ -19,9 +19,9 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/simd/u8-scalar.h"
-#include "replicable_random_device.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/simd/u8-scalar.h"
+#include "test/replicable_random_device.h"
 
 namespace xnnpack {
 

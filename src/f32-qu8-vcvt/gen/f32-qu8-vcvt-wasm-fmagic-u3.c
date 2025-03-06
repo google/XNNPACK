@@ -9,9 +9,9 @@
 
 #include <assert.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/vcvt.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vcvt.h"
 
 void xnn_f32_qu8_vcvt_ukernel__wasm_fmagic_u3(
     size_t batch,

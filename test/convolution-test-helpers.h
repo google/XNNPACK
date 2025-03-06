@@ -9,8 +9,8 @@
 #include <cstdint>
 #include <vector>
 
-#include "xnnpack/buffer.h"
-#include "xnnpack/quantization.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/quantization.h"
 
 namespace xnnpack {
 void compute_convolution_qd8_f32_qc8w_reference_results(

@@ -11,7 +11,7 @@
 
 #include <xmmintrin.h>
 
-#include "xnnpack/dwconv.h"
+#include "src/xnnpack/dwconv.h"
 
 
 void xnn_f32_dwconv_minmax_ukernel_4p4c__sse_acc2(

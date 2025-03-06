@@ -12,8 +12,8 @@
 #include <wasm_simd128.h>
 
 
-#include "xnnpack/dwconv.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/math.h"
 
 
 

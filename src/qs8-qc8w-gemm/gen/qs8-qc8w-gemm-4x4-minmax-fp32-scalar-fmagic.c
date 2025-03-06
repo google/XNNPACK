@@ -9,8 +9,8 @@
 
 #include <assert.h>
 
-#include "xnnpack/gemm.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/math.h"
 
 
 void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x4__scalar_fmagic(

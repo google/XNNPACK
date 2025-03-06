@@ -12,7 +12,7 @@ $assert IZP in [0, 128]
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/packw.h"
+#include "src/xnnpack/packw.h"
 
 $BTYPE = {"QS8": "int32_t", "X8": "uint32_t"}[DATATYPE]
 $WTYPE = {"int8_t": "int8_t", "uint16_t": "uint16_t", "uint32_t": "uint32_t", "float": "uint32_t"}[TYPE]

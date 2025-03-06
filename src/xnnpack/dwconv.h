@@ -11,8 +11,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/microparams.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,14 +31,14 @@ extern "C" {
     size_t input_offset,                                     \
     const datatype* zero,                                       \
     const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-#include "f16-dwconv/f16-dwconv-minmax.h"
-#include "f32-dwconv/f32-dwconv-minmax.h"
-#include "f32-dwconv/f32-dwconv.h"
-#include "qs8-dwconv/qs8-dwconv-minmax-fp32.h"
-#include "qs8-dwconv/qs8-dwconv-minmax-rndnu.h"
-#include "qs8-qc8w-dwconv/qs8-qc8w-dwconv-minmax-fp32.h"
-#include "qu8-dwconv/qu8-dwconv-minmax-fp32.h"
-#include "qu8-dwconv/qu8-dwconv-minmax-rndnu.h"
+#include "src/f16-dwconv/f16-dwconv-minmax.h"
+#include "src/f32-dwconv/f32-dwconv-minmax.h"
+#include "src/f32-dwconv/f32-dwconv.h"
+#include "src/qs8-dwconv/qs8-dwconv-minmax-fp32.h"
+#include "src/qs8-dwconv/qs8-dwconv-minmax-rndnu.h"
+#include "src/qs8-qc8w-dwconv/qs8-qc8w-dwconv-minmax-fp32.h"
+#include "src/qu8-dwconv/qu8-dwconv-minmax-fp32.h"
+#include "src/qu8-dwconv/qu8-dwconv-minmax-rndnu.h"
 #undef XNN_UKERNEL
 
 #define DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(fn_name) \

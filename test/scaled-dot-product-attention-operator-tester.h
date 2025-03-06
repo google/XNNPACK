@@ -17,12 +17,12 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
-#include "xnnpack/math.h"
-#include "xnnpack/common.h"
-#include "replicable_random_device.h"
-#include "pthreadpool.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/aligned-allocator.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/common.h"
+#include "test/replicable_random_device.h"
+#include <pthreadpool.h>
 
 class ScaledDotProductAttentionOperatorTester {
  public:

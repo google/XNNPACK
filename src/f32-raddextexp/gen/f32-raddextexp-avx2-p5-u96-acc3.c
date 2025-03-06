@@ -12,7 +12,7 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/raddextexp.h"
+#include "src/xnnpack/raddextexp.h"
 
 
 void xnn_f32_raddextexp_ukernel__avx2_p5_u96_acc3(

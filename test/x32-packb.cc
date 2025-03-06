@@ -7,11 +7,11 @@
 #include <string>
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/packb.h"
-#include "xnnpack/zerob.h"
-#include "packb-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/packb.h"
+#include "src/xnnpack/zerob.h"
+#include "test/packb-microkernel-tester.h"
 
 namespace {
 
@@ -32,8 +32,8 @@ std::string GetTestName(const testing::TestParamInfo<XnnTest::ParamType>& info) 
   { #ukernel, PackBMicrokernelTester::Kernel{ukernel}, arch_flags, channel_tile, channel_subtile, channel_round },
 
 const XnnTestParam xnn_test_params[] = {
-#include "x32-packb/x32-packb.h"
-#include "x32-zerob/x32-zerob.h"
+#include "src/x32-packb/x32-packb.h"
+#include "src/x32-zerob/x32-zerob.h"
 };
 
 #undef XNN_UKERNEL

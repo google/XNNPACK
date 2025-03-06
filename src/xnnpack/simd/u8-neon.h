@@ -12,8 +12,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/unaligned.h"
 
 // SIMD vector type for u8 using NEON.
 typedef uint8x16_t xnn_simd_u8_t;

@@ -6,7 +6,7 @@
 #include <cstddef>
 
 #include <gtest/gtest.h>
-#include "resize-bilinear-operator-tester.h"
+#include "test/resize-bilinear-operator-tester.h"
 
 TEST(RESIZE_BILINEAR_NCHW_F16, aligned_centers_upscale_y) {
   for (size_t input_height = 2; input_height <= 3; input_height++) {

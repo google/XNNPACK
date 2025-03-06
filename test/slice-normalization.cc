@@ -5,7 +5,7 @@
 
 
 #include <gtest/gtest.h>
-#include "slice-normalization-tester.h"
+#include "test/slice-normalization-tester.h"
 
 TEST(SLICE_NORMALIZATION_TEST, normalize_1d_full_slice) {
   SliceNormalizationTester()

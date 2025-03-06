@@ -11,9 +11,9 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/dwconv.h"
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/unaligned.h"
 
 
 void xnn_qu8_dwconv_minmax_fp32_ukernel_9p16c__avx_mul32(

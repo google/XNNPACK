@@ -12,7 +12,7 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/gemm.h"
+#include "src/xnnpack/gemm.h"
 
 
 void xnn_f32_gemminc_minmax_ukernel_4x8__neon_dup_ld128(

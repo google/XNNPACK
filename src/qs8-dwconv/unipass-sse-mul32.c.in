@@ -15,9 +15,9 @@ $assert KERNEL_TILE >= 2
 
 #include <immintrin.h>
 
-#include "xnnpack/dwconv.h"
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/unaligned.h"
 
 
 $DATATYPE_SPEC = {"QS8": "qs8", "QC8": "qs8_qc8w", "QU8": "qu8"}[DATATYPE]

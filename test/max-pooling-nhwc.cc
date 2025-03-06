@@ -10,9 +10,9 @@
 #include <cstddef>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/config.h"
-#include "max-pooling-operator-tester.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/config.h"
+#include "test/max-pooling-operator-tester.h"
 
 constexpr int max_pool_size = 25;
 

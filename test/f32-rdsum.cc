@@ -9,11 +9,11 @@
 
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/reduce.h"
-#include "rdsum-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/reduce.h"
+#include "test/rdsum-microkernel-tester.h"
 
 
 TEST(F32_RDSUM_7P7X__SCALAR_C4, channels_eq_4_2pass_fulltile) {

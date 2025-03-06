@@ -1,4 +1,4 @@
-#include "gemm-microkernel-tester.h"
+#include "test/gemm-microkernel-tester.h"
 
 #include <stdint.h>
 
@@ -13,20 +13,20 @@
 #include <random>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/common.h"
-#include "xnnpack/config-types.h"
-#include "xnnpack/config.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/pack.h"
-#include "xnnpack/packq.h"
-#include "xnnpack/quantization.h"
-#include "xnnpack/requantization.h"
-#include "replicable_random_device.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/config.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/pack.h"
+#include "src/xnnpack/packq.h"
+#include "src/xnnpack/quantization.h"
+#include "src/xnnpack/requantization.h"
+#include "test/replicable_random_device.h"
 
 constexpr int kIterations = 1;
 

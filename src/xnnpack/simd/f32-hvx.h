@@ -13,8 +13,8 @@
 #include <hvx_hexagon_protos.h>
 #include <hexagon_protos.h>
 #include <hexagon_types.h>
-#include "xnnpack/common.h"
-#include "xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
 
 
 // SIMD vector type for f32 using HVX.
@@ -33,7 +33,7 @@ typedef HVX_Vector xnn_simd_f32_t;
 
 // Include the header for generic functions _after_ declaring the arch-specific
 // types and sizes.
-#include "xnnpack/simd/f32-generic-functions.h"
+#include "src/xnnpack/simd/f32-generic-functions.h"
 
 // Arithmetic operations.
 

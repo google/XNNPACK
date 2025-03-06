@@ -11,8 +11,8 @@
 
 #include <riscv_vector.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
 
 
 void xnn_f32_rdsum_ukernel_7p7x__rvv_u4v(

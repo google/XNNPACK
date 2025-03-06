@@ -9,9 +9,9 @@
 
 #include <assert.h>
 
-#include "xnnpack/gemm.h"
-#include "xnnpack/math.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/unaligned.h"
 
 
 void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x2__scalar(

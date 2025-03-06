@@ -18,13 +18,13 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/dwconv.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/requantization.h"
-#include "dwconv-microkernel-tester.h"
-#include "next_prime.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/requantization.h"
+#include "test/dwconv-microkernel-tester.h"
+#include "test/next_prime.h"
 
 namespace {
 
@@ -151,5 +151,5 @@ INSTANTIATE_TEST_SUITE_P(                                                       
     [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {                                                      \
       return info.param.test_name;                                                                                       \
     });
-#include "f32-dwconv/f32-dwconv.h"
+#include "src/f32-dwconv/f32-dwconv.h"
 #undef XNN_UKERNEL_WITH_PARAMS

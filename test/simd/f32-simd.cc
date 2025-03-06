@@ -10,14 +10,14 @@
 
 // The following `#include`s are needed to trick some compilers and/or build
 // systems into pulling in the correct SIMD header defined above.
-#include "xnnpack/simd/f32-avx-base.h"
-#include "xnnpack/simd/f32-avx.h"
-#include "xnnpack/simd/f32-avx512f.h"
-#include "xnnpack/simd/f32-fma3.h"
-#include "xnnpack/simd/f32-neon.h"
-#include "xnnpack/simd/f32-scalar.h"
-#include "xnnpack/simd/f32-sse2.h"
-#include "xnnpack/simd/f32-wasmsimd.h"
+#include "src/xnnpack/simd/f32-avx-base.h"
+#include "src/xnnpack/simd/f32-avx.h"
+#include "src/xnnpack/simd/f32-avx512f.h"
+#include "src/xnnpack/simd/f32-fma3.h"
+#include "src/xnnpack/simd/f32-neon.h"
+#include "src/xnnpack/simd/f32-scalar.h"
+#include "src/xnnpack/simd/f32-sse2.h"
+#include "src/xnnpack/simd/f32-wasmsimd.h"
 #endif  // defined(SIMD_HEADER)
 
 #include <algorithm>
@@ -29,7 +29,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "replicable_random_device.h"
+#include "test/replicable_random_device.h"
 
 namespace xnnpack {
 

@@ -20,14 +20,14 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/datatype.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/operator-utils.h"
-#include "xnnpack/subgraph.h"
-#include "replicable_random_device.h"
-#include "unary-ops.h"
-#include "runtime-flags.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/datatype.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/operator-utils.h"
+#include "src/xnnpack/subgraph.h"
+#include "test/replicable_random_device.h"
+#include "test/unary-ops.h"
+#include "test/runtime-flags.h"
 
 struct Param {
   using UnaryT = std::tuple<xnn_unary_operator, xnn_datatype>;

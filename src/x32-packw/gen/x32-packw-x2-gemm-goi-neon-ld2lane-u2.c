@@ -14,7 +14,7 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/packw.h"
+#include "src/xnnpack/packw.h"
 
 
 void xnn_x32_packw_gemm_goi_ukernel_x2__neon_ld2lane_u2(

@@ -7,10 +7,10 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/transpose.h"
-#include "xnnpack/microparams.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/transpose.h"
+#include "src/xnnpack/microparams.h"
 
 void xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl128(
     const void* input,

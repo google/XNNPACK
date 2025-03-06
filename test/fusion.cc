@@ -9,12 +9,12 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/node-type.h"
-#include "xnnpack/subgraph.h"
-#include "runtime-tester.h"
-#include "subgraph-tester.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/node-type.h"
+#include "src/xnnpack/subgraph.h"
+#include "test/runtime-tester.h"
+#include "test/subgraph-tester.h"
 
 namespace xnnpack {
 

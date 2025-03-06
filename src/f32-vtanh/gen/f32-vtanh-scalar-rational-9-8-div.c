@@ -11,11 +11,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/simd/f32-scalar.h"
+#include "src/xnnpack/simd/f32-scalar.h"
 
-#include "xnnpack/common.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_f32_vtanh_ukernel__scalar_rational_9_8_div_u1(

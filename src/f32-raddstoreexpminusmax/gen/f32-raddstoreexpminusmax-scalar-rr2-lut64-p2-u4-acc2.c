@@ -9,9 +9,9 @@
 
 #include <assert.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/raddstoreexpminusmax.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/raddstoreexpminusmax.h"
 
 
 extern XNN_INTERNAL const float xnn_table_exp2_k_over_64[64];

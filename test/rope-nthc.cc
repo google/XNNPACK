@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <gtest/gtest.h>
-#include "rope-operator-tester.h"
+#include "test/rope-operator-tester.h"
 
 
 TEST(ROPE_NTHC_F16, two_channels) {

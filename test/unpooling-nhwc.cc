@@ -7,8 +7,8 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "unpooling-operator-tester.h"
+#include "include/xnnpack.h"
+#include "test/unpooling-operator-tester.h"
 
 TEST(UNPOOLING_NHWC_X32, unit_height_horizontal_pool) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));

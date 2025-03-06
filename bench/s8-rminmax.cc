@@ -10,11 +10,11 @@
 #include <limits>
 #include <random>
 
-#include "utils.h"
-#include "xnnpack/common.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/reduce.h"
-#include "xnnpack/buffer.h"
+#include "bench/utils.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/reduce.h"
+#include "src/xnnpack/buffer.h"
 #include <benchmark/benchmark.h>
 
 static void s8_rminmax(

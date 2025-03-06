@@ -7,9 +7,9 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/argmaxpool.h"
-#include "xnnpack/simd/f32-neon.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/argmaxpool.h"
+#include "src/xnnpack/simd/f32-neon.h"
 
 static XNN_INLINE uint32x4_t
 xnn_load_tail_safe_u32(const uint32_t* input, size_t num_elements) {

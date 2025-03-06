@@ -11,8 +11,8 @@ $assert ACTIVATION != "LINEAR" or not WASM
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
-#include "xnnpack/dwconv.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/math.h"
 
 
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"

@@ -10,7 +10,7 @@ $assert MINMAX in ["MINMAX", "PMINMAX"]
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/spmm.h"
+#include "src/xnnpack/spmm.h"
 
 
 $WASM_F32X4_MIN={"MINMAX": "wasm_f32x4_min", "PMINMAX": "wasm_f32x4_pmin"}[MINMAX]

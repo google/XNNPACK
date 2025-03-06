@@ -5,7 +5,7 @@
 
 $assert LMUL in [1, 2, 4, 8]
 #include <assert.h>
-#include "xnnpack/maxpool.h"
+#include "src/xnnpack/maxpool.h"
 #include <riscv_vector.h>
 
 void xnn_f32_maxpool_minmax_ukernel_9p__rvv_u${LMUL}v(

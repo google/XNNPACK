@@ -9,10 +9,10 @@
 
 
 #include <gtest/gtest.h>
-#include "xnnpack/argmaxpool.h"
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "argmaxpool-microkernel-tester.h"
+#include "src/xnnpack/argmaxpool.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "test/argmaxpool-microkernel-tester.h"
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

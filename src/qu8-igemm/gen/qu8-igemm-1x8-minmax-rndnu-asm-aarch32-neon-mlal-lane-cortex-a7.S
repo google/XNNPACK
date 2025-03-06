@@ -8,7 +8,7 @@
 // LICENSE file in the root directory of this source tree.
 
 
-#include "xnnpack/assembly.h"
+#include "src/xnnpack/assembly.h"
 
 .syntax unified
 

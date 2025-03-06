@@ -10,8 +10,8 @@
 #include <cstdint>
 #include <limits>
 
-#include "xnnpack/datatype.h"
-#include "xnnpack.h"
+#include "src/xnnpack/datatype.h"
+#include "include/xnnpack.h"
 
 namespace xnnpack {
 

@@ -11,7 +11,7 @@
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/spmm.h"
+#include "src/xnnpack/spmm.h"
 
 
 void xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86_pipelined_x2(

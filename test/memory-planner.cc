@@ -7,13 +7,13 @@
 #include <cstdint>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/memory-planner.h"
-#include "xnnpack/node-type.h"
-#include "xnnpack/subgraph.h"
-#include "runtime-flags.h"
-#include "runtime-tester.h"
-#include "subgraph-tester.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/memory-planner.h"
+#include "src/xnnpack/node-type.h"
+#include "src/xnnpack/subgraph.h"
+#include "test/runtime-flags.h"
+#include "test/runtime-tester.h"
+#include "test/subgraph-tester.h"
 
 namespace xnnpack {
 

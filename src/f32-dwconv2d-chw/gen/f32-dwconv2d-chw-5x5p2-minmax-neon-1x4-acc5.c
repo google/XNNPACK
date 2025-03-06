@@ -11,8 +11,8 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/dwconv.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/math.h"
 
 
 void xnn_f32_dwconv2d_chw_ukernel_5x5p2__neon_1x4_acc5(

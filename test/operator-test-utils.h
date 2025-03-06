@@ -9,7 +9,7 @@
 #include <cstddef>
 #include <random>
 
-#include "replicable_random_device.h"
+#include "test/replicable_random_device.h"
 
 namespace xnnpack {
 

@@ -6,10 +6,10 @@
 #include <cstddef>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/config.h"
-#include "deconvolution-operator-tester.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/config.h"
+#include "test/deconvolution-operator-tester.h"
 
 constexpr size_t kUnstridedInputHeight = 8;
 constexpr size_t kUnstridedInputWidth = 7;

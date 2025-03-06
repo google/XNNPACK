@@ -11,8 +11,8 @@
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/gemm.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/math.h"
 
 void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x8c16__wasmsdot(
     size_t mr,
