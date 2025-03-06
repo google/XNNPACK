@@ -24,7 +24,7 @@
 #include "xnnpack.h"
 #include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
-#include "xnnpack/log.h"
+#include "xnnpack/datatype.h"
 #include "xnnpack/math.h"
 #include "xnnpack/requantization.h"
 #include "replicable_random_device.h"

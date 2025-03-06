@@ -59,6 +59,22 @@ OPERATOR_TEST_DEPS = [
     "//:XNNPACK",
 ]
 
+SUBGRAPH_TEST_DEPS = [
+    ":replicable_random_device",
+    ":runtime_flags",
+    ":subgraph_tester",
+    "//:XNNPACK",
+    "//:buffer",
+    "//:common",
+    "//:datatype",
+    "//:math",
+    "//:node_type",
+    "//:operators",
+    "//:operator_utils",
+    "//:requantization",
+    "//:subgraph",
+]
+
 ############################## Testing utilities ###############################
 
 xnnpack_cxx_library(
@@ -1102,7 +1118,6 @@ xnnpack_unit_test(
     srcs = ["unary-elementwise-nc.cc"],
     deps = OPERATOR_TEST_DEPS + [
         ":unary_ops",
-        "//:logging",
         "//:operator_h",
         "//:operator_utils",
     ],
@@ -1115,7 +1130,6 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = OPERATOR_TEST_DEPS + [
         ":operator_test_utils",
-        "//:logging",
         "//:operator_utils",
         "//:reference_ukernels",
     ],
@@ -1292,7 +1306,6 @@ xnnpack_unit_test(
         "reduce-nd.cc",
     ],
     deps = OPERATOR_TEST_DEPS + [
-        "//:logging",
         "//:requantization",
     ],
 )
@@ -1475,7 +1488,6 @@ xnnpack_unit_test(
         "//:XNNPACK",
         "//:buffer",
         "//:datatype",
-        "//:logging",
         "//:operator_utils",
         "//:subgraph",
     ],
@@ -1498,19 +1510,7 @@ xnnpack_unit_test(
         "%s.cc" % operator.replace("_", "-"),
     ],
     shard_count = shard_count,
-    deps = [
-        ":replicable_random_device",
-        ":runtime_flags",
-        ":subgraph_tester",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:datatype",
-        "//:math",
-        "//:node_type",
-        "//:operators",
-        "//:requantization",
-        "//:subgraph",
-    ],
+    deps = SUBGRAPH_TEST_DEPS,
 ) for operator, shard_count in [
     ("copy", 1),
     ("softmax", 1),
@@ -1525,80 +1525,31 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "workspace_test",
-    srcs = [
-        "workspace.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        ":runtime_flags",
-        "//:XNNPACK",
-        "//:allocation_type",
-        "//:buffer",
-        "//:common",
-        "//:math",
-        "//:subgraph",
-    ],
+    srcs = ["workspace.cc"],
+    deps = SUBGRAPH_TEST_DEPS + ["//:allocation_type"],
 )
 
 xnnpack_unit_test(
     name = "binary_test",
     srcs = ["binary.cc"],
-    deps = [
-        ":operator_test_utils",
-        ":replicable_random_device",
-        ":runtime_flags",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:datatype",
-        "//:logging",
-        "//:math",
-        "//:operator_utils",
-        "//:operators",
-        "//:subgraph",
-    ],
+    deps = SUBGRAPH_TEST_DEPS + [":operator_test_utils"],
 )
 
 xnnpack_unit_test(
     name = "argmax_pooling_2d_test",
-    srcs = [
-        "argmax-pooling-2d.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        ":runtime_flags",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:common",
-        "//:node_type",
-        "//:operators",
-        "//:subgraph",
-    ],
+    srcs = ["argmax-pooling-2d.cc"],
+    deps = SUBGRAPH_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "average_pooling_2d_test",
-    srcs = [
-        "average-pooling-2d.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        ":runtime_flags",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:common",
-        "//:math",
-        "//:node_type",
-        "//:operator_utils",
-        "//:operators",
-        "//:subgraph",
-    ],
+    srcs = ["average-pooling-2d.cc"],
+    deps = SUBGRAPH_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "average_pooling_2d_reshape_test",
-    srcs = [
-        "average-pooling-2d-reshape.cc",
-    ],
+    srcs = ["average-pooling-2d-reshape.cc"],
     deps = [
         ":runtime_flags",
         "//:XNNPACK",
@@ -1609,20 +1560,8 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "batch_matrix_multiply_test",
-    srcs = [
-        "batch-matrix-multiply.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        ":runtime_flags",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:common",
-        "//:math",
-        "//:node_type",
-        "//:operators",
-        "//:subgraph",
-    ],
+    srcs = ["batch-matrix-multiply.cc"],
+    deps = SUBGRAPH_TEST_DEPS,
 )
 
 [xnnpack_unit_test(
@@ -1630,16 +1569,7 @@ xnnpack_unit_test(
     srcs = [
         "concatenate%d.cc" % n,
     ],
-    deps = [
-        ":replicable_random_device",
-        ":runtime_flags",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:math",
-        "//:node_type",
-        "//:operators",
-        "//:subgraph",
-    ],
+    deps = SUBGRAPH_TEST_DEPS,
 ) for n in [
     2,
     3,
@@ -1649,66 +1579,22 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "convolution_2d_test",
-    srcs = [
-        "convolution-2d.cc",
-    ],
-    deps = [
-        ":convolution_test_helpers",
-        ":replicable_random_device",
-        ":runtime_flags",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:common",
-        "//:math",
-        "//:node_type",
-        "//:operator_utils",
-        "//:operators",
-        "//:requantization",
-        "//:subgraph",
-    ],
+    srcs = ["convolution-2d.cc"],
+    deps = SUBGRAPH_TEST_DEPS + [":convolution_test_helpers"],
 )
 
 xnnpack_unit_test(
     name = "deconvolution_2d_test",
     timeout = "moderate",
-    srcs = [
-        "deconvolution-2d.cc",
-    ],
+    srcs = ["deconvolution-2d.cc"],
     shard_count = 5,
-    deps = [
-        ":replicable_random_device",
-        ":runtime_flags",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:internal",
-        "//:math",
-        "//:node_type",
-        "//:operator_utils",
-        "//:operators",
-        "//:requantization",
-        "//:subgraph",
-    ],
+    deps = SUBGRAPH_TEST_DEPS + [":convolution_test_helpers"],
 )
 
 xnnpack_unit_test(
     name = "depthwise_convolution_2d_test",
-    srcs = [
-        "depthwise-convolution-2d.cc",
-    ],
-    deps = [
-        ":convolution_test_helpers",
-        ":replicable_random_device",
-        ":runtime_flags",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:common",
-        "//:math",
-        "//:node_type",
-        "//:operator_utils",
-        "//:operators",
-        "//:requantization",
-        "//:subgraph",
-    ],
+    srcs = ["depthwise-convolution-2d.cc"],
+    deps = SUBGRAPH_TEST_DEPS + [":convolution_test_helpers"],
 )
 
 [xnnpack_unit_test(
@@ -1716,16 +1602,7 @@ xnnpack_unit_test(
     srcs = [
         "even-split%s.cc" % n,
     ],
-    deps = [
-        ":replicable_random_device",
-        ":runtime_flags",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:math",
-        "//:node_type",
-        "//:operators",
-        "//:subgraph",
-    ],
+    deps = SUBGRAPH_TEST_DEPS,
 ) for n in [
     2,
     3,
@@ -1735,98 +1612,39 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "fully_connected_test",
     timeout = "moderate",
-    srcs = [
-        "fully-connected.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        ":runtime_flags",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:common",
-        "//:math",
-        "//:node_type",
-        "//:operators",
-        "//:params",
-        "//:requantization",
-        "//:subgraph",
-    ],
+    srcs = ["fully-connected.cc"],
+    deps = SUBGRAPH_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "max_pooling_2d_test",
-    srcs = [
-        "max-pooling-2d.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        ":runtime_flags",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:math",
-        "//:node_type",
-        "//:operator_utils",
-        "//:operators",
-        "//:requantization",
-        "//:subgraph",
-    ],
+    srcs = ["max-pooling-2d.cc"],
+    deps = SUBGRAPH_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "rope_test",
-    srcs = [
-        "rope.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        ":runtime_flags",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:math",
-        "//:node_type",
-        "//:operators",
-        "//:subgraph",
-    ],
+    srcs = ["rope.cc"],
+    deps = SUBGRAPH_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "scaled_dot_product_attention_test",
-    srcs = [
-        "scaled-dot-product-attention.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        ":runtime_flags",
-        "//:XNNPACK",
+    srcs = ["scaled-dot-product-attention.cc"],
+    deps = SUBGRAPH_TEST_DEPS + [
         "//:aligned_allocator",
-        "//:common",
-        "//:math",
-        "//:node_type",
-        "//:subgraph",
     ],
 )
 
 xnnpack_unit_test(
     name = "static_reduce_test",
-    srcs = [
-        "static-reduce.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        ":subgraph_tester",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:common",
-        "//:datatype",
-        "//:math",
-    ],
+    srcs = ["static-reduce.cc"],
+    deps = SUBGRAPH_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "reshape_helpers_test",
-    srcs = [
-        "reshape-helpers.cc",
-    ],
+    srcs = ["reshape-helpers.cc"],
     deps = [
         ":replicable_random_device",
         ":runtime_flags",
@@ -1838,36 +1656,14 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "static_resize_bilinear_2d_test",
-    srcs = [
-        "static-resize-bilinear-2d.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        ":runtime_flags",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:math",
-        "//:node_type",
-        "//:operators",
-        "//:subgraph",
-    ],
+    srcs = ["static-resize-bilinear-2d.cc"],
+    deps = SUBGRAPH_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "unpooling_2d_test",
-    srcs = [
-        "unpooling-2d.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        ":runtime_flags",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:node_type",
-        "//:operator_utils",
-        "//:operators",
-        "//:subgraph",
-    ],
+    srcs = ["unpooling-2d.cc"],
+    deps = SUBGRAPH_TEST_DEPS,
 )
 
 xnnpack_unit_test(

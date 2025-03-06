@@ -23,7 +23,6 @@
 #include "xnnpack.h"
 #include "xnnpack/datatype.h"
 #include "xnnpack/buffer.h"
-#include "xnnpack/log.h"
 #include "xnnpack/operator-utils.h"
 #include "xnnpack/subgraph.h"
 #include "replicable_random_device.h"

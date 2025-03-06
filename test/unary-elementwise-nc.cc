@@ -20,7 +20,6 @@
 #include "xnnpack.h"
 #include "xnnpack/buffer.h"
 #include "xnnpack/datatype.h"
-#include "xnnpack/log.h"
 #include "xnnpack/math.h"
 #include "xnnpack/operator-utils.h"
 #include "xnnpack/operator.h"

@@ -605,8 +605,9 @@ class DatatypeGenerator<quantized<T>> {
                     const xnn_quantization_params& params) {
     min = std::ceil(min / params.scale + params.zero_point);
     max = std::floor(max / params.scale + params.zero_point);
-    dist_ = std::uniform_int_distribution<int>(static_cast<int>(min),
-                                               static_cast<int>(max));
+    dist_ = std::uniform_int_distribution<int>(
+        std::max<int>(NumericLimits<T>::min(), static_cast<int>(min)),
+        std::min<int>(NumericLimits<T>::max(), static_cast<int>(max)));
   }
   explicit DatatypeGenerator(const xnn_quantization_params& params)
       : DatatypeGenerator(-1.0f, 1.0f, params) {}

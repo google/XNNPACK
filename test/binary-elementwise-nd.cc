@@ -10,23 +10,16 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
-#include <functional>
-#include <limits>
 #include <memory>
 #include <numeric>
-#include <sstream>
-#include <string>
 #include <tuple>
-#include <type_traits>
 #include <utility>
-#include <vector>
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
 #include "xnnpack/buffer.h"
 #include "xnnpack/common.h"
 #include "xnnpack/datatype.h"
-#include "xnnpack/log.h"
 #include "xnnpack/math.h"
 #include "xnnpack/operator-utils.h"
 #include "xnnpack/reference-utils.h"

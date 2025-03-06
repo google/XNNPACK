@@ -5,8 +5,6 @@
 
 #include <algorithm>
 #include <array>
-#include <cctype>
-#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -17,15 +15,12 @@
 #include <sstream>
 #include <string>
 #include <tuple>
-#include <utility>
 #include <vector>
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
 #include "xnnpack/buffer.h"
 #include "xnnpack/datatype.h"
-#include "xnnpack/log.h"
-#include "xnnpack/math.h"
 #include "xnnpack/operator-utils.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/subgraph.h"

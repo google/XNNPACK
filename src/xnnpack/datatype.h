@@ -39,6 +39,8 @@ size_t xnn_datatype_size_bytes(enum xnn_datatype t);
 // indices and strides.
 bool xnn_datatype_is_byte_addressable(enum xnn_datatype t);
 
+const char* xnn_datatype_to_string(enum xnn_datatype type);
+
 #ifdef __cplusplus
 }  // extern "C"
 
