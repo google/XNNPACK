@@ -85,7 +85,7 @@ static void init_qs8_rsum_config(void) {
       } else
     #endif
     #if XNN_ENABLE_AVXVNNI
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avxvnni) {
+      if (hardware_config->use_x86_avxvnni) {
         qs8_rsum_config = (struct xnn_reduce_config) {
           .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__avxvnni_u128_acc2,
         };
