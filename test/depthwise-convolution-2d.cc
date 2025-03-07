@@ -24,7 +24,7 @@
 #include "src/xnnpack/operator.h"
 #include "src/xnnpack/requantization.h"
 #include "src/xnnpack/subgraph.h"
-#include "test/convolution-test-helpers.h"
+#include "test/operators/convolution-test-helpers.h"
 #include "test/replicable_random_device.h"
 #include "test/runtime-flags.h"
 

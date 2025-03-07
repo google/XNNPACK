@@ -1230,6 +1230,7 @@ ENDIF()
 IF(XNNPACK_BUILD_TESTS)
   # ---[ Macro to shard a test.
   MACRO(SHARD_TEST TEST_NAME NUM_SHARDS)
+    GET_PROPERTY(TEST_LABELS TEST ${TEST_NAME} PROPERTY LABELS)
     SET_PROPERTY(
         TEST ${TEST_NAME}
           APPEND
@@ -1247,6 +1248,7 @@ IF(XNNPACK_BUILD_TESTS)
                     "GTEST_SHARD_INDEX=${SHARD}")
       SET_PROPERTY(
           TEST ${TEST_NAME}-${SHARD} PROPERTY COST 1000.0)
+      SET_PROPERTY(TEST ${TEST_NAME}-${SHARD} PROPERTY LABELS ${TEST_LABELS})
     ENDFOREACH()
   ENDMACRO()
 
@@ -1286,7 +1288,7 @@ IF(XNNPACK_BUILD_TESTS)
   ADD_LIBRARY(unary-ops STATIC test/unary-ops.cc)
   TARGET_LINK_LIBRARIES(unary-ops PRIVATE XNNPACK)
 
-  ADD_LIBRARY(convolution-test-helpers OBJECT test/convolution-test-helpers.cc)
+  ADD_LIBRARY(convolution-test-helpers OBJECT test/operators/convolution-test-helpers.cc)
   TARGET_LINK_LIBRARIES(convolution-test-helpers PRIVATE xnnpack-base)
 
   ADD_LIBRARY(packq-microkernel-tester STATIC test/packq-microkernel-tester.cc)
@@ -1302,18 +1304,44 @@ IF(XNNPACK_BUILD_TESTS)
 
     # ---[ Build operator-level unit tests
     SET(LIBRARY_OPERATOR_TESTS
+      argmax-pooling-nhwc
+      average-pooling-nhwc
       batch-matrix-multiply-nc
-      deconvolution-nhwc
-      fully-connected-nc
       binary-elementwise-nd
+      constant-pad-nd-eager
+      constant-pad-nd
+      convolution-nchw
+      convolution-nhwc
+      copy-nc-eager
+      copy-nc
+      deconvolution-nhwc-qd8-f32-qc8w
+      deconvolution-nhwc
+      depth-to-space-nchw2nhwc
+      depth-to-space-nhwc
+      dynamic-fully-connected-nc
+      fully-connected-nc
+      max-pooling-nhwc
+      reduce-nd
+      resize-bilinear-nchw
+      resize-bilinear-nhwc
+      rope-nthc
+      scaled-dot-product-attention-nhtc
+      slice-nd-eager
+      slice-nd
+      softmax-nc
+      space-to-depth-nhwc
+      transpose-nd-eager
+      transpose-nd
       unary-elementwise-nc
+      unpooling-nhwc
     )
     FOREACH(TEST ${LIBRARY_OPERATOR_TESTS})
-      ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
+      ADD_EXECUTABLE(${TEST}-test test/operators/${TEST}.cc)
       TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         GTest::gmock
         GTest::gtest
         GTest::gtest_main
+        convolution-test-helpers
         hardware-config
         logging
         microkernels-all
@@ -1324,11 +1352,21 @@ IF(XNNPACK_BUILD_TESTS)
         unary-ops
         XNNPACK)
       ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
+      SET_PROPERTY(TEST ${TEST}-test PROPERTY LABELS "operator")
     ENDFOREACH()
-    SHARD_TEST(batch-matrix-multiply-nc-test 10)
+    SHARD_TEST(average-pooling-nhwc-test 5)
+    SHARD_TEST(binary-elementwise-nd-test 10)
+    SHARD_TEST(batch-matrix-multiply-nc-test 5)
+    SHARD_TEST(constant-pad-nd-test 5)
+    SHARD_TEST(constant-pad-nd-eager-test 5)
+    SHARD_TEST(convolution-nchw-test 10)
+    SHARD_TEST(convolution-nhwc-test 10)
     SHARD_TEST(deconvolution-nhwc-test 10)
     SHARD_TEST(fully-connected-nc-test 10)
-    SHARD_TEST(binary-elementwise-nd-test 30)
+    SHARD_TEST(max-pooling-nhwc-test 10)
+    SHARD_TEST(slice-nd-test 5)
+    SHARD_TEST(transpose-nd-test 10)
+    SHARD_TEST(transpose-nd-eager-test 5)
 
     # ---[ Build subgraph optimizations unit tests
     SET(LIBRARY_SUBGRAPH_OPTIMIZATION_TESTS
@@ -1427,7 +1465,7 @@ IF(XNNPACK_BUILD_TESTS)
       reduce-normalization
       transpose-normalization)
   FOREACH(TEST ${NORMALIZATION_UNIT_TESTS})
-    ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
+    ADD_EXECUTABLE(${TEST}-test test/operators/${TEST}.cc)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE GTest::gtest GTest::gtest_main pthreadpool normalization)
     ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
   ENDFOREACH()
@@ -1819,33 +1857,9 @@ IF(XNNPACK_BUILD_TESTS)
     ADD_EXECUTABLE(microkernel-utils-test test/microkernel-utils.cc)
     TARGET_LINK_LIBRARIES(microkernel-utils-test PRIVATE microkernel-utils hardware-config logging GTest::gtest GTest::gtest_main pthreadpool)
 
-    ADD_EXECUTABLE(operator-utils-test test/operator-utils.cc)
+    ADD_EXECUTABLE(operator-utils-test test/operators/operator-utils.cc)
     TARGET_LINK_LIBRARIES(operator-utils-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main pthreadpool)
   ENDIF()
-
-
-  # ---[ Mark the operator tests as such.
-  MACRO(get_all_test_targets_recursive test_targets dir)
-    GET_PROPERTY(subdirectories DIRECTORY ${dir} PROPERTY SUBDIRECTORIES)
-    FOREACH(subdir ${subdirectories})
-      get_all_test_targets_recursive(${test_targets} ${subdir})
-    ENDFOREACH()
-
-    GET_PROPERTY(current_test_targets DIRECTORY ${dir} PROPERTY TESTS)
-    LIST(APPEND ${test_targets} ${current_test_targets})
-  ENDMACRO()
-
-  FUNCTION(get_all_test_targets var)
-    SET(test_targets)
-    get_all_test_targets_recursive(test_targets ${CMAKE_CURRENT_SOURCE_DIR})
-    SET(${var} ${test_targets} PARENT_SCOPE)
-  ENDFUNCTION()
-
-  get_all_test_targets(test_targets)
-  LIST(FILTER test_targets INCLUDE REGEX "-(nc|nd|nd-eager|ncw|nhwc|nhtc|nchw|nwc)-test(-[0-9]+)?$")
-  MESSAGE(STATUS "Inferred operator tests: ${test_targets}")
-  SET_TESTS_PROPERTIES(${test_targets} PROPERTIES LABELS "operator")
-
 ENDIF()
 
 # ---[ XNNPACK microbenchmarks

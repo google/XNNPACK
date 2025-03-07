@@ -24,7 +24,7 @@
 #include "src/xnnpack/operator-utils.h"
 #include "src/xnnpack/operator.h"
 #include "src/xnnpack/subgraph.h"
-#include "test/operator-test-utils.h"
+#include "test/operators/operator-test-utils.h"
 #include "test/replicable_random_device.h"
 #include "test/runtime-flags.h"
 
