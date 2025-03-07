@@ -140,10 +140,6 @@ void xnnpack_batch_matrix_multiply_qd8_f32_qc8w(benchmark::State& state,
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f),
                           std::ref(rng));
-  auto q8rng = std::bind(
-      std::uniform_int_distribution<int8_t>(std::numeric_limits<int8_t>::min(),
-                                            std::numeric_limits<int8_t>::max()),
-      std::ref(rng));
 
   const size_t input1_elements = batch_size * m * k;
   const size_t input2_elements = batch_size * k * n;
@@ -151,9 +147,9 @@ void xnnpack_batch_matrix_multiply_qd8_f32_qc8w(benchmark::State& state,
 
   xnnpack::Buffer<int8_t> input1(input1_elements +
                                  XNN_EXTRA_BYTES / sizeof(int8_t));
-  std::generate(input1.begin(), input1.end(), std::ref(q8rng));
+  xnnpack::fill_uniform_random_bits(input1.data(), input1.size(), rng);
   xnnpack::Buffer<int8_t> input2(input2_elements);
-  std::generate(input2.begin(), input2.end(), std::ref(q8rng));
+  xnnpack::fill_uniform_random_bits(input2.data(), input2.size(), rng);
   xnnpack::Buffer<float> output(output_elements);
 
   // Allocate and fill the quantization parameters.
@@ -164,7 +160,8 @@ void xnnpack_batch_matrix_multiply_qd8_f32_qc8w(benchmark::State& state,
   xnnpack::Buffer<xnn_quantization_params> quantization_params(
       batch_size * m + XNN_EXTRA_QUANTIZATION_PARAMS);
   for (int i = 0; i < batch_size * m; i++) {
-    quantization_params[i] = {.zero_point = q8rng(), .scale = f32rng()};
+    quantization_params[i] =
+        xnnpack::random_quantization(xnn_datatype_qint8, rng);
   }
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);

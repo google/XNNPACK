@@ -1923,13 +1923,19 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     # ---[ Build operator-level microbenchmarks
     SET(LIBRARY_OPERATOR_BENCHMARKS
         average-pooling
+        batch-matrix-multiply
+        binary
         convolution
         deconvolution
+        fully-connected
         max-pooling
+        prelu
+        resize-bilinear-nhwc
+        scaled-dot-product-attention
         softmax
         unary)
     FOREACH(BENCH ${LIBRARY_OPERATOR_BENCHMARKS})
-      ADD_EXECUTABLE(${BENCH}-bench bench/${BENCH}.cc)
+      ADD_EXECUTABLE(${BENCH}-bench bench/operators/${BENCH}.cc)
       TARGET_LINK_LIBRARIES(${BENCH}-bench PRIVATE
         bench-utils
         benchmark::benchmark

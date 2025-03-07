@@ -106,8 +106,9 @@ static void benchmark_binary_operator(benchmark::State& state,
   xnnpack::Buffer<T> input1(batch_size + XNN_EXTRA_BYTES / sizeof(T));
   xnnpack::Buffer<T> input2(batch_size + XNN_EXTRA_BYTES / sizeof(T));
   xnnpack::Buffer<T> output(batch_size);
-  std::generate(input1.begin(), input1.end(), [&]() { return f32dist(rng); });
-  std::generate(input2.begin(), input2.end(), [&]() { return f32dist(rng); });
+  xnnpack::DatatypeGenerator<T> gen;
+  std::generate(input1.begin(), input1.end(), [&]() { return gen(rng); });
+  std::generate(input2.begin(), input2.end(), [&]() { return gen(rng); });
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {
@@ -298,9 +299,11 @@ static void benchmark_tflite_binary_operator(
   auto f32dist = std::uniform_real_distribution<float>(
       std::max<float>(std::numeric_limits<T>::lowest(), -128.0f),
       std::min<float>(std::numeric_limits<T>::max(), 127.0f));
-  T* input_ptr = reinterpret_cast<T*>(interpreter->tensor(0)->data.raw);
-  std::generate(input_ptr, input_ptr + batch_size,
-                [&]() { return f32dist(rng); });
+  T* input1_ptr = reinterpret_cast<T*>(interpreter->tensor(0)->data.raw);
+  T* input2_ptr = reinterpret_cast<T*>(interpreter->tensor(1)->data.raw);
+  xnnpack::DatatypeGenerator<T> gen;
+  std::generate_n(input1_ptr, batch_size, [&]() { return gen(rng); });
+  std::generate_n(input2_ptr, batch_size, [&]() { return gen(rng); });
 
   for (auto _ : state) {
     if (interpreter->Invoke() != kTfLiteOk) {
