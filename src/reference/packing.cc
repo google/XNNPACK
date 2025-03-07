@@ -60,7 +60,7 @@ void copy_bias(const Src* b, size_t b_offset, size_t n, Dst* packed_b) {
   if (b) {
     std::copy_n(b + b_offset, n, packed_b);
   } else {
-    std::fill_n(packed_b, n, 0);
+    std::fill_n(packed_b, n, static_cast<Dst>(0));
   }
 }
 

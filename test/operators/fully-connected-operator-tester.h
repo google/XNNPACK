@@ -1035,7 +1035,7 @@ class FullyConnectedOperatorTester {
           /*lhs_stride=*/k2 * sizeof(float), input_qp8.data());
 
       // Compute reference results, without renormalization.
-      std::fill(output_ref.begin(), output_ref.end(), 0);
+      std::fill(output_ref.begin(), output_ref.end(), 0.0f);
 
       if (transpose_weights()) {
         for (size_t mi = 0; mi < batch_size(); mi++) {

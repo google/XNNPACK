@@ -259,8 +259,8 @@ class ReduceOperatorTester {
 
       std::generate(input.begin(), input.end(), [&]() { return dist(rng); });
       std::fill(output.begin(), output.end(), INT8_C(0xA5));
-      std::fill(output_ref.begin(), output_ref.end(), 0);
-      std::fill(accumulator.begin(), accumulator.end(), 0);
+      std::fill(output_ref.begin(), output_ref.end(), static_cast<StorageType>(0));
+      std::fill(accumulator.begin(), accumulator.end(), static_cast<typename Config::AccumulatorType>(0));
 
       const int32_t num_reduced_elements = num_input_elements() / num_output_elements;
       const float reduce_scale =

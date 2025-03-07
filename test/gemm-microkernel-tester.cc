@@ -1834,7 +1834,7 @@ void GemmMicrokernelTester::Test(
          /*packed_weights_ptr=*/packed_w.data(), &params);
 
     // Compute 32-bit results and output quantization arguments.
-    std::fill(c_ref.begin(), c_ref.end(), 0);
+    std::fill(c_ref.begin(), c_ref.end(), 0.0f);
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
         for (size_t k_index = 0; k_index < k2; k_index++) {
@@ -2826,7 +2826,7 @@ void GemmMicrokernelTester::Test(
     std::generate(bias.begin(), bias.end(), f32rng);
     std::fill(c_ref.begin(), c_ref.end(), 0.0f);
 
-    std::fill(packed_w.begin(), packed_w.end(), 0);
+    std::fill(packed_w.begin(), packed_w.end(), 0.0f);
     pack(/*g=*/1, n(), ks(), k(), nr(), kr(), sr(),
          reinterpret_cast<const uint16_t*>(b.data()),
          reinterpret_cast<const uint16_t*>(bias.data()), /*scale=*/nullptr,
