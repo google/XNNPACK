@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: test/s8-simd.cc.in
+//   Template: test/simd/s8-simd.cc.in
 //   Generator: tools/xngen
 //
 // Copyright 2024 Google LLC
