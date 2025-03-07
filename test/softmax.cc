@@ -29,12 +29,15 @@ Tensor<T> softmax(Tensor<T> x) {
     i.push_back(0);
     const T* x_i = &x(i);
     T* y_i = &y(i);
+    // softmax(x) = softmax(x - C) for any C. To avoid computing exp of large
+    // values which overflow, we use C = max(x).
+    double max = *std::max_element(x_i, x_i + channels);
     double sum_exp = 0.0;
     for (size_t c = 0; c < channels; c++) {
-      sum_exp += std::exp(static_cast<double>(x_i[c]));
+      sum_exp += std::exp(static_cast<double>(x_i[c]) - max);
     }
     for (size_t c = 0; c < channels; c++) {
-      y_i[c] = std::exp(static_cast<double>(x_i[c])) / sum_exp;
+      y_i[c] = std::exp(static_cast<double>(x_i[c]) - max) / sum_exp;
     }
   }
   return y;
@@ -61,7 +64,7 @@ void TestImpl(size_t rank) {
     std::vector<size_t> shape = random_shape(rng, rank);
 
     Tensor<T> input(shape, PaddingBytes{XNN_EXTRA_BYTES});
-    DatatypeGenerator<T> generator;
+    DatatypeGenerator<T> generator(-20.0f, 20.0f);
     input.generate([&]() { return generator(rng); });
 
     Tensor<T> expected = softmax(input);
@@ -78,8 +81,9 @@ void TestImpl(size_t rank) {
         .InvokeRuntime();
 
     // Verify results.
+    const float tolerance = sizeof(T) == 2 ? 1.0e-2f : 1.0e-4f;
     ASSERT_THAT(output,
-                testing::Pointwise(testing::FloatNear(1e-3f), expected));
+                testing::Pointwise(testing::FloatNear(tolerance), expected));
   }
 }
 
