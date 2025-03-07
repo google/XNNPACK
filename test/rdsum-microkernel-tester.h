@@ -139,11 +139,11 @@ class RDSumMicrokernelTester {
     {
       std::generate_n(input.begin(), (rows() - 1) * input_stride() + channels(),
                       [&]() { return i8dist(rng); });
-      // This micro-kernel is incremental, so we need to generate the output
-      // reference values.
-      std::generate_n(output_ref.begin(), channels(),
+      std::generate_n(output.begin(), channels(),
                       [&]() { return i8dist(rng); });
 
+      // This micro-kernel is incremental, so we need to generate the output
+      // reference values.
       std::copy(output.begin(), output.end(), output_ref.begin());
 
       // Compute reference results, without clamping.
@@ -185,11 +185,11 @@ class RDSumMicrokernelTester {
     {
       std::generate_n(input.begin(), (rows() - 1) * input_stride() + channels(),
                       [&]() { return u8dist(rng); });
-      // This micro-kernel is incremental, so we need to generate the output
-      // reference values.
-      std::generate_n(output_ref.begin(), channels(),
+      std::generate_n(output.begin(), channels(),
                       [&]() { return u8dist(rng); });
 
+      // This micro-kernel is incremental, so we need to generate the output
+      // reference values.
       std::copy(output.begin(), output.end(), output_ref.begin());
 
       // Compute reference results, without clamping.
@@ -233,11 +233,11 @@ class RDSumMicrokernelTester {
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate_n(input.begin(), (rows() - 1) * input_stride() + channels(),
                       [&]() { return f32dist(rng); });
-      // This micro-kernel is incremental, so we need to generate the output
-      // reference values.
-      std::generate_n(output_ref.begin(), channels(),
+      std::generate_n(output.begin(), channels(),
                       [&]() { return f32dist(rng); });
 
+      // This micro-kernel is incremental, so we need to generate the output
+      // reference values.
       std::copy(output.begin(), output.end(), output_ref.begin());
 
       // Compute reference results, without clamping.
@@ -281,7 +281,7 @@ class RDSumMicrokernelTester {
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate_n(input.begin(), (rows() - 1) * input_stride() + channels(),
                       [&]() { return f32dist(rng); });
-      std::generate_n(output_ref.begin(), channels(),
+      std::generate_n(output.begin(), channels(),
                       [&]() { return f32dist(rng); });
 
       // This micro-kernel is incremental, so we need to generate the output
@@ -307,10 +307,6 @@ class RDSumMicrokernelTester {
 
       // Verify results.
       for (size_t c = 0; c < channels(); c++) {
-        if (std::isnan(output_ref[c])) {
-          continue;
-        }
-
         ASSERT_NEAR(output[c], output_ref[c], 1.0e-4f)
           << "at position " << c << ", rows = " << rows() << ", channels = "
           << channels();
