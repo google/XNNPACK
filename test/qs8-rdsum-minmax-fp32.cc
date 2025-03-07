@@ -5,7 +5,7 @@
 //
 // Auto-generated file. Do not edit!
 //   Specification: test/qs8-rdsum-minmax-fp32.yaml
-//   Generator: tools/generate-rdsum-test.py
+//   Generator: tools/generate-reduce-discontiguous-test.py
 
 
 #include <gtest/gtest.h>

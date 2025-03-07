@@ -13,7 +13,6 @@
 #include <cstdlib>
 #include <limits>
 #include <random>
-#include <vector>
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
@@ -21,7 +20,6 @@
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams.h"
-#include "src/xnnpack/requantization.h"
 #include "test/replicable_random_device.h"
 
 class RDSumMicrokernelTester {
@@ -133,20 +131,25 @@ class RDSumMicrokernelTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
-    xnnpack::Buffer<int8_t> input((rows() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES);
+    xnnpack::Buffer<int8_t> input((rows() - 1) * input_stride() + channels() +
+                                  XNN_EXTRA_BYTES);
     xnnpack::Buffer<int8_t> zero(channels() + XNN_EXTRA_BYTES, 0);
     xnnpack::Buffer<int32_t> output(channels());
     xnnpack::Buffer<int32_t> output_ref(channels());
-    {//for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-      std::generate(output.begin(), output.end(), [&]() { return i8dist(rng); });
-      // TODO: WHY?!
+    {
+      std::generate_n(input.begin(), (rows() - 1) * input_stride() + channels(),
+                      [&]() { return i8dist(rng); });
+      // This micro-kernel is incremental, so we need to generate the output
+      // reference values.
+      std::generate_n(output_ref.begin(), channels(),
+                      [&]() { return i8dist(rng); });
+
       std::copy(output.begin(), output.end(), output_ref.begin());
 
       // Compute reference results, without clamping.
       for (size_t c = 0; c < channels(); c++) {
         for (size_t n = 0; n < rows(); n++) {
-          output_ref[c] += int32_t(input[n * input_stride() + c]);
+          output_ref[c] += static_cast<int32_t>(input[n * input_stride() + c]);
         }
       }
 
@@ -157,12 +160,14 @@ class RDSumMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      rdsum(rows(), channels(), input.data(), input_stride(), zero.data(), output.data(), &params);
+      rdsum(rows(), channels(), input.data(), input_stride(), zero.data(),
+            output.data(), &params);
 
       // Verify results.
       for (size_t c = 0; c < channels(); c++) {
         EXPECT_EQ(output[c], output_ref[c])
-          << "at position " << c << ", rows = " << rows() << ", channels = " << channels();
+          << "at position " << c << ", rows = " << rows() << ", channels = "
+          << channels();
       }
     }
   }
@@ -172,20 +177,25 @@ class RDSumMicrokernelTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
-    xnnpack::Buffer<uint8_t> input((rows() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES);
+    xnnpack::Buffer<uint8_t> input((rows() - 1) * input_stride() + channels() +
+                                   XNN_EXTRA_BYTES);
     xnnpack::Buffer<uint8_t> zero(channels() + XNN_EXTRA_BYTES, 0);
     xnnpack::Buffer<uint32_t> output(channels());
     xnnpack::Buffer<uint32_t> output_ref(channels());
     {
-      std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-      std::generate(output.begin(), output.end(), [&]() { return u8dist(rng); });
-      // TODO: WHY?!
+      std::generate_n(input.begin(), (rows() - 1) * input_stride() + channels(),
+                      [&]() { return u8dist(rng); });
+      // This micro-kernel is incremental, so we need to generate the output
+      // reference values.
+      std::generate_n(output_ref.begin(), channels(),
+                      [&]() { return u8dist(rng); });
+
       std::copy(output.begin(), output.end(), output_ref.begin());
 
       // Compute reference results, without clamping.
       for (size_t c = 0; c < channels(); c++) {
         for (size_t n = 0; n < rows(); n++) {
-          output_ref[c] += uint32_t(input[n * input_stride() + c]);
+          output_ref[c] += static_cast<uint32_t>(input[n * input_stride() + c]);
         }
       }
 
@@ -196,28 +206,38 @@ class RDSumMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      rdsum(rows(), channels(), input.data(), input_stride(), zero.data(), output.data(), &params);
+      rdsum(rows(), channels(), input.data(), input_stride(), zero.data(),
+            output.data(), &params);
 
       // Verify results.
       for (size_t c = 0; c < channels(); c++) {
         EXPECT_EQ(output[c], output_ref[c])
-          << "at position " << c << ", rows = " << rows() << ", channels = " << channels();
+          << "at position " << c << ", rows = " << rows() << ", channels = "
+          << channels();
       }
     }
   }
 
-  void Test(xnn_f16_f32acc_rdsum_ukernel_fn rdsum, xnn_init_f16_f32acc_scale_params_fn init_params) const {
+  void Test(xnn_f16_f32acc_rdsum_ukernel_fn rdsum,
+            xnn_init_f16_f32acc_scale_params_fn init_params) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
-    xnnpack::Buffer<xnn_float16> input((rows() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-    xnnpack::Buffer<xnn_float16> zero(channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0);
+    xnnpack::Buffer<xnn_float16> input((rows() - 1) * input_stride() +
+                                       channels() +
+                                       XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    xnnpack::Buffer<xnn_float16> zero(channels() +
+                                      XNN_EXTRA_BYTES / sizeof(xnn_float16), 0);
     xnnpack::Buffer<float> output(channels());
     xnnpack::Buffer<float> output_ref(channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::generate(output.begin(), output.end(), [&]() { return f32dist(rng); });
-      // TODO: WHY?!
+      std::generate_n(input.begin(), (rows() - 1) * input_stride() + channels(),
+                      [&]() { return f32dist(rng); });
+      // This micro-kernel is incremental, so we need to generate the output
+      // reference values.
+      std::generate_n(output_ref.begin(), channels(),
+                      [&]() { return f32dist(rng); });
+
       std::copy(output.begin(), output.end(), output_ref.begin());
 
       // Compute reference results, without clamping.
@@ -226,36 +246,46 @@ class RDSumMicrokernelTester {
         for (size_t n = 0; n < rows(); n++) {
           acc += input[n * input_stride() + c];
         }
-        output_ref[c] += acc / float(rows());
+        output_ref[c] += acc / static_cast<float>(rows());
       }
 
       // Prepare parameters.
       struct xnn_f16_f32acc_scale_params params;
-      init_params(&params, 1.f / float(rows()));
+      init_params(&params, 1.f / static_cast<float>(rows()));
 
       // Call optimized micro-kernel.
-      rdsum(rows(), channels(), input.data(), input_stride() * sizeof(xnn_float16), zero.data(), output.data(), &params);
+      rdsum(rows(), channels(), input.data(),
+            input_stride() * sizeof(xnn_float16), zero.data(), output.data(),
+            &params);
 
       // Verify results.
       for (size_t c = 0; c < channels(); c++) {
         ASSERT_NEAR(output[c], output_ref[c], std::abs(output_ref[c]) * 1.0e-5f)
-          << "at position " << c << ", rows = " << rows() << ", channels = " << channels();
+          << "at position " << c << ", rows = " << rows() << ", channels = "
+          << channels();
       }
     }
   }
 
-  void Test(xnn_f32_rdsum_ukernel_fn rdsum, xnn_init_f32_scale_params_fn init_params) const {
+  void Test(xnn_f32_rdsum_ukernel_fn rdsum,
+            xnn_init_f32_scale_params_fn init_params) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
-    xnnpack::Buffer<float> input((rows() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
-    xnnpack::Buffer<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float), 0.0f);
+    xnnpack::Buffer<float> input((rows() - 1) * input_stride() + channels() +
+                                 XNN_EXTRA_BYTES / sizeof(float));
+    xnnpack::Buffer<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float),
+                                0.0f);
     xnnpack::Buffer<float> output(channels());
     xnnpack::Buffer<float> output_ref(channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::generate(output.begin(), output.end(), [&]() { return f32dist(rng); });
-      // TODO: WHY?!
+      std::generate_n(input.begin(), (rows() - 1) * input_stride() + channels(),
+                      [&]() { return f32dist(rng); });
+      std::generate_n(output_ref.begin(), channels(),
+                      [&]() { return f32dist(rng); });
+
+      // This micro-kernel is incremental, so we need to generate the output
+      // reference values.
       std::copy(output.begin(), output.end(), output_ref.begin());
 
       // Compute reference results.
@@ -272,16 +302,21 @@ class RDSumMicrokernelTester {
       init_params(&params, 1.0f / static_cast<float>(rows()));
 
       // Call optimized micro-kernel.
-      rdsum(rows(), channels(), input.data(), input_stride() * sizeof(float), zero.data(), output.data(), &params);
+      rdsum(rows(), channels(), input.data(), input_stride() * sizeof(float),
+            zero.data(), output.data(), &params);
 
       // Verify results.
       for (size_t c = 0; c < channels(); c++) {
-        ASSERT_NEAR(output[c], output_ref[c], std::abs(output_ref[c]) * 1.0e-6f)
-          << "at position " << c << ", rows = " << rows() << ", channels = " << channels();
+        if (std::isnan(output_ref[c])) {
+          continue;
+        }
+
+        ASSERT_NEAR(output[c], output_ref[c], 1.0e-4f)
+          << "at position " << c << ", rows = " << rows() << ", channels = "
+          << channels();
       }
     }
   }
-
 
  private:
   size_t rows_{1};

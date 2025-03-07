@@ -5,7 +5,7 @@
 //
 // Auto-generated file. Do not edit!
 //   Specification: test/f32-rdsum.yaml
-//   Generator: tools/generate-rdsum-test.py
+//   Generator: tools/generate-reduce-discontiguous-test.py
 
 
 #include <gtest/gtest.h>

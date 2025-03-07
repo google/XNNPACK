@@ -18,7 +18,10 @@ import xngen
 import xnncommon
 
 
-parser = argparse.ArgumentParser(description='RDSum microkernel test generator')
+parser = argparse.ArgumentParser(description='Reduce discontiguous microkernel test generator')
+parser.add_argument("-t", "--tester", metavar="TESTER", required=True,
+                    choices=["ReduceDiscontiguousMicrokernelTester", "RDSumMicrokernelTester"],
+                    help="Tester class to be used in the generated test")
 parser.add_argument("-s", "--spec", metavar="FILE", required=True,
                     help="Specification (YAML) file")
 parser.add_argument("-o", "--output", metavar="FILE", required=True,
@@ -27,20 +30,27 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_(qs8|qu8|f16_f32acc|f32)_rdsum?(_minmax)?(_(fp32|rndnu))?_ukernel_((\d+)p)?(\d+)x__(.+)_(c)?(u)?(\d+)(_acc(\d+))?(v)?", name)
+  match = re.fullmatch(r"xnn_(qs8|qu8|f16_f32acc|f32|s8)_rd(minmax|max|min|sum)?(_minmax)?(_(fp32|rndnu))?_ukernel_((\d+)p)?(\d+)x__(.+)_(c)?(u)?(\d+)(_acc(\d+))?(v)?", name)
 
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
 
-  requantization_type = match.group(4)
-  primary_tile = int(match.group(6))
-  incremental_tile = int(match.group(7))
-  channel_tile = int(match.group(11))
-  target_name = match.group(8)
-  vector_tile = bool(match.group(14))
+  op_type = {
+    "minmax": "MinMax",
+    "max": "Max",
+    "min": "Min",
+    "sum": "Sum",
+  }[match.group(2)]
 
-  arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(8))
-  return requantization_type, primary_tile, incremental_tile, channel_tile, vector_tile, arch, isa
+  requantization_type = match.group(5)
+  primary_tile = int(match.group(7))
+  incremental_tile = int(match.group(8))
+  channel_tile = int(match.group(12))
+  target_name = match.group(9)
+  vector_tile = bool(match.group(15))
+
+  arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(9))
+  return requantization_type, op_type, primary_tile, incremental_tile, channel_tile, vector_tile, arch, isa
 
 
 RDSUM_TEST_TEMPLATE = """\
@@ -48,7 +58,7 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_fulltile) 
   $if ISA_CHECK:
     ${ISA_CHECK};
   const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-  RDSumMicrokernelTester()
+  ${TESTER}()
     .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
     .channels(channel_tile)
     .Test(${", ".join(TEST_ARGS)});
@@ -58,7 +68,7 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_fulltile_w
   $if ISA_CHECK:
     ${ISA_CHECK};
   const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-  RDSumMicrokernelTester()
+  ${TESTER}()
     .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
     .channels(channel_tile)
     $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
@@ -73,7 +83,7 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_subtile) {
     ${ISA_CHECK};
   const size_t channel_tile = ${CHANNEL_SCALED_TILE};
   for (size_t rows = 1; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
-    RDSumMicrokernelTester()
+    ${TESTER}()
       .rows(rows)
       .channels(channel_tile)
       .Test(${", ".join(TEST_ARGS)});
@@ -85,7 +95,7 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_subtile_wi
     ${ISA_CHECK};
   const size_t channel_tile = ${CHANNEL_SCALED_TILE};
   for (size_t rows = 1; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
-    RDSumMicrokernelTester()
+    ${TESTER}()
       .rows(rows)
       .channels(channel_tile)
       $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
@@ -101,7 +111,7 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fullti
     ${ISA_CHECK};
   const size_t channel_tile = ${CHANNEL_SCALED_TILE};
   for (size_t rows = 1; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
-    RDSumMicrokernelTester()
+    ${TESTER}()
       .rows(rows)
       .channels(channel_tile)
       .Test(${", ".join(TEST_ARGS)});
@@ -113,7 +123,7 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fullti
     ${ISA_CHECK};
   const size_t channel_tile = ${CHANNEL_SCALED_TILE};
   for (size_t rows = 1; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
-    RDSumMicrokernelTester()
+    ${TESTER}()
       .rows(rows)
       .channels(channel_tile)
       $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
@@ -129,7 +139,7 @@ TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_fulltile)
     ${ISA_CHECK};
   $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
     for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
-      RDSumMicrokernelTester()
+      ${TESTER}()
         .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
         .channels(channels)
         .Test(${", ".join(TEST_ARGS)});
@@ -137,7 +147,7 @@ TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_fulltile)
   $else:
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
     for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
-      RDSumMicrokernelTester()
+      ${TESTER}()
         .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
         .channels(channels)
         .Test(${", ".join(TEST_ARGS)});
@@ -150,7 +160,7 @@ TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_subtile) 
   $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
     for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
       for (size_t rows = 1; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
-        RDSumMicrokernelTester()
+        ${TESTER}()
           .rows(rows)
           .channels(channels)
           .Test(${", ".join(TEST_ARGS)});
@@ -160,7 +170,7 @@ TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_subtile) 
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
     for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
       for (size_t rows = 1; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
-        RDSumMicrokernelTester()
+        ${TESTER}()
           .rows(rows)
           .channels(channels)
           .Test(${", ".join(TEST_ARGS)});
@@ -174,7 +184,7 @@ TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fullt
   $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
     for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
       for (size_t rows = 1; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
-        RDSumMicrokernelTester()
+        ${TESTER}()
           .rows(rows)
           .channels(channels)
           .Test(${", ".join(TEST_ARGS)});
@@ -184,7 +194,7 @@ TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fullt
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
     for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
       for (size_t rows = 1; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
-        RDSumMicrokernelTester()
+        ${TESTER}()
           .rows(rows)
           .channels(channels)
           .Test(${", ".join(TEST_ARGS)});
@@ -198,7 +208,7 @@ TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fullt
   $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
     for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
       for (size_t rows = 1; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
-        RDSumMicrokernelTester()
+        ${TESTER}()
           .rows(rows)
           .channels(channels)
           .input_stride(${next_prime(CHANNEL_TILE*16+1)})
@@ -209,7 +219,7 @@ TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fullt
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
     for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
       for (size_t rows = 1; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
-        RDSumMicrokernelTester()
+        ${TESTER}()
           .rows(rows)
           .channels(channels)
           .input_stride(channel_tile*16+1)
@@ -224,7 +234,7 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
       ${ISA_CHECK};
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
     for (size_t channels = 1; channels < channel_tile; channels++) {
-      RDSumMicrokernelTester()
+      ${TESTER}()
         .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
         .channels(channels)
         .Test(${", ".join(TEST_ARGS)});
@@ -237,7 +247,7 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
     for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
-        RDSumMicrokernelTester()
+        ${TESTER}()
           .rows(rows)
           .channels(channels)
           .Test(${", ".join(TEST_ARGS)});
@@ -251,7 +261,7 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
     for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
-        RDSumMicrokernelTester()
+        ${TESTER}()
           .rows(rows)
           .channels(channels)
           .Test(${", ".join(TEST_ARGS)});
@@ -265,7 +275,7 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
     for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
-        RDSumMicrokernelTester()
+        ${TESTER}()
           .rows(rows)
           .channels(channels)
           $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
@@ -282,7 +292,7 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_fulltile) 
     ${ISA_CHECK};
   $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
     for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-      RDSumMicrokernelTester()
+      ${TESTER}()
         .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
         .channels(channels)
         .Test(${", ".join(TEST_ARGS)});
@@ -290,7 +300,7 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_fulltile) 
   $else:
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
     for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
-      RDSumMicrokernelTester()
+      ${TESTER}()
         .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
         .channels(channels)
         .Test(${", ".join(TEST_ARGS)});
@@ -303,7 +313,7 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_subtile) {
   $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
     for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
       for (size_t rows = 1; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
-        RDSumMicrokernelTester()
+        ${TESTER}()
           .rows(rows)
           .channels(channels)
           .Test(${", ".join(TEST_ARGS)});
@@ -313,7 +323,7 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_subtile) {
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
     for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
       for (size_t rows = 1; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
-        RDSumMicrokernelTester()
+        ${TESTER}()
           .rows(rows)
           .channels(channels)
           .Test(${", ".join(TEST_ARGS)});
@@ -327,7 +337,7 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fullti
   $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
     for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
       for (size_t rows = 1; rows < ${INCREMENTAL_TILE*5}; rows += ${PRIMARY_TILE+INCREMENTAL_TILE}) {
-        RDSumMicrokernelTester()
+        ${TESTER}()
           .rows(rows)
           .channels(channels)
           .Test(${", ".join(TEST_ARGS)});
@@ -337,7 +347,7 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fullti
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
     for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
       for (size_t rows = 1; rows < ${INCREMENTAL_TILE*5}; rows += ${PRIMARY_TILE+INCREMENTAL_TILE}) {
-        RDSumMicrokernelTester()
+        ${TESTER}()
           .rows(rows)
           .channels(channels)
           .Test(${", ".join(TEST_ARGS)});
@@ -351,7 +361,7 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fullti
   $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
     for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
       for (size_t rows = 1; rows < ${INCREMENTAL_TILE*5}; rows += ${PRIMARY_TILE+INCREMENTAL_TILE}) {
-        RDSumMicrokernelTester()
+        ${TESTER}()
           .rows(rows)
           .channels(channels)
           .input_stride(${next_prime(CHANNEL_TILE*2+11)})
@@ -362,7 +372,7 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fullti
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
     for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
       for (size_t rows = 1; rows < ${INCREMENTAL_TILE*5}; rows += ${PRIMARY_TILE+INCREMENTAL_TILE}) {
-        RDSumMicrokernelTester()
+        ${TESTER}()
           .rows(rows)
           .channels(channels)
           .input_stride(channel_tile*2+11)
@@ -376,7 +386,7 @@ TEST(${TEST_NAME}, overflow_accumulator) {
     ${ISA_CHECK};
   const size_t channel_tile = ${CHANNEL_SCALED_TILE};
   for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-     RDSumMicrokernelTester()
+     ${TESTER}()
        .rows(${257 + INCREMENTAL_TILE})
        .channels(channels)
        .Test(${", ".join(TEST_ARGS)});
@@ -385,14 +395,17 @@ TEST(${TEST_NAME}, overflow_accumulator) {
 """
 
 
-def generate_test_cases(ukernel, init_fn, requantization_type, primary_tile,
-                        incremental_tile, channel_tile, vector_tile, isa):
-  """Generates all tests cases for a RDSUM micro-kernel.
+def generate_test_cases(ukernel, op_type, init_fn, requantization_type, tester,
+                        primary_tile, incremental_tile, channel_tile,
+                        vector_tile, isa):
+  """Generates all tests cases for a discontiguous reduce micro-kernel.
 
   Args:
     ukernel: C name of the micro-kernel function.
+    op_type: Operation type (MAX/MIN/SUM/etc).
     init_fn: C name of the function to initialize microkernel parameters.
     requantization_type: Requantization type (FP32/RNDNU).
+    tester: C++ name of the tester class.
     primary_tile: Number of rows (pixels) processed per one iteration of the
                   primary outer loop of the micro-kernel.
     incremental_tile: Number of rows (pixels) processed per one iteration of
@@ -410,6 +423,9 @@ def generate_test_cases(ukernel, init_fn, requantization_type, primary_tile,
   _, test_name = ukernel.split("_", 1)
   _, datatype, ukernel_type, _ = ukernel.split("_", 3)
   test_args = [ukernel]
+  if tester == "ReduceDiscontiguousMicrokernelTester":
+    test_args.append(
+        "ReduceDiscontiguousMicrokernelTester::OpType::%s" % op_type)
   if init_fn is not None:
     test_args.append(init_fn)
   if requantization_type:
@@ -422,6 +438,7 @@ def generate_test_cases(ukernel, init_fn, requantization_type, primary_tile,
   return xngen.preprocess(RDSUM_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": test_args,
+      "TESTER": tester,
       "DATATYPE": datatype,
       "PRIMARY_TILE": primary_tile,
       "INCREMENTAL_TILE": incremental_tile,
@@ -441,6 +458,11 @@ def main(args):
     if not isinstance(spec_yaml, list):
       raise ValueError("expected a list of micro-kernels in the spec")
 
+    tester_header = {
+      "ReduceDiscontiguousMicrokernelTester": "reduce-discontiguous-microkernel-tester.h",
+      "RDSumMicrokernelTester": "rdsum-microkernel-tester.h",
+    }[options.tester]
+
     tests = """\
 // Copyright 2024 Google LLC
 //
@@ -457,18 +479,20 @@ def main(args):
 #include "src/xnnpack/isa-checks.h"
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/reduce.h"
-#include "test/rdsum-microkernel-tester.h"
-""".format(specification=options.spec, generator=sys.argv[0])
+#include "test/{tester_header}"
+""".format(specification=options.spec, generator=sys.argv[0],
+           tester_header=tester_header)
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
       init_fn = ukernel_spec.get("init")
-      requantization_type, primary_tile, incremental_tile, channel_tile, vector_tile, arch, \
+      requantization_type, op_type, primary_tile, incremental_tile, channel_tile, vector_tile, arch, \
         isa = split_ukernel_name(name)
 
-      test_case = generate_test_cases(name, init_fn, requantization_type,
-                                      primary_tile, incremental_tile,
-                                      channel_tile, vector_tile, isa)
+      test_case = generate_test_cases(name, op_type, init_fn, requantization_type,
+                                      options.tester, primary_tile,
+                                      incremental_tile, channel_tile,
+                                      vector_tile, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     xnncommon.overwrite_if_changed(options.output, tests)

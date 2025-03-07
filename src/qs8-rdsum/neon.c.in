@@ -12,7 +12,6 @@
 #include "src/xnnpack/math.h"
 
 
-$PARAMS_STRUCT = "fp32_neon"
 void xnn_qs8_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__neon_c${CHANNELS}(
     size_t rows,
     size_t channels,
