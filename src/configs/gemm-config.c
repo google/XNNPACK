@@ -34,6 +34,7 @@ static struct xnn_gemm_config f16_gemm_config = {0};
 static struct xnn_gemm_config f32_gemm_config = {0};
 static struct xnn_gemm_config f32_igemm_config = {0};
 static struct xnn_gemm_config f32_gemm_nr2_config = {0};
+static struct xnn_gemm_config f32_gemm_tile_10x8_config = {0};
 static struct xnn_gemm_config f32_qc4w_gemm_config = {0};
 static struct xnn_gemm_config f32_qc8w_gemm_config = {0};
 static struct xnn_gemm_config pf16_gemm_config = {0};
@@ -63,6 +64,7 @@ XNN_INIT_ONCE_GUARD(f16_gemm);
 XNN_INIT_ONCE_GUARD(f32_igemm);
 XNN_INIT_ONCE_GUARD(f32_gemm);
 XNN_INIT_ONCE_GUARD(f32_gemm_nr2);
+XNN_INIT_ONCE_GUARD(f32_gemm_tile_10x8);
 XNN_INIT_ONCE_GUARD(f32_qc4w_gemm);
 XNN_INIT_ONCE_GUARD(f32_qc8w_gemm);
 XNN_INIT_ONCE_GUARD(pf16_gemm);
@@ -1546,6 +1548,18 @@ static void init_f32_gemm_nr2_config(void) {
     f32_gemm_nr2_config.nr = 2;
   #endif
   assert(f32_gemm_nr2_config.mr <= XNN_MAX_MR);
+}
+
+static void init_f32_gemm_tile_10x8_config(void) {
+  f32_gemm_tile_10x8_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x8__fma3_broadcast);
+  f32_gemm_tile_10x8_config.minmax.gemm[XNN_MR_TO_INDEX(10)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_10x8__fma3_broadcast);
+  f32_gemm_tile_10x8_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_1x8__fma3_broadcast);
+  f32_gemm_tile_10x8_config.minmax.igemm[XNN_MR_TO_INDEX(10)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_10x8__fma3_broadcast);
+  f32_gemm_tile_10x8_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+  f32_gemm_tile_10x8_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_x32_packw_gemm_gio_ukernel_x8__avx_u8;;
+  f32_gemm_tile_10x8_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x8__avx_u4;
+  f32_gemm_tile_10x8_config.mr = 10;
+  f32_gemm_tile_10x8_config.nr = 8;
 }
 
 static void init_f32_qc4w_gemm_config(void) {
@@ -5127,6 +5141,14 @@ const struct xnn_gemm_config* xnn_init_f32_gemm_nr2_config() {
   }
   XNN_INIT_ONCE(f32_gemm_nr2);
   return &f32_gemm_nr2_config;
+}
+
+const struct xnn_gemm_config* xnn_init_f32_gemm_tile_10x8_config() {
+  if (xnn_init_hardware_config() == NULL) {
+    return NULL;
+  }
+  XNN_INIT_ONCE(f32_gemm_tile_10x8);
+  return &f32_gemm_tile_10x8_config;
 }
 
 const struct xnn_gemm_config* xnn_init_f32_qc4w_gemm_config() {
