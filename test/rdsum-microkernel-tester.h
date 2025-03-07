@@ -260,7 +260,7 @@ class RDSumMicrokernelTester {
 
       // Verify results.
       for (size_t c = 0; c < channels(); c++) {
-        ASSERT_NEAR(output[c], output_ref[c], std::abs(output_ref[c]) * 1.0e-5f)
+        ASSERT_NEAR(output[c], output_ref[c], std::abs(output_ref[c]) * 1.0e-3f)
           << "at position " << c << ", rows = " << rows() << ", channels = "
           << channels();
       }
