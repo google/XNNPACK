@@ -483,6 +483,24 @@ class SubgraphTester {
     return *this;
   }
 
+  SubgraphTester& AddBinary(xnn_binary_operator op, xnn_binary_params* params,
+                            uint32_t input1_id, uint32_t input2_id,
+                            uint32_t output_id) {
+    const xnn_status status =
+        xnn_define_binary(subgraph_.get(), op, params, input1_id, input2_id,
+                          output_id, /*flags=*/0);
+    EXPECT_EQ(status, xnn_status_success);
+    return *this;
+  }
+
+  SubgraphTester& AddUnary(xnn_unary_operator op, xnn_unary_params* params,
+                           uint32_t input_id, uint32_t output_id) {
+    const xnn_status status = xnn_define_unary(
+        subgraph_.get(), op, params, input_id, output_id, /*flags=*/0);
+    EXPECT_EQ(status, xnn_status_success);
+    return *this;
+  }
+
   inline SubgraphTester& AddConvolution2D(
       ConvolutionParams params,
       uint32_t input_id, uint32_t filter_id, uint32_t bias_id,
