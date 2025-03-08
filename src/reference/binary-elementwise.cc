@@ -247,13 +247,7 @@ struct PowOp {
 template <>
 struct PowOp<int32_t> {
   int32_t operator()(int32_t a, int32_t b) const {
-    if (b < 0) {
-      return 0;
-    } else if (b == 0) {
-      return 1;
-    } else {
-      return integer_pow(a, b);
-    }
+    return integer_pow(a, b);
   }
 };
 

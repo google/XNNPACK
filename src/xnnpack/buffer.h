@@ -26,12 +26,15 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/reference-utils.h"
 
 namespace xnnpack {
 
 template <typename T>
 class NumericLimits {
  public:
+  static constexpr T epsilon() { return std::numeric_limits<T>::epsilon(); }
+  static constexpr T infinity() { return std::numeric_limits<T>::infinity(); }
   static constexpr T min() { return std::numeric_limits<T>::lowest(); }
   static constexpr T max() { return std::numeric_limits<T>::max(); }
 };
@@ -39,13 +42,21 @@ class NumericLimits {
 template <>
 class NumericLimits<xnn_float16> {
  public:
-  static xnn_float16 min() { return static_cast<xnn_float16>(-65504); }
-  static xnn_float16 max() { return static_cast<xnn_float16>(65504); }
+  static xnn_float16 epsilon() {
+    return xnn_float16_from_bits(0x1400);  // 2^-10 = 0.0009765625
+  }
+  static xnn_float16 infinity() { return xnn_float16_from_bits(0x7c00); }
+  static xnn_float16 min() { return xnn_float16_from_bits(0xfbff); }
+  static xnn_float16 max() { return xnn_float16_from_bits(0x7bff); }
 };
 
 template <>
 class NumericLimits<xnn_bfloat16> {
  public:
+  static xnn_bfloat16 epsilon() {
+    return xnn_bfloat16_from_bits(0x3c00);  // 2^-7 = 0.0078125
+  }
+  static xnn_bfloat16 infinity() { return xnn_bfloat16_from_bits(0x7f80); }
   static xnn_bfloat16 min() { return xnn_bfloat16_from_bits(0xff7f); }
   static xnn_bfloat16 max() { return xnn_bfloat16_from_bits(0x7f7f); }
 };
@@ -60,6 +71,15 @@ class NumericLimits<quantized<T>> {
     return {std::numeric_limits<T>::max()};
   }
 };
+
+inline float epsilon(xnn_datatype datatype) {
+  switch (datatype) {
+    case xnn_datatype_fp32: return NumericLimits<float>::epsilon();
+    case xnn_datatype_fp16: return NumericLimits<xnn_float16>::epsilon();
+    case xnn_datatype_bf16: return NumericLimits<xnn_bfloat16>::epsilon();
+    default: return 1.0f;
+  }
+}
 
 struct PaddingBytes {
   size_t value;
@@ -546,7 +566,7 @@ xnn_quantization_params random_quantization(xnn_datatype datatype, Rng& rng) {
                                           std::numeric_limits<int8_t>::max()};
   std::uniform_int_distribution<> u8_dist{std::numeric_limits<uint8_t>::min(),
                                           std::numeric_limits<uint8_t>::max()};
-  std::uniform_real_distribution<float> scale_dist{0.1f, 10.0f};
+  std::uniform_real_distribution<float> scale_dist{0.25f, 8.0f};
   switch (datatype) {
     case xnn_datatype_qint8:
       return {i8_dist(rng), scale_dist(rng)};
@@ -586,13 +606,43 @@ class DatatypeGenerator {
 
  public:
   DatatypeGenerator(float min, float max, const xnn_quantization_params& = {})
-      : dist_(min, max) {}
+      : dist_(std::max<float>(min, NumericLimits<T>::min()),
+              std::min<float>(max, NumericLimits<T>::max())) {}
   explicit DatatypeGenerator(const xnn_quantization_params& = {})
-      : dist_(-1.0f, 1.0f) {}
+      : dist_(NumericLimits<T>::min(), NumericLimits<T>::max()) {}
 
   template <typename Rng>
   T operator()(Rng& rng) {
-    return static_cast<T>(dist_(rng));
+    while (true) {
+      float result = dist_(rng);
+      if (!std::isnan(result)) {
+        return static_cast<T>(result);
+      } else {
+        // Don't allow generating NaN
+      }
+    }
+  }
+};
+
+// This specialization for integers doesn't include the lowest negative integer,
+// because testing it is a headache due to undefined behavior when negating it.
+template <>
+class DatatypeGenerator<int> {
+  std::uniform_int_distribution<int> dist_;
+
+ public:
+  DatatypeGenerator(float min, float max, const xnn_quantization_params& = {})
+      : dist_(std::max<int>(round_float_to_int<int>(min),
+                            -std::numeric_limits<int>::max()),
+              std::min<int>(round_float_to_int<int>(max),
+                            std::numeric_limits<int>::max())) {}
+  explicit DatatypeGenerator(const xnn_quantization_params& = {})
+      : dist_(-std::numeric_limits<int>::max(),
+              std::numeric_limits<int>::max()) {}
+
+  template <typename Rng>
+  int operator()(Rng& rng) {
+    return dist_(rng);
   }
 };
 
@@ -603,11 +653,10 @@ class DatatypeGenerator<quantized<T>> {
  public:
   DatatypeGenerator(float min, float max,
                     const xnn_quantization_params& params) {
-    min = std::ceil(min / params.scale + params.zero_point);
-    max = std::floor(max / params.scale + params.zero_point);
-    dist_ = std::uniform_int_distribution<int>(
-        std::max<int>(NumericLimits<T>::min(), static_cast<int>(min)),
-        std::min<int>(NumericLimits<T>::max(), static_cast<int>(max)));
+    min = std::ceil(fake_quantize(min, params));
+    max = std::floor(fake_quantize(max, params));
+    dist_ = std::uniform_int_distribution<int>(round_float_to_int<T>(min),
+                                               round_float_to_int<T>(max));
   }
   explicit DatatypeGenerator(const xnn_quantization_params& params)
       : DatatypeGenerator(-1.0f, 1.0f, params) {}
