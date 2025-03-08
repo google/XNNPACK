@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/s8-ibilinear/wasmsimd-mul32.c.in
 //   Generator: tools/xngen

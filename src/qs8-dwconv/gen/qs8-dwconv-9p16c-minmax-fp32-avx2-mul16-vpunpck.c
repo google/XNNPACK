@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-dwconv/unipass-avx2-mul16-vpunpck.c.in
 //   Generator: tools/xngen

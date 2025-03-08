@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-igemm/2x8c8-aarch64-neon-mlal-cortex-a53.S.in
 //   Generator: tools/xngen

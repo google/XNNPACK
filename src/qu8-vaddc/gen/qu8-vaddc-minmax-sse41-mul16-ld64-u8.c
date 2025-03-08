@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-vaddc/sse-mul16-ld64.c.in
 //   Generator: tools/xngen

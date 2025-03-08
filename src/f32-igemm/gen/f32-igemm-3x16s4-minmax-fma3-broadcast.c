@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-igemm/avx-shuffle4.c.in
 //   Generator: tools/xngen

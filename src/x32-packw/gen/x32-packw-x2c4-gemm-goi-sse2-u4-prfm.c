@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/x32-packw/c4-sse2.c.in
 //   Generator: tools/xngen

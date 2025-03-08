@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-gemm/4x8c4-aarch32-neondot-ld64.S.in
 //   Generator: tools/xngen

@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-igemm/c8-neon-mull.c.in
 //   Generator: tools/xngen

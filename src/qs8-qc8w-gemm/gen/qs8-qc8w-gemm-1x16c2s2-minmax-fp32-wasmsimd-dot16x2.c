@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-gemm/MRx16c2s2-wasmsimd-dot16x2.c.in
 //   Generator: tools/xngen

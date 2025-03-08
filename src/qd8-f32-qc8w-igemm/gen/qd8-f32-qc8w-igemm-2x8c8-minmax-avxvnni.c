@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-igemm/MRx8c8-avxvnni.c.in
 //   Generator: tools/xngen

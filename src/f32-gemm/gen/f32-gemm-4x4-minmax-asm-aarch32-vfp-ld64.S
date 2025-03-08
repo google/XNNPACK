@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-gemm/4x4-aarch32-vfp-ld64.S.in
 //   Generator: tools/xngen

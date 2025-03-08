@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-gemm/c2-neon-mull-shuffle.c.in
 //   Generator: tools/xngen

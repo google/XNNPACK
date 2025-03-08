@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-gemm/c4-avx512amx.c.in
 //   Generator: tools/xngen

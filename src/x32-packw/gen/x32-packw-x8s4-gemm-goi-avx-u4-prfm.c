@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/x32-packw/s4-avx.c.in
 //   Generator: tools/xngen

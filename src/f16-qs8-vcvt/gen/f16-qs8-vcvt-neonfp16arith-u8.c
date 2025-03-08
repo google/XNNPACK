@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-qs8-vcvt/neonfp16arith.c.in
 //   Generator: tools/xngen

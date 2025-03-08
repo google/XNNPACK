@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-igemm/4x8-aarch64-neonfma-ld64.S.in
 //   Generator: tools/xngen

@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-gemm/neon-ld128.c.in
 //   Generator: tools/xngen

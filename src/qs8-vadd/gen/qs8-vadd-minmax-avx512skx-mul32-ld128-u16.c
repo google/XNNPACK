@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-vadd/avx512skx-mul32-ld128.c.in
 //   Generator: tools/xngen

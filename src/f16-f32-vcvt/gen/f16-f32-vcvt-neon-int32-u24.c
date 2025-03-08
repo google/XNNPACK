@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-f32-vcvt/neon-int32.c.in
 //   Generator: tools/xngen
