@@ -122,6 +122,10 @@ static void init_qs8_rsum_config(void) {
     qs8_rsum_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__wasmsimd_u32_acc4,
     };
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    qs8_rsum_config = (struct xnn_reduce_config) {
+      .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__rvv_u2v,
+    };
   #else
     qs8_rsum_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__scalar_u4,
@@ -264,6 +268,10 @@ static void init_qu8_rsum_config(void) {
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     qu8_rsum_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_qu8_rsum_ukernel__wasmsimd_u32_acc4,
+    };
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    qu8_rsum_config = (struct xnn_reduce_config) {
+      .ukernel = (xnn_reduce_ukernel_fn) xnn_qu8_rsum_ukernel__rvv_u2v,
     };
   #else
     qu8_rsum_config = (struct xnn_reduce_config) {
