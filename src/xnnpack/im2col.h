@@ -23,6 +23,7 @@ XNN_INTERNAL void xnn_im2col_conv2d(
   size_t dilation_height,
   size_t dilation_width,
   size_t input_width,
+  size_t input_height,
   size_t input_padding_top,
   size_t input_padding_left,
   size_t group_input_channels_in_bytes,
