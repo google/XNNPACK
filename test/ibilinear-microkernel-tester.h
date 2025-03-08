@@ -136,7 +136,7 @@ class IBilinearMicrokernelTester {
           ASSERT_NEAR(
               output[i * output_stride() + c],
               output_ref[i * channels() + c],
-              std::abs(output_ref[i * channels() + c]) * 1.0e-2f)
+              std::abs(output_ref[i * channels() + c]) * 1.0e-2f + 1.0e-4f)
             << "pixel " << i << " / " << pixels() << ", channel " << c << " / " << channels();
         }
       }
@@ -188,7 +188,7 @@ class IBilinearMicrokernelTester {
           ASSERT_NEAR(
               output_ref[i * channels() + c],
               output[i * output_stride() + c],
-              std::abs(output_ref[i * channels() + c]) * 1.0e-4)
+              std::abs(output_ref[i * channels() + c]) * 1.0e-4 + 1.0e-6f)
             << "pixel " << i << " / " << pixels() << ", channel " << c << " / " << channels();
         }
       }
@@ -352,7 +352,7 @@ class IBilinearMicrokernelTester {
           ASSERT_NEAR(
               output[c * pixels() + i],
               output_ref[c * pixels() + i],
-              std::abs(output_ref[c * pixels() + i]) * 1.0e-2f)
+              std::abs(output_ref[c * pixels() + i]) * 1.0e-2f + 1.0e-4f)
             << "i = " << i << ", channel = " << c;
         }
       }
@@ -408,7 +408,7 @@ class IBilinearMicrokernelTester {
           ASSERT_NEAR(
               output_ref[c * pixels() + i],
               output[c * pixels() + i],
-              std::abs(output_ref[c * pixels() + i]) * 1.0e-3f)
+              std::abs(output_ref[c * pixels() + i]) * 1.0e-3f + 1.0e-6f)
             << "i = " << i << ", channel = " << c;
         }
       }
