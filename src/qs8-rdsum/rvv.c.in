@@ -9,6 +9,7 @@ $assert LMUL in [1, 2]
 #include <riscv_vector.h>
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/reduce.h"
+//#include "src/xnnpack/math.h"
 
 void xnn_qs8_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__rvv_u${LMUL}v(
     size_t rows,
@@ -35,22 +36,31 @@ void xnn_qs8_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__rvv_u${LMUL}v(
 
     vint32m${LMUL*4}_t vacc = __riscv_vmv_v_x_i32m${LMUL*4}(0, vl);
 
-    for (int r = rows; r > 0; r -= ${ACCUMULATORS}) {
-      $for ACC in range(1, ACCUMULATORS, 2):
-        if XNN_UNPREDICTABLE(r < ${ACC+1}) {
-          i${ACC} = zero;
-        }
-        if XNN_UNPREDICTABLE(r <= ${ACC+1}) {
-          i${ACC+1} = zero;
-        }
+    // 256 int8s may be summed into an int16 before overflowing
+    // To prevent handling the tails of the inner 256 loop, we round 256 down to
+    // the nearest integer multiple of ACCUMULATORS.
+    int r = rows;
+    while (r > 0) {
 
-      vint8m${LMUL}_t vinput;
-      vint16m${LMUL*2}_t vinput16;
-      $for ACC in range(ACCUMULATORS):
-        vinput = __riscv_vle8_v_i8m${LMUL}(i${ACC}, vl);
-        vinput16 = __riscv_vsext_vf2_i16m${LMUL*2}(vinput, vl);  
-        vacc = __riscv_vwadd_wv_i32m${LMUL*4}(vacc, vinput16, vl);
-        i${ACC} = (const int8_t*) ((uintptr_t) i${ACC} + input_increment);
+      vint16m${LMUL*2}_t vacc16 = __riscv_vmv_v_x_i16m${LMUL*2}(0, vl);
+
+      for (int current_batch = min(r, 252); current_batch > 0; current_batch -= ${ACCUMULATORS}) {
+        $for ACC in range(1, ACCUMULATORS, 2):
+          if XNN_UNPREDICTABLE(current_batch < ${ACC+1}) {
+            i${ACC} = zero;
+          }
+          if XNN_UNPREDICTABLE(current_batch <= ${ACC+1}) {
+            i${ACC+1} = zero;
+          }
+
+        $for ACC in range(ACCUMULATORS):
+          vint8m${LMUL}_t vinput${ACC} = __riscv_vle8_v_i8m${LMUL}(i${ACC}, vl);
+          vacc16 = __riscv_vwadd_wv_i16m${LMUL*2}(vacc16, vinput${ACC}, vl);
+          i${ACC} = (const int8_t*) ((uintptr_t) i${ACC} + input_increment);
+      }
+
+      vacc = __riscv_vwadd_wv_i32m${LMUL*4}(vacc, vacc16, vl);
+      r = doz(r, 252);
     }
 
     vint32m${LMUL*4}_t voutput = __riscv_vle32_v_i32m${LMUL*4}(output, vl);

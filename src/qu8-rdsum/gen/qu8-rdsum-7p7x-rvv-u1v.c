@@ -42,56 +42,59 @@ void xnn_qu8_rdsum_ukernel_7p7x__rvv_u1v(
 
     vuint32m4_t vacc = __riscv_vmv_v_x_u32m4(0, vl);
 
-    for (int r = rows; r > 0; r -= 7) {
-      if XNN_UNPREDICTABLE(r < 2) {
-        i1 = zero;
-      }
-      if XNN_UNPREDICTABLE(r <= 2) {
-        i2 = zero;
-      }
-      if XNN_UNPREDICTABLE(r < 4) {
-        i3 = zero;
-      }
-      if XNN_UNPREDICTABLE(r <= 4) {
-        i4 = zero;
-      }
-      if XNN_UNPREDICTABLE(r < 6) {
-        i5 = zero;
-      }
-      if XNN_UNPREDICTABLE(r <= 6) {
-        i6 = zero;
+    // 256 uint8s may be summed into an uint16 before overflowing
+    // To prevent handling the tails of the inner 256 loop, we round 256 down to
+    // the nearest integer multiple of ACCUMULATORS.
+    int r = rows;
+    while (r > 0) {
+
+      vuint16m2_t vacc16 = __riscv_vmv_v_x_u16m2(0, vl);
+
+      for (int current_batch = min(r, 252); current_batch > 0; current_batch -= 7) {
+        if XNN_UNPREDICTABLE(current_batch < 2) {
+          i1 = zero;
+        }
+        if XNN_UNPREDICTABLE(current_batch <= 2) {
+          i2 = zero;
+        }
+        if XNN_UNPREDICTABLE(current_batch < 4) {
+          i3 = zero;
+        }
+        if XNN_UNPREDICTABLE(current_batch <= 4) {
+          i4 = zero;
+        }
+        if XNN_UNPREDICTABLE(current_batch < 6) {
+          i5 = zero;
+        }
+        if XNN_UNPREDICTABLE(current_batch <= 6) {
+          i6 = zero;
+        }
+
+        vuint8m1_t vinput0 = __riscv_vle8_v_u8m1(i0, vl);
+        vacc16 = __riscv_vwaddu_wv_u16m2(vacc16, vinput0, vl);
+        i0 = (const uint8_t*) ((uintptr_t) i0 + input_increment);
+        vuint8m1_t vinput1 = __riscv_vle8_v_u8m1(i1, vl);
+        vacc16 = __riscv_vwaddu_wv_u16m2(vacc16, vinput1, vl);
+        i1 = (const uint8_t*) ((uintptr_t) i1 + input_increment);
+        vuint8m1_t vinput2 = __riscv_vle8_v_u8m1(i2, vl);
+        vacc16 = __riscv_vwaddu_wv_u16m2(vacc16, vinput2, vl);
+        i2 = (const uint8_t*) ((uintptr_t) i2 + input_increment);
+        vuint8m1_t vinput3 = __riscv_vle8_v_u8m1(i3, vl);
+        vacc16 = __riscv_vwaddu_wv_u16m2(vacc16, vinput3, vl);
+        i3 = (const uint8_t*) ((uintptr_t) i3 + input_increment);
+        vuint8m1_t vinput4 = __riscv_vle8_v_u8m1(i4, vl);
+        vacc16 = __riscv_vwaddu_wv_u16m2(vacc16, vinput4, vl);
+        i4 = (const uint8_t*) ((uintptr_t) i4 + input_increment);
+        vuint8m1_t vinput5 = __riscv_vle8_v_u8m1(i5, vl);
+        vacc16 = __riscv_vwaddu_wv_u16m2(vacc16, vinput5, vl);
+        i5 = (const uint8_t*) ((uintptr_t) i5 + input_increment);
+        vuint8m1_t vinput6 = __riscv_vle8_v_u8m1(i6, vl);
+        vacc16 = __riscv_vwaddu_wv_u16m2(vacc16, vinput6, vl);
+        i6 = (const uint8_t*) ((uintptr_t) i6 + input_increment);
       }
 
-      vuint8m1_t vinput;
-      vuint16m2_t vinput16;
-      vinput = __riscv_vle8_v_u8m1(i0, vl);
-      vinput16 = __riscv_vzext_vf2_u16m2(vinput, vl);  
-      vacc = __riscv_vwaddu_wv_u32m4(vacc, vinput16, vl);
-      i0 = (const uint8_t*) ((uintptr_t) i0 + input_increment);
-      vinput = __riscv_vle8_v_u8m1(i1, vl);
-      vinput16 = __riscv_vzext_vf2_u16m2(vinput, vl);  
-      vacc = __riscv_vwaddu_wv_u32m4(vacc, vinput16, vl);
-      i1 = (const uint8_t*) ((uintptr_t) i1 + input_increment);
-      vinput = __riscv_vle8_v_u8m1(i2, vl);
-      vinput16 = __riscv_vzext_vf2_u16m2(vinput, vl);  
-      vacc = __riscv_vwaddu_wv_u32m4(vacc, vinput16, vl);
-      i2 = (const uint8_t*) ((uintptr_t) i2 + input_increment);
-      vinput = __riscv_vle8_v_u8m1(i3, vl);
-      vinput16 = __riscv_vzext_vf2_u16m2(vinput, vl);  
-      vacc = __riscv_vwaddu_wv_u32m4(vacc, vinput16, vl);
-      i3 = (const uint8_t*) ((uintptr_t) i3 + input_increment);
-      vinput = __riscv_vle8_v_u8m1(i4, vl);
-      vinput16 = __riscv_vzext_vf2_u16m2(vinput, vl);  
-      vacc = __riscv_vwaddu_wv_u32m4(vacc, vinput16, vl);
-      i4 = (const uint8_t*) ((uintptr_t) i4 + input_increment);
-      vinput = __riscv_vle8_v_u8m1(i5, vl);
-      vinput16 = __riscv_vzext_vf2_u16m2(vinput, vl);  
-      vacc = __riscv_vwaddu_wv_u32m4(vacc, vinput16, vl);
-      i5 = (const uint8_t*) ((uintptr_t) i5 + input_increment);
-      vinput = __riscv_vle8_v_u8m1(i6, vl);
-      vinput16 = __riscv_vzext_vf2_u16m2(vinput, vl);  
-      vacc = __riscv_vwaddu_wv_u32m4(vacc, vinput16, vl);
-      i6 = (const uint8_t*) ((uintptr_t) i6 + input_increment);
+      vacc = __riscv_vwaddu_wv_u32m4(vacc, vacc16, vl);
+      r = doz(r, 252);
     }
 
     vuint32m4_t voutput = __riscv_vle32_v_u32m4(output, vl);
