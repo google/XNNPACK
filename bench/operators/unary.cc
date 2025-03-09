@@ -152,8 +152,8 @@ static void benchmark_unary_operator(benchmark::State& state,
   xnn_unary_params params;
   xnn_quantization_params input_quantization = {0, 1.0f};
   xnn_quantization_params output_quantization = {0, 1.0f};
-  init_params(op_type, xnn_datatype_of<In>(), xnn_datatype_of<Out>(),
-              params, input_quantization, output_quantization);
+  init_params(op_type, xnn_datatype_of<In>(), xnn_datatype_of<Out>(), params,
+              input_quantization, output_quantization);
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
@@ -412,8 +412,8 @@ static void benchmark_tflite_unary_operator(benchmark::State& state,
   xnn_unary_params params;
   xnn_quantization_params input_quantization = {0, 1.0f};
   xnn_quantization_params output_quantization = {0, 1.0f};
-  init_params(op, xnn_datatype_of<In>(), xnn_datatype_of<Out>(),
-              params, input_quantization, output_quantization);
+  init_params(op, xnn_datatype_of<In>(), xnn_datatype_of<Out>(), params,
+              input_quantization, output_quantization);
   auto in_quantization = [=](flatbuffers::FlatBufferBuilder& builder) {
     return CreateTfLiteQuantizationParameters(builder, input_quantization);
   };

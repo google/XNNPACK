@@ -113,7 +113,7 @@ class BatchMatMulOperatorTester {
         for (size_t ni = 0; ni < n; ni++) {
           for (size_t ki = 0; ki < k; ki++) {
             output_ref[mi * n + ni] +=
-                static_cast<float>(input_a[mi * k + ki]) * 
+                static_cast<float>(input_a[mi * k + ki]) *
                 static_cast<float>(input_b[ni * k + ki]);
           }
         }
@@ -124,7 +124,7 @@ class BatchMatMulOperatorTester {
         for (size_t ni = 0; ni < n; ni++) {
           for (size_t ki = 0; ki < k; ki++) {
             output_ref[mi * n + ni] +=
-                static_cast<float>(input_a[mi * k + ki]) * 
+                static_cast<float>(input_a[mi * k + ki]) *
                 static_cast<float>(input_b[ki * n + ni]);
           }
         }
@@ -480,10 +480,9 @@ class BatchMatMulOperatorTester {
     }
   }
 
-  void ComputeQC8W(
-      xnnpack::Buffer<float>& input_b, size_t batch_size_b,
-      xnnpack::Buffer<int8_t>& input_b_qc8,
-      xnnpack::Buffer<float>& channelwise_scale_b) const {
+  void ComputeQC8W(xnnpack::Buffer<float>& input_b, size_t batch_size_b,
+                   xnnpack::Buffer<int8_t>& input_b_qc8,
+                   xnnpack::Buffer<float>& channelwise_scale_b) const {
     if (transpose_b_) {
       for (size_t b = 0; b < batch_size_b; b++) {
         for (size_t c = 0; c < n(); c++) {
@@ -596,8 +595,7 @@ class BatchMatMulOperatorTester {
                                           batch_size_b * k() * n());
       xnnpack::Buffer<float> channelwise_scale_b(
           XNN_EXTRA_BYTES / sizeof(float) + batch_size_b * n());
-      ComputeQC8W(input_b, batch_size_b, input_b_qc8,
-                                         channelwise_scale_b);
+      ComputeQC8W(input_b, batch_size_b, input_b_qc8, channelwise_scale_b);
       // Compute reference results.
       ComputeReference(batch_dims_output, input_a.data(), input_b.data(),
                        output_ref.data(), ComputeRef<float>);
@@ -713,8 +711,7 @@ class BatchMatMulOperatorTester {
                                           batch_size_b * k() * n());
       xnnpack::Buffer<float> channelwise_scale_b(
           XNN_EXTRA_BYTES / sizeof(float) + batch_size_b * n());
-      ComputeQC8W(input_b, batch_size_b, input_b_qc8,
-                                         channelwise_scale_b);
+      ComputeQC8W(input_b, batch_size_b, input_b_qc8, channelwise_scale_b);
 
       // Compute reference results.
       ComputeReference(batch_dims_output, input_a.data(), input_b.data(),

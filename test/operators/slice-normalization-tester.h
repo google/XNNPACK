@@ -66,9 +66,7 @@ class SliceNormalizationTester {
     return *this;
   }
 
-  std::vector<size_t> expected_input_shape() {
-    return expected_input_shape_;
-  }
+  std::vector<size_t> expected_input_shape() { return expected_input_shape_; }
 
   inline SliceNormalizationTester& expected_output_shape(
       const std::vector<size_t> expected_output_shape) {
@@ -80,20 +78,17 @@ class SliceNormalizationTester {
     return *this;
   }
 
-  std::vector<size_t> expected_output_shape() {
-    return expected_output_shape_;
-  }
+  std::vector<size_t> expected_output_shape() { return expected_output_shape_; }
 
   void Test() {
     std::vector<size_t> actual_normalized_offsets(XNN_MAX_TENSOR_DIMS);
     std::vector<size_t> actual_normalized_input_shape(XNN_MAX_TENSOR_DIMS);
     std::vector<size_t> actual_normalized_output_shape(XNN_MAX_TENSOR_DIMS);
     size_t actual_num_normalized_dims;
-    xnn_normalize_slice(num_dims(), offsets().data(), sizes().data(),
-                        input_shape().data(), actual_normalized_offsets.data(),
-                        actual_normalized_input_shape.data(),
-                        actual_normalized_output_shape.data(),
-                        &actual_num_normalized_dims);
+    xnn_normalize_slice(
+        num_dims(), offsets().data(), sizes().data(), input_shape().data(),
+        actual_normalized_offsets.data(), actual_normalized_input_shape.data(),
+        actual_normalized_output_shape.data(), &actual_num_normalized_dims);
 
     EXPECT_EQ(expected_num_normalized_dims_, actual_num_normalized_dims);
     EXPECT_EQ(expected_offsets(), actual_normalized_offsets);

@@ -34,13 +34,9 @@ static XNN_INLINE xnn_simd_u8_t xnn_max_u8(xnn_simd_u8_t a, xnn_simd_u8_t b) {
   return a < b ? b : a;
 }
 
-static XNN_INLINE uint8_t xnn_horizontal_min_u8(xnn_simd_u8_t a) {
-  return a;
-}
+static XNN_INLINE uint8_t xnn_horizontal_min_u8(xnn_simd_u8_t a) { return a; }
 
-static XNN_INLINE uint8_t xnn_horizontal_max_u8(xnn_simd_u8_t a) {
-  return a;
-}
+static XNN_INLINE uint8_t xnn_horizontal_max_u8(xnn_simd_u8_t a) { return a; }
 
 static XNN_INLINE xnn_simd_u8_t xnn_xor_u8(xnn_simd_u8_t a, xnn_simd_u8_t b) {
   return a ^ b;

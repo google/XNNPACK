@@ -51,15 +51,12 @@ void TestImpl(size_t rank) {
       Tensor<T> expected = input.transpose(perm).deep_copy();
 
       // Check reshaped shape is correct
-      subgraph
-          .ReshapeExternalTensor(shape, input.base(), 0)
-          .ReshapeRuntime();
+      subgraph.ReshapeExternalTensor(shape, input.base(), 0).ReshapeRuntime();
       ASSERT_EQ(subgraph.GetExternalTensorShape(1), expected.extents());
 
       // Run subgraph
       Tensor<T> output(expected.extents());
-      subgraph
-          .SetupExternalTensor(output.base(), 1)
+      subgraph.SetupExternalTensor(output.base(), 1)
           .SetupRuntime()
           .InvokeRuntime();
 

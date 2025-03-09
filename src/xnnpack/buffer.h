@@ -64,20 +64,20 @@ class NumericLimits<xnn_bfloat16> {
 template <typename T>
 class NumericLimits<quantized<T>> {
  public:
-  static quantized<T> min() {
-    return {std::numeric_limits<T>::lowest()};
-  }
-  static quantized<T> max() {
-    return {std::numeric_limits<T>::max()};
-  }
+  static quantized<T> min() { return {std::numeric_limits<T>::lowest()}; }
+  static quantized<T> max() { return {std::numeric_limits<T>::max()}; }
 };
 
 inline float epsilon(xnn_datatype datatype) {
   switch (datatype) {
-    case xnn_datatype_fp32: return NumericLimits<float>::epsilon();
-    case xnn_datatype_fp16: return NumericLimits<xnn_float16>::epsilon();
-    case xnn_datatype_bf16: return NumericLimits<xnn_bfloat16>::epsilon();
-    default: return 1.0f;
+    case xnn_datatype_fp32:
+      return NumericLimits<float>::epsilon();
+    case xnn_datatype_fp16:
+      return NumericLimits<xnn_float16>::epsilon();
+    case xnn_datatype_bf16:
+      return NumericLimits<xnn_bfloat16>::epsilon();
+    default:
+      return 1.0f;
   }
 }
 

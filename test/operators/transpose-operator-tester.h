@@ -17,16 +17,12 @@
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
-#include "src/xnnpack/math.h"
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/math.h"
 
-inline size_t reference_index(
-    const size_t* input_stride,
-    const size_t* output_stride,
-    const size_t* perm,
-    const size_t num_dims,
-    size_t pos)
-{
+inline size_t reference_index(const size_t* input_stride,
+                              const size_t* output_stride, const size_t* perm,
+                              const size_t num_dims, size_t pos) {
   size_t in_pos = 0;
   for (size_t j = 0; j < num_dims; ++j) {
     const size_t idx = pos / output_stride[j];
@@ -63,7 +59,8 @@ class TransposeOperatorTester {
   const std::vector<size_t>& perm() const { return this->perm_; }
 
   void TestX8() const {
-    size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1}, std::multiplies<size_t>());
+    size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1},
+                                   std::multiplies<size_t>());
     xnnpack::Buffer<uint8_t> input(count + XNN_EXTRA_BYTES / sizeof(uint8_t));
     xnnpack::Buffer<uint8_t> output(count);
     std::vector<size_t> input_stride(num_dims(), 1);
@@ -76,23 +73,21 @@ class TransposeOperatorTester {
     xnn_operator_t transpose_op = nullptr;
     std::iota(input.begin(), input.end(), 0);
 
-    ASSERT_EQ(xnn_status_success,
-              xnn_create_transpose_nd_x8(0, &transpose_op));
+    ASSERT_EQ(xnn_status_success, xnn_create_transpose_nd_x8(0, &transpose_op));
     ASSERT_NE(nullptr, transpose_op);
 
     // Smart pointer to automatically delete convert op.
-    std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_transpose_op(transpose_op, xnn_delete_operator);
+    std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+        auto_transpose_op(transpose_op, xnn_delete_operator);
 
     ASSERT_EQ(xnn_status_success,
-              xnn_reshape_transpose_nd_x8(
-                  transpose_op,
-                  num_dims(), shape_.data(), perm_.data(),
-                  /*threadpool=*/nullptr));
+              xnn_reshape_transpose_nd_x8(transpose_op, num_dims(),
+                                          shape_.data(), perm_.data(),
+                                          /*threadpool=*/nullptr));
 
-    ASSERT_EQ(xnn_status_success,
-              xnn_setup_transpose_nd_x8(
-                  transpose_op,
-                  input.data(), output.data()));
+    ASSERT_EQ(
+        xnn_status_success,
+        xnn_setup_transpose_nd_x8(transpose_op, input.data(), output.data()));
 
     // Run operator.
     ASSERT_EQ(xnn_status_success,
@@ -100,13 +95,16 @@ class TransposeOperatorTester {
 
     // Verify results.
     for (size_t i = 0; i < count; ++i) {
-      const size_t in_idx = reference_index(input_stride.data(), output_stride.data(), perm_.data(), num_dims(), i);
+      const size_t in_idx =
+          reference_index(input_stride.data(), output_stride.data(),
+                          perm_.data(), num_dims(), i);
       ASSERT_EQ(input[in_idx], output[i]);
     }
   }
 
-    void TestRunX8() const {
-    const size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1}, std::multiplies<size_t>());
+  void TestRunX8() const {
+    const size_t count = std::accumulate(dims().cbegin(), dims().cend(),
+                                         size_t{1}, std::multiplies<size_t>());
     xnnpack::Buffer<uint8_t> input(count + XNN_EXTRA_BYTES / sizeof(uint8_t));
     xnnpack::Buffer<uint8_t> output(count);
     std::vector<size_t> input_stride(input.size(), 1);
@@ -118,23 +116,26 @@ class TransposeOperatorTester {
     std::iota(input.begin(), input.end(), 0);
 
     // Call transpose eager API
-    ASSERT_EQ(xnn_status_success,
-              xnn_run_transpose_nd_x8(
-                  input.data(), output.data(),
-                  num_dims(), shape_.data(), perm_.data(),
-                  0 /* flags */,
-                  /*threadpool=*/nullptr));
+    ASSERT_EQ(
+        xnn_status_success,
+        xnn_run_transpose_nd_x8(input.data(), output.data(), num_dims(),
+                                shape_.data(), perm_.data(), 0 /* flags */,
+                                /*threadpool=*/nullptr));
 
     // Verify results.
     for (size_t i = 0; i < count; ++i) {
-      const size_t in_idx = reference_index(input_stride.data(), output_stride.data(), perm_.data(), num_dims(), i);
+      const size_t in_idx =
+          reference_index(input_stride.data(), output_stride.data(),
+                          perm_.data(), num_dims(), i);
       ASSERT_EQ(input[in_idx], output[i]);
     }
   }
 
   void TestX16() const {
-    size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1}, std::multiplies<size_t>());
-    xnnpack::Buffer<xnn_float16> input(count + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1},
+                                   std::multiplies<size_t>());
+    xnnpack::Buffer<xnn_float16> input(count +
+                                       XNN_EXTRA_BYTES / sizeof(xnn_float16));
     xnnpack::Buffer<xnn_float16> output(count);
     std::vector<size_t> input_stride(num_dims(), 1);
     std::vector<size_t> output_stride(num_dims(), 1);
@@ -151,18 +152,17 @@ class TransposeOperatorTester {
     ASSERT_NE(nullptr, transpose_op);
 
     // Smart pointer to automatically delete convert op.
-    std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_transpose_op(transpose_op, xnn_delete_operator);
+    std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+        auto_transpose_op(transpose_op, xnn_delete_operator);
 
     ASSERT_EQ(xnn_status_success,
-              xnn_reshape_transpose_nd_x16(
-                  transpose_op,
-                  num_dims(), shape_.data(), perm_.data(),
-                  /*threadpool=*/nullptr));
+              xnn_reshape_transpose_nd_x16(transpose_op, num_dims(),
+                                           shape_.data(), perm_.data(),
+                                           /*threadpool=*/nullptr));
 
-    ASSERT_EQ(xnn_status_success,
-              xnn_setup_transpose_nd_x16(
-                  transpose_op,
-                  input.data(), output.data()));
+    ASSERT_EQ(
+        xnn_status_success,
+        xnn_setup_transpose_nd_x16(transpose_op, input.data(), output.data()));
 
     // Run operator.
     ASSERT_EQ(xnn_status_success,
@@ -170,14 +170,18 @@ class TransposeOperatorTester {
 
     // Verify results.
     for (size_t i = 0; i < count; ++i) {
-      const size_t in_idx = reference_index(input_stride.data(), output_stride.data(), perm_.data(), num_dims(), i);
+      const size_t in_idx =
+          reference_index(input_stride.data(), output_stride.data(),
+                          perm_.data(), num_dims(), i);
       ASSERT_EQ(input[in_idx], output[i]);
     }
   }
 
   void TestRunX16() const {
-    const size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1}, std::multiplies<size_t>());
-    xnnpack::Buffer<xnn_float16> input(count + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    const size_t count = std::accumulate(dims().cbegin(), dims().cend(),
+                                         size_t{1}, std::multiplies<size_t>());
+    xnnpack::Buffer<xnn_float16> input(count +
+                                       XNN_EXTRA_BYTES / sizeof(xnn_float16));
     xnnpack::Buffer<xnn_float16> output(count);
     std::vector<size_t> input_stride(input.size(), 1);
     std::vector<size_t> output_stride(input.size(), 1);
@@ -188,22 +192,24 @@ class TransposeOperatorTester {
     std::iota(input.begin(), input.end(), 0.0f);
 
     // Call transpose eager API
-    ASSERT_EQ(xnn_status_success,
-              xnn_run_transpose_nd_x16(
-                  input.data(), output.data(),
-                  num_dims(), shape_.data(), perm_.data(),
-                  0 /* flags */,
-                  /*threadpool=*/nullptr));
+    ASSERT_EQ(
+        xnn_status_success,
+        xnn_run_transpose_nd_x16(input.data(), output.data(), num_dims(),
+                                 shape_.data(), perm_.data(), 0 /* flags */,
+                                 /*threadpool=*/nullptr));
 
     // Verify results.
     for (size_t i = 0; i < count; ++i) {
-      const size_t in_idx = reference_index(input_stride.data(), output_stride.data(), perm_.data(), num_dims(), i);
+      const size_t in_idx =
+          reference_index(input_stride.data(), output_stride.data(),
+                          perm_.data(), num_dims(), i);
       ASSERT_EQ(input[in_idx], output[i]);
     }
   }
 
   void TestX32() const {
-    size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1}, std::multiplies<size_t>());
+    size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1},
+                                   std::multiplies<size_t>());
     xnnpack::Buffer<uint32_t> input(count + XNN_EXTRA_BYTES / sizeof(uint32_t));
     xnnpack::Buffer<uint32_t> output(count);
     std::vector<size_t> input_stride(num_dims(), 1);
@@ -221,18 +227,17 @@ class TransposeOperatorTester {
     ASSERT_NE(nullptr, transpose_op);
 
     // Smart pointer to automatically delete convert op.
-    std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_transpose_op(transpose_op, xnn_delete_operator);
+    std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+        auto_transpose_op(transpose_op, xnn_delete_operator);
 
     ASSERT_EQ(xnn_status_success,
-              xnn_reshape_transpose_nd_x32(
-                  transpose_op,
-                  num_dims(), shape_.data(), perm_.data(),
-                  /*threadpool=*/nullptr));
+              xnn_reshape_transpose_nd_x32(transpose_op, num_dims(),
+                                           shape_.data(), perm_.data(),
+                                           /*threadpool=*/nullptr));
 
-    ASSERT_EQ(xnn_status_success,
-              xnn_setup_transpose_nd_x32(
-                  transpose_op,
-                  input.data(), output.data()));
+    ASSERT_EQ(
+        xnn_status_success,
+        xnn_setup_transpose_nd_x32(transpose_op, input.data(), output.data()));
 
     // Run operator.
     ASSERT_EQ(xnn_status_success,
@@ -240,13 +245,16 @@ class TransposeOperatorTester {
 
     // Verify results.
     for (size_t i = 0; i < count; ++i) {
-      const size_t in_idx = reference_index(input_stride.data(), output_stride.data(), perm_.data(), num_dims(), i);
+      const size_t in_idx =
+          reference_index(input_stride.data(), output_stride.data(),
+                          perm_.data(), num_dims(), i);
       ASSERT_EQ(input[in_idx], output[i]);
     }
   }
 
   void TestX64() const {
-    size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1}, std::multiplies<size_t>());
+    size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1},
+                                   std::multiplies<size_t>());
     xnnpack::Buffer<uint64_t> input(count + XNN_EXTRA_BYTES / sizeof(uint64_t));
     xnnpack::Buffer<uint64_t> output(count);
     std::vector<size_t> input_stride(num_dims(), 1);
@@ -264,18 +272,17 @@ class TransposeOperatorTester {
     ASSERT_NE(nullptr, transpose_op);
 
     // Smart pointer to automatically delete convert op.
-    std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_transpose_op(transpose_op, xnn_delete_operator);
+    std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+        auto_transpose_op(transpose_op, xnn_delete_operator);
 
     ASSERT_EQ(xnn_status_success,
-              xnn_reshape_transpose_nd_x64(
-                  transpose_op,
-                  num_dims(), shape_.data(), perm_.data(),
-                  /*threadpool=*/nullptr));
+              xnn_reshape_transpose_nd_x64(transpose_op, num_dims(),
+                                           shape_.data(), perm_.data(),
+                                           /*threadpool=*/nullptr));
 
-    ASSERT_EQ(xnn_status_success,
-              xnn_setup_transpose_nd_x64(
-                  transpose_op,
-                  input.data(), output.data()));
+    ASSERT_EQ(
+        xnn_status_success,
+        xnn_setup_transpose_nd_x64(transpose_op, input.data(), output.data()));
 
     // Run operator.
     ASSERT_EQ(xnn_status_success,
@@ -283,13 +290,16 @@ class TransposeOperatorTester {
 
     // Verify results.
     for (size_t i = 0; i < count; ++i) {
-      const size_t in_idx = reference_index(input_stride.data(), output_stride.data(), perm_.data(), num_dims(), i);
+      const size_t in_idx =
+          reference_index(input_stride.data(), output_stride.data(),
+                          perm_.data(), num_dims(), i);
       ASSERT_EQ(input[in_idx], output[i]);
     }
   }
 
   void TestRunX32() const {
-    const size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1}, std::multiplies<size_t>());
+    const size_t count = std::accumulate(dims().cbegin(), dims().cend(),
+                                         size_t{1}, std::multiplies<size_t>());
     xnnpack::Buffer<uint32_t> input(count + XNN_EXTRA_BYTES / sizeof(uint32_t));
     xnnpack::Buffer<uint32_t> output(count);
     std::vector<size_t> input_stride(input.size(), 1);
@@ -301,22 +311,24 @@ class TransposeOperatorTester {
     std::iota(input.begin(), input.end(), 0);
 
     // Call transpose eager API
-    ASSERT_EQ(xnn_status_success,
-              xnn_run_transpose_nd_x32(
-                  input.data(), output.data(),
-                  num_dims(), shape_.data(), perm_.data(),
-                  0 /* flags */,
-                  /*threadpool=*/nullptr));
+    ASSERT_EQ(
+        xnn_status_success,
+        xnn_run_transpose_nd_x32(input.data(), output.data(), num_dims(),
+                                 shape_.data(), perm_.data(), 0 /* flags */,
+                                 /*threadpool=*/nullptr));
 
     // Verify results.
     for (size_t i = 0; i < count; ++i) {
-      const size_t in_idx = reference_index(input_stride.data(), output_stride.data(), perm_.data(), num_dims(), i);
+      const size_t in_idx =
+          reference_index(input_stride.data(), output_stride.data(),
+                          perm_.data(), num_dims(), i);
       ASSERT_EQ(input[in_idx], output[i]);
     }
   }
 
   void TestRunX64() const {
-    const size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1}, std::multiplies<size_t>());
+    const size_t count = std::accumulate(dims().cbegin(), dims().cend(),
+                                         size_t{1}, std::multiplies<size_t>());
     xnnpack::Buffer<uint64_t> input(count + XNN_EXTRA_BYTES / sizeof(uint64_t));
     xnnpack::Buffer<uint64_t> output(count);
     std::vector<size_t> input_stride(input.size(), 1);
@@ -328,16 +340,17 @@ class TransposeOperatorTester {
     std::iota(input.begin(), input.end(), 0);
 
     // Call transpose eager API
-    ASSERT_EQ(xnn_status_success,
-              xnn_run_transpose_nd_x64(
-                  input.data(), output.data(),
-                  num_dims(), shape_.data(), perm_.data(),
-                  0 /* flags */,
-                  /*threadpool=*/nullptr));
+    ASSERT_EQ(
+        xnn_status_success,
+        xnn_run_transpose_nd_x64(input.data(), output.data(), num_dims(),
+                                 shape_.data(), perm_.data(), 0 /* flags */,
+                                 /*threadpool=*/nullptr));
 
     // Verify results.
     for (size_t i = 0; i < count; ++i) {
-      const size_t in_idx = reference_index(input_stride.data(), output_stride.data(), perm_.data(), num_dims(), i);
+      const size_t in_idx =
+          reference_index(input_stride.data(), output_stride.data(),
+                          perm_.data(), num_dims(), i);
       ASSERT_EQ(input[in_idx], output[i]);
     }
   }

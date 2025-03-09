@@ -9,11 +9,11 @@
 #include <cstddef>
 
 #include "bench/utils.h"
+#include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/packq.h"
-#include "src/xnnpack/buffer.h"
 #include <benchmark/benchmark.h>
 
 void x8_packq(benchmark::State& state, xnn_x8_packq_f32qp8_ukernel_fn packq,

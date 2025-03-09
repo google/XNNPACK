@@ -8,13 +8,11 @@
 #define __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX512F_H_
 
 #include <assert.h>
+#include <immintrin.h>
 #include <stddef.h>
 #include <stdint.h>
 
-#include <immintrin.h>
-
 #include "src/xnnpack/common.h"
-
 
 // SIMD vector type for f32 using AVX512F.
 typedef __m512 xnn_simd_f32_t;

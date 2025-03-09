@@ -85,7 +85,7 @@ class Avx512Vnni(avx512f_template.Avx512F):
 
   def pre_header(self):
     header_c4 = ''
-    header_c8 = '''
+    header_c8 = """
         .PERMUTATION:
         .long   0
         .long   2
@@ -103,7 +103,7 @@ class Avx512Vnni(avx512f_template.Avx512F):
         .long   26
         .long   28
         .long   30
-        '''
+        """
     match self._c:
       case 4:
         return header_c4
@@ -123,9 +123,7 @@ class Avx512Vnni(avx512f_template.Avx512F):
       case _:
         raise NotImplementedError
     in_asm = {
-        'loop': [
-            loop
-        ],
+        'loop': [loop],
         'compute': ['vpdpbusd  z{ACC}, {A}, {W}\n'],
     }
     return in_asm
@@ -135,7 +133,9 @@ class Avx512Vnni(avx512f_template.Avx512F):
         'loop': [
             'vmovaps  {W}, [{W_ptr} + {offset}]\n',
         ],
-        'after': ['add {W}, {w_step}\n',]
+        'after': [
+            'add {W}, {w_step}\n',
+        ],
     }
     return w_asm
 
@@ -341,6 +341,7 @@ class Avx512VnniQc4w(Avx512Vnni):
         f'xnn_qd8_f32_qc4w_gemm_minmax_ukernel_{self.m}x{self.n * self.n_step()}'
         + f'c{c}__asm_amd64_{self.isa()}'
     )
+
   def weights_asm(self):
     w_asm = {
         'loop': [],

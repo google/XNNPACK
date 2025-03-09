@@ -154,7 +154,8 @@ using FullyConnectedTestQS8 = QuantizedFullyConnectedTestBase<int8_t>;
 using FullyConnectedTestQU8 = QuantizedFullyConnectedTestBase<uint8_t>;
 using FullyConnectedTestF16 = FullyConnectedTestBase<xnn_float16, float, float>;
 using FullyConnectedTestF32 = FullyConnectedTestBase<float>;
-using FullyConnectedTestBF16F32 = FullyConnectedTestBase<xnn_bfloat16, xnn_bfloat16, float, float>;
+using FullyConnectedTestBF16F32 =
+    FullyConnectedTestBase<xnn_bfloat16, xnn_bfloat16, float, float>;
 using DynamicFullyConnectedTestF32 = FullyConnectedTestBase<float>;
 
 TEST_F(FullyConnectedTestQC8, define) {
@@ -3627,9 +3628,9 @@ TEST_F(FullyConnectedTestQD8F32QC4W,
   // 3rd inference: The dq-params should be properly allocated even with memory
   // retrigger
   input_dims[0] += 2;  // +4 total
-  size_t batch_size3 = std::accumulate(input_dims.begin(), input_dims.end() - 1,
-                                       static_cast<size_t>(1),
-                                       std::multiplies<size_t>());
+  size_t batch_size3 =
+      std::accumulate(input_dims.begin(), input_dims.end() - 1,
+                      static_cast<size_t>(1), std::multiplies<size_t>());
   xnnpack::Buffer<float> convert_input3(batch_size3 * input_channels +
                                         XNN_EXTRA_BYTES / sizeof(float));
   std::generate(convert_input3.begin(), convert_input3.end(),
@@ -4183,7 +4184,6 @@ TEST_F(FullyConnectedTestF32, reshape) {
   ASSERT_EQ(runtime->values[fc_node->outputs[0]].size,
             num_output_elements * sizeof(float));
 }
-
 
 TEST_F(FullyConnectedTestF32, matches_operator_api) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));

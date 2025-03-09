@@ -15,11 +15,11 @@
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/isa-checks.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/transpose.h"
-#include "src/xnnpack/buffer.h"
 
 using transpose_ukernel =
     std::function<void(const void* input, void* output, size_t input_row_stride,
@@ -32,8 +32,9 @@ void TestTranspose(transpose_ukernel ukernel, size_t input_stride,
                    size_t output_element_stride, size_t element_size,
                    size_t width, size_t height) {
   xnnpack::Buffer<uint8_t> input(input_stride * height * input_element_stride +
-                             XNN_EXTRA_BYTES);
-  xnnpack::Buffer<uint8_t> output(output_stride * width * output_element_stride);
+                                 XNN_EXTRA_BYTES);
+  xnnpack::Buffer<uint8_t> output(output_stride * width *
+                                  output_element_stride);
   std::iota(input.begin(), input.end(), 0);
 
   // Call optimized micro-kernel.
@@ -97,11 +98,11 @@ TestParams transpose_ukernels[] = {
                               block_width, block_height)                       \
   {#ukernel,     arch_flags,  make_ukernel_wrapper(ukernel),                   \
    element_size, block_width, block_height},
-#include "src/x8-transposec/x8-transposec.h"
 #include "src/x16-transposec/x16-transposec.h"
 #include "src/x24-transposec/x24-transposec.h"
 #include "src/x32-transposec/x32-transposec.h"
 #include "src/x64-transposec/x64-transposec.h"
+#include "src/x8-transposec/x8-transposec.h"
 #include "src/xx-transposev/xx-transposev.h"
 };
 #undef XNN_TRANSPOSE_UKERNEL

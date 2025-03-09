@@ -10,13 +10,19 @@
 
 #include <benchmark/benchmark.h>
 
-
-#define BENCHMARK_DCONV(conv_fn) \
-  BENCHMARK_CAPTURE(conv_fn, mobilenet_v1, "MobileNet v1/v2")->Apply(MobileNetConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(conv_fn, mobilenet_v3, "MobileNet v3")->Apply(MobileNetV3ConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(conv_fn, shufflenet, "ShuffleNet v1/v2")->Apply(ShuffleNetConvArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(conv_fn, squeezenet_v11, "SqueezeNet 1.1")->Apply(SqueezeNetV11ConvArguments)->UseRealTime();
-
+#define BENCHMARK_DCONV(conv_fn)                               \
+  BENCHMARK_CAPTURE(conv_fn, mobilenet_v1, "MobileNet v1/v2")  \
+      ->Apply(MobileNetConvArguments)                          \
+      ->UseRealTime();                                         \
+  BENCHMARK_CAPTURE(conv_fn, mobilenet_v3, "MobileNet v3")     \
+      ->Apply(MobileNetV3ConvArguments)                        \
+      ->UseRealTime();                                         \
+  BENCHMARK_CAPTURE(conv_fn, shufflenet, "ShuffleNet v1/v2")   \
+      ->Apply(ShuffleNetConvArguments)                         \
+      ->UseRealTime();                                         \
+  BENCHMARK_CAPTURE(conv_fn, squeezenet_v11, "SqueezeNet 1.1") \
+      ->Apply(SqueezeNetV11ConvArguments)                      \
+      ->UseRealTime();
 
 // ShuffleNet v1/v2.
 static void ShuffleNetConvArguments(benchmark::internal::Benchmark* b) {
@@ -24,7 +30,7 @@ static void ShuffleNetConvArguments(benchmark::internal::Benchmark* b) {
 
   /********* Conv 1 ********/
   /*        H    W   GCout */
-  b->Args({224, 224,   24});
+  b->Args({224, 224, 24});
 }
 
 // MobileNet v1/v2.
@@ -32,7 +38,7 @@ static void MobileNetConvArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"H", "W", "Cout"});
 
   /*        H    W   GCout */
-  b->Args({224, 224,   32});
+  b->Args({224, 224, 32});
 }
 
 // MobileNet v3 Small/Large.
@@ -41,7 +47,7 @@ static void MobileNetV3ConvArguments(benchmark::internal::Benchmark* b) {
 
   /******************* Initial Stage *******************/
   /*        H    W   GCout */
-  b->Args({224, 224,   16});
+  b->Args({224, 224, 16});
 }
 
 // SqueezeNet 1.1
@@ -50,5 +56,5 @@ static void SqueezeNetV11ConvArguments(benchmark::internal::Benchmark* b) {
 
   /*********************** Conv 1 **********************/
   /*        H    W   GCout */
-  b->Args({224, 224,   64});
+  b->Args({224, 224, 64});
 }

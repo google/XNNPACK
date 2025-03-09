@@ -21,8 +21,8 @@
 #include "src/xnnpack/reference-utils.h"
 
 using xnnpack::dequantize;
-using xnnpack::round_float_to_int;
 using xnnpack::quantize;
+using xnnpack::round_float_to_int;
 
 namespace {
 
@@ -224,7 +224,6 @@ const xnn_unary_elementwise_config* get_convert_config(xnn_datatype input,
       return nullptr;
   }
 }
-
 
 template <typename T>
 struct AbsOp {
@@ -473,7 +472,7 @@ template <typename T>
 struct SignOp {
   explicit SignOp(const xnn_unary_uparams*) {}
 
-  int32_t operator()(int32_t x) const { return x < 0 ? -1 : x > 0 ? 1: 0; }
+  int32_t operator()(int32_t x) const { return x < 0 ? -1 : x > 0 ? 1 : 0; }
   float operator()(float x) const { return x < 0 ? -1 : x > 0 ? 1 : 0; }
 
   static const uint16_t sign_mask = 0x8000;

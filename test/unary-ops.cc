@@ -3,8 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "include/xnnpack.h"
 #include "test/unary-ops.h"
+
+#include "include/xnnpack.h"
 
 const UnaryOpInfo* GetUnaryOpInfo(xnn_unary_operator op) {
   static Abs abs;

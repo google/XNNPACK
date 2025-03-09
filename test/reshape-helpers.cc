@@ -3,6 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include "src/xnnpack/reshape-helpers.h"
+
 #include <algorithm>
 #include <array>
 #include <cstddef>
@@ -17,9 +19,8 @@
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
-#include "src/xnnpack/reshape-helpers.h"
-#include "src/xnnpack/subgraph.h"
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/subgraph.h"
 #include "test/replicable_random_device.h"
 #include "test/runtime-flags.h"
 
@@ -58,13 +59,14 @@ xnn_runtime_t SetupUnary(const std::vector<size_t> &dims) {
     return nullptr;
   }
 
-  if (xnn_define_unary(subgraph, xnn_unary_abs, /*params=*/nullptr, input_id, output_id, /*flags=*/0) !=
-      xnn_status_success) {
+  if (xnn_define_unary(subgraph, xnn_unary_abs, /*params=*/nullptr, input_id,
+                       output_id, /*flags=*/0) != xnn_status_success) {
     return nullptr;
   }
 
   xnn_runtime_t runtime = nullptr;
-  if (xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(),
+  if (xnn_create_runtime_v3(subgraph, nullptr, nullptr,
+                            xnn_test_runtime_flags(),
                             &runtime) != xnn_status_success) {
     return nullptr;
   }
@@ -120,12 +122,13 @@ xnn_runtime_t SetupBinary(const std::vector<size_t> &input0_dims,
   struct xnn_binary_params params = {-std::numeric_limits<float>::infinity(),
                                      std::numeric_limits<float>::infinity()};
   if (xnn_define_binary(subgraph, xnn_binary_add, &params, input0_id, input1_id,
-                      output_id, /*flags=*/0) != xnn_status_success) {
+                        output_id, /*flags=*/0) != xnn_status_success) {
     return nullptr;
   }
 
   xnn_runtime_t runtime = nullptr;
-  if (xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(),
+  if (xnn_create_runtime_v3(subgraph, nullptr, nullptr,
+                            xnn_test_runtime_flags(),
                             &runtime) != xnn_status_success) {
     return nullptr;
   }

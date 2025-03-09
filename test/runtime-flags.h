@@ -8,4 +8,3 @@
 #include <cstdint>
 
 extern "C" uint32_t xnn_test_runtime_flags();
-
