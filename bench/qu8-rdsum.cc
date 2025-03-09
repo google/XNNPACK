@@ -112,6 +112,26 @@ BENCHMARK_CAPTURE(qu8_rdsum, scalar_c4,
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  BENCHMARK_CAPTURE(qu8_rdsum, rvv_u1v,
+                    xnn_qu8_rdsum_ukernel_7p7x__rvv_u1v,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckRVV)
+    ->Apply(BenchmarkRDSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  BENCHMARK_CAPTURE(qu8_rdsum, rvv_u2v,
+                    xnn_qu8_rdsum_ukernel_7p7x__rvv_u2v,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckRVV)
+    ->Apply(BenchmarkRDSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();
 #endif
