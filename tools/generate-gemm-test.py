@@ -737,15 +737,15 @@ def generate_test_cases(
 
   nr_scale = ""
   if vector_tile:
-    ctype = {
-        "qs8": "int8_t",
+    accum_type = {
+        "qs8": "int32_t",
         "qd8": "int32_t",
-        "qp8": "int8_t",
-        "qu8": "uint8_t",
-        "f16": "uint16_t",
+        "qp8": "int32_t",
+        "qu8": "int32_t",
+        "f16": "xnn_float16",
         "f32": "float",
     }[datatype]
-    nr_scale = {"rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype}[isa]
+    nr_scale = {"rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % accum_type}[isa]
   test_fun_name = "".join(ukernel.split("_")[1:4]).upper()
   if test_fun_name in {"QP8F32QC8W"}:
     test_fun_name = "_".join(["Test", test_fun_name])
