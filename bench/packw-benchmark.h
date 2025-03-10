@@ -271,7 +271,7 @@ static void qs8_qc4w_packw(benchmark::State& state,
   const size_t dim_k = state.range(3);  // dim_k is kc parameter
 
   const size_t rounded_n = benchmark::utils::RoundUp(dim_n, nr);
-  const size_t rounded_k = benchmark::utils::RoundUp(dim_k, kr * sr);
+  const size_t rounded_k = round_up_po2(dim_k, 2 * kr * sr);
   const size_t rounded_size = rounded_n * rounded_k / 2 + rounded_n * sizeof(uint32_t);
 
   std::random_device random_device;
