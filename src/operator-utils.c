@@ -33,7 +33,7 @@ void* xnn_get_pointer_to_write_weights(
       return NULL;
     }
   } else {
-    op->packed_weights.pointer = xnn_allocate_zero_simd_memory(aligned_weights_size);
+    op->packed_weights.pointer = xnn_allocate_simd_memory(aligned_weights_size);
     if (op->packed_weights.pointer == NULL) {
       return NULL;
     }
