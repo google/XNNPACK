@@ -288,13 +288,13 @@ static void init_bf16_f32_gemm_config(void) {
   (void) hardware_config;  // May be unused.
   if (XNN_ENABLE_AVX512BF16 && hardware_config->use_x86_avx512bf16) {
     #if XNN_ENABLE_AVX512BF16
-      bf16_f32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_bf16_f32_gemm_minmax_ukernel_1x32c2__asm_amd64_avx512bf16_broadcast);
-      bf16_f32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(11)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_bf16_f32_gemm_minmax_ukernel_11x32c2__asm_amd64_avx512bf16_broadcast);
+      bf16_f32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_bf16_f32_gemm_minmax_ukernel_1x16c2__asm_amd64_avx512bf16_broadcast);
+      bf16_f32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(11)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_bf16_f32_gemm_minmax_ukernel_11x16c2__asm_amd64_avx512bf16_broadcast);
       bf16_f32_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
       bf16_f32_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_bf16_f32_gemm_goi_w;
       bf16_f32_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_bf16_f32_gemm_gio_w;
       bf16_f32_gemm_config.mr = 11;
-      bf16_f32_gemm_config.nr = 32;
+      bf16_f32_gemm_config.nr = 16;
       bf16_f32_gemm_config.log2_kr = 1;
     #endif  // XNN_ENABLE_AVX512BF16
   }
