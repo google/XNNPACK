@@ -1131,21 +1131,22 @@ xnnpack_unit_test(
 
 [xnnpack_unit_test(
     name = "%s_test" % operator,
+    timeout = timeout,
     srcs = [
         "%s.cc" % operator.replace("_", "-"),
     ],
     shard_count = shard_count,
     deps = SUBGRAPH_TEST_DEPS,
-) for operator, shard_count in [
-    ("copy", 1),
-    ("softmax", 1),
-    ("space_to_depth_2d", 1),
-    ("depth_to_space_2d", 1),
-    ("static_constant_pad", 1),
-    ("static_expand_dims", 1),
-    ("static_reshape", 1),
-    ("static_slice", 5),
-    ("static_transpose", 5),
+) for operator, shard_count, timeout in [
+    ("copy", 1, "short"),
+    ("softmax", 1, "moderate"),
+    ("space_to_depth_2d", 1, "short"),
+    ("depth_to_space_2d", 1, "short"),
+    ("static_constant_pad", 1, "short"),
+    ("static_expand_dims", 1, "short"),
+    ("static_reshape", 1, "short"),
+    ("static_slice", 5, "short"),
+    ("static_transpose", 5, "short"),
 ]]
 
 xnnpack_unit_test(
