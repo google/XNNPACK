@@ -24,7 +24,6 @@ SET(PROD_WASM_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-4x2-minmax-wasm.c
   src/f32-igemm/gen/f32-igemm-4x4-minmax-wasm.c
   src/f32-igemm/gen/f32-igemm-4x4-relu-wasm.c
-  src/f32-maxpool/f32-maxpool-9p8x-minmax-wasm-c1.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x4-minmax-wasm.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x4-minmax-wasm.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x4-minmax-wasm.c

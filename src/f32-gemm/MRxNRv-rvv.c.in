@@ -12,7 +12,7 @@ $LMUL = NR[1]
 
 #include <riscv_vector.h>
 
-#include "xnnpack/gemm.h"
+#include "src/xnnpack/gemm.h"
 
 
 $DATATYPE_SPEC = {"F32": "f32"}[DATATYPE]

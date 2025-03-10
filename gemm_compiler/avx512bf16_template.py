@@ -10,6 +10,10 @@ from gemm_compiler import avx512f_template
 class Avx512Bf16(avx512f_template.Avx512F):
   """All SIMD features for avx512f."""
 
+  def __init__(self, m: int, n: int):
+    super().__init__(m=m, n=n)
+    self._c = 2
+
   @property
   def c(self) -> int:
     return 2

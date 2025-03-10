@@ -7,10 +7,10 @@ $assert DATATYPE in ["F32", "QC8"]
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 $if DATATYPE == "QC8" and not NR % 4 == 0:
-  #include "xnnpack/unaligned.h"
+  #include "src/xnnpack/unaligned.h"
 
-#include "xnnpack/math.h"
-#include "xnnpack/spmm.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/spmm.h"
 
 $DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w"}[DATATYPE]
 

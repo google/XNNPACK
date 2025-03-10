@@ -10,10 +10,10 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/mutex.h"
-#include "replicable_random_device.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/mutex.h"
+#include "test/replicable_random_device.h"
 
 TEST(MUTEX, init_lock_unlock_destroy) {
 

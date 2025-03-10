@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-dwconv/unipass-sse.c.in
 //   Generator: tools/xngen
@@ -11,7 +12,7 @@
 
 #include <xmmintrin.h>
 
-#include "xnnpack/dwconv.h"
+#include "src/xnnpack/dwconv.h"
 
 
 void xnn_f32_dwconv_minmax_ukernel_4p4c__sse_acc2(

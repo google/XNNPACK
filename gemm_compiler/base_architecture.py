@@ -14,6 +14,7 @@ class BaseArchitecture:
     """Initializes the `BaseArchitecture` with the given number of rows and columns."""
     self._m = m
     self._n = n // self.n_step()
+    self._c = 1
 
   @property
   def m(self) -> int:

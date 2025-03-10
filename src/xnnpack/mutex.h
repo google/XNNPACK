@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "xnnpack.h"
-#include "xnnpack/common.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
 
 #if XNN_PLATFORM_WINDOWS
 #ifndef WIN32_LEAN_AND_MEAN

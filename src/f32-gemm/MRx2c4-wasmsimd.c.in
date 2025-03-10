@@ -13,7 +13,7 @@ $assert not FMA or ARCH == "RELAXED"
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/gemm.h"
+#include "src/xnnpack/gemm.h"
 
 
 $RANGE_MRX2 = list(range(0, MR, 2))

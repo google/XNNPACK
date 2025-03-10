@@ -16,12 +16,12 @@
 #include <random>
 #include <type_traits>
 
-#include "xnnpack.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/common.h"
-#include "xnnpack/datatype.h"
-#include "xnnpack/math.h"
-#include "xnnpack/reference-utils.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/datatype.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/reference-utils.h"
 
 static float TolExact(float) { return 0.0f; }
 static float TolExact16(float y_ref) {

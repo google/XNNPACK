@@ -11,8 +11,8 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/vbinary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vbinary.h"
 
 void xnn_f32_vcmul_ukernel__avx512f_u64(
     size_t batch,

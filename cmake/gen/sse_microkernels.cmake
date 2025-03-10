@@ -27,7 +27,6 @@ SET(PROD_SSE_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-1x8-minmax-sse-load1.c
   src/f32-igemm/gen/f32-igemm-4x2c4-minmax-sse.c
   src/f32-igemm/gen/f32-igemm-4x8-minmax-sse-load1.c
-  src/f32-maxpool/f32-maxpool-9p8x-minmax-sse-c4.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-sse-c16.c
   src/f32-rminmax/gen/f32-rmax-sse-u16-acc4.c
   src/f32-rminmax/gen/f32-rminmax-sse-u16-acc4.c

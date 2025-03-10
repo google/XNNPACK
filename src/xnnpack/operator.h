@@ -12,15 +12,15 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/compute.h"
-#include "xnnpack/config-types.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microkernel-type.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/operator-type.h"
-#include "pthreadpool.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/compute.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microkernel-type.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/operator-type.h"
+#include <pthreadpool.h>
 
 // Maximum number of pthreadpool parallelization invocations per operator.
 #define XNN_MAX_COMPUTE_INVOCATIONS 3
@@ -39,7 +39,7 @@ struct xnn_ukernel_conv2d {
 };
 
 struct xnn_ukernel_dwconv {
-  xnn_dwconv_unipass_ukernel_fn unipass_fn;
+  xnn_dwconv_ukernel_fn ukernel;
   uint8_t channel_round;
   uint8_t channel_subtile;
   uint8_t channel_tile;
@@ -274,7 +274,6 @@ struct xnn_operator {
     const struct xnn_argmaxpool_config* argmaxpool_config;
     struct {
       const struct xnn_avgpool_config* avgpool_config;
-      const struct xnn_pavgpool_config* pavgpool_config;
       const struct xnn_reduce_config* rdsum_config;
       const struct xnn_reduce_config* rsum_config;
       const struct xnn_unary_elementwise_config* cvt_config;
@@ -352,7 +351,6 @@ struct xnn_operator {
     struct lut_strided_context lut_strided;
     struct max_pooling_context max_pooling;
     struct pad_context pad;
-    struct pixelwise_average_pooling_context pixelwise_average_pooling;
     struct reduce_context reduce;
     struct {
       struct resize_bilinear_context resize_bilinear;

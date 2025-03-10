@@ -19,8 +19,8 @@
   #include <stdlib.h> // For _rotl.
 #endif
 
-#include "xnnpack/common.h"
-#include "xnnpack/fp16.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/fp16.h"
 
 // stdlib.h from Windows 10 SDK defines min & max macros.
 // Undefine them before defining the corresponding functions.
@@ -447,8 +447,6 @@ XNN_INLINE static uint32_t math_cvt_sat_u32_f64(double x) {
       : [i] "=r" (i)
       : [x] "f" (x));
     return i;
-  #elif defined(__clang__) && defined(__wasm__) && defined(__wasm_nontrapping_fptoint__)
-    return __builtin_wasm_trunc_saturate_u_i32_f64(rint(x));
   #else
     x = math_max_f64(x, 0.0);
     x = math_min_f64(x, 4294967295.0);

@@ -10,8 +10,8 @@
 
 #include <emmintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
 
 void xnn_qu8_rsum_ukernel__sse2_u64_acc4(
     size_t batch,

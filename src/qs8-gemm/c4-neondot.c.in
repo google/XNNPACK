@@ -14,10 +14,10 @@ $assert not DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32", "QB4_F16", 
 
 #include <arm_neon.h>
 
-#include "xnnpack/gemm.h"
+#include "src/xnnpack/gemm.h"
 $if REQUANTIZATION == "FP32":
-  #include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/math.h"
+  #include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
 
 
 $#

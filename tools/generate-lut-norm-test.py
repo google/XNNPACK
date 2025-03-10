@@ -137,8 +137,8 @@ def main(args):
 
 #include <gtest/gtest.h>
 
-#include "xnnpack/lut.h"
-#include "lut-norm-microkernel-tester.h"
+#include "src/xnnpack/lut.h"
+#include "test/lut-norm-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
     for ukernel_spec in spec_yaml:

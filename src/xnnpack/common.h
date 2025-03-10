@@ -268,12 +268,6 @@
   #define XNN_DISABLE_TSAN
 #endif
 
-#if XNN_COMPILER_HAS_FEATURE(undefined_behavior_sanitizer)
-  #define XNN_DISABLE_ALIGNMENT_SAN __attribute__((__no_sanitize__("alignment")))
-#else
-  #define XNN_DISABLE_ALIGNMENT_SAN
-#endif
-
 #if XNN_COMPILER_HAS_FEATURE(memory_sanitizer)
   #define XNN_DISABLE_MSAN __attribute__((__no_sanitize__("memory")))
 #else

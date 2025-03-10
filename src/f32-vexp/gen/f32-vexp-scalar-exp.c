@@ -10,8 +10,8 @@
 #include <assert.h>
 #include <math.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_f32_vexp_ukernel__scalar_exp_u1(

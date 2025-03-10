@@ -8,14 +8,14 @@
 #include <stdint.h>  // For uint32_t.
 #include <string.h>
 
-#include "xnnpack.h"
-#include "xnnpack/allocator.h"
-#include "xnnpack/cache.h"
-#include "xnnpack/common.h"
-#include "xnnpack/log.h"
-#include "xnnpack/math.h"
-#include "xnnpack/memory.h"
-#include "xnnpack/mutex.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/allocator.h"
+#include "src/xnnpack/cache.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/memory.h"
+#include "src/xnnpack/mutex.h"
 
 #define XNN_CACHE_HASH_SEED 7
 #define XNN_CACHE_INITIAL_BUCKETS 32

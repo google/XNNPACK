@@ -6,7 +6,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "dwconv-microkernel-tester.h"
+#include "test/dwconv-microkernel-tester.h"
 
 #include <stdint.h>
 
@@ -21,17 +21,17 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microkernel-utils.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/pack.h"
-#include "xnnpack/requantization.h"
-#include "xnnpack/buffer.h"
-#include "replicable_random_device.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microkernel-utils.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/pack.h"
+#include "src/xnnpack/requantization.h"
+#include "src/xnnpack/buffer.h"
+#include "test/replicable_random_device.h"
 
 TEST_P(DWConvTest, Test) {
   const DWConvTestParams& params = GetParam();
@@ -78,7 +78,7 @@ TEST_P(DWConvTest, Test) {
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(DWConvTest);
 
 void DWConvMicrokernelTester::Test(
-    xnn_qu8_dwconv_minmax_unipass_ukernel_fn dwconv_minmax,
+    xnn_qu8_dwconv_minmax_ukernel_fn dwconv_minmax,
     xnn_init_qu8_conv_minmax_params_fn init_params,
     xnn_qu8_requantize_fn requantize) const {
   xnnpack::ReplicableRandomDevice rng;
@@ -210,7 +210,7 @@ void DWConvMicrokernelTester::Test(
 }
 
 void DWConvMicrokernelTester::Test(
-    xnn_qs8_qc8w_dwconv_minmax_unipass_ukernel_fn dwconv_minmax,
+    xnn_qs8_qc8w_dwconv_minmax_ukernel_fn dwconv_minmax,
     xnn_init_qs8_qc8w_conv_minmax_params_fn init_params,
     xnn_qs8_requantize_fn requantize) const {
   xnnpack::ReplicableRandomDevice rng;
@@ -356,7 +356,7 @@ void DWConvMicrokernelTester::Test(
 }
 
 void DWConvMicrokernelTester::Test(
-    xnn_qs8_dwconv_minmax_unipass_ukernel_fn dwconv_minmax,
+    xnn_qs8_dwconv_minmax_ukernel_fn dwconv_minmax,
     xnn_init_qs8_conv_minmax_params_fn init_params,
     xnn_qs8_requantize_fn requantize) const {
   xnnpack::ReplicableRandomDevice rng;
@@ -491,7 +491,7 @@ void DWConvMicrokernelTester::Test(
 }
 
 void DWConvMicrokernelTester::Test(
-    xnn_f16_dwconv_minmax_unipass_ukernel_fn dwconv_minmax,
+    xnn_f16_dwconv_minmax_ukernel_fn dwconv_minmax,
     xnn_init_f16_minmax_params_fn init_params) const {
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist;
@@ -668,7 +668,7 @@ void DWConvMicrokernelTester::Test(
 }
 
 void DWConvMicrokernelTester::Test(
-    xnn_f32_dwconv_minmax_unipass_ukernel_fn dwconv_minmax,
+    xnn_f32_dwconv_minmax_ukernel_fn dwconv_minmax,
     xnn_init_f32_minmax_params_fn init_params) const {
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist;

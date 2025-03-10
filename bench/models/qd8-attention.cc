@@ -12,8 +12,8 @@
 #include <limits>
 #include <random>
 
-#include "models.h"
-#include "xnnpack.h"
+#include "bench/models/models.h"
+#include "include/xnnpack.h"
 
 namespace models {
 

@@ -8,8 +8,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/microparams.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -24,7 +24,7 @@ extern "C" {
       size_t channel_subtile_stride,                                                   \
       const struct xnn_x32_packb_params* params);                                       \
 
-#include "x32-zerob/x32-zerob.h"
+#include "src/x32-zerob/x32-zerob.h"
 
 #undef XNN_UKERNEL
 

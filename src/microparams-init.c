@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack/microparams-init.h"
+#include "src/xnnpack/microparams-init.h"
 
 #include <assert.h>
 #include <math.h>
@@ -11,12 +11,12 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/requantization.h"
-#include "xnnpack/unaligned.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/requantization.h"
+#include "src/xnnpack/unaligned.h"
 
 size_t xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params(
   union xnn_qs8_qc8w_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],

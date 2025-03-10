@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/x32-packw/neon.c.in
 //   Generator: tools/xngen
@@ -14,7 +15,7 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/packw.h"
+#include "src/xnnpack/packw.h"
 
 
 void xnn_x32_packw_gemm_goi_ukernel_x12__neon_ld4lane_u4(

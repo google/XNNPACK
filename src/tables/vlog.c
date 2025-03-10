@@ -5,7 +5,7 @@
 
 #include <stdint.h>
 
-#include "xnnpack/common.h"
+#include "src/xnnpack/common.h"
 
 
 // Log2 table of 128 fractional segments.

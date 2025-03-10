@@ -14,31 +14,27 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "xnnpack.h"
-#include "xnnpack/allocator.h"
-#include "xnnpack/cache.h"
-#include "xnnpack/common.h"
-#include "xnnpack/compute.h"
-#include "xnnpack/config-types.h"
-#include "xnnpack/config.h"
-#include "xnnpack/hardware-config.h"
-#include "xnnpack/indirection.h"
-#include "xnnpack/log.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microkernel-type.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/operator-type.h"
-#include "xnnpack/operator-utils.h"
-#include "xnnpack/operator.h"
-#include "xnnpack/pack.h"
-#include "xnnpack/params.h"
-#include "pthreadpool.h"
-
-#ifndef XNN_ENABLE_GEMM_M_SPECIALIZATION
-#error "XNN_ENABLE_GEMM_M_SPECIALIZATION is not defined"
-#endif
+#include "include/xnnpack.h"
+#include "src/xnnpack/allocator.h"
+#include "src/xnnpack/cache.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/compute.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/config.h"
+#include "src/xnnpack/hardware-config.h"
+#include "src/xnnpack/indirection.h"
+#include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microkernel-type.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/operator-type.h"
+#include "src/xnnpack/operator-utils.h"
+#include "src/xnnpack/operator.h"
+#include "src/xnnpack/pack.h"
+#include "src/xnnpack/params.h"
+#include <pthreadpool.h>
 
 static inline size_t compute_output_dimension_with_tf_same_padding(
     size_t input_dimension,
@@ -227,9 +223,9 @@ static enum xnn_status create_dwconv_path(
         convolution_op->weights_cache, &cache_key, weights_ptr, aligned_total_weights_size);
   }
 
-  const union xnn_dwconv_ukernel* ukernels = &dwconv_ukernel->minmax;
-  if (linear_activation && dwconv_ukernel->linear.unipass != NULL) {
-    ukernels = &dwconv_ukernel->linear;
+  xnn_dwconv_ukernel_fn ukernel = dwconv_ukernel->minmax;
+  if (linear_activation && dwconv_ukernel->linear != NULL) {
+    ukernel = dwconv_ukernel->linear;
   }
   convolution_op->ukernel.dwconv = (struct xnn_ukernel_dwconv) {
     .channel_round = dwconv_ukernel->channel_round,
@@ -238,7 +234,7 @@ static enum xnn_status create_dwconv_path(
     .primary_tile = primary_tile,
   };
 
-  convolution_op->ukernel.dwconv.unipass_fn = ukernels->unipass;
+  convolution_op->ukernel.dwconv.ukernel = ukernel;
 
   *zero_size = XNN_EXTRA_BYTES + (c_stride << log2_input_element_size);
   return xnn_status_success;
@@ -1924,17 +1920,10 @@ static enum xnn_status reshape_igemm(
   const size_t output_width = convolution_op->output_width;
   const size_t output_size = output_height * output_width;
 
-  uint32_t mr = convolution_op->ukernel.igemm.mr;
   const uint32_t nr = convolution_op->ukernel.igemm.nr;
   struct xnn_hmp_igemm_ukernel* igemm_cases = convolution_op->ukernel.igemm.igemm_cases;
-
-  #if XNN_ENABLE_GEMM_M_SPECIALIZATION
-    mr = xnn_get_heuristic_mr_igemm(output_size, mr, nr, igemm_cases);
-  #else
-    if (output_size == 1 && igemm_cases[0].function[XNN_UARCH_DEFAULT] != NULL) {
-      mr = 1;
-    }
-  #endif
+  const uint32_t mr =
+      xnn_get_heuristic_mr_igemm(output_size, convolution_op->ukernel.igemm.mr, nr, igemm_cases);
 
   struct xnn_hmp_igemm_ukernel igemm_ukernel = igemm_cases[mr - 1];
 
@@ -2329,7 +2318,7 @@ static enum xnn_status reshape_dwconv(
   convolution_op->compute[dwconv_compute_index].tile[0] = max(tile_size, channel_tile);
   convolution_op->compute[dwconv_compute_index].type = xnn_parallelization_type_3d_tile_1d;
   convolution_op->compute[dwconv_compute_index].task_3d_tile_1d = (pthreadpool_task_3d_tile_1d_t) xnn_compute_dwconv_unipass;
-  convolution_op->context.dwconv.dwconv.unipass_ukernel = convolution_op->ukernel.dwconv.unipass_fn;
+  convolution_op->context.dwconv.dwconv.ukernel = convolution_op->ukernel.dwconv.ukernel;
 
   *workspace_size = total_workspace_size;
   *workspace_alignment = total_workspace_size == 0 ? 1 : XNN_ALLOCATION_ALIGNMENT;

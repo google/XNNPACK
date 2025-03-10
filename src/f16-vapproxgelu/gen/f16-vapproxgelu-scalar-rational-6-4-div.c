@@ -10,12 +10,12 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "xnnpack/simd/f16-scalar.h"
+#include "src/xnnpack/simd/f16-scalar.h"
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_f16_vapproxgelu_ukernel__scalar_rational_6_4_div_u1(

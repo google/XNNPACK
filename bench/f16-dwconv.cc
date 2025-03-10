@@ -11,23 +11,23 @@
 #include <random>
 #include <vector>
 
-#include "dwconv.h"
-#include "utils.h"
-#include "xnnpack.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/common.h"
-#include "xnnpack/dwconv.h"
-#include "xnnpack/hardware-config.h"
-#include "xnnpack/indirection.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microkernel-utils.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/pack.h"
+#include "bench/dwconv.h"
+#include "bench/utils.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/hardware-config.h"
+#include "src/xnnpack/indirection.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microkernel-utils.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/pack.h"
 #include <benchmark/benchmark.h>
 
 static void bench_impl(uint64_t arch_flags, benchmark::State& state,
-                       xnn_f16_dwconv_minmax_unipass_ukernel_fn dwconv,
+                       xnn_f16_dwconv_minmax_ukernel_fn dwconv,
                        xnn_init_f16_minmax_params_fn init_params,
                        uint32_t channel_tile, uint32_t primary_tile) {
   if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
@@ -147,15 +147,15 @@ static void bench_impl(uint64_t arch_flags, benchmark::State& state,
     benchmark::Counter::kIsRate);
 }
 
-#define XNN_DWCONV_UNIPASS(arch_flags, ukernel, c_block, is_pipelined, cr, kr, \
+#define XNN_UKERNEL(arch_flags, ukernel, c_block, is_pipelined, cr, kr, \
                            datatype, weights_type, params_type, init_params)   \
   static void BM_##ukernel(benchmark::State& state, const char* net) {         \
     bench_impl(arch_flags, state, ukernel, init_params, cr, kr);               \
   }                                                                            \
   BENCHMARK_DWCONV(BM_##ukernel);
 
-// #include "f16-dwconv/f16-dwconv-unipass.h"
-#include "f16-dwconv/f16-dwconv-minmax-unipass.h"
+// #include "src/f16-dwconv/f16-dwconv.h"
+#include "src/f16-dwconv/f16-dwconv-minmax.h"
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();

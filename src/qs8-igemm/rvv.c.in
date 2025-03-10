@@ -11,8 +11,8 @@ $assert NR in ["m4", "m8"]
 
 #include <riscv_vector.h>
 
-#include "xnnpack/math.h"
-#include "xnnpack/igemm.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/igemm.h"
 
 $OUT_LMUL = NR
 $IN_LMUL = {"m4": "m1", "m8": "m2"}[OUT_LMUL]

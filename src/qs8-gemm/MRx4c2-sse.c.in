@@ -14,9 +14,9 @@ $assert MR <= 4
 $SSE_HEADER = {2: "emmintrin.h", 4: "smmintrin.h"}[SSE]
 #include <${SSE_HEADER}>
 
-#include "xnnpack/gemm.h"
-#include "xnnpack/math.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/unaligned.h"
 
 
 

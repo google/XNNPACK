@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <stddef.h>
-#include "xnnpack/microparams.h"
+#include "src/xnnpack/microparams.h"
 
 #if XNN_ENABLE_KLEIDIAI
   // Keep this line indented to avoid it being pulled out of the #ifdef when the

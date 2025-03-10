@@ -15,10 +15,10 @@ $assert IZP in [0, 128]
 
 #include <immintrin.h>
 
-#include "xnnpack/packw.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/packw.h"
+#include "src/xnnpack/unaligned.h"
 $if PREFETCH:
-  #include "xnnpack/prefetch.h"
+  #include "src/xnnpack/prefetch.h"
 $if VARIANT == "MADD":
   // AVXVNNI replacement that uses vpmaddubsw.
   // u7 is vone.  s8 is int8 weights.

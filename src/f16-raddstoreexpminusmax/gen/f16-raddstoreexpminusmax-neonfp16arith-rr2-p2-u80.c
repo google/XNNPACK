@@ -11,8 +11,8 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/raddstoreexpminusmax.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/raddstoreexpminusmax.h"
 
 
 void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u80(

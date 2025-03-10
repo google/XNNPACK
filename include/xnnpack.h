@@ -12,7 +12,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "pthreadpool.h"
+#include <pthreadpool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -2556,15 +2556,12 @@ enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
   size_t channels,
   size_t input_pixel_stride,
   size_t output_pixel_stride,
-  size_t* workspace_size,
-  size_t* workspace_alignment,
   size_t* output_height_out,
   size_t* output_width_out,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
   xnn_operator_t argmax_pooling_op,
-  void* workspace,
   const float* input,
   float* output,
   uint32_t* index);

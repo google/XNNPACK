@@ -9,9 +9,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/config-types.h"
-#include "xnnpack/microfnptr.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/microfnptr.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -127,8 +127,8 @@ XNN_INTERNAL const struct xnn_xx_pad_config* xnn_init_xx_pad_config();
 XNN_INTERNAL const struct xnn_avgpool_config* xnn_init_f16_avgpool_config();
 XNN_INTERNAL const struct xnn_avgpool_config* xnn_init_f32_avgpool_config();
 
-XNN_INTERNAL const struct xnn_pavgpool_config* xnn_init_f16_pavgpool_config();
-XNN_INTERNAL const struct xnn_pavgpool_config* xnn_init_f32_pavgpool_config();
+XNN_INTERNAL const struct xnn_avgpool_config* xnn_init_f16_pavgpool_config();
+XNN_INTERNAL const struct xnn_avgpool_config* xnn_init_f32_pavgpool_config();
 
 #define XNN_MAX_F16_DWCONV_UKERNELS 4
 #define XNN_MAX_F32_DWCONV_UKERNELS 4
@@ -297,8 +297,6 @@ XNN_INTERNAL const struct xnn_vmulcaddc_config* xnn_init_f32_vmulcaddc_config();
 
 XNN_INTERNAL const struct xnn_raddstoreexpminusmax_config* xnn_init_f16_raddstoreexpminusmax_config();
 XNN_INTERNAL const struct xnn_raddstoreexpminusmax_config* xnn_init_f32_raddstoreexpminusmax_config();
-
-#define XNN_MAX_F32_ARGMAXPOOL_UKERNELS 3
 
 XNN_INTERNAL const struct xnn_argmaxpool_config* xnn_init_f32_argmaxpool_config();
 

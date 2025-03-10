@@ -11,10 +11,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/simd/f32-sse2.h"
+#include "src/xnnpack/simd/f32-sse2.h"
 
-#include "xnnpack/common.h"
-#include "xnnpack/microparams.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
 
 void xnn_f32_avgpool_minmax_ukernel_9p__sse2_u4(
     size_t output_pixels,
@@ -23,6 +23,7 @@ void xnn_f32_avgpool_minmax_ukernel_9p__sse2_u4(
     const float** input,
     size_t input_offset,
     const float* zero,
+    const float* multiplier,
     float* output,
     size_t input_increment,
     size_t output_increment,
@@ -35,8 +36,8 @@ void xnn_f32_avgpool_minmax_ukernel_9p__sse2_u4(
   const xnn_simd_f32_t vmax = xnn_set1_f32(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
-  const xnn_simd_f32_t vscale = xnn_set1_f32(params->scalar.scale);
-  XNN_FORCE_REALIZATION(vscale);
+
+  xnn_simd_f32_t vscale = xnn_set1_f32(params->scalar.scale);
 
   do {
     // Start with the previous output as the zero buffer.
@@ -193,6 +194,10 @@ void xnn_f32_avgpool_minmax_ukernel_9p__sse2_u4(
       i8 = (const float*) ((uintptr_t) i8 + input_offset);
     }
 
+    if (multiplier != NULL) {
+      vscale = xnn_set1_f32(*multiplier++);
+    }
+    float* o = output;
     size_t c = channels;
     for (; c >= 4; c -= 4) {
       const xnn_simd_f32_t vi0 = xnn_loadu_f32(i0); i0 += 4;
@@ -221,7 +226,7 @@ void xnn_f32_avgpool_minmax_ukernel_9p__sse2_u4(
       vacc = xnn_max_f32(vacc, vmin);
       vacc = xnn_min_f32(vacc, vmax);
 
-      xnn_storeu_f32(output, vacc); output += 4;
+      xnn_storeu_f32(o, vacc); o += 4;
     }
     if (c > 0) {
       const xnn_simd_f32_t vi0 = xnn_load_tail_f32(i0, c);
@@ -250,7 +255,7 @@ void xnn_f32_avgpool_minmax_ukernel_9p__sse2_u4(
       vacc = xnn_max_f32(vacc, vmin);
       vacc = xnn_min_f32(vacc, vmax);
 
-      xnn_store_tail_f32(output, vacc, c); output += c;
+      xnn_store_tail_f32(o, vacc, c); o += c;
     }
 
     input = (const float**) ((uintptr_t) input + input_increment);

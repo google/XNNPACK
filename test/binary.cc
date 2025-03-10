@@ -5,8 +5,6 @@
 
 #include <algorithm>
 #include <array>
-#include <cctype>
-#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -17,21 +15,18 @@
 #include <sstream>
 #include <string>
 #include <tuple>
-#include <utility>
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/datatype.h"
-#include "xnnpack/log.h"
-#include "xnnpack/math.h"
-#include "xnnpack/operator-utils.h"
-#include "xnnpack/operator.h"
-#include "xnnpack/subgraph.h"
-#include "operator-test-utils.h"
-#include "replicable_random_device.h"
-#include "runtime-flags.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/datatype.h"
+#include "src/xnnpack/operator-utils.h"
+#include "src/xnnpack/operator.h"
+#include "src/xnnpack/subgraph.h"
+#include "test/operators/operator-test-utils.h"
+#include "test/replicable_random_device.h"
+#include "test/runtime-flags.h"
 
 using ::testing::Combine;
 using ::testing::ValuesIn;

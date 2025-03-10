@@ -12,7 +12,7 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
+#include "src/xnnpack/common.h"
 
 // SIMD vector type for s32 using NEON.
 typedef int32x4_t xnn_simd_s32_t;

@@ -12,7 +12,7 @@ $assert REQUANTIZATION in ["FP32"]
 $assert DATATYPE in ["QC8", "QS8", "QU8"]
 #include <assert.h>
 #include <riscv_vector.h>
-#include "xnnpack/dwconv.h"
+#include "src/xnnpack/dwconv.h"
 
 $DATATYPE_SPEC = {"QS8": "qs8", "QC8": "qs8_qc8w", "QU8": "qu8"}[DATATYPE]
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar"

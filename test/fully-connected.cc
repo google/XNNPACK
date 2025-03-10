@@ -18,17 +18,16 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/node-type.h"
-#include "xnnpack/operator.h"
-#include "xnnpack/requantization.h"
-#include "xnnpack/subgraph.h"
-#include "replicable_random_device.h"
-#include "runtime-flags.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/node-type.h"
+#include "src/xnnpack/operator.h"
+#include "src/xnnpack/requantization.h"
+#include "src/xnnpack/subgraph.h"
+#include "test/replicable_random_device.h"
+#include "test/runtime-flags.h"
 
 using ::testing::ElementsAreArray;
 using ::testing::FloatNear;
@@ -1411,10 +1410,6 @@ TEST_F(FullyConnectedTestBF16F32, matches_operator_api) {
 
   xnn_operator_t op = nullptr;
 
-  // std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  // std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng);
-  // }); std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng);
-  // });
   int counter = 0;
   std::generate(input.begin(), input.end(),
                 [&]() { return static_cast<float>(counter++ % 10); });

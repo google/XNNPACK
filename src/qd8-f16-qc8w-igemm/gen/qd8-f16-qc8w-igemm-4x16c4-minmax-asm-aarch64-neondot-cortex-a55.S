@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-igemm/4x16c4-aarch64-neondot-cortex-a55.S.in
 //   Generator: tools/xngen
@@ -8,7 +9,7 @@
 // LICENSE file in the root directory of this source tree.
 
 
-#include "xnnpack/assembly.h"
+#include "src/xnnpack/assembly.h"
 
 # void xnn_qd8_f16_qc8w_igemm_minmax__ukernel_4x16c4__asm_aarch64_neondotfp16arith_cortex_a55(
 #     size_t mr,                 x0
@@ -23,7 +24,7 @@
 #     size_t a_offset,                   [sp + 8] -> x8
 #     const int8_t* zero,                [sp + 16] -> x12
 #     const int8_t* zero_data,             [sp + 24] -> x19
-#     const struct xnn_f16_minmax_params *params,  [sp + 32]  -> x11
+#     const union xnn_f16_minmax_params *params,  [sp + 32]  -> x11
 #     const struct xnn_qd8_quantization_params *quantization_params) [sp + 40] -> x17
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.

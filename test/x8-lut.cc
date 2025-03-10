@@ -9,10 +9,10 @@
 
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/lut.h"
-#include "lut-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/lut.h"
+#include "test/lut-microkernel-tester.h"
 
 
 TEST(X8_LUT__SCALAR_U1, batch_eq_1) {

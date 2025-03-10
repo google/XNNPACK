@@ -5,11 +5,11 @@
 
 
 #include <benchmark/benchmark.h>
-#include "bgemm.h"
-#include "packq-benchmark.h"
-#include "utils.h"
-#include "xnnpack/common.h"
-#include "xnnpack/packq.h"
+#include "bench/bgemm.h"
+#include "bench/packq-benchmark.h"
+#include "bench/utils.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/packq.h"
 
 
 static void x8_packq(benchmark::State& state, const char* net,
@@ -31,7 +31,7 @@ BENCHMARK_CAPTURE_BGEMM(x8_packq, ukernel##_mr4_kr1_, ukernel, arch_flags, /*mr=
 BENCHMARK_CAPTURE_BGEMM(x8_packq, ukernel##_mr4_kr2_, ukernel, arch_flags, /*mr=*/4, /*kr=*/2); \
 BENCHMARK_CAPTURE_BGEMM(x8_packq, ukernel##_mr4_kr4_, ukernel, arch_flags, /*mr=*/4, /*kr=*/4);
 
-#include "x8-packq/x8-packq.h"
+#include "src/x8-packq/x8-packq.h"
 
 #undef XNN_UKERNEL
 

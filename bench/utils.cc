@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "utils.h"
+#include "bench/utils.h"
 
 #include <algorithm>
 #include <atomic>
@@ -28,10 +28,10 @@
 #include <cpuinfo.h>
 #endif  // XNN_ENABLE_CPUINFO
 
-#include "xnnpack/common.h"
-#include "xnnpack/hardware-config.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/hardware-config.h"
 #include <benchmark/benchmark.h>
-#include "pthreadpool.h"
+#include <pthreadpool.h>
 
 // Common flags for all benchmarks.
 int FLAGS_num_threads = 1;

@@ -11,7 +11,7 @@
 
 #include <riscv_vector.h>
 
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_qs8_vlrelu_ukernel__rvv_u1v(

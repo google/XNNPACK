@@ -11,8 +11,8 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/vscaleexpminusmax.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vscaleexpminusmax.h"
 
 
 void xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_u24(

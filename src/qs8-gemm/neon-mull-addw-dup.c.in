@@ -11,8 +11,8 @@ $assert REQUANTIZATION == "RNDNU"
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/gemm.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/gemm.h"
 
 
 void xnn_qs8_gemm_minmax_rndnu_ukernel_${MR}x${NR}__neon_mull_addw_dup(

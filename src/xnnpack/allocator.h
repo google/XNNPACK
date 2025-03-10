@@ -16,9 +16,9 @@
   #include <alloca.h>
 #endif
 
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/params.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/params.h"
 
 #ifdef __cplusplus
 extern "C" {

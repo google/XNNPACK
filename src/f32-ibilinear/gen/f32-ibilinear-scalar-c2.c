@@ -9,7 +9,7 @@
 
 #include <assert.h>
 
-#include "xnnpack/ibilinear.h"
+#include "src/xnnpack/ibilinear.h"
 
 
 void xnn_f32_ibilinear_ukernel__scalar_c2(

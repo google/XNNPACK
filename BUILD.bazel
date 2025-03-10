@@ -33,6 +33,7 @@ load(
     "xnnpack_simd_s16_archs",
     "xnnpack_simd_s32_archs",
     "xnnpack_simd_s8_archs",
+    "xnnpack_simd_u8_archs",
 )
 load(
     "//gen:microkernels.bzl",
@@ -59,10 +60,9 @@ exports_files(["preamble.js.lds"])
 
 MICROKERNEL_DEFS = [
     "src/f16-avgpool/f16-avgpool-minmax.h",
-    "src/f16-dwconv/f16-dwconv-minmax-unipass.h",
+    "src/f16-dwconv/f16-dwconv-minmax.h",
     "src/f16-f32-vcvt/f16-f32-vcvt.h",
     "src/f16-maxpool/f16-maxpool-minmax.h",
-    "src/f16-pavgpool/f16-pavgpool-minmax.h",
     "src/f16-qu8-vcvt/f16-qu8-vcvt.h",
     "src/f16-qs8-vcvt/f16-qs8-vcvt.h",
     "src/f16-vabs/f16-vabs.h",
@@ -104,11 +104,10 @@ MICROKERNEL_DEFS = [
     "src/f16-vsqrt/f16-vsqrt.h",
     "src/f16-vtanh/f16-vtanh.h",
     "src/f32-avgpool/f32-avgpool-minmax.h",
-    "src/f32-dwconv/f32-dwconv-minmax-unipass.h",
-    "src/f32-dwconv/f32-dwconv-unipass.h",
+    "src/f32-dwconv/f32-dwconv-minmax.h",
+    "src/f32-dwconv/f32-dwconv.h",
     "src/f32-f16-vcvt/f32-f16-vcvt.h",
     "src/f32-maxpool/f32-maxpool-minmax.h",
-    "src/f32-pavgpool/f32-pavgpool-minmax.h",
     "src/f32-qs8-vcvt/f32-qs8-vcvt.h",
     "src/f32-qu8-vcvt/f32-qu8-vcvt.h",
     "src/f32-raddextexp/f32-raddextexp.h",
@@ -158,13 +157,13 @@ MICROKERNEL_DEFS = [
     "src/f32-vsqr/f32-vsqr.h",
     "src/f32-vsqrt/f32-vsqrt.h",
     "src/f32-vtanh/f32-vtanh.h",
-    "src/qs8-dwconv/qs8-dwconv-minmax-unipass-fp32.h",
-    "src/qs8-dwconv/qs8-dwconv-minmax-unipass-rndnu.h",
+    "src/qs8-dwconv/qs8-dwconv-minmax-fp32.h",
+    "src/qs8-dwconv/qs8-dwconv-minmax-rndnu.h",
     "src/qs8-f16-vcvt/qs8-f16-vcvt.h",
     "src/qs8-f32-vcvt/qs8-f32-vcvt.h",
     "src/qs8-packw/qs8-packw.h",
     "src/qs8-qc4w-packw/qs8-qc4w-packw.h",
-    "src/qs8-qc8w-dwconv/qs8-qc8w-dwconv-minmax-unipass-fp32.h",
+    "src/qs8-qc8w-dwconv/qs8-qc8w-dwconv-minmax-fp32.h",
     "src/qs8-vadd/qs8-vadd-minmax.h",
     "src/qs8-vaddc/qs8-vaddc-minmax.h",
     "src/qs8-vcvt/qs8-vcvt.h",
@@ -173,8 +172,8 @@ MICROKERNEL_DEFS = [
     "src/qs8-vmul/qs8-vmul-minmax-rndnu.h",
     "src/qs8-vmulc/qs8-vmulc-minmax-fp32.h",
     "src/qs8-vmulc/qs8-vmulc-minmax-rndnu.h",
-    "src/qu8-dwconv/qu8-dwconv-minmax-unipass-fp32.h",
-    "src/qu8-dwconv/qu8-dwconv-minmax-unipass-rndnu.h",
+    "src/qu8-dwconv/qu8-dwconv-minmax-fp32.h",
+    "src/qu8-dwconv/qu8-dwconv-minmax-rndnu.h",
     "src/qu8-f32-vcvt/qu8-f32-vcvt.h",
     "src/qu8-vadd/qu8-vadd-minmax.h",
     "src/qu8-vaddc/qu8-vaddc-minmax.h",
@@ -225,7 +224,6 @@ MICROKERNEL_HDRS = [
     "src/xnnpack/packx.h",
     "src/xnnpack/pad.h",
     "src/xnnpack/pack-lh.h",
-    "src/xnnpack/pavgpool.h",
     "src/xnnpack/ppmm.h",
     "src/xnnpack/quantization.h",
     "src/xnnpack/raddexpminusmax.h",
@@ -277,6 +275,9 @@ SIMD_HEADERS = [
 ] + [
     "src/xnnpack/simd/s8-" + arch + ".h"
     for arch in xnnpack_simd_s8_archs()
+] + [
+    "src/xnnpack/simd/u8-" + arch + ".h"
+    for arch in xnnpack_simd_u8_archs()
 ]
 
 exports_files(SIMD_HEADERS)
@@ -989,7 +990,6 @@ xnnpack_cc_library(
         ":cache",
         ":common",
         ":datatype",
-        ":fp16",
         ":hardware_config",
         ":indirection",
         ":internal",
@@ -1000,7 +1000,6 @@ xnnpack_cc_library(
         ":microkernel_utils",
         ":microkernels_h",
         ":microparams_init",
-        ":node_type",
         ":normalization",
         ":operator_type",
         ":operator_utils",
@@ -1541,18 +1540,6 @@ config_setting(
 config_setting(
     name = "slinky_enabled",
     define_values = {"xnn_use_slinky": "true"},
-)
-
-# Enables usage of mr heuristic to select microkernels.
-config_setting(
-    name = "xnn_enable_gemm_m_specialization_explicit_true",
-    define_values = {"xnn_enable_gemm_m_specialization": "true"},
-)
-
-# Disables usage of mr heuristic to select microkernels.
-config_setting(
-    name = "xnn_enable_gemm_m_specialization_explicit_false",
-    define_values = {"xnn_enable_gemm_m_specialization": "false"},
 )
 
 # Enables usage of WASM SIMD AVX-256 revectorization kernels.
@@ -2108,22 +2095,6 @@ alias(
         ":xnn_enable_memopt_explicit_true": ":xnn_enable_memopt_explicit_true",
         ":xnn_enable_memopt_explicit_false": ":xnn_enable_memopt_explicit_true",
         "//conditions:default": ":memopt_enabled_by_default",
-    }),
-)
-
-selects.config_setting_group(
-    name = "gemm_m_specialization_enabled_by_default",
-    match_any = [
-        "//conditions:default",
-    ],
-)
-
-alias(
-    name = "gemm_m_specialization_enabled",
-    actual = select({
-        ":xnn_enable_gemm_m_specialization_explicit_true": ":xnn_enable_gemm_m_specialization_explicit_true",
-        ":xnn_enable_gemm_m_specialization_explicit_false": ":xnn_enable_gemm_m_specialization_explicit_true",
-        "//conditions:default": ":gemm_m_specialization_enabled_by_default",
     }),
 )
 

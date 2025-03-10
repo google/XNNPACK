@@ -13,10 +13,10 @@ $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 
 #include <arm_neon.h>
 
-#include "xnnpack/igemm.h"
+#include "src/xnnpack/igemm.h"
 $if REQUANTIZATION == "FP32" and ARMV8:
-  #include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/math.h"
+  #include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
 
 
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8"}[DATATYPE]

@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack.h"
+#include "include/xnnpack.h"
 
 #include <algorithm>
 #include <array>
@@ -14,7 +14,7 @@
 #include <limits>
 #include <random>
 
-#include "xnnpack.h"
+#include "include/xnnpack.h"
 
 // align a size up to XNN_EXTRA_BYTES
 #define XNN_PAD_EXTRA_BYTES(s, t) (((s) + XNN_EXTRA_BYTES / sizeof(t) - 1) & ~(XNN_EXTRA_BYTES / sizeof(t) - 1))

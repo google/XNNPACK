@@ -11,6 +11,7 @@
 
 SET(PROD_SSE41_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-sse41-int16-u16.c
+  src/f16-maxpool/gen/f16-maxpool-9p-minmax-sse41-u8.c
   src/f32-f16-vcvt/gen/f32-f16-vcvt-sse41-u8.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x8-minmax-sse41-dup.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x8-minmax-sse41-dup.c
@@ -60,7 +61,7 @@ SET(PROD_SSE41_MICROKERNEL_SRCS
   src/qu8-vmul/gen/qu8-vmul-minmax-fp32-sse41-mul16-ld64-u16.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-sse41-mul16-ld64-u16.c
   src/s8-ibilinear/gen/s8-ibilinear-sse41-c16.c
-  src/s8-maxpool/s8-maxpool-9p8x-minmax-sse41-c16.c
+  src/s8-maxpool/gen/s8-maxpool-9p-minmax-sse41-u16.c
   src/s8-vclamp/s8-vclamp-sse41-u64.c
   src/u8-ibilinear/gen/u8-ibilinear-sse41-c16.c)
 
@@ -303,6 +304,21 @@ SET(NON_PROD_SSE41_MICROKERNEL_SRCS
   src/qu8-vmul/gen/qu8-vmul-minmax-fp32-sse41-mul16-ld64-u8.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-sse41-mul16-ld64-u8.c
   src/s8-ibilinear/gen/s8-ibilinear-sse41-c8.c
+  src/s8-rminmax/gen/s8-rmax-sse41-u16.c
+  src/s8-rminmax/gen/s8-rmax-sse41-u32-acc2.c
+  src/s8-rminmax/gen/s8-rmax-sse41-u48-acc3.c
+  src/s8-rminmax/gen/s8-rmax-sse41-u64-acc2.c
+  src/s8-rminmax/gen/s8-rmax-sse41-u64-acc4.c
+  src/s8-rminmax/gen/s8-rmin-sse41-u16.c
+  src/s8-rminmax/gen/s8-rmin-sse41-u32-acc2.c
+  src/s8-rminmax/gen/s8-rmin-sse41-u48-acc3.c
+  src/s8-rminmax/gen/s8-rmin-sse41-u64-acc2.c
+  src/s8-rminmax/gen/s8-rmin-sse41-u64-acc4.c
+  src/s8-rminmax/gen/s8-rminmax-sse41-u16.c
+  src/s8-rminmax/gen/s8-rminmax-sse41-u32-acc2.c
+  src/s8-rminmax/gen/s8-rminmax-sse41-u48-acc3.c
+  src/s8-rminmax/gen/s8-rminmax-sse41-u64-acc2.c
+  src/s8-rminmax/gen/s8-rminmax-sse41-u64-acc4.c
   src/u8-ibilinear/gen/u8-ibilinear-sse41-c8.c
   src/x32-packw/gen/x32-packw-gio-sse41-u2.c)
 

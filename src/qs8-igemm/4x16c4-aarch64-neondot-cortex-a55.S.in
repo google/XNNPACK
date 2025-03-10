@@ -8,7 +8,7 @@ $assert DATATYPE in ["QC8", "QS8", "QD8_F16", "QD8_F32"]
 $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 $assert DATATYPE != "QD8" or not REQUANTIZATION
 
-#include "xnnpack/assembly.h"
+#include "src/xnnpack/assembly.h"
 
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8", "QD8_F16" : "qd8_f16_qc8w", "QD8_F32": "qd8_f32_qc8w"}[DATATYPE]
 $PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QS8": "xnn_qs8_conv_minmax_params", "QD8_F16": "xnn_f16_minmax_params", "QD8_F32": "xnn_f32_minmax_params"}[DATATYPE]

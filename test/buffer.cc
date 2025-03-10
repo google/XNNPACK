@@ -1,11 +1,11 @@
-#include "xnnpack/buffer.h"
+#include "src/xnnpack/buffer.h"
 
 #include <algorithm>
 #include <cstdint>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "replicable_random_device.h"
+#include "test/replicable_random_device.h"
 
 namespace xnnpack {
 

@@ -13,7 +13,7 @@ $assert KERNEL_TILE >= 2
 
 #include <arm_neon.h>
 
-#include "xnnpack/dwconv.h"
+#include "src/xnnpack/dwconv.h"
 
 
 void xnn_qu8_dwconv_minmax_rndnu_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__neon_mul8(

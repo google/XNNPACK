@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/x32-packw/gio-simd.c.in
 //   Generator: tools/xngen
@@ -12,10 +13,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/simd/s32-wasmsimd.h"
+#include "src/xnnpack/simd/s32-wasmsimd.h"
 
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/packw.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/packw.h"
 
 static XNN_INLINE xnn_simd_s32_t
 xnn_load_tail_no_oob_s32(const int32_t* input, size_t num_elements) {

@@ -1,0 +1,121 @@
+// Copyright 2025 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE >= 1
+$assert OP in ["MAX", "MIN", "MINMAX"]
+$assert DATATYPE in ["S8", "U8"]
+#include <assert.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
+
+$if DATATYPE == "S8":
+  #include "src/xnnpack/simd/s8-${ARCH}.h"
+  $MIN = "xnn_min_s8"
+  $MAX = "xnn_max_s8"
+  $xnn_simd_X8_t = "xnn_simd_s8_t"
+  $xnn_set1_X8 = "xnn_set1_s8"
+  $xnn_loadu_X8 = "xnn_loadu_s8"
+  $xnn_simd_size_X8 = "xnn_simd_size_s8"
+  $xnn_simd_bytes_X8 = "xnn_simd_bytes_s8"
+  $xnn_horizontal_min_X8 = "xnn_horizontal_min_s8"
+  $xnn_horizontal_max_X8 = "xnn_horizontal_max_s8"
+$elif DATATYPE == "U8":
+  #include "src/xnnpack/simd/u8-${ARCH}.h"
+  $MIN = "xnn_min_u8"
+  $MAX = "xnn_max_u8"
+  $xnn_simd_X8_t = "xnn_simd_u8_t"
+  $xnn_set1_X8 = "xnn_set1_u8"
+  $xnn_loadu_X8 = "xnn_loadu_u8"
+  $xnn_simd_size_X8 = "xnn_simd_size_u8"
+  $xnn_simd_bytes_X8 = "xnn_simd_bytes_u8"
+  $xnn_horizontal_min_X8 = "xnn_horizontal_min_u8"
+  $xnn_horizontal_max_X8 = "xnn_horizontal_max_u8"
+
+$ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
+$EMIT_MIN = "MIN" in OP
+$EMIT_MAX = "MAX" in OP
+$MAX_POS = 1 if OP == "MINMAX" else 0
+$XINT8_T = {"S8": "int8_t", "U8": "uint8_t"}[DATATYPE]
+$SIMD_SIZE = {"scalar": 1, "sse41": 16, "neon": 16, "wasmsimd": 16, "sse2": 16}[ARCH]
+$SIMD_TILE = BATCH_TILE // SIMD_SIZE
+void xnn_${DATATYPE.lower()}_r${OP.lower()}_ukernel__${ARCH}_u${BATCH_TILE}${ACC_SUFFIX}(
+    size_t batch,
+    const ${XINT8_T}* input,
+    ${XINT8_T}* output,
+    const void* params)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(${XINT8_T}) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+  assert(${xnn_simd_size_X8} == ${SIMD_SIZE});
+
+  $if EMIT_MIN:
+    ${xnn_simd_X8_t} vmin0 = ${xnn_set1_X8}(output[0]);
+  $if EMIT_MAX:
+    ${xnn_simd_X8_t} vmax0 = ${xnn_set1_X8}(output[${MAX_POS}]);
+  $for A in range(1, ACCUMULATORS):
+    $if EMIT_MIN:
+      ${xnn_simd_X8_t} vmin${A} = vmin0;
+    $if EMIT_MAX:
+      ${xnn_simd_X8_t} vmax${A} = vmax0;
+
+  $if SIMD_TILE > 1:
+    for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
+      ${xnn_simd_X8_t} vt0 = ${xnn_loadu_X8}(input);
+      $for N in range(1, SIMD_TILE):
+        ${xnn_simd_X8_t} vt${N} = ${xnn_loadu_X8}(input + ${N} * ${xnn_simd_size_X8});
+      input += ${SIMD_TILE} * ${xnn_simd_size_X8};
+
+      $for N in range(SIMD_TILE):
+        $if EMIT_MIN:
+          vmin${N % ACCUMULATORS} = ${MIN}(vmin${N % ACCUMULATORS}, vt${N});
+        $if EMIT_MAX:
+          vmax${N % ACCUMULATORS} = ${MAX}(vmax${N % ACCUMULATORS}, vt${N});
+    }
+    $if ACCUMULATORS > 1:
+      $ACC_SLICE = 1
+      $while ACC_SLICE < ACCUMULATORS:
+        $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+          $if A + ACC_SLICE < ACCUMULATORS:
+            $if EMIT_MIN:
+              vmin${A} = ${MIN}(vmin${A}, vmin${A + ACC_SLICE});
+            $if EMIT_MAX:
+              vmax${A} = ${MAX}(vmax${A}, vmax${A + ACC_SLICE});
+        $ACC_SLICE *= 2
+
+  for (; batch >= ${xnn_simd_bytes_X8}; batch -= ${xnn_simd_bytes_X8}) {
+    ${xnn_simd_X8_t} vt = ${xnn_loadu_X8}(input);
+    input += ${xnn_simd_size_X8};
+
+    $if EMIT_MIN:
+      vmin0 = ${MIN}(vmin0, vt);
+    $if EMIT_MAX:
+      vmax0 = ${MAX}(vmax0, vt);
+  }
+
+  $if EMIT_MIN:
+    ${XINT8_T} min0 = ${xnn_horizontal_min_X8}(vmin0);
+  $if EMIT_MAX:
+    ${XINT8_T} max0 = ${xnn_horizontal_max_X8}(vmax0);
+
+  if XNN_UNLIKELY(batch != 0) {
+    do {
+      const ${XINT8_T} vt = *input++;
+
+      $if EMIT_MIN:
+        min0 = vt > min0 ? min0 : vt;
+      $if EMIT_MAX:
+        max0 = vt > max0 ? vt : max0;
+    } while (--batch != 0);
+  }
+
+  $if EMIT_MIN:
+    *output = min0;
+    output += sizeof(${XINT8_T});
+  $if EMIT_MAX:
+    *output = max0;
+}

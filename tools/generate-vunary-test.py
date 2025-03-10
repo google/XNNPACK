@@ -202,14 +202,14 @@ def main(args):
 #include <limits>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/{op_header}"
-#include "next_prime.h"
-#include "{tester_header}"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/{op_header}"
+#include "test/next_prime.h"
+#include "test/{tester_header}"
 
 """.format(
       microkernel=options.ukernel,
@@ -242,7 +242,7 @@ using TestInfo = {op_type};
   if "rnd" in folder:
     folder = folder[0:8]
 
-  tests += f'#include "{xnncommon.xnnpack_src()}{folder}/{options.ukernel}.h"\n'
+  tests += f'#include "src/{folder}/{options.ukernel}.h"\n'
   tests += "#undef XNN_UKERNEL_WITH_PARAMS\n"
   tests += "#undef XNN_QUANTIZED\n"
 

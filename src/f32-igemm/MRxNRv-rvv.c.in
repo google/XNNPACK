@@ -11,7 +11,7 @@ $LMUL = int(NR[1])
 
 #include <riscv_vector.h>
 
-#include "xnnpack/igemm.h"
+#include "src/xnnpack/igemm.h"
 
 
 $SUFFIX = {"LINEAR": "", "RELU": "_relu", "MINMAX": "_minmax"}[ACTIVATION]

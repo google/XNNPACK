@@ -9,11 +9,11 @@
 
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/reduce.h"
-#include "rsum-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/reduce.h"
+#include "test/rsum-microkernel-tester.h"
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

@@ -11,11 +11,11 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/microparams.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/microparams.h"
 
-static void xnn_store_tail_f16(uint16_t* o, __m128i vh, size_t c) {
+static XNN_INLINE void xnn_store_tail_f16(uint16_t* o, __m128i vh, size_t c) {
   assert(c > 0);
   assert(c < 8);
   if (c & 4) {
@@ -33,7 +33,7 @@ static void xnn_store_tail_f16(uint16_t* o, __m128i vh, size_t c) {
   }
 }
 
-static __m128i xnn_load_tail_safe_f16(const uint16_t* i, size_t c) {
+static XNN_INLINE __m128i xnn_load_tail_safe_f16(const uint16_t* i, size_t c) {
   assert(c > 0);
   assert(c < 8);
 
@@ -58,6 +58,7 @@ void xnn_f16_avgpool_minmax_ukernel_9p__f16c_u8(
     const xnn_float16** input,
     size_t input_offset,
     const xnn_float16* zero,
+    const xnn_float16* multiplier,
     xnn_float16* output,
     size_t input_increment,
     size_t output_increment,
@@ -70,8 +71,8 @@ void xnn_f16_avgpool_minmax_ukernel_9p__f16c_u8(
   const __m256 vmax = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.max));
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
-  const __m256 vscale = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.scale));
-  XNN_FORCE_REALIZATION(vscale);
+
+  __m256 vscale = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.scale));
 
   do {
     // Start with the previous output as the zero buffer.
@@ -232,6 +233,10 @@ void xnn_f16_avgpool_minmax_ukernel_9p__f16c_u8(
       i8 = (const uint16_t*) ((uintptr_t) i8 + input_offset);
     }
 
+    if (multiplier) {
+      vscale = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) (multiplier++)));
+    }
+    uint16_t* o = (uint16_t*) output;
     size_t c = channels;
     for (; c >= 8; c -= 8) {
       const __m256 vi0 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i0)); i0 += 8;
@@ -260,7 +265,7 @@ void xnn_f16_avgpool_minmax_ukernel_9p__f16c_u8(
       vacc = _mm256_max_ps(vacc, vmin);
       vacc = _mm256_min_ps(vacc, vmax);
 
-      _mm_storeu_si128((__m128i*) output, _mm256_cvtps_ph(vacc, _MM_FROUND_TO_NEAREST_INT)); output += 8;
+      _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vacc, _MM_FROUND_TO_NEAREST_INT)); o += 8;
     }
     if (c > 0) {
       const __m256 vi0 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i0));
@@ -289,7 +294,7 @@ void xnn_f16_avgpool_minmax_ukernel_9p__f16c_u8(
       vacc = _mm256_max_ps(vacc, vmin);
       vacc = _mm256_min_ps(vacc, vmax);
 
-      xnn_store_tail_f16((uint16_t*) output, _mm256_cvtps_ph(vacc, _MM_FROUND_TO_NEAREST_INT), c); output += c;
+      xnn_store_tail_f16((uint16_t*) o, _mm256_cvtps_ph(vacc, _MM_FROUND_TO_NEAREST_INT), c); o += c;
     }
 
     input = (const xnn_float16**) ((uintptr_t) input + input_increment);

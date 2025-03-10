@@ -10,8 +10,8 @@
 #include <assert.h>
 #include <math.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vunary.h"
 
 #ifndef M_SQRT_2_DIV_PI
 #define M_SQRT_2_DIV_PI 0.7978845608028654

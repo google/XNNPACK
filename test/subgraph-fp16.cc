@@ -15,17 +15,17 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/allocation-type.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/math.h"
-#include "xnnpack/node-type.h"
-#include "xnnpack/subgraph.h"
-#include "mock-allocator.h"
-#include "replicable_random_device.h"
-#include "runtime-flags.h"
-#include "runtime-tester.h"
-#include "subgraph-tester.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/allocation-type.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/node-type.h"
+#include "src/xnnpack/subgraph.h"
+#include "test/mock-allocator.h"
+#include "test/replicable_random_device.h"
+#include "test/runtime-flags.h"
+#include "test/runtime-tester.h"
+#include "test/subgraph-tester.h"
 
 namespace xnnpack {
 

@@ -9,8 +9,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/hardware-config.h"
-#include "xnnpack/microfnptr.h"
+#include "src/xnnpack/hardware-config.h"
+#include "src/xnnpack/microfnptr.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -77,7 +77,7 @@ struct xnn_xx_pad_config {
 };
 
 struct xnn_avgpool_config {
-  xnn_avgpool_unipass_ukernel_fn unipass;
+  xnn_avgpool_ukernel_fn ukernel;
   union {
     xnn_init_f16_scaleminmax_params_fn f16;
     xnn_init_f32_scaleminmax_params_fn f32;
@@ -96,27 +96,9 @@ struct xnn_pack_lh_config {
   xnn_pack_lh_offset_fn offset_fn;
 };
 
-struct xnn_pavgpool_config {
-  xnn_pavgpool_unipass_ukernel_fn unipass;
-  union {
-    xnn_init_f16_scaleminmax_params_fn f16;
-    xnn_init_f32_scaleminmax_params_fn f32;
-  } init;
-  // Number of rows in a primary tile.
-  // TODO: Only used by tests, it should be removed.
-  uint8_t primary_tile;
-  // Number of channels in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
-  uint16_t channel_tile;
-};
-
-union xnn_dwconv_ukernel {
-  xnn_dwconv_unipass_ukernel_fn unipass;
-};
-
 struct xnn_dwconv_config {
-  union xnn_dwconv_ukernel minmax;
-  union xnn_dwconv_ukernel linear;
+  xnn_dwconv_ukernel_fn minmax;
+  xnn_dwconv_ukernel_fn linear;
   union {
     xnn_init_qs8_conv_minmax_params_fn qs8;
     xnn_init_qs8_qc8w_conv_minmax_params_fn qs8_qc8w;
@@ -203,12 +185,6 @@ struct xnn_maxpool_config {
     xnn_init_f32_minmax_params_fn f32;
     xnn_init_f16_minmax_params_fn f16;
   } init;
-  // Number of elements in a tile for the first pass.
-  uint8_t first_pass_tile_size;
-  // Number of elements in a tile for the remainder pass. If the pooling size is less than or equals to
-  // first_pass_tile_size, remainder passes are not run. We run as many remainder passes as required to cover the entire
-  // pooling window.
-  uint8_t remainder_pass_tile_size;
 };
 
 struct xnn_zip_config {
@@ -298,16 +274,9 @@ struct xnn_raddstoreexpminusmax_config {
 };
 
 struct xnn_argmaxpool_config {
-  union {
-    xnn_argmaxpool_unipass_ukernel_fn up;
-    xnn_argmaxpool_multipass_ukernel_fn mp;
-  };
-  // // Number of elements in a tile for the first pass.
-  uint8_t first_pass_tile_size;
-  // Number of elements in a tile for the remainder pass. If the pooling size is less than or equals to
-  // first_pass_tile_size, remainder passes are not run. We run as many remainder passes as required to cover the entire
-  // pooling window.
-  uint8_t remainder_pass_tile_size;
+  xnn_argmaxpool_unipass_ukernel_fn ukernel;
+  // Number of elements in a tile for the first pass.
+  uint8_t primary_tile;
 };
 
 struct xnn_lut32norm_config {

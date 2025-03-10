@@ -10,11 +10,11 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "xnnpack/simd/f32-avx512f.h"
+#include "src/xnnpack/simd/f32-avx512f.h"
 
-#include "xnnpack/common.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_f32_vapproxgelu_ukernel__avx512f_rational_12_10_div_u16(

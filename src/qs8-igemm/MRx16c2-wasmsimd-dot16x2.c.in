@@ -13,8 +13,8 @@ $assert ACCUMULATORS == UNROLL or ACCUMULATORS == 1
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/gemm.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/math.h"
 
 
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUV"

@@ -10,9 +10,9 @@
 #include <functional>
 #include <string>
 
-#include "xnnpack/common.h"
+#include "src/xnnpack/common.h"
 #include <benchmark/benchmark.h>
-#include "pthreadpool.h"
+#include <pthreadpool.h>
 
 #ifdef BENCHMARK_ARGS_BOTTLENECK
 #define XNN_BENCHMARK_MAIN()                            \

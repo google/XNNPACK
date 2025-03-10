@@ -9,9 +9,9 @@
 #include <cstring>
 
 #include <gmock/gmock.h>
-#include "xnnpack.h"
-#include "xnnpack/allocator.h"
-#include "xnnpack/params.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/allocator.h"
+#include "src/xnnpack/params.h"
 
 namespace xnnpack {
 

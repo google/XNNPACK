@@ -10,14 +10,12 @@
 
 
 SET(PROD_RVV_MICROKERNEL_SRCS
-  src/f32-argmaxpool/f32-argmaxpool-4x-rvv-u1v.c
   src/f32-argmaxpool/f32-argmaxpool-9p8x-rvv-u1v.c
-  src/f32-argmaxpool/f32-argmaxpool-9x-rvv-u1v.c
   src/f32-gemm/gen/f32-gemm-1x4v-minmax-rvv.c
   src/f32-gemm/gen/f32-gemm-7x4v-minmax-rvv.c
   src/f32-igemm/gen/f32-igemm-1x4v-minmax-rvv.c
   src/f32-igemm/gen/f32-igemm-7x4v-minmax-rvv.c
-  src/f32-maxpool/gen/f32-maxpool-9p8x-minmax-rvv-c2v.c
+  src/f32-maxpool/gen/f32-maxpool-9p-minmax-rvv-u2v.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-rvv-u2v.c
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-rvv-u2v.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-rvv-rr2-p6-u4v.c
@@ -64,12 +62,16 @@ SET(PROD_RVV_MICROKERNEL_SRCS
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x4v-minmax-fp32-rvv.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x4v-minmax-fp32-rvv.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4v-minmax-fp32-rvv.c
+  src/qs8-vadd/gen/qs8-vadd-minmax-rvv-u2v.c
+  src/qs8-vaddc/gen/qs8-vaddc-minmax-rvv-u2v.c
   src/qs8-vlrelu/gen/qs8-vlrelu-rvv-u2v.c
   src/qs8-vmul/gen/qs8-vmul-minmax-f32-rvv-u2v.c
   src/qs8-vmulc/gen/qs8-vmulc-minmax-f32-rvv-u2v.c
   src/qu8-dwconv/gen/qu8-dwconv-9p8vc-minmax-fp32-rvv.c
   src/qu8-dwconv/gen/qu8-dwconv-25p8vc-minmax-fp32-rvv.c
   src/qu8-f32-vcvt/gen/qu8-f32-vcvt-rvv-u2v.c
+  src/qu8-vadd/gen/qu8-vadd-minmax-rvv-u2v.c
+  src/qu8-vaddc/gen/qu8-vaddc-minmax-rvv-u2v.c
   src/qu8-vlrelu/gen/qu8-vlrelu-rvv-u2v.c
   src/qu8-vmul/gen/qu8-vmul-minmax-f32-rvv-u2v.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-f32-rvv-u2v.c
@@ -90,7 +92,7 @@ SET(NON_PROD_RVV_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-1x4v-rvv.c
   src/f32-igemm/gen/f32-igemm-7x4v-relu-rvv.c
   src/f32-igemm/gen/f32-igemm-7x4v-rvv.c
-  src/f32-maxpool/gen/f32-maxpool-9p8x-minmax-rvv-c1v.c
+  src/f32-maxpool/gen/f32-maxpool-9p-minmax-rvv-u1v.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-rvv-u1v.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-rvv-u4v.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-rvv-u8v.c
@@ -191,10 +193,14 @@ SET(NON_PROD_RVV_MICROKERNEL_SRCS
   src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-6x4v-minmax-rvv.c
   src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-7x4v-minmax-rvv.c
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-rvv-u1v.c
+  src/qs8-vadd/gen/qs8-vadd-minmax-rvv-u1v.c
+  src/qs8-vaddc/gen/qs8-vaddc-minmax-rvv-u1v.c
   src/qs8-vlrelu/gen/qs8-vlrelu-rvv-u1v.c
   src/qs8-vmul/gen/qs8-vmul-minmax-f32-rvv-u1v.c
   src/qs8-vmulc/gen/qs8-vmulc-minmax-f32-rvv-u1v.c
   src/qu8-f32-vcvt/gen/qu8-f32-vcvt-rvv-u1v.c
+  src/qu8-vadd/gen/qu8-vadd-minmax-rvv-u1v.c
+  src/qu8-vaddc/gen/qu8-vaddc-minmax-rvv-u1v.c
   src/qu8-vlrelu/gen/qu8-vlrelu-rvv-u1v.c
   src/qu8-vmul/gen/qu8-vmul-minmax-f32-rvv-u1v.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-f32-rvv-u1v.c

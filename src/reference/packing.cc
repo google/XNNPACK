@@ -12,16 +12,16 @@
 #include <cstdint>
 #include <cstring>
 
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/config-types.h"
-#include "xnnpack/log.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/pack.h"
-#include "xnnpack/unaligned.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/pack.h"
+#include "src/xnnpack/unaligned.h"
 
 #if XNN_ENABLE_KLEIDIAI
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme.h"
@@ -60,7 +60,7 @@ void copy_bias(const Src* b, size_t b_offset, size_t n, Dst* packed_b) {
   if (b) {
     std::copy_n(b + b_offset, n, packed_b);
   } else {
-    std::fill_n(packed_b, n, 0);
+    std::fill_n(packed_b, n, static_cast<Dst>(0));
   }
 }
 
@@ -262,7 +262,6 @@ void xnn_pack_f32_to_f16_gemm_goi_w(size_t g, size_t nc, size_t kc, size_t nr,
   } while (--g != 0);
 }
 
-XNN_DISABLE_ALIGNMENT_SAN
 void xnn_pack_qu8_gemm_goi_w(size_t g, size_t nc, size_t kc, size_t nr,
                              size_t kr, size_t sr, const uint8_t* k,
                              const int32_t* b, const void* scale,
@@ -311,7 +310,6 @@ void xnn_pack_qu8_gemm_goi_w(size_t g, size_t nc, size_t kc, size_t nr,
   } while (--g != 0);
 }
 
-XNN_DISABLE_ALIGNMENT_SAN
 void xnn_pack_qs8_gemm_goi_w(size_t g, size_t nc, size_t kc, size_t nr,
                              size_t kr, size_t sr, const int8_t* k,
                              const int32_t* b, const float* scale,
@@ -407,7 +405,6 @@ void xnn_pack_qs8_to_qu8_gemm_goi_w(
 
 static int8_t sign_extend_int4(int8_t value) { return (value ^ 0x8) - 8; }
 
-XNN_DISABLE_ALIGNMENT_SAN
 void xnn_pack_qs8_qc4w_gemm_goi_w(
     size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
     const uint8_t* k, const int32_t* b, const float* scale,
@@ -617,6 +614,16 @@ void xnn_pack_qs8_qc4w_gemm_goi_w_non_planar_aarch64(
     const struct xnn_qs8_qc4w_packing_params* params) {
   xnn_pack_qs8_qc4w_gemm_goi_w_non_planar(g, nc, kc, nr, kr, sr,
                                           /*register_bytes=*/16, k, b, scale,
+                                          packed_weights, extra_bytes, params);
+}
+
+void xnn_pack_qs8_qc4w_gemm_goi_w_non_planar_avx512(
+    size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
+    const uint8_t* k, const int32_t* b, const float* scale,
+    void* packed_weights, size_t extra_bytes,
+    const struct xnn_qs8_qc4w_packing_params* params) {
+  xnn_pack_qs8_qc4w_gemm_goi_w_non_planar(g, nc, kc, nr, kr, sr,
+                                          /*register_bytes=*/64, k, b, scale,
                                           packed_weights, extra_bytes, params);
 }
 
@@ -2629,7 +2636,6 @@ void xnn_pack_qs8_to_qu8_conv_goki_w(
   } while (--g != 0);
 }
 
-XNN_DISABLE_ALIGNMENT_SAN
 void xnn_pack_qs8_conv_goki_w(size_t g, size_t nc, size_t ks, size_t kc,
                               size_t nr, size_t kr, size_t sr, const int8_t* k,
                               const int32_t* b, const float* scale,
@@ -3559,7 +3565,6 @@ void xnn_pack_qu8_dwconv_ghw_w(size_t primary_tile, size_t h, size_t w,
   }
 }
 
-XNN_DISABLE_ALIGNMENT_SAN
 void xnn_pack_qs8_dwconv_ghw_w(size_t primary_tile, size_t h, size_t w,
                                size_t c, size_t channel_tile,
                                size_t channel_subtile, size_t channel_round,
@@ -3990,7 +3995,6 @@ void xnn_pack_qu8_dwconv_hwg_w(size_t primary_tile, size_t h, size_t w,
   }
 }
 
-XNN_DISABLE_ALIGNMENT_SAN
 void xnn_pack_qs8_dwconv_hwg_w(size_t primary_tile, size_t h, size_t w,
                                size_t c, size_t channel_tile,
                                size_t channel_subtile, size_t channel_round,

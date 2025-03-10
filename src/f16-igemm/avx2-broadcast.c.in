@@ -10,8 +10,8 @@ $ACC_SUFFIX = "_f32acc" if ACCTYPE == "F32" else ""
 
 #include <immintrin.h>
 
-#include "xnnpack/igemm.h"
-#include "xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/igemm.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
 
 
 void xnn_f16${ACC_SUFFIX}_igemm_minmax_ukernel_${MR}x${NR}__avx2_broadcast(

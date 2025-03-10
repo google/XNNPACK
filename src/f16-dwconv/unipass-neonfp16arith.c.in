@@ -11,7 +11,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <arm_neon.h>
 
-#include "xnnpack/dwconv.h"
+#include "src/xnnpack/dwconv.h"
 
 
 void xnn_f16_dwconv_minmax_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__neonfp16arith${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(

@@ -7,10 +7,10 @@
 #include <string>
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/packw.h"
-#include "packw-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/packw.h"
+#include "test/packw-microkernel-tester.h"
 
 namespace {
 
@@ -34,7 +34,7 @@ std::string GetTestName(const testing::TestParamInfo<XnnTest::ParamType>& info) 
 #define XNN_GIO_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale)
 
 const XnnTestParam xnn_test_params[] = {
-#include "x32-packw/x32-packw.h"
+#include "src/x32-packw/x32-packw.h"
 };
 
 #undef XNN_UKERNEL
@@ -267,7 +267,7 @@ std::string GetTestGIOName(const testing::TestParamInfo<XnnTestGIO::ParamType>& 
 #define XNN_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale)
 
 const XnnTestGIOParam xnn_test_gio_params[] = {
-#include "x32-packw/x32-packw.h"
+#include "src/x32-packw/x32-packw.h"
 };
 
 #undef XNN_UKERNEL

@@ -6,7 +6,7 @@
 #ifndef THIRD_PARTY_XNNPACK_SRC_XNNPACK_OPERATOR_TYPE_H_
 #define THIRD_PARTY_XNNPACK_SRC_XNNPACK_OPERATOR_TYPE_H_
 
-#include "xnnpack/common.h"
+#include "src/xnnpack/common.h"
 
 
 #ifdef __cplusplus
@@ -16,7 +16,7 @@ extern "C" {
 enum xnn_operator_type {
 #define XNN_ENUM_ITEM_0(enum_name, enum_string) enum_name = 0,
 #define XNN_ENUM_ITEM(enum_name, enum_string) enum_name,
-  #include "xnnpack/operator-type-defs.h"
+  #include "src/xnnpack/operator-type-defs.h"
 #undef XNN_ENUM_ITEM_0
 #undef XNN_ENUM_ITEM
 };

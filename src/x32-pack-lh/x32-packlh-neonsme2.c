@@ -10,9 +10,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/pack-lh.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/pack-lh.h"
 
 #if XNN_ENABLE_KLEIDIAI
   // Keep this line indented to avoid it being pulled out of the #ifdef when the

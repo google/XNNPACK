@@ -6,7 +6,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack/indirection.h"
+#include "src/xnnpack/indirection.h"
 
 #include <assert.h>
 #include <fxdiv.h>
@@ -14,11 +14,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/operator.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/operator.h"
 
 void xnn_indirection_init_conv2d(
   size_t output_tile_size,

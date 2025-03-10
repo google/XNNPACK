@@ -15,9 +15,9 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/buffer.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/buffer.h"
 
 // Reference bias packing function for f32.
 static void f32_packb_reference(

@@ -7,11 +7,11 @@
 #include <string>
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/packw.h"
-#include "next_prime.h"
-#include "packw-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/packw.h"
+#include "test/next_prime.h"
+#include "test/packw-microkernel-tester.h"
 
 namespace {
 
@@ -35,7 +35,7 @@ std::string GetTestQS8Name(const testing::TestParamInfo<XnnTestQS8::ParamType>& 
 #define XNN_QS8_GIO_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale, izp)
 
 const XnnTestQS8Param xnn_test_qs8_params[] = {
-#include "qs8-packw/qs8-packw.h"
+#include "src/qs8-packw/qs8-packw.h"
 };
 
 #undef XNN_QS8_UKERNEL
@@ -221,7 +221,7 @@ std::string GetTestQS8GIOName(const testing::TestParamInfo<XnnTestQS8GIO::ParamT
 #define XNN_QS8_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale, izp)
 
 const XnnTestQS8GIOParam xnn_test_qs8_gio_params[] = {
-#include "qs8-packw/qs8-packw.h"
+#include "src/qs8-packw/qs8-packw.h"
 };
 
 #undef XNN_QS8_UKERNEL

@@ -8,12 +8,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack.h"
-#include "xnnpack/log.h"
-#include "xnnpack/node-type.h"
-#include "xnnpack/subgraph-validation.h"
-#include "xnnpack/subgraph.h"
-#include "pthreadpool.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/log.h"
+#include "src/xnnpack/node-type.h"
+#include "src/xnnpack/subgraph-validation.h"
+#include "src/xnnpack/subgraph.h"
+#include <pthreadpool.h>
 
 static enum xnn_status create_argmax_pooling_operator(
   const struct xnn_node* node,
@@ -57,7 +57,6 @@ static enum xnn_status reshape_argmax_pooling_operator(
   const size_t channel_dim = values[input_id].shape.dim[3];
 
   size_t output_height, output_width;
-  const size_t old_workspace_size = opdata->workspace_size;
   enum xnn_status status = xnn_reshape_argmax_pooling2d_nhwc_f32(
     opdata->operator_objects[0],
     batch_size,
@@ -66,8 +65,6 @@ static enum xnn_status reshape_argmax_pooling_operator(
     /*channels=*/channel_dim,
     /*input_pixel_stride=*/channel_dim,
     /*output_pixel_stride=*/channel_dim,
-    &opdata->workspace_size,
-    &opdata->workspace_alignment,
     &output_height,
     &output_width,
     threadpool);
@@ -85,7 +82,7 @@ static enum xnn_status reshape_argmax_pooling_operator(
 
   output_value->shape.num_dims = 4;
   const size_t new_size = xnn_tensor_get_size(output_value);
-  if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
+  if (new_size > output_value->size) {
     output_value->size = new_size;
     return xnn_status_reallocation_required;
   }
@@ -124,7 +121,6 @@ static enum xnn_status setup_argmax_pooling_operator(
 
   return xnn_setup_argmax_pooling2d_nhwc_f32(
     opdata->operator_objects[0],
-    opdata->workspace,
     input_data,
     output_value_data,
     output_index_data);

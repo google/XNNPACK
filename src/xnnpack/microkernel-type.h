@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "xnnpack/common.h"
+#include "src/xnnpack/common.h"
 
 
 #ifdef __cplusplus
@@ -15,7 +15,7 @@ extern "C" {
 enum xnn_microkernel_type {
 #define XNN_ENUM_ITEM_0(enum_name, enum_string) enum_name = 0,
 #define XNN_ENUM_ITEM(enum_name, enum_string) enum_name,
-  #include "xnnpack/microkernel-type-defs.h"
+  #include "src/xnnpack/microkernel-type-defs.h"
 #undef XNN_ENUM_ITEM_0
 #undef XNN_ENUM_ITEM
 };

@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "xnnpack.h"
+#include "include/xnnpack.h"
 
 namespace models {
 

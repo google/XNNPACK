@@ -10,7 +10,7 @@
 #include <limits>
 #include <vector>
 
-#include "xnnpack.h"
+#include "include/xnnpack.h"
 
 namespace models {
 

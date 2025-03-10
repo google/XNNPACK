@@ -11,9 +11,9 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/lut.h"
-#include "xnnpack/common.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/lut.h"
+#include "src/xnnpack/common.h"
 
 
 void xnn_x8_lut_ukernel__avx2_u32(

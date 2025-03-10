@@ -5,12 +5,12 @@
 
 
 #include <benchmark/benchmark.h>
-#include "bgemm.h"
-#include "packw-benchmark.h"
-#include "utils.h"
-#include "xnnpack/common.h"
-#include "xnnpack/hardware-config.h"
-#include "xnnpack/packw.h"
+#include "bench/bgemm.h"
+#include "bench/packw-benchmark.h"
+#include "bench/utils.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/hardware-config.h"
+#include "src/xnnpack/packw.h"
 
 static void x32_packw(benchmark::State& state, const char* net,
                       xnn_x32_packw_gemm_goi_ukernel_fn ukernel,
@@ -33,7 +33,7 @@ BENCHMARK_CAPTURE_BGEMM(x32_packw, ukernel##_, ukernel, arch_flags, nr, kr, sr);
 #define XNN_GIO_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale) \
 BENCHMARK_CAPTURE_BGEMM(x32_gio_packw, ukernel##_, ukernel, arch_flags, nr, kr, sr);
 
-#include "x32-packw/x32-packw.h"
+#include "src/x32-packw/x32-packw.h"
 
 #undef XNN_UKERNEL
 

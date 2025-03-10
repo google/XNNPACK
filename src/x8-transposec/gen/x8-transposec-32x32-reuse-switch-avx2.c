@@ -12,11 +12,11 @@
 
 #include <assert.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/math.h"
-#include "xnnpack/transpose.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/transpose.h"
+#include "src/xnnpack/unaligned.h"
 
 void xnn_x8_transposec_ukernel__32x32_reuse_switch_avx2(
     const uint8_t* input,

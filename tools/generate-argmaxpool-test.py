@@ -47,25 +47,49 @@ def split_ukernel_name(name):
 
 
 ARGMAXPOOL_TEST_TEMPLATE = """\
-$if INCREMENTAL_TILE == 0:
-  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_fulltile) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_onetile) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+  ArgMaxPoolMicrokernelTester()
+    .pooling_elements(${PRIMARY_TILE})
+    .channels(channel_tile)
+    .Test(${", ".join(TEST_ARGS)});
+}
+
+TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_onetile_with_input_offset) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+  ArgMaxPoolMicrokernelTester()
+    .pooling_elements(${PRIMARY_TILE})
+    .channels(channel_tile)
+    $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+      .input_offset(${next_prime(CHANNEL_TILE+1)})
+    $else:
+      .input_offset(channel_tile+1)
+    .Test(${", ".join(TEST_ARGS)});
+}
+
+TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_subtile) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+  for (size_t pooling_elements = 2; pooling_elements < ${PRIMARY_TILE}; pooling_elements++) {
     ArgMaxPoolMicrokernelTester()
-      .pooling_elements(${PRIMARY_TILE})
-      .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
+      .pooling_elements(pooling_elements)
       .channels(channel_tile)
       .Test(${", ".join(TEST_ARGS)});
   }
+}
 
-  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_fulltile_with_input_offset) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_subtile_with_input_offset) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+  for (size_t pooling_elements = 2; pooling_elements < ${PRIMARY_TILE}; pooling_elements++) {
     ArgMaxPoolMicrokernelTester()
-      .pooling_elements(${PRIMARY_TILE})
-      .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
+      .pooling_elements(pooling_elements)
       .channels(channel_tile)
       $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
         .input_offset(${next_prime(CHANNEL_TILE+1)})
@@ -73,46 +97,87 @@ $if INCREMENTAL_TILE == 0:
         .input_offset(channel_tile+1)
       .Test(${", ".join(TEST_ARGS)});
   }
+}
 
-  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_subtile) {
+TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multitile) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+  for (size_t pooling_elements = 2; pooling_elements <= 3*${PRIMARY_TILE}; pooling_elements++) {
+    ArgMaxPoolMicrokernelTester()
+      .pooling_elements(pooling_elements)
+      .channels(channel_tile)
+      .Test(${", ".join(TEST_ARGS)});
+  }
+}
+
+TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multitile_with_input_offset) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+  for (size_t pooling_elements = 2; pooling_elements <= 3*${PRIMARY_TILE}; pooling_elements++) {
+    ArgMaxPoolMicrokernelTester()
+      .pooling_elements(pooling_elements)
+      .channels(channel_tile)
+      $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+        .input_offset(${next_prime(CHANNEL_TILE+1)})
+      $else:
+        .input_offset(channel_tile+1)
+      .Test(${", ".join(TEST_ARGS)});
+  }
+}
+
+$if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
+  TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_onetile) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-    for (size_t pooling_elements = 2; pooling_elements < ${PRIMARY_TILE}; pooling_elements++) {
-      ArgMaxPoolMicrokernelTester()
-        .pooling_elements(pooling_elements)
-        .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-        .channels(channel_tile)
-        .Test(${", ".join(TEST_ARGS)});
-    }
+    $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+      for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
+        ArgMaxPoolMicrokernelTester()
+          .pooling_elements(${PRIMARY_TILE})
+          .channels(channels)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    $else:
+      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+      for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+        ArgMaxPoolMicrokernelTester()
+          .pooling_elements(${PRIMARY_TILE})
+          .channels(channels)
+          .Test(${", ".join(TEST_ARGS)});
+      }
   }
 
-  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_subtile_with_input_offset) {
+  TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_onetile_with_input_offset) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-    for (size_t pooling_elements = 2; pooling_elements < ${PRIMARY_TILE}; pooling_elements++) {
-      ArgMaxPoolMicrokernelTester()
-        .pooling_elements(pooling_elements)
-        .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-        .channels(channel_tile)
-        $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-          .input_offset(${next_prime(CHANNEL_TILE+1)})
-        $else:
-          .input_offset(channel_tile+1)
-        .Test(${", ".join(TEST_ARGS)});
-    }
+    $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+      for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
+        ArgMaxPoolMicrokernelTester()
+          .pooling_elements(${PRIMARY_TILE})
+          .channels(channels)
+          .input_offset(${next_prime(CHANNEL_TILE*8)})
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    $else:
+      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+      for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+        ArgMaxPoolMicrokernelTester()
+          .pooling_elements(${PRIMARY_TILE})
+          .channels(channels)
+          .input_offset(channel_tile*8)
+          .Test(${", ".join(TEST_ARGS)});
+      }
   }
 
-  $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
-    TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_fulltile) {
-      $if ISA_CHECK:
-        ${ISA_CHECK};
+  TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_subtile) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (size_t pooling_elements = 2; pooling_elements < ${PRIMARY_TILE}; pooling_elements++) {
       $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
         for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
           ArgMaxPoolMicrokernelTester()
-            .pooling_elements(${PRIMARY_TILE})
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
+            .pooling_elements(pooling_elements)
             .channels(channels)
             .Test(${", ".join(TEST_ARGS)});
         }
@@ -120,21 +185,21 @@ $if INCREMENTAL_TILE == 0:
         const size_t channel_tile = ${CHANNEL_SCALED_TILE};
         for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
           ArgMaxPoolMicrokernelTester()
-            .pooling_elements(${PRIMARY_TILE})
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
+            .pooling_elements(pooling_elements)
             .channels(channels)
             .Test(${", ".join(TEST_ARGS)});
         }
     }
+  }
 
-    TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_fulltile_with_input_offset) {
-      $if ISA_CHECK:
-        ${ISA_CHECK};
+  TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_subtile_with_input_offset) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (size_t pooling_elements = 2; pooling_elements < ${PRIMARY_TILE}; pooling_elements++) {
       $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
         for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
           ArgMaxPoolMicrokernelTester()
-            .pooling_elements(${PRIMARY_TILE})
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
+            .pooling_elements(pooling_elements)
             .channels(channels)
             .input_offset(${next_prime(CHANNEL_TILE*8)})
             .Test(${", ".join(TEST_ARGS)});
@@ -143,85 +208,115 @@ $if INCREMENTAL_TILE == 0:
         const size_t channel_tile = ${CHANNEL_SCALED_TILE};
         for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
           ArgMaxPoolMicrokernelTester()
-            .pooling_elements(${PRIMARY_TILE})
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
+            .pooling_elements(pooling_elements)
             .channels(channels)
             .input_offset(channel_tile*8)
             .Test(${", ".join(TEST_ARGS)});
         }
     }
+  }
 
-    TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_subtile) {
-      $if ISA_CHECK:
-        ${ISA_CHECK};
-      for (size_t pooling_elements = 2; pooling_elements < ${PRIMARY_TILE}; pooling_elements++) {
-        $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-          for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
-            ArgMaxPoolMicrokernelTester()
-              .pooling_elements(pooling_elements)
-              .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-              .channels(channels)
-              .Test(${", ".join(TEST_ARGS)});
-          }
-        $else:
-          const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-          for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
-            ArgMaxPoolMicrokernelTester()
-              .pooling_elements(pooling_elements)
-              .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-              .channels(channels)
-              .Test(${", ".join(TEST_ARGS)});
-          }
-      }
+
+
+
+  TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multitile) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (size_t pooling_elements = 2; pooling_elements <= 3*${PRIMARY_TILE}; pooling_elements++) {
+      $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+        for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
+          ArgMaxPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .channels(channels)
+            .Test(${", ".join(TEST_ARGS)});
+        }
+      $else:
+        const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+        for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+          ArgMaxPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .channels(channels)
+            .Test(${", ".join(TEST_ARGS)});
+        }
     }
+  }
 
-    TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_subtile_with_input_offset) {
-      $if ISA_CHECK:
-        ${ISA_CHECK};
-      for (size_t pooling_elements = 2; pooling_elements < ${PRIMARY_TILE}; pooling_elements++) {
-        $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-          for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
-            ArgMaxPoolMicrokernelTester()
-              .pooling_elements(pooling_elements)
-              .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-              .channels(channels)
-              .input_offset(${next_prime(CHANNEL_TILE*8)})
-              .Test(${", ".join(TEST_ARGS)});
-          }
-        $else:
-          const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-          for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
-            ArgMaxPoolMicrokernelTester()
-              .pooling_elements(pooling_elements)
-              .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-              .channels(channels)
-              .input_offset(channel_tile*8)
-              .Test(${", ".join(TEST_ARGS)});
-          }
-      }
+  TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multitile_with_input_offset) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (size_t pooling_elements = 2; pooling_elements <= 3*${PRIMARY_TILE}; pooling_elements++) {
+      $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+        for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
+          ArgMaxPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .channels(channels)
+            .input_offset(${next_prime(CHANNEL_TILE*8)})
+            .Test(${", ".join(TEST_ARGS)});
+        }
+      $else:
+        const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+        for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+          ArgMaxPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .channels(channels)
+            .input_offset(channel_tile*8)
+            .Test(${", ".join(TEST_ARGS)});
+        }
     }
+  }
 
-    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_fulltile) {
-      $if ISA_CHECK:
-        ${ISA_CHECK};
-      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+
+
+  TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_onetile) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = 1; channels < channel_tile; channels++) {
+      ArgMaxPoolMicrokernelTester()
+        .pooling_elements(${PRIMARY_TILE})
+        .channels(channels)
+        .Test(${", ".join(TEST_ARGS)});
+    }
+  }
+
+  TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_onetile_with_input_offset) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = 1; channels < channel_tile; channels++) {
+      ArgMaxPoolMicrokernelTester()
+        .pooling_elements(${PRIMARY_TILE})
+        .channels(channels)
+        $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+          .input_offset(${next_prime(CHANNEL_TILE)})
+        $else:
+          .input_offset(channel_tile)
+        .Test(${", ".join(TEST_ARGS)});
+    }
+  }
+
+  TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_subtile) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t pooling_elements = 2; pooling_elements < ${PRIMARY_TILE}; pooling_elements++) {
       for (size_t channels = 1; channels < channel_tile; channels++) {
         ArgMaxPoolMicrokernelTester()
-          .pooling_elements(${PRIMARY_TILE})
-          .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
+          .pooling_elements(pooling_elements)
           .channels(channels)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
+  }
 
-    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_fulltile_with_input_offset) {
-      $if ISA_CHECK:
-        ${ISA_CHECK};
-      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+  TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_subtile_with_input_offset) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t pooling_elements = 2; pooling_elements < ${PRIMARY_TILE}; pooling_elements++) {
       for (size_t channels = 1; channels < channel_tile; channels++) {
         ArgMaxPoolMicrokernelTester()
-          .pooling_elements(${PRIMARY_TILE})
-          .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
+          .pooling_elements(pooling_elements)
           .channels(channels)
           $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
             .input_offset(${next_prime(CHANNEL_TILE)})
@@ -230,49 +325,58 @@ $if INCREMENTAL_TILE == 0:
           .Test(${", ".join(TEST_ARGS)});
       }
     }
+  }
 
-    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_subtile) {
-      $if ISA_CHECK:
-        ${ISA_CHECK};
-      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-      for (size_t pooling_elements = 2; pooling_elements < ${PRIMARY_TILE}; pooling_elements++) {
-        for (size_t channels = 1; channels < channel_tile; channels++) {
-          ArgMaxPoolMicrokernelTester()
-            .pooling_elements(pooling_elements)
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-            .channels(channels)
-            .Test(${", ".join(TEST_ARGS)});
-        }
-      }
+TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_onetile) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+    for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
+      ArgMaxPoolMicrokernelTester()
+        .pooling_elements(${PRIMARY_TILE})
+        .channels(channels)
+        .Test(${", ".join(TEST_ARGS)});
     }
-
-    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_subtile_with_input_offset) {
-      $if ISA_CHECK:
-        ${ISA_CHECK};
-      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-      for (size_t pooling_elements = 2; pooling_elements < ${PRIMARY_TILE}; pooling_elements++) {
-        for (size_t channels = 1; channels < channel_tile; channels++) {
-          ArgMaxPoolMicrokernelTester()
-            .pooling_elements(pooling_elements)
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-            .channels(channels)
-            $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-              .input_offset(${next_prime(CHANNEL_TILE)})
-            $else:
-              .input_offset(channel_tile)
-            .Test(${", ".join(TEST_ARGS)});
-        }
-      }
+  $else:
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+      ArgMaxPoolMicrokernelTester()
+        .pooling_elements(${PRIMARY_TILE})
+        .channels(channels)
+        .Test(${", ".join(TEST_ARGS)});
     }
+}
 
-  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_fulltile) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
+TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_onetile_with_input_offset) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+    for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
+      ArgMaxPoolMicrokernelTester()
+        .pooling_elements(${PRIMARY_TILE})
+        .channels(channels)
+        .input_offset(${next_prime(CHANNEL_TILE*2)})
+        .Test(${", ".join(TEST_ARGS)});
+    }
+  $else:
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+      ArgMaxPoolMicrokernelTester()
+        .pooling_elements(${PRIMARY_TILE})
+        .channels(channels)
+        .input_offset(channel_tile*2)
+        .Test(${", ".join(TEST_ARGS)});
+    }
+}
+
+TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_subtile) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  for (size_t pooling_elements = 2; pooling_elements < ${PRIMARY_TILE}; pooling_elements++) {
     $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
       for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
         ArgMaxPoolMicrokernelTester()
-          .pooling_elements(${PRIMARY_TILE})
-          .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
+          .pooling_elements(pooling_elements)
           .channels(channels)
           .Test(${", ".join(TEST_ARGS)});
       }
@@ -280,21 +384,21 @@ $if INCREMENTAL_TILE == 0:
       const size_t channel_tile = ${CHANNEL_SCALED_TILE};
       for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
         ArgMaxPoolMicrokernelTester()
-          .pooling_elements(${PRIMARY_TILE})
-          .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
+          .pooling_elements(pooling_elements)
           .channels(channels)
           .Test(${", ".join(TEST_ARGS)});
       }
   }
+}
 
-  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_fulltile_with_input_offset) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
+TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_subtile_with_input_offset) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  for (size_t pooling_elements = 2; pooling_elements < ${PRIMARY_TILE}; pooling_elements++) {
     $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
       for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
         ArgMaxPoolMicrokernelTester()
-          .pooling_elements(${PRIMARY_TILE})
-          .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
+          .pooling_elements(pooling_elements)
           .channels(channels)
           .input_offset(${next_prime(CHANNEL_TILE*2)})
           .Test(${", ".join(TEST_ARGS)});
@@ -303,290 +407,23 @@ $if INCREMENTAL_TILE == 0:
       const size_t channel_tile = ${CHANNEL_SCALED_TILE};
       for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
         ArgMaxPoolMicrokernelTester()
-          .pooling_elements(${PRIMARY_TILE})
-          .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
+          .pooling_elements(pooling_elements)
           .channels(channels)
           .input_offset(channel_tile*2)
           .Test(${", ".join(TEST_ARGS)});
       }
   }
+}
 
-  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_subtile) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t pooling_elements = 2; pooling_elements < ${PRIMARY_TILE}; pooling_elements++) {
-      $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-        for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-          ArgMaxPoolMicrokernelTester()
-            .pooling_elements(pooling_elements)
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-            .channels(channels)
-            .Test(${", ".join(TEST_ARGS)});
-        }
-      $else:
-        const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
-          ArgMaxPoolMicrokernelTester()
-            .pooling_elements(pooling_elements)
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-            .channels(channels)
-            .Test(${", ".join(TEST_ARGS)});
-        }
-    }
-  }
 
-  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_unipass_subtile_with_input_offset) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t pooling_elements = 2; pooling_elements < ${PRIMARY_TILE}; pooling_elements++) {
-      $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-        for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-          ArgMaxPoolMicrokernelTester()
-            .pooling_elements(pooling_elements)
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-            .channels(channels)
-            .input_offset(${next_prime(CHANNEL_TILE*2)})
-            .Test(${", ".join(TEST_ARGS)});
-        }
-      $else:
-        const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
-          ArgMaxPoolMicrokernelTester()
-            .pooling_elements(pooling_elements)
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-            .channels(channels)
-            .input_offset(channel_tile*2)
-            .Test(${", ".join(TEST_ARGS)});
-        }
-    }
-  }
-
-$if INCREMENTAL_TILE != 0:
-  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_fulltile) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-    ArgMaxPoolMicrokernelTester()
-      .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-      .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-      .channels(channel_tile)
-      .Test(${", ".join(TEST_ARGS)});
-  }
-
-  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_fulltile_with_input_offset) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-    ArgMaxPoolMicrokernelTester()
-      .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-      .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-      .channels(channel_tile)
-      $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-        .input_offset(${next_prime(CHANNEL_TILE+1)})
-      $else:
-        .input_offset(channel_tile+1)
-      .Test(${", ".join(TEST_ARGS)});
-  }
-
-  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_subtile) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-    for (size_t pooling_elements = ${PRIMARY_TILE+1}; pooling_elements < ${PRIMARY_TILE+INCREMENTAL_TILE}; pooling_elements++) {
-      ArgMaxPoolMicrokernelTester()
-        .pooling_elements(pooling_elements)
-        .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-        .channels(channel_tile)
-        .Test(${", ".join(TEST_ARGS)});
-    }
-  }
-
-  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_subtile_with_input_offset) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-    for (size_t pooling_elements = ${PRIMARY_TILE+1}; pooling_elements < ${PRIMARY_TILE+INCREMENTAL_TILE}; pooling_elements++) {
-      ArgMaxPoolMicrokernelTester()
-        .pooling_elements(pooling_elements)
-        .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-        .channels(channel_tile)
-        $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-          .input_offset(${next_prime(CHANNEL_TILE+1)})
-        $else:
-          .input_offset(channel_tile+1)
-        .Test(${", ".join(TEST_ARGS)});
-    }
-  }
-
-  $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
-    TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_fulltile) {
-      $if ISA_CHECK:
-        ${ISA_CHECK};
-      $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-        for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
-          ArgMaxPoolMicrokernelTester()
-            .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-            .channels(channels)
-            .Test(${", ".join(TEST_ARGS)});
-        }
-      $else:
-        const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
-          ArgMaxPoolMicrokernelTester()
-            .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-            .channels(channels)
-            .Test(${", ".join(TEST_ARGS)});
-        }
-    }
-
-    TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_fulltile_with_input_offset) {
-      $if ISA_CHECK:
-        ${ISA_CHECK};
-      $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-        for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
-          ArgMaxPoolMicrokernelTester()
-            .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-            .channels(channels)
-            .input_offset(${next_prime(CHANNEL_TILE*5)})
-            .Test(${", ".join(TEST_ARGS)});
-        }
-      $else:
-        const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
-          ArgMaxPoolMicrokernelTester()
-            .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-            .channels(channels)
-            .input_offset(channel_tile*5)
-            .Test(${", ".join(TEST_ARGS)});
-        }
-    }
-
-    TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_subtile) {
-      $if ISA_CHECK:
-        ${ISA_CHECK};
-      for (size_t pooling_elements = ${PRIMARY_TILE+1}; pooling_elements < ${PRIMARY_TILE+INCREMENTAL_TILE}; pooling_elements++) {
-        $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-          for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
-            ArgMaxPoolMicrokernelTester()
-              .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-              .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-              .channels(channels)
-              .Test(${", ".join(TEST_ARGS)});
-          }
-        $else:
-          const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-          for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
-            ArgMaxPoolMicrokernelTester()
-              .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-              .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-              .channels(channels)
-              .Test(${", ".join(TEST_ARGS)});
-          }
-      }
-    }
-
-    TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_subtile_with_input_offset) {
-      $if ISA_CHECK:
-        ${ISA_CHECK};
-      for (size_t pooling_elements = ${PRIMARY_TILE+1}; pooling_elements < ${PRIMARY_TILE+INCREMENTAL_TILE}; pooling_elements++) {
-        $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-          for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
-            ArgMaxPoolMicrokernelTester()
-              .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-              .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-              .channels(channels)
-              .input_offset(${next_prime(CHANNEL_TILE*8)})
-              .Test(${", ".join(TEST_ARGS)});
-          }
-        $else:
-          const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-          for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
-            ArgMaxPoolMicrokernelTester()
-              .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-              .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-              .channels(channels)
-              .input_offset(channel_tile*8)
-              .Test(${", ".join(TEST_ARGS)});
-          }
-      }
-    }
-
-    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_fulltile) {
-      $if ISA_CHECK:
-        ${ISA_CHECK};
-      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-      for (size_t channels = 1; channels < channel_tile; channels++) {
-        ArgMaxPoolMicrokernelTester()
-          .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-          .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-          .channels(channels)
-          .Test(${", ".join(TEST_ARGS)});
-      }
-    }
-
-    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_fulltile_with_input_offset) {
-      $if ISA_CHECK:
-        ${ISA_CHECK};
-      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-      for (size_t channels = 1; channels < channel_tile; channels++) {
-        ArgMaxPoolMicrokernelTester()
-          .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-          .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-          .channels(channels)
-          $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-            .input_offset(${next_prime(CHANNEL_TILE)})
-          $else:
-            .input_offset(channel_tile)
-          .Test(${", ".join(TEST_ARGS)});
-      }
-    }
-
-    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_subtile) {
-      $if ISA_CHECK:
-        ${ISA_CHECK};
-      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-      for (size_t pooling_elements = ${PRIMARY_TILE+1}; pooling_elements < ${PRIMARY_TILE+INCREMENTAL_TILE}; pooling_elements++) {
-        for (size_t channels = 1; channels < channel_tile; channels++) {
-          ArgMaxPoolMicrokernelTester()
-            .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-            .channels(channels)
-            .Test(${", ".join(TEST_ARGS)});
-        }
-      }
-    }
-
-    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_subtile_with_input_offset) {
-      $if ISA_CHECK:
-        ${ISA_CHECK};
-      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-      for (size_t pooling_elements = ${PRIMARY_TILE+1}; pooling_elements < ${PRIMARY_TILE+INCREMENTAL_TILE}; pooling_elements++) {
-        for (size_t channels = 1; channels < channel_tile; channels++) {
-          ArgMaxPoolMicrokernelTester()
-            .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-            .channels(channels)
-            $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-              .input_offset(${next_prime(CHANNEL_TILE)})
-            $else:
-              .input_offset(channel_tile)
-            .Test(${", ".join(TEST_ARGS)});
-        }
-      }
-    }
-
-  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_fulltile) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
+TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multitile) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  for (size_t pooling_elements = 2; pooling_elements <= 3*${PRIMARY_TILE}; pooling_elements++) {
     $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
       for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
         ArgMaxPoolMicrokernelTester()
-          .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-          .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
+          .pooling_elements(pooling_elements)
           .channels(channels)
           .Test(${", ".join(TEST_ARGS)});
       }
@@ -594,21 +431,21 @@ $if INCREMENTAL_TILE != 0:
       const size_t channel_tile = ${CHANNEL_SCALED_TILE};
       for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
         ArgMaxPoolMicrokernelTester()
-          .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-          .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
+          .pooling_elements(pooling_elements)
           .channels(channels)
           .Test(${", ".join(TEST_ARGS)});
       }
   }
+}
 
-  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_fulltile_with_input_offset) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
+TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multitile_with_input_offset) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  for (size_t pooling_elements = 2; pooling_elements <= 3*${PRIMARY_TILE}; pooling_elements++) {
     $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
       for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
         ArgMaxPoolMicrokernelTester()
-          .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-          .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
+          .pooling_elements(pooling_elements)
           .channels(channels)
           .input_offset(${next_prime(CHANNEL_TILE*2)})
           .Test(${", ".join(TEST_ARGS)});
@@ -617,230 +454,15 @@ $if INCREMENTAL_TILE != 0:
       const size_t channel_tile = ${CHANNEL_SCALED_TILE};
       for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
         ArgMaxPoolMicrokernelTester()
-          .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-          .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
+          .pooling_elements(pooling_elements)
           .channels(channels)
           .input_offset(channel_tile*2)
           .Test(${", ".join(TEST_ARGS)});
       }
   }
+}
 
-  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_subtile) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t pooling_elements = ${PRIMARY_TILE+1}; pooling_elements < ${PRIMARY_TILE+INCREMENTAL_TILE}; pooling_elements++) {
-      $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-        for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-          ArgMaxPoolMicrokernelTester()
-            .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-            .channels(channels)
-            .Test(${", ".join(TEST_ARGS)});
-        }
-      $else:
-        const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
-          ArgMaxPoolMicrokernelTester()
-            .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-            .channels(channels)
-            .Test(${", ".join(TEST_ARGS)});
-        }
-    }
-  }
-
-  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_twopass_subtile_with_input_offset) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t pooling_elements = ${PRIMARY_TILE+1}; pooling_elements < ${PRIMARY_TILE+INCREMENTAL_TILE}; pooling_elements++) {
-      $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-        for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-          ArgMaxPoolMicrokernelTester()
-            .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-            .channels(channels)
-            .input_offset(${next_prime(CHANNEL_TILE*2)})
-            .Test(${", ".join(TEST_ARGS)});
-        }
-      $else:
-        const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
-          ArgMaxPoolMicrokernelTester()
-            .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-            .channels(channels)
-            .input_offset(channel_tile*2)
-            .Test(${", ".join(TEST_ARGS)});
-        }
-    }
-  }
-
-  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
-      ArgMaxPoolMicrokernelTester()
-        .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-        .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-        .channels(channel_tile)
-        .Test(${", ".join(TEST_ARGS)});
-    }
-  }
-
-  TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_input_offset) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
-      ArgMaxPoolMicrokernelTester()
-        .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-        .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-        .channels(channel_tile)
-        $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-          .input_offset(${next_prime(CHANNEL_TILE+1)})
-        $else:
-          .input_offset(channel_tile+1)
-        .Test(${", ".join(TEST_ARGS)});
-    }
-  }
-
-  $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
-    TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass) {
-      $if ISA_CHECK:
-        ${ISA_CHECK};
-      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
-        $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-          for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
-            ArgMaxPoolMicrokernelTester()
-              .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-              .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-              .channels(channels)
-              .Test(${", ".join(TEST_ARGS)});
-          }
-        $else:
-          const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-          for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
-            ArgMaxPoolMicrokernelTester()
-              .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-              .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-              .channels(channels)
-              .Test(${", ".join(TEST_ARGS)});
-          }
-      }
-    }
-
-    TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_input_offset) {
-      $if ISA_CHECK:
-        ${ISA_CHECK};
-      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
-        $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-          for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
-            ArgMaxPoolMicrokernelTester()
-              .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-              .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-              .channels(channels)
-              .input_offset(${next_prime(CHANNEL_TILE*8)})
-              .Test(${", ".join(TEST_ARGS)});
-          }
-        $else:
-          const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-          for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
-            ArgMaxPoolMicrokernelTester()
-              .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-              .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-              .channels(channels)
-              .input_offset(channel_tile*8)
-              .Test(${", ".join(TEST_ARGS)});
-          }
-      }
-    }
-
-    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass) {
-      $if ISA_CHECK:
-        ${ISA_CHECK};
-      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
-        for (size_t channels = 1; channels < channel_tile; channels++) {
-          ArgMaxPoolMicrokernelTester()
-            .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-            .channels(channels)
-            .Test(${", ".join(TEST_ARGS)});
-        }
-      }
-    }
-
-    TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_input_offset) {
-      $if ISA_CHECK:
-        ${ISA_CHECK};
-      const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-      for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
-        for (size_t channels = 1; channels < channel_tile; channels++) {
-          ArgMaxPoolMicrokernelTester()
-            .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-            .channels(channels)
-            .input_offset(channel_tile)
-            .Test(${", ".join(TEST_ARGS)});
-        }
-      }
-    }
-
-  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
-      $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-        for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-          ArgMaxPoolMicrokernelTester()
-            .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-            .channels(channels)
-            .Test(${", ".join(TEST_ARGS)});
-        }
-      $else:
-        const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
-          ArgMaxPoolMicrokernelTester()
-            .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-            .channels(channels)
-            .Test(${", ".join(TEST_ARGS)});
-        }
-    }
-  }
-
-  TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_with_input_offset) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t pooling_elements = ${PRIMARY_TILE+INCREMENTAL_TILE+1}; pooling_elements <= ${PRIMARY_TILE+INCREMENTAL_TILE*3}; pooling_elements += 3) {
-      $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-        for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-          ArgMaxPoolMicrokernelTester()
-            .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-            .channels(channels)
-            .input_offset(${next_prime(CHANNEL_TILE*2)})
-            .Test(${", ".join(TEST_ARGS)});
-        }
-      $else:
-        const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
-          ArgMaxPoolMicrokernelTester()
-            .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
-            .channels(channels)
-            .input_offset(channel_tile*2)
-            .Test(${", ".join(TEST_ARGS)});
-        }
-    }
-  }
-
-$if INCREMENTAL_TILE == 0:
-  $MIN_POOLING, MAX_POOLING = 2, PRIMARY_TILE
-$else:
-  $MIN_POOLING, MAX_POOLING = PRIMARY_TILE + 1, PRIMARY_TILE + INCREMENTAL_TILE
+$MIN_POOLING, MAX_POOLING = 2, 25
 
 TEST(${TEST_NAME}, few_output_pixels) {
   $if ISA_CHECK:
@@ -852,7 +474,6 @@ TEST(${TEST_NAME}, few_output_pixels) {
           ArgMaxPoolMicrokernelTester()
             .output_pixels(output_pixels)
             .pooling_elements(pooling_elements)
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
             .channels(channels)
             .Test(${", ".join(TEST_ARGS)});
         }
@@ -862,7 +483,6 @@ TEST(${TEST_NAME}, few_output_pixels) {
           ArgMaxPoolMicrokernelTester()
             .output_pixels(output_pixels)
             .pooling_elements(pooling_elements)
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
             .channels(channels)
             .Test(${", ".join(TEST_ARGS)});
         }
@@ -880,7 +500,6 @@ TEST(${TEST_NAME}, few_output_pixels_with_input_offset) {
           ArgMaxPoolMicrokernelTester()
             .output_pixels(output_pixels)
             .pooling_elements(pooling_elements)
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
             .channels(channels)
             .input_offset(${next_prime(CHANNEL_TILE*5+1)})
             .Test(${", ".join(TEST_ARGS)});
@@ -891,7 +510,6 @@ TEST(${TEST_NAME}, few_output_pixels_with_input_offset) {
           ArgMaxPoolMicrokernelTester()
             .output_pixels(output_pixels)
             .pooling_elements(pooling_elements)
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
             .channels(channels)
             .input_offset(channel_tile*5+1)
             .Test(${", ".join(TEST_ARGS)});
@@ -910,7 +528,6 @@ TEST(${TEST_NAME}, few_output_pixels_with_output_stride) {
           ArgMaxPoolMicrokernelTester()
             .output_pixels(output_pixels)
             .pooling_elements(pooling_elements)
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
             .channels(channels)
             .output_stride(${next_prime(CHANNEL_TILE*5+1)})
             .Test(${", ".join(TEST_ARGS)});
@@ -921,7 +538,6 @@ TEST(${TEST_NAME}, few_output_pixels_with_output_stride) {
           ArgMaxPoolMicrokernelTester()
             .output_pixels(output_pixels)
             .pooling_elements(pooling_elements)
-            .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
             .channels(channels)
             .output_stride(channel_tile*5+1)
             .Test(${", ".join(TEST_ARGS)});
@@ -941,7 +557,6 @@ TEST(${TEST_NAME}, few_output_pixels_with_step) {
             ArgMaxPoolMicrokernelTester()
               .output_pixels(output_pixels)
               .pooling_elements(pooling_elements)
-              .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
               .step(step)
               .channels(channels)
               .output_stride(${next_prime(CHANNEL_TILE*5+1)})
@@ -955,7 +570,6 @@ TEST(${TEST_NAME}, few_output_pixels_with_step) {
             ArgMaxPoolMicrokernelTester()
               .output_pixels(output_pixels)
               .pooling_elements(pooling_elements)
-              .pooling_tile(${", ".join(map(str, filter(bool, [PRIMARY_TILE, INCREMENTAL_TILE])))})
               .step(step)
               .channels(channels)
               .output_stride(channel_tile*5+1)
@@ -1029,10 +643,10 @@ def main(args):
 
 
 #include <gtest/gtest.h>
-#include "xnnpack/argmaxpool.h"
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "argmaxpool-microkernel-tester.h"
+#include "src/xnnpack/argmaxpool.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "test/argmaxpool-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
     for ukernel_spec in spec_yaml:

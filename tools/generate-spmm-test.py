@@ -468,11 +468,11 @@ def main(args):
 //   Generator: {generator}
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/spmm.h"
-#include "spmm-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/spmm.h"
+#include "test/spmm-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
     benches = """\
@@ -486,11 +486,11 @@ def main(args):
 //   Generator: {generator}
 
 #include <benchmark/benchmark.h>
-#include "spmm-benchmark.h"
-#include "utils.h"
-#include "xnnpack/gemm.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
+#include "bench/spmm-benchmark.h"
+#include "bench/utils.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
     test_outputs = collections.defaultdict(lambda: tests)

@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f16-avgpool/avgpool.c.in
+//   Template: src/f32-avgpool/avgpool.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2025 Google LLC
@@ -11,10 +11,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/simd/f16-neonfp16arith.h"
+#include "src/xnnpack/simd/f16-neonfp16arith.h"
 
-#include "xnnpack/common.h"
-#include "xnnpack/microparams.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
 
 void xnn_f16_avgpool_minmax_ukernel_9p__neonfp16arith_u8(
     size_t output_pixels,
@@ -23,6 +23,7 @@ void xnn_f16_avgpool_minmax_ukernel_9p__neonfp16arith_u8(
     const xnn_float16** input,
     size_t input_offset,
     const xnn_float16* zero,
+    const xnn_float16* multiplier,
     xnn_float16* output,
     size_t input_increment,
     size_t output_increment,
@@ -35,8 +36,8 @@ void xnn_f16_avgpool_minmax_ukernel_9p__neonfp16arith_u8(
   const xnn_simd_f16_t vmax = xnn_set1_f16(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
-  const xnn_simd_f16_t vscale = xnn_set1_f16(params->scalar.scale);
-  XNN_FORCE_REALIZATION(vscale);
+
+  xnn_simd_f16_t vscale = xnn_set1_f16(params->scalar.scale);
 
   do {
     // Start with the previous output as the zero buffer.
@@ -193,6 +194,10 @@ void xnn_f16_avgpool_minmax_ukernel_9p__neonfp16arith_u8(
       i8 = (const xnn_float16*) ((uintptr_t) i8 + input_offset);
     }
 
+    if (multiplier != NULL) {
+      vscale = xnn_set1_f16(*multiplier++);
+    }
+    xnn_float16* o = output;
     size_t c = channels;
     for (; c >= 8; c -= 8) {
       const xnn_simd_f16_t vi0 = xnn_loadu_f16(i0); i0 += 8;
@@ -221,7 +226,7 @@ void xnn_f16_avgpool_minmax_ukernel_9p__neonfp16arith_u8(
       vacc = xnn_max_f16(vacc, vmin);
       vacc = xnn_min_f16(vacc, vmax);
 
-      xnn_storeu_f16(output, vacc); output += 8;
+      xnn_storeu_f16(o, vacc); o += 8;
     }
     if (c > 0) {
       const xnn_simd_f16_t vi0 = xnn_load_tail_f16(i0, c);
@@ -250,7 +255,7 @@ void xnn_f16_avgpool_minmax_ukernel_9p__neonfp16arith_u8(
       vacc = xnn_max_f16(vacc, vmin);
       vacc = xnn_min_f16(vacc, vmax);
 
-      xnn_store_tail_f16(output, vacc, c); output += c;
+      xnn_store_tail_f16(o, vacc, c); o += c;
     }
 
     input = (const xnn_float16**) ((uintptr_t) input + input_increment);

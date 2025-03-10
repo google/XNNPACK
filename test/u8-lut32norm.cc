@@ -10,8 +10,8 @@
 #include <cstddef>
 
 #include <gtest/gtest.h>
-#include "xnnpack/lut.h"
-#include "lut-norm-microkernel-tester.h"
+#include "src/xnnpack/lut.h"
+#include "test/lut-norm-microkernel-tester.h"
 
 TEST(U8_LUT32NORM__SCALAR, n_eq_1) {
   LUTNormMicrokernelTester()

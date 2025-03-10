@@ -18,6 +18,9 @@ class Avx512F(fma3_template.Fma3):
   def register_bytes(self):
     return 64
 
+  def w_register_bytes(self):
+    return self.register_bytes()
+
   def prefix(self):
     return 'z'
 
@@ -49,6 +52,17 @@ class Avx512F(fma3_template.Fma3):
     asm_string = ''
     if 'before' in self.weights_asm():
       asm_string += self.weights_asm()['before']
+    if 'loop_2' in self.weights_asm():
+      for l in self.weights_asm()['loop_2']:
+        for nr in range(0, n, 2):
+          asm_string += l.format(
+              W_ptr=self.w_ptr_register(),
+              W=self.w_registers()[nr],
+              W_1=self.w_registers()[nr + 1],
+              offset=self.register_bytes() * nr // 2,
+              w_step=self.register_bytes() * self.n,
+              mask=self.mask_register(),
+          )
     for l in self.weights_asm()['loop']:
       for nr in range(0, n):
         asm_string += l.format(
@@ -56,6 +70,7 @@ class Avx512F(fma3_template.Fma3):
             W=self.w_registers()[nr],
             offset=self.register_bytes() * nr,
             w_step=self.register_bytes() * n,
+            mask=self.mask_register(),
         )
 
     # input
@@ -64,10 +79,10 @@ class Avx512F(fma3_template.Fma3):
     if 'after' in self.input_asm():
       asm_string += self.input_asm()['after']
     if 'after' in self.weights_asm():
-      asm_string += ''.join(self.weights_asm()['after']).format(
-          W=self.w_ptr_register(),
-          w_step=self.register_bytes() * n,
-      )
+      for l in self.weights_asm()['after']:
+        asm_string += l.format(
+            W=self.w_ptr_register(), w_step=self.w_register_bytes() * n
+        )
 
     for mr in range(0, self.m):
       for l in self.input_asm()['loop']:
@@ -99,6 +114,17 @@ class Avx512F(fma3_template.Fma3):
     # weights
     if 'before' in self.weights_asm():
       asm_string += self.weights_asm()['before']
+    if 'loop_2' in self.weights_asm():
+      for l in self.weights_asm()['loop_2']:
+        for nr in range(0, n, 2):
+          asm_string += l.format(
+              W_ptr=self.w_ptr_register(),
+              W=self.w_registers()[nr],
+              W_1=self.w_registers()[nr + 1],
+              offset=self.register_bytes() * nr // 2,
+              w_step=self.register_bytes() * self.n,
+              mask=self.mask_register(),
+          )
     for l in self.weights_asm()['loop']:
       for nr in range(0, n):
         asm_string += l.format(
@@ -106,12 +132,13 @@ class Avx512F(fma3_template.Fma3):
             W=self.w_registers()[nr],
             offset=self.register_bytes() * nr,
             w_step=self.register_bytes() * n,
+            mask=self.mask_register(),
         )
     if 'after' in self.weights_asm():
-      asm_string += ''.join(self.weights_asm()['after']).format(
-          W=self.w_ptr_register(),
-          w_step=self.register_bytes() * n,
-      )
+      for l in self.weights_asm()['after']:
+        asm_string += l.format(
+            W=self.w_ptr_register(), w_step=self.w_register_bytes() * n
+        )
 
     loop = 'loop_tail' if tail else 'loop'
     for mr in range(0, self.m):
@@ -365,9 +392,6 @@ class Avx512FC(Avx512F):
         )
     return asm_string
 
-  def inner_loop_increment(self):
-    return self.c * self.element_size()
-
   def k_mask(self):
     return '0xFFFFFFFFFFFFFFFB'
 
@@ -415,10 +439,10 @@ class Avx512FC(Avx512F):
     return asm_string
 
   def inner_loop_spill_gp(self, tail: bool = False) -> str:
-    return self._inner_loop_spill_gp(2 * self.n, tail)
+    return self._inner_loop_spill_gp(self._c * self.n, tail)
 
   def inner_loop_small_M_N(self, tail: bool = False) -> str:
-    return self._inner_loop_small_M_N(2 * self.n, tail)
+    return self._inner_loop_small_M_N(self._c * self.n, tail)
 
   def inner_loop_tail(self):
     nc_register = self.nc_register()

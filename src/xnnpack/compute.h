@@ -9,12 +9,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/config-types.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams.h"
-#include "pthreadpool.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams.h"
+#include <pthreadpool.h>
 
 enum xnn_parallelization_type {
   xnn_parallelization_type_invalid = 0,
@@ -834,9 +834,7 @@ struct dwconv_context {
     struct xnn_f16_minmax_params f16;
     struct xnn_f32_minmax_params f32;
   } params;
-  union {
-    xnn_dwconv_unipass_ukernel_fn unipass_ukernel;
-  };
+  xnn_dwconv_ukernel_fn ukernel;
 };
 
 #ifndef __cplusplus
@@ -949,73 +947,17 @@ struct argmax_pooling_context {
   size_t channels;
   size_t input_increment;
   size_t output_increment;
-  union {
-    xnn_argmaxpool_unipass_ukernel_fn unipass_ukernel;
-    xnn_argmaxpool_multipass_ukernel_fn multipass_ukernel;
-  };
-  // Size of accumulation buffer, in bytes, per thread, only for multipass.
-  size_t accumulation_buffer_size;
-  // Size of accumulation and index buffer, in bytes, only used for multipass.
-  size_t accumulation_and_index_buffer_size;
-  void* multipass_buffer;
+  xnn_argmaxpool_unipass_ukernel_fn ukernel;
 };
 
 #ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_argmax_pooling_unipass(
+  XNN_PRIVATE void xnn_compute_argmax_pooling(
       const struct argmax_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index,
-      size_t output_y);
-
-  // Workspace sized based on batch size * output height.
-  XNN_PRIVATE void xnn_compute_argmax_pooling_multipass(
-      const struct argmax_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index,
-      size_t output_y);
-
-  // Workspace sized based on number of threads.
-  XNN_PRIVATE void xnn_compute_argmax_pooling_multipass_with_thread(
-      const struct argmax_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t thread_index,
       size_t batch_index,
       size_t output_y);
 #endif
 
 struct average_pooling_context {
-  const void** indirect_input;
-  size_t indirect_input_height_stride;
-  size_t input_offset;
-  size_t input_batch_stride;
-
-  // Stride to get to the next y of input. Used when we have compressed indirection buffers (i.e. indirection buffers
-  // contain only pointers to the first row of input).
-  size_t input_y_stride;
-  size_t indirect_top_height;  // Number of output rows that form the top section of indirection buffer.
-  size_t indirect_bot_start;  // Smallest output row y for the bottom section of indirection buffer.
-
-  void* output;
-  size_t output_batch_stride;
-  size_t output_height_stride;
-  size_t output_width;
-  size_t pooling_size;
-  size_t channels;
-  const void* zero;
-  size_t input_increment;
-  size_t output_increment;
-  union {
-    struct xnn_f16_scaleminmax_params f16;
-    struct xnn_f32_scaleminmax_params f32;
-  } params;
-  xnn_avgpool_unipass_ukernel_fn unipass_ukernel;
-};
-
-#ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_average_pooling_unipass(
-      const struct average_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index,
-      size_t output_y);
-#endif
-
-struct pixelwise_average_pooling_context {
   const void** indirect_input;
   size_t indirect_input_height_stride;
   size_t input_offset;
@@ -1042,12 +984,12 @@ struct pixelwise_average_pooling_context {
     struct xnn_f16_scaleminmax_params f16;
     struct xnn_f32_scaleminmax_params f32;
   } params;
-  xnn_pavgpool_unipass_ukernel_fn unipass_ukernel;
+  xnn_avgpool_ukernel_fn ukernel;
 };
 
 #ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_pixelwise_average_pooling_unipass(
-      const struct pixelwise_average_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
+  XNN_PRIVATE void xnn_compute_average_pooling(
+      const struct average_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index,
       size_t output_y);
 #endif

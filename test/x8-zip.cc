@@ -9,10 +9,10 @@
 #include <cstddef>
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/zip.h"
-#include "zip-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/zip.h"
+#include "test/zip-microkernel-tester.h"
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(X8_ZIP_X2__NEON, n_eq_8) {

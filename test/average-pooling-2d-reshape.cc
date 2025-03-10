@@ -10,10 +10,10 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/node-type.h"
-#include "xnnpack/subgraph.h"
-#include "runtime-flags.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/node-type.h"
+#include "src/xnnpack/subgraph.h"
+#include "test/runtime-flags.h"
 
 TEST(AveragePooling2DTestF32, Reshape)
 {

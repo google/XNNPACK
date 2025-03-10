@@ -16,9 +16,9 @@ $SSE_HEADER = {1: "xmmintrin.h", 2: "emmintrin.h", 4: "smmintrin.h"}[SSE]
 
 #include <${SSE_HEADER}>
 
-#include "xnnpack/gemm.h"
+#include "src/xnnpack/gemm.h"
 $if DATATYPE == "QC8" and SSE == 4:
-  #include "xnnpack/unaligned.h"
+  #include "src/xnnpack/unaligned.h"
 
 
 $RANGE_MR = list(reversed(range(MR))) if INC else list(range(MR))

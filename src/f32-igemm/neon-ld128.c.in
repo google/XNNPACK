@@ -12,7 +12,7 @@ $VMULADDQ_LANE_F32 = "vfmaq_lane_f32" if FMA else "vmlaq_lane_f32"
 
 #include <arm_neon.h>
 
-#include "xnnpack/igemm.h"
+#include "src/xnnpack/igemm.h"
 
 
 $ISA = ("neonfma" if DUP else "aarch64_neonfma") if FMA else "neon"

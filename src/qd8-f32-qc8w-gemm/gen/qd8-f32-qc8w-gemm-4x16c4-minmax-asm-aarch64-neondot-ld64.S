@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-gemm/4x16c4-aarch64-neondot-ld64.S.in
 //   Generator: tools/xngen
@@ -8,7 +9,7 @@
 // LICENSE file in the root directory of this source tree.
 
 
-#include "xnnpack/assembly.h"
+#include "src/xnnpack/assembly.h"
 
 # void xnn_qd8_f32_qc8w_gemm_minmax__ukernel_4x16c4__asm_aarch64_neondot_ld64(
 #     size_t mr,                 x0
@@ -20,7 +21,7 @@
 #     int8_t* restrict c,        x6
 #     size_t cm_stride,          x7
 #     size_t cn_stride,          [sp] -> x12
-#     const struct xnn_f32_minmax_params *params,  [sp + 8]  -> x11
+#     const union xnn_f32_minmax_params *params,  [sp + 8]  -> x11
 #     const struct xnn_qd8_quantization_params *quantization_params) [sp + 16] -> x16
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.

@@ -70,7 +70,7 @@ class NeonDot(neonfma_template.NeonFma):
     return ret
 
   def quantization_params(self):
-    return """ldr {quantization_params_reg}, [sp, 16]\n""".format(
+    return """ldr {quantization_params_reg}, [sp, 272]\n""".format(
         quantization_params_reg=self.quantization_params_register()
     )
 
@@ -236,7 +236,7 @@ class NeonDotQC4W(NeonDot):
 
   def quantization_params(self):
     return """# Load 0xF0 for masking the weights
-  ldr {quantization_params_reg}, [sp, 16]
+  ldr {quantization_params_reg}, [sp, 272]
   movi v{mask}.16b, #240
   """.format(
         quantization_params_reg=self.quantization_params_register(),

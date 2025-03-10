@@ -82,7 +82,7 @@ class Aarch32(arm_template.Arm):
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack/assembly.h"\n\n"""
+#include "src/xnnpack/assembly.h"\n\n"""
 
     header += 'BEGIN_FUNCTION ' + self.function_name()
     header += """

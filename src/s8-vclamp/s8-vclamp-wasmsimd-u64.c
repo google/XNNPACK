@@ -7,7 +7,7 @@
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_s8_vclamp_ukernel__wasmsimd_u64(

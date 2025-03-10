@@ -16,12 +16,12 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/reshape-helpers.h"
-#include "xnnpack/subgraph.h"
-#include "xnnpack/buffer.h"
-#include "replicable_random_device.h"
-#include "runtime-flags.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/reshape-helpers.h"
+#include "src/xnnpack/subgraph.h"
+#include "src/xnnpack/buffer.h"
+#include "test/replicable_random_device.h"
+#include "test/runtime-flags.h"
 
 xnn_runtime_t SetupUnary(const std::vector<size_t> &dims) {
   if (xnn_initialize(/*allocator=*/nullptr) != xnn_status_success) {

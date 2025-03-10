@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-igemm/MRx4c8-sse.c.in
 //   Generator: tools/xngen
@@ -15,9 +16,9 @@
   #include <x86intrin.h>
 #endif
 
-#include "xnnpack/igemm.h"
-#include "xnnpack/math.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/igemm.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/unaligned.h"
 
 
 void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x4c8__avx_ld128(

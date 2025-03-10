@@ -30,7 +30,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_(f16|f16_f32acc|f32|qs8|qu8|u8)_r(minmax|max|min|sum)(_minmax_(fp32))?_ukernel__(.+)_u(\d+)(v)?(_acc\d+)?", name)
+  match = re.fullmatch(r"xnn_(f16|f16_f32acc|f32|qs8|qu8|s8|u8)_r(minmax|max|min|sum)(_minmax_(fp32))?_ukernel__(.+)_u(\d+)(v)?(_acc\d+)?", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
   op_type = {
@@ -213,11 +213,11 @@ def main(args):
 
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/reduce.h"
-#include "{tester_header}"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/reduce.h"
+#include "test/{tester_header}"
 """.format(specification=options.spec, generator=sys.argv[0],
            tester_header=tester_header)
 

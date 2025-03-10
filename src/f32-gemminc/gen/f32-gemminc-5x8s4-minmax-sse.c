@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-gemm/sse-shuffle.c.in
 //   Generator: tools/xngen
@@ -11,7 +12,7 @@
 
 #include <xmmintrin.h>
 
-#include "xnnpack/gemm.h"
+#include "src/xnnpack/gemm.h"
 
 
 void xnn_f32_gemminc_minmax_ukernel_5x8s4__sse(

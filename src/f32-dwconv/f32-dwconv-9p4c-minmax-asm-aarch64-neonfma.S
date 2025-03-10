@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack/assembly.h"
+#include "src/xnnpack/assembly.h"
 
 # void xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma(
 #     size_t channels,                   x0, x20

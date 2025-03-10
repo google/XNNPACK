@@ -5,10 +5,10 @@
 
 $assert LMUL in [1, 2, 4, 8]
 #include <assert.h>
-#include "xnnpack/maxpool.h"
+#include "src/xnnpack/maxpool.h"
 #include <riscv_vector.h>
 
-void xnn_f32_maxpool_minmax_ukernel_9p8x__rvv_c${LMUL}v(
+void xnn_f32_maxpool_minmax_ukernel_9p__rvv_u${LMUL}v(
     size_t output_pixels,
     size_t kernel_elements,
     size_t channels,
@@ -26,17 +26,18 @@ void xnn_f32_maxpool_minmax_ukernel_9p8x__rvv_c${LMUL}v(
   const float output_min = params->scalar.min;
   const float output_max = params->scalar.max;
   do {
+    const float** i = input;
     float* o = output;
     {
-      const float* i0 = *input++;
-      const float* i1 = *input++;
-      const float* i2 = *input++;
-      const float* i3 = *input++;
-      const float* i4 = *input++;
-      const float* i5 = *input++;
-      const float* i6 = *input++;
-      const float* i7 = *input++;
-      const float* i8 = *input++;
+      const float* i0 = *i++;
+      const float* i1 = 1 < kernel_elements ? *i++ : i0;
+      const float* i2 = 2 < kernel_elements ? *i++ : i0;
+      const float* i3 = 3 < kernel_elements ? *i++ : i0;
+      const float* i4 = 4 < kernel_elements ? *i++ : i0;
+      const float* i5 = 5 < kernel_elements ? *i++ : i0;
+      const float* i6 = 6 < kernel_elements ? *i++ : i0;
+      const float* i7 = 7 < kernel_elements ? *i++ : i0;
+      const float* i8 = 8 < kernel_elements ? *i++ : i0;
       i0 = (const float*) ((uintptr_t) i0 + input_offset);
       i1 = (const float*) ((uintptr_t) i1 + input_offset);
       i2 = (const float*) ((uintptr_t) i2 + input_offset);
@@ -46,30 +47,6 @@ void xnn_f32_maxpool_minmax_ukernel_9p8x__rvv_c${LMUL}v(
       i6 = (const float*) ((uintptr_t) i6 + input_offset);
       i7 = (const float*) ((uintptr_t) i7 + input_offset);
       i8 = (const float*) ((uintptr_t) i8 + input_offset);
-      if (kernel_elements < 2) {
-        i1 = i0;
-      }
-      if (kernel_elements <= 2) {
-        i2 = i0;
-      }
-      if (kernel_elements < 4) {
-        i3 = i0;
-      }
-      if (kernel_elements <= 4) {
-        i4 = i0;
-      }
-      if (kernel_elements < 6) {
-        i5 = i0;
-      }
-      if (kernel_elements <= 6) {
-        i6 = i0;
-      }
-      if (kernel_elements < 8) {
-        i7 = i0;
-      }
-      if (kernel_elements <= 8) {
-        i8 = i0;
-      }
 
       size_t c = channels;
       do {
@@ -102,14 +79,14 @@ void xnn_f32_maxpool_minmax_ukernel_9p8x__rvv_c${LMUL}v(
     }
 
     for (ptrdiff_t k = (ptrdiff_t) kernel_elements - 9; k > 0; k -= 8) {
-      const float* i0 = *input++;
-      const float* i1 = *input++;
-      const float* i2 = *input++;
-      const float* i3 = *input++;
-      const float* i4 = *input++;
-      const float* i5 = *input++;
-      const float* i6 = *input++;
-      const float* i7 = *input++;
+      const float* i0 = *i++;
+      const float* i1 = 1 < k ? *i++ : i0;
+      const float* i2 = 2 < k ? *i++ : i0;
+      const float* i3 = 3 < k ? *i++ : i0;
+      const float* i4 = 4 < k ? *i++ : i0;
+      const float* i5 = 5 < k ? *i++ : i0;
+      const float* i6 = 6 < k ? *i++ : i0;
+      const float* i7 = 7 < k ? *i++ : i0;
       i0 = (const float*) ((uintptr_t) i0 + input_offset);
       i1 = (const float*) ((uintptr_t) i1 + input_offset);
       i2 = (const float*) ((uintptr_t) i2 + input_offset);
@@ -118,27 +95,6 @@ void xnn_f32_maxpool_minmax_ukernel_9p8x__rvv_c${LMUL}v(
       i5 = (const float*) ((uintptr_t) i5 + input_offset);
       i6 = (const float*) ((uintptr_t) i6 + input_offset);
       i7 = (const float*) ((uintptr_t) i7 + input_offset);
-      if (k < 2) {
-        i1 = i0;
-      }
-      if (k <= 2) {
-        i2 = i0;
-      }
-      if (k < 4) {
-        i3 = i0;
-      }
-      if (k <= 4) {
-        i4 = i0;
-      }
-      if (k < 6) {
-        i5 = i0;
-      }
-      if (k <= 6) {
-        i6 = i0;
-      }
-      if (k < 8) {
-        i7 = i0;
-      }
 
       o = output;
       size_t c = channels;
@@ -171,6 +127,6 @@ void xnn_f32_maxpool_minmax_ukernel_9p8x__rvv_c${LMUL}v(
       } while (c != 0);
     }
     input = (const float**) ((uintptr_t) input + input_increment);
-    output = (float*) ((uintptr_t) o + output_increment);
+    output = (float*) ((uintptr_t) output + output_increment);
   } while (--output_pixels != 0);
 }

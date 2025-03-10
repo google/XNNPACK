@@ -10,12 +10,12 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/datatype.h"
-#include "xnnpack/math.h"
-#include "replicable_random_device.h"
-#include "subgraph-tester.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/datatype.h"
+#include "src/xnnpack/math.h"
+#include "test/replicable_random_device.h"
+#include "test/subgraph-tester.h"
 
 namespace xnnpack {
 
@@ -73,12 +73,14 @@ void TestImpl(size_t rank) {
 
       // Make a deep copy so the expected result is contiguous.
       xnnpack::Tensor<T> expected = input.slice(begins, ends).deep_copy();
-      xnnpack::Tensor<T> output(expected.extents());
 
-      // Use the input prior to slicing in the subgraph.
-      subgraph.ReshapeExternalTensor(shape, input.data(), 0)
-          .ReshapeExternalTensor(expected.extents(), output.data(), 1)
-          .ReshapeRuntime()
+      // Check reshape is correct
+      subgraph.ReshapeExternalTensor(shape, input.base(), 0).ReshapeRuntime();
+      ASSERT_EQ(subgraph.GetExternalTensorShape(1), expected.extents());
+
+      // Run subgraph
+      xnnpack::Tensor<T> output(expected.extents());
+      subgraph.SetupExternalTensor(output.base(), 1)
           .SetupRuntime()
           .InvokeRuntime();
 

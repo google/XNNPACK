@@ -9,9 +9,9 @@
 
 #include <assert.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/reduce.h"
 
 void xnn_f32_rmin_ukernel__scalar_u3_acc3(
     size_t batch,

@@ -3,7 +3,7 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "runtime-tester.h"
+#include "test/runtime-tester.h"
 
 TEST(RUNTIME, reshape_runtime) {
   xnnpack::RuntimeTester tester(4);
