@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vrnd/avx512f.c.in
 //   Generator: tools/xngen

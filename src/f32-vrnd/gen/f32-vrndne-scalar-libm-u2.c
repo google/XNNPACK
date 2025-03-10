@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vrnd/scalar-libm.c.in
 //   Generator: tools/xngen
