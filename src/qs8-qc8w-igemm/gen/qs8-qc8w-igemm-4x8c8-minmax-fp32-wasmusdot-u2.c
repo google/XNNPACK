@@ -3,7 +3,7 @@
 //   Template: src/qs8-igemm/c8-wasmdot.c.in
 //   Generator: tools/xngen
 //
-// Copyright 2023 Google LLC
+// Copyright 2024 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -266,17 +266,21 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x8c8__wasmusdot_u2(
     v128_t vacc2x01234567 = wasm_i16x8_narrow_i32x4(vacc2x0123, vacc2x4567);
     v128_t vacc3x01234567 = wasm_i16x8_narrow_i32x4(vacc3x0123, vacc3x4567);
 
-    v128_t vout0x01234567_1x01234567 = wasm_i8x16_narrow_i16x8(vacc0x01234567, vacc1x01234567);
-    v128_t vout2x01234567_3x01234567 = wasm_i8x16_narrow_i16x8(vacc2x01234567, vacc3x01234567);
+    v128_t vout0x01234567 = wasm_i8x16_narrow_i16x8(vacc0x01234567, vacc0x01234567);
+    v128_t vout1x01234567 = wasm_i8x16_narrow_i16x8(vacc1x01234567, vacc1x01234567);
+    v128_t vout2x01234567 = wasm_i8x16_narrow_i16x8(vacc2x01234567, vacc2x01234567);
+    v128_t vout3x01234567 = wasm_i8x16_narrow_i16x8(vacc3x01234567, vacc3x01234567);
 
-    vout0x01234567_1x01234567 = wasm_i8x16_min(vout0x01234567_1x01234567, voutput_max);
-    vout2x01234567_3x01234567 = wasm_i8x16_min(vout2x01234567_3x01234567, voutput_max);
+    vout0x01234567 = wasm_i8x16_min(vout0x01234567, voutput_max);
+    vout1x01234567 = wasm_i8x16_min(vout1x01234567, voutput_max);
+    vout2x01234567 = wasm_i8x16_min(vout2x01234567, voutput_max);
+    vout3x01234567 = wasm_i8x16_min(vout3x01234567, voutput_max);
 
     if (nc >= 8) {
-      wasm_v128_store64_lane(c3, vout2x01234567_3x01234567, 1);
-      wasm_v128_store64_lane(c2, vout2x01234567_3x01234567, 0);
-      wasm_v128_store64_lane(c1, vout0x01234567_1x01234567, 1);
-      wasm_v128_store64_lane(c0, vout0x01234567_1x01234567, 0);
+      wasm_v128_store64_lane(c3, vout3x01234567, 0);
+      wasm_v128_store64_lane(c2, vout2x01234567, 0);
+      wasm_v128_store64_lane(c1, vout1x01234567, 0);
+      wasm_v128_store64_lane(c0, vout0x01234567, 0);
 
       c3 = (int8_t*) ((uintptr_t) c3 + cn_stride);
       c2 = (int8_t*) ((uintptr_t) c2 + cn_stride);
@@ -288,36 +292,40 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x8c8__wasmusdot_u2(
       nc -= 8;
     } else {
       if (nc & 4) {
-        wasm_v128_store32_lane(c3, vout2x01234567_3x01234567, 2);
+        wasm_v128_store32_lane(c3, vout3x01234567, 0);
         c3 += 4;
-        wasm_v128_store32_lane(c2, vout2x01234567_3x01234567, 0);
+        wasm_v128_store32_lane(c2, vout2x01234567, 0);
         c2 += 4;
-        wasm_v128_store32_lane(c1, vout0x01234567_1x01234567, 2);
+        wasm_v128_store32_lane(c1, vout1x01234567, 0);
         c1 += 4;
-        wasm_v128_store32_lane(c0, vout0x01234567_1x01234567, 0);
+        wasm_v128_store32_lane(c0, vout0x01234567, 0);
         c0 += 4;
 
-        vout0x01234567_1x01234567 = wasm_u64x2_shr(vout0x01234567_1x01234567, 32);
-        vout2x01234567_3x01234567 = wasm_u64x2_shr(vout2x01234567_3x01234567, 32);
+        vout0x01234567 = wasm_u64x2_shr(vout0x01234567, 32);
+        vout1x01234567 = wasm_u64x2_shr(vout1x01234567, 32);
+        vout2x01234567 = wasm_u64x2_shr(vout2x01234567, 32);
+        vout3x01234567 = wasm_u64x2_shr(vout3x01234567, 32);
       }
       if (nc & 2) {
-        wasm_v128_store16_lane(c3, vout2x01234567_3x01234567, 4);
+        wasm_v128_store16_lane(c3, vout3x01234567, 0);
         c3 += 2;
-        wasm_v128_store16_lane(c2, vout2x01234567_3x01234567, 0);
+        wasm_v128_store16_lane(c2, vout2x01234567, 0);
         c2 += 2;
-        wasm_v128_store16_lane(c1, vout0x01234567_1x01234567, 4);
+        wasm_v128_store16_lane(c1, vout1x01234567, 0);
         c1 += 2;
-        wasm_v128_store16_lane(c0, vout0x01234567_1x01234567, 0);
+        wasm_v128_store16_lane(c0, vout0x01234567, 0);
         c0 += 2;
 
-        vout0x01234567_1x01234567 = wasm_u32x4_shr(vout0x01234567_1x01234567, 16);
-        vout2x01234567_3x01234567 = wasm_u32x4_shr(vout2x01234567_3x01234567, 16);
+        vout0x01234567 = wasm_u32x4_shr(vout0x01234567, 16);
+        vout1x01234567 = wasm_u32x4_shr(vout1x01234567, 16);
+        vout2x01234567 = wasm_u32x4_shr(vout2x01234567, 16);
+        vout3x01234567 = wasm_u32x4_shr(vout3x01234567, 16);
       }
       if (nc & 1) {
-        wasm_v128_store8_lane(c3, vout2x01234567_3x01234567, 8);
-        wasm_v128_store8_lane(c2, vout2x01234567_3x01234567, 0);
-        wasm_v128_store8_lane(c1, vout0x01234567_1x01234567, 8);
-        wasm_v128_store8_lane(c0, vout0x01234567_1x01234567, 0);
+        wasm_v128_store8_lane(c3, vout3x01234567, 0);
+        wasm_v128_store8_lane(c2, vout2x01234567, 0);
+        wasm_v128_store8_lane(c1, vout1x01234567, 0);
+        wasm_v128_store8_lane(c0, vout0x01234567, 0);
       }
 
       nc = 0;
