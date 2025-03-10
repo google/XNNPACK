@@ -870,7 +870,7 @@ IF(XNNPACK_BUILD_LIBRARY)
   TARGET_LINK_LIBRARIES(operators PRIVATE xnnpack-base allocator indirection logging microkernel-utils normalization operator-utils packing reference-ukernels datatype)
   TARGET_LINK_LIBRARIES(operator-run PRIVATE xnnpack-base logging)
   TARGET_LINK_LIBRARIES(operator-utils PRIVATE xnnpack-base logging)
-  TARGET_LINK_LIBRARIES(reference-ukernels PRIVATE xnnpack-base)
+  TARGET_LINK_LIBRARIES(reference-ukernels PRIVATE xnnpack-base datatype)
   TARGET_LINK_LIBRARIES(subgraph PRIVATE xnnpack-base allocator logging memory mutex operators operator-run datatype)
   TARGET_LINK_LIBRARIES(XNNPACK PRIVATE xnnpack-base allocator cache hardware-config indirection memory microkernel-utils microparams-init mutex normalization operators operator-run operator-utils packing microkernels-prod subgraph datatype reference-ukernels)
   TARGET_LINK_LIBRARIES(XNNPACK PUBLIC pthreadpool logging)
@@ -1754,6 +1754,7 @@ IF(XNNPACK_BUILD_TESTS)
         GTest::gmock
         GTest::gtest
         GTest::gtest_main
+        datatype
         hardware-config
         logging
         microkernels-all
