@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: test/simd/u8-simd.cc.in
 //   Generator: tools/xngen
