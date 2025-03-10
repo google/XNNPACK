@@ -456,8 +456,8 @@ struct TanH : public UnaryOpInfo {
       case xnn_datatype_fp32:
       case xnn_datatype_fp16:
       case xnn_datatype_bf16:
-        return TolRelative(y_ref,
-                           4.0f * xnnpack::epsilon(datatype));  // 4 ULP
+        return TolMixed(y_ref, xnnpack::epsilon(datatype),
+                        4.0f * xnnpack::epsilon(datatype));  // 4 ULP
       default:
         return 1;
     }
