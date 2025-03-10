@@ -18,6 +18,11 @@
 
 // QD8-F32-QC4W GEMM packing tests.
 
+namespace {
+
+using testing::ElementsAreArray;
+using testing::Matcher;
+
 TEST(PACK_QD8_F32_QC4W_GEMM_GOI_W, kr_eq_4) {
   size_t g = 1;
   size_t nc = 1;
@@ -35,12 +40,12 @@ TEST(PACK_QD8_F32_QC4W_GEMM_GOI_W, kr_eq_4) {
   xnn_pack_qs8_qc4w_gemm_goi_w(g, nc, kc, nr, kr, sr,
     k.data(), b.data(), /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
 
-  const std::vector<uint8_t> expected = {
+  const std::vector<Matcher<uint8_t>> expected = {
     // 1 bias.
     0x00, 0x00, 0x00, 0x00,
     0x40, 0x51, 0x62, 0x73, 0xC8, 0xD9, 0xEA, 0xFB,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_QD8_F32_QC4W_GEMM_GIO_W, kr_eq_4) {
@@ -76,12 +81,12 @@ TEST(PACK_QD8_F32_QC4W_GEMM_GIO_W, kr_eq_4) {
   xnn_pack_qs8_qc4w_gemm_gio_w(g, nc, kc, nr, kr, sr,/*k_stride=*/round_up_po2(nc, 2),
     k.data(), b.data(), /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
 
-  const std::vector<uint8_t> expected = {
+  const std::vector<Matcher<uint8_t>> expected = {
     // 1 bias.
     0x00, 0x00, 0x00, 0x00,
     0x40, 0x51, 0x62, 0x73, 0xC8, 0xD9, 0xEA, 0xFB,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_QD8_F32_QC4W_GEMM_GOI_W, kr_eq_4_nr_eq_2) {
@@ -102,14 +107,14 @@ TEST(PACK_QD8_F32_QC4W_GEMM_GOI_W, kr_eq_4_nr_eq_2) {
   xnn_pack_qs8_qc4w_gemm_goi_w(g, nc, kc, nr, kr, sr,
     k.data(), b.data(), /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
 
-  const std::vector<uint8_t> expected = {
+  const std::vector<Matcher<uint8_t>> expected = {
     // 2 bias.
     0x00, 0x00, 0x00, 0x00,
     0x01, 0x00, 0x00, 0x00,
     0x40, 0x51, 0x62, 0x73,
     0xC8, 0xD9, 0xEA, 0xFB,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_QD8_F32_QC4UW_GEMM_GOI_W, kr_eq_4_nr_eq_2) {
@@ -130,14 +135,14 @@ TEST(PACK_QD8_F32_QC4UW_GEMM_GOI_W, kr_eq_4_nr_eq_2) {
   xnn_pack_qs8_qc4uw_gemm_goi_w(g, nc, kc, nr, kr, sr,
     k.data(), b.data(), /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
 
-  const std::vector<uint8_t> expected = {
+  const std::vector<Matcher<uint8_t>> expected = {
     // 2 bias.
     0x00, 0x00, 0x00, 0x00,
     0x01, 0x00, 0x00, 0x00,
     0xC8, 0xD9, 0xEA, 0xFB,
     0x40, 0x51, 0x62, 0x73,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_QD8_F32_QC4W_GEMM_GIO_W, kr_eq_4_nr_eq_2) {
@@ -164,14 +169,14 @@ TEST(PACK_QD8_F32_QC4W_GEMM_GIO_W, kr_eq_4_nr_eq_2) {
   xnn_pack_qs8_qc4w_gemm_gio_w(g, nc, kc, nr, kr, sr, /*k_stride=*/nc,
     k.data(), b.data(), /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/&a);
 
-  const std::vector<uint8_t> expected = {
+  const std::vector<Matcher<uint8_t>> expected = {
     // 2 bias.
     0x00, 0x00, 0x00, 0x00,
     0x01, 0x00, 0x00, 0x00,
     0x40, 0x51, 0x62, 0x73,
     0xC8, 0xD9, 0xEA, 0xFB,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_eq_kc) {
@@ -223,7 +228,7 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_eq_kc) {
     /*scale=*/ scale.data(),
     /*packed_weight=*/ packed_weights.data() + start_offset);
 
-  const std::vector<uint8_t> expected = {
+  const std::vector<Matcher<uint8_t>> expected = {
     // kscaledsum
     // scaled row sum converted to bf16.
     0x00, 0x00, 0xd5, 0xc5, // -1 * 853.6010 (bf16) * sum(-8..+7) = 0xc5d50000
@@ -237,7 +242,7 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_eq_kc) {
     // extra bytes n - no bias for this test
     0, 0, 0, 0
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, nc_gt_1) {
@@ -296,7 +301,7 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, nc_gt_1) {
     /*scale=*/scale.data(),
     /*packed_w=*/packed_weights.data() + start_offset);
 
-  const std::vector<uint8_t> expected = {
+  const std::vector<Matcher<uint8_t>> expected = {
     // kscaledsum
     // scaled row sum converted to bf16.
     0x00, 0x00, 0xd5, 0xc5, // -1 * 853.6010 (bf16) * (sum(-8..+7) = 0xc5d50000
@@ -321,7 +326,7 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, nc_gt_1) {
     0, 0, 0, 0
   };
 
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_lt_kc) {
@@ -374,7 +379,7 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_lt_kc) {
     /*packed_weight=*/ packed_weights.data() + start_offset);
 
 
-  const std::vector<uint8_t> expected = {
+  const std::vector<Matcher<uint8_t>> expected = {
     // kscaledsum
     // scaled row sum converted to bf16.
     0x00, 0x00, 0xd5, 0xc5, // -1 * 853.6010 (bf16) * (sum(-8..+7) = 0xc5d50000
@@ -392,7 +397,7 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_lt_kc) {
     // extra bytes n - no bias for this test
     0, 0, 0, 0
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_QD8_F32_QB4W_GEMM_GIO_W, bl_eq_kc) {
@@ -459,7 +464,7 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GIO_W, bl_eq_kc) {
     /*scale=*/scale.data(),
     /*packed_w=*/packed_weights.data() + start_offset);
 
-  const std::vector<uint8_t> expected = {
+  const std::vector<Matcher<uint8_t>> expected = {
     // kscaledsum
     0x00, 0x00, 0xd5, 0xc5, // -1 * 853.6010 (bf16) * (sum(-8..+7) = 0xc5d50000
 
@@ -483,7 +488,7 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GIO_W, bl_eq_kc) {
     // extra bytes n
     0, 0, 0, 0
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F32_GEMM_GIO_W, g_eq_1) {
@@ -502,13 +507,13 @@ TEST(PACK_F32_GEMM_GIO_W, g_eq_1) {
   xnn_pack_f32_gemm_gio_w(g, nc, kc, nr, kr, sr, nc,
     k.data(), b.data(), /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     0.0f,
     2.0f, 4.f,
     1.0f,
     3.0f, 5.0f,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F32_GEMM_GIO_W, g_eq_1_nr_gt_1_kr_gt_1) {
@@ -527,7 +532,7 @@ TEST(PACK_F32_GEMM_GIO_W, g_eq_1_nr_gt_1_kr_gt_1) {
   xnn_pack_f32_gemm_gio_w(g, nc, kc, nr, kr, sr, nc,
     k.data(), b.data(), /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     0.0f, 1.0f,
     3.0f, 6.0f, 4.0f, 7.0f,
     9.0f, 0.0f, 10.0f, 0.0f,
@@ -535,7 +540,7 @@ TEST(PACK_F32_GEMM_GIO_W, g_eq_1_nr_gt_1_kr_gt_1) {
     5.0f, 8.0f, 0.0f, 0.0f,
     11.0f, 0.0f, 0.0f, 0.0f,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F32_GEMM_GIO_W, g_gt_1) {
@@ -554,7 +559,7 @@ TEST(PACK_F32_GEMM_GIO_W, g_gt_1) {
   xnn_pack_f32_gemm_gio_w(g, nc, kc, nr, kr, sr, nc,
     k.data(), b.data(), /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     0.0f,
     6.0f, 8.f,
     1.0f,
@@ -568,7 +573,7 @@ TEST(PACK_F32_GEMM_GIO_W, g_gt_1) {
     5.0f,
     15.0f, 17.0f,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F32_GEMM_GIO_W, g_gt_1_nr_gt_1_kr_gt_1) {
@@ -591,7 +596,7 @@ TEST(PACK_F32_GEMM_GIO_W, g_gt_1_nr_gt_1_kr_gt_1) {
   xnn_pack_f32_gemm_gio_w(g, nc, kc, nr, kr, sr, nc,
     k.data(), b.data(), /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     // Group 1.
     0.0f, 1.0f,
     9.0f, 12.0f, 10.0f, 13.0f,
@@ -614,7 +619,7 @@ TEST(PACK_F32_GEMM_GIO_W, g_gt_1_nr_gt_1_kr_gt_1) {
     29.0f, 32.0f, 0.0f, 0.0f,
     35.0f, 0.0f, 0.0f, 0.0f,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 float packed_bf16(xnn_bfloat16 a, xnn_bfloat16 b) {
@@ -643,13 +648,13 @@ TEST(PACK_BF16_F32_GEMM_GIO_W, g_eq_1) {
   xnn_pack_bf16_f32_gemm_gio_w(g, nc, kc, nr, kr, sr, nc,
     k.data(), b.data(), /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     0.0f,
     packed_bf16(2.0f, 4.f),
     1.0f,
     packed_bf16(3.0f, 5.0f),
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_BF16_F32_GEMM_GIO_W, g_eq_1_nr_gt_1_kr_gt_1) {
@@ -668,7 +673,7 @@ TEST(PACK_BF16_F32_GEMM_GIO_W, g_eq_1_nr_gt_1_kr_gt_1) {
   xnn_pack_bf16_f32_gemm_gio_w(g, nc, kc, nr, kr, sr, nc,
     k.data(), b.data(), /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     0.0f, 1.0f,
     packed_bf16(3.0f, 6.0f), packed_bf16(4.0f, 7.0f),
     packed_bf16(9.0f, 0.0f), packed_bf16(10.0f, 0.0f),
@@ -676,7 +681,7 @@ TEST(PACK_BF16_F32_GEMM_GIO_W, g_eq_1_nr_gt_1_kr_gt_1) {
     packed_bf16(5.0f, 8.0f), packed_bf16(0.0f, 0.0f),
     packed_bf16(11.0f, 0.0f), packed_bf16(0.0f, 0.0f),
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_BF16_F32_GEMM_GIO_W, g_gt_1) {
@@ -695,7 +700,7 @@ TEST(PACK_BF16_F32_GEMM_GIO_W, g_gt_1) {
   xnn_pack_bf16_f32_gemm_gio_w(g, nc, kc, nr, kr, sr, nc,
     k.data(), b.data(), /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     0.0f,
     packed_bf16(6.0f, 8.f),
     1.0f,
@@ -709,7 +714,7 @@ TEST(PACK_BF16_F32_GEMM_GIO_W, g_gt_1) {
     5.0f,
     packed_bf16(15.0f, 17.0f),
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_BF16_F32_GEMM_GIO_W, g_gt_1_nr_gt_1_kr_gt_1) {
@@ -732,7 +737,7 @@ TEST(PACK_BF16_F32_GEMM_GIO_W, g_gt_1_nr_gt_1_kr_gt_1) {
   xnn_pack_bf16_f32_gemm_gio_w(g, nc, kc, nr, kr, sr, nc,
     k.data(), b.data(), /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     // Group 1.
     0.0f, 1.0f,
     packed_bf16(9.0f, 12.0f), packed_bf16(10.0f, 13.0f),
@@ -755,7 +760,7 @@ TEST(PACK_BF16_F32_GEMM_GIO_W, g_gt_1_nr_gt_1_kr_gt_1) {
     packed_bf16(29.0f, 32.0f), packed_bf16(0.0f, 0.0f),
     packed_bf16(35.0f, 0.0f), packed_bf16(0.0f, 0.0f),
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 // DWCONV packing tests.
@@ -795,7 +800,7 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
 
   const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
   ASSERT_EQ(bias_offset, 48387);
-  const std::vector<uint8_t> expected = {
+  const std::vector<Matcher<uint8_t>> expected = {
     // bias first
     // 48387 + 0 - (2 + 3 + 4) * 127 = 47,244 = 0xB88C
     0x8C, 0xB8, 0, 0,
@@ -806,7 +811,7 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
     3, 6,
     4, 7,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
@@ -848,7 +853,7 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
 
   const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
   ASSERT_EQ(bias_offset, 48387);
-  const std::vector<uint8_t> expected = {
+  const std::vector<Matcher<uint8_t>> expected = {
     // cr blocks
     // bias first (cr == 2 of them)
     // 48387 + 0 - (5 + 6 + 7) * 127 = 46,101 = 0xB415
@@ -871,7 +876,7 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
     // then weights, channels first
     17, 0, 18, 0, 19, 0,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
@@ -912,7 +917,7 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
 
   const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
   ASSERT_EQ(bias_offset, 64516);
-  const std::vector<uint8_t> expected = {
+  const std::vector<Matcher<uint8_t>> expected = {
     // bias first (cr == 2 of them)
     // 64516 + 0 - (2 + 3 + 4 + 5) * 127 = 62,738 = 0xF512
     0x12, 0xF5, 0, 0,
@@ -925,7 +930,7 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
     // followed by 10 zeros to make up the difference with primary_tile
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
@@ -972,7 +977,7 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
 
   const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
   ASSERT_EQ(bias_offset, 64516);
-  const std::vector<uint8_t> expected = {
+  const std::vector<Matcher<uint8_t>> expected = {
     // bias first (cr == 2 of them)
     // 64516 + 0 - (5 + 6 + 7 + 8) * 127 = 61,214 = 0xEF1E
     0x1E, 0xEF, 0, 0,
@@ -1002,7 +1007,7 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     21, 0, 23, 0, 22, 0, 24, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
@@ -1040,7 +1045,7 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
 
   const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
   ASSERT_EQ(bias_offset, 48387);
-  const std::vector<uint8_t> expected = {
+  const std::vector<Matcher<uint8_t>> expected = {
     // bias first
     // 48387 + 0 - (2 + 4 + 6) * 127 = 46,863 = 0xB70F
     0x0F, 0xB7, 0, 0,
@@ -1051,7 +1056,7 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
     4, 5,
     6, 7,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
@@ -1091,7 +1096,7 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
 
   const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
   ASSERT_EQ(bias_offset, 48387);
-  const std::vector<uint8_t> expected = {
+  const std::vector<Matcher<uint8_t>> expected = {
     // cr blocks
     // bias first (cr == 2 of them)
     // 48387 + 0 - (5 + 10 + 15) * 127 = 44577 = 0xAE21
@@ -1114,7 +1119,7 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
     // then weights, channels first
     9, 0, 14, 0, 19, 0,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
@@ -1155,7 +1160,7 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
 
   const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
   ASSERT_EQ(bias_offset, 64516);
-  const std::vector<uint8_t> expected = {
+  const std::vector<Matcher<uint8_t>> expected = {
     // bias first (cr == 2 of them)
     // 64516 + 0 - (2 + 4 + 6 + 8) * 127 = 61976 = 0xF218
     0x18, 0xF2, 0, 0,
@@ -1168,7 +1173,7 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
     // followed by 10 zeros to make up the difference with primary_tile
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
@@ -1209,7 +1214,7 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
 
   const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
   ASSERT_EQ(bias_offset, 64516);
-  const std::vector<uint8_t> expected = {
+  const std::vector<Matcher<uint8_t>> expected = {
     // bias first (cr == 2 of them)
     // 64516 + 0 - (5 + 10 + 15 + 20) * 127 = 58166 = 0xE336
     0x36, 0xE3, 0, 0,
@@ -1239,7 +1244,7 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     9, 0, 19, 0, 14, 0, 24, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
@@ -1274,7 +1279,7 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
       0,
       &params);
 
-  const std::vector<uint8_t> expected = {
+  const std::vector<Matcher<uint8_t>> expected = {
     // bias first
     // (2 + 3 + 4) * 127 = -1143 = 0xFFFFFB89
     0x89, 0xFB, 0xFF, 0xFF,
@@ -1285,7 +1290,7 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
     3, 6,
     4, 7,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
@@ -1324,7 +1329,7 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
       0,
       &params);
 
-  const std::vector<uint8_t> expected = {
+  const std::vector<Matcher<uint8_t>> expected = {
     // cr blocks
     // bias first (cr == 2 of them)
     // 0 - (5 + 6 + 7) * 127 = -2286 = 0xFFFFF712
@@ -1347,7 +1352,7 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
     // then weights, channels first
     17, 0, 18, 0, 19, 0,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
@@ -1385,7 +1390,7 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
       0,
       &params);
 
-  const std::vector<uint8_t> expected = {
+  const std::vector<Matcher<uint8_t>> expected = {
     // bias first (cr == 2 of them)
     // 0 - (2 + 3 + 4 + 5) * 127 = -1778 = 0xFFFFF90E
     0x0E, 0xF9, 0xFF, 0xFF,
@@ -1398,7 +1403,7 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
     // followed by 10 zeros to make up the difference with primary_tile
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
@@ -1442,7 +1447,7 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
       0,
       &params);
 
-  const std::vector<uint8_t> expected = {
+  const std::vector<Matcher<uint8_t>> expected = {
     // bias first (cr == 2 of them)
     // 0 - (5 + 6 + 7 + 8) * 127 = -3302 = 0xFFFFF31A
     0x1A, 0xF3, 0xFF, 0xFF,
@@ -1472,7 +1477,7 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     21, 0, 23, 0, 22, 0, 24, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
@@ -1507,7 +1512,7 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
       0,
       &params);
 
-  const std::vector<uint8_t> expected = {
+  const std::vector<Matcher<uint8_t>> expected = {
     // bias first
     // 0 - (2 + 4 + 6) * 127 = -1524 = 0xFFFFFA0C
     0x0C, 0xFA, 0xFF, 0xFF,
@@ -1518,7 +1523,7 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
     4, 5,
     6, 7,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
@@ -1555,7 +1560,7 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
       0,
       &params);
 
-  const std::vector<uint8_t> expected = {
+  const std::vector<Matcher<uint8_t>> expected = {
     // cr blocks
     // bias first (cr == 2 of them)
     // 0 - (5 + 10 + 15) * 127 = -3810 = 0xFFFFF11E
@@ -1578,7 +1583,7 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
     // then weights, channels first
     9, 0, 14, 0, 19, 0,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
@@ -1616,7 +1621,7 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
       0,
       &params);
 
-  const std::vector<uint8_t> expected = {
+  const std::vector<Matcher<uint8_t>> expected = {
     // bias first (cr == 2 of them)
     // 0 - (2 + 4 + 6 + 8) * 127 = -2540 = 0xFFFFF614
     0x14, 0xF6, 0xFF, 0xFF,
@@ -1629,7 +1634,7 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
     // followed by 10 zeros to make up the difference with primary_tile
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
@@ -1667,7 +1672,7 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
       0,
       &params);
 
-  const std::vector<uint8_t> expected = {
+  const std::vector<Matcher<uint8_t>> expected = {
     // bias first (cr == 2 of them)
     // 0 - (5 + 10 + 15 + 20) * 127 = -6350 = 0xFFFFE732
     0x32, 0xE7, 0xFF, 0xFF,
@@ -1697,7 +1702,7 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     9, 0, 19, 0, 14, 0, 24, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
@@ -1737,7 +1742,7 @@ TEST(PACK_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
     3, 6,
     4, 7,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
@@ -1789,7 +1794,7 @@ TEST(PACK_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
     // then weights, channels first
     17, 0, 18, 0, 19, 0,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
@@ -1835,7 +1840,7 @@ TEST(PACK_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
     // followed by 10 zeros to make up the difference with primary_tile
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
@@ -1899,7 +1904,7 @@ TEST(PACK_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     21, 0, 23, 0, 22, 0, 24, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
@@ -1939,7 +1944,7 @@ TEST(PACK_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
     4, 5,
     6, 7,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
@@ -1989,7 +1994,7 @@ TEST(PACK_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
     // then weights, channels first
     9, 0, 14, 0, 19, 0,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
@@ -2035,7 +2040,7 @@ TEST(PACK_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
     // followed by 10 zeros to make up the difference with primary_tile
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
@@ -2093,7 +2098,7 @@ TEST(PACK_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     9, 0, 19, 0, 14, 0, 24, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F32_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
@@ -2125,7 +2130,7 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
       0,
       nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     // bias first
     0.0f, 1.0f,
     // then weights, channels first
@@ -2133,7 +2138,7 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
     3.0f, 6.0f,
     4.0f, 7.0f,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F32_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
@@ -2170,7 +2175,7 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
       0,
       nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     // cr blocks
     // bias first (cr == 2 of them)
     0.0f, 1.0f,
@@ -2185,7 +2190,7 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
     // then weights, channels first
     17.0f, 0.0f, 18.0f, 0.0f, 19.0f, 0.0f,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F32_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
@@ -2221,7 +2226,7 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
       0,
       nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     // bias first (cr == 2 of them)
     0.0f, 1.0f,
     // then weights, channels first
@@ -2231,7 +2236,7 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
     // followed by 10 zeros to make up the difference with primary_tile
     0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F32_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
@@ -2273,7 +2278,7 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
       0,
       nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     // bias first (cr == 2 of them)
     0.0f, 1.0f,
     // then weights, channels first
@@ -2295,7 +2300,7 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     21.0f, 0.0f, 23.0f, 0.0f, 22.0f, 0.0f, 24.0f, 0.0f,
     0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F32_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
@@ -2327,7 +2332,7 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
       0,
       nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     // bias first
     0.0f, 1.0f,
     // then weights, channels first
@@ -2335,7 +2340,7 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
     4.0f, 5.0f,
     6.0f, 7.0f,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F32_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
@@ -2370,7 +2375,7 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
       0,
       nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     // cr blocks
     // bias first (cr == 2 of them)
     0.0f, 1.0f,
@@ -2385,7 +2390,7 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
     // then weights, channels first
     9.0f, 0.0f, 14.0f, 0.0f, 19.0f, 0.0f,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F32_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
@@ -2421,7 +2426,7 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
       0,
       nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     // bias first (cr == 2 of them)
     0.0f, 1.0f,
     // then weights, channels first
@@ -2431,7 +2436,7 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
     // followed by 10 zeros to make up the difference with primary_tile
     0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F32_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
@@ -2467,7 +2472,7 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
       0,
       nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     // bias first (cr == 2 of them)
     0.0f, 1.0f,
     // then weights, channels first
@@ -2489,7 +2494,7 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     9.0f, 0.0f, 19.0f, 0.0f, 14.0f, 0.0f, 24.0f, 0.0f,
     0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
@@ -2521,7 +2526,7 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
       0,
       nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     // bias first
     0.0f, 1.0f,
     // then weights, channels first
@@ -2529,7 +2534,7 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
     3.0f, 6.0f,
     4.0f, 7.0f,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
@@ -2566,7 +2571,7 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
       0,
       nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     // cr blocks
     // bias first (cr == 2 of them)
     0.0f, 1.0f,
@@ -2581,7 +2586,7 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
     // then weights, channels first
     17.0f, 0.0f, 18.0f, 0.0f, 19.0f, 0.0f,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
@@ -2617,7 +2622,7 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
       0,
       nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     // bias first (cr == 2 of them)
     0.0f, 1.0f,
     // then weights, channels first
@@ -2627,7 +2632,7 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
     // followed by 10 zeros to make up the difference with primary_tile
     0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
@@ -2669,7 +2674,7 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
       0,
       nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     // bias first (cr == 2 of them)
     0.0f, 1.0f,
     // then weights, channels first
@@ -2691,7 +2696,7 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     21.0f, 0.0f, 23.0f, 0.0f, 22.0f, 0.0f, 24.0f, 0.0f,
     0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
@@ -2723,7 +2728,7 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
       0,
       nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     // bias first
     0.0f, 1.0f,
     // then weights, channels first
@@ -2731,7 +2736,7 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
     4.0f, 5.0f,
     6.0f, 7.0f,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
@@ -2766,7 +2771,7 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
       0,
       nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     // cr blocks
     // bias first (cr == 2 of them)
     0.0f, 1.0f,
@@ -2781,7 +2786,7 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
     // then weights, channels first
     9.0f, 0.0f, 14.0f, 0.0f, 19.0f, 0.0f,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
@@ -2817,7 +2822,7 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
       0,
       nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     // bias first (cr == 2 of them)
     0.0f, 1.0f,
     // then weights, channels first
@@ -2827,7 +2832,7 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
     // followed by 10 zeros to make up the difference with primary_tile
     0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 
 }
 
@@ -2864,7 +2869,7 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
       0,
       nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     // bias first (cr == 2 of them)
     0.0f, 1.0f,
     // then weights, channels first
@@ -2886,7 +2891,7 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     9.0f, 0.0f, 19.0f, 0.0f, 14.0f, 0.0f, 24.0f, 0.0f,
     0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 
 }
 
@@ -2909,7 +2914,7 @@ TEST(PACK_F32_TO_F16_CHW_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
       packed_weights.data(),
       nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     // bias first
     0.0f,
     // then weights
@@ -2917,7 +2922,7 @@ TEST(PACK_F32_TO_F16_CHW_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
     2.0f,
     3.0f,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 
 }
 
@@ -2942,7 +2947,7 @@ TEST(PACK_F32_TO_F16_CHW_DWCONV_HWG_W, groups_gt_1) {
       packed_weights.data(),
       nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     // bias first
     0.0f,
     // then weights
@@ -2964,7 +2969,7 @@ TEST(PACK_F32_TO_F16_CHW_DWCONV_HWG_W, groups_gt_1) {
     8.0f,
     11.0f,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 
 }
 
@@ -2995,7 +3000,7 @@ TEST(PACK_F16_CHW_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
     2,
     3,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F16_CHW_DWCONV_HWG_W, groups_gt_1) {
@@ -3040,7 +3045,7 @@ TEST(PACK_F16_CHW_DWCONV_HWG_W, groups_gt_1) {
     8,
     11,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 
@@ -3071,7 +3076,7 @@ TEST(PACK_F16_CHW_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
     2,
     3,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F16_CHW_DWCONV_GHW_W, groups_gt_1) {
@@ -3116,7 +3121,7 @@ TEST(PACK_F16_CHW_DWCONV_GHW_W, groups_gt_1) {
     10,
     11,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 
@@ -3142,7 +3147,7 @@ TEST(PACK_F32_DWCONV_OKI_W, primary_tile_eq_kernel_size) {
       packed_weights.data(),
       nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     // bias first
     0.0f,
     // then weight
@@ -3156,7 +3161,7 @@ TEST(PACK_F32_DWCONV_OKI_W, primary_tile_eq_kernel_size) {
     // then weight
     5.0f,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F32_TO_F16_DWCONV_OKI_W, primary_tile_eq_kernel_size) {
@@ -3181,7 +3186,7 @@ TEST(PACK_F32_TO_F16_DWCONV_OKI_W, primary_tile_eq_kernel_size) {
       packed_weights.data(),
       nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     // bias first
     0.0f,
     // then weight
@@ -3195,7 +3200,7 @@ TEST(PACK_F32_TO_F16_DWCONV_OKI_W, primary_tile_eq_kernel_size) {
     // then weight
     5.0f,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F32_TO_F16_DWCONV_OKI_W, null_bias) {
@@ -3218,7 +3223,7 @@ TEST(PACK_F32_TO_F16_DWCONV_OKI_W, null_bias) {
       packed_weights.data(),
       nullptr);
 
-  const std::vector<float> expected = {
+  const std::vector<Matcher<float>> expected = {
     // bias first
     0.0f,
     // then weight
@@ -3232,7 +3237,7 @@ TEST(PACK_F32_TO_F16_DWCONV_OKI_W, null_bias) {
     // then weight
     5.0f,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
 
 TEST(PACK_F16_DWCONV_OKI_W, primary_tile_eq_kernel_size) {
@@ -3271,5 +3276,7 @@ TEST(PACK_F16_DWCONV_OKI_W, primary_tile_eq_kernel_size) {
     // then weight
     5,
   };
-  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+  EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
+
+}  // namespace
