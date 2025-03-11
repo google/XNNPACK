@@ -4,17 +4,14 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <algorithm>
-#include <array>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
-#include <limits>
-#include <memory>
-#include <numeric>
-#include <random>
 #include <sstream>
 #include <string>
 #include <tuple>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -22,742 +19,288 @@
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/operator-utils.h"
-#include "src/xnnpack/operator.h"
-#include "src/xnnpack/subgraph.h"
-#include "test/operators/operator-test-utils.h"
+#include "src/xnnpack/reference-utils.h"
 #include "test/replicable_random_device.h"
-#include "test/runtime-flags.h"
+#include "test/subgraph-tester.h"
 
 using ::testing::Combine;
 using ::testing::ValuesIn;
 
-template <typename Rng>
-size_t RandomRank(Rng& rng) {
-  return std::uniform_int_distribution<size_t>(0, XNN_MAX_TENSOR_DIMS)(rng);
-}
+namespace xnnpack {
 
-template <typename Rng>
-std::vector<size_t> RandomShape(Rng& rng, size_t rank) {
-  std::uniform_int_distribution<size_t> dims_dist(1, 9);
-  std::vector<size_t> dims(rank);
-  std::generate(dims.begin(), dims.end(), [&]() { return dims_dist(rng); });
+std::vector<size_t> input_shape(size_t rank, std::vector<size_t> dims) {
+  // Remove the leading dimensions to reduce to `rank` dimensions.
+  std::reverse(dims.begin(), dims.end());
+  dims.resize(rank);
+  std::reverse(dims.begin(), dims.end());
   return dims;
 }
 
-template <typename Rng>
-std::vector<size_t> RandomShape(Rng& rng) {
-  return RandomShape(rng, RandomRank(rng));
-}
-
-template <typename Rng>
-xnn_quantization_params RandomQuantization(xnn_datatype datatype, Rng& rng) {
-  if (datatype == xnn_datatype_qint8) {
-    std::uniform_int_distribution<int> dist{std::numeric_limits<int8_t>::min(),
-                                            std::numeric_limits<int8_t>::max()};
-    return {
-        static_cast<int32_t>(dist(rng)),
-        std::uniform_real_distribution<float>(0.1f, 5.0f)(rng),
-    };
-  } else if (datatype == xnn_datatype_quint8) {
-    std::uniform_int_distribution<int> dist{
-        std::numeric_limits<uint8_t>::min(),
-        std::numeric_limits<uint8_t>::max()};
-    return {
-        static_cast<int32_t>(dist(rng)),
-        std::uniform_real_distribution<float>(0.1f, 5.0f)(rng),
-    };
-  } else {
-    return {0, 1.0f};
-  }
-}
-
-void RemoveLeadingOnes(std::vector<size_t>& dims) {
-  while (!dims.empty()) {
-    if (dims.front() == 1) {
-      dims.erase(dims.begin());
-    } else {
-      break;
-    }
-  }
-}
-
-size_t NumElements(const std::vector<size_t>& dims) {
-  return std::accumulate(dims.begin(), dims.end(), size_t(1),
-                         std::multiplies<size_t>());
-}
-
-void MatchesOperatorApi(xnn_datatype datatype, xnn_binary_operator binary_op) {
-  xnnpack::ReplicableRandomDevice rng;
-
-  std::vector<size_t> input0_dims = RandomShape(rng);
-  std::vector<size_t> input1_dims;
-  std::vector<size_t> output_dims;
-  // Create input dimensions.
-  // Create input 2 with an equal or larger number of dimensions.
-  const size_t input1_num_dims = std::uniform_int_distribution<size_t>(
-      input0_dims.size(), XNN_MAX_TENSOR_DIMS)(rng);
-  input1_dims = RandomShape(rng, input1_num_dims);
-  // Ensure that the inputs dimensions match.
-  std::copy_backward(input0_dims.begin(), input0_dims.end(), input1_dims.end());
-
-  // Choose a random dimension to broadcast for each input.
-  const size_t input0_broadcast_dim =
-      std::uniform_int_distribution<size_t>(0, input0_dims.size())(rng);
-  if (input0_broadcast_dim < input0_dims.size()) {
-    input0_dims[input0_broadcast_dim] = 1;
-  }
-  const size_t input1_broadcast_dim =
-      std::uniform_int_distribution<size_t>(0, input1_dims.size())(rng);
-  if (input1_broadcast_dim < input1_dims.size()) {
-    input1_dims[input1_broadcast_dim] = 1;
-  }
-  input0_dims.resize(XNN_MAX_TENSOR_DIMS);
-  input1_dims.resize(XNN_MAX_TENSOR_DIMS);
-  output_dims.resize(XNN_MAX_TENSOR_DIMS);
-
-  // Calculate generalized shapes.
-  std::fill(input0_dims.begin(), input0_dims.end(), 1);
-  std::fill(input1_dims.begin(), input1_dims.end(), 1);
-  std::copy_backward(input0_dims.cbegin(), input0_dims.cend(),
-                     input0_dims.end());
-  std::copy_backward(input1_dims.cbegin(), input1_dims.cend(),
-                     input1_dims.end());
-  for (size_t i = 0; i < XNN_MAX_TENSOR_DIMS; i++) {
-    if (input0_dims[i] != 1 && input1_dims[i] != 1) {
-      ASSERT_EQ(input0_dims[i], input1_dims[i]) << "i: " << i;
-    }
-    output_dims[i] = std::max(input0_dims[i], input1_dims[i]);
-  }
-
-  if (rng() % 2 == 0) {
-    RemoveLeadingOnes(input0_dims);
-  }
-  if (rng() % 2 == 0) {
-    RemoveLeadingOnes(input1_dims);
-  }
-  while (output_dims.size() >
-         std::max(input0_dims.size(), input1_dims.size())) {
-    output_dims.erase(output_dims.begin());
-  }
-
-  size_t datatype_size = xnn_datatype_size_bytes(datatype);
-  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> input0(
-      NumElements(input0_dims) * datatype_size +
-      XNN_EXTRA_BYTES / sizeof(char));
-  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> input1(
-      NumElements(input1_dims) * datatype_size +
-      XNN_EXTRA_BYTES / sizeof(char));
-  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> operator_output(
-      NumElements(output_dims) * datatype_size);
-  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> subgraph_output(
-      NumElements(output_dims) * datatype_size);
-
-  double datatype_min, datatype_max;
-  switch (datatype) {
-    case xnn_datatype_quint8:
-      datatype_min = std::numeric_limits<uint8_t>::min();
-      datatype_max = std::numeric_limits<uint8_t>::max();
-      break;
-    case xnn_datatype_qint8:
-      datatype_min = std::numeric_limits<int8_t>::min();
-      datatype_max = std::numeric_limits<int8_t>::max();
-      break;
-    case xnn_datatype_int32:
-      datatype_min = std::numeric_limits<int32_t>::min();
-      datatype_max = std::numeric_limits<int32_t>::max();
-      break;
-    case xnn_datatype_fp16:
-    case xnn_datatype_bf16:
-    case xnn_datatype_fp32:
-      datatype_min = -10.0;
-      datatype_max = 10.0;
-      break;
-    default:
-      datatype_min = 0;
-      datatype_max = 0;
-      assert(false);
+float compute_float(xnn_binary_operator op, float a, float b) {
+  switch (op) {
+    case xnn_binary_add:
+      return a + b;
+    case xnn_binary_copysign:
+      return std::copysign(a, b);
+    case xnn_binary_divide:
+      return a / b;
+    case xnn_binary_maximum:
+      return std::max(a, b);
+    case xnn_binary_minimum:
+      return std::min(a, b);
+    case xnn_binary_multiply:
+      return a * b;
+    case xnn_binary_subtract:
+      return a - b;
+    case xnn_binary_squared_difference:
+      return (a - b) * (a - b);
+    case xnn_binary_prelu:
+      return a < 0 ? a * b : a;
+    case xnn_binary_modulus:
+      return std::fmod(a, b);
+    case xnn_binary_atan2:
+      return std::atan2(a, b);
+    case xnn_binary_pow:
+      return std::pow(a, b);
+    case xnn_binary_bitwise_and:
+    case xnn_binary_bitwise_or:
+    case xnn_binary_bitwise_xor:
+    case xnn_binary_shift_left:
+    case xnn_binary_shift_right_logical:
+    case xnn_binary_shift_right_arithmetic:
+    case xnn_binary_invalid:
       break;
   }
-  randomize_buffer(datatype, rng, datatype_min, datatype_max, input0);
-  randomize_buffer(datatype, rng, datatype_min, datatype_max, input1);
-
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  bool quantized = xnn_datatype_is_quantized(datatype);
-  xnn_quantization_params input0_quantization =
-      RandomQuantization(datatype, rng);
-  xnn_quantization_params input1_quantization =
-      RandomQuantization(datatype, rng);
-  xnn_quantization_params output_quantization =
-      RandomQuantization(datatype, rng);
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(3, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  uint32_t input0_id = XNN_INVALID_NODE_ID;
-  uint32_t input1_id = XNN_INVALID_NODE_ID;
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  if (quantized) {
-    ASSERT_EQ(xnn_status_success,
-              xnn_define_quantized_tensor_value(
-                  subgraph, datatype, input0_quantization.zero_point,
-                  input0_quantization.scale, input0_dims.size(),
-                  input0_dims.data(), nullptr,
-                  /*external_id=*/0, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT,
-                  &input0_id));
-
-    ASSERT_EQ(xnn_status_success,
-              xnn_define_quantized_tensor_value(
-                  subgraph, datatype, input1_quantization.zero_point,
-                  input1_quantization.scale, input1_dims.size(),
-                  input1_dims.data(), nullptr,
-                  /*external_id=*/1, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT,
-                  &input1_id));
-
-    ASSERT_EQ(xnn_status_success,
-              xnn_define_quantized_tensor_value(
-                  subgraph, datatype, output_quantization.zero_point,
-                  output_quantization.scale, output_dims.size(),
-                  output_dims.data(), nullptr, /*external_id=*/2,
-                  /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  } else {
-    ASSERT_EQ(xnn_status_success,
-              xnn_define_tensor_value(subgraph, datatype, input0_dims.size(),
-                                      input0_dims.data(), nullptr,
-                                      /*external_id=*/0,
-                                      /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT,
-                                      &input0_id));
-
-    ASSERT_EQ(xnn_status_success,
-              xnn_define_tensor_value(subgraph, datatype, input1_dims.size(),
-                                      input1_dims.data(), nullptr,
-                                      /*external_id=*/1,
-                                      /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT,
-                                      &input1_id));
-
-    ASSERT_EQ(xnn_status_success,
-              xnn_define_tensor_value(
-                  subgraph, datatype, output_dims.size(), output_dims.data(),
-                  nullptr, /*external_id=*/2,
-                  /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  }
-  ASSERT_NE(input0_id, XNN_INVALID_NODE_ID);
-  ASSERT_NE(input1_id, XNN_INVALID_NODE_ID);
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(xnn_status_success,
-            xnn_define_binary(subgraph, binary_op, nullptr, input0_id,
-                              input1_id, output_id, /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  xnn_status status =
-      xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime);
-  if (status == xnn_status_unsupported_parameter) {
-    GTEST_SKIP();
-  }
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 3> external = {
-      xnn_external_value{input0_id, input0.data()},
-      xnn_external_value{input1_id, input1.data()},
-      xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  // Call operator API.
-  xnn_operator_t op = nullptr;
-
-  if (quantized) {
-    ASSERT_EQ(xnn_status_success, xnn_create_binary_elementwise_nd(
-                                      binary_op, datatype, &input0_quantization,
-                                      &input1_quantization,
-                                      &output_quantization, /*flags=*/0, &op));
-  } else {
-    ASSERT_EQ(xnn_status_success, xnn_create_binary_elementwise_nd(
-                                      binary_op, datatype, &input0_quantization,
-                                      &input1_quantization,
-                                      &output_quantization, /*flags=*/0, &op));
-  }
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
-      op, xnn_delete_operator);
-
-  ASSERT_EQ(xnn_status_success, xnn_reshape_binary_elementwise_nd(
-                                    op, input0_dims.size(), input0_dims.data(),
-                                    input1_dims.size(), input1_dims.data(),
-                                    /*threadpool=*/nullptr));
-
-  ASSERT_EQ(xnn_status_success,
-            xnn_setup_binary_elementwise_nd(op, input0.data(), input1.data(),
-                                            operator_output.data()));
-
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
-
-  // Check output shape matches.
-  size_t observed_output_num_dims = 0;
-  std::vector<size_t> observed_output_dims(XNN_MAX_TENSOR_DIMS, 0);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_get_external_value_shape(runtime, output_id, &observed_output_num_dims, observed_output_dims.data()));
-  ASSERT_EQ(output_dims.size(), observed_output_num_dims);
-  for (size_t i = 0; i < observed_output_num_dims; i++) {
-    ASSERT_EQ(output_dims[i], observed_output_dims[i]);
-  }
-
-  // Check outputs match.
-  ASSERT_EQ(subgraph_output, operator_output);
+  XNN_UNREACHABLE;
+  return 0.0;
 }
 
-void Reshape(xnn_datatype datatype, xnn_binary_operator binary_op) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/3,
-                                                    /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
-      subgraph, xnn_delete_subgraph);
-
-  std::vector<size_t> dims{2, 3, 4};
-  uint32_t input0_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(xnn_status_success,
-            xnn_define_tensor_value(subgraph, datatype, dims.size(),
-                                    dims.data(), nullptr, /*external_id=*/0,
-                                    /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT,
-                                    &input0_id));
-  ASSERT_NE(input0_id, XNN_INVALID_NODE_ID);
-  uint32_t input1_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(xnn_status_success,
-            xnn_define_tensor_value(subgraph, datatype, dims.size(),
-                                    dims.data(), nullptr, /*external_id=*/1,
-                                    /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT,
-                                    &input1_id));
-  ASSERT_NE(input1_id, XNN_INVALID_NODE_ID);
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(xnn_status_success,
-            xnn_define_tensor_value(subgraph, datatype, dims.size(),
-                                    dims.data(), nullptr, /*external_id=*/2,
-                                    /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT,
-                                    &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(xnn_status_success,
-            xnn_define_binary(subgraph, binary_op, nullptr, input0_id,
-                              input1_id, output_id, /*flags=*/0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_binary_elementwise);
-  ASSERT_EQ(node->binary_operator, binary_op);
-  ASSERT_EQ(node->num_inputs, 2);
-  ASSERT_EQ(node->inputs[0], input0_id);
-  ASSERT_EQ(node->inputs[1], input1_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-
-  xnn_runtime_t runtime = nullptr;
-  xnn_status status =
-      xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime);
-  if (status == xnn_status_unsupported_parameter) {
-    GTEST_SKIP();
+int32_t compute_integral(xnn_binary_operator op, int32_t a, int32_t b) {
+  switch (op) {
+    case xnn_binary_add:
+      return widen(a) + widen(b);
+    case xnn_binary_copysign:
+      return std::copysign(a, b);
+    case xnn_binary_divide:
+      return euclidean_div(a, b);
+    case xnn_binary_maximum:
+      return std::max(a, b);
+    case xnn_binary_minimum:
+      return std::min(a, b);
+    case xnn_binary_multiply:
+      return widen(a) * widen(b);
+    case xnn_binary_subtract:
+      return widen(a) - widen(b);
+    case xnn_binary_modulus:
+      return euclidean_mod(a, b);
+    case xnn_binary_pow:
+      return integer_pow(a, b);
+    case xnn_binary_bitwise_and:
+      return a & b;
+    case xnn_binary_bitwise_or:
+      return a | b;
+    case xnn_binary_bitwise_xor:
+      return a ^ b;
+    case xnn_binary_shift_left:
+      return a << (b & 31);
+    case xnn_binary_shift_right_logical:
+      return static_cast<uint32_t>(a) >> (b & 31);
+    case xnn_binary_shift_right_arithmetic:
+      return a >> (b & 31);
+    case xnn_binary_squared_difference:
+    case xnn_binary_atan2:
+    case xnn_binary_prelu:
+    case xnn_binary_invalid:
+      break;
   }
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
-      runtime, xnn_delete_runtime);
-
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], subgraph->values,
-                          subgraph->num_values, /*threadpool=*/nullptr),
-            xnn_status_success);
-
-  dims[0] = 7;
-  ASSERT_EQ(
-      xnn_status_success,
-      xnn_reshape_external_value(runtime, input0_id, dims.size(), dims.data()));
-  ASSERT_EQ(
-      xnn_status_success,
-      xnn_reshape_external_value(runtime, input1_id, dims.size(), dims.data()));
-
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values,
-                          runtime->num_values, /*threadpool=*/nullptr),
-            xnn_status_reallocation_required);
-  const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
-  const size_t num_input_elements = std::accumulate(
-      dims.cbegin(), dims.cend(), size_t{1}, std::multiplies<size_t>());
-  ASSERT_EQ(output_shape->dim[0], dims[0]);
-  ASSERT_EQ(runtime->values[node->outputs[0]].size,
-            num_input_elements * xnn_datatype_size_bytes(datatype));
+  XNN_UNREACHABLE;
+  return 0;
 }
 
-void ReshapeBroadcastDim0(xnn_datatype datatype,
-                          xnn_binary_operator binary_op) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/3,
-                                                    /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  std::vector<size_t> dim0{1, 3, 4};
-  std::vector<size_t> dim1{5, 3, 4};
-  uint32_t input0_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(xnn_status_success,
-            xnn_define_tensor_value(subgraph, datatype, dim0.size(),
-                                    dim0.data(), nullptr, /*external_id=*/0,
-                                    /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT,
-                                    &input0_id));
-  ASSERT_NE(input0_id, XNN_INVALID_NODE_ID);
-  uint32_t input1_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(xnn_status_success,
-            xnn_define_tensor_value(subgraph, datatype, dim1.size(),
-                                    dim1.data(), nullptr, /*external_id=*/1,
-                                    /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT,
-                                    &input1_id));
-  ASSERT_NE(input1_id, XNN_INVALID_NODE_ID);
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  // Output dims will be correctly set by reshape.
-  ASSERT_EQ(xnn_status_success,
-            xnn_define_tensor_value(subgraph, datatype, dim1.size(),
-                                    dim1.data(), nullptr, /*external_id=*/2,
-                                    /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT,
-                                    &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(xnn_status_success,
-            xnn_define_binary(subgraph, binary_op, nullptr, input0_id,
-                              input1_id, output_id, /*flags=*/0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_binary_elementwise);
-  ASSERT_EQ(node->binary_operator, binary_op);
-  ASSERT_EQ(node->num_inputs, 2);
-  ASSERT_EQ(node->inputs[0], input0_id);
-  ASSERT_EQ(node->inputs[1], input1_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-
-  xnn_runtime_t runtime = nullptr;
-  xnn_status status =
-      xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime);
-  if (status == xnn_status_unsupported_parameter) {
-    GTEST_SKIP();
-  }
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], subgraph->values,
-                          subgraph->num_values, /*threadpool=*/nullptr),
-            xnn_status_success);
-
-  dim0[0] = 7;
-  dim1[0] = 1;
-  ASSERT_EQ(
-      xnn_status_success,
-      xnn_reshape_external_value(runtime, input0_id, dim0.size(), dim0.data()));
-  ASSERT_EQ(
-      xnn_status_success,
-      xnn_reshape_external_value(runtime, input1_id, dim1.size(), dim1.data()));
-
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values,
-                          runtime->num_values, /*threadpool=*/nullptr),
-            xnn_status_reallocation_required);
-  const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
-  const size_t num_input_elements = std::accumulate(
-      dim0.cbegin(), dim0.cend(), size_t{1}, std::multiplies<size_t>());
-  ASSERT_EQ(output_shape->dim[0], dim0[0]);
-  ASSERT_EQ(runtime->values[node->outputs[0]].size,
-            num_input_elements * xnn_datatype_size_bytes(datatype));
-}
-
-void ReshapeBroadcast1D(xnn_datatype datatype, xnn_binary_operator binary_op) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/3,
-                                                    /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
-      subgraph, xnn_delete_subgraph);
-
-  std::vector<size_t> dim0{1, 20, 80, 32};
-  std::vector<size_t> dim1{32};
-  uint32_t input0_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(xnn_status_success,
-            xnn_define_tensor_value(subgraph, datatype, dim0.size(),
-                                    dim0.data(), nullptr, /*external_id=*/0,
-                                    /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT,
-                                    &input0_id));
-  ASSERT_NE(input0_id, XNN_INVALID_NODE_ID);
-  uint32_t input1_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(xnn_status_success,
-            xnn_define_tensor_value(subgraph, datatype, dim1.size(),
-                                    dim1.data(), nullptr, /*external_id=*/1,
-                                    /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT,
-                                    &input1_id));
-  ASSERT_NE(input1_id, XNN_INVALID_NODE_ID);
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(xnn_status_success,
-            xnn_define_tensor_value(subgraph, datatype, dim0.size(),
-                                    dim0.data(), nullptr, /*external_id=*/2,
-                                    /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT,
-                                    &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(xnn_status_success,
-            xnn_define_binary(subgraph, binary_op, nullptr, input0_id,
-                              input1_id, output_id, /*flags=*/0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_binary_elementwise);
-  ASSERT_EQ(node->binary_operator, binary_op);
-  ASSERT_EQ(node->num_inputs, 2);
-  ASSERT_EQ(node->inputs[0], input0_id);
-  ASSERT_EQ(node->inputs[1], input1_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-
-  xnn_runtime_t runtime = nullptr;
-  xnn_status status =
-      xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime);
-  if (status == xnn_status_unsupported_parameter) {
-    GTEST_SKIP();
-  }
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
-      runtime, xnn_delete_runtime);
-
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], subgraph->values,
-                          subgraph->num_values, /*threadpool=*/nullptr),
-            xnn_status_success);
-
-  dim0[0] = 7;
-  dim1[0] = 1;
-  ASSERT_EQ(
-      xnn_status_success,
-      xnn_reshape_external_value(runtime, input0_id, dim0.size(), dim0.data()));
-  ASSERT_EQ(
-      xnn_status_success,
-      xnn_reshape_external_value(runtime, input1_id, dim1.size(), dim1.data()));
-
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values,
-                          runtime->num_values, /*threadpool=*/nullptr),
-            xnn_status_reallocation_required);
-  const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
-  const size_t num_input_elements = std::accumulate(
-      dim0.cbegin(), dim0.cend(), size_t{1}, std::multiplies<size_t>());
-  ASSERT_EQ(output_shape->dim[0], dim0[0]);
-  ASSERT_EQ(runtime->values[node->outputs[0]].size,
-            num_input_elements * xnn_datatype_size_bytes(datatype));
-}
-
-void ReshapeBroadcast2D(xnn_datatype datatype, xnn_binary_operator binary_op) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/3,
-                                                    /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  std::vector<size_t> dim0{1, 20, 80, 32};
-  std::vector<size_t> dim1{80, 32};
-  uint32_t input0_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(xnn_status_success,
-            xnn_define_tensor_value(subgraph, datatype, dim0.size(),
-                                    dim0.data(), nullptr, /*external_id=*/0,
-                                    /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT,
-                                    &input0_id));
-  ASSERT_NE(input0_id, XNN_INVALID_NODE_ID);
-  uint32_t input1_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(xnn_status_success,
-            xnn_define_tensor_value(subgraph, datatype, dim1.size(),
-                                    dim1.data(), nullptr, /*external_id=*/1,
-                                    /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT,
-                                    &input1_id));
-  ASSERT_NE(input1_id, XNN_INVALID_NODE_ID);
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(xnn_status_success,
-            xnn_define_tensor_value(subgraph, datatype, dim0.size(),
-                                    dim0.data(), nullptr, /*external_id=*/2,
-                                    /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT,
-                                    &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(xnn_status_success,
-            xnn_define_binary(subgraph, binary_op, nullptr, input0_id,
-                              input1_id, output_id, /*flags=*/0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_binary_elementwise);
-  ASSERT_EQ(node->binary_operator, binary_op);
-  ASSERT_EQ(node->num_inputs, 2);
-  ASSERT_EQ(node->inputs[0], input0_id);
-  ASSERT_EQ(node->inputs[1], input1_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-
-  xnn_runtime_t runtime = nullptr;
-  xnn_status status =
-      xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime);
-  if (status == xnn_status_unsupported_parameter) {
-    GTEST_SKIP();
-  }
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], subgraph->values,
-                          subgraph->num_values, /*threadpool=*/nullptr),
-            xnn_status_success);
-
-  dim0[0] = 7;
-  dim1[0] = 1;
-  ASSERT_EQ(
-      xnn_status_success,
-      xnn_reshape_external_value(runtime, input0_id, dim0.size(), dim0.data()));
-  ASSERT_EQ(
-      xnn_status_success,
-      xnn_reshape_external_value(runtime, input1_id, dim1.size(), dim1.data()));
-
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values,
-                          runtime->num_values, /*threadpool=*/nullptr),
-            xnn_status_reallocation_required);
-  const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
-  const size_t num_input_elements = std::accumulate(
-      dim0.cbegin(), dim0.cend(), size_t{1}, std::multiplies<size_t>());
-  ASSERT_EQ(output_shape->dim[0], dim0[0]);
-  ASSERT_EQ(runtime->values[node->outputs[0]].size,
-            num_input_elements * xnn_datatype_size_bytes(datatype));
-}
-
-void DegenerateDimension(xnn_datatype datatype, xnn_binary_operator binary_op) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/3,
-                                                    /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
-      subgraph, xnn_delete_subgraph);
-
-  std::vector<size_t> dim0{0, 32};
-  std::vector<size_t> dim1{2, 0, 32};
-  uint32_t input0_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(xnn_status_success,
-            xnn_define_tensor_value(subgraph, datatype, dim0.size(),
-                                    dim0.data(), nullptr, /*external_id=*/0,
-                                    /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT,
-                                    &input0_id));
-  ASSERT_NE(input0_id, XNN_INVALID_NODE_ID);
-  uint32_t input1_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(xnn_status_success,
-            xnn_define_tensor_value(subgraph, datatype, dim1.size(),
-                                    dim1.data(), nullptr, /*external_id=*/1,
-                                    /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT,
-                                    &input1_id));
-  ASSERT_NE(input1_id, XNN_INVALID_NODE_ID);
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(xnn_status_success,
-            xnn_define_tensor_value(subgraph, datatype, dim1.size(),
-                                    dim1.data(), nullptr, /*external_id=*/2,
-                                    /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT,
-                                    &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(xnn_status_success,
-            xnn_define_binary(subgraph, binary_op, nullptr, input0_id,
-                              input1_id, output_id, /*flags=*/0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_binary_elementwise);
-  ASSERT_EQ(node->binary_operator, binary_op);
-  ASSERT_EQ(node->num_inputs, 2);
-  ASSERT_EQ(node->inputs[0], input0_id);
-  ASSERT_EQ(node->inputs[1], input1_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-
-  xnn_runtime_t runtime = nullptr;
-  xnn_status status =
-      xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime);
-  if (status == xnn_status_unsupported_parameter) {
-    GTEST_SKIP();
-  }
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
-      runtime, xnn_delete_runtime);
-
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], subgraph->values,
-                          subgraph->num_values, /*threadpool=*/nullptr),
-            xnn_status_success);
+float compute_tolerance(xnn_datatype datatype, float output_ref) {
+  return std::abs(output_ref) * epsilon(datatype) + epsilon(datatype);
 }
 
 struct Param {
-  using TupleT = std::tuple<xnn_datatype, xnn_binary_operator>;
+  using TupleT = std::tuple<xnn_datatype, xnn_binary_operator, int>;
   explicit Param(TupleT p)
-      : datatype(std::get<0>(p)), binary_operator(std::get<1>(p)) {}
+      : datatype(std::get<0>(p)), op(std::get<1>(p)), rank(std::get<2>(p)) {}
 
   std::string Name() const {
     std::stringstream sstr;
     sstr << xnn_datatype_to_string(datatype) << "_"
-         << xnn_binary_operator_to_string(binary_operator);
+         << xnn_binary_operator_to_string(op) << "_rank" << rank;
     return sstr.str();
   }
 
   xnn_datatype datatype;
-  xnn_binary_operator binary_operator;
+  xnn_binary_operator op;
+  size_t rank;
 };
 
-class BinaryTest : public testing::TestWithParam<Param> {};
+template <typename T>
+void TestImpl(const Param& p) {
+  ReplicableRandomDevice rng;
 
-TEST_P(BinaryTest, matches_operator_api) {
-  MatchesOperatorApi(GetParam().datatype, GetParam().binary_operator);
-}
+  // We want the total number of elements to be reasonable, so choose max_dim
+  // such that a random shape of rank `p.rank` produces this max size.
+  constexpr size_t max_size = 1024;
+  const size_t max_dim = static_cast<size_t>(std::ceil(
+      std::pow(static_cast<double>(max_size),
+               1.0 / static_cast<double>(std::max<size_t>(1, p.rank)))));
+  for (size_t input_rank = 0; input_rank <= p.rank; input_rank++) {
+    for (std::pair<size_t, size_t> input_ranks :
+         {std::make_pair(input_rank, p.rank),
+          std::make_pair(p.rank, input_rank)}) {
+      xnn_quantization_params a_quantization =
+          random_quantization(p.datatype, rng);
+      xnn_quantization_params b_quantization =
+          random_quantization(p.datatype, rng);
+      xnn_quantization_params output_quantization =
+          random_quantization(p.datatype, rng);
 
-TEST_P(BinaryTest, reshape) {
-  if (xnn_datatype_is_quantized(GetParam().datatype)) {
-    GTEST_SKIP();
+      DatatypeGenerator<T> output_gen(output_quantization);
+      xnn_binary_params params = {
+          dequantize(output_gen(rng), output_quantization),
+          dequantize(output_gen(rng), output_quantization),
+      };
+      if (params.output_min > params.output_max) {
+        std::swap(params.output_min, params.output_max);
+      }
+
+      SubgraphTester subgraph(3);
+      subgraph.AddInputTensor(input_ranks.first, p.datatype, a_quantization, 0)
+          .AddInputTensor(input_ranks.second, p.datatype, b_quantization, 1)
+          .AddOutputTensor(p.rank, p.datatype, output_quantization, 2)
+          .AddBinary(p.op, &params, 0, 1, 2);
+      xnn_status status = subgraph.CreateRuntime();
+      ASSERT_EQ(status, xnn_status_success);
+
+      for (int reshape = 0; reshape < 2; ++reshape) {
+        std::vector<size_t> output_shape =
+            random_shape(rng, p.rank, 1, max_dim);
+        std::vector<size_t> a_shape =
+            input_shape(input_ranks.first, output_shape);
+        std::vector<size_t> b_shape =
+            input_shape(input_ranks.second, output_shape);
+
+        Tensor<T> a(a_shape, {XNN_EXTRA_BYTES});
+        Tensor<T> b(b_shape, {XNN_EXTRA_BYTES});
+        Tensor<T> output(output_shape);
+
+        DatatypeGenerator<T> a_gen(a_quantization);
+        DatatypeGenerator<T> b_gen(b_quantization);
+        a.generate([&]() { return a_gen(rng); });
+        b.generate([&]() { return b_gen(rng); });
+
+        subgraph.ReshapeExternalTensor(a_shape, a.data(), 0)
+            .ReshapeExternalTensor(b_shape, b.data(), 1)
+            .ReshapeRuntime();
+
+        ASSERT_EQ(subgraph.GetExternalTensorShape(2), output_shape);
+
+        subgraph.SetupExternalTensor(output.data(), 2)
+            .SetupRuntime()
+            .InvokeRuntime();
+
+        for (const auto& i : EnumerateIndices(output.extents())) {
+          if (std::is_integral<T>::value) {
+            const int32_t expected = std::min<int32_t>(
+                std::max<int32_t>(compute_integral(p.op, a(i), b(i)),
+                                  params.output_min),
+                params.output_max);
+            ASSERT_EQ(expected, output(i))
+                << "i = " << index_to_string(i)
+                << ", a_shape=" << index_to_string(a_shape)
+                << ", b_shape=" << index_to_string(b_shape)
+                << ", a(i) = " << static_cast<int32_t>(a(i))
+                << ", b(i) = " << static_cast<int32_t>(b(i));
+          } else if (is_quantized<T>()) {
+            const float a_i = dequantize(a(i), a_quantization);
+            const float b_i = dequantize(b(i), b_quantization);
+            float expected = compute_float(p.op, a_i, b_i);
+            expected = std::max<float>(expected, params.output_min);
+            expected = std::min<float>(expected, params.output_max);
+            expected = fake_quantize(expected, output_quantization);
+            expected = std::max<float>(expected, NumericLimits<T>::min());
+            expected = std::min<float>(expected, NumericLimits<T>::max());
+            if (std::isnan(expected)) {
+              // We don't know how to represent NaN for quantized datatypes.
+            } else {
+              ASSERT_NEAR(expected, output(i), 1)
+                  << "i = " << index_to_string(i)
+                  << ", a_shape=" << index_to_string(a_shape)
+                  << ", b_shape=" << index_to_string(b_shape)
+                  << ", a(i) = " << a_i << " (" << static_cast<int32_t>(a(i))
+                  << ")"
+                  << ", b(i) = " << b_i << " (" << static_cast<int32_t>(b(i))
+                  << ")"
+                  << ", output(i) = " << static_cast<int32_t>(output(i));
+            }
+          } else {
+            float expected = compute_float(p.op, a(i), b(i));
+            expected = std::max<float>(expected, params.output_min);
+            expected = std::min<float>(expected, params.output_max);
+            if (std::isnan(expected)) {
+              // Checking the output is NaN could make sense, but it fails in
+              // a variety of cases.
+            } else {
+              ASSERT_NEAR(expected, output(i),
+                          compute_tolerance(p.datatype, expected))
+                  << "i = " << index_to_string(i)
+                  << ", a_shape=" << index_to_string(a_shape)
+                  << ", b_shape=" << index_to_string(b_shape)
+                  << ", a(i) = " << static_cast<float>(a(i))
+                  << ", b(i) = " << static_cast<float>(b(i));
+            }
+          }
+        }
+      }
+    }
   }
-  Reshape(GetParam().datatype, GetParam().binary_operator);
 }
 
-TEST_P(BinaryTest, reshape_broadcast_dim0) {
-  if (xnn_datatype_is_quantized(GetParam().datatype)) {
-    GTEST_SKIP();
+class IntegerOps : public testing::TestWithParam<Param> {};
+class RealOps : public testing::TestWithParam<Param> {};
+
+TEST_P(IntegerOps, test) {
+  switch (GetParam().datatype) {
+    case xnn_datatype_int32:
+      TestImpl<int>(GetParam());
+      break;
+    default:
+      XNN_UNREACHABLE;
   }
-  ReshapeBroadcastDim0(GetParam().datatype, GetParam().binary_operator);
 }
 
-TEST_P(BinaryTest, reshape_broadcast_1d) {
-  if (xnn_datatype_is_quantized(GetParam().datatype)) {
-    GTEST_SKIP();
+TEST_P(RealOps, test) {
+  switch (GetParam().datatype) {
+    case xnn_datatype_qint8:
+      TestImpl<quantized<int8_t>>(GetParam());
+      break;
+    case xnn_datatype_quint8:
+      TestImpl<quantized<uint8_t>>(GetParam());
+      break;
+    case xnn_datatype_fp16:
+      TestImpl<xnn_float16>(GetParam());
+      break;
+    case xnn_datatype_bf16:
+      TestImpl<xnn_bfloat16>(GetParam());
+      break;
+    case xnn_datatype_fp32:
+      TestImpl<float>(GetParam());
+      break;
+    default:
+      XNN_UNREACHABLE;
   }
-  ReshapeBroadcast1D(GetParam().datatype, GetParam().binary_operator);
 }
 
-TEST_P(BinaryTest, reshape_broadcast_2d) {
-  if (xnn_datatype_is_quantized(GetParam().datatype)) {
-    GTEST_SKIP();
-  }
-  ReshapeBroadcast2D(GetParam().datatype, GetParam().binary_operator);
-}
+// clang-format off
+const xnn_datatype all_integer_datatypes[] = {
+    xnn_datatype_int32,
+};
 
-const xnn_datatype all_datatypes[] = {
+const xnn_datatype all_real_datatypes[] = {
     xnn_datatype_quint8,
     xnn_datatype_qint8,
 #ifndef XNN_EXCLUDE_F16_TESTS
@@ -765,21 +308,17 @@ const xnn_datatype all_datatypes[] = {
 #endif
     xnn_datatype_bf16,
     xnn_datatype_fp32,
-    xnn_datatype_int32,
 };
 
-const xnn_binary_operator all_binary_ops[] = {
+const xnn_binary_operator all_integer_ops[] = {
     xnn_binary_add,
     xnn_binary_copysign,
     xnn_binary_divide,
     xnn_binary_maximum,
     xnn_binary_minimum,
     xnn_binary_multiply,
-    xnn_binary_prelu,
     xnn_binary_subtract,
-    xnn_binary_squared_difference,
     xnn_binary_modulus,
-    xnn_binary_atan2,
     xnn_binary_pow,
     xnn_binary_bitwise_and,
     xnn_binary_bitwise_or,
@@ -789,9 +328,34 @@ const xnn_binary_operator all_binary_ops[] = {
     xnn_binary_shift_right_arithmetic,
 };
 
-INSTANTIATE_TEST_SUITE_P(
-    BinaryTest, BinaryTest,
-    testing::ConvertGenerator<Param::TupleT>(Combine(
-        ValuesIn(all_datatypes),
-        ValuesIn(all_binary_ops))),
-    [](const auto& info) { return info.param.Name(); });
+const xnn_binary_operator all_real_ops[] = {
+    xnn_binary_add,
+    xnn_binary_atan2,
+    xnn_binary_copysign,
+    xnn_binary_divide,
+    xnn_binary_maximum,
+    xnn_binary_minimum,
+    xnn_binary_modulus,
+    xnn_binary_multiply,
+    xnn_binary_pow,
+    xnn_binary_prelu,
+    xnn_binary_squared_difference,
+    xnn_binary_subtract,
+};
+// clang-format on
+
+auto all_ranks = testing::Range(0, XNN_MAX_TENSOR_DIMS);
+
+INSTANTIATE_TEST_SUITE_P(BinaryTest, IntegerOps,
+                         testing::ConvertGenerator<Param::TupleT>(
+                             Combine(ValuesIn(all_integer_datatypes),
+                                     ValuesIn(all_integer_ops), all_ranks)),
+                         [](const auto& info) { return info.param.Name(); });
+
+INSTANTIATE_TEST_SUITE_P(BinaryTest, RealOps,
+                         testing::ConvertGenerator<Param::TupleT>(
+                             Combine(ValuesIn(all_real_datatypes),
+                                     ValuesIn(all_real_ops), all_ranks)),
+                         [](const auto& info) { return info.param.Name(); });
+
+}  // namespace xnnpack

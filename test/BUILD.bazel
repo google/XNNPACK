@@ -51,6 +51,7 @@ SUBGRAPH_TEST_DEPS = [
     "//:node_type",
     "//:operators",
     "//:operator_utils",
+    "//:reference_ukernels",
     "//:requantization",
     "//:subgraph",
 ]
@@ -1094,19 +1095,8 @@ xnnpack_cxx_library(
 
 xnnpack_unit_test(
     name = "unary_test",
-    srcs = [
-        "unary.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        ":runtime_flags",
-        ":unary_ops",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:datatype",
-        "//:operator_utils",
-        "//:subgraph",
-    ],
+    srcs = ["unary.cc"],
+    deps = SUBGRAPH_TEST_DEPS + [":unary_ops"],
 )
 
 xnnpack_unit_test(
@@ -1117,6 +1107,7 @@ xnnpack_unit_test(
     deps = [
         ":replicable_random_device",
         "//:buffer",
+        "//:math",
     ],
 )
 
@@ -1149,9 +1140,7 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "binary_test",
     srcs = ["binary.cc"],
-    deps = SUBGRAPH_TEST_DEPS + [
-        "//test/operators:operator_test_utils",
-    ],
+    deps = SUBGRAPH_TEST_DEPS,
 )
 
 xnnpack_unit_test(

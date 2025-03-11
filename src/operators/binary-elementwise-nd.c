@@ -136,7 +136,10 @@ static enum xnn_status init_binary_elementwise_nd(
   int sign_b = 1;
   const struct xnn_binary_elementwise_config* config =
       init_config(type, datatype, &sign_b);
-  if (config == NULL) {
+  if (config == NULL ||
+      config->op_ukernel == NULL ||
+      config->opc_ukernel == NULL ||
+      config->ropc_ukernel == NULL) {
     xnn_log_debug(
       "unsupported operator %s for datatype %s, falling back to reference kernel",
       xnn_binary_operator_to_string(type), xnn_datatype_to_string(datatype));
