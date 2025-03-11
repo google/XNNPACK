@@ -56,11 +56,12 @@ void xnn_f32_dwconv_minmax_ukernel_3p8vc__rvv(
     do {
       vl = __riscv_vsetvl_e32m8(c);
       // load bias to vAcc
-      vfloat32m8_t vAcc = __riscv_vle32_v_f32m8_tu(vAcc, w, vl);
+      vfloat32m8_t vAcc = __riscv_vundefined_f32m8();
+      vAcc = __riscv_vle32_v_f32m8_tu(vAcc, w, vl);
       w += vlmax;
 
-      vfloat32m8_t va;
-      vfloat32m8_t vb;
+      vfloat32m8_t va = __riscv_vundefined_f32m8();
+      vfloat32m8_t vb = __riscv_vundefined_f32m8();
       va = __riscv_vle32_v_f32m8_tu(va, i0, vl);
       vb = __riscv_vle32_v_f32m8_tu(vb, w, vl);
       w  += vlmax;

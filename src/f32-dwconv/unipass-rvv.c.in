@@ -49,11 +49,12 @@ void xnn_f32_dwconv${SUFFIX}_ukernel_${KERNEL_TILE}p${LMUL}vc__rvv(
     do {
       vl = __riscv_vsetvl_e32m${LMUL}(c);
       // load bias to vAcc
-      vfloat32m${LMUL}_t vAcc = __riscv_vle32_v_f32m${LMUL}_tu(vAcc, w, vl);
+      vfloat32m${LMUL}_t vAcc = __riscv_vundefined_f32m${LMUL}();
+      vAcc = __riscv_vle32_v_f32m${LMUL}_tu(vAcc, w, vl);
       w += vlmax;
 
-      vfloat32m${LMUL}_t va;
-      vfloat32m${LMUL}_t vb;
+      vfloat32m${LMUL}_t va = __riscv_vundefined_f32m${LMUL}();
+      vfloat32m${LMUL}_t vb = __riscv_vundefined_f32m${LMUL}();
       $for K in range(KERNEL_TILE):
         va = __riscv_vle32_v_f32m${LMUL}_tu(va, i${K}, vl);
         vb = __riscv_vle32_v_f32m${LMUL}_tu(vb, w, vl);
