@@ -302,6 +302,8 @@ xnnpack_cxx_library(
     "s8_rdmax",
     "u8_rmin",
     "u8_rmax",
+    "u8_rdmin",
+    "u8_rdmax",
     "u8_rminmax",
 ]]
 

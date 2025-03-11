@@ -968,6 +968,8 @@ NON_PROD_WASMSIMD_MICROKERNEL_SRCS = [
     "src/u8-ibilinear/gen/u8-ibilinear-wasmsimd-dot16x2-c16.c",
     "src/u8-ibilinear/gen/u8-ibilinear-wasmsimd-mul32-c8.c",
     "src/u8-ibilinear/gen/u8-ibilinear-wasmsimd-mul32-c16.c",
+    "src/u8-rdminmax/gen/u8-rdmax-2p2x-wasmsimd-c32.c",
+    "src/u8-rdminmax/gen/u8-rdmin-2p2x-wasmsimd-c32.c",
     "src/x8-lut/gen/x8-lut-wasmsimd-u16.c",
     "src/x8-lut/gen/x8-lut-wasmsimd-u48.c",
     "src/x8-lut/gen/x8-lut-wasmsimd-u64.c",

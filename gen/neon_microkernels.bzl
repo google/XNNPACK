@@ -689,6 +689,8 @@ NON_PROD_NEON_MICROKERNEL_SRCS = [
     "src/s8-rminmax/gen/s8-rminmax-neon-u48-acc3.c",
     "src/s8-rminmax/gen/s8-rminmax-neon-u64-acc2.c",
     "src/s8-rminmax/gen/s8-rminmax-neon-u64-acc4.c",
+    "src/u8-rdminmax/gen/u8-rdmax-2p2x-neon-c32.c",
+    "src/u8-rdminmax/gen/u8-rdmin-2p2x-neon-c32.c",
     "src/u8-rminmax/gen/u8-rmax-neon-u32-acc2.c",
     "src/u8-rminmax/gen/u8-rmax-neon-u48-acc3.c",
     "src/u8-rminmax/gen/u8-rmax-neon-u64-acc2.c",

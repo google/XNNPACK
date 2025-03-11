@@ -737,6 +737,8 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/s8-rminmax/gen/s8-rminmax-scalar-u4-acc4.c
   src/u8-ibilinear/gen/u8-ibilinear-scalar-c2.c
   src/u8-ibilinear/gen/u8-ibilinear-scalar-c4.c
+  src/u8-rdminmax/gen/u8-rdmax-2p2x-scalar-c2.c
+  src/u8-rdminmax/gen/u8-rdmin-2p2x-scalar-c2.c
   src/u8-rminmax/gen/u8-rmax-scalar-u1.c
   src/u8-rminmax/gen/u8-rmax-scalar-u3-acc3.c
   src/u8-rminmax/gen/u8-rmax-scalar-u4-acc2.c

@@ -663,6 +663,25 @@ DECLARE_S8_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_s8_rdmax_ukernel_2p2x__scal
 DECLARE_S8_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_s8_rdmax_ukernel_2p2x__sse41_c32)
 DECLARE_S8_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_s8_rdmax_ukernel_2p2x__wasmsimd_c32)
 
+#define DECLARE_U8_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(fn_name)  \
+  XNN_INTERNAL void fn_name(  \
+      size_t rows,            \
+      size_t channels,        \
+      const uint8_t* input,    \
+      size_t input_stride,    \
+      uint8_t* output,        \
+      const void* params);
+
+DECLARE_U8_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_u8_rdmin_ukernel_2p2x__neon_c32)
+DECLARE_U8_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_u8_rdmin_ukernel_2p2x__scalar_c2)
+DECLARE_U8_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_u8_rdmin_ukernel_2p2x__sse2_c32)
+DECLARE_U8_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_u8_rdmin_ukernel_2p2x__wasmsimd_c32)
+
+DECLARE_U8_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_u8_rdmax_ukernel_2p2x__neon_c32)
+DECLARE_U8_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_u8_rdmax_ukernel_2p2x__scalar_c2)
+DECLARE_U8_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_u8_rdmax_ukernel_2p2x__sse2_c32)
+DECLARE_U8_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_u8_rdmax_ukernel_2p2x__wasmsimd_c32)
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

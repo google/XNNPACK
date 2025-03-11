@@ -341,6 +341,60 @@ class ReduceMicrokernelTester {
     }
   }
 
+  void Test(xnn_u8_rdminmax_ukernel_fn reduce, OpType op_type) const {
+    xnnpack::ReplicableRandomDevice rng;
+    std::uniform_int_distribution<int32_t> u8dist(
+      std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
+
+    xnnpack::Buffer<uint8_t> input((rows() - 1) * input_stride() + channels() +
+                                  XNN_EXTRA_BYTES / sizeof(int8_t));
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate_n(input.data(), (rows() - 1) * input_stride() + channels(),
+                      [&]() { return u8dist(rng); });
+
+      xnnpack::Buffer<uint8_t> output(channels());
+      xnnpack::Buffer<uint8_t> output_ref(channels());
+
+      std::generate_n(output.begin(), channels(),
+                      [&]() { return u8dist(rng); });
+
+      // Compute reference results.
+      switch (op_type) {
+        case OpType::Max:
+          for (size_t c = 0; c < channels(); ++c) {
+            uint8_t max_value = output[c];
+            for (size_t n = 0; n < rows(); ++n) {
+              max_value = std::max(max_value, input[n * input_stride() + c]);
+            }
+            output_ref[c] = max_value;
+          }
+          break;
+        case OpType::Min:
+          for (size_t c = 0; c < channels(); ++c) {
+            uint8_t min_value = output[c];
+            for (size_t n = 0; n < rows(); ++n) {
+              min_value = std::min(min_value, input[n * input_stride() + c]);
+            }
+            output_ref[c] = min_value;
+          }
+          break;
+        default:
+          XNN_UNREACHABLE;
+      }
+
+      // Call optimized micro-kernel.
+      reduce(rows(), channels(), input.data(), input_stride() * sizeof(uint8_t),
+             output.data(), nullptr);
+
+      // Verify results.
+      for (size_t c = 0; c < channels(); c++) {
+        ASSERT_NEAR(output[c], output_ref[c], output_ref[c] * 1.0e-6f)
+          << "at position " << c << ", rows = " << rows() << ", channels = "
+          << channels();
+      }
+    }
+  }
+
  private:
   size_t rows_{1};
   size_t channels_{1};

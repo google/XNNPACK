@@ -70,6 +70,11 @@ static XNN_INLINE xnn_simd_u8_t xnn_load_tail_u8(const uint8_t *input,
   return *input;
 }
 
+static XNN_INLINE xnn_simd_u8_t xnn_load_tail_safe_u8(const uint8_t *input,
+                                                      size_t num_elements) {
+  return *input;
+}
+
 static XNN_INLINE void xnn_store_tail_u8(uint8_t *output, xnn_simd_u8_t v,
                                          size_t num_elements) {
   *output = v;

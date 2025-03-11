@@ -1447,6 +1447,14 @@ typedef void (*xnn_s8_rdminmax_ukernel_fn)(
     int8_t* output,
     const void* params);
 
+typedef void (*xnn_u8_rdminmax_ukernel_fn)(
+    size_t rows,
+    size_t channels,
+    const uint8_t* input,
+    size_t input_stride,
+    uint8_t* output,
+    const void* params);
+
 // RMAX: Reduce-MAX
 
 typedef void (*xnn_rmax_ukernel_fn)(
