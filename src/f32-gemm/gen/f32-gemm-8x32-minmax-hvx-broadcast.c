@@ -1,6 +1,6 @@
 // clang-format off
 // Auto-generated file. Do not edit!
-//   Template: src/f32-gemm/hvx-broadcast.c.in
+//   Template: src/f32-gemm/simd.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2024 Google LLC
@@ -80,36 +80,36 @@ void xnn_f32_gemm_minmax_ukernel_8x32__hvx_broadcast(
   }
 
   do {
-    HVX_Vector vacc0x0 = xnn_load_f32(w + 0);
-    HVX_Vector vacc1x0 = vacc0x0;
-    HVX_Vector vacc2x0 = vacc0x0;
-    HVX_Vector vacc3x0 = vacc0x0;
-    HVX_Vector vacc4x0 = vacc0x0;
-    HVX_Vector vacc5x0 = vacc0x0;
-    HVX_Vector vacc6x0 = vacc0x0;
-    HVX_Vector vacc7x0 = vacc0x0;
+    xnn_simd_f32_t vacc0x0 = xnn_load_f32(w + 0);
+    xnn_simd_f32_t vacc1x0 = vacc0x0;
+    xnn_simd_f32_t vacc2x0 = vacc0x0;
+    xnn_simd_f32_t vacc3x0 = vacc0x0;
+    xnn_simd_f32_t vacc4x0 = vacc0x0;
+    xnn_simd_f32_t vacc5x0 = vacc0x0;
+    xnn_simd_f32_t vacc6x0 = vacc0x0;
+    xnn_simd_f32_t vacc7x0 = vacc0x0;
     w += 32;
 
     size_t k = kc;
     do {
-      const HVX_Vector va0 = xnn_set1_f32(*a0);
+      const xnn_simd_f32_t va0 = xnn_set1_f32(*a0);
       a0 += 1;
-      const HVX_Vector va1 = xnn_set1_f32(*a1);
+      const xnn_simd_f32_t va1 = xnn_set1_f32(*a1);
       a1 += 1;
-      const HVX_Vector va2 = xnn_set1_f32(*a2);
+      const xnn_simd_f32_t va2 = xnn_set1_f32(*a2);
       a2 += 1;
-      const HVX_Vector va3 = xnn_set1_f32(*a3);
+      const xnn_simd_f32_t va3 = xnn_set1_f32(*a3);
       a3 += 1;
-      const HVX_Vector va4 = xnn_set1_f32(*a4);
+      const xnn_simd_f32_t va4 = xnn_set1_f32(*a4);
       a4 += 1;
-      const HVX_Vector va5 = xnn_set1_f32(*a5);
+      const xnn_simd_f32_t va5 = xnn_set1_f32(*a5);
       a5 += 1;
-      const HVX_Vector va6 = xnn_set1_f32(*a6);
+      const xnn_simd_f32_t va6 = xnn_set1_f32(*a6);
       a6 += 1;
-      const HVX_Vector va7 = xnn_set1_f32(*a7);
+      const xnn_simd_f32_t va7 = xnn_set1_f32(*a7);
       a7 += 1;
 
-      const HVX_Vector vb0 = *((const HVX_Vector *)(w));
+      const xnn_simd_f32_t vb0 = *((const xnn_simd_f32_t *)(w));
       w += 32;
 
       vacc0x0 = xnn_fmadd_qf32(va0, vb0, vacc0x0);
@@ -124,7 +124,7 @@ void xnn_f32_gemm_minmax_ukernel_8x32__hvx_broadcast(
       k -= sizeof(float);
     } while (k != 0);
 
-    HVX_Vector vmin = xnn_set1_f32(params->scalar.min);
+    xnn_simd_f32_t vmin = xnn_set1_f32(params->scalar.min);
     vacc0x0 = xnn_max_f32(vmin, vacc0x0);
     vacc1x0 = xnn_max_f32(vmin, vacc1x0);
     vacc2x0 = xnn_max_f32(vmin, vacc2x0);
@@ -134,7 +134,7 @@ void xnn_f32_gemm_minmax_ukernel_8x32__hvx_broadcast(
     vacc6x0 = xnn_max_f32(vmin, vacc6x0);
     vacc7x0 = xnn_max_f32(vmin, vacc7x0);
 
-    HVX_Vector vmax = xnn_set1_f32(params->scalar.max);
+    xnn_simd_f32_t vmax = xnn_set1_f32(params->scalar.max);
     vacc0x0 = xnn_min_f32(vmax, vacc0x0);
     vacc1x0 = xnn_min_f32(vmax, vacc1x0);
     vacc2x0 = xnn_min_f32(vmax, vacc2x0);

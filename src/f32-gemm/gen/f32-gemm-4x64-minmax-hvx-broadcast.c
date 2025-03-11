@@ -1,6 +1,6 @@
 // clang-format off
 // Auto-generated file. Do not edit!
-//   Template: src/f32-gemm/hvx-broadcast.c.in
+//   Template: src/f32-gemm/simd.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2024 Google LLC
@@ -56,29 +56,29 @@ void xnn_f32_gemm_minmax_ukernel_4x64__hvx_broadcast(
   }
 
   do {
-    HVX_Vector vacc0x0 = xnn_load_f32(w + 0);
-    HVX_Vector vacc0x1 = xnn_load_f32(w + 32);
-    HVX_Vector vacc1x0 = vacc0x0;
-    HVX_Vector vacc1x1 = vacc0x1;
-    HVX_Vector vacc2x0 = vacc0x0;
-    HVX_Vector vacc2x1 = vacc0x1;
-    HVX_Vector vacc3x0 = vacc0x0;
-    HVX_Vector vacc3x1 = vacc0x1;
+    xnn_simd_f32_t vacc0x0 = xnn_load_f32(w + 0);
+    xnn_simd_f32_t vacc0x1 = xnn_load_f32(w + 32);
+    xnn_simd_f32_t vacc1x0 = vacc0x0;
+    xnn_simd_f32_t vacc1x1 = vacc0x1;
+    xnn_simd_f32_t vacc2x0 = vacc0x0;
+    xnn_simd_f32_t vacc2x1 = vacc0x1;
+    xnn_simd_f32_t vacc3x0 = vacc0x0;
+    xnn_simd_f32_t vacc3x1 = vacc0x1;
     w += 64;
 
     size_t k = kc;
     do {
-      const HVX_Vector va0 = xnn_set1_f32(*a0);
+      const xnn_simd_f32_t va0 = xnn_set1_f32(*a0);
       a0 += 1;
-      const HVX_Vector va1 = xnn_set1_f32(*a1);
+      const xnn_simd_f32_t va1 = xnn_set1_f32(*a1);
       a1 += 1;
-      const HVX_Vector va2 = xnn_set1_f32(*a2);
+      const xnn_simd_f32_t va2 = xnn_set1_f32(*a2);
       a2 += 1;
-      const HVX_Vector va3 = xnn_set1_f32(*a3);
+      const xnn_simd_f32_t va3 = xnn_set1_f32(*a3);
       a3 += 1;
 
-      const HVX_Vector vb0 = *((const HVX_Vector *)(w));
-      const HVX_Vector vb1 = *((const HVX_Vector *)(w + 32));
+      const xnn_simd_f32_t vb0 = *((const xnn_simd_f32_t *)(w));
+      const xnn_simd_f32_t vb1 = *((const xnn_simd_f32_t *)(w + 32));
       w += 64;
 
       vacc0x0 = xnn_fmadd_qf32(va0, vb0, vacc0x0);
@@ -93,7 +93,7 @@ void xnn_f32_gemm_minmax_ukernel_4x64__hvx_broadcast(
       k -= sizeof(float);
     } while (k != 0);
 
-    HVX_Vector vmin = xnn_set1_f32(params->scalar.min);
+    xnn_simd_f32_t vmin = xnn_set1_f32(params->scalar.min);
     vacc0x0 = xnn_max_f32(vmin, vacc0x0);
     vacc1x0 = xnn_max_f32(vmin, vacc1x0);
     vacc2x0 = xnn_max_f32(vmin, vacc2x0);
@@ -103,7 +103,7 @@ void xnn_f32_gemm_minmax_ukernel_4x64__hvx_broadcast(
     vacc2x1 = xnn_max_f32(vmin, vacc2x1);
     vacc3x1 = xnn_max_f32(vmin, vacc3x1);
 
-    HVX_Vector vmax = xnn_set1_f32(params->scalar.max);
+    xnn_simd_f32_t vmax = xnn_set1_f32(params->scalar.max);
     vacc0x0 = xnn_min_f32(vmax, vacc0x0);
     vacc1x0 = xnn_min_f32(vmax, vacc1x0);
     vacc2x0 = xnn_min_f32(vmax, vacc2x0);
