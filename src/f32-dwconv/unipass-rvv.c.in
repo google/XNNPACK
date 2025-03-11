@@ -10,7 +10,7 @@ $assert KERNEL_TILE >= 2
 $assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <assert.h>
 #include <riscv_vector.h>
-#include "xnnpack/dwconv.h"
+#include "src/xnnpack/dwconv.h"
 
 $SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
 $PARAMS = {"LINEAR": "struct xnn_f32_default_params", "MINMAX": "struct xnn_f32_minmax_params"}[ACTIVATION]

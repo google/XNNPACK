@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-dwconv/unipass-rvv.c.in
 //   Generator: tools/xngen
@@ -10,7 +11,7 @@
 
 #include <assert.h>
 #include <riscv_vector.h>
-#include "xnnpack/dwconv.h"
+#include "src/xnnpack/dwconv.h"
 
 void xnn_f32_dwconv_minmax_ukernel_9p8vc__rvv(
     size_t channels,
