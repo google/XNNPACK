@@ -346,7 +346,7 @@ xnnpack_cxx_library(
     ],
 ) for (kernel, shard_count) in [
     ("f16_dwconv_minmax", 5),
-    ("f32_dwconv", 1),
+    ("f32_dwconv", 5),
     ("f32_dwconv_minmax", 5),
     ("qs8_qc8w_dwconv_minmax_fp32", 10),
     ("qs8_dwconv_minmax_fp32", 10),

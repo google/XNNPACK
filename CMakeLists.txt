@@ -1581,6 +1581,8 @@ IF(XNNPACK_BUILD_TESTS)
     ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
   ENDFOREACH()
+  SHARD_TEST(f32-dwconv-minmax-test 5)
+  SHARD_TEST(f32-dwconv-test 5)
   SHARD_TEST(qs8-dwconv-minmax-fp32-test 10)
   SHARD_TEST(qs8-qc8w-dwconv-minmax-fp32-test 10)
 
