@@ -529,7 +529,6 @@ SET(XNNPACK_SRCS
   src/configs/gemm-config.c
   src/configs/ibilinear-chw-config.c
   src/configs/ibilinear-config.c
-  src/configs/lut32norm-config.c
   src/configs/maxpool-config.c
   src/configs/pack-lh-config.c
   src/configs/raddstoreexpminusmax-config.c
@@ -1516,7 +1515,6 @@ IF(XNNPACK_BUILD_TESTS)
       qu8-vlrelu
       s8-ibilinear
       u8-ibilinear
-      u8-lut32norm
       u8-rmax
       x16-packw
       x32-packb
