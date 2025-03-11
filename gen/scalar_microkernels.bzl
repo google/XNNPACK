@@ -715,6 +715,8 @@ NON_PROD_SCALAR_MICROKERNEL_SRCS = [
     "src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-scalar-u2.c",
     "src/s8-ibilinear/gen/s8-ibilinear-scalar-c2.c",
     "src/s8-ibilinear/gen/s8-ibilinear-scalar-c4.c",
+    "src/s8-rdminmax/gen/s8-rdmax-2p2x-scalar-c2.c",
+    "src/s8-rdminmax/gen/s8-rdmin-2p2x-scalar-c2.c",
     "src/s8-rminmax/gen/s8-rmax-scalar-u1.c",
     "src/s8-rminmax/gen/s8-rmax-scalar-u2-acc2.c",
     "src/s8-rminmax/gen/s8-rmax-scalar-u3-acc3.c",

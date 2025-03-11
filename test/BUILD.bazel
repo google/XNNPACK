@@ -298,6 +298,8 @@ xnnpack_cxx_library(
     "s8_rmin",
     "s8_rmax",
     "s8_rminmax",
+    "s8_rdmin",
+    "s8_rdmax",
     "u8_rmin",
     "u8_rmax",
     "u8_rminmax",

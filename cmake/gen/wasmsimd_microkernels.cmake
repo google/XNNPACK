@@ -951,6 +951,8 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/s8-ibilinear/gen/s8-ibilinear-wasmsimd-dot16x2-c16.c
   src/s8-ibilinear/gen/s8-ibilinear-wasmsimd-mul32-c8.c
   src/s8-ibilinear/gen/s8-ibilinear-wasmsimd-mul32-c16.c
+  src/s8-rdminmax/gen/s8-rdmax-2p2x-wasmsimd-c32.c
+  src/s8-rdminmax/gen/s8-rdmin-2p2x-wasmsimd-c32.c
   src/s8-rminmax/gen/s8-rmax-wasmsimd-u16.c
   src/s8-rminmax/gen/s8-rmax-wasmsimd-u32-acc2.c
   src/s8-rminmax/gen/s8-rmax-wasmsimd-u48-acc3.c

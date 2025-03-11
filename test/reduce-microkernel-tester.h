@@ -14,10 +14,10 @@
 #include <limits>
 #include <random>
 #include <tuple>
-#include <vector>
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams.h"
@@ -51,6 +51,41 @@ class ReduceMicrokernelTester {
     return this->iterations_;
   }
 
+  ReduceMicrokernelTester& rows(size_t rows) {
+    assert(rows != 0);
+    this->rows_ = rows;
+    return *this;
+  }
+
+  size_t rows() const {
+    return this->rows_;
+  }
+
+  ReduceMicrokernelTester& channels(size_t channels) {
+    assert(channels != 0);
+    this->channels_ = channels;
+    return *this;
+  }
+
+  size_t channels() const {
+    return this->channels_;
+  }
+
+  ReduceMicrokernelTester& input_stride(size_t input_stride) {
+    assert(input_stride != 0);
+    this->input_stride_ = input_stride;
+    return *this;
+  }
+
+  size_t input_stride() const {
+    if (this->input_stride_ == 0) {
+      return channels();
+    } else {
+      assert(this->input_stride_ >= channels());
+      return this->input_stride_;
+    }
+  }
+
   void Test(xnn_f16_reduce_ukernel_fn reduce, OpType op_type, xnn_init_f16_default_params_fn init_params = nullptr) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
@@ -60,8 +95,9 @@ class ReduceMicrokernelTester {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
       // Compute reference results.
-      xnnpack::Buffer<xnn_float16>::iterator min, max;
-      std::tie(min, max) = std::minmax_element(input.begin(), input.begin() + batch_size());
+      xnnpack::Buffer<xnn_float16>::iterator min_value, max_value;
+      std::tie(min_value, max_value) =
+          std::minmax_element(input.begin(), input.begin() + batch_size());
 
       // Prepare parameters.
       xnn_f16_default_params params;
@@ -71,34 +107,30 @@ class ReduceMicrokernelTester {
 
       // Call optimized micro-kernel.
       xnn_float16 output[2];
-      switch (op_type) {
-        case OpType::Max:
-          output[0] = -std::numeric_limits<float>::infinity();
-          break;
-        case OpType::Min:
-          output[0] = std::numeric_limits<float>::infinity();
-          break;
-        case OpType::MinMax:
-          output[0] = std::numeric_limits<float>::infinity();
-          output[1] = -std::numeric_limits<float>::infinity();
-          break;
+      output[0] = f32dist(rng);
+      *min_value = std::min(*min_value, output[0]);
+      if (op_type == OpType::MinMax) {
+        output[1] = f32dist(rng);
+        *max_value = std::max(*max_value, output[1]);
+      } else {
+        *max_value = std::max(*max_value, output[0]);
       }
       reduce(batch_size() * sizeof(xnn_float16), input.data(), output, init_params != nullptr ? &params : nullptr);
 
       // Verify results.
       switch (op_type) {
         case OpType::Max:
-          EXPECT_EQ(output[0], *max)
+          EXPECT_EQ(output[0], *max_value)
               << "with batch " << batch_size();
           break;
         case OpType::Min:
-          EXPECT_EQ(output[0], *min)
+          EXPECT_EQ(output[0], *min_value)
               << "with batch " << batch_size();
           break;
         case OpType::MinMax:
-          EXPECT_EQ(output[0], *min)
+          EXPECT_EQ(output[0], *min_value)
               << "with batch " << batch_size();
-          EXPECT_EQ(output[1], *max)
+          EXPECT_EQ(output[1], *max_value)
               << "with batch " << batch_size();
           break;
       }
@@ -114,8 +146,9 @@ class ReduceMicrokernelTester {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
       // Compute reference results.
-      xnnpack::Buffer<float>::iterator min, max;
-      std::tie(min, max) = std::minmax_element(input.begin(), input.begin() + batch_size());
+      xnnpack::Buffer<float>::iterator min_it, max_it;
+      std::tie(min_it, max_it) =
+          std::minmax_element(input.begin(), input.begin() + batch_size());
 
       // Prepare parameters.
       xnn_f32_default_params params;
@@ -125,34 +158,32 @@ class ReduceMicrokernelTester {
 
       // Call optimized micro-kernel.
       float output[2];
-      switch (op_type) {
-        case OpType::Max:
-          output[0] = -std::numeric_limits<float>::infinity();
-          break;
-        case OpType::Min:
-          output[0] = std::numeric_limits<float>::infinity();
-          break;
-        case OpType::MinMax:
-          output[0] = std::numeric_limits<float>::infinity();
-          output[1] = -std::numeric_limits<float>::infinity();
-          break;
+      float min_value = *min_it;
+      float max_value = *max_it;
+      output[0] = f32dist(rng);
+      min_value = std::min(min_value, output[0]);
+      if (op_type == OpType::MinMax) {
+        output[1] = f32dist(rng);
+        max_value = std::max(max_value, output[1]);
+      } else {
+        max_value = std::max(max_value, output[0]);
       }
       reduce(batch_size() * sizeof(float), input.data(), output, init_params != nullptr ? &params : nullptr);
 
       // Verify results.
       switch (op_type) {
         case OpType::Max:
-          EXPECT_EQ(output[0], *max)
+          EXPECT_EQ(output[0], max_value)
               << "with batch " << batch_size();
           break;
         case OpType::Min:
-          EXPECT_EQ(output[0], *min)
+          EXPECT_EQ(output[0], min_value)
               << "with batch " << batch_size();
           break;
         case OpType::MinMax:
-          EXPECT_EQ(output[0], *min)
+          EXPECT_EQ(output[0], min_value)
               << "with batch " << batch_size();
-          EXPECT_EQ(output[1], *max)
+          EXPECT_EQ(output[1], max_value)
               << "with batch " << batch_size();
           break;
       }
@@ -170,42 +201,94 @@ class ReduceMicrokernelTester {
       std::generate_n(input.data(), batch_size(), [&]() { return i8dist(rng); });
 
       // Compute reference results.
-      xnnpack::Buffer<int8_t>::iterator min, max;
-      std::tie(min, max) = std::minmax_element(input.begin(),
-                                               input.begin() + batch_size());
+      xnnpack::Buffer<int8_t>::iterator min_it, max_it;
+      std::tie(min_it, max_it) =
+          std::minmax_element(input.begin(), input.begin() + batch_size());
 
       // Call optimized micro-kernel.
       int8_t output[2];
-      switch (op_type) {
-        case OpType::Max:
-          output[0] = std::numeric_limits<int8_t>::min();
-          break;
-        case OpType::Min:
-          output[0] = std::numeric_limits<int8_t>::max();
-          break;
-        case OpType::MinMax:
-          output[0] = std::numeric_limits<int8_t>::max();
-          output[1] = std::numeric_limits<int8_t>::min();
-          break;
+      output[0] = i8dist(rng);
+      int8_t min_value = *min_it;
+      int8_t max_value = *max_it;
+      min_value = std::min(min_value, output[0]);
+      if (op_type == OpType::MinMax) {
+        output[1] = i8dist(rng);
+        max_value = std::max(max_value, output[1]);
+      } else {
+        max_value = std::max(max_value, output[0]);
       }
       reduce(batch_size() * sizeof(int8_t), input.data(), output, nullptr);
 
       // Verify results.
       switch (op_type) {
         case OpType::Max:
-          EXPECT_EQ(output[0], *max)
+          EXPECT_EQ(output[0], max_value)
               << "with batch " << batch_size();
           break;
         case OpType::Min:
-          EXPECT_EQ(output[0], *min)
+          EXPECT_EQ(output[0], min_value)
               << "with batch " << batch_size();
           break;
         case OpType::MinMax:
-          EXPECT_EQ(output[0], *min)
+          EXPECT_EQ(output[0], min_value)
               << "with batch " << batch_size();
-          EXPECT_EQ(output[1], *max)
+          EXPECT_EQ(output[1], max_value)
               << "with batch " << batch_size();
           break;
+      }
+    }
+  }
+
+  void Test(xnn_s8_rdminmax_ukernel_fn reduce, OpType op_type) const {
+    xnnpack::ReplicableRandomDevice rng;
+    std::uniform_int_distribution<int32_t> i8dist(
+      std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+
+    xnnpack::Buffer<int8_t> input((rows() - 1) * input_stride() + channels() +
+                                  XNN_EXTRA_BYTES / sizeof(int8_t));
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate_n(input.data(), (rows() - 1) * input_stride() + channels(),
+                      [&]() { return i8dist(rng); });
+
+      xnnpack::Buffer<int8_t> output(channels());
+      xnnpack::Buffer<int8_t> output_ref(channels());
+
+      std::generate_n(output.begin(), channels(),
+                      [&]() { return i8dist(rng); });
+
+      // Compute reference results.
+      switch (op_type) {
+        case OpType::Max:
+          for (size_t c = 0; c < channels(); ++c) {
+            int8_t max_value = output[c];
+            for (size_t n = 0; n < rows(); ++n) {
+              max_value = std::max(max_value, input[n * input_stride() + c]);
+            }
+            output_ref[c] = max_value;
+          }
+          break;
+        case OpType::Min:
+          for (size_t c = 0; c < channels(); ++c) {
+            int8_t min_value = output[c];
+            for (size_t n = 0; n < rows(); ++n) {
+              min_value = std::min(min_value, input[n * input_stride() + c]);
+            }
+            output_ref[c] = min_value;
+          }
+          break;
+        default:
+          XNN_UNREACHABLE;
+      }
+
+      // Call optimized micro-kernel.
+      reduce(rows(), channels(), input.data(), input_stride() * sizeof(int8_t),
+             output.data(), nullptr);
+
+      // Verify results.
+      for (size_t c = 0; c < channels(); c++) {
+        ASSERT_NEAR(output[c], output_ref[c], std::abs(output_ref[c]) * 1.0e-6f)
+          << "at position " << c << ", rows = " << rows() << ", channels = "
+          << channels();
       }
     }
   }
@@ -220,39 +303,38 @@ class ReduceMicrokernelTester {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
 
       // Compute reference results.
-      xnnpack::Buffer<uint8_t>::iterator min, max;
-      std::tie(min, max) = std::minmax_element(input.begin(), input.begin() + batch_size());
+      xnnpack::Buffer<uint8_t>::iterator min_it, max_it;
+      std::tie(min_it, max_it) =
+          std::minmax_element(input.begin(), input.begin() + batch_size());
 
       // Call optimized micro-kernel.
       uint8_t output[2];
-      switch (op_type) {
-        case OpType::Max:
-          output[0] = std::numeric_limits<uint8_t>::min();
-          break;
-        case OpType::Min:
-          output[0] = std::numeric_limits<uint8_t>::max();
-          break;
-        case OpType::MinMax:
-          output[0] = std::numeric_limits<uint8_t>::max();
-          output[1] = std::numeric_limits<uint8_t>::min();
-          break;
+      output[0] = u8dist(rng);
+      uint8_t min_value = *min_it;
+      uint8_t max_value = *max_it;
+      min_value = std::min(min_value, output[0]);
+      if (op_type == OpType::MinMax) {
+        output[1] = u8dist(rng);
+        max_value = std::max(max_value, output[1]);
+      } else {
+        max_value = std::max(max_value, output[0]);
       }
       reduce(batch_size() * sizeof(uint8_t), input.data(), output, nullptr);
 
       // Verify results.
       switch (op_type) {
         case OpType::Max:
-          EXPECT_EQ(output[0], *max)
+          EXPECT_EQ(output[0], max_value)
               << "with batch " << batch_size();
           break;
         case OpType::Min:
-          EXPECT_EQ(output[0], *min)
+          EXPECT_EQ(output[0], min_value)
               << "with batch " << batch_size();
           break;
         case OpType::MinMax:
-          EXPECT_EQ(output[0], *min)
+          EXPECT_EQ(output[0], min_value)
               << "with batch " << batch_size();
-          EXPECT_EQ(output[1], *max)
+          EXPECT_EQ(output[1], max_value)
               << "with batch " << batch_size();
           break;
       }
@@ -260,6 +342,9 @@ class ReduceMicrokernelTester {
   }
 
  private:
+  size_t rows_{1};
+  size_t channels_{1};
+  size_t input_stride_{0};
   size_t batch_size_{1};
   size_t iterations_{15};
 };

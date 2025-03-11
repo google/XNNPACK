@@ -304,6 +304,8 @@ SET(NON_PROD_SSE41_MICROKERNEL_SRCS
   src/qu8-vmul/gen/qu8-vmul-minmax-fp32-sse41-mul16-ld64-u8.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-sse41-mul16-ld64-u8.c
   src/s8-ibilinear/gen/s8-ibilinear-sse41-c8.c
+  src/s8-rdminmax/gen/s8-rdmax-2p2x-sse41-c32.c
+  src/s8-rdminmax/gen/s8-rdmin-2p2x-sse41-c32.c
   src/s8-rminmax/gen/s8-rmax-sse41-u16.c
   src/s8-rminmax/gen/s8-rmax-sse41-u32-acc2.c
   src/s8-rminmax/gen/s8-rmax-sse41-u48-acc3.c

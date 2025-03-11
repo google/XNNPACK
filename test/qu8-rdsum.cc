@@ -212,10 +212,10 @@ TEST(QU8_RDSUM_7P7X__SCALAR_C4, channels_gt_4_multipass_fulltile_with_input_stri
 TEST(QU8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
   const size_t channel_tile = 4;
   for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-     RDSumMicrokernelTester()
-       .rows(264)
-       .channels(channels)
-       .Test(xnn_qu8_rdsum_ukernel_7p7x__scalar_c4);
+    RDSumMicrokernelTester()
+      .rows(264)
+      .channels(channels)
+      .Test(xnn_qu8_rdsum_ukernel_7p7x__scalar_c4);
   }
 }
 
@@ -434,10 +434,10 @@ TEST(QU8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 16;
     for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-       RDSumMicrokernelTester()
-         .rows(264)
-         .channels(channels)
-         .Test(xnn_qu8_rdsum_ukernel_7p7x__neon_u16);
+      RDSumMicrokernelTester()
+        .rows(264)
+        .channels(channels)
+        .Test(xnn_qu8_rdsum_ukernel_7p7x__neon_u16);
     }
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
@@ -658,10 +658,10 @@ TEST(QU8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 32;
     for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-       RDSumMicrokernelTester()
-         .rows(264)
-         .channels(channels)
-         .Test(xnn_qu8_rdsum_ukernel_7p7x__neon_u32);
+      RDSumMicrokernelTester()
+        .rows(264)
+        .channels(channels)
+        .Test(xnn_qu8_rdsum_ukernel_7p7x__neon_u32);
     }
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
@@ -882,10 +882,10 @@ TEST(QU8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 64;
     for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-       RDSumMicrokernelTester()
-         .rows(264)
-         .channels(channels)
-         .Test(xnn_qu8_rdsum_ukernel_7p7x__neon_u64);
+      RDSumMicrokernelTester()
+        .rows(264)
+        .channels(channels)
+        .Test(xnn_qu8_rdsum_ukernel_7p7x__neon_u64);
     }
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
@@ -1106,10 +1106,10 @@ TEST(QU8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     TEST_REQUIRES_X86_SSSE3;
     const size_t channel_tile = 16;
     for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-       RDSumMicrokernelTester()
-         .rows(264)
-         .channels(channels)
-         .Test(xnn_qu8_rdsum_ukernel_7p7x__ssse3_c16);
+      RDSumMicrokernelTester()
+        .rows(264)
+        .channels(channels)
+        .Test(xnn_qu8_rdsum_ukernel_7p7x__ssse3_c16);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -1330,10 +1330,10 @@ TEST(QU8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     TEST_REQUIRES_X86_SSSE3;
     const size_t channel_tile = 32;
     for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-       RDSumMicrokernelTester()
-         .rows(264)
-         .channels(channels)
-         .Test(xnn_qu8_rdsum_ukernel_7p7x__ssse3_c32);
+      RDSumMicrokernelTester()
+        .rows(264)
+        .channels(channels)
+        .Test(xnn_qu8_rdsum_ukernel_7p7x__ssse3_c32);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -1554,10 +1554,10 @@ TEST(QU8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     TEST_REQUIRES_X86_SSSE3;
     const size_t channel_tile = 64;
     for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-       RDSumMicrokernelTester()
-         .rows(264)
-         .channels(channels)
-         .Test(xnn_qu8_rdsum_ukernel_7p7x__ssse3_c64);
+      RDSumMicrokernelTester()
+        .rows(264)
+        .channels(channels)
+        .Test(xnn_qu8_rdsum_ukernel_7p7x__ssse3_c64);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -1759,10 +1759,10 @@ TEST(QU8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
   TEST(QU8_RDSUM_7P7X__WASMSIMD_C16, overflow_accumulator) {
     const size_t channel_tile = 16;
     for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-       RDSumMicrokernelTester()
-         .rows(264)
-         .channels(channels)
-         .Test(xnn_qu8_rdsum_ukernel_7p7x__wasmsimd_c16);
+      RDSumMicrokernelTester()
+        .rows(264)
+        .channels(channels)
+        .Test(xnn_qu8_rdsum_ukernel_7p7x__wasmsimd_c16);
     }
   }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -1964,10 +1964,10 @@ TEST(QU8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
   TEST(QU8_RDSUM_7P7X__WASMSIMD_C32, overflow_accumulator) {
     const size_t channel_tile = 32;
     for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-       RDSumMicrokernelTester()
-         .rows(264)
-         .channels(channels)
-         .Test(xnn_qu8_rdsum_ukernel_7p7x__wasmsimd_c32);
+      RDSumMicrokernelTester()
+        .rows(264)
+        .channels(channels)
+        .Test(xnn_qu8_rdsum_ukernel_7p7x__wasmsimd_c32);
     }
   }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -2169,10 +2169,10 @@ TEST(QU8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
   TEST(QU8_RDSUM_7P7X__WASMSIMD_C64, overflow_accumulator) {
     const size_t channel_tile = 64;
     for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-       RDSumMicrokernelTester()
-         .rows(264)
-         .channels(channels)
-         .Test(xnn_qu8_rdsum_ukernel_7p7x__wasmsimd_c64);
+      RDSumMicrokernelTester()
+        .rows(264)
+        .channels(channels)
+        .Test(xnn_qu8_rdsum_ukernel_7p7x__wasmsimd_c64);
     }
   }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -2401,10 +2401,10 @@ TEST(QU8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(uint8_t));
     for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-       RDSumMicrokernelTester()
-         .rows(264)
-         .channels(channels)
-         .Test(xnn_qu8_rdsum_ukernel_7p7x__rvv_u1v);
+      RDSumMicrokernelTester()
+        .rows(264)
+        .channels(channels)
+        .Test(xnn_qu8_rdsum_ukernel_7p7x__rvv_u1v);
     }
   }
 #endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
@@ -2633,10 +2633,10 @@ TEST(QU8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     TEST_REQUIRES_RISCV_VECTOR;
     const size_t channel_tile = (2*xnn_init_hardware_config()->vlenb/sizeof(uint8_t));
     for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-       RDSumMicrokernelTester()
-         .rows(264)
-         .channels(channels)
-         .Test(xnn_qu8_rdsum_ukernel_7p7x__rvv_u2v);
+      RDSumMicrokernelTester()
+        .rows(264)
+        .channels(channels)
+        .Test(xnn_qu8_rdsum_ukernel_7p7x__rvv_u2v);
     }
   }
 #endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV

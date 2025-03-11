@@ -26,7 +26,7 @@ parser.add_argument(
     "--tester",
     metavar="TESTER",
     required=True,
-    choices=["ReduceDiscontiguousMicrokernelTester", "RDSumMicrokernelTester"],
+    choices=["ReduceMicrokernelTester", "RDSumMicrokernelTester"],
     help="Tester class to be used in the generated test",
 )
 parser.add_argument(
@@ -410,17 +410,18 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fullti
     }
 }
 
-TEST(${TEST_NAME}, overflow_accumulator) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-  for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-     ${TESTER}()
-       .rows(${257 + INCREMENTAL_TILE})
-       .channels(channels)
-       .Test(${", ".join(TEST_ARGS)});
+$if TESTER == "RDSumMicrokernelTester":
+  TEST(${TEST_NAME}, overflow_accumulator) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = 1; channels < channel_tile*2; ++channels) {
+      ${TESTER}()
+        .rows(${257 + INCREMENTAL_TILE})
+        .channels(channels)
+        .Test(${", ".join(TEST_ARGS)});
+    }
   }
-}
 """
 
 
@@ -461,9 +462,9 @@ def generate_test_cases(
   _, test_name = ukernel.split("_", 1)
   _, datatype, ukernel_type, _ = ukernel.split("_", 3)
   test_args = [ukernel]
-  if tester == "ReduceDiscontiguousMicrokernelTester":
+  if tester == "ReduceMicrokernelTester":
     test_args.append(
-        "ReduceDiscontiguousMicrokernelTester::OpType::%s" % op_type
+        "ReduceMicrokernelTester::OpType::%s" % op_type
     )
   if init_fn is not None:
     test_args.append(init_fn)
@@ -510,9 +511,7 @@ def main(args):
       raise ValueError("expected a list of micro-kernels in the spec")
 
     tester_header = {
-        "ReduceDiscontiguousMicrokernelTester": (
-            "reduce-discontiguous-microkernel-tester.h"
-        ),
+        "ReduceMicrokernelTester": "reduce-microkernel-tester.h",
         "RDSumMicrokernelTester": "rdsum-microkernel-tester.h",
     }[options.tester]
 

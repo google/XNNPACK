@@ -675,6 +675,8 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/qu8-vmulc/gen/qu8-vmulc-minmax-rndnu-neon-ld128-u16.c
   src/s8-maxpool/gen/s8-maxpool-2p-minmax-neon-u16.c
   src/s8-maxpool/gen/s8-maxpool-4p-minmax-neon-u16.c
+  src/s8-rdminmax/gen/s8-rdmax-2p2x-neon-c32.c
+  src/s8-rdminmax/gen/s8-rdmin-2p2x-neon-c32.c
   src/s8-rminmax/gen/s8-rmax-neon-u16.c
   src/s8-rminmax/gen/s8-rmax-neon-u32-acc2.c
   src/s8-rminmax/gen/s8-rmax-neon-u48-acc3.c
