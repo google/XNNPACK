@@ -17,19 +17,28 @@ import xnncommon
 
 
 parser = argparse.ArgumentParser(description="RDsum microkernel test generator")
-parser.add_argument("-s", "--spec", metavar="FILE", required=True,
-                    help="Specification (YAML) file")
+parser.add_argument(
+    "-s",
+    "--spec",
+    metavar="FILE",
+    required=True,
+    help="Specification (YAML) file",
+)
 parser.add_argument(
     "-b",
     "--output-bench",
     metavar="FILE",
     required=False,
-    help="Benchmark output (C++ source) file(s)")
+    help="Benchmark output (C++ source) file(s)",
+)
 parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_(f16|f16_f32acc|f32|qs8|qu8|s8|u8)_(rminmax|rmax|rmin|rsum|rdsum)(_minmax_(fp32))?_ukernel_(.*)_(u|c)(\d+)(v)?(_acc\d+)?", name)
+  match = re.fullmatch(
+      r"xnn_(f16|f16_f32acc|f32|qs8|qu8|s8|u8)_(rminmax|rmax|rmin|rsum|rdsum)(_minmax_(fp32))?_ukernel_(.*)_(u|c)(\d+)(v)?(_acc\d+)?",
+      name,
+  )
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
 
@@ -51,6 +60,7 @@ BENCHMARK_CAPTURE(${OP_NAME}, ${BENCHMARK_NAME},
   ->Apply(Benchmark${OP})
   ->UseRealTime();
 """
+
 
 def generate_benchmark_cases(
     ukernel: str,
@@ -89,6 +99,7 @@ def generate_benchmark_cases(
       },
   )
 
+
 def main(args):
   options = parser.parse_args(args)
 
@@ -98,6 +109,7 @@ def main(args):
       raise ValueError("expected a list of micro-kernels in the spec")
 
     benches = """\
+// clang-format off
 // Copyright 2024 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -125,7 +137,9 @@ def main(args):
       dtype, arch, isa, op = split_ukernel_name(name)
 
       benchmark_case = generate_benchmark_cases(name, dtype, op, isa, init_fn)
-      benches += "\n\n" + xnncommon.postprocess_test_case(benchmark_case, arch, isa)
+      benches += "\n\n" + xnncommon.postprocess_test_case(
+          benchmark_case, arch, isa
+      )
 
     # Footer with `main` function.
     benches += "\n\n" + """\

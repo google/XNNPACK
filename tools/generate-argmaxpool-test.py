@@ -19,16 +19,30 @@ import xnncommon
 
 
 parser = argparse.ArgumentParser(
-  description='ArgMaxPool microkernel test generator')
-parser.add_argument("-s", "--spec", metavar="FILE", required=True,
-                    help="Specification (YAML) file")
-parser.add_argument("-o", "--output", metavar="FILE", required=True,
-                    help='Output (C++ source) file')
+    description="ArgMaxPool microkernel test generator"
+)
+parser.add_argument(
+    "-s",
+    "--spec",
+    metavar="FILE",
+    required=True,
+    help="Specification (YAML) file",
+)
+parser.add_argument(
+    "-o",
+    "--output",
+    metavar="FILE",
+    required=True,
+    help="Output (C++ source) file",
+)
 parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_(f16|f32)_argmaxpool_ukernel_((\d+)p)?(\d+)x__(.+)_(c)?(u)?(\d+)(v)?", name)
+  match = re.fullmatch(
+      r"xnn_(f16|f32)_argmaxpool_ukernel_((\d+)p)?(\d+)x__(.+)_(c)?(u)?(\d+)(v)?",
+      name,
+  )
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
 
@@ -582,22 +596,23 @@ TEST(${TEST_NAME}, few_output_pixels_with_step) {
 """
 
 
-def generate_test_cases(ukernel, primary_tile, incremental_tile, channel_tile,
-                        vector_tile, isa):
+def generate_test_cases(
+    ukernel, primary_tile, incremental_tile, channel_tile, vector_tile, isa
+):
   """Generates all tests cases for a ARGMAXPOOL micro-kernel.
 
   Args:
     ukernel: C name of the micro-kernel function.
     primary_tile: Number of rows (pixels) processed per one iteration of the
-                  primary outer loop of the micro-kernel.
-    incremental_tile: Number of rows (pixels) processed per one iteration of
-                      the incremental outer loop of the micro-kernel.
+      primary outer loop of the micro-kernel.
+    incremental_tile: Number of rows (pixels) processed per one iteration of the
+      incremental outer loop of the micro-kernel.
     channel_tile: Number of channels processed per one iteration of the inner
-                  loops of the micro-kernel.
+      loops of the micro-kernel.
     vector_tile: Indicates if channels are specified in vectors rather than
-                 elements.
+      elements.
     isa: instruction set required to run the micro-kernel. Generated unit test
-         will skip execution if the host processor doesn't support this ISA.
+      will skip execution if the host processor doesn't support this ISA.
 
   Returns:
     Code for the test case.
@@ -608,19 +623,25 @@ def generate_test_cases(ukernel, primary_tile, incremental_tile, channel_tile,
   channel_scaled_tile = channel_tile
   if vector_tile:
     ctype = {"f16": "uint16_t", "f32": "float"}[datatype]
-    channel_scaled_tile = {"rvv": "(%s*xnn_init_hardware_config()->vlenb/sizeof(%s))" % (str(channel_tile), ctype)}[isa]
-  return xngen.preprocess(ARGMAXPOOL_TEST_TEMPLATE, {
-      "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
-      "TEST_ARGS": test_args,
-      "DATATYPE": datatype,
-      "PRIMARY_TILE": primary_tile,
-      "INCREMENTAL_TILE": incremental_tile,
-      "CHANNEL_TILE": channel_tile,
-      "CHANNEL_SCALED_TILE": channel_scaled_tile,
-      "CHANNEL_SUFFIX": "v" if vector_tile else "",
-      "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
-      "next_prime": next_prime,
-    })
+    channel_scaled_tile = {
+        "rvv": "(%s*xnn_init_hardware_config()->vlenb/sizeof(%s))"
+        % (str(channel_tile), ctype)
+    }[isa]
+  return xngen.preprocess(
+      ARGMAXPOOL_TEST_TEMPLATE,
+      {
+          "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
+          "TEST_ARGS": test_args,
+          "DATATYPE": datatype,
+          "PRIMARY_TILE": primary_tile,
+          "INCREMENTAL_TILE": incremental_tile,
+          "CHANNEL_TILE": channel_tile,
+          "CHANNEL_SCALED_TILE": channel_scaled_tile,
+          "CHANNEL_SUFFIX": "v" if vector_tile else "",
+          "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
+          "next_prime": next_prime,
+      },
+  )
 
 
 def main(args):
@@ -632,6 +653,7 @@ def main(args):
       raise ValueError("expected a list of micro-kernels in the spec")
 
     tests = """\
+// clang-format off
 // Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -651,11 +673,13 @@ def main(args):
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
-      primary_tile, incremental_tile, channel_tile, vector_tile, arch, isa = \
-        split_ukernel_name(name)
+      primary_tile, incremental_tile, channel_tile, vector_tile, arch, isa = (
+          split_ukernel_name(name)
+      )
 
-      test_case = generate_test_cases(name, primary_tile, incremental_tile,
-                                      channel_tile, vector_tile, isa)
+      test_case = generate_test_cases(
+          name, primary_tile, incremental_tile, channel_tile, vector_tile, isa
+      )
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     xnncommon.overwrite_if_changed(options.output, tests)
