@@ -2004,6 +2004,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       qs8-dwconv
       qs8-gemm
       qs8-qc8w-gemm-fp32
+      qs8-rdsum
       qu8-rdsum
       qs8-rsum
       qu8-rsum
