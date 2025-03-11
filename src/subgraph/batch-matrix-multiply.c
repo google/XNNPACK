@@ -75,8 +75,6 @@ static enum xnn_status create_batch_matrix_multiply_operator(
     case xnn_datatype_bf16:
       switch (inputb_datatype) {
         case xnn_datatype_bf16: {
-          if (xnn_value_is_static(input_b))
-            abort();
           return xnn_create_batch_matrix_multiply_nc_bf16_f32(
                 node->flags, &opdata->operator_objects[0]);
         }
