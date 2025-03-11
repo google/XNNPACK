@@ -42,13 +42,9 @@ static void rewrite_reduction_axes_for_nchw(size_t num_reduction_axes,
 }
 
 static enum xnn_status create_reduce_operator(
-  const struct xnn_node* node,
-  const struct xnn_value* values,
-  size_t num_values,
-  struct xnn_operator_data* opdata,
-  struct xnn_code_cache* code_cache,
-  xnn_weights_cache_t weights_cache)
-{
+    const struct xnn_node* node, const struct xnn_value* values,
+    size_t num_values, struct xnn_operator_data* opdata,
+    struct xnn_code_cache* code_cache, xnn_weights_cache_t weights_cache) {
   assert(node->num_inputs == 1);
   assert(node->num_outputs == 1);
 
@@ -56,7 +52,7 @@ static enum xnn_status create_reduce_operator(
   const uint32_t input_id = node->inputs[0];
   assert(input_id != XNN_INVALID_VALUE_ID);
   assert(input_id < num_values);
-  const struct xnn_value *input_value = &values[input_id];
+  const struct xnn_value* input_value = &values[input_id];
 
   assert(node->num_outputs == 1);
   const uint32_t output_id = node->outputs[0];
@@ -71,19 +67,18 @@ static enum xnn_status create_reduce_operator(
     case xnn_datatype_quint8:
       input_quantization.zero_point = values[input_id].quantization.zero_point;
       input_quantization.scale = values[input_id].quantization.scale;
-      output_quantization.zero_point = values[output_id].quantization.zero_point;
+      output_quantization.zero_point =
+          values[output_id].quantization.zero_point;
       output_quantization.scale = values[output_id].quantization.scale;
       break;
     default:
       break;
   }
 
-  status = xnn_create_reduce_nd(
-    xnn_node_type_to_reduce_operator(node->type),
-    input_value->datatype,
-    &input_quantization, &output_quantization,
-    node->flags,
-    &opdata->operator_objects[0]);
+  status = xnn_create_reduce_nd(xnn_node_type_to_reduce_operator(node->type),
+                                input_value->datatype, &input_quantization,
+                                &output_quantization, node->flags,
+                                &opdata->operator_objects[0]);
   if (status == xnn_status_success) {
     const size_t num_reduction_axes = node->params.reduce.num_reduction_axes;
     opdata->num_reduction_axes = num_reduction_axes;
@@ -93,12 +88,10 @@ static enum xnn_status create_reduce_operator(
   return status;
 }
 
-static enum xnn_status reshape_reduce_operator(
-  struct xnn_operator_data* opdata,
-  struct xnn_value* values,
-  size_t num_values,
-  pthreadpool_t threadpool)
-{
+static enum xnn_status reshape_reduce_operator(struct xnn_operator_data* opdata,
+                                               struct xnn_value* values,
+                                               size_t num_values,
+                                               pthreadpool_t threadpool) {
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id != XNN_INVALID_VALUE_ID);
   assert(input_id < num_values);
@@ -113,7 +106,7 @@ static enum xnn_status reshape_reduce_operator(
   void* workspace_size = &opdata->workspace_size;
   void* workspace_alignment = &opdata->workspace_alignment;
 
-  if(input_value->datatype == xnn_datatype_fp32) {
+  if (input_value->datatype == xnn_datatype_fp32) {
     workspace_size = NULL;
     workspace_alignment = NULL;
   }
@@ -132,7 +125,8 @@ static enum xnn_status reshape_reduce_operator(
   }
   size_t input_dims[XNN_MAX_TENSOR_DIMS];
   memcpy(input_dims, input_value->shape.dim, input_num_dims * sizeof(size_t));
-  if (input_value->shape.num_dims == 4 && input_value->layout == xnn_layout_type_nchw) {
+  if (input_value->shape.num_dims == 4 &&
+      input_value->layout == xnn_layout_type_nchw) {
     rewrite_reduction_axes_for_nchw(num_reduction_axes, reduction_axes);
 
     for (size_t idx = 0; idx < input_num_dims; ++idx) {
@@ -140,15 +134,10 @@ static enum xnn_status reshape_reduce_operator(
     }
   }
 
-  status = xnn_reshape_reduce_nd(
-      opdata->operator_objects[0],
-      num_reduction_axes,
-      reduction_axes,
-      input_num_dims,
-      input_dims,
-      workspace_size,
-      workspace_alignment,
-      threadpool);
+  status =
+      xnn_reshape_reduce_nd(opdata->operator_objects[0], num_reduction_axes,
+                            reduction_axes, input_num_dims, input_dims,
+                            workspace_size, workspace_alignment, threadpool);
 
   struct xnn_value* output_value = values + output_id;
   if (opdata->operator_objects[0]->flags & XNN_FLAG_KEEP_DIMS) {
@@ -203,7 +192,8 @@ static enum xnn_status reshape_reduce_operator(
         }
       }
       if (!is_axis) {
-        output_value->shape.dim[input_idx - num_skip_axis] = input_dims[input_idx];
+        output_value->shape.dim[input_idx - num_skip_axis] =
+            input_dims[input_idx];
       }
     }
     output_value->shape.num_dims = input_num_dims - num_skip_axis;
@@ -217,11 +207,8 @@ static enum xnn_status reshape_reduce_operator(
 }
 
 static enum xnn_status setup_reduce_operator(
-  const struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
-  size_t num_values,
-  pthreadpool_t threadpool)
-{
+    const struct xnn_operator_data* opdata, const struct xnn_value* values,
+    size_t num_values, pthreadpool_t threadpool) {
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id != XNN_INVALID_VALUE_ID);
   assert(input_id < num_values);
@@ -240,20 +227,17 @@ static enum xnn_status setup_reduce_operator(
   void* output_data = output_value->data;
   assert(output_data != NULL);
 
-  void* workspace = input_value->datatype != xnn_datatype_fp32 ? opdata->workspace : NULL;
+  void* workspace =
+      input_value->datatype != xnn_datatype_fp32 ? opdata->workspace : NULL;
 
-  return xnn_setup_reduce_nd(opdata->operator_objects[0], workspace, input_data, output_data);
+  return xnn_setup_reduce_nd(opdata->operator_objects[0], workspace, input_data,
+                             output_data);
 }
 
 enum xnn_status xnn_define_static_reduce(
-  xnn_subgraph_t subgraph,
-  enum xnn_reduce_operator reduce_operator,
-  size_t num_reduction_axes,
-  const size_t* reduction_axes,
-  uint32_t input_id,
-  uint32_t output_id,
-  uint32_t flags)
-{
+    xnn_subgraph_t subgraph, enum xnn_reduce_operator reduce_operator,
+    size_t num_reduction_axes, const size_t* reduction_axes, uint32_t input_id,
+    uint32_t output_id, uint32_t flags) {
   int64_t signed_reduction_axes[XNN_MAX_TENSOR_DIMS];
   for (int i = 0; i < num_reduction_axes; i++) {
     signed_reduction_axes[i] = reduction_axes[i];
@@ -267,24 +251,29 @@ enum xnn_status xnn_define_static_reduce_v2(
     xnn_subgraph_t subgraph, enum xnn_reduce_operator reduce_operator,
     size_t num_reduction_axes, const int64_t* reduction_axes, uint32_t input_id,
     uint32_t output_id, uint32_t flags) {
-  const enum xnn_node_type node_type = xnn_reduce_operator_to_node_type(reduce_operator);
-  if(node_type == xnn_node_type_invalid) {
-    xnn_log_error("failed to define reduce operator: invalid operation %d.", reduce_operator);
+  const enum xnn_node_type node_type =
+      xnn_reduce_operator_to_node_type(reduce_operator);
+  if (node_type == xnn_node_type_invalid) {
+    xnn_log_error("failed to define reduce operator: invalid operation %d.",
+                  reduce_operator);
     return xnn_status_invalid_parameter;
   }
 
   enum xnn_status status;
-  if ((status = xnn_subgraph_check_xnnpack_initialized(node_type)) != xnn_status_success) {
+  if ((status = xnn_subgraph_check_xnnpack_initialized(node_type)) !=
+      xnn_status_success) {
     return status;
   }
 
-  status = xnn_subgraph_check_nth_input_node_id(node_type, input_id, subgraph->num_values, 1);
+  status = xnn_subgraph_check_nth_input_node_id(node_type, input_id,
+                                                subgraph->num_values, 1);
   if (status != xnn_status_success) {
     return status;
   }
 
   const struct xnn_value* input_value = &subgraph->values[input_id];
-  status = xnn_subgraph_check_nth_input_type_dense(node_type, input_id, input_value, 1);
+  status = xnn_subgraph_check_nth_input_type_dense(node_type, input_id,
+                                                   input_value, 1);
   if (status != xnn_status_success) {
     return status;
   }
@@ -297,27 +286,31 @@ enum xnn_status xnn_define_static_reduce_v2(
       break;
     default:
       xnn_log_error(
-        "failed to define %s operator with the first input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-        xnn_node_type_to_string(node_type), input_id,
-        xnn_datatype_to_string(input_value->datatype), input_value->datatype);
+          "failed to define %s operator with the first input ID #%" PRIu32
+          ": unsupported Value datatype %s (%d)",
+          xnn_node_type_to_string(node_type), input_id,
+          xnn_datatype_to_string(input_value->datatype), input_value->datatype);
       return xnn_status_invalid_parameter;
   }
 
-  status = xnn_subgraph_check_output_node_id(node_type, output_id, subgraph->num_values);
+  status = xnn_subgraph_check_output_node_id(node_type, output_id,
+                                             subgraph->num_values);
   if (status != xnn_status_success) {
     return status;
   }
 
   const struct xnn_value* output_value = &subgraph->values[output_id];
-  status = xnn_subgraph_check_output_type_dense(node_type, output_id, output_value);
+  status =
+      xnn_subgraph_check_output_type_dense(node_type, output_id, output_value);
   if (status != xnn_status_success) {
     return status;
   }
 
   if (num_reduction_axes == 0) {
     xnn_log_error(
-      "failed to define %s operator with %zu reduction axes: the number of reduction axes must be non-zero",
-      xnn_node_type_to_string(node_type), num_reduction_axes);
+        "failed to define %s operator with %zu reduction axes: the number of "
+        "reduction axes must be non-zero",
+        xnn_node_type_to_string(node_type), num_reduction_axes);
     return xnn_status_invalid_parameter;
   }
 

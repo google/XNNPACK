@@ -52,7 +52,8 @@ struct xnn_binary_elementwise_config {
   xnn_vbinary_ukernel_fn ropc_ukernel;
   xnn_init_binary_params_fn init;
   // Number of elements in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of elements in each call.
+  // For best efficiency, micro-kernel must process a multiple of this number of
+  // elements in each call.
   size_t element_tile;
 };
 
@@ -86,7 +87,8 @@ struct xnn_avgpool_config {
   // TODO: Only used by tests, it should be removed.
   uint8_t primary_tile;
   // Number of channels in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
+  // For best efficiency, micro-kernel must process a multiple of this number of
+  // channels in each call.
   uint16_t channel_tile;
 };
 
@@ -108,12 +110,14 @@ struct xnn_dwconv_config {
   } init;
   // Number of channels in a tile.
   uint8_t channel_tile;
-  // Number of channels in a subtile. This must be less-than-equal channel_tile. After processing channel_tile, the
-  // remainder is processed in tiles of channel_subtile.
+  // Number of channels in a subtile. This must be less-than-equal channel_tile.
+  // After processing channel_tile, the remainder is processed in tiles of
+  // channel_subtile.
   uint8_t channel_subtile;
   // How much to round channels by to get more optimal tiling.
   uint8_t channel_round;
-  // Number of elements in the tile. For multipass, this is the tile size for first pass.
+  // Number of elements in the tile. For multipass, this is the tile size for
+  // first pass.
   uint8_t primary_tile;
 };
 
@@ -122,7 +126,8 @@ struct xnn_dwconv_config {
 struct xnn_ibilinear_config {
   xnn_ibilinear_ukernel_fn ukernel;
   // Number of output pixels in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of pixels in each call.
+  // For best efficiency, micro-kernel must process a multiple of this number of
+  // pixels in each call.
   uint8_t pixel_tile;
   size_t log2_data_element_size;
   size_t log2_weight_element_size;
@@ -134,7 +139,8 @@ struct xnn_ibilinear_config {
 struct xnn_ibilinear_chw_config {
   xnn_ibilinear_chw_ukernel_fn ukernel;
   // Number of channels in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
+  // For best efficiency, micro-kernel must process a multiple of this number of
+  // channels in each call.
   uint8_t channel_tile;
   size_t log2_data_element_size;
   size_t log2_weight_element_size;
@@ -172,7 +178,7 @@ struct xnn_gemm_config {
   uint8_t nr;
   uint8_t log2_kr;
   uint8_t log2_sr;
-  uint8_t planes;  // number of 4 bit planes (1 for legacy, 2 for unzip)
+  uint8_t planes;     // number of 4 bit planes (1 for legacy, 2 for unzip)
   uint8_t mr_packed;  // `mr` value used for packed left-hand operands.
   enum xnn_arch_flags arch;
 };
@@ -209,10 +215,12 @@ struct xnn_spmm_config {
     xnn_init_f32_minmax_params_fn f32;
   } init;
   // Number of M-dimension elements in a tile.
-  // Corresponds to a block of pixels in 1x1 Convolution and a block of batch size in Fully Connected operator.
+  // Corresponds to a block of pixels in 1x1 Convolution and a block of batch
+  // size in Fully Connected operator.
   uint8_t mr;
   // Number of N-dimension elements in a tile.
-  // Corresponds to a block of output channels/features in 1x1 Convolution and Fully Connected operator.
+  // Corresponds to a block of output channels/features in 1x1 Convolution and
+  // Fully Connected operator.
   uint8_t nr;
 };
 
@@ -227,13 +235,17 @@ struct xnn_dwconv2d_chw_parameters {
 };
 
 struct xnn_dwconv2d_chw_config {
-  // Direct 3x3 stride-1 Convolution with padding 1 on left and right in CHW layout.
+  // Direct 3x3 stride-1 Convolution with padding 1 on left and right in CHW
+  // layout.
   struct xnn_dwconv2d_chw_parameters dwconv2d_chw_3x3;
-  // Direct 3x3 stride-2 Convolution with padding 1 on left and right in CHW layout.
+  // Direct 3x3 stride-2 Convolution with padding 1 on left and right in CHW
+  // layout.
   struct xnn_dwconv2d_chw_parameters dwconv2d_chw_3x3s2;
-  // Direct 5x5 stride-1 Convolution with padding 2 on left and right in CHW layout.
+  // Direct 5x5 stride-1 Convolution with padding 2 on left and right in CHW
+  // layout.
   struct xnn_dwconv2d_chw_parameters dwconv2d_chw_5x5;
-  // Direct 5x5 stride-2 Convolution with padding 2 on left and right in CHW layout.
+  // Direct 5x5 stride-2 Convolution with padding 2 on left and right in CHW
+  // layout.
   struct xnn_dwconv2d_chw_parameters dwconv2d_chw_5x5s2;
 };
 
@@ -247,7 +259,8 @@ struct xnn_conv_hwc2chw_config {
   // This parameter must be passed as is to weight packing function.
   uint8_t output_channel_tile;
   // Number of output height pixels in a tile.
-  // For best efficiency, micro-kernel must produce a multiple of this number of rows in each call.
+  // For best efficiency, micro-kernel must produce a multiple of this number of
+  // rows in each call.
   uint8_t output_height_tile;
 };
 
@@ -258,10 +271,12 @@ struct xnn_vmulcaddc_config {
     xnn_init_f32_minmax_params_fn f32;
   } init;
   // Number of channels in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
+  // For best efficiency, micro-kernel must process a multiple of this number of
+  // channels in each call.
   uint8_t channel_tile;
   // Number of rows of inputs processed in one tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of rows in each call.
+  // For best efficiency, micro-kernel must process a multiple of this number of
+  // rows in each call.
   uint8_t row_tile;
 };
 

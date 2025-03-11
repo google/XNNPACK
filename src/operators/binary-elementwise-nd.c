@@ -138,15 +138,15 @@ static enum xnn_status init_binary_elementwise_nd(
       init_config(type, datatype, &sign_b);
   if (config == NULL) {
     xnn_log_debug(
-      "unsupported operator %s for datatype %s, falling back to reference kernel",
-      xnn_binary_operator_to_string(type), xnn_datatype_to_string(datatype));
+        "unsupported operator %s for datatype %s, falling back to reference "
+        "kernel",
+        xnn_binary_operator_to_string(type), xnn_datatype_to_string(datatype));
     config = xnn_init_binary_reference_config(type, datatype);
   }
   if (config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported datatype %s",
-        xnn_binary_operator_to_string(type),
-        xnn_datatype_to_string(datatype));
+    xnn_log_error("failed to create %s operator: unsupported datatype %s",
+                  xnn_binary_operator_to_string(type),
+                  xnn_datatype_to_string(datatype));
     return xnn_status_unsupported_parameter;
   }
 
@@ -166,21 +166,24 @@ static enum xnn_status init_binary_elementwise_nd(
           output_quantization ? output_quantization->scale : 1.0f;
       if (a_scale <= 0.0f || !isnormal(a_scale)) {
         xnn_log_error(
-            "failed to create %s operator with %.7g input 1 scale: scale must be "
+            "failed to create %s operator with %.7g input 1 scale: scale must "
+            "be "
             "finite and positive",
             xnn_binary_operator_to_string(type), a_scale);
         return xnn_status_invalid_parameter;
       }
       if (b_scale <= 0.0f || !isnormal(b_scale)) {
         xnn_log_error(
-            "failed to create %s operator with %.7g input 2 scale: scale must be "
+            "failed to create %s operator with %.7g input 2 scale: scale must "
+            "be "
             "finite and positive",
             xnn_binary_operator_to_string(type), b_scale);
         return xnn_status_invalid_parameter;
       }
       if (output_scale <= 0.0f || !isnormal(output_scale)) {
         xnn_log_error(
-            "failed to create %s operator with %.7g output scale: scale must be "
+            "failed to create %s operator with %.7g output scale: scale must "
+            "be "
             "finite and positive",
             xnn_binary_operator_to_string(type), output_scale);
         return xnn_status_invalid_parameter;
@@ -190,9 +193,9 @@ static enum xnn_status init_binary_elementwise_nd(
       b_quantization_with_sign.scale *= sign_b;
 
       config->init(&uparams, a_quantization, &b_quantization_with_sign,
-                  output_quantization);
+                   output_quantization);
       config->init(&uparams2, &b_quantization_with_sign, a_quantization,
-                  output_quantization);
+                   output_quantization);
     } else {
       config->init(&uparams, NULL, NULL, NULL);
       config->init(&uparams2, NULL, NULL, NULL);
@@ -481,7 +484,8 @@ enum xnn_status xnn_setup_binary_elementwise_nd(xnn_operator_t op,
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.
     case xnn_run_state_ready:
-      // Operator has been reshaped, and we are setting up with different pointers.
+      // Operator has been reshaped, and we are setting up with different
+      // pointers.
       break;
   }
 

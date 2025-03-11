@@ -11,13 +11,11 @@
 #include "include/xnnpack.h"
 #include "src/xnnpack/allocator.h"
 #include "src/xnnpack/log.h"
-#include "src/xnnpack/operator.h"
 #include "src/xnnpack/operator-utils.h"
+#include "src/xnnpack/operator.h"
 #include "src/xnnpack/params.h"
 
-
-enum xnn_status xnn_delete_operator(xnn_operator_t op)
-{
+enum xnn_status xnn_delete_operator(xnn_operator_t op) {
   enum xnn_status status = xnn_destroy_operator(op);
   if (status != xnn_status_success) {
     return status;

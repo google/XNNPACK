@@ -12,13 +12,13 @@
 #include <string.h>
 
 #ifdef _WIN32
-  #include <windows.h>
+#include <windows.h>
 #else
-  #include <unistd.h>
+#include <unistd.h>
 #endif
 
 #ifdef _MSC_VER
-  #include <intrin.h>
+#include <intrin.h>
 #endif
 
 #include "include/xnnpack.h"
@@ -45,7 +45,8 @@ static void init_allocator_config(void) {
 }
 
 enum xnn_status xnn_initialize(const struct xnn_allocator* allocator) {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
   if (hardware_config == NULL) {
     xnn_log_error("XNNPACK initialization failed: hardware not supported");
     return xnn_status_unsupported_hardware;
@@ -54,11 +55,12 @@ enum xnn_status xnn_initialize(const struct xnn_allocator* allocator) {
   if (allocator == NULL) {
     allocator = &xnn_default_allocator;
   }
-  #ifdef _MSC_VER
-    _InterlockedCompareExchangePointer((PVOID volatile*) &init_allocator, (PVOID) allocator, NULL);
-  #else
-    __sync_bool_compare_and_swap(&init_allocator, NULL, allocator);
-  #endif
+#ifdef _MSC_VER
+  _InterlockedCompareExchangePointer((PVOID volatile*)&init_allocator,
+                                     (PVOID)allocator, NULL);
+#else
+  __sync_bool_compare_and_swap(&init_allocator, NULL, allocator);
+#endif
   XNN_INIT_ONCE(allocator);
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) != 0) {
     return xnn_status_success;
@@ -79,6 +81,4 @@ enum xnn_status xnn_initialize(const struct xnn_allocator* allocator) {
 #endif  // XNN_ENABLE_KLEIDIAI
 }
 
-enum xnn_status xnn_deinitialize(void) {
-  return xnn_status_success;
-}
+enum xnn_status xnn_deinitialize(void) { return xnn_status_success; }

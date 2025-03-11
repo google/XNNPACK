@@ -17,12 +17,8 @@
 extern "C" {
 #endif
 
-
 #define DECLARE_X8_ZIPC_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                      \
-      size_t n,                                   \
-      const uint8_t* x,                           \
-      uint8_t* y);
+  XNN_INTERNAL void fn_name(size_t n, const uint8_t* x, uint8_t* y);
 
 DECLARE_X8_ZIPC_UKERNEL_FUNCTION(xnn_x8_zip_x2_ukernel__neon)
 DECLARE_X8_ZIPC_UKERNEL_FUNCTION(xnn_x8_zip_x2_ukernel__scalar)
@@ -34,12 +30,8 @@ DECLARE_X8_ZIPC_UKERNEL_FUNCTION(xnn_x8_zip_x4_ukernel__neon)
 DECLARE_X8_ZIPC_UKERNEL_FUNCTION(xnn_x8_zip_x4_ukernel__scalar)
 DECLARE_X8_ZIPC_UKERNEL_FUNCTION(xnn_x8_zip_x4_ukernel__sse2)
 
-
 #define DECLARE_X32_ZIPC_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                       \
-      size_t n,                                    \
-      const uint32_t* x,                           \
-      uint32_t* y);
+  XNN_INTERNAL void fn_name(size_t n, const uint32_t* x, uint32_t* y);
 
 DECLARE_X32_ZIPC_UKERNEL_FUNCTION(xnn_x32_zip_x2_ukernel__neon)
 DECLARE_X32_ZIPC_UKERNEL_FUNCTION(xnn_x32_zip_x2_ukernel__scalar)
@@ -54,31 +46,20 @@ DECLARE_X32_ZIPC_UKERNEL_FUNCTION(xnn_x32_zip_x4_ukernel__scalar)
 DECLARE_X32_ZIPC_UKERNEL_FUNCTION(xnn_x32_zip_x4_ukernel__sse2)
 DECLARE_X32_ZIPC_UKERNEL_FUNCTION(xnn_x32_zip_x4_ukernel__wasmsimd)
 
-
 #define DECLARE_X8_ZIPV_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                      \
-      size_t n,                                   \
-      size_t m,                                   \
-      const uint8_t* x,                           \
-      uint8_t* y);
+  XNN_INTERNAL void fn_name(size_t n, size_t m, const uint8_t* x, uint8_t* y);
 
 DECLARE_X8_ZIPV_UKERNEL_FUNCTION(xnn_x8_zip_xm_ukernel__neon)
 DECLARE_X8_ZIPV_UKERNEL_FUNCTION(xnn_x8_zip_xm_ukernel__scalar)
 DECLARE_X8_ZIPV_UKERNEL_FUNCTION(xnn_x8_zip_xm_ukernel__sse2)
 
-
 #define DECLARE_X32_ZIPV_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                       \
-      size_t n,                                    \
-      size_t m,                                    \
-      const uint32_t* x,                           \
-      uint32_t* y);
+  XNN_INTERNAL void fn_name(size_t n, size_t m, const uint32_t* x, uint32_t* y);
 
 DECLARE_X32_ZIPV_UKERNEL_FUNCTION(xnn_x32_zip_xm_ukernel__neon)
 DECLARE_X32_ZIPV_UKERNEL_FUNCTION(xnn_x32_zip_xm_ukernel__scalar)
 DECLARE_X32_ZIPV_UKERNEL_FUNCTION(xnn_x32_zip_xm_ukernel__sse2)
 DECLARE_X32_ZIPV_UKERNEL_FUNCTION(xnn_x32_zip_xm_ukernel__wasmsimd)
-
 
 #ifdef __cplusplus
 }  // extern "C"
