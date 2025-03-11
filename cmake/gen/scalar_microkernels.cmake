@@ -823,14 +823,6 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/x32-transposec/gen/x32-transposec-4x2-scalar-int.c
   src/x32-transposec/gen/x32-transposec-4x4-scalar-float.c
   src/x32-transposec/gen/x32-transposec-4x4-scalar-int.c
-  src/x32-zerob/gen/x32-zerob-2c1s1r-gemm-scalar-float.c
-  src/x32-zerob/gen/x32-zerob-2c1s1r-gemm-scalar-int.c
-  src/x32-zerob/gen/x32-zerob-2c2s1r-gemm-scalar-float.c
-  src/x32-zerob/gen/x32-zerob-2c2s1r-gemm-scalar-int.c
-  src/x32-zerob/gen/x32-zerob-4c1s1r-gemm-scalar-float.c
-  src/x32-zerob/gen/x32-zerob-4c1s1r-gemm-scalar-int.c
-  src/x32-zerob/gen/x32-zerob-4c4s1r-gemm-scalar-float.c
-  src/x32-zerob/gen/x32-zerob-4c4s1r-gemm-scalar-int.c
   src/x64-transposec/gen/x64-transposec-1x2-scalar-float.c
   src/x64-transposec/gen/x64-transposec-1x2-scalar-int.c
   src/x64-transposec/gen/x64-transposec-2x1-scalar-float.c

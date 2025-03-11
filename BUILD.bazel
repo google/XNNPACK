@@ -203,7 +203,6 @@ MICROKERNEL_DEFS = [
     "src/x32-packw/x32-packw.h",
     "src/x32-packx/x32-packx.h",
     "src/x32-transposec/x32-transposec.h",
-    "src/x32-zerob/x32-zerob.h",
     "src/x64-transposec/x64-transposec.h",
 ]
 
@@ -239,7 +238,6 @@ MICROKERNEL_HDRS = [
     "src/xnnpack/vscaleexpminusmax.h",
     "src/xnnpack/vscaleextexp.h",
     "src/xnnpack/vunary.h",
-    "src/xnnpack/zerob.h",
 ] + MICROKERNEL_DEFS
 
 MICROKERNEL_DEPS = [

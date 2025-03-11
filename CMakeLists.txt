@@ -1519,7 +1519,6 @@ IF(XNNPACK_BUILD_TESTS)
       u8-lut32norm
       u8-rmax
       x16-packw
-      x32-packb
       x32-packw
       x32-packx
       x32-unpool
