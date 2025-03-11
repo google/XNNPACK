@@ -1248,10 +1248,10 @@ void xnn_pack_f32_gemm_gio_w(size_t g, size_t nc, size_t kc, size_t nr,
             for (size_t kr_block_offset = 0; kr_block_offset < kr;
                  kr_block_offset++) {
               const size_t kc_idx = kc_begin + kr_block_offset;
-              if (kc_idx < kc) {
-                packed_weights[kr_block_offset] =
-                    k[kc_idx * k_stride + nr_block_start + nr_block_offset];
-              }
+              packed_weights[kr_block_offset] =
+                  kc_idx < kc
+                      ? k[kc_idx * k_stride + nr_block_start + nr_block_offset]
+                      : 0.0f;
             }
             packed_weights += kr;
           }
