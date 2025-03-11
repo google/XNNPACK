@@ -27,7 +27,7 @@ void xnn_f32_vrsubc_ukernel__hvx_u64(
   HVX_Vector vb = xnn_set1_f32(*input_b);
 
   for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
-    HVX_Vector va0 = xnn_loadu_f32(input_a);
+    HVX_Vector va0 = xnn_loadu_f32(input_a + 0);
     HVX_Vector va1 = xnn_loadu_f32(input_a + 32);
     input_a += 64;
 
@@ -35,7 +35,7 @@ void xnn_f32_vrsubc_ukernel__hvx_u64(
     HVX_Vector vacc1 = xnn_sub_f32(vb, va1);
 
 
-   xnn_storeu_f32(output, vacc0);
+    xnn_storeu_f32(output + 0, vacc0);
     xnn_storeu_f32(output + 32, vacc1);
     output += 64;
   }
