@@ -42,6 +42,13 @@ tools/xngen src/s8-rminmax/simd.c.in -D BATCH_TILE=48 -D DATATYPE=U8 -D ACCUMULA
 tools/xngen src/s8-rminmax/simd.c.in -D BATCH_TILE=64 -D DATATYPE=U8 -D ACCUMULATORS=2 -D OP=MINMAX -D ARCH=sse2 -o src/u8-rminmax/gen/u8-rminmax-sse2-u64-acc2.c &
 tools/xngen src/s8-rminmax/simd.c.in -D BATCH_TILE=64 -D DATATYPE=U8 -D ACCUMULATORS=4 -D OP=MINMAX -D ARCH=sse2 -o src/u8-rminmax/gen/u8-rminmax-sse2-u64-acc4.c &
 
+################################## Wasm SIMD ##################################
+tools/xngen src/s8-rminmax/simd.c.in -D BATCH_TILE=32 -D DATATYPE=U8 -D ACCUMULATORS=2 -D OP=MAX -D ARCH=wasmsimd -o src/u8-rminmax/gen/u8-rmax-wasmsimd-u32-acc2.c &
+
+tools/xngen src/s8-rminmax/simd.c.in -D BATCH_TILE=32 -D DATATYPE=U8 -D ACCUMULATORS=2 -D OP=MIN -D ARCH=wasmsimd -o src/u8-rminmax/gen/u8-rmin-wasmsimd-u32-acc2.c &
+
+tools/xngen src/s8-rminmax/simd.c.in -D BATCH_TILE=32 -D DATATYPE=U8 -D ACCUMULATORS=2 -D OP=MINMAX -D ARCH=wasmsimd -o src/u8-rminmax/gen/u8-rminmax-wasmsimd-u32-acc2.c &
+
 #################################### Scalar ###################################
 tools/xngen src/s8-rminmax/simd.c.in -D BATCH_TILE=1 -D DATATYPE=U8 -D ACCUMULATORS=1 -D OP=MINMAX -D ARCH=scalar -o src/u8-rminmax/gen/u8-rminmax-scalar-u1.c &
 tools/xngen src/s8-rminmax/simd.c.in -D BATCH_TILE=2 -D DATATYPE=U8 -D ACCUMULATORS=2 -D OP=MINMAX -D ARCH=scalar -o src/u8-rminmax/gen/u8-rminmax-scalar-u2-acc2.c &
