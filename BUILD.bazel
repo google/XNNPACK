@@ -240,7 +240,6 @@ MICROKERNEL_HDRS = [
     "src/xnnpack/vscaleextexp.h",
     "src/xnnpack/vunary.h",
     "src/xnnpack/zerob.h",
-    "src/xnnpack/zip.h",
 ] + MICROKERNEL_DEFS
 
 MICROKERNEL_DEPS = [
