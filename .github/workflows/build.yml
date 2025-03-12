@@ -455,7 +455,7 @@ jobs:
             --test_filter=*QP8* \
             test:qp8_f32_qc4w_gemm_minmax_test \
             test/operators:fully_connected_nc_test \
-            test:fully_connected_test
+            test/subgraph:fully_connected_test
         working-directory: ${{ github.workspace }}
       - name: Compress disk cache
         # Bazel's `--disk-cache` currently grows without bounds, so we remove files
@@ -510,7 +510,7 @@ jobs:
             --test_filter=*QP8* \
             test:qp8_f32_qc4w_gemm_minmax_test \
             test/operators:fully_connected_nc_test \
-            test:fully_connected_test
+            test/subgraph:fully_connected_test
         working-directory: ${{ github.workspace }}
       - name: Compress disk cache
         # Bazel's `--disk-cache` currently grows without bounds, so we remove files
