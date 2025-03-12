@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-dwconv2d-chw/3x3p1-scalar.c.in
 //   Generator: tools/xngen

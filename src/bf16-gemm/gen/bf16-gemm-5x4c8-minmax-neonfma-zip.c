@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/bf16-gemm/c8-neon-zip.c.in
 //   Generator: tools/xngen

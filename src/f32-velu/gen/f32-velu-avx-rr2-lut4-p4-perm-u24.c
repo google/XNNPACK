@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-velu/avx-rr2-lut4-p4-perm.c.in
 //   Generator: tools/xngen

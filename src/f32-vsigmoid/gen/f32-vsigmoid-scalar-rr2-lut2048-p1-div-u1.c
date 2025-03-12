@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vsigmoid/scalar-rr2-lut2048-p1-div.c.in
 //   Generator: tools/xngen

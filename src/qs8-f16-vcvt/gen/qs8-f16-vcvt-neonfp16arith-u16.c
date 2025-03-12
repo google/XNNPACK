@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-f16-vcvt/neon.c.in
 //   Generator: tools/xngen

@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vscaleextexp/avx512f-p5-scalef.c.in
 //   Generator: tools/xngen

@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qu8-rdsum/rvv.c.in
 //   Generator: tools/xngen

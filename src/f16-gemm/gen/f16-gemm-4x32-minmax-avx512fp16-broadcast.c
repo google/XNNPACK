@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-gemm/avx512fp16-broadcast.c.in
 //   Generator: tools/xngen

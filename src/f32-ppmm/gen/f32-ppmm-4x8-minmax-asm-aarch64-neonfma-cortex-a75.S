@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-ppmm/4x8-aarch64-neonfma-cortex-a75.S.in
 //   Generator: tools/xngen

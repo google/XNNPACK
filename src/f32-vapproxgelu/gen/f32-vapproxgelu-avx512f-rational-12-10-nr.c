@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vapproxgelu/rational-12-10.c.in
 //   Generator: tools/xngen
@@ -33,9 +34,9 @@ void xnn_f32_vapproxgelu_ukernel__avx512f_rational_12_10_nr_u16(
   // beyond this point. This value is chosen as the first floating point
   // number as of which the interpolation returns +/-1.0f.
   #if XNN_SIMD_HAS_NATIVE_FMA || (XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR)
-    XNN_SIMD_CONST_F32(vmax_abs_x, 5.5e+00f);
+    XNN_SIMD_CONST_F32(vmax_abs_x, 4.79519796e+00f);
   #else
-    XNN_SIMD_CONST_F32(vmax_abs_x, 5.5e+00f);
+    XNN_SIMD_CONST_F32(vmax_abs_x, 4.86115026e+00f);
   #endif  // XNN_SIMD_HAS_NATIVE_FMA
 
   // The monomial coefficients of the numerator polynomial (odd).
@@ -150,9 +151,9 @@ void xnn_f32_vapproxgelu_ukernel__avx512f_rational_12_10_nr_u32(
   // beyond this point. This value is chosen as the first floating point
   // number as of which the interpolation returns +/-1.0f.
   #if XNN_SIMD_HAS_NATIVE_FMA || (XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR)
-    XNN_SIMD_CONST_F32(vmax_abs_x, 5.5e+00f);
+    XNN_SIMD_CONST_F32(vmax_abs_x, 4.79519796e+00f);
   #else
-    XNN_SIMD_CONST_F32(vmax_abs_x, 5.5e+00f);
+    XNN_SIMD_CONST_F32(vmax_abs_x, 4.86115026e+00f);
   #endif  // XNN_SIMD_HAS_NATIVE_FMA
 
   // The monomial coefficients of the numerator polynomial (odd).
@@ -332,9 +333,9 @@ void xnn_f32_vapproxgelu_ukernel__avx512f_rational_12_10_nr_u48(
   // beyond this point. This value is chosen as the first floating point
   // number as of which the interpolation returns +/-1.0f.
   #if XNN_SIMD_HAS_NATIVE_FMA || (XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR)
-    XNN_SIMD_CONST_F32(vmax_abs_x, 5.5e+00f);
+    XNN_SIMD_CONST_F32(vmax_abs_x, 4.79519796e+00f);
   #else
-    XNN_SIMD_CONST_F32(vmax_abs_x, 5.5e+00f);
+    XNN_SIMD_CONST_F32(vmax_abs_x, 4.86115026e+00f);
   #endif  // XNN_SIMD_HAS_NATIVE_FMA
 
   // The monomial coefficients of the numerator polynomial (odd).
@@ -535,9 +536,9 @@ void xnn_f32_vapproxgelu_ukernel__avx512f_rational_12_10_nr_u64(
   // beyond this point. This value is chosen as the first floating point
   // number as of which the interpolation returns +/-1.0f.
   #if XNN_SIMD_HAS_NATIVE_FMA || (XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR)
-    XNN_SIMD_CONST_F32(vmax_abs_x, 5.5e+00f);
+    XNN_SIMD_CONST_F32(vmax_abs_x, 4.79519796e+00f);
   #else
-    XNN_SIMD_CONST_F32(vmax_abs_x, 5.5e+00f);
+    XNN_SIMD_CONST_F32(vmax_abs_x, 4.86115026e+00f);
   #endif  // XNN_SIMD_HAS_NATIVE_FMA
 
   // The monomial coefficients of the numerator polynomial (odd).

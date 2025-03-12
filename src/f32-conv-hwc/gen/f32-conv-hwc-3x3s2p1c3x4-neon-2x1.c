@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-conv-hwc/3x3s2p1c3-neon-x1.c.in
 //   Generator: tools/xngen

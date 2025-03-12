@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vsigmoid/sse-rr2-lut64-p2-div.c.in
 //   Generator: tools/xngen

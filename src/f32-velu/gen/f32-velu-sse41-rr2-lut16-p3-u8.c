@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-velu/sse-rr2-lut16-p3.c.in
 //   Generator: tools/xngen

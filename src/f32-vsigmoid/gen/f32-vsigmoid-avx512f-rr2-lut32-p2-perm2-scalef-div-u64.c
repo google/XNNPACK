@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vsigmoid/avx512f-rr2-lut32-p2-perm2-scalef.c.in
 //   Generator: tools/xngen

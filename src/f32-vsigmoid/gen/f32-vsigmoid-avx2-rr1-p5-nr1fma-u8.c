@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vsigmoid/avx2-rr1-p5.c.in
 //   Generator: tools/xngen

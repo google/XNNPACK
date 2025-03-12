@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-rminmax/avx512fp16.c.in
 //   Generator: tools/xngen

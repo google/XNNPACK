@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-gemm/6x16-aarch64-neonfp16arith-cortex-a55.S.in
 //   Generator: tools/xngen

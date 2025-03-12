@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vrsqrt/fma3-rsqrt.c.in
 //   Generator: tools/xngen

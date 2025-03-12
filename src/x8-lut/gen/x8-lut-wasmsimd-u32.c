@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/x8-lut/wasmsimd.c.in
 //   Generator: tools/xngen

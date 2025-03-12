@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vcmul/scalar.c.in
 //   Generator: tools/xngen

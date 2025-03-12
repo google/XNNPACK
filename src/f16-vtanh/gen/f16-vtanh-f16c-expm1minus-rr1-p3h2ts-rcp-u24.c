@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-vtanh/avx-expm1minus.c.in
 //   Generator: tools/xngen

@@ -1,8 +1,9 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-gemm/wasmrelaxedsimd-splat.c.in
 //   Generator: tools/xngen
 //
-// Copyright 2020 Google LLC
+// Copyright 2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.

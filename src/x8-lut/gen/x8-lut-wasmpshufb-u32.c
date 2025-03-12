@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/x8-lut/wasmpshufb.c.in
 //   Generator: tools/xngen

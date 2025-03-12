@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qu8-rsum/avx2.c.in
 //   Generator: tools/xngen

@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vsigmoid/wasmsimd-rr2-p5-div.c.in
 //   Generator: tools/xngen

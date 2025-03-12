@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/bf16-gemm/c2-neonbf16-bfdot-lane-ld128.c.in
 //   Generator: tools/xngen

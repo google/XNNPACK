@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-vlrelu/scalar-select.c.in
 //   Generator: tools/xngen

@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-raddstoreexpminusmax/wasmsimd-rr2-p5.c.in
 //   Generator: tools/xngen

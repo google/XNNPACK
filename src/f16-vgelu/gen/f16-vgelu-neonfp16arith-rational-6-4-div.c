@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-vgelu/rational-6-4.c.in
 //   Generator: tools/xngen

@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-gemm/neonfp16arith-ld64.c.in
 //   Generator: tools/xngen

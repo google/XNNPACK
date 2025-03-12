@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vsigmoid/neon-lut2048-p1.c.in
 //   Generator: tools/xngen

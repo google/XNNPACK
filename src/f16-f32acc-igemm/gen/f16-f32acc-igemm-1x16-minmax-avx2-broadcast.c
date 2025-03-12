@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-igemm/avx2-broadcast.c.in
 //   Generator: tools/xngen

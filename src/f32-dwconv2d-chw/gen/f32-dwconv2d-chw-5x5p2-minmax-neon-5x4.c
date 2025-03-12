@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-dwconv2d-chw/5x5p2-neon.c.in
 //   Generator: tools/xngen

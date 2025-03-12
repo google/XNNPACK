@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-raddstoreexpminusmax/neonfp16arith-rr2-p2.c.in
 //   Generator: tools/xngen

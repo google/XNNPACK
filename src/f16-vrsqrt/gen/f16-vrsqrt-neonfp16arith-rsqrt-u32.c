@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-vrsqrt/neonfp16arith-rsqrt.c.in
 //   Generator: tools/xngen

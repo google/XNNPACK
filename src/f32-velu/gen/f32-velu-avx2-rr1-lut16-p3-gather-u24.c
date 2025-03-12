@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-velu/avx2-rr1-lut16-p3-gather.c.in
 //   Generator: tools/xngen

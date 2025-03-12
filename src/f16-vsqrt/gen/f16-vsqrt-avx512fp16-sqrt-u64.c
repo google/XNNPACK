@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-vsqrt/avx512fp16-sqrt.c.in
 //   Generator: tools/xngen

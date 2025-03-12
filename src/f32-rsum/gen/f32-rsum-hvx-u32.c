@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-rsum/hvx.c.in
 //   Generator: tools/xngen
