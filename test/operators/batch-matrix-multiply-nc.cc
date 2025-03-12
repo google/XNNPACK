@@ -131,15 +131,14 @@ std::vector<BatchMatMulTesterParams> CreateRegularTestParams() {
 
       // Add the test parameters.
       BatchMatMulTesterParams p1;
-      p1.name = std::string(batch.second) +
-                                (transpose_b ? "_transpose_b" : "");
+      p1.name = std::string(batch.second) + (transpose_b ? "_transpose_b" : "");
       p1.batch_dims_a = {batch.first};
       p1.batch_dims_b = {batch.first};
       p1.transpose_b = transpose_b > 0;
       params.push_back(std::move(p1));
       BatchMatMulTesterParams p2;
       p2.name = std::string(batch.second) + "_bigger_matrices" +
-                                (transpose_b ? "_transpose_b" : "");
+                (transpose_b ? "_transpose_b" : "");
       p2.batch_dims_a = {batch.first};
       p2.batch_dims_b = {batch.first};
       p2.m = 37;

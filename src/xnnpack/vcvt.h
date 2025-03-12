@@ -15,8 +15,11 @@
 extern "C" {
 #endif
 
-#define XNN_CVT_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, type_in, type_out, params_type, init_params) \
-  XNN_INTERNAL void ukernel(size_t n, const type_in* input, type_out* output, const params_type* params);
+#define XNN_CVT_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile,          \
+                                    vector_tile, type_in, type_out,           \
+                                    params_type, init_params)                 \
+  XNN_INTERNAL void ukernel(size_t n, const type_in* input, type_out* output, \
+                            const params_type* params);
 #include "src/f16-f32-vcvt/f16-f32-vcvt.h"
 #include "src/f16-qs8-vcvt/f16-qs8-vcvt.h"
 #include "src/f16-qu8-vcvt/f16-qu8-vcvt.h"

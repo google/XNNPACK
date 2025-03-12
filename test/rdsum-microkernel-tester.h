@@ -30,9 +30,7 @@ class RDSumMicrokernelTester {
     return *this;
   }
 
-  size_t rows() const {
-    return this->rows_;
-  }
+  size_t rows() const { return this->rows_; }
 
   RDSumMicrokernelTester& channels(size_t channels) {
     assert(channels != 0);
@@ -40,9 +38,7 @@ class RDSumMicrokernelTester {
     return *this;
   }
 
-  size_t channels() const {
-    return this->channels_;
-  }
+  size_t channels() const { return this->channels_; }
 
   RDSumMicrokernelTester& channel_tile(size_t channel_tile) {
     assert(channel_tile != 0);
@@ -50,9 +46,7 @@ class RDSumMicrokernelTester {
     return *this;
   }
 
-  size_t channel_tile() const {
-    return this->channel_tile_;
-  }
+  size_t channel_tile() const { return this->channel_tile_; }
 
   RDSumMicrokernelTester& input_stride(size_t input_stride) {
     assert(input_stride != 0);
@@ -76,18 +70,14 @@ class RDSumMicrokernelTester {
     return *this;
   }
 
-  float input_scale() const {
-    return this->input_scale_;
-  }
+  float input_scale() const { return this->input_scale_; }
 
   RDSumMicrokernelTester& input_zero_point(uint8_t input_zero_point) {
     this->input_zero_point_ = input_zero_point;
     return *this;
   }
 
-  uint8_t input_zero_point() const {
-    return this->input_zero_point_;
-  }
+  uint8_t input_zero_point() const { return this->input_zero_point_; }
 
   RDSumMicrokernelTester& output_scale(float output_scale) {
     assert(output_scale > 0.0f);
@@ -96,41 +86,31 @@ class RDSumMicrokernelTester {
     return *this;
   }
 
-  float output_scale() const {
-    return this->output_scale_;
-  }
+  float output_scale() const { return this->output_scale_; }
 
   RDSumMicrokernelTester& output_zero_point(uint8_t output_zero_point) {
     this->output_zero_point_ = output_zero_point;
     return *this;
   }
 
-  uint8_t output_zero_point() const {
-    return this->output_zero_point_;
-  }
+  uint8_t output_zero_point() const { return this->output_zero_point_; }
 
   RDSumMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  size_t iterations() const {
-    return this->iterations_;
-  }
+  size_t iterations() const { return this->iterations_; }
 
-  uint8_t qmin() const {
-    return this->qmin_;
-  }
+  uint8_t qmin() const { return this->qmin_; }
 
-  uint8_t qmax() const {
-    return this->qmax_;
-  }
+  uint8_t qmax() const { return this->qmax_; }
 
   void Test(xnn_qs8_rdsum_ukernel_fn rdsum,
-      xnn_init_qs8_rsum_params_fn init_params = nullptr) const {
+            xnn_init_qs8_rsum_params_fn init_params = nullptr) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> i8dist(
-      std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+        std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
     xnnpack::Buffer<int8_t> input((rows() - 1) * input_stride() + channels() +
                                   XNN_EXTRA_BYTES);
     xnnpack::Buffer<int8_t> zero(channels() + XNN_EXTRA_BYTES, 0);
@@ -166,17 +146,18 @@ class RDSumMicrokernelTester {
       // Verify results.
       for (size_t c = 0; c < channels(); c++) {
         EXPECT_EQ(output[c], output_ref[c])
-          << "at position " << c << ", rows = " << rows() << ", channels = "
-          << channels();
+            << "at position " << c << ", rows = " << rows()
+            << ", channels = " << channels();
       }
     }
   }
 
   void Test(xnn_qu8_rdsum_ukernel_fn rdsum,
-      xnn_init_qs8_rsum_params_fn init_params = nullptr) const {
+            xnn_init_qs8_rsum_params_fn init_params = nullptr) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> u8dist(
-      std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
+        std::numeric_limits<uint8_t>::min(),
+        std::numeric_limits<uint8_t>::max());
     xnnpack::Buffer<uint8_t> input((rows() - 1) * input_stride() + channels() +
                                    XNN_EXTRA_BYTES);
     xnnpack::Buffer<uint8_t> zero(channels() + XNN_EXTRA_BYTES, 0);
@@ -212,8 +193,8 @@ class RDSumMicrokernelTester {
       // Verify results.
       for (size_t c = 0; c < channels(); c++) {
         EXPECT_EQ(output[c], output_ref[c])
-          << "at position " << c << ", rows = " << rows() << ", channels = "
-          << channels();
+            << "at position " << c << ", rows = " << rows()
+            << ", channels = " << channels();
       }
     }
   }
@@ -226,8 +207,8 @@ class RDSumMicrokernelTester {
     xnnpack::Buffer<xnn_float16> input((rows() - 1) * input_stride() +
                                        channels() +
                                        XNN_EXTRA_BYTES / sizeof(xnn_float16));
-    xnnpack::Buffer<xnn_float16> zero(channels() +
-                                      XNN_EXTRA_BYTES / sizeof(xnn_float16), 0);
+    xnnpack::Buffer<xnn_float16> zero(
+        channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0);
     xnnpack::Buffer<float> output(channels());
     xnnpack::Buffer<float> output_ref(channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -261,8 +242,8 @@ class RDSumMicrokernelTester {
       // Verify results.
       for (size_t c = 0; c < channels(); c++) {
         ASSERT_NEAR(output[c], output_ref[c], std::abs(output_ref[c]) * 1.0e-5f)
-          << "at position " << c << ", rows = " << rows() << ", channels = "
-          << channels();
+            << "at position " << c << ", rows = " << rows()
+            << ", channels = " << channels();
       }
     }
   }
@@ -308,8 +289,8 @@ class RDSumMicrokernelTester {
       // Verify results.
       for (size_t c = 0; c < channels(); c++) {
         ASSERT_NEAR(output[c], output_ref[c], std::abs(output_ref[c]) * 1.0e-6f)
-          << "at position " << c << ", rows = " << rows() << ", channels = "
-          << channels();
+            << "at position " << c << ", rows = " << rows()
+            << ", channels = " << channels();
       }
     }
   }

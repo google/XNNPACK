@@ -25,7 +25,6 @@
 #include <tensorflow/lite/version.h>
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
-
 void xnnpack_prelu_f32(benchmark::State& state, const char* net) {
   const size_t batch_size = state.range(0);
   const size_t height = state.range(1);
@@ -34,10 +33,13 @@ void xnnpack_prelu_f32(benchmark::State& state, const char* net) {
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32irng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), std::ref(rng));
-  auto f32wrng = std::bind(std::uniform_real_distribution<float>(0.25f, 0.75f), std::ref(rng));
+  auto f32irng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f),
+                           std::ref(rng));
+  auto f32wrng = std::bind(std::uniform_real_distribution<float>(0.25f, 0.75f),
+                           std::ref(rng));
 
-  xnnpack::Buffer<float> input(batch_size * height * width * channels + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> input(batch_size * height * width * channels +
+                               XNN_EXTRA_BYTES / sizeof(float));
   std::generate(input.begin(), input.end(), std::ref(f32irng));
   xnnpack::Buffer<float> slope(channels);
   std::generate(slope.begin(), slope.end(), std::ref(f32wrng));
@@ -98,11 +100,14 @@ void xnnpack_prelu_f32(benchmark::State& state, const char* net) {
 
   const size_t elements_per_iteration = batch_size * height * width * channels;
   state.counters["elements"] =
-    benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration, benchmark::Counter::kIsRate);
+      benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration,
+                         benchmark::Counter::kIsRate);
 
-  const size_t bytes_per_iteration = (2 * elements_per_iteration + channels) * sizeof(float);
+  const size_t bytes_per_iteration =
+      (2 * elements_per_iteration + channels) * sizeof(float);
   state.counters["bytes"] =
-    benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
+      benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
+                         benchmark::Counter::kIsRate);
 }
 
 #ifdef BENCHMARK_TENSORFLOW_LITE
@@ -114,8 +119,10 @@ void tflite_prelu_f32(benchmark::State& state, const char* net) {
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32irng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), std::ref(rng));
-  auto f32wrng = std::bind(std::uniform_real_distribution<float>(0.25f, 0.75f), std::ref(rng));
+  auto f32irng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f),
+                           std::ref(rng));
+  auto f32wrng = std::bind(std::uniform_real_distribution<float>(0.25f, 0.75f),
+                           std::ref(rng));
 
   xnnpack::Buffer<float> slope(channels);
   std::generate(slope.begin(), slope.end(), std::ref(f32wrng));
@@ -125,65 +132,54 @@ void tflite_prelu_f32(benchmark::State& state, const char* net) {
       CreateOperatorCode(builder, tflite::BuiltinOperator_PRELU);
 
   flatbuffers::Offset<tflite::Buffer> buffers[2] = {
-    tflite::CreateBuffer(builder, builder.CreateVector({})),
-    tflite::CreateBuffer(builder, builder.CreateVector(
-      reinterpret_cast<const uint8_t*>(slope.data()),
-      sizeof(float) * slope.size())),
+      tflite::CreateBuffer(builder, builder.CreateVector({})),
+      tflite::CreateBuffer(
+          builder,
+          builder.CreateVector(reinterpret_cast<const uint8_t*>(slope.data()),
+                               sizeof(float) * slope.size())),
   };
 
   const int32_t input_shape[4] = {
-    static_cast<int32_t>(batch_size),
-    static_cast<int32_t>(height),
-    static_cast<int32_t>(width),
-    static_cast<int32_t>(channels)
-  };
+      static_cast<int32_t>(batch_size), static_cast<int32_t>(height),
+      static_cast<int32_t>(width), static_cast<int32_t>(channels)};
   const int32_t output_shape[4] = {
-    static_cast<int32_t>(batch_size),
-    static_cast<int32_t>(height),
-    static_cast<int32_t>(width),
-    static_cast<int32_t>(channels)
-  };
-  const int32_t slope_shape[1] = {
-    static_cast<int32_t>(channels)
-  };
+      static_cast<int32_t>(batch_size), static_cast<int32_t>(height),
+      static_cast<int32_t>(width), static_cast<int32_t>(channels)};
+  const int32_t slope_shape[1] = {static_cast<int32_t>(channels)};
 
   flatbuffers::Offset<tflite::Tensor> tensors[3] = {
-    tflite::CreateTensor(builder,
-                         builder.CreateVector<int32_t>(input_shape, 4),
-                         tflite::TensorType_FLOAT32),
-    tflite::CreateTensor(builder,
-                         builder.CreateVector<int32_t>(slope_shape, 1),
-                         tflite::TensorType_FLOAT32,
-                         1 /* buffer id */),
-    tflite::CreateTensor(builder,
-                         builder.CreateVector<int32_t>(output_shape, 4),
-                         tflite::TensorType_FLOAT32),
+      tflite::CreateTensor(builder,
+                           builder.CreateVector<int32_t>(input_shape, 4),
+                           tflite::TensorType_FLOAT32),
+      tflite::CreateTensor(builder,
+                           builder.CreateVector<int32_t>(slope_shape, 1),
+                           tflite::TensorType_FLOAT32, 1 /* buffer id */),
+      tflite::CreateTensor(builder,
+                           builder.CreateVector<int32_t>(output_shape, 4),
+                           tflite::TensorType_FLOAT32),
   };
 
-  const int32_t op_inputs[2] = { 0, 1 };
-  const int32_t op_outputs[1] = { 2 };
-  flatbuffers::Offset<tflite::Operator> op = tflite::CreateOperator(
-      builder,
-      0 /* opcode_index */,
-      builder.CreateVector<int32_t>(op_inputs, 2),
-      builder.CreateVector<int32_t>(op_outputs, 1));
+  const int32_t op_inputs[2] = {0, 1};
+  const int32_t op_outputs[1] = {2};
+  flatbuffers::Offset<tflite::Operator> op =
+      tflite::CreateOperator(builder, 0 /* opcode_index */,
+                             builder.CreateVector<int32_t>(op_inputs, 2),
+                             builder.CreateVector<int32_t>(op_outputs, 1));
 
-  const int32_t graph_inputs[1] = { 0 };
-  const int32_t graph_outputs[1] = { 2 };
-  flatbuffers::Offset<tflite::SubGraph> subgraph = tflite::CreateSubGraph(
-      builder,
-      builder.CreateVector(tensors, 3),
-      builder.CreateVector<int32_t>(graph_inputs, 1),
-      builder.CreateVector<int32_t>(graph_outputs, 1),
-      builder.CreateVector(&op, 1));
+  const int32_t graph_inputs[1] = {0};
+  const int32_t graph_outputs[1] = {2};
+  flatbuffers::Offset<tflite::SubGraph> subgraph =
+      tflite::CreateSubGraph(builder, builder.CreateVector(tensors, 3),
+                             builder.CreateVector<int32_t>(graph_inputs, 1),
+                             builder.CreateVector<int32_t>(graph_outputs, 1),
+                             builder.CreateVector(&op, 1));
 
-  flatbuffers::Offset<flatbuffers::String> description = builder.CreateString("PReLU model");
+  flatbuffers::Offset<flatbuffers::String> description =
+      builder.CreateString("PReLU model");
 
-  flatbuffers::Offset<tflite::Model> model_buffer = tflite::CreateModel(builder,
-      TFLITE_SCHEMA_VERSION,
-      builder.CreateVector(&operator_code, 1),
-      builder.CreateVector(&subgraph, 1),
-      description,
+  flatbuffers::Offset<tflite::Model> model_buffer = tflite::CreateModel(
+      builder, TFLITE_SCHEMA_VERSION, builder.CreateVector(&operator_code, 1),
+      builder.CreateVector(&subgraph, 1), description,
       builder.CreateVector(buffers, 2));
 
   builder.Finish(model_buffer);
@@ -207,10 +203,10 @@ void tflite_prelu_f32(benchmark::State& state, const char* net) {
     return;
   }
 
-  std::generate(
-    interpreter->typed_tensor<float>(0),
-    interpreter->typed_tensor<float>(0) + batch_size * height * width * channels,
-    std::ref(f32irng));
+  std::generate(interpreter->typed_tensor<float>(0),
+                interpreter->typed_tensor<float>(0) +
+                    batch_size * height * width * channels,
+                std::ref(f32irng));
 
   for (auto _ : state) {
     if (interpreter->Invoke() != kTfLiteOk) {
@@ -226,19 +222,21 @@ void tflite_prelu_f32(benchmark::State& state, const char* net) {
 
   const size_t elements_per_iteration = batch_size * height * width * channels;
   state.counters["elements"] =
-    benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration, benchmark::Counter::kIsRate);
+      benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration,
+                         benchmark::Counter::kIsRate);
 
-  const size_t bytes_per_iteration = (2 * elements_per_iteration + channels) * sizeof(float);
+  const size_t bytes_per_iteration =
+      (2 * elements_per_iteration + channels) * sizeof(float);
   state.counters["bytes"] =
-    benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
+      benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
+                         benchmark::Counter::kIsRate);
 
   interpreter.reset();
 }
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
 // Characteristic arguments for ImageNet classification models
-static void ImageNet(benchmark::internal::Benchmark* b)
-{
+static void ImageNet(benchmark::internal::Benchmark* b) {
   b->ArgNames({"N", "H", "W", "C"});
 
   int32_t c = 16;
@@ -249,10 +247,14 @@ static void ImageNet(benchmark::internal::Benchmark* b)
   }
 }
 
-BENCHMARK_CAPTURE(xnnpack_prelu_f32, imagenet, "ImageNet 224x224")->Apply(ImageNet)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_prelu_f32, imagenet, "ImageNet 224x224")
+    ->Apply(ImageNet)
+    ->UseRealTime();
 
 #ifdef BENCHMARK_TENSORFLOW_LITE
-  BENCHMARK_CAPTURE(tflite_prelu_f32, imagenet, "ImageNet 224x224")->Apply(ImageNet)->UseRealTime();
+BENCHMARK_CAPTURE(tflite_prelu_f32, imagenet, "ImageNet 224x224")
+    ->Apply(ImageNet)
+    ->UseRealTime();
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

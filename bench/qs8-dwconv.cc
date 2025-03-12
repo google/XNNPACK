@@ -110,8 +110,8 @@ static void bench_impl(uint64_t arch_flags, benchmark::State& state,
   // Pack the weights buffer.
   struct xnn_qs8_packing_params packing_params;
   packing_params.input_zero_point = 0;
-  xnn_pack_qs8_dwconv_ghw_w(primary_tile, kernel_height, kernel_width,
-                            channels, channel_tile, channel_tile,
+  xnn_pack_qs8_dwconv_ghw_w(primary_tile, kernel_height, kernel_width, channels,
+                            channel_tile, channel_tile,
                             /*channel_round=*/1, k.data(), b.data(),
                             /*scale=*/nullptr, w.data(),
                             /*per_tile_extra_bytes=*/0,
@@ -175,10 +175,10 @@ static void bench_impl(uint64_t arch_flags, benchmark::State& state,
 }
 
 #define XNN_UKERNEL(arch_flags, ukernel, c_block, is_pipelined, cr, kr, \
-                           datatype, weights_type, params_type, init_params)   \
-  static void BM_##ukernel(benchmark::State& state, const char* net) {         \
-    bench_impl(arch_flags, state, ukernel, init_params, cr, kr);               \
-  }                                                                            \
+                    datatype, weights_type, params_type, init_params)   \
+  static void BM_##ukernel(benchmark::State& state, const char* net) {  \
+    bench_impl(arch_flags, state, ukernel, init_params, cr, kr);        \
+  }                                                                     \
   BENCHMARK_DWCONV(BM_##ukernel);
 
 #include "src/qs8-dwconv/qs8-dwconv-minmax-fp32.h"

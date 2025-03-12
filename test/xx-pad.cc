@@ -19,11 +19,11 @@
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/isa-checks.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/pad.h"
-#include "src/xnnpack/buffer.h"
 #include "test/replicable_random_device.h"
 
 class PadMicrokernelTester {
@@ -108,8 +108,8 @@ class PadMicrokernelTester {
     };
 
     xnnpack::Buffer<uint8_t> input(input_channels() +
-                               (rows() - 1) * input_stride() +
-                               XNN_EXTRA_BYTES / sizeof(uint8_t));
+                                   (rows() - 1) * input_stride() +
+                                   XNN_EXTRA_BYTES / sizeof(uint8_t));
     xnnpack::Buffer<uint8_t> output(
         (pre_padding() + input_channels() + post_padding()) +
         (rows() - 1) * output_stride());

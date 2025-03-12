@@ -21,9 +21,7 @@ class ReduceNormalizationTester {
     return *this;
   }
 
-  const std::vector<size_t>& axes() const {
-    return this->axes_;
-  }
+  const std::vector<size_t>& axes() const { return this->axes_; }
 
   ReduceNormalizationTester& shape(const std::vector<size_t>& shape) {
     assert(shape.size() <= XNN_MAX_TENSOR_DIMS);
@@ -31,11 +29,10 @@ class ReduceNormalizationTester {
     return *this;
   }
 
-  const std::vector<size_t>& shape() const {
-    return this->shape_;
-  }
+  const std::vector<size_t>& shape() const { return this->shape_; }
 
-  ReduceNormalizationTester& expected_axes(const std::vector<size_t>& expected_axes) {
+  ReduceNormalizationTester& expected_axes(
+      const std::vector<size_t>& expected_axes) {
     assert(expected_axes.size() <= XNN_MAX_TENSOR_DIMS);
     this->expected_axes_ = expected_axes;
     return *this;
@@ -45,7 +42,8 @@ class ReduceNormalizationTester {
     return this->expected_axes_;
   }
 
-  ReduceNormalizationTester& expected_shape(const std::vector<size_t>& expected_shape) {
+  ReduceNormalizationTester& expected_shape(
+      const std::vector<size_t>& expected_shape) {
     assert(expected_shape.size() <= XNN_MAX_TENSOR_DIMS);
     this->expected_shape_ = expected_shape;
     return *this;
@@ -61,11 +59,8 @@ class ReduceNormalizationTester {
     std::vector<size_t> reduction_axes{axes()};
     size_t num_reduction_axes = reduction_axes.size();
 
-    xnn_normalize_reduction(
-      &num_reduction_axes,
-      reduction_axes.data(),
-      &num_input_dims,
-      input_dims.data());
+    xnn_normalize_reduction(&num_reduction_axes, reduction_axes.data(),
+                            &num_input_dims, input_dims.data());
 
     ASSERT_EQ(num_reduction_axes, expected_axes().size());
     for (size_t i = 0; i < num_reduction_axes; i++) {

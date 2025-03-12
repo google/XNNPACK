@@ -43,7 +43,8 @@ class VBinaryMicrokernelTester {
   };
 
   template <typename A, typename B, typename Result>
-  void reference_op_impl(const A* a, const B* b, Result* result, size_t n, OpType op_type) const {
+  void reference_op_impl(const A* a, const B* b, Result* result, size_t n,
+                         OpType op_type) const {
     size_t stride_b = broadcast_b() ? 0 : 1;
     for (size_t i = 0; i < n; ++i) {
       switch (op_type) {
@@ -71,20 +72,26 @@ class VBinaryMicrokernelTester {
         case OpType::Mul:
           if (std::is_integral<A>::value && std::is_integral<B>::value) {
             // Overflow is the expected behavior.
-            int64_t result_wide = static_cast<int64_t>(a[i]) * static_cast<int64_t>(b[i * stride_b]);
-            result[i] = result_wide & ((static_cast<int64_t>(1) << (sizeof(Result) * 8)) - 1);
+            int64_t result_wide = static_cast<int64_t>(a[i]) *
+                                  static_cast<int64_t>(b[i * stride_b]);
+            result[i] = result_wide &
+                        ((static_cast<int64_t>(1) << (sizeof(Result) * 8)) - 1);
           } else {
             result[i] = a[i] * b[i * stride_b];
           }
           break;
         case OpType::Prelu:
-          result[i] = a[i] < 0 ? static_cast<Result>(a[i] * b[i * stride_b]) : static_cast<Result>(a[i]);
+          result[i] = a[i] < 0 ? static_cast<Result>(a[i] * b[i * stride_b])
+                               : static_cast<Result>(a[i]);
           break;
         case OpType::RPrelu:
-          result[i] = b[i * stride_b] < 0 ? static_cast<Result>(a[i] * b[i * stride_b]) : static_cast<Result>(b[i * stride_b]);
+          result[i] = b[i * stride_b] < 0
+                          ? static_cast<Result>(a[i] * b[i * stride_b])
+                          : static_cast<Result>(b[i * stride_b]);
           break;
         case OpType::SqrDiff: {
-          const double diff = static_cast<double>(a[i]) - static_cast<double>(b[i * stride_b]);
+          const double diff =
+              static_cast<double>(a[i]) - static_cast<double>(b[i * stride_b]);
           result[i] = diff * diff;
           break;
         }
@@ -236,7 +243,7 @@ class VBinaryMicrokernelTester {
     TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                     \
     const size_t batch_scale = get_batch_scale<datatype>();                   \
     VBinaryMicrokernelTester()                                                \
-        .batch_size(batch_tile* batch_scale)                                  \
+        .batch_size(batch_tile * batch_scale)                                 \
         .broadcast_b(is_binaryc)                                              \
         .Test(__VA_ARGS__);                                                   \
   }

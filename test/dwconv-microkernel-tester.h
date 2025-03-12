@@ -17,13 +17,13 @@
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microkernel-utils.h"
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/requantization.h"
-#include "src/xnnpack/buffer.h"
 
 class DWConvMicrokernelTester {
  public:
@@ -196,7 +196,8 @@ class DWConvMicrokernelTester {
   void Test(xnn_f16_dwconv_minmax_ukernel_fn dwconv_minmax,
             xnn_init_f16_minmax_params_fn init_params) const;
 
-  void Test(xnn_f32_dwconv_unipass_ukernel_fn dwconv, const void* = nullptr) const;
+  void Test(xnn_f32_dwconv_unipass_ukernel_fn dwconv,
+            const void* = nullptr) const;
 
   void Test(xnn_f32_dwconv_minmax_ukernel_fn dwconv_minmax,
             xnn_init_f32_minmax_params_fn init_params) const;
@@ -234,9 +235,10 @@ struct LoopParams {
 };
 
 struct DWConvTestParams {
-  DWConvTestParams(std::string test_name, DWConvMicrokernelTester tester,
-                 std::function<void(DWConvMicrokernelTester& tester)> test_func,
-                 std::function<void(void)> isa_check = nullptr)
+  DWConvTestParams(
+      std::string test_name, DWConvMicrokernelTester tester,
+      std::function<void(DWConvMicrokernelTester& tester)> test_func,
+      std::function<void(void)> isa_check = nullptr)
       : test_name(test_name),
         tester(tester),
         test_func(test_func),

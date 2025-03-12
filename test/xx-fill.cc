@@ -18,11 +18,11 @@
 #include <vector>
 
 #include <gtest/gtest.h>
+#include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/fill.h"
 #include "src/xnnpack/isa-checks.h"
 #include "src/xnnpack/microfnptr.h"
-#include "src/xnnpack/buffer.h"
 #include "test/replicable_random_device.h"
 
 class FillMicrokernelTester {
@@ -73,7 +73,8 @@ class FillMicrokernelTester {
           0, std::numeric_limits<uint8_t>::max())(rng);
     };
 
-    xnnpack::Buffer<uint8_t> output((rows() - 1) * output_stride() + channels());
+    xnnpack::Buffer<uint8_t> output((rows() - 1) * output_stride() +
+                                    channels());
     xnnpack::Buffer<uint8_t> output_copy(output.size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       xnnpack::fill_uniform_random_bits(output.data(), output.size(), rng);

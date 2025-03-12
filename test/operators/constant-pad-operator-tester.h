@@ -26,64 +26,55 @@
 
 class ConstantPadOperatorTester {
  public:
-  ConstantPadOperatorTester& input_shape(std::initializer_list<size_t> input_shape) {
+  ConstantPadOperatorTester& input_shape(
+      std::initializer_list<size_t> input_shape) {
     assert(input_shape.size() <= XNN_MAX_TENSOR_DIMS);
     input_shape_ = std::vector<size_t>(input_shape);
     return *this;
   }
 
-  const std::vector<size_t>& input_shape() const {
-    return input_shape_;
-  }
+  const std::vector<size_t>& input_shape() const { return input_shape_; }
 
   size_t input_dim(size_t i) const {
     return i < input_shape_.size() ? input_shape_[i] : 1;
   }
 
-  size_t num_dims() const {
-    return input_shape_.size();
-  }
+  size_t num_dims() const { return input_shape_.size(); }
 
   size_t num_input_elements() const {
-    return std::accumulate(
-      input_shape_.cbegin(), input_shape_.cend(), size_t(1), std::multiplies<size_t>());
+    return std::accumulate(input_shape_.cbegin(), input_shape_.cend(),
+                           size_t(1), std::multiplies<size_t>());
   }
 
-  ConstantPadOperatorTester& pre_paddings(std::initializer_list<size_t> pre_paddings) {
+  ConstantPadOperatorTester& pre_paddings(
+      std::initializer_list<size_t> pre_paddings) {
     assert(pre_paddings.size() <= XNN_MAX_TENSOR_DIMS);
     pre_paddings_ = std::vector<size_t>(pre_paddings);
     return *this;
   }
 
-  const std::vector<size_t>& pre_paddings() const {
-    return pre_paddings_;
-  }
+  const std::vector<size_t>& pre_paddings() const { return pre_paddings_; }
 
   size_t pre_padding(size_t i) const {
     return i < pre_paddings_.size() ? pre_paddings_[i] : 0;
   }
 
-  size_t num_pre_paddings() const {
-    return pre_paddings_.size();
-  }
+  size_t num_pre_paddings() const { return pre_paddings_.size(); }
 
-  ConstantPadOperatorTester& post_paddings(std::initializer_list<size_t> post_paddings) {
+  ConstantPadOperatorTester& post_paddings(
+      std::initializer_list<size_t> post_paddings) {
     assert(post_paddings.size() <= XNN_MAX_TENSOR_DIMS);
     post_paddings_ = std::vector<size_t>(post_paddings);
     return *this;
   }
 
-  const std::vector<size_t>& post_paddings() const {
-    return post_paddings_;
-  }
+  const std::vector<size_t>& post_paddings() const { return post_paddings_; }
 
   size_t post_padding(size_t i) const {
     return i < post_paddings_.size() ? post_paddings_[i] : 0;
   }
 
-  size_t num_post_paddings() const {
-    return post_paddings_.size();
-  }
+  size_t num_post_paddings() const { return post_paddings_.size(); }
 
   size_t output_dim(size_t i) const {
     return pre_padding(i) + input_dim(i) + post_padding(i);
@@ -102,9 +93,7 @@ class ConstantPadOperatorTester {
     return *this;
   }
 
-  size_t iterations() const {
-    return this->iterations_;
-  }
+  size_t iterations() const { return this->iterations_; }
 
   void TestX8() const {
     ASSERT_EQ(num_dims(), num_pre_paddings());
@@ -112,7 +101,8 @@ class ConstantPadOperatorTester {
 
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> u8dist(
-      std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
+        std::numeric_limits<uint8_t>::min(),
+        std::numeric_limits<uint8_t>::max());
 
     // Compute generalized shapes.
     std::array<size_t, XNN_MAX_TENSOR_DIMS> input_dims;
@@ -126,7 +116,8 @@ class ConstantPadOperatorTester {
     for (size_t i = 0; i < num_dims(); i++) {
       input_dims[XNN_MAX_TENSOR_DIMS - num_dims() + i] = input_dim(i);
       input_pre_paddings[XNN_MAX_TENSOR_DIMS - num_dims() + i] = pre_padding(i);
-      input_post_paddings[XNN_MAX_TENSOR_DIMS - num_dims() + i] = post_padding(i);
+      input_post_paddings[XNN_MAX_TENSOR_DIMS - num_dims() + i] =
+          post_padding(i);
       output_dims[XNN_MAX_TENSOR_DIMS - num_dims() + i] = output_dim(i);
     }
 
@@ -141,7 +132,8 @@ class ConstantPadOperatorTester {
       output_stride *= output_dims[i - 1];
     }
 
-    xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + num_input_elements());
+    xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
+                                   num_input_elements());
     xnnpack::Buffer<uint8_t> output(num_output_elements());
     xnnpack::Buffer<uint8_t> output_ref(num_output_elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -157,15 +149,16 @@ class ConstantPadOperatorTester {
               for (size_t m = 0; m < input_dims[4]; m++) {
                 for (size_t n = 0; n < input_dims[5]; n++) {
                   const size_t output_index =
-                    (i + input_pre_paddings[0]) * output_strides[0] +
-                    (j + input_pre_paddings[1]) * output_strides[1] +
-                    (k + input_pre_paddings[2]) * output_strides[2] +
-                    (l + input_pre_paddings[3]) * output_strides[3] +
-                    (m + input_pre_paddings[4]) * output_strides[4] +
-                    (n + input_pre_paddings[5]) * output_strides[5];
+                      (i + input_pre_paddings[0]) * output_strides[0] +
+                      (j + input_pre_paddings[1]) * output_strides[1] +
+                      (k + input_pre_paddings[2]) * output_strides[2] +
+                      (l + input_pre_paddings[3]) * output_strides[3] +
+                      (m + input_pre_paddings[4]) * output_strides[4] +
+                      (n + input_pre_paddings[5]) * output_strides[5];
                   const size_t input_index =
-                    i * input_strides[0] + j * input_strides[1] + k * input_strides[2] +
-                    l * input_strides[3] + m * input_strides[4] + n * input_strides[5];
+                      i * input_strides[0] + j * input_strides[1] +
+                      k * input_strides[2] + l * input_strides[3] +
+                      m * input_strides[4] + n * input_strides[5];
                   output_ref[output_index] = input[input_index];
                 }
               }
@@ -179,27 +172,24 @@ class ConstantPadOperatorTester {
       xnn_operator_t pad_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
-        xnn_create_constant_pad_nd_x8(
-          &padding_value, 0, &pad_op));
+                xnn_create_constant_pad_nd_x8(&padding_value, 0, &pad_op));
       ASSERT_NE(nullptr, pad_op);
 
       // Smart pointer to automatically delete pad_op.
-      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_pad_op(pad_op, xnn_delete_operator);
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_pad_op(
+          pad_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_reshape_constant_pad_nd_x8(
-          pad_op,
-          num_dims(),
-          input_shape().data(), pre_paddings().data(), post_paddings().data(),
-          /*threadpool=*/nullptr));
+                xnn_reshape_constant_pad_nd_x8(
+                    pad_op, num_dims(), input_shape().data(),
+                    pre_paddings().data(), post_paddings().data(),
+                    /*threadpool=*/nullptr));
+
+      ASSERT_EQ(xnn_status_success, xnn_setup_constant_pad_nd_x8(
+                                        pad_op, input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_constant_pad_nd_x8(
-          pad_op,
-          input.data(), output.data()));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(pad_op, /*threadpool=*/nullptr));
+                xnn_run_operator(pad_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < output_dims[0]; i++) {
@@ -209,12 +199,13 @@ class ConstantPadOperatorTester {
               for (size_t m = 0; m < output_dims[4]; m++) {
                 for (size_t n = 0; n < output_dims[5]; n++) {
                   const size_t index =
-                    i * output_strides[0] + j * output_strides[1] + k * output_strides[2] +
-                    l * output_strides[3] + m * output_strides[4] + n * output_strides[5];
+                      i * output_strides[0] + j * output_strides[1] +
+                      k * output_strides[2] + l * output_strides[3] +
+                      m * output_strides[4] + n * output_strides[5];
                   EXPECT_EQ(output[index], output_ref[index])
-                    << "(i, j, k, l, m, n) = ("
-                    << i << ", " << j << ", " << k << ", " << l << ", " << m << ", " << n << ")"
-                    << ", padding value = " << padding_value;
+                      << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k
+                      << ", " << l << ", " << m << ", " << n << ")"
+                      << ", padding value = " << padding_value;
                 }
               }
             }
@@ -230,7 +221,8 @@ class ConstantPadOperatorTester {
 
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> u8dist(
-      std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
+        std::numeric_limits<uint8_t>::min(),
+        std::numeric_limits<uint8_t>::max());
 
     // Compute generalized shapes.
     std::array<size_t, XNN_MAX_TENSOR_DIMS> input_dims;
@@ -244,7 +236,8 @@ class ConstantPadOperatorTester {
     for (size_t i = 0; i < num_dims(); i++) {
       input_dims[XNN_MAX_TENSOR_DIMS - num_dims() + i] = input_dim(i);
       input_pre_paddings[XNN_MAX_TENSOR_DIMS - num_dims() + i] = pre_padding(i);
-      input_post_paddings[XNN_MAX_TENSOR_DIMS - num_dims() + i] = post_padding(i);
+      input_post_paddings[XNN_MAX_TENSOR_DIMS - num_dims() + i] =
+          post_padding(i);
       output_dims[XNN_MAX_TENSOR_DIMS - num_dims() + i] = output_dim(i);
     }
 
@@ -259,7 +252,8 @@ class ConstantPadOperatorTester {
       output_stride *= output_dims[i - 1];
     }
 
-    xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + num_input_elements());
+    xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
+                                   num_input_elements());
     xnnpack::Buffer<uint8_t> output(num_output_elements());
     xnnpack::Buffer<uint8_t> output_ref(num_output_elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -275,15 +269,16 @@ class ConstantPadOperatorTester {
               for (size_t m = 0; m < input_dims[4]; m++) {
                 for (size_t n = 0; n < input_dims[5]; n++) {
                   const size_t output_index =
-                    (i + input_pre_paddings[0]) * output_strides[0] +
-                    (j + input_pre_paddings[1]) * output_strides[1] +
-                    (k + input_pre_paddings[2]) * output_strides[2] +
-                    (l + input_pre_paddings[3]) * output_strides[3] +
-                    (m + input_pre_paddings[4]) * output_strides[4] +
-                    (n + input_pre_paddings[5]) * output_strides[5];
+                      (i + input_pre_paddings[0]) * output_strides[0] +
+                      (j + input_pre_paddings[1]) * output_strides[1] +
+                      (k + input_pre_paddings[2]) * output_strides[2] +
+                      (l + input_pre_paddings[3]) * output_strides[3] +
+                      (m + input_pre_paddings[4]) * output_strides[4] +
+                      (n + input_pre_paddings[5]) * output_strides[5];
                   const size_t input_index =
-                    i * input_strides[0] + j * input_strides[1] + k * input_strides[2] +
-                    l * input_strides[3] + m * input_strides[4] + n * input_strides[5];
+                      i * input_strides[0] + j * input_strides[1] +
+                      k * input_strides[2] + l * input_strides[3] +
+                      m * input_strides[4] + n * input_strides[5];
                   output_ref[output_index] = input[input_index];
                 }
               }
@@ -293,13 +288,11 @@ class ConstantPadOperatorTester {
       }
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_constant_pad_nd_x8(
-          0 /* flags */,
-          num_dims(),
-          input_shape().data(), pre_paddings().data(), post_paddings().data(),
-          input.data(), output.data(),
-          &padding_value,
-          /*threadpool=*/nullptr));
+                xnn_run_constant_pad_nd_x8(
+                    0 /* flags */, num_dims(), input_shape().data(),
+                    pre_paddings().data(), post_paddings().data(), input.data(),
+                    output.data(), &padding_value,
+                    /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < output_dims[0]; i++) {
@@ -309,12 +302,13 @@ class ConstantPadOperatorTester {
               for (size_t m = 0; m < output_dims[4]; m++) {
                 for (size_t n = 0; n < output_dims[5]; n++) {
                   const size_t index =
-                    i * output_strides[0] + j * output_strides[1] + k * output_strides[2] +
-                    l * output_strides[3] + m * output_strides[4] + n * output_strides[5];
+                      i * output_strides[0] + j * output_strides[1] +
+                      k * output_strides[2] + l * output_strides[3] +
+                      m * output_strides[4] + n * output_strides[5];
                   EXPECT_EQ(output[index], output_ref[index])
-                    << "(i, j, k, l, m, n) = ("
-                    << i << ", " << j << ", " << k << ", " << l << ", " << m << ", " << n << ")"
-                    << ", padding value = " << padding_value;
+                      << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k
+                      << ", " << l << ", " << m << ", " << n << ")"
+                      << ", padding value = " << padding_value;
                 }
               }
             }
@@ -343,7 +337,8 @@ class ConstantPadOperatorTester {
     for (size_t i = 0; i < num_dims(); i++) {
       input_dims[XNN_MAX_TENSOR_DIMS - num_dims() + i] = input_dim(i);
       input_pre_paddings[XNN_MAX_TENSOR_DIMS - num_dims() + i] = pre_padding(i);
-      input_post_paddings[XNN_MAX_TENSOR_DIMS - num_dims() + i] = post_padding(i);
+      input_post_paddings[XNN_MAX_TENSOR_DIMS - num_dims() + i] =
+          post_padding(i);
       output_dims[XNN_MAX_TENSOR_DIMS - num_dims() + i] = output_dim(i);
     }
 
@@ -358,7 +353,8 @@ class ConstantPadOperatorTester {
       output_stride *= output_dims[i - 1];
     }
 
-    xnnpack::Buffer<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) + num_input_elements());
+    xnnpack::Buffer<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
+                                    num_input_elements());
     xnnpack::Buffer<uint16_t> output(num_output_elements());
     xnnpack::Buffer<uint16_t> output_ref(num_output_elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -374,15 +370,16 @@ class ConstantPadOperatorTester {
               for (size_t m = 0; m < input_dims[4]; m++) {
                 for (size_t n = 0; n < input_dims[5]; n++) {
                   const size_t output_index =
-                    (i + input_pre_paddings[0]) * output_strides[0] +
-                    (j + input_pre_paddings[1]) * output_strides[1] +
-                    (k + input_pre_paddings[2]) * output_strides[2] +
-                    (l + input_pre_paddings[3]) * output_strides[3] +
-                    (m + input_pre_paddings[4]) * output_strides[4] +
-                    (n + input_pre_paddings[5]) * output_strides[5];
+                      (i + input_pre_paddings[0]) * output_strides[0] +
+                      (j + input_pre_paddings[1]) * output_strides[1] +
+                      (k + input_pre_paddings[2]) * output_strides[2] +
+                      (l + input_pre_paddings[3]) * output_strides[3] +
+                      (m + input_pre_paddings[4]) * output_strides[4] +
+                      (n + input_pre_paddings[5]) * output_strides[5];
                   const size_t input_index =
-                    i * input_strides[0] + j * input_strides[1] + k * input_strides[2] +
-                    l * input_strides[3] + m * input_strides[4] + n * input_strides[5];
+                      i * input_strides[0] + j * input_strides[1] +
+                      k * input_strides[2] + l * input_strides[3] +
+                      m * input_strides[4] + n * input_strides[5];
                   output_ref[output_index] = input[input_index];
                 }
               }
@@ -396,27 +393,24 @@ class ConstantPadOperatorTester {
       xnn_operator_t pad_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
-        xnn_create_constant_pad_nd_x16(
-          &padding_value, 0, &pad_op));
+                xnn_create_constant_pad_nd_x16(&padding_value, 0, &pad_op));
       ASSERT_NE(nullptr, pad_op);
 
       // Smart pointer to automatically delete pad_op.
-      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_pad_op(pad_op, xnn_delete_operator);
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_pad_op(
+          pad_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_reshape_constant_pad_nd_x16(
-          pad_op,
-          num_dims(),
-          input_shape().data(), pre_paddings().data(), post_paddings().data(),
-          /*threadpool=*/nullptr));
+                xnn_reshape_constant_pad_nd_x16(
+                    pad_op, num_dims(), input_shape().data(),
+                    pre_paddings().data(), post_paddings().data(),
+                    /*threadpool=*/nullptr));
+
+      ASSERT_EQ(xnn_status_success, xnn_setup_constant_pad_nd_x16(
+                                        pad_op, input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_constant_pad_nd_x16(
-          pad_op,
-          input.data(), output.data()));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(pad_op, /*threadpool=*/nullptr));
+                xnn_run_operator(pad_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < output_dims[0]; i++) {
@@ -426,12 +420,13 @@ class ConstantPadOperatorTester {
               for (size_t m = 0; m < output_dims[4]; m++) {
                 for (size_t n = 0; n < output_dims[5]; n++) {
                   const size_t index =
-                    i * output_strides[0] + j * output_strides[1] + k * output_strides[2] +
-                    l * output_strides[3] + m * output_strides[4] + n * output_strides[5];
+                      i * output_strides[0] + j * output_strides[1] +
+                      k * output_strides[2] + l * output_strides[3] +
+                      m * output_strides[4] + n * output_strides[5];
                   EXPECT_EQ(output[index], output_ref[index])
-                    << "(i, j, k, l, m, n) = ("
-                    << i << ", " << j << ", " << k << ", " << l << ", " << m << ", " << n << ")"
-                    << ", padding value = " << padding_value;
+                      << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k
+                      << ", " << l << ", " << m << ", " << n << ")"
+                      << ", padding value = " << padding_value;
                 }
               }
             }
@@ -460,7 +455,8 @@ class ConstantPadOperatorTester {
     for (size_t i = 0; i < num_dims(); i++) {
       input_dims[XNN_MAX_TENSOR_DIMS - num_dims() + i] = input_dim(i);
       input_pre_paddings[XNN_MAX_TENSOR_DIMS - num_dims() + i] = pre_padding(i);
-      input_post_paddings[XNN_MAX_TENSOR_DIMS - num_dims() + i] = post_padding(i);
+      input_post_paddings[XNN_MAX_TENSOR_DIMS - num_dims() + i] =
+          post_padding(i);
       output_dims[XNN_MAX_TENSOR_DIMS - num_dims() + i] = output_dim(i);
     }
 
@@ -475,7 +471,8 @@ class ConstantPadOperatorTester {
       output_stride *= output_dims[i - 1];
     }
 
-    xnnpack::Buffer<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) + num_input_elements());
+    xnnpack::Buffer<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
+                                    num_input_elements());
     xnnpack::Buffer<uint16_t> output(num_output_elements());
     xnnpack::Buffer<uint16_t> output_ref(num_output_elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -491,15 +488,16 @@ class ConstantPadOperatorTester {
               for (size_t m = 0; m < input_dims[4]; m++) {
                 for (size_t n = 0; n < input_dims[5]; n++) {
                   const size_t output_index =
-                    (i + input_pre_paddings[0]) * output_strides[0] +
-                    (j + input_pre_paddings[1]) * output_strides[1] +
-                    (k + input_pre_paddings[2]) * output_strides[2] +
-                    (l + input_pre_paddings[3]) * output_strides[3] +
-                    (m + input_pre_paddings[4]) * output_strides[4] +
-                    (n + input_pre_paddings[5]) * output_strides[5];
+                      (i + input_pre_paddings[0]) * output_strides[0] +
+                      (j + input_pre_paddings[1]) * output_strides[1] +
+                      (k + input_pre_paddings[2]) * output_strides[2] +
+                      (l + input_pre_paddings[3]) * output_strides[3] +
+                      (m + input_pre_paddings[4]) * output_strides[4] +
+                      (n + input_pre_paddings[5]) * output_strides[5];
                   const size_t input_index =
-                    i * input_strides[0] + j * input_strides[1] + k * input_strides[2] +
-                    l * input_strides[3] + m * input_strides[4] + n * input_strides[5];
+                      i * input_strides[0] + j * input_strides[1] +
+                      k * input_strides[2] + l * input_strides[3] +
+                      m * input_strides[4] + n * input_strides[5];
                   output_ref[output_index] = input[input_index];
                 }
               }
@@ -509,13 +507,11 @@ class ConstantPadOperatorTester {
       }
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_constant_pad_nd_x16(
-          0 /* flags */,
-          num_dims(),
-          input_shape().data(), pre_paddings().data(), post_paddings().data(),
-          input.data(), output.data(),
-          &padding_value,
-          /*threadpool=*/nullptr));
+                xnn_run_constant_pad_nd_x16(
+                    0 /* flags */, num_dims(), input_shape().data(),
+                    pre_paddings().data(), post_paddings().data(), input.data(),
+                    output.data(), &padding_value,
+                    /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < output_dims[0]; i++) {
@@ -525,12 +521,13 @@ class ConstantPadOperatorTester {
               for (size_t m = 0; m < output_dims[4]; m++) {
                 for (size_t n = 0; n < output_dims[5]; n++) {
                   const size_t index =
-                    i * output_strides[0] + j * output_strides[1] + k * output_strides[2] +
-                    l * output_strides[3] + m * output_strides[4] + n * output_strides[5];
+                      i * output_strides[0] + j * output_strides[1] +
+                      k * output_strides[2] + l * output_strides[3] +
+                      m * output_strides[4] + n * output_strides[5];
                   EXPECT_EQ(output[index], output_ref[index])
-                    << "(i, j, k, l, m, n) = ("
-                    << i << ", " << j << ", " << k << ", " << l << ", " << m << ", " << n << ")"
-                    << ", padding value = " << padding_value;
+                      << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k
+                      << ", " << l << ", " << m << ", " << n << ")"
+                      << ", padding value = " << padding_value;
                 }
               }
             }
@@ -559,7 +556,8 @@ class ConstantPadOperatorTester {
     for (size_t i = 0; i < num_dims(); i++) {
       input_dims[XNN_MAX_TENSOR_DIMS - num_dims() + i] = input_dim(i);
       input_pre_paddings[XNN_MAX_TENSOR_DIMS - num_dims() + i] = pre_padding(i);
-      input_post_paddings[XNN_MAX_TENSOR_DIMS - num_dims() + i] = post_padding(i);
+      input_post_paddings[XNN_MAX_TENSOR_DIMS - num_dims() + i] =
+          post_padding(i);
       output_dims[XNN_MAX_TENSOR_DIMS - num_dims() + i] = output_dim(i);
     }
 
@@ -574,7 +572,8 @@ class ConstantPadOperatorTester {
       output_stride *= output_dims[i - 1];
     }
 
-    xnnpack::Buffer<uint32_t> input(XNN_EXTRA_BYTES / sizeof(uint32_t) + num_input_elements());
+    xnnpack::Buffer<uint32_t> input(XNN_EXTRA_BYTES / sizeof(uint32_t) +
+                                    num_input_elements());
     xnnpack::Buffer<uint32_t> output(num_output_elements());
     xnnpack::Buffer<uint32_t> output_ref(num_output_elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -590,15 +589,16 @@ class ConstantPadOperatorTester {
               for (size_t m = 0; m < input_dims[4]; m++) {
                 for (size_t n = 0; n < input_dims[5]; n++) {
                   const size_t output_index =
-                    (i + input_pre_paddings[0]) * output_strides[0] +
-                    (j + input_pre_paddings[1]) * output_strides[1] +
-                    (k + input_pre_paddings[2]) * output_strides[2] +
-                    (l + input_pre_paddings[3]) * output_strides[3] +
-                    (m + input_pre_paddings[4]) * output_strides[4] +
-                    (n + input_pre_paddings[5]) * output_strides[5];
+                      (i + input_pre_paddings[0]) * output_strides[0] +
+                      (j + input_pre_paddings[1]) * output_strides[1] +
+                      (k + input_pre_paddings[2]) * output_strides[2] +
+                      (l + input_pre_paddings[3]) * output_strides[3] +
+                      (m + input_pre_paddings[4]) * output_strides[4] +
+                      (n + input_pre_paddings[5]) * output_strides[5];
                   const size_t input_index =
-                    i * input_strides[0] + j * input_strides[1] + k * input_strides[2] +
-                    l * input_strides[3] + m * input_strides[4] + n * input_strides[5];
+                      i * input_strides[0] + j * input_strides[1] +
+                      k * input_strides[2] + l * input_strides[3] +
+                      m * input_strides[4] + n * input_strides[5];
                   output_ref[output_index] = input[input_index];
                 }
               }
@@ -612,27 +612,24 @@ class ConstantPadOperatorTester {
       xnn_operator_t pad_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
-        xnn_create_constant_pad_nd_x32(
-          &padding_value, 0, &pad_op));
+                xnn_create_constant_pad_nd_x32(&padding_value, 0, &pad_op));
       ASSERT_NE(nullptr, pad_op);
 
       // Smart pointer to automatically delete pad_op.
-      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_pad_op(pad_op, xnn_delete_operator);
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_pad_op(
+          pad_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_reshape_constant_pad_nd_x32(
-          pad_op,
-          num_dims(),
-          input_shape().data(), pre_paddings().data(), post_paddings().data(),
-          /*threadpool=*/nullptr));
+                xnn_reshape_constant_pad_nd_x32(
+                    pad_op, num_dims(), input_shape().data(),
+                    pre_paddings().data(), post_paddings().data(),
+                    /*threadpool=*/nullptr));
+
+      ASSERT_EQ(xnn_status_success, xnn_setup_constant_pad_nd_x32(
+                                        pad_op, input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_constant_pad_nd_x32(
-          pad_op,
-          input.data(), output.data()));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(pad_op, /*threadpool=*/nullptr));
+                xnn_run_operator(pad_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < output_dims[0]; i++) {
@@ -642,12 +639,13 @@ class ConstantPadOperatorTester {
               for (size_t m = 0; m < output_dims[4]; m++) {
                 for (size_t n = 0; n < output_dims[5]; n++) {
                   const size_t index =
-                    i * output_strides[0] + j * output_strides[1] + k * output_strides[2] +
-                    l * output_strides[3] + m * output_strides[4] + n * output_strides[5];
+                      i * output_strides[0] + j * output_strides[1] +
+                      k * output_strides[2] + l * output_strides[3] +
+                      m * output_strides[4] + n * output_strides[5];
                   EXPECT_EQ(output[index], output_ref[index])
-                    << "(i, j, k, l, m, n) = ("
-                    << i << ", " << j << ", " << k << ", " << l << ", " << m << ", " << n << ")"
-                    << ", padding value = " << padding_value;
+                      << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k
+                      << ", " << l << ", " << m << ", " << n << ")"
+                      << ", padding value = " << padding_value;
                 }
               }
             }
@@ -676,7 +674,8 @@ class ConstantPadOperatorTester {
     for (size_t i = 0; i < num_dims(); i++) {
       input_dims[XNN_MAX_TENSOR_DIMS - num_dims() + i] = input_dim(i);
       input_pre_paddings[XNN_MAX_TENSOR_DIMS - num_dims() + i] = pre_padding(i);
-      input_post_paddings[XNN_MAX_TENSOR_DIMS - num_dims() + i] = post_padding(i);
+      input_post_paddings[XNN_MAX_TENSOR_DIMS - num_dims() + i] =
+          post_padding(i);
       output_dims[XNN_MAX_TENSOR_DIMS - num_dims() + i] = output_dim(i);
     }
 
@@ -691,7 +690,8 @@ class ConstantPadOperatorTester {
       output_stride *= output_dims[i - 1];
     }
 
-    xnnpack::Buffer<uint32_t> input(XNN_EXTRA_BYTES / sizeof(uint32_t) + num_input_elements());
+    xnnpack::Buffer<uint32_t> input(XNN_EXTRA_BYTES / sizeof(uint32_t) +
+                                    num_input_elements());
     xnnpack::Buffer<uint32_t> output(num_output_elements());
     xnnpack::Buffer<uint32_t> output_ref(num_output_elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -707,15 +707,16 @@ class ConstantPadOperatorTester {
               for (size_t m = 0; m < input_dims[4]; m++) {
                 for (size_t n = 0; n < input_dims[5]; n++) {
                   const size_t output_index =
-                    (i + input_pre_paddings[0]) * output_strides[0] +
-                    (j + input_pre_paddings[1]) * output_strides[1] +
-                    (k + input_pre_paddings[2]) * output_strides[2] +
-                    (l + input_pre_paddings[3]) * output_strides[3] +
-                    (m + input_pre_paddings[4]) * output_strides[4] +
-                    (n + input_pre_paddings[5]) * output_strides[5];
+                      (i + input_pre_paddings[0]) * output_strides[0] +
+                      (j + input_pre_paddings[1]) * output_strides[1] +
+                      (k + input_pre_paddings[2]) * output_strides[2] +
+                      (l + input_pre_paddings[3]) * output_strides[3] +
+                      (m + input_pre_paddings[4]) * output_strides[4] +
+                      (n + input_pre_paddings[5]) * output_strides[5];
                   const size_t input_index =
-                    i * input_strides[0] + j * input_strides[1] + k * input_strides[2] +
-                    l * input_strides[3] + m * input_strides[4] + n * input_strides[5];
+                      i * input_strides[0] + j * input_strides[1] +
+                      k * input_strides[2] + l * input_strides[3] +
+                      m * input_strides[4] + n * input_strides[5];
                   output_ref[output_index] = input[input_index];
                 }
               }
@@ -725,13 +726,11 @@ class ConstantPadOperatorTester {
       }
 
       ASSERT_EQ(xnn_status_success,
-        xnn_run_constant_pad_nd_x32(
-          0 /* flags */,
-          num_dims(),
-          input_shape().data(), pre_paddings().data(), post_paddings().data(),
-          input.data(), output.data(),
-          &padding_value,
-          /*threadpool=*/nullptr));
+                xnn_run_constant_pad_nd_x32(
+                    0 /* flags */, num_dims(), input_shape().data(),
+                    pre_paddings().data(), post_paddings().data(), input.data(),
+                    output.data(), &padding_value,
+                    /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < output_dims[0]; i++) {
@@ -741,12 +740,13 @@ class ConstantPadOperatorTester {
               for (size_t m = 0; m < output_dims[4]; m++) {
                 for (size_t n = 0; n < output_dims[5]; n++) {
                   const size_t index =
-                    i * output_strides[0] + j * output_strides[1] + k * output_strides[2] +
-                    l * output_strides[3] + m * output_strides[4] + n * output_strides[5];
+                      i * output_strides[0] + j * output_strides[1] +
+                      k * output_strides[2] + l * output_strides[3] +
+                      m * output_strides[4] + n * output_strides[5];
                   EXPECT_EQ(output[index], output_ref[index])
-                    << "(i, j, k, l, m, n) = ("
-                    << i << ", " << j << ", " << k << ", " << l << ", " << m << ", " << n << ")"
-                    << ", padding value = " << padding_value;
+                      << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k
+                      << ", " << l << ", " << m << ", " << n << ")"
+                      << ", padding value = " << padding_value;
                 }
               }
             }

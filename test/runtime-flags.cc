@@ -26,5 +26,4 @@ uint32_t xnn_test_runtime_flags() {
   return 0;
 #endif
 }
-
 }

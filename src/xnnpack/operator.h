@@ -122,7 +122,8 @@ struct xnn_ukernel {
 // - xnn_run_state_invalid -> xnn_run_state_ready
 // - xnn_run_state_invalid -> xnn_run_state_needs_setup -> xnn_run_state_ready
 enum xnn_run_state {
-  // When an operator is first created, it starts off in invalid state, it needs to be setup, or reshape + setup.
+  // When an operator is first created, it starts off in invalid state, it needs
+  // to be setup, or reshape + setup.
   xnn_run_state_invalid = 0,
   // Operator is ready to be run.
   xnn_run_state_ready,
@@ -169,16 +170,20 @@ struct xnn_operator {
   union {
     // Pointer to allocated packed weights. Use this if weights_cache is NULL.
     void* pointer;
-    // Offset into the weights cache where the packed weights are. Only valid if weights_cache is not NULL.
+    // Offset into the weights cache where the packed weights are. Only valid if
+    // weights_cache is not NULL.
     size_t offset;
   } packed_weights;
   // Stride between each set of packed weights.
   size_t weights_stride;
-  // Total number of non-zero kernel elements when weights use sparse representation.
+  // Total number of non-zero kernel elements when weights use sparse
+  // representation.
   size_t num_nonzero_values;
-  // Total number of non-zero kernel blocks when weights use sparse representation.
+  // Total number of non-zero kernel blocks when weights use sparse
+  // representation.
   size_t num_nonzero_blocks;
-  // Total number of output channel blocks when weights use sparse representation.
+  // Total number of output channel blocks when weights use sparse
+  // representation.
   size_t num_output_channel_blocks;
   // Input channel corresponding to the first non-zero kernel element.
   size_t first_input_channel;
@@ -245,10 +250,12 @@ struct xnn_operator {
     struct xnn_s32_default_params s32_default;
     struct xnn_u8_minmax_params u8_minmax;
   } params;
-  // Second set of params. Operators like Dynamic Fully Connected only decides on the specific config to use during
-  // reshape, so it needs to keep two sets of params around. Configs can have different initialization functions.
-  // We also use this to store parameters to binary operators. For most such operators, this is a copy of params,
-  // but params need to be swapped for commutative ops with per-operand params.
+  // Second set of params. Operators like Dynamic Fully Connected only decides
+  // on the specific config to use during reshape, so it needs to keep two sets
+  // of params around. Configs can have different initialization functions. We
+  // also use this to store parameters to binary operators. For most such
+  // operators, this is a copy of params, but params need to be swapped for
+  // commutative ops with per-operand params.
   union {
     union xnn_binary_uparams binary;
     union xnn_unary_uparams unary;
@@ -287,7 +294,8 @@ struct xnn_operator {
         const struct xnn_lut32norm_config* lut32norm_config;
         // For F16 and F32.
         struct {
-          const struct xnn_raddstoreexpminusmax_config* raddstoreexpminusmax_config;
+          const struct xnn_raddstoreexpminusmax_config*
+              raddstoreexpminusmax_config;
           const struct xnn_binary_elementwise_config* vmul_config;
         };
       };
@@ -345,7 +353,8 @@ struct xnn_operator {
     } gemm;
     struct {
       struct igemm_context igemm;
-      struct conv2d_igemm_indirection_init_context conv2d_igemm_indirection_init;
+      struct conv2d_igemm_indirection_init_context
+          conv2d_igemm_indirection_init;
     } igemm;
     struct lut_contiguous_context lut_contiguous;
     struct lut_strided_context lut_strided;
@@ -354,7 +363,8 @@ struct xnn_operator {
     struct reduce_context reduce;
     struct {
       struct resize_bilinear_context resize_bilinear;
-      struct resize_bilinear_nhwc_indirection_init_context resize_nhwc_indirection_init;
+      struct resize_bilinear_nhwc_indirection_init_context
+          resize_nhwc_indirection_init;
     };
     struct resize_bilinear_chw_context resize_bilinear_chw;
     struct slice_context slice;
@@ -381,10 +391,8 @@ struct xnn_operator {
 };
 
 XNN_INTERNAL enum xnn_status xnn_run_operator_with_index(
-  xnn_operator_t op,
-  size_t opdata_index,
-  size_t operator_object_index,
-  pthreadpool_t threadpool);
+    xnn_operator_t op, size_t opdata_index, size_t operator_object_index,
+    pthreadpool_t threadpool);
 
 XNN_INTERNAL enum xnn_operator_type xnn_reduce_operator_to_operator_type(
     enum xnn_reduce_operator type);

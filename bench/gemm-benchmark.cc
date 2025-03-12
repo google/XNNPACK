@@ -57,7 +57,8 @@ void GEMMBenchmark(benchmark::State& state, xnn_qs8_gemm_minmax_ukernel_fn gemm,
   std::generate(b.begin(), b.end(), std::ref(i32rng));
 
   const size_t w_element_size = sizeof(int8_t);
-  const size_t w_size = nc_stride * sizeof(int32_t) + kc_stride * nc_stride * w_element_size;
+  const size_t w_size =
+      nc_stride * sizeof(int32_t) + kc_stride * nc_stride * w_element_size;
   const size_t c_elements = mc * nc;
   const size_t num_buffers = 1 + benchmark::utils::DivideRoundUp<size_t>(
                                      benchmark::utils::GetMaxCacheSize(),
@@ -143,7 +144,8 @@ void GEMMBenchmark(benchmark::State& state,
   std::generate(b.begin(), b.end(), std::ref(i32rng));
 
   const size_t w_element_size = sizeof(int8_t);
-  const size_t w_size = nc_stride * (sizeof(float) + sizeof(int32_t)) + kc_stride * nc_stride * w_element_size;
+  const size_t w_size = nc_stride * (sizeof(float) + sizeof(int32_t)) +
+                        kc_stride * nc_stride * w_element_size;
   const size_t c_elements = mc * nc;
   const size_t num_buffers = 1 + benchmark::utils::DivideRoundUp<size_t>(
                                      benchmark::utils::GetMaxCacheSize(),
@@ -400,9 +402,10 @@ void GEMMBenchmark(benchmark::State& state,
                          /* bias */ packed_n * sizeof(float);
 
   const size_t c_elements = mc * nc;
-  const size_t num_buffers = 1 + benchmark::utils::DivideRoundUp<size_t>(
-                                     benchmark::utils::GetMaxCacheSize(),
-                                     w_bytes + sizeof(xnn_bfloat16) * c_elements);
+  const size_t num_buffers =
+      1 + benchmark::utils::DivideRoundUp<size_t>(
+              benchmark::utils::GetMaxCacheSize(),
+              w_bytes + sizeof(xnn_bfloat16) * c_elements);
 
   xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> w(w_bytes * num_buffers);
 
@@ -415,9 +418,8 @@ void GEMMBenchmark(benchmark::State& state,
 
   // Prepare parameters.
   xnn_f16_qb4w_minmax_params params;
-  init_params(
-      &params, std::numeric_limits<int8_t>::min(),
-      std::numeric_limits<int8_t>::max(), 8, bl);
+  init_params(&params, std::numeric_limits<int8_t>::min(),
+              std::numeric_limits<int8_t>::max(), 8, bl);
 
   size_t buffer_index = 0;
   for (auto _ : state) {
@@ -495,8 +497,7 @@ void GEMMBenchmark(benchmark::State& state,
 
   // Prepare parameters.
   xnn_f16_qc4w_minmax_params params;
-  init_params(&params,
-              std::numeric_limits<int8_t>::min(),
+  init_params(&params, std::numeric_limits<int8_t>::min(),
               std::numeric_limits<int8_t>::max(), 8);
 
   size_t buffer_index = 0;
@@ -748,7 +749,8 @@ void GEMMBenchmark(benchmark::State& state,
               benchmark::utils::GetMaxCacheSize(),
               sizeof(float) * (packed_w_size + c_elements));
 
-  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> w(packed_w_size * num_buffers);
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> w(packed_w_size *
+                                                    num_buffers);
 
   // Quantize the left-hand operand.
   const size_t input_packed_size =
@@ -986,7 +988,8 @@ void GEMMBenchmark(benchmark::State& state,
               benchmark::utils::GetMaxCacheSize(),
               sizeof(float) * (packed_w_size + c_elements));
 
-  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> w(packed_w_size * num_buffers);
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> w(packed_w_size *
+                                                    num_buffers);
 
   // Quantize the left-hand operand.
   const size_t input_packed_size =
@@ -1093,7 +1096,8 @@ void GEMMBenchmark(benchmark::State& state, xnn_qu8_gemm_minmax_ukernel_fn gemm,
               benchmark::utils::GetMaxCacheSize(),
               sizeof(uint8_t) * (w_elements + c_elements));
 
-  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> w(w_elements * num_buffers);
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> w(w_elements *
+                                                       num_buffers);
   const xnn_qu8_packing_params packing_params = {127, 127};
   pack(/*groups=*/1, nc, kc, nr, kr, sr, k.data(), b.data(), /*scale=*/nullptr,
        w.data(),
@@ -1300,7 +1304,8 @@ void GEMMBenchmark(benchmark::State& state, xnn_f16_gemm_minmax_ukernel_fn gemm,
   auto f32rng =
       std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
-  xnnpack::Buffer<xnn_float16> a(mc * kc + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  xnnpack::Buffer<xnn_float16> a(mc * kc +
+                                 XNN_EXTRA_BYTES / sizeof(xnn_float16));
   std::generate(a.begin(), a.end(), f32rng);
   xnnpack::Buffer<xnn_float16> k(nc * kc);
   std::generate(k.begin(), k.end(), f32rng);
@@ -1314,7 +1319,8 @@ void GEMMBenchmark(benchmark::State& state, xnn_f16_gemm_minmax_ukernel_fn gemm,
               benchmark::utils::GetMaxCacheSize(),
               sizeof(xnn_float16) * (w_elements + c_elements));
 
-  xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> w(w_elements * num_buffers);
+  xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> w(w_elements *
+                                                           num_buffers);
   pack(/*groups=*/1, nc, kc, nr, kr, sr,
        reinterpret_cast<const uint16_t*>(k.data()),
        reinterpret_cast<const uint16_t*>(b.data()), /*scale=*/nullptr,
@@ -1324,7 +1330,8 @@ void GEMMBenchmark(benchmark::State& state, xnn_f16_gemm_minmax_ukernel_fn gemm,
 
   // Prepare minmax parameters.
   xnn_f16_minmax_params params;
-  init_params(&params, static_cast<xnn_float16>(-INFINITY), static_cast<xnn_float16>(INFINITY));
+  init_params(&params, static_cast<xnn_float16>(-INFINITY),
+              static_cast<xnn_float16>(INFINITY));
 
   size_t buffer_index = 0;
   for (auto _ : state) {
@@ -1345,8 +1352,8 @@ void GEMMBenchmark(benchmark::State& state, xnn_f16_gemm_minmax_ukernel_fn gemm,
         gemm(mb, nb, kc * sizeof(xnn_float16), a.data() + m * kc,
              kc * sizeof(xnn_float16),
              w.data() + (nc_stride * buffer_index + n) * (kc_stride + 1),
-             c.data() + (mc * buffer_index + m) * nc + n, nc * sizeof(xnn_float16),
-             nr * sizeof(xnn_float16), &params);
+             c.data() + (mc * buffer_index + m) * nc + n,
+             nc * sizeof(xnn_float16), nr * sizeof(xnn_float16), &params);
       }
     }
   }

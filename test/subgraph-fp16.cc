@@ -1149,8 +1149,7 @@ TEST(SUBGRAPH_FP16_BATCH_MATRIX_MULTIPLY, with_non_static_value) {
   //                  |
   //               external
   //               output[2]
-  tester
-      .AddInputTensorF32({1, 2, 2, 3}, 0)
+  tester.AddInputTensorF32({1, 2, 2, 3}, 0)
       .AddInputTensorF32({1, 1, 1, 3}, 1)
       .AddOutputTensorF32({1, 2, 2, 3}, 2)
       .AddBatchMatrixMultiply(0, 1, 2, 0)
