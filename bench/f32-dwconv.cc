@@ -84,9 +84,9 @@ static void bench_impl(uint64_t arch_flags, benchmark::State& state,
 
   xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> w(w_elements * num_buffers);
   xnn_pack_f32_dwconv_ghw_w(primary_tile, kernel_height, kernel_width, channels,
-                            channel_tile, channel_tile, /*channel_round=*/1,
-                            k.data(), b.data(), /*scale=*/nullptr, w.data(),
-                            /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0, nullptr);
+                            channel_tile, k.data(), b.data(), /*scale=*/nullptr,
+                            w.data(),
+                            /*per_tile_extra_bytes=*/0, nullptr);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(w.cbegin(), w.cbegin() + w_elements, w.begin() + n * w_elements);
   }

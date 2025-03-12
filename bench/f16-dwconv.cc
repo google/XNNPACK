@@ -84,12 +84,12 @@ static void bench_impl(uint64_t arch_flags, benchmark::State& state,
       sizeof(xnn_float16) * (w_elements + c_elements) + sizeof(void*) * i_elements);
 
   xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> w(w_elements * num_buffers);
-  xnn_pack_f16_dwconv_ghw_w(primary_tile, kernel_height, kernel_width, channels,
-                            channel_tile, channel_tile, /*channel_round=*/1,
-                            reinterpret_cast<const uint16_t*>(k.data()),
-                            reinterpret_cast<const uint16_t*>(b.data()),
-                            /*scale=*/nullptr, reinterpret_cast<uint16_t*>(w.data()),
-                            /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0, /*params=*/nullptr);
+  xnn_pack_f16_dwconv_ghw_w(
+      primary_tile, kernel_height, kernel_width, channels, channel_tile,
+      reinterpret_cast<const uint16_t*>(k.data()),
+      reinterpret_cast<const uint16_t*>(b.data()),
+      /*scale=*/nullptr, reinterpret_cast<uint16_t*>(w.data()),
+      /*per_tile_extra_bytes=*/0, /*params=*/nullptr);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(w.cbegin(), w.cbegin() + w_elements, w.begin() + n * w_elements);
   }

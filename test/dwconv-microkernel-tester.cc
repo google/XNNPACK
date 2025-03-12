@@ -118,11 +118,10 @@ void DWConvMicrokernelTester::Test(
     const xnn_qu8_packing_params packing_params = {input_zero_point(),
                                                    kernel_zero_point()};
     xnn_pack_qu8_dwconv_ghw_w(kernel_tile(), kernel_tile(), 1, channels(),
-                              channel_tile(), channel_tile(), channel_tile(),
+                              channel_tile(),
                               kernel.data(), bias.data(), /*scale=*/nullptr,
                               packed_weights.data(),
-                              /*per_tile_extra_bytes=*/0,
-                              /*per_subtile_extra_bytes=*/0, &packing_params);
+                              /*per_tile_extra_bytes=*/0, &packing_params);
     for (size_t i = 0; i < indirection.size(); i++) {
       indirection[i] = input.data() + i * channels() - input_offset();
     }
@@ -253,11 +252,10 @@ void DWConvMicrokernelTester::Test(
     const xnn_qs8_packing_params packing_params = {
         static_cast<int8_t>(input_zero_point() - 0x80)};
     xnn_pack_qs8_dwconv_ghw_w(
-        kernel_tile(), kernel_tile(), 1, channels(), channel_tile(),
-        channel_tile(), channel_tile(), kernel.data(), bias.data(),
+        kernel_tile(), kernel_tile(), 1, channels(),
+        channel_tile(), kernel.data(), bias.data(),
         /*scale=*/nullptr, packed_weights.data(),
         /*per_tile_extra_bytes=*/channel_tile() * sizeof(float),
-        /*per_subtile_extra_bytes=*/channel_tile() * sizeof(float),
         &packing_params);
     for (size_t i = 0; i < indirection.size(); i++) {
       indirection[i] = input.data() + i * channels() - input_offset();
@@ -398,11 +396,10 @@ void DWConvMicrokernelTester::Test(
     const xnn_qs8_packing_params packing_params = {
         static_cast<int8_t>(input_zero_point() - 0x80)};
     xnn_pack_qs8_dwconv_ghw_w(kernel_tile(), kernel_tile(), 1, channels(),
-                              channel_tile(), channel_tile(), channel_tile(),
+                              channel_tile(),
                               kernel.data(), bias.data(), /*scale=*/nullptr,
                               packed_weights.data(),
-                              /*per_tile_extra_bytes=*/0,
-                              /*per_subtile_extra_bytes=*/0, &packing_params);
+                              /*per_tile_extra_bytes=*/0, &packing_params);
     for (size_t i = 0; i < indirection.size(); i++) {
       indirection[i] = input.data() + i * channels() - input_offset();
     }
@@ -519,11 +516,10 @@ void DWConvMicrokernelTester::Test(
     std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
     xnn_pack_f16_dwconv_ghw_w(
         kernel_tile(), kernel_tile(), 1, channels(), channel_tile(),
-        channel_tile(), channel_tile(),
         reinterpret_cast<const uint16_t*>(kernel.data()),
         reinterpret_cast<const uint16_t*>(bias.data()),
         /*scale=*/nullptr, reinterpret_cast<uint16_t*>(packed_weights.data()),
-        /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0,
+        /*per_tile_extra_bytes=*/0,
         /*params=*/nullptr);
     for (size_t i = 0; i < indirection.size(); i++) {
       indirection[i] = input.data() + i * channels() - input_offset();
@@ -621,9 +617,9 @@ void DWConvMicrokernelTester::Test(
     std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
     xnn_pack_f32_dwconv_ghw_w(
         kernel_tile(), kernel_tile(), 1, channels(), channel_tile(),
-        channel_tile(), channel_tile(), kernel.data(), bias.data(),
+        kernel.data(), bias.data(),
         /*scale=*/nullptr, packed_weights.data(),
-        /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0,
+        /*per_tile_extra_bytes=*/0,
         /*params=*/nullptr);
     for (size_t i = 0; i < indirection.size(); i++) {
       indirection[i] = input.data() + i * channels() - input_offset();
@@ -691,10 +687,10 @@ void DWConvMicrokernelTester::Test(
 
     std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
     xnn_pack_f32_dwconv_ghw_w(
-        kernel_tile(), kernel_tile(), 1, channels(), channel_tile(),
-        channel_tile(), channel_tile(), kernel.data(), bias.data(),
+        kernel_tile(), kernel_tile(), 1, channels(),
+        channel_tile(), kernel.data(), bias.data(),
         /*scale=*/nullptr, packed_weights.data(),
-        /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0,
+        /*per_tile_extra_bytes=*/0,
         /*params=*/nullptr);
     for (size_t i = 0; i < indirection.size(); i++) {
       indirection[i] = input.data() + i * channels() - input_offset();

@@ -1169,14 +1169,11 @@ typedef void (*xnn_pack_dwconv_ghw_w_fn)(
   size_t w,
   size_t c,
   size_t channel_tile,
-  size_t channel_subtile,
-  size_t channel_round,
   const void* kernel,
   const void* bias,
   const void* scale,
   void* packed_weights,
   size_t per_tile_extra_bytes,
-  size_t per_subtile_extra_bytes,
   const void* params);
 
 // Weights layout is channels/(g)roups, (h)eight, (w)idth.
@@ -1186,14 +1183,11 @@ XNN_INTERNAL void xnn_pack_f32_dwconv_ghw_w(
   size_t w,
   size_t c,
   size_t channel_tile,
-  size_t channel_subtile,
-  size_t channel_round,
   const float* kernel,
   const float* bias,
   const void* scale,
   float* packed_weights,
   size_t per_tile_extra_bytes,
-  size_t per_subtile_extra_bytes,
   const void* params);
 
 XNN_INTERNAL void xnn_pack_f16_dwconv_ghw_w(
@@ -1202,14 +1196,11 @@ XNN_INTERNAL void xnn_pack_f16_dwconv_ghw_w(
   size_t w,
   size_t c,
   size_t channel_tile,
-  size_t channel_subtile,
-  size_t channel_round,
   const uint16_t* kernel,
   const uint16_t* bias,
   const void* scale,
   uint16_t* packed_weights,
   size_t per_tile_extra_bytes,
-  size_t per_subtile_extra_bytes,
   const void* params);
 
 XNN_INTERNAL void xnn_pack_f32_to_f16_dwconv_ghw_w(
@@ -1218,14 +1209,11 @@ XNN_INTERNAL void xnn_pack_f32_to_f16_dwconv_ghw_w(
   size_t w,
   size_t c,
   size_t channel_tile,
-  size_t channel_subtile,
-  size_t channel_round,
   const float* kernel,
   const float* bias,
   const void* scale,
   xnn_float16* packed_weights,
   size_t per_tile_extra_bytes,
-  size_t per_subtile_extra_bytes,
   const void* params);
 
 XNN_INTERNAL void xnn_pack_qs8_dwconv_ghw_w(
@@ -1234,14 +1222,11 @@ XNN_INTERNAL void xnn_pack_qs8_dwconv_ghw_w(
   size_t w,
   size_t c,
   size_t channel_tile,
-  size_t channel_subtile,
-  size_t channel_round,
   const int8_t* kernel,
   const int32_t* bias,
   const float* scale,
   void* packed_weights,
   size_t per_tile_extra_bytes,
-  size_t per_subtile_extra_bytes,
   const struct xnn_qs8_packing_params* params);
 
 XNN_INTERNAL void xnn_pack_qu8_dwconv_ghw_w(
@@ -1250,14 +1235,11 @@ XNN_INTERNAL void xnn_pack_qu8_dwconv_ghw_w(
   size_t w,
   size_t c,
   size_t channel_tile,
-  size_t channel_subtile,
-  size_t channel_round,
   const uint8_t* kernel,
   const int32_t* bias,
   const void* scale,
   void* packed_weights,
   size_t per_tile_extra_bytes,
-  size_t per_subtile_extra_bytes,
   const struct xnn_qu8_packing_params* params);
 
 typedef void (*xnn_pack_dwconv_hwg_w_fn)(
@@ -1266,14 +1248,11 @@ typedef void (*xnn_pack_dwconv_hwg_w_fn)(
   size_t w,
   size_t c,
   size_t channel_tile,
-  size_t channel_subtile,
-  size_t channel_round,
   const void* kernel,
   const void* bias,
   const void* scale,
   void* packed_weights,
   size_t per_tile_extra_bytes,
-  size_t per_subtile_extra_bytes,
   const void* params);
 
 // Weights layout is (h)eight, (w)idth, channels/(g)roups.
@@ -1283,14 +1262,11 @@ XNN_INTERNAL void xnn_pack_f32_dwconv_hwg_w(
   size_t w,
   size_t c,
   size_t channel_tile,
-  size_t channel_subtile,
-  size_t channel_round,
   const float* kernel,
   const float* bias,
   const void* scale,
   float* packed_weights,
   size_t per_tile_extra_bytes,
-  size_t per_subtile_extra_bytes,
   const void* params);
 
 XNN_INTERNAL void xnn_pack_f16_dwconv_hwg_w(
@@ -1299,14 +1275,11 @@ XNN_INTERNAL void xnn_pack_f16_dwconv_hwg_w(
   size_t w,
   size_t c,
   size_t channel_tile,
-  size_t channel_subtile,
-  size_t channel_round,
   const uint16_t* kernel,
   const uint16_t* bias,
   const void* scale,
   uint16_t* packed_weights,
   size_t per_tile_extra_bytes,
-  size_t per_subtile_extra_bytes,
   const void* params);
 
 XNN_INTERNAL void xnn_pack_f32_to_f16_dwconv_hwg_w(
@@ -1315,14 +1288,11 @@ XNN_INTERNAL void xnn_pack_f32_to_f16_dwconv_hwg_w(
   size_t w,
   size_t c,
   size_t channel_tile,
-  size_t channel_subtile,
-  size_t channel_round,
   const float* kernel,
   const float* bias,
   const void* scale,
   xnn_float16* packed_weights,
   size_t per_tile_extra_bytes,
-  size_t per_subtile_extra_bytes,
   const void* params);
 
 XNN_INTERNAL void xnn_pack_qs8_dwconv_hwg_w(
@@ -1331,14 +1301,11 @@ XNN_INTERNAL void xnn_pack_qs8_dwconv_hwg_w(
   size_t w,
   size_t c,
   size_t channel_tile,
-  size_t channel_subtile,
-  size_t channel_round,
   const int8_t* kernel,
   const int32_t* bias,
   const float* scale,
   void* packed_weights,
   size_t per_tile_extra_bytes,
-  size_t per_subtile_extra_bytes,
   const struct xnn_qs8_packing_params* params);
 
 XNN_INTERNAL void xnn_pack_qu8_dwconv_hwg_w(
@@ -1347,14 +1314,11 @@ XNN_INTERNAL void xnn_pack_qu8_dwconv_hwg_w(
   size_t w,
   size_t c,
   size_t channel_tile,
-  size_t channel_subtile,
-  size_t channel_round,
   const uint8_t* kernel,
   const int32_t* bias,
   const void* scale,
   void* packed_weights,
   size_t per_tile_extra_bytes,
-  size_t per_subtile_extra_bytes,
   const struct xnn_qu8_packing_params* params);
 
 typedef void (*xnn_pack_f32_gemminc_fn)(

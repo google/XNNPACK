@@ -59,22 +59,6 @@ class DWConvMicrokernelTester {
 
   uint32_t channel_tile() const { return this->channel_tile_; }
 
-  DWConvMicrokernelTester& channel_subtile(uint32_t channel_subtile) {
-    assert(channel_subtile != 0);
-    this->channel_subtile_ = channel_subtile;
-    return *this;
-  }
-
-  uint32_t channel_subtile() const { return this->channel_subtile_; }
-
-  DWConvMicrokernelTester& channel_round(uint32_t channel_round) {
-    assert(channel_round != 0);
-    this->channel_round_ = channel_round;
-    return *this;
-  }
-
-  uint32_t channel_round() const { return this->channel_round_; }
-
   DWConvMicrokernelTester& kernel_tile(uint32_t kernel_tile) {
     assert(kernel_tile != 0);
     this->kernel_tile_ = kernel_tile;
@@ -204,8 +188,6 @@ class DWConvMicrokernelTester {
  private:
   uint32_t channels_{1};
   uint32_t channel_tile_{1};
-  uint32_t channel_subtile_{1};
-  uint32_t channel_round_{1};
   uint32_t kernel_tile_{1};
   uint32_t kernel_size_{1};
   uint32_t width_{1};

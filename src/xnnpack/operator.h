@@ -40,9 +40,7 @@ struct xnn_ukernel_conv2d {
 
 struct xnn_ukernel_dwconv {
   xnn_dwconv_ukernel_fn ukernel;
-  uint8_t channel_round;
-  uint8_t channel_subtile;
-  uint8_t channel_tile;
+  uint32_t channel_tile;
   uint8_t primary_tile;
 };
 

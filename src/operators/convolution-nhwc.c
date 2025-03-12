@@ -174,20 +174,18 @@ static enum xnn_status create_dwconv_path(
         primary_tile,
         kernel_height, kernel_width,
         groups,
-        dwconv_ukernel->channel_tile, dwconv_ukernel->channel_subtile, dwconv_ukernel->channel_round,
+        dwconv_ukernel->channel_tile,
         kernel, bias, /*scale=*/NULL, weights_ptr,
         dwconv_ukernel->channel_tile * extra_weights_bytes,
-        dwconv_ukernel->channel_subtile * extra_weights_bytes,
         packing_params);
   } else {
     pack_dwconv_ghw_w(
         primary_tile,
         kernel_height, kernel_width,
         groups,
-        dwconv_ukernel->channel_tile, dwconv_ukernel->channel_subtile, dwconv_ukernel->channel_round,
+        dwconv_ukernel->channel_tile,
         kernel, bias, /*scale=*/NULL, weights_ptr,
         dwconv_ukernel->channel_tile * extra_weights_bytes,
-        dwconv_ukernel->channel_subtile * extra_weights_bytes,
         packing_params);
   }
 
@@ -210,7 +208,7 @@ static enum xnn_status create_dwconv_path(
   }
 
   uint32_t cache_seed = primary_tile ^ kernel_height ^ kernel_width
-      ^ groups ^ dwconv_ukernel->channel_tile ^ dwconv_ukernel->channel_subtile ^ dwconv_ukernel->channel_round ^ extra_weights_bytes;
+      ^ groups ^ dwconv_ukernel->channel_tile ^ extra_weights_bytes;
   if (flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) {
     cache_seed = ~cache_seed;
   }
@@ -228,8 +226,6 @@ static enum xnn_status create_dwconv_path(
     ukernel = dwconv_ukernel->linear;
   }
   convolution_op->ukernel.dwconv = (struct xnn_ukernel_dwconv) {
-    .channel_round = dwconv_ukernel->channel_round,
-    .channel_subtile = dwconv_ukernel->channel_subtile,
     .channel_tile = dwconv_ukernel->channel_tile,
     .primary_tile = primary_tile,
   };
