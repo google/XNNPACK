@@ -756,15 +756,6 @@ xnnpack_cc_library(
 ]
 
 xnnpack_cc_library(
-    name = "im2col",
-    srcs = ["src/im2col.c"],
-    hdrs = [
-        "src/xnnpack/im2col.h",
-    ],
-    deps = [":common"],
-)
-
-xnnpack_cc_library(
     name = "indirection",
     srcs = ["src/indirection.c"],
     hdrs = ["src/xnnpack/indirection.h"],

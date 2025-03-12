@@ -474,18 +474,6 @@ xnnpack_benchmark(
     deps = MICROKERNEL_BENCHMARK_DEPS + xnnpack_optional_dnnl_deps(),
 )
 
-xnnpack_benchmark(
-    name = "f32_im2col_gemm_bench",
-    srcs = [
-        "f32-im2col-gemm.cc",
-    ],
-    tags = xnnpack_slow_benchmark_tags(),
-    deps = MICROKERNEL_BENCHMARK_DEPS + [
-        ":conv",
-        "//:im2col",
-    ],
-)
-
 xnnpack_cxx_library(
     name = "packq_benchmark",
     srcs = [
