@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/s8-rminmax/simd.c.in
 //   Generator: tools/xngen

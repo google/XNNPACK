@@ -19,12 +19,17 @@ import xngen
 import xnncommon
 
 
-parser = argparse.ArgumentParser(description='XNNPACK generator')
-parser.add_argument("-k", "--ukernel", required=True,
-                    help="ukernel name")
-parser.add_argument("-o", "--output", metavar="FILE", required=True,
-                    help='Output (C++ source) file')
+parser = argparse.ArgumentParser(description="XNNPACK generator")
+parser.add_argument("-k", "--ukernel", required=True, help="ukernel name")
+parser.add_argument(
+    "-o",
+    "--output",
+    metavar="FILE",
+    required=True,
+    help="Output (C++ source) file",
+)
 parser.set_defaults(defines=list())
+
 
 def split_ukernel_name(name):
   common_name, target_name = name.split("__", 1)
@@ -32,9 +37,9 @@ def split_ukernel_name(name):
   param_spec = common_parts[-1]
 
   # New transitional naming convention for microkernels.
-  m = re.search(r'(\d+)p(\d+)c', param_spec);
-  assert(m)
-  primary_tile = 0;
+  m = re.search(r"(\d+)p(\d+)c", param_spec)
+  assert m
+  primary_tile = 0
   cr = int(m[2])
   kr = int(m[1])
   arch, isa, assembly = xnncommon.parse_target_name(target_name)
@@ -250,12 +255,14 @@ INSTANTIATE_TEST_SUITE_P(
     });
 """
 
+
 def main(args):
   options = parser.parse_args(args)
 
   ukernel = options.ukernel
 
   test_header = """\
+// clang-format off
 // Copyright (c) Facebook, Inc. and its affiliates.
 // All rights reserved.
 //
@@ -294,7 +301,9 @@ def main(args):
     folder = datatype + "-qc8w-dwconv"
     parts.pop(1)
   activation = "minmax" if "minmax" in parts else "linear"
-  requantization = "fp32" if "fp32" in parts else "rndnu" if "rndnu" in parts else None
+  requantization = (
+      "fp32" if "fp32" in parts else "rndnu" if "rndnu" in parts else None
+  )
 
   create_tests_args = {
       "DATATYPE": datatype,
@@ -303,9 +312,7 @@ def main(args):
   create_tests = xngen.preprocess(DWCONV_CREATE_TESTS_CODE, create_tests_args)
 
   create_tests = (
-      "namespace {\n\n"
-      + "\n".join([create_tests])
-      + "\n}  // namespace\n"
+      "namespace {\n\n" + "\n".join([create_tests]) + "\n}  // namespace\n"
   )
   tests = test_header + "\n" + create_tests + "\n" + test_cases
 
@@ -316,12 +323,14 @@ def main(args):
         "xnn_%s_requantize_%s" % (requantization_datatype, requantization)
     )
 
-  tests += xnncommon.make_multiline_macro(xngen.preprocess(
-      TEST_TEMPLATE,
-      {
-          "TEST_ARGS": test_args,
-      },
-  ))
+  tests += xnncommon.make_multiline_macro(
+      xngen.preprocess(
+          TEST_TEMPLATE,
+          {
+              "TEST_ARGS": test_args,
+          },
+      )
+  )
 
   tests += f'#include "src/{folder}/{options.ukernel}.h"\n'
   tests += "#undef XNN_UKERNEL_WITH_PARAMS\n"

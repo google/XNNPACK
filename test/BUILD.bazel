@@ -51,6 +51,7 @@ SUBGRAPH_TEST_DEPS = [
     "//:node_type",
     "//:operators",
     "//:operator_utils",
+    "//:reference_ukernels",
     "//:requantization",
     "//:subgraph",
 ]
@@ -297,8 +298,12 @@ xnnpack_cxx_library(
     "s8_rmin",
     "s8_rmax",
     "s8_rminmax",
+    "s8_rdmin",
+    "s8_rdmax",
     "u8_rmin",
     "u8_rmax",
+    "u8_rdmin",
+    "u8_rdmax",
     "u8_rminmax",
 ]]
 
@@ -345,7 +350,7 @@ xnnpack_cxx_library(
     ],
 ) for (kernel, shard_count) in [
     ("f16_dwconv_minmax", 5),
-    ("f32_dwconv", 1),
+    ("f32_dwconv", 5),
     ("f32_dwconv_minmax", 5),
     ("qs8_qc8w_dwconv_minmax_fp32", 10),
     ("qs8_dwconv_minmax_fp32", 10),
@@ -1006,15 +1011,6 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "x32_packb_test",
-    srcs = [
-        "packb-microkernel-tester.h",
-        "x32-packb.cc",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
     name = "x8_packq_test",
     srcs = [
         "x8-packq.cc",
@@ -1103,19 +1099,8 @@ xnnpack_cxx_library(
 
 xnnpack_unit_test(
     name = "unary_test",
-    srcs = [
-        "unary.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        ":runtime_flags",
-        ":unary_ops",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:datatype",
-        "//:operator_utils",
-        "//:subgraph",
-    ],
+    srcs = ["unary.cc"],
+    deps = SUBGRAPH_TEST_DEPS + [":unary_ops"],
 )
 
 xnnpack_unit_test(
@@ -1126,26 +1111,28 @@ xnnpack_unit_test(
     deps = [
         ":replicable_random_device",
         "//:buffer",
+        "//:math",
     ],
 )
 
 [xnnpack_unit_test(
     name = "%s_test" % operator,
+    timeout = timeout,
     srcs = [
         "%s.cc" % operator.replace("_", "-"),
     ],
     shard_count = shard_count,
     deps = SUBGRAPH_TEST_DEPS,
-) for operator, shard_count in [
-    ("copy", 1),
-    ("softmax", 1),
-    ("space_to_depth_2d", 1),
-    ("depth_to_space_2d", 1),
-    ("static_constant_pad", 1),
-    ("static_expand_dims", 1),
-    ("static_reshape", 1),
-    ("static_slice", 5),
-    ("static_transpose", 5),
+) for operator, shard_count, timeout in [
+    ("copy", 1, "short"),
+    ("softmax", 1, "moderate"),
+    ("space_to_depth_2d", 1, "short"),
+    ("depth_to_space_2d", 1, "short"),
+    ("static_constant_pad", 1, "short"),
+    ("static_expand_dims", 1, "short"),
+    ("static_reshape", 1, "short"),
+    ("static_slice", 5, "short"),
+    ("static_transpose", 5, "short"),
 ]]
 
 xnnpack_unit_test(
@@ -1157,9 +1144,7 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "binary_test",
     srcs = ["binary.cc"],
-    deps = SUBGRAPH_TEST_DEPS + [
-        "//test/operators:operator_test_utils",
-    ],
+    deps = SUBGRAPH_TEST_DEPS,
 )
 
 xnnpack_unit_test(

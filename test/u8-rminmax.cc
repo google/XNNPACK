@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -523,3 +524,36 @@ TEST(U8_RMINMAX__SCALAR_U4_ACC4, batch_gt_4) {
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(U8_RMINMAX__WASMSIMD_U32_ACC2, batch_eq_32) {
+    ReduceMicrokernelTester()
+      .batch_size(32)
+      .Test(xnn_u8_rminmax_ukernel__wasmsimd_u32_acc2, ReduceMicrokernelTester::OpType::MinMax);
+  }
+
+  TEST(U8_RMINMAX__WASMSIMD_U32_ACC2, batch_div_32) {
+    for (size_t batch_size = 64; batch_size < 320; batch_size += 32) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_u8_rminmax_ukernel__wasmsimd_u32_acc2, ReduceMicrokernelTester::OpType::MinMax);
+    }
+  }
+
+  TEST(U8_RMINMAX__WASMSIMD_U32_ACC2, batch_lt_32) {
+    for (size_t batch_size = 1; batch_size < 32; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_u8_rminmax_ukernel__wasmsimd_u32_acc2, ReduceMicrokernelTester::OpType::MinMax);
+    }
+  }
+
+  TEST(U8_RMINMAX__WASMSIMD_U32_ACC2, batch_gt_32) {
+    for (size_t batch_size = 33; batch_size < 64; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_u8_rminmax_ukernel__wasmsimd_u32_acc2, ReduceMicrokernelTester::OpType::MinMax);
+    }
+  }
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

@@ -40,16 +40,6 @@ enum xnn_status xnn_insert_clamp_node(xnn_subgraph_t subgraph, float output_min,
   size_t dims[XNN_MAX_TENSOR_DIMS];
   memcpy(dims, output_value->shape.dim, num_dims * sizeof(size_t));
   switch (output_value->datatype) {
-    case xnn_datatype_fp16:
-      status = xnn_define_tensor_value(
-          subgraph, xnn_datatype_fp16, num_dims, dims, NULL,
-          /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, &new_id);
-      break;
-    case xnn_datatype_fp32:
-      status = xnn_define_tensor_value(
-          subgraph, xnn_datatype_fp32, num_dims, dims, NULL,
-          /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, &new_id);
-      break;
     case xnn_datatype_quint8:
       status = xnn_define_quantized_tensor_value(
           subgraph, xnn_datatype_quint8, output_value->quantization.zero_point,
@@ -63,7 +53,10 @@ enum xnn_status xnn_insert_clamp_node(xnn_subgraph_t subgraph, float output_min,
           /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, &new_id);
       break;
     default:
-      XNN_UNREACHABLE;
+      status = xnn_define_tensor_value(
+          subgraph, output_value->datatype, num_dims, dims, NULL,
+          /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, &new_id);
+      break;
   }
   if (status != xnn_status_success) {
     return status;

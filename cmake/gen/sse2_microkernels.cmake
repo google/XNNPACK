@@ -283,6 +283,8 @@ SET(NON_PROD_SSE2_MICROKERNEL_SRCS
   src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-sse2-mul16-ld64-u16.c
   src/s8-ibilinear/gen/s8-ibilinear-sse2-c16.c
   src/u8-ibilinear/gen/u8-ibilinear-sse2-c16.c
+  src/u8-rdminmax/gen/u8-rdmax-2p2x-sse2-c32.c
+  src/u8-rdminmax/gen/u8-rdmin-2p2x-sse2-c32.c
   src/u8-rminmax/gen/u8-rmax-sse2-u32-acc2.c
   src/u8-rminmax/gen/u8-rmax-sse2-u48-acc3.c
   src/u8-rminmax/gen/u8-rmax-sse2-u64-acc2.c

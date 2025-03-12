@@ -235,7 +235,7 @@ static enum xnn_status init_op(
   op->unary_elementwise.op_type = op_type;
 
   const struct xnn_unary_elementwise_config* config = get_config(op_type, input_datatype, output_datatype, input_quantization, output_quantization);
-  if (config) {
+  if (config && config->ukernel) {
     // We have an elementwise config, use it.
     op->unary_elementwise_config = config;
     op->state = xnn_run_state_invalid;
@@ -267,7 +267,7 @@ static enum xnn_status init_op(
     return xnn_status_success;
   } else {
     xnn_log_error(
-      "unsupported operator %s for datatypes %s -> %s, falling back to reference kernel",
+      "unsupported operator %s for datatypes %s -> %s",
       xnn_unary_operator_to_string(op_type), xnn_datatype_to_string(input_datatype), xnn_datatype_to_string(output_datatype));
     return xnn_status_unsupported_parameter;
   }

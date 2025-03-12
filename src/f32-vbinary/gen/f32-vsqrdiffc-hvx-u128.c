@@ -27,7 +27,7 @@ void xnn_f32_vsqrdiffc_ukernel__hvx_u128(
   HVX_Vector vb = xnn_set1_f32(*input_b);
 
   for (; batch >= 128 * sizeof(float); batch -= 128 * sizeof(float)) {
-    HVX_Vector va0 = xnn_loadu_f32(input_a);
+    HVX_Vector va0 = xnn_loadu_f32(input_a + 0);
     HVX_Vector va1 = xnn_loadu_f32(input_a + 32);
     HVX_Vector va2 = xnn_loadu_f32(input_a + 64);
     HVX_Vector va3 = xnn_loadu_f32(input_a + 96);
@@ -43,7 +43,7 @@ void xnn_f32_vsqrdiffc_ukernel__hvx_u128(
     vacc2 = xnn_mul_f32(vacc2, vacc2);
     vacc3 = xnn_mul_f32(vacc3, vacc3);
 
-   xnn_storeu_f32(output, vacc0);
+    xnn_storeu_f32(output + 0, vacc0);
     xnn_storeu_f32(output + 32, vacc1);
     xnn_storeu_f32(output + 64, vacc2);
     xnn_storeu_f32(output + 96, vacc3);

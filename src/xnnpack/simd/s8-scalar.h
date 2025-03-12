@@ -42,6 +42,8 @@ static XNN_INLINE xnn_simd_s8_t xnn_horizontal_max_s8(xnn_simd_s8_t a) {
   return a;
 }
 
+// Load/store operations.
+
 static XNN_INLINE xnn_simd_s8_t xnn_loadu_s8(const int8_t *ptr) { return *ptr; }
 
 static XNN_INLINE xnn_simd_s8_t xnn_load_s8(const int8_t *ptr) { return *ptr; }

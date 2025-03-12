@@ -1,170 +1,288 @@
-// Copyright 2020 Google LLC
+// Copyright 2022 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <sys/types.h>
-
 #include <algorithm>
-#include <array>
-#include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
-#include <cstdlib>
-#include <functional>
-#include <numeric>
-#include <random>
 #include <sstream>
 #include <string>
 #include <tuple>
+#include <type_traits>
 #include <vector>
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
-#include "src/xnnpack/datatype.h"
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/datatype.h"
 #include "src/xnnpack/operator-utils.h"
-#include "src/xnnpack/subgraph.h"
+#include "src/xnnpack/reference-utils.h"
 #include "test/replicable_random_device.h"
+#include "test/subgraph-tester.h"
 #include "test/unary-ops.h"
-#include "test/runtime-flags.h"
+
+using ::testing::Combine;
+using ::testing::ValuesIn;
+
+namespace xnnpack {
 
 struct Param {
-  using UnaryT = std::tuple<xnn_unary_operator, xnn_datatype>;
-  using ConvertT = std::tuple<xnn_unary_operator, xnn_datatype, xnn_datatype>;
-  explicit Param(UnaryT p)
-      : unary_operator(std::get<0>(p)),
-        input_datatype(std::get<1>(p)),
-        output_datatype(std::get<1>(p)) {}
-  explicit Param(ConvertT p)
-      : unary_operator(std::get<0>(p)),
-        input_datatype(std::get<1>(p)),
-        output_datatype(std::get<2>(p)) {}
+  using TupleT = std::tuple<xnn_datatype, xnn_unary_operator, int>;
+  explicit Param(TupleT p)
+      : datatype(std::get<0>(p)), op(std::get<1>(p)), rank(std::get<2>(p)) {}
 
   std::string Name() const {
     std::stringstream sstr;
-    sstr << xnn_unary_operator_to_string(unary_operator) << "_"
-         << xnn_datatype_to_string(input_datatype);
-    if (input_datatype != output_datatype) {
-      sstr << "_" << xnn_datatype_to_string(output_datatype);
-    }
-    std::string s = sstr.str();
-    // Test names must be alphanumeric with no spaces
-    std::replace(s.begin(), s.end(), ' ', '_');
-    std::replace(s.begin(), s.end(), '(', '_');
-    std::replace(s.begin(), s.end(), ')', '_');
-    return s;
+    sstr << xnn_datatype_to_string(datatype) << "_"
+         << xnn_unary_operator_to_string(op) << "_rank" << rank;
+    return sstr.str();
   }
 
-  xnn_unary_operator unary_operator;
-  xnn_datatype input_datatype;
-  xnn_datatype output_datatype;
+  xnn_datatype datatype;
+  xnn_unary_operator op;
+  size_t rank;
 };
 
-class UnaryTest : public testing::TestWithParam<Param> {
- public:
-  xnnpack::ReplicableRandomDevice rng_;
+struct ConvertParam {
+  using TupleT = std::tuple<xnn_datatype, xnn_datatype, int>;
+  explicit ConvertParam(TupleT p)
+      : in(std::get<0>(p)), out(std::get<1>(p)), rank(std::get<2>(p)) {}
+
+  std::string Name() const {
+    std::stringstream sstr;
+    sstr << xnn_datatype_to_string(in) << "_to_" << xnn_datatype_to_string(out)
+         << "_rank" << rank;
+    return sstr.str();
+  }
+
+  xnn_datatype in;
+  xnn_datatype out;
+  size_t rank;
 };
 
-TEST_P(UnaryTest, matches_operator_api) {
-  const xnn_unary_operator unary_operator = GetParam().unary_operator;
-  const xnn_datatype input_datatype = GetParam().input_datatype;
-  const xnn_datatype output_datatype = GetParam().output_datatype;
+template <typename In, typename Out = In>
+void TestImpl(size_t rank, xnn_unary_operator op) {
+  const xnn_datatype datatype_in = xnn_datatype_of<In>();
+  const xnn_datatype datatype_out = xnn_datatype_of<Out>();
 
-  const size_t sizeof_input = xnn_datatype_size_bytes(input_datatype);
-  const size_t sizeof_output = xnn_datatype_size_bytes(output_datatype);
+  ReplicableRandomDevice rng;
 
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  // We want the total number of elements to be reasonable, so choose max_dim
+  // such that a random shape of rank `rank` produces this max size.
+  constexpr size_t max_size = 1024;
+  const size_t max_dim = static_cast<size_t>(std::ceil(
+      std::pow(static_cast<double>(max_size),
+               1.0 / static_cast<double>(std::max<size_t>(1, rank)))));
 
-  std::uniform_int_distribution<> rank_dist(0, XNN_MAX_TENSOR_DIMS);
-  std::uniform_int_distribution<> dim_dist(1, 10);
-  std::vector<size_t> dims(rank_dist(rng_));
-  std::generate(dims.begin(), dims.end(), [&]() { return dim_dist(rng_); });
+  const UnaryOpInfo* op_info = GetUnaryOpInfo(op);
+  ASSERT_NE(op_info, nullptr);
 
-  size_t size =
-      std::accumulate(dims.begin(), dims.end(), static_cast<size_t>(1),
-                      std::multiplies<size_t>());
-  size_t channels = dims.empty() ? 1 : dims.back();
-  size_t batch_size = size / channels;
+  xnn_quantization_params input_quantization =
+      op_info->InputQuantizationParams(datatype_in);
+  xnn_quantization_params output_quantization =
+      op_info->OutputQuantizationParams(datatype_out);
 
-  xnnpack::Buffer<char> input(size * sizeof_input + XNN_EXTRA_BYTES);
-  xnnpack::fill_uniform_random_bits(input.data(), input.size(), rng_);
-
-  xnnpack::Buffer<char> subgraph_output(size * sizeof_output);
-  xnnpack::Buffer<char> operator_output(size * sizeof_output);
-
-  const UnaryOpInfo* op_info = GetUnaryOpInfo(unary_operator);
+  Interval domain = op_info->Domain(datatype_in);
   xnn_unary_params params = op_info->DefaultParams();
-  const xnn_quantization_params input_quantization =
-      op_info->InputQuantizationParams(input_datatype);
-  const xnn_quantization_params output_quantization =
-      op_info->OutputQuantizationParams(output_datatype);
 
-  // Call operator API.
-  const xnn_status status = xnn_run_unary_elementwise_nc(
-      unary_operator, input_datatype, output_datatype, &params,
-      &input_quantization, &output_quantization, /*flags=*/0, batch_size,
-      channels, channels, channels, /*thread_pool=*/nullptr, input.data(),
-      operator_output.data());
-  if (status == xnn_status_unsupported_parameter) {
-    GTEST_SKIP();
+  SubgraphTester subgraph(3);
+  subgraph.AddInputTensor(rank, datatype_in, input_quantization, 0)
+      .AddOutputTensor(rank, datatype_out, output_quantization, 1)
+      .AddUnary(op, &params, 0, 1);
+  xnn_status status = subgraph.CreateRuntime();
+  ASSERT_EQ(status, xnn_status_success);
+
+  for (int reshape = 0; reshape < 2; ++reshape) {
+    std::vector<size_t> shape = random_shape(rng, rank, 1, max_dim);
+
+    Tensor<In> input(shape, {XNN_EXTRA_BYTES});
+    Tensor<Out> output(shape);
+
+    DatatypeGenerator<In> gen(domain.min, domain.max, input_quantization);
+    input.generate([&]() { return gen(rng); });
+
+    subgraph.ReshapeExternalTensor(shape, input.data(), 0).ReshapeRuntime();
+
+    ASSERT_EQ(subgraph.GetExternalTensorShape(1), shape);
+
+    subgraph.SetupExternalTensor(output.data(), 1)
+        .SetupRuntime()
+        .InvokeRuntime();
+
+    for (const auto& i : EnumerateIndices(output.extents())) {
+      if (std::is_integral<Out>::value) {
+        if (std::is_integral<In>::value) {
+          const int32_t expected =
+              op_info->ReferenceImpl(static_cast<int32_t>(input(i)), params);
+          ASSERT_EQ(expected, output(i))
+              << "i = " << index_to_string(i)
+              << ", input(i) = " << static_cast<int32_t>(input(i));
+        } else {
+          // Integral output, non-integral input. We need to potentially
+          // dequantize the input, and avoid UB when converting to int.
+          const float input_i = dequantize(input(i), input_quantization);
+          const int32_t expected =
+              round_float_to_int<Out>(op_info->ReferenceImpl(input_i, params));
+          ASSERT_EQ(expected, output(i))
+              << "i = " << index_to_string(i) << ", input(i) = " << input_i
+              << " (" << static_cast<float>(input(i)) << ")";
+        }
+      } else if (is_quantized<Out>()) {
+        const float input_i = dequantize(input(i), input_quantization);
+        float expected = op_info->ReferenceImpl(input_i, params);
+        expected = fake_quantize(expected, output_quantization);
+        expected = std::max<float>(expected, NumericLimits<Out>::min());
+        expected = std::min<float>(expected, NumericLimits<Out>::max());
+        if (std::isnan(expected)) {
+          // This is expected to overflow.
+        } else {
+          ASSERT_NEAR(expected, output(i), 1)
+              << "i = " << index_to_string(i) << ", input(i) = " << input_i
+              << " (" << static_cast<float>(input(i)) << ")"
+              << ", output(i) = " << static_cast<int32_t>(output(i));
+        }
+      } else {
+        const float input_i = dequantize(input(i), input_quantization);
+        float expected = op_info->ReferenceImpl(
+            input_i, params);
+        // Force overflow to infinity if that is what should happen.
+        expected = static_cast<float>(static_cast<Out>(expected));
+        ASSERT_NEAR(expected, output(i),
+                    op_info->Tolerance(expected, datatype_out))
+            << "i = " << index_to_string(i) << ", input(i) = " << input_i
+            << " (" << static_cast<float>(input(i)) << ")";
+      }
+    }
   }
-  ASSERT_EQ(xnn_status_success, status);
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-  uint32_t input_id = XNN_INVALID_VALUE_ID;
-  if (xnn_datatype_is_quantized(input_datatype)) {
-    ASSERT_EQ(xnn_status_success,
-              xnn_define_quantized_tensor_value(
-                  subgraph, input_datatype, input_quantization.zero_point,
-                  input_quantization.scale, dims.size(), dims.data(), nullptr,
-                  /*external_id=*/0,
-                  /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  } else {
-    ASSERT_EQ(xnn_status_success,
-              xnn_define_tensor_value(subgraph, input_datatype, dims.size(),
-                                      dims.data(), nullptr, /*external_id=*/0,
-                                      /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT,
-                                      &input_id));
-  }
-  ASSERT_NE(input_id, XNN_INVALID_VALUE_ID);
-
-  uint32_t output_id = XNN_INVALID_VALUE_ID;
-  if (xnn_datatype_is_quantized(output_datatype)) {
-    ASSERT_EQ(xnn_status_success,
-              xnn_define_quantized_tensor_value(
-                  subgraph, output_datatype, output_quantization.zero_point,
-                  output_quantization.scale, dims.size(), dims.data(), nullptr,
-                  /*external_id=*/1,
-                  /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  } else {
-    ASSERT_EQ(xnn_status_success,
-              xnn_define_tensor_value(subgraph, output_datatype, dims.size(),
-                                      dims.data(), nullptr, /*external_id=*/1,
-                                      /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT,
-                                      &output_id));
-  }
-  ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success,
-            xnn_define_unary(subgraph, unary_operator, &params, input_id,
-                             output_id, /*flags=*/0));
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  ASSERT_EQ(subgraph_output, operator_output);
 }
 
-xnn_unary_operator all_unary_ops[] = {
+class IntegerOps : public testing::TestWithParam<Param> {};
+class RealOps : public testing::TestWithParam<Param> {};
+class Convert : public testing::TestWithParam<ConvertParam> {};
+
+TEST_P(IntegerOps, test) {
+  switch (GetParam().datatype) {
+    case xnn_datatype_int32:
+      TestImpl<int>(GetParam().rank, GetParam().op);
+      break;
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
+TEST_P(RealOps, test) {
+  switch (GetParam().datatype) {
+    case xnn_datatype_qint8:
+      TestImpl<quantized<int8_t>>(GetParam().rank, GetParam().op);
+      break;
+    case xnn_datatype_quint8:
+      TestImpl<quantized<uint8_t>>(GetParam().rank, GetParam().op);
+      break;
+    case xnn_datatype_fp16:
+      TestImpl<xnn_float16>(GetParam().rank, GetParam().op);
+      break;
+    case xnn_datatype_bf16:
+      TestImpl<xnn_bfloat16>(GetParam().rank, GetParam().op);
+      break;
+    case xnn_datatype_fp32:
+      TestImpl<float>(GetParam().rank, GetParam().op);
+      break;
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
+template <typename Out>
+void ConvertImpl(size_t rank, xnn_datatype in) {
+  switch (in) {
+    case xnn_datatype_int32:
+      TestImpl<int32_t, Out>(rank, xnn_unary_convert);
+      break;
+    case xnn_datatype_qint8:
+      TestImpl<quantized<int8_t>, Out>(rank, xnn_unary_convert);
+      break;
+    case xnn_datatype_quint8:
+      TestImpl<quantized<uint8_t>, Out>(rank, xnn_unary_convert);
+      break;
+    case xnn_datatype_fp16:
+      TestImpl<xnn_float16, Out>(rank, xnn_unary_convert);
+      break;
+    case xnn_datatype_bf16:
+      TestImpl<xnn_bfloat16, Out>(rank, xnn_unary_convert);
+      break;
+    case xnn_datatype_fp32:
+      TestImpl<float, Out>(rank, xnn_unary_convert);
+      break;
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
+TEST_P(Convert, test) {
+  switch (GetParam().out) {
+    case xnn_datatype_int32:
+      ConvertImpl<int32_t>(GetParam().rank, GetParam().in);
+      break;
+    case xnn_datatype_qint8:
+      ConvertImpl<quantized<int8_t>>(GetParam().rank, GetParam().in);
+      break;
+    case xnn_datatype_quint8:
+      ConvertImpl<quantized<uint8_t>>(GetParam().rank, GetParam().in);
+      break;
+    case xnn_datatype_fp16:
+      ConvertImpl<xnn_float16>(GetParam().rank, GetParam().in);
+      break;
+    case xnn_datatype_bf16:
+      ConvertImpl<xnn_bfloat16>(GetParam().rank, GetParam().in);
+      break;
+    case xnn_datatype_fp32:
+      ConvertImpl<float>(GetParam().rank, GetParam().in);
+      break;
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
+// clang-format off
+const xnn_datatype all_integer_datatypes[] = {
+    xnn_datatype_int32,
+};
+
+const xnn_datatype all_real_datatypes[] = {
+    xnn_datatype_quint8,
+    xnn_datatype_qint8,
+#ifndef XNN_EXCLUDE_F16_TESTS
+    xnn_datatype_fp16,
+#endif
+    xnn_datatype_bf16,
+    xnn_datatype_fp32,
+};
+
+const xnn_datatype all_datatypes[] = {
+    xnn_datatype_int32,
+    xnn_datatype_quint8,
+    xnn_datatype_qint8,
+#ifndef XNN_EXCLUDE_F16_TESTS
+    xnn_datatype_fp16,
+#endif
+    xnn_datatype_bf16,
+    xnn_datatype_fp32,
+};
+
+const xnn_unary_operator all_integer_ops[] = {
+    xnn_unary_clamp,
+    xnn_unary_abs,
+    xnn_unary_negate,
+    xnn_unary_square,
+    xnn_unary_count_leading_zeros,
+    xnn_unary_bitwise_not,
+    xnn_unary_popcount,
+    xnn_unary_sign,
+};
+
+const xnn_unary_operator all_real_ops[] = {
     xnn_unary_clamp,
     xnn_unary_abs,
     xnn_unary_bankers_rounding,
@@ -185,84 +303,28 @@ xnn_unary_operator all_unary_ops[] = {
     xnn_unary_cube_root,
     xnn_unary_cosine,
     xnn_unary_sine,
-    xnn_unary_count_leading_zeros,
-    xnn_unary_bitwise_not,
-    xnn_unary_popcount,
     xnn_unary_sign,
 };
+// clang-format on
 
-const xnn_datatype all_datatypes[] = {
-    xnn_datatype_quint8,
-    xnn_datatype_qint8,
-#ifndef XNN_EXCLUDE_F16_TESTS
-    xnn_datatype_fp16,
-#endif
-    xnn_datatype_bf16,
-    xnn_datatype_fp32,
-    xnn_datatype_int32,
-};
+auto all_ranks = testing::Range(0, XNN_MAX_TENSOR_DIMS);
 
-INSTANTIATE_TEST_SUITE_P(
-    UnaryTest, UnaryTest,
-    testing::ConvertGenerator<Param::UnaryT>(testing::Combine(
-        testing::ValuesIn(all_unary_ops), testing::ValuesIn(all_datatypes))),
-    [](const auto& info) { return info.param.Name(); });
+INSTANTIATE_TEST_SUITE_P(UnaryTest, IntegerOps,
+                         testing::ConvertGenerator<Param::TupleT>(
+                             Combine(ValuesIn(all_integer_datatypes),
+                                     ValuesIn(all_integer_ops), all_ranks)),
+                         [](const auto& info) { return info.param.Name(); });
 
-INSTANTIATE_TEST_SUITE_P(
-    ConvertTest, UnaryTest,
-    testing::ConvertGenerator<Param::ConvertT>(testing::Combine(
-        testing::Values(xnn_unary_convert), testing::ValuesIn(all_datatypes),
-        testing::ValuesIn(all_datatypes))),
-    [](const auto& info) { return info.param.Name(); });
+INSTANTIATE_TEST_SUITE_P(UnaryTest, RealOps,
+                         testing::ConvertGenerator<Param::TupleT>(
+                             Combine(ValuesIn(all_real_datatypes),
+                                     ValuesIn(all_real_ops), all_ranks)),
+                         [](const auto& info) { return info.param.Name(); });
 
+INSTANTIATE_TEST_SUITE_P(UnaryTest, Convert,
+                         testing::ConvertGenerator<ConvertParam::TupleT>(
+                             Combine(ValuesIn(all_datatypes),
+                                     ValuesIn(all_datatypes), all_ranks)),
+                         [](const auto& info) { return info.param.Name(); });
 
-TEST(AbsTest, reshape) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  std::vector<size_t> dims{2, 3, 4};
-  uint32_t input_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, dims.size(), dims.data(), nullptr, 0,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_VALUE_ID);
-
-  uint32_t output_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, dims.size(), dims.data(), nullptr, 1,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
-
-  ASSERT_EQ(xnn_status_success, xnn_define_unary(subgraph, xnn_unary_abs, /*params=*/nullptr, input_id, output_id, /*flags=*/0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_unary_elementwise);
-  ASSERT_EQ(node->unary_operator, xnn_unary_abs);
-  ASSERT_EQ(node->num_inputs, 1);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], subgraph->values, subgraph->num_values, /*threadpool=*/nullptr), xnn_status_success);
-
-  dims[0] = 7;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, 0, dims.size(), dims.data()));
-
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
-  const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
-  const size_t num_input_elements = std::accumulate(dims.cbegin(), dims.cend(), size_t{1}, std::multiplies<size_t>());
-  ASSERT_EQ(output_shape->dim[0], dims[0]);
-  ASSERT_EQ(runtime->values[node->outputs[0]].size, num_input_elements * sizeof(float));
-}
+}  // namespace xnnpack

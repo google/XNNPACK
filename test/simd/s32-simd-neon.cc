@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: test/simd/s32-simd.cc.in
 //   Generator: tools/xngen

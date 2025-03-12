@@ -107,10 +107,10 @@ struct xnn_dwconv_config {
     xnn_init_f32_minmax_params_fn f32;
   } init;
   // Number of channels in a tile.
-  uint8_t channel_tile;
+  uint32_t channel_tile;
   // Number of channels in a subtile. This must be less-than-equal channel_tile. After processing channel_tile, the
   // remainder is processed in tiles of channel_subtile.
-  uint8_t channel_subtile;
+  uint32_t channel_subtile;
   // How much to round channels by to get more optimal tiling.
   uint8_t channel_round;
   // Number of elements in the tile. For multipass, this is the tile size for first pass.

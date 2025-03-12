@@ -19,9 +19,9 @@ namespace xnnpack {
 // - Rounds to nearest integer
 // - Replaces NaN with 0
 // - Saturates to the bounds of the result type
-template <typename Result, typename std::enable_if<!xnnpack::is_quantized<
-                               Result>::value>::type* = nullptr>
+template <typename Result>
 Result round_float_to_int(float x) {
+  using Unwrapped = typename unwrap_quantized<Result>::type;
   x = std::isnan(x) ? 0.0f : x;
   x = std::round(x);
   // It's tricky to do this with std::max/std::min, because the min/max values
@@ -29,17 +29,10 @@ Result round_float_to_int(float x) {
   // avoid converting to an out of bounds integer. To avoid this problem, we've
   // determined a constant that when added to the min/max float values, results
   // in the upper bound of the integer range.
-  constexpr int half_mantissa = sizeof(Result) * 8 > 23 ? 127 : 0;
-  x = std::max<float>(x, std::numeric_limits<Result>::min());
-  x = std::min<float>(x, std::numeric_limits<Result>::max() - half_mantissa);
-  return static_cast<Result>(x);
-}
-
-template <typename Result,
-          typename std::enable_if<xnnpack::is_quantized<Result>::value>::type* =
-              nullptr>
-Result round_float_to_int(float x) {
-  return round_float_to_int<typename Result::type>(x);
+  constexpr int half_mantissa = sizeof(Unwrapped) * 8 > 23 ? 127 : 0;
+  x = std::max<float>(x, std::numeric_limits<Unwrapped>::min());
+  x = std::min<float>(x, std::numeric_limits<Unwrapped>::max() - half_mantissa);
+  return static_cast<Unwrapped>(x);
 }
 
 template <typename T>

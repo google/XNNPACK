@@ -530,11 +530,6 @@ enum xnn_status xnn_create_runtime_v4(
     goto error;
   }
 
-  if (workspace == NULL) {
-    xnn_log_debug("Allocating non-shared workspace");
-    workspace = xnn_allocate_zero_memory(sizeof(struct xnn_workspace));
-  }
-
   const uint32_t optimization_flags = XNN_FLAG_HINT_SPARSE_INFERENCE | XNN_FLAG_HINT_FP16_INFERENCE |
     XNN_FLAG_FORCE_FP16_INFERENCE | XNN_FLAG_NO_OPERATOR_FUSION;
   status = xnn_subgraph_optimize(subgraph, flags & optimization_flags);
@@ -671,6 +666,16 @@ enum xnn_status xnn_create_runtime_v4(
     }
   }
 
+  // Create and/or add a workspace.
+  if (workspace == NULL) {
+    xnn_log_debug("Allocating non-shared workspace");
+    workspace = xnn_allocate_zero_memory(sizeof(struct xnn_workspace));
+    if (workspace == NULL) {
+      xnn_log_error("failed to allocate %zu bytes for non-shared workspace",
+                    sizeof(struct xnn_workspace));
+      goto error;
+    }
+  }
   xnn_retain_workspace(workspace);
   runtime->workspace = workspace;
   runtime->next_workspace_user = runtime->workspace->first_user;

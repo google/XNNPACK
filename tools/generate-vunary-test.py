@@ -173,6 +173,7 @@ $if DATATYPE == "f32" and OP_TYPE in SPECIAL_VALUES_F32:
   }
 """
 
+
 def main(args):
   options = parser.parse_args(args)
 
@@ -185,6 +186,7 @@ def main(args):
   tester_header = "vunary-microkernel-tester.h"
   op_header = "vunary.h"
   tests = """\
+// clang-format off
 // Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -226,17 +228,19 @@ using TestInfo = {op_type};
 """.format(op_type=op_type)
 
   tests += "#define XNN_QUANTIZED(T) xnnpack::quantized<T>\n"
-  tests += xnncommon.make_multiline_macro(xngen.preprocess(
-      TEST_TEMPLATE,
-      {
-          "TESTER": tester,
-          "TEST_ARGS": test_args,
-          "DATATYPE": datatype,
-          "OP_TYPE": op_type,
-          "OP_NAME": op,
-          "SPECIAL_VALUES_F32": SPECIAL_VALUES_F32,
-      },
-  ))
+  tests += xnncommon.make_multiline_macro(
+      xngen.preprocess(
+          TEST_TEMPLATE,
+          {
+              "TESTER": tester,
+              "TEST_ARGS": test_args,
+              "DATATYPE": datatype,
+              "OP_TYPE": op_type,
+              "OP_NAME": op,
+              "SPECIAL_VALUES_F32": SPECIAL_VALUES_F32,
+          },
+      )
+  )
 
   folder = options.ukernel
   if "rnd" in folder:

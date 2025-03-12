@@ -20,21 +20,25 @@ import xnncommon
 
 parser = argparse.ArgumentParser(description="XNNPACK generator")
 parser.add_argument(
-    "-s", "--spec", metavar="FILE", required=True, help="Spec (YAML) file")
+    "-s", "--spec", metavar="FILE", required=True, help="Spec (YAML) file"
+)
 parser.add_argument(
     "-o",
     "--output-test",
     action="append",
     metavar="FILE",
     required=True,
-    help="Test output (C++ source) file(s)")
+    help="Test output (C++ source) file(s)",
+)
 parser.add_argument(
     "-b",
     "--output-bench",
     metavar="FILE",
     required=False,
-    help="Benchmark output (C++ source) file(s)")
+    help="Benchmark output (C++ source) file(s)",
+)
 parser.set_defaults(defines=list())
+
 
 def split_ukernel_name(name):
   common_name, target_name = name.split("__", 1)
@@ -66,7 +70,19 @@ def split_ukernel_name(name):
   requantization = common_parts[-3]
   if requantization not in ["fp32", "rndnu", "rndnu16"]:
     requantization = None
-  return mr, nr, kr, sr, mr_packed, vector_tile, requantization, arch, isa, assembly
+  return (
+      mr,
+      nr,
+      kr,
+      sr,
+      mr_packed,
+      vector_tile,
+      requantization,
+      arch,
+      isa,
+      assembly,
+  )
+
 
 GEMM_BENCH_CODE = """\
 $if CPP_CHECK:
@@ -703,9 +719,7 @@ def generate_test_cases(
   _, datatype, ukernel_type, activation, _ = ukernel.split("_", 4)
   kerneltype = datatype
   if datatype in ["f16", "f32"] and ukernel_type in ["qc8w", "qc4w"]:
-    _, datatype, kerneltype, ukernel_type, activation, _ = ukernel.split(
-        "_", 5
-    )
+    _, datatype, kerneltype, ukernel_type, activation, _ = ukernel.split("_", 5)
     datatype = datatype + "_" + kerneltype
   if (
       datatype in ("qd8", "qp8")
@@ -737,15 +751,17 @@ def generate_test_cases(
 
   nr_scale = ""
   if vector_tile:
-    accum_type = {
-        "qs8": "int32_t",
+    ctype = {
+        "qs8": "int8_t",
         "qd8": "int32_t",
-        "qp8": "int32_t",
-        "qu8": "int32_t",
-        "f16": "xnn_float16",
+        "qp8": "int8_t",
+        "qu8": "uint8_t",
+        "f16": "uint16_t",
         "f32": "float",
     }[datatype]
-    nr_scale = {"rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % accum_type}[isa]
+    nr_scale = {
+        "rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype
+    }[isa]
   test_fun_name = "".join(ukernel.split("_")[1:4]).upper()
   if test_fun_name in {"QP8F32QC8W"}:
     test_fun_name = "_".join(["Test", test_fun_name])
@@ -815,6 +831,7 @@ def main(args):
       raise ValueError("expected a list of micro-kernels in the spec")
 
     tests = """\
+// clang-format off
 // Copyright (c) Facebook, Inc. and its affiliates.
 // All rights reserved.
 //
@@ -849,6 +866,7 @@ def main(args):
 """.format(specification=options.spec, generator=sys.argv[0])
 
     benches = """\
+// clang-format off
 // Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -941,9 +959,12 @@ def main(args):
         create_tests_from_idx[create_tests_idx] = create_tests.replace(
             "CreateTests(", f"CreateTests{create_tests_idx}("
         )
-        if isa == 'rvv':
-          create_tests_from_idx[create_tests_idx] = xnncommon.postprocess_test_case(
-            create_tests_from_idx[create_tests_idx], arch, isa, assembly)
+        if isa == "rvv":
+          create_tests_from_idx[create_tests_idx] = (
+              xnncommon.postprocess_test_case(
+                  create_tests_from_idx[create_tests_idx], arch, isa, assembly
+              )
+          )
       test_case = test_case.replace(
           "CreateTests(", f"CreateTests{create_tests_idx}("
       )

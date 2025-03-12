@@ -1,0 +1,159 @@
+// Copyright 2025 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert NR % 8 == 0
+#include <assert.h>
+
+#include <wasm_simd128.h>
+
+#include "xnnpack/gemm.h"
+
+void xnn_f16_gemm_minmax_ukernel_${MR}x${NR}__wasmrelaxedsimd_splat(
+    size_t mr,
+    size_t nc,
+    size_t kc,
+    const xnn_float16* restrict a,
+    size_t a_stride,
+    const xnn_float16* restrict w,
+    xnn_float16* restrict c,
+    size_t cm_stride,
+    size_t cn_stride,
+    const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(mr != 0);
+  assert(mr <= ${MR});
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(kc % sizeof(uint16_t) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
+
+  const uint16_t* a0 = (const uint16_t*) a;
+  uint16_t* c0 = (uint16_t*) c;
+
+  const v128_t vmin = wasm_v128_load16_splat(&params->scalar.min);;
+  const v128_t vmax = wasm_v128_load16_splat(&params->scalar.max);;
+
+  $for M in range(1, MR):
+    const uint16_t* a${M} = (const uint16_t*) ((uintptr_t) a${M-1} + a_stride);
+    uint16_t* c${M} = (uint16_t*) ((uintptr_t) c${M-1} + cm_stride);
+    $if M % 2 == 0:
+      if XNN_UNPREDICTABLE(mr <= ${M}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+    $elif M + 1 == MR:
+      if XNN_UNPREDICTABLE(mr != ${M+1}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+    $else:
+      if XNN_UNPREDICTABLE(mr < ${M+1}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+
+  do {
+    v128_t vacc0x0 = wasm_v128_load(w);
+    $for N in range(8, NR, 8):
+      v128_t vacc0x${N//8} = wasm_v128_load((const uint16_t*) w + ${N});
+    $for M in range(1, MR):
+      $for N in range(0, NR, 8):
+        v128_t vacc${M}x${N//8} = vacc0x${N//8};
+    w = (const xnn_float16*) w + ${NR};
+
+    size_t k = kc;
+    do {
+      $for M in range(MR):
+        const v128_t va${M} = wasm_i16x8_splat(*a${M});
+        a${M} += 1;
+
+      const v128_t vb0 = wasm_v128_load(w);
+      $for N in range(8, NR, 8):
+        const v128_t vb${N//8} = wasm_v128_load((const uint16_t*) w + ${N});
+      w = (const xnn_float16*) w + ${NR};
+
+      $for N in range(0, NR, 8):
+        $for M in range(MR):
+          vacc${M}x${N//8} = wasm_f16x8_relaxed_madd(va${M}, vb${N//8}, vacc${M}x${N//8});
+
+      k -= sizeof(uint16_t);
+    } while (k != 0);
+
+    $for N in range(0, NR, 8):
+      $for M in range(MR):
+        vacc${M}x${N//8} = wasm_f16x8_pmax(vacc${M}x${N//8}, vmin);
+
+    $for N in range(0, NR, 8):
+      $for M in range(MR):
+        vacc${M}x${N//8} = wasm_f16x8_pmin(vacc${M}x${N//8}, vmax);
+
+    if XNN_LIKELY(nc >= ${NR}) {
+      $for M in range(MR):
+        wasm_v128_store(c${M}, vacc${M}x0);
+        $for N in range(8, NR, 8):
+          wasm_v128_store(c${M} + ${N}, vacc${M}x${N//8});
+        c${M} = (uint16_t*) ((uintptr_t) c${M} + cn_stride);
+
+      $for M in range(MR):
+        a${M} = (const uint16_t*) ((uintptr_t) a${M} - kc);
+
+      nc -= ${NR};
+    } else {
+      $for LOG2N in reversed(range(NR.bit_length())):
+        $if LOG2N == 3:
+          $for M in range(MR):
+            v128_t vh${M}x0 = vacc${M}x0;
+        $if NR != 1 << LOG2N:
+          if (nc & ${1 << LOG2N}) {
+            $if LOG2N >= 4:
+              $for M in range(MR):
+                wasm_v128_store(c${M}, vacc${M}x0);
+                $for N in range(8, 1 << LOG2N, 8):
+                  wasm_v128_store(c${M} + ${N}, vacc${M}x${N//8});
+
+              $for M in range(MR):
+                $for N in range(0, NR - (1 << LOG2N), 8):
+                  vacc${M}x${N//8} = vacc${M}x${(N + (1 << LOG2N))//8};
+
+              $for M in range(MR):
+                c${M} += ${1 << LOG2N};
+            $elif LOG2N == 3:
+              $for M in range(MR):
+                wasm_v128_store(c${M}, vh${M}x0);
+
+              $for M in range(MR):
+                vh${M}x0 = vacc${M}x1;
+
+              $for M in range(MR):
+                c${M} += ${1 << LOG2N};
+            $elif LOG2N == 2:
+              $for M in range(MR):
+                wasm_v128_store64_lane(c${M}, vh${M}x0, 0);
+
+              $for M in range(MR):
+                vh${M}x0 = wasm_i64x2_shuffle(vh${M}x0, vh${M}x0, 1, 1);
+
+              $for M in range(MR):
+                c${M} += 4;
+            $elif LOG2N == 1:
+              $for M in range(MR):
+                wasm_v128_store32_lane(c${M}, vh${M}x0, 0);
+
+              $for M in range(MR):
+                wasm_i32x4_shuffle(vh${M}x0, vh${M}x0, 1, 2, 3, 1);
+
+              $for M in range(MR):
+                c${M} += 2;
+            $elif LOG2N == 0:
+              $for M in range(MR):
+                wasm_v128_store16_lane(c${M}, vh${M}x0, 0);
+          }
+
+      nc = 0;
+    }
+  } while (nc != 0);
+}

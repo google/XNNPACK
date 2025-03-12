@@ -345,6 +345,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
         copts = [
             "-fno-fast-math",
             "-fno-math-errno",
+            "-mfp16",
         ],
     ),
     "wasm32": _create_params(

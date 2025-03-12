@@ -168,6 +168,19 @@ TEST_P(BatchMatMulTest, TestF32) {
       .TestF32();
 }
 
+TEST_P(BatchMatMulTest, TestBF16F32) {
+  const BatchMatMulTesterParams& params = GetParam();
+  BatchMatMulOperatorTester()
+      .batch_dims_a(params.batch_dims_a)
+      .batch_dims_b(params.batch_dims_b)
+      .m(params.m)
+      .k(params.k)
+      .n(params.n)
+      .transpose_b(params.transpose_b)
+      .expected_status_reshape(params.expected_status_reshape)
+      .TestBF16F32();
+}
+
 TEST_P(BatchMatMulTest, TestF16) {
   const BatchMatMulTesterParams& params = GetParam();
   BatchMatMulOperatorTester()

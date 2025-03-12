@@ -18,28 +18,48 @@ import xngen
 import xnncommon
 
 
-parser = argparse.ArgumentParser(description='Reduce discontiguous microkernel test generator')
-parser.add_argument("-t", "--tester", metavar="TESTER", required=True,
-                    choices=["ReduceDiscontiguousMicrokernelTester", "RDSumMicrokernelTester"],
-                    help="Tester class to be used in the generated test")
-parser.add_argument("-s", "--spec", metavar="FILE", required=True,
-                    help="Specification (YAML) file")
-parser.add_argument("-o", "--output", metavar="FILE", required=True,
-                    help='Output (C++ source) file')
+parser = argparse.ArgumentParser(
+    description="Reduce discontiguous microkernel test generator"
+)
+parser.add_argument(
+    "-t",
+    "--tester",
+    metavar="TESTER",
+    required=True,
+    choices=["ReduceMicrokernelTester", "RDSumMicrokernelTester"],
+    help="Tester class to be used in the generated test",
+)
+parser.add_argument(
+    "-s",
+    "--spec",
+    metavar="FILE",
+    required=True,
+    help="Specification (YAML) file",
+)
+parser.add_argument(
+    "-o",
+    "--output",
+    metavar="FILE",
+    required=True,
+    help="Output (C++ source) file",
+)
 parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_(qs8|qu8|f16_f32acc|f32|s8)_rd(minmax|max|min|sum)?(_minmax)?(_(fp32|rndnu))?_ukernel_((\d+)p)?(\d+)x__(.+)_(c)?(u)?(\d+)(_acc(\d+))?(v)?", name)
+  match = re.fullmatch(
+      r"xnn_(qs8|qu8|f16_f32acc|f32|s8|u8)_rd(minmax|max|min|sum)?(_minmax)?(_(fp32|rndnu))?_ukernel_((\d+)p)?(\d+)x__(.+)_(c)?(u)?(\d+)(_acc(\d+))?(v)?",
+      name,
+  )
 
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
 
   op_type = {
-    "minmax": "MinMax",
-    "max": "Max",
-    "min": "Min",
-    "sum": "Sum",
+      "minmax": "MinMax",
+      "max": "Max",
+      "min": "Min",
+      "sum": "Sum",
   }[match.group(2)]
 
   requantization_type = match.group(5)
@@ -50,7 +70,16 @@ def split_ukernel_name(name):
   vector_tile = bool(match.group(15))
 
   arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(9))
-  return requantization_type, op_type, primary_tile, incremental_tile, channel_tile, vector_tile, arch, isa
+  return (
+      requantization_type,
+      op_type,
+      primary_tile,
+      incremental_tile,
+      channel_tile,
+      vector_tile,
+      arch,
+      isa,
+  )
 
 
 RDSUM_TEST_TEMPLATE = """\
@@ -381,23 +410,33 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fullti
     }
 }
 
-TEST(${TEST_NAME}, overflow_accumulator) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-  for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-     ${TESTER}()
-       .rows(${257 + INCREMENTAL_TILE})
-       .channels(channels)
-       .Test(${", ".join(TEST_ARGS)});
+$if TESTER == "RDSumMicrokernelTester":
+  TEST(${TEST_NAME}, overflow_accumulator) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = 1; channels < channel_tile*2; ++channels) {
+      ${TESTER}()
+        .rows(${257 + INCREMENTAL_TILE})
+        .channels(channels)
+        .Test(${", ".join(TEST_ARGS)});
+    }
   }
-}
 """
 
 
-def generate_test_cases(ukernel, op_type, init_fn, requantization_type, tester,
-                        primary_tile, incremental_tile, channel_tile,
-                        vector_tile, isa):
+def generate_test_cases(
+    ukernel,
+    op_type,
+    init_fn,
+    requantization_type,
+    tester,
+    primary_tile,
+    incremental_tile,
+    channel_tile,
+    vector_tile,
+    isa,
+):
   """Generates all tests cases for a discontiguous reduce micro-kernel.
 
   Args:
@@ -407,15 +446,15 @@ def generate_test_cases(ukernel, op_type, init_fn, requantization_type, tester,
     requantization_type: Requantization type (FP32/RNDNU).
     tester: C++ name of the tester class.
     primary_tile: Number of rows (pixels) processed per one iteration of the
-                  primary outer loop of the micro-kernel.
-    incremental_tile: Number of rows (pixels) processed per one iteration of
-                      the incremental outer loop of the micro-kernel.
+      primary outer loop of the micro-kernel.
+    incremental_tile: Number of rows (pixels) processed per one iteration of the
+      incremental outer loop of the micro-kernel.
     channel_tile: Number of channels processed per one iteration of the inner
-                  loops of the micro-kernel.
+      loops of the micro-kernel.
     vector_tile: Indicates if channels are specified in vectors rather than
-                 elements.
+      elements.
     isa: instruction set required to run the micro-kernel. Generated unit test
-         will skip execution if the host processor doesn't support this ISA.
+      will skip execution if the host processor doesn't support this ISA.
 
   Returns:
     Code for the test case.
@@ -423,31 +462,44 @@ def generate_test_cases(ukernel, op_type, init_fn, requantization_type, tester,
   _, test_name = ukernel.split("_", 1)
   _, datatype, ukernel_type, _ = ukernel.split("_", 3)
   test_args = [ukernel]
-  if tester == "ReduceDiscontiguousMicrokernelTester":
+  if tester == "ReduceMicrokernelTester":
     test_args.append(
-        "ReduceDiscontiguousMicrokernelTester::OpType::%s" % op_type)
+        "ReduceMicrokernelTester::OpType::%s" % op_type
+    )
   if init_fn is not None:
     test_args.append(init_fn)
   if requantization_type:
-    test_args.append("xnn_%s_requantize_%s" % \
-      (datatype.lower(), requantization_type.lower()))
+    test_args.append(
+        "xnn_%s_requantize_%s" % (datatype.lower(), requantization_type.lower())
+    )
   channel_scaled_tile = channel_tile
   if vector_tile:
-    ctype = {"qs8": "int8_t", "qu8": "uint8_t", "f16": "uint16_t", "f32": "float"}[datatype]
-    channel_scaled_tile = {"rvv": "(%s*xnn_init_hardware_config()->vlenb/sizeof(%s))" % (str(channel_tile), ctype)}[isa]
-  return xngen.preprocess(RDSUM_TEST_TEMPLATE, {
-      "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
-      "TEST_ARGS": test_args,
-      "TESTER": tester,
-      "DATATYPE": datatype,
-      "PRIMARY_TILE": primary_tile,
-      "INCREMENTAL_TILE": incremental_tile,
-      "CHANNEL_TILE": channel_tile,
-      "CHANNEL_SCALED_TILE": channel_scaled_tile,
-      "CHANNEL_SUFFIX": "v" if vector_tile else "",
-      "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
-      "next_prime": next_prime,
-    })
+    ctype = {
+        "qs8": "int8_t",
+        "qu8": "uint8_t",
+        "f16": "uint16_t",
+        "f32": "float",
+    }[datatype]
+    channel_scaled_tile = {
+        "rvv": "(%s*xnn_init_hardware_config()->vlenb/sizeof(%s))"
+        % (str(channel_tile), ctype)
+    }[isa]
+  return xngen.preprocess(
+      RDSUM_TEST_TEMPLATE,
+      {
+          "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
+          "TEST_ARGS": test_args,
+          "TESTER": tester,
+          "DATATYPE": datatype,
+          "PRIMARY_TILE": primary_tile,
+          "INCREMENTAL_TILE": incremental_tile,
+          "CHANNEL_TILE": channel_tile,
+          "CHANNEL_SCALED_TILE": channel_scaled_tile,
+          "CHANNEL_SUFFIX": "v" if vector_tile else "",
+          "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
+          "next_prime": next_prime,
+      },
+  )
 
 
 def main(args):
@@ -459,11 +511,12 @@ def main(args):
       raise ValueError("expected a list of micro-kernels in the spec")
 
     tester_header = {
-      "ReduceDiscontiguousMicrokernelTester": "reduce-discontiguous-microkernel-tester.h",
-      "RDSumMicrokernelTester": "rdsum-microkernel-tester.h",
+        "ReduceMicrokernelTester": "reduce-microkernel-tester.h",
+        "RDSumMicrokernelTester": "rdsum-microkernel-tester.h",
     }[options.tester]
 
     tests = """\
+// clang-format off
 // Copyright 2024 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -480,19 +533,38 @@ def main(args):
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/reduce.h"
 #include "test/{tester_header}"
-""".format(specification=options.spec, generator=sys.argv[0],
-           tester_header=tester_header)
+""".format(
+        specification=options.spec,
+        generator=sys.argv[0],
+        tester_header=tester_header,
+    )
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
       init_fn = ukernel_spec.get("init")
-      requantization_type, op_type, primary_tile, incremental_tile, channel_tile, vector_tile, arch, \
-        isa = split_ukernel_name(name)
+      (
+          requantization_type,
+          op_type,
+          primary_tile,
+          incremental_tile,
+          channel_tile,
+          vector_tile,
+          arch,
+          isa,
+      ) = split_ukernel_name(name)
 
-      test_case = generate_test_cases(name, op_type, init_fn, requantization_type,
-                                      options.tester, primary_tile,
-                                      incremental_tile, channel_tile,
-                                      vector_tile, isa)
+      test_case = generate_test_cases(
+          name,
+          op_type,
+          init_fn,
+          requantization_type,
+          options.tester,
+          primary_tile,
+          incremental_tile,
+          channel_tile,
+          vector_tile,
+          isa,
+      )
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     xnncommon.overwrite_if_changed(options.output, tests)
@@ -500,4 +572,3 @@ def main(args):
 
 if __name__ == "__main__":
   main(sys.argv[1:])
-

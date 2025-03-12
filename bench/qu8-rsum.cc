@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2024 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -187,6 +188,26 @@ BENCHMARK_CAPTURE(qu8_rsum, scalar_u4,
     ->Apply(BenchmarkRSUM)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  BENCHMARK_CAPTURE(qu8_rsum, rvv_u1v,
+                    xnn_qu8_rsum_ukernel__rvv_u1v,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckRVV)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  BENCHMARK_CAPTURE(qu8_rsum, rvv_u2v,
+                    xnn_qu8_rsum_ukernel__rvv_u2v,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckRVV)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

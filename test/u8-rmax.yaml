@@ -23,3 +23,6 @@
 - name: xnn_u8_rmax_ukernel__sse2_u48_acc3
 - name: xnn_u8_rmax_ukernel__sse2_u64_acc2
 - name: xnn_u8_rmax_ukernel__sse2_u64_acc4
+
+# Wasm SIMD
+- name: xnn_u8_rmax_ukernel__wasmsimd_u32_acc2

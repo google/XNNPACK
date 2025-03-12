@@ -152,6 +152,34 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_pf16(
       batch_matrix_multiply_op_out);
 }
 
+enum xnn_status xnn_create_batch_matrix_multiply_nc_bf16_f32(
+    uint32_t flags, xnn_operator_t* batch_matrix_multiply_op_out) {
+  const struct xnn_gemm_config* gemm_config = xnn_init_bf16_f32_gemm_config();
+  if (gemm_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(
+            xnn_operator_type_batch_matrix_multiply_nc_bf16_f32));
+    return xnn_status_unsupported_hardware;
+  }
+
+  const struct gemm_fused_ukernels* gemm_ukernels = &gemm_config->minmax;
+  if (gemm_config->linear.gemm[gemm_config->mr - 1]
+          .function[XNN_UARCH_DEFAULT] != NULL) {
+    gemm_ukernels = &gemm_config->linear;
+  }
+
+  struct xnn_f32_minmax_params params;
+  if XNN_LIKELY (gemm_config->init.f32 != NULL) {
+    gemm_config->init.f32(&params, -INFINITY, INFINITY);
+  }
+
+  return create_batch_matrix_multiply_nc(
+      flags, &params, sizeof(params), gemm_config, gemm_ukernels,
+      xnn_operator_type_batch_matrix_multiply_nc_bf16_f32,
+      batch_matrix_multiply_op_out);
+}
+
 enum xnn_status xnn_create_batch_matrix_multiply_nc_f32(
     uint32_t flags, xnn_operator_t* batch_matrix_multiply_op_out) {
   const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
@@ -680,6 +708,7 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
       // Nothing to do here, the `B` matrix has already been packed.
       break;
 
+    case xnn_operator_type_batch_matrix_multiply_nc_bf16_f32:
     case xnn_operator_type_batch_matrix_multiply_nc_f16:
     case xnn_operator_type_batch_matrix_multiply_nc_f32:
     case xnn_operator_type_batch_matrix_multiply_nc_pf16:
@@ -940,6 +969,25 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_pf16(
       pthreadpool_get_threads_count(threadpool));
 }
 
+enum xnn_status xnn_reshape_batch_matrix_multiply_nc_bf16_f32(
+    xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
+    const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
+    size_t n, size_t* workspace_size, size_t* workspace_alignment,
+    pthreadpool_t threadpool) {
+  return reshape_batch_matrix_multiply_nc(
+      batch_matrix_multiply_op, xnn_operator_type_batch_matrix_multiply_nc_bf16_f32,
+      num_batch_dims, batch_dims_a, batch_dims_b, m, k, n, workspace_size,
+      workspace_alignment,
+      /*log2_input_a_element_size=*/XNN_LOG2_SIZEOF_HALF,
+      /*log2_input_b_element_size=*/XNN_LOG2_SIZEOF_HALF,
+      /*bias_element_size=*/sizeof(float),
+      /*w_stride_extra_bytes=*/0,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      &batch_matrix_multiply_op->params.f32_minmax,
+      sizeof(batch_matrix_multiply_op->params.f32_minmax),
+      pthreadpool_get_threads_count(threadpool));
+}
+
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_f32(
     xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
     const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
@@ -1106,6 +1154,19 @@ enum xnn_status xnn_setup_batch_matrix_multiply_nc_pf16(
     const void* input_a, const void* input_b, void* output) {
   return setup_batch_matrix_multiply_nc(
       batch_matrix_multiply_op, xnn_operator_type_batch_matrix_multiply_nc_pf16,
+      input_a, /*quantization_params=*/NULL, input_b,
+      /*packed_weights=*/
+      batch_matrix_multiply_op->context.gemm.const_weights
+          ? packed_weights(batch_matrix_multiply_op)
+          : workspace,
+      output);
+}
+
+enum xnn_status xnn_setup_batch_matrix_multiply_nc_bf16_f32(
+    xnn_operator_t batch_matrix_multiply_op, void* workspace,
+    const void* input_a, const void* input_b, void* output) {
+  return setup_batch_matrix_multiply_nc(
+      batch_matrix_multiply_op, xnn_operator_type_batch_matrix_multiply_nc_bf16_f32,
       input_a, /*quantization_params=*/NULL, input_b,
       /*packed_weights=*/
       batch_matrix_multiply_op->context.gemm.const_weights
