@@ -25,6 +25,7 @@
 #include "src/xnnpack/config.h"
 #include "src/xnnpack/internal.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/operator.h"
 #include "src/xnnpack/packq.h"
 #include "test/replicable_random_device.h"
 
@@ -113,7 +114,7 @@ class BatchMatMulOperatorTester {
         for (size_t ni = 0; ni < n; ni++) {
           for (size_t ki = 0; ki < k; ki++) {
             output_ref[mi * n + ni] +=
-                static_cast<float>(input_a[mi * k + ki]) * 
+                static_cast<float>(input_a[mi * k + ki]) *
                 static_cast<float>(input_b[ni * k + ki]);
           }
         }
@@ -124,7 +125,7 @@ class BatchMatMulOperatorTester {
         for (size_t ni = 0; ni < n; ni++) {
           for (size_t ki = 0; ki < k; ki++) {
             output_ref[mi * n + ni] +=
-                static_cast<float>(input_a[mi * k + ki]) * 
+                static_cast<float>(input_a[mi * k + ki]) *
                 static_cast<float>(input_b[ki * n + ni]);
           }
         }
