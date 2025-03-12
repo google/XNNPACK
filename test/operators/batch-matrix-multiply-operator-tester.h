@@ -25,6 +25,7 @@
 #include "src/xnnpack/config.h"
 #include "src/xnnpack/internal.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/operator.h"
 #include "src/xnnpack/packq.h"
 #include "test/replicable_random_device.h"
 

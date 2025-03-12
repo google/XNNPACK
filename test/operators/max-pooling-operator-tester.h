@@ -23,6 +23,7 @@
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/operator.h"
 #include "test/replicable_random_device.h"
 
 class MaxPoolingOperatorTester {

@@ -26,6 +26,7 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/operator.h"
 #include "src/xnnpack/requantization.h"
 #include "test/replicable_random_device.h"
 #include <pthreadpool.h>
