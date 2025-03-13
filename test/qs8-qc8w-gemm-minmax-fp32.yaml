@@ -1740,3 +1740,8 @@
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 1
+- name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_7x4v__rvv
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 1
+  
