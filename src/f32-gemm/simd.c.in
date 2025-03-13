@@ -5,12 +5,12 @@
 
 $assert NR % 32 == 0
 
-#include "src/xnnpack/simd/f32-hvx.h"
+#include "src/xnnpack/simd/f32-${ARCH}.h"
 
 #include "src/xnnpack/gemm.h"
 
 $RANGE_MR = list(range(MR))
-void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
+void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__${ARCH}_broadcast(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -54,21 +54,21 @@ void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
 
   do {
     $for N in range(0, NR, 32):
-        HVX_Vector vacc0x${N//32} = xnn_load_f32(w + ${N});
+        xnn_simd_f32_t vacc0x${N//32} = xnn_load_f32(w + ${N});
     $for M in range(1, MR):
       $for N in range(0, NR, 32):
-        HVX_Vector vacc${M}x${N//32} = vacc0x${N//32};
+        xnn_simd_f32_t vacc${M}x${N//32} = vacc0x${N//32};
     w += ${NR};
 
     size_t k = kc;
     do {
       $for M in range(MR):
-        const HVX_Vector va${M} = xnn_set1_f32(*a${M});
+        const xnn_simd_f32_t va${M} = xnn_set1_f32(*a${M});
         a${M} += 1;
 
-      const HVX_Vector vb0 = *((const HVX_Vector *)(w));
+      const xnn_simd_f32_t vb0 = *((const xnn_simd_f32_t *)(w));
       $for N in range(32, NR, 32):
-        const HVX_Vector vb${N//32} = *((const HVX_Vector *)(w + ${N}));
+        const xnn_simd_f32_t vb${N//32} = *((const xnn_simd_f32_t *)(w + ${N}));
       w += ${NR};
 
       $for N in range(0, NR, 32):
@@ -78,12 +78,12 @@ void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
       k -= sizeof(float);
     } while (k != 0);
 
-    HVX_Vector vmin = xnn_set1_f32(params->scalar.min);
+    xnn_simd_f32_t vmin = xnn_set1_f32(params->scalar.min);
     $for N in range(0, NR, 32):
       $for M in range(MR):
         vacc${M}x${N//32} = xnn_max_f32(vmin, vacc${M}x${N//32});
 
-    HVX_Vector vmax = xnn_set1_f32(params->scalar.max);
+    xnn_simd_f32_t vmax = xnn_set1_f32(params->scalar.max);
     $for N in range(0, NR, 32):
       $for M in range(MR):
         vacc${M}x${N//32} = xnn_min_f32(vmax, vacc${M}x${N//32});
