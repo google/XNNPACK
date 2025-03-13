@@ -177,6 +177,7 @@ tools/xngen src/qs8-gemm/rvv.c.in -D MR=8 -D NR=m4 -D  -D DATATYPE=QD8 -o src/qd
 
 tools/xngen src/qs8-gemm/rvv.c.in -D MR=1 -D NR=m4 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x4v-minmax-fp32-rvv.c &
 tools/xngen src/qs8-gemm/rvv.c.in -D MR=4 -D NR=m4 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x4v-minmax-fp32-rvv.c &
+tools/xngen src/qs8-gemm/rvv.c.in -D MR=7 -D NR=m4 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-7x4v-minmax-fp32-rvv.c &
 
 ################################## WAsm SIMD ##################################
 ### C2 micro-kernels
