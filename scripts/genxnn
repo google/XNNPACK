@@ -1,20 +1,5 @@
 #!/bin/bash
 
-function my_generate1() {
-  files_changed=$(scripts/check_files_changed.py $1)
-  if [[ $files_changed ]]
-  then
-    if ${VERBOSE}; then
-      echo $1
-    fi
-    if ${DEBUG}; then
-      echo $files_changed
-    fi
-    touch $files_changed
-    bash -c $1 &
-  fi
-}
-
 function my_generatef() {
   if ${VERBOSE}; then
     echo $1
@@ -22,7 +7,6 @@ function my_generatef() {
   bash -c $1 &
 }
 
-export -f my_generate1
 export -f my_generatef
 
 export FORCE='false'
@@ -59,11 +43,7 @@ done
 shift $(( OPTIND - 1 ))
 [[ "${1}" == "--" ]] && shift
 
-if ${FORCE}; then
-  find scripts/ -name 'generate-*.sh' -exec bash -c 'my_generatef {}' \;
-else
-  find scripts/ -name 'generate-*.sh' -exec bash -c 'my_generate1 {}' \;
-fi
+find scripts/ -name 'generate-*.sh' -exec bash -c 'my_generatef {}' \;
 wait
 if ${VERBOSE}; then
   echo ./tools/update-microkernels.py
