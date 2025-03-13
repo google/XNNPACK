@@ -35,6 +35,8 @@ NON_PROD_HVX_MICROKERNEL_SRCS = [
     "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-hvx-rr2-p5-u64-acc2.c",
     "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-hvx-rr2-p5-u128-acc2.c",
     "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-hvx-rr2-p5-u128-acc4.c",
+    "src/f32-rdminmax/gen/f32-rdmax-2p2x-hvx-c32.c",
+    "src/f32-rdminmax/gen/f32-rdmin-2p2x-hvx-c32.c",
     "src/f32-rsum/gen/f32-rsum-hvx-u32.c",
     "src/f32-rsum/gen/f32-rsum-hvx-u64-acc2.c",
     "src/f32-rsum/gen/f32-rsum-hvx-u96-acc3.c",

@@ -146,6 +146,11 @@ static XNN_INLINE xnn_simd_f32_t xnn_load_tail_f32(const float *input,
   return *input;
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_load_tail_safe_f32(const float *input,
+                                                        size_t num_elements) {
+  return *input;
+}
+
 static XNN_INLINE void xnn_store_tail_f32(float *output, xnn_simd_f32_t v,
                                           size_t num_elements) {
   *output = v;

@@ -1439,6 +1439,14 @@ typedef void (*xnn_qu8_rsum_ukernel_fn)(
 
 // RDMINMAX: Discontiguous Reduce-MINMAX
 
+typedef void (*xnn_f32_rdminmax_ukernel_fn)(
+    size_t rows,
+    size_t channels,
+    const float* input,
+    size_t input_stride,
+    float* output,
+    const void* params);
+
 typedef void (*xnn_s8_rdminmax_ukernel_fn)(
     size_t rows,
     size_t channels,

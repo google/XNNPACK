@@ -647,13 +647,38 @@ DECLARE_QU8_RDSUM_UKERNEL_FUNCTION(xnn_qu8_rdsum_ukernel_7p7x__wasmsimd_c64)
 DECLARE_QU8_RDSUM_UKERNEL_FUNCTION(xnn_qu8_rdsum_ukernel_7p7x__rvv_u1v)
 DECLARE_QU8_RDSUM_UKERNEL_FUNCTION(xnn_qu8_rdsum_ukernel_7p7x__rvv_u2v)
 
+#define DECLARE_F32_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(fn_name)  \
+  XNN_INTERNAL void fn_name(  \
+      size_t rows,            \
+      size_t channels,        \
+      const float* input,     \
+      size_t input_stride,    \
+      float* output,          \
+      const void* params);
+
+DECLARE_F32_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_f32_rdmin_ukernel_2p2x__neon_c32)
+DECLARE_F32_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_f32_rdmin_ukernel_2p2x__sse2_c32)
+DECLARE_F32_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_f32_rdmin_ukernel_2p2x__avx_c32)
+DECLARE_F32_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_f32_rdmin_ukernel_2p2x__avx512f_c32)
+DECLARE_F32_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_f32_rdmin_ukernel_2p2x__wasmsimd_c32)
+DECLARE_F32_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_f32_rdmin_ukernel_2p2x__hvx_c32)
+DECLARE_F32_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_f32_rdmin_ukernel_2p2x__scalar_c2)
+
+DECLARE_F32_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_f32_rdmax_ukernel_2p2x__neon_c32)
+DECLARE_F32_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_f32_rdmax_ukernel_2p2x__sse2_c32)
+DECLARE_F32_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_f32_rdmax_ukernel_2p2x__avx_c32)
+DECLARE_F32_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_f32_rdmax_ukernel_2p2x__avx512f_c32)
+DECLARE_F32_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_f32_rdmax_ukernel_2p2x__wasmsimd_c32)
+DECLARE_F32_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_f32_rdmax_ukernel_2p2x__hvx_c32)
+DECLARE_F32_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_f32_rdmax_ukernel_2p2x__scalar_c2)
+
 #define DECLARE_S8_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(fn_name)  \
   XNN_INTERNAL void fn_name(  \
       size_t rows,            \
       size_t channels,        \
       const int8_t* input,    \
       size_t input_stride,    \
-      int8_t* output,        \
+      int8_t* output,         \
       const void* params);
 
 DECLARE_S8_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_s8_rdmin_ukernel_2p2x__neon_c32)

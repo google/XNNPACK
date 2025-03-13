@@ -269,6 +269,8 @@ xnnpack_cxx_library(
     "f32_rmax",
     "f32_rmin",
     "f32_rminmax",
+    "f32_rdmin",
+    "f32_rdmax",
     "s8_rmin",
     "s8_rmax",
     "s8_rminmax",

@@ -595,6 +595,8 @@ NON_PROD_WASMSIMD_MICROKERNEL_SRCS = [
     "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-wasmsimd-rr2-p5-u4.c",
     "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-wasmsimd-rr2-p5-u8-acc2.c",
     "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-wasmsimd-rr2-p5-u16-acc4.c",
+    "src/f32-rdminmax/gen/f32-rdmax-2p2x-wasmsimd-c32.c",
+    "src/f32-rdminmax/gen/f32-rdmin-2p2x-wasmsimd-c32.c",
     "src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-wasmsimd-c32.c",
     "src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-wasmsimd-c64.c",
     "src/f32-rminmax/gen/f32-rmax-wasmsimd-minmax-u4.c",

@@ -172,6 +172,8 @@ NON_PROD_AVX512F_MICROKERNEL_SRCS = [
     "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr2-p5-u16.c",
     "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr2-p5-u32-acc2.c",
     "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr2-p5-u64-acc4.c",
+    "src/f32-rdminmax/gen/f32-rdmax-2p2x-avx512f-c32.c",
+    "src/f32-rdminmax/gen/f32-rdmin-2p2x-avx512f-c32.c",
     "src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx512f-c16.c",
     "src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx512f-c32.c",
     "src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx512f-c128.c",
