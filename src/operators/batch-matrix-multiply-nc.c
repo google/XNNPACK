@@ -284,7 +284,7 @@ enum xnn_status create_batch_matrix_multiply_nc_fx_const_weights(
 
     // Allocate the packed weights.
     void* packed_data = xnn_get_pointer_to_write_weights(
-        batch_matrix_multiply_op, aligned_size, /*padding_byte=*/0);
+        batch_matrix_multiply_op, aligned_size);
     if (packed_data == NULL) {
       xnn_log_error(
           "failed to allocate %zu bytes for %s operator packed weights",
@@ -478,7 +478,7 @@ enum xnn_status create_batch_matrix_multiply_nc_qx8_f32_qc8w(
         round_up_po2(packed_size, XNN_ALLOCATION_ALIGNMENT);
 
     void* packed_data = xnn_get_pointer_to_write_weights(
-        batch_matrix_multiply_op, aligned_size, /*padding_byte=*/0);
+        batch_matrix_multiply_op, aligned_size);
     if (packed_data == NULL) {
       xnn_log_error(
           "failed to allocate %zu bytes for %s operator packed weights",
@@ -491,6 +491,10 @@ enum xnn_status create_batch_matrix_multiply_nc_qx8_f32_qc8w(
         aligned_size,
         xnn_operator_type_to_string_v2(batch_matrix_multiply_op),
         packed_data);
+    if (extra_bytes > 0) {
+      // TODO(b/402602597): We shouldn't need this initialization.
+      memset(packed_data, 0, aligned_size);
+    }
 
     if (gemm_config->pack_weights_and_biases) {
       const struct xnn_qs8_qc8w_packing_params pack_gemm_params = {
