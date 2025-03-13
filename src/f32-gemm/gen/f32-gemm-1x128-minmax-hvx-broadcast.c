@@ -55,10 +55,10 @@ void xnn_f32_gemm_minmax_ukernel_1x128__hvx_broadcast(
       const HVX_Vector vb3 = *((const HVX_Vector *)(w + 96));
       w += 128;
 
-      vacc0x0 = xnn_fmadd_qf32(va0, vb0, vacc0x0);
-      vacc0x1 = xnn_fmadd_qf32(va0, vb1, vacc0x1);
-      vacc0x2 = xnn_fmadd_qf32(va0, vb2, vacc0x2);
-      vacc0x3 = xnn_fmadd_qf32(va0, vb3, vacc0x3);
+      vacc0x0 = xnn_fmadd_f32(va0, vb0, vacc0x0);
+      vacc0x1 = xnn_fmadd_f32(va0, vb1, vacc0x1);
+      vacc0x2 = xnn_fmadd_f32(va0, vb2, vacc0x2);
+      vacc0x3 = xnn_fmadd_f32(va0, vb3, vacc0x3);
 
       k -= sizeof(float);
     } while (k != 0);

@@ -103,13 +103,13 @@ void xnn_f32_gemm_minmax_ukernel_7x32__hvx_broadcast(
       const HVX_Vector vb0 = *((const HVX_Vector *)(w));
       w += 32;
 
-      vacc0x0 = xnn_fmadd_qf32(va0, vb0, vacc0x0);
-      vacc1x0 = xnn_fmadd_qf32(va1, vb0, vacc1x0);
-      vacc2x0 = xnn_fmadd_qf32(va2, vb0, vacc2x0);
-      vacc3x0 = xnn_fmadd_qf32(va3, vb0, vacc3x0);
-      vacc4x0 = xnn_fmadd_qf32(va4, vb0, vacc4x0);
-      vacc5x0 = xnn_fmadd_qf32(va5, vb0, vacc5x0);
-      vacc6x0 = xnn_fmadd_qf32(va6, vb0, vacc6x0);
+      vacc0x0 = xnn_fmadd_f32(va0, vb0, vacc0x0);
+      vacc1x0 = xnn_fmadd_f32(va1, vb0, vacc1x0);
+      vacc2x0 = xnn_fmadd_f32(va2, vb0, vacc2x0);
+      vacc3x0 = xnn_fmadd_f32(va3, vb0, vacc3x0);
+      vacc4x0 = xnn_fmadd_f32(va4, vb0, vacc4x0);
+      vacc5x0 = xnn_fmadd_f32(va5, vb0, vacc5x0);
+      vacc6x0 = xnn_fmadd_f32(va6, vb0, vacc6x0);
 
       k -= sizeof(float);
     } while (k != 0);

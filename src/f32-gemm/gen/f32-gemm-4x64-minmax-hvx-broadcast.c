@@ -81,14 +81,14 @@ void xnn_f32_gemm_minmax_ukernel_4x64__hvx_broadcast(
       const HVX_Vector vb1 = *((const HVX_Vector *)(w + 32));
       w += 64;
 
-      vacc0x0 = xnn_fmadd_qf32(va0, vb0, vacc0x0);
-      vacc1x0 = xnn_fmadd_qf32(va1, vb0, vacc1x0);
-      vacc2x0 = xnn_fmadd_qf32(va2, vb0, vacc2x0);
-      vacc3x0 = xnn_fmadd_qf32(va3, vb0, vacc3x0);
-      vacc0x1 = xnn_fmadd_qf32(va0, vb1, vacc0x1);
-      vacc1x1 = xnn_fmadd_qf32(va1, vb1, vacc1x1);
-      vacc2x1 = xnn_fmadd_qf32(va2, vb1, vacc2x1);
-      vacc3x1 = xnn_fmadd_qf32(va3, vb1, vacc3x1);
+      vacc0x0 = xnn_fmadd_f32(va0, vb0, vacc0x0);
+      vacc1x0 = xnn_fmadd_f32(va1, vb0, vacc1x0);
+      vacc2x0 = xnn_fmadd_f32(va2, vb0, vacc2x0);
+      vacc3x0 = xnn_fmadd_f32(va3, vb0, vacc3x0);
+      vacc0x1 = xnn_fmadd_f32(va0, vb1, vacc0x1);
+      vacc1x1 = xnn_fmadd_f32(va1, vb1, vacc1x1);
+      vacc2x1 = xnn_fmadd_f32(va2, vb1, vacc2x1);
+      vacc3x1 = xnn_fmadd_f32(va3, vb1, vacc3x1);
 
       k -= sizeof(float);
     } while (k != 0);

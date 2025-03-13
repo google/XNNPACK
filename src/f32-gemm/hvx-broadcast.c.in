@@ -73,7 +73,7 @@ void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
 
       $for N in range(0, NR, 32):
         $for M in range(MR):
-            vacc${M}x${N//32} = xnn_fmadd_qf32(va${M}, vb${N//32}, vacc${M}x${N//32});
+            vacc${M}x${N//32} = xnn_fmadd_f32(va${M}, vb${N//32}, vacc${M}x${N//32});
 
       k -= sizeof(float);
     } while (k != 0);

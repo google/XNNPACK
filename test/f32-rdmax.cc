@@ -558,13 +558,13 @@
 
   TEST(F32_RDMAX_2P2X__AVX_C32, channels_lt_32_2pass_fulltile) {
     TEST_REQUIRES_X86_AVX;
-    // const size_t channel_tile = 32;
-    // for (size_t channels = 1; channels < channel_tile; channels++) {
+    const size_t channel_tile = 32;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       ReduceMicrokernelTester()
         .rows(4)
-        .channels(1)
+        .channels(channels)
         .Test(xnn_f32_rdmax_ukernel_2p2x__avx_c32, ReduceMicrokernelTester::OpType::Max);
-    // }
+    }
   }
 
   TEST(F32_RDMAX_2P2X__AVX_C32, channels_lt_32_2pass_subtile) {

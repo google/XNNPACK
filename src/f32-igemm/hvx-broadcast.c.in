@@ -86,7 +86,7 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
 
         $for M in range(MR):
           $for N in range(0, NR, 32):
-              vacc${M}x${N//32} = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va${M}, vb${N//32}), vacc${M}x${N//32}));
+            vacc${M}x${N//32} = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va${M}, vb${N//32}), vacc${M}x${N//32}));
         k -= sizeof(float);
       } while (k != 0);
       p -= ${MR} * sizeof(void*);
