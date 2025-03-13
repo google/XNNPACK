@@ -28,8 +28,9 @@ void xnn_f16_rminmax_ukernel__avx512skx_u64_acc2(
   assert(output != NULL);
 
   const uint16_t* i = (const uint16_t*) input;
-  __m512 vmin0 = _mm512_cvtph_ps(_mm256_set1_epi16(*i));
-  __m512 vmax0 = vmin0;
+  uint16_t* o = (uint16_t*) output;
+  __m512 vmin0 = _mm512_cvtph_ps(_mm256_set1_epi16(*o));
+  __m512 vmax0 = _mm512_cvtph_ps(_mm256_set1_epi16(o[1]));
   __m512 vmin1 = vmin0;
   __m512 vmax1 = vmax0;
   for (; batch >= 64 * sizeof(uint16_t); batch -= 64 * sizeof(uint16_t)) {

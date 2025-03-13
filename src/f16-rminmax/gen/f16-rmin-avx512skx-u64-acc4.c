@@ -28,7 +28,8 @@ void xnn_f16_rmin_ukernel__avx512skx_u64_acc4(
   assert(output != NULL);
 
   const uint16_t* i = (const uint16_t*) input;
-  __m512 vmin0 = _mm512_cvtph_ps(_mm256_set1_epi16(*i));
+  uint16_t* o = (uint16_t*) output;
+  __m512 vmin0 = _mm512_cvtph_ps(_mm256_set1_epi16(*o));
   __m512 vmin1 = vmin0;
   __m512 vmin2 = vmin0;
   __m512 vmin3 = vmin0;

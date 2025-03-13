@@ -90,14 +90,20 @@ class ReduceMicrokernelTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
-    xnnpack::Buffer<xnn_float16> input(batch_size() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    xnnpack::Buffer<xnn_float16> input(batch_size() +
+                                       XNN_EXTRA_BYTES / sizeof(xnn_float16));
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+      std::generate_n(
+          input.begin(), batch_size(),
+          [&]() { return f32dist(rng); });
 
       // Compute reference results.
-      xnnpack::Buffer<xnn_float16>::iterator min_value, max_value;
-      std::tie(min_value, max_value) =
-          std::minmax_element(input.begin(), input.begin() + batch_size());
+      xnn_float16 min_value = input[0];
+      xnn_float16 max_value = input[0];
+      for (size_t i = 0; i < batch_size(); ++i) {
+        min_value = std::min<float>(min_value, input[i]);
+        max_value = std::max<float>(max_value, input[i]);
+      }
 
       // Prepare parameters.
       xnn_f16_default_params params;
@@ -108,29 +114,30 @@ class ReduceMicrokernelTester {
       // Call optimized micro-kernel.
       xnn_float16 output[2];
       output[0] = f32dist(rng);
-      *min_value = std::min(*min_value, output[0]);
+      min_value = std::min<float>(min_value, output[0]);
       if (op_type == OpType::MinMax) {
         output[1] = f32dist(rng);
-        *max_value = std::max(*max_value, output[1]);
+        max_value = std::max<float>(max_value, output[1]);
       } else {
-        *max_value = std::max(*max_value, output[0]);
+        max_value = std::max<float>(max_value, output[0]);
       }
-      reduce(batch_size() * sizeof(xnn_float16), input.data(), output, init_params != nullptr ? &params : nullptr);
+      reduce(batch_size() * sizeof(xnn_float16), input.data(), output,
+             init_params != nullptr ? &params : nullptr);
 
       // Verify results.
       switch (op_type) {
         case OpType::Max:
-          EXPECT_EQ(output[0], *max_value)
+          EXPECT_EQ(output[0], max_value)
               << "with batch " << batch_size();
           break;
         case OpType::Min:
-          EXPECT_EQ(output[0], *min_value)
+          EXPECT_EQ(output[0], min_value)
               << "with batch " << batch_size();
           break;
         case OpType::MinMax:
-          EXPECT_EQ(output[0], *min_value)
+          EXPECT_EQ(output[0], min_value)
               << "with batch " << batch_size();
-          EXPECT_EQ(output[1], *max_value)
+          EXPECT_EQ(output[1], max_value)
               << "with batch " << batch_size();
           break;
       }

@@ -28,7 +28,8 @@ void xnn_f16_rmax_ukernel__avx512skx_u16(
   assert(output != NULL);
 
   const uint16_t* i = (const uint16_t*) input;
-  __m512 vmax0 = _mm512_cvtph_ps(_mm256_set1_epi16(*i));
+  uint16_t* o = (uint16_t*) output;
+  __m512 vmax0 = _mm512_cvtph_ps(_mm256_set1_epi16(o[0]));
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
     const __m512 vt = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) i));
     i += 16;

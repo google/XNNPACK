@@ -29,7 +29,8 @@ void xnn_f16_rmax_ukernel__avx512fp16_u32(
 
 #if defined(__AVX512FP16__)
   const uint16_t* i = (const uint16_t*) input;
-  __m512h vmax0 = _mm512_castsi512_ph(_mm512_set1_epi16(*i));
+  uint16_t* o = (uint16_t*) output;
+  __m512h vmax0 = _mm512_castsi512_ph(_mm512_set1_epi16(o[0]));
   for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {
     const __m512h vt = _mm512_loadu_ph(i);
     i += 32;

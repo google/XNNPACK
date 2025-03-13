@@ -29,7 +29,7 @@ void xnn_f16_rmin_ukernel__neonfp16arith_u24_acc3(
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
-  float16x8_t vmin0 = vreinterpretq_f16_u16(vld1q_dup_u16(i));
+  float16x8_t vmin0 = vreinterpretq_f16_u16(vld1q_dup_u16(o));
   float16x8_t vmin1 = vmin0;
   float16x8_t vmin2 = vmin0;
   for (; batch >= 24 * sizeof(uint16_t); batch -= 24 * sizeof(uint16_t)) {

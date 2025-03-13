@@ -29,8 +29,8 @@ void xnn_f16_rminmax_ukernel__neonfp16arith_u16_acc2(
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
-  float16x8_t vmin0 = vreinterpretq_f16_u16(vld1q_dup_u16(i));
-  float16x8_t vmax0 = vmin0;
+  float16x8_t vmin0 = vreinterpretq_f16_u16(vld1q_dup_u16(o));
+  float16x8_t vmax0 = vreinterpretq_f16_u16(vld1q_dup_u16((uint16_t*)((uintptr_t) o + 1 * sizeof(uint16_t))));
   float16x8_t vmin1 = vmin0;
   float16x8_t vmax1 = vmax0;
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
