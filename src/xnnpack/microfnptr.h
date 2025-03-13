@@ -1447,6 +1447,14 @@ typedef void (*xnn_f32_rdminmax_ukernel_fn)(
     float* output,
     const void* params);
 
+typedef void (*xnn_f16_rdminmax_ukernel_fn)(
+    size_t rows,
+    size_t channels,
+    const xnn_float16* input,
+    size_t input_stride,
+    xnn_float16* output,
+    const void* params);
+
 typedef void (*xnn_s8_rdminmax_ukernel_fn)(
     size_t rows,
     size_t channels,

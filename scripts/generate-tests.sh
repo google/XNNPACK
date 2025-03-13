@@ -208,6 +208,8 @@ tools/generate-reduce-discontiguous-test.py --tester RDSumMicrokernelTester --sp
 
 tools/generate-reduce-discontiguous-test.py --tester ReduceMicrokernelTester --spec test/f32-rdmin.yaml --output test/f32-rdmin.cc &
 tools/generate-reduce-discontiguous-test.py --tester ReduceMicrokernelTester --spec test/f32-rdmax.yaml --output test/f32-rdmax.cc &
+tools/generate-reduce-discontiguous-test.py --tester ReduceMicrokernelTester --spec test/f16-rdmin.yaml --output test/f16-rdmin.cc &
+tools/generate-reduce-discontiguous-test.py --tester ReduceMicrokernelTester --spec test/f16-rdmax.yaml --output test/f16-rdmax.cc &
 tools/generate-reduce-discontiguous-test.py --tester ReduceMicrokernelTester --spec test/s8-rdmin.yaml --output test/s8-rdmin.cc &
 tools/generate-reduce-discontiguous-test.py --tester ReduceMicrokernelTester --spec test/s8-rdmax.yaml --output test/s8-rdmax.cc &
 tools/generate-reduce-discontiguous-test.py --tester ReduceMicrokernelTester --spec test/u8-rdmin.yaml --output test/u8-rdmin.cc &

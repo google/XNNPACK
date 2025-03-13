@@ -192,6 +192,8 @@ SET(NON_PROD_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-neonfp16arith-rr2-p2-u96-acc3.c
   src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-neonfp16arith-rr2-p2-u96-acc6.c
   src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-neonfp16arith-rr2-p2-u96.c
+  src/f16-rdminmax/gen/f16-rdmax-2p2x-neonfp16arith-c32.c
+  src/f16-rdminmax/gen/f16-rdmin-2p2x-neonfp16arith-c32.c
   src/f16-rminmax/gen/f16-rmax-neonfp16arith-u8.c
   src/f16-rminmax/gen/f16-rmax-neonfp16arith-u16-acc2.c
   src/f16-rminmax/gen/f16-rmax-neonfp16arith-u24-acc3.c

@@ -672,6 +672,21 @@ DECLARE_F32_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_f32_rdmax_ukernel_2p2x__wa
 DECLARE_F32_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_f32_rdmax_ukernel_2p2x__hvx_c32)
 DECLARE_F32_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_f32_rdmax_ukernel_2p2x__scalar_c2)
 
+#define DECLARE_F16_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(fn_name)  \
+  XNN_INTERNAL void fn_name(     \
+      size_t rows,               \
+      size_t channels,           \
+      const xnn_float16* input,  \
+      size_t input_stride,       \
+      xnn_float16* output,       \
+      const void* params);
+
+DECLARE_F16_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_f16_rdmin_ukernel_2p2x__neonfp16arith_c32)
+DECLARE_F16_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_f16_rdmin_ukernel_2p2x__scalar_c2)
+
+DECLARE_F16_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_f16_rdmax_ukernel_2p2x__neonfp16arith_c32)
+DECLARE_F16_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_f16_rdmax_ukernel_2p2x__scalar_c2)
+
 #define DECLARE_S8_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(fn_name)  \
   XNN_INTERNAL void fn_name(  \
       size_t rows,            \

@@ -299,6 +299,64 @@ class ReduceMicrokernelTester {
     }
   }
 
+  void Test(xnn_f16_rdminmax_ukernel_fn reduce, OpType op_type) const {
+    xnnpack::ReplicableRandomDevice rng;
+    std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
+
+    xnnpack::Buffer<xnn_float16> input((rows() - 1) * input_stride() +
+                                       channels() +
+                                       XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate_n(
+          input.data(), (rows() - 1) * input_stride() + channels(),
+          [&]() { return f32dist(rng); });
+
+      xnnpack::Buffer<xnn_float16> output(channels());
+      xnnpack::Buffer<xnn_float16> output_ref(channels());
+
+      std::generate_n(
+          output.begin(), channels(),
+          [&]() { return f32dist(rng); });
+
+      // Compute reference results.
+      switch (op_type) {
+        case OpType::Max:
+          for (size_t c = 0; c < channels(); ++c) {
+            xnn_float16 max_value = output[c];
+            for (size_t n = 0; n < rows(); ++n) {
+              max_value = std::max<float>(max_value,
+                                          input[n * input_stride() + c]);
+            }
+            output_ref[c] = max_value;
+          }
+          break;
+        case OpType::Min:
+          for (size_t c = 0; c < channels(); ++c) {
+            xnn_float16 min_value = output[c];
+            for (size_t n = 0; n < rows(); ++n) {
+              min_value = std::min<float>(min_value,
+                                          input[n * input_stride() + c]);
+            }
+            output_ref[c] = min_value;
+          }
+          break;
+        default:
+          XNN_UNREACHABLE;
+      }
+
+      // Call optimized micro-kernel.
+      reduce(rows(), channels(), input.data(),
+             input_stride() * sizeof(xnn_float16), output.data(), nullptr);
+
+      // Verify results.
+      for (size_t c = 0; c < channels(); c++) {
+        ASSERT_EQ(output[c], output_ref[c])
+          << "at position " << c << ", rows = " << rows() << ", channels = "
+          << channels();
+      }
+    }
+  }
+
   void Test(xnn_s8_rdminmax_ukernel_fn reduce, OpType op_type) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> i8dist(
@@ -346,7 +404,7 @@ class ReduceMicrokernelTester {
 
       // Verify results.
       for (size_t c = 0; c < channels(); c++) {
-        ASSERT_NEAR(output[c], output_ref[c], std::abs(output_ref[c]) * 1.0e-6f)
+        ASSERT_EQ(output[c], output_ref[c])
           << "at position " << c << ", rows = " << rows() << ", channels = "
           << channels();
       }
@@ -448,7 +506,7 @@ class ReduceMicrokernelTester {
 
       // Verify results.
       for (size_t c = 0; c < channels(); c++) {
-        ASSERT_NEAR(output[c], output_ref[c], output_ref[c] * 1.0e-6f)
+        ASSERT_EQ(output[c], output_ref[c])
           << "at position " << c << ", rows = " << rows() << ", channels = "
           << channels();
       }

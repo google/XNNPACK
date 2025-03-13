@@ -48,7 +48,7 @@ parser.set_defaults(defines=list())
 
 def split_ukernel_name(name):
   match = re.fullmatch(
-      r"xnn_(qs8|qu8|f16_f32acc|f32|s8|u8)_rd(minmax|max|min|sum)?(_minmax)?(_(fp32|rndnu))?_ukernel_((\d+)p)?(\d+)x__(.+)_(c)?(u)?(\d+)(_acc(\d+))?(v)?",
+      r"xnn_(qs8|qu8|f16_f32acc|f16|f32|s8|u8)_rd(minmax|max|min|sum)?(_minmax)?(_(fp32|rndnu))?_ukernel_((\d+)p)?(\d+)x__(.+)_(c)?(u)?(\d+)(_acc(\d+))?(v)?",
       name,
   )
 
