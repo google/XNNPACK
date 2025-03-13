@@ -24,6 +24,7 @@ OPERATOR_TEST_DEPS = [
     "//:microkernel_configs",
     "//:microparams",
     "//:normalization",
+    "//:operators",
     "//:params",
     "//:quantization",
     "//test:replicable_random_device",
