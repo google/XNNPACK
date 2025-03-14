@@ -22,25 +22,23 @@
 
 void* xnn_get_pointer_to_write_weights(
   xnn_operator_t op,
-  size_t aligned_weights_size,
-  int padding_byte)
+  size_t aligned_weights_size)
 {
   assert(aligned_weights_size % XNN_ALLOCATION_ALIGNMENT == 0);
-  void* weights_ptr = NULL;
   if (use_weights_cache(op)) {
-    weights_ptr = op->weights_cache->reserve_space(op->weights_cache->context, aligned_weights_size);
-    if (weights_ptr == NULL) {
-      return NULL;
+    void* weights_ptr = op->weights_cache->reserve_space(op->weights_cache->context, aligned_weights_size);
+    // Some implementations of the weights cache return pointers that seg fault
+    // when we read from them, *if* we haven't written to them first?? This can
+    // happen because packing doesn't initialize all memory if it doesn't affect
+    // the results.
+    if (weights_ptr) {
+      memset(weights_ptr, 0, aligned_weights_size);
     }
+    return weights_ptr;
   } else {
     op->packed_weights.pointer = xnn_allocate_simd_memory(aligned_weights_size);
-    if (op->packed_weights.pointer == NULL) {
-      return NULL;
-    }
-    weights_ptr = op->packed_weights.pointer;
+    return op->packed_weights.pointer;
   }
-  memset(weights_ptr, padding_byte, aligned_weights_size);
-  return weights_ptr;
 }
 
 size_t xnn_compute_convolution_output_dimension(
