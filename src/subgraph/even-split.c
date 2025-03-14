@@ -305,7 +305,7 @@ enum xnn_status xnn_define_even_split(
   xnn_subgraph_t subgraph,
   int32_t split_dim,
   uint32_t input_id,
-  uint32_t num_outputs,
+  size_t num_outputs,
   const uint32_t* output_ids,
   uint32_t flags)
 {
@@ -337,8 +337,8 @@ enum xnn_status xnn_define_even_split(
 
   if (num_outputs > XNN_MAX_OUTPUTS) {
     xnn_log_error(
-      "failed to define %s operator with %d outputs: number of outputs (%d) exceeds the supported maximum (%d)",
-      xnn_node_type_to_string(node_type), num_outputs, num_outputs, XNN_MAX_OUTPUTS);
+      "failed to define %s operator with %zu inputs: number of inputs (%zu) exceeds the supported maximum (%zu)",
+      xnn_node_type_to_string(node_type), num_outputs, num_outputs, (size_t) XNN_MAX_OUTPUTS);
     return xnn_status_invalid_parameter;
   }
 

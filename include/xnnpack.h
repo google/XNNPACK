@@ -1512,7 +1512,7 @@ enum xnn_status xnn_define_static_reduce_v2(        //
 enum xnn_status xnn_define_concatenate(
   xnn_subgraph_t subgraph,
   int32_t axis,
-  uint32_t num_inputs,
+  size_t num_inputs,
   const uint32_t* inputs,
   uint32_t output_id,
   uint32_t flags);
@@ -1692,7 +1692,7 @@ enum xnn_status xnn_define_even_split(
   xnn_subgraph_t subgraph,
   int32_t split_dim,
   uint32_t input_id,
-  uint32_t num_outputs,
+  size_t num_outputs,
   const uint32_t* outputs,
   uint32_t flags);
 
