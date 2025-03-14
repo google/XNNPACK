@@ -75,12 +75,12 @@ void xnn_f32_igemm_minmax_ukernel_1x64__hvx_broadcast(
     } while (p != 0);
 
     const HVX_Vector vmin = Q6_V_vsplat_R(params->scalar.min);
-    vacc0x0 = Q6_Vw_vmax_VwVw(vmin, vacc0x0);
-    vacc0x1 = Q6_Vw_vmax_VwVw(vmin, vacc0x1);
+    vacc0x0 = Q6_Vsf_vmax_VsfVsf(vmin, vacc0x0);
+    vacc0x1 = Q6_Vsf_vmax_VsfVsf(vmin, vacc0x1);
 
     const HVX_Vector vmax = Q6_V_vsplat_R(params->scalar.max);
-    vacc0x0 = Q6_Vw_vmin_VwVw(vmax, vacc0x0);
-    vacc0x1 = Q6_Vw_vmin_VwVw(vmax, vacc0x1);
+    vacc0x0 = Q6_Vsf_vmin_VsfVsf(vmax, vacc0x0);
+    vacc0x1 = Q6_Vsf_vmin_VsfVsf(vmax, vacc0x1);
 
     if XNN_LIKELY(nc >= 64) {
       *((HVX_UVector *)(c0)) = vacc0x0;
