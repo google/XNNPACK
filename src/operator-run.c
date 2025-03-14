@@ -2985,6 +2985,20 @@ enum xnn_status xnn_run_operator_with_index(
             op->compute[i].tile[0], op->compute[i].tile[1],
             flags);
         break;
+      case xnn_parallelization_type_4d_tile_2d_dynamic:
+        assert(op->compute[i].range[0] != 0);
+        assert(op->compute[i].range[1] != 0);
+        assert(op->compute[i].range[2] != 0);
+        assert(op->compute[i].range[3] != 0);
+        assert(op->compute[i].tile[0] != 0);
+        assert(op->compute[i].tile[1] != 0);
+        pthreadpool_parallelize_4d_tile_2d_dynamic(
+            threadpool, op->compute[i].task_4d_tile_2d_dynamic,
+            (void*)((uintptr_t)&op->context + op->compute[i].context_offset),
+            op->compute[i].range[0], op->compute[i].range[1],
+            op->compute[i].range[2], op->compute[i].range[3],
+            op->compute[i].tile[0], op->compute[i].tile[1], flags);
+        break;
       case xnn_parallelization_type_5d:
         assert(op->compute[i].range[0] != 0);
         assert(op->compute[i].range[1] != 0);
@@ -3146,6 +3160,21 @@ enum xnn_status xnn_run_operator_with_index(
             op->compute[i].range[0], op->compute[i].range[1], op->compute[i].range[2], op->compute[i].range[3],
             op->compute[i].tile[0], op->compute[i].tile[1],
             flags);
+        break;
+      case xnn_parallelization_type_4d_tile_2d_dynamic_with_uarch:
+        assert(op->compute[i].range[0] != 0);
+        assert(op->compute[i].range[1] != 0);
+        assert(op->compute[i].range[2] != 0);
+        assert(op->compute[i].range[3] != 0);
+        assert(op->compute[i].tile[0] != 0);
+        assert(op->compute[i].tile[1] != 0);
+        pthreadpool_parallelize_4d_tile_2d_dynamic_with_uarch(
+            threadpool, op->compute[i].task_4d_tile_2d_dynamic_with_id,
+            (void*)((uintptr_t)&op->context + op->compute[i].context_offset),
+            0 /* default uarch index */, XNN_MAX_UARCH_TYPES - 1,
+            op->compute[i].range[0], op->compute[i].range[1],
+            op->compute[i].range[2], op->compute[i].range[3],
+            op->compute[i].tile[0], op->compute[i].tile[1], flags);
         break;
   #endif  // XNN_MAX_UARCH_TYPES > 1
       default:

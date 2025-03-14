@@ -2134,14 +2134,14 @@ static enum xnn_status reshape_igemm(
     if (xnn_is_hmp_igemm_ukernel(igemm_ukernel)) {
       if (batch_size > 1) {
         convolution_op->compute[igemm_compute_index].type =
-            xnn_parallelization_type_4d_tile_2d_with_uarch;
+            xnn_parallelization_type_4d_tile_2d_dynamic_with_uarch;
         if (dynamic_quantization) {
-          convolution_op->compute[igemm_compute_index].task_4d_tile_2d_with_id =
-              (pthreadpool_task_4d_tile_2d_with_id_t)
+          convolution_op->compute[igemm_compute_index].task_4d_tile_2d_dynamic_with_id =
+              (pthreadpool_task_4d_tile_2d_dynamic_with_id_t)
                   xnn_compute_hmp_grouped_batch_dqigemm;
         } else {
-          convolution_op->compute[igemm_compute_index].task_4d_tile_2d_with_id =
-              (pthreadpool_task_4d_tile_2d_with_id_t)
+          convolution_op->compute[igemm_compute_index].task_4d_tile_2d_dynamic_with_id =
+              (pthreadpool_task_4d_tile_2d_dynamic_with_id_t)
                   xnn_compute_hmp_grouped_batch_igemm;
         }
       } else {
@@ -2162,13 +2162,13 @@ static enum xnn_status reshape_igemm(
     } else {
       if (batch_size > 1) {
         convolution_op->compute[igemm_compute_index].type =
-            xnn_parallelization_type_4d_tile_2d;
+            xnn_parallelization_type_4d_tile_2d_dynamic;
         if (dynamic_quantization) {
-          convolution_op->compute[igemm_compute_index].task_4d_tile_2d =
-              (pthreadpool_task_4d_tile_2d_t)xnn_compute_grouped_batch_dqigemm;
+          convolution_op->compute[igemm_compute_index].task_4d_tile_2d_dynamic =
+              (pthreadpool_task_4d_tile_2d_dynamic_t)xnn_compute_grouped_batch_dqigemm;
         } else {
-          convolution_op->compute[igemm_compute_index].task_4d_tile_2d =
-              (pthreadpool_task_4d_tile_2d_t)xnn_compute_grouped_batch_igemm;
+          convolution_op->compute[igemm_compute_index].task_4d_tile_2d_dynamic =
+              (pthreadpool_task_4d_tile_2d_dynamic_t)xnn_compute_grouped_batch_igemm;
         }
       } else {
         convolution_op->compute[igemm_compute_index].type =
@@ -2186,13 +2186,13 @@ static enum xnn_status reshape_igemm(
 #else
     if (batch_size > 1) {
       convolution_op->compute[igemm_compute_index].type =
-          xnn_parallelization_type_4d_tile_2d;
+          xnn_parallelization_type_4d_tile_2d_dynamic;
       if (dynamic_quantization) {
-        convolution_op->compute[igemm_compute_index].task_4d_tile_2d =
-            (pthreadpool_task_4d_tile_2d_t)xnn_compute_grouped_batch_dqigemm;
+        convolution_op->compute[igemm_compute_index].task_4d_tile_2d_dynamic =
+            (pthreadpool_task_4d_tile_2d_dynamic_t)xnn_compute_grouped_batch_dqigemm;
       } else {
         convolution_op->compute[igemm_compute_index].task_4d_tile_2d =
-            (pthreadpool_task_4d_tile_2d_t)xnn_compute_grouped_batch_igemm;
+            (pthreadpool_task_4d_tile_2d_dynamic_t)xnn_compute_grouped_batch_igemm;
       }
     } else {
       convolution_op->compute[igemm_compute_index].type =

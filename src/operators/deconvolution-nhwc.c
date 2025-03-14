@@ -1430,14 +1430,14 @@ static enum xnn_status reshape_conv_path(
     if (xnn_is_hmp_igemm_ukernel(igemm_ukernel)) {
       if (batch_size > 1) {
         deconvolution_op->compute[igemm_compute_index].type =
-            xnn_parallelization_type_4d_tile_2d_with_uarch;
+            xnn_parallelization_type_4d_tile_2d_dynamic_with_uarch;
         if (dynamic_quantization) {
           deconvolution_op->compute[igemm_compute_index]
-              .task_4d_tile_2d_with_id = (pthreadpool_task_4d_tile_2d_with_id_t)
+              .task_4d_tile_2d_dynamic_with_id = (pthreadpool_task_4d_tile_2d_dynamic_with_id_t)
               xnn_compute_hmp_grouped_batch_dqigemm;
         } else {
           deconvolution_op->compute[igemm_compute_index]
-              .task_4d_tile_2d_with_id = (pthreadpool_task_4d_tile_2d_with_id_t)
+              .task_4d_tile_2d_dynamic_with_id = (pthreadpool_task_4d_tile_2d_dynamic_with_id_t)
               xnn_compute_hmp_grouped_batch_igemm;
         }
       } else {
@@ -1458,13 +1458,13 @@ static enum xnn_status reshape_conv_path(
     } else {
       if (batch_size > 1) {
         deconvolution_op->compute[igemm_compute_index].type =
-            xnn_parallelization_type_4d_tile_2d;
+            xnn_parallelization_type_4d_tile_2d_dynamic;
         if (dynamic_quantization) {
-          deconvolution_op->compute[igemm_compute_index].task_4d_tile_2d =
-              (pthreadpool_task_4d_tile_2d_t)xnn_compute_grouped_batch_dqigemm;
+          deconvolution_op->compute[igemm_compute_index].task_4d_tile_2d_dynamic =
+              (pthreadpool_task_4d_tile_2d_dynamic_t)xnn_compute_grouped_batch_dqigemm;
         } else {
-          deconvolution_op->compute[igemm_compute_index].task_4d_tile_2d =
-              (pthreadpool_task_4d_tile_2d_t)xnn_compute_grouped_batch_igemm;
+          deconvolution_op->compute[igemm_compute_index].task_4d_tile_2d_dynamic =
+              (pthreadpool_task_4d_tile_2d_dynamic_t)xnn_compute_grouped_batch_igemm;
         }
       } else {
         deconvolution_op->compute[igemm_compute_index].type =
@@ -1483,13 +1483,13 @@ static enum xnn_status reshape_conv_path(
 #else
     if (batch_size > 1) {
       deconvolution_op->compute[igemm_compute_index].type =
-          xnn_parallelization_type_4d_tile_2d;
+          xnn_parallelization_type_4d_tile_2d_dynamic;
       if (dynamic_quantization) {
-        deconvolution_op->compute[igemm_compute_index].task_4d_tile_2d =
-            (pthreadpool_task_4d_tile_2d_t)xnn_compute_grouped_batch_dqigemm;
+        deconvolution_op->compute[igemm_compute_index].task_4d_tile_2d_dynamic =
+            (pthreadpool_task_4d_tile_2d_dynamic_t)xnn_compute_grouped_batch_dqigemm;
       } else {
-        deconvolution_op->compute[igemm_compute_index].task_4d_tile_2d =
-            (pthreadpool_task_4d_tile_2d_t)xnn_compute_grouped_batch_igemm;
+        deconvolution_op->compute[igemm_compute_index].task_4d_tile_2d_dynamic =
+            (pthreadpool_task_4d_tile_2d_dynamic_t)xnn_compute_grouped_batch_igemm;
       }
     } else {
       deconvolution_op->compute[igemm_compute_index].type =

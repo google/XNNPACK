@@ -35,6 +35,7 @@ enum xnn_parallelization_type {
   xnn_parallelization_type_3d_tile_2d_dynamic,
   xnn_parallelization_type_4d,
   xnn_parallelization_type_4d_tile_2d,
+  xnn_parallelization_type_4d_tile_2d_dynamic,
   xnn_parallelization_type_5d,
   xnn_parallelization_type_5d_tile_2d,
   xnn_parallelization_type_6d_tile_2d,
@@ -47,6 +48,7 @@ enum xnn_parallelization_type {
   xnn_parallelization_type_3d_tile_2d_with_uarch,
   xnn_parallelization_type_3d_tile_2d_dynamic_with_uarch,
   xnn_parallelization_type_4d_tile_2d_with_uarch,
+  xnn_parallelization_type_4d_tile_2d_dynamic_with_uarch,
 #endif  // XNN_MAX_UARCH_TYPES > 1
 };
 
@@ -70,6 +72,7 @@ struct compute_parameters {
     pthreadpool_task_3d_tile_2d_dynamic_t task_3d_tile_2d_dynamic;
     pthreadpool_task_4d_t task_4d;
     pthreadpool_task_4d_tile_2d_t task_4d_tile_2d;
+    pthreadpool_task_4d_tile_2d_dynamic_t task_4d_tile_2d_dynamic;
     pthreadpool_task_5d_t task_5d;
     pthreadpool_task_5d_tile_2d_t task_5d_tile_2d;
     pthreadpool_task_6d_tile_2d_t task_6d_tile_2d;
@@ -85,6 +88,8 @@ struct compute_parameters {
     pthreadpool_task_3d_tile_2d_dynamic_with_id_t
         task_3d_tile_2d_dynamic_with_id;
     pthreadpool_task_4d_tile_2d_with_id_t task_4d_tile_2d_with_id;
+    pthreadpool_task_4d_tile_2d_dynamic_with_id_t
+        task_4d_tile_2d_dynamic_with_id;
 #endif  // XNN_MAX_UARCH_TYPES > 1
   };
   // Offset of the invocation context w.r.t. xnn_operator.context. Typically 0,
