@@ -1794,6 +1794,7 @@ IF(XNNPACK_BUILD_TESTS)
       f16-vtanh
       f32-vabs
       f32-vclamp
+      f32-vcos
       f32-velu
       f32-vexp
       f32-vgelu
@@ -1808,6 +1809,7 @@ IF(XNNPACK_BUILD_TESTS)
       f32-vrndz
       f32-vrsqrt
       f32-vsigmoid
+      f32-vsin
       f32-vsqr
       f32-vsqrt
       f32-vtanh

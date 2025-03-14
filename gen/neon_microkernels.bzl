@@ -380,6 +380,8 @@ NON_PROD_NEON_MICROKERNEL_SRCS = [
     "src/f32-vcmul/gen/f32-vcmul-neon-u4.c",
     "src/f32-vcmul/gen/f32-vcmul-neon-u12.c",
     "src/f32-vcmul/gen/f32-vcmul-neon-u16.c",
+    "src/f32-vcos/gen/f32-vcos-neon-rational-5-4-div.c",
+    "src/f32-vcos/gen/f32-vcos-neon-rational-5-4-nr.c",
     "src/f32-velu/gen/f32-velu-neon-rr2-lut16-p3-u4.c",
     "src/f32-velu/gen/f32-velu-neon-rr2-lut16-p3-u12.c",
     "src/f32-velu/gen/f32-velu-neon-rr2-lut16-p3-u16.c",
