@@ -2040,61 +2040,88 @@ static enum xnn_status reshape_igemm(
     ++igemm_compute_index;
   }
   if (groups == 1) {
-    #if XNN_MAX_UARCH_TYPES > 1
-      if (xnn_is_hmp_igemm_ukernel(igemm_ukernel)) {
-        if (batch_size > 1) {
-          convolution_op->compute[igemm_compute_index].type = xnn_parallelization_type_3d_tile_2d_with_uarch;
-            if (dynamic_quantization) {
-            convolution_op->compute[igemm_compute_index].task_3d_tile_2d_with_id = (pthreadpool_task_3d_tile_2d_with_id_t) xnn_compute_batch_hmp_dqigemm;
-          } else {
-            convolution_op->compute[igemm_compute_index].task_3d_tile_2d_with_id = (pthreadpool_task_3d_tile_2d_with_id_t) xnn_compute_batch_hmp_igemm;
-          }
-        } else {
-          convolution_op->compute[igemm_compute_index].type = xnn_parallelization_type_2d_tile_2d_with_uarch;
-          if (dynamic_quantization) {
-            convolution_op->compute[igemm_compute_index].task_2d_tile_2d_with_id = (pthreadpool_task_2d_tile_2d_with_id_t) xnn_compute_hmp_dqigemm;
-          } else {
-            convolution_op->compute[igemm_compute_index].task_2d_tile_2d_with_id = (pthreadpool_task_2d_tile_2d_with_id_t) xnn_compute_hmp_igemm;
-          }
-        }
-      } else {
-        if (batch_size > 1) {
-          convolution_op->compute[igemm_compute_index].type = xnn_parallelization_type_3d_tile_2d;
-          if (dynamic_quantization) {
-            convolution_op->compute[igemm_compute_index].task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_batch_dqigemm;
-          } else {
-            convolution_op->compute[igemm_compute_index].task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_batch_igemm;
-          }
-        } else {
-          convolution_op->compute[igemm_compute_index].type = xnn_parallelization_type_2d_tile_2d;
-          if (dynamic_quantization) {
-            convolution_op->compute[igemm_compute_index].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_dqigemm;
-          } else {
-            convolution_op->compute[igemm_compute_index].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_igemm;
-          }
-        }
-      }
-    #else
+#if XNN_MAX_UARCH_TYPES > 1
+    if (xnn_is_hmp_igemm_ukernel(igemm_ukernel)) {
       if (batch_size > 1) {
-        convolution_op->compute[igemm_compute_index].type = xnn_parallelization_type_3d_tile_2d;
+        convolution_op->compute[igemm_compute_index].type =
+            xnn_parallelization_type_3d_tile_2d_dynamic_with_uarch;
         if (dynamic_quantization) {
-          convolution_op->compute[igemm_compute_index].task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_batch_dqigemm;
+          convolution_op->compute[igemm_compute_index]
+              .task_3d_tile_2d_dynamic_with_id =
+              (pthreadpool_task_3d_tile_2d_dynamic_with_id_t)
+                  xnn_compute_batch_hmp_dqigemm;
         } else {
-          convolution_op->compute[igemm_compute_index].task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_batch_igemm;
+          convolution_op->compute[igemm_compute_index]
+              .task_3d_tile_2d_dynamic_with_id =
+              (pthreadpool_task_3d_tile_2d_dynamic_with_id_t)
+                  xnn_compute_batch_hmp_igemm;
         }
       } else {
-        convolution_op->compute[igemm_compute_index].type = xnn_parallelization_type_2d_tile_2d;
+        convolution_op->compute[igemm_compute_index].type =
+            xnn_parallelization_type_2d_tile_2d_dynamic_with_uarch;
         if (dynamic_quantization) {
-          convolution_op->compute[igemm_compute_index].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_dqigemm;
+          convolution_op->compute[igemm_compute_index]
+              .task_2d_tile_2d_dynamic_with_id =
+              (pthreadpool_task_2d_tile_2d_dynamic_with_id_t)
+                  xnn_compute_hmp_dqigemm;
         } else {
-          convolution_op->compute[igemm_compute_index].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_igemm;
+          convolution_op->compute[igemm_compute_index]
+              .task_2d_tile_2d_dynamic_with_id =
+              (pthreadpool_task_2d_tile_2d_dynamic_with_id_t)
+                  xnn_compute_hmp_igemm;
         }
       }
-    #endif
+    } else {
+      if (batch_size > 1) {
+        convolution_op->compute[igemm_compute_index].type =
+            xnn_parallelization_type_3d_tile_2d_dynamic;
+        if (dynamic_quantization) {
+          convolution_op->compute[igemm_compute_index].task_3d_tile_2d_dynamic =
+              (pthreadpool_task_3d_tile_2d_dynamic_t)xnn_compute_batch_dqigemm;
+        } else {
+          convolution_op->compute[igemm_compute_index].task_3d_tile_2d_dynamic =
+              (pthreadpool_task_3d_tile_2d_dynamic_t)xnn_compute_batch_igemm;
+        }
+      } else {
+        convolution_op->compute[igemm_compute_index].type =
+            xnn_parallelization_type_2d_tile_2d_dynamic;
+        if (dynamic_quantization) {
+          convolution_op->compute[igemm_compute_index].task_2d_tile_2d_dynamic =
+              (pthreadpool_task_2d_tile_2d_dynamic_t)xnn_compute_dqigemm;
+        } else {
+          convolution_op->compute[igemm_compute_index].task_2d_tile_2d_dynamic =
+              (pthreadpool_task_2d_tile_2d_dynamic_t)xnn_compute_igemm;
+        }
+      }
+    }
+#else
+    if (batch_size > 1) {
+      convolution_op->compute[igemm_compute_index].type =
+          xnn_parallelization_type_3d_tile_2d_dynamic;
+      if (dynamic_quantization) {
+        convolution_op->compute[igemm_compute_index].task_3d_tile_2d_dynamic =
+            (pthreadpool_task_3d_tile_2d_dynamic_t)xnn_compute_batch_dqigemm;
+      } else {
+        convolution_op->compute[igemm_compute_index].task_3d_tile_2d_dynamic =
+            (pthreadpool_task_3d_tile_2d_dynamic_t)xnn_compute_batch_igemm;
+      }
+    } else {
+      convolution_op->compute[igemm_compute_index].type =
+          xnn_parallelization_type_2d_tile_2d_dynamic;
+      if (dynamic_quantization) {
+        convolution_op->compute[igemm_compute_index].task_2d_tile_2d_dynamic =
+            (pthreadpool_task_2d_tile_2d_dynamic_t)xnn_compute_dqigemm;
+      } else {
+        convolution_op->compute[igemm_compute_index].task_2d_tile_2d_dynamic =
+            (pthreadpool_task_2d_tile_2d_dynamic_t)xnn_compute_igemm;
+      }
+    }
+#endif
     if (batch_size > 1) {
       convolution_op->compute[igemm_compute_index].range[0] = batch_size;
       convolution_op->compute[igemm_compute_index].range[2] = output_size;
-      convolution_op->compute[igemm_compute_index].range[1] = group_output_channels;
+      convolution_op->compute[igemm_compute_index].range[1] =
+          group_output_channels;
     } else {
       convolution_op->compute[igemm_compute_index].range[1] = output_size;
       convolution_op->compute[igemm_compute_index].range[0] =
@@ -2103,57 +2130,82 @@ static enum xnn_status reshape_igemm(
     convolution_op->compute[igemm_compute_index].tile[1] = mr;
     convolution_op->compute[igemm_compute_index].tile[0] = nc;
   } else {
-    #if XNN_MAX_UARCH_TYPES > 1
-      if (xnn_is_hmp_igemm_ukernel(igemm_ukernel)) {
-        if (batch_size > 1) {
-          convolution_op->compute[igemm_compute_index].type = xnn_parallelization_type_4d_tile_2d_with_uarch;
-           if (dynamic_quantization) {
-            convolution_op->compute[igemm_compute_index].task_4d_tile_2d_with_id = (pthreadpool_task_4d_tile_2d_with_id_t) xnn_compute_hmp_grouped_batch_dqigemm;
-          } else {
-            convolution_op->compute[igemm_compute_index].task_4d_tile_2d_with_id = (pthreadpool_task_4d_tile_2d_with_id_t) xnn_compute_hmp_grouped_batch_igemm;
-          }
-        } else {
-          convolution_op->compute[igemm_compute_index].type = xnn_parallelization_type_3d_tile_2d_with_uarch;
-          if (dynamic_quantization) {
-            convolution_op->compute[igemm_compute_index].task_3d_tile_2d_with_id = (pthreadpool_task_3d_tile_2d_with_id_t) xnn_compute_hmp_grouped_dqigemm;
-          } else {
-            convolution_op->compute[igemm_compute_index].task_3d_tile_2d_with_id = (pthreadpool_task_3d_tile_2d_with_id_t) xnn_compute_hmp_grouped_igemm;
-          }
-        }
-      } else {
-        if (batch_size > 1) {
-          convolution_op->compute[igemm_compute_index].type = xnn_parallelization_type_4d_tile_2d;
-          if (dynamic_quantization) {
-            convolution_op->compute[igemm_compute_index].task_4d_tile_2d = (pthreadpool_task_4d_tile_2d_t) xnn_compute_grouped_batch_dqigemm;
-          } else {
-            convolution_op->compute[igemm_compute_index].task_4d_tile_2d = (pthreadpool_task_4d_tile_2d_t) xnn_compute_grouped_batch_igemm;
-          }
-        } else {
-          convolution_op->compute[igemm_compute_index].type = xnn_parallelization_type_3d_tile_2d;
-          if (dynamic_quantization) {
-            convolution_op->compute[igemm_compute_index].task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_grouped_dqigemm;
-          } else {
-            convolution_op->compute[igemm_compute_index].task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_grouped_igemm;
-          }
-        }
-      }
-    #else
+#if XNN_MAX_UARCH_TYPES > 1
+    if (xnn_is_hmp_igemm_ukernel(igemm_ukernel)) {
       if (batch_size > 1) {
-        convolution_op->compute[igemm_compute_index].type = xnn_parallelization_type_4d_tile_2d;
+        convolution_op->compute[igemm_compute_index].type =
+            xnn_parallelization_type_4d_tile_2d_with_uarch;
         if (dynamic_quantization) {
-          convolution_op->compute[igemm_compute_index].task_4d_tile_2d = (pthreadpool_task_4d_tile_2d_t) xnn_compute_grouped_batch_dqigemm;
+          convolution_op->compute[igemm_compute_index].task_4d_tile_2d_with_id =
+              (pthreadpool_task_4d_tile_2d_with_id_t)
+                  xnn_compute_hmp_grouped_batch_dqigemm;
         } else {
-          convolution_op->compute[igemm_compute_index].task_4d_tile_2d = (pthreadpool_task_4d_tile_2d_t) xnn_compute_grouped_batch_igemm;
+          convolution_op->compute[igemm_compute_index].task_4d_tile_2d_with_id =
+              (pthreadpool_task_4d_tile_2d_with_id_t)
+                  xnn_compute_hmp_grouped_batch_igemm;
         }
       } else {
-        convolution_op->compute[igemm_compute_index].type = xnn_parallelization_type_3d_tile_2d;
+        convolution_op->compute[igemm_compute_index].type =
+            xnn_parallelization_type_3d_tile_2d_dynamic_with_uarch;
         if (dynamic_quantization) {
-          convolution_op->compute[igemm_compute_index].task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_grouped_dqigemm;
+          convolution_op->compute[igemm_compute_index]
+              .task_3d_tile_2d_dynamic_with_id =
+              (pthreadpool_task_3d_tile_2d_dynamic_with_id_t)
+                  xnn_compute_hmp_grouped_dqigemm;
         } else {
-          convolution_op->compute[igemm_compute_index].task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_grouped_igemm;
+          convolution_op->compute[igemm_compute_index]
+              .task_3d_tile_2d_dynamic_with_id =
+              (pthreadpool_task_3d_tile_2d_dynamic_with_id_t)
+                  xnn_compute_hmp_grouped_igemm;
         }
       }
-    #endif
+    } else {
+      if (batch_size > 1) {
+        convolution_op->compute[igemm_compute_index].type =
+            xnn_parallelization_type_4d_tile_2d;
+        if (dynamic_quantization) {
+          convolution_op->compute[igemm_compute_index].task_4d_tile_2d =
+              (pthreadpool_task_4d_tile_2d_t)xnn_compute_grouped_batch_dqigemm;
+        } else {
+          convolution_op->compute[igemm_compute_index].task_4d_tile_2d =
+              (pthreadpool_task_4d_tile_2d_t)xnn_compute_grouped_batch_igemm;
+        }
+      } else {
+        convolution_op->compute[igemm_compute_index].type =
+            xnn_parallelization_type_3d_tile_2d_dynamic;
+        if (dynamic_quantization) {
+          convolution_op->compute[igemm_compute_index].task_3d_tile_2d_dynamic =
+              (pthreadpool_task_3d_tile_2d_dynamic_t)
+                  xnn_compute_grouped_dqigemm;
+        } else {
+          convolution_op->compute[igemm_compute_index].task_3d_tile_2d_dynamic =
+              (pthreadpool_task_3d_tile_2d_dynamic_t)xnn_compute_grouped_igemm;
+        }
+      }
+    }
+#else
+    if (batch_size > 1) {
+      convolution_op->compute[igemm_compute_index].type =
+          xnn_parallelization_type_4d_tile_2d;
+      if (dynamic_quantization) {
+        convolution_op->compute[igemm_compute_index].task_4d_tile_2d =
+            (pthreadpool_task_4d_tile_2d_t)xnn_compute_grouped_batch_dqigemm;
+      } else {
+        convolution_op->compute[igemm_compute_index].task_4d_tile_2d =
+            (pthreadpool_task_4d_tile_2d_t)xnn_compute_grouped_batch_igemm;
+      }
+    } else {
+      convolution_op->compute[igemm_compute_index].type =
+          xnn_parallelization_type_3d_tile_2d_dynamic;
+      if (dynamic_quantization) {
+        convolution_op->compute[igemm_compute_index].task_3d_tile_2d_dynamic =
+            (pthreadpool_task_3d_tile_2d_dynamic_t)xnn_compute_grouped_dqigemm;
+      } else {
+        convolution_op->compute[igemm_compute_index].task_3d_tile_2d_dynamic =
+            (pthreadpool_task_3d_tile_2d_dynamic_t)xnn_compute_grouped_igemm;
+      }
+    }
+#endif
     if (batch_size > 1) {
       convolution_op->compute[igemm_compute_index].range[0] = batch_size;
       convolution_op->compute[igemm_compute_index].range[1] = groups;
