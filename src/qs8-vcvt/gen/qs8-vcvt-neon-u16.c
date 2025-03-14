@@ -13,7 +13,7 @@
 #include <arm_neon.h>
 
 #include "src/xnnpack/common.h"
-#include "src/xnnpack/vcvt.h"
+#include "src/xnnpack/microparams.h"
 
 
 void xnn_qs8_vcvt_ukernel__neon_u16(

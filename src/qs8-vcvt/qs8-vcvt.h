@@ -5,6 +5,11 @@
 
 // clang-format off
 
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/hardware-config.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/microparams.h"
+
 #ifndef XNN_CVT_UKERNEL_WITH_PARAMS
 #define XNN_CVT_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, type_in, type_out, params_type, init_params) \
     XNN_CVT_UKERNEL(arch_flags, ukernel, batch_tile, vector_tile, type_in, type_out)
@@ -80,4 +85,3 @@ XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_qs8_vcvt_ukernel__scalar_u4, 4, false, XNN_QU
 #undef XNN_DEFINED_QUANTIZED
 #undef XNN_QUANTIZED
 #endif
-

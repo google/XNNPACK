@@ -12,7 +12,7 @@
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
-#include "src/xnnpack/vcvt.h"
+#include "src/xnnpack/microparams.h"
 
 
 void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_u2(

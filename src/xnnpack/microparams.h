@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef THIRD_PARTY_XNNPACK_SRC_XNNPACK_MICROPARAMS_H_
+#define THIRD_PARTY_XNNPACK_SRC_XNNPACK_MICROPARAMS_H_
 
 #include <stddef.h>
 #include <stdint.h>
@@ -609,3 +610,4 @@ struct subconvolution_params {
   size_t scaled_kernel_size;
 };
 
+#endif  // THIRD_PARTY_XNNPACK_SRC_XNNPACK_MICROPARAMS_H_

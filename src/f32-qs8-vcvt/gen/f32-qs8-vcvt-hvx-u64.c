@@ -11,7 +11,7 @@
 #include <assert.h>
 
 #include "src/xnnpack/simd/f32-hvx.h"
-#include "src/xnnpack/vcvt.h"
+#include "src/xnnpack/microparams.h"
 
 void xnn_f32_qs8_vcvt_ukernel__hvx_u64(
     size_t batch,

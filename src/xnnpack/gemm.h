@@ -6,12 +6,14 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef THIRD_PARTY_XNNPACK_SRC_XNNPACK_GEMM_H_
+#define THIRD_PARTY_XNNPACK_SRC_XNNPACK_GEMM_H_
 
 #include <stddef.h>
 #include <stdint.h>
 
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
 
 #ifdef __cplusplus
@@ -3766,3 +3768,5 @@ DECLARE_QS8_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc8w_gemm_minmax_fp32_uker
 #ifdef __cplusplus
 }  // extern "C"
 #endif
+
+#endif  // THIRD_PARTY_XNNPACK_SRC_XNNPACK_GEMM_H_

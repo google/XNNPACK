@@ -3,13 +3,15 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+// IWYU pragma: always_keep
+
+#ifndef THRID_PARTH_XNNPACK_SRC_XNNPACK_VCVT_H_
+#define THRID_PARTH_XNNPACK_SRC_XNNPACK_VCVT_H_
 
 #include <stddef.h>
 #include <stdint.h>
 
 #include "src/xnnpack/common.h"
-#include "src/xnnpack/microparams.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,6 +19,7 @@ extern "C" {
 
 #define XNN_CVT_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, type_in, type_out, params_type, init_params) \
   XNN_INTERNAL void ukernel(size_t n, const type_in* input, type_out* output, const params_type* params);
+// IWYU pragma: begin_exports
 #include "src/f16-f32-vcvt/f16-f32-vcvt.h"
 #include "src/f16-qs8-vcvt/f16-qs8-vcvt.h"
 #include "src/f16-qu8-vcvt/f16-qu8-vcvt.h"
@@ -28,8 +31,11 @@ extern "C" {
 #include "src/qs8-vcvt/qs8-vcvt.h"
 #include "src/qu8-f32-vcvt/qu8-f32-vcvt.h"
 #include "src/qu8-vcvt/qu8-vcvt.h"
+// IWYU pragma: end_exports
 #undef XNN_CVT_UKERNEL_WITH_PARAMS
 
 #ifdef __cplusplus
 }  // extern "C"
 #endif
+
+#endif  // THRID_PARTH_XNNPACK_SRC_XNNPACK_VCVT_H_

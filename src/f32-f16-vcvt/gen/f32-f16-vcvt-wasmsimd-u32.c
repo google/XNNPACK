@@ -13,7 +13,7 @@
 #include <wasm_simd128.h>
 
 #include "src/xnnpack/common.h"
-#include "src/xnnpack/vcvt.h"
+#include "src/xnnpack/microparams.h"
 
 
 void xnn_f32_f16_vcvt_ukernel__wasmsimd_u32(
