@@ -9,6 +9,7 @@
 
 #include <assert.h>
 #include <stddef.h>
+#include <string.h>  // for memcpy
 
 #include <hvx_hexagon_protos.h>
 #include <hexagon_protos.h>
@@ -170,6 +171,15 @@ xnn_load_tail_f32(const float* input, size_t num_elements) XNN_OOB_READS {
   assert(num_elements < xnn_simd_size_f32);
 
   return *((HVX_UVector*) input);
+}
+
+static XNN_INLINE xnn_simd_f32_t
+xnn_load_tail_safe_f32(const float* input, size_t num_elements) {
+  assert(num_elements <= xnn_simd_size_f32);
+
+  XNN_ALIGN(128) float padded[xnn_simd_size_f32];
+  memcpy(padded, input, num_elements * sizeof(float));
+  return *(HVX_Vector*) padded;
 }
 
 static XNN_INLINE void xnn_store_tail_f32(float* output, xnn_simd_f32_t v,
