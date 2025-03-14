@@ -19,8 +19,6 @@
 // arch_flags, ukernel, channel_tile, primary_tile, datatype, params_type, init_params
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_s8_maxpool_minmax_ukernel_2p__neon_u16, 16, 2, int8_t, struct xnn_s8_minmax_params, xnn_init_s8_minmax_scalar_params)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_s8_maxpool_minmax_ukernel_4p__neon_u16, 16, 4, int8_t, struct xnn_s8_minmax_params, xnn_init_s8_minmax_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_s8_maxpool_minmax_ukernel_9p__neon_u16, 16, 9, int8_t, struct xnn_s8_minmax_params, xnn_init_s8_minmax_scalar_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
