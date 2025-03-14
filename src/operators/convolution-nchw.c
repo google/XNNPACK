@@ -174,7 +174,7 @@ static enum xnn_status create_conv2d_hwc2chw_path(
   const size_t packed_weights_size = (groups * packed_group_output_channels *
     (group_input_channels * kernel_height * kernel_width + 1 /* bias */)) << log2_filter_element_size;
   const size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
-  void* weights_ptr = xnn_get_pointer_to_write_weights(convolution_op, aligned_total_weights_size, 0);
+  void* weights_ptr = xnn_get_pointer_to_write_weights(convolution_op, aligned_total_weights_size);
   if (weights_ptr == NULL) {
     xnn_log_error("failed to reserve or allocate %zu bytes for %s operator conv2d_hwc2chw packed weights",
                   aligned_total_weights_size,
@@ -228,7 +228,7 @@ static enum xnn_status create_dwconv_path(
   const size_t packed_weights_size = (groups * (kernel_height * kernel_width + 1 /* bias */)) << log2_filter_element_size;
   const size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
   void* weights_ptr = xnn_get_pointer_to_write_weights(
-      convolution_op, aligned_total_weights_size, 0);
+      convolution_op, aligned_total_weights_size);
   if (weights_ptr == NULL) {
     xnn_log_error("failed to reserve or allocated %zu bytes for %s operator dwconv packed weights",
                   aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
