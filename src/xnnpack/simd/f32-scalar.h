@@ -11,7 +11,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
+#include "src/xnnpack/common.h"
 
 
 // SIMD vector type for f32 using SCALAR.
@@ -29,7 +29,7 @@ typedef float xnn_simd_f32_t;
 
 // Include the header for generic functions _after_ declaring the arch-specific
 // types and sizes.
-#include "xnnpack/simd/f32-generic-functions.h"
+#include "src/xnnpack/simd/f32-generic-functions.h"
 
 // Arithmetic operations.
 static XNN_INLINE xnn_simd_f32_t xnn_zero_f32() { return 0.0f; }
@@ -81,6 +81,8 @@ static XNN_INLINE xnn_simd_f32_t xnn_min_f32(xnn_simd_f32_t a, xnn_simd_f32_t b)
 static XNN_INLINE xnn_simd_f32_t xnn_abs_f32(xnn_simd_f32_t a) { return fabsf(a); }
 
 static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) { return -a; }
+
+static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) { return roundf(a); }
 
 // Logical operations.
 static XNN_INLINE xnn_simd_f32_t xnn_and_f32(xnn_simd_f32_t a, xnn_simd_f32_t b) {
@@ -143,6 +145,11 @@ static XNN_INLINE xnn_simd_f32_t xnn_set1_or_load_f32(const float *v) { return *
 // Tail load/store operations.
 static XNN_INLINE xnn_simd_f32_t xnn_load_tail_f32(const float *input,
                                                    size_t num_elements) {
+  return *input;
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_load_tail_safe_f32(const float *input,
+                                                        size_t num_elements) {
   return *input;
 }
 

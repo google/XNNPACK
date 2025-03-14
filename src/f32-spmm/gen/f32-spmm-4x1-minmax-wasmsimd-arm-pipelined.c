@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-spmm/wasmsimd-pipelined.c.in
 //   Generator: tools/xngen
@@ -11,7 +12,7 @@
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/spmm.h"
+#include "src/xnnpack/spmm.h"
 
 
 void xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm_pipelined(

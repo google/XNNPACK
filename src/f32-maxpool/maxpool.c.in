@@ -29,10 +29,10 @@ $else:
   #define xnn_load_tail_safe_impl(x, c) xnn_load_tail_safe_${DATATYPE}(x, c)
   #define xnn_pre_store_impl(x) x
 
-#include "xnnpack/simd/${DATATYPE_IMPL}-${ARCH}.h"
+#include "src/xnnpack/simd/${DATATYPE_IMPL}-${ARCH}.h"
 
-#include "xnnpack/common.h"
-#include "xnnpack/microparams.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
 
 $CTYPE = {"f32": "float", "f16": "xnn_float16", "u8": "uint8_t", "s8": "int8_t"}[DATATYPE]
 $CTYPE_IMPL = {"f32": "float", "f16": "xnn_float16", "s16": "int16_t", "u8": "uint8_t", "s8": "int8_t"}[DATATYPE_IMPL]

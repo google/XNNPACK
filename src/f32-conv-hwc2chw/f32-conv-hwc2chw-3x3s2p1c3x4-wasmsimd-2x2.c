@@ -7,8 +7,8 @@
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/conv.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/conv.h"
+#include "src/xnnpack/math.h"
 
 
 void xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__wasmsimd_2x2(

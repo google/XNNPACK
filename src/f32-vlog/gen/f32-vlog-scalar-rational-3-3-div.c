@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vlog/rational-3-3.c.in
 //   Generator: tools/xngen
@@ -11,11 +12,11 @@
 #include <math.h>
 #include <stddef.h>
 
-#include "xnnpack/simd/f32-scalar.h"
+#include "src/xnnpack/simd/f32-scalar.h"
 
-#include "xnnpack/common.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vunary.h"
 
 // Define some mathematical constants in case they are not provided by `math.h`.
 #ifndef M_LN2

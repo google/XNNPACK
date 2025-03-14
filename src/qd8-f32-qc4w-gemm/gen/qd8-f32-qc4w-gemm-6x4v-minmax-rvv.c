@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-gemm/rvv.c.in
 //   Generator: tools/xngen
@@ -12,8 +13,8 @@
 
 #include <riscv_vector.h>
 
-#include "xnnpack/gemm.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/math.h"
 
 void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_6x4v__rvv(
     size_t mr,

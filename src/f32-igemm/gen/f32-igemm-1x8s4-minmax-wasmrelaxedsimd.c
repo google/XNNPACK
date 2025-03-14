@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-igemm/wasmsimd-s4.c.in
 //   Generator: tools/xngen
@@ -11,7 +12,7 @@
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/igemm.h"
+#include "src/xnnpack/igemm.h"
 
 
 void xnn_f32_igemm_minmax_ukernel_1x8s4__wasmrelaxedsimd(

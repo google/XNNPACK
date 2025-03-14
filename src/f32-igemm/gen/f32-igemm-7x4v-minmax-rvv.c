@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-igemm/MRxNRv-rvv.c.in
 //   Generator: tools/xngen
@@ -11,7 +12,7 @@
 
 #include <riscv_vector.h>
 
-#include "xnnpack/igemm.h"
+#include "src/xnnpack/igemm.h"
 
 
 void xnn_f32_igemm_minmax_ukernel_7x4v__rvv(

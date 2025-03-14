@@ -20,21 +20,25 @@ import xnncommon
 
 parser = argparse.ArgumentParser(description="XNNPACK generator")
 parser.add_argument(
-    "-s", "--spec", metavar="FILE", required=True, help="Spec (YAML) file")
+    "-s", "--spec", metavar="FILE", required=True, help="Spec (YAML) file"
+)
 parser.add_argument(
     "-o",
     "--output-test",
     action="append",
     metavar="FILE",
     required=True,
-    help="Test output (C++ source) file(s)")
+    help="Test output (C++ source) file(s)",
+)
 parser.add_argument(
     "-b",
     "--output-bench",
     metavar="FILE",
     required=False,
-    help="Benchmark output (C++ source) file(s)")
+    help="Benchmark output (C++ source) file(s)",
+)
 parser.set_defaults(defines=list())
+
 
 def split_ukernel_name(name):
   common_name, target_name = name.split("__", 1)
@@ -66,7 +70,19 @@ def split_ukernel_name(name):
   requantization = common_parts[-3]
   if requantization not in ["fp32", "rndnu", "rndnu16"]:
     requantization = None
-  return mr, nr, kr, sr, mr_packed, vector_tile, requantization, arch, isa, assembly
+  return (
+      mr,
+      nr,
+      kr,
+      sr,
+      mr_packed,
+      vector_tile,
+      requantization,
+      arch,
+      isa,
+      assembly,
+  )
+
 
 GEMM_BENCH_CODE = """\
 $if CPP_CHECK:
@@ -703,9 +719,7 @@ def generate_test_cases(
   _, datatype, ukernel_type, activation, _ = ukernel.split("_", 4)
   kerneltype = datatype
   if datatype in ["f16", "f32"] and ukernel_type in ["qc8w", "qc4w"]:
-    _, datatype, kerneltype, ukernel_type, activation, _ = ukernel.split(
-        "_", 5
-    )
+    _, datatype, kerneltype, ukernel_type, activation, _ = ukernel.split("_", 5)
     datatype = datatype + "_" + kerneltype
   if (
       datatype in ("qd8", "qp8")
@@ -745,7 +759,9 @@ def generate_test_cases(
         "f16": "uint16_t",
         "f32": "float",
     }[datatype]
-    nr_scale = {"rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype}[isa]
+    nr_scale = {
+        "rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype
+    }[isa]
   test_fun_name = "".join(ukernel.split("_")[1:4]).upper()
   if test_fun_name in {"QP8F32QC8W"}:
     test_fun_name = "_".join(["Test", test_fun_name])
@@ -815,6 +831,7 @@ def main(args):
       raise ValueError("expected a list of micro-kernels in the spec")
 
     tests = """\
+// clang-format off
 // Copyright (c) Facebook, Inc. and its affiliates.
 // All rights reserved.
 //
@@ -834,21 +851,22 @@ def main(args):
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack/allocator.h"
-#include "xnnpack/common.h"
-#include "xnnpack/gemm.h"
-#include "xnnpack/igemm.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/pack.h"
-#include "xnnpack/packw.h"
-#include "xnnpack/ppmm.h"
-#include "xnnpack/requantization.h"
-#include "gemm-microkernel-tester.h"
-#include "next_prime.h"
+#include "src/xnnpack/allocator.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/igemm.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/pack.h"
+#include "src/xnnpack/packw.h"
+#include "src/xnnpack/ppmm.h"
+#include "src/xnnpack/requantization.h"
+#include "test/gemm-microkernel-tester.h"
+#include "test/next_prime.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
     benches = """\
+// clang-format off
 // Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -859,15 +877,15 @@ def main(args):
 //   Generator: {generator}
 
 #include <benchmark/benchmark.h>
-#include "gemm-benchmark.h"
-#include "utils.h"
-#include "xnnpack/common.h"
-#include "xnnpack/gemm.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/pack.h"
-#include "xnnpack/packw.h"
+#include "bench/gemm-benchmark.h"
+#include "bench/utils.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/pack.h"
+#include "src/xnnpack/packw.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
     test_outputs = collections.defaultdict(str)
@@ -941,9 +959,12 @@ def main(args):
         create_tests_from_idx[create_tests_idx] = create_tests.replace(
             "CreateTests(", f"CreateTests{create_tests_idx}("
         )
-        if isa == 'rvv':
-          create_tests_from_idx[create_tests_idx] = xnncommon.postprocess_test_case(
-            create_tests_from_idx[create_tests_idx], arch, isa, assembly)
+        if isa == "rvv":
+          create_tests_from_idx[create_tests_idx] = (
+              xnncommon.postprocess_test_case(
+                  create_tests_from_idx[create_tests_idx], arch, isa, assembly
+              )
+          )
       test_case = test_case.replace(
           "CreateTests(", f"CreateTests{create_tests_idx}("
       )

@@ -11,15 +11,15 @@
 #include <random>
 #include <vector>
 
-#include "spmm.h"
-#include "utils.h"
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/spmm.h"
-#include "xnnpack/buffer.h"
+#include "bench/spmm.h"
+#include "bench/utils.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/spmm.h"
+#include "src/xnnpack/buffer.h"
 #include <benchmark/benchmark.h>
 
 static void f16_spmm(benchmark::State& state,
@@ -57,7 +57,7 @@ static void f16_spmm(benchmark::State& state,
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
   std::fill(nmap.begin(), nmap.end(), 0);
   std::fill(dmap.begin(), dmap.end(), 0);
-  std::fill(w.begin(), w.end(), 0);
+  std::fill(w.begin(), w.end(), 0.0f);
 
   for (xnn_float16& b_value : b) {
     if (pdist(rng) <= sparsity) {

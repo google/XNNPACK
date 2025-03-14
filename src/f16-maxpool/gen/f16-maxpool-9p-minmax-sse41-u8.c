@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-maxpool/maxpool.c.in
 //   Generator: tools/xngen
@@ -19,10 +20,10 @@
 #define xnn_load_tail_safe_impl(x, c) xnn_signcomplement_s16(xnn_load_tail_safe_s16(x, c))
 #define xnn_pre_store_impl(x) xnn_signcomplement_s16(x)
 
-#include "xnnpack/simd/s16-sse41.h"
+#include "src/xnnpack/simd/s16-sse41.h"
 
-#include "xnnpack/common.h"
-#include "xnnpack/microparams.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
 
 void xnn_f16_maxpool_minmax_ukernel_9p__sse41_u8(
     size_t output_pixels,

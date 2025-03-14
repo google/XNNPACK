@@ -10,10 +10,10 @@ $assert DATATYPE in ["QC8", "QS8", "QU8", "QD8", "QC4", "QB4_F16", "QB4_F32"]
 $if VARIANT == "LRINTF":
   #include <math.h>
 
-#include "xnnpack/gemm.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/math.h"
 $if NR % 4 != 0:
-  #include "xnnpack/unaligned.h"
+  #include "src/xnnpack/unaligned.h"
 
 $#
 $INDENT = 0

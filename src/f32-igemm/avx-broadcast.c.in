@@ -9,9 +9,9 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <immintrin.h>
 
-#include "xnnpack/igemm.h"
+#include "src/xnnpack/igemm.h"
 $if PREFETCH:
-  #include "xnnpack/prefetch.h"
+  #include "src/xnnpack/prefetch.h"
 
 
 $ISA = {0: "avx", 3: "fma3"}[FMA]

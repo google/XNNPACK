@@ -219,7 +219,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/u8-ibilinear/gen/u8-ibilinear-scalar-c1.c
   src/u8-lut32norm/u8-lut32norm-scalar.c
   src/u8-maxpool/gen/u8-maxpool-9p-minmax-scalar-u1.c
-  src/u8-rmax/u8-rmax-scalar-u2.c
+  src/u8-rminmax/gen/u8-rmax-scalar-u2-acc2.c
   src/u8-vclamp/u8-vclamp-scalar-u4.c
   src/x8-lut/gen/x8-lut-scalar-u4.c
   src/x8-packq/x8-packq-scalar-f32qp8-u1.c
@@ -254,6 +254,8 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f16-qu8-vcvt/gen/f16-qu8-vcvt-scalar-imagic-u1.c
   src/f16-qu8-vcvt/gen/f16-qu8-vcvt-scalar-imagic-u2.c
   src/f16-qu8-vcvt/gen/f16-qu8-vcvt-scalar-imagic-u3.c
+  src/f16-rdminmax/gen/f16-rdmax-2p2x-scalar-c2.c
+  src/f16-rdminmax/gen/f16-rdmin-2p2x-scalar-c2.c
   src/f16-rminmax/gen/f16-rmax-scalar-u1.c
   src/f16-rminmax/gen/f16-rmax-scalar-u3-acc3.c
   src/f16-rminmax/gen/f16-rmax-scalar-u4-acc2.c
@@ -383,6 +385,8 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-scalar-rr2-p5-u1.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-scalar-rr2-p5-u2-acc2.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-scalar-rr2-p5-u4-acc4.c
+  src/f32-rdminmax/gen/f32-rdmax-2p2x-scalar-c2.c
+  src/f32-rdminmax/gen/f32-rdmin-2p2x-scalar-c2.c
   src/f32-rminmax/gen/f32-rmax-scalar-u1.c
   src/f32-rminmax/gen/f32-rmax-scalar-u2-acc2.c
   src/f32-rminmax/gen/f32-rmax-scalar-u3-acc3.c
@@ -504,6 +508,7 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-vsigmoid/gen/f32-vsigmoid-scalar-rr2-p5-div-u1.c
   src/f32-vsigmoid/gen/f32-vsigmoid-scalar-rr2-p5-div-u2.c
   src/f32-vsigmoid/gen/f32-vsigmoid-scalar-rr2-p5-div-u4.c
+  src/f32-vsin/gen/f32-vsin-scalar-rational-5-4-div.c
   src/f32-vsqrt/gen/f32-vsqrt-scalar-sqrt-u2.c
   src/f32-vsqrt/gen/f32-vsqrt-scalar-sqrt-u4.c
   src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-1x2-minmax-scalar.c
@@ -718,8 +723,41 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-scalar-u2.c
   src/s8-ibilinear/gen/s8-ibilinear-scalar-c2.c
   src/s8-ibilinear/gen/s8-ibilinear-scalar-c4.c
+  src/s8-rdminmax/gen/s8-rdmax-2p2x-scalar-c2.c
+  src/s8-rdminmax/gen/s8-rdmin-2p2x-scalar-c2.c
+  src/s8-rminmax/gen/s8-rmax-scalar-u1.c
+  src/s8-rminmax/gen/s8-rmax-scalar-u2-acc2.c
+  src/s8-rminmax/gen/s8-rmax-scalar-u3-acc3.c
+  src/s8-rminmax/gen/s8-rmax-scalar-u4-acc2.c
+  src/s8-rminmax/gen/s8-rmax-scalar-u4-acc4.c
+  src/s8-rminmax/gen/s8-rmin-scalar-u1.c
+  src/s8-rminmax/gen/s8-rmin-scalar-u2-acc2.c
+  src/s8-rminmax/gen/s8-rmin-scalar-u3-acc3.c
+  src/s8-rminmax/gen/s8-rmin-scalar-u4-acc2.c
+  src/s8-rminmax/gen/s8-rmin-scalar-u4-acc4.c
+  src/s8-rminmax/gen/s8-rminmax-scalar-u1.c
+  src/s8-rminmax/gen/s8-rminmax-scalar-u2-acc2.c
+  src/s8-rminmax/gen/s8-rminmax-scalar-u3-acc3.c
+  src/s8-rminmax/gen/s8-rminmax-scalar-u4-acc2.c
+  src/s8-rminmax/gen/s8-rminmax-scalar-u4-acc4.c
   src/u8-ibilinear/gen/u8-ibilinear-scalar-c2.c
   src/u8-ibilinear/gen/u8-ibilinear-scalar-c4.c
+  src/u8-rdminmax/gen/u8-rdmax-2p2x-scalar-c2.c
+  src/u8-rdminmax/gen/u8-rdmin-2p2x-scalar-c2.c
+  src/u8-rminmax/gen/u8-rmax-scalar-u1.c
+  src/u8-rminmax/gen/u8-rmax-scalar-u3-acc3.c
+  src/u8-rminmax/gen/u8-rmax-scalar-u4-acc2.c
+  src/u8-rminmax/gen/u8-rmax-scalar-u4-acc4.c
+  src/u8-rminmax/gen/u8-rmin-scalar-u1.c
+  src/u8-rminmax/gen/u8-rmin-scalar-u2-acc2.c
+  src/u8-rminmax/gen/u8-rmin-scalar-u3-acc3.c
+  src/u8-rminmax/gen/u8-rmin-scalar-u4-acc2.c
+  src/u8-rminmax/gen/u8-rmin-scalar-u4-acc4.c
+  src/u8-rminmax/gen/u8-rminmax-scalar-u1.c
+  src/u8-rminmax/gen/u8-rminmax-scalar-u2-acc2.c
+  src/u8-rminmax/gen/u8-rminmax-scalar-u3-acc3.c
+  src/u8-rminmax/gen/u8-rminmax-scalar-u4-acc2.c
+  src/u8-rminmax/gen/u8-rminmax-scalar-u4-acc4.c
   src/x8-lut/gen/x8-lut-scalar-u1.c
   src/x8-lut/gen/x8-lut-scalar-u2.c
   src/x8-lut/gen/x8-lut-scalar-u8.c
@@ -794,14 +832,6 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/x32-transposec/gen/x32-transposec-4x2-scalar-int.c
   src/x32-transposec/gen/x32-transposec-4x4-scalar-float.c
   src/x32-transposec/gen/x32-transposec-4x4-scalar-int.c
-  src/x32-zerob/gen/x32-zerob-2c1s1r-gemm-scalar-float.c
-  src/x32-zerob/gen/x32-zerob-2c1s1r-gemm-scalar-int.c
-  src/x32-zerob/gen/x32-zerob-2c2s1r-gemm-scalar-float.c
-  src/x32-zerob/gen/x32-zerob-2c2s1r-gemm-scalar-int.c
-  src/x32-zerob/gen/x32-zerob-4c1s1r-gemm-scalar-float.c
-  src/x32-zerob/gen/x32-zerob-4c1s1r-gemm-scalar-int.c
-  src/x32-zerob/gen/x32-zerob-4c4s1r-gemm-scalar-float.c
-  src/x32-zerob/gen/x32-zerob-4c4s1r-gemm-scalar-int.c
   src/x64-transposec/gen/x64-transposec-1x2-scalar-float.c
   src/x64-transposec/gen/x64-transposec-1x2-scalar-int.c
   src/x64-transposec/gen/x64-transposec-2x1-scalar-float.c

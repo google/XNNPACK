@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/x32-packb/scalar.c.in
 //   Generator: tools/xngen
@@ -10,9 +11,9 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "xnnpack/math.h"
-#include "xnnpack/packb.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/packb.h"
+#include "src/xnnpack/unaligned.h"
 
 void xnn_x32_packb_gemm_ukernel_2c2s1r__scalar_int(
   size_t groups,

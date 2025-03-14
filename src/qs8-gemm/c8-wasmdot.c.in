@@ -12,8 +12,8 @@ $assert NR == 4 or NR == 8
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/gemm.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/math.h"
 
 
 $ABC = "012345678"

@@ -13,7 +13,7 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
+#include "src/xnnpack/common.h"
 
 // SIMD vector type for s16 using NEON.
 typedef int16x8_t xnn_simd_s16_t;

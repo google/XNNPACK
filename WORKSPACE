@@ -85,9 +85,9 @@ http_archive(
 # pthreadpool library, used for parallelization
 http_archive(
     name = "pthreadpool",
-    sha256 = "cb668c32d6e05099492cc7ea19168e2dad0d1dcc4cbaa0e34fd4b38d39f0e03e",
-    strip_prefix = "pthreadpool-f94ab76fe99754960035d520dce28e15b647e8cf",
-    urls = ["https://github.com/google/pthreadpool/archive/f94ab76fe99754960035d520dce28e15b647e8cf.zip"],
+    sha256 = "acbbf2f821967ab43563e35d86078017c38489a7c3c048b36825b98076d69962",
+    strip_prefix = "pthreadpool-4e1831c02c74334a35ead03362f3342b6cea2a86",
+    urls = ["https://github.com/google/pthreadpool/archive/4e1831c02c74334a35ead03362f3342b6cea2a86.zip"],
 )
 # LINT.ThenChange(cmake/DownloadPThreadPool.cmake,MODULE.bazel:pthreadpool)
 
@@ -107,10 +107,10 @@ http_archive(
 # KleidiAI library, used for ARM microkernels.
 http_archive(
     name = "KleidiAI",
-    sha256 = "f3ea4fce53f3b31076958dbff229f0048dae15bf454929673c78292a56279d52",
-    strip_prefix = "kleidiai-847ebd19d0192528659b0a0fa2c6057eed674c6a",
+    sha256 = "cb6af19d3ef21a0c683bd0c7c5b455c386dee0b7d0d4bc2cc0e14503019ff1e8",
+    strip_prefix = "kleidiai-1.4.0",
     urls = [
-        "https://gitlab.arm.com/kleidi/kleidiai/-/archive/847ebd19d0192528659b0a0fa2c6057eed674c6a/kleidiai-847ebd19d0192528659b0a0fa2c6057eed674c6a.zip",
+        "https://github.com/ARM-software/kleidiai/archive/refs/tags/v1.4.0.zip",
     ],
 )
 # LINT.ThenChange(cmake/DownloadKleidiAI.cmake,MODULE.bazel:kleidiai)

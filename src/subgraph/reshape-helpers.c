@@ -7,12 +7,12 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "xnnpack.h"
-#include "xnnpack/log.h"
-#include "xnnpack/math.h"
-#include "xnnpack/reshape-helpers.h"
-#include "xnnpack/subgraph.h"
-#include "pthreadpool.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/reshape-helpers.h"
+#include "src/xnnpack/subgraph.h"
+#include <pthreadpool.h>
 
 enum xnn_status resize_unary_elementwise_output_tensor(
   const struct xnn_operator_data* opdata,

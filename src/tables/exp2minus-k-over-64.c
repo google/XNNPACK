@@ -5,7 +5,7 @@
 
 #include <stdint.h>
 
-#include "xnnpack/common.h"
+#include "src/xnnpack/common.h"
 
 
 // Table of exp2(k / 64) values decremented (as integer) by (k << 17), k = 0..63

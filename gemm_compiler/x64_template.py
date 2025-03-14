@@ -36,6 +36,9 @@ class X64(base_architecture.BaseArchitecture):
   def cm_stride_register(self):
     return 'r11'
 
+  def mask_register(self):
+    return 'mm13'
+
   def am_registers(self):
     return [self.a_ptr_register()] + [
         'rax',
@@ -171,7 +174,7 @@ class X64(base_architecture.BaseArchitecture):
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack/assembly.h"
+#include "src/xnnpack/assembly.h"
 """
 
   def header(self):
@@ -324,7 +327,7 @@ BEGIN_FUNCTION {function_name}
     return f'mov {self.k_register()}, 0\n'
 
   def inner_loop_increment(self):
-    return self.c * self.element_size()
+    return self._c * self.element_size()
 
   def cmp_k_and_jump_if_less(self, label):
     kc_register = self.kc_register()

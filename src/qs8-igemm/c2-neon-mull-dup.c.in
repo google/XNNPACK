@@ -14,10 +14,10 @@ $assert DUP in ["DUP", "LD1R", "LD2R", "LD4R"]
 
 #include <arm_neon.h>
 
-#include "xnnpack/gemm.h"
+#include "src/xnnpack/gemm.h"
 $if REQUANTIZATION == "FP32" and ARMV8:
-  #include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/math.h"
+  #include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
 
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8"}[DATATYPE]
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("neonv8" if REQUANTIZATION == "FP32" and ARMV8 else "neon")

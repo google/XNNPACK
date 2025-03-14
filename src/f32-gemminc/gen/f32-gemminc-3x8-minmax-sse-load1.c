@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-gemm/sse-load1.c.in
 //   Generator: tools/xngen
@@ -11,7 +12,7 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/gemm.h"
+#include "src/xnnpack/gemm.h"
 
 
 void xnn_f32_gemminc_minmax_ukernel_3x8__sse_load1(

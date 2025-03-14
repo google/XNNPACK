@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vrnd/rvv.c.in
 //   Generator: tools/xngen
@@ -8,12 +9,13 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <math.h>
 
 #include <riscv_vector.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_f32_vrndz_ukernel__rvv_u2v(
@@ -31,8 +33,15 @@ void xnn_f32_vrndz_ukernel__rvv_u2v(
   do {
     const size_t n = __riscv_vsetvl_e32m2(batch);
     vfloat32m2_t x_f32v = __riscv_vle32_v_f32m2(input, n); input += n;
+    // We need to remember which values are infinity, so we can preserve them
+    // after rounding.
+    // TODO: We should also preserve NaN.
+    vbool16_t inf_bv = __riscv_vmfeq_vf_f32m2_b16(x_f32v, INFINITY, n);
+    vbool16_t ninf_bv = __riscv_vmfeq_vf_f32m2_b16(x_f32v, -INFINITY, n);
+    vbool16_t mask_bv = __riscv_vmor_mm_b16(inf_bv, ninf_bv, n);
     vint32m2_t x_rnd_i32v = __riscv_vfcvt_x_f_v_i32m2_rm(x_f32v, __RISCV_FRM_RTZ, n);
     vfloat32m2_t out_f32v = __riscv_vfcvt_f_x_v_f32m2(x_rnd_i32v, n);
+    out_f32v = __riscv_vmerge_vvm_f32m2(out_f32v, x_f32v, mask_bv, n);
     __riscv_vse32_v_f32m2(output, out_f32v, n); output += n;
     batch -= n;
   } while (batch != 0);

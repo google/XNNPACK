@@ -1,4 +1,4 @@
-#include "gemm-microkernel-tester.h"
+#include "test/gemm-microkernel-tester.h"
 
 #include <stdint.h>
 
@@ -13,20 +13,20 @@
 #include <random>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/common.h"
-#include "xnnpack/config-types.h"
-#include "xnnpack/config.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/pack.h"
-#include "xnnpack/packq.h"
-#include "xnnpack/quantization.h"
-#include "xnnpack/requantization.h"
-#include "replicable_random_device.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/config.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/pack.h"
+#include "src/xnnpack/packq.h"
+#include "src/xnnpack/quantization.h"
+#include "src/xnnpack/requantization.h"
+#include "test/replicable_random_device.h"
 
 constexpr int kIterations = 1;
 
@@ -995,8 +995,6 @@ void GemmMicrokernelTester::Test(
   xnn_init_f32_minmax_params_fn init_params,
   xnn_pack_qs8_gemm_fn pack) const
 {
-  if (m() > mr()) return;
-  if (a_stride() < k()) return;
   ASSERT_LE(m(), mr());
 
   xnnpack::ReplicableRandomDevice rng;
@@ -1836,7 +1834,7 @@ void GemmMicrokernelTester::Test(
          /*packed_weights_ptr=*/packed_w.data(), &params);
 
     // Compute 32-bit results and output quantization arguments.
-    std::fill(c_ref.begin(), c_ref.end(), 0);
+    std::fill(c_ref.begin(), c_ref.end(), 0.0f);
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
         for (size_t k_index = 0; k_index < k2; k_index++) {
@@ -2828,7 +2826,7 @@ void GemmMicrokernelTester::Test(
     std::generate(bias.begin(), bias.end(), f32rng);
     std::fill(c_ref.begin(), c_ref.end(), 0.0f);
 
-    std::fill(packed_w.begin(), packed_w.end(), 0);
+    std::fill(packed_w.begin(), packed_w.end(), 0.0f);
     pack(/*g=*/1, n(), ks(), k(), nr(), kr(), sr(),
          reinterpret_cast<const uint16_t*>(b.data()),
          reinterpret_cast<const uint16_t*>(bias.data()), /*scale=*/nullptr,

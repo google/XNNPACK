@@ -16,9 +16,9 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <arm_neon.h>
 
-#include "xnnpack/packw.h"
+#include "src/xnnpack/packw.h"
 $if PREFETCH:
-  #include "xnnpack/prefetch.h"
+  #include "src/xnnpack/prefetch.h"
 
 
 $IFWHILE = "if" if KBLOCK==8 else "while"

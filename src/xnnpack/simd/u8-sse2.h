@@ -12,8 +12,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/unaligned.h"
 
 // SIMD vector type for u8 using SSE41.
 typedef __m128i xnn_simd_u8_t;
@@ -36,6 +36,22 @@ static XNN_INLINE xnn_simd_u8_t xnn_max_u8(xnn_simd_u8_t a, xnn_simd_u8_t b) {
 
 static XNN_INLINE xnn_simd_u8_t xnn_min_u8(xnn_simd_u8_t a, xnn_simd_u8_t b) {
   return _mm_min_epu8(a, b);
+}
+
+static XNN_INLINE uint8_t xnn_horizontal_max_u8(xnn_simd_u8_t a) {
+  xnn_simd_u8_t vmax = _mm_max_epu8(a, _mm_unpackhi_epi64(a, a));
+  vmax = _mm_max_epu8(vmax, _mm_srli_epi64(vmax, 32));
+  vmax = _mm_max_epu8(vmax, _mm_srli_epi32(vmax, 16));
+  vmax = _mm_max_epu8(vmax, _mm_srli_epi16(vmax, 8));
+  return (uint8_t) _mm_cvtsi128_si32(vmax);
+}
+
+static XNN_INLINE uint8_t xnn_horizontal_min_u8(xnn_simd_u8_t a) {
+  xnn_simd_u8_t vmin = _mm_min_epu8(a, _mm_unpackhi_epi64(a, a));
+  vmin = _mm_min_epu8(vmin, _mm_srli_epi64(vmin, 32));
+  vmin = _mm_min_epu8(vmin, _mm_srli_epi32(vmin, 16));
+  vmin = _mm_min_epu8(vmin, _mm_srli_epi16(vmin, 8));
+  return (uint8_t) _mm_cvtsi128_si32(vmin);
 }
 
 static XNN_INLINE xnn_simd_u8_t xnn_xor_u8(xnn_simd_u8_t a, xnn_simd_u8_t b) {

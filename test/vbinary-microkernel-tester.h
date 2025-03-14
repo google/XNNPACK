@@ -14,9 +14,9 @@
 #include <type_traits>
 
 #include <gtest/gtest.h>
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
 
 using std::copysign;
 

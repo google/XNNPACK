@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-ppmm/scalar.c.in
 //   Generator: tools/xngen
@@ -9,8 +10,8 @@
 
 #include <assert.h>
 
-#include "xnnpack/math.h"
-#include "xnnpack/ppmm.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/ppmm.h"
 
 
 void xnn_f32_ppmm_minmax_ukernel_4x2__scalar(

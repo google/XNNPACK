@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack/subgraph.h"
+#include "src/xnnpack/subgraph.h"
 
 #include <assert.h>
 #include <inttypes.h>
@@ -13,19 +13,19 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "xnnpack.h"
-#include "xnnpack/allocation-type.h"
-#include "xnnpack/allocator.h"
-#include "xnnpack/common.h"
-#include "xnnpack/config-types.h"
-#include "xnnpack/config.h"
-#include "xnnpack/fp16.h"
-#include "xnnpack/hardware-config.h"
-#include "xnnpack/internal.h"
-#include "xnnpack/log.h"
-#include "xnnpack/math.h"
-#include "xnnpack/node-type.h"
-#include "xnnpack/params.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/allocation-type.h"
+#include "src/xnnpack/allocator.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/config.h"
+#include "src/xnnpack/fp16.h"
+#include "src/xnnpack/hardware-config.h"
+#include "src/xnnpack/internal.h"
+#include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/node-type.h"
+#include "src/xnnpack/params.h"
 
 #ifndef XNN_ENABLE_SPARSE
   #error "XNN_ENABLE_SPARSE not defined"
@@ -40,16 +40,6 @@ enum xnn_status xnn_insert_clamp_node(xnn_subgraph_t subgraph, float output_min,
   size_t dims[XNN_MAX_TENSOR_DIMS];
   memcpy(dims, output_value->shape.dim, num_dims * sizeof(size_t));
   switch (output_value->datatype) {
-    case xnn_datatype_fp16:
-      status = xnn_define_tensor_value(
-          subgraph, xnn_datatype_fp16, num_dims, dims, NULL,
-          /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, &new_id);
-      break;
-    case xnn_datatype_fp32:
-      status = xnn_define_tensor_value(
-          subgraph, xnn_datatype_fp32, num_dims, dims, NULL,
-          /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, &new_id);
-      break;
     case xnn_datatype_quint8:
       status = xnn_define_quantized_tensor_value(
           subgraph, xnn_datatype_quint8, output_value->quantization.zero_point,
@@ -63,7 +53,10 @@ enum xnn_status xnn_insert_clamp_node(xnn_subgraph_t subgraph, float output_min,
           /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, &new_id);
       break;
     default:
-      XNN_UNREACHABLE;
+      status = xnn_define_tensor_value(
+          subgraph, output_value->datatype, num_dims, dims, NULL,
+          /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, &new_id);
+      break;
   }
   if (status != xnn_status_success) {
     return status;

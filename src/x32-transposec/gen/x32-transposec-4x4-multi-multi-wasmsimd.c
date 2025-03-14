@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/x32-transposec/wasmsimd.c.in
 //   Generator: tools/xngen
@@ -11,9 +12,9 @@
 
 #include <assert.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/transpose.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/transpose.h"
 
 void xnn_x32_transposec_ukernel__4x4_multi_multi_wasmsimd(
     const uint32_t* input,

@@ -12,7 +12,7 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
+#include "src/xnnpack/common.h"
 
 
 // SIMD vector type for f32 using NEON.
@@ -52,7 +52,7 @@ typedef float32x4_t xnn_simd_f32_t;
 
 // Include the header for generic functions _after_ declaring the arch-specific
 // types and sizes.
-#include "xnnpack/simd/f32-generic-functions.h"
+#include "src/xnnpack/simd/f32-generic-functions.h"
 
 // Arithmetic operations.
 static XNN_INLINE xnn_simd_f32_t xnn_zero_f32() { return vdupq_n_f32(0.f); }
@@ -151,9 +151,37 @@ static XNN_INLINE xnn_simd_f32_t xnn_xor_f32(xnn_simd_f32_t a,
       veorq_s32(vreinterpretq_s32_f32(a), vreinterpretq_s32_f32(b)));
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_not_f32(xnn_simd_f32_t a) {
+  return vreinterpretq_f32_u32(
+      vmvnq_u32(vreinterpretq_u32_f32(a)));
+}
+
 static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
                                                xnn_simd_f32_t b) {
   return vreinterpretq_f32_u32(vceqq_f32(a, b));
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
+#if defined(__ARM_ARCH) && __ARM_ARCH < 8
+  // Create a filter for all non-finite values in `a` (all exponent bits set).
+  XNN_SIMD_CONST_F32_FROM_INT32(vexp_bits, 0x7f800000);
+  const xnn_simd_f32_t vfilter =
+      xnn_cmpeq_f32(xnn_and_f32(a, vexp_bits), vexp_bits);
+
+  // Create a vector of `0.5f` with the same sign as the entries of `a`.
+  XNN_SIMD_CONST_F32(vhalf, 0.5f);
+  XNN_SIMD_CONST_F32(vsign_mask, -0.0);
+  const xnn_simd_f32_t vsigned_half =
+      xnn_or_f32(xnn_and_f32(a, vsign_mask), vhalf);
+  const xnn_simd_f32_t vresult =
+      vcvtq_f32_s32(vcvtq_s32_f32(xnn_add_f32(a, vsigned_half)));
+
+  // Apply the non-finite value filter to repace any non-finite input with `a`.
+  return xnn_or_f32(xnn_and_f32(xnn_not_f32(vfilter), vresult),
+                    xnn_and_f32(vfilter, a));
+#else
+  return vrndnq_f32(a);
+#endif  // defined(__ARM_ARCH) && __ARM_ARCH == 7
 }
 
 // Special functions.

@@ -22,16 +22,19 @@
 #include <utility>
 #include <vector>
 
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/datatype.h"
-#include "xnnpack/math.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/datatype.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/reference-utils.h"
 
 namespace xnnpack {
 
 template <typename T>
 class NumericLimits {
  public:
+  static constexpr T epsilon() { return std::numeric_limits<T>::epsilon(); }
+  static constexpr T infinity() { return std::numeric_limits<T>::infinity(); }
   static constexpr T min() { return std::numeric_limits<T>::lowest(); }
   static constexpr T max() { return std::numeric_limits<T>::max(); }
 };
@@ -39,13 +42,21 @@ class NumericLimits {
 template <>
 class NumericLimits<xnn_float16> {
  public:
-  static xnn_float16 min() { return static_cast<xnn_float16>(-65504); }
-  static xnn_float16 max() { return static_cast<xnn_float16>(65504); }
+  static xnn_float16 epsilon() {
+    return xnn_float16_from_bits(0x1400);  // 2^-10 = 0.0009765625
+  }
+  static xnn_float16 infinity() { return xnn_float16_from_bits(0x7c00); }
+  static xnn_float16 min() { return xnn_float16_from_bits(0xfbff); }
+  static xnn_float16 max() { return xnn_float16_from_bits(0x7bff); }
 };
 
 template <>
 class NumericLimits<xnn_bfloat16> {
  public:
+  static xnn_bfloat16 epsilon() {
+    return xnn_bfloat16_from_bits(0x3c00);  // 2^-7 = 0.0078125
+  }
+  static xnn_bfloat16 infinity() { return xnn_bfloat16_from_bits(0x7f80); }
   static xnn_bfloat16 min() { return xnn_bfloat16_from_bits(0xff7f); }
   static xnn_bfloat16 max() { return xnn_bfloat16_from_bits(0x7f7f); }
 };
@@ -60,6 +71,15 @@ class NumericLimits<quantized<T>> {
     return {std::numeric_limits<T>::max()};
   }
 };
+
+inline float epsilon(xnn_datatype datatype) {
+  switch (datatype) {
+    case xnn_datatype_fp32: return NumericLimits<float>::epsilon();
+    case xnn_datatype_fp16: return NumericLimits<xnn_float16>::epsilon();
+    case xnn_datatype_bf16: return NumericLimits<xnn_bfloat16>::epsilon();
+    default: return 1.0f;
+  }
+}
 
 struct PaddingBytes {
   size_t value;
@@ -324,6 +344,43 @@ class Tensor {
     return result;
   }
 
+  // Reshape such that the shape has extent 1 dimensions at `new_axes`
+  // positions.
+  Tensor<T, Alignment> expand_dims(const std::vector<size_t>& new_axes) const {
+    Tensor<T, Alignment> result(*this);
+    size_t new_rank = rank() + new_axes.size();
+    result.extents_.resize(new_rank);
+    result.strides_.resize(new_rank);
+    size_t i = 0;
+    for (size_t j = 0; j < new_rank; ++j) {
+      if (std::find(new_axes.begin(), new_axes.end(), j) != new_axes.end()) {
+        result.extents_[j] = 1;
+        result.strides_[j] = 0;
+      } else {
+        result.extents_[j] = extents_[i];
+        result.strides_[j] = strides_[i];
+        ++i;
+      }
+    }
+    return result;
+  }
+
+  // Reshape the tensor to the given extents, assuming that the tensor is
+  // contiguous, and produces a tensor with contiguous strides.
+  Tensor<T, Alignment> reshape(const std::vector<size_t>& new_extents) const {
+    assert(is_contiguous());
+    Tensor<T, Alignment> result(*this);
+    result.extents_ = new_extents;
+    size_t stride = 1;
+    result.strides_.resize(new_extents.size());
+    for (size_t i = new_extents.size(); i > 0; --i) {
+      result.strides_[i - 1] = stride;
+      stride *= new_extents[i - 1];
+    }
+    assert(stride == size());
+    return result;
+  }
+
   // This uses the same rules for indexing as numpy, i.e. negative numbers are
   // offset are added to the extents.
   Tensor<T, Alignment> slice(const std::vector<int64_t>& begins,
@@ -348,7 +405,7 @@ class Tensor {
   // Remove `pre` elements from the beginning of each dimension, and `post`
   // elements from the end of each dimension.
   Tensor<T, Alignment> crop_padding(const index_type& pre,
-                                    const index_type& post) {
+                                    const index_type& post) const {
     assert(rank() == pre.size());
     assert(rank() == post.size());
 
@@ -485,6 +542,23 @@ std::vector<size_t> random_shape(Rng& rng) {
   return random_shape(rng, 1, 9);
 }
 
+// Like numpy.squeeze, remove dims of extent 1 from shape.
+inline std::vector<size_t> squeeze(std::vector<size_t> shape) {
+  shape.erase(std::remove_if(shape.begin(), shape.end(),
+                             [](size_t x) { return x == 1; }),
+              shape.end());
+  return shape;
+}
+
+template <typename T>
+void broadcast_extent_1(Tensor<T>& tensor) {
+  std::vector<size_t> strides = tensor.strides();
+  for (size_t i = 0; i < tensor.rank(); i++) {
+    strides[i] = tensor.extent(i) == 1 ? 0 : strides[i];
+  }
+  tensor.set_shape(tensor.extents(), std::move(strides));
+}
+
 // Generate random quantization parameters for a given datatype.
 template <typename Rng>
 xnn_quantization_params random_quantization(xnn_datatype datatype, Rng& rng) {
@@ -492,7 +566,7 @@ xnn_quantization_params random_quantization(xnn_datatype datatype, Rng& rng) {
                                           std::numeric_limits<int8_t>::max()};
   std::uniform_int_distribution<> u8_dist{std::numeric_limits<uint8_t>::min(),
                                           std::numeric_limits<uint8_t>::max()};
-  std::uniform_real_distribution<float> scale_dist{0.1f, 10.0f};
+  std::uniform_real_distribution<float> scale_dist{0.25f, 8.0f};
   switch (datatype) {
     case xnn_datatype_qint8:
       return {i8_dist(rng), scale_dist(rng)};
@@ -521,7 +595,7 @@ inline float fake_quantize(float value, const xnn_quantization_params& params) {
 
 template <typename T>
 float dequantize(T x, xnn_quantization_params params) {
-  return dequantize(x, params.scale, params.zero_point);
+  return (static_cast<float>(x) - params.zero_point) * params.scale;
 }
 
 // Make a generator of random values of a datatype T, suitable for use with
@@ -532,14 +606,43 @@ class DatatypeGenerator {
 
  public:
   DatatypeGenerator(float min, float max, const xnn_quantization_params& = {})
-      : dist_(min, max) {}
+      : dist_(std::max<float>(min, NumericLimits<T>::min()),
+              std::min<float>(max, NumericLimits<T>::max())) {}
   explicit DatatypeGenerator(const xnn_quantization_params& = {})
-      : dist_(-1.0f, 1.0f) {}
-  DatatypeGenerator() : dist_(-1.0f, 1.0f) {}
+      : dist_(NumericLimits<T>::min(), NumericLimits<T>::max()) {}
 
   template <typename Rng>
   T operator()(Rng& rng) {
-    return static_cast<T>(dist_(rng));
+    while (true) {
+      float result = dist_(rng);
+      if (!std::isnan(result)) {
+        return static_cast<T>(result);
+      } else {
+        // Don't allow generating NaN
+      }
+    }
+  }
+};
+
+// This specialization for integers doesn't include the lowest negative integer,
+// because testing it is a headache due to undefined behavior when negating it.
+template <>
+class DatatypeGenerator<int> {
+  std::uniform_int_distribution<int> dist_;
+
+ public:
+  DatatypeGenerator(float min, float max, const xnn_quantization_params& = {})
+      : dist_(std::max<int>(round_float_to_int<int>(min),
+                            -std::numeric_limits<int>::max()),
+              std::min<int>(round_float_to_int<int>(max),
+                            std::numeric_limits<int>::max())) {}
+  explicit DatatypeGenerator(const xnn_quantization_params& = {})
+      : dist_(-std::numeric_limits<int>::max(),
+              std::numeric_limits<int>::max()) {}
+
+  template <typename Rng>
+  int operator()(Rng& rng) {
+    return dist_(rng);
   }
 };
 
@@ -550,10 +653,10 @@ class DatatypeGenerator<quantized<T>> {
  public:
   DatatypeGenerator(float min, float max,
                     const xnn_quantization_params& params) {
-    min = std::ceil(min / params.scale + params.zero_point);
-    max = std::floor(max / params.scale + params.zero_point);
-    dist_ = std::uniform_int_distribution<int>(static_cast<int>(min),
-                                               static_cast<int>(max));
+    min = std::ceil(fake_quantize(min, params));
+    max = std::floor(fake_quantize(max, params));
+    dist_ = std::uniform_int_distribution<int>(round_float_to_int<T>(min),
+                                               round_float_to_int<T>(max));
   }
   explicit DatatypeGenerator(const xnn_quantization_params& params)
       : DatatypeGenerator(-1.0f, 1.0f, params) {}

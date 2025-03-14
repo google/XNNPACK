@@ -10,8 +10,8 @@ $SIMD_TILE = BATCH_TILE // 8
 
 #include <immintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/vcvt.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vcvt.h"
 
 
 void xnn_f16_f32_vcvt_ukernel__f16c_u${BATCH_TILE}(

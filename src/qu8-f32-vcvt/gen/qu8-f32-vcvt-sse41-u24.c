@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-f32-vcvt/sse4.c.in
 //   Generator: tools/xngen
@@ -11,9 +12,9 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/unaligned.h"
-#include "xnnpack/vcvt.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/unaligned.h"
+#include "src/xnnpack/vcvt.h"
 
 
 void xnn_qu8_f32_vcvt_ukernel__sse41_u24(

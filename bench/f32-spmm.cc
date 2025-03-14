@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -8,11 +9,11 @@
 //   Generator: tools/generate-spmm-test.py
 
 #include <benchmark/benchmark.h>
-#include "spmm-benchmark.h"
-#include "utils.h"
-#include "xnnpack/gemm.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
+#include "bench/spmm-benchmark.h"
+#include "bench/utils.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
 
 
 #if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON

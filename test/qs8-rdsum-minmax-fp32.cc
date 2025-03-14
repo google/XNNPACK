@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2024 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -5,15 +6,15 @@
 //
 // Auto-generated file. Do not edit!
 //   Specification: test/qs8-rdsum-minmax-fp32.yaml
-//   Generator: tools/generate-rdsum-test.py
+//   Generator: tools/generate-reduce-discontiguous-test.py
 
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/reduce.h"
-#include "rdsum-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/reduce.h"
+#include "test/rdsum-microkernel-tester.h"
 
 
 TEST(QS8_RDSUM_7P7X__SCALAR_C4, channels_eq_4_2pass_fulltile) {
@@ -211,10 +212,10 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, channels_gt_4_multipass_fulltile_with_input_stri
 TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
   const size_t channel_tile = 4;
   for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-     RDSumMicrokernelTester()
-       .rows(264)
-       .channels(channels)
-       .Test(xnn_qs8_rdsum_ukernel_7p7x__scalar_c4);
+    RDSumMicrokernelTester()
+      .rows(264)
+      .channels(channels)
+      .Test(xnn_qs8_rdsum_ukernel_7p7x__scalar_c4);
   }
 }
 
@@ -433,10 +434,10 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 16;
     for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-       RDSumMicrokernelTester()
-         .rows(264)
-         .channels(channels)
-         .Test(xnn_qs8_rdsum_ukernel_7p7x__neon_c16);
+      RDSumMicrokernelTester()
+        .rows(264)
+        .channels(channels)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__neon_c16);
     }
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
@@ -657,10 +658,10 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 32;
     for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-       RDSumMicrokernelTester()
-         .rows(264)
-         .channels(channels)
-         .Test(xnn_qs8_rdsum_ukernel_7p7x__neon_c32);
+      RDSumMicrokernelTester()
+        .rows(264)
+        .channels(channels)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__neon_c32);
     }
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
@@ -881,10 +882,10 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 64;
     for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-       RDSumMicrokernelTester()
-         .rows(264)
-         .channels(channels)
-         .Test(xnn_qs8_rdsum_ukernel_7p7x__neon_c64);
+      RDSumMicrokernelTester()
+        .rows(264)
+        .channels(channels)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__neon_c64);
     }
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
@@ -1105,10 +1106,10 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     TEST_REQUIRES_X86_SSE41;
     const size_t channel_tile = 16;
     for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-       RDSumMicrokernelTester()
-         .rows(264)
-         .channels(channels)
-         .Test(xnn_qs8_rdsum_ukernel_7p7x__sse41_c16);
+      RDSumMicrokernelTester()
+        .rows(264)
+        .channels(channels)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__sse41_c16);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -1329,10 +1330,10 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     TEST_REQUIRES_X86_SSE41;
     const size_t channel_tile = 32;
     for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-       RDSumMicrokernelTester()
-         .rows(264)
-         .channels(channels)
-         .Test(xnn_qs8_rdsum_ukernel_7p7x__sse41_c32);
+      RDSumMicrokernelTester()
+        .rows(264)
+        .channels(channels)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__sse41_c32);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -1553,10 +1554,10 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     TEST_REQUIRES_X86_SSE41;
     const size_t channel_tile = 64;
     for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-       RDSumMicrokernelTester()
-         .rows(264)
-         .channels(channels)
-         .Test(xnn_qs8_rdsum_ukernel_7p7x__sse41_c64);
+      RDSumMicrokernelTester()
+        .rows(264)
+        .channels(channels)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__sse41_c64);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -1777,10 +1778,10 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     TEST_REQUIRES_X86_AVX2;
     const size_t channel_tile = 32;
     for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-       RDSumMicrokernelTester()
-         .rows(264)
-         .channels(channels)
-         .Test(xnn_qs8_rdsum_ukernel_7p7x__avx2_c32);
+      RDSumMicrokernelTester()
+        .rows(264)
+        .channels(channels)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__avx2_c32);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -2001,10 +2002,10 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     TEST_REQUIRES_X86_AVX2;
     const size_t channel_tile = 64;
     for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-       RDSumMicrokernelTester()
-         .rows(264)
-         .channels(channels)
-         .Test(xnn_qs8_rdsum_ukernel_7p7x__avx2_c64);
+      RDSumMicrokernelTester()
+        .rows(264)
+        .channels(channels)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__avx2_c64);
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -2225,10 +2226,10 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     TEST_REQUIRES_X86_AVX512SKX;
     const size_t channel_tile = 64;
     for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-       RDSumMicrokernelTester()
-         .rows(264)
-         .channels(channels)
-         .Test(xnn_qs8_rdsum_ukernel_7p7x__avx512skx_c64);
+      RDSumMicrokernelTester()
+        .rows(264)
+        .channels(channels)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__avx512skx_c64);
     }
   }
 #endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
@@ -2449,10 +2450,10 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
     TEST_REQUIRES_X86_AVX512SKX;
     const size_t channel_tile = 128;
     for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-       RDSumMicrokernelTester()
-         .rows(264)
-         .channels(channels)
-         .Test(xnn_qs8_rdsum_ukernel_7p7x__avx512skx_c128);
+      RDSumMicrokernelTester()
+        .rows(264)
+        .channels(channels)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__avx512skx_c128);
     }
   }
 #endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
@@ -2654,10 +2655,10 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
   TEST(QS8_RDSUM_7P7X__WASMSIMD_C16, overflow_accumulator) {
     const size_t channel_tile = 16;
     for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-       RDSumMicrokernelTester()
-         .rows(264)
-         .channels(channels)
-         .Test(xnn_qs8_rdsum_ukernel_7p7x__wasmsimd_c16);
+      RDSumMicrokernelTester()
+        .rows(264)
+        .channels(channels)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__wasmsimd_c16);
     }
   }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -2859,10 +2860,10 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
   TEST(QS8_RDSUM_7P7X__WASMSIMD_C32, overflow_accumulator) {
     const size_t channel_tile = 32;
     for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-       RDSumMicrokernelTester()
-         .rows(264)
-         .channels(channels)
-         .Test(xnn_qs8_rdsum_ukernel_7p7x__wasmsimd_c32);
+      RDSumMicrokernelTester()
+        .rows(264)
+        .channels(channels)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__wasmsimd_c32);
     }
   }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -3064,10 +3065,474 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
   TEST(QS8_RDSUM_7P7X__WASMSIMD_C64, overflow_accumulator) {
     const size_t channel_tile = 64;
     for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-       RDSumMicrokernelTester()
-         .rows(264)
-         .channels(channels)
-         .Test(xnn_qs8_rdsum_ukernel_7p7x__wasmsimd_c64);
+      RDSumMicrokernelTester()
+        .rows(264)
+        .channels(channels)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__wasmsimd_c64);
     }
   }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  TEST(QS8_RDSUM_7P7X__RVV_U1V, channels_eq_1v_2pass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    RDSumMicrokernelTester()
+      .rows(14)
+      .channels(channel_tile)
+      .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u1v);
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U1V, channels_eq_1v_2pass_fulltile_with_input_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    RDSumMicrokernelTester()
+      .rows(14)
+      .channels(channel_tile)
+      .input_stride(channel_tile+1)
+      .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u1v);
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U1V, channels_eq_1v_2pass_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t rows = 1; rows < 14; rows++) {
+      RDSumMicrokernelTester()
+        .rows(rows)
+        .channels(channel_tile)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u1v);
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U1V, channels_eq_1v_2pass_subtile_with_input_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t rows = 1; rows < 14; rows++) {
+      RDSumMicrokernelTester()
+        .rows(rows)
+        .channels(channel_tile)
+        .input_stride(channel_tile+1)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u1v);
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U1V, channels_eq_1v_multipass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t rows = 1; rows <= 35; rows += 7) {
+      RDSumMicrokernelTester()
+        .rows(rows)
+        .channels(channel_tile)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u1v);
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U1V, channels_eq_1v_multipass_fulltile_with_input_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t rows = 1; rows <= 35; rows += 7) {
+      RDSumMicrokernelTester()
+        .rows(rows)
+        .channels(channel_tile)
+        .input_stride(channel_tile+1)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u1v);
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U1V, channels_div_1v_2pass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+      RDSumMicrokernelTester()
+        .rows(14)
+        .channels(channels)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u1v);
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U1V, channels_div_1v_2pass_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+      for (size_t rows = 1; rows < 14; rows++) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u1v);
+      }
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U1V, channels_div_1v_multipass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+      for (size_t rows = 1; rows <= 35; rows += 7) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u1v);
+      }
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U1V, channels_div_1v_multipass_fulltile_with_input_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+      for (size_t rows = 1; rows <= 35; rows += 7) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .input_stride(channel_tile*16+1)
+          .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u1v);
+      }
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U1V, channels_lt_1v_2pass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t channels = 1; channels < channel_tile; channels++) {
+      RDSumMicrokernelTester()
+        .rows(14)
+        .channels(channels)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u1v);
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U1V, channels_lt_1v_2pass_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t channels = 1; channels < channel_tile; channels++) {
+      for (size_t rows = 1; rows < 14; rows++) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u1v);
+      }
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U1V, channels_lt_1v_multipass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t channels = 1; channels < channel_tile; channels++) {
+      for (size_t rows = 1; rows <= 35; rows += 7) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u1v);
+      }
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U1V, channels_lt_1v_multipass_fulltile_with_input_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t channels = 1; channels < channel_tile; channels++) {
+      for (size_t rows = 1; rows <= 35; rows += 7) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .input_stride(channel_tile+1)
+          .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u1v);
+      }
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U1V, channels_gt_1v_2pass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+      RDSumMicrokernelTester()
+        .rows(14)
+        .channels(channels)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u1v);
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U1V, channels_gt_1v_2pass_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+      for (size_t rows = 1; rows < 14; rows++) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u1v);
+      }
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U1V, channels_gt_1v_multipass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+      for (size_t rows = 1; rows < 35; rows += 14) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u1v);
+      }
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U1V, channels_gt_1v_multipass_fulltile_with_input_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+      for (size_t rows = 1; rows < 35; rows += 14) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .input_stride(channel_tile*2+11)
+          .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u1v);
+      }
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U1V, overflow_accumulator) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t channels = 1; channels < channel_tile*2; ++channels) {
+      RDSumMicrokernelTester()
+        .rows(264)
+        .channels(channels)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u1v);
+    }
+  }
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  TEST(QS8_RDSUM_7P7X__RVV_U2V, channels_eq_2v_2pass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    RDSumMicrokernelTester()
+      .rows(14)
+      .channels(channel_tile)
+      .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u2v);
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U2V, channels_eq_2v_2pass_fulltile_with_input_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    RDSumMicrokernelTester()
+      .rows(14)
+      .channels(channel_tile)
+      .input_stride(channel_tile+1)
+      .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u2v);
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U2V, channels_eq_2v_2pass_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t rows = 1; rows < 14; rows++) {
+      RDSumMicrokernelTester()
+        .rows(rows)
+        .channels(channel_tile)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u2v);
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U2V, channels_eq_2v_2pass_subtile_with_input_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t rows = 1; rows < 14; rows++) {
+      RDSumMicrokernelTester()
+        .rows(rows)
+        .channels(channel_tile)
+        .input_stride(channel_tile+1)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u2v);
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U2V, channels_eq_2v_multipass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t rows = 1; rows <= 35; rows += 7) {
+      RDSumMicrokernelTester()
+        .rows(rows)
+        .channels(channel_tile)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u2v);
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U2V, channels_eq_2v_multipass_fulltile_with_input_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t rows = 1; rows <= 35; rows += 7) {
+      RDSumMicrokernelTester()
+        .rows(rows)
+        .channels(channel_tile)
+        .input_stride(channel_tile+1)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u2v);
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U2V, channels_div_2v_2pass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+      RDSumMicrokernelTester()
+        .rows(14)
+        .channels(channels)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u2v);
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U2V, channels_div_2v_2pass_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+      for (size_t rows = 1; rows < 14; rows++) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u2v);
+      }
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U2V, channels_div_2v_multipass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+      for (size_t rows = 1; rows <= 35; rows += 7) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u2v);
+      }
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U2V, channels_div_2v_multipass_fulltile_with_input_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+      for (size_t rows = 1; rows <= 35; rows += 7) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .input_stride(channel_tile*16+1)
+          .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u2v);
+      }
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U2V, channels_lt_2v_2pass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t channels = 1; channels < channel_tile; channels++) {
+      RDSumMicrokernelTester()
+        .rows(14)
+        .channels(channels)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u2v);
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U2V, channels_lt_2v_2pass_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t channels = 1; channels < channel_tile; channels++) {
+      for (size_t rows = 1; rows < 14; rows++) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u2v);
+      }
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U2V, channels_lt_2v_multipass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t channels = 1; channels < channel_tile; channels++) {
+      for (size_t rows = 1; rows <= 35; rows += 7) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u2v);
+      }
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U2V, channels_lt_2v_multipass_fulltile_with_input_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t channels = 1; channels < channel_tile; channels++) {
+      for (size_t rows = 1; rows <= 35; rows += 7) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .input_stride(channel_tile+1)
+          .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u2v);
+      }
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U2V, channels_gt_2v_2pass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+      RDSumMicrokernelTester()
+        .rows(14)
+        .channels(channels)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u2v);
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U2V, channels_gt_2v_2pass_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+      for (size_t rows = 1; rows < 14; rows++) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u2v);
+      }
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U2V, channels_gt_2v_multipass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+      for (size_t rows = 1; rows < 35; rows += 14) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u2v);
+      }
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U2V, channels_gt_2v_multipass_fulltile_with_input_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+      for (size_t rows = 1; rows < 35; rows += 14) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .input_stride(channel_tile*2+11)
+          .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u2v);
+      }
+    }
+  }
+
+  TEST(QS8_RDSUM_7P7X__RVV_U2V, overflow_accumulator) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    const size_t channel_tile = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t));
+    for (size_t channels = 1; channels < channel_tile*2; ++channels) {
+      RDSumMicrokernelTester()
+        .rows(264)
+        .channels(channels)
+        .Test(xnn_qs8_rdsum_ukernel_7p7x__rvv_u2v);
+    }
+  }
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV

@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-igemm/avx-broadcast.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/igemm.h"
-#include "xnnpack/prefetch.h"
+#include "src/xnnpack/igemm.h"
+#include "src/xnnpack/prefetch.h"
 
 
 void xnn_f32_igemm_minmax_ukernel_6x16__fma3_broadcast_prfm(

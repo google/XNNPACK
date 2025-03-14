@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-ppmm/sse.c.in
 //   Generator: tools/xngen
@@ -11,7 +12,7 @@
 
 #include <xmmintrin.h>
 
-#include "xnnpack/ppmm.h"
+#include "src/xnnpack/ppmm.h"
 
 
 void xnn_f32_ppmm_minmax_ukernel_4x8__sse(

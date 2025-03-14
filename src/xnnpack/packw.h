@@ -8,8 +8,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/microparams.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,7 +47,7 @@ extern "C" {
       size_t extra_bytes,                                                     \
       const void* params);
 
-#include "x8-packw/x8-packw.h"
+#include "src/x8-packw/x8-packw.h"
 
 #undef XNN_UKERNEL
 #undef XNN_GIO_UKERNEL
@@ -83,7 +83,7 @@ extern "C" {
       size_t extra_bytes,                                                               \
       const void* params);
 
-#include "qs8-packw/qs8-packw.h"
+#include "src/qs8-packw/qs8-packw.h"
 
 #undef XNN_QS8_UKERNEL
 #undef XNN_QS8_GIO_UKERNEL
@@ -103,7 +103,7 @@ extern "C" {
       size_t extra_bytes,                                                 \
       const void* params);                                                \
 
-#include "x16-packw/x16-packw.h"
+#include "src/x16-packw/x16-packw.h"
 
 #undef XNN_UKERNEL
 
@@ -138,7 +138,7 @@ extern "C" {
       size_t extra_bytes,                                                     \
       const void* params);                                                    \
 
-#include "x32-packw/x32-packw.h"
+#include "src/x32-packw/x32-packw.h"
 
 #undef XNN_UKERNEL
 #undef XNN_GIO_UKERNEL
@@ -158,7 +158,7 @@ extern "C" {
       size_t extra_bytes,                                                 \
       const struct xnn_qs8_qc4w_packing_params* params);
 
-#include "qs8-qc4w-packw/qs8-qc4w-packw.h"
+#include "src/qs8-qc4w-packw/qs8-qc4w-packw.h"
 
 #undef XNN_UKERNEL
 

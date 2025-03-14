@@ -8,11 +8,11 @@ $assert(SIMD_SIZE > 0)
 
 #include <immintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/microparams.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/microparams.h"
 
-static void xnn_store_tail_f16(uint16_t* o, __m128i vh, size_t c) {
+static XNN_INLINE void xnn_store_tail_f16(uint16_t* o, __m128i vh, size_t c) {
   assert(c > 0);
   assert(c < 8);
   if (c & 4) {
@@ -30,7 +30,7 @@ static void xnn_store_tail_f16(uint16_t* o, __m128i vh, size_t c) {
   }
 }
 
-static __m128i xnn_load_tail_safe_f16(const uint16_t* i, size_t c) {
+static XNN_INLINE __m128i xnn_load_tail_safe_f16(const uint16_t* i, size_t c) {
   assert(c > 0);
   assert(c < 8);
 

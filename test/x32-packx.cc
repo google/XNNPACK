@@ -6,11 +6,11 @@
 #include <string>
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/packx.h"
-#include "next_prime.h"
-#include "pack-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/packx.h"
+#include "test/next_prime.h"
+#include "test/pack-microkernel-tester.h"
 
 namespace {
 
@@ -32,7 +32,7 @@ std::string GetTestName(const testing::TestParamInfo<XnnTest::ParamType>& info) 
   { #ukernel, ukernel, arch_flags, k, mr },
 
 const XnnTestParam xnn_test_params[] = {
-#include "x32-packx/x32-packx.h"
+#include "src/x32-packx/x32-packx.h"
 };
 
 #undef XNN_UKERNEL

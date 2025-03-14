@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vgelu/rational-12-10.c.in
 //   Generator: tools/xngen
@@ -10,11 +11,11 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "xnnpack/simd/f32-avx.h"
+#include "src/xnnpack/simd/f32-avx.h"
 
-#include "xnnpack/common.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_f32_vgelu_ukernel__avx_rational_12_10_div_u8(

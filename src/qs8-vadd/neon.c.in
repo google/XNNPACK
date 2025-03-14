@@ -11,7 +11,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <arm_neon.h>
 
-#include "xnnpack/vbinary.h"
+#include "src/xnnpack/vbinary.h"
 
 
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]

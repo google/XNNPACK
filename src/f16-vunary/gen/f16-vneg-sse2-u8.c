@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-vunary/sse2.c.in
 //   Generator: tools/xngen
@@ -11,10 +12,10 @@
 
 #include <emmintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/unaligned.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/unaligned.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_f16_vneg_ukernel__sse2_u8(

@@ -16,18 +16,20 @@
 #include <random>
 #include <type_traits>
 
-#include "xnnpack.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/common.h"
-#include "xnnpack/datatype.h"
-#include "xnnpack/math.h"
-#include "xnnpack/reference-utils.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/datatype.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/reference-utils.h"
 
 static float TolExact(float) { return 0.0f; }
 static float TolExact16(float y_ref) {
   // The maximum of the relative tolerance and half the smallest positive
   // normal.
-  return std::max(std::abs(y_ref) * 9.77e-04, 0.5 * 6.10e-5);
+  return std::max(
+      std::abs(y_ref) * xnnpack::NumericLimits<xnn_float16>::epsilon(),
+      0.5f * xnnpack::NumericLimits<xnn_float16>::epsilon());
 }
 
 static float TolRelative(float y_ref, float rel_tol) {
@@ -56,7 +58,8 @@ struct Interval {
   static Interval Positive(xnn_datatype datatype) {
     switch (datatype) {
       case xnn_datatype_fp16:
-        return {0.001f, std::numeric_limits<float>::infinity()};
+        return {xnnpack::NumericLimits<xnn_float16>::epsilon(),
+                xnnpack::NumericLimits<xnn_float16>::infinity()};
       case xnn_datatype_fp32:
         return {std::numeric_limits<float>::epsilon(),
                 std::numeric_limits<float>::infinity()};
@@ -123,6 +126,12 @@ struct Convert : public UnaryOpInfo {
     return x;
   }
   int ReferenceImpl(int x, const xnn_unary_params&) const override { return x; }
+
+  float Tolerance(float y_ref, xnn_datatype datatype) const override {
+    return xnn_datatype_is_quantized(datatype)
+               ? 1.0f
+               : TolRelative(y_ref, xnnpack::epsilon(datatype));
+  }
 };
 
 struct ReLU : public UnaryOpInfo {
@@ -272,8 +281,9 @@ struct HardSwish : public UnaryOpInfo {
       case xnn_datatype_fp32:
         return TolMixed(y_ref, 5.0e-6f, 1.0e-5f);
       case xnn_datatype_fp16:
-      case xnn_datatype_bf16:
         return TolMixed(y_ref, 1.0e-3f, 1.0e-2f);
+      case xnn_datatype_bf16:
+        return TolMixed(y_ref, 1.0e-2f, 5.0e-2f);
       case xnn_datatype_qint8:
       case xnn_datatype_quint8:
         return 1;
@@ -353,8 +363,9 @@ struct Sigmoid : public UnaryOpInfo {
       case xnn_datatype_fp32:
         return TolMixed(y_ref, 5.0e-6f, 1.0e-5f);
       case xnn_datatype_fp16:
-      case xnn_datatype_bf16:
         return TolMixed(y_ref, 1.0e-4f, 5.0e-3f);
+      case xnn_datatype_bf16:
+        return TolMixed(y_ref, 1.0e-3f, 1.0e-2f);
       case xnn_datatype_qint8:
       case xnn_datatype_quint8:
         return 1;
@@ -370,6 +381,37 @@ struct Sigmoid : public UnaryOpInfo {
       default:
         return {-125.0f, 125.0f};
     }
+  }
+};
+
+struct Sin : public UnaryOpInfo {
+  float ReferenceImpl(float x, const xnn_unary_params&) const override {
+    return std::sin(x);
+  }
+
+  float Tolerance(float y_ref, xnn_datatype datatype) const override {
+    switch (datatype) {
+      case xnn_datatype_fp32:
+        return TolMixed(y_ref, 3 * xnnpack::NumericLimits<float>::epsilon(),
+                        5 * xnnpack::NumericLimits<float>::epsilon());
+      case xnn_datatype_fp16:
+        return TolMixed(y_ref,
+                        3 * xnnpack::NumericLimits<xnn_float16>::epsilon(),
+                        5 * xnnpack::NumericLimits<xnn_float16>::epsilon());
+      case xnn_datatype_bf16:
+        return TolMixed(y_ref,
+                        3 * xnnpack::NumericLimits<xnn_bfloat16>::epsilon(),
+                        5 * xnnpack::NumericLimits<xnn_bfloat16>::epsilon());
+      case xnn_datatype_qint8:
+      case xnn_datatype_quint8:
+        return 1;
+      default:
+        return TolExact(y_ref);
+    }
+  }
+
+  Interval Domain(xnn_datatype datatype) const override {
+    return {-10.0f, 10.0f};
   }
 };
 
@@ -408,10 +450,16 @@ struct SquareRoot : public UnaryOpInfo {
   float Tolerance(float y_ref, xnn_datatype datatype) const override {
     switch (datatype) {
       case xnn_datatype_fp32:
+        if (y_ref > std::sqrt(std::numeric_limits<float>::epsilon() *
+                              std::numeric_limits<float>::max())) {
+          // When we use reciprocal sqrt to compute sqrt, the error is huge when
+          // the input is near the max float (b/401455604).
+          return std::numeric_limits<float>::max();
+        }
         return TolRelative(y_ref, 3.0f * std::numeric_limits<float>::epsilon());
       case xnn_datatype_fp16:
       case xnn_datatype_bf16:
-        return TolMixed(y_ref, 1.0e-4f, 5.0e-3f);
+        return TolRelative(y_ref, 3.0f * xnnpack::epsilon(datatype));
       case xnn_datatype_qint8:
       case xnn_datatype_quint8:
         return 1;
@@ -437,12 +485,10 @@ struct TanH : public UnaryOpInfo {
   float Tolerance(float y_ref, xnn_datatype datatype) const override {
     switch (datatype) {
       case xnn_datatype_fp32:
-        return TolRelative(
-            y_ref,
-            4.0f * std::numeric_limits<float>::epsilon());  // 4 ULP
       case xnn_datatype_fp16:
       case xnn_datatype_bf16:
-        return TolMixed(y_ref, /*abs_tol=*/1.0e-4f, /*rel_tol=*/5.0e-3f);
+        return TolMixed(y_ref, xnnpack::epsilon(datatype),
+                        4.0f * xnnpack::epsilon(datatype));  // 4 ULP
       default:
         return 1;
     }
@@ -466,7 +512,8 @@ struct ReciprocalSquareRoot : public UnaryOpInfo {
   float Tolerance(float y_ref, xnn_datatype datatype) const override {
     switch (datatype) {
       case xnn_datatype_fp32:
-        return TolRelative(y_ref, 4 * std::numeric_limits<float>::epsilon());
+        return TolMixed(y_ref, std::numeric_limits<float>::epsilon(),
+                        4 * std::numeric_limits<float>::epsilon());
       case xnn_datatype_fp16:
       case xnn_datatype_bf16:
         return TolMixed(y_ref, 1.0e-4f, 5.0e-3f);
@@ -493,8 +540,8 @@ struct Log : public UnaryOpInfo {
   }
 
   float Tolerance(float y_ref, xnn_datatype datatype) const override {
-    return TolMixed(y_ref, 2 * std::numeric_limits<float>::epsilon(),
-                    6 * std::numeric_limits<float>::epsilon());
+    return TolMixed(y_ref, 2 * xnnpack::epsilon(datatype),
+                    6 * xnnpack::epsilon(datatype));
   }
 
   Interval Domain(xnn_datatype datatype) const override {
@@ -508,8 +555,8 @@ struct Exp : public UnaryOpInfo {
   }
 
   float Tolerance(float y_ref, xnn_datatype datatype) const override {
-    return TolMixed(y_ref, 2 * std::numeric_limits<float>::epsilon(),
-                    6 * std::numeric_limits<float>::epsilon());
+    return TolMixed(y_ref, 2 * xnnpack::epsilon(datatype),
+                    6 * xnnpack::epsilon(datatype));
   }
   Interval Domain(xnn_datatype) const override { return {-10.0f, 10.0f}; }
 };
@@ -520,18 +567,7 @@ struct CubeRoot : public UnaryOpInfo {
   }
 
   float Tolerance(float y_ref, xnn_datatype datatype) const override {
-    switch (datatype) {
-      case xnn_datatype_fp32:
-        return TolRelative(y_ref, 2.5f * std::numeric_limits<float>::epsilon());
-      case xnn_datatype_fp16:
-      case xnn_datatype_bf16:
-        return TolMixed(y_ref, 1.0e-4f, 5.0e-3f);
-      case xnn_datatype_qint8:
-      case xnn_datatype_quint8:
-        return 1;
-      default:
-        XNN_UNREACHABLE;
-    }
+    return TolRelative(y_ref, 2.5f * xnnpack::epsilon(datatype));
   }
 
   Interval Domain(xnn_datatype datatype) const override {
@@ -549,7 +585,7 @@ struct Cosine : public UnaryOpInfo {
   }
 
   float Tolerance(float y_ref, xnn_datatype datatype) const override {
-    return 1e-6f;
+    return xnnpack::epsilon(datatype);
   }
   Interval Domain(xnn_datatype) const override { return {-10.0f, 10.0f}; }
 };
@@ -560,7 +596,7 @@ struct Sine : public UnaryOpInfo {
   }
 
   float Tolerance(float y_ref, xnn_datatype datatype) const override {
-    return 1e-6f;
+    return xnnpack::epsilon(datatype);
   }
   Interval Domain(xnn_datatype) const override { return {-10.0f, 10.0f}; }
 };
@@ -603,8 +639,14 @@ struct Sign : public UnaryOpInfo {
 
 const UnaryOpInfo* GetUnaryOpInfo(xnn_unary_operator op);
 
+inline bool is_nan(float x) { return std::isnan(x); }
+
+template <typename T>
+inline bool is_nan(xnnpack::quantized<T> x) { return false; }
+
 // Generate random data in the given domain, where the domain is given as
 // unquantized values.
+// TODO: Replace uses with DatatypeGenerator
 template <typename T, typename Rng>
 void FillRandom(Rng& rng, T* x, size_t n, const Interval& domain,
                 const xnn_quantization_params& quantization = {0, 1.0f}) {
@@ -616,12 +658,16 @@ void FillRandom(Rng& rng, T* x, size_t n, const Interval& domain,
                  static_cast<float>(xnnpack::NumericLimits<T>::min()));
   max = std::min(domain.max,
                  static_cast<float>(xnnpack::NumericLimits<T>::max()));
-  min = std::max(min, -1e6f);
-  max = std::min(max, 1e6f);
 
   std::uniform_real_distribution<float> dist(min, max);
   for (size_t i = 0; i < n; ++i) {
-    x[i] = static_cast<T>(dist(rng));
+    // Try generating random numbers until we get non-NaN
+    while (true) {
+      x[i] = static_cast<T>(dist(rng));
+      if (!is_nan(x[i])) {
+        break;
+      }
+    }
   }
 }
 

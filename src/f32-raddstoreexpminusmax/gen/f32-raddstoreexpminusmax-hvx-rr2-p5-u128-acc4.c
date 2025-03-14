@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-raddstoreexpminusmax/hvx-rr2-p5.c.in
 //   Generator: tools/xngen
@@ -10,8 +11,8 @@
 
 #include <assert.h>
 
-#include "xnnpack/simd/f32-hvx.h"
-#include "xnnpack/raddstoreexpminusmax.h"
+#include "src/xnnpack/simd/f32-hvx.h"
+#include "src/xnnpack/raddstoreexpminusmax.h"
 
 void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u128_acc4(
     size_t batch,

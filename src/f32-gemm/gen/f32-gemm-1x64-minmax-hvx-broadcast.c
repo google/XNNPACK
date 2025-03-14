@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-gemm/hvx-broadcast.c.in
 //   Generator: tools/xngen
@@ -8,12 +9,9 @@
 // LICENSE file in the root directory of this source tree.
 
 
-#include <assert.h>
-#include <hexagon_types.h>
-#include <hexagon_protos.h>
-#include <hvx_hexagon_protos.h>
-#include "xnnpack/gemm.h"
-#include "xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/simd/f32-hvx.h"
+
+#include "src/xnnpack/gemm.h"
 
 void xnn_f32_gemm_minmax_ukernel_1x64__hvx_broadcast(
     size_t mr,
@@ -40,32 +38,32 @@ void xnn_f32_gemm_minmax_ukernel_1x64__hvx_broadcast(
   float* c0 = c;
 
   do {
-    HVX_Vector vacc0x0 = *((HVX_Vector *)(w + 0));
-    HVX_Vector vacc0x1 = *((HVX_Vector *)(w + 32));
+    HVX_Vector vacc0x0 = xnn_load_f32(w + 0);
+    HVX_Vector vacc0x1 = xnn_load_f32(w + 32);
     w += 64;
 
     size_t k = kc;
     do {
-      const HVX_Vector va0 = Q6_V_vsplat_R(*(uint32_t *)a0);
+      const HVX_Vector va0 = xnn_set1_f32(*a0);
       a0 += 1;
 
       const HVX_Vector vb0 = *((const HVX_Vector *)(w));
       const HVX_Vector vb1 = *((const HVX_Vector *)(w + 32));
       w += 64;
 
-      vacc0x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va0, vb0),vacc0x0));
-      vacc0x1 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va0, vb1),vacc0x1));
+      vacc0x0 = xnn_fmadd_f32(va0, vb0, vacc0x0);
+      vacc0x1 = xnn_fmadd_f32(va0, vb1, vacc0x1);
 
       k -= sizeof(float);
     } while (k != 0);
 
-    const HVX_Vector vmin = Q6_V_vsplat_R(params->scalar.min);
-    vacc0x0 = Q6_Vw_vmax_VwVw(vmin, vacc0x0);
-    vacc0x1 = Q6_Vw_vmax_VwVw(vmin, vacc0x1);
+    HVX_Vector vmin = xnn_set1_f32(params->scalar.min);
+    vacc0x0 = xnn_max_f32(vmin, vacc0x0);
+    vacc0x1 = xnn_max_f32(vmin, vacc0x1);
 
-    const HVX_Vector vmax = Q6_V_vsplat_R(params->scalar.max);
-    vacc0x0 = Q6_Vw_vmin_VwVw(vmax, vacc0x0);
-    vacc0x1 = Q6_Vw_vmin_VwVw(vmax, vacc0x1);
+    HVX_Vector vmax = xnn_set1_f32(params->scalar.max);
+    vacc0x0 = xnn_min_f32(vmax, vacc0x0);
+    vacc0x1 = xnn_min_f32(vmax, vacc0x1);
 
     if XNN_LIKELY(nc >= 64) {
       *((HVX_UVector *)c0) = vacc0x0;
@@ -84,7 +82,7 @@ void xnn_f32_gemm_minmax_ukernel_1x64__hvx_broadcast(
         c0 += 32;
         nc ^= 32;
       }
-      vstu_variable_scalar((char*)c0, nc*sizeof(float), vacc0x0);
+      xnn_store_tail_f32(c0, vacc0x0, nc);
       nc = 0;
     }
   } while (nc != 0);

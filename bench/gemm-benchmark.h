@@ -8,15 +8,15 @@
 
 #include <cstddef>
 
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/pack.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/pack.h"
 
 #if XNN_ENABLE_KLEIDIAI
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxp_qs4cxs1s0.h"
 #endif  // XNN_ENABLE_KLEIDIAI
 
-#include "gemm.h"
-#include "utils.h"
+#include "bench/gemm.h"
+#include "bench/utils.h"
 #include <benchmark/benchmark.h>
 
 void GEMMBenchmark(benchmark::State& state, xnn_qs8_gemm_minmax_ukernel_fn gemm,

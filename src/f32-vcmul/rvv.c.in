@@ -6,7 +6,7 @@
 $assert LMUL in [1, 2, 4, 8]
 #include <assert.h>
 
-#include "xnnpack/vbinary.h"
+#include "src/xnnpack/vbinary.h"
 #include <riscv_vector.h>
 
 void xnn_f32_vcmul_ukernel__rvv_u${LMUL}v(

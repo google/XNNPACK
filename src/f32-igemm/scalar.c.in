@@ -7,8 +7,8 @@ $assert ACTIVATION in ["LINEAR", "RELU", "MINMAX"]
 $assert ACTIVATION != "LINEAR" or not WASM
 #include <assert.h>
 
-#include "xnnpack/igemm.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/igemm.h"
+#include "src/xnnpack/math.h"
 
 
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"

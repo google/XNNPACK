@@ -14,10 +14,10 @@ $assert not DATATYPE in ["QD8", "QC4"] or not REQUANTIZATION
 
 #include <arm_neon.h>
 
-#include "xnnpack/gemm.h"
+#include "src/xnnpack/gemm.h"
 $if REQUANTIZATION == "FP32":
-  #include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/math.h"
+  #include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
 
 
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8", "QD8": "qd8_f32_qc8w", "QC4": "qd8_f32_qc4w"}[DATATYPE]

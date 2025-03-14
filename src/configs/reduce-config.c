@@ -6,12 +6,12 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/config.h"
-#include "xnnpack/init-once.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/config.h"
+#include "src/xnnpack/init-once.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/reduce.h"
 
 static struct xnn_reduce_config f16_f32acc_rsum_config = {0};
 static struct xnn_reduce_config f16_f32acc_rdsum_config = {0};
@@ -122,6 +122,10 @@ static void init_qs8_rsum_config(void) {
     qs8_rsum_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__wasmsimd_u32_acc4,
     };
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    qs8_rsum_config = (struct xnn_reduce_config) {
+      .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__rvv_u2v,
+    };
   #else
     qs8_rsum_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__scalar_u4,
@@ -176,6 +180,10 @@ static void init_qs8_rdsum_config(void) {
     qs8_rdsum_config = (struct xnn_reduce_config) {
       .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_qs8_rdsum_ukernel_7p7x__wasmsimd_c32,
     };
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    qs8_rdsum_config = (struct xnn_reduce_config) {
+      .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_qs8_rdsum_ukernel_7p7x__rvv_u2v,
+    };
   #else
     qs8_rdsum_config = (struct xnn_reduce_config) {
       .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_qs8_rdsum_ukernel_7p7x__scalar_c4,
@@ -219,6 +227,10 @@ static void init_qu8_rdsum_config(void) {
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     qu8_rdsum_config = (struct xnn_reduce_config) {
       .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_qu8_rdsum_ukernel_7p7x__wasmsimd_c32,
+    };
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    qu8_rdsum_config = (struct xnn_reduce_config) {
+      .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_qu8_rdsum_ukernel_7p7x__rvv_u2v,
     };
   #else
     qu8_rdsum_config = (struct xnn_reduce_config) {
@@ -264,6 +276,10 @@ static void init_qu8_rsum_config(void) {
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     qu8_rsum_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_qu8_rsum_ukernel__wasmsimd_u32_acc4,
+    };
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    qu8_rsum_config = (struct xnn_reduce_config) {
+      .ukernel = (xnn_reduce_ukernel_fn) xnn_qu8_rsum_ukernel__rvv_u2v,
     };
   #else
     qu8_rsum_config = (struct xnn_reduce_config) {

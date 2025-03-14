@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-dwconv2d-chw/3x3p1-ssse3.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <tmmintrin.h>
 
-#include "xnnpack/dwconv.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/math.h"
 
 
 void xnn_f32_dwconv2d_chw_ukernel_3x3p1__ssse3_4x4(

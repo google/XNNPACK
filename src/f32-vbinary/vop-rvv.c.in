@@ -9,8 +9,8 @@ $assert OP in ["ADD", "DIV", "MAX", "MIN", "MUL", "SUB", "SQRDIFF"]
 
 #include <riscv_vector.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/vbinary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vbinary.h"
 
 
 $OP_FUNC = {

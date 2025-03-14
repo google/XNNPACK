@@ -598,6 +598,8 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-wasmsimd-rr2-p5-u4.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-wasmsimd-rr2-p5-u8-acc2.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-wasmsimd-rr2-p5-u16-acc4.c
+  src/f32-rdminmax/gen/f32-rdmax-2p2x-wasmsimd-c32.c
+  src/f32-rdminmax/gen/f32-rdmin-2p2x-wasmsimd-c32.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-wasmsimd-c32.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-wasmsimd-c64.c
   src/f32-rminmax/gen/f32-rmax-wasmsimd-minmax-u4.c
@@ -754,6 +756,7 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-p5-div-u4.c
   src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-p5-div-u8.c
   src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-p5-div-u12.c
+  src/f32-vsin/gen/f32-vsin-wasmsimd-rational-5-4-div.c
   src/f32-vsqrt/gen/f32-vsqrt-wasmsimd-sqrt-u4.c
   src/f32-vsqrt/gen/f32-vsqrt-wasmsimd-sqrt-u16.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x4c8-minmax-wasmsimd-dot16x2-ld64.c
@@ -951,9 +954,31 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/s8-ibilinear/gen/s8-ibilinear-wasmsimd-dot16x2-c16.c
   src/s8-ibilinear/gen/s8-ibilinear-wasmsimd-mul32-c8.c
   src/s8-ibilinear/gen/s8-ibilinear-wasmsimd-mul32-c16.c
+  src/s8-rdminmax/gen/s8-rdmax-2p2x-wasmsimd-c32.c
+  src/s8-rdminmax/gen/s8-rdmin-2p2x-wasmsimd-c32.c
+  src/s8-rminmax/gen/s8-rmax-wasmsimd-u16.c
+  src/s8-rminmax/gen/s8-rmax-wasmsimd-u32-acc2.c
+  src/s8-rminmax/gen/s8-rmax-wasmsimd-u48-acc3.c
+  src/s8-rminmax/gen/s8-rmax-wasmsimd-u64-acc2.c
+  src/s8-rminmax/gen/s8-rmax-wasmsimd-u64-acc4.c
+  src/s8-rminmax/gen/s8-rmin-wasmsimd-u16.c
+  src/s8-rminmax/gen/s8-rmin-wasmsimd-u32-acc2.c
+  src/s8-rminmax/gen/s8-rmin-wasmsimd-u48-acc3.c
+  src/s8-rminmax/gen/s8-rmin-wasmsimd-u64-acc2.c
+  src/s8-rminmax/gen/s8-rmin-wasmsimd-u64-acc4.c
+  src/s8-rminmax/gen/s8-rminmax-wasmsimd-u16.c
+  src/s8-rminmax/gen/s8-rminmax-wasmsimd-u32-acc2.c
+  src/s8-rminmax/gen/s8-rminmax-wasmsimd-u48-acc3.c
+  src/s8-rminmax/gen/s8-rminmax-wasmsimd-u64-acc2.c
+  src/s8-rminmax/gen/s8-rminmax-wasmsimd-u64-acc4.c
   src/u8-ibilinear/gen/u8-ibilinear-wasmsimd-dot16x2-c16.c
   src/u8-ibilinear/gen/u8-ibilinear-wasmsimd-mul32-c8.c
   src/u8-ibilinear/gen/u8-ibilinear-wasmsimd-mul32-c16.c
+  src/u8-rdminmax/gen/u8-rdmax-2p2x-wasmsimd-c32.c
+  src/u8-rdminmax/gen/u8-rdmin-2p2x-wasmsimd-c32.c
+  src/u8-rminmax/gen/u8-rmax-wasmsimd-u32-acc2.c
+  src/u8-rminmax/gen/u8-rmin-wasmsimd-u32-acc2.c
+  src/u8-rminmax/gen/u8-rminmax-wasmsimd-u32-acc2.c
   src/x8-lut/gen/x8-lut-wasmsimd-u16.c
   src/x8-lut/gen/x8-lut-wasmsimd-u48.c
   src/x8-lut/gen/x8-lut-wasmsimd-u64.c

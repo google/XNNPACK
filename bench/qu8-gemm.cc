@@ -19,21 +19,21 @@
 
 #include <benchmark/benchmark.h>
 #ifdef BENCHMARK_GEMMLOWP
-#include "gemmlowp/public/gemmlowp.h"
+#include <gemmlowp/public/gemmlowp.h>
 #endif  // BENCHMARK_GEMMLOWP
 #ifdef BENCHMARK_RUY
-#include "ruy/ruy.h"
+#include <ruy/ruy.h>
 #endif  // BENCHMARK_RUY
-#include "gemm.h"
-#include "utils.h"
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/gemm.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/pack.h"
-#include "xnnpack/buffer.h"
+#include "bench/gemm.h"
+#include "bench/utils.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/pack.h"
+#include "src/xnnpack/buffer.h"
 
 static void GEMMBenchmark(benchmark::State& state,
   xnn_qu8_gemm_minmax_ukernel_fn gemm,

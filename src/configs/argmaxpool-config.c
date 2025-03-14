@@ -7,11 +7,11 @@
 #include <stddef.h>
 
 
-#include "xnnpack/argmaxpool.h"
-#include "xnnpack/common.h"
-#include "xnnpack/config.h"
-#include "xnnpack/init-once.h"
-#include "xnnpack/microfnptr.h"
+#include "src/xnnpack/argmaxpool.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/config.h"
+#include "src/xnnpack/init-once.h"
+#include "src/xnnpack/microfnptr.h"
 
 static struct xnn_argmaxpool_config f32_argmaxpool_config = {0};
 

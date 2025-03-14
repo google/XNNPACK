@@ -9,10 +9,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microparams.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
 
 /****************** Microkernel pointers for dense inference *****************/
 
@@ -616,9 +616,9 @@ typedef void (*xnn_f32_ppmm_minmax_ukernel_fn)(
     size_t cn_stride,
     const struct xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-// DWCONV: DepthWise CONVolution single-pass without activation
+// DWCONV: DepthWise CONVolution without activation
 
-typedef void (*xnn_dwconv_unipass_ukernel_fn)(
+typedef void (*xnn_dwconv_ukernel_fn)(
     size_t channels,
     size_t output_width,
     const void** input,
@@ -642,9 +642,9 @@ typedef void (*xnn_f32_dwconv_unipass_ukernel_fn)(
     const float* zero,
     const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-// DWCONV: DepthWise CONVolution single-pass with Min+Max activation
+// DWCONV: DepthWise CONVolution with Min+Max activation
 
-typedef void (*xnn_f16_dwconv_minmax_unipass_ukernel_fn)(
+typedef void (*xnn_f16_dwconv_minmax_ukernel_fn)(
     size_t channels,
     size_t output_width,
     const xnn_float16** input,
@@ -656,7 +656,7 @@ typedef void (*xnn_f16_dwconv_minmax_unipass_ukernel_fn)(
     const xnn_float16* zero,
     const struct xnn_f16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-typedef void (*xnn_f32_dwconv_minmax_unipass_ukernel_fn)(
+typedef void (*xnn_f32_dwconv_minmax_ukernel_fn)(
     size_t channels,
     size_t output_width,
     const float** input,
@@ -668,7 +668,7 @@ typedef void (*xnn_f32_dwconv_minmax_unipass_ukernel_fn)(
     const float* zero,
     const struct xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-typedef void (*xnn_qs8_dwconv_minmax_unipass_ukernel_fn)(
+typedef void (*xnn_qs8_dwconv_minmax_ukernel_fn)(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -680,7 +680,7 @@ typedef void (*xnn_qs8_dwconv_minmax_unipass_ukernel_fn)(
     const int8_t* zero,
     const union xnn_qs8_conv_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-typedef void (*xnn_qs8_qc8w_dwconv_minmax_unipass_ukernel_fn)(
+typedef void (*xnn_qs8_qc8w_dwconv_minmax_ukernel_fn)(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -692,7 +692,7 @@ typedef void (*xnn_qs8_qc8w_dwconv_minmax_unipass_ukernel_fn)(
     const int8_t* zero,
     const union xnn_qs8_qc8w_conv_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-typedef void (*xnn_qu8_dwconv_minmax_unipass_ukernel_fn)(
+typedef void (*xnn_qu8_dwconv_minmax_ukernel_fn)(
     size_t channels,
     size_t output_width,
     const uint8_t** input,
@@ -1347,6 +1347,12 @@ typedef void (*xnn_f32_reduce_ukernel_fn)(
     float* output,
     const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+typedef void (*xnn_s8_reduce_ukernel_fn)(
+    size_t batch,
+    const int8_t* input,
+    int8_t* output,
+    const void* params);
+
 typedef void (*xnn_u8_reduce_ukernel_fn)(
     size_t batch,
     const uint8_t* input,
@@ -1430,6 +1436,40 @@ typedef void (*xnn_qu8_rsum_ukernel_fn)(
     const uint8_t* input,
     uint32_t* output,
     const struct xnn_qs8_rsum_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+// RDMINMAX: Discontiguous Reduce-MINMAX
+
+typedef void (*xnn_f32_rdminmax_ukernel_fn)(
+    size_t rows,
+    size_t channels,
+    const float* input,
+    size_t input_stride,
+    float* output,
+    const void* params);
+
+typedef void (*xnn_f16_rdminmax_ukernel_fn)(
+    size_t rows,
+    size_t channels,
+    const xnn_float16* input,
+    size_t input_stride,
+    xnn_float16* output,
+    const void* params);
+
+typedef void (*xnn_s8_rdminmax_ukernel_fn)(
+    size_t rows,
+    size_t channels,
+    const int8_t* input,
+    size_t input_stride,
+    int8_t* output,
+    const void* params);
+
+typedef void (*xnn_u8_rdminmax_ukernel_fn)(
+    size_t rows,
+    size_t channels,
+    const uint8_t* input,
+    size_t input_stride,
+    uint8_t* output,
+    const void* params);
 
 // RMAX: Reduce-MAX
 

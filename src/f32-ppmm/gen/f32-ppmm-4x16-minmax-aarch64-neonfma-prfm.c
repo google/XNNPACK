@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-ppmm/neon.c.in
 //   Generator: tools/xngen
@@ -11,9 +12,9 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/ppmm.h"
-#include "xnnpack/prefetch.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/ppmm.h"
+#include "src/xnnpack/prefetch.h"
 
 
 void xnn_f32_ppmm_minmax_ukernel_4x16__aarch64_neonfma_prfm(

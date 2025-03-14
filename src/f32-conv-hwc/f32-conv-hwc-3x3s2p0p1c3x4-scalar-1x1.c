@@ -5,8 +5,8 @@
 
 #include <assert.h>
 
-#include "xnnpack/conv.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/conv.h"
+#include "src/xnnpack/math.h"
 
 
 void xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__scalar_1x1(

@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-igemm/neonfp16arith-ld64.c.in
 //   Generator: tools/xngen
@@ -12,8 +13,8 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/igemm.h"
-#include "xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/igemm.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
 
 
 void xnn_f16_igemm_minmax_ukernel_4x16__neonfp16arith_ld64(

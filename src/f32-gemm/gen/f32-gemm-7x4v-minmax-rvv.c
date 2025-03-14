@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-gemm/MRxNRv-rvv.c.in
 //   Generator: tools/xngen
@@ -11,7 +12,7 @@
 
 #include <riscv_vector.h>
 
-#include "xnnpack/gemm.h"
+#include "src/xnnpack/gemm.h"
 
 
 void xnn_f32_gemm_minmax_ukernel_7x4v__rvv(

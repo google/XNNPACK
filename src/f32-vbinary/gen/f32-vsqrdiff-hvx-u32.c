@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vbinary/vop-hvx.c.in
 //   Generator: tools/xngen
@@ -5,10 +6,10 @@
 
 #include <assert.h>
 
-#include "xnnpack/simd/f32-hvx.h"
+#include "src/xnnpack/simd/f32-hvx.h"
 
-#include "xnnpack/math.h"
-#include "xnnpack/vbinary.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vbinary.h"
 
 void xnn_f32_vsqrdiff_ukernel__hvx_u32(
     size_t batch,

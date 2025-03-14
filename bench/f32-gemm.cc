@@ -18,20 +18,20 @@
 
 #include <benchmark/benchmark.h>
 #ifdef BENCHMARK_RUY
-#include "ruy/ruy.h"
+#include <ruy/ruy.h>
 #endif  // BENCHMARK_RUY
-#include "gemm.h"
-#include "utils.h"
-#include "xnnpack/allocator.h"
-#include "xnnpack/common.h"
-#include "xnnpack/gemm.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/pack.h"
-#include "xnnpack/packx.h"
-#include "xnnpack/ppmm.h"
-#include "xnnpack/buffer.h"
+#include "bench/gemm.h"
+#include "bench/utils.h"
+#include "src/xnnpack/allocator.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/pack.h"
+#include "src/xnnpack/packx.h"
+#include "src/xnnpack/ppmm.h"
+#include "src/xnnpack/buffer.h"
 
 static void GEMMBenchmark(benchmark::State& state,
   xnn_f32_gemm_minmax_ukernel_fn gemm,
@@ -2171,6 +2171,91 @@ static void ruy_st(benchmark::State& state, const char* net)
   BENCHMARK_GEMM(f32_ppmm_4x8_twopass__wasmsimd_arm_splat)
   BENCHMARK_GEMM(f32_ppmm_4x8_twopass__wasmsimd_x86_splat)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+static void f32_gemm_1x32__hvx_broadcast(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_f32_gemm_minmax_ukernel_1x32__hvx_broadcast,
+    xnn_init_f32_minmax_scalar_params,
+    /*mr=*/1, /*nr=*/32, /*kr=*/1, /*sr=*/1,
+    benchmark::utils::CheckHVX);
+}
+
+static void f32_gemm_1x64__hvx_broadcast(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_f32_gemm_minmax_ukernel_1x64__hvx_broadcast,
+    xnn_init_f32_minmax_scalar_params,
+    /*mr=*/1, /*nr=*/64, /*kr=*/1, /*sr=*/1,
+    benchmark::utils::CheckHVX);
+}
+
+static void f32_gemm_1x128__hvx_broadcast(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_f32_gemm_minmax_ukernel_1x128__hvx_broadcast,
+    xnn_init_f32_minmax_scalar_params,
+    /*mr=*/1, /*nr=*/128, /*kr=*/1, /*sr=*/1,
+    benchmark::utils::CheckHVX);
+}
+
+static void f32_gemm_2x128__hvx_broadcast(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_f32_gemm_minmax_ukernel_2x128__hvx_broadcast,
+    xnn_init_f32_minmax_scalar_params,
+    /*mr=*/2, /*nr=*/128, /*kr=*/1, /*sr=*/1,
+    benchmark::utils::CheckHVX);
+}
+
+static void f32_gemm_4x64__hvx_broadcast(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_f32_gemm_minmax_ukernel_4x64__hvx_broadcast,
+    xnn_init_f32_minmax_scalar_params,
+    /*mr=*/4, /*nr=*/64, /*kr=*/1, /*sr=*/1,
+    benchmark::utils::CheckHVX);
+}
+
+static void f32_gemm_7x64__hvx_broadcast(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_f32_gemm_minmax_ukernel_7x64__hvx_broadcast,
+    xnn_init_f32_minmax_scalar_params,
+    /*mr=*/7, /*nr=*/64, /*kr=*/1, /*sr=*/1,
+    benchmark::utils::CheckHVX);
+}
+
+static void f32_gemm_7x32__hvx_broadcast(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_f32_gemm_minmax_ukernel_7x32__hvx_broadcast,
+    xnn_init_f32_minmax_scalar_params,
+    /*mr=*/7, /*nr=*/32, /*kr=*/1, /*sr=*/1,
+    benchmark::utils::CheckHVX);
+}
+
+static void f32_gemm_8x32__hvx_broadcast(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_f32_gemm_minmax_ukernel_8x32__hvx_broadcast,
+    xnn_init_f32_minmax_scalar_params,
+    /*mr=*/8, /*nr=*/32, /*kr=*/1, /*sr=*/1,
+    benchmark::utils::CheckHVX);
+}
+
+static void f32_gemm_16x32__hvx_broadcast(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_f32_gemm_minmax_ukernel_16x32__hvx_broadcast,
+    xnn_init_f32_minmax_scalar_params,
+    /*mr=*/16, /*nr=*/32, /*kr=*/1, /*sr=*/1,
+    benchmark::utils::CheckHVX);
+}
+
+BENCHMARK_GEMM(f32_gemm_1x32__hvx_broadcast)
+BENCHMARK_GEMM(f32_gemm_1x64__hvx_broadcast)
+BENCHMARK_GEMM(f32_gemm_1x128__hvx_broadcast)
+BENCHMARK_GEMM(f32_gemm_2x128__hvx_broadcast)
+BENCHMARK_GEMM(f32_gemm_4x64__hvx_broadcast)
+BENCHMARK_GEMM(f32_gemm_7x64__hvx_broadcast)
+BENCHMARK_GEMM(f32_gemm_7x32__hvx_broadcast)
+BENCHMARK_GEMM(f32_gemm_8x32__hvx_broadcast)
+BENCHMARK_GEMM(f32_gemm_16x32__hvx_broadcast)
+
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
 
 static void f32_gemm_1x4__scalar(benchmark::State& state, const char* net) {
   GEMMBenchmark(state,

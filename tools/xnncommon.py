@@ -22,8 +22,6 @@ def _remove_duplicate_newlines(text):
     last_newline = is_newline
   return "\n".join(filtered_lines)
 
-_XNNPACK_SRC = ""
-
 _ARCH_TO_MACRO_MAP = {
     "aarch32": "XNN_ARCH_ARM",
     "aarch64": "XNN_ARCH_ARM64",
@@ -203,10 +201,6 @@ _ISA_TO_CHECK_MAP = {
     "wasmusdot": "TEST_REQUIRES_WASM_USDOT",
     "wasmblendvps": "TEST_REQUIRES_WASM_BLENDVPS",
 }
-
-
-def xnnpack_src():
-  return _XNNPACK_SRC
 
 
 def isa_hierarchy_map():

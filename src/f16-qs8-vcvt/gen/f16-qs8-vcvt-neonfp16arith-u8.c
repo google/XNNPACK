@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-qs8-vcvt/neonfp16arith.c.in
 //   Generator: tools/xngen
@@ -11,9 +12,9 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/vcvt.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/vcvt.h"
 
 
 void xnn_f16_qs8_vcvt_ukernel__neonfp16arith_u8(

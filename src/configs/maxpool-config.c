@@ -6,12 +6,12 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/config.h"
-#include "xnnpack/init-once.h"
-#include "xnnpack/maxpool.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/config.h"
+#include "src/xnnpack/init-once.h"
+#include "src/xnnpack/maxpool.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
 
 static struct xnn_maxpool_config f16_maxpool_config = {0};
 static struct xnn_maxpool_config f32_maxpool_config = {0};
@@ -104,7 +104,7 @@ static void init_s8_maxpool_config(void) {
       s8_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_s8_maxpool_minmax_ukernel_9p__sse41_u16;
       s8_maxpool_config.init.s8 = xnn_init_s8_minmax_scalar_params;
     } else {
-      s8_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_s8_maxpool_minmax_ukernel_9p__sse2_u16;
+      s8_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_s8_maxpool_minmax_ukernel_9p__scalar_u1;
       s8_maxpool_config.init.s8 = xnn_init_s8_minmax_scalar_params;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

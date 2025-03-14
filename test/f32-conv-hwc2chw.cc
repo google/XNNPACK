@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -9,11 +10,11 @@
 
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/conv.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microparams-init.h"
-#include "conv-hwc2chw-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/conv.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microparams-init.h"
+#include "test/conv-hwc2chw-microkernel-tester.h"
 
 
 #if XNN_ARCH_ARM64

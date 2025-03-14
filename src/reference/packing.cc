@@ -12,16 +12,16 @@
 #include <cstdint>
 #include <cstring>
 
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/config-types.h"
-#include "xnnpack/log.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/pack.h"
-#include "xnnpack/unaligned.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/pack.h"
+#include "src/xnnpack/unaligned.h"
 
 #if XNN_ENABLE_KLEIDIAI
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme.h"
@@ -60,7 +60,7 @@ void copy_bias(const Src* b, size_t b_offset, size_t n, Dst* packed_b) {
   if (b) {
     std::copy_n(b + b_offset, n, packed_b);
   } else {
-    std::fill_n(packed_b, n, 0);
+    std::fill_n(packed_b, n, static_cast<Dst>(0));
   }
 }
 
@@ -614,6 +614,16 @@ void xnn_pack_qs8_qc4w_gemm_goi_w_non_planar_aarch64(
     const struct xnn_qs8_qc4w_packing_params* params) {
   xnn_pack_qs8_qc4w_gemm_goi_w_non_planar(g, nc, kc, nr, kr, sr,
                                           /*register_bytes=*/16, k, b, scale,
+                                          packed_weights, extra_bytes, params);
+}
+
+void xnn_pack_qs8_qc4w_gemm_goi_w_non_planar_avx512(
+    size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
+    const uint8_t* k, const int32_t* b, const float* scale,
+    void* packed_weights, size_t extra_bytes,
+    const struct xnn_qs8_qc4w_packing_params* params) {
+  xnn_pack_qs8_qc4w_gemm_goi_w_non_planar(g, nc, kc, nr, kr, sr,
+                                          /*register_bytes=*/64, k, b, scale,
                                           packed_weights, extra_bytes, params);
 }
 
@@ -1238,10 +1248,10 @@ void xnn_pack_f32_gemm_gio_w(size_t g, size_t nc, size_t kc, size_t nr,
             for (size_t kr_block_offset = 0; kr_block_offset < kr;
                  kr_block_offset++) {
               const size_t kc_idx = kc_begin + kr_block_offset;
-              if (kc_idx < kc) {
-                packed_weights[kr_block_offset] =
-                    k[kc_idx * k_stride + nr_block_start + nr_block_offset];
-              }
+              packed_weights[kr_block_offset] =
+                  kc_idx < kc
+                      ? k[kc_idx * k_stride + nr_block_start + nr_block_offset]
+                      : 0.0f;
             }
             packed_weights += kr;
           }
@@ -1296,10 +1306,10 @@ void xnn_pack_bf16_f32_gemm_gio_w(size_t g, size_t nc, size_t kc, size_t nr,
             for (size_t kr_block_offset = 0; kr_block_offset < kr;
                  kr_block_offset++) {
               const size_t kc_idx = kc_begin + kr_block_offset;
-              if (kc_idx < kc) {
-                ((xnn_bfloat16*) packed_weights)[kr_block_offset] =
-                    k[kc_idx * k_stride + nr_block_start + nr_block_offset];
-              }
+              ((xnn_bfloat16*)packed_weights)[kr_block_offset] =
+                  kc_idx < kc
+                      ? k[kc_idx * k_stride + nr_block_start + nr_block_offset]
+                      : static_cast<xnn_bfloat16>(0.0f);
             }
             packed_weights = (xnn_bfloat16*) packed_weights + kr;
           }
@@ -3258,199 +3268,112 @@ inline static void advance_x_y(size_t h, size_t* x, size_t* y) {
   }
 }
 
-void xnn_pack_f32_dwconv_ghw_w(
-    size_t primary_tile,
-    size_t h, size_t w, size_t c, size_t channel_tile, size_t channel_subtile,
-    size_t channel_round, const float* k, const float* b, const void* scale,
-    float* packed_weights, size_t per_tile_extra_bytes,
-    size_t per_subtile_extra_bytes, const void* params) {
+void xnn_pack_f32_dwconv_ghw_w(size_t primary_tile, size_t h, size_t w,
+                               size_t c, size_t channel_tile, const float* k,
+                               const float* b, const void* scale,
+                               float* packed_weights,
+                               size_t per_tile_extra_bytes,
+                               const void* params) {
   assert(k != nullptr);
   assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
   assert(kernel_size <= primary_tile);
 
-  // Stores the x and y index that should be processed next.
-  size_t x = 0;
-  size_t y = 0;
-  const size_t tiled_c =
-      round_down_po2(round_up_po2(c, channel_round), channel_tile);
+  for (size_t cr_block_start = 0; cr_block_start < c;
+       cr_block_start += channel_tile) {
+    const size_t cr_block_size = min(c - cr_block_start, channel_tile);
+    copy_bias(b, cr_block_start, cr_block_size, packed_weights);
+    packed_weights += channel_tile;
 
-  // Pack in blocks of channel_tile, then in blocks of channel_subtile.
-  {
-    size_t cr_block_start = 0;
-    for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      copy_bias(b, cr_block_start, cr_block_size, packed_weights);
-      packed_weights += channel_tile;
-
-      x = 0;
-      y = 0;
-      for (size_t i = 0; i < kernel_size; i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const float kv =
-              k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_tile - cr_block_size;
-        advance_x_y(h, &x, &y);
+    // Stores the x and y index that should be processed next.
+    size_t x = 0;
+    size_t y = 0;
+    for (size_t i = 0; i < kernel_size; i++) {
+      for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
+           cr_block_offset++) {
+        const float kv =
+            k[((cr_block_start + cr_block_offset) * h + y) * w + x];
+        *packed_weights++ = kv;
       }
-      packed_weights += (primary_tile - kernel_size) * cr_block_size;
+      packed_weights += channel_tile - cr_block_size;
+      advance_x_y(h, &x, &y);
     }
-
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      copy_bias(b, cr_block_start, cr_block_size, packed_weights);
-      packed_weights += channel_subtile;
-
-      x = 0;
-      y = 0;
-      for (size_t i = 0; i < kernel_size; i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const float kv =
-              k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_subtile - cr_block_size;
-        advance_x_y(h, &x, &y);
-      }
-      packed_weights += (primary_tile - kernel_size) * cr_block_size;
-    }
+    packed_weights += (primary_tile - kernel_size) * cr_block_size;
   }
 }
 
-void xnn_pack_f16_dwconv_ghw_w(
-    size_t primary_tile,
-    size_t h, size_t w, size_t c, size_t channel_tile, size_t channel_subtile,
-    size_t channel_round, const uint16_t* k, const uint16_t* b,
-    const void* scale, uint16_t* packed_weights, size_t per_tile_extra_bytes,
-    size_t per_subtile_extra_bytes, const void* params) {
+void xnn_pack_f16_dwconv_ghw_w(size_t primary_tile, size_t h, size_t w,
+                               size_t c, size_t channel_tile, const uint16_t* k,
+                               const uint16_t* b, const void* scale,
+                               uint16_t* packed_weights,
+                               size_t per_tile_extra_bytes,
+                               const void* params) {
   assert(k != nullptr);
   assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
 
-  // Stores the x and y index that should be processed next.
-  size_t x = 0;
-  size_t y = 0;
-  // Pack in sizes of channel_tile to tiled_c, then in sizes of channel_subtile.
-  const size_t tiled_c =
-      round_down_po2(round_up_po2(c, channel_round), channel_tile);
+  for (size_t cr_block_start = 0; cr_block_start < c;
+       cr_block_start += channel_tile) {
+    const size_t cr_block_size = min(c - cr_block_start, channel_tile);
+    copy_bias(b, cr_block_start, cr_block_size, packed_weights);
+    packed_weights += channel_tile;
 
-  // Pack in blocks of channel_tile, then in blocks of channel_subtile.
-  {
-    size_t cr_block_start = 0;
-    for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      copy_bias(b, cr_block_start, cr_block_size, packed_weights);
-      packed_weights += channel_tile;
-
-      x = 0;
-      y = 0;
-      for (size_t i = 0; i < kernel_size; i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const uint16_t kv =
-              k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_tile - cr_block_size;
-        advance_x_y(h, &x, &y);
+    // Stores the x and y index that should be processed next.
+    size_t x = 0;
+    size_t y = 0;
+    for (size_t i = 0; i < kernel_size; i++) {
+      for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
+           cr_block_offset++) {
+        const uint16_t kv =
+            k[((cr_block_start + cr_block_offset) * h + y) * w + x];
+        *packed_weights++ = kv;
       }
-      packed_weights += (primary_tile - kernel_size) * cr_block_size;
+      packed_weights += channel_tile - cr_block_size;
+      advance_x_y(h, &x, &y);
     }
-
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      copy_bias(b, cr_block_start, cr_block_size, packed_weights);
-      packed_weights += channel_subtile;
-
-      x = 0;
-      y = 0;
-      for (size_t i = 0; i < kernel_size; i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const uint16_t kv =
-              k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_subtile - cr_block_size;
-        advance_x_y(h, &x, &y);
-      }
-      packed_weights += (primary_tile - kernel_size) * cr_block_size;
-    }
+    packed_weights += (primary_tile - kernel_size) * cr_block_size;
   }
 }
 
-void xnn_pack_f32_to_f16_dwconv_ghw_w(
-    size_t primary_tile,
-    size_t h, size_t w, size_t c, size_t channel_tile, size_t channel_subtile,
-    size_t channel_round, const float* k, const float* b, const void* scale,
-    xnn_float16* packed_weights, size_t per_tile_extra_bytes,
-    size_t per_subtile_extra_bytes, const void* params) {
+void xnn_pack_f32_to_f16_dwconv_ghw_w(size_t primary_tile, size_t h, size_t w,
+                                      size_t c, size_t channel_tile,
+                                      const float* k, const float* b,
+                                      const void* scale,
+                                      xnn_float16* packed_weights,
+                                      size_t per_tile_extra_bytes,
+                                      const void* params) {
   assert(k != nullptr);
   assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
 
-  // Stores the x and y index that should be processed next.
-  size_t x = 0;
-  size_t y = 0;
-  // Pack in sizes of channel_tile to tiled_c, then in sizes of channel_subtile.
-  const size_t tiled_c =
-      round_down_po2(round_up_po2(c, channel_round), channel_tile);
+  for (size_t cr_block_start = 0; cr_block_start < c;
+       cr_block_start += channel_tile) {
+    const size_t cr_block_size = min(c - cr_block_start, channel_tile);
+    copy_bias(b, cr_block_start, cr_block_size, packed_weights);
+    packed_weights += channel_tile;
 
-  // Pack in blocks of channel_tile, then in blocks of channel_subtile.
-  {
-    size_t cr_block_start = 0;
-    for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      copy_bias(b, cr_block_start, cr_block_size, packed_weights);
-      packed_weights += channel_tile;
-
-      x = 0;
-      y = 0;
-      for (size_t i = 0; i < kernel_size; i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const xnn_float16 kv = xnn_float16_from_float(
-              k[((cr_block_start + cr_block_offset) * h + y) * w + x]);
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_tile - cr_block_size;
-        advance_x_y(h, &x, &y);
+    // Stores the x and y index that should be processed next.
+    size_t x = 0;
+    size_t y = 0;
+    for (size_t i = 0; i < kernel_size; i++) {
+      for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
+           cr_block_offset++) {
+        const xnn_float16 kv = xnn_float16_from_float(
+            k[((cr_block_start + cr_block_offset) * h + y) * w + x]);
+        *packed_weights++ = kv;
       }
-      packed_weights += (primary_tile - kernel_size) * cr_block_size;
+      packed_weights += channel_tile - cr_block_size;
+      advance_x_y(h, &x, &y);
     }
-
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      copy_bias(b, cr_block_start, cr_block_size, packed_weights);
-      packed_weights += channel_subtile;
-
-      x = 0;
-      y = 0;
-      for (size_t i = 0; i < kernel_size; i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const xnn_float16 kv = xnn_float16_from_float(
-              k[((cr_block_start + cr_block_offset) * h + y) * w + x]);
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_subtile - cr_block_size;
-        advance_x_y(h, &x, &y);
-      }
-      packed_weights += (primary_tile - kernel_size) * cr_block_size;
-    }
+    packed_weights += (primary_tile - kernel_size) * cr_block_size;
   }
 }
 
 void xnn_pack_qu8_dwconv_ghw_w(size_t primary_tile, size_t h, size_t w,
                                size_t c, size_t channel_tile,
-                               size_t channel_subtile, size_t channel_round,
                                const uint8_t* k, const int32_t* b,
                                const void* scale, void* packed_weights,
                                size_t per_tile_extra_bytes,
-                               size_t per_subtile_extra_bytes,
                                const struct xnn_qu8_packing_params* params) {
   assert(k != nullptr);
   assert(packed_weights != nullptr);
@@ -3459,428 +3382,218 @@ void xnn_pack_qu8_dwconv_ghw_w(size_t primary_tile, size_t h, size_t w,
   const int32_t izp = (int32_t)params->input_zero_point;
   const int32_t boff =
       (int32_t)h * (int32_t)w * izp * (int32_t)params->kernel_zero_point;
-  // Stores the x and y index that should be processed next.
-  size_t x = 0;
-  size_t y = 0;
-  // Pack in sizes of channel_tile to tiled_c, then in sizes of channel_subtile.
-  const size_t tiled_c =
-      round_down_po2(round_up_po2(c, channel_round), channel_tile);
+  for (size_t cr_block_start = 0; cr_block_start < c;
+       cr_block_start += channel_tile) {
+    unaligned_int32_t* packed_b = (unaligned_int32_t*)packed_weights;
+    const size_t cr_block_size = min(c - cr_block_start, channel_tile);
+    copy_bias(b, cr_block_start, cr_block_size, packed_b, boff);
+    packed_weights =
+        (void*)((uintptr_t)packed_weights + channel_tile * sizeof(int32_t));
 
-  // Pack in blocks of channel_tile, then in blocks of channel_subtile.
-  {
-    size_t cr_block_start = 0;
-    for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
-      unaligned_int32_t* packed_b = (unaligned_int32_t*)packed_weights;
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      copy_bias(b, cr_block_start, cr_block_size, packed_b, boff);
-      packed_weights =
-          (void*)((uintptr_t)packed_weights + channel_tile * sizeof(int32_t));
-
-      // Biases need to be offset by all kernel values.
-      for (size_t x = 0; x < w; x++) {
-        for (size_t y = 0; y < h; y++) {
-          for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-               cr_block_offset++) {
-            const uint8_t kv =
-                k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-            unaligned_indexed_store_s32(
-                packed_b, cr_block_offset,
-                unaligned_indexed_load_s32(packed_b, cr_block_offset) -
-                    (int32_t)kv * izp);
-          }
-        }
-      }
-
-      x = 0;
-      y = 0;
-      for (size_t i = 0; i < kernel_size; i++) {
+    // Biases need to be offset by all kernel values.
+    for (size_t x = 0; x < w; x++) {
+      for (size_t y = 0; y < h; y++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
              cr_block_offset++) {
           const uint8_t kv =
               k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-          *((uint8_t*)packed_weights) = kv;
-          packed_weights = (void*)((uintptr_t)packed_weights + sizeof(uint8_t));
+          unaligned_indexed_store_s32(
+              packed_b, cr_block_offset,
+              unaligned_indexed_load_s32(packed_b, cr_block_offset) -
+                  (int32_t)kv * izp);
         }
-        packed_weights =
-            (void*)((uintptr_t)packed_weights +
-                    (channel_tile - cr_block_size) * sizeof(uint8_t));
-        advance_x_y(h, &x, &y);
+      }
+    }
+
+    // Stores the x and y index that should be processed next.
+    size_t x = 0;
+    size_t y = 0;
+    for (size_t i = 0; i < kernel_size; i++) {
+      for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
+           cr_block_offset++) {
+        const uint8_t kv =
+            k[((cr_block_start + cr_block_offset) * h + y) * w + x];
+        *((uint8_t*)packed_weights) = kv;
+        packed_weights = (void*)((uintptr_t)packed_weights + sizeof(uint8_t));
       }
       packed_weights =
           (void*)((uintptr_t)packed_weights +
-                  (primary_tile - kernel_size) * cr_block_size);
+                  (channel_tile - cr_block_size) * sizeof(uint8_t));
+      advance_x_y(h, &x, &y);
     }
-
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      unaligned_int32_t* packed_b = (unaligned_int32_t*)packed_weights;
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      copy_bias(b, cr_block_start, cr_block_size, packed_b, boff);
-      packed_weights = (void*)((uintptr_t)packed_weights +
-                               channel_subtile * sizeof(int32_t));
-
-      // Biases need to be offset by all kernel values.
-      for (size_t x = 0; x < w; x++) {
-        for (size_t y = 0; y < h; y++) {
-          for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-               cr_block_offset++) {
-            const uint8_t kv =
-                k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-            unaligned_indexed_store_s32(
-                packed_b, cr_block_offset,
-                unaligned_indexed_load_s32(packed_b, cr_block_offset) -
-                    (int32_t)kv * izp);
-          }
-        }
-      }
-
-      x = 0;
-      y = 0;
-      for (size_t i = 0; i < kernel_size; i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const uint8_t kv =
-              k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-          *((uint8_t*)packed_weights) = kv;
-          packed_weights = (void*)((uintptr_t)packed_weights + sizeof(uint8_t));
-        }
-        packed_weights =
-            (void*)((uintptr_t)packed_weights +
-                    (channel_subtile - cr_block_size) * sizeof(uint8_t));
-        advance_x_y(h, &x, &y);
-      }
-      packed_weights =
-          (void*)((uintptr_t)packed_weights +
-                  (primary_tile - kernel_size) * cr_block_size);
-    }
+    packed_weights = (void*)((uintptr_t)packed_weights +
+                             (primary_tile - kernel_size) * cr_block_size);
   }
 }
 
 void xnn_pack_qs8_dwconv_ghw_w(size_t primary_tile, size_t h, size_t w,
                                size_t c, size_t channel_tile,
-                               size_t channel_subtile, size_t channel_round,
                                const int8_t* k, const int32_t* b,
                                const float* scale, void* packed_weights,
                                size_t per_tile_extra_bytes,
-                               size_t per_subtile_extra_bytes,
                                const struct xnn_qs8_packing_params* params) {
   assert(k != nullptr);
   assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
-
   const uint32_t izp = (uint32_t)params->input_zero_point;
-  // Stores the x and y index that should be processed next.
-  size_t x = 0;
-  size_t y = 0;
-  // Pack in sizes of channel_tile to tiled_c, then in sizes of channel_subtile.
-  const size_t tiled_c =
-      round_down_po2(round_up_po2(c, channel_round), channel_tile);
 
-  // Pack in blocks of channel_tile, then in blocks of channel_subtile.
-  {
-    size_t cr_block_start = 0;
-    for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
-      unaligned_int32_t* packed_b = (unaligned_int32_t*)packed_weights;
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      copy_bias(b, cr_block_start, cr_block_size, packed_b);
-      packed_weights =
-          (void*)((uintptr_t)packed_weights + channel_tile * sizeof(int32_t));
+  for (size_t cr_block_start = 0; cr_block_start < c;
+       cr_block_start += channel_tile) {
+    unaligned_int32_t* packed_b = (unaligned_int32_t*)packed_weights;
+    const size_t cr_block_size = min(c - cr_block_start, channel_tile);
+    copy_bias(b, cr_block_start, cr_block_size, packed_b);
+    packed_weights =
+        (void*)((uintptr_t)packed_weights + channel_tile * sizeof(int32_t));
 
-      // Biases need to be offset by all kernel values.
-      for (size_t x = 0; x < w; x++) {
-        for (size_t y = 0; y < h; y++) {
-          for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-               cr_block_offset++) {
-            const int8_t kv =
-                k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-            packed_b[cr_block_offset] =
-                packed_b[cr_block_offset] - (uint32_t)kv * izp;
-          }
-        }
-      }
-
-      x = 0;
-      y = 0;
-      for (size_t i = 0; i < kernel_size; i++) {
+    // Biases need to be offset by all kernel values.
+    for (size_t x = 0; x < w; x++) {
+      for (size_t y = 0; y < h; y++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
              cr_block_offset++) {
           const int8_t kv =
               k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-          *((int8_t*)packed_weights) = kv;
-          packed_weights = (void*)((uintptr_t)packed_weights + sizeof(int8_t));
+          packed_b[cr_block_offset] =
+              packed_b[cr_block_offset] - (uint32_t)kv * izp;
         }
-        packed_weights =
-            (void*)((uintptr_t)packed_weights +
-                    (channel_tile - cr_block_size) * sizeof(int8_t));
-        advance_x_y(h, &x, &y);
       }
-      packed_weights =
-          (void*)((uintptr_t)packed_weights +
-                  (primary_tile - kernel_size) * cr_block_size);
-      // We need to pack extra bytes for scale values here.
-      packed_weights =
-          (void*)((uintptr_t)packed_weights + per_tile_extra_bytes);
     }
 
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      unaligned_int32_t* packed_b = (unaligned_int32_t*)packed_weights;
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      copy_bias(b, cr_block_start, cr_block_size, packed_b);
+    // Stores the x and y index that should be processed next.
+    size_t x = 0;
+    size_t y = 0;
+    for (size_t i = 0; i < kernel_size; i++) {
+      for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
+           cr_block_offset++) {
+        const int8_t kv =
+            k[((cr_block_start + cr_block_offset) * h + y) * w + x];
+        *((int8_t*)packed_weights) = kv;
+        packed_weights = (void*)((uintptr_t)packed_weights + sizeof(int8_t));
+      }
       packed_weights = (void*)((uintptr_t)packed_weights +
-                               channel_subtile * sizeof(int32_t));
-
-      // Biases need to be offset by all kernel values.
-      for (size_t x = 0; x < w; x++) {
-        for (size_t y = 0; y < h; y++) {
-          for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-               cr_block_offset++) {
-            const int8_t kv =
-                k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-            packed_b[cr_block_offset] =
-                packed_b[cr_block_offset] - (uint32_t)kv * izp;
-          }
-        }
-      }
-
-      x = 0;
-      y = 0;
-      for (size_t i = 0; i < kernel_size; i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const int8_t kv =
-              k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-          *((int8_t*)packed_weights) = kv;
-          packed_weights = (void*)((uintptr_t)packed_weights + sizeof(int8_t));
-        }
-        packed_weights =
-            (void*)((uintptr_t)packed_weights +
-                    (channel_subtile - cr_block_size) * sizeof(int8_t));
-        advance_x_y(h, &x, &y);
-      }
-      packed_weights =
-          (void*)((uintptr_t)packed_weights +
-                  (primary_tile - kernel_size) * cr_block_size);
-      // We need to pack extra bytes for scale values here.
-      packed_weights =
-          (void*)((uintptr_t)packed_weights + per_subtile_extra_bytes);
+                               (channel_tile - cr_block_size) * sizeof(int8_t));
+      advance_x_y(h, &x, &y);
     }
+    packed_weights = (void*)((uintptr_t)packed_weights +
+                             (primary_tile - kernel_size) * cr_block_size);
+    // We need to pack extra bytes for scale values here.
+    packed_weights = (void*)((uintptr_t)packed_weights + per_tile_extra_bytes);
   }
 }
 
-void xnn_pack_f32_dwconv_hwg_w(
-    size_t primary_tile,
-    size_t h, size_t w, size_t c, size_t channel_tile, size_t channel_subtile,
-    size_t channel_round, const float* k, const float* b, const void* scale,
-    float* packed_weights, size_t per_tile_extra_bytes,
-    size_t per_subtile_extra_bytes, const void* params) {
+void xnn_pack_f32_dwconv_hwg_w(size_t primary_tile, size_t h, size_t w,
+                               size_t c, size_t channel_tile, const float* k,
+                               const float* b, const void* scale,
+                               float* packed_weights,
+                               size_t per_tile_extra_bytes,
+                               const void* params) {
   assert(k != nullptr);
   assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
 
-  // Stores the x and y index that should be processed next.
-  size_t processed_x = 0;
-  size_t processed_y = 0;
-  size_t x = 0;
-  size_t y = 0;
-  // Pack in sizes of channel_tile to tiled_c, then in sizes of channel_subtile.
-  const size_t tiled_c =
-      round_down_po2(round_up_po2(c, channel_round), channel_tile);
+  for (size_t cr_block_start = 0; cr_block_start < c;
+       cr_block_start += channel_tile) {
+    const size_t cr_block_size = min(c - cr_block_start, channel_tile);
+    copy_bias(b, cr_block_start, cr_block_size, packed_weights);
+    packed_weights += channel_tile;
 
-  // Pack in blocks of channel_tile, then in blocks of channel_subtile.
-  {
-    size_t cr_block_start = 0;
-    for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      copy_bias(b, cr_block_start, cr_block_size, packed_weights);
-      packed_weights += channel_tile;
-
-      x = processed_x;
-      y = processed_y;
-      for (size_t i = 0; i < kernel_size; i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const float kv =
-              k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_tile - cr_block_size;
-        if (++y == h) {
-          y = 0;
-          x++;
-        }
+    // Stores the x and y index that should be processed next.
+    size_t x = 0;
+    size_t y = 0;
+    for (size_t i = 0; i < kernel_size; i++) {
+      for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
+           cr_block_offset++) {
+        const float kv =
+            k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
+        *packed_weights++ = kv;
       }
-      packed_weights += (primary_tile - kernel_size) * cr_block_size;
-    }
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      copy_bias(b, cr_block_start, cr_block_size, packed_weights);
-      packed_weights += channel_subtile;
-
-      x = processed_x;
-      y = processed_y;
-      for (size_t i = 0; i < kernel_size; i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const float kv =
-              k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_subtile - cr_block_size;
-        if (++y == h) {
-          y = 0;
-          x++;
-        }
+      packed_weights += channel_tile - cr_block_size;
+      if (++y == h) {
+        y = 0;
+        x++;
       }
-      packed_weights += (primary_tile - kernel_size) * cr_block_size;
     }
+    packed_weights += (primary_tile - kernel_size) * cr_block_size;
   }
 }
 
-void xnn_pack_f16_dwconv_hwg_w(
-    size_t primary_tile,
-    size_t h, size_t w, size_t c, size_t channel_tile, size_t channel_subtile,
-    size_t channel_round, const uint16_t* k, const uint16_t* b,
-    const void* scale, uint16_t* packed_weights, size_t per_tile_extra_bytes,
-    size_t per_subtile_extra_bytes, const void* params) {
+void xnn_pack_f16_dwconv_hwg_w(size_t primary_tile, size_t h, size_t w,
+                               size_t c, size_t channel_tile, const uint16_t* k,
+                               const uint16_t* b, const void* scale,
+                               uint16_t* packed_weights,
+                               size_t per_tile_extra_bytes,
+                               const void* params) {
   assert(k != nullptr);
   assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
 
-  // Stores the x and y index that should be processed next.
-  size_t processed_x = 0;
-  size_t processed_y = 0;
-  size_t x = 0;
-  size_t y = 0;
-  // Pack in sizes of channel_tile to tiled_c, then in sizes of channel_subtile.
-  const size_t tiled_c =
-      round_down_po2(round_up_po2(c, channel_round), channel_tile);
+  for (size_t cr_block_start = 0; cr_block_start < c;
+       cr_block_start += channel_tile) {
+    const size_t cr_block_size = min(c - cr_block_start, channel_tile);
+    copy_bias(b, cr_block_start, cr_block_size, packed_weights);
+    packed_weights += channel_tile;
 
-  // Pack in blocks of channel_tile, then in blocks of channel_subtile.
-  {
-    size_t cr_block_start = 0;
-    for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      copy_bias(b, cr_block_start, cr_block_size, packed_weights);
-      packed_weights += channel_tile;
-
-      x = processed_x;
-      y = processed_y;
-      for (size_t i = 0; i < kernel_size; i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const uint16_t kv =
-              k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_tile - cr_block_size;
-        if (++y == h) {
-          y = 0;
-          x++;
-        }
+    // Stores the x and y index that should be processed next.
+    size_t x = 0;
+    size_t y = 0;
+    for (size_t i = 0; i < kernel_size; i++) {
+      for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
+           cr_block_offset++) {
+        const uint16_t kv =
+            k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
+        *packed_weights++ = kv;
       }
-      packed_weights += (primary_tile - kernel_size) * cr_block_size;
-    }
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      copy_bias(b, cr_block_start, cr_block_size, packed_weights);
-      packed_weights += channel_subtile;
-
-      x = processed_x;
-      y = processed_y;
-      for (size_t i = 0; i < kernel_size; i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const uint16_t kv =
-              k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_subtile - cr_block_size;
-        if (++y == h) {
-          y = 0;
-          x++;
-        }
+      packed_weights += channel_tile - cr_block_size;
+      if (++y == h) {
+        y = 0;
+        x++;
       }
-      packed_weights += (primary_tile - kernel_size) * cr_block_size;
     }
+    packed_weights += (primary_tile - kernel_size) * cr_block_size;
   }
 }
 
-void xnn_pack_f32_to_f16_dwconv_hwg_w(
-    size_t primary_tile,
-    size_t h, size_t w, size_t c, size_t channel_tile, size_t channel_subtile,
-    size_t channel_round, const float* k, const float* b, const void* scale,
-    xnn_float16* packed_weights, size_t per_tile_extra_bytes,
-    size_t per_subtile_extra_bytes, const void* params) {
+void xnn_pack_f32_to_f16_dwconv_hwg_w(size_t primary_tile, size_t h, size_t w,
+                                      size_t c, size_t channel_tile,
+                                      const float* k, const float* b,
+                                      const void* scale,
+                                      xnn_float16* packed_weights,
+                                      size_t per_tile_extra_bytes,
+                                      const void* params) {
   assert(k != nullptr);
   assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
 
-  // Stores the x and y index that should be processed next.
-  size_t processed_x = 0;
-  size_t processed_y = 0;
-  size_t x = 0;
-  size_t y = 0;
-  // Pack in sizes of channel_tile to tiled_c, then in sizes of channel_subtile.
-  const size_t tiled_c =
-      round_down_po2(round_up_po2(c, channel_round), channel_tile);
+  for (size_t cr_block_start = 0; cr_block_start < c;
+       cr_block_start += channel_tile) {
+    const size_t cr_block_size = min(c - cr_block_start, channel_tile);
+    copy_bias(b, cr_block_start, cr_block_size, packed_weights);
+    packed_weights += channel_tile;
 
-  // Pack in blocks of channel_tile, then in blocks of channel_subtile.
-  {
-    size_t cr_block_start = 0;
-    for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      copy_bias(b, cr_block_start, cr_block_size, packed_weights);
-      packed_weights += channel_tile;
-
-      x = processed_x;
-      y = processed_y;
-      for (size_t i = 0; i < kernel_size; i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const xnn_float16 kv = xnn_float16_from_float(
-              k[(y * w + x) * c + (cr_block_start + cr_block_offset)]);
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_tile - cr_block_size;
-        if (++y == h) {
-          y = 0;
-          x++;
-        }
+    // Stores the x and y index that should be processed next.
+    size_t x = 0;
+    size_t y = 0;
+    for (size_t i = 0; i < kernel_size; i++) {
+      for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
+           cr_block_offset++) {
+        const xnn_float16 kv = xnn_float16_from_float(
+            k[(y * w + x) * c + (cr_block_start + cr_block_offset)]);
+        *packed_weights++ = kv;
       }
-      // And make sure to skip weights if kernel_size < primary_tile.
-      packed_weights += (primary_tile - kernel_size) * cr_block_size;
-    }
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      copy_bias(b, cr_block_start, cr_block_size, packed_weights);
-      packed_weights += channel_subtile;
-
-      x = processed_x;
-      y = processed_y;
-      for (size_t i = 0; i < kernel_size; i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const xnn_float16 kv = xnn_float16_from_float(
-              k[(y * w + x) * c + (cr_block_start + cr_block_offset)]);
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_subtile - cr_block_size;
-        if (++y == h) {
-          y = 0;
-          x++;
-        }
+      packed_weights += channel_tile - cr_block_size;
+      if (++y == h) {
+        y = 0;
+        x++;
       }
-      packed_weights += (primary_tile - kernel_size) * cr_block_size;
     }
+    packed_weights += (primary_tile - kernel_size) * cr_block_size;
   }
 }
 
 void xnn_pack_qu8_dwconv_hwg_w(size_t primary_tile, size_t h, size_t w,
                                size_t c, size_t channel_tile,
-                               size_t channel_subtile, size_t channel_round,
                                const uint8_t* k, const int32_t* b,
                                const void* scale, void* packed_weights,
                                size_t per_tile_extra_bytes,
-                               size_t per_subtile_extra_bytes,
                                const struct xnn_qu8_packing_params* params) {
   assert(k != nullptr);
   assert(packed_weights != nullptr);
@@ -3889,210 +3602,103 @@ void xnn_pack_qu8_dwconv_hwg_w(size_t primary_tile, size_t h, size_t w,
   const int32_t izp = (int32_t)params->input_zero_point;
   const int32_t boff =
       (int32_t)h * (int32_t)w * izp * (int32_t)params->kernel_zero_point;
-  // Stores the x and y index that should be processed next.
-  size_t x = 0;
-  size_t y = 0;
-  // Pack in sizes of channel_tile to tiled_c, then in sizes of channel_subtile.
-  const size_t tiled_c =
-      round_down_po2(round_up_po2(c, channel_round), channel_tile);
 
-  // Pack in blocks of channel_tile, then in blocks of channel_subtile.
-  {
-    size_t cr_block_start = 0;
-    for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
-      unaligned_int32_t* packed_b = (unaligned_int32_t*)packed_weights;
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      copy_bias(b, cr_block_start, cr_block_size, packed_b, boff);
-      packed_weights =
-          (void*)((uintptr_t)packed_weights + channel_tile * sizeof(int32_t));
+  for (size_t cr_block_start = 0; cr_block_start < c;
+       cr_block_start += channel_tile) {
+    unaligned_int32_t* packed_b = (unaligned_int32_t*)packed_weights;
+    const size_t cr_block_size = min(c - cr_block_start, channel_tile);
+    copy_bias(b, cr_block_start, cr_block_size, packed_b, boff);
+    packed_weights =
+        (void*)((uintptr_t)packed_weights + channel_tile * sizeof(int32_t));
 
-      // Biases need to be offset by all kernel values.
-      for (size_t x = 0; x < w; x++) {
-        for (size_t y = 0; y < h; y++) {
-          for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-               cr_block_offset++) {
-            const uint8_t kv =
-                k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-            unaligned_indexed_store_s32(
-                packed_b, cr_block_offset,
-                unaligned_indexed_load_s32(packed_b, cr_block_offset) -
-                    (int32_t)kv * izp);
-          }
-        }
-      }
-
-      x = 0;
-      y = 0;
-      for (size_t i = 0; i < kernel_size; i++) {
+    // Biases need to be offset by all kernel values.
+    for (size_t x = 0; x < w; x++) {
+      for (size_t y = 0; y < h; y++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
              cr_block_offset++) {
           const uint8_t kv =
               k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-          *((uint8_t*)packed_weights) = kv;
-          packed_weights = (void*)((uintptr_t)packed_weights + sizeof(uint8_t));
+          unaligned_indexed_store_s32(
+              packed_b, cr_block_offset,
+              unaligned_indexed_load_s32(packed_b, cr_block_offset) -
+                  (int32_t)kv * izp);
         }
-        packed_weights =
-            (void*)((uintptr_t)packed_weights +
-                    (channel_tile - cr_block_size) * sizeof(uint8_t));
-        advance_x_y(h, &x, &y);
+      }
+    }
+
+    // Stores the x and y index that should be processed next.
+    size_t x = 0;
+    size_t y = 0;
+    for (size_t i = 0; i < kernel_size; i++) {
+      for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
+           cr_block_offset++) {
+        const uint8_t kv =
+            k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
+        *((uint8_t*)packed_weights) = kv;
+        packed_weights = (void*)((uintptr_t)packed_weights + sizeof(uint8_t));
       }
       packed_weights =
           (void*)((uintptr_t)packed_weights +
-                  (primary_tile - kernel_size) * cr_block_size);
+                  (channel_tile - cr_block_size) * sizeof(uint8_t));
+      advance_x_y(h, &x, &y);
     }
-
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      unaligned_int32_t* packed_b = (unaligned_int32_t*)packed_weights;
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      copy_bias(b, cr_block_start, cr_block_size, packed_b, boff);
-      packed_weights = (void*)((uintptr_t)packed_weights +
-                               channel_subtile * sizeof(int32_t));
-
-      // Biases need to be offset by all kernel values.
-      for (size_t x = 0; x < w; x++) {
-        for (size_t y = 0; y < h; y++) {
-          for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-               cr_block_offset++) {
-            const uint8_t kv =
-                k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-            unaligned_indexed_store_s32(
-                packed_b, cr_block_offset,
-                unaligned_indexed_load_s32(packed_b, cr_block_offset) -
-                    (int32_t)kv * izp);
-          }
-        }
-      }
-
-      x = 0;
-      y = 0;
-      for (size_t i = 0; i < kernel_size; i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const uint8_t kv =
-              k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-          *((uint8_t*)packed_weights) = kv;
-          packed_weights = (void*)((uintptr_t)packed_weights + sizeof(uint8_t));
-        }
-        packed_weights =
-            (void*)((uintptr_t)packed_weights +
-                    (channel_subtile - cr_block_size) * sizeof(uint8_t));
-        advance_x_y(h, &x, &y);
-      }
-      packed_weights =
-          (void*)((uintptr_t)packed_weights +
-                  (primary_tile - kernel_size) * cr_block_size);
-    }
+    packed_weights = (void*)((uintptr_t)packed_weights +
+                             (primary_tile - kernel_size) * cr_block_size);
   }
 }
 
 void xnn_pack_qs8_dwconv_hwg_w(size_t primary_tile, size_t h, size_t w,
                                size_t c, size_t channel_tile,
-                               size_t channel_subtile, size_t channel_round,
                                const int8_t* k, const int32_t* b,
                                const float* scale, void* packed_weights,
                                size_t per_tile_extra_bytes,
-                               size_t per_subtile_extra_bytes,
                                const struct xnn_qs8_packing_params* params) {
   assert(k != nullptr);
   assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
 
   const uint32_t izp = (uint32_t)params->input_zero_point;
-  // Stores the x and y index that should be processed next.
-  size_t x = 0;
-  size_t y = 0;
-  // Pack in sizes of channel_tile to tiled_c, then in sizes of channel_subtile.
-  const size_t tiled_c =
-      round_down_po2(round_up_po2(c, channel_round), channel_tile);
 
-  // Pack in blocks of channel_tile, then in blocks of channel_subtile.
-  {
-    size_t cr_block_start = 0;
-    for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
-      unaligned_int32_t* packed_b = (unaligned_int32_t*)packed_weights;
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      copy_bias(b, cr_block_start, cr_block_size, packed_b);
-      packed_weights =
-          (void*)((uintptr_t)packed_weights + channel_tile * sizeof(int32_t));
+  for (size_t cr_block_start = 0; cr_block_start < c;
+       cr_block_start += channel_tile) {
+    unaligned_int32_t* packed_b = (unaligned_int32_t*)packed_weights;
+    const size_t cr_block_size = min(c - cr_block_start, channel_tile);
+    copy_bias(b, cr_block_start, cr_block_size, packed_b);
+    packed_weights =
+        (void*)((uintptr_t)packed_weights + channel_tile * sizeof(int32_t));
 
-      // Biases need to be offset by all kernel values.
-      for (size_t x = 0; x < w; x++) {
-        for (size_t y = 0; y < h; y++) {
-          for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-               cr_block_offset++) {
-            const int8_t kv =
-                k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-            packed_b[cr_block_offset] =
-                packed_b[cr_block_offset] - (uint32_t)kv * izp;
-          }
-        }
-      }
-
-      x = 0;
-      y = 0;
-      for (size_t i = 0; i < kernel_size; i++) {
+    // Biases need to be offset by all kernel values.
+    for (size_t x = 0; x < w; x++) {
+      for (size_t y = 0; y < h; y++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
              cr_block_offset++) {
           const int8_t kv =
               k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-          *((int8_t*)packed_weights) = kv;
-          packed_weights = (void*)((uintptr_t)packed_weights + sizeof(int8_t));
+          packed_b[cr_block_offset] =
+              packed_b[cr_block_offset] - (uint32_t)kv * izp;
         }
-        packed_weights =
-            (void*)((uintptr_t)packed_weights +
-                    (channel_tile - cr_block_size) * sizeof(int8_t));
-        advance_x_y(h, &x, &y);
       }
-      packed_weights =
-          (void*)((uintptr_t)packed_weights +
-                  (primary_tile - kernel_size) * cr_block_size);
-      // We need to pack extra bytes for scale values here.
-      packed_weights =
-          (void*)((uintptr_t)packed_weights + per_tile_extra_bytes);
     }
 
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      unaligned_int32_t* packed_b = (unaligned_int32_t*)packed_weights;
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      copy_bias(b, cr_block_start, cr_block_size, packed_b);
+    // Stores the x and y index that should be processed next.
+    size_t x = 0;
+    size_t y = 0;
+    for (size_t i = 0; i < kernel_size; i++) {
+      for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
+           cr_block_offset++) {
+        const int8_t kv =
+            k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
+        *((int8_t*)packed_weights) = kv;
+        packed_weights = (void*)((uintptr_t)packed_weights + sizeof(int8_t));
+      }
       packed_weights = (void*)((uintptr_t)packed_weights +
-                               channel_subtile * sizeof(int32_t));
-
-      // Biases need to be offset by all kernel values.
-      for (size_t x = 0; x < w; x++) {
-        for (size_t y = 0; y < h; y++) {
-          for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-               cr_block_offset++) {
-            const int8_t kv =
-                k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-            packed_b[cr_block_offset] =
-                packed_b[cr_block_offset] - (uint32_t)kv * izp;
-          }
-        }
-      }
-
-      x = 0;
-      y = 0;
-      for (size_t i = 0; i < kernel_size; i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const int8_t kv =
-              k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-          *((int8_t*)packed_weights) = kv;
-          packed_weights = (void*)((uintptr_t)packed_weights + sizeof(int8_t));
-        }
-        packed_weights =
-            (void*)((uintptr_t)packed_weights +
-                    (channel_subtile - cr_block_size) * sizeof(int8_t));
-        advance_x_y(h, &x, &y);
-      }
-      packed_weights =
-          (void*)((uintptr_t)packed_weights +
-                  (primary_tile - kernel_size) * cr_block_size);
-      // We need to pack extra bytes for scale values here.
-      packed_weights =
-          (void*)((uintptr_t)packed_weights + per_subtile_extra_bytes);
+                               (channel_tile - cr_block_size) * sizeof(int8_t));
+      advance_x_y(h, &x, &y);
     }
+    packed_weights = (void*)((uintptr_t)packed_weights +
+                             (primary_tile - kernel_size) * cr_block_size);
+    // We need to pack extra bytes for scale values here.
+    packed_weights = (void*)((uintptr_t)packed_weights + per_tile_extra_bytes);
   }
 }
 

@@ -128,6 +128,7 @@ def preprocess(input_text, input_globals, input_path="codegen"):
 
 
 PREAMBLE = """\
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: {template}
 //   Generator: {generator}

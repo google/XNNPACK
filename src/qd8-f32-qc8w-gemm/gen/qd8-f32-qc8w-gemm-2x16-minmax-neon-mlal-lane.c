@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-gemm/neon-mlal-lane.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/gemm.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/gemm.h"
 
 
 void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x16__neon_mlal_lane(

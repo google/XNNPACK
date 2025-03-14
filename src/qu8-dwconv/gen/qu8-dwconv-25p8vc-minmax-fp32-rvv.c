@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-dwconv/unipass-rvv.c.in
 //   Generator: tools/xngen
@@ -9,7 +10,7 @@
 
 #include <assert.h>
 #include <riscv_vector.h>
-#include "xnnpack/dwconv.h"
+#include "src/xnnpack/dwconv.h"
 
 
 void xnn_qu8_dwconv_minmax_fp32_ukernel_25p8vc__rvv(

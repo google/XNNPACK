@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-gemm/MRx2c4-wasmsimd.c.in
 //   Generator: tools/xngen
@@ -11,7 +12,7 @@
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/gemm.h"
+#include "src/xnnpack/gemm.h"
 
 
 void xnn_f32_qc8w_gemm_minmax_ukernel_4x2c4__wasmsimd_arm(

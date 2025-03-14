@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-igemm/hvx-broadcast.c.in
 //   Generator: tools/xngen
@@ -12,8 +13,8 @@
 #include <hexagon_protos.h>
 #include <hvx_hexagon_protos.h>
 
-#include "xnnpack/igemm.h"
-#include "xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/igemm.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
 
 void xnn_f32_igemm_minmax_ukernel_1x32__hvx_broadcast(
     size_t mr,

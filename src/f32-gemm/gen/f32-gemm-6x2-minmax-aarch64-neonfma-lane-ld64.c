@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-gemm/MRx2-neon-ld64.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/gemm.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/gemm.h"
 
 
 void xnn_f32_gemm_minmax_ukernel_6x2__aarch64_neonfma_lane_ld64(

@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/x8-packw/kr-gio-scalar.c.in
 //   Generator: tools/xngen
@@ -12,7 +13,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/packw.h"
+#include "src/xnnpack/packw.h"
 
 void xnn_qs8_packw_gemm_gio_ukernel_x8c4__scalar(
   size_t g,

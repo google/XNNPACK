@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-raddexpminusmax/avx2-p5.c.in
 //   Generator: tools/xngen
@@ -11,7 +12,7 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/raddexpminusmax.h"
+#include "src/xnnpack/raddexpminusmax.h"
 
 
 void xnn_f32_raddexpminusmax_ukernel__avx2_p5_u72_acc3(

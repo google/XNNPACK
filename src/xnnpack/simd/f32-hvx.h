@@ -13,8 +13,8 @@
 #include <hvx_hexagon_protos.h>
 #include <hexagon_protos.h>
 #include <hexagon_types.h>
-#include "xnnpack/common.h"
-#include "xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
 
 
 // SIMD vector type for f32 using HVX.
@@ -33,28 +33,18 @@ typedef HVX_Vector xnn_simd_f32_t;
 
 // Include the header for generic functions _after_ declaring the arch-specific
 // types and sizes.
-#include "xnnpack/simd/f32-generic-functions.h"
+#include "src/xnnpack/simd/f32-generic-functions.h"
 
 // Arithmetic operations.
 
 static XNN_INLINE xnn_simd_f32_t xnn_zero_f32() { return Q6_V_vsplat_R(0); }
 
 static XNN_INLINE xnn_simd_f32_t xnn_add_f32(xnn_simd_f32_t a,
-                                             xnn_simd_f32_t b) {
-  return Q6_Vsf_vadd_VsfVsf(a, b);
-}
-
-static XNN_INLINE xnn_simd_f32_t xnn_add_qf32(xnn_simd_f32_t a,
                                               xnn_simd_f32_t b) {
   return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_VsfVsf(a, b));
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_mul_f32(xnn_simd_f32_t a,
-                                             xnn_simd_f32_t b) {
-  return Q6_Vsf_vmpy_VsfVsf(a, b);
-}
-
-static XNN_INLINE xnn_simd_f32_t xnn_mul_qf32(xnn_simd_f32_t a,
                                               xnn_simd_f32_t b) {
   return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(a, b));
 }
@@ -65,35 +55,18 @@ static XNN_INLINE xnn_simd_f32_t xnn_div_f32(xnn_simd_f32_t a,
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_fmadd_f32(xnn_simd_f32_t a,
-                                               xnn_simd_f32_t b,
-                                               xnn_simd_f32_t c) {
-  return Q6_Vsf_vadd_VsfVsf(c, Q6_Vsf_vmpy_VsfVsf(a, b));
-}
-
-static XNN_INLINE xnn_simd_f32_t xnn_fmadd_qf32(xnn_simd_f32_t a,
                                                 xnn_simd_f32_t b,
                                                 xnn_simd_f32_t c) {
   return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(a, b), c));
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_fnmadd_f32(xnn_simd_f32_t a,
-                                                xnn_simd_f32_t b,
-                                                xnn_simd_f32_t c) {
-  return Q6_Vsf_vsub_VsfVsf(c, Q6_Vsf_vmpy_VsfVsf(a, b));
-}
-
-static XNN_INLINE xnn_simd_f32_t xnn_fnmadd_qf32(xnn_simd_f32_t a,
                                                  xnn_simd_f32_t b,
                                                  xnn_simd_f32_t c) {
-  return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vsub_VsfVsf(c, xnn_mul_qf32(a, b)));
+  return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vsub_VsfVsf(c, xnn_mul_f32(a, b)));
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_sub_f32(xnn_simd_f32_t a,
-                                             xnn_simd_f32_t b) {
-  return Q6_Vsf_vsub_VsfVsf(a, b);
-}
-
-static XNN_INLINE xnn_simd_f32_t xnn_sub_qf32(xnn_simd_f32_t a,
                                               xnn_simd_f32_t b) {
   return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vsub_VsfVsf(a, b));
 }
@@ -115,6 +88,10 @@ static XNN_INLINE xnn_simd_f32_t xnn_abs_f32(xnn_simd_f32_t a) {
 static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
   XNN_SIMD_CONST_F32(v0, 0);
   return Q6_Vsf_vsub_VsfVsf(v0, a);
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
+  return Q6_Vsf_vround_Vsf(a);
 }
 
 // Logical operations.
@@ -166,7 +143,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_loadu_f32(const float* ptr) {
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_load_f32(const float* ptr) {
-  return *((HVX_UVector*) ptr);
+  return *((HVX_Vector*) ptr);
 }
 
 static XNN_INLINE void xnn_storeu_f32(float* ptr, xnn_simd_f32_t v) {

@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/x32-packw/sse2.c.in
 //   Generator: tools/xngen
@@ -14,8 +15,8 @@
 
 #include <emmintrin.h>
 
-#include "xnnpack/packw.h"
-#include "xnnpack/prefetch.h"
+#include "src/xnnpack/packw.h"
+#include "src/xnnpack/prefetch.h"
 
 void xnn_x32_packw_gemm_goi_ukernel_x16__sse2_u4_prfm(
   size_t g,

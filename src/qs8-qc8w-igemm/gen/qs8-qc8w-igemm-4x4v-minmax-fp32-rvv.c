@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-igemm/rvv.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <riscv_vector.h>
 
-#include "xnnpack/math.h"
-#include "xnnpack/igemm.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/igemm.h"
 
 void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4v__rvv(
     size_t mr,

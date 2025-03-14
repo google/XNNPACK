@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vclamp/sse.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <xmmintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_f32_vclamp_ukernel__sse_u8(

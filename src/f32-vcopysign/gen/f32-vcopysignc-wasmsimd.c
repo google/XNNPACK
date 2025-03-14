@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vcopysign/copysignc.c.in
 //   Generator: tools/xngen
@@ -11,11 +12,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/simd/f32-wasmsimd.h"
+#include "src/xnnpack/simd/f32-wasmsimd.h"
 
-#include "xnnpack/common.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_f32_vcopysignc_ukernel__wasmsimd_u4(

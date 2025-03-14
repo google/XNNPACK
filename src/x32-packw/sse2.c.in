@@ -15,9 +15,9 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <emmintrin.h>
 
-#include "xnnpack/packw.h"
+#include "src/xnnpack/packw.h"
 $if PREFETCH:
-  #include "xnnpack/prefetch.h"
+  #include "src/xnnpack/prefetch.h"
 
 $ISA = "avx" if AVX else "sse2"
 void xnn_x32_packw_gemm_goi_ukernel_x${NR}__${ISA}_u${KBLOCK}${"_prfm" if PREFETCH else ""}(

@@ -8,7 +8,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
+#include "src/xnnpack/common.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,7 +22,7 @@ extern "C" {
     void* output,                              \
     size_t output_stride,                      \
     const uint32_t fill_pattern);
-#include "xx-fill/xx-fill.h"
+#include "src/xx-fill/xx-fill.h"
 #undef XNN_FILL_UKERNEL
 
 #ifdef __cplusplus

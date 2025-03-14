@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-vapproxgelu/rational-6-4.c.in
 //   Generator: tools/xngen
@@ -10,12 +11,12 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "xnnpack/simd/f16-neonfp16arith.h"
+#include "src/xnnpack/simd/f16-neonfp16arith.h"
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_f16_vapproxgelu_ukernel__neonfp16arith_rational_6_4_div_u8(

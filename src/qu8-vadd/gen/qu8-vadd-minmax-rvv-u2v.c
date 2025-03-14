@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-vadd/rvv.c.in
 //   Generator: tools/xngen
@@ -9,7 +10,7 @@
 
 #include <assert.h>
 #include <riscv_vector.h>
-#include "xnnpack/vbinary.h"
+#include "src/xnnpack/vbinary.h"
 
 
 void xnn_qu8_vadd_minmax_ukernel__rvv_u2v(

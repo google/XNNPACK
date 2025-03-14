@@ -3,28 +3,22 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/vunary.h"
 
 #include <algorithm>
-#include <cmath>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <limits>
 #include <random>
-#include <vector>
 
-#include "utils.h"
-#include "xnnpack.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/common.h"
-#include "xnnpack/hardware-config.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/vcvt.h"
-#include "xnnpack/vunary.h"
+#include "bench/utils.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vcvt.h"
 #include <benchmark/benchmark.h>
 
 template <typename T>
@@ -182,36 +176,37 @@ void vunary(benchmark::State& state, uint64_t arch_flags,
       ->Apply(                                                                \
           benchmark::utils::UnaryElementwiseParameters<datatype, datatype>)   \
       ->UseRealTime();
-#include "f16-vabs/f16-vabs.h"
-#include "f16-vapproxgelu/f16-vapproxgelu.h"
-#include "f16-vgelu/f16-vgelu.h"
-#include "f16-vhswish/f16-vhswish.h"
-#include "f16-vneg/f16-vneg.h"
-#include "f16-vrnd/f16-vrndd.h"
-#include "f16-vrnd/f16-vrndne.h"
-#include "f16-vrnd/f16-vrndu.h"
-#include "f16-vrnd/f16-vrndz.h"
-#include "f16-vrsqrt/f16-vrsqrt.h"
-#include "f16-vsigmoid/f16-vsigmoid.h"
-#include "f16-vsqr/f16-vsqr.h"
-#include "f16-vsqrt/f16-vsqrt.h"
-#include "f16-vtanh/f16-vtanh.h"
-#include "f32-vabs/f32-vabs.h"
-#include "f32-vapproxgelu/f32-vapproxgelu.h"
-#include "f32-vgelu/f32-vgelu.h"
-#include "f32-vhswish/f32-vhswish.h"
-#include "f32-vlog/f32-vlog.h"
-#include "f32-vneg/f32-vneg.h"
-#include "f32-vrelu/f32-vrelu.h"
-#include "f32-vrnd/f32-vrndd.h"
-#include "f32-vrnd/f32-vrndne.h"
-#include "f32-vrnd/f32-vrndu.h"
-#include "f32-vrnd/f32-vrndz.h"
-#include "f32-vrsqrt/f32-vrsqrt.h"
-#include "f32-vsigmoid/f32-vsigmoid.h"
-#include "f32-vsqr/f32-vsqr.h"
-#include "f32-vsqrt/f32-vsqrt.h"
-#include "f32-vtanh/f32-vtanh.h"
+#include "src/f16-vabs/f16-vabs.h"
+#include "src/f16-vapproxgelu/f16-vapproxgelu.h"
+#include "src/f16-vgelu/f16-vgelu.h"
+#include "src/f16-vhswish/f16-vhswish.h"
+#include "src/f16-vneg/f16-vneg.h"
+#include "src/f16-vrnd/f16-vrndd.h"
+#include "src/f16-vrnd/f16-vrndne.h"
+#include "src/f16-vrnd/f16-vrndu.h"
+#include "src/f16-vrnd/f16-vrndz.h"
+#include "src/f16-vrsqrt/f16-vrsqrt.h"
+#include "src/f16-vsigmoid/f16-vsigmoid.h"
+#include "src/f16-vsqr/f16-vsqr.h"
+#include "src/f16-vsqrt/f16-vsqrt.h"
+#include "src/f16-vtanh/f16-vtanh.h"
+#include "src/f32-vabs/f32-vabs.h"
+#include "src/f32-vapproxgelu/f32-vapproxgelu.h"
+#include "src/f32-vgelu/f32-vgelu.h"
+#include "src/f32-vhswish/f32-vhswish.h"
+#include "src/f32-vlog/f32-vlog.h"
+#include "src/f32-vneg/f32-vneg.h"
+#include "src/f32-vrelu/f32-vrelu.h"
+#include "src/f32-vrnd/f32-vrndd.h"
+#include "src/f32-vrnd/f32-vrndne.h"
+#include "src/f32-vrnd/f32-vrndu.h"
+#include "src/f32-vrnd/f32-vrndz.h"
+#include "src/f32-vrsqrt/f32-vrsqrt.h"
+#include "src/f32-vsigmoid/f32-vsigmoid.h"
+#include "src/f32-vsin/f32-vsin.h"
+#include "src/f32-vsqr/f32-vsqr.h"
+#include "src/f32-vsqrt/f32-vsqrt.h"
+#include "src/f32-vtanh/f32-vtanh.h"
 #undef XNN_UKERNEL_WITH_PARAMS
 
 template <typename TIn, typename TOut, typename UKernelParams>
@@ -229,8 +224,8 @@ void velu(benchmark::State& state, uint64_t arch_flags,
       ->Apply(                                                                \
           benchmark::utils::UnaryElementwiseParameters<datatype, datatype>)   \
       ->UseRealTime();
-#include "f16-velu/f16-velu.h"
-#include "f32-velu/f32-velu.h"
+#include "src/f16-velu/f16-velu.h"
+#include "src/f32-velu/f32-velu.h"
 #undef XNN_UKERNEL_WITH_PARAMS
 
 template <typename TIn, typename TOut, typename UKernelParams>
@@ -253,10 +248,10 @@ void vclamp(benchmark::State& state, uint64_t arch_flags,
       ->Apply(                                                                \
           benchmark::utils::UnaryElementwiseParameters<datatype, datatype>)   \
       ->UseRealTime();
-#include "f16-vclamp/f16-vclamp.h"
-#include "f32-vclamp/f32-vclamp.h"
-#include "s8-vclamp/s8-vclamp.h"
-#include "u8-vclamp/u8-vclamp.h"
+#include "src/f16-vclamp/f16-vclamp.h"
+#include "src/f32-vclamp/f32-vclamp.h"
+#include "src/s8-vclamp/s8-vclamp.h"
+#include "src/u8-vclamp/u8-vclamp.h"
 #undef XNN_UKERNEL_WITH_PARAMS
 
 template <typename TIn, typename TOut, typename UKernelParams>
@@ -274,10 +269,10 @@ void vlrelu(benchmark::State& state, uint64_t arch_flags,
       ->Apply(                                                                \
           benchmark::utils::UnaryElementwiseParameters<datatype, datatype>)   \
       ->UseRealTime();
-#include "f16-vlrelu/f16-vlrelu.h"
-#include "f32-vlrelu/f32-vlrelu.h"
-#include "qs8-vlrelu/qs8-vlrelu.h"
-#include "qu8-vlrelu/qu8-vlrelu.h"
+#include "src/f16-vlrelu/f16-vlrelu.h"
+#include "src/f32-vlrelu/f32-vlrelu.h"
+#include "src/qs8-vlrelu/qs8-vlrelu.h"
+#include "src/qu8-vlrelu/qu8-vlrelu.h"
 #undef XNN_UKERNEL_WITH_PARAMS
 
 #define XNN_CVT_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile,        \
@@ -287,16 +282,16 @@ void vlrelu(benchmark::State& state, uint64_t arch_flags,
       ->Apply(benchmark::utils::UnaryElementwiseParameters<datatype_in,     \
                                                            datatype_out>)   \
       ->UseRealTime();
-#include "f16-f32-vcvt/f16-f32-vcvt.h"
-#include "f16-qs8-vcvt/f16-qs8-vcvt.h"
-#include "f32-f16-vcvt/f32-f16-vcvt.h"
-#include "f32-qs8-vcvt/f32-qs8-vcvt.h"
-#include "f32-qu8-vcvt/f32-qu8-vcvt.h"
-#include "qs8-f16-vcvt/qs8-f16-vcvt.h"
-#include "qs8-f32-vcvt/qs8-f32-vcvt.h"
-#include "qs8-vcvt/qs8-vcvt.h"
-#include "qu8-f32-vcvt/qu8-f32-vcvt.h"
-#include "qu8-vcvt/qu8-vcvt.h"
+#include "src/f16-f32-vcvt/f16-f32-vcvt.h"
+#include "src/f16-qs8-vcvt/f16-qs8-vcvt.h"
+#include "src/f32-f16-vcvt/f32-f16-vcvt.h"
+#include "src/f32-qs8-vcvt/f32-qs8-vcvt.h"
+#include "src/f32-qu8-vcvt/f32-qu8-vcvt.h"
+#include "src/qs8-f16-vcvt/qs8-f16-vcvt.h"
+#include "src/qs8-f32-vcvt/qs8-f32-vcvt.h"
+#include "src/qs8-vcvt/qs8-vcvt.h"
+#include "src/qu8-f32-vcvt/qu8-f32-vcvt.h"
+#include "src/qu8-vcvt/qu8-vcvt.h"
 #undef XNN_CVT_UKERNEL_WITH_PARAMS
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

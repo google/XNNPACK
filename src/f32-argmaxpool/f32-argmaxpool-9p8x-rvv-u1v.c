@@ -6,7 +6,7 @@
 #include <assert.h>
 #include <riscv_vector.h>
 
-#include "xnnpack/argmaxpool.h"
+#include "src/xnnpack/argmaxpool.h"
 
 void xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v(
     size_t output_pixels,

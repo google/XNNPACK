@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-maxpool/maxpool.c.in
 //   Generator: tools/xngen
@@ -19,10 +20,10 @@
 #define xnn_load_tail_safe_impl(x, c) xnn_load_tail_safe_u8(x, c)
 #define xnn_pre_store_impl(x) x
 
-#include "xnnpack/simd/u8-wasmsimd.h"
+#include "src/xnnpack/simd/u8-wasmsimd.h"
 
-#include "xnnpack/common.h"
-#include "xnnpack/microparams.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
 
 void xnn_u8_maxpool_minmax_ukernel_9p__wasmsimd_u16(
     size_t output_pixels,

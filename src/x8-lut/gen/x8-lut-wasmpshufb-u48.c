@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/x8-lut/wasmpshufb.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/lut.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/lut.h"
 
 
 void xnn_x8_lut_ukernel__wasmpshufb_u48(

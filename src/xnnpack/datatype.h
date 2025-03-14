@@ -9,9 +9,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
 
 #ifdef __cplusplus
 #include <type_traits>
@@ -38,6 +38,8 @@ size_t xnn_datatype_size_bytes(enum xnn_datatype t);
 // Returns true if the datatype can be addressed by a linear combination of
 // indices and strides.
 bool xnn_datatype_is_byte_addressable(enum xnn_datatype t);
+
+const char* xnn_datatype_to_string(enum xnn_datatype type);
 
 #ifdef __cplusplus
 }  // extern "C"

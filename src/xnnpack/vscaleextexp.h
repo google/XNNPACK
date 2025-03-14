@@ -8,7 +8,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
+#include "src/xnnpack/common.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,7 +21,7 @@ extern "C" {
       float* output,                                       \
       float scale_mantissa,                                \
       float scale_exponent);
-#include "f32-vscaleextexp/f32-vscaleextexp.h"
+#include "src/f32-vscaleextexp/f32-vscaleextexp.h"
 #undef XNN_UKERNEL
 
 

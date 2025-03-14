@@ -13,9 +13,9 @@ $if DATATYPE in ["QC8", "QC4"]:
 $else:
   #include <xmmintrin.h>
 
-#include "xnnpack/gemm.h"
+#include "src/xnnpack/gemm.h"
 $if DATATYPE == "QC8":
-  #include "xnnpack/unaligned.h"
+  #include "src/xnnpack/unaligned.h"
 
 
 $RANGE_MRX2 = list(range(0, MR, 2))

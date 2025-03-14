@@ -3,15 +3,15 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack/microkernel-utils.h"
+#include "src/xnnpack/microkernel-utils.h"
 
 #include <assert.h>
 #include <stddef.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/hardware-config.h"
-#include "xnnpack/log.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/hardware-config.h"
+#include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
 
 static bool fits_in_cache(size_t mr, size_t nc, size_t m_stride,
                           size_t n_stride, size_t cm_stride, size_t cn_stride,
@@ -104,7 +104,7 @@ size_t xnn_gemm_best_tile_size(size_t num_groups, size_t m, size_t n,
 
   // Restrict the resulting `nc` to `n`.
   nc = min(nc, n);
-  xnn_log_info(
+  xnn_log_debug(
       "Tile size for GEMM with num_groups=%zi, m=%zu, n=%zu and mr=%zu, nr=%zu "
       "set to [%zu, %zu] (%zu tiles)",
       num_groups, m, n, mr, nr, mr, nc, best_num_tiles);

@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/bf16-gemm/c2-neonbf16-bfdot-lane-ld128.c.in
 //   Generator: tools/xngen
@@ -12,7 +13,7 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/gemm.h"
+#include "src/xnnpack/gemm.h"
 
 
 void xnn_bf16_gemm_minmax_ukernel_6x8c2__neonbf16_bfdot_lane_ld128(

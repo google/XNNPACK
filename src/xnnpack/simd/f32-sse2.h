@@ -12,7 +12,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
+#include "src/xnnpack/common.h"
 
 // SIMD vector type for f32 using SSE2.
 typedef __m128 xnn_simd_f32_t;
@@ -31,7 +31,7 @@ typedef __m128 xnn_simd_f32_t;
 
 // Include the header for generic functions _after_ declaring the arch-specific
 // types and sizes.
-#include "xnnpack/simd/f32-generic-functions.h"
+#include "src/xnnpack/simd/f32-generic-functions.h"
 
 // Arithmetic operations.
 
@@ -127,6 +127,19 @@ static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
                                                xnn_simd_f32_t b) {
   return _mm_castsi128_ps(
       _mm_cmpeq_epi32(_mm_castps_si128(a), _mm_castps_si128(b)));
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
+  // Create a filter for all non-finite values in `a` (all exponent bits set).
+  XNN_SIMD_CONST_F32_FROM_INT32(vexp_bits, 0x7f800000);
+  const xnn_simd_f32_t vfilter =
+      xnn_cmpeq_f32(xnn_and_f32(a, vexp_bits), vexp_bits);
+
+  // Round by converting to `int` and back.
+  const xnn_simd_f32_t vresult = _mm_cvtepi32_ps(_mm_cvtps_epi32(a));
+
+  // Apply the non-finite value filter to repace any non-finite input with `a`.
+  return _mm_or_ps(_mm_andnot_ps(vfilter, vresult), _mm_and_ps(vfilter, a));
 }
 
 // Special functions.

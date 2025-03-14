@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack/assembly.h"
+#include "src/xnnpack/assembly.h"
 
 # void xnn_f32_ppmm_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128${"_prfm" if PREFETCH else ""}(
 #     size_t mr,                x0

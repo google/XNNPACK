@@ -11,7 +11,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
+#include "src/xnnpack/common.h"
 
 // SIMD vector type for s8 using SCALAR.
 typedef int8_t xnn_simd_s8_t;
@@ -34,6 +34,16 @@ static XNN_INLINE xnn_simd_s8_t xnn_max_s8(xnn_simd_s8_t a, xnn_simd_s8_t b) {
   return a < b ? b : a;
 }
 
+static XNN_INLINE xnn_simd_s8_t xnn_horizontal_min_s8(xnn_simd_s8_t a) {
+  return a;
+}
+
+static XNN_INLINE xnn_simd_s8_t xnn_horizontal_max_s8(xnn_simd_s8_t a) {
+  return a;
+}
+
+// Load/store operations.
+
 static XNN_INLINE xnn_simd_s8_t xnn_loadu_s8(const int8_t *ptr) { return *ptr; }
 
 static XNN_INLINE xnn_simd_s8_t xnn_load_s8(const int8_t *ptr) { return *ptr; }
@@ -51,6 +61,11 @@ static XNN_INLINE xnn_simd_s8_t xnn_set1_or_load_s8(const int8_t *v) {
 // Tail load/store operations.
 static XNN_INLINE xnn_simd_s8_t xnn_load_tail_s8(const int8_t *input,
                                                  size_t num_elements) {
+  return *input;
+}
+
+static XNN_INLINE xnn_simd_s8_t xnn_load_tail_safe_s8(const int8_t *input,
+                                                      size_t num_elements) {
   return *input;
 }
 

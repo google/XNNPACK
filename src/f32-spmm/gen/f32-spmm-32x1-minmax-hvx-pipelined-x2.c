@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-spmm/hvx-pipelined.c.in
 //   Generator: tools/xngen
@@ -13,10 +14,10 @@
 #include <hexagon_protos.h>
 #include <hexagon_types.h>
 
-#include "xnnpack/simd/f32-hvx.h"
+#include "src/xnnpack/simd/f32-hvx.h"
 
-#include "xnnpack/prefetch.h"
-#include "xnnpack/spmm.h"
+#include "src/xnnpack/prefetch.h"
+#include "src/xnnpack/spmm.h"
 
 void xnn_f32_spmm_minmax_ukernel_32x1__hvx_pipelined_x2(
     size_t mc,

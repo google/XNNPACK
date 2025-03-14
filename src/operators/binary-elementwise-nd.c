@@ -10,21 +10,21 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "xnnpack.h"
-#include "xnnpack/allocator.h"
-#include "xnnpack/compute.h"
-#include "xnnpack/config-types.h"
-#include "xnnpack/config.h"
-#include "xnnpack/datatype.h"
-#include "xnnpack/log.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/operator-type.h"
-#include "xnnpack/operator-utils.h"
-#include "xnnpack/operator.h"
-#include "xnnpack/params.h"
-#include "xnnpack/reference-config.h"
-#include "pthreadpool.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/allocator.h"
+#include "src/xnnpack/compute.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/config.h"
+#include "src/xnnpack/datatype.h"
+#include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/operator-type.h"
+#include "src/xnnpack/operator-utils.h"
+#include "src/xnnpack/operator.h"
+#include "src/xnnpack/params.h"
+#include "src/xnnpack/reference-config.h"
+#include <pthreadpool.h>
 
 static const struct xnn_binary_elementwise_config* init_config(
     enum xnn_binary_operator type, enum xnn_datatype datatype, int* sign_b) {
@@ -136,7 +136,10 @@ static enum xnn_status init_binary_elementwise_nd(
   int sign_b = 1;
   const struct xnn_binary_elementwise_config* config =
       init_config(type, datatype, &sign_b);
-  if (config == NULL) {
+  if (config == NULL ||
+      config->op_ukernel == NULL ||
+      config->opc_ukernel == NULL ||
+      config->ropc_ukernel == NULL) {
     xnn_log_debug(
       "unsupported operator %s for datatype %s, falling back to reference kernel",
       xnn_binary_operator_to_string(type), xnn_datatype_to_string(datatype));

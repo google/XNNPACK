@@ -9,8 +9,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/hardware-config.h"
-#include "xnnpack/microfnptr.h"
+#include "src/xnnpack/hardware-config.h"
+#include "src/xnnpack/microfnptr.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -96,13 +96,9 @@ struct xnn_pack_lh_config {
   xnn_pack_lh_offset_fn offset_fn;
 };
 
-union xnn_dwconv_ukernel {
-  xnn_dwconv_unipass_ukernel_fn unipass;
-};
-
 struct xnn_dwconv_config {
-  union xnn_dwconv_ukernel minmax;
-  union xnn_dwconv_ukernel linear;
+  xnn_dwconv_ukernel_fn minmax;
+  xnn_dwconv_ukernel_fn linear;
   union {
     xnn_init_qs8_conv_minmax_params_fn qs8;
     xnn_init_qs8_qc8w_conv_minmax_params_fn qs8_qc8w;
@@ -111,13 +107,8 @@ struct xnn_dwconv_config {
     xnn_init_f32_minmax_params_fn f32;
   } init;
   // Number of channels in a tile.
-  uint8_t channel_tile;
-  // Number of channels in a subtile. This must be less-than-equal channel_tile. After processing channel_tile, the
-  // remainder is processed in tiles of channel_subtile.
-  uint8_t channel_subtile;
-  // How much to round channels by to get more optimal tiling.
-  uint8_t channel_round;
-  // Number of elements in the tile. For multipass, this is the tile size for first pass.
+  uint32_t channel_tile;
+  // Number of elements in the tile.
   uint8_t primary_tile;
 };
 

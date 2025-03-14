@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-vclamp/rvvfp16arith.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <riscv_vector.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_f16_vclamp_ukernel__rvvfp16arith_u2v(

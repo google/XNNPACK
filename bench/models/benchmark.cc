@@ -14,12 +14,12 @@
 #include <memory>
 #include <vector>
 
-#include "models.h"
-#include "utils.h"
-#include "xnnpack.h"
-#include "xnnpack/allocator.h"
-#include "xnnpack/subgraph.h"
-#include "pthreadpool.h"
+#include "bench/models/models.h"
+#include "bench/utils.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/allocator.h"
+#include "src/xnnpack/subgraph.h"
+#include <pthreadpool.h>
 
 struct ModelRuntime {
   std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> model;

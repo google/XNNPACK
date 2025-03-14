@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-vaddc/neon.c.in
 //   Generator: tools/xngen
@@ -11,7 +12,7 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/vbinary.h"
+#include "src/xnnpack/vbinary.h"
 
 
 void xnn_qu8_vaddc_minmax_ukernel__neon_ld64_u32(

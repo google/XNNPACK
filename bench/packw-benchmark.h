@@ -8,12 +8,12 @@
 #include <random>
 #include <vector>
 
-#include "bgemm.h"
-#include "utils.h"
-#include "xnnpack/common.h"
-#include "xnnpack/pack.h"
-#include "xnnpack/packw.h"
-#include "xnnpack/buffer.h"
+#include "bench/bgemm.h"
+#include "bench/utils.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/pack.h"
+#include "src/xnnpack/packw.h"
+#include "src/xnnpack/buffer.h"
 #include <benchmark/benchmark.h>
 
 static void x8_packw(benchmark::State& state,

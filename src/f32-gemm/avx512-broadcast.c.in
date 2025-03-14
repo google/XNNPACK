@@ -12,8 +12,8 @@ $assert 16 <= NR <= 64
 $if DATATYPE in ["QC8", "QC4"]:
   #include <smmintrin.h>
 
-#include "xnnpack/gemm.h"
-#include "xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
 
 
 $RANGE_MR = list(reversed(range(MR))) if INC else list(range(MR))

@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/x32-packw/rvv.c.in
 //   Generator: tools/xngen
@@ -14,7 +15,7 @@
 
 #include <riscv_vector.h>
 
-#include "xnnpack/packw.h"
+#include "src/xnnpack/packw.h"
 
 void xnn_x32_packw_gemm_goi_ukernel_x1v__rvv_u8(
   size_t g,

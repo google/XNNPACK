@@ -9,8 +9,8 @@ $SIMD_TILE = BATCH_TILE // 32
 
 #include <assert.h>
 
-#include "xnnpack/simd/f32-hvx.h"
-#include "xnnpack/raddstoreexpminusmax.h"
+#include "src/xnnpack/simd/f32-hvx.h"
+#include "src/xnnpack/raddstoreexpminusmax.h"
 
 $PARAMS_STRUCT = "hvx_rr2_p5"
 $VMULADD_F32 = "xnn_fmadd_f32"

@@ -9,7 +9,7 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
+#include "include/xnnpack.h"
 
 TEST(BuildIdentifierTest, SizeIsCorrect) {
   // The current implmentation uses a SHA256 sum, so we expect the size of the

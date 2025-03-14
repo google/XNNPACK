@@ -8,10 +8,10 @@
 #include <string>
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/packq.h"
-#include "packq-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/packq.h"
+#include "test/packq-microkernel-tester.h"
 
 namespace {
 
@@ -33,7 +33,7 @@ std::string GetTestName(const testing::TestParamInfo<XnnTest::ParamType>& info) 
   { #ukernel, ukernel, arch_flags, unroll },
 
 const XnnTestParam xnn_test_params[] = {
-#include "x8-packq/x8-packq.h"
+#include "src/x8-packq/x8-packq.h"
 };
 
 #undef XNN_UKERNEL

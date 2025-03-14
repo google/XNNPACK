@@ -15,8 +15,6 @@ load(
     "xnnpack_optional_gemmlowp_deps",
     "xnnpack_optional_ruy_copts",
     "xnnpack_optional_ruy_deps",
-    "xnnpack_optional_tflite_copts",
-    "xnnpack_optional_tflite_deps",
     "xnnpack_slow_benchmark_tags",
     "xnnpack_visibility",
 )
@@ -40,17 +38,6 @@ MICROKERNEL_BENCHMARK_DEPS = [
     "//:packing",
     "//:params",
     "//:xnnpack_h",
-]
-
-OPERATOR_BENCHMARK_DEPS = [
-    ":bench_utils",
-    "//:XNNPACK",
-    "//:aligned_allocator",
-    "//:buffer",
-    "//:cache",
-    "//:common",
-    "//:datatype",
-    "//:math",
 ]
 
 ############################### Helper libraries ###############################
@@ -303,6 +290,7 @@ xnnpack_benchmark(
     "f32_vscaleextexp",
     "f16_vcmul",
     "f32_vcmul",
+    "s8_rminmax",
     "x8_lut",
 ]]
 
@@ -486,18 +474,6 @@ xnnpack_benchmark(
     deps = MICROKERNEL_BENCHMARK_DEPS + xnnpack_optional_dnnl_deps(),
 )
 
-xnnpack_benchmark(
-    name = "f32_im2col_gemm_bench",
-    srcs = [
-        "f32-im2col-gemm.cc",
-    ],
-    tags = xnnpack_slow_benchmark_tags(),
-    deps = MICROKERNEL_BENCHMARK_DEPS + [
-        ":conv",
-        "//:im2col",
-    ],
-)
-
 xnnpack_cxx_library(
     name = "packq_benchmark",
     srcs = [
@@ -586,104 +562,4 @@ xnnpack_benchmark(
         ":packw_benchmark",
         "//:allocator",
     ],
-)
-
-########################### Benchmarks for operators ###########################
-
-xnnpack_benchmark(
-    name = "unary_bench",
-    srcs = ["unary.cc"],
-    copts = xnnpack_optional_tflite_copts(),
-    tags = ["nowin32"],
-    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
-)
-
-xnnpack_benchmark(
-    name = "binary_bench",
-    srcs = ["binary.cc"],
-    copts = xnnpack_optional_tflite_copts(),
-    tags = ["nowin32"],
-    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
-)
-
-xnnpack_benchmark(
-    name = "average_pooling_bench",
-    srcs = ["average-pooling.cc"],
-    copts = xnnpack_optional_tflite_copts(),
-    tags = ["nowin32"],
-    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
-)
-
-xnnpack_benchmark(
-    name = "batch_matrix_multiply_bench",
-    srcs = ["batch-matrix-multiply.cc"],
-    copts = xnnpack_optional_tflite_copts(),
-    tags = xnnpack_slow_benchmark_tags() + ["nowin32"],
-    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps() + [
-        "//test:next_prime",
-        "@cpuinfo",
-        "@pthreadpool",
-    ],
-)
-
-xnnpack_benchmark(
-    name = "convolution_bench",
-    srcs = ["convolution.cc"],
-    copts = xnnpack_optional_tflite_copts(),
-    tags = xnnpack_slow_benchmark_tags() + ["nowin32"],
-    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps() + ["@pthreadpool"],
-)
-
-xnnpack_benchmark(
-    name = "deconvolution_bench",
-    srcs = ["deconvolution.cc"],
-    copts = xnnpack_optional_tflite_copts(),
-    tags = xnnpack_slow_benchmark_tags() + ["nowin32"],
-    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps() + ["@pthreadpool"],
-)
-
-xnnpack_benchmark(
-    name = "fully_connected_bench",
-    srcs = ["fully-connected.cc"],
-    copts = xnnpack_optional_tflite_copts(),
-    tags = ["nowin32"],
-    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
-)
-
-xnnpack_benchmark(
-    name = "max_pooling_bench",
-    srcs = ["max-pooling.cc"],
-    deps = OPERATOR_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "prelu_bench",
-    srcs = ["prelu.cc"],
-    copts = xnnpack_optional_tflite_copts(),
-    tags = ["nowin32"],
-    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
-)
-
-xnnpack_benchmark(
-    name = "resize_bilinear_nhwc_bench",
-    srcs = ["resize-bilinear-nhwc.cc"],
-    deps = OPERATOR_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "scaled_dot_product_attention_bench",
-    srcs = ["scaled-dot-product-attention.cc"],
-    copts = xnnpack_optional_tflite_copts(),
-    tags = xnnpack_slow_benchmark_tags() + ["nowin32"],
-    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
-)
-
-xnnpack_benchmark(
-    name = "softmax_bench",
-    srcs = [
-        "softmax.cc",
-    ],
-    copts = xnnpack_optional_tflite_copts(),
-    tags = ["nowin32"],
-    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
 )

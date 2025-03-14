@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-gemm/avx-shuffle4.c.in
 //   Generator: tools/xngen
@@ -12,7 +13,7 @@
 #include <immintrin.h>
 #include <smmintrin.h>
 
-#include "xnnpack/gemm.h"
+#include "src/xnnpack/gemm.h"
 
 
 void xnn_f32_qc8w_gemm_minmax_ukernel_1x16s4__avx2_broadcast(

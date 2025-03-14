@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-conv-hwc/3x3s2p1c3-neon-x2.c.in
 //   Generator: tools/xngen
@@ -12,8 +13,8 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/conv.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/conv.h"
+#include "src/xnnpack/math.h"
 
 
 void xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x2(

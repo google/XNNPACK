@@ -18,18 +18,30 @@ import xnncommon
 
 
 parser = argparse.ArgumentParser(
-  description='Vector binary operation microkernel test generator')
-parser.add_argument("-t", "--tester", metavar="TESTER", required=True,
-                    choices=[
-                    "VCMulMicrokernelTester",
-                    "VBinaryMicrokernelTester"],
-                    help="Tester class to be used in the generated test")
-parser.add_argument("-b", "--broadcast_b", action="store_true",
-                    help='Broadcast the RHS of the operation')
-parser.add_argument("-k", "--ukernel", required=True,
-                    help="Microkernel type")
-parser.add_argument("-o", "--output", metavar="FILE", required=True,
-                    help='Output (C++ source) file')
+    description="Vector binary operation microkernel test generator"
+)
+parser.add_argument(
+    "-t",
+    "--tester",
+    metavar="TESTER",
+    required=True,
+    choices=["VCMulMicrokernelTester", "VBinaryMicrokernelTester"],
+    help="Tester class to be used in the generated test",
+)
+parser.add_argument(
+    "-b",
+    "--broadcast_b",
+    action="store_true",
+    help="Broadcast the RHS of the operation",
+)
+parser.add_argument("-k", "--ukernel", required=True, help="Microkernel type")
+parser.add_argument(
+    "-o",
+    "--output",
+    metavar="FILE",
+    required=True,
+    help="Output (C++ source) file",
+)
 parser.set_defaults(defines=list())
 
 OP_TYPES = {
@@ -90,15 +102,17 @@ $if "minmax" in ACTIVATION_TYPE:
   XNN_TEST_BINARY_QMAX(ukernel, arch_flags, batch_tile, ${BROADCAST_B}, datatype, ${", ".join(TEST_ARGS)});
 """
 
+
 def main(args):
   options = parser.parse_args(args)
 
   tester = options.tester
   tester_header = {
-    "VCMulMicrokernelTester": "vcmul-microkernel-tester.h",
-    "VBinaryMicrokernelTester": "vbinary-microkernel-tester.h",
+      "VCMulMicrokernelTester": "vcmul-microkernel-tester.h",
+      "VBinaryMicrokernelTester": "vbinary-microkernel-tester.h",
   }[tester]
   tests = """\
+// clang-format off
 // Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -109,9 +123,9 @@ def main(args):
 //   Generator: {generator}
 
 
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/vbinary.h"
-#include "{tester_header}"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/vbinary.h"
+#include "test/{tester_header}"
 
 """.format(
       microkernel=options.ukernel,
@@ -125,28 +139,30 @@ def main(args):
   activation = ukernel_parts[2] if len(ukernel_parts) >= 3 else ""
 
   broadcast_b = False
-  if op[-1] == 'c':
+  if op[-1] == "c":
     broadcast_b = True
   op_type = OP_TYPES[op]
 
   test_args = ["ukernel"]
-  if tester in ["VBinaryMicrokernelTester"] and not datatype in ['qs8', 'qu8']:
+  if tester in ["VBinaryMicrokernelTester"] and not datatype in ["qs8", "qu8"]:
     test_args.append("%s::OpType::%s" % (tester, op_type))
   test_args.append("init_params")
-  tests += xnncommon.make_multiline_macro(xngen.preprocess(
-      BINOP_TEST_TEMPLATE,
-      {
-          "TEST_ARGS": test_args,
-          "TESTER": tester,
-          "BROADCAST_B": str(broadcast_b).lower(),
-          "DATATYPE": datatype,
-          "OP_TYPE": op_type,
-          "ACTIVATION_TYPE": activation,
-      },
-  ))
+  tests += xnncommon.make_multiline_macro(
+      xngen.preprocess(
+          BINOP_TEST_TEMPLATE,
+          {
+              "TEST_ARGS": test_args,
+              "TESTER": tester,
+              "BROADCAST_B": str(broadcast_b).lower(),
+              "DATATYPE": datatype,
+              "OP_TYPE": op_type,
+              "ACTIVATION_TYPE": activation,
+          },
+      )
+  )
 
   folder = datatype + "-" + ("vbinary" if datatype.startswith("f") else op)
-  tests += f'#include "{xnncommon.xnnpack_src()}{folder}/{options.ukernel}.h"\n'
+  tests += f'#include "src/{folder}/{options.ukernel}.h"\n'
   tests += "#undef XNN_UKERNEL_WITH_PARAMS\n"
   tests = tests.replace("s32-vmulc/s32-vmulc.h", "s32-vmul/s32-vmulc.h")
 

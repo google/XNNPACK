@@ -11,22 +11,22 @@
 #include <random>
 #include <vector>
 
-#include "dwconv.h"
-#include "utils.h"
-#include "xnnpack.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/common.h"
-#include "xnnpack/dwconv.h"
-#include "xnnpack/hardware-config.h"
-#include "xnnpack/indirection.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microkernel-utils.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/pack.h"
+#include "bench/dwconv.h"
+#include "bench/utils.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/hardware-config.h"
+#include "src/xnnpack/indirection.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microkernel-utils.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/pack.h"
 #include <benchmark/benchmark.h>
 
 static void bench_impl(uint64_t arch_flags, benchmark::State& state,
-                       xnn_f32_dwconv_minmax_unipass_ukernel_fn dwconv,
+                       xnn_f32_dwconv_minmax_ukernel_fn dwconv,
                        xnn_init_f32_minmax_params_fn init_params,
                        uint32_t channel_tile, uint32_t primary_tile) {
   if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
@@ -84,9 +84,9 @@ static void bench_impl(uint64_t arch_flags, benchmark::State& state,
 
   xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> w(w_elements * num_buffers);
   xnn_pack_f32_dwconv_ghw_w(primary_tile, kernel_height, kernel_width, channels,
-                            channel_tile, channel_tile, /*channel_round=*/1,
-                            k.data(), b.data(), /*scale=*/nullptr, w.data(),
-                            /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0, nullptr);
+                            channel_tile, k.data(), b.data(), /*scale=*/nullptr,
+                            w.data(),
+                            /*per_tile_extra_bytes=*/0, nullptr);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(w.cbegin(), w.cbegin() + w_elements, w.begin() + n * w_elements);
   }
@@ -145,15 +145,15 @@ static void bench_impl(uint64_t arch_flags, benchmark::State& state,
     benchmark::Counter::kIsRate);
 }
 
-#define XNN_DWCONV_UNIPASS(arch_flags, ukernel, c_block, is_pipelined, cr, kr, \
+#define XNN_UKERNEL(arch_flags, ukernel, c_block, is_pipelined, cr, kr, \
                            datatype, weights_type, params_type, init_params)   \
   static void BM_##ukernel(benchmark::State& state, const char* net) {         \
     bench_impl(arch_flags, state, ukernel, init_params, cr, kr);               \
   }                                                                            \
   BENCHMARK_DWCONV(BM_##ukernel);
 
-// #include "f32-dwconv/f32-dwconv-unipass.h"
-#include "f32-dwconv/f32-dwconv-minmax-unipass.h"
+// #include "src/f32-dwconv/f32-dwconv.h"
+#include "src/f32-dwconv/f32-dwconv-minmax.h"
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();

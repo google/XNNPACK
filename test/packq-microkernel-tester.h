@@ -10,10 +10,10 @@
 #include <cstddef>
 #include <cstdlib>
 
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/pack.h"
-#include "xnnpack/buffer.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/pack.h"
+#include "src/xnnpack/buffer.h"
 
 namespace xnnpack {
 

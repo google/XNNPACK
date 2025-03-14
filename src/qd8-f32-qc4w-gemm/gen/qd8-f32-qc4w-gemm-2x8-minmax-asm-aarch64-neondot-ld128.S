@@ -3,29 +3,30 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack/assembly.h"
+#include "src/xnnpack/assembly.h"
 
 BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8c4__asm_aarch64_neondot_ld128_2
 
       # Free up GP registers.
-      stp x19, x20, [sp, -64]
-      stp x21, x22, [sp, -48]
-      stp x23, x24, [sp, -32]
-      stp x25, x26, [sp, -16]
+      sub sp, sp, 256
+      stp x19, x20, [sp, 192]
+      stp x21, x22, [sp, 160]
+      stp x23, x24, [sp, 128]
+      stp x25, x26, [sp, 96]
 
       # Preserve callee saved q8-q15 registers.
-      stp d8, d9, [sp, -128]
-      stp d10, d11, [sp, -112]
-      stp d12, d13, [sp, -96]
-      stp d14, d15, [sp, -80]
+      stp d8, d9, [sp, 64]
+      stp d10, d11, [sp, 48]
+      stp d12, d13, [sp, 32]
+      stp d14, d15, [sp, 16]
 
       # Load params.
-      ldr x13, [sp, 8]
+      ldr x13, [sp, 264]
 
       # Load min/max values.
       ld2r {v0.4s, v1.4s}, [x13]
       # Load 0xF0 for masking the weights
-      ldr x24, [sp, 16]
+      ldr x24, [sp, 272]
       movi v28.16b, #240
       # Round kc up to channels.
       add x2, x2, #3
@@ -180,15 +181,16 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8c4__asm_aarch64_neondot_l
 
 .Lreturn:
       # Restore the callee saved GP registers.
-      ldp x19, x20, [sp, -64]
-      ldp x21, x22, [sp, -48]
-      ldp x23, x24, [sp, -32]
-      ldp x25, x26, [sp, -16]
+      ldp x19, x20, [sp, 192]
+      ldp x21, x22, [sp, 160]
+      ldp x23, x24, [sp, 128]
+      ldp x25, x26, [sp, 96]
 
       # Restore callee saved q8-q15 registers.
-      ldp d8, d9, [sp, -128]
-      ldp d10, d11, [sp, -112]
-      ldp d12, d13, [sp, -96]
-      ldp d14, d15, [sp, -80]
+      ldp d8, d9, [sp, 64]
+      ldp d10, d11, [sp, 48]
+      ldp d12, d13, [sp, 32]
+      ldp d14, d15, [sp, 16]
+      add sp, sp, 256
       ret
 END_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8c4__asm_aarch64_neondot_ld128_2

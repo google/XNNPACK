@@ -15,7 +15,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
+#include "src/xnnpack/common.h"
 
 // Forward declarations of basic SIMD intrinsics.
 static XNN_INLINE xnn_simd_f16_t xnn_sub_f16(xnn_simd_f16_t a,

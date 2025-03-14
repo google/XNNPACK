@@ -175,6 +175,8 @@ SET(NON_PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr2-p5-u16.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr2-p5-u32-acc2.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr2-p5-u64-acc4.c
+  src/f32-rdminmax/gen/f32-rdmax-2p2x-avx512f-c32.c
+  src/f32-rdminmax/gen/f32-rdmin-2p2x-avx512f-c32.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx512f-c16.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx512f-c32.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx512f-c128.c
@@ -269,6 +271,8 @@ SET(NON_PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-vsigmoid/gen/f32-vsigmoid-avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-u32.c
   src/f32-vsigmoid/gen/f32-vsigmoid-avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-u48.c
   src/f32-vsigmoid/gen/f32-vsigmoid-avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-u64.c
+  src/f32-vsin/gen/f32-vsin-avx512f-rational-5-4-div.c
+  src/f32-vsin/gen/f32-vsin-avx512f-rational-5-4-nr.c
   src/f32-vsqrt/gen/f32-vsqrt-avx512f-rsqrt-u32.c
   src/f32-vsqrt/gen/f32-vsqrt-avx512f-rsqrt-u48.c
   src/f32-vtanh/gen/f32-vtanh-avx512f-rational-9-8-div.c

@@ -11,8 +11,8 @@ $VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
 
 #include <arm_neon.h>
 
-#include "xnnpack/prefetch.h"
-#include "xnnpack/spmm.h"
+#include "src/xnnpack/prefetch.h"
+#include "src/xnnpack/spmm.h"
 
 
 void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}_pipelined(

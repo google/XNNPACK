@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "xnnpack/common.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/unaligned.h"
 
 static XNN_INTRINSIC uint32_t broadcast2x_uint16(uint16_t x) {
   return (uint32_t) x | ((uint32_t) x) << 16;

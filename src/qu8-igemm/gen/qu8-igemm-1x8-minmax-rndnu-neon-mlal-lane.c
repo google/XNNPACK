@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-igemm/neon-mlal-lane.c.in
 //   Generator: tools/xngen
@@ -12,8 +13,8 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/igemm.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/igemm.h"
 
 
 void xnn_qu8_igemm_minmax_rndnu_ukernel_1x8__neon_mlal_lane(

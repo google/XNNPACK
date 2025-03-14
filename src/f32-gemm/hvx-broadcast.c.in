@@ -5,12 +5,9 @@
 
 $assert NR % 32 == 0
 
-#include <assert.h>
-#include <hexagon_types.h>
-#include <hexagon_protos.h>
-#include <hvx_hexagon_protos.h>
-#include "xnnpack/gemm.h"
-#include "xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/simd/f32-hvx.h"
+
+#include "src/xnnpack/gemm.h"
 
 $RANGE_MR = list(range(MR))
 void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
@@ -57,7 +54,7 @@ void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
 
   do {
     $for N in range(0, NR, 32):
-        HVX_Vector vacc0x${N//32} = *((HVX_Vector *)(w + ${N}));
+        HVX_Vector vacc0x${N//32} = xnn_load_f32(w + ${N});
     $for M in range(1, MR):
       $for N in range(0, NR, 32):
         HVX_Vector vacc${M}x${N//32} = vacc0x${N//32};
@@ -66,7 +63,7 @@ void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
     size_t k = kc;
     do {
       $for M in range(MR):
-        const HVX_Vector va${M} = Q6_V_vsplat_R(*(uint32_t *)a${M});
+        const HVX_Vector va${M} = xnn_set1_f32(*a${M});
         a${M} += 1;
 
       const HVX_Vector vb0 = *((const HVX_Vector *)(w));
@@ -76,20 +73,20 @@ void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
 
       $for N in range(0, NR, 32):
         $for M in range(MR):
-            vacc${M}x${N//32} = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va${M}, vb${N//32}),vacc${M}x${N//32}));
+            vacc${M}x${N//32} = xnn_fmadd_f32(va${M}, vb${N//32}, vacc${M}x${N//32});
 
       k -= sizeof(float);
     } while (k != 0);
 
-    const HVX_Vector vmin = Q6_V_vsplat_R(params->scalar.min);
+    HVX_Vector vmin = xnn_set1_f32(params->scalar.min);
     $for N in range(0, NR, 32):
       $for M in range(MR):
-        vacc${M}x${N//32} = Q6_Vw_vmax_VwVw(vmin, vacc${M}x${N//32});
+        vacc${M}x${N//32} = xnn_max_f32(vmin, vacc${M}x${N//32});
 
-    const HVX_Vector vmax = Q6_V_vsplat_R(params->scalar.max);
+    HVX_Vector vmax = xnn_set1_f32(params->scalar.max);
     $for N in range(0, NR, 32):
       $for M in range(MR):
-        vacc${M}x${N//32} = Q6_Vw_vmin_VwVw(vmax, vacc${M}x${N//32});
+        vacc${M}x${N//32} = xnn_min_f32(vmax, vacc${M}x${N//32});
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in RANGE_MR:
@@ -122,11 +119,11 @@ void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
             }
           $else:
             $for M in RANGE_MR:
-              vstu_variable_scalar((char*)c${M}, nc*sizeof(float), vacc${M}x0);
+              xnn_store_tail_f32(c${M}, vacc${M}x0, nc);
             $break
         $elif LOG2N == 5:
             $for M in RANGE_MR:
-              vstu_variable_scalar((char*)c${M}, nc*sizeof(float), vacc${M}x0);
+              xnn_store_tail_f32(c${M}, vacc${M}x0, nc);
             $break  
       nc = 0;
     }

@@ -12,8 +12,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack.h"
-#include "xnnpack/common.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
 
 // Indicates that XNNPACK as a whole has initialized.
 // This does not guarantee that any particular microkernels are available.

@@ -9,8 +9,8 @@ $assert NR % 8 == 0
 
 #include <arm_neon.h>
 
-#include "xnnpack/igemm.h"
-#include "xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/igemm.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
 
 
 void xnn_f16_igemm_minmax_ukernel_${MR}x${NR}__neonfp16arith_ld64(

@@ -6,10 +6,10 @@
 #include <cstddef>
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/unpool.h"
-#include "unpool-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/unpool.h"
+#include "test/unpool-microkernel-tester.h"
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(X32_UNPOOL__NEON, c_eq_4) {

@@ -9,7 +9,7 @@ $assert MR % 2 == 0
 
 #include <xmmintrin.h>
 
-#include "xnnpack/igemm.h"
+#include "src/xnnpack/igemm.h"
 
 
 void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}c4__sse(

@@ -9,8 +9,8 @@ $assert NR % 32 == 0
 
 #include <immintrin.h>
 
-#include "xnnpack/igemm.h"
-#include "xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/igemm.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
 
 
 $RANGE_MR = list(range(MR))

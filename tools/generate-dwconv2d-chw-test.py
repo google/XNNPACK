@@ -18,11 +18,18 @@ import xnncommon
 
 
 parser = argparse.ArgumentParser(
-  description='Test generator for DWCONV2D CHW micro-kernels')
-parser.add_argument("-s", "--spec", metavar="FILE", required=True,
-                    help="Spec (YAML) file")
-parser.add_argument("-o", "--output", metavar="FILE", required=True,
-                    help='Output (C++ source) file')
+    description="Test generator for DWCONV2D CHW micro-kernels"
+)
+parser.add_argument(
+    "-s", "--spec", metavar="FILE", required=True, help="Spec (YAML) file"
+)
+parser.add_argument(
+    "-o",
+    "--output",
+    metavar="FILE",
+    required=True,
+    help="Output (C++ source) file",
+)
 parser.set_defaults(defines=list())
 
 
@@ -221,8 +228,12 @@ $if SUBSAMPLING > 1:
   }
 """
 
+
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_(f16|f32)_dwconv2d_chw_ukernel_(\d+)x(\d+)(s2)?p(\d+)__(.+)_(\d+)x(\d+)(_acc\d+)?", name)
+  match = re.fullmatch(
+      r"xnn_(f16|f32)_dwconv2d_chw_ukernel_(\d+)x(\d+)(s2)?p(\d+)__(.+)_(\d+)x(\d+)(_acc\d+)?",
+      name,
+  )
   assert match is not None
   kernel_height, kernel_width = int(match.group(2)), int(match.group(3))
   if match.group(4):
@@ -236,12 +247,29 @@ def split_ukernel_name(name):
   width_tile = int(match.group(8))
 
   arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(6))
-  return kernel_height, kernel_width, stride, padding, arch, isa, \
-         height_tile, width_tile
+  return (
+      kernel_height,
+      kernel_width,
+      stride,
+      padding,
+      arch,
+      isa,
+      height_tile,
+      width_tile,
+  )
 
 
-def generate_test_cases(ukernel, kernel_height, kernel_width, subsampling, \
-  init_fn, padding, isa, height_tile, width_tile):
+def generate_test_cases(
+    ukernel,
+    kernel_height,
+    kernel_width,
+    subsampling,
+    init_fn,
+    padding,
+    isa,
+    height_tile,
+    width_tile,
+):
   """Generates all tests cases for a DWCONV2D CHW micro-kernel.
 
   Args:
@@ -249,20 +277,20 @@ def generate_test_cases(ukernel, kernel_height, kernel_width, subsampling, \
     kernel_height: convolution kernel height assumed by the micro-kernel.
     kernel_width: convolution kernel width assumed by the micro-kernel.
     subsampling: convolution subsampling (stride) assumed by the micro-kernel.
-                 The same subsampling factor is assumed for both horizontal and
-                 vertical directions.
+      The same subsampling factor is assumed for both horizontal and vertical
+      directions.
     init_fn: C name of the function to initialize microkernel parameters.
     padding: convolution padding value assumed by the micro-kernel for right,
-             bottom, and left padding. If convolution stride is 1, the same
-             padding value is assumed for the top padding. If convolution stride
-             is different than 1, top padding is specified via micro-kernel
-             parameter, and can be either padding or (padding - 1).
+      bottom, and left padding. If convolution stride is 1, the same padding
+      value is assumed for the top padding. If convolution stride is different
+      than 1, top padding is specified via micro-kernel parameter, and can be
+      either padding or (padding - 1).
     isa: instruction set required to run the micro-kernel. Generated unit test
-         will skip execution if the host processor doesn't support this ISA.
+      will skip execution if the host processor doesn't support this ISA.
     height_tile: number of output rows processed in one iteration of the main
-                 loop of the micro-kernel.
+      loop of the micro-kernel.
     width_tile: number of output columns processed in one iteration of the main
-                loop of the micro-kernel.
+      loop of the micro-kernel.
 
   Returns:
     Code for the test case.
@@ -270,20 +298,23 @@ def generate_test_cases(ukernel, kernel_height, kernel_width, subsampling, \
   _, test_name = ukernel.split("_", 1)
   _, datatype, ukernel_type, _ = ukernel.split("_", 3)
   test_args = [ukernel, init_fn]
-  return xngen.preprocess(TEST_TEMPLATE, {
-      "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
-      "TEST_ARGS": test_args,
-      "UKERNEL_TYPE": ukernel_type.upper(),
-      "DATATYPE": datatype,
-      "KERNEL_HEIGHT": kernel_height,
-      "KERNEL_WIDTH": kernel_width,
-      "SUBSAMPLING": subsampling,
-      "PADDING": padding,
-      "HEIGHT_TILE": height_tile,
-      "WIDTH_TILE": width_tile,
-      "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
-      "next_prime": next_prime,
-    })
+  return xngen.preprocess(
+      TEST_TEMPLATE,
+      {
+          "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
+          "TEST_ARGS": test_args,
+          "UKERNEL_TYPE": ukernel_type.upper(),
+          "DATATYPE": datatype,
+          "KERNEL_HEIGHT": kernel_height,
+          "KERNEL_WIDTH": kernel_width,
+          "SUBSAMPLING": subsampling,
+          "PADDING": padding,
+          "HEIGHT_TILE": height_tile,
+          "WIDTH_TILE": width_tile,
+          "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
+          "next_prime": next_prime,
+      },
+  )
 
 
 def main(args):
@@ -295,6 +326,7 @@ def main(args):
       raise ValueError("expected a list of micro-kernels in the spec")
 
     tests = """\
+// clang-format off
 // Copyright 2020 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -306,23 +338,39 @@ def main(args):
 
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/dwconv.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microparams-init.h"
-#include "dwconv2d-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microparams-init.h"
+#include "test/dwconv2d-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
       init_fn = ukernel_spec["init"]
       pipelined = bool(ukernel_spec.get("pipelined", False))
-      kernel_height, kernel_width, subsampling, padding, arch, isa, \
-        height_tile, width_tile = split_ukernel_name(name)
+      (
+          kernel_height,
+          kernel_width,
+          subsampling,
+          padding,
+          arch,
+          isa,
+          height_tile,
+          width_tile,
+      ) = split_ukernel_name(name)
 
-      test_case = generate_test_cases(name, kernel_height, kernel_width, \
-                                      subsampling, init_fn, padding, isa, \
-                                      height_tile, width_tile)
+      test_case = generate_test_cases(
+          name,
+          kernel_height,
+          kernel_width,
+          subsampling,
+          init_fn,
+          padding,
+          isa,
+          height_tile,
+          width_tile,
+      )
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     xnncommon.overwrite_if_changed(options.output, tests)

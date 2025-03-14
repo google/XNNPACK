@@ -11,8 +11,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/microparams.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,8 +27,8 @@ extern "C" {
       size_t output_increment,                                              \
       const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-#include "f16-avgpool/f16-avgpool-minmax.h"
-#include "f32-avgpool/f32-avgpool-minmax.h"
+#include "src/f16-avgpool/f16-avgpool-minmax.h"
+#include "src/f32-avgpool/f32-avgpool-minmax.h"
 
 #undef XNN_UKERNEL
 

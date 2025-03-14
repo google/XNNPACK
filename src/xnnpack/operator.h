@@ -12,15 +12,15 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/compute.h"
-#include "xnnpack/config-types.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microkernel-type.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/operator-type.h"
-#include "pthreadpool.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/compute.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microkernel-type.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/operator-type.h"
+#include <pthreadpool.h>
 
 // Maximum number of pthreadpool parallelization invocations per operator.
 #define XNN_MAX_COMPUTE_INVOCATIONS 3
@@ -39,10 +39,8 @@ struct xnn_ukernel_conv2d {
 };
 
 struct xnn_ukernel_dwconv {
-  xnn_dwconv_unipass_ukernel_fn unipass_fn;
-  uint8_t channel_round;
-  uint8_t channel_subtile;
-  uint8_t channel_tile;
+  xnn_dwconv_ukernel_fn ukernel;
+  uint32_t channel_tile;
   uint8_t primary_tile;
 };
 

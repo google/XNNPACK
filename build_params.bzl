@@ -44,10 +44,6 @@ def xnnpack_configurable_defines():
         ["XNN_ENABLE_MEMOPT=1"],
         ["XNN_ENABLE_MEMOPT=1"],
     ) + xnnpack_select_if(
-        ":gemm_m_specialization_enabled",
-        ["XNN_ENABLE_GEMM_M_SPECIALIZATION=1"],
-        ["XNN_ENABLE_GEMM_M_SPECIALIZATION=0"],
-    ) + xnnpack_select_if(
         ":sparse_enabled",
         ["XNN_ENABLE_SPARSE=1"],
         ["XNN_ENABLE_SPARSE=0"],
@@ -349,6 +345,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
         copts = [
             "-fno-fast-math",
             "-fno-math-errno",
+            "-mfp16",
         ],
     ),
     "wasm32": _create_params(

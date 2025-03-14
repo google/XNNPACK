@@ -12,13 +12,14 @@ $assert OP in ["MAX", "MIN", "MINMAX"]
 
 #include <immintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
 
 
 $ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
 $EMIT_MIN = "MIN" in OP
 $EMIT_MAX = "MAX" in OP
+$MAX_POS = 1 if OP == "MINMAX" else 0
 void xnn_f16_r${OP.lower()}_ukernel__avx512skx_u${BATCH_TILE}${ACC_SUFFIX}(
     size_t batch,
     const xnn_float16* input,
@@ -31,12 +32,11 @@ void xnn_f16_r${OP.lower()}_ukernel__avx512skx_u${BATCH_TILE}${ACC_SUFFIX}(
   assert(output != NULL);
 
   const uint16_t* i = (const uint16_t*) input;
+  uint16_t* o = (uint16_t*) output;
   $if EMIT_MIN:
-    __m512 vmin0 = _mm512_cvtph_ps(_mm256_set1_epi16(*i));
-    $if EMIT_MAX:
-      __m512 vmax0 = vmin0;
-  $elif EMIT_MAX:
-    __m512 vmax0 = _mm512_cvtph_ps(_mm256_set1_epi16(*i));
+    __m512 vmin0 = _mm512_cvtph_ps(_mm256_set1_epi16(*o));
+  $if EMIT_MAX:
+    __m512 vmax0 = _mm512_cvtph_ps(_mm256_set1_epi16(o[${MAX_POS}]));
   $for A in range(1, ACCUMULATORS):
     $if EMIT_MIN:
       __m512 vmin${A} = vmin0;

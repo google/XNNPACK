@@ -312,4 +312,14 @@ tools/xngen src/f32-dwconv/unipass-avx512.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE
 tools/xngen src/f32-dwconv/unipass-avx512.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -o src/f32-dwconv/gen/f32-dwconv-25p32c-minmax-avx512f.c &
 tools/xngen src/f32-dwconv/unipass-avx512.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -o src/f32-dwconv/gen/f32-dwconv-25p32c-minmax-avx512f-acc2.c &
 
+################################## RISC-V RVV #################################
+tools/xngen src/f32-dwconv/unipass-rvv.c.in -D CHANNEL_TILE=m8 -D KERNEL_TILE=3 -D ACTIVATION=LINEAR -o src/f32-dwconv/gen/f32-dwconv-3p8vc-rvv.c &
+tools/xngen src/f32-dwconv/unipass-rvv.c.in -D CHANNEL_TILE=m8 -D KERNEL_TILE=4 -D ACTIVATION=LINEAR -o src/f32-dwconv/gen/f32-dwconv-4p8vc-rvv.c &
+tools/xngen src/f32-dwconv/unipass-rvv.c.in -D CHANNEL_TILE=m8 -D KERNEL_TILE=9 -D ACTIVATION=LINEAR -o src/f32-dwconv/gen/f32-dwconv-9p8vc-rvv.c &
+tools/xngen src/f32-dwconv/unipass-rvv.c.in -D CHANNEL_TILE=m8 -D KERNEL_TILE=25 -D ACTIVATION=LINEAR -o src/f32-dwconv/gen/f32-dwconv-25p8vc-rvv.c &
+
+tools/xngen src/f32-dwconv/unipass-rvv.c.in -D CHANNEL_TILE=m8 -D KERNEL_TILE=3 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-3p8vc-minmax-rvv.c &
+tools/xngen src/f32-dwconv/unipass-rvv.c.in -D CHANNEL_TILE=m8 -D KERNEL_TILE=4 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-4p8vc-minmax-rvv.c &
+tools/xngen src/f32-dwconv/unipass-rvv.c.in -D CHANNEL_TILE=m8 -D KERNEL_TILE=9 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-9p8vc-minmax-rvv.c &
+tools/xngen src/f32-dwconv/unipass-rvv.c.in -D CHANNEL_TILE=m8 -D KERNEL_TILE=25 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-25p8vc-minmax-rvv.c &
 wait

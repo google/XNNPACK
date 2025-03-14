@@ -4,9 +4,9 @@
 // LICENSE file in the root directory of this source tree.
 
 
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/vcvt.h"
-#include "vunary-microkernel-tester.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/vcvt.h"
+#include "test/vunary-microkernel-tester.h"
 
 #define XNN_CVT_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile,                                              \
                                 datatype_in, datatype_out, params_type, init_params)                                           \
@@ -14,5 +14,5 @@
   TEST(ukernel, batch_div) { TestBatchDiv<Convert, datatype_in, datatype_out>(arch_flags, batch_tile, ukernel, init_params); } \
   TEST(ukernel, batch_lt) { TestBatchLT<Convert, datatype_in, datatype_out>(arch_flags, batch_tile, ukernel, init_params); }   \
   TEST(ukernel, batch_gt) { TestBatchGT<Convert, datatype_in, datatype_out>(arch_flags, batch_tile, ukernel, init_params); }
-#include "f32-f16-vcvt/f32-f16-vcvt.h"
+#include "src/f32-f16-vcvt/f32-f16-vcvt.h"
 #undef XNN_CVT_UKERNEL_WITH_PARAMS
