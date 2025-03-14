@@ -923,9 +923,9 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
     2, 6,
     // go down the columns first
     4, 8, 3, 7, 5, 9,
-    // followed by 10 kernel zero values to make up the difference with
+    // followed by 10 uninitialized values to make up the difference with
     // primary_tile
-    127, 127, 127, 127, 127, 127, 127, 127, 127, 127,
+    _, _, _, _, _, _, _, _, _, _,
   };
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
@@ -983,9 +983,9 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     7, 11,
     6, 10,
     8, 12,
-    // followed by 10 kernel zero values to make up the difference with
+    // followed by 10 uninitialized values to make up the difference with
     // primary_tile
-    127, 127, 127, 127, 127, 127, 127, 127, 127, 127,
+    _, _, _, _, _, _, _, _, _, _,
     // bias first (cr == 2 of them)
     // 64516 + 2 - (13 + 14 + 15 + 16) * 127 = 57,152 = 0xDF40
     0x40, 0xDF, 0, 0,
@@ -993,14 +993,14 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     0x51, 0xD7, 0, 0,
     // then weights, channels first
     13, 17, 15, 19, 14, 18, 16, 20,
-    127, 127, 127, 127, 127, 127, 127, 127, 127, 127,
+    _, _, _, _, _, _, _, _, _, _,
     // bias
     // 64516 + 4 - (21 + 22 + 23 + 24) * 127 = 53,090 = 0xCF62
     0x62, 0xCF, 0, 0,
     _, _, _, _,
     // weights
     21, _, 23, _, 22, _, 24, _,
-    127, 127, 127, 127, 127, 127, 127, 127, 127, 127,
+    _, _, _, _, _, _, _, _, _, _,
   };
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
@@ -1156,9 +1156,9 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
     2, 3,
     // go down the columns first
     6, 7, 4, 5, 8, 9,
-    // followed by 10 kernel zero values to make up the difference with
+    // followed by 10 uninitialized values to make up the difference with
     // primary_tile
-    127, 127, 127, 127, 127, 127, 127, 127, 127, 127,
+    _, _, _, _, _, _, _, _, _, _,
   };
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
@@ -1210,9 +1210,9 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     15, 16,
     10, 11,
     20, 21,
-    // followed by 10 kernel zero values to make up the difference with
+    // followed by 10 uninitialized values to make up the difference with
     // primary_tile
-    127, 127, 127, 127, 127, 127, 127, 127, 127, 127,
+    _, _, _, _, _, _, _, _, _, _,
     // bias first (cr == 2 of them)
     // 64516 + 2 - (7 + 12 + 17 + 22) * 127 = 57152 = 0xDF40
     0x40, 0xDF, 0, 0,
@@ -1220,14 +1220,14 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     0x45, 0xDD, 0, 0,
     // then weights, channels first
     7, 8, 17, 18, 12, 13, 22, 23,
-    127, 127, 127, 127, 127, 127, 127, 127, 127, 127,
+    _, _, _, _, _, _, _, _, _, _,
     // bias
     // 64516 + 4 - (9 + 14 + 19 + 24) * 127 = 56138 = 0xDB4A
     0x4A, 0xDB, 0, 0,
     _, _, _, _,
     // weights
     9, _, 19, _, 14, _, 24, _,
-    127, 127, 127, 127, 127, 127, 127, 127, 127, 127,
+    _, _, _, _, _, _, _, _, _, _,
   };
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
@@ -1342,7 +1342,7 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
   const size_t cr = 2;
 
   std::vector<int32_t> b(c);
-  std::iota(b.begin(), b.end(), 0);  // b = [0, 1]
+  std::iota(b.begin(), b.end(), 0);  // b = [_, 1]
   std::vector<int8_t> k(c * h * w);  // k = [
                                       //   2, 3,
                                       //   4, 5,
@@ -1376,8 +1376,9 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
     2, 6,
     // go down the columns first
     4, 8, 3, 7, 5, 9,
-    // followed by 10 zero values to make up the difference with primary_tile
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    // followed by 10 uninitialized values to make up the difference with
+    // primary_tile
+    _, _, _, _, _, _, _, _, _, _,
   };
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
@@ -1432,8 +1433,9 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     7, 11,
     6, 10,
     8, 12,
-    // followed by 10 zero values to make up the difference with primary_tile
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    // followed by 10 uninitialized values to make up the difference with
+    // primary_tile
+    _, _, _, _, _, _, _, _, _, _,
     // bias first (cr == 2 of them)
     // 2 - (13 + 14 + 15 + 16) * 127 = -7364 = 0xFFFFE33C
     0x3C, 0xE3, 0xFF, 0xFF,
@@ -1441,14 +1443,14 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     0x4D, 0xDB, 0xFF, 0xFF,
     // then weights, channels first
     13, 17, 15, 19, 14, 18, 16, 20,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    _, _, _, _, _, _, _, _, _, _,
     // bias
     // 4 - (21 + 22 + 23 + 24) * 127 = -11426 = 0xFFFFD35E
     0x5E, 0xD3, 0xFF, 0xFF,
     _, _, _, _,
     // weights
     21, _, 23, _, 22, _, 24, _,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    _, _, _, _, _, _, _, _, _, _,
   };
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
@@ -1595,8 +1597,9 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
     2, 3,
     // go down the columns first
     6, 7, 4, 5, 8, 9,
-    // followed by 10 zero values to make up the difference with primary_tile
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    // followed by 10 uninitialized values to make up the difference with
+    // primary_tile
+    _, _, _, _, _, _, _, _, _, _,
   };
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
@@ -1645,8 +1648,9 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     15, 16,
     10, 11,
     20, 21,
-    // followed by 10 zero values to make up the difference with primary_tile
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    // followed by 10 uninitialized values to make up the difference with
+    // primary_tile
+    _, _, _, _, _, _, _, _, _, _,
     // bias first (cr == 2 of them)
     // 2 - (7 + 12 + 17 + 22) * 127 = -7364 = 0xFFFFE33C
     0x3C, 0xE3, 0xFF, 0xFF,
@@ -1654,14 +1658,14 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     0x41, 0xE1, 0xFF, 0xFF,
     // then weights, channels first
     7, 8, 17, 18, 12, 13, 22, 23,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    _, _, _, _, _, _, _, _, _, _,
     // bias
     // 4 - (9 + 14 + 19 + 24) * 127 = -8378 = 0xFFFFDF46
     0x46, 0xDF, 0xFF, 0xFF,
     _, _, _, _,
     // weights
     9, _, 19, _, 14, _, 24, _,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    _, _, _, _, _, _, _, _, _, _,
   };
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
@@ -1789,8 +1793,9 @@ TEST(PACK_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
     2, 6,
     // go down the columns first
     4, 8, 3, 7, 5, 9,
-    // followed by 10 zero values to make up the difference with primary_tile
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    // followed by 10 uninitialized values to make up the difference with
+    // primary_tile
+    _, _, _, _, _, _, _, _, _, _,
   };
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
@@ -1840,18 +1845,19 @@ TEST(PACK_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     7, 11,
     6, 10,
     8, 12,
-    // followed by 10 zero values to make up the difference with primary_tile
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    // followed by 10 uninitialized values to make up the difference with
+    // primary_tile
+    _, _, _, _, _, _, _, _, _, _,
     // bias first (cr == 2 of them)
     2, 3,
     // then weights, channels first
     13, 17, 15, 19, 14, 18, 16, 20,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    _, _, _, _, _, _, _, _, _, _,
     // bias
     4, _,
     // weights
     21, _, 23, _, 22, _, 24, _,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    _, _, _, _, _, _, _, _, _, _,
   };
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
@@ -1977,8 +1983,9 @@ TEST(PACK_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
     2, 3,
     // go down the columns first
     6, 7, 4, 5, 8, 9,
-    // followed by 10 zero values to make up the difference with primary_tile
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    // followed by 10 uninitialized values to make up the difference with
+    // primary_tile
+    _, _, _, _, _, _, _, _, _, _,
   };
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
@@ -2022,18 +2029,19 @@ TEST(PACK_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     15, 16,
     10, 11,
     20, 21,
-    // followed by 10 zero values to make up the difference with primary_tile
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    // followed by 10 uninitialized values to make up the difference with
+    // primary_tile
+    _, _, _, _, _, _, _, _, _, _,
     // bias first (cr == 2 of them)
     2, 3,
     // then weights, channels first
     7, 8, 17, 18, 12, 13, 22, 23,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    _, _, _, _, _, _, _, _, _, _,
     // bias
     4, _,
     // weights
     9, _, 19, _, 14, _, 24, _,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    _, _, _, _, _, _, _, _, _, _,
   };
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
@@ -2161,8 +2169,9 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
     2.0f, 6.0f,
     // go down the columns first
     4.0f, 8.0f, 3.0f, 7.0f, 5.0f, 9.0f,
-    // followed by 10 zero values to make up the difference with primary_tile
-    0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    // followed by 10 uninitialized values to make up the difference with
+    // primary_tile
+    _, _, _, _, _, _, _, _, _, _,
   };
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
@@ -2212,18 +2221,19 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     7.0f, 11.0f,
     6.0f, 10.0f,
     8.0f, 12.0f,
-    // followed by 10 zero values to make up the difference with primary_tile
-    0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    // followed by 10 uninitialized values to make up the difference with
+    // primary_tile
+    _, _, _, _, _, _, _, _, _, _,
     // bias first (cr == 2 of them)
     2.0f, 3.0f,
     // then weights, channels first
     13.0f, 17.0f, 15.0f, 19.0f, 14.0f, 18.0f, 16.0f, 20.0f,
-    0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    _, _, _, _, _, _, _, _, _, _,
     // bias
     4.0f, _,
     // weights
     21.0f, _, 23.0f, _, 22.0f, _, 24.0f, _,
-    0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    _, _, _, _, _, _, _, _, _, _,
   };
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
@@ -2349,8 +2359,9 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
     2.0f, 3.0f,
     // go down the columns first
     6.0f, 7.0f, 4.0f, 5.0f, 8.0f, 9.0f,
-    // followed by 10 zero values to make up the difference with primary_tile
-    0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    // followed by 10 uninitialized values to make up the difference with
+    // primary_tile
+    _, _, _, _, _, _, _, _, _, _,
   };
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
@@ -2394,18 +2405,19 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     15.0f, 16.0f,
     10.0f, 11.0f,
     20.0f, 21.0f,
-    // followed by 10 zero values to make up the difference with primary_tile
-    0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    // followed by 10 uninitialized values to make up the difference with
+    // primary_tile
+    _, _, _, _, _, _, _, _, _, _,
     // bias first (cr == 2 of them)
     2.0f, 3.0f,
     // then weights, channels first
     7.0f, 8.0f, 17.0f, 18.0f, 12.0f, 13.0f, 22.0f, 23.0f,
-    0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    _, _, _, _, _, _, _, _, _, _,
     // bias
     4.0f, _,
     // weights
     9.0f, _, 19.0f, _, 14.0f, _, 24.0f, _,
-    0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    _, _, _, _, _, _, _, _, _, _,
   };
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
@@ -2533,8 +2545,9 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
     2.0f, 6.0f,
     // go down the columns first
     4.0f, 8.0f, 3.0f, 7.0f, 5.0f, 9.0f,
-    // followed by 10 zero values to make up the difference with primary_tile
-    0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    // followed by 10 uninitialized values to make up the difference with
+    // primary_tile
+    _, _, _, _, _, _, _, _, _, _,
   };
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
@@ -2584,18 +2597,19 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     7.0f, 11.0f,
     6.0f, 10.0f,
     8.0f, 12.0f,
-    // followed by 10 zero values to make up the difference with primary_tile
-    0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    // followed by 10 uninitialized values to make up the difference with
+    // primary_tile
+    _, _, _, _, _, _, _, _, _, _,
     // bias first (cr == 2 of them)
     2.0f, 3.0f,
     // then weights, channels first
     13.0f, 17.0f, 15.0f, 19.0f, 14.0f, 18.0f, 16.0f, 20.0f,
-    0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    _, _, _, _, _, _, _, _, _, _,
     // bias
     4.0f, _,
     // weights
     21.0f, _, 23.0f, _, 22.0f, _, 24.0f, _,
-    0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    _, _, _, _, _, _, _, _, _, _,
   };
   EXPECT_THAT(packed_weights, ElementsAreArray(expected));
 }
@@ -2721,8 +2735,8 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
     2.0f, 3.0f,
     // go down the columns first
     6.0f, 7.0f, 4.0f, 5.0f, 8.0f, 9.0f,
-    // followed by 10 zero values to make up the difference with primary_tile
-    0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    // followed by 10 uninitialized values to make up the difference withprimary_tile
+    _, _, _, _, _, _, _, _, _, _,
   };
   EXPECT_THAT(packed_weights, testing::ElementsAreArray(expected));
 
@@ -2767,18 +2781,19 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     15.0f, 16.0f,
     10.0f, 11.0f,
     20.0f, 21.0f,
-    // followed by 10 zero values to make up the difference with primary_tile
-    0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    // followed by 10 uninitialized values to make up the difference with
+    // primary_tile
+    _, _, _, _, _, _, _, _, _, _,
     // bias first (cr == 2 of them)
     2.0f, 3.0f,
     // then weights, channels first
     7.0f, 8.0f, 17.0f, 18.0f, 12.0f, 13.0f, 22.0f, 23.0f,
-    0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    _, _, _, _, _, _, _, _, _, _,
     // bias
     4.0f, _,
     // weights
     9.0f, _, 19.0f, _, 14.0f, _, 24.0f, _,
-    0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    _, _, _, _, _, _, _, _, _, _,
   };
   EXPECT_THAT(packed_weights, testing::ElementsAreArray(expected));
 

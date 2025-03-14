@@ -28,7 +28,8 @@ static inline void* packed_weights(struct xnn_operator* op) {
 // cache's buffer, otherwise, allocate and return a pointer to a new region. Returns NULL on error.
 XNN_INTERNAL void* xnn_get_pointer_to_write_weights(
   xnn_operator_t op,
-  size_t aligned_weights_size);
+  size_t aligned_weights_size,
+  int padding_byte);
 
 #ifdef __cplusplus
 extern "C" {
