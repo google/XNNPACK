@@ -5,6 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import argparse
+import math
 import os
 import sys
 
@@ -49,6 +50,7 @@ OP_TYPES = {
     "vrndz": "RoundTowardsZero",
     "vrsqrt": "ReciprocalSquareRoot",
     "vsigmoid": "Sigmoid",
+    "vsin": "Sin",
     "vsqr": "Square",
     "vsqrt": "SquareRoot",
     "vtanh": "TanH",
@@ -93,6 +95,12 @@ SPECIAL_VALUES_F32 = {
         3,  # Number of elements.
         "{0.0f, -1e3f, 1e3f}",  # Inputs.
         "{1.0f, 0.0f, INFINITY}",  # Expected outputs.
+        1,  # Error margin in ULP.
+    ),
+    "Sin": (
+        3,  # Number of elements
+        f"{{0.0f, {-math.pi/2:.8e},  {math.pi/2:.8e}}}",  # Inputs.
+        "{0.0f, -1.0f, 1.0f}",  # Expected outputs.
         1,  # Error margin in ULP.
     ),
 }

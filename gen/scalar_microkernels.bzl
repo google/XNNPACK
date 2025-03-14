@@ -505,6 +505,7 @@ NON_PROD_SCALAR_MICROKERNEL_SRCS = [
     "src/f32-vsigmoid/gen/f32-vsigmoid-scalar-rr2-p5-div-u1.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-scalar-rr2-p5-div-u2.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-scalar-rr2-p5-div-u4.c",
+    "src/f32-vsin/gen/f32-vsin-scalar-rational-5-4-div.c",
     "src/f32-vsqrt/gen/f32-vsqrt-scalar-sqrt-u2.c",
     "src/f32-vsqrt/gen/f32-vsqrt-scalar-sqrt-u4.c",
     "src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-1x2-minmax-scalar.c",

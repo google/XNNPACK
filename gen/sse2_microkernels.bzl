@@ -136,6 +136,7 @@ NON_PROD_SSE2_MICROKERNEL_SRCS = [
     "src/f32-vsigmoid/gen/f32-vsigmoid-sse2-rr2-p5-div-u8.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-sse2-rr2-p5-div-u12.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-sse2-rr2-p5-div-u16.c",
+    "src/f32-vsin/gen/f32-vsin-sse2-rational-5-4-div.c",
     "src/f32-vtanh/gen/f32-vtanh-sse2-rational-9-8-nr.c",
     "src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-1x4c8-minmax-sse2-ld64.c",
     "src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-2x4c8-minmax-sse2-ld64.c",

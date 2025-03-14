@@ -243,6 +243,7 @@ NON_PROD_AVX_MICROKERNEL_SRCS = [
     "src/f32-vsigmoid/gen/f32-vsigmoid-avx-rr2-p5-nr2-u8.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-avx-rr2-p5-nr2-u24.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-avx-rr2-p5-nr2-u32.c",
+    "src/f32-vsin/gen/f32-vsin-avx-rational-5-4-div.c",
     "src/f32-vsqrt/gen/f32-vsqrt-avx-rsqrt-u8.c",
     "src/f32-vsqrt/gen/f32-vsqrt-avx-rsqrt-u32.c",
     "src/f32-vsqrt/gen/f32-vsqrt-avx-sqrt-u8.c",

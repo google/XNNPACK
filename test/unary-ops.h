@@ -384,6 +384,37 @@ struct Sigmoid : public UnaryOpInfo {
   }
 };
 
+struct Sin : public UnaryOpInfo {
+  float ReferenceImpl(float x, const xnn_unary_params&) const override {
+    return std::sin(x);
+  }
+
+  float Tolerance(float y_ref, xnn_datatype datatype) const override {
+    switch (datatype) {
+      case xnn_datatype_fp32:
+        return TolMixed(y_ref, 3 * xnnpack::NumericLimits<float>::epsilon(),
+                        5 * xnnpack::NumericLimits<float>::epsilon());
+      case xnn_datatype_fp16:
+        return TolMixed(y_ref,
+                        3 * xnnpack::NumericLimits<xnn_float16>::epsilon(),
+                        5 * xnnpack::NumericLimits<xnn_float16>::epsilon());
+      case xnn_datatype_bf16:
+        return TolMixed(y_ref,
+                        3 * xnnpack::NumericLimits<xnn_bfloat16>::epsilon(),
+                        5 * xnnpack::NumericLimits<xnn_bfloat16>::epsilon());
+      case xnn_datatype_qint8:
+      case xnn_datatype_quint8:
+        return 1;
+      default:
+        return TolExact(y_ref);
+    }
+  }
+
+  Interval Domain(xnn_datatype datatype) const override {
+    return {-10.0f, 10.0f};
+  }
+};
+
 struct Square : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return x * x;

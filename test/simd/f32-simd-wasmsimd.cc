@@ -15,6 +15,7 @@
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #include <algorithm>
+#include <bit>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -195,6 +196,25 @@ TEST_F(F32SimdWASMSIMDTest, Neg) {
   xnn_storeu_f32(output_.data(), res);
   for (size_t k = 0; k < xnn_simd_size_f32; k++) {
     ASSERT_EQ(output_[k], -inputs_[k]);
+  }
+}
+
+TEST_F(F32SimdWASMSIMDTest, Round) {
+  const xnn_simd_f32_t a = xnn_loadu_f32(inputs_.data());
+  const xnn_simd_f32_t res = xnn_round_f32(a);
+  xnn_storeu_f32(output_.data(), res);
+  for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+    ASSERT_EQ(output_[k], std::round(inputs_[k]));
+  }
+
+  // Check non-finite values.
+  for (const float val : {INFINITY, -INFINITY, NAN}) {
+    inputs_[0] = val;
+    const xnn_simd_f32_t a = xnn_loadu_f32(inputs_.data());
+    const xnn_simd_f32_t res = xnn_round_f32(a);
+    xnn_storeu_f32(output_.data(), res);
+    ASSERT_EQ(std::bit_cast<uint32_t>(output_[0]),
+              std::bit_cast<uint32_t>(std::round(val)));
   }
 }
 

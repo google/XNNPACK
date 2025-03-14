@@ -166,6 +166,7 @@ tools/generate-vunary-test.py --ukernel f32-vrndu  --output test/f32-vrndu.cc &
 tools/generate-vunary-test.py --ukernel f32-vrndz  --output test/f32-vrndz.cc &
 tools/generate-vunary-test.py --ukernel f32-vrsqrt --output test/f32-vrsqrt.cc &
 tools/generate-vunary-test.py --ukernel f32-vsigmoid --output test/f32-vsigmoid.cc &
+tools/generate-vunary-test.py --ukernel f32-vsin --output test/f32-vsin.cc &
 tools/generate-vunary-test.py --ukernel f32-vsqr --output test/f32-vsqr.cc &
 tools/generate-vunary-test.py --ukernel f32-vsqrt --output test/f32-vsqrt.cc &
 tools/generate-vunary-test.py --ukernel f32-vtanh --output test/f32-vtanh.cc &
