@@ -34,9 +34,11 @@ void xnn_f32_vapproxgelu_ukernel__fma3_rational_12_10_div_u8(
   // beyond this point. This value is chosen as the first floating point
   // number as of which the interpolation returns +/-1.0f.
   #if XNN_SIMD_HAS_NATIVE_FMA || (XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR)
-    XNN_SIMD_CONST_F32(vmax_abs_x, 4.84974098e+00f);
+    XNN_SIMD_CONST_F32(vmax_x, 4.84974098e+00f);
+    XNN_SIMD_CONST_F32(vmin_x, -4.84974098e+00f);
   #else
-    XNN_SIMD_CONST_F32(vmax_abs_x, 4.86115026e+00f);
+    XNN_SIMD_CONST_F32(vmax_x, 4.86115026e+00f);
+    XNN_SIMD_CONST_F32(vmin_x, -4.86115026e+00f);
   #endif  // XNN_SIMD_HAS_NATIVE_FMA
 
   // The monomial coefficients of the numerator polynomial (odd).
@@ -64,8 +66,8 @@ void xnn_f32_vapproxgelu_ukernel__fma3_rational_12_10_div_u8(
     input += xnn_simd_size_f32;
 
     // Clamp the inputs to the interpolation range.
-    xnn_simd_f32_t vx = xnn_min_f32(vmax_abs_x, vx_orig);
-    vx = xnn_max_f32(xnn_neg_f32(vmax_abs_x), vx);
+    xnn_simd_f32_t vx = xnn_min_f32(vmax_x, vx_orig);
+    vx = xnn_max_f32(vmin_x, vx);
 
     // Since the polynomials are odd/even, we need x^2.
     const xnn_simd_f32_t vx2 = xnn_mul_f32(vx, vx);
@@ -100,8 +102,8 @@ void xnn_f32_vapproxgelu_ukernel__fma3_rational_12_10_div_u8(
     xnn_simd_f32_t vx_orig = xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
 
   // See above for comments.
-  xnn_simd_f32_t vx = xnn_min_f32(vmax_abs_x, vx_orig);
-  vx = xnn_max_f32(xnn_neg_f32(vmax_abs_x), vx);
+  xnn_simd_f32_t vx = xnn_min_f32(vmax_x, vx_orig);
+  vx = xnn_max_f32(vmin_x, vx);
   const xnn_simd_f32_t vx2 = xnn_mul_f32(vx, vx);
   xnn_simd_f32_t vp = xnn_fmadd_f32(vx2, valpha_11, valpha_9);
   vp = xnn_fmadd_f32(vx2, vp, valpha_7);
@@ -138,9 +140,11 @@ void xnn_f32_vapproxgelu_ukernel__fma3_rational_12_10_div_u16(
   // beyond this point. This value is chosen as the first floating point
   // number as of which the interpolation returns +/-1.0f.
   #if XNN_SIMD_HAS_NATIVE_FMA || (XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR)
-    XNN_SIMD_CONST_F32(vmax_abs_x, 4.84974098e+00f);
+    XNN_SIMD_CONST_F32(vmax_x, 4.84974098e+00f);
+    XNN_SIMD_CONST_F32(vmin_x, -4.84974098e+00f);
   #else
-    XNN_SIMD_CONST_F32(vmax_abs_x, 4.86115026e+00f);
+    XNN_SIMD_CONST_F32(vmax_x, 4.86115026e+00f);
+    XNN_SIMD_CONST_F32(vmin_x, -4.86115026e+00f);
   #endif  // XNN_SIMD_HAS_NATIVE_FMA
 
   // The monomial coefficients of the numerator polynomial (odd).
@@ -169,10 +173,10 @@ void xnn_f32_vapproxgelu_ukernel__fma3_rational_12_10_div_u16(
     input += 16;
 
     // Clamp the inputs to the interpolation range.
-    xnn_simd_f32_t vx_0 = xnn_min_f32(vmax_abs_x, vx_orig_0);
-    xnn_simd_f32_t vx_1 = xnn_min_f32(vmax_abs_x, vx_orig_1);
-    vx_0 = xnn_max_f32(xnn_neg_f32(vmax_abs_x), vx_0);
-    vx_1 = xnn_max_f32(xnn_neg_f32(vmax_abs_x), vx_1);
+    xnn_simd_f32_t vx_0 = xnn_min_f32(vmax_x, vx_orig_0);
+    xnn_simd_f32_t vx_1 = xnn_min_f32(vmax_x, vx_orig_1);
+    vx_0 = xnn_max_f32(vmin_x, vx_0);
+    vx_1 = xnn_max_f32(vmin_x, vx_1);
 
     // Since the polynomials are odd/even, we need x^2.
     const xnn_simd_f32_t vx2_0 = xnn_mul_f32(vx_0, vx_0);
@@ -224,8 +228,8 @@ void xnn_f32_vapproxgelu_ukernel__fma3_rational_12_10_div_u16(
     input += xnn_simd_size_f32;
 
     // Clamp the inputs to the interpolation range.
-    xnn_simd_f32_t vx = xnn_min_f32(vmax_abs_x, vx_orig);
-    vx = xnn_max_f32(xnn_neg_f32(vmax_abs_x), vx);
+    xnn_simd_f32_t vx = xnn_min_f32(vmax_x, vx_orig);
+    vx = xnn_max_f32(vmin_x, vx);
 
     // Since the polynomials are odd/even, we need x^2.
     const xnn_simd_f32_t vx2 = xnn_mul_f32(vx, vx);
@@ -260,8 +264,8 @@ void xnn_f32_vapproxgelu_ukernel__fma3_rational_12_10_div_u16(
     xnn_simd_f32_t vx_orig = xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
 
   // See above for comments.
-  xnn_simd_f32_t vx = xnn_min_f32(vmax_abs_x, vx_orig);
-  vx = xnn_max_f32(xnn_neg_f32(vmax_abs_x), vx);
+  xnn_simd_f32_t vx = xnn_min_f32(vmax_x, vx_orig);
+  vx = xnn_max_f32(vmin_x, vx);
   const xnn_simd_f32_t vx2 = xnn_mul_f32(vx, vx);
   xnn_simd_f32_t vp = xnn_fmadd_f32(vx2, valpha_11, valpha_9);
   vp = xnn_fmadd_f32(vx2, vp, valpha_7);
@@ -298,9 +302,11 @@ void xnn_f32_vapproxgelu_ukernel__fma3_rational_12_10_div_u24(
   // beyond this point. This value is chosen as the first floating point
   // number as of which the interpolation returns +/-1.0f.
   #if XNN_SIMD_HAS_NATIVE_FMA || (XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR)
-    XNN_SIMD_CONST_F32(vmax_abs_x, 4.84974098e+00f);
+    XNN_SIMD_CONST_F32(vmax_x, 4.84974098e+00f);
+    XNN_SIMD_CONST_F32(vmin_x, -4.84974098e+00f);
   #else
-    XNN_SIMD_CONST_F32(vmax_abs_x, 4.86115026e+00f);
+    XNN_SIMD_CONST_F32(vmax_x, 4.86115026e+00f);
+    XNN_SIMD_CONST_F32(vmin_x, -4.86115026e+00f);
   #endif  // XNN_SIMD_HAS_NATIVE_FMA
 
   // The monomial coefficients of the numerator polynomial (odd).
@@ -330,12 +336,12 @@ void xnn_f32_vapproxgelu_ukernel__fma3_rational_12_10_div_u24(
     input += 24;
 
     // Clamp the inputs to the interpolation range.
-    xnn_simd_f32_t vx_0 = xnn_min_f32(vmax_abs_x, vx_orig_0);
-    xnn_simd_f32_t vx_1 = xnn_min_f32(vmax_abs_x, vx_orig_1);
-    xnn_simd_f32_t vx_2 = xnn_min_f32(vmax_abs_x, vx_orig_2);
-    vx_0 = xnn_max_f32(xnn_neg_f32(vmax_abs_x), vx_0);
-    vx_1 = xnn_max_f32(xnn_neg_f32(vmax_abs_x), vx_1);
-    vx_2 = xnn_max_f32(xnn_neg_f32(vmax_abs_x), vx_2);
+    xnn_simd_f32_t vx_0 = xnn_min_f32(vmax_x, vx_orig_0);
+    xnn_simd_f32_t vx_1 = xnn_min_f32(vmax_x, vx_orig_1);
+    xnn_simd_f32_t vx_2 = xnn_min_f32(vmax_x, vx_orig_2);
+    vx_0 = xnn_max_f32(vmin_x, vx_0);
+    vx_1 = xnn_max_f32(vmin_x, vx_1);
+    vx_2 = xnn_max_f32(vmin_x, vx_2);
 
     // Since the polynomials are odd/even, we need x^2.
     const xnn_simd_f32_t vx2_0 = xnn_mul_f32(vx_0, vx_0);
@@ -403,8 +409,8 @@ void xnn_f32_vapproxgelu_ukernel__fma3_rational_12_10_div_u24(
     input += xnn_simd_size_f32;
 
     // Clamp the inputs to the interpolation range.
-    xnn_simd_f32_t vx = xnn_min_f32(vmax_abs_x, vx_orig);
-    vx = xnn_max_f32(xnn_neg_f32(vmax_abs_x), vx);
+    xnn_simd_f32_t vx = xnn_min_f32(vmax_x, vx_orig);
+    vx = xnn_max_f32(vmin_x, vx);
 
     // Since the polynomials are odd/even, we need x^2.
     const xnn_simd_f32_t vx2 = xnn_mul_f32(vx, vx);
@@ -439,8 +445,8 @@ void xnn_f32_vapproxgelu_ukernel__fma3_rational_12_10_div_u24(
     xnn_simd_f32_t vx_orig = xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
 
   // See above for comments.
-  xnn_simd_f32_t vx = xnn_min_f32(vmax_abs_x, vx_orig);
-  vx = xnn_max_f32(xnn_neg_f32(vmax_abs_x), vx);
+  xnn_simd_f32_t vx = xnn_min_f32(vmax_x, vx_orig);
+  vx = xnn_max_f32(vmin_x, vx);
   const xnn_simd_f32_t vx2 = xnn_mul_f32(vx, vx);
   xnn_simd_f32_t vp = xnn_fmadd_f32(vx2, valpha_11, valpha_9);
   vp = xnn_fmadd_f32(vx2, vp, valpha_7);
@@ -477,9 +483,11 @@ void xnn_f32_vapproxgelu_ukernel__fma3_rational_12_10_div_u32(
   // beyond this point. This value is chosen as the first floating point
   // number as of which the interpolation returns +/-1.0f.
   #if XNN_SIMD_HAS_NATIVE_FMA || (XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR)
-    XNN_SIMD_CONST_F32(vmax_abs_x, 4.84974098e+00f);
+    XNN_SIMD_CONST_F32(vmax_x, 4.84974098e+00f);
+    XNN_SIMD_CONST_F32(vmin_x, -4.84974098e+00f);
   #else
-    XNN_SIMD_CONST_F32(vmax_abs_x, 4.86115026e+00f);
+    XNN_SIMD_CONST_F32(vmax_x, 4.86115026e+00f);
+    XNN_SIMD_CONST_F32(vmin_x, -4.86115026e+00f);
   #endif  // XNN_SIMD_HAS_NATIVE_FMA
 
   // The monomial coefficients of the numerator polynomial (odd).
@@ -510,14 +518,14 @@ void xnn_f32_vapproxgelu_ukernel__fma3_rational_12_10_div_u32(
     input += 32;
 
     // Clamp the inputs to the interpolation range.
-    xnn_simd_f32_t vx_0 = xnn_min_f32(vmax_abs_x, vx_orig_0);
-    xnn_simd_f32_t vx_1 = xnn_min_f32(vmax_abs_x, vx_orig_1);
-    xnn_simd_f32_t vx_2 = xnn_min_f32(vmax_abs_x, vx_orig_2);
-    xnn_simd_f32_t vx_3 = xnn_min_f32(vmax_abs_x, vx_orig_3);
-    vx_0 = xnn_max_f32(xnn_neg_f32(vmax_abs_x), vx_0);
-    vx_1 = xnn_max_f32(xnn_neg_f32(vmax_abs_x), vx_1);
-    vx_2 = xnn_max_f32(xnn_neg_f32(vmax_abs_x), vx_2);
-    vx_3 = xnn_max_f32(xnn_neg_f32(vmax_abs_x), vx_3);
+    xnn_simd_f32_t vx_0 = xnn_min_f32(vmax_x, vx_orig_0);
+    xnn_simd_f32_t vx_1 = xnn_min_f32(vmax_x, vx_orig_1);
+    xnn_simd_f32_t vx_2 = xnn_min_f32(vmax_x, vx_orig_2);
+    xnn_simd_f32_t vx_3 = xnn_min_f32(vmax_x, vx_orig_3);
+    vx_0 = xnn_max_f32(vmin_x, vx_0);
+    vx_1 = xnn_max_f32(vmin_x, vx_1);
+    vx_2 = xnn_max_f32(vmin_x, vx_2);
+    vx_3 = xnn_max_f32(vmin_x, vx_3);
 
     // Since the polynomials are odd/even, we need x^2.
     const xnn_simd_f32_t vx2_0 = xnn_mul_f32(vx_0, vx_0);
@@ -601,8 +609,8 @@ void xnn_f32_vapproxgelu_ukernel__fma3_rational_12_10_div_u32(
     input += xnn_simd_size_f32;
 
     // Clamp the inputs to the interpolation range.
-    xnn_simd_f32_t vx = xnn_min_f32(vmax_abs_x, vx_orig);
-    vx = xnn_max_f32(xnn_neg_f32(vmax_abs_x), vx);
+    xnn_simd_f32_t vx = xnn_min_f32(vmax_x, vx_orig);
+    vx = xnn_max_f32(vmin_x, vx);
 
     // Since the polynomials are odd/even, we need x^2.
     const xnn_simd_f32_t vx2 = xnn_mul_f32(vx, vx);
@@ -637,8 +645,8 @@ void xnn_f32_vapproxgelu_ukernel__fma3_rational_12_10_div_u32(
     xnn_simd_f32_t vx_orig = xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
 
   // See above for comments.
-  xnn_simd_f32_t vx = xnn_min_f32(vmax_abs_x, vx_orig);
-  vx = xnn_max_f32(xnn_neg_f32(vmax_abs_x), vx);
+  xnn_simd_f32_t vx = xnn_min_f32(vmax_x, vx_orig);
+  vx = xnn_max_f32(vmin_x, vx);
   const xnn_simd_f32_t vx2 = xnn_mul_f32(vx, vx);
   xnn_simd_f32_t vp = xnn_fmadd_f32(vx2, valpha_11, valpha_9);
   vp = xnn_fmadd_f32(vx2, vp, valpha_7);
