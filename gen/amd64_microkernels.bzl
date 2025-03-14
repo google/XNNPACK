@@ -7,6 +7,7 @@ Auto-generated file. Do not edit!
 
 PROD_AMD64_ASM_MICROKERNEL_SRCS = [
     "src/bf16-f32-gemm/gen/bf16-f32-gemm-1x32c2-minmax-asm-amd64-avx512bf16-broadcast.S",
+    "src/bf16-f32-gemm/gen/bf16-f32-gemm-8x32c2-minmax-asm-amd64-avx512bf16-broadcast.S",
     "src/bf16-f32-gemm/gen/bf16-f32-gemm-11x32c2-minmax-asm-amd64-avx512bf16-broadcast.S",
     "src/f32-gemm/gen/f32-gemm-1x32c2-minmax-asm-amd64-avx512f-broadcast.S",
     "src/f32-gemm/gen/f32-gemm-5x32c2-minmax-asm-amd64-avx512f-broadcast.S",
@@ -34,7 +35,6 @@ NON_PROD_AMD64_ASM_MICROKERNEL_SRCS = [
     "src/bf16-f32-gemm/gen/bf16-f32-gemm-7x16c2-minmax-asm-amd64-avx512bf16-broadcast.S",
     "src/bf16-f32-gemm/gen/bf16-f32-gemm-7x32c2-minmax-asm-amd64-avx512bf16-broadcast.S",
     "src/bf16-f32-gemm/gen/bf16-f32-gemm-8x16c2-minmax-asm-amd64-avx512bf16-broadcast.S",
-    "src/bf16-f32-gemm/gen/bf16-f32-gemm-8x32c2-minmax-asm-amd64-avx512bf16-broadcast.S",
     "src/bf16-f32-gemm/gen/bf16-f32-gemm-9x16c2-minmax-asm-amd64-avx512bf16-broadcast.S",
     "src/bf16-f32-gemm/gen/bf16-f32-gemm-9x32c2-minmax-asm-amd64-avx512bf16-broadcast.S",
     "src/bf16-f32-gemm/gen/bf16-f32-gemm-10x16c2-minmax-asm-amd64-avx512bf16-broadcast.S",
