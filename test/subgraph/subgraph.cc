@@ -50,7 +50,7 @@ TEST(SUBGRAPH, multiple_outputs_with_hanging_nodes) {
     .AddDynamicTensorF32({32}, 2)
     .AddOutputTensorF32({32}, 3)
     // Add split3 with 1 consumed output and two unconsumed outputs.
-    .AddEvenSplit3(0, 1, 2, 3)
+    .AddEvenSplit3(0, 0, 1, 2, 3)
     .Optimize();
 
   // The node is still there.
@@ -74,7 +74,7 @@ TEST(SUBGRAPH, even_split3_first_two_outputs_optimized_away) {
     .AddDynamicTensorF32({3}, 2)
     .AddOutputTensorF32({3}, 3)
     // Add split3 with 1 consumed output and two unconsumed outputs.
-    .AddEvenSplit3(0, 1, 2, 3);
+    .AddEvenSplit3(0, 0, 1, 2, 3);
   // Regression test for a crash where we could not deal with a split where the
   // 0th output is not used (and optimized away).
   auto output = tester.RunWithFusion<float>();
