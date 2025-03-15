@@ -77,7 +77,7 @@ struct UnaryOpInfo {
   virtual float ReferenceImpl(float x, const xnn_unary_params& params) const {
     XNN_UNREACHABLE;
   }
-  virtual int ReferenceImpl(int x, const xnn_unary_params& params) const {
+  virtual int32_t ReferenceImpl(int32_t x, const xnn_unary_params& params) const {
     XNN_UNREACHABLE;
   }
 
@@ -125,7 +125,7 @@ struct Convert : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return x;
   }
-  int ReferenceImpl(int x, const xnn_unary_params&) const override { return x; }
+  int32_t ReferenceImpl(int32_t x, const xnn_unary_params&) const override { return x; }
 
   float Tolerance(float y_ref, xnn_datatype datatype) const override {
     return xnn_datatype_is_quantized(datatype)
@@ -138,8 +138,8 @@ struct ReLU : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return std::max(x, 0.0f);
   }
-  int ReferenceImpl(int x, const xnn_unary_params&) const override {
-    return std::max(x, 0);
+  int32_t ReferenceImpl(int32_t x, const xnn_unary_params&) const override {
+    return std::max<int32_t>(x, 0);
   }
 };
 
@@ -147,7 +147,7 @@ struct Abs : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return std::abs(x);
   }
-  int ReferenceImpl(int x, const xnn_unary_params&) const override {
+  int32_t ReferenceImpl(int32_t x, const xnn_unary_params&) const override {
     return std::abs(x);
   }
 };
@@ -156,7 +156,7 @@ struct Negate : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return -x;
   }
-  int ReferenceImpl(int x, const xnn_unary_params&) const override {
+  int32_t ReferenceImpl(int32_t x, const xnn_unary_params&) const override {
     return -x;
   }
 };
@@ -173,8 +173,8 @@ struct Clamp : public UnaryOpInfo {
     return std::min<float>(std::max<float>(x, params.clamp.min),
                            params.clamp.max);
   }
-  int ReferenceImpl(int x, const xnn_unary_params& params) const override {
-    return std::min<int>(std::max<int>(x, params.clamp.min), params.clamp.max);
+  int32_t ReferenceImpl(int32_t x, const xnn_unary_params& params) const override {
+    return std::min<int32_t>(std::max<int32_t>(x, params.clamp.min), params.clamp.max);
   }
 
   xnn_quantization_params InputQuantizationParams(
@@ -419,8 +419,8 @@ struct Square : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return x * x;
   }
-  int ReferenceImpl(int x, const xnn_unary_params&) const override {
-    return static_cast<int>(static_cast<int64_t>(x) * static_cast<int64_t>(x));
+  int32_t ReferenceImpl(int32_t x, const xnn_unary_params&) const override {
+    return static_cast<int32_t>(static_cast<int64_t>(x) * static_cast<int64_t>(x));
   }
 
   float Tolerance(float y_ref, xnn_datatype datatype) const override {
@@ -605,7 +605,7 @@ struct CountLeadingZeros : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return (float)math_clz_u32((int)x);
   }
-  int ReferenceImpl(int x, const xnn_unary_params&) const override {
+  int32_t ReferenceImpl(int32_t x, const xnn_unary_params&) const override {
     return math_clz_u32(x);
   }
 };
@@ -614,7 +614,7 @@ struct BitwiseNot : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return ~(int)x;
   }
-  int ReferenceImpl(int x, const xnn_unary_params&) const override {
+  int32_t ReferenceImpl(int32_t x, const xnn_unary_params&) const override {
     return ~x;
   }
 };
@@ -623,7 +623,7 @@ struct Popcount : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return (float)math_popcount_u32((int)x);
   }
-  int ReferenceImpl(int x, const xnn_unary_params&) const override {
+  int32_t ReferenceImpl(int32_t x, const xnn_unary_params&) const override {
     return math_popcount_u32(x);
   }
 };
@@ -632,7 +632,7 @@ struct Sign : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return x < 0.0f ? -1.0f : x > 0.0f ? 1.0f : 0.0f;
   }
-  int ReferenceImpl(int x, const xnn_unary_params&) const override {
+  int32_t ReferenceImpl(int32_t x, const xnn_unary_params&) const override {
     return x < 0 ? -1 : x > 0 ? 1 : 0;
   }
 };
@@ -735,10 +735,10 @@ void UnaryReferenceImpl(
   for (size_t i = 0; i < n; i++) {
     float y_i;
     if (std::is_integral<In>::value && std::is_integral<Out>::value) {
-      y[i] = op_info.ReferenceImpl((int)x[i], params);
+      y[i] = op_info.ReferenceImpl((int32_t)x[i], params);
     } else {
       if (std::is_integral<In>::value) {
-        y_i = op_info.ReferenceImpl((int)x[i], params);
+        y_i = op_info.ReferenceImpl((int32_t)x[i], params);
       } else {
         y_i = op_info.ReferenceImpl(static_cast<float>(x[i]), params);
       }
