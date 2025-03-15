@@ -99,9 +99,6 @@ static void benchmark_binary_operator(benchmark::State& state,
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32dist = std::uniform_real_distribution<float>(
-      std::max<float>(std::numeric_limits<T>::lowest(), -128.0f),
-      std::min<float>(std::numeric_limits<T>::max(), 127.0f));
 
   xnnpack::Buffer<T> input1(batch_size + XNN_EXTRA_BYTES / sizeof(T));
   xnnpack::Buffer<T> input2(batch_size + XNN_EXTRA_BYTES / sizeof(T));
@@ -296,9 +293,6 @@ static void benchmark_tflite_binary_operator(
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32dist = std::uniform_real_distribution<float>(
-      std::max<float>(std::numeric_limits<T>::lowest(), -128.0f),
-      std::min<float>(std::numeric_limits<T>::max(), 127.0f));
   T* input1_ptr = reinterpret_cast<T*>(interpreter->tensor(0)->data.raw);
   T* input2_ptr = reinterpret_cast<T*>(interpreter->tensor(1)->data.raw);
   xnnpack::DatatypeGenerator<T> gen;
