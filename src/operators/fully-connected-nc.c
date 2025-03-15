@@ -1666,10 +1666,21 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
   }
 
   const struct xnn_gemm_config* gemm_nr2_config = xnn_init_f32_gemm_nr2_config();
-  if (gemm_config->nr > output_channels) {
-    // Default microkernel is suboptimal, use a microkernel that better supports less output channels.
-    if (gemm_nr2_config != NULL && gemm_nr2_config->minmax.gemm[gemm_nr2_config->mr-1].function[XNN_UARCH_DEFAULT] != NULL) {
-      gemm_config = gemm_nr2_config;
+
+  // Select microkernel configuration based on output channels
+  if (gemm_nr2_config != NULL) {
+    const size_t nr = gemm_config->nr;
+    const size_t nr2 = gemm_nr2_config->nr;
+    size_t nr_overcompute = (nr - output_channels % nr) % nr;
+    size_t nr2_overcompute = (nr2 - output_channels % nr2) % nr2;
+    // Switch to alternative microkernel when:
+    // 1. Alternative microkernel better supports less output channels, or
+    // 2. Alternative microkernel has less overcompute and default wastes >1% of output channels
+    if (nr > output_channels || (nr2_overcompute < nr_overcompute && nr_overcompute * 100 > output_channels)) {
+      // Default microkernel is suboptimal, use a microkernel that better supports less output channels.
+      if (gemm_nr2_config->minmax.gemm[gemm_nr2_config->mr-1].function[XNN_UARCH_DEFAULT] != NULL ) {
+        gemm_config = gemm_nr2_config;
+      }
     }
   }
 
