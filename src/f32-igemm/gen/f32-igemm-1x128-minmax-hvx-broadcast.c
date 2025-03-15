@@ -120,7 +120,7 @@ void xnn_f32_igemm_minmax_ukernel_1x128__hvx_broadcast(
         c0 += 32;
         nc ^= 32;
       }
-      vstu_variable_scalar((char*)c0, nc*sizeof(float), vacc0x0);
+      Q6_V_vstu_variable(c0, nc * sizeof(float), vacc0x0);
 
       nc = 0;
     }

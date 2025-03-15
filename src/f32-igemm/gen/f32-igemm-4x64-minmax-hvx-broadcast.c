@@ -173,10 +173,10 @@ void xnn_f32_igemm_minmax_ukernel_4x64__hvx_broadcast(
         c0 += 32;
         nc ^= 32;
       }
-      vstu_variable_scalar((char*)c3, nc*sizeof(float), vacc3x0);
-      vstu_variable_scalar((char*)c2, nc*sizeof(float), vacc2x0);
-      vstu_variable_scalar((char*)c1, nc*sizeof(float), vacc1x0);
-      vstu_variable_scalar((char*)c0, nc*sizeof(float), vacc0x0);
+      Q6_V_vstu_variable(c3, nc * sizeof(float), vacc3x0);
+      Q6_V_vstu_variable(c2, nc * sizeof(float), vacc2x0);
+      Q6_V_vstu_variable(c1, nc * sizeof(float), vacc1x0);
+      Q6_V_vstu_variable(c0, nc * sizeof(float), vacc0x0);
 
       nc = 0;
     }

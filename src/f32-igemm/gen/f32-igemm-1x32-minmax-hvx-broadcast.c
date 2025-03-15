@@ -84,7 +84,7 @@ void xnn_f32_igemm_minmax_ukernel_1x32__hvx_broadcast(
       a = (const float**restrict) ((uintptr_t) a - ks);
       nc -= 32;
     } else {
-      vstu_variable_scalar((char*)c0, nc*sizeof(float), vacc0x0);
+      Q6_V_vstu_variable(c0, nc * sizeof(float), vacc0x0);
 
       nc = 0;
     }

@@ -339,22 +339,22 @@ void xnn_f32_igemm_minmax_ukernel_16x32__hvx_broadcast(
       a = (const float**restrict) ((uintptr_t) a - ks);
       nc -= 32;
     } else {
-      vstu_variable_scalar((char*)c15, nc*sizeof(float), vacc15x0);
-      vstu_variable_scalar((char*)c14, nc*sizeof(float), vacc14x0);
-      vstu_variable_scalar((char*)c13, nc*sizeof(float), vacc13x0);
-      vstu_variable_scalar((char*)c12, nc*sizeof(float), vacc12x0);
-      vstu_variable_scalar((char*)c11, nc*sizeof(float), vacc11x0);
-      vstu_variable_scalar((char*)c10, nc*sizeof(float), vacc10x0);
-      vstu_variable_scalar((char*)c9, nc*sizeof(float), vacc9x0);
-      vstu_variable_scalar((char*)c8, nc*sizeof(float), vacc8x0);
-      vstu_variable_scalar((char*)c7, nc*sizeof(float), vacc7x0);
-      vstu_variable_scalar((char*)c6, nc*sizeof(float), vacc6x0);
-      vstu_variable_scalar((char*)c5, nc*sizeof(float), vacc5x0);
-      vstu_variable_scalar((char*)c4, nc*sizeof(float), vacc4x0);
-      vstu_variable_scalar((char*)c3, nc*sizeof(float), vacc3x0);
-      vstu_variable_scalar((char*)c2, nc*sizeof(float), vacc2x0);
-      vstu_variable_scalar((char*)c1, nc*sizeof(float), vacc1x0);
-      vstu_variable_scalar((char*)c0, nc*sizeof(float), vacc0x0);
+      Q6_V_vstu_variable(c15, nc * sizeof(float), vacc15x0);
+      Q6_V_vstu_variable(c14, nc * sizeof(float), vacc14x0);
+      Q6_V_vstu_variable(c13, nc * sizeof(float), vacc13x0);
+      Q6_V_vstu_variable(c12, nc * sizeof(float), vacc12x0);
+      Q6_V_vstu_variable(c11, nc * sizeof(float), vacc11x0);
+      Q6_V_vstu_variable(c10, nc * sizeof(float), vacc10x0);
+      Q6_V_vstu_variable(c9, nc * sizeof(float), vacc9x0);
+      Q6_V_vstu_variable(c8, nc * sizeof(float), vacc8x0);
+      Q6_V_vstu_variable(c7, nc * sizeof(float), vacc7x0);
+      Q6_V_vstu_variable(c6, nc * sizeof(float), vacc6x0);
+      Q6_V_vstu_variable(c5, nc * sizeof(float), vacc5x0);
+      Q6_V_vstu_variable(c4, nc * sizeof(float), vacc4x0);
+      Q6_V_vstu_variable(c3, nc * sizeof(float), vacc3x0);
+      Q6_V_vstu_variable(c2, nc * sizeof(float), vacc2x0);
+      Q6_V_vstu_variable(c1, nc * sizeof(float), vacc1x0);
+      Q6_V_vstu_variable(c0, nc * sizeof(float), vacc0x0);
 
       nc = 0;
     }

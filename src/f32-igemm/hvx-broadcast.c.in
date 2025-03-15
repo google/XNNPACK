@@ -131,11 +131,11 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
             }
           $else:
             $for M in reversed(range(MR)):
-              vstu_variable_scalar((char*)c${M}, nc*sizeof(float), vacc${M}x0);
+              Q6_V_vstu_variable(c${M}, nc * sizeof(float), vacc${M}x0);
             $break
         $elif LOG2N == 5:
             $for M in reversed(range(MR)):
-              vstu_variable_scalar((char*)c${M}, nc*sizeof(float), vacc${M}x0);
+              Q6_V_vstu_variable(c${M}, nc * sizeof(float), vacc${M}x0);
             $break  
 
       nc = 0;

@@ -343,9 +343,9 @@ uint8x16x4_t vld1q_u8_x4(const uint8_t* address) {
 #include <hexagon_types.h>
 #include <hvx_hexagon_protos.h>
 
-// Conditional Store:
-// - addr: destination
-// - n: number of elements * sizeof(datatype) where n <= 128
+// Variable Sized Store:
+// - addr: destination pointer (unaligned)
+// - n: number of bytes (n <= 128)
 // - vin: input
 static XNN_INTRINSIC
 void Q6_V_vstu_variable(void *addr, uint32_t n, HVX_Vector vin)
@@ -368,16 +368,6 @@ void Q6_V_vstu_variable(void *addr, uint32_t n, HVX_Vector vin)
 
     ql_not = Q6_Q_or_QQn(ql_not, qr);
     Q6_vmem_QnRIV(ql_not, (HVX_Vector*) addr, vin);
-}
-
-static XNN_INTRINSIC
-void vstu_variable_scalar(char *bytes, size_t num_bytes, HVX_Vector vin) {
-  char temp[128]  __attribute__((aligned(128)));
-  *((HVX_Vector *)temp) = vin;
-  for (size_t idx = 0; idx < num_bytes; idx++){
-     *bytes = temp[idx];
-     bytes++;
-  }
 }
 
 // 32x16 Integer Multiplication:
