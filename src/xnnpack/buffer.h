@@ -402,6 +402,21 @@ class Tensor {
     return result;
   }
 
+  // This is similar to the above, but only slices one dimension.
+  Tensor<T, Alignment> slice(size_t dim, int64_t begin, int64_t end) const {
+    assert(dim < rank());
+
+    begin = begin < 0 ? extents_[dim] + begin : begin;
+    end = end <= 0 ? extents_[dim] + end : end;
+
+    Tensor<T, Alignment> result(*this);
+    result.extents_[dim] = end - begin;
+    result.begin_ = begin_ + strides_[dim] * begin;
+    result.end_ = begin_ + strides_[dim] * end;
+
+    return result;
+  }
+
   // Remove `pre` elements from the beginning of each dimension, and `post`
   // elements from the end of each dimension.
   Tensor<T, Alignment> crop_padding(const index_type& pre,

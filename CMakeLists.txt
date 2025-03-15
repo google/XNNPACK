@@ -1397,9 +1397,6 @@ IF(XNNPACK_BUILD_TESTS)
         concatenate
         copy
         depth-to-space-2d
-        even-split2
-        even-split3
-        even-split4
         even-split
         fully-connected
         max-pooling-2d

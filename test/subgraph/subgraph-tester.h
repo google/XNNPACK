@@ -391,10 +391,9 @@ class SubgraphTester {
     return *this;
   }
 
-  SubgraphTester& AddConcatenate2(size_t axis, uint32_t input1_id, uint32_t input2_id, uint32_t output_id) {
-    const uint32_t input_ids[] = {input1_id, input2_id}; // Create an array of input IDs
+  SubgraphTester& AddConcatenate(size_t axis, std::vector<uint32_t> input_ids, uint32_t output_id) {
     const xnn_status status = xnn_define_concatenate(
-        subgraph_.get(), axis, 2 /* num_inputs */, input_ids, output_id, 0 /* flags */);
+        subgraph_.get(), axis, input_ids.size(), input_ids.data(), output_id, 0 /* flags */);
     EXPECT_EQ(status, xnn_status_success);
     return *this;
   }
@@ -633,18 +632,9 @@ class SubgraphTester {
     return *this;
   }
 
-  SubgraphTester& AddEvenSplit2(size_t split_dim, uint32_t input_id, uint32_t output1_id, uint32_t output2_id) {
-    const uint32_t output_ids[] = {output1_id, output2_id};
+  SubgraphTester& AddEvenSplit(size_t split_dim, uint32_t input_id, std::vector<uint32_t> output_ids) {
     const xnn_status status =
-      xnn_define_even_split(subgraph_.get(), split_dim, input_id, 2, output_ids, 0 /* flags */);
-    EXPECT_EQ(status, xnn_status_success);
-    return *this;
-  }
-
-  SubgraphTester& AddEvenSplit3(size_t split_dim, uint32_t input_id, uint32_t output1_id, uint32_t output2_id, uint32_t output3_id) {
-    const uint32_t output_ids[] = {output1_id, output2_id, output3_id};
-    const xnn_status status =
-      xnn_define_even_split(subgraph_.get(), split_dim, input_id, 3, output_ids, 0 /* flags */);
+      xnn_define_even_split(subgraph_.get(), split_dim, input_id, output_ids.size(), output_ids.data(), 0 /* flags */);
     EXPECT_EQ(status, xnn_status_success);
     return *this;
   }

@@ -692,10 +692,10 @@ TEST(COPY, fused_upstream_with_multiple_outputs) {
       .AddDynamicTensorF32(split_dims, copy_out1)
       .AddDynamicTensorF32(split_dims, copy_out2)
       .AddOutputTensorF32(dims, output_id)
-      .AddEvenSplit2(axis, input_id, split_out1, split_out2)
+      .AddEvenSplit(axis, input_id, {split_out1, split_out2})
       .AddCopy(split_out1, copy_out1)
       .AddCopy(split_out2, copy_out2)
-      .AddConcatenate2(axis, copy_out1, copy_out2, output_id);
+      .AddConcatenate(axis, {copy_out1, copy_out2}, output_id);
 
   xnnpack::Buffer<float> unoptimized_output = tester.RunWithoutFusion<float>();
   EXPECT_EQ(tester.NumOperators(), 4);

@@ -131,18 +131,11 @@ xnnpack_unit_test(
     deps = SUBGRAPH_TEST_DEPS,
 )
 
-[xnnpack_unit_test(
-    name = "concatenate%d_test" % n,
-    srcs = [
-        "concatenate%d.cc" % n,
-    ],
+xnnpack_unit_test(
+    name = "concatenate_test",
+    srcs = ["concatenate.cc"],
     deps = SUBGRAPH_TEST_DEPS,
-) for n in [
-    2,
-    3,
-    4,
-    5,
-]]
+)
 
 xnnpack_unit_test(
     name = "convolution_2d_test",
@@ -174,17 +167,11 @@ xnnpack_unit_test(
     ],
 )
 
-[xnnpack_unit_test(
-    name = "even_split%d_test" % n,
-    srcs = [
-        "even-split%s.cc" % n,
-    ],
+xnnpack_unit_test(
+    name = "even_split_test",
+    srcs = ["even-split.cc"],
     deps = SUBGRAPH_TEST_DEPS,
-) for n in [
-    2,
-    3,
-    4,
-]]
+)
 
 xnnpack_unit_test(
     name = "fully_connected_test",
