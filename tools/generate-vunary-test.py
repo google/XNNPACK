@@ -36,6 +36,7 @@ OP_TYPES = {
     "vabs": "Abs",
     "vapproxgelu": "ApproxGELU",
     "vclamp": "Clamp",
+    "vcos": "Cosine",
     "velu": "ELU",
     "vexp": "Exp",
     "vgelu": "GELU",
@@ -50,7 +51,7 @@ OP_TYPES = {
     "vrndz": "RoundTowardsZero",
     "vrsqrt": "ReciprocalSquareRoot",
     "vsigmoid": "Sigmoid",
-    "vsin": "Sin",
+    "vsin": "Sine",
     "vsqr": "Square",
     "vsqrt": "SquareRoot",
     "vtanh": "TanH",
@@ -97,10 +98,16 @@ SPECIAL_VALUES_F32 = {
         "{1.0f, 0.0f, INFINITY}",  # Expected outputs.
         1,  # Error margin in ULP.
     ),
-    "Sin": (
+    "Sine": (
         3,  # Number of elements
         f"{{0.0f, {-math.pi/2:.8e},  {math.pi/2:.8e}}}",  # Inputs.
         "{0.0f, -1.0f, 1.0f}",  # Expected outputs.
+        1,  # Error margin in ULP.
+    ),
+    "Cosine": (
+        3,  # Number of elements
+        f"{{0.0f, {math.pi/2:.8e},  {-math.pi/2:.8e}}}",  # Inputs.
+        "{1.0f, 0.0f, 0.0f}",  # Expected outputs.
         1,  # Error margin in ULP.
     ),
 }
@@ -219,6 +226,7 @@ def main(args):
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/{op_header}"
 #include "test/next_prime.h"
+#include "test/unary-ops.h"
 #include "test/{tester_header}"
 
 """.format(

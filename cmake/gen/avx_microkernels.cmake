@@ -217,6 +217,7 @@ SET(NON_PROD_AVX_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vsub-avx-u8.c
   src/f32-vbinary/gen/f32-vsubc-avx-u8.c
   src/f32-vclamp/gen/f32-vclamp-avx-u8.c
+  src/f32-vcos/gen/f32-vcos-avx-rational-5-4-div.c
   src/f32-velu/gen/f32-velu-avx-rr2-lut4-p4-perm-u8.c
   src/f32-velu/gen/f32-velu-avx-rr2-lut4-p4-perm-u16.c
   src/f32-velu/gen/f32-velu-avx-rr2-lut4-p4-perm-u24.c

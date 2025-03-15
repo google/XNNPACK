@@ -723,6 +723,7 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-vcmul/gen/f32-vcmul-wasmsimd-u4.c
   src/f32-vcmul/gen/f32-vcmul-wasmsimd-u12.c
   src/f32-vcmul/gen/f32-vcmul-wasmsimd-u16.c
+  src/f32-vcos/gen/f32-vcos-wasmsimd-rational-5-4-div.c
   src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-lut16-p3-u4.c
   src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-lut16-p3-u8.c
   src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-lut16-p3-u12.c
