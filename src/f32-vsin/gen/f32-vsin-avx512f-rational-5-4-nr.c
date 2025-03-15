@@ -15,13 +15,9 @@
 #include "src/xnnpack/simd/f32-avx512f.h"
 
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/vunary.h"
-
-// Some useful constants that may not be defined.
-#ifndef M_PI
-#define M_PI 3.141592653589793238462643383280 /* pi */
-#endif
 
 
 void xnn_f32_vsin_ukernel__avx512f_rational_5_4_nr_u16(

@@ -192,6 +192,7 @@ void vunary(benchmark::State& state, uint64_t arch_flags,
 #include "src/f16-vtanh/f16-vtanh.h"
 #include "src/f32-vabs/f32-vabs.h"
 #include "src/f32-vapproxgelu/f32-vapproxgelu.h"
+#include "src/f32-vcos/f32-vcos.h"
 #include "src/f32-vgelu/f32-vgelu.h"
 #include "src/f32-vhswish/f32-vhswish.h"
 #include "src/f32-vlog/f32-vlog.h"
