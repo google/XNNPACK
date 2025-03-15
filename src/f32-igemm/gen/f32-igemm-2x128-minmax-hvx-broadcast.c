@@ -100,24 +100,24 @@ void xnn_f32_igemm_minmax_ukernel_2x128__hvx_broadcast(
     } while (p != 0);
 
     const HVX_Vector vmin = Q6_V_vsplat_R(params->scalar.min);
-    vacc0x0 = Q6_Vw_vmax_VwVw(vmin, vacc0x0);
-    vacc1x0 = Q6_Vw_vmax_VwVw(vmin, vacc1x0);
-    vacc0x1 = Q6_Vw_vmax_VwVw(vmin, vacc0x1);
-    vacc1x1 = Q6_Vw_vmax_VwVw(vmin, vacc1x1);
-    vacc0x2 = Q6_Vw_vmax_VwVw(vmin, vacc0x2);
-    vacc1x2 = Q6_Vw_vmax_VwVw(vmin, vacc1x2);
-    vacc0x3 = Q6_Vw_vmax_VwVw(vmin, vacc0x3);
-    vacc1x3 = Q6_Vw_vmax_VwVw(vmin, vacc1x3);
+    vacc0x0 = Q6_Vsf_vmax_VsfVsf(vmin, vacc0x0);
+    vacc1x0 = Q6_Vsf_vmax_VsfVsf(vmin, vacc1x0);
+    vacc0x1 = Q6_Vsf_vmax_VsfVsf(vmin, vacc0x1);
+    vacc1x1 = Q6_Vsf_vmax_VsfVsf(vmin, vacc1x1);
+    vacc0x2 = Q6_Vsf_vmax_VsfVsf(vmin, vacc0x2);
+    vacc1x2 = Q6_Vsf_vmax_VsfVsf(vmin, vacc1x2);
+    vacc0x3 = Q6_Vsf_vmax_VsfVsf(vmin, vacc0x3);
+    vacc1x3 = Q6_Vsf_vmax_VsfVsf(vmin, vacc1x3);
 
     const HVX_Vector vmax = Q6_V_vsplat_R(params->scalar.max);
-    vacc0x0 = Q6_Vw_vmin_VwVw(vmax, vacc0x0);
-    vacc1x0 = Q6_Vw_vmin_VwVw(vmax, vacc1x0);
-    vacc0x1 = Q6_Vw_vmin_VwVw(vmax, vacc0x1);
-    vacc1x1 = Q6_Vw_vmin_VwVw(vmax, vacc1x1);
-    vacc0x2 = Q6_Vw_vmin_VwVw(vmax, vacc0x2);
-    vacc1x2 = Q6_Vw_vmin_VwVw(vmax, vacc1x2);
-    vacc0x3 = Q6_Vw_vmin_VwVw(vmax, vacc0x3);
-    vacc1x3 = Q6_Vw_vmin_VwVw(vmax, vacc1x3);
+    vacc0x0 = Q6_Vsf_vmin_VsfVsf(vmax, vacc0x0);
+    vacc1x0 = Q6_Vsf_vmin_VsfVsf(vmax, vacc1x0);
+    vacc0x1 = Q6_Vsf_vmin_VsfVsf(vmax, vacc0x1);
+    vacc1x1 = Q6_Vsf_vmin_VsfVsf(vmax, vacc1x1);
+    vacc0x2 = Q6_Vsf_vmin_VsfVsf(vmax, vacc0x2);
+    vacc1x2 = Q6_Vsf_vmin_VsfVsf(vmax, vacc1x2);
+    vacc0x3 = Q6_Vsf_vmin_VsfVsf(vmax, vacc0x3);
+    vacc1x3 = Q6_Vsf_vmin_VsfVsf(vmax, vacc1x3);
 
     if XNN_LIKELY(nc >= 128) {
       *((HVX_UVector *)(c1)) = vacc1x0;

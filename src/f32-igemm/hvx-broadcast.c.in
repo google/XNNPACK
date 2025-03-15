@@ -95,12 +95,12 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
     const HVX_Vector vmin = Q6_V_vsplat_R(params->scalar.min);
     $for N in range(0, NR, 32):
       $for M in range(MR):
-        vacc${M}x${N//32} = Q6_Vw_vmax_VwVw(vmin, vacc${M}x${N//32});
+        vacc${M}x${N//32} = Q6_Vsf_vmax_VsfVsf(vmin, vacc${M}x${N//32});
 
     const HVX_Vector vmax = Q6_V_vsplat_R(params->scalar.max);
     $for N in range(0, NR, 32):
       $for M in range(MR):
-        vacc${M}x${N//32} = Q6_Vw_vmin_VwVw(vmax, vacc${M}x${N//32});
+        vacc${M}x${N//32} = Q6_Vsf_vmin_VsfVsf(vmax, vacc${M}x${N//32});
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in reversed(range(MR)):
