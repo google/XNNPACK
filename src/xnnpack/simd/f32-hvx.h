@@ -9,12 +9,13 @@
 
 #include <assert.h>
 #include <stddef.h>
+#include <string.h>  // for memcpy
 
 #include <hvx_hexagon_protos.h>
 #include <hexagon_protos.h>
 #include <hexagon_types.h>
-#include "xnnpack/common.h"
-#include "xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
 
 
 // SIMD vector type for f32 using HVX.
@@ -33,7 +34,7 @@ typedef HVX_Vector xnn_simd_f32_t;
 
 // Include the header for generic functions _after_ declaring the arch-specific
 // types and sizes.
-#include "xnnpack/simd/f32-generic-functions.h"
+#include "src/xnnpack/simd/f32-generic-functions.h"
 
 // Arithmetic operations.
 
@@ -67,7 +68,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_fmadd_f32(xnn_simd_f32_t a,
 static XNN_INLINE xnn_simd_f32_t xnn_fnmadd_f32(xnn_simd_f32_t a,
                                                 xnn_simd_f32_t b,
                                                 xnn_simd_f32_t c) {
-  return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vsub_VsfVsf(c, xnn_mul_qf32(a, b)));
+  return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vsub_VsfVsf(c, xnn_mul_f32(a, b)));
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_sub_f32(xnn_simd_f32_t a,
@@ -92,6 +93,12 @@ static XNN_INLINE xnn_simd_f32_t xnn_abs_f32(xnn_simd_f32_t a) {
 static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
   XNN_SIMD_CONST_F32(v0, 0);
   return Q6_Vsf_vsub_VsfVsf(v0, a);
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
+  XNN_UNREACHABLE;
+  XNN_SIMD_CONST_F32(v0, 0);
+  return v0;
 }
 
 // Logical operations.
@@ -181,7 +188,7 @@ xnn_load_tail_safe_f32(const float* input, size_t num_elements) {
   return *(HVX_Vector*) padded;
 }
 
-static XNN_INLINE void xnn_store_tail_f32(float* output, xnn_simd_f32_t v,
+static XNN_INLINE void xnn_store_tail_f32(float* output, xnn_simd_f32_t v,a
                                           size_t num_elements) {
   assert(num_elements > 0);
   assert(num_elements < xnn_simd_size_f32);
