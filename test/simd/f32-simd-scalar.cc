@@ -209,8 +209,8 @@ TEST_F(F32SimdSCALARTest, Round) {
     const xnn_simd_f32_t a = xnn_loadu_f32(inputs_.data());
     const xnn_simd_f32_t res = xnn_round_f32(a);
     xnn_storeu_f32(output_.data(), res);
-    ASSERT_EQ(std::bit_cast<uint32_t>(output_[0]),
-              std::bit_cast<uint32_t>(std::round(val)));
+    ASSERT_EQ(absl::bit_cast<uint32_t>(output_[0]),
+              absl::bit_cast<uint32_t>(std::round(val)));
   }
 }
 
