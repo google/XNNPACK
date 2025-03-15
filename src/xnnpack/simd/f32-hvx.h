@@ -92,7 +92,9 @@ static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
-  return Q6_Vsf_vround_Vsf(a);
+  XNN_UNREACHABLE;
+  XNN_SIMD_CONST_F32(v0, 0);
+  return v0;
 }
 
 // Logical operations.
