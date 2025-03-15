@@ -63,8 +63,17 @@ struct xnn_unary_elementwise_config {
 
 struct xnn_reduce_config {
   xnn_reduce_ukernel_fn ukernel;
+  xnn_reduce_ukernel_fn rmax_ukernel;
+  xnn_reduce_ukernel_fn rminmax_ukernel;
+  xnn_reduce_ukernel_fn rmin_ukernel;
   xnn_rdsum_ukernel_fn rd_ukernel;
-  xnn_init_reduce_params_fn init;
+  xnn_reduce_discontiguous_ukernel_fn rdmax_ukernel;
+  xnn_reduce_discontiguous_ukernel_fn rdmin_ukernel;
+  union {
+    xnn_init_reduce_params_fn reduce;
+    xnn_init_f32_default_params_fn f32;
+    xnn_init_f16_default_params_fn f16;
+  } init;
   xnn_update_reduce_params_fn update;
 };
 
@@ -187,14 +196,6 @@ struct xnn_zip_config {
   xnn_zipc_ukernel_fn x3;
   xnn_zipc_ukernel_fn x4;
   xnn_zipv_ukernel_fn xm;
-};
-
-struct xnn_rmax_config {
-  xnn_rmax_ukernel_fn ukernel;
-  union {
-    xnn_init_f32_default_params_fn f32;
-    xnn_init_f16_default_params_fn f16;
-  } init;
 };
 
 struct xnn_spmm_config {

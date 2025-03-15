@@ -1444,6 +1444,8 @@ enum xnn_reduce_operator {
   xnn_reduce_invalid = -1,
   xnn_reduce_sum,
   xnn_reduce_mean,
+  xnn_reduce_max,
+  xnn_reduce_min,
 };
 
 /// Define a Reduce Node and add it to a Subgraph.

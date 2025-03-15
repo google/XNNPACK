@@ -1749,6 +1749,10 @@ enum xnn_node_type xnn_reduce_operator_to_node_type(enum xnn_reduce_operator typ
       return xnn_node_type_static_mean;
     case xnn_reduce_sum:
       return xnn_node_type_static_sum;
+    case xnn_reduce_max:
+      return xnn_node_type_static_reduce_max;
+    case xnn_reduce_min:
+      return xnn_node_type_static_reduce_min;
     default:
       return xnn_node_type_invalid;
   }
@@ -1761,6 +1765,10 @@ enum xnn_reduce_operator xnn_node_type_to_reduce_operator(enum xnn_node_type typ
       return xnn_reduce_mean;
     case xnn_node_type_static_sum:
       return xnn_reduce_sum;
+    case xnn_node_type_static_reduce_max:
+      return xnn_reduce_max;
+    case xnn_node_type_static_reduce_min:
+      return xnn_reduce_min;
     default:
       return xnn_reduce_invalid;
   }
