@@ -6,19 +6,15 @@
 #include "src/xnnpack/vbinary.h"
 
 #include <algorithm>
-#include <cmath>
+#include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <limits>
 #include <random>
-#include <vector>
 
 #include "bench/utils.h"
 #include "include/xnnpack.h"
 #include "src/xnnpack/common.h"
-#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/math.h"
-#include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/buffer.h"

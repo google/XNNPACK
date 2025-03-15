@@ -5,6 +5,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/hardware-config.h"
 
 #ifndef XNN_UKERNEL_WITH_PARAMS
