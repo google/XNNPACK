@@ -192,7 +192,7 @@ xnn_load_tail_safe_f32(const float* input, size_t num_elements) {
   return *(HVX_Vector*) padded;
 }
 
-static XNN_INLINE void xnn_store_tail_f32(float* output, xnn_simd_f32_t v,a
+static XNN_INLINE void xnn_store_tail_f32(float* output, xnn_simd_f32_t v,
                                           size_t num_elements) {
   assert(num_elements > 0);
   assert(num_elements < xnn_simd_size_f32);
