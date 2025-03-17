@@ -12,7 +12,7 @@
 
 #include <riscv_vector.h>
 
-#include "src/xnnpack/vcvt.h"
+#include "src/xnnpack/microparams.h"
 
 
 void xnn_f32_f16_vcvt_ukernel__rvvfp16arith_u2v(

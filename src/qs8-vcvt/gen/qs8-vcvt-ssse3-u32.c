@@ -13,7 +13,7 @@
 #include <tmmintrin.h>
 
 #include "src/xnnpack/common.h"
-#include "src/xnnpack/vcvt.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/unaligned.h"
 
 

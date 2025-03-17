@@ -312,9 +312,11 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":config_hdrs",
+        ":hardware_config",
         ":math",
         ":memory",
         ":microparams",
+        ":microparams_init",
         ":mutex",
         ":xnnpack_h",
     ],

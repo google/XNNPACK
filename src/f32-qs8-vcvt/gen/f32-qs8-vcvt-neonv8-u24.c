@@ -14,7 +14,7 @@
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/intrinsics-polyfill.h"
-#include "src/xnnpack/vcvt.h"
+#include "src/xnnpack/microparams.h"
 
 
 void xnn_f32_qs8_vcvt_ukernel__neonv8_u24(

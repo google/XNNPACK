@@ -3,6 +3,12 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/hardware-config.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/microparams.h"
+
 #ifndef XNN_UKERNEL_WITH_PARAMS
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, row_tile, channel_tile, datatype, params_type, init_params) \
     XNN_UKERNEL(arch_flags, ukernel, row_tile, channel_tile, datatype, params_type)

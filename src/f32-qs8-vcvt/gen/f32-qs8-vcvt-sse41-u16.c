@@ -14,7 +14,7 @@
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/unaligned.h"
-#include "src/xnnpack/vcvt.h"
+#include "src/xnnpack/microparams.h"
 
 
 void xnn_f32_qs8_vcvt_ukernel__sse41_u16(

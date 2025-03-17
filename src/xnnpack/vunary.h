@@ -3,44 +3,60 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+// IWYU pragma: always_keep
+
+#ifndef THIRD_PARTY_XNNPACK_SRC_XNNPACK_VUNARY_H_
+#define THIRD_PARTY_XNNPACK_SRC_XNNPACK_VUNARY_H_
 
 #include <stddef.h>
 #include <stdint.h>
 
 #include "src/xnnpack/common.h"
-#include "src/xnnpack/microparams.h"
 
 #ifdef __cplusplus
-extern "C" {
-#endif
+#define _EXTERN_C_HEADER extern "C" {
+#define _EXTERN_C_FOOTER }
+#else
+#define _EXTERN_C_HEADER
+#define _EXTERN_C_FOOTER
+#endif  // __cplusplus
 
-#define DECLARE_BF16_UKERNEL_FUNCTION(fn_name, params_type) \
-  XNN_INTERNAL void fn_name(                                \
-      size_t n, const xnn_bfloat16* x, xnn_bfloat16* y,     \
-      const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+#define DECLARE_BF16_UKERNEL_FUNCTION(fn_name, params_type)        \
+  _EXTERN_C_HEADER                                                 \
+  XNN_INTERNAL void fn_name(                                       \
+      size_t n, const xnn_bfloat16* x, xnn_bfloat16* y,            \
+      const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]); \
+  _EXTERN_C_FOOTER
 
-#define DECLARE_F16_UKERNEL_FUNCTION(fn_name, params_type) \
-  XNN_INTERNAL void fn_name(                               \
-      size_t n, const xnn_float16* x, xnn_float16* y,      \
-      const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+#define DECLARE_F16_UKERNEL_FUNCTION(fn_name, params_type)         \
+  _EXTERN_C_HEADER                                                 \
+  XNN_INTERNAL void fn_name(                                       \
+      size_t n, const xnn_float16* x, xnn_float16* y,              \
+      const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]); \
+  _EXTERN_C_FOOTER
 
-#define DECLARE_F32_UKERNEL_FUNCTION(fn_name, params_type) \
-  XNN_INTERNAL void fn_name(                               \
-      size_t n, const float* x, float* y,                  \
-      const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+#define DECLARE_F32_UKERNEL_FUNCTION(fn_name, params_type)         \
+  _EXTERN_C_HEADER                                                 \
+  XNN_INTERNAL void fn_name(                                       \
+      size_t n, const float* x, float* y,                          \
+      const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]); \
+  _EXTERN_C_FOOTER
 
 #define XNN_UKERNEL(arch_flags, fn_name, batch_tile, vector_tile, datatype) \
+  _EXTERN_C_HEADER                                                          \
   XNN_INTERNAL void fn_name(size_t n, const int8_t* x, int8_t* y,           \
                             const struct xnn_s8_minmax_params               \
-                                params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+                                params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);  \
+  _EXTERN_C_FOOTER
 #include "src/s8-vclamp/s8-vclamp.h"
 #undef XNN_UKERNEL
 
 #define XNN_UKERNEL(arch_flags, fn_name, batch_tile, vector_tile, datatype) \
+  _EXTERN_C_HEADER                                                          \
   XNN_INTERNAL void fn_name(size_t n, const uint8_t* x, uint8_t* y,         \
                             const struct xnn_u8_minmax_params               \
-                                params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+                                params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);  \
+  _EXTERN_C_FOOTER
 #include "src/u8-vclamp/u8-vclamp.h"
 #undef XNN_UKERNEL
 
@@ -49,6 +65,7 @@ extern "C" {
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, fn_name, batch_tile, vector_tile, \
                                 datatype, params_type, init_params)           \
   DECLARE_F16_UKERNEL_FUNCTION(fn_name, params_type);
+// IWYU pragma: begin_exports
 #include "src/f16-vabs/f16-vabs.h"
 #include "src/f16-vapproxgelu/f16-vapproxgelu.h"
 #include "src/f16-vclamp/f16-vclamp.h"
@@ -66,6 +83,7 @@ extern "C" {
 #include "src/f16-vsqr/f16-vsqr.h"
 #include "src/f16-vsqrt/f16-vsqrt.h"
 #include "src/f16-vtanh/f16-vtanh.h"
+// IWYU pragma: end_exports
 #undef XNN_UKERNEL
 #undef XNN_UKERNEL_WITH_PARAMS
 
@@ -74,6 +92,7 @@ extern "C" {
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, fn_name, batch_tile, vector_tile, \
                                 datatype, params_type, init_params)           \
   DECLARE_F32_UKERNEL_FUNCTION(fn_name, params_type);
+// IWYU pragma: begin_exports
 #include "src/f32-vabs/f32-vabs.h"
 #include "src/f32-vapproxgelu/f32-vapproxgelu.h"
 #include "src/f32-vclamp/f32-vclamp.h"
@@ -95,31 +114,40 @@ extern "C" {
 #include "src/f32-vsqr/f32-vsqr.h"
 #include "src/f32-vsqrt/f32-vsqrt.h"
 #include "src/f32-vtanh/f32-vtanh.h"
+// IWYU pragma: end_exports
 #undef XNN_UKERNEL
 #undef XNN_UKERNEL_WITH_PARAMS
 
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, fn_name, batch_tile, vector_tile, \
                                 datatype, params_type, init_params)           \
+  _EXTERN_C_HEADER                                                            \
   XNN_INTERNAL void fn_name(                                                  \
       size_t n, const int8_t* input, int8_t* output,                          \
-      const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);            \
+  _EXTERN_C_FOOTER
+// IWYU pragma: begin_exports
 #include "src/qs8-vlrelu/qs8-vlrelu.h"
+// IWYU pragma: end_exports
 #undef XNN_UKERNEL_WITH_PARAMS
 
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, fn_name, batch_tile, vector_tile, \
                                 datatype, params_type, init_params)           \
+  _EXTERN_C_HEADER                                                            \
   XNN_INTERNAL void fn_name(                                                  \
       size_t n, const uint8_t* input, uint8_t* output,                        \
-      const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);            \
+  _EXTERN_C_FOOTER
+// IWYU pragma: begin_exports
 #include "src/qu8-vlrelu/qu8-vlrelu.h"
+// IWYU pragma: end_exports
 #undef XNN_UKERNEL_WITH_PARAMS
 
 #define DECLARE_XX_VUNARY_UKERNEL_FUNCTION(fn_name)           \
+  _EXTERN_C_HEADER                                            \
   XNN_INTERNAL void fn_name(size_t n, const void* x, void* y, \
-                            const void* params);
+                            const void* params);              \
+  _EXTERN_C_FOOTER
 
 DECLARE_XX_VUNARY_UKERNEL_FUNCTION(xnn_xx_copy_ukernel__scalar_memcpy)
 
-#ifdef __cplusplus
-}  // extern "C"
-#endif
+#endif  // THIRD_PARTY_XNNPACK_SRC_XNNPACK_VUNARY_H_

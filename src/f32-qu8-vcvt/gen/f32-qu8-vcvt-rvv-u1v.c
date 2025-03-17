@@ -13,7 +13,7 @@
 #include <riscv_vector.h>
 
 #include "src/xnnpack/math.h"
-#include "src/xnnpack/vcvt.h"
+#include "src/xnnpack/microparams.h"
 
 
 void xnn_f32_qu8_vcvt_ukernel__rvv_u1v(
