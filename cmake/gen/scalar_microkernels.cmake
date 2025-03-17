@@ -109,6 +109,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-vcopysign/gen/f32-vcopysign-scalar.c
   src/f32-vcopysign/gen/f32-vcopysignc-scalar.c
   src/f32-vcopysign/gen/f32-vrcopysignc-scalar.c
+  src/f32-vcos/gen/f32-vcos-scalar-rational-5-4-div.c
   src/f32-velu/gen/f32-velu-scalar-rr2-lut16-p3-u2.c
   src/f32-velu/gen/f32-velu-scalar-rr2-lut16-p3-u4.c
   src/f32-vexp/gen/f32-vexp-scalar-exp.c
@@ -129,6 +130,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-vrsqrt/gen/f32-vrsqrt-scalar-rsqrt-u1.c
   src/f32-vrsqrt/gen/f32-vrsqrt-scalar-rsqrt-u4.c
   src/f32-vsigmoid/gen/f32-vsigmoid-scalar-rr2-lut64-p2-div-u2.c
+  src/f32-vsin/gen/f32-vsin-scalar-rational-5-4-div.c
   src/f32-vsqrt/gen/f32-vsqrt-scalar-sqrt-u1.c
   src/f32-vtanh/gen/f32-vtanh-scalar-rational-9-8-div.c
   src/f32-vunary/gen/f32-vabs-scalar.c
@@ -508,7 +510,6 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-vsigmoid/gen/f32-vsigmoid-scalar-rr2-p5-div-u1.c
   src/f32-vsigmoid/gen/f32-vsigmoid-scalar-rr2-p5-div-u2.c
   src/f32-vsigmoid/gen/f32-vsigmoid-scalar-rr2-p5-div-u4.c
-  src/f32-vsin/gen/f32-vsin-scalar-rational-5-4-div.c
   src/f32-vsqrt/gen/f32-vsqrt-scalar-sqrt-u2.c
   src/f32-vsqrt/gen/f32-vsqrt-scalar-sqrt-u4.c
   src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-1x2-minmax-scalar.c

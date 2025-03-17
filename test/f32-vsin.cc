@@ -23,9 +23,10 @@
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/vunary.h"
 #include "test/next_prime.h"
+#include "test/unary-ops.h"
 #include "test/vunary-microkernel-tester.h"
 
-using TestInfo = Sin;
+using TestInfo = Sine;
 
 #define XNN_QUANTIZED(T) xnnpack::quantized<T>
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, datatype, params_type, init_params)       \

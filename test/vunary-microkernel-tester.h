@@ -149,6 +149,10 @@ class VUnaryMicrokernelTester {
       // msan errors if we don't initialize the XNN_EXTRA_BYTES.
       FillRandom(rng, x.data(), x.size(), domain, input_quantization_);
 
+      // Make a copy of the original input data for debugging output.
+      xnnpack::Buffer<In> x_orig(x.size());
+      std::copy(x.begin(), x.end(), x_orig.begin());
+
       // Compute reference results.
       UnaryReferenceImpl(x.data(), batch_size(), y_ref.data(), test_info,
                          input_quantization_, output_quantization_, params);
@@ -169,7 +173,7 @@ class VUnaryMicrokernelTester {
         ASSERT_NEAR(x[i], y_ref[i],
                     test_info.Tolerance(y_ref[i], xnn_datatype_of<Out>()))
             << "at " << i << " / " << batch_size() << ", x[" << i
-            << "] = " << std::scientific << (float)x[i];
+            << "] = " << std::scientific << (float)x_orig[i];
       }
     }
   }

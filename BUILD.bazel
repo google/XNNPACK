@@ -137,6 +137,7 @@ MICROKERNEL_DEFS = [
     "src/f32-vbinary/f32-vsub.h",
     "src/f32-vbinary/f32-vsubc.h",
     "src/f32-vclamp/f32-vclamp.h",
+    "src/f32-vcos/f32-vcos.h",
     "src/f32-velu/f32-velu.h",
     "src/f32-vexp/f32-vexp.h",
     "src/f32-vgelu/f32-vgelu.h",
