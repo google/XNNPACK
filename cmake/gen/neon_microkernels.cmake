@@ -65,6 +65,7 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/f32-vcopysign/gen/f32-vcopysign-neon.c
   src/f32-vcopysign/gen/f32-vcopysignc-neon.c
   src/f32-vcopysign/gen/f32-vrcopysignc-neon.c
+  src/f32-vcos/gen/f32-vcos-neon-rational-5-4-div.c
   src/f32-velu/gen/f32-velu-neon-rr2-lut16-p3-u8.c
   src/f32-vgelu/gen/f32-vgelu-neon-rational-12-10-div.c
   src/f32-vhswish/gen/f32-vhswish-neon-u16.c
@@ -77,6 +78,7 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/f32-vrnd/gen/f32-vrndz-neon-u8.c
   src/f32-vrsqrt/gen/f32-vrsqrt-neon-rsqrt-u16.c
   src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-lut64-p2-nr2recps-u8.c
+  src/f32-vsin/gen/f32-vsin-neon-rational-5-4-div.c
   src/f32-vtanh/gen/f32-vtanh-neon-rational-9-8-div.c
   src/f32-vunary/gen/f32-vabs-neon.c
   src/f32-vunary/gen/f32-vneg-neon.c
@@ -383,6 +385,7 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/f32-vcmul/gen/f32-vcmul-neon-u4.c
   src/f32-vcmul/gen/f32-vcmul-neon-u12.c
   src/f32-vcmul/gen/f32-vcmul-neon-u16.c
+  src/f32-vcos/gen/f32-vcos-neon-rational-5-4-nr.c
   src/f32-velu/gen/f32-velu-neon-rr2-lut16-p3-u4.c
   src/f32-velu/gen/f32-velu-neon-rr2-lut16-p3-u12.c
   src/f32-velu/gen/f32-velu-neon-rr2-lut16-p3-u16.c
@@ -413,7 +416,6 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-p5-nr2recps-u8.c
   src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-p5-nr2recps-u12.c
   src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-p5-nr2recps-u16.c
-  src/f32-vsin/gen/f32-vsin-neon-rational-5-4-div.c
   src/f32-vsin/gen/f32-vsin-neon-rational-5-4-nr.c
   src/f32-vtanh/gen/f32-vtanh-neon-rational-9-8-nr.c
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-1x16-minmax-neon-mlal-lane-prfm.c

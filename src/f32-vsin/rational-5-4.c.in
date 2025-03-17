@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert DIV in ("DIV", "NR")
+$assert FUN in {"SIN", "COS"}
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $BATCH_TILES = tuple(int(bt) for bt in BATCH_TILES.split(","))
 $SIMD_SIZE = BATCH_TILES[0]
@@ -14,20 +15,16 @@ $SIMD_SIZE = BATCH_TILES[0]
 #include "src/xnnpack/simd/f32-${ARCH}.h"
 
 #include "src/xnnpack/common.h"
+// #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/vunary.h"
-
-// Some useful constants that may not be defined.
-#ifndef M_PI
-#define M_PI 3.141592653589793238462643383280 /* pi */
-#endif
 
 $for BATCH_TILE in BATCH_TILES:
   $assert BATCH_TILE % SIMD_SIZE == 0
   $assert BATCH_TILE >= SIMD_SIZE
   $SIMD_TILE = BATCH_TILE // SIMD_SIZE
 
-  void xnn_f32_vsin_ukernel__${ARCH}_rational_5_4_${DIV.lower()}_u${BATCH_TILE}(
+  void xnn_f32_v${FUN.lower()}_ukernel__${ARCH}_rational_5_4_${DIV.lower()}_u${BATCH_TILE}(
       size_t batch,
       const float* input,
       float* output,
@@ -39,9 +36,17 @@ $for BATCH_TILE in BATCH_TILES:
     assert(output != NULL);
     assert(xnn_simd_size_f32 == ${SIMD_SIZE});
 
-    XNN_SIMD_CONST_F32(vpi, M_PI);
-    XNN_SIMD_CONST_F32(v2pi, 2.0 * M_PI);
-    XNN_SIMD_CONST_F32(v2pi_inv, 0.5 / M_PI);
+    // Some mathematical constants. We don't use pre-defined macros to ensure
+    // that they are rounded exactly as we expect them to be.
+    XNN_SIMD_CONST_F32(vpi, 3.1415927f);  // M_PI
+    XNN_SIMD_CONST_F32(v2pi_inv, 0.15915494f); // 0.5 / M_PI
+    $if FUN == "COS":
+      XNN_SIMD_CONST_F32(vpi_half, 1.5707964f);  // M_PI / 2
+
+    // The following two values sum to 2*Pi with ~33 bits of accuracy. We use
+    // them to accurately subtract integer multiples of 2*Pi from large inputs.
+    XNN_SIMD_CONST_F32(v2pi_hi, 6.28125f);  // 2.0 * M_PI (first 11 bits of mantissa)
+    XNN_SIMD_CONST_F32(v2pi_lo, 1.9353072e-3);  // 2.0 * M_PI (remaining bits)
 
     // The monomial coefficients of the numerator polynomial (odd,
     // `valpha_1` = `vone`).
@@ -71,7 +76,12 @@ $for BATCH_TILE in BATCH_TILES:
         $for N in range(SIMD_TILE):
           vx_div_2pi_${ABC[N]} = xnn_round_f32(vx_div_2pi_${ABC[N]});
         $for N in range(SIMD_TILE):
-          vx_${ABC[N]} = xnn_fnmadd_f32(vx_div_2pi_${ABC[N]}, v2pi, vx_${ABC[N]});
+          vx_${ABC[N]} = xnn_fnmadd_f32(vx_div_2pi_${ABC[N]}, v2pi_hi, vx_${ABC[N]});
+        $for N in range(SIMD_TILE):
+          vx_${ABC[N]} = xnn_fnmadd_f32(vx_div_2pi_${ABC[N]}, v2pi_lo, vx_${ABC[N]});
+        $if FUN == "COS":
+          $for N in range(SIMD_TILE):
+            vx_${ABC[N]} = xnn_sub_f32(vpi_half, vx_${ABC[N]});
         $for N in range(SIMD_TILE):
           vx_${ABC[N]} = xnn_min_f32(vx_${ABC[N]}, xnn_sub_f32(vpi, vx_${ABC[N]}));
         $for N in range(SIMD_TILE):
@@ -123,7 +133,10 @@ $for BATCH_TILE in BATCH_TILES:
       // Map the inputs to the interpolation range.
       xnn_simd_f32_t vx_div_2pi = xnn_mul_f32(vx, v2pi_inv);
       vx_div_2pi = xnn_round_f32(vx_div_2pi);
-      vx = xnn_fnmadd_f32(vx_div_2pi, v2pi, vx);
+      vx = xnn_fnmadd_f32(vx_div_2pi, v2pi_hi, vx);
+      vx = xnn_fnmadd_f32(vx_div_2pi, v2pi_lo, vx);
+      $if FUN == "COS":
+        vx = xnn_sub_f32(vpi_half, vx);
       vx = xnn_min_f32(vx, xnn_sub_f32(vpi, vx));
       vx = xnn_max_f32(vx, xnn_sub_f32(xnn_neg_f32(vpi), vx));
       vx = xnn_min_f32(vx, xnn_sub_f32(vpi, vx));
@@ -160,7 +173,10 @@ $for BATCH_TILE in BATCH_TILES:
         // Map the inputs to the interpolation range.
         xnn_simd_f32_t vx_div_2pi = xnn_mul_f32(vx, v2pi_inv);
         vx_div_2pi = xnn_round_f32(vx_div_2pi);
-        vx = xnn_fnmadd_f32(vx_div_2pi, v2pi, vx);
+        vx = xnn_fnmadd_f32(vx_div_2pi, v2pi_hi, vx);
+        vx = xnn_fnmadd_f32(vx_div_2pi, v2pi_lo, vx);
+        $if FUN == "COS":
+          vx = xnn_sub_f32(vpi_half, vx);
         vx = xnn_min_f32(vx, xnn_sub_f32(vpi, vx));
         vx = xnn_max_f32(vx, xnn_sub_f32(xnn_neg_f32(vpi), vx));
         vx = xnn_min_f32(vx, xnn_sub_f32(vpi, vx));

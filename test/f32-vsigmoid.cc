@@ -23,6 +23,7 @@
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/vunary.h"
 #include "test/next_prime.h"
+#include "test/unary-ops.h"
 #include "test/vunary-microkernel-tester.h"
 
 using TestInfo = Sigmoid;

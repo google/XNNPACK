@@ -15,13 +15,9 @@
 #include "src/xnnpack/simd/f32-scalar.h"
 
 #include "src/xnnpack/common.h"
+// #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/vunary.h"
-
-// Some useful constants that may not be defined.
-#ifndef M_PI
-#define M_PI 3.141592653589793238462643383280 /* pi */
-#endif
 
 
 void xnn_f32_vsin_ukernel__scalar_rational_5_4_div_u1(
@@ -36,9 +32,15 @@ void xnn_f32_vsin_ukernel__scalar_rational_5_4_div_u1(
   assert(output != NULL);
   assert(xnn_simd_size_f32 == 1);
 
-  XNN_SIMD_CONST_F32(vpi, M_PI);
-  XNN_SIMD_CONST_F32(v2pi, 2.0 * M_PI);
-  XNN_SIMD_CONST_F32(v2pi_inv, 0.5 / M_PI);
+  // Some mathematical constants. We don't use pre-defined macros to ensure
+  // that they are rounded exactly as we expect them to be.
+  XNN_SIMD_CONST_F32(vpi, 3.1415927f);  // M_PI
+  XNN_SIMD_CONST_F32(v2pi_inv, 0.15915494f); // 0.5 / M_PI
+
+  // The following two values sum to 2*Pi with ~33 bits of accuracy. We use
+  // them to accurately subtract integer multiples of 2*Pi from large inputs.
+  XNN_SIMD_CONST_F32(v2pi_hi, 6.28125f);  // 2.0 * M_PI (first 11 bits of mantissa)
+  XNN_SIMD_CONST_F32(v2pi_lo, 1.9353072e-3);  // 2.0 * M_PI (remaining bits)
 
   // The monomial coefficients of the numerator polynomial (odd,
   // `valpha_1` = `vone`).
@@ -60,7 +62,8 @@ void xnn_f32_vsin_ukernel__scalar_rational_5_4_div_u1(
     // Map the inputs to the interpolation range.
     xnn_simd_f32_t vx_div_2pi = xnn_mul_f32(vx, v2pi_inv);
     vx_div_2pi = xnn_round_f32(vx_div_2pi);
-    vx = xnn_fnmadd_f32(vx_div_2pi, v2pi, vx);
+    vx = xnn_fnmadd_f32(vx_div_2pi, v2pi_hi, vx);
+    vx = xnn_fnmadd_f32(vx_div_2pi, v2pi_lo, vx);
     vx = xnn_min_f32(vx, xnn_sub_f32(vpi, vx));
     vx = xnn_max_f32(vx, xnn_sub_f32(xnn_neg_f32(vpi), vx));
     vx = xnn_min_f32(vx, xnn_sub_f32(vpi, vx));
@@ -97,9 +100,15 @@ void xnn_f32_vsin_ukernel__scalar_rational_5_4_div_u2(
   assert(output != NULL);
   assert(xnn_simd_size_f32 == 1);
 
-  XNN_SIMD_CONST_F32(vpi, M_PI);
-  XNN_SIMD_CONST_F32(v2pi, 2.0 * M_PI);
-  XNN_SIMD_CONST_F32(v2pi_inv, 0.5 / M_PI);
+  // Some mathematical constants. We don't use pre-defined macros to ensure
+  // that they are rounded exactly as we expect them to be.
+  XNN_SIMD_CONST_F32(vpi, 3.1415927f);  // M_PI
+  XNN_SIMD_CONST_F32(v2pi_inv, 0.15915494f); // 0.5 / M_PI
+
+  // The following two values sum to 2*Pi with ~33 bits of accuracy. We use
+  // them to accurately subtract integer multiples of 2*Pi from large inputs.
+  XNN_SIMD_CONST_F32(v2pi_hi, 6.28125f);  // 2.0 * M_PI (first 11 bits of mantissa)
+  XNN_SIMD_CONST_F32(v2pi_lo, 1.9353072e-3);  // 2.0 * M_PI (remaining bits)
 
   // The monomial coefficients of the numerator polynomial (odd,
   // `valpha_1` = `vone`).
@@ -124,8 +133,10 @@ void xnn_f32_vsin_ukernel__scalar_rational_5_4_div_u2(
     xnn_simd_f32_t vx_div_2pi_1 = xnn_mul_f32(vx_1, v2pi_inv);
     vx_div_2pi_0 = xnn_round_f32(vx_div_2pi_0);
     vx_div_2pi_1 = xnn_round_f32(vx_div_2pi_1);
-    vx_0 = xnn_fnmadd_f32(vx_div_2pi_0, v2pi, vx_0);
-    vx_1 = xnn_fnmadd_f32(vx_div_2pi_1, v2pi, vx_1);
+    vx_0 = xnn_fnmadd_f32(vx_div_2pi_0, v2pi_hi, vx_0);
+    vx_1 = xnn_fnmadd_f32(vx_div_2pi_1, v2pi_hi, vx_1);
+    vx_0 = xnn_fnmadd_f32(vx_div_2pi_0, v2pi_lo, vx_0);
+    vx_1 = xnn_fnmadd_f32(vx_div_2pi_1, v2pi_lo, vx_1);
     vx_0 = xnn_min_f32(vx_0, xnn_sub_f32(vpi, vx_0));
     vx_1 = xnn_min_f32(vx_1, xnn_sub_f32(vpi, vx_1));
     vx_0 = xnn_max_f32(vx_0, xnn_sub_f32(xnn_neg_f32(vpi), vx_0));
@@ -166,7 +177,8 @@ void xnn_f32_vsin_ukernel__scalar_rational_5_4_div_u2(
     // Map the inputs to the interpolation range.
     xnn_simd_f32_t vx_div_2pi = xnn_mul_f32(vx, v2pi_inv);
     vx_div_2pi = xnn_round_f32(vx_div_2pi);
-    vx = xnn_fnmadd_f32(vx_div_2pi, v2pi, vx);
+    vx = xnn_fnmadd_f32(vx_div_2pi, v2pi_hi, vx);
+    vx = xnn_fnmadd_f32(vx_div_2pi, v2pi_lo, vx);
     vx = xnn_min_f32(vx, xnn_sub_f32(vpi, vx));
     vx = xnn_max_f32(vx, xnn_sub_f32(xnn_neg_f32(vpi), vx));
     vx = xnn_min_f32(vx, xnn_sub_f32(vpi, vx));
@@ -203,9 +215,15 @@ void xnn_f32_vsin_ukernel__scalar_rational_5_4_div_u4(
   assert(output != NULL);
   assert(xnn_simd_size_f32 == 1);
 
-  XNN_SIMD_CONST_F32(vpi, M_PI);
-  XNN_SIMD_CONST_F32(v2pi, 2.0 * M_PI);
-  XNN_SIMD_CONST_F32(v2pi_inv, 0.5 / M_PI);
+  // Some mathematical constants. We don't use pre-defined macros to ensure
+  // that they are rounded exactly as we expect them to be.
+  XNN_SIMD_CONST_F32(vpi, 3.1415927f);  // M_PI
+  XNN_SIMD_CONST_F32(v2pi_inv, 0.15915494f); // 0.5 / M_PI
+
+  // The following two values sum to 2*Pi with ~33 bits of accuracy. We use
+  // them to accurately subtract integer multiples of 2*Pi from large inputs.
+  XNN_SIMD_CONST_F32(v2pi_hi, 6.28125f);  // 2.0 * M_PI (first 11 bits of mantissa)
+  XNN_SIMD_CONST_F32(v2pi_lo, 1.9353072e-3);  // 2.0 * M_PI (remaining bits)
 
   // The monomial coefficients of the numerator polynomial (odd,
   // `valpha_1` = `vone`).
@@ -236,10 +254,14 @@ void xnn_f32_vsin_ukernel__scalar_rational_5_4_div_u4(
     vx_div_2pi_1 = xnn_round_f32(vx_div_2pi_1);
     vx_div_2pi_2 = xnn_round_f32(vx_div_2pi_2);
     vx_div_2pi_3 = xnn_round_f32(vx_div_2pi_3);
-    vx_0 = xnn_fnmadd_f32(vx_div_2pi_0, v2pi, vx_0);
-    vx_1 = xnn_fnmadd_f32(vx_div_2pi_1, v2pi, vx_1);
-    vx_2 = xnn_fnmadd_f32(vx_div_2pi_2, v2pi, vx_2);
-    vx_3 = xnn_fnmadd_f32(vx_div_2pi_3, v2pi, vx_3);
+    vx_0 = xnn_fnmadd_f32(vx_div_2pi_0, v2pi_hi, vx_0);
+    vx_1 = xnn_fnmadd_f32(vx_div_2pi_1, v2pi_hi, vx_1);
+    vx_2 = xnn_fnmadd_f32(vx_div_2pi_2, v2pi_hi, vx_2);
+    vx_3 = xnn_fnmadd_f32(vx_div_2pi_3, v2pi_hi, vx_3);
+    vx_0 = xnn_fnmadd_f32(vx_div_2pi_0, v2pi_lo, vx_0);
+    vx_1 = xnn_fnmadd_f32(vx_div_2pi_1, v2pi_lo, vx_1);
+    vx_2 = xnn_fnmadd_f32(vx_div_2pi_2, v2pi_lo, vx_2);
+    vx_3 = xnn_fnmadd_f32(vx_div_2pi_3, v2pi_lo, vx_3);
     vx_0 = xnn_min_f32(vx_0, xnn_sub_f32(vpi, vx_0));
     vx_1 = xnn_min_f32(vx_1, xnn_sub_f32(vpi, vx_1));
     vx_2 = xnn_min_f32(vx_2, xnn_sub_f32(vpi, vx_2));
@@ -302,7 +324,8 @@ void xnn_f32_vsin_ukernel__scalar_rational_5_4_div_u4(
     // Map the inputs to the interpolation range.
     xnn_simd_f32_t vx_div_2pi = xnn_mul_f32(vx, v2pi_inv);
     vx_div_2pi = xnn_round_f32(vx_div_2pi);
-    vx = xnn_fnmadd_f32(vx_div_2pi, v2pi, vx);
+    vx = xnn_fnmadd_f32(vx_div_2pi, v2pi_hi, vx);
+    vx = xnn_fnmadd_f32(vx_div_2pi, v2pi_lo, vx);
     vx = xnn_min_f32(vx, xnn_sub_f32(vpi, vx));
     vx = xnn_max_f32(vx, xnn_sub_f32(xnn_neg_f32(vpi), vx));
     vx = xnn_min_f32(vx, xnn_sub_f32(vpi, vx));
@@ -339,9 +362,15 @@ void xnn_f32_vsin_ukernel__scalar_rational_5_4_div_u8(
   assert(output != NULL);
   assert(xnn_simd_size_f32 == 1);
 
-  XNN_SIMD_CONST_F32(vpi, M_PI);
-  XNN_SIMD_CONST_F32(v2pi, 2.0 * M_PI);
-  XNN_SIMD_CONST_F32(v2pi_inv, 0.5 / M_PI);
+  // Some mathematical constants. We don't use pre-defined macros to ensure
+  // that they are rounded exactly as we expect them to be.
+  XNN_SIMD_CONST_F32(vpi, 3.1415927f);  // M_PI
+  XNN_SIMD_CONST_F32(v2pi_inv, 0.15915494f); // 0.5 / M_PI
+
+  // The following two values sum to 2*Pi with ~33 bits of accuracy. We use
+  // them to accurately subtract integer multiples of 2*Pi from large inputs.
+  XNN_SIMD_CONST_F32(v2pi_hi, 6.28125f);  // 2.0 * M_PI (first 11 bits of mantissa)
+  XNN_SIMD_CONST_F32(v2pi_lo, 1.9353072e-3);  // 2.0 * M_PI (remaining bits)
 
   // The monomial coefficients of the numerator polynomial (odd,
   // `valpha_1` = `vone`).
@@ -384,14 +413,22 @@ void xnn_f32_vsin_ukernel__scalar_rational_5_4_div_u8(
     vx_div_2pi_5 = xnn_round_f32(vx_div_2pi_5);
     vx_div_2pi_6 = xnn_round_f32(vx_div_2pi_6);
     vx_div_2pi_7 = xnn_round_f32(vx_div_2pi_7);
-    vx_0 = xnn_fnmadd_f32(vx_div_2pi_0, v2pi, vx_0);
-    vx_1 = xnn_fnmadd_f32(vx_div_2pi_1, v2pi, vx_1);
-    vx_2 = xnn_fnmadd_f32(vx_div_2pi_2, v2pi, vx_2);
-    vx_3 = xnn_fnmadd_f32(vx_div_2pi_3, v2pi, vx_3);
-    vx_4 = xnn_fnmadd_f32(vx_div_2pi_4, v2pi, vx_4);
-    vx_5 = xnn_fnmadd_f32(vx_div_2pi_5, v2pi, vx_5);
-    vx_6 = xnn_fnmadd_f32(vx_div_2pi_6, v2pi, vx_6);
-    vx_7 = xnn_fnmadd_f32(vx_div_2pi_7, v2pi, vx_7);
+    vx_0 = xnn_fnmadd_f32(vx_div_2pi_0, v2pi_hi, vx_0);
+    vx_1 = xnn_fnmadd_f32(vx_div_2pi_1, v2pi_hi, vx_1);
+    vx_2 = xnn_fnmadd_f32(vx_div_2pi_2, v2pi_hi, vx_2);
+    vx_3 = xnn_fnmadd_f32(vx_div_2pi_3, v2pi_hi, vx_3);
+    vx_4 = xnn_fnmadd_f32(vx_div_2pi_4, v2pi_hi, vx_4);
+    vx_5 = xnn_fnmadd_f32(vx_div_2pi_5, v2pi_hi, vx_5);
+    vx_6 = xnn_fnmadd_f32(vx_div_2pi_6, v2pi_hi, vx_6);
+    vx_7 = xnn_fnmadd_f32(vx_div_2pi_7, v2pi_hi, vx_7);
+    vx_0 = xnn_fnmadd_f32(vx_div_2pi_0, v2pi_lo, vx_0);
+    vx_1 = xnn_fnmadd_f32(vx_div_2pi_1, v2pi_lo, vx_1);
+    vx_2 = xnn_fnmadd_f32(vx_div_2pi_2, v2pi_lo, vx_2);
+    vx_3 = xnn_fnmadd_f32(vx_div_2pi_3, v2pi_lo, vx_3);
+    vx_4 = xnn_fnmadd_f32(vx_div_2pi_4, v2pi_lo, vx_4);
+    vx_5 = xnn_fnmadd_f32(vx_div_2pi_5, v2pi_lo, vx_5);
+    vx_6 = xnn_fnmadd_f32(vx_div_2pi_6, v2pi_lo, vx_6);
+    vx_7 = xnn_fnmadd_f32(vx_div_2pi_7, v2pi_lo, vx_7);
     vx_0 = xnn_min_f32(vx_0, xnn_sub_f32(vpi, vx_0));
     vx_1 = xnn_min_f32(vx_1, xnn_sub_f32(vpi, vx_1));
     vx_2 = xnn_min_f32(vx_2, xnn_sub_f32(vpi, vx_2));
@@ -498,7 +535,8 @@ void xnn_f32_vsin_ukernel__scalar_rational_5_4_div_u8(
     // Map the inputs to the interpolation range.
     xnn_simd_f32_t vx_div_2pi = xnn_mul_f32(vx, v2pi_inv);
     vx_div_2pi = xnn_round_f32(vx_div_2pi);
-    vx = xnn_fnmadd_f32(vx_div_2pi, v2pi, vx);
+    vx = xnn_fnmadd_f32(vx_div_2pi, v2pi_hi, vx);
+    vx = xnn_fnmadd_f32(vx_div_2pi, v2pi_lo, vx);
     vx = xnn_min_f32(vx, xnn_sub_f32(vpi, vx));
     vx = xnn_max_f32(vx, xnn_sub_f32(xnn_neg_f32(vpi), vx));
     vx = xnn_min_f32(vx, xnn_sub_f32(vpi, vx));
