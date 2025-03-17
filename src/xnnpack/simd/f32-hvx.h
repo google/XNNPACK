@@ -50,7 +50,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_mul_f32(xnn_simd_f32_t a,
   return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(a, b));
 }
 
-static XNN_INLINE xnn_simd_f32_t xnn_rcp_f32(xnn_simd_f32_t a){
+static XNN_INLINE xnn_simd_f32_t xnn_rcp_f32(xnn_simd_f32_t a) {
   return fast_inverse__vsf(a);
 }
 
@@ -150,7 +150,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_loadu_f32(const float* ptr) {
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_load_f32(const float* ptr) {
-  return *((HVX_UVector*) ptr);
+  return *((HVX_Vector*) ptr);
 }
 
 static XNN_INLINE void xnn_storeu_f32(float* ptr, xnn_simd_f32_t v) {
