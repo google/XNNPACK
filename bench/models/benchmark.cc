@@ -211,6 +211,15 @@ static void FP32LayerNorm(benchmark::State& state) {
   });
 }
 
+static void FP32DepthwiseSeparable(benchmark::State& state) {
+  models::FP32DepthwiseSeparableWeights weights;
+  BenchmarkInvoke(state, [&state, &weights]() {
+    return models::FP32DepthwiseSeparable(state.range(0), state.range(1),
+                                          state.range(2), state.range(3),
+                                          state.range(4), weights);
+  });
+}
+
 static void AttentionArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"T", "H", "N", "S"});
   b->Args({16, 25, 24, 4});
@@ -229,6 +238,23 @@ static void LayerNormArguments(benchmark::internal::Benchmark* b) {
   for (int norm_mask : {1, 3, 7, 2, 5}) {
     b->Args({128, 256, 512, norm_mask});
   }
+}
+
+static void DepthwiseSeparableArguments(benchmark::internal::Benchmark* b) {
+  b->ArgNames({"W", "H", "KW", "CI", "CO"});
+
+  // Mobilenet v2-ish
+  b->Args({112, 112, 3, 32, 16});
+  b->Args({56, 56, 3, 96, 24});
+  b->Args({28, 28, 3, 144, 32});
+  b->Args({14, 14, 3, 192, 64});
+  b->Args({14, 14, 3, 384, 96});
+  b->Args({14, 14, 3, 576, 160});
+  b->Args({7, 7, 3, 960, 320});
+
+  // Bigger
+  b->Args({512, 512, 3, 128, 128});
+
 }
 
 BENCHMARK(FP32Attention)
@@ -267,5 +293,10 @@ BENCHMARK(FP32LayerNorm)
     ->Unit(benchmark::kMicrosecond)
     ->UseRealTime()
     ->Apply(LayerNormArguments);
+
+BENCHMARK(FP32DepthwiseSeparable)
+    ->Unit(benchmark::kMicrosecond)
+    ->UseRealTime()
+    ->Apply(DepthwiseSeparableArguments);
 
 XNN_BENCHMARK_MAIN();

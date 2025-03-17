@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include "include/xnnpack.h"
 
 namespace models {
@@ -42,5 +44,18 @@ xnn_subgraph_t FP32Elementwise(size_t size, size_t reps);
 // Where `mean(x, norm_mask)` means computing the mean of the dimensions in the
 // `norm_mask`.
 xnn_subgraph_t FP32LayerNorm(size_t m, size_t n, size_t k, uint32_t norm_mask);
+
+struct FP32DepthwiseSeparableWeights {
+  std::vector<float> w0;
+  std::vector<float> w1;
+  std::vector<float> w2;
+  std::vector<float> w3;
+};
+
+// Depthwise convolution with kernel size kw x kw, followed by a 1x1 conv with
+// ci -> co channels. This is a common pattern in imaging models.
+xnn_subgraph_t FP32DepthwiseSeparable(size_t w, size_t h, size_t kw, size_t ci,
+                                      size_t co,
+                                      FP32DepthwiseSeparableWeights& weights);
 
 }  // namespace models
