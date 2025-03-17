@@ -579,6 +579,13 @@ class SubgraphTester {
     return *this;
   }
 
+  SubgraphTester& AddRoPE(uint32_t input_id1, uint32_t input_id2, uint32_t output_id) {
+    const xnn_status status =
+        xnn_define_rope(subgraph_.get(), 0, input_id1, input_id2, output_id, /*flags=*/0);
+    EXPECT_EQ(status, xnn_status_success);
+    return *this;
+  }
+
   inline SubgraphTester& AddDeconvolution2D(
       uint32_t input_padding_top, uint32_t input_padding_right,
       uint32_t input_padding_bottom, uint32_t input_padding_left,

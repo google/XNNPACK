@@ -417,6 +417,10 @@ class Tensor {
     return result;
   }
 
+  Tensor<T, Alignment> slice(size_t dim, int64_t at) const {
+    return slice(dim, at, at + 1);
+  }
+
   // Remove `pre` elements from the beginning of each dimension, and `post`
   // elements from the end of each dimension.
   Tensor<T, Alignment> crop_padding(const index_type& pre,
