@@ -21,6 +21,7 @@ void xnn_f16_rdmin_ukernel_2p2x__scalar_c2(
     size_t channels,
     const xnn_float16* input,
     size_t input_stride,
+    const xnn_float16* zero,
     xnn_float16* output,
     const void* params) XNN_OOB_READS
 {

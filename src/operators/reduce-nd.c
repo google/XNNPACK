@@ -224,7 +224,7 @@ static enum xnn_status reshape_reduce_nd(
 
     reduce_op->context.reduce = (struct reduce_context) {
       .channels = axis_dim << log2_data_element_size,
-      .ukernel.rsum = reduce_op->rsum_config->ukernel,
+      .ukernel.contiguous_reduce = reduce_op->rsum_config->ukernel,
       .accumulation_element_size = UINT32_C(1) << log2_accumulator_element_size,
       .output_element_size = UINT32_C(1) << log2_data_element_size,
     };
@@ -273,7 +273,7 @@ static enum xnn_status reshape_reduce_nd(
     reduce_op->context.reduce = (struct reduce_context) {
       .zero = reduce_op->zero_buffer,
       .channels = axis_dim,
-      .ukernel.rdsum = reduce_op->rdsum_config->rd_ukernel,
+      .ukernel.discontiguous_reduce = reduce_op->rdsum_config->rd_ukernel,
       .accumulation_element_size = UINT32_C(1) << log2_accumulator_element_size,
       .output_element_size = UINT32_C(1) << log2_data_element_size,
     };

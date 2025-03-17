@@ -63,7 +63,7 @@ struct xnn_unary_elementwise_config {
 
 struct xnn_reduce_config {
   xnn_reduce_ukernel_fn ukernel;
-  xnn_rdsum_ukernel_fn rd_ukernel;
+  xnn_reduce_discontiguous_ukernel_fn rd_ukernel;
   xnn_init_reduce_params_fn init;
   xnn_update_reduce_params_fn update;
 };

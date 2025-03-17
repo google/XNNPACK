@@ -21,6 +21,7 @@ void xnn_s8_rdmin_ukernel_2p2x__neon_c32(
     size_t channels,
     const int8_t* input,
     size_t input_stride,
+    const int8_t* zero,
     int8_t* output,
     const void* params) XNN_OOB_READS
 {

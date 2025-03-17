@@ -21,6 +21,7 @@ void xnn_f32_rdmax_ukernel_2p2x__scalar_c2(
     size_t channels,
     const float* input,
     size_t input_stride,
+    const float* zero,
     float* output,
     const void* params)
 {

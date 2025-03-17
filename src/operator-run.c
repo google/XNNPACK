@@ -1892,7 +1892,8 @@ void xnn_compute_contiguous_reduce(
       // output2_block_size output elements are written.
       for (size_t k = 0; k < output2_block_size; ++k) {
         // The microkernel reduces input dimension 5.
-        context->ukernel.rsum(context->channels, input_row, output, &context->params);
+        context->ukernel.contiguous_reduce(context->channels, input_row, output,
+                                           &context->params);
         // input_stride[4] is the number of bytes of input which have been
         // processed by the microkernel call.
         input_row = (const void*) ((uintptr_t) input_row + input_stride[4]);
@@ -1956,8 +1957,9 @@ void xnn_compute_discontiguous_reduce(
     for (size_t j = 0; j < input_shape2; ++j) {
       const void* input_row = input;
       // The microkernel reduces input dimension 4 and iterates over output_block_size elements of dimension 5.
-      context->ukernel.rdsum(context->channels, output2_block_size, input_row, input_stride[4],
-                             context->zero, output, &context->params);
+      context->ukernel.discontiguous_reduce
+          (context->channels, output2_block_size, input_row, input_stride[4],
+           context->zero, output, &context->params);
       // input_stride[4] is the number of bytes of input which have been
       // processed by the microkernel call.
       input_row = (const void*) ((uintptr_t) input_row + input_stride[4]);

@@ -64,10 +64,10 @@ DECLARE_F16_F32ACC_RSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rsum_ukernel__f16c_u32_a
 
 
 #define DECLARE_F16_REDUCE_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                       \
-      size_t batch,                                \
-      const xnn_float16* input,           \
-      xnn_float16* output,                \
+  XNN_INTERNAL void fn_name(                         \
+      size_t batch,                                  \
+      const xnn_float16* input,                      \
+      xnn_float16* output,                           \
       const struct xnn_f16_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmax_ukernel__neonfp16arith_u8)
@@ -653,6 +653,7 @@ DECLARE_QU8_RDSUM_UKERNEL_FUNCTION(xnn_qu8_rdsum_ukernel_7p7x__rvv_u2v)
       size_t channels,        \
       const float* input,     \
       size_t input_stride,    \
+      const float* zero,      \
       float* output,          \
       const void* params);
 
@@ -678,6 +679,7 @@ DECLARE_F32_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_f32_rdmax_ukernel_2p2x__sc
       size_t channels,           \
       const xnn_float16* input,  \
       size_t input_stride,       \
+      const xnn_float16* zero,  \
       xnn_float16* output,       \
       const void* params);
 
@@ -693,6 +695,7 @@ DECLARE_F16_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_f16_rdmax_ukernel_2p2x__sc
       size_t channels,        \
       const int8_t* input,    \
       size_t input_stride,    \
+      const int8_t* zero ,    \
       int8_t* output,         \
       const void* params);
 
@@ -710,8 +713,9 @@ DECLARE_S8_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_s8_rdmax_ukernel_2p2x__wasm
   XNN_INTERNAL void fn_name(  \
       size_t rows,            \
       size_t channels,        \
-      const uint8_t* input,    \
+      const uint8_t* input,   \
       size_t input_stride,    \
+      const uint8_t* zero,    \
       uint8_t* output,        \
       const void* params);
 

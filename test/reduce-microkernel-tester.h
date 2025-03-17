@@ -288,7 +288,7 @@ class ReduceMicrokernelTester {
 
       // Call optimized micro-kernel.
       reduce(rows(), channels(), input.data(), input_stride() * sizeof(float),
-             output.data(), nullptr);
+             /*zero=*/nullptr, output.data(), /*params=*/nullptr);
 
       // Verify results.
       for (size_t c = 0; c < channels(); c++) {
@@ -346,7 +346,8 @@ class ReduceMicrokernelTester {
 
       // Call optimized micro-kernel.
       reduce(rows(), channels(), input.data(),
-             input_stride() * sizeof(xnn_float16), output.data(), nullptr);
+             input_stride() * sizeof(xnn_float16), /*zero=*/nullptr,
+             output.data(), /*params=*/nullptr);
 
       // Verify results.
       for (size_t c = 0; c < channels(); c++) {
@@ -400,7 +401,7 @@ class ReduceMicrokernelTester {
 
       // Call optimized micro-kernel.
       reduce(rows(), channels(), input.data(), input_stride() * sizeof(int8_t),
-             output.data(), nullptr);
+             /*zero=*/nullptr, output.data(), /*params=*/nullptr);
 
       // Verify results.
       for (size_t c = 0; c < channels(); c++) {
@@ -502,7 +503,7 @@ class ReduceMicrokernelTester {
 
       // Call optimized micro-kernel.
       reduce(rows(), channels(), input.data(), input_stride() * sizeof(uint8_t),
-             output.data(), nullptr);
+             /*zero=*/nullptr, output.data(), /*params=*/nullptr);
 
       // Verify results.
       for (size_t c = 0; c < channels(); c++) {

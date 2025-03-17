@@ -14,6 +14,7 @@
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams.h"
+#include "src/xnnpack/operator-type.h"
 #include <pthreadpool.h>
 
 enum xnn_parallelization_type {
@@ -1192,8 +1193,8 @@ struct reduce_context {
   size_t accumulation_element_size;
   size_t output_element_size;
   union {
-    xnn_reduce_ukernel_fn rsum;
-    xnn_rdsum_ukernel_fn rdsum;
+    xnn_reduce_ukernel_fn contiguous_reduce;
+    xnn_reduce_discontiguous_ukernel_fn discontiguous_reduce;
   } ukernel;
   xnn_vunary_ukernel_fn cvt_ukernel;
   struct xnn_reduce_params params;

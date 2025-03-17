@@ -21,6 +21,7 @@ void xnn_u8_rdmin_ukernel_2p2x__scalar_c2(
     size_t channels,
     const uint8_t* input,
     size_t input_stride,
+    const uint8_t* zero,
     uint8_t* output,
     const void* params) XNN_OOB_READS
 {
