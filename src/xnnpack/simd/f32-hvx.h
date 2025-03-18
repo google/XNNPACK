@@ -87,7 +87,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_min_f32(xnn_simd_f32_t a,
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_abs_f32(xnn_simd_f32_t a) {
-  return Q6_Vsf_vabs_Vsf(a);
+  return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vabs_Vsf(a));
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
