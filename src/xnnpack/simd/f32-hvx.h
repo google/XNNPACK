@@ -41,34 +41,38 @@ typedef HVX_Vector xnn_simd_f32_t;
 static XNN_INLINE xnn_simd_f32_t xnn_zero_f32() { return Q6_V_vsplat_R(0); }
 
 static XNN_INLINE xnn_simd_f32_t xnn_add_f32(xnn_simd_f32_t a,
-                                              xnn_simd_f32_t b) {
+                                             xnn_simd_f32_t b) {
   return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_VsfVsf(a, b));
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_mul_f32(xnn_simd_f32_t a,
-                                              xnn_simd_f32_t b) {
+                                             xnn_simd_f32_t b) {
   return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(a, b));
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_rcp_f32(xnn_simd_f32_t a) {
+  return fast_inverse__vsf(a);
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_div_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {
-  return Q6_Vsf_vdiv_VsfVsf(a, b);
+  return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(a, xnn_rcp_f32(b)));
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_fmadd_f32(xnn_simd_f32_t a,
-                                                xnn_simd_f32_t b,
-                                                xnn_simd_f32_t c) {
+                                               xnn_simd_f32_t b,
+                                               xnn_simd_f32_t c) {
   return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(a, b), c));
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_fnmadd_f32(xnn_simd_f32_t a,
-                                                 xnn_simd_f32_t b,
-                                                 xnn_simd_f32_t c) {
+                                                xnn_simd_f32_t b,
+                                                xnn_simd_f32_t c) {
   return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vsub_VsfVsf(c, xnn_mul_f32(a, b)));
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_sub_f32(xnn_simd_f32_t a,
-                                              xnn_simd_f32_t b) {
+                                             xnn_simd_f32_t b) {
   return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vsub_VsfVsf(a, b));
 }
 
