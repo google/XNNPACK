@@ -1401,7 +1401,6 @@ IF(XNNPACK_BUILD_TESTS)
         even-split
         fully-connected
         max-pooling-2d
-        reshape-helpers
         scaled-dot-product-attention
         softmax
         space-to-depth-2d

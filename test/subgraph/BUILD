@@ -208,18 +208,6 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "reshape_helpers_test",
-    srcs = ["reshape-helpers.cc"],
-    deps = [
-        ":runtime_flags",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:subgraph",
-        "//test:replicable_random_device",
-    ],
-)
-
-xnnpack_unit_test(
     name = "static_resize_bilinear_2d_test",
     srcs = ["static-resize-bilinear-2d.cc"],
     deps = SUBGRAPH_TEST_DEPS,
