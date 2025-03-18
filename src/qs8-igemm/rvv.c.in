@@ -94,7 +94,6 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${OUT
 
     $if DATATYPE == "QD8":
       vint32${OUT_LMUL}_t vksum = __riscv_vle32_v_i32${OUT_LMUL}((const int32_t*)w, vl);
-      w = (const int32_t*) w + nr;
       const int32_t vinput_zero_point = quantization_params->zero_point;
       $for M in range(MR):
         vint32${OUT_LMUL}_t vacc${M} = __riscv_vmul_vx_i32${OUT_LMUL}(vksum, vinput_zero_point, vl);
@@ -158,7 +157,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${OUT
 
       const vfloat32${OUT_LMUL}_t vbias = __riscv_vle32_v_f32${OUT_LMUL}((const float*) w, vl);
       $for M in range(MR):
-        vfpacc${M} = __riscv_vfmul_vv_f32${OUT_LMUL}(vfpacc${M}, vbias, vl);
+        vfpacc${M} = __riscv_vfadd_vv_f32${OUT_LMUL}(vfpacc${M}, vbias, vl);
 
       w = (const void*) ((const float*) w + nr);
 

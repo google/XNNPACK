@@ -58,7 +58,6 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_2x4v__rvv(
     nc = nc - vl;
 
     vint32m4_t vksum = __riscv_vle32_v_i32m4((const int32_t*)w, vl);
-    w = (const int32_t*) w + nr;
     const int32_t vinput_zero_point = quantization_params->zero_point;
     vint32m4_t vacc0 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point, vl);
     vint32m4_t vacc1 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point, vl);
@@ -114,8 +113,8 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_2x4v__rvv(
     w = (const void*) ((const float*) w + nr);
 
     const vfloat32m4_t vbias = __riscv_vle32_v_f32m4((const float*) w, vl);
-    vfpacc0 = __riscv_vfmul_vv_f32m4(vfpacc0, vbias, vl);
-    vfpacc1 = __riscv_vfmul_vv_f32m4(vfpacc1, vbias, vl);
+    vfpacc0 = __riscv_vfadd_vv_f32m4(vfpacc0, vbias, vl);
+    vfpacc1 = __riscv_vfadd_vv_f32m4(vfpacc1, vbias, vl);
 
     w = (const void*) ((const float*) w + nr);
 
