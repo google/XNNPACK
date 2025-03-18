@@ -3762,6 +3762,8 @@ DECLARE_QS8_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc8w_gemm_minmax_fp32_uker
 
 DECLARE_QS8_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x4v__rvv)
 DECLARE_QS8_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x4v__rvv)
+DECLARE_QS8_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_7x4v__rvv)
+
 
 #ifdef __cplusplus
 }  // extern "C"

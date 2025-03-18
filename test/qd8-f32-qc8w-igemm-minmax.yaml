@@ -1049,3 +1049,17 @@
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 8
+
+# RISC-V Vector
+- name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x4v__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 1
+- name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x4v__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 1
+- name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_7x4v__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 1
