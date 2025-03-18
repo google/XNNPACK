@@ -98,6 +98,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "binary_test",
+    timeout = "moderate",
     srcs = ["binary.cc"],
     deps = SUBGRAPH_TEST_DEPS,
 )
