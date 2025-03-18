@@ -156,6 +156,14 @@ static XNN_INLINE xnn_simd_f16_t xnn_neg_f16(xnn_simd_f16_t a) {
 #endif  // XNN_HAVE_FLOAT16
 }
 
+static XNN_INLINE xnn_simd_f16_t xnn_round_f16(xnn_simd_f16_t a) {
+#if XNN_HAVE_FLOAT16
+  return roundf(a);
+#else
+  return xnn_float16_from_float(roundf(xnn_float16_to_float(a)));
+#endif  // XNN_HAVE_FLOAT16
+}
+
 // Logical operations.
 static XNN_INLINE xnn_simd_f16_t xnn_and_f16(xnn_simd_f16_t a,
                                              xnn_simd_f16_t b) {

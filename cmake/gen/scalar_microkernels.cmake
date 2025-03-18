@@ -269,6 +269,8 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f16-rminmax/gen/f16-rminmax-scalar-u3-acc3.c
   src/f16-rminmax/gen/f16-rminmax-scalar-u4-acc2.c
   src/f16-rminmax/gen/f16-rminmax-scalar-u4-acc4.c
+  src/f16-vcos/gen/f16-vcos-scalar-rational-3-2-div.c
+  src/f16-vsin/gen/f16-vsin-scalar-rational-3-2-div.c
   src/f32-conv-hwc/f32-conv-hwc-3x3s2p0p1c3x4-scalar-1x1.c
   src/f32-conv-hwc/f32-conv-hwc-3x3s2p1c3x4-scalar-1x1.c
   src/f32-dwconv/gen/f32-dwconv-3p1c-minmax-scalar.c

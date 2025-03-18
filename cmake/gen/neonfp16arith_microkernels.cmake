@@ -242,6 +242,7 @@ SET(NON_PROD_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vclamp/gen/f16-vclamp-neonfp16arith-u8.c
   src/f16-vcmul/gen/f16-vcmul-neonfp16arith-u8.c
   src/f16-vcmul/gen/f16-vcmul-neonfp16arith-u32.c
+  src/f16-vcos/gen/f16-vcos-neonfp16arith-rational-3-2-div.c
   src/f16-velu/gen/f16-velu-neonfp16arith-rr1-p3-u8.c
   src/f16-vhswish/gen/f16-vhswish-neonfp16arith-u8.c
   src/f16-vlrelu/gen/f16-vlrelu-neonfp16arith-u8.c
@@ -258,6 +259,7 @@ SET(NON_PROD_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vsigmoid/gen/f16-vsigmoid-neonfp16arith-rr2-p2-nr1recps-u8.c
   src/f16-vsigmoid/gen/f16-vsigmoid-neonfp16arith-rr2-p2-nr1recps-u24.c
   src/f16-vsigmoid/gen/f16-vsigmoid-neonfp16arith-rr2-p2-nr1recps-u32.c
+  src/f16-vsin/gen/f16-vsin-neonfp16arith-rational-3-2-div.c
   src/f16-vsqrt/gen/f16-vsqrt-neonfp16arith-nr1fma1adj-u16.c
   src/f16-vsqrt/gen/f16-vsqrt-neonfp16arith-nr1fma1adj-u32.c
   src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-nr1fma-u8.c

@@ -135,19 +135,21 @@ tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b -
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel qu8-vmulc-minmax-rndnu --output test/qu8-vmulc-minmax-rndnu.cc &
 
 ### Tests for VUnary micro-kernels
+tools/generate-vunary-test.py --ukernel f16-vabs --output test/f16-vabs.cc &
 tools/generate-vunary-test.py --ukernel f16-vapproxgelu --output test/f16-vapproxgelu.cc &
 tools/generate-vunary-test.py --ukernel f16-vclamp --output test/f16-vclamp.cc &
+tools/generate-vunary-test.py --ukernel f16-vcos --output test/f16-vcos.cc &
 tools/generate-vunary-test.py --ukernel f16-velu --output test/f16-velu.cc &
 tools/generate-vunary-test.py --ukernel f16-vgelu --output test/f16-vgelu.cc &
-tools/generate-vunary-test.py --ukernel f16-vabs --output test/f16-vabs.cc &
 tools/generate-vunary-test.py --ukernel f16-vneg --output test/f16-vneg.cc &
-tools/generate-vunary-test.py --ukernel f16-vsqr --output test/f16-vsqr.cc &
-tools/generate-vunary-test.py --ukernel f16-vrndne --output test/f16-vrndne.cc &
-tools/generate-vunary-test.py --ukernel f16-vrndz  --output test/f16-vrndz.cc &
-tools/generate-vunary-test.py --ukernel f16-vrndu  --output test/f16-vrndu.cc &
 tools/generate-vunary-test.py --ukernel f16-vrndd  --output test/f16-vrndd.cc &
+tools/generate-vunary-test.py --ukernel f16-vrndne --output test/f16-vrndne.cc &
+tools/generate-vunary-test.py --ukernel f16-vrndu  --output test/f16-vrndu.cc &
+tools/generate-vunary-test.py --ukernel f16-vrndz  --output test/f16-vrndz.cc &
 tools/generate-vunary-test.py --ukernel f16-vrsqrt --output test/f16-vrsqrt.cc &
 tools/generate-vunary-test.py --ukernel f16-vsigmoid --output test/f16-vsigmoid.cc &
+tools/generate-vunary-test.py --ukernel f16-vsin --output test/f16-vsin.cc &
+tools/generate-vunary-test.py --ukernel f16-vsqr --output test/f16-vsqr.cc &
 tools/generate-vunary-test.py --ukernel f16-vsqrt --output test/f16-vsqrt.cc &
 tools/generate-vunary-test.py --ukernel f16-vtanh --output test/f16-vtanh.cc &
 

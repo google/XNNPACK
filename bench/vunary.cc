@@ -178,6 +178,7 @@ void vunary(benchmark::State& state, uint64_t arch_flags,
       ->UseRealTime();
 #include "src/f16-vabs/f16-vabs.h"
 #include "src/f16-vapproxgelu/f16-vapproxgelu.h"
+#include "src/f16-vcos/f16-vcos.h"
 #include "src/f16-vgelu/f16-vgelu.h"
 #include "src/f16-vhswish/f16-vhswish.h"
 #include "src/f16-vneg/f16-vneg.h"
@@ -187,6 +188,7 @@ void vunary(benchmark::State& state, uint64_t arch_flags,
 #include "src/f16-vrnd/f16-vrndz.h"
 #include "src/f16-vrsqrt/f16-vrsqrt.h"
 #include "src/f16-vsigmoid/f16-vsigmoid.h"
+#include "src/f16-vsin/f16-vsin.h"
 #include "src/f16-vsqr/f16-vsqr.h"
 #include "src/f16-vsqrt/f16-vsqrt.h"
 #include "src/f16-vtanh/f16-vtanh.h"

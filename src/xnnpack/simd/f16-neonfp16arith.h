@@ -136,6 +136,10 @@ static XNN_INLINE xnn_simd_f16_t xnn_neg_f16(xnn_simd_f16_t a) {
   return vnegq_f16(a);
 }
 
+static XNN_INLINE xnn_simd_f16_t xnn_round_f16(xnn_simd_f16_t a) {
+  return vrndnq_f16(a);
+}
+
 // Logical operations.
 static XNN_INLINE xnn_simd_f16_t xnn_and_f16(xnn_simd_f16_t a,
                                              xnn_simd_f16_t b) {
