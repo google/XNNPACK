@@ -5,6 +5,7 @@
 
 #include <cassert>
 #include <cstddef>
+#include <cstdlib>
 #include <vector>
 
 #include <gmock/gmock.h>
@@ -98,7 +99,8 @@ void TestImpl() {
     // Verify results.
     const float tolerance = 2.0f * xnnpack::epsilon(xnn_datatype_of<T>());
     for (const auto& i : EnumerateIndices(output.extents())) {
-      ASSERT_NEAR(output(i), expected(i), tolerance * std::abs(expected(i)));
+      ASSERT_NEAR(output(i), expected(i),
+                  tolerance * std::abs(static_cast<float>(expected(i))));
     }
   }
 }
