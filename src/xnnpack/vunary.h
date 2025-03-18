@@ -77,6 +77,7 @@ extern "C" {
 #include "src/f32-vabs/f32-vabs.h"
 #include "src/f32-vapproxgelu/f32-vapproxgelu.h"
 #include "src/f32-vclamp/f32-vclamp.h"
+#include "src/f32-vcos/f32-vcos.h"
 #include "src/f32-velu/f32-velu.h"
 #include "src/f32-vexp/f32-vexp.h"
 #include "src/f32-vgelu/f32-vgelu.h"

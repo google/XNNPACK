@@ -119,6 +119,7 @@ SET(NON_PROD_SSE2_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vprelu-sse2-u4.c
   src/f32-vbinary/gen/f32-vpreluc-sse2-u4.c
   src/f32-vbinary/gen/f32-vrpreluc-sse2-u4.c
+  src/f32-vcos/gen/f32-vcos-sse2-rational-5-4-div.c
   src/f32-velu/gen/f32-velu-sse2-rr2-lut16-p3-u4.c
   src/f32-velu/gen/f32-velu-sse2-rr2-lut16-p3-u8.c
   src/f32-velu/gen/f32-velu-sse2-rr2-lut16-p3-u16.c

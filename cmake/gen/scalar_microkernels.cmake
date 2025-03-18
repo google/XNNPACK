@@ -474,6 +474,7 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-vcmul/gen/f32-vcmul-scalar-u1.c
   src/f32-vcmul/gen/f32-vcmul-scalar-u2.c
   src/f32-vcmul/gen/f32-vcmul-scalar-u8.c
+  src/f32-vcos/gen/f32-vcos-scalar-rational-5-4-div.c
   src/f32-velu/gen/f32-velu-scalar-rr2-lut16-p3-u1.c
   src/f32-velu/gen/f32-velu-scalar-rr2-lut16-p3-u3.c
   src/f32-velu/gen/f32-velu-scalar-rr2-lut16-p3-u5.c

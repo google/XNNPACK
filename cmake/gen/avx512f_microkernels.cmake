@@ -221,6 +221,8 @@ SET(NON_PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-vcmul/gen/f32-vcmul-avx512f-u16.c
   src/f32-vcmul/gen/f32-vcmul-avx512f-u64.c
   src/f32-vcmul/gen/f32-vcmul-avx512f-u128.c
+  src/f32-vcos/gen/f32-vcos-avx512f-rational-5-4-div.c
+  src/f32-vcos/gen/f32-vcos-avx512f-rational-5-4-nr.c
   src/f32-velu/gen/f32-velu-avx512f-rr1-lut16-p3-perm-u16.c
   src/f32-velu/gen/f32-velu-avx512f-rr1-lut16-p3-perm-u32.c
   src/f32-velu/gen/f32-velu-avx512f-rr1-lut16-p3-perm-u48.c

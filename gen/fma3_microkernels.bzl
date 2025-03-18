@@ -144,6 +144,7 @@ NON_PROD_FMA3_MICROKERNEL_SRCS = [
     "src/f32-vcmul/gen/f32-vcmul-fma3-u8.c",
     "src/f32-vcmul/gen/f32-vcmul-fma3-u32.c",
     "src/f32-vcmul/gen/f32-vcmul-fma3-u64.c",
+    "src/f32-vcos/gen/f32-vcos-fma3-rational-5-4-div.c",
     "src/f32-vhswish/gen/f32-vhswish-fma3-u8.c",
     "src/f32-vlog/gen/f32-vlog-fma3-rational-3-3-nr.c",
     "src/f32-vrsqrt/gen/f32-vrsqrt-fma3-rsqrt-u8.c",

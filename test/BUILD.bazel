@@ -138,7 +138,10 @@ xnnpack_cxx_library(
     srcs = [
         "%s.cc" % kernel.replace("_", "-"),
     ],
-    deps = MICROKERNEL_TEST_DEPS + [":vunary_microkernel_tester"],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":unary_ops",
+        ":vunary_microkernel_tester",
+    ],
 ) for kernel in [
     "f16_vabs",
     "f16_vapproxgelu",
@@ -160,6 +163,7 @@ xnnpack_cxx_library(
     "f32_vabs",
     "f32_vapproxgelu",
     "f32_vclamp",
+    "f32_vcos",
     "f32_velu",
     "f32_vexp",
     "f32_vgelu",
