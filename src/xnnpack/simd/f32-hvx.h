@@ -92,7 +92,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_abs_f32(xnn_simd_f32_t a) {
 
 static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
   XNN_SIMD_CONST_F32(v0, 0);
-  return Q6_Vsf_vsub_VsfVsf(v0, a);
+  return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vsub_VsfVsf(v0, a));
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
