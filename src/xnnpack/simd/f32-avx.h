@@ -7,7 +7,7 @@
 #ifndef __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX_H_
 #define __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX_H_
 
-#include "src/xnnpack/simd/f32-avx-base.h"
+#include "src/xnnpack/simd/f32-avx-base.h"  // IWYU pragma: export
 #include "src/xnnpack/common.h"
 
 // Whether or not this architecture has native fused multiply-add support.
