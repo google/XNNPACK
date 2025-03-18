@@ -15,7 +15,6 @@
 #if XNN_ARCH_HEXAGON
 
 #include <algorithm>
-#include <bit>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>

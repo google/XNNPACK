@@ -15,7 +15,6 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #include <algorithm>
-#include <bit>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>

@@ -12,7 +12,6 @@ $if ARCH_MACRO:
   #if ${ARCH_MACRO}
 
 #include <algorithm>
-#include <bit>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>

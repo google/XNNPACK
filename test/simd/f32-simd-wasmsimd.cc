@@ -15,7 +15,6 @@
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #include <algorithm>
-#include <bit>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
