@@ -506,6 +506,7 @@ enum xnn_unary_operator {
   xnn_unary_ceiling,
   xnn_unary_clamp,
   xnn_unary_convert,
+  xnn_unary_cosine,
   xnn_unary_elu,
   xnn_unary_exp,
   xnn_unary_floor,
@@ -516,17 +517,16 @@ enum xnn_unary_operator {
   xnn_unary_negate,
   xnn_unary_reciprocal_square_root,
   xnn_unary_sigmoid,
+  xnn_unary_sine,
   xnn_unary_square_root,
   xnn_unary_square,
   xnn_unary_tanh,
   // The following operators are experimental and may be removed.
   xnn_unary_bitwise_not,
-  xnn_unary_cosine,
   xnn_unary_count_leading_zeros,
   xnn_unary_cube_root,
   xnn_unary_popcount,
   xnn_unary_sign,
-  xnn_unary_sine,
 };
 
 /// Parameters for xnn_define_unary

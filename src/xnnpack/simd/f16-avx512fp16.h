@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 //
 
-#ifndef __XNNPACK_SRC_XNNPACK_SIMD_F16_AVX512F_H_
-#define __XNNPACK_SRC_XNNPACK_SIMD_F16_AVX512F_H_
+#ifndef THIRD_PARTY_XNNPACK_SRC_XNNPACK_SIMD_F16_AVX512F_H_
+#define THIRD_PARTY_XNNPACK_SRC_XNNPACK_SIMD_F16_AVX512F_H_
 
 #include <assert.h>
 #include <immintrin.h>
@@ -23,11 +23,17 @@ typedef __m512h xnn_simd_f16_t;
 
 #define XNN_SIMD_CONST_F16(var, val) \
   const xnn_simd_f16_t var = _mm512_set1_ph(val);
-#define XNN_SIMD_CONST_F16_FROM_FLOAT(var, val) \
-  const xnn_simd_f16_t var = _mm512_set1_ph(xnn_float16_from_float(val))
-
 #define XNN_SIMD_CONST_F16_FROM_INT16(var, val) \
   const xnn_simd_f16_t var = _mm512_castsi512_ph(_mm512_set1_epi16(val));
+
+#if XNN_HAVE_FLOAT16
+#define XNN_SIMD_CONST_F16_FROM_FLOAT(var, val) \
+  const xnn_simd_f16_t var = _mm512_set1_ph(xnn_float16_from_float(val))
+#else
+#define XNN_SIMD_CONST_F16_FROM_FLOAT(var, val) \
+  XNN_SIMD_CONST_F16_FROM_INT16(                \
+      var, xnn_float16_to_bits(xnn_float16_from_float(val)))
+#endif  // XNN_HAVE_FLOAT16
 
 // Whether or not this architecture has native fused multiply-add support.
 #define XNN_SIMD_HAS_NATIVE_FMA 1
@@ -173,11 +179,19 @@ static XNN_INLINE void xnn_store_f16(xnn_float16* ptr, xnn_simd_f16_t v) {
 }
 
 static XNN_INLINE xnn_simd_f16_t xnn_set1_f16(xnn_float16 v) {
+#if XNN_HAVE_FLOAT16
   return _mm512_set1_ph(v);
+#else
+  return _mm512_castsi512_ph(_mm512_set1_epi16(v.value));
+#endif  // XNN_HAVE_FLOAT16
 }
 
 static XNN_INLINE xnn_simd_f16_t xnn_set1_or_load_f16(const xnn_float16* v) {
+#if XNN_HAVE_FLOAT16
   return _mm512_set1_ph(*v);
+#else
+  return _mm512_castsi512_ph(_mm512_set1_epi16(v->value));
+#endif  // XNN_HAVE_FLOAT16
 }
 
 // Tail load/store operations.
@@ -206,4 +220,4 @@ static XNN_INLINE void xnn_store_tail_f16(xnn_float16* output, xnn_simd_f16_t v,
   _mm512_mask_storeu_epi16(output, vmask, _mm512_castph_si512(v));
 }
 
-#endif  // __XNNPACK_SRC_XNNPACK_SIMD_F16_AVX512F_H_
+#endif  // THIRD_PARTY_XNNPACK_SRC_XNNPACK_SIMD_F16_AVX512F_H_

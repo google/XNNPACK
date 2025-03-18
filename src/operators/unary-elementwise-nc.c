@@ -149,6 +149,8 @@ static const struct xnn_unary_elementwise_config* get_config(
         return xnn_init_f16_rndu_config();
       case xnn_unary_clamp:
         return xnn_init_f16_clamp_config();
+      case xnn_unary_cosine:
+        return xnn_init_f16_cosine_config();
       case xnn_unary_elu:
         return xnn_init_f16_elu_config();
       case xnn_unary_gelu:
@@ -165,6 +167,8 @@ static const struct xnn_unary_elementwise_config* get_config(
         return xnn_init_f16_rsqrt_config();
       case xnn_unary_sigmoid:
         return xnn_init_f16_sigmoid_config();
+      case xnn_unary_sine:
+        return xnn_init_f16_sine_config();
       case xnn_unary_square_root:
         return xnn_init_f16_sqrt_config();
       case xnn_unary_square:
@@ -186,6 +190,8 @@ static const struct xnn_unary_elementwise_config* get_config(
         return xnn_init_f32_rndu_config();
       case xnn_unary_clamp:
         return xnn_init_f32_clamp_config();
+      case xnn_unary_cosine:
+        return xnn_init_f32_cosine_config();
       case xnn_unary_elu:
         return xnn_init_f32_elu_config();
       case xnn_unary_exp:
@@ -206,6 +212,8 @@ static const struct xnn_unary_elementwise_config* get_config(
         return xnn_init_f32_rsqrt_config();
       case xnn_unary_sigmoid:
         return xnn_init_f32_sigmoid_config();
+      case xnn_unary_sine:
+        return xnn_init_f32_sine_config();
       case xnn_unary_square_root:
         return xnn_init_f32_sqrt_config();
       case xnn_unary_square:
