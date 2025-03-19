@@ -100,6 +100,12 @@ extern "C" {
 /// Retain reduced dimensions with length 1.
 #define XNN_FLAG_KEEP_DIMS 0x00000040
 
+/// This flag indicates that XNNPACK should attempt to produce numerically
+/// consistent results from a specific build of XNNPACK. This causes XNNPACK
+/// to avoid using codepaths that are numerically inconsistent with any other
+/// codepath that could be used in the same compiled XNNPACK library.
+#define XNN_FLAG_CONSISTENT_ARITHMETIC 0x00000100
+
 // Next unused flag value: 0x00000200.
 
 /// The number of entries in an array of xnn_quantization_params that XNNPACK may read beyond array bounds.
@@ -1682,11 +1688,11 @@ enum xnn_status xnn_define_copy(
 ///                    dimensions is added to it.
 /// @param input_id - Value ID for the input tensor. The input tensor must be an N-dimensional tensor defined in the @a
 ///                   subgraph.
-/// @param num_outputs - The number of output tensors to generate. The input tensor will be evenly split into 
-///                      this number of output tensors along the `split_dim`. Each output tensor will have 
-///                      the same dimensions as the input tensor, except for the `split_dim`, which will be 
+/// @param num_outputs - The number of output tensors to generate. The input tensor will be evenly split into
+///                      this number of output tensors along the `split_dim`. Each output tensor will have
+///                      the same dimensions as the input tensor, except for the `split_dim`, which will be
 ///                      divided evenly between the outputs.
-/// @param outputs - An array of Value IDs for the output tensors. Each output tensor must be an N-dimensional 
+/// @param outputs - An array of Value IDs for the output tensors. Each output tensor must be an N-dimensional
 ///                  tensor defined in the @a subgraph with the same shape as the input tensor, except along the
 ///                  `split_dim` dimension, which will be split evenly among the output tensors. The number of
 ///                  output tensors corresponds to the value of `num_outputs`.

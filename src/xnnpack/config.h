@@ -263,8 +263,8 @@ static inline bool xnn_is_hmp_igemm_ukernel(struct xnn_hmp_igemm_ukernel ukernel
 
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_bf16_f32_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f16_gemm_config();
-XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_gemm_config();
-XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_gemm_nr2_config();
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_gemm_config(uint32_t flags);
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_gemm_nr2_config(uint32_t flags);
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_igemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_qc8w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_qc4w_gemm_config();

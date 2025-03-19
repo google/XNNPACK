@@ -233,7 +233,7 @@ enum xnn_status xnn_create_scaled_dot_product_attention_nhtc_f32(
   const enum xnn_operator_type operator_type = xnn_operator_type_scaled_dot_product_attention_nhtc_f32;
   enum xnn_status status = xnn_status_unsupported_hardware;
 
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config(flags);
   if (gemm_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(operator_type));
