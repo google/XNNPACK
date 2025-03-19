@@ -544,6 +544,27 @@ INSTANTIATE_TEST_SUITE_P(
       });
 
   INSTANTIATE_TEST_SUITE_P(
+      GIO_BF16_F32_GEMM_MINMAX_1X32C2__ASM_AMD64_AVX512BF16_BROADCAST, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/4,
+          /*adj_k_block=*/4,
+          /*mr=*/1, /*nr=*/32, /*kr=*/2, /*sr=*/1,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.k(2).Test(xnn_bf16_f32_gemm_minmax_ukernel_1x32c2__asm_amd64_avx512bf16_broadcast,
+                        xnn_init_f32_minmax_scalar_params,
+                        xnn_pack_bf16_f32_gemm_gio_w);
+          },
+          []() {
+            TEST_REQUIRES_X86_AVX512BF16;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
       BF16_F32_GEMM_MINMAX_2X32C2__ASM_AMD64_AVX512BF16_BROADCAST, GemmTest,
       testing::ValuesIn(CreateTests1(
           /*k_block=*/4,

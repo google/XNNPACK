@@ -73,6 +73,12 @@ typedef void (*xnn_pack_bf16_f32_gemm_fn)(
   size_t extra_bytes,
   const void* params);
 
+typedef void (*xnn_pack_bf16_f32_gio_gemm_fn)(
+    size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
+    size_t k_stride, const xnn_bfloat16* kernel, const float* bias,
+    const void* scale, void* packed_weights, size_t extra_bytes,
+    const void* params);
+
 typedef void (*xnn_pack_f16_gemm_fn)(
   size_t g,
   size_t nc,
