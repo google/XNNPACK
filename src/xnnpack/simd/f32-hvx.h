@@ -30,7 +30,7 @@ typedef HVX_Vector xnn_simd_f32_t;
 #define XNN_SIMD_CONST_F32_FROM_INT32(var, val) const HVX_Vector var = Q6_V_vsplat_R(val);
 
 // Whether or not this architecture has native fused multiply-add support.
-#define XNN_SIMD_HAS_NATIVE_FMA 1
+#define XNN_SIMD_HAS_NATIVE_FMA 0
 
 // Include the header for generic functions _after_ declaring the arch-specific
 // types and sizes.
