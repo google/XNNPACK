@@ -1745,8 +1745,12 @@ enum xnn_status xnn_delete_subgraph(
 enum xnn_node_type xnn_reduce_operator_to_node_type(enum xnn_reduce_operator type)
 {
   switch (type) {
+    case xnn_reduce_max:
+      return xnn_node_type_static_reduce_max;
     case xnn_reduce_mean:
       return xnn_node_type_static_mean;
+    case xnn_reduce_min:
+      return xnn_node_type_static_reduce_min;
     case xnn_reduce_sum:
       return xnn_node_type_static_sum;
     default:
@@ -1759,6 +1763,10 @@ enum xnn_reduce_operator xnn_node_type_to_reduce_operator(enum xnn_node_type typ
   switch (type) {
     case xnn_node_type_static_mean:
       return xnn_reduce_mean;
+    case xnn_node_type_static_reduce_max:
+      return xnn_reduce_max;
+    case xnn_node_type_static_reduce_min:
+      return xnn_reduce_min;
     case xnn_node_type_static_sum:
       return xnn_reduce_sum;
     default:

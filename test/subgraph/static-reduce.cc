@@ -3,11 +3,14 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <sstream>
 #include <string>
+#include <type_traits>
 #include <tuple>
 #include <vector>
 
@@ -38,6 +41,12 @@ struct Param {
         break;
       case xnn_reduce_sum:
         sstr << "sum";
+        break;
+      case xnn_reduce_max:
+        sstr << "max";
+        break;
+      case xnn_reduce_min:
+        sstr << "min";
         break;
       case xnn_reduce_invalid:
         sstr << "invalid";
@@ -89,11 +98,19 @@ std::string to_string(const std::vector<T>& v) {
   return sstr.str();
 }
 
-auto get_reference_op(xnn_reduce_operator op) {
+std::function<void(float&, float)> get_reference_op(xnn_reduce_operator op) {
   switch (op) {
     case xnn_reduce_sum:
     case xnn_reduce_mean:
       return [](float& output, float input) { output += input; };
+    case xnn_reduce_min:
+      return [](float& output, float input) {
+        output = std::min(output, input);
+      };
+    case xnn_reduce_max:
+      return [](float& output, float input) {
+        output = std::max(output, input);
+      };
     default:
       XNN_UNREACHABLE;
   }
@@ -106,6 +123,8 @@ void TestImpl(const Param& p) {
   ReplicableRandomDevice rng;
 
   auto reference_op = get_reference_op(p.reduce_operator);
+  const bool is_minmax = (p.reduce_operator == xnn_reduce_min ||
+                          p.reduce_operator == xnn_reduce_max);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -119,6 +138,11 @@ void TestImpl(const Param& p) {
         random_quantization(datatype, rng);
     xnn_quantization_params output_quantization =
         random_quantization(datatype, rng);
+
+    if (is_minmax) {
+      input_quantization = {0, 1.0f};
+      output_quantization = input_quantization;
+    }
 
     // Create a runtime with the reduce op in it.
     SubgraphTester tester(2);
@@ -179,7 +203,20 @@ void TestImpl(const Param& p) {
 
       // Compute reference results.
       Tensor<float> expected(output_shape);
-      expected.fill(0.0f);
+      switch (p.reduce_operator) {
+        case xnn_reduce_sum:
+        case xnn_reduce_mean:
+          expected.fill(0.0f);
+          break;
+        case xnn_reduce_min:
+          expected.fill(NumericLimits<float>::max());
+          break;
+        case xnn_reduce_max:
+          expected.fill(NumericLimits<float>::min());
+          break;
+        default:
+          XNN_UNREACHABLE;
+      }
       broadcast_extent_1(expected);
       for (const auto& i : EnumerateIndices(input.extents())) {
         reference_op(expected(i), dequantize(input(i), input_quantization));
@@ -223,7 +260,8 @@ using ::testing::Range;
 using ::testing::Values;
 
 auto params = testing::ConvertGenerator<Param::TupleT>(
-    Combine(Values(xnn_reduce_sum, xnn_reduce_mean), Bool(), Bool(),
+    Combine(Values(xnn_reduce_sum, xnn_reduce_mean, xnn_reduce_max,
+                   xnn_reduce_min), Bool(), Bool(),
             Range(0, XNN_MAX_TENSOR_DIMS)));
 INSTANTIATE_TEST_SUITE_P(Reduce, ReduceQS8, params,
                          [](auto p) { return p.param.Name(); });

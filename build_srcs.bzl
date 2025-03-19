@@ -97,7 +97,6 @@ XNNPACK_SRCS = [
     "src/configs/pack-lh-config.c",
     "src/configs/raddstoreexpminusmax-config.c",
     "src/configs/reduce-config.c",
-    "src/configs/rmax-config.c",
     "src/configs/spmm-config.c",
     "src/configs/transpose-config.c",
     "src/configs/unary-elementwise-config.c",

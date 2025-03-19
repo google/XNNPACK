@@ -1185,6 +1185,7 @@ struct reduce_context {
   const void* input;
   void* output;
   void* workspace;
+  uint32_t identity_value;
   const void* zero;
   size_t input_shape[XNN_MAX_TENSOR_DIMS];
   size_t input_stride[XNN_MAX_TENSOR_DIMS];
@@ -1197,6 +1198,7 @@ struct reduce_context {
     xnn_reduce_discontiguous_ukernel_fn discontiguous_reduce;
   } ukernel;
   xnn_vunary_ukernel_fn cvt_ukernel;
+  xnn_fill_ukernel_fn fill_ukernel;
   struct xnn_reduce_params params;
   union xnn_unary_uparams cvt_params;
 };

@@ -30,6 +30,8 @@ SET(PROD_WASM_MICROKERNEL_SRCS
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x4-minmax-wasm.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-wasm-fmagic-u4.c
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-wasm-fmagic-u4.c
+  src/f32-rminmax/gen/f32-rmax-wasm-u4-acc4.c
+  src/f32-rminmax/gen/f32-rmin-wasm-u4-acc4.c
   src/f32-rminmax/gen/f32-rminmax-wasm-u4-acc4.c
   src/f32-vbinary/gen/f32-vadd-wasm-u8.c
   src/f32-vbinary/gen/f32-vaddc-wasm-u8.c
@@ -115,12 +117,10 @@ SET(NON_PROD_WASM_MICROKERNEL_SRCS
   src/f32-rminmax/gen/f32-rmax-wasm-u2-acc2.c
   src/f32-rminmax/gen/f32-rmax-wasm-u3-acc3.c
   src/f32-rminmax/gen/f32-rmax-wasm-u4-acc2.c
-  src/f32-rminmax/gen/f32-rmax-wasm-u4-acc4.c
   src/f32-rminmax/gen/f32-rmin-wasm-u1.c
   src/f32-rminmax/gen/f32-rmin-wasm-u2-acc2.c
   src/f32-rminmax/gen/f32-rmin-wasm-u3-acc3.c
   src/f32-rminmax/gen/f32-rmin-wasm-u4-acc2.c
-  src/f32-rminmax/gen/f32-rmin-wasm-u4-acc4.c
   src/f32-rminmax/gen/f32-rminmax-wasm-u1.c
   src/f32-rminmax/gen/f32-rminmax-wasm-u2-acc2.c
   src/f32-rminmax/gen/f32-rminmax-wasm-u3-acc3.c

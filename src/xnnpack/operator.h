@@ -218,6 +218,7 @@ struct xnn_operator {
     struct {
       uint32_t log2_data_element_size;
       uint32_t log2_accumulator_element_size;
+      uint32_t identity_value;
     } reduce;
   };
 
@@ -272,14 +273,13 @@ struct xnn_operator {
     const struct xnn_argmaxpool_config* argmaxpool_config;
     struct {
       const struct xnn_avgpool_config* avgpool_config;
-      const struct xnn_reduce_config* rdsum_config;
-      const struct xnn_reduce_config* rsum_config;
+      const struct xnn_reduce_config* discontiguous_reduce_config;
+      const struct xnn_reduce_config* contiguous_reduce_config;
       const struct xnn_unary_elementwise_config* cvt_config;
     };
     const struct xnn_ibilinear_chw_config* ibilinear_chw_config;
     const struct xnn_ibilinear_config* ibilinear_config;
     struct {
-      const struct xnn_rmax_config* rmax_config;
       union {
         // For QU8.
         const struct xnn_lut32norm_config* lut32norm_config;
@@ -303,13 +303,11 @@ struct xnn_operator {
     const struct xnn_binary_elementwise_config* binary_elementwise_config;
     struct {
       const struct xnn_unary_elementwise_config* unary_elementwise_config;
-      const struct xnn_reduce_config*
-          rminmax_config;  // For dynamic quantization convert operator.
       const struct xnn_gemm_config*
           gemm_config;  // For dynamic quantization convert operator.
     };  // For unary elementwise operators.
     struct {
-      const struct xnn_rmax_config* rmax_config;
+      const struct xnn_reduce_config* rmax_config;
       const struct xnn_raddstoreexpminusmax_config* raddstoreexpminusmax_config;
       const struct xnn_binary_elementwise_config* vadd_config;
       const struct xnn_binary_elementwise_config* vmul_config;

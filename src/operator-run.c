@@ -1880,8 +1880,14 @@ void xnn_compute_contiguous_reduce(
     output_ptr = context->output;
   }
   void* output = (void*) ((uintptr_t) output_ptr + workspace_offset);
-  // Rsum microkernels accumulate into the output buffer.
-  memset(output, 0, context->accumulation_element_size * output2_block_size);
+  // Reduce microkernels accumulate into the output buffer.
+  if (context->identity_value == 0) {
+    memset(output, 0, context->accumulation_element_size * output2_block_size);
+  } else {
+    context->fill_ukernel(
+      1, context->accumulation_element_size * output2_block_size, output,
+      context->accumulation_element_size, context->identity_value);
+  }
 
   // Input dimension 1 is reduced.
   for (size_t i = 0; i < input_shape1; ++i) {
@@ -1947,8 +1953,14 @@ void xnn_compute_discontiguous_reduce(
     output_ptr = context->output;
   }
   void* output = (void*) ((uintptr_t) output_ptr + workspace_offset);
-  // RDsum microkernels accumulate into the output buffer.
-  memset(output, 0, context->accumulation_element_size * output2_block_size);
+  // Discontiguous reduce microkernels accumulate into the output buffer.
+  if (context->identity_value == 0) {
+    memset(output, 0, context->accumulation_element_size * output2_block_size);
+  } else {
+    context->fill_ukernel(
+      1, context->accumulation_element_size * output2_block_size, output,
+      context->accumulation_element_size, context->identity_value);
+  }
 
   // Input dimension 0 is reduced.
   for (size_t i = 0; i < input_shape0; ++i) {
@@ -1957,9 +1969,9 @@ void xnn_compute_discontiguous_reduce(
     for (size_t j = 0; j < input_shape2; ++j) {
       const void* input_row = input;
       // The microkernel reduces input dimension 4 and iterates over output_block_size elements of dimension 5.
-      context->ukernel.discontiguous_reduce
-          (context->channels, output2_block_size, input_row, input_stride[4],
-           context->zero, output, &context->params);
+      context->ukernel.discontiguous_reduce(
+        context->channels, output2_block_size, input_row, input_stride[4],
+        context->zero, output, &context->params);
       // input_stride[4] is the number of bytes of input which have been
       // processed by the microkernel call.
       input_row = (const void*) ((uintptr_t) input_row + input_stride[4]);

@@ -679,7 +679,7 @@ DECLARE_F32_REDUCE_DISCONTIGUOUS_UKERNEL_FUNCTION(xnn_f32_rdmax_ukernel_2p2x__sc
       size_t channels,           \
       const xnn_float16* input,  \
       size_t input_stride,       \
-      const xnn_float16* zero,  \
+      const xnn_float16* zero,   \
       xnn_float16* output,       \
       const void* params);
 

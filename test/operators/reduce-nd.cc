@@ -107,11 +107,11 @@ class ReduceOperatorTester {
     return *this;
   }
 
-   enum xnn_reduce_operator operation() const {
+  enum xnn_reduce_operator operation() const {
     return this->reduce_operator_;
   }
 
-   struct QuantizationConfig {
+  struct QuantizationConfig {
      // Zero means no quantization.
      xnn_quantization_params input = {0, 0};
      xnn_quantization_params output = {0, 0};
@@ -120,7 +120,7 @@ class ReduceOperatorTester {
 
      bool IsQuantized() const { return input.scale != 0; }
      static QuantizationConfig Invalid() { return {}; }
-   };
+  };
 
   struct QS8Config {
     using StorageType = int8_t;
@@ -128,6 +128,11 @@ class ReduceOperatorTester {
 
     static double GetTolerance() { return 0; }
     static xnn_datatype GetXNNDatatype() { return xnn_datatype_qint8; };
+
+    static constexpr StorageType Max =
+        std::numeric_limits<StorageType>::max();
+    static constexpr StorageType Min =
+        std::numeric_limits<StorageType>::min();
 
     static std::uniform_int_distribution<int32_t> BuildRngDistribution() {
       return std::uniform_int_distribution<int32_t>(
@@ -154,6 +159,11 @@ class ReduceOperatorTester {
     static double GetTolerance() { return 0; }
     static xnn_datatype GetXNNDatatype() { return xnn_datatype_quint8; };
 
+    static constexpr StorageType Max =
+        std::numeric_limits<StorageType>::max();
+    static constexpr StorageType Min =
+        std::numeric_limits<StorageType>::min();
+
     static std::uniform_int_distribution<int32_t> BuildRngDistribution() {
       return std::uniform_int_distribution<int32_t>(
           std::numeric_limits<StorageType>::min(),
@@ -179,6 +189,10 @@ class ReduceOperatorTester {
     static double GetTolerance() { return 3e-2; }
     static xnn_datatype GetXNNDatatype() { return xnn_datatype_fp16; };
 
+    static constexpr AccumulatorType Max =
+        std::numeric_limits<AccumulatorType>::max();
+    static constexpr AccumulatorType Min = -Max;
+
     static std::uniform_real_distribution<float> BuildRngDistribution() {
       return std::uniform_real_distribution<float>(0.01, 1.0);
     }
@@ -195,6 +209,10 @@ class ReduceOperatorTester {
 
     static double GetTolerance() { return 5e-6; }
     static xnn_datatype GetXNNDatatype() { return xnn_datatype_fp32; };
+
+    static constexpr StorageType Max =
+        std::numeric_limits<StorageType>::infinity();
+    static constexpr StorageType Min = -Max;
 
     static std::uniform_real_distribution<float> BuildRngDistribution() {
       return std::uniform_real_distribution<float>(0.01, 1.0);
@@ -240,7 +258,8 @@ class ReduceOperatorTester {
       output_stride *= output_dims[i - 1];
     }
 
-    std::vector<StorageType> input(XNN_EXTRA_BYTES / sizeof(StorageType) + num_input_elements());
+    std::vector<StorageType> input(num_input_elements() +
+                                   XNN_EXTRA_BYTES / sizeof(StorageType));
     std::vector<StorageType> output(num_output_elements);
     std::vector<double> output_ref(num_output_elements);
     std::vector<typename Config::AccumulatorType> accumulator(num_output_elements);
@@ -257,10 +276,20 @@ class ReduceOperatorTester {
         }
       }
 
-      std::generate(input.begin(), input.end(), [&]() { return dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
-      std::fill(output_ref.begin(), output_ref.end(), static_cast<StorageType>(0));
-      std::fill(accumulator.begin(), accumulator.end(), static_cast<typename Config::AccumulatorType>(0));
+      std::generate_n(input.begin(), num_input_elements(),
+                      [&]() { return dist(rng); });
+      std::fill(output_ref.begin(), output_ref.end(),
+                static_cast<StorageType>(0));
+      switch (operation()) {
+        case xnn_reduce_max:
+          std::fill(accumulator.begin(), accumulator.end(), Config::Min);
+          break;
+        case xnn_reduce_min:
+          std::fill(accumulator.begin(), accumulator.end(), Config::Max);
+          break;
+        default:
+          std::fill(accumulator.begin(), accumulator.end(), 0);
+      }
 
       const int32_t num_reduced_elements = num_input_elements() / num_output_elements;
       const float reduce_scale =
@@ -285,8 +314,28 @@ class ReduceOperatorTester {
                       i * output_strides[0] + j * output_strides[1] +
                       k * output_strides[2] + l * output_strides[3] +
                       m * output_strides[4] + n * output_strides[5];
-                  accumulator[output_idx] +=
-                      static_cast<typename Config::AccumulatorType>(input[input_idx]);
+                  switch (operation()) {
+                    case xnn_reduce_mean:
+                    case xnn_reduce_sum:
+                      accumulator[output_idx] +=
+                          static_cast<typename Config::AccumulatorType>(
+                              input[input_idx]);
+                      break;
+                    case xnn_reduce_max:
+                      accumulator[output_idx] = std::max(
+                          accumulator[output_idx],
+                          static_cast<typename Config::AccumulatorType>(
+                              input[input_idx]));
+                      break;
+                    case xnn_reduce_min:
+                      accumulator[output_idx] = std::min(
+                          accumulator[output_idx],
+                          static_cast<typename Config::AccumulatorType>(
+                              input[input_idx]));
+                      break;
+                    default:
+                      XNN_UNREACHABLE;
+                  }
                 }
               }
             }
@@ -294,7 +343,9 @@ class ReduceOperatorTester {
         }
       }
 
-      if (q.IsQuantized()) {
+      const bool is_minmax = (operation() == xnn_reduce_min ||
+                              operation() == xnn_reduce_max);
+      if (q.IsQuantized() && !is_minmax) {
         for (size_t idx = 0; idx < output_ref.size(); ++idx) {
           // Shift by input zero point.
           output_ref[idx] =
@@ -319,8 +370,10 @@ class ReduceOperatorTester {
       // Create, setup, run, and destroy a reduce operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t reduce_op = nullptr;
+      // For min/max input and output quantizations are assumed to be the same.
       const xnn_status status =
-          xnn_create_reduce_nd(operation(), Config::GetXNNDatatype(), &q.input, &q.output,
+          xnn_create_reduce_nd(operation(), Config::GetXNNDatatype(), &q.input,
+                               is_minmax ? &q.input : &q.output,
                                /*flags=*/0, &reduce_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -336,7 +389,7 @@ class ReduceOperatorTester {
 
       size_t* workspace_size_ptr = nullptr;
       size_t* workspace_alignment_ptr = nullptr;
-      if(Config::GetXNNDatatype() != xnn_datatype_fp32) {
+      if (Config::GetXNNDatatype() != xnn_datatype_fp32 && !is_minmax) {
         workspace_size_ptr = &workspace_size;
         workspace_alignment_ptr = &workspace_alignment;
       }
@@ -353,7 +406,7 @@ class ReduceOperatorTester {
 
       std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace;
       void* workspace_ptr = nullptr;
-      if(Config::GetXNNDatatype() != xnn_datatype_fp32) {
+      if (Config::GetXNNDatatype() != xnn_datatype_fp32 && !is_minmax) {
         ASSERT_NE(workspace_size, SIZE_MAX);
         ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
         workspace.resize(workspace_size);
@@ -398,6 +451,16 @@ class ReduceOperatorTester {
   enum xnn_reduce_operator reduce_operator_;
 };
 
+// Explicit definitions for static constexpr members (needed before C++17)
+constexpr ReduceOperatorTester::QS8Config::StorageType ReduceOperatorTester::QS8Config::Max;
+constexpr ReduceOperatorTester::QS8Config::StorageType ReduceOperatorTester::QS8Config::Min;
+constexpr ReduceOperatorTester::QU8Config::StorageType ReduceOperatorTester::QU8Config::Max;
+constexpr ReduceOperatorTester::QU8Config::StorageType ReduceOperatorTester::QU8Config::Min;
+constexpr ReduceOperatorTester::F16Config::AccumulatorType ReduceOperatorTester::F16Config::Max;
+constexpr ReduceOperatorTester::F16Config::AccumulatorType ReduceOperatorTester::F16Config::Min;
+constexpr ReduceOperatorTester::F32Config::StorageType ReduceOperatorTester::F32Config::Max;
+constexpr ReduceOperatorTester::F32Config::StorageType ReduceOperatorTester::F32Config::Min;
+
 constexpr size_t kDim1 = 2;
 constexpr size_t kDim2 = 3;
 constexpr size_t kDim3 = 5;
@@ -416,9 +479,15 @@ struct TestParam {
   static std::string GetName(const testing::TestParamInfo<TestParam>& info) {
     std::stringstream sstr;
     const TestParam& param = info.param;
-    switch(param.operation) {
+    switch (param.operation) {
+      case xnn_reduce_max:
+        sstr << "max";
+        break;
       case xnn_reduce_mean:
         sstr << "mean";
+        break;
+      case xnn_reduce_min:
+        sstr << "min";
         break;
       case xnn_reduce_sum:
         sstr << "sum";
@@ -429,7 +498,7 @@ struct TestParam {
     }
     sstr << "_" << xnn_datatype_to_string(param.datatype);
     sstr << "_" << param.dims << "d";
-    if(param.reduction_axes == (1 << param.dims) - 1) {
+    if (param.reduction_axes == (1 << param.dims) - 1) {
       sstr << "_reduce_all";
     } else {
       sstr << "_axes";
@@ -443,7 +512,7 @@ struct TestParam {
     if (param.use_neg_axes) {
       sstr << "_neg_axes";
     }
-    if(param.multithreaded) {
+    if (param.multithreaded) {
       sstr << "_multithreaded";
     }
     return sstr.str();
@@ -468,8 +537,8 @@ class ReduceNDTest : public testing::TestWithParam<TestParam> {
     };
 
     std::vector<int64_t> reduction_axes;
-    for(int i = 0; i < param.dims; ++i) {
-      if(reduce_dims[i]) {
+    for (int i = 0; i < param.dims; ++i) {
+      if (reduce_dims[i]) {
         if (param.use_neg_axes) {
           reduction_axes.push_back(i - param.dims);
         } else {
@@ -500,7 +569,7 @@ TEST_P(ReduceNDTest, reduce) {
     tester.operation(param.operation)
           .input_shape(input_shape)
           .reduction_axes(reduction_axes);
-    switch(param.datatype) {
+    switch (param.datatype) {
       case xnn_datatype_fp16:
         tester.Test<ReduceOperatorTester::F16Config>();
         break;
@@ -520,11 +589,12 @@ TEST_P(ReduceNDTest, reduce) {
 
 std::vector<TestParam> GenerateTests() {
   std::vector<TestParam> params;
-  for(enum xnn_reduce_operator operation : {xnn_reduce_sum, xnn_reduce_mean}) {
-    for(enum xnn_datatype datatype : {xnn_datatype_fp16, xnn_datatype_fp32,
-                                      xnn_datatype_qint8, xnn_datatype_quint8}) {
-      for(int dims = 1; dims <= 6; ++dims) {
-        for(int reduction_axes = 1; reduction_axes < (1 << dims); ++reduction_axes) {
+  for (enum xnn_reduce_operator operation : {xnn_reduce_sum, xnn_reduce_mean,
+                                             xnn_reduce_max, xnn_reduce_min}) {
+    for (enum xnn_datatype datatype : {xnn_datatype_fp16, xnn_datatype_fp32,
+                                       xnn_datatype_qint8, xnn_datatype_quint8}) {
+      for (int dims = 1; dims <= 6; ++dims) {
+        for (int reduction_axes = 1; reduction_axes < (1 << dims); ++reduction_axes) {
           for (bool use_neg_axes : {false, true}) {
             for (bool multithreaded : {false, true}) {
               params.push_back(TestParam{operation, datatype, dims,

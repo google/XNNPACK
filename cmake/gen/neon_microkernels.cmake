@@ -38,8 +38,11 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-minmax-neon-lane-ld64.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-neon-u32.c
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-neon-u32.c
+  src/f32-rdminmax/gen/f32-rdmax-2p2x-neon-c32.c
+  src/f32-rdminmax/gen/f32-rdmin-2p2x-neon-c32.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-neon-c16.c
   src/f32-rminmax/gen/f32-rmax-neon-u16-acc4.c
+  src/f32-rminmax/gen/f32-rmin-neon-u16-acc4.c
   src/f32-rminmax/gen/f32-rminmax-neon-u16-acc4.c
   src/f32-rsum/gen/f32-rsum-neon-u16-acc4.c
   src/f32-spmm/gen/f32-spmm-32x1-minmax-neon.c
@@ -141,11 +144,20 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/s8-ibilinear/gen/s8-ibilinear-neon-c8.c
   src/s8-ibilinear/gen/s8-ibilinear-neon-c16.c
   src/s8-maxpool/gen/s8-maxpool-9p-minmax-neon-u16.c
+  src/s8-rdminmax/gen/s8-rdmax-2p2x-neon-c32.c
+  src/s8-rdminmax/gen/s8-rdmin-2p2x-neon-c32.c
+  src/s8-rminmax/gen/s8-rmax-neon-u32-acc2.c
+  src/s8-rminmax/gen/s8-rmin-neon-u32-acc2.c
+  src/s8-rminmax/gen/s8-rminmax-neon-u32-acc2.c
   src/s8-vclamp/s8-vclamp-neon-u64.c
   src/u8-ibilinear/gen/u8-ibilinear-neon-c8.c
   src/u8-ibilinear/gen/u8-ibilinear-neon-c16.c
   src/u8-maxpool/gen/u8-maxpool-9p-minmax-neon-u16.c
-  src/u8-rminmax/gen/u8-rmax-neon-u16.c
+  src/u8-rdminmax/gen/u8-rdmax-2p2x-neon-c32.c
+  src/u8-rdminmax/gen/u8-rdmin-2p2x-neon-c32.c
+  src/u8-rminmax/gen/u8-rmax-neon-u32-acc2.c
+  src/u8-rminmax/gen/u8-rmin-neon-u32-acc2.c
+  src/u8-rminmax/gen/u8-rminmax-neon-u32-acc2.c
   src/u8-vclamp/u8-vclamp-neon-u64.c
   src/x8-transposec/gen/x8-transposec-16x16-reuse-dec-zip-neon.c
   src/x16-packw/gen/x16-packw-x8-gemm-goi-neon-ld4lane-u8-prfm.c
@@ -331,8 +343,6 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-p5-u8-acc2.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-p5-u16-acc2.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-p5-u16-acc4.c
-  src/f32-rdminmax/gen/f32-rdmax-2p2x-neon-c32.c
-  src/f32-rdminmax/gen/f32-rdmin-2p2x-neon-c32.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-neon-c32.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-neon-c64.c
   src/f32-rminmax/gen/f32-rmax-neon-u4.c
@@ -343,7 +353,6 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/f32-rminmax/gen/f32-rmin-neon-u8-acc2.c
   src/f32-rminmax/gen/f32-rmin-neon-u12-acc3.c
   src/f32-rminmax/gen/f32-rmin-neon-u16-acc2.c
-  src/f32-rminmax/gen/f32-rmin-neon-u16-acc4.c
   src/f32-rminmax/gen/f32-rminmax-neon-u4.c
   src/f32-rminmax/gen/f32-rminmax-neon-u8-acc2.c
   src/f32-rminmax/gen/f32-rminmax-neon-u12-acc3.c
@@ -679,36 +688,27 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-neon-ld128-u16.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-rndnu-neon-ld64-u8.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-rndnu-neon-ld128-u16.c
-  src/s8-rdminmax/gen/s8-rdmax-2p2x-neon-c32.c
-  src/s8-rdminmax/gen/s8-rdmin-2p2x-neon-c32.c
   src/s8-rminmax/gen/s8-rmax-neon-u16.c
-  src/s8-rminmax/gen/s8-rmax-neon-u32-acc2.c
   src/s8-rminmax/gen/s8-rmax-neon-u48-acc3.c
   src/s8-rminmax/gen/s8-rmax-neon-u64-acc2.c
   src/s8-rminmax/gen/s8-rmax-neon-u64-acc4.c
   src/s8-rminmax/gen/s8-rmin-neon-u16.c
-  src/s8-rminmax/gen/s8-rmin-neon-u32-acc2.c
   src/s8-rminmax/gen/s8-rmin-neon-u48-acc3.c
   src/s8-rminmax/gen/s8-rmin-neon-u64-acc2.c
   src/s8-rminmax/gen/s8-rmin-neon-u64-acc4.c
   src/s8-rminmax/gen/s8-rminmax-neon-u16.c
-  src/s8-rminmax/gen/s8-rminmax-neon-u32-acc2.c
   src/s8-rminmax/gen/s8-rminmax-neon-u48-acc3.c
   src/s8-rminmax/gen/s8-rminmax-neon-u64-acc2.c
   src/s8-rminmax/gen/s8-rminmax-neon-u64-acc4.c
-  src/u8-rdminmax/gen/u8-rdmax-2p2x-neon-c32.c
-  src/u8-rdminmax/gen/u8-rdmin-2p2x-neon-c32.c
-  src/u8-rminmax/gen/u8-rmax-neon-u32-acc2.c
+  src/u8-rminmax/gen/u8-rmax-neon-u16.c
   src/u8-rminmax/gen/u8-rmax-neon-u48-acc3.c
   src/u8-rminmax/gen/u8-rmax-neon-u64-acc2.c
   src/u8-rminmax/gen/u8-rmax-neon-u64-acc4.c
   src/u8-rminmax/gen/u8-rmin-neon-u16.c
-  src/u8-rminmax/gen/u8-rmin-neon-u32-acc2.c
   src/u8-rminmax/gen/u8-rmin-neon-u48-acc3.c
   src/u8-rminmax/gen/u8-rmin-neon-u64-acc2.c
   src/u8-rminmax/gen/u8-rmin-neon-u64-acc4.c
   src/u8-rminmax/gen/u8-rminmax-neon-u16.c
-  src/u8-rminmax/gen/u8-rminmax-neon-u32-acc2.c
   src/u8-rminmax/gen/u8-rminmax-neon-u48-acc3.c
   src/u8-rminmax/gen/u8-rminmax-neon-u64-acc2.c
   src/u8-rminmax/gen/u8-rminmax-neon-u64-acc4.c

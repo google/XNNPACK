@@ -115,10 +115,28 @@ XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_xx_copy_config(
 
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f16_f32acc_rsum_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f16_f32acc_rdsum_config();
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f16_rdmax_config();
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f16_rdmin_config();
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f16_rmax_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f16_rminmax_config();
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f16_rmin_config();
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f32_rdmax_config();
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f32_rdmin_config();
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f32_rmax_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f32_rminmax_config();
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f32_rmin_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f32_rsum_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f32_rdsum_config();
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_s8_rdmax_config();
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_s8_rdmin_config();
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_u8_rdmax_config();
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_u8_rdmin_config();
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_s8_rmax_config();
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_s8_rminmax_config();
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_s8_rmin_config();
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_u8_rmax_config();
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_u8_rminmax_config();
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_u8_rmin_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_qs8_rsum_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_qs8_rdsum_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_qu8_rsum_config();
@@ -276,10 +294,6 @@ XNN_INTERNAL const struct xnn_maxpool_config* xnn_init_f16_maxpool_config();
 XNN_INTERNAL const struct xnn_maxpool_config* xnn_init_f32_maxpool_config();
 XNN_INTERNAL const struct xnn_maxpool_config* xnn_init_s8_maxpool_config();
 XNN_INTERNAL const struct xnn_maxpool_config* xnn_init_u8_maxpool_config();
-
-XNN_INTERNAL const struct xnn_rmax_config* xnn_init_f16_rmax_config();
-XNN_INTERNAL const struct xnn_rmax_config* xnn_init_f32_rmax_config();
-XNN_INTERNAL const struct xnn_rmax_config* xnn_init_u8_rmax_config();
 
 // Sparse Matrix-Dense Matrix Multiplication (NR=1 block).
 XNN_INTERNAL const struct xnn_spmm_config* xnn_init_f16_spmm_config();
