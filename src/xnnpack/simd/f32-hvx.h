@@ -81,6 +81,12 @@ static XNN_INLINE xnn_simd_f32_t xnn_fmsub_f32(xnn_simd_f32_t a,
   return v0;
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_fmsub_f32(xnn_simd_f32_t a,
+                                               xnn_simd_f32_t b,
+                                               xnn_simd_f32_t c) {
+  return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vsub_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(a, b), c));
+}
+
 static XNN_INLINE xnn_simd_f32_t xnn_sub_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {
   return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vsub_VsfVsf(a, b));
