@@ -97,9 +97,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_min_f32(xnn_simd_f32_t a,
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_abs_f32(xnn_simd_f32_t a) {
-  XNN_UNREACHABLE;
-  XNN_SIMD_CONST_F32(v0, 0);
-  return v0;
+  return Q6_V_vand_VV(a, Q6_V_vsplat_R(0x7FFFFFFF));
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
