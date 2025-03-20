@@ -76,13 +76,6 @@ static enum xnn_status create_max_pooling2d_nhwc(
     goto error;
   }
 
-  if (pooling_size == 1) {
-    xnn_log_error(
-      "failed to create %s operator with 1 pooling element: 1x1 pooling is meaningless",
-      xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-
   if (stride_height == 0 || stride_width == 0) {
     xnn_log_error(
       "failed to create %s operator with %" PRIu32 "x%" PRIu32 " stride: stride dimensions must be non-zero",
@@ -95,20 +88,6 @@ static enum xnn_status create_max_pooling2d_nhwc(
       "failed to create %s operator with %" PRIu32 "x%" PRIu32 " dilation: dilation dimensions must be non-zero",
       xnn_operator_type_to_string(operator_type), dilation_width, dilation_height);
     goto error;
-  }
-
-  if (stride_height > pooling_height) {
-    xnn_log_error(
-      "failed to create %s operator with %" PRIu32 " stride height: must be less than pooling height %" PRIu32,
-      xnn_operator_type_to_string(operator_type), stride_height, pooling_height);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (stride_width > pooling_width) {
-    xnn_log_error(
-      "failed to create %s operator with %" PRIu32 " stride width: must be less than pooling width %" PRIu32,
-      xnn_operator_type_to_string(operator_type), stride_width, pooling_width);
-    return xnn_status_invalid_parameter;
   }
 
   const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
@@ -484,42 +463,38 @@ static enum xnn_status reshape_max_pooling2d_nhwc(
     max_pooling_op->dilation_width > 1 ? pooling_width : min(max_pooling_op->stride_width, pooling_width);
   const size_t step_height = pooling_size + (output_width - 1) * step_width * pooling_height;
 
-  if (input_height != max_pooling_op->last_input_height ||
-      input_width != max_pooling_op->last_input_width)
-  {
-    const size_t indirection_buffer_size = sizeof(void*) * ((pooling_size - 1) + output_height * step_height);
-    const void** indirection_buffer =
-      (const void**) xnn_reallocate_memory(max_pooling_op->indirection_buffer, indirection_buffer_size);
-    if (indirection_buffer == NULL) {
-      xnn_log_error(
-          "failed to allocate %zu bytes for %s operator indirection buffer",
-          indirection_buffer_size,
-          xnn_operator_type_to_string_v2(max_pooling_op));
-      return xnn_status_out_of_memory;
-    }
-    max_pooling_op->indirection_buffer = indirection_buffer;
-    xnn_log_debug("allocated %zu bytes for indirection buffer in %s operator",
-                  indirection_buffer_size,
-                  xnn_operator_type_to_string_v2(max_pooling_op));
-
-    // Set a dummy input first, the actual input offset is calculated in setup when we have the input pointer.
-    max_pooling_op->input = NULL;
-
-    xnn_indirection_init_maxpool2d(
-      max_pooling_op->indirection_buffer, max_pooling_op->input,
-      max_pooling_op->input_pixel_stride << log2_input_element_size,
-      max_pooling_op->input_height, max_pooling_op->input_width,
-      max_pooling_op->output_height, max_pooling_op->output_width,
-      max_pooling_op->kernel_height, max_pooling_op->kernel_width,
-      max_pooling_op->stride_height, max_pooling_op->stride_width,
-      max_pooling_op->dilation_height, max_pooling_op->dilation_width,
-      max_pooling_op->padding_top, max_pooling_op->padding_left,
-      step_height, step_width);
-
-    max_pooling_op->last_input = max_pooling_op->input;
-    max_pooling_op->last_input_height = input_height;
-    max_pooling_op->last_input_width = input_width;
+  const size_t indirection_buffer_size = sizeof(void*) * ((pooling_size - 1) + output_height * step_height);
+  const void** indirection_buffer =
+    (const void**) xnn_reallocate_memory(max_pooling_op->indirection_buffer, indirection_buffer_size);
+  if (indirection_buffer == NULL) {
+    xnn_log_error(
+        "failed to allocate %zu bytes for %s operator indirection buffer",
+        indirection_buffer_size,
+        xnn_operator_type_to_string_v2(max_pooling_op));
+    return xnn_status_out_of_memory;
   }
+  max_pooling_op->indirection_buffer = indirection_buffer;
+  xnn_log_debug("allocated %zu bytes for indirection buffer in %s operator",
+                indirection_buffer_size,
+                xnn_operator_type_to_string_v2(max_pooling_op));
+
+  // Set a dummy input first, the actual input offset is calculated in setup when we have the input pointer.
+  max_pooling_op->input = NULL;
+
+  xnn_indirection_init_maxpool2d(
+    max_pooling_op->indirection_buffer, max_pooling_op->input,
+    max_pooling_op->input_pixel_stride << log2_input_element_size,
+    max_pooling_op->input_height, max_pooling_op->input_width,
+    max_pooling_op->output_height, max_pooling_op->output_width,
+    max_pooling_op->kernel_height, max_pooling_op->kernel_width,
+    max_pooling_op->stride_height, max_pooling_op->stride_width,
+    max_pooling_op->dilation_height, max_pooling_op->dilation_width,
+    max_pooling_op->padding_top, max_pooling_op->padding_left,
+    step_height, step_width);
+
+  max_pooling_op->last_input = max_pooling_op->input;
+  max_pooling_op->last_input_height = input_height;
+  max_pooling_op->last_input_width = input_width;
 
   const size_t indirect_input_height_stride = step_height * sizeof(void*);
   const size_t output_width_stride = max_pooling_op->output_pixel_stride << log2_output_element_size;

@@ -1391,7 +1391,6 @@ IF(XNNPACK_BUILD_TESTS)
     SET(LIBRARY_SUBGRAPH_UNIT_TESTS
         argmax-pooling-2d
         average-pooling-2d
-        average-pooling-2d-reshape
         batch-matrix-multiply
         binary
         concatenate
