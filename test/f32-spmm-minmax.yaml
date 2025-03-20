@@ -112,6 +112,43 @@
 - name: xnn_f32_spmm_minmax_ukernel_32x4__aarch64_neonfma
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
+# RISC-V Vector
+- name: xnn_f32_spmm_minmax_ukernel_4x1__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_4x2__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_4x4__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_8x1__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_8x2__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_8x4__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_16x1__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_16x2__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_16x4__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_32x1__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_32x2__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_32x4__rvv
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
 # x86 SSE
 - name: xnn_f32_spmm_minmax_ukernel_4x1__sse
   init: xnn_init_f32_minmax_scalar_params
