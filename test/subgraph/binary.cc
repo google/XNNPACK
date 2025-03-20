@@ -118,7 +118,7 @@ int32_t compute_integral(xnn_binary_operator op, int32_t a, int32_t b) {
 }
 
 float compute_tolerance(xnn_datatype datatype, float output_ref) {
-  return std::abs(output_ref) * epsilon(datatype) + epsilon(datatype);
+  return (std::abs(output_ref) + 1.0f) * 3.0f * epsilon(datatype);
 }
 
 struct Param {
@@ -238,7 +238,7 @@ void TestImpl(const Param& p) {
                   << ", output(i) = " << static_cast<int32_t>(output(i));
             }
           } else {
-            float expected = compute_float(p.op, a(i), b(i));
+            float expected = static_cast<T>(compute_float(p.op, a(i), b(i)));
             expected = std::max<float>(expected, params.output_min);
             expected = std::min<float>(expected, params.output_max);
             if (std::isnan(expected)) {

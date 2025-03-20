@@ -1,6 +1,7 @@
 #include "src/xnnpack/buffer.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 
 #include <gmock/gmock.h>
@@ -107,6 +108,20 @@ TEST(EnumerateIndices, Rank4) {
     }
     ASSERT_THAT(EnumerateIndices(extents), testing::ElementsAreArray(expected));
   } while (std::next_permutation(extents.begin(), extents.end()));
+}
+
+TEST(DatatypeGenerator, Float) {
+  ReplicableRandomDevice rng;
+
+  int inf_count = 0;
+  constexpr int kSamples = 1000000;
+  DatatypeGenerator<float> gen;
+  for (int i = 0; i < kSamples; ++i) {
+    float x = gen(rng);
+    if (std::isinf(x)) ++inf_count;
+  }
+  // Don't allow more than 0.1% of samples to be infinity.
+  ASSERT_LT(inf_count, kSamples / 1000);
 }
 
 }  // namespace xnnpack

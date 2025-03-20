@@ -37,6 +37,7 @@ class NumericLimits {
   static constexpr T infinity() { return std::numeric_limits<T>::infinity(); }
   static constexpr T min() { return std::numeric_limits<T>::lowest(); }
   static constexpr T max() { return std::numeric_limits<T>::max(); }
+  static constexpr T smallest_normal() { return std::numeric_limits<T>::min(); }
 };
 
 template <>
@@ -48,6 +49,9 @@ class NumericLimits<xnn_float16> {
   static xnn_float16 infinity() { return xnn_float16_from_bits(0x7c00); }
   static xnn_float16 min() { return xnn_float16_from_bits(0xfbff); }
   static xnn_float16 max() { return xnn_float16_from_bits(0x7bff); }
+  static xnn_float16 smallest_normal() {
+    return xnn_float16_from_bits(0x0400);  // 2^-14
+  }
 };
 
 template <>
@@ -59,6 +63,9 @@ class NumericLimits<xnn_bfloat16> {
   static xnn_bfloat16 infinity() { return xnn_bfloat16_from_bits(0x7f80); }
   static xnn_bfloat16 min() { return xnn_bfloat16_from_bits(0xff7f); }
   static xnn_bfloat16 max() { return xnn_bfloat16_from_bits(0x7f7f); }
+  static xnn_bfloat16 smallest_normal() {
+    return xnn_bfloat16_from_bits(0x0080);  // 2^-126
+  }
 };
 
 template <typename T>
@@ -70,6 +77,7 @@ class NumericLimits<quantized<T>> {
   static quantized<T> max() {
     return {std::numeric_limits<T>::max()};
   }
+  static quantized<T> smallest_normal() { return {0}; }
 };
 
 inline float epsilon(xnn_datatype datatype) {
@@ -622,23 +630,43 @@ float dequantize(T x, xnn_quantization_params params) {
 template <typename T>
 class DatatypeGenerator {
   std::uniform_real_distribution<float> dist_;
+  bool reinterpret_ = false;
 
  public:
-  DatatypeGenerator(float min, float max, const xnn_quantization_params& = {})
-      : dist_(std::max<float>(min, NumericLimits<T>::min()),
-              std::min<float>(max, NumericLimits<T>::max())) {}
-  explicit DatatypeGenerator(const xnn_quantization_params& = {})
-      : dist_(NumericLimits<T>::min(), NumericLimits<T>::max()) {}
+  DatatypeGenerator(float min, float max, const xnn_quantization_params& = {}) {
+    if (min <= NumericLimits<T>::min() && max >= NumericLimits<T>::max()) {
+      // The caller wants a full range of random value. Rather than generate
+      // floats uniformly distributed across the range of floats, where a
+      // negligible fraction of the range contains the "interesting" region near
+      // 0, we generate random bits reinterpreted as a float instead. This
+      // distribution more accurately reflects the numbers we want to test in
+      // typical code.
+      reinterpret_ = true;
+    } else {
+      reinterpret_ = false;
+      dist_ = std::uniform_real_distribution<float>(min, max);
+    }
+  }
+  DatatypeGenerator(const xnn_quantization_params& = {})
+      : DatatypeGenerator(NumericLimits<T>::min(), NumericLimits<T>::max()) {}
 
   template <typename Rng>
   T operator()(Rng& rng) {
-    while (true) {
-      float result = dist_(rng);
-      if (!std::isnan(result)) {
-        return static_cast<T>(result);
+    if (reinterpret_) {
+      static_assert(Rng::min() == 0);
+      static_assert(Rng::max() >= (1ull << (sizeof(T) * 8)) - 1);
+      auto bits = rng();
+      T result;
+      memcpy(&result, &bits, sizeof(T));
+      if (std::abs(static_cast<float>(result)) >
+          NumericLimits<T>::smallest_normal()) {
+        return result;
       } else {
-        // Don't allow generating NaN
+        // Flush denormals (and NaN) to 0.
+        return static_cast<T>(0.0f);
       }
+    } else {
+      return dist_(rng);
     }
   }
 };
