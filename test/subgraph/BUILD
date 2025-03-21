@@ -38,6 +38,15 @@ xnnpack_cxx_library(
     deps = xnnpack_test_deps_for_library(),
 )
 
+xnnpack_cxx_library(
+    name = "stencil",
+    hdrs = ["stencil.h"],
+    deps = [
+        "//:buffer",
+        "//:math",
+    ],
+)
+
 ########################## Size tests for the library #########################
 
 xnnpack_binary(
@@ -106,24 +115,13 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "argmax_pooling_2d_test",
     srcs = ["argmax-pooling-2d.cc"],
-    deps = SUBGRAPH_TEST_DEPS,
+    deps = SUBGRAPH_TEST_DEPS + [":stencil"],
 )
 
 xnnpack_unit_test(
     name = "average_pooling_2d_test",
     srcs = ["average-pooling-2d.cc"],
-    deps = SUBGRAPH_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "average_pooling_2d_reshape_test",
-    srcs = ["average-pooling-2d-reshape.cc"],
-    deps = [
-        ":runtime_flags",
-        "//:XNNPACK",
-        "//:node_type",
-        "//:subgraph",
-    ],
+    deps = SUBGRAPH_TEST_DEPS + [":stencil"],
 )
 
 xnnpack_unit_test(
@@ -184,7 +182,7 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "max_pooling_2d_test",
     srcs = ["max-pooling-2d.cc"],
-    deps = SUBGRAPH_TEST_DEPS,
+    deps = SUBGRAPH_TEST_DEPS + [":stencil"],
 )
 
 xnnpack_unit_test(
@@ -217,7 +215,7 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "unpooling_2d_test",
     srcs = ["unpooling-2d.cc"],
-    deps = SUBGRAPH_TEST_DEPS,
+    deps = SUBGRAPH_TEST_DEPS + [":stencil"],
 )
 
 xnnpack_unit_test(
@@ -316,5 +314,16 @@ xnnpack_unit_test(
         "//:allocation_type",
         "//:allocator",
         "//:params",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "stencil_test",
+    srcs = ["stencil.cc"],
+    deps = [
+        ":stencil",
+        "//:buffer",
+        "//:operator_utils",
+        "//test:replicable_random_device",
     ],
 )

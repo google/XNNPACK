@@ -713,6 +713,20 @@ class SubgraphTester {
     return *this;
   }
 
+  inline SubgraphTester& AddArgMaxPooling2D(
+      uint32_t input_padding_top, uint32_t input_padding_right,
+      uint32_t input_padding_bottom, uint32_t input_padding_left,
+      uint32_t pooling_height, uint32_t pooling_width, uint32_t input_id,
+      uint32_t output_value_id, uint32_t output_index_id) {
+    const xnn_status status = xnn_define_argmax_pooling_2d(
+        subgraph_.get(), input_padding_top, input_padding_right,
+        input_padding_bottom, input_padding_left, pooling_height, pooling_width,
+        input_id, output_value_id, output_index_id, /*flags=*/0);
+    EXPECT_EQ(status, xnn_status_success);
+
+    return *this;
+  }
+
   SubgraphTester& AddMultiply(uint32_t input_id1, uint32_t input_id2, uint32_t output_id) {
     struct xnn_binary_params params = {-std::numeric_limits<float>::infinity(),
                                        std::numeric_limits<float>::infinity()};
