@@ -27,6 +27,7 @@
 #include "src/xnnpack/config.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
+#include "src/xnnpack/operator.h"
 #include "src/xnnpack/packq.h"
 #include "src/xnnpack/internal.h"
 #include "src/xnnpack/buffer.h"

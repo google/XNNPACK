@@ -27,6 +27,7 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/operator.h"
 #include "src/xnnpack/operator-utils.h"
 #include "src/xnnpack/reference-utils.h"
 #include "test/operators/operator-test-utils.h"
