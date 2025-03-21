@@ -588,6 +588,7 @@ xnnpack_cc_library(
     gcc_copts = [],
     deps = [
         ":common",
+        ":init_once",
         ":logging",
         ":math",
         ":xnnpack_h",
