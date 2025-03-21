@@ -163,7 +163,7 @@ static XNN_INLINE void xnn_storeu_f32(float* ptr, xnn_simd_f32_t v) {
 }
 
 static XNN_INLINE void xnn_store_f32(float* ptr, xnn_simd_f32_t v) {
-  *((HVX_UVector*) ptr) = v;
+  *((HVX_Vector*) ptr) = v;
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_set1_f32(float v) {
