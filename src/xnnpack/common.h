@@ -57,6 +57,12 @@
   #define XNN_ARCH_HEXAGON 0
 #endif
 
+#if defined(__loongarch__)
+  #define XNN_ARCH_LOONGARCH 1
+#else
+  #define XNN_ARCH_LOONGARCH 0
+#endif
+
 #if defined(__wasm__)
   #if defined(__wasm_relaxed_simd__)
     #define XNN_ARCH_WASM 0
