@@ -10,10 +10,10 @@
 
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/ibilinear.h"
-#include "xnnpack/isa-checks.h"
-#include "ibilinear-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/ibilinear.h"
+#include "src/xnnpack/isa-checks.h"
+#include "test/ibilinear-microkernel-tester.h"
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, channel_tile, pixel_tile, datatype, weight_type, params_type, init_params) XNN_TEST_IBILINEAR_CHANNELS_EQ(ukernel, arch_flags, channel_tile, pixel_tile, datatype, weight_type, params_type, init_params);\
 XNN_TEST_IBILINEAR_CHANNELS_DIV(ukernel, arch_flags, channel_tile, pixel_tile, datatype, weight_type, params_type, init_params);                                                                                                                               \
 XNN_TEST_IBILINEAR_CHANNELS_LT(ukernel, arch_flags, channel_tile, pixel_tile, datatype, weight_type, params_type, init_params);                                                                                                                                \
@@ -23,5 +23,5 @@ XNN_TEST_IBILINEAR_PIXELS_LT(ukernel, arch_flags, channel_tile, pixel_tile, data
 XNN_TEST_IBILINEAR_PIXELS_GT(ukernel, arch_flags, channel_tile, pixel_tile, datatype, weight_type, params_type, init_params);                                                                                                                                  \
 XNN_TEST_IBILINEAR_INPUT_OFFSET(ukernel, arch_flags, channel_tile, pixel_tile, datatype, weight_type, params_type, init_params);                                                                                                                               \
 XNN_TEST_IBILINEAR_OUTPUT_STRIDE(ukernel, arch_flags, channel_tile, pixel_tile, datatype, weight_type, params_type, init_params);
-#include "f32-ibilinear/f32-ibilinear.h"
+#include "src/f32-ibilinear/f32-ibilinear.h"
 #undef XNN_UKERNEL_WITH_PARAMS

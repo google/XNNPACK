@@ -25,10 +25,10 @@ extern "C" {
       const weight_type* weights,                      \
       datatype* output,                                \
       size_t output_increment);
-#include "f16-ibilinear/f16-ibilinear.h"
-#include "f32-ibilinear/f32-ibilinear.h"
-#include "s8-ibilinear/s8-ibilinear.h"
-#include "u8-ibilinear/u8-ibilinear.h"
+#include "src/f16-ibilinear/f16-ibilinear.h"
+#include "src/f32-ibilinear/f32-ibilinear.h"
+#include "src/s8-ibilinear/s8-ibilinear.h"
+#include "src/u8-ibilinear/u8-ibilinear.h"
 #undef XNN_UKERNEL
 
 #define DECLARE_F32_IBILINEAR_CHW_UKERNEL_FUNCTION(fn_name) \
