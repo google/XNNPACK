@@ -124,15 +124,15 @@ static XNN_INLINE xnn_simd_f32_t xnn_xor_f32(xnn_simd_f32_t a,
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_sll_f32(xnn_simd_f32_t a, uint8_t bits) {
-  return Q6_Vh_vasl_VhR(a, bits);
+  return Q6_Vw_vasl_VwR(a, (uint32_t) bits);
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_srl_f32(xnn_simd_f32_t a, uint8_t bits) {
-  return Q6_Vuh_vlsr_VuhR(a, bits);
+  return Q6_Vuw_vlsr_VuwR(a, (uint32_t) bits);
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_sra_f32(xnn_simd_f32_t a, uint8_t bits) {
-  return Q6_Vh_vasr_VhR(a, bits);
+  return Q6_Vw_vasr_VwR(a, (uint32_t) bits);
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
