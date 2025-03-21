@@ -119,6 +119,10 @@ static const struct xnn_binary_elementwise_config* init_config(
           return xnn_init_f32_vprelu_config();
         case xnn_datatype_fp16:
           return xnn_init_f16_vprelu_config();
+        case xnn_datatype_qint8:
+          return xnn_init_qs8_vprelu_config();
+        case xnn_datatype_quint8:
+          return xnn_init_qu8_vprelu_config();
         default:
           return NULL;
       }
