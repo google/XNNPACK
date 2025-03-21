@@ -473,9 +473,75 @@ class Tensor {
     return result;
   }
 
+  // Add `pre` indices before, `post` indices after, of padding of `value` to the tensor.
+  Tensor<T, Alignment> pad(T value, const index_type& pre,
+                           const index_type& post) const {
+    assert(rank() == pre.size());
+    assert(rank() == post.size());
+
+    std::vector<size_t> extents = extents_;
+    for (size_t i = 0; i < rank(); ++i) {
+      extents[i] += pre[i] + post[i];
+    }
+
+    Tensor<T, Alignment> result(extents);
+    result.fill(value);
+    result.crop_padding(pre, post).assign(*this);
+    return result;
+  }
+
+  // Similar to the above, but repeats the edge value of the tensor instead of
+  // padding with a constant value.
+  Tensor<T, Alignment> pad(const index_type& pre,
+                           const index_type& post) const {
+    assert(rank() == pre.size());
+    assert(rank() == post.size());
+
+    std::vector<size_t> extents = extents_;
+    for (size_t i = 0; i < rank(); ++i) {
+      extents[i] += pre[i] + post[i];
+    }
+
+    Tensor<T, Alignment> result(extents);
+    result.crop_padding(pre, post).assign(*this);
+    // Implementing "repeat edge" is tricky. For each dimension, we need to
+    // slice the padding in that dimension, and copy from the edge of the valid
+    // data. This starts by copying junk padding from the result, but each
+    // dimension fills in more of this junk data (the regions in the "corners"
+    // gets copied more than once).
+    for (size_t dim = 0; dim < rank(); ++dim) {
+      int64_t valid_begin = pre[dim];
+      int64_t valid_end = valid_begin + extents_[dim];
+      // Make a broadcasting set of strides in this dimension.
+      std::vector<size_t> strides = result.strides();
+      strides[dim] = 0;
+
+      if (pre[dim] != 0) {
+        // Copy the pre-padding.
+        Tensor<T, Alignment> valid_pre =
+            result.slice(dim, valid_begin, valid_begin + 1);
+        valid_pre.set_shape(valid_pre.extents(), strides);
+        Tensor<T, Alignment> padding = result.slice(dim, 0, valid_begin);
+        padding.assign(valid_pre);
+      }
+
+      if (post[dim] != 0) {
+        // Copy the post padding.
+        Tensor<T, Alignment> valid_post =
+            result.slice(dim, valid_end - 1, valid_end);
+        valid_post.set_shape(valid_post.extents(), strides);
+        result.slice(dim, valid_end, 0).assign(valid_post);
+      }
+    }
+    return result;
+  }
+
   // Copy the contents from other to this. The extents must match.
   void assign(const Tensor<T, Alignment>& other) {
-    assert(extents_ == other.extents_);
+    assert(rank() == other.rank());
+    for (size_t i = 0; i < rank(); ++i) {
+      assert(other.stride(i) == 0 || other.extent(i) == extent(i));
+    }
     copy_impl(rank(), extents_.data(), other.strides_.data(), other.base(),
               strides_.data(), base());
   }
