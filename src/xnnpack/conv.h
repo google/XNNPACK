@@ -33,8 +33,8 @@ extern "C" {
       size_t output_channels,                          \
       size_t output_height_stride,                     \
       size_t output_width_stride,                      \
-      const union xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]); 
-#include "f32-conv-hwc/f32-conv-hwc.h"
+      const struct xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]); 
+#include "src/f32-conv-hwc/f32-conv-hwc.h"
 #undef XNN_UKERNEL
 
 #define DECLARE_F32_CONV_HWC2CHW_UKERNEL_FUNCTION(fn_name) \

@@ -11,15 +11,15 @@
 #include <gtest/gtest.h>
 #include "replicable_random_device.h"
 #include "xnnpack.h"
-#include "xnnpack/buffer.h"
+#include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/conv.h"
 #include "src/xnnpack/isa-checks.h"
-#include "xnnpack/microfnptr.h"
+#include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
-#include "test/xnnpack/microparams.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/pack.h"
-#include "conv-hwc-microkernel-tester.h"
+#include "test/conv-hwc-microkernel-tester.h"
 
 namespace {
 
@@ -40,7 +40,7 @@ std::string GetTestName(const testing::TestParamInfo<XnnTest::ParamType>& info) 
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, kernel_size, subsampling, padding_right, padding_left, input_channels, output_channels_tile, input_widths, datatype, params_type, init_params) \
 { #ukernel, ConvHWCMicrokernelTester::Kernel{ukernel, init_params}, arch_flags, kernel_size, subsampling, padding_right, padding_left, input_channels, output_channels_tile, input_widths },
 const XnnTestParam xnn_test_params[] = {
-#include "f32-conv-hwc/f32-conv-hwc.h"
+#include "src/f32-conv-hwc/f32-conv-hwc.h"
 };
 
 }  // namespace
