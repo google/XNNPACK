@@ -102,6 +102,9 @@ void TestImpl(size_t rank, xnn_unary_operator op) {
     Tensor<In> input(shape, {XNN_EXTRA_BYTES});
     Tensor<Out> output(shape);
 
+    // TODO(b/397863125): This is a workaround for intrinsics unhandled by msan.
+    std::fill_n(input.data(), input.size() + XNN_EXTRA_BYTES/sizeof(In), 0);
+
     DatatypeGenerator<In> gen(domain.min, domain.max, input_quantization);
     input.generate([&]() { return gen(rng); });
 
