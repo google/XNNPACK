@@ -35,7 +35,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_generic_getexp_f32(xnn_simd_f32_t a) {
   XNN_SIMD_CONST_F32(bias_256, 256.0f);
   XNN_SIMD_CONST_F32(bias_383, 383.0f);
 
-  // The bits of IEE754 single-precision floating-point format are:
+  // The bits of IEEE754 single-precision floating-point format are:
   //
   //   s | e e e e e e e e | m m m m m m m m m m m m m m m m m m m m m m m
   //
