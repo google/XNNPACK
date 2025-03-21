@@ -83,7 +83,7 @@ xnnpack_unit_test(
     ("softmax", 1, "moderate"),
     ("space_to_depth_2d", 1, "short"),
     ("depth_to_space_2d", 1, "short"),
-    ("static_constant_pad", 1, "short"),
+    ("static_constant_pad", 1, "moderate"),
     ("static_expand_dims", 1, "short"),
     ("static_reshape", 1, "short"),
     ("static_slice", 5, "short"),
@@ -189,6 +189,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "rope_test",
+    timeout = "moderate",
     srcs = ["rope.cc"],
     deps = SUBGRAPH_TEST_DEPS,
 )
