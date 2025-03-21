@@ -32,9 +32,6 @@ enum xnn_status xnn_create_unpooling2d_nhwc_x32(
     uint32_t input_padding_left,
     uint32_t pooling_height,
     uint32_t pooling_width,
-    size_t channels,
-    size_t input_pixel_stride,
-    size_t output_pixel_stride,
     uint32_t flags,
     xnn_operator_t* unpooling_op_out)
 {
@@ -55,36 +52,6 @@ enum xnn_status xnn_create_unpooling2d_nhwc_x32(
       "failed to create %s operator with %" PRIu32 "x%" PRIu32 " pooling size: "
       "pooling size dimensions must be non-zero",
       xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32), pooling_width, pooling_height);
-    goto error;
-  }
-
-  if (pooling_size == 1) {
-    xnn_log_error(
-      "failed to create %s operator with 1 pooling element: 1x1 unpooling is meaningless",
-      xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32));
-    goto error;
-  }
-
-  if (channels == 0) {
-    xnn_log_error(
-      "failed to create %s operator with %zu channels: number of channels must be non-zero",
-      xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32), channels);
-    goto error;
-  }
-
-  if (input_pixel_stride < channels) {
-    xnn_log_error(
-      "failed to create %s operator with input pixel stride of %zu: "
-      "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32), input_pixel_stride, channels);
-    goto error;
-  }
-
-  if (output_pixel_stride < channels) {
-    xnn_log_error(
-      "failed to create %s operator with output pixel stride of %zu: "
-      "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32), output_pixel_stride, channels);
     goto error;
   }
 
@@ -113,9 +80,6 @@ enum xnn_status xnn_create_unpooling2d_nhwc_x32(
 
   unpooling_op->kernel_height = pooling_height;
   unpooling_op->kernel_width = pooling_width;
-  unpooling_op->channels = channels;
-  unpooling_op->input_pixel_stride = input_pixel_stride;
-  unpooling_op->output_pixel_stride = output_pixel_stride;
 
   unpooling_op->type = xnn_operator_type_unpooling_nhwc_x32;
   unpooling_op->flags = flags;
@@ -136,6 +100,9 @@ enum xnn_status xnn_reshape_unpooling2d_nhwc_x32(
   size_t batch_size,
   size_t input_height,
   size_t input_width,
+  size_t channels,
+  size_t input_pixel_stride,
+  size_t output_pixel_stride,
   size_t* output_height_out,
   size_t* output_width_out,
   pthreadpool_t threadpool)
@@ -168,9 +135,35 @@ enum xnn_status xnn_reshape_unpooling2d_nhwc_x32(
     return xnn_status_success;
   }
 
+  if (channels == 0) {
+    xnn_log_error(
+      "failed to reshape %s operator with %zu channels: number of channels must be non-zero",
+      xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32), channels);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (input_pixel_stride < channels) {
+    xnn_log_error(
+      "failed to reshape %s operator with input pixel stride of %zu: "
+      "stride must be at least as large as the number of channels (%zu)",
+      xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32), input_pixel_stride, channels);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_pixel_stride < channels) {
+    xnn_log_error(
+      "failed to reshape %s operator with output pixel stride of %zu: "
+      "stride must be at least as large as the number of channels (%zu)",
+      xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32), output_pixel_stride, channels);
+    return xnn_status_invalid_parameter;
+  }
+
   unpooling_op->batch_size = batch_size;
   unpooling_op->input_height = input_height;
   unpooling_op->input_width = input_width;
+  unpooling_op->channels = channels;
+  unpooling_op->input_pixel_stride = input_pixel_stride;
+  unpooling_op->output_pixel_stride = output_pixel_stride;
 
   unpooling_op->output_height = xnn_compute_unpooling_output_dimension(
     input_height, unpooling_op->padding_top + unpooling_op->padding_bottom,
@@ -233,7 +226,6 @@ enum xnn_status xnn_reshape_unpooling2d_nhwc_x32(
     unpooling_op->padding_left,
     valid_batch_size);
 
-  const size_t channels = unpooling_op->channels;
   const size_t input_pixel_stride_in_bytes = unpooling_op->input_pixel_stride * sizeof(float);
   unpooling_op->context.unpooling = (struct unpooling_context) {
     .input_height_stride = input_width * input_pixel_stride_in_bytes,

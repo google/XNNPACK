@@ -124,4 +124,36 @@ TEST(DatatypeGenerator, Float) {
   ASSERT_LT(inf_count, kSamples / 1000);
 }
 
+TEST(Pad, RepeatEdge1D) {
+  Tensor<int> x({2});
+  x(0) = 3;
+  x(1) = 5;
+  Tensor<int> padded = x.pad({2}, {3});
+  ASSERT_THAT(padded.extents(), testing::ElementsAre(7));
+  ASSERT_THAT(padded, testing::ElementsAre(3, 3, 3, 5, 5, 5, 5));
+}
+
+TEST(Pad, RepeatEdge2Dx) {
+  Tensor<int> x({2, 2});
+  x(0, 0) = 3;
+  x(0, 1) = 5;
+  x(1, 0) = 7;
+  x(1, 1) = 9;
+  Tensor<int> padded = x.pad({0, 2}, {0, 1});
+  ASSERT_THAT(padded.extents(), testing::ElementsAre(2, 5));
+  ASSERT_THAT(padded, testing::ElementsAre(3, 3, 3, 5, 5, 7, 7, 7, 9, 9));
+}
+
+TEST(Pad, RepeatEdge2D) {
+  Tensor<int> x({2, 2});
+  x(0, 0) = 3;
+  x(0, 1) = 5;
+  x(1, 0) = 7;
+  x(1, 1) = 9;
+  Tensor<int> padded = x.pad({1, 2}, {0, 1});
+  ASSERT_THAT(padded.extents(), testing::ElementsAre(3, 5));
+  ASSERT_THAT(padded, testing::ElementsAre(3, 3, 3, 5, 5, 3, 3, 3, 5, 5, 7, 7,
+                                           7, 9, 9));
+}
+
 }  // namespace xnnpack

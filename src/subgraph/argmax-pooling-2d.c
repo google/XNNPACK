@@ -73,6 +73,8 @@ static enum xnn_status reshape_argmax_pooling_operator(
   }
   const uint32_t output_id = opdata->outputs[0];
   assert(output_id < num_values);
+  const uint32_t index_id = opdata->outputs[1];
+  assert(index_id < num_values);
 
   struct xnn_value* output_value = values + output_id;
   output_value->shape.dim[0] = batch_size;
@@ -80,10 +82,22 @@ static enum xnn_status reshape_argmax_pooling_operator(
   output_value->shape.dim[2] = output_width;
   output_value->shape.dim[3] = channel_dim;
 
+  struct xnn_value* output_index = values + index_id;
+  output_index->shape.dim[0] = batch_size;
+  output_index->shape.dim[1] = output_height;
+  output_index->shape.dim[2] = output_width;
+  output_index->shape.dim[3] = channel_dim;
+
   output_value->shape.num_dims = 4;
-  const size_t new_size = xnn_tensor_get_size(output_value);
-  if (new_size > output_value->size) {
-    output_value->size = new_size;
+  output_index->shape.num_dims = 4;
+  const size_t new_output_size = xnn_tensor_get_size(output_value);
+  if (new_output_size > output_value->size) {
+    output_value->size = new_output_size;
+    return xnn_status_reallocation_required;
+  }
+  const size_t new_index_size = xnn_tensor_get_size(output_index);
+  if (new_index_size > output_index->size) {
+    output_index->size = new_index_size;
     return xnn_status_reallocation_required;
   }
   return xnn_status_success;
@@ -150,13 +164,6 @@ enum xnn_status xnn_define_argmax_pooling_2d(
       "failed to define %s operator with %" PRIu32 "x%" PRIu32 " pooling size: "
       "pooling size dimensions must be non-zero",
       xnn_node_type_to_string(xnn_node_type_argmax_pooling_2d), pooling_width, pooling_height);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (pooling_size == 1) {
-    xnn_log_error(
-      "failed to define %s operator with 1 pooling element: 1x1 pooling is meaningless",
-      xnn_node_type_to_string(xnn_node_type_argmax_pooling_2d));
     return xnn_status_invalid_parameter;
   }
 

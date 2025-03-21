@@ -1682,11 +1682,11 @@ enum xnn_status xnn_define_copy(
 ///                    dimensions is added to it.
 /// @param input_id - Value ID for the input tensor. The input tensor must be an N-dimensional tensor defined in the @a
 ///                   subgraph.
-/// @param num_outputs - The number of output tensors to generate. The input tensor will be evenly split into 
-///                      this number of output tensors along the `split_dim`. Each output tensor will have 
-///                      the same dimensions as the input tensor, except for the `split_dim`, which will be 
+/// @param num_outputs - The number of output tensors to generate. The input tensor will be evenly split into
+///                      this number of output tensors along the `split_dim`. Each output tensor will have
+///                      the same dimensions as the input tensor, except for the `split_dim`, which will be
 ///                      divided evenly between the outputs.
-/// @param outputs - An array of Value IDs for the output tensors. Each output tensor must be an N-dimensional 
+/// @param outputs - An array of Value IDs for the output tensors. Each output tensor must be an N-dimensional
 ///                  tensor defined in the @a subgraph with the same shape as the input tensor, except along the
 ///                  `split_dim` dimension, which will be split evenly among the output tensors. The number of
 ///                  output tensors corresponds to the value of `num_outputs`.
@@ -4750,9 +4750,6 @@ enum xnn_status xnn_create_unpooling2d_nhwc_x32(
   uint32_t input_padding_left,
   uint32_t pooling_height,
   uint32_t pooling_width,
-  size_t channels,
-  size_t input_pixel_stride,
-  size_t output_pixel_stride,
   uint32_t flags,
   xnn_operator_t* unpooling_op_out);
 
@@ -4761,6 +4758,9 @@ enum xnn_status xnn_reshape_unpooling2d_nhwc_x32(
   size_t batch_size,
   size_t input_height,
   size_t input_width,
+  size_t channels,
+  size_t input_pixel_stride,
+  size_t output_pixel_stride,
   size_t* output_height_out,
   size_t* output_width_out,
   pthreadpool_t threadpool);
