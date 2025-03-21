@@ -64,10 +64,6 @@ static XNN_INLINE xnn_simd_s16_t xnn_set1_s16_t(int16_t v) {
   return _mm512_set1_epi16(v);
 }
 
-static XNN_INLINE xnn_simd_s16_t xnn_set1_or_load_s16_t(const int16_t* v) {
-  return _mm512_set1_epi16(*v);
-}
-
 // Tail load/store operations.
 
 static XNN_INLINE xnn_simd_s16_t

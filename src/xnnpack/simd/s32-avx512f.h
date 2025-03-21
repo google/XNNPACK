@@ -69,14 +69,6 @@ static XNN_INLINE xnn_simd_s32_t xnn_set1_s32(int32_t v) {
   return _mm512_set1_epi32(v);
 }
 
-static XNN_INLINE xnn_simd_s32_t xnn_set1_or_load_s32(const int32_t* v) {
-#if XNN_ARCH_X86
-  return _mm512_load_epi32((const __m128i*)v);
-#else
-  return _mm512_set1_epi32(*v);
-#endif
-}
-
 // Tail load/store operations.
 
 static XNN_INLINE xnn_simd_s32_t

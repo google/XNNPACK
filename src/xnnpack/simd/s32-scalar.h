@@ -54,8 +54,6 @@ static XNN_INLINE void xnn_store_s32(int32_t *ptr, xnn_simd_s32_t v) { *ptr = v;
 
 static XNN_INLINE xnn_simd_s32_t xnn_set1_s32(int32_t v) { return v; }
 
-static XNN_INLINE xnn_simd_s32_t xnn_set1_or_load_s32(const int32_t *v) { return *v; }
-
 // Tail load/store operations.
 static XNN_INLINE xnn_simd_s32_t xnn_load_tail_s32(const int32_t *input,
                                                    size_t num_elements) {

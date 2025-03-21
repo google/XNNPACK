@@ -231,10 +231,6 @@ static XNN_INLINE void xnn_store_f16(xnn_simd_f16_t *ptr, xnn_simd_f16_t v) {
 
 static XNN_INLINE xnn_simd_f16_t xnn_set1_f16(xnn_simd_f16_t v) { return v; }
 
-static XNN_INLINE xnn_simd_f16_t xnn_set1_or_load_f16(xnn_simd_f16_t *v) {
-  return *v;
-}
-
 // Tail load/store operations.
 static XNN_INLINE xnn_simd_f16_t xnn_load_tail_f16(const xnn_simd_f16_t *input,
                                                    size_t num_elements) {

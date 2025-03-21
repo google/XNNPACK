@@ -205,10 +205,6 @@ static XNN_INLINE xnn_simd_f16_t xnn_set1_f16(xnn_float16 v) {
   return vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t *)&v));
 }
 
-static XNN_INLINE xnn_simd_f16_t xnn_set1_or_load_f16(const xnn_float16 *v) {
-  return vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t *)v));
-}
-
 // Tail load/store operations.
 static XNN_INLINE xnn_simd_f16_t
 xnn_load_tail_f16(const xnn_float16 *input, size_t num_elements) XNN_OOB_READS {

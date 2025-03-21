@@ -61,10 +61,6 @@ static XNN_INLINE xnn_simd_s16_t xnn_set1_s16(int16_t v) {
   return vld1q_dup_s16(&v);
 }
 
-static XNN_INLINE xnn_simd_s16_t xnn_set1_or_load_s16(const int16_t* v) {
-  return vld1q_dup_s16(v);
-}
-
 // Tail load/store operations.
 static XNN_INLINE xnn_simd_s16_t
 xnn_load_tail_s16(const int16_t* input, size_t num_elements) XNN_OOB_READS {

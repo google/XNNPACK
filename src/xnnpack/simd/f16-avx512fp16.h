@@ -186,14 +186,6 @@ static XNN_INLINE xnn_simd_f16_t xnn_set1_f16(xnn_float16 v) {
 #endif  // XNN_HAVE_FLOAT16
 }
 
-static XNN_INLINE xnn_simd_f16_t xnn_set1_or_load_f16(const xnn_float16* v) {
-#if XNN_HAVE_FLOAT16
-  return _mm512_set1_ph(*v);
-#else
-  return _mm512_castsi512_ph(_mm512_set1_epi16(v->value));
-#endif  // XNN_HAVE_FLOAT16
-}
-
 // Tail load/store operations.
 static XNN_INLINE xnn_simd_f16_t xnn_load_tail_f16(const xnn_float16* input,
                                                    size_t num_elements) {

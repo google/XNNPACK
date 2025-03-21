@@ -140,8 +140,6 @@ static XNN_INLINE void xnn_store_f32(float *ptr, xnn_simd_f32_t v) { *ptr = v; }
 
 static XNN_INLINE xnn_simd_f32_t xnn_set1_f32(float v) { return v; }
 
-static XNN_INLINE xnn_simd_f32_t xnn_set1_or_load_f32(const float *v) { return *v; }
-
 // Tail load/store operations.
 static XNN_INLINE xnn_simd_f32_t xnn_load_tail_f32(const float *input,
                                                    size_t num_elements) {

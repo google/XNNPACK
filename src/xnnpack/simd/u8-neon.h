@@ -79,14 +79,6 @@ static XNN_INLINE void xnn_store_u8(uint8_t* ptr, xnn_simd_u8_t v) {
 
 static XNN_INLINE xnn_simd_u8_t xnn_set1_u8(uint8_t v) { return vdupq_n_u8(v); }
 
-static XNN_INLINE xnn_simd_u8_t xnn_set1_or_load_u8(const uint8_t* v) {
-#if XNN_ARCH_X86
-  return vld1q_u8(v);
-#else
-  return vdupq_n_u8(*v);
-#endif
-}
-
 // Tail load/store operations.
 
 static XNN_INLINE xnn_simd_u8_t

@@ -68,10 +68,6 @@ static XNN_INLINE xnn_simd_s32_t xnn_set1_s32(int32_t v) {
   return wasm_i32x4_splat(v);
 }
 
-static XNN_INLINE xnn_simd_s32_t xnn_set1_or_load_s32(const int32_t* v) {
-  return wasm_i32x4_splat(*v);
-}
-
 // Tail load/store operations.
 
 static XNN_INLINE xnn_simd_s32_t

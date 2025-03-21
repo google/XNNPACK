@@ -164,10 +164,6 @@ static XNN_INLINE xnn_simd_f32_t xnn_set1_f32(float v) {
   return wasm_f32x4_splat(v);
 }
 
-static XNN_INLINE xnn_simd_f32_t xnn_set1_or_load_f32(const float* v) {
-  return wasm_f32x4_splat(*v);
-}
-
 // Tail load/store operations.
 static XNN_INLINE xnn_simd_f32_t
 xnn_load_tail_f32(const float* input, size_t num_elements) XNN_OOB_READS {

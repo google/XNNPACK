@@ -63,14 +63,6 @@ static XNN_INLINE xnn_simd_s16_t xnn_set1_s16(int16_t v) {
   return _mm_set1_epi16(v);
 }
 
-static XNN_INLINE xnn_simd_s16_t xnn_set1_or_load_s16(const int16_t* v) {
-#if XNN_ARCH_X86
-  return _mm_load_si128((const __m128i*)v);
-#else
-  return _mm_set1_epi16(*v);
-#endif
-}
-
 // Tail load/store operations.
 
 static XNN_INLINE xnn_simd_s16_t

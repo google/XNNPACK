@@ -62,10 +62,6 @@ static XNN_INLINE xnn_simd_s16_t xnn_set1_s16(int16_t v) {
   return wasm_i16x8_splat(v);
 }
 
-static XNN_INLINE xnn_simd_s16_t xnn_set1_or_load_s16(const int16_t* v) {
-  return wasm_i16x8_splat(*v);
-}
-
 // Tail load/store operations.
 
 static XNN_INLINE xnn_simd_s16_t

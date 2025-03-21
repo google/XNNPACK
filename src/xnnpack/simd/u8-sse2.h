@@ -80,14 +80,6 @@ static XNN_INLINE xnn_simd_u8_t xnn_set1_u8(uint8_t v) {
   return _mm_set1_epi8(v);
 }
 
-static XNN_INLINE xnn_simd_u8_t xnn_set1_or_load_u8(const uint8_t* v) {
-#if XNN_ARCH_X86
-  return _mm_load_si128((const __m128i*)v);
-#else
-  return _mm_set1_epi8(*v);
-#endif
-}
-
 // Tail load/store operations.
 
 static XNN_INLINE xnn_simd_u8_t

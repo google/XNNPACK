@@ -89,14 +89,6 @@ static XNN_INLINE xnn_simd_u8_t xnn_set1_u8(uint8_t v) {
   return wasm_i8x16_splat(v);
 }
 
-static XNN_INLINE xnn_simd_u8_t xnn_set1_or_load_u8(const uint8_t* v) {
-#if XNN_ARCH_X86
-  return wasm_v128_load(v);
-#else
-  return wasm_i8x16_splat(*v);
-#endif
-}
-
 // Tail load/store operations.
 
 static XNN_INLINE xnn_simd_u8_t

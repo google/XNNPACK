@@ -54,10 +54,6 @@ static XNN_INLINE void xnn_store_s8(int8_t *ptr, xnn_simd_s8_t v) { *ptr = v; }
 
 static XNN_INLINE xnn_simd_s8_t xnn_set1_s8(int8_t v) { return v; }
 
-static XNN_INLINE xnn_simd_s8_t xnn_set1_or_load_s8(const int8_t *v) {
-  return *v;
-}
-
 // Tail load/store operations.
 static XNN_INLINE xnn_simd_s8_t xnn_load_tail_s8(const int8_t *input,
                                                  size_t num_elements) {

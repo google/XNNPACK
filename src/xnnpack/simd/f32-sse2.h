@@ -182,14 +182,6 @@ static XNN_INLINE xnn_simd_f32_t xnn_set1_f32(float v) {
   return _mm_set1_ps(v);
 }
 
-static XNN_INLINE xnn_simd_f32_t xnn_set1_or_load_f32(const float* v) {
-#if XNN_ARCH_X86
-  return _mm_load_ps(v);
-#else
-  return _mm_set1_ps(*v);
-#endif
-}
-
 // Tail load/store operations.
 
 static XNN_INLINE xnn_simd_f32_t

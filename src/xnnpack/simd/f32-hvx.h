@@ -170,10 +170,6 @@ static XNN_INLINE xnn_simd_f32_t xnn_set1_f32(float v) {
   return Q6_V_vsplat_R(*(uint32_t *)&v);
 }
 
-static XNN_INLINE xnn_simd_f32_t xnn_set1_or_load_f32(const float* v) {
-  return *((HVX_UVector*) v);
-}
-
 // Tail load/store operations.
 
 static XNN_INLINE xnn_simd_f32_t

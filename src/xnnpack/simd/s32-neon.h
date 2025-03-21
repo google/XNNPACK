@@ -64,10 +64,6 @@ static XNN_INLINE xnn_simd_s32_t xnn_set1_s32(int32_t v) {
   return vld1q_dup_s32(&v);
 }
 
-static XNN_INLINE xnn_simd_s32_t xnn_set1_or_load_s32(const int32_t* v) {
-  return vld1q_dup_s32(v);
-}
-
 // Tail load/store operations.
 static XNN_INLINE xnn_simd_s32_t
 xnn_load_tail_s32(const int32_t* input, size_t num_elements) XNN_OOB_READS {
