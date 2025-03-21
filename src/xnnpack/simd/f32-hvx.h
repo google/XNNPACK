@@ -69,16 +69,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_fmadd_f32(xnn_simd_f32_t a,
 static XNN_INLINE xnn_simd_f32_t xnn_fnmadd_f32(xnn_simd_f32_t a,
                                                 xnn_simd_f32_t b,
                                                 xnn_simd_f32_t c) {
-  XNN_SIMD_CONST_F32(v0, 0);
-  return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vsub_Vqf32Vqf32(v0, Q6_Vqf32_vmpy_VsfVsf(a, b)), c));
-}
-
-static XNN_INLINE xnn_simd_f32_t xnn_fmsub_f32(xnn_simd_f32_t a,
-                                               xnn_simd_f32_t b,
-                                               xnn_simd_f32_t c) {
-  XNN_UNREACHABLE;
-  XNN_SIMD_CONST_F32(v0, 0);
-  return v0;
+  return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vsub_Vqf32Vqf32(Q6_V_vzero(), Q6_Vqf32_vmpy_VsfVsf(a, b)), c));
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_fmsub_f32(xnn_simd_f32_t a,
@@ -112,8 +103,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
 
 static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
   XNN_UNREACHABLE;
-  XNN_SIMD_CONST_F32(v0, 0);
-  return v0;
+  return Q6_V_vzero();
 }
 
 // Logical operations.
