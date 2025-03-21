@@ -38,6 +38,11 @@ class NumericLimits {
   static constexpr T min() { return std::numeric_limits<T>::lowest(); }
   static constexpr T max() { return std::numeric_limits<T>::max(); }
   static constexpr T smallest_normal() { return std::numeric_limits<T>::min(); }
+
+  // These are the identity values (values such that f(x, identity) = x) for a
+  // min or max operation.
+  static constexpr T min_identity() { return infinity(); }
+  static constexpr T max_identity() { return -infinity(); }
 };
 
 template <>
@@ -52,6 +57,8 @@ class NumericLimits<xnn_float16> {
   static xnn_float16 smallest_normal() {
     return xnn_float16_from_bits(0x0400);  // 2^-14
   }
+  static xnn_float16 min_identity() { return infinity(); }
+  static xnn_float16 max_identity() { return -infinity(); }
 };
 
 template <>
@@ -66,6 +73,8 @@ class NumericLimits<xnn_bfloat16> {
   static xnn_bfloat16 smallest_normal() {
     return xnn_bfloat16_from_bits(0x0080);  // 2^-126
   }
+  static xnn_bfloat16 min_identity() { return infinity(); }
+  static xnn_bfloat16 max_identity() { return -infinity(); }
 };
 
 template <typename T>
@@ -78,6 +87,8 @@ class NumericLimits<quantized<T>> {
     return {std::numeric_limits<T>::max()};
   }
   static quantized<T> smallest_normal() { return {0}; }
+  static quantized<T> min_identity() { return max(); }
+  static quantized<T> max_identity() { return min(); }
 };
 
 inline float epsilon(xnn_datatype datatype) {
@@ -87,6 +98,23 @@ inline float epsilon(xnn_datatype datatype) {
     case xnn_datatype_bf16: return NumericLimits<xnn_bfloat16>::epsilon();
     default: return 1.0f;
   }
+}
+
+template <typename T>
+T get_reduce_identity(xnn_reduce_operator op) {
+  switch (op) {
+    case xnn_reduce_sum:
+    case xnn_reduce_mean:
+      return 0;
+    case xnn_reduce_max:
+      return NumericLimits<T>::max_identity();
+    case xnn_reduce_min:
+      return NumericLimits<T>::min_identity();
+    case xnn_reduce_invalid:
+      break;
+  }
+  XNN_UNREACHABLE;
+  return 0;
 }
 
 struct PaddingBytes {

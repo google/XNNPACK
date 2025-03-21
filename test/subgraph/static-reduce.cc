@@ -203,20 +203,7 @@ void TestImpl(const Param& p) {
 
       // Compute reference results.
       Tensor<float> expected(output_shape);
-      switch (p.reduce_operator) {
-        case xnn_reduce_sum:
-        case xnn_reduce_mean:
-          expected.fill(0.0f);
-          break;
-        case xnn_reduce_min:
-          expected.fill(NumericLimits<float>::max());
-          break;
-        case xnn_reduce_max:
-          expected.fill(NumericLimits<float>::min());
-          break;
-        default:
-          XNN_UNREACHABLE;
-      }
+      expected.fill(get_reduce_identity<float>(p.reduce_operator));
       broadcast_extent_1(expected);
       for (const auto& i : EnumerateIndices(input.extents())) {
         reference_op(expected(i), dequantize(input(i), input_quantization));
