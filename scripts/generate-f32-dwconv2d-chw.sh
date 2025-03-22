@@ -407,4 +407,23 @@ tools/xngen src/f32-dwconv2d-chw/5x5s2p2-wasmsimd-splat.c.in -D ROW_TILE=2 -D AC
 tools/xngen src/f32-dwconv2d-chw/5x5s2p2-wasmsimd-splat.c.in -D ROW_TILE=2 -D ACCUMULATORS=3 -D X86=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-wasmsimd-x86-splat-2x4-acc3.c &
 tools/xngen src/f32-dwconv2d-chw/5x5s2p2-wasmsimd-splat.c.in -D ROW_TILE=3 -D ACCUMULATORS=2 -D X86=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-wasmsimd-x86-splat-3x4-acc2.c &
 
+################################## RISC-V RVV #################################
+tools/xngen src/f32-dwconv2d-chw/3x3p1-rvv.c.in -D ROW_TILE=5 -D COL_TILE=m1 -D ACCUMULATORS=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-rvv-5x1v.c &
+tools/xngen src/f32-dwconv2d-chw/3x3p1-rvv.c.in -D ROW_TILE=6 -D COL_TILE=m1 -D ACCUMULATORS=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-rvv-6x1v.c &
+tools/xngen src/f32-dwconv2d-chw/3x3p1-rvv.c.in -D ROW_TILE=7 -D COL_TILE=m1 -D ACCUMULATORS=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-rvv-7x1v.c &
+tools/xngen src/f32-dwconv2d-chw/3x3p1-rvv.c.in -D ROW_TILE=8 -D COL_TILE=m1 -D ACCUMULATORS=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-rvv-8x1v.c &
+tools/xngen src/f32-dwconv2d-chw/3x3p1-rvv.c.in -D ROW_TILE=1 -D COL_TILE=m2 -D ACCUMULATORS=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-rvv-1x2v.c &
+tools/xngen src/f32-dwconv2d-chw/3x3p1-rvv.c.in -D ROW_TILE=2 -D COL_TILE=m2 -D ACCUMULATORS=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-rvv-2x2v.c &
+tools/xngen src/f32-dwconv2d-chw/3x3p1-rvv.c.in -D ROW_TILE=3 -D COL_TILE=m2 -D ACCUMULATORS=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-rvv-3x2v.c &
+tools/xngen src/f32-dwconv2d-chw/3x3p1-rvv.c.in -D ROW_TILE=4 -D COL_TILE=m2 -D ACCUMULATORS=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-rvv-4x2v.c &
+
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-rvv.c.in -D ROW_TILE=5 -D COL_TILE=m1 -D ACCUMULATORS=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-rvv-5x1v.c &
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-rvv.c.in -D ROW_TILE=6 -D COL_TILE=m1 -D ACCUMULATORS=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-rvv-6x1v.c &
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-rvv.c.in -D ROW_TILE=7 -D COL_TILE=m1 -D ACCUMULATORS=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-rvv-7x1v.c &
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-rvv.c.in -D ROW_TILE=8 -D COL_TILE=m1 -D ACCUMULATORS=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-rvv-8x1v.c &
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-rvv.c.in -D ROW_TILE=1 -D COL_TILE=m2 -D ACCUMULATORS=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-rvv-1x2v.c &
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-rvv.c.in -D ROW_TILE=2 -D COL_TILE=m2 -D ACCUMULATORS=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-rvv-2x2v.c &
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-rvv.c.in -D ROW_TILE=3 -D COL_TILE=m2 -D ACCUMULATORS=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-rvv-3x2v.c &
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-rvv.c.in -D ROW_TILE=4 -D COL_TILE=m2 -D ACCUMULATORS=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-rvv-4x2v.c &
+
 wait
