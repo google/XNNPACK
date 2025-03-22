@@ -92,10 +92,6 @@ void TestImpl() {
 
     for (int reshape = 0; reshape < 2; ++reshape) {
       std::vector<size_t> output_shape = random_shape(rng, 4);
-      // TODO(dsharlet): This is a workaround for a bug that will be fixed
-      // shortly.
-      output_shape[1] += kw.dilated_kernel_extent() - 1;
-      output_shape[2] += kh.dilated_kernel_extent() - 1;
 
       std::vector<size_t> input_shape = {
           output_shape[0],
