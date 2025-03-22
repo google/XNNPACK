@@ -106,6 +106,7 @@ MICROKERNEL_DEFS = [
     "src/f16-vsqrt/f16-vsqrt.h",
     "src/f16-vtanh/f16-vtanh.h",
     "src/f32-avgpool/f32-avgpool-minmax.h",
+    "src/f32-conv-hwc/f32-conv-hwc.h",
     "src/f32-dwconv/f32-dwconv-minmax.h",
     "src/f32-dwconv/f32-dwconv.h",
     "src/f32-f16-vcvt/f32-f16-vcvt.h",
