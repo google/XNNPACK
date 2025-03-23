@@ -155,7 +155,11 @@ static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
 #define XNN_SIMD_HAVE_RSQRT_F32 0
 
 static XNN_INLINE xnn_simd_f32_t xnn_getexp_f32(xnn_simd_f32_t a) {
-  return xnn_generic_getexp_f32(a);
+  const HVX_Vector bias_256 = Q6_V_vsplat_R(256.0f);
+  const HVX_Vector bias_383 = Q6_V_vsplat_R(383.0f);  // 256 + 127
+
+  const HVX_Vector exp = Q6_Vuw_vlsr_VuwR(Q6_V_vand_VV(a, Q6_V_vsplat_R(0x7f800000)), 8);
+  return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vsub_VsfVsf(Q6_V_vor_VV(exp, bias_256), bias_383));
 }
 
 // Load/store operations.

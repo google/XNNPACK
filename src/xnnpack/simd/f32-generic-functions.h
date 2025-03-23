@@ -29,6 +29,12 @@ static XNN_INLINE xnn_simd_f32_t xnn_srl_f32(xnn_simd_f32_t a, uint8_t b);
 #endif  // XNN_SIMD_SHIFTS_ARE_MACROS
 
 // Extracts the exponent of the input `a` as a `float` value.
+// TODO: Investgate why xnn_generic_getexp_f32 fails on hexagon
+// exp is an 8 bit value 0..255 with bias of 127
+// move exp into mantissa high 8 bits
+// OR magic number for 256.0 so float is 256.0 to 511.0
+// subtract magic number 383.0 which is (256+127) to remove magic number 256 and
+// bias 127 to produce a float -127 to 128.
 static XNN_INLINE xnn_simd_f32_t xnn_generic_getexp_f32(xnn_simd_f32_t a) {
   // Some useful constants.
   XNN_SIMD_CONST_F32_FROM_INT32(exp_mask, 0x7f800000);
