@@ -33,26 +33,26 @@ void VBinaryMicrokernelTester::Test(xnn_f16_vbinary_ukernel_fn vbinary,
                                     OpType op_type,
                                     xnn_init_f16_default_params_fn) const {
   xnnpack::ReplicableRandomDevice rng;
-  std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
+  xnnpack::DatatypeGenerator<xnn_float16> f16dist;
 
+  const int stride_b = broadcast_b() ? 0 : 1;
   xnnpack::Buffer<xnn_float16> a(batch_size() +
                                  XNN_EXTRA_BYTES / sizeof(xnn_float16));
-  xnnpack::Buffer<xnn_float16> b(
-      broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  xnnpack::Buffer<xnn_float16> b(stride_b * batch_size() +
+                                 XNN_EXTRA_BYTES / sizeof(xnn_float16));
   xnnpack::Buffer<xnn_float16> y(
       batch_size() +
       (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(xnn_float16) : 0));
-  xnnpack::Buffer<float> y_ref(batch_size());
+  xnnpack::Buffer<xnn_float16> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     if (!inplace_a()) {
-      std::generate(a.begin(), a.end(), [&]() { return f32dist(rng); });
+      std::generate(a.begin(), a.end(), [&]() { return f16dist(rng); });
     }
     if (!inplace_b()) {
-      std::generate(b.begin(), b.end(), [&]() { return f32dist(rng); });
+      std::generate(b.begin(), b.end(), [&]() { return f16dist(rng); });
     }
     if (inplace_a() || inplace_b()) {
-      std::generate(y.begin(), y.end(),
-                    [&]() { return f32dist(rng); });
+      std::generate(y.begin(), y.end(), [&]() { return f16dist(rng); });
     }
     const xnn_float16* a_data = inplace_a() ? y.data() : a.data();
     const xnn_float16* b_data = inplace_b() ? y.data() : b.data();
@@ -63,9 +63,16 @@ void VBinaryMicrokernelTester::Test(xnn_f16_vbinary_ukernel_fn vbinary,
 
     // Verify results.
     for (size_t i = 0; i < batch_size(); i++) {
-      ASSERT_NEAR(y[i], y_ref[i],
-                  std::max(1.0e-4f, std::abs(y_ref[i]) * 1.0e-2f))
-          << "at " << i << " / " << batch_size();
+      if (std::isnan(y_ref[i])) {
+        // TODO: We could check if y[i] is NaN, but not all our kernels do this.
+      } else {
+        ASSERT_NEAR(
+            y[i], y_ref[i],
+            std::max(1.0e-4f, std::abs(static_cast<float>(y_ref[i])) * 1.0e-2f))
+            << "at " << i << " / " << batch_size()
+            << ", a=" << static_cast<float>(a[i])
+            << ", b=" << static_cast<float>(b[stride_b * i]);
+      }
     }
   }
 }
@@ -74,11 +81,12 @@ void VBinaryMicrokernelTester::Test(xnn_f32_vbinary_ukernel_fn vbinary,
                                     OpType op_type,
                                     xnn_init_f32_default_params_fn) const {
   xnnpack::ReplicableRandomDevice rng;
-  std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
+  xnnpack::DatatypeGenerator<float> f32dist;
 
+  const int stride_b = broadcast_b() ? 0 : 1;
   xnnpack::Buffer<float> a(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-  xnnpack::Buffer<float> b(
-      broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> b(stride_b * batch_size() +
+                           XNN_EXTRA_BYTES / sizeof(float));
   xnnpack::Buffer<float> y(batch_size() + (inplace_a() || inplace_b()
                                                ? XNN_EXTRA_BYTES / sizeof(float)
                                                : 0));
@@ -102,8 +110,13 @@ void VBinaryMicrokernelTester::Test(xnn_f32_vbinary_ukernel_fn vbinary,
 
     // Verify results.
     for (size_t i = 0; i < batch_size(); i++) {
-      ASSERT_NEAR(y[i], y_ref[i], std::abs(y_ref[i]) * 1.0e-6f)
-          << "at " << i << " / " << batch_size();
+      if (std::isnan(y_ref[i])) {
+        // TODO: We could check if y[i] is NaN, but not all our kernels do this.
+      } else {
+        ASSERT_NEAR(y[i], y_ref[i], (std::abs(y_ref[i]) + 1.0f) * 1.0e-6f)
+            << "at " << i << " / " << batch_size() << ", a=" << a[i]
+            << ", b=" << b[stride_b * i];
+      }
     }
   }
 }

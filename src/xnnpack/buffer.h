@@ -747,8 +747,8 @@ class DatatypeGenerator {
   template <typename Rng>
   T operator()(Rng& rng) {
     if (reinterpret_) {
-      static_assert(Rng::min() == 0);
-      static_assert(Rng::max() >= (1ull << (sizeof(T) * 8)) - 1);
+      static_assert(Rng::min() == 0, "");
+      static_assert(Rng::max() >= (1ull << (sizeof(T) * 8)) - 1, "");
       auto bits = rng();
       T result;
       memcpy(&result, &bits, sizeof(T));
