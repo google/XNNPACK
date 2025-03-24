@@ -318,7 +318,6 @@ class UnpoolingOperatorTester {
         xnn_create_unpooling2d_nhwc_x32(
           padding_top(), padding_right(), padding_bottom(), padding_left(),
           pooling_height(), pooling_width(),
-          channels(), input_pixel_stride(), output_pixel_stride(),
           0, &unpooling_op));
       ASSERT_NE(nullptr, unpooling_op);
 
@@ -329,6 +328,7 @@ class UnpoolingOperatorTester {
         xnn_reshape_unpooling2d_nhwc_x32(
           unpooling_op,
           batch_size(), input_height(), input_width(),
+          channels(), input_pixel_stride(), output_pixel_stride(),
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           /*threadpool=*/nullptr));
 
@@ -403,7 +403,6 @@ class UnpoolingOperatorTester {
         xnn_create_unpooling2d_nhwc_x32(
           padding_top(), padding_right(), padding_bottom(), padding_left(),
           pooling_height(), pooling_width(),
-          channels(), input_pixel_stride(), output_pixel_stride(),
           0, &unpooling_op));
       ASSERT_NE(nullptr, unpooling_op);
 
@@ -414,6 +413,7 @@ class UnpoolingOperatorTester {
         xnn_reshape_unpooling2d_nhwc_x32(
           unpooling_op,
           batch_size(), input_height(), input_width(),
+          channels(), input_pixel_stride(), output_pixel_stride(),
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           /*threadpool=*/nullptr));
 
@@ -466,6 +466,7 @@ class UnpoolingOperatorTester {
         xnn_reshape_unpooling2d_nhwc_x32(
           unpooling_op,
           next_batch_size(), next_input_height(), next_input_width(),
+          channels(), input_pixel_stride(), output_pixel_stride(),
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           /*threadpool=*/nullptr));
 
