@@ -949,10 +949,10 @@ void xnn_indirection_init_unpool2d(
   for (size_t image = batch_start; image < batch_size; image++) {
     for (size_t input_y = 0; input_y < input_height; input_y++) {
       for (size_t pooling_y = 0; pooling_y < kernel_height; pooling_y++) {
-        const size_t output_y = min(doz(input_y * kernel_height + pooling_y, output_padding_top), output_height - 1);
+        const size_t output_y = doz(input_y * kernel_height + pooling_y, output_padding_top);
         for (size_t input_x = 0; input_x < input_width; input_x++) {
           for (size_t pooling_x = 0; pooling_x < kernel_width; pooling_x++) {
-            const size_t output_x = min(doz(input_x * kernel_width + pooling_x, output_padding_left), output_width - 1);
+            const size_t output_x = doz(input_x * kernel_width + pooling_x, output_padding_left);
             const size_t index = (((image * input_height + input_y) * input_width + input_x) * kernel_width + pooling_x) * kernel_height + pooling_y;
             indirection_buffer[index] =
               (const void*) ((uintptr_t) output + ((image * output_height + output_y) * output_width + output_x) * output_pixel_stride);

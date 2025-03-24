@@ -169,6 +169,13 @@ enum xnn_status xnn_define_unpooling_2d(
     return xnn_status_invalid_parameter;
   }
 
+  if (padding_top > 0 || padding_right > 0 || padding_bottom > 0 || padding_left > 0) {
+    xnn_log_error(
+      "failed to define %s operator with padding: unpooling with padding is not supported",
+      xnn_node_type_to_string(xnn_node_type_unpooling_2d));
+    return xnn_status_unsupported_parameter;
+  }
+
   if ((status = xnn_subgraph_check_input_node_id(xnn_node_type_unpooling_2d, input_value_id, subgraph->num_values)) !=
       xnn_status_success) {
     return status;
