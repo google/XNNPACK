@@ -104,7 +104,6 @@ void TestImpl() {
       Tensor<T> input(input_shape, PaddingBytes{XNN_EXTRA_BYTES});
       DatatypeGenerator<T> gen(-100.0f, 100.0f, quantization);
       input.generate([&]() { return gen(rng); });
-      std::iota(input.begin(), input.end(), 0);
 
       subgraph.ReshapeExternalTensor(input_shape, input.base(), 0)
           .ReshapeRuntime();
