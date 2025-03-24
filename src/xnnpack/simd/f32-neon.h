@@ -176,7 +176,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
   const xnn_simd_f32_t vresult =
       vcvtq_f32_s32(vcvtq_s32_f32(xnn_add_f32(a, vsigned_half)));
 
-  // Apply the non-finite value filter to repace any non-finite input with `a`.
+  // Apply the non-finite value filter to replace any non-finite input with `a`.
   return xnn_or_f32(xnn_and_f32(xnn_not_f32(vfilter), vresult),
                     xnn_and_f32(vfilter, a));
 #else

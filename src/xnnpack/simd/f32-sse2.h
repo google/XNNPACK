@@ -138,7 +138,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
   // Round by converting to `int` and back.
   const xnn_simd_f32_t vresult = _mm_cvtepi32_ps(_mm_cvtps_epi32(a));
 
-  // Apply the non-finite value filter to repace any non-finite input with `a`.
+  // Apply the non-finite value filter to replace any non-finite input with `a`.
   return _mm_or_ps(_mm_andnot_ps(vfilter, vresult), _mm_and_ps(vfilter, a));
 }
 
