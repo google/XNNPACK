@@ -16,13 +16,14 @@ void xnn_x32_unpool_ukernel__wasmsimd(
     uint32_t fill,
     const uint32_t* input,
     const uint32_t* index,
-    uint32_t** output)
+    uint32_t** output,
+    size_t output_offset)
 {
   // Pre-initialize outputs with constant.
   const v128_t vfill = wasm_i32x4_splat(fill);
   uint32_t** os = output;
   do {
-    float* o = (float*) *os++;
+    uint32_t* o = (uint32_t*) ((uintptr_t) *os++ + output_offset);
     size_t c = channels;
     for (; c >= 4; c -= 4) {
       wasm_v128_store(o, vfill);
@@ -40,7 +41,7 @@ void xnn_x32_unpool_ukernel__wasmsimd(
   } while (--kernel_elements != 0);
 
   // Copy indexed elements to output.
-  size_t offset = 0;
+  size_t offset = output_offset;
   do {
     const uint32_t i = *index++;
     *((uint32_t*) ((uintptr_t) output[i] + offset)) = *input++;

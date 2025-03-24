@@ -14,15 +14,10 @@
 extern "C" {
 #endif
 
-
-#define DECLARE_X32_UNPOOL_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                         \
-    size_t p,                                        \
-    size_t c,                                        \
-    uint32_t f,                                      \
-    const uint32_t* input,                           \
-    const uint32_t* index,                           \
-    uint32_t** output);
+#define DECLARE_X32_UNPOOL_UKERNEL_FUNCTION(fn_name)                      \
+  XNN_INTERNAL void fn_name(size_t p, size_t c, uint32_t f,               \
+                            const uint32_t* input, const uint32_t* index, \
+                            uint32_t** output, size_t output_offset);
 
 DECLARE_X32_UNPOOL_UKERNEL_FUNCTION(xnn_x32_unpool_ukernel__neon)
 DECLARE_X32_UNPOOL_UKERNEL_FUNCTION(xnn_x32_unpool_ukernel__scalar)

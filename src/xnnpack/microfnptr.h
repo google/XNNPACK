@@ -925,7 +925,8 @@ typedef void (*xnn_unpool_ukernel_fn)(
     uint32_t f,
     const void* input,
     const uint32_t* index,
-    void** output);
+    void** output,
+    size_t output_offset);
 
 typedef void (*xnn_x32_unpool_ukernel_fn)(
     size_t p,
@@ -933,7 +934,8 @@ typedef void (*xnn_x32_unpool_ukernel_fn)(
     uint32_t f,
     const uint32_t* input,
     const uint32_t* index,
-    uint32_t** output);
+    uint32_t** output,
+    size_t output_offset);
 
 // TRANSPOSEC: TRANSPOSE Constant-size elements
 

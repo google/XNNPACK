@@ -1231,7 +1231,7 @@ void xnn_compute_unpooling(
     context->pooling_size,
     context->channels,
     context->fill_value,
-    input, index, indirect_output);
+    input, index, indirect_output, /*output_offset=*/0);
 }
 
 void xnn_compute_average_pooling(

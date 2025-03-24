@@ -16,13 +16,14 @@ void xnn_x32_unpool_ukernel__sse2(
     uint32_t fill,
     const uint32_t* input,
     const uint32_t* index,
-    uint32_t** output)
+    uint32_t** output,
+    size_t output_offset)
 {
   // Pre-initialize outputs with constant.
   const __m128i vfill = _mm_set1_epi32((int) fill);
   uint32_t** os = output;
   do {
-    uint32_t* o = *os++;
+    uint32_t* o = (uint32_t*) ((uintptr_t) *os++ + output_offset);
     size_t c = channels;
     for (; c >= 4; c -= 4) {
       _mm_storeu_si128((__m128i*) o, vfill);
@@ -40,7 +41,7 @@ void xnn_x32_unpool_ukernel__sse2(
   } while (--kernel_elements != 0);
 
   // Copy indexed elements to output.
-  size_t offset = 0;
+  size_t offset = output_offset;
   do {
     const uint32_t i = *index++;
     *((uint32_t*) ((uintptr_t) output[i] + offset)) = *input++;

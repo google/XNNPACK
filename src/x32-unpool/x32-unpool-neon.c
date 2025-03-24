@@ -16,13 +16,14 @@ void xnn_x32_unpool_ukernel__neon(
     uint32_t fill,
     const uint32_t* input,
     const uint32_t* index,
-    uint32_t** output)
+    uint32_t** output,
+    size_t output_offset)
 {
   // Pre-initialize outputs with constant.
   const uint32x4_t vfill = vdupq_n_u32(fill);
   uint32_t** os = output;
   do {
-    uint32_t* o = *os++;
+    uint32_t* o = (uint32_t*) ((uintptr_t) *os++ + output_offset);
     size_t c = channels;
     for (; c >= 4; c -= 4) {
       vst1q_u32(o, vfill); o += 4;
@@ -38,7 +39,7 @@ void xnn_x32_unpool_ukernel__neon(
   } while (--kernel_elements != 0);
 
   // Copy indexed elements to output.
-  size_t offset = 0;
+  size_t offset = output_offset;
   do {
     const uint32_t i = *index++;
     *((uint32_t*) ((uintptr_t) output[i] + offset)) = *input++;
