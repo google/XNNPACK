@@ -45,7 +45,7 @@ class FullyConnectedTestBase
     : public ::testing::TestWithParam<FullyConnectedTestParam> {
  protected:
   FullyConnectedTestBase() {
-    f32dist = std::uniform_real_distribution<float>(0.1f, 1.0f);
+    f32dist = std::uniform_real_distribution<float>(-1.0f, 1.0f);
     scale_dist = std::uniform_real_distribution<float>(1.0f, 5.0f);
     i32dist = std::uniform_int_distribution<int32_t>(-10000, 10000);
     auto shape_dist = std::uniform_int_distribution<size_t>(2, 3);
@@ -56,8 +56,14 @@ class FullyConnectedTestBase
         -std::numeric_limits<uint8_t>::max(),
         std::numeric_limits<uint8_t>::max());
 
-    output_min = -std::numeric_limits<float>::infinity();
-    output_max = std::numeric_limits<float>::infinity();
+    output_min = f32dist(rng);
+    if (output_min > 0.0) {
+      output_min = -std::numeric_limits<float>::infinity();
+    }
+    output_max = f32dist(rng);
+    if (output_max < 0.0) {
+      output_max = std::numeric_limits<float>::infinity();
+    }
 
     size_t num_input_dims = shape_dist(rng);
     input_dims = RandomShape(num_input_dims);
@@ -154,7 +160,8 @@ using FullyConnectedTestQS8 = QuantizedFullyConnectedTestBase<int8_t>;
 using FullyConnectedTestQU8 = QuantizedFullyConnectedTestBase<uint8_t>;
 using FullyConnectedTestF16 = FullyConnectedTestBase<xnn_float16, float, float>;
 using FullyConnectedTestF32 = FullyConnectedTestBase<float>;
-using FullyConnectedTestBF16F32 = FullyConnectedTestBase<xnn_bfloat16, xnn_bfloat16, float, float>;
+using FullyConnectedTestBF16F32 =
+    FullyConnectedTestBase<xnn_bfloat16, xnn_bfloat16, float, float>;
 using DynamicFullyConnectedTestF32 = FullyConnectedTestBase<float>;
 
 TEST_F(FullyConnectedTestQC8, define) {
@@ -826,7 +833,7 @@ TEST_F(FullyConnectedTestQC8, matches_operator_api) {
   const float input_scale = scale_dist(rng);
   xnnpack::Buffer<float> requantization_scales(output_channels, 1.0f);
   std::generate(requantization_scales.begin(), requantization_scales.end(),
-                [&]() { return f32dist(rng); });
+                [&]() { return std::abs(f32dist(rng)); });
 
   // Compute reference results, without renormalization.
   initialize_accumulators_from_bias();
@@ -4270,8 +4277,12 @@ TEST_F(FullyConnectedTestF32, matches_operator_api) {
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
-  EXPECT_THAT(
-      subgraph_output,
-      Pointwise(FloatNear(1.0e-5), std::vector<float>(operator_output.begin(),
-                                                      operator_output.end())));
+  float max_abs_output = 0.0f;
+  for (const float val : operator_output) {
+    max_abs_output = std::max(max_abs_output, std::abs(val));
+  }
+  EXPECT_THAT(subgraph_output,
+              Pointwise(FloatNear(1.0e-6 * max_abs_output),
+                        std::vector<float>(operator_output.begin(),
+                                           operator_output.end())));
 }
