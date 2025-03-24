@@ -101,9 +101,19 @@ static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
   return Q6_V_vxor_VV(a, Q6_V_vsplat_R(0x80000000));
 }
 
+// TODO: Implement hvx code sequence.
+// - compare exp to smallest exp that is integer (23)
+// - convert to int and back to float
+// - use compare result to select rounding int or original float
+// - large exp includes NaN and inf and negative versions of these
 static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
-  XNN_UNREACHABLE;
-  return Q6_V_vzero();
+  XNN_ALIGN(128) float input[xnn_simd_size_f32];
+  XNN_ALIGN(128) float output[xnn_simd_size_f32];
+  *((HVX_Vector*) input) = a;
+  for (size_t k = 0; k < xnn_simd_size_f32; ++k) {
+    output[k] = std::round(input[k]);
+  }
+  return *((HVX_Vector*) output);
 }
 
 // Logical operations.
