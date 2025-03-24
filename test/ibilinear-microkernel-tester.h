@@ -416,6 +416,38 @@ class IBilinearMicrokernelTester {
     }
   }
 
+  struct Kernel {
+    int16_t qmin;
+    int16_t qmax;
+
+    explicit Kernel(xnn_s8_ibilinear_ukernel_fn ibilinear) {
+      dispatch = [ibilinear](IBilinearMicrokernelTester& tester) {
+        tester.Test(ibilinear);
+      };
+    }
+    explicit Kernel(xnn_u8_ibilinear_ukernel_fn ibilinear) {
+      dispatch = [ibilinear](IBilinearMicrokernelTester& tester) {
+        tester.Test(ibilinear);
+      };
+    }
+    explicit Kernel(xnn_f16_ibilinear_ukernel_fn ibilinear) {
+      dispatch = [ibilinear](IBilinearMicrokernelTester& tester) {
+        tester.Test(ibilinear);
+      };
+    }
+    explicit Kernel(xnn_f32_ibilinear_ukernel_fn ibilinear) {
+      dispatch = [ibilinear](IBilinearMicrokernelTester& tester) {
+        tester.Test(ibilinear);
+      };
+    }
+
+    std::function<void(IBilinearMicrokernelTester&)> dispatch;
+  };
+
+  void Test(const Kernel& kernel) {
+    kernel.dispatch(*this);
+  }
+
  private:
   uint32_t channels_{1};
   uint32_t pixels_{1};
@@ -424,109 +456,3 @@ class IBilinearMicrokernelTester {
   uint32_t input_offset_{0};
   size_t iterations_{3};
 };
-
-#define XNN_TEST_IBILINEAR_CHANNELS_EQ(                                                                                \
-  ukernel, arch_flags, channel_tile, pixel_tile, datatype, weight_type, params_type, init_params)                      \
-  TEST(ukernel, channels_eq)                                                                                           \
-  {                                                                                                                    \
-    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
-    IBilinearMicrokernelTester().pixels(pixel_tile).channels(channel_tile).Test(ukernel);                              \
-  }
-
-#define XNN_TEST_IBILINEAR_CHANNELS_DIV(                                                                               \
-  ukernel, arch_flags, channel_tile, pixel_tile, datatype, weight_type, params_type, init_params)                      \
-  TEST(ukernel, channels_div)                                                                                          \
-  {                                                                                                                    \
-    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
-    for (size_t channels = channel_tile * 2; channels < channel_tile * 10; channels += channel_tile) {                 \
-      IBilinearMicrokernelTester().pixels(pixel_tile).channels(channels).Test(ukernel);                                \
-    }                                                                                                                  \
-  }
-
-#define XNN_TEST_IBILINEAR_CHANNELS_LT(                                                                                \
-  ukernel, arch_flags, channel_tile, pixel_tile, datatype, weight_type, params_type, init_params)                      \
-  TEST(ukernel, channels_lt)                                                                                           \
-  {                                                                                                                    \
-    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
-    for (size_t channels = 1; channels < channel_tile; channels++) {                                                   \
-      IBilinearMicrokernelTester().pixels(pixel_tile).channels(channels).Test(ukernel);                                \
-    }                                                                                                                  \
-  }
-
-#define XNN_TEST_IBILINEAR_CHANNELS_GT(                                                                                \
-  ukernel, arch_flags, channel_tile, pixel_tile, datatype, weight_type, params_type, init_params)                      \
-  TEST(ukernel, channels_gt)                                                                                           \
-  {                                                                                                                    \
-    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
-    for (size_t channels = channel_tile + 1; channels < ((channel_tile == 1) ? 10 : channel_tile * 2); channels++) {   \
-      IBilinearMicrokernelTester().pixels(pixel_tile).channels(channels).Test(ukernel);                                \
-    }                                                                                                                  \
-  }
-
-#define XNN_TEST_IBILINEAR_PIXELS_DIV(                                                                                 \
-  ukernel, arch_flags, channel_tile, pixel_tile, datatype, weight_type, params_type, init_params)                      \
-  TEST(ukernel, pixels_div)                                                                                            \
-  {                                                                                                                    \
-    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
-    for (size_t pixels = pixel_tile * 2; pixels < channel_tile * 10; pixels += pixel_tile) {                           \
-      for (size_t channels = 1; channels <= channel_tile * 5; channels += max(1, (channel_tile - 1))) {                \
-        IBilinearMicrokernelTester().pixels(pixels).channels(channels).Test(ukernel);                                  \
-      }                                                                                                                \
-    }                                                                                                                  \
-  }
-
-#define XNN_TEST_IBILINEAR_PIXELS_LT(                                                                                  \
-  ukernel, arch_flags, channel_tile, pixel_tile, datatype, weight_type, params_type, init_params)                      \
-  TEST(ukernel, pixels_lt)                                                                                             \
-  {                                                                                                                    \
-    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
-    for (size_t pixels = 1; pixels < pixel_tile; pixels++) {                                                           \
-      for (size_t channels = 1; channels <= channel_tile * 5; channels += max(1, (channel_tile - 1))) {                \
-        IBilinearMicrokernelTester().pixels(pixels).channels(channels).Test(ukernel);                                  \
-      }                                                                                                                \
-    }                                                                                                                  \
-  }
-
-#define XNN_TEST_IBILINEAR_PIXELS_GT(                                                                                  \
-  ukernel, arch_flags, channel_tile, pixel_tile, datatype, weight_type, params_type, init_params)                      \
-  TEST(ukernel, pixels_gt)                                                                                             \
-  {                                                                                                                    \
-    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
-    for (size_t pixels = pixel_tile + 1; pixels < max((pixel_tile * 2), 3); pixels++) {                                \
-      for (size_t channels = 1; channels <= channel_tile * 5; channels += max(1, (channel_tile - 1))) {                \
-        IBilinearMicrokernelTester().pixels(pixels).channels(channels).Test(ukernel);                                  \
-      }                                                                                                                \
-    }                                                                                                                  \
-  }
-
-#define XNN_TEST_IBILINEAR_INPUT_OFFSET(                                                                               \
-  ukernel, arch_flags, channel_tile, pixel_tile, datatype, weight_type, params_type, init_params)                      \
-  TEST(ukernel, input_offset)                                                                                          \
-  {                                                                                                                    \
-    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
-    for (size_t pixels = 1; pixels < pixel_tile * 5; pixels += max(1, (pixel_tile - 1))) {                             \
-      for (size_t channels = 1; channels <= channel_tile * 5; channels += max(1, (channel_tile - 1))) {                \
-        IBilinearMicrokernelTester()                                                                                   \
-          .pixels(pixels)                                                                                              \
-          .channels(channels)                                                                                          \
-          .input_offset(xnnpack::NextPrime(channel_tile * 5 + 1))                                                      \
-          .Test(ukernel);                                                                                              \
-      }                                                                                                                \
-    }                                                                                                                  \
-  }
-
-#define XNN_TEST_IBILINEAR_OUTPUT_STRIDE(                                                                              \
-  ukernel, arch_flags, channel_tile, pixel_tile, datatype, weight_type, params_type, init_params)                      \
-  TEST(ukernel, output_stride)                                                                                         \
-  {                                                                                                                    \
-    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
-    for (size_t pixels = 1; pixels < pixel_tile * 5; pixels += max(1, (pixel_tile - 1))) {                             \
-      for (size_t channels = 1; channels <= channel_tile * 5; channels += max(1, (channel_tile - 1))) {                \
-        IBilinearMicrokernelTester()                                                                                   \
-          .pixels(pixels)                                                                                              \
-          .channels(channels)                                                                                          \
-          .output_stride(xnnpack::NextPrime(channel_tile * 5 + 1))                                                     \
-          .Test(ukernel);                                                                                              \
-      }                                                                                                                \
-    }                                                                                                                  \
-  }
