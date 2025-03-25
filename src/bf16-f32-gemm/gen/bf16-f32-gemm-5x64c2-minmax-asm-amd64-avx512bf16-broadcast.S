@@ -164,87 +164,87 @@ BEGIN_FUNCTION xnn_bf16_f32_gemm_minmax_ukernel_5x64c2__asm_amd64_avx512bf16_bro
       add r9, 256
       vbroadcastss zmm2, DWORD PTR [rcx + r11]
       vpslld zmm2, zmm2, 16
-      vpsrad zmm2, zmm2, 16
+      vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm11, zmm2, zmm7
 
       vpslld zmm2, zmm2, 16
-      vpsrad zmm2, zmm2, 16
+      vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm16, zmm2, zmm8
 
       vpslld zmm2, zmm2, 16
-      vpsrad zmm2, zmm2, 16
+      vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm21, zmm2, zmm9
 
       vpslld zmm2, zmm2, 16
-      vpsrad zmm2, zmm2, 16
+      vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm26, zmm2, zmm10
 
       vbroadcastss zmm3, DWORD PTR [rax + r11]
       vpslld zmm3, zmm3, 16
-      vpsrad zmm3, zmm3, 16
+      vpsrld zmm3, zmm3, 16
       vdpbf16ps  zmm12, zmm3, zmm7
 
       vpslld zmm3, zmm3, 16
-      vpsrad zmm3, zmm3, 16
+      vpsrld zmm3, zmm3, 16
       vdpbf16ps  zmm17, zmm3, zmm8
 
       vpslld zmm3, zmm3, 16
-      vpsrad zmm3, zmm3, 16
+      vpsrld zmm3, zmm3, 16
       vdpbf16ps  zmm22, zmm3, zmm9
 
       vpslld zmm3, zmm3, 16
-      vpsrad zmm3, zmm3, 16
+      vpsrld zmm3, zmm3, 16
       vdpbf16ps  zmm27, zmm3, zmm10
 
       vbroadcastss zmm4, DWORD PTR [r15 + r11]
       vpslld zmm4, zmm4, 16
-      vpsrad zmm4, zmm4, 16
+      vpsrld zmm4, zmm4, 16
       vdpbf16ps  zmm13, zmm4, zmm7
 
       vpslld zmm4, zmm4, 16
-      vpsrad zmm4, zmm4, 16
+      vpsrld zmm4, zmm4, 16
       vdpbf16ps  zmm18, zmm4, zmm8
 
       vpslld zmm4, zmm4, 16
-      vpsrad zmm4, zmm4, 16
+      vpsrld zmm4, zmm4, 16
       vdpbf16ps  zmm23, zmm4, zmm9
 
       vpslld zmm4, zmm4, 16
-      vpsrad zmm4, zmm4, 16
+      vpsrld zmm4, zmm4, 16
       vdpbf16ps  zmm28, zmm4, zmm10
 
       vbroadcastss zmm5, DWORD PTR [r14 + r11]
       vpslld zmm5, zmm5, 16
-      vpsrad zmm5, zmm5, 16
+      vpsrld zmm5, zmm5, 16
       vdpbf16ps  zmm14, zmm5, zmm7
 
       vpslld zmm5, zmm5, 16
-      vpsrad zmm5, zmm5, 16
+      vpsrld zmm5, zmm5, 16
       vdpbf16ps  zmm19, zmm5, zmm8
 
       vpslld zmm5, zmm5, 16
-      vpsrad zmm5, zmm5, 16
+      vpsrld zmm5, zmm5, 16
       vdpbf16ps  zmm24, zmm5, zmm9
 
       vpslld zmm5, zmm5, 16
-      vpsrad zmm5, zmm5, 16
+      vpsrld zmm5, zmm5, 16
       vdpbf16ps  zmm29, zmm5, zmm10
 
       vbroadcastss zmm6, DWORD PTR [r12 + r11]
       vpslld zmm6, zmm6, 16
-      vpsrad zmm6, zmm6, 16
+      vpsrld zmm6, zmm6, 16
       vdpbf16ps  zmm15, zmm6, zmm7
 
       vpslld zmm6, zmm6, 16
-      vpsrad zmm6, zmm6, 16
+      vpsrld zmm6, zmm6, 16
       vdpbf16ps  zmm20, zmm6, zmm8
 
       vpslld zmm6, zmm6, 16
-      vpsrad zmm6, zmm6, 16
+      vpsrld zmm6, zmm6, 16
       vdpbf16ps  zmm25, zmm6, zmm9
 
       vpslld zmm6, zmm6, 16
-      vpsrad zmm6, zmm6, 16
+      vpsrld zmm6, zmm6, 16
       vdpbf16ps  zmm30, zmm6, zmm10
 
 .Linner_loop_end:

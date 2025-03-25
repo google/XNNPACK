@@ -112,29 +112,29 @@ BEGIN_FUNCTION xnn_bf16_f32_gemm_minmax_ukernel_3x32c2__asm_amd64_avx512bf16_bro
       add r9, 128
       vbroadcastss zmm2, DWORD PTR [rcx + r11]
       vpslld zmm2, zmm2, 16
-      vpsrad zmm2, zmm2, 16
+      vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm11, zmm2, zmm7
 
       vpslld zmm2, zmm2, 16
-      vpsrad zmm2, zmm2, 16
+      vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm14, zmm2, zmm8
 
       vbroadcastss zmm3, DWORD PTR [rax + r11]
       vpslld zmm3, zmm3, 16
-      vpsrad zmm3, zmm3, 16
+      vpsrld zmm3, zmm3, 16
       vdpbf16ps  zmm12, zmm3, zmm7
 
       vpslld zmm3, zmm3, 16
-      vpsrad zmm3, zmm3, 16
+      vpsrld zmm3, zmm3, 16
       vdpbf16ps  zmm15, zmm3, zmm8
 
       vbroadcastss zmm4, DWORD PTR [r15 + r11]
       vpslld zmm4, zmm4, 16
-      vpsrad zmm4, zmm4, 16
+      vpsrld zmm4, zmm4, 16
       vdpbf16ps  zmm13, zmm4, zmm7
 
       vpslld zmm4, zmm4, 16
-      vpsrad zmm4, zmm4, 16
+      vpsrld zmm4, zmm4, 16
       vdpbf16ps  zmm16, zmm4, zmm8
 
 .Linner_loop_end:
