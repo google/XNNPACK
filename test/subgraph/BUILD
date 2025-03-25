@@ -114,12 +114,14 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "argmax_pooling_2d_test",
+    timeout = "moderate",
     srcs = ["argmax-pooling-2d.cc"],
     deps = SUBGRAPH_TEST_DEPS + [":stencil"],
 )
 
 xnnpack_unit_test(
     name = "average_pooling_2d_test",
+    timeout = "moderate",
     srcs = ["average-pooling-2d.cc"],
     deps = SUBGRAPH_TEST_DEPS + [":stencil"],
 )
@@ -181,6 +183,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "max_pooling_2d_test",
+    timeout = "moderate",
     srcs = ["max-pooling-2d.cc"],
     deps = SUBGRAPH_TEST_DEPS + [":stencil"],
 )
