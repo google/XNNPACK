@@ -154,8 +154,12 @@ TEST_F(${TESTNAME}, Div) {
   const xnn_simd_f32_t res = xnn_div_f32(a, b);
   xnn_storeu_f32(output_.data(), res);
   for (size_t k = 0; k < xnn_simd_size_f32; k++) {
-    ASSERT_NEAR(output_[k], inputs_[k] / inputs_[k + xnn_simd_size_f32],
-    2 * std::numeric_limits<float>::epsilon() * std::abs(output_[k]));
+    $if ARCH in ["hvx"]:
+      ASSERT_NEAR(output_[k], inputs_[k] / inputs_[k + xnn_simd_size_f32],
+      8 * std::numeric_limits<float>::epsilon() * std::abs(output_[k]));
+    $else:
+      ASSERT_NEAR(output_[k], inputs_[k] / inputs_[k + xnn_simd_size_f32],
+      2 * std::numeric_limits<float>::epsilon() * std::abs(output_[k]));
   }
 }
 

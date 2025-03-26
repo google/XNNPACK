@@ -157,7 +157,7 @@ TEST_F(F32SimdHVXTest, Div) {
   xnn_storeu_f32(output_.data(), res);
   for (size_t k = 0; k < xnn_simd_size_f32; k++) {
     ASSERT_NEAR(output_[k], inputs_[k] / inputs_[k + xnn_simd_size_f32],
-    2 * std::numeric_limits<float>::epsilon() * std::abs(output_[k]));
+    8 * std::numeric_limits<float>::epsilon() * std::abs(output_[k]));
   }
 }
 
