@@ -119,6 +119,10 @@ struct UnaryOpInfo {
         return {0, 1.0f};
     }
   }
+
+  // If this returns false, we do not promise to match the reference
+  // implementation within `Tolerance`.
+  virtual bool IsInSupportedRange(float y) const { return true; }
 };
 
 struct Convert : public UnaryOpInfo {
@@ -327,24 +331,52 @@ struct RoundToNearestEven : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return std::nearbyint(x);
   }
+
+#if XNN_ARCH_RISCV
+  bool IsInSupportedRange(float y) const override {
+    // TODO(#8087): These ops are broken for large inputs on RISCV.
+    return std::abs(y) < 1e6f;
+  }
+#endif
 };
 
 struct RoundTowardsZero : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return std::trunc(x);
   }
+
+#if XNN_ARCH_RISCV
+  bool IsInSupportedRange(float y) const override {
+    // TODO(#8087): These ops are broken for large inputs on RISCV.
+    return std::abs(y) < 1e6f;
+  }
+#endif
 };
 
 struct RoundUp : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return std::ceil(x);
   }
+
+#if XNN_ARCH_RISCV
+  bool IsInSupportedRange(float y) const override {
+    // TODO(#8087): These ops are broken for large inputs on RISCV.
+    return std::abs(y) < 1e6f;
+  }
+#endif
 };
 
 struct RoundDown : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return std::floor(x);
   }
+
+#if XNN_ARCH_RISCV
+  bool IsInSupportedRange(float y) const override {
+    // TODO(#8087): These ops are broken for large inputs on RISCV.
+    return std::abs(y) < 1e6f;
+  }
+#endif
 };
 
 struct Sigmoid : public UnaryOpInfo {
@@ -470,6 +502,12 @@ struct SquareRoot : public UnaryOpInfo {
       return Interval::Positive(datatype);
     }
   }
+
+  bool IsInSupportedRange(float y) const override {
+    // TODO(b/404943039): We have some cases where inf input produces NaN
+    // output, that the reference implementation disagrees with.
+    return !std::isnan(y) && !std::isinf(y);
+  }
 };
 
 struct TanH : public UnaryOpInfo {
@@ -526,6 +564,12 @@ struct ReciprocalSquareRoot : public UnaryOpInfo {
     } else {
       return Interval::Positive(datatype);
     }
+  }
+
+  bool IsInSupportedRange(float y) const override {
+    // TODO(b/404943039): If the input is inf, the result is 0, but we produce
+    // NaN.
+    return y != 0.0f;
   }
 };
 
@@ -636,65 +680,6 @@ struct Sign : public UnaryOpInfo {
 };
 
 const UnaryOpInfo* GetUnaryOpInfo(xnn_unary_operator op);
-
-inline bool is_nan(float x) { return std::isnan(x); }
-
-template <typename T>
-inline bool is_nan(xnnpack::quantized<T> x) { return false; }
-
-// Generate random data in the given domain, where the domain is given as
-// unquantized values.
-// TODO: Replace uses with DatatypeGenerator
-template <typename T, typename Rng>
-void FillRandom(Rng& rng, T* x, size_t n, const Interval& domain,
-                const xnn_quantization_params& quantization = {0, 1.0f}) {
-  float min = domain.min;
-  float max = domain.max;
-  min = min * quantization.scale + quantization.zero_point;
-  max = max * quantization.scale + quantization.zero_point;
-
-  switch (xnn_datatype_of<T>()) {
-    case xnn_datatype_quint8:
-    case xnn_datatype_qint8: {
-      const T min = static_cast<T>(
-          std::max(static_cast<int32_t>(min),
-                   static_cast<int32_t>(xnnpack::NumericLimits<T>::min())));
-      const T max = static_cast<T>(
-          std::min(static_cast<int32_t>(max),
-                   static_cast<int32_t>(xnnpack::NumericLimits<T>::max())));
-      std::uniform_int_distribution<int16_t> dist(min, max);
-      std::generate_n(x, n, [&]() { return dist(rng); });
-      break;
-    }
-    case xnn_datatype_int32:
-    case xnn_datatype_qint32: {
-      const T min = static_cast<T>(
-          std::max(static_cast<int32_t>(min),
-                   static_cast<int32_t>(xnnpack::NumericLimits<T>::min())));
-      const T max = static_cast<T>(
-          std::min(static_cast<int32_t>(max),
-                   static_cast<int32_t>(xnnpack::NumericLimits<T>::max())));
-      std::uniform_int_distribution<int32_t> dist(min, max);
-      std::generate_n(x, n, [&]() { return dist(rng); });
-      break;
-    }
-    default: {
-      min = std::max(min, static_cast<float>(xnnpack::NumericLimits<T>::min()));
-      max = std::min(max, static_cast<float>(xnnpack::NumericLimits<T>::max()));
-      std::uniform_real_distribution<float> dist(min, max);
-      for (size_t i = 0; i < n; ++i) {
-        // Try generating random numbers until we get non-NaN
-        while (true) {
-          x[i] = static_cast<T>(dist(rng));
-          if (!is_nan(x[i])) {
-            break;
-          }
-        }
-      }
-      break;
-    }
-  }
-}
 
 // Compute the result of a unary operator using the reference implementation.
 template <typename In, typename Out, typename UnaryOp>

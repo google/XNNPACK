@@ -158,22 +158,15 @@ void TestImpl(size_t rank, xnn_unary_operator op) {
           // Flush denormals to 0
           expected = 0.0f;
         }
-        if (std::isinf(input_i) && std::isnan(static_cast<float>(output(i)))) {
-          // TODO(b/404943039): We have some cases where inf input produces NaN
-          // output, that the reference implementation disagrees with.
-        } else if (std::isnan(expected)) {
-          // We could check if our output is NaN, but not all operators do this.
-#if XNN_ARCH_RISCV
-        } else if (std::abs(input_i) > 1e6f &&
-                   (op == xnn_unary_bankers_rounding || op == xnn_unary_floor ||
-                    op == xnn_unary_ceiling)) {
-          // TODO(#8087): These ops are broken for large inputs on RISCV.
-#endif
-        } else {
-          ASSERT_NEAR(expected, output(i),
-                      op_info->Tolerance(expected, datatype_out))
-              << "i = " << index_to_string(i) << ", input(i) = " << input_i
-              << " (" << static_cast<float>(input(i)) << ")";
+        if (op_info->IsInSupportedRange(expected)) {
+          if (std::isnan(static_cast<float>(expected))) {
+            ASSERT_TRUE(std::isnan(static_cast<float>(output(i))));
+          } else {
+            ASSERT_NEAR(expected, output(i),
+                        op_info->Tolerance(expected, datatype_out))
+                << "i = " << index_to_string(i) << ", input(i) = " << input_i
+                << " (" << static_cast<float>(input(i)) << ")";
+          }
         }
       }
     }

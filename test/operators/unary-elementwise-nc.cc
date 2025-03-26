@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -170,11 +171,13 @@ class UnaryNCTest : public testing::TestWithParam<Param> {
                               (batch_size - 1) * input_stride + channels);
     xnnpack::Buffer<Out> output((batch_size - 1) * output_stride + channels);
     xnnpack::Buffer<Out> output_ref(batch_size * channels);
+    xnnpack::DatatypeGenerator<In> input_generator(domain.min, domain.max,
+                                                   input_quantization);
     for (size_t iteration = 0; iteration < iterations; iteration++) {
       for (size_t i = 0; i < batch_size; i++) {
-        FillRandom(rng_, input.data() + i * input_stride,
-                   channels + XNN_EXTRA_BYTES / sizeof(In), domain,
-                   input_quantization);
+        std::generate_n(input.data() + i * input_stride,
+                        channels + XNN_EXTRA_BYTES / sizeof(In),
+                        [&]() { return input_generator(rng_); });
       }
 
       if (param.run_mode == RunMode::kEager) {
@@ -228,13 +231,19 @@ class UnaryNCTest : public testing::TestWithParam<Param> {
           const float x = input[i * input_stride + c];
           const float y = output[i * output_stride + c];
           const float y_ref = output_ref[i * channels + c];
-          ASSERT_NEAR(y, y_ref, op_info->Tolerance(y_ref, output_datatype))
-              << "x = " << x
-              << ", y = " << y
-              << ", input1 zero point = " << input_quantization.zero_point
-              << ", input1 scale = " << input_quantization.scale
-              << ", output zero point = " << output_quantization.zero_point
-              << ", output scale = " << output_quantization.scale;
+          if (op_info->IsInSupportedRange(y_ref)) {
+            if (std::isnan(static_cast<float>(y_ref))) {
+              ASSERT_TRUE(std::isnan(static_cast<float>(y)));
+            } else {
+              ASSERT_NEAR(y, y_ref, op_info->Tolerance(y_ref, output_datatype))
+                  << "x = " << x
+                  << ", y = " << y
+                  << ", input1 zero point = " << input_quantization.zero_point
+                  << ", input1 scale = " << input_quantization.scale
+                  << ", output zero point = " << output_quantization.zero_point
+                  << ", output scale = " << output_quantization.scale;
+            }
+          }
         }
       }
     }
