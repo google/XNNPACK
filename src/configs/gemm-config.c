@@ -852,8 +852,17 @@ static void init_f32_gemm_config(void) {
       f32_gemm_config.mr = 7;
       // nr is set to vlen * 4 / sizeof(float) = 4 * VLENB * 8 / 32 = VLENB
       f32_gemm_config.nr = hardware_config->vlenb;
-      return;
     }
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    // TODO: enable hvx igemm
+    f32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(7)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_7x64__hvx_broadcast);
+    f32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x64__hvx_broadcast);
+    f32_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+    // TODO: enable packw scalar
+    f32_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f32_gemm_gio_w;
+    f32_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_f32_gemm_goi_w;
+    f32_gemm_config.mr = 7;
+    f32_gemm_config.nr = 64;
   #else
     f32_gemm_config.linear.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_ukernel_1x4__scalar);
     f32_gemm_config.linear.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_ukernel_4x4__scalar);
