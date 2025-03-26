@@ -652,19 +652,46 @@ void FillRandom(Rng& rng, T* x, size_t n, const Interval& domain,
   float max = domain.max;
   min = min * quantization.scale + quantization.zero_point;
   max = max * quantization.scale + quantization.zero_point;
-  min = std::max(domain.min,
-                 static_cast<float>(xnnpack::NumericLimits<T>::min()));
-  max = std::min(domain.max,
-                 static_cast<float>(xnnpack::NumericLimits<T>::max()));
 
-  std::uniform_real_distribution<float> dist(min, max);
-  for (size_t i = 0; i < n; ++i) {
-    // Try generating random numbers until we get non-NaN
-    while (true) {
-      x[i] = static_cast<T>(dist(rng));
-      if (!is_nan(x[i])) {
-        break;
+  switch (xnn_datatype_of<T>()) {
+    case xnn_datatype_quint8:
+    case xnn_datatype_qint8: {
+      const T min = static_cast<T>(
+          std::max(static_cast<int32_t>(min),
+                   static_cast<int32_t>(xnnpack::NumericLimits<T>::min())));
+      const T max = static_cast<T>(
+          std::min(static_cast<int32_t>(max),
+                   static_cast<int32_t>(xnnpack::NumericLimits<T>::max())));
+      std::uniform_int_distribution<int16_t> dist(min, max);
+      std::generate_n(x, n, [&]() { return dist(rng); });
+      break;
+    }
+    case xnn_datatype_int32:
+    case xnn_datatype_qint32: {
+      const T min = static_cast<T>(
+          std::max(static_cast<int32_t>(min),
+                   static_cast<int32_t>(xnnpack::NumericLimits<T>::min())));
+      const T max = static_cast<T>(
+          std::min(static_cast<int32_t>(max),
+                   static_cast<int32_t>(xnnpack::NumericLimits<T>::max())));
+      std::uniform_int_distribution<int32_t> dist(min, max);
+      std::generate_n(x, n, [&]() { return dist(rng); });
+      break;
+    }
+    default: {
+      min = std::max(min, static_cast<float>(xnnpack::NumericLimits<T>::min()));
+      max = std::min(max, static_cast<float>(xnnpack::NumericLimits<T>::max()));
+      std::uniform_real_distribution<float> dist(min, max);
+      for (size_t i = 0; i < n; ++i) {
+        // Try generating random numbers until we get non-NaN
+        while (true) {
+          x[i] = static_cast<T>(dist(rng));
+          if (!is_nan(x[i])) {
+            break;
+          }
+        }
       }
+      break;
     }
   }
 }

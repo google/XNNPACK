@@ -1264,35 +1264,49 @@ IF(XNNPACK_BUILD_TESTS)
     ENDIF()
   ENDIF()
 
-  # Helper libraries
+  # Create a dummy library that contains shared dependencies and definitions
+  # for all XNNPACK test targets.
+  ADD_LIBRARY(xnnpack-test INTERFACE)
+  IF (MSVC)
+    TARGET_COMPILE_OPTIONS(xnnpack-test INTERFACE "$<$<NOT:$<CONFIG:Debug>>:/O2>" "/DEBUG:FASTLINK" "/Zi")
+  ELSE()
+    TARGET_COMPILE_OPTIONS(xnnpack-test INTERFACE "$<$<NOT:$<CONFIG:Debug>>:-O2>" "-g")
+  ENDIF()
+  TARGET_LINK_LIBRARIES(xnnpack-test INTERFACE
+    GTest::gmock
+    GTest::gtest
+    GTest::gtest_main
+    XNNPACK)
+
+  # Test helper libraries
   ADD_LIBRARY(next-prime STATIC test/next_prime.cc)
   ADD_LIBRARY(runtime-flags STATIC test/subgraph/runtime-flags.cc)
-  TARGET_LINK_LIBRARIES(runtime-flags PRIVATE GTest::gtest)
+  TARGET_LINK_LIBRARIES(runtime-flags PRIVATE xnnpack-test)
 
   ADD_LIBRARY(gemm-microkernel-tester STATIC test/gemm-microkernel-tester.cc)
-  TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE XNNPACK packing)
-  TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE pthreadpool GTest::gtest)
+  TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE xnnpack-test packing)
+  TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE pthreadpool)
   TARGET_LINK_LIBRARIES(gemm-microkernel-tester PUBLIC next-prime)
   IF(XNNPACK_ENABLE_KLEIDIAI)
     TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE kleidiai)
   ENDIF()
 
   ADD_LIBRARY(dwconv-microkernel-tester STATIC test/dwconv-microkernel-tester.cc)
-  TARGET_LINK_LIBRARIES(dwconv-microkernel-tester PRIVATE XNNPACK pthreadpool GTest::gtest)
+  TARGET_LINK_LIBRARIES(dwconv-microkernel-tester PRIVATE xnnpack-test pthreadpool)
   TARGET_LINK_LIBRARIES(dwconv-microkernel-tester PUBLIC next-prime)
 
   ADD_LIBRARY(vbinary-microkernel-tester STATIC test/vbinary-microkernel-tester.cc)
   SET_TARGET_PROPERTIES(vbinary-microkernel-tester PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_LINK_LIBRARIES(vbinary-microkernel-tester PRIVATE XNNPACK pthreadpool GTest::gtest)
+  TARGET_LINK_LIBRARIES(vbinary-microkernel-tester PRIVATE xnnpack-test pthreadpool)
 
   ADD_LIBRARY(unary-ops STATIC test/unary-ops.cc)
-  TARGET_LINK_LIBRARIES(unary-ops PRIVATE XNNPACK)
+  TARGET_LINK_LIBRARIES(unary-ops PRIVATE xnnpack-test )
 
   ADD_LIBRARY(convolution-test-helpers OBJECT test/operators/convolution-test-helpers.cc)
-  TARGET_LINK_LIBRARIES(convolution-test-helpers PRIVATE xnnpack-base)
+  TARGET_LINK_LIBRARIES(convolution-test-helpers PRIVATE xnnpack-test xnnpack-base)
 
   ADD_LIBRARY(packq-microkernel-tester STATIC test/packq-microkernel-tester.cc)
-  TARGET_LINK_LIBRARIES(packq-microkernel-tester PRIVATE XNNPACK pthreadpool  GTest::gtest)
+  TARGET_LINK_LIBRARIES(packq-microkernel-tester PRIVATE xnnpack-test pthreadpool)
   IF(XNNPACK_ENABLE_KLEIDIAI)
     TARGET_LINK_LIBRARIES(packq-microkernel-tester PRIVATE kleidiai)
   ENDIF()
@@ -1300,7 +1314,7 @@ IF(XNNPACK_BUILD_TESTS)
   IF(XNNPACK_BUILD_LIBRARY)
     # ---[ Build size tests
     ADD_EXECUTABLE(subgraph-size-test test/subgraph/subgraph-size.c)
-    TARGET_LINK_LIBRARIES(subgraph-size-test PRIVATE XNNPACK)
+    TARGET_LINK_LIBRARIES(subgraph-size-test PRIVATE xnnpack-test)
 
     # ---[ Build operator-level unit tests
     SET(LIBRARY_OPERATOR_TESTS
@@ -1338,9 +1352,7 @@ IF(XNNPACK_BUILD_TESTS)
     FOREACH(TEST ${LIBRARY_OPERATOR_TESTS})
       ADD_EXECUTABLE(${TEST}-test test/operators/${TEST}.cc)
       TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        GTest::gmock
-        GTest::gtest
-        GTest::gtest_main
+        xnnpack-test
         convolution-test-helpers
         hardware-config
         logging
@@ -1379,11 +1391,8 @@ IF(XNNPACK_BUILD_TESTS)
     FOREACH(TEST ${LIBRARY_SUBGRAPH_OPTIMIZATION_TESTS})
       ADD_EXECUTABLE(${TEST}-test test/subgraph/${TEST}.cc)
       TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        GTest::gmock
-        GTest::gtest
-        GTest::gtest_main
-        runtime-flags
-        XNNPACK)
+        xnnpack-test
+        runtime-flags)
       ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     ENDFOREACH()
 
@@ -1413,21 +1422,17 @@ IF(XNNPACK_BUILD_TESTS)
     FOREACH(TEST ${LIBRARY_SUBGRAPH_UNIT_TESTS})
       ADD_EXECUTABLE(${TEST}-test test/subgraph/${TEST}.cc)
       TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        GTest::gmock
-        GTest::gtest
-        GTest::gtest_main
+        xnnpack-test
         datatype
         subgraph
         logging
         runtime-flags
-        unary-ops
-        XNNPACK)
+        unary-ops)
       ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
       SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
     ENDFOREACH()
     IF(XNNPACK_TARGET_PROCESSOR MATCHES "^riscv")
       SHARD_TEST(static-reduce-test 20)
-      SHARD_TEST(static-slice-test 20)
     ENDIF()
 
     SET(LIBRARY_SUBGRAPH_CONVOLUTION_UNIT_TESTS
@@ -1438,12 +1443,9 @@ IF(XNNPACK_BUILD_TESTS)
       ADD_EXECUTABLE(${TEST}-test test/subgraph/${TEST}.cc)
       TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         convolution-test-helpers
-        GTest::gmock
-        GTest::gtest
-        GTest::gtest_main
+        xnnpack-test
         runtime-flags
-        subgraph
-        XNNPACK)
+        subgraph)
       ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
       SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
     ENDFOREACH()
@@ -1521,9 +1523,7 @@ IF(XNNPACK_BUILD_TESTS)
   FOREACH(TEST ${MICROKERNEL_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        GTest::gmock
-        GTest::gtest
-        GTest::gtest_main
+        xnnpack-test
         hardware-config
         indirection
         logging
@@ -1533,7 +1533,6 @@ IF(XNNPACK_BUILD_TESTS)
         next-prime
         packing
         pthreadpool
-        XNNPACK
     )
     ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
@@ -1560,9 +1559,7 @@ IF(XNNPACK_BUILD_TESTS)
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         dwconv-microkernel-tester
-        GTest::gmock
-        GTest::gtest
-        GTest::gtest_main
+        xnnpack-test
         hardware-config
         logging
         microkernels-all
@@ -1619,9 +1616,7 @@ IF(XNNPACK_BUILD_TESTS)
         ADD_EXECUTABLE(${TEST}-test ${TEST_SOURCES})
         TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
             gemm-microkernel-tester
-            GTest::gmock
-            GTest::gtest
-            GTest::gtest_main
+            xnnpack-test
             hardware-config
             logging
             microkernels-all
@@ -1645,9 +1640,7 @@ IF(XNNPACK_BUILD_TESTS)
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         packq-microkernel-tester
-        GTest::gmock
-        GTest::gtest
-        GTest::gtest_main
+        xnnpack-test
         hardware-config
         logging
         microkernels-all
@@ -1714,9 +1707,7 @@ IF(XNNPACK_BUILD_TESTS)
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         vbinary-microkernel-tester
-        GTest::gmock
-        GTest::gtest
-        GTest::gtest_main
+        xnnpack-test
         hardware-config
         logging
         microkernels-all
@@ -1743,9 +1734,7 @@ IF(XNNPACK_BUILD_TESTS)
   FOREACH(TEST ${MICROKERNEL_VCVT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        GTest::gmock
-        GTest::gtest
-        GTest::gtest_main
+        xnnpack-test
         datatype
         hardware-config
         logging
@@ -1813,9 +1802,7 @@ IF(XNNPACK_BUILD_TESTS)
   FOREACH(TEST ${MICROKERNEL_VUNARY_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        GTest::gmock
-        GTest::gtest
-        GTest::gtest_main
+        xnnpack-test
         hardware-config
         logging
         microkernels-all
@@ -1843,11 +1830,8 @@ IF(XNNPACK_BUILD_TESTS)
 
   ADD_EXECUTABLE(buffer-test test/buffer.cc)
   TARGET_LINK_LIBRARIES(buffer-test PRIVATE
-    GTest::gmock
-    GTest::gtest
-    GTest::gtest_main
-    datatype
-    XNNPACK)
+    xnnpack-test
+    datatype)
   ADD_TEST(NAME buffer-test COMMAND buffer-test)
   SET_TARGET_PROPERTIES(buffer-test PROPERTIES CXX_EXTENSIONS YES)
 
@@ -2024,7 +2008,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       xx-transposev)
   FOREACH(BENCH ${MICROKERNEL_BENCHMARKS})
     ADD_EXECUTABLE(${BENCH}-bench bench/${BENCH}.cc)
-    IF(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    IF(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT XNNPACK_TARGET_PROCESSOR MATCHES "^riscv")
       # Attempt to work around slow compilation/linking of benchmarks with a lot of functions
       TARGET_COMPILE_OPTIONS(${BENCH}-bench PRIVATE "-fno-function-sections")
       TARGET_COMPILE_OPTIONS(${BENCH}-bench PRIVATE "-Os")

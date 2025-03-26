@@ -16,14 +16,8 @@
 #include <string>
 
 #include <gtest/gtest.h>
-#include "include/xnnpack.h"
-#include "src/xnnpack/common.h"
 #include "src/xnnpack/microfnptr.h"
-#include "src/xnnpack/microkernel-utils.h"
-#include "src/xnnpack/microparams-init.h"
-#include "src/xnnpack/pack.h"
 #include "src/xnnpack/requantization.h"
-#include "src/xnnpack/buffer.h"
 
 class DWConvMicrokernelTester {
  public:
@@ -137,13 +131,6 @@ class DWConvMicrokernelTester {
 
   size_t zero_index() const { return this->zero_index_; }
 
-  DWConvMicrokernelTester& iterations(size_t iterations) {
-    this->iterations_ = iterations;
-    return *this;
-  }
-
-  size_t iterations() const { return this->iterations_; }
-
   DWConvMicrokernelTester& first_pass_tile(size_t first_pass_tile) {
     this->first_pass_tile_ = first_pass_tile;
     return *this;
@@ -180,7 +167,8 @@ class DWConvMicrokernelTester {
   void Test(xnn_f16_dwconv_minmax_ukernel_fn dwconv_minmax,
             xnn_init_f16_minmax_params_fn init_params) const;
 
-  void Test(xnn_f32_dwconv_unipass_ukernel_fn dwconv, const void* = nullptr) const;
+  void Test(xnn_f32_dwconv_unipass_ukernel_fn dwconv,
+            const void* = nullptr) const;
 
   void Test(xnn_f32_dwconv_minmax_ukernel_fn dwconv_minmax,
             xnn_init_f32_minmax_params_fn init_params) const;
@@ -199,7 +187,6 @@ class DWConvMicrokernelTester {
   uint8_t qmax_{255};
   size_t input_offset_{0};
   size_t zero_index_{SIZE_MAX};
-  size_t iterations_{3};
   size_t first_pass_tile_{0};
   size_t middle_pass_tile_{0};
   size_t last_pass_tile_{0};
