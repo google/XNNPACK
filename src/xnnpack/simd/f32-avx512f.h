@@ -145,10 +145,6 @@ static XNN_INLINE xnn_simd_f32_t xnn_rsqrt_f32(xnn_simd_f32_t a) {
   return _mm512_rsqrt14_ps(a);
 }
 
-static XNN_INLINE xnn_simd_f32_t xnn_getexp_f32(xnn_simd_f32_t a) {
-  return _mm512_getexp_ps(a);
-}
-
 // Load/store operations.
 static XNN_INLINE xnn_simd_f32_t xnn_loadu_f32(const float* ptr) {
   return _mm512_loadu_ps(ptr);

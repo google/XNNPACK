@@ -38,10 +38,6 @@ typedef __m512h xnn_simd_f16_t;
 // Whether or not this architecture has native fused multiply-add support.
 #define XNN_SIMD_HAS_NATIVE_FMA 1
 
-// Include the header for generic functions _after_ declaring the arch-specific
-// types and sizes.
-#include "src/xnnpack/simd/f16-generic-functions.h"
-
 // Arithmetic operations.
 static XNN_INLINE xnn_simd_f16_t xnn_zero_f16() { return _mm512_setzero_ph(); }
 
@@ -155,10 +151,6 @@ static XNN_INLINE xnn_simd_f16_t xnn_div_f16(xnn_simd_f16_t a,
 #define XNN_SIMD_NUM_RSQRT_ITER_F16 0
 static XNN_INLINE xnn_simd_f16_t xnn_rsqrt_f16(xnn_simd_f16_t a) {
   return _mm512_rsqrt_ph(a);
-}
-
-static XNN_INLINE xnn_simd_f16_t xnn_getexp_f16(xnn_simd_f16_t a) {
-  return _mm512_getexp_ph(a);
 }
 
 // Load/store operations.

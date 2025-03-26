@@ -565,17 +565,6 @@ TEST_F(F16SimdAVX512FP16Test, CmpEq) {
   }
 }
 
-TEST_F(F16SimdAVX512FP16Test, GetExp) {
-  const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
-  const xnn_simd_f16_t res = xnn_getexp_f16(a);
-  xnn_storeu_f16(output_.data(), res);
-  std::vector<float> output_f32 = ToFloat32(output_);
-  std::vector<float> inputs_f32 = ToFloat32(inputs_);
-  for (size_t k = 0; k < xnn_simd_size_f16; k++) {
-    ASSERT_EQ(output_f32[k], std::logb(inputs_f32[k]));
-  }
-}
-
 TEST_F(F16SimdAVX512FP16Test, StoreTail) {
   const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
   std::vector<float> inputs_f32 = ToFloat32(inputs_);

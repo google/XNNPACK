@@ -52,10 +52,6 @@ typedef float16x8_t xnn_simd_f16_t;
 #define xnn_srl_f16(a, bits) \
   vreinterpretq_f16_u16(vshrq_n_u16(vreinterpretq_u16_f16(a), bits))
 
-// Include the header for generic functions _after_ declaring the arch-specific
-// types and sizes.
-#include "src/xnnpack/simd/f16-generic-functions.h"
-
 // Arithmetic operations.
 static XNN_INLINE xnn_simd_f16_t xnn_zero_f16() {
   return vreinterpretq_f16_u16(vdupq_n_u16(0));
@@ -175,10 +171,6 @@ static XNN_INLINE xnn_simd_f16_t xnn_rcp_f16(xnn_simd_f16_t a) {
 #define XNN_SIMD_NUM_RSQRT_ITER_F16 2
 static XNN_INLINE xnn_simd_f16_t xnn_rsqrt_f16(xnn_simd_f16_t a) {
   return vrsqrteq_f16(a);
-}
-
-static XNN_INLINE xnn_simd_f16_t xnn_getexp_f16(xnn_simd_f16_t a) {
-  return xnn_generic_getexp_f16(a);
 }
 
 // Load/store operations.

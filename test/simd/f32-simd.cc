@@ -211,13 +211,4 @@ TEST_F(F32SimdTest, ShiftRight) {
   }
 }
 
-TEST_F(F32SimdTest, GetExp) {
-  const xnn_simd_f32_t a = xnn_loadu_f32(inputs_.data());
-  const xnn_simd_f32_t res = xnn_getexp_f32(a);
-  xnn_storeu_f32(output_.data(), res);
-  for (size_t k = 0; k < xnn_simd_size_f32; k++) {
-    ASSERT_EQ(output_[k], std::logb(inputs_[k]));
-  }
-}
-
 }  // namespace xnnpack
