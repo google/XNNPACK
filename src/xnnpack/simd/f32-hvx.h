@@ -10,6 +10,7 @@
 #include <assert.h>
 #include <stddef.h>
 #include <string.h>  // for memcpy
+#include <math.h>  // for roundf
 
 #include <hvx_hexagon_protos.h>
 #include <hexagon_protos.h>
@@ -34,7 +35,7 @@ typedef HVX_Vector xnn_simd_f32_t;
 
 // Arithmetic operations.
 
-static XNN_INLINE xnn_simd_f32_t xnn_zero_f32() { return Q6_V_vsplat_R(0); }
+static XNN_INLINE xnn_simd_f32_t xnn_zero_f32() { return Q6_V_vzero(); }
 
 static XNN_INLINE xnn_simd_f32_t xnn_add_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {
@@ -107,7 +108,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
   XNN_ALIGN(128) float output[xnn_simd_size_f32];
   *((HVX_Vector*) input) = a;
   for (size_t k = 0; k < xnn_simd_size_f32; ++k) {
-    output[k] = std::round(input[k]);
+    output[k] = roundf(input[k]);
   }
   return *((HVX_Vector*) output);
 }
@@ -169,7 +170,7 @@ static XNN_INLINE void xnn_store_f32(float* ptr, xnn_simd_f32_t v) {
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_set1_f32(float v) {
-  return Q6_V_vsplat_R(*(uint32_t *)&v);
+  return Q6_V_vsplat_R(*(uint32_t *) &v);
 }
 
 // Tail load/store operations.
