@@ -14,13 +14,13 @@ $TILE_SIZE = TILE_WIDTH
 $VECTOR_SIZE = int(128)
 $NUM_D_REGISTERS=int(VECTOR_SIZE/64)
 
-#include <xnnpack/simd/f32-hvx.h>
+#include "src/xnnpack/simd/f32-hvx.h"
 
 #include <assert.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/transpose.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/transpose.h"
 
 void xnn_x${SIZE}_transposec_ukernel__${TILE_HEIGHT}x${TILE_WIDTH}_${IN_PTRS.lower()}_${OUT_PTRS.lower()}_hvx(
     const uint${SIZE}_t* input,
