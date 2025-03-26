@@ -310,6 +310,7 @@ class Tensor {
   }
 
   const index_type& extents() const { return extents_; }
+  const index_type& shape() const { return extents_; }
   const index_type& strides() const { return strides_; }
   size_t extent(size_t dim) const { return extents_[dim]; }
   size_t stride(size_t dim) const { return strides_[dim]; }

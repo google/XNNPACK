@@ -60,7 +60,7 @@ Tensor<T> ReferenceImpl(Tensor<T> input, const StencilParams& kh,
 }
 
 template <typename T>
-void TestImpl() {
+void FuseSplit() {
   ReplicableRandomDevice rng;
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -127,9 +127,9 @@ void TestImpl() {
   }
 }
 
-TEST(MaxPooling2DQS8, test) { TestImpl<quantized<int8_t>>(); }
-TEST(MaxPooling2DQU8, test) { TestImpl<quantized<uint8_t>>(); }
-TEST(MaxPooling2DF16, test) { TestImpl<xnn_float16>(); }
-TEST(MaxPooling2DF32, test) { TestImpl<float>(); }
+TEST(MaxPooling2DQS8, test) { FuseSplit<quantized<int8_t>>(); }
+TEST(MaxPooling2DQU8, test) { FuseSplit<quantized<uint8_t>>(); }
+TEST(MaxPooling2DF16, test) { FuseSplit<xnn_float16>(); }
+TEST(MaxPooling2DF32, test) { FuseSplit<float>(); }
 
 }  // namespace xnnpack

@@ -16,6 +16,7 @@
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator-type.h"
 #include "src/xnnpack/operator.h"
 #include "src/xnnpack/params.h"
@@ -303,104 +304,121 @@ enum xnn_operator_type xnn_reduce_operator_to_operator_type(enum xnn_reduce_oper
 }
 
 const char* xnn_operator_type_to_string_v2(xnn_operator_t op) {
-  if (op->type == xnn_operator_type_binary_elementwise) {
-    switch (op->binary_elementwise.op_type) {
-      case xnn_binary_add:
-        return "Add (ND)";
-      case xnn_binary_divide:
-        return "Divide (ND)";
-      case xnn_binary_multiply:
-        return "Multiply (ND)";
-      case xnn_binary_subtract:
-        return "Subtract (ND)";
-      case xnn_binary_copysign:
-        return "Copy Sign (ND)";
-      case xnn_binary_squared_difference:
-        return "Squared Difference (ND)";
-      case xnn_binary_prelu:
-        return "PReLU (ND)";
-      case xnn_binary_minimum:
-        return "Minimum (ND)";
-      case xnn_binary_maximum:
-        return "Maximum (ND)";
-      case xnn_binary_modulus:
-        return "Modulus (ND)";
-      case xnn_binary_atan2:
-        return "ATan2 (ND)";
-      case xnn_binary_pow:
-        return "Power (ND)";
-      case xnn_binary_bitwise_and:
-        return "Bitwise And (ND)";
-      case xnn_binary_bitwise_or:
-        return "Bitwise Or (ND)";
-      case xnn_binary_bitwise_xor:
-        return "Bitwise Xor (ND)";
-      case xnn_binary_shift_left:
-        return "Shift Left (ND)";
-      case xnn_binary_shift_right_logical:
-        return "Shift Right Logical (ND)";
-      case xnn_binary_shift_right_arithmetic:
-        return "Shift Right Arithmetic (ND)";
-      case xnn_binary_invalid:
-        return "Invalid Binary Op";
-    }
-  } else if (op->type == xnn_operator_type_unary_elementwise) {
-    switch (op->unary_elementwise.op_type) {
-      case xnn_unary_abs:
-        return "Abs (NC)";
-      case xnn_unary_approxgelu:
-        return "ApproxGELU (NC)";
-      case xnn_unary_bankers_rounding:
-        return "Bankders Rounding (NC)";
-      case xnn_unary_ceiling:
-        return "Ceiling (NC)";
-      case xnn_unary_clamp:
-        return "Clamp (NC)";
-      case xnn_unary_convert:
-        return "Convert (NC)";
-      case xnn_unary_elu:
-        return "ELU (NC)";
-      case xnn_unary_exp:
-        return "Exp (NC)";
-      case xnn_unary_floor:
-        return "Floor (NC)";
-      case xnn_unary_gelu:
-        return "GELU (NC)";
-      case xnn_unary_hardswish:
-        return "HardSwish (NC)";
-      case xnn_unary_leaky_relu:
-        return "LeakyReLU (NC)";
-      case xnn_unary_log:
-        return "Log (NC)";
-      case xnn_unary_negate:
-        return "Negate (NC)";
-      case xnn_unary_reciprocal_square_root:
-        return "Reciprocal Square Root (NC)";
-      case xnn_unary_sigmoid:
-        return "Sigmoid (NC)";
-      case xnn_unary_square:
-        return "Square (NC)";
-      case xnn_unary_square_root:
-        return "Square Root (NC)";
-      case xnn_unary_tanh:
-        return "TanH (NC)";
-      case xnn_unary_cube_root:
-        return "Cube Root (NC)";
-      case xnn_unary_cosine:
-        return "Cosine (NC)";
-      case xnn_unary_sine:
-        return "Sine (NC)";
-      case xnn_unary_count_leading_zeros:
-        return "Count Leading Zeros (NC)";
-      case xnn_unary_bitwise_not:
-        return "Bitwise Not (NC)";
-      case xnn_unary_popcount:
-        return "Population Count (NC)";
-      case xnn_unary_sign:
-        return "Sign (NC)";
-      case xnn_unary_invalid:
-        return "Invalid Unary Op";
-    }
+  switch (op->type) {
+    case xnn_operator_type_binary_elementwise:
+      switch (op->binary_elementwise.op_type) {
+        case xnn_binary_add:
+          return "Add (ND)";
+        case xnn_binary_divide:
+          return "Divide (ND)";
+        case xnn_binary_multiply:
+          return "Multiply (ND)";
+        case xnn_binary_subtract:
+          return "Subtract (ND)";
+        case xnn_binary_copysign:
+          return "Copy Sign (ND)";
+        case xnn_binary_squared_difference:
+          return "Squared Difference (ND)";
+        case xnn_binary_prelu:
+          return "PReLU (ND)";
+        case xnn_binary_minimum:
+          return "Minimum (ND)";
+        case xnn_binary_maximum:
+          return "Maximum (ND)";
+        case xnn_binary_modulus:
+          return "Modulus (ND)";
+        case xnn_binary_atan2:
+          return "ATan2 (ND)";
+        case xnn_binary_pow:
+          return "Power (ND)";
+        case xnn_binary_bitwise_and:
+          return "Bitwise And (ND)";
+        case xnn_binary_bitwise_or:
+          return "Bitwise Or (ND)";
+        case xnn_binary_bitwise_xor:
+          return "Bitwise Xor (ND)";
+        case xnn_binary_shift_left:
+          return "Shift Left (ND)";
+        case xnn_binary_shift_right_logical:
+          return "Shift Right Logical (ND)";
+        case xnn_binary_shift_right_arithmetic:
+          return "Shift Right Arithmetic (ND)";
+        case xnn_binary_invalid:
+          return "Invalid Binary Op";
+      }
+    case xnn_operator_type_unary_elementwise:
+      switch (op->unary_elementwise.op_type) {
+        case xnn_unary_abs:
+          return "Abs (NC)";
+        case xnn_unary_approxgelu:
+          return "ApproxGELU (NC)";
+        case xnn_unary_bankers_rounding:
+          return "Bankders Rounding (NC)";
+        case xnn_unary_ceiling:
+          return "Ceiling (NC)";
+        case xnn_unary_clamp:
+          return "Clamp (NC)";
+        case xnn_unary_convert:
+          return "Convert (NC)";
+        case xnn_unary_elu:
+          return "ELU (NC)";
+        case xnn_unary_exp:
+          return "Exp (NC)";
+        case xnn_unary_floor:
+          return "Floor (NC)";
+        case xnn_unary_gelu:
+          return "GELU (NC)";
+        case xnn_unary_hardswish:
+          return "HardSwish (NC)";
+        case xnn_unary_leaky_relu:
+          return "LeakyReLU (NC)";
+        case xnn_unary_log:
+          return "Log (NC)";
+        case xnn_unary_negate:
+          return "Negate (NC)";
+        case xnn_unary_reciprocal_square_root:
+          return "Reciprocal Square Root (NC)";
+        case xnn_unary_sigmoid:
+          return "Sigmoid (NC)";
+        case xnn_unary_square:
+          return "Square (NC)";
+        case xnn_unary_square_root:
+          return "Square Root (NC)";
+        case xnn_unary_tanh:
+          return "TanH (NC)";
+        case xnn_unary_cube_root:
+          return "Cube Root (NC)";
+        case xnn_unary_cosine:
+          return "Cosine (NC)";
+        case xnn_unary_sine:
+          return "Sine (NC)";
+        case xnn_unary_count_leading_zeros:
+          return "Count Leading Zeros (NC)";
+        case xnn_unary_bitwise_not:
+          return "Bitwise Not (NC)";
+        case xnn_unary_popcount:
+          return "Population Count (NC)";
+        case xnn_unary_sign:
+          return "Sign (NC)";
+        case xnn_unary_invalid:
+          return "Invalid Unary Op";
+      }
+    case xnn_operator_type_copy_nc_x16:
+    case xnn_operator_type_copy_nc_x32:
+    case xnn_operator_type_copy_nc_x8:
+      switch (op->copy.subtype) {
+        case xnn_node_type_static_reshape:
+          return "Static Reshape (NC)";
+        case xnn_node_type_static_expand_dims:
+          return "Static Expand Dims (NC)";
+        case xnn_node_type_fuse_dims:
+          return "Fuse Dims (NC)";
+        case xnn_node_type_split_dims:
+          return "Split Dims (NC)";
+        default:
+          return xnn_operator_type_to_string(op->type);
+      }
+    default:
+      return xnn_operator_type_to_string(op->type);
   }
-  return xnn_operator_type_to_string(op->type);
 }

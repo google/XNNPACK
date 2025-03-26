@@ -44,7 +44,7 @@ Tensor<T> ReferenceImpl(Tensor<T> x, Tensor<T> w) {
 }
 
 template <typename T>
-void TestImpl() {
+void FuseAndSplit() {
   ReplicableRandomDevice rng;
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -105,7 +105,7 @@ void TestImpl() {
   }
 }
 
-TEST(RoPEF16, test) { TestImpl<xnn_float16>(); }
-TEST(RoPEF32, test) { TestImpl<float>(); }
+TEST(RoPEF16, test) { FuseAndSplit<xnn_float16>(); }
+TEST(RoPEF32, test) { FuseAndSplit<float>(); }
 
 }  // namespace xnnpack

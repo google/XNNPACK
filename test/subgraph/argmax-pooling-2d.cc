@@ -58,7 +58,7 @@ std::tuple<Tensor<T>, Tensor<int32_t>> ReferenceImpl(Tensor<T> input,
 }
 
 template <typename T>
-void TestImpl() {
+void FuseSplit() {
   ReplicableRandomDevice rng;
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -154,6 +154,6 @@ void TestImpl() {
   }
 }
 
-TEST(ArgMaxPooling2DF32, test) { TestImpl<float>(); }
+TEST(ArgMaxPooling2DF32, test) { FuseSplit<float>(); }
 
 }  // namespace xnnpack

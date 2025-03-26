@@ -308,10 +308,8 @@ struct xnn_node {
       uint32_t padding_value;
     } static_pad;
     struct {
-      struct xnn_shape new_axes;
-    } static_expand_dims;
-    struct {
       struct xnn_shape new_shape;
+      size_t axis;
     } static_reshape;
     struct {
       size_t new_height;
@@ -408,8 +406,6 @@ struct xnn_operator_data {
       size_t num_reshape_dims;
       size_t reshape_dims[XNN_MAX_TENSOR_DIMS];
     };
-    // Used for concatenate.
-    int32_t axis;
     // Used for static constant pad.
     struct {
       size_t post_paddings[XNN_MAX_TENSOR_DIMS];
@@ -421,6 +417,8 @@ struct xnn_operator_data {
       int64_t ends[XNN_MAX_TENSOR_DIMS];
     };
   };
+  // Used for concatenate and static split dims.
+  int32_t axis;
   uint32_t adjustment_height;
   uint32_t adjustment_width;
   uint32_t num_inputs;

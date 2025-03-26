@@ -497,6 +497,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/max-pooling-2d.c
   src/subgraph/pack-lh.c
   src/subgraph/reshape-helpers.c
+  src/subgraph/rope.c
   src/subgraph/scaled-dot-product-attention.c
   src/subgraph/softmax.c
   src/subgraph/space-to-depth-2d.c
@@ -1302,7 +1303,7 @@ IF(XNNPACK_BUILD_TESTS)
   ADD_LIBRARY(unary-ops STATIC test/unary-ops.cc)
   TARGET_LINK_LIBRARIES(unary-ops PRIVATE xnnpack-test )
 
-  ADD_LIBRARY(convolution-test-helpers OBJECT test/operators/convolution-test-helpers.cc)
+  ADD_LIBRARY(convolution-test-helpers STATIC test/operators/convolution-test-helpers.cc)
   TARGET_LINK_LIBRARIES(convolution-test-helpers PRIVATE xnnpack-test xnnpack-base)
 
   ADD_LIBRARY(packq-microkernel-tester STATIC test/packq-microkernel-tester.cc)
@@ -1310,6 +1311,9 @@ IF(XNNPACK_BUILD_TESTS)
   IF(XNNPACK_ENABLE_KLEIDIAI)
     TARGET_LINK_LIBRARIES(packq-microkernel-tester PRIVATE kleidiai)
   ENDIF()
+
+  ADD_LIBRARY(subgraph-tester STATIC test/subgraph/subgraph-tester.cc)
+  TARGET_LINK_LIBRARIES(subgraph-tester PRIVATE xnnpack-test pthreadpool runtime-flags)
 
   IF(XNNPACK_BUILD_LIBRARY)
     # ---[ Build size tests
@@ -1352,7 +1356,6 @@ IF(XNNPACK_BUILD_TESTS)
     FOREACH(TEST ${LIBRARY_OPERATOR_TESTS})
       ADD_EXECUTABLE(${TEST}-test test/operators/${TEST}.cc)
       TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        xnnpack-test
         convolution-test-helpers
         hardware-config
         logging
@@ -1361,7 +1364,7 @@ IF(XNNPACK_BUILD_TESTS)
         next-prime
         pthreadpool
         unary-ops
-        XNNPACK)
+        xnnpack-test)
       ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
       SET_PROPERTY(TEST ${TEST}-test PROPERTY LABELS "operator")
     ENDFOREACH()
@@ -1391,8 +1394,9 @@ IF(XNNPACK_BUILD_TESTS)
     FOREACH(TEST ${LIBRARY_SUBGRAPH_OPTIMIZATION_TESTS})
       ADD_EXECUTABLE(${TEST}-test test/subgraph/${TEST}.cc)
       TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        xnnpack-test
-        runtime-flags)
+        runtime-flags
+        subgraph-tester
+        xnnpack-test)
       ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     ENDFOREACH()
 
@@ -1411,6 +1415,7 @@ IF(XNNPACK_BUILD_TESTS)
         scaled-dot-product-attention
         softmax
         space-to-depth-2d
+        split-fuse
         static-constant-pad
         static-reduce
         static-reshape
@@ -1422,12 +1427,12 @@ IF(XNNPACK_BUILD_TESTS)
     FOREACH(TEST ${LIBRARY_SUBGRAPH_UNIT_TESTS})
       ADD_EXECUTABLE(${TEST}-test test/subgraph/${TEST}.cc)
       TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        xnnpack-test
         datatype
-        subgraph
         logging
         runtime-flags
-        unary-ops)
+        subgraph-tester
+        unary-ops
+        xnnpack-test)
       ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
       SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
     ENDFOREACH()
@@ -1445,7 +1450,8 @@ IF(XNNPACK_BUILD_TESTS)
         convolution-test-helpers
         xnnpack-test
         runtime-flags
-        subgraph)
+        subgraph-tester
+        xnnpack-test)
       ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
       SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
     ENDFOREACH()
@@ -1459,7 +1465,7 @@ IF(XNNPACK_BUILD_TESTS)
       transpose-normalization)
   FOREACH(TEST ${NORMALIZATION_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/operators/${TEST}.cc)
-    TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE GTest::gtest GTest::gtest_main pthreadpool normalization)
+    TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE xnnpack-test pthreadpool normalization)
     ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
   ENDFOREACH()
 
@@ -1523,7 +1529,6 @@ IF(XNNPACK_BUILD_TESTS)
   FOREACH(TEST ${MICROKERNEL_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        xnnpack-test
         hardware-config
         indirection
         logging
@@ -1533,7 +1538,7 @@ IF(XNNPACK_BUILD_TESTS)
         next-prime
         packing
         pthreadpool
-    )
+        xnnpack-test)
     ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
   ENDFOREACH()
@@ -1559,13 +1564,12 @@ IF(XNNPACK_BUILD_TESTS)
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         dwconv-microkernel-tester
-        xnnpack-test
         hardware-config
         logging
         microkernels-all
         microparams-init
         pthreadpool
-    )
+        xnnpack-test)
     ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
   ENDFOREACH()
@@ -1616,13 +1620,12 @@ IF(XNNPACK_BUILD_TESTS)
         ADD_EXECUTABLE(${TEST}-test ${TEST_SOURCES})
         TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
             gemm-microkernel-tester
-            xnnpack-test
             hardware-config
             logging
             microkernels-all
             microparams-init
             pthreadpool
-        )
+            xnnpack-test)
         ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
         SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
     ENDIF()
@@ -1640,13 +1643,12 @@ IF(XNNPACK_BUILD_TESTS)
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         packq-microkernel-tester
-        xnnpack-test
         hardware-config
         logging
         microkernels-all
         microparams-init
         pthreadpool
-    )
+        xnnpack-test)
     ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
   ENDFOREACH()
@@ -1707,13 +1709,12 @@ IF(XNNPACK_BUILD_TESTS)
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         vbinary-microkernel-tester
-        xnnpack-test
         hardware-config
         logging
         microkernels-all
         microparams-init
         pthreadpool
-    )
+        xnnpack-test)
     ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
   ENDFOREACH()
@@ -1734,14 +1735,13 @@ IF(XNNPACK_BUILD_TESTS)
   FOREACH(TEST ${MICROKERNEL_VCVT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        xnnpack-test
         datatype
         hardware-config
         logging
         microkernels-all
         microparams-init
         pthreadpool
-    )
+        xnnpack-test)
     ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
   ENDFOREACH()
@@ -1802,14 +1802,13 @@ IF(XNNPACK_BUILD_TESTS)
   FOREACH(TEST ${MICROKERNEL_VUNARY_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        xnnpack-test
         hardware-config
         logging
         microkernels-all
         microparams-init
         pthreadpool
         next-prime
-    )
+        xnnpack-test)
     ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
   ENDFOREACH()

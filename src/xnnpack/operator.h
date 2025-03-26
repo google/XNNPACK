@@ -19,6 +19,7 @@
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microkernel-type.h"
 #include "src/xnnpack/microparams.h"
+#include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator-type.h"
 #include <pthreadpool.h>
 
@@ -220,6 +221,9 @@ struct xnn_operator {
       uint32_t log2_accumulator_element_size;
       uint32_t identity_value;
     } reduce;
+    struct {
+      enum xnn_node_type subtype;
+    } copy;
   };
 
   union {

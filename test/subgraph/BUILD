@@ -60,16 +60,31 @@ xnnpack_binary(
 xnnpack_cxx_library(
     name = "subgraph_tester",
     testonly = True,
-    hdrs = [
-        "subgraph-tester.h",
-    ],
+    srcs = ["subgraph-tester.cc"],
+    hdrs = ["subgraph-tester.h"],
     deps = xnnpack_test_deps_for_library() + [
         ":runtime_flags",
+        "//:XNNPACK",
         "//:buffer",
         "//:datatype",
         "//:subgraph_h",
         "//:xnnpack_h",
         "//test:replicable_random_device",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cxx_library(
+    name = "runtime_tester",
+    testonly = True,
+    hdrs = [
+        "runtime-tester.h",
+    ],
+    deps = xnnpack_test_deps_for_library() + [
+        ":runtime_flags",
+        ":subgraph_tester",
+        "//:subgraph_h",
+        "//:xnnpack_h",
     ],
 )
 
@@ -210,6 +225,12 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "split_fuse_test",
+    srcs = ["split-fuse.cc"],
+    deps = SUBGRAPH_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "static_resize_bilinear_2d_test",
     srcs = ["static-resize-bilinear-2d.cc"],
     deps = SUBGRAPH_TEST_DEPS,
@@ -225,17 +246,14 @@ xnnpack_unit_test(
     name = "fusion_test",
     srcs = [
         "fusion.cc",
-        "runtime-tester.h",
-        "subgraph-tester.h",
     ],
     deps = [
-        ":runtime_flags",
-        "//:XNNPACK",
+        ":runtime_tester",
+        ":subgraph_tester",
         "//:buffer",
-        "//:datatype",
         "//:node_type",
-        "//:subgraph",
-        "//test:replicable_random_device",
+        "//:subgraph_h",
+        "//:xnnpack_h",
     ],
 )
 
@@ -245,33 +263,21 @@ xnnpack_unit_test(
     name = "runtime_test",
     srcs = [
         "runtime.cc",
-        "runtime-tester.h",
-        "subgraph-tester.h",
     ],
     deps = [
-        ":runtime_flags",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:datatype",
-        "//:subgraph",
-        "//test:replicable_random_device",
+        ":runtime_tester",
     ],
 )
 
 xnnpack_unit_test(
     name = "subgraph_test",
     srcs = [
-        "runtime-tester.h",
         "subgraph.cc",
-        "subgraph-tester.h",
     ],
     deps = [
-        ":runtime_flags",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:datatype",
-        "//:subgraph",
-        "//test:replicable_random_device",
+        ":runtime_tester",
+        ":subgraph_tester",
+        "//:subgraph_h",
     ],
 )
 
@@ -279,17 +285,15 @@ xnnpack_unit_test(
     name = "memory_planner_test",
     srcs = [
         "memory-planner.cc",
-        "runtime-tester.h",
-        "subgraph-tester.h",
     ],
     deps = [
         ":runtime_flags",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:datatype",
+        ":runtime_tester",
+        ":subgraph_tester",
         "//:node_type",
         "//:subgraph",
-        "//test:replicable_random_device",
+        "//:subgraph_h",
+        "//:xnnpack_h",
     ],
 )
 
@@ -298,10 +302,8 @@ xnnpack_unit_test(
     srcs = ["subgraph-nchw.cc"],
     deps = [
         ":subgraph_tester",
-        "//:XNNPACK",
         "//:node_type",
-        "//:subgraph",
-        "//test:replicable_random_device",
+        "//:subgraph_h",
     ],
 )
 
@@ -309,14 +311,21 @@ xnnpack_unit_test(
     name = "subgraph_fp16_test",
     srcs = [
         "mock-allocator.h",
-        "runtime-tester.h",
         "subgraph-fp16.cc",
-        "subgraph-tester.h",
     ],
-    deps = SUBGRAPH_TEST_DEPS + [
+    deps = [
+        ":runtime_flags",
+        ":runtime_tester",
+        ":subgraph_tester",
         "//:allocation_type",
         "//:allocator",
+        "//:buffer",
+        "//:math",
+        "//:node_type",
         "//:params",
+        "//:subgraph_h",
+        "//:xnnpack_h",
+        "//test:replicable_random_device",
     ],
 )
 
