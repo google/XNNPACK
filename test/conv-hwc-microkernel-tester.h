@@ -43,6 +43,19 @@ class ConvHWCMicrokernelTester {
     return *this;
   }
 
+  ConvHWCMicrokernelTester& padding(uint32_t padding_left, uint32_t padding_right) {
+  this->padding_left_ = padding_left;
+  this->padding_right_ = padding_right;
+
+  if (padding_left_ == 1 && padding_right_ == 1) {
+    this->padding_width(padding_right_);
+  } else if (padding_left_ == 0 && padding_right_ == 1) {
+    this->padding_right(padding_right_);
+  }
+  return *this;
+ }
+
+
   ConvHWCMicrokernelTester& padding_height(uint32_t padding_height) {
     this->padding_top_ = padding_height;
     this->padding_bottom_ = padding_height;
@@ -381,6 +394,19 @@ class ConvHWCMicrokernelTester {
         }
       }
     }
+  }
+
+  struct Kernel {
+    explicit Kernel(xnn_f32_conv_hwc_ukernel_fn conv, xnn_init_f32_minmax_params_fn init_params) {
+      dispatch = [conv, init_params](ConvHWCMicrokernelTester& tester) {
+        tester.Test(conv, init_params);
+      };
+    }
+    std::function<void(ConvHWCMicrokernelTester&)> dispatch;
+  };
+
+  void Test(const Kernel& kernel) {
+    kernel.dispatch(*this);
   }
 
  private:
