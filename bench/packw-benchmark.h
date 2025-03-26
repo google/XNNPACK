@@ -824,12 +824,24 @@ static void x32_packw_x16s4__reference(benchmark::State& state, const char* net)
     x32_packw__reference,
      /*nr=*/16, /*kr=*/1, /*sr=*/4);
 }
+static void x32_packw_x32__reference(benchmark::State& state, const char* net) {
+  x32_packw(state,
+    x32_packw__reference,
+    /*nr=*/32, /*kr=*/1, /*sr=*/1);
+}
+static void x32_packw_x64__reference(benchmark::State& state, const char* net) {
+  x32_packw(state,
+    x32_packw__reference,
+    /*nr=*/64, /*kr=*/1, /*sr=*/1);
+}
 
 BENCHMARK_BGEMM(x32_packw_x2c4__reference)
 BENCHMARK_BGEMM(x32_packw_x8__reference)
 BENCHMARK_BGEMM(x32_packw_x8s4__reference)
 BENCHMARK_BGEMM(x32_packw_x16__reference)
 BENCHMARK_BGEMM(x32_packw_x16s4__reference)
+BENCHMARK_BGEMM(x32_packw_x32__reference)
+BENCHMARK_BGEMM(x32_packw_x64__reference)
 
 static void x32_packw_gio__reference(
   size_t batch,
@@ -868,7 +880,13 @@ static void x32_packw_x32_gio__reference(benchmark::State& state, const char* ne
     x32_packw_gio__reference,
     /*nr=*/32, /*kr=*/1, /*sr=*/1);
 }
+static void x32_packw_x64_gio__reference(benchmark::State& state, const char* net) {
+  x32_packw(state,
+    x32_packw_gio__reference,
+    /*nr=*/64, /*kr=*/1, /*sr=*/1);
+}
 
 BENCHMARK_BGEMM(x32_packw_x8_gio__reference)
 BENCHMARK_BGEMM(x32_packw_x16_gio__reference)
 BENCHMARK_BGEMM(x32_packw_x32_gio__reference)
+BENCHMARK_BGEMM(x32_packw_x64_gio__reference)

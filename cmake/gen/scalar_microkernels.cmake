@@ -817,6 +817,11 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/x32-packw/gen/x32-packw-x16-gemm-goi-scalar-float-u4.c
   src/x32-packw/gen/x32-packw-x16-gemm-goi-scalar-int-u4.c
   src/x32-packw/gen/x32-packw-x32-gemm-gio-scalar.c
+  src/x32-packw/gen/x32-packw-x32-gemm-goi-scalar-float-u2.c
+  src/x32-packw/gen/x32-packw-x32-gemm-goi-scalar-int-u2.c
+  src/x32-packw/gen/x32-packw-x64-gemm-gio-scalar.c
+  src/x32-packw/gen/x32-packw-x64-gemm-goi-scalar-float-u2.c
+  src/x32-packw/gen/x32-packw-x64-gemm-goi-scalar-int-u2.c
   src/x32-packx/x32-packx-2x-scalar.c
   src/x32-packx/x32-packx-3x-scalar.c
   src/x32-packx/x32-packx-4x-scalar.c
