@@ -19,7 +19,8 @@
 #include "test/subgraph/stencil.h"
 #include "test/subgraph/subgraph-tester.h"
 
-using testing::ElementsAreArray;
+using testing::FloatNear;
+using testing::Pointwise;
 
 namespace xnnpack {
 
@@ -60,7 +61,7 @@ Tensor<T> ReferenceImpl(Tensor<T> input, const StencilParams& kh,
 }
 
 template <typename T>
-void FuseSplit() {
+void TestImpl() {
   ReplicableRandomDevice rng;
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -119,7 +120,11 @@ void FuseSplit() {
 
       // Verify results.
       Tensor<T> expected = ReferenceImpl(input, kh, kw);
-      ASSERT_THAT(output, ElementsAreArray(expected))
+      // This test should be exact, but it needs a tolerance because kernels
+      // that use fp16 arithmetic might flush denormals to 0, but our reference
+      // code might not.
+      ASSERT_THAT(output,
+                  Pointwise(FloatNear(epsilon(xnn_datatype_of<T>())), expected))
           << "output_shape=" << index_to_string(output_shape)
           << ", input_shape=" << index_to_string(input_shape) << ", kh=" << kh
           << ", kw=" << kw;
@@ -127,9 +132,9 @@ void FuseSplit() {
   }
 }
 
-TEST(MaxPooling2DQS8, test) { FuseSplit<quantized<int8_t>>(); }
-TEST(MaxPooling2DQU8, test) { FuseSplit<quantized<uint8_t>>(); }
-TEST(MaxPooling2DF16, test) { FuseSplit<xnn_float16>(); }
-TEST(MaxPooling2DF32, test) { FuseSplit<float>(); }
+TEST(MaxPooling2DQS8, test) { TestImpl<quantized<int8_t>>(); }
+TEST(MaxPooling2DQU8, test) { TestImpl<quantized<uint8_t>>(); }
+TEST(MaxPooling2DF16, test) { TestImpl<xnn_float16>(); }
+TEST(MaxPooling2DF32, test) { TestImpl<float>(); }
 
 }  // namespace xnnpack

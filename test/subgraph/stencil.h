@@ -67,8 +67,9 @@ inline std::ostream& operator<<(std::ostream& os, const StencilParams& params) {
 }
 
 template <typename Rng>
-StencilParams random_stencil_params(Rng& rng, int max_dilation = 2) {
-  std::uniform_int_distribution<> size_dist{1, 2};
+StencilParams random_stencil_params(Rng& rng, int max_dilation = 2,
+                                    int max_kernel_size = 7) {
+  std::uniform_int_distribution<> size_dist{1, max_kernel_size};
   std::uniform_int_distribution<> dilation_dist{1, max_dilation};
   std::uniform_int_distribution<> stride_dist{1, 2};
 
@@ -102,7 +103,7 @@ Tensor<T> make_stencil_dim(Tensor<T> x, size_t dim,
 
   std::vector<size_t> extents = x.extents();
   std::vector<size_t> strides = x.strides();
-  extents[dim] -= kernel.dilated_kernel_extent() - 1;
+  extents[dim] = doz(extents[dim], kernel.dilated_kernel_extent() - 1);
   extents[dim + 1] = kernel.size;
   strides[dim + 1] = strides[dim] * kernel.dilation;
   strides[dim] *= kernel.stride;

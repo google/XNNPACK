@@ -68,14 +68,17 @@ Tensor<float> ReferenceImpl(Tensor<T> input, const StencilParams& kh,
 }
 
 template <typename T>
-void FuseAndSplit() {
+void TestImpl() {
   ReplicableRandomDevice rng;
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
   for (int rep = 0; rep < 100; ++rep) {
-    StencilParams kw = random_stencil_params(rng, /*max_dilation=*/1);
-    StencilParams kh = random_stencil_params(rng, /*max_dilation=*/1);
+    // TODO(b/406664150): Test kernels bigger than 5.
+    StencilParams kw =
+        random_stencil_params(rng, /*max_dilation=*/1, /*max_kernel_size=*/5);
+    StencilParams kh =
+        random_stencil_params(rng, /*max_dilation=*/1, /*max_kernel_size=*/5);
 
     // Define subgraph
     SubgraphTester subgraph(2);
@@ -99,6 +102,15 @@ void FuseAndSplit() {
           kw.input_extent(output_shape[2]),
           output_shape[3],
       };
+
+      if (input_shape[1] <= kh.padding() || input_shape[2] <= kw.padding()) {
+        // TODO(b/406664150): This is a hack around a horrible long-standing bug
+        // where xnn_indirection_init_dwconv2d_compressed produces incorrect
+        // results if the input is smaller than the padded area. If we hit this
+        // case, just try again.
+        --rep;
+        break;
+      }
 
       // TODO(b/404587443): Fix XNNPACK's pooling implementation so this hack is
       // not necessary.
@@ -137,7 +149,7 @@ void FuseAndSplit() {
   }
 }
 
-TEST(AveragePooling2DF16, test) { FuseAndSplit<xnn_float16>(); }
-TEST(AveragePooling2DF32, test) { FuseAndSplit<float>(); }
+TEST(AveragePooling2DF16, test) { TestImpl<xnn_float16>(); }
+TEST(AveragePooling2DF32, test) { TestImpl<float>(); }
 
 }  // namespace xnnpack
