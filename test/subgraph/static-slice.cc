@@ -3,6 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <random>
@@ -25,7 +26,7 @@ void TestImpl(size_t rank) {
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
-  for (int iters = 0; iters < 100; ++iters) {
+  for (auto _ : FuzzTest(std::chrono::milliseconds(500))) {
     std::vector<size_t> dims = random_shape(rng, rank);
 
     std::vector<int64_t> begins(dims.size());

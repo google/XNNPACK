@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <cassert>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <vector>
@@ -19,19 +20,13 @@
 
 namespace xnnpack {
 
-namespace {
-
-static const size_t kNumIterations = 10;
-
-};
-
 template <typename T>
 void FuseAndSplit() {
   ReplicableRandomDevice rng;
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
-  for (int iter = 0; iter < kNumIterations; ++iter) {
+  for (auto _ : FuzzTest(std::chrono::milliseconds(1000))) {
     xnn_quantization_params quantization =
         random_quantization(xnn_datatype_of<T>(), rng);
 

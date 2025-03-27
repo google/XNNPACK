@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <vector>
@@ -68,7 +69,7 @@ void TestImpl() {
 
   xnn_quantization_params quantization = {0, 1.0f};
 
-  for (int rep = 0; rep < 100; ++rep) {
+  for (auto _ : FuzzTest(std::chrono::milliseconds(1000))) {
     StencilParams kw = random_stencil_params(rng);
     StencilParams kh = random_stencil_params(rng);
 

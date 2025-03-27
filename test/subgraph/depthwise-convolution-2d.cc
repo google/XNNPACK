@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -161,7 +162,7 @@ void TestImpl(bool channelwise_quantization = false) {
 
   auto data_gen = MakeDatatypeGenerator(Data());
 
-  for (int rep = 0; rep < 100; ++rep) {
+  for (auto _ : FuzzTest(std::chrono::milliseconds(1000))) {
     // Generate some random kernel and shape parameters.
     StencilParams kw = random_stencil_params(rng);
     StencilParams kh = random_stencil_params(rng);
