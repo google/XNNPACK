@@ -630,7 +630,11 @@ class Tensor {
     return result;
   }
 
-  size_t flat_offset_variadic(size_t dim0, size_t idx0) {
+  size_t flat_offset_variadic(size_t /*dim0*/) const {
+    return 0;
+  }
+
+  size_t flat_offset_variadic(size_t dim0, size_t idx0) const {
     if (dim0 > 0) {
       // We need to skip the leading dimensions that are broadcasts.
       return 0;
@@ -641,7 +645,7 @@ class Tensor {
   }
 
   template <typename... Args>
-  size_t flat_offset_variadic(size_t dim0, size_t idx0, Args... idxs) {
+  size_t flat_offset_variadic(size_t dim0, size_t idx0, Args... idxs) const {
     if (dim0 > 0) {
       // We need to skip the leading dimensions that are broadcasts.
       return flat_offset_variadic(dim0 - 1, idxs...);
@@ -655,12 +659,12 @@ class Tensor {
     return 0;
   }
   XNN_INLINE size_t flat_offset_no_broadcast(const size_t* strides,
-                                             size_t idx0) {
+                                             size_t idx0) const {
     return *strides * idx0;
   }
   template <typename... Args>
   XNN_INLINE size_t flat_offset_no_broadcast(const size_t* strides, size_t idx0,
-                                             Args... idxs) {
+                                             Args... idxs) const{
     return *strides * idx0 + flat_offset_no_broadcast(strides + 1, idxs...);
   }
 
