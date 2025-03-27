@@ -636,7 +636,7 @@ class Tensor {
       return 0;
     } else {
       // We now have as many indices as there are dimensions.
-      return flat_offset_no_broadcast(0, idx0);
+      return flat_offset_no_broadcast(strides_.data(), idx0);
     }
   }
 
@@ -647,18 +647,21 @@ class Tensor {
       return flat_offset_variadic(dim0 - 1, idxs...);
     } else {
       // We now have as many indices as there are dimensions.
-      return flat_offset_no_broadcast(0, idx0, idxs...);
+      return flat_offset_no_broadcast(strides_.data(), idx0, idxs...);
     }
   }
 
-  XNN_INLINE size_t flat_offset_no_broadcast(size_t dim0) const { return 0; }
-  XNN_INLINE size_t flat_offset_no_broadcast(size_t dim0, size_t idx0) {
-    return strides_[dim0] * idx0;
+  XNN_INLINE size_t flat_offset_no_broadcast(const size_t* strides) const {
+    return 0;
+  }
+  XNN_INLINE size_t flat_offset_no_broadcast(const size_t* strides,
+                                             size_t idx0) {
+    return *strides * idx0;
   }
   template <typename... Args>
-  XNN_INLINE size_t flat_offset_no_broadcast(size_t dim0, size_t idx0,
+  XNN_INLINE size_t flat_offset_no_broadcast(const size_t* strides, size_t idx0,
                                              Args... idxs) {
-    return strides_[dim0] * idx0 + flat_offset_no_broadcast(dim0 + 1, idxs...);
+    return *strides * idx0 + flat_offset_no_broadcast(strides + 1, idxs...);
   }
 
   index_type extents_;
