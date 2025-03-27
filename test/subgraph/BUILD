@@ -67,6 +67,7 @@ xnnpack_cxx_library(
         "//:XNNPACK",
         "//:buffer",
         "//:datatype",
+        "//:math",
         "//:subgraph_h",
         "//:xnnpack_h",
         "//test:replicable_random_device",
@@ -178,9 +179,7 @@ xnnpack_unit_test(
     srcs = [
         "depthwise-convolution-2d.cc",
     ],
-    deps = SUBGRAPH_TEST_DEPS + [
-        "//test/operators:convolution_test_helpers",
-    ],
+    deps = SUBGRAPH_TEST_DEPS + [":stencil"],
 )
 
 xnnpack_unit_test(

@@ -723,15 +723,16 @@ void broadcast_extent_1(Tensor<T>& tensor) {
 
 // Generate random quantization parameters for a given datatype.
 template <typename Rng>
-xnn_quantization_params random_quantization(xnn_datatype datatype, Rng& rng) {
-  std::uniform_int_distribution<> i8_dist{std::numeric_limits<int8_t>::min(),
-                                          std::numeric_limits<int8_t>::max()};
+xnn_quantization_params random_quantization(xnn_datatype datatype, Rng& rng,
+                                            float min_scale = 0.25f,
+                                            float max_scale = 8.0f) {
   std::uniform_int_distribution<> u8_dist{std::numeric_limits<uint8_t>::min(),
                                           std::numeric_limits<uint8_t>::max()};
-  std::uniform_real_distribution<float> scale_dist{0.25f, 8.0f};
+  std::uniform_real_distribution<float> scale_dist{min_scale, max_scale};
   switch (datatype) {
     case xnn_datatype_qint8:
-      return {i8_dist(rng), scale_dist(rng)};
+      // int8 quantization assumes zero point is 0.
+      return {0, scale_dist(rng)};
     case xnn_datatype_quint8:
       return {u8_dist(rng), scale_dist(rng)};
     default:

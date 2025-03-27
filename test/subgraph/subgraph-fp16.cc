@@ -596,7 +596,7 @@ TEST(SUBGRAPH_FP16, fully_connected_qd8_f16_qc8w) {
   const uint32_t fully_connected_out_id = 4;
   tester.AddInputTensorF32({5, 3}, input_id)
       .AddDynamicallyQuantizedTensor({5, 3}, converted_input_id, /*flags=*/0)
-      .AddStaticTensorQS8({2, 3}, TensorType::kDense, &kernel_scale[0],
+      .AddStaticTensorQS8({2, 3}, /*channel_dim=*/0, TensorType::kDense, &kernel_scale[0],
                           filter_id, /*flags=*/0, static_filter_data)
       .AddStaticTensorF32({2}, TensorType::kDense, bias_id, /*flags=*/0,
                           &bias[0])
@@ -625,7 +625,7 @@ TEST(SUBGRAPH_FP16, fully_connected_qd8_f16_qc8w) {
 
   reference_tester.AddInputTensorF32({5, 3}, input_id)
       .AddDynamicallyQuantizedTensor({5, 3}, converted_input_id, /*flags=*/0)
-      .AddStaticTensorQS8({2, 3}, TensorType::kDense, &kernel_scale[0],
+      .AddStaticTensorQS8({2, 3}, /*channel_dim=*/0, TensorType::kDense, &kernel_scale[0],
                           filter_id, /*flags=*/0, static_filter_data)
       .AddStaticTensorF32({2}, TensorType::kDense, bias_id, /*flags=*/0,
                           &bias[0])
