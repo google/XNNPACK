@@ -72,7 +72,7 @@ static XNN_INLINE xnn_simd_s32_t xnn_set1_s32(int32_t v) {
 // Tail load/store operations.
 
 static XNN_INLINE xnn_simd_s32_t
-xnn_load_tail_s32(const int32_t* input, size_t num_elements) XNN_OOB_READS {
+xnn_load_tail_s32(const int32_t* input, size_t num_elements) {
   assert(num_elements > 0);
   assert(num_elements < xnn_simd_size_s32);
   const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << num_elements) - UINT32_C(1)));

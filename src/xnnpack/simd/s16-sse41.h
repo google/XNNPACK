@@ -88,7 +88,7 @@ xnn_load_tail_safe_s16(const int16_t* input, size_t num_elements) {
   case 2: *d++ = *input++;
   case 1: *d++ = *input++;
   }
-  return _mm_loadu_si128((const __m128i*)&padded[0]);
+  return _mm_load_si128((const __m128i*)&padded[0]);
 }
 
 static XNN_INLINE void xnn_store_tail_s16(int16_t* output, xnn_simd_s16_t v,
