@@ -8,8 +8,11 @@ Auto-generated file. Do not edit!
 PROD_HVX_MICROKERNEL_SRCS = [
     "src/f32-gemm/gen/f32-gemm-1x64-minmax-hvx-broadcast.c",
     "src/f32-gemm/gen/f32-gemm-7x64-minmax-hvx-broadcast.c",
+    "src/f32-igemm/gen/f32-igemm-1x64-minmax-hvx-broadcast.c",
+    "src/f32-igemm/gen/f32-igemm-7x64-minmax-hvx-broadcast.c",
     "src/f32-rdminmax/gen/f32-rdmax-2p2x-hvx-c32.c",
     "src/f32-rdminmax/gen/f32-rdmin-2p2x-hvx-c32.c",
+    "src/x32-packw/gen/x32-packw-gio-hvx-u2.c",
 ]
 
 NON_PROD_HVX_MICROKERNEL_SRCS = [
@@ -21,11 +24,9 @@ NON_PROD_HVX_MICROKERNEL_SRCS = [
     "src/f32-gemm/gen/f32-gemm-8x32-minmax-hvx-broadcast.c",
     "src/f32-gemm/gen/f32-gemm-16x32-minmax-hvx-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-1x32-minmax-hvx-broadcast.c",
-    "src/f32-igemm/gen/f32-igemm-1x64-minmax-hvx-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-1x128-minmax-hvx-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-2x128-minmax-hvx-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-4x64-minmax-hvx-broadcast.c",
-    "src/f32-igemm/gen/f32-igemm-7x64-minmax-hvx-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-8x32-minmax-hvx-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-16x32-minmax-hvx-broadcast.c",
     "src/f32-qs8-vcvt/gen/f32-qs8-vcvt-hvx-u32.c",
@@ -108,7 +109,6 @@ NON_PROD_HVX_MICROKERNEL_SRCS = [
     "src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u64.c",
     "src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u96.c",
     "src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u128.c",
-    "src/x32-packw/gen/x32-packw-gio-hvx-u2.c",
 ]
 
 ALL_HVX_MICROKERNEL_SRCS = PROD_HVX_MICROKERNEL_SRCS + NON_PROD_HVX_MICROKERNEL_SRCS
