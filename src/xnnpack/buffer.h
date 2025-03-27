@@ -321,12 +321,12 @@ class Tensor {
     strides_ = std::move(strides);
   }
 
-  size_t rank() const { return extents_.size(); }
-  bool empty() const { return begin_ >= end_; }
+  XNN_INLINE size_t rank() const { return extents_.size(); }
+  XNN_INLINE bool empty() const { return begin_ >= end_; }
 
   // Returns a pointer to the element {0,...}
-  T* base() { return begin_; }
-  const T* base() const { return begin_; }
+  XNN_INLINE T* base() { return begin_; }
+  XNN_INLINE const T* base() const { return begin_; }
 
   // Form a reference to an element at a particular index.
   T& operator()(const index_type& indices) {
@@ -338,11 +338,13 @@ class Tensor {
 
   template <typename... Args>
   T& operator()(Args... args) {
-    return operator()(index_type{static_cast<size_t>(args)...});
+    assert(sizeof...(args) >= rank());
+    return *(begin_ + flat_offset_variadic(sizeof...(args) - rank(), args...));
   }
   template <typename... Args>
   const T& operator()(Args... args) const {
-    return operator()(index_type{static_cast<size_t>(args)...});
+    assert(sizeof...(args) >= rank());
+    return *(begin_ + flat_offset_variadic(sizeof...(args) - rank(), args...));
   }
 
   // The following functions produce iterators or accessors to the "flat" array
@@ -626,6 +628,37 @@ class Tensor {
       result += strides_[i] * indices[i + indices.size() - rank()];
     }
     return result;
+  }
+
+  size_t flat_offset_variadic(size_t dim0, size_t idx0) {
+    if (dim0 > 0) {
+      // We need to skip the leading dimensions that are broadcasts.
+      return 0;
+    } else {
+      // We now have as many indices as there are dimensions.
+      return flat_offset_no_broadcast(0, idx0);
+    }
+  }
+
+  template <typename... Args>
+  size_t flat_offset_variadic(size_t dim0, size_t idx0, Args... idxs) {
+    if (dim0 > 0) {
+      // We need to skip the leading dimensions that are broadcasts.
+      return flat_offset_variadic(dim0 - 1, idxs...);
+    } else {
+      // We now have as many indices as there are dimensions.
+      return flat_offset_no_broadcast(0, idx0, idxs...);
+    }
+  }
+
+  XNN_INLINE size_t flat_offset_no_broadcast(size_t dim0) const { return 0; }
+  XNN_INLINE size_t flat_offset_no_broadcast(size_t dim0, size_t idx0) {
+    return strides_[dim0] * idx0;
+  }
+  template <typename... Args>
+  XNN_INLINE size_t flat_offset_no_broadcast(size_t dim0, size_t idx0,
+                                             Args... idxs) {
+    return strides_[dim0] * idx0 + flat_offset_no_broadcast(dim0 + 1, idxs...);
   }
 
   index_type extents_;
