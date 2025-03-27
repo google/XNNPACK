@@ -81,7 +81,7 @@ static XNN_INLINE void xnn_storeu_s8(int8_t* ptr, xnn_simd_s8_t v) {
   wasm_v128_store(ptr, v);
 }
 
-static XNN_INLINE void xnn_store_s8(float* ptr, xnn_simd_s8_t v) {
+static XNN_INLINE void xnn_store_s8(int8_t* ptr, xnn_simd_s8_t v) {
   wasm_v128_store(ptr, v);
 }
 

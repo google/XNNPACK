@@ -54,7 +54,7 @@ static XNN_INLINE void xnn_storeu_s16(int16_t* ptr, xnn_simd_s16_t v) {
   wasm_v128_store(ptr, v);
 }
 
-static XNN_INLINE void xnn_store_s16(float* ptr, xnn_simd_s16_t v) {
+static XNN_INLINE void xnn_store_s16(int16_t* ptr, xnn_simd_s16_t v) {
   wasm_v128_store(ptr, v);
 }
 

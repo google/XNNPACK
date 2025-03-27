@@ -60,7 +60,7 @@ static XNN_INLINE void xnn_storeu_s32(int32_t* ptr, xnn_simd_s32_t v) {
   _mm_storeu_si128((__m128i*)ptr, v);
 }
 
-static XNN_INLINE void xnn_store_s32(float* ptr, xnn_simd_s32_t v) {
+static XNN_INLINE void xnn_store_s32(int32_t* ptr, xnn_simd_s32_t v) {
   _mm_store_si128((__m128i*)ptr, v);
 }
 
