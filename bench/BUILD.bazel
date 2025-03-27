@@ -552,6 +552,19 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "x16_x32_packw_bench",
+    srcs = [
+        "x16-x32-packw.cc",
+    ],
+    tags = xnnpack_slow_benchmark_tags(),
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":bgemm",
+        ":packw_benchmark",
+        "//:allocator",
+    ],
+)
+
+xnnpack_benchmark(
     name = "x32_packw_bench",
     srcs = [
         "x32-packw.cc",
