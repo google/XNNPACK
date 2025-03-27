@@ -37,6 +37,10 @@ static inline size_t compute_output_dimension_with_tf_same_padding(
   return divide_round_up(input_dimension, stride_dimension);
 }
 
+// We need a dummy base pointer for the indirection buffer. The actual pointers
+// are provided via an offset from this dummy pointer.
+static const void* indirection_buffer_base = (void *) 1;
+
 enum xnn_status create_average_pooling2d_nhwc(
     uint32_t input_padding_top,
     uint32_t input_padding_right,
@@ -422,13 +426,11 @@ static enum xnn_status reshape_average_pooling2d(
                   xnn_operator_type_to_string_v2(average_pooling_op));
 
     // Set a dummy input first, the actual input offset is calculated in setup when we have the input pointer.
-    // This offset must be aligned properly because inputs and input offsets need to be aligned.
-    average_pooling_op->input = (void*) ((uintptr_t) average_pooling_op->zero_buffer + XNN_ALLOCATION_ALIGNMENT);
-    average_pooling_op->last_input = average_pooling_op->input;
+    // We can't use NULL (because the kernels will assert), so use indirection_buffer_base instead.
     xnn_indirection_init_dwconv2d_compressed(
       /*output_y_start=*/0, /*output_y_end=*/average_pooling_op->output_height,
       average_pooling_op->indirection_buffer,
-      average_pooling_op->input,
+      indirection_buffer_base,
       average_pooling_op->input_pixel_stride << log2_data_element_size,
       average_pooling_op->zero_buffer,
       average_pooling_op->input_height, average_pooling_op->input_width,
@@ -622,7 +624,7 @@ static enum xnn_status setup_average_pooling2d(
   average_pooling_op->output = output;
 
   average_pooling_op->context.average_pooling.input_offset =
-    (size_t) ((uintptr_t) input - (uintptr_t) average_pooling_op->last_input);
+      (size_t) input - (size_t) indirection_buffer_base;
   average_pooling_op->context.average_pooling.output = output;
   average_pooling_op->state = xnn_run_state_ready;
 
