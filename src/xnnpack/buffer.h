@@ -80,12 +80,8 @@ class NumericLimits<xnn_bfloat16> {
 template <typename T>
 class NumericLimits<quantized<T>> {
  public:
-  static quantized<T> min() {
-    return {std::numeric_limits<T>::lowest()};
-  }
-  static quantized<T> max() {
-    return {std::numeric_limits<T>::max()};
-  }
+  static quantized<T> min() { return {std::numeric_limits<T>::lowest()}; }
+  static quantized<T> max() { return {std::numeric_limits<T>::max()}; }
   static quantized<T> smallest_normal() { return {0}; }
   static quantized<T> min_identity() { return max(); }
   static quantized<T> max_identity() { return min(); }
@@ -93,10 +89,14 @@ class NumericLimits<quantized<T>> {
 
 inline float epsilon(xnn_datatype datatype) {
   switch (datatype) {
-    case xnn_datatype_fp32: return NumericLimits<float>::epsilon();
-    case xnn_datatype_fp16: return NumericLimits<xnn_float16>::epsilon();
-    case xnn_datatype_bf16: return NumericLimits<xnn_bfloat16>::epsilon();
-    default: return 1.0f;
+    case xnn_datatype_fp32:
+      return NumericLimits<float>::epsilon();
+    case xnn_datatype_fp16:
+      return NumericLimits<xnn_float16>::epsilon();
+    case xnn_datatype_bf16:
+      return NumericLimits<xnn_bfloat16>::epsilon();
+    default:
+      return 1.0f;
   }
 }
 
@@ -476,7 +476,8 @@ class Tensor {
     return result;
   }
 
-  // Add `pre` indices before, `post` indices after, of padding of `value` to the tensor.
+  // Add `pre` indices before, `post` indices after, of padding of `value` to
+  // the tensor.
   Tensor<T, Alignment> pad(T value, const index_type& pre,
                            const index_type& post) const {
     assert(rank() == pre.size());
@@ -630,9 +631,7 @@ class Tensor {
     return result;
   }
 
-  size_t flat_offset_variadic(size_t /*dim0*/) const {
-    return 0;
-  }
+  size_t flat_offset_variadic(size_t /*dim0*/) const { return 0; }
 
   size_t flat_offset_variadic(size_t dim0, size_t idx0) const {
     if (dim0 > 0) {
@@ -664,7 +663,7 @@ class Tensor {
   }
   template <typename... Args>
   XNN_INLINE size_t flat_offset_no_broadcast(const size_t* strides, size_t idx0,
-                                             Args... idxs) const{
+                                             Args... idxs) const {
     return *strides * idx0 + flat_offset_no_broadcast(strides + 1, idxs...);
   }
 

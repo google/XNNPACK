@@ -15,10 +15,10 @@
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/packq.h"
-#include "src/xnnpack/buffer.h"
 
 namespace xnnpack {
 
@@ -32,7 +32,8 @@ void PackQMicrokernelTester::Test(xnn_x8_packq_f32qp8_ukernel_fn packq) const {
 
   // Populate the input and output data.
   std::iota(input.begin(), input.end(), 0.0f);
-  // TODO(b/372820266): Remove these fill calls that hide uninitialized memory bugs.
+  // TODO(b/372820266): Remove these fill calls that hide uninitialized memory
+  // bugs.
   std::fill(packed_w.begin(), packed_w.end(), INT8_C(0x12));
   std::fill(packed_w_ref.begin(), packed_w_ref.end(), INT8_C(0x7B));
 

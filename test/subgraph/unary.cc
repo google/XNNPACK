@@ -103,7 +103,7 @@ void TestImpl(size_t rank, xnn_unary_operator op) {
     Tensor<Out> output(shape);
 
     // TODO(b/397863125): This is a workaround for intrinsics unhandled by msan.
-    std::fill_n(input.data(), input.size() + XNN_EXTRA_BYTES/sizeof(In), 0);
+    std::fill_n(input.data(), input.size() + XNN_EXTRA_BYTES / sizeof(In), 0);
 
     DatatypeGenerator<In> gen(domain.min, domain.max, input_quantization);
     input.generate([&]() { return gen(rng); });
@@ -150,8 +150,7 @@ void TestImpl(size_t rank, xnn_unary_operator op) {
         }
       } else {
         const float input_i = dequantize(input(i), input_quantization);
-        float expected = op_info->ReferenceImpl(
-            input_i, params);
+        float expected = op_info->ReferenceImpl(input_i, params);
         // Force overflow to infinity if that is what should happen.
         expected = static_cast<float>(static_cast<Out>(expected));
         if (std::abs(expected) < NumericLimits<Out>::smallest_normal()) {

@@ -203,9 +203,10 @@ struct LoopParams {
 };
 
 struct DWConvTestParams {
-  DWConvTestParams(std::string test_name, DWConvMicrokernelTester tester,
-                 std::function<void(DWConvMicrokernelTester& tester)> test_func,
-                 std::function<void(void)> isa_check = nullptr)
+  DWConvTestParams(
+      std::string test_name, DWConvMicrokernelTester tester,
+      std::function<void(DWConvMicrokernelTester& tester)> test_func,
+      std::function<void(void)> isa_check = nullptr)
       : test_name(test_name),
         tester(tester),
         test_func(test_func),

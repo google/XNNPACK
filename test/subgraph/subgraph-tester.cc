@@ -102,8 +102,8 @@ SubgraphTester& SubgraphTester::AddDynamicallyQuantizedTensor(
 }
 
 SubgraphTester& SubgraphTester::AddStaticTensorQS8(
-    const std::vector<size_t>& dims, size_t channel_dim, TensorType tensor_type, const float* scale,
-    uint32_t external_id, uint32_t flags, int8_t* data) {
+    const std::vector<size_t>& dims, size_t channel_dim, TensorType tensor_type,
+    const float* scale, uint32_t external_id, uint32_t flags, int8_t* data) {
   assert(external_id < subgraph_->external_value_ids);
   if (data == nullptr) {
     const size_t num_elements = NumElements(dims);
@@ -126,8 +126,8 @@ SubgraphTester& SubgraphTester::AddStaticTensorQS8(
 
   uint32_t id_out;
   const xnn_status status = xnn_define_channelwise_quantized_tensor_value(
-      subgraph_.get(), xnn_datatype_qcint8, scale, dims.size(), channel_dim, dims.data(),
-      data, external_id, flags, &id_out);
+      subgraph_.get(), xnn_datatype_qcint8, scale, dims.size(), channel_dim,
+      dims.data(), data, external_id, flags, &id_out);
   EXPECT_EQ(status, xnn_status_success);
   EXPECT_EQ(id_out, external_id);
   return *this;
@@ -419,9 +419,8 @@ SubgraphTester& SubgraphTester::AddDepthwiseConvolution2D(
       params.padding.bottom, params.padding.left, params.kernel.height,
       params.kernel.width, params.subsampling.height, params.subsampling.width,
       params.dilation.height, params.dilation.width, params.depth_multiplier,
-      params.input_channels, params.output_min,
-      params.output_max, input_id, filter_id, bias_id,
-      output_id, /*flags=*/0);
+      params.input_channels, params.output_min, params.output_max, input_id,
+      filter_id, bias_id, output_id, /*flags=*/0);
   EXPECT_EQ(status, xnn_status_success);
 
   return *this;

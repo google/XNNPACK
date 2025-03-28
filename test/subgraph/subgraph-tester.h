@@ -182,9 +182,10 @@ class SubgraphTester {
                                                 uint32_t external_id,
                                                 uint32_t flags = 0);
 
-  SubgraphTester& AddStaticTensorQS8(const std::vector<size_t>& dims, size_t channel_dim,
-                                     TensorType tensor_type, const float* scale,
-                                     uint32_t external_id, uint32_t flags = 0,
+  SubgraphTester& AddStaticTensorQS8(const std::vector<size_t>& dims,
+                                     size_t channel_dim, TensorType tensor_type,
+                                     const float* scale, uint32_t external_id,
+                                     uint32_t flags = 0,
                                      int8_t* data = nullptr);
 
   SubgraphTester& AddStaticTensorF32(const std::vector<size_t>& dims,

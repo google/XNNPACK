@@ -228,8 +228,8 @@ static XNN_INLINE xnn_simd_f16_t xnn_load_tail_f16(const xnn_simd_f16_t *input,
   return *input;
 }
 
-static XNN_INLINE xnn_simd_f16_t xnn_load_tail_safe_f16(
-    const xnn_simd_f16_t *input, size_t num_elements) {
+static XNN_INLINE xnn_simd_f16_t
+xnn_load_tail_safe_f16(const xnn_simd_f16_t *input, size_t num_elements) {
   return *input;
 }
 

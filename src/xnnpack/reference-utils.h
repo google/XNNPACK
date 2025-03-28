@@ -10,8 +10,8 @@
 #include <cstdint>
 #include <limits>
 
-#include "src/xnnpack/datatype.h"
 #include "include/xnnpack.h"
+#include "src/xnnpack/datatype.h"
 
 namespace xnnpack {
 
@@ -46,15 +46,9 @@ T quantize(float x, float inv_scale, float zero_point) {
 }
 
 // These help to implement integer arithmetic without signed integer overflow.
-inline int64_t widen(int32_t x) {
-  return static_cast<int64_t>(x);
-}
-inline int32_t widen(int16_t x) {
-  return static_cast<int32_t>(x);
-}
-inline int16_t widen(int8_t x) {
-  return static_cast<int16_t>(x);
-}
+inline int64_t widen(int32_t x) { return static_cast<int64_t>(x); }
+inline int32_t widen(int16_t x) { return static_cast<int32_t>(x); }
+inline int16_t widen(int8_t x) { return static_cast<int16_t>(x); }
 
 // This implements "Euclidean division", which is the way integer division
 // should be: (a / b) * b + r = a, where r is always in [0, |b|). This is

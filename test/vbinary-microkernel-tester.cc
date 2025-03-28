@@ -59,7 +59,8 @@ void VBinaryMicrokernelTester::Test(xnn_f16_vbinary_ukernel_fn vbinary,
     reference_op_impl(a_data, b_data, y_ref.data(), batch_size(), op_type);
 
     // Call optimized micro-kernel.
-    vbinary(batch_size() * sizeof(xnn_float16), a_data, b_data, y.data(), nullptr);
+    vbinary(batch_size() * sizeof(xnn_float16), a_data, b_data, y.data(),
+            nullptr);
 
     // Verify results.
     for (size_t i = 0; i < batch_size(); i++) {
@@ -236,7 +237,8 @@ void VBinaryMicrokernelTester::Test(
                 product_output_scale * static_cast<float>(acc);
       y_fp[i] = std::min<float>(y_fp[i], static_cast<float>(UINT8_MAX));
       y_fp[i] = std::max<float>(y_fp[i], static_cast<float>(0));
-      y_ref[i] = xnn_qu8_requantize_fp32(acc, product_output_scale, y_zero_point(), 0, UINT8_MAX);
+      y_ref[i] = xnn_qu8_requantize_fp32(acc, product_output_scale,
+                                         y_zero_point(), 0, UINT8_MAX);
     }
 
     // Call optimized micro-kernel.
@@ -246,7 +248,8 @@ void VBinaryMicrokernelTester::Test(
     for (size_t i = 0; i < batch_size(); i++) {
       ASSERT_NEAR(static_cast<float>(static_cast<int32_t>(y[i])), y_fp[i], 1.0f)
           << "at element " << i << " / " << batch_size();
-      ASSERT_NEAR(static_cast<uint32_t>(y[i]), static_cast<uint32_t>(y_ref[i]), 1)
+      ASSERT_NEAR(static_cast<uint32_t>(y[i]), static_cast<uint32_t>(y_ref[i]),
+                  1)
           << "at element " << i << " / " << batch_size();
     }
   }

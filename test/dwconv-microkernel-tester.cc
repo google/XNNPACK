@@ -85,14 +85,15 @@ void DWConvMicrokernelTester::Test(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
   xnnpack::Buffer<const uint8_t*> indirection((width() - 1) * step() +
-                                          kernel_tile());
+                                              kernel_tile());
   xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
-                             indirection.size() * channels());
+                                 indirection.size() * channels());
   xnnpack::Buffer<uint8_t> kernel(channels() * kernel_tile());
   xnnpack::Buffer<int32_t> bias(channels());
   xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> packed_weights(
       (kernel_tile() + sizeof(int32_t) / sizeof(uint8_t)) * packed_channels());
-  xnnpack::Buffer<uint8_t> zero(channels() + XNN_EXTRA_BYTES / sizeof(uint8_t), input_zero_point());
+  xnnpack::Buffer<uint8_t> zero(channels() + XNN_EXTRA_BYTES / sizeof(uint8_t),
+                                input_zero_point());
   xnnpack::Buffer<uint8_t> output((width() - 1) * output_stride() + channels());
   xnnpack::Buffer<int32_t> accumulators(width() * channels());
   xnnpack::Buffer<uint8_t> output_ref(width() * channels());
@@ -214,15 +215,16 @@ void DWConvMicrokernelTester::Test(
       -std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max());
 
   xnnpack::Buffer<const int8_t*> indirection((width() - 1) * step() +
-                                         kernel_tile());
+                                             kernel_tile());
   xnnpack::Buffer<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
-                            indirection.size() * channels());
+                                indirection.size() * channels());
   xnnpack::Buffer<int8_t> kernel(channels() * kernel_tile());
   xnnpack::Buffer<int32_t> bias(channels());
   xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_weights(
       (kernel_tile() + (sizeof(int32_t) + sizeof(float)) / sizeof(int8_t)) *
       packed_channels());
-  xnnpack::Buffer<int8_t> zero(channels() + XNN_EXTRA_BYTES / sizeof(int8_t), static_cast<int8_t>(input_zero_point() - 0x80));
+  xnnpack::Buffer<int8_t> zero(channels() + XNN_EXTRA_BYTES / sizeof(int8_t),
+                               static_cast<int8_t>(input_zero_point() - 0x80));
   xnnpack::Buffer<int8_t> output((width() - 1) * output_stride() + channels());
   xnnpack::Buffer<int32_t> accumulators(width() * channels());
   xnnpack::Buffer<float> scale(channels());
@@ -356,15 +358,15 @@ void DWConvMicrokernelTester::Test(
       -std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max());
 
   xnnpack::Buffer<const int8_t*> indirection((width() - 1) * step() +
-                                         kernel_tile());
+                                             kernel_tile());
   xnnpack::Buffer<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
-                            indirection.size() * channels());
+                                indirection.size() * channels());
   xnnpack::Buffer<int8_t> kernel(channels() * kernel_tile());
   xnnpack::Buffer<int32_t> bias(channels());
   xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_weights(
       (kernel_tile() + sizeof(int32_t) / sizeof(int8_t)) * packed_channels());
   xnnpack::Buffer<int8_t> zero(channels() + XNN_EXTRA_BYTES / sizeof(int8_t),
-              static_cast<int8_t>(input_zero_point() - 0x80));
+                               static_cast<int8_t>(input_zero_point() - 0x80));
   xnnpack::Buffer<int8_t> output((width() - 1) * output_stride() + channels());
   xnnpack::Buffer<int32_t> accumulators(width() * channels());
   xnnpack::Buffer<int8_t> output_ref(width() * channels());
@@ -481,15 +483,17 @@ void DWConvMicrokernelTester::Test(
   std::uniform_real_distribution<float> f32dist;
 
   xnnpack::Buffer<const xnn_float16*> indirection((width() - 1) * step() +
-                                           kernel_tile());
+                                                  kernel_tile());
   xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
-                              indirection.size() * channels());
+                                     indirection.size() * channels());
   xnnpack::Buffer<xnn_float16> kernel(channels() * kernel_tile());
   xnnpack::Buffer<xnn_float16> bias(channels());
   xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> packed_weights(
       (kernel_tile() + 1) * packed_channels());
-  xnnpack::Buffer<xnn_float16> zero(channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0.0f);
-  xnnpack::Buffer<xnn_float16> output((width() - 1) * output_stride() + channels());
+  xnnpack::Buffer<xnn_float16> zero(
+      channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0.0f);
+  xnnpack::Buffer<xnn_float16> output((width() - 1) * output_stride() +
+                                      channels());
   xnnpack::Buffer<float> output_ref(width() * channels());
 
   // Use the same packed kernel and indirection buffers for all iterations.
@@ -574,19 +578,21 @@ void DWConvMicrokernelTester::Test(
   }
 }
 
-void DWConvMicrokernelTester::Test(
-    xnn_f32_dwconv_unipass_ukernel_fn dwconv, const void*) const {
+void DWConvMicrokernelTester::Test(xnn_f32_dwconv_unipass_ukernel_fn dwconv,
+                                   const void*) const {
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist;
 
-  xnnpack::Buffer<const float*> indirection((width() - 1) * step() + kernel_tile());
+  xnnpack::Buffer<const float*> indirection((width() - 1) * step() +
+                                            kernel_tile());
   xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
-                           indirection.size() * channels());
+                               indirection.size() * channels());
   xnnpack::Buffer<float> kernel(channels() * kernel_tile());
   xnnpack::Buffer<float> bias(channels());
-  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> packed_weights((kernel_tile() + 1) *
-                                                          packed_channels());
-  xnnpack::Buffer<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float), 0.0f);
+  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> packed_weights(
+      (kernel_tile() + 1) * packed_channels());
+  xnnpack::Buffer<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float),
+                              0.0f);
   xnnpack::Buffer<float> output((width() - 1) * output_stride() + channels());
   xnnpack::Buffer<float> output_ref(width() * channels());
 
@@ -648,14 +654,16 @@ void DWConvMicrokernelTester::Test(
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist;
 
-  xnnpack::Buffer<const float*> indirection((width() - 1) * step() + kernel_tile());
+  xnnpack::Buffer<const float*> indirection((width() - 1) * step() +
+                                            kernel_tile());
   xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
-                           indirection.size() * channels());
+                               indirection.size() * channels());
   xnnpack::Buffer<float> kernel(channels() * kernel_tile());
   xnnpack::Buffer<float> bias(channels());
-  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> packed_weights((kernel_tile() + 1) *
-                                                          packed_channels());
-  xnnpack::Buffer<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float), 0.0f);
+  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> packed_weights(
+      (kernel_tile() + 1) * packed_channels());
+  xnnpack::Buffer<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float),
+                              0.0f);
   xnnpack::Buffer<float> output((width() - 1) * output_stride() + channels());
   xnnpack::Buffer<float> output_ref(width() * channels());
 
@@ -735,4 +743,3 @@ void DWConvMicrokernelTester::Test(
     }
   }
 }
-

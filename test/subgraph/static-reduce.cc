@@ -10,8 +10,8 @@
 #include <functional>
 #include <sstream>
 #include <string>
-#include <type_traits>
 #include <tuple>
+#include <type_traits>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -104,13 +104,11 @@ std::function<void(float&, float)> get_reference_op(xnn_reduce_operator op) {
     case xnn_reduce_mean:
       return [](float& output, float input) { output += input; };
     case xnn_reduce_min:
-      return [](float& output, float input) {
-        output = std::min(output, input);
-      };
+      return
+          [](float& output, float input) { output = std::min(output, input); };
     case xnn_reduce_max:
-      return [](float& output, float input) {
-        output = std::max(output, input);
-      };
+      return
+          [](float& output, float input) { output = std::max(output, input); };
     default:
       XNN_UNREACHABLE;
   }
@@ -246,10 +244,9 @@ using ::testing::Combine;
 using ::testing::Range;
 using ::testing::Values;
 
-auto params = testing::ConvertGenerator<Param::TupleT>(
-    Combine(Values(xnn_reduce_sum, xnn_reduce_mean, xnn_reduce_max,
-                   xnn_reduce_min), Bool(), Bool(),
-            Range(0, XNN_MAX_TENSOR_DIMS)));
+auto params = testing::ConvertGenerator<Param::TupleT>(Combine(
+    Values(xnn_reduce_sum, xnn_reduce_mean, xnn_reduce_max, xnn_reduce_min),
+    Bool(), Bool(), Range(0, XNN_MAX_TENSOR_DIMS)));
 INSTANTIATE_TEST_SUITE_P(Reduce, ReduceQS8, params,
                          [](auto p) { return p.param.Name(); });
 INSTANTIATE_TEST_SUITE_P(Reduce, ReduceQU8, params,

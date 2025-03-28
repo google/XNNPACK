@@ -188,8 +188,8 @@ TEST(Pad, Constant2D) {
   x(1, 1) = 9;
   Tensor<int> padded = x.pad(-1, {1, 2}, {0, 1});
   ASSERT_THAT(padded.extents(), testing::ElementsAre(3, 5));
-  ASSERT_THAT(padded, testing::ElementsAre(-1, -1, -1, -1, -1, -1, -1, 3, 5, -1, -1, -1,
-                                           7, 9, -1));
+  ASSERT_THAT(padded, testing::ElementsAre(-1, -1, -1, -1, -1, -1, -1, 3, 5, -1,
+                                           -1, -1, 7, 9, -1));
 }
 
 }  // namespace xnnpack

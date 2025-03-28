@@ -42,8 +42,7 @@ class BatchMatrixMultiplyTestBase : public ::testing::Test {
         std::numeric_limits<uint8_t>::max());
     auto shape_dist =
         std::uniform_int_distribution<size_t>(2, XNN_MAX_TENSOR_DIMS);
-    auto broadcast_dist =
-        std::uniform_int_distribution<size_t>(0, 4);
+    auto broadcast_dist = std::uniform_int_distribution<size_t>(0, 4);
     dim_dist = std::uniform_int_distribution<size_t>(5, 15);
 
     // input1: B x G x M x K
@@ -71,29 +70,29 @@ class BatchMatrixMultiplyTestBase : public ::testing::Test {
     }
 
     input2_t_dims = input2_dims;
-    std::swap(input2_t_dims[num_input_dims - 2], input2_t_dims[num_input_dims - 1]);
+    std::swap(input2_t_dims[num_input_dims - 2],
+              input2_t_dims[num_input_dims - 1]);
 
     output_dims[num_input_dims - 2] = m;
     output_dims[num_input_dims - 1] = n;
 
     input1 = xnnpack::Buffer<InputType>(XNN_EXTRA_BYTES / sizeof(InputType) +
-                                    NumElements(input1_dims));
+                                        NumElements(input1_dims));
     input2 = xnnpack::Buffer<InputType>(XNN_EXTRA_BYTES / sizeof(InputType) +
-                                    NumElements(input2_dims));
+                                        NumElements(input2_dims));
     operator_output = xnnpack::Buffer<OutputType>(NumElements(output_dims));
     subgraph_output = xnnpack::Buffer<OutputType>(operator_output.size());
   }
 
-  std::vector<size_t> RandomShape(size_t num_dims)
-  {
+  std::vector<size_t> RandomShape(size_t num_dims) {
     std::vector<size_t> dims(num_dims);
     std::generate(dims.begin(), dims.end(), [&] { return dim_dist(rng); });
     return dims;
   }
 
-  size_t NumElements(std::vector<size_t>& dims)
-  {
-    return std::accumulate(dims.begin(), dims.end(), size_t(1), std::multiplies<size_t>());
+  size_t NumElements(std::vector<size_t>& dims) {
+    return std::accumulate(dims.begin(), dims.end(), size_t(1),
+                           std::multiplies<size_t>());
   }
 
   xnnpack::ReplicableRandomDevice rng;
@@ -181,39 +180,41 @@ TEST_F(BatchMatrixMultiplyTestBF16F32, define) {
   ASSERT_EQ(bmm_node->flags, 0);
 }
 
-TEST_F(BatchMatrixMultiplyTestF16, define)
-{
+TEST_F(BatchMatrixMultiplyTestF16, define) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   xnn_subgraph_t subgraph = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(3, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
 
   uint32_t input1_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, input1_dims.size(), input1_dims.data(), nullptr,
-                          /*external_id=*/0, /*flags=*/0, &input1_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp16, input1_dims.size(),
+                              input1_dims.data(), nullptr,
+                              /*external_id=*/0, /*flags=*/0, &input1_id));
   ASSERT_NE(input1_id, XNN_INVALID_VALUE_ID);
 
   uint32_t input2_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp16, input2_dims.size(), input2_dims.data(), input2.data(), /*external_id=*/1,
-      /*flags=*/0, &input2_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp16,
+                                    input2_dims.size(), input2_dims.data(),
+                                    input2.data(), /*external_id=*/1,
+                                    /*flags=*/0, &input2_id));
   ASSERT_NE(input2_id, XNN_INVALID_VALUE_ID);
 
   uint32_t output_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/2, /*flags=*/0, &output_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp16, output_dims.size(),
+                              output_dims.data(), nullptr,
+                              /*external_id=*/2, /*flags=*/0, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
 
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_batch_matrix_multiply(subgraph, input1_id, input2_id, output_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_batch_matrix_multiply(subgraph, input1_id, input2_id,
+                                             output_id, /*flags=*/0));
 
   ASSERT_LE(subgraph->num_nodes, 2);
   const struct xnn_node* bmm_node = nullptr;
@@ -235,39 +236,41 @@ TEST_F(BatchMatrixMultiplyTestF16, define)
   ASSERT_EQ(bmm_node->flags, 0);
 }
 
-TEST_F(BatchMatrixMultiplyTestF32, define)
-{
+TEST_F(BatchMatrixMultiplyTestF32, define) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   xnn_subgraph_t subgraph = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(3, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
 
   uint32_t input1_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, input1_dims.size(), input1_dims.data(), nullptr,
-                          /*external_id=*/0, /*flags=*/0, &input1_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, input1_dims.size(),
+                              input1_dims.data(), nullptr,
+                              /*external_id=*/0, /*flags=*/0, &input1_id));
   ASSERT_NE(input1_id, XNN_INVALID_VALUE_ID);
 
   uint32_t input2_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, input2_dims.size(), input2_dims.data(), input2.data(), /*external_id=*/1,
-      /*flags=*/0, &input2_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32,
+                                    input2_dims.size(), input2_dims.data(),
+                                    input2.data(), /*external_id=*/1,
+                                    /*flags=*/0, &input2_id));
   ASSERT_NE(input2_id, XNN_INVALID_VALUE_ID);
 
   uint32_t output_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/2, /*flags=*/0, &output_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, output_dims.size(),
+                              output_dims.data(), nullptr,
+                              /*external_id=*/2, /*flags=*/0, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
 
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_batch_matrix_multiply(subgraph, input1_id, input2_id, output_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_batch_matrix_multiply(subgraph, input1_id, input2_id,
+                                             output_id, /*flags=*/0));
 
   ASSERT_LE(subgraph->num_nodes, 2);
   const struct xnn_node* bmm_node = nullptr;
@@ -289,39 +292,41 @@ TEST_F(BatchMatrixMultiplyTestF32, define)
   ASSERT_EQ(bmm_node->flags, 0);
 }
 
-TEST_F(BatchMatrixMultiplyTestF32, define_transposed)
-{
+TEST_F(BatchMatrixMultiplyTestF32, define_transposed) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   xnn_subgraph_t subgraph = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(3, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
 
   uint32_t input1_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, input1_dims.size(), input1_dims.data(), nullptr,
-                          /*external_id=*/0, /*flags=*/0, &input1_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, input1_dims.size(),
+                              input1_dims.data(), nullptr,
+                              /*external_id=*/0, /*flags=*/0, &input1_id));
   ASSERT_NE(input1_id, XNN_INVALID_VALUE_ID);
 
   uint32_t input2_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, input2_t_dims.size(), input2_t_dims.data(), input2.data(), /*external_id=*/1,
-      /*flags=*/0, &input2_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(subgraph, xnn_datatype_fp32,
+                                    input2_t_dims.size(), input2_t_dims.data(),
+                                    input2.data(), /*external_id=*/1,
+                                    /*flags=*/0, &input2_id));
   ASSERT_NE(input2_id, XNN_INVALID_VALUE_ID);
 
   uint32_t output_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/2, /*flags=*/0, &output_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, output_dims.size(),
+                              output_dims.data(), nullptr,
+                              /*external_id=*/2, /*flags=*/0, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
 
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_batch_matrix_multiply(subgraph, input1_id, input2_id, output_id, /*flags=*/XNN_FLAG_TRANSPOSE_B));
+  ASSERT_EQ(xnn_status_success, xnn_define_batch_matrix_multiply(
+                                    subgraph, input1_id, input2_id, output_id,
+                                    /*flags=*/XNN_FLAG_TRANSPOSE_B));
 
   ASSERT_LE(subgraph->num_nodes, 2);
   const struct xnn_node* bmm_node = nullptr;
@@ -444,8 +449,7 @@ TEST_F(BatchMatrixMultiplyTestBF16F32, matches_operator_api) {
   }
 }
 
-TEST_F(BatchMatrixMultiplyTestF16, matches_operator_api)
-{
+TEST_F(BatchMatrixMultiplyTestF16, matches_operator_api) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   xnn_operator_t op = nullptr;
@@ -454,8 +458,10 @@ TEST_F(BatchMatrixMultiplyTestF16, matches_operator_api)
   std::generate(input2.begin(), input2.end(), [&]() { return f32dist(rng); });
 
   // Call operator API.
-  const xnn_status status = xnn_create_batch_matrix_multiply_nc_f16(/*flags=*/0, &op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
+  const xnn_status status =
+      xnn_create_batch_matrix_multiply_nc_f16(/*flags=*/0, &op);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
@@ -466,64 +472,71 @@ TEST_F(BatchMatrixMultiplyTestF16, matches_operator_api)
 
   size_t workspace_size = 0;
   size_t workspace_alignment = 0;
-  ASSERT_EQ(
-      xnn_status_success,
-      xnn_reshape_batch_matrix_multiply_nc_f16(
-          op, /*num_batch_dims=*/input1_dims.size() - 2,
-          /*batch_dims_a=*/input1_dims.data(),
-          /*batch_dims_b=*/input2_dims.data(), m, k, n,
-          &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_batch_matrix_multiply_nc_f16(
+                op, /*num_batch_dims=*/input1_dims.size() - 2,
+                /*batch_dims_a=*/input1_dims.data(),
+                /*batch_dims_b=*/input2_dims.data(), m, k, n, &workspace_size,
+                &workspace_alignment, /*threadpool=*/nullptr));
   ASSERT_NE(workspace_size, 0);
   ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
   xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size +
-                                                    XNN_EXTRA_BYTES);
+                                                            XNN_EXTRA_BYTES);
   // TODO(b/372731180): This should probably be initialized by the operator.
   std::fill(workspace.begin(), workspace.end(), 0);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_setup_batch_matrix_multiply_nc_f16(op, workspace.data(), input1.data(), input2.data(), operator_output.data()));
+  ASSERT_EQ(xnn_status_success, xnn_setup_batch_matrix_multiply_nc_f16(
+                                    op, workspace.data(), input1.data(),
+                                    input2.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
   // Call subgraph API.
   xnn_subgraph_t subgraph = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(3, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
 
   uint32_t input1_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, input1_dims.size(), input1_dims.data(), nullptr,
-                          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input1_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp16, input1_dims.size(),
+                input1_dims.data(), nullptr,
+                /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input1_id));
   ASSERT_NE(input1_id, XNN_INVALID_VALUE_ID);
 
   uint32_t input2_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, input2_dims.size(), input2_dims.data(), nullptr,
-                          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input2_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp16, input2_dims.size(),
+                input2_dims.data(), nullptr,
+                /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input2_id));
   ASSERT_NE(input2_id, XNN_INVALID_VALUE_ID);
 
   uint32_t output_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/2, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp16, output_dims.size(),
+                output_dims.data(), nullptr,
+                /*external_id=*/2, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_batch_matrix_multiply(subgraph, input1_id, input2_id, output_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_batch_matrix_multiply(subgraph, input1_id, input2_id,
+                                             output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_runtime_v3(subgraph, nullptr, nullptr,
+                                  xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
   std::array<xnn_external_value, 3> external = {
-    xnn_external_value{input1_id, input1.data()},
-    xnn_external_value{input2_id, input2.data()},
-    xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
+      xnn_external_value{input1_id, input1.data()},
+      xnn_external_value{input2_id, input2.data()},
+      xnn_external_value{output_id, subgraph_output.data()}};
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
@@ -538,8 +551,7 @@ TEST_F(BatchMatrixMultiplyTestF16, matches_operator_api)
   }
 }
 
-TEST_F(BatchMatrixMultiplyTestF32, matches_operator_api)
-{
+TEST_F(BatchMatrixMultiplyTestF32, matches_operator_api) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   xnn_operator_t op = nullptr;
@@ -548,8 +560,10 @@ TEST_F(BatchMatrixMultiplyTestF32, matches_operator_api)
   std::generate(input2.begin(), input2.end(), [&]() { return f32dist(rng); });
 
   // Call operator API.
-  const xnn_status status = xnn_create_batch_matrix_multiply_nc_f32(/*flags=*/0, &op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
+  const xnn_status status =
+      xnn_create_batch_matrix_multiply_nc_f32(/*flags=*/0, &op);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
@@ -560,64 +574,71 @@ TEST_F(BatchMatrixMultiplyTestF32, matches_operator_api)
 
   size_t workspace_size = 0;
   size_t workspace_alignment = 0;
-  ASSERT_EQ(
-      xnn_status_success,
-      xnn_reshape_batch_matrix_multiply_nc_f32(
-          op, /*num_batch_dims=*/input1_dims.size() - 2,
-          /*batch_dims_a=*/input1_dims.data(),
-          /*batch_dims_b=*/input2_dims.data(), m, k, n,
-          &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_batch_matrix_multiply_nc_f32(
+                op, /*num_batch_dims=*/input1_dims.size() - 2,
+                /*batch_dims_a=*/input1_dims.data(),
+                /*batch_dims_b=*/input2_dims.data(), m, k, n, &workspace_size,
+                &workspace_alignment, /*threadpool=*/nullptr));
   ASSERT_NE(workspace_size, 0);
   ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
   xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size +
-                                                    XNN_EXTRA_BYTES);
+                                                            XNN_EXTRA_BYTES);
   // TODO(b/372731180): This should probably be initialized by the operator.
   std::fill(workspace.begin(), workspace.end(), 0);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_setup_batch_matrix_multiply_nc_f32(op, workspace.data(), input1.data(), input2.data(), operator_output.data()));
+  ASSERT_EQ(xnn_status_success, xnn_setup_batch_matrix_multiply_nc_f32(
+                                    op, workspace.data(), input1.data(),
+                                    input2.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
   // Call subgraph API.
   xnn_subgraph_t subgraph = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(3, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
 
   uint32_t input1_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, input1_dims.size(), input1_dims.data(), nullptr,
-                          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input1_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, input1_dims.size(),
+                input1_dims.data(), nullptr,
+                /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input1_id));
   ASSERT_NE(input1_id, XNN_INVALID_VALUE_ID);
 
   uint32_t input2_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, input2_dims.size(), input2_dims.data(), nullptr,
-                          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input2_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, input2_dims.size(),
+                input2_dims.data(), nullptr,
+                /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input2_id));
   ASSERT_NE(input2_id, XNN_INVALID_VALUE_ID);
 
   uint32_t output_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/2, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, output_dims.size(),
+                output_dims.data(), nullptr,
+                /*external_id=*/2, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_batch_matrix_multiply(subgraph, input1_id, input2_id, output_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_batch_matrix_multiply(subgraph, input1_id, input2_id,
+                                             output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_runtime_v3(subgraph, nullptr, nullptr,
+                                  xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
   std::array<xnn_external_value, 3> external = {
-    xnn_external_value{input1_id, input1.data()},
-    xnn_external_value{input2_id, input2.data()},
-    xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
+      xnn_external_value{input1_id, input1.data()},
+      xnn_external_value{input2_id, input2.data()},
+      xnn_external_value{output_id, subgraph_output.data()}};
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
@@ -631,8 +652,7 @@ TEST_F(BatchMatrixMultiplyTestF32, matches_operator_api)
   }
 }
 
-TEST_F(BatchMatrixMultiplyTestF32, matches_operator_api_transposed)
-{
+TEST_F(BatchMatrixMultiplyTestF32, matches_operator_api_transposed) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   xnn_operator_t op = nullptr;
@@ -641,8 +661,10 @@ TEST_F(BatchMatrixMultiplyTestF32, matches_operator_api_transposed)
   std::generate(input2.begin(), input2.end(), [&]() { return f32dist(rng); });
 
   // Call operator API.
-  const xnn_status status = xnn_create_batch_matrix_multiply_nc_f32(/*flags=*/XNN_FLAG_TRANSPOSE_B, &op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
+  const xnn_status status = xnn_create_batch_matrix_multiply_nc_f32(
+      /*flags=*/XNN_FLAG_TRANSPOSE_B, &op);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
@@ -653,64 +675,71 @@ TEST_F(BatchMatrixMultiplyTestF32, matches_operator_api_transposed)
 
   size_t workspace_size = 0;
   size_t workspace_alignment = 0;
-  ASSERT_EQ(
-      xnn_status_success,
-      xnn_reshape_batch_matrix_multiply_nc_f32(
-          op, /*num_batch_dims=*/input1_dims.size() - 2,
-          /*batch_dims_a=*/input1_dims.data(),
-          /*batch_dims_b=*/input2_dims.data(), m, k, n,
-          &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_batch_matrix_multiply_nc_f32(
+                op, /*num_batch_dims=*/input1_dims.size() - 2,
+                /*batch_dims_a=*/input1_dims.data(),
+                /*batch_dims_b=*/input2_dims.data(), m, k, n, &workspace_size,
+                &workspace_alignment, /*threadpool=*/nullptr));
   ASSERT_NE(workspace_size, 0);
   ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
   xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size +
-                                                    XNN_EXTRA_BYTES);
+                                                            XNN_EXTRA_BYTES);
   // TODO(b/372731180): This should probably be initialized by the operator.
   std::fill(workspace.begin(), workspace.end(), 0);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_setup_batch_matrix_multiply_nc_f32(op, workspace.data(), input1.data(), input2.data(), operator_output.data()));
+  ASSERT_EQ(xnn_status_success, xnn_setup_batch_matrix_multiply_nc_f32(
+                                    op, workspace.data(), input1.data(),
+                                    input2.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
   // Call subgraph API.
   xnn_subgraph_t subgraph = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(3, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
 
   uint32_t input1_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, input1_dims.size(), input1_dims.data(), nullptr,
-                          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input1_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, input1_dims.size(),
+                input1_dims.data(), nullptr,
+                /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input1_id));
   ASSERT_NE(input1_id, XNN_INVALID_VALUE_ID);
 
   uint32_t input2_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, input2_t_dims.size(), input2_t_dims.data(), nullptr,
-                          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input2_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, input2_t_dims.size(),
+                input2_t_dims.data(), nullptr,
+                /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input2_id));
   ASSERT_NE(input2_id, XNN_INVALID_VALUE_ID);
 
   uint32_t output_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/2, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, output_dims.size(),
+                output_dims.data(), nullptr,
+                /*external_id=*/2, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_batch_matrix_multiply(subgraph, input1_id, input2_id, output_id, /*flags=*/XNN_FLAG_TRANSPOSE_B));
+  ASSERT_EQ(xnn_status_success, xnn_define_batch_matrix_multiply(
+                                    subgraph, input1_id, input2_id, output_id,
+                                    /*flags=*/XNN_FLAG_TRANSPOSE_B));
 
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_runtime_v3(subgraph, nullptr, nullptr,
+                                  xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
   std::array<xnn_external_value, 3> external = {
-    xnn_external_value{input1_id, input1.data()},
-    xnn_external_value{input2_id, input2.data()},
-    xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
+      xnn_external_value{input1_id, input1.data()},
+      xnn_external_value{input2_id, input2.data()},
+      xnn_external_value{output_id, subgraph_output.data()}};
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
@@ -742,8 +771,7 @@ TEST_F(BatchMatrixMultiplyTestQD8ToF32, define) {
 
   uint32_t input2_id = XNN_INVALID_VALUE_ID;
   xnnpack::Buffer<float> channelwise_scale(
-      input2_dims.back(),
-      1.0f / std::numeric_limits<int8_t>::max());
+      input2_dims.back(), 1.0f / std::numeric_limits<int8_t>::max());
   ASSERT_EQ(xnn_status_success,
             xnn_define_channelwise_quantized_tensor_value(
                 subgraph, xnn_datatype_qcint8, channelwise_scale.data(),
@@ -788,7 +816,7 @@ TEST_F(BatchMatrixMultiplyTestQD8ToF32, matches_operator_api) {
   xnnpack::Buffer<xnn_quantization_params> quantization_params(
       input_batch_size * m + XNN_EXTRA_QUANTIZATION_PARAMS);
   xnnpack::Buffer<float> input1_f32(NumElements(input1_dims) +
-                                XNN_EXTRA_BYTES / sizeof(float));
+                                    XNN_EXTRA_BYTES / sizeof(float));
   std::generate(input1_f32.begin(), input1_f32.end(),
                 [&]() { return f32dist(rng); });
 
@@ -895,9 +923,9 @@ TEST_F(BatchMatrixMultiplyTestQD8ToF32, matches_operator_api) {
                                              output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(
-      xnn_status_success,
-      xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_runtime_v3(subgraph, nullptr, nullptr,
+                                  xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
       runtime, xnn_delete_runtime);
@@ -932,27 +960,31 @@ void DefineBatchMatrixMultiplySubgraphHelper(
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(3, /*flags=*/0, &subgraph));
 
   uint32_t input1_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, input1_dims.size(), input1_dims.data(), nullptr,
-                          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input1_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, input1_dims.size(),
+                input1_dims.data(), nullptr,
+                /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input1_id));
   ASSERT_NE(input1_id, XNN_INVALID_VALUE_ID);
 
   uint32_t input2_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, input2_dims.size(), input2_dims.data(), nullptr,
-                          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input2_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, input2_dims.size(),
+                input2_dims.data(), nullptr,
+                /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input2_id));
   ASSERT_NE(input2_id, XNN_INVALID_VALUE_ID);
 
   uint32_t output_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/2, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, output_dims.size(),
+                output_dims.data(), nullptr,
+                /*external_id=*/2, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
 
-  *status_out = xnn_define_batch_matrix_multiply(subgraph, input1_id, input2_id, output_id, batch_matrix_multiply_flags);
+  *status_out = xnn_define_batch_matrix_multiply(
+      subgraph, input1_id, input2_id, output_id, batch_matrix_multiply_flags);
   *subgraph_out = subgraph;
 }
 
@@ -1128,101 +1160,101 @@ TEST_P(BatchMatrixMultiplyTest, DefineAndReshape) {
 INSTANTIATE_TEST_SUITE_P(
     BMM, BatchMatrixMultiplyTest,
     testing::ValuesIn<BatchMatrixMultiplyTestParams>({
-        {/*.name = */"input_a_num_dim_less_than_3",
-         /*.input_a_dims = */{3, 7},
-         /*.input_b_dims = */{2, 7, 5},
-         /*.expected_output_dims = */{2, 3, 5}},
+        {/*.name = */ "input_a_num_dim_less_than_3",
+         /*.input_a_dims = */ {3, 7},
+         /*.input_b_dims = */ {2, 7, 5},
+         /*.expected_output_dims = */ {2, 3, 5}},
 
-        {/*.name = */"input_b_num_dim_less_than_3",
-         /*.input_a_dims = */{2, 3, 5},
-         /*.input_b_dims = */{5, 7},
-         /*.expected_output_dims = */{2, 3, 7}},
+        {/*.name = */ "input_b_num_dim_less_than_3",
+         /*.input_a_dims = */ {2, 3, 5},
+         /*.input_b_dims = */ {5, 7},
+         /*.expected_output_dims = */ {2, 3, 7}},
 
-        {/*.name = */"input_a_k_dim_ne_input2_dim",
-         /*.input_a_dims = */{2, 3, 7},
-         /*.input_b_dims = */{2, 5, 7},
-         /*.expected_output_dims = */{2, 3, 7},
-         /*.flags = */0,
-         /*.expected_status = */xnn_status_invalid_parameter},
+        {/*.name = */ "input_a_k_dim_ne_input2_dim",
+         /*.input_a_dims = */ {2, 3, 7},
+         /*.input_b_dims = */ {2, 5, 7},
+         /*.expected_output_dims = */ {2, 3, 7},
+         /*.flags = */ 0,
+         /*.expected_status = */ xnn_status_invalid_parameter},
 
-        {/*.name = */"input_a_k_dim_ne_transposed_input2_dim",
-         /*.input_a_dims = */{2, 3, 7},
-         /*.input_b_dims = */{2, 7, 5},
-         /*.expected_output_dims = */{2, 3, 7},
-         /*.flags = */XNN_FLAG_TRANSPOSE_B,
-         /*.expected_status = */xnn_status_invalid_parameter},
+        {/*.name = */ "input_a_k_dim_ne_transposed_input2_dim",
+         /*.input_a_dims = */ {2, 3, 7},
+         /*.input_b_dims = */ {2, 7, 5},
+         /*.expected_output_dims = */ {2, 3, 7},
+         /*.flags = */ XNN_FLAG_TRANSPOSE_B,
+         /*.expected_status = */ xnn_status_invalid_parameter},
 
-        {/*.name = */"output_m_ne_input_m",
-         /*.input_a_dims = */{2, 3, 5},
-         /*.input_b_dims = */{2, 7, 5},
-         /*.expected_output_dims = */{2, 5, 7},
-         /*.flags = */0,
-         /*.expected_status = */xnn_status_invalid_parameter},
+        {/*.name = */ "output_m_ne_input_m",
+         /*.input_a_dims = */ {2, 3, 5},
+         /*.input_b_dims = */ {2, 7, 5},
+         /*.expected_output_dims = */ {2, 5, 7},
+         /*.flags = */ 0,
+         /*.expected_status = */ xnn_status_invalid_parameter},
 
-        {/*.name = */"output_shape",
-         /*.input_a_dims = */{2, 3, 5},
-         /*.input_b_dims = */{2, 5, 7},
-         /*.expected_output_dims = */{2, 3, 7}},
+        {/*.name = */ "output_shape",
+         /*.input_a_dims = */ {2, 3, 5},
+         /*.input_b_dims = */ {2, 5, 7},
+         /*.expected_output_dims = */ {2, 3, 7}},
 
-        {/*.name = */"output_shape_transposed",
-         /*.input_a_dims = */{2, 3, 5},
-         /*.input_b_dims = */{2, 7, 5},
-         /*.expected_output_dims = */{2, 3, 7},
-         /*.flags = */XNN_FLAG_TRANSPOSE_B},
+        {/*.name = */ "output_shape_transposed",
+         /*.input_a_dims = */ {2, 3, 5},
+         /*.input_b_dims = */ {2, 7, 5},
+         /*.expected_output_dims = */ {2, 3, 7},
+         /*.flags = */ XNN_FLAG_TRANSPOSE_B},
 
         // Test broadcasting in the batch dimensions of the first input.
-        {/*.name = */"input_a_batch_dim_ne_input2_dim",
-         /*.input_a_dims = */{3, 3, 5},
-         /*.input_b_dims = */{2, 7, 5},
-         /*.expected_output_dims = */{2, 3, 7},
-         /*.flags = */0,
-         /*.expected_status = */xnn_status_invalid_parameter},
+        {/*.name = */ "input_a_batch_dim_ne_input2_dim",
+         /*.input_a_dims = */ {3, 3, 5},
+         /*.input_b_dims = */ {2, 7, 5},
+         /*.expected_output_dims = */ {2, 3, 7},
+         /*.flags = */ 0,
+         /*.expected_status = */ xnn_status_invalid_parameter},
 
-        {/*.name = */"input_a_batch_dim_bcast_one",
-         /*.input_a_dims = */{1, 3, 5},
-         /*.input_b_dims = */{2, 5, 7},
-         /*.expected_output_dims = */{2, 3, 7}},
+        {/*.name = */ "input_a_batch_dim_bcast_one",
+         /*.input_a_dims = */ {1, 3, 5},
+         /*.input_b_dims = */ {2, 5, 7},
+         /*.expected_output_dims = */ {2, 3, 7}},
 
-        {/*.name = */"input_a_batch_dim_bcast_mult",
-         /*.input_a_dims = */{2, 3, 5},
-         /*.input_b_dims = */{6, 5, 7},
-         /*.expected_output_dims = */{6, 3, 7},
-         /*.flags = */0,
-         /*.expected_status = */xnn_status_invalid_parameter},
+        {/*.name = */ "input_a_batch_dim_bcast_mult",
+         /*.input_a_dims = */ {2, 3, 5},
+         /*.input_b_dims = */ {6, 5, 7},
+         /*.expected_output_dims = */ {6, 3, 7},
+         /*.flags = */ 0,
+         /*.expected_status = */ xnn_status_invalid_parameter},
 
-        {/*.name = */"input_b_batch_dim_bcast_one",
-         /*.input_a_dims = */{2, 3, 5},
-         /*.input_b_dims = */{1, 5, 7},
-         /*.expected_output_dims = */{2, 3, 7}},
+        {/*.name = */ "input_b_batch_dim_bcast_one",
+         /*.input_a_dims = */ {2, 3, 5},
+         /*.input_b_dims = */ {1, 5, 7},
+         /*.expected_output_dims = */ {2, 3, 7}},
 
-        {/*.name = */"input_b_batch_dim_bcast_mult",
-         /*.input_a_dims = */{6, 3, 5},
-         /*.input_b_dims = */{2, 5, 7},
-         /*.expected_output_dims = */{6, 3, 7},
-         /*.flags = */0,
-         /*.expected_status = */xnn_status_invalid_parameter},
+        {/*.name = */ "input_b_batch_dim_bcast_mult",
+         /*.input_a_dims = */ {6, 3, 5},
+         /*.input_b_dims = */ {2, 5, 7},
+         /*.expected_output_dims = */ {6, 3, 7},
+         /*.flags = */ 0,
+         /*.expected_status = */ xnn_status_invalid_parameter},
 
-        {/*.name = */"both_inputs_batch_dim_bcast_mult",
-         /*.input_a_dims = */{2, 6, 3, 5},
-         /*.input_b_dims = */{4, 2, 5, 7},
-         /*.expected_output_dims = */{4, 6, 3, 7},
-         /*.flags = */0,
-         /*.expected_status = */xnn_status_invalid_parameter},
+        {/*.name = */ "both_inputs_batch_dim_bcast_mult",
+         /*.input_a_dims = */ {2, 6, 3, 5},
+         /*.input_b_dims = */ {4, 2, 5, 7},
+         /*.expected_output_dims = */ {4, 6, 3, 7},
+         /*.flags = */ 0,
+         /*.expected_status = */ xnn_status_invalid_parameter},
 
-        {/*.name = */"both_inputs_batch_dim_bcast_one",
-         /*.input_a_dims = */{1, 6, 3, 5},
-         /*.input_b_dims = */{4, 1, 5, 7},
-         /*.expected_output_dims = */{4, 6, 3, 7}},
+        {/*.name = */ "both_inputs_batch_dim_bcast_one",
+         /*.input_a_dims = */ {1, 6, 3, 5},
+         /*.input_b_dims = */ {4, 1, 5, 7},
+         /*.expected_output_dims = */ {4, 6, 3, 7}},
 
-        {/*.name = */"input_a_missing_batch_dim",
-         /*.input_a_dims = */{6, 3, 5},
-         /*.input_b_dims = */{4, 1, 5, 7},
-         /*.expected_output_dims = */{4, 6, 3, 7}},
+        {/*.name = */ "input_a_missing_batch_dim",
+         /*.input_a_dims = */ {6, 3, 5},
+         /*.input_b_dims = */ {4, 1, 5, 7},
+         /*.expected_output_dims = */ {4, 6, 3, 7}},
 
-        {/*.name = */"input_b_missing_batch_dim",
-         /*.input_a_dims = */{4, 1, 3, 5},
-         /*.input_b_dims = */{6, 5, 7},
-         /*.expected_output_dims = */{4, 6, 3, 7}},
+        {/*.name = */ "input_b_missing_batch_dim",
+         /*.input_a_dims = */ {4, 1, 3, 5},
+         /*.input_b_dims = */ {6, 5, 7},
+         /*.expected_output_dims = */ {4, 6, 3, 7}},
     }),
     [](const testing::TestParamInfo<BatchMatrixMultiplyTest::ParamType>& info) {
       return info.param.name;

@@ -7,13 +7,11 @@
 #ifndef __XNNPACK_SRC_XNNPACK_SIMD_F32_NEON_H_
 #define __XNNPACK_SRC_XNNPACK_SIMD_F32_NEON_H_
 
+#include <arm_neon.h>
 #include <assert.h>
 #include <stddef.h>
 
-#include <arm_neon.h>
-
 #include "src/xnnpack/common.h"
-
 
 // SIMD vector type for f32 using NEON.
 typedef float32x4_t xnn_simd_f32_t;
@@ -21,8 +19,7 @@ typedef float32x4_t xnn_simd_f32_t;
 #define xnn_simd_log2_size_f32 2
 #define xnn_simd_bytes_f32 (xnn_simd_size_f32 * sizeof(float))
 
-#define XNN_SIMD_CONST_F32(var, val) \
-  const float32x4_t var = vdupq_n_f32(val);
+#define XNN_SIMD_CONST_F32(var, val) const float32x4_t var = vdupq_n_f32(val);
 
 #define XNN_SIMD_CONST_F32_FROM_INT32(var, val) \
   const float32x4_t var = vreinterpretq_f32_u32(vdupq_n_u32(val));
@@ -148,8 +145,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_xor_f32(xnn_simd_f32_t a,
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_not_f32(xnn_simd_f32_t a) {
-  return vreinterpretq_f32_u32(
-      vmvnq_u32(vreinterpretq_u32_f32(a)));
+  return vreinterpretq_f32_u32(vmvnq_u32(vreinterpretq_u32_f32(a)));
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,

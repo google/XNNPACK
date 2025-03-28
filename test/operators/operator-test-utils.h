@@ -18,7 +18,7 @@ void randomize_int_buffer(xnn_datatype datatype,
                           xnnpack::ReplicableRandomDevice& rng, double min,
                           double max, Buffer& buf) {
   std::uniform_int_distribution<int> dist(static_cast<int>(min),
-                                              static_cast<int>(max));
+                                          static_cast<int>(max));
   const auto f = [&]() { return static_cast<T>(dist(rng)); };
   std::generate(reinterpret_cast<T*>(buf.begin()),
                 reinterpret_cast<T*>(buf.end()), f);
@@ -26,10 +26,10 @@ void randomize_int_buffer(xnn_datatype datatype,
 
 template <typename T, typename Buffer>
 void randomize_float_buffer(xnn_datatype datatype,
-                          xnnpack::ReplicableRandomDevice& rng, double min,
-                          double max, Buffer& buf) {
+                            xnnpack::ReplicableRandomDevice& rng, double min,
+                            double max, Buffer& buf) {
   std::uniform_real_distribution<float> dist(static_cast<float>(min),
-                                              static_cast<float>(max));
+                                             static_cast<float>(max));
   const auto f = [&]() { return dist(rng); };
   std::generate(reinterpret_cast<T*>(buf.begin()),
                 reinterpret_cast<T*>(buf.end()), f);
@@ -67,6 +67,5 @@ void randomize_buffer(xnn_datatype datatype,
 }
 
 }  // namespace xnnpack
-
 
 #endif  // _XNNPACK_TEST_OPERATOR_TEST_UTILS_H_

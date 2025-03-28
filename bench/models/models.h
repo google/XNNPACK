@@ -29,10 +29,11 @@ xnn_subgraph_t FP32MobileNetV3Large();
 xnn_subgraph_t FP32MobileNetV3Small();
 xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
                             size_t embedding_dim, size_t num_heads,
-                            size_t head_dim, QD8AttentionWeights &weights);
+                            size_t head_dim, QD8AttentionWeights& weights);
 xnn_subgraph_t QS8MobileNetV2();
 
-// This is a sequence of {add, multiply} x `reps` ops, on `size` x `size` values.
+// This is a sequence of {add, multiply} x `reps` ops, on `size` x `size`
+// values.
 xnn_subgraph_t FP32Elementwise(size_t size, size_t reps);
 
 // Compute the layer norm of [m x n x k] tensors, where the mean and variance

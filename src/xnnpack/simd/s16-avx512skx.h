@@ -41,7 +41,6 @@ static XNN_INLINE xnn_simd_s16_t xnn_signcomplement_s16(xnn_simd_s16_t x) {
                           _mm512_srai_epi16(x, 15));
 }
 
-
 // Load/store operations.
 
 static XNN_INLINE xnn_simd_s16_t xnn_loadu_s16(const int16_t* ptr) {
@@ -66,8 +65,8 @@ static XNN_INLINE xnn_simd_s16_t xnn_set1_s16_t(int16_t v) {
 
 // Tail load/store operations.
 
-static XNN_INLINE xnn_simd_s16_t
-xnn_load_tail_s16(const int16_t* input, size_t num_elements) {
+static XNN_INLINE xnn_simd_s16_t xnn_load_tail_s16(const int16_t* input,
+                                                   size_t num_elements) {
   assert(num_elements > 0);
   assert(num_elements < xnn_simd_size_s16);
   const __mmask32 vmask =

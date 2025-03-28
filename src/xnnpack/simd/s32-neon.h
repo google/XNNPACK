@@ -7,10 +7,9 @@
 #ifndef __XNNPACK_SRC_XNNPACK_SIMD_S32_NEON_H_
 #define __XNNPACK_SRC_XNNPACK_SIMD_S32_NEON_H_
 
+#include <arm_neon.h>
 #include <assert.h>
 #include <stddef.h>
-
-#include <arm_neon.h>
 
 #include "src/xnnpack/common.h"
 
@@ -90,8 +89,7 @@ static XNN_INLINE void xnn_store_tail_s32(int32_t* output, xnn_simd_s32_t v,
 
 // Conversion operations.
 
-static XNN_INLINE float32x4_t
-xnn_cvt_f32_s32(xnn_simd_s32_t a) {
+static XNN_INLINE float32x4_t xnn_cvt_f32_s32(xnn_simd_s32_t a) {
   return vcvtq_f32_s32(a);
 }
 

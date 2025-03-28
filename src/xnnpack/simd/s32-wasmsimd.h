@@ -94,8 +94,7 @@ static XNN_INLINE void xnn_store_tail_s32(int32_t* output, xnn_simd_s32_t v,
 
 // Conversion operations.
 
-static XNN_INLINE v128_t
-xnn_cvt_f32_s32(xnn_simd_s32_t a) {
+static XNN_INLINE v128_t xnn_cvt_f32_s32(xnn_simd_s32_t a) {
   return wasm_f32x4_convert_i32x4(a);
 }
 

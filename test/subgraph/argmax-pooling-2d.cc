@@ -23,7 +23,7 @@ std::tuple<Tensor<T>, Tensor<int32_t>> ReferenceImpl(Tensor<T> input,
                                                      const StencilParams& kh,
                                                      const StencilParams& kw) {
   Tensor<T> value({input.extent(0), kh.output_extent(input.extent(1)),
-                          kw.output_extent(input.extent(2)), input.extent(3)});
+                   kw.output_extent(input.extent(2)), input.extent(3)});
   Tensor<int32_t> index(value.extents());
   value.fill(NumericLimits<T>::min());
   index.fill(NumericLimits<int32_t>::min());

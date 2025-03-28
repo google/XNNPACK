@@ -187,9 +187,9 @@ class VUnaryMicrokernelTester {
             ASSERT_TRUE(std::isnan(static_cast<float>(x[i])));
           } else {
             ASSERT_NEAR(x[i], y_ref[i],
-                      test_info.Tolerance(y_ref[i], xnn_datatype_of<Out>()))
-              << "at " << i << " / " << batch_size() << ", x[" << i
-              << "] = " << std::scientific << (float)x_orig[i];
+                        test_info.Tolerance(y_ref[i], xnn_datatype_of<Out>()))
+                << "at " << i << " / " << batch_size() << ", x[" << i
+                << "] = " << std::scientific << (float)x_orig[i];
           }
         }
       }

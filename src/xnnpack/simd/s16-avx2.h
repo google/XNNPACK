@@ -74,8 +74,8 @@ xnn_load_tail_s16(const int16_t* input, size_t num_elements) XNN_OOB_READS {
   return _mm256_inserti128_si256(_mm256_castsi128_si256(low), high, 1);
 }
 
-static XNN_INLINE xnn_simd_s16_t
-xnn_load_tail_safe_s16(const int16_t* input, size_t num_elements) {
+static XNN_INLINE xnn_simd_s16_t xnn_load_tail_safe_s16(const int16_t* input,
+                                                        size_t num_elements) {
   assert(num_elements > 0);
   assert(num_elements < xnn_simd_size_s16);
 

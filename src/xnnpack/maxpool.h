@@ -18,23 +18,19 @@
 extern "C" {
 #endif
 
-
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, channel_tile, primary_tile, datatype, params_type, init_params) \
-  XNN_INTERNAL void ukernel(                                                                                            \
-      size_t output_pixels,                                                                                             \
-      size_t kernel_size,                                                                                               \
-      size_t channels,                                                                                                  \
-      const datatype** input,                                                                               \
-      size_t input_offset,                                                                                              \
-      datatype* output,                                                                                     \
-      size_t input_increment,                                                                                           \
-      size_t output_increment,                                                                                          \
+#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, channel_tile,   \
+                                primary_tile, datatype, params_type, \
+                                init_params)                         \
+  XNN_INTERNAL void ukernel(                                         \
+      size_t output_pixels, size_t kernel_size, size_t channels,     \
+      const datatype** input, size_t input_offset, datatype* output, \
+      size_t input_increment, size_t output_increment,               \
       const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 #include "src/f16-maxpool/f16-maxpool-minmax.h"
 #include "src/f32-maxpool/f32-maxpool-minmax.h"
-#include "src/u8-maxpool/u8-maxpool-minmax.h"
 #include "src/s8-maxpool/s8-maxpool-minmax.h"
+#include "src/u8-maxpool/u8-maxpool-minmax.h"
 
 #undef XNN_UKERNEL_WITH_PARAMS
 

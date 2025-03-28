@@ -10,11 +10,9 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
-
 #include <wasm_simd128.h>
 
 #include "src/xnnpack/common.h"
-
 
 // SIMD vector type for f32 using WASMSIMD.
 typedef v128_t xnn_simd_f32_t;
@@ -27,7 +25,7 @@ typedef v128_t xnn_simd_f32_t;
       (xnn_simd_f32_t)((__f32x4){(val), (val), (val), (val)});
 
 #define XNN_SIMD_CONST_F32_FROM_INT32(var, val) \
-  static const xnn_simd_f32_t var =  \
+  static const xnn_simd_f32_t var =             \
       (xnn_simd_f32_t)((__u32x4){(val), (val), (val), (val)});
 
 // Whether or not this architecture has native fused multiply-add support.
@@ -164,17 +162,20 @@ xnn_load_tail_f32(const float* input, size_t num_elements) XNN_OOB_READS {
   return wasm_v128_load(input);
 }
 
-static XNN_INLINE xnn_simd_f32_t
-xnn_load_tail_safe_f32(const float* input, size_t num_elements) {
+static XNN_INLINE xnn_simd_f32_t xnn_load_tail_safe_f32(const float* input,
+                                                        size_t num_elements) {
   assert(num_elements > 0);
   assert(num_elements < xnn_simd_size_f32);
 
   XNN_ALIGN(16) float padded[4];
   float* dst = padded;
   switch (num_elements) {
-  case 3: *dst++ = *input++;
-  case 2: *dst++ = *input++;
-  default: *dst++ = *input++;
+    case 3:
+      *dst++ = *input++;
+    case 2:
+      *dst++ = *input++;
+    default:
+      *dst++ = *input++;
   }
   return wasm_v128_load(padded);
 }

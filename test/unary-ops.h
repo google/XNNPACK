@@ -77,7 +77,8 @@ struct UnaryOpInfo {
   virtual float ReferenceImpl(float x, const xnn_unary_params& params) const {
     XNN_UNREACHABLE;
   }
-  virtual int32_t ReferenceImpl(int32_t x, const xnn_unary_params& params) const {
+  virtual int32_t ReferenceImpl(int32_t x,
+                                const xnn_unary_params& params) const {
     XNN_UNREACHABLE;
   }
 
@@ -129,7 +130,9 @@ struct Convert : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return x;
   }
-  int32_t ReferenceImpl(int32_t x, const xnn_unary_params&) const override { return x; }
+  int32_t ReferenceImpl(int32_t x, const xnn_unary_params&) const override {
+    return x;
+  }
 
   float Tolerance(float y_ref, xnn_datatype datatype) const override {
     return xnn_datatype_is_quantized(datatype)
@@ -178,8 +181,10 @@ struct Clamp : public UnaryOpInfo {
     return std::min<float>(std::max<float>(x, params.clamp.min),
                            params.clamp.max);
   }
-  int32_t ReferenceImpl(int32_t x, const xnn_unary_params& params) const override {
-    return std::min<int32_t>(std::max<int32_t>(x, params.clamp.min), params.clamp.max);
+  int32_t ReferenceImpl(int32_t x,
+                        const xnn_unary_params& params) const override {
+    return std::min<int32_t>(std::max<int32_t>(x, params.clamp.min),
+                             params.clamp.max);
   }
 
   xnn_quantization_params InputQuantizationParams(
@@ -447,7 +452,8 @@ struct Square : public UnaryOpInfo {
     return x * x;
   }
   int32_t ReferenceImpl(int32_t x, const xnn_unary_params&) const override {
-    return static_cast<int32_t>(static_cast<int64_t>(x) * static_cast<int64_t>(x));
+    return static_cast<int32_t>(static_cast<int64_t>(x) *
+                                static_cast<int64_t>(x));
   }
 
   float Tolerance(float y_ref, xnn_datatype datatype) const override {

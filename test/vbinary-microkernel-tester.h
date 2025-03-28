@@ -13,9 +13,9 @@
 #include <cstdlib>
 
 #include <gtest/gtest.h>
-#include "src/xnnpack/isa-checks.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
 #include "src/xnnpack/microfnptr.h"
 
 class VBinaryMicrokernelTester {
@@ -70,7 +70,8 @@ class VBinaryMicrokernelTester {
   }
 
   template <typename T>
-  void reference_op_impl(const T* a, const T* b, T* result, size_t n, OpType op_type) const {
+  void reference_op_impl(const T* a, const T* b, T* result, size_t n,
+                         OpType op_type) const {
     size_t stride_b = broadcast_b() ? 0 : 1;
     for (size_t i = 0; i < n; ++i) {
       float f_result = compute_float(op_type, a[i], b[i * stride_b]);
@@ -223,7 +224,7 @@ class VBinaryMicrokernelTester {
     TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                     \
     const size_t batch_scale = get_batch_scale<datatype>();                   \
     VBinaryMicrokernelTester()                                                \
-        .batch_size(batch_tile* batch_scale)                                  \
+        .batch_size(batch_tile * batch_scale)                                 \
         .broadcast_b(is_binaryc)                                              \
         .Test(__VA_ARGS__);                                                   \
   }

@@ -21,13 +21,11 @@
 #define __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX_BASE_H_
 
 #include <assert.h>
+#include <immintrin.h>
 #include <stddef.h>
 #include <stdint.h>
 
-#include <immintrin.h>
-
 #include "src/xnnpack/common.h"
-
 
 // SIMD vector type for f32 using AVX.
 typedef __m256 xnn_simd_f32_t;
@@ -40,7 +38,6 @@ typedef __m256 xnn_simd_f32_t;
 
 #define XNN_SIMD_CONST_F32_FROM_INT32(var, val) \
   const xnn_simd_f32_t var = _mm256_castsi256_ps(_mm256_set1_epi32(val));
-
 
 // Mask table used for masked load/store operations.
 static const int32_t mask_table_avx_f32[14] = {-1, -1, -1, -1, -1, -1, -1,
@@ -88,7 +85,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
-  return _mm256_round_ps(a, _MM_FROUND_TO_NEAREST_INT|_MM_FROUND_NO_EXC);
+  return _mm256_round_ps(a, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
 }
 
 // Logical operations.

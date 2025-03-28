@@ -236,8 +236,7 @@ class UnaryNCTest : public testing::TestWithParam<Param> {
               ASSERT_TRUE(std::isnan(static_cast<float>(y)));
             } else {
               ASSERT_NEAR(y, y_ref, op_info->Tolerance(y_ref, output_datatype))
-                  << "x = " << x
-                  << ", y = " << y
+                  << "x = " << x << ", y = " << y
                   << ", input1 zero point = " << input_quantization.zero_point
                   << ", input1 scale = " << input_quantization.scale
                   << ", output zero point = " << output_quantization.zero_point
@@ -395,14 +394,11 @@ xnn_unary_operator all_unary_ops[] = {
 };
 
 xnn_datatype all_datatypes[] = {
-    xnn_datatype_quint8,
-    xnn_datatype_qint8,
+    xnn_datatype_quint8, xnn_datatype_qint8,
 #ifndef XNN_EXCLUDE_F16_TESTS
     xnn_datatype_fp16,
 #endif
-    xnn_datatype_bf16,
-    xnn_datatype_fp32,
-    xnn_datatype_int32,
+    xnn_datatype_bf16,   xnn_datatype_fp32,  xnn_datatype_int32,
 };
 
 xnn_datatype quantized_datatypes[] = {

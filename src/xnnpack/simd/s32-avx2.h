@@ -72,8 +72,8 @@ static XNN_INLINE xnn_simd_s32_t xnn_set1_s32(int32_t v) {
 
 // Tail load/store operations.
 
-static XNN_INLINE xnn_simd_s32_t
-xnn_load_tail_s32(const int32_t* input, size_t num_elements) {
+static XNN_INLINE xnn_simd_s32_t xnn_load_tail_s32(const int32_t* input,
+                                                   size_t num_elements) {
   assert(num_elements > 0);
   assert(num_elements < xnn_simd_size_s32);
 
@@ -105,8 +105,7 @@ static XNN_INLINE void xnn_store_tail_s32(int32_t* output, xnn_simd_s32_t v,
 
 // Conversion operations.
 
-static XNN_INLINE __m256
-xnn_cvt_f32_s32(xnn_simd_s32_t a) {
+static XNN_INLINE __m256 xnn_cvt_f32_s32(xnn_simd_s32_t a) {
   return _mm256_cvtepi32_ps(a);
 }
 

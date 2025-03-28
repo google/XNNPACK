@@ -96,21 +96,36 @@ static XNN_INLINE xnn_simd_u8_t xnn_load_tail_safe_u8(const uint8_t* input,
   XNN_ALIGN(16) uint8_t padded[16];
   uint8_t* d = &padded[0];
   switch (num_elements) {
-  case 15: *d++ = *input++;
-  case 14: *d++ = *input++;
-  case 13: *d++ = *input++;
-  case 12: *d++ = *input++;
-  case 11: *d++ = *input++;
-  case 10: *d++ = *input++;
-  case 9: *d++ = *input++;
-  case 8: *d++ = *input++;
-  case 7: *d++ = *input++;
-  case 6: *d++ = *input++;
-  case 5: *d++ = *input++;
-  case 4: *d++ = *input++;
-  case 3: *d++ = *input++;
-  case 2: *d++ = *input++;
-  case 1: *d++ = *input++;
+    case 15:
+      *d++ = *input++;
+    case 14:
+      *d++ = *input++;
+    case 13:
+      *d++ = *input++;
+    case 12:
+      *d++ = *input++;
+    case 11:
+      *d++ = *input++;
+    case 10:
+      *d++ = *input++;
+    case 9:
+      *d++ = *input++;
+    case 8:
+      *d++ = *input++;
+    case 7:
+      *d++ = *input++;
+    case 6:
+      *d++ = *input++;
+    case 5:
+      *d++ = *input++;
+    case 4:
+      *d++ = *input++;
+    case 3:
+      *d++ = *input++;
+    case 2:
+      *d++ = *input++;
+    case 1:
+      *d++ = *input++;
   }
   return vld1q_u8(&padded[0]);
 }
