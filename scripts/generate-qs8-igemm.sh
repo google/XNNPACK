@@ -1174,4 +1174,9 @@ tools/xngen src/qs8-igemm/rvv.c.in -D MR=1 -D NR=m4 -D REQUANTIZATION=FP32 -D DA
 tools/xngen src/qs8-igemm/rvv.c.in -D MR=4 -D NR=m4 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4v-minmax-fp32-rvv.c &
 tools/xngen src/qs8-igemm/rvv.c.in -D MR=7 -D NR=m4 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-7x4v-minmax-fp32-rvv.c &
 
+tools/xngen src/qs8-igemm/rvv.c.in -D MR=1 -D NR=m4 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-igemm/gen/qu8-igemm-1x4v-minmax-fp32-rvv.c &
+tools/xngen src/qs8-igemm/rvv.c.in -D MR=4 -D NR=m4 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-igemm/gen/qu8-igemm-4x4v-minmax-fp32-rvv.c &
+tools/xngen src/qs8-igemm/rvv.c.in -D MR=7 -D NR=m4 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-igemm/gen/qu8-igemm-7x4v-minmax-fp32-rvv.c &
+
+
 wait
