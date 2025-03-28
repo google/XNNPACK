@@ -213,7 +213,8 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nhwc(
     *workspace_size = 0;
     *workspace_alignment = 1;
 
-    if (output_height * output_width != resize_op->last_output_height * resize_op->last_output_width) {
+    if (output_height * output_width != resize_op->last_output_height * resize_op->last_output_width ||
+        channels != resize_op->last_input_channels) {
       const void** indirection_buffer = (const void**) xnn_reallocate_memory(resize_op->indirection_buffer, indirection_buffer_size);
       if (indirection_buffer == NULL) {
         xnn_log_error(
@@ -240,7 +241,8 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nhwc(
     if (input_height != resize_op->last_input_height ||
         input_width != resize_op->last_input_width ||
         output_height != resize_op->last_output_height ||
-        output_width != resize_op->last_output_width)
+        output_width != resize_op->last_output_width ||
+        channels != resize_op->last_input_channels)
     {
       const uint32_t flags = resize_op->flags;
       // Set a dummy input first, the actual input offset is calculated in setup when we have the input pointer.
@@ -259,6 +261,7 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nhwc(
       resize_op->last_input_width = input_width;
       resize_op->last_output_height = output_height;
       resize_op->last_output_width = output_width;
+      resize_op->last_input_channels = channels;
     }
   }
 

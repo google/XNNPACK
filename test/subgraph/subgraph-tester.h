@@ -278,6 +278,10 @@ class SubgraphTester {
   SubgraphTester& AddReshape(const std::vector<size_t>& new_dims,
                              uint32_t input_id, uint32_t output_id);
 
+  SubgraphTester& AddResizeBilinear(size_t new_height, size_t new_width,
+                                    uint32_t input_id, uint32_t output_id,
+                                    uint32_t flags = 0);
+
   SubgraphTester& AddFuseDims(size_t first_dim, size_t num_dims,
                               uint32_t input_id, uint32_t output_id);
 

@@ -1409,6 +1409,7 @@ IF(XNNPACK_BUILD_TESTS)
         concatenate
         copy
         depth-to-space-2d
+        depthwise-convolution-2d
         even-split
         fully-connected
         max-pooling-2d
@@ -1442,8 +1443,7 @@ IF(XNNPACK_BUILD_TESTS)
 
     SET(LIBRARY_SUBGRAPH_CONVOLUTION_UNIT_TESTS
         convolution-2d
-        deconvolution-2d
-        depthwise-convolution-2d)
+        deconvolution-2d)
     FOREACH(TEST ${LIBRARY_SUBGRAPH_CONVOLUTION_UNIT_TESTS})
       ADD_EXECUTABLE(${TEST}-test test/subgraph/${TEST}.cc)
       TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE

@@ -292,6 +292,17 @@ SubgraphTester& SubgraphTester::AddReshape(const std::vector<size_t>& new_dims,
   return *this;
 }
 
+SubgraphTester& SubgraphTester::AddResizeBilinear(size_t new_height,
+                                                  size_t new_width,
+                                                  uint32_t input_id,
+                                                  uint32_t output_id,
+                                                  uint32_t flags) {
+  const xnn_status status = xnn_define_static_resize_bilinear_2d(
+      subgraph_.get(), new_height, new_width, input_id, output_id, flags);
+  EXPECT_EQ(status, xnn_status_success);
+  return *this;
+}
+
 SubgraphTester& SubgraphTester::AddFuseDims(size_t first_dim, size_t num_dims,
                                             uint32_t input_id,
                                             uint32_t output_id) {
