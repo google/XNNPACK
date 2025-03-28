@@ -59,6 +59,9 @@ DECLARE_F32_CONV_HWC2CHW_UKERNEL_FUNCTION(xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3
 DECLARE_F32_CONV_HWC2CHW_UKERNEL_FUNCTION(xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__sse_1x1)
 DECLARE_F32_CONV_HWC2CHW_UKERNEL_FUNCTION(xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__sse_2x2)
 DECLARE_F32_CONV_HWC2CHW_UKERNEL_FUNCTION(xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__wasmsimd_2x2)
+DECLARE_F32_CONV_HWC2CHW_UKERNEL_FUNCTION(xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_1x1)
+DECLARE_F32_CONV_HWC2CHW_UKERNEL_FUNCTION(xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_2x1)
+DECLARE_F32_CONV_HWC2CHW_UKERNEL_FUNCTION(xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_2x2)
 
 #define DECLARE_F16_CONV_HWC2CHW_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                                 \
