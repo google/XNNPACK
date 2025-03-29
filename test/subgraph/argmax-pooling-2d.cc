@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <cassert>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <vector>
@@ -63,7 +64,7 @@ void TestImpl() {
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
-  for (int rep = 0; rep < 100; ++rep) {
+  for (auto _ : FuzzTest(std::chrono::milliseconds(1000))) {
     StencilParams kw = random_stencil_params(rng);
     StencilParams kh = random_stencil_params(rng);
     kw.dilation = 1;

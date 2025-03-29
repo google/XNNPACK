@@ -3,6 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <vector>
@@ -24,7 +25,7 @@ void TestImpl(size_t rank) {
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
-  for (int iters = 0; iters < 100; ++iters) {
+  for (auto _ : FuzzTest(std::chrono::milliseconds(250))) {
     std::vector<size_t> pre_padding = random_shape(rng, rank, 0, 3);
     std::vector<size_t> post_padding = random_shape(rng, rank, 0, 3);
     float pad_value = 1.0f;

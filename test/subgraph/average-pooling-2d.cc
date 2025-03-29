@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <cassert>
+#include <chrono>
 #include <cstddef>
 #include <vector>
 
@@ -73,7 +74,7 @@ void TestImpl() {
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
-  for (int rep = 0; rep < 100; ++rep) {
+  for (auto _ : FuzzTest(std::chrono::milliseconds(1000))) {
     // TODO(b/406664150): Test kernels bigger than 5.
     StencilParams kw =
         random_stencil_params(rng, /*max_dilation=*/1, /*max_kernel_size=*/5);
@@ -108,7 +109,6 @@ void TestImpl() {
         // where xnn_indirection_init_dwconv2d_compressed produces incorrect
         // results if the input is smaller than the padded area. If we hit this
         // case, just try again.
-        --rep;
         break;
       }
 

@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <cassert>
+#include <chrono>
 #include <cmath>
 #include <cstddef>
 #include <vector>
@@ -60,7 +61,7 @@ void TestImpl(size_t rank) {
     return;
   }
 
-  for (int reshape = 0; reshape < 100; ++reshape) {
+  for (auto _ : FuzzTest(std::chrono::milliseconds(500))) {
     std::vector<size_t> shape = random_shape(rng, rank);
 
     Tensor<T> input(shape, PaddingBytes{XNN_EXTRA_BYTES});
