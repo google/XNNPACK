@@ -155,10 +155,13 @@ static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
 
 static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
 #if defined(__ARM_ARCH) && __ARM_ARCH < 8
-  // Create a filter for all non-finite values in `a` (all exponent bits set).
-  XNN_SIMD_CONST_F32_FROM_INT32(vexp_bits, 0x7f800000);
+  // Any input larger than 2^23 is already an integer value since its fractional
+  // bits will no longer fit in the mantissa. We create a filter for these that
+  // also catches all non-finite values in `a` (compares with NaN are always
+  // `false`).
+  XNN_SIMD_CONST_F32(vmax_non_int_val, 8388608.0f);  // 2^23.
   const xnn_simd_f32_t vfilter =
-      xnn_cmpeq_f32(xnn_and_f32(a, vexp_bits), vexp_bits);
+      vreinterpretq_f32_u32(vcaltq_f32(a, vmax_non_int_val));
 
   // Create a vector of `0.5f` with the same sign as the entries of `a`.
   XNN_SIMD_CONST_F32(vhalf, 0.5f);
@@ -169,8 +172,8 @@ static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
       vcvtq_f32_s32(vcvtq_s32_f32(xnn_add_f32(a, vsigned_half)));
 
   // Apply the non-finite value filter to replace any non-finite input with `a`.
-  return xnn_or_f32(xnn_and_f32(xnn_not_f32(vfilter), vresult),
-                    xnn_and_f32(vfilter, a));
+  return xnn_or_f32(xnn_and_f32(vfilter, vresult),
+                    xnn_and_f32(xnn_not_f32(vfilter), a));
 #else
   return vrndnq_f32(a);
 #endif  // defined(__ARM_ARCH) && __ARM_ARCH == 7
@@ -235,7 +238,8 @@ static XNN_INLINE xnn_simd_f32_t xnn_load_tail_safe_f32(const float* input,
       *dst++ = *input++;
     case 1:
       *dst++ = *input++;
-    default: ;
+    default: {
+    }
   }
   return vld1q_f32(padded);
 }
