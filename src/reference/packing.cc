@@ -151,12 +151,14 @@ void xnn_pack_bf16_f32_gemm_goi_w(size_t g, size_t nc, size_t kc, size_t nr,
               round_down_po2(kr_block_start, skr) +
               ((kr_block_start + nr_block_offset * kr) & (skr - 1));
           const size_t kc_end = std::min(kc, kc_begin + kr);
+          xnn_bfloat16* end = (xnn_bfloat16*)packed_weights + kr;
           if (kc_begin < kc_end) {
             std::copy_n(&k[(nr_block_start + nr_block_offset) * kc + kc_begin],
                         kc_end - kc_begin, (xnn_bfloat16*)packed_weights);
+            packed_weights = (xnn_bfloat16*)packed_weights + kc_end - kc_begin;
           }
-          packed_weights =
-              (void*)((uintptr_t)packed_weights + kr * sizeof(uint16_t));
+          std::fill((xnn_bfloat16*)packed_weights, end, xnn_bfloat16(0.0f));
+          packed_weights = end;
         }
         packed_weights = (void*)((uintptr_t)packed_weights +
                                  (nr - nr_block_size) * kr * sizeof(uint16_t));
