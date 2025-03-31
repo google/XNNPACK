@@ -202,6 +202,7 @@ void TestImpl(bool channelwise_quantization = false) {
     Tensor<float> filter_scale(
         {channelwise_quantization ? filter.extent(2) : 1});
     if (filter_scale.size() > 1) {
+      // Generate random per-channel scales, in the range of the original scale.
       std::uniform_real_distribution<> filter_scale_dist(
           0.001f, filter_quantization.scale);
       filter_scale.generate([&]() { return filter_scale_dist(rng); });
@@ -235,11 +236,6 @@ void TestImpl(bool channelwise_quantization = false) {
     subgraph.AddInputTensor(4, xnn_datatype_of<Data>(), input_quantization,
                             input_id);
     if (channelwise_quantization) {
-      // Generate random per-channel scales, in the range of the original scale.
-      std::uniform_real_distribution<> filter_scale_dist(
-          0.001f, filter_quantization.scale);
-      filter_scale.generate([&]() { return filter_scale_dist(rng); });
-
       subgraph.AddStaticTensorQS8(
           filter.extents(), /*channel_dim=*/2, TensorType::kDense,
           filter_scale.data(), filter_id,
