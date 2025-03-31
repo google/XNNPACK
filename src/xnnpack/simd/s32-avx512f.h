@@ -73,8 +73,15 @@ static XNN_INLINE xnn_simd_s32_t xnn_set1_s32(int32_t v) {
 
 static XNN_INLINE xnn_simd_s32_t xnn_load_tail_s32(const int32_t* input,
                                                    size_t num_elements) {
-  assert(num_elements > 0);
-  assert(num_elements < xnn_simd_size_s32);
+  assert(num_elements <= xnn_simd_size_s32);
+  const __mmask16 vmask =
+      _cvtu32_mask16((uint32_t)((UINT32_C(1) << num_elements) - UINT32_C(1)));
+  return _mm512_maskz_loadu_epi32(vmask, input);
+}
+
+static XNN_INLINE xnn_simd_s32_t
+xnn_load_tail_safe_s32(const int32_t* input, size_t num_elements) {
+  assert(num_elements <= xnn_simd_size_s32);
   const __mmask16 vmask =
       _cvtu32_mask16((uint32_t)((UINT32_C(1) << num_elements) - UINT32_C(1)));
   return _mm512_maskz_loadu_epi32(vmask, input);
@@ -82,13 +89,13 @@ static XNN_INLINE xnn_simd_s32_t xnn_load_tail_s32(const int32_t* input,
 
 static XNN_INLINE void xnn_store_tail_s32(int32_t* output, xnn_simd_s32_t v,
                                           size_t num_elements) {
-  assert(num_elements > 0);
-  assert(num_elements < xnn_simd_size_s32);
+  assert(num_elements <= xnn_simd_size_s32);
 
   const __mmask16 vmask =
       _cvtu32_mask16((uint32_t)((UINT32_C(1) << num_elements) - UINT32_C(1)));
   _mm512_mask_storeu_epi32(output, vmask, v);
 }
+
 
 // Conversion operations.
 

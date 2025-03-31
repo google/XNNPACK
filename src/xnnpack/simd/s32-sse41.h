@@ -72,15 +72,33 @@ static XNN_INLINE xnn_simd_s32_t xnn_set1_s32(int32_t v) {
 
 static XNN_INLINE xnn_simd_s32_t
 xnn_load_tail_s32(const int32_t* input, size_t num_elements) XNN_OOB_READS {
-  assert(num_elements > 0);
-  assert(num_elements < xnn_simd_size_s32);
+  assert(num_elements <= xnn_simd_size_s32);
   return _mm_loadu_si128((const __m128i*)input);
+}
+
+static XNN_INLINE xnn_simd_s32_t xnn_load_tail_safe_s32(const int32_t* input,
+                                                        size_t num_elements) {
+  assert(num_elements <= xnn_simd_size_s32);
+
+  XNN_ALIGN(16) int32_t padded[4];
+  int32_t* dst = padded;
+  switch (num_elements) {
+    case 4:
+      *dst++ = *input++;
+    case 3:
+      *dst++ = *input++;
+    case 2:
+      *dst++ = *input++;
+    case 1:
+      *dst++ = *input++;
+    default: ;
+  }
+  return _mm_loadu_si128((const __m128i*)padded);
 }
 
 static XNN_INLINE void xnn_store_tail_s32(int32_t* output, xnn_simd_s32_t v,
                                           size_t num_elements) {
-  assert(num_elements > 0);
-  assert(num_elements < xnn_simd_size_s32);
+  assert(num_elements <= xnn_simd_size_s32);
 
   if (num_elements & 2) {
     _mm_storel_epi64((__m128i*)output, v);

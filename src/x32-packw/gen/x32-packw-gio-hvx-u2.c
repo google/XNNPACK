@@ -12,22 +12,11 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <string.h>  // for memcpy
 
 #include "src/xnnpack/simd/s32-hvx.h"
 
 #include "src/xnnpack/intrinsics-polyfill.h"
 #include "src/xnnpack/packw.h"
-
-// todo: port to native masked stores for avx/avx512
-static XNN_INLINE xnn_simd_s32_t
-xnn_load_tail_safe_s32(const int32_t* input, size_t num_elements) {
-  assert(num_elements <= xnn_simd_size_s32);
-
-  xnn_simd_s32_t padded;
-  memcpy(&padded, input, num_elements * sizeof(int32_t));
-  return xnn_load_s32((const int32_t*)&padded);
-}
 
 
 // Pack pre-transposed weights (GIO) for use by f32-gemm

@@ -183,20 +183,24 @@ xnn_load_tail_f32(const float* input, size_t num_elements) XNN_OOB_READS {
   return _mm_loadu_ps(input);
 }
 
+// TODO: Use direct load of 1,2 or 3 floats
+// Consider clearing pad values to 0
 static XNN_INLINE xnn_simd_f32_t xnn_load_tail_safe_f32(const float* input,
                                                         size_t num_elements) {
-  assert(num_elements > 0);
-  assert(num_elements < xnn_simd_size_f32);
+  assert(num_elements <= xnn_simd_size_f32);
 
   XNN_ALIGN(16) float padded[4];
   float* dst = padded;
   switch (num_elements) {
+    case 4:
+      *dst++ = *input++;
     case 3:
       *dst++ = *input++;
     case 2:
       *dst++ = *input++;
-    default:
+    case 1:
       *dst++ = *input++;
+    default: ;
   }
   return _mm_load_ps(padded);
 }
