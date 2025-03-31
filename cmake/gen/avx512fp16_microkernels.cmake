@@ -32,9 +32,7 @@ SET(PROD_AVX512FP16_MICROKERNEL_SRCS
   src/f16-vbinary/gen/f16-vsqrdiffc-avx512fp16-u64.c
   src/f16-vbinary/gen/f16-vsub-avx512fp16-u64.c
   src/f16-vbinary/gen/f16-vsubc-avx512fp16-u64.c
-  src/f16-vcos/gen/f16-vcos-avx512fp16-rational-3-2-div.c
-  src/f16-vgelu/gen/f16-vgelu-avx512fp16-rational-6-4-div.c
-  src/f16-vsin/gen/f16-vsin-avx512fp16-rational-3-2-div.c)
+  src/f16-vgelu/gen/f16-vgelu-avx512fp16-rational-6-4-div.c)
 
 SET(NON_PROD_AVX512FP16_MICROKERNEL_SRCS
   src/f16-gemm/gen/f16-gemm-1x32-minmax-avx512fp16-broadcast.c

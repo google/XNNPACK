@@ -103,6 +103,7 @@ _MICROKERNEL_NAME_REGEX = re.compile(
 _VERIFICATION_IGNORE_SUBDIRS = {
     os.path.join('src', 'qs8-requantization'),
     os.path.join('src', 'qu8-requantization'),
+    os.path.join('src', 'reference'),
     os.path.join('src', 'xnnpack', 'simd'),
 }
 
