@@ -238,14 +238,6 @@ static void init_f16_gelu_config(void) {
   if (hardware_config->use_arm_neon_fp16_arith) {
     f16_gelu_config.ukernel = (xnn_vunary_ukernel_fn)xnn_f16_vgelu_ukernel__neonfp16arith_rational_6_4_div_u16;
   }
-#elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_AVX512FP16
-  const struct xnn_hardware_config* hardware_config =
-      xnn_init_hardware_config();
-  assert(hardware_config != NULL);
-  if (hardware_config->use_x86_avx512fp16) {
-    f16_gelu_config.ukernel = (xnn_vunary_ukernel_fn)
-        xnn_f16_vgelu_ukernel__avx512fp16_rational_6_4_div_u32;
-  }
 #else
   f16_gelu_config.ukernel = (xnn_vunary_ukernel_fn)xnn_f16_vgelu_ukernel__scalar_rational_6_4_div_u4;
 #endif
