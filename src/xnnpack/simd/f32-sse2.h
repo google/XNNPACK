@@ -8,10 +8,11 @@
 #define __XNNPACK_SRC_XNNPACK_SIMD_F32_SSE2_H_
 
 #include <assert.h>
-#include <emmintrin.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <xmmintrin.h>
+
+// Header file for SSE2 intrinsics.
+#include <emmintrin.h>
 
 #include "src/xnnpack/common.h"
 
