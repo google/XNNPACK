@@ -155,18 +155,16 @@ void GemmMicrokernelTester::Test(xnn_qd8_f16_qc8w_igemm_ukernel_fn igemm,
          &packing_params);
     // Fill in packed kernel scale
     xnn_init_qs8_qc8w_scale_fp32_params(
-        n(), nr(), nr(),
+        n(), nr(),
         nr() * (ks() * packed_k() * sizeof(int8_t) + 3 * sizeof(float)),
-        nr() * (ks() * packed_k() * sizeof(int8_t) + 3 * sizeof(float)), 0,
         kernel_scale.data(),
         (void*)((uintptr_t)packed_w.data() +
                 nr() * (ks() * packed_k() * sizeof(int8_t) + sizeof(float))));
 
     // Fill in packed bias
     xnn_init_qs8_qc8w_scale_fp32_params(
-        n(), nr(), nr(),
+        n(), nr(),
         nr() * (ks() * packed_k() * sizeof(int8_t) + 3 * sizeof(float)),
-        nr() * (ks() * packed_k() * sizeof(int8_t) + 3 * sizeof(float)), 0,
         bias.data(),
         (void*)((uintptr_t)packed_w.data() +
                 nr() *
@@ -332,18 +330,16 @@ void GemmMicrokernelTester::Test(xnn_qd8_f32_qc8w_igemm_ukernel_fn igemm,
          &packing_params);
     // Fill in packed kernel scale
     xnn_init_qs8_qc8w_scale_fp32_params(
-        n(), nr(), nr(),
+        n(), nr(),
         nr() * (ks() * packed_k() * sizeof(int8_t) + 3 * sizeof(float)),
-        nr() * (ks() * packed_k() * sizeof(int8_t) + 3 * sizeof(float)), 0,
         kernel_scale.data(),
         (void*)((uintptr_t)packed_w.data() +
                 nr() * (ks() * packed_k() * sizeof(int8_t) + sizeof(float))));
 
     // Fill in packed bias
     xnn_init_qs8_qc8w_scale_fp32_params(
-        n(), nr(), nr(),
+        n(), nr(),
         nr() * (ks() * packed_k() * sizeof(int8_t) + 3 * sizeof(float)),
-        nr() * (ks() * packed_k() * sizeof(int8_t) + 3 * sizeof(float)), 0,
         bias.data(),
         (void*)((uintptr_t)packed_w.data() +
                 nr() *
@@ -745,9 +741,8 @@ void GemmMicrokernelTester::Test(
 
     const size_t type_size = sizeof(int8_t);
     xnn_init_qs8_qc8w_scale_fp32_params(
-        n(), nr(), nr(),
+        n(), nr(),
         nr() * (packed_k() * type_size + (sizeof(int32_t) + sizeof(float))),
-        nr() * (packed_k() * type_size + (sizeof(int32_t) + sizeof(float))), 0,
         scale.data(),
         (void*)((uintptr_t)packed_data +
                 nr() * (packed_k() * type_size + sizeof(int32_t))));
@@ -891,12 +886,10 @@ void GemmMicrokernelTester::Test(
     }
 
     xnn_init_qs8_qc8w_scale_fp32_params(
-        n(), nr(), nr(),
+        n(), nr(),
         nr() * (ks() * packed_k() * sizeof(int8_t) +
                 (sizeof(int32_t) + sizeof(float))),
-        nr() * (ks() * packed_k() * sizeof(int8_t) +
-                (sizeof(int32_t) + sizeof(float))),
-        0, scale.data(),
+        scale.data(),
         (void*)((uintptr_t)packed_w.data() +
                 nr() * (ks() * packed_k() * sizeof(int8_t) + sizeof(int32_t))));
 
@@ -1010,18 +1003,16 @@ void GemmMicrokernelTester::Test(xnn_qd8_f16_qc8w_gemm_ukernel_fn gemm,
          &packing_params);
     // Fill in packed kernel scale
     xnn_init_qs8_qc8w_scale_fp32_params(
-        n(), nr(), nr(),
+        n(), nr(),
         nr() * (ks() * packed_k() * sizeof(int8_t) + 3 * sizeof(float)),
-        nr() * (ks() * packed_k() * sizeof(int8_t) + 3 * sizeof(float)), 0,
         kernel_scale.data(),
         (void*)((uintptr_t)packed_w.data() +
                 nr() * (ks() * packed_k() * sizeof(int8_t) + sizeof(float))));
 
     // Fill in packed bias
     xnn_init_qs8_qc8w_scale_fp32_params(
-        n(), nr(), nr(),
+        n(), nr(),
         nr() * (ks() * packed_k() * sizeof(int8_t) + 3 * sizeof(float)),
-        nr() * (ks() * packed_k() * sizeof(int8_t) + 3 * sizeof(float)), 0,
         bias.data(),
         (void*)((uintptr_t)packed_w.data() +
                 nr() *
@@ -1161,18 +1152,16 @@ void GemmMicrokernelTester::Test(xnn_qd8_f32_qc8w_gemm_ukernel_fn gemm,
          &packing_params);
     // Fill in packed kernel scale
     xnn_init_qs8_qc8w_scale_fp32_params(
-        n(), nr(), nr(),
+        n(), nr(),
         nr() * (ks() * packed_k() * sizeof(int8_t) + 3 * sizeof(float)),
-        nr() * (ks() * packed_k() * sizeof(int8_t) + 3 * sizeof(float)), 0,
         kernel_scale.data(),
         (void*)((uintptr_t)packed_w.data() +
                 nr() * (ks() * packed_k() * sizeof(int8_t) + sizeof(float))));
 
     // Fill in packed bias
     xnn_init_qs8_qc8w_scale_fp32_params(
-        n(), nr(), nr(),
+        n(), nr(),
         nr() * (ks() * packed_k() * sizeof(int8_t) + 3 * sizeof(float)),
-        nr() * (ks() * packed_k() * sizeof(int8_t) + 3 * sizeof(float)), 0,
         bias.data(),
         (void*)((uintptr_t)packed_w.data() +
                 nr() *
@@ -1317,16 +1306,15 @@ void GemmMicrokernelTester::Test(xnn_qd8_f16_qc4w_gemm_ukernel_fn gemm,
          &packing_params);
     // Fill in packed kernel scale
     xnn_init_qs8_qc8w_scale_fp32_params(
-        n(), nr(), nr(), nr() * (ks() * packed_k_bytes + 3 * sizeof(float)),
-        nr() * (ks() * packed_k_bytes + 3 * sizeof(float)), 0,
+        n(), nr(), nr() * (ks() * packed_k_bytes + 3 * sizeof(float)),
         kernel_scale.data(),
         (void*)((uintptr_t)packed_w.data() +
                 nr() * (ks() * packed_k_bytes + sizeof(float))));
 
     // Fill in packed bias
     xnn_init_qs8_qc8w_scale_fp32_params(
-        n(), nr(), nr(), nr() * (ks() * packed_k_bytes + 3 * sizeof(float)),
-        nr() * (ks() * packed_k_bytes + 3 * sizeof(float)), 0, bias.data(),
+        n(), nr(), nr() * (ks() * packed_k_bytes + 3 * sizeof(float)),
+        bias.data(),
         (void*)((uintptr_t)packed_w.data() +
                 nr() * (ks() * packed_k_bytes + 2 * sizeof(float))));
 
@@ -1489,14 +1477,14 @@ void GemmMicrokernelTester::Test(xnn_qd8_f16_qb4w_gemm_ukernel_fn gemm,
     size_t block_stride = (bl() / 2 + sizeof(xnn_float16)) * nr();
     size_t start_offset = nr() * (packed_k_bytes / num_blocks + sizeof(float));
     uintptr_t start = (uintptr_t)packed_w.data() + start_offset;
-    xnn_init_blockwise_scale_bf16_params(n(), nr(), nr(), stride, stride,
+    xnn_init_blockwise_scale_bf16_params(n(), nr(), stride,
                                          /*num_blocks=*/num_blocks,
-                                         /*block_stride=*/block_stride, 0,
+                                         /*block_stride=*/block_stride,
                                          kernel_scale2d.data(), (void*)start);
 
     start = (uintptr_t)packed_w.data() + stride - sizeof(float) * nr();
-    xnn_init_qs8_qc8w_scale_fp32_params(n(), nr(), nr(), stride, stride, 0,
-                                        bias.data(), (void*)start);
+    xnn_init_qs8_qc8w_scale_fp32_params(n(), nr(), stride, bias.data(),
+                                        (void*)start);
 
     // Compute 32-bit results and output quantization arguments.
     std::fill(c_ref.begin(), c_ref.end(), 0.0f);
@@ -1639,16 +1627,15 @@ void GemmMicrokernelTester::Test(xnn_qd8_f32_qc4w_gemm_ukernel_fn gemm,
          &packing_params);
     // Fill in packed kernel scale
     xnn_init_qs8_qc8w_scale_fp32_params(
-        n(), nr(), nr(), nr() * (ks() * packed_k_bytes + 3 * sizeof(float)),
-        nr() * (ks() * packed_k_bytes + 3 * sizeof(float)), 0,
+        n(), nr(), nr() * (ks() * packed_k_bytes + 3 * sizeof(float)),
         kernel_scale.data(),
         (void*)((uintptr_t)packed_w.data() +
                 nr() * (ks() * packed_k_bytes + sizeof(float))));
 
     // Fill in packed bias
     xnn_init_qs8_qc8w_scale_fp32_params(
-        n(), nr(), nr(), nr() * (ks() * packed_k_bytes + 3 * sizeof(float)),
-        nr() * (ks() * packed_k_bytes + 3 * sizeof(float)), 0, bias.data(),
+        n(), nr(), nr() * (ks() * packed_k_bytes + 3 * sizeof(float)),
+        bias.data(),
         (void*)((uintptr_t)packed_w.data() +
                 nr() * (ks() * packed_k_bytes + 2 * sizeof(float))));
 
@@ -1807,14 +1794,14 @@ void GemmMicrokernelTester::Test(xnn_qd8_f32_qb4w_gemm_ukernel_fn gemm,
     size_t block_stride = (bl() / 2 + sizeof(xnn_float16)) * nr();
     size_t start_offset = nr() * (packed_k_bytes / num_blocks + sizeof(float));
     uintptr_t start = (uintptr_t)packed_w.data() + start_offset;
-    xnn_init_blockwise_scale_bf16_params(n(), nr(), nr(), stride, stride,
+    xnn_init_blockwise_scale_bf16_params(n(), nr(), stride,
                                          /*num_blocks=*/num_blocks,
-                                         /*block_stride=*/block_stride, 0,
+                                         /*block_stride=*/block_stride,
                                          kernel_scale2d.data(), (void*)start);
 
     start = (uintptr_t)packed_w.data() + stride - sizeof(float) * nr();
-    xnn_init_qs8_qc8w_scale_fp32_params(n(), nr(), nr(), stride, stride, 0,
-                                        bias.data(), (void*)start);
+    xnn_init_qs8_qc8w_scale_fp32_params(n(), nr(), stride, bias.data(),
+                                        (void*)start);
 
     // Compute 32-bit results and output quantization arguments.
     std::fill(c_ref.begin(), c_ref.end(), 0.0f);
@@ -2355,8 +2342,8 @@ void GemmMicrokernelTester::Test(
     uintptr_t start =
         (uintptr_t)packed_w.data() + stride - sizeof(float) * nr();
 
-    xnn_init_qs8_qc8w_scale_fp32_params(n(), nr(), nr(), stride, stride, 0,
-                                        bias.data(), (void*)start);
+    xnn_init_qs8_qc8w_scale_fp32_params(n(), nr(), stride, bias.data(),
+                                        (void*)start);
 
     // Compute 32-bit results and output quantization arguments.
     std::fill(c_ref.begin(), c_ref.end(), 0);
@@ -3445,9 +3432,8 @@ void GemmMicrokernelTester::Test(
 
     // Fill in packed scale
     xnn_init_qs8_qc8w_scale_fp32_params(
-        n(), nr(), nr(),
+        n(), nr(),
         nr() * (ks() * packed_k_bytes + (sizeof(float) + sizeof(float))),
-        nr() * (ks() * packed_k_bytes + (sizeof(float) + sizeof(float))), 0,
         scale.data(),
         (void*)((uintptr_t)packed_w.data() +
                 nr() * (ks() * packed_k_bytes + sizeof(float))));
@@ -3553,12 +3539,10 @@ void GemmMicrokernelTester::Test(xnn_f32_qc8w_gemm_ukernel_fn gemm,
 
     // Fill in packed scale
     xnn_init_qs8_qc8w_scale_fp32_params(
-        n(), nr(), nr(),
+        n(), nr(),
         nr() * (ks() * packed_k() * sizeof(int8_t) +
                 (sizeof(float) + sizeof(float))),
-        nr() * (ks() * packed_k() * sizeof(int8_t) +
-                (sizeof(float) + sizeof(float))),
-        0, scale.data(),
+        scale.data(),
         (void*)((uintptr_t)packed_w.data() +
                 nr() * (ks() * packed_k() * sizeof(int8_t) + sizeof(float))));
 
@@ -3638,12 +3622,10 @@ void GemmMicrokernelTester::Test(xnn_f32_qc8w_gemm_relu_ukernel_fn gemm_relu,
 
     // Fill in packed scale
     xnn_init_qs8_qc8w_scale_fp32_params(
-        n(), nr(), nr(),
+        n(), nr(),
         nr() * (ks() * packed_k() * sizeof(int8_t) +
                 (sizeof(float) + sizeof(float))),
-        nr() * (ks() * packed_k() * sizeof(int8_t) +
-                (sizeof(float) + sizeof(float))),
-        0, scale.data(),
+        scale.data(),
         (void*)((uintptr_t)packed_w.data() +
                 nr() * (ks() * packed_k() * sizeof(int8_t) + sizeof(float))));
 
@@ -3727,12 +3709,10 @@ void GemmMicrokernelTester::Test(
 
     // Fill in packed scale
     xnn_init_qs8_qc8w_scale_fp32_params(
-        n(), nr(), nr(),
+        n(), nr(),
         nr() * (ks() * packed_k() * sizeof(int8_t) +
                 (sizeof(float) + sizeof(float))),
-        nr() * (ks() * packed_k() * sizeof(int8_t) +
-                (sizeof(float) + sizeof(float))),
-        0, scale.data(),
+        scale.data(),
         (void*)((uintptr_t)packed_w.data() +
                 nr() * (ks() * packed_k() * sizeof(int8_t) + sizeof(float))));
 

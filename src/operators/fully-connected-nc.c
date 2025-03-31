@@ -232,8 +232,8 @@ static enum xnn_status create_fully_connected_nc(
         void* weights = (void*) ((uintptr_t) weights_ptr +
           gemm_config->nr * ((k_stride << log2_filter_element_size) + bias_element_size));
         init_kernel_scale_params(
-            output_channels, gemm_config->nr, gemm_config->nr,
-            gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
+            output_channels, gemm_config->nr,
+            gemm_config->nr * weights_stride,
             kernel_scale_params, weights);
       }
 
@@ -245,8 +245,8 @@ static enum xnn_status create_fully_connected_nc(
           weights = (void*) ((uintptr_t) weights + gemm_config->nr * sizeof(float));
         }
         init_scale_params(
-            output_channels, gemm_config->nr, gemm_config->nr,
-            gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
+            output_channels, gemm_config->nr,
+            gemm_config->nr * weights_stride,
             scale_params, weights);
       }
     }

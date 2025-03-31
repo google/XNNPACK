@@ -223,12 +223,9 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_eq_kc) {
   xnn_init_blockwise_scale_bf16_params(
     /*channels=*/ nc,
     /*channels_tile=*/ nr,
-    /*channel_stride=*/ nr,
     /*stride=*/ stride,
-    /*substride=*/ stride,
     /*num_blocks=*/k_num_blocks,
     /*block_stride=*/block_stride,
-    /*stride_offset=*/ 0,
     /*scale=*/ scale.data(),
     /*packed_weight=*/ packed_weights.data() + start_offset);
 
@@ -296,12 +293,9 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, nc_gt_1) {
   xnn_init_blockwise_scale_bf16_params(
     /*channels=*/nc,
     /*channels_tile=*/nr,
-    /*channels_subtile=*/nr,
     /*stride=*/stride,
-    /*substride=*/stride,
     /*num_blocks=*/k_num_blocks,
     /*block_stride=*/block_stride,
-    /*stride_offset=*/0,
     /*scale=*/scale.data(),
     /*packed_w=*/packed_weights.data() + start_offset);
 
@@ -373,12 +367,9 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_lt_kc) {
   xnn_init_blockwise_scale_bf16_params(
     /*channels=*/ nc,
     /*channels_tile=*/ nr,
-    /*channel_stride=*/ nr,
     /*stride=*/ stride,
-    /*substride=*/ stride,
     /*num_blocks=*/k_num_blocks,
     /*block_stride=*/block_stride,
-    /*stride_offset=*/ 0,
     /*scale=*/ scale.data(),
     /*packed_weight=*/ packed_weights.data() + start_offset);
 
@@ -459,12 +450,9 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GIO_W, bl_eq_kc) {
   xnn_init_blockwise_scale_bf16_params(
     /*channels=*/nc,
     /*channels_tile=*/nr,
-    /*channel_subtile=*/nr,
     /*stride=*/stride,
-    /*substride=*/stride,
     /*num_blocks=*/k_num_blocks,
     /*block_stride=*/block_stride,
-    /*stride_offset=*/0,
     /*scale=*/scale.data(),
     /*packed_w=*/packed_weights.data() + start_offset);
 

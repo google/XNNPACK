@@ -1231,13 +1231,11 @@ typedef void (*xnn_update_f32_scaleminmax_params_fn)(
     struct xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)], float scale);
 
 typedef void (*xnn_init_scale_params_fn)(size_t channels, size_t channels_tile,
-                                         size_t channels_subtile, size_t stride,
-                                         size_t substride, size_t stride_offset,
-                                         const void* scale, void* packed_w);
+                                         size_t stride, const void* scale,
+                                         void* packed_w);
 
 typedef void (*xnn_init_qs8_qc8w_scale_params_fn)(
-    size_t channels, size_t channels_tile, size_t channels_subtile,
-    size_t stride, size_t substride, size_t stride_offset,
+    size_t channels, size_t channels_tile, size_t stride,
     const float scale[XNN_MIN_ELEMENTS(1)], void* packed_w);
 
 struct xnn_gemm_config;

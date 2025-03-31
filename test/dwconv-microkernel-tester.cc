@@ -297,12 +297,10 @@ void DWConvMicrokernelTester::Test(
     scale[c] = 1.0f / output_scale;
   }
   xnn_init_qs8_qc8w_scale_fp32_params(
-      channels(), channel_tile(), channel_tile(),
+      channels(), channel_tile(),
       channel_tile() *
           (kernel_tile() * sizeof(int8_t) + sizeof(int32_t) + sizeof(float)),
-      channel_tile() *
-          (kernel_tile() * sizeof(int8_t) + sizeof(int32_t) + sizeof(float)),
-      0, scale.data(),
+      scale.data(),
       (void*)((uintptr_t)packed_weights.data() +
               channel_tile() *
                   (kernel_tile() * sizeof(int8_t) + sizeof(int32_t))));

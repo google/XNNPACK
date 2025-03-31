@@ -199,10 +199,7 @@ static enum xnn_status create_dwconv_path(
     init_scale_params(
       /*channels=*/groups,
       /*channels_tile=*/dwconv_ukernel->channel_tile,
-      /*channels_subtile=*/dwconv_ukernel->channel_tile,
       /*stride=*/stride,
-      /*substride=*/stride,
-      /*stride_offset=*/0,
       /*scale=*/scale_params,
       /*packed_w=*/
       (void*) ((uintptr_t) weights_ptr +
@@ -362,8 +359,8 @@ static enum xnn_status create_igemm(
           (kernel_size * k_stride << log2_filter_element_size) + bias_element_size + extra_weights_bytes;
       for (uint32_t group = 0; group < groups; group++) {
         init_kernel_scale_params(
-            group_output_channels, gemm_config->nr, gemm_config->nr,
-            gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
+            group_output_channels, gemm_config->nr,
+            gemm_config->nr * weights_stride,
             kernel_scale_params, group_weights);
         kernel_scale_params += group_output_channels;
         group_weights = (void*) ((uintptr_t) group_weights + n_stride * weights_stride);
@@ -385,8 +382,8 @@ static enum xnn_status create_igemm(
           (kernel_size * k_stride << log2_filter_element_size) + bias_element_size + extra_weights_bytes;
       for (uint32_t group = 0; group < groups; group++) {
         init_scale_params(
-            group_output_channels, gemm_config->nr, gemm_config->nr,
-            gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
+            group_output_channels, gemm_config->nr,
+            gemm_config->nr * weights_stride,
             scale_params, group_weights);
         scale_params += group_output_channels;
         group_weights = (void*) ((uintptr_t) group_weights + n_stride * weights_stride);

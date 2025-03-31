@@ -254,8 +254,8 @@ static enum xnn_status create_deconvolution2d_nhwc(
             const size_t weights_stride =
                 (subkernel_size * k_stride << log2_filter_element_size) + bias_element_size + extra_weights_bytes;
             init_kernel_scale_params(
-                group_output_channels, gemm_config->nr, gemm_config->nr,
-                gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
+                group_output_channels, gemm_config->nr,
+                gemm_config->nr * weights_stride,
                 kernel_scale_params_ptr, group_weights);
             subconvolution_params++;
           }
@@ -284,8 +284,8 @@ static enum xnn_status create_deconvolution2d_nhwc(
             const size_t weights_stride =
                 (subkernel_size * k_stride << log2_filter_element_size) + bias_element_size + extra_weights_bytes;
             init_scale_params(
-                group_output_channels, gemm_config->nr, gemm_config->nr,
-                gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
+                group_output_channels, gemm_config->nr,
+                gemm_config->nr * weights_stride,
                 scale_params_ptr, group_weights);
             subconvolution_params++;
           }
@@ -304,8 +304,8 @@ static enum xnn_status create_deconvolution2d_nhwc(
           (kernel_size * k_stride << log2_filter_element_size) + bias_element_size + extra_weights_bytes;
       for (uint32_t group = 0; group < groups; group++) {
         init_kernel_scale_params(
-            group_output_channels, gemm_config->nr, gemm_config->nr,
-            gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
+            group_output_channels, gemm_config->nr,
+            gemm_config->nr * weights_stride,
             kernel_scale_params, group_weights);
         kernel_scale_params += group_output_channels;
         group_weights = (void*) ((uintptr_t) group_weights + n_stride * weights_stride);
@@ -325,8 +325,8 @@ static enum xnn_status create_deconvolution2d_nhwc(
           (kernel_size * k_stride << log2_filter_element_size) + bias_element_size + extra_weights_bytes;
       for (uint32_t group = 0; group < groups; group++) {
         init_scale_params(
-            group_output_channels, gemm_config->nr, gemm_config->nr,
-            gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
+            group_output_channels, gemm_config->nr,
+            gemm_config->nr * weights_stride,
             scale_params, group_weights);
         scale_params += group_output_channels;
         group_weights = (void*) ((uintptr_t) group_weights + n_stride * weights_stride);

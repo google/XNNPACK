@@ -84,35 +84,21 @@ DECLARE_INIT_QU8_CONV_MINMAX_PARAMS_FUNCTION(
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 XNN_INTERNAL void xnn_init_qs8_qc8w_scale_fp32_params(
-    size_t channels, size_t channels_tile, size_t channels_subtile,
-    size_t stride, size_t substride,
-    // How much offset to subtract from packed_w pointer when moving from
-    // channels_tile to channels_subtile.
-    size_t stride_offset, const float scale[XNN_MIN_ELEMENTS(1)],
-    void* packed_w);
+    size_t channels, size_t channels_tile, size_t stride,
+    const float scale[XNN_MIN_ELEMENTS(1)], void* packed_w);
+
+XNN_INTERNAL void xnn_init_qs8_to_qs8_qc8w_scale_fp32_params(
+    size_t channels, size_t channels_tile, size_t stride,
+    const float scale[XNN_MIN_ELEMENTS(1)], void* packed_w);
 
 XNN_INTERNAL void xnn_init_blockwise_scale_fp32_params(
-    size_t channels, size_t channels_tile, size_t channels_subtile,
-    size_t stride, size_t substride, size_t num_blocks, size_t block_stride,
-    // How much offset to subtract from packed_w pointer when moving from
-    // channels_tile to channels_subtile.
-    size_t stride_offset, const float scale[XNN_MIN_ELEMENTS(1)],
+    size_t channels, size_t channels_tile, size_t stride, size_t num_blocks,
+    size_t block_stride, const float scale[XNN_MIN_ELEMENTS(1)],
     void* packed_w);
 
 XNN_INTERNAL void xnn_init_blockwise_scale_bf16_params(
-    size_t channels, size_t channels_tile, size_t channels_subtile,
-    size_t stride, size_t substride, size_t num_blocks, size_t block_stride,
-    // How much offset to subtract from packed_w pointer when moving from
-    // channels_tile to channels_subtile.
-    size_t stride_offset, const xnn_bfloat16 scale[XNN_MIN_ELEMENTS(1)],
-    void* packed_w);
-
-XNN_INTERNAL void xnn_init_qs8_to_qs8_qc8w_scale_fp32_params(
-    size_t channels, size_t channels_tile, size_t channels_subtile,
-    size_t stride, size_t substride,
-    // How much offset to subtract from packed_w pointer when moving from
-    // channels_tile to channels_subtile.
-    size_t stride_offset, const float scale[XNN_MIN_ELEMENTS(1)],
+    size_t channels, size_t channels_tile, size_t stride, size_t num_blocks,
+    size_t block_stride, const xnn_bfloat16 scale[XNN_MIN_ELEMENTS(1)],
     void* packed_w);
 
 XNN_INTERNAL size_t xnn_init_f16_scale_scalar_params(

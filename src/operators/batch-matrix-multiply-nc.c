@@ -537,8 +537,7 @@ enum xnn_status create_batch_matrix_multiply_nc_qx8_f32_qc8w(
           void* weights = (void*)((uintptr_t)packed_data_batch +
                                   nr * ((k_stride << XNN_LOG2_SIZEOF_INT8_T) +
                                         sizeof(int32_t)));
-          xnn_init_qs8_qc8w_scale_fp32_params(n, nr, nr, nr * weights_stride,
-                                              nr * weights_stride, 0,
+          xnn_init_qs8_qc8w_scale_fp32_params(n, nr, nr * weights_stride,
                                               &scale_b[batch * n], weights);
         }
       }

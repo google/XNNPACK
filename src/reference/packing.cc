@@ -1643,8 +1643,8 @@ void pack_weights_and_biases(uint32_t flags,                                 //
       void* extra_data_ptr =
           (void*)((uintptr_t)extra_data1 +
                   extra_data1_element_size * output_channels * group);
-      init_extra_data1_fn(output_channels, nr, nr, nr * weights_stride,
-                          nr * weights_stride, 0, extra_data_ptr, weights);
+      init_extra_data1_fn(output_channels, nr, nr * weights_stride,
+                          extra_data_ptr, weights);
     }
   }
 
@@ -1661,8 +1661,8 @@ void pack_weights_and_biases(uint32_t flags,                                 //
       void* extra_data_ptr =
           (void*)((uintptr_t)extra_data0 +
                   extra_data0_element_size * output_channels * group);
-      init_extra_data0_fn(output_channels, nr, nr, nr * weights_stride,
-                          nr * weights_stride, 0, extra_data_ptr, weights);
+      init_extra_data0_fn(output_channels, nr, nr * weights_stride,
+                          extra_data_ptr, weights);
     }
   }
 }
@@ -1811,9 +1811,9 @@ void xnn_pack_qb4_weights_and_biases(
 
   const size_t block_stride = /*weights*/ block_size / 2 + sizeof(uint16_t);
   xnn_init_blockwise_scale_bf16_params(
-      output_channels, nr, nr, nr * weights_stride, nr * weights_stride,
+      output_channels, nr, nr * weights_stride,
       /*num_blocks=*/num_blocks,
-      /*block_stride=*/gemm_config->nr * block_stride, 0,
+      /*block_stride=*/gemm_config->nr * block_stride,
       (const xnn_bfloat16*)extra_data1, weights_start);
 
   // fill in bias if not null
@@ -1821,8 +1821,7 @@ void xnn_pack_qb4_weights_and_biases(
     weights_start = (void*)((uintptr_t)packed_weights_ptr +
                             gemm_config->nr * (weights_stride - sizeof(float)));
     xnn_init_qs8_qc8w_scale_fp32_params(
-        output_channels, gemm_config->nr, gemm_config->nr,
-        gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
+        output_channels, gemm_config->nr, gemm_config->nr * weights_stride,
         (const float*)accumulator_init, weights_start);
   }
 }
@@ -2339,7 +2338,7 @@ void xnn_pack_kai_qb4_weights_and_biases(
     weights_start = (void*)((uintptr_t)packed_weights_ptr +
                             nr * (weights_stride - sizeof(float)));
     xnn_init_qs8_qc8w_scale_fp32_params(
-        output_channels, nr, nr, nr * weights_stride, nr * weights_stride, 0,
+        output_channels, nr, nr * weights_stride,
         (const float*)accumulator_init, weights_start);
   }
 }
