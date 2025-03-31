@@ -7,17 +7,12 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-
 #include <fxdiv.h>
 
 #include "src/xnnpack/lut.h"
 
-
-static inline uint32_t compute_sum(
-    size_t n,
-    const uint8_t* x,
-    const uint32_t* t)
-{
+static inline uint32_t compute_sum(size_t n, const uint8_t* x,
+                                   const uint32_t* t) {
   assert(n != 0);
 
   uint32_t vsum = 0;
@@ -28,12 +23,8 @@ static inline uint32_t compute_sum(
   return vsum;
 }
 
-void xnn_u8_lut32norm_ukernel__scalar(
-    size_t n,
-    const uint8_t* x,
-    const uint32_t* t,
-    uint8_t* y)
-{
+void xnn_u8_lut32norm_ukernel__scalar(size_t n, const uint8_t* x,
+                                      const uint32_t* t, uint8_t* y) {
   assert(n != 0);
 
   const uint32_t vsum = compute_sum(n, x, t);
@@ -44,8 +35,9 @@ void xnn_u8_lut32norm_ukernel__scalar(
   do {
     const size_t vx = *x++;
     const uint32_t vt = t[vx];
-    const uint32_t vq = fxdiv_quotient_uint32_t((vt << 8) + vrounding, vsum_divisor);
-    const uint8_t vy = vq > 255 ? UINT8_C(255) : (uint8_t) vq;
+    const uint32_t vq =
+        fxdiv_quotient_uint32_t((vt << 8) + vrounding, vsum_divisor);
+    const uint8_t vy = vq > 255 ? UINT8_C(255) : (uint8_t)vq;
     *y++ = vy;
   } while (--n != 0);
 }

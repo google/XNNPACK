@@ -23,13 +23,9 @@
 #include <pthreadpool.h>
 
 static enum xnn_status create_binary_operator(
-  const struct xnn_node* node,
-  const struct xnn_value* values,
-  size_t num_values,
-  struct xnn_operator_data* opdata,
-  struct xnn_code_cache* code_cache,
-  xnn_weights_cache_t weights_cache)
-{
+    const struct xnn_node* node, const struct xnn_value* values,
+    size_t num_values, struct xnn_operator_data* opdata,
+    struct xnn_code_cache* code_cache, xnn_weights_cache_t weights_cache) {
   const uint32_t input1_id = opdata->inputs[0];
   assert(input1_id < num_values);
   const uint32_t input2_id = opdata->inputs[1];
@@ -39,31 +35,27 @@ static enum xnn_status create_binary_operator(
 
   enum xnn_datatype datatype = values[output_id].datatype;
   struct xnn_quantization_params a_quantization = {
-    .scale = values[input1_id].quantization.scale,
-    .zero_point = values[input1_id].quantization.zero_point,
+      .scale = values[input1_id].quantization.scale,
+      .zero_point = values[input1_id].quantization.zero_point,
   };
   struct xnn_quantization_params b_quantization = {
-    .scale = values[input2_id].quantization.scale,
-    .zero_point = values[input2_id].quantization.zero_point,
+      .scale = values[input2_id].quantization.scale,
+      .zero_point = values[input2_id].quantization.zero_point,
   };
   struct xnn_quantization_params output_quantization = {
-    .scale = values[output_id].quantization.scale,
-    .zero_point = values[output_id].quantization.zero_point,
+      .scale = values[output_id].quantization.scale,
+      .zero_point = values[output_id].quantization.zero_point,
   };
 
   return xnn_create_binary_elementwise_nd(
-    node->binary_operator,
-    datatype, &a_quantization, &b_quantization, &output_quantization,
-    node->flags,
-    &opdata->operator_objects[0]);
+      node->binary_operator, datatype, &a_quantization, &b_quantization,
+      &output_quantization, node->flags, &opdata->operator_objects[0]);
 }
 
-static enum xnn_status reshape_binary_operator(
-  struct xnn_operator_data* opdata,
-  struct xnn_value* values,
-  size_t num_values,
-  pthreadpool_t threadpool)
-{
+static enum xnn_status reshape_binary_operator(struct xnn_operator_data* opdata,
+                                               struct xnn_value* values,
+                                               size_t num_values,
+                                               pthreadpool_t threadpool) {
   const uint32_t input1_id = opdata->inputs[0];
   assert(input1_id < num_values);
   const uint32_t input2_id = opdata->inputs[1];
@@ -77,21 +69,27 @@ static enum xnn_status reshape_binary_operator(
     assert(values[input1_id].layout == xnn_layout_type_nchw);
     assert(values[input2_id].layout == xnn_layout_type_nchw);
     opdata->shape1.dim[0] = values[input1_id].shape.dim[0];
-    opdata->shape1.dim[1] = values[input1_id].shape.dim[values[input1_id].shape.num_dims - 1];
+    opdata->shape1.dim[1] =
+        values[input1_id].shape.dim[values[input1_id].shape.num_dims - 1];
     if (values[input1_id].shape.num_dims > 2) {
-      memcpy(&opdata->shape1.dim[2], &values[input1_id].shape.dim[1], (values[input1_id].shape.num_dims - 2) * sizeof(size_t));
+      memcpy(&opdata->shape1.dim[2], &values[input1_id].shape.dim[1],
+             (values[input1_id].shape.num_dims - 2) * sizeof(size_t));
     }
     opdata->shape2.dim[0] = values[input2_id].shape.dim[0];
-    opdata->shape2.dim[1] = values[input2_id].shape.dim[values[input2_id].shape.num_dims - 1];
+    opdata->shape2.dim[1] =
+        values[input2_id].shape.dim[values[input2_id].shape.num_dims - 1];
     if (values[input1_id].shape.num_dims > 2) {
-      memcpy(&opdata->shape2.dim[2], &values[input2_id].shape.dim[1], (values[input2_id].shape.num_dims - 2) * sizeof(size_t));
+      memcpy(&opdata->shape2.dim[2], &values[input2_id].shape.dim[1],
+             (values[input2_id].shape.num_dims - 2) * sizeof(size_t));
     }
   } else {
     assert(values[output_id].layout == xnn_layout_type_nhwc);
     assert(values[input1_id].layout == xnn_layout_type_nhwc);
     assert(values[input2_id].layout == xnn_layout_type_nhwc);
-    memcpy(opdata->shape1.dim, values[input1_id].shape.dim, values[input1_id].shape.num_dims * sizeof(size_t));
-    memcpy(opdata->shape2.dim, values[input2_id].shape.dim, values[input2_id].shape.num_dims * sizeof(size_t));
+    memcpy(opdata->shape1.dim, values[input1_id].shape.dim,
+           values[input1_id].shape.num_dims * sizeof(size_t));
+    memcpy(opdata->shape2.dim, values[input2_id].shape.dim,
+           values[input2_id].shape.num_dims * sizeof(size_t));
   }
 
   // Handle scalars. Although the output shape is dimensionless, the reshape
@@ -106,24 +104,18 @@ static enum xnn_status reshape_binary_operator(
   }
   const size_t old_workspace_size = opdata->workspace_size;
   enum xnn_status status = xnn_reshape_binary_elementwise_nd(
-    opdata->operator_objects[0],
-    opdata->shape1.num_dims,
-    opdata->shape1.dim,
-    opdata->shape2.num_dims,
-    opdata->shape2.dim,
-    threadpool);
+      opdata->operator_objects[0], opdata->shape1.num_dims, opdata->shape1.dim,
+      opdata->shape2.num_dims, opdata->shape2.dim, threadpool);
   if (status != xnn_status_success) {
     return status;
   }
-  return resize_binary_elementwise_output_tensor(opdata, values, num_values, old_workspace_size, threadpool);
+  return resize_binary_elementwise_output_tensor(
+      opdata, values, num_values, old_workspace_size, threadpool);
 }
 
 static enum xnn_status setup_binary_operator(
-  const struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
-  size_t num_values,
-  pthreadpool_t threadpool)
-{
+    const struct xnn_operator_data* opdata, const struct xnn_value* values,
+    size_t num_values, pthreadpool_t threadpool) {
   const uint32_t input1_id = opdata->inputs[0];
   assert(input1_id != XNN_INVALID_VALUE_ID);
   assert(input1_id < num_values);
@@ -148,60 +140,63 @@ static enum xnn_status setup_binary_operator(
   void* output_data = output_value->data;
   assert(output_data != NULL);
 
-  return xnn_setup_binary_elementwise_nd(
-    opdata->operator_objects[0],
-    input1_data, input2_data, output_data);
+  return xnn_setup_binary_elementwise_nd(opdata->operator_objects[0],
+                                         input1_data, input2_data, output_data);
 }
 
-enum xnn_status xnn_define_binary(
-  xnn_subgraph_t subgraph,
-  enum xnn_binary_operator type,
-  const struct xnn_binary_params* params,
-  uint32_t input1_id,
-  uint32_t input2_id,
-  uint32_t output_id,
-  uint32_t flags)
-{
+enum xnn_status xnn_define_binary(xnn_subgraph_t subgraph,
+                                  enum xnn_binary_operator type,
+                                  const struct xnn_binary_params* params,
+                                  uint32_t input1_id, uint32_t input2_id,
+                                  uint32_t output_id, uint32_t flags) {
   enum xnn_status status;
-  if ((status = xnn_subgraph_check_xnnpack_initialized(xnn_node_type_binary_elementwise)) != xnn_status_success) {
+  if ((status = xnn_subgraph_check_xnnpack_initialized(
+           xnn_node_type_binary_elementwise)) != xnn_status_success) {
     return status;
   }
 
-  if ((status = xnn_subgraph_check_nth_input_node_id(xnn_node_type_binary_elementwise, input1_id, subgraph->num_values, 1)) !=
-      xnn_status_success) {
+  if ((status = xnn_subgraph_check_nth_input_node_id(
+           xnn_node_type_binary_elementwise, input1_id, subgraph->num_values,
+           1)) != xnn_status_success) {
     return status;
   }
 
   const struct xnn_value* input1_value = &subgraph->values[input1_id];
-  status = xnn_subgraph_check_nth_input_type_dense(xnn_node_type_binary_elementwise, input1_id, input1_value, 1);
+  status = xnn_subgraph_check_nth_input_type_dense(
+      xnn_node_type_binary_elementwise, input1_id, input1_value, 1);
   if (status != xnn_status_success) {
     return status;
   }
 
-  if ((status = xnn_subgraph_check_nth_input_node_id(xnn_node_type_binary_elementwise, input2_id, subgraph->num_values, 2)) !=
-      xnn_status_success) {
+  if ((status = xnn_subgraph_check_nth_input_node_id(
+           xnn_node_type_binary_elementwise, input2_id, subgraph->num_values,
+           2)) != xnn_status_success) {
     return status;
   }
 
   const struct xnn_value* input2_value = &subgraph->values[input2_id];
-  status = xnn_subgraph_check_nth_input_type_dense(xnn_node_type_binary_elementwise, input2_id, input2_value, 2);
+  status = xnn_subgraph_check_nth_input_type_dense(
+      xnn_node_type_binary_elementwise, input2_id, input2_value, 2);
   if (status != xnn_status_success) {
     return status;
   }
 
-  status = xnn_subgraph_check_output_node_id(xnn_node_type_binary_elementwise, output_id, subgraph->num_values);
+  status = xnn_subgraph_check_output_node_id(xnn_node_type_binary_elementwise,
+                                             output_id, subgraph->num_values);
   if (status != xnn_status_success) {
     return status;
   }
 
   const struct xnn_value* output_value = &subgraph->values[output_id];
-  status = xnn_subgraph_check_output_type_dense(xnn_node_type_binary_elementwise, output_id, output_value);
+  status = xnn_subgraph_check_output_type_dense(
+      xnn_node_type_binary_elementwise, output_id, output_value);
   if (status != xnn_status_success) {
     return status;
   }
 
   status = xnn_subgraph_check_datatype_matches_two_inputs(
-      xnn_node_type_binary_elementwise, input1_id, input1_value, input2_id, input2_value, output_id, output_value);
+      xnn_node_type_binary_elementwise, input1_id, input1_value, input2_id,
+      input2_value, output_id, output_value);
   if (status != xnn_status_success) {
     return status;
   }
@@ -226,7 +221,8 @@ enum xnn_status xnn_define_binary(
 
   if (params) {
     if (params->output_min != -INFINITY || params->output_max != INFINITY) {
-      xnn_insert_clamp_node(subgraph, params->output_min, params->output_max, node);
+      xnn_insert_clamp_node(subgraph, params->output_min, params->output_max,
+                            node);
     }
   }
 

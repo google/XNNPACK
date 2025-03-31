@@ -15,11 +15,10 @@
 #include "src/xnnpack/pack-lh.h"
 
 #if XNN_ENABLE_KLEIDIAI
-  // Keep this line indented to avoid it being pulled out of the #ifdef when the
-  // sources are amalgamated.
-  #include "kai/ukernels/matmul/pack/kai_lhs_pack_x8p2vlx4_x8_sme.h"
+// Keep this line indented to avoid it being pulled out of the #ifdef when the
+// sources are amalgamated.
+#include "kai/ukernels/matmul/pack/kai_lhs_pack_x8p2vlx4_x8_sme.h"
 #endif  // XNN_ENABLE_KLEIDIAI
-
 
 // This function just wraps KleidiAI's `kai_run_lhs_pack_x8p2vlx4_x8_sme`, but
 // with a name that is recognized by our tooling.

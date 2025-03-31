@@ -743,7 +743,7 @@ static enum xnn_status reshape_fully_connected_operator(
   switch (fully_connected_op->type) {
     case xnn_operator_type_fully_connected_nc_bf16_f32:
       status = xnn_reshape_fully_connected_nc_bf16_f32(fully_connected_op,
-                                                  batch_size, threadpool);
+                                                       batch_size, threadpool);
       break;
     case xnn_operator_type_dynamic_fully_connected_nc_f16:
       status = xnn_reshape_dynamic_fully_connected_nc_f16(
@@ -930,8 +930,8 @@ static enum xnn_status setup_fully_connected_operator(
     case xnn_operator_type_fully_connected_nc_bf16_f32:
       assert(kernel_data == NULL);
       assert(bias_data == NULL);
-      return xnn_setup_fully_connected_nc_bf16_f32(fully_connected_op, input_data,
-                                              output_data);
+      return xnn_setup_fully_connected_nc_bf16_f32(fully_connected_op,
+                                                   input_data, output_data);
     case xnn_operator_type_dynamic_fully_connected_nc_f16:
       assert(kernel_data != NULL);
       return xnn_setup_dynamic_fully_connected_nc_f16(

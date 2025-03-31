@@ -4,37 +4,31 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-
 #include <xmmintrin.h>
 
 #include "src/xnnpack/packx.h"
 
-
-void xnn_x32_packx_ukernel_4x__sse(
-    size_t m,
-    size_t k,
-    const uint32_t* restrict x,
-    size_t x_stride,
-    uint32_t* restrict y)
-{
+void xnn_x32_packx_ukernel_4x__sse(size_t m, size_t k,
+                                   const uint32_t* restrict x, size_t x_stride,
+                                   uint32_t* restrict y) {
   assert(m != 0);
   assert(k != 0);
 
-  const float* x0 = (const float*) x;
-  const float* x1 = (const float*) ((uintptr_t) x0 + x_stride);
+  const float* x0 = (const float*)x;
+  const float* x1 = (const float*)((uintptr_t)x0 + x_stride);
   if (m < 2) {
     x1 = x0;
   }
-  const float* x2 = (const float*) ((uintptr_t) x1 + x_stride);
+  const float* x2 = (const float*)((uintptr_t)x1 + x_stride);
   if (m <= 2) {
     x2 = x1;
   }
-  const float* x3 = (const float*) ((uintptr_t) x2 + x_stride);
+  const float* x3 = (const float*)((uintptr_t)x2 + x_stride);
   if (m != 4) {
     x3 = x2;
   }
 
-  float* restrict y_f32 = (float*) y;
+  float* restrict y_f32 = (float*)y;
 
   for (; k >= 4; k -= 4) {
     const __m128 vx0 = _mm_loadu_ps(x0);
@@ -65,7 +59,7 @@ void xnn_x32_packx_ukernel_4x__sse(
 
     y_f32 += 16;
   }
-  if XNN_UNLIKELY(k != 0) {
+  if XNN_UNLIKELY (k != 0) {
     do {
       const __m128 vx0 = _mm_load_ss(x0);
       x0 += 1;

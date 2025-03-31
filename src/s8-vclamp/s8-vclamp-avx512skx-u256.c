@@ -4,23 +4,18 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <immintrin.h>
 #include <stddef.h>
 #include <stdint.h>
-
-#include <immintrin.h>
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/unaligned.h"
 #include "src/xnnpack/vunary.h"
 
-
 void xnn_s8_vclamp_ukernel__avx512skx_u256(
-    size_t batch,
-    const int8_t* input,
-    int8_t* output,
-    const struct xnn_s8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
-{
+    size_t batch, const int8_t* input, int8_t* output,
+    const struct xnn_s8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) {
   assert(batch != 0);
   assert(batch % sizeof(int8_t) == 0);
   assert(input != NULL);
@@ -30,10 +25,10 @@ void xnn_s8_vclamp_ukernel__avx512skx_u256(
   const __m512i voutput_max = _mm512_set1_epi8(params->scalar.max);
 
   for (; batch >= 256; batch -= 256) {
-    __m512i vacc0 = _mm512_loadu_si512((const __m512i*) input);
-    __m512i vacc1 = _mm512_loadu_si512((const __m512i*) input + 1);
-    __m512i vacc2 = _mm512_loadu_si512((const __m512i*) input + 2);
-    __m512i vacc3 = _mm512_loadu_si512((const __m512i*) input + 3);
+    __m512i vacc0 = _mm512_loadu_si512((const __m512i*)input);
+    __m512i vacc1 = _mm512_loadu_si512((const __m512i*)input + 1);
+    __m512i vacc2 = _mm512_loadu_si512((const __m512i*)input + 2);
+    __m512i vacc3 = _mm512_loadu_si512((const __m512i*)input + 3);
     input += 256;
 
     vacc0 = _mm512_max_epi8(vacc0, voutput_min);
@@ -46,26 +41,27 @@ void xnn_s8_vclamp_ukernel__avx512skx_u256(
     vacc2 = _mm512_min_epi8(vacc2, voutput_max);
     vacc3 = _mm512_min_epi8(vacc3, voutput_max);
 
-    _mm512_storeu_si512((__m512i*) output, vacc0);
-    _mm512_storeu_si512((__m512i*) output + 1, vacc1);
-    _mm512_storeu_si512((__m512i*) output + 2, vacc2);
-    _mm512_storeu_si512((__m512i*) output + 3, vacc3);
+    _mm512_storeu_si512((__m512i*)output, vacc0);
+    _mm512_storeu_si512((__m512i*)output + 1, vacc1);
+    _mm512_storeu_si512((__m512i*)output + 2, vacc2);
+    _mm512_storeu_si512((__m512i*)output + 3, vacc3);
     output += 256;
   }
   for (; batch >= 64; batch -= 64) {
-    __m512i vacc = _mm512_loadu_si512((const __m512i*) input);
+    __m512i vacc = _mm512_loadu_si512((const __m512i*)input);
     input += 64;
 
     vacc = _mm512_min_epi8(vacc, voutput_max);
     vacc = _mm512_max_epi8(vacc, voutput_min);
 
-    _mm512_storeu_si512((__m512i*) output, vacc);
+    _mm512_storeu_si512((__m512i*)output, vacc);
     output += 64;
   }
 
-  if XNN_UNLIKELY(batch != 0) {
+  if XNN_UNLIKELY (batch != 0) {
     assert(batch >= 1 && batch <= 63);
-    const __mmask64 vmask = _cvtu64_mask64((uint64_t) ((UINT64_C(1) << batch) - UINT64_C(1)));
+    const __mmask64 vmask =
+        _cvtu64_mask64((uint64_t)((UINT64_C(1) << batch) - UINT64_C(1)));
     __m512i vacc = _mm512_maskz_loadu_epi8(vmask, input);
 
     vacc = _mm512_min_epi8(vacc, voutput_max);

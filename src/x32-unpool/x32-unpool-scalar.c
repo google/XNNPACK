@@ -7,15 +7,9 @@
 
 #include "src/xnnpack/unpool.h"
 
-
-void xnn_x32_unpool_ukernel__scalar(
-    size_t kernel_elements,
-    size_t channels,
-    uint32_t fill,
-    const uint32_t* input,
-    const uint32_t* index,
-    uint32_t** output)
-{
+void xnn_x32_unpool_ukernel__scalar(size_t kernel_elements, size_t channels,
+                                    uint32_t fill, const uint32_t* input,
+                                    const uint32_t* index, uint32_t** output) {
   // Pre-initialize outputs with constant.
   uint32_t** os = output;
   do {
@@ -30,7 +24,7 @@ void xnn_x32_unpool_ukernel__scalar(
   size_t offset = 0;
   do {
     const uint32_t i = *index++;
-    *((uint32_t*) ((uintptr_t) output[i] + offset)) = *input++;
+    *((uint32_t*)((uintptr_t)output[i] + offset)) = *input++;
     offset += sizeof(uint32_t);
   } while (--channels != 0);
 }

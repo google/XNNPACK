@@ -8,14 +8,9 @@
 #include "src/xnnpack/fill.h"
 #include "src/xnnpack/unaligned.h"
 
-
-void xnn_xx_fill_ukernel__scalar_u16(
-    size_t rows,
-    size_t channels,
-    void* output,
-    size_t output_stride,
-    const uint32_t fill_pattern)
-{
+void xnn_xx_fill_ukernel__scalar_u16(size_t rows, size_t channels, void* output,
+                                     size_t output_stride,
+                                     const uint32_t fill_pattern) {
   assert(rows != 0);
   assert(channels != 0);
 
@@ -29,28 +24,28 @@ void xnn_xx_fill_ukernel__scalar_u16(
       unaligned_indexed_store_u32(output, 1, vfill_pattern);
       unaligned_indexed_store_u32(output, 2, vfill_pattern);
       unaligned_indexed_store_u32(output, 3, vfill_pattern);
-      output = ((uint8_t*) output + 16);
+      output = ((uint8_t*)output + 16);
     }
-    if XNN_UNLIKELY(c != 0) {
-      if XNN_LIKELY(c & (8 * sizeof(uint8_t))) {
+    if XNN_UNLIKELY (c != 0) {
+      if XNN_LIKELY (c & (8 * sizeof(uint8_t))) {
         unaligned_indexed_store_u32(output, 0, vfill_pattern);
         unaligned_indexed_store_u32(output, 1, vfill_pattern);
-        output = ((uint8_t*) output + 8);
+        output = ((uint8_t*)output + 8);
       }
-      if XNN_LIKELY(c & (4 * sizeof(uint8_t))) {
+      if XNN_LIKELY (c & (4 * sizeof(uint8_t))) {
         unaligned_store_u32(output, vfill_pattern);
-        output = ((uint8_t*) output + 4);
+        output = ((uint8_t*)output + 4);
       }
-      if XNN_LIKELY(c & (2 * sizeof(uint8_t))) {
-        unaligned_store_u16(output, (uint16_t) vfill_pattern);
+      if XNN_LIKELY (c & (2 * sizeof(uint8_t))) {
+        unaligned_store_u16(output, (uint16_t)vfill_pattern);
         vfill_pattern >>= 16;
-        output = ((uint8_t*) output + 2);
+        output = ((uint8_t*)output + 2);
       }
-      if XNN_LIKELY(c & (1 * sizeof(uint8_t))) {
-        *((uint8_t*) output) = (uint8_t) vfill_pattern;
-        output = ((uint8_t*) output + 1);
+      if XNN_LIKELY (c & (1 * sizeof(uint8_t))) {
+        *((uint8_t*)output) = (uint8_t)vfill_pattern;
+        output = ((uint8_t*)output + 1);
       }
     }
-    output = (void*) ((uintptr_t) output + output_increment);
+    output = (void*)((uintptr_t)output + output_increment);
   } while (--rows != 0);
 }

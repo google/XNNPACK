@@ -4,18 +4,14 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-
 #include <wasm_simd128.h>
 
 #include "src/xnnpack/vunary.h"
 
-
 void xnn_u8_vclamp_ukernel__wasmsimd_u64(
-    size_t batch,
-    const uint8_t* input,
-    uint8_t* output,
-    const struct xnn_u8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
-{
+    size_t batch, const uint8_t* input, uint8_t* output,
+    const struct xnn_u8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    XNN_OOB_READS {
   assert(batch != 0);
   assert(batch % sizeof(uint8_t) == 0);
   assert(input != NULL);
@@ -59,7 +55,7 @@ void xnn_u8_vclamp_ukernel__wasmsimd_u64(
     wasm_v128_store(output, vacc);
     output += 16;
   }
-  if XNN_UNLIKELY(batch != 0) {
+  if XNN_UNLIKELY (batch != 0) {
     v128_t vacc = wasm_v128_load(input);
 
     vacc = wasm_u8x16_min(vacc, voutput_max);

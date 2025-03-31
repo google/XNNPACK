@@ -8,9 +8,9 @@
 #include "src/xnnpack/microparams.h"
 
 #if XNN_ENABLE_KLEIDIAI
-  // Keep this line indented to avoid it being pulled out of the #ifdef when the
-  // sources are amalgamated.
-  #include "kai/ukernels/matmul/matmul_clamp_f32_f32_f32p/kai_matmul_clamp_f32_f32_f32p2vlx1b_1x16vl_sme2_mla.h"
+// Keep this line indented to avoid it being pulled out of the #ifdef when the
+// sources are amalgamated.
+#include "kai/ukernels/matmul/matmul_clamp_f32_f32_f32p/kai_matmul_clamp_f32_f32_f32p2vlx1b_1x16vl_sme2_mla.h"
 #endif  // XNN_ENABLE_KLEIDIAI
 
 // Wraps the `kai_run_matmul_clamp_f32_f32p2vlx1_f32p2vlx1biasf32_sme2_mopa`
@@ -29,7 +29,7 @@ void xnn_pf32_gemm_minmax_ukernel_1x32__neonsme2(
 #else
   assert(
       "Calling KleidiAI microkernel wrapper, but XNNPACK was compiled without "
-      "`XNN_ENABLE_KLEIDIAI`." && 0);
+      "`XNN_ENABLE_KLEIDIAI`." &&
+      0);
 #endif  // XNN_ENABLE_KLEIDIAI
 }
-

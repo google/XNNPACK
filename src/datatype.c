@@ -88,7 +88,6 @@ bool xnn_datatype_is_quantized(enum xnn_datatype t) {
   return false;
 }
 
-
 size_t xnn_datatype_log2_size_bits(enum xnn_datatype t) {
   switch (t) {
     case xnn_datatype_invalid:

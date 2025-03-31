@@ -8,18 +8,10 @@
 
 #include "src/xnnpack/argmaxpool.h"
 
-
 void xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1(
-    size_t output_pixels,
-    size_t pooling_elements,
-    size_t channels,
-    const float** input,
-    size_t input_offset,
-    float* output,
-    uint32_t* index,
-    size_t input_increment,
-    size_t output_increment)
-{
+    size_t output_pixels, size_t pooling_elements, size_t channels,
+    const float** input, size_t input_offset, float* output, uint32_t* index,
+    size_t input_increment, size_t output_increment) {
   assert(output_pixels != 0);
   assert(pooling_elements != 0);
   assert(channels != 0);
@@ -43,15 +35,15 @@ void xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1(
       const float* i6 = 6 < k ? *id++ : i0;
       const float* i7 = 7 < k ? *id++ : i0;
       const float* i8 = 8 < k ? *id++ : i0;
-      i0 = (const float*) ((uintptr_t) i0 + input_offset);
-      i1 = (const float*) ((uintptr_t) i1 + input_offset);
-      i2 = (const float*) ((uintptr_t) i2 + input_offset);
-      i3 = (const float*) ((uintptr_t) i3 + input_offset);
-      i4 = (const float*) ((uintptr_t) i4 + input_offset);
-      i5 = (const float*) ((uintptr_t) i5 + input_offset);
-      i6 = (const float*) ((uintptr_t) i6 + input_offset);
-      i7 = (const float*) ((uintptr_t) i7 + input_offset);
-      i8 = (const float*) ((uintptr_t) i8 + input_offset);
+      i0 = (const float*)((uintptr_t)i0 + input_offset);
+      i1 = (const float*)((uintptr_t)i1 + input_offset);
+      i2 = (const float*)((uintptr_t)i2 + input_offset);
+      i3 = (const float*)((uintptr_t)i3 + input_offset);
+      i4 = (const float*)((uintptr_t)i4 + input_offset);
+      i5 = (const float*)((uintptr_t)i5 + input_offset);
+      i6 = (const float*)((uintptr_t)i6 + input_offset);
+      i7 = (const float*)((uintptr_t)i7 + input_offset);
+      i8 = (const float*)((uintptr_t)i8 + input_offset);
 
       float* o = output;
       uint32_t* i = index;
@@ -123,8 +115,8 @@ void xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1(
       ib = index;
     }
 
-    input = (const float**) ((uintptr_t) input + input_increment);
-    output = (float*) ((uintptr_t) output + output_increment);
+    input = (const float**)((uintptr_t)input + input_increment);
+    output = (float*)((uintptr_t)output + output_increment);
     index += channels;
   } while (--output_pixels != 0);
 }

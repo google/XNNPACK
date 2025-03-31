@@ -4,45 +4,42 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-
 #include <xmmintrin.h>
 
 #include "src/xnnpack/conv.h"
 #include "src/xnnpack/math.h"
 
-
 void xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__sse_1x1(
-    size_t input_height,
-    size_t input_width,
-    size_t output_y_start,
-    size_t output_y_end,
-    const float* input,
-    const float* zero,
-    const float* weights,
-    float* output,
-    size_t input_padding_top,
-    size_t output_channels,
-    size_t output_height_stride,
+    size_t input_height, size_t input_width, size_t output_y_start,
+    size_t output_y_end, const float* input, const float* zero,
+    const float* weights, float* output, size_t input_padding_top,
+    size_t output_channels, size_t output_height_stride,
     size_t output_channel_stride,
-    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
-{
+    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    XNN_OOB_READS {
   assert(input_width != 0);
   assert(output_y_end > output_y_start);
   assert(input_padding_top <= 1);
   assert(output_channels != 0);
 
-  const size_t input_height_stride = input_width * 3 /* channels */ * sizeof(float);
-  const size_t input_width_decrement = round_down_po2(input_width, 2) * 3 /* channels */ * sizeof(float);
+  const size_t input_height_stride =
+      input_width * 3 /* channels */ * sizeof(float);
+  const size_t input_width_decrement =
+      round_down_po2(input_width, 2) * 3 /* channels */ * sizeof(float);
   const size_t output_width = (input_width + 1) / 2;
-  const size_t output_channel_increment = output_channel_stride * 4 - output_width * sizeof(float);
+  const size_t output_channel_increment =
+      output_channel_stride * 4 - output_width * sizeof(float);
 
   // Adjustment for padding processed below
-  const float* i0 = (const float*) ((uintptr_t) input + input_height_stride * (output_y_start * 2 - input_padding_top));
-  const float* i1 = (const float*) ((uintptr_t) i0 + input_height_stride);
-  const float* i2 = (const float*) ((uintptr_t) i1 + input_height_stride);
-  float* output0 = (float*) ((uintptr_t) output + output_height_stride * output_y_start);
+  const float* i0 = (const float*)((uintptr_t)input +
+                                   input_height_stride * (output_y_start * 2 -
+                                                          input_padding_top));
+  const float* i1 = (const float*)((uintptr_t)i0 + input_height_stride);
+  const float* i2 = (const float*)((uintptr_t)i1 + input_height_stride);
+  float* output0 =
+      (float*)((uintptr_t)output + output_height_stride * output_y_start);
 
-  if XNN_UNPREDICTABLE(output_y_start < input_padding_top) {
+  if XNN_UNPREDICTABLE (output_y_start < input_padding_top) {
     i0 = zero;
   }
 
@@ -51,26 +48,27 @@ void xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__sse_1x1(
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
 
-  for (size_t output_y = output_y_start; output_y < output_y_end; output_y += 1) {
+  for (size_t output_y = output_y_start; output_y < output_y_end;
+       output_y += 1) {
     const size_t input_y2 = output_y * 2 + 2 - input_padding_top;
-    if XNN_UNPREDICTABLE(input_y2 >= input_height) {
+    if XNN_UNPREDICTABLE (input_y2 >= input_height) {
       i2 = zero;
     }
 
     const float* w = weights;
     size_t c = output_channels;
     float* o0c0 = output0;
-    float* o0c1 = (float*) ((uintptr_t) o0c0 + output_channel_stride);
-    float* o0c2 = (float*) ((uintptr_t) o0c1 + output_channel_stride);
-    float* o0c3 = (float*) ((uintptr_t) o0c2 + output_channel_stride);
+    float* o0c1 = (float*)((uintptr_t)o0c0 + output_channel_stride);
+    float* o0c2 = (float*)((uintptr_t)o0c1 + output_channel_stride);
+    float* o0c3 = (float*)((uintptr_t)o0c2 + output_channel_stride);
     do {
-      if XNN_UNPREDICTABLE(c < 2) {
+      if XNN_UNPREDICTABLE (c < 2) {
         o0c1 = o0c0;
       }
-      if XNN_UNPREDICTABLE(c <= 2) {
+      if XNN_UNPREDICTABLE (c <= 2) {
         o0c2 = o0c1;
       }
-      if XNN_UNPREDICTABLE(c < 4) {
+      if XNN_UNPREDICTABLE (c < 4) {
         o0c3 = o0c2;
       }
 
@@ -203,17 +201,21 @@ void xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__sse_1x1(
         voc0123 = _mm_min_ps(voc0123, vmax);
         voc0123 = _mm_max_ps(voc0123, vmin);
 
-        _mm_store_ss(o0c0, voc0123); o0c0++;
-        _mm_store_ss(o0c1, _mm_shuffle_ps(voc0123, voc0123, 1)); o0c1++;
-        _mm_store_ss(o0c2, _mm_shuffle_ps(voc0123, voc0123, 2)); o0c2++;
-        _mm_store_ss(o0c3, _mm_shuffle_ps(voc0123, voc0123, 3)); o0c3++;
+        _mm_store_ss(o0c0, voc0123);
+        o0c0++;
+        _mm_store_ss(o0c1, _mm_shuffle_ps(voc0123, voc0123, 1));
+        o0c1++;
+        _mm_store_ss(o0c2, _mm_shuffle_ps(voc0123, voc0123, 2));
+        o0c2++;
+        _mm_store_ss(o0c3, _mm_shuffle_ps(voc0123, voc0123, 3));
+        o0c3++;
 
         i0 += 6;
         i1 += 6;
         i2 += 6;
       }
       assert(iw < 2);
-      if XNN_UNLIKELY(iw != 0) {
+      if XNN_UNLIKELY (iw != 0) {
         __m128 voc0123 = _mm_load_ps(w);
 
         const __m128 vk00c0x0123 = _mm_load_ps(w + 4);
@@ -282,30 +284,34 @@ void xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__sse_1x1(
         voc0123 = _mm_min_ps(voc0123, vmax);
         voc0123 = _mm_max_ps(voc0123, vmin);
 
-        _mm_store_ss(o0c0, voc0123); o0c0++;
-        _mm_store_ss(o0c1, _mm_shuffle_ps(voc0123, voc0123, 1)); o0c1++;
-        _mm_store_ss(o0c2, _mm_shuffle_ps(voc0123, voc0123, 2)); o0c2++;
-        _mm_store_ss(o0c3, _mm_shuffle_ps(voc0123, voc0123, 3)); o0c3++;
+        _mm_store_ss(o0c0, voc0123);
+        o0c0++;
+        _mm_store_ss(o0c1, _mm_shuffle_ps(voc0123, voc0123, 1));
+        o0c1++;
+        _mm_store_ss(o0c2, _mm_shuffle_ps(voc0123, voc0123, 2));
+        o0c2++;
+        _mm_store_ss(o0c3, _mm_shuffle_ps(voc0123, voc0123, 3));
+        o0c3++;
       }
       // Move output pointers back to the position of the first pixel in a row,
       // and forward to the next block of output channels.
-      o0c0 = (float*) ((uintptr_t) o0c0 + output_channel_increment);
-      o0c1 = (float*) ((uintptr_t) o0c1 + output_channel_increment);
-      o0c2 = (float*) ((uintptr_t) o0c2 + output_channel_increment);
-      o0c3 = (float*) ((uintptr_t) o0c3 + output_channel_increment);
+      o0c0 = (float*)((uintptr_t)o0c0 + output_channel_increment);
+      o0c1 = (float*)((uintptr_t)o0c1 + output_channel_increment);
+      o0c2 = (float*)((uintptr_t)o0c2 + output_channel_increment);
+      o0c3 = (float*)((uintptr_t)o0c3 + output_channel_increment);
       // Revert input pointers to the position of the first pixel in a row
-      i0 = (const float*) ((uintptr_t) i0 - input_width_decrement);
-      i1 = (const float*) ((uintptr_t) i1 - input_width_decrement);
-      i2 = (const float*) ((uintptr_t) i2 - input_width_decrement);
+      i0 = (const float*)((uintptr_t)i0 - input_width_decrement);
+      i1 = (const float*)((uintptr_t)i1 - input_width_decrement);
+      i2 = (const float*)((uintptr_t)i2 - input_width_decrement);
       // Move to the block of weights for the next 4 output channels
       w += 112;
       c = doz(c, 4);
     } while (c != 0);
     // Move output pointers forward to the next row
-    output0 = (float*) ((uintptr_t) output0 + output_height_stride);
+    output0 = (float*)((uintptr_t)output0 + output_height_stride);
     // Move input pointers forward to the next row
     i0 = i2;
-    i1 = (const float*) ((uintptr_t) i0 + input_height_stride);
-    i2 = (const float*) ((uintptr_t) i1 + input_height_stride);
+    i1 = (const float*)((uintptr_t)i0 + input_height_stride);
+    i2 = (const float*)((uintptr_t)i1 + input_height_stride);
   }
 }

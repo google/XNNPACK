@@ -9,8 +9,8 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/vunary.h"
 
-
-void xnn_xx_copy_ukernel__scalar_memcpy(size_t batch, const void* input, void* output, const void* params) {
+void xnn_xx_copy_ukernel__scalar_memcpy(size_t batch, const void* input,
+                                        void* output, const void* params) {
   assert(batch != 0);
   assert(input != NULL);
   assert(output != NULL);

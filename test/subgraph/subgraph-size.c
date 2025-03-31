@@ -7,8 +7,8 @@
 
 #include "include/xnnpack.h"
 
-
-// A dummy program that calls every Subgraph API function in XNNPACK, for size estimation.
+// A dummy program that calls every Subgraph API function in XNNPACK, for size
+// estimation.
 int main(int argc, char** argv) {
   int function_idx = 0;
   if (argc >= 2) {
@@ -25,48 +25,24 @@ int main(int argc, char** argv) {
       xnn_delete_subgraph(NULL);
       break;
     case 2:
-      xnn_define_tensor_value(NULL, xnn_datatype_invalid, 0, NULL, NULL, 0, 0, NULL);
+      xnn_define_tensor_value(NULL, xnn_datatype_invalid, 0, NULL, NULL, 0, 0,
+                              NULL);
       break;
     case 3:
-      xnn_define_convolution_2d(
-        NULL,
-        0, 0, 0, 0,
-        0, 0,
-        0, 0,
-        0, 0,
-        0, 0, 0,
-        0.0f, 0.0f,
-        0, 0, 0, 0, 0);
+      xnn_define_convolution_2d(NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0.0f, 0.0f, 0, 0, 0, 0, 0);
       break;
     case 4:
-      xnn_define_depthwise_convolution_2d(
-        NULL,
-        0, 0, 0, 0,
-        0, 0,
-        0, 0,
-        0, 0,
-        0, 0,
-        0.0f, 0.0f,
-        0, 0, 0, 0, 0);
+      xnn_define_depthwise_convolution_2d(NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                          0, 0.0f, 0.0f, 0, 0, 0, 0, 0);
       break;
     case 5:
-      xnn_define_average_pooling_2d(
-        NULL,
-        0, 0, 0, 0,
-        0, 0,
-        0, 0,
-        0.0f, 0.0f,
-        0, 0, 0);
+      xnn_define_average_pooling_2d(NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0.0f, 0.0f, 0,
+                                    0, 0);
       break;
     case 6:
-      xnn_define_max_pooling_2d(
-        NULL,
-        0, 0, 0, 0,
-        0, 0,
-        0, 0,
-        0, 0,
-        0.0f, 0.0f,
-        0, 0, 0);
+      xnn_define_max_pooling_2d(NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0f, 0.0f,
+                                0, 0, 0);
       break;
     case 7:
       xnn_define_binary(NULL, xnn_binary_add, NULL, 0, 0, 0, 0);
