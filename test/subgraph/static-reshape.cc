@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <cassert>
+#include <chrono>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -50,12 +51,12 @@ std::vector<size_t> random_reshape(Rng& rng, size_t n) {
 }
 
 template <typename T>
-void FuseAndSplit() {
+void TestImpl() {
   ReplicableRandomDevice rng;
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
-  for (int rep = 0; rep < 100; ++rep) {
+  for (auto _ : FuzzTest(std::chrono::milliseconds(1000))) {
     xnn_quantization_params quantization =
         random_quantization(xnn_datatype_of<T>(), rng);
 
@@ -84,10 +85,10 @@ void FuseAndSplit() {
   }
 }
 
-TEST(ReshapeQS8, test) { FuseAndSplit<quantized<int8_t>>(); }
-TEST(ReshapeQU8, test) { FuseAndSplit<quantized<uint8_t>>(); }
-TEST(ReshapeBF16, test) { FuseAndSplit<xnn_bfloat16>(); }
-TEST(ReshapeF16, test) { FuseAndSplit<xnn_float16>(); }
-TEST(ReshapeF32, test) { FuseAndSplit<float>(); }
+TEST(ReshapeQS8, test) { TestImpl<quantized<int8_t>>(); }
+TEST(ReshapeQU8, test) { TestImpl<quantized<uint8_t>>(); }
+TEST(ReshapeBF16, test) { TestImpl<xnn_bfloat16>(); }
+TEST(ReshapeF16, test) { TestImpl<xnn_float16>(); }
+TEST(ReshapeF32, test) { TestImpl<float>(); }
 
 }  // namespace xnnpack

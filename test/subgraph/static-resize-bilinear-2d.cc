@@ -113,7 +113,7 @@ void TestImpl() {
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
-  for (int reps = 0; reps < 100; ++reps) {
+  for (auto _ : FuzzTest(std::chrono::milliseconds(1000))) {
     xnn_quantization_params quantization =
         random_quantization(xnn_datatype_of<T>(), rng);
 

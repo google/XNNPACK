@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <cassert>
+#include <chrono>
 #include <cstddef>
 #include <cstdlib>
 #include <vector>
@@ -44,7 +45,7 @@ Tensor<T> ReferenceImpl(Tensor<T> x, Tensor<T> w) {
 }
 
 template <typename T>
-void FuseAndSplit() {
+void TestImpl() {
   ReplicableRandomDevice rng;
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -61,7 +62,7 @@ void FuseAndSplit() {
     return;
   }
 
-  for (int reshape = 0; reshape < 100; ++reshape) {
+  for (auto _ : FuzzTest(std::chrono::milliseconds(1000))) {
     std::vector<size_t> shape = random_shape(rng, 4);
     const size_t batch_size = shape[0];
     const size_t tokens = shape[1];
@@ -105,7 +106,7 @@ void FuseAndSplit() {
   }
 }
 
-TEST(RoPEF16, test) { FuseAndSplit<xnn_float16>(); }
-TEST(RoPEF32, test) { FuseAndSplit<float>(); }
+TEST(RoPEF16, test) { TestImpl<xnn_float16>(); }
+TEST(RoPEF32, test) { TestImpl<float>(); }
 
 }  // namespace xnnpack
