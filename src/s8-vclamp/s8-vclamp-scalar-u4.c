@@ -12,13 +12,9 @@
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/vunary.h"
 
-
 void xnn_s8_vclamp_ukernel__scalar_u4(
-    size_t batch,
-    const int8_t* input,
-    int8_t* output,
-    const struct xnn_s8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
-{
+    size_t batch, const int8_t* input, int8_t* output,
+    const struct xnn_s8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) {
   assert(batch != 0);
   assert(batch % sizeof(int8_t) == 0);
   assert(input != NULL);
@@ -28,10 +24,10 @@ void xnn_s8_vclamp_ukernel__scalar_u4(
   const int32_t voutput_min = params->scalar.min;
 
   for (; batch >= 4 * sizeof(int8_t); batch -= 4 * sizeof(int8_t)) {
-    int32_t vt0 = (int32_t) input[0];
-    int32_t vt1 = (int32_t) input[1];
-    int32_t vt2 = (int32_t) input[2];
-    int32_t vt3 = (int32_t) input[3];
+    int32_t vt0 = (int32_t)input[0];
+    int32_t vt1 = (int32_t)input[1];
+    int32_t vt2 = (int32_t)input[2];
+    int32_t vt3 = (int32_t)input[3];
     input += 4;
 
     vt0 = math_max_s32(vt0, voutput_min);
@@ -44,19 +40,19 @@ void xnn_s8_vclamp_ukernel__scalar_u4(
     vt2 = math_min_s32(vt2, voutput_max);
     vt3 = math_min_s32(vt3, voutput_max);
 
-    output[0] = (int8_t) vt0;
-    output[1] = (int8_t) vt1;
-    output[2] = (int8_t) vt2;
-    output[3] = (int8_t) vt3;
+    output[0] = (int8_t)vt0;
+    output[1] = (int8_t)vt1;
+    output[2] = (int8_t)vt2;
+    output[3] = (int8_t)vt3;
     output += 4;
   }
 
-  if XNN_UNLIKELY(batch != 0) {
+  if XNN_UNLIKELY (batch != 0) {
     do {
-      int32_t vt = (int32_t) *input++;
+      int32_t vt = (int32_t)*input++;
       vt = math_max_s32(vt, voutput_min);
       vt = math_min_s32(vt, voutput_max);
-      *output++ = (int8_t) vt;
+      *output++ = (int8_t)vt;
 
       batch -= sizeof(int8_t);
     } while (batch != 0);

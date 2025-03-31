@@ -4,10 +4,11 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <stddef.h>
+
 #include "src/xnnpack/microparams.h"
 
 #if XNN_ENABLE_KLEIDIAI
-  #include "kai/ukernels/matmul/matmul_clamp_f32_qai8dxp_qsi4c32p/kai_matmul_clamp_f32_qai8dxp4x8_qsi4c32p4x8_16x4x32_neon_i8mm.h"
+#include "kai/ukernels/matmul/matmul_clamp_f32_qai8dxp_qsi4c32p/kai_matmul_clamp_f32_qai8dxp4x8_qsi4c32p4x8_16x4x32_neon_i8mm.h"
 #endif  // XNN_ENABLE_KLEIDIAI
 
 // Wraps the
@@ -21,11 +22,13 @@ void xnn_qp8_f32_qb4w_gemm_minmax_ukernel_16x4c16s2__neoni8mm_mstep4(
         minmax_params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]) {
 #if XNN_ENABLE_KLEIDIAI
   kai_run_matmul_clamp_f32_qai8dxp4x8_qsi4c32p4x8_16x4x32_neon_i8mm(
-      m, n, k, minmax_params->scalar.blocksize, lhs_packed, rhs_packed, dst, dst_stride_row, dst_stride_col,
-      minmax_params->scalar.min, minmax_params->scalar.max);
+      m, n, k, minmax_params->scalar.blocksize, lhs_packed, rhs_packed, dst,
+      dst_stride_row, dst_stride_col, minmax_params->scalar.min,
+      minmax_params->scalar.max);
 #else
   assert(
       "Calling KleidiAI microkernel wrapper, but XNNPACK was compiled without "
-      "`XNN_ENABLE_KLEIDIAI`." && 0);
+      "`XNN_ENABLE_KLEIDIAI`." &&
+      0);
 #endif  // XNN_ENABLE_KLEIDIAI
 }

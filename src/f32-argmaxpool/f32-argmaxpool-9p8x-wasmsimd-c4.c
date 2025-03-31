@@ -4,29 +4,21 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-
 #include <wasm_simd128.h>
 
-#include "src/xnnpack/common.h"
 #include "src/xnnpack/argmaxpool.h"
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/simd/f32-wasmsimd.h"
 
-static XNN_INLINE v128_t
-xnn_load_tail_safe_u32(const uint32_t* input, size_t num_elements) {
-  return xnn_load_tail_safe_f32((const float*) input, num_elements);
+static XNN_INLINE v128_t xnn_load_tail_safe_u32(const uint32_t* input,
+                                                size_t num_elements) {
+  return xnn_load_tail_safe_f32((const float*)input, num_elements);
 }
 
 void xnn_f32_argmaxpool_ukernel_9p8x__wasmsimd_c4(
-    size_t output_pixels,
-    size_t pooling_elements,
-    size_t channels,
-    const float** input,
-    size_t input_offset,
-    float* output,
-    uint32_t* index,
-    size_t input_increment,
-    size_t output_increment) XNN_OOB_READS
-{
+    size_t output_pixels, size_t pooling_elements, size_t channels,
+    const float** input, size_t input_offset, float* output, uint32_t* index,
+    size_t input_increment, size_t output_increment) XNN_OOB_READS {
   assert(output_pixels != 0);
   assert(pooling_elements != 0);
   assert(channels != 0);
@@ -57,15 +49,15 @@ void xnn_f32_argmaxpool_ukernel_9p8x__wasmsimd_c4(
       const float* i6 = 6 < k ? *id++ : i0;
       const float* i7 = 7 < k ? *id++ : i0;
       const float* i8 = 8 < k ? *id++ : i0;
-      i0 = (const float*) ((uintptr_t) i0 + input_offset);
-      i1 = (const float*) ((uintptr_t) i1 + input_offset);
-      i2 = (const float*) ((uintptr_t) i2 + input_offset);
-      i3 = (const float*) ((uintptr_t) i3 + input_offset);
-      i4 = (const float*) ((uintptr_t) i4 + input_offset);
-      i5 = (const float*) ((uintptr_t) i5 + input_offset);
-      i6 = (const float*) ((uintptr_t) i6 + input_offset);
-      i7 = (const float*) ((uintptr_t) i7 + input_offset);
-      i8 = (const float*) ((uintptr_t) i8 + input_offset);
+      i0 = (const float*)((uintptr_t)i0 + input_offset);
+      i1 = (const float*)((uintptr_t)i1 + input_offset);
+      i2 = (const float*)((uintptr_t)i2 + input_offset);
+      i3 = (const float*)((uintptr_t)i3 + input_offset);
+      i4 = (const float*)((uintptr_t)i4 + input_offset);
+      i5 = (const float*)((uintptr_t)i5 + input_offset);
+      i6 = (const float*)((uintptr_t)i6 + input_offset);
+      i7 = (const float*)((uintptr_t)i7 + input_offset);
+      i8 = (const float*)((uintptr_t)i8 + input_offset);
 
       float* o = output;
       uint32_t* i = index;
@@ -236,8 +228,8 @@ void xnn_f32_argmaxpool_ukernel_9p8x__wasmsimd_c4(
       ib = index;
     }
 
-    input = (const float**) ((uintptr_t) input + input_increment);
-    output = (float*) ((uintptr_t) output + output_increment);
+    input = (const float**)((uintptr_t)input + input_increment);
+    output = (float*)((uintptr_t)output + output_increment);
     index += channels;
   } while (--output_pixels != 0);
 }

@@ -16,39 +16,31 @@
 #include <pthreadpool.h>
 
 static enum xnn_status create_argmax_pooling_operator(
-  const struct xnn_node* node,
-  const struct xnn_value* values,
-  size_t num_values,
-  struct xnn_operator_data* opdata,
-  struct xnn_code_cache* code_cache,
-  xnn_weights_cache_t weights_cache)
-{
+    const struct xnn_node* node, const struct xnn_value* values,
+    size_t num_values, struct xnn_operator_data* opdata,
+    struct xnn_code_cache* code_cache, xnn_weights_cache_t weights_cache) {
   assert(node->num_inputs == 1);
   const uint32_t input_id = node->inputs[0];
   assert(input_id != XNN_INVALID_VALUE_ID);
   assert(input_id < num_values);
-  (void) input_id;  // Silence unused warning, only use in asserts.
+  (void)input_id;  // Silence unused warning, only use in asserts.
 
   assert(node->num_outputs == 2);
 
   const enum xnn_status status = xnn_create_argmax_pooling2d_nhwc_f32(
-    node->params.pooling_2d.padding_top,
-    node->params.pooling_2d.padding_right,
-    node->params.pooling_2d.padding_bottom,
-    node->params.pooling_2d.padding_left,
-    node->params.pooling_2d.pooling_height,
-    node->params.pooling_2d.pooling_width,
-    node->flags,
-    &opdata->operator_objects[0]);
+      node->params.pooling_2d.padding_top,
+      node->params.pooling_2d.padding_right,
+      node->params.pooling_2d.padding_bottom,
+      node->params.pooling_2d.padding_left,
+      node->params.pooling_2d.pooling_height,
+      node->params.pooling_2d.pooling_width, node->flags,
+      &opdata->operator_objects[0]);
   return status;
 }
 
 static enum xnn_status reshape_argmax_pooling_operator(
-  struct xnn_operator_data* opdata,
-  struct xnn_value* values,
-  size_t num_values,
-  pthreadpool_t threadpool)
-{
+    struct xnn_operator_data* opdata, struct xnn_value* values,
+    size_t num_values, pthreadpool_t threadpool) {
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
   const size_t batch_size = values[input_id].shape.dim[0];
@@ -58,16 +50,11 @@ static enum xnn_status reshape_argmax_pooling_operator(
 
   size_t output_height, output_width;
   enum xnn_status status = xnn_reshape_argmax_pooling2d_nhwc_f32(
-    opdata->operator_objects[0],
-    batch_size,
-    input_height,
-    input_width,
-    /*channels=*/channel_dim,
-    /*input_pixel_stride=*/channel_dim,
-    /*output_pixel_stride=*/channel_dim,
-    &output_height,
-    &output_width,
-    threadpool);
+      opdata->operator_objects[0], batch_size, input_height, input_width,
+      /*channels=*/channel_dim,
+      /*input_pixel_stride=*/channel_dim,
+      /*output_pixel_stride=*/channel_dim, &output_height, &output_width,
+      threadpool);
   if (status != xnn_status_success) {
     return status;
   }
@@ -104,11 +91,8 @@ static enum xnn_status reshape_argmax_pooling_operator(
 }
 
 static enum xnn_status setup_argmax_pooling_operator(
-  const struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
-  size_t num_values,
-  pthreadpool_t threadpool)
-{
+    const struct xnn_operator_data* opdata, const struct xnn_value* values,
+    size_t num_values, pthreadpool_t threadpool) {
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id != XNN_INVALID_VALUE_ID);
   assert(input_id < num_values);
@@ -133,47 +117,42 @@ static enum xnn_status setup_argmax_pooling_operator(
   void* output_index_data = output_index_value->data;
   assert(output_index_data != NULL);
 
-  return xnn_setup_argmax_pooling2d_nhwc_f32(
-    opdata->operator_objects[0],
-    input_data,
-    output_value_data,
-    output_index_data);
+  return xnn_setup_argmax_pooling2d_nhwc_f32(opdata->operator_objects[0],
+                                             input_data, output_value_data,
+                                             output_index_data);
 }
 
 enum xnn_status xnn_define_argmax_pooling_2d(
-  xnn_subgraph_t subgraph,
-  uint32_t input_padding_top,
-  uint32_t input_padding_right,
-  uint32_t input_padding_bottom,
-  uint32_t input_padding_left,
-  uint32_t pooling_height,
-  uint32_t pooling_width,
-  uint32_t input_id,
-  uint32_t output_value_id,
-  uint32_t output_index_id,
-  uint32_t flags)
-{
+    xnn_subgraph_t subgraph, uint32_t input_padding_top,
+    uint32_t input_padding_right, uint32_t input_padding_bottom,
+    uint32_t input_padding_left, uint32_t pooling_height,
+    uint32_t pooling_width, uint32_t input_id, uint32_t output_value_id,
+    uint32_t output_index_id, uint32_t flags) {
   enum xnn_status status;
-  if ((status = xnn_subgraph_check_xnnpack_initialized(xnn_node_type_argmax_pooling_2d)) != xnn_status_success) {
+  if ((status = xnn_subgraph_check_xnnpack_initialized(
+           xnn_node_type_argmax_pooling_2d)) != xnn_status_success) {
     return status;
   }
 
   const uint32_t pooling_size = pooling_height * pooling_width;
   if (pooling_size == 0) {
-    xnn_log_error(
-      "failed to define %s operator with %" PRIu32 "x%" PRIu32 " pooling size: "
-      "pooling size dimensions must be non-zero",
-      xnn_node_type_to_string(xnn_node_type_argmax_pooling_2d), pooling_width, pooling_height);
+    xnn_log_error("failed to define %s operator with %" PRIu32 "x%" PRIu32
+                  " pooling size: "
+                  "pooling size dimensions must be non-zero",
+                  xnn_node_type_to_string(xnn_node_type_argmax_pooling_2d),
+                  pooling_width, pooling_height);
     return xnn_status_invalid_parameter;
   }
 
-  if ((status = xnn_subgraph_check_input_node_id(xnn_node_type_argmax_pooling_2d, input_id, subgraph->num_values))
-      != xnn_status_success) {
+  if ((status = xnn_subgraph_check_input_node_id(
+           xnn_node_type_argmax_pooling_2d, input_id, subgraph->num_values)) !=
+      xnn_status_success) {
     return status;
   }
 
   const struct xnn_value* input_value = &subgraph->values[input_id];
-  status = xnn_subgraph_check_input_type_dense(xnn_node_type_argmax_pooling_2d, input_id, input_value);
+  status = xnn_subgraph_check_input_type_dense(xnn_node_type_argmax_pooling_2d,
+                                               input_id, input_value);
   if (status != xnn_status_success) {
     return status;
   }
@@ -182,25 +161,29 @@ enum xnn_status xnn_define_argmax_pooling_2d(
     case xnn_datatype_fp32:
       break;
     default:
-      xnn_log_error(
-        "failed to define %s operator with input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-        xnn_node_type_to_string(xnn_node_type_argmax_pooling_2d), input_id,
-        xnn_datatype_to_string(input_value->datatype), input_value->datatype);
+      xnn_log_error("failed to define %s operator with input ID #%" PRIu32
+                    ": unsupported Value datatype %s (%d)",
+                    xnn_node_type_to_string(xnn_node_type_argmax_pooling_2d),
+                    input_id, xnn_datatype_to_string(input_value->datatype),
+                    input_value->datatype);
       return xnn_status_invalid_parameter;
   }
 
   if (output_value_id >= subgraph->num_values) {
-    xnn_log_error(
-      "failed to define %s operator with output value ID #%" PRIu32 ": invalid Value ID",
-      xnn_node_type_to_string(xnn_node_type_argmax_pooling_2d), output_value_id);
+    xnn_log_error("failed to define %s operator with output value ID #%" PRIu32
+                  ": invalid Value ID",
+                  xnn_node_type_to_string(xnn_node_type_argmax_pooling_2d),
+                  output_value_id);
     return xnn_status_invalid_parameter;
   }
 
-  const struct xnn_value* output_value_value = &subgraph->values[output_value_id];
+  const struct xnn_value* output_value_value =
+      &subgraph->values[output_value_id];
   if (output_value_value->type != xnn_value_type_dense_tensor) {
-    xnn_log_error(
-      "failed to define %s operator with output value ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
-      xnn_node_type_to_string(xnn_node_type_argmax_pooling_2d), output_value_id, output_value_value->type);
+    xnn_log_error("failed to define %s operator with output value ID #%" PRIu32
+                  ": unsupported Value type %d (expected dense tensor)",
+                  xnn_node_type_to_string(xnn_node_type_argmax_pooling_2d),
+                  output_value_id, output_value_value->type);
     return xnn_status_invalid_parameter;
   }
 
@@ -209,24 +192,29 @@ enum xnn_status xnn_define_argmax_pooling_2d(
       break;
     default:
       xnn_log_error(
-        "failed to define %s operator with output value ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-        xnn_node_type_to_string(xnn_node_type_argmax_pooling_2d), output_value_id,
-        xnn_datatype_to_string(output_value_value->datatype), output_value_value->datatype);
+          "failed to define %s operator with output value ID #%" PRIu32
+          ": unsupported Value datatype %s (%d)",
+          xnn_node_type_to_string(xnn_node_type_argmax_pooling_2d),
+          output_value_id, xnn_datatype_to_string(output_value_value->datatype),
+          output_value_value->datatype);
       return xnn_status_invalid_parameter;
   }
 
   if (output_index_id >= subgraph->num_values) {
-    xnn_log_error(
-      "failed to define %s operator with output index ID #%" PRIu32 ": invalid Value ID",
-      xnn_node_type_to_string(xnn_node_type_argmax_pooling_2d), output_index_id);
+    xnn_log_error("failed to define %s operator with output index ID #%" PRIu32
+                  ": invalid Value ID",
+                  xnn_node_type_to_string(xnn_node_type_argmax_pooling_2d),
+                  output_index_id);
     return xnn_status_invalid_parameter;
   }
 
-  const struct xnn_value* output_index_value = &subgraph->values[output_index_id];
+  const struct xnn_value* output_index_value =
+      &subgraph->values[output_index_id];
   if (output_index_value->type != xnn_value_type_dense_tensor) {
-    xnn_log_error(
-      "failed to define %s operator with output index ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
-      xnn_node_type_to_string(xnn_node_type_argmax_pooling_2d), output_index_id, output_index_value->type);
+    xnn_log_error("failed to define %s operator with output index ID #%" PRIu32
+                  ": unsupported Value type %d (expected dense tensor)",
+                  xnn_node_type_to_string(xnn_node_type_argmax_pooling_2d),
+                  output_index_id, output_index_value->type);
     return xnn_status_invalid_parameter;
   }
 

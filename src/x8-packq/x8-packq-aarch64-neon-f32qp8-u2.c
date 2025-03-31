@@ -9,26 +9,24 @@
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
+
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/packq.h"
 
 #if XNN_ENABLE_KLEIDIAI
-  // Keep this line indented to avoid it being pulled out of the #ifdef when the
-  // sources are amalgamated.
-  #include "kai/ukernels/matmul/pack/kai_lhs_quant_pack_qai8dxp_f32.h"
+// Keep this line indented to avoid it being pulled out of the #ifdef when the
+// sources are amalgamated.
+#include "kai/ukernels/matmul/pack/kai_lhs_quant_pack_qai8dxp_f32.h"
 #endif  // XNN_ENABLE_KLEIDIAI
-
 
 // This function just wraps KleidiAI's `kai_run_lhs_quant_pack_qai8dxp_f32`, but
 // with a name that is recognized by our tooling.
 
-void xnn_x8_packq_f32qp8_ukernel__aarch64_neon_u2(size_t m, size_t k, size_t mr,
-                                          size_t kr, size_t sr,
-                                          size_t m_idx_start,
-                                          const float* XNN_RESTRICT lhs,
-                                          size_t lhs_stride,
-                                          void* XNN_RESTRICT lhs_packed) {
+void xnn_x8_packq_f32qp8_ukernel__aarch64_neon_u2(
+    size_t m, size_t k, size_t mr, size_t kr, size_t sr, size_t m_idx_start,
+    const float* XNN_RESTRICT lhs, size_t lhs_stride,
+    void* XNN_RESTRICT lhs_packed) {
 #if XNN_ENABLE_KLEIDIAI
   kai_run_lhs_quant_pack_qai8dxp_f32(m, k, mr, kr, sr, m_idx_start, lhs,
                                      lhs_stride, lhs_packed);

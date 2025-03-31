@@ -20,13 +20,9 @@
 #include <pthreadpool.h>
 
 static enum xnn_status create_space_to_depth_operator(
-  const struct xnn_node* node,
-  const struct xnn_value* values,
-  size_t num_values,
-  struct xnn_operator_data* opdata,
-  struct xnn_code_cache* code_cache,
-  xnn_weights_cache_t weights_cache)
-{
+    const struct xnn_node* node, const struct xnn_value* values,
+    size_t num_values, struct xnn_operator_data* opdata,
+    struct xnn_code_cache* code_cache, xnn_weights_cache_t weights_cache) {
   assert(node->num_inputs == 1);
   assert(node->num_outputs == 1);
 
@@ -37,24 +33,21 @@ static enum xnn_status create_space_to_depth_operator(
   const uint32_t input_id = node->inputs[0];
   assert(input_id != XNN_INVALID_VALUE_ID);
   assert(input_id < num_values);
-  const struct xnn_value *input_value = &values[input_id];
+  const struct xnn_value* input_value = &values[input_id];
   switch (xnn_datatype_size_bytes(input_value->datatype)) {
     case 1:
       status = xnn_create_space_to_depth_nhwc_x8(
-          node->params.space_to_depth_2d.block_size,
-          node->flags,
+          node->params.space_to_depth_2d.block_size, node->flags,
           &opdata->operator_objects[0]);
       break;
     case 2:
       status = xnn_create_space_to_depth_nhwc_x16(
-          node->params.space_to_depth_2d.block_size,
-          node->flags,
+          node->params.space_to_depth_2d.block_size, node->flags,
           &opdata->operator_objects[0]);
       break;
     case 4:
       status = xnn_create_space_to_depth_nhwc_x32(
-          node->params.space_to_depth_2d.block_size,
-          node->flags,
+          node->params.space_to_depth_2d.block_size, node->flags,
           &opdata->operator_objects[0]);
       break;
     default:
@@ -65,11 +58,8 @@ static enum xnn_status create_space_to_depth_operator(
 }
 
 static enum xnn_status reshape_space_to_depth_operator(
-  struct xnn_operator_data* opdata,
-  struct xnn_value* values,
-  size_t num_values,
-  pthreadpool_t threadpool)
-{
+    struct xnn_operator_data* opdata, struct xnn_value* values,
+    size_t num_values, pthreadpool_t threadpool) {
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
   const struct xnn_value* input_value = values + input_id;
@@ -83,38 +73,20 @@ static enum xnn_status reshape_space_to_depth_operator(
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_space_to_depth_nhwc_x16:
       status = xnn_reshape_space_to_depth_nhwc_x16(
-          opdata->operator_objects[0],
-          batch_size,
-          input_height,
-          input_width,
-          input_channels,
-          &output_height,
-          &output_width,
-          &output_channels,
+          opdata->operator_objects[0], batch_size, input_height, input_width,
+          input_channels, &output_height, &output_width, &output_channels,
           threadpool);
       break;
     case xnn_operator_type_space_to_depth_nhwc_x32:
       status = xnn_reshape_space_to_depth_nhwc_x32(
-          opdata->operator_objects[0],
-          batch_size,
-          input_height,
-          input_width,
-          input_channels,
-          &output_height,
-          &output_width,
-          &output_channels,
+          opdata->operator_objects[0], batch_size, input_height, input_width,
+          input_channels, &output_height, &output_width, &output_channels,
           threadpool);
       break;
     case xnn_operator_type_space_to_depth_nhwc_x8:
       status = xnn_reshape_space_to_depth_nhwc_x8(
-          opdata->operator_objects[0],
-          batch_size,
-          input_height,
-          input_width,
-          input_channels,
-          &output_height,
-          &output_width,
-          &output_channels,
+          opdata->operator_objects[0], batch_size, input_height, input_width,
+          input_channels, &output_height, &output_width, &output_channels,
           threadpool);
       break;
     default:
@@ -133,7 +105,8 @@ static enum xnn_status reshape_space_to_depth_operator(
   output_value->shape.dim[3] = output_channels;
 
   const size_t new_size = xnn_tensor_get_size(output_value);
-  if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
+  if (new_size > output_value->size ||
+      opdata->workspace_size > old_workspace_size) {
     output_value->size = new_size;
     return xnn_status_reallocation_required;
   }
@@ -141,11 +114,8 @@ static enum xnn_status reshape_space_to_depth_operator(
 }
 
 static enum xnn_status setup_space_to_depth_operator(
-  const struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
-  size_t num_values,
-  pthreadpool_t threadpool)
-{
+    const struct xnn_operator_data* opdata, const struct xnn_value* values,
+    size_t num_values, pthreadpool_t threadpool) {
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id != XNN_INVALID_VALUE_ID);
   assert(input_id < num_values);
@@ -164,92 +134,94 @@ static enum xnn_status setup_space_to_depth_operator(
 
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_space_to_depth_nhwc_x16:
-      return xnn_setup_space_to_depth_nhwc_x16(
-          opdata->operator_objects[0],
-          input_data,
-          output_data);
+      return xnn_setup_space_to_depth_nhwc_x16(opdata->operator_objects[0],
+                                               input_data, output_data);
     case xnn_operator_type_space_to_depth_nhwc_x32:
-      return xnn_setup_space_to_depth_nhwc_x32(
-          opdata->operator_objects[0],
-          input_data,
-          output_data);
+      return xnn_setup_space_to_depth_nhwc_x32(opdata->operator_objects[0],
+                                               input_data, output_data);
     case xnn_operator_type_space_to_depth_nhwc_x8:
-      return xnn_setup_space_to_depth_nhwc_x8(
-          opdata->operator_objects[0],
-          input_data,
-          output_data);
+      return xnn_setup_space_to_depth_nhwc_x8(opdata->operator_objects[0],
+                                              input_data, output_data);
     default:
       XNN_UNREACHABLE;
   }
 }
 
-enum xnn_status xnn_define_space_to_depth_2d(
-  xnn_subgraph_t subgraph,
-  uint32_t block_size,
-  uint32_t input_id,
-  uint32_t output_id,
-  uint32_t flags)
-{
+enum xnn_status xnn_define_space_to_depth_2d(xnn_subgraph_t subgraph,
+                                             uint32_t block_size,
+                                             uint32_t input_id,
+                                             uint32_t output_id,
+                                             uint32_t flags) {
   enum xnn_status status;
-  status = xnn_subgraph_check_xnnpack_initialized(xnn_node_type_space_to_depth_2d);
+  status =
+      xnn_subgraph_check_xnnpack_initialized(xnn_node_type_space_to_depth_2d);
   if (status != xnn_status_success) {
     return status;
   }
 
-  status = xnn_subgraph_check_input_node_id(xnn_node_type_space_to_depth_2d, input_id, subgraph->num_values);
+  status = xnn_subgraph_check_input_node_id(xnn_node_type_space_to_depth_2d,
+                                            input_id, subgraph->num_values);
   if (status != xnn_status_success) {
     return status;
   }
 
   const struct xnn_value* input_value = &subgraph->values[input_id];
-  status = xnn_subgraph_check_input_type_dense(xnn_node_type_space_to_depth_2d, input_id, input_value);
+  status = xnn_subgraph_check_input_type_dense(xnn_node_type_space_to_depth_2d,
+                                               input_id, input_value);
   if (status != xnn_status_success) {
     return status;
   }
 
   if (!xnn_datatype_is_byte_addressable(input_value->datatype)) {
-    xnn_log_error(
-      "failed to define %s operator with input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-      xnn_node_type_to_string(xnn_node_type_space_to_depth_2d), input_id,
-      xnn_datatype_to_string(input_value->datatype), input_value->datatype);
+    xnn_log_error("failed to define %s operator with input ID #%" PRIu32
+                  ": unsupported Value datatype %s (%d)",
+                  xnn_node_type_to_string(xnn_node_type_space_to_depth_2d),
+                  input_id, xnn_datatype_to_string(input_value->datatype),
+                  input_value->datatype);
     return xnn_status_invalid_parameter;
   }
 
-  status = xnn_subgraph_check_output_node_id(xnn_node_type_space_to_depth_2d, output_id, subgraph->num_values);
+  status = xnn_subgraph_check_output_node_id(xnn_node_type_space_to_depth_2d,
+                                             output_id, subgraph->num_values);
   if (status != xnn_status_success) {
     return status;
   }
 
   const struct xnn_value* output_value = &subgraph->values[output_id];
-  status = xnn_subgraph_check_output_type_dense(xnn_node_type_space_to_depth_2d, output_id, output_value);
+  status = xnn_subgraph_check_output_type_dense(xnn_node_type_space_to_depth_2d,
+                                                output_id, output_value);
   if (status != xnn_status_success) {
     return status;
   }
 
   if (!xnn_datatype_is_byte_addressable(output_value->datatype)) {
-    xnn_log_error(
-      "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-      xnn_node_type_to_string(xnn_node_type_space_to_depth_2d), output_id,
-      xnn_datatype_to_string(output_value->datatype), output_value->datatype);
+    xnn_log_error("failed to define %s operator with output ID #%" PRIu32
+                  ": unsupported Value datatype %s (%d)",
+                  xnn_node_type_to_string(xnn_node_type_space_to_depth_2d),
+                  output_id, xnn_datatype_to_string(output_value->datatype),
+                  output_value->datatype);
     return xnn_status_invalid_parameter;
   }
 
-  status = xnn_subgraph_check_datatype_matches(
-    xnn_node_type_space_to_depth_2d, input_id, input_value, output_id, output_value);
+  status = xnn_subgraph_check_datatype_matches(xnn_node_type_space_to_depth_2d,
+                                               input_id, input_value, output_id,
+                                               output_value);
   if (status != xnn_status_success) {
     return status;
   }
 
   status = xnn_subgraph_check_quantization_parameter_matches(
-      xnn_node_type_space_to_depth_2d, input_id, input_value, output_id, output_value);
+      xnn_node_type_space_to_depth_2d, input_id, input_value, output_id,
+      output_value);
   if (status != xnn_status_success) {
     return status;
   }
 
   if (block_size < 2) {
-    xnn_log_error(
-      "failed to define %s operator with block size #%" PRIu32 ": block_size must be >= 2",
-      xnn_node_type_to_string(xnn_node_type_space_to_depth_2d), block_size);
+    xnn_log_error("failed to define %s operator with block size #%" PRIu32
+                  ": block_size must be >= 2",
+                  xnn_node_type_to_string(xnn_node_type_space_to_depth_2d),
+                  block_size);
     return xnn_status_invalid_parameter;
   }
 
@@ -272,4 +244,3 @@ enum xnn_status xnn_define_space_to_depth_2d(
 
   return xnn_status_success;
 }
-

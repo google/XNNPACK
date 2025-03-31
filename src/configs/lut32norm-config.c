@@ -11,7 +11,6 @@
 #include "src/xnnpack/init-once.h"
 #include "src/xnnpack/lut.h"
 
-
 static struct xnn_lut32norm_config u8_lut32norm_config = {0};
 
 XNN_INIT_ONCE_GUARD(u8_lut32norm);
@@ -21,7 +20,8 @@ static void init_u8_lut32norm_config(void) {
 }
 
 const struct xnn_lut32norm_config* xnn_init_u8_lut32norm_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }

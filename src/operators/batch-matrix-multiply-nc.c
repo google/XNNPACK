@@ -294,8 +294,7 @@ enum xnn_status create_batch_matrix_multiply_nc_fx_const_weights(
     }
     xnn_log_debug(
         "allocated %zu bytes for packed weights in %s operator (ptr=%p)",
-        aligned_size,
-        xnn_operator_type_to_string_v2(batch_matrix_multiply_op),
+        aligned_size, xnn_operator_type_to_string_v2(batch_matrix_multiply_op),
         packed_data);
 
     // Pack the weights.
@@ -488,8 +487,7 @@ enum xnn_status create_batch_matrix_multiply_nc_qx8_f32_qc8w(
     }
     xnn_log_debug(
         "allocated %zu bytes for packed weights in %s operator (ptr=%p)",
-        aligned_size,
-        xnn_operator_type_to_string_v2(batch_matrix_multiply_op),
+        aligned_size, xnn_operator_type_to_string_v2(batch_matrix_multiply_op),
         packed_data);
     if (extra_bytes > 0) {
       // TODO(b/402602597): We shouldn't need this initialization.
@@ -979,9 +977,9 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_bf16_f32(
     size_t n, size_t* workspace_size, size_t* workspace_alignment,
     pthreadpool_t threadpool) {
   return reshape_batch_matrix_multiply_nc(
-      batch_matrix_multiply_op, xnn_operator_type_batch_matrix_multiply_nc_bf16_f32,
-      num_batch_dims, batch_dims_a, batch_dims_b, m, k, n, workspace_size,
-      workspace_alignment,
+      batch_matrix_multiply_op,
+      xnn_operator_type_batch_matrix_multiply_nc_bf16_f32, num_batch_dims,
+      batch_dims_a, batch_dims_b, m, k, n, workspace_size, workspace_alignment,
       /*log2_input_a_element_size=*/XNN_LOG2_SIZEOF_HALF,
       /*log2_input_b_element_size=*/XNN_LOG2_SIZEOF_HALF,
       /*bias_element_size=*/sizeof(float),
@@ -1170,8 +1168,9 @@ enum xnn_status xnn_setup_batch_matrix_multiply_nc_bf16_f32(
     xnn_operator_t batch_matrix_multiply_op, void* workspace,
     const void* input_a, const void* input_b, void* output) {
   return setup_batch_matrix_multiply_nc(
-      batch_matrix_multiply_op, xnn_operator_type_batch_matrix_multiply_nc_bf16_f32,
-      input_a, /*quantization_params=*/NULL, input_b,
+      batch_matrix_multiply_op,
+      xnn_operator_type_batch_matrix_multiply_nc_bf16_f32, input_a,
+      /*quantization_params=*/NULL, input_b,
       /*packed_weights=*/
       batch_matrix_multiply_op->context.gemm.const_weights
           ? packed_weights(batch_matrix_multiply_op)

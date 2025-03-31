@@ -4,12 +4,13 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <stddef.h>
+
 #include "src/xnnpack/microparams.h"
 
 #if XNN_ENABLE_KLEIDIAI
-  // Keep this line indented to avoid it being pulled out of the #ifdef when the
-  // sources are amalgamated.
-  #include "kai/ukernels/matmul/matmul_clamp_f32_qai8dxp_qsi8cxp/kai_matmul_clamp_f32_qai8dxp4x8_qsi8cxp4x8_16x4_neon_i8mm.h"
+// Keep this line indented to avoid it being pulled out of the #ifdef when the
+// sources are amalgamated.
+#include "kai/ukernels/matmul/matmul_clamp_f32_qai8dxp_qsi8cxp/kai_matmul_clamp_f32_qai8dxp4x8_qsi8cxp4x8_16x4_neon_i8mm.h"
 #endif  // XNN_ENABLE_KLEIDIAI
 
 // Wraps the `kai_run_matmul_clamp_f32_qai8dxp4x8_qsi8cxp4x8_16x4_neon_i8mm`
@@ -27,6 +28,7 @@ void xnn_qp8_f32_qc8w_gemm_minmax_ukernel_16x4c8__neoni8mm_mstep4(
 #else
   assert(
       "Calling KleidiAI microkernel wrapper, but XNNPACK was compiled without "
-      "`XNN_ENABLE_KLEIDIAI`." && 0);
+      "`XNN_ENABLE_KLEIDIAI`." &&
+      0);
 #endif  // XNN_ENABLE_KLEIDIAI
 }

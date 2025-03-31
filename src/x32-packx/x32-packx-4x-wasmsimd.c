@@ -4,36 +4,31 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-
 #include <wasm_simd128.h>
 
 #include "src/xnnpack/packx.h"
 
-
-void xnn_x32_packx_ukernel_4x__wasmsimd(
-    size_t m,
-    size_t k,
-    const uint32_t* restrict x_ptr,
-    size_t x_stride,
-    uint32_t* restrict y_ptr)
-{
+void xnn_x32_packx_ukernel_4x__wasmsimd(size_t m, size_t k,
+                                        const uint32_t* restrict x_ptr,
+                                        size_t x_stride,
+                                        uint32_t* restrict y_ptr) {
   assert(m != 0);
   assert(k != 0);
 
-  const float* x0 = (const float*) x_ptr;
-  const float* x1 = (const float*) ((uintptr_t) x0 + x_stride);
+  const float* x0 = (const float*)x_ptr;
+  const float* x1 = (const float*)((uintptr_t)x0 + x_stride);
   if (m < 2) {
     x1 = x0;
   }
-  const float* x2 = (const float*) ((uintptr_t) x1 + x_stride);
+  const float* x2 = (const float*)((uintptr_t)x1 + x_stride);
   if (m <= 2) {
     x2 = x1;
   }
-  const float* x3 = (const float*) ((uintptr_t) x2 + x_stride);
+  const float* x3 = (const float*)((uintptr_t)x2 + x_stride);
   if (m != 4) {
     x3 = x2;
   }
-  float* y = (float*) y_ptr;
+  float* y = (float*)y_ptr;
 
   for (; k >= 4; k -= 4) {
     const v128_t vx0 = wasm_v128_load(x0);
@@ -64,7 +59,7 @@ void xnn_x32_packx_ukernel_4x__wasmsimd(
 
     y += 16;
   }
-  if XNN_UNLIKELY(k != 0) {
+  if XNN_UNLIKELY (k != 0) {
     do {
       const float vx0 = *x0++;
       const float vx1 = *x1++;

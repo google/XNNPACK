@@ -5,6 +5,4 @@
 
 #include "src/xnnpack/params.h"
 
-struct xnn_parameters xnn_params = {
-  .init_flags = 0
-};
+struct xnn_parameters xnn_params = {.init_flags = 0};

@@ -7,8 +7,10 @@
 
 #include "src/xnnpack/common.h"
 
-
 // Table of exp2(k / 4) values decremented (as integer) by (k << 21), k = 0..3
 XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_4[4] = {
-  0x3F800000, 0x3F7837F0, 0x3F7504F3, 0x3F7744FD,
+    0x3F800000,
+    0x3F7837F0,
+    0x3F7504F3,
+    0x3F7744FD,
 };

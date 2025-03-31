@@ -8,9 +8,9 @@
 #include "src/xnnpack/microparams.h"
 
 #if XNN_ENABLE_KLEIDIAI
-  // Keep this line indented to avoid it being pulled out of the #ifdef when the
-  // sources are amalgamated.
-  #include "kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p2vlx1_f32p2vlx1biasf32_sme2_mopa.h"
+// Keep this line indented to avoid it being pulled out of the #ifdef when the
+// sources are amalgamated.
+#include "kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p2vlx1_f32p2vlx1biasf32_sme2_mopa.h"
 #endif  // XNN_ENABLE_KLEIDIAI
 
 size_t xnn_pf32_gemm_minmax_ukernel_32x32__neonsme2_get_mr() {
@@ -19,7 +19,8 @@ size_t xnn_pf32_gemm_minmax_ukernel_32x32__neonsme2_get_mr() {
 #else
   assert(
       "Calling KleidiAI kai_get_mr wrapper, but XNNPACK was compiled without "
-      "`XNN_ENABLE_KLEIDIAI`." && 0);
+      "`XNN_ENABLE_KLEIDIAI`." &&
+      0);
   return 0;
 #endif  // XNN_ENABLE_KLEIDIAI
 }
@@ -30,7 +31,8 @@ size_t xnn_pf32_gemm_minmax_ukernel_32x32__neonsme2_get_nr() {
 #else
   assert(
       "Calling KleidiAI kai_get_nr wrapper, but XNNPACK was compiled without "
-      "`XNN_ENABLE_KLEIDIAI`." && 0);
+      "`XNN_ENABLE_KLEIDIAI`." &&
+      0);
   return 0;
 #endif  // XNN_ENABLE_KLEIDIAI
 }
@@ -45,11 +47,13 @@ void xnn_pf32_gemm_minmax_ukernel_32x32__neonsme2(
         minmax_params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]) {
 #if XNN_ENABLE_KLEIDIAI
   kai_run_matmul_clamp_f32_f32p2vlx1_f32p2vlx1biasf32_sme2_mopa(
-      m, n, k / sizeof(float), lhs_packed, rhs_packed, dst, dst_stride_row, /*dst_stride_col=*/sizeof(float),
-      minmax_params->scalar.min, minmax_params->scalar.max);
+      m, n, k / sizeof(float), lhs_packed, rhs_packed, dst, dst_stride_row,
+      /*dst_stride_col=*/sizeof(float), minmax_params->scalar.min,
+      minmax_params->scalar.max);
 #else
   assert(
       "Calling KleidiAI microkernel wrapper, but XNNPACK was compiled without "
-      "`XNN_ENABLE_KLEIDIAI`." && 0);
+      "`XNN_ENABLE_KLEIDIAI`." &&
+      0);
 #endif  // XNN_ENABLE_KLEIDIAI
 }

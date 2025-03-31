@@ -7,24 +7,19 @@
 
 #include "src/xnnpack/packx.h"
 
-
-void xnn_x32_packx_ukernel_2x__scalar(
-    size_t m,
-    size_t k,
-    const uint32_t* restrict x,
-    size_t x_stride,
-    uint32_t* restrict y)
-{
+void xnn_x32_packx_ukernel_2x__scalar(size_t m, size_t k,
+                                      const uint32_t* restrict x,
+                                      size_t x_stride, uint32_t* restrict y) {
   assert(m != 0);
   assert(k != 0);
 
-  const float* x0 = (const float*) x;
-  const float* x1 = (const float*) ((uintptr_t) x0 + x_stride);
+  const float* x0 = (const float*)x;
+  const float* x1 = (const float*)((uintptr_t)x0 + x_stride);
   if (m != 2) {
     x1 = x0;
   }
 
-  float* restrict y_f32 = (float*) y;
+  float* restrict y_f32 = (float*)y;
 
   do {
     const float vx0 = *x0++;
