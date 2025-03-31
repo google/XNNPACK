@@ -93,9 +93,8 @@ DatatypeGenerator<quantized<int32_t>> MakeDatatypeGenerator(
   return DatatypeGenerator<quantized<int32_t>>(-10000, 10000, {0, 1.0f});
 }
 
-template <typename Rng>
 DepthwiseConvolutionParams StencilToDepthwiseConvolutionParams(
-    Rng& rng, const StencilParams& kh, const StencilParams& kw) {
+    const StencilParams& kh, const StencilParams& kw) {
   DepthwiseConvolutionParams params;
   params.padding.top = kh.padding_min;
   params.padding.left = kw.padding_min;
@@ -167,7 +166,7 @@ void TestImpl(bool channelwise_quantization = false) {
     StencilParams kw = random_stencil_params(rng);
     StencilParams kh = random_stencil_params(rng);
     DepthwiseConvolutionParams params =
-        StencilToDepthwiseConvolutionParams(rng, kh, kw);
+        StencilToDepthwiseConvolutionParams(kh, kw);
     std::uniform_int_distribution<> depth_multiplier_dist(1, 7);
     std::uniform_int_distribution<> input_channels_dist{10, 15};
     params.depth_multiplier = depth_multiplier_dist(rng);
@@ -192,7 +191,6 @@ void TestImpl(bool channelwise_quantization = false) {
       Tensor<Bias> bias(bias_shape, PaddingBytes{XNN_EXTRA_BYTES});
       bias.generate([&]() { return bias_gen(rng); });
     }
-    const uint32_t bias_id = bias.empty() ? XNN_INVALID_VALUE_ID : 2;
 
     xnn_quantization_params input_quantization =
         random_quantization(xnn_datatype_of<Data>(), rng, 0.001f, 2.0f);
@@ -203,7 +201,13 @@ void TestImpl(bool channelwise_quantization = false) {
         random_quantization(xnn_datatype_of<Filter>(), rng, 0.001f, 2.0f);
     Tensor<float> filter_scale(
         {channelwise_quantization ? filter.extent(2) : 1});
-    filter_scale.fill(filter_quantization.scale);
+    if (filter_scale.size() > 1) {
+      std::uniform_real_distribution<> filter_scale_dist(
+          0.001f, filter_quantization.scale);
+      filter_scale.generate([&]() { return filter_scale_dist(rng); });
+    } else {
+      filter_scale.fill(filter_quantization.scale);
+    }
     broadcast_extent_1(filter_scale);
 
     // The output quantization is computed from the kernel size and input
@@ -224,27 +228,35 @@ void TestImpl(bool channelwise_quantization = false) {
     }
 
     SubgraphTester subgraph(4);
-    subgraph.AddInputTensor(4, xnn_datatype_of<Data>(), input_quantization, 0);
+    const uint32_t input_id = 0;
+    const uint32_t filter_id = 1;
+    const uint32_t bias_id = bias.empty() ? XNN_INVALID_VALUE_ID : 2;
+    const uint32_t output_id = 3;
+    subgraph.AddInputTensor(4, xnn_datatype_of<Data>(), input_quantization,
+                            input_id);
     if (channelwise_quantization) {
       // Generate random per-channel scales, in the range of the original scale.
       std::uniform_real_distribution<> filter_scale_dist(
           0.001f, filter_quantization.scale);
       filter_scale.generate([&]() { return filter_scale_dist(rng); });
 
-      subgraph.AddStaticTensorQS8(filter.extents(), /*channel_dim=*/2,
-                                  TensorType::kDense, filter_scale.data(), 1,
-                                  /*flags=*/0,
-                                  reinterpret_cast<int8_t*>(filter.base()));
+      subgraph.AddStaticTensorQS8(
+          filter.extents(), /*channel_dim=*/2, TensorType::kDense,
+          filter_scale.data(), filter_id,
+          /*flags=*/0, reinterpret_cast<int8_t*>(filter.base()));
     } else {
-      subgraph.AddStaticTensor(filter.extents(), 1, filter.base(),
+      subgraph.AddStaticTensor(filter.extents(), filter_id, filter.base(),
                                filter_quantization);
     }
     if (bias_id != XNN_INVALID_VALUE_ID) {
       subgraph.AddStaticTensor(bias.extents(), bias_id, bias.base(),
                                bias_quantization);
     }
-    subgraph.AddOutputTensor(4, xnn_datatype_of<Data>(), output_quantization, 3)
-        .AddDepthwiseConvolution2D(params, 0, 1, bias_id, 3);
+    subgraph
+        .AddOutputTensor(4, xnn_datatype_of<Data>(), output_quantization,
+                         output_id)
+        .AddDepthwiseConvolution2D(params, input_id, filter_id, bias_id,
+                                   output_id);
     xnn_status status = subgraph.CreateRuntime();
     if (status == xnn_status_unsupported_hardware) {
       GTEST_SKIP();
@@ -265,15 +277,15 @@ void TestImpl(bool channelwise_quantization = false) {
       Tensor<Data> input(input_shape, PaddingBytes{XNN_EXTRA_BYTES});
       input.generate([&]() { return data_gen(rng); });
 
-      subgraph.ReshapeExternalTensor(input_shape, input.base(), 0)
+      subgraph.ReshapeExternalTensor(input_shape, input.base(), input_id)
           .ReshapeRuntime();
-      ASSERT_EQ(subgraph.GetExternalTensorShape(3), output_shape)
+      ASSERT_EQ(subgraph.GetExternalTensorShape(output_id), output_shape)
           << ", input_shape=" << index_to_string(input_shape) << ", kh=" << kh
           << ", kw=" << kw;
 
       // Run subgraph
       Tensor<Data> output(output_shape);
-      subgraph.SetupExternalTensor(output.base(), 3)
+      subgraph.SetupExternalTensor(output.base(), output_id)
           .SetupRuntime()
           .InvokeRuntime();
 
