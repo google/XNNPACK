@@ -34,6 +34,7 @@
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxp_qs4cxs1s0.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxps1s0_qsu4cxs1s0_neon.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi8cxp_qsi8cx_neon.h"
+#include "kai/ukernels/matmul/pack/kai_rhs_imatmul_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme.h"
 
 #endif  // XNN_ENABLE_KLEIDIAI
 
@@ -2056,6 +2057,55 @@ void xnn_pack_kai_qs8_qc8w_weights_and_biases_sme2(
     free((void*)accumulator_init);
   }
 }
+
+void xnn_pack_kai_qs8_conv_goki_w_sme2(
+    size_t g, size_t nc, size_t ks, size_t kc,
+    size_t nr, size_t kr, size_t sr, const int8_t* k,
+    const int32_t* b, const float* scale,
+    void* packed_weights, size_t extra_bytes,
+    const struct xnn_qs8_packing_params* params) {
+  assert(g != 0);
+  assert(nr >= sr);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
+
+  kai_rhs_pack_qsi8cx_params kai_params{};
+  kai_params.lhs_zero_point = params->input_zero_point;
+  kai_params.scale_multiplier = 0.0F;
+
+  int32_t* tmp_bias = NULL;
+
+  if (b == NULL) {
+    tmp_bias = (int32_t*) calloc(g * nc, sizeof(int32_t));
+    b = tmp_bias;
+  }
+
+  int8_t* tmp_data = (int8_t*) malloc(nc * ks * kc * sizeof(int8_t));
+  const size_t rhs_row_stride = nc * sizeof(int8_t);
+  const size_t packed_rhs_size = kai_get_rhs_packed_size_rhs_imatmul_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme(nc, ks, kc);
+
+  for (size_t g_idx = 0; g_idx < g; ++g_idx) {
+      transpose_weights_x8(k, tmp_data, nc, ks * kc);
+      kai_run_rhs_imatmul_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme(
+        nc, ks, kc, rhs_row_stride, tmp_data, b, scale, packed_weights, &kai_params);
+
+      k += nc * ks * kc;
+      b += nc;
+
+      if (scale != NULL) {
+          scale += nc;
+      }
+
+      packed_weights = (uint8_t*)packed_weights + packed_rhs_size;
+  }
+
+  free(tmp_data);
+
+  if (tmp_bias != NULL) {
+      free(tmp_bias);
+  }
+}
+
 #endif  // XNN_ENABLE_KLEIDIAI
 
 size_t xnn_packed_stride_kai_f16_weights_and_biases(
