@@ -1047,7 +1047,7 @@ struct lut_strided_context {
 #ifndef __cplusplus
 XNN_PRIVATE void xnn_compute_lut_strided(
     const struct lut_strided_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index);
+    size_t batch_offset, size_t batch_range);
 #endif
 
 struct lut_contiguous_context {
@@ -1241,19 +1241,19 @@ struct f32_qd8_convert_context {
 #ifndef __cplusplus
 XNN_PRIVATE void xnn_compute_f16_qd8_convert(
     const struct f16_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index);
+    size_t batch_offset, size_t batch_range);
 
 XNN_PRIVATE void xnn_compute_f16_qdu8_convert(
     const struct f16_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index);
+    size_t batch_offset, size_t batch_range);
 
 XNN_PRIVATE void xnn_compute_f32_qd8_convert(
     const struct f32_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index);
+    size_t batch_offset, size_t batch_range);
 
 XNN_PRIVATE void xnn_compute_f32_qdu8_convert(
     const struct f32_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index);
+    size_t batch_offset, size_t batch_range);
 
 XNN_PRIVATE void xnn_compute_pad_qd8_params(
     const struct f32_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
