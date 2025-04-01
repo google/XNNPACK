@@ -1015,19 +1015,20 @@ XNN_PRIVATE void xnn_compute_elementwise_binary_1d_tile(
 XNN_PRIVATE void xnn_compute_elementwise_binary_1d(
     const struct elementwise_binary_context
         context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t i);
+    size_t offset, size_t count);
 XNN_PRIVATE void xnn_compute_elementwise_binary_2d(
     const struct elementwise_binary_context
         context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t i, size_t j);
+    size_t i, size_t offset, size_t count);
 XNN_PRIVATE void xnn_compute_elementwise_binary_3d(
     const struct elementwise_binary_context
         context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t i, size_t j, size_t k);
+    size_t i, size_t offset_j, size_t offset_k, size_t count_j, size_t count_k);
 XNN_PRIVATE void xnn_compute_elementwise_binary_4d(
     const struct elementwise_binary_context
         context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t i, size_t j, size_t k, size_t l);
+    size_t i, size_t j, size_t offset_k, size_t offset_l, size_t count_k,
+    size_t count_l);
 XNN_PRIVATE void xnn_compute_elementwise_binary_5d(
     const struct elementwise_binary_context
         context[restrict XNN_MIN_ELEMENTS(1)],

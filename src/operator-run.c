@@ -1742,49 +1742,79 @@ void xnn_compute_elementwise_binary_1d_tile(
 }
 
 void xnn_compute_elementwise_binary_1d(
-    const struct elementwise_binary_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t i)
-{
-  const void* a = (const void*) ((uintptr_t) context->a + i * context->a_stride[4]);
-  const void* b = (const void*) ((uintptr_t) context->b + i * context->b_stride[4]);
-  void* y = (void*) ((uintptr_t) context->y + i * context->y_stride[4]);
-  context->ukernel(context->elements, a, b, y, &context->params);
+    const struct elementwise_binary_context
+        context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t offset, size_t count) {
+  for (size_t i = offset; i < offset + count; i++) {
+    const void* a =
+        (const void*)((uintptr_t)context->a + i * context->a_stride[4]);
+    const void* b =
+        (const void*)((uintptr_t)context->b + i * context->b_stride[4]);
+    void* y = (void*)((uintptr_t)context->y + i * context->y_stride[4]);
+    context->ukernel(context->elements, a, b, y, &context->params);
+  }
 }
 
 void xnn_compute_elementwise_binary_2d(
-    const struct elementwise_binary_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t i, size_t j)
-{
-  const void* a = (const void*) ((uintptr_t) context->a + i * context->a_stride[3] + j * context->a_stride[4]);
-  const void* b = (const void*) ((uintptr_t) context->b + i * context->b_stride[3] + j * context->b_stride[4]);
-  void* y = (void*) ((uintptr_t) context->y + i * context->y_stride[3] + j * context->y_stride[4]);
-  context->ukernel(context->elements, a, b, y, &context->params);
+    const struct elementwise_binary_context
+        context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t i, size_t offset, size_t count) {
+  uintptr_t a = (uintptr_t)context->a + i * context->a_stride[3];
+  uintptr_t b = (uintptr_t)context->b + i * context->b_stride[3];
+  uintptr_t y = (uintptr_t)context->y + i * context->y_stride[3];
+  for (size_t j = offset; j < offset + count; j++) {
+    context->ukernel(context->elements,
+                     (const void*)(a + j * context->a_stride[4]),
+                     (const void*)(b + j * context->b_stride[4]),
+                     (void*)(y + j * context->y_stride[4]), &context->params);
+  }
 }
 
 void xnn_compute_elementwise_binary_3d(
-    const struct elementwise_binary_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t i, size_t j, size_t k)
-{
-  const void* a = (const void*) ((uintptr_t) context->a +
-    i * context->a_stride[2] + j * context->a_stride[3] + k * context->a_stride[4]);
-  const void* b = (const void*) ((uintptr_t) context->b +
-    i * context->b_stride[2] + j * context->b_stride[3] + k * context->b_stride[4]);
-  void* y = (void*) ((uintptr_t) context->y +
-    i * context->y_stride[2] + j * context->y_stride[3] + k * context->y_stride[4]);
-  context->ukernel(context->elements, a, b, y, &context->params);
+    const struct elementwise_binary_context
+        context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t i, size_t offset_j, size_t offset_k, size_t count_j,
+    size_t count_k) {
+  uintptr_t a = (uintptr_t)context->a + i * context->a_stride[2];
+  uintptr_t b = (uintptr_t)context->b + i * context->b_stride[2];
+  uintptr_t y = (uintptr_t)context->y + i * context->y_stride[2];
+  for (size_t j = offset_j; j < offset_j + count_j; j++) {
+    for (size_t k = offset_k; k < offset_k + count_k; k++) {
+      context->ukernel(
+          context->elements,
+          (const void*)(a + j * context->a_stride[3] +
+                        k * context->a_stride[4]),
+          (const void*)(b + j * context->b_stride[3] +
+                        k * context->b_stride[4]),
+          (void*)(y + j * context->y_stride[3] + k * context->y_stride[4]),
+          &context->params);
+    }
+  }
 }
 
 void xnn_compute_elementwise_binary_4d(
-    const struct elementwise_binary_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t i, size_t j, size_t k, size_t l)
-{
-  const void* a = (const void*) ((uintptr_t) context->a +
-    i * context->a_stride[1] + j * context->a_stride[2] + k * context->a_stride[3] + l * context->a_stride[4]);
-  const void* b = (const void*) ((uintptr_t) context->b +
-    i * context->b_stride[1] + j * context->b_stride[2] + k * context->b_stride[3] + l * context->b_stride[4]);
-  void* y = (void*) ((uintptr_t) context->y +
-    i * context->y_stride[1] + j * context->y_stride[2] + k * context->y_stride[3] + l * context->y_stride[4]);
-  context->ukernel(context->elements, a, b, y, &context->params);
+    const struct elementwise_binary_context
+        context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t i, size_t j, size_t offset_k, size_t offset_l, size_t count_k,
+    size_t count_l) {
+  uintptr_t a = (uintptr_t)context->a + +i * context->a_stride[1] +
+                j * context->a_stride[2];
+  uintptr_t b = (uintptr_t)context->b + i * context->b_stride[1] +
+                j * context->b_stride[2];
+  uintptr_t y = (uintptr_t)context->y + i * context->y_stride[1] +
+                j * context->y_stride[2];
+  for (size_t k = offset_k; k < offset_k + count_k; k++) {
+    for (size_t l = offset_l; l < offset_l + count_l; l++) {
+      context->ukernel(
+          context->elements,
+          (const void*)(a + k * context->a_stride[3] +
+                        l * context->a_stride[4]),
+          (const void*)(b + k * context->b_stride[3] +
+                        l * context->b_stride[4]),
+          (void*)(y + k * context->y_stride[3] + l * context->y_stride[4]),
+          &context->params);
+    }
+  }
 }
 
 void xnn_compute_elementwise_binary_5d(
