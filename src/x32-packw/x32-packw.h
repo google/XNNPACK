@@ -91,6 +91,7 @@ XNN_GIO_UKERNEL(xnn_arch_x86_sse4_1, xnn_x32_packw_gemm_gio_ukernel_x12__sse41_u
 XNN_GIO_UKERNEL(xnn_arch_x86_sse4_1, xnn_x32_packw_gemm_gio_ukernel_x16__sse41_u2, 16, 1, 1, 1, 1)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+XNN_GIO_UKERNEL(0, xnn_x32_packw_gemm_gio_ukernel_x2__scalar, 2, 1, 1, 1, 1)
 XNN_GIO_UKERNEL(0, xnn_x32_packw_gemm_gio_ukernel_x4__scalar, 4, 1, 1, 1, 1)
 XNN_GIO_UKERNEL(0, xnn_x32_packw_gemm_gio_ukernel_x8__scalar, 8, 1, 1, 1, 1)
 XNN_GIO_UKERNEL(0, xnn_x32_packw_gemm_gio_ukernel_x16__scalar, 16, 1, 1, 1, 1)
