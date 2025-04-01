@@ -133,6 +133,7 @@ SET(PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-vcos/gen/f32-vcos-wasmsimd-rational-5-4-div.c
   src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-p6-u16.c
   src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-p6-u16.c
+  src/f32-vexp/gen/f32-vexp-wasmsimd-rational-3-2-div.c
   src/f32-vgelu/gen/f32-vgelu-wasmsimd-rational-12-10-div.c
   src/f32-vhswish/gen/f32-vhswish-wasmsimd-u16.c
   src/f32-vlog/gen/f32-vlog-wasmsimd-rational-3-3-div.c

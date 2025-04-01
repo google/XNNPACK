@@ -40,6 +40,7 @@ PROD_FMA3_MICROKERNEL_SRCS = [
     "src/f32-vapproxgelu/gen/f32-vapproxgelu-fma3-rational-12-10-div.c",
     "src/f32-vcmul/gen/f32-vcmul-fma3-u16.c",
     "src/f32-vcos/gen/f32-vcos-fma3-rational-5-4-div.c",
+    "src/f32-vexp/gen/f32-vexp-fma3-rational-3-2-div.c",
     "src/f32-vgelu/gen/f32-vgelu-fma3-rational-12-10-div.c",
     "src/f32-vhswish/gen/f32-vhswish-fma3-u16.c",
     "src/f32-vlog/gen/f32-vlog-fma3-rational-3-3-div.c",

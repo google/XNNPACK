@@ -70,6 +70,7 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/f32-vcopysign/gen/f32-vrcopysignc-neon.c
   src/f32-vcos/gen/f32-vcos-neon-rational-5-4-div.c
   src/f32-velu/gen/f32-velu-neon-rr2-lut16-p3-u8.c
+  src/f32-vexp/gen/f32-vexp-neon-rational-3-2-div.c
   src/f32-vgelu/gen/f32-vgelu-neon-rational-12-10-div.c
   src/f32-vhswish/gen/f32-vhswish-neon-u16.c
   src/f32-vlog/gen/f32-vlog-neon-rational-3-3-div.c

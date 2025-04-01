@@ -27,6 +27,7 @@ PROD_SSE2_MICROKERNEL_SRCS = [
     "src/f32-vcopysign/gen/f32-vrcopysignc-sse2.c",
     "src/f32-vcos/gen/f32-vcos-sse2-rational-5-4-div.c",
     "src/f32-velu/gen/f32-velu-sse2-rr2-lut16-p3-u12.c",
+    "src/f32-vexp/gen/f32-vexp-sse2-rational-3-2-div.c",
     "src/f32-vgelu/gen/f32-vgelu-sse2-rational-12-10-div.c",
     "src/f32-vlog/gen/f32-vlog-sse2-rational-3-3-div.c",
     "src/f32-vrnd/gen/f32-vrndd-sse2-u8.c",

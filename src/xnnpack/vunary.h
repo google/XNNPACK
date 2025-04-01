@@ -9,6 +9,7 @@
 #include <stdint.h>
 
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
 
 #ifdef __cplusplus
@@ -54,6 +55,7 @@ extern "C" {
 #include "src/f16-vclamp/f16-vclamp.h"
 #include "src/f16-vcos/f16-vcos.h"
 #include "src/f16-velu/f16-velu.h"
+#include "src/f16-vexp/f16-vexp.h"
 #include "src/f16-vgelu/f16-vgelu.h"
 #include "src/f16-vhswish/f16-vhswish.h"
 #include "src/f16-vlrelu/f16-vlrelu.h"

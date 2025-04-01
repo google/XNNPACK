@@ -63,6 +63,7 @@ SET(PROD_AVX_MICROKERNEL_SRCS
   src/f32-vcopysign/gen/f32-vrcopysignc-avx.c
   src/f32-vcos/gen/f32-vcos-avx-rational-5-4-div.c
   src/f32-velu/gen/f32-velu-avx-rr2-lut4-p4-perm-u32.c
+  src/f32-vexp/gen/f32-vexp-avx-rational-3-2-div.c
   src/f32-vgelu/gen/f32-vgelu-avx-rational-12-10-div.c
   src/f32-vhswish/gen/f32-vhswish-avx-u16.c
   src/f32-vlrelu/gen/f32-vlrelu-avx-u16.c

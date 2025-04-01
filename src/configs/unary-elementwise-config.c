@@ -22,6 +22,7 @@ static struct xnn_unary_elementwise_config f16_approxgelu_config = {0};
 static struct xnn_unary_elementwise_config f16_clamp_config = {0};
 static struct xnn_unary_elementwise_config f16_cosine_config = {0};
 static struct xnn_unary_elementwise_config f16_elu_config = {0};
+static struct xnn_unary_elementwise_config f16_exp_config = {0};
 static struct xnn_unary_elementwise_config f16_gelu_config = {0};
 static struct xnn_unary_elementwise_config f16_hswish_config = {0};
 static struct xnn_unary_elementwise_config f16_lrelu_config = {0};
@@ -82,6 +83,7 @@ XNN_INIT_ONCE_GUARD(f16_approxgelu);
 XNN_INIT_ONCE_GUARD(f16_clamp);
 XNN_INIT_ONCE_GUARD(f16_cosine);
 XNN_INIT_ONCE_GUARD(f16_elu);
+XNN_INIT_ONCE_GUARD(f16_exp);
 XNN_INIT_ONCE_GUARD(f16_gelu);
 XNN_INIT_ONCE_GUARD(f16_hswish);
 XNN_INIT_ONCE_GUARD(f16_lrelu);
@@ -230,6 +232,27 @@ static void init_f16_elu_config(void) {
   #endif
 }
 
+static void init_f16_exp_config(void) {
+#if (XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR) || \
+    (XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR)
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  if (hardware_config->use_arm_neon_fp16_arith) {
+    f16_exp_config.ukernel = (xnn_vunary_ukernel_fn)xnn_f16_vexp_ukernel__neonfp16arith_poly_3_u32;
+  }
+#elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_AVX512FP16
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  if (hardware_config->use_x86_avx512fp16) {
+    f16_exp_config.ukernel =
+        (xnn_vunary_ukernel_fn)xnn_f16_vexp_ukernel__avx512fp16_poly_3_u32;
+  }
+#else
+  f16_exp_config.ukernel = (xnn_vunary_ukernel_fn)xnn_f16_vexp_ukernel__scalar_poly_3_u4;
+#endif
+}
+  
 static void init_f16_gelu_config(void) {
 #if (XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR) || \
     (XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR)
@@ -920,7 +943,40 @@ static void init_f32_hswish_config(void) {
 }
 
 static void init_f32_exp_config(void) {
-  f32_exp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vexp_ukernel__scalar_exp_u4;
+  #if XNN_ARCH_ARM
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  if (hardware_config->use_arm_neon) {
+    f32_exp_config.ukernel = (xnn_vunary_ukernel_fn)xnn_f32_vexp_ukernel__neon_rational_3_2_div_u16;
+  } else {
+    f32_exp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vexp_ukernel__scalar_rational_3_2_div_u4;
+  }
+  #elif XNN_ARCH_ARM64
+    f32_exp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vexp_ukernel__neon_rational_3_2_div_u16;
+  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+        f32_exp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vexp_ukernel__avx512f_rational_3_2_div_u16;
+      } else
+    #endif
+    if (hardware_config->use_x86_fma3) {
+      f32_exp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vexp_ukernel__fma3_rational_3_2_div_u32;
+    } else if (hardware_config->use_x86_avx) {
+      f32_exp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vexp_ukernel__avx_rational_3_2_div_u24;
+    } else {
+      f32_exp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vexp_ukernel__sse2_rational_3_2_div_u16;
+    }
+  #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+    f32_exp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vexp_ukernel__wasmsimd_rational_3_2_div_u12;
+  #elif XNN_ARCH_WASM
+    f32_exp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vexp_ukernel__scalar_rational_3_2_div_u4;
+  #elif XNN_ARCH_RISCV
+    f32_exp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vexp_ukernel__scalar_rational_3_2_div_u4;
+  #else
+    f32_exp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vexp_ukernel__scalar_rational_3_2_div_u4;
+  #endif
 }
 
 static void init_f32_log_config(void) {
@@ -2211,6 +2267,15 @@ const struct xnn_unary_elementwise_config* xnn_init_f16_elu_config() {
   }
   XNN_INIT_ONCE(f16_elu);
   return &f16_elu_config;
+}
+
+const struct xnn_unary_elementwise_config* xnn_init_f16_exp_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
+    return NULL;
+  }
+  XNN_INIT_ONCE(f16_exp);
+  return &f16_exp_config;
 }
 
 const struct xnn_unary_elementwise_config* xnn_init_f16_gelu_config() {

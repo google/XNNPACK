@@ -82,6 +82,8 @@ xnn_init_f16_cosine_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_f16_elu_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
+xnn_init_f16_exp_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_f16_gelu_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_f16_hswish_config();

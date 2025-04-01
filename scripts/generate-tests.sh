@@ -140,6 +140,7 @@ tools/generate-vunary-test.py --ukernel f16-vapproxgelu --output test/f16-vappro
 tools/generate-vunary-test.py --ukernel f16-vclamp --output test/f16-vclamp.cc &
 tools/generate-vunary-test.py --ukernel f16-vcos --output test/f16-vcos.cc &
 tools/generate-vunary-test.py --ukernel f16-velu --output test/f16-velu.cc &
+tools/generate-vunary-test.py --ukernel f16-vexp --output test/f16-vexp.cc &
 tools/generate-vunary-test.py --ukernel f16-vgelu --output test/f16-vgelu.cc &
 tools/generate-vunary-test.py --ukernel f16-vneg --output test/f16-vneg.cc &
 tools/generate-vunary-test.py --ukernel f16-vrndd  --output test/f16-vrndd.cc &

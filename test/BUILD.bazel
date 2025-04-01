@@ -151,6 +151,7 @@ xnnpack_cxx_library(
     "f16_vclamp",
     "f16_vcos",
     "f16_velu",
+    "f16_vexp",
     "f16_vgelu",
     "f16_vhswish",
     "f16_vlrelu",
