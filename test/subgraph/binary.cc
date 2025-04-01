@@ -7,6 +7,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <random>
 #include <sstream>
 #include <string>
 #include <tuple>
@@ -28,12 +29,31 @@ using ::testing::ValuesIn;
 
 namespace xnnpack {
 
-std::vector<size_t> input_shape(size_t rank, std::vector<size_t> dims) {
-  // Remove the leading dimensions to reduce to `rank` dimensions.
-  std::reverse(dims.begin(), dims.end());
-  dims.resize(rank);
-  std::reverse(dims.begin(), dims.end());
-  return dims;
+// Generate random inputs that when used as inputs to a binary elementwise
+// operation, the result is `output_shape`, where the inputs have rank `a_rank`
+// and `b_rank`.
+template <typename Rng>
+std::pair<std::vector<size_t>, std::vector<size_t>> random_broadcasted_inputs(
+    Rng& rng, std::vector<size_t> output_shape, size_t a_rank, size_t b_rank) {
+  // The logic here is simpler if the innermost dimension is first.
+  std::reverse(output_shape.begin(), output_shape.end());
+  std::vector<size_t> a_shape = output_shape;
+  std::vector<size_t> b_shape = output_shape;
+  std::bernoulli_distribution broadcast_dist(0.25);
+  for (size_t i = 0; i < output_shape.size(); i++) {
+    // We only want to broadcast one of the two inputs in this dimension,
+    // including broadcasting due to smaller rank.
+    if (broadcast_dist(rng) && i < b_rank) {
+      a_shape[i] = 1;
+    } else if (broadcast_dist(rng) && i < a_rank) {
+      b_shape[i] = 1;
+    }
+  }
+  a_shape.resize(a_rank);
+  b_shape.resize(b_rank);
+  std::reverse(a_shape.begin(), a_shape.end());
+  std::reverse(b_shape.begin(), b_shape.end());
+  return {a_shape, b_shape};
 }
 
 float compute_float(xnn_binary_operator op, float a, float b) {
@@ -179,10 +199,9 @@ void TestImpl(const Param& p) {
       for (int reshape = 0; reshape < 2; ++reshape) {
         std::vector<size_t> output_shape =
             random_shape(rng, p.rank, 1, max_dim);
-        std::vector<size_t> a_shape =
-            input_shape(input_ranks.first, output_shape);
-        std::vector<size_t> b_shape =
-            input_shape(input_ranks.second, output_shape);
+        std::vector<size_t> a_shape, b_shape;
+        std::tie(a_shape, b_shape) = random_broadcasted_inputs(
+            rng, output_shape, input_ranks.first, input_ranks.second);
 
         Tensor<T> a(a_shape, {XNN_EXTRA_BYTES});
         Tensor<T> b(b_shape, {XNN_EXTRA_BYTES});
@@ -203,6 +222,8 @@ void TestImpl(const Param& p) {
             .SetupRuntime()
             .InvokeRuntime();
 
+        broadcast_extent_1(a);
+        broadcast_extent_1(b);
         for (const auto& i : EnumerateIndices(output.extents())) {
           if (std::is_integral<T>::value) {
             const int32_t expected = std::min<int32_t>(
