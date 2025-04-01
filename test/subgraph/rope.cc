@@ -7,9 +7,9 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdlib>
-#include <random>
 #include <vector>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
@@ -98,14 +98,10 @@ void TestImpl() {
         .InvokeRuntime();
 
     // Verify results.
-    T max_abs_val = 0.0f;
-    for (const T& val : output) {
-      max_abs_val = std::max<T>(max_abs_val, std::abs(val));
-    }
-    const float abs_tol =
-        max_abs_val * 2.0f * xnnpack::epsilon(xnn_datatype_of<T>());
+    const float tolerance = 2.0f * xnnpack::epsilon(xnn_datatype_of<T>());
     for (const auto& i : EnumerateIndices(output.extents())) {
-      ASSERT_NEAR(output(i), expected(i), abs_tol);
+      ASSERT_NEAR(output(i), expected(i),
+                  tolerance * std::abs(static_cast<float>(expected(i))));
     }
   }
 }
