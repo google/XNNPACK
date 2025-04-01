@@ -72,7 +72,7 @@ DECLARE_F32_IBILINEAR_CHW_UKERNEL_FUNCTION(xnn_f32_ibilinear_chw_ukernel__sse_p8
 DECLARE_F16_IBILINEAR_CHW_UKERNEL_FUNCTION(xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p4)
 DECLARE_F16_IBILINEAR_CHW_UKERNEL_FUNCTION(xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p8)
 DECLARE_F16_IBILINEAR_CHW_UKERNEL_FUNCTION(xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p16)
-=======
+
 #define DECLARE_F16_IBILINEAR_UKERNEL_FUNCTION(fn_name)                      \
   XNN_INTERNAL void fn_name(size_t output_pixels, size_t channels,           \
                             const xnn_float16** input, size_t input_offset,  \
