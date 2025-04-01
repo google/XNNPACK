@@ -39,7 +39,11 @@ static void set_shape(struct xnn_value* value, size_t num_dims, const size_t* di
 {
   value->shape.num_dims = num_dims;
   if (num_dims != 0) {
-    memcpy(value->shape.dim, dims, num_dims * sizeof(size_t));
+    if (dims != NULL) {
+      memcpy(value->shape.dim, dims, num_dims * sizeof(size_t));
+    } else {
+      memset(value->shape.dim, 0, num_dims * sizeof(size_t));
+    }
   }
 }
 
