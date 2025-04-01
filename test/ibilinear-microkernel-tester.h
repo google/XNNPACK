@@ -15,6 +15,8 @@
 #include <vector>
 
 #include <gtest/gtest.h>
+#include "next_prime.h"
+#include "xnnpack.h"
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/math.h"
@@ -459,6 +461,38 @@ class IBilinearMicrokernelTester {
         }
       }
     }
+  }
+
+  struct Kernel {
+    int16_t qmin;
+    int16_t qmax;
+
+    explicit Kernel(xnn_s8_ibilinear_ukernel_fn ibilinear) {
+      dispatch = [ibilinear](IBilinearMicrokernelTester& tester) {
+        tester.Test(ibilinear);
+      };
+    }
+    explicit Kernel(xnn_u8_ibilinear_ukernel_fn ibilinear) {
+      dispatch = [ibilinear](IBilinearMicrokernelTester& tester) {
+        tester.Test(ibilinear);
+      };
+    }
+    explicit Kernel(xnn_f16_ibilinear_ukernel_fn ibilinear) {
+      dispatch = [ibilinear](IBilinearMicrokernelTester& tester) {
+        tester.Test(ibilinear);
+      };
+    }
+    explicit Kernel(xnn_f32_ibilinear_ukernel_fn ibilinear) {
+      dispatch = [ibilinear](IBilinearMicrokernelTester& tester) {
+        tester.Test(ibilinear);
+      };
+    }
+
+    std::function<void(IBilinearMicrokernelTester&)> dispatch;
+  };
+
+  void Test(const Kernel& kernel) {
+    kernel.dispatch(*this);
   }
 
  private:
