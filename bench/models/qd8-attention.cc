@@ -33,8 +33,8 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
   // Scales must be positive.
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.01f, +1.0f),
                           std::ref(rng));
-  auto i8rng = std::bind(std::uniform_int_distribution<int>(-127, 127),
-                          std::ref(rng));
+  auto i8rng =
+      std::bind(std::uniform_int_distribution<int>(-127, 127), std::ref(rng));
 
   // External inputs and outputs.
   uint32_t input_id = XNN_INVALID_VALUE_ID;

@@ -107,6 +107,7 @@ MICROKERNEL_DEFS = [
     "src/f16-vsqrt/f16-vsqrt.h",
     "src/f16-vtanh/f16-vtanh.h",
     "src/f32-avgpool/f32-avgpool-minmax.h",
+    "src/f32-conv-hwc/f32-conv-hwc.h",
     "src/f32-dwconv/f32-dwconv-minmax.h",
     "src/f32-dwconv/f32-dwconv.h",
     "src/f32-f16-vcvt/f32-f16-vcvt.h",
@@ -263,9 +264,7 @@ MICROKERNEL_DEPS = [
 ]
 
 SIMD_HEADERS = [
-    "src/xnnpack/simd/f16-generic-functions.h",
     "src/xnnpack/simd/f32-avx-base.h",
-    "src/xnnpack/simd/f32-generic-functions.h",
 ] + [
     "src/xnnpack/simd/f32-" + arch + ".h"
     for arch in xnnpack_simd_f32_archs()
@@ -592,6 +591,7 @@ xnnpack_cc_library(
     gcc_copts = [],
     deps = [
         ":common",
+        ":init_once",
         ":logging",
         ":math",
         ":xnnpack_h",
@@ -927,6 +927,7 @@ xnnpack_cc_library(
         ":common",
         ":logging",
         ":math",
+        ":node_type",
         ":operator_h",
         ":operator_type",
         ":params",
@@ -998,6 +999,7 @@ xnnpack_cc_library(
         ":microkernel_utils",
         ":microkernels_h",
         ":microparams_init",
+        ":node_type",
         ":normalization",
         ":operator_type",
         ":operator_utils",

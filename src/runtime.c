@@ -504,6 +504,16 @@ void propagate_rank(
       case xnn_node_type_static_reshape:
         output_value->shape.num_dims = node->params.static_reshape.new_shape.num_dims;
         break;
+      case xnn_node_type_fuse_dims:
+        output_value->shape.num_dims =
+            input_value->shape.num_dims -
+            node->params.static_reshape.new_shape.num_dims + 1;
+        break;
+      case xnn_node_type_split_dims:
+        output_value->shape.num_dims =
+            input_value->shape.num_dims +
+            node->params.static_reshape.new_shape.num_dims - 1;
+        break;
       default:
         XNN_UNREACHABLE;
     }

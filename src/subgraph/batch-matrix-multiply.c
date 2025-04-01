@@ -279,8 +279,7 @@ static enum xnn_status reshape_batch_matrix_multiply_operator(
       xnn_log_error(
           "failed to reshape %s operator with input_a ID #%" PRIu32
           " and input_b ID #%" PRIu32
-          ": incompatible dimension %zu (%zu not a multiple of %zu or vice "
-          "versa)",
+          ": incompatible dimensions %zu (%zu vs. %zu)",
           xnn_node_type_to_string(xnn_node_type_batch_matrix_multiply),
           input_a_id, input_b_id, i, padded_dims_b[i], padded_dims_a[i]);
       return xnn_status_invalid_parameter;

@@ -508,24 +508,44 @@ std::vector<GemmTestParams> CreateTests(
             .loop_zi(0, mr - 1));
       }
       $if ACTIVATION == "MINMAX":
-        gemm_tests.push_back(GemmTestParams(
-            "qmin",
-            tester.clone()
-                .m(mr).n(nr).k(k_block).qmin(128)
-                $if KERNELTYPE in ['qb4w', 'qc4w']:
-                  .b_zero_point(8)
-                $if KERNELTYPE in ['qb4w']:
-                  .bl(32)
-            , test_func, isa_check));
-        gemm_tests.push_back(GemmTestParams(
-            "qmax",
-            tester.clone()
-                .m(mr).n(nr).k(k_block).qmax(128)
-                $if KERNELTYPE in ['qb4w', 'qc4w']:
-                  .b_zero_point(8)
-                $if KERNELTYPE in ['qb4w']:
-                  .bl(32)
-            , test_func, isa_check));
+        $if OUTPUT_DATATYPE in {'f32', 'f16'}:
+          gemm_tests.push_back(GemmTestParams(
+              "min",
+              tester.clone()
+                  .m(mr).n(nr).k(k_block).min(0.0f)
+                  $if KERNELTYPE in ['qb4w', 'qc4w']:
+                    .b_zero_point(8)
+                  $if KERNELTYPE in ['qb4w']:
+                    .bl(32)
+              , test_func, isa_check));
+          gemm_tests.push_back(GemmTestParams(
+              "max",
+              tester.clone()
+                  .m(mr).n(nr).k(k_block).max(0.0f)
+                  $if KERNELTYPE in ['qb4w', 'qc4w']:
+                    .b_zero_point(8)
+                  $if KERNELTYPE in ['qb4w']:
+                    .bl(32)
+              , test_func, isa_check));
+        $else:
+          gemm_tests.push_back(GemmTestParams(
+              "qmin",
+              tester.clone()
+                  .m(mr).n(nr).k(k_block).qmin(128)
+                  $if KERNELTYPE in ['qb4w', 'qc4w']:
+                    .b_zero_point(8)
+                  $if KERNELTYPE in ['qb4w']:
+                    .bl(32)
+              , test_func, isa_check));
+          gemm_tests.push_back(GemmTestParams(
+              "qmax",
+              tester.clone()
+                  .m(mr).n(nr).k(k_block).qmax(128)
+                  $if KERNELTYPE in ['qb4w', 'qc4w']:
+                    .b_zero_point(8)
+                  $if KERNELTYPE in ['qb4w']:
+                    .bl(32)
+              , test_func, isa_check));
       gemm_tests.push_back(GemmTestParams(
           "strided_cm",
           tester.clone()
@@ -632,30 +652,6 @@ $if TEST_NAME.startswith('GENERATE') and DATATYPE in ['f32', 'f16']:
     }
   }
 
-$if TEST_NAME.startswith('GENERATE') and DATATYPE in ['f32', 'f16'] and PROTOTYPE is not None:
-  #if XNN_ENABLE_ASSEMBLY
-    TEST(${TEST_NAME}, matches_assembly) {
-      $if ISA_CHECK:
-        ${ISA_CHECK};
-      GemmMicrokernelTester()
-        $if MR > 1:
-          .mr(${MR})
-        $if NR > 1:
-          .nr(${NR})
-        $if KR > 1:
-          .kr(${KR})
-        $if SR > 1:
-          .sr(${SR})
-        $if MR > 1:
-          .m(${MR})
-        $if NR > 1:
-          .n(${NR})
-        .k(${KBLOCK})
-        .${TEST_FUN}(
-            ${", ".join(TEST_ARGS)},
-            &${PROTOTYPE});
-    }
-  #endif // XNN_ENABLE_ASSEMBLY
 $if CPP_CHECK:
   #endif  // ${CPP_CHECK}
 """
@@ -679,7 +675,6 @@ def generate_test_cases(
     is_pipelined,
     cpp_check,
     isa,
-    prototype,
 ):
   """Generates all tests cases for a GEMM micro-kernel.
 
@@ -749,6 +744,8 @@ def generate_test_cases(
         "xnn_%s_requantize_%s" % (requantization_datatype, requantization)
     )
 
+  output_datatype = init_fn.split("_")[2] if init_fn else "f32"
+
   nr_scale = ""
   if vector_tile:
     accum_type = {
@@ -759,7 +756,9 @@ def generate_test_cases(
         "f16": "xnn_float16",
         "f32": "float",
     }[datatype]
-    nr_scale = {"rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % accum_type}[isa]
+    nr_scale = {
+        "rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % accum_type
+    }[isa]
   test_fun_name = "".join(ukernel.split("_")[1:4]).upper()
   if test_fun_name in {"QP8F32QC8W"}:
     test_fun_name = "_".join(["Test", test_fun_name])
@@ -788,8 +787,8 @@ def generate_test_cases(
       "IS_PIPELINED": is_pipelined,
       "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
       "next_prime": next_prime,
-      "PROTOTYPE": prototype,
       "CPP_CHECK": cpp_check,
+      "OUTPUT_DATATYPE": output_datatype,
   }
 
   create_test_case = xngen.preprocess(GEMM_CREATE_TESTS_CODE, test_args)
@@ -914,7 +913,6 @@ def main(args):
       packed_stride_fn = ukernel_spec.get("packed-stride")
       pipelined = bool(ukernel_spec.get("pipelined", False))
       cpp_check = ukernel_spec.get("cpp-check", False)
-      prototype = ukernel_spec.get("prototype")
       (
           mr,
           nr,
@@ -947,7 +945,6 @@ def main(args):
           pipelined,
           cpp_check,
           isa,
-          prototype,
       )
 
       # Store or reuse the `CreateTests` function?

@@ -103,6 +103,7 @@ _MICROKERNEL_NAME_REGEX = re.compile(
 _VERIFICATION_IGNORE_SUBDIRS = {
     os.path.join('src', 'qs8-requantization'),
     os.path.join('src', 'qu8-requantization'),
+    os.path.join('src', 'reference'),
     os.path.join('src', 'xnnpack', 'simd'),
 }
 
@@ -206,8 +207,10 @@ def main(args):
 
       # Build microkernel name -> microkernel filepath mapping
       with open(os.path.join(root_dir, filepath), 'r', encoding='utf-8') as f:
-        if filepath.endswith('.swp'): continue
-        if filepath.endswith('.orig'): continue
+        if filepath.endswith('.swp'):
+          continue
+        if filepath.endswith('.orig'):
+          continue
         content = f.read()
         microkernels = re.findall(_MICROKERNEL_NAME_REGEX, content)
         if not microkernels:

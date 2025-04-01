@@ -26,7 +26,7 @@
 #ifndef HAVE_XNN_SIGNED_GETEXP_F32
 #define HAVE_XNN_SIGNED_GETEXP_F32
 static XNN_INLINE xnn_simd_f32_t xnn_signed_getexp_f32(xnn_simd_f32_t a) {
-  // The bits of IEE754 single-precision floating-point format are:
+  // The bits of IEEE754 single-precision floating-point format are:
   //
   //   s | e e e e e e e e | m m m m m m m m m m m m m m m m m m m m m m m
   //

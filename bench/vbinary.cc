@@ -15,13 +15,13 @@
 
 #include "bench/utils.h"
 #include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/microparams.h"
-#include "src/xnnpack/buffer.h"
 #include <benchmark/benchmark.h>
 
 template <typename T>
@@ -46,9 +46,8 @@ struct UniformDistribution<xnn_float16> {
 
 template <>
 struct UniformDistribution<int8_t> {
-  std::uniform_int_distribution<int> dist{
-      std::numeric_limits<int8_t>::lowest(),
-      std::numeric_limits<int8_t>::max()};
+  std::uniform_int_distribution<int> dist{std::numeric_limits<int8_t>::lowest(),
+                                          std::numeric_limits<int8_t>::max()};
 
   template <class Generator>
   int8_t operator()(Generator& g) {
@@ -85,25 +84,29 @@ xnn_quantization_params quantization = {0, 1.0f};
 template <>
 struct ParamsWrapper<xnn_qs8_add_minmax_params> {
   xnn_qs8_add_minmax_params params = make_params<xnn_qs8_add_minmax_params>(
-      xnn_init_qs8_add_minmax_scalar_params, &quantization, &quantization, &quantization);
+      xnn_init_qs8_add_minmax_scalar_params, &quantization, &quantization,
+      &quantization);
 };
 
 template <>
 struct ParamsWrapper<xnn_qu8_add_minmax_params> {
   xnn_qu8_add_minmax_params params = make_params<xnn_qu8_add_minmax_params>(
-      xnn_init_qu8_add_minmax_scalar_params, &quantization, &quantization, &quantization);
+      xnn_init_qu8_add_minmax_scalar_params, &quantization, &quantization,
+      &quantization);
 };
 
 template <>
 struct ParamsWrapper<xnn_qs8_mul_minmax_params> {
   xnn_qs8_mul_minmax_params params = make_params<xnn_qs8_mul_minmax_params>(
-      xnn_init_qs8_mul_minmax_scalar_params, &quantization, &quantization, &quantization);
+      xnn_init_qs8_mul_minmax_scalar_params, &quantization, &quantization,
+      &quantization);
 };
 
 template <>
 struct ParamsWrapper<xnn_qu8_mul_minmax_params> {
   xnn_qu8_mul_minmax_params params = make_params<xnn_qu8_mul_minmax_params>(
-      xnn_init_qu8_mul_minmax_scalar_params, &quantization, &quantization, &quantization);
+      xnn_init_qu8_mul_minmax_scalar_params, &quantization, &quantization,
+      &quantization);
 };
 
 // Microkernel function, templated on the `params` type.
@@ -142,12 +145,14 @@ static void vbinary(benchmark::State& state, uint64_t arch_flags,
   }
 
   const size_t num_elements_per_iteration = num_elements;
-  state.counters["num_elements"] =
-    benchmark::Counter(uint64_t(state.iterations()) * num_elements_per_iteration, benchmark::Counter::kIsRate);
+  state.counters["num_elements"] = benchmark::Counter(
+      uint64_t(state.iterations()) * num_elements_per_iteration,
+      benchmark::Counter::kIsRate);
 
   const size_t bytes_per_iteration = 3 * num_elements * sizeof(T);
   state.counters["bytes"] =
-    benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
+      benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
+                         benchmark::Counter::kIsRate);
 }
 
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, \

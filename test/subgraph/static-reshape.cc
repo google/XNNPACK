@@ -1,9 +1,10 @@
-// Reshaperight 2022 Google LLC
+// Copyright 2022 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
 #include <cassert>
+#include <chrono>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -55,7 +56,7 @@ void TestImpl() {
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
-  for (int rep = 0; rep < 100; ++rep) {
+  for (auto _ : FuzzTest(std::chrono::milliseconds(1000))) {
     xnn_quantization_params quantization =
         random_quantization(xnn_datatype_of<T>(), rng);
 

@@ -3,12 +3,13 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include "src/xnnpack/memory-planner.h"
+
 #include <cstddef>
 #include <cstdint>
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
-#include "src/xnnpack/memory-planner.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/subgraph.h"
 #include "test/subgraph/runtime-flags.h"
@@ -19,9 +20,8 @@ namespace xnnpack {
 
 TEST(MemoryPlanner, ValueLiveInfo) {
   EXPECT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  // Create simple runtime where it has 2 nodes and 4 tensors as illustrated below:
-  // T0 ----> N0 ----> T2  and T2 ----> N1 ----> T3
-  // T1 ----/                  T1 ----/
+  // Create simple runtime where it has 2 nodes and 4 tensors as illustrated
+  // below: T0 ----> N0 ----> T2  and T2 ----> N1 ----> T3 T1 ----/ T1 ----/
   struct xnn_runtime runtime;
   runtime.num_values = 4;
   runtime.num_ops = 2;
@@ -179,7 +179,8 @@ TEST(MemoryPlanner, GeneralPlanning) {
   xnn_release_value_allocation_tracker(&tracker);
 }
 
-// Extra space for memory arena due to sparse microkernels reading extra. Should be in sync with runtime.c
+// Extra space for memory arena due to sparse microkernels reading extra. Should
+// be in sync with runtime.c
 namespace {
 constexpr size_t MEMORY_ARENA_EXTRA_BYTES = 2 * XNN_EXTRA_BYTES;
 }
@@ -194,25 +195,24 @@ TEST(MemoryPlanner, LeakyReluInPlaceAfterConv) {
 
   // Conv -> Leaky Relu -> Clamp
   RuntimeTester tester(5);
-  tester
-    .AddInputTensorF32({1, 5, 5, 3}, input_id)
-    .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense, filter_id)
-    .AddDynamicTensorF32({1, 3, 3, 3}, conv_out, /*flags=*/0)
-    .AddDynamicTensorF32({1, 3, 3, 3}, leaky_relu_out, /*flags=*/0)
-    .AddOutputTensorF32({1, 3, 3, 3}, output_id)
-    .AddConvolution2D(
-        ConvolutionParams{
-            Padding{0, 0, 0, 0},
-            Kernel{3, 3},
-            Subsampling{1, 1},
-            Dilation{1, 1},
-            /*groups=*/1,
-            /*group_input_channels=*/3,
-            /*group_output_channels=*/1,
-        },
-        input_id, filter_id, bias_id, conv_out)
-    .AddLeakyRelu(1.0f, conv_out, leaky_relu_out)
-    .AddClamp(0.0f, 1.0f, leaky_relu_out, output_id);
+  tester.AddInputTensorF32({1, 5, 5, 3}, input_id)
+      .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense, filter_id)
+      .AddDynamicTensorF32({1, 3, 3, 3}, conv_out, /*flags=*/0)
+      .AddDynamicTensorF32({1, 3, 3, 3}, leaky_relu_out, /*flags=*/0)
+      .AddOutputTensorF32({1, 3, 3, 3}, output_id)
+      .AddConvolution2D(
+          ConvolutionParams{
+              Padding{0, 0, 0, 0},
+              Kernel{3, 3},
+              Subsampling{1, 1},
+              Dilation{1, 1},
+              /*groups=*/1,
+              /*group_input_channels=*/3,
+              /*group_output_channels=*/1,
+          },
+          input_id, filter_id, bias_id, conv_out)
+      .AddLeakyRelu(1.0f, conv_out, leaky_relu_out)
+      .AddClamp(0.0f, 1.0f, leaky_relu_out, output_id);
   tester.CreateRuntime(xnn_test_runtime_flags());
   tester.SetupRuntime();
 
@@ -220,8 +220,10 @@ TEST(MemoryPlanner, LeakyReluInPlaceAfterConv) {
 
   // Should only need space for conv_out tensor.
   ASSERT_EQ(runtime->workspace->size,
-            xnn_tensor_get_rounded_size(&runtime->values[conv_out]) + MEMORY_ARENA_EXTRA_BYTES);
-  ASSERT_EQ(runtime->values[conv_out].data, runtime->values[leaky_relu_out].data);
+            xnn_tensor_get_rounded_size(&runtime->values[conv_out]) +
+                MEMORY_ARENA_EXTRA_BYTES);
+  ASSERT_EQ(runtime->values[conv_out].data,
+            runtime->values[leaky_relu_out].data);
 }
 
 TEST(MemoryPlanner, LeakyReluWithTwoConsumersCannotBeInPlace) {
@@ -236,39 +238,41 @@ TEST(MemoryPlanner, LeakyReluWithTwoConsumersCannotBeInPlace) {
   // Conv -> Leaky Relu -> Clamp
   //                   \-> Clamp
   RuntimeTester tester(6);
-  tester
-    .AddInputTensorF32({1, 5, 5, 3}, input_id)
-    .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense, filter_id)
-    .AddDynamicTensorF32({1, 3, 3, 3}, conv_out, /*flags=*/0)  // 108 bytes.
-    .AddDynamicTensorF32({1, 3, 3, 3}, leaky_relu_out, /*flags=*/0) // 108 bytes.
-    .AddOutputTensorF32({1, 3, 3, 3}, output_id)
-    .AddOutputTensorF32({1, 3, 3, 3}, output_id2)
-    .AddConvolution2D(
-        ConvolutionParams{
-            Padding{0, 0, 0, 0},
-            Kernel{3, 3},
-            Subsampling{1, 1},
-            Dilation{1, 1},
-            /*groups=*/1,
-            /*group_input_channels=*/3,
-            /*group_output_channels=*/1,
-        },
-        input_id, filter_id, bias_id, conv_out)
-    .AddLeakyRelu(1.0f, conv_out, leaky_relu_out)
-    .AddClamp(0.0f, 1.0f, leaky_relu_out, output_id)
-    .AddClamp(1.0f, 2.0f, leaky_relu_out, output_id2);
+  tester.AddInputTensorF32({1, 5, 5, 3}, input_id)
+      .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense, filter_id)
+      .AddDynamicTensorF32({1, 3, 3, 3}, conv_out, /*flags=*/0)  // 108 bytes.
+      .AddDynamicTensorF32({1, 3, 3, 3}, leaky_relu_out,
+                           /*flags=*/0)  // 108 bytes.
+      .AddOutputTensorF32({1, 3, 3, 3}, output_id)
+      .AddOutputTensorF32({1, 3, 3, 3}, output_id2)
+      .AddConvolution2D(
+          ConvolutionParams{
+              Padding{0, 0, 0, 0},
+              Kernel{3, 3},
+              Subsampling{1, 1},
+              Dilation{1, 1},
+              /*groups=*/1,
+              /*group_input_channels=*/3,
+              /*group_output_channels=*/1,
+          },
+          input_id, filter_id, bias_id, conv_out)
+      .AddLeakyRelu(1.0f, conv_out, leaky_relu_out)
+      .AddClamp(0.0f, 1.0f, leaky_relu_out, output_id)
+      .AddClamp(1.0f, 2.0f, leaky_relu_out, output_id2);
   tester.CreateRuntime(xnn_test_runtime_flags());
   tester.SetupRuntime();
 
   xnn_runtime_t runtime = tester.Runtime();
 
-  // Since leaky relu has 2 consumers, we cannot yet do it in place since we cannot easily find all consumers of the
-  // value without traversing the graph. This limitation can be lifted in the future.
+  // Since leaky relu has 2 consumers, we cannot yet do it in place since we
+  // cannot easily find all consumers of the value without traversing the graph.
+  // This limitation can be lifted in the future.
   ASSERT_EQ(runtime->workspace->size,
-            xnn_tensor_get_rounded_size(&runtime->values[leaky_relu_out])
-            + xnn_tensor_get_rounded_size(&runtime->values[conv_out])
-            + MEMORY_ARENA_EXTRA_BYTES);
-  ASSERT_NE(runtime->values[conv_out].data, runtime->values[leaky_relu_out].data);
+            xnn_tensor_get_rounded_size(&runtime->values[leaky_relu_out]) +
+                xnn_tensor_get_rounded_size(&runtime->values[conv_out]) +
+                MEMORY_ARENA_EXTRA_BYTES);
+  ASSERT_NE(runtime->values[conv_out].data,
+            runtime->values[leaky_relu_out].data);
 }
 
 TEST(MemoryPlanner, HardSwishAndLeakyReluInPlaceAfterConv) {
@@ -282,37 +286,42 @@ TEST(MemoryPlanner, HardSwishAndLeakyReluInPlaceAfterConv) {
 
   // Conv -> Leaky Relu -> Hard Swish -> Clamp
   RuntimeTester tester(6);
-  tester
-    .AddInputTensorF32({1, 5, 5, 3}, input_id)
-    .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense, filter_id)
-    .AddDynamicTensorF32({1, 3, 3, 3}, conv_out, /*flags=*/0)  // 108 bytes.
-    .AddDynamicTensorF32({1, 3, 3, 3}, leaky_relu_out, /*flags=*/0) // 108 bytes.
-    .AddDynamicTensorF32({1, 3, 3, 3}, hard_swish_out, /*flags=*/0) // 108 bytes.
-    .AddOutputTensorF32({1, 3, 3, 3}, output_id)
-    .AddConvolution2D(
-        ConvolutionParams{
-            Padding{0, 0, 0, 0},
-            Kernel{3, 3},
-            Subsampling{1, 1},
-            Dilation{1, 1},
-            /*groups=*/1,
-            /*group_input_channels=*/3,
-            /*group_output_channels=*/1,
-        },
-        input_id, filter_id, bias_id, conv_out)
-    .AddLeakyRelu(1.0f, conv_out, leaky_relu_out)
-    .AddHardSwish(leaky_relu_out, hard_swish_out)
-    .AddClamp(0.0f, 1.0f, hard_swish_out, output_id);
+  tester.AddInputTensorF32({1, 5, 5, 3}, input_id)
+      .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense, filter_id)
+      .AddDynamicTensorF32({1, 3, 3, 3}, conv_out, /*flags=*/0)  // 108 bytes.
+      .AddDynamicTensorF32({1, 3, 3, 3}, leaky_relu_out,
+                           /*flags=*/0)  // 108 bytes.
+      .AddDynamicTensorF32({1, 3, 3, 3}, hard_swish_out,
+                           /*flags=*/0)  // 108 bytes.
+      .AddOutputTensorF32({1, 3, 3, 3}, output_id)
+      .AddConvolution2D(
+          ConvolutionParams{
+              Padding{0, 0, 0, 0},
+              Kernel{3, 3},
+              Subsampling{1, 1},
+              Dilation{1, 1},
+              /*groups=*/1,
+              /*group_input_channels=*/3,
+              /*group_output_channels=*/1,
+          },
+          input_id, filter_id, bias_id, conv_out)
+      .AddLeakyRelu(1.0f, conv_out, leaky_relu_out)
+      .AddHardSwish(leaky_relu_out, hard_swish_out)
+      .AddClamp(0.0f, 1.0f, hard_swish_out, output_id);
   tester.CreateRuntime(xnn_test_runtime_flags());
   tester.SetupRuntime();
 
   xnn_runtime_t runtime = tester.Runtime();
 
-  // Should only need space for conv_out tensor, leaky relu and hard swish can be in place.
+  // Should only need space for conv_out tensor, leaky relu and hard swish can
+  // be in place.
   ASSERT_EQ(runtime->workspace->size,
-            xnn_tensor_get_rounded_size(&runtime->values[conv_out]) + MEMORY_ARENA_EXTRA_BYTES);
-  ASSERT_EQ(runtime->values[conv_out].data, runtime->values[leaky_relu_out].data);
-  ASSERT_EQ(runtime->values[leaky_relu_out].data, runtime->values[hard_swish_out].data);
+            xnn_tensor_get_rounded_size(&runtime->values[conv_out]) +
+                MEMORY_ARENA_EXTRA_BYTES);
+  ASSERT_EQ(runtime->values[conv_out].data,
+            runtime->values[leaky_relu_out].data);
+  ASSERT_EQ(runtime->values[leaky_relu_out].data,
+            runtime->values[hard_swish_out].data);
 }
 
 TEST(MemoryPlanner, ExternalInputsCannotBeInPlace) {
@@ -322,9 +331,9 @@ TEST(MemoryPlanner, ExternalInputsCannotBeInPlace) {
 
   // Leaky Relu -> Clamp
   RuntimeTester tester(4);
-  tester
-      .AddInputTensorF32({1, 3, 3, 3}, input_id)
-      .AddDynamicTensorF32({1, 3, 3, 3}, leaky_relu_out, /*flags=*/0) // 108 bytes.
+  tester.AddInputTensorF32({1, 3, 3, 3}, input_id)
+      .AddDynamicTensorF32({1, 3, 3, 3}, leaky_relu_out,
+                           /*flags=*/0)  // 108 bytes.
       .AddOutputTensorF32({1, 3, 3, 3}, output_id)
       .AddLeakyRelu(1.0f, input_id, leaky_relu_out)
       .AddClamp(0.0f, 1.0f, leaky_relu_out, output_id);
@@ -333,9 +342,11 @@ TEST(MemoryPlanner, ExternalInputsCannotBeInPlace) {
 
   xnn_runtime_t runtime = tester.Runtime();
 
-  // Need space allocated for leaky relu output tensor because we cannot modify the external input tensor.
+  // Need space allocated for leaky relu output tensor because we cannot modify
+  // the external input tensor.
   ASSERT_EQ(runtime->workspace->size,
-            xnn_tensor_get_rounded_size(&runtime->values[leaky_relu_out]) + MEMORY_ARENA_EXTRA_BYTES);
+            xnn_tensor_get_rounded_size(&runtime->values[leaky_relu_out]) +
+                MEMORY_ARENA_EXTRA_BYTES);
 }
 
 TEST(MemoryPlanner, PersistentValuesCannotReuseInternalValues) {
@@ -346,10 +357,11 @@ TEST(MemoryPlanner, PersistentValuesCannotReuseInternalValues) {
 
   // Clamp -> Leaky Relu -> Clamp
   RuntimeTester tester(4);
-  tester
-      .AddInputTensorF32({1, 3, 3, 3}, input_id)
-      .AddDynamicTensorF32({1, 3, 3, 3}, clamp_out_id, /*flags=*/0) // 108 bytes.
-      .AddDynamicTensorF32({1, 3, 3, 3}, leaky_relu_out_id, XNN_VALUE_FLAG_PERSISTENT) // 108 bytes.
+  tester.AddInputTensorF32({1, 3, 3, 3}, input_id)
+      .AddDynamicTensorF32({1, 3, 3, 3}, clamp_out_id,
+                           /*flags=*/0)  // 108 bytes.
+      .AddDynamicTensorF32({1, 3, 3, 3}, leaky_relu_out_id,
+                           XNN_VALUE_FLAG_PERSISTENT)  // 108 bytes.
       .AddOutputTensorF32({1, 3, 3, 3}, output_id)
       .AddClamp(0.0f, 1.0f, input_id, clamp_out_id)
       .AddLeakyRelu(1.0f, clamp_out_id, leaky_relu_out_id)
@@ -360,11 +372,11 @@ TEST(MemoryPlanner, PersistentValuesCannotReuseInternalValues) {
   xnn_runtime_t runtime = tester.Runtime();
 
   // Persistent values need to be allocated their own space.
-  ASSERT_EQ(runtime->workspace->size,
-            xnn_tensor_get_rounded_size(&runtime->values[clamp_out_id])
-            + xnn_tensor_get_rounded_size(&runtime->values[leaky_relu_out_id])
-            + MEMORY_ARENA_EXTRA_BYTES);
-
+  ASSERT_EQ(
+      runtime->workspace->size,
+      xnn_tensor_get_rounded_size(&runtime->values[clamp_out_id]) +
+          xnn_tensor_get_rounded_size(&runtime->values[leaky_relu_out_id]) +
+          MEMORY_ARENA_EXTRA_BYTES);
 }
 
 TEST(MemoryPlanner, CannotReuseStaticValues) {
@@ -374,9 +386,8 @@ TEST(MemoryPlanner, CannotReuseStaticValues) {
 
   // --- static_id --> Clamp --- clamp_out_id --> Leaky Relu --- output_id -->
   RuntimeTester tester(3);
-  tester
-      .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense, static_id)
-      .AddDynamicTensorF32({1, 3, 3, 3}, clamp_out_id) // 108 bytes.
+  tester.AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense, static_id)
+      .AddDynamicTensorF32({1, 3, 3, 3}, clamp_out_id)  // 108 bytes.
       .AddOutputTensorF32({1, 3, 3, 3}, output_id)
       .AddClamp(0.0f, 1.0f, static_id, clamp_out_id)
       .AddLeakyRelu(1.0f, clamp_out_id, output_id);
@@ -387,7 +398,8 @@ TEST(MemoryPlanner, CannotReuseStaticValues) {
 
   // clamp_out_id cannot reuse static_id (because it is static).
   ASSERT_EQ(runtime->workspace->size,
-            xnn_tensor_get_rounded_size(&runtime->values[clamp_out_id]) + MEMORY_ARENA_EXTRA_BYTES);
+            xnn_tensor_get_rounded_size(&runtime->values[clamp_out_id]) +
+                MEMORY_ARENA_EXTRA_BYTES);
 }
 
 TEST(MemoryPlanner, Add2WithLHSConstantInPlace) {
@@ -401,34 +413,34 @@ TEST(MemoryPlanner, Add2WithLHSConstantInPlace) {
 
   // Conv -> Add -> LeakyRelu
   RuntimeTester tester(6);
-  tester
-    .AddInputTensorF32({1, 5, 5, 3}, input_id)
-    .AddStaticTensorF32({3, 3, 3, 3}, TensorType::kDense, filter_id)
-    .AddDynamicTensorF32({1, 3, 3, 3}, conv_out)  // 108 bytes.
-    .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense, add_constant_input_id)
-    .AddDynamicTensorF32({1, 3, 3, 3}, add_out_id)  // 108 bytes.
-    .AddOutputTensorF32({1, 3, 3, 3}, output_id)
-    .AddConvolution2D(
-        ConvolutionParams{
-            Padding{0, 0, 0, 0},
-            Kernel{3, 3},
-            Subsampling{1, 1},
-            Dilation{1, 1},
-            /*groups=*/1,
-            /*group_input_channels=*/3,
-            /*group_output_channels=*/3,
-        },
-        input_id, filter_id, bias_id, conv_out)
-    .AddAddition(add_constant_input_id, conv_out, add_out_id)
-    .AddLeakyRelu(1.0f, add_out_id, output_id);
+  tester.AddInputTensorF32({1, 5, 5, 3}, input_id)
+      .AddStaticTensorF32({3, 3, 3, 3}, TensorType::kDense, filter_id)
+      .AddDynamicTensorF32({1, 3, 3, 3}, conv_out)  // 108 bytes.
+      .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense,
+                          add_constant_input_id)
+      .AddDynamicTensorF32({1, 3, 3, 3}, add_out_id)  // 108 bytes.
+      .AddOutputTensorF32({1, 3, 3, 3}, output_id)
+      .AddConvolution2D(
+          ConvolutionParams{
+              Padding{0, 0, 0, 0},
+              Kernel{3, 3},
+              Subsampling{1, 1},
+              Dilation{1, 1},
+              /*groups=*/1,
+              /*group_input_channels=*/3,
+              /*group_output_channels=*/3,
+          },
+          input_id, filter_id, bias_id, conv_out)
+      .AddAddition(add_constant_input_id, conv_out, add_out_id)
+      .AddLeakyRelu(1.0f, add_out_id, output_id);
   tester.CreateRuntime(xnn_test_runtime_flags());
   tester.SetupRuntime();
   xnn_runtime_t runtime = tester.Runtime();
 
   // Need space for conv_out tensor and add out as add cannot be done in-place.
   ASSERT_EQ(runtime->workspace->size,
-            xnn_tensor_get_rounded_size(&runtime->values[conv_out])
-            + MEMORY_ARENA_EXTRA_BYTES);
+            xnn_tensor_get_rounded_size(&runtime->values[conv_out]) +
+                MEMORY_ARENA_EXTRA_BYTES);
   ASSERT_EQ(runtime->values[conv_out].data, runtime->values[add_out_id].data);
 }
 
@@ -443,35 +455,35 @@ TEST(MemoryPlanner, Add2WithLHSConstant) {
 
   // Conv -> Add -> LeakyRelu
   RuntimeTester tester(6);
-  tester
-    .AddInputTensorF32({1, 5, 5, 3}, input_id)
-    .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense, filter_id)
-    .AddDynamicTensorF32({1, 3, 3, 3}, conv_out)  // 108 bytes.
-    .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense, add_constant_input_id)
-    .AddDynamicTensorF32({1, 3, 3, 3}, add_out_id)  // 108 bytes.
-    .AddOutputTensorF32({1, 3, 3, 3}, output_id)
-    .AddConvolution2D(
-        ConvolutionParams{
-            Padding{0, 0, 0, 0},
-            Kernel{3, 3},
-            Subsampling{1, 1},
-            Dilation{1, 1},
-            /*groups=*/1,
-            /*group_input_channels=*/3,
-            /*group_output_channels=*/1,
-        },
-        input_id, filter_id, bias_id, conv_out)
-    .AddAddition(add_constant_input_id, conv_out, add_out_id)
-    .AddLeakyRelu(1.0f, add_out_id, output_id);
+  tester.AddInputTensorF32({1, 5, 5, 3}, input_id)
+      .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense, filter_id)
+      .AddDynamicTensorF32({1, 3, 3, 3}, conv_out)  // 108 bytes.
+      .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense,
+                          add_constant_input_id)
+      .AddDynamicTensorF32({1, 3, 3, 3}, add_out_id)  // 108 bytes.
+      .AddOutputTensorF32({1, 3, 3, 3}, output_id)
+      .AddConvolution2D(
+          ConvolutionParams{
+              Padding{0, 0, 0, 0},
+              Kernel{3, 3},
+              Subsampling{1, 1},
+              Dilation{1, 1},
+              /*groups=*/1,
+              /*group_input_channels=*/3,
+              /*group_output_channels=*/1,
+          },
+          input_id, filter_id, bias_id, conv_out)
+      .AddAddition(add_constant_input_id, conv_out, add_out_id)
+      .AddLeakyRelu(1.0f, add_out_id, output_id);
   tester.CreateRuntime(xnn_test_runtime_flags());
   tester.SetupRuntime();
   xnn_runtime_t runtime = tester.Runtime();
 
   // Need space for conv_out tensor and add out as add cannot be done in-place.
   ASSERT_EQ(runtime->workspace->size,
-            xnn_tensor_get_rounded_size(&runtime->values[conv_out])
-            + xnn_tensor_get_rounded_size(&runtime->values[add_out_id])
-            + MEMORY_ARENA_EXTRA_BYTES);
+            xnn_tensor_get_rounded_size(&runtime->values[conv_out]) +
+                xnn_tensor_get_rounded_size(&runtime->values[add_out_id]) +
+                MEMORY_ARENA_EXTRA_BYTES);
 }
 
 TEST(MemoryPlanner, Add2WithRHSConstantInPlace) {
@@ -485,33 +497,34 @@ TEST(MemoryPlanner, Add2WithRHSConstantInPlace) {
 
   // Conv -> Add -> LeakyRelu
   RuntimeTester tester(6);
-  tester
-    .AddInputTensorF32({1, 5, 5, 3}, input_id)
-    .AddStaticTensorF32({3, 3, 3, 3}, TensorType::kDense, filter_id)
-    .AddDynamicTensorF32({1, 3, 3, 3}, conv_out)  // 108 bytes.
-    .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense, add_constant_input_id)
-    .AddDynamicTensorF32({1, 3, 3, 3}, add_out_id)  // 108 bytes.
-    .AddOutputTensorF32({1, 3, 3, 3}, output_id)
-    .AddConvolution2D(
-        ConvolutionParams{
-            Padding{0, 0, 0, 0},
-            Kernel{3, 3},
-            Subsampling{1, 1},
-            Dilation{1, 1},
-            /*groups=*/1,
-            /*group_input_channels=*/3,
-            /*group_output_channels=*/3,
-        },
-        input_id, filter_id, bias_id, conv_out)
-    .AddAddition(conv_out, add_constant_input_id, add_out_id)
-    .AddLeakyRelu(1.0f, add_out_id, output_id);
+  tester.AddInputTensorF32({1, 5, 5, 3}, input_id)
+      .AddStaticTensorF32({3, 3, 3, 3}, TensorType::kDense, filter_id)
+      .AddDynamicTensorF32({1, 3, 3, 3}, conv_out)  // 108 bytes.
+      .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense,
+                          add_constant_input_id)
+      .AddDynamicTensorF32({1, 3, 3, 3}, add_out_id)  // 108 bytes.
+      .AddOutputTensorF32({1, 3, 3, 3}, output_id)
+      .AddConvolution2D(
+          ConvolutionParams{
+              Padding{0, 0, 0, 0},
+              Kernel{3, 3},
+              Subsampling{1, 1},
+              Dilation{1, 1},
+              /*groups=*/1,
+              /*group_input_channels=*/3,
+              /*group_output_channels=*/3,
+          },
+          input_id, filter_id, bias_id, conv_out)
+      .AddAddition(conv_out, add_constant_input_id, add_out_id)
+      .AddLeakyRelu(1.0f, add_out_id, output_id);
   tester.CreateRuntime(xnn_test_runtime_flags());
   tester.SetupRuntime();
   xnn_runtime_t runtime = tester.Runtime();
 
   // Should only need space for conv_out tensor.
   ASSERT_EQ(runtime->workspace->size,
-            xnn_tensor_get_rounded_size(&runtime->values[conv_out]) + MEMORY_ARENA_EXTRA_BYTES);
+            xnn_tensor_get_rounded_size(&runtime->values[conv_out]) +
+                MEMORY_ARENA_EXTRA_BYTES);
   ASSERT_EQ(runtime->values[conv_out].data, runtime->values[add_out_id].data);
 }
 
@@ -526,33 +539,34 @@ TEST(MemoryPlanner, Mul2WithLHSConstant) {
 
   // Conv -> Mul -> LeakyRelu
   RuntimeTester tester(6);
-  tester
-    .AddInputTensorF32({1, 5, 5, 3}, input_id)
-    .AddStaticTensorF32({3, 3, 3, 3}, TensorType::kDense, filter_id)
-    .AddDynamicTensorF32({1, 3, 3, 3}, conv_out)  // 108 bytes.
-    .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense, mul_constant_input_id)
-    .AddDynamicTensorF32({1, 3, 3, 3}, mul_out_id)  // 108 bytes.
-    .AddOutputTensorF32({1, 3, 3, 3}, output_id)
-    .AddConvolution2D(
-        ConvolutionParams{
-            Padding{0, 0, 0, 0},
-            Kernel{3, 3},
-            Subsampling{1, 1},
-            Dilation{1, 1},
-            /*groups=*/1,
-            /*group_input_channels=*/3,
-            /*group_output_channels=*/3,
-        },
-        input_id, filter_id, bias_id, conv_out)
-    .AddMultiply(mul_constant_input_id, conv_out, mul_out_id)
-    .AddLeakyRelu(1.0f, mul_out_id, output_id);
+  tester.AddInputTensorF32({1, 5, 5, 3}, input_id)
+      .AddStaticTensorF32({3, 3, 3, 3}, TensorType::kDense, filter_id)
+      .AddDynamicTensorF32({1, 3, 3, 3}, conv_out)  // 108 bytes.
+      .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense,
+                          mul_constant_input_id)
+      .AddDynamicTensorF32({1, 3, 3, 3}, mul_out_id)  // 108 bytes.
+      .AddOutputTensorF32({1, 3, 3, 3}, output_id)
+      .AddConvolution2D(
+          ConvolutionParams{
+              Padding{0, 0, 0, 0},
+              Kernel{3, 3},
+              Subsampling{1, 1},
+              Dilation{1, 1},
+              /*groups=*/1,
+              /*group_input_channels=*/3,
+              /*group_output_channels=*/3,
+          },
+          input_id, filter_id, bias_id, conv_out)
+      .AddMultiply(mul_constant_input_id, conv_out, mul_out_id)
+      .AddLeakyRelu(1.0f, mul_out_id, output_id);
   tester.CreateRuntime(xnn_test_runtime_flags());
   tester.SetupRuntime();
   xnn_runtime_t runtime = tester.Runtime();
 
   // Should only need space for conv_out tensor.
   ASSERT_EQ(runtime->workspace->size,
-            xnn_tensor_get_rounded_size(&runtime->values[conv_out]) + MEMORY_ARENA_EXTRA_BYTES);
+            xnn_tensor_get_rounded_size(&runtime->values[conv_out]) +
+                MEMORY_ARENA_EXTRA_BYTES);
   ASSERT_EQ(runtime->values[conv_out].data, runtime->values[mul_out_id].data);
 }
 
@@ -567,33 +581,34 @@ TEST(MemoryPlanner, Mul2WithRHSConstant) {
 
   // Conv -> Mul -> LeakyRelu
   RuntimeTester tester(6);
-  tester
-    .AddInputTensorF32({1, 5, 5, 3}, input_id)
-    .AddStaticTensorF32({3, 3, 3, 3}, TensorType::kDense, filter_id)
-    .AddDynamicTensorF32({1, 3, 3, 3}, conv_out)  // 108 bytes.
-    .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense, mul_constant_input_id)
-    .AddDynamicTensorF32({1, 3, 3, 3}, mul_out_id)  // 108 bytes.
-    .AddOutputTensorF32({1, 3, 3, 3}, output_id)
-    .AddConvolution2D(
-        ConvolutionParams{
-            Padding{0, 0, 0, 0},
-            Kernel{3, 3},
-            Subsampling{1, 1},
-            Dilation{1, 1},
-            /*groups=*/1,
-            /*group_input_channels=*/3,
-            /*group_output_channels=*/3,
-        },
-        input_id, filter_id, bias_id, conv_out)
-    .AddMultiply(conv_out, mul_constant_input_id, mul_out_id)
-    .AddLeakyRelu(1.0f, mul_out_id, output_id);
+  tester.AddInputTensorF32({1, 5, 5, 3}, input_id)
+      .AddStaticTensorF32({3, 3, 3, 3}, TensorType::kDense, filter_id)
+      .AddDynamicTensorF32({1, 3, 3, 3}, conv_out)  // 108 bytes.
+      .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense,
+                          mul_constant_input_id)
+      .AddDynamicTensorF32({1, 3, 3, 3}, mul_out_id)  // 108 bytes.
+      .AddOutputTensorF32({1, 3, 3, 3}, output_id)
+      .AddConvolution2D(
+          ConvolutionParams{
+              Padding{0, 0, 0, 0},
+              Kernel{3, 3},
+              Subsampling{1, 1},
+              Dilation{1, 1},
+              /*groups=*/1,
+              /*group_input_channels=*/3,
+              /*group_output_channels=*/3,
+          },
+          input_id, filter_id, bias_id, conv_out)
+      .AddMultiply(conv_out, mul_constant_input_id, mul_out_id)
+      .AddLeakyRelu(1.0f, mul_out_id, output_id);
   tester.CreateRuntime(xnn_test_runtime_flags());
   tester.SetupRuntime();
   xnn_runtime_t runtime = tester.Runtime();
 
   // Should only need space for conv_out tensor.
   ASSERT_EQ(runtime->workspace->size,
-            xnn_tensor_get_rounded_size(&runtime->values[conv_out]) + MEMORY_ARENA_EXTRA_BYTES);
+            xnn_tensor_get_rounded_size(&runtime->values[conv_out]) +
+                MEMORY_ARENA_EXTRA_BYTES);
   ASSERT_EQ(runtime->values[conv_out].data, runtime->values[mul_out_id].data);
 }
 
@@ -619,36 +634,36 @@ TEST(MemoryPlanner, Add2WithImplicitBroadcast) {
 
   RuntimeTester tester(7);
   tester
-    .AddInputTensorF32({1, 1, 1, 3}, input1_id) // intentionally smaller
-    .AddInputTensorF32({1, 5, 5, 3}, input2_id)
-    .AddStaticTensorF32({3, 3, 3, 3}, TensorType::kDense, filter_id)
-    .AddDynamicTensorF32({1, 1, 1, 3}, hard_swish_out)  // 108 bytes.
-    .AddDynamicTensorF32({1, 3, 3, 3}, conv_out)  // 108 bytes.
-    .AddDynamicTensorF32({1, 3, 3, 3}, add_out)  // 108 bytes.
-    .AddOutputTensorF32({1, 3, 3, 3}, output_id)
-    .AddHardSwish(input1_id, hard_swish_out)
-    .AddConvolution2D(
-        ConvolutionParams{
-            Padding{0, 0, 0, 0},
-            Kernel{3, 3},
-            Subsampling{1, 1},
-            Dilation{1, 1},
-            /*groups=*/1,
-            /*group_input_channels=*/3,
-            /*group_output_channels=*/3,
-        },
-        input2_id, filter_id, bias_id, conv_out)
-    .AddAddition(hard_swish_out, conv_out, add_out)
-    .AddLeakyRelu(1.0f, add_out, output_id);
+      .AddInputTensorF32({1, 1, 1, 3}, input1_id)  // intentionally smaller
+      .AddInputTensorF32({1, 5, 5, 3}, input2_id)
+      .AddStaticTensorF32({3, 3, 3, 3}, TensorType::kDense, filter_id)
+      .AddDynamicTensorF32({1, 1, 1, 3}, hard_swish_out)  // 108 bytes.
+      .AddDynamicTensorF32({1, 3, 3, 3}, conv_out)        // 108 bytes.
+      .AddDynamicTensorF32({1, 3, 3, 3}, add_out)         // 108 bytes.
+      .AddOutputTensorF32({1, 3, 3, 3}, output_id)
+      .AddHardSwish(input1_id, hard_swish_out)
+      .AddConvolution2D(
+          ConvolutionParams{
+              Padding{0, 0, 0, 0},
+              Kernel{3, 3},
+              Subsampling{1, 1},
+              Dilation{1, 1},
+              /*groups=*/1,
+              /*group_input_channels=*/3,
+              /*group_output_channels=*/3,
+          },
+          input2_id, filter_id, bias_id, conv_out)
+      .AddAddition(hard_swish_out, conv_out, add_out)
+      .AddLeakyRelu(1.0f, add_out, output_id);
   tester.CreateRuntime(xnn_test_runtime_flags());
   tester.SetupRuntime();
   xnn_runtime_t runtime = tester.Runtime();
 
   // Need space for hard_swish_out conv_out tensor.
   ASSERT_EQ(runtime->workspace->size,
-            xnn_tensor_get_rounded_size(&runtime->values[hard_swish_out])
-            + xnn_tensor_get_rounded_size(&runtime->values[conv_out])
-            + MEMORY_ARENA_EXTRA_BYTES);
+            xnn_tensor_get_rounded_size(&runtime->values[hard_swish_out]) +
+                xnn_tensor_get_rounded_size(&runtime->values[conv_out]) +
+                MEMORY_ARENA_EXTRA_BYTES);
   // add_out should reuse conv_out, hard_swish_out is too small.
   ASSERT_EQ(runtime->values[conv_out].data, runtime->values[add_out].data);
 }
@@ -675,52 +690,57 @@ TEST(MemoryPlanner, Add2WithInputMultipleConsumers) {
   uint32_t output_id = 5;
 
   RuntimeTester tester(6);
-  tester
-    .AddInputTensorF32({1, 5, 5, 3}, input_id)
-    .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense, filter_id)
-    .AddDynamicTensorF32({1, 3, 3, 3}, conv_out)  // 108 bytes.
-    .AddDynamicTensorF32({1, 1, 1, 3}, max_pooling_2d_out)  // 108 bytes.
-    .AddDynamicTensorF32({1, 3, 3, 3}, add_out)  // 108 bytes.
-    .AddOutputTensorF32({1, 3, 3, 3}, output_id)
-    .AddConvolution2D(
-        ConvolutionParams{
-            Padding{0, 0, 0, 0},
-            Kernel{3, 3},
-            Subsampling{1, 1},
-            Dilation{1, 1},
-            /*groups=*/1,
-            /*group_input_channels=*/3,
-            /*group_output_channels=*/1,
-        },
-        input_id, filter_id, bias_id, conv_out)
-    .AddMaxPooling2D(
-        /*input_padding_top=*/0,
-        /*input_padding_right=*/0,
-        /*input_padding_bottom=*/0,
-        /*input_padding_left=*/0,
-        /*pooling_height=*/3,
-        /*pooling_width=*/3,
-        /*stride_height=*/1,
-        /*stride_width=*/1,
-        /*dilation_height=*/1,
-        /*dilation_width=*/1,
-        /*input_id=*/conv_out,
-        /*output_id=*/max_pooling_2d_out)
-    .AddAddition(conv_out, max_pooling_2d_out, add_out)
-    .AddLeakyRelu(1.0f, add_out, output_id);
+  tester.AddInputTensorF32({1, 5, 5, 3}, input_id)
+      .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense, filter_id)
+      .AddDynamicTensorF32({1, 3, 3, 3}, conv_out)            // 108 bytes.
+      .AddDynamicTensorF32({1, 1, 1, 3}, max_pooling_2d_out)  // 108 bytes.
+      .AddDynamicTensorF32({1, 3, 3, 3}, add_out)             // 108 bytes.
+      .AddOutputTensorF32({1, 3, 3, 3}, output_id)
+      .AddConvolution2D(
+          ConvolutionParams{
+              Padding{0, 0, 0, 0},
+              Kernel{3, 3},
+              Subsampling{1, 1},
+              Dilation{1, 1},
+              /*groups=*/1,
+              /*group_input_channels=*/3,
+              /*group_output_channels=*/1,
+          },
+          input_id, filter_id, bias_id, conv_out)
+      .AddMaxPooling2D(
+          /*input_padding_top=*/0,
+          /*input_padding_right=*/0,
+          /*input_padding_bottom=*/0,
+          /*input_padding_left=*/0,
+          /*pooling_height=*/3,
+          /*pooling_width=*/3,
+          /*stride_height=*/1,
+          /*stride_width=*/1,
+          /*dilation_height=*/1,
+          /*dilation_width=*/1,
+          /*input_id=*/conv_out,
+          /*output_id=*/max_pooling_2d_out)
+      .AddAddition(conv_out, max_pooling_2d_out, add_out)
+      .AddLeakyRelu(1.0f, add_out, output_id);
   tester.CreateRuntime(xnn_test_runtime_flags());
   tester.SetupRuntime();
   xnn_runtime_t runtime = tester.Runtime();
 
-  // Need space for conv_out, add cannot reuse conv_out, max_pooling_2d_out is also too small, so it needs allocation.
-  ASSERT_EQ(runtime->workspace->size,
-            xnn_tensor_get_rounded_size(&runtime->values[conv_out])  // for conv_out
-            + xnn_tensor_get_rounded_size(&runtime->values[max_pooling_2d_out])  // for max_pooling_2d_out
-            + xnn_tensor_get_rounded_size(&runtime->values[add_out])  // for add_out
-            + MEMORY_ARENA_EXTRA_BYTES);
+  // Need space for conv_out, add cannot reuse conv_out, max_pooling_2d_out is
+  // also too small, so it needs allocation.
+  ASSERT_EQ(
+      runtime->workspace->size,
+      xnn_tensor_get_rounded_size(&runtime->values[conv_out])  // for conv_out
+          + xnn_tensor_get_rounded_size(
+                &runtime->values[max_pooling_2d_out])  // for max_pooling_2d_out
+          +
+          xnn_tensor_get_rounded_size(&runtime->values[add_out])  // for add_out
+          + MEMORY_ARENA_EXTRA_BYTES);
   // add_out should reuse conv_out, hard_swish_out is too small.
-  ASSERT_NE(runtime->values[conv_out].data, runtime->values[max_pooling_2d_out].data);
-  ASSERT_NE(runtime->values[max_pooling_2d_out].data, runtime->values[add_out].data);
+  ASSERT_NE(runtime->values[conv_out].data,
+            runtime->values[max_pooling_2d_out].data);
+  ASSERT_NE(runtime->values[max_pooling_2d_out].data,
+            runtime->values[add_out].data);
 }
 
 TEST(MemoryPlanner, FullyConnectedDynamicFilterDynamicBias) {
@@ -739,8 +759,7 @@ TEST(MemoryPlanner, FullyConnectedDynamicFilterDynamicBias) {
   //   \     |      |
   //   [fully connected]
   RuntimeTester tester(6);
-  tester
-      .AddInputTensorF32({1, 5, 5, 3}, input1_id)
+  tester.AddInputTensorF32({1, 5, 5, 3}, input1_id)
       .AddInputTensorF32({2, 3, 3, 2}, input2_id)
       .AddInputTensorF32({1}, input3_id)
       .AddDynamicTensorF32({2, 3, 3, 3}, filter_id)
@@ -795,8 +814,7 @@ TEST(MemoryPlanner, FullyConnectedDynamicFilterStaticBias) {
   //   \     |      |
   //   [fully connected]
   RuntimeTester tester(6);
-  tester
-      .AddInputTensorF32({1, 5, 5, 3}, input1_id)
+  tester.AddInputTensorF32({1, 5, 5, 3}, input1_id)
       .AddInputTensorF32({2, 3, 3, 2}, input2_id)
       .AddDynamicTensorF32({2, 3, 3, 3}, filter_id)
       .AddStaticTensorF32({2}, TensorType::kDense, bias_id)
@@ -847,8 +865,7 @@ TEST(MemoryPlanner, FullyConnectedDynamicFilterNoBias) {
   //   \     |
   //   [fully connected]
   RuntimeTester tester(6);
-  tester
-      .AddInputTensorF32({1, 5, 5, 3}, input1_id)
+  tester.AddInputTensorF32({1, 5, 5, 3}, input1_id)
       .AddInputTensorF32({2, 3, 3, 2}, input2_id)
       .AddDynamicTensorF32({2, 3, 3, 3}, filter_id)
       .AddOutputTensorF32({2, 3, 3, 2}, output_id)
@@ -898,8 +915,7 @@ TEST(MemoryPlanner, FullyConnectedStaticFilterDynamicBias) {
   //   \     |      |
   //   [fully connected]
   RuntimeTester tester(6);
-  tester
-      .AddInputTensorF32({1, 5, 5, 3}, input1_id)
+  tester.AddInputTensorF32({1, 5, 5, 3}, input1_id)
       .AddInputTensorF32({1}, input3_id)
       .AddStaticTensorF32({2, 3, 3, 3}, TensorType::kDense, filter_id)
       .AddDynamicTensorF32({2}, bias_id)
@@ -946,8 +962,7 @@ TEST(MemoryPlanner, FullyConnectedExternalFilterExternalBias) {
   //   \     |         /
   //   [fully connected]
   RuntimeTester tester(6);
-  tester
-      .AddInputTensorF32({1, 5, 5, 3}, input_id)
+  tester.AddInputTensorF32({1, 5, 5, 3}, input_id)
       .AddInputTensorF32({2, 3, 3, 3}, filter_id)
       .AddInputTensorF32({2}, bias_id)
       .AddOutputTensorF32({2, 3, 3, 2}, output_id)
@@ -979,4 +994,4 @@ TEST(MemoryPlanner, FullyConnectedExternalFilterExternalBias) {
           + MEMORY_ARENA_EXTRA_BYTES);
 }
 
-} // namespace xnnpack
+}  // namespace xnnpack

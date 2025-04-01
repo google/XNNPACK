@@ -73,7 +73,6 @@ static enum xnn_status create_vmulcaddc_path(
     uint32_t bias_element_size,
     xnn_pack_vmulcaddc_w_fn pack_vmulcaddc_w,
     const void* packing_params,
-    int packed_weights_padding_byte,
     const void* vmulcaddc_params,
     size_t vmulcaddc_params_size,
     const struct xnn_vmulcaddc_config* vmulcaddc_config,
@@ -89,7 +88,7 @@ static enum xnn_status create_vmulcaddc_path(
   const size_t packed_weights_size = ((UINT32_C(1) << log2_filter_element_size) + bias_element_size) * c_stride;
   size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
   void* weights_ptr = xnn_get_pointer_to_write_weights(
-      convolution_op, aligned_total_weights_size, packed_weights_padding_byte);
+      convolution_op, aligned_total_weights_size);
   if (weights_ptr == NULL) {
     xnn_log_error("failed to reserve or allocated %zu bytes for %s operator vmulcaddc packed weights",
                   aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
@@ -135,7 +134,6 @@ static enum xnn_status create_dwconv_path(
     xnn_pack_dwconv_hwg_w_fn pack_dwconv_hwg_w,
     xnn_pack_dwconv_ghw_w_fn pack_dwconv_ghw_w,
     const void* packing_params,
-    int packed_weights_padding_byte,
     size_t extra_weights_bytes,
     xnn_init_qs8_qc8w_scale_params_fn init_scale_params,
     const float* scale_params,
@@ -159,7 +157,7 @@ static enum xnn_status create_dwconv_path(
 
   size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
   void* weights_ptr = xnn_get_pointer_to_write_weights(
-      convolution_op, aligned_total_weights_size, packed_weights_padding_byte);
+      convolution_op, aligned_total_weights_size);
   if (weights_ptr == NULL) {
     xnn_log_error("failed to reserve or allocated %zu bytes for %s operator dwconv packed weights",
                   aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
@@ -167,7 +165,10 @@ static enum xnn_status create_dwconv_path(
   }
   xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
                 aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
-
+  if (extra_weights_bytes > 0) {
+    // TODO(b/402602597): We shouldn't need this initialization.
+    memset(weights_ptr, 0, aligned_total_weights_size);
+  }
   memcpy(&convolution_op->params, dwconv_params, dwconv_params_size);
 
   if (flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) {
@@ -198,10 +199,7 @@ static enum xnn_status create_dwconv_path(
     init_scale_params(
       /*channels=*/groups,
       /*channels_tile=*/dwconv_ukernel->channel_tile,
-      /*channels_subtile=*/dwconv_ukernel->channel_tile,
       /*stride=*/stride,
-      /*substride=*/stride,
-      /*stride_offset=*/0,
       /*scale=*/scale_params,
       /*packed_w=*/
       (void*) ((uintptr_t) weights_ptr +
@@ -254,7 +252,6 @@ static enum xnn_status create_igemm(
     xnn_pack_conv_kgo_w_fn pack_conv_kgo_w,
     xnn_pack_conv_goki_w_fn pack_conv_goki_w,
     const void* packing_params,
-    int packed_weights_padding_byte,
     size_t extra_weights_bytes,
     xnn_init_qs8_qc8w_scale_params_fn init_scale_params,
     const float* scale_params,
@@ -296,8 +293,7 @@ static enum xnn_status create_igemm(
   void* weights_ptr = NULL;
 
   if (!weights_already_cached) {
-    weights_ptr = xnn_get_pointer_to_write_weights(convolution_op, aligned_total_weights_size,
-                                                   packed_weights_padding_byte);
+    weights_ptr = xnn_get_pointer_to_write_weights(convolution_op, aligned_total_weights_size);
     if (!weights_already_cached && weights_ptr == NULL) {
       xnn_log_error( "failed to reserve or allocated %zu bytes for %s operator gemm packed weights",
           aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
@@ -305,6 +301,10 @@ static enum xnn_status create_igemm(
     }
     xnn_log_debug("allocated %zu bytes for packed weights in %s operator", aligned_total_weights_size,
                   xnn_operator_type_to_string(operator_type));
+    if (extra_weights_bytes > 0) {
+      // TODO(b/402602597): We shouldn't need this initialization.
+      memset(weights_ptr, 0, aligned_total_weights_size);
+    }
   }
 
   memcpy(&convolution_op->params, gemm_params, gemm_params_size);
@@ -359,8 +359,8 @@ static enum xnn_status create_igemm(
           (kernel_size * k_stride << log2_filter_element_size) + bias_element_size + extra_weights_bytes;
       for (uint32_t group = 0; group < groups; group++) {
         init_kernel_scale_params(
-            group_output_channels, gemm_config->nr, gemm_config->nr,
-            gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
+            group_output_channels, gemm_config->nr,
+            gemm_config->nr * weights_stride,
             kernel_scale_params, group_weights);
         kernel_scale_params += group_output_channels;
         group_weights = (void*) ((uintptr_t) group_weights + n_stride * weights_stride);
@@ -382,8 +382,8 @@ static enum xnn_status create_igemm(
           (kernel_size * k_stride << log2_filter_element_size) + bias_element_size + extra_weights_bytes;
       for (uint32_t group = 0; group < groups; group++) {
         init_scale_params(
-            group_output_channels, gemm_config->nr, gemm_config->nr,
-            gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
+            group_output_channels, gemm_config->nr,
+            gemm_config->nr * weights_stride,
             scale_params, group_weights);
         scale_params += group_output_channels;
         group_weights = (void*) ((uintptr_t) group_weights + n_stride * weights_stride);
@@ -436,7 +436,6 @@ static enum xnn_status create_convolution2d_nhwc(
     xnn_pack_conv_goki_w_fn pack_conv_goki_w,
     const void* packing_params,
     int input_padding_byte,
-    int packed_weights_padding_byte,
     size_t extra_weights_bytes,
     xnn_init_qs8_qc8w_scale_params_fn init_scale_params,
     const float* scale_params,
@@ -583,7 +582,7 @@ static enum xnn_status create_convolution2d_nhwc(
     {
       status = create_vmulcaddc_path(
           groups, kernel, bias, log2_filter_element_size, bias_element_size,
-          pack_vmulcaddc_w, packing_params, packed_weights_padding_byte,
+          pack_vmulcaddc_w, packing_params,
           vmulcaddc_params, vmulcaddc_params_size, vmulcaddc_config,
           operator_type, convolution_op);
       if (status != xnn_status_success) {
@@ -598,7 +597,7 @@ static enum xnn_status create_convolution2d_nhwc(
           groups, kernel, bias, flags,
           log2_input_element_size, log2_filter_element_size, bias_element_size,
           pack_dwconv_hwg_w, pack_dwconv_ghw_w,
-          packing_params, packed_weights_padding_byte, extra_weights_bytes,
+          packing_params, extra_weights_bytes,
           init_scale_params, scale_params,
           dwconv_params, dwconv_params_size, dwconv_ukernel,
           linear_activation, operator_type, &zero_size, convolution_op);
@@ -615,7 +614,7 @@ static enum xnn_status create_convolution2d_nhwc(
           kernel, bias, flags,
           log2_input_element_size, log2_filter_element_size, bias_element_size,
           pack_conv_kgo_w, pack_conv_goki_w, packing_params,
-          packed_weights_padding_byte, extra_weights_bytes,
+          extra_weights_bytes,
           init_scale_params, scale_params, init_kernel_scale_params, kernel_scale_params,
           gemm_params, gemm_params_size, gemm_config,
           linear_activation, relu_activation,
@@ -760,7 +759,6 @@ enum xnn_status create_convolution2d_nhwc_qx8_f16_qc8w(
     (xnn_pack_conv_goki_w_fn) xnn_pack_qs8_conv_goki_w,
     /*packing_params=*/&packing_params,
     /*input_padding_byte=*/0,
-    /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/sizeof(float) * 2,
     xnn_init_qs8_qc8w_scale_fp32_params, bias,
     xnn_init_qs8_qc8w_scale_fp32_params, kernel_scale,
@@ -924,7 +922,6 @@ enum xnn_status create_convolution2d_nhwc_qx8_f32_qc8w(
     (xnn_pack_conv_goki_w_fn) xnn_pack_qs8_conv_goki_w,
     /*packing_params=*/&packing_params,
     /*input_padding_byte=*/0,
-    /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/sizeof(float) * 2,
     xnn_init_qs8_qc8w_scale_fp32_params, bias,
     xnn_init_qs8_qc8w_scale_fp32_params, kernel_scale,
@@ -1131,7 +1128,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_qu8(
     (xnn_pack_conv_goki_w_fn) xnn_pack_qu8_conv_goki_w,
     /*packing_params=*/&packing_params,
     /*input_padding_byte=*/input_zero_point,
-    /*packed_weights_padding_byte=*/kernel_zero_point,
     /*extra_weights_bytes=*/0,
     /*init_scale_params=*/NULL,
     /*scale_params=*/NULL,
@@ -1274,7 +1270,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8(
     (xnn_pack_conv_goki_w_fn) gemm_config->pack_igemm_goki,
     /*packing_params=*/&packing_params,
     /*input_padding_byte=*/input_zero_point,
-    /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/sizeof(float),
     /*init_scale_params=*/xnn_init_qs8_qc8w_scale_fp32_params,
     /*scale_params=*/duplicated_requantization_scale,
@@ -1425,7 +1420,6 @@ enum xnn_status create_convolution2d_nhwc_qx8_qc8w(
     (xnn_pack_conv_goki_w_fn) gemm_config->pack_igemm_goki,
     /*packing_params=*/&packing_params,
     /*input_padding_byte=*/input_zero_point,
-    /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/sizeof(float),
     /*init_scale_params=*/xnn_init_qs8_qc8w_scale_fp32_params,
     /*scale_params=*/requantization_scale,
@@ -1608,7 +1602,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     pack_conv_goki_w,
     /*packing_params=*/NULL,
     /*input_padding_byte=*/0,
-    /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/0,
     /*init_scale_params=*/NULL,
     /*scale_params=*/NULL,
@@ -1730,7 +1723,6 @@ enum xnn_status create_convolution2d_nhwc_f32(
     (xnn_pack_conv_goki_w_fn) xnn_pack_f32_conv_goki_w,
     /*packing_params=*/NULL,
     /*input_padding_byte=*/0,
-    /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/0,
     /*init_scale_params=*/NULL,
     /*scale_params=*/NULL,

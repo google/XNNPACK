@@ -24,10 +24,6 @@ typedef __m256i xnn_simd_s16_t;
 #define XNN_SIMD_CONST_S16(var, val) \
   const xnn_simd_s16_t var = _mm256_set1_epi16(val);
 
-// Mask table used for masked load/store operations.
-static const int32_t mask_table_avx_s16[30] = {
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    0,  0,  0,  0,  0,  0,  0, 0,  0,  0,  0,  0,  0,  0, 0};
 // Arithmetic operations.
 
 static XNN_INLINE xnn_simd_s16_t xnn_min_s16(xnn_simd_s16_t a,
@@ -68,28 +64,43 @@ static XNN_INLINE xnn_simd_s16_t xnn_set1_s16(int16_t v) {
   return _mm256_set1_epi16(v);
 }
 
-static XNN_INLINE xnn_simd_s16_t xnn_set1_or_load_s16(const int16_t* v) {
-#if XNN_ARCH_X86
-  return _mm256_load_si256((const __m256i*)v);
-#else
-  return _mm256_set1_epi16(*v);
-#endif
-}
-
 // Tail load/store operations.
 
 static XNN_INLINE xnn_simd_s16_t
 xnn_load_tail_s16(const int16_t* input, size_t num_elements) XNN_OOB_READS {
-  assert(num_elements > 0);
-  assert(num_elements < xnn_simd_size_s16);
-  const __m256i vmask = _mm256_loadu_si256(
-      (const __m256i*)(&mask_table_avx_s16[15] - num_elements));
-  return _mm256_maskload_epi32((const int32_t*) input, vmask);
+  __m128i low = _mm_loadu_si128((const __m128i*)input);
+  __m128i high =
+      num_elements > 8 ? _mm_loadu_si128((const __m128i*)(input + 8)) : low;
+  return _mm256_inserti128_si256(_mm256_castsi128_si256(low), high, 1);
 }
 
-static XNN_INLINE xnn_simd_s16_t
-xnn_load_tail_safe_s16(const int16_t* input, size_t num_elements) {
-  return xnn_load_tail_s16(input, num_elements);
+static XNN_INLINE xnn_simd_s16_t xnn_load_tail_safe_s16(const int16_t* input,
+                                                        size_t num_elements) {
+  assert(num_elements > 0);
+  assert(num_elements < xnn_simd_size_s16);
+
+  XNN_ALIGN(32) int16_t padded[16];
+  int16_t* d = &padded[0];
+  // clang-format off
+  switch (num_elements) {
+    case 15: *d++ = *input++;
+    case 14: *d++ = *input++;
+    case 13: *d++ = *input++;
+    case 12: *d++ = *input++;
+    case 11: *d++ = *input++;
+    case 10: *d++ = *input++;
+    case 9: *d++ = *input++;
+    case 8: *d++ = *input++;
+    case 7: *d++ = *input++;
+    case 6: *d++ = *input++;
+    case 5: *d++ = *input++;
+    case 4: *d++ = *input++;
+    case 3: *d++ = *input++;
+    case 2: *d++ = *input++;
+    case 1: *d++ = *input++;
+  }
+  // clang-format on
+  return _mm256_load_si256((const __m256i*)&padded[0]);
 }
 
 static XNN_INLINE void xnn_store_tail_s16(int16_t* output, xnn_simd_s16_t v,

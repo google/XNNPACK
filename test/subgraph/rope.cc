@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <cassert>
+#include <chrono>
 #include <cstddef>
 #include <cstdlib>
 #include <vector>
@@ -61,7 +62,7 @@ void TestImpl() {
     return;
   }
 
-  for (int reshape = 0; reshape < 100; ++reshape) {
+  for (auto _ : FuzzTest(std::chrono::milliseconds(1000))) {
     std::vector<size_t> shape = random_shape(rng, 4);
     const size_t batch_size = shape[0];
     const size_t tokens = shape[1];

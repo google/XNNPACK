@@ -52,7 +52,6 @@ $for BATCH_TILE in BATCH_TILES:
     // `valpha_1` = `vone`).
     XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_3, -1.1200523376e-01f);
 
-
     // The monomial coefficients of the denominator polynomial (even,
     // `vbeta_0` = `vone`).
     XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_2, 5.5543992668e-02f);

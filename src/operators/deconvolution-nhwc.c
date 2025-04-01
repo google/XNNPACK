@@ -60,7 +60,6 @@ static enum xnn_status create_deconvolution2d_nhwc(
     xnn_pack_deconv_goki_w_fn pack_deconv_goki_w,
     const void* packing_params,
     int input_padding_byte,
-    int packed_weights_padding_byte,
     size_t extra_weights_bytes,
     xnn_init_qs8_qc8w_scale_params_fn init_scale_params,
     const float* scale_params,
@@ -187,7 +186,7 @@ static enum xnn_status create_deconvolution2d_nhwc(
   }
   const size_t aligned_total_weights_size = round_up_po2(packed_group_weights_size * groups, XNN_ALLOCATION_ALIGNMENT);
   void* weights_ptr = xnn_get_pointer_to_write_weights(
-      deconvolution_op, aligned_total_weights_size, packed_weights_padding_byte);
+      deconvolution_op, aligned_total_weights_size);
   if (weights_ptr == NULL) {
     xnn_log_error(
       "failed to allocate %zu bytes for %s operator packed weights",
@@ -196,6 +195,10 @@ static enum xnn_status create_deconvolution2d_nhwc(
   }
   xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
     aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
+  if (extra_weights_bytes > 0) {
+    // TODO(b/402602597): We shouldn't need this initialization.
+    memset(weights_ptr, 0, aligned_total_weights_size);
+  }
   switch (ukernel_type) {
     case xnn_microkernel_type_igemm:
       pack_conv_goki_w(
@@ -251,8 +254,8 @@ static enum xnn_status create_deconvolution2d_nhwc(
             const size_t weights_stride =
                 (subkernel_size * k_stride << log2_filter_element_size) + bias_element_size + extra_weights_bytes;
             init_kernel_scale_params(
-                group_output_channels, gemm_config->nr, gemm_config->nr,
-                gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
+                group_output_channels, gemm_config->nr,
+                gemm_config->nr * weights_stride,
                 kernel_scale_params_ptr, group_weights);
             subconvolution_params++;
           }
@@ -281,8 +284,8 @@ static enum xnn_status create_deconvolution2d_nhwc(
             const size_t weights_stride =
                 (subkernel_size * k_stride << log2_filter_element_size) + bias_element_size + extra_weights_bytes;
             init_scale_params(
-                group_output_channels, gemm_config->nr, gemm_config->nr,
-                gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
+                group_output_channels, gemm_config->nr,
+                gemm_config->nr * weights_stride,
                 scale_params_ptr, group_weights);
             subconvolution_params++;
           }
@@ -301,8 +304,8 @@ static enum xnn_status create_deconvolution2d_nhwc(
           (kernel_size * k_stride << log2_filter_element_size) + bias_element_size + extra_weights_bytes;
       for (uint32_t group = 0; group < groups; group++) {
         init_kernel_scale_params(
-            group_output_channels, gemm_config->nr, gemm_config->nr,
-            gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
+            group_output_channels, gemm_config->nr,
+            gemm_config->nr * weights_stride,
             kernel_scale_params, group_weights);
         kernel_scale_params += group_output_channels;
         group_weights = (void*) ((uintptr_t) group_weights + n_stride * weights_stride);
@@ -322,8 +325,8 @@ static enum xnn_status create_deconvolution2d_nhwc(
           (kernel_size * k_stride << log2_filter_element_size) + bias_element_size + extra_weights_bytes;
       for (uint32_t group = 0; group < groups; group++) {
         init_scale_params(
-            group_output_channels, gemm_config->nr, gemm_config->nr,
-            gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
+            group_output_channels, gemm_config->nr,
+            gemm_config->nr * weights_stride,
             scale_params, group_weights);
         scale_params += group_output_channels;
         group_weights = (void*) ((uintptr_t) group_weights + n_stride * weights_stride);
@@ -493,7 +496,7 @@ enum xnn_status create_deconvolution2d_nhwc_qs8_qc8w(
     /*bias_element_size=*/sizeof(int32_t),
     (xnn_pack_conv_goki_w_fn) gemm_config->pack_igemm_goki,
     (xnn_pack_deconv_goki_w_fn) gemm_config->pack_deconv_goki,
-    &packing_params, input_zero_point /* input padding byte */, 0 /* packed weights padding byte */,
+    &packing_params, input_zero_point /* input padding byte */,
     /*extra_weights_bytes=*/sizeof(float),
     /*init_scale_params=*/xnn_init_qs8_qc8w_scale_fp32_params,
     /*scale_params=*/requantization_scale,
@@ -777,7 +780,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qu8(
     /*bias_element_size=*/sizeof(int32_t),
     (xnn_pack_conv_goki_w_fn) xnn_pack_qu8_conv_goki_w,
     (xnn_pack_deconv_goki_w_fn) xnn_pack_qu8_deconv_goki_w,
-    &packing_params, input_zero_point /* input padding byte */, kernel_zero_point /* packed weights padding byte */,
+    &packing_params, input_zero_point /* input padding byte */,
     /*extra_weights_bytes=*/0,
     /*init_scale_params=*/NULL,
     /*scale_params=*/NULL,
@@ -879,7 +882,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f16(
     /*bias_element_size=*/sizeof(uint16_t),
     pack_conv_goki_w,
     pack_deconv_goki_w,
-    NULL /* packing params */, 0 /* input padding byte */, 0 /* packed weights padding byte */,
+    NULL /* packing params */, 0 /* input padding byte */,
     /*extra_weights_bytes=*/0,
     /*init_scale_params=*/NULL,
     /*scale_params=*/NULL,
@@ -964,7 +967,6 @@ enum xnn_status create_deconvolution2d_nhwc_qx8_f32_qc8w(
     (xnn_pack_deconv_goki_w_fn) xnn_pack_qs8_deconv_goki_w,
     /*packing_params=*/&packing_params,
     /*input_padding_byte=*/0,
-    /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/sizeof(float) * 2,
     xnn_init_qs8_qc8w_scale_fp32_params, bias,
     xnn_init_qs8_qc8w_scale_fp32_params, kernel_scale,
@@ -1149,7 +1151,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
     /*bias_element_size=*/sizeof(float),
     (xnn_pack_conv_goki_w_fn) xnn_pack_f32_conv_goki_w,
     (xnn_pack_deconv_goki_w_fn) xnn_pack_f32_deconv_goki_w,
-    NULL /* packing params */, 0 /* input padding byte */, 0 /* packed weights padding byte */,
+    NULL /* packing params */, 0 /* input padding byte */,
     /*extra_weights_bytes=*/0,
     /*init_scale_params=*/NULL,
     /*scale_params=*/NULL,

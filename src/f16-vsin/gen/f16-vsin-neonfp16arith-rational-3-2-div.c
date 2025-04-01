@@ -46,7 +46,6 @@ void xnn_f16_vsin_ukernel__neonfp16arith_rational_3_2_div_u8(
   // `valpha_1` = `vone`).
   XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_3, -1.1200523376e-01f);
 
-
   // The monomial coefficients of the denominator polynomial (even,
   // `vbeta_0` = `vone`).
   XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_2, 5.5543992668e-02f);
@@ -137,7 +136,6 @@ void xnn_f16_vsin_ukernel__neonfp16arith_rational_3_2_div_u16(
   // The monomial coefficients of the numerator polynomial (odd,
   // `valpha_1` = `vone`).
   XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_3, -1.1200523376e-01f);
-
 
   // The monomial coefficients of the denominator polynomial (even,
   // `vbeta_0` = `vone`).
@@ -272,7 +270,6 @@ void xnn_f16_vsin_ukernel__neonfp16arith_rational_3_2_div_u32(
   // The monomial coefficients of the numerator polynomial (odd,
   // `valpha_1` = `vone`).
   XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_3, -1.1200523376e-01f);
-
 
   // The monomial coefficients of the denominator polynomial (even,
   // `vbeta_0` = `vone`).

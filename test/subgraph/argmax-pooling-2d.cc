@@ -3,285 +3,158 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>
-#include <array>
-#include <cmath>
+#include <cassert>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
-#include <memory>
-#include <random>
 #include <vector>
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
-#include "src/xnnpack/common.h"
-#include "src/xnnpack/node-type.h"
-#include "src/xnnpack/operator.h"
-#include "src/xnnpack/subgraph.h"
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/datatype.h"
 #include "test/replicable_random_device.h"
-#include "test/subgraph/runtime-flags.h"
+#include "test/subgraph/stencil.h"
+#include "test/subgraph/subgraph-tester.h"
 
-namespace {
-inline size_t compute_output_dimension(size_t padded_input_dimension, size_t kernel_dimension)
-{
-  return padded_input_dimension / kernel_dimension;
-}
-}  // namespace
+namespace xnnpack {
 
-class ArgmaxPoolingTestF32 : public ::testing::Test {
- protected:
-  ArgmaxPoolingTestF32() {
-    input_size_dist = std::uniform_int_distribution<uint32_t>(10, 15);
-    pooling_size_dist = std::uniform_int_distribution<uint32_t>(2, 5);
-    batch_size = input_size_dist(rng);
-    input_height = input_size_dist(rng);
-    input_width = input_size_dist(rng);
-    channels = input_size_dist(rng);
-    pooling_height = pooling_size_dist(rng);
-    pooling_width = pooling_size_dist(rng);
-    input_padding_top = input_size_dist(rng);
-    input_padding_right = input_size_dist(rng);
-    input_padding_bottom = input_size_dist(rng);
-    input_padding_left = input_size_dist(rng);
-    output_height = compute_output_dimension(input_height + input_padding_top + input_padding_bottom, pooling_height);
-    output_width = compute_output_dimension(input_width + input_padding_left + input_padding_right, pooling_width);
-    input_dims = {batch_size, input_height, input_width, channels};
-    output_dims = {batch_size, output_height, output_width, channels};
-    input = xnnpack::Buffer<float>(XNN_EXTRA_BYTES / sizeof(float) + batch_size * input_height * input_width * channels);
-    operator_output = xnnpack::Buffer<float>(batch_size * output_height * output_width * channels);
-    operator_output_index = xnnpack::Buffer<uint32_t>(batch_size * output_height * output_width * channels);
-    subgraph_output = xnnpack::Buffer<float>(batch_size * output_height * output_width * channels);
-    subgraph_output_index = xnnpack::Buffer<uint32_t>(batch_size * output_height * output_width * channels);
+template <typename T>
+std::tuple<Tensor<T>, Tensor<int32_t>> ReferenceImpl(Tensor<T> input,
+                                                     const StencilParams& kh,
+                                                     const StencilParams& kw) {
+  Tensor<T> value({input.extent(0), kh.output_extent(input.extent(1)),
+                   kw.output_extent(input.extent(2)), input.extent(3)});
+  Tensor<int32_t> index(value.extents());
+  value.fill(NumericLimits<T>::min());
+  index.fill(NumericLimits<int32_t>::min());
+
+  // Pad the input
+  input = input.pad({0, kh.padding_min, kw.padding_min, 0},
+                    {0, kh.padding_max, kw.padding_max, 0});
+
+  input = make_stencil_dim(input, 2, kw);
+  input = make_stencil_dim(input, 1, kh);
+  for (size_t n = 0; n < value.extent(0); ++n) {
+    for (size_t y = 0; y < value.extent(1); ++y) {
+      for (size_t x = 0; x < value.extent(2); ++x) {
+        for (size_t c = 0; c < value.extent(3); ++c) {
+          T& value_nyxc = value(n, y, x, c);
+          int32_t& index_nyxc = index(n, y, x, c);
+          for (size_t dy = 0; dy < kh.size; ++dy) {
+            for (size_t dx = 0; dx < kw.size; ++dx) {
+              T input_nyxc = input(n, y, dy, x, dx, c);
+              if (input_nyxc > value_nyxc) {
+                value_nyxc = input_nyxc;
+                index_nyxc = dx * kh.size + dy;
+              }
+            }
+          }
+        }
+      }
+    }
   }
 
-  xnnpack::ReplicableRandomDevice rng;
-  std::uniform_int_distribution<uint32_t> input_size_dist;
-  std::uniform_int_distribution<uint32_t> pooling_size_dist;
-  uint32_t batch_size;
-  uint32_t input_height;
-  uint32_t input_width;
-  uint32_t channels;
-  uint32_t pooling_height;
-  uint32_t pooling_width;
-  uint32_t output_height;
-  uint32_t output_width;
-  std::array<size_t, 4> input_dims;
-  std::array<size_t, 4> output_dims;
-  uint32_t input_padding_top;
-  uint32_t input_padding_right;
-  uint32_t input_padding_bottom;
-  uint32_t input_padding_left;
-
-  uint32_t input_id;
-  uint32_t output_value_id;
-  uint32_t output_index_id;
-
-  xnnpack::Buffer<float> input;
-  xnnpack::Buffer<float> operator_output;
-  xnnpack::Buffer<uint32_t> operator_output_index;
-  xnnpack::Buffer<float> subgraph_output;
-  xnnpack::Buffer<uint32_t> subgraph_output_index;
-};
-
-TEST_F(ArgmaxPoolingTestF32, define)
-{
-
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/3, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(), nullptr, 0,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  output_value_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr, 1,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_value_id));
-  ASSERT_NE(output_value_id, XNN_INVALID_NODE_ID);
-
-  output_index_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr, 2,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_index_id));
-  ASSERT_NE(output_index_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_argmax_pooling_2d(
-                          subgraph, input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
-                          pooling_height, pooling_width, input_id, output_value_id, output_index_id,
-                          /*flags=*/0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_argmax_pooling_2d);
-  ASSERT_EQ(node->params.pooling_2d.padding_top, input_padding_top);
-  ASSERT_EQ(node->params.pooling_2d.padding_right, input_padding_right);
-  ASSERT_EQ(node->params.pooling_2d.padding_bottom, input_padding_bottom);
-  ASSERT_EQ(node->params.pooling_2d.padding_left, input_padding_left);
-  ASSERT_EQ(node->params.pooling_2d.pooling_height, pooling_height);
-  ASSERT_EQ(node->params.pooling_2d.pooling_width, pooling_width);
-  ASSERT_EQ(node->num_inputs, 1);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->num_outputs, 2);
-  ASSERT_EQ(node->outputs[0], output_value_id);
-  ASSERT_EQ(node->outputs[1], output_index_id);
-  ASSERT_EQ(node->flags, 0);
+  return {value, index};
 }
 
-TEST_F(ArgmaxPoolingTestF32, matches_operator_api)
-{
-  std::uniform_real_distribution<float> f32dist(-255.0f, 255.0f);
-  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+template <typename T>
+void TestImpl() {
+  ReplicableRandomDevice rng;
 
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
-  // Call operator API.
-  xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_argmax_pooling2d_nhwc_f32(
-    input_padding_top, input_padding_right, input_padding_bottom, input_padding_left, pooling_height, pooling_width,
-    /*flags=*/0, &op);
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
+  for (auto _ : FuzzTest(std::chrono::milliseconds(1000))) {
+    StencilParams kw = random_stencil_params(rng);
+    StencilParams kh = random_stencil_params(rng);
+    kw.dilation = 1;
+    kh.dilation = 1;
+    // argmax pooling is weird... stride = kernel extent.
+    kw.stride = kw.size;
+    kh.stride = kh.size;
+
+    // Define subgraph
+    SubgraphTester subgraph(3);
+    subgraph.AddInputTensor(4, xnn_datatype_of<T>(), 0)
+        .AddOutputTensor(4, xnn_datatype_of<T>(), 1)
+        .AddOutputTensor(4, xnn_datatype_int32, 2)
+        .AddArgMaxPooling2D(kh.padding_min, kw.padding_max, kh.padding_max,
+                            kw.padding_min, kh.size, kw.size, 0, 1, 2);
+    xnn_status status = subgraph.CreateRuntime();
+    if (status == xnn_status_unsupported_hardware) {
+      GTEST_SKIP();
+      return;
+    }
+
+    for (int reshape = 0; reshape < 2; ++reshape) {
+      std::vector<size_t> output_shape = random_shape(rng, 4);
+
+      std::vector<size_t> input_shape = {
+          output_shape[0],
+          kh.input_extent(output_shape[1]),
+          kw.input_extent(output_shape[2]),
+          output_shape[3],
+      };
+
+      // TODO(b/404587443): Fix XNNPACK's pooling implementation so this hack is
+      // not necessary.
+      if (kh.result_is_identity(input_shape[1], output_shape[1]) ||
+          kw.result_is_identity(input_shape[2], output_shape[2])) {
+        continue;
+      }
+
+      Tensor<T> input(input_shape, PaddingBytes{XNN_EXTRA_BYTES});
+      DatatypeGenerator<T> gen(-10.0f, 20.0f);
+      input.generate([&]() { return gen(rng); });
+
+      subgraph.ReshapeExternalTensor(input_shape, input.base(), 0)
+          .ReshapeRuntime();
+      ASSERT_EQ(subgraph.GetExternalTensorShape(1), output_shape)
+          << "output_shape=" << index_to_string(output_shape)
+          << ", input_shape=" << index_to_string(input_shape) << ", kh=" << kh
+          << ", kw=" << kw;
+      ASSERT_EQ(subgraph.GetExternalTensorShape(2), output_shape)
+          << "output_shape=" << index_to_string(output_shape)
+          << ", input_shape=" << index_to_string(input_shape) << ", kh=" << kh
+          << ", kw=" << kw;
+
+      // Run subgraph
+      Tensor<T> value(output_shape);
+      Tensor<int32_t> index(output_shape);
+      subgraph.SetupExternalTensor(value.base(), 1)
+          .SetupExternalTensor(index.base(), 2)
+          .SetupRuntime()
+          .InvokeRuntime();
+
+      // Verify results.
+      Tensor<T> expected_value;
+      Tensor<int32_t> expected_index;
+      std::tie(expected_value, expected_index) = ReferenceImpl(input, kh, kw);
+
+      int index_matches = 0;
+      for (const auto& i : EnumerateIndices(output_shape)) {
+        ASSERT_EQ(value(i), expected_value(i))
+            << "output_shape=" << index_to_string(output_shape)
+            << ", input_shape=" << index_to_string(input_shape) << ", kh=" << kh
+            << ", kw=" << kw;
+
+        index_matches += index(i) == expected_index(i);
+      }
+      // In the case of ties, it's unreasonable to match XNNPACK's logic for
+      // which index is considered the argmax. The indirection buffer logic is
+      // very messy and complicated (b/404587443). I think it's better to keep
+      // this reference implementation clean and simple, and just check that the
+      // index agrees most of the time.
+      if (output_shape.size() > 10) {
+        ASSERT_GE(index_matches, output_shape.size() / 2)
+            << "output_shape=" << index_to_string(output_shape)
+            << ", input_shape=" << index_to_string(input_shape) << ", kh=" << kh
+            << ", kw=" << kw;
+      }
+    }
   }
-
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
-
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_reshape_argmax_pooling2d_nhwc_f32(
-      op, batch_size, input_height, input_width,
-      /*channels=*/channels,
-      /*input_pixel_stride=*/channels,
-      /*output_pixel_stride=*/channels,
-      /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    /*threadpool=*/nullptr));
-
-  ASSERT_EQ(
-    xnn_status_success, xnn_setup_argmax_pooling2d_nhwc_f32(
-                          op, input.data(), operator_output.data(), operator_output_index.data()));
-
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/3, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-  input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(), nullptr, /*external_id=*/0,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  output_value_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr, /*external_id=*/1,
-      /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_value_id));
-  ASSERT_NE(output_value_id, XNN_INVALID_NODE_ID);
-
-  output_index_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr, /*external_id=*/2,
-      /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_index_id));
-  ASSERT_NE(output_index_id, XNN_INVALID_NODE_ID);
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_argmax_pooling_2d(
-                          subgraph, input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
-                          pooling_height, pooling_width, input_id, output_value_id, output_index_id,
-                          /*flags=*/0));
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 3> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_value_id, subgraph_output.data()},
-    xnn_external_value{output_index_id, subgraph_output_index.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  ASSERT_EQ(subgraph_output, operator_output);
 }
 
-TEST_F(ArgmaxPoolingTestF32, reshape_output)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+TEST(ArgMaxPooling2DF32, test) { TestImpl<float>(); }
 
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/3, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  std::vector<size_t> dims{2, 3, 4, 5};
-  std::vector<size_t> output_dims{2, 3, 5, 5};
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, dims.size(), dims.data(), nullptr, 0,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  output_value_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr, 1,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_value_id));
-  ASSERT_NE(output_value_id, XNN_INVALID_NODE_ID);
-
-  output_index_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr, 2,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_index_id));
-  ASSERT_NE(output_index_id, XNN_INVALID_NODE_ID);
-  const size_t pooling_height = 2;
-  const size_t pooling_width = 2;
-  ASSERT_EQ(xnn_status_success, xnn_define_argmax_pooling_2d(
-      subgraph, /*input_padding_top=*/3, /*input_padding_right=*/2, /*input_padding_bottom=*/1, /*input_padding_left=*/4,
-      pooling_height, pooling_width, input_id, output_value_id, output_index_id,
-      /*flags=*/0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_argmax_pooling_2d);
-  ASSERT_EQ(node->num_inputs, 1);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->num_outputs, 2);
-  ASSERT_EQ(node->outputs[0], output_value_id);
-  ASSERT_EQ(node->outputs[1], output_index_id);
-  ASSERT_EQ(node->flags, 0);
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], subgraph->values, subgraph->num_values, /*threadpool=*/nullptr), xnn_status_success);
-
-  dims[0] = 2;
-  dims[1] = 2;
-  dims[2] = 8;
-  dims[3] = 17;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, 0, dims.size(), dims.data()));
-
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
-  const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
-  ASSERT_EQ(output_shape->dim[0], dims[0]);
-  ASSERT_EQ(output_shape->dim[1], 3);
-  ASSERT_EQ(output_shape->dim[2], 7);
-  ASSERT_EQ(output_shape->dim[3], dims[3]);
-}
+}  // namespace xnnpack

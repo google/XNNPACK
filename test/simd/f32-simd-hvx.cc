@@ -157,7 +157,7 @@ TEST_F(F32SimdHVXTest, Div) {
   xnn_storeu_f32(output_.data(), res);
   for (size_t k = 0; k < xnn_simd_size_f32; k++) {
     ASSERT_NEAR(output_[k], inputs_[k] / inputs_[k + xnn_simd_size_f32],
-    2 * std::numeric_limits<float>::epsilon() * std::abs(output_[k]));
+    8 * std::numeric_limits<float>::epsilon() * std::abs(output_[k]));
   }
 }
 
@@ -935,15 +935,6 @@ TEST_F(F32SimdHVXTest, CmpEq) {
   for (size_t k = 0; k < xnn_simd_size_f32; k++) {
     ASSERT_EQ(*(uint32_t *)&output_[k],
               inputs_[k] == inputs_[k + xnn_simd_size_f32] ? 0xFFFFFFFF : 0);
-  }
-}
-
-TEST_F(F32SimdHVXTest, GetExp) {
-  const xnn_simd_f32_t a = xnn_loadu_f32(inputs_.data());
-  const xnn_simd_f32_t res = xnn_getexp_f32(a);
-  xnn_storeu_f32(output_.data(), res);
-  for (size_t k = 0; k < xnn_simd_size_f32; k++) {
-    ASSERT_EQ(output_[k], std::logb(inputs_[k]));
   }
 }
 

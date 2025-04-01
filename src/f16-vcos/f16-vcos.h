@@ -31,9 +31,11 @@ XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon_fp16_arith, xnn_f16_vcos_ukernel__neon
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 #if XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512fp16, xnn_f16_vcos_ukernel__avx512fp16_rational_3_2_div_u32, 32, false, xnn_float16, struct xnn_f16_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512fp16, xnn_f16_vcos_ukernel__avx512fp16_rational_3_2_div_u64, 64, false, xnn_float16, struct xnn_f16_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512fp16, xnn_f16_vcos_ukernel__avx512fp16_rational_3_2_div_u96, 96, false, xnn_float16, struct xnn_f16_default_params, NULL)
+// Currently disabled since this causes compiler issues with clang-18
+// (see https://github.com/llvm/llvm-project/issues/132013).
+// XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512fp16, xnn_f16_vcos_ukernel__avx512fp16_rational_3_2_div_u32, 32, false, xnn_float16, struct xnn_f16_default_params, NULL)
+// XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512fp16, xnn_f16_vcos_ukernel__avx512fp16_rational_3_2_div_u64, 64, false, xnn_float16, struct xnn_f16_default_params, NULL)
+// XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512fp16, xnn_f16_vcos_ukernel__avx512fp16_rational_3_2_div_u96, 96, false, xnn_float16, struct xnn_f16_default_params, NULL)
 #endif  // XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #ifdef XNN_DEFINED_UKERNEL_WITH_PARAMS

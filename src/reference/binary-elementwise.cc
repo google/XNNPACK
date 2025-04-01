@@ -246,9 +246,7 @@ struct PowOp {
 
 template <>
 struct PowOp<int32_t> {
-  int32_t operator()(int32_t a, int32_t b) const {
-    return integer_pow(a, b);
-  }
+  int32_t operator()(int32_t a, int32_t b) const { return integer_pow(a, b); }
 };
 
 template <typename T>

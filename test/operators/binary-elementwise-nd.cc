@@ -215,7 +215,6 @@ class BinaryElementwiseOperatorTester {
                            std::multiplies<size_t>());
   }
 
-
   BinaryElementwiseOperatorTester& input2_shape(
       std::vector<size_t> input2_shape) {
     assert(input2_shape.size() <= XNN_MAX_TENSOR_DIMS);
@@ -321,8 +320,10 @@ class BinaryElementwiseOperatorTester {
     Tensor<T> output(output_dims);
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      xnnpack::randomize_buffer(datatype(), rng, limits.min, limits.max, input1);
-      xnnpack::randomize_buffer(datatype(), rng, limits.min, limits.max, input2);
+      xnnpack::randomize_buffer(datatype(), rng, limits.min, limits.max,
+                                input1);
+      xnnpack::randomize_buffer(datatype(), rng, limits.min, limits.max,
+                                input2);
 
       if (mode == RunMode::kCreateReshapeRun) {
         // Create, setup, run, and destroy a binary elementwise operator.
@@ -549,14 +550,11 @@ TEST_P(BinaryNDTest, op) {
 }
 
 const xnn_datatype all_datatypes[] = {
-    xnn_datatype_quint8,
-    xnn_datatype_qint8,
+    xnn_datatype_quint8, xnn_datatype_qint8,
 #ifndef XNN_EXCLUDE_F16_TESTS
     xnn_datatype_fp16,
 #endif
-    xnn_datatype_bf16,
-    xnn_datatype_fp32,
-    xnn_datatype_int32,
+    xnn_datatype_bf16,   xnn_datatype_fp32,  xnn_datatype_int32,
 };
 
 const xnn_binary_operator all_binary_ops[] = {

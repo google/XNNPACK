@@ -11,17 +11,15 @@
 #include <random>
 
 #include "bench/utils.h"
+#include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/reduce.h"
-#include "src/xnnpack/buffer.h"
 #include <benchmark/benchmark.h>
 
-static void s8_rminmax(
-  benchmark::State& state,
-  xnn_s8_reduce_ukernel_fn rminmax,
-  benchmark::utils::IsaCheckFunction isa_check = nullptr)
-{
+static void s8_rminmax(benchmark::State& state,
+                       xnn_s8_reduce_ukernel_fn rminmax,
+                       benchmark::utils::IsaCheckFunction isa_check = nullptr) {
   if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
@@ -39,7 +37,8 @@ static void s8_rminmax(
   int8_t output[2] = {std::numeric_limits<int8_t>::max(),
                       std::numeric_limits<int8_t>::min()};
   for (auto _ : state) {
-    rminmax(elements * sizeof(int8_t), input.data(), output, /*params=*/nullptr);
+    rminmax(elements * sizeof(int8_t), input.data(), output,
+            /*params=*/nullptr);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
@@ -48,172 +47,152 @@ static void s8_rminmax(
   }
 
   const size_t elements_per_iteration = elements;
-  state.counters["elements"] =
-    benchmark::Counter(
-        static_cast<uint64_t>(state.iterations()) * elements_per_iteration,
-        benchmark::Counter::kIsRate);
+  state.counters["elements"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * elements_per_iteration,
+      benchmark::Counter::kIsRate);
 
   const size_t bytes_per_iteration = elements * sizeof(float);
-  state.counters["bytes"] =
-    benchmark::Counter(
-        static_cast<uint64_t>(state.iterations()) * bytes_per_iteration,
-        benchmark::Counter::kIsRate);
+  state.counters["bytes"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * bytes_per_iteration,
+      benchmark::Counter::kIsRate);
 }
 
-BENCHMARK_CAPTURE(s8_rminmax, scalar_u1,
-                  xnn_s8_rminmax_ukernel__scalar_u1)
-  ->Apply(benchmark::utils::ReductionParameters<int8_t>)
-  ->UseRealTime();
+BENCHMARK_CAPTURE(s8_rminmax, scalar_u1, xnn_s8_rminmax_ukernel__scalar_u1)
+    ->Apply(benchmark::utils::ReductionParameters<int8_t>)
+    ->UseRealTime();
 
 BENCHMARK_CAPTURE(s8_rminmax, scalar_u2_acc2,
                   xnn_s8_rminmax_ukernel__scalar_u2_acc2)
-  ->Apply(benchmark::utils::ReductionParameters<int8_t>)
-  ->UseRealTime();
+    ->Apply(benchmark::utils::ReductionParameters<int8_t>)
+    ->UseRealTime();
 
 BENCHMARK_CAPTURE(s8_rminmax, scalar_u3_acc3,
                   xnn_s8_rminmax_ukernel__scalar_u3_acc3)
-  ->Apply(benchmark::utils::ReductionParameters<int8_t>)
-  ->UseRealTime();
+    ->Apply(benchmark::utils::ReductionParameters<int8_t>)
+    ->UseRealTime();
 
 BENCHMARK_CAPTURE(s8_rminmax, scalar_u4_acc2,
                   xnn_s8_rminmax_ukernel__scalar_u4_acc2)
-  ->Apply(benchmark::utils::ReductionParameters<int8_t>)
-  ->UseRealTime();
+    ->Apply(benchmark::utils::ReductionParameters<int8_t>)
+    ->UseRealTime();
 
 BENCHMARK_CAPTURE(s8_rminmax, scalar_u4_acc4,
                   xnn_s8_rminmax_ukernel__scalar_u4_acc4)
-  ->Apply(benchmark::utils::ReductionParameters<int8_t>)
-  ->UseRealTime();
+    ->Apply(benchmark::utils::ReductionParameters<int8_t>)
+    ->UseRealTime();
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(s8_rminmax, neon_u16,
-                    xnn_s8_rminmax_ukernel__neon_u16,
-                    benchmark::utils::CheckNEON)
+BENCHMARK_CAPTURE(s8_rminmax, neon_u16, xnn_s8_rminmax_ukernel__neon_u16,
+                  benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::ReductionParameters<int8_t>)
     ->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(s8_rminmax, neon_u32_acc2,
-                    xnn_s8_rminmax_ukernel__neon_u32_acc2,
-                    benchmark::utils::CheckNEON)
+BENCHMARK_CAPTURE(s8_rminmax, neon_u32_acc2,
+                  xnn_s8_rminmax_ukernel__neon_u32_acc2,
+                  benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::ReductionParameters<int8_t>)
     ->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(s8_rminmax, neon_u48_acc3,
-                    xnn_s8_rminmax_ukernel__neon_u48_acc3,
-                    benchmark::utils::CheckNEON)
+BENCHMARK_CAPTURE(s8_rminmax, neon_u48_acc3,
+                  xnn_s8_rminmax_ukernel__neon_u48_acc3,
+                  benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::ReductionParameters<int8_t>)
     ->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(s8_rminmax, neon_u64_acc2,
-                    xnn_s8_rminmax_ukernel__neon_u64_acc2,
-                    benchmark::utils::CheckNEON)
+BENCHMARK_CAPTURE(s8_rminmax, neon_u64_acc2,
+                  xnn_s8_rminmax_ukernel__neon_u64_acc2,
+                  benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::ReductionParameters<int8_t>)
     ->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(s8_rminmax, neon_u64_acc4,
-                    xnn_s8_rminmax_ukernel__neon_u64_acc4,
-                    benchmark::utils::CheckNEON)
+BENCHMARK_CAPTURE(s8_rminmax, neon_u64_acc4,
+                  xnn_s8_rminmax_ukernel__neon_u64_acc4,
+                  benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::ReductionParameters<int8_t>)
     ->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(s8_rminmax, sse41_u16,
-                    xnn_s8_rminmax_ukernel__sse41_u16,
-                    benchmark::utils::CheckSSE41)
+BENCHMARK_CAPTURE(s8_rminmax, sse41_u16, xnn_s8_rminmax_ukernel__sse41_u16,
+                  benchmark::utils::CheckSSE41)
     ->Apply(benchmark::utils::ReductionParameters<int8_t>)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(s8_rminmax, sse41_u32_acc2,
-                    xnn_s8_rminmax_ukernel__sse41_u32_acc2,
-                    benchmark::utils::CheckSSE41)
+BENCHMARK_CAPTURE(s8_rminmax, sse41_u32_acc2,
+                  xnn_s8_rminmax_ukernel__sse41_u32_acc2,
+                  benchmark::utils::CheckSSE41)
     ->Apply(benchmark::utils::ReductionParameters<int8_t>)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(s8_rminmax, sse41_u48_acc3,
-                    xnn_s8_rminmax_ukernel__sse41_u48_acc3,
-                    benchmark::utils::CheckSSE41)
+BENCHMARK_CAPTURE(s8_rminmax, sse41_u48_acc3,
+                  xnn_s8_rminmax_ukernel__sse41_u48_acc3,
+                  benchmark::utils::CheckSSE41)
     ->Apply(benchmark::utils::ReductionParameters<int8_t>)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(s8_rminmax, sse41_u64_acc2,
-                    xnn_s8_rminmax_ukernel__sse41_u64_acc2,
-                    benchmark::utils::CheckSSE41)
+BENCHMARK_CAPTURE(s8_rminmax, sse41_u64_acc2,
+                  xnn_s8_rminmax_ukernel__sse41_u64_acc2,
+                  benchmark::utils::CheckSSE41)
     ->Apply(benchmark::utils::ReductionParameters<int8_t>)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(s8_rminmax, sse41_u64_acc4,
-                    xnn_s8_rminmax_ukernel__sse41_u64_acc4,
-                    benchmark::utils::CheckSSE41)
+BENCHMARK_CAPTURE(s8_rminmax, sse41_u64_acc4,
+                  xnn_s8_rminmax_ukernel__sse41_u64_acc4,
+                  benchmark::utils::CheckSSE41)
     ->Apply(benchmark::utils::ReductionParameters<int8_t>)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(s8_rminmax, wasmsimd_u16,
-                    xnn_s8_rminmax_ukernel__wasmsimd_u16)
+BENCHMARK_CAPTURE(s8_rminmax, wasmsimd_u16,
+                  xnn_s8_rminmax_ukernel__wasmsimd_u16)
     ->Apply(benchmark::utils::ReductionParameters<int8_t>)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(s8_rminmax, wasmsimd_u32_acc2,
-                    xnn_s8_rminmax_ukernel__wasmsimd_u32_acc2)
+BENCHMARK_CAPTURE(s8_rminmax, wasmsimd_u32_acc2,
+                  xnn_s8_rminmax_ukernel__wasmsimd_u32_acc2)
     ->Apply(benchmark::utils::ReductionParameters<int8_t>)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(s8_rminmax, wasmsimd_u48_acc3,
-                    xnn_s8_rminmax_ukernel__wasmsimd_u48_acc3)
+BENCHMARK_CAPTURE(s8_rminmax, wasmsimd_u48_acc3,
+                  xnn_s8_rminmax_ukernel__wasmsimd_u48_acc3)
     ->Apply(benchmark::utils::ReductionParameters<int8_t>)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(s8_rminmax, wasmsimd_u64_acc2,
-                    xnn_s8_rminmax_ukernel__wasmsimd_u64_acc2)
+BENCHMARK_CAPTURE(s8_rminmax, wasmsimd_u64_acc2,
+                  xnn_s8_rminmax_ukernel__wasmsimd_u64_acc2)
     ->Apply(benchmark::utils::ReductionParameters<int8_t>)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(s8_rminmax, wasmsimd_u64_acc4,
-                    xnn_s8_rminmax_ukernel__wasmsimd_u64_acc4)
+BENCHMARK_CAPTURE(s8_rminmax, wasmsimd_u64_acc4,
+                  xnn_s8_rminmax_ukernel__wasmsimd_u64_acc4)
     ->Apply(benchmark::utils::ReductionParameters<int8_t>)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();

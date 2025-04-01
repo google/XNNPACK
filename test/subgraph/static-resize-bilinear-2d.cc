@@ -3,553 +3,178 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>  // For std::generate, std::min.
-#include <array>      // For std::array.
-#include <cmath>      // For std::lrintf.
-#include <cstddef>    // For size_t.
-#include <cstdint>    // For uint32_t.
-#include <limits>     // For std::numeric_limits.
-#include <memory>     // For std::unique_ptr.
-#include <random>     // For std::uniform_real_distribution.
-#include <vector>     // For std::vector.
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <random>
+#include <type_traits>
+#include <vector>
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
-#include "src/xnnpack/node-type.h"
-#include "src/xnnpack/operator.h"
-#include "src/xnnpack/subgraph.h"
 #include "test/replicable_random_device.h"
-#include "test/subgraph/runtime-flags.h"
+#include "test/subgraph/subgraph-tester.h"
 
-template <class T> class StaticResizeBilinear2DTestBase : public ::testing::Test {
- protected:
-  StaticResizeBilinear2DTestBase() {
-    input_size_dist = std::uniform_int_distribution<uint32_t>(10, 15);
-    kernel_size_dist = std::uniform_int_distribution<uint32_t>(2, 5);
-    stride_dist = std::uniform_int_distribution<uint32_t>(1, 2);
-    f32dist = std::uniform_real_distribution<float>();
-    scale_dist = std::uniform_real_distribution<float>(1.0f, 5.0f);
-    i32dist = std::uniform_int_distribution<int32_t>(-10000, 10000);
-    dilation_dist = std::uniform_int_distribution<uint32_t>(1, 2);
-    i8dist =
-      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
-    u8dist =
-      std::uniform_int_distribution<int32_t>(std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
+namespace xnnpack {
 
-    batch_size = input_size_dist(rng);
-    input_height = input_size_dist(rng);
-    input_width = input_size_dist(rng);
-    channels = input_size_dist(rng);
-    output_height = input_size_dist(rng);
-    output_width = input_size_dist(rng);
-
-    input_dims = {{batch_size, input_height, input_width, channels}};
-    output_dims = {{batch_size, output_height, output_width, channels}};
-
-    input = xnnpack::Buffer<T>(XNN_EXTRA_BYTES / sizeof(T) + batch_size * input_height * input_width * channels);
-    operator_output = xnnpack::Buffer<T>(batch_size * output_height * output_width * channels);
-    subgraph_output = xnnpack::Buffer<T>(batch_size * output_height * output_width * channels);
+template <typename Rng>
+uint32_t random_flags(Rng& rng) {
+  std::uniform_int_distribution<> flags_dist(0, 3);
+  switch (flags_dist(rng)) {
+    case 1:
+      return XNN_FLAG_TENSORFLOW_LEGACY_MODE;
+    case 2:
+      return XNN_FLAG_ALIGN_CORNERS;
+    default:
+      return 0;
   }
-
-  xnnpack::ReplicableRandomDevice rng;
-  std::uniform_int_distribution<uint32_t> input_size_dist;
-  std::uniform_int_distribution<uint32_t> kernel_size_dist;
-  std::uniform_int_distribution<uint32_t> stride_dist;
-  std::uniform_int_distribution<int32_t> i32dist;
-  std::uniform_real_distribution<float> f32dist;
-  std::uniform_real_distribution<float> scale_dist;
-  std::uniform_int_distribution<uint32_t> dilation_dist;
-  std::uniform_int_distribution<int32_t> i8dist;
-  std::uniform_int_distribution<int32_t> u8dist;
-
-  uint32_t batch_size;
-  uint32_t input_height;
-  uint32_t input_width;
-  uint32_t channels;
-  uint32_t output_height;
-  uint32_t output_width;
-
-  std::array<size_t, 4> input_dims;
-  std::array<size_t, 4> output_dims;
-
-  xnnpack::Buffer<T> input;
-  xnnpack::Buffer<T> operator_output;
-  xnnpack::Buffer<T> subgraph_output;
-};
-
-using StaticResizeBilinear2DTestQS8 = StaticResizeBilinear2DTestBase<int8_t>;
-using StaticResizeBilinear2DTestQU8 = StaticResizeBilinear2DTestBase<uint8_t>;
-using StaticResizeBilinear2DTestF16 = StaticResizeBilinear2DTestBase<xnn_float16>;
-using StaticResizeBilinear2DTestF32 = StaticResizeBilinear2DTestBase<float>;
-
-TEST_F(StaticResizeBilinear2DTestQS8, define)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_qint8, 0, 1.0f, input_dims.size(), input_dims.data(), nullptr,
-                          /*external_id=*/0, /*flags=*/0, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_qint8, 0, 1.0f, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/1, /*flags=*/0, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_static_resize_bilinear_2d(subgraph, output_height, output_width, input_id, output_id, /*flags=*/0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_static_resize_bilinear_2d);
-  ASSERT_EQ(node->params.static_resize.new_height, output_height);
-  ASSERT_EQ(node->params.static_resize.new_width, output_width);
-  ASSERT_EQ(node->num_inputs, 1);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
 }
 
-TEST_F(StaticResizeBilinear2DTestQU8, define)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+template <typename T>
+Tensor<T> ReferenceImpl(const Tensor<T>& input, size_t new_height,
+                        size_t new_width, uint32_t flags) {
+  Tensor<T> output({input.extent(0), new_height, new_width, input.extent(3)});
 
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+  const bool align_corners = flags & XNN_FLAG_ALIGN_CORNERS;
+  const bool tensorflow_legacy = flags & XNN_FLAG_TENSORFLOW_LEGACY_MODE;
 
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_quint8, 0, 1.0f, input_dims.size(), input_dims.data(), nullptr,
-                          /*external_id=*/0, /*flags=*/0, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
+  const int input_width = input.extent(2);
+  const int input_height = input.extent(1);
+  const int output_width = output.extent(2);
+  const int output_height = output.extent(1);
 
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_quint8, 0, 1.0f, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/1, /*flags=*/0, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
+  const int width_adjustment = align_corners && output.extent(2) != 1;
+  const int height_adjustment = align_corners && output.extent(1) != 1;
+  const float width_scale = static_cast<float>(input_width - width_adjustment) /
+                            static_cast<float>(output_width - width_adjustment);
+  const float height_scale =
+      static_cast<float>(input_height - height_adjustment) /
+      static_cast<float>(output_height - height_adjustment);
 
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_static_resize_bilinear_2d(subgraph, output_height, output_width, input_id, output_id, /*flags=*/0));
+  const float height_offset =
+      tensorflow_legacy || align_corners ? 0.0f : 0.5f * height_scale - 0.5f;
+  const float width_offset =
+      tensorflow_legacy || align_corners ? 0.0f : 0.5f * width_scale - 0.5f;
 
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_static_resize_bilinear_2d);
-  ASSERT_EQ(node->params.static_resize.new_height, output_height);
-  ASSERT_EQ(node->params.static_resize.new_width, output_width);
-  ASSERT_EQ(node->num_inputs, 1);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-}
-
-TEST_F(StaticResizeBilinear2DTestF16, define)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, input_dims.size(), input_dims.data(), nullptr,
-                          /*external_id=*/0, /*flags=*/0, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/1, /*flags=*/0, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_static_resize_bilinear_2d(subgraph, output_height, output_width, input_id, output_id, /*flags=*/0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_static_resize_bilinear_2d);
-  ASSERT_EQ(node->params.static_resize.new_height, output_height);
-  ASSERT_EQ(node->params.static_resize.new_width, output_width);
-  ASSERT_EQ(node->num_inputs, 1);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-}
-
-TEST_F(StaticResizeBilinear2DTestF32, define)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(), nullptr,
-                          /*external_id=*/0, /*flags=*/0, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/1, /*flags=*/0, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_static_resize_bilinear_2d(subgraph, output_height, output_width, input_id, output_id, /*flags=*/0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_static_resize_bilinear_2d);
-  ASSERT_EQ(node->params.static_resize.new_height, output_height);
-  ASSERT_EQ(node->params.static_resize.new_width, output_width);
-  ASSERT_EQ(node->num_inputs, 1);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-}
-
-TEST_F(StaticResizeBilinear2DTestQS8, matches_operator_api)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-  std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-  const int8_t input_zero_point = i8dist(rng);
-  const float input_scale = scale_dist(rng);
-  const float output_zero_point = input_zero_point;
-  const float output_scale = input_scale;
-
-  // Call operator API.
-  xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_resize_bilinear2d_nhwc(xnn_datatype_qint8, output_height, output_width, /*flags=*/0, &op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
-
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
+  for (size_t n = 0; n < output.extent(0); ++n) {
+    for (size_t y = 0; y < output.extent(1); ++y) {
+      const float iy = y * height_scale + height_offset;
+      int y0 = std::floor(iy);
+      int y1 = y0 + 1;
+      float alpha_y = iy - y0;
+      y0 = std::min(std::max(y0, 0), input_height - 1);
+      y1 = std::min(std::max(y1, 0), input_height - 1);
+      for (size_t x = 0; x < output.extent(2); ++x) {
+        const float ix = x * width_scale + width_offset;
+        int x0 = std::floor(ix);
+        int x1 = x0 + 1;
+        float alpha_x = ix - x0;
+        x0 = std::min(std::max(x0, 0), input_width - 1);
+        x1 = std::min(std::max(x1, 0), input_width - 1);
+        for (size_t c = 0; c < output.extent(3); ++c) {
+          float output_nyxc =
+              input(n, y0, x0, c) * ((1.0f - alpha_x) * (1.0f - alpha_y)) +
+              input(n, y1, x0, c) * ((1.0f - alpha_x) * alpha_y) +
+              input(n, y0, x1, c) * (alpha_x * (1.0f - alpha_y)) +
+              input(n, y1, x1, c) * (alpha_x * alpha_y);
+          if (std::is_integral<typename unwrap_quantized<T>::type>::value) {
+            output(n, y, x, c) = round_float_to_int<T>(output_nyxc);
+          } else {
+            output(n, y, x, c) = output_nyxc;
+          }
+        }
+      }
+    }
   }
-
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-  size_t workspace_size = SIZE_MAX;
-  size_t workspace_alignment = SIZE_MAX;
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_reshape_resize_bilinear2d_nhwc(
-      op, batch_size, input_height, input_width, channels, channels, channels,
-      &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
-  ASSERT_EQ(workspace_size, 0);
-  ASSERT_EQ(workspace_alignment, 1);
-  ASSERT_EQ(xnn_status_success, xnn_setup_resize_bilinear2d_nhwc(op, /*workspace=*/nullptr, input.data(), operator_output.data()));
-
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_qint8, input_zero_point, input_scale, input_dims.size(),
-                          input_dims.data(), nullptr, /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_qint8, output_zero_point, output_scale, output_dims.size(),
-                          output_dims.data(), nullptr, /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_static_resize_bilinear_2d(subgraph, output_height, output_width, input_id, output_id, /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  ASSERT_EQ(subgraph_output, operator_output);
+  return output;
 }
 
-TEST_F(StaticResizeBilinear2DTestQU8, matches_operator_api)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-  std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-  const uint8_t input_zero_point = u8dist(rng);
-  const float input_scale = scale_dist(rng);
-  const uint8_t output_zero_point = input_zero_point;
-  const float output_scale = input_scale;
+// Bilinear resize can be really poorly behaved numerically (hard to test) if
+// the input data has sharp details. Limit the input to [-1, 1] to avoid this.
+template <typename T>
+DatatypeGenerator<T> MakeDatatypeGenerator(T) {
+  return DatatypeGenerator<T>(-1.0f, 1.0f);
+}
 
-  // Call operator API.
-  xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_resize_bilinear2d_nhwc(xnn_datatype_quint8, output_height, output_width, /*flags=*/0, &op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
+// For quantized types, generate the full range of the type.
+template <typename T>
+DatatypeGenerator<quantized<T>> MakeDatatypeGenerator(quantized<T>) {
+  return DatatypeGenerator<quantized<T>>();
+}
 
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
+template <typename T>
+void TestImpl() {
+  ReplicableRandomDevice rng;
+
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  for (auto _ : FuzzTest(std::chrono::milliseconds(1000))) {
+    xnn_quantization_params quantization =
+        random_quantization(xnn_datatype_of<T>(), rng);
+
+    std::vector<size_t> new_size = random_shape(rng, 2);
+
+    // Define subgraph
+    const uint32_t flags = random_flags(rng);
+    SubgraphTester subgraph(2);
+    subgraph.AddInputTensor(4, xnn_datatype_of<T>(), quantization, 0)
+        .AddOutputTensor(4, xnn_datatype_of<T>(), quantization, 1)
+        .AddResizeBilinear(new_size[0], new_size[1], 0, 1, flags);
+    xnn_status status = subgraph.CreateRuntime();
+    if (status == xnn_status_unsupported_hardware) {
+      GTEST_SKIP();
+      return;
+    }
+
+    for (int reshape = 0; reshape < 2; ++reshape) {
+      std::vector<size_t> input_shape = random_shape(rng, 4);
+      Tensor<T> input(input_shape, PaddingBytes{XNN_EXTRA_BYTES});
+      DatatypeGenerator<T> generator = MakeDatatypeGenerator(T());
+      input.generate([&]() { return generator(rng); });
+
+      Tensor<T> expected =
+          ReferenceImpl(input, new_size[0], new_size[1], flags);
+
+      // Check reshaped shape is correct
+      subgraph.ReshapeExternalTensor(input_shape, input.base(), 0)
+          .ReshapeRuntime();
+      ASSERT_EQ(subgraph.GetExternalTensorShape(1), expected.extents());
+
+      // Run subgraph
+      Tensor<T> output(expected.extents());
+      subgraph.SetupExternalTensor(output.base(), 1)
+          .SetupRuntime()
+          .InvokeRuntime();
+
+      // Verify results.
+      for (const auto& i : EnumerateIndices(output.extents())) {
+        if (is_quantized<T>()) {
+          ASSERT_NEAR(expected(i), output(i), 1)
+              << "input_shape=" << index_to_string(input.extents())
+              << ", new_size=" << index_to_string(new_size)
+              << ", flags=" << flags;
+        } else {
+          const float expected_i = expected(i);
+          const float tolerance = (std::abs(expected_i) + 1.0f) *
+                                  (epsilon(xnn_datatype_of<T>()) * 20.0f);
+          ASSERT_NEAR(expected_i, output(i), tolerance)
+              << "input_shape=" << index_to_string(input.extents())
+              << ", new_size=" << index_to_string(new_size)
+              << ", flags=" << flags;
+        }
+      }
+    }
   }
-
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-  size_t workspace_size = SIZE_MAX;
-  size_t workspace_alignment = SIZE_MAX;
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_reshape_resize_bilinear2d_nhwc(
-      op, batch_size, input_height, input_width, channels, channels, channels,
-      &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
-  ASSERT_EQ(workspace_size, 0);
-  ASSERT_EQ(workspace_alignment, 1);
-  ASSERT_EQ(xnn_status_success, xnn_setup_resize_bilinear2d_nhwc(op, /*workspace=*/nullptr, input.data(), operator_output.data()));
-
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_quint8, input_zero_point, input_scale, input_dims.size(),
-                          input_dims.data(), nullptr, /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_quint8, output_zero_point, output_scale, output_dims.size(),
-                          output_dims.data(), nullptr, /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_static_resize_bilinear_2d(subgraph, output_height, output_width, input_id, output_id, /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  ASSERT_EQ(subgraph_output, operator_output);
 }
 
-TEST_F(StaticResizeBilinear2DTestF16, matches_operator_api)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+TEST(ResizeBilinearQS8, test) { TestImpl<quantized<int8_t>>(); }
+TEST(ResizeBilinearQU8, test) { TestImpl<quantized<uint8_t>>(); }
+TEST(ResizeBilinearF16, test) { TestImpl<xnn_float16>(); }
+TEST(ResizeBilinearF32, test) { TestImpl<float>(); }
 
-  // Call operator API.
-  xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_resize_bilinear2d_nhwc(xnn_datatype_fp16, output_height, output_width, /*flags=*/0, &op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
-
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
-  }
-
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-  size_t workspace_size = SIZE_MAX;
-  size_t workspace_alignment = SIZE_MAX;
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_reshape_resize_bilinear2d_nhwc(
-      op, batch_size, input_height, input_width, channels, channels, channels,
-      &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
-  ASSERT_EQ(workspace_size, 0);
-  ASSERT_EQ(workspace_alignment, 1);
-  ASSERT_EQ(xnn_status_success, xnn_setup_resize_bilinear2d_nhwc(op, /*workspace=*/nullptr, input.data(), operator_output.data()));
-
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, input_dims.size(), input_dims.data(), nullptr, /*external_id=*/0,
-                          XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_static_resize_bilinear_2d(subgraph, output_height, output_width, input_id, output_id, /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  ASSERT_EQ(subgraph_output, operator_output);
-}
-
-TEST_F(StaticResizeBilinear2DTestF32, matches_operator_api)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-
-  // Call operator API.
-  xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_resize_bilinear2d_nhwc(xnn_datatype_fp32, output_height, output_width, /*flags=*/0, &op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
-
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
-  }
-
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-  size_t workspace_size = SIZE_MAX;
-  size_t workspace_alignment = SIZE_MAX;
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_reshape_resize_bilinear2d_nhwc(
-      op, batch_size, input_height, input_width, channels, channels, channels,
-      &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
-  ASSERT_EQ(workspace_size, 0);
-  ASSERT_EQ(workspace_alignment, 1);
-  ASSERT_EQ(xnn_status_success, xnn_setup_resize_bilinear2d_nhwc(op, /*workspace=*/nullptr, input.data(), operator_output.data()));
-
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(), nullptr, /*external_id=*/0,
-                          XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_static_resize_bilinear_2d(subgraph, output_height, output_width, input_id, output_id, /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  ASSERT_EQ(subgraph_output, operator_output);
-}
-
-TEST_F(StaticResizeBilinear2DTestF32, reshape_output)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(), nullptr, /*external_id=*/0,
-                          XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_static_resize_bilinear_2d(subgraph, output_height, output_width, input_id, output_id, /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  // Channels and batch size can change.
-  input_dims[0] += 2;
-  input_dims[3] += 7;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_dims.size(), input_dims.data()));
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
-  const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
-  ASSERT_EQ(output_shape->dim[0], input_dims[0]);
-  ASSERT_EQ(output_shape->dim[1], output_dims[1]);
-  ASSERT_EQ(output_shape->dim[2], output_dims[2]);
-  ASSERT_EQ(output_shape->dim[3], input_dims[3]);
-
-  input_dims[0] -= 1;
-  input_dims[1] -= 1;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_dims.size(), input_dims.data()));
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_success);
-  ASSERT_EQ(output_shape->dim[0], input_dims[0]);
-  ASSERT_EQ(output_shape->dim[1], output_dims[1]);
-  ASSERT_EQ(output_shape->dim[2], output_dims[2]);
-  ASSERT_EQ(output_shape->dim[3], input_dims[3]);
-}
+}  // namespace xnnpack

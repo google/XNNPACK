@@ -463,9 +463,7 @@ def generate_test_cases(
   _, datatype, ukernel_type, _ = ukernel.split("_", 3)
   test_args = [ukernel]
   if tester == "ReduceMicrokernelTester":
-    test_args.append(
-        "ReduceMicrokernelTester::OpType::%s" % op_type
-    )
+    test_args.append("ReduceMicrokernelTester::OpType::%s" % op_type)
   if init_fn is not None:
     test_args.append(init_fn)
   if requantization_type:
@@ -481,8 +479,10 @@ def generate_test_cases(
         "f32": "float",
     }[datatype]
     channel_scaled_tile = {
-        "rvv": "(%s*xnn_init_hardware_config()->vlenb/sizeof(%s))"
-        % (str(channel_tile), ctype)
+        "rvv": (
+            "(%s*xnn_init_hardware_config()->vlenb/sizeof(%s))"
+            % (str(channel_tile), ctype)
+        )
     }[isa]
   return xngen.preprocess(
       RDSUM_TEST_TEMPLATE,

@@ -18,9 +18,9 @@
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
-#include "src/xnnpack/buffer.h"
 #include "test/replicable_random_device.h"
 
 class DynamicFullyConnectedOperatorTester {
@@ -31,9 +31,7 @@ class DynamicFullyConnectedOperatorTester {
     return *this;
   }
 
-  size_t input_channels() const {
-    return this->input_channels_;
-  }
+  size_t input_channels() const { return this->input_channels_; }
 
   DynamicFullyConnectedOperatorTester& output_channels(size_t output_channels) {
     assert(output_channels >= 1);
@@ -41,9 +39,7 @@ class DynamicFullyConnectedOperatorTester {
     return *this;
   }
 
-  size_t output_channels() const {
-    return this->output_channels_;
-  }
+  size_t output_channels() const { return this->output_channels_; }
 
   DynamicFullyConnectedOperatorTester& batch_size(size_t batch_size) {
     assert(batch_size >= 1);
@@ -51,9 +47,7 @@ class DynamicFullyConnectedOperatorTester {
     return *this;
   }
 
-  size_t batch_size() const {
-    return this->batch_size_;
-  }
+  size_t batch_size() const { return this->batch_size_; }
 
   DynamicFullyConnectedOperatorTester& input_stride(size_t input_stride) {
     assert(input_stride >= 1);
@@ -90,45 +84,36 @@ class DynamicFullyConnectedOperatorTester {
     return *this;
   }
 
-  uint8_t qmin() const {
-    return this->qmin_;
-  }
+  uint8_t qmin() const { return this->qmin_; }
 
   DynamicFullyConnectedOperatorTester& qmax(uint8_t qmax) {
     this->qmax_ = qmax;
     return *this;
   }
 
-  uint8_t qmax() const {
-    return this->qmax_;
-  }
+  uint8_t qmax() const { return this->qmax_; }
 
-  DynamicFullyConnectedOperatorTester& transpose_weights(bool transpose_weights) {
+  DynamicFullyConnectedOperatorTester& transpose_weights(
+      bool transpose_weights) {
     this->transpose_weights_ = transpose_weights;
     return *this;
   }
 
-  bool transpose_weights() const {
-    return this->transpose_weights_;
-  }
+  bool transpose_weights() const { return this->transpose_weights_; }
 
   DynamicFullyConnectedOperatorTester& has_bias(bool has_bias) {
     this->has_bias_ = has_bias;
     return *this;
   }
 
-  bool has_bias() const {
-    return this->has_bias_;
-  }
+  bool has_bias() const { return this->has_bias_; }
 
   DynamicFullyConnectedOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  size_t iterations() const {
-    return this->iterations_;
-  }
+  size_t iterations() const { return this->iterations_; }
 
   uint32_t flags() const {
     uint32_t flags = 0;
@@ -143,17 +128,20 @@ class DynamicFullyConnectedOperatorTester {
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
     xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
-      (batch_size() - 1) * input_stride() + input_channels());
+                                       (batch_size() - 1) * input_stride() +
+                                       input_channels());
     xnnpack::Buffer<xnn_float16> kernel(output_channels() * input_channels());
     xnnpack::Buffer<float> kernel_as_float(kernel.size());
     xnnpack::Buffer<xnn_float16> bias(output_channels());
     xnnpack::Buffer<float> bias_as_float(bias.size());
-    xnnpack::Buffer<xnn_float16> output((batch_size() - 1) * output_stride() + output_channels());
+    xnnpack::Buffer<xnn_float16> output((batch_size() - 1) * output_stride() +
+                                        output_channels());
     xnnpack::Buffer<float> output_ref(batch_size() * output_channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
+      std::generate(kernel.begin(), kernel.end(),
+                    [&]() { return f32dist(rng); });
       std::copy(kernel.cbegin(), kernel.cend(), kernel_as_float.begin());
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
       std::copy(bias.cbegin(), bias.cend(), bias_as_float.begin());
@@ -192,13 +180,21 @@ class DynamicFullyConnectedOperatorTester {
       }
 
       // Compute clamping parameters.
-      const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
-      const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_min =
+          *std::min_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_max =
+          *std::max_element(output_ref.cbegin(), output_ref.cend());
       const float accumulated_range = accumulated_max - accumulated_min;
-      const float scaled_min = xnn_float16(accumulated_min + accumulated_range / 255.0f * float(qmin()));
-      const float scaled_max = xnn_float16(accumulated_max - accumulated_range / 255.0f * float(255 - qmax()));
-      const float output_min = scaled_min == scaled_max ? -std::numeric_limits<float>::infinity() : scaled_min;
-      const float output_max = scaled_min == scaled_max ? +std::numeric_limits<float>::infinity() : scaled_max;
+      const float scaled_min = xnn_float16(
+          accumulated_min + accumulated_range / 255.0f * float(qmin()));
+      const float scaled_max = xnn_float16(
+          accumulated_max - accumulated_range / 255.0f * float(255 - qmax()));
+      const float output_min = scaled_min == scaled_max
+                                   ? -std::numeric_limits<float>::infinity()
+                                   : scaled_min;
+      const float output_max = scaled_min == scaled_max
+                                   ? +std::numeric_limits<float>::infinity()
+                                   : scaled_max;
 
       // Clamp reference results.
       for (float& value : output_ref) {
@@ -218,28 +214,32 @@ class DynamicFullyConnectedOperatorTester {
       ASSERT_NE(nullptr, dynamic_fully_connected_op);
 
       // Smart pointer to automatically delete dynamic_fully_connected_op.
-      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_dynamic_fully_connected_op(
-        dynamic_fully_connected_op, xnn_delete_operator);
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+          auto_dynamic_fully_connected_op(dynamic_fully_connected_op,
+                                          xnn_delete_operator);
 
       size_t workspace_size = 0;
       size_t workspace_alignment = 0;
       ASSERT_EQ(
-        xnn_status_success,
-        xnn_reshape_dynamic_fully_connected_nc_f16(
-          dynamic_fully_connected_op, batch_size(), input_channels(), output_channels(), input_stride(),
-          output_stride(), &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
+          xnn_status_success,
+          xnn_reshape_dynamic_fully_connected_nc_f16(
+              dynamic_fully_connected_op, batch_size(), input_channels(),
+              output_channels(), input_stride(), output_stride(),
+              &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
       ASSERT_NE(workspace_size, 0);
       ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
       xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
       // TODO(b/372731180): This should probably be initialized by the operator.
       std::fill(workspace.begin(), workspace.end(), 0);
 
-      ASSERT_EQ(
-        xnn_status_success, xnn_setup_dynamic_fully_connected_nc_f16(
-                              dynamic_fully_connected_op, workspace.data(), input.data(), kernel.data(),
-                              has_bias() ? bias.data() : nullptr, output.data()));
+      ASSERT_EQ(xnn_status_success,
+                xnn_setup_dynamic_fully_connected_nc_f16(
+                    dynamic_fully_connected_op, workspace.data(), input.data(),
+                    kernel.data(), has_bias() ? bias.data() : nullptr,
+                    output.data()));
 
-      ASSERT_EQ(xnn_status_success, xnn_run_operator(dynamic_fully_connected_op, /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(dynamic_fully_connected_op,
+                                                     /*threadpool=*/nullptr));
 
       VerifyF16(output, output_ref, output_max, output_min);
     }
@@ -247,19 +247,17 @@ class DynamicFullyConnectedOperatorTester {
 
   void VerifyF16(const xnnpack::Buffer<xnn_float16>& output,
                  const xnnpack::Buffer<float>& output_ref,
-                 const float output_max,
-                 const float output_min) const {
+                 const float output_max, const float output_min) const {
     for (size_t i = 0; i < batch_size(); i++) {
       for (size_t c = 0; c < output_channels(); c++) {
         ASSERT_LE(output[i * output_stride() + c], output_max)
-          << "batch index = " << i << ", channel = " << c;
+            << "batch index = " << i << ", channel = " << c;
         ASSERT_GE(output[i * output_stride() + c], output_min)
-          << "batch index = " << i << ", channel = " << c;
-        ASSERT_NEAR(
-            output_ref[i * output_channels() + c],
-            output[i * output_stride() + c],
-            1.0e-2f * std::abs(output_ref[i * output_channels() + c]))
-          << "batch index = " << i << ", channel = " << c;
+            << "batch index = " << i << ", channel = " << c;
+        ASSERT_NEAR(output_ref[i * output_channels() + c],
+                    output[i * output_stride() + c],
+                    1.0e-2f * std::abs(output_ref[i * output_channels() + c]))
+            << "batch index = " << i << ", channel = " << c;
       }
     }
   }
@@ -269,15 +267,18 @@ class DynamicFullyConnectedOperatorTester {
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
     xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
-      (batch_size() - 1) * input_stride() + input_channels());
+                                 (batch_size() - 1) * input_stride() +
+                                 input_channels());
     xnnpack::Buffer<float> kernel(output_channels() * input_channels());
     xnnpack::Buffer<float> bias(output_channels());
-    xnnpack::Buffer<float> output((batch_size() - 1) * output_stride() + output_channels());
+    xnnpack::Buffer<float> output((batch_size() - 1) * output_stride() +
+                                  output_channels());
     xnnpack::Buffer<float> output_ref(batch_size() * output_channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
+      std::generate(kernel.begin(), kernel.end(),
+                    [&]() { return f32dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
 
       // Compute reference results.
@@ -295,7 +296,8 @@ class DynamicFullyConnectedOperatorTester {
           for (size_t oc = 0; oc < output_channels(); oc++) {
             for (size_t ic = 0; ic < input_channels(); ic++) {
               output_ref[i * output_channels() + oc] +=
-                  input[i * input_stride() + ic] * kernel[ic * output_channels() + oc];
+                  input[i * input_stride() + ic] *
+                  kernel[ic * output_channels() + oc];
             }
           }
         }
@@ -304,20 +306,28 @@ class DynamicFullyConnectedOperatorTester {
           for (size_t oc = 0; oc < output_channels(); oc++) {
             for (size_t ic = 0; ic < input_channels(); ic++) {
               output_ref[i * output_channels() + oc] +=
-                  input[i * input_stride() + ic] * kernel[oc * input_channels() + ic];
+                  input[i * input_stride() + ic] *
+                  kernel[oc * input_channels() + ic];
             }
           }
         }
       }
 
       // Compute clamping parameters.
-      const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
-      const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_min =
+          *std::min_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_max =
+          *std::max_element(output_ref.cbegin(), output_ref.cend());
 
-      const float output_min = qmin() == 0 ? -std::numeric_limits<float>::infinity() :
-        accumulated_min + (accumulated_max - accumulated_min) / 255.0f * float(qmin());
-      const float output_max = qmax() == 255 ? std::numeric_limits<float>::infinity() :
-        accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax());
+      const float output_min =
+          qmin() == 0 ? -std::numeric_limits<float>::infinity()
+                      : accumulated_min + (accumulated_max - accumulated_min) /
+                                              255.0f * float(qmin());
+      const float output_max =
+          qmax() == 255
+              ? std::numeric_limits<float>::infinity()
+              : accumulated_max - (accumulated_max - accumulated_min) / 255.0f *
+                                      float(255 - qmax());
 
       // Clamp reference results.
       for (float& value : output_ref) {
@@ -337,38 +347,40 @@ class DynamicFullyConnectedOperatorTester {
       ASSERT_NE(nullptr, dynamic_fully_connected_op);
 
       // Smart pointer to automatically delete dynamic_fully_connected_op.
-      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_dynamic_fully_connected_op(
-        dynamic_fully_connected_op, xnn_delete_operator);
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+          auto_dynamic_fully_connected_op(dynamic_fully_connected_op,
+                                          xnn_delete_operator);
 
       size_t workspace_size = 0;
       size_t workspace_alignment = 0;
       ASSERT_EQ(
-        xnn_status_success,
-        xnn_reshape_dynamic_fully_connected_nc_f32(
-          dynamic_fully_connected_op, batch_size(), input_channels(), output_channels(), input_stride(),
-          output_stride(), &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
+          xnn_status_success,
+          xnn_reshape_dynamic_fully_connected_nc_f32(
+              dynamic_fully_connected_op, batch_size(), input_channels(),
+              output_channels(), input_stride(), output_stride(),
+              &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
       ASSERT_NE(workspace_size, 0);
       ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
       xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
       // TODO(b/372731180): This should probably be initialized by the operator.
       std::fill(workspace.begin(), workspace.end(), 0);
 
-      ASSERT_EQ(
-        xnn_status_success, xnn_setup_dynamic_fully_connected_nc_f32(
-                              dynamic_fully_connected_op, workspace.data(), input.data(), kernel.data(),
-                              has_bias() ? bias.data() : nullptr, output.data()));
+      ASSERT_EQ(xnn_status_success,
+                xnn_setup_dynamic_fully_connected_nc_f32(
+                    dynamic_fully_connected_op, workspace.data(), input.data(),
+                    kernel.data(), has_bias() ? bias.data() : nullptr,
+                    output.data()));
 
-      ASSERT_EQ(xnn_status_success, xnn_run_operator(dynamic_fully_connected_op, /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(dynamic_fully_connected_op,
+                                                     /*threadpool=*/nullptr));
 
       VerifyF32(output, output_ref, output_max, output_min);
     }
   }
 
   void VerifyF32(const xnnpack::Buffer<float>& output,
-                 const xnnpack::Buffer<float>& output_ref,
-                 float output_max,
-                 float output_min) const
-  {
+                 const xnnpack::Buffer<float>& output_ref, float output_max,
+                 float output_min) const {
     // Verify results.
     for (size_t i = 0; i < batch_size(); i++) {
       for (size_t c = 0; c < output_channels(); c++) {

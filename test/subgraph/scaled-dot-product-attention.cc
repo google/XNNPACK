@@ -34,7 +34,8 @@ class ScaledDotProductAttentionTestBase : public ::testing::Test {
     dim_dist = std::uniform_int_distribution<size_t>(5, 15);
     bernoulli_dist = std::bernoulli_distribution(0.5);
     cap_dist = std::uniform_real_distribution<float>(1.0f, 50.0f);
-    auto shape_dist = std::uniform_int_distribution<size_t>(3, XNN_MAX_TENSOR_DIMS);
+    auto shape_dist =
+        std::uniform_int_distribution<size_t>(3, XNN_MAX_TENSOR_DIMS);
 
     // Query is [..., H, T, C].
     query_dims = RandomShape(shape_dist(rng));
@@ -75,17 +76,21 @@ class ScaledDotProductAttentionTestBase : public ::testing::Test {
     output_dims = query_dims;
     output_dims[output_dims.size() - 1] = value_channels;
 
-    cap_type = bernoulli_dist(rng) ? xnn_attention_logits_cap_type_none : xnn_attention_logits_cap_type_tanh;
+    cap_type = bernoulli_dist(rng) ? xnn_attention_logits_cap_type_none
+                                   : xnn_attention_logits_cap_type_tanh;
     if (cap_type == xnn_attention_logits_cap_type_tanh) {
       cap_params.cap = cap_dist(rng);
     } else {
       cap_params.cap = 0.0f;
     }
 
-    query = std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + NumElements(query_dims));
+    query =
+        std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + NumElements(query_dims));
     key = std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + NumElements(key_dims));
-    value = std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + NumElements(value_dims));
-    scale = std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + NumElements(scale_dims));
+    value =
+        std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + NumElements(value_dims));
+    scale =
+        std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + NumElements(scale_dims));
     mask = std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + NumElements(mask_dims));
     operator_output = std::vector<T>(NumElements(output_dims));
     subgraph_output = std::vector<T>(operator_output.size());
@@ -96,22 +101,17 @@ class ScaledDotProductAttentionTestBase : public ::testing::Test {
    * Also update other private variables to reflect new shapes.
    */
   void ResizeTensors(
-      std::vector<size_t>& query_dims,
-      std::vector<size_t>& key_dims,
-      std::vector<size_t>& value_dims,
-      std::vector<size_t>& mask_dims,
-      std::vector<size_t>& scale_dims,
-      std::vector<size_t>& output_dims,
-      bool resize_operator_output = true,
-      bool multi_query = false){
-
+      std::vector<size_t>& query_dims, std::vector<size_t>& key_dims,
+      std::vector<size_t>& value_dims, std::vector<size_t>& mask_dims,
+      std::vector<size_t>& scale_dims, std::vector<size_t>& output_dims,
+      bool resize_operator_output = true, bool multi_query = false) {
     // Make sure of our assumptions
-    assert (query_dims.size() == 4);
-    assert (key_dims.size() == 4 || key_dims.size() == 3);
-    assert (value_dims.size() == 4 || value_dims.size() == 3);
-    assert (mask_dims.size() == 2);
-    assert (scale_dims.size() == 1);
-    assert (output_dims.size() == 4);
+    assert(query_dims.size() == 4);
+    assert(key_dims.size() == 4 || key_dims.size() == 3);
+    assert(value_dims.size() == 4 || value_dims.size() == 3);
+    assert(mask_dims.size() == 2);
+    assert(scale_dims.size() == 1);
+    assert(output_dims.size() == 4);
 
     batch_size = 1;
     for (size_t i = 0; i + 3 < query_dims.size(); ++i) {
@@ -140,16 +140,15 @@ class ScaledDotProductAttentionTestBase : public ::testing::Test {
     }
   }
 
-  std::vector<size_t> RandomShape(size_t num_dims)
-  {
+  std::vector<size_t> RandomShape(size_t num_dims) {
     std::vector<size_t> dims(num_dims);
     std::generate(dims.begin(), dims.end(), [&] { return dim_dist(rng); });
     return dims;
   }
 
-  size_t NumElements(std::vector<size_t>& dims)
-  {
-    return std::accumulate(dims.begin(), dims.end(), size_t(1), std::multiplies<size_t>());
+  size_t NumElements(std::vector<size_t>& dims) {
+    return std::accumulate(dims.begin(), dims.end(), size_t(1),
+                           std::multiplies<size_t>());
   }
 
   xnnpack::ReplicableRandomDevice rng;
@@ -185,68 +184,71 @@ class ScaledDotProductAttentionTestBase : public ::testing::Test {
   std::vector<T> subgraph_output;
 };
 
-using ScaledDotProductAttentionTestF16 = ScaledDotProductAttentionTestBase<xnn_float16>;
-using ScaledDotProductAttentionTestF32 = ScaledDotProductAttentionTestBase<float>;
+using ScaledDotProductAttentionTestF16 =
+    ScaledDotProductAttentionTestBase<xnn_float16>;
+using ScaledDotProductAttentionTestF32 =
+    ScaledDotProductAttentionTestBase<float>;
 
 TEST_F(ScaledDotProductAttentionTestF16, define) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   xnn_subgraph_t subgraph = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(6, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
 
   uint32_t query_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp16, query_dims.size(), query_dims.data(), nullptr, /*external_id=*/0,
-      XNN_VALUE_FLAG_EXTERNAL_INPUT, &query_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp16, query_dims.size(),
+                              query_dims.data(), nullptr, /*external_id=*/0,
+                              XNN_VALUE_FLAG_EXTERNAL_INPUT, &query_id));
   ASSERT_NE(query_id, XNN_INVALID_VALUE_ID);
 
   uint32_t key_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp16, key_dims.size(), key_dims.data(), nullptr, /*external_id=*/1,
-      XNN_VALUE_FLAG_EXTERNAL_INPUT, &key_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp16, key_dims.size(),
+                              key_dims.data(), nullptr, /*external_id=*/1,
+                              XNN_VALUE_FLAG_EXTERNAL_INPUT, &key_id));
   ASSERT_NE(key_id, XNN_INVALID_VALUE_ID);
 
   uint32_t value_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp16, value_dims.size(), value_dims.data(), nullptr, /*external_id=*/2,
-      XNN_VALUE_FLAG_EXTERNAL_INPUT, &value_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp16, value_dims.size(),
+                              value_dims.data(), nullptr, /*external_id=*/2,
+                              XNN_VALUE_FLAG_EXTERNAL_INPUT, &value_id));
   ASSERT_NE(value_id, XNN_INVALID_VALUE_ID);
 
   uint32_t scale_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp16, scale_dims.size(), scale_dims.data(), nullptr, /*external_id=*/3,
-      XNN_VALUE_FLAG_EXTERNAL_INPUT, &scale_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp16, scale_dims.size(),
+                              scale_dims.data(), nullptr, /*external_id=*/3,
+                              XNN_VALUE_FLAG_EXTERNAL_INPUT, &scale_id));
   ASSERT_NE(scale_id, XNN_INVALID_VALUE_ID);
 
   uint32_t mask_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp16, mask_dims.size(), mask_dims.data(), nullptr, /*external_id=*/4,
-      XNN_VALUE_FLAG_EXTERNAL_INPUT, &mask_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp16, mask_dims.size(),
+                              mask_dims.data(), nullptr, /*external_id=*/4,
+                              XNN_VALUE_FLAG_EXTERNAL_INPUT, &mask_id));
   ASSERT_NE(mask_id, XNN_INVALID_VALUE_ID);
 
   uint32_t output_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp16, output_dims.size(), output_dims.data(), nullptr, /*external_id=*/5,
-      XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp16, output_dims.size(),
+                              output_dims.data(), nullptr, /*external_id=*/5,
+                              XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
 
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_scaled_dot_product_attention(
-      subgraph, cap_type, &cap_params, query_id, key_id, value_id, scale_id, mask_id, output_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_scaled_dot_product_attention(
+                subgraph, cap_type, &cap_params, query_id, key_id, value_id,
+                scale_id, mask_id, output_id, /*flags=*/0));
 
   EXPECT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
@@ -260,7 +262,8 @@ TEST_F(ScaledDotProductAttentionTestF16, define) {
   EXPECT_EQ(node->num_outputs, 1);
   EXPECT_EQ(node->outputs[0], output_id);
   EXPECT_EQ(node->params.scaled_dot_product_attention.cap_type, cap_type);
-  EXPECT_EQ(node->params.scaled_dot_product_attention.cap_tanh_params.cap, cap_params.cap);
+  EXPECT_EQ(node->params.scaled_dot_product_attention.cap_tanh_params.cap,
+            cap_params.cap);
   EXPECT_EQ(node->flags, 0);
 }
 
@@ -269,60 +272,61 @@ TEST_F(ScaledDotProductAttentionTestF32, define) {
 
   xnn_subgraph_t subgraph = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(6, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
 
   uint32_t query_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, query_dims.size(), query_dims.data(), nullptr, /*external_id=*/0,
-      XNN_VALUE_FLAG_EXTERNAL_INPUT, &query_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, query_dims.size(),
+                              query_dims.data(), nullptr, /*external_id=*/0,
+                              XNN_VALUE_FLAG_EXTERNAL_INPUT, &query_id));
   ASSERT_NE(query_id, XNN_INVALID_VALUE_ID);
 
   uint32_t key_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, key_dims.size(), key_dims.data(), nullptr, /*external_id=*/1,
-      XNN_VALUE_FLAG_EXTERNAL_INPUT, &key_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, key_dims.size(),
+                              key_dims.data(), nullptr, /*external_id=*/1,
+                              XNN_VALUE_FLAG_EXTERNAL_INPUT, &key_id));
   ASSERT_NE(key_id, XNN_INVALID_VALUE_ID);
 
   uint32_t value_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, value_dims.size(), value_dims.data(), nullptr, /*external_id=*/2,
-      XNN_VALUE_FLAG_EXTERNAL_INPUT, &value_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, value_dims.size(),
+                              value_dims.data(), nullptr, /*external_id=*/2,
+                              XNN_VALUE_FLAG_EXTERNAL_INPUT, &value_id));
   ASSERT_NE(value_id, XNN_INVALID_VALUE_ID);
 
   uint32_t scale_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, scale_dims.size(), scale_dims.data(), nullptr, /*external_id=*/3,
-      XNN_VALUE_FLAG_EXTERNAL_INPUT, &scale_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, scale_dims.size(),
+                              scale_dims.data(), nullptr, /*external_id=*/3,
+                              XNN_VALUE_FLAG_EXTERNAL_INPUT, &scale_id));
   ASSERT_NE(scale_id, XNN_INVALID_VALUE_ID);
 
   uint32_t mask_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, mask_dims.size(), mask_dims.data(), nullptr, /*external_id=*/4,
-      XNN_VALUE_FLAG_EXTERNAL_INPUT, &mask_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, mask_dims.size(),
+                              mask_dims.data(), nullptr, /*external_id=*/4,
+                              XNN_VALUE_FLAG_EXTERNAL_INPUT, &mask_id));
   ASSERT_NE(mask_id, XNN_INVALID_VALUE_ID);
 
   uint32_t output_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr, /*external_id=*/5,
-      XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, output_dims.size(),
+                              output_dims.data(), nullptr, /*external_id=*/5,
+                              XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
 
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_scaled_dot_product_attention(
-      subgraph, cap_type, &cap_params, query_id, key_id, value_id, scale_id, mask_id, output_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_scaled_dot_product_attention(
+                subgraph, cap_type, &cap_params, query_id, key_id, value_id,
+                scale_id, mask_id, output_id, /*flags=*/0));
 
   EXPECT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
@@ -336,7 +340,8 @@ TEST_F(ScaledDotProductAttentionTestF32, define) {
   EXPECT_EQ(node->num_outputs, 1);
   EXPECT_EQ(node->outputs[0], output_id);
   EXPECT_EQ(node->params.scaled_dot_product_attention.cap_type, cap_type);
-  EXPECT_EQ(node->params.scaled_dot_product_attention.cap_tanh_params.cap, cap_params.cap);
+  EXPECT_EQ(node->params.scaled_dot_product_attention.cap_tanh_params.cap,
+            cap_params.cap);
   EXPECT_EQ(node->flags, 0);
 }
 
@@ -351,8 +356,10 @@ TEST_F(ScaledDotProductAttentionTestF16, matches_operator_api) {
   std::generate(mask.begin(), mask.end(), [&]() { return f32dist(rng); });
 
   // Call operator API.
-  const xnn_status status = xnn_create_scaled_dot_product_attention_nhtc_f16(cap_type, &cap_params, /*flags=*/0, &op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
+  const xnn_status status = xnn_create_scaled_dot_product_attention_nhtc_f16(
+      cap_type, &cap_params, /*flags=*/0, &op);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
@@ -363,92 +370,98 @@ TEST_F(ScaledDotProductAttentionTestF16, matches_operator_api) {
 
   size_t workspace_size = 0;
   size_t workspace_alignment = 0;
-  ASSERT_EQ(
-    xnn_status_success, xnn_reshape_scaled_dot_product_attention_nhtc_f16(
-                          op, batch_size, query_heads, query_tokens, key_value_heads, key_value_tokens,
-                          channels, value_channels,
-                          &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_scaled_dot_product_attention_nhtc_f16(
+                op, batch_size, query_heads, query_tokens, key_value_heads,
+                key_value_tokens, channels, value_channels, &workspace_size,
+                &workspace_alignment, /*threadpool=*/nullptr));
   ASSERT_NE(workspace_size, 0);
   ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_setup_scaled_dot_product_attention_nhtc_f16(op, workspace.data(), query.data(), key.data(), value.data(),
-                                                    scale.data(), mask.data(), operator_output.data()));
+  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(
+      workspace_size);
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_scaled_dot_product_attention_nhtc_f16(
+                op, workspace.data(), query.data(), key.data(), value.data(),
+                scale.data(), mask.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
   // Call subgraph API.
   xnn_subgraph_t subgraph = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(6, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
 
   uint32_t query_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp16, query_dims.size(), query_dims.data(), nullptr, /*external_id=*/0,
-      XNN_VALUE_FLAG_EXTERNAL_INPUT, &query_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp16, query_dims.size(),
+                              query_dims.data(), nullptr, /*external_id=*/0,
+                              XNN_VALUE_FLAG_EXTERNAL_INPUT, &query_id));
   ASSERT_NE(query_id, XNN_INVALID_VALUE_ID);
 
   uint32_t key_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp16, key_dims.size(), key_dims.data(), nullptr, /*external_id=*/1,
-      XNN_VALUE_FLAG_EXTERNAL_INPUT, &key_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp16, key_dims.size(),
+                              key_dims.data(), nullptr, /*external_id=*/1,
+                              XNN_VALUE_FLAG_EXTERNAL_INPUT, &key_id));
   ASSERT_NE(key_id, XNN_INVALID_VALUE_ID);
 
   uint32_t value_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp16, value_dims.size(), value_dims.data(), nullptr, /*external_id=*/2,
-      XNN_VALUE_FLAG_EXTERNAL_INPUT, &value_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp16, value_dims.size(),
+                              value_dims.data(), nullptr, /*external_id=*/2,
+                              XNN_VALUE_FLAG_EXTERNAL_INPUT, &value_id));
   ASSERT_NE(value_id, XNN_INVALID_VALUE_ID);
 
   uint32_t scale_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp16, scale_dims.size(), scale_dims.data(), nullptr, /*external_id=*/3,
-      XNN_VALUE_FLAG_EXTERNAL_INPUT, &scale_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp16, scale_dims.size(),
+                              scale_dims.data(), nullptr, /*external_id=*/3,
+                              XNN_VALUE_FLAG_EXTERNAL_INPUT, &scale_id));
   ASSERT_NE(scale_id, XNN_INVALID_VALUE_ID);
 
   uint32_t mask_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp16, mask_dims.size(), mask_dims.data(), nullptr, /*external_id=*/4,
-      XNN_VALUE_FLAG_EXTERNAL_INPUT, &mask_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp16, mask_dims.size(),
+                              mask_dims.data(), nullptr, /*external_id=*/4,
+                              XNN_VALUE_FLAG_EXTERNAL_INPUT, &mask_id));
   ASSERT_NE(mask_id, XNN_INVALID_VALUE_ID);
 
   uint32_t output_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp16, output_dims.size(), output_dims.data(), nullptr, /*external_id=*/5,
-      XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp16, output_dims.size(),
+                              output_dims.data(), nullptr, /*external_id=*/5,
+                              XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
 
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_scaled_dot_product_attention(
-      subgraph, cap_type, &cap_params, query_id, key_id, value_id, scale_id, mask_id, output_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_scaled_dot_product_attention(
+                subgraph, cap_type, &cap_params, query_id, key_id, value_id,
+                scale_id, mask_id, output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_runtime_v3(subgraph, nullptr, nullptr,
+                                  xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
   std::array<xnn_external_value, 6> external = {
-    xnn_external_value{query_id, query.data()},
-    xnn_external_value{key_id, key.data()},
-    xnn_external_value{value_id, value.data()},
-    xnn_external_value{scale_id, scale.data()},
-    xnn_external_value{mask_id, mask.data()},
-    xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
+      xnn_external_value{query_id, query.data()},
+      xnn_external_value{key_id, key.data()},
+      xnn_external_value{value_id, value.data()},
+      xnn_external_value{scale_id, scale.data()},
+      xnn_external_value{mask_id, mask.data()},
+      xnn_external_value{output_id, subgraph_output.data()}};
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
@@ -468,8 +481,10 @@ TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api) {
   std::generate(mask.begin(), mask.end(), [&]() { return f32dist(rng); });
 
   // Call operator API.
-  const xnn_status status = xnn_create_scaled_dot_product_attention_nhtc_f32(cap_type, &cap_params, /*flags=*/0, &op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
+  const xnn_status status = xnn_create_scaled_dot_product_attention_nhtc_f32(
+      cap_type, &cap_params, /*flags=*/0, &op);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
@@ -480,92 +495,98 @@ TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api) {
 
   size_t workspace_size = 0;
   size_t workspace_alignment = 0;
-  ASSERT_EQ(
-    xnn_status_success, xnn_reshape_scaled_dot_product_attention_nhtc_f32(
-                          op, batch_size, query_heads, query_tokens, key_value_heads, key_value_tokens,
-                          channels, value_channels,
-                          &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_scaled_dot_product_attention_nhtc_f32(
+                op, batch_size, query_heads, query_tokens, key_value_heads,
+                key_value_tokens, channels, value_channels, &workspace_size,
+                &workspace_alignment, /*threadpool=*/nullptr));
   ASSERT_NE(workspace_size, 0);
   ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_setup_scaled_dot_product_attention_nhtc_f32(op, workspace.data(), query.data(), key.data(), value.data(),
-                                                    scale.data(), mask.data(), operator_output.data()));
+  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(
+      workspace_size);
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_scaled_dot_product_attention_nhtc_f32(
+                op, workspace.data(), query.data(), key.data(), value.data(),
+                scale.data(), mask.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
   // Call subgraph API.
   xnn_subgraph_t subgraph = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(6, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
 
   uint32_t query_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, query_dims.size(), query_dims.data(), nullptr, /*external_id=*/0,
-      XNN_VALUE_FLAG_EXTERNAL_INPUT, &query_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, query_dims.size(),
+                              query_dims.data(), nullptr, /*external_id=*/0,
+                              XNN_VALUE_FLAG_EXTERNAL_INPUT, &query_id));
   ASSERT_NE(query_id, XNN_INVALID_VALUE_ID);
 
   uint32_t key_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, key_dims.size(), key_dims.data(), nullptr, /*external_id=*/1,
-      XNN_VALUE_FLAG_EXTERNAL_INPUT, &key_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, key_dims.size(),
+                              key_dims.data(), nullptr, /*external_id=*/1,
+                              XNN_VALUE_FLAG_EXTERNAL_INPUT, &key_id));
   ASSERT_NE(key_id, XNN_INVALID_VALUE_ID);
 
   uint32_t value_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, value_dims.size(), value_dims.data(), nullptr, /*external_id=*/2,
-      XNN_VALUE_FLAG_EXTERNAL_INPUT, &value_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, value_dims.size(),
+                              value_dims.data(), nullptr, /*external_id=*/2,
+                              XNN_VALUE_FLAG_EXTERNAL_INPUT, &value_id));
   ASSERT_NE(value_id, XNN_INVALID_VALUE_ID);
 
   uint32_t scale_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, scale_dims.size(), scale_dims.data(), nullptr, /*external_id=*/3,
-      XNN_VALUE_FLAG_EXTERNAL_INPUT, &scale_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, scale_dims.size(),
+                              scale_dims.data(), nullptr, /*external_id=*/3,
+                              XNN_VALUE_FLAG_EXTERNAL_INPUT, &scale_id));
   ASSERT_NE(scale_id, XNN_INVALID_VALUE_ID);
 
   uint32_t mask_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, mask_dims.size(), mask_dims.data(), nullptr, /*external_id=*/4,
-      XNN_VALUE_FLAG_EXTERNAL_INPUT, &mask_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, mask_dims.size(),
+                              mask_dims.data(), nullptr, /*external_id=*/4,
+                              XNN_VALUE_FLAG_EXTERNAL_INPUT, &mask_id));
   ASSERT_NE(mask_id, XNN_INVALID_VALUE_ID);
 
   uint32_t output_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr, /*external_id=*/5,
-      XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, output_dims.size(),
+                              output_dims.data(), nullptr, /*external_id=*/5,
+                              XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
 
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_scaled_dot_product_attention(
-      subgraph, cap_type, &cap_params, query_id, key_id, value_id, scale_id, mask_id, output_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_scaled_dot_product_attention(
+                subgraph, cap_type, &cap_params, query_id, key_id, value_id,
+                scale_id, mask_id, output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_runtime_v3(subgraph, nullptr, nullptr,
+                                  xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
   std::array<xnn_external_value, 6> external = {
-    xnn_external_value{query_id, query.data()},
-    xnn_external_value{key_id, key.data()},
-    xnn_external_value{value_id, value.data()},
-    xnn_external_value{scale_id, scale.data()},
-    xnn_external_value{mask_id, mask.data()},
-    xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
+      xnn_external_value{query_id, query.data()},
+      xnn_external_value{key_id, key.data()},
+      xnn_external_value{value_id, value.data()},
+      xnn_external_value{scale_id, scale.data()},
+      xnn_external_value{mask_id, mask.data()},
+      xnn_external_value{output_id, subgraph_output.data()}};
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
@@ -577,19 +598,19 @@ TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api) {
   }
 }
 
-TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api_dynamic_shape_no_reallocation)
-{
+TEST_F(ScaledDotProductAttentionTestF32,
+       matches_operator_api_dynamic_shape_no_reallocation) {
   /*
-   * This test makes sure the subgraph is able to match the operator API's with dynamically changing shapes.
-   * In this test, we will
+   * This test makes sure the subgraph is able to match the operator API's with
+   * dynamically changing shapes. In this test, we will
    *   1. Prepare a set of input tensors for the operator API.
    *   2. Run the operator API, and save the output tensor.
-   *   3. Prepare an equivalent single node subgraph but with larger input shapes than ones used for the operator API in
-   * step 1.
+   *   3. Prepare an equivalent single node subgraph but with larger input
+   * shapes than ones used for the operator API in step 1.
    *   4. Run the subgraph, and make sure it works.
    *   5. Reshape the external inputs to match shapes in step 1.
-   *   6. Run the subgraph again, and make sure it produces similar output as the operator API, without requiring any
-   * reallocation after step 4.
+   *   6. Run the subgraph again, and make sure it produces similar output as
+   * the operator API, without requiring any reallocation after step 4.
    */
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
@@ -609,7 +630,8 @@ TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api_dynamic_shape_no_r
   std::vector<size_t> op_output_dims = {N, H, Tok, D};
 
   // Prepare the inputs and outputs for the operator API.
-  ResizeTensors(op_query_dims, op_key_dims, op_value_dims, op_mask_dims, op_scale_dims, op_output_dims);
+  ResizeTensors(op_query_dims, op_key_dims, op_value_dims, op_mask_dims,
+                op_scale_dims, op_output_dims);
 
   std::generate(query.begin(), query.end(), [&]() { return f32dist(rng); });
   std::generate(key.begin(), key.end(), [&]() { return f32dist(rng); });
@@ -619,8 +641,10 @@ TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api_dynamic_shape_no_r
 
   // Call operator API.
   xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_scaled_dot_product_attention_nhtc_f32(cap_type, &cap_params, /*flags=*/0, &op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
+  const xnn_status status = xnn_create_scaled_dot_product_attention_nhtc_f32(
+      cap_type, &cap_params, /*flags=*/0, &op);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
@@ -631,23 +655,26 @@ TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api_dynamic_shape_no_r
 
   size_t workspace_size = 0;
   size_t workspace_alignment = 0;
-  ASSERT_EQ(
-    xnn_status_success, xnn_reshape_scaled_dot_product_attention_nhtc_f32(
-                          op, batch_size, query_heads, query_tokens, key_value_heads, key_value_tokens, channels,
-                          value_channels, &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_scaled_dot_product_attention_nhtc_f32(
+                op, batch_size, query_heads, query_tokens, key_value_heads,
+                key_value_tokens, channels, value_channels, &workspace_size,
+                &workspace_alignment, /*threadpool=*/nullptr));
   ASSERT_NE(workspace_size, 0);
   ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_setup_scaled_dot_product_attention_nhtc_f32(
-      op, workspace.data(), query.data(), key.data(), value.data(), scale.data(), mask.data(), operator_output.data()));
+  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(
+      workspace_size);
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_scaled_dot_product_attention_nhtc_f32(
+                op, workspace.data(), query.data(), key.data(), value.data(),
+                scale.data(), mask.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
   // Prepare input shapes for the Subgraph API.
-  // Make the input/output tensors shapes to be larger than the actual input/output tensors used for the operator API.
+  // Make the input/output tensors shapes to be larger than the actual
+  // input/output tensors used for the operator API.
   size_t N2 = N + 1;      // batch size
   size_t H2 = H + 1;      // num heads
   size_t Tok2 = Tok + 2;  // tokens
@@ -662,114 +689,139 @@ TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api_dynamic_shape_no_r
   std::vector<size_t> subgraph_mask_dims = {Tok2, U2};
   std::vector<size_t> subgraph_output_dims = {N2, H2, Tok2, D2};
 
-  // Resize the internal member tensors to match the new larger shapes (padding zeros).
-  // We don't want to modify the operator output tensor anymore.
-  ResizeTensors(
-    subgraph_query_dims, subgraph_key_dims, subgraph_value_dims, subgraph_mask_dims, subgraph_scale_dims,
-    subgraph_output_dims, /*resize_operator_output=*/false);
+  // Resize the internal member tensors to match the new larger shapes (padding
+  // zeros). We don't want to modify the operator output tensor anymore.
+  ResizeTensors(subgraph_query_dims, subgraph_key_dims, subgraph_value_dims,
+                subgraph_mask_dims, subgraph_scale_dims, subgraph_output_dims,
+                /*resize_operator_output=*/false);
 
   xnn_subgraph_t subgraph = nullptr;
 
   // Call subgraph API.
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(6, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
 
   uint32_t query_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, subgraph_query_dims.size(), subgraph_query_dims.data(), nullptr,
-                          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &query_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, subgraph_query_dims.size(),
+                subgraph_query_dims.data(), nullptr,
+                /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &query_id));
   ASSERT_NE(query_id, XNN_INVALID_VALUE_ID);
 
   uint32_t key_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, subgraph_key_dims.size(), subgraph_key_dims.data(), nullptr,
-                          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_INPUT, &key_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, subgraph_key_dims.size(),
+                subgraph_key_dims.data(), nullptr,
+                /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_INPUT, &key_id));
   ASSERT_NE(key_id, XNN_INVALID_VALUE_ID);
 
   uint32_t value_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, subgraph_value_dims.size(), subgraph_value_dims.data(), nullptr,
-                          /*external_id=*/2, XNN_VALUE_FLAG_EXTERNAL_INPUT, &value_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, subgraph_value_dims.size(),
+                subgraph_value_dims.data(), nullptr,
+                /*external_id=*/2, XNN_VALUE_FLAG_EXTERNAL_INPUT, &value_id));
   ASSERT_NE(value_id, XNN_INVALID_VALUE_ID);
 
   uint32_t scale_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, subgraph_scale_dims.size(), subgraph_scale_dims.data(), nullptr,
-                          /*external_id=*/3, XNN_VALUE_FLAG_EXTERNAL_INPUT, &scale_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, subgraph_scale_dims.size(),
+                subgraph_scale_dims.data(), nullptr,
+                /*external_id=*/3, XNN_VALUE_FLAG_EXTERNAL_INPUT, &scale_id));
   ASSERT_NE(scale_id, XNN_INVALID_VALUE_ID);
 
   uint32_t mask_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, subgraph_mask_dims.size(), subgraph_mask_dims.data(), nullptr,
-                          /*external_id=*/4, XNN_VALUE_FLAG_EXTERNAL_INPUT, &mask_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, subgraph_mask_dims.size(),
+                subgraph_mask_dims.data(), nullptr,
+                /*external_id=*/4, XNN_VALUE_FLAG_EXTERNAL_INPUT, &mask_id));
   ASSERT_NE(mask_id, XNN_INVALID_VALUE_ID);
 
   uint32_t output_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, subgraph_output_dims.size(), subgraph_output_dims.data(),
-                          nullptr, /*external_id=*/5, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, subgraph_output_dims.size(),
+                subgraph_output_dims.data(), nullptr, /*external_id=*/5,
+                XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
 
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_scaled_dot_product_attention(
-      subgraph, cap_type, &cap_params, query_id, key_id, value_id, scale_id, mask_id, output_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_scaled_dot_product_attention(
+                subgraph, cap_type, &cap_params, query_id, key_id, value_id,
+                scale_id, mask_id, output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_runtime_v3(subgraph, nullptr, nullptr,
+                                  xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
 
   std::array<xnn_external_value, 6> external = {
-    xnn_external_value{query_id, query.data()}, xnn_external_value{key_id, key.data()},
-    xnn_external_value{value_id, value.data()}, xnn_external_value{scale_id, scale.data()},
-    xnn_external_value{mask_id, mask.data()},   xnn_external_value{output_id, subgraph_output.data()}};
+      xnn_external_value{query_id, query.data()},
+      xnn_external_value{key_id, key.data()},
+      xnn_external_value{value_id, value.data()},
+      xnn_external_value{scale_id, scale.data()},
+      xnn_external_value{mask_id, mask.data()},
+      xnn_external_value{output_id, subgraph_output.data()}};
 
   const struct xnn_node* node = &subgraph->nodes[0];
   // Since this is before setup, expect it to require reallocation
-  ASSERT_EQ(
-    xnn_status_reallocation_required,
-    node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, nullptr /* thradpool*/));
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
+  ASSERT_EQ(xnn_status_reallocation_required,
+            node->reshape(&runtime->opdata[0], runtime->values,
+                          runtime->num_values, nullptr /* thradpool*/));
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
-  // Reshape the external tensors to the subgraph with the same shape as the ones used in the
-  // operator API, which are smaller than the ones supplied at subgraph creation time.
-  ASSERT_EQ(
-    xnn_status_success, xnn_reshape_external_value(runtime, query_id, op_query_dims.size(), op_query_dims.data()));
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, key_id, op_key_dims.size(), op_key_dims.data()));
-  ASSERT_EQ(
-    xnn_status_success, xnn_reshape_external_value(runtime, value_id, op_value_dims.size(), op_value_dims.data()));
-  ASSERT_EQ(
-    xnn_status_success, xnn_reshape_external_value(runtime, scale_id, op_scale_dims.size(), op_scale_dims.data()));
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, mask_id, op_mask_dims.size(), op_mask_dims.data()));
-  ASSERT_EQ(
-    xnn_status_success, xnn_reshape_external_value(runtime, output_id, op_output_dims.size(), op_output_dims.data()));
+  // Reshape the external tensors to the subgraph with the same shape as the
+  // ones used in the operator API, which are smaller than the ones supplied at
+  // subgraph creation time.
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_external_value(runtime, query_id, op_query_dims.size(),
+                                       op_query_dims.data()));
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_external_value(runtime, key_id, op_key_dims.size(),
+                                       op_key_dims.data()));
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_external_value(runtime, value_id, op_value_dims.size(),
+                                       op_value_dims.data()));
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_external_value(runtime, scale_id, op_scale_dims.size(),
+                                       op_scale_dims.data()));
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_external_value(runtime, mask_id, op_mask_dims.size(),
+                                       op_mask_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(
+                                    runtime, output_id, op_output_dims.size(),
+                                    op_output_dims.data()));
 
   // Resize again to remove those extra elements we added earlier
-  ResizeTensors(
-    op_query_dims, op_key_dims, op_value_dims, op_mask_dims, op_scale_dims, op_output_dims,
-    /*resize_output_tensor*/ false);
+  ResizeTensors(op_query_dims, op_key_dims, op_value_dims, op_mask_dims,
+                op_scale_dims, op_output_dims,
+                /*resize_output_tensor*/ false);
 
   // No reallocation since we should require less memory
-  ASSERT_EQ(
-    xnn_status_success,
-    node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, nullptr /* thradpool*/));
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
+  ASSERT_EQ(xnn_status_success,
+            node->reshape(&runtime->opdata[0], runtime->values,
+                          runtime->num_values, nullptr /* thradpool*/));
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check output shape.
   size_t observed_output_num_dims = 0;
   std::vector<size_t> observed_output_dims(XNN_MAX_TENSOR_DIMS, 0);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_get_external_value_shape(runtime, output_id, &observed_output_num_dims, observed_output_dims.data()));
+  ASSERT_EQ(xnn_status_success,
+            xnn_get_external_value_shape(runtime, output_id,
+                                         &observed_output_num_dims,
+                                         observed_output_dims.data()));
   ASSERT_EQ(op_output_dims.size(), observed_output_num_dims);
   for (size_t i = 0; i < observed_output_num_dims; i++) {
     ASSERT_EQ(op_output_dims[i], observed_output_dims[i]);
@@ -784,19 +836,19 @@ TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api_dynamic_shape_no_r
   }
 }
 
-TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api_dynamic_shape_requires_reallocation)
-{
+TEST_F(ScaledDotProductAttentionTestF32,
+       matches_operator_api_dynamic_shape_requires_reallocation) {
   /*
-   * This test makes sure the subgraph is able to match the operator API's with dynamically changing shapes.
-   * In this test, we will
+   * This test makes sure the subgraph is able to match the operator API's with
+   * dynamically changing shapes. In this test, we will
    *   1. Prepare a set of input tensors for the operator API.
    *   2. Run the operator API, and save the output tensor.
-   *   3. Prepare an equivalent single node subgraph but with smaller shapes than the ones used for the operator API in
-   * step 1.
+   *   3. Prepare an equivalent single node subgraph but with smaller shapes
+   * than the ones used for the operator API in step 1.
    *   4. Run the subgraph, and make sure it works.
    *   5. Reshape the external inputs to match shapes in step 1.
-   *   6. Run the subgraph again, and make sure it produces similar output as the operator API, with requiring memory
-   * reallocation.
+   *   6. Run the subgraph again, and make sure it produces similar output as
+   * the operator API, with requiring memory reallocation.
    */
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
@@ -816,7 +868,8 @@ TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api_dynamic_shape_requ
   std::vector<size_t> op_output_dims = {N, H, Tok, D};
 
   // Prepare the inputs and outputs for both operator and subgraph
-  ResizeTensors(op_query_dims, op_key_dims, op_value_dims, op_mask_dims, op_scale_dims, op_output_dims);
+  ResizeTensors(op_query_dims, op_key_dims, op_value_dims, op_mask_dims,
+                op_scale_dims, op_output_dims);
 
   std::generate(query.begin(), query.end(), [&]() { return f32dist(rng); });
   std::generate(key.begin(), key.end(), [&]() { return f32dist(rng); });
@@ -826,8 +879,10 @@ TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api_dynamic_shape_requ
 
   // Call operator API.
   xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_scaled_dot_product_attention_nhtc_f32(cap_type, &cap_params, /*flags=*/0, &op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
+  const xnn_status status = xnn_create_scaled_dot_product_attention_nhtc_f32(
+      cap_type, &cap_params, /*flags=*/0, &op);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
@@ -838,23 +893,26 @@ TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api_dynamic_shape_requ
 
   size_t workspace_size = 0;
   size_t workspace_alignment = 0;
-  ASSERT_EQ(
-    xnn_status_success, xnn_reshape_scaled_dot_product_attention_nhtc_f32(
-                          op, batch_size, query_heads, query_tokens, key_value_heads, key_value_tokens, channels,
-                          value_channels, &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_scaled_dot_product_attention_nhtc_f32(
+                op, batch_size, query_heads, query_tokens, key_value_heads,
+                key_value_tokens, channels, value_channels, &workspace_size,
+                &workspace_alignment, /*threadpool=*/nullptr));
   ASSERT_NE(workspace_size, 0);
   ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_setup_scaled_dot_product_attention_nhtc_f32(
-      op, workspace.data(), query.data(), key.data(), value.data(), scale.data(), mask.data(), operator_output.data()));
+  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(
+      workspace_size);
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_scaled_dot_product_attention_nhtc_f32(
+                op, workspace.data(), query.data(), key.data(), value.data(),
+                scale.data(), mask.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
   // Prepare for Subgraph API
-  // Input and Output external tensors are smaller than the actual input/output tensors used
+  // Input and Output external tensors are smaller than the actual input/output
+  // tensors used
   size_t N2 = N - 1;      // batch size
   size_t H2 = H - 1;      // num heads
   size_t Tok2 = Tok - 2;  // tokens
@@ -873,97 +931,122 @@ TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api_dynamic_shape_requ
 
   // Call subgraph API.
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(6, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
 
   uint32_t query_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, subgraph_query_dims.size(), subgraph_query_dims.data(), nullptr,
-                          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &query_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, subgraph_query_dims.size(),
+                subgraph_query_dims.data(), nullptr,
+                /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &query_id));
   ASSERT_NE(query_id, XNN_INVALID_VALUE_ID);
 
   uint32_t key_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, subgraph_key_dims.size(), subgraph_key_dims.data(), nullptr,
-                          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_INPUT, &key_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, subgraph_key_dims.size(),
+                subgraph_key_dims.data(), nullptr,
+                /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_INPUT, &key_id));
   ASSERT_NE(key_id, XNN_INVALID_VALUE_ID);
 
   uint32_t value_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, subgraph_value_dims.size(), subgraph_value_dims.data(), nullptr,
-                          /*external_id=*/2, XNN_VALUE_FLAG_EXTERNAL_INPUT, &value_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, subgraph_value_dims.size(),
+                subgraph_value_dims.data(), nullptr,
+                /*external_id=*/2, XNN_VALUE_FLAG_EXTERNAL_INPUT, &value_id));
   ASSERT_NE(value_id, XNN_INVALID_VALUE_ID);
 
   uint32_t scale_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, subgraph_scale_dims.size(), subgraph_scale_dims.data(), nullptr,
-                          /*external_id=*/3, XNN_VALUE_FLAG_EXTERNAL_INPUT, &scale_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, subgraph_scale_dims.size(),
+                subgraph_scale_dims.data(), nullptr,
+                /*external_id=*/3, XNN_VALUE_FLAG_EXTERNAL_INPUT, &scale_id));
   ASSERT_NE(scale_id, XNN_INVALID_VALUE_ID);
 
   uint32_t mask_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, subgraph_mask_dims.size(), subgraph_mask_dims.data(), nullptr,
-                          /*external_id=*/4, XNN_VALUE_FLAG_EXTERNAL_INPUT, &mask_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, subgraph_mask_dims.size(),
+                subgraph_mask_dims.data(), nullptr,
+                /*external_id=*/4, XNN_VALUE_FLAG_EXTERNAL_INPUT, &mask_id));
   ASSERT_NE(mask_id, XNN_INVALID_VALUE_ID);
 
   uint32_t output_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, subgraph_output_dims.size(), subgraph_output_dims.data(),
-                          nullptr, /*external_id=*/5, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, subgraph_output_dims.size(),
+                subgraph_output_dims.data(), nullptr, /*external_id=*/5,
+                XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
 
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_scaled_dot_product_attention(
-      subgraph, cap_type, &cap_params, query_id, key_id, value_id, scale_id, mask_id, output_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_scaled_dot_product_attention(
+                subgraph, cap_type, &cap_params, query_id, key_id, value_id,
+                scale_id, mask_id, output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_runtime_v3(subgraph, nullptr, nullptr,
+                                  xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
 
   std::array<xnn_external_value, 6> external = {
-    xnn_external_value{query_id, query.data()}, xnn_external_value{key_id, key.data()},
-    xnn_external_value{value_id, value.data()}, xnn_external_value{scale_id, scale.data()},
-    xnn_external_value{mask_id, mask.data()},   xnn_external_value{output_id, subgraph_output.data()}};
+      xnn_external_value{query_id, query.data()},
+      xnn_external_value{key_id, key.data()},
+      xnn_external_value{value_id, value.data()},
+      xnn_external_value{scale_id, scale.data()},
+      xnn_external_value{mask_id, mask.data()},
+      xnn_external_value{output_id, subgraph_output.data()}};
 
   const struct xnn_node* node = &subgraph->nodes[0];
   // Since this is before setup, expect it to require reallocation
-  ASSERT_EQ(
-    xnn_status_reallocation_required,
-    node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, nullptr /* thradpool*/));
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
+  ASSERT_EQ(xnn_status_reallocation_required,
+            node->reshape(&runtime->opdata[0], runtime->values,
+                          runtime->num_values, nullptr /* thradpool*/));
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
-  // Reshape the external tensors to the subgraph with the same shape as the ones used in the
-  // operator API, which are larger than the ones supplied at subgraph creation time.
-  ASSERT_EQ(
-    xnn_status_success, xnn_reshape_external_value(runtime, query_id, op_query_dims.size(), op_query_dims.data()));
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, key_id, op_key_dims.size(), op_key_dims.data()));
-  ASSERT_EQ(
-    xnn_status_success, xnn_reshape_external_value(runtime, value_id, op_value_dims.size(), op_value_dims.data()));
-  ASSERT_EQ(
-    xnn_status_success, xnn_reshape_external_value(runtime, scale_id, op_scale_dims.size(), op_scale_dims.data()));
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, mask_id, op_mask_dims.size(), op_mask_dims.data()));
-  ASSERT_EQ(
-    xnn_status_success, xnn_reshape_external_value(runtime, output_id, op_output_dims.size(), op_output_dims.data()));
+  // Reshape the external tensors to the subgraph with the same shape as the
+  // ones used in the operator API, which are larger than the ones supplied at
+  // subgraph creation time.
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_external_value(runtime, query_id, op_query_dims.size(),
+                                       op_query_dims.data()));
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_external_value(runtime, key_id, op_key_dims.size(),
+                                       op_key_dims.data()));
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_external_value(runtime, value_id, op_value_dims.size(),
+                                       op_value_dims.data()));
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_external_value(runtime, scale_id, op_scale_dims.size(),
+                                       op_scale_dims.data()));
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_external_value(runtime, mask_id, op_mask_dims.size(),
+                                       op_mask_dims.data()));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(
+                                    runtime, output_id, op_output_dims.size(),
+                                    op_output_dims.data()));
 
   // We will need more memory to run with the larger shape.
   ASSERT_EQ(xnn_status_success, xnn_reshape_runtime(runtime));
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check output shape.
   size_t observed_output_num_dims = 0;
   std::vector<size_t> observed_output_dims(XNN_MAX_TENSOR_DIMS, 0);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_get_external_value_shape(runtime, output_id, &observed_output_num_dims, observed_output_dims.data()));
+  ASSERT_EQ(xnn_status_success,
+            xnn_get_external_value_shape(runtime, output_id,
+                                         &observed_output_num_dims,
+                                         observed_output_dims.data()));
   ASSERT_EQ(op_output_dims.size(), observed_output_num_dims);
   for (size_t i = 0; i < observed_output_num_dims; i++) {
     ASSERT_EQ(op_output_dims[i], observed_output_dims[i]);
@@ -980,73 +1063,70 @@ TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api_dynamic_shape_requ
 
 namespace {
 void DefineScaledDotProductAttentionSubgraph(
-  xnn_status* status_out,
-  xnn_attention_logits_cap_type cap_type,
-  xnn_attention_logits_cap_tanh_params cap_params,
-  std::vector<size_t> query_dims,
-  std::vector<size_t> key_dims,
-  std::vector<size_t> value_dims,
-  std::vector<size_t> scale_dims,
-  std::vector<size_t> mask_dims,
-  std::vector<size_t> output_dims,
-  uint32_t batch_matrix_multiply_flags = 0)
-{
+    xnn_status* status_out, xnn_attention_logits_cap_type cap_type,
+    xnn_attention_logits_cap_tanh_params cap_params,
+    std::vector<size_t> query_dims, std::vector<size_t> key_dims,
+    std::vector<size_t> value_dims, std::vector<size_t> scale_dims,
+    std::vector<size_t> mask_dims, std::vector<size_t> output_dims,
+    uint32_t batch_matrix_multiply_flags = 0) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   xnn_subgraph_t subgraph = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(6, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
 
   uint32_t query_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, query_dims.size(), query_dims.data(), nullptr, /*external_id=*/0,
-      XNN_VALUE_FLAG_EXTERNAL_INPUT, &query_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, query_dims.size(),
+                              query_dims.data(), nullptr, /*external_id=*/0,
+                              XNN_VALUE_FLAG_EXTERNAL_INPUT, &query_id));
   ASSERT_NE(query_id, XNN_INVALID_VALUE_ID);
 
   uint32_t key_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, key_dims.size(), key_dims.data(), nullptr, /*external_id=*/1,
-      XNN_VALUE_FLAG_EXTERNAL_INPUT, &key_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, key_dims.size(),
+                              key_dims.data(), nullptr, /*external_id=*/1,
+                              XNN_VALUE_FLAG_EXTERNAL_INPUT, &key_id));
   ASSERT_NE(key_id, XNN_INVALID_VALUE_ID);
 
   uint32_t value_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, value_dims.size(), value_dims.data(), nullptr, /*external_id=*/2,
-      XNN_VALUE_FLAG_EXTERNAL_INPUT, &value_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, value_dims.size(),
+                              value_dims.data(), nullptr, /*external_id=*/2,
+                              XNN_VALUE_FLAG_EXTERNAL_INPUT, &value_id));
   ASSERT_NE(value_id, XNN_INVALID_VALUE_ID);
 
   uint32_t scale_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, scale_dims.size(), scale_dims.data(), nullptr, /*external_id=*/3,
-      XNN_VALUE_FLAG_EXTERNAL_INPUT, &scale_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, scale_dims.size(),
+                              scale_dims.data(), nullptr, /*external_id=*/3,
+                              XNN_VALUE_FLAG_EXTERNAL_INPUT, &scale_id));
   ASSERT_NE(scale_id, XNN_INVALID_VALUE_ID);
 
   uint32_t mask_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, mask_dims.size(), mask_dims.data(), nullptr, /*external_id=*/4,
-      XNN_VALUE_FLAG_EXTERNAL_INPUT, &mask_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, mask_dims.size(),
+                              mask_dims.data(), nullptr, /*external_id=*/4,
+                              XNN_VALUE_FLAG_EXTERNAL_INPUT, &mask_id));
   ASSERT_NE(mask_id, XNN_INVALID_VALUE_ID);
 
   uint32_t output_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr, /*external_id=*/5,
-      XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, output_dims.size(),
+                              output_dims.data(), nullptr, /*external_id=*/5,
+                              XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
 
   *status_out = xnn_define_scaled_dot_product_attention(
-    subgraph, cap_type, &cap_params, query_id, key_id, value_id, scale_id, mask_id, output_id, /*flags=*/0);
+      subgraph, cap_type, &cap_params, query_id, key_id, value_id, scale_id,
+      mask_id, output_id, /*flags=*/0);
 }
 }  // namespace
 
@@ -1059,9 +1139,10 @@ TEST(ScaledDotProductAttentionTest, batch_dims_omitted_is_ok) {
   std::vector<size_t> output_dims = {2, 3, 9};
   xnn_status status = xnn_status_success;
   xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
-  xnn_attention_logits_cap_tanh_params cap_params {};
-  DefineScaledDotProductAttentionSubgraph(
-    &status, cap_type, cap_params, query_dims, key_dims, value_dims, scale_dims, mask_dims, output_dims);
+  xnn_attention_logits_cap_tanh_params cap_params{};
+  DefineScaledDotProductAttentionSubgraph(&status, cap_type, cap_params,
+                                          query_dims, key_dims, value_dims,
+                                          scale_dims, mask_dims, output_dims);
   EXPECT_EQ(xnn_status_success, status);
 }
 
@@ -1074,9 +1155,11 @@ TEST(ScaledDotProductAttentionTest, cap_tanh_cap_value_is_finite) {
   std::vector<size_t> output_dims = {1, 2, 3, 5};
   xnn_status status = xnn_status_success;
   xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_tanh;
-  xnn_attention_logits_cap_tanh_params cap_params { std::numeric_limits<float>::infinity() };
-  DefineScaledDotProductAttentionSubgraph(
-    &status, cap_type, cap_params, query_dims, key_dims, value_dims, scale_dims, mask_dims, output_dims);
+  xnn_attention_logits_cap_tanh_params cap_params{
+      std::numeric_limits<float>::infinity()};
+  DefineScaledDotProductAttentionSubgraph(&status, cap_type, cap_params,
+                                          query_dims, key_dims, value_dims,
+                                          scale_dims, mask_dims, output_dims);
   EXPECT_EQ(xnn_status_invalid_parameter, status);
 }
 
@@ -1089,58 +1172,62 @@ TEST(ScaledDotProductAttentionTest, cap_tanh_cap_value_is_gt_zero) {
   std::vector<size_t> output_dims = {1, 2, 3, 5};
   xnn_status status = xnn_status_success;
   xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_tanh;
-  xnn_attention_logits_cap_tanh_params cap_params { 0.0f };
-  DefineScaledDotProductAttentionSubgraph(
-    &status, cap_type, cap_params, query_dims, key_dims, value_dims, scale_dims, mask_dims, output_dims);
+  xnn_attention_logits_cap_tanh_params cap_params{0.0f};
+  DefineScaledDotProductAttentionSubgraph(&status, cap_type, cap_params,
+                                          query_dims, key_dims, value_dims,
+                                          scale_dims, mask_dims, output_dims);
   EXPECT_EQ(xnn_status_invalid_parameter, status);
 }
 
-  TEST(ScaledDotProductAttentionTest, query_num_dim_lt_3) {
-    std::vector<size_t> query_dims = {3, 5};
-    std::vector<size_t> key_dims = {3, 5};
-    std::vector<size_t> value_dims = {3, 5};
-    std::vector<size_t> scale_dims = {5};
-    std::vector<size_t> mask_dims = {3, 3};
-    std::vector<size_t> output_dims = {1, 2, 3, 5};
-    xnn_status status = xnn_status_success;
-    xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
-    xnn_attention_logits_cap_tanh_params cap_params{};
-    DefineScaledDotProductAttentionSubgraph(
-      &status, cap_type, cap_params, query_dims, key_dims, value_dims, scale_dims, mask_dims, output_dims);
-    EXPECT_EQ(xnn_status_invalid_parameter, status);
-  }
+TEST(ScaledDotProductAttentionTest, query_num_dim_lt_3) {
+  std::vector<size_t> query_dims = {3, 5};
+  std::vector<size_t> key_dims = {3, 5};
+  std::vector<size_t> value_dims = {3, 5};
+  std::vector<size_t> scale_dims = {5};
+  std::vector<size_t> mask_dims = {3, 3};
+  std::vector<size_t> output_dims = {1, 2, 3, 5};
+  xnn_status status = xnn_status_success;
+  xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
+  xnn_attention_logits_cap_tanh_params cap_params{};
+  DefineScaledDotProductAttentionSubgraph(&status, cap_type, cap_params,
+                                          query_dims, key_dims, value_dims,
+                                          scale_dims, mask_dims, output_dims);
+  EXPECT_EQ(xnn_status_invalid_parameter, status);
+}
 
-  TEST(ScaledDotProductAttentionTest, key_num_dim_lt_2) {
-    std::vector<size_t> query_dims = {2, 3, 5};
-    std::vector<size_t> key_dims = {5};
-    std::vector<size_t> value_dims = {3, 5};
-    std::vector<size_t> scale_dims = {5};
-    std::vector<size_t> mask_dims = {3, 3};
-    std::vector<size_t> output_dims = {1, 2, 3, 5};
-    xnn_status status = xnn_status_success;
-    xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
-    xnn_attention_logits_cap_tanh_params cap_params{};
-    DefineScaledDotProductAttentionSubgraph(
-      &status, cap_type, cap_params, query_dims, key_dims, value_dims, scale_dims, mask_dims, output_dims);
-    EXPECT_EQ(xnn_status_invalid_parameter, status);
-  }
+TEST(ScaledDotProductAttentionTest, key_num_dim_lt_2) {
+  std::vector<size_t> query_dims = {2, 3, 5};
+  std::vector<size_t> key_dims = {5};
+  std::vector<size_t> value_dims = {3, 5};
+  std::vector<size_t> scale_dims = {5};
+  std::vector<size_t> mask_dims = {3, 3};
+  std::vector<size_t> output_dims = {1, 2, 3, 5};
+  xnn_status status = xnn_status_success;
+  xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
+  xnn_attention_logits_cap_tanh_params cap_params{};
+  DefineScaledDotProductAttentionSubgraph(&status, cap_type, cap_params,
+                                          query_dims, key_dims, value_dims,
+                                          scale_dims, mask_dims, output_dims);
+  EXPECT_EQ(xnn_status_invalid_parameter, status);
+}
 
-  TEST(ScaledDotProductAttentionTest, key_num_dim_eq_query_or_1_less) {
-    std::vector<size_t> query_dims = {1, 2, 3, 5};
-    std::vector<size_t> key_dims = {1, 2, 3, 5, 6};
-    std::vector<size_t> value_dims = {1, 2, 3, 5};
-    std::vector<size_t> scale_dims = {5};
-    std::vector<size_t> mask_dims = {3, 3};
-    std::vector<size_t> output_dims = {1, 2, 3, 5};
-    xnn_status status = xnn_status_success;
-    xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
-    xnn_attention_logits_cap_tanh_params cap_params{};
-    DefineScaledDotProductAttentionSubgraph(
-      &status, cap_type, cap_params, query_dims, key_dims, value_dims, scale_dims, mask_dims, output_dims);
-    EXPECT_EQ(xnn_status_invalid_parameter, status);
-  }
+TEST(ScaledDotProductAttentionTest, key_num_dim_eq_query_or_1_less) {
+  std::vector<size_t> query_dims = {1, 2, 3, 5};
+  std::vector<size_t> key_dims = {1, 2, 3, 5, 6};
+  std::vector<size_t> value_dims = {1, 2, 3, 5};
+  std::vector<size_t> scale_dims = {5};
+  std::vector<size_t> mask_dims = {3, 3};
+  std::vector<size_t> output_dims = {1, 2, 3, 5};
+  xnn_status status = xnn_status_success;
+  xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
+  xnn_attention_logits_cap_tanh_params cap_params{};
+  DefineScaledDotProductAttentionSubgraph(&status, cap_type, cap_params,
+                                          query_dims, key_dims, value_dims,
+                                          scale_dims, mask_dims, output_dims);
+  EXPECT_EQ(xnn_status_invalid_parameter, status);
+}
 
-  TEST(ScaledDotProductAttentionTest, value_num_dim_lt_2) {
+TEST(ScaledDotProductAttentionTest, value_num_dim_lt_2) {
   std::vector<size_t> query_dims = {2, 3, 5};
   std::vector<size_t> key_dims = {3, 5};
   std::vector<size_t> value_dims = {3};
@@ -1150,8 +1237,9 @@ TEST(ScaledDotProductAttentionTest, cap_tanh_cap_value_is_gt_zero) {
   xnn_status status = xnn_status_success;
   xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
   xnn_attention_logits_cap_tanh_params cap_params{};
-  DefineScaledDotProductAttentionSubgraph(
-    &status, cap_type, cap_params, query_dims, key_dims, value_dims, scale_dims, mask_dims, output_dims);
+  DefineScaledDotProductAttentionSubgraph(&status, cap_type, cap_params,
+                                          query_dims, key_dims, value_dims,
+                                          scale_dims, mask_dims, output_dims);
   EXPECT_EQ(xnn_status_invalid_parameter, status);
 }
 
@@ -1165,8 +1253,9 @@ TEST(ScaledDotProductAttentionTest, query_channels_eq_key_channels) {
   xnn_status status = xnn_status_success;
   xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
   xnn_attention_logits_cap_tanh_params cap_params{};
-  DefineScaledDotProductAttentionSubgraph(
-    &status, cap_type, cap_params, query_dims, key_dims, value_dims, scale_dims, mask_dims, output_dims);
+  DefineScaledDotProductAttentionSubgraph(&status, cap_type, cap_params,
+                                          query_dims, key_dims, value_dims,
+                                          scale_dims, mask_dims, output_dims);
   EXPECT_EQ(xnn_status_invalid_parameter, status);
 }
 
@@ -1180,8 +1269,9 @@ TEST(ScaledDotProductAttentionTest, query_heads_eq_key_heads) {
   xnn_status status = xnn_status_success;
   xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
   xnn_attention_logits_cap_tanh_params cap_params{};
-  DefineScaledDotProductAttentionSubgraph(
-    &status, cap_type, cap_params, query_dims, key_dims, value_dims, scale_dims, mask_dims, output_dims);
+  DefineScaledDotProductAttentionSubgraph(&status, cap_type, cap_params,
+                                          query_dims, key_dims, value_dims,
+                                          scale_dims, mask_dims, output_dims);
   EXPECT_EQ(xnn_status_invalid_parameter, status);
 }
 
@@ -1195,8 +1285,9 @@ TEST(ScaledDotProductAttentionTest, query_heads_eq_value_heads) {
   xnn_status status = xnn_status_success;
   xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
   xnn_attention_logits_cap_tanh_params cap_params{};
-  DefineScaledDotProductAttentionSubgraph(
-    &status, cap_type, cap_params, query_dims, key_dims, value_dims, scale_dims, mask_dims, output_dims);
+  DefineScaledDotProductAttentionSubgraph(&status, cap_type, cap_params,
+                                          query_dims, key_dims, value_dims,
+                                          scale_dims, mask_dims, output_dims);
   EXPECT_EQ(xnn_status_invalid_parameter, status);
 }
 
@@ -1210,8 +1301,9 @@ TEST(ScaledDotProductAttentionTest, key_num_dims_ne_query_num_dims) {
   xnn_status status = xnn_status_success;
   xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
   xnn_attention_logits_cap_tanh_params cap_params{};
-  DefineScaledDotProductAttentionSubgraph(
-    &status, cap_type, cap_params, query_dims, key_dims, value_dims, scale_dims, mask_dims, output_dims);
+  DefineScaledDotProductAttentionSubgraph(&status, cap_type, cap_params,
+                                          query_dims, key_dims, value_dims,
+                                          scale_dims, mask_dims, output_dims);
   EXPECT_EQ(xnn_status_invalid_parameter, status);
 }
 
@@ -1225,12 +1317,14 @@ TEST(ScaledDotProductAttentionTest, key_batch_size_ne_query_batch_size) {
   xnn_status status = xnn_status_success;
   xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
   xnn_attention_logits_cap_tanh_params cap_params{};
-  DefineScaledDotProductAttentionSubgraph(
-    &status, cap_type, cap_params, query_dims, key_dims, value_dims, scale_dims, mask_dims, output_dims);
+  DefineScaledDotProductAttentionSubgraph(&status, cap_type, cap_params,
+                                          query_dims, key_dims, value_dims,
+                                          scale_dims, mask_dims, output_dims);
   EXPECT_EQ(xnn_status_invalid_parameter, status);
 }
 
-TEST(ScaledDotProductAttentionTest, key_batch_size_ne_query_batch_size_multi_query) {
+TEST(ScaledDotProductAttentionTest,
+     key_batch_size_ne_query_batch_size_multi_query) {
   std::vector<size_t> query_dims = {1, 7, 2, 3, 5};
   std::vector<size_t> key_dims = {7, 1, 3, 5};
   std::vector<size_t> value_dims = {1, 7, 3, 5};
@@ -1240,8 +1334,9 @@ TEST(ScaledDotProductAttentionTest, key_batch_size_ne_query_batch_size_multi_que
   xnn_status status = xnn_status_success;
   xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
   xnn_attention_logits_cap_tanh_params cap_params{};
-  DefineScaledDotProductAttentionSubgraph(
-    &status, cap_type, cap_params, query_dims, key_dims, value_dims, scale_dims, mask_dims, output_dims);
+  DefineScaledDotProductAttentionSubgraph(&status, cap_type, cap_params,
+                                          query_dims, key_dims, value_dims,
+                                          scale_dims, mask_dims, output_dims);
   EXPECT_EQ(xnn_status_invalid_parameter, status);
 }
 
@@ -1255,8 +1350,9 @@ TEST(ScaledDotProductAttentionTest, value_num_dims_ne_key_num_dims) {
   xnn_status status = xnn_status_success;
   xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
   xnn_attention_logits_cap_tanh_params cap_params{};
-  DefineScaledDotProductAttentionSubgraph(
-    &status, cap_type, cap_params, query_dims, key_dims, value_dims, scale_dims, mask_dims, output_dims);
+  DefineScaledDotProductAttentionSubgraph(&status, cap_type, cap_params,
+                                          query_dims, key_dims, value_dims,
+                                          scale_dims, mask_dims, output_dims);
   EXPECT_EQ(xnn_status_invalid_parameter, status);
 }
 
@@ -1270,12 +1366,14 @@ TEST(ScaledDotProductAttentionTest, value_batch_size_ne_query_batch_size) {
   xnn_status status = xnn_status_success;
   xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
   xnn_attention_logits_cap_tanh_params cap_params{};
-  DefineScaledDotProductAttentionSubgraph(
-    &status, cap_type, cap_params, query_dims, key_dims, value_dims, scale_dims, mask_dims, output_dims);
+  DefineScaledDotProductAttentionSubgraph(&status, cap_type, cap_params,
+                                          query_dims, key_dims, value_dims,
+                                          scale_dims, mask_dims, output_dims);
   EXPECT_EQ(xnn_status_invalid_parameter, status);
 }
 
-TEST(ScaledDotProductAttentionTest, value_batch_size_ne_query_batch_size_multi_query) {
+TEST(ScaledDotProductAttentionTest,
+     value_batch_size_ne_query_batch_size_multi_query) {
   std::vector<size_t> query_dims = {1, 7, 2, 3, 5};
   std::vector<size_t> key_dims = {1, 7, 3, 5};
   std::vector<size_t> value_dims = {7, 1, 3, 5};
@@ -1285,8 +1383,9 @@ TEST(ScaledDotProductAttentionTest, value_batch_size_ne_query_batch_size_multi_q
   xnn_status status = xnn_status_success;
   xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
   xnn_attention_logits_cap_tanh_params cap_params{};
-  DefineScaledDotProductAttentionSubgraph(
-    &status, cap_type, cap_params, query_dims, key_dims, value_dims, scale_dims, mask_dims, output_dims);
+  DefineScaledDotProductAttentionSubgraph(&status, cap_type, cap_params,
+                                          query_dims, key_dims, value_dims,
+                                          scale_dims, mask_dims, output_dims);
   EXPECT_EQ(xnn_status_invalid_parameter, status);
 }
 
@@ -1300,8 +1399,9 @@ TEST(ScaledDotProductAttentionTest, key_tokens_ne_value_tokens) {
   xnn_status status = xnn_status_success;
   xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
   xnn_attention_logits_cap_tanh_params cap_params{};
-  DefineScaledDotProductAttentionSubgraph(
-    &status, cap_type, cap_params, query_dims, key_dims, value_dims, scale_dims, mask_dims, output_dims);
+  DefineScaledDotProductAttentionSubgraph(&status, cap_type, cap_params,
+                                          query_dims, key_dims, value_dims,
+                                          scale_dims, mask_dims, output_dims);
   EXPECT_EQ(xnn_status_invalid_parameter, status);
 }
 
@@ -1315,8 +1415,9 @@ TEST(ScaledDotProductAttentionTest, scale_num_dims_must_be_1) {
   xnn_status status = xnn_status_success;
   xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
   xnn_attention_logits_cap_tanh_params cap_params{};
-  DefineScaledDotProductAttentionSubgraph(
-    &status, cap_type, cap_params, query_dims, key_dims, value_dims, scale_dims, mask_dims, output_dims);
+  DefineScaledDotProductAttentionSubgraph(&status, cap_type, cap_params,
+                                          query_dims, key_dims, value_dims,
+                                          scale_dims, mask_dims, output_dims);
   EXPECT_EQ(xnn_status_invalid_parameter, status);
 }
 
@@ -1330,8 +1431,9 @@ TEST(ScaledDotProductAttentionTest, scale_channels_eq_query_channels) {
   xnn_status status = xnn_status_success;
   xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
   xnn_attention_logits_cap_tanh_params cap_params{};
-  DefineScaledDotProductAttentionSubgraph(
-    &status, cap_type, cap_params, query_dims, key_dims, value_dims, scale_dims, mask_dims, output_dims);
+  DefineScaledDotProductAttentionSubgraph(&status, cap_type, cap_params,
+                                          query_dims, key_dims, value_dims,
+                                          scale_dims, mask_dims, output_dims);
   EXPECT_EQ(xnn_status_invalid_parameter, status);
 }
 
@@ -1345,8 +1447,9 @@ TEST(ScaledDotProductAttentionTest, mask_num_dims_must_be_2) {
   xnn_status status = xnn_status_success;
   xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
   xnn_attention_logits_cap_tanh_params cap_params{};
-  DefineScaledDotProductAttentionSubgraph(
-    &status, cap_type, cap_params, query_dims, key_dims, value_dims, scale_dims, mask_dims, output_dims);
+  DefineScaledDotProductAttentionSubgraph(&status, cap_type, cap_params,
+                                          query_dims, key_dims, value_dims,
+                                          scale_dims, mask_dims, output_dims);
   EXPECT_EQ(xnn_status_invalid_parameter, status);
 }
 
@@ -1360,8 +1463,9 @@ TEST(ScaledDotProductAttentionTest, mask_query_tokens_eq_query_tokens) {
   xnn_status status = xnn_status_success;
   xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
   xnn_attention_logits_cap_tanh_params cap_params{};
-  DefineScaledDotProductAttentionSubgraph(
-    &status, cap_type, cap_params, query_dims, key_dims, value_dims, scale_dims, mask_dims, output_dims);
+  DefineScaledDotProductAttentionSubgraph(&status, cap_type, cap_params,
+                                          query_dims, key_dims, value_dims,
+                                          scale_dims, mask_dims, output_dims);
   EXPECT_EQ(xnn_status_invalid_parameter, status);
 }
 
@@ -1375,8 +1479,9 @@ TEST(ScaledDotProductAttentionTest, mask_key_value_tokens_eq_key_value_tokens) {
   xnn_status status = xnn_status_success;
   xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
   xnn_attention_logits_cap_tanh_params cap_params{};
-  DefineScaledDotProductAttentionSubgraph(
-    &status, cap_type, cap_params, query_dims, key_dims, value_dims, scale_dims, mask_dims, output_dims);
+  DefineScaledDotProductAttentionSubgraph(&status, cap_type, cap_params,
+                                          query_dims, key_dims, value_dims,
+                                          scale_dims, mask_dims, output_dims);
   EXPECT_EQ(xnn_status_invalid_parameter, status);
 }
 
@@ -1390,8 +1495,9 @@ TEST(ScaledDotProductAttentionTest, output_dims_ge_4) {
   xnn_status status = xnn_status_success;
   xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
   xnn_attention_logits_cap_tanh_params cap_params{};
-  DefineScaledDotProductAttentionSubgraph(
-    &status, cap_type, cap_params, query_dims, key_dims, value_dims, scale_dims, mask_dims, output_dims);
+  DefineScaledDotProductAttentionSubgraph(&status, cap_type, cap_params,
+                                          query_dims, key_dims, value_dims,
+                                          scale_dims, mask_dims, output_dims);
   EXPECT_EQ(xnn_status_invalid_parameter, status);
 }
 
@@ -1405,8 +1511,9 @@ TEST(ScaledDotProductAttentionTest, output_dims_eq_query_dims) {
   xnn_status status = xnn_status_success;
   xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
   xnn_attention_logits_cap_tanh_params cap_params{};
-  DefineScaledDotProductAttentionSubgraph(
-    &status, cap_type, cap_params, query_dims, key_dims, value_dims, scale_dims, mask_dims, output_dims);
+  DefineScaledDotProductAttentionSubgraph(&status, cap_type, cap_params,
+                                          query_dims, key_dims, value_dims,
+                                          scale_dims, mask_dims, output_dims);
   EXPECT_EQ(xnn_status_invalid_parameter, status);
 }
 
@@ -1420,8 +1527,9 @@ TEST(ScaledDotProductAttentionTest, output_batch_size_eq_query) {
   xnn_status status = xnn_status_success;
   xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
   xnn_attention_logits_cap_tanh_params cap_params{};
-  DefineScaledDotProductAttentionSubgraph(
-    &status, cap_type, cap_params, query_dims, key_dims, value_dims, scale_dims, mask_dims, output_dims);
+  DefineScaledDotProductAttentionSubgraph(&status, cap_type, cap_params,
+                                          query_dims, key_dims, value_dims,
+                                          scale_dims, mask_dims, output_dims);
   EXPECT_EQ(xnn_status_invalid_parameter, status);
 }
 
@@ -1435,8 +1543,9 @@ TEST(ScaledDotProductAttentionTest, output_heads_eq_query) {
   xnn_status status = xnn_status_success;
   xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
   xnn_attention_logits_cap_tanh_params cap_params{};
-  DefineScaledDotProductAttentionSubgraph(
-    &status, cap_type, cap_params, query_dims, key_dims, value_dims, scale_dims, mask_dims, output_dims);
+  DefineScaledDotProductAttentionSubgraph(&status, cap_type, cap_params,
+                                          query_dims, key_dims, value_dims,
+                                          scale_dims, mask_dims, output_dims);
   EXPECT_EQ(xnn_status_invalid_parameter, status);
 }
 
@@ -1450,8 +1559,9 @@ TEST(ScaledDotProductAttentionTest, output_tokens_eq_query) {
   xnn_status status = xnn_status_success;
   xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
   xnn_attention_logits_cap_tanh_params cap_params{};
-  DefineScaledDotProductAttentionSubgraph(
-    &status, cap_type, cap_params, query_dims, key_dims, value_dims, scale_dims, mask_dims, output_dims);
+  DefineScaledDotProductAttentionSubgraph(&status, cap_type, cap_params,
+                                          query_dims, key_dims, value_dims,
+                                          scale_dims, mask_dims, output_dims);
   EXPECT_EQ(xnn_status_invalid_parameter, status);
 }
 
@@ -1465,7 +1575,8 @@ TEST(ScaledDotProductAttentionTest, output_channels_eq_value) {
   xnn_status status = xnn_status_success;
   xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_none;
   xnn_attention_logits_cap_tanh_params cap_params{};
-  DefineScaledDotProductAttentionSubgraph(
-    &status, cap_type, cap_params, query_dims, key_dims, value_dims, scale_dims, mask_dims, output_dims);
+  DefineScaledDotProductAttentionSubgraph(&status, cap_type, cap_params,
+                                          query_dims, key_dims, value_dims,
+                                          scale_dims, mask_dims, output_dims);
   EXPECT_EQ(xnn_status_invalid_parameter, status);
 }

@@ -206,8 +206,8 @@ static void FP32Elementwise(benchmark::State& state) {
 
 static void FP32LayerNorm(benchmark::State& state) {
   BenchmarkInvoke(state, [&state]() {
-    return models::FP32LayerNorm(state.range(0), state.range(1),
-                                 state.range(2), state.range(3));
+    return models::FP32LayerNorm(state.range(0), state.range(1), state.range(2),
+                                 state.range(3));
   });
 }
 
@@ -254,7 +254,6 @@ static void DepthwiseSeparableArguments(benchmark::internal::Benchmark* b) {
 
   // Bigger
   b->Args({512, 512, 3, 128, 128});
-
 }
 
 BENCHMARK(FP32Attention)
@@ -287,7 +286,10 @@ BENCHMARK(QS8MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
 BENCHMARK(FP32Elementwise)
     ->Unit(benchmark::kMicrosecond)
     ->UseRealTime()
-    ->Arg(6)->Arg(10)->Arg(18)->Arg(34);
+    ->Arg(6)
+    ->Arg(10)
+    ->Arg(18)
+    ->Arg(34);
 
 BENCHMARK(FP32LayerNorm)
     ->Unit(benchmark::kMicrosecond)

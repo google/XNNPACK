@@ -8,13 +8,11 @@
 #define __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX512F_H_
 
 #include <assert.h>
+#include <immintrin.h>
 #include <stddef.h>
 #include <stdint.h>
 
-#include <immintrin.h>
-
 #include "src/xnnpack/common.h"
-
 
 // SIMD vector type for f32 using AVX512F.
 typedef __m512 xnn_simd_f32_t;
@@ -30,11 +28,6 @@ typedef __m512 xnn_simd_f32_t;
 
 // Whether or not this architecture has native fused multiply-add support.
 #define XNN_SIMD_HAS_NATIVE_FMA 1
-
-// Include the header for generic functions _after_ declaring the arch-specific
-// types and sizes.
-#include "src/xnnpack/simd/f32-generic-functions.h"
-
 // Arithmetic operations.
 static XNN_INLINE xnn_simd_f32_t xnn_zero_f32() { return _mm512_setzero_ps(); }
 
@@ -150,10 +143,6 @@ static XNN_INLINE xnn_simd_f32_t xnn_rsqrt_f32(xnn_simd_f32_t a) {
   return _mm512_rsqrt14_ps(a);
 }
 
-static XNN_INLINE xnn_simd_f32_t xnn_getexp_f32(xnn_simd_f32_t a) {
-  return _mm512_getexp_ps(a);
-}
-
 // Load/store operations.
 static XNN_INLINE xnn_simd_f32_t xnn_loadu_f32(const float* ptr) {
   return _mm512_loadu_ps(ptr);
@@ -173,10 +162,6 @@ static XNN_INLINE void xnn_store_f32(float* ptr, xnn_simd_f32_t v) {
 
 static XNN_INLINE xnn_simd_f32_t xnn_set1_f32(float v) {
   return _mm512_set1_ps(v);
-}
-
-static XNN_INLINE xnn_simd_f32_t xnn_set1_or_load_f32(const float* v) {
-  return _mm512_set1_ps(*v);
 }
 
 // Tail load/store operations.

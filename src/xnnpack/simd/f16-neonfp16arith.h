@@ -52,10 +52,6 @@ typedef float16x8_t xnn_simd_f16_t;
 #define xnn_srl_f16(a, bits) \
   vreinterpretq_f16_u16(vshrq_n_u16(vreinterpretq_u16_f16(a), bits))
 
-// Include the header for generic functions _after_ declaring the arch-specific
-// types and sizes.
-#include "src/xnnpack/simd/f16-generic-functions.h"
-
 // Arithmetic operations.
 static XNN_INLINE xnn_simd_f16_t xnn_zero_f16() {
   return vreinterpretq_f16_u16(vdupq_n_u16(0));
@@ -177,10 +173,6 @@ static XNN_INLINE xnn_simd_f16_t xnn_rsqrt_f16(xnn_simd_f16_t a) {
   return vrsqrteq_f16(a);
 }
 
-static XNN_INLINE xnn_simd_f16_t xnn_getexp_f16(xnn_simd_f16_t a) {
-  return xnn_generic_getexp_f16(a);
-}
-
 // Load/store operations.
 //
 // Note that since MSVC doesn't support the `vld1q_f16` and `vst1q_f16`
@@ -205,10 +197,6 @@ static XNN_INLINE xnn_simd_f16_t xnn_set1_f16(xnn_float16 v) {
   return vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t *)&v));
 }
 
-static XNN_INLINE xnn_simd_f16_t xnn_set1_or_load_f16(const xnn_float16 *v) {
-  return vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t *)v));
-}
-
 // Tail load/store operations.
 static XNN_INLINE xnn_simd_f16_t
 xnn_load_tail_f16(const xnn_float16 *input, size_t num_elements) XNN_OOB_READS {
@@ -217,22 +205,30 @@ xnn_load_tail_f16(const xnn_float16 *input, size_t num_elements) XNN_OOB_READS {
   return vreinterpretq_f16_u16(vld1q_u16((const uint16_t *)input));
 }
 
-static xnn_simd_f16_t xnn_load_tail_safe_f16(const xnn_float16 *input, size_t num_elements) {
+static xnn_simd_f16_t xnn_load_tail_safe_f16(const xnn_float16 *input,
+                                             size_t num_elements) {
   assert(num_elements > 0);
   assert(num_elements < xnn_simd_size_f16);
 
   XNN_ALIGN(16) xnn_float16 padded[8];
-  xnn_float16* dst = padded;
+  xnn_float16 *dst = padded;
   switch (num_elements) {
-  case 7: *dst++ = *input++;
-  case 6: *dst++ = *input++;
-  case 5: *dst++ = *input++;
-  case 4: *dst++ = *input++;
-  case 3: *dst++ = *input++;
-  case 2: *dst++ = *input++;
-  default: *dst++ = *input++;
+    case 7:
+      *dst++ = *input++;
+    case 6:
+      *dst++ = *input++;
+    case 5:
+      *dst++ = *input++;
+    case 4:
+      *dst++ = *input++;
+    case 3:
+      *dst++ = *input++;
+    case 2:
+      *dst++ = *input++;
+    default:
+      *dst++ = *input++;
   }
-  return vreinterpretq_f16_u16(vld1q_u16((const uint16_t *) &padded[0]));
+  return vreinterpretq_f16_u16(vld1q_u16((const uint16_t *)&padded[0]));
 }
 
 static XNN_INLINE void xnn_store_tail_f16(xnn_float16 *output, xnn_simd_f16_t v,

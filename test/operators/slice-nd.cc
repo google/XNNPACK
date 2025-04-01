@@ -148,7 +148,8 @@ TEST(SLICE_ND_X8, slice_5d) {
             const size_t dim5_size = dim5_offset_size.second;
             SliceOperatorTester()
                 .input_shape({kDim1, kDim2, kDim3, kDim4, kDim5})
-                .offsets({dim1_offset, dim2_offset, dim3_offset, dim4_offset, dim5_offset})
+                .offsets({dim1_offset, dim2_offset, dim3_offset, dim4_offset,
+                          dim5_offset})
                 .sizes({dim1_size, dim2_size, dim3_size, dim4_size, dim5_size})
                 .TestX8();
           }
@@ -179,8 +180,10 @@ TEST(SLICE_ND_X8, slice_6d) {
               const size_t dim6_size = dim6_offset_size.second;
               SliceOperatorTester()
                   .input_shape({kDim1, kDim2, kDim3, kDim4, kDim5, kDim6})
-                  .offsets({dim1_offset, dim2_offset, dim3_offset, dim4_offset, dim5_offset, dim6_offset})
-                  .sizes({dim1_size, dim2_size, dim3_size, dim4_size, dim5_size, dim6_size})
+                  .offsets({dim1_offset, dim2_offset, dim3_offset, dim4_offset,
+                            dim5_offset, dim6_offset})
+                  .sizes({dim1_size, dim2_size, dim3_size, dim4_size, dim5_size,
+                          dim6_size})
                   .TestX8();
             }
           }
@@ -280,7 +283,8 @@ TEST(SLICE_ND_X16, slice_5d) {
             const size_t dim5_size = dim5_offset_size.second;
             SliceOperatorTester()
                 .input_shape({kDim1, kDim2, kDim3, kDim4, kDim5})
-                .offsets({dim1_offset, dim2_offset, dim3_offset, dim4_offset, dim5_offset})
+                .offsets({dim1_offset, dim2_offset, dim3_offset, dim4_offset,
+                          dim5_offset})
                 .sizes({dim1_size, dim2_size, dim3_size, dim4_size, dim5_size})
                 .TestX16();
           }
@@ -311,8 +315,10 @@ TEST(SLICE_ND_X16, slice_6d) {
               const size_t dim6_size = dim6_offset_size.second;
               SliceOperatorTester()
                   .input_shape({kDim1, kDim2, kDim3, kDim4, kDim5, kDim6})
-                  .offsets({dim1_offset, dim2_offset, dim3_offset, dim4_offset, dim5_offset, dim6_offset})
-                  .sizes({dim1_size, dim2_size, dim3_size, dim4_size, dim5_size, dim6_size})
+                  .offsets({dim1_offset, dim2_offset, dim3_offset, dim4_offset,
+                            dim5_offset, dim6_offset})
+                  .sizes({dim1_size, dim2_size, dim3_size, dim4_size, dim5_size,
+                          dim6_size})
                   .TestX16();
             }
           }
@@ -341,11 +347,11 @@ TEST(SLICE_ND_X32, slice_2d) {
     for (const auto& dim2_offset_size : kDim2TestCases) {
       const size_t dim2_offset = dim2_offset_size.first;
       const size_t dim2_size = dim2_offset_size.second;
-          SliceOperatorTester()
-              .input_shape({kDim1, kDim2})
-              .offsets({dim1_offset, dim2_offset})
-              .sizes({dim1_size, dim2_size})
-              .TestX32();
+      SliceOperatorTester()
+          .input_shape({kDim1, kDim2})
+          .offsets({dim1_offset, dim2_offset})
+          .sizes({dim1_size, dim2_size})
+          .TestX32();
     }
   }
 }
@@ -412,7 +418,8 @@ TEST(SLICE_ND_X32, slice_5d) {
             const size_t dim5_size = dim5_offset_size.second;
             SliceOperatorTester()
                 .input_shape({kDim1, kDim2, kDim3, kDim4, kDim5})
-                .offsets({dim1_offset, dim2_offset, dim3_offset, dim4_offset, dim5_offset})
+                .offsets({dim1_offset, dim2_offset, dim3_offset, dim4_offset,
+                          dim5_offset})
                 .sizes({dim1_size, dim2_size, dim3_size, dim4_size, dim5_size})
                 .TestX32();
           }
@@ -443,8 +450,10 @@ TEST(SLICE_ND_X32, slice_6d) {
               const size_t dim6_size = dim6_offset_size.second;
               SliceOperatorTester()
                   .input_shape({kDim1, kDim2, kDim3, kDim4, kDim5, kDim6})
-                  .offsets({dim1_offset, dim2_offset, dim3_offset, dim4_offset, dim5_offset, dim6_offset})
-                  .sizes({dim1_size, dim2_size, dim3_size, dim4_size, dim5_size, dim6_size})
+                  .offsets({dim1_offset, dim2_offset, dim3_offset, dim4_offset,
+                            dim5_offset, dim6_offset})
+                  .sizes({dim1_size, dim2_size, dim3_size, dim4_size, dim5_size,
+                          dim6_size})
                   .TestX32();
             }
           }

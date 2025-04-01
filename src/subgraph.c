@@ -1698,6 +1698,11 @@ enum xnn_status xnn_subgraph_optimize(
       xnn_log_error("failed to force FP16 inference: subgraph is incompatible with FP16 operators");
       return xnn_status_unsupported_parameter;
     }
+    if (fp16_rewrite_succeeded) {
+      // Re-run xnn_subgraph_analyze_consumers_and_producers since fp16 re-write
+      // inserts nodes and changes producers/consumers.
+      xnn_subgraph_analyze_consumers_and_producers(subgraph);
+    }
   }
 
   #if XNN_ENABLE_SPARSE

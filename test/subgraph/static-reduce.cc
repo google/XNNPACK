@@ -10,8 +10,8 @@
 #include <functional>
 #include <sstream>
 #include <string>
-#include <type_traits>
 #include <tuple>
+#include <type_traits>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -104,13 +104,11 @@ std::function<void(float&, float)> get_reference_op(xnn_reduce_operator op) {
     case xnn_reduce_mean:
       return [](float& output, float input) { output += input; };
     case xnn_reduce_min:
-      return [](float& output, float input) {
-        output = std::min(output, input);
-      };
+      return
+          [](float& output, float input) { output = std::min(output, input); };
     case xnn_reduce_max:
-      return [](float& output, float input) {
-        output = std::max(output, input);
-      };
+      return
+          [](float& output, float input) { output = std::max(output, input); };
     default:
       XNN_UNREACHABLE;
   }
@@ -203,20 +201,7 @@ void TestImpl(const Param& p) {
 
       // Compute reference results.
       Tensor<float> expected(output_shape);
-      switch (p.reduce_operator) {
-        case xnn_reduce_sum:
-        case xnn_reduce_mean:
-          expected.fill(0.0f);
-          break;
-        case xnn_reduce_min:
-          expected.fill(NumericLimits<float>::max());
-          break;
-        case xnn_reduce_max:
-          expected.fill(NumericLimits<float>::min());
-          break;
-        default:
-          XNN_UNREACHABLE;
-      }
+      expected.fill(get_reduce_identity<float>(p.reduce_operator));
       broadcast_extent_1(expected);
       for (const auto& i : EnumerateIndices(input.extents())) {
         reference_op(expected(i), dequantize(input(i), input_quantization));
@@ -259,10 +244,9 @@ using ::testing::Combine;
 using ::testing::Range;
 using ::testing::Values;
 
-auto params = testing::ConvertGenerator<Param::TupleT>(
-    Combine(Values(xnn_reduce_sum, xnn_reduce_mean, xnn_reduce_max,
-                   xnn_reduce_min), Bool(), Bool(),
-            Range(0, XNN_MAX_TENSOR_DIMS)));
+auto params = testing::ConvertGenerator<Param::TupleT>(Combine(
+    Values(xnn_reduce_sum, xnn_reduce_mean, xnn_reduce_max, xnn_reduce_min),
+    Bool(), Bool(), Range(0, XNN_MAX_TENSOR_DIMS)));
 INSTANTIATE_TEST_SUITE_P(Reduce, ReduceQS8, params,
                          [](auto p) { return p.param.Name(); });
 INSTANTIATE_TEST_SUITE_P(Reduce, ReduceQU8, params,

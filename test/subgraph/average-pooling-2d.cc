@@ -3,330 +3,153 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>
-#include <array>
-#include <cmath>
+#include <cassert>
+#include <chrono>
 #include <cstddef>
-#include <cstdint>
-#include <memory>
-#include <random>
 #include <vector>
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
-#include "src/xnnpack/common.h"
+#include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
-#include "src/xnnpack/node-type.h"
-#include "src/xnnpack/operator-utils.h"
-#include "src/xnnpack/operator.h"
-#include "src/xnnpack/subgraph.h"
 #include "test/replicable_random_device.h"
-#include "test/subgraph/runtime-flags.h"
+#include "test/subgraph/stencil.h"
+#include "test/subgraph/subgraph-tester.h"
 
-template <
-  typename InputType,
-  typename OutputType = InputType>
-class AveragePoolingTest : public ::testing::Test {
- protected:
-  AveragePoolingTest() {
-    input_size_dist = std::uniform_int_distribution<uint32_t>(10, 15);
-    pooling_size_dist = std::uniform_int_distribution<uint32_t>(1, 5);
-    stride_dist = std::uniform_int_distribution<uint32_t>(1, 2);
-    batch_size = input_size_dist(rng);
-    input_height = input_size_dist(rng);
-    input_width = input_size_dist(rng);
-    channels = input_size_dist(rng);
-    pooling_height = pooling_size_dist(rng);
-    pooling_width = pooling_size_dist(rng);
-    // Avoid padding == pooling dimension because it will result in NaNs and cause comparison to fail.
-    input_padding_top = std::uniform_int_distribution<uint32_t>(0, pooling_height - 1)(rng);
-    input_padding_right = std::uniform_int_distribution<uint32_t>(0, pooling_width - 1)(rng);
-    input_padding_bottom = std::uniform_int_distribution<uint32_t>(0, pooling_height - 1)(rng);
-    input_padding_left = std::uniform_int_distribution<uint32_t>(0, pooling_width - 1)(rng);
-    stride_height = stride_dist(rng);
-    stride_width = stride_dist(rng);
-    output_height = xnn_compute_convolution_output_dimension(
-      input_padding_top + input_height + input_padding_bottom, pooling_height, 1, stride_height);
-    output_width = xnn_compute_convolution_output_dimension(
-      input_padding_left + input_width + input_padding_right, pooling_width, 1, stride_width);
-    output_min = std::uniform_real_distribution<float>(-255.0f, 0.0f)(rng);
-    output_max = std::uniform_real_distribution<float>(0.1f, 255.0f)(rng);
-    input_dims = {batch_size, input_height, input_width, channels};
-    output_dims = {batch_size, output_height, output_width, channels};
-    input = xnnpack::Buffer<InputType>(XNN_EXTRA_BYTES / sizeof(InputType) + batch_size * input_height * input_width * channels);
-    operator_output = xnnpack::Buffer<OutputType>(batch_size * output_height * output_width * channels);
-    subgraph_output = xnnpack::Buffer<OutputType>(batch_size * output_height * output_width * channels);
+namespace xnnpack {
+
+template <typename T>
+Tensor<float> ReferenceImpl(Tensor<T> input, const StencilParams& kh,
+                            const StencilParams& kw) {
+  Tensor<float> output({input.extent(0), kh.output_extent(input.extent(1)),
+                        kw.output_extent(input.extent(2)), input.extent(3)});
+  output.fill(0.0f);
+
+  // Make a buffer to compute the sum of the kernels.
+  Tensor<float> ones({input.extent(1), input.extent(2)});
+  ones.fill(1.0f);
+
+  // Pad the input and the ones
+  input = input.pad(0.0f, {0, kh.padding_min, kw.padding_min, 0},
+                    {0, kh.padding_max, kw.padding_max, 0});
+  ones = ones.pad(0.0f, {kh.padding_min, kw.padding_min},
+                  {kh.padding_max, kw.padding_max});
+
+  input = make_stencil_dim(input, 2, kw);
+  input = make_stencil_dim(input, 1, kh);
+  ones = make_stencil_dim(ones, 1, kw);
+  ones = make_stencil_dim(ones, 0, kh);
+
+  for (size_t y = 0; y < output.extent(1); ++y) {
+    for (size_t x = 0; x < output.extent(2); ++x) {
+      float kernel_sum = 0.0f;
+      for (size_t dy = 0; dy < kh.size; ++dy) {
+        for (size_t dx = 0; dx < kw.size; ++dx) {
+          kernel_sum += ones(y, dy, x, dx);
+        }
+      }
+      for (size_t n = 0; n < output.extent(0); ++n) {
+        for (size_t c = 0; c < output.extent(3); ++c) {
+          for (size_t dy = 0; dy < kh.size; ++dy) {
+            for (size_t dx = 0; dx < kw.size; ++dx) {
+              output(n, y, x, c) += input(n, y, dy, x, dx, c);
+            }
+          }
+        }
+        for (size_t c = 0; c < output.extent(3); ++c) {
+          output(n, y, x, c) /= kernel_sum;
+        }
+      }
+    }
   }
 
-  xnnpack::ReplicableRandomDevice rng;
-  std::uniform_int_distribution<uint32_t> input_size_dist;
-  std::uniform_int_distribution<uint32_t> pooling_size_dist;
-  std::uniform_int_distribution<uint32_t> stride_dist;
-  uint32_t batch_size;
-  uint32_t input_height;
-  uint32_t input_width;
-  uint32_t channels;
-  uint32_t pooling_height;
-  uint32_t pooling_width;
-  uint32_t output_height;
-  uint32_t output_width;
-  uint32_t stride_height;
-  uint32_t stride_width;
-  std::array<size_t, 4> input_dims;
-  std::array<size_t, 4> output_dims;
-  uint32_t input_padding_top;
-  uint32_t input_padding_right;
-  uint32_t input_padding_bottom;
-  uint32_t input_padding_left;
-  float output_min;
-  float output_max;
-
-  uint32_t input_id;
-  uint32_t output_id;
-
-  xnnpack::Buffer<InputType> input;
-  xnnpack::Buffer<OutputType> operator_output;
-  xnnpack::Buffer<OutputType> subgraph_output;
-};
-
-using AveragePoolingTestF16 = AveragePoolingTest<xnn_float16>;
-using AveragePoolingTestF32 = AveragePoolingTest<float>;
-
-TEST_F(AveragePoolingTestF16, define)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, input_dims.size(), input_dims.data(), nullptr, 0,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, output_dims.size(), output_dims.data(), nullptr, 1,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_average_pooling_2d(
-      subgraph, input_padding_top, input_padding_right, input_padding_bottom, input_padding_left, pooling_height,
-      pooling_width, stride_height, stride_width, output_min, output_max, input_id, output_id,
-      /*flags=*/0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_average_pooling_2d);
-
-  ASSERT_EQ(node->params.pooling_2d.padding_top, input_padding_top);
-  ASSERT_EQ(node->params.pooling_2d.padding_right, input_padding_right);
-  ASSERT_EQ(node->params.pooling_2d.padding_bottom, input_padding_bottom);
-  ASSERT_EQ(node->params.pooling_2d.padding_left, input_padding_left);
-  ASSERT_EQ(node->params.pooling_2d.pooling_height, pooling_height);
-  ASSERT_EQ(node->params.pooling_2d.pooling_width, pooling_width);
-  ASSERT_EQ(node->params.pooling_2d.stride_height, stride_height);
-  ASSERT_EQ(node->params.pooling_2d.stride_width, stride_width);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
-  ASSERT_EQ(node->num_inputs, 1);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
+  // Crop off the 1s we padded.
+  return output;
 }
 
-TEST_F(AveragePoolingTestF32, define)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+template <typename T>
+void TestImpl() {
+  ReplicableRandomDevice rng;
 
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
-  input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(), nullptr, 0,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
+  for (auto _ : FuzzTest(std::chrono::milliseconds(1000))) {
+    // TODO(b/406664150): Test kernels bigger than 5.
+    StencilParams kw =
+        random_stencil_params(rng, /*max_dilation=*/1, /*max_kernel_size=*/5);
+    StencilParams kh =
+        random_stencil_params(rng, /*max_dilation=*/1, /*max_kernel_size=*/5);
 
-  output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr, 1,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
+    // Define subgraph
+    SubgraphTester subgraph(2);
+    subgraph.AddInputTensor(4, xnn_datatype_of<T>(), 0)
+        .AddOutputTensor(4, xnn_datatype_of<T>(), 1)
+        .AddAveragePooling2D(kh.padding_min, kw.padding_max, kh.padding_max,
+                             kw.padding_min, kh.size, kw.size, kh.stride,
+                             kw.stride, 0, 1);
+    xnn_status status = subgraph.CreateRuntime();
+    if (status == xnn_status_unsupported_hardware) {
+      GTEST_SKIP();
+      return;
+    }
 
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_average_pooling_2d(
-      subgraph, input_padding_top, input_padding_right, input_padding_bottom, input_padding_left, pooling_height,
-      pooling_width, stride_height, stride_width, output_min, output_max, input_id, output_id,
-      /*flags=*/0));
+    for (int reshape = 0; reshape < 2; ++reshape) {
+      std::vector<size_t> output_shape = random_shape(rng, 4);
 
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_average_pooling_2d);
+      std::vector<size_t> input_shape = {
+          output_shape[0],
+          kh.input_extent(output_shape[1]),
+          kw.input_extent(output_shape[2]),
+          output_shape[3],
+      };
 
-  ASSERT_EQ(node->params.pooling_2d.padding_top, input_padding_top);
-  ASSERT_EQ(node->params.pooling_2d.padding_right, input_padding_right);
-  ASSERT_EQ(node->params.pooling_2d.padding_bottom, input_padding_bottom);
-  ASSERT_EQ(node->params.pooling_2d.padding_left, input_padding_left);
-  ASSERT_EQ(node->params.pooling_2d.pooling_height, pooling_height);
-  ASSERT_EQ(node->params.pooling_2d.pooling_width, pooling_width);
-  ASSERT_EQ(node->params.pooling_2d.stride_height, stride_height);
-  ASSERT_EQ(node->params.pooling_2d.stride_width, stride_width);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
-  ASSERT_EQ(node->num_inputs, 1);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-}
+      if (input_shape[1] <= kh.padding() || input_shape[2] <= kw.padding()) {
+        // TODO(b/406664150): This is a hack around a horrible long-standing bug
+        // where xnn_indirection_init_dwconv2d_compressed produces incorrect
+        // results if the input is smaller than the padded area. If we hit this
+        // case, just try again.
+        break;
+      }
 
-TEST_F(AveragePoolingTestF16, matches_operator_api)
-{
-  std::uniform_real_distribution<float> f32dist;
-  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+      // TODO(b/404587443): Fix XNNPACK's pooling implementation so this hack is
+      // not necessary.
+      if (kh.result_is_identity(input_shape[1], output_shape[1]) ||
+          kw.result_is_identity(input_shape[2], output_shape[2])) {
+        continue;
+      }
 
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+      Tensor<T> input(input_shape, PaddingBytes{XNN_EXTRA_BYTES});
+      DatatypeGenerator<T> gen(-10.0f, 20.0f);
+      input.generate([&]() { return gen(rng); });
 
-  // Call operator API.
-  xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_average_pooling2d_nhwc_f16(
-    input_padding_top, input_padding_right, input_padding_bottom, input_padding_left, pooling_height, pooling_width,
-    stride_height, stride_width, output_min, output_max, /*flags=*/0, &op);
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
+      subgraph.ReshapeExternalTensor(input_shape, input.base(), 0)
+          .ReshapeRuntime();
+      ASSERT_EQ(subgraph.GetExternalTensorShape(1), output_shape)
+          << ", input_shape=" << index_to_string(input_shape) << ", kh=" << kh
+          << ", kw=" << kw;
+
+      // Run subgraph
+      Tensor<T> output(output_shape);
+      subgraph.SetupExternalTensor(output.base(), 1)
+          .SetupRuntime()
+          .InvokeRuntime();
+
+      // Verify results.
+      Tensor<float> expected = ReferenceImpl(input, kh, kw);
+      const float tolerance = 10.0f * xnnpack::epsilon(xnn_datatype_of<T>());
+      for (const auto& i : EnumerateIndices(output.extents())) {
+        ASSERT_NEAR(output(i), expected(i),
+                    tolerance * (1.0f + std::abs(expected(i))))
+            << "input_shape=" << index_to_string(input_shape)
+            << ", output_shape=" << index_to_string(output_shape)
+            << ", i=" << index_to_string(i) << ", kh=" << kh << ", kw=" << kw;
+      }
+    }
   }
-
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
-
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_reshape_average_pooling2d_nhwc_f16(
-      op, batch_size, input_height, input_width,
-      channels, /*input_pixel_stride=*/channels, /*output_pixel_stride=*/channels,
-      /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-      /*threadpool=*/nullptr));
-
-  ASSERT_EQ(xnn_status_success, xnn_setup_average_pooling2d_nhwc_f16(op, input.data(), operator_output.data()));
-
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-  input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, input_dims.size(), input_dims.data(), nullptr, /*external_id=*/0,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp16, output_dims.size(), output_dims.data(), nullptr, /*external_id=*/1,
-      /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_average_pooling_2d(
-      subgraph, input_padding_top, input_padding_right, input_padding_bottom, input_padding_left, pooling_height,
-      pooling_width, stride_height, stride_width, output_min, output_max, input_id, output_id,
-      /*flags=*/0));
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  ASSERT_EQ(subgraph_output, operator_output);
 }
 
-TEST_F(AveragePoolingTestF32, matches_operator_api)
-{
-  std::uniform_real_distribution<float> f32dist;
-  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+TEST(AveragePooling2DF16, test) { TestImpl<xnn_float16>(); }
+TEST(AveragePooling2DF32, test) { TestImpl<float>(); }
 
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  // Call operator API.
-  xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_average_pooling2d_nhwc_f32(
-    input_padding_top, input_padding_right, input_padding_bottom, input_padding_left, pooling_height, pooling_width,
-    stride_height, stride_width, output_min, output_max, /*flags=*/0, &op);
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
-  }
-
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
-
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_reshape_average_pooling2d_nhwc_f32(
-      op, batch_size, input_height, input_width,
-      channels, /*input_pixel_stride=*/channels, /*output_pixel_stride=*/channels,
-      /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-      /*threadpool=*/nullptr));
-
-  ASSERT_EQ(xnn_status_success, xnn_setup_average_pooling2d_nhwc_f32(op, input.data(), operator_output.data()));
-
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-  input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(), nullptr, /*external_id=*/0,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr, /*external_id=*/1,
-      /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_average_pooling_2d(
-      subgraph, input_padding_top, input_padding_right, input_padding_bottom, input_padding_left, pooling_height,
-      pooling_width, stride_height, stride_width, output_min, output_max, input_id, output_id,
-      /*flags=*/0));
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  ASSERT_EQ(subgraph_output, operator_output);
-}
+}  // namespace xnnpack

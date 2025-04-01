@@ -8,9 +8,11 @@
 #define __XNNPACK_SRC_XNNPACK_SIMD_F32_SSE2_H_
 
 #include <assert.h>
-#include <emmintrin.h>
 #include <stddef.h>
 #include <stdint.h>
+
+// Header file for SSE2 intrinsics.
+#include <emmintrin.h>
 
 #include "src/xnnpack/common.h"
 
@@ -28,10 +30,6 @@ typedef __m128 xnn_simd_f32_t;
 
 // Whether or not this architecture has native fused multiply-add support.
 #define XNN_SIMD_HAS_NATIVE_FMA 0
-
-// Include the header for generic functions _after_ declaring the arch-specific
-// types and sizes.
-#include "src/xnnpack/simd/f32-generic-functions.h"
 
 // Arithmetic operations.
 
@@ -130,16 +128,18 @@ static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
-  // Create a filter for all non-finite values in `a` (all exponent bits set).
-  XNN_SIMD_CONST_F32_FROM_INT32(vexp_bits, 0x7f800000);
-  const xnn_simd_f32_t vfilter =
-      xnn_cmpeq_f32(xnn_and_f32(a, vexp_bits), vexp_bits);
+  // Any input larger than 2^23 is already an integer value since its fractional
+  // bits will no longer fit in the mantissa. We create a filter for these that
+  // also catches all non-finite values in `a` (compares with NaN are always
+  // `false`).
+  XNN_SIMD_CONST_F32(vmax_non_int_val, 8388608.0f);  // 2^23.
+  const xnn_simd_f32_t vfilter = _mm_cmplt_ps(xnn_abs_f32(a), vmax_non_int_val);
 
   // Round by converting to `int` and back.
   const xnn_simd_f32_t vresult = _mm_cvtepi32_ps(_mm_cvtps_epi32(a));
 
-  // Apply the non-finite value filter to repace any non-finite input with `a`.
-  return _mm_or_ps(_mm_andnot_ps(vfilter, vresult), _mm_and_ps(vfilter, a));
+  // Apply the non-finite value filter to replace any non-finite input with `a`.
+  return _mm_or_ps(_mm_and_ps(vfilter, vresult), _mm_andnot_ps(vfilter, a));
 }
 
 // Special functions.
@@ -154,10 +154,6 @@ static XNN_INLINE xnn_simd_f32_t xnn_rcp_f32(xnn_simd_f32_t a) {
 #define XNN_SIMD_NUM_RSQRT_ITER_F32 1
 static XNN_INLINE xnn_simd_f32_t xnn_rsqrt_f32(xnn_simd_f32_t a) {
   return _mm_rsqrt_ps(a);
-}
-
-static XNN_INLINE xnn_simd_f32_t xnn_getexp_f32(xnn_simd_f32_t a) {
-  return xnn_generic_getexp_f32(a);
 }
 
 // Load/store operations.
@@ -182,14 +178,6 @@ static XNN_INLINE xnn_simd_f32_t xnn_set1_f32(float v) {
   return _mm_set1_ps(v);
 }
 
-static XNN_INLINE xnn_simd_f32_t xnn_set1_or_load_f32(const float* v) {
-#if XNN_ARCH_X86
-  return _mm_load_ps(v);
-#else
-  return _mm_set1_ps(*v);
-#endif
-}
-
 // Tail load/store operations.
 
 static XNN_INLINE xnn_simd_f32_t
@@ -199,17 +187,24 @@ xnn_load_tail_f32(const float* input, size_t num_elements) XNN_OOB_READS {
   return _mm_loadu_ps(input);
 }
 
-static XNN_INLINE xnn_simd_f32_t
-xnn_load_tail_safe_f32(const float* input, size_t num_elements) {
-  assert(num_elements > 0);
-  assert(num_elements < xnn_simd_size_f32);
+// TODO: Use direct load of 1,2 or 3 floats
+// Consider clearing pad values to 0
+static XNN_INLINE xnn_simd_f32_t xnn_load_tail_safe_f32(const float* input,
+                                                        size_t num_elements) {
+  assert(num_elements <= xnn_simd_size_f32);
 
   XNN_ALIGN(16) float padded[4];
   float* dst = padded;
   switch (num_elements) {
-  case 3: *dst++ = *input++;
-  case 2: *dst++ = *input++;
-  default: *dst++ = *input++;
+    case 4:
+      *dst++ = *input++;
+    case 3:
+      *dst++ = *input++;
+    case 2:
+      *dst++ = *input++;
+    case 1:
+      *dst++ = *input++;
+    default: ;
   }
   return _mm_load_ps(padded);
 }

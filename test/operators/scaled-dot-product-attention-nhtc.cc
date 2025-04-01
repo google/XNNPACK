@@ -3,7 +3,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-
 #include <gtest/gtest.h>
 #include "test/operators/scaled-dot-product-attention-operator-tester.h"
 
@@ -81,7 +80,8 @@ TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, self_attention_with_cap) {
       .TestF16();
 }
 
-TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_head_self_attention_with_cap) {
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16,
+     multi_head_self_attention_with_cap) {
   ScaledDotProductAttentionOperatorTester()
       .query_heads(17)
       .key_value_heads(17)
@@ -91,7 +91,8 @@ TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_head_self_attention_with_cap) 
       .TestF16();
 }
 
-TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_query_self_attention_with_cap) {
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16,
+     multi_query_self_attention_with_cap) {
   ScaledDotProductAttentionOperatorTester()
       .query_heads(17)
       .key_value_heads(1)
@@ -101,7 +102,8 @@ TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_query_self_attention_with_cap)
       .TestF16();
 }
 
-TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_head_cross_attention_key_value_tokens_lt_query_tokens) {
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16,
+     multi_head_cross_attention_key_value_tokens_lt_query_tokens) {
   ScaledDotProductAttentionOperatorTester()
       .query_heads(17)
       .key_value_heads(17)
@@ -111,7 +113,8 @@ TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_head_cross_attention_key_value
       .TestF16();
 }
 
-TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_head_cross_attention_key_value_tokens_gt_query_tokens) {
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16,
+     multi_head_cross_attention_key_value_tokens_gt_query_tokens) {
   ScaledDotProductAttentionOperatorTester()
       .query_heads(17)
       .key_value_heads(17)
@@ -121,7 +124,8 @@ TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_head_cross_attention_key_value
       .TestF16();
 }
 
-TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_query_cross_attention_key_value_tokens_lt_query_tokens) {
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16,
+     multi_query_cross_attention_key_value_tokens_lt_query_tokens) {
   ScaledDotProductAttentionOperatorTester()
       .query_heads(17)
       .key_value_heads(1)
@@ -131,7 +135,8 @@ TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_query_cross_attention_key_valu
       .TestF16();
 }
 
-TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_query_cross_attention_key_value_tokens_gt_query_tokens) {
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16,
+     multi_query_cross_attention_key_value_tokens_gt_query_tokens) {
   ScaledDotProductAttentionOperatorTester()
       .query_heads(17)
       .key_value_heads(1)
@@ -141,8 +146,10 @@ TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_query_cross_attention_key_valu
       .TestF16();
 }
 
-// Small parallelization terms to test the case where we size workspace using batch size.
-TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_head_cross_attention_multithreaded_small_batch) {
+// Small parallelization terms to test the case where we size workspace using
+// batch size.
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16,
+     multi_head_cross_attention_multithreaded_small_batch) {
   ScaledDotProductAttentionOperatorTester()
       .batch_size(1)
       .query_heads(1)
@@ -152,8 +159,10 @@ TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_head_cross_attention_multithre
       .TestF16();
 }
 
-// Large parallelization terms to test the case where we size workspace using number of threads.
-TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_head_cross_attention_multithreaded) {
+// Large parallelization terms to test the case where we size workspace using
+// number of threads.
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16,
+     multi_head_cross_attention_multithreaded) {
   ScaledDotProductAttentionOperatorTester()
       .batch_size(31)
       .query_heads(17)
@@ -248,7 +257,8 @@ TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, self_attention_with_cap) {
       .TestF32();
 }
 
-TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_head_self_attention_with_cap) {
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32,
+     multi_head_self_attention_with_cap) {
   ScaledDotProductAttentionOperatorTester()
       .query_heads(17)
       .key_value_heads(17)
@@ -258,7 +268,8 @@ TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_head_self_attention_with_cap) 
       .TestF32();
 }
 
-TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_query_self_attention_with_cap) {
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32,
+     multi_query_self_attention_with_cap) {
   ScaledDotProductAttentionOperatorTester()
       .query_heads(17)
       .key_value_heads(1)
@@ -268,7 +279,8 @@ TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_query_self_attention_with_cap)
       .TestF32();
 }
 
-TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_head_cross_attention_key_value_tokens_lt_query_tokens) {
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32,
+     multi_head_cross_attention_key_value_tokens_lt_query_tokens) {
   ScaledDotProductAttentionOperatorTester()
       .query_heads(17)
       .key_value_heads(17)
@@ -278,7 +290,8 @@ TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_head_cross_attention_key_value
       .TestF32();
 }
 
-TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_head_cross_attention_key_value_tokens_gt_query_tokens) {
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32,
+     multi_head_cross_attention_key_value_tokens_gt_query_tokens) {
   ScaledDotProductAttentionOperatorTester()
       .query_heads(17)
       .key_value_heads(17)
@@ -288,7 +301,8 @@ TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_head_cross_attention_key_value
       .TestF32();
 }
 
-TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_query_cross_attention_key_value_tokens_lt_query_tokens) {
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32,
+     multi_query_cross_attention_key_value_tokens_lt_query_tokens) {
   ScaledDotProductAttentionOperatorTester()
       .query_heads(17)
       .key_value_heads(1)
@@ -298,7 +312,8 @@ TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_query_cross_attention_key_valu
       .TestF32();
 }
 
-TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_query_cross_attention_key_value_tokens_gt_query_tokens) {
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32,
+     multi_query_cross_attention_key_value_tokens_gt_query_tokens) {
   ScaledDotProductAttentionOperatorTester()
       .query_heads(17)
       .key_value_heads(1)
@@ -308,8 +323,10 @@ TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_query_cross_attention_key_valu
       .TestF32();
 }
 
-// Small parallelization terms to test the case where we size workspace using batch size.
-TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_head_cross_attention_multithreaded_small_batch) {
+// Small parallelization terms to test the case where we size workspace using
+// batch size.
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32,
+     multi_head_cross_attention_multithreaded_small_batch) {
   ScaledDotProductAttentionOperatorTester()
       .batch_size(1)
       .query_heads(1)
@@ -319,8 +336,10 @@ TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_head_cross_attention_multithre
       .TestF32();
 }
 
-// Large parallelization terms to test the case where we size workspace using number of threads.
-TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_head_cross_attention_multithreaded) {
+// Large parallelization terms to test the case where we size workspace using
+// number of threads.
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32,
+     multi_head_cross_attention_multithreaded) {
   ScaledDotProductAttentionOperatorTester()
       .batch_size(31)
       .query_heads(17)

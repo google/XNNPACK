@@ -30,12 +30,6 @@ XNN_UKERNEL_WITH_PARAMS(0, xnn_f16_vapproxgelu_ukernel__neonfp16arith_rational_6
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f16_vapproxgelu_ukernel__neonfp16arith_rational_6_4_div_u32, 32, false, xnn_float16, struct xnn_f16_default_params, NULL)
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
-#if XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512fp16, xnn_f16_vapproxgelu_ukernel__avx512fp16_rational_6_4_div_u32, 32, false, xnn_float16, struct xnn_f16_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512fp16, xnn_f16_vapproxgelu_ukernel__avx512fp16_rational_6_4_div_u64, 64, false, xnn_float16, struct xnn_f16_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512fp16, xnn_f16_vapproxgelu_ukernel__avx512fp16_rational_6_4_div_u96, 96, false, xnn_float16, struct xnn_f16_default_params, NULL)
-#endif  // XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
-
 #ifdef XNN_DEFINED_UKERNEL_WITH_PARAMS
 #undef XNN_DEFINED_UKERNEL_WITH_PARAMS
 #undef XNN_UKERNEL_WITH_PARAMS
