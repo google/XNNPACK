@@ -403,6 +403,71 @@ static void x16_packw(benchmark::State& state,
                          benchmark::Counter::kIsRate);
 }
 
+static void x16_x32_packw(
+    benchmark::State& state, xnn_x16_x32_packw_gemm_goi_ukernel_fn packw,
+    size_t nr, size_t kr, size_t sr,
+    benchmark::utils::IsaCheckFunction isa_check = nullptr) {
+  if (isa_check != nullptr && !isa_check(state)) {
+    return;
+  }
+
+  const size_t batch = state.range(0);  // batch is g parameter for packw
+  const size_t dim_n = state.range(2);  // dim_n is nc parameter
+  const size_t dim_k = state.range(3);  // dim_k is kc parameter
+
+  const size_t rounded_n = benchmark::utils::RoundUp(dim_n, nr);
+  const size_t rounded_k = benchmark::utils::RoundUp(dim_k, kr * sr);
+
+  std::random_device random_device;
+  auto rng = std::mt19937(random_device());
+
+  // Computer num_buffers that fit cache with source weights + packed_weights.
+  const size_t num_buffers =
+      1 + benchmark::utils::DivideRoundUp<size_t>(
+              benchmark::utils::GetMaxCacheSize(),
+              sizeof(uint16_t) * batch *
+                  (dim_n * dim_k + rounded_n * rounded_k + rounded_n));
+
+  xnnpack::Buffer<uint16_t, XNN_ALLOCATION_ALIGNMENT> weights(
+      num_buffers * batch * dim_n * dim_k);
+  xnnpack::fill_uniform_random_bits(weights.data(), weights.size(), rng);
+  xnnpack::Buffer<uint16_t, XNN_ALLOCATION_ALIGNMENT> packed_weights(
+      num_buffers * batch * (rounded_n * rounded_k + 2 * rounded_n));
+
+  size_t buffer_index = 0;
+  for (auto _ : state) {
+    if (++buffer_index == num_buffers) {
+      buffer_index = 0;
+    }
+
+    packw(batch, dim_n, dim_k, nr, kr, sr,
+          reinterpret_cast<uint16_t*>(weights.data() +
+                                      buffer_index * batch * dim_n * dim_k),
+          /*bias=*/nullptr, /*scale=*/nullptr,
+          reinterpret_cast<uint16_t*>(packed_weights.data() +
+                                      buffer_index * batch *
+                                          (rounded_n * rounded_k + rounded_n)),
+          /*extra_bytes=*/0, /*params=*/nullptr);
+  }
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
+  const size_t elements_per_iteration = batch * dim_n * dim_k;
+  state.counters["elements"] =
+      benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration,
+                         benchmark::Counter::kIsRate);
+
+  const size_t bytes_per_iteration =
+      (elements_per_iteration + batch * (rounded_n * rounded_k + rounded_n)) *
+      sizeof(uint16_t);
+  state.counters["bytes"] =
+      benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
+                         benchmark::Counter::kIsRate);
+}
+
 static void x32_packw(benchmark::State& state,
                       xnn_x32_packw_gemm_goi_ukernel_fn packw, size_t nr,
                       size_t kr, size_t sr,

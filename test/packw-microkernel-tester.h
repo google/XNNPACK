@@ -391,6 +391,87 @@ class PackWMicrokernelTester {
     }
   }
 
+  void Test(xnn_x16_x32_packw_gemm_gio_ukernel_fn packw) const {
+    xnnpack::Buffer<xnn_bfloat16> weights(g() * n() * k());
+    xnnpack::Buffer<float> bias(g() * n());
+    xnnpack::Buffer<xnn_bfloat16, XNN_ALLOCATION_ALIGNMENT> packed_w(
+        g() * (packed_n() * packed_k() + 2 * packed_n()));
+    xnnpack::Buffer<xnn_bfloat16> packed_w_ref(
+        g() * (packed_n() * packed_k() + 2 * packed_n()));
+
+    const xnn_bfloat16 pad_value = xnn_bfloat16_from_bits(
+        std::max(sr(), kr()) == 1 ? UINT16_C(0xDEAD) : 0);
+    std::iota(weights.begin(), weights.end(), 1.0f);
+
+    std::iota(bias.begin(), bias.end(), 0.5f);
+    std::fill(packed_w_ref.begin(), packed_w_ref.end(), pad_value);
+
+    const float* bias_data = nullbias() ? nullptr : bias.data();
+
+    // Compute reference results.
+    xnn_pack_bf16_f32_gemm_gio_w(g(), n(), k(), nr(), kr(), sr(), n(),
+                                 weights.data(), bias_data,
+                                 /*scale=*/nullptr, packed_w_ref.data(),
+                                 /*extra_bytes=*/0, /*params=*/nullptr);
+
+    // Call optimized micro-kernel.
+    packw(g(), n(), k(), nr(), kr(), sr(), n(),
+          reinterpret_cast<const uint16_t*>(weights.data()),
+          reinterpret_cast<const uint32_t*>(bias_data), /*scale=*/nullptr,
+          reinterpret_cast<uint16_t*>(packed_w.data()),
+          /*extra_bytes=*/0, /*params=*/nullptr);
+
+    // Verify results.
+    for (size_t i = 0; i < packed_w.size(); i++) {
+      // Ignore padding in N dimension.
+      if (packed_w_ref[i] != pad_value) {
+        ASSERT_EQ(packed_w[i], packed_w_ref[i])
+            << "at position " << i << " / " << packed_w.size() << ", n " << n()
+            << ", k " << k();
+      }
+    }
+  }
+
+  void Test(xnn_x16_x32_packw_gemm_goi_ukernel_fn packw) const {
+    xnnpack::Buffer<xnn_bfloat16> weights(g() * n() * k());
+    xnnpack::Buffer<float> bias(g() * n());
+    xnnpack::Buffer<xnn_bfloat16, XNN_ALLOCATION_ALIGNMENT> packed_w(
+        g() * (packed_n() * packed_k() + 2 * packed_n()));
+    xnnpack::Buffer<xnn_bfloat16> packed_w_ref(
+        g() * (packed_n() * packed_k() + 2 * packed_n()));
+
+    const xnn_bfloat16 pad_value = xnn_bfloat16_from_bits(
+        std::max(sr(), kr()) == 1 ? UINT16_C(0xDEAD) : 0);
+    std::iota(weights.begin(), weights.end(), 1.0f);
+    std::iota(bias.begin(), bias.end(), 0.5f);
+    std::fill(packed_w_ref.begin(), packed_w_ref.end(), pad_value);
+
+    const float* bias_data = nullbias() ? nullptr : bias.data();
+
+    // Compute reference results.
+    xnn_pack_bf16_f32_gemm_goi_w(g(), n(), k(), nr(), kr(), sr(),
+                                 weights.data(), bias_data,
+                                 /*scale=*/nullptr, packed_w_ref.data(),
+                                 /*extra_bytes=*/0, /*params=*/nullptr);
+
+    // Call optimized micro-kernel.
+    packw(g(), n(), k(), nr(), kr(), sr(),
+          reinterpret_cast<const uint16_t*>(weights.data()),
+          reinterpret_cast<const uint32_t*>(bias_data), /*scale=*/nullptr,
+          reinterpret_cast<uint16_t*>(packed_w.data()),
+          /*extra_bytes=*/0, /*params=*/nullptr);
+
+    // Verify results.
+    for (size_t i = 0; i < packed_w.size(); i++) {
+      // Ignore padding in N dimension.
+      if (packed_w_ref[i] != pad_value) {
+        ASSERT_EQ(packed_w[i], packed_w_ref[i])
+            << "at position " << i << " / " << packed_w.size() << ", n " << n()
+            << ", k " << k();
+      }
+    }
+  }
+
   void Test(xnn_x32_packw_gemm_goi_ukernel_fn packw) const {
     xnnpack::Buffer<uint32_t> weights(g() * n() * k());
     xnnpack::Buffer<uint32_t> padded_weights(g() * n() * packed_k());

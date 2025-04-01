@@ -195,6 +195,7 @@ MICROKERNEL_DEFS = [
     "src/u8-vclamp/u8-vclamp.h",
     "src/x16-pack-lh/x16-pack-lh.h",
     "src/x16-packw/x16-packw.h",
+    "src/x16-x32-packw/x16-x32-packw.h",
     "src/x16-transposec/x16-transposec.h",
     "src/x24-transposec/x24-transposec.h",
     "src/x32-pack-lh/x32-pack-lh.h",

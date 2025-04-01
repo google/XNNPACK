@@ -249,6 +249,8 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/x8-packw/gen/x8-packw-x32-gemm-goi-scalar-u2.c
   src/x8-transposec/gen/x8-transposec-2x4-scalar-int.c
   src/x16-transposec/gen/x16-transposec-2x4-scalar-int.c
+  src/x16-x32-packw/gen/x16-x32-packw-x32c2-gemm-gio-scalar.c
+  src/x16-x32-packw/gen/x16-x32-packw-x32c2-gemm-goi-scalar.c
   src/x24-transposec/gen/x24-transposec-1x2-scalar.c
   src/x32-packw/gen/x32-packw-x2-gemm-gio-scalar.c
   src/x32-packw/gen/x32-packw-x2-gemm-goi-scalar-float-u4.c
