@@ -481,4 +481,82 @@ static XNN_INTRINSIC HVX_Vector Q6_Vsf_vdiv_VsfVsf(HVX_Vector vin1,
   return Q6_Vsf_equals_Vqf32(
       Q6_Vqf32_vmpy_VsfVsf(vin1, fast_inverse__vsf(vin2)));
 }
+
+// For qs8 gemm
+
+static XNN_INTRINSIC HVX_Vector Q6_Vqf32_convert_Vw(HVX_Vector vxl) {
+  HVX_Vector vzero = Q6_V_vzero();
+  HVX_Vector minus_one = Q6_V_vsplat_R(0x80000000);
+  HVX_Vector mant_neg_pow_2 = Q6_V_vsplat_R(0xc0000001);
+  HVX_Vector exp_offset =
+      Q6_V_vsplat_R(157);  // 127 exp0 + 22 frac + 8 exp shift
+  HVX_VectorPred ql_equals_zero, ql_neg_mantissa;
+  HVX_Vector el_exponent, zl_norm_mantissa;
+
+  // Check if any of the elements are zeros
+  ql_equals_zero = Q6_Q_vcmp_eq_VwVw(vxl, vzero);
+  // Count the Leading Sign bits
+  el_exponent = Q6_Vw_vnormamt_Vw(vxl);
+  // Normalize the input to obtain normalized mantissa
+  zl_norm_mantissa = Q6_Vw_vasl_VwVw(vxl, el_exponent);
+  // Check if input element is a negative power of 2 (will become -1 after
+  // normalization)
+  ql_neg_mantissa =
+      Q6_Q_vcmp_eq_VwVw(zl_norm_mantissa, minus_one);  // see if mantissa is -1
+  // Obtain the exponent with qfp offset and normalization factor( 127 + (30 -
+  // normant) = 157 - normant)
+  el_exponent = Q6_Vw_vsub_VwVw(exp_offset, el_exponent);
+  // Correct mantissa  for negative numbers which are power of 2 (will become -1
+  // after normalization) Corrected mantissa is 0xc0000000, now adjust exponent
+  // by 1 as we have right shifted number by 1 to correct mantissa. Hence choose
+  // num: 0xc0000001 when normalized number is -1
+  zl_norm_mantissa =
+      Q6_V_vmux_QVV(ql_neg_mantissa, mant_neg_pow_2, zl_norm_mantissa);
+  // Append the exponent to the mantissa
+  zl_norm_mantissa = Q6_Vw_vadd_VwVw(zl_norm_mantissa, el_exponent);
+  // Handle Zero specially, zero is 0 in qfp
+  zl_norm_mantissa = Q6_V_vmux_QVV(ql_equals_zero, vzero, zl_norm_mantissa);
+
+  return zl_norm_mantissa;
+}
+
+static XNN_INTRINSIC HVX_Vector Q6_Vw_round_to_zero_Vw(HVX_Vector vout,
+                                                       HVX_Vector vxl,
+                                                       HVX_Vector vexp) {
+  // Round to zero adjustment
+  HVX_Vector vzero = Q6_V_vzero();
+  // Shift mantissa back to check for truncated bits
+  HVX_Vector vchk = Q6_Vw_vasl_VwVw(vout, vexp);
+  // If (bits truncated/differ) && (vout negative) -> round to zero, else no
+  // change
+  HVX_VectorPred q1_vxlo_equ = Q6_Q_vcmp_eq_VwVw(vxl, vchk);
+  HVX_VectorPred q1_vxlo_neq = Q6_Q_not_Q(q1_vxlo_equ);
+  HVX_VectorPred q1_vxlo_rtz = Q6_Q_vcmp_gtand_QVwVw(q1_vxlo_neq, vzero, vout);
+  HVX_Vector vone = Q6_V_vsplat_R(1);
+  HVX_Vector vout1 = Q6_Vw_vadd_VwVw(vout, vone);
+  vout = Q6_V_vmux_QVV(q1_vxlo_rtz, vout1, vout);
+
+  return vout;
+}
+
+// Converts a vector of QFloat 32-bit float elements to a vector of int32
+// elements.
+static XNN_INTRINSIC HVX_Vector Q6_Vw_convert_Vqf32(HVX_Vector vxl) {
+  HVX_Vector exp_mask = Q6_V_vsplat_R(0xff);
+  HVX_Vector exp_offset = Q6_V_vsplat_R(149);  // 127 exp0 + 22 frac
+
+  HVX_Vector el_exponent, vout;
+  // Obtain the exponent part: bits (0-7)
+  el_exponent = Q6_V_vand_VV(exp_mask, vxl);
+  // Obtain the un-biased exponent: qfp offset(127) + max normalization
+  // factor(22 + 8) - exp = 149 - xp + 8
+  el_exponent = Q6_Vw_vsub_VwVw(exp_offset, el_exponent);
+  // Shift away the exponent (by 8)
+  vxl = Q6_Vw_vasr_VwR(vxl, 8);
+  // obtain the integer by compensating for exponent.
+  vout = Q6_Vw_vasr_VwVw(vxl, el_exponent);
+
+  return vout;
+}
+
 #endif  // XNN_ARCH_HEXAGON
