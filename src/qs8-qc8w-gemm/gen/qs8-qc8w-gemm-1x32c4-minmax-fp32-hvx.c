@@ -10,6 +10,7 @@
 
 
 #include <assert.h>
+#include <string.h>  // for memcpy
 
 #include <hexagon_types.h>
 #include <hexagon_protos.h>
@@ -20,6 +21,11 @@
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/unaligned.h"
 
+
+static XNN_INTRINSIC void xnn_Q6_V_vstu_variable(void* addr, uint32_t n,
+                                             HVX_Vector vin) {
+  memcpy(addr, &vin, n);
+}
 
 
 void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x32c4__hvx(
@@ -53,7 +59,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x32c4__hvx(
   const HVX_Vector voutput_min = Q6_Vb_vsplat_R(params->fp32_scalar.output_min);
 
   do {
-    HVX_Vector vacc0x32 = *((HVX_Vector*)w);
+    HVX_Vector vacc0x32 = *((HVX_UVector*)w);
     HVX_Vector vacc1x0x32 = Q6_V_vsplat_R(0);
 
     w = (const int32_t*) w + 32;
@@ -64,8 +70,8 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x32c4__hvx(
       const HVX_Vector va0x4567 = Q6_V_vsplat_R(unaligned_load_s32(a0+4));
       a0 += 8;
 
-      const HVX_Vector vb32x0123 = *((HVX_Vector *)((int8_t *)w));
-      const HVX_Vector vb32x4567 = *((HVX_Vector *)((int8_t *)w + 128));
+      const HVX_Vector vb32x0123 = *((HVX_UVector *)((int8_t *)w));
+      const HVX_Vector vb32x4567 = *((HVX_UVector *)((int8_t *)w + 128));
       vacc0x32 =  Q6_Vw_vrmpyacc_VwVbVb(vacc0x32, va0x0123, vb32x0123);
       vacc1x0x32 = Q6_Vw_vrmpyacc_VwVbVb(vacc1x0x32, va0x4567, vb32x4567);
 
@@ -79,7 +85,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x32c4__hvx(
       const HVX_Vector va0x0123 = Q6_V_vsplat_R(unaligned_load_s32(a0));
       a0 += 4;
 
-      const HVX_Vector vb32x0123 = *((HVX_Vector *)((int8_t *)w));
+      const HVX_Vector vb32x0123 = *((HVX_UVector *)((int8_t *)w));
       vacc0x32 =  Q6_Vw_vrmpyacc_VwVbVb(vacc0x32, va0x0123, vb32x0123);
 
       w = (const int8_t*) w + 128;
@@ -113,7 +119,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x32c4__hvx(
       nc -= 32;
     } else {
       // Prepare mask for valid 8-bit elements (depends on nc).
-      Q6_V_vstu_variable(c0, nc, vout0x32);
+      xnn_Q6_V_vstu_variable(c0, nc, vout0x32);
       nc = 0;
     }
   } while (nc != 0);
