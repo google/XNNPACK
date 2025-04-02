@@ -3,8 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <algorithm>
 #include <cassert>
-#include <chrono>
+#include <chrono>  // NOLINT(build/c++11)
 #include <cstddef>
 #include <cstdlib>
 #include <random>
@@ -19,6 +20,13 @@
 #include "test/subgraph/subgraph-tester.h"
 
 namespace xnnpack {
+
+namespace {
+
+static const float kMaxR = 10.0f;
+static const float kMaxI = 1.0;
+
+};  // namespace
 
 template <typename T>
 Tensor<T> ReferenceImpl(Tensor<T> x, Tensor<T> w) {
@@ -76,8 +84,8 @@ void TestImpl() {
     Tensor<T> input({batch_size, tokens, heads, 2, channels},
                     PaddingBytes{XNN_EXTRA_BYTES});
     Tensor<T> weights({max_tokens, 2, channels}, PaddingBytes{XNN_EXTRA_BYTES});
-    DatatypeGenerator<T> gen_r(1.0f, 10.0f);
-    DatatypeGenerator<T> gen_i(0.01f, 1.0f);
+    DatatypeGenerator<T> gen_r(1.0f, kMaxR);
+    DatatypeGenerator<T> gen_i(0.01f, kMaxI);
     input.slice(3, 0).generate([&]() { return gen_r(rng); });
     input.slice(3, 1).generate([&]() { return gen_i(rng); });
     weights.slice(1, 0).generate([&]() { return gen_r(rng); });
@@ -98,12 +106,9 @@ void TestImpl() {
         .InvokeRuntime();
 
     // Verify results.
-    T max_abs_val = 0.0f;
-    for (const T& val : output) {
-      max_abs_val = std::max<T>(max_abs_val, std::abs(val));
-    }
+    const float max_input_val = std::max(kMaxR, kMaxR);
     const float abs_tol =
-        max_abs_val * 2.0f * xnnpack::epsilon(xnn_datatype_of<T>());
+        max_input_val * max_input_val * xnnpack::epsilon(xnn_datatype_of<T>());
     for (const auto& i : EnumerateIndices(output.extents())) {
       ASSERT_NEAR(output(i), expected(i), abs_tol);
     }
