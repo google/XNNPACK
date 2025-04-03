@@ -343,10 +343,6 @@ struct xnn_node {
       size_t perm[XNN_MAX_TENSOR_DIMS];
       size_t num_dims;
     } transpose;
-    struct {
-      enum xnn_attention_logits_cap_type cap_type;
-      struct xnn_attention_logits_cap_tanh_params cap_tanh_params;
-    } scaled_dot_product_attention;
     union xnn_unary_params unary;
   } params;
   struct {
