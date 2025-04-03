@@ -6,7 +6,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <stdio.h>
 #include <assert.h>
 #include <inttypes.h>
 #include <math.h>
@@ -1149,7 +1148,7 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qb4w(
     return xnn_status_invalid_parameter;
   }
 
-  if (kernel_zero_point != 8) {
+  if (kernel_zero_point != 8 && kernel_zero_point != 0) {
     xnn_log_error(
       "failed to create %s operator with %" PRIu8 " kernel zero point: kernel zero point must be equal to 8 "
       "(unsigned weights) or 0 (signed weights)",
@@ -1222,6 +1221,85 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w(
 {
   const struct xnn_gemm_config* gemm_config = xnn_init_qd8_f32_qb4w_gemm_config();
   return create_fully_connected_nc_qx8_f32_qb4w(input_channels, output_channels, input_stride, output_stride,
+                                                block_size, kernel_zero_point, kernel_scale, kernel, bias,
+                                                output_min, output_max, flags, code_cache, weights_cache,
+                                                gemm_config, xnn_operator_type_fully_connected_nc_qd8_f32_qb4w, fully_connected_op_out);
+}
+
+enum xnn_status create_fully_connected_nc_qd8_f32_qb4w_f16_scales(
+    size_t input_channels,
+    size_t output_channels,
+    size_t input_stride,
+    size_t output_stride,
+    size_t block_size,
+    uint8_t kernel_zero_point,
+    const xnn_float16* kernel_scale,
+    const void* kernel,
+    const float* bias,
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_code_cache_t code_cache,
+    xnn_weights_cache_t weights_cache,
+    const struct xnn_gemm_config *gemm_config,
+    enum xnn_operator_type expected_operator_type,
+    xnn_operator_t* fully_connected_op_out)
+{
+  const size_t num_blocks = (input_channels + block_size - 1) / block_size * output_channels;
+  xnn_bfloat16* bf16_scale_buffer = (xnn_bfloat16*)xnn_allocate_memory(
+      output_channels  * num_blocks * sizeof(xnn_bfloat16));
+  for (size_t i = 0; i < num_blocks; ++i) {
+    bf16_scale_buffer[i] = xnn_bfloat16_from_float(xnn_float16_to_float(kernel_scale[i]));
+  }
+  enum xnn_status status = create_fully_connected_nc_qx8_f32_qb4w(input_channels, output_channels, input_stride, output_stride,
+                                                block_size, kernel_zero_point, (const uint16_t*) bf16_scale_buffer, kernel, bias,
+                                                output_min, output_max, flags, code_cache, weights_cache,
+                                                gemm_config, xnn_operator_type_fully_connected_nc_qd8_f32_qb4w, fully_connected_op_out);
+  xnn_release_memory(bf16_scale_buffer);
+  return status;
+}
+
+enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w_f16_scales(
+    size_t input_channels,
+    size_t output_channels,
+    size_t input_stride,
+    size_t output_stride,
+    size_t block_size,
+    uint8_t kernel_zero_point,
+    const xnn_float16* kernel_scale,
+    const void* kernel,
+    const float* bias,
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_code_cache_t code_cache,
+    xnn_weights_cache_t weights_cache,
+    xnn_operator_t* fully_connected_op_out) {
+  const struct xnn_gemm_config* gemm_config = xnn_init_qd8_f32_qb4w_gemm_config();
+  return create_fully_connected_nc_qd8_f32_qb4w_f16_scales(input_channels, output_channels, input_stride, output_stride,
+                                                block_size, kernel_zero_point, kernel_scale, kernel, bias,
+                                                output_min, output_max, flags, code_cache, weights_cache,
+                                                gemm_config, xnn_operator_type_fully_connected_nc_qd8_f32_qb4w, fully_connected_op_out);
+}
+
+enum xnn_status xnn_create_fully_connected_nc_qdu8_f32_qb4w_f16_scales(
+    size_t input_channels,
+    size_t output_channels,
+    size_t input_stride,
+    size_t output_stride,
+    size_t block_size,
+    uint8_t kernel_zero_point,
+    const xnn_float16* kernel_scale,
+    const void* kernel,
+    const float* bias,
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_code_cache_t code_cache,
+    xnn_weights_cache_t weights_cache,
+    xnn_operator_t* fully_connected_op_out) {
+  const struct xnn_gemm_config* gemm_config = xnn_init_qdu8_f32_qb4w_gemm_config();
+  return create_fully_connected_nc_qd8_f32_qb4w_f16_scales(input_channels, output_channels, input_stride, output_stride,
                                                 block_size, kernel_zero_point, kernel_scale, kernel, bias,
                                                 output_min, output_max, flags, code_cache, weights_cache,
                                                 gemm_config, xnn_operator_type_fully_connected_nc_qd8_f32_qb4w, fully_connected_op_out);

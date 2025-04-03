@@ -743,7 +743,7 @@ void xnn_pack_qs8_qb4w_gemm_goi_w(
   assert(k != nullptr);
   assert(packed_weights != nullptr);
   assert(params != nullptr);
-  assert(params->kernel_zero_point == 8);
+  assert(params->kernel_zero_point == 8 || params->kernel_zero_point == 0);
   assert(bias == nullptr);  // Not used here. Must be updated outside.
 
   const size_t skr = sr * kr;
@@ -760,6 +760,7 @@ void xnn_pack_qs8_qb4w_gemm_goi_w(
 
   const size_t num_blocks = round_up_po2(kc, skr) / bl;
   const int32_t izp = (int32_t)params->input_zero_point;
+  const uint32_t kernel_zero_point = (uint32_t)params->kernel_zero_point;
 
   do {
     size_t nr_block_start = 0;
@@ -784,19 +785,37 @@ void xnn_pack_qs8_qb4w_gemm_goi_w(
             const size_t k_offset =
                 (nr_block_start + nr_block_offset) * kc + kc_idx;
             const size_t kh_offset = k_offset + kr;
-            uint8_t kv_lo = 8;
-            if (kc_idx < kc) {
-              kv_lo = ((k_offset & 1) ? (k[k_offset >> 1] >> 4)
-                                      : (k[k_offset >> 1] & 0xF));
+            if (kernel_zero_point == 0) {
+              int8_t kv_lo = 0;
+              if (kc_idx < kc) {
+                kv_lo = ((k_offset & 1) ? (k[k_offset >> 1] >> 4)
+                                        : (k[k_offset >> 1] & 0xF));
+              }
+              int8_t kv_hi = 0;
+              if ((kc_idx + kr) < kc) {
+                kv_hi = ((kh_offset & 1) ? (k[kh_offset >> 1] >> 4)
+                                         : (k[kh_offset >> 1] & 0xF));
+              }
+              const int8_t kv = (kv_lo | (kv_hi << 4));
+              kv_lo = sign_extend_int4(kv_lo);
+              kv_hi = sign_extend_int4(kv_hi);
+              ksum += kv_lo + kv_hi;
+              ((int8_t*)packed_weights)[kr_block_offset] = kv;
+            } else {
+              uint8_t kv_lo = 8;
+              if (kc_idx < kc) {
+                kv_lo = ((k_offset & 1) ? (k[k_offset >> 1] >> 4)
+                                        : (k[k_offset >> 1] & 0xF));
+              }
+              uint8_t kv_hi = 8;
+              if ((kc_idx + kr) < kc) {
+                kv_hi = ((kh_offset & 1) ? (k[kh_offset >> 1] >> 4)
+                                         : (k[kh_offset >> 1] & 0xF));
+              }
+              ksum += kv_lo + kv_hi - 16;  // subtract 2 zero points (8)
+              const uint8_t kv = (kv_lo | (kv_hi << 4)) ^ 0x88;
+              ((uint8_t*)packed_weights)[kr_block_offset] = kv;
             }
-            uint8_t kv_hi = 8;
-            if ((kc_idx + kr) < kc) {
-              kv_hi = ((kh_offset & 1) ? (k[kh_offset >> 1] >> 4)
-                                       : (k[kh_offset >> 1] & 0xF));
-            }
-            ksum += kv_lo + kv_hi - 16;  // subtract 2 zero points (8)
-            const uint8_t kv = (kv_lo | (kv_hi << 4)) ^ 0x88;
-            ((uint8_t*)packed_weights)[kr_block_offset] = kv;
           }
 
           size_t block_index = kr_block_start / bl;

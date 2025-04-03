@@ -449,6 +449,23 @@ enum xnn_status xnn_define_channelwise_quantized_tensor_value_v2(
 ///                     number of input channel element per output channel.
 ///                     For Fully connected operators with 2d filters of size [output_channels, input_channels],
 ///                     expecting number of scale values to be = output_channels * (input_channels / block_size).
+/// @param scale_type - datatype of the scale. bf6 & fp16 are supported,
+///                     however, only 7 mantisaa bits are used for scale calculation.
+enum xnn_status xnn_define_blockwise_quantized_tensor_value_v2(
+  xnn_subgraph_t subgraph,
+  enum xnn_datatype datatype,
+  int32_t zero_point,
+  const void* scale,
+  size_t num_dims,
+  size_t channel_dim,
+  size_t block_size,
+  const size_t* dims,
+  const void* data,
+  uint32_t external_id,
+  uint32_t flags,
+  enum xnn_datatype scale_type,
+  uint32_t* id_out);
+
 enum xnn_status xnn_define_blockwise_quantized_tensor_value(
   xnn_subgraph_t subgraph,
   enum xnn_datatype datatype,

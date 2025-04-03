@@ -512,6 +512,21 @@ enum xnn_status setup_convolution_operator(
     const struct xnn_operator_data* opdata, const struct xnn_value* values,
     size_t num_values, pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w_f16_scales(
+    size_t input_channels, size_t output_channels, size_t input_stride,
+    size_t output_stride, size_t block_size, uint8_t kernel_zero_point,
+    const xnn_float16* kernel_scale, const void* kernel, const float* bias,
+    float output_min, float output_max, uint32_t flags,
+    xnn_code_cache_t code_cache, xnn_weights_cache_t weights_cache,
+    xnn_operator_t* fully_connected_op_out);
+
+enum xnn_status xnn_create_fully_connected_nc_qdu8_f32_qb4w_f16_scales(
+    size_t input_channels, size_t output_channels, size_t input_stride,
+    size_t output_stride, size_t block_size, uint8_t kernel_zero_point,
+    const xnn_float16* kernel_scale, const void* kernel, const float* bias,
+    float output_min, float output_max, uint32_t flags,
+    xnn_code_cache_t code_cache, xnn_weights_cache_t weights_cache,
+    xnn_operator_t* fully_connected_op_out);
 #ifdef __cplusplus
 }  // extern "C"
 #endif
