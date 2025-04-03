@@ -1826,6 +1826,13 @@ enum xnn_status xnn_create_fully_connected_nc_f32_qc4w(
     return xnn_status_invalid_parameter;
   }
 
+  if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+    xnn_log_error(
+      "failed to create %s operator with XNN_FLAG_TRANSPOSE_WEIGHTS: not supported",
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f32_qc4w));
+    return xnn_status_unsupported_parameter;
+  }
+
   for (size_t output_channel = 0; output_channel < output_channels; output_channel++) {
     if (kernel_scale[output_channel] <= 0.0f || !isnormal(kernel_scale[output_channel])) {
       xnn_log_error(

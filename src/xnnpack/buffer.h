@@ -77,8 +77,8 @@ class NumericLimits<xnn_bfloat16> {
   static xnn_bfloat16 max_identity() { return -infinity(); }
 };
 
-template <typename T>
-class NumericLimits<quantized<T>> {
+template <typename T, typename Kind>
+class NumericLimits<quantized<T, Kind>> {
  public:
   static quantized<T> min() { return {std::numeric_limits<T>::lowest()}; }
   static quantized<T> max() { return {std::numeric_limits<T>::max()}; }
@@ -359,7 +359,7 @@ class Tensor {
   }
   size_t size() const {
     assert(is_contiguous());
-    return data_->size();
+    return end_ - begin_;
   }
   T* begin() { return data(); }
   T* end() { return end_; }
@@ -374,12 +374,18 @@ class Tensor {
   // Tensor, they do not affect the memory addressed by the Tensor. To realize
   // the effect of these operations, make a copy with `deep_copy`.
 
-  // Reorder the dimensions to extents = {extent(i) for i in perm}, and similar
-  // for strides.
-  Tensor<T, Alignment> transpose(const std::vector<size_t>& perm) const {
+  // Reorder the dimensions in `dims`. Dimensions not in dims maintain their
+  // relative ordering.
+  Tensor<T, Alignment> transpose(std::vector<size_t> perm) const {
+    // Sort idx to get the new locations
+    std::vector<size_t> sorted = perm;
+    std::sort(sorted.begin(), sorted.end());
+
     Tensor<T, Alignment> result(*this);
-    result.extents_ = permute(perm, extents_);
-    result.strides_ = permute(perm, strides_);
+    for (size_t i = 0; i < sorted.size(); i++) {
+      result.extents_[sorted[i]] = extent(perm[i]);
+      result.strides_[sorted[i]] = stride(perm[i]);
+    }
     return result;
   }
 
@@ -429,14 +435,16 @@ class Tensor {
 
     Tensor<T, Alignment> result(*this);
     std::vector<size_t> offsets(rank());
+    std::vector<size_t> maxs(rank());
     for (size_t i = 0; i < rank(); ++i) {
       offsets[i] = begins[i] < 0 ? extents_[i] + begins[i] : begins[i];
       result.extents_[i] =
           (ends[i] <= 0 ? extents_[i] + ends[i] : ends[i]) - offsets[i];
+      maxs[i] = result.extents_[i] - 1;
     }
 
     result.begin_ = begin_ + flat_offset(offsets);
-    result.end_ = result.begin_ + result.flat_offset(result.extents_);
+    result.end_ = result.begin_ + result.flat_offset(maxs) + 1;
 
     return result;
   }
@@ -458,6 +466,18 @@ class Tensor {
 
   Tensor<T, Alignment> slice(size_t dim, int64_t at) const {
     return slice(dim, at, at + 1);
+  }
+
+  // Slice the leading dimensions at the indices of `at`.
+  Tensor<T, Alignment> slice_leading(std::vector<size_t> at) const {
+    std::vector<int64_t> begins(rank());
+    std::vector<int64_t> ends(rank());
+    std::copy(at.begin(), at.end(), begins.begin());
+    std::copy(at.begin(), at.end(), ends.begin());
+    for (size_t i = 0; i < at.size(); ++i) {
+      ends[i] += 1;
+    }
+    return slice(begins, ends);
   }
 
   // Remove `pre` elements from the beginning of each dimension, and `post`
@@ -730,7 +750,9 @@ xnn_quantization_params random_quantization(xnn_datatype datatype, Rng& rng,
   std::uniform_real_distribution<float> scale_dist{min_scale, max_scale};
   switch (datatype) {
     case xnn_datatype_qint8:
-      // int8 quantization assumes zero point is 0.
+    case xnn_datatype_qcint8:
+    case xnn_datatype_qcint4:
+      // signed integer quantization assumes zero point is 0.
       return {0, scale_dist(rng)};
     case xnn_datatype_quint8:
       return {u8_dist(rng), scale_dist(rng)};

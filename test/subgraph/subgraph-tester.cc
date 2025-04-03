@@ -46,6 +46,16 @@ SubgraphTester& SubgraphTester::AddInternalDynamicTensorF32(
   return *this;
 }
 
+SubgraphTester& SubgraphTester::AddInternalDynamicallyQuantizedTensor(
+    size_t rank, xnn_datatype datatype, size_t num_nonbatch_dims,
+    uint32_t* id_out, uint32_t flags) {
+  const xnn_status status = xnn_define_dynamically_quantized_tensor_value(
+      subgraph_.get(), xnn_datatype_qdint8, rank, num_nonbatch_dims, nullptr,
+      XNN_INVALID_VALUE_ID, flags, id_out);
+  EXPECT_EQ(status, xnn_status_success);
+  return *this;
+}
+
 SubgraphTester& SubgraphTester::AddDynamicTensor(
     const std::vector<size_t>& dims, uint32_t external_id,
     xnn_datatype datatype, xnn_quantization_params quantization,
@@ -98,6 +108,19 @@ SubgraphTester& SubgraphTester::AddDynamicallyQuantizedTensor(
   EXPECT_EQ(status, xnn_status_success);
   EXPECT_EQ(id_out, external_id);
 
+  return *this;
+}
+
+SubgraphTester& SubgraphTester::AddStaticChannelwiseQuantizedTensor(
+    const std::vector<size_t>& dims, size_t channel_dim, xnn_datatype datatype,
+    const float* scale, uint32_t external_id, uint32_t flags, void* data) {
+  assert(external_id < subgraph_->external_value_ids);
+  uint32_t id_out;
+  const xnn_status status = xnn_define_channelwise_quantized_tensor_value(
+      subgraph_.get(), datatype, scale, dims.size(), channel_dim, dims.data(),
+      data, external_id, flags, &id_out);
+  EXPECT_EQ(status, xnn_status_success);
+  EXPECT_EQ(id_out, external_id);
   return *this;
 }
 
@@ -542,18 +565,25 @@ SubgraphTester& SubgraphTester::AddEvenSplit(size_t split_dim,
   return *this;
 }
 
+SubgraphTester& SubgraphTester::AddFullyConnected(
+    float output_min, float output_max, uint32_t input_id, uint32_t filter_id,
+    uint32_t bias_id, uint32_t output_id, uint32_t flags) {
+  const xnn_status status = xnn_define_fully_connected(
+      subgraph_.get(), output_min, output_max, input_id, filter_id, bias_id,
+      output_id, flags);
+  EXPECT_EQ(status, xnn_status_success);
+
+  return *this;
+}
+
 SubgraphTester& SubgraphTester::AddFullyConnected(uint32_t input_id,
                                                   uint32_t filter_id,
                                                   uint32_t bias_id,
                                                   uint32_t output_id,
                                                   uint32_t flags) {
-  const xnn_status status = xnn_define_fully_connected(
-      subgraph_.get(), -std::numeric_limits<float>::infinity(),
-      std::numeric_limits<float>::infinity(), input_id, filter_id, bias_id,
-      output_id, flags);
-  EXPECT_EQ(status, xnn_status_success);
-
-  return *this;
+  return AddFullyConnected(-std::numeric_limits<float>::infinity(),
+                           std::numeric_limits<float>::infinity(), input_id,
+                           filter_id, bias_id, output_id, flags);
 }
 
 SubgraphTester& SubgraphTester::AddBatchMatrixMultiply(uint32_t input_a_id,
