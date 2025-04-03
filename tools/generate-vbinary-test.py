@@ -144,8 +144,12 @@ def main(args):
   op_type = OP_TYPES[op]
 
   test_args = ["ukernel"]
-  if tester in ["VBinaryMicrokernelTester"] and not datatype in ["qs8", "qu8"]:
-    test_args.append("%s::OpType::%s" % (tester, op_type))
+  if tester in ["VBinaryMicrokernelTester"]:
+      if datatype in ['qs8', 'qu8'] and op in ['vprelu', 'vpreluc', 'vrpreluc']:
+          op_type = "Prelu" if op in ['vprelu', 'vpreluc'] else "RPrelu"
+          test_args.append("%s::OpType::%s" % (tester, op_type))
+      elif not datatype in ['qs8', 'qu8']:
+          test_args.append("%s::OpType::%s" % (tester, op_type))
   test_args.append("init_params")
   tests += xnncommon.make_multiline_macro(
       xngen.preprocess(
