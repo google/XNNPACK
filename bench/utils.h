@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -120,8 +121,10 @@ void BinaryElementwiseParameters(benchmark::internal::Benchmark* benchmark) {
 #endif  // XNN_ARCH_ARM
 
   const size_t elementwise_size = 2 * sizeof(InType) + sizeof(OutType);
-  benchmark->Arg(characteristic_l1 / elementwise_size / 960 * 960);
-  benchmark->Arg(characteristic_l2 / elementwise_size / 960 * 960);
+  benchmark->Arg(
+      std::max<size_t>(1, characteristic_l1 / elementwise_size / 960) * 960);
+  benchmark->Arg(
+      std::max<size_t>(1, characteristic_l2 / elementwise_size / 960) * 960);
 }
 
 using IsaCheckFunction = std::function<bool(benchmark::State&)>;
