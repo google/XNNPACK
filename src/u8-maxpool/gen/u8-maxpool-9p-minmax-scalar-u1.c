@@ -31,6 +31,7 @@ void xnn_u8_maxpool_minmax_ukernel_9p__scalar_u1(
     size_t channels,
     const uint8_t** input,
     size_t input_offset,
+    size_t input_pixel_stride,
     uint8_t* output,
     size_t input_increment,
     size_t output_increment,
@@ -153,6 +154,7 @@ void xnn_u8_maxpool_minmax_ukernel_9p__scalar_u1(
     }
 
     input = (const uint8_t**) ((uintptr_t) input + input_increment);
+    input_offset += input_pixel_stride;
     output = (uint8_t*) ((uintptr_t) output + output_increment);
   } while (--output_pixels != 0);
 }

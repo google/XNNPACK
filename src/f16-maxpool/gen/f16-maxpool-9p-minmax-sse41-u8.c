@@ -31,6 +31,7 @@ void xnn_f16_maxpool_minmax_ukernel_9p__sse41_u8(
     size_t channels,
     const xnn_float16** input,
     size_t input_offset,
+    size_t input_pixel_stride,
     xnn_float16* output,
     size_t input_increment,
     size_t output_increment,
@@ -209,6 +210,7 @@ XNN_FORCE_REALIZATION(vmax);
     }
 
     input = (const xnn_float16**) ((uintptr_t) input + input_increment);
+    input_offset += input_pixel_stride;
     output = (xnn_float16*) ((uintptr_t) output + output_increment);
   } while (--output_pixels != 0);
 }

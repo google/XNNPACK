@@ -1192,7 +1192,7 @@ void xnn_compute_argmax_pooling(
 
   context->ukernel(
     context->output_width, context->pooling_size, context->channels,
-    indirect_input, input_offset, output, index,
+    indirect_input, input_offset, /*input_pixel_stride=*/0, output, index,
     context->input_increment, context->output_increment);
 }
 
@@ -1209,7 +1209,7 @@ void xnn_compute_max_pooling(
 
   context->ukernel(
     context->output_width, context->pooling_size, context->channels,
-    indirect_input, input_offset, output,
+    indirect_input, input_offset, /*input_pixel_stride=*/0, output,
     context->input_increment, context->output_increment,
     &context->params);
 }
@@ -1254,8 +1254,8 @@ void xnn_compute_average_pooling(
 
   context->ukernel(
     context->output_width, context->pooling_size, context->channels,
-    indirect_input, input_offset, context->zero, pixelwise_buffer, output,
-    context->input_increment, context->output_increment,
+    indirect_input, input_offset, /*input_pixel_stride=*/0, context->zero,
+    pixelwise_buffer, output, context->input_increment, context->output_increment,
     &context->params);
 }
 

@@ -244,8 +244,8 @@ class Tester {
       pavgpool_minmax(
           output_pixels(), pooling_elements(), channels(),
           reinterpret_cast<const xnn_float16**>(indirect_input.data()),
-          input_offset() * sizeof(xnn_float16), zero.data(),
-          pixelwise_ ? multiplier.data() : nullptr, output.data(),
+          input_offset() * sizeof(xnn_float16), /*input_pixel_stride=*/0,
+          zero.data(), pixelwise_ ? multiplier.data() : nullptr, output.data(),
           step() * sizeof(void*), (output_stride()) * sizeof(xnn_float16),
           &params);
 
@@ -356,9 +356,10 @@ class Tester {
       // Call optimized micro-kernel.
       pavgpool_minmax(output_pixels(), pooling_elements(), channels(),
                       indirect_input.data(), input_offset() * sizeof(float),
-                      zero.data(), pixelwise_ ? multiplier.data() : nullptr,
-                      output.data(), step() * sizeof(void*),
-                      (output_stride()) * sizeof(float), &params);
+                      /*input_pixel_stride=*/0, zero.data(),
+                      pixelwise_ ? multiplier.data() : nullptr, output.data(),
+                      step() * sizeof(void*), (output_stride()) * sizeof(float),
+                      &params);
 
       // Verify results.
       for (size_t x = 0; x < output_pixels(); x++) {

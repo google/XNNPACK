@@ -22,6 +22,7 @@ void xnn_f32_argmaxpool_ukernel_9p8x__wasmsimd_c4(
     size_t channels,
     const float** input,
     size_t input_offset,
+    size_t input_pixel_stride,
     float* output,
     uint32_t* index,
     size_t input_increment,
@@ -237,6 +238,7 @@ void xnn_f32_argmaxpool_ukernel_9p8x__wasmsimd_c4(
     }
 
     input = (const float**) ((uintptr_t) input + input_increment);
+    input_offset += input_pixel_stride;
     output = (float*) ((uintptr_t) output + output_increment);
     index += channels;
   } while (--output_pixels != 0);

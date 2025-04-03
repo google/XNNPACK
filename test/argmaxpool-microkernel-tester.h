@@ -131,8 +131,8 @@ class ArgMaxPoolMicrokernelTester {
       // Call optimized micro-kernel.
       argmaxpool(output_pixels(), pooling_elements(), channels(),
                  indirect_input.data(), input_offset() * sizeof(float),
-                 output.data(), index.data(), step() * sizeof(void*),
-                 output_stride() * sizeof(float));
+                 /*input_pixel_stride=*/0, output.data(), index.data(),
+                 step() * sizeof(void*), output_stride() * sizeof(float));
 
       // Verify results.
       for (size_t x = 0; x < output_pixels(); x++) {

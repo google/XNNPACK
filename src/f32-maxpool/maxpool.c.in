@@ -42,6 +42,7 @@ void xnn_${DATATYPE}_maxpool_minmax_ukernel_9p__${ARCH}_u${SIMD_SIZE}(
     size_t channels,
     const ${CTYPE}** input,
     size_t input_offset,
+    size_t input_pixel_stride,
     ${CTYPE}* output,
     size_t input_increment,
     size_t output_increment,
@@ -181,6 +182,7 @@ $elif DATATYPE == "f16" and ARCH != "neonfp16arith":
     }
 
     input = (const ${CTYPE}**) ((uintptr_t) input + input_increment);
+    input_offset += input_pixel_stride;
     output = (${CTYPE}*) ((uintptr_t) output + output_increment);
   } while (--output_pixels != 0);
 }
