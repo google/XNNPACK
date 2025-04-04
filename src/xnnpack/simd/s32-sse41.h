@@ -12,8 +12,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/unaligned.h"
 
 // SIMD vector type for s32 using SSE41.
 typedef __m128i xnn_simd_s32_t;
@@ -43,7 +43,7 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
 
 static XNN_INLINE xnn_simd_s32_t xnn_sub_s32(xnn_simd_s32_t a,
                                              xnn_simd_s32_t b) {
-  return _mm_min_epi32(a, b);
+  return _mm_sub_epi32(a, b);
 }
 
 // Load/store operations.
@@ -60,7 +60,7 @@ static XNN_INLINE void xnn_storeu_s32(int32_t* ptr, xnn_simd_s32_t v) {
   _mm_storeu_si128((__m128i*)ptr, v);
 }
 
-static XNN_INLINE void xnn_store_s32(float* ptr, xnn_simd_s32_t v) {
+static XNN_INLINE void xnn_store_s32(int32_t* ptr, xnn_simd_s32_t v) {
   _mm_store_si128((__m128i*)ptr, v);
 }
 
@@ -68,27 +68,37 @@ static XNN_INLINE xnn_simd_s32_t xnn_set1_s32(int32_t v) {
   return _mm_set1_epi32(v);
 }
 
-static XNN_INLINE xnn_simd_s32_t xnn_set1_or_load_s32(const int32_t* v) {
-#if XNN_ARCH_X86
-  return _mm_load_si128((const __m128i*)v);
-#else
-  return _mm_set1_epi32(*v);
-#endif
-}
-
 // Tail load/store operations.
 
 static XNN_INLINE xnn_simd_s32_t
 xnn_load_tail_s32(const int32_t* input, size_t num_elements) XNN_OOB_READS {
-  assert(num_elements > 0);
-  assert(num_elements < xnn_simd_size_s32);
+  assert(num_elements <= xnn_simd_size_s32);
   return _mm_loadu_si128((const __m128i*)input);
+}
+
+static XNN_INLINE xnn_simd_s32_t xnn_load_tail_safe_s32(const int32_t* input,
+                                                        size_t num_elements) {
+  assert(num_elements <= xnn_simd_size_s32);
+
+  XNN_ALIGN(16) int32_t padded[4];
+  int32_t* dst = padded;
+  switch (num_elements) {
+    case 4:
+      *dst++ = *input++;
+    case 3:
+      *dst++ = *input++;
+    case 2:
+      *dst++ = *input++;
+    case 1:
+      *dst++ = *input++;
+    default: ;
+  }
+  return _mm_loadu_si128((const __m128i*)padded);
 }
 
 static XNN_INLINE void xnn_store_tail_s32(int32_t* output, xnn_simd_s32_t v,
                                           size_t num_elements) {
-  assert(num_elements > 0);
-  assert(num_elements < xnn_simd_size_s32);
+  assert(num_elements <= xnn_simd_size_s32);
 
   if (num_elements & 2) {
     _mm_storel_epi64((__m128i*)output, v);
@@ -102,8 +112,7 @@ static XNN_INLINE void xnn_store_tail_s32(int32_t* output, xnn_simd_s32_t v,
 
 // Conversion operations.
 
-static XNN_INLINE __m128
-xnn_cvt_f32_s32(xnn_simd_s32_t a) {
+static XNN_INLINE __m128 xnn_cvt_f32_s32(xnn_simd_s32_t a) {
   return _mm_cvtepi32_ps(a);
 }
 

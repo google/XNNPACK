@@ -7,9 +7,9 @@
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/packq.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/packq.h"
 
 // These functions have been adapted from KleidiAI's
 // `kai_run_lhs_quant_pack_qai8dxp_f32` as a reference scalar implementation.

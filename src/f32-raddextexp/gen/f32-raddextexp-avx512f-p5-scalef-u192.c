@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-raddextexp/avx512f-p5-scalef.c.in
 //   Generator: tools/xngen
@@ -12,9 +13,9 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/raddextexp.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/raddextexp.h"
 
 
 void xnn_f32_raddextexp_ukernel__avx512f_p5_scalef_u192(

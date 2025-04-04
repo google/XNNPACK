@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-vmul/sse-mul16-ld64.c.in
 //   Generator: tools/xngen
@@ -11,9 +12,9 @@
 
 #include <smmintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/unaligned.h"
-#include "xnnpack/vbinary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/unaligned.h"
+#include "src/xnnpack/vbinary.h"
 
 
 void xnn_qs8_vmul_minmax_fp32_ukernel__sse41_mul16_ld64_u8(

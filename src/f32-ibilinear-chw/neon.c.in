@@ -12,7 +12,7 @@ $VMULADD_F32 = "vfma_f32" if FMA else "vmla_f32"
 
 #include <arm_neon.h>
 
-#include "xnnpack/ibilinear.h"
+#include "src/xnnpack/ibilinear.h"
 
 
 void xnn_f32_ibilinear_chw_ukernel__${"neonfma" if FMA else "neon"}_p${PIXEL_TILE}(

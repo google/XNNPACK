@@ -5,8 +5,8 @@
 
 #include <assert.h>
 
-#include "xnnpack/gemm.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/math.h"
 
 
 void xnn_bf16_f32_gemm_minmax_ukernel_1x4c2__scalar(
@@ -19,7 +19,7 @@ void xnn_bf16_f32_gemm_minmax_ukernel_1x4c2__scalar(
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr == 1);

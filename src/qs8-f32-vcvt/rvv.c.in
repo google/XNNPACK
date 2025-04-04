@@ -11,9 +11,9 @@ $XLOAD = {"QS8": "__riscv_vle8_v_i8",  "QU8": "__riscv_vle8_v_u8"}[DATATYPE]
 
 #include <riscv_vector.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/vcvt.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/vcvt.h"
 
 
 void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__rvv_u${LMUL}v(

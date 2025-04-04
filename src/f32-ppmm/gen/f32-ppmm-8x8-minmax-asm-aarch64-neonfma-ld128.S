@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-ppmm/8x8-aarch64-neonfma-ld128.S.in
 //   Generator: tools/xngen
@@ -7,7 +8,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack/assembly.h"
+#include "src/xnnpack/assembly.h"
 
 # void xnn_f32_ppmm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld128(
 #     size_t mr,                x0
@@ -18,7 +19,7 @@
 #     uint8_t* restrict c,       x5
 #     size_t cm_stride,         x6
 #     size_t cn_stride,         x7
-#     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp] -> x8
+#     const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp] -> x8
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 

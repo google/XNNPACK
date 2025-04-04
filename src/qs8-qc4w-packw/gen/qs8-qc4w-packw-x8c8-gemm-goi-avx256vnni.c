@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/x8-packw/kr-avxvnni.c.in
 //   Generator: tools/xngen
@@ -14,8 +15,8 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/packw.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/packw.h"
+#include "src/xnnpack/unaligned.h"
 
 XNN_INLINE static uint64_t safe_load_u64(const void* address, size_t n) {
   uint64_t value = 0;

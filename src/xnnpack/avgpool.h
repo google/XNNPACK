@@ -11,112 +11,26 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/microparams.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#define XNN_UKERNEL(arch_flags, ukernel, channel_tile, primary_tile, datatype, \
+                    params_type, init_params)                                  \
+  XNN_INTERNAL void ukernel(                                                   \
+      size_t output_pixels, size_t kernel_elements, size_t channels,           \
+      const datatype** input, size_t input_offset, size_t input_pixel_stride,  \
+      const datatype* zero, const datatype* multiplier, datatype* output,      \
+      size_t input_increment, size_t output_increment,                         \
+      const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-#define XNN_UKERNEL_MULTIPASS(arch_flags, ukernel, channel_tile, channel_scaled_tile, primary_tile, incremental_tile, init_params) \
-  XNN_INTERNAL void ukernel(                                           \
-      size_t output_pixels,                                            \
-      size_t kernel_elements,                                          \
-      size_t channels,                                                 \
-      const xnn_float16** input,                              \
-      size_t input_offset,                                             \
-      const xnn_float16* zero,                                \
-      xnn_float16* buffer,                                    \
-      xnn_float16* output,                                    \
-      size_t input_increment,                                          \
-      size_t output_increment,                                         \
-      const struct xnn_f16_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+#include "src/f16-avgpool/f16-avgpool-minmax.h"
+#include "src/f32-avgpool/f32-avgpool-minmax.h"
 
-#define XNN_UKERNEL_UNIPASS(arch_flags, ukernel, channel_tile, channel_scaled_tile, primary_tile, incremental_tile, init_params) \
-  XNN_INTERNAL void ukernel(                                         \
-      size_t output_pixels,                                          \
-      size_t kernel_elements,                                        \
-      size_t channels,                                               \
-      const xnn_float16** input,                            \
-      size_t input_offset,                                           \
-      const xnn_float16* zero,                              \
-      xnn_float16* output,                                  \
-      size_t input_increment,                                        \
-      size_t output_increment,                                       \
-      const struct xnn_f16_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-#include "f16-avgpool/f16-avgpool-minmax.h"
-
-#undef XNN_UKERNEL_MULTIPASS
-#undef XNN_UKERNEL_UNIPASS
-
-#define XNN_UKERNEL_MULTIPASS(arch_flags, ukernel, channel_tile, channel_scaled_tile, primary_tile, incremental_tile, init_params) \
-  XNN_INTERNAL void ukernel(                                           \
-      size_t output_pixels,                                            \
-      size_t kernel_elements,                                          \
-      size_t channels,                                                 \
-      const float** input,                                             \
-      size_t input_offset,                                             \
-      const float* zero,                                               \
-      float* buffer,                                                   \
-      float* output,                                                   \
-      size_t input_increment,                                          \
-      size_t output_increment,                                         \
-      const struct xnn_f32_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-#define XNN_UKERNEL_UNIPASS(arch_flags, ukernel, channel_tile, channel_scaled_tile, primary_tile, incremental_tile, init_params) \
-  XNN_INTERNAL void ukernel(                                         \
-      size_t output_pixels,                                          \
-      size_t kernel_elements,                                        \
-      size_t channels,                                               \
-      const float** input,                                           \
-      size_t input_offset,                                           \
-      const float* zero,                                             \
-      float* output,                                                 \
-      size_t input_increment,                                        \
-      size_t output_increment,                                       \
-      const struct xnn_f32_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-#include "f32-avgpool/f32-avgpool-minmax.h"
-
-#undef XNN_UKERNEL_MULTIPASS
-#undef XNN_UKERNEL_UNIPASS
-
-
-#define XNN_UKERNEL_MULTIPASS(arch_flags, ukernel, requantize, channel_tile, channel_scaled_tile, primary_tile, incremental_tile, init_params) \
-  XNN_INTERNAL void ukernel(                                           \
-      size_t output_pixels,                                            \
-      size_t kernel_elements,                                          \
-      size_t channels,                                                 \
-      const uint8_t** input,                                           \
-      size_t input_offset,                                             \
-      const uint8_t* zero,                                             \
-      int32_t* buffer,                                                 \
-      uint8_t* output,                                                 \
-      size_t input_increment,                                          \
-      size_t output_increment,                                         \
-      const struct xnn_qu8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-#define XNN_UKERNEL_UNIPASS(arch_flags, ukernel, requantize, channel_tile, channel_scaled_tile, primary_tile, incremental_tile, init_params) \
-  XNN_INTERNAL void ukernel(                                         \
-      size_t output_pixels,                                          \
-      size_t kernel_elements,                                        \
-      size_t channels,                                               \
-      const uint8_t** input,                                         \
-      size_t input_offset,                                           \
-      const uint8_t* zero,                                           \
-      uint8_t* output,                                               \
-      size_t input_increment,                                        \
-      size_t output_increment,                                       \
-      const struct xnn_qu8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-#include "qu8-avgpool/qu8-avgpool-minmax.h"
-
-#undef XNN_UKERNEL_MULTIPASS
-#undef XNN_UKERNEL_UNIPASS
-
-
+#undef XNN_UKERNEL
 
 #ifdef __cplusplus
 }  // extern "C"

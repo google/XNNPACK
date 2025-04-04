@@ -10,7 +10,7 @@
 
 #include <fxdiv.h>
 
-#include "xnnpack/lut.h"
+#include "src/xnnpack/lut.h"
 
 
 static inline uint32_t compute_sum(

@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-dwconv/unipass-fma3.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/dwconv.h"
-#include "xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
 
 
 void xnn_f16_dwconv_minmax_ukernel_4p16c__fma3(
@@ -24,8 +25,9 @@ void xnn_f16_dwconv_minmax_ukernel_4p16c__fma3(
     intptr_t input_stride,
     size_t output_increment,
     size_t input_offset,
+    size_t input_pixel_stride,
     const xnn_float16* zero,
-    const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(channels != 0);
   assert(output_width != 0);
@@ -197,6 +199,7 @@ void xnn_f16_dwconv_minmax_ukernel_4p16c__fma3(
       }
     }
 
+    input_offset += input_pixel_stride;
     o = (uint16_t*) ((uintptr_t) o + output_increment);
   } while (--output_width != 0);
 }

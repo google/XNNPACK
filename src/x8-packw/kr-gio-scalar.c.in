@@ -12,7 +12,7 @@ $assert IZP in [0, 128]
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/packw.h"
+#include "src/xnnpack/packw.h"
 
 $BTYPE = {"QS8": "int32_t", "X8": "uint32_t"}[DATATYPE]
 $WTYPE = {"int8_t": "int8_t", "uint16_t": "uint16_t", "uint32_t": "uint32_t", "float": "uint32_t"}[TYPE]
@@ -98,16 +98,15 @@ void xnn_${DATATYPE.lower()}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_gio_uk
         assert(k >= 1 && k <= ${KR-1});
         $for N in range(NR):
           const ${TYPE} v0x${N} = w0[${N}];
+          $for K in range(1, KR):
+            const ${TYPE} v${K}x${N} = ${K} < k ? w${K}[${N}] : 0;
           $if DATATYPE in ["QS8"]:
             ksum${N} += (uint32_t) v0x${N};
+            $for K in range(1, KR):
+              ksum${N} += (uint32_t) v${K}x${N};
           out[${N*KR}] = v0x${N};
           $for K in range(1, KR):
-            if (${K} < k) {
-              const ${TYPE} v${K}x${N} = w${K}[${N}];
-              $if DATATYPE in ["QS8"]:
-                ksum${N} += (uint32_t) v${K}x${N};
-              out[${N*KR+K}] = v${K}x${N};
-            }
+            out[${N*KR+K}] = v${K}x${N};
         $for K in range(KR):
           w${K} += k * k_stride;
         out += ${NR*KR};
@@ -168,15 +167,13 @@ void xnn_${DATATYPE.lower()}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_gio_uk
         $for K in range(KR):
           out[${K}] = v${K}x0;
         $for N in range(1, NR-1):
-          if (${N} < n) {
-            $for K in range(KR):
-              const ${TYPE} v${K}x${N} = w${K}[${N}];
-            $for K in range(KR):
-              $if DATATYPE in ["QS8"]:
-                ksum${N} += (uint32_t) v${K}x${N};
-            $for K in range(KR):
-              out[${N*KR+K}] = v${K}x${N};
-          }
+          $for K in range(KR):
+            const ${TYPE} v${K}x${N} = ${N} < n ? w${K}[${N}] : 0;
+          $for K in range(KR):
+            $if DATATYPE in ["QS8"]:
+              ksum${N} += (uint32_t) v${K}x${N};
+          $for K in range(KR):
+            out[${N*KR+K}] = v${K}x${N};
         $for K in range(KR):
           w${K} += ${KR} * k_stride;
         out += ${NR*KR};
@@ -188,16 +185,15 @@ void xnn_${DATATYPE.lower()}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_gio_uk
         $for N in range(NR-1):
           if (${N} < n) {
             const ${TYPE} v0x${N} = w0[${N}];
+            $for K in range(1, KR):
+              const ${TYPE} v${K}x${N} = ${K} < k ? w${K}[${N}] : 0;
             $if DATATYPE in ["QS8"]:
               ksum${N} += (uint32_t) v0x${N};
+              $for K in range(1, KR):
+                ksum${N} += (uint32_t) v${K}x${N};
             out[${N*KR}] = v0x${N};
             $for K in range(1, KR):
-              if (${K} < k) {
-                const ${TYPE} v${K}x${N} = w${K}[${N}];
-                $if DATATYPE in ["QS8"]:
-                  ksum${N} += (uint32_t) v${K}x${N};
-                out[${N*KR+K}] = v${K}x${N};
-              }
+              out[${N*KR+K}] = v${K}x${N};
           }
         $for K in range(KR):
           w${K} += k * k_stride;

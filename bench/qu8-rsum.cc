@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2024 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -5,18 +6,18 @@
 //
 // Auto-generated file. Do not edit!
 //   Specification: test/qu8-rsum.yaml
-//   Generator: tools/generate-rdsum-benchmark.py
+//   Generator: tools/generate-reduce-discontiguous-benchmark.py
 
-#include "rsum-benchmark.h"
-#include "utils.h"
+#include "bench/rsum-benchmark.h"
+#include "bench/utils.h"
 #include <benchmark/benchmark.h>
 
-#include "xnnpack.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
 
 
 BENCHMARK_CAPTURE(qu8_rsum, scalar_u1,
@@ -187,6 +188,26 @@ BENCHMARK_CAPTURE(qu8_rsum, scalar_u4,
     ->Apply(BenchmarkRSUM)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  BENCHMARK_CAPTURE(qu8_rsum, rvv_u1v,
+                    xnn_qu8_rsum_ukernel__rvv_u1v,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckRVV)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  BENCHMARK_CAPTURE(qu8_rsum, rvv_u2v,
+                    xnn_qu8_rsum_ukernel__rvv_u2v,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckRVV)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

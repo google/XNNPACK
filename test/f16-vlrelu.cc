@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -15,14 +16,15 @@
 #include <limits>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/vunary.h"
-#include "next_prime.h"
-#include "vunary-microkernel-tester.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vunary.h"
+#include "test/next_prime.h"
+#include "test/unary-ops.h"
+#include "test/vunary-microkernel-tester.h"
 
 using TestInfo = LeakyReLU;
 
@@ -45,6 +47,6 @@ TEST(ukernel, negative_slope) {                                                 
       .Test<TestInfo, datatype, datatype>(ukernel, init_params, params);                                                \
   }                                                                                                                     \
 }
-#include "f16-vlrelu/f16-vlrelu.h"
+#include "src/f16-vlrelu/f16-vlrelu.h"
 #undef XNN_UKERNEL_WITH_PARAMS
 #undef XNN_QUANTIZED

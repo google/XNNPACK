@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-igemm/hvx-broadcast.c.in
 //   Generator: tools/xngen
@@ -12,8 +13,8 @@
 #include <hexagon_protos.h>
 #include <hvx_hexagon_protos.h>
 
-#include "xnnpack/igemm.h"
-#include "xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/igemm.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
 
 void xnn_f32_igemm_minmax_ukernel_1x32__hvx_broadcast(
     size_t mr,
@@ -27,7 +28,7 @@ void xnn_f32_igemm_minmax_ukernel_1x32__hvx_broadcast(
     size_t cn_stride,
     size_t a_offset,
     const float* zero,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= 1);
@@ -71,10 +72,10 @@ void xnn_f32_igemm_minmax_ukernel_1x32__hvx_broadcast(
     } while (p != 0);
 
     const HVX_Vector vmin = Q6_V_vsplat_R(params->scalar.min);
-    vacc0x0 = Q6_Vw_vmax_VwVw(vmin, vacc0x0);
+    vacc0x0 = Q6_Vsf_vmax_VsfVsf(vmin, vacc0x0);
 
     const HVX_Vector vmax = Q6_V_vsplat_R(params->scalar.max);
-    vacc0x0 = Q6_Vw_vmin_VwVw(vmax, vacc0x0);
+    vacc0x0 = Q6_Vsf_vmin_VsfVsf(vmax, vacc0x0);
 
     if XNN_LIKELY(nc >= 32) {
       *((HVX_UVector *)(c0)) = vacc0x0;
@@ -83,7 +84,7 @@ void xnn_f32_igemm_minmax_ukernel_1x32__hvx_broadcast(
       a = (const float**restrict) ((uintptr_t) a - ks);
       nc -= 32;
     } else {
-      vstu_variable_scalar((char*)c0, nc*sizeof(float), vacc0x0);
+      Q6_V_vstu_variable(c0, nc * sizeof(float), vacc0x0);
 
       nc = 0;
     }

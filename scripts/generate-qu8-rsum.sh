@@ -33,4 +33,8 @@ tools/xngen src/qs8-rsum/wasmsimd.c.in -D CHANNEL_TILE=16 -D ACCUMULATORS=2 -D D
 tools/xngen src/qs8-rsum/wasmsimd.c.in -D CHANNEL_TILE=32 -D ACCUMULATORS=2 -D DATATYPE=QU8 -o src/qu8-rsum/gen/qu8-rsum-wasmsimd-u32-acc2.c &
 tools/xngen src/qs8-rsum/wasmsimd.c.in -D CHANNEL_TILE=32 -D ACCUMULATORS=4 -D DATATYPE=QU8 -o src/qu8-rsum/gen/qu8-rsum-wasmsimd-u32-acc4.c &
 
+################################### RISC-V Vector #############################
+tools/xngen src/qu8-rsum/rvv.c.in -D LMUL=1 -o src/qu8-rsum/gen/qu8-rsum-rvv-u1v.c &
+tools/xngen src/qu8-rsum/rvv.c.in -D LMUL=2 -o src/qu8-rsum/gen/qu8-rsum-rvv-u2v.c &
+
 wait

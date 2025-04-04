@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-gemm/avx-broadcast.c.in
 //   Generator: tools/xngen
@@ -13,10 +14,10 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/gemm.h"
-#include "xnnpack/unaligned.h"
-#include "xnnpack/microparams.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/unaligned.h"
+#include "src/xnnpack/microparams.h"
 
 
 void xnn_f32_qc8w_gemm_minmax_ukernel_4x16__fma3_broadcast(
@@ -29,7 +30,7 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x16__fma3_broadcast(
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= 4);

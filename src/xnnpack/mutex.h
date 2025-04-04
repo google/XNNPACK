@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "xnnpack.h"
-#include "xnnpack/common.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
 
 #if XNN_PLATFORM_WINDOWS
 #ifndef WIN32_LEAN_AND_MEAN
@@ -29,7 +29,7 @@ struct xnn_mutex {
 #elif XNN_PLATFORM_MACOS || XNN_PLATFORM_IOS
   dispatch_semaphore_t semaphore;
 #elif XNN_PLATFORM_WEB && !defined(__EMSCRIPTEN_PTHREADS__)
-  char _; // Dummy member variable to comply with the C standard
+  char _;  // Dummy member variable to comply with the C standard
 #else
   pthread_mutex_t mutex;
 #endif
@@ -41,5 +41,5 @@ enum xnn_status xnn_mutex_unlock(struct xnn_mutex* mutex);
 enum xnn_status xnn_mutex_destroy(struct xnn_mutex* mutex);
 
 #ifdef __cplusplus
-} // extern "C"
+}  // extern "C"
 #endif

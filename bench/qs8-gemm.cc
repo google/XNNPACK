@@ -13,34 +13,34 @@
 #include <random>
 #include <vector>
 
+#include "bench/gemm-benchmark.h"
+#include "bench/utils.h"
 #include <benchmark/benchmark.h>
-#include "gemm-benchmark.h"
-#include "utils.h"
 #ifdef BENCHMARK_RUY
-#include "ruy/ruy.h"
+#include <ruy/ruy.h>
 #endif  // BENCHMARK_RUY
 
-#include "xnnpack/buffer.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/gemm.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
 
 #ifdef BENCHMARK_RUY
-static void RuyBenchmark(benchmark::State& state, size_t threads)
-{
+static void RuyBenchmark(benchmark::State& state, size_t threads) {
   const size_t mc = state.range(0);
   const size_t nc = state.range(1);
   const size_t kc = state.range(2);
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
+  auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000),
+                          std::ref(rng));
 
-  const size_t num_buffers = 1 +
-    benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
-      nc * (sizeof(int8_t) * (mc + kc) + sizeof(int32_t)));
+  const size_t num_buffers =
+      1 + benchmark::utils::DivideRoundUp<size_t>(
+              benchmark::utils::GetMaxCacheSize(),
+              nc * (sizeof(int8_t) * (mc + kc) + sizeof(int32_t)));
 
   xnnpack::Buffer<int8_t> a(mc * kc);
   xnnpack::fill_uniform_random_bits(a.data(), a.size(), rng);
@@ -50,7 +50,8 @@ static void RuyBenchmark(benchmark::State& state, size_t threads)
   std::generate(b.begin(), b.end(), std::ref(i32rng));
   xnnpack::Buffer<int8_t> c(num_buffers * nc * mc);
 
-  // Note: context must be static to avoid the cost of re-creating it for each benchmark.
+  // Note: context must be static to avoid the cost of re-creating it for each
+  // benchmark.
   static ruy::Context context;
   context.set_max_num_threads(threads);
 
@@ -69,12 +70,14 @@ static void RuyBenchmark(benchmark::State& state, size_t threads)
   ruy::MulParams<int32_t, int8_t> mul_params;
   mul_params.set_multiplier_fixedpoint(0x40000000);
 
-  // ruy::Context uses deferred initialization, which affects percieved GEMM performance. Initialization happens during
-  // the first GEMM calls, and per Benoit Jacob it takes up to ~250 milliseconds for performance to stabilize.
-  // Thus, on the first benchmark, we compute GEMM for 500 milliseconds (to be safe) without recording performance, and
-  // keep the ruy::Context object initialized (by being static) between subsequent benchmarks.
+  // ruy::Context uses deferred initialization, which affects percieved GEMM
+  // performance. Initialization happens during the first GEMM calls, and per
+  // Benoit Jacob it takes up to ~250 milliseconds for performance to stabilize.
+  // Thus, on the first benchmark, we compute GEMM for 500 milliseconds (to be
+  // safe) without recording performance, and keep the ruy::Context object
+  // initialized (by being static) between subsequent benchmarks.
   static std::once_flag warmup;
-  std::call_once(warmup, [&](){
+  std::call_once(warmup, [&]() {
     auto start = std::chrono::steady_clock::now();
     do {
       ruy_a.set_data(k.data());
@@ -82,12 +85,15 @@ static void RuyBenchmark(benchmark::State& state, size_t threads)
       mul_params.set_bias(b.data());
 
       ruy::Mul(ruy_a, ruy_b, mul_params, &context, &ruy_c);
-    } while (std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count() < 0.5);
+    } while (
+        std::chrono::duration<double>(std::chrono::steady_clock::now() - start)
+            .count() < 0.5);
   });
 
   size_t buffer_index = 0;
   for (auto _ : state) {
-    // Use circular buffers (exceeding cache size) and prefetch to control cache state:
+    // Use circular buffers (exceeding cache size) and prefetch to control cache
+    // state:
     // - A is always in L1 cache (if fits, otherwise L2, L3, etc)
     // - K is not in cache (for any cache level)
     // - B is not in cache (for any cache level)
@@ -109,12 +115,12 @@ static void RuyBenchmark(benchmark::State& state, size_t threads)
     state.counters["cpufreq"] = cpu_frequency;
   }
 
-  state.counters["OPS"] = benchmark::Counter(
-    uint64_t(state.iterations()) * 2 * mc * nc * kc, benchmark::Counter::kIsRate);
+  state.counters["OPS"] =
+      benchmark::Counter(uint64_t(state.iterations()) * 2 * mc * nc * kc,
+                         benchmark::Counter::kIsRate);
 }
 
-static void ruy_st(benchmark::State& state, const char* net)
-{
+static void ruy_st(benchmark::State& state, const char* net) {
   RuyBenchmark(state, 1);
 }
 BENCHMARK_GEMM(ruy_st)

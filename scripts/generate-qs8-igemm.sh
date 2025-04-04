@@ -283,13 +283,16 @@ tools/xngen src/qs8-gemm/MRx16c4-wasmdot.c.in -D ACCUMULATORS=1 -D MR=1 -D NR=16
 tools/xngen src/qs8-gemm/MRx16c4-wasmdot.c.in -D ACCUMULATORS=1 -D MR=3 -D NR=16 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x16c4-minmax-fp32-wasmusdot.c &
 tools/xngen src/qs8-gemm/MRx16c4-wasmdot.c.in -D ACCUMULATORS=1 -D MR=4 -D NR=16 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x16c4-minmax-fp32-wasmusdot.c &
 
-tools/xngen src/qs8-gemm/MRx16c4-wasmdot.c.in -D UNROLL=2 -D ACCUMULATORS=1 -D MR=1 -D NR=16 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x16c4-minmax-fp32-wasmusdot-u2.c &
+tools/xngen src/qs8-gemm/MRx16c4-wasmdot.c.in -D ACCUMULATORS=1 -D UNROLL=2 -D MR=1 -D NR=16 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x16c4-minmax-fp32-wasmusdot-u2.c &
 tools/xngen src/qs8-gemm/MRx16c4-wasmdot.c.in -D ACCUMULATORS=1 -D UNROLL=2 -D MR=3 -D NR=16 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x16c4-minmax-fp32-wasmusdot-u2.c &
 tools/xngen src/qs8-gemm/MRx16c4-wasmdot.c.in -D ACCUMULATORS=1 -D UNROLL=2 -D MR=4 -D NR=16 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x16c4-minmax-fp32-wasmusdot-u2.c &
 
 tools/xngen src/qs8-gemm/MRx16c4-wasmdot.c.in -D UNROLL=2 -D ACCUMULATORS=2 -D MR=1 -D NR=16 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x16c4-minmax-fp32-wasmusdot-u2-acc2.c &
 tools/xngen src/qs8-gemm/MRx16c4-wasmdot.c.in -D UNROLL=2 -D ACCUMULATORS=2 -D MR=3 -D NR=16 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x16c4-minmax-fp32-wasmusdot-u2-acc2.c &
 tools/xngen src/qs8-gemm/MRx16c4-wasmdot.c.in -D UNROLL=2 -D ACCUMULATORS=2 -D MR=4 -D NR=16 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x16c4-minmax-fp32-wasmusdot-u2-acc2.c &
+
+tools/xngen src/qs8-igemm/MRx16c4-wasmdot.c.in -D UNROLL=2 -D ACCUMULATORS=1 -D MR=1 -D NR=16 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=0 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x16c4-minmax-fp32-wasmusdot-u2.c &
+tools/xngen src/qs8-igemm/MRx16c4-wasmdot.c.in -D UNROLL=2 -D ACCUMULATORS=1 -D MR=4 -D NR=16 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=0 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x16c4-minmax-fp32-wasmusdot-u2.c &
 
 tools/xngen src/qs8-igemm/MRx16c4-wasmdot.c.in -D ACCUMULATORS=1 -D MR=1 -D NR=16 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=1 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x16c4-minmax-fp32-wasmsdot.c &
 tools/xngen src/qs8-igemm/MRx16c4-wasmdot.c.in -D ACCUMULATORS=1 -D MR=3 -D NR=16 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=1 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-3x16c4-minmax-fp32-wasmsdot.c &
@@ -1157,5 +1160,18 @@ tools/xngen src/qs8-igemm/c4-avx512amx.c.in -D GFNI=0 -D PREFETCH=0 -D MR=1  -D 
 tools/xngen src/qs8-igemm/c4-avx512amx.c.in -D GFNI=0 -D PREFETCH=0 -D MR=7  -D NR=64 -D DATATYPE=QD8_F16 -D REQUANTIZATION= -o src/qd8-f16-qc8w-igemm/gen/qd8-f16-qc8w-igemm-7x64c4-minmax-avx512amx.c &
 tools/xngen src/qs8-igemm/c4-avx512amx.c.in -D GFNI=0 -D PREFETCH=0 -D MR=16 -D NR=64 -D DATATYPE=QD8_F16 -D REQUANTIZATION= -o src/qd8-f16-qc8w-igemm/gen/qd8-f16-qc8w-igemm-16x64c4-minmax-avx512amx.c &
 tools/xngen src/qs8-igemm/c4-avx512amx.c.in -D GFNI=0 -D PREFETCH=1 -D MR=16 -D NR=64 -D DATATYPE=QD8_F16 -D REQUANTIZATION= -o src/qd8-f16-qc8w-igemm/gen/qd8-f16-qc8w-igemm-16x64c4-minmax-avx512amx-prfm.c &
+
+################################ RISC-V Vector ################################
+tools/xngen src/qs8-igemm/rvv.c.in -D MR=1 -D NR=m4 -D  -D DATATYPE=QD8 -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-1x4v-minmax-rvv.c &
+tools/xngen src/qs8-igemm/rvv.c.in -D MR=2 -D NR=m4 -D  -D DATATYPE=QD8 -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-2x4v-minmax-rvv.c &
+tools/xngen src/qs8-igemm/rvv.c.in -D MR=3 -D NR=m4 -D  -D DATATYPE=QD8 -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-3x4v-minmax-rvv.c &
+tools/xngen src/qs8-igemm/rvv.c.in -D MR=4 -D NR=m4 -D  -D DATATYPE=QD8 -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-4x4v-minmax-rvv.c &
+tools/xngen src/qs8-igemm/rvv.c.in -D MR=5 -D NR=m4 -D  -D DATATYPE=QD8 -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-5x4v-minmax-rvv.c &
+tools/xngen src/qs8-igemm/rvv.c.in -D MR=6 -D NR=m4 -D  -D DATATYPE=QD8 -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-6x4v-minmax-rvv.c &
+tools/xngen src/qs8-igemm/rvv.c.in -D MR=7 -D NR=m4 -D  -D DATATYPE=QD8 -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-7x4v-minmax-rvv.c &
+
+tools/xngen src/qs8-igemm/rvv.c.in -D MR=1 -D NR=m4 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x4v-minmax-fp32-rvv.c &
+tools/xngen src/qs8-igemm/rvv.c.in -D MR=4 -D NR=m4 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4v-minmax-fp32-rvv.c &
+tools/xngen src/qs8-igemm/rvv.c.in -D MR=7 -D NR=m4 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-7x4v-minmax-fp32-rvv.c &
 
 wait

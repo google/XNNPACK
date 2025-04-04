@@ -12,12 +12,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack.h"
-#include "xnnpack/common.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
 
 // Indicates that XNNPACK as a whole has initialized.
 // This does not guarantee that any particular microkernels are available.
-#define XNN_INIT_FLAG_XNNPACK    0x00000001
+#define XNN_INIT_FLAG_XNNPACK 0x00000001
 
 struct xnn_parameters {
   // Bitwise combination of XNN_INIT_FLAG_* flags

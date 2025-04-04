@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack/assembly.h"
+#include "src/xnnpack/assembly.h"
 .PERMUTATION:
       .long   0
       .long   2
@@ -25,8 +25,10 @@
 BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_10x16c2__asm_amd64_avx512f_broadcast
 
       .intel_syntax noprefix
-
       # Free up GP registers.
+      # Save register arguments for tail call to msan annotation helper.
+      push rdi
+      push rsi
       push rbx
       push rbp
       push r15
@@ -35,14 +37,14 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_10x16c2__asm_amd64_avx512f_broadcast
       push r12
 
       # load params to free up a GP registers
-      mov r13, [rsp + 80] # params
+      mov r13, [rsp + 96] # params
       vbroadcastss zmm0, DWORD PTR [r13]
       vbroadcastss zmm1, DWORD PTR [r13 + 4]
 
       # Load c pointer.
-      mov r10, [rsp + 56]
+      mov r10, [rsp + 72]
       # Load cm_stride.
-      mov r11, [rsp + 64]
+      mov r11, [rsp + 80]
 
       # Align the stack pointer.
       mov r13, rsp
@@ -174,7 +176,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_10x16c2__asm_amd64_avx512f_broadcast
       mov r11, 0x5555
       kmovw k3, r11d
 
-outer_loop:
+.Louter_loop:
       # Initialize k counter.
       mov r11, 0
       # Read a pointers from stack into GP registers.
@@ -216,9 +218,9 @@ outer_loop:
 
       # Are there at least 8 bytes?
       cmp rdx, 8
-      js inner_loop_tail
+      js .Linner_loop_tail
 
-inner_loop:
+.Linner_loop:
       vmovaps  zmm7, [r9 + 0]
       vmovaps  zmm8, [r9 + 64]
       add r9, 128
@@ -255,7 +257,7 @@ inner_loop:
 
       add r11, 8
       cmp rdx, r11
-      jne inner_loop
+      jne .Linner_loop
 
       # Store nc_register.
       mov [rsp + 192], rsi
@@ -264,9 +266,9 @@ inner_loop:
       # Check if channels are odd.
       test rsi, rsi
       mov rsi, [rsp + 192]
-      jz inner_loop_end
+      jz .Linner_loop_end
 
-inner_loop_tail:
+.Linner_loop_tail:
       vmovaps  zmm7, [r9 + 0]
       vmovaps  zmm8, [r9 + 64]
       add r9, 128
@@ -300,7 +302,7 @@ inner_loop_tail:
       vbroadcastsd zmm2, QWORD PTR [r8 + r11]
       vfmadd231ps  zmm20{k3}, zmm2, zmm7
       vfmadd231ps  zmm30{k3}, zmm2, zmm8
-inner_loop_end:
+.Linner_loop_end:
       vpsrlq zmm7, zmm11, 32
       vaddps zmm11, zmm11, zmm7
       vpsrlq zmm7, zmm12, 32
@@ -388,7 +390,7 @@ inner_loop_end:
 
       # Check whether full or partial store.
       cmp rsi, 16
-      jl tail
+      jl .Ltail
 
       vmovups  [rcx], zmm11
       vmovups  [rax], zmm12
@@ -424,10 +426,10 @@ inner_loop_end:
       mov [rsp + 168], r8
 
       sub rsi, 16
-      jne outer_loop
-      jmp return
+      jne .Louter_loop
+      jmp .Lreturn
 
-tail:
+.Ltail:
       mov r11, -1
       shlx r11, r11, rsi
       not r11
@@ -443,7 +445,7 @@ tail:
       vmovups  ZMMWORD PTR [rbp]{k1}, zmm19
       vmovups  ZMMWORD PTR [r8]{k1}, zmm20
 
-return:
+.Lreturn:
       add rsp, 256
       mov r13, [rsp]
       mov rsp, r13
@@ -454,11 +456,16 @@ return:
       pop r15
       pop rbp
       pop rbx
+      pop rsi
+      pop rdi
+      #if XNN_HAS_FEATURE(memory_sanitizer)
+      jmp xnn_gemm_ukernel_msan_sizeof_c_4
+      #else
       ret
+      #endif
 END_FUNCTION xnn_f32_gemm_minmax_ukernel_10x16c2__asm_amd64_avx512f_broadcast
 
-      #ifdef __has_feature
-      #if __has_feature(dataflow_sanitizer)
+      #if XNN_HAS_FEATURE(dataflow_sanitizer)
 BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_10x16c2__asm_amd64_avx512f_broadcast.dfsan
       .intel_syntax noprefix
       # We could implement this by calling a function that implements the dfsan instrumentation.
@@ -467,4 +474,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_10x16c2__asm_amd64_avx512f_broadcast.
       ret
 END_FUNCTION xnn_f32_gemm_minmax_ukernel_10x16c2__asm_amd64_avx512f_broadcast.dfsan
       #endif
-      #endif
+
+      #ifdef __ELF__
+      .section .note.GNU-stack, "", @progbits
+      #endif  // __ELF__

@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vscaleexpminusmax/avx512f-p5-scalef.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/vscaleexpminusmax.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/vscaleexpminusmax.h"
 
 
 void xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_u64(

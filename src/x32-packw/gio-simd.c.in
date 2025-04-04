@@ -10,22 +10,12 @@ $SIMD_SIZE = BATCH_TILES[0]
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/simd/s32-${ARCH}.h"
+#include "src/xnnpack/simd/s32-${ARCH}.h"
 
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/packw.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/packw.h"
 $if PREFETCH:
-  #include "xnnpack/prefetch.h"
-
-static XNN_INLINE xnn_simd_s32_t
-xnn_load_tail_no_oob_s32(const int32_t* input, size_t num_elements) {
-  assert(num_elements <= xnn_simd_size_s32);
-  int32_t buf[${SIMD_SIZE}];
-  for (size_t i = 0; i < num_elements; ++i) {
-    buf[i] = input[i];
-  }
-  return xnn_loadu_s32((const int32_t*) &buf[0]);
-}
+  #include "src/xnnpack/prefetch.h"
 
 $for NR in BATCH_TILES:
   $SIMD_TILE = NR // SIMD_SIZE
@@ -69,11 +59,11 @@ $for NR in BATCH_TILES:
           $for N in range(SIMD_TILE):
             const xnn_simd_s32_t vb${N} = xnn_loadu_s32(b + ${N*SIMD_SIZE});
           $for N in range(SIMD_TILE):
-            xnn_storeu_s32(packed_w + ${N*SIMD_SIZE}, vb${N});
+            xnn_store_s32(packed_w + ${N*SIMD_SIZE}, vb${N});
           b += ${NR};
         } else {
           $for N in range(SIMD_TILE):
-            xnn_storeu_s32(packed_w + ${N*SIMD_SIZE}, vzero);
+            xnn_store_s32(packed_w + ${N*SIMD_SIZE}, vzero);
         }
         packed_w += ${NR};
 
@@ -90,7 +80,7 @@ $for NR in BATCH_TILES:
                   xnn_prefetch_to_l1((const int8_t*) w + ${N*4+960});
             $for K in range(KBLOCK):
               $for N in range(SIMD_TILE):
-                xnn_storeu_s32(packed_w + ${N*SIMD_SIZE+K*NR}, v${N}_${K});
+                xnn_store_s32(packed_w + ${N*SIMD_SIZE+K*NR}, v${N}_${K});
             w += k_stride * ${KBLOCK};
             packed_w += ${NR*KBLOCK};
           }
@@ -103,7 +93,7 @@ $for NR in BATCH_TILES:
             $for N in range(SIMD_TILE):
               xnn_prefetch_to_l1((const int8_t*) w + ${N*4+960});
           $for N in range(SIMD_TILE):
-            xnn_storeu_s32(packed_w + ${N*SIMD_SIZE}, v${N});
+            xnn_store_s32(packed_w + ${N*SIMD_SIZE}, v${N});
           w += k_stride;
           packed_w += ${NR};
         }
@@ -124,22 +114,22 @@ $for NR in BATCH_TILES:
 
         if XNN_LIKELY(b != NULL) {
           $for N in range(SIMD_TILE):
-            const xnn_simd_s32_t vb${N} = xnn_load_tail_no_oob_s32(b + ${N*SIMD_SIZE}, vcount${N});
+            const xnn_simd_s32_t vb${N} = xnn_load_tail_safe_s32(b + ${N*SIMD_SIZE}, vcount${N});
           $for N in range(SIMD_TILE):
-            xnn_storeu_s32(packed_w + ${N*SIMD_SIZE}, vb${N});
+            xnn_store_s32(packed_w + ${N*SIMD_SIZE}, vb${N});
           b += n;
         } else {
           $for N in range(SIMD_TILE):
-            xnn_storeu_s32(packed_w + ${N*SIMD_SIZE}, vzero);
+            xnn_store_s32(packed_w + ${N*SIMD_SIZE}, vzero);
         }
         packed_w += ${NR};
 
         // KC main loop
         for (size_t k = kc; k > 0; --k) {
           $for N in range(SIMD_TILE):
-            const xnn_simd_s32_t v${N} = xnn_load_tail_no_oob_s32(w + ${N*SIMD_SIZE}, vcount${N});
+            const xnn_simd_s32_t v${N} = xnn_load_tail_safe_s32(w + ${N*SIMD_SIZE}, vcount${N});
           $for N in range(SIMD_TILE):
-            xnn_storeu_s32(packed_w + ${N*SIMD_SIZE}, v${N});
+            xnn_store_s32(packed_w + ${N*SIMD_SIZE}, v${N});
           w += k_stride;
           packed_w += ${NR};
         }

@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack/assembly.h"
+#include "src/xnnpack/assembly.h"
 
 BEGIN_FUNCTION xnn_bf16_f32_gemm_minmax_ukernel_3x64c2__asm_amd64_avx512bf16_broadcast
 
@@ -63,7 +63,7 @@ BEGIN_FUNCTION xnn_bf16_f32_gemm_minmax_ukernel_3x64c2__asm_amd64_avx512bf16_bro
       and rdx, 0xFFFFFFFFFFFFFFFD
       mov [rsp + 72], r11
 
-outer_loop:
+.Louter_loop:
       # Initialize k counter.
       mov r11, 0
       # Initialize accumulators with the biases.
@@ -83,9 +83,9 @@ outer_loop:
 
       # Are there at least 4 bytes?
       cmp rdx, 4
-      js inner_loop_tail
+      js .Linner_loop_tail
 
-inner_loop:
+.Linner_loop:
       vmovaps  zmm7, [r9 + 0]
       vmovaps  zmm8, [r9 + 64]
       vmovaps  zmm9, [r9 + 128]
@@ -109,7 +109,7 @@ inner_loop:
 
       add r11, 4
       cmp rdx, r11
-      jne inner_loop
+      jne .Linner_loop
 
       # Store nc_register.
       mov [rsp + 80], rsi
@@ -118,9 +118,9 @@ inner_loop:
       # Check if channels are odd.
       test rsi, rsi
       mov rsi, [rsp + 80]
-      jz inner_loop_end
+      jz .Linner_loop_end
 
-inner_loop_tail:
+.Linner_loop_tail:
       vmovaps  zmm7, [r9 + 0]
       vmovaps  zmm8, [r9 + 64]
       vmovaps  zmm9, [r9 + 128]
@@ -128,56 +128,56 @@ inner_loop_tail:
       add r9, 256
       vbroadcastss zmm2, DWORD PTR [rcx + r11]
       vpslld zmm2, zmm2, 16
-      vpsrad zmm2, zmm2, 16
+      vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm11, zmm2, zmm7
 
       vpslld zmm2, zmm2, 16
-      vpsrad zmm2, zmm2, 16
+      vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm14, zmm2, zmm8
 
       vpslld zmm2, zmm2, 16
-      vpsrad zmm2, zmm2, 16
+      vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm17, zmm2, zmm9
 
       vpslld zmm2, zmm2, 16
-      vpsrad zmm2, zmm2, 16
+      vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm20, zmm2, zmm10
 
       vbroadcastss zmm3, DWORD PTR [rax + r11]
       vpslld zmm3, zmm3, 16
-      vpsrad zmm3, zmm3, 16
+      vpsrld zmm3, zmm3, 16
       vdpbf16ps  zmm12, zmm3, zmm7
 
       vpslld zmm3, zmm3, 16
-      vpsrad zmm3, zmm3, 16
+      vpsrld zmm3, zmm3, 16
       vdpbf16ps  zmm15, zmm3, zmm8
 
       vpslld zmm3, zmm3, 16
-      vpsrad zmm3, zmm3, 16
+      vpsrld zmm3, zmm3, 16
       vdpbf16ps  zmm18, zmm3, zmm9
 
       vpslld zmm3, zmm3, 16
-      vpsrad zmm3, zmm3, 16
+      vpsrld zmm3, zmm3, 16
       vdpbf16ps  zmm21, zmm3, zmm10
 
       vbroadcastss zmm4, DWORD PTR [r15 + r11]
       vpslld zmm4, zmm4, 16
-      vpsrad zmm4, zmm4, 16
+      vpsrld zmm4, zmm4, 16
       vdpbf16ps  zmm13, zmm4, zmm7
 
       vpslld zmm4, zmm4, 16
-      vpsrad zmm4, zmm4, 16
+      vpsrld zmm4, zmm4, 16
       vdpbf16ps  zmm16, zmm4, zmm8
 
       vpslld zmm4, zmm4, 16
-      vpsrad zmm4, zmm4, 16
+      vpsrld zmm4, zmm4, 16
       vdpbf16ps  zmm19, zmm4, zmm9
 
       vpslld zmm4, zmm4, 16
-      vpsrad zmm4, zmm4, 16
+      vpsrld zmm4, zmm4, 16
       vdpbf16ps  zmm22, zmm4, zmm10
 
-inner_loop_end:
+.Linner_loop_end:
       # Min/max clamping.
       vminps  zmm11, zmm1, zmm11
       vminps  zmm12, zmm1, zmm12
@@ -206,7 +206,7 @@ inner_loop_end:
 
       # Check whether full or partial store.
       cmp rsi, 64
-      jl tail
+      jl .Ltail
 
       vmovups  [r10], zmm11
       vmovups  [r10 + 64], zmm14
@@ -225,10 +225,10 @@ inner_loop_end:
       add rbx, 256
 
       sub rsi, 64
-      jne outer_loop
-      jmp return
+      jne .Louter_loop
+      jmp .Lreturn
 
-tail:
+.Ltail:
       mov r11, -1
       shlx r11, r11, rsi
       not r11
@@ -253,7 +253,7 @@ tail:
       vmovups  ZMMWORD PTR [rbx + 128]{k3}, zmm19
       vmovups  ZMMWORD PTR [rbx + 192]{k4}, zmm22
 
-return:
+.Lreturn:
       add rsp, 128
       mov r13, [rsp]
       mov rsp, r13
@@ -282,3 +282,7 @@ BEGIN_FUNCTION xnn_bf16_f32_gemm_minmax_ukernel_3x64c2__asm_amd64_avx512bf16_bro
       ret
 END_FUNCTION xnn_bf16_f32_gemm_minmax_ukernel_3x64c2__asm_amd64_avx512bf16_broadcast.dfsan
       #endif
+
+      #ifdef __ELF__
+      .section .note.GNU-stack, "", @progbits
+      #endif  // __ELF__

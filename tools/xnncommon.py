@@ -22,7 +22,6 @@ def _remove_duplicate_newlines(text):
     last_newline = is_newline
   return "\n".join(filtered_lines)
 
-_XNNPACK_SRC = ""
 
 _ARCH_TO_MACRO_MAP = {
     "aarch32": "XNN_ARCH_ARM",
@@ -205,10 +204,6 @@ _ISA_TO_CHECK_MAP = {
 }
 
 
-def xnnpack_src():
-  return _XNNPACK_SRC
-
-
 def isa_hierarchy_map():
   return _ISA_HIERARCHY_MAP
 
@@ -237,11 +232,14 @@ def parse_target_name(target_name):
 def generate_isa_check_macro(isa):
   return _ISA_TO_CHECK_MAP.get(isa, "")
 
+
 def generate_isa_utilcheck_macro(isa):
   return _ISA_TO_UTILCHECK_MAP.get(isa, "")
 
+
 def arch_to_macro(arch, isa):
   return _ARCH_TO_MACRO_MAP[arch]
+
 
 def postprocess_test_case(test_case, arch, isa, assembly=False):
   test_case = _remove_duplicate_newlines(test_case)
@@ -253,13 +251,18 @@ def postprocess_test_case(test_case, arch, isa, assembly=False):
       else:
         guard = "%s && %s" % (_ISA_TO_MACRO_MAP[isa], guard)
     if assembly and "||" in guard:
-      guard = '(' + guard + ')'
+      guard = "(" + guard + ")"
     if assembly:
       guard += " && XNN_ENABLE_ASSEMBLY"
-    return "#if %s\n" % guard + _indent(test_case) + "\n" + \
-      "#endif  // %s\n" % guard
+    return (
+        "#if %s\n" % guard
+        + _indent(test_case)
+        + "\n"
+        + "#endif  // %s\n" % guard
+    )
   else:
     return test_case
+
 
 _ISA_HIERARCHY = [
     "sse",
@@ -308,8 +311,9 @@ def overwrite_if_changed(filepath, content):
     with codecs.open(filepath, "w", encoding="utf-8") as output_file:
       output_file.write(content)
 
+
 def make_multiline_macro(x):
-  lines = x.strip().split('\n')
+  lines = x.strip().split("\n")
   max_len = max([len(i) for i in lines])
   lines = [i.ljust(max_len) + "\\" for i in lines]
   return "\n".join(lines)[:-1].strip() + "\n"

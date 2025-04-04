@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vbinary/vopc-hvx.c.in
 //   Generator: tools/xngen
@@ -5,10 +6,10 @@
 
 #include <assert.h>
 
-#include "xnnpack/simd/f32-hvx.h"
+#include "src/xnnpack/simd/f32-hvx.h"
 
-#include "xnnpack/math.h"
-#include "xnnpack/vbinary.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vbinary.h"
 
 void xnn_f32_vminc_ukernel__hvx_u64(
     size_t batch,
@@ -26,7 +27,7 @@ void xnn_f32_vminc_ukernel__hvx_u64(
   HVX_Vector vb = xnn_set1_f32(*input_b);
 
   for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
-    HVX_Vector va0 = xnn_loadu_f32(input_a);
+    HVX_Vector va0 = xnn_loadu_f32(input_a + 0);
     HVX_Vector va1 = xnn_loadu_f32(input_a + 32);
     input_a += 64;
 
@@ -34,7 +35,7 @@ void xnn_f32_vminc_ukernel__hvx_u64(
     HVX_Vector vacc1 = xnn_min_f32(va1, vb);
 
 
-   xnn_storeu_f32(output, vacc0);
+    xnn_storeu_f32(output + 0, vacc0);
     xnn_storeu_f32(output + 32, vacc1);
     output += 64;
   }

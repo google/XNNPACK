@@ -5,7 +5,7 @@
 
 #include <assert.h>
 
-#include "xnnpack/packx.h"
+#include "src/xnnpack/packx.h"
 
 
 void xnn_x32_packx_ukernel_4x__scalar(

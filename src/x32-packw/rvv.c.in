@@ -13,7 +13,7 @@ $assert KBLOCK in [1, 2, 4, 8]
 
 #include <riscv_vector.h>
 
-#include "xnnpack/packw.h"
+#include "src/xnnpack/packw.h"
 
 void xnn_x32_packw_gemm_goi_ukernel_x${LMUL}v__rvv_u${KBLOCK}(
   size_t g,

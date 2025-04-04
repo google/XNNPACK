@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/x32-packx/neon.c.in
 //   Generator: tools/xngen
@@ -12,7 +13,7 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/packx.h"
+#include "src/xnnpack/packx.h"
 
 
 void xnn_x32_packx_ukernel_4x__neon_st4_x4(

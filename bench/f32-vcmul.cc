@@ -10,14 +10,14 @@
 #include <random>
 #include <vector>
 
-#include "utils.h"
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/hardware-config.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/vbinary.h"
-#include "xnnpack/buffer.h"
+#include "bench/utils.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/hardware-config.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/vbinary.h"
 #include <benchmark/benchmark.h>
 
 static void f32_vcmul(benchmark::State& state, uint64_t arch_flags,
@@ -32,12 +32,13 @@ static void f32_vcmul(benchmark::State& state, uint64_t arch_flags,
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), std::ref(rng));
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f),
+                          std::ref(rng));
 
-  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> a(num_elements * 2 +
-                                             XNN_EXTRA_BYTES / sizeof(float));
-  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> b(num_elements * 2 +
-                                             XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> a(
+      num_elements * 2 + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> b(
+      num_elements * 2 + XNN_EXTRA_BYTES / sizeof(float));
   xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> product(num_elements * 2);
   std::generate(a.begin(), a.end(), std::ref(f32rng));
   std::generate(b.begin(), b.end(), std::ref(f32rng));
@@ -47,7 +48,8 @@ static void f32_vcmul(benchmark::State& state, uint64_t arch_flags,
     init_params(&params);
   }
   for (auto _ : state) {
-    vcmul(num_elements * sizeof(float), a.data(), b.data(), product.data(), init_params == nullptr ? nullptr : &params);
+    vcmul(num_elements * sizeof(float), a.data(), b.data(), product.data(),
+          init_params == nullptr ? nullptr : &params);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
@@ -56,12 +58,15 @@ static void f32_vcmul(benchmark::State& state, uint64_t arch_flags,
   }
 
   const size_t num_elements_per_iteration = num_elements;
-  state.counters["num_elements"] =
-    benchmark::Counter(uint64_t(state.iterations()) * num_elements_per_iteration, benchmark::Counter::kIsRate);
+  state.counters["num_elements"] = benchmark::Counter(
+      uint64_t(state.iterations()) * num_elements_per_iteration,
+      benchmark::Counter::kIsRate);
 
-  const size_t bytes_per_iteration = 3 * num_elements * sizeof(std::complex<float>);
+  const size_t bytes_per_iteration =
+      3 * num_elements * sizeof(std::complex<float>);
   state.counters["bytes"] =
-    benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
+      benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
+                         benchmark::Counter::kIsRate);
 }
 
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, \
@@ -71,7 +76,7 @@ static void f32_vcmul(benchmark::State& state, uint64_t arch_flags,
           benchmark::utils::BinaryElementwiseParameters<std::complex<float>,  \
                                                         std::complex<float>>) \
       ->UseRealTime();
-#include "f32-vbinary/f32-vcmul.h"
+#include "src/f32-vbinary/f32-vcmul.h"
 #undef XNN_UKERNEL_WITH_PARAMS
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

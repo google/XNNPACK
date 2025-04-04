@@ -13,15 +13,16 @@
 #include <cstdlib>
 #include <functional>
 #include <iostream>
+#include <limits>
 #include <ostream>
 #include <string>
 
 #include <gtest/gtest.h>
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/pack.h"
-#include "xnnpack/requantization.h"
-#include "next_prime.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/pack.h"
+#include "src/xnnpack/requantization.h"
+#include "test/next_prime.h"
 
 class GemmMicrokernelTester {
  public:
@@ -155,6 +156,20 @@ class GemmMicrokernelTester {
   }
 
   uint8_t qmax() const { return this->qmax_; }
+
+  GemmMicrokernelTester& min(float min) {
+    this->min_ = min;
+    return *this;
+  }
+
+  float min() const { return this->min_; }
+
+  GemmMicrokernelTester& max(float max) {
+    this->max_ = max;
+    return *this;
+  }
+
+  float max() const { return this->max_; }
 
   GemmMicrokernelTester& a_offset(size_t a_offset) {
     this->a_offset_ = a_offset;
@@ -351,6 +366,8 @@ class GemmMicrokernelTester {
   uint8_t b_zero_point_{127};
   uint8_t qmin_{0};
   uint8_t qmax_{255};
+  float min_ = -std::numeric_limits<float>::infinity();
+  float max_ = std::numeric_limits<float>::infinity();
   size_t a_offset_{0};
   size_t zero_index_{SIZE_MAX};
   bool known_nc_mod_nr_{true};

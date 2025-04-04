@@ -10,20 +10,19 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
-#include <functional>
-#include <limits>
 #include <type_traits>
 
-#include "xnnpack.h"
-#include "xnnpack/config-types.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/reference-utils.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/datatype.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/reference-utils.h"
 
 using xnnpack::dequantize;
-using xnnpack::round_float_to_int;
 using xnnpack::quantize;
+using xnnpack::round_float_to_int;
 
 namespace {
 
@@ -226,7 +225,6 @@ const xnn_unary_elementwise_config* get_convert_config(xnn_datatype input,
   }
 }
 
-
 template <typename T>
 struct AbsOp {
   explicit AbsOp(const xnn_unary_uparams*) {}
@@ -269,6 +267,16 @@ struct GELUOp {
 
   T operator()(T x) const {
     return static_cast<T>((x / 2) * (1 + std::erf(x * std::sqrt(2) / 2)));
+  }
+};
+
+template <typename T>
+struct ApproxGELUOp {
+  explicit ApproxGELUOp(const xnn_unary_uparams*) {}
+
+  T operator()(T x) const {
+    return static_cast<T>((x / 2) * (1 + std::tanh(std::sqrt(2.0 / M_PI) * x *
+                                                   (1 + 0.044715 * x * x))));
   }
 };
 
@@ -464,7 +472,7 @@ template <typename T>
 struct SignOp {
   explicit SignOp(const xnn_unary_uparams*) {}
 
-  int32_t operator()(int32_t x) const { return x < 0 ? -1 : x > 0 ? 1: 0; }
+  int32_t operator()(int32_t x) const { return x < 0 ? -1 : x > 0 ? 1 : 0; }
   float operator()(float x) const { return x < 0 ? -1 : x > 0 ? 1 : 0; }
 
   static const uint16_t sign_mask = 0x8000;
@@ -541,6 +549,8 @@ const xnn_unary_elementwise_config* get_config(xnn_unary_operator op,
       DISPATCH_OPERATOR_FOR_REAL_DATATYPE(datatype, RoundDownOp);
     case xnn_unary_gelu:
       DISPATCH_OPERATOR_FOR_REAL_DATATYPE(datatype, GELUOp);
+    case xnn_unary_approxgelu:
+      DISPATCH_OPERATOR_FOR_REAL_DATATYPE(datatype, ApproxGELUOp);
     case xnn_unary_hardswish:
       DISPATCH_OPERATOR_FOR_REAL_DATATYPE(datatype, HardSwishOp);
     case xnn_unary_leaky_relu:

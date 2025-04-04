@@ -13,8 +13,8 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <arm_neon.h>
 
 $if REQUANTIZATION == "FP32" and ARMV8:
-  #include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/vbinary.h"
+  #include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/vbinary.h"
 
 
 $PARAMS_STRUCT = ("rndnu_neon" if REQUANTIZATION == "RNDNU" else "scalar")

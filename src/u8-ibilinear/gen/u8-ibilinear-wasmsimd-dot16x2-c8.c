@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/s8-ibilinear/wasmsimd-dot16x2.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/ibilinear.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/ibilinear.h"
 
 
 void xnn_u8_ibilinear_ukernel__wasmsimd_dot16x2_c8(

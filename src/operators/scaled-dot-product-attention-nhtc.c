@@ -9,20 +9,22 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "xnnpack.h"
-#include "xnnpack/allocator.h"
-#include "xnnpack/common.h"
-#include "xnnpack/compute.h"
-#include "xnnpack/config-types.h"
-#include "xnnpack/config.h"
-#include "xnnpack/log.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microkernel-type.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/operator-type.h"
-#include "xnnpack/operator.h"
-#include "xnnpack/params.h"
-#include "pthreadpool.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/allocator.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/compute.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/config.h"
+#include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microkernel-type.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/operator-type.h"
+#include "src/xnnpack/operator-utils.h"
+#include "src/xnnpack/operator.h"
+#include "src/xnnpack/params.h"
+#include <pthreadpool.h>
 
 static enum xnn_status create_scaled_dot_product_attention_nhtc(
   enum xnn_attention_logits_cap_type cap_type,
@@ -30,7 +32,7 @@ static enum xnn_status create_scaled_dot_product_attention_nhtc(
   enum xnn_operator_type operator_type,
   const struct xnn_gemm_config* gemm_config,
   const struct xnn_raddstoreexpminusmax_config* raddstoreexpminusmax_config,
-  const struct xnn_rmax_config* rmax_config,
+  const struct xnn_reduce_config* rmax_config,
   const struct xnn_binary_elementwise_config* vadd_config,
   const struct xnn_binary_elementwise_config* vmul_config,
   const struct xnn_unary_elementwise_config* vtanh_config,
@@ -128,7 +130,7 @@ enum xnn_status xnn_create_scaled_dot_product_attention_nhtc_f16(
     goto error;
   }
 
-  union xnn_f16_minmax_params minmax_params;
+  struct xnn_f16_minmax_params minmax_params;
   if XNN_LIKELY(gemm_config->init.f16 != NULL) {
     gemm_config->init.f16(&minmax_params, xnn_float16_from_float(-INFINITY), xnn_float16_from_float(INFINITY));
   }
@@ -147,7 +149,7 @@ enum xnn_status xnn_create_scaled_dot_product_attention_nhtc_f16(
     raddstoreexpminusmax_config->init.f16(&expminus_params);
   }
 
-  const struct xnn_rmax_config* rmax_config = xnn_init_f16_rmax_config();
+  const struct xnn_reduce_config* rmax_config = xnn_init_f16_rmax_config();
   if (rmax_config == NULL) {
     xnn_log_error(
       "failed to create %s operator: unsupported hardware configuration",
@@ -238,7 +240,7 @@ enum xnn_status xnn_create_scaled_dot_product_attention_nhtc_f32(
     goto error;
   }
 
-  union xnn_f32_minmax_params minmax_params;
+  struct xnn_f32_minmax_params minmax_params;
   if XNN_LIKELY(gemm_config->init.f32 != NULL) {
     gemm_config->init.f32(&minmax_params, -INFINITY , INFINITY);
   }
@@ -254,7 +256,7 @@ enum xnn_status xnn_create_scaled_dot_product_attention_nhtc_f32(
 
   struct xnn_f32_default_params expminus_params;
 
-  const struct xnn_rmax_config* rmax_config = xnn_init_f32_rmax_config();
+  const struct xnn_reduce_config* rmax_config = xnn_init_f32_rmax_config();
   if (rmax_config == NULL) {
     xnn_log_error(
       "failed to create %s operator: unsupported hardware configuration",
@@ -369,16 +371,18 @@ static enum xnn_status reshape_scaled_dot_product_attention_nhtc(
   pthreadpool_t threadpool)
 {
   if (attention_op->type != expected_operator_type) {
-    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(attention_op->type));
+    xnn_log_error(
+        "failed to reshape operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_operator_type),
+        xnn_operator_type_to_string_v2(attention_op));
     return xnn_status_invalid_parameter;
   }
   attention_op->state = xnn_run_state_invalid;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to reshape %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(attention_op->type));
+                  xnn_operator_type_to_string_v2(attention_op));
     return xnn_status_uninitialized;
   }
 
@@ -704,9 +708,10 @@ static enum xnn_status setup_scaled_dot_product_attention_nhtc(
 {
   if (attention_op->type != expected_operator_type) {
     xnn_log_error(
-        "failed to setup operator: operator type mismatch (expected %s, got %s)",
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
         xnn_operator_type_to_string(expected_operator_type),
-        xnn_operator_type_to_string(attention_op->type));
+        xnn_operator_type_to_string_v2(attention_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -715,8 +720,8 @@ static enum xnn_status setup_scaled_dot_product_attention_nhtc(
       return xnn_status_success;
     case xnn_run_state_invalid:
       xnn_log_error(
-        "failed to setup %s operator: operator has not been reshaped yet",
-        xnn_operator_type_to_string(attention_op->type));
+          "failed to setup %s operator: operator has not been reshaped yet",
+          xnn_operator_type_to_string_v2(attention_op));
       return xnn_status_invalid_state;
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.

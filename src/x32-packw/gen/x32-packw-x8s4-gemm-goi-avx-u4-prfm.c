@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/x32-packw/s4-avx.c.in
 //   Generator: tools/xngen
@@ -14,8 +15,8 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/packw.h"
-#include "xnnpack/prefetch.h"
+#include "src/xnnpack/packw.h"
+#include "src/xnnpack/prefetch.h"
 
 
 void xnn_x32_packw_gemm_goi_ukernel_x8s4__avx_u4_prfm(

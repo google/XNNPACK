@@ -20,21 +20,25 @@ import xnncommon
 
 parser = argparse.ArgumentParser(description="XNNPACK generator")
 parser.add_argument(
-    "-s", "--spec", metavar="FILE", required=True, help="Spec (YAML) file")
+    "-s", "--spec", metavar="FILE", required=True, help="Spec (YAML) file"
+)
 parser.add_argument(
     "-o",
     "--output-test",
     action="append",
     metavar="FILE",
     required=True,
-    help="Test output (C++ source) file(s)")
+    help="Test output (C++ source) file(s)",
+)
 parser.add_argument(
     "-b",
     "--output-bench",
     metavar="FILE",
     required=False,
-    help="Benchmark output (C++ source) file(s)")
+    help="Benchmark output (C++ source) file(s)",
+)
 parser.set_defaults(defines=list())
+
 
 def split_ukernel_name(name):
   common_name, target_name = name.split("__", 1)
@@ -66,7 +70,19 @@ def split_ukernel_name(name):
   requantization = common_parts[-3]
   if requantization not in ["fp32", "rndnu", "rndnu16"]:
     requantization = None
-  return mr, nr, kr, sr, mr_packed, vector_tile, requantization, arch, isa, assembly
+  return (
+      mr,
+      nr,
+      kr,
+      sr,
+      mr_packed,
+      vector_tile,
+      requantization,
+      arch,
+      isa,
+      assembly,
+  )
+
 
 GEMM_BENCH_CODE = """\
 $if CPP_CHECK:
@@ -492,24 +508,44 @@ std::vector<GemmTestParams> CreateTests(
             .loop_zi(0, mr - 1));
       }
       $if ACTIVATION == "MINMAX":
-        gemm_tests.push_back(GemmTestParams(
-            "qmin",
-            tester.clone()
-                .m(mr).n(nr).k(k_block).qmin(128)
-                $if KERNELTYPE in ['qb4w', 'qc4w']:
-                  .b_zero_point(8)
-                $if KERNELTYPE in ['qb4w']:
-                  .bl(32)
-            , test_func, isa_check));
-        gemm_tests.push_back(GemmTestParams(
-            "qmax",
-            tester.clone()
-                .m(mr).n(nr).k(k_block).qmax(128)
-                $if KERNELTYPE in ['qb4w', 'qc4w']:
-                  .b_zero_point(8)
-                $if KERNELTYPE in ['qb4w']:
-                  .bl(32)
-            , test_func, isa_check));
+        $if OUTPUT_DATATYPE in {'f32', 'f16'}:
+          gemm_tests.push_back(GemmTestParams(
+              "min",
+              tester.clone()
+                  .m(mr).n(nr).k(k_block).min(0.0f)
+                  $if KERNELTYPE in ['qb4w', 'qc4w']:
+                    .b_zero_point(8)
+                  $if KERNELTYPE in ['qb4w']:
+                    .bl(32)
+              , test_func, isa_check));
+          gemm_tests.push_back(GemmTestParams(
+              "max",
+              tester.clone()
+                  .m(mr).n(nr).k(k_block).max(0.0f)
+                  $if KERNELTYPE in ['qb4w', 'qc4w']:
+                    .b_zero_point(8)
+                  $if KERNELTYPE in ['qb4w']:
+                    .bl(32)
+              , test_func, isa_check));
+        $else:
+          gemm_tests.push_back(GemmTestParams(
+              "qmin",
+              tester.clone()
+                  .m(mr).n(nr).k(k_block).qmin(128)
+                  $if KERNELTYPE in ['qb4w', 'qc4w']:
+                    .b_zero_point(8)
+                  $if KERNELTYPE in ['qb4w']:
+                    .bl(32)
+              , test_func, isa_check));
+          gemm_tests.push_back(GemmTestParams(
+              "qmax",
+              tester.clone()
+                  .m(mr).n(nr).k(k_block).qmax(128)
+                  $if KERNELTYPE in ['qb4w', 'qc4w']:
+                    .b_zero_point(8)
+                  $if KERNELTYPE in ['qb4w']:
+                    .bl(32)
+              , test_func, isa_check));
       gemm_tests.push_back(GemmTestParams(
           "strided_cm",
           tester.clone()
@@ -616,30 +652,6 @@ $if TEST_NAME.startswith('GENERATE') and DATATYPE in ['f32', 'f16']:
     }
   }
 
-$if TEST_NAME.startswith('GENERATE') and DATATYPE in ['f32', 'f16'] and PROTOTYPE is not None:
-  #if XNN_ENABLE_ASSEMBLY
-    TEST(${TEST_NAME}, matches_assembly) {
-      $if ISA_CHECK:
-        ${ISA_CHECK};
-      GemmMicrokernelTester()
-        $if MR > 1:
-          .mr(${MR})
-        $if NR > 1:
-          .nr(${NR})
-        $if KR > 1:
-          .kr(${KR})
-        $if SR > 1:
-          .sr(${SR})
-        $if MR > 1:
-          .m(${MR})
-        $if NR > 1:
-          .n(${NR})
-        .k(${KBLOCK})
-        .${TEST_FUN}(
-            ${", ".join(TEST_ARGS)},
-            &${PROTOTYPE});
-    }
-  #endif // XNN_ENABLE_ASSEMBLY
 $if CPP_CHECK:
   #endif  // ${CPP_CHECK}
 """
@@ -663,7 +675,6 @@ def generate_test_cases(
     is_pipelined,
     cpp_check,
     isa,
-    prototype,
 ):
   """Generates all tests cases for a GEMM micro-kernel.
 
@@ -703,9 +714,7 @@ def generate_test_cases(
   _, datatype, ukernel_type, activation, _ = ukernel.split("_", 4)
   kerneltype = datatype
   if datatype in ["f16", "f32"] and ukernel_type in ["qc8w", "qc4w"]:
-    _, datatype, kerneltype, ukernel_type, activation, _ = ukernel.split(
-        "_", 5
-    )
+    _, datatype, kerneltype, ukernel_type, activation, _ = ukernel.split("_", 5)
     datatype = datatype + "_" + kerneltype
   if (
       datatype in ("qd8", "qp8")
@@ -735,17 +744,21 @@ def generate_test_cases(
         "xnn_%s_requantize_%s" % (requantization_datatype, requantization)
     )
 
+  output_datatype = init_fn.split("_")[2] if init_fn else "f32"
+
   nr_scale = ""
   if vector_tile:
-    ctype = {
-        "qs8": "int8_t",
+    accum_type = {
+        "qs8": "int32_t",
         "qd8": "int32_t",
-        "qp8": "int8_t",
-        "qu8": "uint8_t",
-        "f16": "uint16_t",
+        "qp8": "int32_t",
+        "qu8": "int32_t",
+        "f16": "xnn_float16",
         "f32": "float",
     }[datatype]
-    nr_scale = {"rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype}[isa]
+    nr_scale = {
+        "rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % accum_type
+    }[isa]
   test_fun_name = "".join(ukernel.split("_")[1:4]).upper()
   if test_fun_name in {"QP8F32QC8W"}:
     test_fun_name = "_".join(["Test", test_fun_name])
@@ -774,8 +787,8 @@ def generate_test_cases(
       "IS_PIPELINED": is_pipelined,
       "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
       "next_prime": next_prime,
-      "PROTOTYPE": prototype,
       "CPP_CHECK": cpp_check,
+      "OUTPUT_DATATYPE": output_datatype,
   }
 
   create_test_case = xngen.preprocess(GEMM_CREATE_TESTS_CODE, test_args)
@@ -815,6 +828,7 @@ def main(args):
       raise ValueError("expected a list of micro-kernels in the spec")
 
     tests = """\
+// clang-format off
 // Copyright (c) Facebook, Inc. and its affiliates.
 // All rights reserved.
 //
@@ -834,21 +848,22 @@ def main(args):
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack/allocator.h"
-#include "xnnpack/common.h"
-#include "xnnpack/gemm.h"
-#include "xnnpack/igemm.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/pack.h"
-#include "xnnpack/packw.h"
-#include "xnnpack/ppmm.h"
-#include "xnnpack/requantization.h"
-#include "gemm-microkernel-tester.h"
-#include "next_prime.h"
+#include "src/xnnpack/allocator.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/igemm.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/pack.h"
+#include "src/xnnpack/packw.h"
+#include "src/xnnpack/ppmm.h"
+#include "src/xnnpack/requantization.h"
+#include "test/gemm-microkernel-tester.h"
+#include "test/next_prime.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
     benches = """\
+// clang-format off
 // Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -859,15 +874,15 @@ def main(args):
 //   Generator: {generator}
 
 #include <benchmark/benchmark.h>
-#include "gemm-benchmark.h"
-#include "utils.h"
-#include "xnnpack/common.h"
-#include "xnnpack/gemm.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/pack.h"
-#include "xnnpack/packw.h"
+#include "bench/gemm-benchmark.h"
+#include "bench/utils.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/pack.h"
+#include "src/xnnpack/packw.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
     test_outputs = collections.defaultdict(str)
@@ -898,7 +913,6 @@ def main(args):
       packed_stride_fn = ukernel_spec.get("packed-stride")
       pipelined = bool(ukernel_spec.get("pipelined", False))
       cpp_check = ukernel_spec.get("cpp-check", False)
-      prototype = ukernel_spec.get("prototype")
       (
           mr,
           nr,
@@ -931,7 +945,6 @@ def main(args):
           pipelined,
           cpp_check,
           isa,
-          prototype,
       )
 
       # Store or reuse the `CreateTests` function?
@@ -941,9 +954,12 @@ def main(args):
         create_tests_from_idx[create_tests_idx] = create_tests.replace(
             "CreateTests(", f"CreateTests{create_tests_idx}("
         )
-        if isa == 'rvv':
-          create_tests_from_idx[create_tests_idx] = xnncommon.postprocess_test_case(
-            create_tests_from_idx[create_tests_idx], arch, isa, assembly)
+        if isa == "rvv":
+          create_tests_from_idx[create_tests_idx] = (
+              xnncommon.postprocess_test_case(
+                  create_tests_from_idx[create_tests_idx], arch, isa, assembly
+              )
+          )
       test_case = test_case.replace(
           "CreateTests(", f"CreateTests{create_tests_idx}("
       )

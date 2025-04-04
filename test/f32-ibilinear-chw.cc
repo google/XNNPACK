@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2020 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -9,10 +10,10 @@
 
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/ibilinear.h"
-#include "xnnpack/isa-checks.h"
-#include "ibilinear-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/ibilinear.h"
+#include "src/xnnpack/isa-checks.h"
+#include "test/ibilinear-microkernel-tester.h"
 
 
 TEST(F32_IBILINEAR_CHW__SCALAR_P1, pixels_eq_1) {

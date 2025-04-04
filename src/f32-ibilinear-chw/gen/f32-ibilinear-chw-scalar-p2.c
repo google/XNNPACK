@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-ibilinear-chw/scalar.c.in
 //   Generator: tools/xngen
@@ -9,7 +10,7 @@
 
 #include <assert.h>
 
-#include "xnnpack/ibilinear.h"
+#include "src/xnnpack/ibilinear.h"
 
 
 void xnn_f32_ibilinear_chw_ukernel__scalar_p2(

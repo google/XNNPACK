@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/x8-lut/neon-tbx128x4.c.in
 //   Generator: tools/xngen
@@ -11,9 +12,9 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/lut.h"
-#include "xnnpack/common.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/lut.h"
+#include "src/xnnpack/common.h"
 
 
 void xnn_x8_lut_ukernel__aarch64_neon_tbx128x4_u64(

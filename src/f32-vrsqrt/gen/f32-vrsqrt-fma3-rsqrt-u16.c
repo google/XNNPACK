@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vrsqrt/fma3-rsqrt.c.in
 //   Generator: tools/xngen
@@ -12,9 +13,9 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <xmmintrin.h>
-#include "xnnpack/common.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vunary.h"
 
 // In the following, we do a single Newton-Raphson step on the equation
 // $x^{-2} - a$, which expands to:

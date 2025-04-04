@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2024 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -90,10 +91,12 @@ XNN_GIO_UKERNEL(xnn_arch_x86_sse4_1, xnn_x32_packw_gemm_gio_ukernel_x12__sse41_u
 XNN_GIO_UKERNEL(xnn_arch_x86_sse4_1, xnn_x32_packw_gemm_gio_ukernel_x16__sse41_u2, 16, 1, 1, 1, 1)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+XNN_GIO_UKERNEL(0, xnn_x32_packw_gemm_gio_ukernel_x2__scalar, 2, 1, 1, 1, 1)
 XNN_GIO_UKERNEL(0, xnn_x32_packw_gemm_gio_ukernel_x4__scalar, 4, 1, 1, 1, 1)
 XNN_GIO_UKERNEL(0, xnn_x32_packw_gemm_gio_ukernel_x8__scalar, 8, 1, 1, 1, 1)
 XNN_GIO_UKERNEL(0, xnn_x32_packw_gemm_gio_ukernel_x16__scalar, 16, 1, 1, 1, 1)
 XNN_GIO_UKERNEL(0, xnn_x32_packw_gemm_gio_ukernel_x32__scalar, 32, 1, 1, 1, 1)
+XNN_GIO_UKERNEL(0, xnn_x32_packw_gemm_gio_ukernel_x64__scalar, 64, 1, 1, 1, 1)
 
 #if XNN_ENABLE_AVX512F && (XNN_ARCH_X86_64 || XNN_ARCH_X86)
 XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_x32_packw_gemm_goi_ukernel_x16__avx512f_u4, 16, 1, 1, 4, 1)
@@ -132,6 +135,10 @@ XNN_UKERNEL(0, xnn_x32_packw_gemm_goi_ukernel_x8__scalar_float_u4, 8, 1, 1, 4, 1
 XNN_UKERNEL(0, xnn_x32_packw_gemm_goi_ukernel_x8__scalar_int_u4, 8, 1, 1, 4, 1)
 XNN_UKERNEL(0, xnn_x32_packw_gemm_goi_ukernel_x16__scalar_float_u4, 16, 1, 1, 4, 1)
 XNN_UKERNEL(0, xnn_x32_packw_gemm_goi_ukernel_x16__scalar_int_u4, 16, 1, 1, 4, 1)
+XNN_UKERNEL(0, xnn_x32_packw_gemm_goi_ukernel_x32__scalar_float_u2, 32, 1, 1, 2, 1)
+XNN_UKERNEL(0, xnn_x32_packw_gemm_goi_ukernel_x32__scalar_int_u2, 32, 1, 1, 2, 1)
+XNN_UKERNEL(0, xnn_x32_packw_gemm_goi_ukernel_x64__scalar_float_u2, 64, 1, 1, 2, 1)
+XNN_UKERNEL(0, xnn_x32_packw_gemm_goi_ukernel_x64__scalar_int_u2, 64, 1, 1, 2, 1)
 
 #if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 XNN_UKERNEL(xnn_arch_riscv_vector, xnn_x32_packw_gemm_goi_ukernel_x1v__rvv_u2, 1, 1, 1, 2, xnn_init_hardware_config()->vlenb / sizeof(uint32_t))

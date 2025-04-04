@@ -14,11 +14,11 @@ $_MM256_UNPACKHI_PX = {8: "_mm256_unpackhi_epi8", 16: "_mm256_unpackhi_epi16"}[S
 
 #include <assert.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/math.h"
-#include "xnnpack/transpose.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/transpose.h"
+#include "src/xnnpack/unaligned.h"
 
 void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_reuse_${OUT_PTRS.lower()}_avx2(
     const uint${SIZE}_t* input,

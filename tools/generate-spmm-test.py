@@ -10,8 +10,8 @@ import codecs
 import collections
 import os
 import sys
-import yaml
 import zlib
+import yaml
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from primes import next_prime
@@ -19,19 +19,25 @@ import xngen
 import xnncommon
 
 
-parser = argparse.ArgumentParser(description='XNNPACK generator')
-parser.add_argument("-s", "--spec", metavar="FILE", required=True,
-                    help="Spec (YAML) file")
+parser = argparse.ArgumentParser(description="XNNPACK generator")
+parser.add_argument(
+    "-s", "--spec", metavar="FILE", required=True, help="Spec (YAML) file"
+)
 parser.add_argument(
     "-o",
     "--output-test",
     action="append",
     metavar="FILE",
     required=True,
-    help="Test output (C++ source) file(s)")
-parser.add_argument( "-b", "--output-bench",
-                    metavar="FILE", required=False,
-                    help="Benchmark output (C++ source) file(s)")
+    help="Test output (C++ source) file(s)",
+)
+parser.add_argument(
+    "-b",
+    "--output-bench",
+    metavar="FILE",
+    required=False,
+    help="Benchmark output (C++ source) file(s)",
+)
 parser.set_defaults(defines=list())
 
 
@@ -42,6 +48,7 @@ def split_ukernel_name(name):
   mr, nr = map(int, param_spec.split("x"))
   arch, isa, assembly = xnncommon.parse_target_name(target_name)
   return mr, nr, arch, isa
+
 
 SPMM_BENCH_CODE = """\
 static void ${UKERNEL_NAME}(benchmark::State& state, const char* net) {
@@ -407,13 +414,13 @@ def generate_test_cases(ukernel, init_fn, mr, nr, k_block, is_pipelined, isa):
     mr: MR parameter of the GEMM micro-kernel.
     nr: NR parameter of the GEMM micro-kernel.
     k_block: Number of K values processed per one iteration of the main loop of
-             the micro-kernel.
+      the micro-kernel.
     is_pipelined: Indicates if the micro-kernel is implemented with software
-                  pipelining. Additional test cases are generated for software
-                  pipelined micro-kernels to separately test prologue + epiloque
-                  of the pipelined loop and iteration of the pipelined loop.
+      pipelining. Additional test cases are generated for software pipelined
+      micro-kernels to separately test prologue + epiloque of the pipelined loop
+      and iteration of the pipelined loop.
     isa: instruction set required to run the micro-kernel. Generated unit test
-         will skip execution if the host processor doesn't support this ISA.
+      will skip execution if the host processor doesn't support this ISA.
 
   Returns:
     Code for the test case.
@@ -422,29 +429,35 @@ def generate_test_cases(ukernel, init_fn, mr, nr, k_block, is_pipelined, isa):
   _, test_name = ukernel.split("_", 1)
   _, datatype, ukernel_type, _ = ukernel.split("_", 3)
   test_args = [ukernel, init_fn]
-  test_case = xngen.preprocess(TEST_TEMPLATE, {
-      "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
-      "TEST_ARGS": test_args,
-      "UKERNEL_TYPE": ukernel_type.upper(),
-      "DATATYPE": datatype,
-      "MR": mr,
-      "NR": nr,
-      "KBLOCK": k_block,
-      "ADJKBLOCK": 2 * k_block if is_pipelined else k_block,
-      "IS_PIPELINED": is_pipelined,
-      "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
-      "next_prime": next_prime,
-    })
+  test_case = xngen.preprocess(
+      TEST_TEMPLATE,
+      {
+          "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
+          "TEST_ARGS": test_args,
+          "UKERNEL_TYPE": ukernel_type.upper(),
+          "DATATYPE": datatype,
+          "MR": mr,
+          "NR": nr,
+          "KBLOCK": k_block,
+          "ADJKBLOCK": 2 * k_block if is_pipelined else k_block,
+          "IS_PIPELINED": is_pipelined,
+          "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
+          "next_prime": next_prime,
+      },
+  )
 
-  benchmark = xngen.preprocess(SPMM_BENCH_CODE, {
-      "UKERNEL_NAME": ukernel_name,
-      "SPMM": ukernel,
-      "MR": mr,
-      "NR": nr,
-      "INIT_PARAMS": init_fn,
-      "ISA_CHECK": xnncommon.generate_isa_utilcheck_macro(isa),
-      "next_prime": next_prime,
-    })
+  benchmark = xngen.preprocess(
+      SPMM_BENCH_CODE,
+      {
+          "UKERNEL_NAME": ukernel_name,
+          "SPMM": ukernel,
+          "MR": mr,
+          "NR": nr,
+          "INIT_PARAMS": init_fn,
+          "ISA_CHECK": xnncommon.generate_isa_utilcheck_macro(isa),
+          "next_prime": next_prime,
+      },
+  )
   return test_case, benchmark
 
 
@@ -458,6 +471,7 @@ def main(args):
       raise ValueError("expected a list of micro-kernels in the spec")
 
     tests = """\
+// clang-format off
 // Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -468,14 +482,15 @@ def main(args):
 //   Generator: {generator}
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/spmm.h"
-#include "spmm-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/spmm.h"
+#include "test/spmm-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
     benches = """\
+// clang-format off
 // Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -486,11 +501,11 @@ def main(args):
 //   Generator: {generator}
 
 #include <benchmark/benchmark.h>
-#include "spmm-benchmark.h"
-#include "utils.h"
-#include "xnnpack/gemm.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
+#include "bench/spmm-benchmark.h"
+#include "bench/utils.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
     test_outputs = collections.defaultdict(lambda: tests)
@@ -506,14 +521,18 @@ def main(args):
       pipelined = bool(ukernel_spec.get("pipelined", False))
       mr, nr, arch, isa = split_ukernel_name(name)
 
-      test_case, bench_case = generate_test_cases(name, init_fn, mr, nr, k_block,
-                                      pipelined, isa)
+      test_case, bench_case = generate_test_cases(
+          name, init_fn, mr, nr, k_block, pipelined, isa
+      )
       # Hash the name of each microkernel and figure out which output file to
       # write it to.
       output_index = zlib.crc32(bytes(name, "utf-8")) % num_output_files
-      test_outputs[options.output_test[output_index]] += "\n\n" + xnncommon.postprocess_test_case(
-          test_case, arch, isa)
-      benches[isa_hierarchy.get(isa, 0)] +=  "\n\n" + xnncommon.postprocess_test_case(bench_case, arch, isa)
+      test_outputs[
+          options.output_test[output_index]
+      ] += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
+      benches[
+          isa_hierarchy.get(isa, 0)
+      ] += "\n\n" + xnncommon.postprocess_test_case(bench_case, arch, isa)
 
     for arch_idx in reversed(range(len(isa_hierarchy))):
       bench_outputs += benches[arch_idx]

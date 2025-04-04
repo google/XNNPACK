@@ -11,9 +11,9 @@ $assert TYPE in ["int8_t"]
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/math.h"
-#include "xnnpack/packw.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/packw.h"
+#include "src/xnnpack/unaligned.h"
 
 $BITS = {"int8_t": 8}[TYPE]
 $BTYPE = {"int8_t": "uint32_t"}[TYPE]

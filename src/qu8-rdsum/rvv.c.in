@@ -1,0 +1,72 @@
+// Copyright 2025 Microchip
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert LMUL in [1, 2]
+
+#include <assert.h>
+#include <riscv_vector.h>
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
+
+void xnn_qu8_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__rvv_u${LMUL}v(
+    size_t rows,
+    size_t channels,
+    const uint8_t* input,
+    size_t input_stride,
+    const uint8_t* zero,
+    uint32_t* output,
+    const struct xnn_qs8_rsum_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(rows != 0);
+  assert(channels != 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  size_t input_increment = ${ACCUMULATORS} * input_stride;
+
+  do {
+    size_t vl = __riscv_vsetvl_e8m${LMUL}(channels); channels -= vl;
+
+    const uint8_t* i0 = input;
+    $for ACC in range(1, ACCUMULATORS):
+      const uint8_t* i${ACC} = (const uint8_t*) ((uintptr_t) i${ACC - 1} + input_stride);
+
+    vuint32m${LMUL*4}_t vacc = __riscv_vmv_v_x_u32m${LMUL*4}(0, vl);
+
+    // 256 uint8s may be summed into an uint16 before overflowing
+    // To prevent handling the tails of the inner 256 loop, we round 256 down to
+    // the nearest integer multiple of ACCUMULATORS.
+    int r = rows;
+    while (r > 0) {
+
+      vuint16m${LMUL*2}_t vacc16 = __riscv_vmv_v_x_u16m${LMUL*2}(0, vl);
+
+      for (int current_batch = min(r, 252); current_batch > 0; current_batch -= ${ACCUMULATORS}) {
+        $for ACC in range(1, ACCUMULATORS, 2):
+          if XNN_UNPREDICTABLE(current_batch < ${ACC+1}) {
+            i${ACC} = zero;
+          }
+          if XNN_UNPREDICTABLE(current_batch <= ${ACC+1}) {
+            i${ACC+1} = zero;
+          }
+
+        $for ACC in range(ACCUMULATORS):
+          vuint8m${LMUL}_t vinput${ACC} = __riscv_vle8_v_u8m${LMUL}(i${ACC}, vl);
+          vacc16 = __riscv_vwaddu_wv_u16m${LMUL*2}(vacc16, vinput${ACC}, vl);
+          i${ACC} = (const uint8_t*) ((uintptr_t) i${ACC} + input_increment);
+      }
+
+      vacc = __riscv_vwaddu_wv_u32m${LMUL*4}(vacc, vacc16, vl);
+      r = doz(r, 252);
+    }
+
+    vuint32m${LMUL*4}_t voutput = __riscv_vle32_v_u32m${LMUL*4}(output, vl);
+    voutput = __riscv_vadd_vv_u32m${LMUL*4}(voutput, vacc, vl);
+    __riscv_vse32_v_u32m${LMUL*4}(output, voutput, vl); output += vl;
+
+    input = (const uint8_t*) ((uintptr_t) input + vl);
+
+  } while (channels != 0);
+}

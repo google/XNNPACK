@@ -9,8 +9,8 @@
 
 #include <stdint.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/simd/f32-avx-base.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/simd/f32-avx-base.h"  // IWYU pragma: export
 
 // Whether or not this architecture has native fused multiply-add support.
 #define XNN_SIMD_HAS_NATIVE_FMA 1

@@ -1,0 +1,164 @@
+// Copyright 2025 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert NR > 1
+$assert KR > 1
+$assert TYPE in ["uint16_t"]
+$assert BTYPE in ["uint32_t"]
+
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/packw.h"
+
+$BITS = 16
+$BIAS_BITS = 32
+$WTYPE = $TYPE
+
+void xnn_x${BITS}_x${BIAS_BITS}_packw_gemm_gio_ukernel_x${NR}c${KR}__scalar(
+  size_t g,
+  size_t nc,
+  size_t kc,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  size_t k_stride,
+  const ${WTYPE}* weights,
+  const ${BTYPE}* bias,
+  const void* scale,
+  ${WTYPE}* packed_weights,
+  size_t extra_bytes,
+  const void* params)
+{
+  assert(g != 0);
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(nr == ${NR});
+  assert(kr == ${KR});
+  assert(sr == 1);
+  assert(weights != NULL);
+  assert(packed_weights != NULL);
+
+  ${TYPE}* out = (${TYPE}*) packed_weights;
+  const ${BTYPE}* b = (const ${BTYPE}*) bias;
+
+  do {
+    // NC main loop multiple of ${NR}
+    const ${TYPE}* w0 = (const ${TYPE}*) weights;
+    size_t n = nc;
+    for (;n >= ${NR}; n -= ${NR}) {
+      if XNN_LIKELY(b != NULL) {
+        memcpy(out, b, sizeof(${BTYPE}) * ${NR});
+        b += ${NR};
+      } else {
+        memset(out, 0, sizeof(${BTYPE}) * ${NR});
+      }
+      out += ${NR} * sizeof(${BTYPE}) / sizeof(${TYPE});
+
+      $for K in range(1, KR):
+        const ${TYPE}* w${K} = w${K-1} + k_stride;
+
+      // KC main loop multiple of ${NR}x${KR}
+      size_t k = kc;
+      for (; k >= ${KR}; k -= ${KR}) {
+        $for N in range(NR):
+          $for K in range(KR):
+            const ${TYPE} v${K}x${N} = w${K}[${N}];
+          $for K in range(KR):
+            out[${N*KR+K}] = v${K}x${N};
+        $for K in range(KR):
+          w${K} += ${KR} * k_stride;
+        out += ${NR*KR};
+      }
+
+      // KC remainder of 1..${KR-1}
+      if (k != 0) {
+        assert(k >= 1 && k <= ${KR-1});
+        $for N in range(NR):
+          const ${TYPE} v0x${N} = w0[${N}];
+          $for K in range(1, KR):
+            const ${TYPE} v${K}x${N} = ${K} < k ? w${K}[${N}] : 0;
+          out[${N*KR}] = v0x${N};
+          $for K in range(1, KR):
+            out[${N*KR+K}] = v${K}x${N};
+        $for K in range(KR):
+          w${K} += k * k_stride;
+        out += ${NR*KR};
+      }
+
+      out = (${TYPE}*) ((uintptr_t) out + extra_bytes);
+      w0 = w0 - kc * k_stride + ${NR};
+    }
+
+    // NC remainder (1..${NR-1})
+    if XNN_UNLIKELY(n != 0) {
+      if XNN_LIKELY(b != NULL) {
+        size_t nb = n;
+        do {
+          $if BTYPE == TYPE:
+            *out++ = *b++;
+          $else:
+            *((${BTYPE}*) out) = *b++;
+            out += sizeof(${BTYPE})/sizeof(${TYPE});
+        } while (--nb != 0);
+      } else {
+        size_t nb = n;
+        do {
+          $if BTYPE == TYPE:
+            *out++ = 0;
+          $else:
+            *((${BTYPE}*) out) = 0;
+            out += sizeof(${BTYPE})/sizeof(${TYPE});
+        } while (--nb != 0);
+      }
+      out += (${NR} - n) * sizeof(${BTYPE}) / sizeof(${TYPE});
+
+     $if NR > 2:
+        // NR remainder has less than ${NR} rows so last row is not loaded
+      $for K in range(1, KR):
+        const ${TYPE}* w${K} = w${K-1} + k_stride;
+
+      // KC main loop multiple of ${NR}x${KR}
+      size_t k = kc;
+      for (; k >= ${KR}; k -= ${KR}) {
+        $for K in range(KR):
+          const ${TYPE} v${K}x0 = w${K}[0];
+        $for K in range(KR):
+          out[${K}] = v${K}x0;
+        $for N in range(1, NR-1):
+          if (${N} < n) {
+            $for K in range(KR):
+              const ${TYPE} v${K}x${N} = w${K}[${N}];
+            $for K in range(KR):
+              out[${N*KR+K}] = v${K}x${N};
+          }
+        $for K in range(KR):
+          w${K} += ${KR} * k_stride;
+        out += ${NR*KR};
+      }
+
+      // KC remainder of 1..${KR-1}
+      if (k != 0) {
+        assert(k >= 1 && k <= ${KR-1});
+        $for N in range(NR-1):
+          if (${N} < n) {
+            const ${TYPE} v0x${N} = w0[${N}];
+            $for K in range(1, KR):
+              const ${TYPE} v${K}x${N} = ${K} < k ? w${K}[${N}] : 0;
+            out[${N*KR}] = v0x${N};
+            $for K in range(1, KR):
+              out[${N*KR+K}] = v${K}x${N};
+          }
+        $for K in range(KR):
+          w${K} += k * k_stride;
+        out += ${NR*KR};
+      }
+
+      out = (${TYPE}*) ((uintptr_t) out + extra_bytes);
+    }
+    weights += nc * kc;
+  } while (--g != 0);
+}

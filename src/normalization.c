@@ -10,9 +10,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
 
 void xnn_normalize_slice(
     const size_t num_dims,
@@ -279,12 +279,6 @@ void xnn_normalize_transpose_permutation(
   }
   *normalized_element_size_out = normalized_element_size;
   *normalized_num_dims = output_dims;
-}
-
-static int cmp_value_size_t(const void* a_ptr, const void* b_ptr) {
-  const size_t a = *((const size_t*) a_ptr);
-  const size_t b = *((const size_t*) b_ptr);
-  return (b < a) - (b > a);
 }
 
 void xnn_normalize_reduction(

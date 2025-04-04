@@ -21,13 +21,11 @@
 #define __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX_BASE_H_
 
 #include <assert.h>
+#include <immintrin.h>
 #include <stddef.h>
 #include <stdint.h>
 
-#include <immintrin.h>
-
-#include "xnnpack/common.h"
-
+#include "src/xnnpack/common.h"
 
 // SIMD vector type for f32 using AVX.
 typedef __m256 xnn_simd_f32_t;
@@ -41,14 +39,9 @@ typedef __m256 xnn_simd_f32_t;
 #define XNN_SIMD_CONST_F32_FROM_INT32(var, val) \
   const xnn_simd_f32_t var = _mm256_castsi256_ps(_mm256_set1_epi32(val));
 
-// Include the header for generic functions _after_ declaring the arch-specific
-// types and sizes.
-#include "xnnpack/simd/f32-generic-functions.h"
-
 // Mask table used for masked load/store operations.
 static const int32_t mask_table_avx_f32[14] = {-1, -1, -1, -1, -1, -1, -1,
                                                0,  0,  0,  0,  0,  0,  0};
-
 // Arithmetic operations.
 static XNN_INLINE xnn_simd_f32_t xnn_zero_f32() { return _mm256_setzero_ps(); }
 
@@ -91,6 +84,10 @@ static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
   return xnn_sub_f32(xnn_zero_f32(), a);
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
+  return _mm256_round_ps(a, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
+}
+
 // Logical operations.
 static XNN_INLINE xnn_simd_f32_t xnn_and_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {
@@ -120,10 +117,6 @@ static XNN_INLINE xnn_simd_f32_t xnn_rsqrt_f32(xnn_simd_f32_t a) {
   return _mm256_rsqrt_ps(a);
 }
 
-static XNN_INLINE xnn_simd_f32_t xnn_getexp_f32(xnn_simd_f32_t a) {
-  return xnn_generic_getexp_f32(a);
-}
-
 // Load/store operations.
 static XNN_INLINE xnn_simd_f32_t xnn_loadu_f32(const float* ptr) {
   return _mm256_loadu_ps(ptr);
@@ -145,10 +138,6 @@ static XNN_INLINE xnn_simd_f32_t xnn_set1_f32(float v) {
   return _mm256_set1_ps(v);
 }
 
-static XNN_INLINE xnn_simd_f32_t xnn_set1_or_load_f32(const float* v) {
-  return _mm256_set1_ps(*v);
-}
-
 // Tail load/store operations.
 static XNN_INLINE xnn_simd_f32_t xnn_load_tail_f32(const float* input,
                                                    size_t num_elements) {
@@ -158,6 +147,11 @@ static XNN_INLINE xnn_simd_f32_t xnn_load_tail_f32(const float* input,
   const __m256i vmask = _mm256_loadu_si256(
       (const __m256i*)(&mask_table_avx_f32[7] - num_elements));
   return _mm256_maskload_ps(input, vmask);
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_load_tail_safe_f32(const float* input,
+                                                        size_t num_elements) {
+  return xnn_load_tail_f32(input, num_elements);
 }
 
 static XNN_INLINE void xnn_store_tail_f32(float* output, xnn_simd_f32_t v,

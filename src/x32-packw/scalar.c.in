@@ -11,8 +11,8 @@ $assert TYPE in ["int8_t", "uint16_t", "uint32_t", "float"]
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/math.h"
-#include "xnnpack/packw.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/packw.h"
 
 $TYPE_SUFFIX = {"int8_t": "int", "uint16_t": "int", "uint32_t": "int", "float": "float"}[TYPE]
 $BITS = {"int8_t": 8, "uint16_t": 16, "uint32_t": 32, "float": 32}[TYPE]

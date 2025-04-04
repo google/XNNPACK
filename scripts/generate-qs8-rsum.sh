@@ -75,4 +75,8 @@ tools/xngen src/qs8-rsum/wasmrelaxedsimd.c.in -D CHANNEL_TILE=32 -D ACCUMULATORS
 tools/xngen src/qs8-rsum/wasmrelaxedsimd.c.in -D CHANNEL_TILE=64 -D ACCUMULATORS=2 -D DATATYPE=QS8 -o src/qs8-rsum/gen/qs8-rsum-wasmrelaxedsimd-u64-acc2.c &
 tools/xngen src/qs8-rsum/wasmrelaxedsimd.c.in -D CHANNEL_TILE=64 -D ACCUMULATORS=4 -D DATATYPE=QS8 -o src/qs8-rsum/gen/qs8-rsum-wasmrelaxedsimd-u64-acc4.c &
 
+################################### RISC-V Vector #############################
+tools/xngen src/qs8-rsum/rvv.c.in -D LMUL=1 -D DATATYPE=QS8 -o src/qs8-rsum/gen/qs8-rsum-rvv-u1v.c &
+tools/xngen src/qs8-rsum/rvv.c.in -D LMUL=2 -D DATATYPE=QS8 -o src/qs8-rsum/gen/qs8-rsum-rvv-u2v.c &
+
 wait

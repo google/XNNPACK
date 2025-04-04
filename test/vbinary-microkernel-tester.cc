@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "vbinary-microkernel-tester.h"
+#include "test/vbinary-microkernel-tester.h"
 
 #include <stdint.h>
 
@@ -20,52 +20,60 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/requantization.h"
-#include "replicable_random_device.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/requantization.h"
+#include "test/replicable_random_device.h"
 
 void VBinaryMicrokernelTester::Test(xnn_f16_vbinary_ukernel_fn vbinary,
                                     OpType op_type,
                                     xnn_init_f16_default_params_fn) const {
   xnnpack::ReplicableRandomDevice rng;
-  std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
+  xnnpack::DatatypeGenerator<xnn_float16> f16dist;
 
+  const int stride_b = broadcast_b() ? 0 : 1;
   xnnpack::Buffer<xnn_float16> a(batch_size() +
                                  XNN_EXTRA_BYTES / sizeof(xnn_float16));
-  xnnpack::Buffer<xnn_float16> b(
-      broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  xnnpack::Buffer<xnn_float16> b(stride_b * batch_size() +
+                                 XNN_EXTRA_BYTES / sizeof(xnn_float16));
   xnnpack::Buffer<xnn_float16> y(
       batch_size() +
       (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(xnn_float16) : 0));
-  xnnpack::Buffer<float> y_ref(batch_size());
+  xnnpack::Buffer<xnn_float16> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     if (!inplace_a()) {
-      std::generate(a.begin(), a.end(), [&]() { return f32dist(rng); });
+      std::generate(a.begin(), a.end(), [&]() { return f16dist(rng); });
     }
     if (!inplace_b()) {
-      std::generate(b.begin(), b.end(), [&]() { return f32dist(rng); });
+      std::generate(b.begin(), b.end(), [&]() { return f16dist(rng); });
     }
     if (inplace_a() || inplace_b()) {
-      std::generate(y.begin(), y.end(),
-                    [&]() { return f32dist(rng); });
+      std::generate(y.begin(), y.end(), [&]() { return f16dist(rng); });
     }
     const xnn_float16* a_data = inplace_a() ? y.data() : a.data();
     const xnn_float16* b_data = inplace_b() ? y.data() : b.data();
     reference_op_impl(a_data, b_data, y_ref.data(), batch_size(), op_type);
 
     // Call optimized micro-kernel.
-    vbinary(batch_size() * sizeof(xnn_float16), a_data, b_data, y.data(), nullptr);
+    vbinary(batch_size() * sizeof(xnn_float16), a_data, b_data, y.data(),
+            nullptr);
 
     // Verify results.
     for (size_t i = 0; i < batch_size(); i++) {
-      ASSERT_NEAR(y[i], y_ref[i],
-                  std::max(1.0e-4f, std::abs(y_ref[i]) * 1.0e-2f))
-          << "at " << i << " / " << batch_size();
+      if (std::isnan(y_ref[i])) {
+        // TODO: We could check if y[i] is NaN, but not all our kernels do this.
+      } else {
+        ASSERT_NEAR(
+            y[i], y_ref[i],
+            std::max(1.0e-4f, std::abs(static_cast<float>(y_ref[i])) * 1.0e-2f))
+            << "at " << i << " / " << batch_size()
+            << ", a=" << static_cast<float>(a[i])
+            << ", b=" << static_cast<float>(b[stride_b * i]);
+      }
     }
   }
 }
@@ -74,11 +82,12 @@ void VBinaryMicrokernelTester::Test(xnn_f32_vbinary_ukernel_fn vbinary,
                                     OpType op_type,
                                     xnn_init_f32_default_params_fn) const {
   xnnpack::ReplicableRandomDevice rng;
-  std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
+  xnnpack::DatatypeGenerator<float> f32dist;
 
+  const int stride_b = broadcast_b() ? 0 : 1;
   xnnpack::Buffer<float> a(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-  xnnpack::Buffer<float> b(
-      broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> b(stride_b * batch_size() +
+                           XNN_EXTRA_BYTES / sizeof(float));
   xnnpack::Buffer<float> y(batch_size() + (inplace_a() || inplace_b()
                                                ? XNN_EXTRA_BYTES / sizeof(float)
                                                : 0));
@@ -102,8 +111,13 @@ void VBinaryMicrokernelTester::Test(xnn_f32_vbinary_ukernel_fn vbinary,
 
     // Verify results.
     for (size_t i = 0; i < batch_size(); i++) {
-      ASSERT_NEAR(y[i], y_ref[i], std::abs(y_ref[i]) * 1.0e-6f)
-          << "at " << i << " / " << batch_size();
+      if (std::isnan(y_ref[i])) {
+        // TODO: We could check if y[i] is NaN, but not all our kernels do this.
+      } else {
+        ASSERT_NEAR(y[i], y_ref[i], (std::abs(y_ref[i]) + 1.0f) * 1.0e-6f)
+            << "at " << i << " / " << batch_size() << ", a=" << a[i]
+            << ", b=" << b[stride_b * i];
+      }
     }
   }
 }
@@ -223,7 +237,8 @@ void VBinaryMicrokernelTester::Test(
                 product_output_scale * static_cast<float>(acc);
       y_fp[i] = std::min<float>(y_fp[i], static_cast<float>(UINT8_MAX));
       y_fp[i] = std::max<float>(y_fp[i], static_cast<float>(0));
-      y_ref[i] = xnn_qu8_requantize_fp32(acc, product_output_scale, y_zero_point(), 0, UINT8_MAX);
+      y_ref[i] = xnn_qu8_requantize_fp32(acc, product_output_scale,
+                                         y_zero_point(), 0, UINT8_MAX);
     }
 
     // Call optimized micro-kernel.
@@ -233,7 +248,8 @@ void VBinaryMicrokernelTester::Test(
     for (size_t i = 0; i < batch_size(); i++) {
       ASSERT_NEAR(static_cast<float>(static_cast<int32_t>(y[i])), y_fp[i], 1.0f)
           << "at element " << i << " / " << batch_size();
-      ASSERT_NEAR(static_cast<uint32_t>(y[i]), static_cast<uint32_t>(y_ref[i]), 1)
+      ASSERT_NEAR(static_cast<uint32_t>(y[i]), static_cast<uint32_t>(y_ref[i]),
+                  1)
           << "at element " << i << " / " << batch_size();
     }
   }

@@ -9,9 +9,9 @@ $assert ODATATYPE in ["QS8", "QU8"]
 $assert IDATATYPE == "F16" and ODATATYPE == "QS8" or IDATATYPE == "F32"
 #include <assert.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/vcvt.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vcvt.h"
 
 $INPUT_T = {"F16": "xnn_float16", "F32": "float"}[IDATATYPE]
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[ODATATYPE]

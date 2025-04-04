@@ -7,7 +7,7 @@
 
 #include <emmintrin.h>
 
-#include "xnnpack/unpool.h"
+#include "src/xnnpack/unpool.h"
 
 
 void xnn_x32_unpool_ukernel__sse2(

@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2024 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -5,18 +6,18 @@
 //
 // Auto-generated file. Do not edit!
 //   Specification: test/f16-f32acc-rdsum.yaml
-//   Generator: tools/generate-rdsum-benchmark.py
+//   Generator: tools/generate-reduce-discontiguous-benchmark.py
 
-#include "rsum-benchmark.h"
-#include "utils.h"
+#include "bench/rsum-benchmark.h"
+#include "bench/utils.h"
 #include <benchmark/benchmark.h>
 
-#include "xnnpack.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
 
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)

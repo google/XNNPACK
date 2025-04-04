@@ -1,0 +1,160 @@
+// Copyright 2025 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert(SIMD_SIZE > 0)
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/simd/${DATATYPE}-${ARCH}.h"
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+
+$CTYPE = {"f32": "float", "f16": "xnn_float16"}[DATATYPE]
+void xnn_${DATATYPE}_avgpool_minmax_ukernel_9p__${ARCH}_u${SIMD_SIZE}(
+    size_t output_pixels,
+    size_t kernel_elements,
+    size_t channels,
+    const ${CTYPE}** input,
+    size_t input_offset,
+    size_t input_pixel_stride,
+    const ${CTYPE}* zero,
+    const ${CTYPE}* multiplier,
+    ${CTYPE}* output,
+    size_t input_increment,
+    size_t output_increment,
+    const struct xnn_${DATATYPE}_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(output_pixels != 0);
+  assert(channels != 0);
+
+  const xnn_simd_${DATATYPE}_t vmin = xnn_set1_${DATATYPE}(params->scalar.min);
+  const xnn_simd_${DATATYPE}_t vmax = xnn_set1_${DATATYPE}(params->scalar.max);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
+
+  xnn_simd_${DATATYPE}_t vscale = xnn_set1_${DATATYPE}(params->scalar.scale);
+
+  do {
+    // Start with the previous output as the zero buffer.
+    const ${CTYPE}* prev_output = zero;
+
+    const ${CTYPE}** i = input;
+
+    // Passes 0 - n-1: load the output, add 9 inputs.
+    size_t k = kernel_elements;
+    for (; k > 9; k -= 9) {
+      $for K in range(9):
+        const ${CTYPE}* i${K} = *i++;
+        assert(i${K} != NULL);
+        if XNN_UNPREDICTABLE(i${K} != zero) {
+          i${K} = (const ${CTYPE}*) ((uintptr_t) i${K} + input_offset);
+        }
+
+      ${CTYPE}* o = output;
+      size_t c = channels;
+      for (; c >= ${SIMD_SIZE}; c -= ${SIMD_SIZE}) {
+        $for K in range(9):
+          const xnn_simd_${DATATYPE}_t vi${K} = xnn_loadu_${DATATYPE}(i${K}); i${K} += ${SIMD_SIZE};
+        const xnn_simd_${DATATYPE}_t vprev = xnn_loadu_${DATATYPE}(prev_output); prev_output += ${SIMD_SIZE};
+
+        const xnn_simd_${DATATYPE}_t vsum018 = xnn_add_${DATATYPE}(xnn_add_${DATATYPE}(vi0, vi1), vi8);
+        const xnn_simd_${DATATYPE}_t vsum23 = xnn_add_${DATATYPE}(vi2, vi3);
+        const xnn_simd_${DATATYPE}_t vsum45 = xnn_add_${DATATYPE}(vi4, vi5);
+        const xnn_simd_${DATATYPE}_t vsum67 = xnn_add_${DATATYPE}(vi6, vi7);
+
+        const xnn_simd_${DATATYPE}_t vsum2345 = xnn_add_${DATATYPE}(vsum23, vsum45);
+        const xnn_simd_${DATATYPE}_t vsum01678 = xnn_add_${DATATYPE}(vsum018, vsum67);
+        const xnn_simd_${DATATYPE}_t vsum012345678 = xnn_add_${DATATYPE}(vsum2345, vsum01678);
+        const xnn_simd_${DATATYPE}_t vacc = xnn_add_${DATATYPE}(vprev, vsum012345678);
+        xnn_storeu_${DATATYPE}(o, vacc); o += ${SIMD_SIZE};
+      }
+      $if SIMD_SIZE > 1:
+        if (c > 0) {
+          $for K in range(9):
+            const xnn_simd_${DATATYPE}_t vi${K} = xnn_load_tail_${DATATYPE}(i${K}, c);
+          const xnn_simd_${DATATYPE}_t vprev = xnn_load_tail_safe_${DATATYPE}(prev_output, c);
+
+          const xnn_simd_${DATATYPE}_t vsum018 = xnn_add_${DATATYPE}(xnn_add_${DATATYPE}(vi0, vi1), vi8);
+          const xnn_simd_${DATATYPE}_t vsum23 = xnn_add_${DATATYPE}(vi2, vi3);
+          const xnn_simd_${DATATYPE}_t vsum45 = xnn_add_${DATATYPE}(vi4, vi5);
+          const xnn_simd_${DATATYPE}_t vsum67 = xnn_add_${DATATYPE}(vi6, vi7);
+
+          const xnn_simd_${DATATYPE}_t vsum2345 = xnn_add_${DATATYPE}(vsum23, vsum45);
+          const xnn_simd_${DATATYPE}_t vsum01678 = xnn_add_${DATATYPE}(vsum018, vsum67);
+          const xnn_simd_${DATATYPE}_t vsum012345678 = xnn_add_${DATATYPE}(vsum2345, vsum01678);
+          const xnn_simd_${DATATYPE}_t vacc = xnn_add_${DATATYPE}(vprev, vsum012345678);
+          xnn_store_tail_${DATATYPE}(o, vacc, c);
+        }
+
+      // Subsequent passes read from the previous output.
+      prev_output = output;
+    }
+
+    // Final pass: load the output, add remaining kernel elements, apply scaling/min/max
+    $for K in range(9):
+      const ${CTYPE}* i${K} = ${K} < k ? *i++ : zero;
+      assert(i${K} != NULL);
+      if XNN_UNPREDICTABLE(i${K} != zero) {
+        i${K} = (const ${CTYPE}*) ((uintptr_t) i${K} + input_offset);
+      }
+
+    if (multiplier != NULL) {
+      vscale = xnn_set1_${DATATYPE}(*multiplier++);
+    }
+    ${CTYPE}* o = output;
+    size_t c = channels;
+    for (; c >= ${SIMD_SIZE}; c -= ${SIMD_SIZE}) {
+      $for K in range(9):
+        const xnn_simd_${DATATYPE}_t vi${K} = xnn_loadu_${DATATYPE}(i${K}); i${K} += ${SIMD_SIZE};
+      const xnn_simd_${DATATYPE}_t vprev = xnn_loadu_${DATATYPE}(prev_output); prev_output += ${SIMD_SIZE};
+
+      const xnn_simd_${DATATYPE}_t vsum018 = xnn_add_${DATATYPE}(xnn_add_${DATATYPE}(vi0, vi1), vi8);
+      const xnn_simd_${DATATYPE}_t vsum23 = xnn_add_${DATATYPE}(vi2, vi3);
+      const xnn_simd_${DATATYPE}_t vsum45 = xnn_add_${DATATYPE}(vi4, vi5);
+      const xnn_simd_${DATATYPE}_t vsum67 = xnn_add_${DATATYPE}(vi6, vi7);
+
+      const xnn_simd_${DATATYPE}_t vsum2345 = xnn_add_${DATATYPE}(vsum23, vsum45);
+      const xnn_simd_${DATATYPE}_t vsum01678 = xnn_add_${DATATYPE}(vsum018, vsum67);
+      const xnn_simd_${DATATYPE}_t vsum012345678 = xnn_add_${DATATYPE}(vsum2345, vsum01678);
+
+      xnn_simd_${DATATYPE}_t vacc = xnn_add_${DATATYPE}(vprev, vsum012345678);
+
+      vacc = xnn_mul_${DATATYPE}(vacc, vscale);
+      vacc = xnn_max_${DATATYPE}(vacc, vmin);
+      vacc = xnn_min_${DATATYPE}(vacc, vmax);
+
+      xnn_storeu_${DATATYPE}(o, vacc); o += ${SIMD_SIZE};
+    }
+    $if SIMD_SIZE > 1:
+      if (c > 0) {
+        $for K in range(9):
+          const xnn_simd_${DATATYPE}_t vi${K} = xnn_load_tail_${DATATYPE}(i${K}, c);
+        const xnn_simd_${DATATYPE}_t vprev = xnn_load_tail_safe_${DATATYPE}(prev_output, c);
+
+        const xnn_simd_${DATATYPE}_t vsum018 = xnn_add_${DATATYPE}(xnn_add_${DATATYPE}(vi0, vi1), vi8);
+        const xnn_simd_${DATATYPE}_t vsum23 = xnn_add_${DATATYPE}(vi2, vi3);
+        const xnn_simd_${DATATYPE}_t vsum45 = xnn_add_${DATATYPE}(vi4, vi5);
+        const xnn_simd_${DATATYPE}_t vsum67 = xnn_add_${DATATYPE}(vi6, vi7);
+
+        const xnn_simd_${DATATYPE}_t vsum2345 = xnn_add_${DATATYPE}(vsum23, vsum45);
+        const xnn_simd_${DATATYPE}_t vsum01678 = xnn_add_${DATATYPE}(vsum018, vsum67);
+        const xnn_simd_${DATATYPE}_t vsum012345678 = xnn_add_${DATATYPE}(vsum2345, vsum01678);
+
+        xnn_simd_${DATATYPE}_t vacc = xnn_add_${DATATYPE}(vprev, vsum012345678);
+
+        vacc = xnn_mul_${DATATYPE}(vacc, vscale);
+        vacc = xnn_max_${DATATYPE}(vacc, vmin);
+        vacc = xnn_min_${DATATYPE}(vacc, vmax);
+
+        xnn_store_tail_${DATATYPE}(o, vacc, c); o += c;
+      }
+
+    input = (const ${CTYPE}**) ((uintptr_t) input + input_increment);
+    input_offset += input_pixel_stride;
+    output = (${CTYPE}*) ((uintptr_t) output + output_increment);
+  } while (--output_pixels != 0);
+}

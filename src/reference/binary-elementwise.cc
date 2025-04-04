@@ -11,13 +11,13 @@
 #include <cstring>
 #include <type_traits>
 
-#include "xnnpack.h"
-#include "xnnpack/config-types.h"
-#include "xnnpack/datatype.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/reference-utils.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/datatype.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/reference-utils.h"
 
 using xnnpack::dequantize;
 using xnnpack::euclidean_div;
@@ -246,15 +246,7 @@ struct PowOp {
 
 template <>
 struct PowOp<int32_t> {
-  int32_t operator()(int32_t a, int32_t b) const {
-    if (b < 0) {
-      return 0;
-    } else if (b == 0) {
-      return 1;
-    } else {
-      return integer_pow(a, b);
-    }
-  }
+  int32_t operator()(int32_t a, int32_t b) const { return integer_pow(a, b); }
 };
 
 template <typename T>
@@ -300,15 +292,13 @@ using std::copysign;
 xnn_float16 copysign(xnn_float16 a, xnn_float16 b) {
   uint16_t a_bits = xnn_float16_to_bits(a);
   uint16_t b_bits = xnn_float16_to_bits(b);
-  uint16_t sign_bit = b_bits & 0x8000;
-  return xnn_float16_from_bits((a_bits & 0x7FFF) | (sign_bit & 0x8000));
+  return xnn_float16_from_bits((a_bits & 0x7FFF) | (b_bits & 0x8000));
 }
 
 xnn_bfloat16 copysign(xnn_bfloat16 a, xnn_bfloat16 b) {
   uint16_t a_bits = xnn_bfloat16_to_bits(a);
   uint16_t b_bits = xnn_bfloat16_to_bits(b);
-  uint16_t sign_bit = b_bits & 0x8000;
-  return xnn_bfloat16_from_bits((a_bits & 0x7FFF) | (sign_bit & 0x8000));
+  return xnn_bfloat16_from_bits((a_bits & 0x7FFF) | (b_bits & 0x8000));
 }
 
 template <typename T>

@@ -337,6 +337,7 @@ tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=5 -D NR=8  -D FMA=3 -D PREFET
 tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=6 -D NR=8  -D FMA=3 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-6x8-minmax-fma3-broadcast.c &
 tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=7 -D NR=8  -D FMA=3 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-7x8-minmax-fma3-broadcast.c &
 tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=8 -D NR=8  -D FMA=3 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-8x8-minmax-fma3-broadcast.c &
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=10 -D NR=8 -D FMA=3 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-10x8-minmax-fma3-broadcast.c &
 tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=1 -D NR=16 -D FMA=3 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-1x16-minmax-fma3-broadcast.c &
 tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=3 -D NR=16 -D FMA=3 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-3x16-minmax-fma3-broadcast.c &
 tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=4 -D NR=16 -D FMA=3 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-4x16-minmax-fma3-broadcast.c &
@@ -377,12 +378,18 @@ tools/xngen src/f32-igemm/MRxNRv-rvv.c.in -D MR=1 -D NR=m4 -D ACTIVATION=MINMAX 
 tools/xngen src/f32-igemm/MRxNRv-rvv.c.in -D MR=7 -D NR=m4 -D ACTIVATION=MINMAX -o src/f32-igemm/gen/f32-igemm-7x4v-minmax-rvv.c &
 
 ################################### HEXAGON HVX ##################################
-tools/xngen src/f32-igemm/hvx-broadcast.c.in -D MR=1 -D NR=32 -o src/f32-igemm/gen/f32-igemm-1x32-minmax-hvx-broadcast.c &
-tools/xngen src/f32-igemm/hvx-broadcast.c.in -D MR=8 -D NR=32 -o src/f32-igemm/gen/f32-igemm-8x32-minmax-hvx-broadcast.c &
+tools/xngen src/f32-igemm/hvx-broadcast.c.in -D MR=1  -D NR=32 -o src/f32-igemm/gen/f32-igemm-1x32-minmax-hvx-broadcast.c &
+tools/xngen src/f32-igemm/hvx-broadcast.c.in -D MR=4  -D NR=32 -o src/f32-igemm/gen/f32-igemm-4x32-minmax-hvx-broadcast.c &
+tools/xngen src/f32-igemm/hvx-broadcast.c.in -D MR=7  -D NR=32 -o src/f32-igemm/gen/f32-igemm-7x32-minmax-hvx-broadcast.c &
+tools/xngen src/f32-igemm/hvx-broadcast.c.in -D MR=8  -D NR=32 -o src/f32-igemm/gen/f32-igemm-8x32-minmax-hvx-broadcast.c &
 tools/xngen src/f32-igemm/hvx-broadcast.c.in -D MR=16 -D NR=32 -o src/f32-igemm/gen/f32-igemm-16x32-minmax-hvx-broadcast.c &
-tools/xngen src/f32-igemm/hvx-broadcast.c.in -D MR=1 -D NR=64 -o src/f32-igemm/gen/f32-igemm-1x64-minmax-hvx-broadcast.c &
-tools/xngen src/f32-igemm/hvx-broadcast.c.in -D MR=4 -D NR=64 -o src/f32-igemm/gen/f32-igemm-4x64-minmax-hvx-broadcast.c &
-tools/xngen src/f32-igemm/hvx-broadcast.c.in -D MR=7 -D NR=64 -o src/f32-igemm/gen/f32-igemm-7x64-minmax-hvx-broadcast.c &
+
+tools/xngen src/f32-igemm/hvx-broadcast.c.in -D MR=1  -D NR=64 -o src/f32-igemm/gen/f32-igemm-1x64-minmax-hvx-broadcast.c &
+tools/xngen src/f32-igemm/hvx-broadcast.c.in -D MR=4  -D NR=64 -o src/f32-igemm/gen/f32-igemm-4x64-minmax-hvx-broadcast.c &
+tools/xngen src/f32-igemm/hvx-broadcast.c.in -D MR=7  -D NR=64 -o src/f32-igemm/gen/f32-igemm-7x64-minmax-hvx-broadcast.c &
+tools/xngen src/f32-igemm/hvx-broadcast.c.in -D MR=8  -D NR=64 -o src/f32-igemm/gen/f32-igemm-8x64-minmax-hvx-broadcast.c &
+tools/xngen src/f32-igemm/hvx-broadcast.c.in -D MR=16 -D NR=64 -o src/f32-igemm/gen/f32-igemm-16x64-minmax-hvx-broadcast.c &
+
 tools/xngen src/f32-igemm/hvx-broadcast.c.in -D MR=1 -D NR=128 -o src/f32-igemm/gen/f32-igemm-1x128-minmax-hvx-broadcast.c &
 tools/xngen src/f32-igemm/hvx-broadcast.c.in -D MR=2 -D NR=128 -o src/f32-igemm/gen/f32-igemm-2x128-minmax-hvx-broadcast.c &
 

@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-qs8-vcvt/hvx.c.in
 //   Generator: tools/xngen
@@ -9,8 +10,8 @@
 
 #include <assert.h>
 
-#include "xnnpack/simd/f32-hvx.h"
-#include "xnnpack/vcvt.h"
+#include "src/xnnpack/simd/f32-hvx.h"
+#include "src/xnnpack/vcvt.h"
 
 void xnn_f32_qs8_vcvt_ukernel__hvx_u256(
     size_t batch,

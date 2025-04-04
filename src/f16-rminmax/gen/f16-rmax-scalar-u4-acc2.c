@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-rminmax/scalar.c.in
 //   Generator: tools/xngen
@@ -9,9 +10,9 @@
 
 #include <assert.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/reduce.h"
 
 
 void xnn_f16_rmax_ukernel__scalar_u4_acc2(
@@ -28,9 +29,8 @@ void xnn_f16_rmax_ukernel__scalar_u4_acc2(
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
 
-  int16_t vt = math_signcomplement_f16(*i);
-  int16_t vmax0 = vt;
-  int16_t vmax1 = vt;
+  int16_t vmax0 = math_signcomplement_f16(o[0]);
+  int16_t vmax1 = vmax0;
   for (; batch >= 4 * sizeof(uint16_t); batch -= 4 * sizeof(uint16_t)) {
     const int16_t vt0 = math_signcomplement_f16(i[0]);
     const int16_t vt1 = math_signcomplement_f16(i[1]);
@@ -47,7 +47,7 @@ void xnn_f16_rmax_ukernel__scalar_u4_acc2(
 
   if XNN_UNLIKELY(batch != 0) {
     do {
-      vt = math_signcomplement_f16(*i++);
+      int16_t vt = math_signcomplement_f16(*i++);
       vmax0 = math_max_s16(vmax0, vt);
       batch -= sizeof(uint16_t);
     } while (batch != 0);

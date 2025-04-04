@@ -5,8 +5,8 @@
 
 #include <assert.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
 #include <riscv_vector.h>
 
 void xnn_f32_rsum_ukernel__rvv_u1v(

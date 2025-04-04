@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-raddstoreexpminusmax/avx2-rr1-p2.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/raddstoreexpminusmax.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/raddstoreexpminusmax.h"
 
 
 void xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u48_acc3(

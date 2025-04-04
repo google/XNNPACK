@@ -5,7 +5,9 @@
 
 #pragma once
 
-#include "xnnpack.h"
+#include <vector>
+
+#include "include/xnnpack.h"
 
 namespace models {
 
@@ -27,10 +29,11 @@ xnn_subgraph_t FP32MobileNetV3Large();
 xnn_subgraph_t FP32MobileNetV3Small();
 xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
                             size_t embedding_dim, size_t num_heads,
-                            size_t head_dim, QD8AttentionWeights &weights);
+                            size_t head_dim, QD8AttentionWeights& weights);
 xnn_subgraph_t QS8MobileNetV2();
 
-// This is a sequence of {add, multiply} x `reps` ops, on `size` x `size` values.
+// This is a sequence of {add, multiply} x `reps` ops, on `size` x `size`
+// values.
 xnn_subgraph_t FP32Elementwise(size_t size, size_t reps);
 
 // Compute the layer norm of [m x n x k] tensors, where the mean and variance
@@ -42,5 +45,18 @@ xnn_subgraph_t FP32Elementwise(size_t size, size_t reps);
 // Where `mean(x, norm_mask)` means computing the mean of the dimensions in the
 // `norm_mask`.
 xnn_subgraph_t FP32LayerNorm(size_t m, size_t n, size_t k, uint32_t norm_mask);
+
+struct FP32DepthwiseSeparableWeights {
+  std::vector<float> w0;
+  std::vector<float> w1;
+  std::vector<float> w2;
+  std::vector<float> w3;
+};
+
+// Depthwise convolution with kernel size kw x kw, followed by a 1x1 conv with
+// ci -> co channels. This is a common pattern in imaging models.
+xnn_subgraph_t FP32DepthwiseSeparable(size_t w, size_t h, size_t kw, size_t ci,
+                                      size_t co,
+                                      FP32DepthwiseSeparableWeights& weights);
 
 }  // namespace models

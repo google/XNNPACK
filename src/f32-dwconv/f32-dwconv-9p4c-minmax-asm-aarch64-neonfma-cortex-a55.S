@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack/assembly.h"
+#include "src/xnnpack/assembly.h"
 
 # void xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma_cortex_a55(
 #     size_t channels,                   x0, x20
@@ -14,8 +14,9 @@
 #     intptr_t input_stride,             x5
 #     size_t output_increment,           x6
 #     size_t input_offset,               x7
-#     const float* zero,                 [sp + 64] -> x17
-#     const xnn_f32_minmax_params params [sp + 72] -> (x16)
+#     size_t input_pixel_stride          [sp + 80] -> x21
+#     const float* zero,                 [sp + 88] -> x17
+#     const xnn_f32_minmax_params params [sp + 96] -> (x16)
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -57,14 +58,16 @@
 
 BEGIN_FUNCTION xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma_cortex_a55
 
-        # Load zero, params pointer
-        LDP         x17, x16, [sp]
-
-        # Save x19-x20,d10-d15 on stack
-        STP         x19, x20, [sp, -64]!
+        # Save x19-x21,d10-d15 on stack
+        STP         x19, x20, [sp, -80]!
         STP         d10, d11, [sp, 16]
         STP         d12, d13, [sp, 32]
         STP         d14, d15, [sp, 48]
+        STR         x21, [sp, 64]
+
+        # Load input_pixel_stride, zero, params pointer
+        LDR         x21, [sp, 80]
+        LDP         x17, x16, [sp, 88]
 
         # Load min/max values
         LD2R        {v30.4s, v31.4s}, [x16]
@@ -872,14 +875,17 @@ BEGIN_FUNCTION xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma_cortex_a5
         SUBS        x1, x1, 1
         # output += output_increment
         ADD         x4, x4, x6
+        # input_offset += input_pixel_stride
+        ADD         x7, x7, x21
         # process next pixel if output_width != 0
         B.NE        0b
 
         # Restore x19-x20,d10-d15 from stack
+        LDR         x21, [sp, 64]
         LDP         d14, d15, [sp, 48]
         LDP         d12, d13, [sp, 32]
         LDP         d10, d11, [sp, 16]
-        LDP         x19, x20, [sp], 64
+        LDP         x19, x20, [sp], 80
         RET
 
 END_FUNCTION xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma_cortex_a55

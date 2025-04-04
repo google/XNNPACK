@@ -18,16 +18,30 @@ import xnncommon
 
 
 parser = argparse.ArgumentParser(
-  description='RAddStoreExpMinusMax microkernel test generator')
-parser.add_argument("-s", "--spec", metavar="FILE", required=True,
-                    help="Specification (YAML) file")
-parser.add_argument("-o", "--output", metavar="FILE", required=True,
-                    help='Output (C++ source) file')
+    description="RAddStoreExpMinusMax microkernel test generator"
+)
+parser.add_argument(
+    "-s",
+    "--spec",
+    metavar="FILE",
+    required=True,
+    help="Specification (YAML) file",
+)
+parser.add_argument(
+    "-o",
+    "--output",
+    metavar="FILE",
+    required=True,
+    help="Output (C++ source) file",
+)
 parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_(f16|f32)_raddstoreexpminusmax_ukernel__(.+)_u(\d+)(v)?(_acc(\d+))?", name)
+  match = re.fullmatch(
+      r"xnn_(f16|f32)_raddstoreexpminusmax_ukernel__(.+)_u(\d+)(v)?(_acc(\d+))?",
+      name,
+  )
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
   elements_tile = int(match.group(3))
@@ -113,11 +127,11 @@ def generate_test_cases(ukernel, init_fn, elements_tile, vector_tile, isa):
     ukernel: C name of the micro-kernel function.
     init_fn: C name of the function to initialize microkernel parameters.
     elements_tile: Number of batch elements processed per one iteration of the
-                   inner loop of the micro-kernel.
+      inner loop of the micro-kernel.
     vector_tile: Indicates if elements_tile is specified in vectors rather than
-                 elements.
+      elements.
     isa: instruction set required to run the micro-kernel. Generated unit test
-         will skip execution if the host processor doesn't support this ISA.
+      will skip execution if the host processor doesn't support this ISA.
 
   Returns:
     Code for the test case.
@@ -128,21 +142,25 @@ def generate_test_cases(ukernel, init_fn, elements_tile, vector_tile, isa):
   if vector_tile:
     ctype = {"f16": "uint16_t", "f32": "float"}[datatype]
     elements_scale = {
-      "rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype,
-      "rvvfp16arith": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype,
+        "rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype,
+        "rvvfp16arith": (
+            " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype
+        ),
     }[isa]
 
-
-  return xngen.preprocess(RADDSTOREEXPMINUSMAX_TEST_TEMPLATE, {
-      "TEST_FUNCTION": ukernel,
-      "INIT_FUNCTION": init_fn,
-      "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
-      "DATATYPE": datatype,
-      "ELEMENTS_TILE": elements_tile,
-      "ELEMENTS_SCALE": elements_scale,
-      "ELEMENTS_SUFFIX": "v" if vector_tile else "",
-      "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
-    })
+  return xngen.preprocess(
+      RADDSTOREEXPMINUSMAX_TEST_TEMPLATE,
+      {
+          "TEST_FUNCTION": ukernel,
+          "INIT_FUNCTION": init_fn,
+          "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
+          "DATATYPE": datatype,
+          "ELEMENTS_TILE": elements_tile,
+          "ELEMENTS_SCALE": elements_scale,
+          "ELEMENTS_SUFFIX": "v" if vector_tile else "",
+          "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
+      },
+  )
 
 
 def main(args):
@@ -154,6 +172,7 @@ def main(args):
       raise ValueError("expected a list of micro-kernels in the spec")
 
     tests = """\
+// clang-format off
 // Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -165,11 +184,11 @@ def main(args):
 
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/raddstoreexpminusmax.h"
-#include "raddstoreexpminusmax-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/raddstoreexpminusmax.h"
+#include "test/raddstoreexpminusmax-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
     for ukernel_spec in spec_yaml:
@@ -179,7 +198,9 @@ def main(args):
         init_fn = "nullptr"
       elements_tile, vector_tile, arch, isa = split_ukernel_name(name)
 
-      test_case = generate_test_cases(name, init_fn, elements_tile, vector_tile, isa)
+      test_case = generate_test_cases(
+          name, init_fn, elements_tile, vector_tile, isa
+      )
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     xnncommon.overwrite_if_changed(options.output, tests)

@@ -11,18 +11,12 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
-#include <type_traits>
 
 #include <gtest/gtest.h>
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-
-using std::copysign;
-
-inline xnn_float16 copysign(xnn_float16 a, xnn_float16 b) {
-  return (xnn_float16)std::copysign((float)a, (float)b);
-}
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microfnptr.h"
 
 class VBinaryMicrokernelTester {
  public:
@@ -42,58 +36,52 @@ class VBinaryMicrokernelTester {
     RPrelu,
   };
 
-  template <typename A, typename B, typename Result>
-  void reference_op_impl(const A* a, const B* b, Result* result, size_t n, OpType op_type) const {
+  float compute_float(OpType op, float a, float b) const {
+    switch (op) {
+      case OpType::Add:
+        return a + b;
+      case OpType::CopySign:
+        return std::copysign(a, b);
+      case OpType::RCopySign:
+        return std::copysign(b, a);
+      case OpType::Div:
+        return a / b;
+      case OpType::RDiv:
+        return b / a;
+      case OpType::Max:
+        return std::max(a, b);
+      case OpType::Min:
+        return std::min(a, b);
+      case OpType::Mul:
+        return a * b;
+      case OpType::Prelu:
+        return a < 0 ? a * b : a;
+      case OpType::RPrelu:
+        return b < 0 ? b * a : b;
+      case OpType::SqrDiff:
+        return (a - b) * (a - b);
+      case OpType::Sub:
+        return a - b;
+      case OpType::RSub:
+        return b - a;
+    }
+    XNN_UNREACHABLE;
+    return 0.0;
+  }
+
+  template <typename T>
+  void reference_op_impl(const T* a, const T* b, T* result, size_t n,
+                         OpType op_type) const {
     size_t stride_b = broadcast_b() ? 0 : 1;
     for (size_t i = 0; i < n; ++i) {
-      switch (op_type) {
-        case OpType::Add:
-          result[i] = a[i] + b[i * stride_b];
-          break;
-        case OpType::CopySign:
-          result[i] = copysign(a[i], b[i * stride_b]);
-          break;
-        case OpType::RCopySign:
-          result[i] = copysign(b[i * stride_b], a[i]);
-          break;
-        case OpType::Div:
-          result[i] = a[i] / b[i * stride_b];
-          break;
-        case OpType::RDiv:
-          result[i] = b[i * stride_b] / a[i];
-          break;
-        case OpType::Max:
-          result[i] = std::max(a[i], b[i * stride_b]);
-          break;
-        case OpType::Min:
-          result[i] = std::min(a[i], b[i * stride_b]);
-          break;
-        case OpType::Mul:
-          if (std::is_integral<A>::value && std::is_integral<B>::value) {
-            // Overflow is the expected behavior.
-            int64_t result_wide = static_cast<int64_t>(a[i]) * static_cast<int64_t>(b[i * stride_b]);
-            result[i] = result_wide & ((static_cast<int64_t>(1) << (sizeof(Result) * 8)) - 1);
-          } else {
-            result[i] = a[i] * b[i * stride_b];
-          }
-          break;
-        case OpType::Prelu:
-          result[i] = a[i] < 0 ? static_cast<Result>(a[i] * b[i * stride_b]) : static_cast<Result>(a[i]);
-          break;
-        case OpType::RPrelu:
-          result[i] = b[i * stride_b] < 0 ? static_cast<Result>(a[i] * b[i * stride_b]) : static_cast<Result>(b[i * stride_b]);
-          break;
-        case OpType::SqrDiff: {
-          const double diff = static_cast<double>(a[i]) - static_cast<double>(b[i * stride_b]);
-          result[i] = diff * diff;
-          break;
-        }
-        case OpType::Sub:
-          result[i] = a[i] - b[i * stride_b];
-          break;
-        case OpType::RSub:
-          result[i] = b[i * stride_b] - a[i];
-          break;
+      float f_result = compute_float(op_type, a[i], b[i * stride_b]);
+      // TODO: We shouldn't need to do this check for overflow.
+      if (f_result < xnnpack::NumericLimits<T>::min()) {
+        result[i] = -xnnpack::NumericLimits<T>::infinity();
+      } else if (f_result > xnnpack::NumericLimits<T>::max()) {
+        result[i] = xnnpack::NumericLimits<T>::infinity();
+      } else {
+        result[i] = compute_float(op_type, a[i], b[i * stride_b]);
       }
     }
   }
@@ -236,7 +224,7 @@ class VBinaryMicrokernelTester {
     TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                     \
     const size_t batch_scale = get_batch_scale<datatype>();                   \
     VBinaryMicrokernelTester()                                                \
-        .batch_size(batch_tile* batch_scale)                                  \
+        .batch_size(batch_tile * batch_scale)                                 \
         .broadcast_b(is_binaryc)                                              \
         .Test(__VA_ARGS__);                                                   \
   }

@@ -18,16 +18,29 @@ import xnncommon
 
 
 parser = argparse.ArgumentParser(
-  description='RAddExpMinusMax microkernel test generator')
-parser.add_argument("-s", "--spec", metavar="FILE", required=True,
-                    help="Specification (YAML) file")
-parser.add_argument("-o", "--output", metavar="FILE", required=True,
-                    help='Output (C++ source) file')
+    description="RAddExpMinusMax microkernel test generator"
+)
+parser.add_argument(
+    "-s",
+    "--spec",
+    metavar="FILE",
+    required=True,
+    help="Specification (YAML) file",
+)
+parser.add_argument(
+    "-o",
+    "--output",
+    metavar="FILE",
+    required=True,
+    help="Output (C++ source) file",
+)
 parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_(f16|f32)_raddexpminusmax_ukernel__(.+)_u(\d+)(_acc(\d+))?", name)
+  match = re.fullmatch(
+      r"xnn_(f16|f32)_raddexpminusmax_ukernel__(.+)_u(\d+)(_acc(\d+))?", name
+  )
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
   elements_tile = int(match.group(3))
@@ -84,22 +97,25 @@ def generate_test_cases(ukernel, elements_tile, isa):
   Args:
     ukernel: C name of the micro-kernel function.
     elements_tile: Number of batch elements processed per one iteration of the
-                   inner loop of the micro-kernel.
+      inner loop of the micro-kernel.
     isa: instruction set required to run the micro-kernel. Generated unit test
-         will skip execution if the host processor doesn't support this ISA.
+      will skip execution if the host processor doesn't support this ISA.
 
   Returns:
     Code for the test case.
   """
   _, test_name = ukernel.split("_", 1)
   _, datatype, _ = ukernel.split("_", 2)
-  return xngen.preprocess(RADDEXPMINUSMAX_TEST_TEMPLATE, {
-      "TEST_FUNCTION": ukernel,
-      "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
-      "DATATYPE": datatype,
-      "ELEMENTS_TILE": elements_tile,
-      "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
-    })
+  return xngen.preprocess(
+      RADDEXPMINUSMAX_TEST_TEMPLATE,
+      {
+          "TEST_FUNCTION": ukernel,
+          "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
+          "DATATYPE": datatype,
+          "ELEMENTS_TILE": elements_tile,
+          "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
+      },
+  )
 
 
 def main(args):
@@ -111,6 +127,7 @@ def main(args):
       raise ValueError("expected a list of micro-kernels in the spec")
 
     tests = """\
+// clang-format off
 // Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -122,10 +139,10 @@ def main(args):
 
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/raddexpminusmax.h"
-#include "raddexpminusmax-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/raddexpminusmax.h"
+#include "test/raddexpminusmax-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
     for ukernel_spec in spec_yaml:

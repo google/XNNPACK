@@ -6,18 +6,18 @@
 #include <limits>
 #include <random>
 
-#include "utils.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/common.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/raddexpminusmax.h"
-#include "xnnpack/raddextexp.h"
-#include "xnnpack/raddstoreexpminusmax.h"
-#include "xnnpack/reduce.h"
-#include "xnnpack/vbinary.h"
-#include "xnnpack/vscaleexpminusmax.h"
-#include "xnnpack/vscaleextexp.h"
+#include "bench/utils.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/raddexpminusmax.h"
+#include "src/xnnpack/raddextexp.h"
+#include "src/xnnpack/raddstoreexpminusmax.h"
+#include "src/xnnpack/reduce.h"
+#include "src/xnnpack/vbinary.h"
+#include "src/xnnpack/vscaleexpminusmax.h"
+#include "src/xnnpack/vscaleextexp.h"
 #include <benchmark/benchmark.h>
 
 #ifdef BENCHMARK_INTEL_DNNL

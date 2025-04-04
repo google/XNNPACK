@@ -11,8 +11,8 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <immintrin.h>
 
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/vscaleexpminusmax.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/vscaleexpminusmax.h"
 
 
 void xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_u${BATCH_TILE}(

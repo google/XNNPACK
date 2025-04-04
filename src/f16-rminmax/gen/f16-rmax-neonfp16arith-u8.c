@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-rminmax/neonfp16arith.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
 
 
 void xnn_f16_rmax_ukernel__neonfp16arith_u8(
@@ -28,7 +29,7 @@ void xnn_f16_rmax_ukernel__neonfp16arith_u8(
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
-  float16x8_t vmax0 = vreinterpretq_f16_u16(vld1q_dup_u16(i));
+  float16x8_t vmax0 = vreinterpretq_f16_u16(vld1q_dup_u16((uint16_t*)((uintptr_t) o + 0 * sizeof(uint16_t))));
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     const float16x8_t vt = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
     vmax0 = vmaxq_f16(vmax0, vt);

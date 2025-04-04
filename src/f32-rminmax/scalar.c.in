@@ -7,12 +7,12 @@ $assert BATCH_TILE >= 1
 $assert OP in ["MAX", "MIN", "MINMAX"]
 #include <assert.h>
 
-#include "xnnpack/common.h"
+#include "src/xnnpack/common.h"
 $if not WASM:
-  #include "xnnpack/math.h"
-#include "xnnpack/reduce.h"
+  #include "src/xnnpack/math.h"
+#include "src/xnnpack/reduce.h"
 $if DATATYPE == "F16":
-  #include "xnnpack/fp16.h"
+  #include "src/xnnpack/fp16.h"
 
 $ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
 $MAX = "__builtin_wasm_max_f32" if WASM else "math_max_f32"

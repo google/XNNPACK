@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -15,14 +16,15 @@
 #include <limits>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/vunary.h"
-#include "next_prime.h"
-#include "vunary-microkernel-tester.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vunary.h"
+#include "test/next_prime.h"
+#include "test/unary-ops.h"
+#include "test/vunary-microkernel-tester.h"
 
 using TestInfo = RoundToNearestEven;
 
@@ -33,6 +35,6 @@ using TestInfo = RoundToNearestEven;
   TEST(ukernel, batch_lt) { TestBatchLT<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }  \
   TEST(ukernel, batch_gt) { TestBatchGT<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }  \
   TEST(ukernel, inplace) { TestInPlace<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }
-#include "f16-vrnd/f16-vrndne.h"
+#include "src/f16-vrnd/f16-vrndne.h"
 #undef XNN_UKERNEL_WITH_PARAMS
 #undef XNN_QUANTIZED

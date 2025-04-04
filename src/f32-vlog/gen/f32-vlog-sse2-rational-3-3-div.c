@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vlog/rational-3-3.c.in
 //   Generator: tools/xngen
@@ -10,11 +11,11 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "xnnpack/simd/f32-sse2.h"
+#include "src/xnnpack/simd/f32-sse2.h"
 
-#include "xnnpack/common.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vunary.h"
 
 // Define some mathematical constants in case they are not provided by `math.h`.
 #ifndef M_LN2
@@ -25,7 +26,7 @@
 #ifndef HAVE_XNN_SIGNED_GETEXP_F32
 #define HAVE_XNN_SIGNED_GETEXP_F32
 static XNN_INLINE xnn_simd_f32_t xnn_signed_getexp_f32(xnn_simd_f32_t a) {
-  // The bits of IEE754 single-precision floating-point format are:
+  // The bits of IEEE754 single-precision floating-point format are:
   //
   //   s | e e e e e e e e | m m m m m m m m m m m m m m m m m m m m m m m
   //

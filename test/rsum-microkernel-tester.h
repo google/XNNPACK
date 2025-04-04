@@ -17,13 +17,13 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/requantization.h"
-#include "replicable_random_device.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/requantization.h"
+#include "test/replicable_random_device.h"
 
 class RSumMicrokernelTester {
  public:
@@ -33,27 +33,21 @@ class RSumMicrokernelTester {
     return *this;
   }
 
-  size_t batch_size() const {
-    return this->batch_size_;
-  }
+  size_t batch_size() const { return this->batch_size_; }
 
   RSumMicrokernelTester& scale(float scale) {
     this->scale_ = scale;
     return *this;
   }
 
-  float scale() const {
-    return this->scale_;
-  }
+  float scale() const { return this->scale_; }
 
   RSumMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  size_t iterations() const {
-    return this->iterations_;
-  }
+  size_t iterations() const { return this->iterations_; }
 
   RSumMicrokernelTester& input_scale(float input_scale) {
     assert(input_scale > 0.0f);
@@ -62,9 +56,7 @@ class RSumMicrokernelTester {
     return *this;
   }
 
-  float input_scale() const {
-    return this->input_scale_;
-  }
+  float input_scale() const { return this->input_scale_; }
 
   RSumMicrokernelTester& output_scale(float output_scale) {
     assert(output_scale > 0.0f);
@@ -73,43 +65,34 @@ class RSumMicrokernelTester {
     return *this;
   }
 
-  float output_scale() const {
-    return this->output_scale_;
-  }
+  float output_scale() const { return this->output_scale_; }
 
   RSumMicrokernelTester& input_zero_point(uint8_t input_zero_point) {
     this->input_zero_point_ = input_zero_point;
     return *this;
   }
 
-  uint8_t input_zero_point() const {
-    return this->input_zero_point_;
-  }
+  uint8_t input_zero_point() const { return this->input_zero_point_; }
 
   RSumMicrokernelTester& output_zero_point(uint8_t output_zero_point) {
     this->output_zero_point_ = output_zero_point;
     return *this;
   }
 
-  uint8_t output_zero_point() const {
-    return this->output_zero_point_;
-  }
+  uint8_t output_zero_point() const { return this->output_zero_point_; }
 
-  uint8_t qmin() const {
-    return this->qmin_;
-  }
+  uint8_t qmin() const { return this->qmin_; }
 
-  uint8_t qmax() const {
-    return this->qmax_;
-  }
+  uint8_t qmax() const { return this->qmax_; }
 
   void Test(xnn_qs8_rsum_ukernel_fn rsum,
-      xnn_init_qs8_rsum_params_fn init_params = nullptr) const {
+            xnn_init_qs8_rsum_params_fn init_params = nullptr) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> i8dist(
-      std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+        std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
-    xnnpack::Buffer<int8_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
+    xnnpack::Buffer<int8_t> input(batch_size() +
+                                  XNN_EXTRA_BYTES / sizeof(int8_t));
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
 
@@ -136,12 +119,14 @@ class RSumMicrokernelTester {
   }
 
   void Test(xnn_qu8_rsum_ukernel_fn rsum,
-      xnn_init_qs8_rsum_params_fn init_params = nullptr) const {
+            xnn_init_qs8_rsum_params_fn init_params = nullptr) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<uint32_t> u8dist(
-      std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
+        std::numeric_limits<uint8_t>::min(),
+        std::numeric_limits<uint8_t>::max());
 
-    xnnpack::Buffer<uint8_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+    xnnpack::Buffer<uint8_t> input(batch_size() +
+                                   XNN_EXTRA_BYTES / sizeof(uint8_t));
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
 
@@ -169,11 +154,13 @@ class RSumMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_rsum_ukernel_fn rsum, xnn_init_f16_scale_params_fn init_params) const {
+  void Test(xnn_f16_rsum_ukernel_fn rsum,
+            xnn_init_f16_scale_params_fn init_params) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
-    xnnpack::Buffer<xnn_float16> input(batch_size() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    xnnpack::Buffer<xnn_float16> input(batch_size() +
+                                       XNN_EXTRA_BYTES / sizeof(xnn_float16));
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
@@ -194,15 +181,17 @@ class RSumMicrokernelTester {
 
       // Verify results.
       ASSERT_NEAR(output, output_ref, std::abs(output_ref) * 4.0e-3f)
-        << "with batch " << batch_size() << ", scale " << scale();
+          << "with batch " << batch_size() << ", scale " << scale();
     }
   }
 
-  void Test(xnn_f16_f32acc_rsum_ukernel_fn rsum, xnn_init_f16_f32acc_scale_params_fn init_params) const {
+  void Test(xnn_f16_f32acc_rsum_ukernel_fn rsum,
+            xnn_init_f16_f32acc_scale_params_fn init_params) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
-    xnnpack::Buffer<xnn_float16> input(batch_size() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    xnnpack::Buffer<xnn_float16> input(batch_size() +
+                                       XNN_EXTRA_BYTES / sizeof(xnn_float16));
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
@@ -223,15 +212,17 @@ class RSumMicrokernelTester {
 
       // Verify results.
       ASSERT_NEAR(output, output_ref, std::abs(output_ref) * 1.0e-5f)
-        << "with batch " << batch_size() << ", scale " << scale();
+          << "with batch " << batch_size() << ", scale " << scale();
     }
   }
 
-  void Test(xnn_f32_rsum_ukernel_fn rsum, xnn_init_f32_scale_params_fn init_params) const {
+  void Test(xnn_f32_rsum_ukernel_fn rsum,
+            xnn_init_f32_scale_params_fn init_params) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
-    xnnpack::Buffer<float> input(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+    xnnpack::Buffer<float> input(batch_size() +
+                                 XNN_EXTRA_BYTES / sizeof(float));
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
@@ -250,7 +241,7 @@ class RSumMicrokernelTester {
 
       // Verify results.
       ASSERT_NEAR(output, output_ref, std::abs(output_ref) * 1.0e-6f)
-        << "with batch " << batch_size() << ", scale " << scale();
+          << "with batch " << batch_size() << ", scale " << scale();
     }
   }
 

@@ -5,8 +5,8 @@
 
 #include <stddef.h>
 
-#include "xnnpack/math.h"
-#include "xnnpack/microparams.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
 
 #if XNN_ENABLE_KLEIDIAI
   // Keep this line indented to avoid it being pulled out of the #ifdef when the
@@ -42,7 +42,7 @@ void xnn_pf16_gemm_minmax_ukernel_32x32__neonsme2(
     size_t m, size_t n, size_t k, const void* lhs_packed,
     const void* rhs_packed, float* dst, size_t dst_stride_row,
     size_t dst_stride_col,
-    union xnn_f16_minmax_params
+    struct xnn_f16_minmax_params
         minmax_params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]) {
 #if XNN_ENABLE_KLEIDIAI
   kai_run_matmul_clamp_f16_f16p2vlx2_f16p2vlx2_2vlx2vl_sme2_mopa(

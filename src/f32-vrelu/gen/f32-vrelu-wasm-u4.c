@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vrelu/wasm.c.in
 //   Generator: tools/xngen
@@ -9,9 +10,9 @@
 
 #include <assert.h>
 
-#include "xnnpack/vunary.h"
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
 
 
 void xnn_f32_vrelu_ukernel__wasm_u4(

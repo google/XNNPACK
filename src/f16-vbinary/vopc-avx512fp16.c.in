@@ -12,9 +12,9 @@ $assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIF
 
 #include <immintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/vbinary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/vbinary.h"
 
 
 $_MM512_OP_ph = {
@@ -123,7 +123,7 @@ void xnn_f16_v${OP.lower()}c_ukernel__avx512fp16_u${BATCH_TILE}(
     __m512h va = _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, a));
 
     $if OP == "PRELU":
-      const __mmask16 vsign = _mm512_cmp_ph_mask(va, vzero, _CMP_LT_OQ);
+      const __mmask32 vsign = _mm512_cmp_ph_mask(va, vzero, _CMP_LT_OQ);
       __m512h vacc = _mm512_mask_mul_ph(va, vsign, va, vb);
     $elif OP == "RPRELU":
       __m512h vacc = _mm512_mask_mul_ph(vb, vsign, va, vb);

@@ -9,27 +9,27 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "xnnpack.h"
-#include "xnnpack/allocator.h"
-#include "xnnpack/cache.h"
-#include "xnnpack/common.h"
-#include "xnnpack/compute.h"
-#include "xnnpack/config-types.h"
-#include "xnnpack/config.h"
-#include "xnnpack/log.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microkernel-type.h"
-#include "xnnpack/microkernel-utils.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/operator-type.h"
-#include "xnnpack/operator-utils.h"
-#include "xnnpack/operator.h"
-#include "xnnpack/pack.h"
-#include "xnnpack/packq.h"
-#include "xnnpack/params.h"
-#include "pthreadpool.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/allocator.h"
+#include "src/xnnpack/cache.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/compute.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/config.h"
+#include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microkernel-type.h"
+#include "src/xnnpack/microkernel-utils.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/operator-type.h"
+#include "src/xnnpack/operator-utils.h"
+#include "src/xnnpack/operator.h"
+#include "src/xnnpack/pack.h"
+#include "src/xnnpack/packq.h"
+#include "src/xnnpack/params.h"
+#include <pthreadpool.h>
 
 enum xnn_status create_batch_matrix_multiply_nc(
     uint32_t flags, const void* params, size_t params_size,
@@ -111,7 +111,7 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_f16(
     gemm_ukernels = &gemm_config->linear;
   }
 
-  union xnn_f16_minmax_params params;
+  struct xnn_f16_minmax_params params;
   if XNN_LIKELY (gemm_config->init.f16 != NULL) {
     gemm_config->init.f16(&params, xnn_float16_from_float(-INFINITY),
                           xnn_float16_from_float(INFINITY));
@@ -140,7 +140,7 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_pf16(
     gemm_ukernels = &gemm_config->linear;
   }
 
-  union xnn_f16_minmax_params params;
+  struct xnn_f16_minmax_params params;
   if XNN_LIKELY (gemm_config->init.f16 != NULL) {
     gemm_config->init.f16(&params, xnn_float16_from_float(-INFINITY),
                           xnn_float16_from_float(INFINITY));
@@ -149,6 +149,34 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_pf16(
   return create_batch_matrix_multiply_nc(
       flags, &params, sizeof(params), gemm_config, gemm_ukernels,
       xnn_operator_type_batch_matrix_multiply_nc_pf16,
+      batch_matrix_multiply_op_out);
+}
+
+enum xnn_status xnn_create_batch_matrix_multiply_nc_bf16_f32(
+    uint32_t flags, xnn_operator_t* batch_matrix_multiply_op_out) {
+  const struct xnn_gemm_config* gemm_config = xnn_init_bf16_f32_gemm_config();
+  if (gemm_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(
+            xnn_operator_type_batch_matrix_multiply_nc_bf16_f32));
+    return xnn_status_unsupported_hardware;
+  }
+
+  const struct gemm_fused_ukernels* gemm_ukernels = &gemm_config->minmax;
+  if (gemm_config->linear.gemm[gemm_config->mr - 1]
+          .function[XNN_UARCH_DEFAULT] != NULL) {
+    gemm_ukernels = &gemm_config->linear;
+  }
+
+  struct xnn_f32_minmax_params params;
+  if XNN_LIKELY (gemm_config->init.f32 != NULL) {
+    gemm_config->init.f32(&params, -INFINITY, INFINITY);
+  }
+
+  return create_batch_matrix_multiply_nc(
+      flags, &params, sizeof(params), gemm_config, gemm_ukernels,
+      xnn_operator_type_batch_matrix_multiply_nc_bf16_f32,
       batch_matrix_multiply_op_out);
 }
 
@@ -169,7 +197,7 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_f32(
     gemm_ukernels = &gemm_config->linear;
   }
 
-  union xnn_f32_minmax_params params;
+  struct xnn_f32_minmax_params params;
   if XNN_LIKELY (gemm_config->init.f32 != NULL) {
     gemm_config->init.f32(&params, -INFINITY, INFINITY);
   }
@@ -197,7 +225,7 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_pf32(
     gemm_ukernels = &gemm_config->linear;
   }
 
-  union xnn_f32_minmax_params params;
+  struct xnn_f32_minmax_params params;
   if XNN_LIKELY (gemm_config->init.f32 != NULL) {
     gemm_config->init.f32(&params, -INFINITY, INFINITY);
   }
@@ -256,18 +284,18 @@ enum xnn_status create_batch_matrix_multiply_nc_fx_const_weights(
 
     // Allocate the packed weights.
     void* packed_data = xnn_get_pointer_to_write_weights(
-        batch_matrix_multiply_op, aligned_size, /*padding_byte=*/0);
+        batch_matrix_multiply_op, aligned_size);
     if (packed_data == NULL) {
       xnn_log_error(
           "failed to allocate %zu bytes for %s operator packed weights",
           packed_size,
-          xnn_operator_type_to_string(batch_matrix_multiply_op->type));
+          xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
       return xnn_status_out_of_memory;
     }
     xnn_log_debug(
         "allocated %zu bytes for packed weights in %s operator (ptr=%p)",
         aligned_size,
-        xnn_operator_type_to_string(batch_matrix_multiply_op->type),
+        xnn_operator_type_to_string_v2(batch_matrix_multiply_op),
         packed_data);
 
     // Pack the weights.
@@ -399,7 +427,7 @@ enum xnn_status create_batch_matrix_multiply_nc_qx8_f32_qc8w(
     gemm_ukernels = &gemm_config->linear;
   }
 
-  union xnn_f32_minmax_params params;
+  struct xnn_f32_minmax_params params;
   if XNN_LIKELY (gemm_config->init.f32 != NULL) {
     gemm_config->init.f32(&params, -INFINITY, INFINITY);
   }
@@ -450,19 +478,23 @@ enum xnn_status create_batch_matrix_multiply_nc_qx8_f32_qc8w(
         round_up_po2(packed_size, XNN_ALLOCATION_ALIGNMENT);
 
     void* packed_data = xnn_get_pointer_to_write_weights(
-        batch_matrix_multiply_op, aligned_size, /*padding_byte=*/0);
+        batch_matrix_multiply_op, aligned_size);
     if (packed_data == NULL) {
       xnn_log_error(
           "failed to allocate %zu bytes for %s operator packed weights",
           packed_size,
-          xnn_operator_type_to_string(batch_matrix_multiply_op->type));
+          xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
       return xnn_status_out_of_memory;
     }
     xnn_log_debug(
         "allocated %zu bytes for packed weights in %s operator (ptr=%p)",
         aligned_size,
-        xnn_operator_type_to_string(batch_matrix_multiply_op->type),
+        xnn_operator_type_to_string_v2(batch_matrix_multiply_op),
         packed_data);
+    if (extra_bytes > 0) {
+      // TODO(b/402602597): We shouldn't need this initialization.
+      memset(packed_data, 0, aligned_size);
+    }
 
     if (gemm_config->pack_weights_and_biases) {
       const struct xnn_qs8_qc8w_packing_params pack_gemm_params = {
@@ -505,8 +537,7 @@ enum xnn_status create_batch_matrix_multiply_nc_qx8_f32_qc8w(
           void* weights = (void*)((uintptr_t)packed_data_batch +
                                   nr * ((k_stride << XNN_LOG2_SIZEOF_INT8_T) +
                                         sizeof(int32_t)));
-          xnn_init_qs8_qc8w_scale_fp32_params(n, nr, nr, nr * weights_stride,
-                                              nr * weights_stride, 0,
+          xnn_init_qs8_qc8w_scale_fp32_params(n, nr, nr * weights_stride,
                                               &scale_b[batch * n], weights);
         }
       }
@@ -576,14 +607,14 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
         "failed to setup operator: operator type mismatch (expected %s, got "
         "%s)",
         xnn_operator_type_to_string(expected_operator_type),
-        xnn_operator_type_to_string(batch_matrix_multiply_op->type));
+        xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
     return xnn_status_invalid_parameter;
   }
   batch_matrix_multiply_op->state = xnn_run_state_invalid;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
-                  xnn_operator_type_to_string(batch_matrix_multiply_op->type));
+                  xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
     return xnn_status_uninitialized;
   }
 
@@ -591,7 +622,7 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
     xnn_log_error(
         "failed to reshape %s operator with %zu rows: number of rows must be "
         "non-zero",
-        xnn_operator_type_to_string(batch_matrix_multiply_op->type), m);
+        xnn_operator_type_to_string_v2(batch_matrix_multiply_op), m);
     return xnn_status_invalid_parameter;
   }
 
@@ -599,7 +630,7 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
     xnn_log_error(
         "failed to reshape %s operator with %zu columns: number of columns "
         "must be non-zero",
-        xnn_operator_type_to_string(batch_matrix_multiply_op->type), k);
+        xnn_operator_type_to_string_v2(batch_matrix_multiply_op), k);
     return xnn_status_invalid_parameter;
   }
 
@@ -607,7 +638,7 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
     xnn_log_error(
         "failed to reshape %s operator with %zu columns: number of columns "
         "must be non-zero",
-        xnn_operator_type_to_string(batch_matrix_multiply_op->type), n);
+        xnn_operator_type_to_string_v2(batch_matrix_multiply_op), n);
     return xnn_status_invalid_parameter;
   }
 
@@ -645,7 +676,7 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
           "failed to reshape %s operator with incompatible %i-th batch "
           "dimensions %zu and %zu: batch dimensions must be equal or "
           "broadcastable",
-          xnn_operator_type_to_string(batch_matrix_multiply_op->type), k,
+          xnn_operator_type_to_string_v2(batch_matrix_multiply_op), k,
           batch_dims_a[k], batch_dims_b[k]);
       return xnn_status_invalid_parameter;
     }
@@ -680,6 +711,7 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
       // Nothing to do here, the `B` matrix has already been packed.
       break;
 
+    case xnn_operator_type_batch_matrix_multiply_nc_bf16_f32:
     case xnn_operator_type_batch_matrix_multiply_nc_f16:
     case xnn_operator_type_batch_matrix_multiply_nc_f32:
     case xnn_operator_type_batch_matrix_multiply_nc_pf16:
@@ -940,6 +972,25 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_pf16(
       pthreadpool_get_threads_count(threadpool));
 }
 
+enum xnn_status xnn_reshape_batch_matrix_multiply_nc_bf16_f32(
+    xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
+    const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
+    size_t n, size_t* workspace_size, size_t* workspace_alignment,
+    pthreadpool_t threadpool) {
+  return reshape_batch_matrix_multiply_nc(
+      batch_matrix_multiply_op, xnn_operator_type_batch_matrix_multiply_nc_bf16_f32,
+      num_batch_dims, batch_dims_a, batch_dims_b, m, k, n, workspace_size,
+      workspace_alignment,
+      /*log2_input_a_element_size=*/XNN_LOG2_SIZEOF_HALF,
+      /*log2_input_b_element_size=*/XNN_LOG2_SIZEOF_HALF,
+      /*bias_element_size=*/sizeof(float),
+      /*w_stride_extra_bytes=*/0,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      &batch_matrix_multiply_op->params.f32_minmax,
+      sizeof(batch_matrix_multiply_op->params.f32_minmax),
+      pthreadpool_get_threads_count(threadpool));
+}
+
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_f32(
     xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
     const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
@@ -1045,7 +1096,7 @@ static enum xnn_status setup_batch_matrix_multiply_nc(
         "failed to setup operator: operator type mismatch (expected %s, got "
         "%s)",
         xnn_operator_type_to_string(expected_operator_type),
-        xnn_operator_type_to_string(batch_matrix_multiply_op->type));
+        xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -1055,7 +1106,7 @@ static enum xnn_status setup_batch_matrix_multiply_nc(
     case xnn_run_state_invalid:
       xnn_log_error(
           "failed to setup %s operator: operator has not been reshaped yet",
-          xnn_operator_type_to_string(batch_matrix_multiply_op->type));
+          xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
       return xnn_status_invalid_state;
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.
@@ -1106,6 +1157,19 @@ enum xnn_status xnn_setup_batch_matrix_multiply_nc_pf16(
     const void* input_a, const void* input_b, void* output) {
   return setup_batch_matrix_multiply_nc(
       batch_matrix_multiply_op, xnn_operator_type_batch_matrix_multiply_nc_pf16,
+      input_a, /*quantization_params=*/NULL, input_b,
+      /*packed_weights=*/
+      batch_matrix_multiply_op->context.gemm.const_weights
+          ? packed_weights(batch_matrix_multiply_op)
+          : workspace,
+      output);
+}
+
+enum xnn_status xnn_setup_batch_matrix_multiply_nc_bf16_f32(
+    xnn_operator_t batch_matrix_multiply_op, void* workspace,
+    const void* input_a, const void* input_b, void* output) {
+  return setup_batch_matrix_multiply_nc(
+      batch_matrix_multiply_op, xnn_operator_type_batch_matrix_multiply_nc_bf16_f32,
       input_a, /*quantization_params=*/NULL, input_b,
       /*packed_weights=*/
       batch_matrix_multiply_op->context.gemm.const_weights

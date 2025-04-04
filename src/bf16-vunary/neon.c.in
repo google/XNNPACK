@@ -11,8 +11,8 @@ $assert OP in ["ABS", "NEG", "SQR"]
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_bf16_v${OP.lower()}_ukernel__neonbf16_u${BATCH_TILE}(

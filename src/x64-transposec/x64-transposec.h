@@ -3,6 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+// clang-format off
+
 XNN_TRANSPOSE_UKERNEL(0, xnn_x64_transposec_ukernel__1x2_scalar_float, 64, uint64_t, 1, 2)
 XNN_TRANSPOSE_UKERNEL(0, xnn_x64_transposec_ukernel__1x2_scalar_int, 64, uint64_t, 1, 2)
 XNN_TRANSPOSE_UKERNEL(0, xnn_x64_transposec_ukernel__2x1_scalar_float, 64, uint64_t, 2, 1)

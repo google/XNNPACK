@@ -8,13 +8,11 @@
 #define __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX512F_H_
 
 #include <assert.h>
+#include <immintrin.h>
 #include <stddef.h>
 #include <stdint.h>
 
-#include <immintrin.h>
-
-#include "xnnpack/common.h"
-
+#include "src/xnnpack/common.h"
 
 // SIMD vector type for f32 using AVX512F.
 typedef __m512 xnn_simd_f32_t;
@@ -30,11 +28,6 @@ typedef __m512 xnn_simd_f32_t;
 
 // Whether or not this architecture has native fused multiply-add support.
 #define XNN_SIMD_HAS_NATIVE_FMA 1
-
-// Include the header for generic functions _after_ declaring the arch-specific
-// types and sizes.
-#include "xnnpack/simd/f32-generic-functions.h"
-
 // Arithmetic operations.
 static XNN_INLINE xnn_simd_f32_t xnn_zero_f32() { return _mm512_setzero_ps(); }
 
@@ -96,6 +89,10 @@ static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
   return xnn_sub_f32(xnn_zero_f32(), a);
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
+  return _mm512_roundscale_ps(a, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
+}
+
 // Logical operations.
 static XNN_INLINE xnn_simd_f32_t xnn_and_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {
@@ -146,10 +143,6 @@ static XNN_INLINE xnn_simd_f32_t xnn_rsqrt_f32(xnn_simd_f32_t a) {
   return _mm512_rsqrt14_ps(a);
 }
 
-static XNN_INLINE xnn_simd_f32_t xnn_getexp_f32(xnn_simd_f32_t a) {
-  return _mm512_getexp_ps(a);
-}
-
 // Load/store operations.
 static XNN_INLINE xnn_simd_f32_t xnn_loadu_f32(const float* ptr) {
   return _mm512_loadu_ps(ptr);
@@ -171,10 +164,6 @@ static XNN_INLINE xnn_simd_f32_t xnn_set1_f32(float v) {
   return _mm512_set1_ps(v);
 }
 
-static XNN_INLINE xnn_simd_f32_t xnn_set1_or_load_f32(const float* v) {
-  return _mm512_set1_ps(*v);
-}
-
 // Tail load/store operations.
 static XNN_INLINE xnn_simd_f32_t xnn_load_tail_f32(const float* input,
                                                    size_t num_elements) {
@@ -184,6 +173,11 @@ static XNN_INLINE xnn_simd_f32_t xnn_load_tail_f32(const float* input,
   const __mmask16 vmask =
       _cvtu32_mask16((uint32_t)((UINT32_C(1) << num_elements) - UINT32_C(1)));
   return _mm512_maskz_loadu_ps(vmask, input);
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_load_tail_safe_f32(const float* input,
+                                                        size_t num_elements) {
+  return xnn_load_tail_f32(input, num_elements);
 }
 
 static XNN_INLINE void xnn_store_tail_f32(float* output, xnn_simd_f32_t v,

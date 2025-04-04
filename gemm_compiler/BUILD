@@ -30,9 +30,8 @@ py_library(
         "generate_qd8_f32_qc8w_gemm_microkernels.py",
     ],
     deps = [
-        ":arm_arch_template",
         ":arm_isa_templates",
-        ":x64_arch_template",
+        ":base_architecture",
         ":x64_isa_templates",
     ],
 )
@@ -45,6 +44,7 @@ py_library(
         "avx512vnni_template.py",
         "fma3_template.py",
     ],
+    deps = [":x64_arch_template"],
 )
 
 py_library(
@@ -64,6 +64,7 @@ py_library(
         "neonfma_template.py",
         "neonmlal_aarch32_template.py",
     ],
+    deps = [":arm_arch_template"],
 )
 
 py_library(

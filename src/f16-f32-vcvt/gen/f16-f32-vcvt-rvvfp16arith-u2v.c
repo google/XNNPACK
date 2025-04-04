@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-f32-vcvt/rvvfp16arith.c.in
 //   Generator: tools/xngen
@@ -11,7 +12,7 @@
 
 #include <riscv_vector.h>
 
-#include "xnnpack/vcvt.h"
+#include "src/xnnpack/vcvt.h"
 
 
 void xnn_f16_f32_vcvt_ukernel__rvvfp16arith_u2v(

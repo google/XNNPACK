@@ -7,7 +7,7 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/pad.h"
+#include "src/xnnpack/pad.h"
 
 
 void xnn_xx_pad_ukernel_p16__neon_u16(

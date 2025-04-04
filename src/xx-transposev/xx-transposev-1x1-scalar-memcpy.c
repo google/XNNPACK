@@ -6,9 +6,9 @@
 #include <assert.h>
 #include <string.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/transpose.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/transpose.h"
 
 void xnn_xx_transposev_ukernel__1x1_scalar_memcpy(
     const void* input,

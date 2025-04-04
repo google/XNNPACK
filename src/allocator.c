@@ -11,9 +11,9 @@
   #include <malloc.h>
 #endif
 
-#include "xnnpack.h"
-#include "xnnpack/allocator.h"
-#include "xnnpack/common.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/allocator.h"
+#include "src/xnnpack/common.h"
 
 
 extern int posix_memalign(void **memptr, size_t alignment, size_t size);

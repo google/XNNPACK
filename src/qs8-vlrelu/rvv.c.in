@@ -9,7 +9,7 @@ $assert DATATYPE in ["QS8", "QU8"]
 
 #include <riscv_vector.h>
 
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/vunary.h"
 
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 

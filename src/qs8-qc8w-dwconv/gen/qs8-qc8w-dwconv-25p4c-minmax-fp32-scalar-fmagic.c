@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-dwconv/unipass-scalar.c.in
 //   Generator: tools/xngen
@@ -11,10 +12,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/dwconv.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microparams.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
 
 void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_25p4c__scalar_fmagic(
     size_t channels,
@@ -25,6 +26,7 @@ void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_25p4c__scalar_fmagic(
     intptr_t input_stride,
     size_t output_increment,
     size_t input_offset,
+    size_t input_pixel_stride,
     const int8_t* zero,
     const union xnn_qs8_qc8w_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
@@ -711,6 +713,7 @@ void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_25p4c__scalar_fmagic(
       } while (--c != 0);
     }
 
+    input_offset += input_pixel_stride;
     output = (int8_t*) ((uintptr_t) output + output_increment);
   } while (--output_width != 0);
 }

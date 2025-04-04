@@ -7,12 +7,12 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "xnnpack.h"
-#include "xnnpack/log.h"
-#include "xnnpack/math.h"
-#include "xnnpack/reshape-helpers.h"
-#include "xnnpack/subgraph.h"
-#include "pthreadpool.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/reshape-helpers.h"
+#include "src/xnnpack/subgraph.h"
+#include <pthreadpool.h>
 
 enum xnn_status resize_unary_elementwise_output_tensor(
   const struct xnn_operator_data* opdata,
@@ -27,14 +27,14 @@ enum xnn_status resize_unary_elementwise_output_tensor(
   // Propagate input shape to output.
   const struct xnn_value* input = &values[opdata->inputs[0]];
   output->shape.num_dims = input->shape.num_dims;
+  size_t old_dynamic_quant_params_size = xnn_tensor_get_dynamic_quant_param_size(output);
   memcpy(&output->shape.dim[0], &input->shape.dim[0], input->shape.num_dims * sizeof(size_t));
+  output->quantization.dynamic_params_size = xnn_tensor_get_dynamic_quant_param_size(output);
   const size_t new_size = xnn_tensor_get_size(output);
-  if (new_size > output->size || opdata->workspace_size > old_workspace_size) {
+  if (new_size > output->size ||
+      output->quantization.dynamic_params_size > old_dynamic_quant_params_size ||
+      opdata->workspace_size > old_workspace_size) {
     output->size = new_size;
-    if (output->datatype == xnn_datatype_qdint8 || output->datatype == xnn_datatype_qduint8) {
-      // reallocation will use this to adjust memory needed for dynamic quant params
-      output->quantization.dynamic_params_size = xnn_tensor_get_dynamic_quant_param_size(output);
-    }
     return xnn_status_reallocation_required;
   }
   return xnn_status_success;

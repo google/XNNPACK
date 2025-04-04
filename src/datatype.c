@@ -3,9 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack/datatype.h"
+#include "src/xnnpack/datatype.h"
 
-#include "xnnpack.h"
+#include "include/xnnpack.h"
 
 bool xnn_datatype_is_real(enum xnn_datatype t) {
   switch (t) {
@@ -86,6 +86,26 @@ bool xnn_datatype_is_quantized(enum xnn_datatype t) {
   }
   XNN_UNREACHABLE;
   return false;
+}
+
+bool xnn_datatype_is_channelwise_quantized(enum xnn_datatype t) {
+  switch (t) {
+    case xnn_datatype_qcint8:
+    case xnn_datatype_qcint32:
+    case xnn_datatype_qcint4:
+      return true;
+    default:
+      return false;
+  }
+}
+
+bool xnn_datatype_is_blockwise_quantized(enum xnn_datatype t) {
+  switch (t) {
+    case xnn_datatype_qbint4:
+      return true;
+    default: return false;
+      return false;
+  }
 }
 
 

@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/x32-packw/c4-sse2.c.in
 //   Generator: tools/xngen
@@ -14,7 +15,7 @@
 
 #include <emmintrin.h>
 
-#include "xnnpack/packw.h"
+#include "src/xnnpack/packw.h"
 
 
 void xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_u4(

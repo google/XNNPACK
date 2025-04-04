@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-vgelu/rational-6-4.c.in
 //   Generator: tools/xngen
@@ -10,12 +11,12 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "xnnpack/simd/f16-scalar.h"
+#include "src/xnnpack/simd/f16-scalar.h"
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_f16_vgelu_ukernel__scalar_rational_6_4_div_u1(
@@ -33,7 +34,11 @@ void xnn_f16_vgelu_ukernel__scalar_rational_6_4_div_u1(
   // Cap the inputs to this value as `erf(x/sqrt(2))` will always be `+/-1.0f`
   // beyond this point. This value is chosen as the first floating point
   // number as of which the interpolation returns +/-1.0f.
+#if XNN_SIMD_HAS_NATIVE_FMA
+  XNN_SIMD_CONST_F16_FROM_FLOAT(vmax_abs_x, 3.5e+00);
+#else
   XNN_SIMD_CONST_F16_FROM_FLOAT(vmax_abs_x, 3.28906250e+00);
+#endif  // XNN_SIMD_HAS_NATIVE_FMA
 
   // The monomial coefficients of the numerator polynomial (odd).
   XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_1, 7.9763203859e-01f);
@@ -96,7 +101,11 @@ void xnn_f16_vgelu_ukernel__scalar_rational_6_4_div_u2(
   // Cap the inputs to this value as `erf(x/sqrt(2))` will always be `+/-1.0f`
   // beyond this point. This value is chosen as the first floating point
   // number as of which the interpolation returns +/-1.0f.
+#if XNN_SIMD_HAS_NATIVE_FMA
+  XNN_SIMD_CONST_F16_FROM_FLOAT(vmax_abs_x, 3.5e+00);
+#else
   XNN_SIMD_CONST_F16_FROM_FLOAT(vmax_abs_x, 3.28906250e+00);
+#endif  // XNN_SIMD_HAS_NATIVE_FMA
 
   // The monomial coefficients of the numerator polynomial (odd).
   XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_1, 7.9763203859e-01f);
@@ -203,7 +212,11 @@ void xnn_f16_vgelu_ukernel__scalar_rational_6_4_div_u4(
   // Cap the inputs to this value as `erf(x/sqrt(2))` will always be `+/-1.0f`
   // beyond this point. This value is chosen as the first floating point
   // number as of which the interpolation returns +/-1.0f.
+#if XNN_SIMD_HAS_NATIVE_FMA
+  XNN_SIMD_CONST_F16_FROM_FLOAT(vmax_abs_x, 3.5e+00);
+#else
   XNN_SIMD_CONST_F16_FROM_FLOAT(vmax_abs_x, 3.28906250e+00);
+#endif  // XNN_SIMD_HAS_NATIVE_FMA
 
   // The monomial coefficients of the numerator polynomial (odd).
   XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_1, 7.9763203859e-01f);
@@ -336,7 +349,11 @@ void xnn_f16_vgelu_ukernel__scalar_rational_6_4_div_u8(
   // Cap the inputs to this value as `erf(x/sqrt(2))` will always be `+/-1.0f`
   // beyond this point. This value is chosen as the first floating point
   // number as of which the interpolation returns +/-1.0f.
+#if XNN_SIMD_HAS_NATIVE_FMA
+  XNN_SIMD_CONST_F16_FROM_FLOAT(vmax_abs_x, 3.5e+00);
+#else
   XNN_SIMD_CONST_F16_FROM_FLOAT(vmax_abs_x, 3.28906250e+00);
+#endif  // XNN_SIMD_HAS_NATIVE_FMA
 
   // The monomial coefficients of the numerator polynomial (odd).
   XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_1, 7.9763203859e-01f);

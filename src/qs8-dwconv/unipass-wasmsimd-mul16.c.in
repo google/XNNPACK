@@ -14,8 +14,8 @@ $assert KERNEL_TILE >= 2
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/dwconv.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/math.h"
 
 
 $DATATYPE_SPEC = {"QS8": "qs8", "QC8": "qs8_qc8w", "QU8": "qu8"}[DATATYPE]
@@ -36,6 +36,7 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${KERN
     intptr_t input_stride,
     size_t output_increment,
     size_t input_offset,
+    size_t input_pixel_stride,
     const ${XINT8_T}* zero,
     const ${PARAMS_TYPE} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
@@ -274,6 +275,7 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${KERN
       }${" while (c != 0);" if CHANNEL_TILE > 8 else ""}
     }
 
+    input_offset += input_pixel_stride;
     output = (${XINT8_T}*) ((uintptr_t) output + output_increment);
   } while (--output_width != 0);
 }

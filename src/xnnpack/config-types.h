@@ -9,8 +9,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/hardware-config.h"
-#include "xnnpack/microfnptr.h"
+#include "src/xnnpack/hardware-config.h"
+#include "src/xnnpack/microfnptr.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -52,7 +52,8 @@ struct xnn_binary_elementwise_config {
   xnn_vbinary_ukernel_fn ropc_ukernel;
   xnn_init_binary_params_fn init;
   // Number of elements in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of elements in each call.
+  // For best efficiency, micro-kernel must process a multiple of this number of
+  // elements in each call.
   size_t element_tile;
 };
 
@@ -63,8 +64,13 @@ struct xnn_unary_elementwise_config {
 
 struct xnn_reduce_config {
   xnn_reduce_ukernel_fn ukernel;
-  xnn_rdsum_ukernel_fn rd_ukernel;
-  xnn_init_reduce_params_fn init;
+  xnn_reduce_discontiguous_ukernel_fn rd_ukernel;
+  uint32_t identity_value;
+  union {
+    xnn_init_reduce_params_fn reduce;
+    xnn_init_f32_default_params_fn f32;
+    xnn_init_f16_default_params_fn f16;
+  } init;
   xnn_update_reduce_params_fn update;
 };
 
@@ -77,23 +83,17 @@ struct xnn_xx_pad_config {
 };
 
 struct xnn_avgpool_config {
-  xnn_avgpool_unipass_ukernel_fn unipass;
-  xnn_avgpool_multipass_ukernel_fn multipass;
+  xnn_avgpool_ukernel_fn ukernel;
   union {
     xnn_init_f16_scaleminmax_params_fn f16;
     xnn_init_f32_scaleminmax_params_fn f32;
-    xnn_init_qu8_avgpool_minmax_params_fn qu8;
   } init;
   // Number of rows in a primary tile.
-  // Unipass micro-kernel must be called with this number of rows, or fewer.
-  // Multipass micro-kernel must be called with more than this number of rows.
+  // TODO: Only used by tests, it should be removed.
   uint8_t primary_tile;
-  // Number of rows in an incremental tile.
-  // For best efficiency, multipass micro-kernel must process the number of rows in the primary tile plus a multiple
-  // of this number of rows in each call. This number has no meaning for the unipass micro-kernel.
-  uint8_t incremental_tile;
   // Number of channels in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
+  // For best efficiency, micro-kernel must process a multiple of this number of
+  // channels in each call.
   uint16_t channel_tile;
 };
 
@@ -103,34 +103,9 @@ struct xnn_pack_lh_config {
   xnn_pack_lh_offset_fn offset_fn;
 };
 
-struct xnn_pavgpool_config {
-  xnn_pavgpool_unipass_ukernel_fn unipass;
-  xnn_pavgpool_multipass_ukernel_fn multipass;
-  union {
-    xnn_init_f16_scaleminmax_params_fn f16;
-    xnn_init_f32_minmax_params_fn f32;
-  } init;
-  // Number of rows in a primary tile.
-  // Unipass micro-kernel must be called with this number of rows, or fewer.
-  // Multipass micro-kernel must be called with more than this number of rows.
-  uint8_t primary_tile;
-  // Number of rows in an incremental tile.
-  // For best efficiency, multipass micro-kernel must process the number of rows in the primary tile plus a multiple
-  // of this number of rows in each call. This number has no meaning for the unipass micro-kernel.
-  uint8_t incremental_tile;
-  // Number of channels in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
-  uint16_t channel_tile;
-};
-
-union xnn_dwconv_ukernel {
-  xnn_dwconv_unipass_ukernel_fn unipass;
-  xnn_dwconv_multipass_ukernel_fn multipass;
-};
-
 struct xnn_dwconv_config {
-  union xnn_dwconv_ukernel minmax;
-  union xnn_dwconv_ukernel linear;
+  xnn_dwconv_ukernel_fn minmax;
+  xnn_dwconv_ukernel_fn linear;
   union {
     xnn_init_qs8_conv_minmax_params_fn qs8;
     xnn_init_qs8_qc8w_conv_minmax_params_fn qs8_qc8w;
@@ -139,19 +114,9 @@ struct xnn_dwconv_config {
     xnn_init_f32_minmax_params_fn f32;
   } init;
   // Number of channels in a tile.
-  uint8_t channel_tile;
-  // Number of channels in a subtile. This must be less-than-equal channel_tile. After processing channel_tile, the
-  // remainder is processed in tiles of channel_subtile.
-  uint8_t channel_subtile;
-  // How much to round channels by to get more optimal tiling.
-  uint8_t channel_round;
-  // Number of elements in the tile. For multipass, this is the tile size for first pass.
+  uint32_t channel_tile;
+  // Number of elements in the tile.
   uint8_t primary_tile;
-  // Tile size for middle pass. Middle pass can be run multiple times. Will be zero for unipass, non-zero and not
-  // greater than last_tile for multipass.
-  uint8_t middle_tile;
-  // Tile size for last pass. Will be zero for unipass, non-zero for multipass.
-  uint8_t last_tile;
 };
 
 // Bilinear interpolation (2D).
@@ -159,8 +124,12 @@ struct xnn_dwconv_config {
 struct xnn_ibilinear_config {
   xnn_ibilinear_ukernel_fn ukernel;
   // Number of output pixels in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of pixels in each call.
+  // For best efficiency, micro-kernel must process a multiple of this number of
+  // pixels in each call.
   uint8_t pixel_tile;
+  size_t log2_data_element_size;
+  size_t log2_weight_element_size;
+  xnn_indirection_init_resize_bilinear2d_hwc_fn indirection_init;
 };
 
 // Bilinear interpolation (2D) in CHW layout.
@@ -168,8 +137,12 @@ struct xnn_ibilinear_config {
 struct xnn_ibilinear_chw_config {
   xnn_ibilinear_chw_ukernel_fn ukernel;
   // Number of channels in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
+  // For best efficiency, micro-kernel must process a multiple of this number of
+  // channels in each call.
   uint8_t channel_tile;
+  size_t log2_data_element_size;
+  size_t log2_weight_element_size;
+  xnn_indirection_init_resize_bilinear2d_chw_fn indirection_init;
 };
 
 struct xnn_gemm_config {
@@ -203,7 +176,7 @@ struct xnn_gemm_config {
   uint8_t nr;
   uint8_t log2_kr;
   uint8_t log2_sr;
-  uint8_t planes;  // number of 4 bit planes (1 for legacy, 2 for unzip)
+  uint8_t planes;     // number of 4 bit planes (1 for legacy, 2 for unzip)
   uint8_t mr_packed;  // `mr` value used for packed left-hand operands.
   enum xnn_arch_flags arch;
 };
@@ -216,12 +189,6 @@ struct xnn_maxpool_config {
     xnn_init_f32_minmax_params_fn f32;
     xnn_init_f16_minmax_params_fn f16;
   } init;
-  // Number of elements in a tile for the first pass.
-  uint8_t first_pass_tile_size;
-  // Number of elements in a tile for the remainder pass. If the pooling size is less than or equals to
-  // first_pass_tile_size, remainder passes are not run. We run as many remainder passes as required to cover the entire
-  // pooling window.
-  uint8_t remainder_pass_tile_size;
 };
 
 struct xnn_zip_config {
@@ -231,14 +198,6 @@ struct xnn_zip_config {
   xnn_zipv_ukernel_fn xm;
 };
 
-struct xnn_rmax_config {
-  xnn_rmax_ukernel_fn ukernel;
-  union {
-    xnn_init_f32_default_params_fn f32;
-    xnn_init_f16_default_params_fn f16;
-  } init;
-};
-
 struct xnn_spmm_config {
   xnn_spmm_ukernel_fn ukernel;
   union {
@@ -246,10 +205,12 @@ struct xnn_spmm_config {
     xnn_init_f32_minmax_params_fn f32;
   } init;
   // Number of M-dimension elements in a tile.
-  // Corresponds to a block of pixels in 1x1 Convolution and a block of batch size in Fully Connected operator.
+  // Corresponds to a block of pixels in 1x1 Convolution and a block of batch
+  // size in Fully Connected operator.
   uint8_t mr;
   // Number of N-dimension elements in a tile.
-  // Corresponds to a block of output channels/features in 1x1 Convolution and Fully Connected operator.
+  // Corresponds to a block of output channels/features in 1x1 Convolution and
+  // Fully Connected operator.
   uint8_t nr;
 };
 
@@ -264,13 +225,17 @@ struct xnn_dwconv2d_chw_parameters {
 };
 
 struct xnn_dwconv2d_chw_config {
-  // Direct 3x3 stride-1 Convolution with padding 1 on left and right in CHW layout.
+  // Direct 3x3 stride-1 Convolution with padding 1 on left and right in CHW
+  // layout.
   struct xnn_dwconv2d_chw_parameters dwconv2d_chw_3x3;
-  // Direct 3x3 stride-2 Convolution with padding 1 on left and right in CHW layout.
+  // Direct 3x3 stride-2 Convolution with padding 1 on left and right in CHW
+  // layout.
   struct xnn_dwconv2d_chw_parameters dwconv2d_chw_3x3s2;
-  // Direct 5x5 stride-1 Convolution with padding 2 on left and right in CHW layout.
+  // Direct 5x5 stride-1 Convolution with padding 2 on left and right in CHW
+  // layout.
   struct xnn_dwconv2d_chw_parameters dwconv2d_chw_5x5;
-  // Direct 5x5 stride-2 Convolution with padding 2 on left and right in CHW layout.
+  // Direct 5x5 stride-2 Convolution with padding 2 on left and right in CHW
+  // layout.
   struct xnn_dwconv2d_chw_parameters dwconv2d_chw_5x5s2;
 };
 
@@ -284,7 +249,8 @@ struct xnn_conv_hwc2chw_config {
   // This parameter must be passed as is to weight packing function.
   uint8_t output_channel_tile;
   // Number of output height pixels in a tile.
-  // For best efficiency, micro-kernel must produce a multiple of this number of rows in each call.
+  // For best efficiency, micro-kernel must produce a multiple of this number of
+  // rows in each call.
   uint8_t output_height_tile;
 };
 
@@ -295,10 +261,12 @@ struct xnn_vmulcaddc_config {
     xnn_init_f32_minmax_params_fn f32;
   } init;
   // Number of channels in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
+  // For best efficiency, micro-kernel must process a multiple of this number of
+  // channels in each call.
   uint8_t channel_tile;
   // Number of rows of inputs processed in one tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of rows in each call.
+  // For best efficiency, micro-kernel must process a multiple of this number of
+  // rows in each call.
   uint8_t row_tile;
 };
 
@@ -311,16 +279,9 @@ struct xnn_raddstoreexpminusmax_config {
 };
 
 struct xnn_argmaxpool_config {
-  union {
-    xnn_argmaxpool_unipass_ukernel_fn up;
-    xnn_argmaxpool_multipass_ukernel_fn mp;
-  };
-  // // Number of elements in a tile for the first pass.
-  uint8_t first_pass_tile_size;
-  // Number of elements in a tile for the remainder pass. If the pooling size is less than or equals to
-  // first_pass_tile_size, remainder passes are not run. We run as many remainder passes as required to cover the entire
-  // pooling window.
-  uint8_t remainder_pass_tile_size;
+  xnn_argmaxpool_unipass_ukernel_fn ukernel;
+  // Number of elements in a tile for the first pass.
+  uint8_t primary_tile;
 };
 
 struct xnn_lut32norm_config {

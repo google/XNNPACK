@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vcmul/avx512f.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <xmmintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/vbinary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vbinary.h"
 
 void xnn_f32_vcmul_ukernel__sse_u16(
     size_t batch,

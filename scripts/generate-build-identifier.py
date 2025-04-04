@@ -40,7 +40,9 @@ parser.add_argument(
     help="The source files to use to generate the fingerprint.",
 )
 
-FILE_TEMPLATE = """// Copyright 2024 Google LLC
+FILE_TEMPLATE = """
+// clang-format off
+// Copyright 2024 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -90,7 +92,9 @@ def main(args) -> None:
     with open(path, "rb") as f:
       m.update(f.read())
   byte_list = ", ".join(str(b).rjust(3, "x") for b in m.digest())
-  byte_list = textwrap.indent(textwrap.fill(byte_list, width=40), "  ").replace("x", " ")
+  byte_list = textwrap.indent(textwrap.fill(byte_list, width=40), "  ").replace(
+      "x", " "
+  )
   formatted_input_list = "\n".join("// - " + p for p in inputs)
   with open(args.output, "w") as out:
     out.write(

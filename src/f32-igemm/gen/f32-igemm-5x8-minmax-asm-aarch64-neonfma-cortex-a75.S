@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-igemm/5x8-aarch64-neonfma-cortex-a75.S.in
 //   Generator: tools/xngen
@@ -7,7 +8,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack/assembly.h"
+#include "src/xnnpack/assembly.h"
 
 # void xnn_f32_igemm_minmax_ukernel_5x8__asm_aarch64_neonfma_cortex_a75(
 #     size_t mr,                         x0

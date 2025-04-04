@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/x16-packw/avx.c.in
 //   Generator: tools/xngen
@@ -14,7 +15,7 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/packw.h"
+#include "src/xnnpack/packw.h"
 
 
 void xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16(

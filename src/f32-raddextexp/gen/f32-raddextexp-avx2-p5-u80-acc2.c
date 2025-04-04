@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-raddextexp/avx2-p5.c.in
 //   Generator: tools/xngen
@@ -12,7 +13,7 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/raddextexp.h"
+#include "src/xnnpack/raddextexp.h"
 
 
 void xnn_f32_raddextexp_ukernel__avx2_p5_u80_acc2(

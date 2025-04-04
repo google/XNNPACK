@@ -12,15 +12,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "xnnpack.h"
-#include "xnnpack/allocation-type.h"
-#include "xnnpack/common.h"
-#include "xnnpack/datatype.h"
-#include "xnnpack/log.h"
-#include "xnnpack/math.h"
-#include "xnnpack/packq.h"
-#include "xnnpack/params.h"
-#include "xnnpack/subgraph.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/allocation-type.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/datatype.h"
+#include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/packq.h"
+#include "src/xnnpack/params.h"
+#include "src/xnnpack/subgraph.h"
 
 static void set_allocation_type(struct xnn_value* value)
 {
@@ -39,7 +39,11 @@ static void set_shape(struct xnn_value* value, size_t num_dims, const size_t* di
 {
   value->shape.num_dims = num_dims;
   if (num_dims != 0) {
-    memcpy(value->shape.dim, dims, num_dims * sizeof(size_t));
+    if (dims != NULL) {
+      memcpy(value->shape.dim, dims, num_dims * sizeof(size_t));
+    } else {
+      memset(value->shape.dim, 0, num_dims * sizeof(size_t));
+    }
   }
 }
 
@@ -450,11 +454,11 @@ enum xnn_status xnn_define_channelwise_quantized_tensor_value_v2(
   return xnn_status_success;
 }
 
-enum xnn_status xnn_define_blockwise_quantized_tensor_value(
+enum xnn_status xnn_define_blockwise_quantized_tensor_value_v2(
     xnn_subgraph_t subgraph,
     enum xnn_datatype datatype,
     int32_t zero_point,
-    const uint16_t* scale,
+    const void* scale,
     size_t num_dims,
     size_t channel_dim,
     size_t block_size,
@@ -462,6 +466,7 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value(
     const void* data,
     uint32_t external_id,
     uint32_t flags,
+    enum xnn_datatype scale_type,
     uint32_t* id_out)
 {
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
@@ -518,9 +523,28 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value(
       return xnn_status_unsupported_parameter;
   }
 
+  switch (scale_type) {
+    case xnn_datatype_bf16:
+    case xnn_datatype_fp16:
+      break;
+    default:
+      xnn_log_error("failed to create Blockwise Quantized Dense Tensor value: unsupported scale datatype %s (%d)",
+        xnn_datatype_to_string(scale_type), datatype);
+      return xnn_status_unsupported_parameter;
+  }
   const size_t block_count = dims[0] * dims[1] / block_size;
   for (size_t block = 0; block < block_count; block++) {
-    float float_scale = math_cvt_fp32_bf16(scale[block]);
+    float float_scale;
+    switch (scale_type) {
+      case xnn_datatype_bf16:
+        float_scale = math_cvt_fp32_bf16(((const uint16_t*) scale)[block]);
+        break;
+      case xnn_datatype_fp16:
+        float_scale = xnn_float16_to_float(((const xnn_float16*) scale)[block]);
+        break;
+      default:
+        XNN_UNREACHABLE;
+    }
     if (float_scale <= 0.0f || !isnormal(float_scale)) {
       xnn_log_error(
         "failed to create Blockwise Quantized Dense Tensor value with %.7g scale in block #%zu: "
@@ -540,7 +564,18 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value(
   value->type = xnn_value_type_dense_tensor;
   value->datatype = datatype;
   value->quantization.zero_point = zero_point;
-  value->quantization.blockwise_scale = (const xnn_bfloat16*) scale;
+  switch (scale_type) {
+    case xnn_datatype_bf16:
+      value->quantization.blockwise_scale.bf16_scale = (const xnn_bfloat16*) scale;
+      value->quantization.scale_type = xnn_datatype_bf16;
+      break;
+    case xnn_datatype_fp16:
+      value->quantization.blockwise_scale.fp16_scale = (const xnn_float16*) scale;
+      value->quantization.scale_type = xnn_datatype_fp16;
+      break;
+    default:
+      XNN_UNREACHABLE;
+  }
   value->quantization.channel_dimension_blockwise = channel_dim;
   value->quantization.block_size = block_size;
   set_shape(value, num_dims, dims);
@@ -551,6 +586,23 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value(
 
   *id_out = value->id;
   return xnn_status_success;
+}
+
+enum xnn_status xnn_define_blockwise_quantized_tensor_value(
+    xnn_subgraph_t subgraph,
+    enum xnn_datatype datatype,
+    int32_t zero_point,
+    const uint16_t* scale,
+    size_t num_dims,
+    size_t channel_dim,
+    size_t block_size,
+    const size_t* dims,
+    const void* data,
+    uint32_t external_id,
+    uint32_t flags,
+    uint32_t* id_out) {
+  return xnn_define_blockwise_quantized_tensor_value_v2(subgraph, datatype, zero_point, scale, num_dims, channel_dim,
+                                                        block_size, dims, data, external_id, flags, xnn_datatype_bf16, id_out);
 }
 
 size_t xnn_shape_multiply_all_dims(
@@ -645,11 +697,10 @@ size_t xnn_tensor_get_dynamic_quant_param_size(const struct xnn_value* value)
           &value->shape, value->quantization.num_nonbatch_dims);
       return batch_dims_size * sizeof(struct xnn_quantization_params);
     }
-    case xnn_datatype_qpint8:
-      return 0;
     default:
-      XNN_UNREACHABLE;
+      return 0;
   }
+  return 0;
 }
 
 size_t xnn_tensor_get_size_by_id(xnn_subgraph_t subgraph, uint32_t value_id)

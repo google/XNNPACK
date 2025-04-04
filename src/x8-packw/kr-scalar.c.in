@@ -12,7 +12,7 @@ $assert IZP in [0, 128]
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/packw.h"
+#include "src/xnnpack/packw.h"
 
 $BITS = {"int8_t": 8, "uint16_t": 16, "uint32_t": 32, "float": 32}[TYPE]
 $BTYPE = {"int8_t": "int32_t", "uint16_t": "uint16_t", "uint32_t": "uint32_t", "float": "float"}[TYPE]
@@ -100,16 +100,15 @@ void xnn_qs${BITS}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${N
         assert(k >= 1 && k <= ${KR-1});
         $for N in range(NR):
           const ${TYPE} v${N}x0 = w${N}[0];
+          $for K in range(1, KR):
+            const ${TYPE} v${N}x${K} = ${K} < k ? w${N}[${K}] : 0;
           $if BITS == 8:
             ksum${N} += (uint32_t) v${N}x0;
+            $for K in range(1, KR):
+              ksum${N} += (uint32_t) v${N}x${K};
           out[${N*KR}] = v${N}x0;
           $for K in range(1, KR):
-            if (${K} < k) {
-              const ${TYPE} v${N}x${K} = w${N}[${K}];
-              $if BITS == 8:
-                ksum${N} += (uint32_t) v${N}x${K};
-              out[${N*KR+K}] = v${N}x${K};
-            }
+            out[${N*KR+K}] = v${N}x${K};
           w${N} += k;
         out += ${NR*KR};
       }
@@ -186,17 +185,18 @@ void xnn_qs${BITS}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${N
         assert(k >= 1 && k <= ${KR-1});
         $for N in range(NR-1):
           const ${TYPE} v${N}x0 = w${N}[0];
+          $for K in range(1, KR):
+            const ${TYPE} v${N}x${K} = ${K} < k ? w${N}[${K}] : 0;
           $if BITS == 8:
             ksum${N} += (uint32_t) v${N}x0;
+            $for K in range(1, KR):
+              ksum${N} += (uint32_t) v${N}x${K};
           out[${N*KR}] = v${N}x0;
           $for K in range(1, KR):
-            if (${K} < k) {
-              const ${TYPE} v${N}x${K} = w${N}[${K}];
-              $if BITS == 8:
-                ksum${N} += (uint32_t) v${N}x${K};
-              out[${N*KR+K}] = v${N}x${K};
-            }
+            out[${N*KR+K}] = v${N}x${K};
           w${N} += k;
+        $for N in range((NR - 1)*KR, NR*KR, 1):
+          out[${N}] = 0;
         out += ${NR*KR};
       }
 

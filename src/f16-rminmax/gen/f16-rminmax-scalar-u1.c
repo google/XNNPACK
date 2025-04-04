@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-rminmax/scalar.c.in
 //   Generator: tools/xngen
@@ -9,9 +10,9 @@
 
 #include <assert.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/reduce.h"
 
 
 void xnn_f16_rminmax_ukernel__scalar_u1(
@@ -28,11 +29,10 @@ void xnn_f16_rminmax_ukernel__scalar_u1(
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
 
-  int16_t vt = math_signcomplement_f16(*i);
-  int16_t vmin0 = vt;
-  int16_t vmax0 = vt;
+  int16_t vmin0 = math_signcomplement_f16(o[0]);
+  int16_t vmax0 = math_signcomplement_f16(o[1]);
   do {
-    vt = math_signcomplement_f16(*i++);
+    int16_t vt = math_signcomplement_f16(*i++);
     vmin0 = math_min_s16(vmin0, vt);
     vmax0 = math_max_s16(vmax0, vt);
     batch -= sizeof(uint16_t);

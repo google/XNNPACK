@@ -14,12 +14,12 @@
 #include <memory>
 #include <vector>
 
-#include "models.h"
-#include "utils.h"
-#include "xnnpack.h"
-#include "xnnpack/allocator.h"
-#include "xnnpack/subgraph.h"
-#include "pthreadpool.h"
+#include "bench/models/models.h"
+#include "bench/utils.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/allocator.h"
+#include "src/xnnpack/subgraph.h"
+#include <pthreadpool.h>
 
 struct ModelRuntime {
   std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> model;
@@ -206,8 +206,17 @@ static void FP32Elementwise(benchmark::State& state) {
 
 static void FP32LayerNorm(benchmark::State& state) {
   BenchmarkInvoke(state, [&state]() {
-    return models::FP32LayerNorm(state.range(0), state.range(1),
-                                 state.range(2), state.range(3));
+    return models::FP32LayerNorm(state.range(0), state.range(1), state.range(2),
+                                 state.range(3));
+  });
+}
+
+static void FP32DepthwiseSeparable(benchmark::State& state) {
+  models::FP32DepthwiseSeparableWeights weights;
+  BenchmarkInvoke(state, [&state, &weights]() {
+    return models::FP32DepthwiseSeparable(state.range(0), state.range(1),
+                                          state.range(2), state.range(3),
+                                          state.range(4), weights);
   });
 }
 
@@ -229,6 +238,22 @@ static void LayerNormArguments(benchmark::internal::Benchmark* b) {
   for (int norm_mask : {1, 3, 7, 2, 5}) {
     b->Args({128, 256, 512, norm_mask});
   }
+}
+
+static void DepthwiseSeparableArguments(benchmark::internal::Benchmark* b) {
+  b->ArgNames({"W", "H", "KW", "CI", "CO"});
+
+  // Mobilenet v2-ish
+  b->Args({112, 112, 3, 32, 16});
+  b->Args({56, 56, 3, 96, 24});
+  b->Args({28, 28, 3, 144, 32});
+  b->Args({14, 14, 3, 192, 64});
+  b->Args({14, 14, 3, 384, 96});
+  b->Args({14, 14, 3, 576, 160});
+  b->Args({7, 7, 3, 960, 320});
+
+  // Bigger
+  b->Args({512, 512, 3, 128, 128});
 }
 
 BENCHMARK(FP32Attention)
@@ -261,11 +286,19 @@ BENCHMARK(QS8MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
 BENCHMARK(FP32Elementwise)
     ->Unit(benchmark::kMicrosecond)
     ->UseRealTime()
-    ->Arg(6)->Arg(10)->Arg(18)->Arg(34);
+    ->Arg(6)
+    ->Arg(10)
+    ->Arg(18)
+    ->Arg(34);
 
 BENCHMARK(FP32LayerNorm)
     ->Unit(benchmark::kMicrosecond)
     ->UseRealTime()
     ->Apply(LayerNormArguments);
+
+BENCHMARK(FP32DepthwiseSeparable)
+    ->Unit(benchmark::kMicrosecond)
+    ->UseRealTime()
+    ->Apply(DepthwiseSeparableArguments);
 
 XNN_BENCHMARK_MAIN();

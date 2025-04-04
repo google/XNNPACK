@@ -11,9 +11,9 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <tmmintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/vunary.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vunary.h"
+#include "src/xnnpack/unaligned.h"
 
 
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
