@@ -183,8 +183,8 @@ void DWConvMicrokernelTester::Test(
   dwconv_minmax(channels(), width(), indirection.data(), packed_weights.data(),
                 output.data(), step() * sizeof(void*),
                 (output_stride() - channels()) * sizeof(uint8_t),
-                input_offset() * sizeof(uint8_t), zero.data(),
-                &quantization_params);
+                input_offset() * sizeof(uint8_t), /*input_pixel_stride=*/0,
+                zero.data(), &quantization_params);
 
   // Verify results.
   for (size_t x = 0; x < width(); x++) {
@@ -325,7 +325,8 @@ void DWConvMicrokernelTester::Test(
   dwconv_minmax(channels(), width(), indirection.data(), packed_weights.data(),
                 output.data(), step() * sizeof(void*),
                 (output_stride() - channels()) * sizeof(int8_t),
-                input_offset() * sizeof(int8_t), zero.data(), &minmax_params);
+                input_offset() * sizeof(int8_t), /*input_pixel_stride=*/0,
+                zero.data(), &minmax_params);
 
   // Verify results.
   for (size_t x = 0; x < width(); x++) {
@@ -454,8 +455,8 @@ void DWConvMicrokernelTester::Test(
   dwconv_minmax(channels(), width(), indirection.data(), packed_weights.data(),
                 output.data(), step() * sizeof(void*),
                 (output_stride() - channels()) * sizeof(int8_t),
-                input_offset() * sizeof(int8_t), zero.data(),
-                &quantization_params);
+                input_offset() * sizeof(int8_t), /*input_pixel_stride=*/0,
+                zero.data(), &quantization_params);
 
   // Verify results.
   for (size_t x = 0; x < width(); x++) {
@@ -559,7 +560,8 @@ void DWConvMicrokernelTester::Test(
                 reinterpret_cast<const xnn_float16**>(indirection.data()),
                 packed_weights.data(), output.data(), step() * sizeof(void*),
                 (output_stride() - channels()) * sizeof(xnn_float16),
-                input_offset() * sizeof(xnn_float16), zero.data(), &params);
+                input_offset() * sizeof(xnn_float16), /*input_pixel_stride=*/0,
+                zero.data(), &params);
 
   // Verify results.
   for (size_t x = 0; x < width(); x++) {
@@ -633,7 +635,8 @@ void DWConvMicrokernelTester::Test(xnn_f32_dwconv_unipass_ukernel_fn dwconv,
   dwconv(channels(), width(), indirection.data(), packed_weights.data(),
          output.data(), step() * sizeof(void*),
          (output_stride() - channels()) * sizeof(float),
-         input_offset() * sizeof(float), zero.data(), nullptr);
+         input_offset() * sizeof(float), /*input_pixel_stride=*/0, zero.data(),
+         nullptr);
 
   // Verify results.
   for (size_t x = 0; x < width(); x++) {
@@ -725,7 +728,8 @@ void DWConvMicrokernelTester::Test(
   dwconv_minmax(channels(), width(), indirection.data(), packed_weights.data(),
                 output.data(), step() * sizeof(void*),
                 (output_stride() - channels()) * sizeof(float),
-                input_offset() * sizeof(float), zero.data(), &params);
+                input_offset() * sizeof(float), /*input_pixel_stride=*/0,
+                zero.data(), &params);
 
   // Verify results.
   for (size_t x = 0; x < width(); x++) {

@@ -33,6 +33,7 @@ void xnn_f32_dwconv${ACTIVATION_SUFFIX}_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c_
     intptr_t input_stride,
     size_t output_increment,
     size_t input_offset,
+    size_t input_pixel_stride,
     const float* zero,
     const ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
@@ -191,6 +192,7 @@ void xnn_f32_dwconv${ACTIVATION_SUFFIX}_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c_
       }
     }
 
+    input_offset += input_pixel_stride;
     output = (float*) ((uintptr_t) output + output_increment);
   } while (--output_width != 0);
 }

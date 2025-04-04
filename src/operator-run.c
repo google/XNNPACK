@@ -1157,7 +1157,7 @@ void xnn_compute_dwconv_unipass(
     output_c_tile, context->output_width,
     indirect_input, weights, output,
     context->indirect_input_width_stride, output_increment,
-    input_offset, context->zero,
+    input_offset, /*input_pixel_stride=*/0, context->zero,
     &context->params);
 }
 

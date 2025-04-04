@@ -25,6 +25,7 @@ void xnn_f16_dwconv_minmax_ukernel_9p8c__fma3_acc2(
     intptr_t input_stride,
     size_t output_increment,
     size_t input_offset,
+    size_t input_pixel_stride,
     const xnn_float16* zero,
     const struct xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
@@ -230,6 +231,7 @@ void xnn_f16_dwconv_minmax_ukernel_9p8c__fma3_acc2(
       }
     }
 
+    input_offset += input_pixel_stride;
     o = (uint16_t*) ((uintptr_t) o + output_increment);
   } while (--output_width != 0);
 }

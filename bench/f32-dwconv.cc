@@ -132,7 +132,7 @@ static void bench_impl(uint64_t arch_flags, benchmark::State& state,
              i.data() + buffer_index * i_elements + step_height * y,
              w.data() + buffer_index * w_elements,
              c.data() + buffer_index * c_elements + y * output_width * channels,
-             kernel_height * step_width * sizeof(void*), 0, 0, z.data(),
+             kernel_height * step_width * sizeof(void*), 0, 0, 0, z.data(),
              &params);
     }
   }

@@ -18,12 +18,13 @@
 extern "C" {
 #endif
 
-#define XNN_UKERNEL(arch_flags, fn_name, c_block, adj_c_block, cr, kr,      \
-                    datatype, weights_type, params_type, init_fn)           \
-  XNN_INTERNAL void fn_name(                                                \
-      size_t channels, size_t output_width, const datatype** input,         \
-      const weights_type* weights, datatype* output, intptr_t input_stride, \
-      size_t output_increment, size_t input_offset, const datatype* zero,   \
+#define XNN_UKERNEL(arch_flags, fn_name, c_block, adj_c_block, cr, kr,         \
+                    datatype, weights_type, params_type, init_fn)              \
+  XNN_INTERNAL void fn_name(                                                   \
+      size_t channels, size_t output_width, const datatype** input,            \
+      const weights_type* weights, datatype* output, intptr_t input_stride,    \
+      size_t output_increment, size_t input_offset, size_t input_pixel_stride, \
+      const datatype* zero,                                                    \
       const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 #include "src/f16-dwconv/f16-dwconv-minmax.h"
 #include "src/f32-dwconv/f32-dwconv-minmax.h"

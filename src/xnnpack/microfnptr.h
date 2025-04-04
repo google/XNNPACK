@@ -342,13 +342,15 @@ typedef void (*xnn_dwconv_ukernel_fn)(size_t channels, size_t output_width,
                                       const void** input, const void* weights,
                                       void* output, intptr_t input_stride,
                                       size_t output_increment,
-                                      size_t input_offset, const void* zero,
-                                      const void* params);
+                                      size_t input_offset,
+                                      size_t input_pixel_stride,
+                                      const void* zero, const void* params);
 
 typedef void (*xnn_f32_dwconv_unipass_ukernel_fn)(
     size_t channels, size_t output_width, const float** input,
     const float* weights, float* output, intptr_t input_stride,
-    size_t output_increment, size_t input_offset, const float* zero,
+    size_t output_increment, size_t input_offset, size_t input_pixel_stride,
+    const float* zero,
     const struct xnn_f32_default_params
         params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
@@ -357,35 +359,40 @@ typedef void (*xnn_f32_dwconv_unipass_ukernel_fn)(
 typedef void (*xnn_f16_dwconv_minmax_ukernel_fn)(
     size_t channels, size_t output_width, const xnn_float16** input,
     const xnn_float16* weights, xnn_float16* output, intptr_t input_stride,
-    size_t output_increment, size_t input_offset, const xnn_float16* zero,
+    size_t output_increment, size_t input_offset, size_t input_pixel_stride,
+    const xnn_float16* zero,
     const struct xnn_f16_minmax_params
         params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_f32_dwconv_minmax_ukernel_fn)(
     size_t channels, size_t output_width, const float** input,
     const float* weights, float* output, intptr_t input_stride,
-    size_t output_increment, size_t input_offset, const float* zero,
+    size_t output_increment, size_t input_offset, size_t input_pixel_stride,
+    const float* zero,
     const struct xnn_f32_minmax_params
         params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_qs8_dwconv_minmax_ukernel_fn)(
     size_t channels, size_t output_width, const int8_t** input,
     const void* weights, int8_t* output, intptr_t input_stride,
-    size_t output_increment, size_t input_offset, const int8_t* zero,
+    size_t output_increment, size_t input_offset, size_t input_pixel_stride,
+    const int8_t* zero,
     const union xnn_qs8_conv_minmax_params
         params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_qs8_qc8w_dwconv_minmax_ukernel_fn)(
     size_t channels, size_t output_width, const int8_t** input,
     const void* weights, int8_t* output, intptr_t input_stride,
-    size_t output_increment, size_t input_offset, const int8_t* zero,
+    size_t output_increment, size_t input_offset, size_t input_pixel_stride,
+    const int8_t* zero,
     const union xnn_qs8_qc8w_conv_minmax_params
         params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_qu8_dwconv_minmax_ukernel_fn)(
     size_t channels, size_t output_width, const uint8_t** input,
     const void* weights, uint8_t* output, intptr_t input_stride,
-    size_t output_increment, size_t input_offset, const uint8_t* zero,
+    size_t output_increment, size_t input_offset, size_t input_pixel_stride,
+    const uint8_t* zero,
     const union xnn_qu8_conv_minmax_params
         params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 

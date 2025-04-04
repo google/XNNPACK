@@ -24,6 +24,7 @@ void xnn_f32_dwconv_minmax_ukernel_4p4c__neonfma(
     intptr_t input_stride,
     size_t output_increment,
     size_t input_offset,
+    size_t input_pixel_stride,
     const float* zero,
     const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
@@ -118,6 +119,7 @@ void xnn_f32_dwconv_minmax_ukernel_4p4c__neonfma(
       }
     }
 
+    input_offset += input_pixel_stride;
     output = (float*) ((uintptr_t) output + output_increment);
   } while (--output_width != 0);
 }
