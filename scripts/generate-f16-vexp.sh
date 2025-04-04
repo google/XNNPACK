@@ -7,6 +7,5 @@
 ##################################### SIMD #####################################
 tools/xngen src/f16-vexp/poly-3.c.in -D ARCH=scalar -D BATCH_TILES=1,2,4,8 -o src/f16-vexp/gen/f16-vexp-scalar-poly-3.c &
 tools/xngen src/f16-vexp/poly-3.c.in -D ARCH=neonfp16arith -D BATCH_TILES=8,16,32 -o src/f16-vexp/gen/f16-vexp-neonfp16arith-poly-3.c &
-tools/xngen src/f16-vexp/poly-3.c.in -D ARCH=avx512fp16 -D BATCH_TILES=32,64,96 -o src/f16-vexp/gen/f16-vexp-avx512fp16-poly-3.c &
 
 wait

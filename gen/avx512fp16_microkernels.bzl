@@ -28,7 +28,6 @@ PROD_AVX512FP16_MICROKERNEL_SRCS = [
     "src/f16-vbinary/gen/f16-vsqrdiffc-avx512fp16-u64.c",
     "src/f16-vbinary/gen/f16-vsub-avx512fp16-u64.c",
     "src/f16-vbinary/gen/f16-vsubc-avx512fp16-u64.c",
-    "src/f16-vexp/gen/f16-vexp-avx512fp16-poly-3.c",
 ]
 
 NON_PROD_AVX512FP16_MICROKERNEL_SRCS = [
