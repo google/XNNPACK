@@ -6,7 +6,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
  
-#include "xnnpack/assembly.h"
+#include "src/xnnpack/assembly.h"
  
 #define fpack_rhs_head_rows                    4
 #define fpack_rhs_tail_rows                    1

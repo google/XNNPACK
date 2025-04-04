@@ -14,10 +14,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/pack-lh.h"
-#include "pf32-gemm/gen/pf32-gemm-minmax-utils.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/pack-lh.h"
+#include "src/pf32-gemm/gen/pf32-gemm-minmax-utils.h"
 
 #define GET_MIN(a, b) ((a) < (b) ? (a) : (b))
 #define roundup(x, y)   ((((x) + ((y) - 1)) / (y)) * (y))

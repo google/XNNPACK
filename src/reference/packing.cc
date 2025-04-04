@@ -1880,6 +1880,15 @@ void xnn_pack_qu8_weights_and_biases(
       packed_weights_ptr, extra_bytes, params);
 }
 
+void transpose_weights(const float* in, float* out, size_t height,
+                       size_t width) {
+  for (size_t i = 0; i < height; ++i) {
+    for (size_t j = 0; j < width; ++j) {
+      out[j * height + i] = in[i * width + j];
+    }
+  }
+}
+
 #if XNN_ENABLE_KLEIDIAI
 size_t xnn_packed_stride_kai_qs4_weights_and_biases_sme(
     const struct xnn_gemm_config* gemm_config, size_t k, size_t unused_k_stride,
@@ -2356,15 +2365,6 @@ void xnn_pack_kai_qb4_weights_and_biases(
   }
 }
 #endif  // XNN_ENABLE_KLEIDIAI
-
-void transpose_weights(const float* in, float* out, size_t height,
-                       size_t width) {
-  for (size_t i = 0; i < height; ++i) {
-    for (size_t j = 0; j < width; ++j) {
-      out[j * height + i] = in[i * width + j];
-    }
-  }
-}
 
 void xnn_pack_f32_run_pack_rhs(size_t num_groups, size_t n, size_t k, size_t nr, size_t kr,
                   size_t sr, size_t rhs_stride, const void *rhs,

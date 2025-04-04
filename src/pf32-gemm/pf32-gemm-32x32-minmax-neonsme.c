@@ -7,8 +7,8 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <stddef.h>
-#include "xnnpack/microparams.h"
-#include "pf32-gemm/gen/pf32-gemm-minmax-utils.h"
+#include "src/xnnpack/microparams.h"
+#include "src/pf32-gemm/gen/pf32-gemm-minmax-utils.h"
 
 size_t xnn_pf32_gemm_minmax_ukernel_32x32__neonsme_get_mr() {
     return xnn_pf32_gemm_minmax_mr * xnn_pf32_get_word_sme_vl__asm_aarch64_neonsme();
@@ -24,7 +24,7 @@ void xnn_pf32_gemm_minmax_ukernel_32x32__neonsme(
     size_t m, size_t n, size_t k, const void* lhs_packed,
     const void* rhs_packed, float* dst, size_t dst_stride_row,
     size_t dst_stride_col,
-    union xnn_f32_minmax_params
+    struct xnn_f32_minmax_params
         minmax_params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]) {
     
     xnn_pf32_gemm_minmax__asm_aarch64_neonsme(lhs_packed, rhs_packed, dst, (k/sizeof(float)), &minmax_params->scalar.max,

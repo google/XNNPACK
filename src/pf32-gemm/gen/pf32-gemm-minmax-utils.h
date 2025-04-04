@@ -7,7 +7,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <stdint.h>
-#include "xnnpack/common.h"
+#include "src/xnnpack/common.h"
 
 #ifdef __cplusplus
 extern "C" {
