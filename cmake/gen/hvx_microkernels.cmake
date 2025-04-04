@@ -18,6 +18,19 @@ SET(PROD_HVX_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-8x64-minmax-hvx-broadcast.c
   src/f32-rdminmax/gen/f32-rdmax-2p2x-hvx-c32.c
   src/f32-rdminmax/gen/f32-rdmin-2p2x-hvx-c32.c
+  src/f32-vbinary/gen/f32-vadd-hvx-u128.c
+  src/f32-vbinary/gen/f32-vaddc-hvx-u128.c
+  src/f32-vbinary/gen/f32-vmax-hvx-u128.c
+  src/f32-vbinary/gen/f32-vmaxc-hvx-u128.c
+  src/f32-vbinary/gen/f32-vmin-hvx-u128.c
+  src/f32-vbinary/gen/f32-vminc-hvx-u128.c
+  src/f32-vbinary/gen/f32-vmul-hvx-u128.c
+  src/f32-vbinary/gen/f32-vmulc-hvx-u128.c
+  src/f32-vbinary/gen/f32-vrsubc-hvx-u128.c
+  src/f32-vbinary/gen/f32-vsqrdiff-hvx-u128.c
+  src/f32-vbinary/gen/f32-vsqrdiffc-hvx-u128.c
+  src/f32-vbinary/gen/f32-vsub-hvx-u128.c
+  src/f32-vbinary/gen/f32-vsubc-hvx-u128.c
   src/x32-packw/gen/x32-packw-gio-hvx-u2.c)
 
 SET(NON_PROD_HVX_MICROKERNEL_SRCS
@@ -74,43 +87,30 @@ SET(NON_PROD_HVX_MICROKERNEL_SRCS
   src/f32-vapproxgelu/gen/f32-vapproxgelu-hvx-rational-12-10-div.c
   src/f32-vbinary/gen/f32-vadd-hvx-u32.c
   src/f32-vbinary/gen/f32-vadd-hvx-u64.c
-  src/f32-vbinary/gen/f32-vadd-hvx-u128.c
   src/f32-vbinary/gen/f32-vaddc-hvx-u32.c
   src/f32-vbinary/gen/f32-vaddc-hvx-u64.c
-  src/f32-vbinary/gen/f32-vaddc-hvx-u128.c
   src/f32-vbinary/gen/f32-vmax-hvx-u32.c
   src/f32-vbinary/gen/f32-vmax-hvx-u64.c
-  src/f32-vbinary/gen/f32-vmax-hvx-u128.c
   src/f32-vbinary/gen/f32-vmaxc-hvx-u32.c
   src/f32-vbinary/gen/f32-vmaxc-hvx-u64.c
-  src/f32-vbinary/gen/f32-vmaxc-hvx-u128.c
   src/f32-vbinary/gen/f32-vmin-hvx-u32.c
   src/f32-vbinary/gen/f32-vmin-hvx-u64.c
-  src/f32-vbinary/gen/f32-vmin-hvx-u128.c
   src/f32-vbinary/gen/f32-vminc-hvx-u32.c
   src/f32-vbinary/gen/f32-vminc-hvx-u64.c
-  src/f32-vbinary/gen/f32-vminc-hvx-u128.c
   src/f32-vbinary/gen/f32-vmul-hvx-u32.c
   src/f32-vbinary/gen/f32-vmul-hvx-u64.c
-  src/f32-vbinary/gen/f32-vmul-hvx-u128.c
   src/f32-vbinary/gen/f32-vmulc-hvx-u32.c
   src/f32-vbinary/gen/f32-vmulc-hvx-u64.c
-  src/f32-vbinary/gen/f32-vmulc-hvx-u128.c
   src/f32-vbinary/gen/f32-vrsubc-hvx-u32.c
   src/f32-vbinary/gen/f32-vrsubc-hvx-u64.c
-  src/f32-vbinary/gen/f32-vrsubc-hvx-u128.c
   src/f32-vbinary/gen/f32-vsqrdiff-hvx-u32.c
   src/f32-vbinary/gen/f32-vsqrdiff-hvx-u64.c
-  src/f32-vbinary/gen/f32-vsqrdiff-hvx-u128.c
   src/f32-vbinary/gen/f32-vsqrdiffc-hvx-u32.c
   src/f32-vbinary/gen/f32-vsqrdiffc-hvx-u64.c
-  src/f32-vbinary/gen/f32-vsqrdiffc-hvx-u128.c
   src/f32-vbinary/gen/f32-vsub-hvx-u32.c
   src/f32-vbinary/gen/f32-vsub-hvx-u64.c
-  src/f32-vbinary/gen/f32-vsub-hvx-u128.c
   src/f32-vbinary/gen/f32-vsubc-hvx-u32.c
   src/f32-vbinary/gen/f32-vsubc-hvx-u64.c
-  src/f32-vbinary/gen/f32-vsubc-hvx-u128.c
   src/f32-vexp/gen/f32-vexp-hvx-rational-3-2-div.c
   src/f32-vgelu/gen/f32-vgelu-hvx-rational-12-10-div.c
   src/f32-vunary/gen/f32-vabs-hvx.c

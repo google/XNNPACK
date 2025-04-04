@@ -431,6 +431,11 @@ static void init_f32_vadd_config(void) {
     f32_vadd_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vaddc_ukernel__rvv_u8v;
     f32_vadd_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vaddc_ukernel__rvv_u8v;
     f32_vadd_config.element_tile = hardware_config->vlenb * 2;  // VLENB * (8 / sizeof(float))
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    f32_vadd_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vadd_ukernel__hvx_u128;
+    f32_vadd_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vaddc_ukernel__hvx_u128;
+    f32_vadd_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vaddc_ukernel__hvx_u128;
+    f32_vadd_config.element_tile = 128;
   #else
     f32_vadd_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vadd_ukernel__scalar_u8;
     f32_vadd_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vaddc_ukernel__scalar_u8;
@@ -628,6 +633,11 @@ static void init_f32_vmax_config(void) {
     f32_vmax_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmaxc_ukernel__rvv_u8v;
     f32_vmax_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmaxc_ukernel__rvv_u8v;
     f32_vmax_config.element_tile = hardware_config->vlenb * 2;  // VLENB * (8 / sizeof(float))
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    f32_vmax_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmax_ukernel__hvx_u128;
+    f32_vmax_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmaxc_ukernel__hvx_u128;
+    f32_vmax_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmaxc_ukernel__hvx_u128;
+    f32_vmax_config.element_tile = 128;
   #else
     f32_vmax_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmax_ukernel__scalar_u8;
     f32_vmax_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmaxc_ukernel__scalar_u8;
@@ -703,6 +713,11 @@ static void init_f32_vmin_config(void) {
     f32_vmin_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vminc_ukernel__rvv_u8v;
     f32_vmin_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vminc_ukernel__rvv_u8v;
     f32_vmin_config.element_tile = hardware_config->vlenb * 2;  // VLENB * (8 / sizeof(float))
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    f32_vmin_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmin_ukernel__hvx_u128;
+    f32_vmin_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vminc_ukernel__hvx_u128;
+    f32_vmin_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vminc_ukernel__hvx_u128;
+    f32_vmin_config.element_tile = 128;
   #else
     f32_vmin_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmin_ukernel__scalar_u8;
     f32_vmin_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vminc_ukernel__scalar_u8;
@@ -769,6 +784,11 @@ static void init_f32_vmul_config(void) {
     f32_vmul_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmulc_ukernel__rvv_u8v;
     f32_vmul_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmulc_ukernel__rvv_u8v;
     f32_vmul_config.element_tile = hardware_config->vlenb * 2;  // VLENB * (8 / sizeof(float))
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    f32_vmul_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmul_ukernel__hvx_u128;
+    f32_vmul_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmulc_ukernel__hvx_u128;
+    f32_vmul_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmulc_ukernel__hvx_u128;
+    f32_vmul_config.element_tile = 128;
   #else
     f32_vmul_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmul_ukernel__scalar_u8;
     f32_vmul_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmulc_ukernel__scalar_u8;
@@ -895,6 +915,11 @@ static void init_f32_vsub_config(void) {
     f32_vsub_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsubc_ukernel__rvv_u8v;
     f32_vsub_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrsubc_ukernel__rvv_u8v;
     f32_vsub_config.element_tile = hardware_config->vlenb * 2;  // VLENB * (8 / sizeof(float))
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    f32_vsub_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsub_ukernel__hvx_u128;
+    f32_vsub_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsubc_ukernel__hvx_u128;
+    f32_vsub_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrsubc_ukernel__hvx_u128;
+    f32_vsub_config.element_tile = 128;
   #else
     f32_vsub_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsub_ukernel__scalar_u8;
     f32_vsub_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsubc_ukernel__scalar_u8;
@@ -956,6 +981,11 @@ static void init_f32_vsqrdiff_config(void) {
     f32_vsqrdiff_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsqrdiffc_ukernel__rvv_u8v;
     f32_vsqrdiff_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsqrdiffc_ukernel__rvv_u8v;
     f32_vsqrdiff_config.element_tile = hardware_config->vlenb * 2;  // VLENB * (8 / sizeof(float))
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    f32_vsqrdiff_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsqrdiff_ukernel__hvx_u128;
+    f32_vsqrdiff_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsqrdiffc_ukernel__hvx_u128;
+    f32_vsqrdiff_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsqrdiffc_ukernel__hvx_u128;
+    f32_vsqrdiff_config.element_tile = 128;
   #else
     f32_vsqrdiff_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsqrdiff_ukernel__scalar_u8;
     f32_vsqrdiff_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsqrdiffc_ukernel__scalar_u8;
