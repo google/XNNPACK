@@ -8,18 +8,10 @@
 // Arguments are:
 // XNN_UKERNEL(arch, name, c_block, pipelined, cr, kr, datatype, weights_type,params_type, init_fn)
 
-#if XNN_ARCH_ARM
-XNN_UKERNEL(xnn_arch_arm_neon_v8, xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p8c__asm_aarch32_neonv8_mla8_cortex_a35, 8, false, 8, 3, int8_t, void, union xnn_qs8_qc8w_conv_minmax_params, xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params)
-#endif  // XNN_ARCH_ARM
-
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 XNN_UKERNEL(xnn_arch_arm_neon, xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p8c__neon_mla8_ld64, 8, false, 8, 3, int8_t, void, union xnn_qs8_qc8w_conv_minmax_params, xnn_init_qs8_qc8w_conv_minmax_fp32_neon_params)
 XNN_UKERNEL(xnn_arch_arm_neon_v8, xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p8c__neonv8_mla8_ld64, 8, false, 8, 3, int8_t, void, union xnn_qs8_qc8w_conv_minmax_params, xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_ARM
-XNN_UKERNEL(xnn_arch_arm_neon_v8, xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p16c__asm_aarch32_neonv8_mla8_cortex_a35, 16, false, 16, 3, int8_t, void, union xnn_qs8_qc8w_conv_minmax_params, xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params)
-#endif  // XNN_ARCH_ARM
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 XNN_UKERNEL(xnn_arch_arm_neon, xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p16c__neon_mla8_ld64, 16, false, 16, 3, int8_t, void, union xnn_qs8_qc8w_conv_minmax_params, xnn_init_qs8_qc8w_conv_minmax_fp32_neon_params)

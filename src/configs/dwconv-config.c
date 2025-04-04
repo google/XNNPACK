@@ -447,7 +447,7 @@ static void init_qs8_qc8w_dwconv_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon) {
       if (hardware_config->use_arm_neon_v8) {
-        qs8_qc8w_dwconv_config[0].minmax = (xnn_dwconv_ukernel_fn) xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p16c__asm_aarch32_neonv8_mla8_cortex_a35;
+        qs8_qc8w_dwconv_config[0].minmax = (xnn_dwconv_ukernel_fn) xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p16c__neonv8_mla8_ld64;
         qs8_qc8w_dwconv_config[0].init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params;
         qs8_qc8w_dwconv_config[0].channel_tile = 16;
         qs8_qc8w_dwconv_config[0].primary_tile = 3;
