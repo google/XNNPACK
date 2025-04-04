@@ -29,7 +29,7 @@
       xnn_pack_kai_f32_weights_and_biases,
       xnn_packed_stride_kai_f32_weights_and_biases,
       /*mr=*/1, /*nr=*/32, /*kr=*/1, /*sr=*/1,
-      /*mr_packed=*/32,
+      /*mr_packed=*/1,
       benchmark::utils::CheckNEONSME2);
   }
 

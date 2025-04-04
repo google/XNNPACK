@@ -9,9 +9,7 @@
 #include "src/xnnpack/microparams.h"
 
 #if XNN_ENABLE_KLEIDIAI
-  // Keep this line indented to avoid it being pulled out of the #ifdef when the
-  // sources are amalgamated.
-  #include "kai/ukernels/matmul/matmul_clamp_f16_f16p_f16p/kai_matmul_clamp_f16_f16p2vlx2_f16p2vlx2_2vlx2vl_sme2_mopa.h"
+#include "kai/ukernels/matmul/matmul_clamp_f16_f16p_f16p/kai_matmul_clamp_f16_f16p2vlx2_f16p2vlx2_2vlx2vl_sme2_mopa.h"
 #endif  // XNN_ENABLE_KLEIDIAI
 
 size_t xnn_pf16_gemm_minmax_ukernel_32x32__neonsme2_get_mr() {

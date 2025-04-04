@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -381,7 +382,11 @@ struct LoopParams {
   LoopParams() = default;
   explicit LoopParams(size_t from, size_t to, size_t step,
                       LoopStepType step_type)
-      : is_set(true), from(from), to(to), step(step), step_type(step_type) {}
+      : is_set(true),
+        from(from),
+        to(std::max(from, to)),
+        step(step),
+        step_type(step_type) {}
   bool is_set = false;
   size_t from = 1;
   size_t to = 1;
@@ -401,6 +406,16 @@ struct LoopParams {
     }
   }
 };
+
+inline std::ostream& operator<<(std::ostream& outs,
+                                const LoopParams& loop_params) {
+  return outs << "LoopParams(from=" << loop_params.from
+              << ", to=" << loop_params.to << ", step=" << loop_params.step
+              << ", type="
+              << (loop_params.step_type == LoopStepType::Linear ? "linear"
+                                                                : "next-prime")
+              << ")";
+}
 
 struct GemmTestParams {
   GemmTestParams(std::string test_name, GemmMicrokernelTester tester,
@@ -454,5 +469,41 @@ struct GemmTestParams {
   LoopParams loop_bzp_;
   LoopParams loop_bl_;
 };
+
+inline std::ostream& operator<<(std::ostream& outs,
+                                const GemmTestParams& params) {
+  outs << "GemmTestParams(name=" << params.test_name;
+  if (params.loop_k_.is_set) {
+    outs << ", loop_k=" << params.loop_k_;
+  } else {
+    outs << ", k=" << params.tester.k();
+  }
+  if (params.loop_m_.is_set) {
+    outs << ", loop_m=" << params.loop_m_;
+  } else {
+    outs << ", m=" << params.tester.m();
+  }
+  if (params.loop_n_.is_set) {
+    outs << ", loop_n=" << params.loop_n_;
+  } else {
+    outs << ", n=" << params.tester.n();
+  }
+  if (params.loop_zi_.is_set) {
+    outs << ", loop_zi=" << params.loop_zi_;
+  } else {
+    outs << ", zi=" << params.tester.zero_index();
+  }
+  if (params.loop_bzp_.is_set) {
+    outs << ", loop_bzp=" << params.loop_bzp_;
+  } else {
+    outs << ", bzp=" << params.tester.b_zero_point();
+  }
+  if (params.loop_bl_.is_set) {
+    outs << ", loop_bl=" << params.loop_bl_;
+  } else {
+    outs << ", bl=" << params.tester.bl();
+  }
+  return outs << ")";
+}
 
 using GemmTest = testing::TestWithParam<GemmTestParams>;
