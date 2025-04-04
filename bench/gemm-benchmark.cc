@@ -867,14 +867,14 @@ void GEMMBenchmark(benchmark::State& state,
       packed_w_size * num_buffers / sizeof(float));
 
   // Pack the left-hand operand.
-  const size_t input_packed_size =
-      xnn_x32_pack_lh_size__neonsme2(mc, kc, mr_packed, kr, sr);
+  const size_t input_packed_size = 2;
+      //xnn_x32_pack_lh_size__neonsme2(mc, kc, mr_packed, kr, sr);
   xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> input_packed(
       input_packed_size / sizeof(float));
-  xnn_x32_pack_lh_ukernel__neonsme2(mc, kc, mr_packed, kr, sr,
-                                    /*m_idx_start=*/0, a.data(),
-                                    /*lhs_stride=*/kc * sizeof(float),
-                                    input_packed.data());
+  //xnn_x32_pack_lh_ukernel__neonsme2(mc, kc, mr_packed, kr, sr,
+  //                                  /*m_idx_start=*/0, a.data(),
+  //                                  /*lhs_stride=*/kc * sizeof(float),
+  //                                  input_packed.data());
 
   // RHS packing
   xnnpack::Buffer<float> kernel_scale(nc, 1.0f);
@@ -916,7 +916,7 @@ void GEMMBenchmark(benchmark::State& state,
         const uint32_t mb = min(mc - m, mr);
         gemm(mb, nc, kc,
              input_packed.data() +
-                 xnn_x32_pack_lh_offset__neonsme2(m, kc, mr_packed, kr, sr),
+                 1,//xnn_x32_pack_lh_offset__neonsme2(m, kc, mr_packed, kr, sr),
              w.data() + packed_w_size / sizeof(float) * buffer_index,
              c.data() + (buffer_index * mc + m) * nc, nc * sizeof(float),
              sizeof(float), &minmax_params);
