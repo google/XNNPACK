@@ -111,17 +111,17 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_7x4v__rvv(
       const int32_t va6 = (int32_t) *a6++;
 
       const vint8m1_t vb = __riscv_vle8_v_i8m1((const int8_t*) w, vl);
-      const vint16m2_t vb0 = __riscv_vsext_vf2(vb, vl);
+      const vint32m4_t vb0 = __riscv_vsext_vf4(vb, vl);
 
       w = (const int8_t*) w + nr;
 
-      vacc0 = __riscv_vwmacc_vx_i32m4(vacc0, va0, vb0, vl);
-      vacc1 = __riscv_vwmacc_vx_i32m4(vacc1, va1, vb0, vl);
-      vacc2 = __riscv_vwmacc_vx_i32m4(vacc2, va2, vb0, vl);
-      vacc3 = __riscv_vwmacc_vx_i32m4(vacc3, va3, vb0, vl);
-      vacc4 = __riscv_vwmacc_vx_i32m4(vacc4, va4, vb0, vl);
-      vacc5 = __riscv_vwmacc_vx_i32m4(vacc5, va5, vb0, vl);
-      vacc6 = __riscv_vwmacc_vx_i32m4(vacc6, va6, vb0, vl);
+      vacc0 = __riscv_vmacc_vx_i32m4(vacc0, va0, vb0, vl);
+      vacc1 = __riscv_vmacc_vx_i32m4(vacc1, va1, vb0, vl);
+      vacc2 = __riscv_vmacc_vx_i32m4(vacc2, va2, vb0, vl);
+      vacc3 = __riscv_vmacc_vx_i32m4(vacc3, va3, vb0, vl);
+      vacc4 = __riscv_vmacc_vx_i32m4(vacc4, va4, vb0, vl);
+      vacc5 = __riscv_vmacc_vx_i32m4(vacc5, va5, vb0, vl);
+      vacc6 = __riscv_vmacc_vx_i32m4(vacc6, va6, vb0, vl);
 
       k -= sizeof(int8_t);
     } while (k != 0);
