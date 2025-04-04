@@ -7,6 +7,7 @@ $assert REQUANTIZATION == "FP32" or not REQUANTIZATION
 $assert DATATYPE in ["QC8"]
 
 #include <assert.h>
+#include <string.h>  // for memcpy
 
 #include <hexagon_types.h>
 #include <hexagon_protos.h>
@@ -17,6 +18,11 @@ $assert DATATYPE in ["QC8"]
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/unaligned.h"
 
+
+static XNN_INTRINSIC void xnn_Q6_V_vstu_variable(void* addr, uint32_t n,
+                                             HVX_Vector vin) {
+  memcpy(addr, &vin, n);
+}
 
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8": "qd8_f32_qc8w", "QS8": "qs8", "QU8": "qu8", "QC4": "qd8_f32_qc4w"}[DATATYPE]
 $REQUANTIZATION_SPEC = "" if DATATYPE in ["QD8", "QC4"] else "_" + REQUANTIZATION.lower()
@@ -74,23 +80,23 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x32c4__
   const HVX_Vector voutput_min = Q6_Vb_vsplat_R(params->${PARAMS_STRUCT}.output_min);
 
   do {
-    HVX_Vector vacc0x32 = *((HVX_Vector*)w);
+    HVX_Vector vacc0x32 = *((HVX_UVector*)w);
     HVX_Vector vacc1x0x32 = Q6_V_vsplat_R(0);
     $for M in range(1, MR):
-       HVX_Vector vacc${M}x32 = *((HVX_Vector*)w);
-       HVX_Vector vacc1x${M}x32 = Q6_V_vsplat_R(0);
+      HVX_Vector vacc${M}x32 = *((HVX_UVector*)w);
+      HVX_Vector vacc1x${M}x32 = Q6_V_vsplat_R(0);
 
     w = (const int32_t*) w + 32;
 
     size_t k = kc;
     while (k >= 8 * sizeof(${XINT8_T})) {
       $for M in range(MR):   
-         const HVX_Vector va${M}x0123 = Q6_V_vsplat_R(unaligned_load_s32(a${M}));
-         const HVX_Vector va${M}x4567 = Q6_V_vsplat_R(unaligned_load_s32(a${M}+4));
-         a${M} += 8;
+        const HVX_Vector va${M}x0123 = Q6_V_vsplat_R(unaligned_load_s32(a${M}));
+        const HVX_Vector va${M}x4567 = Q6_V_vsplat_R(unaligned_load_s32(a${M}+4));
+        a${M} += 8;
 
-      const HVX_Vector vb32x0123 = *((HVX_Vector *)((${XINT8_T} *)w));
-      const HVX_Vector vb32x4567 = *((HVX_Vector *)((${XINT8_T} *)w + 128));
+      const HVX_Vector vb32x0123 = *((HVX_UVector *)((${XINT8_T} *)w));
+      const HVX_Vector vb32x4567 = *((HVX_UVector *)((${XINT8_T} *)w + 128));
       $for M in range(MR):
          vacc${M}x32 =  Q6_Vw_vrmpyacc_VwVbVb(vacc${M}x32, va${M}x0123, vb32x0123);
          vacc1x${M}x32 = Q6_Vw_vrmpyacc_VwVbVb(vacc1x${M}x32, va${M}x4567, vb32x4567);
@@ -107,7 +113,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x32c4__
         const HVX_Vector va${M}x0123 = Q6_V_vsplat_R(unaligned_load_s32(a${M}));
         a${M} += 4;
 
-      const HVX_Vector vb32x0123 = *((HVX_Vector *)((${XINT8_T} *)w));
+      const HVX_Vector vb32x0123 = *((HVX_UVector *)((${XINT8_T} *)w));
       $for M in range(MR):
         vacc${M}x32 =  Q6_Vw_vrmpyacc_VwVbVb(vacc${M}x32, va${M}x0123, vb32x0123);
 
@@ -153,7 +159,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x32c4__
     } else {
       // Prepare mask for valid 8-bit elements (depends on nc).
       $for M in range(MR):
-        Q6_V_vstu_variable(c${M}, nc, vout${M}x32);
+        xnn_Q6_V_vstu_variable(c${M}, nc, vout${M}x32);
       nc = 0;
     }
   } while (nc != 0);
