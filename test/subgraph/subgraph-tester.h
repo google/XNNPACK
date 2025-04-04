@@ -61,6 +61,8 @@ struct ConvolutionParams {
   uint32_t groups;
   uint32_t group_input_channels;
   uint32_t group_output_channels;
+  float output_min = -std::numeric_limits<float>::infinity();
+  float output_max = std::numeric_limits<float>::infinity();
 };
 
 struct DeconvolutionParams {
@@ -72,6 +74,8 @@ struct DeconvolutionParams {
   uint32_t groups;
   uint32_t group_input_channels;
   uint32_t group_output_channels;
+  float output_min = -std::numeric_limits<float>::infinity();
+  float output_max = std::numeric_limits<float>::infinity();
 };
 
 struct DepthwiseConvolutionParams {

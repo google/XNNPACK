@@ -153,29 +153,19 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "convolution_2d_test",
-    srcs = [
-        "convolution-2d.cc",
-    ],
-    deps = SUBGRAPH_TEST_DEPS + [
-        "//test/operators:convolution_test_helpers",
-    ],
+    srcs = ["convolution-2d.cc"],
+    deps = SUBGRAPH_TEST_DEPS + [":stencil"],
 )
 
 xnnpack_unit_test(
     name = "deconvolution_2d_test",
-    timeout = "moderate",
     srcs = ["deconvolution-2d.cc"],
-    shard_count = 5,
-    deps = SUBGRAPH_TEST_DEPS + [
-        "//test/operators:convolution_test_helpers",
-    ],
+    deps = SUBGRAPH_TEST_DEPS + [":stencil"],
 )
 
 xnnpack_unit_test(
     name = "depthwise_convolution_2d_test",
-    srcs = [
-        "depthwise-convolution-2d.cc",
-    ],
+    srcs = ["depthwise-convolution-2d.cc"],
     deps = SUBGRAPH_TEST_DEPS + [":stencil"],
 )
 

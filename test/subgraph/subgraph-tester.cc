@@ -419,8 +419,7 @@ SubgraphTester& SubgraphTester::AddConvolution2D(ConvolutionParams params,
       params.kernel.width, params.subsampling.height, params.subsampling.width,
       params.dilation.height, params.dilation.width, params.groups,
       params.group_input_channels, params.group_output_channels,
-      -std::numeric_limits<float>::infinity(),
-      std::numeric_limits<float>::infinity(), input_id, filter_id, bias_id,
+      params.output_min, params.output_max, input_id, filter_id, bias_id,
       output_id, /*flags=*/0);
   EXPECT_EQ(status, xnn_status_success);
 
@@ -534,9 +533,8 @@ SubgraphTester& SubgraphTester::AddDeconvolution2D(DeconvolutionParams params,
       params.adjustment.width, params.kernel.height, params.kernel.width,
       params.upsampling.height, params.upsampling.width, params.dilation.height,
       params.dilation.width, params.groups, params.group_input_channels,
-      params.group_output_channels, -std::numeric_limits<float>::infinity(),
-      std::numeric_limits<float>::infinity(), input_id, filter_id, bias_id,
-      output_id, /*flags=*/0);
+      params.group_output_channels, params.output_min, params.output_max,
+      input_id, filter_id, bias_id, output_id, /*flags=*/0);
   EXPECT_EQ(status, xnn_status_success);
 
   return *this;

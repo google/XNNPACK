@@ -12,6 +12,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <functional>
 #include <initializer_list>
 #include <limits>
 #include <memory>
@@ -478,6 +479,59 @@ class Tensor {
       ends[i] += 1;
     }
     return slice(begins, ends);
+  }
+
+  // Split a dimension dim into dimensions of extent `split_extents`. The first
+  // split extent of 0 will be replaced with
+  // extent(dim) / product(non-zero split extents). The product of split_extents
+  // must be equal to extent(dim).
+  Tensor<T, Alignment> split(size_t dim,
+                             std::vector<size_t> split_extents) const {
+    assert(dim < rank());
+    size_t splits_size = 1;
+    for (size_t i : split_extents) {
+      if (i != 0) {
+        splits_size *= i;
+      }
+    }
+    for (size_t& i : split_extents) {
+      if (i == 0) {
+        assert(extent(dim) % splits_size == 0);
+        i = extent(dim) / splits_size;
+        splits_size *= i;
+      }
+    }
+    assert(splits_size == extent(dim) || stride(dim) == 0);
+    std::vector<size_t> new_dims(split_extents.size() - 1);
+    std::iota(new_dims.begin(), new_dims.end(), dim + 1);
+    Tensor<T, Alignment> result = expand_dims(new_dims);
+    for (size_t i = 0; i < split_extents.size(); ++i) {
+      result.extents_[dim + i] = split_extents[i];
+      splits_size /= split_extents[i];
+      result.strides_[dim + i] = stride(dim) * splits_size;
+    }
+    return result;
+  }
+
+  // Fuse two dimensions into one, where the new dimension's extent is the
+  // product of the extents of the two dimensions. The stride of the outer
+  // dimension must match the product of the stride and extent of the inner
+  // dimension.
+  Tensor<T, Alignment> fuse(std::vector<size_t> dims) const {
+    assert(!dims.empty());
+    size_t a = dims.front();
+    assert(a < rank());
+    dims.erase(dims.begin());
+    Tensor<T, Alignment> result(*this);
+    for (size_t b : dims) {
+      assert(b < rank());
+      assert(stride(b) * extent(b) == stride(a));
+      result.extents_[a] *= result.extent(b);
+      result.strides_[a] = result.stride(b);
+      result.extents_.erase(result.extents_.begin() + b);
+      result.strides_.erase(result.strides_.begin() + b);
+    }
+    return result;
   }
 
   // Remove `pre` elements from the beginning of each dimension, and `post`
