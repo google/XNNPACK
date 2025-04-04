@@ -12,7 +12,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-#include <mutex>  // NOLINT
+#include <mutex>
 
 #ifdef __linux__
 #include <sched.h>

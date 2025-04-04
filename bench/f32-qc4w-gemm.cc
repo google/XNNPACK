@@ -8,6 +8,7 @@
 #include <chrono>
 #include <cmath>
 #include <functional>
+#include <limits>
 #include <mutex>
 #include <random>
 #include <vector>

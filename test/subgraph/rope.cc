@@ -5,7 +5,7 @@
 
 #include <algorithm>
 #include <cassert>
-#include <chrono>  // NOLINT(build/c++11)
+#include <chrono>
 #include <cstddef>
 #include <cstdlib>
 #include <random>
