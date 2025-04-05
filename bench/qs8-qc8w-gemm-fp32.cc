@@ -20,6 +20,53 @@
 #include "src/xnnpack/packw.h"
 
 
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  static void qs8_qc8w_gemm_minmax_fp32_ukernel_1x32c4__hvx(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x32c4__hvx,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+      xnn_pack_qs8_gemm_goi_w,
+      /*mr=*/1, /*nr=*/32, /*kr=*/4, /*sr=*/1,
+      benchmark::utils::CheckHVX);
+  }
+
+  BENCHMARK_GEMM(qs8_qc8w_gemm_minmax_fp32_ukernel_1x32c4__hvx)
+
+  static void qs8_qc8w_gemm_minmax_fp32_ukernel_4x32c4__hvx(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x32c4__hvx,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+      xnn_pack_qs8_gemm_goi_w,
+      /*mr=*/4, /*nr=*/32, /*kr=*/4, /*sr=*/1,
+      benchmark::utils::CheckHVX);
+  }
+
+  BENCHMARK_GEMM(qs8_qc8w_gemm_minmax_fp32_ukernel_4x32c4__hvx)
+
+  static void qs8_qc8w_gemm_minmax_fp32_ukernel_8x32c4__hvx(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x32c4__hvx,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+      xnn_pack_qs8_gemm_goi_w,
+      /*mr=*/8, /*nr=*/32, /*kr=*/4, /*sr=*/1,
+      benchmark::utils::CheckHVX);
+  }
+
+  BENCHMARK_GEMM(qs8_qc8w_gemm_minmax_fp32_ukernel_8x32c4__hvx)
+
+  static void qs8_qc8w_gemm_minmax_fp32_ukernel_16x32c4__hvx(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_16x32c4__hvx,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+      xnn_pack_qs8_gemm_goi_w,
+      /*mr=*/16, /*nr=*/32, /*kr=*/4, /*sr=*/1,
+      benchmark::utils::CheckHVX);
+  }
+
+  BENCHMARK_GEMM(qs8_qc8w_gemm_minmax_fp32_ukernel_16x32c4__hvx)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   static void qs8_qc8w_gemm_minmax_fp32_ukernel_1x4c2__wasmsimd_dot16x2_ld64(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
