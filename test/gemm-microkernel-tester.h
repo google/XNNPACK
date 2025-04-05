@@ -349,6 +349,11 @@ class GemmMicrokernelTester {
                  xnn_pack_weights_and_biases_fn pack,
                  xnn_packed_stride_weights_and_biases_fn packed_stride);
 
+  void Test_PQS8(xnn_pqs8_qc8w_gemm_minmax_ukernel_fn gemm,
+                 xnn_init_qs8_qc8w_conv_minmax_params_fn init_minmax_params,
+                 xnn_pack_weights_and_biases_fn pack,
+                 xnn_packed_stride_weights_and_biases_fn packed_stride) const;
+
  private:
   size_t mr_{1};
   size_t nr_{1};
@@ -358,7 +363,7 @@ class GemmMicrokernelTester {
   size_t n_{1};
   size_t k_{1};
   size_t ks_{1};
-  size_t bl_{SIZE_MAX};
+  size_t bl_{0};
   bool unsigned_inputs_{false};
   uint8_t planes_{1};
   size_t a_stride_{0};
@@ -370,7 +375,7 @@ class GemmMicrokernelTester {
   float min_ = -std::numeric_limits<float>::infinity();
   float max_ = std::numeric_limits<float>::infinity();
   size_t a_offset_{0};
-  size_t zero_index_{SIZE_MAX};
+  size_t zero_index_{0};
   bool known_nc_mod_nr_{true};
   bool relu_{false};
   size_t mr_packed_{0};
@@ -496,7 +501,7 @@ inline std::ostream& operator<<(std::ostream& outs,
   if (params.loop_bzp_.is_set) {
     outs << ", loop_bzp=" << params.loop_bzp_;
   } else {
-    outs << ", bzp=" << params.tester.b_zero_point();
+    outs << ", bzp=" << static_cast<int>(params.tester.b_zero_point());
   }
   if (params.loop_bl_.is_set) {
     outs << ", loop_bl=" << params.loop_bl_;

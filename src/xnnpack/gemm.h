@@ -12,6 +12,7 @@
 #include <stdint.h>
 
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
 
 #ifdef __cplusplus
@@ -322,14 +323,16 @@ DECLARE_PF32_GEMM_MINMAX_UKERNEL_FUNCTION(
   XNN_INTERNAL size_t fn_name##_get_mr();                                     \
   XNN_INTERNAL size_t fn_name##_get_nr();                                     \
                                                                               \
-  XNN_INTERNAL void fn_name(size_t mr, size_t nc, size_t kc, const int8_t* a, \
-                            const void* w, int8_t* c, size_t cm_stride,       \
-                            size_t cn_stride,                                 \
+  XNN_INTERNAL void fn_name(size_t m, size_t n, size_t k,                     \
+                            const void* lhs_packed, const void* w, void* dst, \
+                            size_t dst_stride_row, size_t dst_stride_col,     \
                             const union xnn_qs8_qc8w_conv_minmax_params       \
                                 params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_PQS8_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32__neonsme2)
+    xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme2)
+DECLARE_PQS8_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_pqs8_qc8w_gemm_minmax_ukernel_1x32c4__neonsme2)
 
 #define DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(fn_name)                    \
   XNN_INTERNAL void fn_name(size_t mr, size_t nc, size_t kc, const float* a, \

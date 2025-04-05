@@ -10,10 +10,6 @@ load(
     "xnnpack_test_deps_for_library",
     "xnnpack_unit_test",
 )
-#load(
-#    "//:build_params.bzl",
-#    "xnnpack_select_if"
-#)
 
 MICROKERNEL_TEST_DEPS = [
     "//:buffer",
@@ -862,6 +858,18 @@ xnnpack_unit_test(
         "qs8-qc8w-gemm-minmax-fp32-3.cc",
     ],
     shard_count = 5,
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "pqs8_qc8w_gemm_minmax_test",
+    timeout = "moderate",
+    srcs = [
+        "pqs8-qc8w-gemm-minmax.cc",
+    ],
+    shard_count = 1,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],

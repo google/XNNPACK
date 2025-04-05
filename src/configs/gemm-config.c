@@ -336,13 +336,17 @@ static void init_pqs8_qc8w_gemm_config(void) {
   if (XNN_ENABLE_ARM_SME2 && hardware_config->use_arm_sme2) {
 #if XNN_ENABLE_ARM_SME2
     const size_t mr =
-        xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32__neonsme2_get_mr();
+        xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme2_get_mr();
     const size_t nr =
-        xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32__neonsme2_get_nr();
+        xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme2_get_nr();
     pqs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(mr)] =
         xnn_init_hmp_gemm_ukernel(
             (xnn_gemm_ukernel_fn)
-                xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32__neonsme2);
+                xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme2);
+    pqs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] =
+        xnn_init_hmp_gemm_ukernel(
+            (xnn_gemm_ukernel_fn)
+                xnn_pqs8_qc8w_gemm_minmax_ukernel_1x32c4__neonsme2);
     pqs8_qc8w_gemm_config.init.qs8_qc8w =
         xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
     pqs8_qc8w_gemm_config.pack_weights_and_biases =

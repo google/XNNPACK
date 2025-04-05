@@ -228,6 +228,18 @@ typedef void (*xnn_pf16_gemm_minmax_ukernel_fn)(
     const struct xnn_f32_minmax_params
         params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+typedef void (*xnn_pqs8_qc8w_gemm_minmax_ukernel_fn)(
+    size_t m,                //
+    size_t n,                //
+    size_t k,                //
+    const void* lhs_packed,  //
+    const void* rhs_packed,  //
+    void* dst,               //
+    size_t dst_stride_row,   //
+    size_t dst_strice_col,   //
+    const union xnn_qs8_qc8w_conv_minmax_params
+        params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
 // GEMMINC: GEMM INCremental with Min+Max activation
 
 typedef void (*xnn_f32_gemminc_minmax_ukernel_fn)(

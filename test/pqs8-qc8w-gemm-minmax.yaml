@@ -1,0 +1,20 @@
+# Copyright 2025 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# Arm KleidiAI kernels
+- name: xnn_pqs8_qc8w_gemm_minmax_ukernel_1x32c4__neonsme2
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_kai_qs8_qc8w_weights_and_biases_sme2
+  packed-stride: xnn_packed_stride_kai_qs8_qc8w_weights_and_biases_sme2
+  cpp-check: XNN_ENABLE_KLEIDIAI
+  k-block: 4
+  mr-packed: 1
+- name: xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme2
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_kai_qs8_qc8w_weights_and_biases_sme2
+  packed-stride: xnn_packed_stride_kai_qs8_qc8w_weights_and_biases_sme2
+  cpp-check: XNN_ENABLE_KLEIDIAI
+  k-block: 4
+  mr-packed: 32

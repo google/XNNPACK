@@ -1,7 +1,5 @@
 #include "test/gemm-microkernel-tester.h"
 
-#include <stdint.h>
-
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -2258,6 +2256,148 @@ void GemmMicrokernelTester::Test_PF32(
           << ", Mr x Nr x Kr = " << mr() << " x " << nr() << " x " << kr()
           << ", M x N x K = " << m() << " x " << n() << " x " << k()
           << ", nr = " << nr() << ", cm_stride = " << cm_stride();
+    }
+  }
+}
+
+void GemmMicrokernelTester::Test_PQS8(
+    xnn_pqs8_qc8w_gemm_minmax_ukernel_fn gemm,
+    xnn_init_qs8_qc8w_conv_minmax_params_fn init_minmax_params,
+    xnn_pack_weights_and_biases_fn pack,
+    xnn_packed_stride_weights_and_biases_fn packed_stride) const {
+  ASSERT_LE(m(), mr());
+
+  xnnpack::ReplicableRandomDevice rng;
+  auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000),
+                          std::ref(rng));
+  auto w8rng = std::bind(std::uniform_int_distribution<int32_t>(
+                             -std::numeric_limits<int8_t>::max(),
+                             std::numeric_limits<int8_t>::max()),
+                         std::ref(rng));
+
+  xnnpack::Buffer<int8_t> a((m() - 1) * a_stride() + k() +
+                            XNN_EXTRA_BYTES / sizeof(int8_t));
+  xnnpack::Buffer<int8_t> b(n() * k());
+  xnnpack::Buffer<int32_t> bias(n());
+  xnnpack::Buffer<int8_t> c((mr() - 1) * cm_stride() +
+                            ((n() - 1) / nr()) * nr() + (n() - 1) % nr() + 1);
+  xnnpack::Buffer<int32_t> acc(m() * n());
+  xnnpack::Buffer<float> scale(n());
+  xnnpack::Buffer<int8_t> c_ref(m() * n());
+
+  // Create a fake `gemm_config` for the packing functions.
+  struct xnn_gemm_config gemm_config;
+  gemm_config.mr = static_cast<uint8_t>(mr());
+  gemm_config.mr_packed = static_cast<uint8_t>(mr_packed());
+  gemm_config.nr = static_cast<uint8_t>(nr());
+  gemm_config.log2_kr = static_cast<uint8_t>(31 - math_clz_nonzero_u32(kr()));
+  gemm_config.log2_sr = static_cast<uint8_t>(31 - math_clz_nonzero_u32(sr()));
+
+  const size_t packed_w_stride =
+      packed_stride(&gemm_config, k(), /*unused_block_size=*/0,
+                    /*k_stride=*/k(), /*extra_bytes=*/0);
+  const size_t packed_w_size = packed_w_stride * round_up(n(), nr());
+  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> packed_w(packed_w_size);
+
+  // Get the LHS packing config.
+  const struct xnn_pack_lh_config* pack_lh_config =
+      xnn_init_x8_pack_lh_config();
+  ASSERT_NE(pack_lh_config, nullptr);
+
+  xnnpack::fill_uniform_random_bits(a.data(), a.size(), rng);
+  std::generate(b.begin(), b.end(), std::ref(w8rng));
+  std::generate(bias.begin(), bias.end(), std::ref(i32rng));
+
+  // Pack the left-hand operand.
+  const size_t input_packed_size =
+      pack_lh_config->size_fn(m(), k(), mr_packed(), kr(), sr());
+  xnnpack::Buffer<int8_t> input_packed(input_packed_size);
+  pack_lh_config->ukernel(m(), k(), mr_packed(), kr(), sr(),
+                          /*m_idx_start=*/0, a.data(),
+                          /*lhs_stride=*/k() * sizeof(int8_t),
+                          input_packed.data());
+
+  // Compute 32-bit results and output quantization arguments.
+  std::fill(acc.begin(), acc.end(), 0);
+  for (size_t m_index = 0; m_index < m(); m_index++) {
+    for (size_t n_index = 0; n_index < n(); n_index++) {
+      for (size_t k_index = 0; k_index < k(); k_index++) {
+        acc[m_index * n() + n_index] +=
+            (static_cast<int32_t>(a[m_index * a_stride() + k_index]) -
+             static_cast<int32_t>(a_zero_point() - 0x80)) *
+            static_cast<int32_t>(b[n_index * k() + k_index]);
+      }
+      acc[m_index * n() + n_index] += bias[n_index];
+    }
+  }
+
+  const int8_t c_zero_point = -1;
+  for (size_t n_index = 0; n_index < n(); n_index++) {
+    int32_t accumulated_min = acc[n_index];
+    int32_t accumulated_max = acc[n_index];
+    for (size_t m_index = 0; m_index < m(); m_index++) {
+      accumulated_min = std::min(accumulated_min, acc[m_index * n() + n_index]);
+      accumulated_max = std::max(accumulated_max, acc[m_index * n() + n_index]);
+    }
+    const uint32_t accumulated_range =
+        static_cast<uint32_t>(accumulated_max - accumulated_min);
+    const float c_scale = accumulated_range >= 256
+                              ? static_cast<double>(accumulated_range) / 255.0
+                              : 256.0 / 255;
+    scale[n_index] = 1.0f / c_scale;
+  }
+
+  // RHS packing.
+  struct xnn_qs8_packing_params params;
+  params.input_zero_point = static_cast<int8_t>(a_zero_point() - 0x80);
+  pack(/*flags=*/0, &gemm_config, k(), n(),
+       /*groups=*/1, /*unused_block_size=*/0,
+       /*k_stride=*/k(),
+       /*accumulator_init=*/bias.data(),
+       /*weights=*/b.data(),
+       /*int_extra_data0_fn=*/nullptr,
+       /*extra_data0=*/scale.data(),
+       /*extra_data0_size=*/sizeof(float),
+       /*init_extra_data1_fn=*/
+       nullptr,
+       /*extra_data1=*/scale.data(),
+       /*extra_data1_size=*/sizeof(float),
+       /*packed_weights_ptr=*/packed_w.data(), &params);
+
+  union xnn_qs8_qc8w_conv_minmax_params minmax_params;
+  init_minmax_params(&minmax_params, c_zero_point,
+                     static_cast<int8_t>(qmin() - 0x80),
+                     static_cast<int8_t>(qmax() - 0x80));
+
+  gemm(m(), n(), k(), input_packed.data(), packed_w.data(), c.data(),
+       cm_stride() * sizeof(int8_t), sizeof(int8_t), &minmax_params);
+
+  for (size_t m_index = 0; m_index < m(); m_index++) {
+    for (size_t n_index = 0; n_index < n(); n_index++) {
+      c_ref[m_index * n() + n_index] = xnn_qs8_requantize_fp32(
+          acc[m_index * n() + n_index], scale[n_index], c_zero_point,
+          static_cast<int8_t>(qmin() - 0x80),
+          static_cast<int8_t>(qmax() - 0x80));
+    }
+  }
+
+  for (size_t i = 0; i < m(); i++) {
+    for (size_t j = 0; j < n(); j++) {
+      const size_t idx = i * cm_stride() + (j / nr()) * nr() + j % nr();
+      ASSERT_LE(static_cast<int32_t>(c[idx]),
+                static_cast<int32_t>(qmax()) - 0x80);
+      ASSERT_GE(static_cast<int32_t>(c[idx]),
+                static_cast<int32_t>(qmin()) - 0x80);
+      ASSERT_EQ(static_cast<int32_t>(c[idx]),
+                static_cast<int32_t>(c_ref[i * n() + j]))
+          << "at " << i << ", " << j
+          << ": reference = " << static_cast<int32_t>(c_ref[i * n() + j])
+          << " (accumulator = " << acc[i * n() + j]
+          << "), optimized = " << static_cast<int32_t>(c[idx])
+          << ", Mr x Nr x Kr = " << mr() << " x " << nr() << " x " << kr()
+          << ", M x N x K = " << m() << " x " << n() << " x " << k()
+          << ", requantization scale = " << scale[j]
+          << ", output zero point = " << static_cast<int32_t>(c_zero_point);
     }
   }
 }

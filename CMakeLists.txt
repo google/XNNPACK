@@ -1599,6 +1599,7 @@ IF(XNNPACK_BUILD_TESTS)
       f32-qc8w-gemm-minmax
       f32-qc8w-gemm-relu
       pf32-gemm-minmax
+      pqs8-qc8w-gemm-minmax
       qd8-f16-qb4w-gemm-minmax
       qd8-f16-qc4w-gemm-minmax
       qd8-f16-qc8w-gemm-minmax
