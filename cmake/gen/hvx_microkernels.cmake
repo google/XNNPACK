@@ -120,6 +120,10 @@ SET(NON_PROD_HVX_MICROKERNEL_SRCS
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x32c4-minmax-fp32-hvx.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-8x32c4-minmax-fp32-hvx.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-16x32c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x32c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x32c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-8x32c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-16x32c4-minmax-fp32-hvx.c
   src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u32.c
   src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u64.c
   src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u96.c
