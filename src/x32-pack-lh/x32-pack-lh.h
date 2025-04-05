@@ -23,6 +23,9 @@
 XNN_UKERNEL(xnn_arch_arm_sme, xnn_x32_pack_lh_ukernel__neonsme2, xnn_x32_pack_lh_size__neonsme2, xnn_x32_pack_lh_offset__neonsme2)
 #endif  // XNN_ENABLE_KLEIDIAI
 
+XNN_UKERNEL(xnn_arch_arm_sme, xnn_x32_pack_lhs_ukernel__neonsme,
+            xnn_x32_pack_lhs_size__neonsme, xnn_x32_pack_lhs_offset__neonsme)
+
 #ifdef XNN_DEFINED_UKERNEL_WITH_PARAMS
 #undef XNN_DEFINED_UKERNEL_WITH_PARAMS
 #undef XNN_UKERNEL_WITH_PARAMS

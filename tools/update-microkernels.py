@@ -105,6 +105,7 @@ _VERIFICATION_IGNORE_SUBDIRS = {
     os.path.join('src', 'qu8-requantization'),
     os.path.join('src', 'reference'),
     os.path.join('src', 'xnnpack', 'simd'),
+    os.path.join('src', 'pf32-gemm', 'gen'),
 }
 
 
