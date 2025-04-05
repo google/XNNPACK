@@ -29,6 +29,9 @@
     .internal \name
     .type \name, %function
     \name:
+#if defined(__aarch64__)
+      bti c
+#endif
   .endm
 
   .macro END_FUNCTION name
