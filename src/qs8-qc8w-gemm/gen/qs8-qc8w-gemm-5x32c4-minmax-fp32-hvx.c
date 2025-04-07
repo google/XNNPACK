@@ -20,7 +20,7 @@
 #include "src/xnnpack/unaligned.h"
 
 
-void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x32c4__hvx(
+void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_5x32c4__hvx(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -33,7 +33,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x32c4__hvx(
     const union xnn_qs8_qc8w_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
-  assert(mr <= 4);
+  assert(mr <= 5);
   assert(nc != 0);
   assert(kc != 0);
   assert(kc % sizeof(int8_t) == 0);
@@ -58,9 +58,15 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x32c4__hvx(
   }
   const int8_t* a3 = (const int8_t*) ((uintptr_t) a2 + a_stride);
   int8_t* c3 = (int8_t*) ((uintptr_t) c2 + cm_stride);
-  if XNN_UNPREDICTABLE(mr != 4) {
+  if XNN_UNPREDICTABLE(mr < 4) {
     a3 = a2;
     c3 = c2;
+  }
+  const int8_t* a4 = (const int8_t*) ((uintptr_t) a3 + a_stride);
+  int8_t* c4 = (int8_t*) ((uintptr_t) c3 + cm_stride);
+  if XNN_UNPREDICTABLE(mr <= 4) {
+    a4 = a3;
+    c4 = c3;
   }
 
   const float output_max_less_zero_point = (float)((int32_t) params->fp32_scalar.output_max - (int32_t)params->fp32_scalar.output_zero_point);
@@ -73,6 +79,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x32c4__hvx(
     HVX_Vector vacc1x0 = vacc0x0;
     HVX_Vector vacc2x0 = vacc0x0;
     HVX_Vector vacc3x0 = vacc0x0;
+    HVX_Vector vacc4x0 = vacc0x0;
 
     w = (const int32_t*) w + 32;
 
@@ -82,12 +89,14 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x32c4__hvx(
       const HVX_Vector va1x0123 = Q6_V_vsplat_R(unaligned_load_s32(a1)); a1 += 4;
       const HVX_Vector va2x0123 = Q6_V_vsplat_R(unaligned_load_s32(a2)); a2 += 4;
       const HVX_Vector va3x0123 = Q6_V_vsplat_R(unaligned_load_s32(a3)); a3 += 4;
+      const HVX_Vector va4x0123 = Q6_V_vsplat_R(unaligned_load_s32(a4)); a4 += 4;
 
       const HVX_Vector vb0x0123 = *((HVX_Vector *)((int8_t *)w) + 0);
       vacc0x0 =  Q6_Vw_vrmpyacc_VwVbVb(vacc0x0, va0x0123, vb0x0123);
       vacc1x0 =  Q6_Vw_vrmpyacc_VwVbVb(vacc1x0, va1x0123, vb0x0123);
       vacc2x0 =  Q6_Vw_vrmpyacc_VwVbVb(vacc2x0, va2x0123, vb0x0123);
       vacc3x0 =  Q6_Vw_vrmpyacc_VwVbVb(vacc3x0, va3x0123, vb0x0123);
+      vacc4x0 =  Q6_Vw_vrmpyacc_VwVbVb(vacc4x0, va4x0123, vb0x0123);
 
       w = (const int8_t*) w + 128 * sizeof(int8_t);
     }
@@ -99,46 +108,55 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x32c4__hvx(
     HVX_Vector vscaled1x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_convert_Vw(vacc1x0));
     HVX_Vector vscaled2x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_convert_Vw(vacc2x0));
     HVX_Vector vscaled3x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_convert_Vw(vacc3x0));
+    HVX_Vector vscaled4x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_convert_Vw(vacc4x0));
 
     vscaled0x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(vscaled0x0, vscale0));
     vscaled1x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(vscaled1x0, vscale0));
     vscaled2x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(vscaled2x0, vscale0));
     vscaled3x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(vscaled3x0, vscale0));
+    vscaled4x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(vscaled4x0, vscale0));
 
     vscaled0x0 = Q6_Vsf_vmin_VsfVsf(vscaled0x0, voutput_max_less_zero_point);
     vscaled1x0 = Q6_Vsf_vmin_VsfVsf(vscaled1x0, voutput_max_less_zero_point);
     vscaled2x0 = Q6_Vsf_vmin_VsfVsf(vscaled2x0, voutput_max_less_zero_point);
     vscaled3x0 = Q6_Vsf_vmin_VsfVsf(vscaled3x0, voutput_max_less_zero_point);
+    vscaled4x0 = Q6_Vsf_vmin_VsfVsf(vscaled4x0, voutput_max_less_zero_point);
 
     HVX_Vector vscaled0x0_qf = Q6_Vqf32_vadd_VsfVsf(vscaled0x0, Q6_V_vzero());
     HVX_Vector vscaled1x0_qf = Q6_Vqf32_vadd_VsfVsf(vscaled1x0, Q6_V_vzero());
     HVX_Vector vscaled2x0_qf = Q6_Vqf32_vadd_VsfVsf(vscaled2x0, Q6_V_vzero());
     HVX_Vector vscaled3x0_qf = Q6_Vqf32_vadd_VsfVsf(vscaled3x0, Q6_V_vzero());
+    HVX_Vector vscaled4x0_qf = Q6_Vqf32_vadd_VsfVsf(vscaled4x0, Q6_V_vzero());
 
     vacc0x0 = Q6_Vw_convert_Vqf32(vscaled0x0_qf);
     vacc1x0 = Q6_Vw_convert_Vqf32(vscaled1x0_qf);
     vacc2x0 = Q6_Vw_convert_Vqf32(vscaled2x0_qf);
     vacc3x0 = Q6_Vw_convert_Vqf32(vscaled3x0_qf);
+    vacc4x0 = Q6_Vw_convert_Vqf32(vscaled4x0_qf);
 
     vacc0x0 = Q6_Vw_vadd_VwVw(vacc0x0, voutput_zero_point);
     vacc1x0 = Q6_Vw_vadd_VwVw(vacc1x0, voutput_zero_point);
     vacc2x0 = Q6_Vw_vadd_VwVw(vacc2x0, voutput_zero_point);
     vacc3x0 = Q6_Vw_vadd_VwVw(vacc3x0, voutput_zero_point);
+    vacc4x0 = Q6_Vw_vadd_VwVw(vacc4x0, voutput_zero_point);
 
     HVX_Vector vout0x0 =  Q6_Vh_vpack_VwVw_sat(vacc0x0, vacc0x0);
     HVX_Vector vout1x0 =  Q6_Vh_vpack_VwVw_sat(vacc1x0, vacc1x0);
     HVX_Vector vout2x0 =  Q6_Vh_vpack_VwVw_sat(vacc2x0, vacc2x0);
     HVX_Vector vout3x0 =  Q6_Vh_vpack_VwVw_sat(vacc3x0, vacc3x0);
+    HVX_Vector vout4x0 =  Q6_Vh_vpack_VwVw_sat(vacc4x0, vacc4x0);
 
     HVX_Vector vout0 = Q6_Vb_vpack_VhVh_sat(vout0x0, vout0x0);
     HVX_Vector vout1 = Q6_Vb_vpack_VhVh_sat(vout1x0, vout1x0);
     HVX_Vector vout2 = Q6_Vb_vpack_VhVh_sat(vout2x0, vout2x0);
     HVX_Vector vout3 = Q6_Vb_vpack_VhVh_sat(vout3x0, vout3x0);
+    HVX_Vector vout4 = Q6_Vb_vpack_VhVh_sat(vout4x0, vout4x0);
 
     vout0 = Q6_Vb_vmax_VbVb(vout0, voutput_min);
     vout1 = Q6_Vb_vmax_VbVb(vout1, voutput_min);
     vout2 = Q6_Vb_vmax_VbVb(vout2, voutput_min);
     vout3 = Q6_Vb_vmax_VbVb(vout3, voutput_min);
+    vout4 = Q6_Vb_vmax_VbVb(vout4, voutput_min);
 
     if XNN_LIKELY(nc >= 32) {
       Q6_V_vstu_variable(c0, 32, vout0);
@@ -153,6 +171,9 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x32c4__hvx(
       Q6_V_vstu_variable(c3, 32, vout3);
       c3 = (int8_t*) ((uintptr_t) c3 + cn_stride);
       a3 = (const int8_t*) ((uintptr_t) a3 - kc);
+      Q6_V_vstu_variable(c4, 32, vout4);
+      c4 = (int8_t*) ((uintptr_t) c4 + cn_stride);
+      a4 = (const int8_t*) ((uintptr_t) a4 - kc);
 
       nc -= 32;
     } else {
@@ -161,6 +182,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x32c4__hvx(
       Q6_V_vstu_variable(c1, nc, vout1);
       Q6_V_vstu_variable(c2, nc, vout2);
       Q6_V_vstu_variable(c3, nc, vout3);
+      Q6_V_vstu_variable(c4, nc, vout4);
       nc = 0;
     }
   } while (nc != 0);

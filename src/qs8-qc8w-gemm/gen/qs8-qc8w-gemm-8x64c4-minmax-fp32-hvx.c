@@ -20,7 +20,7 @@
 #include "src/xnnpack/unaligned.h"
 
 
-void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x32c4__hvx(
+void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x64c4__hvx(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -94,6 +94,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x32c4__hvx(
 
   do {
     HVX_Vector vacc0x0 = *((HVX_Vector*)w);
+    HVX_Vector vacc0x1 = *((HVX_Vector*)w);
     HVX_Vector vacc1x0 = vacc0x0;
     HVX_Vector vacc2x0 = vacc0x0;
     HVX_Vector vacc3x0 = vacc0x0;
@@ -101,8 +102,15 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x32c4__hvx(
     HVX_Vector vacc5x0 = vacc0x0;
     HVX_Vector vacc6x0 = vacc0x0;
     HVX_Vector vacc7x0 = vacc0x0;
+    HVX_Vector vacc1x1 = vacc0x1;
+    HVX_Vector vacc2x1 = vacc0x1;
+    HVX_Vector vacc3x1 = vacc0x1;
+    HVX_Vector vacc4x1 = vacc0x1;
+    HVX_Vector vacc5x1 = vacc0x1;
+    HVX_Vector vacc6x1 = vacc0x1;
+    HVX_Vector vacc7x1 = vacc0x1;
 
-    w = (const int32_t*) w + 32;
+    w = (const int32_t*) w + 64;
 
     size_t k = kc;
     for (; k >= 4 * sizeof(int8_t); k -= 4 * sizeof(int8_t)) {
@@ -116,83 +124,141 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x32c4__hvx(
       const HVX_Vector va7x0123 = Q6_V_vsplat_R(unaligned_load_s32(a7)); a7 += 4;
 
       const HVX_Vector vb0x0123 = *((HVX_Vector *)((int8_t *)w) + 0);
+      const HVX_Vector vb1x0123 = *((HVX_Vector *)((int8_t *)w) + 128);
       vacc0x0 =  Q6_Vw_vrmpyacc_VwVbVb(vacc0x0, va0x0123, vb0x0123);
+      vacc0x1 =  Q6_Vw_vrmpyacc_VwVbVb(vacc0x1, va0x0123, vb1x0123);
       vacc1x0 =  Q6_Vw_vrmpyacc_VwVbVb(vacc1x0, va1x0123, vb0x0123);
+      vacc1x1 =  Q6_Vw_vrmpyacc_VwVbVb(vacc1x1, va1x0123, vb1x0123);
       vacc2x0 =  Q6_Vw_vrmpyacc_VwVbVb(vacc2x0, va2x0123, vb0x0123);
+      vacc2x1 =  Q6_Vw_vrmpyacc_VwVbVb(vacc2x1, va2x0123, vb1x0123);
       vacc3x0 =  Q6_Vw_vrmpyacc_VwVbVb(vacc3x0, va3x0123, vb0x0123);
+      vacc3x1 =  Q6_Vw_vrmpyacc_VwVbVb(vacc3x1, va3x0123, vb1x0123);
       vacc4x0 =  Q6_Vw_vrmpyacc_VwVbVb(vacc4x0, va4x0123, vb0x0123);
+      vacc4x1 =  Q6_Vw_vrmpyacc_VwVbVb(vacc4x1, va4x0123, vb1x0123);
       vacc5x0 =  Q6_Vw_vrmpyacc_VwVbVb(vacc5x0, va5x0123, vb0x0123);
+      vacc5x1 =  Q6_Vw_vrmpyacc_VwVbVb(vacc5x1, va5x0123, vb1x0123);
       vacc6x0 =  Q6_Vw_vrmpyacc_VwVbVb(vacc6x0, va6x0123, vb0x0123);
+      vacc6x1 =  Q6_Vw_vrmpyacc_VwVbVb(vacc6x1, va6x0123, vb1x0123);
       vacc7x0 =  Q6_Vw_vrmpyacc_VwVbVb(vacc7x0, va7x0123, vb0x0123);
+      vacc7x1 =  Q6_Vw_vrmpyacc_VwVbVb(vacc7x1, va7x0123, vb1x0123);
 
-      w = (const int8_t*) w + 128 * sizeof(int8_t);
+      w = (const int8_t*) w + 256 * sizeof(int8_t);
     }
 
     const HVX_Vector vscale0 = *((const HVX_Vector *)((const float *)w) + 0);
-    w = (const float*) w + 32;
+    const HVX_Vector vscale1 = *((const HVX_Vector *)((const float *)w) + 32);
+    w = (const float*) w + 64;
 
     HVX_Vector vscaled0x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_convert_Vw(vacc0x0));
+    HVX_Vector vscaled0x1 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_convert_Vw(vacc0x1));
     HVX_Vector vscaled1x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_convert_Vw(vacc1x0));
+    HVX_Vector vscaled1x1 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_convert_Vw(vacc1x1));
     HVX_Vector vscaled2x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_convert_Vw(vacc2x0));
+    HVX_Vector vscaled2x1 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_convert_Vw(vacc2x1));
     HVX_Vector vscaled3x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_convert_Vw(vacc3x0));
+    HVX_Vector vscaled3x1 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_convert_Vw(vacc3x1));
     HVX_Vector vscaled4x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_convert_Vw(vacc4x0));
+    HVX_Vector vscaled4x1 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_convert_Vw(vacc4x1));
     HVX_Vector vscaled5x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_convert_Vw(vacc5x0));
+    HVX_Vector vscaled5x1 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_convert_Vw(vacc5x1));
     HVX_Vector vscaled6x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_convert_Vw(vacc6x0));
+    HVX_Vector vscaled6x1 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_convert_Vw(vacc6x1));
     HVX_Vector vscaled7x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_convert_Vw(vacc7x0));
+    HVX_Vector vscaled7x1 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_convert_Vw(vacc7x1));
 
     vscaled0x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(vscaled0x0, vscale0));
+    vscaled0x1 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(vscaled0x1, vscale1));
     vscaled1x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(vscaled1x0, vscale0));
+    vscaled1x1 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(vscaled1x1, vscale1));
     vscaled2x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(vscaled2x0, vscale0));
+    vscaled2x1 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(vscaled2x1, vscale1));
     vscaled3x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(vscaled3x0, vscale0));
+    vscaled3x1 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(vscaled3x1, vscale1));
     vscaled4x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(vscaled4x0, vscale0));
+    vscaled4x1 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(vscaled4x1, vscale1));
     vscaled5x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(vscaled5x0, vscale0));
+    vscaled5x1 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(vscaled5x1, vscale1));
     vscaled6x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(vscaled6x0, vscale0));
+    vscaled6x1 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(vscaled6x1, vscale1));
     vscaled7x0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(vscaled7x0, vscale0));
+    vscaled7x1 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(vscaled7x1, vscale1));
 
     vscaled0x0 = Q6_Vsf_vmin_VsfVsf(vscaled0x0, voutput_max_less_zero_point);
+    vscaled0x1 = Q6_Vsf_vmin_VsfVsf(vscaled0x1, voutput_max_less_zero_point);
     vscaled1x0 = Q6_Vsf_vmin_VsfVsf(vscaled1x0, voutput_max_less_zero_point);
+    vscaled1x1 = Q6_Vsf_vmin_VsfVsf(vscaled1x1, voutput_max_less_zero_point);
     vscaled2x0 = Q6_Vsf_vmin_VsfVsf(vscaled2x0, voutput_max_less_zero_point);
+    vscaled2x1 = Q6_Vsf_vmin_VsfVsf(vscaled2x1, voutput_max_less_zero_point);
     vscaled3x0 = Q6_Vsf_vmin_VsfVsf(vscaled3x0, voutput_max_less_zero_point);
+    vscaled3x1 = Q6_Vsf_vmin_VsfVsf(vscaled3x1, voutput_max_less_zero_point);
     vscaled4x0 = Q6_Vsf_vmin_VsfVsf(vscaled4x0, voutput_max_less_zero_point);
+    vscaled4x1 = Q6_Vsf_vmin_VsfVsf(vscaled4x1, voutput_max_less_zero_point);
     vscaled5x0 = Q6_Vsf_vmin_VsfVsf(vscaled5x0, voutput_max_less_zero_point);
+    vscaled5x1 = Q6_Vsf_vmin_VsfVsf(vscaled5x1, voutput_max_less_zero_point);
     vscaled6x0 = Q6_Vsf_vmin_VsfVsf(vscaled6x0, voutput_max_less_zero_point);
+    vscaled6x1 = Q6_Vsf_vmin_VsfVsf(vscaled6x1, voutput_max_less_zero_point);
     vscaled7x0 = Q6_Vsf_vmin_VsfVsf(vscaled7x0, voutput_max_less_zero_point);
+    vscaled7x1 = Q6_Vsf_vmin_VsfVsf(vscaled7x1, voutput_max_less_zero_point);
 
     HVX_Vector vscaled0x0_qf = Q6_Vqf32_vadd_VsfVsf(vscaled0x0, Q6_V_vzero());
+    HVX_Vector vscaled0x32_qf = Q6_Vqf32_vadd_VsfVsf(vscaled0x1, Q6_V_vzero());
     HVX_Vector vscaled1x0_qf = Q6_Vqf32_vadd_VsfVsf(vscaled1x0, Q6_V_vzero());
+    HVX_Vector vscaled1x32_qf = Q6_Vqf32_vadd_VsfVsf(vscaled1x1, Q6_V_vzero());
     HVX_Vector vscaled2x0_qf = Q6_Vqf32_vadd_VsfVsf(vscaled2x0, Q6_V_vzero());
+    HVX_Vector vscaled2x32_qf = Q6_Vqf32_vadd_VsfVsf(vscaled2x1, Q6_V_vzero());
     HVX_Vector vscaled3x0_qf = Q6_Vqf32_vadd_VsfVsf(vscaled3x0, Q6_V_vzero());
+    HVX_Vector vscaled3x32_qf = Q6_Vqf32_vadd_VsfVsf(vscaled3x1, Q6_V_vzero());
     HVX_Vector vscaled4x0_qf = Q6_Vqf32_vadd_VsfVsf(vscaled4x0, Q6_V_vzero());
+    HVX_Vector vscaled4x32_qf = Q6_Vqf32_vadd_VsfVsf(vscaled4x1, Q6_V_vzero());
     HVX_Vector vscaled5x0_qf = Q6_Vqf32_vadd_VsfVsf(vscaled5x0, Q6_V_vzero());
+    HVX_Vector vscaled5x32_qf = Q6_Vqf32_vadd_VsfVsf(vscaled5x1, Q6_V_vzero());
     HVX_Vector vscaled6x0_qf = Q6_Vqf32_vadd_VsfVsf(vscaled6x0, Q6_V_vzero());
+    HVX_Vector vscaled6x32_qf = Q6_Vqf32_vadd_VsfVsf(vscaled6x1, Q6_V_vzero());
     HVX_Vector vscaled7x0_qf = Q6_Vqf32_vadd_VsfVsf(vscaled7x0, Q6_V_vzero());
+    HVX_Vector vscaled7x32_qf = Q6_Vqf32_vadd_VsfVsf(vscaled7x1, Q6_V_vzero());
 
     vacc0x0 = Q6_Vw_convert_Vqf32(vscaled0x0_qf);
+    vacc0x1 = Q6_Vw_convert_Vqf32(vscaled0x32_qf);
     vacc1x0 = Q6_Vw_convert_Vqf32(vscaled1x0_qf);
+    vacc1x1 = Q6_Vw_convert_Vqf32(vscaled1x32_qf);
     vacc2x0 = Q6_Vw_convert_Vqf32(vscaled2x0_qf);
+    vacc2x1 = Q6_Vw_convert_Vqf32(vscaled2x32_qf);
     vacc3x0 = Q6_Vw_convert_Vqf32(vscaled3x0_qf);
+    vacc3x1 = Q6_Vw_convert_Vqf32(vscaled3x32_qf);
     vacc4x0 = Q6_Vw_convert_Vqf32(vscaled4x0_qf);
+    vacc4x1 = Q6_Vw_convert_Vqf32(vscaled4x32_qf);
     vacc5x0 = Q6_Vw_convert_Vqf32(vscaled5x0_qf);
+    vacc5x1 = Q6_Vw_convert_Vqf32(vscaled5x32_qf);
     vacc6x0 = Q6_Vw_convert_Vqf32(vscaled6x0_qf);
+    vacc6x1 = Q6_Vw_convert_Vqf32(vscaled6x32_qf);
     vacc7x0 = Q6_Vw_convert_Vqf32(vscaled7x0_qf);
+    vacc7x1 = Q6_Vw_convert_Vqf32(vscaled7x32_qf);
 
     vacc0x0 = Q6_Vw_vadd_VwVw(vacc0x0, voutput_zero_point);
+    vacc0x1 = Q6_Vw_vadd_VwVw(vacc0x1, voutput_zero_point);
     vacc1x0 = Q6_Vw_vadd_VwVw(vacc1x0, voutput_zero_point);
+    vacc1x1 = Q6_Vw_vadd_VwVw(vacc1x1, voutput_zero_point);
     vacc2x0 = Q6_Vw_vadd_VwVw(vacc2x0, voutput_zero_point);
+    vacc2x1 = Q6_Vw_vadd_VwVw(vacc2x1, voutput_zero_point);
     vacc3x0 = Q6_Vw_vadd_VwVw(vacc3x0, voutput_zero_point);
+    vacc3x1 = Q6_Vw_vadd_VwVw(vacc3x1, voutput_zero_point);
     vacc4x0 = Q6_Vw_vadd_VwVw(vacc4x0, voutput_zero_point);
+    vacc4x1 = Q6_Vw_vadd_VwVw(vacc4x1, voutput_zero_point);
     vacc5x0 = Q6_Vw_vadd_VwVw(vacc5x0, voutput_zero_point);
+    vacc5x1 = Q6_Vw_vadd_VwVw(vacc5x1, voutput_zero_point);
     vacc6x0 = Q6_Vw_vadd_VwVw(vacc6x0, voutput_zero_point);
+    vacc6x1 = Q6_Vw_vadd_VwVw(vacc6x1, voutput_zero_point);
     vacc7x0 = Q6_Vw_vadd_VwVw(vacc7x0, voutput_zero_point);
+    vacc7x1 = Q6_Vw_vadd_VwVw(vacc7x1, voutput_zero_point);
 
-    HVX_Vector vout0x0 =  Q6_Vh_vpack_VwVw_sat(vacc0x0, vacc0x0);
-    HVX_Vector vout1x0 =  Q6_Vh_vpack_VwVw_sat(vacc1x0, vacc1x0);
-    HVX_Vector vout2x0 =  Q6_Vh_vpack_VwVw_sat(vacc2x0, vacc2x0);
-    HVX_Vector vout3x0 =  Q6_Vh_vpack_VwVw_sat(vacc3x0, vacc3x0);
-    HVX_Vector vout4x0 =  Q6_Vh_vpack_VwVw_sat(vacc4x0, vacc4x0);
-    HVX_Vector vout5x0 =  Q6_Vh_vpack_VwVw_sat(vacc5x0, vacc5x0);
-    HVX_Vector vout6x0 =  Q6_Vh_vpack_VwVw_sat(vacc6x0, vacc6x0);
-    HVX_Vector vout7x0 =  Q6_Vh_vpack_VwVw_sat(vacc7x0, vacc7x0);
+    HVX_Vector vout0x0 =  Q6_Vh_vpack_VwVw_sat(vacc0x0, vacc0x1);
+    HVX_Vector vout1x0 =  Q6_Vh_vpack_VwVw_sat(vacc1x0, vacc1x1);
+    HVX_Vector vout2x0 =  Q6_Vh_vpack_VwVw_sat(vacc2x0, vacc2x1);
+    HVX_Vector vout3x0 =  Q6_Vh_vpack_VwVw_sat(vacc3x0, vacc3x1);
+    HVX_Vector vout4x0 =  Q6_Vh_vpack_VwVw_sat(vacc4x0, vacc4x1);
+    HVX_Vector vout5x0 =  Q6_Vh_vpack_VwVw_sat(vacc5x0, vacc5x1);
+    HVX_Vector vout6x0 =  Q6_Vh_vpack_VwVw_sat(vacc6x0, vacc6x1);
+    HVX_Vector vout7x0 =  Q6_Vh_vpack_VwVw_sat(vacc7x0, vacc7x1);
 
     HVX_Vector vout0 = Q6_Vb_vpack_VhVh_sat(vout0x0, vout0x0);
     HVX_Vector vout1 = Q6_Vb_vpack_VhVh_sat(vout1x0, vout1x0);
@@ -212,33 +278,33 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x32c4__hvx(
     vout6 = Q6_Vb_vmax_VbVb(vout6, voutput_min);
     vout7 = Q6_Vb_vmax_VbVb(vout7, voutput_min);
 
-    if XNN_LIKELY(nc >= 32) {
-      Q6_V_vstu_variable(c0, 32, vout0);
+    if XNN_LIKELY(nc >= 64) {
+      Q6_V_vstu_variable(c0, 64, vout0);
       c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
       a0 = (const int8_t*) ((uintptr_t) a0 - kc);
-      Q6_V_vstu_variable(c1, 32, vout1);
+      Q6_V_vstu_variable(c1, 64, vout1);
       c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);
       a1 = (const int8_t*) ((uintptr_t) a1 - kc);
-      Q6_V_vstu_variable(c2, 32, vout2);
+      Q6_V_vstu_variable(c2, 64, vout2);
       c2 = (int8_t*) ((uintptr_t) c2 + cn_stride);
       a2 = (const int8_t*) ((uintptr_t) a2 - kc);
-      Q6_V_vstu_variable(c3, 32, vout3);
+      Q6_V_vstu_variable(c3, 64, vout3);
       c3 = (int8_t*) ((uintptr_t) c3 + cn_stride);
       a3 = (const int8_t*) ((uintptr_t) a3 - kc);
-      Q6_V_vstu_variable(c4, 32, vout4);
+      Q6_V_vstu_variable(c4, 64, vout4);
       c4 = (int8_t*) ((uintptr_t) c4 + cn_stride);
       a4 = (const int8_t*) ((uintptr_t) a4 - kc);
-      Q6_V_vstu_variable(c5, 32, vout5);
+      Q6_V_vstu_variable(c5, 64, vout5);
       c5 = (int8_t*) ((uintptr_t) c5 + cn_stride);
       a5 = (const int8_t*) ((uintptr_t) a5 - kc);
-      Q6_V_vstu_variable(c6, 32, vout6);
+      Q6_V_vstu_variable(c6, 64, vout6);
       c6 = (int8_t*) ((uintptr_t) c6 + cn_stride);
       a6 = (const int8_t*) ((uintptr_t) a6 - kc);
-      Q6_V_vstu_variable(c7, 32, vout7);
+      Q6_V_vstu_variable(c7, 64, vout7);
       c7 = (int8_t*) ((uintptr_t) c7 + cn_stride);
       a7 = (const int8_t*) ((uintptr_t) a7 - kc);
 
-      nc -= 32;
+      nc -= 64;
     } else {
       // Prepare mask for valid 8-bit elements (depends on nc).
       Q6_V_vstu_variable(c0, nc, vout0);
