@@ -121,8 +121,8 @@ xnn_subgraph_t FP32DepthwiseSeparable(size_t w, size_t h, size_t kw, size_t ci,
 
   status = xnn_define_depthwise_convolution_2d(
       subgraph,
-      /*padding_top=*/1, /*padding_right=*/1, /*padding_bottom=*/1,
-      /*padding_left=*/1,
+      /*padding_top=*/0, /*padding_right=*/0, /*padding_bottom=*/0,
+      /*padding_left=*/0,
       /*kernel_height=*/kw, /*kernel_width=*/kw,
       /*subsampling_height=*/1, /*subsampling_width=*/1,
       /*dilation_height=*/1, /*dilation_width=*/1,
