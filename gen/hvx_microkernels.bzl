@@ -27,6 +27,10 @@ PROD_HVX_MICROKERNEL_SRCS = [
     "src/f32-vbinary/gen/f32-vsqrdiffc-hvx-u128.c",
     "src/f32-vbinary/gen/f32-vsub-hvx-u128.c",
     "src/f32-vbinary/gen/f32-vsubc-hvx-u128.c",
+    "src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x32c4-minmax-fp32-hvx.c",
+    "src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x32c4-minmax-fp32-hvx.c",
+    "src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x32c4-minmax-fp32-hvx.c",
+    "src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x32c4-minmax-fp32-hvx.c",
     "src/x32-packw/gen/x32-packw-gio-hvx-u2.c",
 ]
 
@@ -113,10 +117,10 @@ NON_PROD_HVX_MICROKERNEL_SRCS = [
     "src/f32-vunary/gen/f32-vabs-hvx.c",
     "src/f32-vunary/gen/f32-vneg-hvx.c",
     "src/f32-vunary/gen/f32-vsqr-hvx.c",
-    "src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x32c4-minmax-fp32-hvx.c",
-    "src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x32c4-minmax-fp32-hvx.c",
     "src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-8x32c4-minmax-fp32-hvx.c",
     "src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-16x32c4-minmax-fp32-hvx.c",
+    "src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-8x32c4-minmax-fp32-hvx.c",
+    "src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-16x32c4-minmax-fp32-hvx.c",
     "src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u32.c",
     "src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u64.c",
     "src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u96.c",

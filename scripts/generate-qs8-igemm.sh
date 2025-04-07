@@ -1165,5 +1165,10 @@ tools/xngen src/qs8-igemm/c4-avx512amx.c.in -D GFNI=0 -D PREFETCH=1 -D MR=16 -D 
 tools/xngen src/qs8-igemm/rvv.c.in -D MR=1 -D NR=m4 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x4v-minmax-fp32-rvv.c &
 tools/xngen src/qs8-igemm/rvv.c.in -D MR=4 -D NR=m4 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4v-minmax-fp32-rvv.c &
 
+################################## Hexagon HVX #################################
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=1  -D NR=32 -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x32c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=4  -D NR=32 -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x32c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=8  -D NR=32 -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-8x32c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=16 -D NR=32 -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-16x32c4-minmax-fp32-hvx.c &
 
 wait
