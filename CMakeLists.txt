@@ -465,7 +465,6 @@ SET(OPERATOR_SRCS
   src/operators/resize-bilinear-nchw.c
   src/operators/resize-bilinear-nhwc.c
   src/operators/rope-nthc.c
-  src/operators/scaled-dot-product-attention-nhtc.c
   src/operators/slice-nd.c
   src/operators/softmax-nc.c
   src/operators/transpose-nd.c
@@ -498,7 +497,6 @@ SET(SUBGRAPH_SRCS
   src/subgraph/pack-lh.c
   src/subgraph/reshape-helpers.c
   src/subgraph/rope.c
-  src/subgraph/scaled-dot-product-attention.c
   src/subgraph/softmax.c
   src/subgraph/space-to-depth-2d.c
   src/subgraph/static-constant-pad.c
@@ -1344,7 +1342,6 @@ IF(XNNPACK_BUILD_TESTS)
       resize-bilinear-nchw
       resize-bilinear-nhwc
       rope-nthc
-      scaled-dot-product-attention-nhtc
       slice-nd-eager
       slice-nd
       softmax-nc
@@ -1414,7 +1411,6 @@ IF(XNNPACK_BUILD_TESTS)
         even-split
         fully-connected
         max-pooling-2d
-        scaled-dot-product-attention
         softmax
         space-to-depth-2d
         split-fuse
@@ -1920,7 +1916,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
         max-pooling
         prelu
         resize-bilinear-nhwc
-        scaled-dot-product-attention
         softmax
         unary)
     FOREACH(BENCH ${LIBRARY_OPERATOR_BENCHMARKS})

@@ -34,8 +34,6 @@ XNN_ENUM_ITEM(xnn_node_type_global_sum_pooling_2d, "Global Sum Pooling 2D")
 XNN_ENUM_ITEM(xnn_node_type_max_pooling_2d, "Max Pooling 2D")
 XNN_ENUM_ITEM(xnn_node_type_pack_lh, "Pack LH")
 XNN_ENUM_ITEM(xnn_node_type_rope, "RoPE")
-XNN_ENUM_ITEM(xnn_node_type_scaled_dot_product_attention,
-              "Scaled Dot Product Attention")
 XNN_ENUM_ITEM(xnn_node_type_softmax, "Softmax")
 XNN_ENUM_ITEM(xnn_node_type_space_to_depth_2d, "Space To Depth 2D")
 XNN_ENUM_ITEM(xnn_node_type_static_constant_pad, "Static Constant Pad")
