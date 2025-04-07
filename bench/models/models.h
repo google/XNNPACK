@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <cstddef>
+#include <cstdint>
 #include <vector>
 
 #include "include/xnnpack.h"
@@ -45,6 +47,10 @@ xnn_subgraph_t FP32Elementwise(size_t size, size_t reps);
 // Where `mean(x, norm_mask)` means computing the mean of the dimensions in the
 // `norm_mask`.
 xnn_subgraph_t FP32LayerNorm(size_t m, size_t n, size_t k, uint32_t norm_mask);
+
+// Similar to the above, but computes the softmax instead of the layer norm.
+xnn_subgraph_t FP32Softmax(size_t m, size_t n, size_t k, uint32_t norm_mask,
+                           bool use_softmax);
 
 struct FP32DepthwiseSeparableWeights {
   std::vector<float> w0;

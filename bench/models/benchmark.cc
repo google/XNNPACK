@@ -211,6 +211,13 @@ static void FP32LayerNorm(benchmark::State& state) {
   });
 }
 
+static void FP32Softmax(benchmark::State& state) {
+  BenchmarkInvoke(state, [&state]() {
+    return models::FP32Softmax(state.range(0), state.range(1), state.range(2),
+                               state.range(3), state.range(4));
+  });
+}
+
 static void FP32DepthwiseSeparable(benchmark::State& state) {
   models::FP32DepthwiseSeparableWeights weights;
   BenchmarkInvoke(state, [&state, &weights]() {
@@ -238,6 +245,15 @@ static void LayerNormArguments(benchmark::internal::Benchmark* b) {
   for (int norm_mask : {1, 3, 7, 2, 5}) {
     b->Args({128, 256, 512, norm_mask});
   }
+}
+
+static void SoftmaxArguments(benchmark::internal::Benchmark* b) {
+  b->ArgNames({"M", "N", "K", "NormMask", "UseSoftmax"});
+  for (int norm_mask : {1, 3, 7, 2, 5, 4}) {
+    b->Args({128, 256, 512, norm_mask, false});
+  }
+  // xnn_define_softmax only supports computing the softmax of the last dimension.
+  b->Args({128, 256, 512, 2, true});
 }
 
 static void DepthwiseSeparableArguments(benchmark::internal::Benchmark* b) {
@@ -295,6 +311,11 @@ BENCHMARK(FP32LayerNorm)
     ->Unit(benchmark::kMicrosecond)
     ->UseRealTime()
     ->Apply(LayerNormArguments);
+
+BENCHMARK(FP32Softmax)
+    ->Unit(benchmark::kMicrosecond)
+    ->UseRealTime()
+    ->Apply(SoftmaxArguments);
 
 BENCHMARK(FP32DepthwiseSeparable)
     ->Unit(benchmark::kMicrosecond)
