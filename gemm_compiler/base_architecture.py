@@ -69,7 +69,7 @@ class BaseArchitecture:
     raise NotImplementedError
 
   @abc.abstractmethod
-  def dequantize(self) -> str:
+  def convert_to_output_type(self) -> str:
     """Returns an assembly string dequantizing the accumulators."""
     raise NotImplementedError
 
@@ -248,16 +248,19 @@ class BaseArchitecture:
     """Returns an assembly string computing the maximum clamp."""
     raise NotImplementedError
 
+  def output_n(self) -> int:
+    return self.n
+
   def clamp(self) -> str:
     """Returns an assembly string computing the minimum/maximum clamp."""
     acc_registers = self.acc_registers()
     asm_string = ''
-    for nr in range(0, self.n):
+    for nr in range(0, self.output_n()):
       for mr in range(0, self.m):
         asm_string += self.clamp_min(
             reg=acc_registers[self.m * nr + mr], prefix=self.prefix()
         )
-    for nr in range(0, self.n):
+    for nr in range(0, self.output_n()):
       for mr in range(0, self.m):
         asm_string += self.clamp_max(
             reg=acc_registers[self.m * nr + mr], prefix=self.prefix()

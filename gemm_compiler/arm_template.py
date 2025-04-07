@@ -72,7 +72,7 @@ class Arm(base_architecture.BaseArchitecture):
   def tmp_w_register(self):
     return ''
 
-  def dequantize(self):
+  def convert_to_output_type(self):
     return ''
 
   def adjust_kc(self):

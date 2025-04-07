@@ -170,7 +170,7 @@ class Avx512Vnni(avx512f_template.Avx512F):
         ret += f'vcvtdq2ps z{ACC}, z{other_reg}\n'
     return ret
 
-  def dequantize(self):
+  def convert_to_output_type(self):
     W = self.w_ptr_register()
     asm_string = ''
     if self._c == 8:

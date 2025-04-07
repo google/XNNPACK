@@ -124,7 +124,7 @@ class NeonMlal(aarch32_template.Aarch32):
     ret += f'sub {minmax_reg}, {minmax_reg}, #4\n'
     return ret
 
-  def dequantize(self):
+  def convert_to_output_type(self):
     accumulators = self.acc_registers()
     ret = '\n# Convert from int32 to float.\n'
     for nr in range(0, self.n * self.m):

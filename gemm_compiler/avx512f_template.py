@@ -35,7 +35,7 @@ class Avx512F(fma3_template.Fma3):
   def n_step(self):
     return 16
 
-  def dequantize(self):
+  def convert_to_output_type(self):
     return ''
 
   def adjust_kc(self):
@@ -370,7 +370,7 @@ class Avx512FC(Avx512F):
         + f'__asm_amd64_{self.isa()}_broadcast'
     )
 
-  def dequantize(self):
+  def convert_to_output_type(self):
     shift_add = """vpsrlq {tmp}, z{acc}, 32
       vaddps z{acc}, z{acc}, {tmp}\n"""
     asm_string = ''

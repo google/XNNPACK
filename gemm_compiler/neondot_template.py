@@ -14,7 +14,7 @@ class NeonDot(neonfma_template.NeonFma):
     return 'neondot'
 
   def a_registers(self, idx):
-    registers = ['2', '3', '4', '5']
+    registers = ['2', '3', '4', '5', '11']
     assert idx < len(registers)
     return registers[idx]
 
@@ -42,6 +42,7 @@ class NeonDot(neonfma_template.NeonFma):
         '28',
         '29',
         '30',
+        '31',
     ]
 
   def function_name(self):
@@ -109,7 +110,7 @@ class NeonDot(neonfma_template.NeonFma):
       case _:
         raise NotImplementedError
 
-  def dequantize(self):
+  def convert_to_output_type(self):
     accumulators = self.acc_registers()
     ret = '\n# Convert from int32 to float.\n'
     for nr in range(0, self.n * self.m):
@@ -252,3 +253,159 @@ class NeonDotQC4W(NeonDot):
 
   def cvtf(self):
     return 'scvtf v{ACC}.4s, v{ACC}.4s, #4\n'
+
+class NeonDotQS8QC8W(NeonDot):
+
+  def function_name(self):
+    ld = self.unroll_factor * 32
+    return (
+        f'xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_{self.m}x{self.n * self.n_step()}'
+        + f'c4__asm_aarch64_{self.isa()}_ld{ld}_2'
+    )
+
+  def load_min_max(self):
+      return '''
+      # Load min/max values.
+      ld1r {v10.8h}, [x13]
+      add x13, x13, 2
+      ld2r {v0.16b, v1.16b}, [x13]\n'''
+
+  def init_accumulators(self):
+    return super(NeonDot, self).init_accumulators()
+
+  def cvts(self):
+    return 'fcvtns v{ACC}.4s, v{ACC}.4s\n'
+
+  def output_n(self) -> int:
+    return self.n // 4
+
+  def convert_to_output_type(self):
+    accumulators = self.acc_registers()
+    ret = '\n# Convert from int32 to float.\n'
+    for nr in range(0, self.n * self.m):
+      ret += self.cvtf().format(ACC=accumulators[nr])
+
+    ret += '# Load weights scale.\n'
+    output_scale_pair = 'ldp q{W_SCALE_0}, q{W_SCALE_1}, [{W}, {offset}]\n'
+    # output scales
+    for nr in range(0, self.n, 2):
+      ret += output_scale_pair.format(
+          W=self.w_ptr_register(),
+          offset=self.register_bytes() * nr,
+          W_SCALE_0=self.a_registers(nr),
+          W_SCALE_1=self.a_registers(nr + 1),
+      )
+    ret += self.increment_ptr(
+        ptr=self.w_ptr_register(), step=self.register_bytes() * self.n
+    )
+    ret += "# Multiply by weight's scale.\n"
+    for nr in range(0, self.n):
+      for mr in range(0, self.m):
+        ret += 'fmul v{ACC}.4s, v{ACC}.4s, v{SCALE}.4s\n'.format(
+            ACC=accumulators[nr * self.m + mr], SCALE=self.a_registers(nr)
+        )
+    ret += "# Reconvert to int32.\n"
+    for nr in range(0, self.n * self.m):
+      ret += self.cvts().format(ACC=accumulators[nr])
+
+    ret += '# Convert to int16.\n'
+    for nr in range(0, self.n, 2):
+      for mr in range(0, self.m):
+        ret += 'sqxtn v{ACC}.4h, v{ACC}.4s\n'.format(
+            ACC=accumulators[nr * self.m + mr])
+    for nr in range(1, self.n, 2):
+      for mr in range(0, self.m):
+        ret += 'sqxtn2 v{ACC_UPPER}.8h, v{ACC}.4s\n'.format(
+            ACC_UPPER=accumulators[(nr-1) * self.m + mr],
+            ACC=accumulators[nr * self.m + mr])
+    ret += '# Add output zero point.\n'
+    for nr in range(0, self.n, 2):
+      for mr in range(0, self.m):
+        ret += 'sqadd v{ACC}.8h, v{ACC}.8h, v10.8h\n'.format(
+            ACC=accumulators[nr * self.m + mr])
+    ret += '# Convert to int8.\n'
+    for nr in range(0, self.n // 2, 2):
+      for mr in range(0, self.m):
+        ret += 'sqxtn v{ACC}.8b, v{ACC}.8h\n'.format(
+            ACC=accumulators[nr * self.m + mr])
+    for nr in range(1, self.n // 2, 2):
+      for mr in range(0, self.m):
+        ret += 'sqxtn2 v{ACC_UPPER}.16b, v{ACC}.8h\n'.format(
+            ACC_UPPER=accumulators[(nr-1) * self.m + mr],
+            ACC=accumulators[nr * 2 * self.m + mr])
+
+    return ret
+
+  def clamp_min(self, reg, prefix):
+    max_reg = self.max_register()
+    return f'smin  {prefix}{reg}.16b, {max_reg}.16b, {prefix}{reg}.16b\n'
+
+  def clamp_max(self, reg, prefix):
+    min_reg = self.min_register()
+    return f'smax  {prefix}{reg}.16b, {min_reg}.16b, {prefix}{reg}.16b\n'
+
+  def store(self):
+    accumulators = self.acc_registers()
+    cm_registers = self.cm_registers()
+    nc_reg = self.nc_register()
+    nc_lo = self.register_map_byte(nc_reg)
+    nc = self.n * self.n_step()
+    asm_string = """
+      # Check whether full or partial store.
+      cmp {nc}, {n_step}
+      b.lo .Ltail_{N_2}\n""".format(n_step=nc, N_2=nc // 2, nc=nc_reg)
+    for mr in range(0, self.m):
+      asm_string += 'str q{ACC}, [{c_reg}], 16\n'.format(
+          ACC=accumulators[mr],
+          ACC_1=accumulators[self.m + mr],
+          c_reg=cm_registers[mr],
+      )
+
+    for mr in range(0, self.m):
+      am_ptr = self.am_registers()[mr]
+      kc_register = self.kc_register()
+      asm_string += f'sub {am_ptr}, {am_ptr}, {kc_register}\n'
+    check = """
+      sub {nc}, {nc}, {n_step}
+      b.ne .Louter_loop
+      b .Lreturn""".format(n_step=nc, nc=nc_reg)
+    asm_string += check
+    nc = nc // 2
+    asm_string += """
+\n.Ltail_8:
+      tbz {nc_lo}, 3, .Ltail_4\n""".format(nc_lo=nc_lo)
+    for mr in range(0, self.m):
+      asm_string += 'str d{ACC}, [{c_reg}], 8\n'.format(
+          ACC=accumulators[mr], c_reg=cm_registers[mr]
+      )
+    for mr in range(0, self.m):
+      asm_string += 'ext v{ACC}.16b, v{ACC}.16b, v{ACC}.16b, 8\n'.format(ACC=accumulators[mr])
+    asm_string += """
+\n.Ltail_4:
+      tbz {nc_lo}, 2, .Ltail_2\n""".format(nc_lo=nc_lo)
+    for mr in range(0, self.m):
+      asm_string += 'st1 {{v{ACC}.s}}[0], [{c_reg}], 4\n'.format(
+          ACC=accumulators[mr], c_reg=cm_registers[mr]
+      )
+    for mr in range(0, self.m):
+      asm_string += 'ext v{ACC}.16b, v{ACC}.16b, v{ACC}.16b, 4\n'.format(ACC=accumulators[mr])
+
+    asm_string += """
+\n.Ltail_2:
+      tbz {nc_lo}, 1, .Ltail_1\n""".format(nc_lo=nc_lo)
+    for mr in range(0, self.m):
+      asm_string += 'st1 {{v{ACC}.h}}[0], [{c_reg}], 2\n'.format(
+          ACC=accumulators[mr], c_reg=cm_registers[mr]
+      )
+    for mr in range(0, self.m):
+      asm_string += 'ext v{ACC}.16b, v{ACC}.16b, v{ACC}.16b, 2\n'.format(ACC=accumulators[mr])
+
+    asm_string += """
+\n.Ltail_1:
+      tbz {nc_lo}, 0, .Lreturn\n""".format(nc_lo=nc_lo)
+    for mr in range(0, self.m):
+      asm_string += 'st1 {{v{ACC}.b}}[0], [{c_reg}]\n'.format(
+          ACC=accumulators[mr], c_reg=cm_registers[mr]
+      )
+
+    return asm_string

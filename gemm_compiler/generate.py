@@ -40,7 +40,7 @@ def generate_gemm_microkernel(
   asm_string += isa.inner_loop()
 
   asm_string += '.Linner_loop_end:\n'
-  asm_string += isa.dequantize()
+  asm_string += isa.convert_to_output_type()
 
   ## min/max clamping
   asm_string += '# Min/max clamping.\n'

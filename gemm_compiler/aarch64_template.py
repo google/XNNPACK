@@ -88,6 +88,11 @@ class Aarch64(arm_template.Arm):
         + f'__asm_aarch64_{self.isa()}_ld{ld}_2'
     )
 
+  def load_min_max(self):
+      return '''
+      # Load min/max values.
+      ld2r {v0.4s, v1.4s}, [x13]\n'''
+
   def header(self):
     header = """// Copyright 2025 Google LLC
 //
@@ -113,10 +118,8 @@ BEGIN_FUNCTION {function_name}
 
       # Load params.
       ldr x13, [sp, 264]
-
-      # Load min/max values.
-      ld2r {{v0.4s, v1.4s}}, [x13]
 """.format(function_name=self.function_name())
+    header += self.load_min_max()
     header += self.quantization_params()
     return header
 
