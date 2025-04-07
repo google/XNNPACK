@@ -372,9 +372,14 @@ ENDIF()
 
 IF(CMAKE_SYSTEM_NAME MATCHES "^(Android|Linux)$")
   IF(XNNPACK_TARGET_PROCESSOR MATCHES "^arm64")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mbranch-protection=bti")
-    set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -mbranch-protection=bti")
-    set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -mmark-bti-property")
+    IF(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mbranch-protection=bti")
+      set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -mbranch-protection=bti")
+      # GCC doesn't support this flag yet
+      set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -mmark-bti-property")
+    ELSE()
+      MESSAGE(WARNING "Security: XNNPACK doesn't support BTI control flow integrity with GCC. Continuing.")
+    ENDIF()
   ENDIF()
 ENDIF()
 
