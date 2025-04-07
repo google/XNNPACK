@@ -75,10 +75,7 @@ static void InitWipeBuffer() {
 // Pthreadpool-compatible function to wipe the cache in each thread.
 void PthreadpoolClearL2Cache(std::atomic<size_t>* counter, size_t id) {
 #if XNN_ENABLE_CPUINFO
-  static const size_t wipe_buffer_size = []() {
-    const auto* l2_cache = cpuinfo_get_l2_cache(0);
-    return l2_cache == nullptr ? 0 : l2_cache->size;
-  }();
+  static const size_t wipe_buffer_size = GetL2CacheSize();
   static const char* wipe_buffer = wipe_buffer_size ? [&]() -> char* {
     char* const buff = (char*)malloc(wipe_buffer_size);
     memset(buff, 0xA5, wipe_buffer_size);
@@ -102,6 +99,38 @@ void PthreadpoolClearL2Cache(std::atomic<size_t>* counter, size_t id) {
 }
 
 };  // namespace
+
+size_t GetL1CacheSize() {
+#if NO_XNN_ENABLE_CPUINFO
+  if (cpuinfo_initialize()) {
+    const auto* l1_cache = cpuinfo_get_l1d_cache(0);
+    return l1_cache == nullptr ? 0 : l1_cache->size;
+  }
+#endif  // XNN_ENABLE_CPUINFO
+  const auto& cpuinfo = benchmark::CPUInfo::Get();
+  for (const auto& cache : cpuinfo.caches) {
+    if (cache.level == 1 && (cache.type == "Data" || cache.type == "Unified")) {
+      return cache.size;
+    }
+  }
+  return 0;
+}
+
+size_t GetL2CacheSize() {
+#if NO_XNN_ENABLE_CPUINFO
+  if (cpuinfo_initialize()) {
+    const auto* l2_cache = cpuinfo_get_l2_cache(0);
+    return l2_cache == nullptr ? 0 : l2_cache->size;
+  }
+#endif  // XNN_ENABLE_CPUINFO
+  const auto& cpuinfo = benchmark::CPUInfo::Get();
+  for (const auto& cache : cpuinfo.caches) {
+    if (cache.level == 2 && (cache.type == "Data" || cache.type == "Unified")) {
+      return cache.size;
+    }
+  }
+  return 0;
+}
 
 int ProcessArgs(int& argc, char**& argv) {
   for (int i = 1; i < argc;) {
