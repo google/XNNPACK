@@ -303,8 +303,8 @@ static void init_bf16_f32_gemm_config(void) {
 }
 
 static void init_pf32_gemm_config(void) {
-#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
   assert(hardware_config != NULL);
   (void) hardware_config;  // May be unused.
   if (XNN_ENABLE_ARM_SME2 && hardware_config->use_arm_sme2) {
@@ -323,8 +323,27 @@ static void init_pf32_gemm_config(void) {
       pf32_gemm_config.nr = nr;
     #endif  // XNN_ENABLE_ARM_SME2
   }
-  assert(pf32_gemm_config.mr <= XNN_MAX_MR);
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+#if XNN_ARCH_ARM64
+  assert(hardware_config != NULL);
+  (void) hardware_config;  // May be unused.
+  if(XNN_ENABLE_ARM_SME && hardware_config->use_arm_sme && !(hardware_config->use_arm_sme2)){
+    #if XNN_ENABLE_ARM_SME
+      const size_t mr = xnn_pf32_gemm_minmax_ukernel_32x32__neonsme_get_mr();
+      const size_t nr = xnn_pf32_gemm_minmax_ukernel_32x32__neonsme_get_nr();
+      pf32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(mr)] =
+          xnn_init_hmp_gemm_ukernel((
+              xnn_gemm_ukernel_fn)xnn_pf32_gemm_minmax_ukernel_32x32__neonsme);
+      pf32_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+      pf32_gemm_config.pack_weights_and_biases = xnn_pack_f32_weights_and_biases;
+      pf32_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_f32_weights_and_biases;
+      pf32_gemm_config.mr = mr;
+      pf32_gemm_config.mr_packed = mr;
+      pf32_gemm_config.nr = nr;
+    #endif // XNN_ENABLE_ARM_SME
+  }
+#endif // XNN_ARCH_ARM64
+  assert(pf32_gemm_config.mr <= XNN_MAX_MR);
 }
 
 static void init_pqs8_qc8w_gemm_config(void) {

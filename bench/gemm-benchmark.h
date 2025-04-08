@@ -109,7 +109,6 @@ void GEMMBenchmark(benchmark::State& state, xnn_f16_gemm_minmax_ukernel_fn gemm,
                    size_t sr,
                    benchmark::utils::IsaCheckFunction isa_check = nullptr);
 
-#if XNN_ENABLE_KLEIDIAI
 void GEMMBenchmark(benchmark::State& state,
                    xnn_pf32_gemm_minmax_ukernel_fn gemm,
                    xnn_init_f32_minmax_params_fn init_minmax_params,
@@ -117,6 +116,5 @@ void GEMMBenchmark(benchmark::State& state,
                    xnn_packed_stride_weights_and_biases_fn packed_stride,
                    size_t mr, size_t nr, size_t kr, size_t sr, size_t mr_packed,
                    benchmark::utils::IsaCheckFunction isa_check);
-#endif  // XNN_ENABLE_KLEIDIAI
 
 #endif  // THIRD_PARTY_XNNPACK_BENCH_GEMM_BENCHMARK_H_
