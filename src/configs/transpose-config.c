@@ -226,6 +226,11 @@ static void init_transpose_config(void) {
           .tile_size = 32,
         };
       }
+    #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+      transpose_config.x32 = (struct xnn_transpose_subconfig) {
+        .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x32_transposec_ukernel__32x32_multi_multi_hvx,
+        .tile_size = 32,
+      };
     #else
       transpose_config.x32 = (struct xnn_transpose_subconfig) {
         .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x32_transposec_ukernel__2x4_scalar_int,

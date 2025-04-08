@@ -35,7 +35,8 @@ SET(PROD_HVX_MICROKERNEL_SRCS
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x32c4-minmax-fp32-hvx.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x32c4-minmax-fp32-hvx.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x32c4-minmax-fp32-hvx.c
-  src/x32-packw/gen/x32-packw-gio-hvx-u2.c)
+  src/x32-packw/gen/x32-packw-gio-hvx-u2.c
+  src/x32-transposec/gen/x32-transposec-32x32-multi-multi-hvx.c)
 
 SET(NON_PROD_HVX_MICROKERNEL_SRCS
   src/f32-gemm/gen/f32-gemm-1x128-minmax-hvx-broadcast.c
@@ -127,7 +128,6 @@ SET(NON_PROD_HVX_MICROKERNEL_SRCS
   src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u32.c
   src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u64.c
   src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u96.c
-  src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u128.c
-  src/x32-transposec/gen/x32-transposec-32x32-multi-multi-hvx.c)
+  src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u128.c)
 
 SET(ALL_HVX_MICROKERNEL_SRCS ${PROD_HVX_MICROKERNEL_SRCS} + ${NON_PROD_HVX_MICROKERNEL_SRCS})
