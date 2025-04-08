@@ -566,7 +566,9 @@ void GemmMicrokernelTester::Test(xnn_qu8_igemm_minmax_ukernel_fn igemm,
                              ((n() - 1) / nr()) * nr() + (n() - 1) % nr() + 1);
   xnnpack::Buffer<int32_t> acc(m() * n());
   xnnpack::Buffer<uint8_t> c_ref(m() * n());
-  xnnpack::Buffer<uint8_t> junk(k() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+  // The junk data needs to be initialized for some kernels because msan will
+  // assert in functions like `lrintf`.
+  xnnpack::Buffer<uint8_t> junk(k() + XNN_EXTRA_BYTES / sizeof(uint8_t), 0);
   xnnpack::Buffer<const uint8_t*> im2col(mr() * ks());
 
   xnnpack::fill_uniform_random_bits(a.data(), a.size(), rng);
@@ -836,7 +838,9 @@ void GemmMicrokernelTester::Test(
   xnnpack::Buffer<int32_t> acc(m() * n());
   xnnpack::Buffer<float> scale(n());
   xnnpack::Buffer<int8_t> c_ref(m() * n());
-  xnnpack::Buffer<int8_t> junk(k() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+  // The junk data needs to be initialized for some kernels because msan will
+  // assert in functions like `lrintf`.
+  xnnpack::Buffer<int8_t> junk(k() + XNN_EXTRA_BYTES / sizeof(uint8_t), 0);
   xnnpack::Buffer<const int8_t*> im2col(mr() * ks());
 
   xnnpack::fill_uniform_random_bits(a.data(), a.size(), rng);
