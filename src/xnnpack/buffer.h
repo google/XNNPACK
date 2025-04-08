@@ -697,17 +697,21 @@ class Tensor {
   // `indices` corresponds to the last dimension of this tensor. Missing
   // dimensions are treated as stride 0.
   size_t flat_offset(const index_type& indices) const {
+    const size_t rank = this->rank();
+    const size_t indices_rank = indices.size();
+    assert(indices_rank >= rank);
     size_t result = 0;
-    assert(indices.size() >= rank());
-    for (size_t i = 0; i < rank(); ++i) {
-      result += strides_[i] * indices[i + indices.size() - rank()];
+    const size_t* strides = strides_.data();
+    const size_t* indices_offset = indices.data() + indices_rank - rank;
+    for (size_t i = 0; i < rank; ++i) {
+      result += strides[i] * indices_offset[i];
     }
     return result;
   }
 
-  size_t flat_offset_variadic(size_t /*dim0*/) const { return 0; }
+  XNN_INLINE size_t flat_offset_variadic(size_t /*dim0*/) const { return 0; }
 
-  size_t flat_offset_variadic(size_t dim0, size_t idx0) const {
+  XNN_INLINE size_t flat_offset_variadic(size_t dim0, size_t idx0) const {
     if (dim0 > 0) {
       // We need to skip the leading dimensions that are broadcasts.
       return 0;
@@ -718,7 +722,8 @@ class Tensor {
   }
 
   template <typename... Args>
-  size_t flat_offset_variadic(size_t dim0, size_t idx0, Args... idxs) const {
+  XNN_INLINE size_t flat_offset_variadic(size_t dim0, size_t idx0,
+                                         Args... idxs) const {
     if (dim0 > 0) {
       // We need to skip the leading dimensions that are broadcasts.
       return flat_offset_variadic(dim0 - 1, idxs...);
