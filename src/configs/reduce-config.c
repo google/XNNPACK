@@ -826,10 +826,9 @@ static void init_f16_rmax_config(void) {
       };
     }
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    #if XNN_ENABLE_AVX512FP16 || XNN_ENABLE_AVX512SKX
-      const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-      assert(hardware_config != NULL);
-    #endif
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    (void) hardware_config;  // May be unused.
     #if XNN_ENABLE_AVX512FP16
       if (hardware_config->use_x86_avx512fp16) {
         f16_rmax_config = (struct xnn_reduce_config) {
