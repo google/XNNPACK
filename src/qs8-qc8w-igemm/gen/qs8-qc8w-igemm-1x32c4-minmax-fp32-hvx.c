@@ -50,7 +50,6 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x32c4__hvx(
   kc = round_up_po2(kc, 4 * sizeof(int8_t));
   int8_t* c0 = c;
 
-  assert(params->fp32_scalar.output_zero_point)) == 2);
   const HVX_Vector voutput_zero_point = Q6_Vh_vsplat_R(params->fp32_scalar.output_zero_point);
   const HVX_Vector voutput_min = Q6_Vb_vsplat_R(params->fp32_scalar.output_min);
   const HVX_Vector voutput_max = Q6_Vb_vsplat_R(params->fp32_scalar.output_max);

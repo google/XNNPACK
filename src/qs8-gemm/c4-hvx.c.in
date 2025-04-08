@@ -69,7 +69,6 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x32c4__
         c${M} = c${M-1};
       }
 
-  assert(params->${PARAMS_STRUCT}.output_zero_point)) == 2);
   const HVX_Vector voutput_zero_point = Q6_Vh_vsplat_R(params->${PARAMS_STRUCT}.output_zero_point);
   const HVX_Vector voutput_min = Q6_Vb_vsplat_R(params->${PARAMS_STRUCT}.output_min);
   const HVX_Vector voutput_max = Q6_Vb_vsplat_R(params->${PARAMS_STRUCT}.output_max);
