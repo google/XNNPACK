@@ -783,6 +783,36 @@ size_t xnn_init_f32_clamp_scalar_params(
   return sizeof(params->f32_minmax);
 }
 
+size_t xnn_init_qs8_vhswish_scalar_params(
+ union xnn_unary_uparams* params,
+  const union xnn_unary_params* op_params,
+  const struct xnn_quantization_params* input_quantization,
+  const struct xnn_quantization_params* output_quantization)
+{
+  params->qs8_vhswish.scalar.input_zero_point = input_quantization->zero_point;
+  params->qs8_vhswish.scalar.output_zero_point = output_quantization->zero_point;
+  params->qs8_vhswish.scalar.input_scale = input_quantization->scale;
+  params->qs8_vhswish.scalar.output_scale = output_quantization->scale;
+  params->qs8_vhswish.scalar.output_min = INT8_MIN;
+  params->qs8_vhswish.scalar.output_max = INT8_MAX;
+  return sizeof(params->qs8_vhswish);
+} 
+
+size_t xnn_init_qu8_vhswish_scalar_params(
+ union xnn_unary_uparams* params,
+  const union xnn_unary_params* op_params,
+  const struct xnn_quantization_params* input_quantization,
+  const struct xnn_quantization_params* output_quantization)
+{
+  params->qs8_vhswish.scalar.input_zero_point = input_quantization->zero_point;
+  params->qs8_vhswish.scalar.output_zero_point = output_quantization->zero_point;
+  params->qs8_vhswish.scalar.input_scale = input_quantization->scale;
+  params->qs8_vhswish.scalar.output_scale = output_quantization->scale;
+  params->qu8_vhswish.scalar.output_min = 0;
+  params->qu8_vhswish.scalar.output_max = UINT8_MAX;
+  return sizeof(params->qu8_vhswish);
+} 
+
 size_t xnn_init_s8_minmax_scalar_params(
   struct xnn_s8_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t output_min,

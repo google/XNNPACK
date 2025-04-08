@@ -559,6 +559,17 @@ struct xnn_qs8_qc8w_packing_params {
   float scale_multiplier;
 };
 
+union xnn_qs8_vhswish_scalar_params {
+  struct {
+    int32_t input_zero_point;
+    float input_scale;
+    float output_scale;
+    int32_t output_zero_point;
+    int32_t output_min;
+    int32_t output_max;
+  } scalar;
+}; 
+
 struct xnn_x32_packb_params {
   char _;  // Dummy member variable to comply with the C standard
 };
@@ -586,6 +597,8 @@ union xnn_unary_uparams {
   struct xnn_f32_lrelu_params f32_lrelu;
   struct xnn_qs8_lrelu_params qs8_lrelu;
   struct xnn_qu8_lrelu_params qu8_lrelu;
+  union xnn_qs8_vhswish_scalar_params qs8_vhswish;
+  union xnn_qs8_vhswish_scalar_params qu8_vhswish;
   struct xnn_f32_minmax_params f32_minmax;
   struct xnn_f16_minmax_params f16_minmax;
   struct xnn_s8_minmax_params s8_minmax;

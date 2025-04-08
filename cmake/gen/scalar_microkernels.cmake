@@ -194,6 +194,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/qs8-vaddc/gen/qs8-vaddc-minmax-scalar-u4.c
   src/qs8-vcvt/gen/qs8-vcvt-scalar-u1.c
   src/qs8-vcvt/gen/qs8-vcvt-scalar-u4.c
+  src/qs8-vhswish/gen/qs8-vhswish-scalar-u8.c
   src/qs8-vlrelu/gen/qs8-vlrelu-scalar-andxor-u4.c
   src/qs8-vlrelu/gen/qs8-vlrelu-scalar-select-u4.c
   src/qs8-vmul/gen/qs8-vmul-minmax-fp32-scalar-u4.c
@@ -222,6 +223,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/qu8-vaddc/gen/qu8-vaddc-minmax-scalar-u4.c
   src/qu8-vcvt/gen/qu8-vcvt-scalar-u1.c
   src/qu8-vcvt/gen/qu8-vcvt-scalar-u4.c
+  src/qu8-vhswish/gen/qu8-vhswish-scalar-u8.c
   src/qu8-vlrelu/gen/qu8-vlrelu-scalar-andxor-u4.c
   src/qu8-vlrelu/gen/qu8-vlrelu-scalar-select-u4.c
   src/qu8-vmul/gen/qu8-vmul-minmax-fp32-scalar-u4.c
@@ -647,6 +649,9 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/qs8-vadd/gen/qs8-vadd-minmax-scalar-u2.c
   src/qs8-vaddc/gen/qs8-vaddc-minmax-scalar-u2.c
   src/qs8-vcvt/gen/qs8-vcvt-scalar-u2.c
+  src/qs8-vhswish/gen/qs8-vhswish-scalar-u1.c
+  src/qs8-vhswish/gen/qs8-vhswish-scalar-u2.c
+  src/qs8-vhswish/gen/qs8-vhswish-scalar-u4.c
   src/qs8-vlrelu/gen/qs8-vlrelu-scalar-andxor-u1.c
   src/qs8-vlrelu/gen/qs8-vlrelu-scalar-andxor-u2.c
   src/qs8-vlrelu/gen/qs8-vlrelu-scalar-select-u1.c
@@ -733,6 +738,9 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/qu8-vadd/gen/qu8-vadd-minmax-scalar-u2.c
   src/qu8-vaddc/gen/qu8-vaddc-minmax-scalar-u2.c
   src/qu8-vcvt/gen/qu8-vcvt-scalar-u2.c
+  src/qu8-vhswish/gen/qu8-vhswish-scalar-u1.c
+  src/qu8-vhswish/gen/qu8-vhswish-scalar-u2.c
+  src/qu8-vhswish/gen/qu8-vhswish-scalar-u4.c
   src/qu8-vlrelu/gen/qu8-vlrelu-scalar-andxor-u1.c
   src/qu8-vlrelu/gen/qu8-vlrelu-scalar-andxor-u2.c
   src/qu8-vlrelu/gen/qu8-vlrelu-scalar-select-u1.c
