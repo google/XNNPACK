@@ -111,8 +111,9 @@ class SpaceToDepthOperatorTester {
   void TestNHWCxX8() const {
     xnnpack::Buffer<int8_t> input(
         (batch_size() * input_height() * input_width() - 1) *
-            input_channels_stride() +
-        input_channels() + XNN_EXTRA_BYTES / (sizeof(int8_t)));
+                input_channels_stride() +
+            input_channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<int8_t> output(
         (batch_size() * output_height() * output_width() - 1) *
             output_channels_stride() +
@@ -193,8 +194,9 @@ class SpaceToDepthOperatorTester {
   void TestNHWCxX16() const {
     xnnpack::Buffer<int16_t> input(
         (batch_size() * input_height() * input_width() - 1) *
-            input_channels_stride() +
-        input_channels() + XNN_EXTRA_BYTES / (sizeof(int16_t)));
+                input_channels_stride() +
+            input_channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<int16_t> output(
         (batch_size() * output_height() * output_width() - 1) *
             output_channels_stride() +
@@ -275,8 +277,9 @@ class SpaceToDepthOperatorTester {
   void TestNHWCxX32() const {
     xnnpack::Buffer<int32_t> input(
         (batch_size() * input_height() * input_width() - 1) *
-            input_channels_stride() +
-        input_channels() + XNN_EXTRA_BYTES / (sizeof(int32_t)));
+                input_channels_stride() +
+            input_channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<int32_t> output(
         (batch_size() * output_height() * output_width() - 1) *
             output_channels_stride() +

@@ -44,8 +44,7 @@ static void bf16_gemm(benchmark::State& state,
   auto f32rng =
       std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
-  xnnpack::Buffer<xnn_bfloat16> a(mc * kc +
-                                  XNN_EXTRA_BYTES / sizeof(xnn_bfloat16));
+  xnnpack::Buffer<xnn_bfloat16> a(mc * kc, xnnpack::XnnExtraBytes);
   std::generate(a.begin(), a.end(),
                 [&] { return xnn_bfloat16_from_float(f32rng(rng)); });
   xnnpack::Buffer<xnn_bfloat16> k(nc * kc);

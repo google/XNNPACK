@@ -88,8 +88,8 @@ class IBilinearMicrokernelTester {
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
     xnnpack::Buffer<const xnn_float16*> indirection(pixels() * 4);
-    xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
-                                       indirection.size() * channels());
+    xnnpack::Buffer<xnn_float16> input(indirection.size() * channels(),
+                                       xnnpack::XnnExtraBytes);
     xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> packed_weights(
         pixels() * 2);
     xnnpack::Buffer<xnn_float16> output((pixels() - 1) * output_stride() +
@@ -147,8 +147,8 @@ class IBilinearMicrokernelTester {
     std::uniform_real_distribution<float> f32dist;
 
     xnnpack::Buffer<const float*> indirection(pixels() * 4);
-    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
-                                 indirection.size() * channels());
+    xnnpack::Buffer<float> input(indirection.size() * channels(),
+                                 xnnpack::XnnExtraBytes);
     xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> packed_weights(pixels() *
                                                                     2);
     xnnpack::Buffer<float> output((pixels() - 1) * output_stride() +
@@ -206,8 +206,8 @@ class IBilinearMicrokernelTester {
     std::uniform_int_distribution<int16_t> w11dist(0, 2047);
 
     xnnpack::Buffer<const int8_t*> indirection(pixels() * 4);
-    xnnpack::Buffer<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
-                                  indirection.size() * channels());
+    xnnpack::Buffer<int8_t> input(indirection.size() * channels(),
+                                  xnnpack::XnnExtraBytes);
     xnnpack::Buffer<int16_t, XNN_ALLOCATION_ALIGNMENT> packed_weights(pixels() *
                                                                       2);
     xnnpack::Buffer<int8_t> output((pixels() - 1) * output_stride() +
@@ -271,8 +271,8 @@ class IBilinearMicrokernelTester {
     std::uniform_int_distribution<int16_t> w11dist(0, 2047);
 
     xnnpack::Buffer<const uint8_t*> indirection(pixels() * 4);
-    xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
-                                   indirection.size() * channels());
+    xnnpack::Buffer<uint8_t> input(indirection.size() * channels(),
+                                   xnnpack::XnnExtraBytes);
     xnnpack::Buffer<int16_t, XNN_ALLOCATION_ALIGNMENT> packed_weights(pixels() *
                                                                       2);
     xnnpack::Buffer<uint8_t> output((pixels() - 1) * output_stride() +
@@ -333,9 +333,9 @@ class IBilinearMicrokernelTester {
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
     xnnpack::Buffer<const xnn_float16*> indirection(pixels() * 2);
-    xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
-                                       (channels() - 1) * input_stride() +
-                                       4 * pixels());
+    xnnpack::Buffer<xnn_float16> input(
+        (channels() - 1) * input_stride() + 4 * pixels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> packed_weights(
         pixels() * 2);
     xnnpack::Buffer<xnn_float16> output(pixels() * channels());
@@ -400,9 +400,9 @@ class IBilinearMicrokernelTester {
     std::uniform_real_distribution<float> f32dist;
 
     xnnpack::Buffer<const float*> indirection(pixels() * 2);
-    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
-                                 (channels() - 1) * input_stride() +
-                                 4 * pixels());
+    xnnpack::Buffer<float> input(
+        (channels() - 1) * input_stride() + 4 * pixels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> packed_weights(pixels() *
                                                                     2);
     xnnpack::Buffer<float> output(pixels() * channels());

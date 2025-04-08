@@ -110,8 +110,9 @@ class DepthToSpaceOperatorTester {
 
     xnnpack::Buffer<int8_t> input(
         (batch_size() * input_height() * input_width() - 1) *
-            input_channels_stride() +
-        input_channels() + XNN_EXTRA_BYTES / sizeof(int8_t));
+                input_channels_stride() +
+            input_channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<int8_t> output(
         (batch_size() * output_height() * output_width() - 1) *
             output_channels_stride() +
@@ -190,8 +191,9 @@ class DepthToSpaceOperatorTester {
 
     xnnpack::Buffer<int16_t> input(
         (batch_size() * input_height() * input_width() - 1) *
-            input_channels_stride() +
-        input_channels() + XNN_EXTRA_BYTES / sizeof(int16_t));
+                input_channels_stride() +
+            input_channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<int16_t> output(
         (batch_size() * output_height() * output_width() - 1) *
             output_channels_stride() +
@@ -269,8 +271,9 @@ class DepthToSpaceOperatorTester {
 
     xnnpack::Buffer<int32_t> input(
         (batch_size() * input_height() * input_width() - 1) *
-            input_channels_stride() +
-        input_channels() + XNN_EXTRA_BYTES / sizeof(int32_t));
+                input_channels_stride() +
+            input_channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<int32_t> output(
         (batch_size() * output_height() * output_width() - 1) *
             output_channels_stride() +
@@ -347,9 +350,9 @@ class DepthToSpaceOperatorTester {
         std::bind(std::uniform_int_distribution<int16_t>(), std::ref(rng));
 
     xnnpack::Buffer<int16_t> input(
-        XNN_EXTRA_BYTES / sizeof(int16_t) +
         ((batch_size() - 1) * input_channels_stride() + input_channels()) *
-            input_height() * input_width());
+            input_height() * input_width(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<int16_t> output(
         (batch_size() * output_height() * output_width() - 1) *
             output_channels_stride() +
@@ -430,9 +433,9 @@ class DepthToSpaceOperatorTester {
         std::bind(std::uniform_int_distribution<int32_t>(), std::ref(rng));
 
     xnnpack::Buffer<int32_t> input(
-        XNN_EXTRA_BYTES / sizeof(int32_t) +
         ((batch_size() - 1) * input_channels_stride() + input_channels()) *
-            input_height() * input_width());
+            input_height() * input_width(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<int32_t> output(
         (batch_size() * output_height() * output_width() - 1) *
             output_channels_stride() +

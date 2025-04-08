@@ -642,7 +642,7 @@ TEST(SUBGRAPH_FP16, fully_connected_qd8_f16_qc8w) {
   xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.f, 1.f),
                           std::ref(rng));
-  xnnpack::Buffer<float> input(15 + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> input(15, xnnpack::XnnExtraBytes);
   std::generate(input.begin(), input.end(), std::ref(f32rng));
   xnnpack::Buffer<float> reference_output(10), output(10);
   ASSERT_EQ(tester.NumNodes(), 4);

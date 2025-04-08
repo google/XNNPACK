@@ -49,8 +49,8 @@ static void f32_conv_hwc2chw(
   const size_t output_width =
       (input_width + 2 * padding - kernel_size) / subsampling + 1;
 
-  xnnpack::Buffer<float> input(input_height * input_width * input_channels +
-                               XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> input(input_height * input_width * input_channels,
+                               xnnpack::XnnExtraBytes);
   std::generate(input.begin(), input.end(), std::ref(f32rng));
   xnnpack::Buffer<float> kernel(output_channels * kernel_size * kernel_size *
                                 input_channels);
@@ -59,7 +59,7 @@ static void f32_conv_hwc2chw(
   std::generate(bias.begin(), bias.end(), std::ref(f32rng));
 
   xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> zero(
-      input_channels * input_width + XNN_EXTRA_BYTES / sizeof(float));
+      input_channels * input_width, xnnpack::XnnExtraBytes);
 
   const size_t weights_elements =
       (kernel_size * kernel_size * input_channels + 1) *

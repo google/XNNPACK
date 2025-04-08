@@ -61,7 +61,7 @@ class TransposeOperatorTester {
   void TestX8() const {
     size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1},
                                    std::multiplies<size_t>());
-    xnnpack::Buffer<uint8_t> input(count + XNN_EXTRA_BYTES / sizeof(uint8_t));
+    xnnpack::Buffer<uint8_t> input(count, xnnpack::XnnExtraBytes);
     xnnpack::Buffer<uint8_t> output(count);
     std::vector<size_t> input_stride(num_dims(), 1);
     std::vector<size_t> output_stride(num_dims(), 1);
@@ -105,7 +105,7 @@ class TransposeOperatorTester {
   void TestRunX8() const {
     const size_t count = std::accumulate(dims().cbegin(), dims().cend(),
                                          size_t{1}, std::multiplies<size_t>());
-    xnnpack::Buffer<uint8_t> input(count + XNN_EXTRA_BYTES / sizeof(uint8_t));
+    xnnpack::Buffer<uint8_t> input(count, xnnpack::XnnExtraBytes);
     xnnpack::Buffer<uint8_t> output(count);
     std::vector<size_t> input_stride(input.size(), 1);
     std::vector<size_t> output_stride(input.size(), 1);
@@ -134,8 +134,7 @@ class TransposeOperatorTester {
   void TestX16() const {
     size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1},
                                    std::multiplies<size_t>());
-    xnnpack::Buffer<xnn_float16> input(count +
-                                       XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    xnnpack::Buffer<xnn_float16> input(count, xnnpack::XnnExtraBytes);
     xnnpack::Buffer<xnn_float16> output(count);
     std::vector<size_t> input_stride(num_dims(), 1);
     std::vector<size_t> output_stride(num_dims(), 1);
@@ -180,8 +179,7 @@ class TransposeOperatorTester {
   void TestRunX16() const {
     const size_t count = std::accumulate(dims().cbegin(), dims().cend(),
                                          size_t{1}, std::multiplies<size_t>());
-    xnnpack::Buffer<xnn_float16> input(count +
-                                       XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    xnnpack::Buffer<xnn_float16> input(count, xnnpack::XnnExtraBytes);
     xnnpack::Buffer<xnn_float16> output(count);
     std::vector<size_t> input_stride(input.size(), 1);
     std::vector<size_t> output_stride(input.size(), 1);
@@ -210,7 +208,7 @@ class TransposeOperatorTester {
   void TestX32() const {
     size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1},
                                    std::multiplies<size_t>());
-    xnnpack::Buffer<uint32_t> input(count + XNN_EXTRA_BYTES / sizeof(uint32_t));
+    xnnpack::Buffer<uint32_t> input(count, xnnpack::XnnExtraBytes);
     xnnpack::Buffer<uint32_t> output(count);
     std::vector<size_t> input_stride(num_dims(), 1);
     std::vector<size_t> output_stride(num_dims(), 1);
@@ -255,7 +253,7 @@ class TransposeOperatorTester {
   void TestX64() const {
     size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1},
                                    std::multiplies<size_t>());
-    xnnpack::Buffer<uint64_t> input(count + XNN_EXTRA_BYTES / sizeof(uint64_t));
+    xnnpack::Buffer<uint64_t> input(count, xnnpack::XnnExtraBytes);
     xnnpack::Buffer<uint64_t> output(count);
     std::vector<size_t> input_stride(num_dims(), 1);
     std::vector<size_t> output_stride(num_dims(), 1);
@@ -300,7 +298,7 @@ class TransposeOperatorTester {
   void TestRunX32() const {
     const size_t count = std::accumulate(dims().cbegin(), dims().cend(),
                                          size_t{1}, std::multiplies<size_t>());
-    xnnpack::Buffer<uint32_t> input(count + XNN_EXTRA_BYTES / sizeof(uint32_t));
+    xnnpack::Buffer<uint32_t> input(count, xnnpack::XnnExtraBytes);
     xnnpack::Buffer<uint32_t> output(count);
     std::vector<size_t> input_stride(input.size(), 1);
     std::vector<size_t> output_stride(input.size(), 1);
@@ -329,7 +327,7 @@ class TransposeOperatorTester {
   void TestRunX64() const {
     const size_t count = std::accumulate(dims().cbegin(), dims().cend(),
                                          size_t{1}, std::multiplies<size_t>());
-    xnnpack::Buffer<uint64_t> input(count + XNN_EXTRA_BYTES / sizeof(uint64_t));
+    xnnpack::Buffer<uint64_t> input(count, xnnpack::XnnExtraBytes);
     xnnpack::Buffer<uint64_t> output(count);
     std::vector<size_t> input_stride(input.size(), 1);
     std::vector<size_t> output_stride(input.size(), 1);

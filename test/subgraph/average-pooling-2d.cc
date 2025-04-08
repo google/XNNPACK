@@ -119,7 +119,7 @@ void TestImpl() {
         continue;
       }
 
-      Tensor<T> input(input_shape, PaddingBytes{XNN_EXTRA_BYTES});
+      Tensor<T> input(input_shape, XnnExtraBytes);
       DatatypeGenerator<T> gen(-10.0f, 20.0f);
       input.generate([&]() { return gen(rng); });
 

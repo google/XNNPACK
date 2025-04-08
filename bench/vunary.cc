@@ -143,8 +143,8 @@ void vunary(benchmark::State& state, uint64_t arch_flags,
   auto rng = std::mt19937(random_device());
   UniformDistribution<TIn> dist;
 
-  xnnpack::Buffer<TIn, XNN_ALLOCATION_ALIGNMENT> x(
-      num_elements + XNN_EXTRA_BYTES / sizeof(TIn));
+  xnnpack::Buffer<TIn, XNN_ALLOCATION_ALIGNMENT> x(num_elements,
+                                                   xnnpack::XnnExtraBytes);
   xnnpack::Buffer<TOut, XNN_ALLOCATION_ALIGNMENT> y(num_elements);
   std::generate(x.begin(), x.end(), [&]() { return dist(rng); });
 

@@ -31,8 +31,8 @@ void TestTranspose(transpose_ukernel ukernel, size_t input_stride,
                    size_t output_stride, size_t input_element_stride,
                    size_t output_element_stride, size_t element_size,
                    size_t width, size_t height) {
-  xnnpack::Buffer<uint8_t> input(input_stride * height * input_element_stride +
-                                 XNN_EXTRA_BYTES);
+  xnnpack::Buffer<uint8_t> input(input_stride * height * input_element_stride,
+                                 xnnpack::XnnExtraBytes);
   xnnpack::Buffer<uint8_t> output(output_stride * width *
                                   output_element_stride);
   std::iota(input.begin(), input.end(), 0);

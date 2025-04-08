@@ -38,7 +38,8 @@ void max_pooling_u8(benchmark::State& state, const char* net) {
       (2 * padding_size + input_width - pooling_size) / stride + 1;
 
   xnnpack::Buffer<uint8_t> input(
-      batch_size * input_height * input_width * channels + XNN_EXTRA_BYTES);
+      batch_size * input_height * input_width * channels,
+      xnnpack::XnnExtraBytes);
   xnnpack::fill_uniform_random_bits(input.data(), input.size(), rng);
   xnnpack::Buffer<uint8_t> output(batch_size * output_height * output_width *
                                   channels);
@@ -122,9 +123,9 @@ void max_pooling_f32(benchmark::State& state, const char* net) {
   const size_t output_width =
       (2 * padding_size + input_width - pooling_size) / stride + 1;
 
-  xnnpack::Buffer<float> input(batch_size * input_height * input_width *
-                                   channels +
-                               XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> input(
+      batch_size * input_height * input_width * channels,
+      xnnpack::XnnExtraBytes);
   std::generate(input.begin(), input.end(), std::ref(f32rng));
   xnnpack::Buffer<float> output(batch_size * output_height * output_width *
                                 channels);

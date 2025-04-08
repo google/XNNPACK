@@ -53,7 +53,7 @@ static void GEMMBenchmark(
   auto f32rng =
       std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
-  xnnpack::Buffer<float> a(mc * kc + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> a(mc * kc, xnnpack::XnnExtraBytes);
   std::generate(a.begin(), a.end(), std::ref(f32rng));
   xnnpack::Buffer<float> k(nc * kc);
   std::generate(k.begin(), k.end(), std::ref(f32rng));
@@ -124,7 +124,7 @@ static void GEMMGoiBenchmark(
   auto f32rng =
       std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
-  xnnpack::Buffer<float> a(mc * kc + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> a(mc * kc, xnnpack::XnnExtraBytes);
   std::generate(a.begin(), a.end(), std::ref(f32rng));
 
   const size_t k_elements = nc * kc;
@@ -192,7 +192,7 @@ static void PPMM1PBenchmark(
   auto f32rng =
       std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
-  xnnpack::Buffer<float> a(mc * kc + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> a(mc * kc, xnnpack::XnnExtraBytes);
   std::generate(a.begin(), a.end(), std::ref(f32rng));
   xnnpack::Buffer<float> k(nc * kc);
   std::generate(k.begin(), k.end(), std::ref(f32rng));
@@ -271,7 +271,7 @@ static void PPMM2PBenchmark(
   auto f32rng =
       std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
-  xnnpack::Buffer<float> a(mc * kc + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> a(mc * kc, xnnpack::XnnExtraBytes);
   std::generate(a.begin(), a.end(), std::ref(f32rng));
   xnnpack::Buffer<float> k(nc * kc);
   std::generate(k.begin(), k.end(), std::ref(f32rng));
@@ -348,7 +348,7 @@ static void RuyBenchmark(benchmark::State& state, uint32_t threads) {
                                      benchmark::utils::GetMaxCacheSize(),
                                      sizeof(float) * (nc * (mc + kc + 1)));
 
-  xnnpack::Buffer<float> a(mc * kc + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> a(mc * kc, xnnpack::XnnExtraBytes);
   std::generate(a.begin(), a.end(), std::ref(f32rng));
   xnnpack::Buffer<float> k(num_buffers * nc * kc);
   std::generate(k.begin(), k.end(), std::ref(f32rng));

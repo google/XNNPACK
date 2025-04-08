@@ -91,8 +91,8 @@ void TestImpl() {
           input_shape[3],
       };
 
-      Tensor<T> value(input_shape, PaddingBytes{XNN_EXTRA_BYTES});
-      Tensor<int32_t> index(input_shape, PaddingBytes{XNN_EXTRA_BYTES});
+      Tensor<T> value(input_shape, XnnExtraBytes);
+      Tensor<int32_t> index(input_shape, XnnExtraBytes);
       DatatypeGenerator<T> value_gen(-10.0f, 20.0f);
       DatatypeGenerator<int32_t> index_gen(0, kh.size * kw.size - 1);
       value.generate([&]() { return value_gen(rng); });

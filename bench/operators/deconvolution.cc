@@ -67,9 +67,9 @@ void xnnpack_deconvolution_qu8(benchmark::State& state, const char* net) {
                                        padding_width) -
                               padding_width;
 
-  xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES + batch_size * input_height *
-                                                       input_width *
-                                                       input_channels);
+  xnnpack::Buffer<uint8_t> input(
+      batch_size * input_height * input_width * input_channels,
+      xnnpack::XnnExtraBytes);
   xnnpack::fill_uniform_random_bits(input.data(), input.size(), rng);
   xnnpack::Buffer<uint8_t> kernel(output_channels * kernel_height *
                                   kernel_width * input_channels);
@@ -188,9 +188,9 @@ void xnnpack_deconvolution_f32(benchmark::State& state, const char* net) {
                                        padding_width) -
                               padding_width;
 
-  xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
-                               batch_size * input_height * input_width *
-                                   input_channels);
+  xnnpack::Buffer<float> input(
+      batch_size * input_height * input_width * input_channels,
+      xnnpack::XnnExtraBytes);
   std::generate(input.begin(), input.end(), std::ref(f32rng));
   xnnpack::Buffer<float> kernel(output_channels * kernel_height * kernel_width *
                                 input_channels);

@@ -72,15 +72,15 @@ static void bench_impl(uint64_t arch_flags, benchmark::State& state,
   const size_t c_stride =
       benchmark::utils::RoundUp<size_t>(channels, channel_tile);
 
-  xnnpack::Buffer<float> a(channels * input_height * input_width +
-                           XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> a(channels * input_height * input_width,
+                           xnnpack::XnnExtraBytes);
   std::generate(a.begin(), a.end(), std::ref(f32rng));
   xnnpack::Buffer<float> k(channels * kernel_height * kernel_width);
   std::generate(k.begin(), k.end(), std::ref(f32rng));
   xnnpack::Buffer<float> b(channels);
   std::generate(b.begin(), b.end(), std::ref(f32rng));
 
-  xnnpack::Buffer<float> z(channels + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> z(channels, xnnpack::XnnExtraBytes);
 
   const size_t w_elements = (kernel_size + 1) * c_stride;
   // Can read (primary_tile - kernel_size) elements after end of indirection

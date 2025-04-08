@@ -35,10 +35,10 @@ static void f32_vcmul(benchmark::State& state, uint64_t arch_flags,
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f),
                           std::ref(rng));
 
-  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> a(
-      num_elements * 2 + XNN_EXTRA_BYTES / sizeof(float));
-  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> b(
-      num_elements * 2 + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> a(num_elements * 2,
+                                                     xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> b(num_elements * 2,
+                                                     xnnpack::XnnExtraBytes);
   xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> product(num_elements * 2);
   std::generate(a.begin(), a.end(), std::ref(f32rng));
   std::generate(b.begin(), b.end(), std::ref(f32rng));

@@ -54,8 +54,7 @@ static void f32_gemm(benchmark::State& state,
   auto f32rng =
       std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
-  xnnpack::Buffer<float> a(batch * dim_m * dim_k +
-                           XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> a(batch * dim_m * dim_k, xnnpack::XnnExtraBytes);
   std::generate(a.begin(), a.end(), std::ref(f32rng));
   xnnpack::Buffer<float> b(batch * dim_n * dim_k);
   std::generate(b.begin(), b.end(), std::ref(f32rng));
@@ -121,8 +120,7 @@ static void f32_ppmm1p(benchmark::State& state,
   auto f32rng =
       std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
-  xnnpack::Buffer<float> a(batch * dim_m * dim_k +
-                           XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> a(batch * dim_m * dim_k, xnnpack::XnnExtraBytes);
   std::generate(a.begin(), a.end(), std::ref(f32rng));
   xnnpack::Buffer<float> b(batch * dim_n * dim_k);
   std::generate(b.begin(), b.end(), std::ref(f32rng));
@@ -195,8 +193,7 @@ static void f32_ppmm2p(benchmark::State& state,
   auto f32rng =
       std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
-  xnnpack::Buffer<float> a(batch * dim_m * dim_k +
-                           XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> a(batch * dim_m * dim_k, xnnpack::XnnExtraBytes);
   std::generate(a.begin(), a.end(), std::ref(f32rng));
   xnnpack::Buffer<float> b(batch * dim_n * dim_k);
   std::generate(b.begin(), b.end(), std::ref(f32rng));

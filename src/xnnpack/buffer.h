@@ -119,13 +119,13 @@ T get_reduce_identity(xnn_reduce_operator op) {
 }
 
 struct PaddingBytes {
-  size_t value;
+  int value;
 };
+
+static constexpr PaddingBytes XnnExtraBytes = {XNN_EXTRA_BYTES};
 
 // This is a container similar to std::vector, but it leaves the memory
 // uninitialized, supports alignment.
-// TODO: It would be good if this also managed padding in a way that allowed
-// the client code to see the unpadded data, and the padding was hidden.
 template <typename T, size_t Alignment = alignof(T)>
 class Buffer {
   static_assert(std::is_trivial<T>::value, "");
@@ -179,7 +179,8 @@ class Buffer {
       : data_(reinterpret_cast<T*>(
             allocate(size * sizeof(T) + extra_bytes.value))),
         size_(size) {}
-  Buffer(size_t size, T value) : Buffer(size) {
+  Buffer(size_t size, T value, PaddingBytes extra_bytes = {0})
+      : Buffer(size, extra_bytes) {
     std::fill(begin(), end(), value);
   }
   Buffer(std::initializer_list<T> init) : Buffer(init.size()) {

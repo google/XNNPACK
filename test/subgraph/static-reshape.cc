@@ -61,8 +61,7 @@ void TestImpl() {
         random_quantization(xnn_datatype_of<T>(), rng);
 
     Tensor<T> output(random_shape(rng));
-    Tensor<T> input(random_reshape(rng, output.size()),
-                    PaddingBytes{XNN_EXTRA_BYTES});
+    Tensor<T> input(random_reshape(rng, output.size()), xnnpack::XnnExtraBytes);
     DatatypeGenerator<T> generator(quantization);
     input.generate([&]() { return generator(rng); });
 

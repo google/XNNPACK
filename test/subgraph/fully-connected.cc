@@ -374,7 +374,7 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid,
       std::swap(filter_shape[0], filter_shape[1]);
     }
     auto filter_gen = MakeDatatypeGenerator(Filter());
-    Tensor<Filter> filter(filter_shape, PaddingBytes{XNN_EXTRA_BYTES});
+    Tensor<Filter> filter(filter_shape, XnnExtraBytes);
     filter.generate([&]() { return filter_gen(rng); });
 
     // (Maybe) make a random bias.
@@ -382,7 +382,7 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid,
     if (rng() & 1) {
       std::vector<size_t> bias_shape = {output_channels};
       DatatypeGenerator<Bias> bias_gen = MakeDatatypeGenerator(Bias());
-      Tensor<Bias> bias(bias_shape, PaddingBytes{XNN_EXTRA_BYTES});
+      Tensor<Bias> bias(bias_shape, XnnExtraBytes);
       bias.generate([&]() { return bias_gen(rng); });
     }
 
@@ -490,7 +490,7 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid,
         output_shape = Reshape2D(output_shape);
       }
 
-      Tensor<Input> input(input_shape, PaddingBytes{XNN_EXTRA_BYTES});
+      Tensor<Input> input(input_shape, XnnExtraBytes);
       input.generate([&]() { return input_gen(rng); });
       if (convert_to != xnn_datatype_invalid) {
         // If we are dynamically quantizing, preprocess the data to have zero

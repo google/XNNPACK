@@ -36,13 +36,12 @@ void VBinaryMicrokernelTester::Test(xnn_f16_vbinary_ukernel_fn vbinary,
   xnnpack::DatatypeGenerator<xnn_float16> f16dist;
 
   const int stride_b = broadcast_b() ? 0 : 1;
-  xnnpack::Buffer<xnn_float16> a(batch_size() +
-                                 XNN_EXTRA_BYTES / sizeof(xnn_float16));
-  xnnpack::Buffer<xnn_float16> b(stride_b * batch_size() +
-                                 XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  xnnpack::Buffer<xnn_float16> a(batch_size(), xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<xnn_float16> b(broadcast_b() ? 1 : batch_size(),
+                                 xnnpack::XnnExtraBytes);
   xnnpack::Buffer<xnn_float16> y(
-      batch_size() +
-      (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(xnn_float16) : 0));
+      batch_size(),
+      xnnpack::PaddingBytes{inplace_a() || inplace_b() ? XNN_EXTRA_BYTES : 0});
   xnnpack::Buffer<xnn_float16> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     if (!inplace_a()) {
@@ -85,21 +84,24 @@ void VBinaryMicrokernelTester::Test(xnn_f32_vbinary_ukernel_fn vbinary,
   xnnpack::DatatypeGenerator<float> f32dist;
 
   const int stride_b = broadcast_b() ? 0 : 1;
-  xnnpack::Buffer<float> a(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-  xnnpack::Buffer<float> b(stride_b * batch_size() +
-                           XNN_EXTRA_BYTES / sizeof(float));
-  xnnpack::Buffer<float> y(batch_size() + (inplace_a() || inplace_b()
-                                               ? XNN_EXTRA_BYTES / sizeof(float)
-                                               : 0));
+  xnnpack::Buffer<float> a(batch_size(), xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<float> b(broadcast_b() ? 1 : batch_size(),
+                           xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<float> y(
+      batch_size(),
+      xnnpack::PaddingBytes{inplace_a() || inplace_b() ? XNN_EXTRA_BYTES : 0});
   xnnpack::Buffer<float> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     if (!inplace_a()) {
+      std::cout << __LINE__ << std::endl;
       std::generate(a.begin(), a.end(), [&]() { return f32dist(rng); });
     }
     if (!inplace_b()) {
+      std::cout << __LINE__ << std::endl;
       std::generate(b.begin(), b.end(), [&]() { return f32dist(rng); });
     }
     if (inplace_a() || inplace_b()) {
+      std::cout << __LINE__ << std::endl;
       std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
     }
     const float* a_data = inplace_a() ? y.data() : a.data();
@@ -131,12 +133,12 @@ void VBinaryMicrokernelTester::Test(
         0, std::numeric_limits<uint8_t>::max())(rng);
   };
 
-  xnnpack::Buffer<uint8_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
-  xnnpack::Buffer<uint8_t> b(
-      broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+  xnnpack::Buffer<uint8_t> a(batch_size(), xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<uint8_t> b(broadcast_b() ? 1 : batch_size(),
+                             xnnpack::XnnExtraBytes);
   xnnpack::Buffer<uint8_t> y(
-      batch_size() +
-      (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(uint8_t) : 0));
+      batch_size(),
+      xnnpack::PaddingBytes{inplace_a() || inplace_b() ? XNN_EXTRA_BYTES : 0});
   xnnpack::Buffer<float> y_fp(batch_size());
   xnnpack::Buffer<uint8_t> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -196,12 +198,12 @@ void VBinaryMicrokernelTester::Test(
         0, std::numeric_limits<uint8_t>::max())(rng);
   };
 
-  xnnpack::Buffer<uint8_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
-  xnnpack::Buffer<uint8_t> b(
-      broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+  xnnpack::Buffer<uint8_t> a(batch_size(), xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<uint8_t> b(broadcast_b() ? 1 : batch_size(),
+                             xnnpack::XnnExtraBytes);
   xnnpack::Buffer<uint8_t> y(
-      batch_size() +
-      (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(uint8_t) : 0));
+      batch_size(),
+      xnnpack::PaddingBytes{inplace_a() || inplace_b() ? XNN_EXTRA_BYTES : 0});
   xnnpack::Buffer<float> y_fp(batch_size());
   xnnpack::Buffer<uint8_t> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -265,11 +267,11 @@ void VBinaryMicrokernelTester::Test(
         std::numeric_limits<int8_t>::max())(rng);
   };
 
-  xnnpack::Buffer<int8_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
-  xnnpack::Buffer<int8_t> b(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
+  xnnpack::Buffer<int8_t> a(batch_size(), xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<int8_t> b(batch_size(), xnnpack::XnnExtraBytes);
   xnnpack::Buffer<int8_t> y(
-      batch_size() +
-      (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(int8_t) : 0));
+      batch_size(),
+      xnnpack::PaddingBytes{inplace_a() || inplace_b() ? XNN_EXTRA_BYTES : 0});
   xnnpack::Buffer<float> y_fp(batch_size());
   xnnpack::Buffer<int8_t> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -334,11 +336,11 @@ void VBinaryMicrokernelTester::Test(
         std::numeric_limits<int8_t>::max())(rng);
   };
 
-  xnnpack::Buffer<int8_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
-  xnnpack::Buffer<int8_t> b(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
+  xnnpack::Buffer<int8_t> a(batch_size(), xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<int8_t> b(batch_size(), xnnpack::XnnExtraBytes);
   xnnpack::Buffer<int8_t> y(
-      batch_size() +
-      (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(int8_t) : 0));
+      batch_size(),
+      xnnpack::PaddingBytes{inplace_a() || inplace_b() ? XNN_EXTRA_BYTES : 0});
   xnnpack::Buffer<float> y_fp(batch_size());
   xnnpack::Buffer<int8_t> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {

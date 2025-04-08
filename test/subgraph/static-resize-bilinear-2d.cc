@@ -136,7 +136,7 @@ void TestImpl() {
 
     for (int reshape = 0; reshape < 2; ++reshape) {
       std::vector<size_t> input_shape = random_shape(rng, 4);
-      Tensor<T> input(input_shape, PaddingBytes{XNN_EXTRA_BYTES});
+      Tensor<T> input(input_shape, XnnExtraBytes);
       DatatypeGenerator<T> generator = MakeDatatypeGenerator(T());
       input.generate([&]() { return generator(rng); });
 

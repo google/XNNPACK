@@ -127,9 +127,9 @@ class DynamicFullyConnectedOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
-    xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
-                                       (batch_size() - 1) * input_stride() +
-                                       input_channels());
+    xnnpack::Buffer<xnn_float16> input(
+        (batch_size() - 1) * input_stride() + input_channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<xnn_float16> kernel(output_channels() * input_channels());
     xnnpack::Buffer<float> kernel_as_float(kernel.size());
     xnnpack::Buffer<xnn_float16> bias(output_channels());
@@ -266,9 +266,9 @@ class DynamicFullyConnectedOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
-    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
-                                 (batch_size() - 1) * input_stride() +
-                                 input_channels());
+    xnnpack::Buffer<float> input(
+        (batch_size() - 1) * input_stride() + input_channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<float> kernel(output_channels() * input_channels());
     xnnpack::Buffer<float> bias(output_channels());
     xnnpack::Buffer<float> output((batch_size() - 1) * output_stride() +

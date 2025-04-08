@@ -48,7 +48,7 @@ static void GEMMBenchmark(
   auto f32rng =
       std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
-  xnnpack::Buffer<float> a(mc * kc + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> a(mc * kc, xnnpack::XnnExtraBytes);
   std::generate(a.begin(), a.end(), std::ref(f32rng));
   xnnpack::Buffer<uint8_t> k(nc * kc * sizeof(uint8_t) / 2 /* int4_t */);
   xnnpack::fill_uniform_random_bits(k.data(), k.size(), rng);

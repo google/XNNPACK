@@ -76,8 +76,8 @@ static void bench_impl(uint64_t arch_flags, benchmark::State& state,
   const size_t c_stride =
       benchmark::utils::RoundUp<size_t>(channels, channel_tile);
 
-  xnnpack::Buffer<int8_t> a(channels * input_height * input_width +
-                            XNN_EXTRA_BYTES / sizeof(int8_t));
+  xnnpack::Buffer<int8_t> a(channels * input_height * input_width,
+                            xnnpack::XnnExtraBytes);
   std::generate(a.begin(), a.end(), std::ref(i8rng));
   xnnpack::Buffer<int8_t> k(channels * kernel_height * kernel_width);
   std::generate(k.begin(), k.end(), std::ref(i8rng));
@@ -85,7 +85,7 @@ static void bench_impl(uint64_t arch_flags, benchmark::State& state,
   std::generate(b.begin(), b.end(), std::ref(i32rng));
 
   // Zero buffer needs to be initialized with zeros.
-  xnnpack::Buffer<int8_t> z(channels + XNN_EXTRA_BYTES / sizeof(int8_t));
+  xnnpack::Buffer<int8_t> z(channels, xnnpack::XnnExtraBytes);
   std::fill(z.begin(), z.end(), 0);
 
   const size_t k_elements = kernel_size * c_stride;

@@ -81,9 +81,8 @@ void TestImpl() {
         tokens + std::uniform_int_distribution<>(0, 10)(rng);
 
     // The last dimension is split into 2 dimensions {re, im}, channels
-    Tensor<T> input({batch_size, tokens, heads, 2, channels},
-                    PaddingBytes{XNN_EXTRA_BYTES});
-    Tensor<T> weights({max_tokens, 2, channels}, PaddingBytes{XNN_EXTRA_BYTES});
+    Tensor<T> input({batch_size, tokens, heads, 2, channels}, XnnExtraBytes);
+    Tensor<T> weights({max_tokens, 2, channels}, XnnExtraBytes);
     DatatypeGenerator<T> gen_r(1.0f, kMaxR);
     DatatypeGenerator<T> gen_i(0.01f, kMaxI);
     input.slice(3, 0).generate([&]() { return gen_r(rng); });

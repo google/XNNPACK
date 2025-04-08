@@ -60,7 +60,7 @@ void TestImpl(size_t block_size) {
       shape[1] *= block_size;
       shape[2] *= block_size;
 
-      Tensor<T> input(shape, PaddingBytes{XNN_EXTRA_BYTES});
+      Tensor<T> input(shape, XnnExtraBytes);
       DatatypeGenerator<T> generator(quantization);
       input.generate([&]() { return generator(rng); });
 

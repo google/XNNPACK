@@ -111,9 +111,9 @@ class RDSumMicrokernelTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> i8dist(
         std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
-    xnnpack::Buffer<int8_t> input((rows() - 1) * input_stride() + channels() +
-                                  XNN_EXTRA_BYTES);
-    xnnpack::Buffer<int8_t> zero(channels() + XNN_EXTRA_BYTES, 0);
+    xnnpack::Buffer<int8_t> input((rows() - 1) * input_stride() + channels(),
+                                  xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<int8_t> zero(channels(), 0, xnnpack::XnnExtraBytes);
     xnnpack::Buffer<int32_t> output(channels());
     xnnpack::Buffer<int32_t> output_ref(channels());
     {
@@ -158,9 +158,9 @@ class RDSumMicrokernelTester {
     std::uniform_int_distribution<int32_t> u8dist(
         std::numeric_limits<uint8_t>::min(),
         std::numeric_limits<uint8_t>::max());
-    xnnpack::Buffer<uint8_t> input((rows() - 1) * input_stride() + channels() +
-                                   XNN_EXTRA_BYTES);
-    xnnpack::Buffer<uint8_t> zero(channels() + XNN_EXTRA_BYTES, 0);
+    xnnpack::Buffer<uint8_t> input((rows() - 1) * input_stride() + channels(),
+                                   xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<uint8_t> zero(channels(), 0, xnnpack::XnnExtraBytes);
     xnnpack::Buffer<uint32_t> output(channels());
     xnnpack::Buffer<uint32_t> output_ref(channels());
     {
@@ -204,11 +204,9 @@ class RDSumMicrokernelTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
-    xnnpack::Buffer<xnn_float16> input((rows() - 1) * input_stride() +
-                                       channels() +
-                                       XNN_EXTRA_BYTES / sizeof(xnn_float16));
-    xnnpack::Buffer<xnn_float16> zero(
-        channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0);
+    xnnpack::Buffer<xnn_float16> input(
+        (rows() - 1) * input_stride() + channels(), xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<xnn_float16> zero(channels(), 0, xnnpack::XnnExtraBytes);
     xnnpack::Buffer<float> output(channels());
     xnnpack::Buffer<float> output_ref(channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -253,10 +251,9 @@ class RDSumMicrokernelTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
-    xnnpack::Buffer<float> input((rows() - 1) * input_stride() + channels() +
-                                 XNN_EXTRA_BYTES / sizeof(float));
-    xnnpack::Buffer<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float),
-                                0.0f);
+    xnnpack::Buffer<float> input((rows() - 1) * input_stride() + channels(),
+                                 xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<float> zero(channels(), 0.0f, xnnpack::XnnExtraBytes);
     xnnpack::Buffer<float> output(channels());
     xnnpack::Buffer<float> output_ref(channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {

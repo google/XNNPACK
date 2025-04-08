@@ -167,16 +167,15 @@ class UnaryNCTest : public testing::TestWithParam<Param> {
         test_params.input_stride == 0 ? channels : test_params.input_stride;
     const size_t output_stride =
         test_params.output_stride == 0 ? channels : test_params.output_stride;
-    xnnpack::Buffer<In> input(XNN_EXTRA_BYTES / sizeof(In) +
-                              (batch_size - 1) * input_stride + channels);
+    xnnpack::Buffer<In> input((batch_size - 1) * input_stride + channels,
+                              xnnpack::XnnExtraBytes);
     xnnpack::Buffer<Out> output((batch_size - 1) * output_stride + channels);
     xnnpack::Buffer<Out> output_ref(batch_size * channels);
     xnnpack::DatatypeGenerator<In> input_generator(domain.min, domain.max,
                                                    input_quantization);
     for (size_t iteration = 0; iteration < iterations; iteration++) {
       for (size_t i = 0; i < batch_size; i++) {
-        std::generate_n(input.data() + i * input_stride,
-                        channels + XNN_EXTRA_BYTES / sizeof(In),
+        std::generate_n(input.data() + i * input_stride, channels,
                         [&]() { return input_generator(rng_); });
       }
 

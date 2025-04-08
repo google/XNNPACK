@@ -240,8 +240,8 @@ void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid) {
         std::swap(b_shape[input_b_rank - 1], b_shape[input_b_rank - 2]);
       }
 
-      Tensor<Input> input_a(a_shape, PaddingBytes{XNN_EXTRA_BYTES});
-      Tensor<Input> input_b(b_shape, PaddingBytes{XNN_EXTRA_BYTES});
+      Tensor<Input> input_a(a_shape, XnnExtraBytes);
+      Tensor<Input> input_b(b_shape, XnnExtraBytes);
       auto input_gen = MakeDatatypeGenerator(Input());
       input_a.generate([&]() { return input_gen(rng); });
       input_b.generate([&]() { return input_gen(rng); });
@@ -318,7 +318,7 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid) {
     std::vector<size_t> b_shape = random_shape(rng, input_b_rank, 1, 4);
     b_shape[input_b_rank - 2] = dim_dist(rng);
     b_shape[input_b_rank - 1] = dim_dist(rng);
-    Tensor<InputB> input_b(b_shape, PaddingBytes{XNN_EXTRA_BYTES});
+    Tensor<InputB> input_b(b_shape, XnnExtraBytes);
     auto input_b_gen = MakeDatatypeGenerator(InputB());
     input_b.generate([&]() { return input_b_gen(rng); });
     broadcast_extent_1(input_b);
@@ -365,7 +365,7 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid) {
       a_shape[input_a_rank - 2] = m;
       a_shape[input_a_rank - 1] = k;
 
-      Tensor<InputA> input_a(a_shape, PaddingBytes{XNN_EXTRA_BYTES});
+      Tensor<InputA> input_a(a_shape, XnnExtraBytes);
       auto input_a_gen = MakeDatatypeGenerator(InputA());
       input_a.generate([&]() { return input_a_gen(rng); });
       if (convert_to != xnn_datatype_invalid) {

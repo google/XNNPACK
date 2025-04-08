@@ -68,7 +68,7 @@ void TestImpl(size_t rank) {
         shape[i] += dims[i];
       }
 
-      xnnpack::Tensor<T> input(shape, xnnpack::PaddingBytes{XNN_EXTRA_BYTES});
+      xnnpack::Tensor<T> input(shape, xnnpack::XnnExtraBytes);
       DatatypeGenerator<T> generator(quantization);
       input.generate([&]() { return generator(rng); });
 

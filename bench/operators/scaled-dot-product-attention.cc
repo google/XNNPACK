@@ -31,24 +31,22 @@ void xnnpack_multihead_scaled_batch_matrix_multiply_cap_tanh_f32(
   std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
   std::uniform_real_distribution<float> scaledist(0.2f, 2.0f);
 
-  xnnpack::Buffer<float> query(XNN_EXTRA_BYTES / sizeof(float) +
-                               batch_size * heads * query_tokens * channels);
-  xnnpack::Buffer<float> key(XNN_EXTRA_BYTES / sizeof(float) +
-                             batch_size * heads * key_value_tokens * channels);
-  xnnpack::Buffer<float> value(XNN_EXTRA_BYTES / sizeof(float) +
-                               batch_size * heads * key_value_tokens *
-                                   channels);
-  xnnpack::Buffer<float> scale(XNN_EXTRA_BYTES / sizeof(float) + channels);
-  xnnpack::Buffer<float> mask(XNN_EXTRA_BYTES / sizeof(float) +
-                              query_tokens * key_value_tokens);
+  xnnpack::Buffer<float> query(batch_size * heads * query_tokens * channels,
+                               xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<float> key(batch_size * heads * key_value_tokens * channels,
+                             xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<float> value(batch_size * heads * key_value_tokens * channels,
+                               xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<float> scale(channels, xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<float> mask(query_tokens * key_value_tokens,
+                              xnnpack::XnnExtraBytes);
   xnnpack::Buffer<float> output(batch_size * heads * query_tokens * channels);
 
-  xnnpack::Buffer<float> query_scaled(XNN_EXTRA_BYTES / sizeof(float) +
-                                      batch_size * heads * query_tokens *
-                                          channels);
-  xnnpack::Buffer<float> logits(XNN_EXTRA_BYTES / sizeof(float) +
-                                batch_size * heads * query_tokens *
-                                    key_value_tokens);
+  xnnpack::Buffer<float> query_scaled(
+      batch_size * heads * query_tokens * channels, xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<float> logits(
+      batch_size * heads * query_tokens * key_value_tokens,
+      xnnpack::XnnExtraBytes);
 
   std::generate(query.begin(), query.end(), [&]() { return f32dist(rng); });
   // Use a different distribution to avoid divide by 0.
@@ -334,16 +332,15 @@ void xnnpack_multihead_scaled_dot_product_attention_cap_tanh_f32(
   std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
   std::uniform_real_distribution<float> scaledist(0.2f, 2.0f);
 
-  xnnpack::Buffer<float> query(XNN_EXTRA_BYTES / sizeof(float) +
-                               batch_size * heads * query_tokens * channels);
-  xnnpack::Buffer<float> key(XNN_EXTRA_BYTES / sizeof(float) +
-                             batch_size * heads * key_value_tokens * channels);
-  xnnpack::Buffer<float> value(XNN_EXTRA_BYTES / sizeof(float) +
-                               batch_size * heads * key_value_tokens *
-                                   channels);
-  xnnpack::Buffer<float> scale(XNN_EXTRA_BYTES / sizeof(float) + channels);
-  xnnpack::Buffer<float> mask(XNN_EXTRA_BYTES / sizeof(float) +
-                              query_tokens * key_value_tokens);
+  xnnpack::Buffer<float> query(batch_size * heads * query_tokens * channels,
+                               xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<float> key(batch_size * heads * key_value_tokens * channels,
+                             xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<float> value(batch_size * heads * key_value_tokens * channels,
+                               xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<float> scale(channels, xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<float> mask(query_tokens * key_value_tokens,
+                              xnnpack::XnnExtraBytes);
   xnnpack::Buffer<float> output(batch_size * heads * query_tokens * channels);
 
   std::generate(query.begin(), query.end(), [&]() { return f32dist(rng); });

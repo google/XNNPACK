@@ -48,8 +48,7 @@ class RAddStoreExpMinusMaxMicrokernelTester {
     // exp doesn't overflow.
     std::uniform_real_distribution<float> f32dist(15.0f, 20.0f);
 
-    xnnpack::Buffer<xnn_float16> x(elements() +
-                                   XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    xnnpack::Buffer<xnn_float16> x(elements(), xnnpack::XnnExtraBytes);
     xnnpack::Buffer<xnn_float16> y(elements());
     xnnpack::Buffer<float> y_ref(elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -93,7 +92,7 @@ class RAddStoreExpMinusMaxMicrokernelTester {
     // exp doesn't overflow.
     std::uniform_real_distribution<float> f32dist(90.0f, 100.0f);
 
-    xnnpack::Buffer<float> x(elements() + XNN_EXTRA_BYTES / sizeof(float));
+    xnnpack::Buffer<float> x(elements(), xnnpack::XnnExtraBytes);
     xnnpack::Buffer<float> y(elements());
     xnnpack::Buffer<double> y_ref(elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {

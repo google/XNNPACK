@@ -112,13 +112,11 @@ static void xnnpack_softmax_f32(benchmark::State& state) {
   auto f32rng = std::bind(
       std::uniform_real_distribution<float>(-100.0f, 100.0f), std::ref(rng));
 
-  xnnpack::Buffer<float> input(batch_size * channels +
-                               XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> input(batch_size * channels, xnnpack::XnnExtraBytes);
   // Pad the outputs as well since the softmax computation is a multi-phase
   // operation in which the output is re-read, potentially going OOB with
   // vectorized kernels.
-  xnnpack::Buffer<float> output(batch_size * channels +
-                                XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> output(batch_size * channels, xnnpack::XnnExtraBytes);
   std::generate(input.begin(), input.end(), std::ref(f32rng));
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);
@@ -187,13 +185,13 @@ static void xnnpack_softmax_f16(benchmark::State& state) {
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(
       std::uniform_real_distribution<float>(-100.0f, 100.0f), std::ref(rng));
-  xnnpack::Buffer<xnn_float16> input(batch_size * channels +
-                                     XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  xnnpack::Buffer<xnn_float16> input(batch_size * channels,
+                                     xnnpack::XnnExtraBytes);
   // Pad the outputs as well since the softmax computation is a multi-phase
   // operation in which the output is re-read, potentially going OOB with
   // vectorized kernels.
-  xnnpack::Buffer<xnn_float16> output(batch_size * channels +
-                                      XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  xnnpack::Buffer<xnn_float16> output(batch_size * channels,
+                                      xnnpack::XnnExtraBytes);
   std::generate(input.begin(), input.end(), f32rng);
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);

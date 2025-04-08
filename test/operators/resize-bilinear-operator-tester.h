@@ -230,10 +230,10 @@ class ResizeBilinearOperatorTester {
     std::uniform_real_distribution<float> f32dist;
 
     xnnpack::Buffer<xnn_float16> input(
-        XNN_EXTRA_BYTES / sizeof(xnn_float16) +
         (batch_size() * input_height() * input_width() - 1) *
-            input_pixel_stride() +
-        channels());
+                input_pixel_stride() +
+            channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<xnn_float16> output(
         (batch_size() * output_height() * output_width() - 1) *
             output_pixel_stride() +
@@ -391,8 +391,9 @@ class ResizeBilinearOperatorTester {
 
     xnnpack::Buffer<float> input(
         (batch_size() * input_height() * input_width() - 1) *
-            input_pixel_stride() +
-        channels() + XNN_EXTRA_BYTES / sizeof(float));
+                input_pixel_stride() +
+            channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<float> output(
         (batch_size() * output_height() * output_width() - 1) *
             output_pixel_stride() +
@@ -548,8 +549,9 @@ class ResizeBilinearOperatorTester {
 
     xnnpack::Buffer<int8_t> input(
         (batch_size() * input_height() * input_width() - 1) *
-            input_pixel_stride() +
-        channels() + XNN_EXTRA_BYTES / sizeof(int8_t));
+                input_pixel_stride() +
+            channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<int8_t> output(
         (batch_size() * output_height() * output_width() - 1) *
             output_pixel_stride() +
@@ -706,8 +708,9 @@ class ResizeBilinearOperatorTester {
 
     xnnpack::Buffer<uint8_t> input(
         (batch_size() * input_height() * input_width() - 1) *
-            input_pixel_stride() +
-        channels() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+                input_pixel_stride() +
+            channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<uint8_t> output(
         (batch_size() * output_height() * output_width() - 1) *
             output_pixel_stride() +
@@ -862,8 +865,9 @@ class ResizeBilinearOperatorTester {
 
     xnnpack::Buffer<xnn_float16> input(
         (batch_size() * input_height() * input_width() - 1) *
-            input_pixel_stride() +
-        channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+                input_pixel_stride() +
+            channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<xnn_float16> output(
         (batch_size() * output_height() * output_width() - 1) *
             output_pixel_stride() +
@@ -989,8 +993,9 @@ class ResizeBilinearOperatorTester {
 
     xnnpack::Buffer<float> input(
         (batch_size() * input_height() * input_width() - 1) *
-            input_pixel_stride() +
-        channels() + XNN_EXTRA_BYTES / sizeof(float));
+                input_pixel_stride() +
+            channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<float> output(
         (batch_size() * output_height() * output_width() - 1) *
             output_pixel_stride() +

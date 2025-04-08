@@ -435,10 +435,10 @@ class DeconvolutionOperatorTester {
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
     xnnpack::Buffer<int8_t> input(
-        XNN_EXTRA_BYTES / sizeof(int8_t) +
         (batch_size() * input_height() * input_width() - 1) *
-            input_pixel_stride() +
-        groups() * group_input_channels());
+                input_pixel_stride() +
+            groups() * group_input_channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<int8_t> kernel(groups() * group_output_channels() *
                                    kernel_height() * kernel_width() *
                                    group_input_channels());
@@ -751,10 +751,10 @@ class DeconvolutionOperatorTester {
         std::numeric_limits<uint8_t>::max());
 
     xnnpack::Buffer<uint8_t> input(
-        XNN_EXTRA_BYTES / sizeof(uint8_t) +
         (batch_size() * input_height() * input_width() - 1) *
-            input_pixel_stride() +
-        groups() * group_input_channels());
+                input_pixel_stride() +
+            groups() * group_input_channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<uint8_t> kernel(groups() * group_output_channels() *
                                     kernel_height() * kernel_width() *
                                     group_input_channels());
@@ -1036,10 +1036,10 @@ class DeconvolutionOperatorTester {
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
     xnnpack::Buffer<xnn_float16> input(
-        XNN_EXTRA_BYTES / sizeof(xnn_float16) +
         (batch_size() * input_height() * input_width() - 1) *
-            input_pixel_stride() +
-        groups() * group_input_channels());
+                input_pixel_stride() +
+            groups() * group_input_channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<xnn_float16> kernel(groups() * group_output_channels() *
                                         kernel_height() * kernel_width() *
                                         group_input_channels());
@@ -1325,10 +1325,10 @@ class DeconvolutionOperatorTester {
         std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
     xnnpack::Buffer<int8_t> input(
-        XNN_EXTRA_BYTES / sizeof(int8_t) +
         (batch_size() * input_height() * input_width() - 1) *
-            input_pixel_stride() +
-        groups() * group_input_channels());
+                input_pixel_stride() +
+            groups() * group_input_channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<int8_t> kernel(groups() * group_output_channels() *
                                    kernel_height() * kernel_width() *
                                    group_input_channels());
@@ -1601,10 +1601,10 @@ class DeconvolutionOperatorTester {
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
     xnnpack::Buffer<float> input(
-        XNN_EXTRA_BYTES / sizeof(float) +
         (batch_size() * input_height() * input_width() - 1) *
-            input_pixel_stride() +
-        groups() * group_input_channels());
+                input_pixel_stride() +
+            groups() * group_input_channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<float> kernel(groups() * group_output_channels() *
                                   kernel_height() * kernel_width() *
                                   group_input_channels());
@@ -1892,10 +1892,10 @@ class DeconvolutionOperatorTester {
 
     for (size_t iteration = 0; iteration < kIterations; iteration++) {
       xnnpack::Buffer<float> input(
-          XNN_EXTRA_BYTES / sizeof(float) +
           (batch_size() * input_height() * input_width() - 1) *
-              input_pixel_stride() +
-          groups() * group_input_channels());
+                  input_pixel_stride() +
+              groups() * group_input_channels(),
+          xnnpack::XnnExtraBytes);
       xnnpack::Buffer<float> kernel(groups() * group_output_channels() *
                                     kernel_height() * kernel_width() *
                                     group_input_channels());
@@ -2122,13 +2122,13 @@ class DeconvolutionOperatorTester {
         std::numeric_limits<int8_t>::max());
 
     xnnpack::Buffer<int8_t> input(
-        XNN_EXTRA_BYTES / sizeof(int8_t) +
         std::max((batch_size() * input_height() * input_width() - 1) *
                          input_pixel_stride() +
                      groups() * group_input_channels(),
                  (next_batch_size() * next_input_height() * next_input_width() -
                   1) * input_pixel_stride() +
-                     groups() * group_input_channels()));
+                     groups() * group_input_channels()),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<int8_t> kernel(groups() * group_output_channels() *
                                    kernel_height() * kernel_width() *
                                    group_input_channels());
@@ -2485,13 +2485,13 @@ class DeconvolutionOperatorTester {
         std::numeric_limits<uint8_t>::max());
 
     xnnpack::Buffer<uint8_t> input(
-        XNN_EXTRA_BYTES / sizeof(uint8_t) +
         std::max((batch_size() * input_height() * input_width() - 1) *
                          input_pixel_stride() +
                      groups() * group_input_channels(),
                  (next_batch_size() * next_input_height() * next_input_width() -
                   1) * input_pixel_stride() +
-                     groups() * group_input_channels()));
+                     groups() * group_input_channels()),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<uint8_t> kernel(groups() * group_output_channels() *
                                     kernel_height() * kernel_width() *
                                     group_input_channels());
@@ -2849,13 +2849,13 @@ class DeconvolutionOperatorTester {
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
     xnnpack::Buffer<xnn_float16> input(
-        XNN_EXTRA_BYTES / sizeof(xnn_float16) +
         std::max((batch_size() * input_height() * input_width() - 1) *
                          input_pixel_stride() +
                      groups() * group_input_channels(),
                  (next_batch_size() * next_input_height() * next_input_width() -
                   1) * input_pixel_stride() +
-                     groups() * group_input_channels()));
+                     groups() * group_input_channels()),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<xnn_float16> kernel(groups() * group_output_channels() *
                                         kernel_height() * kernel_width() *
                                         group_input_channels());
@@ -3201,13 +3201,13 @@ class DeconvolutionOperatorTester {
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
     xnnpack::Buffer<float> input(
-        XNN_EXTRA_BYTES / sizeof(float) +
         std::max((batch_size() * input_height() * input_width() - 1) *
                          input_pixel_stride() +
                      groups() * group_input_channels(),
                  (next_batch_size() * next_input_height() * next_input_width() -
                   1) * input_pixel_stride() +
-                     groups() * group_input_channels()));
+                     groups() * group_input_channels()),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<float> kernel(groups() * group_output_channels() *
                                   kernel_height() * kernel_width() *
                                   group_input_channels());

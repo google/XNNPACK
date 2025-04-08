@@ -31,7 +31,7 @@ void FuseAndSplit() {
         random_quantization(xnn_datatype_of<T>(), rng);
 
     const auto input_shape = random_shape(rng);
-    Tensor<T> input(input_shape, PaddingBytes{XNN_EXTRA_BYTES});
+    Tensor<T> input(input_shape, XnnExtraBytes);
     DatatypeGenerator<T> generator(quantization);
     input.generate([&]() { return generator(rng); });
 

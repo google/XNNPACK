@@ -238,7 +238,7 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
         params.group_input_channels,
     };
     DatatypeGenerator<Filter> filter_gen = MakeDatatypeGenerator(Filter());
-    Tensor<Filter> filter(filter_shape, PaddingBytes{XNN_EXTRA_BYTES});
+    Tensor<Filter> filter(filter_shape, XnnExtraBytes);
     filter.generate([&]() { return filter_gen(rng); });
     const size_t reduction_size =
         filter.extent(1) * filter.extent(2) * filter.extent(3);
@@ -249,7 +249,7 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
       std::vector<size_t> bias_shape = {params.groups *
                                         params.group_output_channels};
       DatatypeGenerator<Bias> bias_gen = MakeDatatypeGenerator(Bias());
-      Tensor<Bias> bias(bias_shape, PaddingBytes{XNN_EXTRA_BYTES});
+      Tensor<Bias> bias(bias_shape, XnnExtraBytes);
       bias.generate([&]() { return bias_gen(rng); });
     }
 
@@ -338,7 +338,7 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
       };
       input_shape[3] = params.groups * params.group_input_channels;
 
-      Tensor<Data> input(input_shape, PaddingBytes{XNN_EXTRA_BYTES});
+      Tensor<Data> input(input_shape, XnnExtraBytes);
       input.generate([&]() { return data_gen(rng); });
       if (convert_to != xnn_datatype_invalid) {
         assert(convert_to == xnn_datatype_qdint8);

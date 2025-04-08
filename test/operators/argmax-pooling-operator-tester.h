@@ -345,8 +345,9 @@ class ArgmaxPoolingOperatorTester {
 
     xnnpack::Buffer<float> input(
         (batch_size() * input_height() * input_width() - 1) *
-            input_pixel_stride() +
-        channels() + XNN_EXTRA_BYTES / sizeof(float));
+                input_pixel_stride() +
+            channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<float> output(
         (batch_size() * output_height() * output_width() - 1) *
             output_pixel_stride() +
@@ -484,14 +485,14 @@ class ArgmaxPoolingOperatorTester {
     std::uniform_real_distribution<float> f32dist;
 
     xnnpack::Buffer<float> input(
-        XNN_EXTRA_BYTES / sizeof(float) +
         std::max<size_t>(
             (batch_size() * input_height() * input_width() - 1) *
                     input_pixel_stride() +
                 channels(),
             (next_batch_size() * next_input_height() * next_input_width() - 1) *
                     input_pixel_stride() +
-                channels()));
+                channels()),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<float> output(std::max<size_t>(
         (batch_size() * output_height() * output_width() - 1) *
                 output_pixel_stride() +

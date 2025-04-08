@@ -346,14 +346,14 @@ TEST(WORKSPACE, workspace_grow) {
       auto_workspace(workspace, xnn_release_workspace);
 
   std::array<size_t, 4> dims1 = {2, 20, 20, 3};
-  xnnpack::Buffer<float> dummy_data(
-      2 * 20 * 20 * 3 + XNN_EXTRA_BYTES / sizeof(float), 0.0f);
+  xnnpack::Buffer<float> dummy_data(2 * 20 * 20 * 3, 0.0f,
+                                    xnnpack::XnnExtraBytes);
   const std::array<xnn_external_value, 2> external_values = {
       xnn_external_value{0, dummy_data.data()},
       xnn_external_value{2, dummy_data.data()},
   };
-  xnnpack::Buffer<float> dummy_data2(
-      2 * 20 * 20 * 3 * 16 + XNN_EXTRA_BYTES / sizeof(float), 0.0f);
+  xnnpack::Buffer<float> dummy_data2(2 * 20 * 20 * 3 * 16, 0.0f,
+                                     xnnpack::XnnExtraBytes);
   const std::array<xnn_external_value, 2> external_values2 = {
       xnn_external_value{0, dummy_data2.data()},
       xnn_external_value{2, dummy_data2.data()},
@@ -446,8 +446,8 @@ TEST(WORKSPACE, workspace_runtime_delete_head_runtime_first) {
       auto_workspace(workspace, xnn_release_workspace);
 
   const std::array<size_t, 4> dims = {2, 20, 20, 3};
-  xnnpack::Buffer<float> dummy_data(
-      2 * 20 * 20 * 3 + XNN_EXTRA_BYTES / sizeof(float), 0.0f);
+  xnnpack::Buffer<float> dummy_data(2 * 20 * 20 * 3, 0.0f,
+                                    xnnpack::XnnExtraBytes);
   const std::array<xnn_external_value, 2> external_values = {
       xnn_external_value{0, dummy_data.data()},
       xnn_external_value{2, dummy_data.data()},
@@ -509,8 +509,8 @@ TEST(WORKSPACE, workspace_runtime_delete_tail_runtime_first) {
       auto_workspace(workspace, xnn_release_workspace);
 
   std::array<size_t, 4> dims = {2, 20, 20, 3};
-  xnnpack::Buffer<float> dummy_data(
-      2 * 20 * 20 * 3 + XNN_EXTRA_BYTES / sizeof(float), 0.0f);
+  xnnpack::Buffer<float> dummy_data(2 * 20 * 20 * 3, 0.0f,
+                                    xnnpack::XnnExtraBytes);
   const std::array<xnn_external_value, 2> external_values = {
       xnn_external_value{0, dummy_data.data()},
       xnn_external_value{2, dummy_data.data()},
@@ -573,8 +573,8 @@ TEST(WORKSPACE, workspace_runtime_delete_middle_runtime_first) {
       auto_workspace(workspace, xnn_release_workspace);
 
   std::array<size_t, 4> dims = {2, 20, 20, 3};
-  xnnpack::Buffer<float> dummy_data(
-      2 * 20 * 20 * 3 + XNN_EXTRA_BYTES / sizeof(float), 0.0f);
+  xnnpack::Buffer<float> dummy_data(2 * 20 * 20 * 3, 0.0f,
+                                    xnnpack::XnnExtraBytes);
   const std::array<xnn_external_value, 2> external_values = {
       xnn_external_value{0, dummy_data.data()},
       xnn_external_value{2, dummy_data.data()},
@@ -662,8 +662,8 @@ TEST(WORKSPACE, zero_sized_workspace_for_graph_without_internal_tensors) {
       auto_workspace(workspace, xnn_release_workspace);
 
   std::array<size_t, 4> dims = {2, 20, 20, 3};
-  xnnpack::Buffer<float> dummy_data(
-      2 * 20 * 20 * 3 + XNN_EXTRA_BYTES / sizeof(float), 0.0f);
+  xnnpack::Buffer<float> dummy_data(2 * 20 * 20 * 3, 0.0f,
+                                    xnnpack::XnnExtraBytes);
   const std::array<xnn_external_value, 2> external_values = {
       xnn_external_value{0, dummy_data.data()},
       xnn_external_value{1, dummy_data.data()},
@@ -701,8 +701,8 @@ TEST(WORKSPACE, persistent_tensors_allocated_at_start_of_workspace) {
       auto_workspace(workspace, xnn_release_workspace);
 
   const std::array<size_t, 4> dims = {2, 20, 20, 3};
-  xnnpack::Buffer<float> dummy_data(
-      2 * 20 * 20 * 3 + XNN_EXTRA_BYTES / sizeof(float), 0.0f);
+  xnnpack::Buffer<float> dummy_data(2 * 20 * 20 * 3, 0.0f,
+                                    xnnpack::XnnExtraBytes);
   const std::array<xnn_external_value, 2> external_values = {
       xnn_external_value{0, dummy_data.data()},
       xnn_external_value{3, dummy_data.data()},
@@ -749,14 +749,14 @@ TEST(WORKSPACE, persistent_tensors_updated_correct_when_workspace_grows) {
       auto_workspace(workspace, xnn_release_workspace);
 
   const std::array<size_t, 4> dims1 = {2, 20, 20, 3};
-  xnnpack::Buffer<float> dummy_data(
-      2 * 20 * 20 * 3 + XNN_EXTRA_BYTES / sizeof(float), 0.0f);
+  xnnpack::Buffer<float> dummy_data(2 * 20 * 20 * 3, 0.0f,
+                                    xnnpack::XnnExtraBytes);
   const std::array<xnn_external_value, 2> external_values = {
       xnn_external_value{0, dummy_data.data()},
       xnn_external_value{3, dummy_data.data()},
   };
-  xnnpack::Buffer<float> dummy_data2(
-      2 * 20 * 20 * 3 * 16 + XNN_EXTRA_BYTES / sizeof(float), 0.0f);
+  xnnpack::Buffer<float> dummy_data2(2 * 20 * 20 * 3 * 16, 0.0f,
+                                     xnnpack::XnnExtraBytes);
   const std::array<xnn_external_value, 2> external_values2 = {
       xnn_external_value{0, dummy_data2.data()},
       xnn_external_value{3, dummy_data2.data()},
@@ -902,8 +902,7 @@ TEST(WORKSPACE, persistent_tensors_values_copied_when_workspace_grows) {
                                   xnn_test_runtime_flags(), &runtime1));
   const std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)>
       auto_runtime(runtime1, xnn_delete_runtime);
-  xnnpack::Buffer<float> expected(
-      2 * 2 * 2 * 3 + XNN_EXTRA_BYTES / sizeof(float), 3.14f);
+  xnnpack::Buffer<float> expected(2 * 2 * 2 * 3, 3.14f, xnnpack::XnnExtraBytes);
   const std::array<xnn_external_value, 1> external_values = {
       xnn_external_value{0, expected.data()},
   };
@@ -926,10 +925,8 @@ TEST(WORKSPACE, persistent_tensors_values_copied_when_workspace_grows) {
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime1));
 
   // Setup second runtime, this should grow.
-  xnnpack::Buffer<float> actual(2 * 2 * 2 * 3 +
-                                XNN_EXTRA_BYTES / sizeof(float));
-  xnnpack::Buffer<float> dummy(22 * 2 * 2 * 3 +
-                               XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> actual(2 * 2 * 2 * 3, xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<float> dummy(22 * 2 * 2 * 3, xnnpack::XnnExtraBytes);
   const std::array<xnn_external_value, 2> external_values2 = {
       xnn_external_value{0, actual.data()},
       xnn_external_value{1, dummy.data()},
@@ -964,8 +961,8 @@ TEST(WORKSPACE, internally_allocated_dynamic_quantization_parameters) {
   std::vector<size_t> input_dims{batch_size, input_channels};
   std::vector<size_t> kernel_dims{output_channels, input_channels};
   std::vector<size_t> bias_dims{output_channels};
-  xnnpack::Buffer<float> input(batch_size * input_channels +
-                               XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> input(batch_size * input_channels,
+                               xnnpack::XnnExtraBytes);
   xnnpack::Buffer<float> subgraph_output(batch_size * output_channels);
   xnnpack::Buffer<xnn_quantization_params> quantization_params(
       3 + XNN_EXTRA_QUANTIZATION_PARAMS);

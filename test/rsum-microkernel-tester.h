@@ -91,8 +91,7 @@ class RSumMicrokernelTester {
     std::uniform_int_distribution<int32_t> i8dist(
         std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
-    xnnpack::Buffer<int8_t> input(batch_size() +
-                                  XNN_EXTRA_BYTES / sizeof(int8_t));
+    xnnpack::Buffer<int8_t> input(batch_size(), xnnpack::XnnExtraBytes);
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
 
@@ -125,8 +124,7 @@ class RSumMicrokernelTester {
         std::numeric_limits<uint8_t>::min(),
         std::numeric_limits<uint8_t>::max());
 
-    xnnpack::Buffer<uint8_t> input(batch_size() +
-                                   XNN_EXTRA_BYTES / sizeof(uint8_t));
+    xnnpack::Buffer<uint8_t> input(batch_size(), xnnpack::XnnExtraBytes);
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
 
@@ -159,8 +157,7 @@ class RSumMicrokernelTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
-    xnnpack::Buffer<xnn_float16> input(batch_size() +
-                                       XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    xnnpack::Buffer<xnn_float16> input(batch_size(), xnnpack::XnnExtraBytes);
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
@@ -190,8 +187,7 @@ class RSumMicrokernelTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
-    xnnpack::Buffer<xnn_float16> input(batch_size() +
-                                       XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    xnnpack::Buffer<xnn_float16> input(batch_size(), xnnpack::XnnExtraBytes);
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
@@ -221,8 +217,7 @@ class RSumMicrokernelTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
-    xnnpack::Buffer<float> input(batch_size() +
-                                 XNN_EXTRA_BYTES / sizeof(float));
+    xnnpack::Buffer<float> input(batch_size(), xnnpack::XnnExtraBytes);
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 

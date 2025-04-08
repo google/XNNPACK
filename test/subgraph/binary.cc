@@ -203,8 +203,8 @@ void TestImpl(const Param& p) {
         std::tie(a_shape, b_shape) = random_broadcasted_inputs(
             rng, output_shape, input_ranks.first, input_ranks.second);
 
-        Tensor<T> a(a_shape, {XNN_EXTRA_BYTES});
-        Tensor<T> b(b_shape, {XNN_EXTRA_BYTES});
+        Tensor<T> a(a_shape, XnnExtraBytes);
+        Tensor<T> b(b_shape, XnnExtraBytes);
         Tensor<T> output(output_shape);
 
         DatatypeGenerator<T> a_gen(a_quantization);

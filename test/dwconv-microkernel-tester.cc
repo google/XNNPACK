@@ -86,14 +86,14 @@ void DWConvMicrokernelTester::Test(
 
   xnnpack::Buffer<const uint8_t*> indirection((width() - 1) * step() +
                                               kernel_tile());
-  xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
-                                 indirection.size() * channels());
+  xnnpack::Buffer<uint8_t> input(indirection.size() * channels(),
+                                 xnnpack::XnnExtraBytes);
   xnnpack::Buffer<uint8_t> kernel(channels() * kernel_tile());
   xnnpack::Buffer<int32_t> bias(channels());
   xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> packed_weights(
       (kernel_tile() + sizeof(int32_t) / sizeof(uint8_t)) * packed_channels());
-  xnnpack::Buffer<uint8_t> zero(channels() + XNN_EXTRA_BYTES / sizeof(uint8_t),
-                                input_zero_point());
+  xnnpack::Buffer<uint8_t> zero(channels(), input_zero_point(),
+                                xnnpack::XnnExtraBytes);
   xnnpack::Buffer<uint8_t> output((width() - 1) * output_stride() + channels());
   xnnpack::Buffer<int32_t> accumulators(width() * channels());
   xnnpack::Buffer<uint8_t> output_ref(width() * channels());
@@ -216,15 +216,16 @@ void DWConvMicrokernelTester::Test(
 
   xnnpack::Buffer<const int8_t*> indirection((width() - 1) * step() +
                                              kernel_tile());
-  xnnpack::Buffer<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
-                                indirection.size() * channels());
+  xnnpack::Buffer<int8_t> input(indirection.size() * channels(),
+                                xnnpack::XnnExtraBytes);
   xnnpack::Buffer<int8_t> kernel(channels() * kernel_tile());
   xnnpack::Buffer<int32_t> bias(channels());
   xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_weights(
       (kernel_tile() + (sizeof(int32_t) + sizeof(float)) / sizeof(int8_t)) *
       packed_channels());
-  xnnpack::Buffer<int8_t> zero(channels() + XNN_EXTRA_BYTES / sizeof(int8_t),
-                               static_cast<int8_t>(input_zero_point() - 0x80));
+  xnnpack::Buffer<int8_t> zero(channels(),
+                               static_cast<int8_t>(input_zero_point() - 0x80),
+                               xnnpack::XnnExtraBytes);
   xnnpack::Buffer<int8_t> output((width() - 1) * output_stride() + channels());
   xnnpack::Buffer<int32_t> accumulators(width() * channels());
   xnnpack::Buffer<float> scale(channels());
@@ -358,14 +359,15 @@ void DWConvMicrokernelTester::Test(
 
   xnnpack::Buffer<const int8_t*> indirection((width() - 1) * step() +
                                              kernel_tile());
-  xnnpack::Buffer<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
-                                indirection.size() * channels());
+  xnnpack::Buffer<int8_t> input(indirection.size() * channels(),
+                                xnnpack::XnnExtraBytes);
   xnnpack::Buffer<int8_t> kernel(channels() * kernel_tile());
   xnnpack::Buffer<int32_t> bias(channels());
   xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_weights(
       (kernel_tile() + sizeof(int32_t) / sizeof(int8_t)) * packed_channels());
-  xnnpack::Buffer<int8_t> zero(channels() + XNN_EXTRA_BYTES / sizeof(int8_t),
-                               static_cast<int8_t>(input_zero_point() - 0x80));
+  xnnpack::Buffer<int8_t> zero(channels(),
+                               static_cast<int8_t>(input_zero_point() - 0x80),
+                               xnnpack::XnnExtraBytes);
   xnnpack::Buffer<int8_t> output((width() - 1) * output_stride() + channels());
   xnnpack::Buffer<int32_t> accumulators(width() * channels());
   xnnpack::Buffer<int8_t> output_ref(width() * channels());
@@ -483,14 +485,13 @@ void DWConvMicrokernelTester::Test(
 
   xnnpack::Buffer<const xnn_float16*> indirection((width() - 1) * step() +
                                                   kernel_tile());
-  xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
-                                     indirection.size() * channels());
+  xnnpack::Buffer<xnn_float16> input(indirection.size() * channels(),
+                                     xnnpack::XnnExtraBytes);
   xnnpack::Buffer<xnn_float16> kernel(channels() * kernel_tile());
   xnnpack::Buffer<xnn_float16> bias(channels());
   xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> packed_weights(
       (kernel_tile() + 1) * packed_channels());
-  xnnpack::Buffer<xnn_float16> zero(
-      channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0.0f);
+  xnnpack::Buffer<xnn_float16> zero(channels(), 0.0f, xnnpack::XnnExtraBytes);
   xnnpack::Buffer<xnn_float16> output((width() - 1) * output_stride() +
                                       channels());
   xnnpack::Buffer<float> output_ref(width() * channels());
@@ -585,14 +586,13 @@ void DWConvMicrokernelTester::Test(xnn_f32_dwconv_unipass_ukernel_fn dwconv,
 
   xnnpack::Buffer<const float*> indirection((width() - 1) * step() +
                                             kernel_tile());
-  xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
-                               indirection.size() * channels());
+  xnnpack::Buffer<float> input(indirection.size() * channels(),
+                               xnnpack::XnnExtraBytes);
   xnnpack::Buffer<float> kernel(channels() * kernel_tile());
   xnnpack::Buffer<float> bias(channels());
   xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> packed_weights(
       (kernel_tile() + 1) * packed_channels());
-  xnnpack::Buffer<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float),
-                              0.0f);
+  xnnpack::Buffer<float> zero(channels(), 0.0f, xnnpack::XnnExtraBytes);
   xnnpack::Buffer<float> output((width() - 1) * output_stride() + channels());
   xnnpack::Buffer<float> output_ref(width() * channels());
 
@@ -657,14 +657,13 @@ void DWConvMicrokernelTester::Test(
 
   xnnpack::Buffer<const float*> indirection((width() - 1) * step() +
                                             kernel_tile());
-  xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
-                               indirection.size() * channels());
+  xnnpack::Buffer<float> input(indirection.size() * channels(),
+                               xnnpack::XnnExtraBytes);
   xnnpack::Buffer<float> kernel(channels() * kernel_tile());
   xnnpack::Buffer<float> bias(channels());
   xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> packed_weights(
       (kernel_tile() + 1) * packed_channels());
-  xnnpack::Buffer<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float),
-                              0.0f);
+  xnnpack::Buffer<float> zero(channels(), 0.0f, xnnpack::XnnExtraBytes);
   xnnpack::Buffer<float> output((width() - 1) * output_stride() + channels());
   xnnpack::Buffer<float> output_ref(width() * channels());
 

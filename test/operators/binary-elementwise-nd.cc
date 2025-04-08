@@ -313,8 +313,8 @@ class BinaryElementwiseOperatorTester {
       output_dims[i] = std::max(input1_dims[i], input2_dims[i]);
     }
 
-    Tensor<T> input1(input1_shape(), {XNN_EXTRA_BYTES});
-    Tensor<T> input2(input2_shape(), {XNN_EXTRA_BYTES});
+    Tensor<T> input1(input1_shape(), XnnExtraBytes);
+    Tensor<T> input2(input2_shape(), XnnExtraBytes);
     broadcast_extent_1(input1);
     broadcast_extent_1(input2);
     Tensor<T> output(output_dims);
