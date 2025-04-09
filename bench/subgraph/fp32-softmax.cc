@@ -3,6 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <cstddef>
@@ -55,10 +56,78 @@ xnn_subgraph_t FP32Softmax(size_t m, size_t n, size_t k, uint32_t norm_mask,
   }
 
   if (use_softmax) {
-    assert(norm_mask == 1 << (dims.size() - 1));
-    status = xnn_define_softmax(subgraph, v0, v1, /*flags=*/0);
+    // Create a permutation that pushes the reduction dimensions to the
+    // inside dimensions.
+    std::vector<size_t> perm;
+    std::vector<size_t> reshaped_dims;
+    for (size_t k = 0; k < dims.size(); k++) {
+      if ((norm_mask & (1 << k)) == 0) {
+        perm.push_back(k);
+        reshaped_dims.push_back(dims[k]);
+      }
+    }
+    for (size_t k = 0; k < dims.size(); k++) {
+      if ((norm_mask & (1 << k)) != 0) {
+        perm.push_back(k);
+      }
+    }
+
+    // Transpose the reduction dimensions to the innermost dimensions (if
+    // needed).
+    uint32_t transposed_v0 = XNN_INVALID_VALUE_ID;
+    if (std::is_sorted(perm.begin(), perm.end())) {
+      transposed_v0 = v0;
+    } else {
+      status = xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, reduction_dims.size(),
+          reduction_dims.data(),
+          /*data=*/nullptr, transposed_v0, /*flags=*/0, &transposed_v0);
+      if (status != xnn_status_success) {
+        std::cerr << "failed to create tensor transposed_v0" << std::endl;
+        return nullptr;
+      }
+
+      status = xnn_define_static_transpose(subgraph, perm.size(), perm.data(),
+                                           v0, transposed_v0,
+                                           /*flags=*/0);
+      if (status != xnn_status_success) {
+        std::cerr << "failed to create transpose node" << std::endl;
+        return nullptr;
+      }
+    }
+
+    // Reshape to group the reduction dimensions (if needed).
+    uint32_t transposed_reshaped_v0 = XNN_INVALID_VALUE_ID;
+    reshaped_dims.push_back(0);
+    if (reshaped_dims.size() == dims.size()) {
+      transposed_reshaped_v0 = transposed_v0;
+    } else {
+      status =
+          xnn_define_tensor_value(subgraph, xnn_datatype_fp32,
+                                  reduction_dims.size(), reduction_dims.data(),
+                                  /*data=*/nullptr, transposed_reshaped_v0,
+                                  /*flags=*/0, &transposed_reshaped_v0);
+      if (status != xnn_status_success) {
+        std::cerr << "failed to create tensor transposed_reshaped_v0"
+                  << std::endl;
+        return nullptr;
+      }
+
+      status = xnn_define_static_reshape(subgraph, reshaped_dims.size(),
+                                         reshaped_dims.data(), transposed_v0,
+                                         transposed_reshaped_v0,
+                                         /*flags=*/XNN_FLAG_KEEP_DIMS);
+      if (status != xnn_status_success) {
+        std::cerr << "failed to create reshape node" << std::endl;
+        return nullptr;
+      }
+    }
+
+    // Compute the softmax.
+    status = xnn_define_softmax(subgraph, transposed_reshaped_v0, v1,
+                                /*flags=*/0);
     if (status != xnn_status_success) {
-      std::cerr << "failed to create node #1" << std::endl;
+      std::cerr << "failed to create softmax node" << std::endl;
       return nullptr;
     }
   } else {
