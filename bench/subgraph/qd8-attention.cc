@@ -12,7 +12,7 @@
 #include <limits>
 #include <random>
 
-#include "bench/models/models.h"
+#include "bench/subgraph/models.h"
 #include "include/xnnpack.h"
 
 namespace models {

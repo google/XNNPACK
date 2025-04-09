@@ -13,7 +13,7 @@
 #include <random>
 #include <vector>
 
-#include "bench/models/models.h"
+#include "bench/subgraph/models.h"
 #include "include/xnnpack.h"
 
 // align a size up to XNN_EXTRA_BYTES

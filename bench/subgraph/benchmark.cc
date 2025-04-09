@@ -14,7 +14,7 @@
 #include <memory>
 #include <vector>
 
-#include "bench/models/models.h"
+#include "bench/subgraph/models.h"
 #include "bench/utils.h"
 #include "include/xnnpack.h"
 #include "src/xnnpack/allocator.h"

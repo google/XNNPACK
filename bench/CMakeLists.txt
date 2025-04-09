@@ -38,7 +38,7 @@ IF(XNNPACK_ENABLE_KLEIDIAI)
   TARGET_LINK_LIBRARIES(gemm-benchmark PUBLIC kleidiai)
 ENDIF()
 
-ADD_SUBDIRECTORY(models)
+ADD_SUBDIRECTORY(subgraph)
 ADD_SUBDIRECTORY(operators)
 
 # ---[ Build microkernel-level microbenchmarks
