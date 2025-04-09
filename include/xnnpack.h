@@ -55,7 +55,7 @@ extern "C" {
 /// Enable timing of each operator's runtime.
 #define XNN_FLAG_BASIC_PROFILING 0x00000008
 
-/// Enable the just-in-time compiler.
+/// Deprecated
 #define XNN_FLAG_JIT 0x00000010
 
 /// The convolution operator represents a depthwise convolution, and use HWGo layout for filters.
@@ -201,7 +201,7 @@ enum xnn_status xnn_initialize(const struct xnn_allocator* allocator);
 
 /// Deinitialize XNNPACK library.
 ///
-/// To avoid memory and resource leaks, users must call xnn_deinitialize once for each successful xnn_initialize call.
+/// Currently, this does nothing.
 ///
 /// @retval xnn_status_success - deinitialization call succeeded.
 enum xnn_status xnn_deinitialize(void);
