@@ -13,6 +13,7 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator-type.h"
 #include "src/xnnpack/operator.h"
@@ -77,17 +78,19 @@ static enum xnn_status reshape_slice_operator(
   enum xnn_status status = xnn_status_invalid_state;
   const size_t old_workspace_size = opdata->workspace_size;
   size_t offsets[XNN_MAX_TENSOR_DIMS], sizes[XNN_MAX_TENSOR_DIMS];
+  output_value->shape.num_dims = num_dims;
   for (size_t i = 0; i < num_dims; ++i) {
     if (opdata->begins[i] < 0) {
-      offsets[i] = opdata->begins[i] + input_value->shape.dim[i];
+      offsets[i] = doz(input_value->shape.dim[i], -opdata->begins[i]);
     } else {
       offsets[i] = opdata->begins[i];
     }
     if (opdata->ends[i] <= 0) {
-      sizes[i] = opdata->ends[i] + input_value->shape.dim[i] - offsets[i];
+      sizes[i] = doz(doz(input_value->shape.dim[i], -opdata->ends[i]), offsets[i]);
     } else {
-      sizes[i] = opdata->ends[i] - offsets[i];
+      sizes[i] = doz(opdata->ends[i], offsets[i]);
     }
+    output_value->shape.dim[i] = sizes[i];
   }
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_slice_nd_x8:
@@ -113,14 +116,6 @@ static enum xnn_status reshape_slice_operator(
   }
   if (status != xnn_status_success) {
     return status;
-  }
-  output_value->shape.num_dims = num_dims;
-  for (size_t i = 0; i < num_dims; ++i) {
-    if (sizes[i] == 0) {
-      output_value->shape.dim[i] = input_value->shape.dim[i];
-    } else {
-      output_value->shape.dim[i] = sizes[i];
-    }
   }
   const size_t new_size = xnn_tensor_get_size(output_value);
   if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
