@@ -302,6 +302,9 @@ class Tensor {
       if (extents_[i - 1] == 1) {
         // We don't care about the stride of extent 1 dimensions.
         continue;
+      } else if (extents_[i - 1] == 0) {
+        // Tensor is empty, it's contiguous.
+        return true;
       }
       if (strides_[i - 1] != stride) {
         return false;
@@ -440,9 +443,11 @@ class Tensor {
     std::vector<size_t> maxs(rank());
     for (size_t i = 0; i < rank(); ++i) {
       offsets[i] = begins[i] < 0 ? extents_[i] + begins[i] : begins[i];
-      result.extents_[i] =
-          (ends[i] <= 0 ? extents_[i] + ends[i] : ends[i]) - offsets[i];
-      maxs[i] = result.extents_[i] - 1;
+      result.extents_[i] = std::max<int64_t>(
+          0, (ends[i] <= 0 ? static_cast<int64_t>(extents_[i]) + ends[i]
+                           : ends[i]) -
+                 static_cast<int64_t>(offsets[i]));
+      maxs[i] = doz(result.extents_[i], 1);
     }
 
     result.begin_ = begin_ + flat_offset(offsets);
