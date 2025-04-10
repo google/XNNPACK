@@ -232,6 +232,150 @@
 #endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
 
 
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  static void f32_spmm_minmax_ukernel_1vx1__rvv(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_1vx1__rvv, 1 * xnn_init_hardware_config()->vlenb / sizeof(float), 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckRVV
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_1vx1__rvv)
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  static void f32_spmm_minmax_ukernel_1vx2__rvv(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_1vx2__rvv, 1 * xnn_init_hardware_config()->vlenb / sizeof(float), 2,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckRVV
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_1vx2__rvv)
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  static void f32_spmm_minmax_ukernel_1vx4__rvv(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_1vx4__rvv, 1 * xnn_init_hardware_config()->vlenb / sizeof(float), 4,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckRVV
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_1vx4__rvv)
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  static void f32_spmm_minmax_ukernel_2vx1__rvv(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_2vx1__rvv, 2 * xnn_init_hardware_config()->vlenb / sizeof(float), 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckRVV
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_2vx1__rvv)
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  static void f32_spmm_minmax_ukernel_2vx2__rvv(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_2vx2__rvv, 2 * xnn_init_hardware_config()->vlenb / sizeof(float), 2,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckRVV
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_2vx2__rvv)
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  static void f32_spmm_minmax_ukernel_2vx4__rvv(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_2vx4__rvv, 2 * xnn_init_hardware_config()->vlenb / sizeof(float), 4,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckRVV
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_2vx4__rvv)
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  static void f32_spmm_minmax_ukernel_4vx1__rvv(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_4vx1__rvv, 4 * xnn_init_hardware_config()->vlenb / sizeof(float), 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckRVV
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_4vx1__rvv)
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  static void f32_spmm_minmax_ukernel_4vx2__rvv(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_4vx2__rvv, 4 * xnn_init_hardware_config()->vlenb / sizeof(float), 2,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckRVV
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_4vx2__rvv)
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  static void f32_spmm_minmax_ukernel_4vx4__rvv(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_4vx4__rvv, 4 * xnn_init_hardware_config()->vlenb / sizeof(float), 4,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckRVV
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_4vx4__rvv)
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  static void f32_spmm_minmax_ukernel_8vx1__rvv(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_8vx1__rvv, 8 * xnn_init_hardware_config()->vlenb / sizeof(float), 1,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckRVV
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_8vx1__rvv)
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  static void f32_spmm_minmax_ukernel_8vx2__rvv(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_8vx2__rvv, 8 * xnn_init_hardware_config()->vlenb / sizeof(float), 2,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckRVV
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_8vx2__rvv)
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  static void f32_spmm_minmax_ukernel_8vx4__rvv(benchmark::State& state, const char* net) {
+    f32_spmm(state, xnn_f32_spmm_minmax_ukernel_8vx4__rvv, 8 * xnn_init_hardware_config()->vlenb / sizeof(float), 4,
+      /*sparsity=*/0.8f, xnn_init_f32_minmax_scalar_params,
+    benchmark::utils::CheckRVV
+    );
+  }
+
+  BENCHMARK_SPMM(f32_spmm_minmax_ukernel_8vx4__rvv)
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
 #if XNN_ARCH_WASMRELAXEDSIMD
   static void f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_arm(benchmark::State& state, const char* net) {
     f32_spmm(state, xnn_f32_spmm_minmax_ukernel_4x1__wasmrelaxedsimd_arm, 4, 1,
