@@ -100,6 +100,7 @@ BEGIN_FUNCTION xnn_bf16_f32_gemm_minmax_ukernel_2x16c2__asm_amd64_avx512bf16_bro
       vpsrld zmm3, zmm3, 16
       vdpbf16ps  zmm12, zmm3, zmm7
 
+
 .Linner_loop_end:
       # Min/max clamping.
       vminps  zmm11, zmm1, zmm11

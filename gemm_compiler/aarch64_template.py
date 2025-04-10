@@ -89,9 +89,9 @@ class Aarch64(arm_template.Arm):
     )
 
   def load_min_max(self):
-      return '''
+    self.asm_string += """
       # Load min/max values.
-      ld2r {v0.4s, v1.4s}, [x13]\n'''
+      ld2r {v0.4s, v1.4s}, [x13]\n"""
 
   def header(self):
     header = """// Copyright 2025 Google LLC
@@ -119,15 +119,14 @@ BEGIN_FUNCTION {function_name}
       # Load params.
       ldr x13, [sp, 264]
 """.format(function_name=self.function_name())
-    header += self.load_min_max()
-    header += self.quantization_params()
-    return header
-
+    self.asm_string += header
+    self.load_min_max()
+    self.quantization_params()
   def jump_to_label(self, label):
-    return f'b {label}\n'
+    self.asm_string += f'b {label}\n'
 
   def read_a_registers(self):
-    return ''
+    return
 
   @abc.abstractmethod
   def w_registers(self) -> list[str]:
@@ -138,10 +137,9 @@ BEGIN_FUNCTION {function_name}
     raise NotImplementedError
 
   def do_loop(self, pos):
-    asm_string = ''
     for l in self.weights_asm()['loop_2']:
       for nr in range(0, self.n - 1, 2):
-        asm_string += l.format(
+        self.asm_string += l.format(
             W_ptr=self.w_ptr_register(),
             W=self.w_registers()[nr],
             W_1=self.w_registers()[nr + 1],
@@ -151,63 +149,62 @@ BEGIN_FUNCTION {function_name}
             tmp_W=self.tmp_w_register(),
         )
     if 'after' in self.weights_asm():
-      asm_string += ''.join(self.weights_asm()['after']).format(
+      self.asm_string += ''.join(self.weights_asm()['after']).format(
           W=self.w_ptr_register(), w_step=self.register_bytes() * self.n
       )
 
     for l in self.compute_asm()['loop']:
       for nr in range(0, self.n):
         for mr in range(0, self.m):
-          asm_string += l.format(
+          self.asm_string += l.format(
               W=self.w_registers()[nr],
               A=self.a_registers(mr),
-              ACC=self.acc_registers()[self.m * nr + mr],
+              # ACC=self.acc_registers()[self.m * nr + mr],
+              ACC=self.acc_registers()[self.n * mr + nr],
               POS=pos,
           )
-    return asm_string
 
   @abc.abstractmethod
   def base_input_asm(self) -> dict[str, list[str]]:
     raise NotImplementedError
 
   def inner_loop(self):
-    asm_string = ''
     if self.unroll_factor > 1:
       decrement = self.unroll_factor * 4
       k_register = self.k_register()
-      asm_string += f'\n# Are there at least {decrement} bytes?\n'
-      asm_string += f'cmp {k_register}, {decrement}\n'
-      asm_string += 'blt .Linner_loop_tail\n'
-      asm_string += f'sub {k_register}, {k_register}, {decrement}\n'
+      self.asm_string += f'\n# Are there at least {decrement} bytes?\n'
+      self.asm_string += f'cmp {k_register}, {decrement}\n'
+      self.asm_string += 'blt .Linner_loop_tail\n'
+      self.asm_string += f'sub {k_register}, {k_register}, {decrement}\n'
 
-    asm_string += '\n.Linner_loop:\n'
+    self.asm_string += '\n.Linner_loop:\n'
     decrement = 4 * self.unroll_factor
     if 'before' in self.input_asm():
-      asm_string += self.input_asm()['before']
+      self.asm_string += self.input_asm()['before']
     if self.unroll_factor > 1:
       for mr in range(0, self.m):
         for l in self.input_asm()['loop']:
-          asm_string += l.format(
+          self.asm_string += l.format(
               AM_ptr=self.am_registers()[mr],
               AM=self.a_registers(mr),
               a_offset=self.k_register(),
           )
     if 'after' in self.input_asm():
-      asm_string += self.input_asm()['after']
+      self.asm_string += self.input_asm()['after']
 
     # weights
     if 'before' in self.weights_asm():
-      asm_string += self.weights_asm()['before']
+      self.asm_string += self.weights_asm()['before']
     inner_loop_label = '.Linner_loop'
     if self.unroll_factor > 1:
       for u in range(self.unroll_factor):
-        asm_string += self.do_loop(u)
+        self.do_loop(u)
       # loop counter
-      asm_string += self.cmp_k_and_jump_if_less(
+      self.cmp_k_and_jump_if_less(
           label=inner_loop_label, decrement=decrement, cond='bhs'
       )
 
-      asm_string += f"""
+      self.asm_string += f"""
       add x20, x20, {decrement}
       cmp x20, 4
       blt .Linner_loop_end
@@ -216,19 +213,15 @@ BEGIN_FUNCTION {function_name}
 
     for mr in range(0, self.m):
       for l in self.base_input_asm()['loop']:
-        asm_string += l.format(
+        self.asm_string += l.format(
             AM_ptr=self.am_registers()[mr],
             AM=self.a_registers(mr),
             a_offset=self.k_register(),
         )
-    asm_string += self.do_loop(0)
+    self.do_loop(0)
     # loop counter
-    asm_string += self.cmp_k_and_jump_if_less(
-        label=inner_loop_label, decrement=4, cond='bne'
-    )
-    asm_string += '\n'
-
-    return asm_string
+    self.cmp_k_and_jump_if_less(label=inner_loop_label, decrement=4, cond='bne')
+    self.asm_string += '\n'
 
   def clamp_inputs_and_outputs(self, labels, input_registers, output_registers):
     clamping = {
@@ -239,12 +232,11 @@ BEGIN_FUNCTION {function_name}
       csel  {AM_2}, {AM_1}, {AM_2}, LS
       csel  {CM_2}, {CM_1}, {CM_2}, LS\n""",
     }
-    ret = ''
     outer = self.m
     # clamp a & c
     end_index = self.m if (self.m % 2 == 1) else self.m - 1
     for mr in range(2, end_index, 2):
-      ret += clamping['clamp'].format(
+      self.asm_string += clamping['clamp'].format(
           mr_reg=self.mr_register(),
           AM_0=input_registers[mr - 2],
           AM_1=input_registers[mr - 1],
@@ -255,7 +247,7 @@ BEGIN_FUNCTION {function_name}
           M=mr,
       )
     if end_index != self.m:
-      ret += """
+      self.asm_string += """
       cmp {mr_reg}, {M}
       csel  {AM_1}, {AM_0}, {AM_1}, LO
       csel  {CM_1}, {CM_0}, {CM_1}, LO\n""".format(
@@ -267,10 +259,8 @@ BEGIN_FUNCTION {function_name}
           M=end_index + 1,
       )
 
-    return ret, outer
-
   def initialize_k_register(self):
-    return f'mov {self.k_register()}, {self.kc_register()}\n'
+    self.asm_string += f'mov {self.k_register()}, {self.kc_register()}\n'
 
   def epilogue(self):
     restore_stack = """
@@ -290,4 +280,61 @@ BEGIN_FUNCTION {function_name}
       ret
 END_FUNCTION {function_name}
 """.format(function_name=self.function_name())
-    return restore_stack
+    self.asm_string += restore_stack
+
+  def mul_lane(self, a, b, c, lane):
+    self.asm_string += f'mul v{a}.4s, v{b}.4s, v{c}.s[{lane}]\n'
+
+  def fmul_lane(self, a, b, c, lane):
+    self.asm_string += f'fmul v{a}.4s, v{b}.4s, v{c}.s[{lane}]\n'
+
+  def fmul(self, a, b, c):
+    self.asm_string += f'fmul v{a}.4s, v{b}.4s, v{c}.4s\n'
+
+  def load_simd_register(self, q, ptr, offset):
+    self.asm_string += f'ldr q{q}, [{ptr}, {offset}]\n'
+
+  def load_simd_register_pair(self, q0, q1, ptr, offset):
+    self.asm_string += f'ldp q{q0}, q{q1}, [{ptr}, {offset}]\n'
+
+  def store_simd_register_lane(self, r, prefix, ptr, lane, post_increment):
+    if post_increment == 0:
+      # for some reason the assembler dislikes post_incremnt of zero for st1.
+      self.asm_string += f'st1 {{v{r}.{prefix}}}[{lane}], [{ptr}]\n'
+    else:
+      self.asm_string += (
+          f'st1 {{v{r}.{prefix}}}[{lane}], [{ptr}], #{post_increment}\n'
+      )
+
+  def store_simd_register(self, r, prefix, ptr, post_increment):
+    self.asm_string += f'str {prefix}{r}, [{ptr}], #{post_increment}\n'
+
+  def store_simd_register_pair(self, q0, q1, ptr, post_increment):
+    self.asm_string += f'stp q{q0}, q{q1}, [{ptr}], #{post_increment}\n'
+
+  def fadd(self, a, b, c):
+    self.asm_string += f'fadd v{a}.4s, v{b}.4s, v{c}.4s\n'
+
+  def sqxtn_base(self, instruction, a, b, atype, multiplier):
+    match atype:
+      case 'sint32':
+        qq = 4 * multiplier
+        small = f'{qq}h'
+        large = '4s'
+      case 'sint16':
+        qq = 8 * multiplier
+        small = f'{qq}b'
+        large = '8h'
+      case _:
+        raise NotImplementedError
+
+    self.asm_string += f'{instruction} v{a}.{small}, v{b}.{large}\n'
+
+  def sqxtn(self, a, b, atype):
+    self.sqxtn_base('sqxtn', a, b, atype, 1)
+
+  def sqxtn2(self, a, b, atype):
+    self.sqxtn_base('sqxtn2', a, b, atype, 2)
+
+  def sqadd(self, a, b, c):
+    self.asm_string += f'sqadd v{a}.8h, v{b}.8h, v{c}.8h\n'

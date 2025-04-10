@@ -44,16 +44,16 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x16__asm_aarch64_neonfma_ld64_2
       ldr d2, [x3], 8
       ldp q7, q8, [x5], 32
       ldp q9, q10, [x5], 32
-      fmla  v11.4s, v7.4s, v2.s[0]
-      fmla  v12.4s, v8.4s, v2.s[0]
-      fmla  v13.4s, v9.4s, v2.s[0]
-      fmla  v14.4s, v10.4s, v2.s[0]
+      fmla v11.4s, v7.4s, v2.s[0]
+      fmla v12.4s, v8.4s, v2.s[0]
+      fmla v13.4s, v9.4s, v2.s[0]
+      fmla v14.4s, v10.4s, v2.s[0]
       ldp q7, q8, [x5], 32
       ldp q9, q10, [x5], 32
-      fmla  v11.4s, v7.4s, v2.s[1]
-      fmla  v12.4s, v8.4s, v2.s[1]
-      fmla  v13.4s, v9.4s, v2.s[1]
-      fmla  v14.4s, v10.4s, v2.s[1]
+      fmla v11.4s, v7.4s, v2.s[1]
+      fmla v12.4s, v8.4s, v2.s[1]
+      fmla v13.4s, v9.4s, v2.s[1]
+      fmla v14.4s, v10.4s, v2.s[1]
       subs x20, x20, 8
       bhs .Linner_loop
 
@@ -65,29 +65,30 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x16__asm_aarch64_neonfma_ld64_2
       ldr s2, [x3], 4
       ldp q7, q8, [x5], 32
       ldp q9, q10, [x5], 32
-      fmla  v11.4s, v7.4s, v2.s[0]
-      fmla  v12.4s, v8.4s, v2.s[0]
-      fmla  v13.4s, v9.4s, v2.s[0]
-      fmla  v14.4s, v10.4s, v2.s[0]
+      fmla v11.4s, v7.4s, v2.s[0]
+      fmla v12.4s, v8.4s, v2.s[0]
+      fmla v13.4s, v9.4s, v2.s[0]
+      fmla v14.4s, v10.4s, v2.s[0]
       subs x20, x20, 4
       bne .Linner_loop_tail
 
+
 .Linner_loop_end:
       # Min/max clamping.
-      fmin  v11.4s, v1.4s, v11.4s
-      fmin  v12.4s, v1.4s, v12.4s
-      fmin  v13.4s, v1.4s, v13.4s
-      fmin  v14.4s, v1.4s, v14.4s
-      fmax  v11.4s, v0.4s, v11.4s
-      fmax  v12.4s, v0.4s, v12.4s
-      fmax  v13.4s, v0.4s, v13.4s
-      fmax  v14.4s, v0.4s, v14.4s
+      fmin v11.4s, v1.4s, v11.4s
+      fmin v12.4s, v1.4s, v12.4s
+      fmin v13.4s, v1.4s, v13.4s
+      fmin v14.4s, v1.4s, v14.4s
+      fmax v11.4s, v0.4s, v11.4s
+      fmax v12.4s, v0.4s, v12.4s
+      fmax v13.4s, v0.4s, v13.4s
+      fmax v14.4s, v0.4s, v14.4s
 
       # Check whether full or partial store.
       cmp x1, 16
       b.lo .Ltail_8
-      stp  q11, q12, [x6], 32
-      stp  q13, q14, [x6], 32
+      stp q11, q12, [x6], #32
+      stp q13, q14, [x6], #32
       sub x3, x3, x2
 
       sub x1, x1, 16
@@ -96,26 +97,26 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x16__asm_aarch64_neonfma_ld64_2
 
 .Ltail_8:
       tbz w1, 3, .Ltail_4
-      stp  q11, q12, [x6], 32
-      mov  v11.16b, v13.16b
-      mov  v12.16b, v14.16b
+      stp q11, q12, [x6], #32
+      mov v11.16b, v13.16b
+      mov v12.16b, v14.16b
 
 
 .Ltail_4:
       tbz w1, 2, .Ltail_2
-      str  q11, [x6], 16
-      mov  v11.16b, v12.16b
+      str q11, [x6], #16
+      mov v11.16b, v12.16b
 
 
 .Ltail_2:
       tbz w1, 1, .Ltail_1
-      str  d11, [x6], 8
+      str d11, [x6], #8
       dup d11, v11.d[1]
 
 
 .Ltail_1:
       tbz w1, 0, .Lreturn
-      str  s11, [x6]
+      str s11, [x6], #0
 
 .Lreturn:
       # Restore the callee saved GP registers.

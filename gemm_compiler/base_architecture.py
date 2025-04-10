@@ -15,6 +15,7 @@ class BaseArchitecture:
     self._m = m
     self._n = n // self.n_step()
     self._c = 1
+    self.asm_string = ''
 
   @property
   def m(self) -> int:
@@ -45,17 +46,17 @@ class BaseArchitecture:
     ]
 
   @abc.abstractmethod
-  def adjust_kc(self) -> str:
+  def adjust_kc(self) -> None:
     """Returns an assembly string computing the adjusted `kc`."""
     raise NotImplementedError
 
   @abc.abstractmethod
-  def outer_loop_prepare(self) -> str:
+  def outer_loop_prepare(self) -> None:
     """Returns an assembly string preparing the outer loop."""
     raise NotImplementedError
 
   @abc.abstractmethod
-  def init_accumulators(self) -> str:
+  def init_accumulators(self) -> None:
     """Returns an assembly string initializing the accumulators."""
     raise NotImplementedError
 
@@ -64,17 +65,17 @@ class BaseArchitecture:
     raise NotImplementedError
 
   @abc.abstractmethod
-  def isa(self) -> str:
+  def isa(self) -> None:
     """Returns a string identifying the ISA of this `BaseArchitecture`."""
     raise NotImplementedError
 
   @abc.abstractmethod
-  def convert_to_output_type(self) -> str:
+  def convert_to_output_type(self) -> None:
     """Returns an assembly string dequantizing the accumulators."""
     raise NotImplementedError
 
   @abc.abstractmethod
-  def store(self) -> str:
+  def store(self) -> None:
     """Returns an assembly string storing the results."""
     raise NotImplementedError
 
@@ -100,7 +101,7 @@ class BaseArchitecture:
     raise NotImplementedError
 
   @abc.abstractmethod
-  def a_registers(self, idx) -> str:
+  def a_registers(self, idx) -> None:
     raise NotImplementedError
 
   @abc.abstractmethod
@@ -234,7 +235,7 @@ class BaseArchitecture:
     raise NotImplementedError
 
   @abc.abstractmethod
-  def prefix(self) -> str:
+  def prefix(self) -> None:
     """Returns the register name prefix."""
     raise NotImplementedError
 
@@ -251,18 +252,25 @@ class BaseArchitecture:
   def output_n(self) -> int:
     return self.n
 
-  def clamp(self) -> str:
+  def clamp(self) -> None:
     """Returns an assembly string computing the minimum/maximum clamp."""
     acc_registers = self.acc_registers()
-    asm_string = ''
     for nr in range(0, self.output_n()):
       for mr in range(0, self.m):
-        asm_string += self.clamp_min(
-            reg=acc_registers[self.m * nr + mr], prefix=self.prefix()
+        self.clamp_min(
+            reg=acc_registers[self.n * mr + nr], prefix=self.prefix()
         )
     for nr in range(0, self.output_n()):
       for mr in range(0, self.m):
-        asm_string += self.clamp_max(
-            reg=acc_registers[self.m * nr + mr], prefix=self.prefix()
+        self.clamp_max(
+            reg=acc_registers[self.n * mr + nr], prefix=self.prefix()
         )
-    return asm_string
+
+  def label(self, label_name) -> None:
+    self.asm_string += f'\n.L{label_name}:\n'
+
+  def comment(self, comment_str) -> None:
+    self.asm_string += f'# {comment_str}\n'
+
+  def get_string(self) -> str:
+    return self.asm_string

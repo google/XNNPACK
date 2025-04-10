@@ -187,6 +187,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x32c2__asm_amd64_avx512f_broadcast
       vfmadd231ps  zmm18{k3}, zmm5, zmm8
       vfmadd231ps  zmm22{k3}, zmm5, zmm9
       vfmadd231ps  zmm26{k3}, zmm5, zmm10
+
 .Linner_loop_end:
       vpsrlq zmm7, zmm11, 32
       vaddps zmm11, zmm11, zmm7

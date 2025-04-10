@@ -61,11 +61,15 @@ class Fma3(x64_template.X64):
 
   def clamp_min(self, reg, prefix):
     max_reg = self.max_register()
-    return f'vminps  {prefix}{reg}, {prefix}{max_reg}, {prefix}{reg}\n'
+    self.asm_string += (
+        f'vminps  {prefix}{reg}, {prefix}{max_reg}, {prefix}{reg}\n'
+    )
 
   def clamp_max(self, reg, prefix):
     min_reg = self.min_register()
-    return f'vmaxps  {prefix}{reg}, {prefix}{min_reg}, {prefix}{reg}\n'
+    self.asm_string += (
+        f'vmaxps  {prefix}{reg}, {prefix}{min_reg}, {prefix}{reg}\n'
+    )
 
   def store(self):
     accumulators = self.acc_registers()

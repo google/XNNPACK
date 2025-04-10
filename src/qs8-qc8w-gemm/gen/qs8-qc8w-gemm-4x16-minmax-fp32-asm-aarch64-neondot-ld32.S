@@ -55,20 +55,20 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot
       mov x20, x2
 
       # Initialize accumulators with the biases.
-      ldp q12, q16, [x5, 0]
-      ldp q20, q24, [x5, 32]
-      mov v13.16b, v12.16b
-      mov v14.16b, v12.16b
-      mov v15.16b, v12.16b
-      mov v17.16b, v16.16b
-      mov v18.16b, v16.16b
-      mov v19.16b, v16.16b
-      mov v21.16b, v20.16b
-      mov v22.16b, v20.16b
-      mov v23.16b, v20.16b
-      mov v25.16b, v24.16b
-      mov v26.16b, v24.16b
-      mov v27.16b, v24.16b
+      ldp q12, q13, [x5, 0]
+      ldp q14, q15, [x5, 32]
+      mov v16.16b, v12.16b
+      mov v20.16b, v12.16b
+      mov v24.16b, v12.16b
+      mov v17.16b, v13.16b
+      mov v21.16b, v13.16b
+      mov v25.16b, v13.16b
+      mov v18.16b, v14.16b
+      mov v22.16b, v14.16b
+      mov v26.16b, v14.16b
+      mov v19.16b, v15.16b
+      mov v23.16b, v15.16b
+      mov v27.16b, v15.16b
       add x5, x5, 64
 
 .Linner_loop:
@@ -79,26 +79,26 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot
       ldp q6, q7, [x5], 32
       ldp q8, q9, [x5], 32
       sdot  v12.4s, v6.16b, v2.4b[0]
-      sdot  v13.4s, v6.16b, v3.4b[0]
-      sdot  v14.4s, v6.16b, v4.4b[0]
-      sdot  v15.4s, v6.16b, v5.4b[0]
-      sdot  v16.4s, v7.16b, v2.4b[0]
+      sdot  v16.4s, v6.16b, v3.4b[0]
+      sdot  v20.4s, v6.16b, v4.4b[0]
+      sdot  v24.4s, v6.16b, v5.4b[0]
+      sdot  v13.4s, v7.16b, v2.4b[0]
       sdot  v17.4s, v7.16b, v3.4b[0]
-      sdot  v18.4s, v7.16b, v4.4b[0]
-      sdot  v19.4s, v7.16b, v5.4b[0]
-      sdot  v20.4s, v8.16b, v2.4b[0]
-      sdot  v21.4s, v8.16b, v3.4b[0]
+      sdot  v21.4s, v7.16b, v4.4b[0]
+      sdot  v25.4s, v7.16b, v5.4b[0]
+      sdot  v14.4s, v8.16b, v2.4b[0]
+      sdot  v18.4s, v8.16b, v3.4b[0]
       sdot  v22.4s, v8.16b, v4.4b[0]
-      sdot  v23.4s, v8.16b, v5.4b[0]
-      sdot  v24.4s, v9.16b, v2.4b[0]
-      sdot  v25.4s, v9.16b, v3.4b[0]
-      sdot  v26.4s, v9.16b, v4.4b[0]
+      sdot  v26.4s, v8.16b, v5.4b[0]
+      sdot  v15.4s, v9.16b, v2.4b[0]
+      sdot  v19.4s, v9.16b, v3.4b[0]
+      sdot  v23.4s, v9.16b, v4.4b[0]
       sdot  v27.4s, v9.16b, v5.4b[0]
       subs x20, x20, 4
       bne .Linner_loop
 
-.Linner_loop_end:
 
+.Linner_loop_end:
       # Convert from int32 to float.
       scvtf v12.4s, v12.4s
       scvtf v13.4s, v13.4s
@@ -122,20 +122,20 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot
       add x5, x5, 64
       # Multiply by weight's scale.
       fmul v12.4s, v12.4s, v2.4s
-      fmul v13.4s, v13.4s, v2.4s
-      fmul v14.4s, v14.4s, v2.4s
-      fmul v15.4s, v15.4s, v2.4s
-      fmul v16.4s, v16.4s, v3.4s
+      fmul v16.4s, v16.4s, v2.4s
+      fmul v20.4s, v20.4s, v2.4s
+      fmul v24.4s, v24.4s, v2.4s
+      fmul v13.4s, v13.4s, v3.4s
       fmul v17.4s, v17.4s, v3.4s
-      fmul v18.4s, v18.4s, v3.4s
-      fmul v19.4s, v19.4s, v3.4s
-      fmul v20.4s, v20.4s, v4.4s
-      fmul v21.4s, v21.4s, v4.4s
+      fmul v21.4s, v21.4s, v3.4s
+      fmul v25.4s, v25.4s, v3.4s
+      fmul v14.4s, v14.4s, v4.4s
+      fmul v18.4s, v18.4s, v4.4s
       fmul v22.4s, v22.4s, v4.4s
-      fmul v23.4s, v23.4s, v4.4s
-      fmul v24.4s, v24.4s, v5.4s
-      fmul v25.4s, v25.4s, v5.4s
-      fmul v26.4s, v26.4s, v5.4s
+      fmul v26.4s, v26.4s, v4.4s
+      fmul v15.4s, v15.4s, v5.4s
+      fmul v19.4s, v19.4s, v5.4s
+      fmul v23.4s, v23.4s, v5.4s
       fmul v27.4s, v27.4s, v5.4s
       # Reconvert to int32.
       fcvtns v12.4s, v12.4s
@@ -156,56 +156,56 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot
       fcvtns v27.4s, v27.4s
       # Convert to int16.
       sqxtn v12.4h, v12.4s
-      sqxtn v13.4h, v13.4s
-      sqxtn v14.4h, v14.4s
-      sqxtn v15.4h, v15.4s
+      sqxtn v16.4h, v16.4s
       sqxtn v20.4h, v20.4s
-      sqxtn v21.4h, v21.4s
+      sqxtn v24.4h, v24.4s
+      sqxtn v14.4h, v14.4s
+      sqxtn v18.4h, v18.4s
       sqxtn v22.4h, v22.4s
-      sqxtn v23.4h, v23.4s
-      sqxtn2 v12.8h, v16.4s
-      sqxtn2 v13.8h, v17.4s
-      sqxtn2 v14.8h, v18.4s
-      sqxtn2 v15.8h, v19.4s
-      sqxtn2 v20.8h, v24.4s
-      sqxtn2 v21.8h, v25.4s
-      sqxtn2 v22.8h, v26.4s
-      sqxtn2 v23.8h, v27.4s
+      sqxtn v26.4h, v26.4s
+      sqxtn2 v12.8h, v13.4s
+      sqxtn2 v16.8h, v17.4s
+      sqxtn2 v20.8h, v21.4s
+      sqxtn2 v24.8h, v25.4s
+      sqxtn2 v14.8h, v15.4s
+      sqxtn2 v18.8h, v19.4s
+      sqxtn2 v22.8h, v23.4s
+      sqxtn2 v26.8h, v27.4s
       # Add output zero point.
       sqadd v12.8h, v12.8h, v10.8h
-      sqadd v13.8h, v13.8h, v10.8h
-      sqadd v14.8h, v14.8h, v10.8h
-      sqadd v15.8h, v15.8h, v10.8h
+      sqadd v16.8h, v16.8h, v10.8h
       sqadd v20.8h, v20.8h, v10.8h
-      sqadd v21.8h, v21.8h, v10.8h
+      sqadd v24.8h, v24.8h, v10.8h
+      sqadd v14.8h, v14.8h, v10.8h
+      sqadd v18.8h, v18.8h, v10.8h
       sqadd v22.8h, v22.8h, v10.8h
-      sqadd v23.8h, v23.8h, v10.8h
+      sqadd v26.8h, v26.8h, v10.8h
       # Convert to int8.
       sqxtn v12.8b, v12.8h
-      sqxtn v13.8b, v13.8h
-      sqxtn v14.8b, v14.8h
-      sqxtn v15.8b, v15.8h
-      sqxtn2 v12.16b, v20.8h
-      sqxtn2 v13.16b, v21.8h
-      sqxtn2 v14.16b, v22.8h
-      sqxtn2 v15.16b, v23.8h
+      sqxtn v16.8b, v16.8h
+      sqxtn v20.8b, v20.8h
+      sqxtn v24.8b, v24.8h
+      sqxtn2 v12.16b, v14.8h
+      sqxtn2 v16.16b, v18.8h
+      sqxtn2 v20.16b, v22.8h
+      sqxtn2 v24.16b, v26.8h
       # Min/max clamping.
       smin  v12.16b, v1.16b, v12.16b
-      smin  v13.16b, v1.16b, v13.16b
-      smin  v14.16b, v1.16b, v14.16b
-      smin  v15.16b, v1.16b, v15.16b
+      smin  v16.16b, v1.16b, v16.16b
+      smin  v20.16b, v1.16b, v20.16b
+      smin  v24.16b, v1.16b, v24.16b
       smax  v12.16b, v0.16b, v12.16b
-      smax  v13.16b, v0.16b, v13.16b
-      smax  v14.16b, v0.16b, v14.16b
-      smax  v15.16b, v0.16b, v15.16b
+      smax  v16.16b, v0.16b, v16.16b
+      smax  v20.16b, v0.16b, v20.16b
+      smax  v24.16b, v0.16b, v24.16b
 
       # Check whether full or partial store.
       cmp x1, 16
       b.lo .Ltail_8
-      str q12, [x6], 16
-      str q13, [x13], 16
-      str q14, [x14], 16
-      str q15, [x15], 16
+      str q12, [x6], #16
+      str q16, [x13], #16
+      str q20, [x14], #16
+      str q24, [x15], #16
       sub x3, x3, x2
       sub x9, x9, x2
       sub x10, x10, x2
@@ -217,46 +217,46 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot
 
 .Ltail_8:
       tbz w1, 3, .Ltail_4
-      str d12, [x6], 8
-      str d13, [x13], 8
-      str d14, [x14], 8
-      str d15, [x15], 8
+      str d12, [x6], #8
+      str d16, [x13], #8
+      str d20, [x14], #8
+      str d24, [x15], #8
       ext v12.16b, v12.16b, v12.16b, 8
-      ext v13.16b, v13.16b, v13.16b, 8
-      ext v14.16b, v14.16b, v14.16b, 8
-      ext v15.16b, v15.16b, v15.16b, 8
+      ext v16.16b, v16.16b, v16.16b, 8
+      ext v20.16b, v20.16b, v20.16b, 8
+      ext v24.16b, v24.16b, v24.16b, 8
 
 
 .Ltail_4:
       tbz w1, 2, .Ltail_2
-      st1 {v12.s}[0], [x6], 4
-      st1 {v13.s}[0], [x13], 4
-      st1 {v14.s}[0], [x14], 4
-      st1 {v15.s}[0], [x15], 4
+      st1 {v12.s}[0], [x6], #4
+      st1 {v16.s}[0], [x13], #4
+      st1 {v20.s}[0], [x14], #4
+      st1 {v24.s}[0], [x15], #4
       ext v12.16b, v12.16b, v12.16b, 4
-      ext v13.16b, v13.16b, v13.16b, 4
-      ext v14.16b, v14.16b, v14.16b, 4
-      ext v15.16b, v15.16b, v15.16b, 4
+      ext v16.16b, v16.16b, v16.16b, 4
+      ext v20.16b, v20.16b, v20.16b, 4
+      ext v24.16b, v24.16b, v24.16b, 4
 
 
 .Ltail_2:
       tbz w1, 1, .Ltail_1
-      st1 {v12.h}[0], [x6], 2
-      st1 {v13.h}[0], [x13], 2
-      st1 {v14.h}[0], [x14], 2
-      st1 {v15.h}[0], [x15], 2
+      st1 {v12.h}[0], [x6], #2
+      st1 {v16.h}[0], [x13], #2
+      st1 {v20.h}[0], [x14], #2
+      st1 {v24.h}[0], [x15], #2
       ext v12.16b, v12.16b, v12.16b, 2
-      ext v13.16b, v13.16b, v13.16b, 2
-      ext v14.16b, v14.16b, v14.16b, 2
-      ext v15.16b, v15.16b, v15.16b, 2
+      ext v16.16b, v16.16b, v16.16b, 2
+      ext v20.16b, v20.16b, v20.16b, 2
+      ext v24.16b, v24.16b, v24.16b, 2
 
 
 .Ltail_1:
       tbz w1, 0, .Lreturn
       st1 {v12.b}[0], [x6]
-      st1 {v13.b}[0], [x13]
-      st1 {v14.b}[0], [x14]
-      st1 {v15.b}[0], [x15]
+      st1 {v16.b}[0], [x13]
+      st1 {v20.b}[0], [x14]
+      st1 {v24.b}[0], [x15]
 
 .Lreturn:
       # Restore the callee saved GP registers.

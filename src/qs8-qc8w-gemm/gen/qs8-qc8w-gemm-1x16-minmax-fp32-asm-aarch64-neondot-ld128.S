@@ -91,8 +91,8 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__asm_aarch64_neondot
       subs x20, x20, 4
       bne .Linner_loop_tail
 
-.Linner_loop_end:
 
+.Linner_loop_end:
       # Convert from int32 to float.
       scvtf v12.4s, v12.4s
       scvtf v13.4s, v13.4s
@@ -130,7 +130,7 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__asm_aarch64_neondot
       # Check whether full or partial store.
       cmp x1, 16
       b.lo .Ltail_8
-      str q12, [x6], 16
+      str q12, [x6], #16
       sub x3, x3, x2
 
       sub x1, x1, 16
@@ -139,19 +139,19 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__asm_aarch64_neondot
 
 .Ltail_8:
       tbz w1, 3, .Ltail_4
-      str d12, [x6], 8
+      str d12, [x6], #8
       ext v12.16b, v12.16b, v12.16b, 8
 
 
 .Ltail_4:
       tbz w1, 2, .Ltail_2
-      st1 {v12.s}[0], [x6], 4
+      st1 {v12.s}[0], [x6], #4
       ext v12.16b, v12.16b, v12.16b, 4
 
 
 .Ltail_2:
       tbz w1, 1, .Ltail_1
-      st1 {v12.h}[0], [x6], 2
+      st1 {v12.h}[0], [x6], #2
       ext v12.16b, v12.16b, v12.16b, 2
 
 

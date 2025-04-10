@@ -64,7 +64,6 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x16c4__asm_amd64_avx512vnni
       cmp rdi, 2
       cmovle r15, rax
       cmovle rbx, r13
-
       # Load quantization_params pointer from stack
       mov r11, [rsp + 328]
       mov edi, [r11 + 0]
@@ -100,6 +99,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x16c4__asm_amd64_avx512vnni
       add r11, 4
       cmp rdx, r11
       jne .Linner_loop
+
 .Linner_loop_end:
 
       # Convert from int32 to float.

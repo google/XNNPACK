@@ -37,8 +37,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c4__asm_aarch64_neondot_l
       # Initialize k counter.
       mov x20, x2
       # Initialize accumulators with k_sum * input zero point.
-      ldr q10, [x24]
-      ldp  q2, q3, [x5, 0]
+      ldr q10, [x24, 0]
+      ldp q2, q3, [x5, 0]
       mul v12.4s, v2.4s, v10.s[0]
       mul v13.4s, v3.4s, v10.s[0]
       add x5, x5, 32
@@ -53,8 +53,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c4__asm_aarch64_neondot_l
       subs x20, x20, 4
       bne .Linner_loop
 
-.Linner_loop_end:
 
+.Linner_loop_end:
       # Convert from int32 to float.
       scvtf v12.4s, v12.4s, #4
       scvtf v13.4s, v13.4s, #4
@@ -74,15 +74,15 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c4__asm_aarch64_neondot_l
       fadd v12.4s, v12.4s, v6.4s
       fadd v13.4s, v13.4s, v7.4s
       # Min/max clamping.
-      fmin  v12.4s, v1.4s, v12.4s
-      fmin  v13.4s, v1.4s, v13.4s
-      fmax  v12.4s, v0.4s, v12.4s
-      fmax  v13.4s, v0.4s, v13.4s
+      fmin v12.4s, v1.4s, v12.4s
+      fmin v13.4s, v1.4s, v13.4s
+      fmax v12.4s, v0.4s, v12.4s
+      fmax v13.4s, v0.4s, v13.4s
 
       # Check whether full or partial store.
       cmp x1, 8
       b.lo .Ltail_4
-      stp  q12, q13, [x6], 32
+      stp q12, q13, [x6], #32
       sub x3, x3, x2
 
       sub x1, x1, 8
@@ -91,19 +91,19 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c4__asm_aarch64_neondot_l
 
 .Ltail_4:
       tbz w1, 2, .Ltail_2
-      str  q12, [x6], 16
-      mov  v12.16b, v13.16b
+      str q12, [x6], #16
+      mov v12.16b, v13.16b
 
 
 .Ltail_2:
       tbz w1, 1, .Ltail_1
-      str  d12, [x6], 8
+      str d12, [x6], #8
       dup d12, v12.d[1]
 
 
 .Ltail_1:
       tbz w1, 0, .Lreturn
-      str  s12, [x6]
+      str s12, [x6], #0
 
 .Lreturn:
       # Restore the callee saved GP registers.

@@ -140,7 +140,6 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_7x16c8__asm_amd64_avx512vnni
 
       mov [rsp + 112], rcx
       mov [rsp + 120], r10
-
       # Load quantization_params pointer from stack
       mov r11, [rsp + 648]
       mov edi, [r11 + 0]
@@ -239,6 +238,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_7x16c8__asm_amd64_avx512vnni
       add r11, 8
       cmp rdx, r11
       jne .Linner_loop
+
 .Linner_loop_end:
       vpsrlq zmm6, zmm5, 32
       vpaddd zmm5, zmm5, zmm6

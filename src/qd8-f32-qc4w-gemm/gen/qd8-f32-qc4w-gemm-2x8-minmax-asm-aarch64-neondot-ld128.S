@@ -44,11 +44,11 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8c4__asm_aarch64_neondot_l
       # Initialize k counter.
       mov x20, x2
       # Initialize accumulators with k_sum * input zero point.
-      ldp q10, q11, [x24]
-      ldp  q2, q3, [x5, 0]
+      ldp q10, q11, [x24, 0]
+      ldp q2, q3, [x5, 0]
       mul v12.4s, v2.4s, v10.s[0]
-      mul v13.4s, v2.4s, v10.s[2]
-      mul v14.4s, v3.4s, v10.s[0]
+      mul v14.4s, v2.4s, v10.s[2]
+      mul v13.4s, v3.4s, v10.s[0]
       mul v15.4s, v3.4s, v10.s[2]
       add x5, x5, 32
 
@@ -64,29 +64,29 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8c4__asm_aarch64_neondot_l
       shl v6.16b, v29.16b, #4
       and v7.16b, v29.16b, v28.16b
       sdot  v12.4s, v6.16b, v2.4b[0]
-      sdot  v13.4s, v6.16b, v3.4b[0]
-      sdot  v14.4s, v7.16b, v2.4b[0]
+      sdot  v14.4s, v6.16b, v3.4b[0]
+      sdot  v13.4s, v7.16b, v2.4b[0]
       sdot  v15.4s, v7.16b, v3.4b[0]
       ldr q29, [x5], 16
       shl v6.16b, v29.16b, #4
       and v7.16b, v29.16b, v28.16b
       sdot  v12.4s, v6.16b, v2.4b[1]
-      sdot  v13.4s, v6.16b, v3.4b[1]
-      sdot  v14.4s, v7.16b, v2.4b[1]
+      sdot  v14.4s, v6.16b, v3.4b[1]
+      sdot  v13.4s, v7.16b, v2.4b[1]
       sdot  v15.4s, v7.16b, v3.4b[1]
       ldr q29, [x5], 16
       shl v6.16b, v29.16b, #4
       and v7.16b, v29.16b, v28.16b
       sdot  v12.4s, v6.16b, v2.4b[2]
-      sdot  v13.4s, v6.16b, v3.4b[2]
-      sdot  v14.4s, v7.16b, v2.4b[2]
+      sdot  v14.4s, v6.16b, v3.4b[2]
+      sdot  v13.4s, v7.16b, v2.4b[2]
       sdot  v15.4s, v7.16b, v3.4b[2]
       ldr q29, [x5], 16
       shl v6.16b, v29.16b, #4
       and v7.16b, v29.16b, v28.16b
       sdot  v12.4s, v6.16b, v2.4b[3]
-      sdot  v13.4s, v6.16b, v3.4b[3]
-      sdot  v14.4s, v7.16b, v2.4b[3]
+      sdot  v14.4s, v6.16b, v3.4b[3]
+      sdot  v13.4s, v7.16b, v2.4b[3]
       sdot  v15.4s, v7.16b, v3.4b[3]
       subs x20, x20, 16
       bhs .Linner_loop
@@ -102,14 +102,14 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8c4__asm_aarch64_neondot_l
       shl v6.16b, v29.16b, #4
       and v7.16b, v29.16b, v28.16b
       sdot  v12.4s, v6.16b, v2.4b[0]
-      sdot  v13.4s, v6.16b, v3.4b[0]
-      sdot  v14.4s, v7.16b, v2.4b[0]
+      sdot  v14.4s, v6.16b, v3.4b[0]
+      sdot  v13.4s, v7.16b, v2.4b[0]
       sdot  v15.4s, v7.16b, v3.4b[0]
       subs x20, x20, 4
       bne .Linner_loop_tail
 
-.Linner_loop_end:
 
+.Linner_loop_end:
       # Convert from int32 to float.
       scvtf v12.4s, v12.4s, #4
       scvtf v13.4s, v13.4s, #4
@@ -117,8 +117,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8c4__asm_aarch64_neondot_l
       scvtf v15.4s, v15.4s, #4
       # Multiply by input scale.
       fmul v12.4s, v12.4s, v10.s[1]
-      fmul v13.4s, v13.4s, v10.s[3]
-      fmul v14.4s, v14.4s, v10.s[1]
+      fmul v14.4s, v14.4s, v10.s[3]
+      fmul v13.4s, v13.4s, v10.s[1]
       fmul v15.4s, v15.4s, v10.s[3]
       # Load weights scale.
       ldp q2, q3, [x5, 0]
@@ -128,29 +128,29 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8c4__asm_aarch64_neondot_l
       add x5, x5, 32
       # Multiply by weight's scale.
       fmul v12.4s, v12.4s, v2.4s
-      fmul v13.4s, v13.4s, v2.4s
-      fmul v14.4s, v14.4s, v3.4s
+      fmul v14.4s, v14.4s, v2.4s
+      fmul v13.4s, v13.4s, v3.4s
       fmul v15.4s, v15.4s, v3.4s
       # Add bias.
       fadd v12.4s, v12.4s, v6.4s
-      fadd v13.4s, v13.4s, v6.4s
-      fadd v14.4s, v14.4s, v7.4s
+      fadd v14.4s, v14.4s, v6.4s
+      fadd v13.4s, v13.4s, v7.4s
       fadd v15.4s, v15.4s, v7.4s
       # Min/max clamping.
-      fmin  v12.4s, v1.4s, v12.4s
-      fmin  v13.4s, v1.4s, v13.4s
-      fmin  v14.4s, v1.4s, v14.4s
-      fmin  v15.4s, v1.4s, v15.4s
-      fmax  v12.4s, v0.4s, v12.4s
-      fmax  v13.4s, v0.4s, v13.4s
-      fmax  v14.4s, v0.4s, v14.4s
-      fmax  v15.4s, v0.4s, v15.4s
+      fmin v12.4s, v1.4s, v12.4s
+      fmin v14.4s, v1.4s, v14.4s
+      fmin v13.4s, v1.4s, v13.4s
+      fmin v15.4s, v1.4s, v15.4s
+      fmax v12.4s, v0.4s, v12.4s
+      fmax v14.4s, v0.4s, v14.4s
+      fmax v13.4s, v0.4s, v13.4s
+      fmax v15.4s, v0.4s, v15.4s
 
       # Check whether full or partial store.
       cmp x1, 8
       b.lo .Ltail_4
-      stp  q12, q14, [x6], 32
-      stp  q13, q15, [x13], 32
+      stp q12, q13, [x6], #32
+      stp q14, q15, [x13], #32
       sub x3, x3, x2
       sub x9, x9, x2
 
@@ -160,24 +160,24 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8c4__asm_aarch64_neondot_l
 
 .Ltail_4:
       tbz w1, 2, .Ltail_2
-      str  q12, [x6], 16
-      str  q13, [x13], 16
-      mov  v12.16b, v14.16b
-      mov  v13.16b, v15.16b
+      str q12, [x6], #16
+      str q14, [x13], #16
+      mov v12.16b, v13.16b
+      mov v14.16b, v15.16b
 
 
 .Ltail_2:
       tbz w1, 1, .Ltail_1
-      str  d12, [x6], 8
-      str  d13, [x13], 8
+      str d12, [x6], #8
+      str d14, [x13], #8
       dup d12, v12.d[1]
-      dup d13, v13.d[1]
+      dup d14, v14.d[1]
 
 
 .Ltail_1:
       tbz w1, 0, .Lreturn
-      str  s12, [x6]
-      str  s13, [x13]
+      str s12, [x6], #0
+      str s14, [x13], #0
 
 .Lreturn:
       # Restore the callee saved GP registers.

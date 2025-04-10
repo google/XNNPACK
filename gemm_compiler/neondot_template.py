@@ -61,19 +61,17 @@ class NeonDot(neonfma_template.NeonFma):
     channels = 4
     m = pow(2, 64) - channels
     not_channels = f'0x{m:016X}'
-    ret = '# Round kc up to channels.\n'
-    ret += """add {kc_reg}, {kc_reg}, #{channels}
+    self.comment('Round kc up to channels.')
+    self.asm_string += """add {kc_reg}, {kc_reg}, #{channels}
       and {kc_reg}, {kc_reg}, #{not_channels}\n\n""".format(
         kc_reg=self.kc_register(),
         channels=channels - 1,
         not_channels=not_channels,
     )
-    return ret
 
   def quantization_params(self):
-    return """ldr {quantization_params_reg}, [sp, 272]\n""".format(
-        quantization_params_reg=self.quantization_params_register()
-    )
+    quantization_params_reg = self.quantization_params_register()
+    self.asm_string += f'ldr {quantization_params_reg}, [sp, 272]\n'
 
   def quantization_params_register(self):
     return 'x24'
@@ -84,8 +82,8 @@ class NeonDot(neonfma_template.NeonFma):
     }
     return c_asm
 
-  def cvtf(self):
-    return 'scvtf v{ACC}.4s, v{ACC}.4s\n'
+  def cvtf(self, acc):
+    self.asm_string += f'scvtf v{acc}.4s, v{acc}.4s\n'
 
   def input_asm(self):
     match self.unroll_factor:
@@ -112,41 +110,43 @@ class NeonDot(neonfma_template.NeonFma):
 
   def convert_to_output_type(self):
     accumulators = self.acc_registers()
-    ret = '\n# Convert from int32 to float.\n'
+    self.comment('Convert from int32 to float.')
     for nr in range(0, self.n * self.m):
-      ret += self.cvtf().format(ACC=accumulators[nr])
-    ret += '# Multiply by input scale.\n'
+      self.cvtf(accumulators[nr])
+    self.comment('Multiply by input scale.')
     for nr in range(0, self.n):
       for mr in range(0, self.m):
-        ret += 'fmul v{ACC}.4s, v{ACC}.4s, v{zp_scale}.s[{pos}]\n'.format(
-            ACC=accumulators[nr * self.m + mr],
-            zp_scale=self.zp_scale(mr // 2),
-            pos=int((mr % 2) * 2) + 1,
+        self.fmul_lane(
+            a=accumulators[mr * self.n + nr],
+            b=accumulators[mr * self.n + nr],
+            c=self.zp_scale(mr // 2),
+            lane=int((mr % 2) * 2) + 1,
         )
-    ret += '# Load weights scale.\n'
-    output_scale_pair = 'ldp q{W_SCALE_0}, q{W_SCALE_1}, [{W}, {offset}]\n'
+    self.comment('Load weights scale.')
     # output scales
     for nr in range(0, self.n, 2):
-      ret += output_scale_pair.format(
-          W=self.w_ptr_register(),
+      self.load_simd_register_pair(
+          q0=self.a_registers(nr),
+          q1=self.a_registers(nr + 1),
+          ptr=self.w_ptr_register(),
           offset=self.register_bytes() * nr,
-          W_SCALE_0=self.a_registers(nr),
-          W_SCALE_1=self.a_registers(nr + 1),
       )
-    ret += self.increment_ptr(
+
+    self.increment_ptr(
         ptr=self.w_ptr_register(), step=self.register_bytes() * self.n
     )
     # biases
-    ret += '# Load biases.\n'
+    self.comment('Load biases.')
     for nr in range(0, self.n, 2):
-      ret += output_scale_pair.format(
-          W=self.w_ptr_register(),
+      self.load_simd_register_pair(
+          q0=self.w_registers()[nr],
+          q1=self.w_registers()[nr + 1],
+          ptr=self.w_ptr_register(),
           offset=self.register_bytes() * nr,
-          W_SCALE_0=self.w_registers()[nr],
-          W_SCALE_1=self.w_registers()[nr + 1],
       )
-    ret += 'add {W}, {W}, {increment}\n'.format(
-        W=self.w_ptr_register(), increment=self.register_bytes() * self.n
+
+    self.increment_ptr(
+        ptr=self.w_ptr_register(), step=self.register_bytes() * self.n
     )
     # do mul + add here instead of fmla.
     # fmla accumulaltes into the additional term, in this case the bias. This
@@ -156,64 +156,59 @@ class NeonDot(neonfma_template.NeonFma):
     # 5 cycles for four movs + fmla. fadd takes 2 cycles with a throughput of 4
     # and fmul takes 3 cycles with a throughput of 4, for a total of 5 cycles
     # for 4 results.
-    ret += "# Multiply by weight's scale.\n"
+    self.comment("Multiply by weight's scale.")
     for nr in range(0, self.n):
       for mr in range(0, self.m):
-        ret += 'fmul v{ACC}.4s, v{ACC}.4s, v{SCALE}.4s\n'.format(
-            ACC=accumulators[nr * self.m + mr], SCALE=self.a_registers(nr)
+        self.fmul(
+            a=accumulators[mr * self.n + nr],
+            b=accumulators[mr * self.n + nr],
+            c=self.a_registers(nr),
         )
-    ret += '# Add bias.\n'
+    self.comment('Add bias.')
     for nr in range(0, self.n):
       for mr in range(0, self.m):
-        ret += 'fadd v{ACC}.4s, v{ACC}.4s, v{BIAS}.4s\n'.format(
-            ACC=accumulators[nr * self.m + mr], BIAS=self.w_registers()[nr]
+        self.fadd(
+            a=accumulators[mr * self.n + nr],
+            b=accumulators[mr * self.n + nr],
+            c=self.w_registers()[nr],
         )
-
-    return ret
 
   def init_accumulators(self):
-    ret = '# Initialize accumulators with k_sum * input zero point.\n'
+    self.comment('Initialize accumulators with k_sum * input zero point.')
     accumulators = self.acc_registers()
-    zp_scale_x2 = 'ldr q{zp_scale}, [{quantization_params_reg}]\n'
-    zp_scale_x4 = (
-        'ldp q{zp_scale_0}, q{zp_scale_1}, [{quantization_params_reg}]\n'
-    )
-    ksum_x8 = 'ldp  q{KSUM_0}, q{KSUM_1}, [{W}, {offset}]\n'
     vksum = 'mul v{ACC}.4s, v{KSUM}.4s, v{zp_scale}.s[{pos}]\n'
 
     mr = 0
     for mr in range(0, self.m - 1, 4):
-      ret += zp_scale_x4.format(
-          quantization_params_reg=self.quantization_params_register(),
-          zp_scale_0=self.zp_scale(mr),
-          zp_scale_1=self.zp_scale(mr + 1),
+      self.load_simd_register_pair(
+          q0=self.zp_scale(mr),
+          q1=self.zp_scale(mr + 1),
+          ptr=self.quantization_params_register(),
+          offset=0,
       )
     if self.m % 2 == 1:
-      ret += zp_scale_x2.format(
-          quantization_params_reg=self.quantization_params_register(),
-          zp_scale=self.zp_scale(mr),
+      self.load_simd_register(
+          q=self.zp_scale(mr), ptr=self.quantization_params_register(), offset=0
       )
     for nr in range(0, self.n - 1, 2):
-      ret += ksum_x8.format(
-          W=self.w_ptr_register(),
-          KSUM_0=self.a_registers(nr),
-          KSUM_1=self.a_registers(nr + 1),
+      self.load_simd_register_pair(
+          q0=self.a_registers(nr),
+          q1=self.a_registers(nr + 1),
+          ptr=self.w_ptr_register(),
           offset=self.register_bytes() * nr,
       )
     for nr in range(0, self.n):
       for mr in range(0, self.m):
-        ret += vksum.format(
-            ACC=accumulators[nr * self.m + mr],
-            KSUM=self.a_registers(nr),
-            zp_scale=self.zp_scale(mr // 2),
-            pos=int((mr % 2) * 2),
+        self.mul_lane(
+            a=accumulators[mr * self.n + nr],
+            b=self.a_registers(nr),
+            c=self.zp_scale(mr // 2),
+            lane=int((mr % 2) * 2),
         )
 
-    ret += self.increment_ptr(
+    self.increment_ptr(
         ptr=self.w_ptr_register(), step=self.register_bytes() * self.n
     )
-    return ret
-
 
 class NeonDotQC4W(NeonDot):
   """All SIMD features for Aarch64 neondot with 4-bit weights."""
@@ -236,7 +231,7 @@ class NeonDotQC4W(NeonDot):
     return '29'
 
   def quantization_params(self):
-    return """# Load 0xF0 for masking the weights
+    self.asm_string += """# Load 0xF0 for masking the weights
   ldr {quantization_params_reg}, [sp, 272]
   movi v{mask}.16b, #240
   """.format(
@@ -251,8 +246,9 @@ class NeonDotQC4W(NeonDot):
         + f'c4__asm_aarch64_{self.isa()}_ld{ld}_2'
     )
 
-  def cvtf(self):
-    return 'scvtf v{ACC}.4s, v{ACC}.4s, #4\n'
+  def cvtf(self, acc):
+    self.asm_string += f'scvtf v{acc}.4s, v{acc}.4s, #4\n'
+
 
 class NeonDotQS8QC8W(NeonDot):
 
@@ -264,85 +260,99 @@ class NeonDotQS8QC8W(NeonDot):
     )
 
   def load_min_max(self):
-      return '''
+    self.asm_string += """
       # Load min/max values.
       ld1r {v10.8h}, [x13]
       add x13, x13, 2
-      ld2r {v0.16b, v1.16b}, [x13]\n'''
+      ld2r {v0.16b, v1.16b}, [x13]\n"""
 
   def init_accumulators(self):
     return super(NeonDot, self).init_accumulators()
 
-  def cvts(self):
-    return 'fcvtns v{ACC}.4s, v{ACC}.4s\n'
+  def cvts(self, acc):
+    self.asm_string += f'fcvtns v{acc}.4s, v{acc}.4s\n'
 
   def output_n(self) -> int:
     return self.n // 4
 
   def convert_to_output_type(self):
     accumulators = self.acc_registers()
-    ret = '\n# Convert from int32 to float.\n'
+    self.comment('Convert from int32 to float.')
     for nr in range(0, self.n * self.m):
-      ret += self.cvtf().format(ACC=accumulators[nr])
+      self.cvtf(accumulators[nr])
 
-    ret += '# Load weights scale.\n'
-    output_scale_pair = 'ldp q{W_SCALE_0}, q{W_SCALE_1}, [{W}, {offset}]\n'
+    self.comment('Load weights scale.')
     # output scales
     for nr in range(0, self.n, 2):
-      ret += output_scale_pair.format(
-          W=self.w_ptr_register(),
+      self.load_simd_register_pair(
+          q0=self.a_registers(nr),
+          q1=self.a_registers(nr + 1),
+          ptr=self.w_ptr_register(),
           offset=self.register_bytes() * nr,
-          W_SCALE_0=self.a_registers(nr),
-          W_SCALE_1=self.a_registers(nr + 1),
       )
-    ret += self.increment_ptr(
+    self.increment_ptr(
         ptr=self.w_ptr_register(), step=self.register_bytes() * self.n
     )
-    ret += "# Multiply by weight's scale.\n"
+    self.comment("Multiply by weight's scale.")
     for nr in range(0, self.n):
       for mr in range(0, self.m):
-        ret += 'fmul v{ACC}.4s, v{ACC}.4s, v{SCALE}.4s\n'.format(
-            ACC=accumulators[nr * self.m + mr], SCALE=self.a_registers(nr)
+        self.fmul(
+            a=accumulators[mr * self.n + nr],
+            b=accumulators[mr * self.n + nr],
+            c=self.a_registers(nr),
         )
-    ret += "# Reconvert to int32.\n"
+    self.comment('Reconvert to int32.')
     for nr in range(0, self.n * self.m):
-      ret += self.cvts().format(ACC=accumulators[nr])
+      self.cvts(accumulators[nr])
 
-    ret += '# Convert to int16.\n'
+    self.comment('Convert to int16.')
     for nr in range(0, self.n, 2):
       for mr in range(0, self.m):
-        ret += 'sqxtn v{ACC}.4h, v{ACC}.4s\n'.format(
-            ACC=accumulators[nr * self.m + mr])
+        self.sqxtn(
+            a=accumulators[mr * self.n + nr],
+            b=accumulators[mr * self.n + nr],
+            atype='sint32',
+        )
     for nr in range(1, self.n, 2):
       for mr in range(0, self.m):
-        ret += 'sqxtn2 v{ACC_UPPER}.8h, v{ACC}.4s\n'.format(
-            ACC_UPPER=accumulators[(nr-1) * self.m + mr],
-            ACC=accumulators[nr * self.m + mr])
-    ret += '# Add output zero point.\n'
+        self.sqxtn2(
+            a=accumulators[mr * self.n + nr - 1],
+            b=accumulators[mr * self.n + nr],
+            atype='sint32',
+        )
+    self.comment('Add output zero point.')
     for nr in range(0, self.n, 2):
       for mr in range(0, self.m):
-        ret += 'sqadd v{ACC}.8h, v{ACC}.8h, v10.8h\n'.format(
-            ACC=accumulators[nr * self.m + mr])
-    ret += '# Convert to int8.\n'
-    for nr in range(0, self.n // 2, 2):
-      for mr in range(0, self.m):
-        ret += 'sqxtn v{ACC}.8b, v{ACC}.8h\n'.format(
-            ACC=accumulators[nr * self.m + mr])
-    for nr in range(1, self.n // 2, 2):
-      for mr in range(0, self.m):
-        ret += 'sqxtn2 v{ACC_UPPER}.16b, v{ACC}.8h\n'.format(
-            ACC_UPPER=accumulators[(nr-1) * self.m + mr],
-            ACC=accumulators[nr * 2 * self.m + mr])
-
-    return ret
+        self.sqadd(
+            a=accumulators[mr * self.n + nr],
+            b=accumulators[mr * self.n + nr],
+            c=10,
+        )
+    self.comment('Convert to int8.')
+    for mr in range(0, self.m):
+      self.sqxtn(
+          a=accumulators[mr * self.n],
+          b=accumulators[mr * self.n],
+          atype='sint16',
+      )
+    for mr in range(0, self.m):
+      self.sqxtn2(
+          a=accumulators[mr * self.n],
+          b=accumulators[mr * self.n + 2],
+          atype='sint16',
+      )
 
   def clamp_min(self, reg, prefix):
     max_reg = self.max_register()
-    return f'smin  {prefix}{reg}.16b, {max_reg}.16b, {prefix}{reg}.16b\n'
+    self.asm_string += (
+        f'smin  {prefix}{reg}.16b, {max_reg}.16b, {prefix}{reg}.16b\n'
+    )
 
   def clamp_max(self, reg, prefix):
     min_reg = self.min_register()
-    return f'smax  {prefix}{reg}.16b, {min_reg}.16b, {prefix}{reg}.16b\n'
+    self.asm_string += (
+        f'smax  {prefix}{reg}.16b, {min_reg}.16b, {prefix}{reg}.16b\n'
+    )
 
   def store(self):
     accumulators = self.acc_registers()
@@ -350,62 +360,82 @@ class NeonDotQS8QC8W(NeonDot):
     nc_reg = self.nc_register()
     nc_lo = self.register_map_byte(nc_reg)
     nc = self.n * self.n_step()
-    asm_string = """
+    self.asm_string += """
       # Check whether full or partial store.
       cmp {nc}, {n_step}
       b.lo .Ltail_{N_2}\n""".format(n_step=nc, N_2=nc // 2, nc=nc_reg)
     for mr in range(0, self.m):
-      asm_string += 'str q{ACC}, [{c_reg}], 16\n'.format(
-          ACC=accumulators[mr],
-          ACC_1=accumulators[self.m + mr],
-          c_reg=cm_registers[mr],
+      self.store_simd_register(
+          r=accumulators[mr * self.n],
+          prefix='q',
+          ptr=cm_registers[mr],
+          post_increment=16,
       )
 
     for mr in range(0, self.m):
       am_ptr = self.am_registers()[mr]
       kc_register = self.kc_register()
-      asm_string += f'sub {am_ptr}, {am_ptr}, {kc_register}\n'
+      self.asm_string += f'sub {am_ptr}, {am_ptr}, {kc_register}\n'
     check = """
       sub {nc}, {nc}, {n_step}
       b.ne .Louter_loop
       b .Lreturn""".format(n_step=nc, nc=nc_reg)
-    asm_string += check
+    self.asm_string += check
     nc = nc // 2
-    asm_string += """
+    self.asm_string += """
 \n.Ltail_8:
       tbz {nc_lo}, 3, .Ltail_4\n""".format(nc_lo=nc_lo)
     for mr in range(0, self.m):
-      asm_string += 'str d{ACC}, [{c_reg}], 8\n'.format(
-          ACC=accumulators[mr], c_reg=cm_registers[mr]
+      self.store_simd_register(
+          r=accumulators[mr * self.n],
+          prefix='d',
+          ptr=cm_registers[mr],
+          post_increment=8,
       )
     for mr in range(0, self.m):
-      asm_string += 'ext v{ACC}.16b, v{ACC}.16b, v{ACC}.16b, 8\n'.format(ACC=accumulators[mr])
-    asm_string += """
+      self.asm_string += 'ext v{ACC}.16b, v{ACC}.16b, v{ACC}.16b, 8\n'.format(
+          ACC=accumulators[mr * self.n]
+      )
+    self.asm_string += """
 \n.Ltail_4:
       tbz {nc_lo}, 2, .Ltail_2\n""".format(nc_lo=nc_lo)
     for mr in range(0, self.m):
-      asm_string += 'st1 {{v{ACC}.s}}[0], [{c_reg}], 4\n'.format(
-          ACC=accumulators[mr], c_reg=cm_registers[mr]
+      self.store_simd_register_lane(
+          r=accumulators[mr * self.n],
+          prefix='s',
+          ptr=cm_registers[mr],
+          lane=0,
+          post_increment=4,
       )
     for mr in range(0, self.m):
-      asm_string += 'ext v{ACC}.16b, v{ACC}.16b, v{ACC}.16b, 4\n'.format(ACC=accumulators[mr])
+      self.asm_string += 'ext v{ACC}.16b, v{ACC}.16b, v{ACC}.16b, 4\n'.format(
+          ACC=accumulators[mr * self.n]
+      )
 
-    asm_string += """
+    self.asm_string += """
 \n.Ltail_2:
       tbz {nc_lo}, 1, .Ltail_1\n""".format(nc_lo=nc_lo)
     for mr in range(0, self.m):
-      asm_string += 'st1 {{v{ACC}.h}}[0], [{c_reg}], 2\n'.format(
-          ACC=accumulators[mr], c_reg=cm_registers[mr]
+      self.store_simd_register_lane(
+          r=accumulators[mr * self.n],
+          prefix='h',
+          ptr=cm_registers[mr],
+          lane=0,
+          post_increment=2,
       )
     for mr in range(0, self.m):
-      asm_string += 'ext v{ACC}.16b, v{ACC}.16b, v{ACC}.16b, 2\n'.format(ACC=accumulators[mr])
+      self.asm_string += 'ext v{ACC}.16b, v{ACC}.16b, v{ACC}.16b, 2\n'.format(
+          ACC=accumulators[mr * self.n]
+      )
 
-    asm_string += """
+    self.asm_string += """
 \n.Ltail_1:
       tbz {nc_lo}, 0, .Lreturn\n""".format(nc_lo=nc_lo)
     for mr in range(0, self.m):
-      asm_string += 'st1 {{v{ACC}.b}}[0], [{c_reg}]\n'.format(
-          ACC=accumulators[mr], c_reg=cm_registers[mr]
+      self.store_simd_register_lane(
+          r=accumulators[mr * self.n],
+          prefix='b',
+          ptr=cm_registers[mr],
+          lane=0,
+          post_increment=0,
       )
-
-    return asm_string

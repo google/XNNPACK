@@ -37,9 +37,9 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c4__asm_aarch64_neondot_
       # Initialize k counter.
       mov x20, x2
       # Initialize accumulators with k_sum * input zero point.
-      ldr q10, [x24]
-      ldp  q2, q3, [x5, 0]
-      ldp  q4, q5, [x5, 32]
+      ldr q10, [x24, 0]
+      ldp q2, q3, [x5, 0]
+      ldp q4, q5, [x5, 32]
       mul v12.4s, v2.4s, v10.s[0]
       mul v13.4s, v3.4s, v10.s[0]
       mul v14.4s, v4.4s, v10.s[0]
@@ -115,8 +115,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c4__asm_aarch64_neondot_
       subs x20, x20, 4
       bne .Linner_loop_tail
 
-.Linner_loop_end:
 
+.Linner_loop_end:
       # Convert from int32 to float.
       scvtf v12.4s, v12.4s, #4
       scvtf v13.4s, v13.4s, #4
@@ -146,20 +146,20 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c4__asm_aarch64_neondot_
       fadd v14.4s, v14.4s, v8.4s
       fadd v15.4s, v15.4s, v9.4s
       # Min/max clamping.
-      fmin  v12.4s, v1.4s, v12.4s
-      fmin  v13.4s, v1.4s, v13.4s
-      fmin  v14.4s, v1.4s, v14.4s
-      fmin  v15.4s, v1.4s, v15.4s
-      fmax  v12.4s, v0.4s, v12.4s
-      fmax  v13.4s, v0.4s, v13.4s
-      fmax  v14.4s, v0.4s, v14.4s
-      fmax  v15.4s, v0.4s, v15.4s
+      fmin v12.4s, v1.4s, v12.4s
+      fmin v13.4s, v1.4s, v13.4s
+      fmin v14.4s, v1.4s, v14.4s
+      fmin v15.4s, v1.4s, v15.4s
+      fmax v12.4s, v0.4s, v12.4s
+      fmax v13.4s, v0.4s, v13.4s
+      fmax v14.4s, v0.4s, v14.4s
+      fmax v15.4s, v0.4s, v15.4s
 
       # Check whether full or partial store.
       cmp x1, 16
       b.lo .Ltail_8
-      stp  q12, q13, [x6], 32
-      stp  q14, q15, [x6], 32
+      stp q12, q13, [x6], #32
+      stp q14, q15, [x6], #32
       sub x3, x3, x2
 
       sub x1, x1, 16
@@ -168,26 +168,26 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c4__asm_aarch64_neondot_
 
 .Ltail_8:
       tbz w1, 3, .Ltail_4
-      stp  q12, q13, [x6], 32
-      mov  v12.16b, v14.16b
-      mov  v13.16b, v15.16b
+      stp q12, q13, [x6], #32
+      mov v12.16b, v14.16b
+      mov v13.16b, v15.16b
 
 
 .Ltail_4:
       tbz w1, 2, .Ltail_2
-      str  q12, [x6], 16
-      mov  v12.16b, v13.16b
+      str q12, [x6], #16
+      mov v12.16b, v13.16b
 
 
 .Ltail_2:
       tbz w1, 1, .Ltail_1
-      str  d12, [x6], 8
+      str d12, [x6], #8
       dup d12, v12.d[1]
 
 
 .Ltail_1:
       tbz w1, 0, .Lreturn
-      str  s12, [x6]
+      str s12, [x6], #0
 
 .Lreturn:
       # Restore the callee saved GP registers.
