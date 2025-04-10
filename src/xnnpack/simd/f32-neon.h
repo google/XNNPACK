@@ -165,7 +165,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
 
   // Create a vector of `0.5f` with the same sign as the entries of `a`.
   XNN_SIMD_CONST_F32(vhalf, 0.5f);
-  XNN_SIMD_CONST_F32(vsign_mask, -0.0);
+  XNN_SIMD_CONST_F32(vsign_mask, -0.0f);
   const xnn_simd_f32_t vsigned_half =
       xnn_or_f32(xnn_and_f32(a, vsign_mask), vhalf);
   const xnn_simd_f32_t vresult =
