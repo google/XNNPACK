@@ -240,15 +240,6 @@ typedef void (*xnn_pqs8_qc8w_gemm_minmax_ukernel_fn)(
     const union xnn_qs8_qc8w_conv_minmax_params
         params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-// GEMMINC: GEMM INCremental with Min+Max activation
-
-typedef void (*xnn_f32_gemminc_minmax_ukernel_fn)(
-    size_t mr, size_t nr, size_t k, const float* a, size_t a_stride,
-    const float* w, float* c, size_t cm_stride, size_t cn_stride,
-    const float* acc,
-    const struct xnn_f32_minmax_params
-        params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
 // IGEMM: Indirect GEMM without activation
 
 typedef void (*xnn_dqigemm_ukernel_fn)(
