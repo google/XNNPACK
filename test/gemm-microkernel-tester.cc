@@ -781,13 +781,6 @@ void GemmMicrokernelTester::Test(
     }
   }
 
-#if XNN_ARCH_HEXAGON
-  // HVX losses 1 bit of accuracy due to qfloat for FP32 quantization on V73
-  // V79 should be lossless.
-  const int32_t tolerance = 1;
-#else
-  const int32_t tolerance = 0;
-#endif
   for (size_t i = 0; i < m(); i++) {
     for (size_t j = 0; j < n(); j++) {
       ASSERT_LE(static_cast<int32_t>(
@@ -796,9 +789,9 @@ void GemmMicrokernelTester::Test(
       ASSERT_GE(static_cast<int32_t>(
                     c[i * cm_stride() + (j / nr()) * nr() + j % nr()]),
                 static_cast<int32_t>(qmin()) - 0x80);
-      ASSERT_NEAR(static_cast<int32_t>(
+      ASSERT_EQ(static_cast<int32_t>(
                       c[i * cm_stride() + (j / nr()) * nr() + j % nr()]),
-                  static_cast<int32_t>(c_ref[i * n() + j]), tolerance)
+                  static_cast<int32_t>(c_ref[i * n() + j]))
           << "at " << i << ", " << j
           << ": reference = " << static_cast<int32_t>(c_ref[i * n() + j])
           << " (accumulator = " << acc[i * n() + j] << "), optimized = "
@@ -943,13 +936,6 @@ void GemmMicrokernelTester::Test(
     }
   }
 
-#if XNN_ARCH_HEXAGON
-  // HVX losses 1 bit of accuracy due to qfloat for FP32 quantization on V73
-  // V79 should be lossless.
-  const int32_t tolerance = 1;
-#else
-  const int32_t tolerance = 0;
-#endif
   for (size_t i = 0; i < m(); i++) {
     for (size_t j = 0; j < n(); j++) {
       ASSERT_LE(static_cast<int32_t>(
@@ -958,9 +944,9 @@ void GemmMicrokernelTester::Test(
       ASSERT_GE(static_cast<int32_t>(
                     c[i * cm_stride() + (j / nr()) * nr() + j % nr()]),
                 static_cast<int32_t>(qmin()) - 0x80);
-      ASSERT_NEAR(static_cast<int32_t>(
+      ASSERT_EQ(static_cast<int32_t>(
                       c[i * cm_stride() + (j / nr()) * nr() + j % nr()]),
-                  static_cast<int32_t>(c_ref[i * n() + j]), tolerance)
+                  static_cast<int32_t>(c_ref[i * n() + j]))
           << "at " << i << ", " << j
           << ": reference = " << static_cast<uint32_t>(c_ref[i * n() + j])
           << " (accumulator = " << acc[i * n() + j] << "), optimized = "

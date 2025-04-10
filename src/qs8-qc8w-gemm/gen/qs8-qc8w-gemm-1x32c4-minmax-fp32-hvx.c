@@ -9,17 +9,36 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <math.h>  // for lrintf
 
 #include <hexagon_types.h>
 #include <hexagon_protos.h>
 #include <hvx_hexagon_protos.h>
 
 #include "src/xnnpack/gemm.h"
-#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/intrinsics-polyfill.h"  // for Q6_V_vstu_variable
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/unaligned.h"
 
 
+
+// multiply vacc by vscale and return result as int
+// vacc is vector of int32
+// vscale is vector of floats
+// return is vector of int
+static HVX_Vector rescale_fp32(HVX_Vector vacc, HVX_Vector vscale)
+{
+  XNN_ALIGN(128) int32_t vacc_buffer[32];
+  XNN_ALIGN(128) float vscale_buffer[32];
+
+  *((HVX_Vector *)&vacc_buffer) = vacc;
+  *((HVX_Vector *)&vscale_buffer) = vscale;
+
+  for (int i = 0; i < 32; ++i) {
+    vacc_buffer[i] = (int32_t)lrintf((float)vacc_buffer[i] * vscale_buffer[i]);
+  }
+  return *(HVX_Vector *)&vacc_buffer;
+}
 
 void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x32c4__hvx(
     size_t mr,
@@ -62,17 +81,12 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x32c4__hvx(
       vacc0x32 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x32, va0x0123, vb32x0123);
     }
 
-    const HVX_Vector vscale32 = *((HVX_Vector *)w);
-    w = (const float*) w + 32;
-    HVX_Vector vscaled0x32 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_convert_Vw(vacc0x32));
-
-    vscaled0x32 = Q6_Vqf32_vmpy_VsfVsf(vscaled0x32, vscale32);
-
-    vacc0x32 = Q6_Vw_convert_Vqf32(vscaled0x32);
+    const HVX_Vector vscale32 = *((HVX_Vector *)w); w = (const float*) w + 32;
+    vacc0x32 = rescale_fp32(vacc0x32, vscale32);
 
     HVX_Vector vout0x32 = Q6_Vh_vpack_VwVw_sat(vacc0x32, vacc0x32);
 
-    vout0x32 = Q6_Vh_vadd_VhVh(vout0x32, voutput_zero_point);
+    vout0x32 = Q6_Vh_vadd_VhVh_sat(vout0x32, voutput_zero_point);
 
     vout0x32 = Q6_Vb_vpack_VhVh_sat(vout0x32, vout0x32);
 
