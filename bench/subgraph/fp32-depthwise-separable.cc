@@ -47,7 +47,7 @@ xnn_subgraph_t FP32DepthwiseSeparable(size_t w, size_t h, size_t kw, size_t ci,
   }
 
   uint32_t v1 = XNN_INVALID_VALUE_ID;
-  std::array<size_t, 4> v1_dims = {{1, h, w, ci}};
+  std::array<size_t, 4> v1_dims = {{1, h - 2, w - 2, ci}};
   status = xnn_define_tensor_value(
       subgraph, xnn_datatype_fp32, v1_dims.size(), v1_dims.data(),
       /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &v1);
@@ -57,7 +57,7 @@ xnn_subgraph_t FP32DepthwiseSeparable(size_t w, size_t h, size_t kw, size_t ci,
   }
 
   uint32_t v2 = 1;
-  std::array<size_t, 4> v2_dims = {{1, h, w, co}};
+  std::array<size_t, 4> v2_dims = {{1, h - 2, w - 2, co}};
   status = xnn_define_tensor_value(
       subgraph, xnn_datatype_fp32, v2_dims.size(), v2_dims.data(),
       /*data=*/nullptr, v2, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &v2);
