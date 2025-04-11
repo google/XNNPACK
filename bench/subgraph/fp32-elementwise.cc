@@ -3,20 +3,18 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <iostream>
 #include <limits>
-#include <random>
 
 #include "include/xnnpack.h"
 
 namespace models {
 
-xnn_subgraph_t FP32Elementwise(size_t size, size_t reps) {
+xnn_subgraph_t FP32Elementwise(size_t batch_size, size_t num_elements,
+                               size_t depth) {
   xnn_status status;
   xnn_subgraph_t subgraph = nullptr;
   status = xnn_create_subgraph(/*num_external_values=*/3, 0, &subgraph);
@@ -25,7 +23,7 @@ xnn_subgraph_t FP32Elementwise(size_t size, size_t reps) {
     return nullptr;
   }
 
-  std::array<size_t, 2> dims = {{size, size}};
+  std::array<size_t, 2> dims = {{batch_size, num_elements}};
 
   uint32_t v0 = XNN_INVALID_VALUE_ID;
   status = xnn_define_tensor_value(
@@ -58,7 +56,7 @@ xnn_subgraph_t FP32Elementwise(size_t size, size_t reps) {
                               std::numeric_limits<float>::infinity()};
   uint32_t mul = v0;
   uint32_t add = v1;
-  for (int i = 0; i < reps; ++i) {
+  for (int i = 0; i < depth; ++i) {
     uint32_t new_add = XNN_INVALID_VALUE_ID;
     status = xnn_define_tensor_value(
         subgraph, xnn_datatype_fp32, dims.size(), dims.data(),
