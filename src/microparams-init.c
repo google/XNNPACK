@@ -934,6 +934,30 @@ size_t xnn_init_qs8_add_minmax_scalar_params(
   return sizeof(uparams->scalar);
 }
 
+size_t xnn_init_qs8_vprelu_scalar_params(
+    union xnn_qs8_vprelu_scalar_params uparams[XNN_MIN_ELEMENTS(1)],
+    const struct xnn_quantization_params* a_quantization,
+    const struct xnn_quantization_params* b_quantization,
+    const struct xnn_quantization_params* output_quantization) {
+  assert(a_quantization);
+  assert(b_quantization);
+  assert(output_quantization);
+  const float negative_product_scale = (a_quantization->scale * b_quantization->scale) / output_quantization->scale;
+  const float positive_product_scale = a_quantization->scale / output_quantization->scale;
+  const float rprelu_positive_product_scale = b_quantization->scale / output_quantization->scale;
+  assert(negative_product_scale >= 0x1.0p-16f);
+  assert(negative_product_scale < 0x1.0p+8f);
+  uparams->scalar.input_zero_point = a_quantization->zero_point;
+  uparams->scalar.slope_zero_point = b_quantization->zero_point;
+  uparams->scalar.negative_multiplier = negative_product_scale;
+  uparams->scalar.positive_multiplier = positive_product_scale;
+  uparams->scalar.rprelu_positive_multiplier = rprelu_positive_product_scale;
+  uparams->scalar.output_zero_point = output_quantization->zero_point;
+  uparams->scalar.output_min = INT8_MIN;
+  uparams->scalar.output_max = INT8_MAX;
+  return sizeof(uparams->scalar);
+}
+
 size_t xnn_init_qu8_mul_minmax_scalar_params(
     union xnn_qu8_mul_minmax_params uparams[XNN_MIN_ELEMENTS(1)],
     const struct xnn_quantization_params* a_quantization,
@@ -999,6 +1023,31 @@ size_t xnn_init_qu8_mul_minmax_rndnu_neon_params(
   return sizeof(uparams->rndnu_neon);
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+size_t xnn_init_qu8_vprelu_scalar_params(
+    union xnn_qs8_vprelu_scalar_params uparams[XNN_MIN_ELEMENTS(1)],
+    const struct xnn_quantization_params* a_quantization,
+    const struct xnn_quantization_params* b_quantization,
+    const struct xnn_quantization_params* output_quantization) {
+  assert(a_quantization);
+  assert(b_quantization);
+  assert(output_quantization);
+  const float negative_product_scale = (a_quantization->scale * b_quantization->scale) / output_quantization->scale;
+  const float positive_product_scale = a_quantization->scale / output_quantization->scale;
+  const float rprelu_positive_product_scale = b_quantization->scale / output_quantization->scale;
+  assert(negative_product_scale >= 0x1.0p-16f);
+  assert(negative_product_scale < 0x1.0p+8f);
+  uparams->scalar.input_zero_point = a_quantization->zero_point;
+  uparams->scalar.slope_zero_point = b_quantization->zero_point;
+  uparams->scalar.negative_multiplier = negative_product_scale;
+  uparams->scalar.positive_multiplier = positive_product_scale;
+  uparams->scalar.rprelu_positive_multiplier = rprelu_positive_product_scale;
+  uparams->scalar.output_zero_point = output_quantization->zero_point;
+  uparams->scalar.output_min = 0;
+  uparams->scalar.output_max = UINT8_MAX;
+  return sizeof(uparams->scalar);
+}
+
 
 size_t xnn_init_qs8_mul_minmax_scalar_params(
     union xnn_qs8_mul_minmax_params uparams[XNN_MIN_ELEMENTS(1)],
