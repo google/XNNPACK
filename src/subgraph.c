@@ -1144,11 +1144,12 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       } else if (xnn_value_is_external(value)) {
         assert(value->datatype == xnn_datatype_fp32);
         assert(value->fp16_id != XNN_INVALID_VALUE_ID);
-        struct xnn_value* fp16_value = &subgraph->values[value->fp16_id];
         value->producer = XNN_INVALID_NODE_ID;
         value->num_consumers = 0;
         value->first_consumer = XNN_INVALID_NODE_ID;
-        xnn_log_debug("FP16 rewrite: created FP16 tensor #%" PRIu32 " for FP32 tensor #%" PRIu32, fp16_value->id, n);
+        xnn_log_debug("FP16 rewrite: created FP16 tensor #%" PRIu32
+                      " for FP32 tensor #%" PRIu32,
+                      subgraph->values[value->fp16_id].id, n);
       } else {
         switch (value->datatype) {
           case xnn_datatype_fp32:
