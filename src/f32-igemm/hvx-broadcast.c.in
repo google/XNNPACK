@@ -55,9 +55,8 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
       }
 
   do {
-    HVX_Vector vacc0x0 = *((HVX_Vector *)(w));
-    $for N in range(32, NR, 32):
-      HVX_Vector vacc0x${N//32} = *((HVX_Vector *)(w + ${N}));
+    $for N in range(0, NR, 32):
+      HVX_Vector vacc0x${N//32} = Q6_Vqf32_vadd_Vqf32Vsf(Q6_V_vzero(), *((HVX_Vector *)(w + ${N})));
     $for M in range(1, MR):
       $for N in range(0, NR, 32):
         HVX_Vector vacc${M}x${N//32} = vacc0x${N//32};
@@ -86,11 +85,15 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
 
         $for M in range(MR):
           $for N in range(0, NR, 32):
-            vacc${M}x${N//32} = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(va${M}, vb${N//32}), vacc${M}x${N//32}));
+            vacc${M}x${N//32} = Q6_Vqf32_vadd_Vqf32Vqf32(vacc${M}x${N//32}, Q6_Vqf32_vmpy_VsfVsf(va${M}, vb${N//32}));
         k -= sizeof(float);
       } while (k != 0);
       p -= ${MR} * sizeof(void*);
     } while (p != 0);
+
+    $for N in range(0, NR, 32):
+      $for M in range(MR):
+        vacc${M}x${N//32} = Q6_Vsf_equals_Vqf32(vacc${M}x${N//32});
 
     const HVX_Vector vmin = Q6_V_vsplat_R(params->scalar.min);
     $for N in range(0, NR, 32):
