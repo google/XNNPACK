@@ -13,6 +13,7 @@
 #include "src/xnnpack/isa-checks.h"
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/spmm.h"
+#include "test/next_prime.h"
 #include "test/spmm-microkernel-tester.h"
 
 

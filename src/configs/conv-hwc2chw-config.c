@@ -78,6 +78,13 @@ static void init_f32_conv_hwc2chw_3x3c3s2_config(void) {
     f32_conv_hwc2chw_3x3c3s2_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_conv_hwc2chw_3x3c3s2_config.output_channel_tile = 4;
     f32_conv_hwc2chw_3x3c3s2_config.output_height_tile = 2;
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    f32_conv_hwc2chw_3x3c3s2_config.ukernel_with_symm_padding =
+      (xnn_conv_hwc2chw_ukernel_fn) xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_2x2;
+    f32_conv_hwc2chw_3x3c3s2_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+    f32_conv_hwc2chw_3x3c3s2_config.output_channel_tile = 2 * hardware_config->vlenb / sizeof(float);
+    f32_conv_hwc2chw_3x3c3s2_config.output_height_tile = 2;
   #else
     f32_conv_hwc2chw_3x3c3s2_config.ukernel_with_symm_padding =
       (xnn_conv_hwc2chw_ukernel_fn) xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__scalar_1x1;
