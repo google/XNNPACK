@@ -44,7 +44,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x16c4__asm_aarch64_neondot_
       # Initialize k counter.
       mov x20, x2
       # Initialize accumulators with k_sum * input zero point.
-      ldp q10, q11, [x24, 0]
+      ldr q10, [x24, 0]
       ldp q2, q3, [x5, 0]
       ldp q4, q5, [x5, 32]
       mul v12.4s, v2.4s, v10.s[0]

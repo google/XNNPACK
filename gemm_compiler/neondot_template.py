@@ -176,19 +176,17 @@ class NeonDot(neonfma_template.NeonFma):
   def init_accumulators(self):
     self.comment('Initialize accumulators with k_sum * input zero point.')
     accumulators = self.acc_registers()
-    vksum = 'mul v{ACC}.4s, v{KSUM}.4s, v{zp_scale}.s[{pos}]\n'
 
-    mr = 0
-    for mr in range(0, self.m - 1, 4):
+    if self.m > 2:
       self.load_simd_register_pair(
-          q0=self.zp_scale(mr),
-          q1=self.zp_scale(mr + 1),
+          q0=self.zp_scale(0),
+          q1=self.zp_scale(1),
           ptr=self.quantization_params_register(),
           offset=0,
       )
-    if self.m % 2 == 1:
+    else:
       self.load_simd_register(
-          q=self.zp_scale(mr), ptr=self.quantization_params_register(), offset=0
+          q=self.zp_scale(0), ptr=self.quantization_params_register(), offset=0
       )
     for nr in range(0, self.n - 1, 2):
       self.load_simd_register_pair(
