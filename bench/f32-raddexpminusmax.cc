@@ -78,7 +78,7 @@ static void f32_raddexpminusmax(
 
 static void CharacteristicArguments(benchmark::internal::Benchmark* b) {
   b->ArgName("N");
-  for (int32_t n = 10000; n <= 100000000; n *= 10) {
+  for (int32_t n = 10000; n <= 1000000; n *= 10) {
     b->Arg(n);
   }
 }
