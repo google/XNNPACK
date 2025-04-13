@@ -29,14 +29,13 @@
 static HVX_Vector rescale_fp32(HVX_Vector vacc, HVX_Vector vscale)
 {
   XNN_ALIGN(128) float vacc_buffer[32];
-  XNN_ALIGN(128) float vscale_buffer[32];
   XNN_ALIGN(128) int32_t vresult_buffer[32];
 
-  *((HVX_Vector *)&vacc_buffer) = Q6_Vsf_equals_Vw(vacc);
-  *((HVX_Vector *)&vscale_buffer) = vscale;
+  HVX_Vector vaccf = Q6_Vsf_equals_Vw(vacc);
+  *((HVX_Vector *)&vacc_buffer) = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(vaccf, vscale));
 
   for (int i = 0; i < 32; ++i) {
-    vresult_buffer[i] = (int32_t)lrintf(vacc_buffer[i] * vscale_buffer[i]);
+    vresult_buffer[i] = (int32_t)lrintf(vacc_buffer[i]);
   }
   return *(HVX_Vector *)&vresult_buffer;
 }
