@@ -28,16 +28,17 @@
 // return is vector of int
 static HVX_Vector rescale_fp32(HVX_Vector vacc, HVX_Vector vscale)
 {
-  XNN_ALIGN(128) int32_t vacc_buffer[32];
+  XNN_ALIGN(128) float vacc_buffer[32];
   XNN_ALIGN(128) float vscale_buffer[32];
+  XNN_ALIGN(128) int32_t vresult_buffer[32];
 
-  *((HVX_Vector *)&vacc_buffer) = vacc;
+  *((HVX_Vector *)&vacc_buffer) = Q6_Vsf_equals_Vw(vacc);
   *((HVX_Vector *)&vscale_buffer) = vscale;
 
   for (int i = 0; i < 32; ++i) {
-    vacc_buffer[i] = (int32_t)lrintf((float)vacc_buffer[i] * vscale_buffer[i]);
+    vresult_buffer[i] = (int32_t)lrintf(vacc_buffer[i] * vscale_buffer[i]);
   }
-  return *(HVX_Vector *)&vacc_buffer;
+  return *(HVX_Vector *)&vresult_buffer;
 }
 
 void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_16x32c4__hvx(
