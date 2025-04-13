@@ -9,7 +9,6 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-#include <math.h>  // for lrintf
 
 #include <hexagon_types.h>
 #include <hexagon_protos.h>
@@ -26,18 +25,17 @@
 // vacc is vector of int32
 // vscale is vector of floats
 // return is vector of int
-static HVX_Vector rescale_fp32(HVX_Vector vacc, HVX_Vector vscale)
+static XNN_INLINE HVX_Vector rescale_fp32(HVX_Vector vacc, HVX_Vector vscale)
 {
-  XNN_ALIGN(128) float vacc_buffer[32];
-  XNN_ALIGN(128) int32_t vresult_buffer[32];
+  const HVX_Vector vaccf = Q6_Vsf_equals_Vw(vacc);
+  const HVX_Vector vscaledqf = Q6_Vqf32_vmpy_VsfVsf(vaccf, vscale);
 
-  HVX_Vector vaccf = Q6_Vsf_equals_Vw(vacc);
-  *((HVX_Vector *)&vacc_buffer) = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(vaccf, vscale));
-
-  for (int i = 0; i < 32; ++i) {
-    vresult_buffer[i] = (int32_t)lrintf(vacc_buffer[i]);
-  }
-  return *(HVX_Vector *)&vresult_buffer;
+  // Create a vector of `0.5f` with the same sign as the entries of `a`.
+  const HVX_Vector vhalf = Q6_V_vsplat_R(0.5f);
+  const HVX_Vector vsign_mask = Q6_V_vsplat_R(-0.0f);
+  const HVX_Vector vsigned_half = Q6_V_vor_VV(Q6_V_vand_VV(vaccf, vsign_mask), vhalf);
+  const HVX_Vector vresult = Q6_Vw_equals_Vsf(Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(vscaledqf, vsigned_half)));
+  return vresult;
 }
 
 void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x32c4__hvx(
