@@ -56,7 +56,7 @@ void xnn_f32_gemm_minmax_ukernel_4x32__hvx_broadcast(
   }
 
   do {
-    HVX_Vector vacc0x0 = xnn_load_f32(w + 0);
+    HVX_Vector vacc0x0 = Q6_Vqf32_vadd_Vqf32Vsf(Q6_V_vzero(), xnn_load_f32(w + 0));
     HVX_Vector vacc1x0 = vacc0x0;
     HVX_Vector vacc2x0 = vacc0x0;
     HVX_Vector vacc3x0 = vacc0x0;
@@ -73,16 +73,26 @@ void xnn_f32_gemm_minmax_ukernel_4x32__hvx_broadcast(
       const HVX_Vector va3 = xnn_set1_f32(*a3);
       a3 += 1;
 
-      const HVX_Vector vb0 = *((const HVX_Vector *)(w));
+      const HVX_Vector vb0 = *((const HVX_Vector *)(w + 0));
       w += 32;
 
-      vacc0x0 = xnn_fmadd_f32(va0, vb0, vacc0x0);
-      vacc1x0 = xnn_fmadd_f32(va1, vb0, vacc1x0);
-      vacc2x0 = xnn_fmadd_f32(va2, vb0, vacc2x0);
-      vacc3x0 = xnn_fmadd_f32(va3, vb0, vacc3x0);
+      const HVX_Vector vtemp0x0 = Q6_Vqf32_vmpy_VsfVsf(va0, vb0);
+      const HVX_Vector vtemp1x0 = Q6_Vqf32_vmpy_VsfVsf(va1, vb0);
+      const HVX_Vector vtemp2x0 = Q6_Vqf32_vmpy_VsfVsf(va2, vb0);
+      const HVX_Vector vtemp3x0 = Q6_Vqf32_vmpy_VsfVsf(va3, vb0);
+
+      vacc0x0 = Q6_Vqf32_vadd_Vqf32Vqf32(vacc0x0, vtemp0x0);
+      vacc1x0 = Q6_Vqf32_vadd_Vqf32Vqf32(vacc1x0, vtemp1x0);
+      vacc2x0 = Q6_Vqf32_vadd_Vqf32Vqf32(vacc2x0, vtemp2x0);
+      vacc3x0 = Q6_Vqf32_vadd_Vqf32Vqf32(vacc3x0, vtemp3x0);
 
       k -= sizeof(float);
     } while (k != 0);
+
+    vacc0x0 = Q6_Vsf_equals_Vqf32(vacc0x0);
+    vacc1x0 = Q6_Vsf_equals_Vqf32(vacc1x0);
+    vacc2x0 = Q6_Vsf_equals_Vqf32(vacc2x0);
+    vacc3x0 = Q6_Vsf_equals_Vqf32(vacc3x0);
 
     HVX_Vector vmin = xnn_set1_f32(params->scalar.min);
     vacc0x0 = xnn_max_f32(vmin, vacc0x0);
