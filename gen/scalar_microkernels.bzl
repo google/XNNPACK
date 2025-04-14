@@ -222,7 +222,7 @@ PROD_SCALAR_MICROKERNEL_SRCS = [
     "src/qu8-vlrelu/gen/qu8-vlrelu-scalar-select-u4.c",
     "src/qu8-vmul/gen/qu8-vmul-minmax-fp32-scalar-u4.c",
     "src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-scalar-u4.c",
-    "src/qu8-vprelu/gen/qu8-vprelu-scalar-u8.c", 
+    "src/qu8-vprelu/gen/qu8-vprelu-scalar-u8.c",
     "src/qu8-vpreluc/gen/qu8-vpreluc-scalar-u8.c",
     "src/qu8-vrpreluc/gen/qu8-vrpreluc-scalar-u8.c",
     "src/s8-ibilinear/gen/s8-ibilinear-scalar-c1.c",
