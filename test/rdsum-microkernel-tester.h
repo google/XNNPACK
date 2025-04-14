@@ -145,7 +145,7 @@ class RDSumMicrokernelTester {
 
       // Verify results.
       for (size_t c = 0; c < channels(); c++) {
-        EXPECT_EQ(output[c], output_ref[c])
+        ASSERT_EQ(output[c], output_ref[c])
             << "at position " << c << ", rows = " << rows()
             << ", channels = " << channels();
       }
@@ -192,7 +192,7 @@ class RDSumMicrokernelTester {
 
       // Verify results.
       for (size_t c = 0; c < channels(); c++) {
-        EXPECT_EQ(output[c], output_ref[c])
+        ASSERT_EQ(output[c], output_ref[c])
             << "at position " << c << ", rows = " << rows()
             << ", channels = " << channels();
       }
