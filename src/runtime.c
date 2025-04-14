@@ -652,7 +652,9 @@ enum xnn_status xnn_create_runtime_v4(
 #endif
   if (use_slinky) {
     #ifdef XNN_SLINKY_AVAILABLE
-    // slinky_init_pipeline(runtime);
+    if ((runtime->flags & XNN_FLAG_SLINKY_CONCRETE_BOUNDS) == 0) {
+      // slinky_init_pipeline(runtime);
+    }
     #else
     xnn_log_warning("Slinky requested but not available");
     #endif
