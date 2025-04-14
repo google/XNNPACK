@@ -232,6 +232,29 @@ BENCHMARK_CAPTURE(f32_rmax, rvv_u8v, xnn_f32_rmax_ukernel__rvv_u8v,
     ->UseRealTime();
 #endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+BENCHMARK_CAPTURE(f32_rmax, hvx_u32, xnn_f32_rmax_ukernel__hvx_u32,
+                  /*init_params=*/nullptr, benchmark::utils::CheckHVX)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(f32_rmax, hvx_u64_acc2, xnn_f32_rmax_ukernel__hvx_u64_acc2,
+                  /*init_params=*/nullptr, benchmark::utils::CheckHVX)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(f32_rmax, hvx_u96_acc3, xnn_f32_rmax_ukernel__hvx_u96_acc3,
+                  /*init_params=*/nullptr, benchmark::utils::CheckHVX)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(f32_rmax, hvx_u128_acc2, xnn_f32_rmax_ukernel__hvx_u128_acc2,
+                  /*init_params=*/nullptr, benchmark::utils::CheckHVX)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(f32_rmax, hvx_u128_acc4, xnn_f32_rmax_ukernel__hvx_u128_acc4,
+                  /*init_params=*/nullptr, benchmark::utils::CheckHVX)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
 BENCHMARK_CAPTURE(f32_rmax, scalar_u1, xnn_f32_rmax_ukernel__scalar_u1)
     ->Apply(benchmark::utils::ReductionParameters<float>)
     ->UseRealTime();
