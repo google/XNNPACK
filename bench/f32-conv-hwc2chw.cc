@@ -17,6 +17,7 @@
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/conv.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/pack.h"
@@ -154,6 +155,33 @@ static void f32_conv_hwc2chw_3x3s2p1c3x4__wasmsimd_2x2(benchmark::State& state,
 
 BENCHMARK_DCONV(f32_conv_hwc2chw_3x3s2p1c3x4__wasmsimd_2x2);
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+static void f32_conv_hwc2chw_3x3s2p1c3x2v__rvv_1x1(benchmark::State& state,
+                                                   const char* net) {
+  f32_conv_hwc2chw(state, xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_1x1,
+                   xnn_init_f32_minmax_scalar_params,
+                   2 * xnn_init_hardware_config()->vlenb / sizeof(float) /* output channel tile */);
+}
+
+static void f32_conv_hwc2chw_3x3s2p1c3x2v__rvv_2x1(benchmark::State& state,
+                                                   const char* net) {
+  f32_conv_hwc2chw(state, xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_2x1,
+                   xnn_init_f32_minmax_scalar_params,
+                   2 * xnn_init_hardware_config()->vlenb / sizeof(float) /* output channel tile */);
+}
+
+static void f32_conv_hwc2chw_3x3s2p1c3x2v__rvv_2x2(benchmark::State& state,
+                                                   const char* net) {
+    f32_conv_hwc2chw(state, xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_2x2,
+                   xnn_init_f32_minmax_scalar_params,
+                   2 * xnn_init_hardware_config()->vlenb / sizeof(float) /* output channel tile */);
+}
+
+BENCHMARK_DCONV(f32_conv_hwc2chw_3x3s2p1c3x2v__rvv_1x1);
+BENCHMARK_DCONV(f32_conv_hwc2chw_3x3s2p1c3x2v__rvv_2x1);
+BENCHMARK_DCONV(f32_conv_hwc2chw_3x3s2p1c3x2v__rvv_2x2);
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 
 static void f32_conv_hwc2chw_3x3s2p1c3x4__scalar_1x1(benchmark::State& state,
                                                      const char* net) {
