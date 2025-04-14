@@ -3,6 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <benchmark/benchmark.h>
+
 #include <algorithm>
 #include <functional>
 #include <random>
@@ -14,7 +16,6 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/packw.h"
-#include <benchmark/benchmark.h>
 
 static void x8_packw(benchmark::State& state,
                      xnn_x8_packw_gemm_goi_ukernel_fn packw, size_t nr,
@@ -140,6 +141,87 @@ static void x8_gio_packw(
 
   const size_t bytes_per_iteration =
       elements_per_iteration + batch * rounded_size;
+  state.counters["bytes"] =
+      benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
+                         benchmark::Counter::kIsRate);
+}
+
+static void qb4_packw(benchmark::State& state,
+                      xnn_qb4_packw_gemm_goi_ukernel_fn packw, size_t nr,
+                      size_t kr, size_t sr, size_t bl, bool null_bias,
+                      benchmark::utils::IsaCheckFunction isa_check = nullptr) {
+  if (isa_check != nullptr && !isa_check(state)) {
+    return;
+  }
+
+  const size_t batch = state.range(0);  // batch is g parameter for packw
+  const size_t dim_n = state.range(2);  // dim_n is nc parameter
+  const size_t dim_k = round_up(state.range(3), bl);  // dim_k is kc parameter
+
+  const size_t rounded_n = benchmark::utils::RoundUp(dim_n, nr);
+  const size_t rounded_k = benchmark::utils::RoundUp(dim_k, 2 * kr * sr);
+  const size_t num_block_total = (rounded_k / bl) * rounded_n;
+  const size_t rounded_size =
+      rounded_n * rounded_k + rounded_n * sizeof(uint32_t) +
+      rounded_n * sizeof(float) + num_block_total * sizeof(uint16_t);
+
+  std::random_device random_device;
+  auto rng = std::mt19937(random_device());
+
+  // Computer num_buffers that fit cache with source weights + packed_weights.
+  const size_t num_buffers =
+      1 +
+      benchmark::utils::DivideRoundUp<size_t>(
+          benchmark::utils::GetMaxCacheSize(),
+          sizeof(int8_t) * batch * ((dim_n * dim_k + 1) / 2 + rounded_size));
+
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> weights(
+      num_buffers * batch * (dim_n * dim_k + 1) / 2);
+  xnnpack::fill_uniform_random_bits(weights.data(), weights.size(), rng);
+  xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_weights(
+      num_buffers * batch * rounded_size);
+  xnnpack::Buffer<int32_t, XNN_ALLOCATION_ALIGNMENT> bias(num_buffers * batch *
+                                                          dim_n);
+  xnnpack::fill_uniform_random_bits(bias.data(), bias.size(), rng);
+  xnnpack::Buffer<xnn_bfloat16, XNN_ALLOCATION_ALIGNMENT> bf16_scales(
+      num_block_total * batch * num_buffers);
+  xnnpack::fill_uniform_random_bits(bf16_scales.data(), bf16_scales.size(),
+                                    rng);
+
+  const xnn_qs8_qc4w_packing_params packing_params = {1, 8};
+
+  size_t buffer_index = 0;
+  for (auto _ : state) {
+    if (++buffer_index == num_buffers) {
+      buffer_index = 0;
+    }
+    int32_t* bias_ptr =
+        null_bias
+            ? nullptr
+            : bias.data() + (buffer_index * batch * dim_n) * sizeof(uint32_t);
+
+    packw(batch, dim_n, dim_k, nr, kr, sr, bl,
+          weights.data() + buffer_index * batch * (dim_n * dim_k + 1) / 2,
+          /*bias=*/bias_ptr,
+          /*scale=*/bf16_scales.data() +
+              (buffer_index * batch * dim_n) * sizeof(uint16_t),
+          packed_weights.data() + buffer_index * batch * rounded_size,
+          /*extra_bytes_bl=*/sizeof(uint16_t) * nr, sizeof(float) * nr,
+          &packing_params);
+  }
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
+  const size_t elements_per_iteration = batch * dim_n * dim_k;
+  state.counters["elements"] =
+      benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration,
+                         benchmark::Counter::kIsRate);
+
+  const size_t bytes_per_iteration =
+      (elements_per_iteration + batch * rounded_size);
   state.counters["bytes"] =
       benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
                          benchmark::Counter::kIsRate);
@@ -910,3 +992,34 @@ BENCHMARK_BGEMM(x32_packw_x8_gio__reference)
 BENCHMARK_BGEMM(x32_packw_x16_gio__reference)
 BENCHMARK_BGEMM(x32_packw_x32_gio__reference)
 BENCHMARK_BGEMM(x32_packw_x64_gio__reference)
+
+static void qb4_packw_goi__reference(size_t batch, size_t dim_n, size_t dim_k,
+                                     size_t nr, size_t kr, size_t sr, size_t bl,
+                                     const uint32_t* weights,
+                                     const uint32_t* bias, const void* scale,
+                                     uint32_t* packed_weights,
+                                     size_t extra_bytes_bl,
+                                     size_t extra_bytes_n, const void* params) {
+  xnn_pack_qs8_qb4w_gemm_goi_w(
+      batch, dim_n, dim_k, nr, kr, sr, bl,
+      reinterpret_cast<const uint8_t*>(weights),
+      reinterpret_cast<const float*>(bias),
+      reinterpret_cast<const xnn_bfloat16*>(scale), packed_weights,
+      extra_bytes_bl, extra_bytes_n,
+      reinterpret_cast<const struct xnn_qs8_qc4w_packing_params*>(params));
+}
+
+static void qb4_packw_x16c4_goi__reference(benchmark::State& state,
+                                           const char* net) {
+  qb4_packw(state, (xnn_qb4_packw_gemm_goi_ukernel_fn)qb4_packw_goi__reference,
+            /*nr=*/16, /*kr=*/4, /*sr=*/1, /*bl=*/32, true);
+}
+
+static void qb4_packw_x16c8_goi__reference(benchmark::State& state,
+                                           const char* net) {
+  qb4_packw(state, (xnn_qb4_packw_gemm_goi_ukernel_fn)qb4_packw_goi__reference,
+            /*nr=*/16, /*kr=*/8, /*sr=*/1, /*bl=*/32, true);
+}
+
+BENCHMARK_BGEMM(qb4_packw_x16c4_goi__reference)
+BENCHMARK_BGEMM(qb4_packw_x16c8_goi__reference)
