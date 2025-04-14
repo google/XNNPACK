@@ -859,11 +859,11 @@ static void init_f32_gemm_config(void) {
     }
   #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
     f32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x64__hvx_broadcast);
-    f32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(8)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_8x64__hvx_broadcast);
+    f32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(5)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_5x64__hvx_broadcast);
     f32_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_x32_packw_gemm_gio_ukernel_x64__hvx_u2;
     f32_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x64__scalar_int_u2;
-    f32_gemm_config.mr = 8;
+    f32_gemm_config.mr = 5;
     f32_gemm_config.nr = 64;
   #else
     f32_gemm_config.linear.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_ukernel_1x4__scalar);
@@ -1363,11 +1363,11 @@ static void init_f32_igemm_config(void) {
     }
   #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
     f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_1x64__hvx_broadcast);
-    f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(8)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_8x64__hvx_broadcast);
+    f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(5)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_5x64__hvx_broadcast);
     f32_igemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_igemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_x32_packw_gemm_gio_ukernel_x64__hvx_u2;
     f32_igemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x64__scalar_int_u2;
-    f32_igemm_config.mr = 8;
+    f32_igemm_config.mr = 5;
     f32_igemm_config.nr = 64;
   #else
     f32_igemm_config.linear.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_ukernel_1x4__scalar);

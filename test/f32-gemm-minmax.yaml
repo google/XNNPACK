@@ -1419,12 +1419,29 @@
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
-# HEXAGON
+
+# Hexagon HVX
 - name: xnn_f32_gemm_minmax_ukernel_1x32__hvx_broadcast
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
+- name: xnn_f32_gemm_minmax_ukernel_2x32__hvx_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_gemm_minmax_ukernel_3x32__hvx_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
 - name: xnn_f32_gemm_minmax_ukernel_4x32__hvx_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_gemm_minmax_ukernel_5x32__hvx_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_gemm_minmax_ukernel_6x32__hvx_broadcast
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
@@ -1436,7 +1453,11 @@
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
-- name: xnn_f32_gemm_minmax_ukernel_16x32__hvx_broadcast
+- name: xnn_f32_gemm_minmax_ukernel_9x32__hvx_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_gemm_minmax_ukernel_10x32__hvx_broadcast
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
@@ -1444,7 +1465,23 @@
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
+- name: xnn_f32_gemm_minmax_ukernel_2x64__hvx_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_gemm_minmax_ukernel_3x64__hvx_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
 - name: xnn_f32_gemm_minmax_ukernel_4x64__hvx_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_gemm_minmax_ukernel_5x64__hvx_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_gemm_minmax_ukernel_6x64__hvx_broadcast
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
@@ -1456,7 +1493,11 @@
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
-- name: xnn_f32_gemm_minmax_ukernel_16x64__hvx_broadcast
+- name: xnn_f32_gemm_minmax_ukernel_9x64__hvx_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_gemm_minmax_ukernel_10x64__hvx_broadcast
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
@@ -1468,3 +1509,20 @@
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
+- name: xnn_f32_gemm_minmax_ukernel_3x128__hvx_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_gemm_minmax_ukernel_4x128__hvx_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_gemm_minmax_ukernel_5x128__hvx_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+- name: xnn_f32_gemm_minmax_ukernel_6x128__hvx_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 1
+
