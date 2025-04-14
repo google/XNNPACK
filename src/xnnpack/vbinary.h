@@ -88,6 +88,9 @@ extern "C" {
 #include "src/qu8-vmul/qu8-vmul-minmax-rndnu.h"
 #include "src/qu8-vmulc/qu8-vmulc-minmax-fp32.h"
 #include "src/qu8-vmulc/qu8-vmulc-minmax-rndnu.h"
+#include "src/qu8-vprelu/qu8-vprelu.h"
+#include "src/qu8-vpreluc/qu8-vpreluc.h"
+#include "src/qu8-vrpreluc/qu8-vrpreluc.h"
 #undef XNN_UKERNEL_WITH_PARAMS
 
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, \
@@ -101,6 +104,9 @@ extern "C" {
 #include "src/qs8-vmul/qs8-vmul-minmax-rndnu.h"
 #include "src/qs8-vmulc/qs8-vmulc-minmax-fp32.h"
 #include "src/qs8-vmulc/qs8-vmulc-minmax-rndnu.h"
+#include "src/qs8-vprelu/qs8-vprelu.h"
+#include "src/qs8-vpreluc/qs8-vpreluc.h"
+#include "src/qs8-vrpreluc/qs8-vrpreluc.h"
 #undef XNN_UKERNEL_WITH_PARAMS
 
 #ifdef __cplusplus
