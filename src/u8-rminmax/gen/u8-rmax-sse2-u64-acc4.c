@@ -55,7 +55,7 @@ void xnn_u8_rmax_ukernel__sse2_u64_acc4(
     vmax0 = xnn_max_u8(vmax0, vt);
   }
 
-  uint8_t max0 = xnn_horizontal_max_u8(vmax0);
+  uint8_t max0 = xnn_reduce_max_u8(vmax0);
 
   if XNN_UNLIKELY(batch != 0) {
     do {

@@ -20,8 +20,8 @@ $if DATATYPE == "S8":
   $xnn_loadu_X8 = "xnn_loadu_s8"
   $xnn_simd_size_X8 = "xnn_simd_size_s8"
   $xnn_simd_bytes_X8 = "xnn_simd_bytes_s8"
-  $xnn_horizontal_min_X8 = "xnn_horizontal_min_s8"
-  $xnn_horizontal_max_X8 = "xnn_horizontal_max_s8"
+  $xnn_reduce_min_X8 = "xnn_reduce_min_s8"
+  $xnn_reduce_max_X8 = "xnn_reduce_max_s8"
 $elif DATATYPE == "U8":
   #include "src/xnnpack/simd/u8-${ARCH}.h"
   $MIN = "xnn_min_u8"
@@ -31,8 +31,8 @@ $elif DATATYPE == "U8":
   $xnn_loadu_X8 = "xnn_loadu_u8"
   $xnn_simd_size_X8 = "xnn_simd_size_u8"
   $xnn_simd_bytes_X8 = "xnn_simd_bytes_u8"
-  $xnn_horizontal_min_X8 = "xnn_horizontal_min_u8"
-  $xnn_horizontal_max_X8 = "xnn_horizontal_max_u8"
+  $xnn_reduce_min_X8 = "xnn_reduce_min_u8"
+  $xnn_reduce_max_X8 = "xnn_reduce_max_u8"
 
 $ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
 $EMIT_MIN = "MIN" in OP
@@ -98,9 +98,9 @@ void xnn_${DATATYPE.lower()}_r${OP.lower()}_ukernel__${ARCH}_u${BATCH_TILE}${ACC
   }
 
   $if EMIT_MIN:
-    ${XINT8_T} min0 = ${xnn_horizontal_min_X8}(vmin0);
+    ${XINT8_T} min0 = ${xnn_reduce_min_X8}(vmin0);
   $if EMIT_MAX:
-    ${XINT8_T} max0 = ${xnn_horizontal_max_X8}(vmax0);
+    ${XINT8_T} max0 = ${xnn_reduce_max_X8}(vmax0);
 
   if XNN_UNLIKELY(batch != 0) {
     do {

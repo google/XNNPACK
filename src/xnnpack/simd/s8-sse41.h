@@ -38,7 +38,7 @@ static XNN_INLINE xnn_simd_s8_t xnn_min_s8(xnn_simd_s8_t a, xnn_simd_s8_t b) {
   return _mm_min_epi8(a, b);
 }
 
-static XNN_INLINE int8_t xnn_horizontal_max_s8(xnn_simd_s8_t a) {
+static XNN_INLINE int8_t xnn_reduce_max_s8(xnn_simd_s8_t a) {
   xnn_simd_s8_t vmax = _mm_max_epi8(a, _mm_unpackhi_epi64(a, a));
   vmax = _mm_max_epi8(vmax, _mm_srli_epi64(vmax, 32));
   vmax = _mm_max_epi8(vmax, _mm_srli_epi32(vmax, 16));
@@ -46,7 +46,7 @@ static XNN_INLINE int8_t xnn_horizontal_max_s8(xnn_simd_s8_t a) {
   return (int8_t)_mm_cvtsi128_si32(vmax);
 }
 
-static XNN_INLINE int8_t xnn_horizontal_min_s8(xnn_simd_s8_t a) {
+static XNN_INLINE int8_t xnn_reduce_min_s8(xnn_simd_s8_t a) {
   xnn_simd_s8_t vmin = _mm_min_epi8(a, _mm_unpackhi_epi64(a, a));
   vmin = _mm_min_epi8(vmin, _mm_srli_epi64(vmin, 32));
   vmin = _mm_min_epi8(vmin, _mm_srli_epi32(vmin, 16));

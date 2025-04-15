@@ -51,7 +51,7 @@ void xnn_u8_rmin_ukernel__sse2_u64_acc2(
     vmin0 = xnn_min_u8(vmin0, vt);
   }
 
-  uint8_t min0 = xnn_horizontal_min_u8(vmin0);
+  uint8_t min0 = xnn_reduce_min_u8(vmin0);
 
   if XNN_UNLIKELY(batch != 0) {
     do {

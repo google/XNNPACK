@@ -60,8 +60,8 @@ void xnn_u8_rminmax_ukernel__scalar_u3_acc3(
     vmax0 = xnn_max_u8(vmax0, vt);
   }
 
-  uint8_t min0 = xnn_horizontal_min_u8(vmin0);
-  uint8_t max0 = xnn_horizontal_max_u8(vmax0);
+  uint8_t min0 = xnn_reduce_min_u8(vmin0);
+  uint8_t max0 = xnn_reduce_max_u8(vmax0);
 
   if XNN_UNLIKELY(batch != 0) {
     do {

@@ -55,7 +55,7 @@ void xnn_s8_rmin_ukernel__scalar_u4_acc4(
     vmin0 = xnn_min_s8(vmin0, vt);
   }
 
-  int8_t min0 = xnn_horizontal_min_s8(vmin0);
+  int8_t min0 = xnn_reduce_min_s8(vmin0);
 
   if XNN_UNLIKELY(batch != 0) {
     do {

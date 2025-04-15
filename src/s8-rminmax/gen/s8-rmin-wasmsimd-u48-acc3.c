@@ -51,7 +51,7 @@ void xnn_s8_rmin_ukernel__wasmsimd_u48_acc3(
     vmin0 = xnn_min_s8(vmin0, vt);
   }
 
-  int8_t min0 = xnn_horizontal_min_s8(vmin0);
+  int8_t min0 = xnn_reduce_min_s8(vmin0);
 
   if XNN_UNLIKELY(batch != 0) {
     do {
