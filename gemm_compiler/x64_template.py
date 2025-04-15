@@ -414,3 +414,111 @@ END_FUNCTION {function_name}.dfsan
     # loop counter
     self.cmp_k_and_jump_if_less(label='.Linner_loop')
     self.inner_loop_tail()
+
+  def _inner_loop_small_M_N(self, n: int, tail: bool = False) -> str:
+    # input
+    if 'before' in self.input_asm():
+      self.asm_string += self.input_asm()['before']
+    if 'after' in self.input_asm():
+      self.asm_string += self.input_asm()['after']
+
+    # weights
+    if 'before' in self.weights_asm():
+      self.asm_string += self.weights_asm()['before']
+    if 'loop_2' in self.weights_asm():
+      for l in self.weights_asm()['loop_2']:
+        for nr in range(0, n, 2):
+          self.asm_string += l.format(
+              W_ptr=self.w_ptr_register(),
+              W=self.w_registers()[nr],
+              W_1=self.w_registers()[nr + 1],
+              offset=self.register_bytes() * nr // 2,
+              w_step=self.register_bytes() * self.n,
+              mask=self.mask_register(),
+          )
+    for l in self.weights_asm()['loop']:
+      for nr in range(0, n):
+        self.asm_string += l.format(
+            W_ptr=self.w_ptr_register(),
+            W=self.w_registers()[nr],
+            offset=self.register_bytes() * nr,
+            w_step=self.register_bytes() * n,
+            mask=self.mask_register(),
+        )
+    if 'after' in self.weights_asm():
+      for l in self.weights_asm()['after']:
+        self.asm_string += l.format(
+            W=self.w_ptr_register(), w_step=self.w_register_bytes() * n
+        )
+
+    loop = 'loop_tail' if tail else 'loop'
+    for mr in range(0, self.m):
+      for l in self.input_asm()['loop']:
+        self.asm_string += l.format(
+            AM_ptr=self.am_registers()[mr],
+            AM=self.a_registers(mr),
+            a_offset=self.k_register(),
+            A=self.a_registers(mr),
+        )
+      for m in self.compute_asm()[loop]:
+        for nr in range(0, n):
+          self.asm_string += m.format(
+              W=self.w_registers()[nr],
+              A=self.a_registers(mr),
+              ACC=self.acc_registers()[self.m * nr + mr],
+              mask=self.mask(),
+          )
+
+  def _inner_loop_spill_gp(self, n: int, tail: bool = False) -> str:
+    # weights
+    if 'before' in self.weights_asm():
+      self.asm_string += self.weights_asm()['before']
+    if 'loop_2' in self.weights_asm():
+      for l in self.weights_asm()['loop_2']:
+        for nr in range(0, n, 2):
+          self.asm_string += l.format(
+              W_ptr=self.w_ptr_register(),
+              W=self.w_registers()[nr],
+              W_1=self.w_registers()[nr + 1],
+              offset=self.register_bytes() * nr // 2,
+              w_step=self.register_bytes() * self.n,
+              mask=self.mask_register(),
+          )
+    for l in self.weights_asm()['loop']:
+      for nr in range(0, n):
+        self.asm_string += l.format(
+            W_ptr=self.w_ptr_register(),
+            W=self.w_registers()[nr],
+            offset=self.register_bytes() * nr,
+            w_step=self.register_bytes() * n,
+            mask=self.mask_register(),
+        )
+
+    # input
+    if 'before' in self.input_asm():
+      self.asm_string += self.input_asm()['before']
+    if 'after' in self.input_asm():
+      self.asm_string += self.input_asm()['after']
+    if 'after' in self.weights_asm():
+      for l in self.weights_asm()['after']:
+        self.asm_string += l.format(
+            W=self.w_ptr_register(), w_step=self.w_register_bytes() * n
+        )
+
+    for mr in range(0, self.m):
+      for l in self.input_asm()['loop']:
+        self.asm_string += l.format(
+            AM_ptr=self.am_registers()[mr],
+            AM=self.a_registers(0),
+            a_offset=self.k_register(),
+            A=self.a_registers(0),
+        )
+        loop = 'loop_tail' if tail else 'loop'
+        for m in self.compute_asm()[loop]:
+          for nr in range(0, n):
+            self.asm_string += m.format(
+                W=self.w_registers()[nr],
+                A=self.a_registers(0),
+                ACC=self.acc_registers()[self.m * nr + mr],
+                mask=self.mask(),
+            )

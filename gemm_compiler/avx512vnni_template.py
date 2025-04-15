@@ -12,8 +12,7 @@ class Avx512Vnni(avx512f_template.Avx512F):
   """All SIMD features for avx512vnni."""
 
   def __init__(self, m: int, n: int, c: int):
-    super().__init__(m, n)
-    self._c = c
+    super().__init__(m, n, c)
 
   def isa(self):
     return 'avx512vnni'

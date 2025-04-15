@@ -159,7 +159,6 @@ BEGIN_FUNCTION {function_name}
           self.asm_string += l.format(
               W=self.w_registers()[nr],
               A=self.a_registers(mr),
-              # ACC=self.acc_registers()[self.m * nr + mr],
               ACC=self.acc_registers()[self.n * mr + nr],
               POS=pos,
           )

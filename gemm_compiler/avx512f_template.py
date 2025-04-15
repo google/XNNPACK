@@ -12,6 +12,14 @@ from gemm_compiler import fma3_template
 class Avx512F(fma3_template.Fma3):
   """All SIMD features for avx512f."""
 
+  def __init__(self, m: int, n: int, c: int):
+    super().__init__(m, n)
+    self._c = c
+
+  @property
+  def c(self) -> int:
+    return self._c
+
   def isa(self):
     return 'avx512f'
 
@@ -44,122 +52,9 @@ class Avx512F(fma3_template.Fma3):
   def compute_asm(self):
     c_asm = {
         'loop': ['vfmadd231ps  z{ACC}, {A}, {W}\n'],
+        'loop_tail': ['vfmadd231ps  z{ACC}{{{mask}}}, {A}, {W}\n'],
     }
     return c_asm
-
-  def _inner_loop_spill_gp(self, n: int, tail: bool = False) -> str:
-    # weights
-    if 'before' in self.weights_asm():
-      self.asm_string += self.weights_asm()['before']
-    if 'loop_2' in self.weights_asm():
-      for l in self.weights_asm()['loop_2']:
-        for nr in range(0, n, 2):
-          self.asm_string += l.format(
-              W_ptr=self.w_ptr_register(),
-              W=self.w_registers()[nr],
-              W_1=self.w_registers()[nr + 1],
-              offset=self.register_bytes() * nr // 2,
-              w_step=self.register_bytes() * self.n,
-              mask=self.mask_register(),
-          )
-    for l in self.weights_asm()['loop']:
-      for nr in range(0, n):
-        self.asm_string += l.format(
-            W_ptr=self.w_ptr_register(),
-            W=self.w_registers()[nr],
-            offset=self.register_bytes() * nr,
-            w_step=self.register_bytes() * n,
-            mask=self.mask_register(),
-        )
-
-    # input
-    if 'before' in self.input_asm():
-      self.asm_string += self.input_asm()['before']
-    if 'after' in self.input_asm():
-      self.asm_string += self.input_asm()['after']
-    if 'after' in self.weights_asm():
-      for l in self.weights_asm()['after']:
-        self.asm_string += l.format(
-            W=self.w_ptr_register(), w_step=self.w_register_bytes() * n
-        )
-
-    for mr in range(0, self.m):
-      for l in self.input_asm()['loop']:
-        self.asm_string += l.format(
-            AM_ptr=self.am_registers()[mr],
-            AM=self.a_registers(0),
-            a_offset=self.k_register(),
-            A=self.a_registers(0),
-        )
-        loop = 'loop_tail' if tail else 'loop'
-        for m in self.compute_asm()[loop]:
-          for nr in range(0, n):
-            self.asm_string += m.format(
-                W=self.w_registers()[nr],
-                A=self.a_registers(0),
-                ACC=self.acc_registers()[self.m * nr + mr],
-                mask=self.mask(),
-            )
-
-  def _inner_loop_small_M_N(self, n: int, tail: bool = False) -> str:
-    # input
-    if 'before' in self.input_asm():
-      self.asm_string += self.input_asm()['before']
-    if 'after' in self.input_asm():
-      self.asm_string += self.input_asm()['after']
-
-    # weights
-    if 'before' in self.weights_asm():
-      self.asm_string += self.weights_asm()['before']
-    if 'loop_2' in self.weights_asm():
-      for l in self.weights_asm()['loop_2']:
-        for nr in range(0, n, 2):
-          self.asm_string += l.format(
-              W_ptr=self.w_ptr_register(),
-              W=self.w_registers()[nr],
-              W_1=self.w_registers()[nr + 1],
-              offset=self.register_bytes() * nr // 2,
-              w_step=self.register_bytes() * self.n,
-              mask=self.mask_register(),
-          )
-    for l in self.weights_asm()['loop']:
-      for nr in range(0, n):
-        self.asm_string += l.format(
-            W_ptr=self.w_ptr_register(),
-            W=self.w_registers()[nr],
-            offset=self.register_bytes() * nr,
-            w_step=self.register_bytes() * n,
-            mask=self.mask_register(),
-        )
-    if 'after' in self.weights_asm():
-      for l in self.weights_asm()['after']:
-        self.asm_string += l.format(
-            W=self.w_ptr_register(), w_step=self.w_register_bytes() * n
-        )
-
-    loop = 'loop_tail' if tail else 'loop'
-    for mr in range(0, self.m):
-      for l in self.input_asm()['loop']:
-        self.asm_string += l.format(
-            AM_ptr=self.am_registers()[mr],
-            AM=self.a_registers(mr),
-            a_offset=self.k_register(),
-            A=self.a_registers(mr),
-        )
-      for m in self.compute_asm()[loop]:
-        for nr in range(0, n):
-          self.asm_string += m.format(
-              W=self.w_registers()[nr],
-              A=self.a_registers(mr),
-              ACC=self.acc_registers()[self.m * nr + mr],
-              mask=self.mask(),
-          )
-
-  def inner_loop_spill_gp(self, tail: bool = False) -> str:
-    return self._inner_loop_spill_gp(self.n, tail)
-
-  def inner_loop_small_M_N(self, tail: bool = False) -> str:
-    return self._inner_loop_small_M_N(self.n, tail)
 
   def init_accumulators(self):
     self.comment('Initialize accumulators with the biases.')
@@ -319,6 +214,12 @@ class Avx512F(fma3_template.Fma3):
             )
         )
 
+  def inner_loop_spill_gp(self, tail: bool = False) -> str:
+    return self._inner_loop_spill_gp(self.n, tail)
+
+  def inner_loop_small_M_N(self, tail: bool = False) -> str:
+    return self._inner_loop_small_M_N(self.n, tail)
+
   def stack_size(self):
     # Increase the stack size to allow for storing the original stack pointer,
     # nc, odd bits of k and other registers as required.
@@ -326,17 +227,8 @@ class Avx512F(fma3_template.Fma3):
     # round up to multiple of 64.
     return math.ceil(size / 64) * 64
 
-
 class Avx512FC(Avx512F):
   """All SIMD features for avx512fc."""
-
-  def __init__(self, m: int, n: int, c: int):
-    super().__init__(m, n)
-    self._c = c
-
-  @property
-  def c(self) -> int:
-    return self._c
 
   def input_asm(self):
     in_asm = {
@@ -433,39 +325,6 @@ class Avx512FC(Avx512F):
       cmp rdx, {c}
       js .Linner_loop_tail\n"""
 
-  def inner_loop_spill_gp(self, tail: bool = False) -> str:
-    return self._inner_loop_spill_gp(self._c * self.n, tail)
-
-  def inner_loop_small_M_N(self, tail: bool = False) -> str:
-    return self._inner_loop_small_M_N(self._c * self.n, tail)
-
-  def inner_loop_tail(self):
-    nc_register = self.nc_register()
-    offset = self.m * 16 + self.c_ptr_stack_offset()
-    nc_offset = offset + 8
-    self.asm_string += f"""
-      # Store nc_register.
-      mov [rsp + {nc_offset}], {nc_register}
-      # Load odd k bit.
-      mov {nc_register}, [rsp + {offset}]
-      # Check if channels are odd.
-      test {nc_register}, {nc_register}
-      mov {nc_register}, [rsp + {nc_offset}]
-      jz .Linner_loop_end
-
-      .Linner_loop_tail:\n"""
-    if self.m > self.max_m_before_spilling():
-      self.inner_loop_spill_gp(tail=True)
-    else:
-      self.inner_loop_small_M_N(tail=True)
-
-  def compute_asm(self):
-    c_asm = {
-        'loop': ['vfmadd231ps  z{ACC}, {A}, {W}\n'],
-        'loop_tail': ['vfmadd231ps  z{ACC}{{{mask}}}, {A}, {W}\n'],
-    }
-    return c_asm
-
   def outer_loop_prepare(self):
     k_register = self.k_register()
     kc_register = self.kc_register()
@@ -509,3 +368,29 @@ class Avx512FC(Avx512F):
         self.clamp_max(
             reg=acc_registers[self.m * nr + mr], prefix=self.prefix()
         )
+
+  def inner_loop_spill_gp(self, tail: bool = False) -> str:
+    return self._inner_loop_spill_gp(self._c * self.n, tail)
+
+  def inner_loop_small_M_N(self, tail: bool = False) -> str:
+    return self._inner_loop_small_M_N(self._c * self.n, tail)
+
+  def inner_loop_tail(self):
+    nc_register = self.nc_register()
+    offset = self.m * 16 + self.c_ptr_stack_offset()
+    nc_offset = offset + 8
+    self.asm_string += f"""
+      # Store nc_register.
+      mov [rsp + {nc_offset}], {nc_register}
+      # Load odd k bit.
+      mov {nc_register}, [rsp + {offset}]
+      # Check if channels are odd.
+      test {nc_register}, {nc_register}
+      mov {nc_register}, [rsp + {nc_offset}]
+      jz .Linner_loop_end
+
+      .Linner_loop_tail:\n"""
+    if self.m > self.max_m_before_spilling():
+      self.inner_loop_spill_gp(tail=True)
+    else:
+      self.inner_loop_small_M_N(tail=True)
