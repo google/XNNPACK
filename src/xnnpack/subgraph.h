@@ -41,7 +41,7 @@
 #define XNN_FLAG_SLINKY_ENABLED 0x40000000
 
 /// If Slinky is enabled, disable any scheduling.
-#define XNN_FLAG_SLINKY_SCHEDULE_DISABLED 0x20000000
+#define XNN_FLAG_SLINKY_NO_SCHEDULE 0x20000000
 
 /// If Slinky is enabled, assume shapes are concrete (and rebuild pipeline in
 /// reshape). This makes reshaping more expensive, but may reduce overhead in
