@@ -33,21 +33,22 @@ void xnn_f32_rsum_ukernel__hvx_u32(
     const xnn_simd_f32_t vt = xnn_loadu_f32(input);
     input += 32;
 
-    vacc0 = xnn_add_f32(vacc0, vt);
+    vacc0 = Q6_Vqf32_vadd_Vqf32Vsf(vacc0, vt);
   }
 
   if XNN_UNLIKELY(batch) {
     const xnn_simd_f32_t vt = xnn_loadu_f32(input);
     HVX_VectorPred mask = Q6_Q_vsetq_R(batch);
 
-    vacc0 = xnn_add_f32(vacc0, Q6_V_vmux_QVV(mask, vt, xnn_zero_f32()));
+    vacc0 = Q6_Vqf32_vadd_Vqf32Vsf(vacc0, Q6_V_vmux_QVV(mask, vt, xnn_zero_f32()));
   }
 
-  vacc0 = xnn_add_f32(vacc0, Q6_V_vror_VR(vacc0, 64));
-  vacc0 = xnn_add_f32(vacc0, Q6_V_vror_VR(vacc0, 32));
-  vacc0 = xnn_add_f32(vacc0, Q6_V_vror_VR(vacc0, 16));
-  vacc0 = xnn_add_f32(vacc0, Q6_V_vror_VR(vacc0, 8));
-  vacc0 = xnn_add_f32(vacc0, Q6_V_vror_VR(vacc0, 4));
+  vacc0 = Q6_Vqf32_vadd_Vqf32Vqf32(vacc0, Q6_V_vror_VR(vacc0, 64));
+  vacc0 = Q6_Vqf32_vadd_Vqf32Vqf32(vacc0, Q6_V_vror_VR(vacc0, 32));
+  vacc0 = Q6_Vqf32_vadd_Vqf32Vqf32(vacc0, Q6_V_vror_VR(vacc0, 16));
+  vacc0 = Q6_Vqf32_vadd_Vqf32Vqf32(vacc0, Q6_V_vror_VR(vacc0, 8));
+  vacc0 = Q6_Vqf32_vadd_Vqf32Vqf32(vacc0, Q6_V_vror_VR(vacc0, 4));
+  vacc0 = Q6_Vsf_equals_Vqf32(vacc0);
 
   float partial_sum = *((float*) &vacc0);
 

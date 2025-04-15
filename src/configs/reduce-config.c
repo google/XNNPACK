@@ -1317,6 +1317,12 @@ static void init_f32_rsum_config(void) {
       .init.reduce = NULL,
       .update = xnn_update_f32_reduce_scalar_params,
     };
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    f32_rsum_config = (struct xnn_reduce_config) {
+      .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__hvx_u64_acc2,
+      .init.reduce = NULL,
+      .update = xnn_update_f32_reduce_scalar_params,
+    };
   #else
     f32_rsum_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__scalar_u4_acc4,

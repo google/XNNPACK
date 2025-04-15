@@ -21,6 +21,7 @@ SET(PROD_HVX_MICROKERNEL_SRCS
   src/f32-rminmax/gen/f32-rmax-hvx-u64-acc2.c
   src/f32-rminmax/gen/f32-rmin-hvx-u64-acc2.c
   src/f32-rminmax/gen/f32-rminmax-hvx-u64-acc2.c
+  src/f32-rsum/gen/f32-rsum-hvx-u64-acc2.c
   src/f32-vbinary/gen/f32-vadd-hvx-u128.c
   src/f32-vbinary/gen/f32-vaddc-hvx-u128.c
   src/f32-vbinary/gen/f32-vmax-hvx-u128.c
@@ -120,7 +121,6 @@ SET(NON_PROD_HVX_MICROKERNEL_SRCS
   src/f32-rminmax/gen/f32-rminmax-hvx-u128-acc2.c
   src/f32-rminmax/gen/f32-rminmax-hvx-u128-acc4.c
   src/f32-rsum/gen/f32-rsum-hvx-u32.c
-  src/f32-rsum/gen/f32-rsum-hvx-u64-acc2.c
   src/f32-rsum/gen/f32-rsum-hvx-u96-acc3.c
   src/f32-rsum/gen/f32-rsum-hvx-u128-acc2.c
   src/f32-rsum/gen/f32-rsum-hvx-u128-acc4.c
