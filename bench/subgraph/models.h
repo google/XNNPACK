@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef THIRD_PARTY_XNNPACK_BENCH_MODELS_MODELS_H_
+#define THIRD_PARTY_XNNPACK_BENCH_MODELS_MODELS_H_
 
 #include <cstddef>
 #include <cstdint>
@@ -34,9 +35,10 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
                             size_t head_dim, QD8AttentionWeights& weights);
 xnn_subgraph_t QS8MobileNetV2();
 
-// This is a sequence of {add, multiply} x `reps` ops, on `size` x `size`
-// values.
-xnn_subgraph_t FP32Elementwise(size_t size, size_t reps);
+// This is a sequence of {add, multiply} x `depth` ops, on `batch_size` x
+// `num_elements` values.
+xnn_subgraph_t FP32Elementwise(size_t batch_size, size_t num_elements,
+                               size_t depth);
 
 // Compute the layer norm of [m x n x k] tensors, where the mean and variance
 // are computed over the dimensions in `norm_mask`. This computation is
@@ -49,6 +51,10 @@ xnn_subgraph_t FP32Elementwise(size_t size, size_t reps);
 xnn_subgraph_t FP32LayerNorm(size_t m, size_t n, size_t k, uint32_t norm_mask);
 
 // Similar to the above, but computes the softmax instead of the layer norm.
+// If `use_softmax` is `false`, a "decomposed" subgraph which computes the
+// softmax using unary and binary elementwise ops and reduction ops, is used,
+// whereas if `use_softmax` is `true`, a single `softmax` subgraph node is
+// created.
 xnn_subgraph_t FP32Softmax(size_t m, size_t n, size_t k, uint32_t norm_mask,
                            bool use_softmax);
 
@@ -66,3 +72,5 @@ xnn_subgraph_t FP32DepthwiseSeparable(size_t w, size_t h, size_t kw, size_t ci,
                                       FP32DepthwiseSeparableWeights& weights);
 
 }  // namespace models
+
+#endif  // THIRD_PARTY_XNNPACK_BENCH_MODELS_MODELS_H_

@@ -200,7 +200,9 @@ static void QS8MobileNetV2(benchmark::State& state) {
 
 static void FP32Elementwise(benchmark::State& state) {
   BenchmarkInvoke(state, [&state]() {
-    return models::FP32Elementwise(FLAGS_batch_size, state.range(0));
+    return models::FP32Elementwise(/*batch_size=*/state.range(0),
+                                   /*num_elements=*/state.range(1),
+                                   /*depth=*/state.range(2));
   });
 }
 
@@ -211,10 +213,17 @@ static void FP32LayerNorm(benchmark::State& state) {
   });
 }
 
-static void FP32Softmax(benchmark::State& state) {
+static void FP32SoftmaxDecomp(benchmark::State& state) {
   BenchmarkInvoke(state, [&state]() {
     return models::FP32Softmax(state.range(0), state.range(1), state.range(2),
-                               state.range(3), state.range(4));
+                               state.range(3), /*use_softmax=*/false);
+  });
+}
+
+static void FP32SoftmaxFused(benchmark::State& state) {
+  BenchmarkInvoke(state, [&state]() {
+    return models::FP32Softmax(state.range(0), state.range(1), state.range(2),
+                               state.range(3), /*use_softmax=*/true);
   });
 }
 
@@ -242,18 +251,16 @@ static void AttentionArguments(benchmark::internal::Benchmark* b) {
 
 static void LayerNormArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"M", "N", "K", "NormMask"});
-  for (int norm_mask : {1, 3, 7, 2, 5}) {
+  for (int norm_mask = 1; norm_mask < 8; norm_mask++) {
     b->Args({128, 256, 512, norm_mask});
   }
 }
 
 static void SoftmaxArguments(benchmark::internal::Benchmark* b) {
-  b->ArgNames({"M", "N", "K", "NormMask", "UseSoftmax"});
-  for (int norm_mask : {1, 3, 7, 2, 5, 4}) {
-    b->Args({128, 256, 512, norm_mask, false});
+  b->ArgNames({"M", "N", "K", "NormMask"});
+  for (int norm_mask = 1; norm_mask < 8; norm_mask++) {
+    b->Args({128, 256, 512, norm_mask});
   }
-  // xnn_define_softmax only supports computing the softmax of the last dimension.
-  b->Args({128, 256, 512, 2, true});
 }
 
 static void DepthwiseSeparableArguments(benchmark::internal::Benchmark* b) {
@@ -302,17 +309,23 @@ BENCHMARK(QS8MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
 BENCHMARK(FP32Elementwise)
     ->Unit(benchmark::kMicrosecond)
     ->UseRealTime()
-    ->Arg(6)
-    ->Arg(10)
-    ->Arg(18)
-    ->Arg(34);
+    ->ArgNames({"B", "N", "D"})
+    ->Args({1024, 1024, 6})
+    ->Args({1024, 1024, 10})
+    ->Args({1024, 1024, 18})
+    ->Args({1024, 1024, 34});
 
 BENCHMARK(FP32LayerNorm)
     ->Unit(benchmark::kMicrosecond)
     ->UseRealTime()
     ->Apply(LayerNormArguments);
 
-BENCHMARK(FP32Softmax)
+BENCHMARK(FP32SoftmaxDecomp)
+    ->Unit(benchmark::kMicrosecond)
+    ->UseRealTime()
+    ->Apply(SoftmaxArguments);
+
+BENCHMARK(FP32SoftmaxFused)
     ->Unit(benchmark::kMicrosecond)
     ->UseRealTime()
     ->Apply(SoftmaxArguments);
