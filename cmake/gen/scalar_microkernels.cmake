@@ -166,8 +166,8 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-scalar-u1.c
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-scalar-u4.c
   src/qs8-packw/gen/qs8-packw-x16c8-gemm-goi-scalar.c
-  src/qs8-packw/gen/qs8-packw-x32c4-gemm-gio-scalar.c
-  src/qs8-packw/gen/qs8-packw-x32c4-gemm-goi-scalar.c
+  src/qs8-packw/gen/qs8-packw-x128c4-gemm-gio-scalar.c
+  src/qs8-packw/gen/qs8-packw-x128c4-gemm-goi-scalar.c
   src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-3p1c-minmax-fp32-scalar-fmagic.c
   src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-3p2c-minmax-fp32-scalar-imagic.c
   src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-3p2c-minmax-fp32-scalar-lrintf.c
@@ -581,8 +581,12 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/qs8-packw/gen/qs8-packw-x16c4-gemm-gio-scalar.c
   src/qs8-packw/gen/qs8-packw-x16c4-gemm-goi-scalar.c
   src/qs8-packw/gen/qs8-packw-x16c8-gemm-gio-scalar.c
+  src/qs8-packw/gen/qs8-packw-x32c4-gemm-gio-scalar.c
+  src/qs8-packw/gen/qs8-packw-x32c4-gemm-goi-scalar.c
   src/qs8-packw/gen/qs8-packw-x64c4-gemm-gio-scalar.c
   src/qs8-packw/gen/qs8-packw-x64c4-gemm-goi-scalar.c
+  src/qs8-packw/gen/qs8-packw-x96c4-gemm-gio-scalar.c
+  src/qs8-packw/gen/qs8-packw-x96c4-gemm-goi-scalar.c
   src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x8c8-gemm-goi-scalar.c
   src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x16c8-gemm-goi-scalar.c
   src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x32c8-gemm-goi-scalar.c

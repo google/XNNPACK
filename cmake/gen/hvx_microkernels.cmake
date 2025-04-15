@@ -34,10 +34,10 @@ SET(PROD_HVX_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vsqrdiffc-hvx-u128.c
   src/f32-vbinary/gen/f32-vsub-hvx-u128.c
   src/f32-vbinary/gen/f32-vsubc-hvx-u128.c
-  src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x32c4-minmax-fp32-hvx.c
-  src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x32c4-minmax-fp32-hvx.c
-  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x32c4-minmax-fp32-hvx.c
-  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x32c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x128c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x128c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x128c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-3x128c4-minmax-fp32-hvx.c
   src/x32-packw/gen/x32-packw-gio-hvx-u2.c
   src/x32-transposec/gen/x32-transposec-32x32-multi-multi-hvx.c)
 
@@ -168,9 +168,9 @@ SET(NON_PROD_HVX_MICROKERNEL_SRCS
   src/f32-vunary/gen/f32-vabs-hvx.c
   src/f32-vunary/gen/f32-vneg-hvx.c
   src/f32-vunary/gen/f32-vsqr-hvx.c
+  src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x32c4-minmax-fp32-hvx.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x64c4-minmax-fp32-hvx.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x96c4-minmax-fp32-hvx.c
-  src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x128c4-minmax-fp32-hvx.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x32c4-minmax-fp32-hvx.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x64c4-minmax-fp32-hvx.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x96c4-minmax-fp32-hvx.c
@@ -178,7 +178,7 @@ SET(NON_PROD_HVX_MICROKERNEL_SRCS
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x32c4-minmax-fp32-hvx.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x64c4-minmax-fp32-hvx.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x96c4-minmax-fp32-hvx.c
-  src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x128c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x32c4-minmax-fp32-hvx.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x64c4-minmax-fp32-hvx.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x96c4-minmax-fp32-hvx.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x128c4-minmax-fp32-hvx.c
@@ -207,7 +207,44 @@ SET(NON_PROD_HVX_MICROKERNEL_SRCS
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-10x96c4-minmax-fp32-hvx.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-10x128c4-minmax-fp32-hvx.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-16x32c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x32c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x64c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x96c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x32c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x64c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x96c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x128c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-3x32c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-3x64c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-3x96c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x32c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x64c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x96c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x128c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-5x32c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-5x64c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-5x96c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-5x128c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-6x32c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-6x64c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-6x96c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-6x128c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-7x32c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-7x64c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-7x96c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-7x128c4-minmax-fp32-hvx.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-8x32c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-8x64c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-8x96c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-8x128c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-9x32c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-9x64c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-9x96c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-9x128c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-10x32c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-10x64c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-10x96c4-minmax-fp32-hvx.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-10x128c4-minmax-fp32-hvx.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-16x32c4-minmax-fp32-hvx.c
   src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u32.c
   src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u64.c

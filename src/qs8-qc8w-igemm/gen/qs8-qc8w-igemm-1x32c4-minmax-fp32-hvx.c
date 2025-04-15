@@ -20,7 +20,6 @@
 #include "src/xnnpack/unaligned.h"
 
 
-
 // multiply vacc by vscale and return result as int
 // vacc is vector of int32
 // vscale is vector of floats
@@ -63,7 +62,6 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x32c4__hvx(
   assert(w != NULL);
   assert(c != NULL);
 
-
   kc = round_up_po2(kc, 4 * sizeof(int8_t));
   int8_t* c0 = c;
 
@@ -72,7 +70,9 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x32c4__hvx(
   const HVX_Vector voutput_max = Q6_Vb_vsplat_R(params->fp32_scalar.output_max);
 
   do {
-    HVX_Vector vacc0x32 = *((HVX_Vector*)w); w = (const int32_t*) w + 32;
+    HVX_Vector vacc0x0 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+
+    w = (const int32_t*) w + 32;
 
     size_t p = ks;
     do {
@@ -86,36 +86,36 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x32c4__hvx(
       for (; k >= 4 * sizeof(int8_t); k -= 4 * sizeof(int8_t)) {
         const HVX_Vector va0x0123 = Q6_V_vsplat_R(unaligned_load_s32(a0)); a0 += 4;
 
-        const HVX_Vector vb32x0123 = *((HVX_Vector *)((int8_t *)w)); w = (const int8_t*) w + 128;
+        const HVX_Vector vb0x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
 
-        vacc0x32 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x32, va0x0123, vb32x0123);
+        vacc0x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x0, va0x0123, vb0x0123);
       }
 
       p -= 1 * sizeof(void*);
     } while (p != 0);
 
-    const HVX_Vector vscale32 = *((HVX_Vector *)w); w = (const float*) w + 32;
-    vacc0x32 = rescale_fp32(vacc0x32, vscale32);
+    const HVX_Vector vscale0 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+    vacc0x0 = rescale_fp32(vacc0x0, vscale0);
 
-    HVX_Vector vout0x32 = Q6_Vh_vpack_VwVw_sat(vacc0x32, vacc0x32);
+    HVX_Vector vout0x0 = Q6_Vh_vpack_VwVw_sat(vacc0x0, vacc0x0);
 
-    vout0x32 = Q6_Vh_vadd_VhVh_sat(vout0x32, voutput_zero_point);
+    vout0x0 = Q6_Vh_vadd_VhVh_sat(vout0x0, voutput_zero_point);
 
-    vout0x32 = Q6_Vb_vpack_VhVh_sat(vout0x32, vout0x32);
+    HVX_Vector vout0 = Q6_Vb_vpack_VhVh_sat(vout0x0, vout0x0);
 
-    vout0x32 = Q6_Vb_vmax_VbVb(vout0x32, voutput_min);
+    vout0 = Q6_Vb_vmax_VbVb(vout0, voutput_min);
 
-    vout0x32 = Q6_Vb_vmin_VbVb(vout0x32, voutput_max);
+    vout0 = Q6_Vb_vmin_VbVb(vout0, voutput_max);
 
     if XNN_LIKELY(nc >= 32) {
-      Q6_V_vstu_variable(c0, 32, vout0x32);
+      Q6_V_vstu_variable(c0, 32, vout0);
       c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
 
       a = (const int8_t**restrict) ((uintptr_t) a - ks);
       nc -= 32;
     } else {
       // Prepare mask for valid 8-bit elements (depends on nc).
-      Q6_V_vstu_variable(c0, nc, vout0x32);
+      Q6_V_vstu_variable(c0, nc, vout0);
       nc = 0;
     }
   } while (nc != 0);
