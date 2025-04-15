@@ -53,7 +53,6 @@ void xnn_qs8_vprelu_ukernel__scalar_u1(
 
   const int32_t input_zero_point = params->scalar.input_zero_point;
   const int32_t slope_zero_point = params->scalar.slope_zero_point;
-  const int32_t output_zero_point = params->scalar.output_zero_point;
   const float vpositive_multiplier = params->scalar.positive_multiplier;
   const float vnegative_multiplier = params->scalar.negative_multiplier;                                
   const float voutput_min_less_zero_point = (int32_t) params->scalar.output_min - (int32_t) params->scalar.output_zero_point;

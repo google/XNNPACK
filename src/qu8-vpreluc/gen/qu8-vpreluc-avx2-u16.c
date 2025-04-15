@@ -65,11 +65,9 @@ void xnn_qu8_vpreluc_ukernel__avx2_u16(
   for (; batch >= 16 * sizeof(uint8_t); batch -= 16 * sizeof(uint8_t)) {
     __m256i va0 = _mm256_cvtepu8_epi32(_mm_loadu_si64((const __m128i*) input_a));
     
-    
     __m256i va1 = _mm256_cvtepu8_epi32(_mm_loadu_si64((const __m128i*) (input_a + 8)));
     input_a += 16;
     
-
     __m256i va0_sub = _mm256_sub_epi32(va0, vinput_zero_point);
     __m256i vcompare0 = _mm256_cmpgt_epi32(_mm256_setzero_si256(), va0_sub);
     __m256i vacc0 = _mm256_blendv_epi8(va0_sub, _mm256_mullo_epi32(va0_sub, vslope), vcompare0);
@@ -122,8 +120,6 @@ void xnn_qu8_vpreluc_ukernel__avx2_u16(
     __m128i vout_final = _mm_packus_epi16(vout_packed, vout_packed);
     _mm_storeu_si64((__m128i*) output, vout_final);
     output+=8;
-
-    
   }
 
   if XNN_UNLIKELY(batch != 0) {

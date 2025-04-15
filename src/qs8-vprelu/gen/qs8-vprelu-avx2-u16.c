@@ -55,7 +55,6 @@ void xnn_qs8_vprelu_ukernel__avx2_u16(
 
   const __m256i vinput_zero_point = _mm256_set1_epi32(params->scalar.input_zero_point);
   const __m256i vslope_zero_point = _mm256_set1_epi32(params->scalar.slope_zero_point);
-  const __m256i voutput_zero_point = _mm256_set1_epi32(params->scalar.output_zero_point);
   const __m256 vpositive_multiplier = _mm256_set1_ps(params->scalar.positive_multiplier);
   const __m256 vnegative_multiplier = _mm256_set1_ps(params->scalar.negative_multiplier);
   const __m256 voutput_min_less_zero_point = _mm256_set1_ps((int32_t) params->scalar.output_min - (int32_t) params->scalar.output_zero_point);
@@ -129,8 +128,6 @@ void xnn_qs8_vprelu_ukernel__avx2_u16(
     __m128i vout_final = _mm_packs_epi16(vout_packed16, vout_packed16);
     _mm_storeu_si64((__m128i*) output, vout_final);
     output+=8;
-
-    
   }
 
   if XNN_UNLIKELY(batch != 0) {
