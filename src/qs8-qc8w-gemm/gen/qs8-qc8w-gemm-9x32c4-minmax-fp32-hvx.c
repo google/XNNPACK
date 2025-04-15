@@ -37,7 +37,7 @@ static XNN_INLINE HVX_Vector rescale_fp32(HVX_Vector vacc, HVX_Vector vscale)
   return vresult;
 }
 
-void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x32c4__hvx(
+void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_9x32c4__hvx(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -50,7 +50,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x32c4__hvx(
     const union xnn_qs8_qc8w_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
-  assert(mr <= 8);
+  assert(mr <= 9);
   assert(nc != 0);
   assert(kc != 0);
   assert(kc % sizeof(int8_t) == 0);
@@ -99,9 +99,15 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x32c4__hvx(
   }
   const int8_t* a7 = (const int8_t*) ((uintptr_t) a6 + a_stride);
   int8_t* c7 = (int8_t*) ((uintptr_t) c6 + cm_stride);
-  if XNN_UNPREDICTABLE(mr != 8) {
+  if XNN_UNPREDICTABLE(mr < 8) {
     a7 = a6;
     c7 = c6;
+  }
+  const int8_t* a8 = (const int8_t*) ((uintptr_t) a7 + a_stride);
+  int8_t* c8 = (int8_t*) ((uintptr_t) c7 + cm_stride);
+  if XNN_UNPREDICTABLE(mr <= 8) {
+    a8 = a7;
+    c8 = c7;
   }
 
   const HVX_Vector voutput_zero_point = Q6_Vh_vsplat_R(params->fp32_scalar.output_zero_point);
@@ -117,6 +123,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x32c4__hvx(
     HVX_Vector vacc5x0 = vacc0x0;
     HVX_Vector vacc6x0 = vacc0x0;
     HVX_Vector vacc7x0 = vacc0x0;
+    HVX_Vector vacc8x0 = vacc0x0;
 
     size_t k = kc;
     for (; k >= 4 * sizeof(int8_t); k -= 4 * sizeof(int8_t)) {
@@ -128,6 +135,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x32c4__hvx(
       const HVX_Vector va5x0123 = Q6_V_vsplat_R(unaligned_load_s32(a5)); a5 += 4;
       const HVX_Vector va6x0123 = Q6_V_vsplat_R(unaligned_load_s32(a6)); a6 += 4;
       const HVX_Vector va7x0123 = Q6_V_vsplat_R(unaligned_load_s32(a7)); a7 += 4;
+      const HVX_Vector va8x0123 = Q6_V_vsplat_R(unaligned_load_s32(a8)); a8 += 4;
 
       const HVX_Vector vb0x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
 
@@ -139,6 +147,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x32c4__hvx(
       vacc5x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc5x0, va5x0123, vb0x0123);
       vacc6x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc6x0, va6x0123, vb0x0123);
       vacc7x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc7x0, va7x0123, vb0x0123);
+      vacc8x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc8x0, va8x0123, vb0x0123);
     }
 
     const HVX_Vector vscale0 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
@@ -150,6 +159,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x32c4__hvx(
     vacc5x0 = rescale_fp32(vacc5x0, vscale0);
     vacc6x0 = rescale_fp32(vacc6x0, vscale0);
     vacc7x0 = rescale_fp32(vacc7x0, vscale0);
+    vacc8x0 = rescale_fp32(vacc8x0, vscale0);
 
     HVX_Vector vout0x0 = Q6_Vh_vpack_VwVw_sat(vacc0x0, vacc0x0);
     HVX_Vector vout1x0 = Q6_Vh_vpack_VwVw_sat(vacc1x0, vacc1x0);
@@ -159,6 +169,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x32c4__hvx(
     HVX_Vector vout5x0 = Q6_Vh_vpack_VwVw_sat(vacc5x0, vacc5x0);
     HVX_Vector vout6x0 = Q6_Vh_vpack_VwVw_sat(vacc6x0, vacc6x0);
     HVX_Vector vout7x0 = Q6_Vh_vpack_VwVw_sat(vacc7x0, vacc7x0);
+    HVX_Vector vout8x0 = Q6_Vh_vpack_VwVw_sat(vacc8x0, vacc8x0);
 
     vout0x0 = Q6_Vh_vadd_VhVh_sat(vout0x0, voutput_zero_point);
     vout1x0 = Q6_Vh_vadd_VhVh_sat(vout1x0, voutput_zero_point);
@@ -168,6 +179,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x32c4__hvx(
     vout5x0 = Q6_Vh_vadd_VhVh_sat(vout5x0, voutput_zero_point);
     vout6x0 = Q6_Vh_vadd_VhVh_sat(vout6x0, voutput_zero_point);
     vout7x0 = Q6_Vh_vadd_VhVh_sat(vout7x0, voutput_zero_point);
+    vout8x0 = Q6_Vh_vadd_VhVh_sat(vout8x0, voutput_zero_point);
 
     HVX_Vector vout0 = Q6_Vb_vpack_VhVh_sat(vout0x0, vout0x0);
     HVX_Vector vout1 = Q6_Vb_vpack_VhVh_sat(vout1x0, vout1x0);
@@ -177,6 +189,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x32c4__hvx(
     HVX_Vector vout5 = Q6_Vb_vpack_VhVh_sat(vout5x0, vout5x0);
     HVX_Vector vout6 = Q6_Vb_vpack_VhVh_sat(vout6x0, vout6x0);
     HVX_Vector vout7 = Q6_Vb_vpack_VhVh_sat(vout7x0, vout7x0);
+    HVX_Vector vout8 = Q6_Vb_vpack_VhVh_sat(vout8x0, vout8x0);
 
     vout0 = Q6_Vb_vmax_VbVb(vout0, voutput_min);
     vout1 = Q6_Vb_vmax_VbVb(vout1, voutput_min);
@@ -186,6 +199,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x32c4__hvx(
     vout5 = Q6_Vb_vmax_VbVb(vout5, voutput_min);
     vout6 = Q6_Vb_vmax_VbVb(vout6, voutput_min);
     vout7 = Q6_Vb_vmax_VbVb(vout7, voutput_min);
+    vout8 = Q6_Vb_vmax_VbVb(vout8, voutput_min);
 
     vout0 = Q6_Vb_vmin_VbVb(vout0, voutput_max);
     vout1 = Q6_Vb_vmin_VbVb(vout1, voutput_max);
@@ -195,6 +209,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x32c4__hvx(
     vout5 = Q6_Vb_vmin_VbVb(vout5, voutput_max);
     vout6 = Q6_Vb_vmin_VbVb(vout6, voutput_max);
     vout7 = Q6_Vb_vmin_VbVb(vout7, voutput_max);
+    vout8 = Q6_Vb_vmin_VbVb(vout8, voutput_max);
 
     if XNN_LIKELY(nc >= 32) {
       Q6_V_vstu_variable(c0, 32, vout0);
@@ -221,6 +236,9 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x32c4__hvx(
       Q6_V_vstu_variable(c7, 32, vout7);
       c7 = (int8_t*) ((uintptr_t) c7 + cn_stride);
       a7 = (const int8_t*) ((uintptr_t) a7 - kc);
+      Q6_V_vstu_variable(c8, 32, vout8);
+      c8 = (int8_t*) ((uintptr_t) c8 + cn_stride);
+      a8 = (const int8_t*) ((uintptr_t) a8 - kc);
 
       nc -= 32;
     } else {
@@ -233,6 +251,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x32c4__hvx(
       Q6_V_vstu_variable(c5, nc, vout5);
       Q6_V_vstu_variable(c6, nc, vout6);
       Q6_V_vstu_variable(c7, nc, vout7);
+      Q6_V_vstu_variable(c8, nc, vout8);
       nc = 0;
     }
   } while (nc != 0);
