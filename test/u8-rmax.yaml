@@ -26,3 +26,6 @@
 
 # Wasm SIMD
 - name: xnn_u8_rmax_ukernel__wasmsimd_u32_acc2
+
+# Hexagon HVX
+- name: xnn_u8_rmax_ukernel__hvx_u256_acc2

@@ -211,6 +211,10 @@ static void init_s8_rmax_config(void) {
         .ukernel = (xnn_reduce_ukernel_fn) xnn_s8_rmax_ukernel__scalar_u2_acc2,
       };
     }
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    s8_rmax_config = (struct xnn_reduce_config) {
+      .ukernel = (xnn_reduce_ukernel_fn) xnn_s8_rmax_ukernel__hvx_u256_acc2,
+    };
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     s8_rmax_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_s8_rmax_ukernel__wasmsimd_u32_acc2,
@@ -253,6 +257,10 @@ static void init_s8_rminmax_config(void) {
         .ukernel = (xnn_reduce_ukernel_fn) xnn_s8_rminmax_ukernel__scalar_u2_acc2,
       };
     }
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    s8_rminmax_config = (struct xnn_reduce_config) {
+      .ukernel = (xnn_reduce_ukernel_fn) xnn_s8_rminmax_ukernel__hvx_u256_acc2,
+    };
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     s8_rminmax_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_s8_rminmax_ukernel__wasmsimd_u32_acc2,
@@ -293,6 +301,10 @@ static void init_s8_rmin_config(void) {
         .ukernel = (xnn_reduce_ukernel_fn) xnn_s8_rmin_ukernel__scalar_u2_acc2,
       };
     }
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    s8_rmin_config = (struct xnn_reduce_config) {
+      .ukernel = (xnn_reduce_ukernel_fn) xnn_s8_rmin_ukernel__hvx_u256_acc2,
+    };
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     s8_rmin_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_s8_rmin_ukernel__wasmsimd_u32_acc2,
@@ -395,6 +407,10 @@ static void init_u8_rmax_config(void) {
     u8_rmax_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_u8_rmax_ukernel__sse2_u32_acc2,
     };
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    u8_rmax_config = (struct xnn_reduce_config) {
+      .ukernel = (xnn_reduce_ukernel_fn) xnn_u8_rmax_ukernel__hvx_u256_acc2,
+    };
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     u8_rmax_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_u8_rmax_ukernel__wasmsimd_u32_acc2,
@@ -429,6 +445,10 @@ static void init_u8_rminmax_config(void) {
     u8_rminmax_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_u8_rminmax_ukernel__sse2_u32_acc2,
     };
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    u8_rminmax_config = (struct xnn_reduce_config) {
+      .ukernel = (xnn_reduce_ukernel_fn) xnn_u8_rminmax_ukernel__hvx_u256_acc2,
+    };
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     u8_rminmax_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_u8_rminmax_ukernel__wasmsimd_u32_acc2,
@@ -460,6 +480,10 @@ static void init_u8_rmin_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     u8_rmin_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_u8_rmin_ukernel__sse2_u32_acc2,
+    };
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    u8_rmin_config = (struct xnn_reduce_config) {
+      .ukernel = (xnn_reduce_ukernel_fn) xnn_u8_rmin_ukernel__hvx_u256_acc2,
     };
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     u8_rmin_config = (struct xnn_reduce_config) {

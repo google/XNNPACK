@@ -253,7 +253,6 @@ _XNNPACK_SIMD_ARCH_COPT_MAPPING = {
         ],
     ),
     "fma3": xnnpack_select_if("//build_config:x86", ["-mfma"]),
-    "hvx": xnnpack_select_if("//build_config:hexagon", ["-mhvx-ieee-fp"]),
     "neon": select({
         "//build_config:aarch32": [
             "-marm",
@@ -273,6 +272,7 @@ _XNNPACK_SIMD_ARCH_COPT_MAPPING = {
     }),
     "sse2": xnnpack_select_if("//build_config:x86", ["-msse2"]),
     "sse41": xnnpack_select_if("//build_config:x86", ["-msse4.1"]),
+    "hvx": xnnpack_select_if("//build_config:hexagon", ["-mhvx-ieee-fp"]),
 }
 
 def xnnpack_simd_copts_for_arch(arch):
@@ -291,10 +291,10 @@ def xnnpack_simd_s32_archs():
     return ["avx2", "avx512f", "neon", "scalar", "sse41", "hvx", "wasmsimd"]
 
 def xnnpack_simd_s8_archs():
-    return ["scalar", "sse41", "neon", "wasmsimd"]
+    return ["scalar", "sse41", "neon", "hvx", "wasmsimd"]
 
 def xnnpack_simd_u8_archs():
-    return ["scalar", "sse2", "neon", "wasmsimd"]
+    return ["scalar", "sse2", "neon", "hvx", "wasmsimd"]
 
 def xnnpack_archs():
     return XNNPACK_PARAMS_FOR_ARCH.keys()

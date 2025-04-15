@@ -61,6 +61,11 @@ tools/xngen src/s8-rminmax/simd.c.in -D BATCH_TILE=48 -D DATATYPE=S8  -D ACCUMUL
 tools/xngen src/s8-rminmax/simd.c.in -D BATCH_TILE=64 -D DATATYPE=S8  -D ACCUMULATORS=2 -D OP=MINMAX -D ARCH=wasmsimd -o src/s8-rminmax/gen/s8-rminmax-wasmsimd-u64-acc2.c &
 tools/xngen src/s8-rminmax/simd.c.in -D BATCH_TILE=64 -D DATATYPE=S8  -D ACCUMULATORS=4 -D OP=MINMAX -D ARCH=wasmsimd -o src/s8-rminmax/gen/s8-rminmax-wasmsimd-u64-acc4.c &
 
+################################### HEXAGON HVX ################################
+tools/xngen src/s8-rminmax/simd.c.in -D BATCH_TILE=256 -D DATATYPE=S8 -D ACCUMULATORS=2 -D OP=MAX    -D ARCH=hvx -o src/s8-rminmax/gen/s8-rmax-hvx-u256-acc2.c &
+tools/xngen src/s8-rminmax/simd.c.in -D BATCH_TILE=256 -D DATATYPE=S8 -D ACCUMULATORS=2 -D OP=MIN    -D ARCH=hvx -o src/s8-rminmax/gen/s8-rmin-hvx-u256-acc2.c &
+tools/xngen src/s8-rminmax/simd.c.in -D BATCH_TILE=256 -D DATATYPE=S8 -D ACCUMULATORS=2 -D OP=MINMAX -D ARCH=hvx -o src/s8-rminmax/gen/s8-rminmax-hvx-u256-acc2.c &
+
 #################################### Scalar ###################################
 tools/xngen src/s8-rminmax/simd.c.in -D BATCH_TILE=1 -D DATATYPE=S8 -D ACCUMULATORS=1 -D OP=MINMAX -D ARCH=scalar -o src/s8-rminmax/gen/s8-rminmax-scalar-u1.c &
 tools/xngen src/s8-rminmax/simd.c.in -D BATCH_TILE=2 -D DATATYPE=S8 -D ACCUMULATORS=2 -D OP=MINMAX -D ARCH=scalar -o src/s8-rminmax/gen/s8-rminmax-scalar-u2-acc2.c &
