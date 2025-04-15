@@ -154,6 +154,26 @@ static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
 #define XNN_SIMD_HAVE_RCP_F32 0
 #define XNN_SIMD_HAVE_RSQRT_F32 0
 
+#define XNN_SIMD_HAVE_REDUCE_MAX_F32 1
+static XNN_INLINE float xnn_reduce_max_f32(xnn_simd_f32_t v) {
+  v = Q6_Vsf_vmax_VsfVsf(v, Q6_V_vror_VR(v, 64));
+  v = Q6_Vsf_vmax_VsfVsf(v, Q6_V_vror_VR(v, 32));
+  v = Q6_Vsf_vmax_VsfVsf(v, Q6_V_vror_VR(v, 16));
+  v = Q6_Vsf_vmax_VsfVsf(v, Q6_V_vror_VR(v, 8));
+  v = Q6_Vsf_vmax_VsfVsf(v, Q6_V_vror_VR(v, 4));
+  return *((float*)&v);
+}
+
+#define XNN_SIMD_HAVE_REDUCE_MIN_F32 1
+static XNN_INLINE float xnn_reduce_min_f32(xnn_simd_f32_t v) {
+  v = Q6_Vsf_vmin_VsfVsf(v, Q6_V_vror_VR(v, 64));
+  v = Q6_Vsf_vmin_VsfVsf(v, Q6_V_vror_VR(v, 32));
+  v = Q6_Vsf_vmin_VsfVsf(v, Q6_V_vror_VR(v, 16));
+  v = Q6_Vsf_vmin_VsfVsf(v, Q6_V_vror_VR(v, 8));
+  v = Q6_Vsf_vmin_VsfVsf(v, Q6_V_vror_VR(v, 4));
+  return *((float*)&v);
+}
+
 // Load/store operations.
 
 static XNN_INLINE xnn_simd_f32_t xnn_loadu_f32(const float* ptr) {

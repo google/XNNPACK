@@ -16,45 +16,6 @@
 #include "src/xnnpack/simd/f32-hvx.h"
 
 
-static XNN_INLINE float xnn_reduce_max_f32(xnn_simd_f32_t v) {
-  HVX_VectorPair vsum_pair = Q6_W_vshuff_VVR(v, v, 64);
-  v = Q6_Vsf_vmax_VsfVsf(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
-  vsum_pair = Q6_W_vshuff_VVR(v, v, 32);
-  v = Q6_Vsf_vmax_VsfVsf(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
-  vsum_pair = Q6_W_vshuff_VVR(v, v, 16);
-  v = Q6_Vsf_vmax_VsfVsf(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
-  vsum_pair = Q6_W_vshuff_VVR(v, v, 8);
-  v = Q6_Vsf_vmax_VsfVsf(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
-  vsum_pair = Q6_W_vshuff_VVR(v, v, 4);
-  v = Q6_Vsf_vmax_VsfVsf(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
-  return *((float*)&v);
-}
-
-static XNN_INLINE float xnn_reduce_min_f32(xnn_simd_f32_t v) {
-  HVX_VectorPair vsum_pair = Q6_W_vshuff_VVR(v, v, 64);
-  v = Q6_Vsf_vmin_VsfVsf(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
-  vsum_pair = Q6_W_vshuff_VVR(v, v, 32);
-  v = Q6_Vsf_vmin_VsfVsf(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
-  vsum_pair = Q6_W_vshuff_VVR(v, v, 16);
-  v = Q6_Vsf_vmin_VsfVsf(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
-  vsum_pair = Q6_W_vshuff_VVR(v, v, 8);
-  v = Q6_Vsf_vmin_VsfVsf(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
-  vsum_pair = Q6_W_vshuff_VVR(v, v, 4);
-  v = Q6_Vsf_vmin_VsfVsf(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
-  return *((float*)&v);
-}
-
-
 void xnn_f32_rminmax_ukernel__hvx_u64_acc2(
     size_t batch,
     const float* input,
@@ -71,7 +32,7 @@ void xnn_f32_rminmax_ukernel__hvx_u64_acc2(
   xnn_simd_f32_t vmin1 = vmin0;
   xnn_simd_f32_t vmax1 = vmax0;
   for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
-    const xnn_simd_f32_t vt0 = xnn_loadu_f32(input);
+    const xnn_simd_f32_t vt0 = xnn_loadu_f32(input + 0);
     const xnn_simd_f32_t vt1 = xnn_loadu_f32(input + 32);
     input += 64;
 
@@ -90,12 +51,12 @@ void xnn_f32_rminmax_ukernel__hvx_u64_acc2(
     vmax0 = xnn_max_f32(vmax0, vt);
   }
 
-  for (; batch != 0; batch -= sizeof(float)) {
-    const xnn_simd_f32_t vt = xnn_set1_f32(input[0]);
-    input += 1;
+  if XNN_UNLIKELY(batch) {
+    const xnn_simd_f32_t vt = xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
+    HVX_VectorPred mask = Q6_Q_vsetq_R(batch);
 
-    vmin0 = xnn_min_f32(vmin0, vt);
-    vmax0 = xnn_max_f32(vmax0, vt);
+    vmin0 = xnn_min_f32(vmin0, Q6_V_vmux_QVV(mask, vt, vmin0));
+    vmax0 = xnn_max_f32(vmax0, Q6_V_vmux_QVV(mask, vt, vmax0));
   }
 
   const float vmin = xnn_reduce_min_f32(vmin0);

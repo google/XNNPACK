@@ -37,54 +37,27 @@ static XNN_INLINE xnn_simd_u8_t xnn_min_u8(xnn_simd_u8_t a, xnn_simd_u8_t b) {
 }
 
 static XNN_INLINE float xnn_reduce_max_u8(xnn_simd_u8_t v) {
-  HVX_VectorPair vsum_pair = Q6_W_vshuff_VVR(v, v, 64);
-  v = Q6_Vub_vmax_VubVub(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
-  vsum_pair = Q6_W_vshuff_VVR(v, v, 32);
-  v = Q6_Vub_vmax_VubVub(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
-  vsum_pair = Q6_W_vshuff_VVR(v, v, 16);
-  v = Q6_Vub_vmax_VubVub(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
-  vsum_pair = Q6_W_vshuff_VVR(v, v, 8);
-  v = Q6_Vub_vmax_VubVub(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
-  vsum_pair = Q6_W_vshuff_VVR(v, v, 4);
-  v = Q6_Vub_vmax_VubVub(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
-  vsum_pair = Q6_W_vshuff_VVR(v, v, 2);
-  v = Q6_Vub_vmax_VubVub(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
-  vsum_pair = Q6_W_vshuff_VVR(v, v, 1);
-  v = Q6_Vub_vmax_VubVub(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
+  v = Q6_Vub_vmax_VubVub(v, Q6_V_vror_VR(v, 64));
+  v = Q6_Vub_vmax_VubVub(v, Q6_V_vror_VR(v, 32));
+  v = Q6_Vub_vmax_VubVub(v, Q6_V_vror_VR(v, 16));
+  v = Q6_Vub_vmax_VubVub(v, Q6_V_vror_VR(v, 8));
+  v = Q6_Vub_vmax_VubVub(v, Q6_V_vror_VR(v, 4));
+  v = Q6_Vub_vmax_VubVub(v, Q6_V_vror_VR(v, 2));
+  v = Q6_Vub_vmax_VubVub(v, Q6_V_vror_VR(v, 1));
   return *((uint8_t*)&v);
 }
 
 static XNN_INLINE float xnn_reduce_min_u8(xnn_simd_u8_t v) {
-  HVX_VectorPair vsum_pair = Q6_W_vshuff_VVR(v, v, 64);
-  v = Q6_Vub_vmin_VubVub(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
-  vsum_pair = Q6_W_vshuff_VVR(v, v, 32);
-  v = Q6_Vub_vmin_VubVub(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
-  vsum_pair = Q6_W_vshuff_VVR(v, v, 16);
-  v = Q6_Vub_vmin_VubVub(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
-  vsum_pair = Q6_W_vshuff_VVR(v, v, 8);
-  v = Q6_Vub_vmin_VubVub(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
-  vsum_pair = Q6_W_vshuff_VVR(v, v, 4);
-  v = Q6_Vub_vmin_VubVub(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
-  vsum_pair = Q6_W_vshuff_VVR(v, v, 2);
-  v = Q6_Vub_vmin_VubVub(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
-  vsum_pair = Q6_W_vshuff_VVR(v, v, 1);
-  v = Q6_Vub_vmin_VubVub(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
+  v = Q6_Vub_vmin_VubVub(v, Q6_V_vror_VR(v, 64));
+  v = Q6_Vub_vmin_VubVub(v, Q6_V_vror_VR(v, 32));
+  v = Q6_Vub_vmin_VubVub(v, Q6_V_vror_VR(v, 16));
+  v = Q6_Vub_vmin_VubVub(v, Q6_V_vror_VR(v, 8));
+  v = Q6_Vub_vmin_VubVub(v, Q6_V_vror_VR(v, 4));
+  v = Q6_Vub_vmin_VubVub(v, Q6_V_vror_VR(v, 2));
+  v = Q6_Vub_vmin_VubVub(v, Q6_V_vror_VR(v, 1));
   return *((uint8_t*)&v);
 }
+
 // Load/store operations.
 static XNN_INLINE xnn_simd_u8_t xnn_loadu_u8(const uint8_t* ptr) {
   return *((HVX_UVector*)ptr);
