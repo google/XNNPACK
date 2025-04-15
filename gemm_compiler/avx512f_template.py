@@ -4,30 +4,17 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
-import math
-
 from gemm_compiler import fma3_template
 
 
 class Avx512F(fma3_template.Fma3):
   """All SIMD features for avx512f."""
 
-  def __init__(self, m: int, n: int, c: int):
-    super().__init__(m, n)
-    self._c = c
-
-  @property
-  def c(self) -> int:
-    return self._c
-
   def isa(self):
     return 'avx512f'
 
   def register_bytes(self):
     return 64
-
-  def w_register_bytes(self):
-    return self.register_bytes()
 
   def prefix(self):
     return 'z'
@@ -43,12 +30,6 @@ class Avx512F(fma3_template.Fma3):
   def n_step(self):
     return 16
 
-  def convert_to_output_type(self):
-    return ''
-
-  def adjust_kc(self):
-    return ''
-
   def compute_asm(self):
     c_asm = {
         'loop': ['vfmadd231ps  z{ACC}, {A}, {W}\n'],
@@ -56,28 +37,51 @@ class Avx512F(fma3_template.Fma3):
     }
     return c_asm
 
-  def init_accumulators(self):
-    self.comment('Initialize accumulators with the biases.')
-    w_reg = self.w_ptr_register()
-    accumulators = self.acc_registers()
-    bias = 'vmovaps  z{ACC}, [{W} + {offset}]\n'
-    for nr in range(0, self.n):
-      self.asm_string += bias.format(
-          W=w_reg,
-          ACC=accumulators[nr * self.m],
-          offset=self.register_bytes() * nr,
-      )
-    for nr in range(0, self.n):
-      for mr in range(1, self.m):
-        self.copy_simd_register(
-            prefix=self.prefix(),
-            src=accumulators[self.m * nr],
-            dst=accumulators[self.m * nr + mr],
-        )
-    self.increment_ptr(ptr=w_reg, step=self.register_bytes() * self.n)
+  def am_registers(self):
+    return [self.a_ptr_register()] + [
+        'rax',
+        'r15',
+        'r14',
+        'r12',
+        'r10',
+        'r13',
+        'rbx',
+        'rbp',
+        'r8',
+        'rdi',
+    ]
 
   def copy_simd_register(self, prefix, src, dst):
     self.asm_string += f'vmovaps {prefix}{dst}, {prefix}{src}\n'
+
+  def max_m_before_spilling(self):
+    return 5
+
+  def acc_registers(self):
+    return [
+        'mm11',
+        'mm12',
+        'mm13',
+        'mm14',
+        'mm15',
+        'mm16',
+        'mm17',
+        'mm18',
+        'mm19',
+        'mm20',
+        'mm21',
+        'mm22',
+        'mm23',
+        'mm24',
+        'mm25',
+        'mm26',
+        'mm27',
+        'mm28',
+        'mm29',
+        'mm30',
+        'mm9',
+        'mm10',
+    ]
 
   def store(self):
     tmp_gp_regs = self.tmp_gp_registers()
@@ -213,19 +217,6 @@ class Avx512F(fma3_template.Fma3):
                 ACC=accumulators[mr], c_reg=cm_registers[mr + c_reg_offset]
             )
         )
-
-  def inner_loop_spill_gp(self, tail: bool = False) -> str:
-    return self._inner_loop_spill_gp(self.n, tail)
-
-  def inner_loop_small_M_N(self, tail: bool = False) -> str:
-    return self._inner_loop_small_M_N(self.n, tail)
-
-  def stack_size(self):
-    # Increase the stack size to allow for storing the original stack pointer,
-    # nc, odd bits of k and other registers as required.
-    size = self.m * 16 + 64
-    # round up to multiple of 64.
-    return math.ceil(size / 64) * 64
 
 class Avx512FC(Avx512F):
   """All SIMD features for avx512fc."""

@@ -21,6 +21,28 @@ def generate_f32_gemm_microkernels():
   if '/bazel-out/' in os.getcwd():
     os.chdir(os.environ['BUILD_WORKING_DIRECTORY'])
 
+  nr = 8
+  for mr in range(1, 10):
+    print('Mr ', mr, ' nr ', nr)
+    generate.generate_gemm_microkernel(
+        isa=fma3_template.Fma3(mr, nr, c=1),
+        output_file=os.path.join(
+            output_base,
+            f'f32-gemm-{mr}x{nr}-minmax-asm-amd64-fma3-broadcast.S',
+        ),
+    )
+
+  nr = 16
+  for mr in range(1, 5):
+    print('Mr ', mr, ' nr ', nr)
+    generate.generate_gemm_microkernel(
+        isa=fma3_template.Fma3(mr, nr, c=1),
+        output_file=os.path.join(
+            output_base,
+            f'f32-gemm-{mr}x{nr}-minmax-asm-amd64-fma3-broadcast.S',
+        ),
+    )
+
   for nr in range(16, 33, 16):
     for mr in range(1, 12):
       generate.generate_gemm_microkernel(

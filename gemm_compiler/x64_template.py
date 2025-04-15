@@ -44,8 +44,8 @@ class X64(base_architecture.BaseArchitecture):
         'rax',
         'r15',
         'r14',
-        'r12',
         'r10',
+        'r12',
         'r13',
         'rbx',
         'rbp',
@@ -61,32 +61,6 @@ class X64(base_architecture.BaseArchitecture):
 
   def cm_registers(self):
     return self.am_registers()
-
-  def acc_registers(self):
-    return [
-        'mm11',
-        'mm12',
-        'mm13',
-        'mm14',
-        'mm15',
-        'mm16',
-        'mm17',
-        'mm18',
-        'mm19',
-        'mm20',
-        'mm21',
-        'mm22',
-        'mm23',
-        'mm24',
-        'mm25',
-        'mm26',
-        'mm27',
-        'mm28',
-        'mm29',
-        'mm30',
-        'mm9',
-        'mm10',
-    ]
 
   def bias_registers(self):
     return self.acc_registers()
@@ -310,9 +284,6 @@ BEGIN_FUNCTION {function_name}
             a_rsp_offset=a_rsp_offset,
             c_rsp_offset=a_rsp_offset + 8,
         )
-
-  def max_m_before_spilling(self):
-    return 5
 
   def read_a_registers(self):
     registers = self.am_registers()
