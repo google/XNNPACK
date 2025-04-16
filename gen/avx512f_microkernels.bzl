@@ -73,7 +73,6 @@ PROD_AVX512F_MICROKERNEL_SRCS = [
     "src/x32-packw/gen/x32-packw-x16-gemm-gio-avx512f-u8.c",
     "src/x32-packw/gen/x32-packw-x16-gemm-goi-avx512f-u4-prfm.c",
     "src/x32-packw/gen/x32-packw-x32-gemm-gio-avx512f-u8.c",
-    "src/x32-packw/gen/x32-packw-x32-gemm-goi-avx512f-u4-prfm.c",
 ]
 
 NON_PROD_AVX512F_MICROKERNEL_SRCS = [
@@ -284,6 +283,7 @@ NON_PROD_AVX512F_MICROKERNEL_SRCS = [
     "src/x32-packw/gen/x32-packw-x32-gemm-gio-avx512f-u1-prfm.c",
     "src/x32-packw/gen/x32-packw-x32-gemm-gio-avx512f-u1.c",
     "src/x32-packw/gen/x32-packw-x32-gemm-gio-avx512f-u8-prfm.c",
+    "src/x32-packw/gen/x32-packw-x32-gemm-goi-avx512f-u4-prfm.c",
     "src/x32-packw/gen/x32-packw-x32-gemm-goi-avx512f-u4.c",
 ]
 
