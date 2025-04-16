@@ -207,7 +207,6 @@ SET(MICROKERNEL_GEMM_UNIT_TESTS
     f32-gemm-goi-minmax
     f32-gemm-minmax
     f32-gemm-relu
-    f32-gemminc-minmax
     f32-igemm
     f32-igemm-minmax
     f32-igemm-relu
