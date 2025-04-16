@@ -197,7 +197,7 @@ static void init_transpose_config(void) {
       .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x24_transposec_ukernel__1x2_scalar,
       .tile_size = 32,
     };
-    #if XNN_ENABLE_RISCV_VECTOR
+    #if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
       const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
       assert(hardware_config != NULL);
       if (hardware_config->vlenb >= 128) {
