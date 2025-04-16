@@ -202,12 +202,6 @@ class Fma3(x64_template.X64):
             ACC=accumulators[mr], c_reg=cm_registers[mr + c_reg_offset]
         )
       for nr in range(1, self.n):
-        # $for mr in range(0, self.m):
-        # $  self.asm_string += 'Qvmovups  [{c_reg} + {offset}], y{ACC}\n'.format(
-        # $      ACC=accumulators[self.m * nr + mr],
-        # $      c_reg=cm_registers[mr + c_reg_offset],
-        # $      offset=self.register_bytes() * nr,
-        # $  )
         for mr in range(0, self.m):
           self.asm_string += 'vmovaps  y{ACC0}, y{ACC1}\n'.format(
               ACC0=accumulators[mr], ACC1=accumulators[mr + self.m * nr]

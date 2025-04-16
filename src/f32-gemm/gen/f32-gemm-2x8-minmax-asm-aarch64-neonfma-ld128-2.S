@@ -27,11 +27,11 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_2x8__asm_aarch64_neonfma_ld128_2
       ld2r {v0.4s, v1.4s}, [x13]
       # Setup and alias a & c pointers.
       add x9, x3, x4
-      add x13, x6, x7
+      add x14, x6, x7
 
       cmp x0, 2
       csel  x9, x3, x9, LO
-      csel  x13, x6, x13, LO
+      csel  x14, x6, x14, LO
 
 .Louter_loop:
       # Initialize k counter.
@@ -105,7 +105,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_2x8__asm_aarch64_neonfma_ld128_2
       cmp x1, 8
       b.lo .Ltail_4
       stp q11, q12, [x6], #32
-      stp q13, q14, [x13], #32
+      stp q13, q14, [x14], #32
       sub x3, x3, x2
       sub x9, x9, x2
 
@@ -116,7 +116,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_2x8__asm_aarch64_neonfma_ld128_2
 .Ltail_4:
       tbz w1, 2, .Ltail_2
       str q11, [x6], #16
-      str q13, [x13], #16
+      str q13, [x14], #16
       mov v11.16b, v12.16b
       mov v13.16b, v14.16b
 
@@ -124,7 +124,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_2x8__asm_aarch64_neonfma_ld128_2
 .Ltail_2:
       tbz w1, 1, .Ltail_1
       str d11, [x6], #8
-      str d13, [x13], #8
+      str d13, [x14], #8
       dup d11, v11.d[1]
       dup d13, v13.d[1]
 
@@ -132,7 +132,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_2x8__asm_aarch64_neonfma_ld128_2
 .Ltail_1:
       tbz w1, 0, .Lreturn
       str s11, [x6], #0
-      str s13, [x13], #0
+      str s13, [x14], #0
 
 .Lreturn:
       # Restore the callee saved GP registers.

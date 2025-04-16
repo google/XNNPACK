@@ -850,6 +850,18 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "qs8_qc4w_gemm_minmax_fp32_test",
+    timeout = "moderate",
+    srcs = [
+        "qs8-qc4w-gemm-minmax-fp32.cc",
+    ],
+    shard_count = 5,
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
     name = "qs8_qc8w_gemm_minmax_fp32_test",
     timeout = "moderate",
     srcs = [

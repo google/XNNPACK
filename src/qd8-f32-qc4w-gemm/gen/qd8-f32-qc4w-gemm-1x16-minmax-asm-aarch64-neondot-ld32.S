@@ -27,7 +27,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c4__asm_aarch64_neondot_
       ld2r {v0.4s, v1.4s}, [x13]
       # Load 0xF0 for masking the weights
       ldr x24, [sp, 272]
-      movi v28.16b, #240
+      movi v10.16b, #240
       # Round kc up to channels.
       add x2, x2, #3
       and x2, x2, #0xFFFFFFFFFFFFFFFC
@@ -37,23 +37,23 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c4__asm_aarch64_neondot_
       # Initialize k counter.
       mov x20, x2
       # Initialize accumulators with k_sum * input zero point.
-      ldr q10, [x24, 0]
+      ldr q30, [x24, 0]
       ldp q2, q3, [x5, 0]
       ldp q4, q5, [x5, 32]
-      mul v12.4s, v2.4s, v10.s[0]
-      mul v13.4s, v3.4s, v10.s[0]
-      mul v14.4s, v4.4s, v10.s[0]
-      mul v15.4s, v5.4s, v10.s[0]
+      mul v12.4s, v2.4s, v30.s[0]
+      mul v13.4s, v3.4s, v30.s[0]
+      mul v14.4s, v4.4s, v30.s[0]
+      mul v15.4s, v5.4s, v30.s[0]
       add x5, x5, 64
 
 .Linner_loop:
       ldr s2, [x3], 4
-      ldr q29, [x5], 16
-      shl v6.16b, v29.16b, #4
-      and v7.16b, v29.16b, v28.16b
-      ldr q29, [x5], 16
-      shl v8.16b, v29.16b, #4
-      and v9.16b, v29.16b, v28.16b
+      ldr q9, [x5], 16
+      shl v6.16b, v9.16b, #4
+      and v7.16b, v9.16b, v10.16b
+      ldr q9, [x5], 16
+      shl v8.16b, v9.16b, #4
+      and v9.16b, v9.16b, v10.16b
       sdot  v12.4s, v6.16b, v2.4b[0]
       sdot  v13.4s, v7.16b, v2.4b[0]
       sdot  v14.4s, v8.16b, v2.4b[0]
@@ -69,10 +69,10 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c4__asm_aarch64_neondot_
       scvtf v14.4s, v14.4s, #4
       scvtf v15.4s, v15.4s, #4
       # Multiply by input scale.
-      fmul v12.4s, v12.4s, v10.s[1]
-      fmul v13.4s, v13.4s, v10.s[1]
-      fmul v14.4s, v14.4s, v10.s[1]
-      fmul v15.4s, v15.4s, v10.s[1]
+      fmul v12.4s, v12.4s, v30.s[1]
+      fmul v13.4s, v13.4s, v30.s[1]
+      fmul v14.4s, v14.4s, v30.s[1]
+      fmul v15.4s, v15.4s, v30.s[1]
       # Load weights scale.
       ldp q2, q3, [x5, 0]
       ldp q4, q5, [x5, 32]

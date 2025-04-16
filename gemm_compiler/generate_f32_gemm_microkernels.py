@@ -23,7 +23,6 @@ def generate_f32_gemm_microkernels():
 
   nr = 8
   for mr in range(1, 10):
-    print('Mr ', mr, ' nr ', nr)
     generate.generate_gemm_microkernel(
         isa=fma3_template.Fma3(mr, nr, c=1),
         output_file=os.path.join(
@@ -34,7 +33,6 @@ def generate_f32_gemm_microkernels():
 
   nr = 16
   for mr in range(1, 5):
-    print('Mr ', mr, ' nr ', nr)
     generate.generate_gemm_microkernel(
         isa=fma3_template.Fma3(mr, nr, c=1),
         output_file=os.path.join(

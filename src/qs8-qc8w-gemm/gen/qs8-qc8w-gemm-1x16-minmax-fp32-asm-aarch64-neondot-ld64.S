@@ -24,9 +24,9 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__asm_aarch64_neondot
       ldr x13, [sp, 264]
 
       # Load min/max values.
-      ld1r {v10.8h}, [x13]
       add x13, x13, 2
       ld2r {v0.16b, v1.16b}, [x13]
+      sub x13, x13, 2
       ldr x24, [sp, 272]
       # Round kc up to channels.
       add x2, x2, #3
@@ -105,9 +105,10 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__asm_aarch64_neondot
       sqxtn v14.4h, v14.4s
       sqxtn2 v12.8h, v13.4s
       sqxtn2 v14.8h, v15.4s
+      ld1r {v9.8h}, [x13]
       # Add output zero point.
-      sqadd v12.8h, v12.8h, v10.8h
-      sqadd v14.8h, v14.8h, v10.8h
+      sqadd v12.8h, v12.8h, v9.8h
+      sqadd v14.8h, v14.8h, v9.8h
       # Convert to int8.
       sqxtn v12.8b, v12.8h
       sqxtn2 v12.16b, v14.8h

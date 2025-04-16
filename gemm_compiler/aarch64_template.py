@@ -17,6 +17,9 @@ class Aarch64(arm_template.Arm):
     super().__init__(m, n)
     self.decrement = 4
 
+  def params_register(self):
+    return 'x13'
+
   def astride_register(self):
     return 'x4'
 
@@ -48,13 +51,13 @@ class Aarch64(arm_template.Arm):
 
   def cm_registers(self):
     return [self.c_ptr_register()] + [
-        'x13',
         'x14',
         'x15',
         'x19',
         'x23',
         'x24',
         'x26',
+        'x28',
     ]
 
   def w_ptr_register(self):
@@ -89,9 +92,12 @@ class Aarch64(arm_template.Arm):
     )
 
   def load_min_max(self):
-    self.asm_string += """
+    params_register = self.params_register()
+    min_reg = self.min_register()
+    max_reg = self.max_register()
+    self.asm_string += f"""
       # Load min/max values.
-      ld2r {v0.4s, v1.4s}, [x13]\n"""
+      ld2r {{{min_reg}.4s, {max_reg}.4s}}, [{params_register}]\n"""
 
   def header(self):
     header = """// Copyright 2025 Google LLC
@@ -117,8 +123,8 @@ BEGIN_FUNCTION {function_name}
       stp d14, d15, [sp, 16]
 
       # Load params.
-      ldr x13, [sp, 264]
-""".format(function_name=self.function_name())
+      ldr {params_register}, [sp, 264]
+""".format(function_name=self.function_name(), params_register=self.params_register())
     self.asm_string += header
     self.load_min_max()
     self.quantization_params()

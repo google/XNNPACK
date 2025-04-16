@@ -543,7 +543,13 @@ void xnn_pack_qs8_qc4w_gemm_goi_w_non_planar(
     do {
       size_t nr_block_size = min(nc - nr_block_start, nr);
       unaligned_int32_t* packed_b = (unaligned_int32_t*)packed_weights;
-      copy_bias(b, nr_block_start, nr_block_size, packed_b);
+      if (b) {
+        for (size_t i = 0; i < nr_block_size; ++i) {
+          packed_b[i] = b[nr_block_start + i] * 16;
+        }
+      } else {
+        std::fill_n(packed_b, nr_block_size, 0);
+      }
       packed_weights = (int32_t*)packed_weights + nr;
 
       size_t num_k_blocks = round_up_po2(kc, skr * 1);
@@ -567,25 +573,49 @@ void xnn_pack_qs8_qc4w_gemm_goi_w_non_planar(
               const size_t k_offset =
                   (nr_block_start + actual_nr_block_offset) * kc + kc_idx;
               const size_t kh_offset = k_offset + kc * row_offset;
-              uint8_t kv_lo = kernel_zero_point;
-              if ((nr_block_start + actual_nr_block_offset) < nc) {
-                if (kc_idx < kc) {
-                  kv_lo = ((k_offset & 1) ? (k[k_offset >> 1] >> 4)
-                                          : (k[k_offset >> 1] & 0xF));
+              if (kernel_zero_point == 0) {
+                int8_t kv_lo = kernel_zero_point;
+                if ((nr_block_start + actual_nr_block_offset) < nc) {
+                  if (kc_idx < kc) {
+                    kv_lo = ((k_offset & 1) ? (k[k_offset >> 1] >> 4)
+                                            : (k[k_offset >> 1] & 0xF));
+                  }
                 }
-              }
-              uint8_t kv_hi = kernel_zero_point;
-              if ((nr_block_start + actual_nr_block_offset + row_offset) < nc) {
-                if (kc_idx < kc) {
-                  kv_hi = ((kh_offset & 1) ? (k[kh_offset >> 1] >> 4)
-                                           : (k[kh_offset >> 1] & 0xF));
+                int8_t kv_hi = kernel_zero_point;
+                if ((nr_block_start + actual_nr_block_offset + row_offset) < nc) {
+                  if (kc_idx < kc) {
+                    kv_hi = ((kh_offset & 1) ? (k[kh_offset >> 1] >> 4)
+                                             : (k[kh_offset >> 1] & 0xF));
+                  }
                 }
+                // Pack and flip the sign bit.
+                const int8_t kv = (kv_lo | (kv_hi << 4));
+                kv_lo = sign_extend_int4(kv_lo);
+                kv_hi = sign_extend_int4(kv_hi);
+                ksum_lo += kv_lo;
+                ksum_hi += kv_hi;
+                ((uint8_t*)pw)[kr_block_offset] = kv;
+              } else {
+                uint8_t kv_lo = kernel_zero_point;
+                if ((nr_block_start + actual_nr_block_offset) < nc) {
+                  if (kc_idx < kc) {
+                    kv_lo = ((k_offset & 1) ? (k[k_offset >> 1] >> 4)
+                                            : (k[k_offset >> 1] & 0xF));
+                  }
+                }
+                uint8_t kv_hi = kernel_zero_point;
+                if ((nr_block_start + actual_nr_block_offset + row_offset) < nc) {
+                  if (kc_idx < kc) {
+                    kv_hi = ((kh_offset & 1) ? (k[kh_offset >> 1] >> 4)
+                                             : (k[kh_offset >> 1] & 0xF));
+                  }
+                }
+                // Pack and flip the sign bit.
+                const uint8_t kv = (kv_lo | (kv_hi << 4)) ^ 0x88;
+                ksum_lo += kv_lo - kernel_zero_point;
+                ksum_hi += kv_hi - kernel_zero_point;
+                ((uint8_t*)pw)[kr_block_offset] = kv;
               }
-              // Pack and flip the sign bit.
-              const uint8_t kv = (kv_lo | (kv_hi << 4)) ^ 0x88;
-              ksum_lo += kv_lo - kernel_zero_point;
-              ksum_hi += kv_hi - kernel_zero_point;
-              ((uint8_t*)pw)[kr_block_offset] = kv;
             }
             packed_b[actual_nr_block_offset] =
                 packed_b[actual_nr_block_offset] - ksum_lo * izp * 16;
@@ -607,6 +637,16 @@ void xnn_pack_qs8_qc4w_gemm_goi_w_non_planar(
       b += nc;
     }
   } while (--g != 0);
+}
+
+void xnn_pack_qs8_qc4w_gemm_goi_w_non_planar_scalar(
+    size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
+    const uint8_t* k, const int32_t* b, const float* scale,
+    void* packed_weights, size_t extra_bytes,
+    const struct xnn_qs8_qc4w_packing_params* params) {
+  xnn_pack_qs8_qc4w_gemm_goi_w_non_planar(g, nc, kc, nr, kr, sr,
+                                          /*register_bytes=*/1, k, b, scale,
+                                          packed_weights, extra_bytes, params);
 }
 
 void xnn_pack_qs8_qc4w_gemm_goi_w_non_planar_aarch64(

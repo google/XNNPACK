@@ -24,9 +24,9 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_5x16c4__asm_aarch64_neondot
       ldr x13, [sp, 264]
 
       # Load min/max values.
-      ld1r {v10.8h}, [x13]
       add x13, x13, 2
       ld2r {v0.16b, v1.16b}, [x13]
+      sub x13, x13, 2
       ldr x24, [sp, 272]
       # Round kc up to channels.
       add x2, x2, #3
@@ -37,22 +37,22 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_5x16c4__asm_aarch64_neondot
       add x10, x9, x4
       add x11, x10, x4
       add x12, x11, x4
-      add x13, x6, x7
-      add x14, x13, x7
+      add x14, x6, x7
       add x15, x14, x7
       add x19, x15, x7
+      add x23, x19, x7
 
       cmp x0, 2
       csel  x9, x3, x9, LO
-      csel  x13, x6, x13, LO
+      csel  x14, x6, x14, LO
       csel  x10, x9, x10, LS
-      csel  x14, x13, x14, LS
+      csel  x15, x14, x15, LS
 
       cmp x0, 4
       csel  x11, x10, x11, LO
-      csel  x15, x14, x15, LO
+      csel  x19, x15, x19, LO
       csel  x12, x11, x12, LS
-      csel  x19, x15, x19, LS
+      csel  x23, x19, x23, LS
 
 .Louter_loop:
       # Initialize k counter.
@@ -200,17 +200,18 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_5x16c4__asm_aarch64_neondot
       sqxtn2 v22.8h, v23.4s
       sqxtn2 v26.8h, v27.4s
       sqxtn2 v30.8h, v31.4s
+      ld1r {v9.8h}, [x13]
       # Add output zero point.
-      sqadd v12.8h, v12.8h, v10.8h
-      sqadd v16.8h, v16.8h, v10.8h
-      sqadd v20.8h, v20.8h, v10.8h
-      sqadd v24.8h, v24.8h, v10.8h
-      sqadd v28.8h, v28.8h, v10.8h
-      sqadd v14.8h, v14.8h, v10.8h
-      sqadd v18.8h, v18.8h, v10.8h
-      sqadd v22.8h, v22.8h, v10.8h
-      sqadd v26.8h, v26.8h, v10.8h
-      sqadd v30.8h, v30.8h, v10.8h
+      sqadd v12.8h, v12.8h, v9.8h
+      sqadd v16.8h, v16.8h, v9.8h
+      sqadd v20.8h, v20.8h, v9.8h
+      sqadd v24.8h, v24.8h, v9.8h
+      sqadd v28.8h, v28.8h, v9.8h
+      sqadd v14.8h, v14.8h, v9.8h
+      sqadd v18.8h, v18.8h, v9.8h
+      sqadd v22.8h, v22.8h, v9.8h
+      sqadd v26.8h, v26.8h, v9.8h
+      sqadd v30.8h, v30.8h, v9.8h
       # Convert to int8.
       sqxtn v12.8b, v12.8h
       sqxtn v16.8b, v16.8h
@@ -238,10 +239,10 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_5x16c4__asm_aarch64_neondot
       cmp x1, 16
       b.lo .Ltail_8
       str q12, [x6], #16
-      str q16, [x13], #16
-      str q20, [x14], #16
-      str q24, [x15], #16
-      str q28, [x19], #16
+      str q16, [x14], #16
+      str q20, [x15], #16
+      str q24, [x19], #16
+      str q28, [x23], #16
       sub x3, x3, x2
       sub x9, x9, x2
       sub x10, x10, x2
@@ -255,10 +256,10 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_5x16c4__asm_aarch64_neondot
 .Ltail_8:
       tbz w1, 3, .Ltail_4
       str d12, [x6], #8
-      str d16, [x13], #8
-      str d20, [x14], #8
-      str d24, [x15], #8
-      str d28, [x19], #8
+      str d16, [x14], #8
+      str d20, [x15], #8
+      str d24, [x19], #8
+      str d28, [x23], #8
       ext v12.16b, v12.16b, v12.16b, 8
       ext v16.16b, v16.16b, v16.16b, 8
       ext v20.16b, v20.16b, v20.16b, 8
@@ -269,10 +270,10 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_5x16c4__asm_aarch64_neondot
 .Ltail_4:
       tbz w1, 2, .Ltail_2
       st1 {v12.s}[0], [x6], #4
-      st1 {v16.s}[0], [x13], #4
-      st1 {v20.s}[0], [x14], #4
-      st1 {v24.s}[0], [x15], #4
-      st1 {v28.s}[0], [x19], #4
+      st1 {v16.s}[0], [x14], #4
+      st1 {v20.s}[0], [x15], #4
+      st1 {v24.s}[0], [x19], #4
+      st1 {v28.s}[0], [x23], #4
       ext v12.16b, v12.16b, v12.16b, 4
       ext v16.16b, v16.16b, v16.16b, 4
       ext v20.16b, v20.16b, v20.16b, 4
@@ -283,10 +284,10 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_5x16c4__asm_aarch64_neondot
 .Ltail_2:
       tbz w1, 1, .Ltail_1
       st1 {v12.h}[0], [x6], #2
-      st1 {v16.h}[0], [x13], #2
-      st1 {v20.h}[0], [x14], #2
-      st1 {v24.h}[0], [x15], #2
-      st1 {v28.h}[0], [x19], #2
+      st1 {v16.h}[0], [x14], #2
+      st1 {v20.h}[0], [x15], #2
+      st1 {v24.h}[0], [x19], #2
+      st1 {v28.h}[0], [x23], #2
       ext v12.16b, v12.16b, v12.16b, 2
       ext v16.16b, v16.16b, v16.16b, 2
       ext v20.16b, v20.16b, v20.16b, 2
@@ -297,10 +298,10 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_5x16c4__asm_aarch64_neondot
 .Ltail_1:
       tbz w1, 0, .Lreturn
       st1 {v12.b}[0], [x6]
-      st1 {v16.b}[0], [x13]
-      st1 {v20.b}[0], [x14]
-      st1 {v24.b}[0], [x15]
-      st1 {v28.b}[0], [x19]
+      st1 {v16.b}[0], [x14]
+      st1 {v20.b}[0], [x15]
+      st1 {v24.b}[0], [x19]
+      st1 {v28.b}[0], [x23]
 
 .Lreturn:
       # Restore the callee saved GP registers.

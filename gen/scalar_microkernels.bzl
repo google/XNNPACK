@@ -584,6 +584,7 @@ NON_PROD_SCALAR_MICROKERNEL_SRCS = [
     "src/qs8-packw/gen/qs8-packw-x64c4-gemm-goi-scalar.c",
     "src/qs8-packw/gen/qs8-packw-x96c4-gemm-gio-scalar.c",
     "src/qs8-packw/gen/qs8-packw-x96c4-gemm-goi-scalar.c",
+    "src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-1x2-minmax-fp32-scalar-lrintf.c",
     "src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x8c8-gemm-goi-scalar.c",
     "src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x16c8-gemm-goi-scalar.c",
     "src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x32c8-gemm-goi-scalar.c",

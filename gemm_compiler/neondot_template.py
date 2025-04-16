@@ -53,7 +53,7 @@ class NeonDot(neonfma_template.NeonFma):
     )
 
   def zp_scale(self, pos):
-    regs = ['10', '11']
+    regs = ['30', '31']
     return regs[pos]
 
   # kc = round_up_po2(kc, channels)
@@ -208,6 +208,15 @@ class NeonDot(neonfma_template.NeonFma):
         ptr=self.w_ptr_register(), step=self.register_bytes() * self.n
     )
 
+  def mask_register(self):
+    return '10'
+
+  def tmp_w_register(self):
+    w_registers = self.w_registers()
+    w_registers_size = len(w_registers)
+    return w_registers[w_registers_size - 1]
+
+
 class NeonDotQC4W(NeonDot):
   """All SIMD features for Aarch64 neondot with 4-bit weights."""
 
@@ -221,12 +230,6 @@ class NeonDotQC4W(NeonDot):
             and v{W_1}.16b, v{tmp_W}.16b, v{mask}.16b\n"""],
     }
     return w_asm
-
-  def mask_register(self):
-    return '28'
-
-  def tmp_w_register(self):
-    return '29'
 
   def quantization_params(self):
     self.asm_string += """# Load 0xF0 for masking the weights
@@ -258,11 +261,14 @@ class NeonDotQS8QC8W(NeonDot):
     )
 
   def load_min_max(self):
-    self.asm_string += """
+    params_register = self.params_register()
+    min_reg = self.min_register()
+    max_reg = self.max_register()
+    self.asm_string += f"""
       # Load min/max values.
-      ld1r {v10.8h}, [x13]
-      add x13, x13, 2
-      ld2r {v0.16b, v1.16b}, [x13]\n"""
+      add {params_register}, {params_register}, 2
+      ld2r {{{min_reg}.16b, {max_reg}.16b}}, [{params_register}]
+      sub {params_register}, {params_register}, 2\n"""
 
   def init_accumulators(self):
     return super(NeonDot, self).init_accumulators()
@@ -272,6 +278,9 @@ class NeonDotQS8QC8W(NeonDot):
 
   def output_n(self) -> int:
     return self.n // 4
+
+  def dup_s16(self, ptr, q):
+    self.asm_string += f'ld1r {{v{q}.8h}}, [{ptr}]\n'
 
   def convert_to_output_type(self):
     accumulators = self.acc_registers()
@@ -318,13 +327,14 @@ class NeonDotQS8QC8W(NeonDot):
             b=accumulators[mr * self.n + nr],
             atype='sint32',
         )
+    self.dup_s16(ptr=self.params_register(), q=self.tmp_w_register())
     self.comment('Add output zero point.')
     for nr in range(0, self.n, 2):
       for mr in range(0, self.m):
         self.sqadd(
             a=accumulators[mr * self.n + nr],
             b=accumulators[mr * self.n + nr],
-            c=10,
+            c=self.tmp_w_register(),
         )
     self.comment('Convert to int8.')
     for mr in range(0, self.m):
@@ -437,3 +447,11 @@ class NeonDotQS8QC8W(NeonDot):
           lane=0,
           post_increment=0,
       )
+
+class NeonDotQS8QC4W(NeonDotQC4W, NeonDotQS8QC8W):
+  def function_name(self):
+    ld = self.unroll_factor * 32
+    return (
+        f'xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_{self.m}x{self.n * self.n_step()}'
+        + f'c4__asm_aarch64_{self.isa()}_ld{ld}_2'
+    )

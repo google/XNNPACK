@@ -32,27 +32,27 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x16c4__asm_aarch64_neondot_
 
       # Setup and alias a & c pointers.
       add x9, x3, x4
-      add x13, x6, x7
+      add x14, x6, x7
 
       cmp x0, 2
       csel  x9, x3, x9, LO
-      csel  x13, x6, x13, LO
+      csel  x14, x6, x14, LO
 
 .Louter_loop:
       # Initialize k counter.
       mov x20, x2
       # Initialize accumulators with k_sum * input zero point.
-      ldr q10, [x24, 0]
+      ldr q30, [x24, 0]
       ldp q2, q3, [x5, 0]
       ldp q4, q5, [x5, 32]
-      mul v12.4s, v2.4s, v10.s[0]
-      mul v16.4s, v2.4s, v10.s[2]
-      mul v13.4s, v3.4s, v10.s[0]
-      mul v17.4s, v3.4s, v10.s[2]
-      mul v14.4s, v4.4s, v10.s[0]
-      mul v18.4s, v4.4s, v10.s[2]
-      mul v15.4s, v5.4s, v10.s[0]
-      mul v19.4s, v5.4s, v10.s[2]
+      mul v12.4s, v2.4s, v30.s[0]
+      mul v16.4s, v2.4s, v30.s[2]
+      mul v13.4s, v3.4s, v30.s[0]
+      mul v17.4s, v3.4s, v30.s[2]
+      mul v14.4s, v4.4s, v30.s[0]
+      mul v18.4s, v4.4s, v30.s[2]
+      mul v15.4s, v5.4s, v30.s[0]
+      mul v19.4s, v5.4s, v30.s[2]
       add x5, x5, 64
 
       # Are there at least 8 bytes?
@@ -118,14 +118,14 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x16c4__asm_aarch64_neondot_
       scvtf v18.4s, v18.4s
       scvtf v19.4s, v19.4s
       # Multiply by input scale.
-      fmul v12.4s, v12.4s, v10.s[1]
-      fmul v16.4s, v16.4s, v10.s[3]
-      fmul v13.4s, v13.4s, v10.s[1]
-      fmul v17.4s, v17.4s, v10.s[3]
-      fmul v14.4s, v14.4s, v10.s[1]
-      fmul v18.4s, v18.4s, v10.s[3]
-      fmul v15.4s, v15.4s, v10.s[1]
-      fmul v19.4s, v19.4s, v10.s[3]
+      fmul v12.4s, v12.4s, v30.s[1]
+      fmul v16.4s, v16.4s, v30.s[3]
+      fmul v13.4s, v13.4s, v30.s[1]
+      fmul v17.4s, v17.4s, v30.s[3]
+      fmul v14.4s, v14.4s, v30.s[1]
+      fmul v18.4s, v18.4s, v30.s[3]
+      fmul v15.4s, v15.4s, v30.s[1]
+      fmul v19.4s, v19.4s, v30.s[3]
       # Load weights scale.
       ldp q2, q3, [x5, 0]
       ldp q4, q5, [x5, 32]
@@ -175,8 +175,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x16c4__asm_aarch64_neondot_
       b.lo .Ltail_8
       stp q12, q13, [x6], #32
       stp q14, q15, [x6], #32
-      stp q16, q17, [x13], #32
-      stp q18, q19, [x13], #32
+      stp q16, q17, [x14], #32
+      stp q18, q19, [x14], #32
       sub x3, x3, x2
       sub x9, x9, x2
 
@@ -187,7 +187,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x16c4__asm_aarch64_neondot_
 .Ltail_8:
       tbz w1, 3, .Ltail_4
       stp q12, q13, [x6], #32
-      stp q16, q17, [x13], #32
+      stp q16, q17, [x14], #32
       mov v12.16b, v14.16b
       mov v13.16b, v15.16b
       mov v16.16b, v18.16b
@@ -197,7 +197,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x16c4__asm_aarch64_neondot_
 .Ltail_4:
       tbz w1, 2, .Ltail_2
       str q12, [x6], #16
-      str q16, [x13], #16
+      str q16, [x14], #16
       mov v12.16b, v13.16b
       mov v16.16b, v17.16b
 
@@ -205,7 +205,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x16c4__asm_aarch64_neondot_
 .Ltail_2:
       tbz w1, 1, .Ltail_1
       str d12, [x6], #8
-      str d16, [x13], #8
+      str d16, [x14], #8
       dup d12, v12.d[1]
       dup d16, v16.d[1]
 
@@ -213,7 +213,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x16c4__asm_aarch64_neondot_
 .Ltail_1:
       tbz w1, 0, .Lreturn
       str s12, [x6], #0
-      str s16, [x13], #0
+      str s16, [x14], #0
 
 .Lreturn:
       # Restore the callee saved GP registers.
