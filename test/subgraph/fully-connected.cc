@@ -551,7 +551,8 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid,
 
 TEST(FullyConnectedQC8, test) { TestImpl<qint8, qcint8, qint32>(); }
 TEST(FullyConnectedQU8, test) { TestImpl<quint8, quint8, qint32>(); }
-TEST(FullyConnectedQS8, test) { TestImpl<qint8, qint8, qint32>(); }
+TEST(FullyConnectedQS8QC8W, test) { TestImpl<qint8, qcint8, qint32>(); }
+TEST(FullyConnectedQS8QC4W, test) { TestImpl<qint8, qcint4, qint32>(); }
 TEST(FullyConnectedF16, test) { TestImpl<xnn_float16, float, float>(); }
 TEST(FullyConnectedF32, test) { TestImpl<float, float, float>(); }
 // TODO(b/407771627): Either add xnn_datatype_qcuint4, or remove F32QC4W.
