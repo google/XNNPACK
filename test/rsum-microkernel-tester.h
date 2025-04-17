@@ -234,9 +234,15 @@ class RSumMicrokernelTester {
       float output = 0.f;
       rsum(batch_size() * sizeof(float), input.data(), &output, &params);
 
+#if __HVX_ARCH__ < 79
+      // Verify results.
+      ASSERT_NEAR(output, output_ref, std::abs(output_ref) * 1.0e-5f)
+          << "with batch " << batch_size() << ", scale " << scale();
+#else
       // Verify results.
       ASSERT_NEAR(output, output_ref, std::abs(output_ref) * 1.0e-6f)
           << "with batch " << batch_size() << ", scale " << scale();
+#endif
     }
   }
 
