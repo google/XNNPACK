@@ -30,6 +30,7 @@ void xnn_f32_rsum_ukernel__hvx_u128_acc2(
 
   xnn_simd_f32_t vacc0 = xnn_zero_f32();
   xnn_simd_f32_t vacc1 = xnn_zero_f32();
+
   for (; batch >= 128 * sizeof(float); batch -= 128 * sizeof(float)) {
     const xnn_simd_f32_t vt0 = xnn_loadu_f32(input + 0);
     const xnn_simd_f32_t vt1 = xnn_loadu_f32(input + 32);
@@ -57,12 +58,21 @@ void xnn_f32_rsum_ukernel__hvx_u128_acc2(
     vacc0 = Q6_Vqf32_vadd_Vqf32Vsf(vacc0, Q6_V_vmux_QVV(mask, vt, xnn_zero_f32()));
   }
 
+#if __HVX_ARCH__ >= 79
+  vacc0 = Q6_Vsf_equals_Vqf32(vacc0);
+  vacc0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_VsfVsf(vacc0, Q6_V_vror_VR(vacc0, 64)));
+  vacc0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_VsfVsf(vacc0, Q6_V_vror_VR(vacc0, 32)));
+  vacc0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_VsfVsf(vacc0, Q6_V_vror_VR(vacc0, 16)));
+  vacc0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_VsfVsf(vacc0, Q6_V_vror_VR(vacc0, 8)));
+  vacc0 = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_VsfVsf(vacc0, Q6_V_vror_VR(vacc0, 4)));
+#else
   vacc0 = Q6_Vqf32_vadd_Vqf32Vqf32(vacc0, Q6_V_vror_VR(vacc0, 64));
   vacc0 = Q6_Vqf32_vadd_Vqf32Vqf32(vacc0, Q6_V_vror_VR(vacc0, 32));
   vacc0 = Q6_Vqf32_vadd_Vqf32Vqf32(vacc0, Q6_V_vror_VR(vacc0, 16));
   vacc0 = Q6_Vqf32_vadd_Vqf32Vqf32(vacc0, Q6_V_vror_VR(vacc0, 8));
   vacc0 = Q6_Vqf32_vadd_Vqf32Vqf32(vacc0, Q6_V_vror_VR(vacc0, 4));
   vacc0 = Q6_Vsf_equals_Vqf32(vacc0);
+#endif
 
   float partial_sum = *((float*) &vacc0);
 

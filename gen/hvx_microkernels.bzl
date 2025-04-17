@@ -121,6 +121,7 @@ NON_PROD_HVX_MICROKERNEL_SRCS = [
     "src/f32-rsum/gen/f32-rsum-hvx-u96-acc3.c",
     "src/f32-rsum/gen/f32-rsum-hvx-u128-acc2.c",
     "src/f32-rsum/gen/f32-rsum-hvx-u128-acc4.c",
+    "src/f32-rsum/gen/f32-rsum-hvx-u256-acc4.c",
     "src/f32-spmm/gen/f32-spmm-32x1-minmax-hvx-pipelined-x2.c",
     "src/f32-spmm/gen/f32-spmm-32x1-minmax-hvx-pipelined-x4.c",
     "src/f32-spmm/gen/f32-spmm-32x1-minmax-hvx-pipelined.c",
