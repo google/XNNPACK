@@ -4202,6 +4202,36 @@ enum xnn_status xnn_setup_fully_connected_nc_qs8(
   const int8_t* input,
   int8_t* output);
 
+enum xnn_status xnn_create_fully_connected_nc_qs8_qc4w(
+  size_t input_channels,
+  size_t output_channels,
+  size_t input_stride,
+  size_t output_stride,
+  int8_t input_zero_point,
+  float input_scale,
+  uint8_t kernel_zero_point,
+  const float* kernel_scale,
+  const void* kernel,
+  const int32_t* bias,
+  int8_t output_zero_point,
+  float output_scale,
+  int8_t output_min,
+  int8_t output_max,
+  uint32_t flags,
+  xnn_code_cache_t code_cache,
+  xnn_weights_cache_t weights_cache,
+  xnn_operator_t* fully_connected_op_out);
+
+enum xnn_status xnn_reshape_fully_connected_nc_qs8_qc4w(
+  xnn_operator_t fully_connected_op,
+  size_t batch_size,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_fully_connected_nc_qs8_qc4w(
+  xnn_operator_t fully_connected_op,
+  const int8_t* input,
+  int8_t* output);
+
 enum xnn_status xnn_create_fully_connected_nc_qs8_qc8w(
   size_t input_channels,
   size_t output_channels,
