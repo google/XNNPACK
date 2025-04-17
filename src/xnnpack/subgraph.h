@@ -64,9 +64,10 @@ struct slinky_pipeline;
 typedef struct slinky_pipeline* slinky_pipeline_t;
 
 void slinky_init_pipeline(xnn_runtime_t runtime);
-void slinky_setup_inputs_and_outputs(xnn_runtime_t runtime);
+void slinky_setup_pipeline(xnn_runtime_t runtime);
 void slinky_destroy_pipeline(xnn_runtime_t runtime);
-bool slinky_evaluate(xnn_runtime_t runtime, enum xnn_status* status);
+enum xnn_status slinky_reshape_pipeline(xnn_runtime_t runtime);
+enum xnn_status slinky_invoke_pipeline(xnn_runtime_t runtime);
 #endif  // XNN_SLINKY_AVAILABLE
 
 struct xnn_shape {
