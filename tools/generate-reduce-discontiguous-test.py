@@ -111,150 +111,114 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_subtile) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-  for (size_t rows = 1; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
-    ${TESTER}()
-      .rows(rows)
-      .channels(channel_tile)
-      .Test(${", ".join(TEST_ARGS)});
-  }
+  ${TESTER}()
+    .rows({1, ${PRIMARY_TILE+INCREMENTAL_TILE}})
+    .channels(channel_tile)
+    .Test(${", ".join(TEST_ARGS)});
 }
 
 TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_subtile_with_input_stride) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-  for (size_t rows = 1; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
-    ${TESTER}()
-      .rows(rows)
-      .channels(channel_tile)
-      $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-        .input_stride(${next_prime(CHANNEL_TILE+1)})
-      $else:
-        .input_stride(channel_tile+1)
-      .Test(${", ".join(TEST_ARGS)});
-  }
+  ${TESTER}()
+    .rows({1, ${PRIMARY_TILE+INCREMENTAL_TILE}})
+    .channels(channel_tile)
+    $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+      .input_stride(${next_prime(CHANNEL_TILE+1)})
+    $else:
+      .input_stride(channel_tile+1)
+    .Test(${", ".join(TEST_ARGS)});
 }
 
 TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fulltile) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-  for (size_t rows = 1; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
-    ${TESTER}()
-      .rows(rows)
-      .channels(channel_tile)
-      .Test(${", ".join(TEST_ARGS)});
-  }
+  ${TESTER}()
+    .rows({1, ${INCREMENTAL_TILE*5 + 1}, ${INCREMENTAL_TILE}})
+    .channels(channel_tile)
+    .Test(${", ".join(TEST_ARGS)});
 }
 
 TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fulltile_with_input_stride) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-  for (size_t rows = 1; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
-    ${TESTER}()
-      .rows(rows)
-      .channels(channel_tile)
-      $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-        .input_stride(${next_prime(CHANNEL_TILE+1)})
-      $else:
-        .input_stride(channel_tile+1)
-      .Test(${", ".join(TEST_ARGS)});
-  }
+  ${TESTER}()
+    .rows({1, ${INCREMENTAL_TILE*5 + 1}, ${INCREMENTAL_TILE}})
+    .channels(channel_tile)
+    $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+      .input_stride(${next_prime(CHANNEL_TILE+1)})
+    $else:
+      .input_stride(channel_tile+1)
+    .Test(${", ".join(TEST_ARGS)});
 }
 
 TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_fulltile) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-    for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
-      ${TESTER}()
-        .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
-        .channels(channels)
-        .Test(${", ".join(TEST_ARGS)});
-    }
+    ${TESTER}()
+      .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
+      .channels({${CHANNEL_TILE*2}, ${CHANNEL_TILE*8}, ${CHANNEL_TILE}})
+      .Test(${", ".join(TEST_ARGS)});
   $else:
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-    for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
-      ${TESTER}()
-        .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
-        .channels(channels)
-        .Test(${", ".join(TEST_ARGS)});
-    }
+    ${TESTER}()
+      .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
+      .channels({channel_tile*2, channel_tile*8, channel_tile})
+      .Test(${", ".join(TEST_ARGS)});
 }
 
 TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_subtile) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-    for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
-      for (size_t rows = 1; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
-        ${TESTER}()
-          .rows(rows)
-          .channels(channels)
-          .Test(${", ".join(TEST_ARGS)});
-      }
-    }
+    ${TESTER}()
+      .channels({${CHANNEL_TILE*2}, ${CHANNEL_TILE*8}, ${CHANNEL_TILE}})
+      .rows({1, ${PRIMARY_TILE+INCREMENTAL_TILE}})
+      .Test(${", ".join(TEST_ARGS)});
   $else:
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-    for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
-      for (size_t rows = 1; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
-        ${TESTER}()
-          .rows(rows)
-          .channels(channels)
-          .Test(${", ".join(TEST_ARGS)});
-      }
-    }
+    ${TESTER}()
+      .channels({channel_tile*2, channel_tile*8, channel_tile})
+      .rows({1, ${PRIMARY_TILE+INCREMENTAL_TILE}})
+      .Test(${", ".join(TEST_ARGS)});
 }
 
 TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fulltile) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-    for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
-      for (size_t rows = 1; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
-        ${TESTER}()
-          .rows(rows)
-          .channels(channels)
-          .Test(${", ".join(TEST_ARGS)});
-      }
-    }
+    ${TESTER}()
+      .channels({${CHANNEL_TILE*2}, ${CHANNEL_TILE*8}, ${CHANNEL_TILE}})
+      .rows({1, ${INCREMENTAL_TILE*5 + 1}, ${INCREMENTAL_TILE}})
+      .Test(${", ".join(TEST_ARGS)});
   $else:
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-    for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
-      for (size_t rows = 1; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
-        ${TESTER}()
-          .rows(rows)
-          .channels(channels)
-          .Test(${", ".join(TEST_ARGS)});
-      }
-    }
+    ${TESTER}()
+      .channels({channel_tile*2, channel_tile*8, channel_tile})
+      .rows({1, ${INCREMENTAL_TILE*5 + 1}, ${INCREMENTAL_TILE}})
+      .Test(${", ".join(TEST_ARGS)});
 }
 
 TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fulltile_with_input_stride) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-    for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
-      for (size_t rows = 1; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
-        ${TESTER}()
-          .rows(rows)
-          .channels(channels)
-          .input_stride(${next_prime(CHANNEL_TILE*16+1)})
-          .Test(${", ".join(TEST_ARGS)});
-      }
-    }
+    ${TESTER}()
+      .channels({${CHANNEL_TILE*2}, ${CHANNEL_TILE*8}, ${CHANNEL_TILE}})
+      .rows({1, ${INCREMENTAL_TILE*5 + 1}, ${INCREMENTAL_TILE}})
+      .input_stride(${next_prime(CHANNEL_TILE*16+1)})
+      .Test(${", ".join(TEST_ARGS)});
   $else:
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-    for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
-      for (size_t rows = 1; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
-        ${TESTER}()
-          .rows(rows)
-          .channels(channels)
-          .input_stride(channel_tile*16+1)
-          .Test(${", ".join(TEST_ARGS)});
-      }
-    }
+    ${TESTER}()
+      .channels({channel_tile*2, channel_tile*8, channel_tile})
+      .rows({1, ${INCREMENTAL_TILE*5 + 1}, ${INCREMENTAL_TILE}})
+      .input_stride(channel_tile*16+1)
+      .Test(${", ".join(TEST_ARGS)});
 }
 
 $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
@@ -262,152 +226,111 @@ $if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
     $if ISA_CHECK:
       ${ISA_CHECK};
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      ${TESTER}()
-        .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
-        .channels(channels)
-        .Test(${", ".join(TEST_ARGS)});
-    }
+    ${TESTER}()
+      .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
+      .channels({1, channel_tile})
+      .Test(${", ".join(TEST_ARGS)});
   }
 
   TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_subtile) {
     $if ISA_CHECK:
       ${ISA_CHECK};
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      for (size_t rows = 1; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
-        ${TESTER}()
-          .rows(rows)
-          .channels(channels)
-          .Test(${", ".join(TEST_ARGS)});
-      }
-    }
+    ${TESTER}()
+      .channels({1, channel_tile})
+      .rows({1, ${PRIMARY_TILE+INCREMENTAL_TILE}})
+      .Test(${", ".join(TEST_ARGS)});
   }
 
   TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fulltile) {
     $if ISA_CHECK:
       ${ISA_CHECK};
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      for (size_t rows = 1; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
-        ${TESTER}()
-          .rows(rows)
-          .channels(channels)
-          .Test(${", ".join(TEST_ARGS)});
-      }
-    }
+    ${TESTER}()
+      .channels({1, channel_tile})
+      .rows({1, ${INCREMENTAL_TILE*5 + 1}, ${INCREMENTAL_TILE}})
+      .Test(${", ".join(TEST_ARGS)});
   }
 
   TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fulltile_with_input_stride) {
     $if ISA_CHECK:
       ${ISA_CHECK};
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      for (size_t rows = 1; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
-        ${TESTER}()
-          .rows(rows)
-          .channels(channels)
-          $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-            .input_stride(${next_prime(CHANNEL_TILE+1)})
-          $else:
-            .input_stride(channel_tile+1)
-          .Test(${", ".join(TEST_ARGS)});
-      }
-    }
+    ${TESTER}()
+      .channels({1, channel_tile})
+      .rows({1, ${INCREMENTAL_TILE*5 + 1}, ${INCREMENTAL_TILE}})
+      $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+        .input_stride(${next_prime(CHANNEL_TILE+1)})
+      $else:
+        .input_stride(channel_tile+1)
+      .Test(${", ".join(TEST_ARGS)});
   }
 
 TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_fulltile) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-    for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-      ${TESTER}()
-        .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
-        .channels(channels)
-        .Test(${", ".join(TEST_ARGS)});
-    }
+    ${TESTER}()
+      .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
+      .channels({${CHANNEL_TILE+1}, ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}})
+      .Test(${", ".join(TEST_ARGS)});
   $else:
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-    for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
-      ${TESTER}()
-        .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
-        .channels(channels)
-        .Test(${", ".join(TEST_ARGS)});
-    }
+    ${TESTER}()
+      .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
+      .channels({channel_tile+1, channel_tile*2})
+      .Test(${", ".join(TEST_ARGS)});
 }
 
 TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_subtile) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-    for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-      for (size_t rows = 1; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
-        ${TESTER}()
-          .rows(rows)
-          .channels(channels)
-          .Test(${", ".join(TEST_ARGS)});
-      }
-    }
+    ${TESTER}()
+      .channels({${CHANNEL_TILE+1}, ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}})
+      .rows({1, ${PRIMARY_TILE+INCREMENTAL_TILE}})
+      .Test(${", ".join(TEST_ARGS)});
   $else:
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-    for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
-      for (size_t rows = 1; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
-        ${TESTER}()
-          .rows(rows)
-          .channels(channels)
-          .Test(${", ".join(TEST_ARGS)});
-      }
-    }
+    ${TESTER}()
+      .channels({channel_tile+1, channel_tile*2})
+      .rows({1, ${PRIMARY_TILE+INCREMENTAL_TILE}})
+      .Test(${", ".join(TEST_ARGS)});
 }
 
 TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fulltile) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-    for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-      for (size_t rows = 1; rows < ${INCREMENTAL_TILE*5}; rows += ${PRIMARY_TILE+INCREMENTAL_TILE}) {
-        ${TESTER}()
-          .rows(rows)
-          .channels(channels)
-          .Test(${", ".join(TEST_ARGS)});
-      }
-    }
+    ${TESTER}()
+      .channels({${CHANNEL_TILE+1}, ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}})
+      .rows({1, ${INCREMENTAL_TILE*5}, ${PRIMARY_TILE+INCREMENTAL_TILE}})
+      .Test(${", ".join(TEST_ARGS)});
   $else:
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-    for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
-      for (size_t rows = 1; rows < ${INCREMENTAL_TILE*5}; rows += ${PRIMARY_TILE+INCREMENTAL_TILE}) {
-        ${TESTER}()
-          .rows(rows)
-          .channels(channels)
-          .Test(${", ".join(TEST_ARGS)});
-      }
-    }
+    ${TESTER}()
+      .channels({channel_tile+1, channel_tile*2})
+      .rows({1, ${INCREMENTAL_TILE*5}, ${PRIMARY_TILE+INCREMENTAL_TILE}})
+      .Test(${", ".join(TEST_ARGS)});
 }
 
 TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fulltile_with_input_stride) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
-    for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-      for (size_t rows = 1; rows < ${INCREMENTAL_TILE*5}; rows += ${PRIMARY_TILE+INCREMENTAL_TILE}) {
-        ${TESTER}()
-          .rows(rows)
-          .channels(channels)
-          .input_stride(${next_prime(CHANNEL_TILE*2+11)})
-          .Test(${", ".join(TEST_ARGS)});
-      }
-    }
+    ${TESTER}()
+      .channels({${CHANNEL_TILE+1}, ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}})
+      .rows({1, ${INCREMENTAL_TILE*5}, ${PRIMARY_TILE+INCREMENTAL_TILE}})
+      .input_stride(${next_prime(CHANNEL_TILE*2+11)})
+      .Test(${", ".join(TEST_ARGS)});
   $else:
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-    for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
-      for (size_t rows = 1; rows < ${INCREMENTAL_TILE*5}; rows += ${PRIMARY_TILE+INCREMENTAL_TILE}) {
-        ${TESTER}()
-          .rows(rows)
-          .channels(channels)
-          .input_stride(channel_tile*2+11)
-          .Test(${", ".join(TEST_ARGS)});
-      }
-    }
+
+    ${TESTER}()
+      .channels({channel_tile+1, channel_tile*2})
+      .rows({1, ${INCREMENTAL_TILE*5}, ${PRIMARY_TILE+INCREMENTAL_TILE}})
+      .input_stride(channel_tile*2+11)
+      .Test(${", ".join(TEST_ARGS)});
 }
 
 $if TESTER == "RDSumMicrokernelTester":
@@ -415,12 +338,10 @@ $if TESTER == "RDSumMicrokernelTester":
     $if ISA_CHECK:
       ${ISA_CHECK};
     const size_t channel_tile = ${CHANNEL_SCALED_TILE};
-    for (size_t channels = 1; channels < channel_tile*2; ++channels) {
-      ${TESTER}()
-        .rows(${257 + INCREMENTAL_TILE})
-        .channels(channels)
-        .Test(${", ".join(TEST_ARGS)});
-    }
+    ${TESTER}()
+      .rows(${257 + INCREMENTAL_TILE})
+      .channels({1, channel_tile*2})
+      .Test(${", ".join(TEST_ARGS)});
   }
 """
 
