@@ -404,7 +404,7 @@ jobs:
           CC: clang-18
           CXX: clang++-18
         run: |
-            bazel build test:all
+            bazel build //test/... //bench/...
         working-directory: ${{ github.workspace }}
       - name: Run tests
         if: ${{ inputs.run-tests }}
@@ -412,7 +412,7 @@ jobs:
           CC: clang-18
           CXX: clang++-18
         run: |
-            bazel test --test_output=errors test:all
+            bazel test --test_output=errors //test/... //bench/...
         working-directory: ${{ github.workspace }}
       - name: Compress disk cache
         # Bazel's `--disk-cache` currently grows without bounds, so we remove files
@@ -453,12 +453,12 @@ jobs:
             ${{ github.job }}-
       - name: Build tests
         run: |
-            bazel build ${BAZEL_DEFINES} test:all
+            bazel build ${BAZEL_DEFINES} //test/... //bench/...
         working-directory: ${{ github.workspace }}
       - name: Run tests
         if: ${{ inputs.run-tests }}
         run: |
-            bazel test ${BAZEL_DEFINES} --test_output=errors test:all
+            bazel test ${BAZEL_DEFINES} --test_output=errors //test/... //bench/...
         working-directory: ${{ github.workspace }}
       - name: Compress disk cache
         # Bazel's `--disk-cache` currently grows without bounds, so we remove files
@@ -500,7 +500,7 @@ jobs:
           CC: clang-18
           CXX: clang++-18
         run: |
-            bazel build test:all
+            bazel build //test/... //bench/...
         working-directory: ${{ github.workspace }}
       - name: Run tests
         if: ${{ inputs.run-tests }}
@@ -556,7 +556,7 @@ jobs:
           CC: gcc-13
           CXX: g++-13
         run: |
-            bazel build test:all
+            bazel build //test/... //bench/...
         working-directory: ${{ github.workspace }}
       - name: Run tests
         if: ${{ inputs.run-tests }}
