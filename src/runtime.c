@@ -850,7 +850,11 @@ enum xnn_status xnn_setup_runtime(
     }
   }
 
-  enum xnn_status status = status = xnn_plan_memory(runtime);
+  enum xnn_status status = xnn_plan_memory(runtime);
+  if (status != xnn_status_success) {
+    xnn_log_error("failed to setup runtime: error in planning memory");
+    return status;
+  }
   runtime->memory_planned = true;
 
   for (uint32_t opdata_id = 0; opdata_id < runtime->num_ops; opdata_id++) {
