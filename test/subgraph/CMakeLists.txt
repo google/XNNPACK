@@ -26,6 +26,7 @@ IF(XNNPACK_BUILD_LIBRARY)
       subgraph
       runtime
       subgraph-nchw
+      persistent
       workspace)
   FOREACH(TEST ${LIBRARY_SUBGRAPH_OPTIMIZATION_TESTS})
     ADD_EXECUTABLE(${TEST}-test ${TEST}.cc)

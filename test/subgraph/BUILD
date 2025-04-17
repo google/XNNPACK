@@ -119,6 +119,12 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "persistent_test",
+    srcs = ["persistent.cc"],
+    deps = SUBGRAPH_TEST_DEPS + ["//:allocation_type"],
+)
+
+xnnpack_unit_test(
     name = "binary_test",
     timeout = "moderate",
     srcs = ["binary.cc"],
