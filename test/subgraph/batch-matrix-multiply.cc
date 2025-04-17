@@ -329,7 +329,7 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid) {
     if (xnn_datatype_is_channelwise_quantized(xnn_datatype_of<InputB>())) {
       std::vector<size_t> scales_shape = input_b.extents();
       scales_shape[input_b.rank() - 2] = 1;
-      std::uniform_real_distribution<> b_scale_dist(0.001f,
+      std::uniform_real_distribution<float> b_scale_dist(0.001f,
                                                     input_b_quantization.scale);
       b_scales = Tensor<float>({scales_shape});
       b_scales.generate([&]() { return b_scale_dist(rng); });

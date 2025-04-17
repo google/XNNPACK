@@ -283,7 +283,8 @@ class ReduceOperatorTester {
           std::fill(accumulator.begin(), accumulator.end(), Config::Max);
           break;
         default:
-          std::fill(accumulator.begin(), accumulator.end(), 0);
+          std::fill(accumulator.begin(), accumulator.end(),
+                    static_cast<typename Config::AccumulatorType>(0));
       }
 
       const int32_t num_reduced_elements =

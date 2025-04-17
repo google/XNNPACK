@@ -264,7 +264,7 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
         {channelwise_quantization ? filter.extent(0) : 1});
     if (filter_scale.size() > 1) {
       // Generate random per-channel scales, in the range of the original scale.
-      std::uniform_real_distribution<> filter_scale_dist(
+      std::uniform_real_distribution<float> filter_scale_dist(
           0.001f, filter_quantization.scale);
       filter_scale.generate([&]() { return filter_scale_dist(rng); });
     } else {

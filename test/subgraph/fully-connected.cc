@@ -400,7 +400,7 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid,
                                 divide_round_up(input_channels, block_size)});
     if (filter_scale.size() > 1) {
       // Generate random per-channel scales, in the range of the original scale.
-      std::uniform_real_distribution<> filter_scale_dist(
+      std::uniform_real_distribution<float> filter_scale_dist(
           0.001f, filter_quantization.scale);
       filter_scale.generate([&]() { return filter_scale_dist(rng); });
     } else {

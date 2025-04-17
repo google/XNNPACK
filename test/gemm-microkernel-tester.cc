@@ -2213,7 +2213,7 @@ void GemmMicrokernelTester::Test_QP8F32QC8W(
   xnnpack::Buffer<float> c((mr() - 1) * cm_stride() +
                            ((n() - 1) / nr()) * nr() + (n() - 1) % nr() + 1);
   xnnpack::Buffer<int32_t> acc(m() * n());
-  xnnpack::Buffer<float> c_ref(m() * n(), 0);
+  xnnpack::Buffer<float> c_ref(m() * n());
 
   // Create a fake `gemm_config` for the packing functions.
   struct xnn_gemm_config gemm_config;
@@ -2264,7 +2264,7 @@ void GemmMicrokernelTester::Test_QP8F32QC8W(
        /*packed_weights_ptr=*/packed_w.data(), &params);
 
   // Compute 32-bit results and output quantization arguments.
-  std::fill(c_ref.begin(), c_ref.end(), 0);
+  std::fill(c_ref.begin(), c_ref.end(), 0.0f);
   for (size_t m_index = 0; m_index < m(); m_index++) {
     for (size_t n_index = 0; n_index < n(); n_index++) {
       for (size_t k_index = 0; k_index < k(); k_index++) {
