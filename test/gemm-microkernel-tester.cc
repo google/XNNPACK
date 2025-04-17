@@ -95,6 +95,23 @@ TEST_P(GemmTest, Test) {
   ASSERT_GT(num_tests_invocations, 0) << "No tests were run.";
 }
 
+static float compute_sum_tolerance(float max_value, int reduction_size,
+                               float epsilon) {
+  // Each `reduction_size` add potentially grows the error by `epsilon`.
+  float tolerance = reduction_size * epsilon;
+  // The error is then scaled by the max value.
+  tolerance *= max_value;
+  // Also include some absolute error tolerance.
+  tolerance += epsilon;
+
+  // TODO: This tolerance is very lax in some cases, but is required to be
+  // able to run the f16_qb4w tests.
+  EXPECT_LT(tolerance, max_value)
+      << "max_value=" << max_value << ", reduction_size=" << reduction_size
+      << ", epsilon=" << epsilon;
+  return tolerance;
+}
+
 static int8_t sign_extend_int4(int8_t value) {
   int8_t mask = 0x08;
   if (value & mask) {
@@ -117,6 +134,7 @@ void GemmMicrokernelTester::Test(xnn_qd8_f16_qc8w_igemm_ukernel_fn igemm,
                              -std::numeric_limits<int8_t>::max(),
                              std::numeric_limits<int8_t>::max()),
                          std::ref(rng));
+  const float max_abs_product = 1.0f * 256.0f * 2.0f;
 
   xnnpack::Buffer<float> input(mr() * k());
   xnnpack::Buffer<int8_t> a((mr() - 1) * a_stride() + k(),
@@ -261,12 +279,11 @@ void GemmMicrokernelTester::Test(xnn_qd8_f16_qc8w_igemm_ukernel_fn igemm,
         a_offset() * sizeof(uint8_t), zero_sentinel, zero_data, &params,
         quantization_params.data());
 
+  const float tolerance =
+      compute_sum_tolerance(max_abs_product, ks() * k(),
+                        xnnpack::NumericLimits<xnn_float16>::epsilon());
   for (size_t i = 0; i < m(); i++) {
     for (size_t j = 0; j < n(); j++) {
-      // Extract tolerance into variable to workaround test failures on Linux
-      // AArch64.
-      const float tolerance =
-          std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-2f);
       ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
                   c_ref[i * n() + j], tolerance)
           << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
@@ -292,6 +309,7 @@ void GemmMicrokernelTester::Test(xnn_qd8_f32_qc8w_igemm_ukernel_fn igemm,
                              -std::numeric_limits<int8_t>::max(),
                              std::numeric_limits<int8_t>::max()),
                          std::ref(rng));
+  const float max_abs_product = 1.0f * 256.0f * 2.0f;
 
   xnnpack::Buffer<float> input(mr() * k());
   xnnpack::Buffer<int8_t> a((mr() - 1) * a_stride() + k(),
@@ -434,12 +452,10 @@ void GemmMicrokernelTester::Test(xnn_qd8_f32_qc8w_igemm_ukernel_fn igemm,
         a_offset() * sizeof(uint8_t), zero_sentinel, zero_data, &params,
         quantization_params.data());
 
+  const float tolerance = compute_sum_tolerance(
+      max_abs_product, ks() * k(), xnnpack::NumericLimits<float>::epsilon());
   for (size_t i = 0; i < m(); i++) {
     for (size_t j = 0; j < n(); j++) {
-      // Extract tolerance into variable to workaround test failures on Linux
-      // AArch64.
-      const float tolerance =
-          std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f);
       ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
                   c_ref[i * n() + j], tolerance)
           << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
@@ -1130,6 +1146,7 @@ void GemmMicrokernelTester::Test(xnn_qd8_f16_qc8w_gemm_ukernel_fn gemm,
                              -std::numeric_limits<int8_t>::max(),
                              std::numeric_limits<int8_t>::max()),
                          std::ref(rng));
+  const float max_abs_product = 1.0f * 256.0f * 2.0f;
 
   xnnpack::Buffer<float> input(m() * k());
   xnnpack::Buffer<int8_t> a((m() - 1) * a_stride() + k(),
@@ -1245,12 +1262,11 @@ void GemmMicrokernelTester::Test(xnn_qd8_f16_qc8w_gemm_ukernel_fn gemm,
        cm_stride() * sizeof(xnn_float16), nr() * sizeof(xnn_float16), &params,
        quantization_params.data());
 
+  const float tolerance =
+      compute_sum_tolerance(max_abs_product, ks() * k(),
+                        xnnpack::NumericLimits<xnn_float16>::epsilon());
   for (size_t i = 0; i < m(); i++) {
     for (size_t j = 0; j < n(); j++) {
-      // Extract tolerance into variable to workaround test failures on Linux
-      // AArch64.
-      const float tolerance =
-          std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-2f);
       ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
                   c_ref[i * n() + j], tolerance)
           << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
@@ -1276,6 +1292,7 @@ void GemmMicrokernelTester::Test(xnn_qd8_f32_qc8w_gemm_ukernel_fn gemm,
                              -std::numeric_limits<int8_t>::max(),
                              std::numeric_limits<int8_t>::max()),
                          std::ref(rng));
+  const float max_abs_product = 1.0f * 256.0f * 2.0f;
 
   xnnpack::Buffer<float> input(m() * k());
   xnnpack::Buffer<int8_t> a((m() - 1) * a_stride() + k(),
@@ -1390,12 +1407,10 @@ void GemmMicrokernelTester::Test(xnn_qd8_f32_qc8w_gemm_ukernel_fn gemm,
        cm_stride() * sizeof(float), nr() * sizeof(float), &params,
        quantization_params.data());
 
+  const float tolerance = compute_sum_tolerance(
+      max_abs_product, ks() * k(), xnnpack::NumericLimits<float>::epsilon());
   for (size_t i = 0; i < m(); i++) {
     for (size_t j = 0; j < n(); j++) {
-      // Extract tolerance into variable to workaround test failures on Linux
-      // AArch64.
-      const float tolerance =
-          std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f);
       ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
                   c_ref[i * n() + j], tolerance)
           << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
@@ -1420,6 +1435,7 @@ void GemmMicrokernelTester::Test(xnn_qd8_f16_qc4w_gemm_ukernel_fn gemm,
   auto w8rng = std::bind(std::uniform_int_distribution<int32_t>(
                              0, std::numeric_limits<uint8_t>::max()),
                          std::ref(rng));
+  const float max_abs_product = 1.0f * 16.0f * 2.0f;
 
   const size_t planes = 2;  // 4 bit is 2 planes - low nibbles and high nibbles
   const size_t k2 = round_up_po2(k(), 2);  // tester assumes byte aligned rows
@@ -1545,12 +1561,11 @@ void GemmMicrokernelTester::Test(xnn_qd8_f16_qc4w_gemm_ukernel_fn gemm,
        cm_stride() * sizeof(xnn_float16), nr() * sizeof(xnn_float16), &params,
        quantization_params.data());
 
+  const float tolerance =
+      compute_sum_tolerance(max_abs_product, ks() * k(),
+                        xnnpack::NumericLimits<xnn_float16>::epsilon());
   for (size_t i = 0; i < m(); i++) {
     for (size_t j = 0; j < n(); j++) {
-      // Extract tolerance into variable to workaround test failures on Linux
-      // AArch64.
-      const float tolerance =
-          std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-2f);
       ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
                   c_ref[i * n() + j], tolerance)
           << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
@@ -1576,6 +1591,7 @@ void GemmMicrokernelTester::Test(xnn_qd8_f16_qb4w_gemm_ukernel_fn gemm,
   auto w8rng = std::bind(std::uniform_int_distribution<int32_t>(
                              0, std::numeric_limits<uint8_t>::max()),
                          std::ref(rng));
+  const float max_abs_product = 1.0f * 16.0f * 2.0f;
 
   const size_t planes = 2;  // 4 bit is 2 planes - low nibbles and high nibbles
   const size_t k2 = round_up_po2(k(), 2);  // tester assumes byte aligned rows
@@ -1708,12 +1724,11 @@ void GemmMicrokernelTester::Test(xnn_qd8_f16_qb4w_gemm_ukernel_fn gemm,
        cm_stride() * sizeof(xnn_float16), nr() * sizeof(xnn_float16), &params,
        quantization_params.data());
 
+  const float tolerance =
+      compute_sum_tolerance(max_abs_product, ks() * k(),
+                        xnnpack::NumericLimits<xnn_float16>::epsilon());
   for (size_t i = 0; i < m(); i++) {
     for (size_t j = 0; j < n(); j++) {
-      // Extract tolerance into variable to workaround test failures on Linux
-      // AArch64.
-      const float tolerance =
-          std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-3f);
       ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
                   c_ref[i * n() + j], tolerance)
           << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
@@ -1738,6 +1753,7 @@ void GemmMicrokernelTester::Test(xnn_qd8_f32_qc4w_gemm_ukernel_fn gemm,
   auto w8rng = std::bind(std::uniform_int_distribution<int32_t>(
                              0, std::numeric_limits<uint8_t>::max()),
                          std::ref(rng));
+  const float max_abs_product = 1.0f * 16.0f * 2.0f;
 
   const size_t k2 = round_up_po2(k(), 2);  // tester assumes byte aligned rows
   const size_t packed_k2 =
@@ -1861,12 +1877,10 @@ void GemmMicrokernelTester::Test(xnn_qd8_f32_qc4w_gemm_ukernel_fn gemm,
        cm_stride() * sizeof(float), nr() * sizeof(float), &params,
        quantization_params.data());
 
+  const float tolerance = compute_sum_tolerance(
+      max_abs_product, ks() * k(), xnnpack::NumericLimits<float>::epsilon());
   for (size_t i = 0; i < m(); i++) {
     for (size_t j = 0; j < n(); j++) {
-      // Extract tolerance into variable to workaround test failures on Linux
-      // AArch64.
-      const float tolerance =
-          std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f);
       ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
                   c_ref[i * n() + j], tolerance)
           << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
@@ -1892,6 +1906,7 @@ void GemmMicrokernelTester::Test(xnn_qd8_f32_qb4w_gemm_ukernel_fn gemm,
   auto w8rng = std::bind(std::uniform_int_distribution<int32_t>(
                              0, std::numeric_limits<uint8_t>::max()),
                          std::ref(rng));
+  const float max_abs_product = 1.0f * 16.0f * 2.0f;
 
   const size_t planes = 2;  // 4 bit is 2 planes - low nibbles and high nibbles
   const size_t k2 = round_up_po2(k(), 2);  // tester assumes byte aligned rows
@@ -2031,12 +2046,10 @@ void GemmMicrokernelTester::Test(xnn_qd8_f32_qb4w_gemm_ukernel_fn gemm,
        cm_stride() * sizeof(float), nr() * sizeof(float), &params,
        quantization_params.data());
 
+  const float tolerance = compute_sum_tolerance(
+      max_abs_product, ks() * k(), xnnpack::NumericLimits<float>::epsilon());
   for (size_t i = 0; i < m(); i++) {
     for (size_t j = 0; j < n(); j++) {
-      // Extract tolerance into variable to workaround test failures on Linux
-      // AArch64.
-      const float tolerance =
-          std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-5f);
       ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
                   c_ref[i * n() + j], tolerance)
           << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
@@ -2063,6 +2076,7 @@ void GemmMicrokernelTester::Test(
   auto w8rng = std::bind(std::uniform_int_distribution<int32_t>(
                              0, std::numeric_limits<uint8_t>::max()),
                          std::ref(rng));
+  const float max_abs_product = 1.0f * 16.0f * 2.0f;
 
   const size_t k2 = round_up_po2(k(), 2);  // tester assumes byte aligned rows
 
@@ -2158,12 +2172,10 @@ void GemmMicrokernelTester::Test(
   gemm(m(), n(), k2, input_qp8.data(), packed_w.data(), c.data(),
        cm_stride() * sizeof(float), sizeof(float), &minmax_params);
 
+  const float tolerance = compute_sum_tolerance(
+      max_abs_product, ks() * k(), xnnpack::NumericLimits<float>::epsilon());
   for (size_t i = 0; i < m(); i++) {
     for (size_t j = 0; j < n(); j++) {
-      // Extract tolerance into variable to workaround test failures on Linux
-      // AArch64.
-      const float tolerance =
-          std::max(1.1e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f);
       ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
                   c_ref[i * n() + j], tolerance)
           << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
@@ -2192,6 +2204,7 @@ void GemmMicrokernelTester::Test_QP8F32QC8W(
                              std::numeric_limits<int8_t>::min(),
                              std::numeric_limits<int8_t>::max()),
                          std::ref(rng));
+  const float max_abs_product = 1.0f * 256.0f * 2.0f;
 
   xnnpack::Buffer<float> input_f32(m() * k());
   xnnpack::Buffer<int8_t> b(n() * k());
@@ -2281,12 +2294,10 @@ void GemmMicrokernelTester::Test_QP8F32QC8W(
   gemm(m(), n(), k(), input_qp8.data(), packed_w.data(), c.data(),
        cm_stride() * sizeof(float), sizeof(float), &minmax_params);
 
+  const float tolerance = compute_sum_tolerance(
+      max_abs_product, ks() * k(), xnnpack::NumericLimits<float>::epsilon());
   for (size_t i = 0; i < m(); i++) {
     for (size_t j = 0; j < n(); j++) {
-      // Extract tolerance into variable to workaround test failures on Linux
-      // AArch64.
-      const float tolerance =
-          std::max(1.1e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f);
       ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
                   c_ref[i * n() + j], tolerance)
           << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
@@ -2309,6 +2320,7 @@ void GemmMicrokernelTester::Test_PF32(
   xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.f, 1.f),
                           std::ref(rng));
+  const float max_abs_product = 1.0f;
 
   xnnpack::Buffer<float> input_f32(m() * k());
   xnnpack::Buffer<float> weights(n() * k());
@@ -2396,12 +2408,10 @@ void GemmMicrokernelTester::Test_PF32(
   gemm(m(), n(), k() * sizeof(float), input_packed.data(), packed_w.data(),
        c.data(), cm_stride() * sizeof(float), sizeof(float), &minmax_params);
 
+  const float tolerance = compute_sum_tolerance(
+      max_abs_product, ks() * k(), xnnpack::NumericLimits<float>::epsilon());
   for (size_t i = 0; i < m(); i++) {
     for (size_t j = 0; j < n(); j++) {
-      // Extract tolerance into variable to workaround test failures on Linux
-      // AArch64.
-      const float tolerance =
-          std::max(1.1e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f);
       ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
                   c_ref[i * n() + j], tolerance)
           << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
@@ -2571,6 +2581,7 @@ void GemmMicrokernelTester::Test(
   auto w8rng = std::bind(std::uniform_int_distribution<int32_t>(
                              0, std::numeric_limits<uint8_t>::max()),
                          std::ref(rng));
+  const float max_abs_product = 1.0f * 16.0f * 2.0f;
 
   const size_t k2 = round_up_po2(k(), 2);  // tester assumes byte aligned rows
 
@@ -2695,12 +2706,10 @@ void GemmMicrokernelTester::Test(
   gemm(m(), n(), k2, input_qp8.data(), packed_w.data(), c.data(),
        cm_stride() * sizeof(float), sizeof(float), &minmax_params);
 
+  const float tolerance = compute_sum_tolerance(
+      max_abs_product, ks() * k(), xnnpack::NumericLimits<float>::epsilon());
   for (size_t i = 0; i < m(); i++) {
     for (size_t j = 0; j < n(); j++) {
-      // Extract tolerance into variable to workaround test failures on Linux
-      // AArch64.
-      const float tolerance =
-          std::max(1.1e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f);
       ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
                   c_ref[i * n() + j], tolerance)
           << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
@@ -3200,6 +3209,7 @@ void GemmMicrokernelTester::Test(xnn_f16_igemm_minmax_ukernel_fn igemm_minmax,
   xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f),
                           std::ref(rng));
+  const float max_abs_product = 1.0f;
 
   xnnpack::Buffer<xnn_float16> a((mr() - 1) * a_stride() + k(),
                                  xnnpack::XnnExtraBytes);
@@ -3285,12 +3295,9 @@ void GemmMicrokernelTester::Test(xnn_f16_igemm_minmax_ukernel_fn igemm_minmax,
                nr() * sizeof(xnn_float16), a_offset() * sizeof(xnn_float16),
                zero_pointer, &params);
 
-  // Compute an upper bound for the summation error of the inner products
-  // assuming `a` and `b` are in the range `[-1, 1]`.
-  const size_t num_terms = k() * ks();
-  const float nu = num_terms * xnnpack::NumericLimits<xnn_float16>::epsilon();
-  ASSERT_LT(nu, 0.1f) << "Unreasonable dimensions for `xnn_float16` tolerance.";
-  float max_abs_err = num_terms * nu / (1.0f - nu);
+  const float tolerance =
+      compute_sum_tolerance(max_abs_product, ks() * k(),
+                        xnnpack::NumericLimits<xnn_float16>::epsilon());
 
   for (size_t i = 0; i < m(); i++) {
     for (size_t j = 0; j < n(); j++) {
@@ -3309,7 +3316,7 @@ void GemmMicrokernelTester::Test(xnn_f16_igemm_minmax_ukernel_fn igemm_minmax,
           << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k()
           << " x " << ks();
       ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
-                  c_ref[i * n() + j], max_abs_err)
+                  c_ref[i * n() + j], tolerance)
           << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
           << ", optimized = "
           << (float)c[i * cm_stride() + (j / nr()) * nr() + j % nr()]
@@ -3972,6 +3979,7 @@ void GemmMicrokernelTester::Test(
   std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
   std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+  const float max_abs_product = 1.0f;  // scale is 1/max b value below.
 
   xnnpack::Buffer<float> a((m() - 1) * a_stride() + k(),
                            xnnpack::XnnExtraBytes);
@@ -4036,11 +4044,8 @@ void GemmMicrokernelTester::Test(
               a.data(), a_stride() * sizeof(float), packed_w.data(), c.data(),
               cm_stride() * sizeof(float), nr() * sizeof(float), &params);
 
-  // Compute an upper bound for the summation error of the inner products
-  // assuming `a` and `b` are in the range `[-1, 1]`.
-  const float nu = k() * xnnpack::NumericLimits<float>::epsilon();
-  ASSERT_LT(k() * nu, 1.0f) << "Unreasonable dimensions for `float` tolerance.";
-  float max_abs_err = k() * nu / (1.0f - nu);
+  const float tolerance = compute_sum_tolerance(
+      max_abs_product, ks() * k(), xnnpack::NumericLimits<float>::epsilon());
 
   // Validate micro-kernel outputs.
   for (size_t i = 0; i < m(); i++) {
@@ -4058,7 +4063,7 @@ void GemmMicrokernelTester::Test(
           << ", Mr x Nr x Kr = " << mr() << " x " << nr() << " x " << kr()
           << ", M x N x K = " << m() << " x " << n() << " x " << k();
       ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
-                  c_ref[i * n() + j], max_abs_err)
+                  c_ref[i * n() + j], tolerance)
           << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
           << ", optimized = "
           << c[i * cm_stride() + (j / nr()) * nr() + j % nr()]
