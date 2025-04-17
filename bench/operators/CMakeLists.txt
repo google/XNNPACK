@@ -18,7 +18,6 @@ IF(XNNPACK_BUILD_LIBRARY)
       max-pooling
       prelu
       resize-bilinear-nhwc
-      scaled-dot-product-attention
       softmax
       unary)
   FOREACH(BENCH ${LIBRARY_OPERATOR_BENCHMARKS})

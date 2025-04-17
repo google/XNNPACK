@@ -319,16 +319,6 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "scaled_dot_product_attention_nhtc_test",
-    timeout = "moderate",
-    srcs = [
-        "scaled-dot-product-attention-nhtc.cc",
-        "scaled-dot-product-attention-operator-tester.h",
-    ],
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
     name = "slice_nd_test",
     timeout = "moderate",
     srcs = [

@@ -485,7 +485,6 @@ SET(OPERATOR_SRCS
   src/operators/resize-bilinear-nchw.c
   src/operators/resize-bilinear-nhwc.c
   src/operators/rope-nthc.c
-  src/operators/scaled-dot-product-attention-nhtc.c
   src/operators/slice-nd.c
   src/operators/softmax-nc.c
   src/operators/transpose-nd.c
@@ -518,7 +517,6 @@ SET(SUBGRAPH_SRCS
   src/subgraph/pack-lh.c
   src/subgraph/reshape-helpers.c
   src/subgraph/rope.c
-  src/subgraph/scaled-dot-product-attention.c
   src/subgraph/softmax.c
   src/subgraph/space-to-depth-2d.c
   src/subgraph/static-constant-pad.c

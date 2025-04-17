@@ -203,14 +203,6 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "scaled_dot_product_attention_test",
-    srcs = ["scaled-dot-product-attention.cc"],
-    deps = SUBGRAPH_TEST_DEPS + [
-        "//:aligned_allocator",
-    ],
-)
-
-xnnpack_unit_test(
     name = "static_reduce_test",
     srcs = ["static-reduce.cc"],
     deps = SUBGRAPH_TEST_DEPS,

@@ -103,14 +103,6 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
-    name = "scaled_dot_product_attention_bench",
-    srcs = ["scaled-dot-product-attention.cc"],
-    copts = xnnpack_optional_tflite_copts(),
-    tags = xnnpack_slow_benchmark_tags() + ["nowin32"],
-    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
-)
-
-xnnpack_benchmark(
     name = "softmax_bench",
     srcs = [
         "softmax.cc",

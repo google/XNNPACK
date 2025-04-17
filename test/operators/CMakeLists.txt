@@ -33,7 +33,6 @@ IF(XNNPACK_BUILD_LIBRARY)
     resize-bilinear-nchw
     resize-bilinear-nhwc
     rope-nthc
-    scaled-dot-product-attention-nhtc
     slice-nd-eager
     slice-nd
     softmax-nc
