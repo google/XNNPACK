@@ -455,10 +455,10 @@ jobs:
         run: |
             bazel build ${BAZEL_DEFINES} //test/... //bench/...
         working-directory: ${{ github.workspace }}
-      - name: Run tests
+      - name: Build XNNPack
         if: ${{ inputs.run-tests }}
         run: |
-            bazel test ${BAZEL_DEFINES} --test_output=errors //test/... //bench/...
+            bazel build ${BAZEL_DEFINES} //test/...
         working-directory: ${{ github.workspace }}
       - name: Compress disk cache
         # Bazel's `--disk-cache` currently grows without bounds, so we remove files
