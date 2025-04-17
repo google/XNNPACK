@@ -3432,7 +3432,7 @@ void xnn_pack_f16_dwconv_ghw_w(size_t primary_tile, size_t h, size_t w,
       advance_x_y(h, &x, &y);
     }
     std::fill_n(packed_weights, (primary_tile - kernel_size) * channel_tile,
-                static_cast<xnn_float16>(0.0f));
+                UINT16_C(0));
     packed_weights += (primary_tile - kernel_size) * cr_block_size;
   }
 }
