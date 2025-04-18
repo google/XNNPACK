@@ -62,11 +62,17 @@ uint64_t GetCurrentCpuFrequency();
 // Can overestimate, but not underestimate LLC size.
 size_t GetMaxCacheSize();
 
+// Returns the size of the L1/L2 caches or zero if they could not be determined.
+size_t GetL1CacheSize();
+size_t GetL2CacheSize();
+
 // Set number of elements for a reduction microkernel such that:
 // - It is divisible by 2, 3, 4, 5, 6.
 // - It is divisible by AVX512 width.
 // - Total memory footprint does not exceed the characteristic cache size for
 //   the architecture.
+// - Use both the characteristic and, if available, actual cache sizes to have a
+//   point of comparison across different machines.
 template <class InType>
 void ReductionParameters(benchmark::internal::Benchmark* benchmark) {
   benchmark->ArgName("N");
@@ -77,10 +83,24 @@ void ReductionParameters(benchmark::internal::Benchmark* benchmark) {
   characteristic_l1 = 16 * 1024;
   characteristic_l2 = 128 * 1024;
 #endif  // XNN_ARCH_ARM
+  const size_t actual_l1 = GetL1CacheSize();
+  const size_t actual_l2 = GetL2CacheSize();
 
   const size_t elementwise_size = sizeof(InType);
-  benchmark->Arg(characteristic_l1 / elementwise_size / 960 * 960);
-  benchmark->Arg(characteristic_l2 / elementwise_size / 960 * 960);
+  benchmark->Arg(
+      std::max<size_t>(1, characteristic_l1 / elementwise_size / 960) * 960);
+  benchmark->Arg(
+      std::max<size_t>(1, characteristic_l2 / elementwise_size / 960) * 960);
+  if (actual_l1 && actual_l1 != characteristic_l1 &&
+      actual_l1 != characteristic_l2) {
+    benchmark->Arg(std::max<size_t>(1, actual_l1 / elementwise_size / 960) *
+                   960);
+  }
+  if (actual_l2 && actual_l2 != characteristic_l1 &&
+      actual_l2 != characteristic_l2) {
+    benchmark->Arg(std::max<size_t>(1, actual_l2 / elementwise_size / 960) *
+                   960);
+  }
 }
 
 // Set number of elements for a unary elementwise microkernel such that:
@@ -88,6 +108,8 @@ void ReductionParameters(benchmark::internal::Benchmark* benchmark) {
 // - It is divisible by AVX512 width.
 // - Total memory footprint does not exceed the characteristic cache size for
 //   the architecture.
+// - Use both the characteristic and, if available, actual cache sizes to have a
+//   point of comparison across different machines.
 template <class InType, class OutType>
 void UnaryElementwiseParameters(benchmark::internal::Benchmark* benchmark) {
   benchmark->ArgName("N");
@@ -98,10 +120,24 @@ void UnaryElementwiseParameters(benchmark::internal::Benchmark* benchmark) {
   characteristic_l1 = 16 * 1024;
   characteristic_l2 = 128 * 1024;
 #endif  // XNN_ARCH_ARM
+  const size_t actual_l1 = GetL1CacheSize();
+  const size_t actual_l2 = GetL2CacheSize();
 
   const size_t elementwise_size = sizeof(InType) + sizeof(OutType);
-  benchmark->Arg(characteristic_l1 / elementwise_size / 960 * 960);
-  benchmark->Arg(characteristic_l2 / elementwise_size / 960 * 960);
+  benchmark->Arg(
+      std::max<size_t>(1, characteristic_l1 / elementwise_size / 960) * 960);
+  benchmark->Arg(
+      std::max<size_t>(1, characteristic_l2 / elementwise_size / 960) * 960);
+  if (actual_l1 && actual_l1 != characteristic_l1 &&
+      actual_l1 != characteristic_l2) {
+    benchmark->Arg(std::max<size_t>(1, actual_l1 / elementwise_size / 960) *
+                   960);
+  }
+  if (actual_l2 && actual_l2 != characteristic_l1 &&
+      actual_l2 != characteristic_l2) {
+    benchmark->Arg(std::max<size_t>(1, actual_l2 / elementwise_size / 960) *
+                   960);
+  }
 }
 
 // Set number of elements for a binary elementwise microkernel such that:
@@ -109,6 +145,8 @@ void UnaryElementwiseParameters(benchmark::internal::Benchmark* benchmark) {
 // - It is divisible by AVX512 width.
 // - Total memory footprint does not exceed the characteristic cache size for
 //   the architecture.
+// - Use both the characteristic and, if available, actual cache sizes to have a
+//   point of comparison across different machines.
 template <class InType, class OutType>
 void BinaryElementwiseParameters(benchmark::internal::Benchmark* benchmark) {
   benchmark->ArgName("N");
@@ -119,12 +157,24 @@ void BinaryElementwiseParameters(benchmark::internal::Benchmark* benchmark) {
   characteristic_l1 = 16 * 1024;
   characteristic_l2 = 128 * 1024;
 #endif  // XNN_ARCH_ARM
+  const size_t actual_l1 = GetL1CacheSize();
+  const size_t actual_l2 = GetL2CacheSize();
 
   const size_t elementwise_size = 2 * sizeof(InType) + sizeof(OutType);
   benchmark->Arg(
       std::max<size_t>(1, characteristic_l1 / elementwise_size / 960) * 960);
   benchmark->Arg(
       std::max<size_t>(1, characteristic_l2 / elementwise_size / 960) * 960);
+  if (actual_l1 && actual_l1 != characteristic_l1 &&
+      actual_l1 != characteristic_l2) {
+    benchmark->Arg(std::max<size_t>(1, actual_l1 / elementwise_size / 960) *
+                   960);
+  }
+  if (actual_l2 && actual_l2 != characteristic_l1 &&
+      actual_l2 != characteristic_l2) {
+    benchmark->Arg(std::max<size_t>(1, actual_l2 / elementwise_size / 960) *
+                   960);
+  }
 }
 
 using IsaCheckFunction = std::function<bool(benchmark::State&)>;
