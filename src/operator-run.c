@@ -482,7 +482,6 @@ void xnn_compute_grouped_gemm(
                                mr_block_size);
 }
 
-size_t xnn_x32_pack_lh_offset__neonsme2(size_t m, size_t k, size_t mr, size_t kr, size_t sr);
 void xnn_compute_gemm(
     const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
