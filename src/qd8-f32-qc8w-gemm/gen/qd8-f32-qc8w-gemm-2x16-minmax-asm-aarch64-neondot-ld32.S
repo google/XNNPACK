@@ -9,10 +9,11 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x16c4__asm_aarch64_neondot_
 
       # Free up GP registers.
       sub sp, sp, 256
-      stp x19, x20, [sp, 192]
-      stp x21, x22, [sp, 160]
-      stp x23, x24, [sp, 128]
-      stp x25, x26, [sp, 96]
+      stp x27, x28, [sp, 224]
+      stp x25, x26, [sp, 192]
+      stp x23, x24, [sp, 160]
+      stp x21, x22, [sp, 128]
+      stp x19, x20, [sp, 96]
 
       # Preserve callee saved q8-q15 registers.
       stp d8, d9, [sp, 64]
@@ -182,10 +183,11 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x16c4__asm_aarch64_neondot_
 
 .Lreturn:
       # Restore the callee saved GP registers.
-      ldp x19, x20, [sp, 192]
-      ldp x21, x22, [sp, 160]
-      ldp x23, x24, [sp, 128]
-      ldp x25, x26, [sp, 96]
+      ldp x27, x28, [sp, 224]
+      ldp x25, x26, [sp, 192]
+      ldp x23, x24, [sp, 160]
+      ldp x21, x22, [sp, 128]
+      ldp x19, x20, [sp, 96]
 
       # Restore callee saved q8-q15 registers.
       ldp d8, d9, [sp, 64]
