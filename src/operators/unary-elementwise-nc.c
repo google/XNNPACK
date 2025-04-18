@@ -118,6 +118,8 @@ static const struct xnn_unary_elementwise_config* get_config(
         return xnn_init_qs8_lrelu_config();
       case xnn_unary_convert:
         return xnn_init_qs8_cvt_config();
+      case xnn_unary_hardswish:
+        return xnn_init_qs8_vhswish_config();
       default:
         return NULL;
     }
@@ -134,6 +136,8 @@ static const struct xnn_unary_elementwise_config* get_config(
         return xnn_init_qu8_lrelu_config();
       case xnn_unary_convert:
         return xnn_init_qu8_cvt_config();
+      case xnn_unary_hardswish:
+        return xnn_init_qu8_vhswish_config();
       default:
         return NULL;
     }

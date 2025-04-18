@@ -132,6 +132,8 @@ SET(MICROKERNEL_UNIT_TESTS
     qu8-rdsum
     qu8-rsum
     qu8-vlrelu
+    qs8-vhswish
+    qu8-vhswish
     s8-ibilinear
     u8-ibilinear
     u8-lut32norm

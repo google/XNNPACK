@@ -181,12 +181,16 @@ XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_qs8_to_f16_cvt_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_qs8_to_f32_cvt_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* 
+xnn_init_qs8_vhswish_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_qu8_cvt_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_qu8_lrelu_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_qu8_to_f32_cvt_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* 
+xnn_init_qu8_vhswish_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_s32_to_f32_cvt_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
