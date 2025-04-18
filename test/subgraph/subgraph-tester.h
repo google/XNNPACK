@@ -110,7 +110,8 @@ struct TensorShape {
   const size_t* Dims() const { return dims.data(); }
 
   size_t NumElements() const {
-    return std::accumulate(dims.begin(), dims.end(), 1, std::multiplies<>());
+    return std::accumulate(dims.begin(), dims.end(), static_cast<size_t>(1),
+                           std::multiplies<>());
   }
 };
 

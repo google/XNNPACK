@@ -2362,7 +2362,7 @@ void GemmMicrokernelTester::Test_PF32(
 
   std::generate(weights.begin(), weights.end(), std::ref(f32rng));
   std::generate(bias.begin(), bias.end(), std::ref(f32rng));
-  std::fill(packed_w.begin(), packed_w.end(), 0);
+  std::fill(packed_w.begin(), packed_w.end(), 0.0f);
 
   // RHS packing.
   struct xnn_qs8_qc8w_packing_params params;
@@ -3008,7 +3008,7 @@ void GemmMicrokernelTester::Test(
   std::generate(bias.begin(), bias.end(), [&] { return f32rng(rng); });
   std::fill(c_ref.begin(), c_ref.end(), 0.0f);
 
-  std::fill(packed_w.begin(), packed_w.end(), 0.0f);
+  std::fill(packed_w.begin(), packed_w.end(), static_cast<xnn_bfloat16>(0.0f));
   pack(/*g=*/1, n(), k(), nr(), kr(), sr(), b.data(), bias.data(),
        /*scale=*/nullptr, packed_w.data(),
        /*extra_bytes=*/0, /*params=*/nullptr);
@@ -3079,7 +3079,7 @@ void GemmMicrokernelTester::Test(xnn_bf16_gemm_minmax_ukernel_fn gemm_minmax,
   std::generate(bias.begin(), bias.end(), [&] { return f32rng(rng); });
   std::fill(c_ref.begin(), c_ref.end(), 0.0f);
 
-  std::fill(packed_w.begin(), packed_w.end(), 0.0f);
+  std::fill(packed_w.begin(), packed_w.end(), static_cast<xnn_bfloat16>(0.0f));
   pack(/*g=*/1, n(), k(), nr(), kr(), sr(),
        reinterpret_cast<const uint16_t*>(b.data()),
        reinterpret_cast<const uint16_t*>(bias.data()), /*scale=*/nullptr,
@@ -3152,7 +3152,7 @@ void GemmMicrokernelTester::Test(xnn_f16_gemm_minmax_ukernel_fn gemm_minmax,
   std::generate(bias.begin(), bias.end(), f32rng);
   std::fill(c_ref.begin(), c_ref.end(), 0.0f);
 
-  std::fill(packed_w.begin(), packed_w.end(), 0.0f);
+  std::fill(packed_w.begin(), packed_w.end(), static_cast<xnn_float16>(0.0f));
   pack(/*g=*/1, n(), k(), nr(), kr(), sr(),
        reinterpret_cast<const uint16_t*>(b.data()),
        reinterpret_cast<const uint16_t*>(bias.data()),
@@ -3229,7 +3229,7 @@ void GemmMicrokernelTester::Test(xnn_f16_igemm_minmax_ukernel_fn igemm_minmax,
   std::generate(bias.begin(), bias.end(), f32rng);
   std::fill(c_ref.begin(), c_ref.end(), 0.0f);
 
-  std::fill(packed_w.begin(), packed_w.end(), 0.0f);
+  std::fill(packed_w.begin(), packed_w.end(), static_cast<xnn_float16>(0.0f));
   pack(/*g=*/1, n(), ks(), k(), nr(), kr(), sr(),
        reinterpret_cast<const uint16_t*>(b.data()),
        reinterpret_cast<const uint16_t*>(bias.data()), /*scale=*/nullptr,
