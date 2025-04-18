@@ -32,12 +32,13 @@ void xnn_f32_rsum_ukernel__hvx_u32(
   xnn_simd_f32_t vacc0 = xnn_zero_f32();
 
   const size_t alignment_size = -(size_t)input & 127;
-  if (alignment_size != 0 && batch >= alignment_size) {
+  if XNN_UNLIKELY(alignment_size) {
+    const size_t head_size = alignment_size > batch ? batch : alignment_size;
     const xnn_simd_f32_t vt = xnn_loadu_f32(input);
-    HVX_VectorPred mask = Q6_Q_vsetq_R(alignment_size);
+    HVX_VectorPred mask = Q6_Q_vsetq_R(head_size);
     vacc0 = Q6_Vqf32_vadd_Vqf32Vsf(vacc0, Q6_V_vmux_QVV(mask, vt, xnn_zero_f32()));
-    batch -= alignment_size;
-    input = (const float*)((intptr_t)input + alignment_size);
+    batch -= head_size;
+    input = (const float*)((intptr_t)input + head_size);
   }
 
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
@@ -48,7 +49,7 @@ void xnn_f32_rsum_ukernel__hvx_u32(
   }
 
   if XNN_UNLIKELY(batch) {
-    const xnn_simd_f32_t vt = xnn_loadu_f32(input);
+    const xnn_simd_f32_t vt = xnn_load_f32(input);
     HVX_VectorPred mask = Q6_Q_vsetq_R(batch);
 
     vacc0 = Q6_Vqf32_vadd_Vqf32Vsf(vacc0, Q6_V_vmux_QVV(mask, vt, xnn_zero_f32()));
