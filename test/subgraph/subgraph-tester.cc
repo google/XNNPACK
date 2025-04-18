@@ -37,9 +37,9 @@ SubgraphTester::SubgraphTester(uint32_t external_value_ids) {
 }
 
 SubgraphTester& SubgraphTester::AddInternalDynamicTensorF32(
-    const std::vector<size_t>& dims, uint32_t* id_out, uint32_t flags) {
+    const TensorShape& shape, uint32_t* id_out, uint32_t flags) {
   const xnn_status status = xnn_define_tensor_value(
-      subgraph_.get(), xnn_datatype_fp32, dims.size(), dims.data(), nullptr,
+      subgraph_.get(), xnn_datatype_fp32, shape.Rank(), shape.Dims(), nullptr,
       XNN_INVALID_VALUE_ID, flags, id_out);
   EXPECT_EQ(status, xnn_status_success);
 
@@ -47,43 +47,34 @@ SubgraphTester& SubgraphTester::AddInternalDynamicTensorF32(
 }
 
 SubgraphTester& SubgraphTester::AddInternalDynamicallyQuantizedTensor(
-    size_t rank, xnn_datatype datatype, size_t num_nonbatch_dims,
+    const TensorShape& shape, xnn_datatype datatype, size_t num_nonbatch_dims,
     uint32_t* id_out, uint32_t flags) {
   const xnn_status status = xnn_define_dynamically_quantized_tensor_value(
-      subgraph_.get(), xnn_datatype_qdint8, rank, num_nonbatch_dims, nullptr,
-      XNN_INVALID_VALUE_ID, flags, id_out);
+      subgraph_.get(), xnn_datatype_qdint8, shape.Rank(), num_nonbatch_dims,
+      shape.Dims(), XNN_INVALID_VALUE_ID, flags, id_out);
   EXPECT_EQ(status, xnn_status_success);
   return *this;
 }
 
 SubgraphTester& SubgraphTester::AddDynamicTensor(
-    const std::vector<size_t>& dims, uint32_t external_id,
-    xnn_datatype datatype, xnn_quantization_params quantization,
-    uint32_t flags) {
+    const TensorShape& shape, uint32_t external_id, xnn_datatype datatype,
+    xnn_quantization_params quantization, uint32_t flags) {
   assert(external_id < subgraph_->external_value_ids);
   uint32_t id_out = 0;
   if (xnn_datatype_is_quantized(datatype)) {
     const xnn_status status = xnn_define_quantized_tensor_value(
         subgraph_.get(), datatype, quantization.zero_point, quantization.scale,
-        dims.size(), dims.data(), nullptr, external_id, flags, &id_out);
+        shape.Rank(), shape.Dims(), nullptr, external_id, flags, &id_out);
     EXPECT_EQ(status, xnn_status_success);
   } else {
     const xnn_status status = xnn_define_tensor_value(
-        subgraph_.get(), datatype, dims.size(), dims.data(), nullptr,
-        external_id, flags, &id_out);
+        subgraph_.get(), datatype, shape.Rank(), shape.Dims(), nullptr, external_id,
+        flags, &id_out);
     EXPECT_EQ(status, xnn_status_success);
   }
   EXPECT_EQ(id_out, external_id);
 
   return *this;
-}
-
-SubgraphTester& SubgraphTester::AddDynamicTensor(
-    const std::vector<size_t>& dims, uint32_t external_id,
-    xnn_datatype datatype, uint32_t flags) {
-  assert(!xnn_datatype_is_quantized(datatype));
-  assert(external_id < subgraph_->external_value_ids);
-  return AddDynamicTensor(dims, external_id, datatype, {}, flags);
 }
 
 std::vector<size_t> SubgraphTester::GetExternalTensorShape(
@@ -99,11 +90,11 @@ std::vector<size_t> SubgraphTester::GetExternalTensorShape(
 }
 
 SubgraphTester& SubgraphTester::AddDynamicallyQuantizedTensor(
-    const std::vector<size_t>& dims, uint32_t external_id, uint32_t flags) {
+    const TensorShape& shape, uint32_t external_id, uint32_t flags) {
   assert(external_id < subgraph_->external_value_ids);
   uint32_t id_out = 0;
   const xnn_status status = xnn_define_dynamically_quantized_tensor_value(
-      subgraph_.get(), xnn_datatype_qdint8, dims.size(), 1, dims.data(),
+      subgraph_.get(), xnn_datatype_qdint8, shape.Rank(), 1, shape.Dims(),
       external_id, flags, &id_out);
   EXPECT_EQ(status, xnn_status_success);
   EXPECT_EQ(id_out, external_id);
@@ -189,20 +180,19 @@ SubgraphTester& SubgraphTester::AddStaticTensorF32(
 }
 
 SubgraphTester& SubgraphTester::AddInputTensor(
-    size_t rank, xnn_datatype datatype, xnn_quantization_params quantization,
-    uint32_t external_id) {
-  std::vector<size_t> dims(rank);
-  AddDynamicTensor(dims, external_id, datatype, quantization,
+    const TensorShape& shape, xnn_datatype datatype,
+    xnn_quantization_params quantization, uint32_t external_id) {
+  AddDynamicTensor(shape, external_id, datatype, quantization,
                    XNN_VALUE_FLAG_EXTERNAL_INPUT);
   auto it = external_tensors_.insert({external_id, nullptr});
   EXPECT_TRUE(it.second);
   return *this;
 }
 
-SubgraphTester& SubgraphTester::AddInputTensorF32(
-    const std::vector<size_t>& dims, uint32_t external_id) {
-  AddDynamicTensorF32(dims, external_id, XNN_VALUE_FLAG_EXTERNAL_INPUT);
-  size_t num_elements = NumElements(dims);
+SubgraphTester& SubgraphTester::AddInputTensorF32(const TensorShape& shape,
+                                                  uint32_t external_id) {
+  AddDynamicTensorF32(shape, external_id, XNN_VALUE_FLAG_EXTERNAL_INPUT);
+  size_t num_elements = shape.NumElements();
   xnnpack::Buffer<char> input(num_elements * sizeof(float),
                               xnnpack::XnnExtraBytes);
   float* data = reinterpret_cast<float*>(input.data());
@@ -213,12 +203,13 @@ SubgraphTester& SubgraphTester::AddInputTensorF32(
   return *this;
 }
 
-SubgraphTester& SubgraphTester::AddInputTensorQS8(
-    int32_t zero_point, float scale, const std::vector<size_t>& dims,
-    uint32_t external_id) {
-  AddDynamicTensorQS8(zero_point, scale, dims, external_id,
+SubgraphTester& SubgraphTester::AddInputTensorQS8(int32_t zero_point,
+                                                  float scale,
+                                                  const TensorShape& shape,
+                                                  uint32_t external_id) {
+  AddDynamicTensorQS8(zero_point, scale, shape, external_id,
                       XNN_VALUE_FLAG_EXTERNAL_INPUT);
-  size_t num_elements = NumElements(dims);
+  size_t num_elements = shape.NumElements();
   xnnpack::Buffer<char> input(num_elements * sizeof(float),
                               xnnpack::XnnExtraBytes);
   float* data = reinterpret_cast<float*>(input.data());
@@ -230,22 +221,20 @@ SubgraphTester& SubgraphTester::AddInputTensorQS8(
 }
 
 SubgraphTester& SubgraphTester::AddOutputTensor(
-    size_t rank, xnn_datatype datatype, xnn_quantization_params quantization,
-    uint32_t external_id) {
-  std::vector<size_t> dims(rank);
-  AddDynamicTensor(dims, external_id, datatype, quantization,
+    const TensorShape& shape, xnn_datatype datatype,
+    xnn_quantization_params quantization, uint32_t external_id) {
+  AddDynamicTensor(shape, external_id, datatype, quantization,
                    XNN_VALUE_FLAG_EXTERNAL_OUTPUT);
   auto it = external_tensors_.insert({external_id, nullptr});
   EXPECT_TRUE(it.second);
   return *this;
 }
 
-SubgraphTester& SubgraphTester::AddOutputTensorF32(
-    const std::vector<size_t>& dims, uint32_t external_id) {
+SubgraphTester& SubgraphTester::AddOutputTensorF32(const TensorShape& shape,
+                                                   uint32_t external_id) {
   output_id_ = external_id;
-  AddDynamicTensorF32(dims, external_id, XNN_VALUE_FLAG_EXTERNAL_OUTPUT);
-  size_t num_elements = NumElements(dims);
-  xnnpack::Buffer<char> output(num_elements * sizeof(float));
+  AddDynamicTensorF32(shape, external_id, XNN_VALUE_FLAG_EXTERNAL_OUTPUT);
+  xnnpack::Buffer<char> output(shape.NumElements() * sizeof(float));
   auto it = external_tensors_.insert({external_id, output.data()});
   buffers_[external_id] = std::move(output);
   EXPECT_TRUE(it.second);
