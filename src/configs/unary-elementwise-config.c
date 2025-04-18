@@ -574,10 +574,6 @@ static void init_f16_to_f32_cvt_config(void) {
     #else
       f16_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_f32_vcvt_ukernel__wasmsimd_int16_u16;
     #endif
-  #elif XNN_ARCH_WASM
-    f16_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_f32_vcvt_ukernel__scalar_u1;
-  #elif XNN_ARCH_RISCV
-    f16_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_f32_vcvt_ukernel__scalar_u4;
   #else
     f16_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_f32_vcvt_ukernel__scalar_u4;
   #endif
@@ -667,10 +663,6 @@ static void init_f32_approxgelu_config(void) {
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_approxgelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vapproxgelu_ukernel__wasmsimd_rational_12_10_div_u12;
-  #elif XNN_ARCH_WASM
-    f32_approxgelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vapproxgelu_ukernel__scalar_rational_12_10_div_u1;
-  #elif XNN_ARCH_RISCV
-    f32_approxgelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vapproxgelu_ukernel__scalar_rational_12_10_div_u1;
   #else
     f32_approxgelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vapproxgelu_ukernel__scalar_rational_12_10_div_u1;
   #endif
@@ -880,10 +872,6 @@ static void init_f32_gelu_config(void) {
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__wasmsimd_rational_12_10_div_u12;
-  #elif XNN_ARCH_WASM
-    f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u1;
-  #elif XNN_ARCH_RISCV
-    f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u1;
   #else
     f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u1;
   #endif
@@ -960,10 +948,6 @@ static void init_f32_exp_config(void) {
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_exp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vexp_ukernel__wasmsimd_rational_3_2_div_u12;
-  #elif XNN_ARCH_WASM
-    f32_exp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vexp_ukernel__scalar_rational_3_2_div_u4;
-  #elif XNN_ARCH_RISCV
-    f32_exp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vexp_ukernel__scalar_rational_3_2_div_u4;
   #else
     f32_exp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vexp_ukernel__scalar_rational_3_2_div_u4;
   #endif
@@ -1094,10 +1078,8 @@ static void init_f32_neg_config(void) {
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_neg_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__wasmsimd_u8;
-  #elif XNN_ARCH_WASM
-    f32_neg_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__scalar_u4;
-  #elif XNN_ARCH_RISCV
-    f32_neg_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__scalar_u4;
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    f32_neg_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__hvx_u128;
   #else
     f32_neg_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__scalar_u4;
   #endif
@@ -1322,10 +1304,6 @@ static void init_f32_sigmoid_config(void) {
     #else
       f32_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_p5_div_u16;
     #endif
-  #elif XNN_ARCH_WASM
-    f32_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_u2;
-  #elif XNN_ARCH_RISCV
-    f32_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_u2;
   #else
     f32_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_u2;
   #endif
@@ -1357,10 +1335,6 @@ static void init_f32_sqr_config(void) {
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_sqr_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqr_ukernel__wasmsimd_u8;
-  #elif XNN_ARCH_WASM
-    f32_sqr_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqr_ukernel__scalar_u4;
-  #elif XNN_ARCH_RISCV
-    f32_sqr_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqr_ukernel__scalar_u4;
   #else
     f32_sqr_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqr_ukernel__scalar_u4;
   #endif
@@ -1394,10 +1368,6 @@ static void init_f32_sqrt_config(void) {
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqrt_ukernel__wasmsimd_sqrt_u8;
-  #elif XNN_ARCH_WASM
-    f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqrt_ukernel__scalar_sqrt_u1;
-  #elif XNN_ARCH_RISCV
-    f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqrt_ukernel__scalar_sqrt_u1;
   #else
     f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqrt_ukernel__scalar_sqrt_u1;
   #endif
@@ -1570,10 +1540,6 @@ static void init_f32_to_f16_cvt_config(void) {
     #else
       f32_to_f16_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_f16_vcvt_ukernel__wasmsimd_u24;
     #endif
-  #elif XNN_ARCH_WASM
-    f32_to_f16_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_f16_vcvt_ukernel__scalar_bitcast_u4;
-  #elif XNN_ARCH_RISCV
-    f32_to_f16_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_f16_vcvt_ukernel__scalar_fabsf_u2;
   #else
     f32_to_f16_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_f16_vcvt_ukernel__scalar_fabsf_u2;
   #endif
@@ -2208,10 +2174,6 @@ static void init_xx_copy_config(void) {
     xx_copy_config.ukernel = (xnn_vunary_ukernel_fn) xnn_xx_copy_ukernel__scalar_memcpy;
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     xx_copy_config.ukernel = (xnn_vunary_ukernel_fn) xnn_xx_copy_ukernel__scalar_memcpy;
-  #elif XNN_ARCH_WASM
-    xx_copy_config.ukernel = (xnn_vunary_ukernel_fn) xnn_xx_copy_ukernel__scalar_memcpy;
-  #elif XNN_ARCH_RISCV
-    xx_copy_config.ukernel = (xnn_vunary_ukernel_fn) xnn_xx_copy_ukernel__scalar_memcpy;
   #else
     xx_copy_config.ukernel = (xnn_vunary_ukernel_fn) xnn_xx_copy_ukernel__scalar_memcpy;
   #endif
@@ -2749,3 +2711,4 @@ const struct xnn_unary_elementwise_config* xnn_init_xx_copy_config() {
   XNN_INIT_ONCE(xx_copy);
   return &xx_copy_config;
 }
+
