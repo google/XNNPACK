@@ -1067,6 +1067,12 @@ static void init_qs8_vadd_config(void) {
     qs8_vadd_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__rvv_u2v;
     qs8_vadd_config.init = (xnn_init_binary_params_fn) xnn_init_qs8_add_minmax_scalar_params;
     qs8_vadd_config.element_tile = 2 * hardware_config->vlenb / sizeof(int8_t);
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    qs8_vadd_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vadd_minmax_ukernel__hvx_u128;
+    qs8_vadd_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__hvx_u128;
+    qs8_vadd_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__hvx_u128;
+    qs8_vadd_config.init = (xnn_init_binary_params_fn) xnn_init_qs8_add_minmax_scalar_params;
+    qs8_vadd_config.element_tile = 128;
   #else
     qs8_vadd_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vadd_minmax_ukernel__scalar_u4;
     qs8_vadd_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__scalar_u4;
