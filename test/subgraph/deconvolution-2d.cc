@@ -40,6 +40,9 @@ Tensor<float> ReferenceImpl(Tensor<Data> input, Tensor<Filter> filter,
                         kw.input_extent(input.extent(2)),
                         groups * group_output_channels});
 
+  assert(kw.padding() == 0);
+  assert(kh.padding() == 0);
+
   input = input.split(3, {groups, group_input_channels});
   output = output.split(3, {groups, group_output_channels});
   if (!bias.empty()) {
@@ -218,8 +221,14 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
 
   for (auto _ : FuzzTest(std::chrono::milliseconds(1000))) {
     // Generate some random kernel and shape parameters.
-    StencilParams kw = random_stencil_params(rng);
-    StencilParams kh = random_stencil_params(rng);
+    StencilParams kw = random_stencil_params(rng, /*max_kernel_size=*/5);
+    StencilParams kh = random_stencil_params(rng, /*max_kernel_size=*/5);
+
+    // And no padding
+    kw.padding_min = 0;
+    kw.padding_max = 0;
+    kh.padding_min = 0;
+    kh.padding_max = 0;
 
     DeconvolutionParams params = StencilToDeconvolutionParams(kh, kw);
     std::uniform_int_distribution<> channels_dist{1, 10};
@@ -345,8 +354,8 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
         // If we are dynamically quantizing, preprocess the data to have zero
         // error when it will be quantized, which makes testing the behavior
         // much easier.
-        for (size_t b = 0; b < input.extent(0); ++b) {
-          FakeDynamicQuantize(input.slice(0, b), convert_to);
+        for (const auto& i : EnumerateIndices(input.extents())) {
+          FakeDynamicQuantize(input.slice_leading(i), convert_to);
         }
       }
 
