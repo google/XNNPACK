@@ -147,7 +147,8 @@ xnn_subgraph_t FP32Softmax(size_t m, size_t n, size_t k, uint32_t norm_mask,
     }
 
     // Compute the softmax.
-    status = xnn_define_softmax(subgraph, transposed_reshaped_v0, transposed_v1,
+    status = xnn_define_softmax(subgraph, transposed_reshaped_v0,
+                                transposed_reshaped_v1,
                                 /*flags=*/0);
     if (status != xnn_status_success) {
       std::cerr << "failed to create softmax node" << std::endl;
