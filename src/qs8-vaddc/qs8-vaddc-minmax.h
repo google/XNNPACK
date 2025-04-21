@@ -66,6 +66,13 @@ XNN_UKERNEL_WITH_PARAMS(0, xnn_qs8_vaddc_minmax_ukernel__wasmsimd_u24, 24, false
 XNN_UKERNEL_WITH_PARAMS(0, xnn_qs8_vaddc_minmax_ukernel__wasmsimd_u32, 32, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ENABLE_HVX && (XNN_ARCH_HEXAGON)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_hvx, xnn_qs8_vaddc_minmax_ukernel__hvx_u32, 32, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_hvx, xnn_qs8_vaddc_minmax_ukernel__hvx_u64, 64, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_hvx, xnn_qs8_vaddc_minmax_ukernel__hvx_u96, 96, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_hvx, xnn_qs8_vaddc_minmax_ukernel__hvx_u128, 128, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)
+#endif  // XNN_ENABLE_HVX && (XNN_ARCH_HEXAGON)
+
 #if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_qs8_vaddc_minmax_ukernel__rvv_u1v, 1, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_qs8_vaddc_minmax_ukernel__rvv_u2v, 2, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)

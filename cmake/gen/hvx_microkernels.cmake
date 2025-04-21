@@ -254,6 +254,10 @@ SET(NON_PROD_HVX_MICROKERNEL_SRCS
   src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u32.c
   src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u64.c
   src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u96.c
-  src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u128.c)
+  src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u128.c
+  src/qs8-vaddc/gen/qs8-vaddc-minmax-hvx-u32.c
+  src/qs8-vaddc/gen/qs8-vaddc-minmax-hvx-u64.c
+  src/qs8-vaddc/gen/qs8-vaddc-minmax-hvx-u96.c
+  src/qs8-vaddc/gen/qs8-vaddc-minmax-hvx-u128.c)
 
 SET(ALL_HVX_MICROKERNEL_SRCS ${PROD_HVX_MICROKERNEL_SRCS} + ${NON_PROD_HVX_MICROKERNEL_SRCS})
