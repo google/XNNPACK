@@ -802,7 +802,7 @@ enum xnn_status xnn_reshape_runtime(
   return xnn_status_success;
 }
 
-enum xnn_status xnn_setup_runtime(
+static enum xnn_status set_external_values(
   xnn_runtime_t runtime,
   size_t num_external_values,
   const struct xnn_external_value* external_values)
@@ -832,38 +832,11 @@ enum xnn_status xnn_setup_runtime(
     struct xnn_value* value = &runtime->values[value_id];
     value->data = external_value->data;
   }
+  return xnn_status_success;
+}
 
-  #ifdef XNN_SLINKY_AVAILABLE
-  if (runtime->slinky_pipeline) {
-    // slinky_setup_pipeline(runtime);
-    return // slinky_reshape_pipeline(runtime);
-  }
-  #endif
-
-  for (uint32_t opdata_id = 0; opdata_id < runtime->num_ops; opdata_id++) {
-    struct xnn_operator_data* opdata = &runtime->opdata[opdata_id];
-    for (size_t j = 0; j < XNN_MAX_OPERATOR_OBJECTS; j++) {
-      if (opdata->operator_objects[j] == NULL) {
-        // Operator was removed during optimization
-        continue;
-      }
-
-      assert(opdata->reshape != NULL);
-      enum xnn_status status = opdata->reshape(opdata, runtime->values, runtime->num_values, runtime->threadpool);
-      if (status != xnn_status_success && status != xnn_status_reallocation_required) {
-        xnn_log_error("failed to setup runtime: error in reshaping operator #%u", opdata_id);
-        return status;
-      }
-    }
-  }
-
-  enum xnn_status status = xnn_plan_memory(runtime);
-  if (status != xnn_status_success) {
-    xnn_log_error("failed to setup runtime: error in planning memory");
-    return status;
-  }
-  runtime->memory_planned = true;
-
+static enum xnn_status setup_runtime(xnn_runtime_t runtime)
+{
   for (uint32_t opdata_id = 0; opdata_id < runtime->num_ops; opdata_id++) {
     struct xnn_operator_data* opdata = &runtime->opdata[opdata_id];
     for (size_t j = 0; j < XNN_MAX_OPERATOR_OBJECTS; j++) {
@@ -882,8 +855,33 @@ enum xnn_status xnn_setup_runtime(
   }
 
   runtime->has_been_setup = true;
-
   return xnn_status_success;
+}
+
+enum xnn_status xnn_setup_runtime(
+  xnn_runtime_t runtime,
+  size_t num_external_values,
+  const struct xnn_external_value* external_values)
+{
+  enum xnn_status status = set_external_values(runtime, num_external_values, external_values);
+  if (status != xnn_status_success) {
+    return status;
+  }
+
+  status = xnn_reshape_runtime(runtime);
+  if (status != xnn_status_success) {
+    xnn_log_error("failed to setup runtime: error in reshaping runtime");
+    return status;
+  }
+
+  #ifdef XNN_SLINKY_AVAILABLE
+  if (runtime->slinky_pipeline) {
+    // Slinky reshape also performs setup.
+    return xnn_status_success;
+  }
+  #endif
+
+  return setup_runtime(runtime);
 }
 
 enum xnn_status xnn_setup_runtime_v2(
@@ -891,30 +889,9 @@ enum xnn_status xnn_setup_runtime_v2(
   size_t num_external_values,
   const struct xnn_external_value* external_values)
 {
-  // Validate inputs without changing internal state.
-  // This ensures that runtime stays in consistent state in case validation fails midway.
-  for (size_t i = 0; i < num_external_values; i++) {
-    const struct xnn_external_value* external_value = &external_values[i];
-    const uint32_t value_id = external_value->id;
-    if (value_id >= runtime->num_values) {
-      xnn_log_error("failed to setup runtime: out-of-bounds ID %" PRIu32 " in external value #%zu",
-                    value_id, i);
-      return xnn_status_invalid_parameter;
-    }
-
-    const struct xnn_value* value = &runtime->values[value_id];
-    if (value->allocation_type != xnn_allocation_type_external) {
-      xnn_log_error("failed to setup runtime: Value %" PRIu32 " is not external (%d)", value_id, value->allocation_type);
-      return xnn_status_invalid_parameter;
-    }
-  }
-
-  // Apply runtime state changes.
-  for (size_t i = 0; i < num_external_values; i++) {
-    const struct xnn_external_value* external_value = &external_values[i];
-    const uint32_t value_id = external_value->id;
-    struct xnn_value* value = &runtime->values[value_id];
-    value->data = external_value->data;
+  enum xnn_status status = set_external_values(runtime, num_external_values, external_values);
+  if (status != xnn_status_success) {
+    return status;
   }
 
   #ifdef XNN_SLINKY_AVAILABLE
@@ -924,24 +901,7 @@ enum xnn_status xnn_setup_runtime_v2(
   }
   #endif
 
-  for (uint32_t opdata_id = 0; opdata_id < runtime->num_ops; opdata_id++) {
-    struct xnn_operator_data* opdata = &runtime->opdata[opdata_id];
-
-    if (opdata->operator_objects[0] == NULL) {
-      // Operator was removed during optimization
-      continue;
-    }
-    assert(opdata->setup != NULL);
-    enum xnn_status status = opdata->setup(opdata, runtime->values, runtime->num_values, runtime->threadpool);
-    if (status != xnn_status_success) {
-      xnn_log_error("failed to setup runtime: error in setting pointers of operator #%u", opdata_id);
-      return status;
-    }
-  }
-
-  runtime->has_been_setup = true;
-
-  return xnn_status_success;
+  return setup_runtime(runtime);
 }
 
 static xnn_timestamp xnn_read_timer() {
