@@ -397,11 +397,9 @@ SubgraphTester& SubgraphTester::AddUnary(xnn_unary_operator op,
   return *this;
 }
 
-SubgraphTester& SubgraphTester::AddConvolution2D(ConvolutionParams params,
-                                                 uint32_t input_id,
-                                                 uint32_t filter_id,
-                                                 uint32_t bias_id,
-                                                 uint32_t output_id) {
+SubgraphTester& SubgraphTester::AddConvolution2D(
+    ConvolutionParams params, uint32_t input_id, uint32_t filter_id,
+    uint32_t bias_id, uint32_t output_id, uint32_t flags) {
   const xnn_status status = xnn_define_convolution_2d(
       subgraph_.get(), params.padding.top, params.padding.right,
       params.padding.bottom, params.padding.left, params.kernel.height,
@@ -409,7 +407,7 @@ SubgraphTester& SubgraphTester::AddConvolution2D(ConvolutionParams params,
       params.dilation.height, params.dilation.width, params.groups,
       params.group_input_channels, params.group_output_channels,
       params.output_min, params.output_max, input_id, filter_id, bias_id,
-      output_id, /*flags=*/0);
+      output_id, flags);
   EXPECT_EQ(status, xnn_status_success);
 
   return *this;
@@ -424,14 +422,14 @@ SubgraphTester& SubgraphTester::AddCopy(uint32_t input_id, uint32_t output_id) {
 
 SubgraphTester& SubgraphTester::AddDepthwiseConvolution2D(
     DepthwiseConvolutionParams params, uint32_t input_id, uint32_t filter_id,
-    uint32_t bias_id, uint32_t output_id) {
+    uint32_t bias_id, uint32_t output_id, uint32_t flags) {
   const xnn_status status = xnn_define_depthwise_convolution_2d(
       subgraph_.get(), params.padding.top, params.padding.right,
       params.padding.bottom, params.padding.left, params.kernel.height,
       params.kernel.width, params.subsampling.height, params.subsampling.width,
       params.dilation.height, params.dilation.width, params.depth_multiplier,
       params.input_channels, params.output_min, params.output_max, input_id,
-      filter_id, bias_id, output_id, /*flags=*/0);
+      filter_id, bias_id, output_id, flags);
   EXPECT_EQ(status, xnn_status_success);
 
   return *this;
@@ -454,13 +452,13 @@ SubgraphTester& SubgraphTester::AddAveragePooling2D(
     uint32_t input_padding_top, uint32_t input_padding_right,
     uint32_t input_padding_bottom, uint32_t input_padding_left,
     uint32_t pooling_height, uint32_t pooling_width, uint32_t stride_height,
-    uint32_t stride_width, uint32_t input_id, uint32_t output_id) {
+    uint32_t stride_width, uint32_t input_id, uint32_t output_id,
+    uint32_t flags) {
   const xnn_status status = xnn_define_average_pooling_2d(
       subgraph_.get(), input_padding_top, input_padding_right,
       input_padding_bottom, input_padding_left, pooling_height, pooling_width,
       stride_height, stride_width, -std::numeric_limits<float>::infinity(),
-      std::numeric_limits<float>::infinity(), input_id, output_id,
-      /*flags=*/0);
+      std::numeric_limits<float>::infinity(), input_id, output_id, flags);
   EXPECT_EQ(status, xnn_status_success);
 
   return *this;
@@ -623,14 +621,13 @@ SubgraphTester& SubgraphTester::AddMaxPooling2D(
     uint32_t input_padding_bottom, uint32_t input_padding_left,
     uint32_t pooling_height, uint32_t pooling_width, uint32_t stride_height,
     uint32_t stride_width, uint32_t dilation_height, uint32_t dilation_width,
-    uint32_t input_id, uint32_t output_id) {
+    uint32_t input_id, uint32_t output_id, uint32_t flags) {
   const xnn_status status = xnn_define_max_pooling_2d(
       subgraph_.get(), input_padding_top, input_padding_right,
       input_padding_bottom, input_padding_left, pooling_height, pooling_width,
       stride_height, stride_width, dilation_height, dilation_width,
       -std::numeric_limits<float>::infinity(),
-      std::numeric_limits<float>::infinity(), input_id, output_id,
-      /*flags=*/0);
+      std::numeric_limits<float>::infinity(), input_id, output_id, flags);
   EXPECT_EQ(status, xnn_status_success);
 
   return *this;
@@ -640,11 +637,11 @@ SubgraphTester& SubgraphTester::AddArgMaxPooling2D(
     uint32_t input_padding_top, uint32_t input_padding_right,
     uint32_t input_padding_bottom, uint32_t input_padding_left,
     uint32_t pooling_height, uint32_t pooling_width, uint32_t input_id,
-    uint32_t output_value_id, uint32_t output_index_id) {
+    uint32_t output_value_id, uint32_t output_index_id, uint32_t flags) {
   const xnn_status status = xnn_define_argmax_pooling_2d(
       subgraph_.get(), input_padding_top, input_padding_right,
       input_padding_bottom, input_padding_left, pooling_height, pooling_width,
-      input_id, output_value_id, output_index_id, /*flags=*/0);
+      input_id, output_value_id, output_index_id, flags);
   EXPECT_EQ(status, xnn_status_success);
 
   return *this;

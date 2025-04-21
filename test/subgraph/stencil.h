@@ -26,17 +26,36 @@ struct StencilParams {
   size_t padding_min;
   size_t padding_max;
 
+  // Update the padding of this stencil to be "SAME" padding given an input
+  // size.
+  void compute_tf_same_padding(size_t input_extent) {
+    const size_t output_extent = divide_round_up(input_extent, stride);
+    const size_t total_padding = doz(
+        (output_extent - 1) * stride + dilated_kernel_extent(), input_extent);
+    padding_min = total_padding / 2;
+    padding_max = total_padding - padding_min;
+  }
+
   size_t padding() const { return padding_min + padding_max; }
   size_t dilated_kernel_extent() const { return (size - 1) * dilation + 1; }
 
-  size_t output_extent(size_t input_extent) const {
-    return doz(input_extent + padding(), dilated_kernel_extent()) / stride + 1;
+  size_t output_extent(size_t input_extent, bool same_padding = false) const {
+    if (same_padding) {
+      return divide_round_up(input_extent, stride);
+    } else {
+      return doz(input_extent + padding(), dilated_kernel_extent()) / stride +
+             1;
+    }
   }
 
-  size_t input_extent(size_t output_extent) const {
-    assert(output_extent > 0);
-    size_t unpadded = stride * (output_extent - 1) + dilated_kernel_extent();
-    return std::max<size_t>(1, doz(unpadded, padding()));
+  size_t input_extent(size_t output_extent, bool same_padding = false) const {
+    if (same_padding) {
+      return output_extent * stride;
+    } else {
+      assert(output_extent > 0);
+      size_t unpadded = stride * (output_extent - 1) + dilated_kernel_extent();
+      return std::max<size_t>(1, doz(unpadded, padding()));
+    }
   }
 
   // Many XNPACK implementations of stencil operations can't work correctly if

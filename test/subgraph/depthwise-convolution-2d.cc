@@ -165,6 +165,17 @@ void TestImpl(bool channelwise_quantization = false) {
     // Generate some random kernel and shape parameters.
     StencilParams kw = random_stencil_params(rng);
     StencilParams kh = random_stencil_params(rng);
+
+    std::bernoulli_distribution bool_dist(0.5);
+    const bool same_padding = bool_dist(rng);
+
+    uint32_t flags = 0;
+    if (same_padding) {
+      flags |= XNN_FLAG_TENSORFLOW_SAME_PADDING;
+      kw.padding_min = kw.padding_max = 0;
+      kh.padding_min = kh.padding_max = 0;
+    }
+
     DepthwiseConvolutionParams params =
         StencilToDepthwiseConvolutionParams(kh, kw);
     std::uniform_int_distribution<> depth_multiplier_dist(1, 7);
@@ -184,7 +195,7 @@ void TestImpl(bool channelwise_quantization = false) {
 
     // (Maybe) make a random bias.
     Tensor<Bias> bias;
-    if (rng() & 1) {
+    if (bool_dist(rng)) {
       std::vector<size_t> bias_shape = {params.input_channels *
                                         params.depth_multiplier};
       DatatypeGenerator<Bias> bias_gen = MakeDatatypeGenerator(Bias());
@@ -252,7 +263,7 @@ void TestImpl(bool channelwise_quantization = false) {
         .AddOutputTensor(4, xnn_datatype_of<Data>(), output_quantization,
                          output_id)
         .AddDepthwiseConvolution2D(params, input_id, filter_id, bias_id,
-                                   output_id);
+                                   output_id, flags);
     xnn_status status = subgraph.CreateRuntime();
     if (status == xnn_status_unsupported_hardware) {
       GTEST_SKIP();
@@ -264,11 +275,16 @@ void TestImpl(bool channelwise_quantization = false) {
       std::vector<size_t> output_shape = random_shape(rng, 4);
       std::vector<size_t> input_shape = {
           output_shape[0],
-          kh.input_extent(output_shape[1]),
-          kw.input_extent(output_shape[2]),
+          kh.input_extent(output_shape[1], same_padding),
+          kw.input_extent(output_shape[2], same_padding),
           params.input_channels,
       };
       output_shape[3] = params.input_channels * params.depth_multiplier;
+
+      if (same_padding) {
+        kh.compute_tf_same_padding(input_shape[1]);
+        kw.compute_tf_same_padding(input_shape[2]);
+      }
 
       Tensor<Data> input(input_shape, XnnExtraBytes);
       input.generate([&]() { return data_gen(rng); });

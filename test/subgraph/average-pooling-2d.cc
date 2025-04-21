@@ -6,6 +6,8 @@
 #include <cassert>
 #include <chrono>
 #include <cstddef>
+#include <cstdint>
+#include <random>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -71,6 +73,7 @@ Tensor<float> ReferenceImpl(Tensor<T> input, const StencilParams& kh,
 template <typename T>
 void TestImpl() {
   ReplicableRandomDevice rng;
+  std::bernoulli_distribution bool_dist(0.5);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
@@ -81,13 +84,22 @@ void TestImpl() {
     StencilParams kh =
         random_stencil_params(rng, /*max_dilation=*/1, /*max_kernel_size=*/5);
 
+    const bool same_padding = bool_dist(rng);
+
+    uint32_t flags = 0;
+    if (same_padding) {
+      flags |= XNN_FLAG_TENSORFLOW_SAME_PADDING;
+      kw.padding_min = kw.padding_max = 0;
+      kh.padding_min = kh.padding_max = 0;
+    }
+
     // Define subgraph
     SubgraphTester subgraph(2);
     subgraph.AddInputTensor(4, xnn_datatype_of<T>(), 0)
         .AddOutputTensor(4, xnn_datatype_of<T>(), 1)
         .AddAveragePooling2D(kh.padding_min, kw.padding_max, kh.padding_max,
                              kw.padding_min, kh.size, kw.size, kh.stride,
-                             kw.stride, 0, 1);
+                             kw.stride, 0, 1, flags);
     xnn_status status = subgraph.CreateRuntime();
     if (status == xnn_status_unsupported_hardware) {
       GTEST_SKIP();
@@ -99,10 +111,15 @@ void TestImpl() {
 
       std::vector<size_t> input_shape = {
           output_shape[0],
-          kh.input_extent(output_shape[1]),
-          kw.input_extent(output_shape[2]),
+          kh.input_extent(output_shape[1], same_padding),
+          kw.input_extent(output_shape[2], same_padding),
           output_shape[3],
       };
+
+      if (same_padding) {
+        kh.compute_tf_same_padding(input_shape[1]);
+        kw.compute_tf_same_padding(input_shape[2]);
+      }
 
       if (input_shape[1] <= kh.padding() || input_shape[2] <= kw.padding()) {
         // TODO(b/406664150): This is a hack around a horrible long-standing bug

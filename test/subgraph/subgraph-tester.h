@@ -383,15 +383,13 @@ class SubgraphTester {
 
   SubgraphTester& AddConvolution2D(ConvolutionParams params, uint32_t input_id,
                                    uint32_t filter_id, uint32_t bias_id,
-                                   uint32_t output_id);
+                                   uint32_t output_id, uint32_t flags = 0);
 
   SubgraphTester& AddCopy(uint32_t input_id, uint32_t output_id);
 
-  SubgraphTester& AddDepthwiseConvolution2D(DepthwiseConvolutionParams params,
-                                            uint32_t input_id,
-                                            uint32_t filter_id,
-                                            uint32_t bias_id,
-                                            uint32_t output_id);
+  SubgraphTester& AddDepthwiseConvolution2D(
+      DepthwiseConvolutionParams params, uint32_t input_id, uint32_t filter_id,
+      uint32_t bias_id, uint32_t output_id, uint32_t flags = 0);
 
   SubgraphTester& AddAddition(uint32_t input_id1, uint32_t input_id2,
                               uint32_t output_id);
@@ -400,7 +398,8 @@ class SubgraphTester {
       uint32_t input_padding_top, uint32_t input_padding_right,
       uint32_t input_padding_bottom, uint32_t input_padding_left,
       uint32_t pooling_height, uint32_t pooling_width, uint32_t stride_height,
-      uint32_t stride_width, uint32_t input_id, uint32_t output_id);
+      uint32_t stride_width, uint32_t input_id, uint32_t output_id,
+      uint32_t flags = 0);
 
   SubgraphTester& AddClamp(float output_min, float output_max,
                            uint32_t input_id, uint32_t output_id);
@@ -454,13 +453,13 @@ class SubgraphTester {
       uint32_t input_padding_bottom, uint32_t input_padding_left,
       uint32_t pooling_height, uint32_t pooling_width, uint32_t stride_height,
       uint32_t stride_width, uint32_t dilation_height, uint32_t dilation_width,
-      uint32_t input_id, uint32_t output_id);
+      uint32_t input_id, uint32_t output_id, uint32_t flags = 0);
 
   SubgraphTester& AddArgMaxPooling2D(
       uint32_t input_padding_top, uint32_t input_padding_right,
       uint32_t input_padding_bottom, uint32_t input_padding_left,
       uint32_t pooling_height, uint32_t pooling_width, uint32_t input_id,
-      uint32_t output_value_id, uint32_t output_index_id);
+      uint32_t output_value_id, uint32_t output_index_id, uint32_t flags = 0);
 
   SubgraphTester& AddUnpooling2D(
       uint32_t input_padding_top, uint32_t input_padding_right,
