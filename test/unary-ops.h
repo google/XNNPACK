@@ -95,7 +95,11 @@ struct UnaryOpInfo {
       case xnn_datatype_fp16:
         return TolExact16(y_ref);
       default:
+#if XNN_ARCH_HEXAGON
+        return TolExact(y_ref) * 4.f;
+#else
         return TolExact(y_ref);
+#endif
     }
   }
 

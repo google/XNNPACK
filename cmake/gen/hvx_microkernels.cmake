@@ -38,6 +38,7 @@ SET(PROD_HVX_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vsub-hvx-u128.c
   src/f32-vbinary/gen/f32-vsubc-hvx-u128.c
   src/f32-vexp/gen/f32-vexp-hvx-rational-3-2-div.c
+  src/f32-vgelu/gen/f32-vgelu-hvx-rational-12-10-div.c
   src/f32-vunary/gen/f32-vabs-hvx.c
   src/f32-vunary/gen/f32-vneg-hvx.c
   src/f32-vunary/gen/f32-vsqr-hvx.c
@@ -174,7 +175,7 @@ SET(NON_PROD_HVX_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vsub-hvx-u64.c
   src/f32-vbinary/gen/f32-vsubc-hvx-u32.c
   src/f32-vbinary/gen/f32-vsubc-hvx-u64.c
-  src/f32-vgelu/gen/f32-vgelu-hvx-rational-12-10-div.c
+  src/f32-vgelu/gen/f32-vgelu-hvx-rational-12-10-nr.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x32c4-minmax-fp32-hvx.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x64c4-minmax-fp32-hvx.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x96c4-minmax-fp32-hvx.c
