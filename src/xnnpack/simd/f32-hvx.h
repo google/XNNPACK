@@ -153,6 +153,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
 // Special functions.
 #define XNN_SIMD_HAVE_RCP_F32 0
 #define XNN_SIMD_HAVE_RSQRT_F32 0
+#define XNN_SIMD_NUM_RCP_ITER_F32 2
 
 #define XNN_SIMD_HAVE_REDUCE_MAX_F32 1
 static XNN_INLINE float xnn_reduce_max_f32(xnn_simd_f32_t v) {
