@@ -1192,7 +1192,7 @@ void xnn_compute_argmax_pooling(
   context->ukernel(
     context->output_width, context->pooling_size, context->channels,
     indirect_input, input_offset, /*input_pixel_stride=*/0, output, index,
-    context->input_increment, context->output_increment);
+    context->input_increment, context->output_increment, context->index_increment);
 }
 
 void xnn_compute_max_pooling(

@@ -537,13 +537,13 @@ typedef void (*xnn_argmaxpool_unipass_ukernel_fn)(
     size_t output_pixels, size_t kernel_elements, size_t channels,
     const void** input, size_t input_offset, size_t input_pixel_stride,
     void* output, uint32_t* index, size_t input_increment,
-    size_t output_increment);
+    size_t output_increment, size_t index_increment);
 
 typedef void (*xnn_f32_argmaxpool_unipass_ukernel_fn)(
     size_t output_pixels, size_t kernel_elements, size_t channels,
     const float** input, size_t input_offset, size_t input_pixel_stride,
     float* output, uint32_t* index, size_t input_increment,
-    size_t output_increment);
+    size_t output_increment, size_t index_increment);
 
 // UNPOOL: UNPOOLing
 

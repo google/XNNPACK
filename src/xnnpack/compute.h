@@ -869,6 +869,7 @@ struct argmax_pooling_context {
   size_t channels;
   size_t input_increment;
   size_t output_increment;
+  size_t index_increment;
   xnn_argmaxpool_unipass_ukernel_fn ukernel;
 };
 

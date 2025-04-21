@@ -26,7 +26,8 @@ void xnn_f32_argmaxpool_ukernel_9p8x__wasmsimd_c4(
     float* output,
     uint32_t* index,
     size_t input_increment,
-    size_t output_increment) XNN_OOB_READS
+    size_t output_increment,
+    size_t index_increment) XNN_OOB_READS
 {
   assert(output_pixels != 0);
   assert(pooling_elements != 0);
@@ -240,6 +241,6 @@ void xnn_f32_argmaxpool_ukernel_9p8x__wasmsimd_c4(
     input = (const float**) ((uintptr_t) input + input_increment);
     input_offset += input_pixel_stride;
     output = (float*) ((uintptr_t) output + output_increment);
-    index += channels;
+    index = (uint32_t*) ((uintptr_t) index + index_increment);
   } while (--output_pixels != 0);
 }
