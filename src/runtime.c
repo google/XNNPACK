@@ -748,13 +748,16 @@ enum xnn_status xnn_reshape_runtime(
   const bool use_slinky = (runtime->flags & XNN_FLAG_SLINKY_ENABLED) != 0;
 #endif
   if (use_slinky) {
-    #ifdef XNN_SLINKY_AVAILABLE
+#ifdef XNN_SLINKY_AVAILABLE
     if (!runtime->slinky_pipeline || (runtime->flags & XNN_FLAG_SLINKY_CONCRETE_BOUNDS) != 0) {
-      // slinky_init_pipeline(runtime);
+      enum xnn_status status = slinky_init_pipeline(runtime);
+      if (status != xnn_status_success) {
+        return status;
+      }
     }
-    // slinky_setup_pipeline(runtime);
-    return // slinky_reshape_pipeline(runtime);
-    #endif
+    slinky_setup_pipeline(runtime);
+    return slinky_reshape_pipeline(runtime);
+#endif
   }
 
   bool reallocation_required = false;
@@ -879,7 +882,7 @@ enum xnn_status xnn_setup_runtime_v2(
 
   #ifdef XNN_SLINKY_AVAILABLE
   if (runtime->slinky_pipeline) {
-    // slinky_setup_pipeline(runtime);
+    slinky_setup_pipeline(runtime);
     return xnn_status_success;
   }
   #endif
@@ -1040,7 +1043,7 @@ enum xnn_status xnn_invoke_runtime(
 {
   #ifdef XNN_SLINKY_AVAILABLE
   if (runtime->slinky_pipeline) {
-    return // slinky_invoke_pipeline(runtime);
+    return slinky_invoke_pipeline(runtime);
   }
   #endif
 
@@ -1071,7 +1074,7 @@ enum xnn_status xnn_delete_runtime(
 {
   if (runtime != NULL) {
     #ifdef XNN_SLINKY_AVAILABLE
-    // slinky_destroy_pipeline(runtime);
+    slinky_destroy_pipeline(runtime);
     #endif
 
     if (runtime->opdata != NULL) {

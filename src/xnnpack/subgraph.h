@@ -63,7 +63,7 @@ extern "C" {
 struct slinky_pipeline;
 typedef struct slinky_pipeline* slinky_pipeline_t;
 
-void slinky_init_pipeline(xnn_runtime_t runtime);
+enum xnn_status slinky_init_pipeline(xnn_runtime_t runtime);
 void slinky_setup_pipeline(xnn_runtime_t runtime);
 void slinky_destroy_pipeline(xnn_runtime_t runtime);
 enum xnn_status slinky_reshape_pipeline(xnn_runtime_t runtime);
