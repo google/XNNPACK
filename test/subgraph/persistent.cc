@@ -15,6 +15,7 @@
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/datatype.h"
+#include "src/xnnpack/math.h"
 #include "test/replicable_random_device.h"
 #include "test/subgraph/subgraph-tester.h"
 
@@ -86,6 +87,55 @@ TEST(Persistent, test) {
   std::fill(input.begin(), input.end(), 2.0f);
   Tensor<float> add = run(1.0f, 1.0f);
   ASSERT_THAT(add, testing::ElementsAre(2.0f, 3.0f, 4.0f, 5.0f, 6.0f));
+}
+
+TEST(Persistent, sliding_window) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  const size_t slices = 20;
+  const size_t slice_size = 5;
+  std::vector<size_t> dims = {slices, slice_size};
+  std::vector<size_t> slice_dims = {1, slice_size};
+
+  // Define subgraph
+  SubgraphTester subgraph(4);
+  const uint32_t input_id = 0;
+  const uint32_t output_id = 1;
+  uint32_t persistent_id = XNN_INVALID_VALUE_ID;
+  uint32_t prev_id = XNN_INVALID_VALUE_ID;
+  subgraph.AddInputTensor(slice_dims, xnn_datatype_of<float>(), input_id)
+      .AddOutputTensor(dims, xnn_datatype_of<float>(), output_id)
+      .AddInternalDynamicTensorF32(dims, &persistent_id,
+                                   XNN_VALUE_FLAG_PERSISTENT)
+      .AddInternalDynamicTensorF32(dims, &prev_id);
+
+  // Concatenate the new input with the persistent tensor, except for the last
+  // slice.
+  subgraph.AddSlice({0, 0}, {-1, 0}, {1, 1}, persistent_id, prev_id)
+      .AddConcatenate(0, {input_id, prev_id}, persistent_id)
+      .AddCopy(persistent_id, output_id);
+  ASSERT_EQ(xnn_status_success, subgraph.CreateRuntime());
+
+  Tensor<float> input(slice_dims, xnnpack::XnnExtraBytes);
+  subgraph.ReshapeExternalTensor(slice_dims, input.base(), input_id)
+      .ReshapeRuntime();
+  ASSERT_EQ(subgraph.GetExternalTensorShape(output_id), dims);
+
+  Tensor<float> output(dims);
+  subgraph.SetupExternalTensor(output.base(), output_id).SetupRuntime();
+
+  // We should start out with a buffer of zeros.
+  std::vector<float> expected(dims.front(), 0.0f);
+  for (size_t t = 0; t < slices * 2; ++t) {
+    std::fill(input.begin(), input.end(), t);
+    subgraph.InvokeRuntime();
+
+    for (size_t i = 0; i < slices; ++i) {
+      for (size_t j = 0; j < slice_size; ++j) {
+        ASSERT_EQ(output(i, j), doz(t, i));
+      }
+    }
+  }
 }
 
 }  // namespace xnnpack
