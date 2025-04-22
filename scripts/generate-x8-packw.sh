@@ -23,8 +23,9 @@ tools/xngen src/x8-packw/kr-scalar.c.in -D NR=8   -D KR=4 -D TYPE=int8_t -D IZP=
 tools/xngen src/x8-packw/kr-scalar.c.in -D NR=16  -D KR=4 -D TYPE=int8_t -D IZP=0 -o src/qs8-packw/gen/qs8-packw-x16c4-gemm-goi-scalar.c &
 tools/xngen src/x8-packw/kr-scalar.c.in -D NR=32  -D KR=4 -D TYPE=int8_t -D IZP=0 -o src/qs8-packw/gen/qs8-packw-x32c4-gemm-goi-scalar.c &
 tools/xngen src/x8-packw/kr-scalar.c.in -D NR=64  -D KR=4 -D TYPE=int8_t -D IZP=0 -o src/qs8-packw/gen/qs8-packw-x64c4-gemm-goi-scalar.c &
-tools/xngen src/x8-packw/kr-scalar.c.in -D NR=96  -D KR=4 -D TYPE=int8_t -D IZP=0 -o src/qs8-packw/gen/qs8-packw-x96c4-gemm-goi-scalar.c &
-tools/xngen src/x8-packw/kr-scalar.c.in -D NR=128 -D KR=4 -D TYPE=int8_t -D IZP=0 -o src/qs8-packw/gen/qs8-packw-x128c4-gemm-goi-scalar.c &
+# The following file names limit these microkernels to hexagon
+tools/xngen src/x8-packw/kr-scalar.c.in -D NR=96  -D KR=4 -D TYPE=int8_t -D IZP=0 -o src/qs8-packw/gen/qs8-packw-x96c4-gemm-goi-hvx.c &
+tools/xngen src/x8-packw/kr-scalar.c.in -D NR=128 -D KR=4 -D TYPE=int8_t -D IZP=0 -o src/qs8-packw/gen/qs8-packw-x128c4-gemm-goi-hvx.c &
 
 ### C8 packing
 tools/xngen src/x8-packw/kr-scalar.c.in -D NR=8  -D KR=8 -D TYPE=int8_t -D IZP=0   -o src/qs8-packw/gen/qs8-packw-x8c8-gemm-goi-scalar.c &

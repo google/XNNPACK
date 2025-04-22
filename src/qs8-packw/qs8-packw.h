@@ -10,8 +10,11 @@ XNN_QS8_UKERNEL(0, xnn_qs8_packw_gemm_goi_ukernel_x8c4__scalar, 8, 4, 1, 4, 1, 0
 XNN_QS8_UKERNEL(0, xnn_qs8_packw_gemm_goi_ukernel_x16c4__scalar, 16, 4, 1, 4, 1, 0)
 XNN_QS8_UKERNEL(0, xnn_qs8_packw_gemm_goi_ukernel_x32c4__scalar, 32, 4, 1, 4, 1, 0)
 XNN_QS8_UKERNEL(0, xnn_qs8_packw_gemm_goi_ukernel_x64c4__scalar, 64, 4, 1, 4, 1, 0)
+
+#if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 XNN_QS8_UKERNEL(0, xnn_qs8_packw_gemm_goi_ukernel_x96c4__scalar, 96, 4, 1, 4, 1, 0)
 XNN_QS8_UKERNEL(0, xnn_qs8_packw_gemm_goi_ukernel_x128c4__scalar, 128, 4, 1, 4, 1, 0)
+#endif
 
 XNN_QS8_UKERNEL(0, xnn_qs8_packw_gemm_goi_ukernel_x8c8__scalar, 8, 8, 1, 8, 1, 0)
 XNN_QS8_UKERNEL(0, xnn_qs8_packw_gemm_goi_ukernel_x16c8__scalar, 16, 8, 1, 8, 1, 0)
