@@ -1506,6 +1506,7 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
 
   // Non-static kernel is supported, but only for some data types
   switch (kernel_value->datatype) {
+    case xnn_datatype_fp16:
     case xnn_datatype_fp32:
       break;  // non-static kernel is supported
     default:
@@ -1630,6 +1631,7 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
 
     // Non-static bias is supported, but only for some data types
     switch (bias_value->datatype) {
+      case xnn_datatype_fp16:
       case xnn_datatype_fp32:
         if (is_channelwise_quantized && bias_value->data == NULL) {
           xnn_log_error("failed to define %s operator with bias ID #%" PRIu32

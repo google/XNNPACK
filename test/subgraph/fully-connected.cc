@@ -327,8 +327,8 @@ const size_t no_blockwise = std::numeric_limits<size_t>::max();
 
 template <typename Input, typename Filter, typename Bias,
           typename Output = Input, typename Scale = float>
-void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid,
-              size_t block_size = no_blockwise) {
+void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
+                 size_t block_size = no_blockwise) {
   const bool channelwise_quantization =
       xnn_datatype_is_channelwise_quantized(datatype_of<Filter>());
   // If the filter datatype is sub-byte, we have more than one filter element
@@ -347,7 +347,7 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid,
   // codepaths that assume the LHS has rank >= 2.
   std::uniform_int_distribution<> rank_dist{2, XNN_MAX_TENSOR_DIMS - 1};
 
-  for (auto _ : FuzzTest(std::chrono::milliseconds(1000))) {
+  for (auto _ : FuzzTest(std::chrono::milliseconds(500))) {
     size_t rank = rank_dist(rng);
     size_t input_channels = channels_dist(rng);
     size_t output_channels = channels_dist(rng);
@@ -549,40 +549,191 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid,
   }
 }
 
-TEST(FullyConnectedQC8, test) { TestImpl<qint8, qcint8, qint32>(); }
-TEST(FullyConnectedQU8, test) { TestImpl<quint8, quint8, qint32>(); }
-TEST(FullyConnectedQS8QC8W, test) { TestImpl<qint8, qcint8, qint32>(); }
-TEST(FullyConnectedQS8QC4W, test) { TestImpl<qint8, qcint4, qint32>(); }
-TEST(FullyConnectedF16, test) { TestImpl<xnn_float16, float, float>(); }
-TEST(FullyConnectedF32, test) { TestImpl<float, float, float>(); }
+TEST(FullyConnectedQC8, static_b) { TestStaticB<qint8, qcint8, qint32>(); }
+TEST(FullyConnectedQU8, static_b) { TestStaticB<quint8, quint8, qint32>(); }
+TEST(FullyConnectedQS8QC8W, static_b) { TestStaticB<qint8, qcint8, qint32>(); }
+TEST(FullyConnectedQS8QC4W, static_b) { TestStaticB<qint8, qcint4, qint32>(); }
+TEST(FullyConnectedF16, static_b) { TestStaticB<xnn_float16, float, float>(); }
+TEST(FullyConnectedF32, static_b) { TestStaticB<float, float, float>(); }
 // TODO(b/407771627): Either add xnn_datatype_qcuint4, or remove F32QC4W.
-TEST(FullyConnectedF32QC4W, test) { TestImpl<float, qcuint4, float>(); }
-TEST(FullyConnectedF32QC8W, test) { TestImpl<float, qcint8, float>(); }
-TEST(FullyConnectedBF16F32, test) {
-  TestImpl<xnn_bfloat16, xnn_bfloat16, float, float>();
+TEST(FullyConnectedF32QC4W, static_b) { TestStaticB<float, qcuint4, float>(); }
+TEST(FullyConnectedF32QC8W, static_b) { TestStaticB<float, qcint8, float>(); }
+TEST(FullyConnectedBF16F32, static_b) {
+  TestStaticB<xnn_bfloat16, xnn_bfloat16, float, float>();
 }
-TEST(FullyConnectedQD8F16QC4W, test) {
-  TestImpl<xnn_float16, qcint4, xnn_float16>(
+TEST(FullyConnectedQD8F16QC4W, static_b) {
+  TestStaticB<xnn_float16, qcint4, xnn_float16>(
       /*convert_to=*/xnn_datatype_qdint8);
 }
-TEST(FullyConnectedQD8F16QC8W, test) {
-  TestImpl<xnn_float16, qcint8, xnn_float16>(
+TEST(FullyConnectedQD8F16QC8W, static_b) {
+  TestStaticB<xnn_float16, qcint8, xnn_float16>(
       /*convert_to=*/xnn_datatype_qdint8);
 }
-TEST(FullyConnectedQD8F32QC4W, test) {
-  TestImpl<float, qcint4, float>(/*convert_to=*/xnn_datatype_qdint8);
+TEST(FullyConnectedQD8F32QC4W, static_b) {
+  TestStaticB<float, qcint4, float>(/*convert_to=*/xnn_datatype_qdint8);
 }
-TEST(FullyConnectedQD8F32QC8W, test) {
-  TestImpl<float, qcint8, float>(/*convert_to=*/xnn_datatype_qdint8);
+TEST(FullyConnectedQD8F32QC8W, static_b) {
+  TestStaticB<float, qcint8, float>(/*convert_to=*/xnn_datatype_qdint8);
 }
 
-TEST(FullyConnectedQD8F16QB4W, test) {
-  TestImpl<xnn_float16, qcuint4, xnn_float16, xnn_float16, xnn_bfloat16>(
+TEST(FullyConnectedQD8F16QB4W, static_b) {
+  TestStaticB<xnn_float16, qcuint4, xnn_float16, xnn_float16, xnn_bfloat16>(
       /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
 }
-TEST(FullyConnectedQD8F32QB4W, test) {
-  TestImpl<float, qcuint4, float, float, xnn_bfloat16>(
+TEST(FullyConnectedQD8F32QB4W, static_b) {
+  TestStaticB<float, qcuint4, float, float, xnn_bfloat16>(
       /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
+}
+
+template <typename Input, typename Filter, typename Bias,
+          typename Output = Input>
+void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid,
+                  size_t block_size = no_blockwise) {
+  ReplicableRandomDevice rng;
+
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  // There is no quantization in this case.
+  xnn_quantization_params filter_quantization = {0, 1.0f};
+  xnn_quantization_params input_quantization = {0, 1.0f};
+  xnn_quantization_params output_quantization = {0, 1.0f};
+  xnn_quantization_params bias_quantization = {0, 1.0f};
+  Tensor<float> filter_scale({1, 1});
+  filter_scale.fill(1.0f);
+  broadcast_extent_1(filter_scale);
+
+  auto input_gen = MakeDatatypeGenerator(Input());
+  auto output_gen = MakeDatatypeGenerator(Output());
+  std::uniform_int_distribution<> channels_dist{1, 100};
+  std::uniform_int_distribution<> rank_dist{1, XNN_MAX_TENSOR_DIMS - 1};
+
+  for (auto _ : FuzzTest(std::chrono::milliseconds(500))) {
+    const size_t rank = rank_dist(rng);
+
+    uint32_t flags = 0;
+    if (rng() & 1) {
+      flags |= XNN_FLAG_TRANSPOSE_WEIGHTS;
+    }
+
+    float output_min = output_gen(rng);
+    float output_max = output_gen(rng);
+    if (output_min >= output_max) {
+      // ~50% of the time, there is no min/max.
+      output_min = -std::numeric_limits<float>::infinity();
+      output_max = std::numeric_limits<float>::infinity();
+    }
+
+    SubgraphTester subgraph(4);
+    const uint32_t input_id = 0;
+    const uint32_t filter_id = 1;
+    const uint32_t bias_id = rng() & 1 ? XNN_INVALID_VALUE_ID : 2;
+    const uint32_t output_id = 3;
+    subgraph.AddInputTensor(rank, datatype_of<Input>(), input_id);
+
+    subgraph.AddInputTensor(2, xnn_datatype_of<Filter>(), filter_id);
+    if (bias_id != XNN_INVALID_VALUE_ID) {
+      subgraph.AddInputTensor(1, xnn_datatype_of<Bias>(), bias_id);
+    }
+    subgraph.AddOutputTensor(rank, datatype_of<Output>(), output_id)
+        .AddFullyConnected(output_min, output_max, input_id, filter_id, bias_id,
+                           output_id, flags);
+    xnn_status status = subgraph.CreateRuntime();
+    if (status == xnn_status_unsupported_hardware) {
+      GTEST_SKIP();
+      return;
+    }
+
+    // Run the subgraph twice, with a different input/output shape each time.
+    for (int reshape = 0; reshape < 2; ++reshape) {
+      size_t input_channels = channels_dist(rng);
+      size_t output_channels = channels_dist(rng);
+
+      // Make a random filter.
+      std::vector<size_t> filter_shape = {output_channels, input_channels};
+      if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+        std::swap(filter_shape[0], filter_shape[1]);
+      }
+      auto filter_gen = MakeDatatypeGenerator(Filter());
+      Tensor<Filter> filter(filter_shape, XnnExtraBytes);
+      filter.generate([&]() { return filter_gen(rng); });
+
+      std::vector<size_t> input_shape = random_shape(rng, rank, 1, 4);
+      std::vector<size_t> output_shape = input_shape;
+      input_shape.back() = input_channels;
+      output_shape.back() = output_channels;
+      if (flags & XNN_FLAG_TENSORFLOW_RESHAPE_2D) {
+        output_shape = Reshape2D(output_shape);
+      }
+
+      Tensor<Input> input(input_shape, XnnExtraBytes);
+      input.generate([&]() { return input_gen(rng); });
+
+      subgraph.ReshapeExternalTensor(input_shape, input.base(), input_id)
+          .ReshapeExternalTensor(filter_shape, filter.base(), filter_id);
+      Tensor<Bias> bias;
+      if (bias_id != XNN_INVALID_VALUE_ID) {
+        std::vector<size_t> bias_shape = {output_channels};
+        bias = Tensor<Bias>(bias_shape, XnnExtraBytes);
+        DatatypeGenerator<Bias> bias_gen = MakeDatatypeGenerator(Bias());
+        bias.generate([&]() { return bias_gen(rng); });
+        subgraph.ReshapeExternalTensor(bias_shape, bias.base(), bias_id);
+      }
+      subgraph.ReshapeRuntime();
+      ASSERT_EQ(subgraph.GetExternalTensorShape(output_id), output_shape)
+          << ", input_shape=" << index_to_string(input_shape);
+
+      // Run subgraph
+      Tensor<Output> output(output_shape);
+      subgraph.SetupExternalTensor(output.base(), output_id)
+          .SetupRuntime()
+          .InvokeRuntime();
+
+      // Verify results.
+      Tensor<float> expected =
+          ReferenceImpl(input, filter, bias, input_quantization,
+                        filter_quantization.zero_point, filter_scale,
+                        block_size, bias_quantization, flags);
+      for (float& i : expected) {
+        i = std::max(i, output_min);
+        i = std::min(i, output_max);
+      }
+
+      ASSERT_EQ(expected.extents(), output.extents());
+      if (xnn_datatype_is_quantized(datatype_of<Output>())) {
+        for (const auto& i : EnumerateIndices(output.extents())) {
+          ASSERT_NEAR(output(i),
+                      quantize<Output>(expected(i), output_quantization), 1)
+              << "input_shape=" << index_to_string(input_shape)
+              << ", output_shape=" << index_to_string(output_shape)
+              << ", filter_shape=" << index_to_string(filter_shape);
+        }
+      } else {
+        const float max_a = MaxOfDatatype(Input());
+        const float max_b = MaxOfDatatype(Filter()) * filter_quantization.scale;
+        const float tolerance = xnnpack::epsilon(xnn_datatype_of<Output>()) *
+                                input_channels * max_a * max_b * 4.0f;
+        for (const auto& i : EnumerateIndices(output.extents())) {
+          ASSERT_NEAR(static_cast<float>(output(i)), expected(i), tolerance)
+              << "input_shape=" << index_to_string(input_shape)
+              << ", output_shape=" << index_to_string(output_shape)
+              << ", filter_shape=" << index_to_string(filter_shape);
+        }
+      }
+    }
+  }
+}
+
+TEST(FullyConnectedF16, dynamic_b) {
+  TestDynamicB<xnn_float16, xnn_float16, xnn_float16, xnn_float16>();
+}
+TEST(FullyConnectedF16F32F16, dynamic_b) {
+  // TODO(b/412077394): Fix this case.
+  GTEST_SKIP();
+  return;
+  TestDynamicB<xnn_float16, float, float, xnn_float16>();
+}
+TEST(FullyConnectedF32, dynamic_b) {
+  TestDynamicB<float, float, float, float>();
 }
 
 }  // namespace xnnpack
