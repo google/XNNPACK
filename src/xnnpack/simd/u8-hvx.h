@@ -58,6 +58,10 @@ static XNN_INLINE float xnn_reduce_min_u8(xnn_simd_u8_t v) {
   return *((uint8_t*)&v);
 }
 
+static XNN_INLINE xnn_simd_u8_t xnn_xor_u8(xnn_simd_u8_t a, xnn_simd_u8_t b) {
+  return Q6_V_vxor_VV(a, b);
+}
+
 // Load/store operations.
 static XNN_INLINE xnn_simd_u8_t xnn_loadu_u8(const uint8_t* ptr) {
   return *((HVX_UVector*)ptr);

@@ -12,8 +12,6 @@ $SIMD_TILE = BATCH_TILE // 32
 #include "src/xnnpack/simd/f32-hvx.h"
 #include "src/xnnpack/raddstoreexpminusmax.h"
 
-$PARAMS_STRUCT = "hvx_rr2_p5"
-$VMULADD_F32 = "xnn_fmadd_f32"
 void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u${BATCH_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
     size_t batch,
     const float* input,
@@ -52,10 +50,9 @@ void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u${BATCH_TILE}${"" if ACCU
   XNN_FORCE_REALIZATION(vc1);
   XNN_FORCE_REALIZATION(vdenorm_cutoff);
 
+  $for A in range(ACCUMULATORS):
+    xnn_simd_f32_t vacc${A} = xnn_zero_f32();
   $if BATCH_TILE > 32:
-    HVX_Vector vacc0 = Q6_V_vzero();
-    $for K in range(1, ACCUMULATORS):
-      HVX_Vector vacc${K} = vacc0;
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
       const HVX_Vector vi0 =  xnn_loadu_f32(input);
       $for N in range(32, BATCH_TILE, 32):
@@ -68,7 +65,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u${BATCH_TILE}${"" if ACCU
 
       // n := round(x / log(2))
       $for N in range(0, BATCH_TILE, 32):
-        HVX_Vector vn${int(N/32)} = ${VMULADD_F32}(vx${int(N/32)}, vlog2e, vmagic_bias);
+        HVX_Vector vn${int(N/32)} = xnn_fmadd_f32(vx${int(N/32)}, vlog2e, vmagic_bias);
 
       // Create a floating-point number s (scale) such that s == 2**n for inputs which don't cause underflow.
       $for N in range(0, BATCH_TILE, 32):
@@ -81,10 +78,10 @@ void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u${BATCH_TILE}${"" if ACCU
       // Compute reduced argument t := x - batch * log(2).
       // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
       $for N in range(0, BATCH_TILE, 32):
-          HVX_Vector vt${int(N/32)} = ${VMULADD_F32}(vn${int(N/32)}, vminus_ln2_hi, vx${int(N/32)});
+          HVX_Vector vt${int(N/32)} = xnn_fmadd_f32(vn${int(N/32)}, vminus_ln2_hi, vx${int(N/32)});
 
       $for N in range(0, BATCH_TILE, 32):
-        vt${int(N/32)} = ${VMULADD_F32}(vn${int(N/32)}, vminus_ln2_lo, vt${int(N/32)});
+        vt${int(N/32)} = xnn_fmadd_f32(vn${int(N/32)}, vminus_ln2_lo, vt${int(N/32)});
 
       // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
       //  p := c5 * t + c4;
@@ -92,16 +89,16 @@ void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u${BATCH_TILE}${"" if ACCU
       //  p = p * t + c2;
       //  p = p * t + c1;
       $for N in range(0, BATCH_TILE, 32):
-        HVX_Vector vp${int(N/32)} = ${VMULADD_F32}(vc5, vt${int(N/32)}, vc4);
+        HVX_Vector vp${int(N/32)} = xnn_fmadd_f32(vc5, vt${int(N/32)}, vc4);
 
       $for N in range(0, BATCH_TILE, 32):
-        vp${int(N/32)} = ${VMULADD_F32}(vp${int(N/32)}, vt${int(N/32)}, vc3);
+        vp${int(N/32)} = xnn_fmadd_f32(vp${int(N/32)}, vt${int(N/32)}, vc3);
 
       $for N in range(0, BATCH_TILE, 32):
-        vp${int(N/32)} = ${VMULADD_F32}(vp${int(N/32)}, vt${int(N/32)}, vc2);
+        vp${int(N/32)} = xnn_fmadd_f32(vp${int(N/32)}, vt${int(N/32)}, vc2);
 
       $for N in range(0, BATCH_TILE, 32):
-        vp${int(N/32)} = ${VMULADD_F32}(vp${int(N/32)}, vt${int(N/32)}, vc1);
+        vp${int(N/32)} = xnn_fmadd_f32(vp${int(N/32)}, vt${int(N/32)}, vc1);
 
       // Reconstruct the final f value:
       //   f = s * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
@@ -111,7 +108,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u${BATCH_TILE}${"" if ACCU
         vt${int(N/32)} = xnn_mul_f32(vt${int(N/32)}, vs${int(N/32)});
 
       $for N in range(0, BATCH_TILE, 32):
-        HVX_Vector vf${int(N/32)} = ${VMULADD_F32}(vt${int(N/32)}, vp${int(N/32)}, vs${int(N/32)});
+        HVX_Vector vf${int(N/32)} = xnn_fmadd_f32(vt${int(N/32)}, vp${int(N/32)}, vs${int(N/32)});
 
       // For inputs below zero cutoff, replace output with +0.0f.
       // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
@@ -134,41 +131,37 @@ void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u${BATCH_TILE}${"" if ACCU
             vacc${A} = xnn_add_f32(vacc${A}, vacc${A + ACC_SLICE});
         $ACC_SLICE *= 2
 
-    HVX_Vector vacc = vacc0;
-  $if BATCH_TILE == 32:
-    HVX_Vector vacc = Q6_V_vzero();
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
     const HVX_Vector vi = xnn_loadu_f32(input);
     input += 32;
 
     const HVX_Vector vx = xnn_sub_f32(vi, vi_max);
 
-    HVX_Vector vn = ${VMULADD_F32}(vx, vlog2e, vmagic_bias);
+    HVX_Vector vn = xnn_fmadd_f32(vx, vlog2e, vmagic_bias);
 
     const HVX_Vector vs = Q6_Vw_vasl_VwR(vn, 23);
 
     vn = xnn_sub_f32(vn, vmagic_bias);
 
-    HVX_Vector vt = ${VMULADD_F32}(vn, vminus_ln2_hi, vx);
-    vt = ${VMULADD_F32}(vn, vminus_ln2_lo, vt);
+    HVX_Vector vt = xnn_fmadd_f32(vn, vminus_ln2_hi, vx);
+    vt = xnn_fmadd_f32(vn, vminus_ln2_lo, vt);
 
-    HVX_Vector vp = ${VMULADD_F32}(vc5, vt, vc4);
-    vp = ${VMULADD_F32}(vp, vt, vc3);
-    vp = ${VMULADD_F32}(vp, vt, vc2);
-    vp = ${VMULADD_F32}(vp, vt, vc1);
+    HVX_Vector vp = xnn_fmadd_f32(vc5, vt, vc4);
+    vp = xnn_fmadd_f32(vp, vt, vc3);
+    vp = xnn_fmadd_f32(vp, vt, vc2);
+    vp = xnn_fmadd_f32(vp, vt, vc1);
 
     vt = xnn_mul_f32(vt, vs);
-    HVX_Vector vf = ${VMULADD_F32}(vt, vp, vs);
+    HVX_Vector vf = xnn_fmadd_f32(vt, vp, vs);
 
     vf = Q6_V_vand_QnV(Q6_Q_vcmp_gt_VsfVsf(vdenorm_cutoff, vx), vf);
 
     xnn_storeu_f32(output, vf);
     output += 32;
 
-    vacc = xnn_add_f32(vacc, vf);
+    vacc0 = xnn_add_f32(vacc0, vf);
   }
 
-  float vacc_lo = Q6_f32_vrsum_Vsf(vacc);
   if XNN_UNLIKELY(batch != 0) {
     assert(batch >= 1 * sizeof(float));
     assert(batch < 32 * sizeof(float));
@@ -177,29 +170,30 @@ void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u${BATCH_TILE}${"" if ACCU
 
     const HVX_Vector vx = xnn_sub_f32(vi, vi_max);
 
-    HVX_Vector vn = ${VMULADD_F32}(vx, vlog2e, vmagic_bias);
+    HVX_Vector vn = xnn_fmadd_f32(vx, vlog2e, vmagic_bias);
 
     const HVX_Vector vs = Q6_Vw_vasl_VwR(vn, 23);
 
     vn = xnn_sub_f32(vn, vmagic_bias);
 
-    HVX_Vector vt = ${VMULADD_F32}(vn, vminus_ln2_hi, vx);
-    vt = ${VMULADD_F32}(vn, vminus_ln2_lo, vt);
+    HVX_Vector vt = xnn_fmadd_f32(vn, vminus_ln2_hi, vx);
+    vt = xnn_fmadd_f32(vn, vminus_ln2_lo, vt);
 
-    HVX_Vector vp = ${VMULADD_F32}(vc5, vt, vc4);
-    vp = ${VMULADD_F32}(vp, vt, vc3);
-    vp = ${VMULADD_F32}(vp, vt, vc2);
-    vp = ${VMULADD_F32}(vp, vt, vc1);
+    HVX_Vector vp = xnn_fmadd_f32(vc5, vt, vc4);
+    vp = xnn_fmadd_f32(vp, vt, vc3);
+    vp = xnn_fmadd_f32(vp, vt, vc2);
+    vp = xnn_fmadd_f32(vp, vt, vc1);
 
     vt = xnn_mul_f32(vt, vs);
-    HVX_Vector vf = ${VMULADD_F32}(vt, vp, vs);
+    HVX_Vector vf = xnn_fmadd_f32(vt, vp, vs);
 
     vf = Q6_V_vand_QnV(Q6_Q_vcmp_gt_VsfVsf(vdenorm_cutoff, vx), vf);
 
     Q6_V_vstu_variable(output, batch, vf);
 
-    vf = Q6_V_vand_QV(Q6_Q_vsetq_R(batch), vf);
-    vacc_lo += Q6_f32_vrsum_Vsf(vf);
+    HVX_VectorPred mask = Q6_Q_vsetq_R(batch);
+    vacc0 = xnn_add_f32(vacc0, Q6_V_vand_QV(mask, vf));
   }
-  *sum = vacc_lo;
+
+  *sum = xnn_reduce_add_f32(vacc0);
 }

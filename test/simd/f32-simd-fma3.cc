@@ -938,6 +938,19 @@ TEST_F(F32SimdFMA3Test, CmpEq) {
   }
 }
 
+#if XNN_SIMD_HAVE_REDUCE_ADD_F32
+TEST_F(F32SimdFMA3Test, Reduce_Add) {
+  const xnn_simd_f32_t a = xnn_loadu_f32(inputs_.data());
+  const float res = xnn_reduce_add_f32(a);
+  float sum = 0.0f;
+  for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+    sum += inputs_[k];
+  }
+  const float tolerance = std::numeric_limits<float>::epsilon() * std::abs(sum);
+  ASSERT_NEAR(res, sum, tolerance);
+}
+#endif
+
 TEST_F(F32SimdFMA3Test, StoreTail) {
   const xnn_simd_f32_t a = xnn_loadu_f32(inputs_.data());
   for (size_t num_elements = 1; num_elements < xnn_simd_size_f32;

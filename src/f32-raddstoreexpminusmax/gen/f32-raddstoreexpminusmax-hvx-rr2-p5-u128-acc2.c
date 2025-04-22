@@ -52,8 +52,8 @@ void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u128_acc2(
   XNN_FORCE_REALIZATION(vc1);
   XNN_FORCE_REALIZATION(vdenorm_cutoff);
 
-  HVX_Vector vacc0 = Q6_V_vzero();
-  HVX_Vector vacc1 = vacc0;
+  xnn_simd_f32_t vacc0 = xnn_zero_f32();
+  xnn_simd_f32_t vacc1 = xnn_zero_f32();
   for (; batch >= 128 * sizeof(float); batch -= 128 * sizeof(float)) {
     const HVX_Vector vi0 =  xnn_loadu_f32(input);
     const HVX_Vector vi1 = xnn_loadu_f32(input + 32);
@@ -156,7 +156,6 @@ void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u128_acc2(
   }
   vacc0 = xnn_add_f32(vacc0, vacc1);
 
-  HVX_Vector vacc = vacc0;
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
     const HVX_Vector vi = xnn_loadu_f32(input);
     input += 32;
@@ -185,10 +184,9 @@ void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u128_acc2(
     xnn_storeu_f32(output, vf);
     output += 32;
 
-    vacc = xnn_add_f32(vacc, vf);
+    vacc0 = xnn_add_f32(vacc0, vf);
   }
 
-  float vacc_lo = Q6_f32_vrsum_Vsf(vacc);
   if XNN_UNLIKELY(batch != 0) {
     assert(batch >= 1 * sizeof(float));
     assert(batch < 32 * sizeof(float));
@@ -218,8 +216,9 @@ void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u128_acc2(
 
     Q6_V_vstu_variable(output, batch, vf);
 
-    vf = Q6_V_vand_QV(Q6_Q_vsetq_R(batch), vf);
-    vacc_lo += Q6_f32_vrsum_Vsf(vf);
+    HVX_VectorPred mask = Q6_Q_vsetq_R(batch);
+    vacc0 = xnn_add_f32(vacc0, Q6_V_vand_QV(mask, vf));
   }
-  *sum = vacc_lo;
+
+  *sum = xnn_reduce_add_f32(vacc0);
 }
