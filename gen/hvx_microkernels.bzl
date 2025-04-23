@@ -108,7 +108,6 @@ NON_PROD_HVX_MICROKERNEL_SRCS = [
     "src/f32-igemm/gen/f32-igemm-9x64-minmax-hvx-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-10x32-minmax-hvx-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-10x64-minmax-hvx-broadcast.c",
-    "src/f32-igemm/gen/f32-igemm-16x32-minmax-hvx-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-16x64-minmax-hvx-broadcast.c",
     "src/f32-qs8-vcvt/gen/f32-qs8-vcvt-hvx-u32.c",
     "src/f32-qs8-vcvt/gen/f32-qs8-vcvt-hvx-u64.c",
