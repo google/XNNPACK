@@ -1505,6 +1505,8 @@ static void init_f32_tanh_config(void) {
     } else {
       f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__scalar_rational_9_8_div_u4;
     }
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__hvx_rational_9_8_div_u128;
   #else
     f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn)xnn_f32_vtanh_ukernel__scalar_rational_9_8_div_u1;
   #endif
