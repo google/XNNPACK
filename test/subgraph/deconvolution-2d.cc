@@ -40,6 +40,9 @@ Tensor<float> ReferenceImpl(Tensor<Data> input, Tensor<Filter> filter,
                         kw.input_extent(input.extent(2)),
                         groups * group_output_channels});
 
+  assert(kw.padding() == 0);
+  assert(kh.padding() == 0);
+
   input = input.split(3, {groups, group_input_channels});
   output = output.split(3, {groups, group_output_channels});
   if (!bias.empty()) {
@@ -220,6 +223,12 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
     // Generate some random kernel and shape parameters.
     StencilParams kw = random_stencil_params(rng);
     StencilParams kh = random_stencil_params(rng);
+
+    // And no padding
+    kw.padding_min = 0;
+    kw.padding_max = 0;
+    kh.padding_min = 0;
+    kh.padding_max = 0;
 
     DeconvolutionParams params = StencilToDeconvolutionParams(kh, kw);
     std::uniform_int_distribution<> channels_dist{1, 10};
