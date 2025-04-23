@@ -59,11 +59,11 @@ XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_vapproxgelu_ukernel__neon_rat
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_vapproxgelu_ukernel__neon_rational_12_10_div_u16, 16, false, float, struct xnn_f32_default_params, NULL)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-#if XNN_ENABLE_HVX && (XNN_ARCH_HEXAGON)
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_hvx, xnn_f32_vapproxgelu_ukernel__hvx_rational_12_10_div_u32, 32, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_hvx, xnn_f32_vapproxgelu_ukernel__hvx_rational_12_10_div_u64, 64, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_hvx, xnn_f32_vapproxgelu_ukernel__hvx_rational_12_10_div_u128, 128, false, float, struct xnn_f32_default_params, NULL)
-#endif  // XNN_ENABLE_HVX && (XNN_ARCH_HEXAGON)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vapproxgelu_ukernel__wasmsimd_rational_12_10_div_u4, 4, false, float, struct xnn_f32_default_params, NULL)

@@ -39,22 +39,22 @@ $for BATCH_TILE in BATCH_TILES:
     // which the interpolation returns 1.0f.
     #if XNN_SIMD_HAS_NATIVE_FMA
       $if DIV == "DIV":
-        XNN_SIMD_CONST_F32(vmax_x, 7.9807181358e+00);
-        XNN_SIMD_CONST_F32(vmin_x, -7.9807181358e+00);
+        XNN_SIMD_CONST_F32(vmax_x, 7.9807181358e+00f);
+        XNN_SIMD_CONST_F32(vmin_x, -7.9807181358e+00f);
       $else:
         $if ARCH == "avx512f":
-          XNN_SIMD_CONST_F32(vmax_x, 7.8473143578e+00);
-          XNN_SIMD_CONST_F32(vmin_x, -7.8473143578e+00);
+          XNN_SIMD_CONST_F32(vmax_x, 7.8473143578e+00f);
+          XNN_SIMD_CONST_F32(vmin_x, -7.8473143578e+00f);
         $else:
-          XNN_SIMD_CONST_F32(vmax_x, 7.8947348595e+00);
-          XNN_SIMD_CONST_F32(vmin_x, -7.8947348595e+00);
+          XNN_SIMD_CONST_F32(vmax_x, 7.8947348595e+00f);
+          XNN_SIMD_CONST_F32(vmin_x, -7.8947348595e+00f);
     #else
       $if DIV == "DIV":
-        XNN_SIMD_CONST_F32(vmax_x, 7.8522667885e+00);
-        XNN_SIMD_CONST_F32(vmin_x, -7.8522667885e+00);
+        XNN_SIMD_CONST_F32(vmax_x, 7.8522667885e+00f);
+        XNN_SIMD_CONST_F32(vmin_x, -7.8522667885e+00f);
       $else:
-        XNN_SIMD_CONST_F32(vmax_x, 7.7497606277e+00);
-        XNN_SIMD_CONST_F32(vmin_x, -7.7497606277e+00);
+        XNN_SIMD_CONST_F32(vmax_x, 7.7497606277e+00f);
+        XNN_SIMD_CONST_F32(vmin_x, -7.7497606277e+00f);
     #endif  // XNN_SIMD_HAS_NATIVE_FMA
 
     // The monomial coefficients of the numerator polynomial (odd).

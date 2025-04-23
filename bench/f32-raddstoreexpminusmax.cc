@@ -190,7 +190,7 @@ BENCHMARK_CAPTURE(
     ->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, rvv_rr2_p6_u2v,
                   xnn_f32_rmax_ukernel__rvv_u8v,
                   xnn_f32_raddstoreexpminusmax_ukernel__rvv_rr2_p6_u2v, nullptr,
@@ -203,7 +203,7 @@ BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, rvv_rr2_p6_u4v,
                   benchmark::utils::CheckRVV)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
 #if XNN_ENABLE_AVX256SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
@@ -426,7 +426,7 @@ BENCHMARK_CAPTURE(
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+#if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, hvx_rr2_p5_u32,
                   xnn_f32_rmax_ukernel__hvx_u64_acc2,
                   xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u32, nullptr,
@@ -451,7 +451,7 @@ BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, hvx_rr2_p5_u128_acc4,
                   nullptr, benchmark::utils::CheckHVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+#endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 
 BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, scalar_rr2_lut64_p2_u1,
                   xnn_f32_rmax_ukernel__scalar_u4_acc4,

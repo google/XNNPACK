@@ -45,12 +45,12 @@ XNN_TRANSPOSE_UKERNEL(0, xnn_x32_transposec_ukernel__4x4_reuse_multi_wasmsimd, 3
 XNN_TRANSPOSE_UKERNEL(0, xnn_x32_transposec_ukernel__4x4_reuse_switch_wasmsimd, 32, uint32_t, 4, 4)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-#if XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 XNN_TRANSPOSE_UKERNEL(xnn_arch_riscv_vector, xnn_x32_transposec_ukernel__4x4_rvv, 32, uint32_t, 4, 4)
 XNN_TRANSPOSE_UKERNEL(xnn_arch_riscv_vector, xnn_x32_transposec_ukernel__8x8_rvv, 32, uint32_t, 8, 8)
 XNN_TRANSPOSE_UKERNEL(xnn_arch_riscv_vector, xnn_x32_transposec_ukernel__16x8_rvv, 32, uint32_t, 16, 8)
 XNN_TRANSPOSE_UKERNEL(xnn_arch_riscv_vector, xnn_x32_transposec_ukernel__32x8_rvv, 32, uint32_t, 32, 8)
-#endif  // XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 XNN_TRANSPOSE_UKERNEL(xnn_arch_arm_neon, xnn_x32_transposec_ukernel__2x2_multi_dec_zip_neon, 32, uint32_t, 2, 2)

@@ -23,12 +23,12 @@ XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_vclamp_ukernel__neon_u8, 8, f
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_vclamp_ukernel__neon_u16, 16, false, float, struct xnn_f32_minmax_params, xnn_init_f32_clamp_scalar_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-#if XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_f32_vclamp_ukernel__rvv_u1v, 1, true, float, struct xnn_f32_minmax_params, xnn_init_f32_clamp_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_f32_vclamp_ukernel__rvv_u2v, 2, true, float, struct xnn_f32_minmax_params, xnn_init_f32_clamp_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_f32_vclamp_ukernel__rvv_u4v, 4, true, float, struct xnn_f32_minmax_params, xnn_init_f32_clamp_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_f32_vclamp_ukernel__rvv_u8v, 8, true, float, struct xnn_f32_minmax_params, xnn_init_f32_clamp_scalar_params)
-#endif  // XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vclamp_ukernel__sse_u4, 4, false, float, struct xnn_f32_minmax_params, xnn_init_f32_clamp_scalar_params)

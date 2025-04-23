@@ -35,11 +35,11 @@ void xnn_f32_vtanh_ukernel__avx512f_rational_9_8_div_u16(
   // this point. This value is chosen as the first floating point number as of
   // which the interpolation returns 1.0f.
   #if XNN_SIMD_HAS_NATIVE_FMA
-    XNN_SIMD_CONST_F32(vmax_x, 7.9807181358e+00);
-    XNN_SIMD_CONST_F32(vmin_x, -7.9807181358e+00);
+    XNN_SIMD_CONST_F32(vmax_x, 7.9807181358e+00f);
+    XNN_SIMD_CONST_F32(vmin_x, -7.9807181358e+00f);
   #else
-    XNN_SIMD_CONST_F32(vmax_x, 7.8522667885e+00);
-    XNN_SIMD_CONST_F32(vmin_x, -7.8522667885e+00);
+    XNN_SIMD_CONST_F32(vmax_x, 7.8522667885e+00f);
+    XNN_SIMD_CONST_F32(vmin_x, -7.8522667885e+00f);
   #endif  // XNN_SIMD_HAS_NATIVE_FMA
 
   // The monomial coefficients of the numerator polynomial (odd).
@@ -136,11 +136,11 @@ void xnn_f32_vtanh_ukernel__avx512f_rational_9_8_div_u32(
   // this point. This value is chosen as the first floating point number as of
   // which the interpolation returns 1.0f.
   #if XNN_SIMD_HAS_NATIVE_FMA
-    XNN_SIMD_CONST_F32(vmax_x, 7.9807181358e+00);
-    XNN_SIMD_CONST_F32(vmin_x, -7.9807181358e+00);
+    XNN_SIMD_CONST_F32(vmax_x, 7.9807181358e+00f);
+    XNN_SIMD_CONST_F32(vmin_x, -7.9807181358e+00f);
   #else
-    XNN_SIMD_CONST_F32(vmax_x, 7.8522667885e+00);
-    XNN_SIMD_CONST_F32(vmin_x, -7.8522667885e+00);
+    XNN_SIMD_CONST_F32(vmax_x, 7.8522667885e+00f);
+    XNN_SIMD_CONST_F32(vmin_x, -7.8522667885e+00f);
   #endif  // XNN_SIMD_HAS_NATIVE_FMA
 
   // The monomial coefficients of the numerator polynomial (odd).
@@ -282,11 +282,11 @@ void xnn_f32_vtanh_ukernel__avx512f_rational_9_8_div_u48(
   // this point. This value is chosen as the first floating point number as of
   // which the interpolation returns 1.0f.
   #if XNN_SIMD_HAS_NATIVE_FMA
-    XNN_SIMD_CONST_F32(vmax_x, 7.9807181358e+00);
-    XNN_SIMD_CONST_F32(vmin_x, -7.9807181358e+00);
+    XNN_SIMD_CONST_F32(vmax_x, 7.9807181358e+00f);
+    XNN_SIMD_CONST_F32(vmin_x, -7.9807181358e+00f);
   #else
-    XNN_SIMD_CONST_F32(vmax_x, 7.8522667885e+00);
-    XNN_SIMD_CONST_F32(vmin_x, -7.8522667885e+00);
+    XNN_SIMD_CONST_F32(vmax_x, 7.8522667885e+00f);
+    XNN_SIMD_CONST_F32(vmin_x, -7.8522667885e+00f);
   #endif  // XNN_SIMD_HAS_NATIVE_FMA
 
   // The monomial coefficients of the numerator polynomial (odd).
@@ -443,11 +443,11 @@ void xnn_f32_vtanh_ukernel__avx512f_rational_9_8_div_u64(
   // this point. This value is chosen as the first floating point number as of
   // which the interpolation returns 1.0f.
   #if XNN_SIMD_HAS_NATIVE_FMA
-    XNN_SIMD_CONST_F32(vmax_x, 7.9807181358e+00);
-    XNN_SIMD_CONST_F32(vmin_x, -7.9807181358e+00);
+    XNN_SIMD_CONST_F32(vmax_x, 7.9807181358e+00f);
+    XNN_SIMD_CONST_F32(vmin_x, -7.9807181358e+00f);
   #else
-    XNN_SIMD_CONST_F32(vmax_x, 7.8522667885e+00);
-    XNN_SIMD_CONST_F32(vmin_x, -7.8522667885e+00);
+    XNN_SIMD_CONST_F32(vmax_x, 7.8522667885e+00f);
+    XNN_SIMD_CONST_F32(vmin_x, -7.8522667885e+00f);
   #endif  // XNN_SIMD_HAS_NATIVE_FMA
 
   // The monomial coefficients of the numerator polynomial (odd).

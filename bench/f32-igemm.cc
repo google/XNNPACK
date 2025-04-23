@@ -1240,7 +1240,7 @@ BENCHMARK_CONV(f32_igemm_1x4__scalar)
 BENCHMARK_CONV(f32_igemm_2x4__scalar)
 BENCHMARK_CONV(f32_igemm_4x4__scalar)
 
-#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 static void f32_igemm_1x4v__rvv(benchmark::State& state, const char* net) {
   size_t vlenb = 0;
   asm volatile("csrr %0, vlenb" : "=r"(vlenb));
@@ -1265,16 +1265,16 @@ static void f32_igemm_7x4v__rvv(benchmark::State& state, const char* net) {
 
 BENCHMARK_CONV(f32_igemm_1x4v__rvv)
 BENCHMARK_CONV(f32_igemm_7x4v__rvv)
-#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
-#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
-  static void f32_igemm_1x32__hvx_broadcast(benchmark::State& state, const char* net) {
-    f32_igemm(state,
-      xnn_f32_igemm_minmax_ukernel_1x32__hvx_broadcast,
-      xnn_init_f32_minmax_scalar_params,
-      /*mr=*/1, /*nr=*/32, /*kr=*/1, /*sr=*/1,
-      benchmark::utils::CheckHVX);
-  }
+#if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+static void f32_igemm_1x32__hvx_broadcast(benchmark::State& state,
+                                          const char* net) {
+  f32_igemm(state, xnn_f32_igemm_minmax_ukernel_1x32__hvx_broadcast,
+            xnn_init_f32_minmax_scalar_params,
+            /*mr=*/1, /*nr=*/32, /*kr=*/1, /*sr=*/1,
+            benchmark::utils::CheckHVX);
+}
 
   static void f32_igemm_8x32__hvx_broadcast(benchmark::State& state, const char* net) {
     f32_igemm(state,
@@ -1341,8 +1341,8 @@ BENCHMARK_CONV(f32_igemm_7x4v__rvv)
   BENCHMARK_CONV(f32_igemm_1x128__hvx_broadcast)
   BENCHMARK_CONV(f32_igemm_2x128__hvx_broadcast)
 
-#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+#endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-XNN_BENCHMARK_MAIN();
+  XNN_BENCHMARK_MAIN();
 #endif

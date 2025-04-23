@@ -2837,7 +2837,7 @@ BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__wasmsimd_x86_splat_2x4_acc3)
 BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__wasmsimd_x86_splat_3x4_acc2)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 static void dwconv2d_chw_3x3p1__rvv_5x1v(benchmark::State& state,
                                          const char* net) {
   f32_dwconv2d_chw(state,
@@ -2985,7 +2985,7 @@ BENCHMARK_DWCONV(dwconv2d_chw_3x3s2p1__rvv_1x2v)
 BENCHMARK_DWCONV(dwconv2d_chw_3x3s2p1__rvv_2x2v)
 BENCHMARK_DWCONV(dwconv2d_chw_3x3s2p1__rvv_3x2v)
 BENCHMARK_DWCONV(dwconv2d_chw_3x3s2p1__rvv_4x2v)
-#endif // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
 static void dwconv2d_chw_3x3p1__scalar_1x1(benchmark::State& state,
                                            const char* net) {

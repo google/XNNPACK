@@ -156,7 +156,7 @@ static void f32_conv_hwc2chw_3x3s2p1c3x4__wasmsimd_2x2(benchmark::State& state,
 BENCHMARK_DCONV(f32_conv_hwc2chw_3x3s2p1c3x4__wasmsimd_2x2);
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 static void f32_conv_hwc2chw_3x3s2p1c3x2v__rvv_1x1(benchmark::State& state,
                                                    const char* net) {
   f32_conv_hwc2chw(state, xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_1x1,
@@ -181,7 +181,7 @@ static void f32_conv_hwc2chw_3x3s2p1c3x2v__rvv_2x2(benchmark::State& state,
 BENCHMARK_DCONV(f32_conv_hwc2chw_3x3s2p1c3x2v__rvv_1x1);
 BENCHMARK_DCONV(f32_conv_hwc2chw_3x3s2p1c3x2v__rvv_2x1);
 BENCHMARK_DCONV(f32_conv_hwc2chw_3x3s2p1c3x2v__rvv_2x2);
-#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
 static void f32_conv_hwc2chw_3x3s2p1c3x4__scalar_1x1(benchmark::State& state,
                                                      const char* net) {
