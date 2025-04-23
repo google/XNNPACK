@@ -37,7 +37,7 @@ void xnn_u8_rminmax_ukernel__sse2_u64_acc4(
   xnn_simd_u8_t vmax3 = vmax0;
 
   for (; batch >= 64 * sizeof(uint8_t); batch -= 64 * sizeof(uint8_t)) {
-    xnn_simd_u8_t vt0 = xnn_loadu_u8(input);
+    xnn_simd_u8_t vt0 = xnn_loadu_u8(input + 0 * xnn_simd_size_u8);
     xnn_simd_u8_t vt1 = xnn_loadu_u8(input + 1 * xnn_simd_size_u8);
     xnn_simd_u8_t vt2 = xnn_loadu_u8(input + 2 * xnn_simd_size_u8);
     xnn_simd_u8_t vt3 = xnn_loadu_u8(input + 3 * xnn_simd_size_u8);

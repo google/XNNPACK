@@ -137,7 +137,7 @@ void xnn_f16_vexp_ukernel__neonfp16arith_poly_3_u16(
   XNN_SIMD_CONST_F16_FROM_FLOAT(vone, 1.0f);
 
   for (; batch >= 16 * sizeof(xnn_float16); batch -= 16 * sizeof(xnn_float16)) {
-    xnn_simd_f16_t vx_0 = xnn_loadu_f16(input);
+    xnn_simd_f16_t vx_0 = xnn_loadu_f16(input + 0 * xnn_simd_size_f16);
     xnn_simd_f16_t vx_1 = xnn_loadu_f16(input + 1 * xnn_simd_size_f16);
     input += 16;
     
@@ -169,7 +169,7 @@ void xnn_f16_vexp_ukernel__neonfp16arith_poly_3_u16(
     const xnn_simd_f16_t vy_0 = xnn_mul_f16(v2z_0, v2r_0);
     const xnn_simd_f16_t vy_1 = xnn_mul_f16(v2z_1, v2r_1);
 
-    xnn_storeu_f16(output, vy_0);
+    xnn_storeu_f16(output + 0 * xnn_simd_size_f16, vy_0);
     xnn_storeu_f16(output + 1 * xnn_simd_size_f16, vy_1);
     output += 16;
   }
@@ -249,7 +249,7 @@ void xnn_f16_vexp_ukernel__neonfp16arith_poly_3_u32(
   XNN_SIMD_CONST_F16_FROM_FLOAT(vone, 1.0f);
 
   for (; batch >= 32 * sizeof(xnn_float16); batch -= 32 * sizeof(xnn_float16)) {
-    xnn_simd_f16_t vx_0 = xnn_loadu_f16(input);
+    xnn_simd_f16_t vx_0 = xnn_loadu_f16(input + 0 * xnn_simd_size_f16);
     xnn_simd_f16_t vx_1 = xnn_loadu_f16(input + 1 * xnn_simd_size_f16);
     xnn_simd_f16_t vx_2 = xnn_loadu_f16(input + 2 * xnn_simd_size_f16);
     xnn_simd_f16_t vx_3 = xnn_loadu_f16(input + 3 * xnn_simd_size_f16);
@@ -301,7 +301,7 @@ void xnn_f16_vexp_ukernel__neonfp16arith_poly_3_u32(
     const xnn_simd_f16_t vy_2 = xnn_mul_f16(v2z_2, v2r_2);
     const xnn_simd_f16_t vy_3 = xnn_mul_f16(v2z_3, v2r_3);
 
-    xnn_storeu_f16(output, vy_0);
+    xnn_storeu_f16(output + 0 * xnn_simd_size_f16, vy_0);
     xnn_storeu_f16(output + 1 * xnn_simd_size_f16, vy_1);
     xnn_storeu_f16(output + 2 * xnn_simd_size_f16, vy_2);
     xnn_storeu_f16(output + 3 * xnn_simd_size_f16, vy_3);

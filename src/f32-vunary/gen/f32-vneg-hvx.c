@@ -66,14 +66,14 @@ void xnn_f32_vneg_ukernel__hvx_u64(
   assert(xnn_simd_size_f32 == 32);
 
   for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
-    const xnn_simd_f32_t vx0 = xnn_loadu_f32(input);
+    const xnn_simd_f32_t vx0 = xnn_loadu_f32(input + 0 * xnn_simd_size_f32);
     const xnn_simd_f32_t vx1 = xnn_loadu_f32(input + 1 * xnn_simd_size_f32);
     input += 2 * xnn_simd_size_f32;
 
     const xnn_simd_f32_t vy0 = xnn_neg_f32(vx0);
     const xnn_simd_f32_t vy1 = xnn_neg_f32(vx1);
 
-    xnn_storeu_f32(output, vy0);
+    xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vy0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy1);
     output += 2 * xnn_simd_size_f32;
   }
@@ -111,7 +111,7 @@ void xnn_f32_vneg_ukernel__hvx_u128(
   assert(xnn_simd_size_f32 == 32);
 
   for (; batch >= 128 * sizeof(float); batch -= 128 * sizeof(float)) {
-    const xnn_simd_f32_t vx0 = xnn_loadu_f32(input);
+    const xnn_simd_f32_t vx0 = xnn_loadu_f32(input + 0 * xnn_simd_size_f32);
     const xnn_simd_f32_t vx1 = xnn_loadu_f32(input + 1 * xnn_simd_size_f32);
     const xnn_simd_f32_t vx2 = xnn_loadu_f32(input + 2 * xnn_simd_size_f32);
     const xnn_simd_f32_t vx3 = xnn_loadu_f32(input + 3 * xnn_simd_size_f32);
@@ -122,7 +122,7 @@ void xnn_f32_vneg_ukernel__hvx_u128(
     const xnn_simd_f32_t vy2 = xnn_neg_f32(vx2);
     const xnn_simd_f32_t vy3 = xnn_neg_f32(vx3);
 
-    xnn_storeu_f32(output, vy0);
+    xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vy0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy1);
     xnn_storeu_f32(output + 2 * xnn_simd_size_f32, vy2);
     xnn_storeu_f32(output + 3 * xnn_simd_size_f32, vy3);

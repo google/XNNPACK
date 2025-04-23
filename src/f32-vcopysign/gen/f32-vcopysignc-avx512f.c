@@ -75,14 +75,14 @@ void xnn_f32_vcopysignc_ukernel__avx512f_u32(
 
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
 
-    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag));
+    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag + 0 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_1 = xnn_abs_f32(xnn_loadu_f32(mag + 1 * xnn_simd_size_f32));
     mag += 32;
 
     xnn_simd_f32_t vy_0 = xnn_or_f32(vsign, vmag_0);
     xnn_simd_f32_t vy_1 = xnn_or_f32(vsign, vmag_1);
 
-    xnn_storeu_f32(output, vy_0);
+    xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
     output += 32;
   }
@@ -124,7 +124,7 @@ void xnn_f32_vcopysignc_ukernel__avx512f_u48(
 
   for (; batch >= 48 * sizeof(float); batch -= 48 * sizeof(float)) {
 
-    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag));
+    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag + 0 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_1 = xnn_abs_f32(xnn_loadu_f32(mag + 1 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_2 = xnn_abs_f32(xnn_loadu_f32(mag + 2 * xnn_simd_size_f32));
     mag += 48;
@@ -133,7 +133,7 @@ void xnn_f32_vcopysignc_ukernel__avx512f_u48(
     xnn_simd_f32_t vy_1 = xnn_or_f32(vsign, vmag_1);
     xnn_simd_f32_t vy_2 = xnn_or_f32(vsign, vmag_2);
 
-    xnn_storeu_f32(output, vy_0);
+    xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
     xnn_storeu_f32(output + 2 * xnn_simd_size_f32, vy_2);
     output += 48;
@@ -176,7 +176,7 @@ void xnn_f32_vcopysignc_ukernel__avx512f_u64(
 
   for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
 
-    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag));
+    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag + 0 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_1 = xnn_abs_f32(xnn_loadu_f32(mag + 1 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_2 = xnn_abs_f32(xnn_loadu_f32(mag + 2 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_3 = xnn_abs_f32(xnn_loadu_f32(mag + 3 * xnn_simd_size_f32));
@@ -187,7 +187,7 @@ void xnn_f32_vcopysignc_ukernel__avx512f_u64(
     xnn_simd_f32_t vy_2 = xnn_or_f32(vsign, vmag_2);
     xnn_simd_f32_t vy_3 = xnn_or_f32(vsign, vmag_3);
 
-    xnn_storeu_f32(output, vy_0);
+    xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
     xnn_storeu_f32(output + 2 * xnn_simd_size_f32, vy_2);
     xnn_storeu_f32(output + 3 * xnn_simd_size_f32, vy_3);

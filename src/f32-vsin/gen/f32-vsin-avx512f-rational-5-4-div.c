@@ -153,7 +153,7 @@ void xnn_f32_vsin_ukernel__avx512f_rational_5_4_div_u32(
   XNN_SIMD_CONST_F32(vone, 1.0f);
 
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
-    xnn_simd_f32_t vx_0 = xnn_loadu_f32(input);
+    xnn_simd_f32_t vx_0 = xnn_loadu_f32(input + 0 * xnn_simd_size_f32);
     xnn_simd_f32_t vx_1 = xnn_loadu_f32(input + 1 * xnn_simd_size_f32);
     input += 32;
 
@@ -195,7 +195,7 @@ void xnn_f32_vsin_ukernel__avx512f_rational_5_4_div_u32(
     const xnn_simd_f32_t vy_0 = xnn_div_f32(vp_0, vq_0);
     const xnn_simd_f32_t vy_1 = xnn_div_f32(vp_1, vq_1);
 
-    xnn_storeu_f32(output, vy_0);
+    xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
     output += 32;
   }
@@ -297,7 +297,7 @@ void xnn_f32_vsin_ukernel__avx512f_rational_5_4_div_u48(
   XNN_SIMD_CONST_F32(vone, 1.0f);
 
   for (; batch >= 48 * sizeof(float); batch -= 48 * sizeof(float)) {
-    xnn_simd_f32_t vx_0 = xnn_loadu_f32(input);
+    xnn_simd_f32_t vx_0 = xnn_loadu_f32(input + 0 * xnn_simd_size_f32);
     xnn_simd_f32_t vx_1 = xnn_loadu_f32(input + 1 * xnn_simd_size_f32);
     xnn_simd_f32_t vx_2 = xnn_loadu_f32(input + 2 * xnn_simd_size_f32);
     input += 48;
@@ -354,7 +354,7 @@ void xnn_f32_vsin_ukernel__avx512f_rational_5_4_div_u48(
     const xnn_simd_f32_t vy_1 = xnn_div_f32(vp_1, vq_1);
     const xnn_simd_f32_t vy_2 = xnn_div_f32(vp_2, vq_2);
 
-    xnn_storeu_f32(output, vy_0);
+    xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
     xnn_storeu_f32(output + 2 * xnn_simd_size_f32, vy_2);
     output += 48;
@@ -457,7 +457,7 @@ void xnn_f32_vsin_ukernel__avx512f_rational_5_4_div_u64(
   XNN_SIMD_CONST_F32(vone, 1.0f);
 
   for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
-    xnn_simd_f32_t vx_0 = xnn_loadu_f32(input);
+    xnn_simd_f32_t vx_0 = xnn_loadu_f32(input + 0 * xnn_simd_size_f32);
     xnn_simd_f32_t vx_1 = xnn_loadu_f32(input + 1 * xnn_simd_size_f32);
     xnn_simd_f32_t vx_2 = xnn_loadu_f32(input + 2 * xnn_simd_size_f32);
     xnn_simd_f32_t vx_3 = xnn_loadu_f32(input + 3 * xnn_simd_size_f32);
@@ -529,7 +529,7 @@ void xnn_f32_vsin_ukernel__avx512f_rational_5_4_div_u64(
     const xnn_simd_f32_t vy_2 = xnn_div_f32(vp_2, vq_2);
     const xnn_simd_f32_t vy_3 = xnn_div_f32(vp_3, vq_3);
 
-    xnn_storeu_f32(output, vy_0);
+    xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
     xnn_storeu_f32(output + 2 * xnn_simd_size_f32, vy_2);
     xnn_storeu_f32(output + 3 * xnn_simd_size_f32, vy_3);

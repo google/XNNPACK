@@ -65,8 +65,7 @@ void xnn_${DATATYPE.lower()}_r${OP.lower()}_ukernel__${ARCH}_u${BATCH_TILE}${ACC
 
   $if SIMD_TILE > 1:
     for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
-      ${xnn_simd_X8_t} vt0 = ${xnn_loadu_X8}(input);
-      $for N in range(1, SIMD_TILE):
+      $for N in range(SIMD_TILE):
         ${xnn_simd_X8_t} vt${N} = ${xnn_loadu_X8}(input + ${N} * ${xnn_simd_size_X8});
       input += ${SIMD_TILE} * ${xnn_simd_size_X8};
 

@@ -78,21 +78,21 @@ void xnn_f32_vcopysign_ukernel__wasmsimd_u8(
   XNN_SIMD_CONST_F32(vsign_mask, -0.f);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    xnn_simd_f32_t vsign_0 = xnn_loadu_f32(sign);
+    xnn_simd_f32_t vsign_0 = xnn_loadu_f32(sign + 0 * xnn_simd_size_f32);
     xnn_simd_f32_t vsign_1 = xnn_loadu_f32(sign + 1 * xnn_simd_size_f32);
     sign += 8;
 
     vsign_0 = xnn_and_f32(vsign_0, vsign_mask);
     vsign_1 = xnn_and_f32(vsign_1, vsign_mask);
 
-    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag));
+    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag + 0 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_1 = xnn_abs_f32(xnn_loadu_f32(mag + 1 * xnn_simd_size_f32));
     mag += 8;
 
     xnn_simd_f32_t vy_0 = xnn_or_f32(vsign_0, vmag_0);
     xnn_simd_f32_t vy_1 = xnn_or_f32(vsign_1, vmag_1);
 
-    xnn_storeu_f32(output, vy_0);
+    xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
     output += 8;
   }
@@ -139,7 +139,7 @@ void xnn_f32_vcopysign_ukernel__wasmsimd_u12(
   XNN_SIMD_CONST_F32(vsign_mask, -0.f);
 
   for (; batch >= 12 * sizeof(float); batch -= 12 * sizeof(float)) {
-    xnn_simd_f32_t vsign_0 = xnn_loadu_f32(sign);
+    xnn_simd_f32_t vsign_0 = xnn_loadu_f32(sign + 0 * xnn_simd_size_f32);
     xnn_simd_f32_t vsign_1 = xnn_loadu_f32(sign + 1 * xnn_simd_size_f32);
     xnn_simd_f32_t vsign_2 = xnn_loadu_f32(sign + 2 * xnn_simd_size_f32);
     sign += 12;
@@ -148,7 +148,7 @@ void xnn_f32_vcopysign_ukernel__wasmsimd_u12(
     vsign_1 = xnn_and_f32(vsign_1, vsign_mask);
     vsign_2 = xnn_and_f32(vsign_2, vsign_mask);
 
-    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag));
+    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag + 0 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_1 = xnn_abs_f32(xnn_loadu_f32(mag + 1 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_2 = xnn_abs_f32(xnn_loadu_f32(mag + 2 * xnn_simd_size_f32));
     mag += 12;
@@ -157,7 +157,7 @@ void xnn_f32_vcopysign_ukernel__wasmsimd_u12(
     xnn_simd_f32_t vy_1 = xnn_or_f32(vsign_1, vmag_1);
     xnn_simd_f32_t vy_2 = xnn_or_f32(vsign_2, vmag_2);
 
-    xnn_storeu_f32(output, vy_0);
+    xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
     xnn_storeu_f32(output + 2 * xnn_simd_size_f32, vy_2);
     output += 12;
@@ -205,7 +205,7 @@ void xnn_f32_vcopysign_ukernel__wasmsimd_u16(
   XNN_SIMD_CONST_F32(vsign_mask, -0.f);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    xnn_simd_f32_t vsign_0 = xnn_loadu_f32(sign);
+    xnn_simd_f32_t vsign_0 = xnn_loadu_f32(sign + 0 * xnn_simd_size_f32);
     xnn_simd_f32_t vsign_1 = xnn_loadu_f32(sign + 1 * xnn_simd_size_f32);
     xnn_simd_f32_t vsign_2 = xnn_loadu_f32(sign + 2 * xnn_simd_size_f32);
     xnn_simd_f32_t vsign_3 = xnn_loadu_f32(sign + 3 * xnn_simd_size_f32);
@@ -216,7 +216,7 @@ void xnn_f32_vcopysign_ukernel__wasmsimd_u16(
     vsign_2 = xnn_and_f32(vsign_2, vsign_mask);
     vsign_3 = xnn_and_f32(vsign_3, vsign_mask);
 
-    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag));
+    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag + 0 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_1 = xnn_abs_f32(xnn_loadu_f32(mag + 1 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_2 = xnn_abs_f32(xnn_loadu_f32(mag + 2 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_3 = xnn_abs_f32(xnn_loadu_f32(mag + 3 * xnn_simd_size_f32));
@@ -227,7 +227,7 @@ void xnn_f32_vcopysign_ukernel__wasmsimd_u16(
     xnn_simd_f32_t vy_2 = xnn_or_f32(vsign_2, vmag_2);
     xnn_simd_f32_t vy_3 = xnn_or_f32(vsign_3, vmag_3);
 
-    xnn_storeu_f32(output, vy_0);
+    xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
     xnn_storeu_f32(output + 2 * xnn_simd_size_f32, vy_2);
     xnn_storeu_f32(output + 3 * xnn_simd_size_f32, vy_3);
