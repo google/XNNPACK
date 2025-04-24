@@ -13,6 +13,7 @@
 #include <cstdlib>
 #include <limits>
 #include <random>
+#include <utility>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -237,11 +238,17 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
     }
 
     ConvolutionParams params = StencilToConvolutionParams(kh, kw);
-    std::uniform_int_distribution<> channels_dist{1, 10};
     std::uniform_int_distribution<> groups_dist{1, 3};
     params.groups = groups_dist(rng);
-    params.group_input_channels = channels_dist(rng);
-    params.group_output_channels = channels_dist(rng);
+    // To get coverage of large dimensions without making the test too slow,
+    // make one big channel dimension and one small one.
+    std::uniform_int_distribution<> big_channels_dist{1, 100};
+    std::uniform_int_distribution<> small_channels_dist{1, 10};
+    params.group_input_channels = big_channels_dist(rng);
+    params.group_output_channels = small_channels_dist(rng);
+    if (bool_dist(rng)) {
+      std::swap(params.group_input_channels, params.group_output_channels);
+    }
 
     // Make a random filter.
     std::vector<size_t> filter_shape = {
