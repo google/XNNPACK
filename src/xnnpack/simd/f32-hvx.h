@@ -101,11 +101,27 @@ static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
   return Q6_V_vxor_VV(a, Q6_V_vsplat_R(0x80000000));
 }
 
-// TODO: Implement hvx code sequence.
-// - compare exp to smallest exp that is integer (23)
-// - convert to int and back to float
-// - use compare result to select rounding int or original float
-// - large exp includes NaN and inf and negative versions of these
+#if __HVX_ARCH__ >= 73
+static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
+  const float max_non_int_val = 8388608.0f;  // 2^23.
+  const HVX_Vector vmax_non_int_val =
+      Q6_V_vsplat_R(*(int32_t*)&max_non_int_val);
+
+  const HVX_VectorPred vfilter = Q6_Q_vcmp_gt_VsfVsf(
+      Q6_V_vand_VV(a, Q6_V_vsplat_R(0x7FFFFFFF)), vmax_non_int_val);
+
+  // Create a vector of `0.5f` with the same sign as the entries of `a`.
+  const float half = 0.5f;
+  const HVX_Vector vhalf = Q6_V_vsplat_R(*(int32_t*)&half);
+  const HVX_Vector vsign_mask = Q6_V_vsplat_R(0x80000000);
+  const HVX_Vector vsigned_half =
+      Q6_V_vor_VV(Q6_V_vand_VV(a, vsign_mask), vhalf);
+  const HVX_Vector vresult = Q6_Vsf_equals_Vw(Q6_Vw_equals_Vsf(
+      Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_VsfVsf(a, vsigned_half))));
+
+  return Q6_V_vmux_QVV(vfilter, a, vresult);
+}
+#else
 static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
   XNN_ALIGN(128) float input[xnn_simd_size_f32];
   XNN_ALIGN(128) float output[xnn_simd_size_f32];
@@ -115,6 +131,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
   }
   return *((HVX_Vector*)output);
 }
+#endif  // __HVX_ARCH__ >= 73
 
 // Logical operations.
 
