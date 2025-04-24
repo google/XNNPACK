@@ -21,20 +21,29 @@
 
 namespace xnnpack {
 
-TEST(Persistent, test) {
-  ReplicableRandomDevice rng;
+// We have two ways of implementing "persistent tensors":
+// - Using XNN_VALUE_FLAG_PERSISTENT: allocate a tensor in the workspace, we own
+//   the allocation.
+// - Using a value that is both an input and an output, the caller owns the
+//   allocation.
+class Persistent : public testing::TestWithParam<bool> {};
+
+INSTANTIATE_TEST_SUITE_P(InputOutput, Persistent, testing::Bool());
+
+TEST_P(Persistent, test) {
+  const bool input_output = GetParam();
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
   std::vector<size_t> dims = {5};
 
   // Define subgraph
-  SubgraphTester subgraph(4);
+  SubgraphTester subgraph(5);
   const uint32_t input_id = 0;
   const uint32_t a_id = 1;
   const uint32_t b_id = 2;
   const uint32_t output_id = 3;
-  uint32_t persistent_id = XNN_INVALID_VALUE_ID;
+  uint32_t persistent_id = input_output ? 4 : XNN_INVALID_VALUE_ID;
   uint32_t persistent_a_id = XNN_INVALID_VALUE_ID;
   uint32_t input_b_id = XNN_INVALID_VALUE_ID;
   // This subgraph computes:
@@ -45,10 +54,17 @@ TEST(Persistent, test) {
       .AddInputTensor({}, xnn_datatype_of<float>(), a_id)
       .AddInputTensor({}, xnn_datatype_of<float>(), b_id)
       .AddOutputTensor(dims, xnn_datatype_of<float>(), output_id)
-      .AddInternalDynamicTensorF32(dims, &persistent_id,
-                                   XNN_VALUE_FLAG_PERSISTENT)
       .AddInternalDynamicTensorF32(dims, &persistent_a_id)
       .AddInternalDynamicTensorF32(dims, &input_b_id);
+
+  if (input_output) {
+    subgraph.AddDynamicTensor(
+        dims, persistent_id, xnn_datatype_fp32,
+        XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT);
+  } else {
+    subgraph.AddInternalDynamicTensorF32(dims, &persistent_id,
+                                         XNN_VALUE_FLAG_PERSISTENT);
+  }
 
   subgraph.AddBinary(xnn_binary_multiply, nullptr, persistent_id, a_id,
                  persistent_a_id)
@@ -60,6 +76,14 @@ TEST(Persistent, test) {
 
   Tensor<float> input(dims, xnnpack::XnnExtraBytes);
   std::iota(input.begin(), input.end(), 0.0f);
+
+  // If we are using an input-output tensor as the persistent tensor, we need
+  // to provide the storage for it.
+  Tensor<float> persistent(dims, xnnpack::XnnExtraBytes);
+  persistent.fill(0.0f);
+  if (input_output) {
+    subgraph.ReshapeExternalTensor(dims, persistent.base(), persistent_id);
+  }
 
   subgraph.ReshapeExternalTensor(dims, input.base(), input_id)
       .ReshapeRuntime();
@@ -89,7 +113,9 @@ TEST(Persistent, test) {
   ASSERT_THAT(add, testing::ElementsAre(2.0f, 3.0f, 4.0f, 5.0f, 6.0f));
 }
 
-TEST(Persistent, sliding_window) {
+TEST_P(Persistent, sliding_window) {
+  const bool input_output = GetParam();
+
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
   const size_t slices = 20;
@@ -98,16 +124,23 @@ TEST(Persistent, sliding_window) {
   std::vector<size_t> slice_dims = {1, slice_size};
 
   // Define subgraph
-  SubgraphTester subgraph(4);
+  SubgraphTester subgraph(3);
   const uint32_t input_id = 0;
   const uint32_t output_id = 1;
-  uint32_t persistent_id = XNN_INVALID_VALUE_ID;
+  uint32_t persistent_id = input_output ? 2 : XNN_INVALID_VALUE_ID;
   uint32_t prev_id = XNN_INVALID_VALUE_ID;
   subgraph.AddInputTensor(slice_dims, xnn_datatype_of<float>(), input_id)
       .AddOutputTensor(dims, xnn_datatype_of<float>(), output_id)
-      .AddInternalDynamicTensorF32(dims, &persistent_id,
-                                   XNN_VALUE_FLAG_PERSISTENT)
       .AddInternalDynamicTensorF32(dims, &prev_id);
+
+  if (input_output) {
+    subgraph.AddDynamicTensor(
+        dims, persistent_id, xnn_datatype_fp32,
+        XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT);
+  } else {
+    subgraph.AddInternalDynamicTensorF32(dims, &persistent_id,
+                                          XNN_VALUE_FLAG_PERSISTENT);
+  }
 
   // Concatenate the new input with the persistent tensor, except for the last
   // slice.
@@ -115,6 +148,14 @@ TEST(Persistent, sliding_window) {
       .AddConcatenate(0, {input_id, prev_id}, persistent_id)
       .AddCopy(persistent_id, output_id);
   ASSERT_EQ(xnn_status_success, subgraph.CreateRuntime());
+
+  // If we are using an input-output tensor as the persistent tensor, we need
+  // to provide the storage for it.
+  Tensor<float> persistent(dims, xnnpack::XnnExtraBytes);
+  persistent.fill(0.0f);
+  if (input_output) {
+    subgraph.ReshapeExternalTensor(dims, persistent.base(), persistent_id);
+  }
 
   Tensor<float> input(slice_dims, xnnpack::XnnExtraBytes);
   subgraph.ReshapeExternalTensor(slice_dims, input.base(), input_id)
