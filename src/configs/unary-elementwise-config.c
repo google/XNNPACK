@@ -989,6 +989,8 @@ static void init_f32_log_config(void) {
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_log_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u8;
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    f32_log_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlog_ukernel__hvx_rational_3_3_div_u128;
   #else
     f32_log_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlog_ukernel__scalar_rational_3_3_div_u1;
   #endif
