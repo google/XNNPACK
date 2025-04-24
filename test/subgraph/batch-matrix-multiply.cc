@@ -226,10 +226,15 @@ void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid) {
       std::vector<size_t> a_shape, b_shape;
       std::tie(a_shape, b_shape) = random_broadcasted_inputs(
           rng, output_shape, input_a_rank, input_b_rank);
-      std::uniform_int_distribution<> dim_dist{1, 100};
-      size_t m = dim_dist(rng);
-      size_t n = dim_dist(rng);
-      size_t k = dim_dist(rng);
+      // To get good coverage without excessive cost, pick one of the M, N, K
+      // dimensions to make very large.
+      std::uniform_int_distribution<size_t> dim_dist{1, 10};
+      size_t mnk[] = {dim_dist(rng), dim_dist(rng), dim_dist(rng)};
+      std::uniform_int_distribution<size_t> big_dim_dist{1, 1000};
+      mnk[rng() % 3] = big_dim_dist(rng);
+      const size_t m = mnk[0];
+      const size_t k = mnk[1];
+      const size_t n = mnk[2];
 
       a_shape[input_a_rank - 2] = m;
       a_shape[input_a_rank - 1] = k;
