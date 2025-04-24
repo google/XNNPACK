@@ -24,8 +24,11 @@ typedef HVX_Vector xnn_simd_f32_t;
 #define xnn_simd_log2_size_f32 5
 #define xnn_simd_bytes_f32 (xnn_simd_size_f32 * sizeof(float))
 
+#define XNN_SIMD_CONST_F32_VARNAME(prefix, name) prefix##name
+
 #define XNN_SIMD_CONST_F32(var, val) \
-  const xnn_simd_f32_t var = Q6_V_vsplat_R(val);
+  const float XNN_SIMD_CONST_F32_VARNAME(var, _scalar) = val; \
+  const xnn_simd_f32_t var = Q6_V_vsplat_R(*(uint32_t*) &XNN_SIMD_CONST_F32_VARNAME(var, _scalar));
 
 #define XNN_SIMD_CONST_F32_FROM_INT32(var, val) \
   const HVX_Vector var = Q6_V_vsplat_R(val);
