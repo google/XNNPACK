@@ -17,6 +17,7 @@
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"  // for float_as_uint32
 
 // SIMD vector type for f32 using HVX.
 typedef HVX_Vector xnn_simd_f32_t;
@@ -106,16 +107,14 @@ static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
 
 #if __HVX_ARCH__ >= 73
 static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
-  const float max_non_int_val = 8388608.0f;  // 2^23.
   const HVX_Vector vmax_non_int_val =
-      Q6_V_vsplat_R(*(int32_t*)&max_non_int_val);
+      Q6_V_vsplat_R(float_as_uint32(8388608.0f));  // 2^23.
 
   const HVX_VectorPred vfilter = Q6_Q_vcmp_gt_VsfVsf(
       Q6_V_vand_VV(a, Q6_V_vsplat_R(0x7FFFFFFF)), vmax_non_int_val);
 
   // Create a vector of `0.5f` with the same sign as the entries of `a`.
-  const float half = 0.5f;
-  const HVX_Vector vhalf = Q6_V_vsplat_R(*(int32_t*)&half);
+  const HVX_Vector vhalf = Q6_V_vsplat_R(float_as_uint32(0.5f));
   const HVX_Vector vsign_mask = Q6_V_vsplat_R(0x80000000);
   const HVX_Vector vsigned_half =
       Q6_V_vor_VV(Q6_V_vand_VV(a, vsign_mask), vhalf);
@@ -234,7 +233,7 @@ static XNN_INLINE void xnn_store_f32(float* ptr, xnn_simd_f32_t v) {
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_set1_f32(float v) {
-  return Q6_V_vsplat_R(*(uint32_t*)&v);
+  return Q6_V_vsplat_R(float_as_uint32(v));
 }
 
 // Tail load/store operations.
