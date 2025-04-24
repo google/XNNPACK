@@ -26,6 +26,10 @@
 #include "src/xnnpack/requantization.h"
 #include "test/replicable_random_device.h"
 
+// Dynamically quantized kernels do extra arithmetic, which accumulates more
+// error, which we factor into our tolerances with this constant.
+const float dynamic_quantization_ops = 2.0f;
+
 TEST_P(GemmTest, Test) {
   const GemmTestParams& params = GetParam();
   GemmMicrokernelTester tester = params.tester;
@@ -281,7 +285,8 @@ void GemmMicrokernelTester::Test(xnn_qd8_f16_qc8w_igemm_ukernel_fn igemm,
 
   const float tolerance =
       compute_sum_tolerance(max_abs_product, ks() * k(),
-                        xnnpack::NumericLimits<xnn_float16>::epsilon());
+                            xnnpack::NumericLimits<xnn_float16>::epsilon()) *
+      dynamic_quantization_ops;
   for (size_t i = 0; i < m(); i++) {
     for (size_t j = 0; j < n(); j++) {
       ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
@@ -452,8 +457,10 @@ void GemmMicrokernelTester::Test(xnn_qd8_f32_qc8w_igemm_ukernel_fn igemm,
         a_offset() * sizeof(uint8_t), zero_sentinel, zero_data, &params,
         quantization_params.data());
 
-  const float tolerance = compute_sum_tolerance(
-      max_abs_product, ks() * k(), xnnpack::NumericLimits<float>::epsilon());
+  const float tolerance =
+      compute_sum_tolerance(max_abs_product, ks() * k(),
+                            xnnpack::NumericLimits<float>::epsilon()) *
+      dynamic_quantization_ops;
   for (size_t i = 0; i < m(); i++) {
     for (size_t j = 0; j < n(); j++) {
       ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
@@ -1264,7 +1271,8 @@ void GemmMicrokernelTester::Test(xnn_qd8_f16_qc8w_gemm_ukernel_fn gemm,
 
   const float tolerance =
       compute_sum_tolerance(max_abs_product, ks() * k(),
-                        xnnpack::NumericLimits<xnn_float16>::epsilon());
+                            xnnpack::NumericLimits<xnn_float16>::epsilon()) *
+      dynamic_quantization_ops;
   for (size_t i = 0; i < m(); i++) {
     for (size_t j = 0; j < n(); j++) {
       ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
@@ -1407,8 +1415,10 @@ void GemmMicrokernelTester::Test(xnn_qd8_f32_qc8w_gemm_ukernel_fn gemm,
        cm_stride() * sizeof(float), nr() * sizeof(float), &params,
        quantization_params.data());
 
-  const float tolerance = compute_sum_tolerance(
-      max_abs_product, ks() * k(), xnnpack::NumericLimits<float>::epsilon());
+  const float tolerance =
+      compute_sum_tolerance(max_abs_product, ks() * k(),
+                            xnnpack::NumericLimits<float>::epsilon()) *
+      dynamic_quantization_ops;
   for (size_t i = 0; i < m(); i++) {
     for (size_t j = 0; j < n(); j++) {
       ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
@@ -1563,7 +1573,8 @@ void GemmMicrokernelTester::Test(xnn_qd8_f16_qc4w_gemm_ukernel_fn gemm,
 
   const float tolerance =
       compute_sum_tolerance(max_abs_product, ks() * k(),
-                        xnnpack::NumericLimits<xnn_float16>::epsilon());
+                            xnnpack::NumericLimits<xnn_float16>::epsilon()) *
+      dynamic_quantization_ops;
   for (size_t i = 0; i < m(); i++) {
     for (size_t j = 0; j < n(); j++) {
       ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
@@ -1726,7 +1737,8 @@ void GemmMicrokernelTester::Test(xnn_qd8_f16_qb4w_gemm_ukernel_fn gemm,
 
   const float tolerance =
       compute_sum_tolerance(max_abs_product, ks() * k(),
-                        xnnpack::NumericLimits<xnn_float16>::epsilon());
+                            xnnpack::NumericLimits<xnn_float16>::epsilon()) *
+      dynamic_quantization_ops;
   for (size_t i = 0; i < m(); i++) {
     for (size_t j = 0; j < n(); j++) {
       ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
@@ -1877,8 +1889,10 @@ void GemmMicrokernelTester::Test(xnn_qd8_f32_qc4w_gemm_ukernel_fn gemm,
        cm_stride() * sizeof(float), nr() * sizeof(float), &params,
        quantization_params.data());
 
-  const float tolerance = compute_sum_tolerance(
-      max_abs_product, ks() * k(), xnnpack::NumericLimits<float>::epsilon());
+  const float tolerance =
+      compute_sum_tolerance(max_abs_product, ks() * k(),
+                            xnnpack::NumericLimits<float>::epsilon()) *
+      dynamic_quantization_ops;
   for (size_t i = 0; i < m(); i++) {
     for (size_t j = 0; j < n(); j++) {
       ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
@@ -2046,8 +2060,10 @@ void GemmMicrokernelTester::Test(xnn_qd8_f32_qb4w_gemm_ukernel_fn gemm,
        cm_stride() * sizeof(float), nr() * sizeof(float), &params,
        quantization_params.data());
 
-  const float tolerance = compute_sum_tolerance(
-      max_abs_product, ks() * k(), xnnpack::NumericLimits<float>::epsilon());
+  const float tolerance =
+      compute_sum_tolerance(max_abs_product, ks() * k(),
+                            xnnpack::NumericLimits<float>::epsilon()) *
+      dynamic_quantization_ops;
   for (size_t i = 0; i < m(); i++) {
     for (size_t j = 0; j < n(); j++) {
       ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
