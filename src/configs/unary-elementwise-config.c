@@ -765,6 +765,8 @@ static void init_f32_cosine_config(void) {
     } else {
       f32_cosine_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vcos_ukernel__scalar_rational_5_4_div_u4;
     }
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    f32_cosine_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vcos_ukernel__hvx_rational_5_4_div_u128;
   #else
     f32_cosine_config.ukernel = (xnn_vunary_ukernel_fn)xnn_f32_vcos_ukernel__scalar_rational_5_4_div_u1;
   #endif
@@ -1457,6 +1459,8 @@ static void init_f32_sine_config(void) {
     } else {
       f32_sine_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsin_ukernel__scalar_rational_5_4_div_u4;
     }
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    f32_sine_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsin_ukernel__hvx_rational_5_4_div_u128;
   #else
     f32_sine_config.ukernel = (xnn_vunary_ukernel_fn)xnn_f32_vsin_ukernel__scalar_rational_5_4_div_u1;
   #endif
