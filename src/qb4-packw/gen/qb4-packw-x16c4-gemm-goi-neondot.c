@@ -11,7 +11,6 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <math.h>
 #include <arm_neon.h>
 
 #include "src/xnnpack/packw.h"
@@ -22,22 +21,19 @@ int8x16_t xnn_packed2planar(
   int32x4_t *vacc,
   const int8x16_t v,
   const int8x16_t vmask,
-  const int8x16_t veor_mask,
-  const int32x4_t neg_zp,
   const int8x16_t vones)
 {
-  const uint8x16_t vl = vshrq_n_u8(v, 4);  // isolate lower int 4
-  const uint8x16_t vh = vandq_u8(v, vmask);  // isolate upper int 4
-  *vacc = vdotq_u32(*vacc, vh, vones);
-  *vacc = vdotq_u32(*vacc, vl, vones);
-  *vacc = vaddq_s32(*vacc, neg_zp);
+  const int8x16_t vl = vandq_u8(v, vmask);  // isolate lower int 4
+  const int8x16_t vh = vshlq_n_s8(v, 4);// isolate upper int 4
+  *vacc = vdotq_s32(*vacc, vh, vones);
+  *vacc = vdotq_s32(*vacc, vl, vones);
   const int8x16_t v0123 = vzip1q_s8(vh, vl);
   const int8x16_t v4567 = vzip2q_s8(vh, vl);
   const int8x16_t v0246 = vreinterpretq_s8_u32(vuzp1q_u32(vreinterpretq_u32_u8(v0123), vreinterpretq_u32_u8(v4567)));
   const int8x16_t v1357 = vreinterpretq_s8_u32(vuzp2q_u32(vreinterpretq_u32_u8(v0123), vreinterpretq_u32_u8(v4567)));
-  const int8x16_t vl1357 = vshlq_n_s8(v1357, 4);
-  const int8x16_t v01234567 = vorrq_s8(v0246, vl1357);
-  return veorq_s8(v01234567, veor_mask);
+  const uint8x16_t vl0246 = vshrq_n_u8(v0246, 4);
+  const int8x16_t v01234567 = vorrq_s8(vl0246, v1357);
+  return v01234567;
 }
 
 void xnn_qb4_packw_gemm_goi_ukernel_x16c4__neondot(
@@ -70,15 +66,16 @@ void xnn_qb4_packw_gemm_goi_ukernel_x16c4__neondot(
   assert(kc % bl == 0);
   size_t num_blocks = kc / bl;
   size_t weight_stride = (kc >> 1);
-  const int8x16_t vmask = vmovq_n_s8(INT8_C(0x0F));
-  const int8x16_t veor_mask = vmovq_n_u8(UINT8_C(0x88));
-  const int32x4_t neg_zp = vmovq_n_s32(-64);
+  const int8x16_t vmask = vmovq_n_s8(INT8_C(0xF0));
   const int8x16_t vones = vmovq_n_u8(UINT8_C(0x01));
 
   uint8_t* out = (uint8_t*) packed_weights;
   const int32_t* b = (const int32_t*) bias;
   const float32x4_t vzeropoint = vmovq_n_f32((float) (((const struct xnn_qs8_qc4w_packing_params*) params)->input_zero_point + 0));
   const float32x4_t vrecip_sixteen = vmovq_n_f32(1.0f/ 16.0f);
+  const int8_t kzp = (int8_t) (((const struct xnn_qs8_qc4w_packing_params*) params)->kernel_zero_point);
+  assert(kzp == 0 || kzp == 8);
+  const int8x16_t vkernel_zero_point = vmovq_n_s8(kzp * 0x11);
 
   do {
     // NC main loop multiple of 16
@@ -202,22 +199,22 @@ void xnn_qb4_packw_gemm_goi_ukernel_x16c4__neondot(
 
         // KC Main loop multiple of 16x32
         for(; k >= 32; k-=32) {
-          const uint32x4_t w0x0123 = vld1q_u32((uint32_t*) w0);
-          const uint32x4_t w1x0123 = vld1q_u32((uint32_t*) w1);
-          const uint32x4_t w2x0123 = vld1q_u32((uint32_t*) w2);
-          const uint32x4_t w3x0123 = vld1q_u32((uint32_t*) w3);
-          const uint32x4_t w4x0123 = vld1q_u32((uint32_t*) w4);
-          const uint32x4_t w5x0123 = vld1q_u32((uint32_t*) w5);
-          const uint32x4_t w6x0123 = vld1q_u32((uint32_t*) w6);
-          const uint32x4_t w7x0123 = vld1q_u32((uint32_t*) w7);
-          const uint32x4_t w8x0123 = vld1q_u32((uint32_t*) w8);
-          const uint32x4_t w9x0123 = vld1q_u32((uint32_t*) w9);
-          const uint32x4_t w10x0123 = vld1q_u32((uint32_t*) w10);
-          const uint32x4_t w11x0123 = vld1q_u32((uint32_t*) w11);
-          const uint32x4_t w12x0123 = vld1q_u32((uint32_t*) w12);
-          const uint32x4_t w13x0123 = vld1q_u32((uint32_t*) w13);
-          const uint32x4_t w14x0123 = vld1q_u32((uint32_t*) w14);
-          const uint32x4_t w15x0123 = vld1q_u32((uint32_t*) w15);
+          const uint32x4_t w0x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w0), vkernel_zero_point)); w0 += 16;
+          const uint32x4_t w1x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w1), vkernel_zero_point)); w1 += 16;
+          const uint32x4_t w2x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w2), vkernel_zero_point)); w2 += 16;
+          const uint32x4_t w3x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w3), vkernel_zero_point)); w3 += 16;
+          const uint32x4_t w4x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w4), vkernel_zero_point)); w4 += 16;
+          const uint32x4_t w5x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w5), vkernel_zero_point)); w5 += 16;
+          const uint32x4_t w6x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w6), vkernel_zero_point)); w6 += 16;
+          const uint32x4_t w7x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w7), vkernel_zero_point)); w7 += 16;
+          const uint32x4_t w8x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w8), vkernel_zero_point)); w8 += 16;
+          const uint32x4_t w9x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w9), vkernel_zero_point)); w9 += 16;
+          const uint32x4_t w10x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w10), vkernel_zero_point)); w10 += 16;
+          const uint32x4_t w11x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w11), vkernel_zero_point)); w11 += 16;
+          const uint32x4_t w12x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w12), vkernel_zero_point)); w12 += 16;
+          const uint32x4_t w13x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w13), vkernel_zero_point)); w13 += 16;
+          const uint32x4_t w14x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w14), vkernel_zero_point)); w14 += 16;
+          const uint32x4_t w15x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w15), vkernel_zero_point)); w15 += 16;
 
           const uint32x4_t v0_02 = vtrn1q_u32(w0x0123, w1x0123);
           const uint32x4_t v0_13 = vtrn2q_u32(w0x0123, w1x0123);
@@ -253,22 +250,22 @@ void xnn_qb4_packw_gemm_goi_ukernel_x16c4__neondot(
           uint32x4_t v3_1 = vcombine_u32(vget_low_u32(v12_13), vget_low_u32(v14_13));
           uint32x4_t v3_3 = vcombine_u32(vget_high_u32(v12_13), vget_high_u32(v14_13));
 
-          v0_0 = xnn_packed2planar(&ksum0, v0_0, vmask, veor_mask, neg_zp, vones);
-          v0_1 = xnn_packed2planar(&ksum0, v0_1, vmask, veor_mask, neg_zp, vones);
-          v0_2 = xnn_packed2planar(&ksum0, v0_2, vmask, veor_mask, neg_zp, vones);
-          v0_3 = xnn_packed2planar(&ksum0, v0_3, vmask, veor_mask, neg_zp, vones);
-          v1_0 = xnn_packed2planar(&ksum1, v1_0, vmask, veor_mask, neg_zp, vones);
-          v1_1 = xnn_packed2planar(&ksum1, v1_1, vmask, veor_mask, neg_zp, vones);
-          v1_2 = xnn_packed2planar(&ksum1, v1_2, vmask, veor_mask, neg_zp, vones);
-          v1_3 = xnn_packed2planar(&ksum1, v1_3, vmask, veor_mask, neg_zp, vones);
-          v2_0 = xnn_packed2planar(&ksum2, v2_0, vmask, veor_mask, neg_zp, vones);
-          v2_1 = xnn_packed2planar(&ksum2, v2_1, vmask, veor_mask, neg_zp, vones);
-          v2_2 = xnn_packed2planar(&ksum2, v2_2, vmask, veor_mask, neg_zp, vones);
-          v2_3 = xnn_packed2planar(&ksum2, v2_3, vmask, veor_mask, neg_zp, vones);
-          v3_0 = xnn_packed2planar(&ksum3, v3_0, vmask, veor_mask, neg_zp, vones);
-          v3_1 = xnn_packed2planar(&ksum3, v3_1, vmask, veor_mask, neg_zp, vones);
-          v3_2 = xnn_packed2planar(&ksum3, v3_2, vmask, veor_mask, neg_zp, vones);
-          v3_3 = xnn_packed2planar(&ksum3, v3_3, vmask, veor_mask, neg_zp, vones);
+          v0_0 = xnn_packed2planar(&ksum0, v0_0, vmask, vones);
+          v0_1 = xnn_packed2planar(&ksum0, v0_1, vmask, vones);
+          v0_2 = xnn_packed2planar(&ksum0, v0_2, vmask, vones);
+          v0_3 = xnn_packed2planar(&ksum0, v0_3, vmask, vones);
+          v1_0 = xnn_packed2planar(&ksum1, v1_0, vmask, vones);
+          v1_1 = xnn_packed2planar(&ksum1, v1_1, vmask, vones);
+          v1_2 = xnn_packed2planar(&ksum1, v1_2, vmask, vones);
+          v1_3 = xnn_packed2planar(&ksum1, v1_3, vmask, vones);
+          v2_0 = xnn_packed2planar(&ksum2, v2_0, vmask, vones);
+          v2_1 = xnn_packed2planar(&ksum2, v2_1, vmask, vones);
+          v2_2 = xnn_packed2planar(&ksum2, v2_2, vmask, vones);
+          v2_3 = xnn_packed2planar(&ksum2, v2_3, vmask, vones);
+          v3_0 = xnn_packed2planar(&ksum3, v3_0, vmask, vones);
+          v3_1 = xnn_packed2planar(&ksum3, v3_1, vmask, vones);
+          v3_2 = xnn_packed2planar(&ksum3, v3_2, vmask, vones);
+          v3_3 = xnn_packed2planar(&ksum3, v3_3, vmask, vones);
 
           vst1q_s8((int8_t*)&out[0], v0_0);
           vst1q_s8((int8_t*)&out[16], v1_0);
@@ -287,22 +284,6 @@ void xnn_qb4_packw_gemm_goi_ukernel_x16c4__neondot(
           vst1q_s8((int8_t*)&out[224], v2_3);
           vst1q_s8((int8_t*)&out[240], v3_3);
 
-          w0 += 16;
-          w1 += 16;
-          w2 += 16;
-          w3 += 16;
-          w4 += 16;
-          w5 += 16;
-          w6 += 16;
-          w7 += 16;
-          w8 += 16;
-          w9 += 16;
-          w10 += 16;
-          w11 += 16;
-          w12 += 16;
-          w13 += 16;
-          w14 += 16;
-          w15 += 16;
           out += 256;
         }
 
@@ -349,6 +330,11 @@ void xnn_qb4_packw_gemm_goi_ukernel_x16c4__neondot(
         s14 += 1;
         s15 += 1;
 
+        f_scales0 = vmulq_f32(f_scales0, vrecip_sixteen);
+        f_scales1 = vmulq_f32(f_scales1, vrecip_sixteen);
+        f_scales2 = vmulq_f32(f_scales2, vrecip_sixteen);
+        f_scales3 = vmulq_f32(f_scales3, vrecip_sixteen);
+
         float32x4_t f_ksum0 = vcvtq_f32_s32(ksum0);
         f_ksum0 = vmulq_f32(f_ksum0, vzeropoint);
         packed_k_scaled_sums0 = vfmsq_f32(packed_k_scaled_sums0, f_ksum0, f_scales0);
@@ -367,10 +353,6 @@ void xnn_qb4_packw_gemm_goi_ukernel_x16c4__neondot(
         vst1q_f32(&packed_k_scaled_sum[8], packed_k_scaled_sums2);
         vst1q_f32(&packed_k_scaled_sum[12], packed_k_scaled_sums3);
 
-        f_scales0 = vmulq_f32(f_scales0, vrecip_sixteen);
-        f_scales1 = vmulq_f32(f_scales1, vrecip_sixteen);
-        f_scales2 = vmulq_f32(f_scales2, vrecip_sixteen);
-        f_scales3 = vmulq_f32(f_scales3, vrecip_sixteen);
 
         vst1_u16((uint16_t*)out+0, vshrn_n_s32(vreinterpretq_s32_f32(f_scales0), 16));
         vst1_u16((uint16_t*)out+4, vshrn_n_s32(vreinterpretq_s32_f32(f_scales1), 16));
