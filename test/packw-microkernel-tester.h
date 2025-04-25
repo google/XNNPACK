@@ -87,6 +87,13 @@ class PackWMicrokernelTester {
 
   size_t bl() const { return this->bl_; }
 
+  PackWMicrokernelTester& kzp(size_t kzp) {
+    this->kzp_ = kzp;
+    return *this;
+  }
+
+  size_t kzp() const { return this->kzp_; }
+
   PackWMicrokernelTester& nullbias(bool nullbias) {
     this->nullbias_ = nullbias;
     return *this;
@@ -614,15 +621,7 @@ class PackWMicrokernelTester {
 
     const int32_t* bias_data = nullbias() ? nullptr : bias.data();
     const xnn_bfloat16* scale_data = bf16_scales.data();
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-    const xnn_qs8_qc4w_packing_params packing_params = {1, 8};
-=======
-    const xnn_qs8_qc4w_packing_params packing_params = {1, static_cast<uint8_t>(kzp()));
->>>>>>> Stashed changes
-=======
     const xnn_qs8_qc4w_packing_params packing_params = {1, static_cast<uint8_t>(kzp())};
->>>>>>> Stashed changes
 
     // Compute reference results.
     xnn_pack_qs8_qb4w_gemm_goi_w(
@@ -742,4 +741,5 @@ class PackWMicrokernelTester {
   size_t bl_{1};
   bool nullbias_{false};
   size_t izp_{0};
+  size_t kzp_{8};
 };

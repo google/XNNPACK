@@ -158,6 +158,21 @@ TEST_P(XnnTestQB4, bl_gt_32) {
   }
 }
 
+TEST_P(XnnTestQB4, kzp_is_0) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  for(size_t ni = 1; ni < GetParam().nr; ++ni){
+    PackWMicrokernelTester()
+      .n(GetParam().nr * GetParam().nr_scale * 4 + ni)
+      .k(GetParam().kblock)
+      .nr(GetParam().nr * GetParam().nr_scale)
+      .kr(GetParam().kr)
+      .sr(GetParam().sr)
+      .bl(GetParam().bl)
+      .izp(GetParam().izp)
+      .kzp(0)
+      .Test(GetParam().ukernel);
+  }
+}
 
 INSTANTIATE_TEST_SUITE_P(qb4_packw,
                          XnnTestQB4,

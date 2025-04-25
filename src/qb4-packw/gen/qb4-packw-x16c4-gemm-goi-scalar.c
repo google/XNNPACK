@@ -11,40 +11,38 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <math.h>
 
 #include "src/xnnpack/packw.h"
 
 static XNN_INTRINSIC void xnn_packed2planar(
   int32_t* ksum,
   const uint8_t* weights,
-  int8_t* out)
+  int8_t* out,
+  int32_t vkernel_zero_point)
 {
-  const uint8_t v0 = weights[0] & 0xF;
-  const uint8_t v1 = weights[0] >> 4;
-  const uint8_t v2 = weights[1] & 0xF;
-  const uint8_t v3 = weights[1] >> 4;
-  const uint8_t v4 = weights[2] & 0xF;
-  const uint8_t v5 = weights[2] >> 4;
-  const uint8_t v6 = weights[3] & 0xF;
-  const uint8_t v7 = weights[3] >> 4;
+  const uint32_t s_v0 = (((uint32_t*)weights)[0] ^ vkernel_zero_point);
+  const int8_t v0 = (((int8_t*)&s_v0))[0] << 4;
+  const int8_t v1 = (((int8_t*)&s_v0))[0] & 0xF0;
+  const int8_t v2 = (((int8_t*)&s_v0))[1] << 4;
+  const int8_t v3 = (((int8_t*)&s_v0))[1] & 0xF0;
+  const int8_t v4 = (((int8_t*)&s_v0))[2] << 4;
+  const int8_t v5 = (((int8_t*)&s_v0))[2] & 0xF0;
+  const int8_t v6 = (((int8_t*)&s_v0))[3] << 4;
+  const int8_t v7 = (((int8_t*)&s_v0))[3] & 0xF0;
 
-  (*ksum) += (uint32_t) (v0);
-  (*ksum) += (uint32_t) (v1);
-  (*ksum) += (uint32_t) (v2);
-  (*ksum) += (uint32_t) (v3);
-  (*ksum) += (uint32_t) (v4);
-  (*ksum) += (uint32_t) (v5);
-  (*ksum) += (uint32_t) (v6);
-  (*ksum) += (uint32_t) (v7);
+  (*ksum) += (int32_t) (v0);
+  (*ksum) += (int32_t) (v1);
+  (*ksum) += (int32_t) (v2);
+  (*ksum) += (int32_t) (v3);
+  (*ksum) += (int32_t) (v4);
+  (*ksum) += (int32_t) (v5);
+  (*ksum) += (int32_t) (v6);
+  (*ksum) += (int32_t) (v7);
 
-  // Subtract 8 zero points (8)
-  (*ksum) -= 64;
-
-  out[0] = (v0 | (v4 << 4)) ^ 0x88;
-  out[1] = (v1 | (v5 << 4)) ^ 0x88;
-  out[2] = (v2 | (v6 << 4)) ^ 0x88;
-  out[3] = (v3 | (v7 << 4)) ^ 0x88;
+  out[0] = (((uint8_t) v0) >> 4 | (v4));
+  out[1] = (((uint8_t) v1) >> 4 | (v5));
+  out[2] = (((uint8_t) v2) >> 4 | (v6));
+  out[3] = (((uint8_t) v3) >> 4 | (v7));
 }
 
 void xnn_qb4_packw_gemm_goi_ukernel_x16c4__scalar(
@@ -81,6 +79,9 @@ void xnn_qb4_packw_gemm_goi_ukernel_x16c4__scalar(
   int8_t* out = (int8_t*) packed_weights;
   const int32_t* b = (const int32_t*) bias;
   const uint32_t izp = (uint32_t) (((const struct xnn_qs8_qc4w_packing_params*) params)->input_zero_point + 0);
+  const uint32_t kernel_zero_point = (uint32_t) (((const struct xnn_qs8_qc4w_packing_params*) params)->kernel_zero_point);
+  assert(kernel_zero_point == 0 || kernel_zero_point == 8);
+  const int32_t vkernel_zero_point = (uint32_t) kernel_zero_point * 0x11111111;
 
   do {
     // NC main loop multiple of 16
@@ -226,41 +227,41 @@ void xnn_qb4_packw_gemm_goi_ukernel_x16c4__scalar(
         int32_t ksum15 = 0;
         size_t k = bl;
         for(; k >= 8; k-=8) {
-          xnn_packed2planar(&ksum0, w0, out + 0); w0 += 4;
-          xnn_packed2planar(&ksum1, w1, out + 4); w1 += 4;
-          xnn_packed2planar(&ksum2, w2, out + 8); w2 += 4;
-          xnn_packed2planar(&ksum3, w3, out + 12); w3 += 4;
-          xnn_packed2planar(&ksum4, w4, out + 16); w4 += 4;
-          xnn_packed2planar(&ksum5, w5, out + 20); w5 += 4;
-          xnn_packed2planar(&ksum6, w6, out + 24); w6 += 4;
-          xnn_packed2planar(&ksum7, w7, out + 28); w7 += 4;
-          xnn_packed2planar(&ksum8, w8, out + 32); w8 += 4;
-          xnn_packed2planar(&ksum9, w9, out + 36); w9 += 4;
-          xnn_packed2planar(&ksum10, w10, out + 40); w10 += 4;
-          xnn_packed2planar(&ksum11, w11, out + 44); w11 += 4;
-          xnn_packed2planar(&ksum12, w12, out + 48); w12 += 4;
-          xnn_packed2planar(&ksum13, w13, out + 52); w13 += 4;
-          xnn_packed2planar(&ksum14, w14, out + 56); w14 += 4;
-          xnn_packed2planar(&ksum15, w15, out + 60); w15 += 4;
+          xnn_packed2planar(&ksum0, w0, out + 0, vkernel_zero_point); w0 += 4;
+          xnn_packed2planar(&ksum1, w1, out + 4, vkernel_zero_point); w1 += 4;
+          xnn_packed2planar(&ksum2, w2, out + 8, vkernel_zero_point); w2 += 4;
+          xnn_packed2planar(&ksum3, w3, out + 12, vkernel_zero_point); w3 += 4;
+          xnn_packed2planar(&ksum4, w4, out + 16, vkernel_zero_point); w4 += 4;
+          xnn_packed2planar(&ksum5, w5, out + 20, vkernel_zero_point); w5 += 4;
+          xnn_packed2planar(&ksum6, w6, out + 24, vkernel_zero_point); w6 += 4;
+          xnn_packed2planar(&ksum7, w7, out + 28, vkernel_zero_point); w7 += 4;
+          xnn_packed2planar(&ksum8, w8, out + 32, vkernel_zero_point); w8 += 4;
+          xnn_packed2planar(&ksum9, w9, out + 36, vkernel_zero_point); w9 += 4;
+          xnn_packed2planar(&ksum10, w10, out + 40, vkernel_zero_point); w10 += 4;
+          xnn_packed2planar(&ksum11, w11, out + 44, vkernel_zero_point); w11 += 4;
+          xnn_packed2planar(&ksum12, w12, out + 48, vkernel_zero_point); w12 += 4;
+          xnn_packed2planar(&ksum13, w13, out + 52, vkernel_zero_point); w13 += 4;
+          xnn_packed2planar(&ksum14, w14, out + 56, vkernel_zero_point); w14 += 4;
+          xnn_packed2planar(&ksum15, w15, out + 60, vkernel_zero_point); w15 += 4;
 
           out += 64;
         }
-        float scale0 = math_cvt_fp32_bf16(s0[0]);
-        float scale1 = math_cvt_fp32_bf16(s1[0]);
-        float scale2 = math_cvt_fp32_bf16(s2[0]);
-        float scale3 = math_cvt_fp32_bf16(s3[0]);
-        float scale4 = math_cvt_fp32_bf16(s4[0]);
-        float scale5 = math_cvt_fp32_bf16(s5[0]);
-        float scale6 = math_cvt_fp32_bf16(s6[0]);
-        float scale7 = math_cvt_fp32_bf16(s7[0]);
-        float scale8 = math_cvt_fp32_bf16(s8[0]);
-        float scale9 = math_cvt_fp32_bf16(s9[0]);
-        float scale10 = math_cvt_fp32_bf16(s10[0]);
-        float scale11 = math_cvt_fp32_bf16(s11[0]);
-        float scale12 = math_cvt_fp32_bf16(s12[0]);
-        float scale13 = math_cvt_fp32_bf16(s13[0]);
-        float scale14 = math_cvt_fp32_bf16(s14[0]);
-        float scale15 = math_cvt_fp32_bf16(s15[0]);
+        float scale0 = math_cvt_fp32_bf16(s0[0]) / 16.0f;
+        float scale1 = math_cvt_fp32_bf16(s1[0]) / 16.0f;
+        float scale2 = math_cvt_fp32_bf16(s2[0]) / 16.0f;
+        float scale3 = math_cvt_fp32_bf16(s3[0]) / 16.0f;
+        float scale4 = math_cvt_fp32_bf16(s4[0]) / 16.0f;
+        float scale5 = math_cvt_fp32_bf16(s5[0]) / 16.0f;
+        float scale6 = math_cvt_fp32_bf16(s6[0]) / 16.0f;
+        float scale7 = math_cvt_fp32_bf16(s7[0]) / 16.0f;
+        float scale8 = math_cvt_fp32_bf16(s8[0]) / 16.0f;
+        float scale9 = math_cvt_fp32_bf16(s9[0]) / 16.0f;
+        float scale10 = math_cvt_fp32_bf16(s10[0]) / 16.0f;
+        float scale11 = math_cvt_fp32_bf16(s11[0]) / 16.0f;
+        float scale12 = math_cvt_fp32_bf16(s12[0]) / 16.0f;
+        float scale13 = math_cvt_fp32_bf16(s13[0]) / 16.0f;
+        float scale14 = math_cvt_fp32_bf16(s14[0]) / 16.0f;
+        float scale15 = math_cvt_fp32_bf16(s15[0]) / 16.0f;
         s0 += 1;
         s1 += 1;
         s2 += 1;
@@ -295,22 +296,22 @@ void xnn_qb4_packw_gemm_goi_ukernel_x16c4__scalar(
         packed_k_scaled_sum[14] -= (float)ksum14 * izp * scale14;
         packed_k_scaled_sum[15] -= (float)ksum15 * izp * scale15;
 
-        ((uint16_t*) out)[0] = math_cvt_bf16_fp32(scale0 / 16.0f);
-        ((uint16_t*) out)[1] = math_cvt_bf16_fp32(scale1 / 16.0f);
-        ((uint16_t*) out)[2] = math_cvt_bf16_fp32(scale2 / 16.0f);
-        ((uint16_t*) out)[3] = math_cvt_bf16_fp32(scale3 / 16.0f);
-        ((uint16_t*) out)[4] = math_cvt_bf16_fp32(scale4 / 16.0f);
-        ((uint16_t*) out)[5] = math_cvt_bf16_fp32(scale5 / 16.0f);
-        ((uint16_t*) out)[6] = math_cvt_bf16_fp32(scale6 / 16.0f);
-        ((uint16_t*) out)[7] = math_cvt_bf16_fp32(scale7 / 16.0f);
-        ((uint16_t*) out)[8] = math_cvt_bf16_fp32(scale8 / 16.0f);
-        ((uint16_t*) out)[9] = math_cvt_bf16_fp32(scale9 / 16.0f);
-        ((uint16_t*) out)[10] = math_cvt_bf16_fp32(scale10 / 16.0f);
-        ((uint16_t*) out)[11] = math_cvt_bf16_fp32(scale11 / 16.0f);
-        ((uint16_t*) out)[12] = math_cvt_bf16_fp32(scale12 / 16.0f);
-        ((uint16_t*) out)[13] = math_cvt_bf16_fp32(scale13 / 16.0f);
-        ((uint16_t*) out)[14] = math_cvt_bf16_fp32(scale14 / 16.0f);
-        ((uint16_t*) out)[15] = math_cvt_bf16_fp32(scale15 / 16.0f);
+        ((uint16_t*) out)[0] = math_cvt_bf16_fp32(scale0);
+        ((uint16_t*) out)[1] = math_cvt_bf16_fp32(scale1);
+        ((uint16_t*) out)[2] = math_cvt_bf16_fp32(scale2);
+        ((uint16_t*) out)[3] = math_cvt_bf16_fp32(scale3);
+        ((uint16_t*) out)[4] = math_cvt_bf16_fp32(scale4);
+        ((uint16_t*) out)[5] = math_cvt_bf16_fp32(scale5);
+        ((uint16_t*) out)[6] = math_cvt_bf16_fp32(scale6);
+        ((uint16_t*) out)[7] = math_cvt_bf16_fp32(scale7);
+        ((uint16_t*) out)[8] = math_cvt_bf16_fp32(scale8);
+        ((uint16_t*) out)[9] = math_cvt_bf16_fp32(scale9);
+        ((uint16_t*) out)[10] = math_cvt_bf16_fp32(scale10);
+        ((uint16_t*) out)[11] = math_cvt_bf16_fp32(scale11);
+        ((uint16_t*) out)[12] = math_cvt_bf16_fp32(scale12);
+        ((uint16_t*) out)[13] = math_cvt_bf16_fp32(scale13);
+        ((uint16_t*) out)[14] = math_cvt_bf16_fp32(scale14);
+        ((uint16_t*) out)[15] = math_cvt_bf16_fp32(scale15);
 
         out += 16 * sizeof(uint16_t);
       }
