@@ -38,40 +38,40 @@ void xnn_f32_vhswish_ukernel__wasmsimd_u16(
   // XNN_FORCE_REALIZATION(vzero);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    v128_t vx0123 = wasm_v128_load(input);
-    v128_t vx4567 = wasm_v128_load(input + 4);
-    v128_t vx89AB = wasm_v128_load(input + 8);
-    v128_t vxCDEF = wasm_v128_load(input + 12);
+    v128_t vx0 = wasm_v128_load(input + 0);
+    v128_t vx1 = wasm_v128_load(input + 4);
+    v128_t vx2 = wasm_v128_load(input + 8);
+    v128_t vx3 = wasm_v128_load(input + 12);
     input += 16;
 
-    v128_t vacc0123 = wasm_f32x4_add(vx0123, vthree);
-    vx0123 = wasm_f32x4_mul(vx0123, vsixth);
-    v128_t vacc4567 = wasm_f32x4_add(vx4567, vthree);
-    vx4567 = wasm_f32x4_mul(vx4567, vsixth);
-    v128_t vacc89AB = wasm_f32x4_add(vx89AB, vthree);
-    vx89AB = wasm_f32x4_mul(vx89AB, vsixth);
-    v128_t vaccCDEF = wasm_f32x4_add(vxCDEF, vthree);
-    vxCDEF = wasm_f32x4_mul(vxCDEF, vsixth);
+    v128_t vacc0 = wasm_f32x4_add(vx0, vthree);
+    vx0 = wasm_f32x4_mul(vx0, vsixth);
+    v128_t vacc1 = wasm_f32x4_add(vx1, vthree);
+    vx1 = wasm_f32x4_mul(vx1, vsixth);
+    v128_t vacc2 = wasm_f32x4_add(vx2, vthree);
+    vx2 = wasm_f32x4_mul(vx2, vsixth);
+    v128_t vacc3 = wasm_f32x4_add(vx3, vthree);
+    vx3 = wasm_f32x4_mul(vx3, vsixth);
 
-    vacc0123 = wasm_i32x4_max(vacc0123, vzero);
-    vacc4567 = wasm_i32x4_max(vacc4567, vzero);
-    vacc89AB = wasm_i32x4_max(vacc89AB, vzero);
-    vaccCDEF = wasm_i32x4_max(vaccCDEF, vzero);
+    vacc0 = wasm_i32x4_max(vacc0, vzero);
+    vacc1 = wasm_i32x4_max(vacc1, vzero);
+    vacc2 = wasm_i32x4_max(vacc2, vzero);
+    vacc3 = wasm_i32x4_max(vacc3, vzero);
 
-    vacc0123 = wasm_i32x4_min(vacc0123, vsix);
-    vacc4567 = wasm_i32x4_min(vacc4567, vsix);
-    vacc89AB = wasm_i32x4_min(vacc89AB, vsix);
-    vaccCDEF = wasm_i32x4_min(vaccCDEF, vsix);
+    vacc0 = wasm_i32x4_min(vacc0, vsix);
+    vacc1 = wasm_i32x4_min(vacc1, vsix);
+    vacc2 = wasm_i32x4_min(vacc2, vsix);
+    vacc3 = wasm_i32x4_min(vacc3, vsix);
 
-    vacc0123 = wasm_f32x4_mul(vacc0123, vx0123);
-    vacc4567 = wasm_f32x4_mul(vacc4567, vx4567);
-    vacc89AB = wasm_f32x4_mul(vacc89AB, vx89AB);
-    vaccCDEF = wasm_f32x4_mul(vaccCDEF, vxCDEF);
+    vacc0 = wasm_f32x4_mul(vacc0, vx0);
+    vacc1 = wasm_f32x4_mul(vacc1, vx1);
+    vacc2 = wasm_f32x4_mul(vacc2, vx2);
+    vacc3 = wasm_f32x4_mul(vacc3, vx3);
 
-    wasm_v128_store(output, vacc0123);
-    wasm_v128_store(output + 4, vacc4567);
-    wasm_v128_store(output + 8, vacc89AB);
-    wasm_v128_store(output + 12, vaccCDEF);
+    wasm_v128_store(output + 0, vacc0);
+    wasm_v128_store(output + 4, vacc1);
+    wasm_v128_store(output + 8, vacc2);
+    wasm_v128_store(output + 12, vacc3);
     output += 16;
   }
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
