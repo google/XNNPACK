@@ -38,26 +38,26 @@ void xnn_f32_vhswish_ukernel__wasmsimd_u8(
   // XNN_FORCE_REALIZATION(vzero);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    v128_t vx0123 = wasm_v128_load(input);
-    v128_t vx4567 = wasm_v128_load(input + 4);
+    v128_t vx0 = wasm_v128_load(input + 0);
+    v128_t vx1 = wasm_v128_load(input + 4);
     input += 8;
 
-    v128_t vacc0123 = wasm_f32x4_add(vx0123, vthree);
-    vx0123 = wasm_f32x4_mul(vx0123, vsixth);
-    v128_t vacc4567 = wasm_f32x4_add(vx4567, vthree);
-    vx4567 = wasm_f32x4_mul(vx4567, vsixth);
+    v128_t vacc0 = wasm_f32x4_add(vx0, vthree);
+    vx0 = wasm_f32x4_mul(vx0, vsixth);
+    v128_t vacc1 = wasm_f32x4_add(vx1, vthree);
+    vx1 = wasm_f32x4_mul(vx1, vsixth);
 
-    vacc0123 = wasm_i32x4_max(vacc0123, vzero);
-    vacc4567 = wasm_i32x4_max(vacc4567, vzero);
+    vacc0 = wasm_i32x4_max(vacc0, vzero);
+    vacc1 = wasm_i32x4_max(vacc1, vzero);
 
-    vacc0123 = wasm_i32x4_min(vacc0123, vsix);
-    vacc4567 = wasm_i32x4_min(vacc4567, vsix);
+    vacc0 = wasm_i32x4_min(vacc0, vsix);
+    vacc1 = wasm_i32x4_min(vacc1, vsix);
 
-    vacc0123 = wasm_f32x4_mul(vacc0123, vx0123);
-    vacc4567 = wasm_f32x4_mul(vacc4567, vx4567);
+    vacc0 = wasm_f32x4_mul(vacc0, vx0);
+    vacc1 = wasm_f32x4_mul(vacc1, vx1);
 
-    wasm_v128_store(output, vacc0123);
-    wasm_v128_store(output + 4, vacc4567);
+    wasm_v128_store(output + 0, vacc0);
+    wasm_v128_store(output + 4, vacc1);
     output += 8;
   }
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {

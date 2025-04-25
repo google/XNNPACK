@@ -38,25 +38,25 @@ void xnn_f32_vhswish_ukernel__neon_u8(
   // XNN_FORCE_REALIZATION(vzero);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    float32x4_t vx0123 = vld1q_f32(input); input += 4;
-    float32x4_t vx4567 = vld1q_f32(input); input += 4;
+    float32x4_t vx0 = vld1q_f32(input); input += 4;
+    float32x4_t vx1 = vld1q_f32(input); input += 4;
 
-    float32x4_t vacc0123 = vaddq_f32(vx0123, vthree);
-    vx0123 = vmulq_f32(vx0123, vsixth);
-    float32x4_t vacc4567 = vaddq_f32(vx4567, vthree);
-    vx4567 = vmulq_f32(vx4567, vsixth);
+    float32x4_t vacc0 = vaddq_f32(vx0, vthree);
+    vx0 = vmulq_f32(vx0, vsixth);
+    float32x4_t vacc1 = vaddq_f32(vx1, vthree);
+    vx1 = vmulq_f32(vx1, vsixth);
 
-    vacc0123 = vreinterpretq_f32_s32(vmaxq_s32(vreinterpretq_s32_f32(vacc0123), vzero));
-    vacc4567 = vreinterpretq_f32_s32(vmaxq_s32(vreinterpretq_s32_f32(vacc4567), vzero));
+    vacc0 = vreinterpretq_f32_s32(vmaxq_s32(vreinterpretq_s32_f32(vacc0), vzero));
+    vacc1 = vreinterpretq_f32_s32(vmaxq_s32(vreinterpretq_s32_f32(vacc1), vzero));
 
-    vacc0123 = vreinterpretq_f32_s32(vminq_s32(vreinterpretq_s32_f32(vacc0123), vsix));
-    vacc4567 = vreinterpretq_f32_s32(vminq_s32(vreinterpretq_s32_f32(vacc4567), vsix));
+    vacc0 = vreinterpretq_f32_s32(vminq_s32(vreinterpretq_s32_f32(vacc0), vsix));
+    vacc1 = vreinterpretq_f32_s32(vminq_s32(vreinterpretq_s32_f32(vacc1), vsix));
 
-    vacc0123 = vmulq_f32(vacc0123, vx0123);
-    vacc4567 = vmulq_f32(vacc4567, vx4567);
+    vacc0 = vmulq_f32(vacc0, vx0);
+    vacc1 = vmulq_f32(vacc1, vx1);
 
-    vst1q_f32(output, vacc0123); output += 4;
-    vst1q_f32(output, vacc4567); output += 4;
+    vst1q_f32(output, vacc0); output += 4;
+    vst1q_f32(output, vacc1); output += 4;
   }
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     float32x4_t vx = vld1q_f32(input); input += 4;
