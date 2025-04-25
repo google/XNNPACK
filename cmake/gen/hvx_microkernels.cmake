@@ -39,6 +39,9 @@ SET(PROD_HVX_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vsqrdiffc-hvx-u128.c
   src/f32-vbinary/gen/f32-vsub-hvx-u128.c
   src/f32-vbinary/gen/f32-vsubc-hvx-u128.c
+  src/f32-vcopysign/gen/f32-vcopysign-hvx.c
+  src/f32-vcopysign/gen/f32-vcopysignc-hvx.c
+  src/f32-vcopysign/gen/f32-vrcopysignc-hvx.c
   src/f32-vcos/gen/f32-vcos-hvx-rational-5-4-div.c
   src/f32-vexp/gen/f32-vexp-hvx-rational-3-2-div.c
   src/f32-vgelu/gen/f32-vgelu-hvx-rational-12-10-div.c

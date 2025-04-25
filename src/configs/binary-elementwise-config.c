@@ -492,6 +492,12 @@ static void init_f32_vcopysign_config(void) {
     f32_vcopysign_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrcopysignc_ukernel__wasmsimd_u16;
     f32_vcopysign_config.element_tile = 16;
     f32_vcopysign_config.element_tile = 16;
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    f32_vcopysign_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vcopysign_ukernel__hvx_u128;
+    f32_vcopysign_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vcopysignc_ukernel__hvx_u128;
+    f32_vcopysign_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrcopysignc_ukernel__hvx_u128;
+    f32_vcopysign_config.element_tile = 128;
+    f32_vcopysign_config.element_tile = 128;
   #else
     f32_vcopysign_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vcopysign_ukernel__scalar_u2;
     f32_vcopysign_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vcopysignc_ukernel__scalar_u2;
