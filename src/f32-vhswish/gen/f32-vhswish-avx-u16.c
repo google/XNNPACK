@@ -40,27 +40,27 @@ void xnn_f32_vhswish_ukernel__avx_u16(
   // XNN_FORCE_REALIZATION(vzero);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const __m256 vx01234567 = _mm256_loadu_ps(input);
-    const __m256 vx89ABCDEF = _mm256_loadu_ps(input + 8);
+    const __m256 vx0 = _mm256_loadu_ps(input + 0);
+    const __m256 vx1 = _mm256_loadu_ps(input + 8);
     input += 16;
 
-    __m256 vacc01234567 = _mm256_mul_ps(vx01234567, vsixth);
-    __m256 vacc89ABCDEF = _mm256_mul_ps(vx89ABCDEF, vsixth);
+    __m256 vacc0 = _mm256_mul_ps(vx0, vsixth);
+    __m256 vacc1 = _mm256_mul_ps(vx1, vsixth);
 
-    vacc01234567 = _mm256_add_ps(vacc01234567, vhalf);
-    vacc89ABCDEF = _mm256_add_ps(vacc89ABCDEF, vhalf);
+    vacc0 = _mm256_add_ps(vacc0, vhalf);
+    vacc1 = _mm256_add_ps(vacc1, vhalf);
 
-    vacc01234567 = _mm256_max_ps(vacc01234567, vzero);
-    vacc89ABCDEF = _mm256_max_ps(vacc89ABCDEF, vzero);
+    vacc0 = _mm256_max_ps(vacc0, vzero);
+    vacc1 = _mm256_max_ps(vacc1, vzero);
 
-    vacc01234567 = _mm256_min_ps(vacc01234567, vone);
-    vacc89ABCDEF = _mm256_min_ps(vacc89ABCDEF, vone);
+    vacc0 = _mm256_min_ps(vacc0, vone);
+    vacc1 = _mm256_min_ps(vacc1, vone);
 
-    vacc01234567 = _mm256_mul_ps(vacc01234567, vx01234567);
-    vacc89ABCDEF = _mm256_mul_ps(vacc89ABCDEF, vx89ABCDEF);
+    vacc0 = _mm256_mul_ps(vacc0, vx0);
+    vacc1 = _mm256_mul_ps(vacc1, vx1);
 
-    _mm256_storeu_ps(output, vacc01234567);
-    _mm256_storeu_ps(output + 8, vacc89ABCDEF);
+    _mm256_storeu_ps(output + 0, vacc0);
+    _mm256_storeu_ps(output + 8, vacc1);
     output += 16;
   }
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {

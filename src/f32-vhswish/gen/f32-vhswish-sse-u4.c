@@ -38,20 +38,20 @@ void xnn_f32_vhswish_ukernel__sse_u4(
   // XNN_FORCE_REALIZATION(vzero);
 
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
-    const __m128 vx0123 = _mm_loadu_ps(input);
+    const __m128 vx0 = _mm_loadu_ps(input + 0);
     input += 4;
 
-    __m128 vacc0123 = _mm_mul_ps(vx0123, vsixth);
+    __m128 vacc0 = _mm_mul_ps(vx0, vsixth);
 
-    vacc0123 = _mm_add_ps(vacc0123, vhalf);
+    vacc0 = _mm_add_ps(vacc0, vhalf);
 
-    vacc0123 = _mm_max_ps(vacc0123, vzero);
+    vacc0 = _mm_max_ps(vacc0, vzero);
 
-    vacc0123 = _mm_min_ps(vacc0123, vone);
+    vacc0 = _mm_min_ps(vacc0, vone);
 
-    vacc0123 = _mm_mul_ps(vacc0123, vx0123);
+    vacc0 = _mm_mul_ps(vacc0, vx0);
 
-    _mm_storeu_ps(output, vacc0123);
+    _mm_storeu_ps(output + 0, vacc0);
     output += 4;
   }
   if XNN_UNLIKELY(batch != 0) {

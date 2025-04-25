@@ -38,39 +38,39 @@ void xnn_f32_vhswish_ukernel__neon_u16(
   // XNN_FORCE_REALIZATION(vzero);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    float32x4_t vx0123 = vld1q_f32(input); input += 4;
-    float32x4_t vx4567 = vld1q_f32(input); input += 4;
-    float32x4_t vx89AB = vld1q_f32(input); input += 4;
-    float32x4_t vxCDEF = vld1q_f32(input); input += 4;
+    float32x4_t vx0 = vld1q_f32(input); input += 4;
+    float32x4_t vx1 = vld1q_f32(input); input += 4;
+    float32x4_t vx2 = vld1q_f32(input); input += 4;
+    float32x4_t vx3 = vld1q_f32(input); input += 4;
 
-    float32x4_t vacc0123 = vaddq_f32(vx0123, vthree);
-    vx0123 = vmulq_f32(vx0123, vsixth);
-    float32x4_t vacc4567 = vaddq_f32(vx4567, vthree);
-    vx4567 = vmulq_f32(vx4567, vsixth);
-    float32x4_t vacc89AB = vaddq_f32(vx89AB, vthree);
-    vx89AB = vmulq_f32(vx89AB, vsixth);
-    float32x4_t vaccCDEF = vaddq_f32(vxCDEF, vthree);
-    vxCDEF = vmulq_f32(vxCDEF, vsixth);
+    float32x4_t vacc0 = vaddq_f32(vx0, vthree);
+    vx0 = vmulq_f32(vx0, vsixth);
+    float32x4_t vacc1 = vaddq_f32(vx1, vthree);
+    vx1 = vmulq_f32(vx1, vsixth);
+    float32x4_t vacc2 = vaddq_f32(vx2, vthree);
+    vx2 = vmulq_f32(vx2, vsixth);
+    float32x4_t vacc3 = vaddq_f32(vx3, vthree);
+    vx3 = vmulq_f32(vx3, vsixth);
 
-    vacc0123 = vreinterpretq_f32_s32(vmaxq_s32(vreinterpretq_s32_f32(vacc0123), vzero));
-    vacc4567 = vreinterpretq_f32_s32(vmaxq_s32(vreinterpretq_s32_f32(vacc4567), vzero));
-    vacc89AB = vreinterpretq_f32_s32(vmaxq_s32(vreinterpretq_s32_f32(vacc89AB), vzero));
-    vaccCDEF = vreinterpretq_f32_s32(vmaxq_s32(vreinterpretq_s32_f32(vaccCDEF), vzero));
+    vacc0 = vreinterpretq_f32_s32(vmaxq_s32(vreinterpretq_s32_f32(vacc0), vzero));
+    vacc1 = vreinterpretq_f32_s32(vmaxq_s32(vreinterpretq_s32_f32(vacc1), vzero));
+    vacc2 = vreinterpretq_f32_s32(vmaxq_s32(vreinterpretq_s32_f32(vacc2), vzero));
+    vacc3 = vreinterpretq_f32_s32(vmaxq_s32(vreinterpretq_s32_f32(vacc3), vzero));
 
-    vacc0123 = vreinterpretq_f32_s32(vminq_s32(vreinterpretq_s32_f32(vacc0123), vsix));
-    vacc4567 = vreinterpretq_f32_s32(vminq_s32(vreinterpretq_s32_f32(vacc4567), vsix));
-    vacc89AB = vreinterpretq_f32_s32(vminq_s32(vreinterpretq_s32_f32(vacc89AB), vsix));
-    vaccCDEF = vreinterpretq_f32_s32(vminq_s32(vreinterpretq_s32_f32(vaccCDEF), vsix));
+    vacc0 = vreinterpretq_f32_s32(vminq_s32(vreinterpretq_s32_f32(vacc0), vsix));
+    vacc1 = vreinterpretq_f32_s32(vminq_s32(vreinterpretq_s32_f32(vacc1), vsix));
+    vacc2 = vreinterpretq_f32_s32(vminq_s32(vreinterpretq_s32_f32(vacc2), vsix));
+    vacc3 = vreinterpretq_f32_s32(vminq_s32(vreinterpretq_s32_f32(vacc3), vsix));
 
-    vacc0123 = vmulq_f32(vacc0123, vx0123);
-    vacc4567 = vmulq_f32(vacc4567, vx4567);
-    vacc89AB = vmulq_f32(vacc89AB, vx89AB);
-    vaccCDEF = vmulq_f32(vaccCDEF, vxCDEF);
+    vacc0 = vmulq_f32(vacc0, vx0);
+    vacc1 = vmulq_f32(vacc1, vx1);
+    vacc2 = vmulq_f32(vacc2, vx2);
+    vacc3 = vmulq_f32(vacc3, vx3);
 
-    vst1q_f32(output, vacc0123); output += 4;
-    vst1q_f32(output, vacc4567); output += 4;
-    vst1q_f32(output, vacc89AB); output += 4;
-    vst1q_f32(output, vaccCDEF); output += 4;
+    vst1q_f32(output, vacc0); output += 4;
+    vst1q_f32(output, vacc1); output += 4;
+    vst1q_f32(output, vacc2); output += 4;
+    vst1q_f32(output, vacc3); output += 4;
   }
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     float32x4_t vx = vld1q_f32(input); input += 4;
