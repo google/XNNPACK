@@ -240,12 +240,11 @@ class Aarch32(arm_template.Arm):
       movls  {AM_2}, {AM_1}
       movls  {CM_2}, {CM_1}\n""",
     }
-    ret = ''
     outer = self.m
     # clamp a & c
     end_index = self.m if (self.m % 2 == 1) else self.m - 1
     for mr in range(2, end_index, 2):
-      ret += clamping['clamp'].format(
+      self.asm_string += clamping['clamp'].format(
           mr_reg=self.mr_register(),
           AM_0=input_registers[mr - 2],
           AM_1=input_registers[mr - 1],
@@ -256,7 +255,7 @@ class Aarch32(arm_template.Arm):
           M=mr,
       )
     if end_index != self.m:
-      ret += """
+      self.asm_string += """
       cmp {mr_reg}, #{M}
       movlo  {AM_1}, {AM_0}
       movlo  {CM_1}, {CM_0}\n""".format(

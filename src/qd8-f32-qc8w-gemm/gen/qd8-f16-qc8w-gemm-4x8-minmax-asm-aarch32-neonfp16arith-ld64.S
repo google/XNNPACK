@@ -42,6 +42,16 @@ BEGIN_FUNCTION xnn_qd8_f16_qc8w_gemm_minmax_ukernel_4x8__asm_aarch32_neonfp16ari
       add r8, r4, r12
       add r14, r8, r12
 
+      cmp r0, #2
+      movlo  r7, r3
+      movlo  r4, r6
+      movls  r9, r7
+      movls  r8, r4
+
+      cmp r0, #4
+      movlo  r10, r9
+      movlo  r14, r8
+
 .Louter_loop:
       # Initialize k counter.
       subs r0, r2, #8
