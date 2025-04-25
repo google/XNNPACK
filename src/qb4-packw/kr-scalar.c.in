@@ -8,27 +8,26 @@ $assert KR > 1
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <math.h>
 
 #include "src/xnnpack/packw.h"
 
 static XNN_INTRINSIC void xnn_packed2planar(
   int32_t* ksum,
   const uint8_t* weights,
-  int8_t* out)
+  int8_t* out,
+  int32_t vkernel_zero_point)
 {
-  $for K in range(0, KR):
-    const uint8_t v${2*K} = weights[${K}] & 0xF;
-    const uint8_t v${2*K+1} = weights[${K}] >> 4;
+  $for K_I in range(0, KR, 4):
+    const uint32_t s_v${K_I//4} = (((uint32_t*)weights)[${K_I//4}] ^ vkernel_zero_point);
+    $for K in range(0, 4):
+      const int8_t v${2*(K_I+K)} = (((int8_t*)&s_v${K_I//4}))[${K}] << 4;
+      const int8_t v${2*(K_I+K)+1} = (((int8_t*)&s_v${K_I//4}))[${K}] & 0xF0;
 
   $for K in range(0, 2*KR):
-    (*ksum) += (uint32_t) (v${K});
-
-  // Subtract ${2*KR} zero points (8)
-  (*ksum) -= ${8*2*KR};
+    (*ksum) += (int32_t) (v${K});
 
   $for K in range(0, KR):
-    out[${K}] = (v${K} | (v${K+KR} << 4)) ^ 0x88;
+    out[${K}] = (((uint8_t) v${K}) >> 4 | (v${K+KR}));
 }
 
 void xnn_qb4_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
@@ -65,6 +64,9 @@ void xnn_qb4_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
   int8_t* out = (int8_t*) packed_weights;
   const int32_t* b = (const int32_t*) bias;
   const uint32_t izp = (uint32_t) (((const struct xnn_qs8_qc4w_packing_params*) params)->input_zero_point + 0);
+  const uint32_t kernel_zero_point = (uint32_t) (((const struct xnn_qs8_qc4w_packing_params*) params)->kernel_zero_point);
+  assert(kernel_zero_point == 0 || kernel_zero_point == 8);
+  const int32_t vkernel_zero_point = (uint32_t) kernel_zero_point * 0x11111111;
 
   do {
     // NC main loop multiple of ${NR}
@@ -108,12 +110,12 @@ void xnn_qb4_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
         size_t k = bl;
         for(; k >= ${2 * KR}; k-=${2*KR}) {
           $for N in range(NR):
-            xnn_packed2planar(&ksum${N}, w${N}, out + ${N*KR}); w${N} += ${KR};
+            xnn_packed2planar(&ksum${N}, w${N}, out + ${N*KR}, vkernel_zero_point); w${N} += ${KR};
 
           out += ${NR*KR};
         }
         $for N in range(NR):
-          float scale${N} = math_cvt_fp32_bf16(s${N}[0]);
+          float scale${N} = math_cvt_fp32_bf16(s${N}[0]) / 16.0f;
         $for N in range(NR):
           s${N} += 1;
 
@@ -121,7 +123,7 @@ void xnn_qb4_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
           packed_k_scaled_sum[${N}] -= (float)ksum${N} * izp * scale${N};
 
         $for N in range(NR):
-          ((uint16_t*) out)[${N}] = math_cvt_bf16_fp32(scale${N} / 16.0f);
+          ((uint16_t*) out)[${N}] = math_cvt_bf16_fp32(scale${N});
 
         out += ${NR} * sizeof(uint16_t);
       }
