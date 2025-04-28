@@ -713,8 +713,8 @@ static void init_f32_clamp_config(void) {
   #elif XNN_ARCH_WASM
     f32_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__wasm_u4;
     f32_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_clamp_scalar_params;
-  #elif XNN_ARCH_RISCV
-    f32_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__scalar_u4;
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    f32_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__hvx_u128;
     f32_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_clamp_scalar_params;
   #else
     f32_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__scalar_u4;
