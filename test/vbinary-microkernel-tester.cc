@@ -93,15 +93,12 @@ void VBinaryMicrokernelTester::Test(xnn_f32_vbinary_ukernel_fn vbinary,
   xnnpack::Buffer<float> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     if (!inplace_a()) {
-      std::cout << __LINE__ << std::endl;
       std::generate(a.begin(), a.end(), [&]() { return f32dist(rng); });
     }
     if (!inplace_b()) {
-      std::cout << __LINE__ << std::endl;
       std::generate(b.begin(), b.end(), [&]() { return f32dist(rng); });
     }
     if (inplace_a() || inplace_b()) {
-      std::cout << __LINE__ << std::endl;
       std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
     }
     const float* a_data = inplace_a() ? y.data() : a.data();
