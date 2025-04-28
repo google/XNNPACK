@@ -44,4 +44,7 @@ tools/xngen src/f32-vrelu/avx.c.in -D BATCH_TILE=16 -o src/f32-vrelu/gen/f32-vre
 tools/xngen src/f32-vrelu/avx512f.c.in -D BATCH_TILE=16 -o src/f32-vrelu/gen/f32-vrelu-avx512f-u16.c &
 tools/xngen src/f32-vrelu/avx512f.c.in -D BATCH_TILE=32 -o src/f32-vrelu/gen/f32-vrelu-avx512f-u32.c &
 
+##################################### SIMD #####################################
+tools/xngen src/f32-vrelu/simd.c.in -D ARCH=hvx -D BATCH_TILES=32,64,128 -o src/f32-vrelu/gen/f32-vrelu-hvx.c &
+
 wait

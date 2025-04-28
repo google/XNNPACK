@@ -1109,6 +1109,8 @@ static void init_f32_relu_config(void) {
     } else {
       f32_relu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrelu_ukernel__wasm_u8;
     }
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    f32_relu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrelu_ukernel__hvx_u128;
   #endif
 }
 

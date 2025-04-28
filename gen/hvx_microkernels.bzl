@@ -42,6 +42,7 @@ PROD_HVX_MICROKERNEL_SRCS = [
     "src/f32-vexp/gen/f32-vexp-hvx-rational-3-2-div.c",
     "src/f32-vgelu/gen/f32-vgelu-hvx-rational-12-10-div.c",
     "src/f32-vlog/gen/f32-vlog-hvx-rational-3-3-div.c",
+    "src/f32-vrelu/gen/f32-vrelu-hvx.c",
     "src/f32-vsin/gen/f32-vsin-hvx-rational-5-4-div.c",
     "src/f32-vtanh/gen/f32-vtanh-hvx-rational-9-8-div.c",
     "src/f32-vunary/gen/f32-vabs-hvx.c",
