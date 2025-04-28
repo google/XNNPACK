@@ -29,10 +29,10 @@ typedef __m512h xnn_simd_f16_t;
 #if XNN_HAVE_FLOAT16
 
 #if defined(__clang__) && (__clang_major__ < 19)
-static XNN_INLINE __m512d xnn_broadcast_16_512_workaround(uint16_t x) {
+static XNN_INLINE __m512h xnn_broadcast_16_512_workaround(uint16_t x) {
   uint32_t bits = (uint32_t)x | ((uint32_t)x) << 16;
   __asm__ volatile("" : "=m"(bits) : "m"(bits));
-  return _mm512_castsi512_pd(_mm512_set1_epi32(bits));
+  return (__m512h)_mm512_castsi512_pd(_mm512_set1_epi32(bits));
 }
 #define XNN_SIMD_CONST_F16_FROM_FLOAT(var, val)               \
   const xnn_simd_f16_t var = xnn_broadcast_16_512_workaround( \
