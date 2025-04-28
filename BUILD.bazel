@@ -555,6 +555,7 @@ xnnpack_cc_library(
     ],
 )
 
+# TODO: This should be test_only = True.
 xnnpack_cxx_library(
     name = "buffer",
     hdrs = ["src/xnnpack/buffer.h"],

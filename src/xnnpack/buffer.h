@@ -12,8 +12,10 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <cstring>
 #include <functional>
 #include <initializer_list>
+#include <iostream>
 #include <limits>
 #include <memory>
 #include <numeric>
@@ -28,6 +30,24 @@
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/reference-utils.h"
+
+#if XNN_COMPILER_HAS_FEATURE(memory_sanitizer)
+#include <sanitizer/msan_interface.h>
+#define XNN_MSAN_POISON(x, size) __msan_poison(x, size)
+#define XNN_MSAN_UNPOISON(x, size) __msan_unpoison(x, size)
+#else
+#define XNN_MSAN_POISON(x, size)
+#define XNN_MSAN_UNPOISON(x, size)
+#endif
+
+#if XNN_COMPILER_HAS_FEATURE(address_sanitizer)
+#include <sanitizer/asan_interface.h>
+#define XNN_ASAN_POISON(x, size) __asan_poison_memory_region(x, size)
+#define XNN_ASAN_UNPOISON(x, size) __asan_unpoison_memory_region(x, size)
+#else
+#define XNN_ASAN_POISON(x, size)
+#define XNN_ASAN_UNPOISON(x, size)
+#endif
 
 namespace xnnpack {
 
@@ -124,8 +144,17 @@ struct PaddingBytes {
 
 static constexpr PaddingBytes XnnExtraBytes = {XNN_EXTRA_BYTES};
 
-// This is a container similar to std::vector, but it leaves the memory
-// uninitialized, supports alignment.
+// This is a container similar to std::vector, but:
+// - It is move-only
+// - It does not initialize its memory. This helps detect bugs with msan, and
+//   speeds up tests/benchmarks (especially on slow emulators).
+// - It supports allocating some extra bytes past the end, but does not consider
+//   those bytes to be part of the container (size() and end() do not include
+//   these bytes).
+// - It allocates extra bytes before and after the buffer to detect memory
+//   corruption. This is necessary because we have some code that only runs on
+//   targets where we have no other reasonable way to detect out of bounds
+//   memory writes (e.g. arm 32-bit assembly, which doesn't support asan).
 template <typename T, size_t Alignment = alignof(T)>
 class Buffer {
   static_assert(std::is_trivial<T>::value, "");
@@ -169,6 +198,29 @@ class Buffer {
 #endif
   }
 
+  // Some compilers can't handle static constexpr member variables.
+  enum { guard_bytes = std::max<size_t>(64, Alignment) };
+  enum { guard_signal = 0xB8AEBCB293DCA04F };
+
+  static void fill_guard_bytes(uint8_t* x) {
+    assert(guard_bytes % sizeof(guard_signal) == 0);
+    const auto guard_signal_with_addr = guard_signal;
+    for (size_t i = 0; i < guard_bytes; i += sizeof(guard_signal)) {
+      memcpy(x + i, &guard_signal_with_addr, sizeof(guard_signal));
+    }
+  }
+
+  static bool check_guard_bytes(const uint8_t* x) {
+    assert(guard_bytes % sizeof(guard_signal) == 0);
+    const auto guard_signal_with_addr = guard_signal;
+    for (size_t i = 0; i < guard_bytes; i += sizeof(guard_signal)) {
+      if (memcmp(x + i, &guard_signal_with_addr, sizeof(guard_signal)) != 0) {
+        return false;
+      }
+    }
+    return true;
+  }
+
  public:
   using value_type = T;
   using iterator = T*;
@@ -177,8 +229,30 @@ class Buffer {
   Buffer() : data_(nullptr), size_(0) {}
   explicit Buffer(size_t size, PaddingBytes extra_bytes = {0})
       : data_(reinterpret_cast<T*>(
-            allocate(size * sizeof(T) + extra_bytes.value))),
-        size_(size) {}
+            allocate(size * sizeof(T) + guard_bytes +
+                     std::max<size_t>(guard_bytes, extra_bytes.value)))),
+        size_(size) {
+    // Fill the region before the allocation with the guard bytes, and poison it
+    // for sanitizers.
+    uint8_t* before = reinterpret_cast<uint8_t*>(data_);
+    fill_guard_bytes(before);
+    XNN_MSAN_POISON(before, guard_bytes);
+    XNN_ASAN_POISON(before, guard_bytes);
+
+    // The actual allocation is after the guard bytes.
+    data_ =
+        reinterpret_cast<T*>(reinterpret_cast<uint8_t*>(data_) + guard_bytes);
+
+    // Fill the region after the allocation with the guard bytes.
+    uint8_t* after = reinterpret_cast<uint8_t*>(data_ + size_);
+    fill_guard_bytes(after);
+    // Here, we only want to poison the memory for sanitizers after the extra
+    // bytes. We want to allow reads past the end to not crash (in asan or
+    // otherwise), but we don't want that memory to be considered initialized by
+    // msan.
+    XNN_ASAN_POISON(after + extra_bytes.value, guard_bytes - extra_bytes.value);
+    XNN_MSAN_POISON(after, guard_bytes);
+  }
   Buffer(size_t size, T value, PaddingBytes extra_bytes = {0})
       : Buffer(size, extra_bytes) {
     std::fill(begin(), end(), value);
@@ -192,7 +266,31 @@ class Buffer {
     std::swap(size_, other.size_);
   }
   ~Buffer() {
-    if (data_) free(data_);
+    if (data_) {
+      // Check that the guard bytes after the buffer have not been modified. We
+      // need to unpoison the memory first so we can read it.
+      const uint8_t* after = reinterpret_cast<uint8_t*>(data_ + size_);
+      XNN_ASAN_UNPOISON(after, guard_bytes);
+      XNN_MSAN_UNPOISON(after, guard_bytes);
+      if (!check_guard_bytes(after)) {
+        std::cerr << "guard bytes after allocation were corrupted" << std::endl;
+        std::abort();
+      }
+      data_ =
+          reinterpret_cast<T*>(reinterpret_cast<uint8_t*>(data_) - guard_bytes);
+
+      // Check that the guard bytes before the buffer have not been modified.
+      const uint8_t* before = reinterpret_cast<uint8_t*>(data_);
+      XNN_ASAN_UNPOISON(before, guard_bytes);
+      XNN_MSAN_UNPOISON(before, guard_bytes);
+      if (!check_guard_bytes(before)) {
+        std::cerr << "guard bytes before allocation were corrupted"
+                  << std::endl;
+        std::abort();
+      }
+
+      free(data_);
+    }
   }
 
   Buffer& operator=(const Buffer&) = delete;

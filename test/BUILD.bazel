@@ -1088,7 +1088,6 @@ xnnpack_unit_test(
     deps = [
         ":replicable_random_device",
         "//:buffer",
-        "//:math",
     ],
 )
 
