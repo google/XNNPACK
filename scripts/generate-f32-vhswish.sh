@@ -46,4 +46,7 @@ tools/xngen src/f32-vhswish/avx.c.in -D BATCH_TILE=16 -D FMA=3 -o src/f32-vhswis
 tools/xngen src/f32-vhswish/avx512f.c.in -D BATCH_TILE=16 -o src/f32-vhswish/gen/f32-vhswish-avx512f-u16.c &
 tools/xngen src/f32-vhswish/avx512f.c.in -D BATCH_TILE=32 -o src/f32-vhswish/gen/f32-vhswish-avx512f-u32.c &
 
+##################################### SIMD #####################################
+tools/xngen src/f32-vhswish/simd.c.in -D ARCH=hvx -D BATCH_TILES=32,64,128 -o src/f32-vhswish/gen/f32-vhswish-hvx.c &
+
 wait

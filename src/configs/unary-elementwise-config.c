@@ -921,6 +921,8 @@ static void init_f32_hswish_config(void) {
     }
   #elif XNN_ARCH_RISCV
     f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__scalar_u4;
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__hvx_u128;
   #else
     f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__scalar_u4;
   #endif
