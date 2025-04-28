@@ -125,9 +125,7 @@ class GemmMicrokernelTester {
   }
 
   size_t cm_stride() const {
-    return this->cm_stride_ == 0
-               ? nr() * ((n() - 1) / nr()) + (n() - 1) % nr() + 1
-               : this->cm_stride_;
+    return this->cm_stride_ == 0 ? n() : this->cm_stride_;
   }
 
   GemmMicrokernelTester& a_zero_point(uint8_t a_zero_point) {
