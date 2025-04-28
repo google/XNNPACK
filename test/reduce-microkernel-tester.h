@@ -506,5 +506,4 @@ class ReduceMicrokernelTester {
   LoopInfo channels_{1};
   size_t input_stride_{0};
   size_t batch_size_{1};
-  size_t iterations_{15};
 };
