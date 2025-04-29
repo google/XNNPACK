@@ -31,17 +31,21 @@ XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_f32_vhswish_ukernel__rvv_u8v,
 #endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vhswish_ukernel__sse_u4, 4, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vhswish_ukernel__sse_u8, 8, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vhswish_ukernel__sse2_u4, 4, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vhswish_ukernel__sse2_u8, 8, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vhswish_ukernel__sse2_u16, 16, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx, xnn_f32_vhswish_ukernel__avx_u8, 8, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx, xnn_f32_vhswish_ukernel__avx_u16, 16, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx, xnn_f32_vhswish_ukernel__avx_u32, 32, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_fma3, xnn_f32_vhswish_ukernel__fma3_u8, 8, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_fma3, xnn_f32_vhswish_ukernel__fma3_u16, 16, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_fma3, xnn_f32_vhswish_ukernel__fma3_u32, 32, false, float, struct xnn_f32_default_params, NULL)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_f32_vhswish_ukernel__avx512f_u16, 16, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_f32_vhswish_ukernel__avx512f_u32, 32, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_f32_vhswish_ukernel__avx512f_u64, 64, false, float, struct xnn_f32_default_params, NULL)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -49,12 +53,6 @@ XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vhswish_ukernel__wasmsimd_u4, 4, false, float
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vhswish_ukernel__wasmsimd_u8, 8, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vhswish_ukernel__wasmsimd_u16, 16, false, float, struct xnn_f32_default_params, NULL)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vhswish_ukernel__wasm_u1, 1, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vhswish_ukernel__wasm_u2, 2, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vhswish_ukernel__wasm_u4, 4, false, float, struct xnn_f32_default_params, NULL)
-#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vhswish_ukernel__hvx_u32, 32, false, float, struct xnn_f32_default_params, NULL)

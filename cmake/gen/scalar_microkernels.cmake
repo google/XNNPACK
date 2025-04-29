@@ -121,7 +121,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-velu/gen/f32-velu-scalar-rr2-lut16-p3-u4.c
   src/f32-vexp/gen/f32-vexp-scalar-rational-3-2-div.c
   src/f32-vgelu/gen/f32-vgelu-scalar-rational-12-10-div.c
-  src/f32-vhswish/gen/f32-vhswish-scalar-u4.c
+  src/f32-vhswish/gen/f32-vhswish-scalar.c
   src/f32-vlog/gen/f32-vlog-scalar-rational-3-3-div.c
   src/f32-vlrelu/gen/f32-vlrelu-scalar-u4.c
   src/f32-vmulcaddc/gen/f32-vmulcaddc-c1-minmax-scalar-2x.c
@@ -507,8 +507,6 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-velu/gen/f32-velu-scalar-rr2-p6-u6.c
   src/f32-vexp/gen/f32-vexp-scalar-exp.c
   src/f32-vgelu/gen/f32-vgelu-scalar.c
-  src/f32-vhswish/gen/f32-vhswish-scalar-u1.c
-  src/f32-vhswish/gen/f32-vhswish-scalar-u2.c
   src/f32-vlog/gen/f32-vlog-scalar-log.c
   src/f32-vlrelu/gen/f32-vlrelu-scalar-u1.c
   src/f32-vlrelu/gen/f32-vlrelu-scalar-u2.c

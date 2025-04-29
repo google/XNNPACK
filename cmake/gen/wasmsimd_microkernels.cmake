@@ -135,7 +135,7 @@ SET(PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-p6-u16.c
   src/f32-vexp/gen/f32-vexp-wasmsimd-rational-3-2-div.c
   src/f32-vgelu/gen/f32-vgelu-wasmsimd-rational-12-10-div.c
-  src/f32-vhswish/gen/f32-vhswish-wasmsimd-u16.c
+  src/f32-vhswish/gen/f32-vhswish-wasmsimd.c
   src/f32-vlog/gen/f32-vlog-wasmsimd-rational-3-3-div.c
   src/f32-vlrelu/gen/f32-vlrelu-wasmsimd-iminmax-u8.c
   src/f32-vlrelu/gen/f32-vlrelu-wasmsimd-laneselect-u8.c
@@ -750,8 +750,6 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-p6-u4.c
   src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-p6-u8.c
   src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-p6-u12.c
-  src/f32-vhswish/gen/f32-vhswish-wasmsimd-u4.c
-  src/f32-vhswish/gen/f32-vhswish-wasmsimd-u8.c
   src/f32-vlrelu/gen/f32-vlrelu-wasmsimd-iminmax-u4.c
   src/f32-vlrelu/gen/f32-vlrelu-wasmsimd-laneselect-u4.c
   src/f32-vmulcaddc/gen/f32-vmulcaddc-c8-minmax-wasmsimd-arm-2x.c

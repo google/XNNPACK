@@ -10,13 +10,13 @@
 
 #include <assert.h>
 
-#include "src/xnnpack/simd/f32-hvx.h"
+#include "src/xnnpack/simd/f32-scalar.h"
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/vunary.h"
 
 
-void xnn_f32_vhswish_ukernel__hvx_u32(
+void xnn_f32_vhswish_ukernel__scalar_u1(
     size_t batch,
     const float* input,
     float* output,
@@ -52,7 +52,7 @@ void xnn_f32_vhswish_ukernel__hvx_u32(
   }
 }
 
-void xnn_f32_vhswish_ukernel__hvx_u64(
+void xnn_f32_vhswish_ukernel__scalar_u2(
     size_t batch,
     const float* input,
     float* output,
@@ -68,10 +68,10 @@ void xnn_f32_vhswish_ukernel__hvx_u64(
   XNN_SIMD_CONST_F32(vone, 1.0f);
   XNN_SIMD_CONST_F32(vzero, 0.0f);
 
-  for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
+  for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
     const xnn_simd_f32_t vx0 = xnn_loadu_f32(input + 0 * xnn_simd_size_f32);
     const xnn_simd_f32_t vx1 = xnn_loadu_f32(input + 1 * xnn_simd_size_f32);
-    input += 64;
+    input += 2;
 
     xnn_simd_f32_t vacc0 = xnn_fmadd_f32(vx0, vsixth, vhalf);
     xnn_simd_f32_t vacc1 = xnn_fmadd_f32(vx1, vsixth, vhalf);
@@ -87,7 +87,7 @@ void xnn_f32_vhswish_ukernel__hvx_u64(
 
     xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vacc0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vacc1);
-    output += 64;
+    output += 2;
   }
   for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
     const xnn_simd_f32_t vx = xnn_loadu_f32(input);
@@ -109,7 +109,7 @@ void xnn_f32_vhswish_ukernel__hvx_u64(
   }
 }
 
-void xnn_f32_vhswish_ukernel__hvx_u128(
+void xnn_f32_vhswish_ukernel__scalar_u4(
     size_t batch,
     const float* input,
     float* output,
@@ -125,12 +125,12 @@ void xnn_f32_vhswish_ukernel__hvx_u128(
   XNN_SIMD_CONST_F32(vone, 1.0f);
   XNN_SIMD_CONST_F32(vzero, 0.0f);
 
-  for (; batch >= 128 * sizeof(float); batch -= 128 * sizeof(float)) {
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const xnn_simd_f32_t vx0 = xnn_loadu_f32(input + 0 * xnn_simd_size_f32);
     const xnn_simd_f32_t vx1 = xnn_loadu_f32(input + 1 * xnn_simd_size_f32);
     const xnn_simd_f32_t vx2 = xnn_loadu_f32(input + 2 * xnn_simd_size_f32);
     const xnn_simd_f32_t vx3 = xnn_loadu_f32(input + 3 * xnn_simd_size_f32);
-    input += 128;
+    input += 4;
 
     xnn_simd_f32_t vacc0 = xnn_fmadd_f32(vx0, vsixth, vhalf);
     xnn_simd_f32_t vacc1 = xnn_fmadd_f32(vx1, vsixth, vhalf);
@@ -156,7 +156,7 @@ void xnn_f32_vhswish_ukernel__hvx_u128(
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vacc1);
     xnn_storeu_f32(output + 2 * xnn_simd_size_f32, vacc2);
     xnn_storeu_f32(output + 3 * xnn_simd_size_f32, vacc3);
-    output += 128;
+    output += 4;
   }
   for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
     const xnn_simd_f32_t vx = xnn_loadu_f32(input);

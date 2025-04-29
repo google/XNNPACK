@@ -59,7 +59,7 @@ SET(PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-velu/gen/f32-velu-avx512f-rr1-p6-u64.c
   src/f32-vexp/gen/f32-vexp-avx512f-rational-3-2-div.c
   src/f32-vgelu/gen/f32-vgelu-avx512f-rational-12-10-nr.c
-  src/f32-vhswish/gen/f32-vhswish-avx512f-u16.c
+  src/f32-vhswish/gen/f32-vhswish-avx512f.c
   src/f32-vlog/gen/f32-vlog-avx512f-rational-3-3-div.c
   src/f32-vlrelu/gen/f32-vlrelu-avx512f-u16.c
   src/f32-vrnd/gen/f32-vrndd-avx512f-u16.c
@@ -234,7 +234,6 @@ SET(NON_PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-velu/gen/f32-velu-avx512f-rr1-p6-u48.c
   src/f32-vexp/gen/f32-vexp-avx512f-rational-3-2-nr.c
   src/f32-vgelu/gen/f32-vgelu-avx512f-rational-12-10-div.c
-  src/f32-vhswish/gen/f32-vhswish-avx512f-u32.c
   src/f32-vlog/gen/f32-vlog-avx512f-rational-3-3-nr.c
   src/f32-vlrelu/gen/f32-vlrelu-avx512f-u32.c
   src/f32-vrelu/gen/f32-vrelu-avx512f-u16.c
