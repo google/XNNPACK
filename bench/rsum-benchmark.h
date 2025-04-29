@@ -127,7 +127,7 @@ void qs8_rsum(benchmark::State& state, xnn_qs8_rsum_ukernel_fn rsum,
 
   xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> input(
       rows * channels, xnnpack::XnnExtraBytes);
-  xnnpack::Buffer<int32_t> output(rows);
+  xnnpack::Buffer<int32_t> output(rows, 0);
   std::iota(input.begin(), input.end(), 1);
 
   // Prepare parameters.
@@ -159,7 +159,7 @@ void qu8_rsum(benchmark::State& state, xnn_qu8_rsum_ukernel_fn rsum,
 
   xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> input(
       rows * channels, xnnpack::XnnExtraBytes);
-  xnnpack::Buffer<uint32_t> output(rows);
+  xnnpack::Buffer<uint32_t> output(rows, 0);
   std::iota(input.begin(), input.end(), 1);
 
   // Prepare parameters.
