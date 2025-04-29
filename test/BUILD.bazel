@@ -251,12 +251,18 @@ xnnpack_cxx_library(
     "qs8_vmul_minmax_rndnu",
     "qs8_vmulc_minmax_fp32",
     "qs8_vmulc_minmax_rndnu",
+    "qs8_vprelu",
+    "qs8_vpreluc",
+    "qs8_vrpreluc",
     "qu8_vadd_minmax",
     "qu8_vaddc_minmax",
     "qu8_vmul_minmax_fp32",
     "qu8_vmul_minmax_rndnu",
     "qu8_vmulc_minmax_fp32",
     "qu8_vmulc_minmax_rndnu",
+    "qu8_vprelu",
+    "qu8_vpreluc",
+    "qu8_vrpreluc",
 ]]
 
 [xnnpack_unit_test(

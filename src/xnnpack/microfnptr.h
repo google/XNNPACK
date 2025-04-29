@@ -988,6 +988,22 @@ typedef void (*xnn_qu8_vmul_minmax_ukernel_fn)(
     const union xnn_qu8_mul_minmax_params
         params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+
+ // VPRELU: Vector PRELU elementwise 
+
+typedef void (*xnn_qs8_vprelu_ukernel_fn)(
+    size_t batch, const int8_t* input_x, const int8_t* input_y,
+    int8_t* output,
+    const union xnn_qs8_vprelu_scalar_params
+        params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+typedef void (*xnn_qu8_vprelu_ukernel_fn)(
+    size_t batch, const uint8_t* input_x, const uint8_t* input_y,
+    uint8_t* output,
+    const union xnn_qs8_vprelu_scalar_params
+        params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+
 /***************** Microkernel pointers for sparse inference *****************/
 
 // SpMM: Sparse Matrix-Matrix multiplication
@@ -1185,6 +1201,18 @@ typedef size_t (*xnn_init_qu8_mul_minmax_params_fn)(
     const struct xnn_quantization_params* a_quantization,
     const struct xnn_quantization_params* b_quantization,
     const struct xnn_quantization_params* output_quantization);
+
+typedef size_t(*xnn_init_qs8_vprelu_params_fn)(
+  union xnn_qs8_vprelu_scalar_params params[XNN_MIN_ELEMENTS(1)],
+  const struct xnn_quantization_params* a_quantization,
+  const struct xnn_quantization_params* b_quantization,
+  const struct xnn_quantization_params* output_quantization);
+
+typedef size_t(*xnn_init_qu8_vprelu_params_fn)(
+  union xnn_qs8_vprelu_scalar_params params[XNN_MIN_ELEMENTS(1)],
+  const struct xnn_quantization_params* a_quantization,
+  const struct xnn_quantization_params* b_quantization,
+  const struct xnn_quantization_params* output_quantization);
 
 typedef size_t (*xnn_init_bf16_default_params_fn)(
     struct xnn_bf16_default_params params[XNN_MIN_ELEMENTS(1)]);
