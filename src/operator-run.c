@@ -525,8 +525,7 @@ void xnn_compute_dqgemm(
         (void*)((uintptr_t)context->c + mr_block_start * cm_stride +
                 (nr_block_start << context->log2_csize)),
         cm_stride, context->cn_stride, context->fused_params,
-        (const void*)((uintptr_t)&context
-                          ->quantization_params[mr_block_start]));
+        &context->quantization_params[mr_block_start]);
     mr_block_size -= mr_step;
     mr_block_start += mr_step;
   }
@@ -712,7 +711,7 @@ void xnn_compute_grouped_batch_dqigemm(
         context->a_offset + group_index * context->ga_stride +
             batch_index * context->ba_stride,
         context->zero, context->zero_buffers[batch_index], &context->params,
-        (const void*)((uintptr_t)&context->quantization_params[batch_index]));
+        &context->quantization_params[batch_index]);
     mr_block_size -= mr_step;
     mr_block_start += mr_step;
   }
@@ -767,7 +766,7 @@ void xnn_compute_grouped_dqigemm(
         cm_stride, context->cn_stride,
         context->a_offset + group_index * context->ga_stride, context->zero,
         context->zero_buffers[0], &context->params,
-        (const void*)((uintptr_t)context->quantization_params));
+        context->quantization_params);
     mr_block_size -= mr_step;
     mr_block_start += mr_step;
   }
@@ -820,7 +819,7 @@ void xnn_compute_batch_dqigemm(
         cm_stride, context->cn_stride,
         context->a_offset + batch_index * context->ba_stride, context->zero,
         context->zero_buffers[batch_index], &context->params,
-        (const void*)((uintptr_t)&context->quantization_params[batch_index]));
+        &context->quantization_params[batch_index]);
     mr_block_size -= mr_step;
     mr_block_start += mr_step;
   }
@@ -869,8 +868,7 @@ void xnn_compute_dqigemm(
                 (nr_block_start << context->log2_csize)),
         cm_stride, context->cn_stride, context->a_offset, context->zero,
         context->zero_buffers[0], &context->params,
-        (const void*)((uintptr_t)&context
-                          ->quantization_params[/*mr_block_start=*/0]));
+        &context->quantization_params[/*mr_block_start=*/0]);
     mr_block_size -= mr_step;
     mr_block_start += mr_step;
   }
@@ -1013,7 +1011,7 @@ void xnn_compute_grouped_dqsubconv2d(
       context->zero,
       context->zero_buffers[batch_index],
       &context->params,
-      (const void*) ((uintptr_t) &context->quantization_params[batch_index]));
+      &context->quantization_params[batch_index]);
 }
 
 void xnn_compute_subconv2d(
@@ -1091,7 +1089,7 @@ void xnn_compute_dqsubconv2d(
       context->zero,
       context->zero_buffers[batch_index],
       &context->params,
-      (const void*) ((uintptr_t) &context->quantization_params[batch_index]));
+      &context->quantization_params[batch_index]);
 }
 
 void xnn_compute_conv2d_hwc2chw(
@@ -1986,8 +1984,7 @@ void xnn_compute_hmp_dqgemm(
         (void*)((uintptr_t)context->c + mr_block_start * cm_stride +
                 (nr_block_start << context->log2_csize)),
         cm_stride, context->cn_stride, context->fused_params,
-        (const void*)((uintptr_t)&context
-                          ->quantization_params[mr_block_start]));
+        &context->quantization_params[mr_block_start]);
     mr_block_size -= mr_step;
     mr_block_start += mr_step;
   }
@@ -2046,7 +2043,7 @@ void xnn_compute_hmp_grouped_batch_dqigemm(
         context->a_offset + group_index * context->ga_stride +
             batch_index * context->ba_stride,
         context->zero, context->zero_buffers[batch_index], &context->params,
-        (const void*)((uintptr_t)&context->quantization_params[batch_index]));
+        &context->quantization_params[batch_index]);
     mr_block_size -= mr_step;
     mr_block_start += mr_step;
   }
@@ -2154,7 +2151,7 @@ void xnn_compute_batch_hmp_dqigemm(
         cm_stride, context->cn_stride,
         context->a_offset + batch_index * context->ba_stride, context->zero,
         context->zero_buffers[batch_index], &context->params,
-        (const void*)((uintptr_t)&context->quantization_params[batch_index]));
+        &context->quantization_params[batch_index]);
     mr_block_size -= mr_step;
     mr_block_start += mr_step;
   }
