@@ -269,6 +269,7 @@ MICROKERNEL_DEPS = [
 
 SIMD_HEADERS = [
     "src/xnnpack/simd/f32-avx-base.h",
+    "src/xnnpack/simd/f32-wasmsimd-base.h",
 ] + [
     "src/xnnpack/simd/f32-" + arch + ".h"
     for arch in xnnpack_simd_f32_archs()

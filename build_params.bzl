@@ -279,7 +279,7 @@ def xnnpack_simd_copts_for_arch(arch):
     return _XNNPACK_SIMD_ARCH_COPT_MAPPING.get(arch, [])
 
 def xnnpack_simd_f32_archs():
-    return ["avx", "avx2", "avx512f", "fma3", "hvx", "neon", "scalar", "sse2", "wasmsimd"]
+    return ["avx", "avx2", "avx512f", "fma3", "hvx", "neon", "scalar", "sse2", "wasmsimd", "wasmrelaxedsimd"]
 
 def xnnpack_simd_f16_archs():
     return ["scalar", "neonfp16arith", "avx512fp16"]

@@ -65,6 +65,7 @@ SET(PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS
   src/f32-spmm/gen/f32-spmm-32x1-minmax-wasmrelaxedsimd-arm.c
   src/f32-spmm/gen/f32-spmm-32x1-minmax-wasmrelaxedsimd-x86.c
   src/f32-velu/gen/f32-velu-wasmrelaxedsimd-fma-rr2-p6-u16.c
+  src/f32-vhswish/gen/f32-vhswish-wasmrelaxedsimd.c
   src/f32-vlrelu/gen/f32-vlrelu-wasmrelaxedsimd-iminmax-u4.c
   src/f32-vlrelu/gen/f32-vlrelu-wasmrelaxedsimd-laneselect-u4.c
   src/f32-vmulcaddc/gen/f32-vmulcaddc-c4-minmax-wasmrelaxedsimd-fma-2x.c

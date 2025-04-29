@@ -14,9 +14,12 @@
 #include "src/xnnpack/simd/f32-avx.h"
 #include "src/xnnpack/simd/f32-avx512f.h"
 #include "src/xnnpack/simd/f32-fma3.h"
+#include "src/xnnpack/simd/f32-hvx.h"
 #include "src/xnnpack/simd/f32-neon.h"
 #include "src/xnnpack/simd/f32-scalar.h"
 #include "src/xnnpack/simd/f32-sse2.h"
+#include "src/xnnpack/simd/f32-wasmrelaxedsimd.h"
+#include "src/xnnpack/simd/f32-wasmsimd-base.h"
 #include "src/xnnpack/simd/f32-wasmsimd.h"
 #endif  // defined(SIMD_HEADER)
 
