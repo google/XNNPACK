@@ -65,6 +65,7 @@ PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS = [
     "src/f32-vlrelu/gen/f32-vlrelu-wasmrelaxedsimd-iminmax-u4.c",
     "src/f32-vlrelu/gen/f32-vlrelu-wasmrelaxedsimd-laneselect-u4.c",
     "src/f32-vmulcaddc/gen/f32-vmulcaddc-c4-minmax-wasmrelaxedsimd-fma-2x.c",
+    "src/f32-vrelu/gen/f32-vrelu-wasmrelaxedsimd.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-wasmrelaxedsimd-fma-rr2-p5-div-u16.c",
     "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8c8-minmax-wasmsdot-u2.c",
     "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8c8-minmax-wasmsdot.c",

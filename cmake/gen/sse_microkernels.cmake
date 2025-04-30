@@ -197,8 +197,6 @@ SET(NON_PROD_SSE_MICROKERNEL_SRCS
   src/f32-vcmul/gen/f32-vcmul-sse-u16.c
   src/f32-vlrelu/gen/f32-vlrelu-sse-u4.c
   src/f32-vmulcaddc/gen/f32-vmulcaddc-c8-minmax-sse-2x.c
-  src/f32-vrelu/gen/f32-vrelu-sse-u4.c
-  src/f32-vrelu/gen/f32-vrelu-sse-u8.c
   src/f32-vrsqrt/gen/f32-vrsqrt-sse-rsqrt-u4.c
   src/f32-vrsqrt/gen/f32-vrsqrt-sse-rsqrt-u16.c
   src/f32-vsqrt/gen/f32-vsqrt-sse-rsqrt-u4.c

@@ -141,7 +141,7 @@ SET(PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-vlrelu/gen/f32-vlrelu-wasmsimd-laneselect-u8.c
   src/f32-vmulcaddc/gen/f32-vmulcaddc-c4-minmax-wasmsimd-arm-2x.c
   src/f32-vmulcaddc/gen/f32-vmulcaddc-c4-minmax-wasmsimd-x86-2x.c
-  src/f32-vrelu/gen/f32-vrelu-wasmsimd-u16.c
+  src/f32-vrelu/gen/f32-vrelu-wasmsimd.c
   src/f32-vrnd/gen/f32-vrndd-wasmsimd-u8.c
   src/f32-vrnd/gen/f32-vrndne-wasmsimd-u8.c
   src/f32-vrnd/gen/f32-vrndu-wasmsimd-u8.c
@@ -754,8 +754,6 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-vlrelu/gen/f32-vlrelu-wasmsimd-laneselect-u4.c
   src/f32-vmulcaddc/gen/f32-vmulcaddc-c8-minmax-wasmsimd-arm-2x.c
   src/f32-vmulcaddc/gen/f32-vmulcaddc-c8-minmax-wasmsimd-x86-2x.c
-  src/f32-vrelu/gen/f32-vrelu-wasmsimd-u4.c
-  src/f32-vrelu/gen/f32-vrelu-wasmsimd-u8.c
   src/f32-vrnd/gen/f32-vrndd-wasmsimd-u4.c
   src/f32-vrnd/gen/f32-vrndne-wasmsimd-u4.c
   src/f32-vrnd/gen/f32-vrndu-wasmsimd-u4.c

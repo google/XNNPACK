@@ -76,6 +76,7 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/f32-vlog/gen/f32-vlog-neon-rational-3-3-div.c
   src/f32-vlrelu/gen/f32-vlrelu-neon-u8.c
   src/f32-vmulcaddc/gen/f32-vmulcaddc-c4-minmax-neon-2x.c
+  src/f32-vrelu/gen/f32-vrelu-neon.c
   src/f32-vrnd/gen/f32-vrndd-neon-u8.c
   src/f32-vrnd/gen/f32-vrndne-neon-u8.c
   src/f32-vrnd/gen/f32-vrndu-neon-u8.c
@@ -405,8 +406,6 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/f32-velu/gen/f32-velu-neon-rr2-p6-u16.c
   src/f32-vlrelu/gen/f32-vlrelu-neon-u4.c
   src/f32-vmulcaddc/gen/f32-vmulcaddc-c8-minmax-neon-2x.c
-  src/f32-vrelu/gen/f32-vrelu-neon-u4.c
-  src/f32-vrelu/gen/f32-vrelu-neon-u8.c
   src/f32-vrnd/gen/f32-vrndd-neon-u4.c
   src/f32-vrnd/gen/f32-vrndne-neon-u4.c
   src/f32-vrnd/gen/f32-vrndu-neon-u4.c

@@ -909,10 +909,12 @@ static void init_f32_hswish_config(void) {
     } else {
       f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__sse2_u8;
     }
+  #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
   #elif XNN_ARCH_WASMRELAXEDSIMD
-    f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__wasmrelaxedsimd_u16;
+    f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__wasmrelaxedsimd_u4;
   #elif XNN_ARCH_WASMSIMD
-    f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__wasmsimd_u16;
+    f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__wasmsimd_u8;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__rvv_u4v;
   #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
@@ -1092,21 +1094,39 @@ static void init_f32_neg_config(void) {
 }
 
 static void init_f32_relu_config(void) {
-  #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-    f32_relu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrelu_ukernel__wasmsimd_u16;
-  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    f32_relu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrelu_ukernel__rvv_u4v;
-  #elif XNN_ARCH_WASM
+  #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (hardware_config->is_x86) {
-      f32_relu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrelu_ukernel__scalar_u8;
-    } else {
-      f32_relu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrelu_ukernel__wasm_u8;
+    if (hardware_config->use_arm_neon) {
+      f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrelu_ukernel__neon_u16;
+    } else if (!XNN_PLATFORM_MOBILE) {
+      f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrelu_ukernel__scalar_u4;
     }
+  #elif XNN_ARCH_ARM64
+    f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrelu_ukernel__neon_u16;
+  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+        f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrelu_ukernel__avx512f_u32;
+      } else
+    #endif
+    if (hardware_config->use_x86_avx) {
+      f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrelu_ukernel__avx_u16;
+    } else {
+      f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrelu_ukernel__sse2_u8;
+    }
+  #elif XNN_ARCH_WASMRELAXEDSIMD
+    f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrelu_ukernel__wasmrelaxedsimd_u4;
+  #elif XNN_ARCH_WASMSIMD
+    f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrelu_ukernel__wasmsimd_u8;
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrelu_ukernel__rvv_u4v;
   #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
-    f32_relu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrelu_ukernel__hvx_u128;
+    f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrelu_ukernel__hvx_u128;
+  #else
+    f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrelu_ukernel__scalar_u4;
   #endif
 }
 
