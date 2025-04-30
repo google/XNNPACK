@@ -57,7 +57,7 @@ XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vhswish_ukernel__wasmsimd_u16, 16, false, flo
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vhswish_ukernel__wasmrelaxedsimd_u4, 4, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vhswish_ukernel__wasmrelaxedsimd_u8, 8, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vhswish_ukernel__wasmrelaxedsimd_u16, 16, false, float, struct xnn_f32_default_params, NULL)
-#endif  XNN_ARCH_WASMRELAXEDSIMD
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vhswish_ukernel__hvx_u32, 32, false, float, struct xnn_f32_default_params, NULL)
