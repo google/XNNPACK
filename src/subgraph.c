@@ -1552,7 +1552,10 @@ void xnn_subgraph_optimize_dynamic_quantization_ops(xnn_subgraph_t subgraph) {
                      xnn_init_qp8_f32_qc8w_gemm_config() != NULL) {
             pack_activations = true;
           } else if ((weights_type == xnn_weights_type_qb4w) &&
-                     xnn_init_qp8_f32_qb4w_gemm_config() != NULL) {
+                     xnn_init_qp8_f32_qb4w_gemm_config() != NULL &&
+                     // The `qp8_f32_qb4w` GEMMs currently only accept unsigned
+                     // weights.
+                     filter->quantization.zero_point == 8) {
             pack_activations = true;
           }
         }
