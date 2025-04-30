@@ -29,7 +29,6 @@ enum fully_connected_op_type {
   fc_type_f16_f16_f16 = 1,
   fc_type_f16_f16_f16_dynamic = 2,
   fc_type_f16_f32_f16 = 3,
-  fc_type_f16_f32_f16_dynamic = 4,
   fc_type_qd8_f16_qc4w = 5,
   fc_type_qd8_f16_qb4w = 6,
   fc_type_qd8_f16_qc8w = 7,
@@ -99,7 +98,7 @@ enum fully_connected_op_type get_fully_connected_op_type(
           }
         case xnn_datatype_fp32:
           if (has_non_static_weights) {
-            return fc_type_f16_f32_f16_dynamic;
+            XNN_UNREACHABLE;
           } else {
             return fc_type_f16_f32_f16;
           }
@@ -337,11 +336,6 @@ static enum xnn_status create_fully_connected_operator(
           /*output_stride=*/output_channels, kernel_data, bias_data,
           node->activation.output_min, node->activation.output_max, node->flags,
           code_cache, weights_cache, fully_connected_op_ptr);
-      break;
-    case fc_type_f16_f32_f16_dynamic:
-      status = xnn_create_dynamic_fully_connected_nc_f16(
-          node->activation.output_min, node->activation.output_max,
-          node->flags | XNN_FLAG_FP32_STATIC_WEIGHTS, fully_connected_op_ptr);
       break;
     case fc_type_f16_f32_f16:
       status = xnn_create_fully_connected_nc_f16(

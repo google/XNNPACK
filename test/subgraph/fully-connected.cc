@@ -726,12 +726,6 @@ void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid,
 TEST(FullyConnectedF16, dynamic_b) {
   TestDynamicB<xnn_float16, xnn_float16, xnn_float16, xnn_float16>();
 }
-TEST(FullyConnectedF16F32F16, dynamic_b) {
-  // TODO(b/412077394): Fix this case.
-  GTEST_SKIP();
-  return;
-  TestDynamicB<xnn_float16, float, float, xnn_float16>();
-}
 TEST(FullyConnectedF32, dynamic_b) {
   TestDynamicB<float, float, float, float>();
 }
