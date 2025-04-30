@@ -124,8 +124,7 @@ SET(PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vsqrdiffc-wasmsimd-u16.c
   src/f32-vbinary/gen/f32-vsub-wasmsimd-u16.c
   src/f32-vbinary/gen/f32-vsubc-wasmsimd-u16.c
-  src/f32-vclamp/gen/f32-vclamp-wasmsimd-arm-u8.c
-  src/f32-vclamp/gen/f32-vclamp-wasmsimd-x86-u8.c
+  src/f32-vclamp/gen/f32-vclamp-wasmsimd.c
   src/f32-vcmul/gen/f32-vcmul-wasmsimd-u8.c
   src/f32-vcopysign/gen/f32-vcopysign-wasmsimd.c
   src/f32-vcopysign/gen/f32-vcopysignc-wasmsimd.c
@@ -731,8 +730,6 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vsub-wasmsimd-u8.c
   src/f32-vbinary/gen/f32-vsubc-wasmsimd-u4.c
   src/f32-vbinary/gen/f32-vsubc-wasmsimd-u8.c
-  src/f32-vclamp/gen/f32-vclamp-wasmsimd-arm-u4.c
-  src/f32-vclamp/gen/f32-vclamp-wasmsimd-x86-u4.c
   src/f32-vcmul/gen/f32-vcmul-wasmsimd-u4.c
   src/f32-vcmul/gen/f32-vcmul-wasmsimd-u12.c
   src/f32-vcmul/gen/f32-vcmul-wasmsimd-u16.c

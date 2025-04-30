@@ -26,6 +26,7 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vprelu-sse2-u8.c
   src/f32-vbinary/gen/f32-vpreluc-sse2-u8.c
   src/f32-vbinary/gen/f32-vrpreluc-sse2-u8.c
+  src/f32-vclamp/gen/f32-vclamp-sse2.c
   src/f32-vcopysign/gen/f32-vcopysign-sse2.c
   src/f32-vcopysign/gen/f32-vcopysignc-sse2.c
   src/f32-vcopysign/gen/f32-vrcopysignc-sse2.c

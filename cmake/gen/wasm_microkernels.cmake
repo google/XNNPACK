@@ -50,7 +50,6 @@ SET(PROD_WASM_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vrsubc-wasm-u8.c
   src/f32-vbinary/gen/f32-vsub-wasm-u8.c
   src/f32-vbinary/gen/f32-vsubc-wasm-u8.c
-  src/f32-vclamp/gen/f32-vclamp-wasm-u4.c
   src/f32-velu/gen/f32-velu-wasm-rr2-p6-u6.c
   src/f32-vmulcaddc/gen/f32-vmulcaddc-c1-minmax-wasm-2x.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x4-minmax-wasm.c
@@ -174,8 +173,6 @@ SET(NON_PROD_WASM_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vsubc-wasm-u1.c
   src/f32-vbinary/gen/f32-vsubc-wasm-u2.c
   src/f32-vbinary/gen/f32-vsubc-wasm-u4.c
-  src/f32-vclamp/gen/f32-vclamp-wasm-u1.c
-  src/f32-vclamp/gen/f32-vclamp-wasm-u2.c
   src/f32-velu/gen/f32-velu-wasm-rr2-lut16-p3-u1.c
   src/f32-velu/gen/f32-velu-wasm-rr2-lut16-p3-u2.c
   src/f32-velu/gen/f32-velu-wasm-rr2-lut16-p3-u3.c

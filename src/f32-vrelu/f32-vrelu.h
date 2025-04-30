@@ -45,10 +45,6 @@ XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_f32_vrelu_ukernel__avx512f_u32
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_f32_vrelu_ukernel__avx512f_u64, 64, false, float, struct xnn_f32_relu_params, NULL)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vrelu_ukernel__scalar_u1, 1, false, float, struct xnn_f32_relu_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vrelu_ukernel__scalar_u2, 2, false, float, struct xnn_f32_relu_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vrelu_ukernel__scalar_u4, 4, false, float, struct xnn_f32_relu_params, NULL)
-
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vrelu_ukernel__wasmsimd_u4, 4, false, float, struct xnn_f32_relu_params, NULL)
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vrelu_ukernel__wasmsimd_u8, 8, false, float, struct xnn_f32_relu_params, NULL)
@@ -65,6 +61,10 @@ XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vrelu_ukernel__hvx_u32, 32, false, float, str
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vrelu_ukernel__hvx_u64, 64, false, float, struct xnn_f32_relu_params, NULL)
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vrelu_ukernel__hvx_u128, 128, false, float, struct xnn_f32_relu_params, NULL)
 #endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vrelu_ukernel__scalar_u1, 1, false, float, struct xnn_f32_relu_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vrelu_ukernel__scalar_u2, 2, false, float, struct xnn_f32_relu_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vrelu_ukernel__scalar_u4, 4, false, float, struct xnn_f32_relu_params, NULL)
 
 #ifdef XNN_DEFINED_UKERNEL_WITH_PARAMS
 #undef XNN_DEFINED_UKERNEL_WITH_PARAMS

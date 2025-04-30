@@ -111,7 +111,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vsqrdiffc-scalar-u8.c
   src/f32-vbinary/gen/f32-vsub-scalar-u8.c
   src/f32-vbinary/gen/f32-vsubc-scalar-u8.c
-  src/f32-vclamp/gen/f32-vclamp-scalar-u4.c
+  src/f32-vclamp/gen/f32-vclamp-scalar.c
   src/f32-vcmul/gen/f32-vcmul-scalar-u4.c
   src/f32-vcopysign/gen/f32-vcopysign-scalar.c
   src/f32-vcopysign/gen/f32-vcopysignc-scalar.c
@@ -496,8 +496,6 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vsubc-scalar-u1.c
   src/f32-vbinary/gen/f32-vsubc-scalar-u2.c
   src/f32-vbinary/gen/f32-vsubc-scalar-u4.c
-  src/f32-vclamp/gen/f32-vclamp-scalar-u1.c
-  src/f32-vclamp/gen/f32-vclamp-scalar-u2.c
   src/f32-vcmul/gen/f32-vcmul-scalar-u1.c
   src/f32-vcmul/gen/f32-vcmul-scalar-u2.c
   src/f32-vcmul/gen/f32-vcmul-scalar-u8.c
