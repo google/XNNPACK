@@ -68,6 +68,22 @@ static void init_f32_maxpool_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     f32_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p__sse2_u4;
     f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+        f32_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p__avx512f_u16;
+        f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+      } else
+    #endif
+    if (hardware_config->use_x86_avx) {
+      f32_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p__avx_u8;
+      f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+    } else {
+      f32_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p__sse2_u4;
+      f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+    }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p__wasmsimd_u4;
     f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -76,6 +92,9 @@ static void init_f32_maxpool_config(void) {
     f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     f32_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p__rvv_u2v;
+    f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    f32_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p__hvx_u32;
     f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
   #else
     f32_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p__scalar_u1;
