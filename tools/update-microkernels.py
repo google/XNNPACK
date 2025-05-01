@@ -297,6 +297,8 @@ def main(args):
   # Collect filenames of production microkernels as a set
   prod_microkernels = set()
   for configs_filepath in os.listdir(configs_dir):
+    if not configs_filepath.endswith('-config.c'):
+      continue
     with open(
         os.path.join(configs_dir, configs_filepath), 'r', encoding='utf-8'
     ) as config_file:
