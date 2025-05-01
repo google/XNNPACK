@@ -10,6 +10,10 @@
 
 
 SET(PROD_HVX_MICROKERNEL_SRCS
+  src/f32-dwconv/gen/f32-dwconv-3p64c-minmax-hvx.c
+  src/f32-dwconv/gen/f32-dwconv-4p64c-minmax-hvx.c
+  src/f32-dwconv/gen/f32-dwconv-9p64c-minmax-hvx.c
+  src/f32-dwconv/gen/f32-dwconv-25p64c-minmax-hvx.c
   src/f32-gemm/gen/f32-gemm-1x32-minmax-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-1x64-minmax-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-5x64-minmax-hvx-broadcast.c
@@ -72,6 +76,18 @@ SET(PROD_HVX_MICROKERNEL_SRCS
   src/x32-transposec/gen/x32-transposec-32x32-multi-multi-hvx.c)
 
 SET(NON_PROD_HVX_MICROKERNEL_SRCS
+  src/f32-dwconv/gen/f32-dwconv-3p32c-minmax-hvx-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-3p32c-minmax-hvx.c
+  src/f32-dwconv/gen/f32-dwconv-3p64c-minmax-hvx-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-4p32c-minmax-hvx-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-4p32c-minmax-hvx.c
+  src/f32-dwconv/gen/f32-dwconv-4p64c-minmax-hvx-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-9p32c-minmax-hvx-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-9p32c-minmax-hvx.c
+  src/f32-dwconv/gen/f32-dwconv-9p64c-minmax-hvx-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-25p32c-minmax-hvx-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-25p32c-minmax-hvx.c
+  src/f32-dwconv/gen/f32-dwconv-25p64c-minmax-hvx-acc2.c
   src/f32-gemm/gen/f32-gemm-1x128-minmax-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-2x32-minmax-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-2x64-minmax-hvx-broadcast.c
