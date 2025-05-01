@@ -10,6 +10,7 @@
 
 
 SET(PROD_HVX_MICROKERNEL_SRCS
+  src/f32-avgpool/gen/f32-avgpool-9p-minmax-hvx-u32.c
   src/f32-dwconv/gen/f32-dwconv-3p32c-minmax-hvx.c
   src/f32-dwconv/gen/f32-dwconv-4p32c-minmax-hvx.c
   src/f32-dwconv/gen/f32-dwconv-9p32c-minmax-hvx.c
