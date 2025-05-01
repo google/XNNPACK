@@ -1,6 +1,6 @@
 // clang-format off
 // Auto-generated file. Do not edit!
-//   Template: src/f32-dwconv/unipass-avx512.c.in
+//   Template: src/f32-dwconv/simd.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2019 Google LLC
@@ -10,10 +10,9 @@
 
 #include <assert.h>
 
-#include <immintrin.h>
+#include "src/xnnpack/simd/f32-avx512f.h"
 
 #include "src/xnnpack/dwconv.h"
-#include "src/xnnpack/intrinsics-polyfill.h"
 
 
 void xnn_f32_dwconv_minmax_ukernel_4p16c__avx512f(
@@ -32,8 +31,8 @@ void xnn_f32_dwconv_minmax_ukernel_4p16c__avx512f(
   assert(channels != 0);
   assert(output_width != 0);
 
-  const __m512 vmin = _mm512_set1_ps(params->scalar.min);
-  const __m512 vmax = _mm512_set1_ps(params->scalar.max);
+  const xnn_simd_f32_t vmin = xnn_set1_f32(params->scalar.min);
+  const xnn_simd_f32_t vmax = xnn_set1_f32(params->scalar.max);
   do {
     const float* i0 = input[0];
     assert(i0 != NULL);
@@ -60,71 +59,69 @@ void xnn_f32_dwconv_minmax_ukernel_4p16c__avx512f(
     size_t c = channels;
     const float* w = weights;
     for (; c >= 16; c -= 16) {
-      __m512 vacc0123456789ABCDEFp0 = _mm512_load_ps(w);
+      xnn_simd_f32_t vacc0p0 = xnn_load_f32(w + 0);
 
 
-      const __m512 vi0x0123456789ABCDEF = _mm512_loadu_ps(i0);
+      const xnn_simd_f32_t vi0x0 = xnn_loadu_f32(i0 + 0);
       i0 += 16;
 
-      const __m512 vk0x0123456789ABCDEF = _mm512_load_ps(w + 16);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi0x0123456789ABCDEF, vk0x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vk0x0 = xnn_load_f32(w + 16);
+      vacc0p0 = xnn_fmadd_f32(vi0x0, vk0x0, vacc0p0);
 
-      const __m512 vi1x0123456789ABCDEF = _mm512_loadu_ps(i1);
+      const xnn_simd_f32_t vi1x0 = xnn_loadu_f32(i1 + 0);
       i1 += 16;
 
-      const __m512 vk1x0123456789ABCDEF = _mm512_load_ps(w + 32);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi1x0123456789ABCDEF, vk1x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vk1x0 = xnn_load_f32(w + 32);
+      vacc0p0 = xnn_fmadd_f32(vi1x0, vk1x0, vacc0p0);
 
-      const __m512 vi2x0123456789ABCDEF = _mm512_loadu_ps(i2);
+      const xnn_simd_f32_t vi2x0 = xnn_loadu_f32(i2 + 0);
       i2 += 16;
 
-      const __m512 vk2x0123456789ABCDEF = _mm512_load_ps(w + 48);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi2x0123456789ABCDEF, vk2x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vk2x0 = xnn_load_f32(w + 48);
+      vacc0p0 = xnn_fmadd_f32(vi2x0, vk2x0, vacc0p0);
 
-      const __m512 vi3x0123456789ABCDEF = _mm512_loadu_ps(i3);
+      const xnn_simd_f32_t vi3x0 = xnn_loadu_f32(i3 + 0);
       i3 += 16;
 
-      const __m512 vk3x0123456789ABCDEF = _mm512_load_ps(w + 64);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi3x0123456789ABCDEF, vk3x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vk3x0 = xnn_load_f32(w + 64);
+      vacc0p0 = xnn_fmadd_f32(vi3x0, vk3x0, vacc0p0);
 
       w += 80;
 
 
-      __m512 vacc0123456789ABCDEF = _mm512_max_ps(vmin, vacc0123456789ABCDEFp0);
-      vacc0123456789ABCDEF = _mm512_min_ps(vmax, vacc0123456789ABCDEF);
+      xnn_simd_f32_t vacc0 = xnn_max_f32(vmin, vacc0p0);
+      vacc0 = xnn_min_f32(vmax, vacc0);
 
-      _mm512_storeu_ps(output, vacc0123456789ABCDEF);
+      xnn_storeu_f32(output + 0, vacc0);
       output += 16;
     }
     if XNN_UNLIKELY(c != 0) {
       assert(c >= 1);
       assert(c <= 16);
-      // Prepare mask for valid 32-bit elements (depends on nc).
-      const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << c) - UINT32_C(1)));
 
-      __m512 vacc0123456789ABCDEFp0 = _mm512_maskz_loadu_ps(vmask, w);
+      xnn_simd_f32_t vacc0p0 = xnn_load_tail_f32(w, c);
 
-      const __m512 vi0x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i0);
-      const __m512 vk0x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 16);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi0x0123456789ABCDEF, vk0x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vi0x0 = xnn_load_tail_f32(i0, c);
+      const xnn_simd_f32_t vk0x0 = xnn_load_tail_f32(w + 16, c);
+      vacc0p0 = xnn_fmadd_f32(vi0x0, vk0x0, vacc0p0);
 
-      const __m512 vi1x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i1);
-      const __m512 vk1x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 32);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi1x0123456789ABCDEF, vk1x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vi1x0 = xnn_load_tail_f32(i1, c);
+      const xnn_simd_f32_t vk1x0 = xnn_load_tail_f32(w + 32, c);
+      vacc0p0 = xnn_fmadd_f32(vi1x0, vk1x0, vacc0p0);
 
-      const __m512 vi2x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i2);
-      const __m512 vk2x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 48);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi2x0123456789ABCDEF, vk2x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vi2x0 = xnn_load_tail_f32(i2, c);
+      const xnn_simd_f32_t vk2x0 = xnn_load_tail_f32(w + 48, c);
+      vacc0p0 = xnn_fmadd_f32(vi2x0, vk2x0, vacc0p0);
 
-      const __m512 vi3x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i3);
-      const __m512 vk3x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 64);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi3x0123456789ABCDEF, vk3x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vi3x0 = xnn_load_tail_f32(i3, c);
+      const xnn_simd_f32_t vk3x0 = xnn_load_tail_f32(w + 64, c);
+      vacc0p0 = xnn_fmadd_f32(vi3x0, vk3x0, vacc0p0);
 
 
-      __m512 vacc0123456789ABCDEF = _mm512_max_ps(vmin, vacc0123456789ABCDEFp0);
-      vacc0123456789ABCDEF = _mm512_min_ps(vmax, vacc0123456789ABCDEF);
+      xnn_simd_f32_t vacc0 = xnn_max_f32(vmin, vacc0p0);
+      vacc0 = xnn_min_f32(vmax, vacc0);
 
-      _mm512_mask_storeu_ps(output, vmask, vacc0123456789ABCDEF);
+      xnn_store_tail_f32(output, vacc0, c);
       output += c;
     }
 

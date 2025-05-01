@@ -10,12 +10,12 @@
 
 #include <assert.h>
 
-#include "src/xnnpack/simd/f32-avx512f.h"
+#include "src/xnnpack/simd/f32-hvx.h"
 
 #include "src/xnnpack/dwconv.h"
 
 
-void xnn_f32_dwconv_minmax_ukernel_25p32c__avx512f(
+void xnn_f32_dwconv_minmax_ukernel_25p64c__hvx(
     size_t channels,
     size_t output_width,
     const float** input,
@@ -163,514 +163,514 @@ void xnn_f32_dwconv_minmax_ukernel_25p32c__avx512f(
 
     size_t c = channels;
     const float* w = weights;
-    for (; c >= 32; c -= 32) {
+    for (; c >= 64; c -= 64) {
       xnn_simd_f32_t vacc0p0 = xnn_load_f32(w + 0);
-      xnn_simd_f32_t vacc16p0 = xnn_load_f32(w + 16);
+      xnn_simd_f32_t vacc32p0 = xnn_load_f32(w + 32);
 
 
       const xnn_simd_f32_t vi0x0 = xnn_loadu_f32(i0 + 0);
-      const xnn_simd_f32_t vi0x16 = xnn_loadu_f32(i0 + 16);
-      i0 += 32;
+      const xnn_simd_f32_t vi0x32 = xnn_loadu_f32(i0 + 32);
+      i0 += 64;
 
-      const xnn_simd_f32_t vk0x0 = xnn_load_f32(w + 32);
-      const xnn_simd_f32_t vk0x16 = xnn_load_f32(w + 48);
+      const xnn_simd_f32_t vk0x0 = xnn_load_f32(w + 64);
+      const xnn_simd_f32_t vk0x32 = xnn_load_f32(w + 96);
       vacc0p0 = xnn_fmadd_f32(vi0x0, vk0x0, vacc0p0);
-      vacc16p0 = xnn_fmadd_f32(vi0x16, vk0x16, vacc16p0);
+      vacc32p0 = xnn_fmadd_f32(vi0x32, vk0x32, vacc32p0);
 
       const xnn_simd_f32_t vi1x0 = xnn_loadu_f32(i1 + 0);
-      const xnn_simd_f32_t vi1x16 = xnn_loadu_f32(i1 + 16);
-      i1 += 32;
+      const xnn_simd_f32_t vi1x32 = xnn_loadu_f32(i1 + 32);
+      i1 += 64;
 
-      const xnn_simd_f32_t vk1x0 = xnn_load_f32(w + 64);
-      const xnn_simd_f32_t vk1x16 = xnn_load_f32(w + 80);
+      const xnn_simd_f32_t vk1x0 = xnn_load_f32(w + 128);
+      const xnn_simd_f32_t vk1x32 = xnn_load_f32(w + 160);
       vacc0p0 = xnn_fmadd_f32(vi1x0, vk1x0, vacc0p0);
-      vacc16p0 = xnn_fmadd_f32(vi1x16, vk1x16, vacc16p0);
+      vacc32p0 = xnn_fmadd_f32(vi1x32, vk1x32, vacc32p0);
 
       const xnn_simd_f32_t vi2x0 = xnn_loadu_f32(i2 + 0);
-      const xnn_simd_f32_t vi2x16 = xnn_loadu_f32(i2 + 16);
-      i2 += 32;
+      const xnn_simd_f32_t vi2x32 = xnn_loadu_f32(i2 + 32);
+      i2 += 64;
 
-      const xnn_simd_f32_t vk2x0 = xnn_load_f32(w + 96);
-      const xnn_simd_f32_t vk2x16 = xnn_load_f32(w + 112);
+      const xnn_simd_f32_t vk2x0 = xnn_load_f32(w + 192);
+      const xnn_simd_f32_t vk2x32 = xnn_load_f32(w + 224);
       vacc0p0 = xnn_fmadd_f32(vi2x0, vk2x0, vacc0p0);
-      vacc16p0 = xnn_fmadd_f32(vi2x16, vk2x16, vacc16p0);
+      vacc32p0 = xnn_fmadd_f32(vi2x32, vk2x32, vacc32p0);
 
       const xnn_simd_f32_t vi3x0 = xnn_loadu_f32(i3 + 0);
-      const xnn_simd_f32_t vi3x16 = xnn_loadu_f32(i3 + 16);
-      i3 += 32;
+      const xnn_simd_f32_t vi3x32 = xnn_loadu_f32(i3 + 32);
+      i3 += 64;
 
-      const xnn_simd_f32_t vk3x0 = xnn_load_f32(w + 128);
-      const xnn_simd_f32_t vk3x16 = xnn_load_f32(w + 144);
+      const xnn_simd_f32_t vk3x0 = xnn_load_f32(w + 256);
+      const xnn_simd_f32_t vk3x32 = xnn_load_f32(w + 288);
       vacc0p0 = xnn_fmadd_f32(vi3x0, vk3x0, vacc0p0);
-      vacc16p0 = xnn_fmadd_f32(vi3x16, vk3x16, vacc16p0);
+      vacc32p0 = xnn_fmadd_f32(vi3x32, vk3x32, vacc32p0);
 
       const xnn_simd_f32_t vi4x0 = xnn_loadu_f32(i4 + 0);
-      const xnn_simd_f32_t vi4x16 = xnn_loadu_f32(i4 + 16);
-      i4 += 32;
+      const xnn_simd_f32_t vi4x32 = xnn_loadu_f32(i4 + 32);
+      i4 += 64;
 
-      const xnn_simd_f32_t vk4x0 = xnn_load_f32(w + 160);
-      const xnn_simd_f32_t vk4x16 = xnn_load_f32(w + 176);
+      const xnn_simd_f32_t vk4x0 = xnn_load_f32(w + 320);
+      const xnn_simd_f32_t vk4x32 = xnn_load_f32(w + 352);
       vacc0p0 = xnn_fmadd_f32(vi4x0, vk4x0, vacc0p0);
-      vacc16p0 = xnn_fmadd_f32(vi4x16, vk4x16, vacc16p0);
+      vacc32p0 = xnn_fmadd_f32(vi4x32, vk4x32, vacc32p0);
 
       const xnn_simd_f32_t vi5x0 = xnn_loadu_f32(i5 + 0);
-      const xnn_simd_f32_t vi5x16 = xnn_loadu_f32(i5 + 16);
-      i5 += 32;
+      const xnn_simd_f32_t vi5x32 = xnn_loadu_f32(i5 + 32);
+      i5 += 64;
 
-      const xnn_simd_f32_t vk5x0 = xnn_load_f32(w + 192);
-      const xnn_simd_f32_t vk5x16 = xnn_load_f32(w + 208);
+      const xnn_simd_f32_t vk5x0 = xnn_load_f32(w + 384);
+      const xnn_simd_f32_t vk5x32 = xnn_load_f32(w + 416);
       vacc0p0 = xnn_fmadd_f32(vi5x0, vk5x0, vacc0p0);
-      vacc16p0 = xnn_fmadd_f32(vi5x16, vk5x16, vacc16p0);
+      vacc32p0 = xnn_fmadd_f32(vi5x32, vk5x32, vacc32p0);
 
       const xnn_simd_f32_t vi6x0 = xnn_loadu_f32(i6 + 0);
-      const xnn_simd_f32_t vi6x16 = xnn_loadu_f32(i6 + 16);
-      i6 += 32;
+      const xnn_simd_f32_t vi6x32 = xnn_loadu_f32(i6 + 32);
+      i6 += 64;
 
-      const xnn_simd_f32_t vk6x0 = xnn_load_f32(w + 224);
-      const xnn_simd_f32_t vk6x16 = xnn_load_f32(w + 240);
+      const xnn_simd_f32_t vk6x0 = xnn_load_f32(w + 448);
+      const xnn_simd_f32_t vk6x32 = xnn_load_f32(w + 480);
       vacc0p0 = xnn_fmadd_f32(vi6x0, vk6x0, vacc0p0);
-      vacc16p0 = xnn_fmadd_f32(vi6x16, vk6x16, vacc16p0);
+      vacc32p0 = xnn_fmadd_f32(vi6x32, vk6x32, vacc32p0);
 
       const xnn_simd_f32_t vi7x0 = xnn_loadu_f32(i7 + 0);
-      const xnn_simd_f32_t vi7x16 = xnn_loadu_f32(i7 + 16);
-      i7 += 32;
+      const xnn_simd_f32_t vi7x32 = xnn_loadu_f32(i7 + 32);
+      i7 += 64;
 
-      const xnn_simd_f32_t vk7x0 = xnn_load_f32(w + 256);
-      const xnn_simd_f32_t vk7x16 = xnn_load_f32(w + 272);
+      const xnn_simd_f32_t vk7x0 = xnn_load_f32(w + 512);
+      const xnn_simd_f32_t vk7x32 = xnn_load_f32(w + 544);
       vacc0p0 = xnn_fmadd_f32(vi7x0, vk7x0, vacc0p0);
-      vacc16p0 = xnn_fmadd_f32(vi7x16, vk7x16, vacc16p0);
+      vacc32p0 = xnn_fmadd_f32(vi7x32, vk7x32, vacc32p0);
 
       const xnn_simd_f32_t vi8x0 = xnn_loadu_f32(i8 + 0);
-      const xnn_simd_f32_t vi8x16 = xnn_loadu_f32(i8 + 16);
-      i8 += 32;
+      const xnn_simd_f32_t vi8x32 = xnn_loadu_f32(i8 + 32);
+      i8 += 64;
 
-      const xnn_simd_f32_t vk8x0 = xnn_load_f32(w + 288);
-      const xnn_simd_f32_t vk8x16 = xnn_load_f32(w + 304);
+      const xnn_simd_f32_t vk8x0 = xnn_load_f32(w + 576);
+      const xnn_simd_f32_t vk8x32 = xnn_load_f32(w + 608);
       vacc0p0 = xnn_fmadd_f32(vi8x0, vk8x0, vacc0p0);
-      vacc16p0 = xnn_fmadd_f32(vi8x16, vk8x16, vacc16p0);
+      vacc32p0 = xnn_fmadd_f32(vi8x32, vk8x32, vacc32p0);
 
       const xnn_simd_f32_t vi9x0 = xnn_loadu_f32(i9 + 0);
-      const xnn_simd_f32_t vi9x16 = xnn_loadu_f32(i9 + 16);
-      i9 += 32;
+      const xnn_simd_f32_t vi9x32 = xnn_loadu_f32(i9 + 32);
+      i9 += 64;
 
-      const xnn_simd_f32_t vk9x0 = xnn_load_f32(w + 320);
-      const xnn_simd_f32_t vk9x16 = xnn_load_f32(w + 336);
+      const xnn_simd_f32_t vk9x0 = xnn_load_f32(w + 640);
+      const xnn_simd_f32_t vk9x32 = xnn_load_f32(w + 672);
       vacc0p0 = xnn_fmadd_f32(vi9x0, vk9x0, vacc0p0);
-      vacc16p0 = xnn_fmadd_f32(vi9x16, vk9x16, vacc16p0);
+      vacc32p0 = xnn_fmadd_f32(vi9x32, vk9x32, vacc32p0);
 
       const xnn_simd_f32_t vi10x0 = xnn_loadu_f32(i10 + 0);
-      const xnn_simd_f32_t vi10x16 = xnn_loadu_f32(i10 + 16);
-      i10 += 32;
+      const xnn_simd_f32_t vi10x32 = xnn_loadu_f32(i10 + 32);
+      i10 += 64;
 
-      const xnn_simd_f32_t vk10x0 = xnn_load_f32(w + 352);
-      const xnn_simd_f32_t vk10x16 = xnn_load_f32(w + 368);
+      const xnn_simd_f32_t vk10x0 = xnn_load_f32(w + 704);
+      const xnn_simd_f32_t vk10x32 = xnn_load_f32(w + 736);
       vacc0p0 = xnn_fmadd_f32(vi10x0, vk10x0, vacc0p0);
-      vacc16p0 = xnn_fmadd_f32(vi10x16, vk10x16, vacc16p0);
+      vacc32p0 = xnn_fmadd_f32(vi10x32, vk10x32, vacc32p0);
 
       const xnn_simd_f32_t vi11x0 = xnn_loadu_f32(i11 + 0);
-      const xnn_simd_f32_t vi11x16 = xnn_loadu_f32(i11 + 16);
-      i11 += 32;
+      const xnn_simd_f32_t vi11x32 = xnn_loadu_f32(i11 + 32);
+      i11 += 64;
 
-      const xnn_simd_f32_t vk11x0 = xnn_load_f32(w + 384);
-      const xnn_simd_f32_t vk11x16 = xnn_load_f32(w + 400);
+      const xnn_simd_f32_t vk11x0 = xnn_load_f32(w + 768);
+      const xnn_simd_f32_t vk11x32 = xnn_load_f32(w + 800);
       vacc0p0 = xnn_fmadd_f32(vi11x0, vk11x0, vacc0p0);
-      vacc16p0 = xnn_fmadd_f32(vi11x16, vk11x16, vacc16p0);
+      vacc32p0 = xnn_fmadd_f32(vi11x32, vk11x32, vacc32p0);
 
       const xnn_simd_f32_t vi12x0 = xnn_loadu_f32(i12 + 0);
-      const xnn_simd_f32_t vi12x16 = xnn_loadu_f32(i12 + 16);
-      i12 += 32;
+      const xnn_simd_f32_t vi12x32 = xnn_loadu_f32(i12 + 32);
+      i12 += 64;
 
-      const xnn_simd_f32_t vk12x0 = xnn_load_f32(w + 416);
-      const xnn_simd_f32_t vk12x16 = xnn_load_f32(w + 432);
+      const xnn_simd_f32_t vk12x0 = xnn_load_f32(w + 832);
+      const xnn_simd_f32_t vk12x32 = xnn_load_f32(w + 864);
       vacc0p0 = xnn_fmadd_f32(vi12x0, vk12x0, vacc0p0);
-      vacc16p0 = xnn_fmadd_f32(vi12x16, vk12x16, vacc16p0);
+      vacc32p0 = xnn_fmadd_f32(vi12x32, vk12x32, vacc32p0);
 
       const xnn_simd_f32_t vi13x0 = xnn_loadu_f32(i13 + 0);
-      const xnn_simd_f32_t vi13x16 = xnn_loadu_f32(i13 + 16);
-      i13 += 32;
+      const xnn_simd_f32_t vi13x32 = xnn_loadu_f32(i13 + 32);
+      i13 += 64;
 
-      const xnn_simd_f32_t vk13x0 = xnn_load_f32(w + 448);
-      const xnn_simd_f32_t vk13x16 = xnn_load_f32(w + 464);
+      const xnn_simd_f32_t vk13x0 = xnn_load_f32(w + 896);
+      const xnn_simd_f32_t vk13x32 = xnn_load_f32(w + 928);
       vacc0p0 = xnn_fmadd_f32(vi13x0, vk13x0, vacc0p0);
-      vacc16p0 = xnn_fmadd_f32(vi13x16, vk13x16, vacc16p0);
+      vacc32p0 = xnn_fmadd_f32(vi13x32, vk13x32, vacc32p0);
 
       const xnn_simd_f32_t vi14x0 = xnn_loadu_f32(i14 + 0);
-      const xnn_simd_f32_t vi14x16 = xnn_loadu_f32(i14 + 16);
-      i14 += 32;
+      const xnn_simd_f32_t vi14x32 = xnn_loadu_f32(i14 + 32);
+      i14 += 64;
 
-      const xnn_simd_f32_t vk14x0 = xnn_load_f32(w + 480);
-      const xnn_simd_f32_t vk14x16 = xnn_load_f32(w + 496);
+      const xnn_simd_f32_t vk14x0 = xnn_load_f32(w + 960);
+      const xnn_simd_f32_t vk14x32 = xnn_load_f32(w + 992);
       vacc0p0 = xnn_fmadd_f32(vi14x0, vk14x0, vacc0p0);
-      vacc16p0 = xnn_fmadd_f32(vi14x16, vk14x16, vacc16p0);
+      vacc32p0 = xnn_fmadd_f32(vi14x32, vk14x32, vacc32p0);
 
       const xnn_simd_f32_t vi15x0 = xnn_loadu_f32(i15 + 0);
-      const xnn_simd_f32_t vi15x16 = xnn_loadu_f32(i15 + 16);
-      i15 += 32;
+      const xnn_simd_f32_t vi15x32 = xnn_loadu_f32(i15 + 32);
+      i15 += 64;
 
-      const xnn_simd_f32_t vk15x0 = xnn_load_f32(w + 512);
-      const xnn_simd_f32_t vk15x16 = xnn_load_f32(w + 528);
+      const xnn_simd_f32_t vk15x0 = xnn_load_f32(w + 1024);
+      const xnn_simd_f32_t vk15x32 = xnn_load_f32(w + 1056);
       vacc0p0 = xnn_fmadd_f32(vi15x0, vk15x0, vacc0p0);
-      vacc16p0 = xnn_fmadd_f32(vi15x16, vk15x16, vacc16p0);
+      vacc32p0 = xnn_fmadd_f32(vi15x32, vk15x32, vacc32p0);
 
       const xnn_simd_f32_t vi16x0 = xnn_loadu_f32(i16 + 0);
-      const xnn_simd_f32_t vi16x16 = xnn_loadu_f32(i16 + 16);
-      i16 += 32;
+      const xnn_simd_f32_t vi16x32 = xnn_loadu_f32(i16 + 32);
+      i16 += 64;
 
-      const xnn_simd_f32_t vk16x0 = xnn_load_f32(w + 544);
-      const xnn_simd_f32_t vk16x16 = xnn_load_f32(w + 560);
+      const xnn_simd_f32_t vk16x0 = xnn_load_f32(w + 1088);
+      const xnn_simd_f32_t vk16x32 = xnn_load_f32(w + 1120);
       vacc0p0 = xnn_fmadd_f32(vi16x0, vk16x0, vacc0p0);
-      vacc16p0 = xnn_fmadd_f32(vi16x16, vk16x16, vacc16p0);
+      vacc32p0 = xnn_fmadd_f32(vi16x32, vk16x32, vacc32p0);
 
       const xnn_simd_f32_t vi17x0 = xnn_loadu_f32(i17 + 0);
-      const xnn_simd_f32_t vi17x16 = xnn_loadu_f32(i17 + 16);
-      i17 += 32;
+      const xnn_simd_f32_t vi17x32 = xnn_loadu_f32(i17 + 32);
+      i17 += 64;
 
-      const xnn_simd_f32_t vk17x0 = xnn_load_f32(w + 576);
-      const xnn_simd_f32_t vk17x16 = xnn_load_f32(w + 592);
+      const xnn_simd_f32_t vk17x0 = xnn_load_f32(w + 1152);
+      const xnn_simd_f32_t vk17x32 = xnn_load_f32(w + 1184);
       vacc0p0 = xnn_fmadd_f32(vi17x0, vk17x0, vacc0p0);
-      vacc16p0 = xnn_fmadd_f32(vi17x16, vk17x16, vacc16p0);
+      vacc32p0 = xnn_fmadd_f32(vi17x32, vk17x32, vacc32p0);
 
       const xnn_simd_f32_t vi18x0 = xnn_loadu_f32(i18 + 0);
-      const xnn_simd_f32_t vi18x16 = xnn_loadu_f32(i18 + 16);
-      i18 += 32;
+      const xnn_simd_f32_t vi18x32 = xnn_loadu_f32(i18 + 32);
+      i18 += 64;
 
-      const xnn_simd_f32_t vk18x0 = xnn_load_f32(w + 608);
-      const xnn_simd_f32_t vk18x16 = xnn_load_f32(w + 624);
+      const xnn_simd_f32_t vk18x0 = xnn_load_f32(w + 1216);
+      const xnn_simd_f32_t vk18x32 = xnn_load_f32(w + 1248);
       vacc0p0 = xnn_fmadd_f32(vi18x0, vk18x0, vacc0p0);
-      vacc16p0 = xnn_fmadd_f32(vi18x16, vk18x16, vacc16p0);
+      vacc32p0 = xnn_fmadd_f32(vi18x32, vk18x32, vacc32p0);
 
       const xnn_simd_f32_t vi19x0 = xnn_loadu_f32(i19 + 0);
-      const xnn_simd_f32_t vi19x16 = xnn_loadu_f32(i19 + 16);
-      i19 += 32;
+      const xnn_simd_f32_t vi19x32 = xnn_loadu_f32(i19 + 32);
+      i19 += 64;
 
-      const xnn_simd_f32_t vk19x0 = xnn_load_f32(w + 640);
-      const xnn_simd_f32_t vk19x16 = xnn_load_f32(w + 656);
+      const xnn_simd_f32_t vk19x0 = xnn_load_f32(w + 1280);
+      const xnn_simd_f32_t vk19x32 = xnn_load_f32(w + 1312);
       vacc0p0 = xnn_fmadd_f32(vi19x0, vk19x0, vacc0p0);
-      vacc16p0 = xnn_fmadd_f32(vi19x16, vk19x16, vacc16p0);
+      vacc32p0 = xnn_fmadd_f32(vi19x32, vk19x32, vacc32p0);
 
       const xnn_simd_f32_t vi20x0 = xnn_loadu_f32(i20 + 0);
-      const xnn_simd_f32_t vi20x16 = xnn_loadu_f32(i20 + 16);
-      i20 += 32;
+      const xnn_simd_f32_t vi20x32 = xnn_loadu_f32(i20 + 32);
+      i20 += 64;
 
-      const xnn_simd_f32_t vk20x0 = xnn_load_f32(w + 672);
-      const xnn_simd_f32_t vk20x16 = xnn_load_f32(w + 688);
+      const xnn_simd_f32_t vk20x0 = xnn_load_f32(w + 1344);
+      const xnn_simd_f32_t vk20x32 = xnn_load_f32(w + 1376);
       vacc0p0 = xnn_fmadd_f32(vi20x0, vk20x0, vacc0p0);
-      vacc16p0 = xnn_fmadd_f32(vi20x16, vk20x16, vacc16p0);
+      vacc32p0 = xnn_fmadd_f32(vi20x32, vk20x32, vacc32p0);
 
       const xnn_simd_f32_t vi21x0 = xnn_loadu_f32(i21 + 0);
-      const xnn_simd_f32_t vi21x16 = xnn_loadu_f32(i21 + 16);
-      i21 += 32;
+      const xnn_simd_f32_t vi21x32 = xnn_loadu_f32(i21 + 32);
+      i21 += 64;
 
-      const xnn_simd_f32_t vk21x0 = xnn_load_f32(w + 704);
-      const xnn_simd_f32_t vk21x16 = xnn_load_f32(w + 720);
+      const xnn_simd_f32_t vk21x0 = xnn_load_f32(w + 1408);
+      const xnn_simd_f32_t vk21x32 = xnn_load_f32(w + 1440);
       vacc0p0 = xnn_fmadd_f32(vi21x0, vk21x0, vacc0p0);
-      vacc16p0 = xnn_fmadd_f32(vi21x16, vk21x16, vacc16p0);
+      vacc32p0 = xnn_fmadd_f32(vi21x32, vk21x32, vacc32p0);
 
       const xnn_simd_f32_t vi22x0 = xnn_loadu_f32(i22 + 0);
-      const xnn_simd_f32_t vi22x16 = xnn_loadu_f32(i22 + 16);
-      i22 += 32;
+      const xnn_simd_f32_t vi22x32 = xnn_loadu_f32(i22 + 32);
+      i22 += 64;
 
-      const xnn_simd_f32_t vk22x0 = xnn_load_f32(w + 736);
-      const xnn_simd_f32_t vk22x16 = xnn_load_f32(w + 752);
+      const xnn_simd_f32_t vk22x0 = xnn_load_f32(w + 1472);
+      const xnn_simd_f32_t vk22x32 = xnn_load_f32(w + 1504);
       vacc0p0 = xnn_fmadd_f32(vi22x0, vk22x0, vacc0p0);
-      vacc16p0 = xnn_fmadd_f32(vi22x16, vk22x16, vacc16p0);
+      vacc32p0 = xnn_fmadd_f32(vi22x32, vk22x32, vacc32p0);
 
       const xnn_simd_f32_t vi23x0 = xnn_loadu_f32(i23 + 0);
-      const xnn_simd_f32_t vi23x16 = xnn_loadu_f32(i23 + 16);
-      i23 += 32;
+      const xnn_simd_f32_t vi23x32 = xnn_loadu_f32(i23 + 32);
+      i23 += 64;
 
-      const xnn_simd_f32_t vk23x0 = xnn_load_f32(w + 768);
-      const xnn_simd_f32_t vk23x16 = xnn_load_f32(w + 784);
+      const xnn_simd_f32_t vk23x0 = xnn_load_f32(w + 1536);
+      const xnn_simd_f32_t vk23x32 = xnn_load_f32(w + 1568);
       vacc0p0 = xnn_fmadd_f32(vi23x0, vk23x0, vacc0p0);
-      vacc16p0 = xnn_fmadd_f32(vi23x16, vk23x16, vacc16p0);
+      vacc32p0 = xnn_fmadd_f32(vi23x32, vk23x32, vacc32p0);
 
       const xnn_simd_f32_t vi24x0 = xnn_loadu_f32(i24 + 0);
-      const xnn_simd_f32_t vi24x16 = xnn_loadu_f32(i24 + 16);
-      i24 += 32;
+      const xnn_simd_f32_t vi24x32 = xnn_loadu_f32(i24 + 32);
+      i24 += 64;
 
-      const xnn_simd_f32_t vk24x0 = xnn_load_f32(w + 800);
-      const xnn_simd_f32_t vk24x16 = xnn_load_f32(w + 816);
+      const xnn_simd_f32_t vk24x0 = xnn_load_f32(w + 1600);
+      const xnn_simd_f32_t vk24x32 = xnn_load_f32(w + 1632);
       vacc0p0 = xnn_fmadd_f32(vi24x0, vk24x0, vacc0p0);
-      vacc16p0 = xnn_fmadd_f32(vi24x16, vk24x16, vacc16p0);
+      vacc32p0 = xnn_fmadd_f32(vi24x32, vk24x32, vacc32p0);
 
-      w += 832;
+      w += 1664;
 
 
       xnn_simd_f32_t vacc0 = xnn_max_f32(vmin, vacc0p0);
-      xnn_simd_f32_t vacc16 = xnn_max_f32(vmin, vacc16p0);
+      xnn_simd_f32_t vacc32 = xnn_max_f32(vmin, vacc32p0);
       vacc0 = xnn_min_f32(vmax, vacc0);
-      vacc16 = xnn_min_f32(vmax, vacc16);
+      vacc32 = xnn_min_f32(vmax, vacc32);
 
       xnn_storeu_f32(output + 0, vacc0);
-      xnn_storeu_f32(output + 16, vacc16);
-      output += 32;
+      xnn_storeu_f32(output + 32, vacc32);
+      output += 64;
     }
-    for (; c >= 16; c -= 16) {
+    for (; c >= 32; c -= 32) {
       xnn_simd_f32_t vacc0p0 = xnn_load_f32(w);
 
       const xnn_simd_f32_t vi0x0 = xnn_loadu_f32(i0);
-      i0 += 16;
+      i0 += 32;
 
-      const xnn_simd_f32_t vk0x0 = xnn_load_f32(w + 32);
+      const xnn_simd_f32_t vk0x0 = xnn_load_f32(w + 64);
       vacc0p0 = xnn_fmadd_f32(vi0x0, vk0x0, vacc0p0);
 
       const xnn_simd_f32_t vi1x0 = xnn_loadu_f32(i1);
-      i1 += 16;
+      i1 += 32;
 
-      const xnn_simd_f32_t vk1x0 = xnn_load_f32(w + 64);
+      const xnn_simd_f32_t vk1x0 = xnn_load_f32(w + 128);
       vacc0p0 = xnn_fmadd_f32(vi1x0, vk1x0, vacc0p0);
 
       const xnn_simd_f32_t vi2x0 = xnn_loadu_f32(i2);
-      i2 += 16;
+      i2 += 32;
 
-      const xnn_simd_f32_t vk2x0 = xnn_load_f32(w + 96);
+      const xnn_simd_f32_t vk2x0 = xnn_load_f32(w + 192);
       vacc0p0 = xnn_fmadd_f32(vi2x0, vk2x0, vacc0p0);
 
       const xnn_simd_f32_t vi3x0 = xnn_loadu_f32(i3);
-      i3 += 16;
+      i3 += 32;
 
-      const xnn_simd_f32_t vk3x0 = xnn_load_f32(w + 128);
+      const xnn_simd_f32_t vk3x0 = xnn_load_f32(w + 256);
       vacc0p0 = xnn_fmadd_f32(vi3x0, vk3x0, vacc0p0);
 
       const xnn_simd_f32_t vi4x0 = xnn_loadu_f32(i4);
-      i4 += 16;
+      i4 += 32;
 
-      const xnn_simd_f32_t vk4x0 = xnn_load_f32(w + 160);
+      const xnn_simd_f32_t vk4x0 = xnn_load_f32(w + 320);
       vacc0p0 = xnn_fmadd_f32(vi4x0, vk4x0, vacc0p0);
 
       const xnn_simd_f32_t vi5x0 = xnn_loadu_f32(i5);
-      i5 += 16;
+      i5 += 32;
 
-      const xnn_simd_f32_t vk5x0 = xnn_load_f32(w + 192);
+      const xnn_simd_f32_t vk5x0 = xnn_load_f32(w + 384);
       vacc0p0 = xnn_fmadd_f32(vi5x0, vk5x0, vacc0p0);
 
       const xnn_simd_f32_t vi6x0 = xnn_loadu_f32(i6);
-      i6 += 16;
+      i6 += 32;
 
-      const xnn_simd_f32_t vk6x0 = xnn_load_f32(w + 224);
+      const xnn_simd_f32_t vk6x0 = xnn_load_f32(w + 448);
       vacc0p0 = xnn_fmadd_f32(vi6x0, vk6x0, vacc0p0);
 
       const xnn_simd_f32_t vi7x0 = xnn_loadu_f32(i7);
-      i7 += 16;
+      i7 += 32;
 
-      const xnn_simd_f32_t vk7x0 = xnn_load_f32(w + 256);
+      const xnn_simd_f32_t vk7x0 = xnn_load_f32(w + 512);
       vacc0p0 = xnn_fmadd_f32(vi7x0, vk7x0, vacc0p0);
 
       const xnn_simd_f32_t vi8x0 = xnn_loadu_f32(i8);
-      i8 += 16;
+      i8 += 32;
 
-      const xnn_simd_f32_t vk8x0 = xnn_load_f32(w + 288);
+      const xnn_simd_f32_t vk8x0 = xnn_load_f32(w + 576);
       vacc0p0 = xnn_fmadd_f32(vi8x0, vk8x0, vacc0p0);
 
       const xnn_simd_f32_t vi9x0 = xnn_loadu_f32(i9);
-      i9 += 16;
+      i9 += 32;
 
-      const xnn_simd_f32_t vk9x0 = xnn_load_f32(w + 320);
+      const xnn_simd_f32_t vk9x0 = xnn_load_f32(w + 640);
       vacc0p0 = xnn_fmadd_f32(vi9x0, vk9x0, vacc0p0);
 
       const xnn_simd_f32_t vi10x0 = xnn_loadu_f32(i10);
-      i10 += 16;
+      i10 += 32;
 
-      const xnn_simd_f32_t vk10x0 = xnn_load_f32(w + 352);
+      const xnn_simd_f32_t vk10x0 = xnn_load_f32(w + 704);
       vacc0p0 = xnn_fmadd_f32(vi10x0, vk10x0, vacc0p0);
 
       const xnn_simd_f32_t vi11x0 = xnn_loadu_f32(i11);
-      i11 += 16;
+      i11 += 32;
 
-      const xnn_simd_f32_t vk11x0 = xnn_load_f32(w + 384);
+      const xnn_simd_f32_t vk11x0 = xnn_load_f32(w + 768);
       vacc0p0 = xnn_fmadd_f32(vi11x0, vk11x0, vacc0p0);
 
       const xnn_simd_f32_t vi12x0 = xnn_loadu_f32(i12);
-      i12 += 16;
+      i12 += 32;
 
-      const xnn_simd_f32_t vk12x0 = xnn_load_f32(w + 416);
+      const xnn_simd_f32_t vk12x0 = xnn_load_f32(w + 832);
       vacc0p0 = xnn_fmadd_f32(vi12x0, vk12x0, vacc0p0);
 
       const xnn_simd_f32_t vi13x0 = xnn_loadu_f32(i13);
-      i13 += 16;
+      i13 += 32;
 
-      const xnn_simd_f32_t vk13x0 = xnn_load_f32(w + 448);
+      const xnn_simd_f32_t vk13x0 = xnn_load_f32(w + 896);
       vacc0p0 = xnn_fmadd_f32(vi13x0, vk13x0, vacc0p0);
 
       const xnn_simd_f32_t vi14x0 = xnn_loadu_f32(i14);
-      i14 += 16;
+      i14 += 32;
 
-      const xnn_simd_f32_t vk14x0 = xnn_load_f32(w + 480);
+      const xnn_simd_f32_t vk14x0 = xnn_load_f32(w + 960);
       vacc0p0 = xnn_fmadd_f32(vi14x0, vk14x0, vacc0p0);
 
       const xnn_simd_f32_t vi15x0 = xnn_loadu_f32(i15);
-      i15 += 16;
+      i15 += 32;
 
-      const xnn_simd_f32_t vk15x0 = xnn_load_f32(w + 512);
+      const xnn_simd_f32_t vk15x0 = xnn_load_f32(w + 1024);
       vacc0p0 = xnn_fmadd_f32(vi15x0, vk15x0, vacc0p0);
 
       const xnn_simd_f32_t vi16x0 = xnn_loadu_f32(i16);
-      i16 += 16;
+      i16 += 32;
 
-      const xnn_simd_f32_t vk16x0 = xnn_load_f32(w + 544);
+      const xnn_simd_f32_t vk16x0 = xnn_load_f32(w + 1088);
       vacc0p0 = xnn_fmadd_f32(vi16x0, vk16x0, vacc0p0);
 
       const xnn_simd_f32_t vi17x0 = xnn_loadu_f32(i17);
-      i17 += 16;
+      i17 += 32;
 
-      const xnn_simd_f32_t vk17x0 = xnn_load_f32(w + 576);
+      const xnn_simd_f32_t vk17x0 = xnn_load_f32(w + 1152);
       vacc0p0 = xnn_fmadd_f32(vi17x0, vk17x0, vacc0p0);
 
       const xnn_simd_f32_t vi18x0 = xnn_loadu_f32(i18);
-      i18 += 16;
+      i18 += 32;
 
-      const xnn_simd_f32_t vk18x0 = xnn_load_f32(w + 608);
+      const xnn_simd_f32_t vk18x0 = xnn_load_f32(w + 1216);
       vacc0p0 = xnn_fmadd_f32(vi18x0, vk18x0, vacc0p0);
 
       const xnn_simd_f32_t vi19x0 = xnn_loadu_f32(i19);
-      i19 += 16;
+      i19 += 32;
 
-      const xnn_simd_f32_t vk19x0 = xnn_load_f32(w + 640);
+      const xnn_simd_f32_t vk19x0 = xnn_load_f32(w + 1280);
       vacc0p0 = xnn_fmadd_f32(vi19x0, vk19x0, vacc0p0);
 
       const xnn_simd_f32_t vi20x0 = xnn_loadu_f32(i20);
-      i20 += 16;
+      i20 += 32;
 
-      const xnn_simd_f32_t vk20x0 = xnn_load_f32(w + 672);
+      const xnn_simd_f32_t vk20x0 = xnn_load_f32(w + 1344);
       vacc0p0 = xnn_fmadd_f32(vi20x0, vk20x0, vacc0p0);
 
       const xnn_simd_f32_t vi21x0 = xnn_loadu_f32(i21);
-      i21 += 16;
+      i21 += 32;
 
-      const xnn_simd_f32_t vk21x0 = xnn_load_f32(w + 704);
+      const xnn_simd_f32_t vk21x0 = xnn_load_f32(w + 1408);
       vacc0p0 = xnn_fmadd_f32(vi21x0, vk21x0, vacc0p0);
 
       const xnn_simd_f32_t vi22x0 = xnn_loadu_f32(i22);
-      i22 += 16;
+      i22 += 32;
 
-      const xnn_simd_f32_t vk22x0 = xnn_load_f32(w + 736);
+      const xnn_simd_f32_t vk22x0 = xnn_load_f32(w + 1472);
       vacc0p0 = xnn_fmadd_f32(vi22x0, vk22x0, vacc0p0);
 
       const xnn_simd_f32_t vi23x0 = xnn_loadu_f32(i23);
-      i23 += 16;
+      i23 += 32;
 
-      const xnn_simd_f32_t vk23x0 = xnn_load_f32(w + 768);
+      const xnn_simd_f32_t vk23x0 = xnn_load_f32(w + 1536);
       vacc0p0 = xnn_fmadd_f32(vi23x0, vk23x0, vacc0p0);
 
       const xnn_simd_f32_t vi24x0 = xnn_loadu_f32(i24);
-      i24 += 16;
+      i24 += 32;
 
-      const xnn_simd_f32_t vk24x0 = xnn_load_f32(w + 800);
+      const xnn_simd_f32_t vk24x0 = xnn_load_f32(w + 1600);
       vacc0p0 = xnn_fmadd_f32(vi24x0, vk24x0, vacc0p0);
 
-      w += 16;
+      w += 32;
 
 
       xnn_simd_f32_t vacc0 = xnn_max_f32(vmin, vacc0p0);
       vacc0 = xnn_min_f32(vmax, vacc0);
 
       xnn_storeu_f32(output, vacc0);
-      output += 16;
+      output += 32;
     }
     if XNN_UNLIKELY(c != 0) {
       assert(c >= 1);
-      assert(c <= 16);
+      assert(c <= 32);
 
       xnn_simd_f32_t vacc0p0 = xnn_load_tail_f32(w, c);
 
       const xnn_simd_f32_t vi0x0 = xnn_load_tail_f32(i0, c);
-      const xnn_simd_f32_t vk0x0 = xnn_load_tail_f32(w + 32, c);
+      const xnn_simd_f32_t vk0x0 = xnn_load_tail_f32(w + 64, c);
       vacc0p0 = xnn_fmadd_f32(vi0x0, vk0x0, vacc0p0);
 
       const xnn_simd_f32_t vi1x0 = xnn_load_tail_f32(i1, c);
-      const xnn_simd_f32_t vk1x0 = xnn_load_tail_f32(w + 64, c);
+      const xnn_simd_f32_t vk1x0 = xnn_load_tail_f32(w + 128, c);
       vacc0p0 = xnn_fmadd_f32(vi1x0, vk1x0, vacc0p0);
 
       const xnn_simd_f32_t vi2x0 = xnn_load_tail_f32(i2, c);
-      const xnn_simd_f32_t vk2x0 = xnn_load_tail_f32(w + 96, c);
+      const xnn_simd_f32_t vk2x0 = xnn_load_tail_f32(w + 192, c);
       vacc0p0 = xnn_fmadd_f32(vi2x0, vk2x0, vacc0p0);
 
       const xnn_simd_f32_t vi3x0 = xnn_load_tail_f32(i3, c);
-      const xnn_simd_f32_t vk3x0 = xnn_load_tail_f32(w + 128, c);
+      const xnn_simd_f32_t vk3x0 = xnn_load_tail_f32(w + 256, c);
       vacc0p0 = xnn_fmadd_f32(vi3x0, vk3x0, vacc0p0);
 
       const xnn_simd_f32_t vi4x0 = xnn_load_tail_f32(i4, c);
-      const xnn_simd_f32_t vk4x0 = xnn_load_tail_f32(w + 160, c);
+      const xnn_simd_f32_t vk4x0 = xnn_load_tail_f32(w + 320, c);
       vacc0p0 = xnn_fmadd_f32(vi4x0, vk4x0, vacc0p0);
 
       const xnn_simd_f32_t vi5x0 = xnn_load_tail_f32(i5, c);
-      const xnn_simd_f32_t vk5x0 = xnn_load_tail_f32(w + 192, c);
+      const xnn_simd_f32_t vk5x0 = xnn_load_tail_f32(w + 384, c);
       vacc0p0 = xnn_fmadd_f32(vi5x0, vk5x0, vacc0p0);
 
       const xnn_simd_f32_t vi6x0 = xnn_load_tail_f32(i6, c);
-      const xnn_simd_f32_t vk6x0 = xnn_load_tail_f32(w + 224, c);
+      const xnn_simd_f32_t vk6x0 = xnn_load_tail_f32(w + 448, c);
       vacc0p0 = xnn_fmadd_f32(vi6x0, vk6x0, vacc0p0);
 
       const xnn_simd_f32_t vi7x0 = xnn_load_tail_f32(i7, c);
-      const xnn_simd_f32_t vk7x0 = xnn_load_tail_f32(w + 256, c);
+      const xnn_simd_f32_t vk7x0 = xnn_load_tail_f32(w + 512, c);
       vacc0p0 = xnn_fmadd_f32(vi7x0, vk7x0, vacc0p0);
 
       const xnn_simd_f32_t vi8x0 = xnn_load_tail_f32(i8, c);
-      const xnn_simd_f32_t vk8x0 = xnn_load_tail_f32(w + 288, c);
+      const xnn_simd_f32_t vk8x0 = xnn_load_tail_f32(w + 576, c);
       vacc0p0 = xnn_fmadd_f32(vi8x0, vk8x0, vacc0p0);
 
       const xnn_simd_f32_t vi9x0 = xnn_load_tail_f32(i9, c);
-      const xnn_simd_f32_t vk9x0 = xnn_load_tail_f32(w + 320, c);
+      const xnn_simd_f32_t vk9x0 = xnn_load_tail_f32(w + 640, c);
       vacc0p0 = xnn_fmadd_f32(vi9x0, vk9x0, vacc0p0);
 
       const xnn_simd_f32_t vi10x0 = xnn_load_tail_f32(i10, c);
-      const xnn_simd_f32_t vk10x0 = xnn_load_tail_f32(w + 352, c);
+      const xnn_simd_f32_t vk10x0 = xnn_load_tail_f32(w + 704, c);
       vacc0p0 = xnn_fmadd_f32(vi10x0, vk10x0, vacc0p0);
 
       const xnn_simd_f32_t vi11x0 = xnn_load_tail_f32(i11, c);
-      const xnn_simd_f32_t vk11x0 = xnn_load_tail_f32(w + 384, c);
+      const xnn_simd_f32_t vk11x0 = xnn_load_tail_f32(w + 768, c);
       vacc0p0 = xnn_fmadd_f32(vi11x0, vk11x0, vacc0p0);
 
       const xnn_simd_f32_t vi12x0 = xnn_load_tail_f32(i12, c);
-      const xnn_simd_f32_t vk12x0 = xnn_load_tail_f32(w + 416, c);
+      const xnn_simd_f32_t vk12x0 = xnn_load_tail_f32(w + 832, c);
       vacc0p0 = xnn_fmadd_f32(vi12x0, vk12x0, vacc0p0);
 
       const xnn_simd_f32_t vi13x0 = xnn_load_tail_f32(i13, c);
-      const xnn_simd_f32_t vk13x0 = xnn_load_tail_f32(w + 448, c);
+      const xnn_simd_f32_t vk13x0 = xnn_load_tail_f32(w + 896, c);
       vacc0p0 = xnn_fmadd_f32(vi13x0, vk13x0, vacc0p0);
 
       const xnn_simd_f32_t vi14x0 = xnn_load_tail_f32(i14, c);
-      const xnn_simd_f32_t vk14x0 = xnn_load_tail_f32(w + 480, c);
+      const xnn_simd_f32_t vk14x0 = xnn_load_tail_f32(w + 960, c);
       vacc0p0 = xnn_fmadd_f32(vi14x0, vk14x0, vacc0p0);
 
       const xnn_simd_f32_t vi15x0 = xnn_load_tail_f32(i15, c);
-      const xnn_simd_f32_t vk15x0 = xnn_load_tail_f32(w + 512, c);
+      const xnn_simd_f32_t vk15x0 = xnn_load_tail_f32(w + 1024, c);
       vacc0p0 = xnn_fmadd_f32(vi15x0, vk15x0, vacc0p0);
 
       const xnn_simd_f32_t vi16x0 = xnn_load_tail_f32(i16, c);
-      const xnn_simd_f32_t vk16x0 = xnn_load_tail_f32(w + 544, c);
+      const xnn_simd_f32_t vk16x0 = xnn_load_tail_f32(w + 1088, c);
       vacc0p0 = xnn_fmadd_f32(vi16x0, vk16x0, vacc0p0);
 
       const xnn_simd_f32_t vi17x0 = xnn_load_tail_f32(i17, c);
-      const xnn_simd_f32_t vk17x0 = xnn_load_tail_f32(w + 576, c);
+      const xnn_simd_f32_t vk17x0 = xnn_load_tail_f32(w + 1152, c);
       vacc0p0 = xnn_fmadd_f32(vi17x0, vk17x0, vacc0p0);
 
       const xnn_simd_f32_t vi18x0 = xnn_load_tail_f32(i18, c);
-      const xnn_simd_f32_t vk18x0 = xnn_load_tail_f32(w + 608, c);
+      const xnn_simd_f32_t vk18x0 = xnn_load_tail_f32(w + 1216, c);
       vacc0p0 = xnn_fmadd_f32(vi18x0, vk18x0, vacc0p0);
 
       const xnn_simd_f32_t vi19x0 = xnn_load_tail_f32(i19, c);
-      const xnn_simd_f32_t vk19x0 = xnn_load_tail_f32(w + 640, c);
+      const xnn_simd_f32_t vk19x0 = xnn_load_tail_f32(w + 1280, c);
       vacc0p0 = xnn_fmadd_f32(vi19x0, vk19x0, vacc0p0);
 
       const xnn_simd_f32_t vi20x0 = xnn_load_tail_f32(i20, c);
-      const xnn_simd_f32_t vk20x0 = xnn_load_tail_f32(w + 672, c);
+      const xnn_simd_f32_t vk20x0 = xnn_load_tail_f32(w + 1344, c);
       vacc0p0 = xnn_fmadd_f32(vi20x0, vk20x0, vacc0p0);
 
       const xnn_simd_f32_t vi21x0 = xnn_load_tail_f32(i21, c);
-      const xnn_simd_f32_t vk21x0 = xnn_load_tail_f32(w + 704, c);
+      const xnn_simd_f32_t vk21x0 = xnn_load_tail_f32(w + 1408, c);
       vacc0p0 = xnn_fmadd_f32(vi21x0, vk21x0, vacc0p0);
 
       const xnn_simd_f32_t vi22x0 = xnn_load_tail_f32(i22, c);
-      const xnn_simd_f32_t vk22x0 = xnn_load_tail_f32(w + 736, c);
+      const xnn_simd_f32_t vk22x0 = xnn_load_tail_f32(w + 1472, c);
       vacc0p0 = xnn_fmadd_f32(vi22x0, vk22x0, vacc0p0);
 
       const xnn_simd_f32_t vi23x0 = xnn_load_tail_f32(i23, c);
-      const xnn_simd_f32_t vk23x0 = xnn_load_tail_f32(w + 768, c);
+      const xnn_simd_f32_t vk23x0 = xnn_load_tail_f32(w + 1536, c);
       vacc0p0 = xnn_fmadd_f32(vi23x0, vk23x0, vacc0p0);
 
       const xnn_simd_f32_t vi24x0 = xnn_load_tail_f32(i24, c);
-      const xnn_simd_f32_t vk24x0 = xnn_load_tail_f32(w + 800, c);
+      const xnn_simd_f32_t vk24x0 = xnn_load_tail_f32(w + 1600, c);
       vacc0p0 = xnn_fmadd_f32(vi24x0, vk24x0, vacc0p0);
 
 

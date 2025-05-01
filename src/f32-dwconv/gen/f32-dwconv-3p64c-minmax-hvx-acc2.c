@@ -10,12 +10,12 @@
 
 #include <assert.h>
 
-#include "src/xnnpack/simd/f32-avx512f.h"
+#include "src/xnnpack/simd/f32-hvx.h"
 
 #include "src/xnnpack/dwconv.h"
 
 
-void xnn_f32_dwconv_minmax_ukernel_3p32c__avx512f(
+void xnn_f32_dwconv_minmax_ukernel_3p64c__hvx_acc2(
     size_t channels,
     size_t output_width,
     const float** input,
@@ -53,98 +53,105 @@ void xnn_f32_dwconv_minmax_ukernel_3p32c__avx512f(
 
     size_t c = channels;
     const float* w = weights;
-    for (; c >= 32; c -= 32) {
+    for (; c >= 64; c -= 64) {
       xnn_simd_f32_t vacc0p0 = xnn_load_f32(w + 0);
-      xnn_simd_f32_t vacc16p0 = xnn_load_f32(w + 16);
+      xnn_simd_f32_t vacc32p0 = xnn_load_f32(w + 32);
 
 
       const xnn_simd_f32_t vi0x0 = xnn_loadu_f32(i0 + 0);
-      const xnn_simd_f32_t vi0x16 = xnn_loadu_f32(i0 + 16);
-      i0 += 32;
+      const xnn_simd_f32_t vi0x32 = xnn_loadu_f32(i0 + 32);
+      i0 += 64;
 
-      const xnn_simd_f32_t vk0x0 = xnn_load_f32(w + 32);
-      const xnn_simd_f32_t vk0x16 = xnn_load_f32(w + 48);
+      const xnn_simd_f32_t vk0x0 = xnn_load_f32(w + 64);
+      const xnn_simd_f32_t vk0x32 = xnn_load_f32(w + 96);
       vacc0p0 = xnn_fmadd_f32(vi0x0, vk0x0, vacc0p0);
-      vacc16p0 = xnn_fmadd_f32(vi0x16, vk0x16, vacc16p0);
+      vacc32p0 = xnn_fmadd_f32(vi0x32, vk0x32, vacc32p0);
 
       const xnn_simd_f32_t vi1x0 = xnn_loadu_f32(i1 + 0);
-      const xnn_simd_f32_t vi1x16 = xnn_loadu_f32(i1 + 16);
-      i1 += 32;
+      const xnn_simd_f32_t vi1x32 = xnn_loadu_f32(i1 + 32);
+      i1 += 64;
 
-      const xnn_simd_f32_t vk1x0 = xnn_load_f32(w + 64);
-      const xnn_simd_f32_t vk1x16 = xnn_load_f32(w + 80);
-      vacc0p0 = xnn_fmadd_f32(vi1x0, vk1x0, vacc0p0);
-      vacc16p0 = xnn_fmadd_f32(vi1x16, vk1x16, vacc16p0);
+      const xnn_simd_f32_t vk1x0 = xnn_load_f32(w + 128);
+      const xnn_simd_f32_t vk1x32 = xnn_load_f32(w + 160);
+      xnn_simd_f32_t vacc0p1 = xnn_mul_f32(vi1x0, vk1x0);
+      xnn_simd_f32_t vacc32p1 = xnn_mul_f32(vi1x32, vk1x32);
 
       const xnn_simd_f32_t vi2x0 = xnn_loadu_f32(i2 + 0);
-      const xnn_simd_f32_t vi2x16 = xnn_loadu_f32(i2 + 16);
-      i2 += 32;
+      const xnn_simd_f32_t vi2x32 = xnn_loadu_f32(i2 + 32);
+      i2 += 64;
 
-      const xnn_simd_f32_t vk2x0 = xnn_load_f32(w + 96);
-      const xnn_simd_f32_t vk2x16 = xnn_load_f32(w + 112);
+      const xnn_simd_f32_t vk2x0 = xnn_load_f32(w + 192);
+      const xnn_simd_f32_t vk2x32 = xnn_load_f32(w + 224);
       vacc0p0 = xnn_fmadd_f32(vi2x0, vk2x0, vacc0p0);
-      vacc16p0 = xnn_fmadd_f32(vi2x16, vk2x16, vacc16p0);
+      vacc32p0 = xnn_fmadd_f32(vi2x32, vk2x32, vacc32p0);
 
-      w += 128;
+      w += 256;
 
+      // Add up all accumulators to vacc0p0
+      vacc0p0 = xnn_add_f32(vacc0p0, vacc0p1);
+      vacc32p0 = xnn_add_f32(vacc32p0, vacc32p1);
 
       xnn_simd_f32_t vacc0 = xnn_max_f32(vmin, vacc0p0);
-      xnn_simd_f32_t vacc16 = xnn_max_f32(vmin, vacc16p0);
+      xnn_simd_f32_t vacc32 = xnn_max_f32(vmin, vacc32p0);
       vacc0 = xnn_min_f32(vmax, vacc0);
-      vacc16 = xnn_min_f32(vmax, vacc16);
+      vacc32 = xnn_min_f32(vmax, vacc32);
 
       xnn_storeu_f32(output + 0, vacc0);
-      xnn_storeu_f32(output + 16, vacc16);
-      output += 32;
+      xnn_storeu_f32(output + 32, vacc32);
+      output += 64;
     }
-    for (; c >= 16; c -= 16) {
+    for (; c >= 32; c -= 32) {
       xnn_simd_f32_t vacc0p0 = xnn_load_f32(w);
 
       const xnn_simd_f32_t vi0x0 = xnn_loadu_f32(i0);
-      i0 += 16;
+      i0 += 32;
 
-      const xnn_simd_f32_t vk0x0 = xnn_load_f32(w + 32);
+      const xnn_simd_f32_t vk0x0 = xnn_load_f32(w + 64);
       vacc0p0 = xnn_fmadd_f32(vi0x0, vk0x0, vacc0p0);
 
       const xnn_simd_f32_t vi1x0 = xnn_loadu_f32(i1);
-      i1 += 16;
+      i1 += 32;
 
-      const xnn_simd_f32_t vk1x0 = xnn_load_f32(w + 64);
-      vacc0p0 = xnn_fmadd_f32(vi1x0, vk1x0, vacc0p0);
+      const xnn_simd_f32_t vk1x0 = xnn_load_f32(w + 128);
+      xnn_simd_f32_t vacc0p1 = xnn_mul_f32(vi1x0, vk1x0);
 
       const xnn_simd_f32_t vi2x0 = xnn_loadu_f32(i2);
-      i2 += 16;
+      i2 += 32;
 
-      const xnn_simd_f32_t vk2x0 = xnn_load_f32(w + 96);
+      const xnn_simd_f32_t vk2x0 = xnn_load_f32(w + 192);
       vacc0p0 = xnn_fmadd_f32(vi2x0, vk2x0, vacc0p0);
 
-      w += 16;
+      w += 32;
 
+      // Add up all accumulators to vacc0p0
+      vacc0p0 = xnn_add_f32(vacc0p0, vacc0p1);
 
       xnn_simd_f32_t vacc0 = xnn_max_f32(vmin, vacc0p0);
       vacc0 = xnn_min_f32(vmax, vacc0);
 
       xnn_storeu_f32(output, vacc0);
-      output += 16;
+      output += 32;
     }
     if XNN_UNLIKELY(c != 0) {
       assert(c >= 1);
-      assert(c <= 16);
+      assert(c <= 32);
 
       xnn_simd_f32_t vacc0p0 = xnn_load_tail_f32(w, c);
 
       const xnn_simd_f32_t vi0x0 = xnn_load_tail_f32(i0, c);
-      const xnn_simd_f32_t vk0x0 = xnn_load_tail_f32(w + 32, c);
+      const xnn_simd_f32_t vk0x0 = xnn_load_tail_f32(w + 64, c);
       vacc0p0 = xnn_fmadd_f32(vi0x0, vk0x0, vacc0p0);
 
       const xnn_simd_f32_t vi1x0 = xnn_load_tail_f32(i1, c);
-      const xnn_simd_f32_t vk1x0 = xnn_load_tail_f32(w + 64, c);
-      vacc0p0 = xnn_fmadd_f32(vi1x0, vk1x0, vacc0p0);
+      const xnn_simd_f32_t vk1x0 = xnn_load_tail_f32(w + 128, c);
+      xnn_simd_f32_t vacc0p1 = xnn_mul_f32(vi1x0, vk1x0);
 
       const xnn_simd_f32_t vi2x0 = xnn_load_tail_f32(i2, c);
-      const xnn_simd_f32_t vk2x0 = xnn_load_tail_f32(w + 96, c);
+      const xnn_simd_f32_t vk2x0 = xnn_load_tail_f32(w + 192, c);
       vacc0p0 = xnn_fmadd_f32(vi2x0, vk2x0, vacc0p0);
 
+      // Add up all accumulators to vacc0p0
+      vacc0p0 = xnn_add_f32(vacc0p0, vacc0p1);
 
       xnn_simd_f32_t vacc0 = xnn_max_f32(vmin, vacc0p0);
       vacc0 = xnn_min_f32(vmax, vacc0);
