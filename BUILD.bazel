@@ -49,7 +49,6 @@ load(
     "OPERATOR_SRCS",
     "SUBGRAPH_SRCS",
     "TABLE_SRCS",
-    "XNNPACK_SRCS",
 )
 
 licenses(["notice"])
@@ -297,6 +296,31 @@ MICROKERNEL_DEPS = [
     ":unaligned",
 ]
 
+CONFIGS = [
+    "argmaxpool",
+    "avgpool",
+    "binary-elementwise",
+    "cmul",
+    "conv-hwc2chw",
+    "dwconv",
+    "dwconv2d-chw",
+    "gemm",
+    "ibilinear-chw",
+    "ibilinear",
+    "lut32norm",
+    "maxpool",
+    "raddstoreexpminusmax",
+    "reduce",
+    "spmm",
+    "transpose",
+    "unary-elementwise",
+    "unpool",
+    "vmulcaddc",
+    "x8-lut",
+    "xx-fill",
+    "xx-pad",
+]
+
 SIMD_HEADERS = [
     "src/xnnpack/simd/f32-avx-base.h",
     "src/xnnpack/simd/f32-wasmsimd-base.h",
@@ -425,19 +449,21 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
-    name = "microkernel_configs",
-    srcs = XNNPACK_SRCS,
-    hdrs = [
-        "src/xnnpack/config.h",
-        "src/xnnpack/config-types.h",
-        "src/xnnpack/microfnptr.h",
-        "src/xnnpack/microparams.h",
-    ],
-    copts = select({
-        ":cpuinfo_enabled": ["-DXNN_ENABLE_CPUINFO=1"],
-        "//conditions:default": ["-DXNN_ENABLE_CPUINFO=0"],
-    }),
-    defines = xnnpack_configurable_defines(),
+    name = "microfnptr_h",
+    hdrs = ["src/xnnpack/microfnptr.h"],
+    compatible_with = [],
+)
+
+xnnpack_cc_library(
+    name = "microparams_h",
+    hdrs = ["src/xnnpack/microparams.h"],
+    compatible_with = [],
+)
+
+[xnnpack_cc_library(
+    name = config_name.replace("-", "_") + "_config",
+    srcs = ["src/configs/" + config_name + "-config.c"],
+    compatible_with = [],
     deps = [
         ":common",
         ":config_hdrs",
@@ -448,6 +474,48 @@ xnnpack_cc_library(
         ":math",
         ":microkernels_h",
         ":microparams_init",
+        ":packing",
+        ":xnnpack_h",
+    ] + select({
+        ":cpuinfo_enabled": ["@cpuinfo"],
+        "//conditions:default": [],
+    }),
+) for config_name in CONFIGS]
+
+# The `pack-lh` configs depend transitively on other configs (`rminmax` and `convert`) so they
+# need to be built separately.
+xnnpack_cc_library(
+    name = "pack_lh_config",
+    srcs = ["src/configs/pack-lh-config.c"],
+    compatible_with = [],
+    deps = [
+        ":common",
+        ":config_hdrs",
+        ":hardware_config",
+        ":init_once",
+        ":microkernels_h",
+        ":pack_lh",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "microkernel_configs",
+    copts = select({
+        ":cpuinfo_enabled": ["-DXNN_ENABLE_CPUINFO=1"],
+        "//conditions:default": ["-DXNN_ENABLE_CPUINFO=0"],
+    }),
+    defines = xnnpack_configurable_defines(),
+    deps = [":" + name.replace("-", "_") + "_config" for name in CONFIGS] + [
+        ":common",
+        ":config_hdrs",
+        ":hardware_config",
+        ":indirection",
+        ":init_once",
+        ":logging",
+        ":math",
+        ":microkernels_h",
+        ":microparams_init",
+        ":pack_lh_config",
         ":packing",
         ":prod_microkernels",
         ":xnnpack_h",
@@ -461,7 +529,6 @@ xnnpack_cc_library(
     name = "params",
     srcs = ["src/params.c"],
     hdrs = [
-        "src/xnnpack/microfnptr.h",
         "src/xnnpack/params.h",
     ],
     deps = [
@@ -824,14 +891,34 @@ xnnpack_cxx_library(
         ":config_hdrs",
         ":logging",
         ":math",
+        ":microfnptr_h",
         ":microparams",
         ":microparams_init",
         ":params",
+        ":quantization",
         ":unaligned",
         ":xnnpack_h",
     ] + xnnpack_if_kleidiai_enabled([
         "@KleidiAI//kai/ukernels/matmul",
     ]),
+)
+
+xnnpack_cxx_library(
+    name = "pack_lh",
+    srcs = ["src/pack-lh.cc"],
+    hdrs = ["src/xnnpack/pack-lh.h"],
+    compatible_with = [],
+    defines = xnnpack_configurable_defines(),
+    deps = [
+        ":common",
+        ":config_hdrs",
+        ":math",
+        ":microkernels_h",
+        ":microparams",
+        ":quantization",
+        ":reduce_config",
+        ":unary_elementwise_config",
+    ],
 )
 
 py_binary(
@@ -963,6 +1050,7 @@ xnnpack_cc_library(
         ":common",
         ":logging",
         ":math",
+        ":microfnptr_h",
         ":node_type",
         ":operator_h",
         ":operator_type",
@@ -1024,6 +1112,7 @@ xnnpack_cc_library(
         ":allocator",
         ":cache",
         ":common",
+        ":config_hdrs",
         ":datatype",
         ":hardware_config",
         ":indirection",

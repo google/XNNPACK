@@ -11,21 +11,23 @@ load(
 
 OPERATOR_TEST_DEPS = [
     "@pthreadpool",
-    "//:XNNPACK",
-    "//:buffer",
     "//:aligned_allocator",
     "//:allocator",
+    "//:buffer",
     "//:cache",
     "//:common",
+    "//:config_hdrs",
     "//:datatype",
     "//:fp16",
     "//:internal",
     "//:math",
     "//:microkernel_configs",
+    "//:microkernels_h",
     "//:microparams",
     "//:normalization",
     "//:params",
     "//:quantization",
+    "//:XNNPACK",
     "//test:replicable_random_device",
 ]
 
@@ -60,6 +62,7 @@ xnnpack_unit_test(
     name = "operator_utils_test",
     srcs = ["operator-utils.cc"],
     deps = [
+        "//:config_hdrs",
         "//:microkernel_configs",
         "//:operator_utils",
     ],
@@ -115,7 +118,7 @@ xnnpack_unit_test(
         "batch-matrix-multiply-operator-tester.h",
     ],
     shard_count = 5,
-    deps = OPERATOR_TEST_DEPS + ["//:microkernels_h"],
+    deps = OPERATOR_TEST_DEPS,
 )
 
 xnnpack_unit_test(
@@ -143,7 +146,7 @@ xnnpack_unit_test(
     srcs = [
         "convert-nc.cc",
     ],
-    deps = OPERATOR_TEST_DEPS + ["//:microkernels_h"],
+    deps = OPERATOR_TEST_DEPS,
 )
 
 xnnpack_unit_test(
@@ -237,9 +240,7 @@ xnnpack_unit_test(
         "fully-connected-nc.cc",
         "fully-connected-operator-tester.h",
     ],
-    deps = OPERATOR_TEST_DEPS + [
-        "//:microkernels_h",
-    ],
+    deps = OPERATOR_TEST_DEPS,
 )
 
 xnnpack_unit_test(

@@ -309,6 +309,9 @@ struct xnn_node {
       int32_t axis;
     } even_split;
     struct {
+      enum xnn_datatype assumed_input_datatype;
+    } fully_connected;
+    struct {
       uint32_t padding_top;
       uint32_t padding_right;
       uint32_t padding_bottom;
@@ -450,6 +453,8 @@ struct xnn_subgraph {
   uint32_t num_reserved_nodes;
   uint32_t num_nodes;
   struct xnn_node* nodes;
+
+  uint32_t flags;
 };
 
 /// Runtime is a combination of an execution plan for subgraph Nodes and a

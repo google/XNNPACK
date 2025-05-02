@@ -13,12 +13,14 @@
 #include <random>
 #include <vector>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "src/xnnpack/allocation-type.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
-#include "src/xnnpack/math.h"
+#include "src/xnnpack/node-type.h"
+#include "src/xnnpack/operator.h"
 #include "src/xnnpack/subgraph.h"
 #include "test/replicable_random_device.h"
 #include "test/subgraph/runtime-flags.h"
@@ -754,5 +756,18 @@ TEST(WORKSPACE, internally_allocated_dynamic_quantization_parameters) {
         break;
     }
   }
-  ASSERT_EQ(dq_tensors, 1);
+  if (dq_tensors == 0) {
+    // If no quantized datatype tensor was found, maybe it was inlined?
+    for (size_t i = 0; i < subgraph->num_nodes; i++) {
+      const xnn_node* node = &subgraph->nodes[i];
+      if (node->type == xnn_node_type_fully_connected) {
+        EXPECT_TRUE(node->flags & XNN_FLAG_INLINE_LHS_PACKING);
+        EXPECT_THAT(node->params.fully_connected.assumed_input_datatype,
+                    testing::AnyOf(xnn_datatype_qdint8, xnn_datatype_qdint8,
+                                   xnn_datatype_qpint8));
+      }
+    }
+  } else {
+    ASSERT_EQ(dq_tensors, 1);
+  }
 }
