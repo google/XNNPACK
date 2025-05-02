@@ -87,6 +87,7 @@ SET(MICROKERNEL_BENCHMARKS
     f32-vscaleextexp
     pf32-gemm-minmax
     qd8-f16-qb4w-gemm
+    qd8-bf16-qb4w-gemm
     qd8-f16-qc4w-gemm
     qd8-f16-qc8w-gemm
     qd8-f32-qb4w-gemm

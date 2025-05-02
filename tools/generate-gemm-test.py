@@ -721,7 +721,7 @@ def generate_test_cases(
     kerneltype = 'qc4w'
   if (
       datatype in ("qd8", "qp8")
-      and ukernel_type in ["f16", "f32"]
+      and ukernel_type in ["f16", "f32", "bf16"]
       and activation in ["qc8w", "qc4w", "qb4w"]
   ):
     _, datatype, _, kerneltype, ukernel_type, activation, _ = ukernel.split(

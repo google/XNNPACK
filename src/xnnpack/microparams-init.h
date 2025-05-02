@@ -87,6 +87,10 @@ XNN_INTERNAL void xnn_init_qs8_qc8w_scale_fp32_params(
     size_t channels, size_t channels_tile, size_t stride,
     const float scale[XNN_MIN_ELEMENTS(1)], void* packed_w);
 
+XNN_INTERNAL void xnn_init_qs8_qc8w_scale_u16_params(
+    size_t channels, size_t channels_tile, size_t stride,
+    const uint16_t scale[XNN_MIN_ELEMENTS(1)], void* packed_w);
+
 XNN_INTERNAL void xnn_init_qs8_to_qs8_qc8w_scale_fp32_params(
     size_t channels, size_t channels_tile, size_t stride,
     const float scale[XNN_MIN_ELEMENTS(1)], void* packed_w);

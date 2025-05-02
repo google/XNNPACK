@@ -453,6 +453,102 @@ void GEMMBenchmark(benchmark::State& state,
 }
 
 void GEMMBenchmark(benchmark::State& state,
+                   xnn_qd8_bf16_qb4w_gemm_ukernel_fn gemm,
+                   xnn_init_f32_qb4w_minmax_params_fn init_params,
+                   xnn_pack_qs8_qb4w_gemm_fn pack, size_t mr, size_t nr,
+                   size_t kr, size_t sr,
+                   benchmark::utils::IsaCheckFunction isa_check) {
+  if (isa_check != nullptr && !isa_check(state)) {
+    return;
+  }
+
+  const size_t mc = state.range(0);
+  const size_t nc = state.range(1);
+  const size_t bl = state.range(3);
+  const size_t kc = round_up(state.range(2), bl);
+
+  std::random_device random_device;
+  auto rng = std::mt19937(random_device());
+  auto scalerng = std::bind(std::uniform_real_distribution<float>(0.5f, 2.f),
+                            std::ref(rng));
+
+  const size_t planes = 2;  // 4 bit is 2 planes - low nibbles and high nibbles
+  const size_t k2 = round_up_po2(kc, 2);  // tester assumes byte aligned rows
+  const size_t packed_k2 =
+      round_up_po2(kc, kr * sr * planes);  // 2 blocks for nibbles
+
+  const size_t packed_k_bytes = (packed_k2 + 1) / 2;
+  const size_t num_blocks = packed_k2 / bl;
+  const size_t packed_n = round_up_po2(nc, nr);
+
+  xnnpack::Buffer<int8_t> a(mc * kc, xnnpack::XnnExtraBytes);
+  xnnpack::fill_uniform_random_bits(a.data(), a.size(), rng);
+  xnnpack::Buffer<uint8_t> k(nc * kc / 2);
+  xnnpack::fill_uniform_random_bits(k.data(), k.size(), rng);
+  xnnpack::Buffer<xnn_bfloat16> kernel_scale2d(nc * k2 / bl);
+  xnnpack::fill_uniform_random_bits(k.data(), k.size(), rng);
+  std::generate(kernel_scale2d.begin(), kernel_scale2d.end(),
+                [&]() { return scalerng(); });
+
+  xnnpack::Buffer<xnn_qd8_quantization_params> quantization_params(
+      mc + XNN_EXTRA_QUANTIZATION_PARAMS);
+  const size_t w_bytes = packed_n * packed_k_bytes +
+                         /* vksum */ packed_n * sizeof(float) +
+                         /* scales */ packed_n * num_blocks * sizeof(float) +
+                         /* bias */ packed_n * sizeof(float);
+
+  const size_t c_elements = mc * nc;
+  const size_t num_buffers =
+      1 + benchmark::utils::DivideRoundUp<size_t>(
+              benchmark::utils::GetMaxCacheSize(),
+              w_bytes + sizeof(xnn_bfloat16) * c_elements);
+
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> w(w_bytes * num_buffers);
+
+  const xnn_qs8_qc4w_packing_params packing_params = {/*input_zero_point=*/1,
+                                                      /*kernel_zero_point=*/8};
+  pack(1, nc, k2, nr, kr, sr, bl, k.data(), /*bias=*/nullptr,
+       /*scale=*/kernel_scale2d.data(), w.data(), sizeof(float) * nr,
+       sizeof(float) * nr, &packing_params);
+  xnnpack::Buffer<xnn_bfloat16> c(c_elements * num_buffers);
+
+  // Prepare parameters.
+  xnn_f32_qb4w_minmax_params params;
+  init_params(&params, std::numeric_limits<int8_t>::min(),
+              std::numeric_limits<int8_t>::max(), 8, bl);
+
+  size_t buffer_index = 0;
+  for (auto _ : state) {
+    // Use circular buffers (exceeding cache size) and prefetch to control cache
+    // state:
+    // - A is always in L1 cache (if fits, otherwise L2, L3, etc)
+    // - W is not in cache (for any cache level)
+    // - C is not in cache (for any cache level)
+    state.PauseTiming();
+    benchmark::utils::PrefetchToL1(a.data(), a.size());
+    buffer_index = (buffer_index + 1) % num_buffers;
+    state.ResumeTiming();
+
+    for (uint32_t m = 0; m < mc; m += mr) {
+      const uint32_t mb = min(mc - m, mr);
+      gemm(mb, nc, kc, a.data() + m * kc, kc * sizeof(int8_t),
+           w.data() + w_bytes * buffer_index,
+           c.data() + (buffer_index * mc + m) * nc, nc * sizeof(xnn_float16),
+           nr * sizeof(xnn_float16), &params, quantization_params.data() + m);
+    }
+  }
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
+  state.counters["OPS"] =
+      benchmark::Counter(uint64_t(state.iterations()) * 2 * mc * nc * kc,
+                         benchmark::Counter::kIsRate);
+}
+
+void GEMMBenchmark(benchmark::State& state,
                    xnn_qd8_f16_qc4w_gemm_ukernel_fn gemm,
                    xnn_init_f16_qc4w_minmax_params_fn init_params,
                    xnn_pack_qs8_qc4w_gemm_fn pack, size_t mr, size_t nr,

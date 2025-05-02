@@ -220,6 +220,7 @@ SET(MICROKERNEL_GEMM_UNIT_TESTS
     pf32-gemm-minmax
     pqs8-qc8w-gemm-minmax
     qd8-f16-qb4w-gemm-minmax
+    qd8-bf16-qb4w-gemm-minmax
     qd8-f16-qc4w-gemm-minmax
     qd8-f16-qc8w-gemm-minmax
     qd8-f32-qb4w-gemm-minmax

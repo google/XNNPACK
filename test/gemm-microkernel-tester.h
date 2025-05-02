@@ -260,6 +260,10 @@ class GemmMicrokernelTester {
             xnn_init_f16_qb4w_minmax_params_fn init_params,
             xnn_pack_qs8_qb4w_gemm_fn pack) const;
 
+  void Test(xnn_qd8_bf16_qb4w_gemm_ukernel_fn gemm,
+            xnn_init_f32_qb4w_minmax_params_fn init_params,
+            xnn_pack_qs8_qb4w_gemm_fn pack) const;
+
   void Test(xnn_qd8_f32_qc4w_gemm_ukernel_fn gemm,
             xnn_init_f32_qc4w_minmax_params_fn init_params,
             xnn_pack_qs8_qc4w_gemm_fn pack) const;
