@@ -23,7 +23,7 @@ void xnn_f16_rdmax_ukernel_2p2x__neonfp16arith_c32(
     size_t input_stride,
     const xnn_float16* zero,
     xnn_float16* output,
-    const void* params) XNN_OOB_READS
+    const void* params)
 {
   assert(rows != 0);
   assert(channels != 0);
@@ -87,7 +87,7 @@ void xnn_f16_rdmax_ukernel_2p2x__neonfp16arith_c32(
       if (channels >= xnn_simd_size_f16) {
         vmax = xnn_loadu_f16(output);
       } else {
-        vmax = xnn_load_tail_safe_f16(output, channels);
+        vmax = xnn_load_tail_f16(output, channels);
       }
 
       for (int r = rows; r > 0; r -= 2) {
