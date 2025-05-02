@@ -100,7 +100,7 @@ extern "C" {
 /// Retain reduced dimensions with length 1.
 #define XNN_FLAG_KEEP_DIMS 0x00000040
 
-// Next unused flag value: 0x00000200.
+// Next unused flag value: 0x00000800.
 
 /// The number of entries in an array of xnn_quantization_params that XNNPACK may read beyond array bounds.
 /// The caller must allocate at least this many extra xnn_quantization_params before passing the array to XNNPACK.
@@ -3951,11 +3951,13 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_f16_qc4w(
   xnn_operator_t fully_connected_op,
   const int8_t* input,
   void* output,
+  void* workspace,
   const struct xnn_quantization_params* quantization_params);
 
 enum xnn_status xnn_reshape_fully_connected_nc_qd8_f16_qc4w(
   xnn_operator_t fully_connected_op,
   size_t batch_size,
+  size_t* workspace_size, 
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w(
@@ -3977,12 +3979,14 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w(
 enum xnn_status xnn_reshape_fully_connected_nc_qd8_f16_qb4w(
     xnn_operator_t fully_connected_op,
     size_t batch_size,
+    size_t* workspace_size, 
     pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_fully_connected_nc_qd8_f16_qb4w(
     xnn_operator_t fully_connected_op,
     const int8_t* input,
     void* output,
+    void* workspace,
     const struct xnn_quantization_params* quantization_params);
 
 enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qc4w(
@@ -4004,11 +4008,13 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_f32_qc4w(
   xnn_operator_t fully_connected_op,
   const int8_t* input,
   float* output,
+  void* workspace,
   const struct xnn_quantization_params* quantization_params);
 
 enum xnn_status xnn_reshape_fully_connected_nc_qd8_f32_qc4w(
   xnn_operator_t fully_connected_op,
   size_t batch_size,
+  size_t* workspace_size, 
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w(
@@ -4030,12 +4036,14 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w(
 enum xnn_status xnn_reshape_fully_connected_nc_qd8_f32_qb4w(
   xnn_operator_t fully_connected_op,
   size_t batch_size,
+  size_t* workspace_size, 
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_fully_connected_nc_qd8_f32_qb4w(
   xnn_operator_t fully_connected_op,
   const int8_t* input,
   float* output,
+  void* workspace,
   const struct xnn_quantization_params* quantization_params);
 
 enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qc8w(
@@ -4056,11 +4064,13 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_f16_qc8w(
   xnn_operator_t fully_connected_op,
   const int8_t* input,
   void* output,
+  void* workspace,
   const struct xnn_quantization_params* quantization_params);
 
 enum xnn_status xnn_reshape_fully_connected_nc_qd8_f16_qc8w(
   xnn_operator_t fully_connected_op,
   size_t batch_size,
+  size_t* workspace_size, 
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qc8w(
@@ -4081,11 +4091,13 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_f32_qc8w(
   xnn_operator_t fully_connected_op,
   const int8_t* input,
   float* output,
+  void* workspace,
   const struct xnn_quantization_params* quantization_params);
 
 enum xnn_status xnn_reshape_fully_connected_nc_qd8_f32_qc8w(
   xnn_operator_t fully_connected_op,
   size_t batch_size,
+  size_t* workspace_size, 
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_create_fully_connected_nc_qs8(
