@@ -64,7 +64,7 @@ void xnn_f16_avgpool_minmax_ukernel_9p__f16c_u8(
     xnn_float16* output,
     size_t input_increment,
     size_t output_increment,
-    const struct xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(output_pixels != 0);
   assert(channels != 0);
