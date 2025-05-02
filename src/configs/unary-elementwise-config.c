@@ -244,7 +244,7 @@ static void init_f16_exp_config(void) {
   f16_exp_config.ukernel = (xnn_vunary_ukernel_fn)xnn_f16_vexp_ukernel__scalar_poly_3_u4;
 #endif
 }
-  
+
 static void init_f16_gelu_config(void) {
 #if (XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR) || \
     (XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR)
@@ -731,7 +731,7 @@ static void init_f32_cosine_config(void) {
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
       if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-        f32_cosine_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vcos_ukernel__avx512f_rational_5_4_nr_u16;
+        f32_cosine_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vcos_ukernel__avx512f_rational_5_4_div_u32;
       } else
     #endif
     if (hardware_config->use_x86_fma3) {
@@ -1445,7 +1445,7 @@ static void init_f32_sine_config(void) {
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
       if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-        f32_sine_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsin_ukernel__avx512f_rational_5_4_nr_u16;
+        f32_sine_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsin_ukernel__avx512f_rational_5_4_div_u32;
       } else
     #endif
     if (hardware_config->use_x86_fma3) {
@@ -1495,7 +1495,7 @@ static void init_f32_tanh_config(void) {
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
       if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-        f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__avx512f_rational_9_8_nr_u16;
+        f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__avx512f_rational_9_8_div_u32;
       } else
     #endif
     if (hardware_config->use_x86_fma3) {
