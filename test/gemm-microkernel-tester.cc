@@ -9,7 +9,6 @@
 #include <functional>
 #include <limits>
 #include <random>
-#include <stdio.h>
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
@@ -1776,12 +1775,11 @@ void GemmMicrokernelTester::Test(xnn_qd8_bf16_qb4w_gemm_ukernel_fn gemm,
   }
 
   std::generate(b.begin(), b.end(), std::ref(w8rng));
-  // std::generate(bias.begin(), bias.end(), std::ref(f32rng));
+  std::generate(bias.begin(), bias.end(), std::ref(f32rng));
   std::generate(kernel_scale2d.begin(), kernel_scale2d.end(),
                 [&]() { return scalerng(); });
 
   std::fill(packed_w.begin(), packed_w.end(), 0);
-  std::fill(bias.begin(), bias.end(), 2);
   // Row sums are multiplied by input zero point, since we don't know it
   // until runtime, set it to 1.
   const xnn_qs8_qc4w_packing_params packing_params = {/*input_zero_point=*/1,
@@ -1857,7 +1855,7 @@ void GemmMicrokernelTester::Test(xnn_qd8_bf16_qb4w_gemm_ukernel_fn gemm,
 
   for (size_t i = 0; i < m(); i++) {
     for (size_t j = 0; j < n(); j++) {
-      ASSERT_NEAR(c[i * cm_stride() + j], c_ref[i * n() + j], 
+      ASSERT_NEAR(xnn_bfloat16_to_float(c[i * cm_stride() + j]), c_ref[i * n() + j], 
                   std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 3.0e-2f))
           << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
           << ", optimized = " << (float)c[i * cm_stride() + j]

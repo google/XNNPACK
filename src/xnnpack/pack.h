@@ -290,6 +290,13 @@ XNN_INTERNAL size_t xnn_packed_stride_qb4_weights_and_biases(
     size_t k_stride,                            //
     size_t extra_bytes);
 
+XNN_INTERNAL size_t xnn_packed_stride_qb4_weights_and_bf16_biases(
+    const struct xnn_gemm_config* gemm_config,  //
+    size_t k,                                   //
+    size_t block_size,                          //
+    size_t k_stride,                            //
+    size_t extra_bytes);
+
 XNN_INTERNAL void xnn_pack_qu8_weights_and_biases(
     uint32_t flags,                                //
     const struct xnn_gemm_config* gemm_config,     //

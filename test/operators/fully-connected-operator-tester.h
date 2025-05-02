@@ -625,6 +625,169 @@ class FullyConnectedOperatorTester {
     }
   }
 
+  void TestQD8BF16QB4W() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    std::uniform_real_distribution<float> f32dist(-1.f, 1.f);
+    std::uniform_real_distribution<float> f32idist(0.5f, 2.0f);
+    std::uniform_int_distribution<int32_t> w8dist(
+        std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+
+    const size_t k2 =
+        round_up_po2(input_channels(), 2);  // tester assumes byte aligned rows
+
+    xnnpack::Buffer<int8_t> input(
+        (batch_size() - 1) * input_stride() + input_channels(),
+        xnnpack::XnnExtraBytes);
+    const size_t kernel_stride = calc_kernel_stride();
+    xnnpack::Buffer<uint8_t> kernel(
+        (transpose_weights() ? k2 : output_channels()) * kernel_stride);
+    xnnpack::Buffer<xnn_bfloat16> bias(output_channels());
+    xnnpack::Buffer<xnn_bfloat16> output((batch_size() - 1) * output_stride() +
+                                        output_channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * output_channels());
+    xnnpack::Buffer<xnn_qd8_quantization_params> quantization_params(
+        batch_size() + XNN_EXTRA_QUANTIZATION_PARAMS);
+    size_t num_blocks = k2 / block_size();
+    xnnpack::Buffer<xnn_bfloat16> kernel_scale2d(output_channels() *
+                                                 num_blocks);
+
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
+      std::generate(input.begin(), input.end(), [&]() { return w8dist(rng); });
+      std::generate(kernel.begin(), kernel.end(),
+                    [&]() { return w8dist(rng); });
+      std::generate(bias.begin(), bias.end(), [&]() { return math_cvt_bf16_fp32(f32idist(rng)); });
+
+      std::generate(kernel_scale2d.begin(), kernel_scale2d.end(),
+                    [&]() { return math_cvt_bf16_fp32(f32dist(rng)); });
+      std::generate(
+          quantization_params.begin(), quantization_params.end(), [&]() {
+            return xnn_qd8_quantization_params{w8dist(rng), f32idist(rng)};
+          });
+      for (size_t i = batch_size();
+           i < batch_size() + XNN_EXTRA_QUANTIZATION_PARAMS; ++i) {
+        quantization_params[i].zero_point =
+            quantization_params[batch_size() - 1].zero_point;
+        quantization_params[i].inv_scale =
+            quantization_params[batch_size() - 1].inv_scale;
+      }
+
+      // Compute reference results, without renormalization.
+      std::fill(output_ref.begin(), output_ref.end(), 0.0f);
+
+      // TODO: Not supported right now.
+      assert(transpose_weights() == false);
+
+      for (size_t mi = 0; mi < batch_size(); mi++) {
+        for (size_t ni = 0; ni < output_channels(); ni++) {
+          float kfsum = 0.0;
+          for (size_t bi = 0; bi < num_blocks; bi++) {
+            int32_t ksum = 0;
+            int32_t c_ref_acc = 0;
+            for (size_t ki = 0; ki < block_size(); ki++) {
+              const size_t k_index = bi * block_size() + ki;
+              const size_t nb_index = (ni * k2 + k_index) / 2;
+              const int32_t kernel_value =
+                  int32_t((k_index % 2 == 0) ? (kernel[nb_index] & UINT8_C(0xF))
+                                             : (kernel[nb_index] >> 4)) -
+                  kernel_zero_point();
+              ksum += kernel_value;
+              c_ref_acc += int32_t(input[mi * input_stride() + k_index]) *
+                           static_cast<float>(kernel_value);
+            }
+            size_t scale_index = ni * num_blocks + bi;
+            float scale = xnn_bfloat16_to_float(kernel_scale2d[scale_index]);
+            output_ref[mi * output_channels() + ni] += c_ref_acc * scale;
+            kfsum += scale * ksum;
+          }
+          output_ref[mi * output_channels() + ni] -=
+              (quantization_params[mi].zero_point * kfsum);
+          output_ref[mi * output_channels() + ni] *=
+              quantization_params[mi].inv_scale;
+          if (has_bias()) {
+            output_ref[mi * output_channels() + ni] += xnn_bfloat16_to_float(bias[ni]);
+          }
+
+        }
+      }
+
+      // Compute clamping parameters.
+      const float accumulated_max =
+          *std::max_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_min =
+          *std::min_element(output_ref.cbegin(), output_ref.cend());
+
+      const float output_min =
+          qmin() == 0 ? -std::numeric_limits<float>::infinity()
+                      : accumulated_min + (accumulated_max - accumulated_min) /
+                                              255.0f * float(qmin());
+      const float output_max =
+          qmax() == 255
+              ? std::numeric_limits<float>::infinity()
+              : accumulated_max - (accumulated_max - accumulated_min) / 255.0f *
+                                      float(255 - qmax());
+
+      // Clamp reference results.
+      for (float& value : output_ref) {
+        value = std::max(std::min(value, output_max), output_min);
+      }
+
+      // Create, setup, run, and destroy Fully Connected operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+      xnn_operator_t fully_connected_op = nullptr;
+
+      struct xnn_internal_weights_cache* internal_weights_cache = nullptr;
+      std::unique_ptr<xnn_weights_cache_provider,
+                      decltype(&xnn_delete_weights_cache)>
+          auto_weights_cache(nullptr, xnn_delete_weights_cache);
+      if (use_weights_cache()) {
+        xnn_weights_cache_t weights_cache = nullptr;
+        xnn_create_weights_cache(&weights_cache);
+        auto_weights_cache.reset(weights_cache);
+        if (weights_cache) {
+          internal_weights_cache =
+              (struct xnn_internal_weights_cache*)weights_cache->context;
+        }
+      }
+
+      const xnn_status status = xnn_create_fully_connected_nc_qd8_bf16_qb4w(
+          input_channels(), output_channels(), input_stride(), output_stride(),
+          /* block_size= */ block_size(), kernel_zero_point(),
+          reinterpret_cast<uint16_t*>(kernel_scale2d.data()),
+          kernel.data(), has_bias() ? reinterpret_cast<uint16_t*>(bias.data()) : nullptr, output_min,
+          output_max, transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
+          nullptr, auto_weights_cache.get(), &fully_connected_op);
+      if (status == xnn_status_unsupported_hardware) {
+        GTEST_SKIP();
+      }
+
+      ASSERT_EQ(xnn_status_success, status);
+      ASSERT_NE(nullptr, fully_connected_op);
+
+      // Smart pointer to automatically delete fully_connected_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+          auto_fully_connected_op(fully_connected_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success, xnn_reshape_fully_connected_nc_qd8_bf16_qb4w(
+                                        fully_connected_op, batch_size(),
+                                        /*threadpool=*/nullptr));
+
+      ASSERT_EQ(xnn_status_success,
+                xnn_setup_fully_connected_nc_qd8_bf16_qb4w(
+                    fully_connected_op, input.data(), output.data(),
+                    reinterpret_cast<const struct xnn_quantization_params*>(
+                        quantization_params.data())));
+
+      ASSERT_EQ(xnn_status_success,
+                xnn_run_operator(fully_connected_op, /*threadpool=*/nullptr));
+
+      // Verify results.
+      VerifyBF16(output, output_ref, output_max, output_min);
+    }
+  }
+
   void TestQD8F32QC4W() const {
     ASSERT_EQ(weights_type(), WeightsType::Default);
 
@@ -4006,6 +4169,33 @@ class FullyConnectedOperatorTester {
             << "batch index = " << i << ", channel = " << c;
         const float tolerance = std::max(
             1e-4f, 1.0e-2f * std::abs(output_ref[i * output_channels() + c]));
+        ASSERT_NEAR(output_ref[i * output_channels() + c],
+                    output[i * output_stride() + c], tolerance)
+            << "batch index = " << i << ", channel = " << c;
+      }
+    }
+  }
+
+  void VerifyBF16(const xnnpack::Buffer<xnn_bfloat16>& output,
+                 const xnnpack::Buffer<float>& output_ref,
+                 const float output_max, const float output_min) const {
+    for (size_t i = 0; i < batch_size(); i++) {
+      for (size_t c = 0; c < output_channels(); c++) {
+        // FP16 overflows, it's the nature of the beast. If both reference and
+        // actual are infinity, then consider the output to be correct.
+        const bool reference_infinity =
+            std::isinf(output_ref[i * output_channels() + c]);
+        const bool actual_infinity =
+            std::isinf((float)output[i * output_stride() + c]);
+        if (reference_infinity && actual_infinity) {
+          continue;
+        }
+        ASSERT_LE(output[i * output_stride() + c], output_max)
+            << "batch index = " << i << ", channel = " << c;
+        ASSERT_GE(output[i * output_stride() + c], output_min)
+            << "batch index = " << i << ", channel = " << c;
+        const float tolerance = std::max(
+            1e-4f, 3.0e-2f * std::abs(output_ref[i * output_channels() + c]));
         ASSERT_NEAR(output_ref[i * output_channels() + c],
                     output[i * output_stride() + c], tolerance)
             << "batch index = " << i << ", channel = " << c;

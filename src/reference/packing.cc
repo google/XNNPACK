@@ -1792,6 +1792,26 @@ void xnn_pack_qs4_weights_and_biases(
       extra_data1_element_size, packed_weights_ptr, extra_bytes, params);
 }
 
+size_t xnn_packed_stride_qb4_weights_and_bf16_biases(
+    const struct xnn_gemm_config* gemm_config, size_t k, size_t block_size,
+    size_t k_stride, size_t extra_bytes) {
+  const size_t planes = gemm_config->planes;
+  size_t input_channels = round_up_po2(k, planes);
+
+  size_t block_scale_bytes = 0;
+  size_t num_blocks = 0;
+  const bool block_wise = (block_size != 0);
+  if (block_wise) {
+    num_blocks = input_channels / block_size;
+    block_scale_bytes += num_blocks * sizeof(uint16_t);
+  }
+
+  const size_t bias_element_size = sizeof(uint16_t);
+  const size_t log2_filter_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  return (k_stride << log2_filter_element_size) + bias_element_size +
+         extra_bytes + block_scale_bytes;
+}
+
 size_t xnn_packed_stride_qb4_weights_and_biases(
     const struct xnn_gemm_config* gemm_config, size_t k, size_t block_size,
     size_t k_stride, size_t extra_bytes) {
@@ -1868,10 +1888,10 @@ void xnn_pack_qb4_weights_and_biases(
   // fill in kernel scales
   const size_t num_blocks = input_channels / block_size;
   const size_t weights_stride = stride_fn(
-      gemm_config, input_channels, block_size, k_stride, extra_bytes_n);
+      gemm_config, input_channels, block_size, k_stride, /*ksum_size=*/sizeof(float));
   void* weights_start =
       (void*)((uintptr_t)packed_weights_ptr +
-              nr * (extra_bytes_n + (block_size * sizeof(int8_t) / 2)));
+              nr * (/*ksum_size=*/sizeof(float) + (block_size * sizeof(int8_t) / 2)));
 
   const size_t block_stride = /*weights*/ block_size / 2 + extra_data1_element_size;
   // Generalize this to use init_extra_data1_fn
@@ -1884,7 +1904,7 @@ void xnn_pack_qb4_weights_and_biases(
   // fill in bias if not null
   if (extra_data0 != nullptr) {
     weights_start = (void*)((uintptr_t)packed_weights_ptr +
-                            gemm_config->nr * (weights_stride - sizeof(float)));
+                            gemm_config->nr * (weights_stride - extra_data0_element_size));
     init_extra_data0_fn(
         output_channels, gemm_config->nr, gemm_config->nr * weights_stride,
         extra_data0, weights_start);
