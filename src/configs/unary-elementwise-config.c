@@ -651,7 +651,7 @@ static void init_f32_approxgelu_config(void) {
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
       if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-        f32_approxgelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vapproxgelu_ukernel__avx512f_rational_12_10_nr_u32;
+        f32_approxgelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vapproxgelu_ukernel__avx512f_rational_12_10_div_u32;
       } else
     #endif
     if (hardware_config->use_x86_fma3) {
@@ -857,7 +857,7 @@ static void init_f32_gelu_config(void) {
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
       if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-        f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__avx512f_rational_12_10_nr_u32;
+        f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__avx512f_rational_12_10_div_u32;
       } else
     #endif
     if (hardware_config->use_x86_fma3) {
