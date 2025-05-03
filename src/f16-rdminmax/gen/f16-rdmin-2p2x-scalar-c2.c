@@ -73,7 +73,7 @@ void xnn_f16_rdmin_ukernel_2p2x__scalar_c2(
       if (channels >= xnn_simd_size_f16) {
         vmin = xnn_loadu_f16(output);
       } else {
-        vmin = xnn_load_tail_f16(output, channels);
+        vmin = xnn_load_tail_safe_f16(output, channels);
       }
 
       for (int r = rows; r > 0; r -= 2) {

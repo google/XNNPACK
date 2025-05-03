@@ -92,9 +92,9 @@ void xnn_f16_rd${OP.lower()}_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__${ARCH}_c
           vmax = xnn_loadu_f16(output);
       } else {
         $if EMIT_MIN:
-          vmin = xnn_load_tail_f16(output, channels);
+          vmin = xnn_load_tail_safe_f16(output, channels);
         $if EMIT_MAX:
-          vmax = xnn_load_tail_f16(output, channels);
+          vmax = xnn_load_tail_safe_f16(output, channels);
       }
 
       for (int r = rows; r > 0; r -= ${ACCUMULATORS}) {
