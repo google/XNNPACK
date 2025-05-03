@@ -509,11 +509,11 @@ enum xnn_status create_batch_matrix_multiply_nc_qx8_f32_qc8w(
           /*accumulator_init=*/NULL,
           /*weights=*/data_b,
           /*int_extra_data0_fn=*/
-          (xnn_init_scale_params_fn)xnn_init_qs8_qc8w_scale_fp32_params,
+          (xnn_init_extra_data_params_fn)xnn_init_qs8_qc8w_scale_fp32_params,
           /*extra_data0=*/NULL,
           /*extra_data0_size=*/sizeof(float),
           /*init_extra_data1_fn=*/
-          (xnn_init_scale_params_fn)xnn_init_qs8_qc8w_scale_fp32_params,
+          (xnn_init_extra_data_params_fn)xnn_init_qs8_qc8w_scale_fp32_params,
           /*extra_data1=*/scale_b,
           /*extra_data1_size=*/sizeof(float),
           /*packed_weights_ptr=*/packed_data, &pack_gemm_params);
