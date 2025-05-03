@@ -18,17 +18,26 @@
 
 // arch_flags, ukernel, channel_tile, primary_tile, datatype, params_type, init_params
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_maxpool_minmax_ukernel_9p__sse2_u4, 4, 9, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_maxpool_minmax_ukernel_9p__neon_u4, 4, 9, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_maxpool_minmax_ukernel_9p__sse2_u4, 4, 9, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx, xnn_f32_maxpool_minmax_ukernel_9p__avx_u8, 8, 9, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_f32_maxpool_minmax_ukernel_9p__avx512f_u16, 16, 9, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_maxpool_minmax_ukernel_9p__wasmsimd_u4, 4, 9, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_maxpool_minmax_ukernel_9p__hvx_u32, 32, 9, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
 
 #if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_f32_maxpool_minmax_ukernel_9p__rvv_u1v, (1*xnn_init_hardware_config()->vlenb/sizeof(float)), 9, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)

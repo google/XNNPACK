@@ -19,6 +19,7 @@ PROD_AVX512F_MICROKERNEL_SRCS = [
     "src/f32-igemm/gen/f32-igemm-1x32-minmax-avx512f-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-7x16-minmax-avx512f-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-7x32-minmax-avx512f-broadcast.c",
+    "src/f32-maxpool/gen/f32-maxpool-9p-minmax-avx512f-u16.c",
     "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr2-p5-u64-acc2.c",
     "src/f32-rdminmax/gen/f32-rdmax-2p2x-avx512f-c32.c",
     "src/f32-rdminmax/gen/f32-rdmin-2p2x-avx512f-c32.c",
