@@ -1824,9 +1824,12 @@ void xnn_pack_qb4_weights_and_biases(
   const uint32_t nr = gemm_config->nr;
   const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
   const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
+  xnn_packed_stride_weights_and_biases_fn stride_fn = gemm_config->packed_stride_weights_and_biases;
 
-  const size_t extra_bytes_bl = sizeof(uint16_t);
-  const size_t extra_bytes_n = sizeof(uint32_t);
+  // scales
+  const size_t extra_bytes_bl = extra_data1_element_size;
+  // bias
+  const size_t extra_bytes_n = extra_data0_element_size;
   if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
     xnn_pack_qs8_qb4w_gemm_gio_w(
         /*g=*/groups,
@@ -1864,13 +1867,14 @@ void xnn_pack_qb4_weights_and_biases(
 
   // fill in kernel scales
   const size_t num_blocks = input_channels / block_size;
-  const size_t weights_stride = xnn_packed_stride_qb4_weights_and_biases(
+  const size_t weights_stride = stride_fn(
       gemm_config, input_channels, block_size, k_stride, extra_bytes_n);
   void* weights_start =
       (void*)((uintptr_t)packed_weights_ptr +
-              nr * (sizeof(float) + (block_size * sizeof(int8_t) / 2)));
+              nr * (extra_bytes_n + (block_size * sizeof(int8_t) / 2)));
 
-  const size_t block_stride = /*weights*/ block_size / 2 + sizeof(uint16_t);
+  const size_t block_stride = /*weights*/ block_size / 2 + extra_data1_element_size;
+  // Generalize this to use init_extra_data1_fn
   xnn_init_blockwise_scale_bf16_params(
       output_channels, nr, nr * weights_stride,
       /*num_blocks=*/num_blocks,
@@ -1878,12 +1882,12 @@ void xnn_pack_qb4_weights_and_biases(
       (const xnn_bfloat16*)extra_data1, weights_start);
 
   // fill in bias if not null
-  if (accumulator_init != nullptr) {
+  if (extra_data0 != nullptr) {
     weights_start = (void*)((uintptr_t)packed_weights_ptr +
                             gemm_config->nr * (weights_stride - sizeof(float)));
-    xnn_init_qs8_qc8w_scale_fp32_params(
+    init_extra_data0_fn(
         output_channels, gemm_config->nr, gemm_config->nr * weights_stride,
-        (const float*)accumulator_init, weights_start);
+        extra_data0, weights_start);
   }
 }
 

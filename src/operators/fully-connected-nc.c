@@ -1197,7 +1197,7 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qb4w(
     /*init_extra_data0=*/(xnn_init_extra_data_params_fn)xnn_init_qs8_qc8w_scale_fp32_params, 
     /*extra_data0=*/bias,
     /*extra_data0_size=*/sizeof(float),
-    /*init_extra_data1=*/(xnn_init_extra_data_params_fn)xnn_init_blockwise_scale_bf16_params, 
+    /*init_extra_data1=*/NULL, // blockwise scale init takes different args
     /*extra_data1=*/kernel_scale,
     /*extra_data1_size=*/sizeof(uint16_t),
     &params, sizeof(params),
