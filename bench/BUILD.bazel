@@ -538,7 +538,6 @@ xnnpack_benchmark(
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":bgemm",
         ":packw_benchmark",
-        "//:allocator",
     ],
 )
 

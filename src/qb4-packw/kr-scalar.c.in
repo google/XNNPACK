@@ -9,6 +9,7 @@ $assert KR > 1
 #include <stddef.h>
 #include <stdint.h>
 
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/packw.h"
 
 static XNN_INTRINSIC void xnn_packed2planar(
@@ -18,10 +19,10 @@ static XNN_INTRINSIC void xnn_packed2planar(
   int32_t vkernel_zero_point)
 {
   $for K_I in range(0, KR, 4):
-    const uint32_t s_v${K_I//4} = (((uint32_t*)weights)[${K_I//4}] ^ vkernel_zero_point);
+    const uint32_t s_v${K_I//4} = (((const uint32_t*)weights)[${K_I//4}] ^ vkernel_zero_point);
     $for K in range(0, 4):
-      const int8_t v${2*(K_I+K)} = (((int8_t*)&s_v${K_I//4}))[${K}] << 4;
-      const int8_t v${2*(K_I+K)+1} = (((int8_t*)&s_v${K_I//4}))[${K}] & 0xF0;
+      const int8_t v${2*(K_I+K)} = (((const int8_t*)&s_v${K_I//4}))[${K}] << 4;
+      const int8_t v${2*(K_I+K)+1} = (((const int8_t*)&s_v${K_I//4}))[${K}] & 0xF0;
 
   $for K in range(0, 2*KR):
     (*ksum) += (int32_t) (v${K});
@@ -44,7 +45,7 @@ void xnn_qb4_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
   int8_t* packed_weights,
   size_t extra_bytes_bl,
   size_t extra_bytes_n,
-  const void* params)
+  const void* params) XNN_OOB_READS
 {
   assert(g != 0);
   assert(nc != 0);

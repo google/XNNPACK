@@ -6,6 +6,8 @@ Auto-generated file. Do not edit!
 """
 
 PROD_NEONDOT_AARCH64_MICROKERNEL_SRCS = [
+    "src/qb4-packw/gen/qb4-packw-x16c4-gemm-goi-aarch64-neondot.c",
+    "src/qb4-packw/gen/qb4-packw-x16c8-gemm-goi-aarch64-neondot.c",
     "src/qp8-f32-qb4w-gemm/qp8-f32-qb4w-gemm-minmax-1x4c16s2-aarch64-neondot.c",
     "src/qp8-f32-qb4w-gemm/qp8-f32-qb4w-gemm-minmax-1x8c16s2-aarch64-neondot.c",
     "src/qp8-f32-qc4w-gemm/qp8-f32-qc4w-gemm-minmax-1x4c8s2-aarch64-neondot.c",

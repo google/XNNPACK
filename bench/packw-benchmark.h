@@ -158,12 +158,15 @@ static void qb4_packw(benchmark::State& state,
   const size_t dim_n = state.range(2);  // dim_n is nc parameter
   const size_t dim_k = round_up(state.range(3), bl);  // dim_k is kc parameter
 
-  const size_t rounded_n = benchmark::utils::RoundUp(dim_n, nr);
-  const size_t rounded_k = benchmark::utils::RoundUp(dim_k, 2 * kr * sr);
-  const size_t num_block_total = (rounded_k / bl) * rounded_n;
-  const size_t rounded_size =
-      rounded_n * rounded_k + rounded_n * sizeof(uint32_t) +
-      rounded_n * sizeof(float) + num_block_total * sizeof(uint16_t);
+  const size_t k2 = round_up_po2(dim_k, 2);  // tester assumes byte aligned rows
+  size_t rounded_k2 = round_up_po2(k2, kr * sr * 2);
+  const size_t rounded_n = round_up_po2(dim_n, nr);
+
+  const size_t num_blocks = (rounded_k2 / bl); 
+  const size_t rounded_k_bytes = (rounded_k2 + 1);
+  const size_t rounded_size = rounded_n * (
+    rounded_k_bytes + sizeof(float) + num_blocks * sizeof(uint16_t) + sizeof(float)
+  );
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
@@ -173,18 +176,18 @@ static void qb4_packw(benchmark::State& state,
       1 +
       benchmark::utils::DivideRoundUp<size_t>(
           benchmark::utils::GetMaxCacheSize(),
-          sizeof(int8_t) * batch * ((dim_n * dim_k + 1) / 2 + rounded_size));
+          sizeof(int8_t) * batch * ((dim_n * dim_k + 1) / 2 + batch * rounded_size));
 
   xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> weights(
-      num_buffers * batch * (dim_n * dim_k + 1) / 2);
+      num_buffers * ((batch * (dim_n * dim_k+1)/2) + XNN_EXTRA_BYTES));
   xnnpack::fill_uniform_random_bits(weights.data(), weights.size(), rng);
   xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_weights(
       num_buffers * batch * rounded_size);
   xnnpack::Buffer<int32_t, XNN_ALLOCATION_ALIGNMENT> bias(num_buffers * batch *
-                                                          dim_n);
+                                                          rounded_n);
   xnnpack::fill_uniform_random_bits(bias.data(), bias.size(), rng);
   xnnpack::Buffer<xnn_bfloat16, XNN_ALLOCATION_ALIGNMENT> bf16_scales(
-      num_block_total * batch * num_buffers);
+      num_buffers * dim_n * num_blocks * batch);
   xnnpack::fill_uniform_random_bits(bf16_scales.data(), bf16_scales.size(),
                                     rng);
 
@@ -192,19 +195,16 @@ static void qb4_packw(benchmark::State& state,
 
   size_t buffer_index = 0;
   for (auto _ : state) {
-    if (++buffer_index == num_buffers) {
-      buffer_index = 0;
-    }
+    buffer_index = (buffer_index + 1) % num_buffers;
     int32_t* bias_ptr =
         null_bias
             ? nullptr
-            : bias.data() + (buffer_index * batch * dim_n) * sizeof(uint32_t);
+            : bias.data() + (buffer_index * batch * dim_n);
 
     packw(batch, dim_n, dim_k, nr, kr, sr, bl,
-          weights.data() + buffer_index * batch * (dim_n * dim_k + 1) / 2,
+          weights.data() + buffer_index * (batch * (dim_n * dim_k + 1) / 2),
           /*bias=*/bias_ptr,
-          /*scale=*/bf16_scales.data() +
-              (buffer_index * batch * dim_n) * sizeof(uint16_t),
+          /*scale=*/bf16_scales.data() + (buffer_index * batch * dim_n * num_blocks),
           packed_weights.data() + buffer_index * batch * rounded_size,
           /*extra_bytes_bl=*/sizeof(uint16_t) * nr, sizeof(float) * nr,
           &packing_params);
