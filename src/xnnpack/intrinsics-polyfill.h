@@ -401,30 +401,6 @@ static XNN_INTRINSIC HVX_Vector Q6_Vw_vmpyie_VwVh(HVX_Vector multiplier_lo,
   return vout;
 }
 
-// Horizontal vector sum by pairwise addition.
-// To calculate fewer elements than the full 128 bytes in 'vin',
-// use the following code first before calling the intrinsic:
-//   vin = Q6_V_vand_QV(Q6_Q_vsetq_R(batch), vin);
-// where 'batch' is equal to 'elements * sizeof(float)'
-static XNN_INTRINSIC float Q6_f32_vrsum_Vsf(HVX_Vector vin) {
-  HVX_VectorPair vsum_pair = Q6_W_vshuff_VVR(vin, vin, 64);
-  vin = Q6_Vsf_vadd_VsfVsf(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
-  vsum_pair = Q6_W_vshuff_VVR(vin, vin, 32);
-  vin = Q6_Vsf_vadd_VsfVsf(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
-  vsum_pair = Q6_W_vshuff_VVR(vin, vin, 16);
-  vin = Q6_Vsf_vadd_VsfVsf(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
-  vsum_pair = Q6_W_vshuff_VVR(vin, vin, 8);
-  vin = Q6_Vsf_vadd_VsfVsf(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
-  vsum_pair = Q6_W_vshuff_VVR(vin, vin, 4);
-  vin = Q6_Vsf_vadd_VsfVsf(Q6_V_lo_W(vsum_pair), Q6_V_hi_W(vsum_pair));
-
-  return *((float*)&vin);
-}
-
 // DIV implementation using Newton-Raphson reciprocal approximation
 // Implementation comes from Halide project
 // a/b = a * fast_inverse__vsf(b)
@@ -481,4 +457,5 @@ static XNN_INTRINSIC HVX_Vector Q6_Vsf_vdiv_VsfVsf(HVX_Vector vin1,
   return Q6_Vsf_equals_Vqf32(
       Q6_Vqf32_vmpy_VsfVsf(vin1, fast_inverse__vsf(vin2)));
 }
+
 #endif  // XNN_ARCH_HEXAGON

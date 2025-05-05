@@ -14,11 +14,12 @@
 extern "C" {
 #endif
 
-#define DECLARE_F32_ARGMAXPOOL_UKERNEL_FUNCTION(fn_name)             \
-  XNN_INTERNAL void fn_name(                                         \
-      size_t output_pixels, size_t kernel_elements, size_t channels, \
-      const float** input, size_t input_offset, float* output,       \
-      uint32_t* index, size_t input_increment, size_t output_increment);
+#define DECLARE_F32_ARGMAXPOOL_UKERNEL_FUNCTION(fn_name)                   \
+  XNN_INTERNAL void fn_name(                                               \
+      size_t output_pixels, size_t kernel_elements, size_t channels,       \
+      const float** input, size_t input_offset, size_t input_pixel_stride, \
+      float* output, uint32_t* index, size_t input_increment,              \
+      size_t output_increment, size_t index_increment);
 
 DECLARE_F32_ARGMAXPOOL_UKERNEL_FUNCTION(
     xnn_f32_argmaxpool_ukernel_9p8x__neon_c4)

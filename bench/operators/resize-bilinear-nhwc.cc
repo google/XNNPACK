@@ -28,8 +28,8 @@ static void xnnpack_resize_bilinear(benchmark::State& state) {
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
 
-  xnnpack::Buffer<T> input(in_height * in_width * channels +
-                           XNN_EXTRA_BYTES / sizeof(T));
+  xnnpack::Buffer<T> input(in_height * in_width * channels,
+                           xnnpack::XnnExtraBytes);
   xnnpack::Buffer<T> output(out_height * out_width * channels);
 
   xnnpack::fill_uniform_random_bits(input.data(), input.size(), rng);

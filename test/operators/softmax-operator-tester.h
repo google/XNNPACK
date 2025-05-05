@@ -107,12 +107,12 @@ class SoftMaxOperatorTester {
     // exp doesn't overflow.
     std::uniform_real_distribution<float> f32dist(15.0f, 20.0f);
 
-    xnnpack::Buffer<xnn_float16> input((batch_size() - 1) * input_stride() +
-                                       channels() +
-                                       XNN_EXTRA_BYTES / sizeof(xnn_float16));
-    xnnpack::Buffer<xnn_float16> output((batch_size() - 1) * output_stride() +
-                                        channels() +
-                                        XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    xnnpack::Buffer<xnn_float16> input(
+        (batch_size() - 1) * input_stride() + channels(),
+        xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<xnn_float16> output(
+        (batch_size() - 1) * output_stride() + channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
@@ -177,10 +177,12 @@ class SoftMaxOperatorTester {
     // exp doesn't overflow.
     std::uniform_real_distribution<float> f32dist(90.0f, 100.0f);
 
-    xnnpack::Buffer<float> input((batch_size() - 1) * input_stride() +
-                                 channels() + XNN_EXTRA_BYTES / sizeof(float));
-    xnnpack::Buffer<float> output((batch_size() - 1) * output_stride() +
-                                  channels() + XNN_EXTRA_BYTES / sizeof(float));
+    xnnpack::Buffer<float> input(
+        (batch_size() - 1) * input_stride() + channels(),
+        xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<float> output(
+        (batch_size() - 1) * output_stride() + channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<double> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });

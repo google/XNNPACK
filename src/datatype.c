@@ -88,6 +88,26 @@ bool xnn_datatype_is_quantized(enum xnn_datatype t) {
   return false;
 }
 
+bool xnn_datatype_is_channelwise_quantized(enum xnn_datatype t) {
+  switch (t) {
+    case xnn_datatype_qcint8:
+    case xnn_datatype_qcint32:
+    case xnn_datatype_qcint4:
+      return true;
+    default:
+      return false;
+  }
+}
+
+bool xnn_datatype_is_blockwise_quantized(enum xnn_datatype t) {
+  switch (t) {
+    case xnn_datatype_qbint4:
+      return true;
+    default: return false;
+      return false;
+  }
+}
+
 
 size_t xnn_datatype_log2_size_bits(enum xnn_datatype t) {
   switch (t) {

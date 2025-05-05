@@ -104,14 +104,14 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4v__rvv(
         const int32_t va3 = (int32_t) *a3++;
 
         const vint8m1_t vb = __riscv_vle8_v_i8m1((const int8_t*) w, vl);
-        const vint16m2_t vb0 = __riscv_vsext_vf2(vb, vl);
+        const vint32m4_t vb0 = __riscv_vsext_vf4(vb, vl);
 
         w = (const void*) ((const int8_t*) w + nr);
 
-        vacc0 = __riscv_vwmacc_vx_i32m4(vacc0, va0, vb0, vl);
-        vacc1 = __riscv_vwmacc_vx_i32m4(vacc1, va1, vb0, vl);
-        vacc2 = __riscv_vwmacc_vx_i32m4(vacc2, va2, vb0, vl);
-        vacc3 = __riscv_vwmacc_vx_i32m4(vacc3, va3, vb0, vl);
+        vacc0 = __riscv_vmacc_vx_i32m4(vacc0, va0, vb0, vl);
+        vacc1 = __riscv_vmacc_vx_i32m4(vacc1, va1, vb0, vl);
+        vacc2 = __riscv_vmacc_vx_i32m4(vacc2, va2, vb0, vl);
+        vacc3 = __riscv_vmacc_vx_i32m4(vacc3, va3, vb0, vl);
 
         k -= sizeof(int8_t);
       } while (k != 0);
@@ -139,17 +139,15 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4v__rvv(
     vfpacc1 = __riscv_vfmin_vf_f32m4(vfpacc1, output_max_less_zero_point, vl);
     vfpacc2 = __riscv_vfmin_vf_f32m4(vfpacc2, output_max_less_zero_point, vl);
     vfpacc3 = __riscv_vfmin_vf_f32m4(vfpacc3, output_max_less_zero_point, vl);
+    vfpacc0 = __riscv_vfadd_vf_f32m4(vfpacc0, output_zero_point, vl);
+    vfpacc1 = __riscv_vfadd_vf_f32m4(vfpacc1, output_zero_point, vl);
+    vfpacc2 = __riscv_vfadd_vf_f32m4(vfpacc2, output_zero_point, vl);
+    vfpacc3 = __riscv_vfadd_vf_f32m4(vfpacc3, output_zero_point, vl);
 
     vint16m2_t vout0 = __riscv_vfncvt_x(vfpacc0, vl);
     vint16m2_t vout1 = __riscv_vfncvt_x(vfpacc1, vl);
     vint16m2_t vout2 = __riscv_vfncvt_x(vfpacc2, vl);
     vint16m2_t vout3 = __riscv_vfncvt_x(vfpacc3, vl);
-
-    vout0 = __riscv_vadd_vx_i16m2(vout0, (int16_t) output_zero_point, vl);
-    vout1 = __riscv_vadd_vx_i16m2(vout1, (int16_t) output_zero_point, vl);
-    vout2 = __riscv_vadd_vx_i16m2(vout2, (int16_t) output_zero_point, vl);
-    vout3 = __riscv_vadd_vx_i16m2(vout3, (int16_t) output_zero_point, vl);
-
     vint8m1_t vout80 = __riscv_vncvt_x_x_w_i8m1(vout0, vl);
     vint8m1_t vout81 = __riscv_vncvt_x_x_w_i8m1(vout1, vl);
     vint8m1_t vout82 = __riscv_vncvt_x_x_w_i8m1(vout2, vl);

@@ -49,7 +49,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x4v__rvv(
     nc = nc - vl;
 
     vint32m4_t vacc0 = __riscv_vle32_v_i32m4((const int32_t*)w, vl);
- 
+
     w = (const int32_t*) w + nr;
 
     size_t k = kc;
@@ -57,15 +57,15 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x4v__rvv(
       const int32_t va0 = (int32_t) *a0++;
 
       const vint8m1_t vb = __riscv_vle8_v_i8m1((const int8_t*) w, vl);
-      const vint16m2_t vb0 = __riscv_vsext_vf2(vb, vl);
+      const vint32m4_t vb0 = __riscv_vsext_vf4(vb, vl);
 
       w = (const int8_t*) w + nr;
 
-      vacc0 = __riscv_vwmacc_vx_i32m4(vacc0, va0, vb0, vl);
+      vacc0 = __riscv_vmacc_vx_i32m4(vacc0, va0, vb0, vl);
 
       k -= sizeof(int8_t);
     } while (k != 0);
- 
+
     vfloat32m4_t vfacc0 = __riscv_vfcvt_f_x_v_f32m4(vacc0, vl);
 
     const vfloat32m4_t vscale = __riscv_vle32_v_f32m4((const float*) w, vl);

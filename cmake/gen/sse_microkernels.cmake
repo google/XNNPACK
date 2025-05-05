@@ -49,9 +49,7 @@ SET(PROD_SSE_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vsqrdiffc-sse-u8.c
   src/f32-vbinary/gen/f32-vsub-sse-u8.c
   src/f32-vbinary/gen/f32-vsubc-sse-u8.c
-  src/f32-vclamp/gen/f32-vclamp-sse-u8.c
   src/f32-vcmul/gen/f32-vcmul-sse-u8.c
-  src/f32-vhswish/gen/f32-vhswish-sse-u8.c
   src/f32-vlrelu/gen/f32-vlrelu-sse-u8.c
   src/f32-vmulcaddc/gen/f32-vmulcaddc-c4-minmax-sse-2x.c
   src/f32-vrsqrt/gen/f32-vrsqrt-sse-rsqrt-u8.c
@@ -192,15 +190,11 @@ SET(NON_PROD_SSE_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vsqrdiffc-sse-u4.c
   src/f32-vbinary/gen/f32-vsub-sse-u4.c
   src/f32-vbinary/gen/f32-vsubc-sse-u4.c
-  src/f32-vclamp/gen/f32-vclamp-sse-u4.c
   src/f32-vcmul/gen/f32-vcmul-sse-u4.c
   src/f32-vcmul/gen/f32-vcmul-sse-u12.c
   src/f32-vcmul/gen/f32-vcmul-sse-u16.c
-  src/f32-vhswish/gen/f32-vhswish-sse-u4.c
   src/f32-vlrelu/gen/f32-vlrelu-sse-u4.c
   src/f32-vmulcaddc/gen/f32-vmulcaddc-c8-minmax-sse-2x.c
-  src/f32-vrelu/gen/f32-vrelu-sse-u4.c
-  src/f32-vrelu/gen/f32-vrelu-sse-u8.c
   src/f32-vrsqrt/gen/f32-vrsqrt-sse-rsqrt-u4.c
   src/f32-vrsqrt/gen/f32-vrsqrt-sse-rsqrt-u16.c
   src/f32-vsqrt/gen/f32-vsqrt-sse-rsqrt-u4.c

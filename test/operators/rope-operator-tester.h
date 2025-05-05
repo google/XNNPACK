@@ -74,11 +74,10 @@ class RoPEOperatorTester {
     std::uniform_real_distribution<float> f32rdist(1.0f, 10.0f);
     std::uniform_real_distribution<float> f32idist(0.01f, 0.1f);
 
-    xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
-                                       batch_size() * tokens() * heads() *
-                                           channels());
-    xnnpack::Buffer<xnn_float16> weights(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
-                                         tokens() * channels());
+    xnnpack::Buffer<xnn_float16> input(
+        batch_size() * tokens() * heads() * channels(), xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<xnn_float16> weights(tokens() * channels(),
+                                         xnnpack::XnnExtraBytes);
     xnnpack::Buffer<xnn_float16> output(batch_size() * tokens() * heads() *
                                         channels());
     xnnpack::Buffer<float> output_ref(batch_size() * tokens() * heads() *
@@ -188,11 +187,10 @@ class RoPEOperatorTester {
     std::uniform_real_distribution<float> f32rdist(1.0f, 10.0f);
     std::uniform_real_distribution<float> f32idist(0.01f, 0.1f);
 
-    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
-                                 batch_size() * tokens() * heads() *
-                                     channels());
-    xnnpack::Buffer<float> weights(XNN_EXTRA_BYTES / sizeof(float) +
-                                   tokens() * channels());
+    xnnpack::Buffer<float> input(batch_size() * tokens() * heads() * channels(),
+                                 xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<float> weights(tokens() * channels(),
+                                   xnnpack::XnnExtraBytes);
     xnnpack::Buffer<float> output(batch_size() * tokens() * heads() *
                                   channels());
     xnnpack::Buffer<double> output_ref(batch_size() * tokens() * heads() *

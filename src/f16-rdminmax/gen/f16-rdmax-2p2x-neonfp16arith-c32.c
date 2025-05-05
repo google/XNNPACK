@@ -23,7 +23,7 @@ void xnn_f16_rdmax_ukernel_2p2x__neonfp16arith_c32(
     size_t input_stride,
     const xnn_float16* zero,
     xnn_float16* output,
-    const void* params) XNN_OOB_READS
+    const void* params)
 {
   assert(rows != 0);
   assert(channels != 0);

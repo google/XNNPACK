@@ -7,6 +7,8 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <random>
+#include <tuple>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -61,6 +63,7 @@ std::tuple<Tensor<T>, Tensor<int32_t>> ReferenceImpl(Tensor<T> input,
 template <typename T>
 void TestImpl() {
   ReplicableRandomDevice rng;
+  std::bernoulli_distribution bool_dist(0.5);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
@@ -73,13 +76,22 @@ void TestImpl() {
     kw.stride = kw.size;
     kh.stride = kh.size;
 
+    const bool same_padding = bool_dist(rng);
+
+    uint32_t flags = 0;
+    if (same_padding) {
+      flags |= XNN_FLAG_TENSORFLOW_SAME_PADDING;
+      kw.padding_min = kw.padding_max = 0;
+      kh.padding_min = kh.padding_max = 0;
+    }
+
     // Define subgraph
     SubgraphTester subgraph(3);
     subgraph.AddInputTensor(4, xnn_datatype_of<T>(), 0)
         .AddOutputTensor(4, xnn_datatype_of<T>(), 1)
         .AddOutputTensor(4, xnn_datatype_int32, 2)
         .AddArgMaxPooling2D(kh.padding_min, kw.padding_max, kh.padding_max,
-                            kw.padding_min, kh.size, kw.size, 0, 1, 2);
+                            kw.padding_min, kh.size, kw.size, 0, 1, 2, flags);
     xnn_status status = subgraph.CreateRuntime();
     if (status == xnn_status_unsupported_hardware) {
       GTEST_SKIP();
@@ -91,10 +103,15 @@ void TestImpl() {
 
       std::vector<size_t> input_shape = {
           output_shape[0],
-          kh.input_extent(output_shape[1]),
-          kw.input_extent(output_shape[2]),
+          kh.input_extent(output_shape[1], same_padding),
+          kw.input_extent(output_shape[2], same_padding),
           output_shape[3],
       };
+
+      if (same_padding) {
+        kh.compute_tf_same_padding(input_shape[1]);
+        kw.compute_tf_same_padding(input_shape[2]);
+      }
 
       // TODO(b/404587443): Fix XNNPACK's pooling implementation so this hack is
       // not necessary.
@@ -103,7 +120,7 @@ void TestImpl() {
         continue;
       }
 
-      Tensor<T> input(input_shape, PaddingBytes{XNN_EXTRA_BYTES});
+      Tensor<T> input(input_shape, XnnExtraBytes);
       DatatypeGenerator<T> gen(-10.0f, 20.0f);
       input.generate([&]() { return gen(rng); });
 

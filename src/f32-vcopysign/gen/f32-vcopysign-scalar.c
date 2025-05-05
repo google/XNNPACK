@@ -68,21 +68,21 @@ void xnn_f32_vcopysign_ukernel__scalar_u2(
   XNN_SIMD_CONST_F32(vsign_mask, -0.f);
 
   for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
-    xnn_simd_f32_t vsign_0 = xnn_loadu_f32(sign);
+    xnn_simd_f32_t vsign_0 = xnn_loadu_f32(sign + 0 * xnn_simd_size_f32);
     xnn_simd_f32_t vsign_1 = xnn_loadu_f32(sign + 1 * xnn_simd_size_f32);
     sign += 2;
 
     vsign_0 = xnn_and_f32(vsign_0, vsign_mask);
     vsign_1 = xnn_and_f32(vsign_1, vsign_mask);
 
-    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag));
+    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag + 0 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_1 = xnn_abs_f32(xnn_loadu_f32(mag + 1 * xnn_simd_size_f32));
     mag += 2;
 
     xnn_simd_f32_t vy_0 = xnn_or_f32(vsign_0, vmag_0);
     xnn_simd_f32_t vy_1 = xnn_or_f32(vsign_1, vmag_1);
 
-    xnn_storeu_f32(output, vy_0);
+    xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
     output += 2;
   }
@@ -119,7 +119,7 @@ void xnn_f32_vcopysign_ukernel__scalar_u4(
   XNN_SIMD_CONST_F32(vsign_mask, -0.f);
 
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
-    xnn_simd_f32_t vsign_0 = xnn_loadu_f32(sign);
+    xnn_simd_f32_t vsign_0 = xnn_loadu_f32(sign + 0 * xnn_simd_size_f32);
     xnn_simd_f32_t vsign_1 = xnn_loadu_f32(sign + 1 * xnn_simd_size_f32);
     xnn_simd_f32_t vsign_2 = xnn_loadu_f32(sign + 2 * xnn_simd_size_f32);
     xnn_simd_f32_t vsign_3 = xnn_loadu_f32(sign + 3 * xnn_simd_size_f32);
@@ -130,7 +130,7 @@ void xnn_f32_vcopysign_ukernel__scalar_u4(
     vsign_2 = xnn_and_f32(vsign_2, vsign_mask);
     vsign_3 = xnn_and_f32(vsign_3, vsign_mask);
 
-    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag));
+    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag + 0 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_1 = xnn_abs_f32(xnn_loadu_f32(mag + 1 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_2 = xnn_abs_f32(xnn_loadu_f32(mag + 2 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_3 = xnn_abs_f32(xnn_loadu_f32(mag + 3 * xnn_simd_size_f32));
@@ -141,7 +141,7 @@ void xnn_f32_vcopysign_ukernel__scalar_u4(
     xnn_simd_f32_t vy_2 = xnn_or_f32(vsign_2, vmag_2);
     xnn_simd_f32_t vy_3 = xnn_or_f32(vsign_3, vmag_3);
 
-    xnn_storeu_f32(output, vy_0);
+    xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
     xnn_storeu_f32(output + 2 * xnn_simd_size_f32, vy_2);
     xnn_storeu_f32(output + 3 * xnn_simd_size_f32, vy_3);
@@ -180,7 +180,7 @@ void xnn_f32_vcopysign_ukernel__scalar_u8(
   XNN_SIMD_CONST_F32(vsign_mask, -0.f);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    xnn_simd_f32_t vsign_0 = xnn_loadu_f32(sign);
+    xnn_simd_f32_t vsign_0 = xnn_loadu_f32(sign + 0 * xnn_simd_size_f32);
     xnn_simd_f32_t vsign_1 = xnn_loadu_f32(sign + 1 * xnn_simd_size_f32);
     xnn_simd_f32_t vsign_2 = xnn_loadu_f32(sign + 2 * xnn_simd_size_f32);
     xnn_simd_f32_t vsign_3 = xnn_loadu_f32(sign + 3 * xnn_simd_size_f32);
@@ -199,7 +199,7 @@ void xnn_f32_vcopysign_ukernel__scalar_u8(
     vsign_6 = xnn_and_f32(vsign_6, vsign_mask);
     vsign_7 = xnn_and_f32(vsign_7, vsign_mask);
 
-    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag));
+    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag + 0 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_1 = xnn_abs_f32(xnn_loadu_f32(mag + 1 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_2 = xnn_abs_f32(xnn_loadu_f32(mag + 2 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_3 = xnn_abs_f32(xnn_loadu_f32(mag + 3 * xnn_simd_size_f32));
@@ -218,7 +218,7 @@ void xnn_f32_vcopysign_ukernel__scalar_u8(
     xnn_simd_f32_t vy_6 = xnn_or_f32(vsign_6, vmag_6);
     xnn_simd_f32_t vy_7 = xnn_or_f32(vsign_7, vmag_7);
 
-    xnn_storeu_f32(output, vy_0);
+    xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
     xnn_storeu_f32(output + 2 * xnn_simd_size_f32, vy_2);
     xnn_storeu_f32(output + 3 * xnn_simd_size_f32, vy_3);

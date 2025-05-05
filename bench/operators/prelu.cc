@@ -38,8 +38,8 @@ void xnnpack_prelu_f32(benchmark::State& state, const char* net) {
   auto f32wrng = std::bind(std::uniform_real_distribution<float>(0.25f, 0.75f),
                            std::ref(rng));
 
-  xnnpack::Buffer<float> input(batch_size * height * width * channels +
-                               XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> input(batch_size * height * width * channels,
+                               xnnpack::XnnExtraBytes);
   std::generate(input.begin(), input.end(), std::ref(f32irng));
   xnnpack::Buffer<float> slope(channels);
   std::generate(slope.begin(), slope.end(), std::ref(f32wrng));

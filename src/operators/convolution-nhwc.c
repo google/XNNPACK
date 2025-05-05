@@ -2540,9 +2540,9 @@ enum xnn_status reshape_convolution2d_nhwc_qx8_f16_qc8w(
   convolution_op->last_input_width = convolution_op->input_width;
   convolution_op->input_height = input_height;
   convolution_op->input_width = input_width;
-  if (input_size_changed(convolution_op)) {
+  if (convolution_op->valid_batch_size != batch_size) {
     if (convolution_op->zero_buffers) {
-      for (size_t i = 1; i < batch_size; ++i) {
+      for (size_t i = 1; i < convolution_op->valid_batch_size; ++i) {
         xnn_release_simd_memory(convolution_op->zero_buffers[i]);
       }
     }
@@ -2551,6 +2551,7 @@ enum xnn_status reshape_convolution2d_nhwc_qx8_f16_qc8w(
     for (size_t i = 1; i < batch_size; ++i) {
       convolution_op->zero_buffers[i] = xnn_allocate_simd_memory(convolution_op->zero_size);
     }
+    convolution_op->valid_batch_size = batch_size;
   }
   return reshape_convolution2d_nhwc(
     convolution_op, expected_operator_type,
@@ -2614,9 +2615,9 @@ enum xnn_status reshape_convolution2d_nhwc_qx8_f32_qc8w(
   convolution_op->last_input_width = convolution_op->input_width;
   convolution_op->input_height = input_height;
   convolution_op->input_width = input_width;
-  if (input_size_changed(convolution_op)) {
+  if (convolution_op->valid_batch_size != batch_size) {
     if (convolution_op->zero_buffers) {
-      for (size_t i = 1; i < batch_size; ++i) {
+      for (size_t i = 1; i < convolution_op->valid_batch_size; ++i) {
         xnn_release_simd_memory(convolution_op->zero_buffers[i]);
       }
     }
@@ -2625,6 +2626,7 @@ enum xnn_status reshape_convolution2d_nhwc_qx8_f32_qc8w(
     for (size_t i = 1; i < batch_size; ++i) {
       convolution_op->zero_buffers[i] = xnn_allocate_simd_memory(convolution_op->zero_size);
     }
+    convolution_op->valid_batch_size = batch_size;
   }
   return reshape_convolution2d_nhwc(
     convolution_op, expected_operator_type,

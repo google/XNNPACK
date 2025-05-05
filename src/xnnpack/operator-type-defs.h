@@ -135,6 +135,8 @@ XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qp8_f32_qb4w,
               "Fully Connected (NC, QP8, F32, QB4W)")
 XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qs8,
               "Fully Connected (NC, QS8)")
+XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qs8_qc4w,
+              "Fully Connected (NC, QS8, QC4W)")
 XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qs8_qc8w,
               "Fully Connected (NC, QS8, QC8W)")
 XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_pqs8_qc8w,
@@ -157,10 +159,6 @@ XNN_ENUM_ITEM(xnn_operator_type_resize_bilinear_nchw, "Resize Bilinear (NCHW)")
 XNN_ENUM_ITEM(xnn_operator_type_resize_bilinear_nhwc, "Resize Bilinear (NHWC)")
 XNN_ENUM_ITEM(xnn_operator_type_rope_nthc_f16, "RoPE (NTHC, F16)")
 XNN_ENUM_ITEM(xnn_operator_type_rope_nthc_f32, "RoPE (NTHC, F32)")
-XNN_ENUM_ITEM(xnn_operator_type_scaled_dot_product_attention_nhtc_f16,
-              "Scaled Dot-Product Attention (NHTC, F16)")
-XNN_ENUM_ITEM(xnn_operator_type_scaled_dot_product_attention_nhtc_f32,
-              "Scaled Dot-Product Attention (NHTC, F32)")
 XNN_ENUM_ITEM(xnn_operator_type_slice_nd_x8, "Slice (ND, X8)")
 XNN_ENUM_ITEM(xnn_operator_type_slice_nd_x16, "Slice (ND, X16)")
 XNN_ENUM_ITEM(xnn_operator_type_slice_nd_x32, "Slice (ND, X32)")

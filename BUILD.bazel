@@ -91,6 +91,7 @@ MICROKERNEL_DEFS = [
     "src/f16-vclamp/f16-vclamp.h",
     "src/f16-vcos/f16-vcos.h",
     "src/f16-velu/f16-velu.h",
+    "src/f16-vexp/f16-vexp.h",
     "src/f16-vgelu/f16-vgelu.h",
     "src/f16-vhswish/f16-vhswish.h",
     "src/f16-vlrelu/f16-vlrelu.h",
@@ -179,6 +180,9 @@ MICROKERNEL_DEFS = [
     "src/qs8-vmul/qs8-vmul-minmax-rndnu.h",
     "src/qs8-vmulc/qs8-vmulc-minmax-fp32.h",
     "src/qs8-vmulc/qs8-vmulc-minmax-rndnu.h",
+    "src/qs8-vprelu/qs8-vprelu.h",
+    "src/qs8-vpreluc/qs8-vpreluc.h",
+    "src/qs8-vrpreluc/qs8-vrpreluc.h",
     "src/qu8-dwconv/qu8-dwconv-minmax-fp32.h",
     "src/qu8-dwconv/qu8-dwconv-minmax-rndnu.h",
     "src/qu8-f32-vcvt/qu8-f32-vcvt.h",
@@ -191,6 +195,10 @@ MICROKERNEL_DEFS = [
     "src/qu8-vmulc/qu8-vmulc-minmax-fp32.h",
     "src/qu8-vmulc/qu8-vmulc-minmax-rndnu.h",
     "src/s8-ibilinear/s8-ibilinear.h",
+    "src/qu8-vprelu/qu8-vprelu.h",
+    "src/qu8-vpreluc/qu8-vpreluc.h",
+    "src/qu8-vrpreluc/qu8-vrpreluc.h",
+    "src/s8-ibilinear/s8-ibilinear.h",
     "src/s8-maxpool/s8-maxpool-minmax.h",
     "src/s8-vclamp/s8-vclamp.h",
     "src/u8-ibilinear/u8-ibilinear.h",
@@ -198,6 +206,7 @@ MICROKERNEL_DEFS = [
     "src/u8-vclamp/u8-vclamp.h",
     "src/x16-pack-lh/x16-pack-lh.h",
     "src/x16-packw/x16-packw.h",
+    "src/x16-x32-packw/x16-x32-packw.h",
     "src/x16-transposec/x16-transposec.h",
     "src/x24-transposec/x24-transposec.h",
     "src/x32-pack-lh/x32-pack-lh.h",
@@ -265,6 +274,7 @@ MICROKERNEL_DEPS = [
 
 SIMD_HEADERS = [
     "src/xnnpack/simd/f32-avx-base.h",
+    "src/xnnpack/simd/f32-wasmsimd-base.h",
 ] + [
     "src/xnnpack/simd/f32-" + arch + ".h"
     for arch in xnnpack_simd_f32_archs()
@@ -557,6 +567,7 @@ xnnpack_cc_library(
     ],
 )
 
+# TODO: This should be test_only = True.
 xnnpack_cxx_library(
     name = "buffer",
     hdrs = ["src/xnnpack/buffer.h"],
@@ -1766,7 +1777,7 @@ alias(
         ":xnn_enable_arm_sme2_explicit_true": ":xnn_enable_arm_sme2_explicit_true",
         ":xnn_enable_arm_sme2_explicit_false": ":xnn_enable_arm_sme2_explicit_true",
         # Only enable this by default once we're sure it doesn't break anything.
-        "//conditions:default": ":xnn_enable_arm_sme2_explicit_true",
+        "//conditions:default": ":arm_sme2_enabled_by_default",
     }),
 )
 

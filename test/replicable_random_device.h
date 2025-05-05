@@ -13,6 +13,7 @@
 #include <string>
 
 #include <gtest/gtest.h>
+#include "src/xnnpack/common.h"
 
 namespace xnnpack {
 
@@ -103,7 +104,8 @@ class FuzzTest {
       return !parent_->Done();
     }
 
-    int operator*() const { return 0; }
+    struct XNN_UNUSED DummyValue {};
+    DummyValue operator*() const { return {}; }
 
    private:
     FuzzTest* parent_;

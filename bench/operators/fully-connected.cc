@@ -36,8 +36,8 @@ void xnnpack_fully_connected_qd8_f32_qc4w(benchmark::State& state,
   std::uniform_real_distribution<float> f32idist(0.5f, 2.0f);
   std::uniform_int_distribution<int32_t> w8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
-  xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
-                               batch_size * input_channels);
+  xnnpack::Buffer<float> input(batch_size * input_channels,
+                               xnnpack::XnnExtraBytes);
   xnnpack::Buffer<int8_t> kernel(output_channels * input_channels / 1);
   xnnpack::Buffer<float> bias(output_channels);
   xnnpack::Buffer<float> output(batch_size * output_channels);
@@ -174,8 +174,8 @@ void xnnpack_fully_connected_f32(benchmark::State& state, const char* net) {
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.01f, 1.0f),
                           std::ref(rng));
 
-  xnnpack::Buffer<float> input(batch_size * input_channels +
-                               XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> input(batch_size * input_channels,
+                               xnnpack::XnnExtraBytes);
   std::generate(input.begin(), input.end(), std::ref(f32rng));
   xnnpack::Buffer<float> kernel(input_channels * output_channels);
   std::generate(kernel.begin(), kernel.end(), std::ref(f32rng));
@@ -270,8 +270,8 @@ void xnnpack_dynamic_fully_connected_f32(benchmark::State& state,
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.01f, 1.0f),
                           std::ref(rng));
 
-  xnnpack::Buffer<float> input(batch_size * input_channels +
-                               XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> input(batch_size * input_channels,
+                               xnnpack::XnnExtraBytes);
   std::generate(input.begin(), input.end(), std::ref(f32rng));
   xnnpack::Buffer<float> kernel(input_channels * output_channels);
   std::generate(kernel.begin(), kernel.end(), std::ref(f32rng));

@@ -125,6 +125,7 @@ BEGIN_FUNCTION xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x8__asm_aarch32_neonfp16ari
       adds r0, r0, #8
       bne .Lepilogue
 
+
 .Linner_loop_end:
 
       # Convert from int32 to float.

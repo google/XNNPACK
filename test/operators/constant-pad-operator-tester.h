@@ -132,8 +132,8 @@ class ConstantPadOperatorTester {
       output_stride *= output_dims[i - 1];
     }
 
-    xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
-                                   num_input_elements());
+    xnnpack::Buffer<uint8_t> input(num_input_elements(),
+                                   xnnpack::XnnExtraBytes);
     xnnpack::Buffer<uint8_t> output(num_output_elements());
     xnnpack::Buffer<uint8_t> output_ref(num_output_elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -252,8 +252,8 @@ class ConstantPadOperatorTester {
       output_stride *= output_dims[i - 1];
     }
 
-    xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
-                                   num_input_elements());
+    xnnpack::Buffer<uint8_t> input(num_input_elements(),
+                                   xnnpack::XnnExtraBytes);
     xnnpack::Buffer<uint8_t> output(num_output_elements());
     xnnpack::Buffer<uint8_t> output_ref(num_output_elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -353,8 +353,8 @@ class ConstantPadOperatorTester {
       output_stride *= output_dims[i - 1];
     }
 
-    xnnpack::Buffer<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
-                                    num_input_elements());
+    xnnpack::Buffer<uint16_t> input(num_input_elements(),
+                                    xnnpack::XnnExtraBytes);
     xnnpack::Buffer<uint16_t> output(num_output_elements());
     xnnpack::Buffer<uint16_t> output_ref(num_output_elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -471,8 +471,8 @@ class ConstantPadOperatorTester {
       output_stride *= output_dims[i - 1];
     }
 
-    xnnpack::Buffer<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
-                                    num_input_elements());
+    xnnpack::Buffer<uint16_t> input(num_input_elements(),
+                                    xnnpack::XnnExtraBytes);
     xnnpack::Buffer<uint16_t> output(num_output_elements());
     xnnpack::Buffer<uint16_t> output_ref(num_output_elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -572,8 +572,8 @@ class ConstantPadOperatorTester {
       output_stride *= output_dims[i - 1];
     }
 
-    xnnpack::Buffer<uint32_t> input(XNN_EXTRA_BYTES / sizeof(uint32_t) +
-                                    num_input_elements());
+    xnnpack::Buffer<uint32_t> input(num_input_elements(),
+                                    xnnpack::XnnExtraBytes);
     xnnpack::Buffer<uint32_t> output(num_output_elements());
     xnnpack::Buffer<uint32_t> output_ref(num_output_elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -690,8 +690,8 @@ class ConstantPadOperatorTester {
       output_stride *= output_dims[i - 1];
     }
 
-    xnnpack::Buffer<uint32_t> input(XNN_EXTRA_BYTES / sizeof(uint32_t) +
-                                    num_input_elements());
+    xnnpack::Buffer<uint32_t> input(num_input_elements(),
+                                    xnnpack::XnnExtraBytes);
     xnnpack::Buffer<uint32_t> output(num_output_elements());
     xnnpack::Buffer<uint32_t> output_ref(num_output_elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {

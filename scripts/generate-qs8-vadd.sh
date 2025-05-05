@@ -181,10 +181,15 @@ tools/xngen src/qs8-vaddc/avx512skx-mul32-ld128.c.in -D BATCH_TILE=16 -D DATATYP
 tools/xngen src/qs8-vaddc/avx512skx-mul32-ld128.c.in -D BATCH_TILE=32 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/qu8-vaddc-minmax-avx512skx-mul32-ld128-u32.c &
 
 ################################## Hexagon HVX #################################
-tools/xngen src/qs8-vadd/hvx.c.in -D BATCH_TILE=32 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u32.c &
-tools/xngen src/qs8-vadd/hvx.c.in -D BATCH_TILE=64 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u64.c &
-tools/xngen src/qs8-vadd/hvx.c.in -D BATCH_TILE=96 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u96.c &
+tools/xngen src/qs8-vadd/hvx.c.in -D BATCH_TILE=32  -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u32.c &
+tools/xngen src/qs8-vadd/hvx.c.in -D BATCH_TILE=64  -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u64.c &
+tools/xngen src/qs8-vadd/hvx.c.in -D BATCH_TILE=96  -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u96.c &
 tools/xngen src/qs8-vadd/hvx.c.in -D BATCH_TILE=128 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u128.c &
+
+tools/xngen src/qs8-vaddc/hvx.c.in -D BATCH_TILE=32  -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-hvx-u32.c &
+tools/xngen src/qs8-vaddc/hvx.c.in -D BATCH_TILE=64  -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-hvx-u64.c &
+tools/xngen src/qs8-vaddc/hvx.c.in -D BATCH_TILE=96  -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-hvx-u96.c &
+tools/xngen src/qs8-vaddc/hvx.c.in -D BATCH_TILE=128 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-hvx-u128.c &
 
 ################################## RISC-V Vector ###############################
 tools/xngen src/qs8-vadd/rvv.c.in -D LMUL=1 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-rvv-u1v.c &

@@ -199,6 +199,12 @@
 #define XNN_COMPILER_HAS_FEATURE(builtin) 0
 #endif
 
+#if !defined(__has_attribute)
+#define XNN_COMPILER_HAS_ATTRIBUTE(x) 0
+#else
+#define XNN_COMPILER_HAS_ATTRIBUTE(x) __has_attribute(x)
+#endif
+
 #if defined(__GNUC__)
 #if defined(__clang__) || (__GNUC__ > 4 || __GNUC__ == 4 && __GNUC_MINOR__ >= 5)
 #define XNN_UNREACHABLE      \
@@ -399,6 +405,12 @@
 #endif
 #else
 #define XNN_FORCE_REALIZATION(x)
+#endif
+
+#if XNN_COMPILER_HAS_ATTRIBUTE(unused)
+#define XNN_UNUSED __attribute__((unused))
+#else
+#define XNN_UNUSED
 #endif
 
 #define XNN_LOG2_SIZEOF_INT8_T 0    // log2(sizeof(int8_t))

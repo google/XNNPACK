@@ -24,7 +24,7 @@ namespace xnnpack {
 
 void PackQMicrokernelTester::Test(xnn_x8_packq_f32qp8_ukernel_fn packq) const {
   // Allocate the input and output data.
-  xnnpack::Buffer<float> input(m() * k() + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> input(m() * k(), xnnpack::XnnExtraBytes);
   const size_t packed_size =
       xnn_x8_packq_f32qp8_packed_size(m(), k(), mr(), kr(), sr());
   xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_w(packed_size);

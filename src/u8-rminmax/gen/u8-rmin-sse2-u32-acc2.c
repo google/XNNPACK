@@ -31,7 +31,7 @@ void xnn_u8_rmin_ukernel__sse2_u32_acc2(
   xnn_simd_u8_t vmin1 = vmin0;
 
   for (; batch >= 32 * sizeof(uint8_t); batch -= 32 * sizeof(uint8_t)) {
-    xnn_simd_u8_t vt0 = xnn_loadu_u8(input);
+    xnn_simd_u8_t vt0 = xnn_loadu_u8(input + 0 * xnn_simd_size_u8);
     xnn_simd_u8_t vt1 = xnn_loadu_u8(input + 1 * xnn_simd_size_u8);
     input += 2 * xnn_simd_size_u8;
 
@@ -47,7 +47,7 @@ void xnn_u8_rmin_ukernel__sse2_u32_acc2(
     vmin0 = xnn_min_u8(vmin0, vt);
   }
 
-  uint8_t min0 = xnn_horizontal_min_u8(vmin0);
+  uint8_t min0 = xnn_reduce_min_u8(vmin0);
 
   if XNN_UNLIKELY(batch != 0) {
     do {

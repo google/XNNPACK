@@ -28,6 +28,8 @@ py_library(
         "generate_f32_gemm_microkernels.py",
         "generate_qd8_f32_qc4w_gemm_microkernels.py",
         "generate_qd8_f32_qc8w_gemm_microkernels.py",
+        "generate_qs8_qc4w_gemm_microkernels.py",
+        "generate_qs8_qc8w_gemm_microkernels.py",
     ],
     deps = [
         ":arm_isa_templates",

@@ -65,7 +65,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x4v__rvv(
     vint32m4_t vacc0 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point0, vl);
     vint32m4_t vacc1 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point1, vl);
     vint32m4_t vacc2 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point2, vl);
- 
+
     w = (const int32_t*) w + nr;
 
     size_t k = kc;
@@ -75,17 +75,17 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x4v__rvv(
       const int32_t va2 = (int32_t) *a2++;
 
       const vint8m1_t vb = __riscv_vle8_v_i8m1((const int8_t*) w, vl);
-      const vint16m2_t vb0 = __riscv_vsext_vf2(vb, vl);
+      const vint32m4_t vb0 = __riscv_vsext_vf4(vb, vl);
 
       w = (const int8_t*) w + nr;
 
-      vacc0 = __riscv_vwmacc_vx_i32m4(vacc0, va0, vb0, vl);
-      vacc1 = __riscv_vwmacc_vx_i32m4(vacc1, va1, vb0, vl);
-      vacc2 = __riscv_vwmacc_vx_i32m4(vacc2, va2, vb0, vl);
+      vacc0 = __riscv_vmacc_vx_i32m4(vacc0, va0, vb0, vl);
+      vacc1 = __riscv_vmacc_vx_i32m4(vacc1, va1, vb0, vl);
+      vacc2 = __riscv_vmacc_vx_i32m4(vacc2, va2, vb0, vl);
 
       k -= sizeof(int8_t);
     } while (k != 0);
- 
+
     // i32 -> f32
     vfloat32m4_t vout0 = __riscv_vfcvt_f_x_v_f32m4(vacc0, vl);
     vfloat32m4_t vout1 = __riscv_vfcvt_f_x_v_f32m4(vacc1, vl);

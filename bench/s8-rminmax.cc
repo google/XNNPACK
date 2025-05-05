@@ -159,6 +159,14 @@ BENCHMARK_CAPTURE(s8_rminmax, sse41_u64_acc4,
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+#if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+BENCHMARK_CAPTURE(s8_rminmax, hvx_u256_acc2,
+                  xnn_s8_rminmax_ukernel__hvx_u256_acc2,
+                  benchmark::utils::CheckHVX)
+    ->Apply(benchmark::utils::ReductionParameters<int8_t>)
+    ->UseRealTime();
+#endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 BENCHMARK_CAPTURE(s8_rminmax, wasmsimd_u16,
                   xnn_s8_rminmax_ukernel__wasmsimd_u16)

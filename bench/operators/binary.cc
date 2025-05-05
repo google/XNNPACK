@@ -100,8 +100,8 @@ static void benchmark_binary_operator(benchmark::State& state,
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
 
-  xnnpack::Buffer<T> input1(batch_size + XNN_EXTRA_BYTES / sizeof(T));
-  xnnpack::Buffer<T> input2(batch_size + XNN_EXTRA_BYTES / sizeof(T));
+  xnnpack::Buffer<T> input1(batch_size, xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<T> input2(batch_size, xnnpack::XnnExtraBytes);
   xnnpack::Buffer<T> output(batch_size);
   xnnpack::DatatypeGenerator<T> gen;
   std::generate(input1.begin(), input1.end(), [&]() { return gen(rng); });

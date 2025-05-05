@@ -53,6 +53,7 @@ std::vector<size_t> random_reshape(Rng& rng, size_t n) {
 template <typename T>
 void TestImpl() {
   ReplicableRandomDevice rng;
+  std::bernoulli_distribution bool_dist(0.5);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
@@ -61,16 +62,24 @@ void TestImpl() {
         random_quantization(xnn_datatype_of<T>(), rng);
 
     Tensor<T> output(random_shape(rng));
-    Tensor<T> input(random_reshape(rng, output.size()),
-                    PaddingBytes{XNN_EXTRA_BYTES});
+    Tensor<T> input(random_reshape(rng, output.size()), xnnpack::XnnExtraBytes);
     DatatypeGenerator<T> generator(quantization);
     input.generate([&]() { return generator(rng); });
+
+    std::vector<size_t> dims = output.shape();
+
+    // Randomly set one dimension to 0, indicating reshape should deduce the
+    // size of that dimension.
+    if (!dims.empty() && bool_dist(rng)) {
+      std::uniform_int_distribution<> dim_dist(0, dims.size() - 1);
+      dims[dim_dist(rng)] = 0;
+    }
 
     // Define subgraph
     SubgraphTester subgraph(2);
     subgraph.AddInputTensor(input.extents(), input.data(), quantization, 0)
         .AddOutputTensor(output.extents(), output.data(), quantization, 1)
-        .AddReshape(output.extents(), 0, 1);
+        .AddReshape(dims, 0, 1);
     ASSERT_EQ(xnn_status_success, subgraph.CreateRuntime());
     subgraph.ReshapeRuntime();
 

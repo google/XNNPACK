@@ -25,6 +25,7 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_9p16c__avx2_mul32(
     intptr_t input_stride,
     size_t output_increment,
     size_t input_offset,
+    size_t input_pixel_stride,
     const uint8_t* zero,
     const union xnn_qu8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
@@ -302,6 +303,7 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_9p16c__avx2_mul32(
       } while (c != 0);
     }
 
+    input_offset += input_pixel_stride;
     output = (uint8_t*) ((uintptr_t) output + output_increment);
   } while (--output_width != 0);
 }

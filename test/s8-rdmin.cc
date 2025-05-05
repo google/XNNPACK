@@ -36,177 +36,127 @@ TEST(S8_RDMIN_2P2X__SCALAR_C2, channels_eq_2_2pass_fulltile_with_input_stride) {
 
 TEST(S8_RDMIN_2P2X__SCALAR_C2, channels_eq_2_2pass_subtile) {
   const size_t channel_tile = 2;
-  for (size_t rows = 1; rows < 4; rows++) {
-    ReduceMicrokernelTester()
-      .rows(rows)
-      .channels(channel_tile)
-      .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
-  }
+  ReduceMicrokernelTester()
+    .rows({1, 4})
+    .channels(channel_tile)
+    .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
 }
 
 TEST(S8_RDMIN_2P2X__SCALAR_C2, channels_eq_2_2pass_subtile_with_input_stride) {
   const size_t channel_tile = 2;
-  for (size_t rows = 1; rows < 4; rows++) {
-    ReduceMicrokernelTester()
-      .rows(rows)
-      .channels(channel_tile)
-      .input_stride(5)
-      .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
-  }
+  ReduceMicrokernelTester()
+    .rows({1, 4})
+    .channels(channel_tile)
+    .input_stride(5)
+    .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
 }
 
 TEST(S8_RDMIN_2P2X__SCALAR_C2, channels_eq_2_multipass_fulltile) {
   const size_t channel_tile = 2;
-  for (size_t rows = 1; rows <= 10; rows += 2) {
-    ReduceMicrokernelTester()
-      .rows(rows)
-      .channels(channel_tile)
-      .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
-  }
+  ReduceMicrokernelTester()
+    .rows({1, 11, 2})
+    .channels(channel_tile)
+    .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
 }
 
 TEST(S8_RDMIN_2P2X__SCALAR_C2, channels_eq_2_multipass_fulltile_with_input_stride) {
   const size_t channel_tile = 2;
-  for (size_t rows = 1; rows <= 10; rows += 2) {
-    ReduceMicrokernelTester()
-      .rows(rows)
-      .channels(channel_tile)
-      .input_stride(5)
-      .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
-  }
+  ReduceMicrokernelTester()
+    .rows({1, 11, 2})
+    .channels(channel_tile)
+    .input_stride(5)
+    .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
 }
 
 TEST(S8_RDMIN_2P2X__SCALAR_C2, channels_div_2_2pass_fulltile) {
-  for (size_t channels = 4; channels < 16; channels += 2) {
-    ReduceMicrokernelTester()
-      .rows(4)
-      .channels(channels)
-      .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
-  }
+  ReduceMicrokernelTester()
+    .rows(4)
+    .channels({4, 16, 2})
+    .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
 }
 
 TEST(S8_RDMIN_2P2X__SCALAR_C2, channels_div_2_2pass_subtile) {
-  for (size_t channels = 4; channels < 16; channels += 2) {
-    for (size_t rows = 1; rows < 4; rows++) {
-      ReduceMicrokernelTester()
-        .rows(rows)
-        .channels(channels)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
-    }
-  }
+  ReduceMicrokernelTester()
+    .channels({4, 16, 2})
+    .rows({1, 4})
+    .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
 }
 
 TEST(S8_RDMIN_2P2X__SCALAR_C2, channels_div_2_multipass_fulltile) {
-  for (size_t channels = 4; channels < 16; channels += 2) {
-    for (size_t rows = 1; rows <= 10; rows += 2) {
-      ReduceMicrokernelTester()
-        .rows(rows)
-        .channels(channels)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
-    }
-  }
+  ReduceMicrokernelTester()
+    .channels({4, 16, 2})
+    .rows({1, 11, 2})
+    .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
 }
 
 TEST(S8_RDMIN_2P2X__SCALAR_C2, channels_div_2_multipass_fulltile_with_input_stride) {
-  for (size_t channels = 4; channels < 16; channels += 2) {
-    for (size_t rows = 1; rows <= 10; rows += 2) {
-      ReduceMicrokernelTester()
-        .rows(rows)
-        .channels(channels)
-        .input_stride(37)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
-    }
-  }
+  ReduceMicrokernelTester()
+    .channels({4, 16, 2})
+    .rows({1, 11, 2})
+    .input_stride(37)
+    .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
 }
 
 TEST(S8_RDMIN_2P2X__SCALAR_C2, channels_lt_2_2pass_fulltile) {
   const size_t channel_tile = 2;
-  for (size_t channels = 1; channels < channel_tile; channels++) {
-    ReduceMicrokernelTester()
-      .rows(4)
-      .channels(channels)
-      .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
-  }
+  ReduceMicrokernelTester()
+    .rows(4)
+    .channels({1, channel_tile})
+    .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
 }
 
 TEST(S8_RDMIN_2P2X__SCALAR_C2, channels_lt_2_2pass_subtile) {
   const size_t channel_tile = 2;
-  for (size_t channels = 1; channels < channel_tile; channels++) {
-    for (size_t rows = 1; rows < 4; rows++) {
-      ReduceMicrokernelTester()
-        .rows(rows)
-        .channels(channels)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
-    }
-  }
+  ReduceMicrokernelTester()
+    .channels({1, channel_tile})
+    .rows({1, 4})
+    .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
 }
 
 TEST(S8_RDMIN_2P2X__SCALAR_C2, channels_lt_2_multipass_fulltile) {
   const size_t channel_tile = 2;
-  for (size_t channels = 1; channels < channel_tile; channels++) {
-    for (size_t rows = 1; rows <= 10; rows += 2) {
-      ReduceMicrokernelTester()
-        .rows(rows)
-        .channels(channels)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
-    }
-  }
+  ReduceMicrokernelTester()
+    .channels({1, channel_tile})
+    .rows({1, 11, 2})
+    .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
 }
 
 TEST(S8_RDMIN_2P2X__SCALAR_C2, channels_lt_2_multipass_fulltile_with_input_stride) {
   const size_t channel_tile = 2;
-  for (size_t channels = 1; channels < channel_tile; channels++) {
-    for (size_t rows = 1; rows <= 10; rows += 2) {
-      ReduceMicrokernelTester()
-        .rows(rows)
-        .channels(channels)
-        .input_stride(5)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
-    }
-  }
+  ReduceMicrokernelTester()
+    .channels({1, channel_tile})
+    .rows({1, 11, 2})
+    .input_stride(5)
+    .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
 }
 
 TEST(S8_RDMIN_2P2X__SCALAR_C2, channels_gt_2_2pass_fulltile) {
-  for (size_t channels = 3; channels < 4; channels++) {
-    ReduceMicrokernelTester()
-      .rows(4)
-      .channels(channels)
-      .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
-  }
+  ReduceMicrokernelTester()
+    .rows(4)
+    .channels({3, 4})
+    .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
 }
 
 TEST(S8_RDMIN_2P2X__SCALAR_C2, channels_gt_2_2pass_subtile) {
-  for (size_t channels = 3; channels < 4; channels++) {
-    for (size_t rows = 1; rows < 4; rows++) {
-      ReduceMicrokernelTester()
-        .rows(rows)
-        .channels(channels)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
-    }
-  }
+  ReduceMicrokernelTester()
+    .channels({3, 4})
+    .rows({1, 4})
+    .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
 }
 
 TEST(S8_RDMIN_2P2X__SCALAR_C2, channels_gt_2_multipass_fulltile) {
-  for (size_t channels = 3; channels < 4; channels++) {
-    for (size_t rows = 1; rows < 10; rows += 4) {
-      ReduceMicrokernelTester()
-        .rows(rows)
-        .channels(channels)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
-    }
-  }
+  ReduceMicrokernelTester()
+    .channels({3, 4})
+    .rows({1, 10, 4})
+    .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
 }
 
 TEST(S8_RDMIN_2P2X__SCALAR_C2, channels_gt_2_multipass_fulltile_with_input_stride) {
-  for (size_t channels = 3; channels < 4; channels++) {
-    for (size_t rows = 1; rows < 10; rows += 4) {
-      ReduceMicrokernelTester()
-        .rows(rows)
-        .channels(channels)
-        .input_stride(17)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
-    }
-  }
+  ReduceMicrokernelTester()
+    .channels({3, 4})
+    .rows({1, 10, 4})
+    .input_stride(17)
+    .Test(xnn_s8_rdmin_ukernel_2p2x__scalar_c2, ReduceMicrokernelTester::OpType::Min);
 }
 
 
@@ -233,192 +183,142 @@ TEST(S8_RDMIN_2P2X__SCALAR_C2, channels_gt_2_multipass_fulltile_with_input_strid
   TEST(S8_RDMIN_2P2X__NEON_C32, channels_eq_32_2pass_subtile) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 32;
-    for (size_t rows = 1; rows < 4; rows++) {
-      ReduceMicrokernelTester()
-        .rows(rows)
-        .channels(channel_tile)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
-    }
+    ReduceMicrokernelTester()
+      .rows({1, 4})
+      .channels(channel_tile)
+      .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__NEON_C32, channels_eq_32_2pass_subtile_with_input_stride) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 32;
-    for (size_t rows = 1; rows < 4; rows++) {
-      ReduceMicrokernelTester()
-        .rows(rows)
-        .channels(channel_tile)
-        .input_stride(37)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
-    }
+    ReduceMicrokernelTester()
+      .rows({1, 4})
+      .channels(channel_tile)
+      .input_stride(37)
+      .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__NEON_C32, channels_eq_32_multipass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 32;
-    for (size_t rows = 1; rows <= 10; rows += 2) {
-      ReduceMicrokernelTester()
-        .rows(rows)
-        .channels(channel_tile)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
-    }
+    ReduceMicrokernelTester()
+      .rows({1, 11, 2})
+      .channels(channel_tile)
+      .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__NEON_C32, channels_eq_32_multipass_fulltile_with_input_stride) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 32;
-    for (size_t rows = 1; rows <= 10; rows += 2) {
-      ReduceMicrokernelTester()
-        .rows(rows)
-        .channels(channel_tile)
-        .input_stride(37)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
-    }
+    ReduceMicrokernelTester()
+      .rows({1, 11, 2})
+      .channels(channel_tile)
+      .input_stride(37)
+      .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__NEON_C32, channels_div_32_2pass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 64; channels < 256; channels += 32) {
-      ReduceMicrokernelTester()
-        .rows(4)
-        .channels(channels)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
-    }
+    ReduceMicrokernelTester()
+      .rows(4)
+      .channels({64, 256, 32})
+      .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__NEON_C32, channels_div_32_2pass_subtile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 64; channels < 256; channels += 32) {
-      for (size_t rows = 1; rows < 4; rows++) {
-        ReduceMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
-      }
-    }
+    ReduceMicrokernelTester()
+      .channels({64, 256, 32})
+      .rows({1, 4})
+      .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__NEON_C32, channels_div_32_multipass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 64; channels < 256; channels += 32) {
-      for (size_t rows = 1; rows <= 10; rows += 2) {
-        ReduceMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
-      }
-    }
+    ReduceMicrokernelTester()
+      .channels({64, 256, 32})
+      .rows({1, 11, 2})
+      .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__NEON_C32, channels_div_32_multipass_fulltile_with_input_stride) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 64; channels < 256; channels += 32) {
-      for (size_t rows = 1; rows <= 10; rows += 2) {
-        ReduceMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .input_stride(521)
-          .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
-      }
-    }
+    ReduceMicrokernelTester()
+      .channels({64, 256, 32})
+      .rows({1, 11, 2})
+      .input_stride(521)
+      .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__NEON_C32, channels_lt_32_2pass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 32;
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      ReduceMicrokernelTester()
-        .rows(4)
-        .channels(channels)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
-    }
+    ReduceMicrokernelTester()
+      .rows(4)
+      .channels({1, channel_tile})
+      .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__NEON_C32, channels_lt_32_2pass_subtile) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 32;
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      for (size_t rows = 1; rows < 4; rows++) {
-        ReduceMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
-      }
-    }
+    ReduceMicrokernelTester()
+      .channels({1, channel_tile})
+      .rows({1, 4})
+      .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__NEON_C32, channels_lt_32_multipass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 32;
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      for (size_t rows = 1; rows <= 10; rows += 2) {
-        ReduceMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
-      }
-    }
+    ReduceMicrokernelTester()
+      .channels({1, channel_tile})
+      .rows({1, 11, 2})
+      .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__NEON_C32, channels_lt_32_multipass_fulltile_with_input_stride) {
     TEST_REQUIRES_ARM_NEON;
     const size_t channel_tile = 32;
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      for (size_t rows = 1; rows <= 10; rows += 2) {
-        ReduceMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .input_stride(37)
-          .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
-      }
-    }
+    ReduceMicrokernelTester()
+      .channels({1, channel_tile})
+      .rows({1, 11, 2})
+      .input_stride(37)
+      .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__NEON_C32, channels_gt_32_2pass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 33; channels < 64; channels++) {
-      ReduceMicrokernelTester()
-        .rows(4)
-        .channels(channels)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
-    }
+    ReduceMicrokernelTester()
+      .rows(4)
+      .channels({33, 64})
+      .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__NEON_C32, channels_gt_32_2pass_subtile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 33; channels < 64; channels++) {
-      for (size_t rows = 1; rows < 4; rows++) {
-        ReduceMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
-      }
-    }
+    ReduceMicrokernelTester()
+      .channels({33, 64})
+      .rows({1, 4})
+      .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__NEON_C32, channels_gt_32_multipass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 33; channels < 64; channels++) {
-      for (size_t rows = 1; rows < 10; rows += 4) {
-        ReduceMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
-      }
-    }
+    ReduceMicrokernelTester()
+      .channels({33, 64})
+      .rows({1, 10, 4})
+      .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__NEON_C32, channels_gt_32_multipass_fulltile_with_input_stride) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 33; channels < 64; channels++) {
-      for (size_t rows = 1; rows < 10; rows += 4) {
-        ReduceMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .input_stride(79)
-          .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
-      }
-    }
+    ReduceMicrokernelTester()
+      .channels({33, 64})
+      .rows({1, 10, 4})
+      .input_stride(79)
+      .Test(xnn_s8_rdmin_ukernel_2p2x__neon_c32, ReduceMicrokernelTester::OpType::Min);
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
@@ -446,192 +346,142 @@ TEST(S8_RDMIN_2P2X__SCALAR_C2, channels_gt_2_multipass_fulltile_with_input_strid
   TEST(S8_RDMIN_2P2X__SSE41_C32, channels_eq_32_2pass_subtile) {
     TEST_REQUIRES_X86_SSE41;
     const size_t channel_tile = 32;
-    for (size_t rows = 1; rows < 4; rows++) {
-      ReduceMicrokernelTester()
-        .rows(rows)
-        .channels(channel_tile)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
-    }
+    ReduceMicrokernelTester()
+      .rows({1, 4})
+      .channels(channel_tile)
+      .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__SSE41_C32, channels_eq_32_2pass_subtile_with_input_stride) {
     TEST_REQUIRES_X86_SSE41;
     const size_t channel_tile = 32;
-    for (size_t rows = 1; rows < 4; rows++) {
-      ReduceMicrokernelTester()
-        .rows(rows)
-        .channels(channel_tile)
-        .input_stride(37)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
-    }
+    ReduceMicrokernelTester()
+      .rows({1, 4})
+      .channels(channel_tile)
+      .input_stride(37)
+      .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__SSE41_C32, channels_eq_32_multipass_fulltile) {
     TEST_REQUIRES_X86_SSE41;
     const size_t channel_tile = 32;
-    for (size_t rows = 1; rows <= 10; rows += 2) {
-      ReduceMicrokernelTester()
-        .rows(rows)
-        .channels(channel_tile)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
-    }
+    ReduceMicrokernelTester()
+      .rows({1, 11, 2})
+      .channels(channel_tile)
+      .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__SSE41_C32, channels_eq_32_multipass_fulltile_with_input_stride) {
     TEST_REQUIRES_X86_SSE41;
     const size_t channel_tile = 32;
-    for (size_t rows = 1; rows <= 10; rows += 2) {
-      ReduceMicrokernelTester()
-        .rows(rows)
-        .channels(channel_tile)
-        .input_stride(37)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
-    }
+    ReduceMicrokernelTester()
+      .rows({1, 11, 2})
+      .channels(channel_tile)
+      .input_stride(37)
+      .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__SSE41_C32, channels_div_32_2pass_fulltile) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 64; channels < 256; channels += 32) {
-      ReduceMicrokernelTester()
-        .rows(4)
-        .channels(channels)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
-    }
+    ReduceMicrokernelTester()
+      .rows(4)
+      .channels({64, 256, 32})
+      .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__SSE41_C32, channels_div_32_2pass_subtile) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 64; channels < 256; channels += 32) {
-      for (size_t rows = 1; rows < 4; rows++) {
-        ReduceMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
-      }
-    }
+    ReduceMicrokernelTester()
+      .channels({64, 256, 32})
+      .rows({1, 4})
+      .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__SSE41_C32, channels_div_32_multipass_fulltile) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 64; channels < 256; channels += 32) {
-      for (size_t rows = 1; rows <= 10; rows += 2) {
-        ReduceMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
-      }
-    }
+    ReduceMicrokernelTester()
+      .channels({64, 256, 32})
+      .rows({1, 11, 2})
+      .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__SSE41_C32, channels_div_32_multipass_fulltile_with_input_stride) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 64; channels < 256; channels += 32) {
-      for (size_t rows = 1; rows <= 10; rows += 2) {
-        ReduceMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .input_stride(521)
-          .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
-      }
-    }
+    ReduceMicrokernelTester()
+      .channels({64, 256, 32})
+      .rows({1, 11, 2})
+      .input_stride(521)
+      .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__SSE41_C32, channels_lt_32_2pass_fulltile) {
     TEST_REQUIRES_X86_SSE41;
     const size_t channel_tile = 32;
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      ReduceMicrokernelTester()
-        .rows(4)
-        .channels(channels)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
-    }
+    ReduceMicrokernelTester()
+      .rows(4)
+      .channels({1, channel_tile})
+      .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__SSE41_C32, channels_lt_32_2pass_subtile) {
     TEST_REQUIRES_X86_SSE41;
     const size_t channel_tile = 32;
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      for (size_t rows = 1; rows < 4; rows++) {
-        ReduceMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
-      }
-    }
+    ReduceMicrokernelTester()
+      .channels({1, channel_tile})
+      .rows({1, 4})
+      .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__SSE41_C32, channels_lt_32_multipass_fulltile) {
     TEST_REQUIRES_X86_SSE41;
     const size_t channel_tile = 32;
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      for (size_t rows = 1; rows <= 10; rows += 2) {
-        ReduceMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
-      }
-    }
+    ReduceMicrokernelTester()
+      .channels({1, channel_tile})
+      .rows({1, 11, 2})
+      .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__SSE41_C32, channels_lt_32_multipass_fulltile_with_input_stride) {
     TEST_REQUIRES_X86_SSE41;
     const size_t channel_tile = 32;
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      for (size_t rows = 1; rows <= 10; rows += 2) {
-        ReduceMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .input_stride(37)
-          .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
-      }
-    }
+    ReduceMicrokernelTester()
+      .channels({1, channel_tile})
+      .rows({1, 11, 2})
+      .input_stride(37)
+      .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__SSE41_C32, channels_gt_32_2pass_fulltile) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 33; channels < 64; channels++) {
-      ReduceMicrokernelTester()
-        .rows(4)
-        .channels(channels)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
-    }
+    ReduceMicrokernelTester()
+      .rows(4)
+      .channels({33, 64})
+      .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__SSE41_C32, channels_gt_32_2pass_subtile) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 33; channels < 64; channels++) {
-      for (size_t rows = 1; rows < 4; rows++) {
-        ReduceMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
-      }
-    }
+    ReduceMicrokernelTester()
+      .channels({33, 64})
+      .rows({1, 4})
+      .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__SSE41_C32, channels_gt_32_multipass_fulltile) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 33; channels < 64; channels++) {
-      for (size_t rows = 1; rows < 10; rows += 4) {
-        ReduceMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
-      }
-    }
+    ReduceMicrokernelTester()
+      .channels({33, 64})
+      .rows({1, 10, 4})
+      .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__SSE41_C32, channels_gt_32_multipass_fulltile_with_input_stride) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 33; channels < 64; channels++) {
-      for (size_t rows = 1; rows < 10; rows += 4) {
-        ReduceMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .input_stride(79)
-          .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
-      }
-    }
+    ReduceMicrokernelTester()
+      .channels({33, 64})
+      .rows({1, 10, 4})
+      .input_stride(79)
+      .Test(xnn_s8_rdmin_ukernel_2p2x__sse41_c32, ReduceMicrokernelTester::OpType::Min);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -656,176 +506,126 @@ TEST(S8_RDMIN_2P2X__SCALAR_C2, channels_gt_2_multipass_fulltile_with_input_strid
 
   TEST(S8_RDMIN_2P2X__WASMSIMD_C32, channels_eq_32_2pass_subtile) {
     const size_t channel_tile = 32;
-    for (size_t rows = 1; rows < 4; rows++) {
-      ReduceMicrokernelTester()
-        .rows(rows)
-        .channels(channel_tile)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
-    }
+    ReduceMicrokernelTester()
+      .rows({1, 4})
+      .channels(channel_tile)
+      .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__WASMSIMD_C32, channels_eq_32_2pass_subtile_with_input_stride) {
     const size_t channel_tile = 32;
-    for (size_t rows = 1; rows < 4; rows++) {
-      ReduceMicrokernelTester()
-        .rows(rows)
-        .channels(channel_tile)
-        .input_stride(37)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
-    }
+    ReduceMicrokernelTester()
+      .rows({1, 4})
+      .channels(channel_tile)
+      .input_stride(37)
+      .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__WASMSIMD_C32, channels_eq_32_multipass_fulltile) {
     const size_t channel_tile = 32;
-    for (size_t rows = 1; rows <= 10; rows += 2) {
-      ReduceMicrokernelTester()
-        .rows(rows)
-        .channels(channel_tile)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
-    }
+    ReduceMicrokernelTester()
+      .rows({1, 11, 2})
+      .channels(channel_tile)
+      .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__WASMSIMD_C32, channels_eq_32_multipass_fulltile_with_input_stride) {
     const size_t channel_tile = 32;
-    for (size_t rows = 1; rows <= 10; rows += 2) {
-      ReduceMicrokernelTester()
-        .rows(rows)
-        .channels(channel_tile)
-        .input_stride(37)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
-    }
+    ReduceMicrokernelTester()
+      .rows({1, 11, 2})
+      .channels(channel_tile)
+      .input_stride(37)
+      .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__WASMSIMD_C32, channels_div_32_2pass_fulltile) {
-    for (size_t channels = 64; channels < 256; channels += 32) {
-      ReduceMicrokernelTester()
-        .rows(4)
-        .channels(channels)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
-    }
+    ReduceMicrokernelTester()
+      .rows(4)
+      .channels({64, 256, 32})
+      .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__WASMSIMD_C32, channels_div_32_2pass_subtile) {
-    for (size_t channels = 64; channels < 256; channels += 32) {
-      for (size_t rows = 1; rows < 4; rows++) {
-        ReduceMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
-      }
-    }
+    ReduceMicrokernelTester()
+      .channels({64, 256, 32})
+      .rows({1, 4})
+      .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__WASMSIMD_C32, channels_div_32_multipass_fulltile) {
-    for (size_t channels = 64; channels < 256; channels += 32) {
-      for (size_t rows = 1; rows <= 10; rows += 2) {
-        ReduceMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
-      }
-    }
+    ReduceMicrokernelTester()
+      .channels({64, 256, 32})
+      .rows({1, 11, 2})
+      .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__WASMSIMD_C32, channels_div_32_multipass_fulltile_with_input_stride) {
-    for (size_t channels = 64; channels < 256; channels += 32) {
-      for (size_t rows = 1; rows <= 10; rows += 2) {
-        ReduceMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .input_stride(521)
-          .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
-      }
-    }
+    ReduceMicrokernelTester()
+      .channels({64, 256, 32})
+      .rows({1, 11, 2})
+      .input_stride(521)
+      .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__WASMSIMD_C32, channels_lt_32_2pass_fulltile) {
     const size_t channel_tile = 32;
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      ReduceMicrokernelTester()
-        .rows(4)
-        .channels(channels)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
-    }
+    ReduceMicrokernelTester()
+      .rows(4)
+      .channels({1, channel_tile})
+      .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__WASMSIMD_C32, channels_lt_32_2pass_subtile) {
     const size_t channel_tile = 32;
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      for (size_t rows = 1; rows < 4; rows++) {
-        ReduceMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
-      }
-    }
+    ReduceMicrokernelTester()
+      .channels({1, channel_tile})
+      .rows({1, 4})
+      .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__WASMSIMD_C32, channels_lt_32_multipass_fulltile) {
     const size_t channel_tile = 32;
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      for (size_t rows = 1; rows <= 10; rows += 2) {
-        ReduceMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
-      }
-    }
+    ReduceMicrokernelTester()
+      .channels({1, channel_tile})
+      .rows({1, 11, 2})
+      .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__WASMSIMD_C32, channels_lt_32_multipass_fulltile_with_input_stride) {
     const size_t channel_tile = 32;
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      for (size_t rows = 1; rows <= 10; rows += 2) {
-        ReduceMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .input_stride(37)
-          .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
-      }
-    }
+    ReduceMicrokernelTester()
+      .channels({1, channel_tile})
+      .rows({1, 11, 2})
+      .input_stride(37)
+      .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__WASMSIMD_C32, channels_gt_32_2pass_fulltile) {
-    for (size_t channels = 33; channels < 64; channels++) {
-      ReduceMicrokernelTester()
-        .rows(4)
-        .channels(channels)
-        .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
-    }
+    ReduceMicrokernelTester()
+      .rows(4)
+      .channels({33, 64})
+      .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__WASMSIMD_C32, channels_gt_32_2pass_subtile) {
-    for (size_t channels = 33; channels < 64; channels++) {
-      for (size_t rows = 1; rows < 4; rows++) {
-        ReduceMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
-      }
-    }
+    ReduceMicrokernelTester()
+      .channels({33, 64})
+      .rows({1, 4})
+      .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__WASMSIMD_C32, channels_gt_32_multipass_fulltile) {
-    for (size_t channels = 33; channels < 64; channels++) {
-      for (size_t rows = 1; rows < 10; rows += 4) {
-        ReduceMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
-      }
-    }
+    ReduceMicrokernelTester()
+      .channels({33, 64})
+      .rows({1, 10, 4})
+      .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
   }
 
   TEST(S8_RDMIN_2P2X__WASMSIMD_C32, channels_gt_32_multipass_fulltile_with_input_stride) {
-    for (size_t channels = 33; channels < 64; channels++) {
-      for (size_t rows = 1; rows < 10; rows += 4) {
-        ReduceMicrokernelTester()
-          .rows(rows)
-          .channels(channels)
-          .input_stride(79)
-          .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
-      }
-    }
+    ReduceMicrokernelTester()
+      .channels({33, 64})
+      .rows({1, 10, 4})
+      .input_stride(79)
+      .Test(xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32, ReduceMicrokernelTester::OpType::Min);
   }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

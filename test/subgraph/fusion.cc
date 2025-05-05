@@ -131,7 +131,7 @@ TEST(DECONVOLUTION_2D_THEN_CLAMP, fusion) {
                               Kernel{3, 3}, Upsampling{2, 2}, Dilation{1, 1},
                               /*groups=*/1,
                               /*group_input_channels=*/3,
-                              /*groups_output_channels*/ 32},
+                              /*groups_output_channels=*/32},
           input_id, filter_id, bias_id, intermediate_id)
       .AddClamp(output_min, output_max, intermediate_id, output_id);
 

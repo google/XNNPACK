@@ -12,8 +12,7 @@ class Avx512Vnni(avx512f_template.Avx512F):
   """All SIMD features for avx512vnni."""
 
   def __init__(self, m: int, n: int, c: int):
-    super().__init__(m, n)
-    self._c = c
+    super().__init__(m, n, c)
 
   def isa(self):
     return 'avx512vnni'
@@ -73,12 +72,11 @@ class Avx512Vnni(avx512f_template.Avx512F):
   # kc = round_up_po2(kc, channels)
   def adjust_kc(self):
     channels = self.channels()
-    ret = """
+    self.asm_string += """
       add {kc_reg}, {channels}
       and {kc_reg}, {neg_channels}\n""".format(
         kc_reg=self.kc_register(), channels=channels - 1, neg_channels=-channels
     )
-    return ret
 
   def quantization_params_register(self):
     return self.k_register()
@@ -106,9 +104,9 @@ class Avx512Vnni(avx512f_template.Avx512F):
         """
     match self._c:
       case 4:
-        return header_c4
+        self.asm_string += header_c4
       case 8:
-        return header_c8
+        self.asm_string += header_c8
       case _:
         raise NotImplementedError
 
@@ -160,50 +158,50 @@ class Avx512Vnni(avx512f_template.Avx512F):
 
   def convert_to_float(self):
     accumulators = self.acc_registers()
-    ret = ''
-    ret += '\n# Convert from int32 to float.\n'
+    self.asm_string += '\n# Convert from int32 to float.\n'
     for nr in range(0, self.n):
       for mr in range(0, self.m):
         reg_ofset = self.accumulator_reg_offset(self.m, nr)
         other_reg = accumulators[self.m * nr + mr + reg_ofset]
         ACC = accumulators[self.m * nr + mr]
-        ret += f'vcvtdq2ps z{ACC}, z{other_reg}\n'
-    return ret
+        self.asm_string += f'vcvtdq2ps z{ACC}, z{other_reg}\n'
 
-  def dequantize(self):
+  def convert_to_output_type(self):
     W = self.w_ptr_register()
-    asm_string = ''
     if self._c == 8:
       shift_add = """vpsrlq {tmp}, z{acc}, 32
         vpaddd z{acc}, z{acc}, {tmp}\n"""
-      asm_string = ''
       accumulators = self.acc_registers()
       for nr in range(0, self.n * 2):
         for mr in range(0, self.m):
-          asm_string += shift_add.format(
+          self.asm_string += shift_add.format(
               acc=accumulators[self.m * nr + mr], tmp=self.w_registers()[0]
           )
       perm_reg = self.w_registers()[0]
-      asm_string += f'vmovups {perm_reg}, zmmword ptr [rip + .PERMUTATION]\n'
+      self.asm_string += (
+          f'vmovups {perm_reg}, zmmword ptr [rip + .PERMUTATION]\n'
+      )
       perm = 'vpermt2ps z{acc0}, {perm_reg}, z{acc1}\n'
       for nr in range(0, self.n):
         for mr in range(0, self.m):
-          asm_string += perm.format(
+          self.asm_string += perm.format(
               perm_reg=perm_reg,
               acc0=accumulators[2 * self.m * nr + mr],
               acc1=accumulators[2 * self.m * nr + self.m + mr],
           )
 
-    asm_string += self.convert_to_float()
+    self.convert_to_float()
     accumulators = self.acc_registers()
-    asm_string += '# Load quantization_params pointer from stack\n'
-    asm_string += 'mov {quantization_params_reg}, [rsp + {offset}]\n'.format(
-        quantization_params_reg=self.quantization_params_register(),
-        offset=self.stack_size() + self.quantization_params_offset(),
+    self.asm_string += '# Load quantization_params pointer from stack\n'
+    self.asm_string += (
+        'mov {quantization_params_reg}, [rsp + {offset}]\n'.format(
+            quantization_params_reg=self.quantization_params_register(),
+            offset=self.stack_size() + self.quantization_params_offset(),
+        )
     )
     for nr in range(0, self.n):
       for mr in range(0, self.m):
-        asm_string += (
+        self.asm_string += (
             'vmulps z{ACC}, z{ACC}, DWORD PTR [{quantization_params_reg} +'
             ' {offset}]{{1to16}}\n'.format(
                 ACC=accumulators[nr * self.m + mr],
@@ -214,29 +212,29 @@ class Avx512Vnni(avx512f_template.Avx512F):
     output_scale = 'vmovaps {W_SCALE}, [{W} + {offset}]\n'
     # output scales
     for nr in range(0, self.n):
-      asm_string += output_scale.format(
+      self.asm_string += output_scale.format(
           W=W,
           offset=self.register_bytes() * nr,
           W_SCALE=self.scale_registers()[nr],
       )
-    asm_string += self.increment_ptr(ptr=W, step=self.register_bytes() * self.n)
+    self.increment_ptr(ptr=W, step=self.register_bytes() * self.n)
     # biases
     for nr in range(0, self.n):
-      asm_string += output_scale.format(
+      self.asm_string += output_scale.format(
           W=W, offset=self.register_bytes() * nr, W_SCALE=self.w_registers()[nr]
       )
-    asm_string += self.increment_ptr(ptr=W, step=self.register_bytes() * self.n)
+    self.increment_ptr(ptr=W, step=self.register_bytes() * self.n)
     # Intel gets points here for its fma instructions which can accumulate into
     # any of the registers. For once, Intel has saner instructions than Arm.
     for nr in range(0, self.n):
       for mr in range(0, self.m):
-        asm_string += 'vfmadd213ps z{ACC}, {SCALE}, {BIAS}\n'.format(
+        self.asm_string += 'vfmadd213ps z{ACC}, {SCALE}, {BIAS}\n'.format(
             ACC=accumulators[nr * self.m + mr],
             SCALE=self.scale_registers()[nr],
             BIAS=self.w_registers()[nr],
         )
 
-    return asm_string
+    return self.asm_string
 
   def outer_loop_prepare(self):
     # outside the outer loop
@@ -245,23 +243,24 @@ class Avx512Vnni(avx512f_template.Avx512F):
       vpbroadcastd {tmp_s_reg}, {tmp_reg}
       vmovaps zmmword ptr [rsp + {offset}], {tmp_s_reg}\n"""
     )
-    ret = '\n# Load quantization_params pointer from stack\n'
-    ret += 'mov {quantization_params_reg}, [rsp + {offset}]\n'.format(
-        quantization_params_reg=self.quantization_params_register(),
-        offset=self.stack_size() + self.quantization_params_offset(),
+    self.comment('Load quantization_params pointer from stack')
+    self.asm_string += (
+        'mov {quantization_params_reg}, [rsp + {offset}]\n'.format(
+            quantization_params_reg=self.quantization_params_register(),
+            offset=self.stack_size() + self.quantization_params_offset(),
+        )
     )
     for mr in range(0, self.m, 1):
-      ret += zp_scale_load_push.format(
+      self.asm_string += zp_scale_load_push.format(
           tmp_reg=self.register_map_dword(self.tmp_gp_registers()[0]),
           quantization_params_reg=self.quantization_params_register(),
           tmp_s_reg=self.w_registers()[0],
           offset=self.stupid_offset() + mr * 64,
           zp_offset=mr * 8,
       )
-    return ret
 
   def init_accumulators(self):
-    ret = '# Initialize accumulators with k_sum * input zero point.\n'
+    self.comment('Initialize accumulators with k_sum * input zero point.')
     accumulators = self.acc_registers()
     W = self.w_ptr_register()
 
@@ -269,23 +268,22 @@ class Avx512Vnni(avx512f_template.Avx512F):
     vksum = 'vpmulld z{ACC}, {KSUM}, ZMMWORD PTR [rsp + {offset}]\n'
 
     for nr in range(0, self.n):
-      ret += ksum_x16.format(
+      self.asm_string += ksum_x16.format(
           W=self.w_ptr_register(),
           KSUM=self.w_registers()[nr],
           offset=self.register_bytes() * nr,
       )
     for nr in range(0, self.n):
       for mr in range(0, self.m):
-        ret += vksum.format(
+        self.asm_string += vksum.format(
             ACC=accumulators[nr * self.m + mr],
             KSUM=self.w_registers()[nr],
             pos=int((mr % 2) * 2),
             offset=self.stupid_offset() + mr * 64,
         )
 
-    ret += self.increment_ptr(ptr=W, step=self.register_bytes() * self.n)
-    ret += self.interleave_zeros(self.m, self.n)
-    return ret
+    self.increment_ptr(ptr=W, step=self.register_bytes() * self.n)
+    self.interleave_zeros(self.m, self.n)
 
   def stupid_offset(self):
     size = self.m * 16 + self.c_ptr_stack_offset()
@@ -299,30 +297,28 @@ class Avx512Vnni(avx512f_template.Avx512F):
   def interleave_zeros(self, M, N):
     match self._c:
       case 4:
-        return ''
+        return
       case 8:
         W = self.w_ptr_register()
         accumulators = self.acc_registers()
         bias_registers = self.bias_registers()
 
         c = self._c * self.element_size()
-        asm_string = '# Interleave with zeros.\n'
+        self.comment('Interleave with zeros.')
         unpack_lo = 'vpmovzxdq z{acc0}, y{acc1}\n'
         unpack_hi = """vextracti64x4 y{acc0}, z{acc1}, 1
         vpmovzxdq z{acc0}, y{acc0}
         """
         for mr in range(0, M):
           for nr in reversed(range(0, N)):
-            asm_string += unpack_hi.format(
+            self.asm_string += unpack_hi.format(
                 acc0=accumulators[mr + 2 * M * nr + M],
                 acc1=accumulators[mr + nr * M],
             )
-            asm_string += unpack_lo.format(
+            self.asm_string += unpack_lo.format(
                 acc0=accumulators[mr + 2 * M * nr],
                 acc1=accumulators[mr + nr * M],
             )
-
-        return asm_string
       case _:
         raise NotImplementedError
 
@@ -354,8 +350,8 @@ class Avx512VnniQc4w(Avx512Vnni):
     return w_asm
 
   def outer_loop_prepare(self):
-    res = super().outer_loop_prepare()
-    res += """
+    super().outer_loop_prepare()
+    self.asm_string += """
     mov {quantization_params_reg}, [rsp + 88]
     # Load 0xF0 for masking the weights
     vbroadcastsd  z{mask}, qword ptr [rip + .MASK]\n
@@ -363,24 +359,21 @@ class Avx512VnniQc4w(Avx512Vnni):
         quantization_params_reg=self.quantization_params_register(),
         mask=self.mask_register(),
     )
-    return res
 
   def convert_to_float(self):
     accumulators = self.acc_registers()
-    ret = ''
-    ret += '\n# Convert from int32 to float.\n'
+    self.asm_string += '\n# Convert from int32 to float.\n'
     for nr in range(0, self.n):
       for mr in range(0, self.m):
         reg_ofset = self.accumulator_reg_offset(self.m, nr)
         other_reg = accumulators[self.m * nr + mr + reg_ofset]
         ACC = accumulators[self.m * nr + mr]
-        ret += f'vpsrad z{other_reg}, z{other_reg}, 4\n'
-        ret += f'vcvtdq2ps z{ACC}, z{other_reg}\n'
-    return ret
+        self.asm_string += f'vpsrad z{other_reg}, z{other_reg}, 4\n'
+        self.asm_string += f'vcvtdq2ps z{ACC}, z{other_reg}\n'
 
   def pre_header(self):
-    asm_string = super().pre_header()
-    return asm_string + """.MASK:
+    super().pre_header()
+    self.asm_string += """.MASK:
         .quad   -1085102592571150096\n"""
 
   def w_register_bytes(self):

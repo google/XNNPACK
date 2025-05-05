@@ -64,7 +64,7 @@ void TestImpl(size_t rank) {
   for (auto _ : FuzzTest(std::chrono::milliseconds(500))) {
     std::vector<size_t> shape = random_shape(rng, rank);
 
-    Tensor<T> input(shape, PaddingBytes{XNN_EXTRA_BYTES});
+    Tensor<T> input(shape, xnnpack::XnnExtraBytes);
     DatatypeGenerator<T> generator(-20.0f, 20.0f);
     input.generate([&]() { return generator(rng); });
 
@@ -76,7 +76,7 @@ void TestImpl(size_t rank) {
 
     // Run subgraph
     // Softmax reads from the output assuming XNN_EXTRA_BYTES exist.
-    Tensor<T> output(expected.extents(), PaddingBytes{XNN_EXTRA_BYTES});
+    Tensor<T> output(expected.extents(), xnnpack::XnnExtraBytes);
     subgraph.SetupExternalTensor(output.base(), 1)
         .SetupRuntime()
         .InvokeRuntime();

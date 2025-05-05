@@ -1,0 +1,107 @@
+// Copyright 2025 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert OP in ["MAX", "MIN", "MINMAX"]
+#include <assert.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
+
+#include "src/xnnpack/simd/f32-${ARCH}.h"
+
+$ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
+$EMIT_MIN = "MIN" in OP
+$EMIT_MAX = "MAX" in OP
+$SIMD_SIZE = {"scalar": 1, "sse2": 4, "neon": 4, "wasmsimd": 4, "avx": 8, "avx512f": 16, "hvx": 32}[ARCH]
+$SIMD_TILE = BATCH_TILE // SIMD_SIZE
+$assert ACCUMULATORS <= SIMD_TILE
+
+void xnn_f32_r${OP.lower()}_ukernel__${ARCH}_u${BATCH_TILE}${ACC_SUFFIX}(
+    size_t batch,
+    const float* input,
+    float* output,
+    const struct xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  $if EMIT_MIN:
+    xnn_simd_f32_t vmin0 = xnn_set1_f32(output[0]);
+    $if EMIT_MAX:
+      xnn_simd_f32_t vmax0 = xnn_set1_f32(output[1]);
+  $elif EMIT_MAX:
+    xnn_simd_f32_t vmax0 = xnn_set1_f32(output[0]);
+  $for A in range(1, ACCUMULATORS):
+    $if EMIT_MIN:
+      xnn_simd_f32_t vmin${A} = vmin0;
+    $if EMIT_MAX:
+      xnn_simd_f32_t vmax${A} = vmax0;
+  $if BATCH_TILE > 32:
+    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+      $for N in range(SIMD_TILE):
+        const xnn_simd_f32_t vt${N} = xnn_loadu_f32(input + ${N * 32});
+      input += ${BATCH_TILE};
+
+      $for N in range(SIMD_TILE):
+        $if EMIT_MIN:
+          vmin${N % ACCUMULATORS} = xnn_min_f32(vmin${N % ACCUMULATORS}, vt${N});
+        $if EMIT_MAX:
+          vmax${N % ACCUMULATORS} = xnn_max_f32(vmax${N % ACCUMULATORS}, vt${N});
+    }
+    $if ACCUMULATORS > 1:
+      $ACC_SLICE = 1
+      $while ACC_SLICE < ACCUMULATORS:
+        $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+          $if A + ACC_SLICE < ACCUMULATORS:
+            $if EMIT_MIN:
+              vmin${A} = xnn_min_f32(vmin${A}, vmin${A + ACC_SLICE});
+            $if EMIT_MAX:
+              vmax${A} = xnn_max_f32(vmax${A}, vmax${A + ACC_SLICE});
+        $ACC_SLICE *= 2
+  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
+    const xnn_simd_f32_t vt = xnn_loadu_f32(input);
+    input += 32;
+
+    $if EMIT_MIN:
+      vmin0 = xnn_min_f32(vmin0, vt);
+    $if EMIT_MAX:
+      vmax0 = xnn_max_f32(vmax0, vt);
+  }
+
+  $if ARCH in ["hvx"]:
+    if XNN_UNLIKELY(batch) {
+      const xnn_simd_f32_t vt = xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
+      HVX_VectorPred mask = Q6_Q_vsetq_R(batch);
+
+      $if EMIT_MIN:
+        vmin0 = xnn_min_f32(vmin0, Q6_V_vmux_QVV(mask, vt, vmin0));
+      $if EMIT_MAX:
+        vmax0 = xnn_max_f32(vmax0, Q6_V_vmux_QVV(mask, vt, vmax0));
+    }
+  $else:
+    for (; batch != 0; batch -= sizeof(float)) {
+      const xnn_simd_f32_t vt = xnn_set1_f32(input[0]);
+      input += 1;
+
+      $if EMIT_MIN:
+        vmin0 = xnn_min_f32(vmin0, vt);
+      $if EMIT_MAX:
+        vmax0 = xnn_max_f32(vmax0, vt);
+    }
+
+  $if EMIT_MIN:
+    const float vmin = xnn_reduce_min_f32(vmin0);
+  $if EMIT_MAX:
+    const float vmax = xnn_reduce_max_f32(vmax0);
+
+  $if EMIT_MIN:
+    output[0] = vmin;
+    $if EMIT_MAX:
+      output[1] = vmax;
+  $elif EMIT_MAX:
+    output[0] = vmax;
+}

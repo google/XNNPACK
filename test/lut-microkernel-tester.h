@@ -53,11 +53,10 @@ class LUTMicrokernelTester {
   void Test(xnn_x8_lut_ukernel_fn lut) const {
     xnnpack::ReplicableRandomDevice rng;
 
-    xnnpack::Buffer<uint8_t> x(batch_size() +
-                               XNN_EXTRA_BYTES / sizeof(uint8_t));
+    xnnpack::Buffer<uint8_t> x(batch_size(), xnnpack::XnnExtraBytes);
     XNN_ALIGN(64) std::array<uint8_t, 256> t;
     xnnpack::Buffer<uint8_t> y(
-        batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint8_t) : 0));
+        batch_size(), xnnpack::PaddingBytes{inplace() ? XNN_EXTRA_BYTES : 0});
     xnnpack::Buffer<uint8_t> y_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       xnnpack::fill_uniform_random_bits(x.data(), x.size(), rng);

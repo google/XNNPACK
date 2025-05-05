@@ -17,6 +17,7 @@
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"  // for float_as_uint32
 
 // SIMD vector type for f32 using HVX.
 typedef HVX_Vector xnn_simd_f32_t;
@@ -24,8 +25,11 @@ typedef HVX_Vector xnn_simd_f32_t;
 #define xnn_simd_log2_size_f32 5
 #define xnn_simd_bytes_f32 (xnn_simd_size_f32 * sizeof(float))
 
+#define XNN_SIMD_CONST_F32_VARNAME(prefix, name) prefix##name
+
 #define XNN_SIMD_CONST_F32(var, val) \
-  const xnn_simd_f32_t var = Q6_V_vsplat_R(val);
+  const float XNN_SIMD_CONST_F32_VARNAME(var, _scalar) = val; \
+  const xnn_simd_f32_t var = Q6_V_vsplat_R(*(uint32_t*) &XNN_SIMD_CONST_F32_VARNAME(var, _scalar));
 
 #define XNN_SIMD_CONST_F32_FROM_INT32(var, val) \
   const HVX_Vector var = Q6_V_vsplat_R(val);
@@ -101,11 +105,25 @@ static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
   return Q6_V_vxor_VV(a, Q6_V_vsplat_R(0x80000000));
 }
 
-// TODO: Implement hvx code sequence.
-// - compare exp to smallest exp that is integer (23)
-// - convert to int and back to float
-// - use compare result to select rounding int or original float
-// - large exp includes NaN and inf and negative versions of these
+#if __HVX_ARCH__ >= 73
+static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
+  const HVX_Vector vmax_non_int_val =
+      Q6_V_vsplat_R(float_as_uint32(8388608.0f));  // 2^23.
+
+  const HVX_VectorPred vfilter = Q6_Q_vcmp_gt_VsfVsf(
+      Q6_V_vand_VV(a, Q6_V_vsplat_R(0x7FFFFFFF)), vmax_non_int_val);
+
+  // Create a vector of `0.5f` with the same sign as the entries of `a`.
+  const HVX_Vector vhalf = Q6_V_vsplat_R(float_as_uint32(0.5f));
+  const HVX_Vector vsign_mask = Q6_V_vsplat_R(0x80000000);
+  const HVX_Vector vsigned_half =
+      Q6_V_vor_VV(Q6_V_vand_VV(a, vsign_mask), vhalf);
+  const HVX_Vector vresult = Q6_Vsf_equals_Vw(Q6_Vw_equals_Vsf(
+      Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_VsfVsf(a, vsigned_half))));
+
+  return Q6_V_vmux_QVV(vfilter, a, vresult);
+}
+#else
 static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
   XNN_ALIGN(128) float input[xnn_simd_size_f32];
   XNN_ALIGN(128) float output[xnn_simd_size_f32];
@@ -115,6 +133,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
   }
   return *((HVX_Vector*)output);
 }
+#endif  // __HVX_ARCH__ >= 73
 
 // Logical operations.
 
@@ -152,7 +171,48 @@ static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
 
 // Special functions.
 #define XNN_SIMD_HAVE_RCP_F32 0
+#define XNN_SIMD_NUM_RCP_ITER_F32 1
 #define XNN_SIMD_HAVE_RSQRT_F32 0
+#define XNN_SIMD_NUM_RCP_ITER_F32 2
+
+#define XNN_SIMD_HAVE_REDUCE_MAX_F32 1
+static XNN_INLINE float xnn_reduce_max_f32(xnn_simd_f32_t v) {
+  v = Q6_Vsf_vmax_VsfVsf(v, Q6_V_vror_VR(v, 64));
+  v = Q6_Vsf_vmax_VsfVsf(v, Q6_V_vror_VR(v, 32));
+  v = Q6_Vsf_vmax_VsfVsf(v, Q6_V_vror_VR(v, 16));
+  v = Q6_Vsf_vmax_VsfVsf(v, Q6_V_vror_VR(v, 8));
+  v = Q6_Vsf_vmax_VsfVsf(v, Q6_V_vror_VR(v, 4));
+  return *((float*)&v);
+}
+
+#define XNN_SIMD_HAVE_REDUCE_MIN_F32 1
+static XNN_INLINE float xnn_reduce_min_f32(xnn_simd_f32_t v) {
+  v = Q6_Vsf_vmin_VsfVsf(v, Q6_V_vror_VR(v, 64));
+  v = Q6_Vsf_vmin_VsfVsf(v, Q6_V_vror_VR(v, 32));
+  v = Q6_Vsf_vmin_VsfVsf(v, Q6_V_vror_VR(v, 16));
+  v = Q6_Vsf_vmin_VsfVsf(v, Q6_V_vror_VR(v, 8));
+  v = Q6_Vsf_vmin_VsfVsf(v, Q6_V_vror_VR(v, 4));
+  return *((float*)&v);
+}
+
+#define XNN_SIMD_HAVE_REDUCE_ADD_F32 1
+static XNN_INLINE float xnn_reduce_add_f32(xnn_simd_f32_t v) {
+#if __HVX_ARCH__ >= 79
+  v = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_VsfVsf(v, Q6_V_vror_VR(v, 64)));
+  v = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_VsfVsf(v, Q6_V_vror_VR(v, 32)));
+  v = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_VsfVsf(v, Q6_V_vror_VR(v, 16)));
+  v = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_VsfVsf(v, Q6_V_vror_VR(v, 8)));
+  v = Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_VsfVsf(v, Q6_V_vror_VR(v, 4)));
+#else
+  v = Q6_Vqf32_vadd_VsfVsf(v, Q6_V_vror_VR(v, 64));
+  v = Q6_Vqf32_vadd_Vqf32Vqf32(v, Q6_V_vror_VR(v, 32));
+  v = Q6_Vqf32_vadd_Vqf32Vqf32(v, Q6_V_vror_VR(v, 16));
+  v = Q6_Vqf32_vadd_Vqf32Vqf32(v, Q6_V_vror_VR(v, 8));
+  v = Q6_Vqf32_vadd_Vqf32Vqf32(v, Q6_V_vror_VR(v, 4));
+  v = Q6_Vsf_equals_Vqf32(v);
+#endif
+  return *((float*)&v);
+}
 
 // Load/store operations.
 
@@ -173,7 +233,7 @@ static XNN_INLINE void xnn_store_f32(float* ptr, xnn_simd_f32_t v) {
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_set1_f32(float v) {
-  return Q6_V_vsplat_R(*(uint32_t*)&v);
+  return Q6_V_vsplat_R(float_as_uint32(v));
 }
 
 // Tail load/store operations.

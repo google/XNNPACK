@@ -119,6 +119,12 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "persistent_test",
+    srcs = ["persistent.cc"],
+    deps = SUBGRAPH_TEST_DEPS + ["//:allocation_type"],
+)
+
+xnnpack_unit_test(
     name = "binary_test",
     timeout = "moderate",
     srcs = ["binary.cc"],
@@ -153,29 +159,19 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "convolution_2d_test",
-    srcs = [
-        "convolution-2d.cc",
-    ],
-    deps = SUBGRAPH_TEST_DEPS + [
-        "//test/operators:convolution_test_helpers",
-    ],
+    srcs = ["convolution-2d.cc"],
+    deps = SUBGRAPH_TEST_DEPS + [":stencil"],
 )
 
 xnnpack_unit_test(
     name = "deconvolution_2d_test",
-    timeout = "moderate",
     srcs = ["deconvolution-2d.cc"],
-    shard_count = 5,
-    deps = SUBGRAPH_TEST_DEPS + [
-        "//test/operators:convolution_test_helpers",
-    ],
+    deps = SUBGRAPH_TEST_DEPS + [":stencil"],
 )
 
 xnnpack_unit_test(
     name = "depthwise_convolution_2d_test",
-    srcs = [
-        "depthwise-convolution-2d.cc",
-    ],
+    srcs = ["depthwise-convolution-2d.cc"],
     deps = SUBGRAPH_TEST_DEPS + [":stencil"],
 )
 
@@ -204,14 +200,6 @@ xnnpack_unit_test(
     timeout = "moderate",
     srcs = ["rope.cc"],
     deps = SUBGRAPH_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "scaled_dot_product_attention_test",
-    srcs = ["scaled-dot-product-attention.cc"],
-    deps = SUBGRAPH_TEST_DEPS + [
-        "//:aligned_allocator",
-    ],
 )
 
 xnnpack_unit_test(

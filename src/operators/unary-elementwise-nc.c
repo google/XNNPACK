@@ -153,6 +153,8 @@ static const struct xnn_unary_elementwise_config* get_config(
         return xnn_init_f16_cosine_config();
       case xnn_unary_elu:
         return xnn_init_f16_elu_config();
+      case xnn_unary_exp:
+        return xnn_init_f16_exp_config();
       case xnn_unary_gelu:
         return xnn_init_f16_gelu_config();
       case xnn_unary_floor:

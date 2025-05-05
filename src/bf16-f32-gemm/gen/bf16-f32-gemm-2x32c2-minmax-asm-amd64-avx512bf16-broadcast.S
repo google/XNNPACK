@@ -114,15 +114,16 @@ BEGIN_FUNCTION xnn_bf16_f32_gemm_minmax_ukernel_2x32c2__asm_amd64_avx512bf16_bro
       vpsrld zmm3, zmm3, 16
       vdpbf16ps  zmm14, zmm3, zmm8
 
+
 .Linner_loop_end:
       # Min/max clamping.
       vminps  zmm11, zmm1, zmm11
-      vminps  zmm12, zmm1, zmm12
       vminps  zmm13, zmm1, zmm13
+      vminps  zmm12, zmm1, zmm12
       vminps  zmm14, zmm1, zmm14
       vmaxps  zmm11, zmm0, zmm11
-      vmaxps  zmm12, zmm0, zmm12
       vmaxps  zmm13, zmm0, zmm13
+      vmaxps  zmm12, zmm0, zmm12
       vmaxps  zmm14, zmm0, zmm14
 
       # Check whether full or partial store.

@@ -110,15 +110,15 @@ class VMulCAddCMicrokernelTester {
       ASSERT_EQ(input_stride(), output_stride());
     }
 
-    xnnpack::Buffer<xnn_float16> x((rows() - 1) * input_stride() + channels() +
-                                   XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    xnnpack::Buffer<xnn_float16> x((rows() - 1) * input_stride() + channels(),
+                                   xnnpack::XnnExtraBytes);
     xnnpack::Buffer<xnn_float16> scale(channels());
     xnnpack::Buffer<xnn_float16> bias(channels());
     xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> packed_w(
         packed_channels() * 2);
     xnnpack::Buffer<xnn_float16> y(
-        (rows() - 1) * output_stride() + channels() +
-        (inplace() ? XNN_EXTRA_BYTES / sizeof(xnn_float16) : 0));
+        (rows() - 1) * output_stride() + channels(),
+        xnnpack::PaddingBytes{inplace() ? XNN_EXTRA_BYTES : 0});
     xnnpack::Buffer<float> y_ref(rows() * channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -189,14 +189,15 @@ class VMulCAddCMicrokernelTester {
       ASSERT_EQ(input_stride(), output_stride());
     }
 
-    xnnpack::Buffer<float> x((rows() - 1) * input_stride() + channels() +
-                             XNN_EXTRA_BYTES / sizeof(float));
+    xnnpack::Buffer<float> x((rows() - 1) * input_stride() + channels(),
+                             xnnpack::XnnExtraBytes);
     xnnpack::Buffer<float> scale(channels());
     xnnpack::Buffer<float> bias(channels());
     xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> packed_w(
         packed_channels() * 2);
-    xnnpack::Buffer<float> y((rows() - 1) * output_stride() + channels() +
-                             (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
+    xnnpack::Buffer<float> y(
+        (rows() - 1) * output_stride() + channels(),
+        xnnpack::PaddingBytes{inplace() ? XNN_EXTRA_BYTES : 0});
     xnnpack::Buffer<float> y_ref(rows() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(scale.begin(), scale.end(), [&]() { return f32dist(rng); });

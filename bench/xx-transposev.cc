@@ -29,9 +29,9 @@ void transpose(benchmark::State& state, xnn_transposev_ukernel_fn transpose,
   const size_t tile_wbytes = width * 3;
 
   xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> x(
-      height * width * element_size + XNN_EXTRA_BYTES / sizeof(uint8_t));
+      height * width * element_size, xnnpack::XnnExtraBytes);
   xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> y(
-      height * width * element_size + XNN_EXTRA_BYTES / sizeof(uint8_t));
+      height * width * element_size, xnnpack::XnnExtraBytes);
   std::iota(x.begin(), x.end(), 0);
 
   for (auto _ : state) {

@@ -10,7 +10,6 @@ Microkernel function names follow this convention:
 
 Where `<datatype>` can be:
 
--   `cs16`
 -   `f16` - 16-bit half precision float
 -   `f32` - 32-bit single precision float
 -   `qc8`
@@ -65,12 +64,53 @@ details.
 In the context of convolution operator, we decide whether to use GEMM or IGEMM
 based on parameters like stride, padding, kernel size, etc.
 
-The `<parameters>` for GEMM and IGEMM microkernels represent the `mr` and `nr`
-of the microkernel. You can think of it as the number of rows and columns of the
-output calculated by the microkernel.
+To understand the meaning of microkernels parameters let us consider
 
-E.g. `xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a7` processes 32
-elements of the output matrix.
+```cpp
+void xnn_f32_gemm_minmax_ukernel_2x4__scalar(
+    size_t mr,
+    size_t nc,
+    size_t kc,
+    const float* restrict a,
+    size_t a_stride,
+    const float* restrict w,
+    float* restrict c,
+    size_t cm_stride,
+    size_t cn_stride,
+    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+```
+
+In this context `a` refers to the activations matrix `A`,
+`w` to the weights matrix `B` and `c` to the output `C := A x B`.
+The shape of `A` is `mr x KC`,
+the shape of `B` is `KC x nc`.
+Note, that `kc` is expressed in bytes, so `KC = kc / sizeof(float)`
+if the element type is `float`.
+
+The valid values of `mr` are less than or equal to `2`,
+`kc` is required to be a multiple of `sizeof(float)` while
+`nc` can be an arbitrary positive integer.
+
+Conceptually, in the simplest scenario
+`xnn_f32_gemm_minmax_ukernel_2x4__scalar` computes the matrix product `C`
+of shape `mr x nc`:
+
+```cpp
+for (int n = 0; n < nc; n += NR) {
+    for (int k = 0; k < KC; k += 1) {
+        1. Load MR (2) activations.
+        Logically the activations represent A[0, k], ..., A[MR - 1, k].
+        2. Load NR (4) weights
+        Logically the weights represent B[k, n], ..., B[k, n + NR - 1].
+        3. Compute MR x NR products between activations and weights.
+        4. Update the accumulators C[0, n], ..., C[MR - 1, n + NR - 1].
+    }
+}
+```
+Computing a general matrix product for a given value `m` can be done by
+calling `xnn_f32_gemm_minmax_ukernel_2x4__scalar` in a loop over `mr`,
+where each invocation of `xnn_f32_gemm_minmax_ukernel_2x4__scalar`
+is responsible for computing `mr` rows of the output.
 
 ## DWCONV microkernels
 

@@ -487,7 +487,7 @@ BENCHMARK_CAPTURE(ThreePassSoftMaxWithReloading, avx2_p5,
     ->UseManualTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 BENCHMARK_CAPTURE(ThreePassSoftMaxWithReloading, rvv_p6_rmax_m8_exp_m4_vmulc_m8,
                   xnn_f32_rmax_ukernel__rvv_u8v,
                   (xnn_init_f32_default_params_fn) nullptr,
@@ -495,7 +495,18 @@ BENCHMARK_CAPTURE(ThreePassSoftMaxWithReloading, rvv_p6_rmax_m8_exp_m4_vmulc_m8,
                   xnn_f32_vmulc_ukernel__rvv_u8v, benchmark::utils::CheckRVV)
     ->Apply(CharacteristicArguments)
     ->UseManualTime();
-#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+
+#if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+BENCHMARK_CAPTURE(ThreePassSoftMaxWithReloading, hvx_p5,
+                  xnn_f32_rmax_ukernel__hvx_u64_acc2,
+                  (xnn_init_f32_default_params_fn) nullptr,
+                  xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u128_acc2,
+                  nullptr, xnn_f32_vmulc_ukernel__hvx_u128,
+                  benchmark::utils::CheckHVX)
+    ->Apply(CharacteristicArguments)
+    ->UseManualTime();
+#endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();

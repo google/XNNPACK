@@ -3,7 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <assert.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #if XNN_ENABLE_CPUINFO
 #include <cpuinfo.h>
@@ -68,58 +70,68 @@ static struct xnn_hardware_config hardware_config = {0};
 
 XNN_INIT_ONCE_GUARD(hardware);
 
+// TODO(b/409244409): Remove before end of 2025/Q2.
+#if XNN_ARCH_ARM64
+int32_t xnn_enable_arm_sme2_default = 1;
+#endif  // XNN_ARCH_ARM64
+
 static void init_hardware_config(void) {
-  #if XNN_ARCH_ARM64 || XNN_ARCH_ARM
-    #if XNN_PLATFORM_WINDOWS
-      SYSTEM_INFO system_info;
-      GetSystemInfo(&system_info);
-      switch (system_info.wProcessorLevel) {
-        case 0x803:  // Kryo 385 Silver
-          hardware_config.use_arm_neon_fp16_arith = true;
-          break;
-        default:
-          // Assume that Dot Product support implies FP16 support.
-          // ARM manuals don't guarantee that, but it holds in practice.
-          hardware_config.use_arm_neon_fp16_arith = !!IsProcessorFeaturePresent(PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE);
-          break;
-      }
-      hardware_config.use_arm_fp16_arith = hardware_config.use_arm_neon_fp16_arith;
+#if XNN_ARCH_ARM64 || XNN_ARCH_ARM
+#if XNN_PLATFORM_WINDOWS
+  SYSTEM_INFO system_info;
+  GetSystemInfo(&system_info);
+  switch (system_info.wProcessorLevel) {
+    case 0x803:  // Kryo 385 Silver
+      hardware_config.use_arm_neon_fp16_arith = true;
+      break;
+    default:
+      // Assume that Dot Product support implies FP16 support.
+      // ARM manuals don't guarantee that, but it holds in practice.
+      hardware_config.use_arm_neon_fp16_arith =
+          !!IsProcessorFeaturePresent(PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE);
+      break;
+  }
+  hardware_config.use_arm_fp16_arith = hardware_config.use_arm_neon_fp16_arith;
 
-      hardware_config.use_arm_neon_bf16 = false;
-      hardware_config.use_arm_neon_dot = !!IsProcessorFeaturePresent(PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE);
-    #else
-      hardware_config.use_arm_fp16_arith = cpuinfo_has_arm_fp16_arith();
-      hardware_config.use_arm_neon_fp16_arith = cpuinfo_has_arm_neon_fp16_arith();
-      hardware_config.use_arm_neon_bf16 = cpuinfo_has_arm_neon_bf16();
-      hardware_config.use_arm_neon_dot = cpuinfo_has_arm_neon_dot();
-    #endif
-    hardware_config.use_arm_vfpv3 = cpuinfo_has_arm_vfpv3();
-    hardware_config.use_arm_neon = cpuinfo_has_arm_neon();
-    hardware_config.use_arm_neon_fp16 = cpuinfo_has_arm_neon_fp16();
-    hardware_config.use_arm_neon_fma = cpuinfo_has_arm_neon_fma();
-    hardware_config.use_arm_neon_v8 = cpuinfo_has_arm_neon_v8();
-  #endif
+  hardware_config.use_arm_neon_bf16 = false;
+  hardware_config.use_arm_neon_dot =
+      !!IsProcessorFeaturePresent(PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE);
+#else
+  hardware_config.use_arm_fp16_arith = cpuinfo_has_arm_fp16_arith();
+  hardware_config.use_arm_neon_fp16_arith = cpuinfo_has_arm_neon_fp16_arith();
+  hardware_config.use_arm_neon_bf16 = cpuinfo_has_arm_neon_bf16();
+  hardware_config.use_arm_neon_dot = cpuinfo_has_arm_neon_dot();
+#endif
+  hardware_config.use_arm_vfpv3 = cpuinfo_has_arm_vfpv3();
+  hardware_config.use_arm_neon = cpuinfo_has_arm_neon();
+  hardware_config.use_arm_neon_fp16 = cpuinfo_has_arm_neon_fp16();
+  hardware_config.use_arm_neon_fma = cpuinfo_has_arm_neon_fma();
+  hardware_config.use_arm_neon_v8 = cpuinfo_has_arm_neon_v8();
+#endif
 
-  #if XNN_ARCH_ARM
-    hardware_config.use_arm_v6 = cpuinfo_has_arm_v6();
-    hardware_config.use_arm_vfpv2 = cpuinfo_has_arm_vfpv2();
-  #endif
+#if XNN_ARCH_ARM
+  hardware_config.use_arm_v6 = cpuinfo_has_arm_v6();
+  hardware_config.use_arm_vfpv2 = cpuinfo_has_arm_vfpv2();
+#endif
 
-  #if XNN_ARCH_ARM64
-    hardware_config.use_arm_neon_i8mm = cpuinfo_has_arm_i8mm();
-    hardware_config.use_arm_sve = cpuinfo_has_arm_sve();
-    hardware_config.use_arm_sve2 = cpuinfo_has_arm_sve2();
-    hardware_config.use_arm_sme = cpuinfo_has_arm_sme();
-    hardware_config.use_arm_sme2 = cpuinfo_has_arm_sme2();
-  #endif
+#if XNN_ARCH_ARM64
+  hardware_config.use_arm_neon_i8mm = cpuinfo_has_arm_i8mm();
+  hardware_config.use_arm_sve = cpuinfo_has_arm_sve();
+  hardware_config.use_arm_sve2 = cpuinfo_has_arm_sve2();
+  hardware_config.use_arm_sme = cpuinfo_has_arm_sme();
+  // TODO(b/409244409): Remove before end of 2025/Q2.
+  hardware_config.use_arm_sme2 =
+      xnn_enable_arm_sme2_default && cpuinfo_has_arm_sme2();
+  xnn_enable_arm_sme2_default = -1;
+#endif
 
-  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-    hardware_config.use_x86_ssse3 = cpuinfo_has_x86_ssse3();
-    hardware_config.use_x86_sse4_1 = cpuinfo_has_x86_sse4_1();
-    hardware_config.use_x86_avx = cpuinfo_has_x86_avx();
-    hardware_config.use_x86_f16c = cpuinfo_has_x86_f16c();
-    hardware_config.use_x86_fma3 = cpuinfo_has_x86_fma3();
-    hardware_config.use_x86_avx2 = cpuinfo_has_x86_avx2();
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  hardware_config.use_x86_ssse3 = cpuinfo_has_x86_ssse3();
+  hardware_config.use_x86_sse4_1 = cpuinfo_has_x86_sse4_1();
+  hardware_config.use_x86_avx = cpuinfo_has_x86_avx();
+  hardware_config.use_x86_f16c = cpuinfo_has_x86_f16c();
+  hardware_config.use_x86_fma3 = cpuinfo_has_x86_fma3();
+  hardware_config.use_x86_avx2 = cpuinfo_has_x86_avx2();
 #if XNN_ENABLE_AVX512F
     hardware_config.use_x86_avx512f = cpuinfo_has_x86_avx512f();
 #else

@@ -557,3 +557,40 @@ TEST(U8_RMIN__SCALAR_U4_ACC4, batch_gt_4) {
     }
   }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  TEST(U8_RMIN__HVX_U256_ACC2, batch_eq_256) {
+    TEST_REQUIRES_HVX;
+    ReduceMicrokernelTester()
+      .batch_size(256)
+      .Test(xnn_u8_rmin_ukernel__hvx_u256_acc2, ReduceMicrokernelTester::OpType::Min);
+  }
+
+  TEST(U8_RMIN__HVX_U256_ACC2, batch_div_256) {
+    TEST_REQUIRES_HVX;
+    for (size_t batch_size = 512; batch_size < 2560; batch_size += 256) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_u8_rmin_ukernel__hvx_u256_acc2, ReduceMicrokernelTester::OpType::Min);
+    }
+  }
+
+  TEST(U8_RMIN__HVX_U256_ACC2, batch_lt_256) {
+    TEST_REQUIRES_HVX;
+    for (size_t batch_size = 1; batch_size < 256; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_u8_rmin_ukernel__hvx_u256_acc2, ReduceMicrokernelTester::OpType::Min);
+    }
+  }
+
+  TEST(U8_RMIN__HVX_U256_ACC2, batch_gt_256) {
+    TEST_REQUIRES_HVX;
+    for (size_t batch_size = 257; batch_size < 512; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_u8_rmin_ukernel__hvx_u256_acc2, ReduceMicrokernelTester::OpType::Min);
+    }
+  }
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON

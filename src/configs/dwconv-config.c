@@ -414,6 +414,26 @@ static void init_f32_dwconv_config(void) {
     f32_dwconv_config[3].init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_dwconv_config[3].channel_tile = hardware_config->vlenb / element_size * lmul;
     f32_dwconv_config[3].primary_tile = 25;
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    f32_dwconv_config[0].minmax = (xnn_dwconv_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_3p32c__hvx;
+    f32_dwconv_config[0].init.f32 = xnn_init_f32_minmax_scalar_params;
+    f32_dwconv_config[0].channel_tile = 32;
+    f32_dwconv_config[0].primary_tile = 3;
+
+    f32_dwconv_config[1].minmax = (xnn_dwconv_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_4p32c__hvx;
+    f32_dwconv_config[1].init.f32 = xnn_init_f32_minmax_scalar_params;
+    f32_dwconv_config[1].channel_tile = 32;
+    f32_dwconv_config[1].primary_tile = 4;
+
+    f32_dwconv_config[2].minmax = (xnn_dwconv_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_9p32c__hvx;
+    f32_dwconv_config[2].init.f32 = xnn_init_f32_minmax_scalar_params;
+    f32_dwconv_config[2].channel_tile = 32;
+    f32_dwconv_config[2].primary_tile = 9;
+
+    f32_dwconv_config[3].minmax = (xnn_dwconv_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_25p32c__hvx;
+    f32_dwconv_config[3].init.f32 = xnn_init_f32_minmax_scalar_params;
+    f32_dwconv_config[3].channel_tile = 32;
+    f32_dwconv_config[3].primary_tile = 25;
   #else
     f32_dwconv_config[0].minmax = (xnn_dwconv_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_3p1c__scalar_acc2;
     f32_dwconv_config[0].linear = (xnn_dwconv_ukernel_fn) xnn_f32_dwconv_ukernel_3p1c__scalar_acc2;
@@ -447,7 +467,7 @@ static void init_qs8_qc8w_dwconv_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon) {
       if (hardware_config->use_arm_neon_v8) {
-        qs8_qc8w_dwconv_config[0].minmax = (xnn_dwconv_ukernel_fn) xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p16c__asm_aarch32_neonv8_mla8_cortex_a35;
+        qs8_qc8w_dwconv_config[0].minmax = (xnn_dwconv_ukernel_fn) xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p16c__neonv8_mla8_ld64;
         qs8_qc8w_dwconv_config[0].init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params;
         qs8_qc8w_dwconv_config[0].channel_tile = 16;
         qs8_qc8w_dwconv_config[0].primary_tile = 3;

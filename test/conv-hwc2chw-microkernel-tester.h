@@ -263,13 +263,12 @@ class ConvHWC2CHWMicrokernelTester {
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
     xnnpack::Buffer<float> input(
-        XNN_EXTRA_BYTES / sizeof(float) +
         batch_size() *
             ((input_height() * input_width() - 1) * input_pixel_stride() +
-             input_channels()));
-    xnnpack::Buffer<float> zero(
-        XNN_EXTRA_BYTES / sizeof(float) + input_width() * input_channels(),
-        0.0f);
+             input_channels()),
+        xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<float> zero(input_width() * input_channels(), 0.0f,
+                                xnnpack::XnnExtraBytes);
     xnnpack::Buffer<float> kernel(output_channels() * kernel_height() *
                                   kernel_width() * input_channels());
     xnnpack::Buffer<float> bias(output_channels());
@@ -408,13 +407,12 @@ class ConvHWC2CHWMicrokernelTester {
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
     xnnpack::Buffer<xnn_float16> input(
-        XNN_EXTRA_BYTES / sizeof(xnn_float16) +
         batch_size() *
             ((input_height() * input_width() - 1) * input_pixel_stride() +
-             input_channels()));
-    xnnpack::Buffer<xnn_float16> zero(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
-                                          input_width() * input_channels(),
-                                      0);
+             input_channels()),
+        xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<xnn_float16> zero(input_width() * input_channels(), 0,
+                                      xnnpack::XnnExtraBytes);
     xnnpack::Buffer<xnn_float16> kernel(output_channels() * kernel_height() *
                                         kernel_width() * input_channels());
     xnnpack::Buffer<xnn_float16> bias(output_channels());

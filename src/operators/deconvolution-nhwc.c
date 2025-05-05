@@ -1980,16 +1980,19 @@ enum xnn_status reshape_deconvolution2d_nhwc_qx8_f32_qc8w(
     return xnn_status_invalid_parameter;
   }
 
-  if (deconvolution_op->zero_buffers) {
-    for (size_t i = 1; i < batch_size; ++i) {
-      xnn_release_simd_memory(deconvolution_op->zero_buffers[i]);
+  if (deconvolution_op->valid_batch_size != batch_size) {
+    if (deconvolution_op->zero_buffers) {
+      for (size_t i = 1; i < deconvolution_op->valid_batch_size; ++i) {
+        xnn_release_simd_memory(deconvolution_op->zero_buffers[i]);
+      }
     }
-  }
 
-  deconvolution_op->zero_buffers = xnn_reallocate_memory(deconvolution_op->zero_buffers, batch_size * sizeof(void*));
-  deconvolution_op->zero_buffers[0] = deconvolution_op->zero_buffer;
-  for (size_t i = 1; i < batch_size; ++i) {
-    deconvolution_op->zero_buffers[i] = xnn_allocate_simd_memory(deconvolution_op->zero_size);
+    deconvolution_op->zero_buffers = xnn_reallocate_memory(deconvolution_op->zero_buffers, batch_size * sizeof(void*));
+    deconvolution_op->zero_buffers[0] = deconvolution_op->zero_buffer;
+    for (size_t i = 1; i < batch_size; ++i) {
+      deconvolution_op->zero_buffers[i] = xnn_allocate_simd_memory(deconvolution_op->zero_size);
+    }
+    deconvolution_op->valid_batch_size = batch_size;
   }
 
   return reshape_deconvolution2d_nhwc(

@@ -37,43 +37,44 @@ SubgraphTester::SubgraphTester(uint32_t external_value_ids) {
 }
 
 SubgraphTester& SubgraphTester::AddInternalDynamicTensorF32(
-    const std::vector<size_t>& dims, uint32_t* id_out, uint32_t flags) {
+    const TensorShape& shape, uint32_t* id_out, uint32_t flags) {
   const xnn_status status = xnn_define_tensor_value(
-      subgraph_.get(), xnn_datatype_fp32, dims.size(), dims.data(), nullptr,
+      subgraph_.get(), xnn_datatype_fp32, shape.Rank(), shape.Dims(), nullptr,
       XNN_INVALID_VALUE_ID, flags, id_out);
   EXPECT_EQ(status, xnn_status_success);
 
   return *this;
 }
 
+SubgraphTester& SubgraphTester::AddInternalDynamicallyQuantizedTensor(
+    const TensorShape& shape, xnn_datatype datatype, size_t num_nonbatch_dims,
+    uint32_t* id_out, uint32_t flags) {
+  const xnn_status status = xnn_define_dynamically_quantized_tensor_value(
+      subgraph_.get(), xnn_datatype_qdint8, shape.Rank(), num_nonbatch_dims,
+      shape.Dims(), XNN_INVALID_VALUE_ID, flags, id_out);
+  EXPECT_EQ(status, xnn_status_success);
+  return *this;
+}
+
 SubgraphTester& SubgraphTester::AddDynamicTensor(
-    const std::vector<size_t>& dims, uint32_t external_id,
-    xnn_datatype datatype, xnn_quantization_params quantization,
-    uint32_t flags) {
+    const TensorShape& shape, uint32_t external_id, xnn_datatype datatype,
+    xnn_quantization_params quantization, uint32_t flags) {
   assert(external_id < subgraph_->external_value_ids);
   uint32_t id_out = 0;
   if (xnn_datatype_is_quantized(datatype)) {
     const xnn_status status = xnn_define_quantized_tensor_value(
         subgraph_.get(), datatype, quantization.zero_point, quantization.scale,
-        dims.size(), dims.data(), nullptr, external_id, flags, &id_out);
+        shape.Rank(), shape.Dims(), nullptr, external_id, flags, &id_out);
     EXPECT_EQ(status, xnn_status_success);
   } else {
     const xnn_status status = xnn_define_tensor_value(
-        subgraph_.get(), datatype, dims.size(), dims.data(), nullptr,
-        external_id, flags, &id_out);
+        subgraph_.get(), datatype, shape.Rank(), shape.Dims(), nullptr, external_id,
+        flags, &id_out);
     EXPECT_EQ(status, xnn_status_success);
   }
   EXPECT_EQ(id_out, external_id);
 
   return *this;
-}
-
-SubgraphTester& SubgraphTester::AddDynamicTensor(
-    const std::vector<size_t>& dims, uint32_t external_id,
-    xnn_datatype datatype, uint32_t flags) {
-  assert(!xnn_datatype_is_quantized(datatype));
-  assert(external_id < subgraph_->external_value_ids);
-  return AddDynamicTensor(dims, external_id, datatype, {}, flags);
 }
 
 std::vector<size_t> SubgraphTester::GetExternalTensorShape(
@@ -89,15 +90,28 @@ std::vector<size_t> SubgraphTester::GetExternalTensorShape(
 }
 
 SubgraphTester& SubgraphTester::AddDynamicallyQuantizedTensor(
-    const std::vector<size_t>& dims, uint32_t external_id, uint32_t flags) {
+    const TensorShape& shape, uint32_t external_id, uint32_t flags) {
   assert(external_id < subgraph_->external_value_ids);
   uint32_t id_out = 0;
   const xnn_status status = xnn_define_dynamically_quantized_tensor_value(
-      subgraph_.get(), xnn_datatype_qdint8, dims.size(), 1, dims.data(),
+      subgraph_.get(), xnn_datatype_qdint8, shape.Rank(), 1, shape.Dims(),
       external_id, flags, &id_out);
   EXPECT_EQ(status, xnn_status_success);
   EXPECT_EQ(id_out, external_id);
 
+  return *this;
+}
+
+SubgraphTester& SubgraphTester::AddStaticChannelwiseQuantizedTensor(
+    const std::vector<size_t>& dims, size_t channel_dim, xnn_datatype datatype,
+    const float* scale, uint32_t external_id, uint32_t flags, void* data) {
+  assert(external_id < subgraph_->external_value_ids);
+  uint32_t id_out;
+  const xnn_status status = xnn_define_channelwise_quantized_tensor_value(
+      subgraph_.get(), datatype, scale, dims.size(), channel_dim, dims.data(),
+      data, external_id, flags, &id_out);
+  EXPECT_EQ(status, xnn_status_success);
+  EXPECT_EQ(id_out, external_id);
   return *this;
 }
 
@@ -166,22 +180,21 @@ SubgraphTester& SubgraphTester::AddStaticTensorF32(
 }
 
 SubgraphTester& SubgraphTester::AddInputTensor(
-    size_t rank, xnn_datatype datatype, xnn_quantization_params quantization,
-    uint32_t external_id) {
-  std::vector<size_t> dims(rank);
-  AddDynamicTensor(dims, external_id, datatype, quantization,
+    const TensorShape& shape, xnn_datatype datatype,
+    xnn_quantization_params quantization, uint32_t external_id) {
+  AddDynamicTensor(shape, external_id, datatype, quantization,
                    XNN_VALUE_FLAG_EXTERNAL_INPUT);
   auto it = external_tensors_.insert({external_id, nullptr});
   EXPECT_TRUE(it.second);
   return *this;
 }
 
-SubgraphTester& SubgraphTester::AddInputTensorF32(
-    const std::vector<size_t>& dims, uint32_t external_id) {
-  AddDynamicTensorF32(dims, external_id, XNN_VALUE_FLAG_EXTERNAL_INPUT);
-  size_t num_elements = NumElements(dims);
-  xnnpack::Buffer<char> input(num_elements * sizeof(float) +
-                              XNN_EXTRA_BYTES * sizeof(char));
+SubgraphTester& SubgraphTester::AddInputTensorF32(const TensorShape& shape,
+                                                  uint32_t external_id) {
+  AddDynamicTensorF32(shape, external_id, XNN_VALUE_FLAG_EXTERNAL_INPUT);
+  size_t num_elements = shape.NumElements();
+  xnnpack::Buffer<char> input(num_elements * sizeof(float),
+                              xnnpack::XnnExtraBytes);
   float* data = reinterpret_cast<float*>(input.data());
   std::generate(data, data + num_elements, [&]() { return f32dist(rng_); });
   auto it = external_tensors_.insert({external_id, data});
@@ -190,14 +203,15 @@ SubgraphTester& SubgraphTester::AddInputTensorF32(
   return *this;
 }
 
-SubgraphTester& SubgraphTester::AddInputTensorQS8(
-    int32_t zero_point, float scale, const std::vector<size_t>& dims,
-    uint32_t external_id) {
-  AddDynamicTensorQS8(zero_point, scale, dims, external_id,
+SubgraphTester& SubgraphTester::AddInputTensorQS8(int32_t zero_point,
+                                                  float scale,
+                                                  const TensorShape& shape,
+                                                  uint32_t external_id) {
+  AddDynamicTensorQS8(zero_point, scale, shape, external_id,
                       XNN_VALUE_FLAG_EXTERNAL_INPUT);
-  size_t num_elements = NumElements(dims);
-  xnnpack::Buffer<char> input(num_elements * sizeof(float) +
-                              XNN_EXTRA_BYTES * sizeof(char));
+  size_t num_elements = shape.NumElements();
+  xnnpack::Buffer<char> input(num_elements * sizeof(float),
+                              xnnpack::XnnExtraBytes);
   float* data = reinterpret_cast<float*>(input.data());
   std::generate(data, data + num_elements, [&]() { return f32dist(rng_); });
   auto it = external_tensors_.insert({external_id, data});
@@ -207,22 +221,20 @@ SubgraphTester& SubgraphTester::AddInputTensorQS8(
 }
 
 SubgraphTester& SubgraphTester::AddOutputTensor(
-    size_t rank, xnn_datatype datatype, xnn_quantization_params quantization,
-    uint32_t external_id) {
-  std::vector<size_t> dims(rank);
-  AddDynamicTensor(dims, external_id, datatype, quantization,
+    const TensorShape& shape, xnn_datatype datatype,
+    xnn_quantization_params quantization, uint32_t external_id) {
+  AddDynamicTensor(shape, external_id, datatype, quantization,
                    XNN_VALUE_FLAG_EXTERNAL_OUTPUT);
   auto it = external_tensors_.insert({external_id, nullptr});
   EXPECT_TRUE(it.second);
   return *this;
 }
 
-SubgraphTester& SubgraphTester::AddOutputTensorF32(
-    const std::vector<size_t>& dims, uint32_t external_id) {
+SubgraphTester& SubgraphTester::AddOutputTensorF32(const TensorShape& shape,
+                                                   uint32_t external_id) {
   output_id_ = external_id;
-  AddDynamicTensorF32(dims, external_id, XNN_VALUE_FLAG_EXTERNAL_OUTPUT);
-  size_t num_elements = NumElements(dims);
-  xnnpack::Buffer<char> output(num_elements * sizeof(float));
+  AddDynamicTensorF32(shape, external_id, XNN_VALUE_FLAG_EXTERNAL_OUTPUT);
+  xnnpack::Buffer<char> output(shape.NumElements() * sizeof(float));
   auto it = external_tensors_.insert({external_id, output.data()});
   buffers_[external_id] = std::move(output);
   EXPECT_TRUE(it.second);
@@ -385,20 +397,17 @@ SubgraphTester& SubgraphTester::AddUnary(xnn_unary_operator op,
   return *this;
 }
 
-SubgraphTester& SubgraphTester::AddConvolution2D(ConvolutionParams params,
-                                                 uint32_t input_id,
-                                                 uint32_t filter_id,
-                                                 uint32_t bias_id,
-                                                 uint32_t output_id) {
+SubgraphTester& SubgraphTester::AddConvolution2D(
+    ConvolutionParams params, uint32_t input_id, uint32_t filter_id,
+    uint32_t bias_id, uint32_t output_id, uint32_t flags) {
   const xnn_status status = xnn_define_convolution_2d(
       subgraph_.get(), params.padding.top, params.padding.right,
       params.padding.bottom, params.padding.left, params.kernel.height,
       params.kernel.width, params.subsampling.height, params.subsampling.width,
       params.dilation.height, params.dilation.width, params.groups,
       params.group_input_channels, params.group_output_channels,
-      -std::numeric_limits<float>::infinity(),
-      std::numeric_limits<float>::infinity(), input_id, filter_id, bias_id,
-      output_id, /*flags=*/0);
+      params.output_min, params.output_max, input_id, filter_id, bias_id,
+      output_id, flags);
   EXPECT_EQ(status, xnn_status_success);
 
   return *this;
@@ -413,14 +422,14 @@ SubgraphTester& SubgraphTester::AddCopy(uint32_t input_id, uint32_t output_id) {
 
 SubgraphTester& SubgraphTester::AddDepthwiseConvolution2D(
     DepthwiseConvolutionParams params, uint32_t input_id, uint32_t filter_id,
-    uint32_t bias_id, uint32_t output_id) {
+    uint32_t bias_id, uint32_t output_id, uint32_t flags) {
   const xnn_status status = xnn_define_depthwise_convolution_2d(
       subgraph_.get(), params.padding.top, params.padding.right,
       params.padding.bottom, params.padding.left, params.kernel.height,
       params.kernel.width, params.subsampling.height, params.subsampling.width,
       params.dilation.height, params.dilation.width, params.depth_multiplier,
       params.input_channels, params.output_min, params.output_max, input_id,
-      filter_id, bias_id, output_id, /*flags=*/0);
+      filter_id, bias_id, output_id, flags);
   EXPECT_EQ(status, xnn_status_success);
 
   return *this;
@@ -443,13 +452,13 @@ SubgraphTester& SubgraphTester::AddAveragePooling2D(
     uint32_t input_padding_top, uint32_t input_padding_right,
     uint32_t input_padding_bottom, uint32_t input_padding_left,
     uint32_t pooling_height, uint32_t pooling_width, uint32_t stride_height,
-    uint32_t stride_width, uint32_t input_id, uint32_t output_id) {
+    uint32_t stride_width, uint32_t input_id, uint32_t output_id,
+    uint32_t flags) {
   const xnn_status status = xnn_define_average_pooling_2d(
       subgraph_.get(), input_padding_top, input_padding_right,
       input_padding_bottom, input_padding_left, pooling_height, pooling_width,
       stride_height, stride_width, -std::numeric_limits<float>::infinity(),
-      std::numeric_limits<float>::infinity(), input_id, output_id,
-      /*flags=*/0);
+      std::numeric_limits<float>::infinity(), input_id, output_id, flags);
   EXPECT_EQ(status, xnn_status_success);
 
   return *this;
@@ -511,9 +520,8 @@ SubgraphTester& SubgraphTester::AddDeconvolution2D(DeconvolutionParams params,
       params.adjustment.width, params.kernel.height, params.kernel.width,
       params.upsampling.height, params.upsampling.width, params.dilation.height,
       params.dilation.width, params.groups, params.group_input_channels,
-      params.group_output_channels, -std::numeric_limits<float>::infinity(),
-      std::numeric_limits<float>::infinity(), input_id, filter_id, bias_id,
-      output_id, /*flags=*/0);
+      params.group_output_channels, params.output_min, params.output_max,
+      input_id, filter_id, bias_id, output_id, /*flags=*/0);
   EXPECT_EQ(status, xnn_status_success);
 
   return *this;
@@ -542,18 +550,25 @@ SubgraphTester& SubgraphTester::AddEvenSplit(size_t split_dim,
   return *this;
 }
 
+SubgraphTester& SubgraphTester::AddFullyConnected(
+    float output_min, float output_max, uint32_t input_id, uint32_t filter_id,
+    uint32_t bias_id, uint32_t output_id, uint32_t flags) {
+  const xnn_status status = xnn_define_fully_connected(
+      subgraph_.get(), output_min, output_max, input_id, filter_id, bias_id,
+      output_id, flags);
+  EXPECT_EQ(status, xnn_status_success);
+
+  return *this;
+}
+
 SubgraphTester& SubgraphTester::AddFullyConnected(uint32_t input_id,
                                                   uint32_t filter_id,
                                                   uint32_t bias_id,
                                                   uint32_t output_id,
                                                   uint32_t flags) {
-  const xnn_status status = xnn_define_fully_connected(
-      subgraph_.get(), -std::numeric_limits<float>::infinity(),
-      std::numeric_limits<float>::infinity(), input_id, filter_id, bias_id,
-      output_id, flags);
-  EXPECT_EQ(status, xnn_status_success);
-
-  return *this;
+  return AddFullyConnected(-std::numeric_limits<float>::infinity(),
+                           std::numeric_limits<float>::infinity(), input_id,
+                           filter_id, bias_id, output_id, flags);
 }
 
 SubgraphTester& SubgraphTester::AddBatchMatrixMultiply(uint32_t input_a_id,
@@ -606,14 +621,13 @@ SubgraphTester& SubgraphTester::AddMaxPooling2D(
     uint32_t input_padding_bottom, uint32_t input_padding_left,
     uint32_t pooling_height, uint32_t pooling_width, uint32_t stride_height,
     uint32_t stride_width, uint32_t dilation_height, uint32_t dilation_width,
-    uint32_t input_id, uint32_t output_id) {
+    uint32_t input_id, uint32_t output_id, uint32_t flags) {
   const xnn_status status = xnn_define_max_pooling_2d(
       subgraph_.get(), input_padding_top, input_padding_right,
       input_padding_bottom, input_padding_left, pooling_height, pooling_width,
       stride_height, stride_width, dilation_height, dilation_width,
       -std::numeric_limits<float>::infinity(),
-      std::numeric_limits<float>::infinity(), input_id, output_id,
-      /*flags=*/0);
+      std::numeric_limits<float>::infinity(), input_id, output_id, flags);
   EXPECT_EQ(status, xnn_status_success);
 
   return *this;
@@ -623,11 +637,11 @@ SubgraphTester& SubgraphTester::AddArgMaxPooling2D(
     uint32_t input_padding_top, uint32_t input_padding_right,
     uint32_t input_padding_bottom, uint32_t input_padding_left,
     uint32_t pooling_height, uint32_t pooling_width, uint32_t input_id,
-    uint32_t output_value_id, uint32_t output_index_id) {
+    uint32_t output_value_id, uint32_t output_index_id, uint32_t flags) {
   const xnn_status status = xnn_define_argmax_pooling_2d(
       subgraph_.get(), input_padding_top, input_padding_right,
       input_padding_bottom, input_padding_left, pooling_height, pooling_width,
-      input_id, output_value_id, output_index_id, /*flags=*/0);
+      input_id, output_value_id, output_index_id, flags);
   EXPECT_EQ(status, xnn_status_success);
 
   return *this;

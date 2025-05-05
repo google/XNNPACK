@@ -33,6 +33,7 @@
 
 namespace {
 
+// NOLINTNEXTLINE(clang-diagnostic-unused-function)
 std::vector<GemmTestParams> CreateTests1(
     size_t k_block, size_t adj_k_block,
     size_t mr, size_t nr, size_t kr, size_t sr,
@@ -235,7 +236,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*k_block=*/1,
           /*adj_k_block=*/1,
           /*mr=*/1, /*nr=*/32, /*kr=*/1, /*sr=*/1,
-          /*mr_packed=*/32,
+          /*mr_packed=*/1,
           /*is_igemm=*/false,
           /*unsigned_inputs=*/false,
           /*planes=*/1,

@@ -54,7 +54,7 @@ static void GEMMBenchmark(
                              std::numeric_limits<int8_t>::max()),
                          std::ref(rng));
 
-  xnnpack::Buffer<float> a(mc * kc + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> a(mc * kc, xnnpack::XnnExtraBytes);
   std::generate(a.begin(), a.end(), std::ref(f32rng));
   xnnpack::Buffer<int8_t> k(nc * kc);
   std::generate(k.begin(), k.end(), std::ref(s8rng));

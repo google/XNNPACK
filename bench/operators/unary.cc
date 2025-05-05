@@ -161,7 +161,7 @@ static void benchmark_unary_operator(benchmark::State& state,
       std::max<float>(std::numeric_limits<In>::lowest(), -128.0f),
       std::min<float>(std::numeric_limits<In>::max(), 127.0f));
 
-  xnnpack::Buffer<In> input(batch_size + XNN_EXTRA_BYTES / sizeof(In));
+  xnnpack::Buffer<In> input(batch_size, xnnpack::XnnExtraBytes);
   xnnpack::Buffer<Out> output(batch_size);
   std::generate(input.begin(), input.end(),
                 [&]() { return static_cast<In>(f32dist(rng)); });

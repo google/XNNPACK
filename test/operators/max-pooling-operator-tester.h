@@ -450,12 +450,14 @@ class MaxPoolingOperatorTester {
 
     xnnpack::Buffer<int8_t> input(
         (batch_size() * input_height() * input_width() - 1) *
-            input_pixel_stride() +
-        channels() + XNN_EXTRA_BYTES / sizeof(int8_t));
+                input_pixel_stride() +
+            channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<int8_t> output(
         (batch_size() * output_height() * output_width() - 1) *
-            output_pixel_stride() +
-        channels() + XNN_EXTRA_BYTES / sizeof(int8_t));
+                output_pixel_stride() +
+            channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<int8_t> output_ref(batch_size() * output_height() *
                                        output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -571,12 +573,14 @@ class MaxPoolingOperatorTester {
 
     xnnpack::Buffer<uint8_t> input(
         (batch_size() * input_height() * input_width() - 1) *
-            input_pixel_stride() +
-        channels() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+                input_pixel_stride() +
+            channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<uint8_t> output(
         (batch_size() * output_height() * output_width() - 1) *
-            output_pixel_stride() +
-        channels() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+                output_pixel_stride() +
+            channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<uint8_t> output_ref(batch_size() * output_height() *
                                         output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -692,12 +696,14 @@ class MaxPoolingOperatorTester {
 
     xnnpack::Buffer<xnn_float16> input(
         (batch_size() * input_height() * input_width() - 1) *
-            input_pixel_stride() +
-        channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+                input_pixel_stride() +
+            channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<xnn_float16> output(
         (batch_size() * output_height() * output_width() - 1) *
-            output_pixel_stride() +
-        channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+                output_pixel_stride() +
+            channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<float> output_ref(batch_size() * output_height() *
                                       output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -835,12 +841,14 @@ class MaxPoolingOperatorTester {
 
     xnnpack::Buffer<float> input(
         (batch_size() * input_height() * input_width() - 1) *
-            input_pixel_stride() +
-        channels() + XNN_EXTRA_BYTES / sizeof(float));
+                input_pixel_stride() +
+            channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<float> output(
         (batch_size() * output_height() * output_width() - 1) *
-            output_pixel_stride() +
-        channels() + XNN_EXTRA_BYTES / sizeof(float));
+                output_pixel_stride() +
+            channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<float> output_ref(batch_size() * output_height() *
                                       output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -968,23 +976,21 @@ class MaxPoolingOperatorTester {
         std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
     xnnpack::Buffer<int8_t> input(
-        XNN_EXTRA_BYTES / sizeof(int8_t) +
         std::max<size_t>(
             (batch_size() * input_height() * input_width() - 1) *
                     input_pixel_stride() +
                 channels(),
             (next_batch_size() * next_input_height() * next_input_width() - 1) *
                     input_pixel_stride() +
-                channels()));
-    xnnpack::Buffer<int8_t> output(
-        XNN_EXTRA_BYTES / sizeof(int8_t) +
-        std::max<size_t>(
-            (batch_size() * output_height() * output_width() - 1) *
-                    output_pixel_stride() +
-                channels(),
-            (next_batch_size() * next_output_height() * next_output_width() -
-             1) * output_pixel_stride() +
-                channels()));
+                channels()),
+        xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<int8_t> output(std::max<size_t>(
+        (batch_size() * output_height() * output_width() - 1) *
+                output_pixel_stride() +
+            channels(),
+        (next_batch_size() * next_output_height() * next_output_width() - 1) *
+                output_pixel_stride() +
+            channels()));
     xnnpack::Buffer<float> output_ref(batch_size() * output_height() *
                                       output_width() * channels());
     xnnpack::Buffer<float> next_output_ref(next_batch_size() *
@@ -1186,23 +1192,21 @@ class MaxPoolingOperatorTester {
         std::numeric_limits<uint8_t>::max());
 
     xnnpack::Buffer<uint8_t> input(
-        XNN_EXTRA_BYTES / sizeof(uint8_t) +
         std::max<size_t>(
             (batch_size() * input_height() * input_width() - 1) *
                     input_pixel_stride() +
                 channels(),
             (next_batch_size() * next_input_height() * next_input_width() - 1) *
                     input_pixel_stride() +
-                channels()));
-    xnnpack::Buffer<uint8_t> output(
-        XNN_EXTRA_BYTES / sizeof(uint8_t) +
-        std::max<size_t>(
-            (batch_size() * output_height() * output_width() - 1) *
-                    output_pixel_stride() +
-                channels(),
-            (next_batch_size() * next_output_height() * next_output_width() -
-             1) * output_pixel_stride() +
-                channels()));
+                channels()),
+        xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<uint8_t> output(std::max<size_t>(
+        (batch_size() * output_height() * output_width() - 1) *
+                output_pixel_stride() +
+            channels(),
+        (next_batch_size() * next_output_height() * next_output_width() - 1) *
+                output_pixel_stride() +
+            channels()));
     xnnpack::Buffer<float> output_ref(batch_size() * output_height() *
                                       output_width() * channels());
     xnnpack::Buffer<float> next_output_ref(next_batch_size() *
@@ -1404,23 +1408,21 @@ class MaxPoolingOperatorTester {
     std::uniform_real_distribution<float> f32dist(0.001f, 1.0f);
 
     xnnpack::Buffer<xnn_float16> input(
-        XNN_EXTRA_BYTES / sizeof(xnn_float16) +
         std::max<size_t>(
             (batch_size() * input_height() * input_width() - 1) *
                     input_pixel_stride() +
                 channels(),
             (next_batch_size() * next_input_height() * next_input_width() - 1) *
                     input_pixel_stride() +
-                channels()));
-    xnnpack::Buffer<xnn_float16> output(
-        XNN_EXTRA_BYTES / sizeof(xnn_float16) +
-        std::max<size_t>(
-            (batch_size() * output_height() * output_width() - 1) *
-                    output_pixel_stride() +
-                channels(),
-            (next_batch_size() * next_output_height() * next_output_width() -
-             1) * output_pixel_stride() +
-                channels()));
+                channels()),
+        xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<xnn_float16> output(std::max<size_t>(
+        (batch_size() * output_height() * output_width() - 1) *
+                output_pixel_stride() +
+            channels(),
+        (next_batch_size() * next_output_height() * next_output_width() - 1) *
+                output_pixel_stride() +
+            channels()));
     xnnpack::Buffer<float> output_ref(batch_size() * output_height() *
                                       output_width() * channels());
     xnnpack::Buffer<float> next_output_ref(next_batch_size() *
@@ -1643,23 +1645,21 @@ class MaxPoolingOperatorTester {
     std::uniform_real_distribution<float> f32dist;
 
     xnnpack::Buffer<float> input(
-        XNN_EXTRA_BYTES / sizeof(float) +
         std::max<size_t>(
             (batch_size() * input_height() * input_width() - 1) *
                     input_pixel_stride() +
                 channels(),
             (next_batch_size() * next_input_height() * next_input_width() - 1) *
                     input_pixel_stride() +
-                channels()));
-    xnnpack::Buffer<float> output(
-        XNN_EXTRA_BYTES / sizeof(float) +
-        std::max<size_t>(
-            (batch_size() * output_height() * output_width() - 1) *
-                    output_pixel_stride() +
-                channels(),
-            (next_batch_size() * next_output_height() * next_output_width() -
-             1) * output_pixel_stride() +
-                channels()));
+                channels()),
+        xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<float> output(std::max<size_t>(
+        (batch_size() * output_height() * output_width() - 1) *
+                output_pixel_stride() +
+            channels(),
+        (next_batch_size() * next_output_height() * next_output_width() - 1) *
+                output_pixel_stride() +
+            channels()));
     xnnpack::Buffer<float> output_ref(batch_size() * output_height() *
                                       output_width() * channels());
     xnnpack::Buffer<float> next_output_ref(next_batch_size() *

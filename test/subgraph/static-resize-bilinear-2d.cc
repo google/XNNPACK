@@ -61,21 +61,21 @@ Tensor<T> ReferenceImpl(const Tensor<T>& input, size_t new_height,
   const float width_offset =
       tensorflow_legacy || align_corners ? 0.0f : 0.5f * width_scale - 0.5f;
 
-  for (size_t n = 0; n < output.extent(0); ++n) {
-    for (size_t y = 0; y < output.extent(1); ++y) {
-      const float iy = y * height_scale + height_offset;
-      int y0 = std::floor(iy);
-      int y1 = y0 + 1;
-      float alpha_y = iy - y0;
-      y0 = std::min(std::max(y0, 0), input_height - 1);
-      y1 = std::min(std::max(y1, 0), input_height - 1);
-      for (size_t x = 0; x < output.extent(2); ++x) {
-        const float ix = x * width_scale + width_offset;
-        int x0 = std::floor(ix);
-        int x1 = x0 + 1;
-        float alpha_x = ix - x0;
-        x0 = std::min(std::max(x0, 0), input_width - 1);
-        x1 = std::min(std::max(x1, 0), input_width - 1);
+  for (size_t y = 0; y < output.extent(1); ++y) {
+    const float iy = y * height_scale + height_offset;
+    int y0 = std::floor(iy);
+    int y1 = y0 + 1;
+    float alpha_y = iy - y0;
+    y0 = std::min(std::max(y0, 0), input_height - 1);
+    y1 = std::min(std::max(y1, 0), input_height - 1);
+    for (size_t x = 0; x < output.extent(2); ++x) {
+      const float ix = x * width_scale + width_offset;
+      int x0 = std::floor(ix);
+      int x1 = x0 + 1;
+      float alpha_x = ix - x0;
+      x0 = std::min(std::max(x0, 0), input_width - 1);
+      x1 = std::min(std::max(x1, 0), input_width - 1);
+      for (size_t n = 0; n < output.extent(0); ++n) {
         for (size_t c = 0; c < output.extent(3); ++c) {
           float output_nyxc =
               input(n, y0, x0, c) * ((1.0f - alpha_x) * (1.0f - alpha_y)) +
@@ -117,14 +117,17 @@ void TestImpl() {
     xnn_quantization_params quantization =
         random_quantization(xnn_datatype_of<T>(), rng);
 
-    std::vector<size_t> new_size = random_shape(rng, 2);
+    std::uniform_int_distribution<size_t> width_dist(1, 128);
+    std::uniform_int_distribution<size_t> height_dist(1, 9);
+    const size_t new_width = width_dist(rng);
+    const size_t new_height = height_dist(rng);
 
     // Define subgraph
     const uint32_t flags = random_flags(rng);
     SubgraphTester subgraph(2);
     subgraph.AddInputTensor(4, xnn_datatype_of<T>(), quantization, 0)
         .AddOutputTensor(4, xnn_datatype_of<T>(), quantization, 1)
-        .AddResizeBilinear(new_size[0], new_size[1], 0, 1, flags);
+        .AddResizeBilinear(new_height, new_width, 0, 1, flags);
     xnn_status status = subgraph.CreateRuntime();
     if (status == xnn_status_unsupported_hardware) {
       GTEST_SKIP();
@@ -133,12 +136,12 @@ void TestImpl() {
 
     for (int reshape = 0; reshape < 2; ++reshape) {
       std::vector<size_t> input_shape = random_shape(rng, 4);
-      Tensor<T> input(input_shape, PaddingBytes{XNN_EXTRA_BYTES});
+      Tensor<T> input(input_shape, XnnExtraBytes);
       DatatypeGenerator<T> generator = MakeDatatypeGenerator(T());
       input.generate([&]() { return generator(rng); });
 
       Tensor<T> expected =
-          ReferenceImpl(input, new_size[0], new_size[1], flags);
+          ReferenceImpl(input, new_height, new_width, flags);
 
       // Check reshaped shape is correct
       subgraph.ReshapeExternalTensor(input_shape, input.base(), 0)
@@ -156,7 +159,7 @@ void TestImpl() {
         if (is_quantized<T>()) {
           ASSERT_NEAR(expected(i), output(i), 1)
               << "input_shape=" << index_to_string(input.extents())
-              << ", new_size=" << index_to_string(new_size)
+              << ", new_width=" << new_width << ", new_height=" << new_height
               << ", flags=" << flags;
         } else {
           const float expected_i = expected(i);
@@ -164,7 +167,7 @@ void TestImpl() {
                                   (epsilon(xnn_datatype_of<T>()) * 20.0f);
           ASSERT_NEAR(expected_i, output(i), tolerance)
               << "input_shape=" << index_to_string(input.extents())
-              << ", new_size=" << index_to_string(new_size)
+              << ", new_width=" << new_width << ", new_height=" << new_height
               << ", flags=" << flags;
         }
       }

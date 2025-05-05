@@ -173,6 +173,7 @@ BEGIN_FUNCTION xnn_qd8_f16_qc8w_gemm_minmax_ukernel_2x8__asm_aarch32_neonfp16ari
       adds r0, r0, #8
       bne .Lepilogue
 
+
 .Linner_loop_end:
 
       # Convert from int32 to float.
@@ -208,15 +209,15 @@ BEGIN_FUNCTION xnn_qd8_f16_qc8w_gemm_minmax_ukernel_2x8__asm_aarch32_neonfp16ari
       # Min/max clamping.
       vcvt.f16.f32 d16, q8
       vmin.f16 d16, d16, d2
-      vcvt.f16.f32 d18, q9
-      vmin.f16 d18, d18, d2
       vcvt.f16.f32 d20, q10
       vmin.f16 d20, d20, d2
+      vcvt.f16.f32 d18, q9
+      vmin.f16 d18, d18, d2
       vcvt.f16.f32 d22, q11
       vmin.f16 d22, d22, d2
       vmax.f16 d16, d16, d0
-      vmax.f16 d18, d18, d0
       vmax.f16 d20, d20, d0
+      vmax.f16 d18, d18, d0
       vmax.f16 d22, d22, d0
 
       # Check whether full or partial store.

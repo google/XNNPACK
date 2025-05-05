@@ -59,14 +59,12 @@ class VCMulMicrokernelTester {
     std::uniform_real_distribution<float> f32rdist(1.0f, 10.0f);
     std::uniform_real_distribution<float> f32idist(0.01f, 0.1f);
 
-    xnnpack::Buffer<xnn_float16> a(2 * batch_size() +
-                                   XNN_EXTRA_BYTES / sizeof(xnn_float16));
-    xnnpack::Buffer<xnn_float16> b(2 * batch_size() +
-                                   XNN_EXTRA_BYTES / sizeof(xnn_float16));
-    xnnpack::Buffer<xnn_float16> y(2 * batch_size() +
-                                   (inplace_a() || inplace_b()
-                                        ? XNN_EXTRA_BYTES / sizeof(xnn_float16)
-                                        : 0));
+    xnnpack::Buffer<xnn_float16> a(2 * batch_size(), xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<xnn_float16> b(2 * batch_size(), xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<xnn_float16> y(
+        2 * batch_size(),
+        xnnpack::PaddingBytes{inplace_a() || inplace_b() ? XNN_EXTRA_BYTES
+                                                         : 0});
     xnnpack::Buffer<float> y_ref(2 * batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate_n(a.begin(), batch_size(), [&]() { return f32rdist(rng); });
@@ -118,13 +116,12 @@ class VCMulMicrokernelTester {
     std::uniform_real_distribution<float> f32rdist(1.0f, 10.0f);
     std::uniform_real_distribution<float> f32idist(0.01f, 0.1f);
 
-    xnnpack::Buffer<float> a(2 * batch_size() +
-                             XNN_EXTRA_BYTES / sizeof(float));
-    xnnpack::Buffer<float> b(2 * batch_size() +
-                             XNN_EXTRA_BYTES / sizeof(float));
+    xnnpack::Buffer<float> a(2 * batch_size(), xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<float> b(2 * batch_size(), xnnpack::XnnExtraBytes);
     xnnpack::Buffer<float> y(
-        2 * batch_size() +
-        (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
+        2 * batch_size(),
+        xnnpack::PaddingBytes{inplace_a() || inplace_b() ? XNN_EXTRA_BYTES
+                                                         : 0});
     xnnpack::Buffer<double> y_ref(2 * batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate_n(a.begin(), batch_size(), [&]() { return f32rdist(rng); });

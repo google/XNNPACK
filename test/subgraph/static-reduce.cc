@@ -177,7 +177,7 @@ void TestImpl(const Param& p) {
         }
       }
 
-      Tensor<T> input(input_shape, PaddingBytes{XNN_EXTRA_BYTES});
+      Tensor<T> input(input_shape, xnnpack::XnnExtraBytes);
       // Don't let the data be zero-mean, to avoid numerical issues with sums
       // near 0.
       DatatypeGenerator<T> generator(0.0f, 1.0f, input_quantization);

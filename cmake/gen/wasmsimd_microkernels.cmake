@@ -124,8 +124,7 @@ SET(PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vsqrdiffc-wasmsimd-u16.c
   src/f32-vbinary/gen/f32-vsub-wasmsimd-u16.c
   src/f32-vbinary/gen/f32-vsubc-wasmsimd-u16.c
-  src/f32-vclamp/gen/f32-vclamp-wasmsimd-arm-u8.c
-  src/f32-vclamp/gen/f32-vclamp-wasmsimd-x86-u8.c
+  src/f32-vclamp/gen/f32-vclamp-wasmsimd.c
   src/f32-vcmul/gen/f32-vcmul-wasmsimd-u8.c
   src/f32-vcopysign/gen/f32-vcopysign-wasmsimd.c
   src/f32-vcopysign/gen/f32-vcopysignc-wasmsimd.c
@@ -133,14 +132,15 @@ SET(PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-vcos/gen/f32-vcos-wasmsimd-rational-5-4-div.c
   src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-p6-u16.c
   src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-p6-u16.c
+  src/f32-vexp/gen/f32-vexp-wasmsimd-rational-3-2-div.c
   src/f32-vgelu/gen/f32-vgelu-wasmsimd-rational-12-10-div.c
-  src/f32-vhswish/gen/f32-vhswish-wasmsimd-u16.c
+  src/f32-vhswish/gen/f32-vhswish-wasmsimd.c
   src/f32-vlog/gen/f32-vlog-wasmsimd-rational-3-3-div.c
   src/f32-vlrelu/gen/f32-vlrelu-wasmsimd-iminmax-u8.c
   src/f32-vlrelu/gen/f32-vlrelu-wasmsimd-laneselect-u8.c
   src/f32-vmulcaddc/gen/f32-vmulcaddc-c4-minmax-wasmsimd-arm-2x.c
   src/f32-vmulcaddc/gen/f32-vmulcaddc-c4-minmax-wasmsimd-x86-2x.c
-  src/f32-vrelu/gen/f32-vrelu-wasmsimd-u16.c
+  src/f32-vrelu/gen/f32-vrelu-wasmsimd.c
   src/f32-vrnd/gen/f32-vrndd-wasmsimd-u8.c
   src/f32-vrnd/gen/f32-vrndne-wasmsimd-u8.c
   src/f32-vrnd/gen/f32-vrndu-wasmsimd-u8.c
@@ -730,8 +730,6 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vsub-wasmsimd-u8.c
   src/f32-vbinary/gen/f32-vsubc-wasmsimd-u4.c
   src/f32-vbinary/gen/f32-vsubc-wasmsimd-u8.c
-  src/f32-vclamp/gen/f32-vclamp-wasmsimd-arm-u4.c
-  src/f32-vclamp/gen/f32-vclamp-wasmsimd-x86-u4.c
   src/f32-vcmul/gen/f32-vcmul-wasmsimd-u4.c
   src/f32-vcmul/gen/f32-vcmul-wasmsimd-u12.c
   src/f32-vcmul/gen/f32-vcmul-wasmsimd-u16.c
@@ -749,14 +747,10 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-p6-u4.c
   src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-p6-u8.c
   src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-p6-u12.c
-  src/f32-vhswish/gen/f32-vhswish-wasmsimd-u4.c
-  src/f32-vhswish/gen/f32-vhswish-wasmsimd-u8.c
   src/f32-vlrelu/gen/f32-vlrelu-wasmsimd-iminmax-u4.c
   src/f32-vlrelu/gen/f32-vlrelu-wasmsimd-laneselect-u4.c
   src/f32-vmulcaddc/gen/f32-vmulcaddc-c8-minmax-wasmsimd-arm-2x.c
   src/f32-vmulcaddc/gen/f32-vmulcaddc-c8-minmax-wasmsimd-x86-2x.c
-  src/f32-vrelu/gen/f32-vrelu-wasmsimd-u4.c
-  src/f32-vrelu/gen/f32-vrelu-wasmsimd-u8.c
   src/f32-vrnd/gen/f32-vrndd-wasmsimd-u4.c
   src/f32-vrnd/gen/f32-vrndne-wasmsimd-u4.c
   src/f32-vrnd/gen/f32-vrndu-wasmsimd-u4.c

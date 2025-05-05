@@ -106,7 +106,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_8x4v__rvv(
     vint32m4_t vacc5 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point5, vl);
     vint32m4_t vacc6 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point6, vl);
     vint32m4_t vacc7 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point7, vl);
- 
+
     w = (const int32_t*) w + nr;
 
     size_t k = kc;
@@ -173,7 +173,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_8x4v__rvv(
       vint16m2_t va7bc1 = __riscv_vwmul_vx_i16m2(vbc1, va7c1, vl);
       vacc7 = __riscv_vwadd_wv_i32m4(vacc7, va7bc1, vl);
     }
- 
+
     vacc0 = __riscv_vsra_vx_i32m4(vacc0, 4, vl);
     vacc1 = __riscv_vsra_vx_i32m4(vacc1, 4, vl);
     vacc2 = __riscv_vsra_vx_i32m4(vacc2, 4, vl);

@@ -68,9 +68,8 @@ static void f16_igemm(benchmark::State& state,
   const size_t kc_stride =
       benchmark::utils::RoundUp<size_t>(group_input_channels, kr * sr);
 
-  xnnpack::Buffer<xnn_float16> a(input_height * input_width *
-                                     input_pixel_stride +
-                                 XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  xnnpack::Buffer<xnn_float16> a(
+      input_height * input_width * input_pixel_stride, xnnpack::XnnExtraBytes);
   std::generate(a.begin(), a.end(), f32rng);
   xnnpack::Buffer<xnn_float16> k(group_output_channels * kernel_height *
                                  kernel_width * group_input_channels);
@@ -78,8 +77,7 @@ static void f16_igemm(benchmark::State& state,
   xnnpack::Buffer<xnn_float16> b(group_output_channels);
   std::generate(b.begin(), b.end(), f32rng);
 
-  xnnpack::Buffer<xnn_float16> z(group_input_channels +
-                                 XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  xnnpack::Buffer<xnn_float16> z(group_input_channels, xnnpack::XnnExtraBytes);
 
   const size_t w_elements = (kernel_size * kc_stride + 1) * nc_stride;
   const size_t i_elements = mc_stride * kernel_size;

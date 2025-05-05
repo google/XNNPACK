@@ -163,11 +163,10 @@ class Tester {
 
     xnnpack::Buffer<const xnn_float16*> indirect_input(
         (output_pixels() - 1) * step() + pooling_elements());
-    xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
-                                       input_offset() +
-                                       indirect_input.size() * channels());
-    xnnpack::Buffer<xnn_float16> zero(
-        channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0);
+    xnnpack::Buffer<xnn_float16> input(
+        input_offset() + indirect_input.size() * channels(),
+        xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<xnn_float16> zero(channels(), 0, xnnpack::XnnExtraBytes);
     xnnpack::Buffer<xnn_float16> multiplier(output_pixels());
     xnnpack::Buffer<xnn_float16> output(
         (output_pixels() - 1) * output_stride() + channels());
@@ -175,8 +174,6 @@ class Tester {
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(input.begin(), input.begin() + input_offset(), std::nanf(""));
-      std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(xnn_float16),
-                input.end(), std::nanf(""));
       std::generate(multiplier.begin(), multiplier.end(),
                     [&]() { return m32dist(rng); });
 
@@ -244,8 +241,8 @@ class Tester {
       pavgpool_minmax(
           output_pixels(), pooling_elements(), channels(),
           reinterpret_cast<const xnn_float16**>(indirect_input.data()),
-          input_offset() * sizeof(xnn_float16), zero.data(),
-          pixelwise_ ? multiplier.data() : nullptr, output.data(),
+          input_offset() * sizeof(xnn_float16), /*input_pixel_stride=*/0,
+          zero.data(), pixelwise_ ? multiplier.data() : nullptr, output.data(),
           step() * sizeof(void*), (output_stride()) * sizeof(xnn_float16),
           &params);
 
@@ -283,11 +280,10 @@ class Tester {
 
     xnnpack::Buffer<const float*> indirect_input(
         (output_pixels() - 1) * step() + pooling_elements());
-    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
-                                 input_offset() +
-                                 indirect_input.size() * channels());
-    xnnpack::Buffer<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float),
-                                0.0f);
+    xnnpack::Buffer<float> input(
+        input_offset() + indirect_input.size() * channels(),
+        xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<float> zero(channels(), 0.0f, xnnpack::XnnExtraBytes);
     xnnpack::Buffer<float> multiplier(output_pixels());
     xnnpack::Buffer<float> output((output_pixels() - 1) * output_stride() +
                                   channels());
@@ -295,8 +291,6 @@ class Tester {
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(input.begin(), input.begin() + input_offset(), std::nanf(""));
-      std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(float), input.end(),
-                std::nanf(""));
       std::generate(multiplier.begin(), multiplier.end(),
                     [&]() { return m32dist(rng); });
 
@@ -356,9 +350,10 @@ class Tester {
       // Call optimized micro-kernel.
       pavgpool_minmax(output_pixels(), pooling_elements(), channels(),
                       indirect_input.data(), input_offset() * sizeof(float),
-                      zero.data(), pixelwise_ ? multiplier.data() : nullptr,
-                      output.data(), step() * sizeof(void*),
-                      (output_stride()) * sizeof(float), &params);
+                      /*input_pixel_stride=*/0, zero.data(),
+                      pixelwise_ ? multiplier.data() : nullptr, output.data(),
+                      step() * sizeof(void*), (output_stride()) * sizeof(float),
+                      &params);
 
       // Verify results.
       for (size_t x = 0; x < output_pixels(); x++) {

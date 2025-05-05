@@ -91,8 +91,8 @@ class ArgMaxPoolMicrokernelTester {
     xnnpack::Buffer<const float*> indirect_input(
         (output_pixels() - 1) * step() + pooling_elements());
     xnnpack::Buffer<float> input(
-        XNN_EXTRA_BYTES / sizeof(float) +
-        ((output_pixels() - 1) * step() + pooling_elements()) * channels());
+        ((output_pixels() - 1) * step() + pooling_elements()) * channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<float> output((output_pixels() - 1) * output_stride() +
                                   channels());
     xnnpack::Buffer<uint32_t> index(output_pixels() * channels());
@@ -131,8 +131,9 @@ class ArgMaxPoolMicrokernelTester {
       // Call optimized micro-kernel.
       argmaxpool(output_pixels(), pooling_elements(), channels(),
                  indirect_input.data(), input_offset() * sizeof(float),
-                 output.data(), index.data(), step() * sizeof(void*),
-                 output_stride() * sizeof(float));
+                 /*input_pixel_stride=*/0, output.data(), index.data(),
+                 step() * sizeof(void*), output_stride() * sizeof(float),
+                 channels() * sizeof(float));
 
       // Verify results.
       for (size_t x = 0; x < output_pixels(); x++) {

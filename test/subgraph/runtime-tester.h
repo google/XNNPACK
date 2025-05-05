@@ -114,8 +114,8 @@ class RuntimeTester : public SubgraphTester {
 
   void ReshapeInput(const std::vector<size_t>& dims, uint32_t external_id) {
     size_t num_elements = NumElements(dims);
-    xnnpack::Buffer<char> input(num_elements * sizeof(float) +
-                                XNN_EXTRA_BYTES * sizeof(char));
+    xnnpack::Buffer<char> input(num_elements * sizeof(float),
+                                xnnpack::XnnExtraBytes);
     float* data = reinterpret_cast<float*>(input.data());
     std::generate(data, data + num_elements, [&]() { return f32dist(rng_); });
     ReshapeExternalTensor(dims, input.data(), external_id);

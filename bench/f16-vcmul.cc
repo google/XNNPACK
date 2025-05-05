@@ -38,9 +38,9 @@ static void f16_vcmul(benchmark::State& state, uint64_t arch_flags,
   auto f16rng = std::bind(xnn_float16_from_float, f32rng);
 
   xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> a(
-      num_elements * 2 + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+      num_elements * 2, xnnpack::XnnExtraBytes);
   xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> b(
-      num_elements * 2 + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+      num_elements * 2, xnnpack::XnnExtraBytes);
   xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> product(num_elements *
                                                                  2);
   std::generate(a.begin(), a.end(), std::ref(f16rng));

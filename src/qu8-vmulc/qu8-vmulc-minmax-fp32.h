@@ -41,10 +41,10 @@ XNN_UKERNEL_WITH_PARAMS(0, xnn_qu8_vmulc_minmax_fp32_ukernel__wasmsimd_mul32_ld6
 XNN_UKERNEL_WITH_PARAMS(0, xnn_qu8_vmulc_minmax_fp32_ukernel__wasmsimd_mul32_ld64_u16, 16, false, uint8_t, union xnn_qu8_mul_minmax_params, xnn_init_qu8_mul_minmax_scalar_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-#if XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_qu8_vmulc_minmax_fp32_ukernel__rvv_u1v, 1, true, uint8_t, union xnn_qu8_mul_minmax_params, xnn_init_qu8_mul_minmax_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_qu8_vmulc_minmax_fp32_ukernel__rvv_u2v, 2, true, uint8_t, union xnn_qu8_mul_minmax_params, xnn_init_qu8_mul_minmax_scalar_params)
-#endif  // XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
 XNN_UKERNEL_WITH_PARAMS(0, xnn_qu8_vmulc_minmax_fp32_ukernel__scalar_u1, 1, false, uint8_t, union xnn_qu8_mul_minmax_params, xnn_init_qu8_mul_minmax_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(0, xnn_qu8_vmulc_minmax_fp32_ukernel__scalar_u2, 2, false, uint8_t, union xnn_qu8_mul_minmax_params, xnn_init_qu8_mul_minmax_scalar_params)

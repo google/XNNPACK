@@ -173,6 +173,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x8__asm_aarch32_neonmlal_ld
       adds r0, r0, #8
       bne .Lepilogue
 
+
 .Linner_loop_end:
 
       # Convert from int32 to float.
@@ -207,12 +208,12 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x8__asm_aarch32_neonmlal_ld
       vadd.f32 q11, q11, q7
       # Min/max clamping.
       vmin.f32 q8, q8, q1
-      vmin.f32 q9, q9, q1
       vmin.f32 q10, q10, q1
+      vmin.f32 q9, q9, q1
       vmin.f32 q11, q11, q1
       vmax.f32 q8, q8, q0
-      vmax.f32 q9, q9, q0
       vmax.f32 q10, q10, q0
+      vmax.f32 q9, q9, q0
       vmax.f32 q11, q11, q0
 
       # Check whether full or partial store.

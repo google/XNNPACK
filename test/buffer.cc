@@ -11,6 +11,25 @@
 
 namespace xnnpack {
 
+TEST(Buffer, GuardBytes) {
+  // The regex matching of the error message is very limited on some platforms,
+  // so we don't bother checking the error (which will vary if running with
+  // a sanitizer).
+  ASSERT_DEATH_IF_SUPPORTED(
+      {
+        Buffer<int> buffer({10});
+        buffer.data()[10] = 0;
+      },
+      "");
+
+  ASSERT_DEATH_IF_SUPPORTED(
+      {
+        Buffer<int> buffer({10});
+        buffer.data()[-1] = 0;
+      },
+      "");
+}
+
 TEST(Tensor, Basic) {
   ReplicableRandomDevice rng;
 

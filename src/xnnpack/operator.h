@@ -268,15 +268,6 @@ struct xnn_operator {
     struct xnn_s8_minmax_params s8_minmax;
     struct xnn_u8_minmax_params u8_minmax;
   } params2;
-  // Third set of params. Used by scaled dot attention operator.
-  union {
-    struct xnn_f16_default_params f16_rmax;
-    struct xnn_f32_default_params f32_rmax;
-  } params3;
-  // Fourth set of params. Used by scaled dot attention operator.
-  union {
-    union xnn_unary_uparams unary;
-  } params4;
   enum xnn_operator_type type;
   struct xnn_ukernel ukernel;
 
@@ -324,6 +315,7 @@ struct xnn_operator {
       const struct xnn_binary_elementwise_config* vadd_config;
       const struct xnn_binary_elementwise_config* vmul_config;
       const struct xnn_unary_elementwise_config* vtanh_config;
+      const struct xnn_binary_elementwise_config* vprelu_config;
       enum xnn_attention_logits_cap_type cap_type;
       struct xnn_attention_logits_cap_tanh_params cap_params;
     } attention;  // For attention operator.
@@ -345,7 +337,6 @@ struct xnn_operator {
     struct {
       union {
         struct gemm_context gemm;
-        struct scaled_dot_product_attention_context attention;
       } gemm;
       struct packw_gemm_goi_context packw_gemm_goi;
       struct packw_gemm_gio_context packw_gemm_gio;

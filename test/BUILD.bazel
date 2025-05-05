@@ -10,10 +10,6 @@ load(
     "xnnpack_test_deps_for_library",
     "xnnpack_unit_test",
 )
-#load(
-#    "//:build_params.bzl",
-#    "xnnpack_select_if"
-#)
 
 MICROKERNEL_TEST_DEPS = [
     "//:buffer",
@@ -151,6 +147,7 @@ xnnpack_cxx_library(
     "f16_vclamp",
     "f16_vcos",
     "f16_velu",
+    "f16_vexp",
     "f16_vgelu",
     "f16_vhswish",
     "f16_vlrelu",
@@ -254,12 +251,18 @@ xnnpack_cxx_library(
     "qs8_vmul_minmax_rndnu",
     "qs8_vmulc_minmax_fp32",
     "qs8_vmulc_minmax_rndnu",
+    "qs8_vprelu",
+    "qs8_vpreluc",
+    "qs8_vrpreluc",
     "qu8_vadd_minmax",
     "qu8_vaddc_minmax",
     "qu8_vmul_minmax_fp32",
     "qu8_vmul_minmax_rndnu",
     "qu8_vmulc_minmax_fp32",
     "qu8_vmulc_minmax_rndnu",
+    "qu8_vprelu",
+    "qu8_vpreluc",
+    "qu8_vrpreluc",
 ]]
 
 [xnnpack_unit_test(
@@ -850,6 +853,18 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "qs8_qc4w_gemm_minmax_fp32_test",
+    timeout = "moderate",
+    srcs = [
+        "qs8-qc4w-gemm-minmax-fp32.cc",
+    ],
+    shard_count = 5,
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
     name = "qs8_qc8w_gemm_minmax_fp32_test",
     timeout = "moderate",
     srcs = [
@@ -858,6 +873,18 @@ xnnpack_unit_test(
         "qs8-qc8w-gemm-minmax-fp32-3.cc",
     ],
     shard_count = 5,
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "pqs8_qc8w_gemm_minmax_test",
+    timeout = "moderate",
+    srcs = [
+        "pqs8-qc8w-gemm-minmax.cc",
+    ],
+    shard_count = 1,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -1014,6 +1041,7 @@ xnnpack_unit_test(
     "qs8_packw",
     "qs8_qc4w_packw",
     "x16_packw",
+    "x16_x32_packw",
     "x32_packw",
 ]]
 
@@ -1063,7 +1091,6 @@ xnnpack_unit_test(
     deps = [
         ":replicable_random_device",
         "//:buffer",
-        "//:math",
     ],
 )
 

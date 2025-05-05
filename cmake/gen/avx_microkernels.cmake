@@ -11,6 +11,7 @@
 
 SET(PROD_AVX_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-avx-int16-u16.c
+  src/f32-avgpool/gen/f32-avgpool-9p-minmax-avx-u8.c
   src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-avx.c
   src/f32-dwconv/gen/f32-dwconv-4p16c-minmax-avx.c
   src/f32-dwconv/gen/f32-dwconv-9p16c-minmax-avx.c
@@ -57,15 +58,17 @@ SET(PROD_AVX_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vsqrdiffc-avx-u16.c
   src/f32-vbinary/gen/f32-vsub-avx-u16.c
   src/f32-vbinary/gen/f32-vsubc-avx-u16.c
-  src/f32-vclamp/gen/f32-vclamp-avx-u16.c
+  src/f32-vclamp/gen/f32-vclamp-avx.c
   src/f32-vcopysign/gen/f32-vcopysign-avx.c
   src/f32-vcopysign/gen/f32-vcopysignc-avx.c
   src/f32-vcopysign/gen/f32-vrcopysignc-avx.c
   src/f32-vcos/gen/f32-vcos-avx-rational-5-4-div.c
   src/f32-velu/gen/f32-velu-avx-rr2-lut4-p4-perm-u32.c
+  src/f32-vexp/gen/f32-vexp-avx-rational-3-2-div.c
   src/f32-vgelu/gen/f32-vgelu-avx-rational-12-10-div.c
-  src/f32-vhswish/gen/f32-vhswish-avx-u16.c
+  src/f32-vhswish/gen/f32-vhswish-avx.c
   src/f32-vlrelu/gen/f32-vlrelu-avx-u16.c
+  src/f32-vrelu/gen/f32-vrelu-avx.c
   src/f32-vrnd/gen/f32-vrndd-avx-u16.c
   src/f32-vrnd/gen/f32-vrndne-avx-u16.c
   src/f32-vrnd/gen/f32-vrndu-avx-u16.c
@@ -218,7 +221,6 @@ SET(NON_PROD_AVX_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vsqrdiffc-avx-u8.c
   src/f32-vbinary/gen/f32-vsub-avx-u8.c
   src/f32-vbinary/gen/f32-vsubc-avx-u8.c
-  src/f32-vclamp/gen/f32-vclamp-avx-u8.c
   src/f32-velu/gen/f32-velu-avx-rr2-lut4-p4-perm-u8.c
   src/f32-velu/gen/f32-velu-avx-rr2-lut4-p4-perm-u16.c
   src/f32-velu/gen/f32-velu-avx-rr2-lut4-p4-perm-u24.c
@@ -230,10 +232,7 @@ SET(NON_PROD_AVX_MICROKERNEL_SRCS
   src/f32-velu/gen/f32-velu-avx-rr2-p6-u16.c
   src/f32-velu/gen/f32-velu-avx-rr2-p6-u24.c
   src/f32-velu/gen/f32-velu-avx-rr2-p6-u32.c
-  src/f32-vhswish/gen/f32-vhswish-avx-u8.c
   src/f32-vlrelu/gen/f32-vlrelu-avx-u8.c
-  src/f32-vrelu/gen/f32-vrelu-avx-u8.c
-  src/f32-vrelu/gen/f32-vrelu-avx-u16.c
   src/f32-vrnd/gen/f32-vrndd-avx-u8.c
   src/f32-vrnd/gen/f32-vrndne-avx-u8.c
   src/f32-vrnd/gen/f32-vrndu-avx-u8.c

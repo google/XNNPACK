@@ -157,6 +157,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x16c2__asm_amd64_avx512f_broadcast
       vbroadcastsd zmm5, QWORD PTR [r14 + r11]
       vfmadd231ps  zmm14{k3}, zmm5, zmm7
       vfmadd231ps  zmm18{k3}, zmm5, zmm8
+
 .Linner_loop_end:
       vpsrlq zmm7, zmm11, 32
       vaddps zmm11, zmm11, zmm7

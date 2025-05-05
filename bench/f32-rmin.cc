@@ -212,7 +212,7 @@ BENCHMARK_CAPTURE(f32_rmin, wasm_u4_acc4, xnn_f32_rmin_ukernel__wasm_u4_acc4)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 BENCHMARK_CAPTURE(f32_rmin, rvv_u1v, xnn_f32_rmin_ukernel__rvv_u1v,
                   /*init_params=*/nullptr, benchmark::utils::CheckRVV)
     ->Apply(benchmark::utils::ReductionParameters<float>)
@@ -229,7 +229,30 @@ BENCHMARK_CAPTURE(f32_rmin, rvv_u8v, xnn_f32_rmin_ukernel__rvv_u8v,
                   /*init_params=*/nullptr, benchmark::utils::CheckRVV)
     ->Apply(benchmark::utils::ReductionParameters<float>)
     ->UseRealTime();
-#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+
+#if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+BENCHMARK_CAPTURE(f32_rmin, hvx_u32, xnn_f32_rmin_ukernel__hvx_u32,
+                  /*init_params=*/nullptr, benchmark::utils::CheckHVX)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(f32_rmin, hvx_u64_acc2, xnn_f32_rmin_ukernel__hvx_u64_acc2,
+                  /*init_params=*/nullptr, benchmark::utils::CheckHVX)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(f32_rmin, hvx_u96_acc3, xnn_f32_rmin_ukernel__hvx_u96_acc3,
+                  /*init_params=*/nullptr, benchmark::utils::CheckHVX)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(f32_rmin, hvx_u128_acc2, xnn_f32_rmin_ukernel__hvx_u128_acc2,
+                  /*init_params=*/nullptr, benchmark::utils::CheckHVX)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(f32_rmin, hvx_u128_acc4, xnn_f32_rmin_ukernel__hvx_u128_acc4,
+                  /*init_params=*/nullptr, benchmark::utils::CheckHVX)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+#endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 
 BENCHMARK_CAPTURE(f32_rmin, scalar_u1, xnn_f32_rmin_ukernel__scalar_u1)
     ->Apply(benchmark::utils::ReductionParameters<float>)

@@ -91,14 +91,12 @@ class VUnaryMicrokernelTester {
     auto domain = test_info.Domain(xnn_datatype_of<In>());
     xnnpack::ReplicableRandomDevice rng;
 
-    xnnpack::Buffer<In> x(batch_size() + XNN_EXTRA_BYTES / sizeof(In));
+    xnnpack::Buffer<In> x(batch_size(), xnnpack::XnnExtraBytes);
     xnnpack::Buffer<Out> y(batch_size());
     xnnpack::Buffer<Out> y_ref(batch_size());
     xnnpack::DatatypeGenerator<In> input_generator(domain.min, domain.max,
                                                    input_quantization_);
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      // This should only fill batch_size() elements, but some kernels trigger
-      // msan errors if we don't initialize the XNN_EXTRA_BYTES.
       std::generate_n(x.data(), x.size(),
                       [&]() { return input_generator(rng); });
 
@@ -150,14 +148,12 @@ class VUnaryMicrokernelTester {
     auto domain = test_info.Domain(xnn_datatype_of<In>());
     xnnpack::ReplicableRandomDevice rng;
 
-    xnnpack::Buffer<In> x(batch_size() + XNN_EXTRA_BYTES / sizeof(In));
+    xnnpack::Buffer<In> x(batch_size(), xnnpack::XnnExtraBytes);
     Out* y = reinterpret_cast<Out*>(x.data());
     xnnpack::Buffer<Out> y_ref(batch_size());
     xnnpack::DatatypeGenerator<In> input_generator(domain.min, domain.max,
                                                    input_quantization_);
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      // This should only fill batch_size() elements, but some kernels trigger
-      // msan errors if we don't initialize the XNN_EXTRA_BYTES.
       std::generate_n(x.data(), x.size(),
                       [&]() { return input_generator(rng); });
 

@@ -39,14 +39,14 @@ void TestImpl(size_t rank) {
       std::uniform_int_distribution<int64_t> end_dist;
       if (begins[i] < 0) {
         // Negative begin, negative end
-        end_dist = std::uniform_int_distribution<int64_t>(begins[i] + 1, 0);
+        end_dist = std::uniform_int_distribution<int64_t>(begins[i], 0);
       } else if (rng() % 2 == 0) {
         // Positive begin, negative end
         end_dist =
-            std::uniform_int_distribution<int64_t>(begins[i] + 1 - range, 0);
+            std::uniform_int_distribution<int64_t>(begins[i] - range, 0);
       } else {
         // Positive begin, positive end
-        end_dist = std::uniform_int_distribution<int64_t>(begins[i] + 1, range);
+        end_dist = std::uniform_int_distribution<int64_t>(begins[i], range);
       }
       ends[i] = end_dist(rng);
     }
@@ -68,7 +68,7 @@ void TestImpl(size_t rank) {
         shape[i] += dims[i];
       }
 
-      xnnpack::Tensor<T> input(shape, xnnpack::PaddingBytes{XNN_EXTRA_BYTES});
+      xnnpack::Tensor<T> input(shape, xnnpack::XnnExtraBytes);
       DatatypeGenerator<T> generator(quantization);
       input.generate([&]() { return generator(rng); });
 

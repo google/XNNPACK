@@ -68,8 +68,8 @@ static void f32_igemm(benchmark::State& state,
   const size_t kc_stride =
       benchmark::utils::RoundUp<size_t>(group_input_channels, kr * sr);
 
-  xnnpack::Buffer<float> a(input_height * input_width * input_pixel_stride +
-                           XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> a(input_height * input_width * input_pixel_stride,
+                           xnnpack::XnnExtraBytes);
   std::generate(a.begin(), a.end(), std::ref(f32rng));
   xnnpack::Buffer<float> k(group_output_channels * kernel_height *
                            kernel_width * group_input_channels);
@@ -77,8 +77,7 @@ static void f32_igemm(benchmark::State& state,
   xnnpack::Buffer<float> b(group_output_channels);
   std::generate(b.begin(), b.end(), std::ref(f32rng));
 
-  xnnpack::Buffer<float> z(group_input_channels +
-                           XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> z(group_input_channels, xnnpack::XnnExtraBytes);
 
   const size_t w_elements = kernel_size * kc_stride * nc_stride + nc_stride;
   const size_t i_elements = mc_stride * kernel_size;
@@ -1241,7 +1240,7 @@ BENCHMARK_CONV(f32_igemm_1x4__scalar)
 BENCHMARK_CONV(f32_igemm_2x4__scalar)
 BENCHMARK_CONV(f32_igemm_4x4__scalar)
 
-#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 static void f32_igemm_1x4v__rvv(benchmark::State& state, const char* net) {
   size_t vlenb = 0;
   asm volatile("csrr %0, vlenb" : "=r"(vlenb));
@@ -1266,8 +1265,84 @@ static void f32_igemm_7x4v__rvv(benchmark::State& state, const char* net) {
 
 BENCHMARK_CONV(f32_igemm_1x4v__rvv)
 BENCHMARK_CONV(f32_igemm_7x4v__rvv)
-#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+
+#if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+static void f32_igemm_1x32__hvx_broadcast(benchmark::State& state,
+                                          const char* net) {
+  f32_igemm(state, xnn_f32_igemm_minmax_ukernel_1x32__hvx_broadcast,
+            xnn_init_f32_minmax_scalar_params,
+            /*mr=*/1, /*nr=*/32, /*kr=*/1, /*sr=*/1,
+            benchmark::utils::CheckHVX);
+}
+
+  static void f32_igemm_8x32__hvx_broadcast(benchmark::State& state, const char* net) {
+    f32_igemm(state,
+      xnn_f32_igemm_minmax_ukernel_8x32__hvx_broadcast,
+      xnn_init_f32_minmax_scalar_params,
+      /*mr=*/8, /*nr=*/32, /*kr=*/1, /*sr=*/1,
+      benchmark::utils::CheckHVX);
+  }
+
+  static void f32_igemm_16x32__hvx_broadcast(benchmark::State& state, const char* net) {
+    f32_igemm(state,
+      xnn_f32_igemm_minmax_ukernel_16x32__hvx_broadcast,
+      xnn_init_f32_minmax_scalar_params,
+      /*mr=*/16, /*nr=*/32, /*kr=*/1, /*sr=*/1,
+      benchmark::utils::CheckHVX);
+  }
+
+  static void f32_igemm_1x64__hvx_broadcast(benchmark::State& state, const char* net) {
+    f32_igemm(state,
+      xnn_f32_igemm_minmax_ukernel_1x64__hvx_broadcast,
+      xnn_init_f32_minmax_scalar_params,
+      /*mr=*/1, /*nr=*/64, /*kr=*/1, /*sr=*/1,
+      benchmark::utils::CheckHVX);
+  }
+
+  static void f32_igemm_4x64__hvx_broadcast(benchmark::State& state, const char* net) {
+    f32_igemm(state,
+      xnn_f32_igemm_minmax_ukernel_4x64__hvx_broadcast,
+      xnn_init_f32_minmax_scalar_params,
+      /*mr=*/4, /*nr=*/64, /*kr=*/1, /*sr=*/1,
+      benchmark::utils::CheckHVX);
+  }
+
+  static void f32_igemm_7x64__hvx_broadcast(benchmark::State& state, const char* net) {
+    f32_igemm(state,
+      xnn_f32_igemm_minmax_ukernel_7x64__hvx_broadcast,
+      xnn_init_f32_minmax_scalar_params,
+      /*mr=*/7, /*nr=*/64, /*kr=*/1, /*sr=*/1,
+      benchmark::utils::CheckHVX);
+  }
+
+  static void f32_igemm_1x128__hvx_broadcast(benchmark::State& state, const char* net) {
+    f32_igemm(state,
+      xnn_f32_igemm_minmax_ukernel_1x128__hvx_broadcast,
+      xnn_init_f32_minmax_scalar_params,
+      /*mr=*/1, /*nr=*/128, /*kr=*/1, /*sr=*/1,
+      benchmark::utils::CheckHVX);
+  }
+
+  static void f32_igemm_2x128__hvx_broadcast(benchmark::State& state, const char* net) {
+    f32_igemm(state,
+      xnn_f32_igemm_minmax_ukernel_2x128__hvx_broadcast,
+      xnn_init_f32_minmax_scalar_params,
+      /*mr=*/2, /*nr=*/128, /*kr=*/1, /*sr=*/1,
+      benchmark::utils::CheckHVX);
+  }
+
+  BENCHMARK_CONV(f32_igemm_1x32__hvx_broadcast)
+  BENCHMARK_CONV(f32_igemm_8x32__hvx_broadcast)
+  BENCHMARK_CONV(f32_igemm_16x32__hvx_broadcast)
+  BENCHMARK_CONV(f32_igemm_1x64__hvx_broadcast)
+  BENCHMARK_CONV(f32_igemm_4x64__hvx_broadcast)
+  BENCHMARK_CONV(f32_igemm_7x64__hvx_broadcast)
+  BENCHMARK_CONV(f32_igemm_1x128__hvx_broadcast)
+  BENCHMARK_CONV(f32_igemm_2x128__hvx_broadcast)
+
+#endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-XNN_BENCHMARK_MAIN();
+  XNN_BENCHMARK_MAIN();
 #endif

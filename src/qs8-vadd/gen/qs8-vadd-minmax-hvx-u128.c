@@ -126,8 +126,7 @@ void xnn_qs8_vadd_minmax_ukernel__hvx_u128(
         Q6_V_vstu_variable(output, 32, vout);
         output += 32;
         batch -=32;
-      }
-      else{
+      } else {
         Q6_V_vstu_variable(output, batch, vout);
         batch = 0;
       }

@@ -31,6 +31,7 @@ void xnn_s8_maxpool_minmax_ukernel_9p__wasmsimd_u16(
     size_t channels,
     const int8_t** input,
     size_t input_offset,
+    size_t input_pixel_stride,
     int8_t* output,
     size_t input_increment,
     size_t output_increment,
@@ -209,6 +210,7 @@ void xnn_s8_maxpool_minmax_ukernel_9p__wasmsimd_u16(
     }
 
     input = (const int8_t**) ((uintptr_t) input + input_increment);
+    input_offset += input_pixel_stride;
     output = (int8_t*) ((uintptr_t) output + output_increment);
   } while (--output_pixels != 0);
 }

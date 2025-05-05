@@ -32,7 +32,7 @@ void xnn_s8_rmax_ukernel__wasmsimd_u48_acc3(
   xnn_simd_s8_t vmax2 = vmax0;
 
   for (; batch >= 48 * sizeof(int8_t); batch -= 48 * sizeof(int8_t)) {
-    xnn_simd_s8_t vt0 = xnn_loadu_s8(input);
+    xnn_simd_s8_t vt0 = xnn_loadu_s8(input + 0 * xnn_simd_size_s8);
     xnn_simd_s8_t vt1 = xnn_loadu_s8(input + 1 * xnn_simd_size_s8);
     xnn_simd_s8_t vt2 = xnn_loadu_s8(input + 2 * xnn_simd_size_s8);
     input += 3 * xnn_simd_size_s8;
@@ -51,7 +51,7 @@ void xnn_s8_rmax_ukernel__wasmsimd_u48_acc3(
     vmax0 = xnn_max_s8(vmax0, vt);
   }
 
-  int8_t max0 = xnn_horizontal_max_s8(vmax0);
+  int8_t max0 = xnn_reduce_max_s8(vmax0);
 
   if XNN_UNLIKELY(batch != 0) {
     do {

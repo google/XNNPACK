@@ -58,7 +58,7 @@ void TestImpl(size_t block_size) {
       std::vector<size_t> shape = random_shape(rng, 4, 1, 3);
       shape[3] *= block_size * block_size;
 
-      Tensor<T> input(shape, PaddingBytes{XNN_EXTRA_BYTES});
+      Tensor<T> input(shape, XnnExtraBytes);
       DatatypeGenerator<T> generator(quantization);
       input.generate([&]() { return generator(rng); });
 

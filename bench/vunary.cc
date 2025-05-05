@@ -143,8 +143,8 @@ void vunary(benchmark::State& state, uint64_t arch_flags,
   auto rng = std::mt19937(random_device());
   UniformDistribution<TIn> dist;
 
-  xnnpack::Buffer<TIn, XNN_ALLOCATION_ALIGNMENT> x(
-      num_elements + XNN_EXTRA_BYTES / sizeof(TIn));
+  xnnpack::Buffer<TIn, XNN_ALLOCATION_ALIGNMENT> x(num_elements,
+                                                   xnnpack::XnnExtraBytes);
   xnnpack::Buffer<TOut, XNN_ALLOCATION_ALIGNMENT> y(num_elements);
   std::generate(x.begin(), x.end(), [&]() { return dist(rng); });
 
@@ -179,6 +179,7 @@ void vunary(benchmark::State& state, uint64_t arch_flags,
 #include "src/f16-vabs/f16-vabs.h"
 #include "src/f16-vapproxgelu/f16-vapproxgelu.h"
 #include "src/f16-vcos/f16-vcos.h"
+#include "src/f16-vexp/f16-vexp.h"
 #include "src/f16-vgelu/f16-vgelu.h"
 #include "src/f16-vhswish/f16-vhswish.h"
 #include "src/f16-vneg/f16-vneg.h"
@@ -195,6 +196,7 @@ void vunary(benchmark::State& state, uint64_t arch_flags,
 #include "src/f32-vabs/f32-vabs.h"
 #include "src/f32-vapproxgelu/f32-vapproxgelu.h"
 #include "src/f32-vcos/f32-vcos.h"
+#include "src/f32-vexp/f32-vexp.h"
 #include "src/f32-vgelu/f32-vgelu.h"
 #include "src/f32-vhswish/f32-vhswish.h"
 #include "src/f32-vlog/f32-vlog.h"

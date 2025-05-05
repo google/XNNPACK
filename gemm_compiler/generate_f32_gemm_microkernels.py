@@ -21,10 +21,30 @@ def generate_f32_gemm_microkernels():
   if '/bazel-out/' in os.getcwd():
     os.chdir(os.environ['BUILD_WORKING_DIRECTORY'])
 
+  nr = 8
+  for mr in range(1, 10):
+    generate.generate_gemm_microkernel(
+        isa=fma3_template.Fma3(mr, nr, c=1),
+        output_file=os.path.join(
+            output_base,
+            f'f32-gemm-{mr}x{nr}-minmax-asm-amd64-fma3-broadcast.S',
+        ),
+    )
+
+  nr = 16
+  for mr in range(1, 5):
+    generate.generate_gemm_microkernel(
+        isa=fma3_template.Fma3(mr, nr, c=1),
+        output_file=os.path.join(
+            output_base,
+            f'f32-gemm-{mr}x{nr}-minmax-asm-amd64-fma3-broadcast.S',
+        ),
+    )
+
   for nr in range(16, 33, 16):
     for mr in range(1, 12):
       generate.generate_gemm_microkernel(
-          isa=avx512f_template.Avx512F(mr, nr),
+          isa=avx512f_template.Avx512F(mr, nr, c=1),
           output_file=os.path.join(
               output_base,
               f'f32-gemm-{mr}x{nr}-minmax-asm-amd64-avx512f-broadcast.S',
@@ -34,7 +54,7 @@ def generate_f32_gemm_microkernels():
   # not enough SIMD registers to go above 5x64
   for mr in range(1, 6):
     generate.generate_gemm_microkernel(
-        isa=avx512f_template.Avx512F(mr, n=64),
+        isa=avx512f_template.Avx512F(mr, n=64, c=1),
         output_file=os.path.join(
             output_base,
             f'f32-gemm-{mr}x64-minmax-asm-amd64-avx512f-broadcast.S',

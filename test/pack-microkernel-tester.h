@@ -75,8 +75,8 @@ class PackMicrokernelTester {
     };
 
     const uint32_t c = u32rng();
-    xnnpack::Buffer<uint32_t> x(k() + (m() - 1) * x_stride() +
-                                XNN_EXTRA_BYTES / sizeof(uint32_t));
+    xnnpack::Buffer<uint32_t> x(k() + (m() - 1) * x_stride(),
+                                xnnpack::XnnExtraBytes);
     xnnpack::Buffer<uint32_t, XNN_ALLOCATION_ALIGNMENT> y(mr() * k());
     xnnpack::Buffer<uint32_t> y_ref(mr() * k());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {

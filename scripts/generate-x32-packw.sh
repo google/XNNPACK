@@ -22,6 +22,7 @@ tools/xngen src/x32-packw/scalar.c.in -D NR=32 -D KBLOCK=2 -D TYPE=float    -o s
 tools/xngen src/x32-packw/scalar.c.in -D NR=64 -D KBLOCK=2 -D TYPE=float    -o src/x32-packw/gen/x32-packw-x64-gemm-goi-scalar-float-u2.c &
 
 ### GIO KR=1
+tools/xngen src/x32-packw/gio-scalar.c.in -D NR=2  -o src/x32-packw/gen/x32-packw-x2-gemm-gio-scalar.c &
 tools/xngen src/x32-packw/gio-scalar.c.in -D NR=4  -o src/x32-packw/gen/x32-packw-x4-gemm-gio-scalar.c &
 tools/xngen src/x32-packw/gio-scalar.c.in -D NR=8  -o src/x32-packw/gen/x32-packw-x8-gemm-gio-scalar.c &
 tools/xngen src/x32-packw/gio-scalar.c.in -D NR=16 -o src/x32-packw/gen/x32-packw-x16-gemm-gio-scalar.c &

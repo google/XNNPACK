@@ -108,9 +108,9 @@ class ConvertOperatorTester {
 
     xnnpack::Buffer<float> input_float((batch_size() - 1) * input_stride() +
                                        channels());
-    xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
-                                       (batch_size() - 1) * input_stride() +
-                                       channels());
+    xnnpack::Buffer<xnn_float16> input(
+        (batch_size() - 1) * input_stride() + channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<int8_t> output((batch_size() - 1) * output_stride() +
                                    channels());
     xnnpack::Buffer<xnn_quantization_params> quantization_params(
@@ -183,9 +183,9 @@ class ConvertOperatorTester {
   void TestF32toQD8() const {
     xnnpack::ReplicableRandomDevice rng;
 
-    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
-                                 (batch_size() - 1) * input_stride() +
-                                 channels());
+    xnnpack::Buffer<float> input(
+        (batch_size() - 1) * input_stride() + channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<int8_t> output((batch_size() - 1) * output_stride() +
                                    channels());
     xnnpack::Buffer<xnn_quantization_params> quantization_params(
@@ -250,9 +250,9 @@ class ConvertOperatorTester {
   void TestF32toQDU8() const {
     xnnpack::ReplicableRandomDevice rng;
 
-    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
-                                 (batch_size() - 1) * input_stride() +
-                                 channels());
+    xnnpack::Buffer<float> input(
+        (batch_size() - 1) * input_stride() + channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<uint8_t> output((batch_size() - 1) * output_stride() +
                                     channels());
     xnnpack::Buffer<xnn_quantization_params> quantization_params(
@@ -319,9 +319,9 @@ class ConvertOperatorTester {
     // The parameters of the GEMM config are used as packing parameters.
     const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_nr2_config();
 
-    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
-                                 (batch_size() - 1) * input_stride() +
-                                 channels());
+    xnnpack::Buffer<float> input(
+        (batch_size() - 1) * input_stride() + channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<int8_t> output(xnn_x8_packq_f32qp8_packed_size(
         batch_size(), channels(), gemm_config->mr, 1 << gemm_config->log2_kr,
         1 << gemm_config->log2_sr));

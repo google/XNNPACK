@@ -30,3 +30,6 @@
 - name: xnn_s8_rmax_ukernel__wasmsimd_u48_acc3
 - name: xnn_s8_rmax_ukernel__wasmsimd_u64_acc2
 - name: xnn_s8_rmax_ukernel__wasmsimd_u64_acc4
+
+# Hexagon HVX
+- name: xnn_s8_rmax_ukernel__hvx_u256_acc2

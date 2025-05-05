@@ -47,7 +47,7 @@ void xnn_${DATATYPE.lower()}_rd${OP.lower()}_ukernel_${ACCUMULATORS}p${ACCUMULAT
     size_t input_stride,
     const ${XINT8_T}* zero,
     ${XINT8_T}* output,
-    const void* params) XNN_OOB_READS
+    const void* params)
 {
   assert(rows != 0);
   assert(channels != 0);

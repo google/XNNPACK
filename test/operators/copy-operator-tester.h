@@ -82,9 +82,9 @@ class CopyOperatorTester {
         std::numeric_limits<uint8_t>::min(),
         std::numeric_limits<uint8_t>::max());
 
-    xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
-                                   (batch_size() - 1) * input_stride() +
-                                   channels());
+    xnnpack::Buffer<uint8_t> input(
+        (batch_size() - 1) * input_stride() + channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<uint8_t> output((batch_size() - 1) * output_stride() +
                                     channels());
     xnnpack::Buffer<uint8_t> output_ref(batch_size() * channels());
@@ -134,9 +134,9 @@ class CopyOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<uint16_t> u16dist;
 
-    xnnpack::Buffer<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
-                                    (batch_size() - 1) * input_stride() +
-                                    channels());
+    xnnpack::Buffer<uint16_t> input(
+        (batch_size() - 1) * input_stride() + channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<uint16_t> output((batch_size() - 1) * output_stride() +
                                      channels());
     xnnpack::Buffer<uint16_t> output_ref(batch_size() * channels());
@@ -186,9 +186,9 @@ class CopyOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<uint32_t> u32dist;
 
-    xnnpack::Buffer<uint32_t> input(XNN_EXTRA_BYTES / sizeof(uint32_t) +
-                                    (batch_size() - 1) * input_stride() +
-                                    channels());
+    xnnpack::Buffer<uint32_t> input(
+        (batch_size() - 1) * input_stride() + channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<uint32_t> output((batch_size() - 1) * output_stride() +
                                      channels());
     xnnpack::Buffer<uint32_t> output_ref(batch_size() * channels());
@@ -238,9 +238,9 @@ class CopyOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<uint32_t> u32dist;
 
-    xnnpack::Buffer<uint32_t> input(XNN_EXTRA_BYTES / sizeof(uint32_t) +
-                                    (batch_size() - 1) * input_stride() +
-                                    channels());
+    xnnpack::Buffer<uint32_t> input(
+        (batch_size() - 1) * input_stride() + channels(),
+        xnnpack::XnnExtraBytes);
     xnnpack::Buffer<uint32_t> output((batch_size() - 1) * output_stride() +
                                      channels());
     xnnpack::Buffer<uint32_t> output_ref(batch_size() * channels());

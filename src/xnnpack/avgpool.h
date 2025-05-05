@@ -22,9 +22,9 @@ extern "C" {
                     params_type, init_params)                                  \
   XNN_INTERNAL void ukernel(                                                   \
       size_t output_pixels, size_t kernel_elements, size_t channels,           \
-      const datatype** input, size_t input_offset, const datatype* zero,       \
-      const datatype* multiplier, datatype* output, size_t input_increment,    \
-      size_t output_increment,                                                 \
+      const datatype** input, size_t input_offset, size_t input_pixel_stride,  \
+      const datatype* zero, const datatype* multiplier, datatype* output,      \
+      size_t input_increment, size_t output_increment,                         \
       const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 #include "src/f16-avgpool/f16-avgpool-minmax.h"

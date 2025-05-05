@@ -37,7 +37,7 @@ static XNN_INLINE xnn_simd_u8_t xnn_min_u8(xnn_simd_u8_t a, xnn_simd_u8_t b) {
   return wasm_u8x16_min(a, b);
 }
 
-static XNN_INLINE uint8_t xnn_horizontal_max_u8(xnn_simd_u8_t a) {
+static XNN_INLINE uint8_t xnn_reduce_max_u8(xnn_simd_u8_t a) {
   v128_t max1 =
       wasm_u8x16_max(a, wasm_i8x16_shuffle(a, a, 8, 9, 10, 11, 12, 13, 14, 15,
                                            0, 1, 2, 3, 4, 5, 6, 7));
@@ -54,7 +54,7 @@ static XNN_INLINE uint8_t xnn_horizontal_max_u8(xnn_simd_u8_t a) {
   return wasm_u8x16_extract_lane(max1, 0);
 }
 
-static XNN_INLINE uint8_t xnn_horizontal_min_u8(xnn_simd_u8_t a) {
+static XNN_INLINE uint8_t xnn_reduce_min_u8(xnn_simd_u8_t a) {
   v128_t min1 =
       wasm_u8x16_min(a, wasm_i8x16_shuffle(a, a, 8, 9, 10, 11, 12, 13, 14, 15,
                                            0, 1, 2, 3, 4, 5, 6, 7));

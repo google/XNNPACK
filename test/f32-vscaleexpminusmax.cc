@@ -58,7 +58,7 @@ class VScaleExpMinusMaxMicrokernelTester {
       return std::uniform_real_distribution<float>(90.0f, 100.0f)(rng);
     };
 
-    xnnpack::Buffer<float> x(elements() + XNN_EXTRA_BYTES / sizeof(float));
+    xnnpack::Buffer<float> x(elements(), xnnpack::XnnExtraBytes);
     xnnpack::Buffer<float> y(elements());
     xnnpack::Buffer<double> y_ref(elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {

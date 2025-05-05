@@ -71,11 +71,11 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x4v__rvv(
         const int32_t va0 = (int32_t) *a0++;
 
         const vint8m1_t vb = __riscv_vle8_v_i8m1((const int8_t*) w, vl);
-        const vint16m2_t vb0 = __riscv_vsext_vf2(vb, vl);
+        const vint32m4_t vb0 = __riscv_vsext_vf4(vb, vl);
 
         w = (const void*) ((const int8_t*) w + nr);
 
-        vacc0 = __riscv_vwmacc_vx_i32m4(vacc0, va0, vb0, vl);
+        vacc0 = __riscv_vmacc_vx_i32m4(vacc0, va0, vb0, vl);
 
         k -= sizeof(int8_t);
       } while (k != 0);
@@ -91,11 +91,9 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x4v__rvv(
 
     vfpacc0 = __riscv_vfmax_vf_f32m4(vfpacc0, output_min_less_zero_point, vl);
     vfpacc0 = __riscv_vfmin_vf_f32m4(vfpacc0, output_max_less_zero_point, vl);
+    vfpacc0 = __riscv_vfadd_vf_f32m4(vfpacc0, output_zero_point, vl);
 
     vint16m2_t vout0 = __riscv_vfncvt_x(vfpacc0, vl);
-
-    vout0 = __riscv_vadd_vx_i16m2(vout0, (int16_t) output_zero_point, vl);
-
     vint8m1_t vout80 = __riscv_vncvt_x_x_w_i8m1(vout0, vl);
 
     __riscv_vse8_v_i8m1(c0, vout80, vl);
