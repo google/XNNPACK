@@ -1,0 +1,195 @@
+// Copyright 2025 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert DIV in ("DIV", "NR")
+$assert FUN in {"SIN", "COS"}
+$BATCH_TILES = tuple(int(bt) for bt in BATCH_TILES.split(","))
+$SIMD_SIZE = BATCH_TILES[0]
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/simd/f16-${ARCH}.h"
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vunary.h"
+
+$for BATCH_TILE in BATCH_TILES:
+  $assert BATCH_TILE % SIMD_SIZE == 0
+  $assert BATCH_TILE >= SIMD_SIZE
+  $SIMD_TILE = BATCH_TILE // SIMD_SIZE
+
+  void xnn_f16_v${FUN.lower()}_ukernel__${ARCH}_rational_3_2_${DIV.lower()}_u${BATCH_TILE}(
+      size_t batch,
+      const xnn_float16* input,
+      xnn_float16* output,
+      const struct xnn_f16_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
+  {
+    assert(batch != 0);
+    assert(batch % sizeof(xnn_float16) == 0);
+    assert(input != NULL);
+    assert(output != NULL);
+    assert(xnn_simd_size_f16 == ${SIMD_SIZE});
+
+    // Some mathematical constants. We don't use pre-defined macros to ensure
+    // that they are rounded exactly as we expect them to be.
+    XNN_SIMD_CONST_F16_FROM_FLOAT(vpi, 3.140625f);  // M_PI
+    XNN_SIMD_CONST_F16_FROM_FLOAT(v2pi_inv, 0.15917969f); // 0.5 / M_PI
+    $if FUN == "COS":
+      XNN_SIMD_CONST_F16_FROM_FLOAT(vpi_half, 1.5703125f);  // M_PI / 2
+
+    // The following two values sum to 2*Pi with ~33 bits of accuracy. We use
+    // them to accurately subtract integer multiples of 2*Pi from large inputs.
+    XNN_SIMD_CONST_F16_FROM_FLOAT(v2pi_hi, 6.25f);  // 2.0 * M_PI (first 5 bits of mantissa)
+    XNN_SIMD_CONST_F16_FROM_FLOAT(v2pi_lo, 3.3172607e-2f);  // 2.0 * M_PI (remaining bits)
+
+    // The monomial coefficients of the numerator polynomial (odd,
+    // `valpha_1` = `vone`).
+    XNN_SIMD_CONST_F16_FROM_FLOAT(valpha_3, -1.1200523376e-01f);
+
+    // The monomial coefficients of the denominator polynomial (even,
+    // `vbeta_0` = `vone`).
+    XNN_SIMD_CONST_F16_FROM_FLOAT(vbeta_2, 5.5543992668e-02f);
+
+    // Some useful constants.
+    XNN_SIMD_CONST_F16_FROM_FLOAT(vone, 1.0f);
+    $if DIV == "NR":
+      XNN_SIMD_CONST_F16_FROM_FLOAT(vtwo, 2.0f);
+
+    $if SIMD_TILE > 1:
+      for (; batch >= ${BATCH_TILE} * sizeof(xnn_float16); batch -= ${BATCH_TILE} * sizeof(xnn_float16)) {
+        $for N in range(SIMD_TILE):
+          xnn_simd_f16_t vx_${N} = xnn_loadu_f16(input + ${N} * xnn_simd_size_f16);
+        input += ${BATCH_TILE};
+
+        // Map the inputs to the interpolation range.
+        $for N in range(SIMD_TILE):
+          xnn_simd_f16_t vx_div_2pi_${N} = xnn_mul_f16(vx_${N}, v2pi_inv);
+        $for N in range(SIMD_TILE):
+          vx_div_2pi_${N} = xnn_round_f16(vx_div_2pi_${N});
+        $for N in range(SIMD_TILE):
+          vx_${N} = xnn_fnmadd_f16(vx_div_2pi_${N}, v2pi_hi, vx_${N});
+        $for N in range(SIMD_TILE):
+          vx_${N} = xnn_fnmadd_f16(vx_div_2pi_${N}, v2pi_lo, vx_${N});
+        $if FUN == "COS":
+          $for N in range(SIMD_TILE):
+            vx_${N} = xnn_sub_f16(vpi_half, vx_${N});
+        $for N in range(SIMD_TILE):
+          vx_${N} = xnn_min_f16(vx_${N}, xnn_sub_f16(vpi, vx_${N}));
+        $for N in range(SIMD_TILE):
+          vx_${N} = xnn_max_f16(vx_${N}, xnn_sub_f16(xnn_neg_f16(vpi), vx_${N}));
+        $for N in range(SIMD_TILE):
+          vx_${N} = xnn_min_f16(vx_${N}, xnn_sub_f16(vpi, vx_${N}));
+
+        // Since the polynomials are odd/even, we need x^2.
+        $for N in range(SIMD_TILE):
+          const xnn_simd_f16_t vx2_${N} = xnn_mul_f16(vx_${N}, vx_${N});
+
+        // Evaluate the numerator polynomial p.
+        $for N in range(SIMD_TILE):
+          xnn_simd_f16_t vp_${N} = xnn_fmadd_f16(vx2_${N}, valpha_3, vone);
+        $for N in range(SIMD_TILE):
+          vp_${N} = xnn_mul_f16(vx_${N}, vp_${N});
+
+        // Evaluate the denominator polynomial q.
+        $for N in range(SIMD_TILE):
+          xnn_simd_f16_t vq_${N} = xnn_fmadd_f16(vx2_${N}, vbeta_2, vone);
+
+        // Divide the numerator by the denominator.
+        $if DIV == "DIV":
+          $for N in range(SIMD_TILE):
+            const xnn_simd_f16_t vy_${N} = xnn_div_f16(vp_${N}, vq_${N});
+        $else:
+          $for N in range(SIMD_TILE):
+            xnn_simd_f16_t vrq_${N} = xnn_rcp_f16(vq_${N});
+          for (size_t iter = 0; iter < XNN_SIMD_NUM_RCP_ITER_F16; iter++) {
+            $for N in range(SIMD_TILE):
+              vrq_${N} = xnn_mul_f16(vrq_${N}, xnn_fnmadd_f16(vrq_${N}, vq_${N}, vtwo));
+          }
+          $for N in range(SIMD_TILE):
+            const xnn_simd_f16_t vy_${N} = xnn_mul_f16(vp_${N}, vrq_${N});
+
+        $for N in range(SIMD_TILE):
+          xnn_storeu_f16(output + ${N} * xnn_simd_size_f16, vy_${N});
+        output += ${BATCH_TILE};
+      }
+    for (; batch >= xnn_simd_bytes_f16; batch -= xnn_simd_bytes_f16) {
+      xnn_simd_f16_t vx = xnn_loadu_f16(input);
+      input += xnn_simd_size_f16;
+
+      // Map the inputs to the interpolation range.
+      xnn_simd_f16_t vx_div_2pi = xnn_mul_f16(vx, v2pi_inv);
+      vx_div_2pi = xnn_round_f16(vx_div_2pi);
+      vx = xnn_fnmadd_f16(vx_div_2pi, v2pi_hi, vx);
+      vx = xnn_fnmadd_f16(vx_div_2pi, v2pi_lo, vx);
+      $if FUN == "COS":
+        vx = xnn_sub_f16(vpi_half, vx);
+      vx = xnn_min_f16(vx, xnn_sub_f16(vpi, vx));
+      vx = xnn_max_f16(vx, xnn_sub_f16(xnn_neg_f16(vpi), vx));
+      vx = xnn_min_f16(vx, xnn_sub_f16(vpi, vx));
+
+      // Since the polynomials are odd/even, we need x^2.
+      const xnn_simd_f16_t vx2 = xnn_mul_f16(vx, vx);
+
+      // Evaluate the numerator polynomial p.
+      xnn_simd_f16_t vp = xnn_fmadd_f16(vx2, valpha_3, vone);
+      vp = xnn_mul_f16(vx, vp);
+
+      // Evaluate the denominator polynomial q.
+      xnn_simd_f16_t vq = xnn_fmadd_f16(vx2, vbeta_2, vone);
+
+      // Divide the numerator by the denominator.
+      $if DIV == "DIV":
+        const xnn_simd_f16_t vy =  xnn_div_f16(vp, vq);
+      $else:
+        xnn_simd_f16_t vrq = xnn_rcp_f16(vq);
+        for (size_t iter = 0; iter < XNN_SIMD_NUM_RCP_ITER_F16; iter++) {
+          vrq = xnn_mul_f16(vrq, xnn_fnmadd_f16(vrq, vq, vtwo));
+        }
+        const xnn_simd_f16_t vy = xnn_mul_f16(vp, vrq);
+
+      xnn_storeu_f16(output, vy);
+      output += xnn_simd_size_f16;
+    }
+    $if SIMD_SIZE > 1:
+      if XNN_UNLIKELY(batch != 0) {
+        xnn_simd_f16_t vx = xnn_load_tail_f16(input, batch >> XNN_LOG2_SIZEOF_UINT16_T);
+
+        // Map the inputs to the interpolation range.
+        xnn_simd_f16_t vx_div_2pi = xnn_mul_f16(vx, v2pi_inv);
+        vx_div_2pi = xnn_round_f16(vx_div_2pi);
+        vx = xnn_fnmadd_f16(vx_div_2pi, v2pi_hi, vx);
+        vx = xnn_fnmadd_f16(vx_div_2pi, v2pi_lo, vx);
+        $if FUN == "COS":
+          vx = xnn_sub_f16(vpi_half, vx);
+        vx = xnn_min_f16(vx, xnn_sub_f16(vpi, vx));
+        vx = xnn_max_f16(vx, xnn_sub_f16(xnn_neg_f16(vpi), vx));
+        vx = xnn_min_f16(vx, xnn_sub_f16(vpi, vx));
+
+        // Since the polynomials are odd/even, we need x^2.
+        const xnn_simd_f16_t vx2 = xnn_mul_f16(vx, vx);
+
+        // Evaluate the numerator polynomial p.
+        xnn_simd_f16_t vp = xnn_fmadd_f16(vx2, valpha_3, vone);
+        vp = xnn_mul_f16(vx, vp);
+
+        // Evaluate the denominator polynomial q.
+        xnn_simd_f16_t vq = xnn_fmadd_f16(vx2, vbeta_2, vone);
+
+        // Divide the numerator by the denominator.
+        $if DIV == "DIV":
+          const xnn_simd_f16_t vy =  xnn_div_f16(vp, vq);
+        $else:
+          xnn_simd_f16_t vrq = xnn_rcp_f16(vq);
+          for (size_t iter = 0; iter < XNN_SIMD_NUM_RCP_ITER_F16; iter++) {
+            vrq = xnn_mul_f16(vrq, xnn_fnmadd_f16(vrq, vq, vtwo));
+          }
+          const xnn_simd_f16_t vy = xnn_mul_f16(vp, vrq);
+
+        xnn_store_tail_f16(output, vy, batch >> XNN_LOG2_SIZEOF_UINT16_T);
+      }
+  }

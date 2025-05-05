@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -21,10 +22,10 @@ XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_vmax_ukernel__neon_u4, 4, fal
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_vmax_ukernel__neon_u8, 8, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-#if XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_f32_vmax_ukernel__rvv_u4v, 4, true, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_f32_vmax_ukernel__rvv_u8v, 8, true, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
-#endif  // XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vmax_ukernel__sse_u4, 4, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
@@ -54,11 +55,11 @@ XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vmax_ukernel__wasm_u4, 4, false, float, struc
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vmax_ukernel__wasm_u8, 8, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-#if XNN_ENABLE_HVX && (XNN_ARCH_HEXAGON)
+#if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_hvx, xnn_f32_vmax_ukernel__hvx_u32, 32, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_hvx, xnn_f32_vmax_ukernel__hvx_u64, 64, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_hvx, xnn_f32_vmax_ukernel__hvx_u128, 128, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
-#endif  // XNN_ENABLE_HVX && (XNN_ARCH_HEXAGON)
+#endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vmax_ukernel__scalar_u1, 1, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vmax_ukernel__scalar_u2, 2, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))

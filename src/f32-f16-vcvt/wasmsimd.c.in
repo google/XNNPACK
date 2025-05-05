@@ -10,8 +10,8 @@ $SIMD_TILE = BATCH_TILE // 8
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/vcvt.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vcvt.h"
 
 
 $WASM_V16X8_LANESELECT = "wasm_i16x8_relaxed_laneselect" if RELAXED else "wasm_v128_bitselect"

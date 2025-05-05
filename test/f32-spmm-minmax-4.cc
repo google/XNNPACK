@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -8,11 +9,12 @@
 //   Generator: tools/generate-spmm-test.py
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/spmm.h"
-#include "spmm-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/spmm.h"
+#include "test/next_prime.h"
+#include "test/spmm-microkernel-tester.h"
 
 
 #if XNN_ARCH_ARM64
@@ -968,6 +970,828 @@
     }
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  TEST(F32_SPMM_MINMAX_1VX4__RVV, k_eq_1) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    SpMMMicrokernelTester()
+      .mr(1 * xnn_init_hardware_config()->vlenb / sizeof(float))
+      .nr(4)
+      .m(1 * xnn_init_hardware_config()->vlenb / sizeof(float))
+      .n(4)
+      .k(1)
+      .sparsity(0.0f)
+      .Test(xnn_f32_spmm_minmax_ukernel_1vx4__rvv, xnn_init_f32_minmax_scalar_params);
+  }
+
+  TEST(F32_SPMM_MINMAX_1VX4__RVV, k_eq_1_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t n = 1; n <= 4; n++) {
+      SpMMMicrokernelTester()
+        .mr(1 * xnn_init_hardware_config()->vlenb / sizeof(float))
+        .nr(4)
+        .m(1 * xnn_init_hardware_config()->vlenb / sizeof(float))
+        .n(n)
+        .k(1)
+        .sparsity(0.0f)
+        .Test(xnn_f32_spmm_minmax_ukernel_1vx4__rvv, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_1VX4__RVV, k_gt_1) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t k = 2; k < 10; k++) {
+      SpMMMicrokernelTester()
+        .mr(1 * xnn_init_hardware_config()->vlenb / sizeof(float))
+        .nr(4)
+        .m(1 * xnn_init_hardware_config()->vlenb / sizeof(float))
+        .n(4)
+        .k(k)
+        .sparsity(0.0f)
+        .Test(xnn_f32_spmm_minmax_ukernel_1vx4__rvv, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_1VX4__RVV, k_gt_1_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t k = 2; k < 10; k++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        SpMMMicrokernelTester()
+          .mr(1 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .nr(4)
+          .m(1 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .n(n)
+          .k(k)
+          .sparsity(0.0f)
+          .Test(xnn_f32_spmm_minmax_ukernel_1vx4__rvv, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_1VX4__RVV, n_gt_4) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t n = 5; n < 10; n++) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(1 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .nr(4)
+          .m(1 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .n(n)
+          .k(k)
+          .sparsity(0.0f)
+          .Test(xnn_f32_spmm_minmax_ukernel_1vx4__rvv, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_1VX4__RVV, n_div_4) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t n = 8; n <= 12; n += 4) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(1 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .nr(4)
+          .m(1 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .n(n)
+          .k(k)
+          .Test(xnn_f32_spmm_minmax_ukernel_1vx4__rvv, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_1VX4__RVV, m_lt_1v) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t m = 1; m < 1 * xnn_init_hardware_config()->vlenb / sizeof(float); m++) {
+      for (uint32_t n = 1; n < 20; n += 5) {
+        for (size_t k = 1; k <= 5; k += 2) {
+          SpMMMicrokernelTester()
+            .mr(1 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .nr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .sparsity(0.0f)
+            .Test(xnn_f32_spmm_minmax_ukernel_1vx4__rvv, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_1VX4__RVV, m_div_1v) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t m = 2 * xnn_init_hardware_config()->vlenb / sizeof(float); m <= 3 * xnn_init_hardware_config()->vlenb / sizeof(float); m += 1 * xnn_init_hardware_config()->vlenb / sizeof(float)) {
+      for (uint32_t n = 1; n < 20; n += 5) {
+        for (size_t k = 1; k <= 5; k += 2) {
+          SpMMMicrokernelTester()
+            .mr(1 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .nr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .sparsity(0.0f)
+            .Test(xnn_f32_spmm_minmax_ukernel_1vx4__rvv, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_1VX4__RVV, m_gt_1v) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    size_t vl = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    for (uint32_t m = vl + 1; m < 2 * xnn_init_hardware_config()->vlenb / sizeof(float); m++) {
+      for (uint32_t n = 1; n < 20; n += 5) {
+        for (size_t k = 1; k <= 5; k += 2) {
+          SpMMMicrokernelTester()
+            .mr(1 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .nr(4)
+            .m(m)
+            .n(n)
+            .k(k)
+            .sparsity(0.0f)
+            .Test(xnn_f32_spmm_minmax_ukernel_1vx4__rvv, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_1VX4__RVV, output_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t n = 1; n < 20; n += 5) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(1 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .nr(4)
+          .m(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .n(n)
+          .k(k)
+          .output_stride(xnnpack::NextPrime(1 * xnn_init_hardware_config()->vlenb / sizeof(float) * 2 + 1))
+          .sparsity(0.0f)
+          .Test(xnn_f32_spmm_minmax_ukernel_1vx4__rvv, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_1VX4__RVV, qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t n = 1; n < 20; n += 5) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(1 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .nr(4)
+          .m(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .n(n)
+          .k(k)
+          .sparsity(0.0f)
+          .qmin(128)
+          .Test(xnn_f32_spmm_minmax_ukernel_1vx4__rvv, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_1VX4__RVV, qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t n = 1; n < 20; n += 5) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(1 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .nr(4)
+          .m(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .n(n)
+          .k(k)
+          .sparsity(0.0f)
+          .qmax(128)
+          .Test(xnn_f32_spmm_minmax_ukernel_1vx4__rvv, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_1VX4__RVV, half_sparse) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t n = 1; n < 20; n += 5) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(1 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .nr(4)
+          .m(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .n(n)
+          .k(k)
+          .sparsity(0.5f)
+          .Test(xnn_f32_spmm_minmax_ukernel_1vx4__rvv, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_1VX4__RVV, zero_weights) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t n = 1; n < 20; n += 5) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(1 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .nr(4)
+          .m(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .n(n)
+          .k(k)
+          .sparsity(1.0f)
+          .Test(xnn_f32_spmm_minmax_ukernel_1vx4__rvv, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  TEST(F32_SPMM_MINMAX_2VX2__RVV, k_eq_1) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    SpMMMicrokernelTester()
+      .mr(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+      .nr(2)
+      .m(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+      .n(2)
+      .k(1)
+      .sparsity(0.0f)
+      .Test(xnn_f32_spmm_minmax_ukernel_2vx2__rvv, xnn_init_f32_minmax_scalar_params);
+  }
+
+  TEST(F32_SPMM_MINMAX_2VX2__RVV, k_eq_1_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t n = 1; n <= 2; n++) {
+      SpMMMicrokernelTester()
+        .mr(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+        .nr(2)
+        .m(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+        .n(n)
+        .k(1)
+        .sparsity(0.0f)
+        .Test(xnn_f32_spmm_minmax_ukernel_2vx2__rvv, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_2VX2__RVV, k_gt_1) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t k = 2; k < 10; k++) {
+      SpMMMicrokernelTester()
+        .mr(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+        .nr(2)
+        .m(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+        .n(2)
+        .k(k)
+        .sparsity(0.0f)
+        .Test(xnn_f32_spmm_minmax_ukernel_2vx2__rvv, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_2VX2__RVV, k_gt_1_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t k = 2; k < 10; k++) {
+      for (uint32_t n = 1; n <= 2; n++) {
+        SpMMMicrokernelTester()
+          .mr(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .nr(2)
+          .m(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .n(n)
+          .k(k)
+          .sparsity(0.0f)
+          .Test(xnn_f32_spmm_minmax_ukernel_2vx2__rvv, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_2VX2__RVV, n_gt_2) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t n = 3; n < 10; n++) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .nr(2)
+          .m(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .n(n)
+          .k(k)
+          .sparsity(0.0f)
+          .Test(xnn_f32_spmm_minmax_ukernel_2vx2__rvv, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_2VX2__RVV, n_div_2) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t n = 4; n <= 6; n += 2) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .nr(2)
+          .m(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .n(n)
+          .k(k)
+          .Test(xnn_f32_spmm_minmax_ukernel_2vx2__rvv, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_2VX2__RVV, m_lt_2v) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t m = 1; m < 2 * xnn_init_hardware_config()->vlenb / sizeof(float); m++) {
+      for (uint32_t n = 1; n < 10; n += 3) {
+        for (size_t k = 1; k <= 5; k += 2) {
+          SpMMMicrokernelTester()
+            .mr(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .nr(2)
+            .m(m)
+            .n(n)
+            .k(k)
+            .sparsity(0.0f)
+            .Test(xnn_f32_spmm_minmax_ukernel_2vx2__rvv, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_2VX2__RVV, m_div_2v) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t m = 4 * xnn_init_hardware_config()->vlenb / sizeof(float); m <= 6 * xnn_init_hardware_config()->vlenb / sizeof(float); m += 2 * xnn_init_hardware_config()->vlenb / sizeof(float)) {
+      for (uint32_t n = 1; n < 10; n += 3) {
+        for (size_t k = 1; k <= 5; k += 2) {
+          SpMMMicrokernelTester()
+            .mr(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .nr(2)
+            .m(m)
+            .n(n)
+            .k(k)
+            .sparsity(0.0f)
+            .Test(xnn_f32_spmm_minmax_ukernel_2vx2__rvv, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_2VX2__RVV, m_gt_2v) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    size_t vl = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    for (uint32_t m = vl + 1; m < 4 * xnn_init_hardware_config()->vlenb / sizeof(float); m++) {
+      for (uint32_t n = 1; n < 10; n += 3) {
+        for (size_t k = 1; k <= 5; k += 2) {
+          SpMMMicrokernelTester()
+            .mr(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .nr(2)
+            .m(m)
+            .n(n)
+            .k(k)
+            .sparsity(0.0f)
+            .Test(xnn_f32_spmm_minmax_ukernel_2vx2__rvv, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_2VX2__RVV, output_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t n = 1; n < 10; n += 3) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .nr(2)
+          .m(4 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .n(n)
+          .k(k)
+          .output_stride(xnnpack::NextPrime(2 * xnn_init_hardware_config()->vlenb / sizeof(float) * 2 + 1))
+          .sparsity(0.0f)
+          .Test(xnn_f32_spmm_minmax_ukernel_2vx2__rvv, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_2VX2__RVV, qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t n = 1; n < 10; n += 3) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .nr(2)
+          .m(4 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .n(n)
+          .k(k)
+          .sparsity(0.0f)
+          .qmin(128)
+          .Test(xnn_f32_spmm_minmax_ukernel_2vx2__rvv, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_2VX2__RVV, qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t n = 1; n < 10; n += 3) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .nr(2)
+          .m(4 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .n(n)
+          .k(k)
+          .sparsity(0.0f)
+          .qmax(128)
+          .Test(xnn_f32_spmm_minmax_ukernel_2vx2__rvv, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_2VX2__RVV, half_sparse) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t n = 1; n < 10; n += 3) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .nr(2)
+          .m(4 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .n(n)
+          .k(k)
+          .sparsity(0.5f)
+          .Test(xnn_f32_spmm_minmax_ukernel_2vx2__rvv, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_2VX2__RVV, zero_weights) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t n = 1; n < 10; n += 3) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .nr(2)
+          .m(4 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .n(n)
+          .k(k)
+          .sparsity(1.0f)
+          .Test(xnn_f32_spmm_minmax_ukernel_2vx2__rvv, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  TEST(F32_SPMM_MINMAX_4VX1__RVV, k_eq_1) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    SpMMMicrokernelTester()
+      .mr(4 * xnn_init_hardware_config()->vlenb / sizeof(float))
+      .nr(1)
+      .m(4 * xnn_init_hardware_config()->vlenb / sizeof(float))
+      .n(1)
+      .k(1)
+      .sparsity(0.0f)
+      .Test(xnn_f32_spmm_minmax_ukernel_4vx1__rvv, xnn_init_f32_minmax_scalar_params);
+  }
+
+  TEST(F32_SPMM_MINMAX_4VX1__RVV, k_gt_1) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t k = 2; k < 10; k++) {
+      SpMMMicrokernelTester()
+        .mr(4 * xnn_init_hardware_config()->vlenb / sizeof(float))
+        .nr(1)
+        .m(4 * xnn_init_hardware_config()->vlenb / sizeof(float))
+        .n(1)
+        .k(k)
+        .sparsity(0.0f)
+        .Test(xnn_f32_spmm_minmax_ukernel_4vx1__rvv, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_4VX1__RVV, n_gt_1) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t n = 2; n < 10; n++) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(4 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .nr(1)
+          .m(4 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .n(n)
+          .k(k)
+          .sparsity(0.0f)
+          .Test(xnn_f32_spmm_minmax_ukernel_4vx1__rvv, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_4VX1__RVV, m_lt_4v) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t m = 1; m < 4 * xnn_init_hardware_config()->vlenb / sizeof(float); m++) {
+      for (uint32_t n = 1; n < 10; n += 2) {
+        for (size_t k = 1; k <= 5; k += 2) {
+          SpMMMicrokernelTester()
+            .mr(4 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .nr(1)
+            .m(m)
+            .n(n)
+            .k(k)
+            .sparsity(0.0f)
+            .Test(xnn_f32_spmm_minmax_ukernel_4vx1__rvv, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_4VX1__RVV, m_div_4v) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t m = 8 * xnn_init_hardware_config()->vlenb / sizeof(float); m <= 12 * xnn_init_hardware_config()->vlenb / sizeof(float); m += 4 * xnn_init_hardware_config()->vlenb / sizeof(float)) {
+      for (uint32_t n = 1; n < 10; n += 2) {
+        for (size_t k = 1; k <= 5; k += 2) {
+          SpMMMicrokernelTester()
+            .mr(4 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .nr(1)
+            .m(m)
+            .n(n)
+            .k(k)
+            .sparsity(0.0f)
+            .Test(xnn_f32_spmm_minmax_ukernel_4vx1__rvv, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_4VX1__RVV, m_gt_4v) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    size_t vl = 4 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    for (uint32_t m = vl + 1; m < 8 * xnn_init_hardware_config()->vlenb / sizeof(float); m++) {
+      for (uint32_t n = 1; n < 10; n += 2) {
+        for (size_t k = 1; k <= 5; k += 2) {
+          SpMMMicrokernelTester()
+            .mr(4 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .nr(1)
+            .m(m)
+            .n(n)
+            .k(k)
+            .sparsity(0.0f)
+            .Test(xnn_f32_spmm_minmax_ukernel_4vx1__rvv, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_4VX1__RVV, output_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t n = 1; n < 10; n += 2) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(4 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .nr(1)
+          .m(8 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .n(n)
+          .k(k)
+          .output_stride(xnnpack::NextPrime(4 * xnn_init_hardware_config()->vlenb / sizeof(float) * 2 + 1))
+          .sparsity(0.0f)
+          .Test(xnn_f32_spmm_minmax_ukernel_4vx1__rvv, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_4VX1__RVV, qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t n = 1; n < 10; n += 2) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(4 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .nr(1)
+          .m(8 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .n(n)
+          .k(k)
+          .sparsity(0.0f)
+          .qmin(128)
+          .Test(xnn_f32_spmm_minmax_ukernel_4vx1__rvv, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_4VX1__RVV, qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t n = 1; n < 10; n += 2) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(4 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .nr(1)
+          .m(8 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .n(n)
+          .k(k)
+          .sparsity(0.0f)
+          .qmax(128)
+          .Test(xnn_f32_spmm_minmax_ukernel_4vx1__rvv, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_4VX1__RVV, half_sparse) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t n = 1; n < 10; n += 2) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(4 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .nr(1)
+          .m(8 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .n(n)
+          .k(k)
+          .sparsity(0.5f)
+          .Test(xnn_f32_spmm_minmax_ukernel_4vx1__rvv, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_4VX1__RVV, zero_weights) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t n = 1; n < 10; n += 2) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(4 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .nr(1)
+          .m(8 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .n(n)
+          .k(k)
+          .sparsity(1.0f)
+          .Test(xnn_f32_spmm_minmax_ukernel_4vx1__rvv, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  TEST(F32_SPMM_MINMAX_8VX1__RVV, k_eq_1) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    SpMMMicrokernelTester()
+      .mr(8 * xnn_init_hardware_config()->vlenb / sizeof(float))
+      .nr(1)
+      .m(8 * xnn_init_hardware_config()->vlenb / sizeof(float))
+      .n(1)
+      .k(1)
+      .sparsity(0.0f)
+      .Test(xnn_f32_spmm_minmax_ukernel_8vx1__rvv, xnn_init_f32_minmax_scalar_params);
+  }
+
+  TEST(F32_SPMM_MINMAX_8VX1__RVV, k_gt_1) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t k = 2; k < 10; k++) {
+      SpMMMicrokernelTester()
+        .mr(8 * xnn_init_hardware_config()->vlenb / sizeof(float))
+        .nr(1)
+        .m(8 * xnn_init_hardware_config()->vlenb / sizeof(float))
+        .n(1)
+        .k(k)
+        .sparsity(0.0f)
+        .Test(xnn_f32_spmm_minmax_ukernel_8vx1__rvv, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_8VX1__RVV, n_gt_1) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t n = 2; n < 10; n++) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(8 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .nr(1)
+          .m(8 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .n(n)
+          .k(k)
+          .sparsity(0.0f)
+          .Test(xnn_f32_spmm_minmax_ukernel_8vx1__rvv, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_8VX1__RVV, m_lt_8v) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t m = 1; m < 8 * xnn_init_hardware_config()->vlenb / sizeof(float); m++) {
+      for (uint32_t n = 1; n < 10; n += 2) {
+        for (size_t k = 1; k <= 5; k += 2) {
+          SpMMMicrokernelTester()
+            .mr(8 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .nr(1)
+            .m(m)
+            .n(n)
+            .k(k)
+            .sparsity(0.0f)
+            .Test(xnn_f32_spmm_minmax_ukernel_8vx1__rvv, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_8VX1__RVV, m_div_8v) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t m = 16 * xnn_init_hardware_config()->vlenb / sizeof(float); m <= 24 * xnn_init_hardware_config()->vlenb / sizeof(float); m += 8 * xnn_init_hardware_config()->vlenb / sizeof(float)) {
+      for (uint32_t n = 1; n < 10; n += 2) {
+        for (size_t k = 1; k <= 5; k += 2) {
+          SpMMMicrokernelTester()
+            .mr(8 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .nr(1)
+            .m(m)
+            .n(n)
+            .k(k)
+            .sparsity(0.0f)
+            .Test(xnn_f32_spmm_minmax_ukernel_8vx1__rvv, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_8VX1__RVV, m_gt_8v) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    size_t vl = 8 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    for (uint32_t m = vl + 1; m < 16 * xnn_init_hardware_config()->vlenb / sizeof(float); m++) {
+      for (uint32_t n = 1; n < 10; n += 2) {
+        for (size_t k = 1; k <= 5; k += 2) {
+          SpMMMicrokernelTester()
+            .mr(8 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .nr(1)
+            .m(m)
+            .n(n)
+            .k(k)
+            .sparsity(0.0f)
+            .Test(xnn_f32_spmm_minmax_ukernel_8vx1__rvv, xnn_init_f32_minmax_scalar_params);
+        }
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_8VX1__RVV, output_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t n = 1; n < 10; n += 2) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(8 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .nr(1)
+          .m(16 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .n(n)
+          .k(k)
+          .output_stride(xnnpack::NextPrime(8 * xnn_init_hardware_config()->vlenb / sizeof(float) * 2 + 1))
+          .sparsity(0.0f)
+          .Test(xnn_f32_spmm_minmax_ukernel_8vx1__rvv, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_8VX1__RVV, qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t n = 1; n < 10; n += 2) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(8 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .nr(1)
+          .m(16 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .n(n)
+          .k(k)
+          .sparsity(0.0f)
+          .qmin(128)
+          .Test(xnn_f32_spmm_minmax_ukernel_8vx1__rvv, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_8VX1__RVV, qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t n = 1; n < 10; n += 2) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(8 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .nr(1)
+          .m(16 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .n(n)
+          .k(k)
+          .sparsity(0.0f)
+          .qmax(128)
+          .Test(xnn_f32_spmm_minmax_ukernel_8vx1__rvv, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_8VX1__RVV, half_sparse) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t n = 1; n < 10; n += 2) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(8 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .nr(1)
+          .m(16 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .n(n)
+          .k(k)
+          .sparsity(0.5f)
+          .Test(xnn_f32_spmm_minmax_ukernel_8vx1__rvv, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_SPMM_MINMAX_8VX1__RVV, zero_weights) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (uint32_t n = 1; n < 10; n += 2) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        SpMMMicrokernelTester()
+          .mr(8 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .nr(1)
+          .m(16 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .n(n)
+          .k(k)
+          .sparsity(1.0f)
+          .Test(xnn_f32_spmm_minmax_ukernel_8vx1__rvv, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64

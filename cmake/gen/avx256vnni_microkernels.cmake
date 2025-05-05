@@ -18,6 +18,7 @@ SET(PROD_AVX256VNNI_MICROKERNEL_SRCS
   src/qd8-f16-qc8w-igemm/gen/qd8-f16-qc8w-igemm-8x8c8-minmax-avx256vnni.c
   src/qs8-packw/gen/qs8-packw-x8c8-gemm-goi-avx256vnni-prfm.c
   src/qs8-packw/gen/qs8-packw-x16c8-gemm-goi-avx256vnni-prfm.c
+  src/qs8-packw/gen/qs8-packw-x64c4-gemm-goi-avx256vnni-prfm.c
   src/qs8-qu8-packw/gen/qs8-qu8-packw-x16c8-gemm-goi-avx256vnni.c)
 
 SET(NON_PROD_AVX256VNNI_MICROKERNEL_SRCS
@@ -113,6 +114,11 @@ SET(NON_PROD_AVX256VNNI_MICROKERNEL_SRCS
   src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-14x8c8-minmax-avx256vnni.c
   src/qs8-packw/gen/qs8-packw-x8c8-gemm-goi-avx256vnni.c
   src/qs8-packw/gen/qs8-packw-x16c8-gemm-goi-avx256vnni.c
+  src/qs8-packw/gen/qs8-packw-x64c4-gemm-goi-avx256vnni.c
+  src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x8c8-gemm-goi-avx256vnni-prfm.c
+  src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x8c8-gemm-goi-avx256vnni.c
+  src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x16c8-gemm-goi-avx256vnni-prfm.c
+  src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x16c8-gemm-goi-avx256vnni.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-avx256vnni-prfm.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-avx256vnni.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-5x8c8-minmax-fp32-avx256vnni-prfm.c

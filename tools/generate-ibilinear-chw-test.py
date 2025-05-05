@@ -50,6 +50,7 @@ def main(args):
   ukernel = options.ukernel
 
   tests = """\
+
 // Copyright 2020 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -61,6 +62,7 @@ def main(args):
 
 
 #include <gtest/gtest.h>
+
 #include "xnnpack/common.h"
 #include "xnnpack/ibilinear.h"
 #include "xnnpack/isa-checks.h"
@@ -87,6 +89,7 @@ def main(args):
   tests += f'#include "{folder}/{options.ukernel}.h"\n'
   tests += "#undef XNN_UKERNEL_WITH_PARAMS\n"
   xnncommon.overwrite_if_changed(options.output, tests)
+
 
 if __name__ == "__main__":
   main(sys.argv[1:])

@@ -5,13 +5,12 @@
 
 $assert BATCH_TILE % 8 == 0
 $assert BATCH_TILE >= 8
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_f16_vhswish_ukernel__neonfp16arith_u${BATCH_TILE}(
@@ -41,23 +40,23 @@ void xnn_f16_vhswish_ukernel__neonfp16arith_u${BATCH_TILE}(
   $if BATCH_TILE > 8:
     for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {
       $for N in range(0, BATCH_TILE, 8):
-        float16x8_t vx${ABC[N:N+8]} = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
+        float16x8_t vx${N//8} = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
 
       $for N in range(0, BATCH_TILE, 8):
-        float16x8_t vacc${ABC[N:N+8]} = vaddq_f16(vx${ABC[N:N+8]}, vthree);
-        vx${ABC[N:N+8]} = vmulq_f16(vx${ABC[N:N+8]}, vsixth);
+        float16x8_t vacc${N//8} = vaddq_f16(vx${N//8}, vthree);
+        vx${N//8} = vmulq_f16(vx${N//8}, vsixth);
 
       $for N in range(0, BATCH_TILE, 8):
-        vacc${ABC[N:N+8]} = vreinterpretq_f16_s16(vmaxq_s16(vreinterpretq_s16_f16(vacc${ABC[N:N+8]}), vzero));
+        vacc${N//8} = vreinterpretq_f16_s16(vmaxq_s16(vreinterpretq_s16_f16(vacc${N//8}), vzero));
 
       $for N in range(0, BATCH_TILE, 8):
-        vacc${ABC[N:N+8]} = vreinterpretq_f16_s16(vminq_s16(vreinterpretq_s16_f16(vacc${ABC[N:N+8]}), vsix));
+        vacc${N//8} = vreinterpretq_f16_s16(vminq_s16(vreinterpretq_s16_f16(vacc${N//8}), vsix));
 
       $for N in range(0, BATCH_TILE, 8):
-        vacc${ABC[N:N+8]} = vmulq_f16(vacc${ABC[N:N+8]}, vx${ABC[N:N+8]});
+        vacc${N//8} = vmulq_f16(vacc${N//8}, vx${N//8});
 
       $for N in range(0, BATCH_TILE, 8):
-        vst1q_u16(o, vreinterpretq_u16_f16(vacc${ABC[N:N+8]})); o += 8;
+        vst1q_u16(o, vreinterpretq_u16_f16(vacc${N//8})); o += 8;
     }
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     float16x8_t vx = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;

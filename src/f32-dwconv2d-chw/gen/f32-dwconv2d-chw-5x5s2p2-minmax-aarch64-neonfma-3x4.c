@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-dwconv2d-chw/5x5s2p2-neon.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/dwconv.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/math.h"
 
 
 void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__aarch64_neonfma_3x4(
@@ -23,7 +24,7 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__aarch64_neonfma_3x4(
     const float* zero,
     float* output,
     uint32_t padding_top,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(input_height != 0);
   assert(input_width != 0);
@@ -31,8 +32,8 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__aarch64_neonfma_3x4(
   assert(padding_top >= 1);
   assert(padding_top <= 2);
 
-  const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
-  const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
+  const float32x4_t vmax = vdupq_n_f32(params->scalar.max);
+  const float32x4_t vmin = vdupq_n_f32(params->scalar.min);
 
   static const int32_t mask_table[8] = {-1, -1, -1, -1, 0, 0, 0, 0};
   const uint32x4_t vmask_even = vld1q_u32((const uint32_t*) &mask_table[3 - (((input_width - 4) & 31) >> 3)]);

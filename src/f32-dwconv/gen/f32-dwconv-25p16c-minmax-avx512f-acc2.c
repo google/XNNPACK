@@ -1,5 +1,6 @@
+// clang-format off
 // Auto-generated file. Do not edit!
-//   Template: src/f32-dwconv/unipass-avx512.c.in
+//   Template: src/f32-dwconv/simd.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2019 Google LLC
@@ -9,10 +10,9 @@
 
 #include <assert.h>
 
-#include <immintrin.h>
+#include "src/xnnpack/simd/f32-avx512f.h"
 
-#include "xnnpack/dwconv.h"
-#include "xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/dwconv.h"
 
 
 void xnn_f32_dwconv_minmax_ukernel_25p16c__avx512f_acc2(
@@ -24,14 +24,15 @@ void xnn_f32_dwconv_minmax_ukernel_25p16c__avx512f_acc2(
     intptr_t input_stride,
     size_t output_increment,
     size_t input_offset,
+    size_t input_pixel_stride,
     const float* zero,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(channels != 0);
   assert(output_width != 0);
 
-  const __m512 vmin = _mm512_set1_ps(params->scalar.min);
-  const __m512 vmax = _mm512_set1_ps(params->scalar.max);
+  const xnn_simd_f32_t vmin = xnn_set1_f32(params->scalar.min);
+  const xnn_simd_f32_t vmax = xnn_set1_f32(params->scalar.max);
   do {
     const float* i0 = input[0];
     assert(i0 != NULL);
@@ -163,288 +164,287 @@ void xnn_f32_dwconv_minmax_ukernel_25p16c__avx512f_acc2(
     size_t c = channels;
     const float* w = weights;
     for (; c >= 16; c -= 16) {
-      __m512 vacc0123456789ABCDEFp0 = _mm512_load_ps(w);
+      xnn_simd_f32_t vacc0p0 = xnn_load_f32(w + 0);
 
 
-      const __m512 vi0x0123456789ABCDEF = _mm512_loadu_ps(i0);
+      const xnn_simd_f32_t vi0x0 = xnn_loadu_f32(i0 + 0);
       i0 += 16;
 
-      const __m512 vk0x0123456789ABCDEF = _mm512_load_ps(w + 16);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi0x0123456789ABCDEF, vk0x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vk0x0 = xnn_load_f32(w + 16);
+      vacc0p0 = xnn_fmadd_f32(vi0x0, vk0x0, vacc0p0);
 
-      const __m512 vi1x0123456789ABCDEF = _mm512_loadu_ps(i1);
+      const xnn_simd_f32_t vi1x0 = xnn_loadu_f32(i1 + 0);
       i1 += 16;
 
-      const __m512 vk1x0123456789ABCDEF = _mm512_load_ps(w + 32);
-      __m512 vacc0123456789ABCDEFp1 = _mm512_mul_ps(vi1x0123456789ABCDEF, vk1x0123456789ABCDEF);
+      const xnn_simd_f32_t vk1x0 = xnn_load_f32(w + 32);
+      xnn_simd_f32_t vacc0p1 = xnn_mul_f32(vi1x0, vk1x0);
 
-      const __m512 vi2x0123456789ABCDEF = _mm512_loadu_ps(i2);
+      const xnn_simd_f32_t vi2x0 = xnn_loadu_f32(i2 + 0);
       i2 += 16;
 
-      const __m512 vk2x0123456789ABCDEF = _mm512_load_ps(w + 48);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi2x0123456789ABCDEF, vk2x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vk2x0 = xnn_load_f32(w + 48);
+      vacc0p0 = xnn_fmadd_f32(vi2x0, vk2x0, vacc0p0);
 
-      const __m512 vi3x0123456789ABCDEF = _mm512_loadu_ps(i3);
+      const xnn_simd_f32_t vi3x0 = xnn_loadu_f32(i3 + 0);
       i3 += 16;
 
-      const __m512 vk3x0123456789ABCDEF = _mm512_load_ps(w + 64);
-      vacc0123456789ABCDEFp1 = _mm512_fmadd_ps(vi3x0123456789ABCDEF, vk3x0123456789ABCDEF, vacc0123456789ABCDEFp1);
+      const xnn_simd_f32_t vk3x0 = xnn_load_f32(w + 64);
+      vacc0p1 = xnn_fmadd_f32(vi3x0, vk3x0, vacc0p1);
 
-      const __m512 vi4x0123456789ABCDEF = _mm512_loadu_ps(i4);
+      const xnn_simd_f32_t vi4x0 = xnn_loadu_f32(i4 + 0);
       i4 += 16;
 
-      const __m512 vk4x0123456789ABCDEF = _mm512_load_ps(w + 80);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi4x0123456789ABCDEF, vk4x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vk4x0 = xnn_load_f32(w + 80);
+      vacc0p0 = xnn_fmadd_f32(vi4x0, vk4x0, vacc0p0);
 
-      const __m512 vi5x0123456789ABCDEF = _mm512_loadu_ps(i5);
+      const xnn_simd_f32_t vi5x0 = xnn_loadu_f32(i5 + 0);
       i5 += 16;
 
-      const __m512 vk5x0123456789ABCDEF = _mm512_load_ps(w + 96);
-      vacc0123456789ABCDEFp1 = _mm512_fmadd_ps(vi5x0123456789ABCDEF, vk5x0123456789ABCDEF, vacc0123456789ABCDEFp1);
+      const xnn_simd_f32_t vk5x0 = xnn_load_f32(w + 96);
+      vacc0p1 = xnn_fmadd_f32(vi5x0, vk5x0, vacc0p1);
 
-      const __m512 vi6x0123456789ABCDEF = _mm512_loadu_ps(i6);
+      const xnn_simd_f32_t vi6x0 = xnn_loadu_f32(i6 + 0);
       i6 += 16;
 
-      const __m512 vk6x0123456789ABCDEF = _mm512_load_ps(w + 112);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi6x0123456789ABCDEF, vk6x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vk6x0 = xnn_load_f32(w + 112);
+      vacc0p0 = xnn_fmadd_f32(vi6x0, vk6x0, vacc0p0);
 
-      const __m512 vi7x0123456789ABCDEF = _mm512_loadu_ps(i7);
+      const xnn_simd_f32_t vi7x0 = xnn_loadu_f32(i7 + 0);
       i7 += 16;
 
-      const __m512 vk7x0123456789ABCDEF = _mm512_load_ps(w + 128);
-      vacc0123456789ABCDEFp1 = _mm512_fmadd_ps(vi7x0123456789ABCDEF, vk7x0123456789ABCDEF, vacc0123456789ABCDEFp1);
+      const xnn_simd_f32_t vk7x0 = xnn_load_f32(w + 128);
+      vacc0p1 = xnn_fmadd_f32(vi7x0, vk7x0, vacc0p1);
 
-      const __m512 vi8x0123456789ABCDEF = _mm512_loadu_ps(i8);
+      const xnn_simd_f32_t vi8x0 = xnn_loadu_f32(i8 + 0);
       i8 += 16;
 
-      const __m512 vk8x0123456789ABCDEF = _mm512_load_ps(w + 144);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi8x0123456789ABCDEF, vk8x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vk8x0 = xnn_load_f32(w + 144);
+      vacc0p0 = xnn_fmadd_f32(vi8x0, vk8x0, vacc0p0);
 
-      const __m512 vi9x0123456789ABCDEF = _mm512_loadu_ps(i9);
+      const xnn_simd_f32_t vi9x0 = xnn_loadu_f32(i9 + 0);
       i9 += 16;
 
-      const __m512 vk9x0123456789ABCDEF = _mm512_load_ps(w + 160);
-      vacc0123456789ABCDEFp1 = _mm512_fmadd_ps(vi9x0123456789ABCDEF, vk9x0123456789ABCDEF, vacc0123456789ABCDEFp1);
+      const xnn_simd_f32_t vk9x0 = xnn_load_f32(w + 160);
+      vacc0p1 = xnn_fmadd_f32(vi9x0, vk9x0, vacc0p1);
 
-      const __m512 vi10x0123456789ABCDEF = _mm512_loadu_ps(i10);
+      const xnn_simd_f32_t vi10x0 = xnn_loadu_f32(i10 + 0);
       i10 += 16;
 
-      const __m512 vk10x0123456789ABCDEF = _mm512_load_ps(w + 176);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi10x0123456789ABCDEF, vk10x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vk10x0 = xnn_load_f32(w + 176);
+      vacc0p0 = xnn_fmadd_f32(vi10x0, vk10x0, vacc0p0);
 
-      const __m512 vi11x0123456789ABCDEF = _mm512_loadu_ps(i11);
+      const xnn_simd_f32_t vi11x0 = xnn_loadu_f32(i11 + 0);
       i11 += 16;
 
-      const __m512 vk11x0123456789ABCDEF = _mm512_load_ps(w + 192);
-      vacc0123456789ABCDEFp1 = _mm512_fmadd_ps(vi11x0123456789ABCDEF, vk11x0123456789ABCDEF, vacc0123456789ABCDEFp1);
+      const xnn_simd_f32_t vk11x0 = xnn_load_f32(w + 192);
+      vacc0p1 = xnn_fmadd_f32(vi11x0, vk11x0, vacc0p1);
 
-      const __m512 vi12x0123456789ABCDEF = _mm512_loadu_ps(i12);
+      const xnn_simd_f32_t vi12x0 = xnn_loadu_f32(i12 + 0);
       i12 += 16;
 
-      const __m512 vk12x0123456789ABCDEF = _mm512_load_ps(w + 208);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi12x0123456789ABCDEF, vk12x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vk12x0 = xnn_load_f32(w + 208);
+      vacc0p0 = xnn_fmadd_f32(vi12x0, vk12x0, vacc0p0);
 
-      const __m512 vi13x0123456789ABCDEF = _mm512_loadu_ps(i13);
+      const xnn_simd_f32_t vi13x0 = xnn_loadu_f32(i13 + 0);
       i13 += 16;
 
-      const __m512 vk13x0123456789ABCDEF = _mm512_load_ps(w + 224);
-      vacc0123456789ABCDEFp1 = _mm512_fmadd_ps(vi13x0123456789ABCDEF, vk13x0123456789ABCDEF, vacc0123456789ABCDEFp1);
+      const xnn_simd_f32_t vk13x0 = xnn_load_f32(w + 224);
+      vacc0p1 = xnn_fmadd_f32(vi13x0, vk13x0, vacc0p1);
 
-      const __m512 vi14x0123456789ABCDEF = _mm512_loadu_ps(i14);
+      const xnn_simd_f32_t vi14x0 = xnn_loadu_f32(i14 + 0);
       i14 += 16;
 
-      const __m512 vk14x0123456789ABCDEF = _mm512_load_ps(w + 240);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi14x0123456789ABCDEF, vk14x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vk14x0 = xnn_load_f32(w + 240);
+      vacc0p0 = xnn_fmadd_f32(vi14x0, vk14x0, vacc0p0);
 
-      const __m512 vi15x0123456789ABCDEF = _mm512_loadu_ps(i15);
+      const xnn_simd_f32_t vi15x0 = xnn_loadu_f32(i15 + 0);
       i15 += 16;
 
-      const __m512 vk15x0123456789ABCDEF = _mm512_load_ps(w + 256);
-      vacc0123456789ABCDEFp1 = _mm512_fmadd_ps(vi15x0123456789ABCDEF, vk15x0123456789ABCDEF, vacc0123456789ABCDEFp1);
+      const xnn_simd_f32_t vk15x0 = xnn_load_f32(w + 256);
+      vacc0p1 = xnn_fmadd_f32(vi15x0, vk15x0, vacc0p1);
 
-      const __m512 vi16x0123456789ABCDEF = _mm512_loadu_ps(i16);
+      const xnn_simd_f32_t vi16x0 = xnn_loadu_f32(i16 + 0);
       i16 += 16;
 
-      const __m512 vk16x0123456789ABCDEF = _mm512_load_ps(w + 272);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi16x0123456789ABCDEF, vk16x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vk16x0 = xnn_load_f32(w + 272);
+      vacc0p0 = xnn_fmadd_f32(vi16x0, vk16x0, vacc0p0);
 
-      const __m512 vi17x0123456789ABCDEF = _mm512_loadu_ps(i17);
+      const xnn_simd_f32_t vi17x0 = xnn_loadu_f32(i17 + 0);
       i17 += 16;
 
-      const __m512 vk17x0123456789ABCDEF = _mm512_load_ps(w + 288);
-      vacc0123456789ABCDEFp1 = _mm512_fmadd_ps(vi17x0123456789ABCDEF, vk17x0123456789ABCDEF, vacc0123456789ABCDEFp1);
+      const xnn_simd_f32_t vk17x0 = xnn_load_f32(w + 288);
+      vacc0p1 = xnn_fmadd_f32(vi17x0, vk17x0, vacc0p1);
 
-      const __m512 vi18x0123456789ABCDEF = _mm512_loadu_ps(i18);
+      const xnn_simd_f32_t vi18x0 = xnn_loadu_f32(i18 + 0);
       i18 += 16;
 
-      const __m512 vk18x0123456789ABCDEF = _mm512_load_ps(w + 304);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi18x0123456789ABCDEF, vk18x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vk18x0 = xnn_load_f32(w + 304);
+      vacc0p0 = xnn_fmadd_f32(vi18x0, vk18x0, vacc0p0);
 
-      const __m512 vi19x0123456789ABCDEF = _mm512_loadu_ps(i19);
+      const xnn_simd_f32_t vi19x0 = xnn_loadu_f32(i19 + 0);
       i19 += 16;
 
-      const __m512 vk19x0123456789ABCDEF = _mm512_load_ps(w + 320);
-      vacc0123456789ABCDEFp1 = _mm512_fmadd_ps(vi19x0123456789ABCDEF, vk19x0123456789ABCDEF, vacc0123456789ABCDEFp1);
+      const xnn_simd_f32_t vk19x0 = xnn_load_f32(w + 320);
+      vacc0p1 = xnn_fmadd_f32(vi19x0, vk19x0, vacc0p1);
 
-      const __m512 vi20x0123456789ABCDEF = _mm512_loadu_ps(i20);
+      const xnn_simd_f32_t vi20x0 = xnn_loadu_f32(i20 + 0);
       i20 += 16;
 
-      const __m512 vk20x0123456789ABCDEF = _mm512_load_ps(w + 336);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi20x0123456789ABCDEF, vk20x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vk20x0 = xnn_load_f32(w + 336);
+      vacc0p0 = xnn_fmadd_f32(vi20x0, vk20x0, vacc0p0);
 
-      const __m512 vi21x0123456789ABCDEF = _mm512_loadu_ps(i21);
+      const xnn_simd_f32_t vi21x0 = xnn_loadu_f32(i21 + 0);
       i21 += 16;
 
-      const __m512 vk21x0123456789ABCDEF = _mm512_load_ps(w + 352);
-      vacc0123456789ABCDEFp1 = _mm512_fmadd_ps(vi21x0123456789ABCDEF, vk21x0123456789ABCDEF, vacc0123456789ABCDEFp1);
+      const xnn_simd_f32_t vk21x0 = xnn_load_f32(w + 352);
+      vacc0p1 = xnn_fmadd_f32(vi21x0, vk21x0, vacc0p1);
 
-      const __m512 vi22x0123456789ABCDEF = _mm512_loadu_ps(i22);
+      const xnn_simd_f32_t vi22x0 = xnn_loadu_f32(i22 + 0);
       i22 += 16;
 
-      const __m512 vk22x0123456789ABCDEF = _mm512_load_ps(w + 368);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi22x0123456789ABCDEF, vk22x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vk22x0 = xnn_load_f32(w + 368);
+      vacc0p0 = xnn_fmadd_f32(vi22x0, vk22x0, vacc0p0);
 
-      const __m512 vi23x0123456789ABCDEF = _mm512_loadu_ps(i23);
+      const xnn_simd_f32_t vi23x0 = xnn_loadu_f32(i23 + 0);
       i23 += 16;
 
-      const __m512 vk23x0123456789ABCDEF = _mm512_load_ps(w + 384);
-      vacc0123456789ABCDEFp1 = _mm512_fmadd_ps(vi23x0123456789ABCDEF, vk23x0123456789ABCDEF, vacc0123456789ABCDEFp1);
+      const xnn_simd_f32_t vk23x0 = xnn_load_f32(w + 384);
+      vacc0p1 = xnn_fmadd_f32(vi23x0, vk23x0, vacc0p1);
 
-      const __m512 vi24x0123456789ABCDEF = _mm512_loadu_ps(i24);
+      const xnn_simd_f32_t vi24x0 = xnn_loadu_f32(i24 + 0);
       i24 += 16;
 
-      const __m512 vk24x0123456789ABCDEF = _mm512_load_ps(w + 400);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi24x0123456789ABCDEF, vk24x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vk24x0 = xnn_load_f32(w + 400);
+      vacc0p0 = xnn_fmadd_f32(vi24x0, vk24x0, vacc0p0);
 
       w += 416;
 
-      // Add up all accumulators to vacc0123456789ABCDEFp0
-      vacc0123456789ABCDEFp0 = _mm512_add_ps(vacc0123456789ABCDEFp0, vacc0123456789ABCDEFp1);
+      // Add up all accumulators to vacc0p0
+      vacc0p0 = xnn_add_f32(vacc0p0, vacc0p1);
 
-      __m512 vacc0123456789ABCDEF = _mm512_max_ps(vmin, vacc0123456789ABCDEFp0);
-      vacc0123456789ABCDEF = _mm512_min_ps(vmax, vacc0123456789ABCDEF);
+      xnn_simd_f32_t vacc0 = xnn_max_f32(vmin, vacc0p0);
+      vacc0 = xnn_min_f32(vmax, vacc0);
 
-      _mm512_storeu_ps(output, vacc0123456789ABCDEF);
+      xnn_storeu_f32(output + 0, vacc0);
       output += 16;
     }
     if XNN_UNLIKELY(c != 0) {
       assert(c >= 1);
       assert(c <= 16);
-      // Prepare mask for valid 32-bit elements (depends on nc).
-      const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << c) - UINT32_C(1)));
 
-      __m512 vacc0123456789ABCDEFp0 = _mm512_maskz_loadu_ps(vmask, w);
+      xnn_simd_f32_t vacc0p0 = xnn_load_tail_f32(w, c);
 
-      const __m512 vi0x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i0);
-      const __m512 vk0x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 16);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi0x0123456789ABCDEF, vk0x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vi0x0 = xnn_load_tail_f32(i0, c);
+      const xnn_simd_f32_t vk0x0 = xnn_load_tail_f32(w + 16, c);
+      vacc0p0 = xnn_fmadd_f32(vi0x0, vk0x0, vacc0p0);
 
-      const __m512 vi1x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i1);
-      const __m512 vk1x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 32);
-      __m512 vacc0123456789ABCDEFp1 = _mm512_mul_ps(vi1x0123456789ABCDEF, vk1x0123456789ABCDEF);
+      const xnn_simd_f32_t vi1x0 = xnn_load_tail_f32(i1, c);
+      const xnn_simd_f32_t vk1x0 = xnn_load_tail_f32(w + 32, c);
+      xnn_simd_f32_t vacc0p1 = xnn_mul_f32(vi1x0, vk1x0);
 
-      const __m512 vi2x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i2);
-      const __m512 vk2x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 48);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi2x0123456789ABCDEF, vk2x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vi2x0 = xnn_load_tail_f32(i2, c);
+      const xnn_simd_f32_t vk2x0 = xnn_load_tail_f32(w + 48, c);
+      vacc0p0 = xnn_fmadd_f32(vi2x0, vk2x0, vacc0p0);
 
-      const __m512 vi3x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i3);
-      const __m512 vk3x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 64);
-      vacc0123456789ABCDEFp1 = _mm512_fmadd_ps(vi3x0123456789ABCDEF, vk3x0123456789ABCDEF, vacc0123456789ABCDEFp1);
+      const xnn_simd_f32_t vi3x0 = xnn_load_tail_f32(i3, c);
+      const xnn_simd_f32_t vk3x0 = xnn_load_tail_f32(w + 64, c);
+      vacc0p1 = xnn_fmadd_f32(vi3x0, vk3x0, vacc0p1);
 
-      const __m512 vi4x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i4);
-      const __m512 vk4x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 80);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi4x0123456789ABCDEF, vk4x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vi4x0 = xnn_load_tail_f32(i4, c);
+      const xnn_simd_f32_t vk4x0 = xnn_load_tail_f32(w + 80, c);
+      vacc0p0 = xnn_fmadd_f32(vi4x0, vk4x0, vacc0p0);
 
-      const __m512 vi5x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i5);
-      const __m512 vk5x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 96);
-      vacc0123456789ABCDEFp1 = _mm512_fmadd_ps(vi5x0123456789ABCDEF, vk5x0123456789ABCDEF, vacc0123456789ABCDEFp1);
+      const xnn_simd_f32_t vi5x0 = xnn_load_tail_f32(i5, c);
+      const xnn_simd_f32_t vk5x0 = xnn_load_tail_f32(w + 96, c);
+      vacc0p1 = xnn_fmadd_f32(vi5x0, vk5x0, vacc0p1);
 
-      const __m512 vi6x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i6);
-      const __m512 vk6x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 112);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi6x0123456789ABCDEF, vk6x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vi6x0 = xnn_load_tail_f32(i6, c);
+      const xnn_simd_f32_t vk6x0 = xnn_load_tail_f32(w + 112, c);
+      vacc0p0 = xnn_fmadd_f32(vi6x0, vk6x0, vacc0p0);
 
-      const __m512 vi7x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i7);
-      const __m512 vk7x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 128);
-      vacc0123456789ABCDEFp1 = _mm512_fmadd_ps(vi7x0123456789ABCDEF, vk7x0123456789ABCDEF, vacc0123456789ABCDEFp1);
+      const xnn_simd_f32_t vi7x0 = xnn_load_tail_f32(i7, c);
+      const xnn_simd_f32_t vk7x0 = xnn_load_tail_f32(w + 128, c);
+      vacc0p1 = xnn_fmadd_f32(vi7x0, vk7x0, vacc0p1);
 
-      const __m512 vi8x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i8);
-      const __m512 vk8x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 144);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi8x0123456789ABCDEF, vk8x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vi8x0 = xnn_load_tail_f32(i8, c);
+      const xnn_simd_f32_t vk8x0 = xnn_load_tail_f32(w + 144, c);
+      vacc0p0 = xnn_fmadd_f32(vi8x0, vk8x0, vacc0p0);
 
-      const __m512 vi9x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i9);
-      const __m512 vk9x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 160);
-      vacc0123456789ABCDEFp1 = _mm512_fmadd_ps(vi9x0123456789ABCDEF, vk9x0123456789ABCDEF, vacc0123456789ABCDEFp1);
+      const xnn_simd_f32_t vi9x0 = xnn_load_tail_f32(i9, c);
+      const xnn_simd_f32_t vk9x0 = xnn_load_tail_f32(w + 160, c);
+      vacc0p1 = xnn_fmadd_f32(vi9x0, vk9x0, vacc0p1);
 
-      const __m512 vi10x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i10);
-      const __m512 vk10x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 176);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi10x0123456789ABCDEF, vk10x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vi10x0 = xnn_load_tail_f32(i10, c);
+      const xnn_simd_f32_t vk10x0 = xnn_load_tail_f32(w + 176, c);
+      vacc0p0 = xnn_fmadd_f32(vi10x0, vk10x0, vacc0p0);
 
-      const __m512 vi11x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i11);
-      const __m512 vk11x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 192);
-      vacc0123456789ABCDEFp1 = _mm512_fmadd_ps(vi11x0123456789ABCDEF, vk11x0123456789ABCDEF, vacc0123456789ABCDEFp1);
+      const xnn_simd_f32_t vi11x0 = xnn_load_tail_f32(i11, c);
+      const xnn_simd_f32_t vk11x0 = xnn_load_tail_f32(w + 192, c);
+      vacc0p1 = xnn_fmadd_f32(vi11x0, vk11x0, vacc0p1);
 
-      const __m512 vi12x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i12);
-      const __m512 vk12x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 208);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi12x0123456789ABCDEF, vk12x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vi12x0 = xnn_load_tail_f32(i12, c);
+      const xnn_simd_f32_t vk12x0 = xnn_load_tail_f32(w + 208, c);
+      vacc0p0 = xnn_fmadd_f32(vi12x0, vk12x0, vacc0p0);
 
-      const __m512 vi13x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i13);
-      const __m512 vk13x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 224);
-      vacc0123456789ABCDEFp1 = _mm512_fmadd_ps(vi13x0123456789ABCDEF, vk13x0123456789ABCDEF, vacc0123456789ABCDEFp1);
+      const xnn_simd_f32_t vi13x0 = xnn_load_tail_f32(i13, c);
+      const xnn_simd_f32_t vk13x0 = xnn_load_tail_f32(w + 224, c);
+      vacc0p1 = xnn_fmadd_f32(vi13x0, vk13x0, vacc0p1);
 
-      const __m512 vi14x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i14);
-      const __m512 vk14x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 240);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi14x0123456789ABCDEF, vk14x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vi14x0 = xnn_load_tail_f32(i14, c);
+      const xnn_simd_f32_t vk14x0 = xnn_load_tail_f32(w + 240, c);
+      vacc0p0 = xnn_fmadd_f32(vi14x0, vk14x0, vacc0p0);
 
-      const __m512 vi15x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i15);
-      const __m512 vk15x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 256);
-      vacc0123456789ABCDEFp1 = _mm512_fmadd_ps(vi15x0123456789ABCDEF, vk15x0123456789ABCDEF, vacc0123456789ABCDEFp1);
+      const xnn_simd_f32_t vi15x0 = xnn_load_tail_f32(i15, c);
+      const xnn_simd_f32_t vk15x0 = xnn_load_tail_f32(w + 256, c);
+      vacc0p1 = xnn_fmadd_f32(vi15x0, vk15x0, vacc0p1);
 
-      const __m512 vi16x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i16);
-      const __m512 vk16x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 272);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi16x0123456789ABCDEF, vk16x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vi16x0 = xnn_load_tail_f32(i16, c);
+      const xnn_simd_f32_t vk16x0 = xnn_load_tail_f32(w + 272, c);
+      vacc0p0 = xnn_fmadd_f32(vi16x0, vk16x0, vacc0p0);
 
-      const __m512 vi17x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i17);
-      const __m512 vk17x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 288);
-      vacc0123456789ABCDEFp1 = _mm512_fmadd_ps(vi17x0123456789ABCDEF, vk17x0123456789ABCDEF, vacc0123456789ABCDEFp1);
+      const xnn_simd_f32_t vi17x0 = xnn_load_tail_f32(i17, c);
+      const xnn_simd_f32_t vk17x0 = xnn_load_tail_f32(w + 288, c);
+      vacc0p1 = xnn_fmadd_f32(vi17x0, vk17x0, vacc0p1);
 
-      const __m512 vi18x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i18);
-      const __m512 vk18x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 304);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi18x0123456789ABCDEF, vk18x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vi18x0 = xnn_load_tail_f32(i18, c);
+      const xnn_simd_f32_t vk18x0 = xnn_load_tail_f32(w + 304, c);
+      vacc0p0 = xnn_fmadd_f32(vi18x0, vk18x0, vacc0p0);
 
-      const __m512 vi19x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i19);
-      const __m512 vk19x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 320);
-      vacc0123456789ABCDEFp1 = _mm512_fmadd_ps(vi19x0123456789ABCDEF, vk19x0123456789ABCDEF, vacc0123456789ABCDEFp1);
+      const xnn_simd_f32_t vi19x0 = xnn_load_tail_f32(i19, c);
+      const xnn_simd_f32_t vk19x0 = xnn_load_tail_f32(w + 320, c);
+      vacc0p1 = xnn_fmadd_f32(vi19x0, vk19x0, vacc0p1);
 
-      const __m512 vi20x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i20);
-      const __m512 vk20x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 336);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi20x0123456789ABCDEF, vk20x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vi20x0 = xnn_load_tail_f32(i20, c);
+      const xnn_simd_f32_t vk20x0 = xnn_load_tail_f32(w + 336, c);
+      vacc0p0 = xnn_fmadd_f32(vi20x0, vk20x0, vacc0p0);
 
-      const __m512 vi21x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i21);
-      const __m512 vk21x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 352);
-      vacc0123456789ABCDEFp1 = _mm512_fmadd_ps(vi21x0123456789ABCDEF, vk21x0123456789ABCDEF, vacc0123456789ABCDEFp1);
+      const xnn_simd_f32_t vi21x0 = xnn_load_tail_f32(i21, c);
+      const xnn_simd_f32_t vk21x0 = xnn_load_tail_f32(w + 352, c);
+      vacc0p1 = xnn_fmadd_f32(vi21x0, vk21x0, vacc0p1);
 
-      const __m512 vi22x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i22);
-      const __m512 vk22x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 368);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi22x0123456789ABCDEF, vk22x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vi22x0 = xnn_load_tail_f32(i22, c);
+      const xnn_simd_f32_t vk22x0 = xnn_load_tail_f32(w + 368, c);
+      vacc0p0 = xnn_fmadd_f32(vi22x0, vk22x0, vacc0p0);
 
-      const __m512 vi23x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i23);
-      const __m512 vk23x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 384);
-      vacc0123456789ABCDEFp1 = _mm512_fmadd_ps(vi23x0123456789ABCDEF, vk23x0123456789ABCDEF, vacc0123456789ABCDEFp1);
+      const xnn_simd_f32_t vi23x0 = xnn_load_tail_f32(i23, c);
+      const xnn_simd_f32_t vk23x0 = xnn_load_tail_f32(w + 384, c);
+      vacc0p1 = xnn_fmadd_f32(vi23x0, vk23x0, vacc0p1);
 
-      const __m512 vi24x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, i24);
-      const __m512 vk24x0123456789ABCDEF = _mm512_maskz_loadu_ps(vmask, w + 400);
-      vacc0123456789ABCDEFp0 = _mm512_fmadd_ps(vi24x0123456789ABCDEF, vk24x0123456789ABCDEF, vacc0123456789ABCDEFp0);
+      const xnn_simd_f32_t vi24x0 = xnn_load_tail_f32(i24, c);
+      const xnn_simd_f32_t vk24x0 = xnn_load_tail_f32(w + 400, c);
+      vacc0p0 = xnn_fmadd_f32(vi24x0, vk24x0, vacc0p0);
 
-      // Add up all accumulators to vacc0123456789ABCDEFp0
-      vacc0123456789ABCDEFp0 = _mm512_add_ps(vacc0123456789ABCDEFp0, vacc0123456789ABCDEFp1);
+      // Add up all accumulators to vacc0p0
+      vacc0p0 = xnn_add_f32(vacc0p0, vacc0p1);
 
-      __m512 vacc0123456789ABCDEF = _mm512_max_ps(vmin, vacc0123456789ABCDEFp0);
-      vacc0123456789ABCDEF = _mm512_min_ps(vmax, vacc0123456789ABCDEF);
+      xnn_simd_f32_t vacc0 = xnn_max_f32(vmin, vacc0p0);
+      vacc0 = xnn_min_f32(vmax, vacc0);
 
-      _mm512_mask_storeu_ps(output, vmask, vacc0123456789ABCDEF);
+      xnn_store_tail_f32(output, vacc0, c);
       output += c;
     }
 
+    input_offset += input_pixel_stride;
     output = (float*) ((uintptr_t) output + output_increment);
   } while (--output_width != 0);
 }

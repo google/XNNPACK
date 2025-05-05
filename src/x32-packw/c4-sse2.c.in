@@ -12,9 +12,9 @@ $assert KR == 4
 
 #include <emmintrin.h>
 
-#include "xnnpack/packw.h"
+#include "src/xnnpack/packw.h"
 $if PREFETCH:
-  #include "xnnpack/prefetch.h"
+  #include "src/xnnpack/prefetch.h"
 
 
 void xnn_x32_packw_gemm_goi_ukernel_x${NR}c${KR}__sse2_u4${"_prfm" if PREFETCH else ""}(

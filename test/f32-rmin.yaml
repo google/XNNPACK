@@ -62,3 +62,10 @@
 - name: xnn_f32_rmin_ukernel__rvv_u2v
 - name: xnn_f32_rmin_ukernel__rvv_u4v
 - name: xnn_f32_rmin_ukernel__rvv_u8v
+
+# Hexagon HVX
+- name: xnn_f32_rmin_ukernel__hvx_u32
+- name: xnn_f32_rmin_ukernel__hvx_u64_acc2
+- name: xnn_f32_rmin_ukernel__hvx_u96_acc3
+- name: xnn_f32_rmin_ukernel__hvx_u128_acc2
+- name: xnn_f32_rmin_ukernel__hvx_u128_acc4

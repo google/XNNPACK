@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-rdsum/wasm-simd.c.in
 //   Generator: tools/xngen
@@ -10,9 +11,9 @@
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
+#include "src/xnnpack/math.h"
 
 void xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c32(
     size_t rows,

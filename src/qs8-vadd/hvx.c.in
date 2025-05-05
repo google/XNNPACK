@@ -12,9 +12,9 @@ $assert BATCH_TILE >= 32
 #include <hexagon_protos.h>
 #include <hexagon_types.h>
 
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/math.h"
-#include "xnnpack/vbinary.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vbinary.h"
 
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 void xnn_${DATATYPE.lower()}_vadd_minmax_ukernel__hvx_u${BATCH_TILE}(
@@ -147,8 +147,7 @@ void xnn_${DATATYPE.lower()}_vadd_minmax_ukernel__hvx_u${BATCH_TILE}(
           Q6_V_vstu_variable(output, 32, vout);
           output += 32;
           batch -=32;
-        }
-        else{
+        } else {
           Q6_V_vstu_variable(output, batch, vout);
           batch = 0;
         }

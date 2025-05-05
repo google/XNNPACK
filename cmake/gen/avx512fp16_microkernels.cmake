@@ -10,11 +10,8 @@
 
 
 SET(PROD_AVX512FP16_MICROKERNEL_SRCS
-  src/f16-gemm/gen/f16-gemm-1x64-minmax-avx512fp16-broadcast.c
-  src/f16-gemm/gen/f16-gemm-7x64-minmax-avx512fp16-broadcast.c
-  src/f16-igemm/gen/f16-igemm-1x64-minmax-avx512fp16-broadcast.c
-  src/f16-igemm/gen/f16-igemm-7x64-minmax-avx512fp16-broadcast.c
   src/f16-rminmax/gen/f16-rmax-avx512fp16-u128-acc4.c
+  src/f16-rminmax/gen/f16-rmin-avx512fp16-u128-acc4.c
   src/f16-rminmax/gen/f16-rminmax-avx512fp16-u128-acc4.c
   src/f16-vbinary/gen/f16-vadd-avx512fp16-u64.c
   src/f16-vbinary/gen/f16-vaddc-avx512fp16-u64.c
@@ -38,6 +35,7 @@ SET(PROD_AVX512FP16_MICROKERNEL_SRCS
 
 SET(NON_PROD_AVX512FP16_MICROKERNEL_SRCS
   src/f16-gemm/gen/f16-gemm-1x32-minmax-avx512fp16-broadcast.c
+  src/f16-gemm/gen/f16-gemm-1x64-minmax-avx512fp16-broadcast.c
   src/f16-gemm/gen/f16-gemm-4x32-minmax-avx512fp16-broadcast.c
   src/f16-gemm/gen/f16-gemm-4x64-minmax-avx512fp16-broadcast.c
   src/f16-gemm/gen/f16-gemm-5x32-minmax-avx512fp16-broadcast.c
@@ -45,9 +43,11 @@ SET(NON_PROD_AVX512FP16_MICROKERNEL_SRCS
   src/f16-gemm/gen/f16-gemm-6x32-minmax-avx512fp16-broadcast.c
   src/f16-gemm/gen/f16-gemm-6x64-minmax-avx512fp16-broadcast.c
   src/f16-gemm/gen/f16-gemm-7x32-minmax-avx512fp16-broadcast.c
+  src/f16-gemm/gen/f16-gemm-7x64-minmax-avx512fp16-broadcast.c
   src/f16-gemm/gen/f16-gemm-8x32-minmax-avx512fp16-broadcast.c
   src/f16-gemm/gen/f16-gemm-8x64-minmax-avx512fp16-broadcast.c
   src/f16-igemm/gen/f16-igemm-1x32-minmax-avx512fp16-broadcast.c
+  src/f16-igemm/gen/f16-igemm-1x64-minmax-avx512fp16-broadcast.c
   src/f16-igemm/gen/f16-igemm-4x32-minmax-avx512fp16-broadcast.c
   src/f16-igemm/gen/f16-igemm-4x64-minmax-avx512fp16-broadcast.c
   src/f16-igemm/gen/f16-igemm-5x32-minmax-avx512fp16-broadcast.c
@@ -55,6 +55,7 @@ SET(NON_PROD_AVX512FP16_MICROKERNEL_SRCS
   src/f16-igemm/gen/f16-igemm-6x32-minmax-avx512fp16-broadcast.c
   src/f16-igemm/gen/f16-igemm-6x64-minmax-avx512fp16-broadcast.c
   src/f16-igemm/gen/f16-igemm-7x32-minmax-avx512fp16-broadcast.c
+  src/f16-igemm/gen/f16-igemm-7x64-minmax-avx512fp16-broadcast.c
   src/f16-igemm/gen/f16-igemm-8x32-minmax-avx512fp16-broadcast.c
   src/f16-igemm/gen/f16-igemm-8x64-minmax-avx512fp16-broadcast.c
   src/f16-rminmax/gen/f16-rmax-avx512fp16-u32.c
@@ -65,7 +66,6 @@ SET(NON_PROD_AVX512FP16_MICROKERNEL_SRCS
   src/f16-rminmax/gen/f16-rmin-avx512fp16-u64-acc2.c
   src/f16-rminmax/gen/f16-rmin-avx512fp16-u96-acc3.c
   src/f16-rminmax/gen/f16-rmin-avx512fp16-u128-acc2.c
-  src/f16-rminmax/gen/f16-rmin-avx512fp16-u128-acc4.c
   src/f16-rminmax/gen/f16-rminmax-avx512fp16-u32.c
   src/f16-rminmax/gen/f16-rminmax-avx512fp16-u64-acc2.c
   src/f16-rminmax/gen/f16-rminmax-avx512fp16-u96-acc3.c
@@ -94,6 +94,9 @@ SET(NON_PROD_AVX512FP16_MICROKERNEL_SRCS
   src/f16-vbinary/gen/f16-vsqrdiffc-avx512fp16-u32.c
   src/f16-vbinary/gen/f16-vsub-avx512fp16-u32.c
   src/f16-vbinary/gen/f16-vsubc-avx512fp16-u32.c
+  src/f16-vcos/gen/f16-vcos-avx512fp16-rational-3-2-div.c
+  src/f16-vgelu/gen/f16-vgelu-avx512fp16-rational-6-4-div.c
+  src/f16-vsin/gen/f16-vsin-avx512fp16-rational-3-2-div.c
   src/f16-vsqrt/gen/f16-vsqrt-avx512fp16-sqrt-u32.c
   src/f16-vsqrt/gen/f16-vsqrt-avx512fp16-sqrt-u64.c
   src/f16-vsqrt/gen/f16-vsqrt-avx512fp16-sqrt-u128.c)

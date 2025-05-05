@@ -8,18 +8,19 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/log.h"
-#include "xnnpack/node-type.h"
-#include "xnnpack/operator-type.h"
-#include "xnnpack/operator.h"
-#include "xnnpack/requantization.h"
-#include "xnnpack/subgraph-validation.h"
-#include "xnnpack/subgraph.h"
-#include "pthreadpool.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/internal.h"
+#include "src/xnnpack/log.h"
+#include "src/xnnpack/node-type.h"
+#include "src/xnnpack/operator-type.h"
+#include "src/xnnpack/operator.h"
+#include "src/xnnpack/requantization.h"
+#include "src/xnnpack/subgraph-validation.h"
+#include "src/xnnpack/subgraph.h"
+#include <pthreadpool.h>
 
-static enum xnn_status create_convolution_operator(
+static enum xnn_status create_depthwise_convolution_operator(
   const struct xnn_node* node,
   const struct xnn_value* values,
   size_t num_values,
@@ -45,8 +46,9 @@ static enum xnn_status create_convolution_operator(
   assert(filter_data != NULL);
 
   const void* bias_data = NULL;
+  uint32_t bias_id = XNN_INVALID_VALUE_ID;
   if (node->num_inputs > 2) {
-    const uint32_t bias_id = node->inputs[2];
+    bias_id = node->inputs[2];
     assert(bias_id != XNN_INVALID_VALUE_ID);
     assert(bias_id < num_values);
 
@@ -57,6 +59,9 @@ static enum xnn_status create_convolution_operator(
   enum xnn_status status;
   const enum xnn_datatype filter_datatype = values[filter_id].datatype;
   const enum xnn_datatype output_datatype = values[output_id].datatype;
+  const enum xnn_datatype bias_datatype = bias_id != XNN_INVALID_VALUE_ID
+                                              ? values[filter_id].datatype
+                                              : xnn_datatype_invalid;
   if (values[output_id].layout == xnn_layout_type_nchw) {
     assert(values[input_id].layout == xnn_layout_type_nchw);
     switch (filter_datatype) {
@@ -87,30 +92,69 @@ static enum xnn_status create_convolution_operator(
           &opdata->operator_objects[0]);
         break;
       case xnn_datatype_fp16:
-        status = xnn_create_convolution2d_nchw_f16(
-          node->params.depthwise_convolution_2d.input_padding_top,
-          node->params.depthwise_convolution_2d.input_padding_right,
-          node->params.depthwise_convolution_2d.input_padding_bottom,
-          node->params.depthwise_convolution_2d.input_padding_left,
-          node->params.depthwise_convolution_2d.kernel_height,
-          node->params.depthwise_convolution_2d.kernel_width,
-          node->params.depthwise_convolution_2d.subsampling_height,
-          node->params.depthwise_convolution_2d.subsampling_width,
-          node->params.depthwise_convolution_2d.dilation_height,
-          node->params.depthwise_convolution_2d.dilation_width,
-          node->params.depthwise_convolution_2d.input_channels /* groups */,
-          1 /* group_input_channels */,
-          node->params.depthwise_convolution_2d.depth_multiplier /* group_output_channels */,
-          node->params.depthwise_convolution_2d.input_channels /* input_channel_stride */,
-          node->params.depthwise_convolution_2d.input_channels * node->params.depthwise_convolution_2d.depth_multiplier /* output_channel_stride */,
-          filter_data,
-          bias_data,
-          node->activation.output_min,
-          node->activation.output_max,
-          node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION,
-          code_cache,
-          weights_cache,
-          &opdata->operator_objects[0]);
+        switch (output_datatype) {
+          case xnn_datatype_fp32: {
+            uint32_t flags = node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION;
+            if (bias_datatype == xnn_datatype_fp32) {
+              flags |= XNN_FLAG_FP32_STATIC_BIASES;
+            }
+            status = xnn_create_convolution2d_nchw_f32_f16(
+                node->params.depthwise_convolution_2d.input_padding_top,
+                node->params.depthwise_convolution_2d.input_padding_right,
+                node->params.depthwise_convolution_2d.input_padding_bottom,
+                node->params.depthwise_convolution_2d.input_padding_left,
+                node->params.depthwise_convolution_2d.kernel_height,
+                node->params.depthwise_convolution_2d.kernel_width,
+                node->params.depthwise_convolution_2d.subsampling_height,
+                node->params.depthwise_convolution_2d.subsampling_width,
+                node->params.depthwise_convolution_2d.dilation_height,
+                node->params.depthwise_convolution_2d.dilation_width,
+                node->params.depthwise_convolution_2d
+                    .input_channels /* groups */,
+                1 /* group_input_channels */,
+                node->params.depthwise_convolution_2d
+                    .depth_multiplier /* group_output_channels */,
+                node->params.depthwise_convolution_2d
+                    .input_channels /* input_channel_stride */,
+                node->params.depthwise_convolution_2d.input_channels *
+                    node->params.depthwise_convolution_2d
+                        .depth_multiplier /* output_channel_stride */,
+                filter_data, bias_data, node->activation.output_min,
+                node->activation.output_max, flags, code_cache, weights_cache,
+                &opdata->operator_objects[0]);
+            break;
+          }
+          case xnn_datatype_fp16:
+            status = xnn_create_convolution2d_nchw_f16(
+                node->params.depthwise_convolution_2d.input_padding_top,
+                node->params.depthwise_convolution_2d.input_padding_right,
+                node->params.depthwise_convolution_2d.input_padding_bottom,
+                node->params.depthwise_convolution_2d.input_padding_left,
+                node->params.depthwise_convolution_2d.kernel_height,
+                node->params.depthwise_convolution_2d.kernel_width,
+                node->params.depthwise_convolution_2d.subsampling_height,
+                node->params.depthwise_convolution_2d.subsampling_width,
+                node->params.depthwise_convolution_2d.dilation_height,
+                node->params.depthwise_convolution_2d.dilation_width,
+                node->params.depthwise_convolution_2d
+                    .input_channels /* groups */,
+                1 /* group_input_channels */,
+                node->params.depthwise_convolution_2d
+                    .depth_multiplier /* group_output_channels */,
+                node->params.depthwise_convolution_2d
+                    .input_channels /* input_channel_stride */,
+                node->params.depthwise_convolution_2d.input_channels *
+                    node->params.depthwise_convolution_2d
+                        .depth_multiplier /* output_channel_stride */,
+                filter_data, bias_data, node->activation.output_min,
+                node->activation.output_max,
+                node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION, code_cache,
+                weights_cache, &opdata->operator_objects[0]);
+            break;
+          default:
+            XNN_UNREACHABLE;
+            break;
+        }
         break;
       default:
         XNN_UNREACHABLE;
@@ -350,7 +394,7 @@ static enum xnn_status create_convolution_operator(
   return status;
 }
 
-static enum xnn_status reshape_convolution_operator(
+static enum xnn_status reshape_depthwise_convolution_operator(
   struct xnn_operator_data* opdata,
   struct xnn_value* values,
   size_t num_values,
@@ -464,7 +508,7 @@ static enum xnn_status reshape_convolution_operator(
   return xnn_status_success;
 }
 
-static enum xnn_status setup_convolution_operator(
+static enum xnn_status setup_depthwise_convolution_operator(
   const struct xnn_operator_data* opdata,
   const struct xnn_value* values,
   size_t num_values,
@@ -943,9 +987,9 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
   node->outputs[0] = output_id;
   node->flags = flags;
 
-  node->create = create_convolution_operator;
-  node->reshape = reshape_convolution_operator;
-  node->setup = setup_convolution_operator;
+  node->create = create_depthwise_convolution_operator;
+  node->reshape = reshape_depthwise_convolution_operator;
+  node->setup = setup_depthwise_convolution_operator;
 
   return xnn_status_success;
 };

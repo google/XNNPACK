@@ -12,8 +12,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/unaligned.h"
 
 // SIMD vector type for s32 using AVX2.
 typedef __m256i xnn_simd_s32_t;
@@ -25,8 +25,8 @@ typedef __m256i xnn_simd_s32_t;
   const xnn_simd_s32_t var = _mm256_set1_epi32(val);
 
 // Mask table used for masked load/store operations.
-static const int32_t mask_table_avx_s32[14] = {-1, -1, -1, -1, -1, -1, -1,
-                                               0,  0,  0,  0,  0,  0,  0};
+static const int32_t mask_table_avx_s32[16] = {-1, -1, -1, -1, -1, -1, -1, -1,
+                                               0,  0,  0,  0, 0,  0,  0,  0};
 // Arithmetic operations.
 static XNN_INLINE xnn_simd_s32_t xnn_mul_s32(xnn_simd_s32_t a,
                                              xnn_simd_s32_t b) {
@@ -70,30 +70,29 @@ static XNN_INLINE xnn_simd_s32_t xnn_set1_s32(int32_t v) {
   return _mm256_set1_epi32(v);
 }
 
-static XNN_INLINE xnn_simd_s32_t xnn_set1_or_load_s32(const int32_t* v) {
-#if XNN_ARCH_X86
-  return _mm256_load_si256((const __m256i*)v);
-#else
-  return _mm256_set1_epi32(*v);
-#endif
-}
-
 // Tail load/store operations.
 
-static XNN_INLINE xnn_simd_s32_t
-xnn_load_tail_s32(const int32_t* input, size_t num_elements) {
-  assert(num_elements > 0);
-  assert(num_elements < xnn_simd_size_s32);
+static XNN_INLINE xnn_simd_s32_t xnn_load_tail_s32(const int32_t* input,
+                                                   size_t num_elements) {
+  assert(num_elements <= xnn_simd_size_s32);
 
   const __m256i vmask = _mm256_loadu_si256(
-      (const __m256i*)(&mask_table_avx_s32[7] - num_elements));
+      (const __m256i*)(&mask_table_avx_s32[8] - num_elements));
+  return _mm256_maskload_epi32(input, vmask);
+}
+
+static XNN_INLINE xnn_simd_s32_t
+xnn_load_tail_safe_s32(const int32_t* input, size_t num_elements) {
+  assert(num_elements <= xnn_simd_size_s32);
+
+  const __m256i vmask = _mm256_loadu_si256(
+      (const __m256i*)(&mask_table_avx_s32[8] - num_elements));
   return _mm256_maskload_epi32(input, vmask);
 }
 
 static XNN_INLINE void xnn_store_tail_s32(int32_t* output, xnn_simd_s32_t v,
                                           size_t num_elements) {
-  assert(num_elements > 0);
-  assert(num_elements < xnn_simd_size_s32);
+  assert(num_elements <= xnn_simd_size_s32);
 
   __m128i v_lo = _mm256_castsi256_si128(v);
   if (num_elements & 4) {
@@ -113,8 +112,7 @@ static XNN_INLINE void xnn_store_tail_s32(int32_t* output, xnn_simd_s32_t v,
 
 // Conversion operations.
 
-static XNN_INLINE __m256
-xnn_cvt_f32_s32(xnn_simd_s32_t a) {
+static XNN_INLINE __m256 xnn_cvt_f32_s32(xnn_simd_s32_t a) {
   return _mm256_cvtepi32_ps(a);
 }
 

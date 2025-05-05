@@ -15,10 +15,11 @@ IF(POLICY CMP0135)
   CMAKE_POLICY(SET CMP0135 NEW)
 ENDIF()
 
+# LINT.IfChange
 INCLUDE(ExternalProject)
 ExternalProject_Add(googlebenchmark
-  URL https://github.com/google/benchmark/archive/d2a8a4ee41b923876c034afb939c4fc03598e622.zip
-  URL_HASH SHA256=1ba14374fddcd9623f126b1a60945e4deac4cdc4fb25a5f25e7f779e36f2db52
+  URL https://github.com/google/benchmark/archive/8d4fdd6e6e003867045e0bb3473b5b423818e4b7.zip
+  URL_HASH SHA256=28c7cac12cc25d87d3dcc8c5fb7d1bd0971b41a599a5c4787f8742cb39ca47db
   SOURCE_DIR "${CMAKE_BINARY_DIR}/googlebenchmark-source"
   BINARY_DIR "${CMAKE_BINARY_DIR}/googlebenchmark"
   CONFIGURE_COMMAND ""
@@ -26,3 +27,4 @@ ExternalProject_Add(googlebenchmark
   INSTALL_COMMAND ""
   TEST_COMMAND ""
 )
+# LINT.ThenChange(../MODULE.bazel:benchmark)

@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-conv-hwc/3x3s2p0p1c3-neon-x1.c.in
 //   Generator: tools/xngen
@@ -12,8 +13,8 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/conv.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/conv.h"
+#include "src/xnnpack/math.h"
 
 
 void xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x1(
@@ -29,7 +30,7 @@ void xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x1(
     size_t output_channels,
     size_t output_height_stride,
     size_t output_width_stride,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(input_width != 0);
   assert(output_y_end > output_y_start);
@@ -246,8 +247,8 @@ void xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x1(
         vi3x0 = vcombine_f32(vget_high_f32(vi3x1), vi3x2);
         vi4x0 = vcombine_f32(vget_high_f32(vi4x1), vi4x2);
 
-        const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
-        const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+        const float32x4_t vmin = vdupq_n_f32(params->scalar.min);
+        const float32x4_t vmax = vdupq_n_f32(params->scalar.max);
 
         vo0c0123 = vmaxq_f32(vo0c0123, vmin);
         vo1c0123 = vmaxq_f32(vo1c0123, vmin);
@@ -382,8 +383,8 @@ void xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x1(
         vo0c0123 = vmlaq_lane_f32(vo0c0123, vk21c2x0123, vi2x1, 1);
         vo1c0123 = vmlaq_lane_f32(vo1c0123, vk21c2x0123, vi4x1, 1);
 
-        const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
-        const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+        const float32x4_t vmin = vdupq_n_f32(params->scalar.min);
+        const float32x4_t vmax = vdupq_n_f32(params->scalar.max);
 
         vo0c0123 = vmaxq_f32(vo0c0123, vmin);
         vo1c0123 = vmaxq_f32(vo1c0123, vmin);

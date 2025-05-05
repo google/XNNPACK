@@ -1,0 +1,16 @@
+# Copyright 2025 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# Scalar
+- name: xnn_u8_rdmax_ukernel_2p2x__scalar_c2
+
+# ARM NEON
+- name: xnn_u8_rdmax_ukernel_2p2x__neon_c32
+
+# x86 SSE2
+- name: xnn_u8_rdmax_ukernel_2p2x__sse2_c32
+
+# Wasm SIMD
+- name: xnn_u8_rdmax_ukernel_2p2x__wasmsimd_c32

@@ -11,8 +11,8 @@ $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 
 #include <riscv_vector.h>
 
-#include "xnnpack/math.h"
-#include "xnnpack/vcvt.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vcvt.h"
 
 
 $OUTPUT_MIN = {"QS8": -128, "QU8": 0}[DATATYPE]

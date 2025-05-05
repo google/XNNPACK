@@ -3,17 +3,14 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/reduce.h"
 
 
 $CHANNELS_BATCH = 4
-$MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
-$MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
 void xnn_qs8_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__scalar_c4(
     size_t rows,
     size_t channels,

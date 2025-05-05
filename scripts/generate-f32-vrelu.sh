@@ -4,44 +4,20 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
-#################################### Scalar ###################################
-### Generic C micro-kernels
-tools/xngen src/f32-vrelu/scalar.c.in -D BATCH_TILE=1 -o src/f32-vrelu/gen/f32-vrelu-scalar-u1.c &
-tools/xngen src/f32-vrelu/scalar.c.in -D BATCH_TILE=2 -o src/f32-vrelu/gen/f32-vrelu-scalar-u2.c &
-tools/xngen src/f32-vrelu/scalar.c.in -D BATCH_TILE=4 -o src/f32-vrelu/gen/f32-vrelu-scalar-u4.c &
-tools/xngen src/f32-vrelu/scalar.c.in -D BATCH_TILE=8 -o src/f32-vrelu/gen/f32-vrelu-scalar-u8.c &
-
-### WAsm-specific micro-kernels
-tools/xngen src/f32-vrelu/wasm.c.in -D BATCH_TILE=1 -o src/f32-vrelu/gen/f32-vrelu-wasm-u1.c &
-tools/xngen src/f32-vrelu/wasm.c.in -D BATCH_TILE=2 -o src/f32-vrelu/gen/f32-vrelu-wasm-u2.c &
-tools/xngen src/f32-vrelu/wasm.c.in -D BATCH_TILE=4 -o src/f32-vrelu/gen/f32-vrelu-wasm-u4.c &
-tools/xngen src/f32-vrelu/wasm.c.in -D BATCH_TILE=8 -o src/f32-vrelu/gen/f32-vrelu-wasm-u8.c &
-
-################################## WAsm SIMD ##################################
-tools/xngen src/f32-vrelu/wasmsimd.c.in -D BATCH_TILE=4  -o src/f32-vrelu/gen/f32-vrelu-wasmsimd-u4.c &
-tools/xngen src/f32-vrelu/wasmsimd.c.in -D BATCH_TILE=8  -o src/f32-vrelu/gen/f32-vrelu-wasmsimd-u8.c &
-tools/xngen src/f32-vrelu/wasmsimd.c.in -D BATCH_TILE=16 -o src/f32-vrelu/gen/f32-vrelu-wasmsimd-u16.c &
-
-################################### ARM NEON ##################################
-tools/xngen src/f32-vrelu/neon.c.in -D BATCH_TILE=4 -o src/f32-vrelu/gen/f32-vrelu-neon-u4.c &
-tools/xngen src/f32-vrelu/neon.c.in -D BATCH_TILE=8 -o src/f32-vrelu/gen/f32-vrelu-neon-u8.c &
+##################################### SIMD #####################################
+tools/xngen src/f32-vrelu/simd.c.in -D ARCH=scalar          -D BATCH_TILES=1,2,4     -o src/f32-vrelu/gen/f32-vrelu-scalar.c &
+tools/xngen src/f32-vrelu/simd.c.in -D ARCH=wasmsimd        -D BATCH_TILES=4,8,16    -o src/f32-vrelu/gen/f32-vrelu-wasmsimd.c &
+tools/xngen src/f32-vrelu/simd.c.in -D ARCH=wasmrelaxedsimd -D BATCH_TILES=4,8,16    -o src/f32-vrelu/gen/f32-vrelu-wasmrelaxedsimd.c &
+tools/xngen src/f32-vrelu/simd.c.in -D ARCH=neon            -D BATCH_TILES=4,8,16    -o src/f32-vrelu/gen/f32-vrelu-neon.c &
+tools/xngen src/f32-vrelu/simd.c.in -D ARCH=sse2            -D BATCH_TILES=4,8,16    -o src/f32-vrelu/gen/f32-vrelu-sse2.c &
+tools/xngen src/f32-vrelu/simd.c.in -D ARCH=avx             -D BATCH_TILES=8,16,32   -o src/f32-vrelu/gen/f32-vrelu-avx.c &
+tools/xngen src/f32-vrelu/simd.c.in -D ARCH=avx512f         -D BATCH_TILES=16,32,64  -o src/f32-vrelu/gen/f32-vrelu-avx512f.c &
+tools/xngen src/f32-vrelu/simd.c.in -D ARCH=hvx             -D BATCH_TILES=32,64,128 -o src/f32-vrelu/gen/f32-vrelu-hvx.c &
 
 ################################ RISC-V Vector ################################
 tools/xngen src/f32-vrelu/rvv.c.in -D LMUL=1 -o src/f32-vrelu/gen/f32-vrelu-rvv-u1v.c &
 tools/xngen src/f32-vrelu/rvv.c.in -D LMUL=2 -o src/f32-vrelu/gen/f32-vrelu-rvv-u2v.c &
 tools/xngen src/f32-vrelu/rvv.c.in -D LMUL=4 -o src/f32-vrelu/gen/f32-vrelu-rvv-u4v.c &
 tools/xngen src/f32-vrelu/rvv.c.in -D LMUL=8 -o src/f32-vrelu/gen/f32-vrelu-rvv-u8v.c &
-
-################################# x86 128-bit #################################
-tools/xngen src/f32-vrelu/sse.c.in -D BATCH_TILE=4 -o src/f32-vrelu/gen/f32-vrelu-sse-u4.c &
-tools/xngen src/f32-vrelu/sse.c.in -D BATCH_TILE=8 -o src/f32-vrelu/gen/f32-vrelu-sse-u8.c &
-
-################################# x86 256-bit #################################
-tools/xngen src/f32-vrelu/avx.c.in -D BATCH_TILE=8  -o src/f32-vrelu/gen/f32-vrelu-avx-u8.c &
-tools/xngen src/f32-vrelu/avx.c.in -D BATCH_TILE=16 -o src/f32-vrelu/gen/f32-vrelu-avx-u16.c &
-
-################################# x86 512-bit #################################
-tools/xngen src/f32-vrelu/avx512f.c.in -D BATCH_TILE=16 -o src/f32-vrelu/gen/f32-vrelu-avx512f-u16.c &
-tools/xngen src/f32-vrelu/avx512f.c.in -D BATCH_TILE=32 -o src/f32-vrelu/gen/f32-vrelu-avx512f-u32.c &
 
 wait

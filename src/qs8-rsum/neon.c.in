@@ -30,8 +30,8 @@ $VGET_LANE_X32 = "vget_lane_u32" if DATATYPE == "QU8" else "vget_lane_s32"
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
 
 $ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
 void xnn_${DATATYPE_SPEC}_rsum_ukernel__neon_u${CHANNEL_TILE}${ACC_SUFFIX}(

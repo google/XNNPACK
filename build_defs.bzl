@@ -135,9 +135,7 @@ def xnnpack_cc_library(
       wasmsimd_srcs: The list of WebAssembly SIMD-specific source files.
       wasmrelaxedsimd_srcs: The list of WebAssembly Relaxed SIMD-specific
                             source files.
-      copts: The list of compiler flags to use in all builds. -I flags for
-             include/ and src/ directories of XNNPACK are always prepended
-             before these user-specified flags.
+      copts: The list of compiler flags to use in all builds.
       gcc_copts: The list of compiler flags to use with GCC-like compilers.
       msvc_copts: The list of compiler flags to use with MSVC compiler.
       mingw_copts: The list of compiler flags to use with MinGW GCC compilers.
@@ -181,10 +179,7 @@ def xnnpack_cc_library(
             "//build_config:emscripten_wasmrelaxedsimd": wasmrelaxedsimd_srcs,
             "//conditions:default": [],
         }),
-        copts = [
-            "-Iinclude",
-            "-Isrc",
-        ] + copts + select({
+        copts = copts + select({
             "//build_config:linux_k8": gcc_x86_copts,
             "//build_config:linux_arm": aarch32_copts,
             "//build_config:linux_armeabi": aarch32_copts,
@@ -253,15 +248,13 @@ def xnnpack_cxx_library(name, copts = xnnpack_std_cxxopts(), gcc_copts = [], msv
         **kwargs
     )
 
-def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [], deps = [], tags = [], linkopts = [], defines = [], automatic = True, timeout = "short", shard_count = 1, **kwargs):
+def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [], deps = [], tags = [], linkopts = [], defines = [], timeout = "short", shard_count = 1, **kwargs):
     """Unit test binary based on Google Test.
 
     Args:
       name: The name of the test target to define.
       srcs: The list of source and header files.
-      copts: The list of additional compiler flags for the target. -I flags
-             for include/ and src/ directories of XNNPACK are always prepended
-             before these user-specified flags.
+      copts: The list of additional compiler flags for the target.
       mingw_copts: The list of compiler flags to use with MinGW GCC compilers.
       msys_copts: The list of compiler flags to use with MSYS (Cygwin) GCC compilers.
       deps: The list of additional libraries to be linked. Google Test library
@@ -270,81 +263,42 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
       linkopts: The list of linking options
       defines: List of predefines macros to be added to the compile line.
       tags: List of arbitrary text tags.
-      automatic: Whether to create the test or testable binary.
       timeout: How long the test is expected to run before returning.
       shard_count: Specifies the number of parallel shards to use to run the test.
       **kwargs: Other arguments to pass to the cc_test rule.
     """
 
-    if automatic:
-        native.cc_test(
-            name = name,
-            srcs = srcs,
-            copts = xnnpack_std_cxxopts() + [
-                "-Iinclude",
-                "-Isrc",
-            ] + select({
-                "//build_config:windows_x86_64_mingw": mingw_copts,
-                "//build_config:windows_x86_64_msys": msys_copts,
-                "//conditions:default": [],
-            }) + select({
-                "//build_config:windows_x86_64_clang": ["/clang:-Wno-unused-function"],
-                "//build_config:windows_x86_64_mingw": ["-Wno-unused-function"],
-                "//build_config:windows_x86_64_msys": ["-Wno-unused-function"],
-                "//build_config:windows_x86_64": [],
-                "//conditions:default": ["-Wno-unused-function"],
-            }) + copts,
-            linkopts = select({
-                "//build_config:emscripten": xnnpack_emscripten_test_linkopts(),
-                "//conditions:default": [],
-            }) + linkopts,
-            linkstatic = True,
-            defines = defines,
-            deps = [
-                "@com_google_googletest//:gtest_main",
-            ] + deps + select({
-                "//build_config:emscripten": xnnpack_emscripten_deps(),
-                "//conditions:default": [],
-            }),
-            tags = tags,
-            timeout = timeout,
-            shard_count = shard_count,
-            **kwargs,
-        )
-    else:
-        native.cc_binary(
-            name = name,
-            srcs = srcs,
-            copts = xnnpack_std_cxxopts() + [
-                "-Iinclude",
-                "-Isrc",
-            ] + select({
-                "//build_config:windows_x86_64_mingw": mingw_copts,
-                "//build_config:windows_x86_64_msys": msys_copts,
-                "//conditions:default": [],
-            }) + select({
-                "//build_config:windows_x86_64_clang": ["/clang:-Wno-unused-function"],
-                "//build_config:windows_x86_64_mingw": ["-Wno-unused-function"],
-                "//build_config:windows_x86_64_msys": ["-Wno-unused-function"],
-                "//build_config:windows_x86_64": [],
-                "//conditions:default": ["-Wno-unused-function"],
-            }) + copts,
-            linkopts = select({
-                "//build_config:emscripten": xnnpack_emscripten_test_linkopts(),
-                "//conditions:default": [],
-            }),
-            linkstatic = True,
-            defines = defines,
-            deps = [
-                "@com_google_googletest//:gtest_main",
-            ] + deps + select({
-                "//build_config:emscripten": xnnpack_emscripten_deps(),
-                "//conditions:default": [],
-            }),
-            testonly = True,
-            tags = tags,
-            **kwargs,
-        )
+    native.cc_test(
+        name = name,
+        srcs = srcs,
+        copts = xnnpack_std_cxxopts() + select({
+            "//build_config:windows_x86_64_mingw": mingw_copts,
+            "//build_config:windows_x86_64_msys": msys_copts,
+            "//conditions:default": [],
+        }) + select({
+            "//build_config:windows_x86_64_clang": ["/clang:-Wno-unused-function"],
+            "//build_config:windows_x86_64_mingw": ["-Wno-unused-function"],
+            "//build_config:windows_x86_64_msys": ["-Wno-unused-function"],
+            "//build_config:windows_x86_64": [],
+            "//conditions:default": ["-Wno-unused-function"],
+        }) + copts,
+        linkopts = select({
+            "//build_config:emscripten": xnnpack_emscripten_test_linkopts(),
+            "//conditions:default": [],
+        }) + linkopts,
+        linkstatic = True,
+        defines = defines,
+        deps = [
+            "@com_google_googletest//:gtest_main",
+        ] + deps + select({
+            "//build_config:emscripten": xnnpack_emscripten_deps(),
+            "//conditions:default": [],
+        }),
+        tags = tags,
+        timeout = timeout,
+        shard_count = shard_count,
+        **kwargs,
+    )
 
 def xnnpack_binary(name, srcs, copts = [], deps = [], linkopts = []):
     """Minimal binary
@@ -352,19 +306,14 @@ def xnnpack_binary(name, srcs, copts = [], deps = [], linkopts = []):
     Args:
       name: The name of the binary target to define.
       srcs: The list of source and header files.
-      copts: The list of additional compiler flags for the target. -I flags
-             for include/ and src/ directories of XNNPACK are always prepended
-             before these user-specified flags.
+      copts: The list of additional compiler flags for the target.
       deps: The list of libraries to be linked.
       linkopts: The list of additional linker options
     """
     native.cc_binary(
         name = name,
         srcs = srcs,
-        copts = [
-            "-Iinclude",
-            "-Isrc",
-        ] + copts,
+        copts = copts,
         linkopts = select({
             "//build_config:emscripten": xnnpack_emscripten_minimal_linkopts(),
             "//conditions:default": [],
@@ -379,9 +328,7 @@ def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = [], defines = []
     Args:
       name: The name of the binary target to define.
       srcs: The list of source and header files.
-      copts: The list of additional compiler flags for the target. -I flags
-             for include/ and src/ directories of XNNPACK are always prepended
-             before these user-specified flags.
+      copts: The list of additional compiler flags for the target.
       deps: The list of additional libraries to be linked. Google Benchmark
             library is always added as a dependency and does not need to be
             explicitly specified.
@@ -391,10 +338,7 @@ def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = [], defines = []
     native.cc_test(
         name = name,
         srcs = srcs,
-        copts = xnnpack_std_cxxopts() + [
-            "-Iinclude",
-            "-Isrc",
-        ] + select({
+        copts = xnnpack_std_cxxopts() + select({
             "//build_config:windows_x86_64_clang": ["/clang:-Wno-unused-function"],
             "//build_config:windows_x86_64_mingw": ["-Wno-unused-function"],
             "//build_config:windows_x86_64_msys": ["-Wno-unused-function"],

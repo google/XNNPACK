@@ -14,42 +14,21 @@
 #include <cstring>
 #include <functional>
 #include <ios>
-#include <random>
-#include <vector>
-
-#include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/datatype.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/buffer.h"
-#include "replicable_random_device.h"
-
-// Copyright 2019 Google LLC
-//
-// This source code is licensed under the BSD-style license found in the
-// LICENSE file in the root directory of this source tree.
-
-#include <algorithm>
-#include <cassert>
-#include <cmath>
-#include <cstddef>
-#include <cstdint>
-#include <cstdlib>
-#include <functional>
 #include <limits>
 #include <random>
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams.h"
-#include "replicable_random_device.h"
-#include "unary-ops.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/datatype.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams.h"
+#include "test/replicable_random_device.h"
+#include "test/unary-ops.h"
 
 class VUnaryMicrokernelTester {
  public:
@@ -60,13 +39,6 @@ class VUnaryMicrokernelTester {
   }
 
   size_t batch_size() const { return this->batch_size_; }
-
-  VUnaryMicrokernelTester& inplace(bool inplace) {
-    this->inplace_ = inplace;
-    return *this;
-  }
-
-  bool inplace() const { return this->inplace_; }
 
   VUnaryMicrokernelTester& input_quantization(
       const xnn_quantization_params& quantization) {
@@ -119,22 +91,17 @@ class VUnaryMicrokernelTester {
     auto domain = test_info.Domain(xnn_datatype_of<In>());
     xnnpack::ReplicableRandomDevice rng;
 
-    xnnpack::Buffer<In> x(batch_size() + XNN_EXTRA_BYTES / sizeof(In));
-    xnnpack::Buffer<Out> y(batch_size() +
-                           (inplace() ? XNN_EXTRA_BYTES / sizeof(Out) : 0));
+    xnnpack::Buffer<In> x(batch_size(), xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<Out> y(batch_size());
     xnnpack::Buffer<Out> y_ref(batch_size());
+    xnnpack::DatatypeGenerator<In> input_generator(domain.min, domain.max,
+                                                   input_quantization_);
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      // This should only fill batch_size() elements, but some kernels trigger
-      // msan errors if we don't initialize the XNN_EXTRA_BYTES.
-      FillRandom(rng, x.data(), x.size(), domain, input_quantization_);
-      if (inplace()) {
-        std::copy((InKernel*)x.begin(), (InKernel*)x.end(),
-                  (OutKernel*)y.begin());
-      }
-      const In* x_data = inplace() ? (const In*)y.data() : x.data();
+      std::generate_n(x.data(), x.size(),
+                      [&]() { return input_generator(rng); });
 
       // Compute reference results.
-      UnaryReferenceImpl(x_data, batch_size(), y_ref.data(), test_info,
+      UnaryReferenceImpl(x.data(), batch_size(), y_ref.data(), test_info,
                          input_quantization_, output_quantization_, params);
 
       // Initialize the params.
@@ -145,15 +112,82 @@ class VUnaryMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      ukernel(batch_size() * sizeof(In), (const InKernel*)x_data,
+      ukernel(batch_size() * sizeof(In), (const InKernel*)x.data(),
               (OutKernel*)y.data(), (UKernelParamsType*)&uparams);
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_NEAR(y[i], y_ref[i],
-                    test_info.Tolerance(y_ref[i], xnn_datatype_of<Out>()))
-            << "at " << i << " / " << batch_size() << ", x[" << i
-            << "] = " << std::scientific << (float)x[i];
+        if (test_info.IsInSupportedRange(y_ref[i])) {
+          if (std::isnan(static_cast<float>(y_ref[i]))) {
+            ASSERT_TRUE(std::isnan(static_cast<float>(y[i])));
+          } else {
+            ASSERT_NEAR(y[i], y_ref[i],
+                        test_info.Tolerance(y_ref[i], xnn_datatype_of<Out>()))
+                << "at " << i << " / " << batch_size() << ", x[" << i
+                << "] = " << std::scientific << (float)x[i];
+          }
+        }
+      }
+    }
+  }
+
+  template <typename TestInfo, typename In, typename Out,
+            typename UKernelParamsType>
+  void TestInPlace(
+      void (*ukernel)(size_t,
+                      const typename xnnpack::unwrap_quantized<In>::type*,
+                      typename xnnpack::unwrap_quantized<Out>::type*,
+                      const UKernelParamsType*),
+      xnn_init_unary_uparams_fn init_params,
+      const xnn_unary_params& params) const {
+    using InKernel = typename xnnpack::unwrap_quantized<In>::type;
+    using OutKernel = typename xnnpack::unwrap_quantized<Out>::type;
+    static_assert(sizeof(InKernel) == sizeof(OutKernel), "");
+
+    TestInfo test_info;
+    auto domain = test_info.Domain(xnn_datatype_of<In>());
+    xnnpack::ReplicableRandomDevice rng;
+
+    xnnpack::Buffer<In> x(batch_size(), xnnpack::XnnExtraBytes);
+    Out* y = reinterpret_cast<Out*>(x.data());
+    xnnpack::Buffer<Out> y_ref(batch_size());
+    xnnpack::DatatypeGenerator<In> input_generator(domain.min, domain.max,
+                                                   input_quantization_);
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate_n(x.data(), x.size(),
+                      [&]() { return input_generator(rng); });
+
+      // Make a copy of the original input data for debugging output.
+      xnnpack::Buffer<In> x_orig(x.size());
+      std::copy(x.begin(), x.end(), x_orig.begin());
+
+      // Compute reference results.
+      UnaryReferenceImpl(x.data(), batch_size(), y_ref.data(), test_info,
+                         input_quantization_, output_quantization_, params);
+
+      // Initialize the params.
+      xnn_unary_uparams uparams;
+      if (init_params) {
+        init_params(&uparams, &params, &input_quantization_,
+                    &output_quantization_);
+      }
+
+      // Call optimized micro-kernel.
+      ukernel(batch_size() * sizeof(In), (const InKernel*)x.data(),
+              (OutKernel*)y, (UKernelParamsType*)&uparams);
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        if (test_info.IsInSupportedRange(y_ref[i])) {
+          if (std::isnan(static_cast<float>(y_ref[i]))) {
+            ASSERT_TRUE(std::isnan(static_cast<float>(x[i])));
+          } else {
+            ASSERT_NEAR(x[i], y_ref[i],
+                        test_info.Tolerance(y_ref[i], xnn_datatype_of<Out>()))
+                << "at " << i << " / " << batch_size() << ", x[" << i
+                << "] = " << std::scientific << (float)x_orig[i];
+          }
+        }
       }
     }
   }
@@ -166,6 +200,18 @@ class VUnaryMicrokernelTester {
                             const UKernelParamsType*),
             xnn_init_unary_uparams_fn init_params) const {
     Test<TestInfo, In, Out>(ukernel, init_params, TestInfo().DefaultParams());
+  }
+
+  template <typename TestInfo, typename In, typename Out,
+            typename UKernelParamsType>
+  void TestInPlace(
+      void (*ukernel)(size_t,
+                      const typename xnnpack::unwrap_quantized<In>::type*,
+                      typename xnnpack::unwrap_quantized<Out>::type*,
+                      const UKernelParamsType*),
+      xnn_init_unary_uparams_fn init_params) const {
+    TestInPlace<TestInfo, In, Out>(ukernel, init_params,
+                                   TestInfo().DefaultParams());
   }
 
   template <typename TestInfo, typename In, typename Out,
@@ -184,7 +230,7 @@ class VUnaryMicrokernelTester {
             (UKernelParamsType*)&uparams);
     for (size_t i = 0; i < outputs.size(); i++) {
       if (std::isfinite(expected[i])) {
-        EXPECT_NEAR(expected[i], outputs[i],
+        ASSERT_NEAR(expected[i], outputs[i],
                     tolerance_ulp * std::abs(expected[i]) *
                         std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];
@@ -209,7 +255,6 @@ class VUnaryMicrokernelTester {
 
  private:
   size_t batch_size_ = 1;
-  bool inplace_ = false;
   xnn_quantization_params input_quantization_ = {0, 1.0f};
   xnn_quantization_params output_quantization_ = {0, 1.0f};
   size_t iterations_ = 15;
@@ -285,8 +330,7 @@ void TestInPlace(uint64_t arch_flags, size_t batch_tile, UKernelFn ukernel,
        batch_size += batch_step) {
     VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .inplace(true)
-        .Test<TestInfo, In, Out>(ukernel, init_params, args...);
+        .TestInPlace<TestInfo, In, Out>(ukernel, init_params, args...);
   }
 }
 

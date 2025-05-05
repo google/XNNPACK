@@ -10,10 +10,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/config-types.h"
-#include "xnnpack/config.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/math.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,13 +56,11 @@ XNN_INLINE static size_t xnn_x8_packq_f32qp8_packed_size(size_t m, size_t k,
   return num_rows * lhs_packed_stride(k, mr_packed, kr, sr);
 }
 
-XNN_INLINE static size_t xnn_x8_packq_f32qp8_gemm_packed_size(size_t m,
-                                                              size_t k) {
-  const struct xnn_gemm_config* gemm_config =
-      xnn_init_qp8_f32_qc4w_gemm_config();
-  assert(gemm_config != NULL);
-
-  const uint32_t mr_packed = m == 1 ? 1 : gemm_config->mr_packed;
+XNN_INLINE static size_t xnn_x8_packq_f32qp8_gemm_packed_size(
+    const struct xnn_gemm_config* gemm_config, size_t m, size_t k) {
+  const uint32_t mr_packed = m == 1                   ? 1
+                             : gemm_config->mr_packed ? gemm_config->mr_packed
+                                                      : gemm_config->mr;
   const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
   const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
 
@@ -86,8 +83,8 @@ XNN_INLINE static int8_t xnn_x8_packq_f32qp8_get_quantized(
 }
 
 XNN_INLINE static float xnn_x8_packq_f32qp8_get_recip_scale(
-    size_t m_idx, const int8_t* lhs_packed, size_t k,
-    size_t mr_packed, size_t kr, size_t sr) {
+    size_t m_idx, const int8_t* lhs_packed, size_t k, size_t mr_packed,
+    size_t kr, size_t sr) {
   const size_t k_internal = k_roundedup(k, kr, sr);
   const size_t dst_x = (m_idx % mr_packed);
   const size_t packed_offset =
@@ -102,8 +99,8 @@ XNN_INLINE static float xnn_x8_packq_f32qp8_get_recip_scale(
 }
 
 XNN_INLINE static float xnn_x8_packq_f32qp8_get_neg_nudged_zp(
-    size_t m_idx, const int8_t* lhs_packed, size_t k,
-    size_t mr_packed, size_t kr, size_t sr) {
+    size_t m_idx, const int8_t* lhs_packed, size_t k, size_t mr_packed,
+    size_t kr, size_t sr) {
   const size_t k_internal = k_roundedup(k, kr, sr);
   const size_t dst_x = (m_idx % mr_packed);
   const size_t packed_offset =
@@ -147,7 +144,7 @@ XNN_INLINE static float xnn_x8_packq_f32qp8_get_dequantized(
                             const float* XNN_RESTRICT lhs, size_t lhs_stride, \
                             void* XNN_RESTRICT lhs_packed);
 
-#include "x8-packq/x8-packq.h"
+#include "src/x8-packq/x8-packq.h"
 
 #undef XNN_UKERNEL
 

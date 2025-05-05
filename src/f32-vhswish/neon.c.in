@@ -5,13 +5,12 @@
 
 $assert BATCH_TILE % 4 == 0
 $assert BATCH_TILE >= 4
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_f32_vhswish_ukernel__neon_u${BATCH_TILE}(
@@ -38,23 +37,23 @@ void xnn_f32_vhswish_ukernel__neon_u${BATCH_TILE}(
   $if BATCH_TILE > 4:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
       $for N in range(0, BATCH_TILE, 4):
-        float32x4_t vx${ABC[N:N+4]} = vld1q_f32(input); input += 4;
+        float32x4_t vx${N//4} = vld1q_f32(input); input += 4;
 
       $for N in range(0, BATCH_TILE, 4):
-        float32x4_t vacc${ABC[N:N+4]} = vaddq_f32(vx${ABC[N:N+4]}, vthree);
-        vx${ABC[N:N+4]} = vmulq_f32(vx${ABC[N:N+4]}, vsixth);
+        float32x4_t vacc${N//4} = vaddq_f32(vx${N//4}, vthree);
+        vx${N//4} = vmulq_f32(vx${N//4}, vsixth);
 
       $for N in range(0, BATCH_TILE, 4):
-        vacc${ABC[N:N+4]} = vreinterpretq_f32_s32(vmaxq_s32(vreinterpretq_s32_f32(vacc${ABC[N:N+4]}), vzero));
+        vacc${N//4} = vreinterpretq_f32_s32(vmaxq_s32(vreinterpretq_s32_f32(vacc${N//4}), vzero));
 
       $for N in range(0, BATCH_TILE, 4):
-        vacc${ABC[N:N+4]} = vreinterpretq_f32_s32(vminq_s32(vreinterpretq_s32_f32(vacc${ABC[N:N+4]}), vsix));
+        vacc${N//4} = vreinterpretq_f32_s32(vminq_s32(vreinterpretq_s32_f32(vacc${N//4}), vsix));
 
       $for N in range(0, BATCH_TILE, 4):
-        vacc${ABC[N:N+4]} = vmulq_f32(vacc${ABC[N:N+4]}, vx${ABC[N:N+4]});
+        vacc${N//4} = vmulq_f32(vacc${N//4}, vx${N//4});
 
       $for N in range(0, BATCH_TILE, 4):
-        vst1q_f32(output, vacc${ABC[N:N+4]}); output += 4;
+        vst1q_f32(output, vacc${N//4}); output += 4;
     }
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     float32x4_t vx = vld1q_f32(input); input += 4;

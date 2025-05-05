@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-igemm/scalar.c.in
 //   Generator: tools/xngen
@@ -10,8 +11,8 @@
 #include <assert.h>
 #include <math.h>
 
-#include "xnnpack/math.h"
-#include "xnnpack/gemm.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/gemm.h"
 
 
 void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4__scalar_lrintf(

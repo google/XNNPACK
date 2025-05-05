@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-qs8-vcvt/scalar-imagic.c.in
 //   Generator: tools/xngen
@@ -8,10 +9,11 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <float.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/vcvt.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vcvt.h"
 
 void xnn_f16_qu8_vcvt_ukernel__scalar_imagic_u1(
     size_t batch,
@@ -25,7 +27,9 @@ void xnn_f16_qu8_vcvt_ukernel__scalar_imagic_u1(
   assert(output != NULL);
 
   const xnn_float16* i = input;
-  const float vscale = xnn_float16_to_float(params->scalar.scale);
+  // Don't let the scale be 0, which can happen for large scales, and should
+  // not happen because this value is a reciprocal.
+  const float vscale = math_max_f32(FLT_MIN, xnn_float16_to_float(params->scalar.scale));
   const float vmagic_bias = 12582912.0f;
   const float output_min_less_zero_point = (float) ((int32_t) 0 - (int32_t) params->scalar.output_zero_point);
   const float output_max_less_zero_point = (float) ((int32_t) 255 - (int32_t) params->scalar.output_zero_point);

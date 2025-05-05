@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-rminmax/scalar.c.in
 //   Generator: tools/xngen
@@ -9,9 +10,9 @@
 
 #include <assert.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/reduce.h"
 
 void xnn_f32_rminmax_ukernel__scalar_u4_acc2(
     size_t batch,
@@ -26,8 +27,8 @@ void xnn_f32_rminmax_ukernel__scalar_u4_acc2(
 
   const float* i = input;
 
-  float vmin0 = *i;
-  float vmax0 = *i;
+  float vmin0 = output[0];
+  float vmax0 = output[1];
   float vmin1 = vmin0;
   float vmax1 = vmax0;
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {

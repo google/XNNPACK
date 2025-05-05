@@ -9,14 +9,12 @@
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/packq.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/packq.h"
 
 #if XNN_ENABLE_KLEIDIAI
-  // Keep this line indented to avoid it being pulled out of the #ifdef when the
-  // sources are amalgamated.
-  #include "kai/ukernels/matmul/pack/kai_lhs_quant_pack_qai8dxp_f32.h"
+#include "kai/ukernels/matmul/pack/kai_lhs_quant_pack_qai8dxp_f32.h"
 #endif  // XNN_ENABLE_KLEIDIAI
 
 

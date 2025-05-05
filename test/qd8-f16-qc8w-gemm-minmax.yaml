@@ -192,140 +192,188 @@
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 8
+- name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x8__asm_aarch32_neonfp16arith_ld64_2
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 8
+- name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_2x8__asm_aarch32_neonfp16arith_ld64_2
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 8
+- name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_3x8__asm_aarch32_neonfp16arith_ld64_2
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 8
+- name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_4x8__asm_aarch32_neonfp16arith_ld64_2
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 8
 
 # x86 AVX256 VNNI
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x8c8__avx256vnni
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_5x8c8__avx256vnni
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_7x8c8__avx256vnni
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_8x8c8__avx256vnni
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_9x8c8__avx256vnni
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_10x8c8__avx256vnni
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_12x8c8__avx256vnni
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_14x8c8__avx256vnni
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x8c8__avx256vnni_prfm
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_5x8c8__avx256vnni_prfm
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_7x8c8__avx256vnni_prfm
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_8x8c8__avx256vnni_prfm
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_9x8c8__avx256vnni_prfm
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_10x8c8__avx256vnni_prfm
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_12x8c8__avx256vnni_prfm
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_14x8c8__avx256vnni_prfm
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 
 # AVXVNNI
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x8c8__avxvnni
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_2x8c8__avxvnni
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_3x8c8__avxvnni
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_4x8c8__avxvnni
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_5x8c8__avxvnni
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_6x8c8__avxvnni
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_7x8c8__avxvnni
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_8x8c8__avxvnni
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x8c8__avxvnni_prfm
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_2x8c8__avxvnni_prfm
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_3x8c8__avxvnni_prfm
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_4x8c8__avxvnni_prfm
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_5x8c8__avxvnni_prfm
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_6x8c8__avxvnni_prfm
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_7x8c8__avxvnni_prfm
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_8x8c8__avxvnni_prfm
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 
 # x86 AVX2
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x8c8__avx2

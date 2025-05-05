@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/x8-lut/ssse3.c.in
 //   Generator: tools/xngen
@@ -11,9 +12,9 @@
 
 #include <tmmintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/lut.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/lut.h"
+#include "src/xnnpack/unaligned.h"
 
 
 void xnn_x8_lut_ukernel__ssse3_u16(

@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "packq-microkernel-tester.h"
+#include "test/packq-microkernel-tester.h"
 
 #include <algorithm>
 #include <cassert>
@@ -14,25 +14,26 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/packq.h"
-#include "xnnpack/buffer.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/packq.h"
 
 namespace xnnpack {
 
 void PackQMicrokernelTester::Test(xnn_x8_packq_f32qp8_ukernel_fn packq) const {
   // Allocate the input and output data.
-  xnnpack::Buffer<float> input(m() * k() + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> input(m() * k(), xnnpack::XnnExtraBytes);
   const size_t packed_size =
       xnn_x8_packq_f32qp8_packed_size(m(), k(), mr(), kr(), sr());
   xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_w(packed_size);
   xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_w_ref(packed_size);
 
   // Populate the input and output data.
-  std::iota(input.begin(), input.end(), 0);
-  // TODO(b/372820266): Remove these fill calls that hide uninitialized memory bugs.
+  std::iota(input.begin(), input.end(), 0.0f);
+  // TODO(b/372820266): Remove these fill calls that hide uninitialized memory
+  // bugs.
   std::fill(packed_w.begin(), packed_w.end(), INT8_C(0x12));
   std::fill(packed_w_ref.begin(), packed_w_ref.end(), INT8_C(0x7B));
 

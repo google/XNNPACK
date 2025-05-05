@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-igemm/c4-avx512amx.c.in
 //   Generator: tools/xngen
@@ -8,13 +9,18 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#if defined(__has_feature)
+  #if __has_feature(memory_sanitizer)
+    #include <sanitizer/msan_interface.h>
+  #endif
+#endif
 
 #include <immintrin.h>
 
-#include "xnnpack/gemm.h"
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/math.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/unaligned.h"
 
 
 void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_7x16c4__avx512amx(
@@ -30,7 +36,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_7x16c4__avx512amx(
     size_t a_offset,
     const int8_t* zero,
     const int8_t* zero_data,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
+    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
     const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
@@ -42,15 +48,8 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_7x16c4__avx512amx(
   assert(w != NULL);
   assert(c != NULL);
 
-// TODO: amxintrin.h only provide intrinsics for __x86_64__
-// Update if amxintrin changes
-#if defined(__x86_64__)
-  __attribute__((aligned(64))) int32_t vintile[7 * 16];
-  __attribute__((aligned(64))) int32_t res0[7 * 16];
-
-  kc = round_up_po2(kc, 4 * sizeof(int8_t));
-  const size_t kremainder = (kc & 63) ? (kc & 63) : 64;
-  const __mmask16 kremainder_mask = _cvtu32_mask16((UINT32_C(1) << (kremainder >> 2)) - 1);
+// AMX is only available for __x86_64__
+#if XNN_ARCH_X86_64
 
   // Define tile config data structure
   struct __tile_config {
@@ -63,29 +62,35 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_7x16c4__avx512amx(
     uint8_t reserved_2[8];
   };
 
+  XNN_ALIGN(64) struct __tile_config tile_data = {0};
+  XNN_ALIGN(64) int32_t res[1][7 * 16];
+  XNN_ALIGN(64) int32_t vintile[7 * 16];
+
+  kc = round_up_po2(kc, 4 * sizeof(int8_t));
+  const size_t kremainder = (kc & 63) ? (kc & 63) : 64;
+  const __mmask16 kremainder_mask = _cvtu32_mask16((UINT32_C(1) << (kremainder >> 2)) - 1);
+
   // Load tile configuration
-  __attribute__((aligned(64))) struct __tile_config tile_data = {0};
   tile_data.palette_id = 1;
-  tile_data.rows[0] = mr;              // tmm0 = res 0
-  tile_data.rows[1] = mr;              // tmm1 = res 1
-  tile_data.rows[2] = mr;              // tmm2 = res 2
-  tile_data.rows[3] = mr;              // tmm3 = res 3
+  tile_data.rows[0] = mr;              // tmm0 = res[0]
+  tile_data.rows[1] = mr;              // tmm1 = res[1]
+  tile_data.rows[2] = mr;              // tmm2 = res[2]
+  tile_data.rows[3] = mr;              // tmm3 = res[3]
   tile_data.rows[4] = mr;              // tmm4 = input
   tile_data.rows[5] = 16;              // tmm5 = weights
   tile_data.rows[6] = mr;              // tmm6 = input remainder
   tile_data.rows[7] = kremainder >> 2; // tmm7 = weights remainder
 
-  tile_data.colsb[0] = 64;          // tmm0 = res 0
-  tile_data.colsb[1] = 64;          // tmm1 = res 1
-  tile_data.colsb[2] = 64;          // tmm2 = res 1
-  tile_data.colsb[3] = 64;          // tmm3 = res 1
+  tile_data.colsb[0] = 64;          // tmm0 = res[0]
+  tile_data.colsb[1] = 64;          // tmm1 = res[1]
+  tile_data.colsb[2] = 64;          // tmm2 = res[2]
+  tile_data.colsb[3] = 64;          // tmm3 = res[3]
   tile_data.colsb[4] = 64;          // tmm4 = input
   tile_data.colsb[5] = 64;          // tmm5 = weights
   tile_data.colsb[6] = kremainder;  // tmm6 = input remainder
   tile_data.colsb[7] = 64;          // tmm7 = weights remainder
 
-  //_tile_loadconfig(&tile_data);
-  __asm__ volatile ("ldtilecfg %0" :: "m" (tile_data));
+  _tile_loadconfig(&tile_data);
 
   float* c0 = c;
   float* c1 = (float*) ((uintptr_t) c0 + cm_stride);
@@ -123,9 +128,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_7x16c4__avx512amx(
     w = (const int32_t*) w + 16;
 
     // Zero tile accumulator
-    __asm__ volatile (
-      "tilezero %%tmm0\n"
-      ::);
+    _tile_zero(0);
 
     size_t p = ks;
     do {
@@ -178,7 +181,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_7x16c4__avx512amx(
       {
         while (k >= 64 * sizeof(int8_t)) {
           _tile_loadd(4, a0, 64);   // Directly load input for mr=1
-          a6 += 64;
+          a0 += 64;
           _tile_loadd(5, (const int8_t*) w + 0, 64);
           _tile_dpbssd(0, 4, 5);
 
@@ -251,9 +254,20 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_7x16c4__avx512amx(
       p -= 7 * sizeof(void*);
     } while (p != 0);
 
-    // Add tile to bias
-    _tile_stored(0, res0, 64);
+    // TODO: Instead of processing up to 4 tiles (16x64) consider
+    // quantizing 1 tile at a time (16 registers)
+    _tile_stored(0, &res[0][0], 64);
 
+    // TODO: Fix msan for AMX
+    #if defined(__has_feature)
+      #if __has_feature(memory_sanitizer)
+        __msan_unpoison(res, sizeof(res));
+      #endif
+    #endif
+
+    // TODO: Instead of processing up to 4 tiles (16x64) consider
+    // quantizing 1 row at a time.
+    // Add tile to bias
     __m512i vacc0x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, _mm512_set1_epi32((int) quantization_params->zero_point));
     __m512i vacc1x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, _mm512_set1_epi32((int) quantization_params->zero_point));
     __m512i vacc2x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, _mm512_set1_epi32((int) quantization_params->zero_point));
@@ -261,13 +275,13 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_7x16c4__avx512amx(
     __m512i vacc4x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, _mm512_set1_epi32((int) quantization_params->zero_point));
     __m512i vacc5x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, _mm512_set1_epi32((int) quantization_params->zero_point));
     __m512i vacc6x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, _mm512_set1_epi32((int) quantization_params->zero_point));
-    vacc0x0123456789ABCDEF = _mm512_add_epi32(vacc0x0123456789ABCDEF, _mm512_load_epi32(res0 + 0));
-    vacc1x0123456789ABCDEF = _mm512_add_epi32(vacc1x0123456789ABCDEF, _mm512_load_epi32(res0 + 16));
-    vacc2x0123456789ABCDEF = _mm512_add_epi32(vacc2x0123456789ABCDEF, _mm512_load_epi32(res0 + 32));
-    vacc3x0123456789ABCDEF = _mm512_add_epi32(vacc3x0123456789ABCDEF, _mm512_load_epi32(res0 + 48));
-    vacc4x0123456789ABCDEF = _mm512_add_epi32(vacc4x0123456789ABCDEF, _mm512_load_epi32(res0 + 64));
-    vacc5x0123456789ABCDEF = _mm512_add_epi32(vacc5x0123456789ABCDEF, _mm512_load_epi32(res0 + 80));
-    vacc6x0123456789ABCDEF = _mm512_add_epi32(vacc6x0123456789ABCDEF, _mm512_load_epi32(res0 + 96));
+    vacc0x0123456789ABCDEF = _mm512_add_epi32(vacc0x0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 0));
+    vacc1x0123456789ABCDEF = _mm512_add_epi32(vacc1x0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 16));
+    vacc2x0123456789ABCDEF = _mm512_add_epi32(vacc2x0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 32));
+    vacc3x0123456789ABCDEF = _mm512_add_epi32(vacc3x0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 48));
+    vacc4x0123456789ABCDEF = _mm512_add_epi32(vacc4x0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 64));
+    vacc5x0123456789ABCDEF = _mm512_add_epi32(vacc5x0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 80));
+    vacc6x0123456789ABCDEF = _mm512_add_epi32(vacc6x0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 96));
 
     __m512 vscaled0x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc0x0123456789ABCDEF);
     __m512 vscaled1x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc1x0123456789ABCDEF);
@@ -347,7 +361,6 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_7x16c4__avx512amx(
   } while (nc != 0);
 
   // Release tile config
-  //  _tile_release();
-  __asm__ volatile ("tilerelease" ::);
+  _tile_release();
   #endif  // defined(__x86_64__)
 }

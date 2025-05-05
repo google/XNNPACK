@@ -1,3 +1,11 @@
+# Copyright 2025 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+#
+# Description:
+#   XNNPACK - optimized floating-point neural network operators library
+
 workspace(name = "xnnpack")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
@@ -43,7 +51,7 @@ http_archive(
     urls = ["https://github.com/bazelbuild/platforms/releases/download/0.0.6/platforms-0.0.6.tar.gz"],
 )
 
-# LINT.IfChange
+# LINT.IfChange(googletest)
 # Google Test framework, used by most unit-tests.
 http_archive(
     name = "com_google_googletest",
@@ -51,19 +59,19 @@ http_archive(
     strip_prefix = "googletest-d144031940543e15423a25ae5a8a74141044862f",
     urls = ["https://github.com/google/googletest/archive/d144031940543e15423a25ae5a8a74141044862f.zip"],
 )
-# LINT.ThenChange(cmake/DownloadGoogleTest.cmake)
+# LINT.ThenChange(cmake/DownloadGoogleTest.cmake,MODULE.bazel:googletest)
 
-# LINT.IfChange
+# LINT.IfChange(benchmark)
 # Google Benchmark library, used in micro-benchmarks.
 http_archive(
     name = "com_google_benchmark",
-    sha256 = "1ba14374fddcd9623f126b1a60945e4deac4cdc4fb25a5f25e7f779e36f2db52",
-    strip_prefix = "benchmark-d2a8a4ee41b923876c034afb939c4fc03598e622",
-    urls = ["https://github.com/google/benchmark/archive/d2a8a4ee41b923876c034afb939c4fc03598e622.zip"],
+    sha256 = "28c7cac12cc25d87d3dcc8c5fb7d1bd0971b41a599a5c4787f8742cb39ca47db",
+    strip_prefix = "benchmark-8d4fdd6e6e003867045e0bb3473b5b423818e4b7",
+    urls = ["https://github.com/google/benchmark/archive/8d4fdd6e6e003867045e0bb3473b5b423818e4b7.zip"],
 )
-# LINT.ThenChange(cmake/DownloadGoogleBenchmark.cmake)
+# LINT.ThenChange(cmake/DownloadGoogleBenchmark.cmake,MODULE.bazel:benchmark)
 
-# LINT.IfChange
+# LINT.IfChange(FXdiv)
 # FXdiv library, used for repeated integer division by the same factor
 http_archive(
     name = "FXdiv",
@@ -71,41 +79,41 @@ http_archive(
     strip_prefix = "FXdiv-b408327ac2a15ec3e43352421954f5b1967701d1",
     urls = ["https://github.com/Maratyszcza/FXdiv/archive/b408327ac2a15ec3e43352421954f5b1967701d1.zip"],
 )
-# LINT.ThenChange(cmake/DownloadFXdiv.cmake)
+# LINT.ThenChange(cmake/DownloadFXdiv.cmake,MODULE.bazel:FXdiv)
 
-# LINT.IfChange
+# LINT.IfChange(pthreadpool)
 # pthreadpool library, used for parallelization
 http_archive(
     name = "pthreadpool",
-    sha256 = "a4cf06de57bfdf8d7b537c61f1c3071bce74e57524fe053e0bbd2332feca7f95",
-    strip_prefix = "pthreadpool-4fe0e1e183925bf8cfa6aae24237e724a96479b8",
-    urls = ["https://github.com/Maratyszcza/pthreadpool/archive/4fe0e1e183925bf8cfa6aae24237e724a96479b8.zip"],
+    sha256 = "745e56516d6a58d183eb33d9017732d87cff43ce9f78908906f9faa52633e421",
+    strip_prefix = "pthreadpool-b92447772365661680f486e39a91dfe6675adafc",
+    urls = ["https://github.com/google/pthreadpool/archive/b92447772365661680f486e39a91dfe6675adafc.zip"],
 )
-# LINT.ThenChange(cmake/DownloadPThreadPool.cmake)
+# LINT.ThenChange(cmake/DownloadPThreadPool.cmake,MODULE.bazel:pthreadpool)
 
-# LINT.IfChange
+# LINT.IfChange(cpuinfo)
 # cpuinfo library, used for detecting processor characteristics
 http_archive(
     name = "cpuinfo",
-    sha256 = "52e0ffd7998d8cb3a927d8a6e1145763744d866d2be09c4eccea27fc157b6bb0",
-    strip_prefix = "cpuinfo-cebb0933058d7f181c979afd50601dc311e1bf8c",
+    sha256 = "593ac799e8c9382362e7b29a58917053299fa906e271185204bb571465bb2f79",
+    strip_prefix = "cpuinfo-b73ae6ce38d5dd0b7fe46dbe0a4b5f4bab91c7ea",
     urls = [
-        "https://github.com/pytorch/cpuinfo/archive/cebb0933058d7f181c979afd50601dc311e1bf8c.zip",
+        "https://github.com/pytorch/cpuinfo/archive/b73ae6ce38d5dd0b7fe46dbe0a4b5f4bab91c7ea.zip",
     ],
 )
-# LINT.ThenChange(cmake/DownloadCpuinfo.cmake)
+# LINT.ThenChange(cmake/DownloadCpuinfo.cmake,MODULE.bazel:cpuinfo)
 
-# LINT.IfChange
+# LINT.IfChange(kleidiai)
 # KleidiAI library, used for ARM microkernels.
 http_archive(
     name = "KleidiAI",
-    sha256 = "ad37707084a6d4ff41be10cbe8540c75bea057ba79d0de6c367c1bfac6ba0852",
-    strip_prefix = "kleidiai-40a926833857fb64786e02f97703e42b1537cb57",
+    sha256 = "ca8b8ee0c3dd2284c1eae3ac07f7064ce92317ac7c3cfcd1d511662e0594cdb8",
+    strip_prefix = "kleidiai-fb4caf0937a45002861cc12788b6018bfb89ae58",
     urls = [
-        "https://gitlab.arm.com/kleidi/kleidiai/-/archive/40a926833857fb64786e02f97703e42b1537cb57/kleidiai-40a926833857fb64786e02f97703e42b1537cb57.zip"
+        "https://github.com/ARM-software/kleidiai/archive/fb4caf0937a45002861cc12788b6018bfb89ae58.zip",
     ],
 )
-# LINT.ThenChange(cmake/DownloadKleidiAI.cmake)
+# LINT.ThenChange(cmake/DownloadKleidiAI.cmake,MODULE.bazel:kleidiai)
 
 # Ruy library, used to benchmark against
 http_archive(
@@ -115,4 +123,3 @@ http_archive(
     urls = [
         "https://github.com/google/ruy/archive/9f53ba413e6fc879236dcaa3e008915973d67a4f.zip",
     ],
-)

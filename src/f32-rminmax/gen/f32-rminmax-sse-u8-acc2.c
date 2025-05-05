@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-rminmax/sse.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <xmmintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
 
 
 void xnn_f32_rminmax_ukernel__sse_u8_acc2(
@@ -26,9 +27,8 @@ void xnn_f32_rminmax_ukernel__sse_u8_acc2(
   assert(input != NULL);
   assert(output != NULL);
 
-  __m128 vmin0 = _mm_load_ss(input);
-  vmin0 = _mm_shuffle_ps(vmin0, vmin0, _MM_SHUFFLE(0, 0, 0, 0));
-  __m128 vmax0 = vmin0;
+  __m128 vmin0 = _mm_set1_ps(output[0]);
+  __m128 vmax0 = _mm_set1_ps(output[1]);
   __m128 vmin1 = vmin0;
   __m128 vmax1 = vmax0;
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {

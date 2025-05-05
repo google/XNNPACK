@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/x32-packw/scalar.c.in
 //   Generator: tools/xngen
@@ -12,8 +13,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/math.h"
-#include "xnnpack/packw.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/packw.h"
 
 
 

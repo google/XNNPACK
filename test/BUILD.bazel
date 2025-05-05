@@ -5,21 +5,10 @@
 
 load(
     "//:build_defs.bzl",
-    "xnnpack_binary",
     "xnnpack_cxx_library",
     "xnnpack_kleidiai_defines",
     "xnnpack_test_deps_for_library",
     "xnnpack_unit_test",
-)
-load(
-    "//:build_params.bzl",
-    "xnnpack_select_if",
-    "xnnpack_simd_copts_for_arch",
-    "xnnpack_simd_f16_archs",
-    "xnnpack_simd_f32_archs",
-    "xnnpack_simd_s16_archs",
-    "xnnpack_simd_s32_archs",
-    "xnnpack_simd_s8_archs",
 )
 
 MICROKERNEL_TEST_DEPS = [
@@ -45,26 +34,6 @@ MICROKERNEL_TEST_DEPS = [
     "//:xnnpack_h",
 ]
 
-OPERATOR_TEST_DEPS = [
-    "//:buffer",
-    ":replicable_random_device",
-    "@pthreadpool",
-    "//:aligned_allocator",
-    "//:allocator",
-    "//:cache",
-    "//:common",
-    "//:datatype",
-    "//:fp16",
-    "//:internal",
-    "//:math",
-    "//:microkernel_configs",
-    "//:microparams",
-    "//:normalization",
-    "//:params",
-    "//:quantization",
-    "//:XNNPACK",
-]
-
 ############################## Testing utilities ###############################
 
 xnnpack_cxx_library(
@@ -72,13 +41,6 @@ xnnpack_cxx_library(
     testonly = True,
     hdrs = ["replicable_random_device.h"],
     deps = xnnpack_test_deps_for_library(),
-)
-
-xnnpack_cxx_library(
-    name = "operator_test_utils",
-    testonly = True,
-    hdrs = ["operator-test-utils.h"],
-    deps = [":replicable_random_device"],
 )
 
 xnnpack_cxx_library(
@@ -148,98 +110,22 @@ xnnpack_cxx_library(
 )
 
 ####################### Unit tests for microkernel lists #######################
-sh_test(
-    name = "microkernel_lists_test",
-    size = "small",
-    srcs = ["microkernel_lists_test.sh"],
-    data = [
-        "//:cmake_microkernel_lists",
-        "//:generated_microkernel_lists",
-        "//gen:bzl_microkernel_lists",
-    ],
-    target_compatible_with = xnnpack_select_if(
-        "//build_config:linux",
-        [],
-        ["@platforms//:incompatible"],
-    ),
-)
-
-######################### Unit tests for simd wrappers #########################
-[xnnpack_unit_test(
-    name = "f32_simd_" + arch + "_test",
-    srcs = [
-        "f32-simd-" + arch + ".cc",
-    ],
-    copts = xnnpack_simd_copts_for_arch(arch),
-    deps = [
-        ":replicable_random_device",
-        "//:buffer",
-        "//:common",
-        "//:isa_checks",
-        "//:microkernels_h",
-    ],
-) for arch in xnnpack_simd_f32_archs()]
-
-[xnnpack_unit_test(
-    name = "f16_simd_" + arch + "_test",
-    srcs = [
-        "f16-simd-" + arch + ".cc",
-    ],
-    copts = xnnpack_simd_copts_for_arch(arch),
-    deps = [
-        ":replicable_random_device",
-        "//:buffer",
-        "//:common",
-        "//:fp16",
-        "//:isa_checks",
-        "//:microkernels_h",
-    ],
-) for arch in xnnpack_simd_f16_archs()]
-
-[xnnpack_unit_test(
-    name = "s16_simd_" + arch + "_test",
-    srcs = [
-        "s16-simd-" + arch + ".cc",
-    ],
-    copts = xnnpack_simd_copts_for_arch(arch),
-    deps = [
-        ":replicable_random_device",
-        "//:buffer",
-        "//:common",
-        "//:isa_checks",
-        "//:microkernels_h",
-    ],
-) for arch in xnnpack_simd_s16_archs()]
-
-[xnnpack_unit_test(
-    name = "s32_simd_" + arch + "_test",
-    srcs = [
-        "s32-simd-" + arch + ".cc",
-    ],
-    copts = xnnpack_simd_copts_for_arch(arch),
-    deps = [
-        ":replicable_random_device",
-        "//:buffer",
-        "//:common",
-        "//:isa_checks",
-        "//:microkernels_h",
-    ],
-) for arch in xnnpack_simd_s32_archs()]
-
-[xnnpack_unit_test(
-    name = "s8_simd_" + arch + "_test",
-    srcs = [
-        "s8-simd-" + arch + ".cc",
-    ],
-    copts = xnnpack_simd_copts_for_arch(arch),
-    deps = [
-        ":replicable_random_device",
-        "//:buffer",
-        "//:common",
-        "//:isa_checks",
-        "//:microkernels_h",
-    ],
-) for arch in xnnpack_simd_s8_archs()]
+# TODO: b/381390736 - Reenable once fixed.
+#sh_test(
+#    name = "microkernel_lists_test",
+#    size = "small",
+#    srcs = ["microkernel_lists_test.sh"],
+#    data = [
+#        "//:cmake_microkernel_lists",
+#        "//:generated_microkernel_lists",
+#        "//gen:bzl_microkernel_lists",
+#    ],
+#    target_compatible_with = xnnpack_select_if(
+#        "//build_config:linux",
+#        [],
+#        ["@platforms//:incompatible"],
+#    ),
+#)
 
 ######################### Unit tests for micro-kernels #########################
 
@@ -248,11 +134,21 @@ sh_test(
     srcs = [
         "%s.cc" % kernel.replace("_", "-"),
     ],
-    deps = MICROKERNEL_TEST_DEPS + [":vunary_microkernel_tester"],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":unary_ops",
+        ":vunary_microkernel_tester",
+    ],
 ) for kernel in [
+    "f16_f32_vcvt",
+    "f16_qs8_vcvt",
+    "f16_qu8_vcvt",
     "f16_vabs",
+    "f16_vapproxgelu",
     "f16_vclamp",
+    "f16_vcos",
     "f16_velu",
+    "f16_vexp",
+    "f16_vgelu",
     "f16_vhswish",
     "f16_vlrelu",
     "f16_vneg",
@@ -262,11 +158,17 @@ sh_test(
     "f16_vrndz",
     "f16_vrsqrt",
     "f16_vsigmoid",
+    "f16_vsin",
     "f16_vsqr",
     "f16_vsqrt",
     "f16_vtanh",
+    "f32_f16_vcvt",
+    "f32_qs8_vcvt",
+    "f32_qu8_vcvt",
     "f32_vabs",
+    "f32_vapproxgelu",
     "f32_vclamp",
+    "f32_vcos",
     "f32_velu",
     "f32_vexp",
     "f32_vgelu",
@@ -281,25 +183,19 @@ sh_test(
     "f32_vrndz",
     "f32_vrsqrt",
     "f32_vsigmoid",
+    "f32_vsin",
     "f32_vsqr",
     "f32_vsqrt",
     "f32_vtanh",
-    "s8_vclamp",
-    "u8_vclamp",
-    "qs8_vlrelu",
-    "qu8_vlrelu",
-    "f16_f32_vcvt",
-    "f16_qs8_vcvt",
-    "f16_qu8_vcvt",
-    "f32_f16_vcvt",
-    "f32_qs8_vcvt",
-    "f32_qu8_vcvt",
-    "s32_f32_vcvt",
     "qs8_f16_vcvt",
     "qs8_f32_vcvt",
     "qs8_vcvt",
-    "qu8_vcvt",
+    "qs8_vlrelu",
     "qu8_f32_vcvt",
+    "qu8_vcvt",
+    "qu8_vlrelu",
+    "s8_vclamp",
+    "u8_vclamp",
 ]]
 
 [xnnpack_unit_test(
@@ -355,12 +251,18 @@ sh_test(
     "qs8_vmul_minmax_rndnu",
     "qs8_vmulc_minmax_fp32",
     "qs8_vmulc_minmax_rndnu",
+    "qs8_vprelu",
+    "qs8_vpreluc",
+    "qs8_vrpreluc",
     "qu8_vadd_minmax",
     "qu8_vaddc_minmax",
     "qu8_vmul_minmax_fp32",
     "qu8_vmul_minmax_rndnu",
     "qu8_vmulc_minmax_fp32",
     "qu8_vmulc_minmax_rndnu",
+    "qu8_vprelu",
+    "qu8_vpreluc",
+    "qu8_vrpreluc",
 ]]
 
 [xnnpack_unit_test(
@@ -377,6 +279,20 @@ sh_test(
     "f32_rmax",
     "f32_rmin",
     "f32_rminmax",
+    "f32_rdmin",
+    "f32_rdmax",
+    "f16_rdmin",
+    "f16_rdmax",
+    "s8_rmin",
+    "s8_rmax",
+    "s8_rminmax",
+    "s8_rdmin",
+    "s8_rdmax",
+    "u8_rmin",
+    "u8_rmax",
+    "u8_rdmin",
+    "u8_rdmax",
+    "u8_rminmax",
 ]]
 
 [xnnpack_unit_test(
@@ -421,22 +337,14 @@ sh_test(
         ":dwconv_microkernel_tester",
     ],
 ) for (kernel, shard_count) in [
-    ("f16_dwconv_minmax_multipass", 5),
-    ("f16_dwconv_minmax_unipass", 5),
-    ("f32_dwconv_unipass", 1),
-    ("f32_dwconv_multipass", 5),
-    ("f32_dwconv_minmax_unipass", 5),
-    ("f32_dwconv_minmax_multipass", 5),
-    ("qs8_qc8w_dwconv_minmax_multipass_fp32", 10),
-    ("qs8_qc8w_dwconv_minmax_unipass_fp32", 10),
-    ("qs8_dwconv_minmax_multipass_fp32", 10),
-    ("qs8_dwconv_minmax_multipass_rndnu", 10),
-    ("qs8_dwconv_minmax_unipass_fp32", 10),
-    ("qs8_dwconv_minmax_unipass_rndnu", 1),
-    ("qu8_dwconv_minmax_multipass_fp32", 10),
-    ("qu8_dwconv_minmax_multipass_rndnu", 10),
-    ("qu8_dwconv_minmax_unipass_fp32", 5),
-    ("qu8_dwconv_minmax_unipass_rndnu", 1),
+    ("f16_dwconv_minmax", 5),
+    ("f32_dwconv", 5),
+    ("f32_dwconv_minmax", 5),
+    ("qs8_qc8w_dwconv_minmax_fp32", 10),
+    ("qs8_dwconv_minmax_fp32", 10),
+    ("qs8_dwconv_minmax_rndnu", 1),
+    ("qu8_dwconv_minmax_fp32", 5),
+    ("qu8_dwconv_minmax_rndnu", 1),
 ]]
 
 xnnpack_unit_test(
@@ -460,11 +368,18 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "avgpool_minmax_test",
+    name = "bf16_f32_gemm_minmax_test",
     srcs = [
-        "avgpool-microkernel-tester.h",
-        "avgpool-minmax.cc",
+        "bf16-f32-gemm-minmax.cc",
     ],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "avgpool_minmax_test",
+    srcs = ["avgpool-minmax.cc"],
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -667,6 +582,17 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "pf32_gemm_minmax_test",
+    srcs = [
+        "pf32-gemm-minmax.cc",
+    ],
+    defines = xnnpack_kleidiai_defines(),
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
     name = "f32_qc8w_gemm_test",
     srcs = [
         "f32-qc8w-gemm.cc",
@@ -740,7 +666,6 @@ xnnpack_unit_test(
     name = "f32_raddextexp_test",
     srcs = [
         "f32-raddextexp.cc",
-        "raddextexp-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -834,6 +759,7 @@ xnnpack_unit_test(
         "qd8-f16-qc8w-gemm-minmax-3.cc",
         "qd8-f16-qc8w-gemm-minmax-4.cc",
     ],
+    shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -848,6 +774,7 @@ xnnpack_unit_test(
         "qd8-f32-qc8w-gemm-minmax-3.cc",
         "qd8-f32-qc8w-gemm-minmax-4.cc",
     ],
+    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -917,6 +844,30 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "qp8_f32_qc8w_gemm_minmax_test",
+    timeout = "moderate",
+    srcs = [
+        "qp8-f32-qc8w-gemm-minmax.cc",
+    ],
+    defines = xnnpack_kleidiai_defines(),
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "qs8_qc4w_gemm_minmax_fp32_test",
+    timeout = "moderate",
+    srcs = [
+        "qs8-qc4w-gemm-minmax-fp32.cc",
+    ],
+    shard_count = 5,
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
     name = "qs8_qc8w_gemm_minmax_fp32_test",
     timeout = "moderate",
     srcs = [
@@ -924,6 +875,19 @@ xnnpack_unit_test(
         "qs8-qc8w-gemm-minmax-fp32-2.cc",
         "qs8-qc8w-gemm-minmax-fp32-3.cc",
     ],
+    shard_count = 5,
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "pqs8_qc8w_gemm_minmax_test",
+    timeout = "moderate",
+    srcs = [
+        "pqs8-qc8w-gemm-minmax.cc",
+    ],
+    shard_count = 1,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -950,6 +914,7 @@ xnnpack_unit_test(
         "qd8-f32-qc8w-igemm-minmax-2.cc",
         "qd8-f32-qc8w-igemm-minmax-3.cc",
     ],
+    shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -957,12 +922,13 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "qs8_qc8w_igemm_minmax_fp32_test",
-    timeout = "moderate",
+    timeout = "long",
     srcs = [
         "qs8-qc8w-igemm-minmax-fp32.cc",
         "qs8-qc8w-igemm-minmax-fp32-2.cc",
         "qs8-qc8w-igemm-minmax-fp32-3.cc",
     ],
+    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -1048,37 +1014,10 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "u8_rmax_test",
-    srcs = [
-        "reduce-microkernel-tester.h",
-        "u8-rmax.cc",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
     name = "x8_lut_test",
     srcs = [
         "lut-microkernel-tester.h",
         "x8-lut.cc",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "x8_zip_test",
-    srcs = [
-        "x8-zip.cc",
-        "zip-microkernel-tester.h",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "x32_packb_test",
-    srcs = [
-        "packb-microkernel-tester.h",
-        "x32-packb.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -1105,6 +1044,7 @@ xnnpack_unit_test(
     "qs8_packw",
     "qs8_qc4w_packw",
     "x16_packw",
+    "x16_x32_packw",
     "x32_packw",
 ]]
 
@@ -1133,15 +1073,6 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "x32_zip_test",
-    srcs = [
-        "x32-zip.cc",
-        "zip-microkernel-tester.h",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
     name = "xx_fill_test",
     srcs = ["xx-fill.cc"],
     deps = MICROKERNEL_TEST_DEPS,
@@ -1153,980 +1084,16 @@ xnnpack_unit_test(
     deps = MICROKERNEL_TEST_DEPS,
 )
 
-########################## Size tests for the library #########################
-
-xnnpack_binary(
-    name = "subgraph_size_test",
-    srcs = ["subgraph-size.c"],
-    deps = ["//:XNNPACK"],
-)
-
-########################### Unit tests for operators ##########################
-
-xnnpack_unit_test(
-    name = "unary_elementwise_nc_test",
-    timeout = "long",
-    srcs = ["unary-elementwise-nc.cc"],
-    deps = OPERATOR_TEST_DEPS + [
-        ":unary_ops",
-        "//:logging",
-        "//:operator_h",
-        "//:operator_utils",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "binary_elementwise_nd_test",
-    timeout = "long",
-    srcs = ["binary-elementwise-nd.cc"],
-    shard_count = 10,
-    deps = OPERATOR_TEST_DEPS + [
-        ":operator_test_utils",
-        "//:logging",
-        "//:operator_utils",
-        "//:reference_ukernels",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "argmax_pooling_nhwc_test",
-    srcs = [
-        "argmax-pooling-nhwc.cc",
-        "argmax-pooling-operator-tester.h",
-    ],
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "average_pooling_nhwc_test",
-    srcs = [
-        "average-pooling-nhwc.cc",
-        "average-pooling-operator-tester.h",
-    ],
-    shard_count = 5,
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "batch_matrix_multiply_nc_test",
-    timeout = "long",
-    srcs = [
-        "batch-matrix-multiply-nc.cc",
-        "batch-matrix-multiply-operator-tester.h",
-    ],
-    shard_count = 2,
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "channel_shuffle_nc_test",
-    srcs = [
-        "channel-shuffle-nc.cc",
-        "channel-shuffle-operator-tester.h",
-    ],
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "constant_pad_nd_test",
-    srcs = [
-        "constant-pad-nd.cc",
-        "constant-pad-operator-tester.h",
-    ],
-    shard_count = 5,
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "constant_pad_nd_eager_test",
-    srcs = [
-        "constant-pad-nd-eager.cc",
-        "constant-pad-operator-tester.h",
-    ],
-    shard_count = 5,
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "convert_nc_test",
-    srcs = [
-        "convert-nc.cc",
-    ],
-    deps = OPERATOR_TEST_DEPS + ["//:microkernels_h"],
-)
-
-xnnpack_unit_test(
-    name = "convolution_nhwc_test",
-    timeout = "moderate",
-    srcs = [
-        "convolution-nhwc.cc",
-        "convolution-operator-tester.h",
-    ],
-    shard_count = 10,
-    deps = OPERATOR_TEST_DEPS + [
-        ":convolution_test_helpers",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "convolution_nchw_test",
-    timeout = "moderate",
-    srcs = [
-        "convolution-nchw.cc",
-        "convolution-operator-tester.h",
-    ],
-    deps = OPERATOR_TEST_DEPS + [
-        ":convolution_test_helpers",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "copy_nc_test",
-    srcs = [
-        "copy-nc.cc",
-        "copy-operator-tester.h",
-    ],
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "copy_nc_eager_test",
-    srcs = [
-        "copy-nc-eager.cc",
-        "copy-operator-tester.h",
-    ],
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "deconvolution_nhwc_test",
-    timeout = "moderate",
-    srcs = [
-        "deconvolution-nhwc.cc",
-        "deconvolution-nhwc-qd8-f32-qc8w.cc",
-        "deconvolution-operator-tester.h",
-    ],
-    shard_count = 10,
-    deps = OPERATOR_TEST_DEPS + [
-        ":convolution_test_helpers",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "depth_to_space_nchw2nhwc_test",
-    srcs = [
-        "depth-to-space-nchw2nhwc.cc",
-        "depth-to-space-operator-tester.h",
-    ],
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "depth_to_space_nhwc_test",
-    srcs = [
-        "depth-to-space-nhwc.cc",
-        "depth-to-space-operator-tester.h",
-    ],
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "dynamic_fully_connected_nc_test",
-    srcs = [
-        "dynamic-fully-connected-nc.cc",
-        "dynamic-fully-connected-operator-tester.h",
-    ],
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "fully_connected_nc_test",
-    srcs = [
-        "fully-connected-nc.cc",
-        "fully-connected-operator-tester.h",
-    ],
-    deps = OPERATOR_TEST_DEPS + [
-        "//:microkernels_h",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "max_pooling_nhwc_test",
-    timeout = "moderate",
-    srcs = [
-        "max-pooling-nhwc.cc",
-        "max-pooling-operator-tester.h",
-    ],
-    shard_count = 10,
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "reduce_nd_test",
-    timeout = "moderate",
-    srcs = [
-        "reduce-nd.cc",
-    ],
-    deps = OPERATOR_TEST_DEPS + [
-        "//:logging",
-        "//:requantization",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "slice_normalization_test",
-    srcs = [
-        "slice-normalization.cc",
-        "slice-normalization-tester.h",
-    ],
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "reduce_normalization_test",
-    srcs = [
-        "reduce-normalization.cc",
-        "reduce-normalization-tester.h",
-    ],
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "transpose_normalization_test",
-    srcs = [
-        "transpose-normalization.cc",
-        "transpose-normalization-tester.h",
-    ],
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "resize_bilinear_nhwc_test",
-    srcs = [
-        "resize-bilinear-nhwc.cc",
-        "resize-bilinear-operator-tester.h",
-    ],
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "resize_bilinear_nchw_test",
-    srcs = [
-        "resize-bilinear-nchw.cc",
-        "resize-bilinear-operator-tester.h",
-    ],
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "rope_nthc_test",
-    srcs = [
-        "rope-nthc.cc",
-        "rope-operator-tester.h",
-    ],
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "scaled_dot_product_attention_nhtc_test",
-    timeout = "moderate",
-    srcs = [
-        "scaled-dot-product-attention-nhtc.cc",
-        "scaled-dot-product-attention-operator-tester.h",
-    ],
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "slice_nd_test",
-    timeout = "moderate",
-    srcs = [
-        "slice-nd.cc",
-        "slice-operator-tester.h",
-    ],
-    shard_count = 5,
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "slice_nd_eager_test",
-    timeout = "moderate",
-    srcs = [
-        "slice-nd-eager.cc",
-        "slice-operator-tester.h",
-    ],
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "softmax_nc_test",
-    srcs = [
-        "softmax-nc.cc",
-        "softmax-operator-tester.h",
-    ],
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "space_to_depth_nhwc_test",
-    srcs = [
-        "space-to-depth-nhwc.cc",
-        "space-to-depth-operator-tester.h",
-    ],
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "transpose_nd_test",
-    srcs = [
-        "transpose-nd.cc",
-        "transpose-operator-tester.h",
-    ],
-    shard_count = 10,
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "transpose_nd_eager_test",
-    srcs = [
-        "transpose-nd-eager.cc",
-        "transpose-operator-tester.h",
-    ],
-    shard_count = 5,
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "unpooling_nhwc_test",
-    srcs = [
-        "unpooling-nhwc.cc",
-        "unpooling-operator-tester.h",
-    ],
-    deps = OPERATOR_TEST_DEPS,
-)
-
-########################### Unit tests for subgraph ###########################
-
-xnnpack_cxx_library(
-    name = "convolution_test_helpers",
-    testonly = True,
-    srcs = [
-        "convolution-test-helpers.cc",
-    ],
-    hdrs = [
-        "convolution-test-helpers.h",
-    ],
-    deps = [
-        "//:buffer",
-        "//:microparams",
-        "//:quantization",
-    ],
-)
-
-xnnpack_cxx_library(
-    name = "subgraph_unary_tester",
-    testonly = True,
-    hdrs = [
-        "subgraph-unary-tester.h",
-    ],
-    deps = xnnpack_test_deps_for_library() + [
-        ":replicable_random_device",
-        "//:buffer",
-        "//:node_type",
-        "//:operators",
-        "//:requantization",
-        "//:subgraph",
-        "//:xnnpack_h",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "unary_test",
-    srcs = [
-        "unary.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        ":unary_ops",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:datatype",
-        "//:logging",
-        "//:operator_utils",
-        "//:operators",
-        "//:subgraph",
-    ],
-)
-
-[xnnpack_unit_test(
-    name = "%s_test" % operator,
-    srcs = [
-        "%s.cc" % operator.replace("_", "-"),
-    ],
-    deps = [
-        ":replicable_random_device",
-        ":subgraph_unary_tester",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:math",
-        "//:node_type",
-        "//:operators",
-        "//:requantization",
-        "//:subgraph",
-    ],
-) for operator in [
-    "copy",
-    "softmax",
-    "space_to_depth_2d",
-    "static_constant_pad",
-    "static_expand_dims",
-    "static_reshape",
-    "static_slice",
-    "static_transpose",
-]]
-
-xnnpack_cxx_library(
-    name = "subgraph_binary_tester",
-    testonly = True,
-    hdrs = [
-        "subgraph-binary-tester.h",
-    ],
-    deps = xnnpack_test_deps_for_library() + [
-        ":replicable_random_device",
-        "//:buffer",
-        "//:node_type",
-        "//:operators",
-        "//:requantization",
-        "//:subgraph",
-        "//:xnnpack_h",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "workspace_test",
-    srcs = [
-        "workspace.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:allocation_type",
-        "//:buffer",
-        "//:math",
-        "//:subgraph",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "binary_test",
-    srcs = ["binary.cc"],
-    deps = [
-        ":operator_test_utils",
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:datatype",
-        "//:logging",
-        "//:math",
-        "//:operator_utils",
-        "//:operators",
-        "//:subgraph",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "argmax_pooling_2d_test",
-    srcs = [
-        "argmax-pooling-2d.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:common",
-        "//:node_type",
-        "//:operators",
-        "//:subgraph",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "average_pooling_2d_test",
-    srcs = [
-        "average-pooling-2d.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:common",
-        "//:math",
-        "//:node_type",
-        "//:operator_utils",
-        "//:operators",
-        "//:subgraph",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "average_pooling_2d_reshape_test",
-    srcs = [
-        "average-pooling-2d-reshape.cc",
-    ],
-    deps = [
-        "//:XNNPACK",
-        "//:node_type",
-        "//:subgraph",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "batch_matrix_multiply_test",
-    srcs = [
-        "batch-matrix-multiply.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:common",
-        "//:math",
-        "//:node_type",
-        "//:operators",
-        "//:subgraph",
-    ],
-)
-
-[xnnpack_unit_test(
-    name = "concatenate%d_test" % n,
-    srcs = [
-        "concatenate%d.cc" % n,
-    ],
-    deps = [
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:math",
-        "//:node_type",
-        "//:operators",
-        "//:subgraph",
-    ],
-) for n in [
-    2,
-    3,
-    4,
-    5,
-]]
-
-xnnpack_unit_test(
-    name = "convolution_2d_test",
-    srcs = [
-        "convolution-2d.cc",
-    ],
-    deps = [
-        ":convolution_test_helpers",
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:common",
-        "//:math",
-        "//:node_type",
-        "//:operator_utils",
-        "//:operators",
-        "//:requantization",
-        "//:subgraph",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "deconvolution_2d_test",
-    timeout = "moderate",
-    srcs = [
-        "deconvolution-2d.cc",
-    ],
-    shard_count = 5,
-    deps = [
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:math",
-        "//:node_type",
-        "//:operator_utils",
-        "//:operators",
-        "//:requantization",
-        "//:subgraph",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "depth_to_space_2d_test",
-    srcs = [
-        "depth-to-space-2d.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:math",
-        "//:node_type",
-        "//:operators",
-        "//:subgraph",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "depthwise_convolution_2d_test",
-    srcs = [
-        "depthwise-convolution-2d.cc",
-    ],
-    deps = [
-        ":convolution_test_helpers",
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:common",
-        "//:math",
-        "//:node_type",
-        "//:operator_utils",
-        "//:operators",
-        "//:requantization",
-        "//:subgraph",
-    ],
-)
-
-[xnnpack_unit_test(
-    name = "even_split%d_test" % n,
-    srcs = [
-        "even-split%s.cc" % n,
-    ],
-    deps = [
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:math",
-        "//:node_type",
-        "//:operators",
-        "//:subgraph",
-    ],
-) for n in [
-    2,
-    3,
-    4,
-]]
-
-xnnpack_unit_test(
-    name = "fully_connected_test",
-    timeout = "moderate",
-    srcs = [
-        "fully-connected.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:common",
-        "//:config_hdrs",
-        "//:internal",
-        "//:math",
-        "//:microkernels_h",
-        "//:node_type",
-        "//:operators",
-        "//:requantization",
-        "//:subgraph",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "global_average_pooling_1d_test",
-    srcs = [
-        "global-average-pooling-1d.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:aligned_allocator",
-        "//:common",
-        "//:math",
-        "//:node_type",
-        "//:operators",
-        "//:requantization",
-        "//:subgraph",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "global_average_pooling_2d_test",
-    srcs = [
-        "global-average-pooling-2d.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:aligned_allocator",
-        "//:common",
-        "//:math",
-        "//:node_type",
-        "//:operators",
-        "//:requantization",
-        "//:subgraph",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "global_sum_pooling_1d_test",
-    srcs = [
-        "global-sum-pooling-1d.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:aligned_allocator",
-        "//:common",
-        "//:math",
-        "//:node_type",
-        "//:operators",
-        "//:subgraph",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "global_sum_pooling_2d_test",
-    srcs = [
-        "global-sum-pooling-2d.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:aligned_allocator",
-        "//:common",
-        "//:math",
-        "//:node_type",
-        "//:operators",
-        "//:subgraph",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "max_pooling_2d_test",
-    srcs = [
-        "max-pooling-2d.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:math",
-        "//:node_type",
-        "//:operator_utils",
-        "//:operators",
-        "//:requantization",
-        "//:subgraph",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "rope_test",
-    srcs = [
-        "rope.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:math",
-        "//:node_type",
-        "//:operators",
-        "//:subgraph",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "scaled_dot_product_attention_test",
-    srcs = [
-        "scaled-dot-product-attention.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:aligned_allocator",
-        "//:common",
-        "//:math",
-        "//:node_type",
-        "//:subgraph",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "static_reduce_test",
-    srcs = [
-        "static-reduce.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:common",
-        "//:datatype",
-        "//:logging",
-        "//:math",
-        "//:operators",
-        "//:subgraph",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "reshape_helpers_test",
-    srcs = [
-        "reshape-helpers.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:subgraph",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "static_resize_bilinear_2d_test",
-    srcs = [
-        "static-resize-bilinear-2d.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:math",
-        "//:node_type",
-        "//:operators",
-        "//:subgraph",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "transpose_reshape_test",
-    srcs = [
-        "transpose-reshape.cc",
-    ],
-    deps = [
-        "//:XNNPACK",
-        "//:node_type",
-        "//:subgraph",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "unpooling_2d_test",
-    srcs = [
-        "unpooling-2d.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:node_type",
-        "//:operator_utils",
-        "//:operators",
-        "//:subgraph",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "fusion_test",
-    srcs = [
-        "fusion.cc",
-        "runtime-tester.h",
-        "subgraph-tester.h",
-    ],
-    deps = [
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:node_type",
-        "//:subgraph",
-    ],
-)
-
 ############################### Misc unit tests ###############################
 
 xnnpack_unit_test(
-    name = "runtime_test",
+    name = "buffer_test",
     srcs = [
-        "runtime.cc",
-        "runtime-tester.h",
-        "subgraph-tester.h",
+        "buffer.cc",
     ],
     deps = [
         ":replicable_random_device",
-        "//:XNNPACK",
         "//:buffer",
-        "//:subgraph",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "subgraph_test",
-    srcs = [
-        "runtime-tester.h",
-        "subgraph.cc",
-        "subgraph-tester.h",
-    ],
-    deps = [
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:subgraph",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "memory_planner_test",
-    srcs = [
-        "memory-planner.cc",
-        "runtime-tester.h",
-        "subgraph-tester.h",
-    ],
-    deps = [
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:node_type",
-        "//:subgraph",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "subgraph_nchw_test",
-    srcs = [
-        "subgraph-nchw.cc",
-        "subgraph-tester.h",
-    ],
-    deps = [
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:subgraph",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "subgraph_fp16_test",
-    srcs = [
-        "mock-allocator.h",
-        "runtime-tester.h",
-        "subgraph-fp16.cc",
-        "subgraph-tester.h",
-    ],
-    deps = [
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:allocation_type",
-        "//:allocator",
-        "//:buffer",
-        "//:math",
-        "//:node_type",
-        "//:params",
-        "//:subgraph",
     ],
 )
 
@@ -2160,15 +1127,6 @@ xnnpack_unit_test(
         "//:math",
         "//:microkernel_utils",
         "//:params",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "operator_utils_test",
-    srcs = ["operator-utils.cc"],
-    deps = [
-        "//:microkernel_configs",
-        "//:operator_utils",
     ],
 )
 

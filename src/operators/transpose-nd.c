@@ -10,20 +10,21 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "xnnpack.h"
-#include "xnnpack/allocator.h"
-#include "xnnpack/common.h"
-#include "xnnpack/compute.h"
-#include "xnnpack/config-types.h"
-#include "xnnpack/config.h"
-#include "xnnpack/log.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microkernel-type.h"
-#include "xnnpack/normalization.h"
-#include "xnnpack/operator-type.h"
-#include "xnnpack/operator.h"
-#include "xnnpack/params.h"
-#include "pthreadpool.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/allocator.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/compute.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/config.h"
+#include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microkernel-type.h"
+#include "src/xnnpack/normalization.h"
+#include "src/xnnpack/operator-type.h"
+#include "src/xnnpack/operator-utils.h"
+#include "src/xnnpack/operator.h"
+#include "src/xnnpack/params.h"
+#include <pthreadpool.h>
 
 /// Reorder the data in array using the indices in loop_order.
 ///
@@ -153,23 +154,27 @@ static enum xnn_status reshape_transpose_nd(
   enum xnn_status status = xnn_status_invalid_parameter;
   if (num_dims == 0) {
     xnn_log_error(
-      "failed to create %s operator with %zu num_dims: num_dims must be non-zero",
-      xnn_operator_type_to_string(transpose_op->type), num_dims);
+        "failed to create %s operator with %zu num_dims: num_dims must be "
+        "non-zero",
+        xnn_operator_type_to_string_v2(transpose_op), num_dims);
     goto error;
   }
 
   if (num_dims > XNN_MAX_TENSOR_DIMS) {
     xnn_log_error(
-      "failed to create %s operator with %zu num_dims: num_dims must be <= %d",
-      xnn_operator_type_to_string(transpose_op->type), num_dims, XNN_MAX_TENSOR_DIMS);
+        "failed to create %s operator with %zu num_dims: num_dims must be <= "
+        "%d",
+        xnn_operator_type_to_string_v2(transpose_op), num_dims,
+        XNN_MAX_TENSOR_DIMS);
     goto error;
   }
 
   for (size_t i = 0; i < num_dims; ++i) {
     if (perm[i] >= num_dims) {
       xnn_log_error(
-          "failed to create %s operator with %zu perm and %zu num_dims: 0 <= perm < num_dims",
-          xnn_operator_type_to_string(transpose_op->type), perm[i], num_dims);
+          "failed to create %s operator with %zu perm and %zu num_dims: 0 <= "
+          "perm < num_dims",
+          xnn_operator_type_to_string_v2(transpose_op), perm[i], num_dims);
       goto error;
     }
   }
@@ -178,8 +183,9 @@ static enum xnn_status reshape_transpose_nd(
     for (size_t j = i + 1; j < num_dims; ++j) {
       if (perm[i] == perm[j]) {
         xnn_log_error(
-            "failed to create %s operator with duplicate entries in perm %zu %zu",
-            xnn_operator_type_to_string(transpose_op->type), perm[i], perm[j]);
+            "failed to create %s operator with duplicate entries in perm %zu "
+            "%zu",
+            xnn_operator_type_to_string_v2(transpose_op), perm[i], perm[j]);
         goto error;
       }
     }
@@ -188,16 +194,20 @@ static enum xnn_status reshape_transpose_nd(
   if (input_stride != NULL) {
     if (input_stride[num_dims - 1] != 1) {
       xnn_log_error(
-          "failed to create %s operator with %zu input_stride[num_dims - 1]: input_stride[num_dims - 1] == 1",
-          xnn_operator_type_to_string(transpose_op->type), input_stride[num_dims - 1]);
+          "failed to create %s operator with %zu input_stride[num_dims - 1]: "
+          "input_stride[num_dims - 1] == 1",
+          xnn_operator_type_to_string_v2(transpose_op),
+          input_stride[num_dims - 1]);
       goto error;
     }
     size_t current_stride = 1;
     for (size_t i = num_dims - 1; i > 0; --i) {
       if ((input_stride[i - 1] < input_stride[i] * input_shape[i]) || (input_stride[i - 1] < current_stride)) {
         xnn_log_error(
-            "failed to create %s operator with %zu input_shape and %zu input_stride: input_stride >= input_shape",
-            xnn_operator_type_to_string(transpose_op->type), input_shape[i], input_stride[i]);
+            "failed to create %s operator with %zu input_shape and %zu "
+            "input_stride: input_stride >= input_shape",
+            xnn_operator_type_to_string_v2(transpose_op), input_shape[i],
+            input_stride[i]);
         goto error;
       }
       current_stride *= input_shape[i];
@@ -207,16 +217,20 @@ static enum xnn_status reshape_transpose_nd(
   if (output_stride != NULL) {
     if (output_stride[num_dims - 1] != 1) {
       xnn_log_error(
-          "failed to create %s operator with %zu output_stride[num_dims - 1]: output_stride[num_dims - 1] == 1",
-          xnn_operator_type_to_string(transpose_op->type), output_stride[num_dims - 1]);
+          "failed to create %s operator with %zu output_stride[num_dims - 1]: "
+          "output_stride[num_dims - 1] == 1",
+          xnn_operator_type_to_string_v2(transpose_op),
+          output_stride[num_dims - 1]);
       goto error;
     }
     size_t current_stride = 1;
     for (size_t i = num_dims - 1; i > 0; --i) {
       if ((output_stride[i - 1] < output_stride[i] * input_shape[perm[i]]) || (output_stride[i - 1] < current_stride)) {
         xnn_log_error(
-            "failed to create %s operator with %zu output_shape and %zu output_stride: output_stride >= output_shape",
-            xnn_operator_type_to_string(transpose_op->type), input_shape[perm[i]], output_stride[i]);
+            "failed to create %s operator with %zu output_shape and %zu "
+            "output_stride: output_stride >= output_shape",
+            xnn_operator_type_to_string_v2(transpose_op), input_shape[perm[i]],
+            output_stride[i]);
         goto error;
       }
       current_stride *= input_shape[perm[i]];
@@ -314,8 +328,11 @@ static enum xnn_status reshape_transpose_nd(
   struct univector_contiguous_context* univector_context = &transpose_op->context.univector_contiguous;
   switch (normalized_dims) {
     case 1:
-      transpose_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
-      transpose_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_univector_contiguous;
+      transpose_op->compute[0].type =
+          xnn_parallelization_type_1d_tile_1d_dynamic;
+      transpose_op->compute[0].task_1d_tile_1d_dynamic =
+          (pthreadpool_task_1d_tile_1d_dynamic_t)
+              xnn_compute_univector_contiguous;
       transpose_op->compute[0].range[0] = normalized_element_size;
       transpose_op->compute[0].tile[0] = normalized_element_size;
       univector_context->ukernel = transpose_config->copy;
@@ -323,27 +340,36 @@ static enum xnn_status reshape_transpose_nd(
       univector_context->log2_ysize = 0;
       break;
     case 2:
-      transpose_op->compute[0].type = xnn_parallelization_type_2d_tile_2d;
+      transpose_op->compute[0].type =
+          xnn_parallelization_type_2d_tile_2d_dynamic;
       if (variable_size_ukernel) {
-        transpose_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_transposev_2d;
+        transpose_op->compute[0].task_2d_tile_2d_dynamic =
+            (pthreadpool_task_2d_tile_2d_dynamic_t)xnn_compute_transposev_2d;
       } else {
-        transpose_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_transposec_2d;
+        transpose_op->compute[0].task_2d_tile_2d_dynamic =
+            (pthreadpool_task_2d_tile_2d_dynamic_t)xnn_compute_transposec_2d;
       }
       break;
     case 3:
-      transpose_op->compute[0].type = xnn_parallelization_type_3d_tile_2d;
+      transpose_op->compute[0].type =
+          xnn_parallelization_type_3d_tile_2d_dynamic;
       if (variable_size_ukernel) {
-        transpose_op->compute[0].task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_transposev_3d;
+        transpose_op->compute[0].task_3d_tile_2d_dynamic =
+            (pthreadpool_task_3d_tile_2d_dynamic_t)xnn_compute_transposev_3d;
       } else {
-        transpose_op->compute[0].task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_transposec_3d;
+        transpose_op->compute[0].task_3d_tile_2d_dynamic =
+            (pthreadpool_task_3d_tile_2d_dynamic_t)xnn_compute_transposec_3d;
       }
       break;
     case 4:
-      transpose_op->compute[0].type = xnn_parallelization_type_4d_tile_2d;
+      transpose_op->compute[0].type =
+          xnn_parallelization_type_4d_tile_2d_dynamic;
       if (variable_size_ukernel) {
-        transpose_op->compute[0].task_4d_tile_2d = (pthreadpool_task_4d_tile_2d_t) xnn_compute_transposev_4d;
+        transpose_op->compute[0].task_4d_tile_2d_dynamic =
+            (pthreadpool_task_4d_tile_2d_dynamic_t)xnn_compute_transposev_4d;
       } else {
-        transpose_op->compute[0].task_4d_tile_2d = (pthreadpool_task_4d_tile_2d_t) xnn_compute_transposec_4d;
+        transpose_op->compute[0].task_4d_tile_2d_dynamic =
+            (pthreadpool_task_4d_tile_2d_dynamic_t)xnn_compute_transposec_4d;
       }
       break;
     case 5:
@@ -389,9 +415,11 @@ enum xnn_status xnn_reshape_transpose_nd_x64(
     pthreadpool_t threadpool)
 {
   if (transpose_op->type != xnn_operator_type_transpose_nd_x64) {
-    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_transpose_nd_x64),
-      xnn_operator_type_to_string(transpose_op->type));
+    xnn_log_error(
+        "failed to reshape operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(xnn_operator_type_transpose_nd_x64),
+        xnn_operator_type_to_string_v2(transpose_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -409,9 +437,11 @@ enum xnn_status xnn_reshape_transpose_nd_x32(
     pthreadpool_t threadpool)
 {
   if (transpose_op->type != xnn_operator_type_transpose_nd_x32) {
-    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_transpose_nd_x32),
-      xnn_operator_type_to_string(transpose_op->type));
+    xnn_log_error(
+        "failed to reshape operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(xnn_operator_type_transpose_nd_x32),
+        xnn_operator_type_to_string_v2(transpose_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -429,9 +459,11 @@ enum xnn_status xnn_reshape_transpose_nd_x16(
     pthreadpool_t threadpool)
 {
   if (transpose_op->type != xnn_operator_type_transpose_nd_x16) {
-    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_transpose_nd_x16),
-      xnn_operator_type_to_string(transpose_op->type));
+    xnn_log_error(
+        "failed to reshape operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(xnn_operator_type_transpose_nd_x16),
+        xnn_operator_type_to_string_v2(transpose_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -449,9 +481,11 @@ enum xnn_status xnn_reshape_transpose_nd_x8(
     pthreadpool_t threadpool)
 {
   if (transpose_op->type != xnn_operator_type_transpose_nd_x8) {
-    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_transpose_nd_x8),
-      xnn_operator_type_to_string(transpose_op->type));
+    xnn_log_error(
+        "failed to reshape operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(xnn_operator_type_transpose_nd_x8),
+        xnn_operator_type_to_string_v2(transpose_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -480,8 +514,8 @@ static enum xnn_status setup_transpose_nd(
       return xnn_status_success;
     case xnn_run_state_invalid:
       xnn_log_error(
-        "failed to setup %s operator: operator has not been reshaped yet",
-        xnn_operator_type_to_string(transpose_op->type));
+          "failed to setup %s operator: operator has not been reshaped yet",
+          xnn_operator_type_to_string_v2(transpose_op));
       return xnn_status_invalid_state;
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.
@@ -509,9 +543,11 @@ enum xnn_status xnn_setup_transpose_nd_x64(
     void* output)
 {
   if (transpose_op->type != xnn_operator_type_transpose_nd_x64) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_transpose_nd_x64),
-      xnn_operator_type_to_string(transpose_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(xnn_operator_type_transpose_nd_x64),
+        xnn_operator_type_to_string_v2(transpose_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -524,9 +560,11 @@ enum xnn_status xnn_setup_transpose_nd_x32(
     void* output)
 {
   if (transpose_op->type != xnn_operator_type_transpose_nd_x32) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_transpose_nd_x32),
-      xnn_operator_type_to_string(transpose_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(xnn_operator_type_transpose_nd_x32),
+        xnn_operator_type_to_string_v2(transpose_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -539,9 +577,11 @@ enum xnn_status xnn_setup_transpose_nd_x16(
     void* output)
 {
   if (transpose_op->type != xnn_operator_type_transpose_nd_x16) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_transpose_nd_x16),
-      xnn_operator_type_to_string(transpose_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(xnn_operator_type_transpose_nd_x16),
+        xnn_operator_type_to_string_v2(transpose_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -554,9 +594,11 @@ enum xnn_status xnn_setup_transpose_nd_x8(
     void* output)
 {
   if (transpose_op->type != xnn_operator_type_transpose_nd_x8) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_transpose_nd_x8),
-      xnn_operator_type_to_string(transpose_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(xnn_operator_type_transpose_nd_x8),
+        xnn_operator_type_to_string_v2(transpose_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -833,9 +875,12 @@ enum xnn_status xnn_reshape_depth_to_space_nchw2nhwc_x16(
     pthreadpool_t threadpool)
 {
   if (depth_to_space_op->type != xnn_operator_type_depth_to_space_nchw2nhwc_x16) {
-    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_depth_to_space_nchw2nhwc_x16),
-      xnn_operator_type_to_string(depth_to_space_op->type));
+    xnn_log_error(
+        "failed to reshape operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(
+            xnn_operator_type_depth_to_space_nchw2nhwc_x16),
+        xnn_operator_type_to_string_v2(depth_to_space_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -858,9 +903,12 @@ enum xnn_status xnn_reshape_depth_to_space_nchw2nhwc_x32(
     pthreadpool_t threadpool)
 {
   if (depth_to_space_op->type != xnn_operator_type_depth_to_space_nchw2nhwc_x32) {
-    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_depth_to_space_nchw2nhwc_x32),
-      xnn_operator_type_to_string(depth_to_space_op->type));
+    xnn_log_error(
+        "failed to reshape operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(
+            xnn_operator_type_depth_to_space_nchw2nhwc_x32),
+        xnn_operator_type_to_string_v2(depth_to_space_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -885,9 +933,12 @@ enum xnn_status xnn_setup_depth_to_space_nchw2nhwc_x16(
     void* output)
 {
   if (depth_to_space_op->type != xnn_operator_type_depth_to_space_nchw2nhwc_x16) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_depth_to_space_nchw2nhwc_x16),
-      xnn_operator_type_to_string(depth_to_space_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(
+            xnn_operator_type_depth_to_space_nchw2nhwc_x16),
+        xnn_operator_type_to_string_v2(depth_to_space_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -902,9 +953,12 @@ enum xnn_status xnn_setup_depth_to_space_nchw2nhwc_x32(
     void* output)
 {
   if (depth_to_space_op->type != xnn_operator_type_depth_to_space_nchw2nhwc_x32) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_depth_to_space_nchw2nhwc_x32),
-      xnn_operator_type_to_string(depth_to_space_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(
+            xnn_operator_type_depth_to_space_nchw2nhwc_x32),
+        xnn_operator_type_to_string_v2(depth_to_space_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -1018,9 +1072,11 @@ static enum xnn_status reshape_depth_to_space_nhwc(
     size_t* output_channels_out)
 {
   if (depth_to_space_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(depth_to_space_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_operator_type),
+        xnn_operator_type_to_string_v2(depth_to_space_op));
     return xnn_status_invalid_parameter;
   }
   depth_to_space_op->state = xnn_run_state_invalid;
@@ -1152,9 +1208,11 @@ static enum xnn_status setup_depth_to_space_nhwc(
     void* output)
 {
   if (depth_to_space_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(depth_to_space_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_operator_type),
+        xnn_operator_type_to_string_v2(depth_to_space_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -1300,9 +1358,11 @@ static enum xnn_status reshape_space_to_depth_nhwc(
     size_t* output_channels_out)
 {
   if (space_to_depth_op->type != expected_operator_type) {
-    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(space_to_depth_op->type));
+    xnn_log_error(
+        "failed to reshape operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_operator_type),
+        xnn_operator_type_to_string_v2(space_to_depth_op));
     return xnn_status_invalid_parameter;
   }
   space_to_depth_op->state = xnn_run_state_invalid;
@@ -1447,9 +1507,11 @@ static enum xnn_status setup_space_to_depth_nhwc(
     void* output)
 {
   if (space_to_depth_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(space_to_depth_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_operator_type),
+        xnn_operator_type_to_string_v2(space_to_depth_op));
     return xnn_status_invalid_parameter;
   }
 

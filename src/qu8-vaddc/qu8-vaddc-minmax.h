@@ -3,6 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+// clang-format off
+
 #ifndef XNN_UKERNEL_WITH_PARAMS
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, datatype, params_type, init_params) \
     XNN_UKERNEL(arch_flags, ukernel, batch_tile, vector_tile, datatype)
@@ -48,6 +50,11 @@ XNN_UKERNEL_WITH_PARAMS(0, xnn_qu8_vaddc_minmax_ukernel__wasmsimd_u8, 8, false, 
 XNN_UKERNEL_WITH_PARAMS(0, xnn_qu8_vaddc_minmax_ukernel__wasmsimd_u16, 16, false, uint8_t, struct xnn_qu8_add_minmax_params, xnn_init_qu8_add_minmax_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(0, xnn_qu8_vaddc_minmax_ukernel__wasmsimd_u32, 32, false, uint8_t, struct xnn_qu8_add_minmax_params, xnn_init_qu8_add_minmax_scalar_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_qu8_vaddc_minmax_ukernel__rvv_u1v, 1, false, uint8_t, struct xnn_qu8_add_minmax_params, xnn_init_qu8_add_minmax_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_qu8_vaddc_minmax_ukernel__rvv_u2v, 2, false, uint8_t, struct xnn_qu8_add_minmax_params, xnn_init_qu8_add_minmax_scalar_params)
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
 XNN_UKERNEL_WITH_PARAMS(0, xnn_qu8_vaddc_minmax_ukernel__scalar_u1, 1, false, uint8_t, struct xnn_qu8_add_minmax_params, xnn_init_qu8_add_minmax_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(0, xnn_qu8_vaddc_minmax_ukernel__scalar_u2, 2, false, uint8_t, struct xnn_qu8_add_minmax_params, xnn_init_qu8_add_minmax_scalar_params)

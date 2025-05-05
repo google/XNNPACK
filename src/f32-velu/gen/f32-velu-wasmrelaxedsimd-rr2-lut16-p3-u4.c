@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-velu/wasmsimd-rr2-lut16-p3.c.in
 //   Generator: tools/xngen
@@ -11,11 +12,11 @@
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/vunary.h"
-#include "xnnpack/common.h"
+#include "src/xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
 
 
-extern XNN_INTERNAL const float xnn_table_exp2minus_k_over_16[16];
+extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_16[16];
 
 void xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_lut16_p3_u4(
     size_t batch,

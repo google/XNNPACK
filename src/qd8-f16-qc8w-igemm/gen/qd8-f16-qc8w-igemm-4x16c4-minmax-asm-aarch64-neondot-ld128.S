@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-igemm/4x16c4-aarch64-neondot-ld128.S.in
 //   Generator: tools/xngen
@@ -8,7 +9,7 @@
 // LICENSE file in the root directory of this source tree.
 
 
-#include "xnnpack/assembly.h"
+#include "src/xnnpack/assembly.h"
 
 # void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondotfp16arith_ld128(
 #     size_t mr,                 x0
@@ -55,12 +56,13 @@ BEGIN_FUNCTION xnn_qd8_f16_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondot
                                             // if mr <= 2
         CSEL        x17, x16, x17, LS       //   c2 = c1
         BIC         x2, x2, 3
-        STR         x19, [sp, -56]      // Push x19 to the stack
-        LDR         x19, [sp, 24]       // Load zero_data
-        LDR         x15, [sp, 40]           // &quantization_params[0].zero_point
-        STP         d8,  d9, [sp, -48]!
-        STP         d10, d11, [sp, 16]
-        STP         d12,  d13, [sp, 32]
+        SUB         sp, sp, 64
+        STR         x19, [sp]      // Push x19 to the stack
+        LDR         x19, [sp, 88]       // Load zero_data
+        LDR         x15, [sp, 104]           // &quantization_params[0].zero_point
+        STP         d8,  d9, [sp, 16]
+        STP         d10, d11, [sp, 32]
+        STP         d12,  d13, [sp, 48]
         LD1         {v12.4s}, [x15]         // v12 & v13 interleaved zero_point & scale
 
         CMP         x0, 4                   // if mr < 4
@@ -285,7 +287,7 @@ BEGIN_FUNCTION xnn_qd8_f16_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondot
         FCVTN2      v25.8h, v29.4s
         FCVTN2      v16.8h, v20.4s
         FCVTN2      v24.8h, v28.4s
-        LDR         x0, [sp, 48]                // cn_stride
+        LDR         x0, [sp, 64]                // cn_stride
         FMAX        v19.8h, v19.8h, v4.8h
         FMAX        v27.8h, v27.8h, v4.8h
         FMAX        v18.8h, v18.8h, v4.8h
@@ -318,10 +320,11 @@ BEGIN_FUNCTION xnn_qd8_f16_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondot
         # nc loop
         B.HI        0b
         # Restore d8-d13 from stack
-        LDR         x19, [sp, -8]
-        LDP         d12, d13, [sp, 32]
-        LDP         d10, d11, [sp, 16]
-        LDP         d8, d9, [sp], 48
+        LDR         x19, [sp]
+        LDP         d12, d13, [sp, 48]
+        LDP         d10, d11, [sp, 32]
+        LDP         d8, d9, [sp, 16]
+        ADD         sp, sp, 64
         RET
 
 
@@ -442,10 +445,11 @@ BEGIN_FUNCTION xnn_qd8_f16_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondot
         STR         h16, [x6]
 10:
         # Restore d8-d13 from stack
-        LDR         x19, [sp, -8]
-        LDP         d12, d13, [sp, 32]
-        LDP         d10, d11, [sp, 16]
-        LDP         d8, d9, [sp], 48
+        LDR         x19, [sp]
+        LDP         d12, d13, [sp, 48]
+        LDP         d10, d11, [sp, 32]
+        LDP         d8, d9, [sp, 16]
+        ADD         sp, sp, 64
         RET
 
 END_FUNCTION xnn_qd8_f16_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondotfp16arith_ld128

@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2020 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -9,11 +10,11 @@
 
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/dwconv.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microparams-init.h"
-#include "dwconv2d-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microparams-init.h"
+#include "test/dwconv2d-microkernel-tester.h"
 
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)

@@ -6,12 +6,12 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/config.h"
-#include "xnnpack/conv.h"
-#include "xnnpack/init-once.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/config.h"
+#include "src/xnnpack/conv.h"
+#include "src/xnnpack/init-once.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
 
 static struct xnn_conv_hwc2chw_config f16_conv_hwc2chw_3x3c3s2_config = {0};
 static struct xnn_conv_hwc2chw_config f32_conv_hwc2chw_3x3c3s2_config = {0};
@@ -77,6 +77,13 @@ static void init_f32_conv_hwc2chw_3x3c3s2_config(void) {
       (xnn_conv_hwc2chw_ukernel_fn) xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__wasmsimd_2x2;
     f32_conv_hwc2chw_3x3c3s2_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_conv_hwc2chw_3x3c3s2_config.output_channel_tile = 4;
+    f32_conv_hwc2chw_3x3c3s2_config.output_height_tile = 2;
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    f32_conv_hwc2chw_3x3c3s2_config.ukernel_with_symm_padding =
+      (xnn_conv_hwc2chw_ukernel_fn) xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_2x2;
+    f32_conv_hwc2chw_3x3c3s2_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+    f32_conv_hwc2chw_3x3c3s2_config.output_channel_tile = 2 * hardware_config->vlenb / sizeof(float);
     f32_conv_hwc2chw_3x3c3s2_config.output_height_tile = 2;
   #else
     f32_conv_hwc2chw_3x3c3s2_config.ukernel_with_symm_padding =

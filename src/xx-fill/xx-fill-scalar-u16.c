@@ -5,8 +5,8 @@
 
 #include <assert.h>
 
-#include "xnnpack/fill.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/fill.h"
+#include "src/xnnpack/unaligned.h"
 
 
 void xnn_xx_fill_ukernel__scalar_u16(

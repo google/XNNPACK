@@ -3,7 +3,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert OP in ["ABS", "NEG", "SQR"]
 $BATCH_TILES = tuple(int(bt) for bt in BATCH_TILES.split(","))
 $SIMD_SIZE = BATCH_TILES[0]
@@ -11,12 +10,12 @@ $SIMD_SIZE = BATCH_TILES[0]
 #include <assert.h>
 #include <stddef.h>
 
-#include "xnnpack/simd/f32-${ARCH}.h"
+#include "src/xnnpack/simd/f32-${ARCH}.h"
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/vunary.h"
-#include "xnnpack/microparams.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vunary.h"
+#include "src/xnnpack/microparams.h"
 
 $for BATCH_TILE in BATCH_TILES:
 
@@ -35,22 +34,20 @@ $for BATCH_TILE in BATCH_TILES:
     $SIMD_TILE = BATCH_TILE // SIMD_SIZE
     $if SIMD_TILE > 1:
       for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
-        const xnn_simd_f32_t vx${ABC[0]} = xnn_loadu_f32(input);
-        $for N in range(1, SIMD_TILE):
-          const xnn_simd_f32_t vx${ABC[N]} = xnn_loadu_f32(input + ${N} * xnn_simd_size_f32);
+        $for N in range(SIMD_TILE):
+          const xnn_simd_f32_t vx${N} = xnn_loadu_f32(input + ${N} * xnn_simd_size_f32);
         input += ${SIMD_TILE} * xnn_simd_size_f32;
 
         $for N in range(SIMD_TILE):
           $if OP == "ABS":
-            const xnn_simd_f32_t vy${ABC[N]} = xnn_abs_f32(vx${ABC[N]});
+            const xnn_simd_f32_t vy${N} = xnn_abs_f32(vx${N});
           $elif OP == "NEG":
-            const xnn_simd_f32_t vy${ABC[N]} = xnn_neg_f32(vx${ABC[N]});
+            const xnn_simd_f32_t vy${N} = xnn_neg_f32(vx${N});
           $elif OP == "SQR":
-            const xnn_simd_f32_t vy${ABC[N]} = xnn_mul_f32(vx${ABC[N]}, vx${ABC[N]});
+            const xnn_simd_f32_t vy${N} = xnn_mul_f32(vx${N}, vx${N});
 
-        xnn_storeu_f32(output, vy${ABC[0]});
-        $for N in range(1, SIMD_TILE):
-          xnn_storeu_f32(output + ${N} * xnn_simd_size_f32, vy${ABC[N]});
+        $for N in range(SIMD_TILE):
+          xnn_storeu_f32(output + ${N} * xnn_simd_size_f32, vy${N});
         output += ${SIMD_TILE} * xnn_simd_size_f32;
       }
 

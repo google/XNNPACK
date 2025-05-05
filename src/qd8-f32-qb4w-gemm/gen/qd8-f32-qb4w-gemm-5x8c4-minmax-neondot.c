@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-gemm/c4-neondot.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/gemm.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/math.h"
 
 
 void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_5x8c4__neondot(
@@ -222,7 +223,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_5x8c4__neondot(
     vout3x4567 = vaddq_f32(vbias4567, vout3x4567);
     vout4x4567 = vaddq_f32(vbias4567, vout4x4567);
 
-    const float32x4_t voutput_min = vld1q_dup_f32(&params->scalar.min);
+    const float32x4_t voutput_min = vdupq_n_f32(params->scalar.min);
     vout0x0123 = vmaxq_f32(vout0x0123, voutput_min);
     vout0x4567 = vmaxq_f32(vout0x4567, voutput_min);
     vout1x0123 = vmaxq_f32(vout1x0123, voutput_min);
@@ -234,7 +235,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_5x8c4__neondot(
     vout4x0123 = vmaxq_f32(vout4x0123, voutput_min);
     vout4x4567 = vmaxq_f32(vout4x4567, voutput_min);
 
-    const float32x4_t voutput_max = vld1q_dup_f32(&params->scalar.max);
+    const float32x4_t voutput_max = vdupq_n_f32(params->scalar.max);
     vout0x0123 = vminq_f32(vout0x0123, voutput_max);
     vout0x4567 = vminq_f32(vout0x4567, voutput_max);
     vout1x0123 = vminq_f32(vout1x0123, voutput_max);

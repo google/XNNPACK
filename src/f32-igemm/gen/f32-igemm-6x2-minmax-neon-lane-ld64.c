@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-igemm/MRx2-neon-ld64.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/igemm.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/igemm.h"
 
 
 void xnn_f32_igemm_minmax_ukernel_6x2__neon_lane_ld64(
@@ -27,7 +28,7 @@ void xnn_f32_igemm_minmax_ukernel_6x2__neon_lane_ld64(
     size_t cn_stride,
     size_t a_offset,
     const float* zero,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= 6);
@@ -151,7 +152,7 @@ void xnn_f32_igemm_minmax_ukernel_6x2__neon_lane_ld64(
       p -= 6 * sizeof(void*);
     } while (p != 0);
 
-    const float32x2_t vmax = vld1_dup_f32(&params->scalar.max);
+    const float32x2_t vmax = vdup_n_f32(params->scalar.max);
     vacc0x01 = vmin_f32(vacc0x01, vmax);
     vacc1x01 = vmin_f32(vacc1x01, vmax);
     vacc2x01 = vmin_f32(vacc2x01, vmax);
@@ -159,7 +160,7 @@ void xnn_f32_igemm_minmax_ukernel_6x2__neon_lane_ld64(
     vacc4x01 = vmin_f32(vacc4x01, vmax);
     vacc5x01 = vmin_f32(vacc5x01, vmax);
 
-    const float32x2_t vmin = vld1_dup_f32(&params->scalar.min);
+    const float32x2_t vmin = vdup_n_f32(params->scalar.min);
     vacc0x01 = vmax_f32(vacc0x01, vmin);
     vacc1x01 = vmax_f32(vacc1x01, vmin);
     vacc2x01 = vmax_f32(vacc2x01, vmin);

@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-rminmax/neon.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
 
 
 void xnn_f32_rminmax_ukernel__neon_u16_acc4(
@@ -26,8 +27,8 @@ void xnn_f32_rminmax_ukernel__neon_u16_acc4(
   assert(input != NULL);
   assert(output != NULL);
 
-  float32x4_t vmin0 = vld1q_dup_f32(input);
-  float32x4_t vmax0 = vmin0;
+  float32x4_t vmin0 = vld1q_dup_f32(output);
+  float32x4_t vmax0 = vld1q_dup_f32(output + 1);
   float32x4_t vmin1 = vmin0;
   float32x4_t vmax1 = vmax0;
   float32x4_t vmin2 = vmin0;

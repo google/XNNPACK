@@ -12,8 +12,8 @@
 #include <stdint.h>
 #include <wasm_simd128.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/unaligned.h"
 
 // SIMD vector type for s32 using WASMSIMD.
 typedef v128_t xnn_simd_s32_t;
@@ -60,7 +60,7 @@ static XNN_INLINE void xnn_storeu_s32(int32_t* ptr, xnn_simd_s32_t v) {
   wasm_v128_store(ptr, v);
 }
 
-static XNN_INLINE void xnn_store_s32(float* ptr, xnn_simd_s32_t v) {
+static XNN_INLINE void xnn_store_s32(int32_t* ptr, xnn_simd_s32_t v) {
   wasm_v128_store(ptr, v);
 }
 
@@ -68,23 +68,37 @@ static XNN_INLINE xnn_simd_s32_t xnn_set1_s32(int32_t v) {
   return wasm_i32x4_splat(v);
 }
 
-static XNN_INLINE xnn_simd_s32_t xnn_set1_or_load_s32(const int32_t* v) {
-  return wasm_i32x4_splat(*v);
-}
-
 // Tail load/store operations.
 
 static XNN_INLINE xnn_simd_s32_t
 xnn_load_tail_s32(const int32_t* input, size_t num_elements) XNN_OOB_READS {
-  assert(num_elements > 0);
-  assert(num_elements < xnn_simd_size_s32);
+  assert(num_elements <= xnn_simd_size_s32);
   return wasm_v128_load(input);
+}
+
+static XNN_INLINE xnn_simd_s32_t xnn_load_tail_safe_s32(const int32_t* input,
+                                                        size_t num_elements) {
+  assert(num_elements <= xnn_simd_size_s32);
+
+  XNN_ALIGN(16) int32_t padded[4];
+  int32_t* dst = padded;
+  switch (num_elements) {
+    case 4:
+      *dst++ = *input++;
+    case 3:
+      *dst++ = *input++;
+    case 2:
+      *dst++ = *input++;
+    case 1:
+      *dst++ = *input++;
+    default: ;
+  }
+  return wasm_v128_load(padded);
 }
 
 static XNN_INLINE void xnn_store_tail_s32(int32_t* output, xnn_simd_s32_t v,
                                           size_t num_elements) {
-  assert(num_elements > 0);
-  assert(num_elements < xnn_simd_size_s32);
+  assert(num_elements <= xnn_simd_size_s32);
 
   if (num_elements & 2) {
     wasm_v128_store64_lane(output, v, 0);
@@ -98,8 +112,7 @@ static XNN_INLINE void xnn_store_tail_s32(int32_t* output, xnn_simd_s32_t v,
 
 // Conversion operations.
 
-static XNN_INLINE v128_t
-xnn_cvt_f32_s32(xnn_simd_s32_t a) {
+static XNN_INLINE v128_t xnn_cvt_f32_s32(xnn_simd_s32_t a) {
   return wasm_f32x4_convert_i32x4(a);
 }
 

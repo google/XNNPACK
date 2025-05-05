@@ -24,11 +24,11 @@ $else:
   $SSE_HEADER = {2: "emmintrin.h", 3: "tmmintrin.h", 4: "smmintrin.h"}[SSE]
   #include <${SSE_HEADER}>
 
-#include "xnnpack/common.h"
-#include "xnnpack/gemm.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/math.h"
 $if DATATYPE != "QD8":
-  #include "xnnpack/unaligned.h"
+  #include "src/xnnpack/unaligned.h"
 
 
 $#
@@ -57,7 +57,7 @@ $if DATATYPE in ["QD8", "QC4", "QB4"]:
   $PARAMS_STRUCT = "scalar"
 $else:
   $PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar"
-$PARAMS_TYPE = {"QC8": "union xnn_qs8_qc8w_conv_minmax_params", "QD8": "union xnn_f32_minmax_params", "QC4": "struct xnn_f32_qc4w_minmax_params", "QS8": "union xnn_qs8_conv_minmax_params", "QU8": "union xnn_qu8_conv_minmax_params", "QB4": "struct xnn_f32_qb4w_minmax_params"}[DATATYPE]
+$PARAMS_TYPE = {"QC8": "union xnn_qs8_qc8w_conv_minmax_params", "QD8": "struct xnn_f32_minmax_params", "QC4": "struct xnn_f32_qc4w_minmax_params", "QS8": "union xnn_qs8_conv_minmax_params", "QU8": "union xnn_qu8_conv_minmax_params", "QB4": "struct xnn_f32_qb4w_minmax_params"}[DATATYPE]
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $OUT_T = "float" if DATATYPE in ["QD8", "QC4", "QB4"] else XINT8_T
 $_MM_LOADX_SI128 = "_mm_loadu_si128" if DATATYPE == "QB4" else "_mm_load_si128"
@@ -198,7 +198,7 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
           __m128i vacc${M}x2 = _mm_unpacklo_epi64(vksum23${M}, vzero);
           __m128i vacc${M}x3 = _mm_unpackhi_epi64(vksum23${M}, vzero);
     $elif DATATYPE == "QB4":
-      const __m128 vksum = _mm_load_ps((const float*) w);
+      const __m128 vksum = _mm_loadu_ps((const float*) w);
       $if AVX:
         $for M in range(MR):
           const __m128i vinput_zero_point${M} = _mm_castps_si128(_mm_broadcast_ss((const float*) &quantization_params[${M}].zero_point));
@@ -404,11 +404,6 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
               $# SSE 2 only
               $else:
                 ${_}const __m128i vxb${N} = _mm_srai_epi16(_mm_unpacklo_epi8(vb${N}, vb${N}), 8);
-          $elif VARIANT == "EXTENDED":
-            $if N == 0:
-              ${_}const __m128i vxb${N} = _mm_load_si128((const __m128i*) w);
-            $else:
-              ${_}const __m128i vxb${N} = _mm_load_si128((const __m128i*) ((const int16_t*) w + ${N * 8}));
 
           $for M in range(MR):
             ${_}vacc${M}x${N} = _mm_add_epi32(vacc${M}x${N}, _mm_madd_epi16(vxa${M}, vxb${N}));

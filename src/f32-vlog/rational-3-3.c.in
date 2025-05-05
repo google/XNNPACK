@@ -4,7 +4,6 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert DIV in ("DIV", "NR")
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $BATCH_TILES = tuple(int(bt) for bt in BATCH_TILES.split(","))
 $SIMD_SIZE = BATCH_TILES[0]
 #include <assert.h>
@@ -12,11 +11,11 @@ $if ARCH == "scalar":
   #include <math.h>
 #include <stddef.h>
 
-#include "xnnpack/simd/f32-${ARCH}.h"
+#include "src/xnnpack/simd/f32-${ARCH}.h"
 
-#include "xnnpack/common.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vunary.h"
 
 // Define some mathematical constants in case they are not provided by `math.h`.
 #ifndef M_LN2
@@ -45,7 +44,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_signed_getexp_f32(xnn_simd_f32_t a) {
 
     return res;
   $else:
-    // The bits of IEE754 single-precision floating-point format are:
+    // The bits of IEEE754 single-precision floating-point format are:
     //
     //   s | e e e e e e e e | m m m m m m m m m m m m m m m m m m m m m m m
     //
@@ -137,28 +136,27 @@ $for BATCH_TILE in BATCH_TILES:
 
     $if SIMD_TILE > 1:
       for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
-        xnn_simd_f32_t vx_${ABC[0]} = xnn_loadu_f32(input);
-        $for N in range(1, SIMD_TILE):
-          xnn_simd_f32_t vx_${ABC[N]} = xnn_loadu_f32(input + ${N} * xnn_simd_size_f32);
+        $for N in range(SIMD_TILE):
+          xnn_simd_f32_t vx_${N} = xnn_loadu_f32(input + ${N} * xnn_simd_size_f32);
         input += ${BATCH_TILE};
 
         // Scale `x` with `sqrt(2)` so that the exponent is rounded up.
         $for N in range(0, SIMD_TILE):
-          vx_${ABC[N]} = xnn_mul_f32(vx_${ABC[N]}, vsqrt2);
+          vx_${N} = xnn_mul_f32(vx_${N}, vsqrt2);
 
         // Extract the exponent.
         $for N in range(0, SIMD_TILE):
-          const xnn_simd_f32_t vexp_${ABC[N]} = xnn_signed_getexp_f32(vx_${ABC[N]});
+          const xnn_simd_f32_t vexp_${N} = xnn_signed_getexp_f32(vx_${N});
 
         // Normalize `x` to an exponent of zero.
         $for N in range(0, SIMD_TILE):
-          vx_${ABC[N]} = xnn_or_f32(xnn_and_f32(vx_${ABC[N]}, vmantissa_bits_mask), vone);
+          vx_${N} = xnn_or_f32(xnn_and_f32(vx_${N}, vmantissa_bits_mask), vone);
 
         // Scale `x` back with `1/sqrt(2)` to move its range from `[1.0, 2.0)` to
         // `[sqrt(1/2), sqrt(2))`, and further subtract `1.0` so that it is around
         // zero, i.e. `[sqrt(1/2) - 1, sqrt(2) - 1)`, or `[−0.29289, 0.4142136)`.
         $for N in range(0, SIMD_TILE):
-          vx_${ABC[N]} = xnn_sub_f32(xnn_mul_f32(vx_${ABC[N]}, vsqrt1_2), vone);
+          vx_${N} = xnn_sub_f32(xnn_mul_f32(vx_${N}, vsqrt1_2), vone);
 
         // In the following, we use a 3/2-degree rational polynomial to
         // approximate the (shifted) `log(x + 1)` on the (shifted) interval
@@ -167,41 +165,40 @@ $for BATCH_TILE in BATCH_TILES:
 
         // Evaluate the numerator polynomial p.
         $for N in range(0, SIMD_TILE):
-          xnn_simd_f32_t vp_${ABC[N]} = xnn_fmadd_f32(vx_${ABC[N]}, valpha_3, vone);
+          xnn_simd_f32_t vp_${N} = xnn_fmadd_f32(vx_${N}, valpha_3, vone);
         $for N in range(0, SIMD_TILE):
-          vp_${ABC[N]} = xnn_fmadd_f32(vx_${ABC[N]}, vp_${ABC[N]}, vone);
+          vp_${N} = xnn_fmadd_f32(vx_${N}, vp_${N}, vone);
         $for N in range(0, SIMD_TILE):
-          vp_${ABC[N]} = xnn_mul_f32(vx_${ABC[N]}, vp_${ABC[N]});
+          vp_${N} = xnn_mul_f32(vx_${N}, vp_${N});
 
         // Evaluate the denominator polynomial q.
         $for N in range(0, SIMD_TILE):
-          xnn_simd_f32_t vq_${ABC[N]} = xnn_fmadd_f32(vx_${ABC[N]}, vbeta_3, vbeta_2);
+          xnn_simd_f32_t vq_${N} = xnn_fmadd_f32(vx_${N}, vbeta_3, vbeta_2);
         $for N in range(0, SIMD_TILE):
-          vq_${ABC[N]} = xnn_fmadd_f32(vx_${ABC[N]}, vq_${ABC[N]}, vbeta_1);
+          vq_${N} = xnn_fmadd_f32(vx_${N}, vq_${N}, vbeta_1);
         $for N in range(0, SIMD_TILE):
-          vq_${ABC[N]} = xnn_fmadd_f32(vx_${ABC[N]}, vq_${ABC[N]}, vone);
+          vq_${N} = xnn_fmadd_f32(vx_${N}, vq_${N}, vone);
 
         // Divide the numerator by the denominator.
         $if DIV == "DIV":
           $for N in range(SIMD_TILE):
-            xnn_simd_f32_t vy_${ABC[N]} = xnn_div_f32(vp_${ABC[N]}, vq_${ABC[N]});
+            xnn_simd_f32_t vy_${N} = xnn_div_f32(vp_${N}, vq_${N});
         $else:
           $for N in range(SIMD_TILE):
-            xnn_simd_f32_t vrq_${ABC[N]} = xnn_rcp_f32(vq_${ABC[N]});
+            xnn_simd_f32_t vrq_${N} = xnn_rcp_f32(vq_${N});
           for (size_t iter = 0; iter < XNN_SIMD_NUM_RCP_ITER_F32; iter++) {
             $for N in range(SIMD_TILE):
-              vrq_${ABC[N]} = xnn_mul_f32(vrq_${ABC[N]}, xnn_fnmadd_f32(vrq_${ABC[N]}, vq_${ABC[N]}, vtwo));
+              vrq_${N} = xnn_mul_f32(vrq_${N}, xnn_fnmadd_f32(vrq_${N}, vq_${N}, vtwo));
           }
           $for N in range(SIMD_TILE):
-            xnn_simd_f32_t vy_${ABC[N]} = xnn_mul_f32(vp_${ABC[N]}, vrq_${ABC[N]});
+            xnn_simd_f32_t vy_${N} = xnn_mul_f32(vp_${N}, vrq_${N});
 
         // Put it all together, i.e. `log(x) = `log(2)*exp + y`.
         $for N in range(0, SIMD_TILE):
-          vy_${ABC[N]} = xnn_fmadd_f32(vexp_${ABC[N]}, vln2, vy_${ABC[N]});
+          vy_${N} = xnn_fmadd_f32(vexp_${N}, vln2, vy_${N});
 
-        xnn_storeu_f32(output, vy_${ABC[0]});
-        $for N in range(1, SIMD_TILE):
-          xnn_storeu_f32(output + ${N} * xnn_simd_size_f32, vy_${ABC[N]});
+        $for N in range(SIMD_TILE):
+          xnn_storeu_f32(output + ${N} * xnn_simd_size_f32, vy_${N});
         output += ${BATCH_TILE};
       }
     for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {

@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vlrelu/rvv.c.in
 //   Generator: tools/xngen
@@ -10,8 +11,8 @@
 #include <assert.h>
 
 #include <riscv_vector.h>
-#include "xnnpack/common.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vunary.h"
 
 void xnn_f32_vlrelu_ukernel__rvv_u4v(
     size_t batch,

@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-dwconv/unipass-avx.c.in
 //   Generator: tools/xngen
@@ -11,7 +12,7 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/dwconv.h"
+#include "src/xnnpack/dwconv.h"
 
 
 void xnn_f32_dwconv_minmax_ukernel_9p16c__fma3(
@@ -23,13 +24,14 @@ void xnn_f32_dwconv_minmax_ukernel_9p16c__fma3(
     intptr_t input_stride,
     size_t output_increment,
     size_t input_offset,
+    size_t input_pixel_stride,
     const float* zero,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(channels != 0);
   assert(output_width != 0);
 
-  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+  static const int32_t mask_table[16] = {-1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0};
 
   const __m256 vmin = _mm256_set1_ps(params->scalar.min);
   const __m256 vmax = _mm256_set1_ps(params->scalar.max);
@@ -252,7 +254,7 @@ void xnn_f32_dwconv_minmax_ukernel_9p16c__fma3(
     if XNN_UNLIKELY(c != 0) {
       assert(c >= 1);
       assert(c <= 7);
-      const __m256i vmask = _mm256_loadu_si256((const __m256i*) &mask_table[7 - c]);
+      const __m256i vmask = _mm256_loadu_si256((const __m256i*) &mask_table[8 - c]);
 
       __m256 vacc01234567p0 = _mm256_load_ps(w);
 
@@ -296,23 +298,11 @@ void xnn_f32_dwconv_minmax_ukernel_9p16c__fma3(
       __m256 vacc01234567 = _mm256_max_ps(vmin, vacc01234567p0);
       vacc01234567 = _mm256_min_ps(vmax, vacc01234567);
 
-      __m128 vacc0123 = _mm256_castps256_ps128(vacc01234567);
-      if (c & 4) {
-        _mm_storeu_ps(output, vacc0123);
-        vacc0123 = _mm256_extractf128_ps(vacc01234567, 1);
-        output += 4;
-      }
-      if (c & 2) {
-        _mm_storel_pi((__m64*) output, vacc0123);
-        vacc0123 = _mm_movehl_ps(vacc0123, vacc0123);
-        output += 2;
-      }
-      if (c & 1) {
-        _mm_store_ss(output, vacc0123);
-        output += 1;
-      }
+      _mm256_maskstore_ps(output, vmask, vacc01234567);
+      output += c;
     }
 
+    input_offset += input_pixel_stride;
     output = (float*) ((uintptr_t) output + output_increment);
   } while (--output_width != 0);
 }

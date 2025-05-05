@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vunary/simd.c.in
 //   Generator: tools/xngen
@@ -11,12 +12,12 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "xnnpack/simd/f32-avx.h"
+#include "src/xnnpack/simd/f32-avx.h"
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/vunary.h"
-#include "xnnpack/microparams.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vunary.h"
+#include "src/xnnpack/microparams.h"
 
 
 void xnn_f32_vneg_ukernel__avx_u8(
@@ -65,14 +66,14 @@ void xnn_f32_vneg_ukernel__avx_u16(
   assert(xnn_simd_size_f32 == 8);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const xnn_simd_f32_t vx0 = xnn_loadu_f32(input);
+    const xnn_simd_f32_t vx0 = xnn_loadu_f32(input + 0 * xnn_simd_size_f32);
     const xnn_simd_f32_t vx1 = xnn_loadu_f32(input + 1 * xnn_simd_size_f32);
     input += 2 * xnn_simd_size_f32;
 
     const xnn_simd_f32_t vy0 = xnn_neg_f32(vx0);
     const xnn_simd_f32_t vy1 = xnn_neg_f32(vx1);
 
-    xnn_storeu_f32(output, vy0);
+    xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vy0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy1);
     output += 2 * xnn_simd_size_f32;
   }
@@ -110,7 +111,7 @@ void xnn_f32_vneg_ukernel__avx_u24(
   assert(xnn_simd_size_f32 == 8);
 
   for (; batch >= 24 * sizeof(float); batch -= 24 * sizeof(float)) {
-    const xnn_simd_f32_t vx0 = xnn_loadu_f32(input);
+    const xnn_simd_f32_t vx0 = xnn_loadu_f32(input + 0 * xnn_simd_size_f32);
     const xnn_simd_f32_t vx1 = xnn_loadu_f32(input + 1 * xnn_simd_size_f32);
     const xnn_simd_f32_t vx2 = xnn_loadu_f32(input + 2 * xnn_simd_size_f32);
     input += 3 * xnn_simd_size_f32;
@@ -119,7 +120,7 @@ void xnn_f32_vneg_ukernel__avx_u24(
     const xnn_simd_f32_t vy1 = xnn_neg_f32(vx1);
     const xnn_simd_f32_t vy2 = xnn_neg_f32(vx2);
 
-    xnn_storeu_f32(output, vy0);
+    xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vy0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy1);
     xnn_storeu_f32(output + 2 * xnn_simd_size_f32, vy2);
     output += 3 * xnn_simd_size_f32;

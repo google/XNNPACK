@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-rminmax/scalar.c.in
 //   Generator: tools/xngen
@@ -9,8 +10,8 @@
 
 #include <assert.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
 
 void xnn_f32_rminmax_ukernel__wasm_u1(
     size_t batch,
@@ -25,8 +26,8 @@ void xnn_f32_rminmax_ukernel__wasm_u1(
 
   const float* i = input;
 
-  float vmin0 = *i;
-  float vmax0 = *i;
+  float vmin0 = output[0];
+  float vmax0 = output[1];
   do {
     const float vt = *i++;
     vmin0 = __builtin_wasm_min_f32(vmin0, vt);

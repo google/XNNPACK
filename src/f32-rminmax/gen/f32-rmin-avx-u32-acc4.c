@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-rminmax/avx.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
 
 
 void xnn_f32_rmin_ukernel__avx_u32_acc4(
@@ -28,7 +29,7 @@ void xnn_f32_rmin_ukernel__avx_u32_acc4(
 
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-  __m256 vmin0 = _mm256_broadcast_ss(input);
+  __m256 vmin0 = _mm256_broadcast_ss(output);
   __m256 vmin1 = vmin0;
   __m256 vmin2 = vmin0;
   __m256 vmin3 = vmin0;

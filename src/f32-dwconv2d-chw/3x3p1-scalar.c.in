@@ -7,8 +7,8 @@ $assert ROW_TILE >= 1
 $assert ACCUMULATORS >= 1
 #include <assert.h>
 
-#include "xnnpack/dwconv.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/math.h"
 
 
 void xnn_f32_dwconv2d_chw_ukernel_3x3p1__scalar_${ROW_TILE}x1${"_acc%d" % ACCUMULATORS if ACCUMULATORS > 1 else ""}(
@@ -19,7 +19,7 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__scalar_${ROW_TILE}x1${"_acc%d" % ACCUMU
     const float* zero,
     float* output,
     uint32_t padding_top,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(input_height != 0);
   assert(input_width != 0);

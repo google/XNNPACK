@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -33,12 +34,12 @@ XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_u8_vclamp_ukernel__avx2_u128, 128
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512skx, xnn_u8_vclamp_ukernel__avx512skx_u256, 256, false, XNN_QUANTIZED(uint8_t), struct xnn_u8_minmax_params, xnn_init_qu8_clamp_scalar_params)
 #endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
-#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_u8_vclamp_ukernel__rvv_u1v, 1, true, XNN_QUANTIZED(uint8_t), struct xnn_u8_minmax_params, xnn_init_qu8_clamp_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_u8_vclamp_ukernel__rvv_u2v, 2, true, XNN_QUANTIZED(uint8_t), struct xnn_u8_minmax_params, xnn_init_qu8_clamp_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_u8_vclamp_ukernel__rvv_u4v, 4, true, XNN_QUANTIZED(uint8_t), struct xnn_u8_minmax_params, xnn_init_qu8_clamp_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_u8_vclamp_ukernel__rvv_u8v, 8, true, XNN_QUANTIZED(uint8_t), struct xnn_u8_minmax_params, xnn_init_qu8_clamp_scalar_params)
-#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 XNN_UKERNEL_WITH_PARAMS(0, xnn_u8_vclamp_ukernel__wasmsimd_u64, 64, false, XNN_QUANTIZED(uint8_t), struct xnn_u8_minmax_params, xnn_init_qu8_clamp_scalar_params)

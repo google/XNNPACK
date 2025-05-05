@@ -3,18 +3,17 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $BATCH_TILES = tuple(int(bt) for bt in BATCH_TILES.split(","))
 $SIMD_SIZE = BATCH_TILES[0]
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/simd/f32-${ARCH}.h"
+#include "src/xnnpack/simd/f32-${ARCH}.h"
 
-#include "xnnpack/common.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vunary.h"
 
 $for BATCH_TILE in BATCH_TILES:
   $assert BATCH_TILE % SIMD_SIZE == 0
@@ -42,17 +41,15 @@ $for BATCH_TILE in BATCH_TILES:
     $if SIMD_TILE > 1:
       for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
 
-        xnn_simd_f32_t vmag_${ABC[0]} = xnn_abs_f32(xnn_loadu_f32(mag));
-        $for N in range(1, SIMD_TILE):
-          xnn_simd_f32_t vmag_${ABC[N]} = xnn_abs_f32(xnn_loadu_f32(mag + ${N} * xnn_simd_size_f32));
+        $for N in range(SIMD_TILE):
+          xnn_simd_f32_t vmag_${N} = xnn_abs_f32(xnn_loadu_f32(mag + ${N} * xnn_simd_size_f32));
         mag += ${BATCH_TILE};
 
         $for N in range(0, SIMD_TILE):
-          xnn_simd_f32_t vy_${ABC[N]} = xnn_or_f32(vsign, vmag_${ABC[N]});
+          xnn_simd_f32_t vy_${N} = xnn_or_f32(vsign, vmag_${N});
 
-        xnn_storeu_f32(output, vy_${ABC[0]});
-        $for N in range(1, SIMD_TILE):
-          xnn_storeu_f32(output + ${N} * xnn_simd_size_f32, vy_${ABC[N]});
+        $for N in range(SIMD_TILE):
+          xnn_storeu_f32(output + ${N} * xnn_simd_size_f32, vy_${N});
         output += ${BATCH_TILE};
       }
     for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {

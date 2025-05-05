@@ -15,9 +15,9 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/buffer.h"
-#include "replicable_random_device.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/microfnptr.h"
+#include "test/replicable_random_device.h"
 
 class UnpoolMicrokernelTester {
  public:
@@ -27,9 +27,7 @@ class UnpoolMicrokernelTester {
     return *this;
   }
 
-  size_t p() const {
-    return this->p_;
-  }
+  size_t p() const { return this->p_; }
 
   UnpoolMicrokernelTester& c(size_t c) {
     assert(c != 0);
@@ -37,18 +35,14 @@ class UnpoolMicrokernelTester {
     return *this;
   }
 
-  size_t c() const {
-    return this->c_;
-  }
+  size_t c() const { return this->c_; }
 
   UnpoolMicrokernelTester& f(uint32_t f) {
     this->f_ = f;
     return *this;
   }
 
-  uint32_t f() const {
-    return this->f_;
-  }
+  uint32_t f() const { return this->f_; }
 
   UnpoolMicrokernelTester& y_stride(size_t y_stride) {
     assert(y_stride != 0);
@@ -70,14 +64,15 @@ class UnpoolMicrokernelTester {
     return *this;
   }
 
-  size_t iterations() const {
-    return this->iterations_;
-  }
+  size_t iterations() const { return this->iterations_; }
 
   void Test(xnn_x32_unpool_ukernel_fn unpool) const {
     xnnpack::ReplicableRandomDevice rng;
-    auto x_rng = std::bind(std::uniform_int_distribution<uint32_t>(), std::ref(rng));
-    auto i_rng = std::bind(std::uniform_int_distribution<uint32_t>(0, uint32_t(p() - 1)), std::ref(rng));
+    auto x_rng =
+        std::bind(std::uniform_int_distribution<uint32_t>(), std::ref(rng));
+    auto i_rng =
+        std::bind(std::uniform_int_distribution<uint32_t>(0, uint32_t(p() - 1)),
+                  std::ref(rng));
 
     xnnpack::Buffer<uint32_t> x(c());
     xnnpack::Buffer<uint32_t> i(c());
@@ -108,8 +103,8 @@ class UnpoolMicrokernelTester {
       for (size_t i = 0; i < p(); i++) {
         for (size_t k = 0; k < c(); k++) {
           EXPECT_EQ(y_ref[i * y_stride() + k], y[i * y_stride() + k])
-            << "at pixel " << i << ", channel " << k
-            << ", p = " << p() << ", c = " << c();
+              << "at pixel " << i << ", channel " << k << ", p = " << p()
+              << ", c = " << c();
         }
       }
     }

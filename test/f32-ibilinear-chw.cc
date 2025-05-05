@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2020 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -9,6 +10,7 @@
 
 
 #include <gtest/gtest.h>
+
 #include "xnnpack/common.h"
 #include "xnnpack/ibilinear.h"
 #include "xnnpack/isa-checks.h"

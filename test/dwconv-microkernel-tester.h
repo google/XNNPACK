@@ -16,14 +16,8 @@
 #include <string>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microkernel-utils.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/pack.h"
-#include "xnnpack/requantization.h"
-#include "xnnpack/buffer.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/requantization.h"
 
 class DWConvMicrokernelTester {
  public:
@@ -58,22 +52,6 @@ class DWConvMicrokernelTester {
   }
 
   uint32_t channel_tile() const { return this->channel_tile_; }
-
-  DWConvMicrokernelTester& channel_subtile(uint32_t channel_subtile) {
-    assert(channel_subtile != 0);
-    this->channel_subtile_ = channel_subtile;
-    return *this;
-  }
-
-  uint32_t channel_subtile() const { return this->channel_subtile_; }
-
-  DWConvMicrokernelTester& channel_round(uint32_t channel_round) {
-    assert(channel_round != 0);
-    this->channel_round_ = channel_round;
-    return *this;
-  }
-
-  uint32_t channel_round() const { return this->channel_round_; }
 
   DWConvMicrokernelTester& kernel_tile(uint32_t kernel_tile) {
     assert(kernel_tile != 0);
@@ -153,13 +131,6 @@ class DWConvMicrokernelTester {
 
   size_t zero_index() const { return this->zero_index_; }
 
-  DWConvMicrokernelTester& iterations(size_t iterations) {
-    this->iterations_ = iterations;
-    return *this;
-  }
-
-  size_t iterations() const { return this->iterations_; }
-
   DWConvMicrokernelTester& first_pass_tile(size_t first_pass_tile) {
     this->first_pass_tile_ = first_pass_tile;
     return *this;
@@ -181,51 +152,30 @@ class DWConvMicrokernelTester {
 
   size_t last_pass_tile() const { return this->last_pass_tile_; }
 
-  void Test(xnn_qu8_dwconv_minmax_unipass_ukernel_fn dwconv_minmax,
+  void Test(xnn_qu8_dwconv_minmax_ukernel_fn dwconv_minmax,
             xnn_init_qu8_conv_minmax_params_fn init_params,
             xnn_qu8_requantize_fn requantize) const;
 
-  void Test(xnn_qu8_dwconv_minmax_multipass_ukernel_fn dwconv_minmax,
-            xnn_init_qu8_conv_minmax_params_fn init_params,
-            xnn_qu8_requantize_fn requantize) const;
-
-  void Test(xnn_qs8_qc8w_dwconv_minmax_unipass_ukernel_fn dwconv_minmax,
+  void Test(xnn_qs8_qc8w_dwconv_minmax_ukernel_fn dwconv_minmax,
             xnn_init_qs8_qc8w_conv_minmax_params_fn init_params,
             xnn_qs8_requantize_fn requantize) const;
 
-  void Test(xnn_qs8_qc8w_dwconv_minmax_multipass_ukernel_fn dwconv_minmax,
-            xnn_init_qs8_qc8w_conv_minmax_params_fn init_params,
-            xnn_qs8_requantize_fn requantize) const;
-
-  void Test(xnn_qs8_dwconv_minmax_unipass_ukernel_fn dwconv_minmax,
+  void Test(xnn_qs8_dwconv_minmax_ukernel_fn dwconv_minmax,
             xnn_init_qs8_conv_minmax_params_fn init_params,
             xnn_qs8_requantize_fn requantize) const;
 
-  void Test(xnn_qs8_dwconv_minmax_multipass_ukernel_fn dwconv_minmax,
-            xnn_init_qs8_conv_minmax_params_fn init_params,
-            xnn_qs8_requantize_fn requantize) const;
-
-  void Test(xnn_f16_dwconv_minmax_unipass_ukernel_fn dwconv_minmax,
+  void Test(xnn_f16_dwconv_minmax_ukernel_fn dwconv_minmax,
             xnn_init_f16_minmax_params_fn init_params) const;
 
-  void Test(xnn_f16_dwconv_minmax_multipass_ukernel_fn dwconv_minmax,
-            xnn_init_f16_minmax_params_fn init_params) const;
+  void Test(xnn_f32_dwconv_unipass_ukernel_fn dwconv,
+            const void* = nullptr) const;
 
-  void Test(xnn_f32_dwconv_unipass_ukernel_fn dwconv, const void* = nullptr) const;
-
-  void Test(xnn_f32_dwconv_minmax_unipass_ukernel_fn dwconv_minmax,
-            xnn_init_f32_minmax_params_fn init_params) const;
-
-  void Test(xnn_f32_dwconv_multipass_ukernel_fn dwconv, const void* = nullptr) const;
-
-  void Test(xnn_f32_dwconv_minmax_multipass_ukernel_fn dwconv_minmax,
+  void Test(xnn_f32_dwconv_minmax_ukernel_fn dwconv_minmax,
             xnn_init_f32_minmax_params_fn init_params) const;
 
  private:
   uint32_t channels_{1};
   uint32_t channel_tile_{1};
-  uint32_t channel_subtile_{1};
-  uint32_t channel_round_{1};
   uint32_t kernel_tile_{1};
   uint32_t kernel_size_{1};
   uint32_t width_{1};
@@ -237,7 +187,6 @@ class DWConvMicrokernelTester {
   uint8_t qmax_{255};
   size_t input_offset_{0};
   size_t zero_index_{SIZE_MAX};
-  size_t iterations_{3};
   size_t first_pass_tile_{0};
   size_t middle_pass_tile_{0};
   size_t last_pass_tile_{0};
@@ -254,9 +203,10 @@ struct LoopParams {
 };
 
 struct DWConvTestParams {
-  DWConvTestParams(std::string test_name, DWConvMicrokernelTester tester,
-                 std::function<void(DWConvMicrokernelTester& tester)> test_func,
-                 std::function<void(void)> isa_check = nullptr)
+  DWConvTestParams(
+      std::string test_name, DWConvMicrokernelTester tester,
+      std::function<void(DWConvMicrokernelTester& tester)> test_func,
+      std::function<void(void)> isa_check = nullptr)
       : test_name(test_name),
         tester(tester),
         test_func(test_func),

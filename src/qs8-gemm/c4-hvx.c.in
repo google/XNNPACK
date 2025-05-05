@@ -1,0 +1,174 @@
+// Copyright 2025 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert REQUANTIZATION == "FP32" or not REQUANTIZATION
+$assert REQUANTIZATION in ["FP32", "RNDNU"] or not REQUANTIZATION
+$assert DATATYPE in ["QC8", "QS8", "QD8", "QC4"]
+$assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
+$assert not DATATYPE in ["QD8", "QC4"] or not REQUANTIZATION
+#include <assert.h>
+#include <math.h>  // for lrintf
+
+#include <hexagon_types.h>
+#include <hexagon_protos.h>
+#include <hvx_hexagon_protos.h>
+
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/intrinsics-polyfill.h"  // for Q6_V_vstu_variable
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/unaligned.h"
+
+$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8": "qd8_f32_qc8w", "QS8": "qs8", "QU8": "qu8", "QC4": "qd8_f32_qc4w"}[DATATYPE]
+$REQUANTIZATION_SPEC = "" if DATATYPE in ["QD8", "QC4"] else "_" + REQUANTIZATION.lower()
+$PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar" if REQUANTIZATION else "scalar"
+$PARAMS_TYPE = {"QC8": "union xnn_qs8_qc8w_conv_minmax_params", "QS8": "union xnn_qs8_conv_minmax_params", "QD8": "struct xnn_f32_minmax_params"}[DATATYPE]
+$OUT_T = "float" if DATATYPE in ["QD8", "QC4"] else "int8_t"
+
+// multiply vacc by vscale and return result as int
+// vacc is vector of int32
+// vscale is vector of floats
+// return is vector of int
+#if __HVX_ARCH__ >= 73
+static XNN_INLINE HVX_Vector rescale_fp32(HVX_Vector vacc, HVX_Vector vscale)
+{
+  const HVX_Vector vaccf = Q6_Vsf_equals_Vw(vacc);
+  const HVX_Vector vscaledqf = Q6_Vqf32_vmpy_VsfVsf(vaccf, vscale);
+
+  // Create a vector of `0.5f` with the same sign as the entries of `a`.
+  const HVX_Vector vhalf = Q6_V_vsplat_R(float_as_uint32(0.5f));
+  const HVX_Vector vsign_mask = Q6_V_vsplat_R(0x80000000);
+  const HVX_Vector vsigned_half = Q6_V_vor_VV(Q6_V_vand_VV(vaccf, vsign_mask), vhalf);
+  const HVX_Vector vresult = Q6_Vw_equals_Vsf(Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(vscaledqf, vsigned_half)));
+  return vresult;
+}
+#else
+static HVX_Vector rescale_fp32(HVX_Vector vacc, HVX_Vector vscale)
+{
+  XNN_ALIGN(128) int32_t vacc_buffer[32];
+  XNN_ALIGN(128) float vscale_buffer[32];
+
+  *((HVX_Vector *)&vacc_buffer) = vacc;
+  *((HVX_Vector *)&vscale_buffer) = vscale;
+
+  for (int i = 0; i < 32; ++i) {
+    vacc_buffer[i] = (int32_t)lrintf((float)vacc_buffer[i] * vscale_buffer[i]);
+  }
+  return *(HVX_Vector *)&vacc_buffer;
+}
+#endif  // __HVX_ARCH__ >= 73
+
+void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c4__hvx(
+    size_t mr,
+    size_t nc,
+    size_t kc,
+    const int8_t* restrict a,
+    size_t a_stride,
+    const void* restrict w,
+    ${OUT_T}* restrict c,
+    size_t cm_stride,
+    size_t cn_stride,
+    const ${PARAMS_TYPE} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+{
+  assert(mr != 0);
+  assert(mr <= ${MR});
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(kc % sizeof(int8_t) == 0);
+  assert(a != NULL);
+  assert(w != NULL);
+  assert(c != NULL);
+
+  kc = round_up_po2(kc, 4 * sizeof(int8_t));
+  const int8_t* a0 = a;
+  ${OUT_T}* c0 = c;
+  $for M in range(1, MR):
+    const int8_t* a${M} = (const int8_t*) ((uintptr_t) a${M-1} + a_stride);
+    ${OUT_T}* c${M} = (${OUT_T}*) ((uintptr_t) c${M-1} + cm_stride);
+    $if M % 2 == 0:
+      if XNN_UNPREDICTABLE(mr <= ${M}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+    $elif M + 1 == MR:
+      if XNN_UNPREDICTABLE(mr != ${M+1}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+    $else:
+      if XNN_UNPREDICTABLE(mr < ${M+1}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+
+  const HVX_Vector voutput_zero_point = Q6_Vh_vsplat_R(params->${PARAMS_STRUCT}.output_zero_point);
+  const HVX_Vector voutput_min = Q6_Vb_vsplat_R(params->${PARAMS_STRUCT}.output_min);
+  const HVX_Vector voutput_max = Q6_Vb_vsplat_R(params->${PARAMS_STRUCT}.output_max);
+
+  do {
+    $for N in range(0, NR, 32):
+      HVX_Vector vacc0x${N//32} = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+    $for M in range(1, MR):
+      $for N in range(0, NR, 32):
+        HVX_Vector vacc${M}x${N//32} = vacc0x${N//32};
+
+    size_t k = kc;
+    for (; k >= 4 * sizeof(int8_t); k -= 4 * sizeof(int8_t)) {
+      $for M in range(MR):
+        const HVX_Vector va${M}x0123 = Q6_V_vsplat_R(unaligned_load_s32(a${M})); a${M} += 4;
+
+      $for N in range(0, NR, 32):
+        const HVX_Vector vb${N//32}x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+
+      $for M in range(MR):
+        $for N in range(0, NR, 32):
+          vacc${M}x${N//32} = Q6_Vw_vrmpyacc_VwVbVb(vacc${M}x${N//32}, va${M}x0123, vb${N//32}x0123);
+    }
+
+    $for N in range(0, NR, 32):
+      const HVX_Vector vscale${N//32} = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+      $for M in range(MR):
+        vacc${M}x${N//32} = rescale_fp32(vacc${M}x${N//32}, vscale${N//32});
+
+    $for M in range(MR):
+      $for N in range(0, NR, 64):
+        $if N + 32 < NR:
+          HVX_Vector vout${M}x${N//64} = Q6_Vh_vpack_VwVw_sat(vacc${M}x${N//32+1}, vacc${M}x${N//32});
+        $else:
+          HVX_Vector vout${M}x${N//64} = Q6_Vh_vpack_VwVw_sat(vacc${M}x${N//32}, vacc${M}x${N//32});
+
+    $for M in range(MR):
+      $for N in range(0, NR, 64):
+        vout${M}x${N//64} = Q6_Vh_vadd_VhVh_sat(vout${M}x${N//64}, voutput_zero_point);
+
+    $for M in range(MR):
+      $if NR > 64:
+        HVX_Vector vout${M} = Q6_Vb_vpack_VhVh_sat(vout${M}x1, vout${M}x0);
+      $else:
+        HVX_Vector vout${M} = Q6_Vb_vpack_VhVh_sat(vout${M}x0, vout${M}x0);
+
+    $for M in range(MR):
+      vout${M} = Q6_Vb_vmax_VbVb(vout${M}, voutput_min);
+
+    $for M in range(MR):
+      vout${M} = Q6_Vb_vmin_VbVb(vout${M}, voutput_max);
+
+    if XNN_LIKELY(nc >= ${NR}) {
+      $for M in range(MR):
+        $if NR == 128:
+          *((HVX_UVector *)c${M}) = vout${M};
+        $else:
+          Q6_V_vstu_variable(c${M}, ${NR}, vout${M});
+        c${M} = (${OUT_T}*) ((uintptr_t) c${M} + cn_stride);
+        a${M} = (const int8_t*) ((uintptr_t) a${M} - kc);
+
+      nc -= ${NR};
+    } else {
+      // Prepare mask for valid 8-bit elements (depends on nc).
+      $for M in range(MR):
+        Q6_V_vstu_variable(c${M}, nc, vout${M});
+      nc = 0;
+    }
+  } while (nc != 0);
+}

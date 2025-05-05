@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -9,11 +10,11 @@
 
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/reduce.h"
-#include "reduce-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/reduce.h"
+#include "test/reduce-microkernel-tester.h"
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
@@ -1544,3 +1545,188 @@ TEST(F32_RMAX__SCALAR_U4_ACC4, batch_gt_4) {
     }
   }
 #endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  TEST(F32_RMAX__HVX_U32, batch_eq_32) {
+    TEST_REQUIRES_HVX;
+    ReduceMicrokernelTester()
+      .batch_size(32)
+      .Test(xnn_f32_rmax_ukernel__hvx_u32, ReduceMicrokernelTester::OpType::Max);
+  }
+
+  TEST(F32_RMAX__HVX_U32, batch_div_32) {
+    TEST_REQUIRES_HVX;
+    for (size_t batch_size = 64; batch_size < 320; batch_size += 32) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_rmax_ukernel__hvx_u32, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F32_RMAX__HVX_U32, batch_lt_32) {
+    TEST_REQUIRES_HVX;
+    for (size_t batch_size = 1; batch_size < 32; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_rmax_ukernel__hvx_u32, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F32_RMAX__HVX_U32, batch_gt_32) {
+    TEST_REQUIRES_HVX;
+    for (size_t batch_size = 33; batch_size < 64; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_rmax_ukernel__hvx_u32, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  TEST(F32_RMAX__HVX_U64_ACC2, batch_eq_64) {
+    TEST_REQUIRES_HVX;
+    ReduceMicrokernelTester()
+      .batch_size(64)
+      .Test(xnn_f32_rmax_ukernel__hvx_u64_acc2, ReduceMicrokernelTester::OpType::Max);
+  }
+
+  TEST(F32_RMAX__HVX_U64_ACC2, batch_div_64) {
+    TEST_REQUIRES_HVX;
+    for (size_t batch_size = 128; batch_size < 640; batch_size += 64) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_rmax_ukernel__hvx_u64_acc2, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F32_RMAX__HVX_U64_ACC2, batch_lt_64) {
+    TEST_REQUIRES_HVX;
+    for (size_t batch_size = 1; batch_size < 64; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_rmax_ukernel__hvx_u64_acc2, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F32_RMAX__HVX_U64_ACC2, batch_gt_64) {
+    TEST_REQUIRES_HVX;
+    for (size_t batch_size = 65; batch_size < 128; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_rmax_ukernel__hvx_u64_acc2, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  TEST(F32_RMAX__HVX_U96_ACC3, batch_eq_96) {
+    TEST_REQUIRES_HVX;
+    ReduceMicrokernelTester()
+      .batch_size(96)
+      .Test(xnn_f32_rmax_ukernel__hvx_u96_acc3, ReduceMicrokernelTester::OpType::Max);
+  }
+
+  TEST(F32_RMAX__HVX_U96_ACC3, batch_div_96) {
+    TEST_REQUIRES_HVX;
+    for (size_t batch_size = 192; batch_size < 960; batch_size += 96) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_rmax_ukernel__hvx_u96_acc3, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F32_RMAX__HVX_U96_ACC3, batch_lt_96) {
+    TEST_REQUIRES_HVX;
+    for (size_t batch_size = 1; batch_size < 96; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_rmax_ukernel__hvx_u96_acc3, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F32_RMAX__HVX_U96_ACC3, batch_gt_96) {
+    TEST_REQUIRES_HVX;
+    for (size_t batch_size = 97; batch_size < 192; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_rmax_ukernel__hvx_u96_acc3, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  TEST(F32_RMAX__HVX_U128_ACC2, batch_eq_128) {
+    TEST_REQUIRES_HVX;
+    ReduceMicrokernelTester()
+      .batch_size(128)
+      .Test(xnn_f32_rmax_ukernel__hvx_u128_acc2, ReduceMicrokernelTester::OpType::Max);
+  }
+
+  TEST(F32_RMAX__HVX_U128_ACC2, batch_div_128) {
+    TEST_REQUIRES_HVX;
+    for (size_t batch_size = 256; batch_size < 1280; batch_size += 128) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_rmax_ukernel__hvx_u128_acc2, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F32_RMAX__HVX_U128_ACC2, batch_lt_128) {
+    TEST_REQUIRES_HVX;
+    for (size_t batch_size = 1; batch_size < 128; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_rmax_ukernel__hvx_u128_acc2, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F32_RMAX__HVX_U128_ACC2, batch_gt_128) {
+    TEST_REQUIRES_HVX;
+    for (size_t batch_size = 129; batch_size < 256; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_rmax_ukernel__hvx_u128_acc2, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
+
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+  TEST(F32_RMAX__HVX_U128_ACC4, batch_eq_128) {
+    TEST_REQUIRES_HVX;
+    ReduceMicrokernelTester()
+      .batch_size(128)
+      .Test(xnn_f32_rmax_ukernel__hvx_u128_acc4, ReduceMicrokernelTester::OpType::Max);
+  }
+
+  TEST(F32_RMAX__HVX_U128_ACC4, batch_div_128) {
+    TEST_REQUIRES_HVX;
+    for (size_t batch_size = 256; batch_size < 1280; batch_size += 128) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_rmax_ukernel__hvx_u128_acc4, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F32_RMAX__HVX_U128_ACC4, batch_lt_128) {
+    TEST_REQUIRES_HVX;
+    for (size_t batch_size = 1; batch_size < 128; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_rmax_ukernel__hvx_u128_acc4, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+
+  TEST(F32_RMAX__HVX_U128_ACC4, batch_gt_128) {
+    TEST_REQUIRES_HVX;
+    for (size_t batch_size = 129; batch_size < 256; batch_size++) {
+      ReduceMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f32_rmax_ukernel__hvx_u128_acc4, ReduceMicrokernelTester::OpType::Max);
+    }
+  }
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON

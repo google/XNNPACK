@@ -6,13 +6,13 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/config.h"
-#include "xnnpack/init-once.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/transpose.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/config.h"
+#include "src/xnnpack/init-once.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/transpose.h"
+#include "src/xnnpack/vunary.h"
 
 static struct xnn_transpose_config transpose_config = {0};
 
@@ -197,7 +197,7 @@ static void init_transpose_config(void) {
       .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x24_transposec_ukernel__1x2_scalar,
       .tile_size = 32,
     };
-    #if XNN_ENABLE_RISCV_VECTOR
+    #if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
       const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
       assert(hardware_config != NULL);
       if (hardware_config->vlenb >= 128) {
@@ -226,6 +226,11 @@ static void init_transpose_config(void) {
           .tile_size = 32,
         };
       }
+    #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+      transpose_config.x32 = (struct xnn_transpose_subconfig) {
+        .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x32_transposec_ukernel__32x32_multi_multi_hvx,
+        .tile_size = 32,
+      };
     #else
       transpose_config.x32 = (struct xnn_transpose_subconfig) {
         .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x32_transposec_ukernel__2x4_scalar_int,

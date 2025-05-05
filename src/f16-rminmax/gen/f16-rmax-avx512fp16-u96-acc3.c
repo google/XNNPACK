@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-rminmax/avx512fp16.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
 
 
 void xnn_f16_rmax_ukernel__avx512fp16_u96_acc3(
@@ -28,7 +29,8 @@ void xnn_f16_rmax_ukernel__avx512fp16_u96_acc3(
 
 #if defined(__AVX512FP16__)
   const uint16_t* i = (const uint16_t*) input;
-  __m512h vmax0 = _mm512_castsi512_ph(_mm512_set1_epi16(*i));
+  uint16_t* o = (uint16_t*) output;
+  __m512h vmax0 = _mm512_castsi512_ph(_mm512_set1_epi16(o[0]));
   __m512h vmax1 = vmax0;
   __m512h vmax2 = vmax0;
   for (; batch >= 96 * sizeof(uint16_t); batch -= 96 * sizeof(uint16_t)) {

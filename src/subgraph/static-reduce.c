@@ -9,13 +9,13 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "xnnpack.h"
-#include "xnnpack/log.h"
-#include "xnnpack/node-type.h"
-#include "xnnpack/operator.h"
-#include "xnnpack/subgraph-validation.h"
-#include "xnnpack/subgraph.h"
-#include "pthreadpool.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/log.h"
+#include "src/xnnpack/node-type.h"
+#include "src/xnnpack/operator.h"
+#include "src/xnnpack/subgraph-validation.h"
+#include "src/xnnpack/subgraph.h"
+#include <pthreadpool.h>
 
 static const size_t NCHW_AXES_MAPPING[4] = {0, 2, 3, 1};
 static const size_t INVERSE_NCHW_AXES_MAPPING[4] = {0, 3, 2, 1};
@@ -240,7 +240,11 @@ static enum xnn_status setup_reduce_operator(
   void* output_data = output_value->data;
   assert(output_data != NULL);
 
-  void* workspace = input_value->datatype != xnn_datatype_fp32 ? opdata->workspace : NULL;
+  const bool is_minmax = (opdata->type == xnn_node_type_static_reduce_min ||
+                          opdata->type == xnn_node_type_static_reduce_max);
+  void* workspace =
+      (input_value->datatype != xnn_datatype_fp32 && !is_minmax)
+      ? opdata->workspace : NULL;
 
   return xnn_setup_reduce_nd(opdata->operator_objects[0], workspace, input_data, output_data);
 }

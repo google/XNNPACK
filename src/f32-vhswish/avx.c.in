@@ -5,13 +5,12 @@
 
 $assert BATCH_TILE % 8 == 0
 $assert BATCH_TILE >= 8
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
 #include <immintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vunary.h"
 
 
 $ISA = {0: "avx", 3: "fma3"}[FMA]
@@ -40,33 +39,31 @@ void xnn_f32_vhswish_ukernel__${ISA}_u${BATCH_TILE}(
 
   $if BATCH_TILE > 8:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
-      const __m256 vx${ABC[0:8]} = _mm256_loadu_ps(input);
-      $for N in range(8, BATCH_TILE, 8):
-        const __m256 vx${ABC[N:N+8]} = _mm256_loadu_ps(input + ${N});
+      $for N in range(0, BATCH_TILE, 8):
+        const __m256 vx${N//8} = _mm256_loadu_ps(input + ${N});
       input += ${BATCH_TILE};
 
       $if FMA == 3:
         $for N in range(0, BATCH_TILE, 8):
-          __m256 vacc${ABC[N:N+8]} = _mm256_fmadd_ps(vx${ABC[N:N+8]}, vsixth, vhalf);
+          __m256 vacc${N//8} = _mm256_fmadd_ps(vx${N//8}, vsixth, vhalf);
       $else:
         $for N in range(0, BATCH_TILE, 8):
-          __m256 vacc${ABC[N:N+8]} = _mm256_mul_ps(vx${ABC[N:N+8]}, vsixth);
+          __m256 vacc${N//8} = _mm256_mul_ps(vx${N//8}, vsixth);
 
         $for N in range(0, BATCH_TILE, 8):
-          vacc${ABC[N:N+8]} = _mm256_add_ps(vacc${ABC[N:N+8]}, vhalf);
+          vacc${N//8} = _mm256_add_ps(vacc${N//8}, vhalf);
 
       $for N in range(0, BATCH_TILE, 8):
-        vacc${ABC[N:N+8]} = _mm256_max_ps(vacc${ABC[N:N+8]}, vzero);
+        vacc${N//8} = _mm256_max_ps(vacc${N//8}, vzero);
 
       $for N in range(0, BATCH_TILE, 8):
-        vacc${ABC[N:N+8]} = _mm256_min_ps(vacc${ABC[N:N+8]}, vone);
+        vacc${N//8} = _mm256_min_ps(vacc${N//8}, vone);
 
       $for N in range(0, BATCH_TILE, 8):
-        vacc${ABC[N:N+8]} = _mm256_mul_ps(vacc${ABC[N:N+8]}, vx${ABC[N:N+8]});
+        vacc${N//8} = _mm256_mul_ps(vacc${N//8}, vx${N//8});
 
-      _mm256_storeu_ps(output, vacc${ABC[0:8]});
-      $for N in range(8, BATCH_TILE, 8):
-        _mm256_storeu_ps(output + ${N}, vacc${ABC[N:N+8]});
+      $for N in range(0, BATCH_TILE, 8):
+        _mm256_storeu_ps(output + ${N}, vacc${N//8});
       output += ${BATCH_TILE};
     }
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {

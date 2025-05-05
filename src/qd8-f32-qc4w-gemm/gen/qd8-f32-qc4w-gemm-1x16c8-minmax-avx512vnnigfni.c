@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-gemm/MRx16c8-avx512vnni.c.in
 //   Generator: tools/xngen
@@ -11,11 +12,11 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/gemm.h"
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/math.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/unaligned.h"
 
 
 void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c8__avx512vnnigfni(
@@ -44,9 +45,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c8__avx512vnnigfni(
   const int8_t* a0 = a;
   float* c0 = c;
 
-  const __m512i vsign_mask = _mm512_set1_epi8(0x80);
-  XNN_FORCE_REALIZATION(vsign_mask);
-  const __m512i vinput_zero_point0 = _mm512_set1_epi32((int) quantization_params[0].zero_point + 128);
+  const __m512i vinput_zero_point0 = _mm512_set1_epi32((int) quantization_params[0].zero_point);
   const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
   const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
   // XNN_FORCE_REALIZATION(voutput_min);
@@ -66,8 +65,8 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c8__avx512vnnigfni(
 
     size_t k = kc;
     while (k >= 16 * sizeof(int8_t)) {
-      const __m512i va0x01234567 = _mm512_xor_epi64(_mm512_set1_epi64((int64_t) unaligned_load_u64(a0)), vsign_mask);
-      const __m512i va0x89ABCDEF = _mm512_xor_epi64(_mm512_set1_epi64((int64_t) unaligned_load_u64(a0 + 8)), vsign_mask);
+      const __m512i va0x01234567 = _mm512_set1_epi64((int64_t) unaligned_load_u64(a0));
+      const __m512i va0x89ABCDEF = _mm512_set1_epi64((int64_t) unaligned_load_u64(a0 + 8));
       a0 += 16;
 
       const __m512i vbb01234567x01234567 = _mm512_load_si512(w);
@@ -87,7 +86,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c8__avx512vnnigfni(
     }
 
     if (k != 0) {
-      const __m512i va0x01234567 = _mm512_xor_epi64(_mm512_set1_epi64((int64_t) unaligned_load_u64(a0)), vsign_mask);
+      const __m512i va0x01234567 = _mm512_set1_epi64((int64_t) unaligned_load_u64(a0));
       a0 += 8;
 
       const __m512i vbb01234567x01234567 = _mm512_load_si512(w);

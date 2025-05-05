@@ -10,35 +10,26 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "xnnpack.h"
-#include "xnnpack/allocator.h"
-#include "xnnpack/common.h"
-#include "xnnpack/compute.h"
-#include "xnnpack/config-types.h"
-#include "xnnpack/config.h"
-#include "xnnpack/indirection.h"
-#include "xnnpack/log.h"
-#include "xnnpack/math.h"
-#include "xnnpack/operator-type.h"
-#include "xnnpack/operator.h"
-#include "xnnpack/params.h"
-#include "pthreadpool.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/allocator.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/compute.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/config.h"
+#include "src/xnnpack/indirection.h"
+#include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/operator-type.h"
+#include "src/xnnpack/operator-utils.h"
+#include "src/xnnpack/operator.h"
+#include "src/xnnpack/params.h"
+#include <pthreadpool.h>
 
 static inline size_t compute_output_dimension(
     size_t padded_input_dimension,
     size_t kernel_dimension)
 {
   return padded_input_dimension / kernel_dimension;
-}
-
-static const struct xnn_argmaxpool_config* select_ukernel(
-    size_t pooling_size,
-    const struct xnn_argmaxpool_config* ukernel)
-{
-  while (ukernel->remainder_pass_tile_size == 0 && ukernel->first_pass_tile_size < pooling_size) {
-    ukernel++;
-  }
-  return ukernel;
 }
 
 enum xnn_status xnn_create_argmax_pooling2d_nhwc_f32(
@@ -78,13 +69,6 @@ enum xnn_status xnn_create_argmax_pooling2d_nhwc_f32(
       "failed to create %s operator with %" PRIu32 "x%" PRIu32 " pooling size: "
       "pooling size dimensions must be non-zero",
       xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32), pooling_width, pooling_height);
-    goto error;
-  }
-
-  if (pooling_size == 1) {
-    xnn_log_error(
-      "failed to create %s operator with 1 pooling element: 1x1 pooling is meaningless",
-      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32));
     goto error;
   }
 
@@ -144,16 +128,16 @@ enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
     size_t channels,
     size_t input_pixel_stride,
     size_t output_pixel_stride,
-    size_t* workspace_size,
-    size_t* workspace_alignment,
     size_t* output_height_out,
     size_t* output_width_out,
     pthreadpool_t threadpool)
 {
   if (argmax_pooling_op->type != xnn_operator_type_argmax_pooling_nhwc_f32) {
-    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32),
-      xnn_operator_type_to_string(argmax_pooling_op->type));
+    xnn_log_error(
+        "failed to reshape operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32),
+        xnn_operator_type_to_string_v2(argmax_pooling_op));
     return xnn_status_invalid_parameter;
   }
   argmax_pooling_op->state = xnn_run_state_invalid;
@@ -238,14 +222,11 @@ enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
   }
   const size_t pooling_size = pooling_height * pooling_width;
   const struct xnn_argmaxpool_config* argmaxpool_config = argmax_pooling_op->argmaxpool_config;
-  const struct xnn_argmaxpool_config* ukernel = select_ukernel(pooling_size, argmaxpool_config);
-  const uint32_t first_pass_tile_size = ukernel->first_pass_tile_size;
 
   const size_t step_width = pooling_width;
   const size_t step_height = pooling_size + (output_width - 1) * step_width * pooling_height;
 
-  // Micro-kernel may read up to (first_pass_tile_size - 1) elements after the end of indirection buffer.
-  const size_t indirection_buffer_size = sizeof(void*) * ((first_pass_tile_size - 1) + output_height * step_height);
+  const size_t indirection_buffer_size = sizeof(void*) * (output_height * step_height);
 
   // Allocate indirection buffer as size is known here. We initialize the buffer in setup, when input pointer is known.
   const void** indirection_buffer =
@@ -262,11 +243,10 @@ enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
 
   const size_t indirect_input_height_stride = step_height * sizeof(void*);
   const size_t output_width_stride = output_pixel_stride * sizeof(float);
+  const size_t index_width_stride = channels * sizeof(uint32_t);
   const size_t output_height_stride = output_width * output_width_stride;
-  const size_t index_height_stride = output_width * channels * sizeof(uint32_t);
+  const size_t index_height_stride = output_width * index_width_stride;
 
-  const uint32_t remainder_pass_tile_size = ukernel->remainder_pass_tile_size;
-  const size_t multipass_adjustment = remainder_pass_tile_size == 0 ? 0 : round_up(pooling_size - first_pass_tile_size, remainder_pass_tile_size) + first_pass_tile_size - remainder_pass_tile_size;
   argmax_pooling_op->context.argmax_pooling = (struct argmax_pooling_context) {
     .indirect_input = argmax_pooling_op->indirection_buffer,
     .indirect_input_height_stride = indirect_input_height_stride,
@@ -279,46 +259,16 @@ enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
     .index_height_stride = index_height_stride,
     .pooling_size = pooling_size,
     .channels = channels,
-    .input_increment = (pooling_height * step_width - multipass_adjustment) * sizeof(void*),
-    .output_increment = output_width_stride - channels * sizeof(float),
+    .input_increment = (pooling_height * step_width) * sizeof(void*),
+    .output_increment = output_width_stride,
+    .index_increment = index_width_stride,
   };
   argmax_pooling_op->compute[0].range[0] = batch_size;
   argmax_pooling_op->compute[0].range[1] = output_height;
 
-  if (pooling_size <= first_pass_tile_size) {
-    *workspace_size = 0;
-    *workspace_alignment = 1;
-    argmax_pooling_op->compute[0].type = xnn_parallelization_type_2d;
-    argmax_pooling_op->context.argmax_pooling.unipass_ukernel = ukernel->up;
-    argmax_pooling_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_argmax_pooling_unipass;
-  } else {
-    const size_t accumulation_buffer_size =
-      round_up_po2((channels + XNN_MULTIPASS_EXTRA_BYTES / sizeof(float)) * sizeof(float), XNN_ALLOCATION_ALIGNMENT);
-    const size_t index_buffer_size =
-      round_up_po2((channels + XNN_MULTIPASS_EXTRA_BYTES / sizeof(float)) * sizeof(uint32_t), XNN_ALLOCATION_ALIGNMENT);
-    const size_t accumulation_and_index_buffer_size = accumulation_buffer_size + index_buffer_size;
-
-    argmax_pooling_op->context.argmax_pooling.accumulation_buffer_size = accumulation_buffer_size;
-    argmax_pooling_op->context.argmax_pooling.accumulation_and_index_buffer_size = accumulation_and_index_buffer_size;
-
-    const size_t num_threads = pthreadpool_get_threads_count(threadpool);
-    const bool use_threads_workspace = num_threads < batch_size * output_height;
-
-    if (use_threads_workspace) {
-      *workspace_size = num_threads * accumulation_and_index_buffer_size;
-      *workspace_alignment = XNN_ALLOCATION_ALIGNMENT;
-      argmax_pooling_op->compute[0].type = xnn_parallelization_type_2d_with_thread;
-      argmax_pooling_op->compute[0].task_2d_with_thread =
-        (pthreadpool_task_2d_with_thread_t) xnn_compute_argmax_pooling_multipass_with_thread;
-    } else {
-      *workspace_size = batch_size * output_height * accumulation_and_index_buffer_size;
-      *workspace_alignment = XNN_ALLOCATION_ALIGNMENT;
-      argmax_pooling_op->compute[0].type = xnn_parallelization_type_2d;
-      argmax_pooling_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_argmax_pooling_multipass;
-    }
-
-    argmax_pooling_op->context.argmax_pooling.multipass_ukernel = ukernel->mp;
-  }
+  argmax_pooling_op->compute[0].type = xnn_parallelization_type_2d;
+  argmax_pooling_op->context.argmax_pooling.ukernel = argmaxpool_config->ukernel;
+  argmax_pooling_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_argmax_pooling;
   argmax_pooling_op->state = xnn_run_state_needs_setup;
 
   return xnn_status_success;
@@ -326,15 +276,16 @@ enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
 
 enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
     xnn_operator_t argmax_pooling_op,
-    void* workspace,
     const float* input,
     float* output,
     uint32_t* index)
 {
   if (argmax_pooling_op->type != xnn_operator_type_argmax_pooling_nhwc_f32) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32),
-      xnn_operator_type_to_string(argmax_pooling_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32),
+        xnn_operator_type_to_string_v2(argmax_pooling_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -343,8 +294,8 @@ enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
       return xnn_status_success;
     case xnn_run_state_invalid:
       xnn_log_error(
-        "failed to setup %s operator: operator has not been reshaped yet",
-        xnn_operator_type_to_string(argmax_pooling_op->type));
+          "failed to setup %s operator: operator has not been reshaped yet",
+          xnn_operator_type_to_string_v2(argmax_pooling_op));
       return xnn_status_invalid_state;
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.
@@ -358,13 +309,6 @@ enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
   argmax_pooling_op->context.argmax_pooling.output = output;
   argmax_pooling_op->context.argmax_pooling.index = index;
 
-  if ((argmax_pooling_op->context.argmax_pooling.accumulation_buffer_size != 0) && workspace == NULL) {
-    xnn_log_error(
-        "failed to setup %s operator: workspace is NULL",
-        xnn_operator_type_to_string(argmax_pooling_op->type));
-  }
-  argmax_pooling_op->context.argmax_pooling.multipass_buffer = workspace;
-
   const size_t pooling_height = argmax_pooling_op->kernel_height;
   const size_t pooling_width = argmax_pooling_op->kernel_width;
   const size_t pooling_size = pooling_height * pooling_width;
@@ -373,7 +317,16 @@ enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
   const size_t step_width = pooling_width;
   const size_t step_height = pooling_size + (output_width - 1) * step_width * pooling_height;
 
-  xnn_indirection_init_maxpool2d(argmax_pooling_op, step_height, step_width, /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT);
+  xnn_indirection_init_maxpool2d(
+    argmax_pooling_op->indirection_buffer, argmax_pooling_op->input,
+    argmax_pooling_op->input_pixel_stride << XNN_LOG2_SIZEOF_FLOAT,
+    argmax_pooling_op->input_height, argmax_pooling_op->input_width,
+    argmax_pooling_op->output_height, argmax_pooling_op->output_width,
+    argmax_pooling_op->kernel_height, argmax_pooling_op->kernel_width,
+    argmax_pooling_op->stride_height, argmax_pooling_op->stride_width,
+    argmax_pooling_op->dilation_height, argmax_pooling_op->dilation_width,
+    argmax_pooling_op->padding_top, argmax_pooling_op->padding_left,
+    step_height, step_width);
 
   argmax_pooling_op->context.argmax_pooling.indirect_input = argmax_pooling_op->indirection_buffer,
 

@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-gemm/1x8-aarch64-neonfma-ld128.S.in
 //   Generator: tools/xngen
@@ -7,7 +8,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack/assembly.h"
+#include "src/xnnpack/assembly.h"
 
 # void xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128(
 #     size_t mr,                (x0) - unused.  mr = 1

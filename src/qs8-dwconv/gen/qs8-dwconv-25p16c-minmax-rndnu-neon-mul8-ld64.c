@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-dwconv/unipass-neon-mul8.c.in
 //   Generator: tools/xngen
@@ -11,7 +12,7 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/dwconv.h"
+#include "src/xnnpack/dwconv.h"
 
 
 void xnn_qs8_dwconv_minmax_rndnu_ukernel_25p16c__neon_mul8_ld64(
@@ -23,18 +24,19 @@ void xnn_qs8_dwconv_minmax_rndnu_ukernel_25p16c__neon_mul8_ld64(
     intptr_t input_stride,
     size_t output_increment,
     size_t input_offset,
+    size_t input_pixel_stride,
     const int8_t* zero,
     const union xnn_qs8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(channels != 0);
   assert(output_width != 0);
 
-  const int32x4_t vright_pre_shift = vld1q_dup_s32(&params->rndnu_neon.right_pre_shift);
-  const int32x4_t vmultiplier = vld1q_dup_s32(&params->rndnu_neon.multiplier);
-  const int32x4_t vright_post_shift = vld1q_dup_s32(&params->rndnu_neon.right_post_shift);
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->rndnu_neon.output_zero_point);
-  const int8x16_t voutput_min = vld1q_dup_s8(&params->rndnu_neon.output_min);
-  const int8x16_t voutput_max = vld1q_dup_s8(&params->rndnu_neon.output_max);
+  const int32x4_t vright_pre_shift = vdupq_n_s32(params->rndnu_neon.right_pre_shift);
+  const int32x4_t vmultiplier = vdupq_n_s32(params->rndnu_neon.multiplier);
+  const int32x4_t vright_post_shift = vdupq_n_s32(params->rndnu_neon.right_post_shift);
+  const int16x8_t voutput_zero_point = vdupq_n_s16(params->rndnu_neon.output_zero_point);
+  const int8x16_t voutput_min = vdupq_n_s8(params->rndnu_neon.output_min);
+  const int8x16_t voutput_max = vdupq_n_s8(params->rndnu_neon.output_max);
   do {
     const int8_t* i0 = input[0];
     assert(i0 != NULL);
@@ -733,6 +735,7 @@ void xnn_qs8_dwconv_minmax_rndnu_ukernel_25p16c__neon_mul8_ld64(
       } while (c != 0);
     }
 
+    input_offset += input_pixel_stride;
     output = (int8_t*) ((uintptr_t) output + output_increment);
   } while (--output_width != 0);
 }

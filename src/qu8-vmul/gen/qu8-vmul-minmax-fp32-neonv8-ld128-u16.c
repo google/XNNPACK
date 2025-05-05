@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-vmul/neon.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/vbinary.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/vbinary.h"
 
 
 void xnn_qu8_vmul_minmax_fp32_ukernel__neonv8_ld128_u16(
@@ -29,16 +30,16 @@ void xnn_qu8_vmul_minmax_fp32_ukernel__neonv8_ld128_u16(
   assert(output != NULL);
 
   #if XNN_ARCH_ARM64
-    const uint8x16_t va_zero_point = vld1q_dup_u8(&params->scalar.a_zero_point);
-    const uint8x16_t vb_zero_point = vld1q_dup_u8(&params->scalar.b_zero_point);
+    const uint8x16_t va_zero_point = vdupq_n_u8(params->scalar.a_zero_point);
+    const uint8x16_t vb_zero_point = vdupq_n_u8(params->scalar.b_zero_point);
   #else
-    const uint8x8_t va_zero_point = vld1_dup_u8(&params->scalar.a_zero_point);
-    const uint8x8_t vb_zero_point = vld1_dup_u8(&params->scalar.b_zero_point);
+    const uint8x8_t va_zero_point = vdup_n_u8(params->scalar.a_zero_point);
+    const uint8x8_t vb_zero_point = vdup_n_u8(params->scalar.b_zero_point);
   #endif
-  const float32x4_t vscale = vld1q_dup_f32(&params->scalar.scale);
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->scalar.output_zero_point);
-  const uint8x16_t voutput_min = vld1q_dup_u8(&params->scalar.output_min);
-  const uint8x16_t voutput_max = vld1q_dup_u8(&params->scalar.output_max);
+  const float32x4_t vscale = vdupq_n_f32(params->scalar.scale);
+  const int16x8_t voutput_zero_point = vdupq_n_s16(params->scalar.output_zero_point);
+  const uint8x16_t voutput_min = vdupq_n_u8(params->scalar.output_min);
+  const uint8x16_t voutput_max = vdupq_n_u8(params->scalar.output_max);
 
   for (; batch >= 16 * sizeof(uint8_t); batch -= 16 * sizeof(uint8_t)) {
     const uint8x16_t va0123456789ABCDEF = vld1q_u8(input_a); input_a += 16;

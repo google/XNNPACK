@@ -94,4 +94,16 @@ tools/xngen src/f16-gemm/avx512fp16-broadcast.c.in -D MR=6 -D NR=64 -D DATATYPE=
 tools/xngen src/f16-gemm/avx512fp16-broadcast.c.in -D MR=7 -D NR=64 -D DATATYPE=F16 -o src/f16-gemm/gen/f16-gemm-7x64-minmax-avx512fp16-broadcast.c &
 tools/xngen src/f16-gemm/avx512fp16-broadcast.c.in -D MR=8 -D NR=64 -D DATATYPE=F16 -o src/f16-gemm/gen/f16-gemm-8x64-minmax-avx512fp16-broadcast.c &
 
+################################# WASM FP16 #################################
+### WASM FP16X8 micro-kernels
+tools/xngen src/f16-gemm/wasmrelaxedsimd-splat.c.in -D MR=1 -D NR=8 -D -o src/f16-gemm/gen/f16-gemm-1x8-minmax-wasmrelaxedsimd-splat.c &
+tools/xngen src/f16-gemm/wasmrelaxedsimd-splat.c.in -D MR=4 -D NR=8 -D -o src/f16-gemm/gen/f16-gemm-4x8-minmax-wasmrelaxedsimd-splat.c &
+tools/xngen src/f16-gemm/wasmrelaxedsimd-splat.c.in -D MR=6 -D NR=8 -D -o src/f16-gemm/gen/f16-gemm-6x8-minmax-wasmrelaxedsimd-splat.c &
+tools/xngen src/f16-gemm/wasmrelaxedsimd-splat.c.in -D MR=8 -D NR=8 -D -o src/f16-gemm/gen/f16-gemm-8x8-minmax-wasmrelaxedsimd-splat.c &
+
+tools/xngen src/f16-gemm/wasmrelaxedsimd-splat.c.in -D MR=1 -D NR=16 -D -o src/f16-gemm/gen/f16-gemm-1x16-minmax-wasmrelaxedsimd-splat.c &
+tools/xngen src/f16-gemm/wasmrelaxedsimd-splat.c.in -D MR=4 -D NR=16 -D -o src/f16-gemm/gen/f16-gemm-4x16-minmax-wasmrelaxedsimd-splat.c &
+tools/xngen src/f16-gemm/wasmrelaxedsimd-splat.c.in -D MR=6 -D NR=16 -D -o src/f16-gemm/gen/f16-gemm-6x16-minmax-wasmrelaxedsimd-splat.c &
+tools/xngen src/f16-gemm/wasmrelaxedsimd-splat.c.in -D MR=8 -D NR=16 -D -o src/f16-gemm/gen/f16-gemm-8x16-minmax-wasmrelaxedsimd-splat.c &
+
 wait

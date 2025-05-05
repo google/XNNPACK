@@ -1,9 +1,9 @@
 name: Run Linux and Windows (x86, x64) Tests with Intel SDE Processors
 
 env:
-  SDE_WINDOWS_URL: https://downloadmirror.intel.com/831748/sde-external-9.44.0-2024-08-22-win.tar.xz
-  SDE_LINUX_URL: https://downloadmirror.intel.com/831748/sde-external-9.44.0-2024-08-22-lin.tar.xz
-  
+  SDE_WINDOWS_URL: https://downloadmirror.intel.com/843185/sde-external-9.48.0-2024-11-25-win.tar.xz
+  SDE_LINUX_URL: https://downloadmirror.intel.com/843185/sde-external-9.48.0-2024-11-25-lin.tar.xz
+
 on:
   workflow_dispatch:
 
@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         arch: [windows-x86, windows-x64, linux-x86_64]
-        sde-processor: [snb, ivb, hsw, bdw, skl, cnl, icl, skx, clx, cpx, icx, tgl, adl, mtl, rpl, spr, emr, gnr, gnr256, srf, arl, lnl, future]
+        sde-processor: [slm, wsm, snb, ivb, hsw, bdw, skl, cnl, icl, skx, clx, cpx, icx, tgl, adl, mtl, rpl, spr, emr, gnr, gnr256, dmr, srf, arl, lnl, cwf]
     runs-on: ${{ matrix.arch == 'linux-x86_64' && 'ubuntu-latest' || 'windows-latest' }}
     needs: build
     continue-on-error: true
@@ -24,29 +24,32 @@ jobs:
     name: >
       (${{ matrix.arch }}, ${{ matrix.sde-processor }})
       - ${{ fromJson('{
-        "snb": {"main": "Sandy Bridge Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX"},
-        "ivb": {"main": "Ivy Bridge Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C "},
-        "hsw": {"main": "Haswell Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2"},
-        "bdw": {"main": "Broadwell Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2"},
-        "skl": {"main": "Skylake Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2"},
-        "cnl": {"main": "Cannon Lake Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512SKX, AVX256SKX, AVX512VBMI"},
-        "icl": {"main": "Ice Lake Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512SKX, AVX256SKX, AVX512VBMI, AVX512VNNI, AVX512VNNIGFNI"},
-        "skx": {"main": "Skylake Server Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512SKX, AVX256SKX"},
-        "clx": {"main": "Cascade Lake Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512SKX, AVX256SKX, AVX512VNNI"},
-        "cpx": {"main": "Cooper Lake Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512SKX, AVX256SKX, AVX512VNNI"},
-        "icx": {"main": "Ice Lake Server Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512SKX, AVX256SKX, AVX512VBMI, AVX512VNNI, AVX512VNNIGFNI"},
-        "tgl": {"main": "Tiger Lake Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2 AVX512F, AVX512SKX, AVX256SKX, AVX512VBMI, AVX512VNNI, AVX512VNNIGFNI"},
-        "adl": {"main": "Alder Lake Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVXVNNI, AVXVNNIINT8	"},
-        "mtl": {"main": "Meteor Lake Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVXVNNI, AVXVNNIINT8"},
-        "rpl": {"main": "Raptor Lake Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVXVNNI, AVXVNNIINT8"},
-        "spr": {"main": "Sapphire Rapids Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512FP16, AVX512SKX, AVX256SKX, AVX512VBMI, AVX512VNNI, AVX512VNNIGFNI, AVX256VNNI, AVX256VNNIGFNI, AVXVNNI, AVXVNNIINT8"},
-        "emr": {"main": "Emerald Rapids Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512FP16, AVX512SKX, AVX256SKX, AVX512VBMI, AVX512VNNI, AVX512VNNIGFNI, AVX256VNNI, AVX256VNNIGFNI, AVXVNNI,  AVXVNNIINT8"},
-        "gnr": {"main": "Granite Rapids Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512FP16, AVX512SKX, AVX256SKX, AVX512VBMI, AVX512VNNI, AVX512VNNIGFNI, AVX256VNNI, AVX256VNNIGFNI, AVXVNNI,  AVXVNNIINT8"},
-        "gnr256": {"main": "Granite Rapids (AVX 10.1/256VL) Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVX256SKX, AVX256VNNI, AVX256VNNIGFNI, AVXVNNI, AVXVNNIINT8"},
-        "srf": {"main": "Sierra Forest Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVXVNNI, AVXVNNIINT8"},
-        "arl": {"main": "Arrow Lake Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVXVNNI, AVXVNNIINT8"},
-        "lnl": {"main": "Lunar Lake Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVXVNNI, AVXVNNIINT8"},
-        "future": {"main": "Future Chip Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512FP16, AVX512SKX, AVX256SKX, AVX512VBMI, AVX512VNNI, AVX512VNNIGFNI, AVX256VNNI, AVX256VNNIGFNI, AVXVNNI,  AVXVNNIINT8"}
+        "slm": {"main": "Silvermont Processor - Supports SSE41"},
+        "wsm": {"main": "Westmere Processor - Supports SSE41"},
+        "snb": {"main": "Sandy Bridge Processor - Supports SSE41, AVX"},
+        "ivb": {"main": "Ivy Bridge Processor - Supports SSE41, AVX, F16C"},
+        "hsw": {"main": "Haswell Processor - Supports SSE41, AVX, F16C, FMA3, AVX2"},
+        "bdw": {"main": "Broadwell Processor - Supports SSE41, AVX, F16C, FMA3, AVX2"},
+        "skl": {"main": "Skylake Processor - Supports SSE41, AVX, F16C, FMA3, AVX2"},
+        "cnl": {"main": "Cannon Lake Processor - Supports SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512SKX, AVX256SKX, AVX512VBMI"},
+        "icl": {"main": "Ice Lake Processor - Supports SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512SKX, AVX256SKX, AVX512VBMI, AVX512VNNI, AVX512VNNIGFNI"},
+        "skx": {"main": "Skylake Server Processor - Supports SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512SKX, AVX256SKX"},
+        "clx": {"main": "Cascade Lake Processor - Supports SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512SKX, AVX256SKX, AVX512VNNI"},
+        "cpx": {"main": "Cooper Lake Processor - Supports SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512SKX, AVX256SKX, AVX512VNNI, AVX512BF16"},
+        "icx": {"main": "Ice Lake Server Processor - Supports SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512SKX, AVX256SKX, AVX512VBMI, AVX512VNNI, AVX512VNNIGFNI"},
+        "tgl": {"main": "Tiger Lake Processor - Supports SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512SKX, AVX256SKX, AVX512VBMI, AVX512VNNI, AVX512VNNIGFNI"},
+        "adl": {"main": "Alder Lake Processor - Supports SSE41, AVX, F16C, FMA3, AVX2, AVXVNNI, AVXVNNIINT8"},
+        "mtl": {"main": "Meteor Lake Processor - Supports SSE41, AVX, F16C, FMA3, AVX2, AVXVNNI, AVXVNNIINT8"},
+        "rpl": {"main": "Raptor Lake Processor - Supports SSE41, AVX, F16C, FMA3, AVX2, AVXVNNI, AVXVNNIINT8"},
+        "spr": {"main": "Sapphire Rapids Processor - Supports SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512FP16, AVX512SKX, AVX256SKX, AVX512VBMI, AVX512VNNI, AVX512VNNIGFNI, AVX256VNNI, AVX256VNNIGFNI, AVX512BF16, AVXVNNI, AVXVNNIINT8"},
+        "emr": {"main": "Emerald Rapids Processor - Supports SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512FP16, AVX512SKX, AVX256SKX, AVX512VBMI, AVX512VNNI, AVX512VNNIGFNI, AVX256VNNI, AVX256VNNIGFNI, AVX512BF16, AVXVNNI, AVXVNNIINT8"},
+        "gnr": {"main": "Granite Rapids Processor - Supports SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512FP16, AVX512SKX, AVX256SKX, AVX512VBMI, AVX512VNNI, AVX512VNNIGFNI, AVX256VNNI, AVX256VNNIGFNI, AVX512BF16, AVXVNNI, AVXVNNIINT8"},
+        "gnr256": {"main": "Granite Rapids (AVX 10.1/256VL) Processor - Supports SSE41, AVX, F16C, FMA3, AVX2, AVX256SKX, AVX256VNNI, AVX256VNNIGFNI, AVXVNNI, AVXVNNIINT8"},
+        "dmr": {"main": "Diamond Rapids Processor - Supports SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512FP16, AVX512SKX, AVX256SKX, AVX512VBMI, AVX512VNNI, AVX512VNNIGFNI, AVX256VNNI, AVX256VNNIGFNI, AVX512BF16, AVXVNNI, AVXVNNIINT8"},
+        "srf": {"main": "Sierra Forest Processor - Supports SSE41, AVX, F16C, FMA3, AVX2, AVXVNNI, AVXVNNIINT8"},
+        "arl": {"main": "Arrow Lake Processor - Supports SSE41, AVX, F16C, FMA3, AVX2, AVXVNNI, AVXVNNIINT8"},
+        "lnl": {"main": "Lunar Lake Processor - Supports SSE41, AVX, F16C, FMA3, AVX2, AVXVNNI, AVXVNNIINT8"},
+        "cwf": {"main": "Clearwater Forest Processor - Supports SSE41, AVX, F16C, FMA3, AVX2, AVXVNNI, AVXVNNIINT8"}
          }')[matrix.sde-processor].main }}
 
     steps:
@@ -95,13 +98,13 @@ jobs:
         if: matrix.arch == 'linux-x86_64'
         run: |
           chmod +x ./*
-          "${{ env.SDE_PATH }}" -${{ matrix.sde-processor }} -- ctest -C Release --parallel $(nproc)
+          "${{ env.SDE_PATH }}" -${{ matrix.sde-processor }} -chip_check_exe_only -- ctest -C Release --output-on-failure --parallel $(nproc)
         working-directory: ${{ env.BUILD_PATH }}
         shell: bash
 
       - name: Run SDE tests (Windows-x86 and Windows-x64)
         if: matrix.arch == 'windows-x86' || matrix.arch == 'windows-x64'
         run: |
-          & "$env:SDE_PATH" -${{ matrix.sde-processor }} -- ctest -C Release --parallel $env:NUMBER_OF_PROCESSORS
+          & "$env:SDE_PATH" -${{ matrix.sde-processor }} -chip_check_exe_only -- ctest -C Release --output-on-failure --parallel $env:NUMBER_OF_PROCESSORS
         working-directory: ${{ env.BUILD_PATH }}
         shell: pwsh

@@ -11,17 +11,23 @@ tools/xngen src/x32-packw/scalar.c.in -D NR=3  -D KBLOCK=4 -D TYPE=uint32_t -o s
 tools/xngen src/x32-packw/scalar.c.in -D NR=4  -D KBLOCK=4 -D TYPE=uint32_t -o src/x32-packw/gen/x32-packw-x4-gemm-goi-scalar-int-u4.c &
 tools/xngen src/x32-packw/scalar.c.in -D NR=8  -D KBLOCK=4 -D TYPE=uint32_t -o src/x32-packw/gen/x32-packw-x8-gemm-goi-scalar-int-u4.c &
 tools/xngen src/x32-packw/scalar.c.in -D NR=16 -D KBLOCK=4 -D TYPE=uint32_t -o src/x32-packw/gen/x32-packw-x16-gemm-goi-scalar-int-u4.c &
+tools/xngen src/x32-packw/scalar.c.in -D NR=32 -D KBLOCK=2 -D TYPE=uint32_t -o src/x32-packw/gen/x32-packw-x32-gemm-goi-scalar-int-u2.c &
+tools/xngen src/x32-packw/scalar.c.in -D NR=64 -D KBLOCK=2 -D TYPE=uint32_t -o src/x32-packw/gen/x32-packw-x64-gemm-goi-scalar-int-u2.c &
 tools/xngen src/x32-packw/scalar.c.in -D NR=2  -D KBLOCK=4 -D TYPE=float    -o src/x32-packw/gen/x32-packw-x2-gemm-goi-scalar-float-u4.c &
 tools/xngen src/x32-packw/scalar.c.in -D NR=3  -D KBLOCK=4 -D TYPE=float    -o src/x32-packw/gen/x32-packw-x3-gemm-goi-scalar-float-u4.c &
 tools/xngen src/x32-packw/scalar.c.in -D NR=4  -D KBLOCK=4 -D TYPE=float    -o src/x32-packw/gen/x32-packw-x4-gemm-goi-scalar-float-u4.c &
 tools/xngen src/x32-packw/scalar.c.in -D NR=8  -D KBLOCK=4 -D TYPE=float    -o src/x32-packw/gen/x32-packw-x8-gemm-goi-scalar-float-u4.c &
 tools/xngen src/x32-packw/scalar.c.in -D NR=16 -D KBLOCK=4 -D TYPE=float    -o src/x32-packw/gen/x32-packw-x16-gemm-goi-scalar-float-u4.c &
+tools/xngen src/x32-packw/scalar.c.in -D NR=32 -D KBLOCK=2 -D TYPE=float    -o src/x32-packw/gen/x32-packw-x32-gemm-goi-scalar-float-u2.c &
+tools/xngen src/x32-packw/scalar.c.in -D NR=64 -D KBLOCK=2 -D TYPE=float    -o src/x32-packw/gen/x32-packw-x64-gemm-goi-scalar-float-u2.c &
 
 ### GIO KR=1
+tools/xngen src/x32-packw/gio-scalar.c.in -D NR=2  -o src/x32-packw/gen/x32-packw-x2-gemm-gio-scalar.c &
 tools/xngen src/x32-packw/gio-scalar.c.in -D NR=4  -o src/x32-packw/gen/x32-packw-x4-gemm-gio-scalar.c &
 tools/xngen src/x32-packw/gio-scalar.c.in -D NR=8  -o src/x32-packw/gen/x32-packw-x8-gemm-gio-scalar.c &
 tools/xngen src/x32-packw/gio-scalar.c.in -D NR=16 -o src/x32-packw/gen/x32-packw-x16-gemm-gio-scalar.c &
 tools/xngen src/x32-packw/gio-scalar.c.in -D NR=32 -o src/x32-packw/gen/x32-packw-x32-gemm-gio-scalar.c &
+tools/xngen src/x32-packw/gio-scalar.c.in -D NR=64 -o src/x32-packw/gen/x32-packw-x64-gemm-gio-scalar.c &
 
 ################################### ARM NEON ##################################
 ### NR multiple of 4
@@ -140,5 +146,17 @@ tools/xngen src/x32-packw/rvv.c.in -D NR=m4 -D KBLOCK=8 -o src/x32-packw/gen/x32
 tools/xngen src/x32-packw/rvv.c.in -D NR=m8 -D KBLOCK=2 -o src/x32-packw/gen/x32-packw-x8v-gemm-goi-rvv-u2.c &
 tools/xngen src/x32-packw/rvv.c.in -D NR=m8 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x8v-gemm-goi-rvv-u4.c &
 tools/xngen src/x32-packw/rvv.c.in -D NR=m8 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x8v-gemm-goi-rvv-u8.c &
+
+################################## ARM NEON ###################################
+tools/xngen src/x32-packw/gio-simd.c.in -D BATCH_TILES=4,8,12,16    -D PREFETCH=0 -D KBLOCK=2 -D ARCH=neon     -o src/x32-packw/gen/x32-packw-gio-neon-u2.c
+
+################################# x86 SSE41 #################################
+tools/xngen src/x32-packw/gio-simd.c.in -D BATCH_TILES=4,8,12,16    -D PREFETCH=0 -D KBLOCK=2 -D ARCH=sse41    -o src/x32-packw/gen/x32-packw-gio-sse41-u2.c
+
+################################## WAsm SIMD ##################################
+tools/xngen src/x32-packw/gio-simd.c.in -D BATCH_TILES=4,8,12,16    -D PREFETCH=0 -D KBLOCK=2 -D ARCH=wasmsimd -o src/x32-packw/gen/x32-packw-gio-wasmsimd-u2.c
+
+################################## Hexagon HVX #################################
+tools/xngen src/x32-packw/gio-simd.c.in -D BATCH_TILES=32,64,96,128 -D PREFETCH=0 -D KBLOCK=2 -D ARCH=hvx      -o src/x32-packw/gen/x32-packw-gio-hvx-u2.c
 
 wait

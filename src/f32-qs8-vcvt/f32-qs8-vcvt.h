@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -31,12 +32,12 @@ XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon_v8, xnn_f32_qs8_vcvt_ukernel__neon
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon_v8, xnn_f32_qs8_vcvt_ukernel__neonv8_u32, 32, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-#if XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_f32_qs8_vcvt_ukernel__rvv_u1v, 1, true, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_f32_qs8_vcvt_ukernel__rvv_u2v, 2, true, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_f32_qs8_vcvt_ukernel__rvv_u4v, 4, true, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_f32_qs8_vcvt_ukernel__rvv_u8v, 8, true, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
-#endif  // XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_f32_qs8_vcvt_ukernel__sse2_u8, 8, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
@@ -82,13 +83,13 @@ XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_f32_qs8_vcvt_ukernel__wasm_fmagic_u3, 3, fals
 XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_f32_qs8_vcvt_ukernel__wasm_fmagic_u4, 4, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-#if XNN_ENABLE_HVX && (XNN_ARCH_HEXAGON)
+#if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_hvx, xnn_f32_qs8_vcvt_ukernel__hvx_u32, 32, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_hvx, xnn_f32_qs8_vcvt_ukernel__hvx_u64, 64, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_hvx, xnn_f32_qs8_vcvt_ukernel__hvx_u96, 96, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_hvx, xnn_f32_qs8_vcvt_ukernel__hvx_u128, 128, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_hvx, xnn_f32_qs8_vcvt_ukernel__hvx_u256, 256, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
-#endif  // XNN_ENABLE_HVX && (XNN_ARCH_HEXAGON)
+#endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 
 XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_f32_qs8_vcvt_ukernel__scalar_fmagic_u1, 1, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
 XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_f32_qs8_vcvt_ukernel__scalar_fmagic_u2, 2, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)

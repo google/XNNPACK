@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-raddstoreexpminusmax/hvx-rr2-p5.c.in
 //   Generator: tools/xngen
@@ -10,8 +11,8 @@
 
 #include <assert.h>
 
-#include "xnnpack/simd/f32-hvx.h"
-#include "xnnpack/raddstoreexpminusmax.h"
+#include "src/xnnpack/simd/f32-hvx.h"
+#include "src/xnnpack/raddstoreexpminusmax.h"
 
 void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u32(
     size_t batch,
@@ -51,7 +52,8 @@ void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u32(
   XNN_FORCE_REALIZATION(vc1);
   XNN_FORCE_REALIZATION(vdenorm_cutoff);
 
-  HVX_Vector vacc = Q6_V_vzero();
+  xnn_simd_f32_t vacc0 = xnn_zero_f32();
+
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
     const HVX_Vector vi = xnn_loadu_f32(input);
     input += 32;
@@ -80,10 +82,9 @@ void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u32(
     xnn_storeu_f32(output, vf);
     output += 32;
 
-    vacc = xnn_add_f32(vacc, vf);
+    vacc0 = xnn_add_f32(vacc0, vf);
   }
 
-  float vacc_lo = Q6_f32_vrsum_Vsf(vacc);
   if XNN_UNLIKELY(batch != 0) {
     assert(batch >= 1 * sizeof(float));
     assert(batch < 32 * sizeof(float));
@@ -113,8 +114,9 @@ void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u32(
 
     Q6_V_vstu_variable(output, batch, vf);
 
-    vf = Q6_V_vand_QV(Q6_Q_vsetq_R(batch), vf);
-    vacc_lo += Q6_f32_vrsum_Vsf(vf);
+    HVX_VectorPred mask = Q6_Q_vsetq_R(batch);
+    vacc0 = xnn_add_f32(vacc0, Q6_V_vand_QV(mask, vf));
   }
-  *sum = vacc_lo;
+
+  *sum = xnn_reduce_add_f32(vacc0);
 }

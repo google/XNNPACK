@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-velu/sse-rr2-p6.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <emmintrin.h>
 
-#include "xnnpack/vunary.h"
-#include "xnnpack/common.h"
+#include "src/xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
 
 
 void xnn_f32_velu_ukernel__sse2_rr2_p6_u16(

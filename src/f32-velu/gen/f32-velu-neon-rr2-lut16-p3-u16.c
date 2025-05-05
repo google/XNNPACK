@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-velu/neon-lut16-p3.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/vunary.h"
-#include "xnnpack/common.h"
+#include "src/xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
 
 
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_16[16];
@@ -48,9 +49,9 @@ void xnn_f32_velu_ukernel__neon_rr2_lut16_p3_u16(
   XNN_FORCE_REALIZATION(vminus_ln2_hi);
   XNN_FORCE_REALIZATION(vminus_ln2_lo);
 
-  const float32x4_t vprescale = vld1q_dup_f32(&params->scalar.prescale);
-  const float32x4_t valpha = vld1q_dup_f32(&params->scalar.alpha);
-  const float32x4_t vbeta = vld1q_dup_f32(&params->scalar.beta);
+  const float32x4_t vprescale = vdupq_n_f32(params->scalar.prescale);
+  const float32x4_t valpha = vdupq_n_f32(params->scalar.alpha);
+  const float32x4_t vbeta = vdupq_n_f32(params->scalar.beta);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     float32x4_t vx0123 = vld1q_f32(input); input += 4;

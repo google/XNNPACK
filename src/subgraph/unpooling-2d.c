@@ -8,12 +8,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack.h"
-#include "xnnpack/log.h"
-#include "xnnpack/node-type.h"
-#include "xnnpack/subgraph-validation.h"
-#include "xnnpack/subgraph.h"
-#include "pthreadpool.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/log.h"
+#include "src/xnnpack/node-type.h"
+#include "src/xnnpack/subgraph-validation.h"
+#include "src/xnnpack/subgraph.h"
+#include <pthreadpool.h>
 
 static enum xnn_status create_unpooling_operator(
   const struct xnn_node* node,
@@ -24,17 +24,7 @@ static enum xnn_status create_unpooling_operator(
   xnn_weights_cache_t weights_cache)
 {
   assert(node->num_inputs == 2);
-  const uint32_t input_value_id = node->inputs[0];
-  assert(input_value_id != XNN_INVALID_VALUE_ID);
-  assert(input_value_id < num_values);
-  const struct xnn_value *input_value = &values[input_value_id];
-  assert(input_value->datatype == xnn_datatype_fp32);
-
   assert(node->num_outputs == 1);
-
-  const size_t channel_dim = input_value->shape.dim[3];
-  assert(channel_dim == values[node->inputs[1]].shape.dim[3]);
-  assert(channel_dim == values[node->outputs[0]].shape.dim[3]);
 
   const enum xnn_status status = xnn_create_unpooling2d_nhwc_x32(
     node->params.pooling_2d.padding_top,
@@ -43,7 +33,6 @@ static enum xnn_status create_unpooling_operator(
     node->params.pooling_2d.padding_left,
     node->params.pooling_2d.pooling_height,
     node->params.pooling_2d.pooling_width,
-    channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
     node->flags,
     &opdata->operator_objects[0]);
   return status;
@@ -57,6 +46,8 @@ static enum xnn_status reshape_unpooling_operator(
 {
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
+  const uint32_t index_id = opdata->inputs[1];
+  assert(index_id < num_values);
 
   const uint32_t output_id = opdata->outputs[0];
   assert(output_id < num_values);
@@ -71,11 +62,15 @@ static enum xnn_status reshape_unpooling_operator(
   const size_t old_workspace_size = opdata->workspace_size;
   size_t output_height, output_width;
 
+  (void)index_id;
+  assert(channel_dim == values[index_id].shape.dim[3]);
+
   status = xnn_reshape_unpooling2d_nhwc_x32(
     opdata->operator_objects[0],
     batch_size,
     input_height,
     input_width,
+    channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
     &output_height,
     &output_width,
     threadpool);
@@ -159,13 +154,6 @@ enum xnn_status xnn_define_unpooling_2d(
       "failed to define %s operator with %" PRIu32 "x%" PRIu32 " pooling size: "
       "pooling size dimensions must be non-zero",
       xnn_node_type_to_string(xnn_node_type_unpooling_2d), pooling_width, pooling_height);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (pooling_size == 1) {
-    xnn_log_error(
-      "failed to define %s operator with 1 pooling element: 1x1 pooling is meaningless",
-      xnn_node_type_to_string(xnn_node_type_unpooling_2d));
     return xnn_status_invalid_parameter;
   }
 

@@ -10,7 +10,8 @@
 #include <cstdint>
 #include <limits>
 
-#include "xnnpack/datatype.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/datatype.h"
 
 namespace xnnpack {
 
@@ -18,9 +19,9 @@ namespace xnnpack {
 // - Rounds to nearest integer
 // - Replaces NaN with 0
 // - Saturates to the bounds of the result type
-template <typename Result, typename std::enable_if<!xnnpack::is_quantized<
-                               Result>::value>::type* = nullptr>
+template <typename Result>
 Result round_float_to_int(float x) {
+  using Unwrapped = typename unwrap_quantized<Result>::type;
   x = std::isnan(x) ? 0.0f : x;
   x = std::round(x);
   // It's tricky to do this with std::max/std::min, because the min/max values
@@ -28,39 +29,26 @@ Result round_float_to_int(float x) {
   // avoid converting to an out of bounds integer. To avoid this problem, we've
   // determined a constant that when added to the min/max float values, results
   // in the upper bound of the integer range.
-  constexpr int half_mantissa = sizeof(Result) * 8 > 23 ? 127 : 0;
-  x = std::max<float>(x, std::numeric_limits<Result>::min());
-  x = std::min<float>(x, std::numeric_limits<Result>::max() - half_mantissa);
-  return static_cast<Result>(x);
-}
-
-template <typename Result,
-          typename std::enable_if<xnnpack::is_quantized<Result>::value>::type* =
-              nullptr>
-Result round_float_to_int(float x) {
-  return round_float_to_int<typename Result::type>(x);
+  constexpr int half_mantissa = sizeof(Unwrapped) * 8 > 23 ? 127 : 0;
+  x = std::max<float>(x, std::numeric_limits<Unwrapped>::min());
+  x = std::min<float>(x, std::numeric_limits<Unwrapped>::max() - half_mantissa);
+  return static_cast<Unwrapped>(x);
 }
 
 template <typename T>
-float dequantize(T x, float scale, int32_t zero_point) {
-  return (static_cast<float>(x) - static_cast<float>(zero_point)) * scale;
+float dequantize(T x, float scale, float zero_point) {
+  return (static_cast<float>(x) - zero_point) * scale;
 }
 
 template <typename T>
-T quantize(float x, float inv_scale, int32_t zero_point) {
+T quantize(float x, float inv_scale, float zero_point) {
   return round_float_to_int<T>(x * inv_scale + zero_point);
 }
 
 // These help to implement integer arithmetic without signed integer overflow.
-inline int64_t widen(int32_t x) {
-  return static_cast<int64_t>(x);
-}
-inline int32_t widen(int16_t x) {
-  return static_cast<int32_t>(x);
-}
-inline int16_t widen(int8_t x) {
-  return static_cast<int16_t>(x);
-}
+inline int64_t widen(int32_t x) { return static_cast<int64_t>(x); }
+inline int32_t widen(int16_t x) { return static_cast<int32_t>(x); }
+inline int16_t widen(int8_t x) { return static_cast<int16_t>(x); }
 
 // This implements "Euclidean division", which is the way integer division
 // should be: (a / b) * b + r = a, where r is always in [0, |b|). This is

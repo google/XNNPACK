@@ -21,12 +21,18 @@
   #include <intrin.h>
 #endif
 
-#include "xnnpack.h"
-#include "xnnpack/allocator.h"
-#include "xnnpack/hardware-config.h"
-#include "xnnpack/init-once.h"
-#include "xnnpack/log.h"
-#include "xnnpack/params.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/allocator.h"
+#include "src/xnnpack/hardware-config.h"
+#include "src/xnnpack/init-once.h"
+#include "src/xnnpack/log.h"
+#include "src/xnnpack/params.h"
+
+#if XNN_ENABLE_KLEIDIAI
+#include <stdio.h>
+
+#include "kai/kai_common.h"
+#endif  // XNN_ENABLE_KLEIDIAI
 
 XNN_INIT_ONCE_GUARD(allocator);
 
@@ -59,6 +65,18 @@ enum xnn_status xnn_initialize(const struct xnn_allocator* allocator) {
   } else {
     return xnn_status_unsupported_hardware;
   }
+
+#if XNN_ENABLE_KLEIDIAI
+  /* If we're using KleidiAI, log their version string. */
+  static bool first = true;
+  if (first) {
+    first = false;
+    fprintf(stderr,
+            "XNNPACK built with KleidiAI v%s (see "
+            "https://gitlab.arm.com/kleidi/kleidiai).\n",
+            kai_get_version());
+  }
+#endif  // XNN_ENABLE_KLEIDIAI
 }
 
 enum xnn_status xnn_deinitialize(void) {

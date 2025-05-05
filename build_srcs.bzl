@@ -13,7 +13,6 @@ OPERATOR_SRCS = [
     "src/operators/average-pooling-nhwc.c",
     "src/operators/batch-matrix-multiply-nc.c",
     "src/operators/binary-elementwise-nd.c",
-    "src/operators/channel-shuffle-nc.c",
     "src/operators/constant-pad-nd.c",
     "src/operators/convolution-nchw.c",
     "src/operators/convolution-nhwc.c",
@@ -26,7 +25,6 @@ OPERATOR_SRCS = [
     "src/operators/resize-bilinear-nchw.c",
     "src/operators/resize-bilinear-nhwc.c",
     "src/operators/rope-nthc.c",
-    "src/operators/scaled-dot-product-attention-nhtc.c",
     "src/operators/slice-nd.c",
     "src/operators/softmax-nc.c",
     "src/operators/transpose-nd.c",
@@ -56,7 +54,6 @@ SUBGRAPH_SRCS = [
     "src/subgraph/pack-lh.c",
     "src/subgraph/reshape-helpers.c",
     "src/subgraph/rope.c",
-    "src/subgraph/scaled-dot-product-attention.c",
     "src/subgraph/softmax.c",
     "src/subgraph/space-to-depth-2d.c",
     "src/subgraph/static-constant-pad.c",
@@ -95,11 +92,9 @@ XNNPACK_SRCS = [
     "src/configs/ibilinear-config.c",
     "src/configs/lut32norm-config.c",
     "src/configs/maxpool-config.c",
-    "src/configs/pavgpool-config.c",
     "src/configs/pack-lh-config.c",
     "src/configs/raddstoreexpminusmax-config.c",
     "src/configs/reduce-config.c",
-    "src/configs/rmax-config.c",
     "src/configs/spmm-config.c",
     "src/configs/transpose-config.c",
     "src/configs/unary-elementwise-config.c",
@@ -108,7 +103,6 @@ XNNPACK_SRCS = [
     "src/configs/x8-lut-config.c",
     "src/configs/xx-fill-config.c",
     "src/configs/xx-pad-config.c",
-    "src/configs/zip-config.c",
 ]
 
 LOGGING_SRCS = [

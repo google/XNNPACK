@@ -5,14 +5,13 @@
 
 $assert BATCH_TILE % 16 == 0
 $assert BATCH_TILE >= 16
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
 #include <immintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_f32_vhswish_ukernel__avx512f_u${BATCH_TILE}(
@@ -33,26 +32,24 @@ void xnn_f32_vhswish_ukernel__avx512f_u${BATCH_TILE}(
 
   $if BATCH_TILE > 16:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
-      const __m512 vx${ABC[0:16]} = _mm512_loadu_ps(input);
-      $for N in range(16, BATCH_TILE, 16):
-        const __m512 vx${ABC[N:N+16]} = _mm512_loadu_ps(input + ${N});
+      $for N in range(0, BATCH_TILE, 16):
+        const __m512 vx${N//16} = _mm512_loadu_ps(input + ${N});
       input += ${BATCH_TILE};
 
       $for N in range(0, BATCH_TILE, 16):
-        __m512 vacc${ABC[N:N+16]} = _mm512_fmadd_ps(vx${ABC[N:N+16]}, vsixth, vhalf);
+        __m512 vacc${N//16} = _mm512_fmadd_ps(vx${N//16}, vsixth, vhalf);
 
       $for N in range(0, BATCH_TILE, 16):
-        vacc${ABC[N:N+16]} = _mm512_max_ps(vacc${ABC[N:N+16]}, vzero);
+        vacc${N//16} = _mm512_max_ps(vacc${N//16}, vzero);
 
       $for N in range(0, BATCH_TILE, 16):
-        vacc${ABC[N:N+16]} = _mm512_min_ps(vacc${ABC[N:N+16]}, vone);
+        vacc${N//16} = _mm512_min_ps(vacc${N//16}, vone);
 
       $for N in range(0, BATCH_TILE, 16):
-        vacc${ABC[N:N+16]} = _mm512_mul_ps(vacc${ABC[N:N+16]}, vx${ABC[N:N+16]});
+        vacc${N//16} = _mm512_mul_ps(vacc${N//16}, vx${N//16});
 
-      _mm512_storeu_ps(output, vacc${ABC[0:16]});
-      $for N in range(16, BATCH_TILE, 16):
-        _mm512_storeu_ps(output + ${N}, vacc${ABC[N:N+16]});
+      $for N in range(0, BATCH_TILE, 16):
+        _mm512_storeu_ps(output + ${N}, vacc${N//16});
       output += ${BATCH_TILE};
     }
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {

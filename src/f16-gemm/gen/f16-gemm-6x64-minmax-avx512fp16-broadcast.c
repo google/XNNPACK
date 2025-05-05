@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-gemm/avx512fp16-broadcast.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/gemm.h"
-#include "xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
 
 
 void xnn_f16_gemm_minmax_ukernel_6x64__avx512fp16_broadcast(
@@ -25,7 +26,7 @@ void xnn_f16_gemm_minmax_ukernel_6x64__avx512fp16_broadcast(
     xnn_float16* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= 6);
@@ -149,27 +150,27 @@ void xnn_f16_gemm_minmax_ukernel_6x64__avx512fp16_broadcast(
 
     if XNN_LIKELY(nc >= 64) {
       _mm512_storeu_ph(c0, vacc0x0);
-      _mm512_storeu_ph((uint16_t*) c0 + 1, vacc0x1);
+      _mm512_storeu_ph((uint16_t*) c0 + 32, vacc0x1);
       a0 = (const uint16_t*) ((uintptr_t) a0 - kc);
       c0 = (uint16_t*) ((uintptr_t) c0 + cn_stride);
       _mm512_storeu_ph(c1, vacc1x0);
-      _mm512_storeu_ph((uint16_t*) c1 + 1, vacc1x1);
+      _mm512_storeu_ph((uint16_t*) c1 + 32, vacc1x1);
       a1 = (const uint16_t*) ((uintptr_t) a1 - kc);
       c1 = (uint16_t*) ((uintptr_t) c1 + cn_stride);
       _mm512_storeu_ph(c2, vacc2x0);
-      _mm512_storeu_ph((uint16_t*) c2 + 1, vacc2x1);
+      _mm512_storeu_ph((uint16_t*) c2 + 32, vacc2x1);
       a2 = (const uint16_t*) ((uintptr_t) a2 - kc);
       c2 = (uint16_t*) ((uintptr_t) c2 + cn_stride);
       _mm512_storeu_ph(c3, vacc3x0);
-      _mm512_storeu_ph((uint16_t*) c3 + 1, vacc3x1);
+      _mm512_storeu_ph((uint16_t*) c3 + 32, vacc3x1);
       a3 = (const uint16_t*) ((uintptr_t) a3 - kc);
       c3 = (uint16_t*) ((uintptr_t) c3 + cn_stride);
       _mm512_storeu_ph(c4, vacc4x0);
-      _mm512_storeu_ph((uint16_t*) c4 + 1, vacc4x1);
+      _mm512_storeu_ph((uint16_t*) c4 + 32, vacc4x1);
       a4 = (const uint16_t*) ((uintptr_t) a4 - kc);
       c4 = (uint16_t*) ((uintptr_t) c4 + cn_stride);
       _mm512_storeu_ph(c5, vacc5x0);
-      _mm512_storeu_ph((uint16_t*) c5 + 1, vacc5x1);
+      _mm512_storeu_ph((uint16_t*) c5 + 32, vacc5x1);
       a5 = (const uint16_t*) ((uintptr_t) a5 - kc);
       c5 = (uint16_t*) ((uintptr_t) c5 + cn_stride);
 
