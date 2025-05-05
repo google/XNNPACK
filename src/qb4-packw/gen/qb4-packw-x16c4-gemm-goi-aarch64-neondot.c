@@ -1,6 +1,6 @@
 // clang-format off
 // Auto-generated file. Do not edit!
-//   Template: src/qb4-packw/c4-neondot.c.in
+//   Template: src/qb4-packw/c4-aarch64-neondot.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2023 Google LLC
@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <arm_neon.h>
 
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/packw.h"
 
 // convert a vector from packed nibbles to planar, and accumulate sum
@@ -23,20 +24,20 @@ int8x16_t xnn_packed2planar(
   const int8x16_t vmask,
   const int8x16_t vones)
 {
-  const int8x16_t vl = vandq_u8(v, vmask);  // isolate lower int 4
+  const int8x16_t vl = vandq_s8(v, vmask);  // isolate lower int 4
   const int8x16_t vh = vshlq_n_s8(v, 4);// isolate upper int 4
   *vacc = vdotq_s32(*vacc, vh, vones);
   *vacc = vdotq_s32(*vacc, vl, vones);
   const int8x16_t v0123 = vzip1q_s8(vh, vl);
   const int8x16_t v4567 = vzip2q_s8(vh, vl);
-  const int8x16_t v0246 = vreinterpretq_s8_u32(vuzp1q_u32(vreinterpretq_u32_u8(v0123), vreinterpretq_u32_u8(v4567)));
-  const int8x16_t v1357 = vreinterpretq_s8_u32(vuzp2q_u32(vreinterpretq_u32_u8(v0123), vreinterpretq_u32_u8(v4567)));
+  const uint8x16_t v0246 = vreinterpretq_u8_u32(vuzp1q_u32(vreinterpretq_u32_s8(v0123), vreinterpretq_u32_s8(v4567)));
+  const uint8x16_t v1357 = vreinterpretq_u8_u32(vuzp2q_u32(vreinterpretq_u32_s8(v0123), vreinterpretq_u32_s8(v4567)));
   const uint8x16_t vl0246 = vshrq_n_u8(v0246, 4);
-  const int8x16_t v01234567 = vorrq_s8(vl0246, v1357);
-  return v01234567;
+  const uint8x16_t v01234567 = vorrq_u8(vl0246, v1357);
+  return vreinterpretq_s8_u8(v01234567);
 }
 
-void xnn_qb4_packw_gemm_goi_ukernel_x16c4__neondot(
+void xnn_qb4_packw_gemm_goi_ukernel_x16c4__aarch64_neondot(
   size_t g,
   size_t nc,
   size_t kc,
@@ -50,7 +51,7 @@ void xnn_qb4_packw_gemm_goi_ukernel_x16c4__neondot(
   int8_t* packed_weights,
   size_t extra_bytes_bl,
   size_t extra_bytes_n,
-  const void* params)
+  const void* params) XNN_OOB_READS
 {
   assert(g != 0);
   assert(nc != 0);
@@ -67,7 +68,7 @@ void xnn_qb4_packw_gemm_goi_ukernel_x16c4__neondot(
   size_t num_blocks = kc / bl;
   size_t weight_stride = (kc >> 1);
   const int8x16_t vmask = vmovq_n_s8(INT8_C(0xF0));
-  const int8x16_t vones = vmovq_n_u8(UINT8_C(0x01));
+  const int8x16_t vones = vmovq_n_s8(UINT8_C(0x01));
 
   uint8_t* out = (uint8_t*) packed_weights;
   const int32_t* b = (const int32_t*) bias;
@@ -79,7 +80,7 @@ void xnn_qb4_packw_gemm_goi_ukernel_x16c4__neondot(
 
   do {
     // NC main loop multiple of 16
-    const uint8_t* w0 = (const uint8_t*) weights;
+    const int8_t* w0 = (const int8_t*) weights;
     const uint16_t* s0 = (const uint16_t*) scale;
     int n = nc;
     for (;n > 0; n -= 16) {
@@ -91,21 +92,21 @@ void xnn_qb4_packw_gemm_goi_ukernel_x16c4__neondot(
       out += 16 * sizeof(float);
 
       // KC/2 bytes is KC Nibbles
-      const uint8_t* w1 = w0 + weight_stride;
-      const uint8_t* w2 = w1 + weight_stride;
-      const uint8_t* w3 = w2 + weight_stride;
-      const uint8_t* w4 = w3 + weight_stride;
-      const uint8_t* w5 = w4 + weight_stride;
-      const uint8_t* w6 = w5 + weight_stride;
-      const uint8_t* w7 = w6 + weight_stride;
-      const uint8_t* w8 = w7 + weight_stride;
-      const uint8_t* w9 = w8 + weight_stride;
-      const uint8_t* w10 = w9 + weight_stride;
-      const uint8_t* w11 = w10 + weight_stride;
-      const uint8_t* w12 = w11 + weight_stride;
-      const uint8_t* w13 = w12 + weight_stride;
-      const uint8_t* w14 = w13 + weight_stride;
-      const uint8_t* w15 = w14 + weight_stride;
+      const int8_t* w1 = w0 + weight_stride;
+      const int8_t* w2 = w1 + weight_stride;
+      const int8_t* w3 = w2 + weight_stride;
+      const int8_t* w4 = w3 + weight_stride;
+      const int8_t* w5 = w4 + weight_stride;
+      const int8_t* w6 = w5 + weight_stride;
+      const int8_t* w7 = w6 + weight_stride;
+      const int8_t* w8 = w7 + weight_stride;
+      const int8_t* w9 = w8 + weight_stride;
+      const int8_t* w10 = w9 + weight_stride;
+      const int8_t* w11 = w10 + weight_stride;
+      const int8_t* w12 = w11 + weight_stride;
+      const int8_t* w13 = w12 + weight_stride;
+      const int8_t* w14 = w13 + weight_stride;
+      const int8_t* w15 = w14 + weight_stride;
 
       // scales
       const uint16_t* s1 = s0 + num_blocks;
@@ -199,22 +200,22 @@ void xnn_qb4_packw_gemm_goi_ukernel_x16c4__neondot(
 
         // KC Main loop multiple of 16x32
         for(; k >= 32; k-=32) {
-          const uint32x4_t w0x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w0), vkernel_zero_point)); w0 += 16;
-          const uint32x4_t w1x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w1), vkernel_zero_point)); w1 += 16;
-          const uint32x4_t w2x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w2), vkernel_zero_point)); w2 += 16;
-          const uint32x4_t w3x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w3), vkernel_zero_point)); w3 += 16;
-          const uint32x4_t w4x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w4), vkernel_zero_point)); w4 += 16;
-          const uint32x4_t w5x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w5), vkernel_zero_point)); w5 += 16;
-          const uint32x4_t w6x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w6), vkernel_zero_point)); w6 += 16;
-          const uint32x4_t w7x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w7), vkernel_zero_point)); w7 += 16;
-          const uint32x4_t w8x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w8), vkernel_zero_point)); w8 += 16;
-          const uint32x4_t w9x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w9), vkernel_zero_point)); w9 += 16;
-          const uint32x4_t w10x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w10), vkernel_zero_point)); w10 += 16;
-          const uint32x4_t w11x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w11), vkernel_zero_point)); w11 += 16;
-          const uint32x4_t w12x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w12), vkernel_zero_point)); w12 += 16;
-          const uint32x4_t w13x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w13), vkernel_zero_point)); w13 += 16;
-          const uint32x4_t w14x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w14), vkernel_zero_point)); w14 += 16;
-          const uint32x4_t w15x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_u8(w15), vkernel_zero_point)); w15 += 16;
+          const uint32x4_t w0x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_s8(w0), vkernel_zero_point)); w0 += 16;
+          const uint32x4_t w1x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_s8(w1), vkernel_zero_point)); w1 += 16;
+          const uint32x4_t w2x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_s8(w2), vkernel_zero_point)); w2 += 16;
+          const uint32x4_t w3x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_s8(w3), vkernel_zero_point)); w3 += 16;
+          const uint32x4_t w4x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_s8(w4), vkernel_zero_point)); w4 += 16;
+          const uint32x4_t w5x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_s8(w5), vkernel_zero_point)); w5 += 16;
+          const uint32x4_t w6x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_s8(w6), vkernel_zero_point)); w6 += 16;
+          const uint32x4_t w7x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_s8(w7), vkernel_zero_point)); w7 += 16;
+          const uint32x4_t w8x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_s8(w8), vkernel_zero_point)); w8 += 16;
+          const uint32x4_t w9x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_s8(w9), vkernel_zero_point)); w9 += 16;
+          const uint32x4_t w10x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_s8(w10), vkernel_zero_point)); w10 += 16;
+          const uint32x4_t w11x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_s8(w11), vkernel_zero_point)); w11 += 16;
+          const uint32x4_t w12x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_s8(w12), vkernel_zero_point)); w12 += 16;
+          const uint32x4_t w13x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_s8(w13), vkernel_zero_point)); w13 += 16;
+          const uint32x4_t w14x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_s8(w14), vkernel_zero_point)); w14 += 16;
+          const uint32x4_t w15x0123 = vreinterpretq_u32_s8(veorq_s8(vld1q_s8(w15), vkernel_zero_point)); w15 += 16;
 
           const uint32x4_t v0_02 = vtrn1q_u32(w0x0123, w1x0123);
           const uint32x4_t v0_13 = vtrn2q_u32(w0x0123, w1x0123);
@@ -233,22 +234,22 @@ void xnn_qb4_packw_gemm_goi_ukernel_x16c4__neondot(
           const uint32x4_t v14_02 = vtrn1q_u32(w14x0123, w15x0123);
           const uint32x4_t v14_13 = vtrn2q_u32(w14x0123, w15x0123);
 
-          uint32x4_t v0_0 = vcombine_u32(vget_low_u32(v0_02), vget_low_u32(v2_02));
-          uint32x4_t v0_2 = vcombine_u32(vget_high_u32(v0_02), vget_high_u32(v2_02));
-          uint32x4_t v0_1 = vcombine_u32(vget_low_u32(v0_13), vget_low_u32(v2_13));
-          uint32x4_t v0_3 = vcombine_u32(vget_high_u32(v0_13), vget_high_u32(v2_13));
-          uint32x4_t v1_0 = vcombine_u32(vget_low_u32(v4_02), vget_low_u32(v6_02));
-          uint32x4_t v1_2 = vcombine_u32(vget_high_u32(v4_02), vget_high_u32(v6_02));
-          uint32x4_t v1_1 = vcombine_u32(vget_low_u32(v4_13), vget_low_u32(v6_13));
-          uint32x4_t v1_3 = vcombine_u32(vget_high_u32(v4_13), vget_high_u32(v6_13));
-          uint32x4_t v2_0 = vcombine_u32(vget_low_u32(v8_02), vget_low_u32(v10_02));
-          uint32x4_t v2_2 = vcombine_u32(vget_high_u32(v8_02), vget_high_u32(v10_02));
-          uint32x4_t v2_1 = vcombine_u32(vget_low_u32(v8_13), vget_low_u32(v10_13));
-          uint32x4_t v2_3 = vcombine_u32(vget_high_u32(v8_13), vget_high_u32(v10_13));
-          uint32x4_t v3_0 = vcombine_u32(vget_low_u32(v12_02), vget_low_u32(v14_02));
-          uint32x4_t v3_2 = vcombine_u32(vget_high_u32(v12_02), vget_high_u32(v14_02));
-          uint32x4_t v3_1 = vcombine_u32(vget_low_u32(v12_13), vget_low_u32(v14_13));
-          uint32x4_t v3_3 = vcombine_u32(vget_high_u32(v12_13), vget_high_u32(v14_13));
+          int8x16_t v0_0 = vreinterpretq_s8_u32(vcombine_u32(vget_low_u32(v0_02), vget_low_u32(v2_02)));
+          int8x16_t v0_2 = vreinterpretq_s8_u32(vcombine_u32(vget_high_u32(v0_02), vget_high_u32(v2_02)));
+          int8x16_t v0_1 = vreinterpretq_s8_u32(vcombine_u32(vget_low_u32(v0_13), vget_low_u32(v2_13)));
+          int8x16_t v0_3 = vreinterpretq_s8_u32(vcombine_u32(vget_high_u32(v0_13), vget_high_u32(v2_13)));
+          int8x16_t v1_0 = vreinterpretq_s8_u32(vcombine_u32(vget_low_u32(v4_02), vget_low_u32(v6_02)));
+          int8x16_t v1_2 = vreinterpretq_s8_u32(vcombine_u32(vget_high_u32(v4_02), vget_high_u32(v6_02)));
+          int8x16_t v1_1 = vreinterpretq_s8_u32(vcombine_u32(vget_low_u32(v4_13), vget_low_u32(v6_13)));
+          int8x16_t v1_3 = vreinterpretq_s8_u32(vcombine_u32(vget_high_u32(v4_13), vget_high_u32(v6_13)));
+          int8x16_t v2_0 = vreinterpretq_s8_u32(vcombine_u32(vget_low_u32(v8_02), vget_low_u32(v10_02)));
+          int8x16_t v2_2 = vreinterpretq_s8_u32(vcombine_u32(vget_high_u32(v8_02), vget_high_u32(v10_02)));
+          int8x16_t v2_1 = vreinterpretq_s8_u32(vcombine_u32(vget_low_u32(v8_13), vget_low_u32(v10_13)));
+          int8x16_t v2_3 = vreinterpretq_s8_u32(vcombine_u32(vget_high_u32(v8_13), vget_high_u32(v10_13)));
+          int8x16_t v3_0 = vreinterpretq_s8_u32(vcombine_u32(vget_low_u32(v12_02), vget_low_u32(v14_02)));
+          int8x16_t v3_2 = vreinterpretq_s8_u32(vcombine_u32(vget_high_u32(v12_02), vget_high_u32(v14_02)));
+          int8x16_t v3_1 = vreinterpretq_s8_u32(vcombine_u32(vget_low_u32(v12_13), vget_low_u32(v14_13)));
+          int8x16_t v3_3 = vreinterpretq_s8_u32(vcombine_u32(vget_high_u32(v12_13), vget_high_u32(v14_13)));
 
           v0_0 = xnn_packed2planar(&ksum0, v0_0, vmask, vones);
           v0_1 = xnn_packed2planar(&ksum0, v0_1, vmask, vones);
@@ -287,26 +288,24 @@ void xnn_qb4_packw_gemm_goi_ukernel_x16c4__neondot(
           out += 256;
         }
 
-        uint16x8_t bf_scales0 = {
-          s0[0],
-          s1[0],
-          s2[0],
-          s3[0],
-          s4[0],
-          s5[0],
-          s6[0],
-          s7[0],
-        };
-        uint16x8_t bf_scales1 = {
-          s8[0],
-          s9[0],
-          s10[0],
-          s11[0],
-          s12[0],
-          s13[0],
-          s14[0],
-          s15[0],
-        };
+        uint16x8_t bf_scales0 = vdupq_n_u16(0);
+        bf_scales0 = vsetq_lane_u16(s0[0], bf_scales0, 0);
+        bf_scales0 = vsetq_lane_u16(s1[0], bf_scales0, 1);
+        bf_scales0 = vsetq_lane_u16(s2[0], bf_scales0, 2);
+        bf_scales0 = vsetq_lane_u16(s3[0], bf_scales0, 3);
+        bf_scales0 = vsetq_lane_u16(s4[0], bf_scales0, 4);
+        bf_scales0 = vsetq_lane_u16(s5[0], bf_scales0, 5);
+        bf_scales0 = vsetq_lane_u16(s6[0], bf_scales0, 6);
+        bf_scales0 = vsetq_lane_u16(s7[0], bf_scales0, 7);
+        uint16x8_t bf_scales1 = vdupq_n_u16(0);
+        bf_scales1 = vsetq_lane_u16(s8[0], bf_scales1, 0);
+        bf_scales1 = vsetq_lane_u16(s9[0], bf_scales1, 1);
+        bf_scales1 = vsetq_lane_u16(s10[0], bf_scales1, 2);
+        bf_scales1 = vsetq_lane_u16(s11[0], bf_scales1, 3);
+        bf_scales1 = vsetq_lane_u16(s12[0], bf_scales1, 4);
+        bf_scales1 = vsetq_lane_u16(s13[0], bf_scales1, 5);
+        bf_scales1 = vsetq_lane_u16(s14[0], bf_scales1, 6);
+        bf_scales1 = vsetq_lane_u16(s15[0], bf_scales1, 7);
 
         float32x4_t f_scales0 = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(bf_scales0), 16));
         float32x4_t f_scales1 = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(bf_scales0), 16));
@@ -354,10 +353,10 @@ void xnn_qb4_packw_gemm_goi_ukernel_x16c4__neondot(
         vst1q_f32(&packed_k_scaled_sum[12], packed_k_scaled_sums3);
 
 
-        vst1_u16((uint16_t*)out+0, vshrn_n_s32(vreinterpretq_s32_f32(f_scales0), 16));
-        vst1_u16((uint16_t*)out+4, vshrn_n_s32(vreinterpretq_s32_f32(f_scales1), 16));
-        vst1_u16((uint16_t*)out+8, vshrn_n_s32(vreinterpretq_s32_f32(f_scales2), 16));
-        vst1_u16((uint16_t*)out+12, vshrn_n_s32(vreinterpretq_s32_f32(f_scales3), 16));
+        vst1_u16((uint16_t*)out+0, vreinterpret_u16_s16(vshrn_n_s32(vreinterpretq_s32_f32(f_scales0), 16)));
+        vst1_u16((uint16_t*)out+4, vreinterpret_u16_s16(vshrn_n_s32(vreinterpretq_s32_f32(f_scales1), 16)));
+        vst1_u16((uint16_t*)out+8, vreinterpret_u16_s16(vshrn_n_s32(vreinterpretq_s32_f32(f_scales2), 16)));
+        vst1_u16((uint16_t*)out+12, vreinterpret_u16_s16(vshrn_n_s32(vreinterpretq_s32_f32(f_scales3), 16)));
 
         out += 16 * sizeof(uint16_t);
       }

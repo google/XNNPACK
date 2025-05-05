@@ -12,6 +12,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/packw.h"
 
 static XNN_INTRINSIC void xnn_packed2planar(
@@ -20,24 +21,24 @@ static XNN_INTRINSIC void xnn_packed2planar(
   int8_t* out,
   int32_t vkernel_zero_point)
 {
-  const uint32_t s_v0 = (((uint32_t*)weights)[0] ^ vkernel_zero_point);
-  const int8_t v0 = (((int8_t*)&s_v0))[0] << 4;
-  const int8_t v1 = (((int8_t*)&s_v0))[0] & 0xF0;
-  const int8_t v2 = (((int8_t*)&s_v0))[1] << 4;
-  const int8_t v3 = (((int8_t*)&s_v0))[1] & 0xF0;
-  const int8_t v4 = (((int8_t*)&s_v0))[2] << 4;
-  const int8_t v5 = (((int8_t*)&s_v0))[2] & 0xF0;
-  const int8_t v6 = (((int8_t*)&s_v0))[3] << 4;
-  const int8_t v7 = (((int8_t*)&s_v0))[3] & 0xF0;
-  const uint32_t s_v1 = (((uint32_t*)weights)[1] ^ vkernel_zero_point);
-  const int8_t v8 = (((int8_t*)&s_v1))[0] << 4;
-  const int8_t v9 = (((int8_t*)&s_v1))[0] & 0xF0;
-  const int8_t v10 = (((int8_t*)&s_v1))[1] << 4;
-  const int8_t v11 = (((int8_t*)&s_v1))[1] & 0xF0;
-  const int8_t v12 = (((int8_t*)&s_v1))[2] << 4;
-  const int8_t v13 = (((int8_t*)&s_v1))[2] & 0xF0;
-  const int8_t v14 = (((int8_t*)&s_v1))[3] << 4;
-  const int8_t v15 = (((int8_t*)&s_v1))[3] & 0xF0;
+  const uint32_t s_v0 = (((const uint32_t*)weights)[0] ^ vkernel_zero_point);
+  const int8_t v0 = (((const int8_t*)&s_v0))[0] << 4;
+  const int8_t v1 = (((const int8_t*)&s_v0))[0] & 0xF0;
+  const int8_t v2 = (((const int8_t*)&s_v0))[1] << 4;
+  const int8_t v3 = (((const int8_t*)&s_v0))[1] & 0xF0;
+  const int8_t v4 = (((const int8_t*)&s_v0))[2] << 4;
+  const int8_t v5 = (((const int8_t*)&s_v0))[2] & 0xF0;
+  const int8_t v6 = (((const int8_t*)&s_v0))[3] << 4;
+  const int8_t v7 = (((const int8_t*)&s_v0))[3] & 0xF0;
+  const uint32_t s_v1 = (((const uint32_t*)weights)[1] ^ vkernel_zero_point);
+  const int8_t v8 = (((const int8_t*)&s_v1))[0] << 4;
+  const int8_t v9 = (((const int8_t*)&s_v1))[0] & 0xF0;
+  const int8_t v10 = (((const int8_t*)&s_v1))[1] << 4;
+  const int8_t v11 = (((const int8_t*)&s_v1))[1] & 0xF0;
+  const int8_t v12 = (((const int8_t*)&s_v1))[2] << 4;
+  const int8_t v13 = (((const int8_t*)&s_v1))[2] & 0xF0;
+  const int8_t v14 = (((const int8_t*)&s_v1))[3] << 4;
+  const int8_t v15 = (((const int8_t*)&s_v1))[3] & 0xF0;
 
   (*ksum) += (int32_t) (v0);
   (*ksum) += (int32_t) (v1);
@@ -80,7 +81,7 @@ void xnn_qb4_packw_gemm_goi_ukernel_x16c8__scalar(
   int8_t* packed_weights,
   size_t extra_bytes_bl,
   size_t extra_bytes_n,
-  const void* params)
+  const void* params) XNN_OOB_READS
 {
   assert(g != 0);
   assert(nc != 0);
