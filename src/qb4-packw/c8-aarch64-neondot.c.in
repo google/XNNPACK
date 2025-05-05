@@ -11,30 +11,31 @@ $assert KR > 1
 #include <stdint.h>
 #include <arm_neon.h>
 
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/packw.h"
 
 // convert a vector from packed nibbles to planar, and accumulate sum
 static XNN_INTRINSIC
 int8x16_t xnn_packed2planar(
   int32x4_t *vacc,
-  const uint8x16_t v,
+  const int8x16_t v,
   const int8x16_t vmask,
   const int8x16_t vones)
 {
-  const int8x16_t vl = vandq_u8(v, vmask);  // isolate lower int 4
+  const int8x16_t vl = vandq_s8(v, vmask);  // isolate lower int 4
   const int8x16_t vh = vshlq_n_s8(v, 4);// isolate upper int 4
   *vacc = vdotq_s32(*vacc, vh, vones);
   *vacc = vdotq_s32(*vacc, vl, vones);
   const int8x16_t v01 = vzip1q_s8(vh, vl);
   const int8x16_t v23 = vzip2q_s8(vh, vl);
-  const int8x16_t v02 = vreinterpretq_s8_u64(vuzp1q_s64(vreinterpretq_s64_s8(v01), vreinterpretq_s64_s8(v23)));
-  const int8x16_t v13 = vreinterpretq_s8_u64(vuzp2q_s64(vreinterpretq_s64_s8(v01), vreinterpretq_s64_s8(v23)));
-  const int8x16_t vl02 = vshrq_n_u8(v02, 4);
-  const int8x16_t v0123 = vorrq_s8(vl02, v13);
-  return v0123;
+  const uint8x16_t v02 = vreinterpretq_u8_s64(vuzp1q_s64(vreinterpretq_s64_s8(v01), vreinterpretq_s64_s8(v23)));
+  const uint8x16_t v13 = vreinterpretq_u8_s64(vuzp2q_s64(vreinterpretq_s64_s8(v01), vreinterpretq_s64_s8(v23)));
+  const uint8x16_t vl02 = vshrq_n_u8(v02, 4);
+  const uint8x16_t v0123 = vorrq_u8(vl02, v13);
+  return vreinterpretq_s8_u8(v0123);
 }
 
-void xnn_qb4_packw_gemm_goi_ukernel_x${NR}c${KR}__neondot(
+void xnn_qb4_packw_gemm_goi_ukernel_x${NR}c${KR}__aarch64_neondot(
   size_t g,
   size_t nc,
   size_t kc,
@@ -48,7 +49,7 @@ void xnn_qb4_packw_gemm_goi_ukernel_x${NR}c${KR}__neondot(
   int8_t* packed_weights,
   size_t extra_bytes_bl,
   size_t extra_bytes_n,
-  const void* params)
+  const void* params) XNN_OOB_READS
 {
   assert(g != 0);
   assert(nc != 0);
@@ -65,10 +66,7 @@ void xnn_qb4_packw_gemm_goi_ukernel_x${NR}c${KR}__neondot(
   size_t num_blocks = kc / bl;
   size_t weight_stride = (kc >> 1);
   const int8x16_t vmask = vmovq_n_s8(INT8_C(0xF0));
-  const uint8x16_t veor_mask = vmovq_n_u8(UINT8_C(0x88));
-  const int32x4_t neg_zp = vmovq_n_s32(-64);
-  const int8x16_t vones = vmovq_n_u8(UINT8_C(0x01));
-  const uint8x8_t vzeros = vmov_n_u8(0);
+  const int8x16_t vones = vmovq_n_s8(UINT8_C(0x01));
 
   uint8_t* out = (uint8_t*) packed_weights;
   const int32_t* b = (const int32_t*) bias;
@@ -80,7 +78,7 @@ void xnn_qb4_packw_gemm_goi_ukernel_x${NR}c${KR}__neondot(
 
   do {
     // NC main loop multiple of ${NR}
-    const uint8_t* w0 = (const uint8_t*) weights;
+    const int8_t* w0 = (const int8_t*) weights;
     const uint16_t* s0 = (const uint16_t*) scale;
     int n = nc;
     for (;n > 0; n -= ${NR}) {
@@ -91,7 +89,7 @@ void xnn_qb4_packw_gemm_goi_ukernel_x${NR}c${KR}__neondot(
 
       // KC/2 bytes is KC Nibbles
       $for N in range(1, NR):
-        const uint8_t* w${N} = w${N-1} + weight_stride;
+        const int8_t* w${N} = w${N-1} + weight_stride;
 
       // scales
       $for N in range(1, NR):
@@ -122,11 +120,11 @@ void xnn_qb4_packw_gemm_goi_ukernel_x${NR}c${KR}__neondot(
         // KC Main loop multiple of 16x32
         for(; k >= 32; k-=32) {
           $for N in range(0, NR):
-            const int64x2_t w${N}x01 = vreinterpretq_s64_s8(veorq_s8(vld1q_u8(w${N}), vkernel_zero_point)); w${N} += ${2 * KR};
+            const int64x2_t w${N}x01 = vreinterpretq_s64_s8(veorq_s8(vld1q_s8(w${N}), vkernel_zero_point)); w${N} += ${2 * KR};
 
           $for N in range(0, NR, 2):
-            int64x2_t v${N}${N+1}_0 = vzip1q_s64(w${N}x01, w${N+1}x01);
-            int64x2_t v${N}${N+1}_1 = vzip2q_s64(w${N}x01, w${N+1}x01);
+            int8x16_t v${N}${N+1}_0 = vreinterpretq_s8_s64(vzip1q_s64(w${N}x01, w${N+1}x01));
+            int8x16_t v${N}${N+1}_1 = vreinterpretq_s8_s64(vzip2q_s64(w${N}x01, w${N+1}x01));
 
           $for I in range(0, 2):
             $for N in range(0, NR, 4):
@@ -141,10 +139,9 @@ void xnn_qb4_packw_gemm_goi_ukernel_x${NR}c${KR}__neondot(
         }
 
         $for N in range(0, NR, 8):
-          uint16x8_t bf_scales${N//8} = {
-            $for N_I in range(N, N+8):
-              s${N_I}[0],
-          };
+          uint16x8_t bf_scales${N//8} = vdupq_n_u16(0);
+          $for N_I in range(0, 8):
+            bf_scales${N//8} = vsetq_lane_u16(s${N + N_I}[0], bf_scales${N//8}, ${N_I});
 
         $for N in range(0, NR, 8):
           float32x4_t f_scales${N//4} = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(bf_scales${N//8}), 16));
@@ -165,7 +162,7 @@ void xnn_qb4_packw_gemm_goi_ukernel_x${NR}c${KR}__neondot(
           vst1q_f32(&packed_k_scaled_sum[${N}], packed_k_scaled_sums${N//4});
 
         $for N in range(0, NR, 4):
-          vst1_u16((uint16_t*)out+${N}, vshrn_n_s32(vreinterpretq_s32_f32(f_scales${N//4}), 16));
+          vst1_u16((uint16_t*)out+${N}, vreinterpret_u16_s16(vshrn_n_s32(vreinterpretq_s32_f32(f_scales${N//4}), 16)));
 
         out += ${NR} * sizeof(uint16_t);
       }

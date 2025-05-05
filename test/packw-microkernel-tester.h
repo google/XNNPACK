@@ -603,15 +603,21 @@ class PackWMicrokernelTester {
   }
 
   void Test(xnn_qb4_packw_gemm_goi_ukernel_fn packw) const {
+    size_t packed_k2 = round_up_po2(k(), kr() * sr() * 2);
+    size_t k_num_blocks = packed_k2 / bl();
+    size_t packed_k_bytes = packed_k2 / 2;
+    size_t packed_weight_size = packed_n() * (
+      packed_k_bytes + sizeof(float) + k_num_blocks * sizeof(uint16_t) + sizeof(float)
+    );
+
     xnnpack::Buffer<uint8_t> weights(XNN_EXTRA_BYTES / sizeof(int8_t) +
                                      n() * k());
-    xnnpack::Buffer<int32_t> bias(n());
-    xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_w(
-        packed_n() * packed_k() + packed_n() * sizeof(uint32_t));
-    xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_w_ref(
-        packed_n() * packed_k() + packed_n() * sizeof(uint32_t));
+    xnnpack::Buffer<int32_t> bias(packed_n());
+    xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_w(packed_weight_size);
+    xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_w_ref(packed_weight_size);
     xnnpack::Buffer<xnn_bfloat16, XNN_ALLOCATION_ALIGNMENT> bf16_scales(
-        n() * (k() / bl()));
+        n() * k_num_blocks
+    );
 
     std::iota(weights.begin(), weights.end(), 0);
     std::iota(bias.begin(), bias.end(), UINT32_C(15));
@@ -630,18 +636,9 @@ class PackWMicrokernelTester {
         /*extra_bytes=*/sizeof(float) * nr(), &packing_params);
 
     // fill in scale as second step (reference)
-    size_t k_stride = round_up_po2(k(), kr() * sr() * 2 /* planes */);
-    k_stride = round_up_po2(k_stride, 2) >> 1;
-    size_t k_num_blocks = k() / bl();
-    size_t k_bytes = sizeof(int8_t) * k_stride * nr();
-    size_t bias_bytes = sizeof(float) * nr();
-    size_t ksum_bytes = sizeof(float) * nr();
-    size_t block_bytes = sizeof(uint16_t) * k_num_blocks * nr();
-
-    size_t start_offset = ksum_bytes + k_bytes / k_num_blocks;
-    size_t stride = ksum_bytes + k_bytes + block_bytes + bias_bytes;
-    size_t block_stride = (bl() * nr()) / 2 + (sizeof(uint16_t) * nr());
-
+    size_t stride = nr() * (packed_k_bytes + k_num_blocks * sizeof(uint16_t) + sizeof(float) + sizeof(float));
+    size_t block_stride = (bl() /2 + sizeof(uint16_t)) * nr();
+    size_t start_offset = nr() * (packed_k_bytes / k_num_blocks + sizeof(float));
     xnn_init_blockwise_scale_bf16_params(
         /*channels=*/n(),
         /*channels_tile=*/nr(),
