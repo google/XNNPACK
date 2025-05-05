@@ -4,12 +4,11 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert BATCH_TILE >= 1
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vunary.h"
 
 
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
@@ -33,24 +32,24 @@ void xnn_f32_vhswish_ukernel__${"wasm" if WASM else "scalar"}_u${BATCH_TILE}(
   $if BATCH_TILE > 1:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
       $for N in range(BATCH_TILE):
-        float vx${ABC[N]} = input[${N}];
+        float vx${N} = input[${N}];
       input += ${BATCH_TILE};
 
       $for N in range(BATCH_TILE):
-        float vacc${ABC[N]} = vx${ABC[N]} + vthree;
-        vx${ABC[N]} *= vsixth;
+        float vacc${N} = vx${N} + vthree;
+        vx${N} *= vsixth;
 
       $for N in range(BATCH_TILE):
-        vacc${ABC[N]} = ${MAX_F32}(vacc${ABC[N]}, vzero);
+        vacc${N} = ${MAX_F32}(vacc${N}, vzero);
 
       $for N in range(BATCH_TILE):
-        vacc${ABC[N]} = ${MIN_F32}(vacc${ABC[N]}, vsix);
+        vacc${N} = ${MIN_F32}(vacc${N}, vsix);
 
       $for N in range(BATCH_TILE):
-        vacc${ABC[N]} *= vx${ABC[N]};
+        vacc${N} *= vx${N};
 
       $for N in range(BATCH_TILE):
-        output[${N}] = vacc${ABC[N]};
+        output[${N}] = vacc${N};
       output += ${BATCH_TILE};
     }
     if XNN_UNLIKELY(batch != 0) {

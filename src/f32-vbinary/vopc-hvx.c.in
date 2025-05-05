@@ -5,10 +5,10 @@ $SIMD_TILE = BATCH_TILE // 32
 $assert OP in ["ADD", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF"]
 #include <assert.h>
 
-#include "xnnpack/simd/f32-hvx.h"
+#include "src/xnnpack/simd/f32-hvx.h"
 
-#include "xnnpack/math.h"
-#include "xnnpack/vbinary.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vbinary.h"
 
 $_HEXAGON_OP_HVX = {
 $  "ADD": lambda x: "xnn_add_f32(%s, vb)" % x,
@@ -36,8 +36,7 @@ void xnn_f32_v${OP.lower()}c_ukernel__hvx_u${BATCH_TILE}(
 
   $if BATCH_TILE > 32:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
-      HVX_Vector va0 = xnn_loadu_f32(input_a);
-      $for N in range(32, BATCH_TILE, 32):
+      $for N in range(0, BATCH_TILE, 32):
         HVX_Vector va${int(N/32)} = xnn_loadu_f32(input_a + ${N});
       input_a += ${BATCH_TILE};
 
@@ -48,8 +47,7 @@ void xnn_f32_v${OP.lower()}c_ukernel__hvx_u${BATCH_TILE}(
         $for N in range(SIMD_TILE):
           vacc${N} = xnn_mul_f32(vacc${N}, vacc${N});
 
-     xnn_storeu_f32(output, vacc0);
-      $for N in range(32, BATCH_TILE, 32):
+      $for N in range(0, BATCH_TILE, 32):
         xnn_storeu_f32(output + ${N}, vacc${int(N/32)});
       output += ${BATCH_TILE};
     }

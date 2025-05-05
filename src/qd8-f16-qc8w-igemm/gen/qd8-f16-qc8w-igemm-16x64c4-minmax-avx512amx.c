@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-igemm/c4-avx512amx.c.in
 //   Generator: tools/xngen
@@ -16,10 +17,10 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/gemm.h"
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/math.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/unaligned.h"
 
 
 void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_16x64c4__avx512amx(
@@ -35,7 +36,7 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_16x64c4__avx512amx(
     size_t a_offset,
     const int8_t* zero,
     const int8_t* zero_data,
-    const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
+    const struct xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
     const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
@@ -47,15 +48,8 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_16x64c4__avx512amx(
   assert(w != NULL);
   assert(c != NULL);
 
-// TODO: amxintrin.h only provide intrinsics for __x86_64__
-// Update if amxintrin changes
-#if defined(__x86_64__)
-  __attribute__((aligned(64))) int32_t vintile[16 * 16];
-  __attribute__((aligned(64))) int32_t res[4][16 * 16];
-
-  kc = round_up_po2(kc, 4 * sizeof(int8_t));
-  const size_t kremainder = (kc & 63) ? (kc & 63) : 64;
-  const __mmask16 kremainder_mask = _cvtu32_mask16((UINT32_C(1) << (kremainder >> 2)) - 1);
+// AMX is only available for __x86_64__
+#if XNN_ARCH_X86_64
 
   // Define tile config data structure
   struct __tile_config {
@@ -68,8 +62,15 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_16x64c4__avx512amx(
     uint8_t reserved_2[8];
   };
 
+  XNN_ALIGN(64) struct __tile_config tile_data = {0};
+  XNN_ALIGN(64) int32_t res[4][16 * 16];
+  XNN_ALIGN(64) int32_t vintile[16 * 16];
+
+  kc = round_up_po2(kc, 4 * sizeof(int8_t));
+  const size_t kremainder = (kc & 63) ? (kc & 63) : 64;
+  const __mmask16 kremainder_mask = _cvtu32_mask16((UINT32_C(1) << (kremainder >> 2)) - 1);
+
   // Load tile configuration
-  __attribute__((aligned(64))) struct __tile_config tile_data = {0};
   tile_data.palette_id = 1;
   tile_data.rows[0] = mr;              // tmm0 = res[0]
   tile_data.rows[1] = mr;              // tmm1 = res[1]
@@ -89,8 +90,7 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_16x64c4__avx512amx(
   tile_data.colsb[6] = kremainder;  // tmm6 = input remainder
   tile_data.colsb[7] = 64;          // tmm7 = weights remainder
 
-  //_tile_loadconfig(&tile_data);
-  __asm__ volatile ("ldtilecfg %0" :: "m" (tile_data));
+  _tile_loadconfig(&tile_data);
 
   xnn_float16* c0 = c;
   xnn_float16* c1 = (xnn_float16*) ((uintptr_t) c0 + cm_stride);
@@ -167,12 +167,10 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_16x64c4__avx512amx(
     w = (const int32_t*) w + 64;
 
     // Zero tile accumulator
-    __asm__ volatile (
-      "tilezero %%tmm0\n"
-      "tilezero %%tmm1\n"
-      "tilezero %%tmm2\n"
-      "tilezero %%tmm3\n"
-      ::);
+    _tile_zero(0);
+    _tile_zero(1);
+    _tile_zero(2);
+    _tile_zero(3);
 
     size_t p = ks;
     do {
@@ -1129,7 +1127,6 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_16x64c4__avx512amx(
   } while (nc != 0);
 
   // Release tile config
-  //  _tile_release();
-  __asm__ volatile ("tilerelease" ::);
+  _tile_release();
   #endif  // defined(__x86_64__)
 }

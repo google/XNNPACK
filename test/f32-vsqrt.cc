@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -15,14 +16,15 @@
 #include <limits>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/vunary.h"
-#include "next_prime.h"
-#include "vunary-microkernel-tester.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vunary.h"
+#include "test/next_prime.h"
+#include "test/unary-ops.h"
+#include "test/vunary-microkernel-tester.h"
 
 using TestInfo = SquareRoot;
 
@@ -40,6 +42,6 @@ TEST(ukernel, special_values) {                                                 
     /*outputs=*/{0.0f, -0.0f, 1.0f, NAN},                                                                               \
     /*tolerance_ulp=*/1);                                                                                               \
 }
-#include "f32-vsqrt/f32-vsqrt.h"
+#include "src/f32-vsqrt/f32-vsqrt.h"
 #undef XNN_UKERNEL_WITH_PARAMS
 #undef XNN_QUANTIZED

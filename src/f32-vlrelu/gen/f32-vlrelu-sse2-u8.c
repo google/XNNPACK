@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vlrelu/sse.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <emmintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_f32_vlrelu_ukernel__sse2_u8(

@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-rsum/ssse3.c.in
 //   Generator: tools/xngen
@@ -10,8 +11,8 @@
 
 #include <tmmintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
 
 void xnn_qs8_rsum_ukernel__ssse3_u64_acc2(
     size_t batch,

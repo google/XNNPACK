@@ -172,4 +172,23 @@ tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=3 -D DATATYPE=F32 -D ACCUM
 tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=4 -D DATATYPE=F32 -D ACCUMULATORS=2 -D OP=MINMAX -D WASM=1 -o src/f32-rminmax/gen/f32-rminmax-wasm-u4-acc2.c &
 tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=4 -D DATATYPE=F32 -D ACCUMULATORS=4 -D OP=MINMAX -D WASM=1 -o src/f32-rminmax/gen/f32-rminmax-wasm-u4-acc4.c &
 
+################################## Hexagon HVX #################################
+tools/xngen src/f32-rminmax/simd.c.in -D BATCH_TILE=32  -D ACCUMULATORS=1 -D OP=MAX -D ARCH=hvx -o src/f32-rminmax/gen/f32-rmax-hvx-u32.c &
+tools/xngen src/f32-rminmax/simd.c.in -D BATCH_TILE=64  -D ACCUMULATORS=2 -D OP=MAX -D ARCH=hvx -o src/f32-rminmax/gen/f32-rmax-hvx-u64-acc2.c &
+tools/xngen src/f32-rminmax/simd.c.in -D BATCH_TILE=96  -D ACCUMULATORS=3 -D OP=MAX -D ARCH=hvx -o src/f32-rminmax/gen/f32-rmax-hvx-u96-acc3.c &
+tools/xngen src/f32-rminmax/simd.c.in -D BATCH_TILE=128 -D ACCUMULATORS=2 -D OP=MAX -D ARCH=hvx -o src/f32-rminmax/gen/f32-rmax-hvx-u128-acc2.c &
+tools/xngen src/f32-rminmax/simd.c.in -D BATCH_TILE=128 -D ACCUMULATORS=4 -D OP=MAX -D ARCH=hvx -o src/f32-rminmax/gen/f32-rmax-hvx-u128-acc4.c &
+
+tools/xngen src/f32-rminmax/simd.c.in -D BATCH_TILE=32  -D ACCUMULATORS=1 -D OP=MIN -D ARCH=hvx -o src/f32-rminmax/gen/f32-rmin-hvx-u32.c &
+tools/xngen src/f32-rminmax/simd.c.in -D BATCH_TILE=64  -D ACCUMULATORS=2 -D OP=MIN -D ARCH=hvx -o src/f32-rminmax/gen/f32-rmin-hvx-u64-acc2.c &
+tools/xngen src/f32-rminmax/simd.c.in -D BATCH_TILE=96  -D ACCUMULATORS=3 -D OP=MIN -D ARCH=hvx -o src/f32-rminmax/gen/f32-rmin-hvx-u96-acc3.c &
+tools/xngen src/f32-rminmax/simd.c.in -D BATCH_TILE=128 -D ACCUMULATORS=2 -D OP=MIN -D ARCH=hvx -o src/f32-rminmax/gen/f32-rmin-hvx-u128-acc2.c &
+tools/xngen src/f32-rminmax/simd.c.in -D BATCH_TILE=128 -D ACCUMULATORS=4 -D OP=MIN -D ARCH=hvx -o src/f32-rminmax/gen/f32-rmin-hvx-u128-acc4.c &
+
+tools/xngen src/f32-rminmax/simd.c.in -D BATCH_TILE=32  -D ACCUMULATORS=1 -D OP=MINMAX -D ARCH=hvx -o src/f32-rminmax/gen/f32-rminmax-hvx-u32.c &
+tools/xngen src/f32-rminmax/simd.c.in -D BATCH_TILE=64  -D ACCUMULATORS=2 -D OP=MINMAX -D ARCH=hvx -o src/f32-rminmax/gen/f32-rminmax-hvx-u64-acc2.c &
+tools/xngen src/f32-rminmax/simd.c.in -D BATCH_TILE=96  -D ACCUMULATORS=3 -D OP=MINMAX -D ARCH=hvx -o src/f32-rminmax/gen/f32-rminmax-hvx-u96-acc3.c &
+tools/xngen src/f32-rminmax/simd.c.in -D BATCH_TILE=128 -D ACCUMULATORS=2 -D OP=MINMAX -D ARCH=hvx -o src/f32-rminmax/gen/f32-rminmax-hvx-u128-acc2.c &
+tools/xngen src/f32-rminmax/simd.c.in -D BATCH_TILE=128 -D ACCUMULATORS=4 -D OP=MINMAX -D ARCH=hvx -o src/f32-rminmax/gen/f32-rminmax-hvx-u128-acc4.c &
+
 wait

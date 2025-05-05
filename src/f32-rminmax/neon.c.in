@@ -12,8 +12,8 @@ $assert OP in ["MAX", "MIN", "MINMAX"]
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
 
 
 $ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
@@ -31,11 +31,11 @@ void xnn_f32_r${OP.lower()}_ukernel__neon_u${BATCH_TILE}${ACC_SUFFIX}(
   assert(output != NULL);
 
   $if EMIT_MIN:
-    float32x4_t vmin0 = vld1q_dup_f32(input);
+    float32x4_t vmin0 = vld1q_dup_f32(output);
     $if EMIT_MAX:
-      float32x4_t vmax0 = vmin0;
+      float32x4_t vmax0 = vld1q_dup_f32(output + 1);
   $elif EMIT_MAX:
-    float32x4_t vmax0 = vld1q_dup_f32(input);
+    float32x4_t vmax0 = vld1q_dup_f32(output);
   $for A in range(1, ACCUMULATORS):
     $if EMIT_MIN:
       float32x4_t vmin${A} = vmin0;

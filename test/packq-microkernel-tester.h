@@ -10,16 +10,16 @@
 #include <cstddef>
 #include <cstdlib>
 
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/pack.h"
-#include "xnnpack/buffer.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/pack.h"
 
 namespace xnnpack {
 
 class PackQMicrokernelTester {
  public:
-  PackQMicrokernelTester&m(size_t m) {
+  PackQMicrokernelTester& m(size_t m) {
     this->m_ = m;
     return *this;
   }

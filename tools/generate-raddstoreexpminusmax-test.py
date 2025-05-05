@@ -28,7 +28,6 @@ parser.add_argument("-o", "--output", metavar="FILE", required=True,
                     help='Output (C++ source) file')
 parser.set_defaults(defines=list())
 
-
 RADDSTOREEXPMINUSMAX_TEST_TEMPLATE = """\
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, element_tile, datatype, params_type, init_params) \
 XNN_TEST_RADDSTOREEXPMINUSMAX_ELEMENT_EQ(ukernel, arch_flags, ${", ".join(TEST_ARGS)});  
@@ -36,6 +35,7 @@ XNN_TEST_RADDSTOREEXPMINUSMAX_ELEMENT_DIV(ukernel, arch_flags, ${", ".join(TEST_
 XNN_TEST_RADDSTOREEXPMINUSMAX_ELEMENT_LT(ukernel, arch_flags, ${", ".join(TEST_ARGS)});
 XNN_TEST_RADDSTOREEXPMINUSMAX_ELEMENT_GT(ukernel, arch_flags, ${", ".join(TEST_ARGS)});
 """
+
 
 def main(args):
   options = parser.parse_args(args)
@@ -46,6 +46,7 @@ def main(args):
   ukernel = options.ukernel
 
   tests = """\
+
 // Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -57,6 +58,7 @@ def main(args):
 
 
 #include <gtest/gtest.h>
+
 #include "xnnpack/common.h"
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/microparams-init.h"

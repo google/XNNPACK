@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vsigmoid/neon-lut64-p2.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vunary.h"
 
 
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_64[64];

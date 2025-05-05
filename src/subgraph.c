@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack/subgraph.h"
+#include "src/xnnpack/subgraph.h"
 
 #include <assert.h>
 #include <inttypes.h>
@@ -13,19 +13,19 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "xnnpack.h"
-#include "xnnpack/allocation-type.h"
-#include "xnnpack/allocator.h"
-#include "xnnpack/common.h"
-#include "xnnpack/config-types.h"
-#include "xnnpack/config.h"
-#include "xnnpack/fp16.h"
-#include "xnnpack/hardware-config.h"
-#include "xnnpack/internal.h"
-#include "xnnpack/log.h"
-#include "xnnpack/math.h"
-#include "xnnpack/node-type.h"
-#include "xnnpack/params.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/allocation-type.h"
+#include "src/xnnpack/allocator.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/config.h"
+#include "src/xnnpack/fp16.h"
+#include "src/xnnpack/hardware-config.h"
+#include "src/xnnpack/internal.h"
+#include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/node-type.h"
+#include "src/xnnpack/params.h"
 
 #ifndef XNN_ENABLE_SPARSE
   #error "XNN_ENABLE_SPARSE not defined"
@@ -40,16 +40,6 @@ enum xnn_status xnn_insert_clamp_node(xnn_subgraph_t subgraph, float output_min,
   size_t dims[XNN_MAX_TENSOR_DIMS];
   memcpy(dims, output_value->shape.dim, num_dims * sizeof(size_t));
   switch (output_value->datatype) {
-    case xnn_datatype_fp16:
-      status = xnn_define_tensor_value(
-          subgraph, xnn_datatype_fp16, num_dims, dims, NULL,
-          /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, &new_id);
-      break;
-    case xnn_datatype_fp32:
-      status = xnn_define_tensor_value(
-          subgraph, xnn_datatype_fp32, num_dims, dims, NULL,
-          /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, &new_id);
-      break;
     case xnn_datatype_quint8:
       status = xnn_define_quantized_tensor_value(
           subgraph, xnn_datatype_quint8, output_value->quantization.zero_point,
@@ -63,7 +53,10 @@ enum xnn_status xnn_insert_clamp_node(xnn_subgraph_t subgraph, float output_min,
           /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, &new_id);
       break;
     default:
-      XNN_UNREACHABLE;
+      status = xnn_define_tensor_value(
+          subgraph, output_value->datatype, num_dims, dims, NULL,
+          /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, &new_id);
+      break;
   }
   if (status != xnn_status_success) {
     return status;
@@ -84,13 +77,17 @@ enum xnn_status xnn_insert_pack_lh_node(xnn_subgraph_t subgraph, uint32_t input_
   const struct xnn_value *input = &subgraph->values[input_id];
   enum xnn_status status = xnn_status_uninitialized;
   switch (input->datatype) {
-    case xnn_datatype_qint8:
+    case xnn_datatype_qint8: {
+      // Create a copy of the input shape since it might be reallocated by the
+      // subgraph when the new tensor is added.
+      struct xnn_shape input_shape = input->shape;
       status = xnn_define_quantized_tensor_value(
-          subgraph, input->datatype, input->quantization.zero_point, input->quantization.scale,
-          input->shape.num_dims,
-          input->shape.dim, /*data=*/input->data,
+          subgraph, input->datatype, input->quantization.zero_point,
+          input->quantization.scale, input_shape.num_dims, input_shape.dim,
+          /*data=*/input->data,
           /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, new_id);
       break;
+    }
     case xnn_datatype_fp16:
     case xnn_datatype_fp32:
       status = xnn_define_tensor_value(
@@ -843,14 +840,17 @@ static bool any_values_fp32(xnn_subgraph_t subgraph, const struct xnn_node* node
   return false;
 }
 
-static bool all_values_fp32(xnn_subgraph_t subgraph, const struct xnn_node* node) {
+static bool all_values_fp32_or_pfp32(xnn_subgraph_t subgraph,
+                                     const struct xnn_node* node) {
   for (uint32_t i = 0; i < node->num_inputs; i++) {
-    if (subgraph->values[node->inputs[i]].datatype != xnn_datatype_fp32) {
+    if (subgraph->values[node->inputs[i]].datatype != xnn_datatype_fp32 &&
+        subgraph->values[node->inputs[i]].datatype != xnn_datatype_pfp32) {
       return false;
     }
   }
   for (uint32_t i = 0; i < node->num_outputs; i++) {
-    if (subgraph->values[node->outputs[i]].datatype != xnn_datatype_fp32) {
+    if (subgraph->values[node->outputs[i]].datatype != xnn_datatype_fp32 &&
+        subgraph->values[node->outputs[i]].datatype != xnn_datatype_pfp32) {
       return false;
     }
   }
@@ -885,10 +885,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       case xnn_node_type_binary_elementwise:
       case xnn_node_type_unary_elementwise:
       case xnn_node_type_batch_matrix_multiply:
-      case xnn_node_type_concatenate2:
-      case xnn_node_type_concatenate3:
-      case xnn_node_type_concatenate4:
-      case xnn_node_type_concatenate5:
+      case xnn_node_type_concatenate:
       case xnn_node_type_convert:
       case xnn_node_type_average_pooling_2d:
       case xnn_node_type_copy:
@@ -896,9 +893,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       case xnn_node_type_deconvolution_2d:
       case xnn_node_type_depthwise_convolution_2d:
       case xnn_node_type_depth_to_space_2d:
-      case xnn_node_type_even_split2:
-      case xnn_node_type_even_split3:
-      case xnn_node_type_even_split4:
+      case xnn_node_type_even_split:
       case xnn_node_type_fully_connected:
       case xnn_node_type_global_average_pooling_2d:
       case xnn_node_type_global_sum_pooling_2d:
@@ -914,6 +909,10 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       case xnn_node_type_static_transpose:
       case xnn_node_type_rope:
         break;
+      case xnn_node_type_pack_lh:
+        if (xnn_init_x16_pack_lh_config() != NULL) {
+          break;
+        }
       default:
         xnn_log_warning("FP16 rewrite aborted: node #%" PRIu32 " (%s) is not supported for FP16 inference",
           n, xnn_node_type_to_string(node->type));
@@ -949,8 +948,10 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
           // `qdint8` for conversion to fp16.
           subgraph->values[node->inputs[0]].datatype = xnn_datatype_qdint8;
           subgraph->values[node->outputs[0]].fp16_compatible = true;
-        } else if (subgraph->values[node->inputs[0]].datatype ==
-                       xnn_datatype_fp32 &&
+        } else if ((subgraph->values[node->inputs[0]].datatype ==
+                        xnn_datatype_fp32 ||
+                    subgraph->values[node->inputs[0]].datatype ==
+                        xnn_datatype_pfp32) &&
                    subgraph->values[node->inputs[1]].datatype ==
                        xnn_datatype_fp16 &&
                    subgraph->values[node->outputs[0]].datatype ==
@@ -961,7 +962,20 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
               subgraph->values[node->inputs[2]].datatype == xnn_datatype_fp32) {
             subgraph->values[node->inputs[2]].fp16_compatible = true;
           }
-        } else if (all_values_fp32(subgraph, node)) {
+        } else if (subgraph->values[node->inputs[0]].datatype ==
+                        xnn_datatype_pfp32 &&
+                   subgraph->values[node->inputs[1]].datatype ==
+                       xnn_datatype_fp32 &&
+                   subgraph->values[node->outputs[0]].datatype ==
+                       xnn_datatype_fp32) {
+          subgraph->values[node->inputs[0]].fp16_compatible = true;
+          subgraph->values[node->inputs[1]].fp16_compatible = true;
+          subgraph->values[node->outputs[0]].fp16_compatible = true;
+          if (node->num_inputs > 2 &&
+              subgraph->values[node->inputs[2]].datatype == xnn_datatype_fp32) {
+            subgraph->values[node->inputs[2]].fp16_compatible = true;
+          }
+        } else if (all_values_fp32_or_pfp32(subgraph, node)) {
           subgraph->values[node->inputs[0]].fp16_compatible = true;
           subgraph->values[node->outputs[0]].fp16_compatible = true;
         } else {
@@ -986,16 +1000,30 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
           subgraph->values[node->outputs[0]].fp16_compatible = true;
         }
         break;
+      case xnn_node_type_pack_lh:
+        if (subgraph->values[node->inputs[0]].datatype == xnn_datatype_fp32) {
+          subgraph->values[node->inputs[0]].fp16_compatible = true;
+        }
+        break;
       default:
         for (uint32_t i = 0; i < node->num_inputs; i++) {
-          if (subgraph->values[node->inputs[i]].datatype == xnn_datatype_fp32) {
-            subgraph->values[node->inputs[i]].fp16_compatible = true;
+          switch (subgraph->values[node->inputs[i]].datatype) {
+            case xnn_datatype_fp32:
+            case xnn_datatype_pfp32:
+              subgraph->values[node->inputs[i]].fp16_compatible = true;
+              break;
+            default:
+              break;
           }
         }
         for (uint32_t o = 0; o < node->num_outputs; o++) {
-          if (subgraph->values[node->outputs[o]].datatype ==
-              xnn_datatype_fp32) {
-            subgraph->values[node->outputs[o]].fp16_compatible = true;
+          switch (subgraph->values[node->outputs[o]].datatype) {
+            case xnn_datatype_fp32:
+            case xnn_datatype_pfp32:
+              subgraph->values[node->outputs[o]].fp16_compatible = true;
+              break;
+            default:
+              break;
           }
         }
         break;
@@ -1009,7 +1037,8 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
     value->fp16_id = XNN_INVALID_VALUE_ID;
     value->fp32_id = XNN_INVALID_VALUE_ID;
     if (value->fp16_compatible) {
-      assert(value->datatype == xnn_datatype_fp32);
+      assert(value->datatype == xnn_datatype_fp32 ||
+             value->datatype == xnn_datatype_pfp32);
       if (xnn_value_is_static(value)) {
         assert(value->producer == XNN_INVALID_NODE_ID);
         const size_t fp16_size = xnn_tensor_get_size_by_id(subgraph, n) / 2 + XNN_EXTRA_BYTES;
@@ -1027,7 +1056,16 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
           // Recompute value due to potential reallocation in xnn_subgraph_new_internal_value
           value = &subgraph->values[n];
           xnn_value_copy(fp16_value, value);
-          fp16_value->datatype = xnn_datatype_fp16;
+          switch (value->datatype) {
+            case xnn_datatype_fp32:
+              fp16_value->datatype = xnn_datatype_fp16;
+              break;
+            case xnn_datatype_pfp32:
+              fp16_value->datatype = xnn_datatype_pfp16;
+              break;
+            default:
+              XNN_UNREACHABLE;
+          }
           // Clear external input/output flags
           fp16_value->flags = 0;
           fp16_value->fp16_id = XNN_INVALID_VALUE_ID;
@@ -1089,8 +1127,8 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
   for (uint32_t n = 0; n < num_original_values; n++) {
     struct xnn_value* value = &subgraph->values[n];
     if (value->fp16_compatible) {
-      assert(value->datatype == xnn_datatype_fp32);
       if (xnn_value_is_static(value)) {
+        assert(value->datatype == xnn_datatype_fp32);
         const size_t num_elements = xnn_shape_multiply_all_dims(&value->shape);
         xnn_run_unary_elementwise_nc(
             xnn_unary_convert, xnn_datatype_fp32, xnn_datatype_fp16,
@@ -1104,15 +1142,30 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
         value->datatype = xnn_datatype_fp16;
         xnn_log_debug("FP16 rewrite: converted static FP32 tensor #%" PRIu32 " to FP16 in new buffer", n);
       } else if (xnn_value_is_external(value)) {
+        assert(value->datatype == xnn_datatype_fp32);
         assert(value->fp16_id != XNN_INVALID_VALUE_ID);
-        struct xnn_value* fp16_value = &subgraph->values[value->fp16_id];
         value->producer = XNN_INVALID_NODE_ID;
         value->num_consumers = 0;
         value->first_consumer = XNN_INVALID_NODE_ID;
-        xnn_log_debug("FP16 rewrite: created FP16 tensor #%" PRIu32 " for FP32 tensor #%" PRIu32, fp16_value->id, n);
+        xnn_log_debug("FP16 rewrite: created FP16 tensor #%" PRIu32
+                      " for FP32 tensor #%" PRIu32,
+                      subgraph->values[value->fp16_id].id, n);
       } else {
-        xnn_log_debug("FP16 rewrite: converted FP32 tensor #%" PRIu32 " to FP16", n);
-        value->datatype = xnn_datatype_fp16;
+        switch (value->datatype) {
+          case xnn_datatype_fp32:
+            xnn_log_debug(
+                "FP16 rewrite: converted FP32 tensor #%" PRIu32 " to FP16", n);
+            value->datatype = xnn_datatype_fp16;
+            break;
+          case xnn_datatype_pfp32:
+            xnn_log_debug("FP16 rewrite: converted PFP32 tensor #%" PRIu32
+                          " to PFP16",
+                          n);
+            value->datatype = xnn_datatype_pfp16;
+            break;
+          default:
+            XNN_UNREACHABLE;
+        }
       }
     }
   }
@@ -1499,7 +1552,10 @@ void xnn_subgraph_optimize_dynamic_quantization_ops(xnn_subgraph_t subgraph) {
                      xnn_init_qp8_f32_qc8w_gemm_config() != NULL) {
             pack_activations = true;
           } else if ((weights_type == xnn_weights_type_qb4w) &&
-                     xnn_init_qp8_f32_qb4w_gemm_config() != NULL) {
+                     xnn_init_qp8_f32_qb4w_gemm_config() != NULL &&
+                     // The `qp8_f32_qb4w` GEMMs currently only accept unsigned
+                     // weights.
+                     filter->quantization.zero_point == 8) {
             pack_activations = true;
           }
         }
@@ -1541,7 +1597,18 @@ void xnn_subgraph_optimize_dynamic_quantization_ops(xnn_subgraph_t subgraph) {
             unsigned_config = xnn_init_qdu8_f32_qc4w_gemm_config();
           } else if (weights_type == xnn_weights_type_qc8w) {
             original_config = xnn_init_qd8_f32_qc8w_gemm_config();
-            unsigned_config = xnn_init_qdu8_f32_qc8w_gemm_config();
+            switch (consumer_type) {
+              case xnn_consumer_type_batch_mat_mul:
+              case xnn_consumer_type_fully_connected:
+                unsigned_config = xnn_init_qdu8_f32_qc8w_gemm_config();
+                break;
+              case xnn_consumer_type_convolution_2d:
+              case xnn_consumer_type_deconvolution:
+                unsigned_config = xnn_init_qdu8_f32_qc8w_igemm_config();
+                break;
+              default:
+                XNN_UNREACHABLE;
+            }
           } else if (weights_type == xnn_weights_type_qb4w) {
             original_config = xnn_init_qd8_f32_qb4w_gemm_config();
             unsigned_config = xnn_init_qdu8_f32_qb4w_gemm_config();
@@ -1551,8 +1618,20 @@ void xnn_subgraph_optimize_dynamic_quantization_ops(xnn_subgraph_t subgraph) {
             original_config = xnn_init_qd8_f16_qc4w_gemm_config();
             unsigned_config = xnn_init_qdu8_f16_qc4w_gemm_config();
           } else if (weights_type == xnn_weights_type_qc8w) {
-            original_config = xnn_init_qd8_f16_qc8w_gemm_config();
-            unsigned_config = xnn_init_qdu8_f16_qc8w_gemm_config();
+            switch (consumer_type) {
+              case xnn_consumer_type_batch_mat_mul:
+              case xnn_consumer_type_fully_connected:
+                original_config = xnn_init_qd8_f16_qc8w_gemm_config();
+                unsigned_config = xnn_init_qdu8_f16_qc8w_gemm_config();
+                break;
+              case xnn_consumer_type_convolution_2d:
+              case xnn_consumer_type_deconvolution:
+                original_config = xnn_init_qd8_f16_qc8w_igemm_config();
+                unsigned_config = xnn_init_qdu8_f16_qc8w_gemm_config();
+                break;
+              default:
+                XNN_UNREACHABLE;
+            }
           }
         }
         bool convert_to_qu8 = false;
@@ -1623,6 +1702,11 @@ enum xnn_status xnn_subgraph_optimize(
       xnn_log_error("failed to force FP16 inference: subgraph is incompatible with FP16 operators");
       return xnn_status_unsupported_parameter;
     }
+    if (fp16_rewrite_succeeded) {
+      // Re-run xnn_subgraph_analyze_consumers_and_producers since fp16 re-write
+      // inserts nodes and changes producers/consumers.
+      xnn_subgraph_analyze_consumers_and_producers(subgraph);
+    }
   }
 
   #if XNN_ENABLE_SPARSE
@@ -1670,8 +1754,12 @@ enum xnn_status xnn_delete_subgraph(
 enum xnn_node_type xnn_reduce_operator_to_node_type(enum xnn_reduce_operator type)
 {
   switch (type) {
+    case xnn_reduce_max:
+      return xnn_node_type_static_reduce_max;
     case xnn_reduce_mean:
       return xnn_node_type_static_mean;
+    case xnn_reduce_min:
+      return xnn_node_type_static_reduce_min;
     case xnn_reduce_sum:
       return xnn_node_type_static_sum;
     default:
@@ -1684,6 +1772,10 @@ enum xnn_reduce_operator xnn_node_type_to_reduce_operator(enum xnn_node_type typ
   switch (type) {
     case xnn_node_type_static_mean:
       return xnn_reduce_mean;
+    case xnn_node_type_static_reduce_max:
+      return xnn_reduce_max;
+    case xnn_node_type_static_reduce_min:
+      return xnn_reduce_min;
     case xnn_node_type_static_sum:
       return xnn_reduce_sum;
     default:

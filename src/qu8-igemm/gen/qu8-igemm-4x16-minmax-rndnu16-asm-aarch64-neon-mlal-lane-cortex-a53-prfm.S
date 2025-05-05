@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-igemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in
 //   Generator: tools/xngen
@@ -8,7 +9,7 @@
 // LICENSE file in the root directory of this source tree.
 
 
-#include "xnnpack/assembly.h"
+#include "src/xnnpack/assembly.h"
 
 # void xnn_qu8_igemm_minmax_rndnu16_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a53_prfm(
 #     size_t mr,                 x0
@@ -69,7 +70,8 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu16_ukernel_4x16__asm_aarch64_neon_mlal_
         ADD         x7,  x17, x7            // c3 = c2 + cm_stride
         CSEL        x7,  x17, x7, LO        //   c3 = c2
 
-        LD1R        {v7.16b}, [x11]          // kernel_zero_point
+        LD1R        {v7.16b}, [x11]         // kernel_zero_point
+        ADD         x11, x11, 4             // adjust params pointer
 
         .p2align    3
 0:
@@ -80,7 +82,6 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu16_ukernel_4x16__asm_aarch64_neon_mlal_
         LDP         q24, q28, [x5], 32
         MOV         v19.16b, v16.16b
         MOV         v21.16b, v20.16b
-        ADD         x11, x11, 4                 // adjust params pointer
         MOV         v22.16b, v20.16b
         MOV         v23.16b, v20.16b
         MOV         v25.16b, v24.16b

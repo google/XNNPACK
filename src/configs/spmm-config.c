@@ -6,12 +6,12 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/config.h"
-#include "xnnpack/init-once.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/spmm.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/config.h"
+#include "src/xnnpack/init-once.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/spmm.h"
 
 static struct xnn_spmm_config f16_spmm_config = {0};
 static struct xnn_spmm_config f32_spmm_config = {0};
@@ -70,6 +70,12 @@ static void init_f32_spmm_config(void) {
     f32_spmm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_spmm_config.mr = 32;
     f32_spmm_config.nr = 1;
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    f32_spmm_config.ukernel = (xnn_spmm_ukernel_fn) xnn_f32_spmm_minmax_ukernel_8vx1__rvv;
+    f32_spmm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+    f32_spmm_config.mr = 8 * hardware_config->vlenb / sizeof(float);
+    f32_spmm_config.nr = 1;
   #elif XNN_ARCH_WASMRELAXEDSIMD
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -98,6 +104,11 @@ static void init_f32_spmm_config(void) {
       f32_spmm_config.mr = 32;
       f32_spmm_config.nr = 1;
     }
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    f32_spmm_config.ukernel = (xnn_spmm_ukernel_fn) xnn_f32_spmm_minmax_ukernel_128x1__hvx_pipelined_x2;
+    f32_spmm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+    f32_spmm_config.mr = 128;
+    f32_spmm_config.nr = 1;
   #else
     f32_spmm_config.ukernel = (xnn_spmm_ukernel_fn) xnn_f32_spmm_minmax_ukernel_8x1__scalar;
     f32_spmm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -121,6 +132,12 @@ static void init_f32_spmm2_config(void) {
     f32_spmm2_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_spmm2_config.mr = 32;
     f32_spmm2_config.nr = 2;
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    f32_spmm2_config.ukernel = (xnn_spmm_ukernel_fn) xnn_f32_spmm_minmax_ukernel_8vx2__rvv;
+    f32_spmm2_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+    f32_spmm2_config.mr = 8 * hardware_config->vlenb / sizeof(float);
+    f32_spmm2_config.nr = 2;
   #elif XNN_ARCH_WASM
     f32_spmm2_config.ukernel = (xnn_spmm_ukernel_fn) xnn_f32_spmm_minmax_ukernel_8x2__scalar;
     f32_spmm2_config.init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -141,6 +158,12 @@ static void init_f32_spmm4_config(void) {
     f32_spmm4_config.ukernel = (xnn_spmm_ukernel_fn) xnn_f32_spmm_minmax_ukernel_32x4__aarch64_neonfma;
     f32_spmm4_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_spmm4_config.mr = 32;
+    f32_spmm4_config.nr = 4;
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    f32_spmm4_config.ukernel = (xnn_spmm_ukernel_fn) xnn_f32_spmm_minmax_ukernel_4vx4__rvv;
+    f32_spmm4_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+    f32_spmm4_config.mr = 4 * hardware_config->vlenb / sizeof(float);
     f32_spmm4_config.nr = 4;
   #elif XNN_ARCH_WASM
     f32_spmm4_config.ukernel = (xnn_spmm_ukernel_fn) xnn_f32_spmm_minmax_ukernel_8x4__scalar;

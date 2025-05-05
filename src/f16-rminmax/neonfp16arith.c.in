@@ -12,13 +12,14 @@ $assert OP in ["MAX", "MIN", "MINMAX"]
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
 
 
 $ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
 $EMIT_MIN = "MIN" in OP
 $EMIT_MAX = "MAX" in OP
+$MAX_POS = 1 if OP == "MINMAX" else 0
 void xnn_f16_r${OP.lower()}_ukernel__neonfp16arith_u${BATCH_TILE}${ACC_SUFFIX}(
     size_t batch,
     const xnn_float16* input,
@@ -33,11 +34,9 @@ void xnn_f16_r${OP.lower()}_ukernel__neonfp16arith_u${BATCH_TILE}${ACC_SUFFIX}(
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
   $if EMIT_MIN:
-    float16x8_t vmin0 = vreinterpretq_f16_u16(vld1q_dup_u16(i));
-    $if EMIT_MAX:
-      float16x8_t vmax0 = vmin0;
-  $elif EMIT_MAX:
-    float16x8_t vmax0 = vreinterpretq_f16_u16(vld1q_dup_u16(i));
+    float16x8_t vmin0 = vreinterpretq_f16_u16(vld1q_dup_u16(o));
+  $if EMIT_MAX:
+    float16x8_t vmax0 = vreinterpretq_f16_u16(vld1q_dup_u16((uint16_t*)((uintptr_t) o + ${MAX_POS} * sizeof(uint16_t))));
   $if BATCH_TILE > 8:
     $for A in range(1, ACCUMULATORS):
       $if EMIT_MIN:

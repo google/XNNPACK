@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-ppmm/scalar.c.in
 //   Generator: tools/xngen
@@ -9,8 +10,8 @@
 
 #include <assert.h>
 
-#include "xnnpack/math.h"
-#include "xnnpack/ppmm.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/ppmm.h"
 
 
 void xnn_f32_ppmm_minmax_ukernel_4x2__scalar(
@@ -22,7 +23,7 @@ void xnn_f32_ppmm_minmax_ukernel_4x2__scalar(
   float* restrict c,
   size_t cm_stride,
   size_t cn_stride,
-  const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+  const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= 4);

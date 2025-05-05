@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-f32-vcvt/neon.c.in
 //   Generator: tools/xngen
@@ -11,9 +12,9 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/vcvt.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/vcvt.h"
 
 
 void xnn_qu8_f32_vcvt_ukernel__neon_u8(
@@ -28,7 +29,7 @@ void xnn_qu8_f32_vcvt_ukernel__neon_u8(
   assert(output != NULL);
 
   const int16x8_t vminus_zero_point = vdupq_n_s16(-params->scalar.zero_point);
-  const float32x4_t vscale = vld1q_dup_f32(&params->scalar.scale);
+  const float32x4_t vscale = vdupq_n_f32(params->scalar.scale);
   for (; batch >= 8 * sizeof(uint8_t); batch -= 8 * sizeof(uint8_t)) {
     const uint8x8_t vx = vld1_u8(input); input += 8;
 

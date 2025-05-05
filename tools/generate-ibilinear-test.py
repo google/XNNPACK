@@ -18,16 +18,29 @@ import xnncommon
 
 
 parser = argparse.ArgumentParser(
-  description='IBILINEAR microkernel test generator')
-parser.add_argument("-s", "--spec", metavar="FILE", required=True,
-                    help="Specification (YAML) file")
-parser.add_argument("-o", "--output", metavar="FILE", required=True,
-                    help='Output (C++ source) file')
+    description="IBILINEAR microkernel test generator"
+)
+parser.add_argument(
+    "-s",
+    "--spec",
+    metavar="FILE",
+    required=True,
+    help="Specification (YAML) file",
+)
+parser.add_argument(
+    "-o",
+    "--output",
+    metavar="FILE",
+    required=True,
+    help="Output (C++ source) file",
+)
 parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_(f16|f32|s8|u8)_ibilinear_ukernel__(.+)_c(\d+)", name)
+  match = re.fullmatch(
+      r"xnn_(f16|f32|s8|u8)_ibilinear_ukernel__(.+)_c(\d+)", name
+  )
   assert match is not None
   channel_tile = int(match.group(3))
   pixel_tile = 1
@@ -156,11 +169,11 @@ def generate_test_cases(ukernel, channel_tile, pixel_tile, isa):
   Args:
     ukernel: C name of the micro-kernel function.
     channel_tile: Number of channels processed per one iteration of the inner
-                  loop of the micro-kernel.
+      loop of the micro-kernel.
     pixel_tile: Number of pixels processed per one iteration of the outer loop
-                of the micro-kernel.
+      of the micro-kernel.
     isa: instruction set required to run the micro-kernel. Generated unit test
-         will skip execution if the host processor doesn't support this ISA.
+      will skip execution if the host processor doesn't support this ISA.
 
   Returns:
     Code for the test case.
@@ -168,16 +181,19 @@ def generate_test_cases(ukernel, channel_tile, pixel_tile, isa):
   _, test_name = ukernel.split("_", 1)
   _, datatype, ukernel_type, _ = ukernel.split("_", 3)
   test_args = [ukernel]
-  return xngen.preprocess(IBILINEAR_TEST_TEMPLATE, {
-      "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
-      "TEST_FUNC": ukernel,
-      "UKERNEL_TYPE": ukernel_type.upper(),
-      "DATATYPE": datatype,
-      "CHANNEL_TILE": channel_tile,
-      "PIXEL_TILE": pixel_tile,
-      "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
-      "next_prime": next_prime,
-    })
+  return xngen.preprocess(
+      IBILINEAR_TEST_TEMPLATE,
+      {
+          "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
+          "TEST_FUNC": ukernel,
+          "UKERNEL_TYPE": ukernel_type.upper(),
+          "DATATYPE": datatype,
+          "CHANNEL_TILE": channel_tile,
+          "PIXEL_TILE": pixel_tile,
+          "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
+          "next_prime": next_prime,
+      },
+  )
 
 
 def main(args):
@@ -189,6 +205,7 @@ def main(args):
       raise ValueError("expected a list of micro-kernels in the spec")
 
     tests = """\
+// clang-format off
 // Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -200,10 +217,10 @@ def main(args):
 
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/ibilinear.h"
-#include "xnnpack/isa-checks.h"
-#include "ibilinear-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/ibilinear.h"
+#include "src/xnnpack/isa-checks.h"
+#include "test/ibilinear-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
     for ukernel_spec in spec_yaml:

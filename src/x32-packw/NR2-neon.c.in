@@ -12,9 +12,9 @@ $assert KBLOCK >= 2
 
 #include <arm_neon.h>
 
-#include "xnnpack/packw.h"
+#include "src/xnnpack/packw.h"
 $if PREFETCH:
-  #include "xnnpack/prefetch.h"
+  #include "src/xnnpack/prefetch.h"
 
 
 void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon_ld2lane_u${KBLOCK}${"_prfm" if PREFETCH else ""}(

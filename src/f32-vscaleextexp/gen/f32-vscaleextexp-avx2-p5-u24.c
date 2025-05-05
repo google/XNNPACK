@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vscaleextexp/avx2-p5.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/vscaleextexp.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vscaleextexp.h"
 
 
 void xnn_f32_vscaleextexp_ukernel__avx2_p5_u24(

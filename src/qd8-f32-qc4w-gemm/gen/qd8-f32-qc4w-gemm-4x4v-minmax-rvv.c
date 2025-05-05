@@ -1,8 +1,10 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-gemm/rvv.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2024 SiFive, Inc.
+// Copyright 2024 Microchip
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -11,8 +13,8 @@
 
 #include <riscv_vector.h>
 
-#include "xnnpack/gemm.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/math.h"
 
 void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x4v__rvv(
     size_t mr,
@@ -55,6 +57,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x4v__rvv(
 
   const size_t nr = __riscv_vsetvlmax_e32m4();
   size_t vl = nr;
+
   kc = round_up_po2(kc, 2);
   do {
     if XNN_UNLIKELY(nc < nr) {
@@ -63,7 +66,6 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x4v__rvv(
     nc = nc - vl;
 
     vint32m4_t vksum = __riscv_vle32_v_i32m4((const int32_t*)w, vl);
-    w = (const int32_t*) w + nr;
     const int32_t vinput_zero_point0 = quantization_params[0].zero_point;
     const int32_t vinput_zero_point1 = quantization_params[1].zero_point;
     const int32_t vinput_zero_point2 = quantization_params[2].zero_point;
@@ -72,6 +74,8 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x4v__rvv(
     vint32m4_t vacc1 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point1, vl);
     vint32m4_t vacc2 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point2, vl);
     vint32m4_t vacc3 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point3, vl);
+
+    w = (const int32_t*) w + nr;
 
     size_t k = kc;
     for (; k >= 2 * sizeof(uint8_t); k -= 2 * sizeof(uint8_t)) {
@@ -109,6 +113,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x4v__rvv(
       vint16m2_t va3bc1 = __riscv_vwmul_vx_i16m2(vbc1, va3c1, vl);
       vacc3 = __riscv_vwadd_wv_i32m4(vacc3, va3bc1, vl);
     }
+
     vacc0 = __riscv_vsra_vx_i32m4(vacc0, 4, vl);
     vacc1 = __riscv_vsra_vx_i32m4(vacc1, 4, vl);
     vacc2 = __riscv_vsra_vx_i32m4(vacc2, 4, vl);
@@ -168,5 +173,6 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x4v__rvv(
     a1 = (const int8_t*) ((uintptr_t) a1 - kc);
     a2 = (const int8_t*) ((uintptr_t) a2 - kc);
     a3 = (const int8_t*) ((uintptr_t) a3 - kc);
+
   } while (nc != 0);
 }

@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-qs8-vcvt/scalar-lrintf.c.in
 //   Generator: tools/xngen
@@ -10,9 +11,9 @@
 #include <assert.h>
 #include <math.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/vcvt.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vcvt.h"
 
 
 void xnn_f32_qu8_vcvt_ukernel__scalar_lrintf_u1(

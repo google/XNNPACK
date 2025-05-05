@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-gemm/MRx8c8-avxvnni.c.in
 //   Generator: tools/xngen
@@ -11,10 +12,10 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/gemm.h"
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/math.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/unaligned.h"
 
 
 void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_10x8c8__avx256vnni(
@@ -27,7 +28,7 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_10x8c8__avx256vnni(
     xnn_float16* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
+    const struct xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
     const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);

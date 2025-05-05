@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vmulcaddc/wasmsimd.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/math.h"
-#include "xnnpack/vmulcaddc.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vmulcaddc.h"
 
 
 void xnn_f32_vmulcaddc_minmax_ukernel_c4__wasmrelaxedsimd_2x(
@@ -23,7 +24,7 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c4__wasmrelaxedsimd_2x(
     const float* restrict weights,
     float* restrict output,
     size_t output_stride,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(rows != 0);
   assert(channels != 0);

@@ -3,16 +3,19 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+$import math
 $assert NR > 1
 $assert KR > 1
 $assert TYPE in ["int8_t"]
 $assert IZP in [0, 128]
 
+$NR_TILE = math.gcd(16, NR)
+
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/packw.h"
+#include "src/xnnpack/packw.h"
 
 $BTYPE = {"QS8": "int32_t", "X8": "uint32_t"}[DATATYPE]
 $WTYPE = {"int8_t": "int8_t", "uint16_t": "uint16_t", "uint32_t": "uint32_t", "float": "uint32_t"}[TYPE]
@@ -53,18 +56,10 @@ void xnn_${DATATYPE.lower()}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_gio_uk
       $if DATATYPE in ["QS8"]:
         int32_t* packed_b = (int32_t*) out;
       if XNN_LIKELY(b != NULL) {
-        $for N in range(NR):
-          $if BTYPE == TYPE:
-            out[${N}] = b[${N}];
-          $else:
-            ((${BTYPE}*) out)[${N}] = b[${N}];
+        memcpy(out, b, ${NR} * sizeof(${BTYPE}));
         b += ${NR};
       } else {
-        $for N in range(NR):
-          $if BTYPE == TYPE:
-            out[${N}] = 0;
-          $else:
-            ((${BTYPE}*) out)[${N}] = 0;
+        memset(out, 0, ${NR} * sizeof(${BTYPE}));
       }
       $if BTYPE == TYPE:
         out += ${NR};
@@ -74,48 +69,52 @@ void xnn_${DATATYPE.lower()}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_gio_uk
       $for K in range(1, KR):
         const ${TYPE}* w${K} = w${K-1} + k_stride;
       $if DATATYPE in ["QS8"]:
-        $for N in range(NR):
-          uint32_t ksum${N} = 0;
+        uint32_t ksum[${NR}] = {0,};
 
       // KC main loop multiple of ${NR}x${KR}
       size_t k = kc;
       for (; k >= ${KR}; k -= ${KR}) {
-        $for N in range(NR):
-          $for K in range(KR):
-            const ${TYPE} v${K}x${N} = w${K}[${N}];
-          $for K in range(KR):
-            $if DATATYPE in ["QS8"]:
-              ksum${N} += (uint32_t) v${K}x${N};
-          $for K in range(KR):
-            out[${N*KR+K}] = v${K}x${N};
+        for (size_t no = 0; no < ${NR}; no += ${NR_TILE}) {
+          $for N in range(NR_TILE):
+            $for K in range(KR):
+              const ${TYPE} v${K}x${N} = w${K}[no + ${N}];
+            $for K in range(KR):
+              $if DATATYPE in ["QS8"]:
+                ksum[no + ${N}] += (uint32_t) v${K}x${N};
+            $for K in range(KR):
+              out[${N*KR+K}] = v${K}x${N};
+          out += ${NR_TILE*KR};
+        }
         $for K in range(KR):
           w${K} += ${KR} * k_stride;
-        out += ${NR*KR};
       }
 
       // KC remainder of 1..${KR-1}
       if (k != 0) {
         assert(k >= 1 && k <= ${KR-1});
-        $for N in range(NR):
-          const ${TYPE} v0x${N} = w0[${N}];
-          $if DATATYPE in ["QS8"]:
-            ksum${N} += (uint32_t) v0x${N};
-          out[${N*KR}] = v0x${N};
-          $for K in range(1, KR):
-            if (${K} < k) {
-              const ${TYPE} v${K}x${N} = w${K}[${N}];
-              $if DATATYPE in ["QS8"]:
-                ksum${N} += (uint32_t) v${K}x${N};
+        for (size_t no = 0; no < ${NR}; no += ${NR_TILE}) {
+          $for N in range(NR_TILE):
+            const ${TYPE} v0x${N} = w0[no + ${N}];
+            $for K in range(1, KR):
+              const ${TYPE} v${K}x${N} = ${K} < k ? w${K}[no + ${N}] : 0;
+            $if DATATYPE in ["QS8"]:
+              ksum[no + ${N}] += (uint32_t) v0x${N};
+              $for K in range(1, KR):
+                ksum[no + ${N}] += (uint32_t) v${K}x${N};
+            out[${N*KR}] = v0x${N};
+            $for K in range(1, KR):
               out[${N*KR+K}] = v${K}x${N};
-            }
+          out += ${NR_TILE*KR};
+        }
         $for K in range(KR):
           w${K} += k * k_stride;
-        out += ${NR*KR};
       }
 
       $if DATATYPE in ["QS8"]:
-        $for N in range(NR):
-          packed_b[${N}] -= ksum${N} * izp;
+        for (size_t no = 0; no < ${NR}; no += ${NR_TILE}) {
+          $for N in range(NR_TILE):
+            packed_b[no + ${N}] -= ksum[no + ${N}] * izp;
+        }
       out = (${TYPE}*) ((uintptr_t) out + extra_bytes);
       w0 = w0 - kc * k_stride + ${NR};
     }
@@ -125,28 +124,15 @@ void xnn_${DATATYPE.lower()}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_gio_uk
       $if DATATYPE in ["QS8"]:
         int32_t* packed_b = (int32_t*) out;
       if XNN_LIKELY(b != NULL) {
-        size_t nb = n;
-        do {
-          $if BTYPE == TYPE:
-            *out++ = *b++;
-          $else:
-            *((${BTYPE}*) out) = *b++;
-            out += sizeof(${BTYPE});
-        } while (--nb != 0);
+        memcpy(out, b, n * sizeof(${BTYPE}));
+        b += n;
       } else {
-        size_t nb = n;
-        do {
-          $if BTYPE == TYPE:
-            *out++ = 0;
-          $else:
-            *((${BTYPE}*) out) = 0;
-            out += sizeof(${BTYPE});
-        } while (--nb != 0);
+        memset(out, 0, n * sizeof(${BTYPE}));
       }
       $if BTYPE == TYPE:
-        out += (${NR} - n);
+        out += ${NR};
       $else:
-        out += (${NR} - n) * sizeof(${BTYPE});
+        out += ${NR} * sizeof(${BTYPE});
 
      $if NR > 2:
         // NR remainder has less than ${NR} rows so last row is not loaded
@@ -154,8 +140,7 @@ void xnn_${DATATYPE.lower()}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_gio_uk
         const ${TYPE}* w${K} = w${K-1} + k_stride;
 
       $if DATATYPE in ["QS8"]:
-        $for N in range(NR-1):
-          uint32_t ksum${N} = 0;
+        uint32_t ksum[${NR}] = {0,};
 
       // KC main loop multiple of ${NR}x${KR}
       size_t k = kc;
@@ -164,19 +149,30 @@ void xnn_${DATATYPE.lower()}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_gio_uk
           const ${TYPE} v${K}x0 = w${K}[0];
         $for K in range(KR):
           $if DATATYPE in ["QS8"]:
-            ksum0 += (uint32_t) v${K}x0;
+            ksum[0] += (uint32_t) v${K}x0;
         $for K in range(KR):
           out[${K}] = v${K}x0;
-        $for N in range(1, NR-1):
-          if (${N} < n) {
-            $for K in range(KR):
-              const ${TYPE} v${K}x${N} = w${K}[${N}];
-            $for K in range(KR):
-              $if DATATYPE in ["QS8"]:
-                ksum${N} += (uint32_t) v${K}x${N};
-            $for K in range(KR):
-              out[${N*KR+K}] = v${K}x${N};
-          }
+        $for N in range(1, NR_TILE):
+          $for K in range(KR):
+            const ${TYPE} v${K}x${N} = ${N} < n ? w${K}[${N}] : 0;
+          $for K in range(KR):
+            $if DATATYPE in ["QS8"]:
+              ksum[${N}] += (uint32_t) v${K}x${N};
+          $for K in range(KR):
+            out[${N*KR+K}] = v${K}x${N};
+        for (size_t N = ${NR_TILE}; N < n; ++N) {
+          $for K in range(KR):
+            const ${TYPE} v${K} = w${K}[N];
+          $for K in range(KR):
+            $if DATATYPE in ["QS8"]:
+              ksum[N] += (uint32_t) v${K};
+          $for K in range(KR):
+            out[N*${KR} + ${K}] = v${K};
+        }
+        for (size_t N = n; N < ${NR}; ++N) {
+          $for K in range(KR):
+            out[N*${KR} + ${K}] = 0;
+        }
         $for K in range(KR):
           w${K} += ${KR} * k_stride;
         out += ${NR*KR};
@@ -185,28 +181,27 @@ void xnn_${DATATYPE.lower()}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_gio_uk
       // KC remainder of 1..${KR-1}
       if (k != 0) {
         assert(k >= 1 && k <= ${KR-1});
-        $for N in range(NR-1):
-          if (${N} < n) {
-            const ${TYPE} v0x${N} = w0[${N}];
-            $if DATATYPE in ["QS8"]:
-              ksum${N} += (uint32_t) v0x${N};
-            out[${N*KR}] = v0x${N};
+        for (size_t N = 0; N < n; ++N) {
+          const ${TYPE} v0 = w0[N];
+          $for K in range(1, KR):
+            const ${TYPE} v${K} = ${K} < k ? w${K}[N] : 0;
+          $if DATATYPE in ["QS8"]:
+            ksum[N] += (uint32_t) v0;
             $for K in range(1, KR):
-              if (${K} < k) {
-                const ${TYPE} v${K}x${N} = w${K}[${N}];
-                $if DATATYPE in ["QS8"]:
-                  ksum${N} += (uint32_t) v${K}x${N};
-                out[${N*KR+K}] = v${K}x${N};
-              }
-          }
+              ksum[N] += (uint32_t) v${K};
+          out[N*${KR}] = v0;
+          $for K in range(1, KR):
+            out[N*${KR} + ${K}] = v${K};
+        }
         $for K in range(KR):
           w${K} += k * k_stride;
         out += ${NR*KR};
       }
 
       $if DATATYPE in ["QS8"]:
-        $for N in range(NR-1):
-          packed_b[${N}] -= ksum${N} * izp;
+        for (size_t N = 0; N < ${NR - 1}; ++N) {
+          packed_b[N] -= ksum[N] * izp;
+        }
       out = (${TYPE}*) ((uintptr_t) out + extra_bytes);
     }
     weights += nc * kc;

@@ -19,9 +19,9 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/buffer.h"
-#include "replicable_random_device.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/microfnptr.h"
+#include "test/replicable_random_device.h"
 
 class LUTNormMicrokernelTester {
  public:
@@ -31,27 +31,21 @@ class LUTNormMicrokernelTester {
     return *this;
   }
 
-  size_t n() const {
-    return this->n_;
-  }
+  size_t n() const { return this->n_; }
 
   LUTNormMicrokernelTester& inplace(bool inplace) {
     this->inplace_ = inplace;
     return *this;
   }
 
-  bool inplace() const {
-    return this->inplace_;
-  }
+  bool inplace() const { return this->inplace_; }
 
   LUTNormMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  size_t iterations() const {
-    return this->iterations_;
-  }
+  size_t iterations() const { return this->iterations_; }
 
   void Test(xnn_u8_lut32norm_ukernel_fn lutnorm) const {
     xnnpack::ReplicableRandomDevice rng;
@@ -88,7 +82,7 @@ class LUTNormMicrokernelTester {
       // Verify results.
       for (size_t i = 0; i < n(); i++) {
         ASSERT_NEAR(y_ref[i], float(y[i]), 0.5f)
-          << "at position " << i << ", n = " << n() << ", sum = " << sum;
+            << "at position " << i << ", n = " << n() << ", sum = " << sum;
       }
     }
   }

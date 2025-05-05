@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-vsigmoid/neonfp16arith.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1fma_u24(

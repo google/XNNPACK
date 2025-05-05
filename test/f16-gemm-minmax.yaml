@@ -182,3 +182,38 @@
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16_prfm
   k-block: 1
+
+# WASM RELAXED SIMD
+- name: xnn_f16_gemm_minmax_ukernel_1x8__wasmrelaxedsimd_splat
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_u4
+  k-block: 1
+- name: xnn_f16_gemm_minmax_ukernel_4x8__wasmrelaxedsimd_splat
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_u4
+  k-block: 1
+- name: xnn_f16_gemm_minmax_ukernel_6x8__wasmrelaxedsimd_splat
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_u4
+  k-block: 1
+- name: xnn_f16_gemm_minmax_ukernel_8x8__wasmrelaxedsimd_splat
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_u4
+  k-block: 1
+
+- name: xnn_f16_gemm_minmax_ukernel_1x16__wasmrelaxedsimd_splat
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_u4
+  k-block: 1
+- name: xnn_f16_gemm_minmax_ukernel_4x16__wasmrelaxedsimd_splat
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_u4
+  k-block: 1
+- name: xnn_f16_gemm_minmax_ukernel_6x16__wasmrelaxedsimd_splat
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_u4
+  k-block: 1
+- name: xnn_f16_gemm_minmax_ukernel_8x16__wasmrelaxedsimd_splat
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_u4
+  k-block: 1

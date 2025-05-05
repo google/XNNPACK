@@ -8,18 +8,15 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
+#include "src/xnnpack/common.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define XNN_UKERNEL(arch_flags, fn_name, element_tile, datatype) \
-  XNN_INTERNAL void fn_name(                             \
-      size_t n,                                          \
-      const float* input,                                \
-      float* sum);
-#include "f32-raddextexp/f32-raddextexp.h"
+  XNN_INTERNAL void fn_name(size_t n, const float* input, float* sum);
+#include "src/f32-raddextexp/f32-raddextexp.h"
 #undef XNN_UKERNEL
 
 #ifdef __cplusplus

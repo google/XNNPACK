@@ -8,20 +8,22 @@
 
 #pragma once
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <functional>
 #include <iostream>
+#include <limits>
 #include <ostream>
 #include <string>
 
 #include <gtest/gtest.h>
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/pack.h"
-#include "xnnpack/requantization.h"
-#include "next_prime.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/pack.h"
+#include "src/xnnpack/requantization.h"
+#include "test/next_prime.h"
 
 class GemmMicrokernelTester {
  public:
@@ -101,6 +103,13 @@ class GemmMicrokernelTester {
     return *this;
   }
 
+  uint8_t planes() const { return this->planes_; }
+
+  GemmMicrokernelTester& planes(uint8_t planes) {
+    this->planes_ = planes;
+    return *this;
+  }
+
   GemmMicrokernelTester& a_stride(size_t a_stride) {
     this->a_stride_ = a_stride;
     return *this;
@@ -116,9 +125,7 @@ class GemmMicrokernelTester {
   }
 
   size_t cm_stride() const {
-    return this->cm_stride_ == 0
-               ? nr() * ((n() - 1) / nr()) + (n() - 1) % nr() + 1
-               : this->cm_stride_;
+    return this->cm_stride_ == 0 ? n() : this->cm_stride_;
   }
 
   GemmMicrokernelTester& a_zero_point(uint8_t a_zero_point) {
@@ -148,6 +155,20 @@ class GemmMicrokernelTester {
   }
 
   uint8_t qmax() const { return this->qmax_; }
+
+  GemmMicrokernelTester& min(float min) {
+    this->min_ = min;
+    return *this;
+  }
+
+  float min() const { return this->min_; }
+
+  GemmMicrokernelTester& max(float max) {
+    this->max_ = max;
+    return *this;
+  }
+
+  float max() const { return this->max_; }
 
   GemmMicrokernelTester& a_offset(size_t a_offset) {
     this->a_offset_ = a_offset;
@@ -207,6 +228,10 @@ class GemmMicrokernelTester {
             xnn_init_qu8_conv_minmax_params_fn init_params,
             xnn_pack_qu8_igemm_fn pack, xnn_qu8_requantize_fn requantize);
 
+  void Test(xnn_qs8_qc4w_gemm_minmax_ukernel_fn gemm,
+            xnn_init_qs8_qc8w_conv_minmax_params_fn init_params,
+            xnn_pack_qs8_qc4w_gemm_fn pack, xnn_qs8_requantize_fn requantize) ;
+
   void Test(xnn_qs8_qc8w_gemm_minmax_ukernel_fn gemm,
             xnn_init_qs8_qc8w_conv_minmax_params_fn init_params,
             xnn_pack_qs8_gemm_fn pack, xnn_qs8_requantize_fn requantize) const;
@@ -246,6 +271,10 @@ class GemmMicrokernelTester {
   void Test(xnn_qs8_igemm_minmax_ukernel_fn igemm,
             xnn_init_qs8_conv_minmax_params_fn init_params,
             xnn_pack_qs8_igemm_fn pack, xnn_qs8_requantize_fn requantize) const;
+
+  void Test(xnn_bf16_f32_gemm_minmax_ukernel_fn gemm_minmax,
+            xnn_init_f32_minmax_params_fn init_params,
+            xnn_pack_bf16_f32_gemm_fn pack) const;
 
   void Test(xnn_bf16_gemm_minmax_ukernel_fn gemm_minmax,
             xnn_init_bf16_minmax_params_fn init_params,
@@ -317,6 +346,16 @@ class GemmMicrokernelTester {
             xnn_pack_weights_and_biases_fn pack,
             xnn_packed_stride_weights_and_biases_fn packed_stride);
 
+  void Test_PF32(xnn_pf32_gemm_minmax_ukernel_fn gemm,
+                 xnn_init_f32_minmax_params_fn init_minmax_params,
+                 xnn_pack_weights_and_biases_fn pack,
+                 xnn_packed_stride_weights_and_biases_fn packed_stride);
+
+  void Test_PQS8(xnn_pqs8_qc8w_gemm_minmax_ukernel_fn gemm,
+                 xnn_init_qs8_qc8w_conv_minmax_params_fn init_minmax_params,
+                 xnn_pack_weights_and_biases_fn pack,
+                 xnn_packed_stride_weights_and_biases_fn packed_stride) const;
+
  private:
   size_t mr_{1};
   size_t nr_{1};
@@ -326,16 +365,19 @@ class GemmMicrokernelTester {
   size_t n_{1};
   size_t k_{1};
   size_t ks_{1};
-  size_t bl_{SIZE_MAX};
+  size_t bl_{0};
   bool unsigned_inputs_{false};
+  uint8_t planes_{1};
   size_t a_stride_{0};
   size_t cm_stride_{0};
   uint8_t a_zero_point_{127};
   uint8_t b_zero_point_{127};
   uint8_t qmin_{0};
   uint8_t qmax_{255};
+  float min_ = -std::numeric_limits<float>::infinity();
+  float max_ = std::numeric_limits<float>::infinity();
   size_t a_offset_{0};
-  size_t zero_index_{SIZE_MAX};
+  size_t zero_index_{0};
   bool known_nc_mod_nr_{true};
   bool relu_{false};
   size_t mr_packed_{0};
@@ -347,7 +389,11 @@ struct LoopParams {
   LoopParams() = default;
   explicit LoopParams(size_t from, size_t to, size_t step,
                       LoopStepType step_type)
-      : is_set(true), from(from), to(to), step(step), step_type(step_type) {}
+      : is_set(true),
+        from(from),
+        to(std::max(from, to)),
+        step(step),
+        step_type(step_type) {}
   bool is_set = false;
   size_t from = 1;
   size_t to = 1;
@@ -367,6 +413,16 @@ struct LoopParams {
     }
   }
 };
+
+inline std::ostream& operator<<(std::ostream& outs,
+                                const LoopParams& loop_params) {
+  return outs << "LoopParams(from=" << loop_params.from
+              << ", to=" << loop_params.to << ", step=" << loop_params.step
+              << ", type="
+              << (loop_params.step_type == LoopStepType::Linear ? "linear"
+                                                                : "next-prime")
+              << ")";
+}
 
 struct GemmTestParams {
   GemmTestParams(std::string test_name, GemmMicrokernelTester tester,
@@ -420,5 +476,41 @@ struct GemmTestParams {
   LoopParams loop_bzp_;
   LoopParams loop_bl_;
 };
+
+inline std::ostream& operator<<(std::ostream& outs,
+                                const GemmTestParams& params) {
+  outs << "GemmTestParams(name=" << params.test_name;
+  if (params.loop_k_.is_set) {
+    outs << ", loop_k=" << params.loop_k_;
+  } else {
+    outs << ", k=" << params.tester.k();
+  }
+  if (params.loop_m_.is_set) {
+    outs << ", loop_m=" << params.loop_m_;
+  } else {
+    outs << ", m=" << params.tester.m();
+  }
+  if (params.loop_n_.is_set) {
+    outs << ", loop_n=" << params.loop_n_;
+  } else {
+    outs << ", n=" << params.tester.n();
+  }
+  if (params.loop_zi_.is_set) {
+    outs << ", loop_zi=" << params.loop_zi_;
+  } else {
+    outs << ", zi=" << params.tester.zero_index();
+  }
+  if (params.loop_bzp_.is_set) {
+    outs << ", loop_bzp=" << params.loop_bzp_;
+  } else {
+    outs << ", bzp=" << static_cast<int>(params.tester.b_zero_point());
+  }
+  if (params.loop_bl_.is_set) {
+    outs << ", loop_bl=" << params.loop_bl_;
+  } else {
+    outs << ", bl=" << params.tester.bl();
+  }
+  return outs << ")";
+}
 
 using GemmTest = testing::TestWithParam<GemmTestParams>;

@@ -5,13 +5,12 @@
 
 $assert BATCH_TILE % 4 == 0
 $assert BATCH_TILE >= 4
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_f32_vhswish_ukernel__wasmsimd_u${BATCH_TILE}(
@@ -37,27 +36,25 @@ void xnn_f32_vhswish_ukernel__wasmsimd_u${BATCH_TILE}(
 
   $if BATCH_TILE > 4:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
-      v128_t vx${ABC[0:4]} = wasm_v128_load(input);
-      $for N in range(4, BATCH_TILE, 4):
-        v128_t vx${ABC[N:N+4]} = wasm_v128_load(input + ${N});
+      $for N in range(0, BATCH_TILE, 4):
+        v128_t vx${N//4} = wasm_v128_load(input + ${N});
       input += ${BATCH_TILE};
 
       $for N in range(0, BATCH_TILE, 4):
-        v128_t vacc${ABC[N:N+4]} = wasm_f32x4_add(vx${ABC[N:N+4]}, vthree);
-        vx${ABC[N:N+4]} = wasm_f32x4_mul(vx${ABC[N:N+4]}, vsixth);
+        v128_t vacc${N//4} = wasm_f32x4_add(vx${N//4}, vthree);
+        vx${N//4} = wasm_f32x4_mul(vx${N//4}, vsixth);
 
       $for N in range(0, BATCH_TILE, 4):
-        vacc${ABC[N:N+4]} = wasm_i32x4_max(vacc${ABC[N:N+4]}, vzero);
+        vacc${N//4} = wasm_i32x4_max(vacc${N//4}, vzero);
 
       $for N in range(0, BATCH_TILE, 4):
-        vacc${ABC[N:N+4]} = wasm_i32x4_min(vacc${ABC[N:N+4]}, vsix);
+        vacc${N//4} = wasm_i32x4_min(vacc${N//4}, vsix);
 
       $for N in range(0, BATCH_TILE, 4):
-        vacc${ABC[N:N+4]} = wasm_f32x4_mul(vacc${ABC[N:N+4]}, vx${ABC[N:N+4]});
+        vacc${N//4} = wasm_f32x4_mul(vacc${N//4}, vx${N//4});
 
-      wasm_v128_store(output, vacc${ABC[0:4]});
-      $for N in range(4, BATCH_TILE, 4):
-        wasm_v128_store(output + ${N}, vacc${ABC[N:N+4]});
+      $for N in range(0, BATCH_TILE, 4):
+        wasm_v128_store(output + ${N}, vacc${N//4});
       output += ${BATCH_TILE};
     }
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {

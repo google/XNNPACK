@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-f32acc-rdsum/neon.c.in
 //   Generator: tools/xngen
@@ -11,9 +12,9 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
+#include "src/xnnpack/math.h"
 
 
 void xnn_f16_f32acc_rdsum_ukernel_7p7x__neonfp16arith_c16(
@@ -30,7 +31,7 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__neonfp16arith_c16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float32x4_t vscale = vld1q_dup_f32(&params->scalar.scale);
+  const float32x4_t vscale = vdupq_n_f32(params->scalar.scale);
 
   size_t input_increment = 7 * input_stride;
   for (; channels >= 16; channels -= 16) {

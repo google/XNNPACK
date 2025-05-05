@@ -22,3 +22,11 @@
 # Scalar
 - name: xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__scalar_1x1
   init: xnn_init_f32_minmax_scalar_params
+
+# RVV
+- name: xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_1x1
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_2x1
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_2x2
+  init: xnn_init_f32_minmax_scalar_params

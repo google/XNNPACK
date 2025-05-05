@@ -15,20 +15,25 @@
 #include <string.h>
 
 #ifdef _MSC_VER
-  #include <intrin.h>
-  #include <stdlib.h> // For _rotl.
+#include <intrin.h>
+#include <stdlib.h>  // For _rotl.
 #endif
 
-#include "xnnpack/common.h"
-#include "xnnpack/fp16.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/fp16.h"
 
 // stdlib.h from Windows 10 SDK defines min & max macros.
 // Undefine them before defining the corresponding functions.
 #ifdef min
-  #undef min
+#undef min
 #endif
 #ifdef max
-  #undef max
+#undef max
+#endif
+
+// Some useful constants that may not be defined.
+#ifndef M_PI
+#define M_PI 3.141592653589793238462643383280 /* pi */
 #endif
 
 #ifdef __cplusplus
@@ -82,7 +87,7 @@ XNN_INLINE static float uint32_as_float(uint32_t i) {
   union {
     uint32_t as_uint32;
     float as_float;
-  } bits = { i };
+  } bits = {i};
   return bits.as_float;
 }
 
@@ -90,7 +95,7 @@ XNN_INLINE static uint32_t float_as_uint32(float f) {
   union {
     float as_float;
     uint32_t as_uint32;
-  } bits = { f };
+  } bits = {f};
   return bits.as_uint32;
 }
 
@@ -98,7 +103,7 @@ XNN_INLINE static double uint64_as_double(uint64_t i) {
   union {
     uint64_t as_uint64;
     double as_double;
-  } bits = { i };
+  } bits = {i};
   return bits.as_double;
 }
 
@@ -106,7 +111,7 @@ XNN_INLINE static uint64_t double_as_uint64(double f) {
   union {
     double as_double;
     uint64_t as_uint64;
-  } bits = { f };
+  } bits = {f};
   return bits.as_uint64;
 }
 
@@ -148,16 +153,16 @@ XNN_INLINE static int32_t saturating_rounding_shift_left_s32(int32_t x,
 }
 
 XNN_INLINE static uint32_t math_abs_s32(int32_t n) {
-  #if defined(_MSC_VER)
-    return (uint32_t) abs((int) n);
-  #else
-    return XNN_UNPREDICTABLE(n >= 0) ? (uint32_t) n : -(uint32_t) n;
-  #endif
+#if defined(_MSC_VER)
+  return (uint32_t)abs((int)n);
+#else
+  return XNN_UNPREDICTABLE(n >= 0) ? (uint32_t)n : -(uint32_t)n;
+#endif
 }
 
 // Flip low 15 bits based on high bit.  Reversible.
 XNN_INLINE static int16_t math_signcomplement_f16(uint16_t a) {
-  return (a & 0x7FFF) ^ -((int16_t) a < 0);
+  return (a & 0x7FFF) ^ -((int16_t)a < 0);
 }
 
 XNN_INLINE static int16_t math_min_s16(int16_t a, int16_t b) {
@@ -190,28 +195,28 @@ XNN_INLINE static uint32_t math_doz_u32(uint32_t a, uint32_t b) {
 
 XNN_INLINE static int64_t math_mulext_s32(int32_t a, int32_t b) {
 #if defined(_MSC_VER) && defined(_M_IX86)
-  return (int64_t) __emul((int) a, (int) b);
+  return (int64_t)__emul((int)a, (int)b);
 #else
-  return (int64_t) a * (int64_t) b;
+  return (int64_t)a * (int64_t)b;
 #endif
 }
 
 XNN_INLINE static uint64_t math_mulext_u32(uint32_t a, uint32_t b) {
 #if defined(_MSC_VER) && defined(_M_IX86)
-  return (uint64_t) __emulu((unsigned int) a, (unsigned int) b);
+  return (uint64_t)__emulu((unsigned int)a, (unsigned int)b);
 #else
-  return (uint64_t) a * (uint64_t) b;
+  return (uint64_t)a * (uint64_t)b;
 #endif
 }
 
 XNN_INLINE static float math_muladd_f32(float x, float y, float acc) {
-  #if defined(__GNUC__) && defined(__FP_FAST_FMAF)
-    return __builtin_fmaf(x, y, acc);
-  #elif defined(__clang__) && defined(__riscv)
-    return __builtin_fmaf(x, y, acc);
-  #else
-    return x * y + acc;
-  #endif
+#if defined(__GNUC__) && defined(__FP_FAST_FMAF)
+  return __builtin_fmaf(x, y, acc);
+#elif defined(__clang__) && defined(__riscv)
+  return __builtin_fmaf(x, y, acc);
+#else
+  return x * y + acc;
+#endif
 }
 
 XNN_INLINE static float math_pmin_f32(float a, float b) {
@@ -231,163 +236,161 @@ XNN_INLINE static double math_pmax_f64(double a, double b) {
 }
 
 XNN_INLINE static float math_min_f32(float a, float b) {
-  #if defined(__GNUC__) && defined(__ARM_ARCH) && (__ARM_ARCH >= 8)
-    return __builtin_fminf(a, b);
-  #elif defined(__clang__) && defined(__riscv)
-    return __builtin_fminf(a, b);
-  #else
-    return XNN_UNPREDICTABLE(b < a) ? b : a;
-  #endif
+#if defined(__GNUC__) && defined(__ARM_ARCH) && (__ARM_ARCH >= 8)
+  return __builtin_fminf(a, b);
+#elif defined(__clang__) && defined(__riscv)
+  return __builtin_fminf(a, b);
+#else
+  return XNN_UNPREDICTABLE(b < a) ? b : a;
+#endif
 }
 
 XNN_INLINE static float math_max_f32(float a, float b) {
-  #if defined(__GNUC__) && defined(__ARM_ARCH) && (__ARM_ARCH >= 8)
-    return __builtin_fmaxf(a, b);
-  #elif defined(__clang__) && defined(__riscv)
-    return __builtin_fmaxf(a, b);
-  #else
-    return XNN_UNPREDICTABLE(b < a) ? a : b;
-  #endif
+#if defined(__GNUC__) && defined(__ARM_ARCH) && (__ARM_ARCH >= 8)
+  return __builtin_fmaxf(a, b);
+#elif defined(__clang__) && defined(__riscv)
+  return __builtin_fmaxf(a, b);
+#else
+  return XNN_UNPREDICTABLE(b < a) ? a : b;
+#endif
 }
 
 XNN_INLINE static double math_min_f64(double a, double b) {
-  #if defined(__GNUC__) && defined(__ARM_ARCH) && (__ARM_ARCH >= 8)
-    return __builtin_fmin(a, b);
-  #elif defined(__clang__) && defined(__riscv)
-    return __builtin_fmin(a, b);
-  #else
-    return XNN_UNPREDICTABLE(b < a) ? b : a;
-  #endif
+#if defined(__GNUC__) && defined(__ARM_ARCH) && (__ARM_ARCH >= 8)
+  return __builtin_fmin(a, b);
+#elif defined(__clang__) && defined(__riscv)
+  return __builtin_fmin(a, b);
+#else
+  return XNN_UNPREDICTABLE(b < a) ? b : a;
+#endif
 }
 
 XNN_INLINE static double math_max_f64(double a, double b) {
-  #if defined(__GNUC__) && defined(__ARM_ARCH) && (__ARM_ARCH >= 8)
-    return __builtin_fmax(a, b);
-  #elif defined(__clang__) && defined(__riscv)
-    return __builtin_fmax(a, b);
-  #else
-    return XNN_UNPREDICTABLE(b < a) ? a : b;
-  #endif
+#if defined(__GNUC__) && defined(__ARM_ARCH) && (__ARM_ARCH >= 8)
+  return __builtin_fmax(a, b);
+#elif defined(__clang__) && defined(__riscv)
+  return __builtin_fmax(a, b);
+#else
+  return XNN_UNPREDICTABLE(b < a) ? a : b;
+#endif
 }
 
 XNN_INLINE static float math_nonsign_mask_f32() {
-  #if defined(__INTEL_COMPILER)
-    // Surprisingly, Intel compiler ignores __builtin_nanf payload
-    return _castu32_f32(0x7FFFFFFF);
-  #elif defined(__GNUC__)
-    return __builtin_nanf("0x7FFFFF");
-  #else
-    union {
-      uint32_t as_word;
-      float as_float;
-    } f;
-    f.as_word = 0x7FFFFFFF;
-    return f.as_float;
-  #endif
+#if defined(__INTEL_COMPILER)
+  // Surprisingly, Intel compiler ignores __builtin_nanf payload
+  return _castu32_f32(0x7FFFFFFF);
+#elif defined(__GNUC__)
+  return __builtin_nanf("0x7FFFFF");
+#else
+  union {
+    uint32_t as_word;
+    float as_float;
+  } f;
+  f.as_word = 0x7FFFFFFF;
+  return f.as_float;
+#endif
 }
 
-
 #if defined(__clang__)
-  #if __clang_major__ == 3 && __clang_minor__ >= 7 || __clang_major__ > 3
-    #define XNN_IGNORE_SHIFT_BASE_UB __attribute__((__no_sanitize__("shift-base")))
-  #else
-    #define XNN_IGNORE_SHIFT_BASE_UB
-  #endif
-#elif defined(__GNUC__)
-  #if __GNUC__ >= 8
-    #define XNN_IGNORE_SHIFT_BASE_UB __attribute__((__no_sanitize__("shift-base")))
-  #elif __GNUC__ == 4 && __GNUC_MINOR__ >= 9 || __GNUC__ > 4
-    // 4.9 <= gcc < 8 support ubsan, but doesn't support no_sanitize attribute
-    #define XNN_IGNORE_SHIFT_BASE_UB
-    #ifndef XNN_USE_SHIFT_BASE_UB_WORKAROUND
-      #define XNN_USE_SHIFT_BASE_UB_WORKAROUND 1
-    #endif
-  #else
-    #define XNN_IGNORE_SHIFT_BASE_UB
-  #endif
+#if __clang_major__ == 3 && __clang_minor__ >= 7 || __clang_major__ > 3
+#define XNN_IGNORE_SHIFT_BASE_UB __attribute__((__no_sanitize__("shift-base")))
 #else
-  #define XNN_IGNORE_SHIFT_BASE_UB
+#define XNN_IGNORE_SHIFT_BASE_UB
+#endif
+#elif defined(__GNUC__)
+#if __GNUC__ >= 8
+#define XNN_IGNORE_SHIFT_BASE_UB __attribute__((__no_sanitize__("shift-base")))
+#elif __GNUC__ == 4 && __GNUC_MINOR__ >= 9 || __GNUC__ > 4
+// 4.9 <= gcc < 8 support ubsan, but doesn't support no_sanitize attribute
+#define XNN_IGNORE_SHIFT_BASE_UB
+#ifndef XNN_USE_SHIFT_BASE_UB_WORKAROUND
+#define XNN_USE_SHIFT_BASE_UB_WORKAROUND 1
+#endif
+#else
+#define XNN_IGNORE_SHIFT_BASE_UB
+#endif
+#else
+#define XNN_IGNORE_SHIFT_BASE_UB
 #endif
 
 XNN_IGNORE_SHIFT_BASE_UB
 XNN_INLINE static int32_t math_asr_s32(int32_t x, uint32_t n) {
-  #ifdef XNN_USE_SHIFT_BASE_UB_WORKAROUND
-    #if XNN_ARCH_X86_64 || XNN_ARCH_ARM64
-      return (int32_t) ((uint64_t) (int64_t) x >> n);
-    #else
-      return x >= 0 ? x >> n : ~(~x >> n);
-    #endif
-  #else
-    return x >> n;
-  #endif
+#ifdef XNN_USE_SHIFT_BASE_UB_WORKAROUND
+#if XNN_ARCH_X86_64 || XNN_ARCH_ARM64
+  return (int32_t)((uint64_t)(int64_t)x >> n);
+#else
+  return x >= 0 ? x >> n : ~(~x >> n);
+#endif
+#else
+  return x >> n;
+#endif
 }
 
 XNN_IGNORE_SHIFT_BASE_UB
 XNN_INLINE static int64_t math_asr_s64(int64_t x, uint32_t n) {
-  #ifdef XNN_USE_SHIFT_BASE_UB_WORKAROUND
-    return x >= 0 ? x >> n : ~(~x >> n);
-  #else
-    return x >> n;
-  #endif
+#ifdef XNN_USE_SHIFT_BASE_UB_WORKAROUND
+  return x >= 0 ? x >> n : ~(~x >> n);
+#else
+  return x >> n;
+#endif
 }
 
 XNN_INLINE static uint32_t math_clz_u32(uint32_t x) {
-  #if defined(_MSC_VER) && !defined(__clang__)
-    unsigned long index;
-    if XNN_UNPREDICTABLE(_BitScanReverse(&index, (unsigned long) x) != 0) {
-      return (uint32_t) index ^ 31;
-    } else {
-      return 32;
-    }
-  #else
-    if XNN_UNPREDICTABLE(x == 0) {
-      return 32;
-    } else {
-      return (uint32_t) __builtin_clz((unsigned int) x);
-    }
-  #endif
+#if defined(_MSC_VER) && !defined(__clang__)
+  unsigned long index;
+  if XNN_UNPREDICTABLE (_BitScanReverse(&index, (unsigned long)x) != 0) {
+    return (uint32_t)index ^ 31;
+  } else {
+    return 32;
+  }
+#else
+  if XNN_UNPREDICTABLE (x == 0) {
+    return 32;
+  } else {
+    return (uint32_t)__builtin_clz((unsigned int)x);
+  }
+#endif
 }
 
 XNN_INLINE static uint32_t math_clz_nonzero_u32(uint32_t x) {
   assert(x != 0);
-  #if defined(_MSC_VER) && !defined(__clang__)
-    unsigned long index;
-    _BitScanReverse(&index, (unsigned long) x);
-    return (uint32_t) index ^ 31;
-  #else
-    return (uint32_t) __builtin_clz((unsigned int) x);
-  #endif
+#if defined(_MSC_VER) && !defined(__clang__)
+  unsigned long index;
+  _BitScanReverse(&index, (unsigned long)x);
+  return (uint32_t)index ^ 31;
+#else
+  return (uint32_t)__builtin_clz((unsigned int)x);
+#endif
 }
 
 XNN_INLINE static uint32_t math_ctz_u32(uint32_t x) {
-  #if defined(_MSC_VER) && !defined(__clang__)
-    unsigned long index;
-    _BitScanForward(&index, (unsigned long) x);
-    return (uint32_t) index;
-  #else
-    return (uint32_t) __builtin_ctz((unsigned int) x);
-  #endif
+#if defined(_MSC_VER) && !defined(__clang__)
+  unsigned long index;
+  _BitScanForward(&index, (unsigned long)x);
+  return (uint32_t)index;
+#else
+  return (uint32_t)__builtin_ctz((unsigned int)x);
+#endif
 }
 
 XNN_INLINE static uint32_t math_popcount_u32(uint32_t x) {
-  #if defined(_MSC_VER) && !defined(__clang__)
-    uint32_t result = 0;
-    for (int i = 0; i < 32; ++i) {
-      result += (x >> i) & 1;
-    }
-    return result;
-  #else
-    return (uint32_t) __builtin_popcount((unsigned int) x);
-  #endif
+#if defined(_MSC_VER) && !defined(__clang__)
+  uint32_t result = 0;
+  for (int i = 0; i < 32; ++i) {
+    result += (x >> i) & 1;
+  }
+  return result;
+#else
+  return (uint32_t)__builtin_popcount((unsigned int)x);
+#endif
 }
 
-XNN_INLINE static uint32_t math_rotl_u32(uint32_t x, int8_t r)
-{
-  #if XNN_COMPILER_MSVC
-    return _rotl((unsigned int) x, (int) r);
-  #else
-    return (x << r) | (x >> (32 - r));
-  #endif
+XNN_INLINE static uint32_t math_rotl_u32(uint32_t x, int8_t r) {
+#if XNN_COMPILER_MSVC
+  return _rotl((unsigned int)x, (int)r);
+#else
+  return (x << r) | (x >> (32 - r));
+#endif
 }
 
 extern XNN_INTERNAL const uint16_t xnn_table_vlog[129];
@@ -424,45 +427,37 @@ XNN_INLINE static uint32_t math_u32_log32(uint32_t x, uint32_t out_scale) {
 
 #ifndef __cplusplus
 XNN_INLINE static uint32_t math_cvt_sat_u32_f64(double x) {
-  #if defined(__GNUC__) && defined(__arm__) && (__GNUC__ >= 9)
-    uint32_t i;
-    __asm__ ("vcvt.u32.f64 %[i], %P[x]"
-      : [i] "=t" (i)
-      : [x] "w" (x));
-    return i;
-  #elif defined(__GNUC__) && defined(__aarch64__)
-    uint32_t i;
-    __asm__ ("fcvtnu %w[i], %d[x]"
-      : [i] "=r" (i)
-      : [x] "w" (x));
-    return i;
-  #elif defined(__GNUC__) && defined(__riscv)
-    uint32_t i;
-    __asm__ ("fcvt.wu.d %[i], %[x], rne"
-      : [i] "=r" (i)
-      : [x] "f" (x));
-    return i;
-  #elif defined(__clang__) && defined(__wasm__) && defined(__wasm_nontrapping_fptoint__)
-    return __builtin_wasm_trunc_saturate_u_i32_f64(rint(x));
-  #else
-    x = math_max_f64(x, 0.0);
-    x = math_min_f64(x, 4294967295.0);
-    return (uint32_t) double_as_uint64(x + 0x1.0p+52);
-  #endif
+#if defined(__GNUC__) && defined(__arm__) && (__GNUC__ >= 9)
+  uint32_t i;
+  __asm__("vcvt.u32.f64 %[i], %P[x]" : [i] "=t"(i) : [x] "w"(x));
+  return i;
+#elif defined(__GNUC__) && defined(__aarch64__)
+  uint32_t i;
+  __asm__("fcvtnu %w[i], %d[x]" : [i] "=r"(i) : [x] "w"(x));
+  return i;
+#elif defined(__GNUC__) && defined(__riscv)
+  uint32_t i;
+  __asm__("fcvt.wu.d %[i], %[x], rne" : [i] "=r"(i) : [x] "f"(x));
+  return i;
+#else
+  x = math_max_f64(x, 0.0);
+  x = math_min_f64(x, 4294967295.0);
+  return (uint32_t)double_as_uint64(x + 0x1.0p+52);
+#endif
 }
 #endif
 
 XNN_INLINE static float math_cvt_fp32_bf16(uint16_t x) {
-   union {
+  union {
     float as_float;
     uint32_t as_uint32;
   } bits;
-  bits.as_uint32 = ((uint32_t) x) << 16;
+  bits.as_uint32 = ((uint32_t)x) << 16;
   return bits.as_float;
 }
 
 XNN_INLINE static uint16_t math_cvt_bf16_fp32(float x) {
-   union {
+  union {
     float as_float;
     uint32_t as_uint32;
   } bits;
@@ -500,9 +495,8 @@ XNN_INLINE static uint16_t math_cvt_bf16_fp32(float x) {
 #define XNN_HAVE_FLOAT16 1
 #endif
 
-#if (defined(__aarch64__) && !defined(_MSC_VER)) &&     \
-    ((defined(__clang__) && (__clang_major__ >= 15)) || \
-     (XNN_GNUC_ACTUAL >= 13))
+#if ((XNN_ARCH_ARM || XNN_ARCH_ARM64) && !defined(_MSC_VER)) && \
+    defined(__ARM_FEATURE_FP16_SCALAR_ARITHMETIC)
 #define XNN_HAVE_FLOAT16 1
 #endif
 
@@ -548,14 +542,13 @@ struct xnn_bfloat16 {
 };
 typedef struct xnn_bfloat16 xnn_bfloat16;
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 XNN_INLINE static xnn_float16 xnn_float16_from_float(float f) {
 #if XNN_HAVE_FLOAT16
-  return (xnn_float16) f;
+  return (xnn_float16)f;
 #else
   struct xnn_float16 result;
   result.value = fp16_ieee_from_fp32_value(f);
@@ -565,7 +558,7 @@ XNN_INLINE static xnn_float16 xnn_float16_from_float(float f) {
 
 XNN_INLINE static float xnn_float16_to_float(xnn_float16 fp16) {
 #if XNN_HAVE_FLOAT16
-  return (float) fp16;
+  return (float)fp16;
 #else
   return fp16_ieee_to_fp32_value(fp16.value);
 #endif
@@ -607,7 +600,7 @@ XNN_INLINE static xnn_bfloat16 xnn_bfloat16_from_bits(uint16_t x) {
 
 XNN_INLINE static xnn_float16 xnn_float16_zero() {
 #if XNN_HAVE_FLOAT16
-  return (xnn_float16) 0.0f;
+  return (xnn_float16)0.0f;
 #else
   struct xnn_float16 result;
   result.value = 0;
@@ -616,12 +609,14 @@ XNN_INLINE static xnn_float16 xnn_float16_zero() {
 }
 
 XNN_INLINE static bool xnn_float16_is_zero(xnn_float16 f) {
-  // Check for +/- zero (0x0000/0x8000). uint16 overflow is well defined to wrap around.
+  // Check for +/- zero (0x0000/0x8000). uint16 overflow is well defined to wrap
+  // around.
   return xnn_float16_to_bits(f) * 2 == 0;
 }
 
 XNN_INLINE static bool xnn_bfloat16_is_zero(xnn_bfloat16 f) {
-  // Check for +/- zero (0x0000/0x8000). uint16 overflow is well defined to wrap around.
+  // Check for +/- zero (0x0000/0x8000). uint16 overflow is well defined to wrap
+  // around.
   return xnn_bfloat16_to_bits(f) * 2 == 0;
 }
 

@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-vlrelu/rvv.c.in
 //   Generator: tools/xngen
@@ -11,7 +12,7 @@
 
 #include <riscv_vector.h>
 
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_qu8_vlrelu_ukernel__rvv_u2v(

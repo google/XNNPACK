@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-vadd/hvx.c.in
 //   Generator: tools/xngen
@@ -13,9 +14,9 @@
 #include <hexagon_protos.h>
 #include <hexagon_types.h>
 
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/math.h"
-#include "xnnpack/vbinary.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vbinary.h"
 
 void xnn_qs8_vadd_minmax_ukernel__hvx_u64(
     size_t batch,
@@ -115,8 +116,7 @@ void xnn_qs8_vadd_minmax_ukernel__hvx_u64(
         Q6_V_vstu_variable(output, 32, vout);
         output += 32;
         batch -=32;
-      }
-      else{
+      } else {
         Q6_V_vstu_variable(output, batch, vout);
         batch = 0;
       }

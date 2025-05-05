@@ -8,19 +8,19 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/config-types.h"
-#include "xnnpack/config.h"
-#include "xnnpack/internal.h"
-#include "xnnpack/log.h"
-#include "xnnpack/node-type.h"
-#include "xnnpack/operator-type.h"
-#include "xnnpack/operator.h"
-#include "xnnpack/requantization.h"
-#include "xnnpack/subgraph-validation.h"
-#include "xnnpack/subgraph.h"
-#include "pthreadpool.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/config.h"
+#include "src/xnnpack/internal.h"
+#include "src/xnnpack/log.h"
+#include "src/xnnpack/node-type.h"
+#include "src/xnnpack/operator-type.h"
+#include "src/xnnpack/operator.h"
+#include "src/xnnpack/requantization.h"
+#include "src/xnnpack/subgraph-validation.h"
+#include "src/xnnpack/subgraph.h"
+#include <pthreadpool.h>
 
 enum xnn_status create_nchw_convolution(
       uint32_t input_padding_top,
@@ -1105,7 +1105,7 @@ enum xnn_status xnn_define_convolution_2d(
     return status;
   }
 
-  const struct xnn_value* input_value = &subgraph->values[input_id];
+  struct xnn_value* input_value = &subgraph->values[input_id];
   status = xnn_subgraph_check_input_type_dense(xnn_node_type_convolution_2d, input_id, input_value);
   if (status != xnn_status_success) {
     return status;
@@ -1299,22 +1299,19 @@ enum xnn_status xnn_define_convolution_2d(
       }
     }
   }
-
-  const enum xnn_datatype input_datatype = input_value->datatype;
-  const enum xnn_datatype output_datatype = output_value->datatype;
-  if (input_datatype == xnn_datatype_fp32
-      || input_datatype == xnn_datatype_fp16
-      || input_datatype == xnn_datatype_qint8) {
-    if (input_value->datatype == output_datatype) {
-      const bool unit_subsampling = (subsampling_width | subsampling_height) == 1;
-      const size_t kernel_size = kernel_height * kernel_width;
-      if (groups == 1 && kernel_size == 1 && unit_subsampling && !any_padding) {
-        // Check if the convolution can take the vmulcaddc path.
-        if (group_input_channels + group_output_channels > 2) {
-          return xnn_define_fully_connected(subgraph, output_min, output_max,
-                                            input_id, filter_id, bias_id, output_id, /*flags=*/0);
-        }
+  const bool unit_subsampling = (subsampling_width | subsampling_height) == 1;
+  const size_t kernel_size = kernel_height * kernel_width;
+  if (groups == 1 && kernel_size == 1 && unit_subsampling && !any_padding) {
+    // Check if the convolution can take the vmulcaddc path.
+    if (group_input_channels + group_output_channels > 2) {
+      if (input_value->datatype == xnn_datatype_qdint8) {
+        // Dynammically quantized tensors for fully connected ops are quantized
+        // per-channel, not per-batch.
+        input_value->quantization.num_nonbatch_dims = 1;
+        input_value->quantization.dynamic_params_size =  xnn_tensor_get_dynamic_quant_param_size(input_value);
       }
+      return xnn_define_fully_connected(subgraph, output_min, output_max,
+                                        input_id, filter_id, bias_id, output_id, /*flags=*/0);
     }
   }
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);

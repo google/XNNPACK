@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-ibilinear-chw/neonfp16arith.c.in
 //   Generator: tools/xngen
@@ -11,7 +12,7 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/ibilinear.h"
+#include "src/xnnpack/ibilinear.h"
 
 
 void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p16(

@@ -5,8 +5,8 @@
 
 #include <assert.h>
 
-#include "xnnpack/conv.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/conv.h"
+#include "src/xnnpack/math.h"
 
 
 void xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__scalar_1x1(
@@ -22,7 +22,7 @@ void xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__scalar_1x1(
     size_t output_channels,
     size_t output_height_stride,
     size_t output_channel_stride,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(input_width != 0);
   assert(output_y_end > output_y_start);

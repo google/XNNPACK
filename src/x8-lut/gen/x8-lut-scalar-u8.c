@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/x8-lut/scalar.c.in
 //   Generator: tools/xngen
@@ -9,8 +10,8 @@
 
 #include <assert.h>
 
-#include "xnnpack/lut.h"
-#include "xnnpack/common.h"
+#include "src/xnnpack/lut.h"
+#include "src/xnnpack/common.h"
 
 
 void xnn_x8_lut_ukernel__scalar_u8(

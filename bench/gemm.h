@@ -8,112 +8,140 @@
 
 #pragma once
 
-#include <benchmark/benchmark.h>
-#include "xnnpack/math.h"
-
 #include <cstdint>
-#include <initializer_list>
 #include <functional>
+#include <initializer_list>
 #include <string>
 #include <vector>
 
+#include "src/xnnpack/math.h"
+#include <benchmark/benchmark.h>
+
 /*
- * This is a lightweight wrapper around the underlying benchmark::internal::Benchmark
- * class, which handles registration of benchmark case args. It provides default values
- * for blocksize and skips blockwise-specific cases for non-blockwise kernels.
+ * This is a lightweight wrapper around the underlying
+ * benchmark::internal::Benchmark class, which handles registration of benchmark
+ * case args. It provides default values for blocksize and skips
+ * blockwise-specific cases for non-blockwise kernels.
  */
 class BenchmarkWrapper {
-  public:
-    BenchmarkWrapper(benchmark::internal::Benchmark* benchmark, bool blockwise)
-      : benchmark_(benchmark), blockwise_(blockwise), last_k_(0), last_m_(0), last_n_(0) {}
+ public:
+  BenchmarkWrapper(benchmark::internal::Benchmark* benchmark, bool blockwise)
+      : benchmark_(benchmark),
+        blockwise_(blockwise),
+        last_k_(0),
+        last_m_(0),
+        last_n_(0) {}
 
-    void ArgNames(const std::initializer_list<std::string>& names) {
-      std::vector<std::string> vals(names.begin(), names.end());
-      // Args are standardized as M, N, K, [BL] for gemm kernels.
-      if (blockwise_ && names.size() < 4) {
-        vals.push_back("BL");
-      }
-      else if (!blockwise_ && vals.size() == 4) {
-        // Drop blocksize argument for non-blockwise kernels. This declutters the
-        // benchmark output slightly.
-        vals.pop_back();
-      }
-      benchmark_->ArgNames(vals);
+  void ArgNames(const std::initializer_list<std::string>& names) {
+    std::vector<std::string> vals(names.begin(), names.end());
+    // Args are standardized as M, N, K, [BL] for gemm kernels.
+    if (blockwise_ && names.size() < 4) {
+      vals.push_back("BL");
+    } else if (!blockwise_ && vals.size() == 4) {
+      // Drop blocksize argument for non-blockwise kernels. This declutters the
+      // benchmark output slightly.
+      vals.pop_back();
+    }
+    benchmark_->ArgNames(vals);
+  }
+
+  void Args(const std::initializer_list<int64_t>& args) {
+    std::vector<int64_t> vals(args.begin(), args.end());
+
+    // Args are standardized as M, N, K, [BL] for gemm kernels.
+    auto m = vals[0];
+    auto n = vals[1];
+    auto k = vals[2];
+
+    // For non-blockwise kernels, skip test cases that differ only by blocksize.
+    if (!blockwise_ && m == last_m_ && n == last_n_ && k == last_k_) {
+      return;
     }
 
-    void Args(const std::initializer_list<int64_t>& args) {
-      std::vector<int64_t> vals(args.begin(), args.end());
-
-      // Args are standardized as M, N, K, [BL] for gemm kernels.
-      auto m = vals[0];
-      auto n = vals[1];
-      auto k = vals[2];
-
-      // For non-blockwise kernels, skip test cases that differ only by blocksize.
-      if (!blockwise_ && m == last_m_ && n == last_n_ && k == last_k_) {
-        return;
-      }
-
-      if (blockwise_ && args.size() < 4) {
-        // Use K as default blocksize for parity with non-blockwise kernels.
-        // This is equivalent to per-channel quantization.
-        vals.push_back(round_up_po2(k, 32));
-      }
-      else if (!blockwise_ && vals.size() == 4) {
-        // Drop blocksize argument for non-blockwise kernels. This declutters the
-        // benchmark output slightly.
-        vals.pop_back();
-      }
-
-      last_m_ = m;
-      last_n_ = n;
-      last_k_ = k;
-      benchmark_->Args(vals);
+    if (blockwise_ && args.size() < 4) {
+      // Use K as default blocksize for parity with non-blockwise kernels.
+      // This is equivalent to per-channel quantization.
+      vals.push_back(round_up_po2(k, 32));
+    } else if (!blockwise_ && vals.size() == 4) {
+      // Drop blocksize argument for non-blockwise kernels. This declutters the
+      // benchmark output slightly.
+      vals.pop_back();
     }
 
-  private:
-    benchmark::internal::Benchmark* benchmark_;
-    bool blockwise_;
+    last_m_ = m;
+    last_n_ = n;
+    last_k_ = k;
+    benchmark_->Args(vals);
+  }
 
-    int64_t last_k_;
-    int64_t last_m_;
-    int64_t last_n_;
+ private:
+  benchmark::internal::Benchmark* benchmark_;
+  bool blockwise_;
+
+  int64_t last_k_;
+  int64_t last_m_;
+  int64_t last_n_;
 };
 
-void Configure(benchmark::internal::Benchmark* benchmark, void (setup_method)(BenchmarkWrapper*), bool blockwise) {
-    BenchmarkWrapper wrapper(benchmark, blockwise);
-    setup_method(&wrapper);
-    benchmark->UseRealTime();
+void Configure(benchmark::internal::Benchmark* benchmark,
+               void(setup_method)(BenchmarkWrapper*), bool blockwise) {
+  BenchmarkWrapper wrapper(benchmark, blockwise);
+  setup_method(&wrapper);
+  benchmark->UseRealTime();
 }
 
 #define BENCHMARK_CASE(gemm_fn, test_case_name, name, setup_method, blockwise) \
-  BENCHMARK_CAPTURE(gemm_fn, test_case_name, name) \
-    ->Apply([](benchmark::internal::Benchmark* b) { return Configure(b, &setup_method, blockwise); }) \
-    ->UseRealTime();
+  BENCHMARK_CAPTURE(gemm_fn, test_case_name, name)                             \
+      ->Apply([](benchmark::internal::Benchmark* b) {                          \
+        return Configure(b, &setup_method, blockwise);                         \
+      })                                                                       \
+      ->UseRealTime();
 
-#define BENCHMARK_GEMM_BASE(gemm_fn, blockwise) \
-  BENCHMARK_CASE(gemm_fn, mobilenet_v1, "MobileNet v1", MobileNetV1GemmArguments, blockwise); \
-  BENCHMARK_CASE(gemm_fn, mobilenet_v2, "MobileNet v2", MobileNetV2GemmArguments, blockwise); \
-  BENCHMARK_CASE(gemm_fn, mobilenet_v3_small, "MobileNet v3 Small", MobileNetV3SmallGemmArguments, blockwise); \
-  BENCHMARK_CASE(gemm_fn, mobilenet_v3_large, "MobileNet v3 Large", MobileNetV3LargeGemmArguments, blockwise); \
-  BENCHMARK_CASE(gemm_fn, shufflenet_v1_g1, "ShuffleNet v1 (1 group)", ShuffleNetV1G1GemmArguments, blockwise); \
-  BENCHMARK_CASE(gemm_fn, shufflenet_v1_g2, "ShuffleNet v1 (2 groups)", ShuffleNetV1G2GemmArguments, blockwise); \
-  BENCHMARK_CASE(gemm_fn, shufflenet_v1_g3, "ShuffleNet v1 (3 groups)", ShuffleNetV1G3GemmArguments, blockwise); \
-  BENCHMARK_CASE(gemm_fn, shufflenet_v1_g4, "ShuffleNet v1 (4 groups)", ShuffleNetV1G4GemmArguments, blockwise); \
-  BENCHMARK_CASE(gemm_fn, shufflenet_v1_g8, "ShuffleNet v1 (8 groups)", ShuffleNetV1G8GemmArguments, blockwise); \
-  BENCHMARK_CASE(gemm_fn, shufflenet_v2_x05, "ShuffleNet v2 0.5X", ShuffleNetV2X05GemmArguments, blockwise); \
-  BENCHMARK_CASE(gemm_fn, shufflenet_v2_x10, "ShuffleNet v2 1.0X", ShuffleNetV2X10GemmArguments, blockwise); \
-  BENCHMARK_CASE(gemm_fn, shufflenet_v2_x15, "ShuffleNet v2 1.5X", ShuffleNetV2X15GemmArguments, blockwise); \
-  BENCHMARK_CASE(gemm_fn, shufflenet_v2_x20, "ShuffleNet v2 2.0X", ShuffleNetV2X20GemmArguments, blockwise); \
-  BENCHMARK_CASE(gemm_fn, inception_v3, "Inception v3", InceptionV3GemmArguments, blockwise); \
-  BENCHMARK_CASE(gemm_fn, resnet18, "ResNet-18", ResNet18GemmArguments, blockwise); \
-  BENCHMARK_CASE(gemm_fn, resnet50, "ResNet-50", ResNet50GemmArguments, blockwise); \
-  BENCHMARK_CASE(gemm_fn, squeezenet_v10, "SqueezeNet 1.0", SqueezeNetV10GemmArguments, blockwise); \
-  BENCHMARK_CASE(gemm_fn, squeezenet_v11, "SqueezeNet 1.1", SqueezeNetV11GemmArguments, blockwise); \
-  BENCHMARK_CASE(gemm_fn, vgg, "VGG", VGGGemmArguments, blockwise); \
-  BENCHMARK_CASE(gemm_fn, srcnn915, "SRCNN (9-1-5)", SRCNN915GemmArguments, blockwise); \
-  BENCHMARK_CASE(gemm_fn, srcnn935, "SRCNN (9-3-5)", SRCNN935GemmArguments, blockwise); \
+#define BENCHMARK_GEMM_BASE(gemm_fn, blockwise)                      \
+  BENCHMARK_CASE(gemm_fn, mobilenet_v1, "MobileNet v1",                     \
+                 MobileNetV1GemmArguments, blockwise);                      \
+  BENCHMARK_CASE(gemm_fn, mobilenet_v2, "MobileNet v2",                     \
+                 MobileNetV2GemmArguments, blockwise);                      \
+  BENCHMARK_CASE(gemm_fn, mobilenet_v3_small, "MobileNet v3 Small",         \
+                 MobileNetV3SmallGemmArguments, blockwise);                 \
+  BENCHMARK_CASE(gemm_fn, mobilenet_v3_large, "MobileNet v3 Large",         \
+                 MobileNetV3LargeGemmArguments, blockwise);                 \
+  BENCHMARK_CASE(gemm_fn, shufflenet_v1_g1, "ShuffleNet v1 (1 group)",      \
+                 ShuffleNetV1G1GemmArguments, blockwise);                   \
+  BENCHMARK_CASE(gemm_fn, shufflenet_v1_g2, "ShuffleNet v1 (2 groups)",     \
+                 ShuffleNetV1G2GemmArguments, blockwise);                   \
+  BENCHMARK_CASE(gemm_fn, shufflenet_v1_g3, "ShuffleNet v1 (3 groups)",     \
+                 ShuffleNetV1G3GemmArguments, blockwise);                   \
+  BENCHMARK_CASE(gemm_fn, shufflenet_v1_g4, "ShuffleNet v1 (4 groups)",     \
+                 ShuffleNetV1G4GemmArguments, blockwise);                   \
+  BENCHMARK_CASE(gemm_fn, shufflenet_v1_g8, "ShuffleNet v1 (8 groups)",     \
+                 ShuffleNetV1G8GemmArguments, blockwise);                   \
+  BENCHMARK_CASE(gemm_fn, shufflenet_v2_x05, "ShuffleNet v2 0.5X",          \
+                 ShuffleNetV2X05GemmArguments, blockwise);                  \
+  BENCHMARK_CASE(gemm_fn, shufflenet_v2_x10, "ShuffleNet v2 1.0X",          \
+                 ShuffleNetV2X10GemmArguments, blockwise);                  \
+  BENCHMARK_CASE(gemm_fn, shufflenet_v2_x15, "ShuffleNet v2 1.5X",          \
+                 ShuffleNetV2X15GemmArguments, blockwise);                  \
+  BENCHMARK_CASE(gemm_fn, shufflenet_v2_x20, "ShuffleNet v2 2.0X",          \
+                 ShuffleNetV2X20GemmArguments, blockwise);                  \
+  BENCHMARK_CASE(gemm_fn, inception_v3, "Inception v3",                     \
+                 InceptionV3GemmArguments, blockwise);                      \
+  BENCHMARK_CASE(gemm_fn, resnet18, "ResNet-18", ResNet18GemmArguments,     \
+                 blockwise);                                                \
+  BENCHMARK_CASE(gemm_fn, resnet50, "ResNet-50", ResNet50GemmArguments,     \
+                 blockwise);                                                \
+  BENCHMARK_CASE(gemm_fn, squeezenet_v10, "SqueezeNet 1.0",                 \
+                 SqueezeNetV10GemmArguments, blockwise);                    \
+  BENCHMARK_CASE(gemm_fn, squeezenet_v11, "SqueezeNet 1.1",                 \
+                 SqueezeNetV11GemmArguments, blockwise);                    \
+  BENCHMARK_CASE(gemm_fn, vgg, "VGG", VGGGemmArguments, blockwise);         \
+  BENCHMARK_CASE(gemm_fn, srcnn915, "SRCNN (9-1-5)", SRCNN915GemmArguments, \
+                 blockwise);                                                \
+  BENCHMARK_CASE(gemm_fn, srcnn935, "SRCNN (9-3-5)", SRCNN935GemmArguments, \
+                 blockwise);                                                \
   BENCHMARK_CASE(gemm_fn, llm, "LLM", LLMGemmArguments, blockwise);
+
+// clang-format off
 
 // Removed due to OOM SEGFAULT on 32 bit ARM.
 //  BENCHMARK_CAPTURE(gemm_fn, srcnn955, "SRCNN (9-5-5)")->Apply(SRCNN955GemmArguments)->UseRealTime();

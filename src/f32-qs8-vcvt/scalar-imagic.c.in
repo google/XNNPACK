@@ -7,10 +7,12 @@ $assert BATCH_TILE >= 1
 $assert IDATATYPE in ["F16", "F32"]
 $assert ODATATYPE in ["QS8", "QU8"]
 #include <assert.h>
+$if IDATATYPE == "F16":
+  #include <float.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/vcvt.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vcvt.h"
 
 $INPUT_T = {"F16": "xnn_float16", "F32": "float"}[IDATATYPE]
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[ODATATYPE]
@@ -29,7 +31,9 @@ void xnn_${IDATATYPE.lower()}_${ODATATYPE.lower()}_vcvt_ukernel__${"wasm" if WAS
 
   $if IDATATYPE == "F16":
     const xnn_float16* i = input;
-    const float vscale = xnn_float16_to_float(params->scalar.scale);
+    // Don't let the scale be 0, which can happen for large scales, and should
+    // not happen because this value is a reciprocal.
+    const float vscale = math_max_f32(FLT_MIN, xnn_float16_to_float(params->scalar.scale));
   $else:
     const float* i = input;
     const float vscale = params->scalar.scale;

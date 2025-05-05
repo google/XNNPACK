@@ -12,8 +12,8 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
-#include "xnnpack.h"
-#include "xnnpack/common.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
 
 #ifndef XNN_LOG_LEVEL
 #error "Undefined XNN_LOG_LEVEL"
@@ -64,76 +64,86 @@ const char* xnn_datatype_to_string(enum xnn_datatype type);
 #endif
 #endif
 
+#if XNN_LOG_LEVEL >= XNN_LOG_DEBUG
 #define xnn_log_debug(format, ...)                                             \
   xnn_log_debug_(format " (%s, %s:%i)", ##__VA_ARGS__, __FUNCTION__, __FILE__, \
                  __LINE__)
 
 XNN_LOG_ARGUMENTS_FORMAT inline static void xnn_log_debug_(const char* format,
                                                            ...) {
-#if XNN_LOG_LEVEL >= XNN_LOG_DEBUG
   va_list args;
   va_start(args, format);
   xnn_vlog_debug(format, args);
   va_end(args);
-#endif
 }
+#else
+#define xnn_log_debug(format, ...)
+#endif  // XNN_LOG_LEVEL >= XNN_LOG_DEBUG
 
+#if XNN_LOG_LEVEL >= XNN_LOG_INFO
 #define xnn_log_info(format, ...)                                             \
   xnn_log_info_(format " (%s, %s:%i)", ##__VA_ARGS__, __FUNCTION__, __FILE__, \
                 __LINE__)
 
 XNN_LOG_ARGUMENTS_FORMAT inline static void xnn_log_info_(const char* format,
                                                           ...) {
-#if XNN_LOG_LEVEL >= XNN_LOG_INFO
   va_list args;
   va_start(args, format);
   xnn_vlog_info(format, args);
   va_end(args);
-#endif
 }
+#else
+#define xnn_log_info(format, ...)
+#endif  // XNN_LOG_LEVEL >= XNN_LOG_INFO
 
+#if XNN_LOG_LEVEL >= XNN_LOG_WARNING
 #define xnn_log_warning(format, ...)                                   \
   xnn_log_warning_(format " (%s, %s:%i)", ##__VA_ARGS__, __FUNCTION__, \
                    __FILE__, __LINE__)
 
 XNN_LOG_ARGUMENTS_FORMAT inline static void xnn_log_warning_(const char* format,
                                                              ...) {
-#if XNN_LOG_LEVEL >= XNN_LOG_WARNING
   va_list args;
   va_start(args, format);
   xnn_vlog_warning(format, args);
   va_end(args);
-#endif
 }
+#else
+#define xnn_log_warning(format, ...)
+#endif  // XNN_LOG_LEVEL >= XNN_LOG_WARNING
 
+#if XNN_LOG_LEVEL >= XNN_LOG_ERROR
 #define xnn_log_error(format, ...)                                             \
   xnn_log_error_(format " (%s, %s:%i)", ##__VA_ARGS__, __FUNCTION__, __FILE__, \
                  __LINE__)
 
 XNN_LOG_ARGUMENTS_FORMAT inline static void xnn_log_error_(const char* format,
                                                            ...) {
-#if XNN_LOG_LEVEL >= XNN_LOG_ERROR
   va_list args;
   va_start(args, format);
   xnn_vlog_error(format, args);
   va_end(args);
-#endif
 }
+#else
+#define xnn_log_error(format, ...)
+#endif  // XNN_LOG_LEVEL >= XNN_LOG_ERROR
 
+#if XNN_LOG_LEVEL >= XNN_LOG_FATAL
 #define xnn_log_fatal(format, ...)                                             \
   xnn_log_fatal_(format " (%s, %s:%i)", ##__VA_ARGS__, __FUNCTION__, __FILE__, \
                  __LINE__)
 
 XNN_LOG_ARGUMENTS_FORMAT inline static void xnn_log_fatal_(const char* format,
                                                            ...) {
-#if XNN_LOG_LEVEL >= XNN_LOG_FATAL
   va_list args;
   va_start(args, format);
   xnn_vlog_fatal(format, args);
   va_end(args);
-#endif
   abort();
 }
+#else
+#define xnn_log_fatal(format, ...) abort()
+#endif  // XNN_LOG_LEVEL >= XNN_LOG_FATAL
 
 #if XNN_LOG_LEVEL >= XNN_LOG_DEBUG
 #define XNN_LOG_UNREACHABLE(...) \

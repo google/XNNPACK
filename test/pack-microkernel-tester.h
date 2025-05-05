@@ -15,10 +15,10 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/buffer.h"
-#include "replicable_random_device.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/microfnptr.h"
+#include "test/replicable_random_device.h"
 
 class PackMicrokernelTester {
  public:
@@ -28,9 +28,7 @@ class PackMicrokernelTester {
     return *this;
   }
 
-  size_t mr() const {
-    return this->mr_;
-  }
+  size_t mr() const { return this->mr_; }
 
   PackMicrokernelTester& m(size_t m) {
     assert(m != 0);
@@ -38,9 +36,7 @@ class PackMicrokernelTester {
     return *this;
   }
 
-  size_t m() const {
-    return this->m_;
-  }
+  size_t m() const { return this->m_; }
 
   PackMicrokernelTester& k(size_t k) {
     assert(k != 0);
@@ -48,9 +44,7 @@ class PackMicrokernelTester {
     return *this;
   }
 
-  size_t k() const {
-    return this->k_;
-  }
+  size_t k() const { return this->k_; }
 
   PackMicrokernelTester& x_stride(size_t x_stride) {
     assert(x_stride != 0);
@@ -72,9 +66,7 @@ class PackMicrokernelTester {
     return *this;
   }
 
-  size_t iterations() const {
-    return this->iterations_;
-  }
+  size_t iterations() const { return this->iterations_; }
 
   void Test(xnn_x32_packx_ukernel_fn packx) const {
     xnnpack::ReplicableRandomDevice rng;
@@ -83,7 +75,8 @@ class PackMicrokernelTester {
     };
 
     const uint32_t c = u32rng();
-    xnnpack::Buffer<uint32_t> x(k() + (m() - 1) * x_stride() + XNN_EXTRA_BYTES / sizeof(uint32_t));
+    xnnpack::Buffer<uint32_t> x(k() + (m() - 1) * x_stride(),
+                                xnnpack::XnnExtraBytes);
     xnnpack::Buffer<uint32_t, XNN_ALLOCATION_ALIGNMENT> y(mr() * k());
     xnnpack::Buffer<uint32_t> y_ref(mr() * k());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -99,17 +92,14 @@ class PackMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      packx(
-        m(), k(),
-        x.data(), x_stride() * sizeof(uint32_t),
-        y.data());
+      packx(m(), k(), x.data(), x_stride() * sizeof(uint32_t), y.data());
 
       // Verify results.
       for (size_t i = 0; i < mr(); i++) {
         for (size_t j = 0; j < k(); j++) {
           EXPECT_EQ(y_ref[j * mr() + i], y[j * mr() + i])
-            << "at pixel = " << i << ", channel = " << j << ", "
-            << "m = " << m() << ", k = " << k();
+              << "at pixel = " << i << ", channel = " << j << ", "
+              << "m = " << m() << ", k = " << k();
         }
       }
     }

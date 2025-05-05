@@ -6,12 +6,13 @@
 $assert LMUL in [1, 2, 4, 8]
 $assert OP in ["RNDNE", "RNDZ", "RNDU", "RNDD"]
 #include <assert.h>
+#include <math.h>
 
 #include <riscv_vector.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vunary.h"
 
 
 $ROUND_MODE = {
@@ -35,8 +36,15 @@ void xnn_f32_v${OP.lower()}_ukernel__rvv_u${LMUL}v(
   do {
     const size_t n = __riscv_vsetvl_e32m${LMUL}(batch);
     vfloat32m${LMUL}_t x_f32v = __riscv_vle32_v_f32m${LMUL}(input, n); input += n;
+    // We need to remember which values are infinity, so we can preserve them
+    // after rounding.
+    // TODO: We should also preserve NaN.
+    vbool${32//LMUL}_t inf_bv = __riscv_vmfeq_vf_f32m${LMUL}_b${32//LMUL}(x_f32v, INFINITY, n);
+    vbool${32//LMUL}_t ninf_bv = __riscv_vmfeq_vf_f32m${LMUL}_b${32//LMUL}(x_f32v, -INFINITY, n);
+    vbool${32//LMUL}_t mask_bv = __riscv_vmor_mm_b${32//LMUL}(inf_bv, ninf_bv, n);
     vint32m${LMUL}_t x_rnd_i32v = __riscv_vfcvt_x_f_v_i32m${LMUL}_rm(x_f32v, ${ROUND_MODE}, n);
     vfloat32m${LMUL}_t out_f32v = __riscv_vfcvt_f_x_v_f32m${LMUL}(x_rnd_i32v, n);
+    out_f32v = __riscv_vmerge_vvm_f32m${LMUL}(out_f32v, x_f32v, mask_bv, n);
     __riscv_vse32_v_f32m${LMUL}(output, out_f32v, n); output += n;
     batch -= n;
   } while (batch != 0);

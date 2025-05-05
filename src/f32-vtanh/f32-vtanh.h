@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -64,6 +65,17 @@ XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vtanh_ukernel__wasmsimd_rational_9_8_div_u8, 
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vtanh_ukernel__wasmsimd_rational_9_8_div_u12, 12, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vtanh_ukernel__wasmsimd_rational_9_8_div_u16, 16, false, float, struct xnn_f32_default_params, NULL)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+#if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vtanh_ukernel__hvx_rational_9_8_div_u32,  32,  false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vtanh_ukernel__hvx_rational_9_8_div_u64,  64,  false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vtanh_ukernel__hvx_rational_9_8_div_u96,  96,  false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vtanh_ukernel__hvx_rational_9_8_div_u128, 128, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vtanh_ukernel__hvx_rational_9_8_nr_u32,   32,  false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vtanh_ukernel__hvx_rational_9_8_nr_u64,   64,  false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vtanh_ukernel__hvx_rational_9_8_nr_u96,   96,  false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vtanh_ukernel__hvx_rational_9_8_nr_u128,  128, false, float, struct xnn_f32_default_params, NULL)
+#endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_vtanh_ukernel__neon_rational_9_8_div_u4, 4, false, float, struct xnn_f32_default_params, NULL)

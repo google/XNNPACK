@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f16-vhswish/neonfp16arith.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_f16_vhswish_ukernel__neonfp16arith_u16(
@@ -40,25 +41,25 @@ void xnn_f16_vhswish_ukernel__neonfp16arith_u16(
   // XNN_FORCE_REALIZATION(vzero);
 
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
-    float16x8_t vx01234567 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
-    float16x8_t vx89ABCDEF = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
+    float16x8_t vx0 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
+    float16x8_t vx1 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
 
-    float16x8_t vacc01234567 = vaddq_f16(vx01234567, vthree);
-    vx01234567 = vmulq_f16(vx01234567, vsixth);
-    float16x8_t vacc89ABCDEF = vaddq_f16(vx89ABCDEF, vthree);
-    vx89ABCDEF = vmulq_f16(vx89ABCDEF, vsixth);
+    float16x8_t vacc0 = vaddq_f16(vx0, vthree);
+    vx0 = vmulq_f16(vx0, vsixth);
+    float16x8_t vacc1 = vaddq_f16(vx1, vthree);
+    vx1 = vmulq_f16(vx1, vsixth);
 
-    vacc01234567 = vreinterpretq_f16_s16(vmaxq_s16(vreinterpretq_s16_f16(vacc01234567), vzero));
-    vacc89ABCDEF = vreinterpretq_f16_s16(vmaxq_s16(vreinterpretq_s16_f16(vacc89ABCDEF), vzero));
+    vacc0 = vreinterpretq_f16_s16(vmaxq_s16(vreinterpretq_s16_f16(vacc0), vzero));
+    vacc1 = vreinterpretq_f16_s16(vmaxq_s16(vreinterpretq_s16_f16(vacc1), vzero));
 
-    vacc01234567 = vreinterpretq_f16_s16(vminq_s16(vreinterpretq_s16_f16(vacc01234567), vsix));
-    vacc89ABCDEF = vreinterpretq_f16_s16(vminq_s16(vreinterpretq_s16_f16(vacc89ABCDEF), vsix));
+    vacc0 = vreinterpretq_f16_s16(vminq_s16(vreinterpretq_s16_f16(vacc0), vsix));
+    vacc1 = vreinterpretq_f16_s16(vminq_s16(vreinterpretq_s16_f16(vacc1), vsix));
 
-    vacc01234567 = vmulq_f16(vacc01234567, vx01234567);
-    vacc89ABCDEF = vmulq_f16(vacc89ABCDEF, vx89ABCDEF);
+    vacc0 = vmulq_f16(vacc0, vx0);
+    vacc1 = vmulq_f16(vacc1, vx1);
 
-    vst1q_u16(o, vreinterpretq_u16_f16(vacc01234567)); o += 8;
-    vst1q_u16(o, vreinterpretq_u16_f16(vacc89ABCDEF)); o += 8;
+    vst1q_u16(o, vreinterpretq_u16_f16(vacc0)); o += 8;
+    vst1q_u16(o, vreinterpretq_u16_f16(vacc1)); o += 8;
   }
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     float16x8_t vx = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;

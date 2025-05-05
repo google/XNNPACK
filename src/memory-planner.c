@@ -8,10 +8,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "xnnpack.h"
-#include "xnnpack/allocator.h"
-#include "xnnpack/memory-planner.h"
-#include "xnnpack/subgraph.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/allocator.h"
+#include "src/xnnpack/memory-planner.h"
+#include "src/xnnpack/subgraph.h"
 
 // Check if two xnn_value's lifecycles overlap.
 inline static bool value_lifecycle_overlap(const struct xnn_usage_record* a, const struct xnn_usage_record* b) {

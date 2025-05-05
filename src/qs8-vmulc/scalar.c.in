@@ -8,8 +8,8 @@ $assert REQUANTIZATION == "FP32"
 $assert BATCH_TILE >= 1
 #include <assert.h>
 
-#include "xnnpack/math.h"
-#include "xnnpack/vbinary.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vbinary.h"
 
 
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]

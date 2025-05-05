@@ -3,14 +3,13 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-
+#include "bench/bgemm.h"
+#include "bench/packw-benchmark.h"
+#include "bench/utils.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/hardware-config.h"
+#include "src/xnnpack/packw.h"
 #include <benchmark/benchmark.h>
-#include "bgemm.h"
-#include "packw-benchmark.h"
-#include "utils.h"
-#include "xnnpack/common.h"
-#include "xnnpack/hardware-config.h"
-#include "xnnpack/packw.h"
 
 static void x16_packw(benchmark::State& state, const char* net,
                       xnn_x16_packw_gemm_goi_ukernel_fn ukernel,
@@ -19,14 +18,14 @@ static void x16_packw(benchmark::State& state, const char* net,
   x16_packw(state, ukernel, nr, kr, sr);
 }
 
-#define XNN_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale)       \
-BENCHMARK_CAPTURE_BGEMM(x16_packw, ukernel##_, ukernel, arch_flags, nr, kr, sr);
+#define XNN_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale)        \
+  BENCHMARK_CAPTURE_BGEMM(x16_packw, ukernel##_, ukernel, arch_flags, nr, kr, \
+                          sr);
 
-#include "x16-packw/x16-packw.h"
+#include "src/x16-packw/x16-packw.h"
 
 #undef XNN_UKERNEL
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();
 #endif
-

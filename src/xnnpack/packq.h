@@ -10,9 +10,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/config-types.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/math.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -83,8 +83,8 @@ XNN_INLINE static int8_t xnn_x8_packq_f32qp8_get_quantized(
 }
 
 XNN_INLINE static float xnn_x8_packq_f32qp8_get_recip_scale(
-    size_t m_idx, const int8_t* lhs_packed, size_t k,
-    size_t mr_packed, size_t kr, size_t sr) {
+    size_t m_idx, const int8_t* lhs_packed, size_t k, size_t mr_packed,
+    size_t kr, size_t sr) {
   const size_t k_internal = k_roundedup(k, kr, sr);
   const size_t dst_x = (m_idx % mr_packed);
   const size_t packed_offset =
@@ -99,8 +99,8 @@ XNN_INLINE static float xnn_x8_packq_f32qp8_get_recip_scale(
 }
 
 XNN_INLINE static float xnn_x8_packq_f32qp8_get_neg_nudged_zp(
-    size_t m_idx, const int8_t* lhs_packed, size_t k,
-    size_t mr_packed, size_t kr, size_t sr) {
+    size_t m_idx, const int8_t* lhs_packed, size_t k, size_t mr_packed,
+    size_t kr, size_t sr) {
   const size_t k_internal = k_roundedup(k, kr, sr);
   const size_t dst_x = (m_idx % mr_packed);
   const size_t packed_offset =
@@ -144,7 +144,7 @@ XNN_INLINE static float xnn_x8_packq_f32qp8_get_dequantized(
                             const float* XNN_RESTRICT lhs, size_t lhs_stride, \
                             void* XNN_RESTRICT lhs_packed);
 
-#include "x8-packq/x8-packq.h"
+#include "src/x8-packq/x8-packq.h"
 
 #undef XNN_UKERNEL
 

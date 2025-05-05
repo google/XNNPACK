@@ -14,8 +14,8 @@ $if AVX >= 1:
 $else:
   #include <xmmintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/vbinary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vbinary.h"
 
 $ISA = {512: "avx512f", 1: "fma3", 0: "sse"}[AVX]
 void xnn_f32_vcmul_ukernel__${ISA}_u${BATCH_TILE}(

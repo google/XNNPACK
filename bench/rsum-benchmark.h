@@ -12,23 +12,20 @@
 #include <numeric>
 #include <vector>
 
-#include "rsum-benchmark.h"
-#include "utils.h"
-#include "xnnpack.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/reduce.h"
+#include "bench/rsum-benchmark.h"
+#include "bench/utils.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/reduce.h"
 #include <benchmark/benchmark.h>
 
 namespace {
-void f16_rsum(
-    benchmark::State& state,
-    xnn_f16_rsum_ukernel_fn rsum,
-    xnn_init_f16_scale_params_fn init_params,
-    benchmark::utils::IsaCheckFunction isa_check = nullptr)
-{
+void f16_rsum(benchmark::State& state, xnn_f16_rsum_ukernel_fn rsum,
+              xnn_init_f16_scale_params_fn init_params,
+              benchmark::utils::IsaCheckFunction isa_check = nullptr) {
   if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
@@ -36,9 +33,9 @@ void f16_rsum(
   const size_t rows = state.range(1);
 
   xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> input(
-      rows * channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+      rows * channels, xnnpack::XnnExtraBytes);
   xnnpack::Buffer<xnn_float16> output(rows);
-  std::iota(input.begin(), input.end(), 1);
+  std::iota(input.begin(), input.end(), 1.0f);
 
   // Prepare parameters.
   xnn_f16_scale_params params;
@@ -46,7 +43,8 @@ void f16_rsum(
 
   for (auto _ : state) {
     for (int i = 0; i < rows; ++i) {
-      rsum(channels * sizeof(xnn_float16), &input[i * channels], &output[i], &params);
+      rsum(channels * sizeof(xnn_float16), &input[i * channels], &output[i],
+           &params);
     }
   }
 
@@ -56,12 +54,10 @@ void f16_rsum(
   }
 }
 
-void f16_f32acc_rsum(
-    benchmark::State& state,
-    xnn_f16_f32acc_rsum_ukernel_fn rsum,
-    xnn_init_f16_f32acc_scale_params_fn init_params,
-    benchmark::utils::IsaCheckFunction isa_check = nullptr)
-{
+void f16_f32acc_rsum(benchmark::State& state,
+                     xnn_f16_f32acc_rsum_ukernel_fn rsum,
+                     xnn_init_f16_f32acc_scale_params_fn init_params,
+                     benchmark::utils::IsaCheckFunction isa_check = nullptr) {
   if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
@@ -69,9 +65,9 @@ void f16_f32acc_rsum(
   const size_t rows = state.range(1);
 
   xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> input(
-      rows * channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+      rows * channels, xnnpack::XnnExtraBytes);
   xnnpack::Buffer<float> output(rows);
-  std::iota(input.begin(), input.end(), 1);
+  std::iota(input.begin(), input.end(), 1.0f);
 
   // Prepare parameters.
   xnn_f16_f32acc_scale_params params;
@@ -79,7 +75,8 @@ void f16_f32acc_rsum(
 
   for (auto _ : state) {
     for (int i = 0; i < rows; ++i) {
-      rsum(channels * sizeof(xnn_float16), &input[i * channels], &output[i], &params);
+      rsum(channels * sizeof(xnn_float16), &input[i * channels], &output[i],
+           &params);
     }
   }
 
@@ -89,12 +86,9 @@ void f16_f32acc_rsum(
   }
 }
 
-void f32_rsum(
-    benchmark::State& state,
-    xnn_f32_rsum_ukernel_fn rsum,
-    xnn_init_f32_scale_params_fn init_params,
-    benchmark::utils::IsaCheckFunction isa_check = nullptr)
-{
+void f32_rsum(benchmark::State& state, xnn_f32_rsum_ukernel_fn rsum,
+              xnn_init_f32_scale_params_fn init_params,
+              benchmark::utils::IsaCheckFunction isa_check = nullptr) {
   if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
@@ -102,9 +96,9 @@ void f32_rsum(
   const size_t rows = state.range(1);
 
   xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> input(
-      rows * channels + XNN_EXTRA_BYTES / sizeof(float));
+      rows * channels, xnnpack::XnnExtraBytes);
   xnnpack::Buffer<float> output(rows);
-  std::iota(input.begin(), input.end(), 1);
+  std::iota(input.begin(), input.end(), 1.0f);
 
   // Prepare parameters.
   xnn_f32_scale_params params;
@@ -122,21 +116,18 @@ void f32_rsum(
   }
 }
 
-void qs8_rsum(
-    benchmark::State& state,
-    xnn_qs8_rsum_ukernel_fn rsum,
-    xnn_init_qs8_rsum_params_fn init_params,
-    benchmark::utils::IsaCheckFunction isa_check = nullptr)
-{
+void qs8_rsum(benchmark::State& state, xnn_qs8_rsum_ukernel_fn rsum,
+              xnn_init_qs8_rsum_params_fn init_params,
+              benchmark::utils::IsaCheckFunction isa_check = nullptr) {
   if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
   const size_t channels = state.range(0);
   const size_t rows = state.range(1);
 
-  xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> input(rows * channels +
-                                                  XNN_EXTRA_BYTES);
-  xnnpack::Buffer<int32_t> output(rows);
+  xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> input(
+      rows * channels, xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<int32_t> output(rows, 0);
   std::iota(input.begin(), input.end(), 1);
 
   // Prepare parameters.
@@ -157,21 +148,18 @@ void qs8_rsum(
   }
 }
 
-void qu8_rsum(
-    benchmark::State& state,
-    xnn_qu8_rsum_ukernel_fn rsum,
-    xnn_init_qs8_rsum_params_fn init_params,
-    benchmark::utils::IsaCheckFunction isa_check = nullptr)
-{
+void qu8_rsum(benchmark::State& state, xnn_qu8_rsum_ukernel_fn rsum,
+              xnn_init_qs8_rsum_params_fn init_params,
+              benchmark::utils::IsaCheckFunction isa_check = nullptr) {
   if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
   const size_t channels = state.range(0);
   const size_t rows = state.range(1);
 
-  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> input(rows * channels +
-                                                   XNN_EXTRA_BYTES);
-  xnnpack::Buffer<uint32_t> output(rows);
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> input(
+      rows * channels, xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<uint32_t> output(rows, 0);
   std::iota(input.begin(), input.end(), 1);
 
   // Prepare parameters.
@@ -192,12 +180,9 @@ void qu8_rsum(
   }
 }
 
-void f32_rdsum(
-    benchmark::State& state,
-    xnn_f32_rdsum_ukernel_fn rdsum,
-    xnn_init_f32_scale_params_fn init_params,
-    benchmark::utils::IsaCheckFunction isa_check = nullptr)
-{
+void f32_rdsum(benchmark::State& state, xnn_f32_rdsum_ukernel_fn rdsum,
+               xnn_init_f32_scale_params_fn init_params,
+               benchmark::utils::IsaCheckFunction isa_check = nullptr) {
   if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
@@ -205,9 +190,9 @@ void f32_rdsum(
   const size_t channels = state.range(1);
 
   xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> input(
-      rows * channels + XNN_EXTRA_BYTES / sizeof(float));
+      rows * channels, xnnpack::XnnExtraBytes);
   xnnpack::Buffer<float> output(channels);
-  xnnpack::Buffer<float> zero(channels + XNN_EXTRA_BYTES / sizeof(float), 0.f);
+  xnnpack::Buffer<float> zero(channels, 0.f, xnnpack::XnnExtraBytes);
   std::iota(input.begin(), input.end(), 0.0f);
 
   // Prepare parameters.
@@ -215,7 +200,8 @@ void f32_rdsum(
   init_params(&params, /*scale=*/1.0f / rows);
 
   for (auto _ : state) {
-    rdsum(rows, channels, input.data(), channels * sizeof(float), zero.data(), output.data(), &params);
+    rdsum(rows, channels, input.data(), channels * sizeof(float), zero.data(),
+          output.data(), &params);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
@@ -224,22 +210,19 @@ void f32_rdsum(
   }
 }
 
-void qs8_rdsum(
-    benchmark::State& state,
-    xnn_qs8_rdsum_ukernel_fn rdsum,
-    xnn_init_qs8_rsum_params_fn init_params,
-    benchmark::utils::IsaCheckFunction isa_check = nullptr)
-{
+void qs8_rdsum(benchmark::State& state, xnn_qs8_rdsum_ukernel_fn rdsum,
+               xnn_init_qs8_rsum_params_fn init_params,
+               benchmark::utils::IsaCheckFunction isa_check = nullptr) {
   if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
   const size_t rows = state.range(0);
   const size_t channels = state.range(1);
 
-  xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> input(rows * channels +
-                                                  XNN_EXTRA_BYTES);
+  xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> input(
+      rows * channels, xnnpack::XnnExtraBytes);
   xnnpack::Buffer<int32_t> output(channels);
-  xnnpack::Buffer<int8_t> zero(channels + XNN_EXTRA_BYTES, 0);
+  xnnpack::Buffer<int8_t> zero(channels, 0, xnnpack::XnnExtraBytes);
   std::fill(input.begin(), input.end(), 0);
 
   // Prepare parameters.
@@ -249,7 +232,8 @@ void qs8_rdsum(
   }
 
   for (auto _ : state) {
-    rdsum(rows, channels, input.data(), channels * sizeof(int8_t), zero.data(), output.data(), &params);
+    rdsum(rows, channels, input.data(), channels * sizeof(int8_t), zero.data(),
+          output.data(), &params);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
@@ -258,22 +242,19 @@ void qs8_rdsum(
   }
 }
 
-void qu8_rdsum(
-    benchmark::State& state,
-    xnn_qu8_rdsum_ukernel_fn rdsum,
-    xnn_init_qs8_rsum_params_fn init_params,
-    benchmark::utils::IsaCheckFunction isa_check = nullptr)
-{
+void qu8_rdsum(benchmark::State& state, xnn_qu8_rdsum_ukernel_fn rdsum,
+               xnn_init_qs8_rsum_params_fn init_params,
+               benchmark::utils::IsaCheckFunction isa_check = nullptr) {
   if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
   const size_t rows = state.range(0);
   const size_t channels = state.range(1);
 
-  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> input(rows * channels +
-                                                   XNN_EXTRA_BYTES);
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> input(
+      rows * channels, xnnpack::XnnExtraBytes);
   xnnpack::Buffer<uint32_t> output(channels);
-  xnnpack::Buffer<uint8_t> zero(channels + XNN_EXTRA_BYTES, 0);
+  xnnpack::Buffer<uint8_t> zero(channels, 0, xnnpack::XnnExtraBytes);
   std::fill(input.begin(), input.end(), 0);
 
   // Prepare parameters.
@@ -283,7 +264,8 @@ void qu8_rdsum(
   }
 
   for (auto _ : state) {
-    rdsum(rows, channels, input.data(), channels * sizeof(int8_t), zero.data(), output.data(), &params);
+    rdsum(rows, channels, input.data(), channels * sizeof(int8_t), zero.data(),
+          output.data(), &params);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
@@ -292,12 +274,10 @@ void qu8_rdsum(
   }
 }
 
-void f16_f32acc_rdsum(
-    benchmark::State& state,
-    xnn_f16_f32acc_rdsum_ukernel_fn rdsum,
-    xnn_init_f16_f32acc_scale_params_fn init_params,
-    benchmark::utils::IsaCheckFunction isa_check = nullptr)
-{
+void f16_f32acc_rdsum(benchmark::State& state,
+                      xnn_f16_f32acc_rdsum_ukernel_fn rdsum,
+                      xnn_init_f16_f32acc_scale_params_fn init_params,
+                      benchmark::utils::IsaCheckFunction isa_check = nullptr) {
   if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
@@ -305,9 +285,9 @@ void f16_f32acc_rdsum(
   const size_t channels = state.range(1);
 
   xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> input(
-      rows * channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+      rows * channels, xnnpack::XnnExtraBytes);
   xnnpack::Buffer<float> output(channels);
-  xnnpack::Buffer<xnn_float16> zero(channels + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0);
+  xnnpack::Buffer<xnn_float16> zero(channels, 0, xnnpack::XnnExtraBytes);
   std::iota(input.begin(), input.end(), 0.0f);
 
   // Prepare parameters.
@@ -315,7 +295,8 @@ void f16_f32acc_rdsum(
   init_params(&params, /*scale=*/1.0f / rows);
 
   for (auto _ : state) {
-    rdsum(rows, channels, input.data(), channels * sizeof(xnn_float16), zero.data(), output.data(), &params);
+    rdsum(rows, channels, input.data(), channels * sizeof(xnn_float16),
+          zero.data(), output.data(), &params);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
@@ -324,9 +305,8 @@ void f16_f32acc_rdsum(
   }
 }
 
-static void BenchmarkRSUM(benchmark::internal::Benchmark* b)
-{
-  b->ArgNames({"channels","rows"});
+static void BenchmarkRSUM(benchmark::internal::Benchmark* b) {
+  b->ArgNames({"channels", "rows"});
   b->Args({1, 512});
   b->Args({1, 1024});
   b->Args({1, 8000});
@@ -337,8 +317,7 @@ static void BenchmarkRSUM(benchmark::internal::Benchmark* b)
   b->Args({32768, 1});
 }
 
-static void BenchmarkRDSUM(benchmark::internal::Benchmark* b)
-{
+static void BenchmarkRDSUM(benchmark::internal::Benchmark* b) {
   b->ArgNames({"rows", "channels"});
   b->Args({8, 1024});
   b->Args({16, 1024});

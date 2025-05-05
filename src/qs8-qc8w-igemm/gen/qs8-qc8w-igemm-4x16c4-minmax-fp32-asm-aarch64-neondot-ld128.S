@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-igemm/4x16c4-aarch64-neondot-ld128.S.in
 //   Generator: tools/xngen
@@ -8,7 +9,7 @@
 // LICENSE file in the root directory of this source tree.
 
 
-#include "xnnpack/assembly.h"
+#include "src/xnnpack/assembly.h"
 
 # void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld128(
 #     size_t mr,                 x0
@@ -53,6 +54,7 @@ BEGIN_FUNCTION xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondo
                                             // if mr <= 2
         CSEL        x17, x16, x17, LS       //   c2 = c1
         BIC         x2, x2, 3
+        SUB         sp, sp, 64
 
         CMP         x0, 4                   // if mr < 4
         ADD         x7,  x17, x7            // c3 = c2 + cm_stride
@@ -289,7 +291,7 @@ BEGIN_FUNCTION xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondo
         SQXTN2      v1.16b, v25.8h
         SQXTN2      v2.16b, v26.8h
         SQXTN2      v3.16b, v27.8h
-        LDR         x0, [sp]                // cn_stride
+        LDR         x0, [sp, 64]                // cn_stride
 
         SMAX        v0.16b, v0.16b, v4.16b
         SMAX        v1.16b, v1.16b, v4.16b
@@ -313,6 +315,7 @@ BEGIN_FUNCTION xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondo
 
         # nc loop
         B.HI        0b
+        ADD         sp, sp, 64
         RET
 
         # Remainder- 8 bytes of A
@@ -431,6 +434,7 @@ BEGIN_FUNCTION xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondo
         STR         b1, [x16]
         STR         b0, [x6]
 10:
+        ADD         sp, sp, 64
         RET
 
 END_FUNCTION xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld128

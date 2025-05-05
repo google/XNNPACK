@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-rminmax/wasmsimd.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
 
 
 void xnn_f32_rmax_ukernel__wasmsimd_pminmax_u16_acc4(
@@ -26,7 +27,7 @@ void xnn_f32_rmax_ukernel__wasmsimd_pminmax_u16_acc4(
   assert(input != NULL);
   assert(output != NULL);
 
-  v128_t vmax0 = wasm_v128_load32_splat(input);
+  v128_t vmax0 = wasm_v128_load32_splat(output);
   v128_t vmax1 = vmax0;
   v128_t vmax2 = vmax0;
   v128_t vmax3 = vmax0;

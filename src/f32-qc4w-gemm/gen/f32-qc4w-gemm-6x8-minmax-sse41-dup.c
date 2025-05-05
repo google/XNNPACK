@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-gemm/sse-dup.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <smmintrin.h>
 
-#include "xnnpack/gemm.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/unaligned.h"
 
 
 void xnn_f32_qc4w_gemm_minmax_ukernel_6x8__sse41_dup(

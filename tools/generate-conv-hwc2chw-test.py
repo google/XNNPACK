@@ -42,8 +42,8 @@ TEST(${TEST_NAME}, input_width_eq_${INPUT_WIDTH}) {
     .subsampling(${SUBSAMPLING})
     .padding_width(${PADDING_RIGHT})
     .input_channels(${INPUT_CHANNELS})
-    .output_channels_tile(${OUTPUT_CHANNELS_TILE})
-    .output_channels(${OUTPUT_CHANNELS_TILE})
+    .output_channels_tile(${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE})
+    .output_channels(${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE})
     .input_width(${INPUT_WIDTH})
     .input_height(${KERNEL_SIZE})
     .Test(${", ".join(TEST_ARGS)});
@@ -59,8 +59,8 @@ $if INPUT_WIDTH > 1:
         .subsampling(${SUBSAMPLING})
         .padding_width(${PADDING_RIGHT})
         .input_channels(${INPUT_CHANNELS})
-        .output_channels_tile(${OUTPUT_CHANNELS_TILE})
-        .output_channels(${OUTPUT_CHANNELS_TILE})
+        .output_channels_tile(${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE})
+        .output_channels(${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE})
         .input_width(input_width)
         .input_height(${KERNEL_SIZE})
         .Test(${", ".join(TEST_ARGS)});
@@ -76,8 +76,8 @@ $if INPUT_WIDTH > 1:
         .subsampling(${SUBSAMPLING})
         .padding_width(${PADDING_RIGHT})
         .input_channels(${INPUT_CHANNELS})
-        .output_channels_tile(${OUTPUT_CHANNELS_TILE})
-        .output_channels(${OUTPUT_CHANNELS_TILE})
+        .output_channels_tile(${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE})
+        .output_channels(${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE})
         .input_width(input_width)
         .input_height(${KERNEL_SIZE})
         .Test(${", ".join(TEST_ARGS)});
@@ -93,25 +93,30 @@ TEST(${TEST_NAME}, input_width_gt_${INPUT_WIDTH}) {
       .subsampling(${SUBSAMPLING})
       .padding_width(${PADDING_RIGHT})
       .input_channels(${INPUT_CHANNELS})
-      .output_channels_tile(${OUTPUT_CHANNELS_TILE})
-      .output_channels(${OUTPUT_CHANNELS_TILE})
+      .output_channels_tile(${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE})
+      .output_channels(${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE})
       .input_width(input_width)
       .input_height(${KERNEL_SIZE})
       .Test(${", ".join(TEST_ARGS)});
   }
 }
 
-TEST(${TEST_NAME}, output_channels_lt_${OUTPUT_CHANNELS_TILE}) {
+TEST(${TEST_NAME}, output_channels_lt_${OUTPUT_CHANNELS_TILE}${IS_VECTOR}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t output_channels = 1; output_channels < ${OUTPUT_CHANNELS_TILE}; output_channels++) {
+  $if IS_VECTOR == "v":
+    size_t output_channels_tile = ${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE};
+    $LOOP_END = 'output_channels_tile'
+  $else:
+    $LOOP_END = OUTPUT_CHANNELS_TILE
+  for (size_t output_channels = 1; output_channels < ${LOOP_END}; output_channels++) {
     for (size_t input_width = ${1 if PADDING_LEFT else 2}; input_width < ${INPUT_WIDTH*8}; input_width += ${INPUT_WIDTH*2-1}) {
       ConvHWC2CHWMicrokernelTester()
         .kernel_size(${KERNEL_SIZE})
         .subsampling(${SUBSAMPLING})
         .padding_width(${PADDING_RIGHT})
         .input_channels(${INPUT_CHANNELS})
-        .output_channels_tile(${OUTPUT_CHANNELS_TILE})
+        .output_channels_tile(${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE})
         .output_channels(output_channels)
         .input_width(input_width)
         .input_height(${KERNEL_SIZE})
@@ -120,17 +125,26 @@ TEST(${TEST_NAME}, output_channels_lt_${OUTPUT_CHANNELS_TILE}) {
   }
 }
 
-TEST(${TEST_NAME}, output_channels_div_${OUTPUT_CHANNELS_TILE}) {
+TEST(${TEST_NAME}, output_channels_div_${OUTPUT_CHANNELS_TILE}${IS_VECTOR}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t output_channels = ${OUTPUT_CHANNELS_TILE*2}; output_channels <= ${OUTPUT_CHANNELS_TILE*4}; output_channels += ${OUTPUT_CHANNELS_TILE}) {
+  $if IS_VECTOR == "v":
+    size_t output_channels_tile = ${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE};
+    $LOOP_START = 'output_channels_tile * 2'
+    $LOOP_END = 'output_channels_tile * 4'
+    $LOOP_INC = 'output_channels_tile'
+  $else:
+    $LOOP_START = OUTPUT_CHANNELS_TILE*2
+    $LOOP_END = OUTPUT_CHANNELS_TILE*4
+    $LOOP_INC = OUTPUT_CHANNELS_TILE
+  for (size_t output_channels = ${LOOP_START}; output_channels <= ${LOOP_END}; output_channels += ${LOOP_INC}) {
     for (size_t input_width = ${1 if PADDING_LEFT else 2}; input_width < ${INPUT_WIDTH*8}; input_width += ${INPUT_WIDTH*2-1}) {
       ConvHWC2CHWMicrokernelTester()
         .kernel_size(${KERNEL_SIZE})
         .subsampling(${SUBSAMPLING})
         .padding_width(${PADDING_RIGHT})
         .input_channels(${INPUT_CHANNELS})
-        .output_channels_tile(${OUTPUT_CHANNELS_TILE})
+        .output_channels_tile(${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE})
         .output_channels(output_channels)
         .input_width(input_width)
         .input_height(${KERNEL_SIZE})
@@ -139,17 +153,24 @@ TEST(${TEST_NAME}, output_channels_div_${OUTPUT_CHANNELS_TILE}) {
   }
 }
 
-TEST(${TEST_NAME}, output_channels_gt_${OUTPUT_CHANNELS_TILE}) {
+TEST(${TEST_NAME}, output_channels_gt_${OUTPUT_CHANNELS_TILE}${IS_VECTOR}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t output_channels = ${OUTPUT_CHANNELS_TILE+1}; output_channels < ${OUTPUT_CHANNELS_TILE*2}; output_channels++) {
+  $if IS_VECTOR == "v":
+    size_t output_channels_tile = ${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE};
+    $LOOP_START = 'output_channels_tile + 1'
+    $LOOP_END = 'output_channels_tile * 2'
+  $else:
+    $LOOP_START = OUTPUT_CHANNELS_TILE+1
+    $LOOP_END = OUTPUT_CHANNELS_TILE*2
+  for (size_t output_channels = ${LOOP_START}; output_channels < ${LOOP_END}; output_channels++) {
     for (size_t input_width = ${1 if PADDING_LEFT else 2}; input_width < ${INPUT_WIDTH*8}; input_width += ${INPUT_WIDTH*2-1}) {
       ConvHWC2CHWMicrokernelTester()
         .kernel_size(${KERNEL_SIZE})
         .subsampling(${SUBSAMPLING})
         .padding_width(${PADDING_RIGHT})
         .input_channels(${INPUT_CHANNELS})
-        .output_channels_tile(${OUTPUT_CHANNELS_TILE})
+        .output_channels_tile(${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE})
         .output_channels(output_channels)
         .input_width(input_width)
         .input_height(${KERNEL_SIZE})
@@ -161,15 +182,22 @@ TEST(${TEST_NAME}, output_channels_gt_${OUTPUT_CHANNELS_TILE}) {
 TEST(${TEST_NAME}, input_height_lt_3) {
   $if ISA_CHECK:
     ${ISA_CHECK};
+  $if IS_VECTOR == "v":
+    size_t output_channels_tile = ${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE};
+    $LOOP_END = 'output_channels_tile * 2'
+    $LOOP_INC = 'output_channels_tile - 1'
+  $else:
+    $LOOP_END = OUTPUT_CHANNELS_TILE*2
+    $LOOP_INC = OUTPUT_CHANNELS_TILE-1
   for (size_t input_height = 1; input_height < 3; input_height++) {
-    for (size_t output_channels = 1; output_channels < ${OUTPUT_CHANNELS_TILE*2}; output_channels += ${OUTPUT_CHANNELS_TILE-1}) {
+    for (size_t output_channels = 1; output_channels < ${LOOP_END}; output_channels += ${LOOP_INC}) {
       for (size_t input_width = ${1 if PADDING_LEFT else 2}; input_width < ${INPUT_WIDTH*8}; input_width += ${INPUT_WIDTH*2-1}) {
         ConvHWC2CHWMicrokernelTester()
           .kernel_size(${KERNEL_SIZE})
           .subsampling(${SUBSAMPLING})
           .padding(1)  // padded input height of at least 3 required
           .input_channels(${INPUT_CHANNELS})
-          .output_channels_tile(${OUTPUT_CHANNELS_TILE})
+          .output_channels_tile(${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE})
           .output_channels(output_channels)
           .input_width(input_width)
           .input_height(input_height)
@@ -182,15 +210,22 @@ TEST(${TEST_NAME}, input_height_lt_3) {
 TEST(${TEST_NAME}, input_height_gt_3) {
   $if ISA_CHECK:
     ${ISA_CHECK};
+  $if IS_VECTOR == "v":
+    size_t output_channels_tile = ${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE};
+    $LOOP_END = 'output_channels_tile * 2'
+    $LOOP_INC = 'output_channels_tile - 1'
+  $else:
+    $LOOP_END = OUTPUT_CHANNELS_TILE*2
+    $LOOP_INC = OUTPUT_CHANNELS_TILE-1
   for (size_t input_height = 4; input_height <= 9; input_height++) {
-    for (size_t output_channels = 1; output_channels < ${OUTPUT_CHANNELS_TILE*2}; output_channels += ${OUTPUT_CHANNELS_TILE-1}) {
+    for (size_t output_channels = 1; output_channels < ${LOOP_END}; output_channels += ${LOOP_INC}) {
       for (size_t input_width = ${1 if PADDING_LEFT else 2}; input_width < ${INPUT_WIDTH*8}; input_width += ${INPUT_WIDTH*2-1}) {
         ConvHWC2CHWMicrokernelTester()
           .kernel_size(${KERNEL_SIZE})
           .subsampling(${SUBSAMPLING})
           .padding_width(${PADDING_RIGHT})
           .input_channels(${INPUT_CHANNELS})
-          .output_channels_tile(${OUTPUT_CHANNELS_TILE})
+          .output_channels_tile(${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE})
           .output_channels(output_channels)
           .input_width(input_width)
           .input_height(input_height)
@@ -203,8 +238,15 @@ TEST(${TEST_NAME}, input_height_gt_3) {
 TEST(${TEST_NAME}, padding_top) {
   $if ISA_CHECK:
     ${ISA_CHECK};
+  $if IS_VECTOR == "v":
+    size_t output_channels_tile = ${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE};
+    $LOOP_END = 'output_channels_tile * 4'
+    $LOOP_INC = 'output_channels_tile * 2 - 1'
+  $else:
+    $LOOP_END = OUTPUT_CHANNELS_TILE*4
+    $LOOP_INC = OUTPUT_CHANNELS_TILE*2-1
   for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
-    for (size_t output_channels = 1; output_channels < ${OUTPUT_CHANNELS_TILE*4}; output_channels += ${OUTPUT_CHANNELS_TILE*2-1}) {
+    for (size_t output_channels = 1; output_channels < ${LOOP_END}; output_channels += ${LOOP_INC}) {
       for (size_t input_width = ${1 if PADDING_LEFT else 2}; input_width < ${INPUT_WIDTH*8}; input_width += ${INPUT_WIDTH*2-1}) {
         ConvHWC2CHWMicrokernelTester()
           .kernel_size(${KERNEL_SIZE})
@@ -212,7 +254,7 @@ TEST(${TEST_NAME}, padding_top) {
           .padding_width(${PADDING_RIGHT})
           .padding_top(padding_top)
           .input_channels(${INPUT_CHANNELS})
-          .output_channels_tile(${OUTPUT_CHANNELS_TILE})
+          .output_channels_tile(${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE})
           .output_channels(output_channels)
           .input_width(input_width)
           .input_height(9)
@@ -225,8 +267,15 @@ TEST(${TEST_NAME}, padding_top) {
 TEST(${TEST_NAME}, padding_bottom) {
   $if ISA_CHECK:
     ${ISA_CHECK};
+  $if IS_VECTOR == "v":
+    size_t output_channels_tile = ${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE};
+    $LOOP_END = 'output_channels_tile * 4'
+    $LOOP_INC = 'output_channels_tile * 2 - 1'
+  $else:
+    $LOOP_END = OUTPUT_CHANNELS_TILE*4
+    $LOOP_INC = OUTPUT_CHANNELS_TILE*2-1
   for (size_t padding_bottom = 0; padding_bottom <= 1; padding_bottom++) {
-    for (size_t output_channels = 1; output_channels < ${OUTPUT_CHANNELS_TILE*4}; output_channels += ${OUTPUT_CHANNELS_TILE*2-1}) {
+    for (size_t output_channels = 1; output_channels < ${LOOP_END}; output_channels += ${LOOP_INC}) {
       for (size_t input_width = ${1 if PADDING_LEFT else 2}; input_width < ${INPUT_WIDTH*8}; input_width += ${INPUT_WIDTH*2-1}) {
         ConvHWC2CHWMicrokernelTester()
           .kernel_size(${KERNEL_SIZE})
@@ -234,7 +283,7 @@ TEST(${TEST_NAME}, padding_bottom) {
           .padding_width(${PADDING_RIGHT})
           .padding_bottom(padding_bottom)
           .input_channels(${INPUT_CHANNELS})
-          .output_channels_tile(${OUTPUT_CHANNELS_TILE})
+          .output_channels_tile(${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE})
           .output_channels(output_channels)
           .input_width(input_width)
           .input_height(9)
@@ -247,15 +296,22 @@ TEST(${TEST_NAME}, padding_bottom) {
 TEST(${TEST_NAME}, output_y_start) {
   $if ISA_CHECK:
     ${ISA_CHECK};
+  $if IS_VECTOR == "v":
+    size_t output_channels_tile = ${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE};
+    $LOOP_END = 'output_channels_tile * 2'
+    $LOOP_INC = 'output_channels_tile - 1'
+  $else:
+    $LOOP_END = OUTPUT_CHANNELS_TILE*2
+    $LOOP_INC = OUTPUT_CHANNELS_TILE-1
   for (size_t output_y_start = 1; output_y_start <= 3; output_y_start++) {
-    for (size_t output_channels = 1; output_channels < ${OUTPUT_CHANNELS_TILE*2}; output_channels += ${OUTPUT_CHANNELS_TILE-1}) {
+    for (size_t output_channels = 1; output_channels < ${LOOP_END}; output_channels += ${LOOP_INC}) {
       for (size_t input_width = ${1 if PADDING_LEFT else 2}; input_width < ${INPUT_WIDTH*8}; input_width += ${INPUT_WIDTH*2-1}) {
         ConvHWC2CHWMicrokernelTester()
           .kernel_size(${KERNEL_SIZE})
           .subsampling(${SUBSAMPLING})
           .padding_width(${PADDING_RIGHT})
           .input_channels(${INPUT_CHANNELS})
-          .output_channels_tile(${OUTPUT_CHANNELS_TILE})
+          .output_channels_tile(${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE})
           .output_channels(output_channels)
           .input_width(input_width)
           .input_height(9)
@@ -269,15 +325,22 @@ TEST(${TEST_NAME}, output_y_start) {
 TEST(${TEST_NAME}, output_y_end) {
   $if ISA_CHECK:
     ${ISA_CHECK};
+  $if IS_VECTOR == "v":
+    size_t output_channels_tile = ${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE};
+    $LOOP_END = 'output_channels_tile * 2'
+    $LOOP_INC = 'output_channels_tile - 1'
+  $else:
+    $LOOP_END = OUTPUT_CHANNELS_TILE*2
+    $LOOP_INC = OUTPUT_CHANNELS_TILE-1
   for (size_t output_y_end = 2; output_y_end < 5; output_y_end++) {
-    for (size_t output_channels = 1; output_channels < ${OUTPUT_CHANNELS_TILE*2}; output_channels += ${OUTPUT_CHANNELS_TILE-1}) {
+    for (size_t output_channels = 1; output_channels < ${LOOP_END}; output_channels += ${LOOP_INC}) {
       for (size_t input_width = ${1 if PADDING_LEFT else 2}; input_width < ${INPUT_WIDTH*8}; input_width += ${INPUT_WIDTH*2-1}) {
         ConvHWC2CHWMicrokernelTester()
           .kernel_size(${KERNEL_SIZE})
           .subsampling(${SUBSAMPLING})
           .padding_width(${PADDING_RIGHT})
           .input_channels(${INPUT_CHANNELS})
-          .output_channels_tile(${OUTPUT_CHANNELS_TILE})
+          .output_channels_tile(${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE})
           .output_channels(output_channels)
           .input_width(input_width)
           .input_height(9)
@@ -291,14 +354,21 @@ TEST(${TEST_NAME}, output_y_end) {
 TEST(${TEST_NAME}, qmin) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t output_channels = 1; output_channels < ${OUTPUT_CHANNELS_TILE*2}; output_channels += ${OUTPUT_CHANNELS_TILE-1}) {
+  $if IS_VECTOR == "v":
+    size_t output_channels_tile = ${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE};
+    $LOOP_END = 'output_channels_tile * 2'
+    $LOOP_INC = 'output_channels_tile - 1'
+  $else:
+    $LOOP_END = OUTPUT_CHANNELS_TILE*2
+    $LOOP_INC = OUTPUT_CHANNELS_TILE-1
+  for (size_t output_channels = 1; output_channels < ${LOOP_END}; output_channels += ${LOOP_INC}) {
     for (size_t input_width = ${1 if PADDING_LEFT else 2}; input_width < ${INPUT_WIDTH*8}; input_width += ${INPUT_WIDTH*2-1}) {
       ConvHWC2CHWMicrokernelTester()
         .kernel_size(${KERNEL_SIZE})
         .subsampling(${SUBSAMPLING})
         .padding_width(${PADDING_RIGHT})
         .input_channels(${INPUT_CHANNELS})
-        .output_channels_tile(${OUTPUT_CHANNELS_TILE})
+        .output_channels_tile(${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE})
         .output_channels(output_channels)
         .input_width(input_width)
         .input_height(6)
@@ -311,14 +381,21 @@ TEST(${TEST_NAME}, qmin) {
 TEST(${TEST_NAME}, qmax) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t output_channels = 1; output_channels < ${OUTPUT_CHANNELS_TILE*2}; output_channels += ${OUTPUT_CHANNELS_TILE-1}) {
+  $if IS_VECTOR == "v":
+    size_t output_channels_tile = ${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE};
+    $LOOP_END = 'output_channels_tile * 2'
+    $LOOP_INC = 'output_channels_tile - 1'
+  $else:
+    $LOOP_END = OUTPUT_CHANNELS_TILE*2
+    $LOOP_INC = OUTPUT_CHANNELS_TILE-1
+  for (size_t output_channels = 1; output_channels < ${LOOP_END}; output_channels += ${LOOP_INC}) {
     for (size_t input_width = ${1 if PADDING_LEFT else 2}; input_width < ${INPUT_WIDTH*8}; input_width += ${INPUT_WIDTH*2-1}) {
       ConvHWC2CHWMicrokernelTester()
         .kernel_size(${KERNEL_SIZE})
         .subsampling(${SUBSAMPLING})
         .padding_width(${PADDING_RIGHT})
         .input_channels(${INPUT_CHANNELS})
-        .output_channels_tile(${OUTPUT_CHANNELS_TILE})
+        .output_channels_tile(${OUTPUT_CHANNELS_TILE}${OUTPUT_CHANNELS_SCALE})
         .output_channels(output_channels)
         .input_width(input_width)
         .input_height(6)
@@ -332,7 +409,7 @@ TEST(${TEST_NAME}, qmax) {
 
 def split_ukernel_name(name):
   match = re.fullmatch(
-      r"xnn_(f16|f32)_conv_hwc2chw_ukernel_(\d+)x(\d+)s(\d+)(p1)c(\d+)x(\d+)__(.+)_(\d+)x(\d+)?",
+      r"xnn_(f16|f32)_conv_hwc2chw_ukernel_(\d+)x(\d+)s(\d+)(p1)c(\d+)x(\d+)(v)?__(.+)_(\d+)x(\d+)?",
       name,
   )
   assert match is not None
@@ -343,10 +420,14 @@ def split_ukernel_name(name):
   padding_left = 1
   input_channels = int(match.group(6))
   channel_tile = int(match.group(7))
-  height_tile = int(match.group(9))
-  width_tile = int(match.group(10))
+  if match.group(8):
+    vector_tile = True
+  else:
+    vector_tile = False
+  height_tile = int(match.group(10))
+  width_tile = int(match.group(11))
 
-  arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(8))
+  arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(9))
   return (
       kernel_height,
       kernel_width,
@@ -355,6 +436,7 @@ def split_ukernel_name(name):
       padding_right,
       input_channels,
       channel_tile,
+      vector_tile,
       height_tile,
       width_tile,
       arch,
@@ -371,6 +453,7 @@ def generate_test_cases(
     padding_right,
     input_channels,
     channel_tile,
+    vector_tile,
     height_tile,
     width_tile,
     init_fn,
@@ -404,6 +487,13 @@ def generate_test_cases(
   """
   _, test_name = ukernel.split("_", 1)
   _, datatype, ukernel_type, _ = ukernel.split("_", 3)
+  output_channels_scale = ""
+  is_vector = ""
+  if (vector_tile):
+    ctype = {"f16": "uint16_t", "f32": "float"}[datatype]
+    output_channels_scale = {"rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype}[isa]
+    is_vector = "v"
+
   test_args = [ukernel, init_fn]
   return xngen.preprocess(
       TEST_TEMPLATE,
@@ -421,8 +511,10 @@ def generate_test_cases(
           "PADDING_RIGHT": padding_right,
           "INPUT_CHANNELS": input_channels,
           "OUTPUT_CHANNELS_TILE": channel_tile,
+          "OUTPUT_CHANNELS_SCALE": output_channels_scale,
           "HEIGHT_TILE": height_tile,
           "WIDTH_TILE": width_tile,
+          "IS_VECTOR": is_vector,
           "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
           "next_prime": next_prime,
       },
@@ -438,6 +530,7 @@ def main(args):
       raise ValueError("expected a list of micro-kernels in the spec")
 
     tests = """\
+// clang-format off
 // Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -449,11 +542,11 @@ def main(args):
 
 
 #include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/conv.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microparams-init.h"
-#include "conv-hwc2chw-microkernel-tester.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/conv.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microparams-init.h"
+#include "test/conv-hwc2chw-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
     for ukernel_spec in spec_yaml:
@@ -467,6 +560,7 @@ def main(args):
           padding_right,
           input_channels,
           channel_tile,
+          vector_tile,
           height_tile,
           width_tile,
           arch,
@@ -482,6 +576,7 @@ def main(args):
           padding_right,
           input_channels,
           channel_tile,
+          vector_tile,
           height_tile,
           width_tile,
           init_fn,

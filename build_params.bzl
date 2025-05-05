@@ -36,119 +36,115 @@ def xnnpack_select_if(cond = None, val_true = [], val_false = []):
 
 def xnnpack_configurable_defines():
     return xnnpack_select_if(
-        ":cpuinfo_enabled",
+        "//:cpuinfo_enabled",
         ["XNN_ENABLE_CPUINFO=1"],
         ["XNN_ENABLE_CPUINFO=0"],
     ) + xnnpack_select_if(
-        ":memopt_enabled",
+        "//:memopt_enabled",
         ["XNN_ENABLE_MEMOPT=1"],
         ["XNN_ENABLE_MEMOPT=1"],
     ) + xnnpack_select_if(
-        ":dwconv_multipass_enabled",
-        ["XNN_ENABLE_DWCONV_MULTIPASS=1"],
-        ["XNN_ENABLE_DWCONV_MULTIPASS=0"],
-    ) + xnnpack_select_if(
-        ":gemm_m_specialization_enabled",
-        ["XNN_ENABLE_GEMM_M_SPECIALIZATION=1"],
-        ["XNN_ENABLE_GEMM_M_SPECIALIZATION=0"],
-    ) + xnnpack_select_if(
-        ":sparse_enabled",
+        "//:sparse_enabled",
         ["XNN_ENABLE_SPARSE=1"],
         ["XNN_ENABLE_SPARSE=0"],
     ) + xnnpack_select_if(
-        ":assembly_enabled",
+        "//:assembly_enabled",
         ["XNN_ENABLE_ASSEMBLY=1"],
         ["XNN_ENABLE_ASSEMBLY=0"],
     ) + xnnpack_select_if(
-        ":arm_fp16_scalar_enabled",
+        "//:arm_fp16_scalar_enabled",
         ["XNN_ENABLE_ARM_FP16_SCALAR=1"],
         ["XNN_ENABLE_ARM_FP16_SCALAR=0"],
     ) + xnnpack_select_if(
-        ":arm_fp16_vector_enabled",
+        "//:arm_fp16_vector_enabled",
         ["XNN_ENABLE_ARM_FP16_VECTOR=1"],
         ["XNN_ENABLE_ARM_FP16_VECTOR=0"],
     ) + xnnpack_select_if(
-        ":arm_bf16_enabled",
+        "//:arm_bf16_enabled",
         ["XNN_ENABLE_ARM_BF16=1"],
         ["XNN_ENABLE_ARM_BF16=0"],
     ) + xnnpack_select_if(
-        ":arm_dotprod_enabled",
+        "//:arm_dotprod_enabled",
         ["XNN_ENABLE_ARM_DOTPROD=1"],
         ["XNN_ENABLE_ARM_DOTPROD=0"],
     ) + xnnpack_select_if(
-        ":arm_i8mm_enabled",
+        "//:arm_i8mm_enabled",
         ["XNN_ENABLE_ARM_I8MM=1"],
         ["XNN_ENABLE_ARM_I8MM=0"],
     ) + xnnpack_select_if(
-        ":riscv_fp16_vector_enabled",
+        "//:riscv_fp16_vector_enabled",
         ["XNN_ENABLE_RISCV_FP16_VECTOR=1"],
         ["XNN_ENABLE_RISCV_FP16_VECTOR=0"],
     ) + xnnpack_select_if(
-        ":avx512amx_enabled",
+        "//:avx512amx_enabled",
         ["XNN_ENABLE_AVX512AMX=1"],
         ["XNN_ENABLE_AVX512AMX=0"],
     ) + xnnpack_select_if(
-        ":avx512fp16_enabled",
+        "//:avx512fp16_enabled",
         ["XNN_ENABLE_AVX512FP16=1"],
         ["XNN_ENABLE_AVX512FP16=0"],
     ) + xnnpack_select_if(
-        ":avxvnni_enabled",
+        "//:avx512bf16_enabled",
+        ["XNN_ENABLE_AVX512BF16=1"],
+        ["XNN_ENABLE_AVX512BF16=0"],
+    ) + xnnpack_select_if(
+        "//:avxvnni_enabled",
         ["XNN_ENABLE_AVXVNNI=1"],
         ["XNN_ENABLE_AVXVNNI=0"],
     ) + xnnpack_select_if(
-        ":avxvnniint8_enabled",
+        "//:avxvnniint8_enabled",
         ["XNN_ENABLE_AVXVNNIINT8=1"],
         ["XNN_ENABLE_AVXVNNIINT8=0"],
     ) + xnnpack_select_if(
-        ":avx512f_enabled",
+        "//:avx512f_enabled",
         ["XNN_ENABLE_AVX512F=1"],
         ["XNN_ENABLE_AVX512F=0"],
     ) + xnnpack_select_if(
-        ":avx256skx_enabled",
+        "//:avx256skx_enabled",
         ["XNN_ENABLE_AVX256SKX=1"],
         ["XNN_ENABLE_AVX256SKX=0"],
     ) + xnnpack_select_if(
-        ":avx256vnni_enabled",
+        "//:avx256vnni_enabled",
         ["XNN_ENABLE_AVX256VNNI=1"],
         ["XNN_ENABLE_AVX256VNNI=0"],
     ) + xnnpack_select_if(
-        ":avx256vnnigfni_enabled",
+        "//:avx256vnnigfni_enabled",
         ["XNN_ENABLE_AVX256VNNIGFNI=1"],
         ["XNN_ENABLE_AVX256VNNIGFNI=0"],
     ) + xnnpack_select_if(
-        ":avx512skx_enabled",
+        "//:avx512skx_enabled",
         ["XNN_ENABLE_AVX512SKX=1"],
         ["XNN_ENABLE_AVX512SKX=0"],
     ) + xnnpack_select_if(
-        ":avx512vbmi_enabled",
+        "//:avx512vbmi_enabled",
         ["XNN_ENABLE_AVX512VBMI=1"],
         ["XNN_ENABLE_AVX512VBMI=0"],
     ) + xnnpack_select_if(
-        ":avx512vnni_enabled",
+        "//:avx512vnni_enabled",
         ["XNN_ENABLE_AVX512VNNI=1"],
         ["XNN_ENABLE_AVX512VNNI=0"],
     ) + xnnpack_select_if(
-        ":avx512vnnigfni_enabled",
+        "//:avx512vnnigfni_enabled",
         ["XNN_ENABLE_AVX512VNNIGFNI=1"],
         ["XNN_ENABLE_AVX512VNNIGFNI=0"],
     ) + xnnpack_select_if(
-        ":hvx_enabled",
+        "//:hvx_enabled",
         ["XNN_ENABLE_HVX=1"],
         ["XNN_ENABLE_HVX=0"],
     ) + xnnpack_select_if(
-        ":kleidiai_enabled",
+        "//:kleidiai_enabled",
         ["XNN_ENABLE_KLEIDIAI=1"],
         ["XNN_ENABLE_KLEIDIAI=0"],
     ) + xnnpack_select_if(
-        ":arm_sme_enabled",
+        "//:arm_sme_enabled",
         ["XNN_ENABLE_ARM_SME=1"],
         ["XNN_ENABLE_SRM_SME=0"],
     ) + xnnpack_select_if(
-        ":arm_sme2_enabled",
+        "//:arm_sme2_enabled",
         ["XNN_ENABLE_ARM_SME2=1"],
         ["XNN_ENABLE_ARM_SME2=0"],
     ) + xnnpack_select_if(
-        ":wasm_revectorize_enabled",
+        "//:wasm_revectorize_enabled",
         ["XNN_ENABLE_WASM_REVECTORIZE=1"],
         ["XNN_ENABLE_WASM_REVECTORIZE=0"],
     ) + xnnpack_slinky_defines()
@@ -241,8 +237,22 @@ _XNNPACK_SIMD_ARCH_COPT_MAPPING = {
             "-mavx512vl",
         ],
     ),
+    "avx512fp16": xnnpack_select_if(
+        "//:avx512fp16_enabled",
+        [
+            "-mf16c",
+            "-mfma",
+            "-mavx512f",
+            "-mavx512cd",
+            "-mavx512bw",
+            "-mavx512dq",
+            "-mavx512vl",
+            "-mavx512vnni",
+            "-mgfni",
+            "-mavx512fp16",
+        ],
+    ),
     "fma3": xnnpack_select_if("//build_config:x86", ["-mfma"]),
-    "hvx": xnnpack_select_if("//build_config:hexagon", ["-mhvx-ieee-fp"]),
     "neon": select({
         "//build_config:aarch32": [
             "-marm",
@@ -251,20 +261,28 @@ _XNNPACK_SIMD_ARCH_COPT_MAPPING = {
         ],
         "//conditions:default": [],
     }),
-    "scalar": [],
+    "neonfp16arith": select({
+        "//build_config:aarch32": [
+            "-marm",
+            "-march=armv8.2-a+fp16",
+            "-mfpu=neon-fp-armv8",
+        ],
+        "//build_config:aarch64": ["-march=armv8.2-a+fp16"],
+        "//conditions:default": [],
+    }),
     "sse2": xnnpack_select_if("//build_config:x86", ["-msse2"]),
     "sse41": xnnpack_select_if("//build_config:x86", ["-msse4.1"]),
-    "wasmsimd": [],
+    "hvx": xnnpack_select_if("//build_config:hexagon", ["-mhvx-ieee-fp"]),
 }
 
 def xnnpack_simd_copts_for_arch(arch):
-    return _XNNPACK_SIMD_ARCH_COPT_MAPPING[arch]
+    return _XNNPACK_SIMD_ARCH_COPT_MAPPING.get(arch, [])
 
 def xnnpack_simd_f32_archs():
-    return ["avx", "avx2", "avx512f", "fma3", "hvx", "neon", "scalar", "sse2", "wasmsimd"]
+    return ["avx", "avx2", "avx512f", "fma3", "hvx", "neon", "scalar", "sse2", "wasmsimd", "wasmrelaxedsimd"]
 
 def xnnpack_simd_f16_archs():
-    return ["scalar"]
+    return ["scalar", "neonfp16arith", "avx512fp16"]
 
 def xnnpack_simd_s16_archs():
     return ["avx2", "avx512skx", "neon", "scalar", "sse41", "wasmsimd"]
@@ -273,10 +291,37 @@ def xnnpack_simd_s32_archs():
     return ["avx2", "avx512f", "neon", "scalar", "sse41", "hvx", "wasmsimd"]
 
 def xnnpack_simd_s8_archs():
-    return ["scalar"]
+    return ["scalar", "sse41", "neon", "hvx", "wasmsimd"]
+
+def xnnpack_simd_u8_archs():
+    return ["scalar", "sse2", "neon", "hvx", "wasmsimd"]
 
 def xnnpack_archs():
     return XNNPACK_PARAMS_FOR_ARCH.keys()
+
+def _x86_align_stack(alignment):
+    """Adds `copt`s to align the stack to the given `alignment` for `x86`."""
+    log2_alignment = 0
+    temp = alignment
+    for _ in range(64):
+        if temp == 0:
+            break
+        log2_alignment += 1
+        temp = temp // 2
+    return select({
+        "//build_config:clang_and_not_fuchsia_or_ios": [
+            "-mstack-alignment=" + str(alignment),
+            "-fomit-frame-pointer",
+            "-mstackrealign",
+        ],
+        "//build_config:gcc": [
+            "-mpreferred-stack-boundary=" + str(log2_alignment),
+            "-fomit-frame-pointer",
+            "-mstackrealign",
+            "-mincoming-stack-boundary=4",
+        ],
+        "//conditions:default": [],
+    })
 
 XNNPACK_PARAMS_FOR_ARCH = {
     # Scalar.
@@ -315,6 +360,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
         copts = [
             "-fno-fast-math",
             "-fno-math-errno",
+            "-mfp16",
         ],
     ),
     "wasm32": _create_params(
@@ -500,6 +546,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
     # X86.
     "sse": _create_params(
         cond = "//build_config:x86",
+        copts = _x86_align_stack(16),
         gcc_x86_copts = [
             "-msse",
             "-mno-sse2",
@@ -509,6 +556,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
     ),
     "sse2": _create_params(
         cond = "//build_config:x86",
+        copts = _x86_align_stack(16),
         gcc_x86_copts = [
             "-msse2",
             "-mno-sse3",
@@ -518,6 +566,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
     ),
     "ssse3": _create_params(
         cond = "//build_config:x86",
+        copts = _x86_align_stack(16),
         gcc_x86_copts = [
             "-mssse3",
             "-mno-sse4.1",
@@ -527,6 +576,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
     ),
     "sse41": _create_params(
         cond = "//build_config:x86",
+        copts = _x86_align_stack(16),
         gcc_x86_copts = [
             "-msse4.1",
             "-mno-sse4.2",
@@ -538,6 +588,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
     ),
     "avx": _create_params(
         cond = "//build_config:x86",
+        copts = _x86_align_stack(32),
         gcc_x86_copts = [
             "-mavx",
             "-mno-avx2",
@@ -549,6 +600,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
     ),
     "avxvnni": _create_params(
         cond = "//:avxvnni_enabled",
+        copts = _x86_align_stack(32),
         gcc_x86_copts = [
             "-mavx2",
             "-mavxvnni",
@@ -560,6 +612,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
     ),
     "avxvnniint8": _create_params(
         cond = "//:avxvnniint8_enabled",
+        copts = _x86_align_stack(32),
         gcc_x86_copts = [
             "-mavx2",
             "-mavxvnniint8",
@@ -571,6 +624,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
     ),
     "f16c": _create_params(
         cond = "//build_config:x86",
+        copts = _x86_align_stack(32),
         gcc_x86_copts = [
             "-mf16c",
             "-mno-avx2",
@@ -581,6 +635,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
     ),
     "fma3": _create_params(
         cond = "//build_config:x86",
+        copts = _x86_align_stack(32),
         gcc_x86_copts = [
             "-mf16c",
             "-mfma",
@@ -591,6 +646,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
     ),
     "avx2": _create_params(
         cond = "//build_config:x86",
+        copts = _x86_align_stack(32),
         gcc_x86_copts = [
             "-mf16c",
             "-mfma",
@@ -601,6 +657,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
     ),
     "avx512f": _create_params(
         cond = "//:avx512f_enabled",
+        copts = _x86_align_stack(64),
         gcc_x86_copts = [
             "-mavx512f",
         ],
@@ -611,6 +668,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
     ),
     "avx512skx": _create_params(
         cond = "//:avx512skx_enabled",
+        copts = _x86_align_stack(64),
         gcc_x86_copts = [
             "-mf16c",
             "-mfma",
@@ -627,6 +685,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
     ),
     "avx256skx": _create_params(
         cond = "//:avx256skx_enabled",
+        copts = _x86_align_stack(32),
         gcc_x86_copts = [
             "-mf16c",
             "-mfma",
@@ -643,6 +702,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
     ),
     "avx512vbmi": _create_params(
         cond = "//:avx512vbmi_enabled",
+        copts = _x86_align_stack(64),
         gcc_x86_copts = [
             "-mf16c",
             "-mfma",
@@ -660,6 +720,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
     ),
     "avx512vnni": _create_params(
         cond = "//:avx512vnni_enabled",
+        copts = _x86_align_stack(64),
         gcc_x86_copts = [
             "-mf16c",
             "-mfma",
@@ -677,6 +738,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
     ),
     "avx256vnni": _create_params(
         cond = "//:avx256vnni_enabled",
+        copts = _x86_align_stack(32),
         gcc_x86_copts = [
             "-mf16c",
             "-mfma",
@@ -694,6 +756,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
     ),
     "avx512vnnigfni": _create_params(
         cond = "//:avx512vnnigfni_enabled",
+        copts = _x86_align_stack(64),
         gcc_x86_copts = [
             "-mf16c",
             "-mfma",
@@ -712,6 +775,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
     ),
     "avx256vnnigfni": _create_params(
         cond = "//:avx256vnnigfni_enabled",
+        copts = _x86_align_stack(32),
         gcc_x86_copts = [
             "-mf16c",
             "-mfma",
@@ -730,6 +794,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
     ),
     "avx512amx": _create_params(
         cond = "//:avx512amx_enabled",
+        copts = _x86_align_stack(64),
         gcc_x86_copts = [
             "-mf16c",
             "-mfma",
@@ -750,6 +815,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
     ),
     "avx512fp16": _create_params(
         cond = "//:avx512fp16_enabled",
+        copts = _x86_align_stack(64),
         gcc_x86_copts = [
             "-mf16c",
             "-mfma",
@@ -761,6 +827,25 @@ XNNPACK_PARAMS_FOR_ARCH = {
             "-mavx512vnni",
             "-mgfni",
             "-mavx512fp16",
+        ],
+        msvc_x86_32_copts = ["/arch:AVX512"],
+        msvc_x86_64_copts = ["/arch:AVX512"],
+        mingw_copts = ["-fno-asynchronous-unwind-tables"],
+        msys_copts = ["-fno-asynchronous-unwind-tables"],
+    ),
+    "avx512bf16": _create_params(
+        cond = "//:avx512bf16_enabled",
+        gcc_x86_copts = [
+            "-mf16c",
+            "-mfma",
+            "-mavx512f",
+            "-mavx512cd",
+            "-mavx512bw",
+            "-mavx512dq",
+            "-mavx512vl",
+            "-mavx512vnni",
+            "-mgfni",
+            "-mavx512bf16",
         ],
         msvc_x86_32_copts = ["/arch:AVX512"],
         msvc_x86_64_copts = ["/arch:AVX512"],

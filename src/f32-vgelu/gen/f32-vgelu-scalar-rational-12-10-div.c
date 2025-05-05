@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vgelu/rational-12-10.c.in
 //   Generator: tools/xngen
@@ -10,11 +11,11 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "xnnpack/simd/f32-scalar.h"
+#include "src/xnnpack/simd/f32-scalar.h"
 
-#include "xnnpack/common.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u1(
@@ -137,7 +138,7 @@ void xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u2(
   XNN_SIMD_CONST_F32(vhalf, 0.5f);
 
   for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
-    const xnn_simd_f32_t vx_orig_0 = xnn_loadu_f32(input);
+    const xnn_simd_f32_t vx_orig_0 = xnn_loadu_f32(input + 0 * xnn_simd_size_f32);
     const xnn_simd_f32_t vx_orig_1 = xnn_loadu_f32(input + 1 * xnn_simd_size_f32);
     input += 2;
 
@@ -184,11 +185,11 @@ void xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u2(
     // Add one to the rational interpolant, and multiply by 0.5 times the
     // original input.
     const xnn_simd_f32_t vy_0 = xnn_mul_f32(xnn_mul_f32(vx_orig_0, vhalf),
-                                        xnn_add_f32(verf_0, vone));
+                                               xnn_add_f32(verf_0, vone));
     const xnn_simd_f32_t vy_1 = xnn_mul_f32(xnn_mul_f32(vx_orig_1, vhalf),
-                                        xnn_add_f32(verf_1, vone));
+                                               xnn_add_f32(verf_1, vone));
 
-    xnn_storeu_f32(output, vy_0);
+    xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
     output += 2;
   }
@@ -272,7 +273,7 @@ void xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u4(
   XNN_SIMD_CONST_F32(vhalf, 0.5f);
 
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
-    const xnn_simd_f32_t vx_orig_0 = xnn_loadu_f32(input);
+    const xnn_simd_f32_t vx_orig_0 = xnn_loadu_f32(input + 0 * xnn_simd_size_f32);
     const xnn_simd_f32_t vx_orig_1 = xnn_loadu_f32(input + 1 * xnn_simd_size_f32);
     const xnn_simd_f32_t vx_orig_2 = xnn_loadu_f32(input + 2 * xnn_simd_size_f32);
     const xnn_simd_f32_t vx_orig_3 = xnn_loadu_f32(input + 3 * xnn_simd_size_f32);
@@ -351,15 +352,15 @@ void xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u4(
     // Add one to the rational interpolant, and multiply by 0.5 times the
     // original input.
     const xnn_simd_f32_t vy_0 = xnn_mul_f32(xnn_mul_f32(vx_orig_0, vhalf),
-                                        xnn_add_f32(verf_0, vone));
+                                               xnn_add_f32(verf_0, vone));
     const xnn_simd_f32_t vy_1 = xnn_mul_f32(xnn_mul_f32(vx_orig_1, vhalf),
-                                        xnn_add_f32(verf_1, vone));
+                                               xnn_add_f32(verf_1, vone));
     const xnn_simd_f32_t vy_2 = xnn_mul_f32(xnn_mul_f32(vx_orig_2, vhalf),
-                                        xnn_add_f32(verf_2, vone));
+                                               xnn_add_f32(verf_2, vone));
     const xnn_simd_f32_t vy_3 = xnn_mul_f32(xnn_mul_f32(vx_orig_3, vhalf),
-                                        xnn_add_f32(verf_3, vone));
+                                               xnn_add_f32(verf_3, vone));
 
-    xnn_storeu_f32(output, vy_0);
+    xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
     xnn_storeu_f32(output + 2 * xnn_simd_size_f32, vy_2);
     xnn_storeu_f32(output + 3 * xnn_simd_size_f32, vy_3);
@@ -445,7 +446,7 @@ void xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u8(
   XNN_SIMD_CONST_F32(vhalf, 0.5f);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const xnn_simd_f32_t vx_orig_0 = xnn_loadu_f32(input);
+    const xnn_simd_f32_t vx_orig_0 = xnn_loadu_f32(input + 0 * xnn_simd_size_f32);
     const xnn_simd_f32_t vx_orig_1 = xnn_loadu_f32(input + 1 * xnn_simd_size_f32);
     const xnn_simd_f32_t vx_orig_2 = xnn_loadu_f32(input + 2 * xnn_simd_size_f32);
     const xnn_simd_f32_t vx_orig_3 = xnn_loadu_f32(input + 3 * xnn_simd_size_f32);
@@ -588,23 +589,23 @@ void xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u8(
     // Add one to the rational interpolant, and multiply by 0.5 times the
     // original input.
     const xnn_simd_f32_t vy_0 = xnn_mul_f32(xnn_mul_f32(vx_orig_0, vhalf),
-                                        xnn_add_f32(verf_0, vone));
+                                               xnn_add_f32(verf_0, vone));
     const xnn_simd_f32_t vy_1 = xnn_mul_f32(xnn_mul_f32(vx_orig_1, vhalf),
-                                        xnn_add_f32(verf_1, vone));
+                                               xnn_add_f32(verf_1, vone));
     const xnn_simd_f32_t vy_2 = xnn_mul_f32(xnn_mul_f32(vx_orig_2, vhalf),
-                                        xnn_add_f32(verf_2, vone));
+                                               xnn_add_f32(verf_2, vone));
     const xnn_simd_f32_t vy_3 = xnn_mul_f32(xnn_mul_f32(vx_orig_3, vhalf),
-                                        xnn_add_f32(verf_3, vone));
+                                               xnn_add_f32(verf_3, vone));
     const xnn_simd_f32_t vy_4 = xnn_mul_f32(xnn_mul_f32(vx_orig_4, vhalf),
-                                        xnn_add_f32(verf_4, vone));
+                                               xnn_add_f32(verf_4, vone));
     const xnn_simd_f32_t vy_5 = xnn_mul_f32(xnn_mul_f32(vx_orig_5, vhalf),
-                                        xnn_add_f32(verf_5, vone));
+                                               xnn_add_f32(verf_5, vone));
     const xnn_simd_f32_t vy_6 = xnn_mul_f32(xnn_mul_f32(vx_orig_6, vhalf),
-                                        xnn_add_f32(verf_6, vone));
+                                               xnn_add_f32(verf_6, vone));
     const xnn_simd_f32_t vy_7 = xnn_mul_f32(xnn_mul_f32(vx_orig_7, vhalf),
-                                        xnn_add_f32(verf_7, vone));
+                                               xnn_add_f32(verf_7, vone));
 
-    xnn_storeu_f32(output, vy_0);
+    xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
     xnn_storeu_f32(output + 2 * xnn_simd_size_f32, vy_2);
     xnn_storeu_f32(output + 3 * xnn_simd_size_f32, vy_3);

@@ -8,17 +8,17 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack.h"
-#include "xnnpack/internal.h"
-#include "xnnpack/log.h"
-#include "xnnpack/node-type.h"
-#include "xnnpack/operator-type.h"
-#include "xnnpack/operator-utils.h"
-#include "xnnpack/operator.h"
-#include "xnnpack/reshape-helpers.h"
-#include "xnnpack/subgraph-validation.h"
-#include "xnnpack/subgraph.h"
-#include "pthreadpool.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/internal.h"
+#include "src/xnnpack/log.h"
+#include "src/xnnpack/node-type.h"
+#include "src/xnnpack/operator-type.h"
+#include "src/xnnpack/operator-utils.h"
+#include "src/xnnpack/operator.h"
+#include "src/xnnpack/reshape-helpers.h"
+#include "src/xnnpack/subgraph-validation.h"
+#include "src/xnnpack/subgraph.h"
+#include <pthreadpool.h>
 
 
 static enum xnn_status create_convert_operator(
@@ -84,6 +84,12 @@ static enum xnn_status create_convert_operator(
     default:
       break;
   }
+
+  if (status == xnn_status_success) {
+    opdata->operator_objects[0]->unary_elementwise.num_nonbatch_dims =
+        output_value->quantization.num_nonbatch_dims;
+  }
+
   if (status == xnn_status_uninitialized) {
     status = xnn_create_unary_elementwise_nc(xnn_unary_convert, input_datatype,
                                              output_datatype, NULL, NULL, NULL,

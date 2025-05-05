@@ -14,12 +14,12 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/transpose.h"
-#include "xnnpack/buffer.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/transpose.h"
 
 using transpose_ukernel =
     std::function<void(const void* input, void* output, size_t input_row_stride,
@@ -31,9 +31,10 @@ void TestTranspose(transpose_ukernel ukernel, size_t input_stride,
                    size_t output_stride, size_t input_element_stride,
                    size_t output_element_stride, size_t element_size,
                    size_t width, size_t height) {
-  xnnpack::Buffer<uint8_t> input(input_stride * height * input_element_stride +
-                             XNN_EXTRA_BYTES);
-  xnnpack::Buffer<uint8_t> output(output_stride * width * output_element_stride);
+  xnnpack::Buffer<uint8_t> input(input_stride * height * input_element_stride,
+                                 xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<uint8_t> output(output_stride * width *
+                                  output_element_stride);
   std::iota(input.begin(), input.end(), 0);
 
   // Call optimized micro-kernel.
@@ -97,12 +98,12 @@ TestParams transpose_ukernels[] = {
                               block_width, block_height)                       \
   {#ukernel,     arch_flags,  make_ukernel_wrapper(ukernel),                   \
    element_size, block_width, block_height},
-#include "x8-transposec/x8-transposec.h"
-#include "x16-transposec/x16-transposec.h"
-#include "x24-transposec/x24-transposec.h"
-#include "x32-transposec/x32-transposec.h"
-#include "x64-transposec/x64-transposec.h"
-#include "xx-transposev/xx-transposev.h"
+#include "src/x16-transposec/x16-transposec.h"
+#include "src/x24-transposec/x24-transposec.h"
+#include "src/x32-transposec/x32-transposec.h"
+#include "src/x64-transposec/x64-transposec.h"
+#include "src/x8-transposec/x8-transposec.h"
+#include "src/xx-transposev/xx-transposev.h"
 };
 #undef XNN_TRANSPOSE_UKERNEL
 
@@ -112,7 +113,7 @@ TestParams transposev_ukernels[] = {
                               block_width, block_height)                       \
   {#ukernel,     arch_flags,  make_ukernel_wrapper(ukernel),                   \
    element_size, block_width, block_height},
-#include "xx-transposev/xx-transposev.h"
+#include "src/xx-transposev/xx-transposev.h"
 };
 #undef XNN_TRANSPOSE_UKERNEL
 

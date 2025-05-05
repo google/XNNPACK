@@ -9,24 +9,24 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "xnnpack.h"
-#include "xnnpack/allocator.h"
-#include "xnnpack/common.h"
-#include "xnnpack/compute.h"
-#include "xnnpack/config-types.h"
-#include "xnnpack/config.h"
-#include "xnnpack/datatype.h"
-#include "xnnpack/internal.h"
-#include "xnnpack/log.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/operator-type.h"
-#include "xnnpack/operator-utils.h"
-#include "xnnpack/operator.h"
-#include "xnnpack/packq.h"
-#include "xnnpack/params.h"
-#include "xnnpack/reference-config.h"
-#include "pthreadpool.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/allocator.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/compute.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/config.h"
+#include "src/xnnpack/datatype.h"
+#include "src/xnnpack/internal.h"
+#include "src/xnnpack/log.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/operator-type.h"
+#include "src/xnnpack/operator-utils.h"
+#include "src/xnnpack/operator.h"
+#include "src/xnnpack/packq.h"
+#include "src/xnnpack/params.h"
+#include "src/xnnpack/reference-config.h"
+#include <pthreadpool.h>
 
 static enum xnn_status check_op_type(xnn_operator_t op,
                                      enum xnn_operator_type expected_type) {
@@ -35,7 +35,7 @@ static enum xnn_status check_op_type(xnn_operator_t op,
         "failed to setup operator: operator type mismatch (expected %s, got "
         "%s)",
         xnn_operator_type_to_string(expected_type),
-        xnn_operator_type_to_string(op->type));
+        xnn_operator_type_to_string_v2(op));
     return xnn_status_invalid_parameter;
   }
   return xnn_status_success;
@@ -50,9 +50,8 @@ static enum xnn_status init_lut_op(
   const int lookup_table_elements = 256;
   op->lookup_table = xnn_allocate_simd_memory(lookup_table_elements * sizeof(uint8_t));
   if (op->lookup_table == NULL) {
-    xnn_log_error(
-      "failed to allocate %s operator lookup table",
-      xnn_operator_type_to_string(op->type));
+    xnn_log_error("failed to allocate %s operator lookup table",
+                  xnn_operator_type_to_string_v2(op));
     return xnn_status_out_of_memory;
   }
 
@@ -142,14 +141,22 @@ static const struct xnn_unary_elementwise_config* get_config(
     switch (op_type) {
       case xnn_unary_abs:
         return xnn_init_f16_abs_config();
+      case xnn_unary_approxgelu:
+        return xnn_init_f16_approxgelu_config();
       case xnn_unary_bankers_rounding:
         return xnn_init_f16_rndne_config();
       case xnn_unary_ceiling:
         return xnn_init_f16_rndu_config();
       case xnn_unary_clamp:
         return xnn_init_f16_clamp_config();
+      case xnn_unary_cosine:
+        return xnn_init_f16_cosine_config();
       case xnn_unary_elu:
         return xnn_init_f16_elu_config();
+      case xnn_unary_exp:
+        return xnn_init_f16_exp_config();
+      case xnn_unary_gelu:
+        return xnn_init_f16_gelu_config();
       case xnn_unary_floor:
         return xnn_init_f16_rndd_config();
       case xnn_unary_hardswish:
@@ -162,6 +169,8 @@ static const struct xnn_unary_elementwise_config* get_config(
         return xnn_init_f16_rsqrt_config();
       case xnn_unary_sigmoid:
         return xnn_init_f16_sigmoid_config();
+      case xnn_unary_sine:
+        return xnn_init_f16_sine_config();
       case xnn_unary_square_root:
         return xnn_init_f16_sqrt_config();
       case xnn_unary_square:
@@ -175,12 +184,16 @@ static const struct xnn_unary_elementwise_config* get_config(
     switch (op_type) {
       case xnn_unary_abs:
         return xnn_init_f32_abs_config();
+      case xnn_unary_approxgelu:
+        return xnn_init_f32_approxgelu_config();
       case xnn_unary_bankers_rounding:
         return xnn_init_f32_rndne_config();
       case xnn_unary_ceiling:
         return xnn_init_f32_rndu_config();
       case xnn_unary_clamp:
         return xnn_init_f32_clamp_config();
+      case xnn_unary_cosine:
+        return xnn_init_f32_cosine_config();
       case xnn_unary_elu:
         return xnn_init_f32_elu_config();
       case xnn_unary_exp:
@@ -201,6 +214,8 @@ static const struct xnn_unary_elementwise_config* get_config(
         return xnn_init_f32_rsqrt_config();
       case xnn_unary_sigmoid:
         return xnn_init_f32_sigmoid_config();
+      case xnn_unary_sine:
+        return xnn_init_f32_sine_config();
       case xnn_unary_square_root:
         return xnn_init_f32_sqrt_config();
       case xnn_unary_square:
@@ -227,9 +242,10 @@ static enum xnn_status init_op(
   op->flags = flags;
   op->unary_elementwise.log2_input_size = xnn_datatype_log2_size_bytes(input_datatype);
   op->unary_elementwise.log2_output_size = xnn_datatype_log2_size_bytes(output_datatype);
+  op->unary_elementwise.op_type = op_type;
 
   const struct xnn_unary_elementwise_config* config = get_config(op_type, input_datatype, output_datatype, input_quantization, output_quantization);
-  if (config) {
+  if (config && config->ukernel) {
     // We have an elementwise config, use it.
     op->unary_elementwise_config = config;
     op->state = xnn_run_state_invalid;
@@ -261,7 +277,7 @@ static enum xnn_status init_op(
     return xnn_status_success;
   } else {
     xnn_log_error(
-      "unsupported operator %s for datatypes %s -> %s, falling back to reference kernel",
+      "unsupported operator %s for datatypes %s -> %s",
       xnn_unary_operator_to_string(op_type), xnn_datatype_to_string(input_datatype), xnn_datatype_to_string(output_datatype));
     return xnn_status_unsupported_parameter;
   }
@@ -325,17 +341,17 @@ enum xnn_status xnn_reshape_unary_elementwise_nc(
 
   if (input_stride < channels) {
     xnn_log_error(
-      "failed to create %s operator with input element stride of %zu: "
-      "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(op->type), input_stride, channels);
+        "failed to create %s operator with input element stride of %zu: "
+        "stride must be at least as large as the number of channels (%zu)",
+        xnn_operator_type_to_string_v2(op), input_stride, channels);
     return xnn_status_invalid_parameter;
   }
 
   if (output_stride < channels) {
     xnn_log_error(
-      "failed to create %s operator with output element stride of %zu: "
-      "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(op->type), output_stride, channels);
+        "failed to create %s operator with output element stride of %zu: "
+        "stride must be at least as large as the number of channels (%zu)",
+        xnn_operator_type_to_string_v2(op), output_stride, channels);
     return xnn_status_invalid_parameter;
   }
 
@@ -361,8 +377,9 @@ enum xnn_status xnn_reshape_unary_elementwise_nc(
         tile = block_size * sizeof(uint8_t);
       }
 
-      op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
-      op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_lut_contiguous;
+      op->compute[0].type = xnn_parallelization_type_1d_tile_1d_dynamic;
+      op->compute[0].task_1d_tile_1d_dynamic =
+          (pthreadpool_task_1d_tile_1d_dynamic_t)xnn_compute_lut_contiguous;
       op->compute[0].range[0] = range;
       op->compute[0].tile[0] = tile;
     } else {
@@ -373,13 +390,14 @@ enum xnn_status xnn_reshape_unary_elementwise_nc(
         .y_stride = output_stride * sizeof(uint8_t),
         .ukernel = lut_config->microkernel,
       };
-      op->compute[0].type = xnn_parallelization_type_1d;
-      op->compute[0].task_1d = (pthreadpool_task_1d_t) xnn_compute_lut_strided;
+      op->compute[0].type = xnn_parallelization_type_1d_tile_1d_dynamic;
+      op->compute[0].task_1d_tile_1d_dynamic =
+          (pthreadpool_task_1d_tile_1d_dynamic_t)xnn_compute_lut_strided;
       op->compute[0].range[0] = batch_size;
+      op->compute[0].tile[0] = 1;
     }
   } else {
     const xnn_vunary_ukernel_fn ukernel = op->unary_elementwise_config->ukernel;
-    const size_t num_threads = pthreadpool_get_threads_count(threadpool);
     if (is_contiguous(op)) {
       const size_t block_size = 4096;
 
@@ -391,10 +409,12 @@ enum xnn_status xnn_reshape_unary_elementwise_nc(
       memcpy(&op->context.univector_contiguous.params, &op->params.unary, sizeof(op->params.unary));
 
       const size_t range = (batch_size * channels) << op->unary_elementwise.log2_input_size;
-      op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
-      op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_univector_contiguous;
+      op->compute[0].type = xnn_parallelization_type_1d_tile_1d_dynamic;
+      op->compute[0].task_1d_tile_1d_dynamic =
+          (pthreadpool_task_1d_tile_1d_dynamic_t)
+              xnn_compute_univector_contiguous;
       op->compute[0].range[0] = range;
-      op->compute[0].tile[0] = (num_threads == 1) ? range : block_size;
+      op->compute[0].tile[0] = block_size;
     } else {
       op->context.univector_strided = (struct univector_strided_context) {
         .n = channels << op->unary_elementwise.log2_input_size,
@@ -404,10 +424,11 @@ enum xnn_status xnn_reshape_unary_elementwise_nc(
       };
       memcpy(&op->context.univector_strided.params, &op->params.unary, sizeof(op->params.unary));
 
-      op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
-      op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_univector_strided;
+      op->compute[0].type = xnn_parallelization_type_1d_tile_1d_dynamic;
+      op->compute[0].task_1d_tile_1d_dynamic =
+          (pthreadpool_task_1d_tile_1d_dynamic_t)xnn_compute_univector_strided;
       op->compute[0].range[0] = batch_size;
-      op->compute[0].tile[0] = (num_threads == 1) ? batch_size : 1;
+      op->compute[0].tile[0] = 1;
     }
   }
   op->state = xnn_run_state_needs_setup;
@@ -423,8 +444,8 @@ enum xnn_status xnn_setup_unary_elementwise_nc(
       return xnn_status_success;
     case xnn_run_state_invalid:
       xnn_log_error(
-        "failed to setup %s operator: operator has not been reshaped yet",
-        xnn_operator_type_to_string(op->type));
+          "failed to setup %s operator: operator has not been reshaped yet",
+          xnn_operator_type_to_string_v2(op));
       return xnn_status_invalid_state;
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.
@@ -590,9 +611,11 @@ static enum xnn_status reshape_unary_elementwise_nc(
     pthreadpool_t threadpool)
 {
   if (unary_elementwise_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(unary_elementwise_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_operator_type),
+        xnn_operator_type_to_string_v2(unary_elementwise_op));
     return xnn_status_invalid_parameter;
   }
   unary_elementwise_op->state = xnn_run_state_invalid;
@@ -604,17 +627,19 @@ static enum xnn_status reshape_unary_elementwise_nc(
 
   if (input_stride < channels) {
     xnn_log_error(
-      "failed to create %s operator with input element stride of %zu: "
-      "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(unary_elementwise_op->type), input_stride, channels);
+        "failed to create %s operator with input element stride of %zu: "
+        "stride must be at least as large as the number of channels (%zu)",
+        xnn_operator_type_to_string_v2(unary_elementwise_op), input_stride,
+        channels);
     return xnn_status_invalid_parameter;
   }
 
   if (output_stride < channels) {
     xnn_log_error(
-      "failed to create %s operator with output element stride of %zu: "
-      "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(unary_elementwise_op->type), output_stride, channels);
+        "failed to create %s operator with output element stride of %zu: "
+        "stride must be at least as large as the number of channels (%zu)",
+        xnn_operator_type_to_string_v2(unary_elementwise_op), output_stride,
+        channels);
     return xnn_status_invalid_parameter;
   }
 
@@ -623,8 +648,8 @@ static enum xnn_status reshape_unary_elementwise_nc(
   unary_elementwise_op->input_pixel_stride = input_stride;
   unary_elementwise_op->output_pixel_stride = output_stride;
 
-  const xnn_vunary_ukernel_fn ukernel = unary_elementwise_op->unary_elementwise_config->ukernel;
-  const size_t num_threads = pthreadpool_get_threads_count(threadpool);
+  const xnn_vunary_ukernel_fn ukernel =
+      unary_elementwise_op->unary_elementwise_config->ukernel;
   if ((((input_stride ^ channels) | (output_stride ^ channels)) == 0) || batch_size == 1) {
     const size_t block_size = 4096;
 
@@ -638,10 +663,13 @@ static enum xnn_status reshape_unary_elementwise_nc(
     }
 
     const size_t range = (batch_size * channels) << log2_input_size;
-    unary_elementwise_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
-    unary_elementwise_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_univector_contiguous;
+    unary_elementwise_op->compute[0].type =
+        xnn_parallelization_type_1d_tile_1d_dynamic;
+    unary_elementwise_op->compute[0].task_1d_tile_1d_dynamic =
+        (pthreadpool_task_1d_tile_1d_dynamic_t)xnn_compute_univector_contiguous;
     unary_elementwise_op->compute[0].range[0] = range;
-    unary_elementwise_op->compute[0].tile[0] = (num_threads == 1) ? range : block_size;;
+    unary_elementwise_op->compute[0].tile[0] = block_size;
+    ;
   } else {
     unary_elementwise_op->context.univector_strided = (struct univector_strided_context) {
       .n = channels << log2_input_size,
@@ -653,10 +681,12 @@ static enum xnn_status reshape_unary_elementwise_nc(
       memcpy(&unary_elementwise_op->context.univector_strided.params, params, params_size);
     }
 
-    unary_elementwise_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
-    unary_elementwise_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_univector_strided;
+    unary_elementwise_op->compute[0].type =
+        xnn_parallelization_type_1d_tile_1d_dynamic;
+    unary_elementwise_op->compute[0].task_1d_tile_1d_dynamic =
+        (pthreadpool_task_1d_tile_1d_dynamic_t)xnn_compute_univector_strided;
     unary_elementwise_op->compute[0].range[0] = batch_size;
-    unary_elementwise_op->compute[0].tile[0] = (num_threads == 1) ? batch_size : 1;
+    unary_elementwise_op->compute[0].tile[0] = 1;
   }
   unary_elementwise_op->state = xnn_run_state_needs_setup;
 
@@ -670,9 +700,11 @@ static enum xnn_status setup_unary_elementwise_nc(
     void* output)
 {
   if (unary_elementwise_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(unary_elementwise_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_operator_type),
+        xnn_operator_type_to_string_v2(unary_elementwise_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -681,8 +713,8 @@ static enum xnn_status setup_unary_elementwise_nc(
       return xnn_status_success;
     case xnn_run_state_invalid:
       xnn_log_error(
-        "failed to setup %s operator: operator has not been reshaped yet",
-        xnn_operator_type_to_string(unary_elementwise_op->type));
+          "failed to setup %s operator: operator has not been reshaped yet",
+          xnn_operator_type_to_string_v2(unary_elementwise_op));
       return xnn_status_invalid_state;
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.
@@ -733,7 +765,7 @@ enum xnn_status create_convert_nc_f16_qx8(
     &params, sizeof(params),
     expected_operator_type, convert_op_out);
   if (status == xnn_status_success) {
-    (*convert_op_out)->rminmax_config = f16_rminmax_config;
+    (*convert_op_out)->contiguous_reduce_config = f16_rminmax_config;
   }
   return status;
 }
@@ -759,7 +791,7 @@ enum xnn_status create_convert_nc_f32_qx8(
     &params, sizeof(params),
     expected_operator_type, convert_op_out);
   if (status == xnn_status_success) {
-    (*convert_op_out)->rminmax_config = f32_rminmax_config;
+    (*convert_op_out)->contiguous_reduce_config = f32_rminmax_config;
   }
   return status;
 }
@@ -807,7 +839,7 @@ enum xnn_status xnn_create_convert_nc_f32_qp8(
     &params, sizeof(params),
     xnn_operator_type_convert_nc_f32_qp8, convert_op_out);
   if (status == xnn_status_success) {
-    (*convert_op_out)->rminmax_config = f32_rminmax_config;
+    (*convert_op_out)->contiguous_reduce_config = f32_rminmax_config;
     (*convert_op_out)->gemm_config = gemm_config;
   }
   return status;
@@ -853,9 +885,11 @@ enum xnn_status reshape_convert_nc_f16_qx8(
     pthreadpool_t threadpool)
 {
   if (convert_op->type != expected_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_type),
-      xnn_operator_type_to_string(convert_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_type),
+        xnn_operator_type_to_string_v2(convert_op));
     return xnn_status_invalid_parameter;
   }
   convert_op->state = xnn_run_state_invalid;
@@ -872,25 +906,27 @@ enum xnn_status reshape_convert_nc_f16_qx8(
     .x_stride = input_stride * sizeof(uint16_t),
     .y_stride = output_stride,
     .batch_size = batch_size,
-    .rminmax_ukernel = convert_op->rminmax_config->ukernel,
+    .rminmax_ukernel = convert_op->contiguous_reduce_config->ukernel,
     .convert_ukernel = convert_op->unary_elementwise_config->ukernel,
     .init_params = convert_op->unary_elementwise_config->init,
   };
   memcpy(&convert_op->context.f16_qd8_convert.params, &convert_op->params.f16_default, sizeof(convert_op->params.f16_default));
 
-  convert_op->compute[0].type = xnn_parallelization_type_1d;
-  convert_op->compute[0].task_1d = (pthreadpool_task_1d_t) xnn_compute_f16_qd8_convert;
+  convert_op->compute[0].type = xnn_parallelization_type_1d_tile_1d_dynamic;
   switch (expected_type) {
     case xnn_operator_type_convert_nc_f16_qd8:
-      convert_op->compute[0].task_1d = (pthreadpool_task_1d_t) xnn_compute_f16_qd8_convert;
+      convert_op->compute[0].task_1d_tile_1d_dynamic =
+          (pthreadpool_task_1d_tile_1d_dynamic_t)xnn_compute_f16_qd8_convert;
       break;
     case xnn_operator_type_convert_nc_f16_qdu8:
-      convert_op->compute[0].task_1d = (pthreadpool_task_1d_t) xnn_compute_f16_qdu8_convert;
+      convert_op->compute[0].task_1d_tile_1d_dynamic =
+          (pthreadpool_task_1d_tile_1d_dynamic_t)xnn_compute_f16_qdu8_convert;
       break;
     default:
       XNN_UNREACHABLE;
   }
   convert_op->compute[0].range[0] = batch_size;
+  convert_op->compute[0].tile[0] = 1;
 
   convert_op->compute[1].type = xnn_parallelization_type_1d;
   convert_op->compute[1].task_1d = (pthreadpool_task_1d_t) xnn_compute_pad_qd8_params;
@@ -911,9 +947,11 @@ enum xnn_status reshape_convert_nc_f32_qx8(
     pthreadpool_t threadpool)
 {
   if (convert_op->type != expected_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_type),
-      xnn_operator_type_to_string(convert_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_type),
+        xnn_operator_type_to_string_v2(convert_op));
     return xnn_status_invalid_parameter;
   }
   convert_op->state = xnn_run_state_invalid;
@@ -930,24 +968,27 @@ enum xnn_status reshape_convert_nc_f32_qx8(
     .x_stride = input_stride * sizeof(float),
     .y_stride = output_stride,
     .batch_size = batch_size,
-    .rminmax_ukernel = convert_op->rminmax_config->ukernel,
+    .rminmax_ukernel = convert_op->contiguous_reduce_config->ukernel,
     .convert_ukernel = convert_op->unary_elementwise_config->ukernel,
     .init_params = convert_op->unary_elementwise_config->init,
   };
   memcpy(&convert_op->context.f32_qd8_convert.params, &convert_op->params.f32_default, sizeof(convert_op->params.f32_default));
 
-  convert_op->compute[0].type = xnn_parallelization_type_1d;
+  convert_op->compute[0].type = xnn_parallelization_type_1d_tile_1d_dynamic;
   switch (expected_type) {
     case xnn_operator_type_convert_nc_f32_qd8:
-      convert_op->compute[0].task_1d = (pthreadpool_task_1d_t) xnn_compute_f32_qd8_convert;
+      convert_op->compute[0].task_1d_tile_1d_dynamic =
+          (pthreadpool_task_1d_tile_1d_dynamic_t)xnn_compute_f32_qd8_convert;
       break;
     case xnn_operator_type_convert_nc_f32_qdu8:
-      convert_op->compute[0].task_1d = (pthreadpool_task_1d_t) xnn_compute_f32_qdu8_convert;
+      convert_op->compute[0].task_1d_tile_1d_dynamic =
+          (pthreadpool_task_1d_tile_1d_dynamic_t)xnn_compute_f32_qdu8_convert;
       break;
     default:
       XNN_UNREACHABLE;
   }
   convert_op->compute[0].range[0] = batch_size;
+  convert_op->compute[0].tile[0] = 1;
 
   convert_op->compute[1].type = xnn_parallelization_type_1d;
   convert_op->compute[1].task_1d = (pthreadpool_task_1d_t) xnn_compute_pad_qd8_params;
@@ -1013,7 +1054,7 @@ enum xnn_status xnn_reshape_convert_nc_f32_qp8(xnn_operator_t convert_op,  //
         "failed to setup operator: operator type mismatch (expected %s, got "
         "%s)",
         xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_qp8),
-        xnn_operator_type_to_string(convert_op->type));
+        xnn_operator_type_to_string_v2(convert_op));
     return xnn_status_invalid_parameter;
   }
   convert_op->state = xnn_run_state_invalid;
@@ -1028,7 +1069,7 @@ enum xnn_status xnn_reshape_convert_nc_f32_qp8(xnn_operator_t convert_op,  //
   const struct xnn_gemm_config* gemm_config = convert_op->gemm_config;
   if (gemm_config == NULL) {
     xnn_log_error("failed to setup %s operator: No GEMM config provided.",
-                  xnn_operator_type_to_string(convert_op->type));
+                  xnn_operator_type_to_string_v2(convert_op));
     return xnn_status_invalid_parameter;
   }
   const uint32_t mr_packed = batch_size == 1          ? 1
@@ -1050,9 +1091,9 @@ enum xnn_status xnn_reshape_convert_nc_f32_qp8(xnn_operator_t convert_op,  //
                            convert_op->unary_elementwise_config->ukernel,
   };
 
-  convert_op->compute[0].type = xnn_parallelization_type_2d_tile_1d;
-  convert_op->compute[0].task_2d_tile_1d =
-      (pthreadpool_task_2d_tile_1d_t)xnn_compute_f32_qp8_convert;
+  convert_op->compute[0].type = xnn_parallelization_type_2d_tile_1d_dynamic;
+  convert_op->compute[0].task_2d_tile_1d_dynamic =
+      (pthreadpool_task_2d_tile_1d_dynamic_t)xnn_compute_f32_qp8_convert;
   convert_op->compute[0].range[0] = num_groups;
   convert_op->compute[0].range[1] = batch_size;
   convert_op->compute[0].tile[0] = mr_packed;
@@ -1124,9 +1165,11 @@ enum xnn_status setup_convert_nc_f16_qx8(
   struct xnn_quantization_params* quantization_params)
 {
   if (convert_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(convert_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_operator_type),
+        xnn_operator_type_to_string_v2(convert_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -1135,8 +1178,8 @@ enum xnn_status setup_convert_nc_f16_qx8(
       return xnn_status_success;
     case xnn_run_state_invalid:
       xnn_log_error(
-        "failed to setup %s operator: operator has not been reshaped yet",
-        xnn_operator_type_to_string(convert_op->type));
+          "failed to setup %s operator: operator has not been reshaped yet",
+          xnn_operator_type_to_string_v2(convert_op));
       return xnn_status_invalid_state;
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.
@@ -1161,9 +1204,11 @@ enum xnn_status setup_convert_nc_f32_qx8(
   struct xnn_quantization_params* quantization_params)
 {
   if (convert_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(convert_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_operator_type),
+        xnn_operator_type_to_string_v2(convert_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -1172,8 +1217,8 @@ enum xnn_status setup_convert_nc_f32_qx8(
       return xnn_status_success;
     case xnn_run_state_invalid:
       xnn_log_error(
-        "failed to setup %s operator: operator has not been reshaped yet",
-        xnn_operator_type_to_string(convert_op->type));
+          "failed to setup %s operator: operator has not been reshaped yet",
+          xnn_operator_type_to_string_v2(convert_op));
       return xnn_status_invalid_state;
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.
@@ -1242,7 +1287,7 @@ enum xnn_status xnn_setup_convert_nc_f32_qp8(xnn_operator_t convert_op,
     case xnn_run_state_invalid:
       xnn_log_error(
           "failed to setup %s operator: operator has not been reshaped yet",
-          xnn_operator_type_to_string(convert_op->type));
+          xnn_operator_type_to_string_v2(convert_op));
       return xnn_status_invalid_state;
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.

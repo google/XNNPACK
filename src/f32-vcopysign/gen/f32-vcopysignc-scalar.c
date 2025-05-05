@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vcopysign/copysignc.c.in
 //   Generator: tools/xngen
@@ -11,11 +12,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/simd/f32-scalar.h"
+#include "src/xnnpack/simd/f32-scalar.h"
 
-#include "xnnpack/common.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_f32_vcopysignc_ukernel__scalar_u1(
@@ -67,14 +68,14 @@ void xnn_f32_vcopysignc_ukernel__scalar_u2(
 
   for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
 
-    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag));
+    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag + 0 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_1 = xnn_abs_f32(xnn_loadu_f32(mag + 1 * xnn_simd_size_f32));
     mag += 2;
 
     xnn_simd_f32_t vy_0 = xnn_or_f32(vsign, vmag_0);
     xnn_simd_f32_t vy_1 = xnn_or_f32(vsign, vmag_1);
 
-    xnn_storeu_f32(output, vy_0);
+    xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
     output += 2;
   }
@@ -109,7 +110,7 @@ void xnn_f32_vcopysignc_ukernel__scalar_u4(
 
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
 
-    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag));
+    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag + 0 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_1 = xnn_abs_f32(xnn_loadu_f32(mag + 1 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_2 = xnn_abs_f32(xnn_loadu_f32(mag + 2 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_3 = xnn_abs_f32(xnn_loadu_f32(mag + 3 * xnn_simd_size_f32));
@@ -120,7 +121,7 @@ void xnn_f32_vcopysignc_ukernel__scalar_u4(
     xnn_simd_f32_t vy_2 = xnn_or_f32(vsign, vmag_2);
     xnn_simd_f32_t vy_3 = xnn_or_f32(vsign, vmag_3);
 
-    xnn_storeu_f32(output, vy_0);
+    xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
     xnn_storeu_f32(output + 2 * xnn_simd_size_f32, vy_2);
     xnn_storeu_f32(output + 3 * xnn_simd_size_f32, vy_3);
@@ -157,7 +158,7 @@ void xnn_f32_vcopysignc_ukernel__scalar_u8(
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
 
-    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag));
+    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag + 0 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_1 = xnn_abs_f32(xnn_loadu_f32(mag + 1 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_2 = xnn_abs_f32(xnn_loadu_f32(mag + 2 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_3 = xnn_abs_f32(xnn_loadu_f32(mag + 3 * xnn_simd_size_f32));
@@ -176,7 +177,7 @@ void xnn_f32_vcopysignc_ukernel__scalar_u8(
     xnn_simd_f32_t vy_6 = xnn_or_f32(vsign, vmag_6);
     xnn_simd_f32_t vy_7 = xnn_or_f32(vsign, vmag_7);
 
-    xnn_storeu_f32(output, vy_0);
+    xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
     xnn_storeu_f32(output + 2 * xnn_simd_size_f32, vy_2);
     xnn_storeu_f32(output + 3 * xnn_simd_size_f32, vy_3);

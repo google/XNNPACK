@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-rminmax/avx512f.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
 
 
 void xnn_f32_rmax_ukernel__avx512f_u64_acc4(
@@ -26,7 +27,7 @@ void xnn_f32_rmax_ukernel__avx512f_u64_acc4(
   assert(input != NULL);
   assert(output != NULL);
 
-  __m512 vmax0 = _mm512_set1_ps(*input);
+  __m512 vmax0 = _mm512_set1_ps(output[0]);
   __m512 vmax1 = vmax0;
   __m512 vmax2 = vmax0;
   __m512 vmax3 = vmax0;

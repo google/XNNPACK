@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -8,15 +9,15 @@
 //   Generator: tools/generate-gemm-test.py
 
 #include <benchmark/benchmark.h>
-#include "gemm-benchmark.h"
-#include "utils.h"
-#include "xnnpack/common.h"
-#include "xnnpack/gemm.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/pack.h"
-#include "xnnpack/packw.h"
+#include "bench/gemm-benchmark.h"
+#include "bench/utils.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/pack.h"
+#include "src/xnnpack/packw.h"
 
 
 #if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
@@ -131,6 +132,37 @@
   BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_16x4c8s2__aarch64_neondot_mstep4)
   #endif  // XNN_ENABLE_KLEIDIAI
 #endif  // XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM64
+
+
+#if XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
+  #if XNN_ENABLE_KLEIDIAI
+  static void qp8_f32_qc4w_gemm_minmax_ukernel_1x128c4__neonsme2(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qp8_f32_qc4w_gemm_minmax_ukernel_1x128c4__neonsme2,
+      xnn_init_f32_minmax_scalar_params,
+      xnn_pack_kai_qs4_weights_and_biases_sme,
+      xnn_packed_stride_kai_qs4_weights_and_biases_sme,
+      /*mr=*/1, /*nr=*/128, /*kr=*/4, /*sr=*/1,
+      /*mr_packed=*/1,
+      benchmark::utils::CheckNEONSME2);
+  }
+
+  BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_1x128c4__neonsme2)
+
+  static void qp8_f32_qc4w_gemm_minmax_ukernel_32x128c4__neonsme2(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qp8_f32_qc4w_gemm_minmax_ukernel_32x128c4__neonsme2,
+      xnn_init_f32_minmax_scalar_params,
+      xnn_pack_kai_qs4_weights_and_biases_sme,
+      xnn_packed_stride_kai_qs4_weights_and_biases_sme,
+      /*mr=*/32, /*nr=*/128, /*kr=*/4, /*sr=*/1,
+      /*mr_packed=*/32,
+      benchmark::utils::CheckNEONSME2);
+  }
+
+  BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_32x128c4__neonsme2)
+  #endif  // XNN_ENABLE_KLEIDIAI
+#endif  // XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
 
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

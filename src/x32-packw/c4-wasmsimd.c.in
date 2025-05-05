@@ -12,7 +12,7 @@ $assert KR == 4
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/packw.h"
+#include "src/xnnpack/packw.h"
 
 
 void xnn_x32_packw_gemm_goi_ukernel_x${NR}c${KR}__wasmsimd_u4(

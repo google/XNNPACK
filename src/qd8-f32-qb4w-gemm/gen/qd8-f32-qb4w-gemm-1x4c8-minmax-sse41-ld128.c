@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-gemm/MRx4c8-sse.c.in
 //   Generator: tools/xngen
@@ -11,10 +12,10 @@
 
 #include <smmintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/gemm.h"
-#include "xnnpack/math.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/unaligned.h"
 
 
 void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x4c8__sse41_ld128(
@@ -56,7 +57,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x4c8__sse41_ld128(
   XNN_FORCE_REALIZATION(vmask);
 
   do {
-    const __m128 vksum = _mm_load_ps((const float*) w);
+    const __m128 vksum = _mm_loadu_ps((const float*) w);
     __m128i vinput_zero_point0 = _mm_cvtsi32_si128(*((const int*) &quantization_params[0].zero_point));
     vinput_zero_point0 = _mm_shuffle_epi32(vinput_zero_point0, _MM_SHUFFLE(0, 0, 0, 0));
 

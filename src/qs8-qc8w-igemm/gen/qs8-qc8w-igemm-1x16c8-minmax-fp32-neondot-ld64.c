@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-igemm/c8-neondot.c.in
 //   Generator: tools/xngen
@@ -11,9 +12,9 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/gemm.h"
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
 
 
 void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x16c8__neondot_ld64(
@@ -124,7 +125,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x16c8__neondot_ld64(
     vacc0x89AB = vcvtnq_s32_f32(vfpacc0x89AB);
     vacc0xCDEF = vcvtnq_s32_f32(vfpacc0xCDEF);
 
-    const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->fp32_neonv8.output_zero_point);
+    const int16x8_t voutput_zero_point = vdupq_n_s16(params->fp32_neonv8.output_zero_point);
     #if XNN_ARCH_ARM64
       const int16x8_t vacc0x01234567 = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc0x0123), vacc0x4567), voutput_zero_point);
       const int16x8_t vacc0x89ABCDEF = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc0x89AB), vacc0xCDEF), voutput_zero_point);
@@ -136,8 +137,8 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x16c8__neondot_ld64(
 
       int8x16_t vout0x0123456789ABCDEF = vcombine_s8(vqmovn_s16(vacc0x01234567), vqmovn_s16(vacc0x89ABCDEF));
     #endif
-    const int8x16_t voutput_min = vld1q_dup_s8(&params->fp32_neonv8.output_min);
-    const int8x16_t voutput_max = vld1q_dup_s8(&params->fp32_neonv8.output_max);
+    const int8x16_t voutput_min = vdupq_n_s8(params->fp32_neonv8.output_min);
+    const int8x16_t voutput_max = vdupq_n_s8(params->fp32_neonv8.output_max);
 
     vout0x0123456789ABCDEF = vmaxq_s8(vout0x0123456789ABCDEF, voutput_min);
 

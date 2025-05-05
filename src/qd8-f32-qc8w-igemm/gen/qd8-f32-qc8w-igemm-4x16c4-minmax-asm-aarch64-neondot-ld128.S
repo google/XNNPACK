@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-igemm/4x16c4-aarch64-neondot-ld128.S.in
 //   Generator: tools/xngen
@@ -8,7 +9,7 @@
 // LICENSE file in the root directory of this source tree.
 
 
-#include "xnnpack/assembly.h"
+#include "src/xnnpack/assembly.h"
 
 # void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_ld128(
 #     size_t mr,                 x0
@@ -55,12 +56,13 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondot
                                             // if mr <= 2
         CSEL        x17, x16, x17, LS       //   c2 = c1
         BIC         x2, x2, 3
-        STR         x19, [sp, -56]      // Push x19 to the stack
-        LDR         x19, [sp, 24]       // Load zero_data
-        LDR         x15, [sp, 40]           // &quantization_params[0].zero_point
-        STP         d8,  d9, [sp, -48]!
-        STP         d10, d11, [sp, 16]
-        STP         d12,  d13, [sp, 32]
+        SUB         sp, sp, 64
+        STR         x19, [sp]      // Push x19 to the stack
+        LDR         x19, [sp, 88]       // Load zero_data
+        LDR         x15, [sp, 104]           // &quantization_params[0].zero_point
+        STP         d8,  d9, [sp, 16]
+        STP         d10, d11, [sp, 32]
+        STP         d12,  d13, [sp, 48]
         LD1         {v12.4s}, [x15]         // v12 & v13 interleaved zero_point & scale
 
         CMP         x0, 4                   // if mr < 4
@@ -292,7 +294,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondot
         FMIN        v18.4s, v18.4s, v5.4s
         FMIN        v22.4s, v22.4s, v5.4s
         FMIN        v26.4s, v26.4s, v5.4s
-        LDR         x0, [sp, 48]                // cn_stride
+        LDR         x0, [sp, 64]                // cn_stride
         FMIN        v30.4s, v30.4s, v5.4s
         FMIN        v17.4s, v17.4s, v5.4s
         FMIN        v21.4s, v21.4s, v5.4s
@@ -322,10 +324,11 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondot
         # nc loop
         B.HI        0b
         # Restore d8-d13 from stack
-        LDR         x19, [sp, -8]
-        LDP         d12, d13, [sp, 32]
-        LDP         d10, d11, [sp, 16]
-        LDP         d8, d9, [sp], 48
+        LDR         x19, [sp]
+        LDP         d12, d13, [sp, 48]
+        LDP         d10, d11, [sp, 32]
+        LDP         d8, d9, [sp, 16]
+        ADD         sp, sp, 64
         RET
 
 
@@ -462,48 +465,11 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondot
         STR         s16, [x6]
 10:
         # Restore d8-d13 from stack
-        LDR         x19, [sp, -8]
-        LDP         d12, d13, [sp, 32]
-        LDP         d10, d11, [sp, 16]
-        LDP         d8, d9, [sp], 48
-        RET
-6:
-        TBZ         x1, 3, 7f
-        STR         d3, [x7], 8
-        STR         d2, [x17], 8
-        DUP         d3, v3.d[1]
-        DUP         d2, v2.d[1]
-        STR         d1, [x16], 8
-        STR         d0, [x6], 8
-        DUP         d1, v1.d[1]
-        DUP         d0, v0.d[1]
-7:
-        TBZ         x1, 2, 8f
-        STR         s3, [x7], 4
-        STR         s2, [x17], 4
-        DUP         s3, v3.s[1]
-        DUP         s2, v2.s[1]
-        STR         s1, [x16], 4
-        STR         s0, [x6], 4
-        DUP         s1, v1.s[1]
-        DUP         s0, v0.s[1]
-8:
-        TBZ         x1, 1, 9f
-        STR         h3, [x7], 2
-        STR         h2, [x17], 2
-        DUP         h3, v3.h[1]
-        DUP         h2, v2.h[1]
-        STR         h1, [x16], 2
-        STR         h0, [x6], 2
-        DUP         h1, v1.h[1]
-        DUP         h0, v0.h[1]
-9:
-        TBZ         x1, 0, 10f
-        STR         b3, [x7]
-        STR         b2, [x17]
-        STR         b1, [x16]
-        STR         b0, [x6]
-10:
+        LDR         x19, [sp]
+        LDP         d12, d13, [sp, 48]
+        LDP         d10, d11, [sp, 32]
+        LDP         d8, d9, [sp, 16]
+        ADD         sp, sp, 64
         RET
 
 END_FUNCTION xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_ld128

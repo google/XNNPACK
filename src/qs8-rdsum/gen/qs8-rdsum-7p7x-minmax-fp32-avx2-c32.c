@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-rdsum/avx2.c.in
 //   Generator: tools/xngen
@@ -11,10 +12,10 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/unaligned.h"
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/unaligned.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
+#include "src/xnnpack/math.h"
 
 
 void xnn_qs8_rdsum_ukernel_7p7x__avx2_c32(

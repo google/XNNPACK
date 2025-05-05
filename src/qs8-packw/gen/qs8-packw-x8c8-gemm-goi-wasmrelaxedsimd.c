@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/x8-packw/kr-wasmdot.c.in
 //   Generator: tools/xngen
@@ -12,7 +13,7 @@
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/packw.h"
+#include "src/xnnpack/packw.h"
 
 XNN_INLINE static v128_t safe_v128_load64_splat(const void* address, size_t n) {
   assert(n >= 1 && n <= sizeof(uint64_t));

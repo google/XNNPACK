@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-rminmax/avx512f.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
 
 
 void xnn_f32_rmin_ukernel__avx512f_u16(
@@ -26,7 +27,7 @@ void xnn_f32_rmin_ukernel__avx512f_u16(
   assert(input != NULL);
   assert(output != NULL);
 
-  __m512 vmin0 = _mm512_set1_ps(*input);
+  __m512 vmin0 = _mm512_set1_ps(output[0]);
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const __m512 vt = _mm512_loadu_ps(input);
     input += 16;

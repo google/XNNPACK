@@ -33,6 +33,7 @@ load(
     "xnnpack_simd_s16_archs",
     "xnnpack_simd_s32_archs",
     "xnnpack_simd_s8_archs",
+    "xnnpack_simd_u8_archs",
 )
 load(
     "//gen:microkernels.bzl",
@@ -59,15 +60,14 @@ exports_files(["preamble.js.lds"])
 
 MICROKERNEL_DEFS = [
     "src/f16-avgpool/f16-avgpool-minmax.h",
-    "src/f16-dwconv/f16-dwconv-minmax-multipass.h",
-    "src/f16-dwconv/f16-dwconv-minmax-unipass.h",
+    "src/f16-dwconv/f16-dwconv-minmax.h",
     "src/f16-f32-vcvt/f16-f32-vcvt.h",
     "src/f16-maxpool/f16-maxpool-minmax.h",
-    "src/f16-pavgpool/f16-pavgpool-minmax.h",
-    "src/f16-qu8-vcvt/f16-qu8-vcvt.h",
     "src/f16-qs8-vcvt/f16-qs8-vcvt.h",
+    "src/f16-qu8-vcvt/f16-qu8-vcvt.h"
     "src/f16-raddstoreexpminusmax/f16-raddstoreexpminusmax.h",
     "src/f16-vabs/f16-vabs.h",
+    "src/f16-vapproxgelu/f16-vapproxgelu.h",
     "src/f16-vbinary/f16-vadd.h",
     "src/f16-vbinary/f16-vaddc.h",
     "src/f16-vbinary/f16-vcmul.h",
@@ -89,7 +89,10 @@ MICROKERNEL_DEFS = [
     "src/f16-vbinary/f16-vsub.h",
     "src/f16-vbinary/f16-vsubc.h",
     "src/f16-vclamp/f16-vclamp.h",
+    "src/f16-vcos/f16-vcos.h",
     "src/f16-velu/f16-velu.h",
+    "src/f16-vexp/f16-vexp.h",
+    "src/f16-vgelu/f16-vgelu.h",
     "src/f16-vhswish/f16-vhswish.h",
     "src/f16-vlrelu/f16-vlrelu.h",
     "src/f16-vmulcaddc/f16-vmulcaddc.h",
@@ -100,22 +103,22 @@ MICROKERNEL_DEFS = [
     "src/f16-vrnd/f16-vrndz.h",
     "src/f16-vrsqrt/f16-vrsqrt.h",
     "src/f16-vsigmoid/f16-vsigmoid.h",
+    "src/f16-vsin/f16-vsin.h",
     "src/f16-vsqr/f16-vsqr.h",
     "src/f16-vsqrt/f16-vsqrt.h",
     "src/f16-vtanh/f16-vtanh.h",
     "src/f32-avgpool/f32-avgpool-minmax.h",
-    "src/f32-dwconv/f32-dwconv-minmax-multipass.h",
-    "src/f32-dwconv/f32-dwconv-minmax-unipass.h",
-    "src/f32-dwconv/f32-dwconv-multipass.h",
-    "src/f32-dwconv/f32-dwconv-unipass.h",
+    "src/f32-conv-hwc/f32-conv-hwc.h",
+    "src/f32-dwconv/f32-dwconv-minmax.h",
+    "src/f32-dwconv/f32-dwconv.h",
     "src/f32-f16-vcvt/f32-f16-vcvt.h",
     "src/f32-maxpool/f32-maxpool-minmax.h",
-    "src/f32-pavgpool/f32-pavgpool-minmax.h",
     "src/f32-qs8-vcvt/f32-qs8-vcvt.h",
     "src/f32-qu8-vcvt/f32-qu8-vcvt.h",
     "src/f32-raddextexp/f32-raddextexp.h",
     "src/f32-raddstoreexpminusmax/f32-raddstoreexpminusmax.h",
     "src/f32-vabs/f32-vabs.h",
+    "src/f32-vapproxgelu/f32-vapproxgelu.h",
     "src/f32-vbinary/f32-vadd.h",
     "src/f32-vbinary/f32-vaddc.h",
     "src/f32-vbinary/f32-vcmul.h",
@@ -140,6 +143,7 @@ MICROKERNEL_DEFS = [
     "src/f32-vbinary/f32-vsub.h",
     "src/f32-vbinary/f32-vsubc.h",
     "src/f32-vclamp/f32-vclamp.h",
+    "src/f32-vcos/f32-vcos.h",
     "src/f32-velu/f32-velu.h",
     "src/f32-vexp/f32-vexp.h",
     "src/f32-vgelu/f32-vgelu.h",
@@ -157,19 +161,17 @@ MICROKERNEL_DEFS = [
     "src/f32-vscaleexpminusmax/f32-vscaleexpminusmax.h",
     "src/f32-vscaleextexp/f32-vscaleextexp.h",
     "src/f32-vsigmoid/f32-vsigmoid.h",
+    "src/f32-vsin/f32-vsin.h",
     "src/f32-vsqr/f32-vsqr.h",
     "src/f32-vsqrt/f32-vsqrt.h",
     "src/f32-vtanh/f32-vtanh.h",
-    "src/qs8-dwconv/qs8-dwconv-minmax-multipass-fp32.h",
-    "src/qs8-dwconv/qs8-dwconv-minmax-multipass-rndnu.h",
-    "src/qs8-dwconv/qs8-dwconv-minmax-unipass-fp32.h",
-    "src/qs8-dwconv/qs8-dwconv-minmax-unipass-rndnu.h",
+    "src/qs8-dwconv/qs8-dwconv-minmax-fp32.h",
+    "src/qs8-dwconv/qs8-dwconv-minmax-rndnu.h",
     "src/qs8-f16-vcvt/qs8-f16-vcvt.h",
     "src/qs8-f32-vcvt/qs8-f32-vcvt.h",
     "src/qs8-packw/qs8-packw.h",
     "src/qs8-qc4w-packw/qs8-qc4w-packw.h",
-    "src/qs8-qc8w-dwconv/qs8-qc8w-dwconv-minmax-multipass-fp32.h",
-    "src/qs8-qc8w-dwconv/qs8-qc8w-dwconv-minmax-unipass-fp32.h",
+    "src/qs8-qc8w-dwconv/qs8-qc8w-dwconv-minmax-fp32.h",
     "src/qs8-vadd/qs8-vadd-minmax.h",
     "src/qs8-vaddc/qs8-vaddc-minmax.h",
     "src/qs8-vcvt/qs8-vcvt.h",
@@ -178,11 +180,11 @@ MICROKERNEL_DEFS = [
     "src/qs8-vmul/qs8-vmul-minmax-rndnu.h",
     "src/qs8-vmulc/qs8-vmulc-minmax-fp32.h",
     "src/qs8-vmulc/qs8-vmulc-minmax-rndnu.h",
-    "src/qu8-avgpool/qu8-avgpool-minmax.h",
-    "src/qu8-dwconv/qu8-dwconv-minmax-multipass-fp32.h",
-    "src/qu8-dwconv/qu8-dwconv-minmax-multipass-rndnu.h",
-    "src/qu8-dwconv/qu8-dwconv-minmax-unipass-fp32.h",
-    "src/qu8-dwconv/qu8-dwconv-minmax-unipass-rndnu.h",
+    "src/qs8-vprelu/qs8-vprelu.h",
+    "src/qs8-vpreluc/qs8-vpreluc.h",
+    "src/qs8-vrpreluc/qs8-vrpreluc.h",
+    "src/qu8-dwconv/qu8-dwconv-minmax-fp32.h",
+    "src/qu8-dwconv/qu8-dwconv-minmax-rndnu.h",
     "src/qu8-f32-vcvt/qu8-f32-vcvt.h",
     "src/qu8-vadd/qu8-vadd-minmax.h",
     "src/qu8-vaddc/qu8-vaddc-minmax.h",
@@ -192,28 +194,31 @@ MICROKERNEL_DEFS = [
     "src/qu8-vmul/qu8-vmul-minmax-rndnu.h",
     "src/qu8-vmulc/qu8-vmulc-minmax-fp32.h",
     "src/qu8-vmulc/qu8-vmulc-minmax-rndnu.h",
+    "src/qu8-vprelu/qu8-vprelu.h",
+    "src/qu8-vpreluc/qu8-vpreluc.h",
+    "src/qu8-vrpreluc/qu8-vrpreluc.h",
     "src/s8-maxpool/s8-maxpool-minmax.h",
     "src/s8-vclamp/s8-vclamp.h",
     "src/u8-maxpool/u8-maxpool-minmax.h",
     "src/u8-vclamp/u8-vclamp.h",
-    "src/xx-fill/xx-fill.h",
-    "src/xx-pad/xx-pad.h",
-    "src/xx-transposev/xx-transposev.h",
+    "src/x16-pack-lh/x16-pack-lh.h",
+    "src/x16-packw/x16-packw.h",
+    "src/x16-x32-packw/x16-x32-packw.h",
+    "src/x16-transposec/x16-transposec.h",
+    "src/x24-transposec/x24-transposec.h",
+    "src/x32-pack-lh/x32-pack-lh.h",
+    "src/x32-packb/x32-packb.h",
+    "src/x32-packw/x32-packw.h",
+    "src/x32-packx/x32-packx.h",
+    "src/x32-transposec/x32-transposec.h",
+    "src/x64-transposec/x64-transposec.h",
     "src/x8-pack-lh/x8-pack-lh.h",
     "src/x8-packq/x8-packq.h",
     "src/x8-packw/x8-packw.h",
     "src/x8-transposec/x8-transposec.h",
-    "src/x16-pack-lh/x16-pack-lh.h",
-    "src/x16-packw/x16-packw.h",
-    "src/x16-transposec/x16-transposec.h",
-    "src/x24-transposec/x24-transposec.h",
-    "src/x32-packb/x32-packb.h",
-    "src/x32-pack-lh/x32-pack-lh.h",
-    "src/x32-packw/x32-packw.h",
-    "src/x32-packx/x32-packx.h",
-    "src/x32-transposec/x32-transposec.h",
-    "src/x32-zerob/x32-zerob.h",
-    "src/x64-transposec/x64-transposec.h",
+    "src/xx-fill/xx-fill.h",
+    "src/xx-pad/xx-pad.h",
+    "src/xx-transposev/xx-transposev.h",
 ]
 
 MICROKERNEL_HDRS = [
@@ -233,7 +238,6 @@ MICROKERNEL_HDRS = [
     "src/xnnpack/packx.h",
     "src/xnnpack/pad.h",
     "src/xnnpack/pack-lh.h",
-    "src/xnnpack/pavgpool.h",
     "src/xnnpack/ppmm.h",
     "src/xnnpack/quantization.h",
     "src/xnnpack/raddexpminusmax.h",
@@ -249,8 +253,6 @@ MICROKERNEL_HDRS = [
     "src/xnnpack/vscaleexpminusmax.h",
     "src/xnnpack/vscaleextexp.h",
     "src/xnnpack/vunary.h",
-    "src/xnnpack/zerob.h",
-    "src/xnnpack/zip.h",
 ] + MICROKERNEL_DEFS
 
 MICROKERNEL_DEPS = [
@@ -259,15 +261,17 @@ MICROKERNEL_DEPS = [
     ":hardware_config",
     ":math",
     ":microkernels_h",
+    ":microparams_init",
     ":microparams",
     ":prefetch",
+    ":sanitizers",
     ":tables",
     ":unaligned",
 ]
 
 SIMD_HEADERS = [
     "src/xnnpack/simd/f32-avx-base.h",
-    "src/xnnpack/simd/f32-generic-functions.h",
+    "src/xnnpack/simd/f32-wasmsimd-base.h",
 ] + [
     "src/xnnpack/simd/f32-" + arch + ".h"
     for arch in xnnpack_simd_f32_archs()
@@ -283,6 +287,9 @@ SIMD_HEADERS = [
 ] + [
     "src/xnnpack/simd/s8-" + arch + ".h"
     for arch in xnnpack_simd_s8_archs()
+] + [
+    "src/xnnpack/simd/u8-" + arch + ".h"
+    for arch in xnnpack_simd_u8_archs()
 ]
 
 exports_files(SIMD_HEADERS)
@@ -318,7 +325,6 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":config_hdrs",
-        ":fp16",
         ":math",
         ":memory",
         ":microparams",
@@ -333,13 +339,6 @@ xnnpack_cc_library(
     deps = [
         "@pthreadpool",
     ],
-)
-
-xnnpack_cc_library(
-    name = "experiments_config",
-    srcs = ["src/configs/experiments-config.c"],
-    hdrs = ["include/experiments-config.h"],
-    visibility = xnnpack_visibility(),
 )
 
 xnnpack_cc_library(
@@ -414,8 +413,8 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":config_hdrs",
-        ":experiments_config",
         ":hardware_config",
+        ":indirection",
         ":init_once",
         ":logging",
         ":math",
@@ -565,10 +564,17 @@ xnnpack_cc_library(
     ],
 )
 
+# TODO: This should be test_only = True.
 xnnpack_cxx_library(
     name = "buffer",
     hdrs = ["src/xnnpack/buffer.h"],
-    deps = [":datatype"],
+    deps = [
+        ":common",
+        ":datatype",
+        ":math",
+        ":reference_ukernels",
+        ":xnnpack_h",
+    ],
 )
 
 xnnpack_cc_library(
@@ -593,6 +599,7 @@ xnnpack_cc_library(
     gcc_copts = [],
     deps = [
         ":common",
+        ":init_once",
         ":logging",
         ":math",
         ":xnnpack_h",
@@ -766,15 +773,6 @@ xnnpack_cc_library(
 ]
 
 xnnpack_cc_library(
-    name = "im2col",
-    srcs = ["src/im2col.c"],
-    hdrs = [
-        "src/xnnpack/im2col.h",
-    ],
-    deps = [":common"],
-)
-
-xnnpack_cc_library(
     name = "indirection",
     srcs = ["src/indirection.c"],
     hdrs = ["src/xnnpack/indirection.h"],
@@ -917,12 +915,13 @@ xnnpack_cc_library(
         "src/xnnpack/operator.h",
     ],
     deps = [
-        ":allocator",
-        ":cache",
+        ":common",
         ":compute_h",
         ":microkernel_type",
+        ":microparams",
         ":operator_type",
         ":params",
+        ":xnnpack_h",
         "@pthreadpool",
     ],
 )
@@ -936,6 +935,7 @@ xnnpack_cc_library(
         ":common",
         ":logging",
         ":math",
+        ":node_type",
         ":operator_h",
         ":operator_type",
         ":params",
@@ -997,7 +997,7 @@ xnnpack_cc_library(
         ":cache",
         ":common",
         ":datatype",
-        ":fp16",
+        ":hardware_config",
         ":indirection",
         ":internal",
         ":logging",
@@ -1021,11 +1021,29 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "sanitizers",
+    srcs = [
+        "src/sanitizers.c",
+    ],
+    compatible_with = [],
+)
+
+xnnpack_cc_library(
     name = "subgraph_h",
     hdrs = [
         "src/xnnpack/subgraph.h",
     ],
     compatible_with = [],
+    deps = [
+        ":allocation_type",
+        ":common",
+        ":config_hdrs",
+        ":math",
+        ":microkernels_h",
+        ":node_type",
+        ":xnnpack_h",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_cc_library(
@@ -1111,21 +1129,23 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         ":allocator",
-        ":build_identifier",
-        ":common",
-        ":config_hdrs",
+        ":build_identifier",  # build_cleaner: keep
+        ":common",  # build_cleaner: keep
+        ":config_hdrs",  # build_cleaner: keep
         ":hardware_config",
         ":init_once",
         ":logging",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":microparams_init",
-        ":operators",
+        ":math",  # build_cleaner: keep
+        ":microkernels_h",  # build_cleaner: keep
+        ":microparams",  # build_cleaner: keep
+        ":microparams_init",  # build_cleaner: keep
+        ":operators",  # build_cleaner: keep
         ":params",
-        ":subgraph",
+        ":subgraph",  # build_cleaner: keep
         "@pthreadpool",
-    ],
+    ] + xnnpack_if_kleidiai_enabled([
+        "@KleidiAI//:common",
+    ]),
 )
 
 # Specialized XNNPACK version for TensorFlow Lite. Excludes operators currently
@@ -1350,6 +1370,18 @@ config_setting(
     define_values = {"xnn_enable_avx512fp16": "false"},
 )
 
+# Enables usage of Intel AVX512-BF16 (bf16 arithmetic) kernels.
+config_setting(
+    name = "xnn_enable_avx512bf16_explicit_true",
+    define_values = {"xnn_enable_avx512bf16": "true"},
+)
+
+# Disables usage of Intel AVX512-BF16 (bf16 arithmetic) kernels.
+config_setting(
+    name = "xnn_enable_avx512bf16_explicit_false",
+    define_values = {"xnn_enable_avx512bf16": "false"},
+)
+
 # Enables usage of Intel AVX-VNNI (integer dot product) kernels.
 config_setting(
     name = "xnn_enable_avxvnni_explicit_true",
@@ -1518,30 +1550,6 @@ config_setting(
     define_values = {"xnn_use_slinky": "true"},
 )
 
-# Enables usage of mr heuristic to select microkernels.
-config_setting(
-    name = "xnn_enable_gemm_m_specialization_explicit_true",
-    define_values = {"xnn_enable_gemm_m_specialization": "true"},
-)
-
-# Disables usage of mr heuristic to select microkernels.
-config_setting(
-    name = "xnn_enable_gemm_m_specialization_explicit_false",
-    define_values = {"xnn_enable_gemm_m_specialization": "false"},
-)
-
-# Enables usage of DWCONV multipass kernels.
-config_setting(
-    name = "xnn_enable_dwconv_multipass_explicit_true",
-    define_values = {"xnn_enable_dwconv_multipass": "true"},
-)
-
-# Disables usage of DWCONV multipass kernels.
-config_setting(
-    name = "xnn_enable_dwconv_multipass_explicit_false",
-    define_values = {"xnn_enable_dwconv_multipass": "false"},
-)
-
 # Enables usage of WASM SIMD AVX-256 revectorization kernels.
 config_setting(
     name = "xnn_enable_wasm_revectorize_explicit_true",
@@ -1665,6 +1673,22 @@ selects.config_setting_group(
 )
 
 selects.config_setting_group(
+    name = "avx512bf16_enabled_by_default",
+    match_any = [
+        "//build_config:x86_64",
+    ],
+)
+
+alias(
+    name = "avx512bf16_enabled",
+    actual = select({
+        ":xnn_enable_avx512bf16_explicit_true": ":xnn_enable_avx512bf16_explicit_true",
+        ":xnn_enable_avx512bf16_explicit_false": ":xnn_enable_avx512bf16_explicit_true",
+        "//conditions:default": ":avx512bf16_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
     name = "arm_bf16_enabled_by_default",
     match_any = [
         "//build_config:aarch64",
@@ -1721,13 +1745,27 @@ alias(
     }),
 )
 
+selects.config_setting_group(
+    name = "arm_sme_enabled_by_default",
+    match_any = [
+        "//build_config:aarch64",
+    ],
+)
+
 alias(
     name = "arm_sme_enabled",
     actual = select({
         ":xnn_enable_arm_sme_explicit_true": ":xnn_enable_arm_sme_explicit_true",
         ":xnn_enable_arm_sme_explicit_false": ":xnn_enable_arm_sme_explicit_true",
-        "//conditions:default": ":xnn_enable_arm_sme_explicit_true",
+        "//conditions:default": ":arm_sme_enabled_by_default",
     }),
+)
+
+selects.config_setting_group(
+    name = "arm_sme2_enabled_by_default",
+    match_any = [
+        "//build_config:aarch64",
+    ],
 )
 
 alias(
@@ -1735,7 +1773,8 @@ alias(
     actual = select({
         ":xnn_enable_arm_sme2_explicit_true": ":xnn_enable_arm_sme2_explicit_true",
         ":xnn_enable_arm_sme2_explicit_false": ":xnn_enable_arm_sme2_explicit_true",
-        "//conditions:default": ":xnn_enable_arm_sme2_explicit_true",
+        # Only enable this by default once we're sure it doesn't break anything.
+        "//conditions:default": ":arm_sme2_enabled_by_default",
     }),
 )
 
@@ -1848,7 +1887,6 @@ alias(
     actual = select({
         ":xnn_enable_avx512fp16_explicit_true": ":xnn_enable_avx512fp16_explicit_true",
         ":xnn_enable_avx512fp16_explicit_false": ":xnn_enable_avx512fp16_explicit_true",
-        "//build_config:windows_lexan": ":xnn_enable_avx512fp16_explicit_true",
         "//conditions:default": ":avx512fp16_enabled_by_default",
     }),
 )
@@ -2065,38 +2103,6 @@ alias(
         ":xnn_enable_memopt_explicit_true": ":xnn_enable_memopt_explicit_true",
         ":xnn_enable_memopt_explicit_false": ":xnn_enable_memopt_explicit_true",
         "//conditions:default": ":memopt_enabled_by_default",
-    }),
-)
-
-selects.config_setting_group(
-    name = "gemm_m_specialization_enabled_by_default",
-    match_any = [
-        "//conditions:default",
-    ],
-)
-
-alias(
-    name = "gemm_m_specialization_enabled",
-    actual = select({
-        ":xnn_enable_gemm_m_specialization_explicit_true": ":xnn_enable_gemm_m_specialization_explicit_true",
-        ":xnn_enable_gemm_m_specialization_explicit_false": ":xnn_enable_gemm_m_specialization_explicit_true",
-        "//conditions:default": ":gemm_m_specialization_enabled_by_default",
-    }),
-)
-
-selects.config_setting_group(
-    name = "dwconv_multipass_enabled_by_default",
-    match_any = [
-        "//conditions:default",
-    ],
-)
-
-alias(
-    name = "dwconv_multipass_enabled",
-    actual = select({
-        ":xnn_enable_dwconv_multipass_explicit_true": ":xnn_enable_dwconv_multipass_explicit_true",
-        ":xnn_enable_dwconv_multipass_explicit_false": ":xnn_enable_dwconv_multipass_explicit_true",
-        "//conditions:default": ":dwconv_multipass_enabled_by_default",
     }),
 )
 

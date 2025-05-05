@@ -66,7 +66,24 @@ tools/xngen src/f32-spmm/neon-pipelined.c.in -D MR=8  -D NR=1 -D FMA=1 -o src/f3
 tools/xngen src/f32-spmm/neon-pipelined.c.in -D MR=16 -D NR=1 -D FMA=1 -o src/f32-spmm/gen/f32-spmm-16x1-minmax-neonfma-pipelined.c &
 tools/xngen src/f32-spmm/neon-pipelined.c.in -D MR=32 -D NR=1 -D FMA=1 -o src/f32-spmm/gen/f32-spmm-32x1-minmax-neonfma-pipelined.c &
 
-################################### x86 SSE ###################################
+################################# RISC-V Vector #################################
+### Microkernels without unrolling
+tools/xngen src/f32-spmm/rvv.c.in -D MR=m1 -D NR=1 -D UNROLL=1 -o src/f32-spmm/gen/f32-spmm-1vx1-minmax-rvv.c &
+tools/xngen src/f32-spmm/rvv.c.in -D MR=m2 -D NR=1 -D UNROLL=1 -o src/f32-spmm/gen/f32-spmm-2vx1-minmax-rvv.c &
+tools/xngen src/f32-spmm/rvv.c.in -D MR=m4 -D NR=1 -D UNROLL=1 -o src/f32-spmm/gen/f32-spmm-4vx1-minmax-rvv.c &
+tools/xngen src/f32-spmm/rvv.c.in -D MR=m8 -D NR=1 -D UNROLL=1 -o src/f32-spmm/gen/f32-spmm-8vx1-minmax-rvv.c &
+
+tools/xngen src/f32-spmm/rvv.c.in -D MR=m1 -D NR=2 -D UNROLL=1 -o src/f32-spmm/gen/f32-spmm-1vx2-minmax-rvv.c &
+tools/xngen src/f32-spmm/rvv.c.in -D MR=m2 -D NR=2 -D UNROLL=1 -o src/f32-spmm/gen/f32-spmm-2vx2-minmax-rvv.c &
+tools/xngen src/f32-spmm/rvv.c.in -D MR=m4 -D NR=2 -D UNROLL=1 -o src/f32-spmm/gen/f32-spmm-4vx2-minmax-rvv.c &
+tools/xngen src/f32-spmm/rvv.c.in -D MR=m8 -D NR=2 -D UNROLL=1 -o src/f32-spmm/gen/f32-spmm-8vx2-minmax-rvv.c &
+
+tools/xngen src/f32-spmm/rvv.c.in -D MR=m1 -D NR=4 -D UNROLL=1 -o src/f32-spmm/gen/f32-spmm-1vx4-minmax-rvv.c &
+tools/xngen src/f32-spmm/rvv.c.in -D MR=m2 -D NR=4 -D UNROLL=1 -o src/f32-spmm/gen/f32-spmm-2vx4-minmax-rvv.c &
+tools/xngen src/f32-spmm/rvv.c.in -D MR=m4 -D NR=4 -D UNROLL=1 -o src/f32-spmm/gen/f32-spmm-4vx4-minmax-rvv.c &
+tools/xngen src/f32-spmm/rvv.c.in -D MR=m8 -D NR=4 -D UNROLL=1 -o src/f32-spmm/gen/f32-spmm-8vx4-minmax-rvv.c &
+
+#################################### x86 SSE ####################################
 ### Microkernels without unrolling
 tools/xngen src/f32-spmm/sse.c.in -D MR=4 -D NR=1 -D UNROLL=1 -o src/f32-spmm/gen/f32-spmm-4x1-minmax-sse.c &
 tools/xngen src/f32-spmm/sse.c.in -D MR=8  -D NR=1 -D UNROLL=1 -o src/f32-spmm/gen/f32-spmm-8x1-minmax-sse.c &

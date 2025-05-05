@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 // Include first for the platform detection macros.
-#include "xnnpack/common.h"
+#include "src/xnnpack/common.h"
 
 #if XNN_PLATFORM_WEB
 #include <emscripten/emscripten.h>
@@ -33,7 +33,7 @@
 #endif  // XNN_PLATFORM_WINDOWS
 
 #if XNN_PLATFORM_QURT
-#include "qurt/qurt_alloc.h"  // NOLINT - header provided by Hexagon toolchain
+#include <qurt/qurt_alloc.h>  // NOLINT - header provided by Hexagon toolchain
 #endif
 
 #include <assert.h>
@@ -41,36 +41,41 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "xnnpack.h"
-#include "xnnpack/log.h"
-#include "xnnpack/math.h"
-#include "xnnpack/memory.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/init-once.h"
+#include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/memory.h"
 
 // Helpers to allocate/mmap and release memory used by both code and weights cache.
 
 static size_t system_page_size = 0;
 
-static size_t get_page_size() {
-  if (system_page_size == 0) {
-    // Get page size.
-    #if XNN_PLATFORM_WINDOWS
-      SYSTEM_INFO sysinfo;
-      GetSystemInfo(&sysinfo);
-      assert(sysinfo.dwPageSize != 0);
-      system_page_size = (size_t) sysinfo.dwPageSize;
-    #elif XNN_PLATFORM_QURT || !XNN_HAS_MMAP
-      // sysconf(_SC_PAGESIZE) will fail, but we're just using malloc anyway.
-      system_page_size = 4096;
-    #else
-      long result = sysconf(_SC_PAGESIZE);
-      if (result == -1) {
-        xnn_log_fatal("failed to get page size, error code: %d", errno);
-      }
-      assert(result >= 0);
-      system_page_size = (size_t) result;
-    #endif
+XNN_INIT_ONCE_GUARD(memory);
+
+static void init_memory_config() {
+// Get page size.
+#if XNN_PLATFORM_WINDOWS
+  SYSTEM_INFO sysinfo;
+  GetSystemInfo(&sysinfo);
+  assert(sysinfo.dwPageSize != 0);
+  system_page_size = (size_t) sysinfo.dwPageSize;
+#elif XNN_PLATFORM_QURT || !XNN_HAS_MMAP
+  // sysconf(_SC_PAGESIZE) will fail, but we're just using malloc anyway.
+  system_page_size = 4096;
+#else
+  long result = sysconf(_SC_PAGESIZE);
+  if (result == -1) {
+    xnn_log_fatal("failed to get page size, error code: %d", errno);
   }
+  assert(result >= 0);
+  system_page_size = (size_t) result;
+#endif
   assert(is_po2(system_page_size));
+}
+
+static size_t get_page_size() {
+  XNN_INIT_ONCE(memory);
   return system_page_size;
 }
 

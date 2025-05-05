@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-gemm/c4-avx512amx.c.in
 //   Generator: tools/xngen
@@ -16,11 +17,11 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/gemm.h"
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/math.h"
-#include "xnnpack/unaligned.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/unaligned.h"
 
 
 void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_7x64c4__avx512amx(
@@ -45,14 +46,8 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_7x64c4__avx512amx(
   assert(w != NULL);
   assert(c != NULL);
 
-// TODO: amxintrin.h only provide intrinsics for __x86_64__
-// Update if amxintrin changes
-#if defined(__x86_64__)
-  __attribute__((aligned(64))) int8_t weight_buffer[16 * 64];
-  __attribute__((aligned(64))) int32_t res[4][7 * 16];
-
-  kc = round_up_po2(kc, 4 * sizeof(int8_t));
-  const size_t kremainder = (kc & 63) ? (kc & 63) : 64;
+// AMX is only available for __x86_64__
+#if XNN_ARCH_X86_64
 
   // Define tile config data structure
   struct __tile_config {
@@ -65,8 +60,13 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_7x64c4__avx512amx(
     uint8_t reserved_2[8];
   };
 
-  // Load tile configuration
-  __attribute__((aligned(64))) struct __tile_config tile_data = {0};
+  XNN_ALIGN(64) struct __tile_config tile_data = {0};
+  XNN_ALIGN(64) int32_t res[4][7 * 16];
+  XNN_ALIGN(64) int8_t weight_buffer[16 * 64];
+
+  kc = round_up_po2(kc, 4 * sizeof(int8_t));
+  const size_t kremainder = (kc & 63) ? (kc & 63) : 64;
+
   tile_data.palette_id = 1;
   tile_data.rows[0] = mr;              // tmm0 = res[0]
   tile_data.rows[1] = mr;              // tmm1 = res[1]
@@ -76,7 +76,6 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_7x64c4__avx512amx(
   tile_data.rows[5] = 16;              // tmm5 = weights
   tile_data.rows[6] = mr;              // tmm6 = input remainder
   tile_data.rows[7] = kremainder >> 2; // tmm7 = weights remainder
-
   tile_data.colsb[0] = 64;          // tmm0 = res[0]
   tile_data.colsb[1] = 64;          // tmm1 = res[1]
   tile_data.colsb[2] = 64;          // tmm2 = res[2]
@@ -85,9 +84,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_7x64c4__avx512amx(
   tile_data.colsb[5] = 64;          // tmm5 = weights
   tile_data.colsb[6] = kremainder;  // tmm6 = input remainder
   tile_data.colsb[7] = 64;          // tmm7 = weights remainder
-
-  //_tile_loadconfig(&tile_data);
-  __asm__ volatile ("ldtilecfg %0" :: "m" (tile_data));
+  _tile_loadconfig(&tile_data);
 
   float* c0 = c;
   float* c1 = (float*) ((uintptr_t) c0 + cm_stride);
@@ -132,12 +129,10 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_7x64c4__avx512amx(
     w = (const int32_t*) w + 64;
 
     // Zero tile accumulator
-    __asm__ volatile (
-      "tilezero %%tmm0\n"
-      "tilezero %%tmm1\n"
-      "tilezero %%tmm2\n"
-      "tilezero %%tmm3\n"
-      ::);
+    _tile_zero(0);
+    _tile_zero(1);
+    _tile_zero(2);
+    _tile_zero(3);
 
     size_t k = kc;
     while (k >= 64 * sizeof(int8_t)) {
@@ -695,7 +690,6 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_7x64c4__avx512amx(
     }
   } while (nc != 0);
   // Release tile config
-  //  _tile_release();
-  __asm__ volatile ("tilerelease" ::);
+  _tile_release();
   #endif  // defined(__x86_64__)
 }

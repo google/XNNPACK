@@ -3,20 +3,21 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <limits>
 #include <random>
 
-#include "utils.h"
-#include "xnnpack/buffer.h"
-#include "xnnpack/common.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/raddexpminusmax.h"
-#include "xnnpack/raddextexp.h"
-#include "xnnpack/raddstoreexpminusmax.h"
-#include "xnnpack/reduce.h"
-#include "xnnpack/vbinary.h"
-#include "xnnpack/vscaleexpminusmax.h"
-#include "xnnpack/vscaleextexp.h"
+#include "bench/utils.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/raddexpminusmax.h"
+#include "src/xnnpack/raddextexp.h"
+#include "src/xnnpack/raddstoreexpminusmax.h"
+#include "src/xnnpack/reduce.h"
+#include "src/xnnpack/vbinary.h"
+#include "src/xnnpack/vscaleexpminusmax.h"
+#include "src/xnnpack/vscaleextexp.h"
 #include <benchmark/benchmark.h>
 
 #ifdef BENCHMARK_INTEL_DNNL
@@ -246,7 +247,7 @@ static void ThreePassSoftMaxWithRecomputing(
     }
 
     const auto start = std::chrono::high_resolution_clock::now();
-    float x_max;
+    float x_max = -std::numeric_limits<float>::infinity();
     rmax(elements * sizeof(float), x.data(), &x_max, &rmax_params);
     float y_sum;
     raddexpminusmax(elements * sizeof(float), x.data(), &y_sum, x_max);
@@ -324,7 +325,7 @@ static void ThreePassSoftMaxWithReloading(
     }
 
     const auto start = std::chrono::high_resolution_clock::now();
-    float x_max;
+    float x_max = -std::numeric_limits<float>::infinity();
     rmax(elements * sizeof(float), x.data(), &x_max, &rmax_params);
     float y_sum;
     raddstoreexpminusmax(elements * sizeof(float), x.data(), &x_max,
@@ -486,7 +487,7 @@ BENCHMARK_CAPTURE(ThreePassSoftMaxWithReloading, avx2_p5,
     ->UseManualTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 BENCHMARK_CAPTURE(ThreePassSoftMaxWithReloading, rvv_p6_rmax_m8_exp_m4_vmulc_m8,
                   xnn_f32_rmax_ukernel__rvv_u8v,
                   (xnn_init_f32_default_params_fn) nullptr,
@@ -494,7 +495,18 @@ BENCHMARK_CAPTURE(ThreePassSoftMaxWithReloading, rvv_p6_rmax_m8_exp_m4_vmulc_m8,
                   xnn_f32_vmulc_ukernel__rvv_u8v, benchmark::utils::CheckRVV)
     ->Apply(CharacteristicArguments)
     ->UseManualTime();
-#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+
+#if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+BENCHMARK_CAPTURE(ThreePassSoftMaxWithReloading, hvx_p5,
+                  xnn_f32_rmax_ukernel__hvx_u64_acc2,
+                  (xnn_init_f32_default_params_fn) nullptr,
+                  xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u128_acc2,
+                  nullptr, xnn_f32_vmulc_ukernel__hvx_u128,
+                  benchmark::utils::CheckHVX)
+    ->Apply(CharacteristicArguments)
+    ->UseManualTime();
+#endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();

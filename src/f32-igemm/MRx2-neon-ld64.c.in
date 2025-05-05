@@ -8,8 +8,8 @@ $assert NR == 2
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/igemm.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/igemm.h"
 
 
 void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__${"aarch64_neonfma" if FMA else "neon"}_lane_ld64(
@@ -24,7 +24,7 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__${"aarch64_neonfma" if FMA else "
     size_t cn_stride,
     size_t a_offset,
     const float* zero,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= ${MR});
@@ -106,12 +106,12 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__${"aarch64_neonfma" if FMA else "
       p -= ${MR} * sizeof(void*);
     } while (p != 0);
 
-    const float32x2_t vmax = vld1_dup_f32(&params->scalar.max);
+    const float32x2_t vmax = vdup_n_f32(params->scalar.max);
     $for N in range(0, NR, 4):
       $for M in range(MR):
         vacc${M}x01 = vmin_f32(vacc${M}x01, vmax);
 
-    const float32x2_t vmin = vld1_dup_f32(&params->scalar.min);
+    const float32x2_t vmin = vdup_n_f32(params->scalar.min);
     $for N in range(0, NR, 4):
       $for M in range(MR):
         vacc${M}x01 = vmax_f32(vacc${M}x01, vmin);

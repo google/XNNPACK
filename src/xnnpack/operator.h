@@ -6,19 +6,22 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef THIRD_PARTY_XNNPACK_SRC_XNNPACK_OPERATOR_H_
+#define THIRD_PARTY_XNNPACK_SRC_XNNPACK_OPERATOR_H_
 
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/compute.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microkernel-type.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/operator-type.h"
-#include "pthreadpool.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/compute.h"
+#include "src/xnnpack/config-types.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microkernel-type.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/node-type.h"
+#include "src/xnnpack/operator-type.h"
+#include <pthreadpool.h>
 
 // Maximum number of pthreadpool parallelization invocations per operator.
 #define XNN_MAX_COMPUTE_INVOCATIONS 3
@@ -37,16 +40,9 @@ struct xnn_ukernel_conv2d {
 };
 
 struct xnn_ukernel_dwconv {
-  union {
-    xnn_dwconv_unipass_ukernel_fn unipass_fn;
-    xnn_dwconv_multipass_ukernel_fn multipass_fn;
-  };
+  xnn_dwconv_ukernel_fn ukernel;
+  uint32_t channel_tile;
   uint8_t primary_tile;
-  uint8_t middle_tile;
-  uint8_t last_tile;
-  // For unipass, tile_size == primary_tile, otherwise it is calculated based on
-  // how many pass the middle_tile runs.
-  size_t tile_size;
 };
 
 // Direct 2D Depthwise Convolution
@@ -87,6 +83,7 @@ struct xnn_ukernel_spmm {
 struct xnn_ukernel_vmulcaddc {
   xnn_vmulcaddc_ukernel_fn function;
   uint8_t mr;
+  uint8_t channel_tile;
 };
 
 struct xnn_ukernel_vbinary {
@@ -124,7 +121,8 @@ struct xnn_ukernel {
 // - xnn_run_state_invalid -> xnn_run_state_ready
 // - xnn_run_state_invalid -> xnn_run_state_needs_setup -> xnn_run_state_ready
 enum xnn_run_state {
-  // When an operator is first created, it starts off in invalid state, it needs to be setup, or reshape + setup.
+  // When an operator is first created, it starts off in invalid state, it needs
+  // to be setup, or reshape + setup.
   xnn_run_state_invalid = 0,
   // Operator is ready to be run.
   xnn_run_state_ready,
@@ -171,23 +169,26 @@ struct xnn_operator {
   union {
     // Pointer to allocated packed weights. Use this if weights_cache is NULL.
     void* pointer;
-    // Offset into the weights cache where the packed weights are. Only valid if weights_cache is not NULL.
+    // Offset into the weights cache where the packed weights are. Only valid if
+    // weights_cache is not NULL.
     size_t offset;
   } packed_weights;
   // Stride between each set of packed weights.
   size_t weights_stride;
-  // Total number of non-zero kernel elements when weights use sparse representation.
+  // Total number of non-zero kernel elements when weights use sparse
+  // representation.
   size_t num_nonzero_values;
-  // Total number of non-zero kernel blocks when weights use sparse representation.
+  // Total number of non-zero kernel blocks when weights use sparse
+  // representation.
   size_t num_nonzero_blocks;
-  // Total number of output channel blocks when weights use sparse representation.
+  // Total number of output channel blocks when weights use sparse
+  // representation.
   size_t num_output_channel_blocks;
   // Input channel corresponding to the first non-zero kernel element.
   size_t first_input_channel;
 
   float input_scale;
   float output_scale;
-  int32_t input_zero_point;
 
   size_t valid_batch_size;
   size_t last_input_height;
@@ -212,15 +213,22 @@ struct xnn_operator {
   union {
     struct {
       uint32_t log2_element_size;
+      enum xnn_binary_operator op_type;
     } binary_elementwise;
     struct {
-      uint32_t log2_input_size;
-      uint32_t log2_output_size;
+      uint8_t num_nonbatch_dims;
+      uint8_t log2_input_size;
+      uint8_t log2_output_size;
+      enum xnn_unary_operator op_type;
     } unary_elementwise;
     struct {
       uint32_t log2_data_element_size;
       uint32_t log2_accumulator_element_size;
+      uint32_t identity_value;
     } reduce;
+    struct {
+      enum xnn_node_type subtype;
+    } copy;
   };
 
   union {
@@ -228,50 +236,38 @@ struct xnn_operator {
     union xnn_unary_uparams unary;
     struct xnn_f16_default_params f16_default;
     struct xnn_f32_default_params f32_default;
-    union xnn_f16_minmax_params f16_minmax;
+    struct xnn_f16_minmax_params f16_minmax;
     struct xnn_f16_scaleminmax_params f16_scaleminmax;
     struct xnn_reduce_params reduce;
-    // Pixelwise Average Pooling normally use f32_minmax_params, but also initialize
-    // f32_scaleminmax_params in case it needs to switch to Global Average Pooling operation.
-    struct {
-      union xnn_f32_minmax_params f32_minmax;
-      struct xnn_f32_scaleminmax_params f32_scaleminmax;
-    };
+    struct xnn_f32_minmax_params f32_minmax;
+    struct xnn_f32_scaleminmax_params f32_scaleminmax;
     struct xnn_f32_scale_params f32_scale;
-    union xnn_f16_minmax_params f16_chw;
-    union xnn_f32_minmax_params f32_chw;
+    struct xnn_f16_minmax_params f16_chw;
+    struct xnn_f32_minmax_params f32_chw;
     struct xnn_f32_qb4w_minmax_params f32_qb4w_minmax;
     struct xnn_f32_qc4w_minmax_params f32_qc4w_minmax;
     union xnn_qs8_conv_minmax_params qs8_conv_minmax;
     union xnn_qs8_qc8w_conv_minmax_params qs8_qc8w_conv_minmax;
     union xnn_qu8_conv_minmax_params qu8_conv_minmax;
-    struct xnn_qu8_avgpool_minmax_params qu8_avgpool;
     struct xnn_s8_minmax_params s8_minmax;
     struct xnn_s32_default_params s32_default;
     struct xnn_u8_minmax_params u8_minmax;
   } params;
-  // Second set of params. Operators like Dynamic Fully Connected only decides on the specific config to use during
-  // reshape, so it needs to keep two sets of params around. Configs can have different initialization functions.
-  // We also use this to store parameters to binary operators. For most such operators, this is a copy of params,
-  // but params need to be swapped for commutative ops with per-operand params.
+  // Second set of params. Operators like Dynamic Fully Connected only decides
+  // on the specific config to use during reshape, so it needs to keep two sets
+  // of params around. Configs can have different initialization functions. We
+  // also use this to store parameters to binary operators. For most such
+  // operators, this is a copy of params, but params need to be swapped for
+  // commutative ops with per-operand params.
   union {
     union xnn_binary_uparams binary;
     union xnn_unary_uparams unary;
     struct xnn_f16_default_params f16_default;
-    union xnn_f32_minmax_params f32_minmax;
+    struct xnn_f32_minmax_params f32_minmax;
     struct xnn_f32_default_params f32_default;
     struct xnn_s8_minmax_params s8_minmax;
     struct xnn_u8_minmax_params u8_minmax;
   } params2;
-  // Third set of params. Used by scaled dot attention operator.
-  union {
-    struct xnn_f16_default_params f16_rmax;
-    struct xnn_f32_default_params f32_rmax;
-  } params3;
-  // Fourth set of params. Used by scaled dot attention operator.
-  union {
-    union xnn_unary_uparams unary;
-  } params4;
   enum xnn_operator_type type;
   struct xnn_ukernel ukernel;
 
@@ -279,21 +275,20 @@ struct xnn_operator {
     const struct xnn_argmaxpool_config* argmaxpool_config;
     struct {
       const struct xnn_avgpool_config* avgpool_config;
-      const struct xnn_pavgpool_config* pavgpool_config;
-      const struct xnn_reduce_config* rdsum_config;
-      const struct xnn_reduce_config* rsum_config;
+      const struct xnn_reduce_config* discontiguous_reduce_config;
+      const struct xnn_reduce_config* contiguous_reduce_config;
       const struct xnn_unary_elementwise_config* cvt_config;
     };
     const struct xnn_ibilinear_chw_config* ibilinear_chw_config;
     const struct xnn_ibilinear_config* ibilinear_config;
     struct {
-      const struct xnn_rmax_config* rmax_config;
       union {
         // For QU8.
         const struct xnn_lut32norm_config* lut32norm_config;
         // For F16 and F32.
         struct {
-          const struct xnn_raddstoreexpminusmax_config* raddstoreexpminusmax_config;
+          const struct xnn_raddstoreexpminusmax_config*
+              raddstoreexpminusmax_config;
           const struct xnn_binary_elementwise_config* vmul_config;
         };
       };
@@ -311,17 +306,16 @@ struct xnn_operator {
     const struct xnn_binary_elementwise_config* binary_elementwise_config;
     struct {
       const struct xnn_unary_elementwise_config* unary_elementwise_config;
-      const struct xnn_reduce_config*
-          rminmax_config;  // For dynamic quantization convert operator.
       const struct xnn_gemm_config*
           gemm_config;  // For dynamic quantization convert operator.
     };  // For unary elementwise operators.
     struct {
-      const struct xnn_rmax_config* rmax_config;
+      const struct xnn_reduce_config* rmax_config;
       const struct xnn_raddstoreexpminusmax_config* raddstoreexpminusmax_config;
       const struct xnn_binary_elementwise_config* vadd_config;
       const struct xnn_binary_elementwise_config* vmul_config;
       const struct xnn_unary_elementwise_config* vtanh_config;
+      const struct xnn_binary_elementwise_config* vprelu_config;
       enum xnn_attention_logits_cap_type cap_type;
       struct xnn_attention_logits_cap_tanh_params cap_params;
     } attention;  // For attention operator.
@@ -343,7 +337,6 @@ struct xnn_operator {
     struct {
       union {
         struct gemm_context gemm;
-        struct scaled_dot_product_attention_context attention;
       } gemm;
       struct packw_gemm_goi_context packw_gemm_goi;
       struct packw_gemm_gio_context packw_gemm_gio;
@@ -351,17 +344,18 @@ struct xnn_operator {
     } gemm;
     struct {
       struct igemm_context igemm;
-      struct conv2d_igemm_indirection_init_context conv2d_igemm_indirection_init;
+      struct conv2d_igemm_indirection_init_context
+          conv2d_igemm_indirection_init;
     } igemm;
     struct lut_contiguous_context lut_contiguous;
     struct lut_strided_context lut_strided;
     struct max_pooling_context max_pooling;
     struct pad_context pad;
-    struct pixelwise_average_pooling_context pixelwise_average_pooling;
     struct reduce_context reduce;
     struct {
       struct resize_bilinear_context resize_bilinear;
-      struct resize_bilinear_nhwc_indirection_init_context resize_nhwc_indirection_init;
+      struct resize_bilinear_nhwc_indirection_init_context
+          resize_nhwc_indirection_init;
     };
     struct resize_bilinear_chw_context resize_bilinear_chw;
     struct slice_context slice;
@@ -388,13 +382,14 @@ struct xnn_operator {
 };
 
 XNN_INTERNAL enum xnn_status xnn_run_operator_with_index(
-  xnn_operator_t op,
-  size_t opdata_index,
-  size_t operator_object_index,
-  pthreadpool_t threadpool);
+    xnn_operator_t op, size_t opdata_index, size_t operator_object_index,
+    pthreadpool_t threadpool);
 
-XNN_INTERNAL enum xnn_operator_type xnn_reduce_operator_to_operator_type(enum xnn_reduce_operator op);
+XNN_INTERNAL enum xnn_operator_type xnn_reduce_operator_to_operator_type(
+    enum xnn_reduce_operator type);
 
 #ifdef __cplusplus
 }  // extern "C"
 #endif
+
+#endif  // THIRD_PARTY_XNNPACK_SRC_XNNPACK_OPERATOR_H_

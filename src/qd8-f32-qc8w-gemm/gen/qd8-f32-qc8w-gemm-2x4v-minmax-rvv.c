@@ -1,8 +1,10 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-gemm/rvv.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2024 SiFive, Inc.
+// Copyright 2024 Microchip
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -11,8 +13,8 @@
 
 #include <riscv_vector.h>
 
-#include "xnnpack/gemm.h"
-#include "xnnpack/math.h"
+#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/math.h"
 
 void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x4v__rvv(
     size_t mr,
@@ -24,7 +26,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x4v__rvv(
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
+    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
     const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
@@ -43,6 +45,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x4v__rvv(
 
   const size_t nr = __riscv_vsetvlmax_e32m4();
   size_t vl = nr;
+
   do {
     if XNN_UNLIKELY(nc < nr) {
       vl = __riscv_vsetvl_e32m4(nc);
@@ -50,26 +53,29 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x4v__rvv(
     nc = nc - vl;
 
     vint32m4_t vksum = __riscv_vle32_v_i32m4((const int32_t*)w, vl);
-    w = (const int32_t*) w + nr;
     const int32_t vinput_zero_point0 = quantization_params[0].zero_point;
     const int32_t vinput_zero_point1 = quantization_params[1].zero_point;
     vint32m4_t vacc0 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point0, vl);
     vint32m4_t vacc1 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point1, vl);
 
+    w = (const int32_t*) w + nr;
+
     size_t k = kc;
     do {
-      const int8_t va0 = *a0++;
-      const int8_t va1 = *a1++;
+      const int32_t va0 = (int32_t) *a0++;
+      const int32_t va1 = (int32_t) *a1++;
+
       const vint8m1_t vb = __riscv_vle8_v_i8m1((const int8_t*) w, vl);
+      const vint32m4_t vb0 = __riscv_vsext_vf4(vb, vl);
+
       w = (const int8_t*) w + nr;
 
-      vint16m2_t va0b = __riscv_vwmul_vx_i16m2(vb, va0, vl);
-      vacc0 = __riscv_vwadd_wv_i32m4(vacc0, va0b, vl);
-      vint16m2_t va1b = __riscv_vwmul_vx_i16m2(vb, va1, vl);
-      vacc1 = __riscv_vwadd_wv_i32m4(vacc1, va1b, vl);
+      vacc0 = __riscv_vmacc_vx_i32m4(vacc0, va0, vb0, vl);
+      vacc1 = __riscv_vmacc_vx_i32m4(vacc1, va1, vb0, vl);
 
       k -= sizeof(int8_t);
     } while (k != 0);
+
     // i32 -> f32
     vfloat32m4_t vout0 = __riscv_vfcvt_f_x_v_f32m4(vacc0, vl);
     vfloat32m4_t vout1 = __riscv_vfcvt_f_x_v_f32m4(vacc1, vl);
@@ -105,5 +111,6 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x4v__rvv(
 
     a0 = (const int8_t*) ((uintptr_t) a0 - kc);
     a1 = (const int8_t*) ((uintptr_t) a1 - kc);
+
   } while (nc != 0);
 }

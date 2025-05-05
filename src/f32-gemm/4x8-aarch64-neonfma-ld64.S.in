@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert DATATYPE in ["F32", "QC4", "QC8"]
-#include "xnnpack/assembly.h"
+#include "src/xnnpack/assembly.h"
 
 $DATATYPE_SPEC = {"F32": "f32", "QC4": "f32_qc4w", "QC8": "f32_qc8w"}[DATATYPE]
 # void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_4x8__asm_aarch64_neonfma_ld64(

@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-gemm/neon-ld64.c.in
 //   Generator: tools/xngen
@@ -12,7 +13,7 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/gemm.h"
+#include "src/xnnpack/gemm.h"
 
 
 void xnn_f32_qc4w_gemm_minmax_ukernel_1x8__neon_dup_ld64(
@@ -86,11 +87,11 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_1x8__neon_dup_ld64(
     vacc0x0 = vmulq_f32(vacc0x0, vscale0123);
     const float32x4_t vscale4567 = vld1q_f32(w); w = (const float*) w + 4;
     vacc0x1 = vmulq_f32(vacc0x1, vscale4567);
-    const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+    const float32x4_t vmax = vdupq_n_f32(params->scalar.max);
     vacc0x0 = vminq_f32(vacc0x0, vmax);
     vacc0x1 = vminq_f32(vacc0x1, vmax);
 
-    const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
+    const float32x4_t vmin = vdupq_n_f32(params->scalar.min);
     vacc0x0 = vmaxq_f32(vacc0x0, vmin);
     vacc0x1 = vmaxq_f32(vacc0x1, vmin);
 

@@ -3,21 +3,20 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#ifndef __XNNPACK_BENCH_GEMM_BENCHMARK_H__
-#define __XNNPACK_BENCH_GEMM_BENCHMARK_H__
+#ifndef THIRD_PARTY_XNNPACK_BENCH_GEMM_BENCHMARK_H_
+#define THIRD_PARTY_XNNPACK_BENCH_GEMM_BENCHMARK_H_
 
 #include <cstddef>
 
-#include "xnnpack/common.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/pack.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/pack.h"
 
 #if XNN_ENABLE_KLEIDIAI
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxp_qs4cxs1s0.h"
 #endif  // XNN_ENABLE_KLEIDIAI
 
-#include "gemm.h"
-#include "utils.h"
+#include "bench/gemm.h"  // IWYU pragma: export
+#include "bench/utils.h"
 #include <benchmark/benchmark.h>
 
 void GEMMBenchmark(benchmark::State& state, xnn_qs8_gemm_minmax_ukernel_fn gemm,
@@ -76,8 +75,7 @@ void GEMMBenchmark(benchmark::State& state,
                    xnn_init_f32_minmax_params_fn init_minmax_params,
                    xnn_pack_weights_and_biases_fn pack_weights,
                    xnn_packed_stride_weights_and_biases_fn packed_stride,
-                   size_t mr,
-                   size_t nr, size_t kr, size_t sr, size_t mr_packed,
+                   size_t mr, size_t nr, size_t kr, size_t sr, size_t mr_packed,
                    benchmark::utils::IsaCheckFunction isa_check);
 
 void GEMMBenchmark(benchmark::State& state,
@@ -85,8 +83,7 @@ void GEMMBenchmark(benchmark::State& state,
                    xnn_init_f32_qb4w_minmax_params_fn init_params,
                    xnn_pack_weights_and_biases_fn pack_weights,
                    xnn_packed_stride_weights_and_biases_fn packed_stride,
-                   size_t mr,
-                   size_t nr, size_t kr, size_t sr, size_t mr_packed,
+                   size_t mr, size_t nr, size_t kr, size_t sr, size_t mr_packed,
                    benchmark::utils::IsaCheckFunction isa_check);
 
 void GEMMBenchmark(benchmark::State& state, xnn_qu8_gemm_minmax_ukernel_fn gemm,
@@ -112,4 +109,14 @@ void GEMMBenchmark(benchmark::State& state, xnn_f16_gemm_minmax_ukernel_fn gemm,
                    size_t sr,
                    benchmark::utils::IsaCheckFunction isa_check = nullptr);
 
-#endif  // __XNNPACK_BENCH_GEMM_BENCHMARK_H__
+#if XNN_ENABLE_KLEIDIAI
+void GEMMBenchmark(benchmark::State& state,
+                   xnn_pf32_gemm_minmax_ukernel_fn gemm,
+                   xnn_init_f32_minmax_params_fn init_minmax_params,
+                   xnn_pack_weights_and_biases_fn pack_weights,
+                   xnn_packed_stride_weights_and_biases_fn packed_stride,
+                   size_t mr, size_t nr, size_t kr, size_t sr, size_t mr_packed,
+                   benchmark::utils::IsaCheckFunction isa_check);
+#endif  // XNN_ENABLE_KLEIDIAI
+
+#endif  // THIRD_PARTY_XNNPACK_BENCH_GEMM_BENCHMARK_H_

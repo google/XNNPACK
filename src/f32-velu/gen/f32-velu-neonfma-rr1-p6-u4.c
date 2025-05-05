@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-velu/neon-p6.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/vunary.h"
-#include "xnnpack/common.h"
+#include "src/xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
 
 
 void xnn_f32_velu_ukernel__neonfma_rr1_p6_u4(
@@ -49,9 +50,9 @@ void xnn_f32_velu_ukernel__neonfma_rr1_p6_u4(
   const float32x4_t vminus_ln2 = vmovq_n_f32(-0x1.62E430p-1f);
   XNN_FORCE_REALIZATION(vminus_ln2);
 
-  const float32x4_t vprescale = vld1q_dup_f32(&params->scalar.prescale);
-  const float32x4_t valpha = vld1q_dup_f32(&params->scalar.alpha);
-  const float32x4_t vbeta = vld1q_dup_f32(&params->scalar.beta);
+  const float32x4_t vprescale = vdupq_n_f32(params->scalar.prescale);
+  const float32x4_t valpha = vdupq_n_f32(params->scalar.alpha);
+  const float32x4_t vbeta = vdupq_n_f32(params->scalar.beta);
 
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     float32x4_t vx = vld1q_f32(input); input += 4;

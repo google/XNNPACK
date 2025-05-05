@@ -1,0 +1,182 @@
+// Copyright 2020 Google LLC
+// Copyright 2025 Andes Technology
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert ROW_TILE >= 1
+$assert ACCUMULATORS >= 1
+$assert COL_TILE in ["m1", "m2", "m4", "m8"]
+$LMUL = int(COL_TILE[1])
+#include <assert.h>
+#include <riscv_vector.h>
+
+#include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/math.h"
+
+
+void xnn_f32_dwconv2d_chw_ukernel_3x3p1__rvv_${ROW_TILE}x${LMUL}v${"_acc%d" % ACCUMULATORS if ACCUMULATORS > 1 else ""}(
+    size_t input_height,
+    size_t input_width,
+    const float* input,
+    const float* weights,
+    const float* zero,
+    float* output,
+    uint32_t padding_top,
+    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(input_height != 0);
+  assert(input_width != 0);
+  assert(input_width % sizeof(float) == 0);
+  assert(padding_top == 1);
+
+  size_t vlmax = __riscv_vsetvlmax_e32m${LMUL}();
+
+  const float vmin = params->scalar.min;
+  const float vmax = params->scalar.max;
+
+  const float vbias = weights[0];
+  const float vk00 = weights[1];
+  const float vk01 = weights[2];
+  const float vk02 = weights[3];
+  const float vk10 = weights[4];
+  const float vk11 = weights[5];
+  const float vk12 = weights[6];
+  const float vk20 = weights[7];
+  const float vk21 = weights[8];
+  const float vk22 = weights[9];
+
+  const float* i0 = zero;
+  const float* i1 = input;
+  $for M in range(2, 2 + ROW_TILE):
+    const float* i${M} = (const float*) ((uintptr_t) i${M-1} + input_width);
+
+  float* o0 = output;
+  $for M in range(1, ROW_TILE):
+    float* o${M} = (float*) ((uintptr_t) o${M-1} + input_width);
+
+  size_t output_height = input_height;
+  do {
+    $for M in range(2, 2 + ROW_TILE):
+      if XNN_UNPREDICTABLE(output_height < ${M}) {
+        i${M} = zero;
+        $if M <= ROW_TILE:
+          o${M-1} = o${M-2};
+      }
+
+    size_t w = input_width >> XNN_LOG2_SIZEOF_FLOAT;
+    size_t vl =  __riscv_vsetvl_e32m${LMUL}(w);
+    $for M in range(2 + ROW_TILE):
+      vfloat32m${LMUL}_t vi${M}x1 =  __riscv_vle32_v_f32m${LMUL}(i${M}, vl);
+      vfloat32m${LMUL}_t vi${M}x0 =  __riscv_vfslide1up_vf_f32m${LMUL}(vi${M}x1, 0.0f, vl);
+      i${M} += vl;
+
+    while (w > vlmax) {
+      $for M in range(2 + ROW_TILE):
+        vfloat32m${LMUL}_t vi${M}x2 = __riscv_vfslide1down_vf_f32m${LMUL}(vi${M}x1, *i${M}, vl);
+
+      $for A in range(ACCUMULATORS):
+        $for M in range(ROW_TILE):
+          $if A == 0:
+            vfloat32m${LMUL}_t vo${M}p0 = __riscv_vfmv_v_f_f32m${LMUL}(vbias, vl);
+          $else:
+            vfloat32m${LMUL}_t vo${M}p${A} = __riscv_vfmv_v_f_f32m${LMUL}(0, vl);
+
+      $for K in range(3):
+        $for M in range(ROW_TILE):
+          vo${M}p${K % ACCUMULATORS} = __riscv_vfmacc_vf_f32m${LMUL}(vo${M}p${K % ACCUMULATORS}, vk${K}0, vi${M+K}x0, vl);
+
+      $for K in range(3):
+        $for M in range(ROW_TILE):
+          vo${M}p${(K+3) % ACCUMULATORS} = __riscv_vfmacc_vf_f32m${LMUL}(vo${M}p${(K+3) % ACCUMULATORS}, vk${K}1, vi${M+K}x1, vl);
+
+      $for K in range(3):
+        $for M in range(ROW_TILE):
+          vo${M}p${(K+6) % ACCUMULATORS} = __riscv_vfmacc_vf_f32m${LMUL}(vo${M}p${(K+6) % ACCUMULATORS}, vk${K}2, vi${M+K}x2, vl);
+
+      $if ACCUMULATORS > 1:
+        $ACC_SLICE = 1
+        $while ACC_SLICE < ACCUMULATORS:
+          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+            $if A + ACC_SLICE < ACCUMULATORS:
+              $for M in range(ROW_TILE):
+                vo${M}p${A} = __riscv_vfadd_vv_f32m${LMUL}(vo${M}p${A}, vo${M}p${A + ACC_SLICE}, vl);
+          $ACC_SLICE *= 2
+
+      $for M in range(ROW_TILE):
+        vo${M}p0 = __riscv_vfmax_vf_f32m${LMUL}(vo${M}p0, vmin, vl);
+
+      $for M in range(ROW_TILE):
+        vo${M}p0 = __riscv_vfmin_vf_f32m${LMUL}(vo${M}p0, vmax, vl);
+
+      $for M in reversed(range(ROW_TILE)):
+        __riscv_vse32_v_f32m${LMUL}(o${M}, vo${M}p0, vl);
+        o${M} += vl;
+
+      w -= vl;
+      vl = __riscv_vsetvl_e32m${LMUL}(w);
+      $for M in range(2 + ROW_TILE):
+        vi${M}x1 =  __riscv_vle32_v_f32m${LMUL}(i${M}, vl);
+        vi${M}x0 =  __riscv_vfslide1up_vf_f32m${LMUL}(vi${M}x1, *(i${M}-1), vl);
+        i${M} += vl;
+    }
+    // Always process the last tile separately to account for right edge.
+    assert(w <= vlmax);
+    {
+      $for M in range(2 + ROW_TILE):
+        vfloat32m${LMUL}_t vi${M}x2 = __riscv_vfslide1down_vf_f32m${LMUL}(vi${M}x1, 0.0f, vl);
+
+      $for A in range(ACCUMULATORS):
+        $for M in range(ROW_TILE):
+          $if A == 0:
+            vfloat32m${LMUL}_t vo${M}p0 = __riscv_vfmv_v_f_f32m${LMUL}(vbias, vl);
+          $else:
+            vfloat32m${LMUL}_t vo${M}p${A} = __riscv_vfmv_v_f_f32m${LMUL}(0, vl);
+
+      $for K in range(3):
+        $for M in range(ROW_TILE):
+          vo${M}p${K % ACCUMULATORS} = __riscv_vfmacc_vf_f32m${LMUL}(vo${M}p${K % ACCUMULATORS}, vk${K}0, vi${M+K}x0, vl);
+
+      $for K in range(3):
+        $for M in range(ROW_TILE):
+          vo${M}p${(K+3) % ACCUMULATORS} = __riscv_vfmacc_vf_f32m${LMUL}(vo${M}p${(K+3) % ACCUMULATORS}, vk${K}1, vi${M+K}x1, vl);
+
+      $for K in range(3):
+        $for M in range(ROW_TILE):
+          vo${M}p${(K+6) % ACCUMULATORS} = __riscv_vfmacc_vf_f32m${LMUL}(vo${M}p${(K+6) % ACCUMULATORS}, vk${K}2, vi${M+K}x2, vl);
+
+      $if ACCUMULATORS > 1:
+        $ACC_SLICE = 1
+        $while ACC_SLICE < ACCUMULATORS:
+          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+            $if A + ACC_SLICE < ACCUMULATORS:
+              $for M in range(ROW_TILE):
+                vo${M}p${A} = __riscv_vfadd_vv_f32m${LMUL}(vo${M}p${A}, vo${M}p${A + ACC_SLICE}, vl);
+          $ACC_SLICE *= 2
+
+      $for M in range(ROW_TILE):
+        vo${M}p0 = __riscv_vfmax_vf_f32m${LMUL}(vo${M}p0, vmin, vl);
+
+      $for M in range(ROW_TILE):
+        vo${M}p0 = __riscv_vfmin_vf_f32m${LMUL}(vo${M}p0, vmax, vl);
+
+      $for M in reversed(range(ROW_TILE)):
+        __riscv_vse32_v_f32m${LMUL}(o${M}, vo${M}p0, vl);
+        o${M} += vl;
+    }
+
+    i0 = (const float*) ((uintptr_t) i${ROW_TILE} - input_width);
+    $if ROW_TILE > 1:
+      i1 = (const float*) ((uintptr_t) i${ROW_TILE+1} - input_width);
+      $for M in range(2, 2 + ROW_TILE):
+        i${M} = (const float*) ((uintptr_t) i${M-1} + input_width);
+
+    $if ROW_TILE > 1:
+      o0 = o${ROW_TILE - 1};
+      $for M in range(1, ROW_TILE):
+        o${M} = (float*) ((uintptr_t) o${M-1} + input_width);
+
+    $if ROW_TILE > 1:
+      output_height = doz(output_height, ${ROW_TILE});
+  } while (${"--" if ROW_TILE == 1 else ""}output_height != 0);
+}

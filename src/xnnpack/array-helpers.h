@@ -43,8 +43,7 @@ class ArrayPrefix {
     assert(size_ <= max_size);
   }
 
-  template <typename Array,
-            typename = decltype(std::declval<Array>().begin())>
+  template <typename Array, typename = decltype(std::declval<Array>().begin())>
   explicit constexpr ArrayPrefix(Array&& array, T placeholder)
       : ArrayPrefix(0, placeholder) {
     for (const auto& v : array) {

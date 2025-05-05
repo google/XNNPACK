@@ -31,3 +31,7 @@
 - name: xnn_qs8_rsum_ukernel__wasmsimd_u16_acc2
 - name: xnn_qs8_rsum_ukernel__wasmsimd_u32_acc2
 - name: xnn_qs8_rsum_ukernel__wasmsimd_u32_acc4
+
+# RISC-V Vector
+- name: xnn_qu8_rsum_ukernel__rvv_u1v
+- name: xnn_qu8_rsum_ukernel__rvv_u2v

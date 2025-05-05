@@ -9,9 +9,9 @@ $EMIT_MIN = "MIN" in OP
 $EMIT_MAX = "MAX" in OP
 #include <assert.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/math.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/reduce.h"
 
 
 $ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
@@ -33,15 +33,18 @@ void xnn_f16_r${OP.lower()}_ukernel__scalar_u${BATCH_TILE}${ACC_SUFFIX}(
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
 
-  int16_t vt = math_signcomplement_f16(*i);
-  $for A in range(ACCUMULATORS):
+  $if EMIT_MIN:
+    int16_t vmin0 = math_signcomplement_f16(o[0]);
+  $if EMIT_MAX:
+    int16_t vmax0 = math_signcomplement_f16(o[${MAX_POS}]);
+  $for A in range(1, ACCUMULATORS):
     $if EMIT_MIN:
-      int16_t vmin${A} = vt;
+      int16_t vmin${A} = vmin0;
     $if EMIT_MAX:
-      int16_t vmax${A} = vt;
+      int16_t vmax${A} = vmax0;
   $if BATCH_TILE == 1:
     do {
-      vt = math_signcomplement_f16(*i++);
+      int16_t vt = math_signcomplement_f16(*i++);
       $if EMIT_MIN:
         vmin0 = ${MIN}(vmin0, vt);
       $if EMIT_MAX:
@@ -73,14 +76,14 @@ void xnn_f16_r${OP.lower()}_ukernel__scalar_u${BATCH_TILE}${ACC_SUFFIX}(
 
     if XNN_UNLIKELY(batch != 0) {
       $if BATCH_TILE == 2:
-        vt = math_signcomplement_f16(*i);
+        int16_t vt = math_signcomplement_f16(*i);
         $if EMIT_MIN:
           vmin0 = ${MIN}(vmin0, vt);
         $if EMIT_MAX:
           vmax0 = ${MAX}(vmax0, vt);
       $else:
         do {
-          vt = math_signcomplement_f16(*i++);
+          int16_t vt = math_signcomplement_f16(*i++);
           $if EMIT_MIN:
             vmin0 = ${MIN}(vmin0, vt);
           $if EMIT_MAX:

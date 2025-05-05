@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/f32-vbinary/vop-hvx.c.in
 //   Generator: tools/xngen
@@ -5,10 +6,10 @@
 
 #include <assert.h>
 
-#include "xnnpack/simd/f32-hvx.h"
+#include "src/xnnpack/simd/f32-hvx.h"
 
-#include "xnnpack/math.h"
-#include "xnnpack/vbinary.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vbinary.h"
 
 void xnn_f32_vsub_ukernel__hvx_u128(
     size_t batch,
@@ -24,11 +25,11 @@ void xnn_f32_vsub_ukernel__hvx_u128(
   assert(output != NULL);
 
   for (; batch >= 128 * sizeof(float); batch -= 128 * sizeof(float)) {
-    HVX_Vector va0 = xnn_loadu_f32(input_a);
+    HVX_Vector va0 = xnn_loadu_f32(input_a + 0);
     HVX_Vector va1 = xnn_loadu_f32(input_a + 32);
     HVX_Vector va2 = xnn_loadu_f32(input_a + 64);
     HVX_Vector va3 = xnn_loadu_f32(input_a + 96);
-    HVX_Vector vb0 = xnn_loadu_f32(input_b);
+    HVX_Vector vb0 = xnn_loadu_f32(input_b + 0);
     HVX_Vector vb1 = xnn_loadu_f32(input_b + 32);
     HVX_Vector vb2 = xnn_loadu_f32(input_b + 64);
     HVX_Vector vb3 = xnn_loadu_f32(input_b + 96);
@@ -41,7 +42,7 @@ void xnn_f32_vsub_ukernel__hvx_u128(
     HVX_Vector vacc3 = xnn_sub_f32(va3, vb3);
 
 
-    xnn_storeu_f32(output, vacc0);
+    xnn_storeu_f32(output + 0, vacc0);
     xnn_storeu_f32(output + 32, vacc1);
     xnn_storeu_f32(output + 64, vacc2);
     xnn_storeu_f32(output + 96, vacc3);

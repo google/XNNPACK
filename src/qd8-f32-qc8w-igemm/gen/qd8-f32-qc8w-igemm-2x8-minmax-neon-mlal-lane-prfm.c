@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-igemm/neon-mlal-lane.c.in
 //   Generator: tools/xngen
@@ -12,9 +13,9 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/igemm.h"
-#include "xnnpack/prefetch.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/igemm.h"
+#include "src/xnnpack/prefetch.h"
 
 
 void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_2x8__neon_mlal_lane_prfm(
@@ -30,7 +31,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_2x8__neon_mlal_lane_prfm(
     size_t a_offset,
     const int8_t* zero,
     const int8_t* zero_data,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
+    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
     const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
@@ -252,13 +253,13 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_2x8__neon_mlal_lane_prfm(
       vout1x4567 = vmlaq_f32(vbias4567, vout1x4567, vfilter_output_scale4567);
     #endif
 
-    const float32x4_t voutput_min = vld1q_dup_f32(&params->scalar.min);
+    const float32x4_t voutput_min = vdupq_n_f32(params->scalar.min);
     vout0x0123 = vmaxq_f32(vout0x0123, voutput_min);
     vout0x4567 = vmaxq_f32(vout0x4567, voutput_min);
     vout1x0123 = vmaxq_f32(vout1x0123, voutput_min);
     vout1x4567 = vmaxq_f32(vout1x4567, voutput_min);
 
-    const float32x4_t voutput_max = vld1q_dup_f32(&params->scalar.max);
+    const float32x4_t voutput_max = vdupq_n_f32(params->scalar.max);
     vout0x0123 = vminq_f32(vout0x0123, voutput_max);
     vout0x4567 = vminq_f32(vout0x4567, voutput_max);
     vout1x0123 = vminq_f32(vout1x0123, voutput_max);

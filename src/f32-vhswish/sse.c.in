@@ -5,13 +5,12 @@
 
 $assert BATCH_TILE % 4 == 0
 $assert BATCH_TILE >= 4
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
 #include <xmmintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_f32_vhswish_ukernel__sse_u${BATCH_TILE}(
@@ -36,29 +35,27 @@ void xnn_f32_vhswish_ukernel__sse_u${BATCH_TILE}(
   // XNN_FORCE_REALIZATION(vzero);
 
   for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
-    const __m128 vx${ABC[0:4]} = _mm_loadu_ps(input);
-    $for N in range(4, BATCH_TILE, 4):
-      const __m128 vx${ABC[N:N+4]} = _mm_loadu_ps(input + ${N});
+    $for N in range(0, BATCH_TILE, 4):
+      const __m128 vx${N//4} = _mm_loadu_ps(input + ${N});
     input += ${BATCH_TILE};
 
     $for N in range(0, BATCH_TILE, 4):
-      __m128 vacc${ABC[N:N+4]} = _mm_mul_ps(vx${ABC[N:N+4]}, vsixth);
+      __m128 vacc${N//4} = _mm_mul_ps(vx${N//4}, vsixth);
 
     $for N in range(0, BATCH_TILE, 4):
-      vacc${ABC[N:N+4]} = _mm_add_ps(vacc${ABC[N:N+4]}, vhalf);
+      vacc${N//4} = _mm_add_ps(vacc${N//4}, vhalf);
 
     $for N in range(0, BATCH_TILE, 4):
-      vacc${ABC[N:N+4]} = _mm_max_ps(vacc${ABC[N:N+4]}, vzero);
+      vacc${N//4} = _mm_max_ps(vacc${N//4}, vzero);
 
     $for N in range(0, BATCH_TILE, 4):
-      vacc${ABC[N:N+4]} = _mm_min_ps(vacc${ABC[N:N+4]}, vone);
+      vacc${N//4} = _mm_min_ps(vacc${N//4}, vone);
 
     $for N in range(0, BATCH_TILE, 4):
-      vacc${ABC[N:N+4]} = _mm_mul_ps(vacc${ABC[N:N+4]}, vx${ABC[N:N+4]});
+      vacc${N//4} = _mm_mul_ps(vacc${N//4}, vx${N//4});
 
-    _mm_storeu_ps(output, vacc${ABC[0:4]});
-    $for N in range(4, BATCH_TILE, 4):
-      _mm_storeu_ps(output + ${N}, vacc${ABC[N:N+4]});
+    $for N in range(0, BATCH_TILE, 4):
+      _mm_storeu_ps(output + ${N}, vacc${N//4});
     output += ${BATCH_TILE};
   }
   $if BATCH_TILE > 4:

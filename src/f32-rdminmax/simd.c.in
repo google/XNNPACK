@@ -1,0 +1,140 @@
+// Copyright 2025 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert OP in ["MAX", "MIN"]
+#include <assert.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
+
+#include "src/xnnpack/simd/f32-${ARCH}.h"
+
+$EMIT_MIN = "MIN" in OP
+$EMIT_MAX = "MAX" in OP
+$SIMD_SIZE = {"scalar": 1, "sse2": 4, "neon": 4, "wasmsimd": 4, "avx": 8, "avx512f": 16, "hvx": 32}[ARCH]
+
+void xnn_f32_rd${OP.lower()}_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__${ARCH}_c${CHANNELS}(
+    size_t rows,
+    size_t channels,
+    const float* input,
+    size_t input_stride,
+    const float* zero,
+    float* output,
+    const void* params)
+{
+  assert(rows != 0);
+  assert(channels != 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  size_t input_increment = ${ACCUMULATORS} * input_stride;
+  for (; channels >= ${CHANNELS}; channels -= ${CHANNELS}) {
+    const float* i0 = input;
+    $for ACC in range(1, ACCUMULATORS):
+      const float* i${ACC} = (const float*) ((uintptr_t) input + ${ACC} * input_stride);
+
+    $if EMIT_MIN:
+      xnn_simd_f32_t vmin0 = xnn_loadu_f32(output);
+    $if EMIT_MAX:
+      xnn_simd_f32_t vmax0 = xnn_loadu_f32(output);
+    $for C in range(SIMD_SIZE, CHANNELS, SIMD_SIZE):
+      $if EMIT_MIN:
+        xnn_simd_f32_t vmin${C} = xnn_loadu_f32((float*)((uintptr_t) output + ${C} * sizeof(float)));
+      $if EMIT_MAX:
+        xnn_simd_f32_t vmax${C} = xnn_loadu_f32((float*)((uintptr_t) output + ${C} * sizeof(float)));
+
+    for (int r = rows; r > 0; r -= ${ACCUMULATORS}) {
+      $for ACC in range(1, ACCUMULATORS):
+        if XNN_UNPREDICTABLE(r < ${ACC+1}) {
+          i${ACC} = i${ACC - 1};
+        }
+      $for ACC in range(ACCUMULATORS):
+        $for C in range(0, CHANNELS, SIMD_SIZE):
+          xnn_simd_f32_t vin_${ACC}_${C} = xnn_loadu_f32(&i${ACC}[${C}]);
+      $for ACC in range(ACCUMULATORS):
+        $for C in range(0, CHANNELS, SIMD_SIZE):
+          $if EMIT_MIN:
+            vmin${C} = xnn_min_f32(vmin${C}, vin_${ACC}_${C});
+          $if EMIT_MAX:
+            vmax${C} = xnn_max_f32(vmax${C}, vin_${ACC}_${C});
+
+      $for ACC in range(0, ACCUMULATORS):
+        i${ACC} = (float*) ((uintptr_t) i${ACC} + input_increment);
+    }
+
+    $for C in range(0, CHANNELS, SIMD_SIZE):
+      $if EMIT_MIN:
+        xnn_storeu_f32(output, vmin${C});
+      $if EMIT_MAX:
+        xnn_storeu_f32(output, vmax${C});
+      output = (float*) ((uintptr_t) output + xnn_simd_bytes_f32);
+
+    input = (float*) ((uintptr_t) input + ${CHANNELS} * sizeof(float));
+  }
+  if (channels != 0) {
+    input_increment = ${ACCUMULATORS} * input_stride;
+    do {
+      const float* i0 = input;
+      $for ACC in range(1, ACCUMULATORS):
+        const float* i${ACC} = (const float*) ((uintptr_t) input + ${ACC} * input_stride);
+
+      $if EMIT_MIN:
+        xnn_simd_f32_t vmin;
+      $if EMIT_MAX:
+        xnn_simd_f32_t vmax;
+
+      if (channels >= xnn_simd_size_f32) {
+        $if EMIT_MIN:
+          vmin = xnn_loadu_f32(output);
+        $if EMIT_MAX:
+          vmax = xnn_loadu_f32(output);
+      } else {
+        $if EMIT_MIN:
+          vmin = xnn_load_tail_safe_f32(output, channels);
+        $if EMIT_MAX:
+          vmax = xnn_load_tail_safe_f32(output, channels);
+      }
+
+      for (int r = rows; r > 0; r -= ${ACCUMULATORS}) {
+        $for ACC in range(1, ACCUMULATORS):
+          if XNN_UNPREDICTABLE(r < ${ACC+1}) {
+            i${ACC} = i${ACC - 1};
+          }
+        $for ACC in range(ACCUMULATORS):
+          xnn_simd_f32_t vin${ACC};
+        $for ACC in range(ACCUMULATORS):
+          if (channels >= xnn_simd_size_f32) {
+            vin${ACC} = xnn_loadu_f32(&i${ACC}[0]);
+          } else {
+            vin${ACC} = xnn_load_tail_safe_f32(&i${ACC}[0], channels);
+          }
+        $for ACC in range(ACCUMULATORS):
+          $if EMIT_MIN:
+            vmin = xnn_min_f32(vmin, vin${ACC});
+          $if EMIT_MAX:
+            vmax = xnn_max_f32(vmax, vin${ACC});
+        $for ACC in range(ACCUMULATORS):
+          i${ACC} = (float*) ((uintptr_t) i${ACC} + input_increment);
+      }
+
+      if (channels >= xnn_simd_size_f32) {
+        $if EMIT_MIN:
+          xnn_storeu_f32(output, vmin);
+        $if EMIT_MAX:
+          xnn_storeu_f32(output, vmax);
+        output = (float*) ((uintptr_t) output + xnn_simd_bytes_f32);
+        input = (float*) ((uintptr_t) input + xnn_simd_bytes_f32);
+        channels -= xnn_simd_size_f32;
+      } else {
+        $if EMIT_MIN:
+          xnn_store_tail_f32(output, vmin, channels);
+        $if EMIT_MAX:
+          xnn_store_tail_f32(output, vmax, channels);
+
+        channels = 0;
+      }
+    } while (channels != 0);
+  }
+}

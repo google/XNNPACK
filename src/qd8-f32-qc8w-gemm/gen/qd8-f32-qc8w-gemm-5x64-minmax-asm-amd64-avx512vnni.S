@@ -1,10 +1,17 @@
-#include "xnnpack/assembly.h"
+// Copyright 2025 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include "src/xnnpack/assembly.h"
 
 BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_5x64c4__asm_amd64_avx512vnni
 
       .intel_syntax noprefix
-
       # Free up GP registers.
+      # Save register arguments for tail call to msan annotation helper.
+      push rdi
+      push rsi
       push rbx
       push rbp
       push r15
@@ -12,32 +19,41 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_5x64c4__asm_amd64_avx512vnni
       push r13
       push r12
 
-      # Swap rsi & rcx because sal can only use cl.
-      mov r15, rsi
-      mov rsi, rcx
-      mov rcx, r15
-
       # load params to free up a GP registers
-      mov r13, [rsp + 80] # params
+      mov r13, [rsp + 96] # params
       vbroadcastss zmm0, DWORD PTR [r13]
       vbroadcastss zmm1, DWORD PTR [r13 + 4]
 
       # Load c pointer.
-      mov r10, [rsp + 56]
+      mov r10, [rsp + 72]
       # Load cm_stride.
-      mov r11, [rsp + 64]
+      mov r11, [rsp + 80]
 
       add rdx, 3
       and rdx, -4
-      sub rsp, 784
+
+      # Move stack parameters which have not yet been loaded
+      mov r12, [rsp + 104]
+
+      # Align the stack pointer.
+      mov r13, rsp
+      sub rsp, 64
+      and rsp, 0xFFFFFFFFFFFFFFC0
+      # Store the old stack pointer containing the return address
+      mov [rsp], r13
+      # Push additional stack parameters to the new stack
+      mov [rsp + 8], r12
+
+      # Allocate some space on the stack.
+      sub rsp, 448
 
       # Clamp a & c pointers if mr <= 1
-      mov rax, rsi
+      mov rax, rcx
       add rax, r8
       mov r13, r10
       add r13, r11
       cmp rdi, 1
-      cmovle rax, rsi
+      cmovle rax, rcx
       cmovle r13, r10
 
       # Clamp a & c pointers if mr <= 2
@@ -66,26 +82,25 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_5x64c4__asm_amd64_avx512vnni
       cmp rdi, 4
       cmovle r12, r14
       cmovle r8, rbp
-
-      # Load quantization params pointer from stack
-      mov r11, [rsp + 872]
+      # Load quantization_params pointer from stack
+      mov r11, [rsp + 456]
       mov edi, [r11 + 0]
       vpbroadcastd zmm6, edi
-      vmovups zmmword ptr [rsp + 464], zmm6
+      vmovaps zmmword ptr [rsp + 128], zmm6
       mov edi, [r11 + 8]
       vpbroadcastd zmm6, edi
-      vmovups zmmword ptr [rsp + 528], zmm6
+      vmovaps zmmword ptr [rsp + 192], zmm6
       mov edi, [r11 + 16]
       vpbroadcastd zmm6, edi
-      vmovups zmmword ptr [rsp + 592], zmm6
+      vmovaps zmmword ptr [rsp + 256], zmm6
       mov edi, [r11 + 24]
       vpbroadcastd zmm6, edi
-      vmovups zmmword ptr [rsp + 656], zmm6
+      vmovaps zmmword ptr [rsp + 320], zmm6
       mov edi, [r11 + 32]
       vpbroadcastd zmm6, edi
-      vmovups zmmword ptr [rsp + 720], zmm6
+      vmovaps zmmword ptr [rsp + 384], zmm6
 
-outer_loop:
+.Louter_loop:
       # Initialize k counter.
       mov r11, 0
       # Initialize accumulators with k_sum * input zero point.
@@ -93,35 +108,35 @@ outer_loop:
       vmovaps  zmm7, [r9 + 64]
       vmovaps  zmm8, [r9 + 128]
       vmovaps  zmm9, [r9 + 192]
-      vpmulld zmm5, zmm6, ZMMWORD PTR [rsp + 464]
-      vpmulld zmm12, zmm6, ZMMWORD PTR [rsp + 528]
-      vpmulld zmm14, zmm6, ZMMWORD PTR [rsp + 592]
-      vpmulld zmm15, zmm6, ZMMWORD PTR [rsp + 656]
-      vpmulld zmm16, zmm6, ZMMWORD PTR [rsp + 720]
-      vpmulld zmm17, zmm7, ZMMWORD PTR [rsp + 464]
-      vpmulld zmm18, zmm7, ZMMWORD PTR [rsp + 528]
-      vpmulld zmm19, zmm7, ZMMWORD PTR [rsp + 592]
-      vpmulld zmm20, zmm7, ZMMWORD PTR [rsp + 656]
-      vpmulld zmm21, zmm7, ZMMWORD PTR [rsp + 720]
-      vpmulld zmm22, zmm8, ZMMWORD PTR [rsp + 464]
-      vpmulld zmm23, zmm8, ZMMWORD PTR [rsp + 528]
-      vpmulld zmm24, zmm8, ZMMWORD PTR [rsp + 592]
-      vpmulld zmm25, zmm8, ZMMWORD PTR [rsp + 656]
-      vpmulld zmm26, zmm8, ZMMWORD PTR [rsp + 720]
-      vpmulld zmm27, zmm9, ZMMWORD PTR [rsp + 464]
-      vpmulld zmm28, zmm9, ZMMWORD PTR [rsp + 528]
-      vpmulld zmm29, zmm9, ZMMWORD PTR [rsp + 592]
-      vpmulld zmm30, zmm9, ZMMWORD PTR [rsp + 656]
-      vpmulld zmm4, zmm9, ZMMWORD PTR [rsp + 720]
+      vpmulld zmm5, zmm6, ZMMWORD PTR [rsp + 128]
+      vpmulld zmm12, zmm6, ZMMWORD PTR [rsp + 192]
+      vpmulld zmm14, zmm6, ZMMWORD PTR [rsp + 256]
+      vpmulld zmm15, zmm6, ZMMWORD PTR [rsp + 320]
+      vpmulld zmm16, zmm6, ZMMWORD PTR [rsp + 384]
+      vpmulld zmm17, zmm7, ZMMWORD PTR [rsp + 128]
+      vpmulld zmm18, zmm7, ZMMWORD PTR [rsp + 192]
+      vpmulld zmm19, zmm7, ZMMWORD PTR [rsp + 256]
+      vpmulld zmm20, zmm7, ZMMWORD PTR [rsp + 320]
+      vpmulld zmm21, zmm7, ZMMWORD PTR [rsp + 384]
+      vpmulld zmm22, zmm8, ZMMWORD PTR [rsp + 128]
+      vpmulld zmm23, zmm8, ZMMWORD PTR [rsp + 192]
+      vpmulld zmm24, zmm8, ZMMWORD PTR [rsp + 256]
+      vpmulld zmm25, zmm8, ZMMWORD PTR [rsp + 320]
+      vpmulld zmm26, zmm8, ZMMWORD PTR [rsp + 384]
+      vpmulld zmm27, zmm9, ZMMWORD PTR [rsp + 128]
+      vpmulld zmm28, zmm9, ZMMWORD PTR [rsp + 192]
+      vpmulld zmm29, zmm9, ZMMWORD PTR [rsp + 256]
+      vpmulld zmm30, zmm9, ZMMWORD PTR [rsp + 320]
+      vpmulld zmm4, zmm9, ZMMWORD PTR [rsp + 384]
       add r9, 256
 
-inner_loop:
+.Linner_loop:
       vmovaps  zmm6, [r9 + 0]
       vmovaps  zmm7, [r9 + 64]
       vmovaps  zmm8, [r9 + 128]
       vmovaps  zmm9, [r9 + 192]
       add r9, 256
-      vpbroadcastd zmm2, [rsi + r11]
+      vpbroadcastd zmm2, [rcx + r11]
       vpdpbusd  zmm5, zmm2, zmm6
       vpdpbusd  zmm17, zmm2, zmm7
       vpdpbusd  zmm22, zmm2, zmm8
@@ -149,8 +164,9 @@ inner_loop:
 
       add r11, 4
       cmp rdx, r11
-      jne inner_loop
-inner_loop_end:
+      jne .Linner_loop
+
+.Linner_loop_end:
 
       # Convert from int32 to float.
       vcvtdq2ps zmm5, zmm5
@@ -174,7 +190,7 @@ inner_loop_end:
       vcvtdq2ps zmm30, zmm30
       vcvtdq2ps zmm4, zmm4
       # Load quantization_params pointer from stack
-      mov r11, [rsp + 872]
+      mov r11, [rsp + 456]
       vmulps zmm5, zmm5, DWORD PTR [r11 + 4]{1to16}
       vmulps zmm12, zmm12, DWORD PTR [r11 + 12]{1to16}
       vmulps zmm14, zmm14, DWORD PTR [r11 + 20]{1to16}
@@ -227,49 +243,49 @@ inner_loop_end:
       vfmadd213ps zmm4, zmm3, zmm9
       # Min/max clamping.
       vminps  zmm5, zmm1, zmm5
-      vminps  zmm12, zmm1, zmm12
-      vminps  zmm14, zmm1, zmm14
-      vminps  zmm15, zmm1, zmm15
       vminps  zmm16, zmm1, zmm16
-      vminps  zmm17, zmm1, zmm17
-      vminps  zmm18, zmm1, zmm18
-      vminps  zmm19, zmm1, zmm19
       vminps  zmm20, zmm1, zmm20
-      vminps  zmm21, zmm1, zmm21
-      vminps  zmm22, zmm1, zmm22
-      vminps  zmm23, zmm1, zmm23
       vminps  zmm24, zmm1, zmm24
-      vminps  zmm25, zmm1, zmm25
-      vminps  zmm26, zmm1, zmm26
-      vminps  zmm27, zmm1, zmm27
       vminps  zmm28, zmm1, zmm28
+      vminps  zmm12, zmm1, zmm12
+      vminps  zmm17, zmm1, zmm17
+      vminps  zmm21, zmm1, zmm21
+      vminps  zmm25, zmm1, zmm25
       vminps  zmm29, zmm1, zmm29
+      vminps  zmm14, zmm1, zmm14
+      vminps  zmm18, zmm1, zmm18
+      vminps  zmm22, zmm1, zmm22
+      vminps  zmm26, zmm1, zmm26
       vminps  zmm30, zmm1, zmm30
+      vminps  zmm15, zmm1, zmm15
+      vminps  zmm19, zmm1, zmm19
+      vminps  zmm23, zmm1, zmm23
+      vminps  zmm27, zmm1, zmm27
       vminps  zmm4, zmm1, zmm4
       vmaxps  zmm5, zmm0, zmm5
-      vmaxps  zmm12, zmm0, zmm12
-      vmaxps  zmm14, zmm0, zmm14
-      vmaxps  zmm15, zmm0, zmm15
       vmaxps  zmm16, zmm0, zmm16
-      vmaxps  zmm17, zmm0, zmm17
-      vmaxps  zmm18, zmm0, zmm18
-      vmaxps  zmm19, zmm0, zmm19
       vmaxps  zmm20, zmm0, zmm20
-      vmaxps  zmm21, zmm0, zmm21
-      vmaxps  zmm22, zmm0, zmm22
-      vmaxps  zmm23, zmm0, zmm23
       vmaxps  zmm24, zmm0, zmm24
-      vmaxps  zmm25, zmm0, zmm25
-      vmaxps  zmm26, zmm0, zmm26
-      vmaxps  zmm27, zmm0, zmm27
       vmaxps  zmm28, zmm0, zmm28
+      vmaxps  zmm12, zmm0, zmm12
+      vmaxps  zmm17, zmm0, zmm17
+      vmaxps  zmm21, zmm0, zmm21
+      vmaxps  zmm25, zmm0, zmm25
       vmaxps  zmm29, zmm0, zmm29
+      vmaxps  zmm14, zmm0, zmm14
+      vmaxps  zmm18, zmm0, zmm18
+      vmaxps  zmm22, zmm0, zmm22
+      vmaxps  zmm26, zmm0, zmm26
       vmaxps  zmm30, zmm0, zmm30
+      vmaxps  zmm15, zmm0, zmm15
+      vmaxps  zmm19, zmm0, zmm19
+      vmaxps  zmm23, zmm0, zmm23
+      vmaxps  zmm27, zmm0, zmm27
       vmaxps  zmm4, zmm0, zmm4
 
       # Check whether full or partial store.
-      cmp rcx, 64
-      jl tail
+      cmp rsi, 64
+      jl .Ltail
 
       vmovups  [r10], zmm5
       vmovups  [r10 + 64], zmm17
@@ -297,13 +313,13 @@ inner_loop_end:
       add rbp, 256
       add r8, 256
 
-      sub rcx, 64
-      jne outer_loop
-      jmp return
+      sub rsi, 64
+      jne .Louter_loop
+      jmp .Lreturn
 
-tail:
+.Ltail:
       mov r11, -1
-      sal r11, cl
+      shlx r11, r11, rsi
       not r11
       kmovw k1, r11d
       shr r11, 16
@@ -334,9 +350,10 @@ tail:
       vmovups  ZMMWORD PTR [r8 + 128]{k3}, zmm26
       vmovups  ZMMWORD PTR [r8 + 192]{k4}, zmm4
 
-return:
-      add rsp, 784
-
+.Lreturn:
+      add rsp, 448
+      mov r13, [rsp]
+      mov rsp, r13
       # Restore the callee saved registers.
       pop r12
       pop r13
@@ -344,5 +361,25 @@ return:
       pop r15
       pop rbp
       pop rbx
+      pop rsi
+      pop rdi
+      #if XNN_HAS_FEATURE(memory_sanitizer)
+      jmp xnn_gemm_ukernel_msan_sizeof_c_4
+      #else
       ret
+      #endif
 END_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_5x64c4__asm_amd64_avx512vnni
+
+      #if XNN_HAS_FEATURE(dataflow_sanitizer)
+BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_5x64c4__asm_amd64_avx512vnni.dfsan
+      .intel_syntax noprefix
+      # We could implement this by calling a function that implements the dfsan instrumentation.
+      # For now, just break, so if someone tries to use this, they'll know where the problem is.
+      int 3
+      ret
+END_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_5x64c4__asm_amd64_avx512vnni.dfsan
+      #endif
+
+      #ifdef __ELF__
+      .section .note.GNU-stack, "", @progbits
+      #endif  // __ELF__

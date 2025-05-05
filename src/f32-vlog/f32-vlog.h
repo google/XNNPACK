@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -67,6 +68,12 @@ XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u12, 
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u16, 16, false, float, struct xnn_f32_default_params, NULL)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vlog_ukernel__hvx_rational_3_3_div_u32, 32, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vlog_ukernel__hvx_rational_3_3_div_u64, 64, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vlog_ukernel__hvx_rational_3_3_div_u96, 96, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vlog_ukernel__hvx_rational_3_3_div_u128, 128, false, float, struct xnn_f32_default_params, NULL)
+#endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 
 #ifdef XNN_DEFINED_UKERNEL_WITH_PARAMS
 #undef XNN_DEFINED_UKERNEL_WITH_PARAMS

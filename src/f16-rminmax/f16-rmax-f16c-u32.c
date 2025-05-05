@@ -7,8 +7,8 @@
 
 #include <immintrin.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
 
 
 void xnn_f16_rmax_ukernel__f16c_u32(
@@ -23,7 +23,8 @@ void xnn_f16_rmax_ukernel__f16c_u32(
   assert(output != 0);
 
   const uint16_t* i = (const uint16_t*) input;
-  __m128i vmax_init = _mm_shufflelo_epi16(_mm_loadl_epi64((const __m128i*) i), _MM_SHUFFLE(0, 0, 0, 0));
+  uint16_t* o = (uint16_t*) output;
+  __m128i vmax_init = _mm_set1_epi16(*o);
   vmax_init = _mm_unpacklo_epi64(vmax_init, vmax_init);
   __m256 vmax0 = _mm256_cvtph_ps(vmax_init);
   __m256 vmax1 = vmax0;

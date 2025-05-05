@@ -5,25 +5,24 @@
 
 #pragma once
 
-#include "spmm.h"
-#include "utils.h"
-
-#include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/spmm.h"
-
 #include <functional>
 #include <random>
 
+#include "bench/spmm.h"
+#include "bench/utils.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/aligned-allocator.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/spmm.h"
+
 static void f32_spmm(benchmark::State& state,
-  xnn_f32_spmm_minmax_ukernel_fn spmm, uint32_t mr, uint32_t nr, float sparsity,
-  xnn_init_f32_minmax_params_fn init_params,
-  benchmark::utils::IsaCheckFunction isa_check = nullptr)
-{
+                     xnn_f32_spmm_minmax_ukernel_fn spmm, uint32_t mr,
+                     uint32_t nr, float sparsity,
+                     xnn_init_f32_minmax_params_fn init_params,
+                     benchmark::utils::IsaCheckFunction isa_check = nullptr) {
   if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
@@ -34,7 +33,8 @@ static void f32_spmm(benchmark::State& state,
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
+  auto f32rng =
+      std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
   // if using blocks, generate the reduced matrix first and then extrude along
   // the block dimension (n), to get the full matrix
@@ -44,18 +44,22 @@ static void f32_spmm(benchmark::State& state,
   std::vector<float> w;
   std::vector<uint32_t> nmap;
   std::vector<int32_t> dmap;
-  const size_t sparse_end = std::min(size_t(float(b.size()) * sparsity), b.size());
+  const size_t sparse_end =
+      std::min(size_t(float(b.size()) * sparsity), b.size());
   const size_t num_nonzeroes = nr * (b.size() - sparse_end);
 
   const size_t w_elements = num_nonzeroes + nc;
   const size_t c_elements = mc * nc;
   const size_t dmap_elements = num_nonzeroes / nr;
   const size_t nmap_elements = nc;
-  const size_t num_buffers = 1 +
-    benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
-      sizeof(float) * (w_elements + c_elements) + sizeof(uint32_t) * (dmap_elements + nmap_elements));
+  const size_t num_buffers =
+      1 + benchmark::utils::DivideRoundUp<size_t>(
+              benchmark::utils::GetMaxCacheSize(),
+              sizeof(float) * (w_elements + c_elements) +
+                  sizeof(uint32_t) * (dmap_elements + nmap_elements));
 
-  // Micro-kernel can access one element beyond w and dmap for software pipelining.
+  // Micro-kernel can access one element beyond w and dmap for software
+  // pipelining.
   w.reserve(num_buffers * w_elements + 1);
   dmap.reserve(num_buffers * dmap_elements + 1);
   nmap.resize(num_buffers * nmap_elements);
@@ -63,7 +67,8 @@ static void f32_spmm(benchmark::State& state,
   std::vector<size_t> a_offsets(num_buffers);
 
   for (size_t buffer_index = 0; buffer_index < num_buffers; buffer_index++) {
-    // Re-generate weights. Note: each re-generation produces the number of non-zeroes.
+    // Re-generate weights. Note: each re-generation produces the number of
+    // non-zeroes.
     std::fill(b.begin(), b.begin() + sparse_end, 0.0f);
     std::generate(b.begin() + sparse_end, b.end(), std::ref(f32rng));
     std::shuffle(b.begin(), b.end(), rng);
@@ -72,8 +77,7 @@ static void f32_spmm(benchmark::State& state,
     uint32_t first_j = 0, last_j = 0;
     bool is_first_nonzero = true;
     for (uint32_t i = 0; i < nc / nr; i++) {
-      for (uint32_t n = 0; n < nr; n++)
-        w.push_back(bias[nr * i + n]);
+      for (uint32_t n = 0; n < nr; n++) w.push_back(bias[nr * i + n]);
       for (uint32_t j = 0; j < kc; j++) {
         if (b[i * kc + j] != 0.0f) {
           for (size_t l = 0; l < nr; l++)
@@ -81,7 +85,8 @@ static void f32_spmm(benchmark::State& state,
           if (is_first_nonzero) {
             first_j = j;
           } else {
-            const ptrdiff_t increment = int32_t(j - last_j) * int32_t(mc) * int32_t(sizeof(float));
+            const ptrdiff_t increment =
+                int32_t(j - last_j) * int32_t(mc) * int32_t(sizeof(float));
             dmap.push_back(increment);
           }
           last_j = j;
@@ -98,7 +103,8 @@ static void f32_spmm(benchmark::State& state,
           if (is_first_nonzero) {
             first_j = j;
           } else {
-            const ptrdiff_t increment = int32_t(j - last_j) * int32_t(mc) * int32_t(sizeof(float));
+            const ptrdiff_t increment =
+                int32_t(j - last_j) * int32_t(mc) * int32_t(sizeof(float));
             dmap.push_back(increment);
           }
           last_j = j;
@@ -108,14 +114,16 @@ static void f32_spmm(benchmark::State& state,
       }
     }
     {
-      const ptrdiff_t increment = int32_t(first_j - last_j) * int32_t(mc) * int32_t(sizeof(float));
+      const ptrdiff_t increment =
+          int32_t(first_j - last_j) * int32_t(mc) * int32_t(sizeof(float));
       dmap.push_back(increment);
     }
 
     a_offsets[buffer_index] = first_j * mc;
   }
 
-  // Micro-kernel can access one element beyond w and dmap for software pipelining.
+  // Micro-kernel can access one element beyond w and dmap for software
+  // pipelining.
   w.resize(w.size() + 1);
   dmap.resize(dmap.size() + 1);
 
@@ -125,11 +133,13 @@ static void f32_spmm(benchmark::State& state,
   std::generate(a.begin(), a.end(), std::ref(f32rng));
 
   xnn_f32_minmax_params params;
-  init_params(&params, -std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
+  init_params(&params, -std::numeric_limits<float>::infinity(),
+              +std::numeric_limits<float>::infinity());
 
   size_t buffer_index = 0;
   for (auto _ : state) {
-    // Use circular buffers (exceeding cache size) and prefetch to control cache state:
+    // Use circular buffers (exceeding cache size) and prefetch to control cache
+    // state:
     // - A is always in L1 cache (if fits, otherwise L2, L3, etc)
     // - W, Kmap, and Nmap is not in cache (for any cache level)
     // - C is not in cache (for any cache level)
@@ -138,13 +148,11 @@ static void f32_spmm(benchmark::State& state,
     buffer_index = (buffer_index + 1) % num_buffers;
     state.ResumeTiming();
 
-    spmm(mc * sizeof(float), nc,
-      a.data() + a_offsets[buffer_index],
-      w.data() + buffer_index * w_elements,
-      dmap.data() + buffer_index * dmap_elements,
-      nmap.data() + buffer_index * nmap_elements,
-      c.data() + buffer_index * c_elements, mc * sizeof(float),
-      &params);
+    spmm(mc * sizeof(float), nc, a.data() + a_offsets[buffer_index],
+         w.data() + buffer_index * w_elements,
+         dmap.data() + buffer_index * dmap_elements,
+         nmap.data() + buffer_index * nmap_elements,
+         c.data() + buffer_index * c_elements, mc * sizeof(float), &params);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
@@ -152,11 +160,11 @@ static void f32_spmm(benchmark::State& state,
     state.counters["cpufreq"] = cpu_frequency;
   }
 
-  state.counters["FLOPS"] = benchmark::Counter(
-    uint64_t(state.iterations()) * 2 * mc * num_nonzeroes, benchmark::Counter::kIsRate);
+  state.counters["FLOPS"] =
+      benchmark::Counter(uint64_t(state.iterations()) * 2 * mc * num_nonzeroes,
+                         benchmark::Counter::kIsRate);
 
-  state.counters["EffFLOPS"] = benchmark::Counter(
-    uint64_t(state.iterations()) * 2 * mc * nc * kc, benchmark::Counter::kIsRate);
+  state.counters["EffFLOPS"] =
+      benchmark::Counter(uint64_t(state.iterations()) * 2 * mc * nc * kc,
+                         benchmark::Counter::kIsRate);
 }
-
-

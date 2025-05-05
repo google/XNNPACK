@@ -1,3 +1,4 @@
+// clang-format off
 // Auto-generated file. Do not edit!
 //   Template: src/qs8-dwconv/unipass-neon-mul16.c.in
 //   Generator: tools/xngen
@@ -11,8 +12,8 @@
 
 #include <arm_neon.h>
 
-#include "xnnpack/dwconv.h"
-#include "xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
 
 
 void xnn_qu8_dwconv_minmax_fp32_ukernel_9p8c__neonv8_mul16(
@@ -24,17 +25,18 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_9p8c__neonv8_mul16(
     intptr_t input_stride,
     size_t output_increment,
     size_t input_offset,
+    size_t input_pixel_stride,
     const uint8_t* zero,
     const union xnn_qu8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(channels != 0);
   assert(output_width != 0);
 
-  const uint8x8_t vkernel_zero_point = vld1_dup_u8(&params->fp32_neonv8.kernel_zero_point);
-  const float32x4_t vscale = vld1q_dup_f32(&params->fp32_neonv8.scale);
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->fp32_neonv8.output_zero_point);
-  const uint8x8_t voutput_min = vld1_dup_u8(&params->fp32_neonv8.output_min);
-  const uint8x8_t voutput_max = vld1_dup_u8(&params->fp32_neonv8.output_max);
+  const uint8x8_t vkernel_zero_point = vdup_n_u8(params->fp32_neonv8.kernel_zero_point);
+  const float32x4_t vscale = vdupq_n_f32(params->fp32_neonv8.scale);
+  const int16x8_t voutput_zero_point = vdupq_n_s16(params->fp32_neonv8.output_zero_point);
+  const uint8x8_t voutput_min = vdup_n_u8(params->fp32_neonv8.output_min);
+  const uint8x8_t voutput_max = vdup_n_u8(params->fp32_neonv8.output_max);
   do {
     const uint8_t* i0 = input[0];
     assert(i0 != NULL);
@@ -258,6 +260,7 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_9p8c__neonv8_mul16(
       }
     }
 
+    input_offset += input_pixel_stride;
     output = (uint8_t*) ((uintptr_t) output + output_increment);
   } while (--output_width != 0);
 }

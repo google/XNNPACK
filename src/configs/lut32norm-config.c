@@ -6,10 +6,10 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "xnnpack/common.h"
-#include "xnnpack/config.h"
-#include "xnnpack/init-once.h"
-#include "xnnpack/lut.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/config.h"
+#include "src/xnnpack/init-once.h"
+#include "src/xnnpack/lut.h"
 
 
 static struct xnn_lut32norm_config u8_lut32norm_config = {0};

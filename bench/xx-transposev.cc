@@ -9,19 +9,16 @@
 #include <numeric>
 #include <vector>
 
-#include "utils.h"
-#include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/transpose.h"
-#include "xnnpack/buffer.h"
+#include "bench/utils.h"
+#include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/transpose.h"
 #include <benchmark/benchmark.h>
 
-void transpose(
-    benchmark::State& state,
-    xnn_transposev_ukernel_fn transpose,
-    benchmark::utils::IsaCheckFunction isa_check = nullptr)
-{
+void transpose(benchmark::State& state, xnn_transposev_ukernel_fn transpose,
+               benchmark::utils::IsaCheckFunction isa_check = nullptr) {
   if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
@@ -32,9 +29,9 @@ void transpose(
   const size_t tile_wbytes = width * 3;
 
   xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> x(
-      height * width * element_size + XNN_EXTRA_BYTES / sizeof(uint8_t));
+      height * width * element_size, xnnpack::XnnExtraBytes);
   xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> y(
-      height * width * element_size + XNN_EXTRA_BYTES / sizeof(uint8_t));
+      height * width * element_size, xnnpack::XnnExtraBytes);
   std::iota(x.begin(), x.end(), 0);
 
   for (auto _ : state) {
@@ -48,18 +45,19 @@ void transpose(
   }
 }
 
-static void BenchmarkKernelSize(benchmark::internal::Benchmark* b)
-{
+static void BenchmarkKernelSize(benchmark::internal::Benchmark* b) {
   b->ArgNames({"height", "width", "element_size"});
-  //b->Args({32, 32, 3});
-  //b->Args({64, 64, 3});
-  //b->Args({117, 117, 3});
-  //b->Args({1024, 1024, 3});
+  // b->Args({32, 32, 3});
+  // b->Args({64, 64, 3});
+  // b->Args({117, 117, 3});
+  // b->Args({1024, 1024, 3});
   b->Args({49153, 8, 128});
 }
 
-BENCHMARK_CAPTURE(transpose, 1x1_scalar_memcpy, xnn_xx_transposev_ukernel__1x1_scalar_memcpy)
-    ->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(transpose, 1x1_scalar_memcpy,
+                  xnn_xx_transposev_ukernel__1x1_scalar_memcpy)
+    ->Apply(BenchmarkKernelSize)
+    ->UseRealTime();
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();
