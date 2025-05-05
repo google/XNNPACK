@@ -16,7 +16,7 @@ void xnn_f32_vmax_ukernel__hvx_u64(
     const float* input_a,
     const float* input_b,
     float* output,
-    const struct xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -52,8 +52,8 @@ void xnn_f32_vmax_ukernel__hvx_u64(
     output += 32;
   }
   if XNN_UNLIKELY(batch != 0) {
-     HVX_Vector va = xnn_loadu_f32(input_a);
-     HVX_Vector vb = xnn_loadu_f32(input_b);
+     HVX_Vector va = xnn_load_tail_f32(input_a, batch >> 2);
+     HVX_Vector vb = xnn_load_tail_f32(input_b, batch >> 2);
 
      HVX_Vector vacc = xnn_max_f32(va, vb);
 
