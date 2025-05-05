@@ -20,15 +20,15 @@ static XNN_INTRINSIC void xnn_packed2planar(
   int8_t* out,
   int32_t vkernel_zero_point)
 {
-  const uint32_t s_v0 = (((uint32_t*)weights)[0] ^ vkernel_zero_point);
-  const int8_t v0 = (((int8_t*)&s_v0))[0] << 4;
-  const int8_t v1 = (((int8_t*)&s_v0))[0] & 0xF0;
-  const int8_t v2 = (((int8_t*)&s_v0))[1] << 4;
-  const int8_t v3 = (((int8_t*)&s_v0))[1] & 0xF0;
-  const int8_t v4 = (((int8_t*)&s_v0))[2] << 4;
-  const int8_t v5 = (((int8_t*)&s_v0))[2] & 0xF0;
-  const int8_t v6 = (((int8_t*)&s_v0))[3] << 4;
-  const int8_t v7 = (((int8_t*)&s_v0))[3] & 0xF0;
+  const uint32_t s_v0 = (((const uint32_t*)weights)[0] ^ vkernel_zero_point);
+  const int8_t v0 = (((const int8_t*)&s_v0))[0] << 4;
+  const int8_t v1 = (((const int8_t*)&s_v0))[0] & 0xF0;
+  const int8_t v2 = (((const int8_t*)&s_v0))[1] << 4;
+  const int8_t v3 = (((const int8_t*)&s_v0))[1] & 0xF0;
+  const int8_t v4 = (((const int8_t*)&s_v0))[2] << 4;
+  const int8_t v5 = (((const int8_t*)&s_v0))[2] & 0xF0;
+  const int8_t v6 = (((const int8_t*)&s_v0))[3] << 4;
+  const int8_t v7 = (((const int8_t*)&s_v0))[3] & 0xF0;
 
   (*ksum) += (int32_t) (v0);
   (*ksum) += (int32_t) (v1);
