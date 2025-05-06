@@ -44,7 +44,6 @@ static enum xnn_status create_fully_connected_nc(
     const void* bias,
     uint32_t flags,
     size_t block_size,
-    const uint16_t* blockwise_kernel_scale_params,
     uint32_t log2_input_element_size,
     uint32_t log2_filter_element_size,
     bool filter_is_nibble,
@@ -53,10 +52,12 @@ static enum xnn_status create_fully_connected_nc(
     xnn_packw_gemm_goi_ukernel_fn pack_gemm_goi_w,
     const void* packing_params,
     size_t extra_weights_bytes,
-    xnn_init_qs8_qc8w_scale_params_fn init_scale_params,
-    const float* scale_params,
-    xnn_init_qs8_qc8w_scale_params_fn init_kernel_scale_params,
-    const float* kernel_scale_params,
+    xnn_init_extra_data_params_fn init_extra_data0,
+    const void* extra_data0,
+    size_t extra_data0_size,
+    xnn_init_extra_data_params_fn init_extra_data1,
+    const void* extra_data1,
+    size_t extra_data1_size,
     const void* params,
     size_t params_size,
     const struct xnn_gemm_config* gemm_config,
@@ -141,20 +142,12 @@ static enum xnn_status create_fully_connected_nc(
     k_stride = round_up_po2(k_stride, 2) >> 1;
   }
 
-  size_t block_scale_bytes = 0;
-  size_t num_blocks = 0;
-  const bool block_wise = (block_size != 0);
-  if (block_wise) {
-    num_blocks = input_channels / block_size;
-    block_scale_bytes += num_blocks * sizeof(uint16_t);
-  }
-
   const size_t weights_stride =
       gemm_config->packed_stride_weights_and_biases
           ? gemm_config->packed_stride_weights_and_biases(
                 gemm_config, input_channels, block_size, k_stride, extra_weights_bytes)
           : (k_stride << log2_filter_element_size) + bias_element_size +
-                extra_weights_bytes + block_scale_bytes;
+                extra_weights_bytes;
   const size_t packed_weights_size = n_stride * weights_stride;
   fully_connected_op->weights_stride = weights_stride;
   size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
@@ -197,14 +190,12 @@ static enum xnn_status create_fully_connected_nc(
           /*kstride=*/k_stride,
           /*accumulator_init=*/bias,
           /*weights=*/kernel,
-          /*int_extra_data0_fn=*/(xnn_init_scale_params_fn)init_scale_params,
-          /*extra_data0=*/scale_params,
-          /*extra_data0_size=*/init_scale_params != NULL ? sizeof(float) : 0,
-          /*init_extra_data1_fn=*/
-          (xnn_init_scale_params_fn)init_kernel_scale_params,
-          /*extra_data1=*/block_wise ? (const void *) blockwise_kernel_scale_params : (const void *) kernel_scale_params,
-          /*extra_data1_size=*/init_kernel_scale_params != NULL ? sizeof(float)
-                                                                : 0,
+          /*int_extra_data0_fn=*/init_extra_data0,
+          /*extra_data0=*/extra_data0,
+          /*extra_data0_size=*/extra_data0_size,
+          /*init_extra_data1_fn=*/init_extra_data1,
+          /*extra_data1=*/extra_data1,
+          /*extra_data1_size=*/extra_data1_size,
           /*packed_weights_ptr=*/weights_ptr, packing_params);
     } else {
       if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
@@ -225,28 +216,28 @@ static enum xnn_status create_fully_connected_nc(
           gemm_config->nr * extra_weights_bytes,
           packing_params);
       }
-      if (kernel_scale_params != NULL) {
-        assert(init_kernel_scale_params != NULL);
+      if (extra_data1 != NULL) {
+        assert(init_extra_data1 != NULL);
 
         void* weights = (void*) ((uintptr_t) weights_ptr +
           gemm_config->nr * ((k_stride << log2_filter_element_size) + bias_element_size));
-        init_kernel_scale_params(
+        init_extra_data1(
             output_channels, gemm_config->nr,
             gemm_config->nr * weights_stride,
-            kernel_scale_params, weights);
+            extra_data1, weights);
       }
 
-      if (scale_params != NULL) {
-        assert(init_scale_params != NULL);
+      if (extra_data0 != NULL) {
+        assert(init_extra_data0 != NULL);
         void* weights = (void*) ((uintptr_t) weights_ptr +
           gemm_config->nr * ((k_stride << log2_filter_element_size) + bias_element_size));
-        if (kernel_scale_params != NULL) {
+        if (extra_data1 != NULL) {
           weights = (void*) ((uintptr_t) weights + gemm_config->nr * sizeof(float));
         }
-        init_scale_params(
+        init_extra_data0(
             output_channels, gemm_config->nr,
             gemm_config->nr * weights_stride,
-            scale_params, weights);
+            extra_data0, weights);
       }
     }
 
@@ -353,7 +344,6 @@ enum xnn_status create_fully_connected_nc_f16(
     input_stride, output_stride,
     kernel, bias, flags,
     /*block_size=*/0,
-    /*blockwise_kernel_scale_params=*/NULL,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_HALF,
     /*filter_is_nibble=*/false,
@@ -362,8 +352,12 @@ enum xnn_status create_fully_connected_nc_f16(
     pack_gemm_goi_w,
     /*packing_params=*/NULL,
     /*extra_weights_bytes=*/0,
-    /*init_scale_params=*/NULL, /*scale_params=*/NULL,
-    /*init_kernel_scale_params=*/NULL, /*kernel_scale_params=*/NULL,
+    /*init_extra_data0=*/NULL, 
+    /*extra_data0=*/NULL,
+    /*extra_data0_size=*/0,
+    /*init_extra_data1=*/NULL, 
+    /*extra_data1=*/NULL,
+    /*extra_data1_size=*/0,
     &params, sizeof(params),
     gemm_config, &gemm_config->minmax,
     expected_operator_type,
@@ -487,7 +481,6 @@ enum xnn_status create_fully_connected_nc_qx8_f16_qc4w(
     input_stride, output_stride,
     kernel, /*bias=*/NULL, flags,
     /*block_size=*/0,
-    /*blockwise_kernel_scale_params=*/NULL,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     /*filter_is_nibble=*/true,
@@ -496,10 +489,12 @@ enum xnn_status create_fully_connected_nc_qx8_f16_qc4w(
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
     &packing_params,
     /*extra_weights_bytes=*/sizeof(float) * 2,
-    /*init_scale_params=*/xnn_init_qs8_qc8w_scale_fp32_params,
-    /*scale_params=*/bias,
-    /*init_kernel_scale_params=*/xnn_init_qs8_qc8w_scale_fp32_params,
-    /*kernel_scale_params=*/kernel_scale,
+    /*init_extra_data0=*/(xnn_init_extra_data_params_fn)xnn_init_qs8_qc8w_scale_fp32_params,
+    /*extra_data0=*/bias,
+    /*extra_data_size=*/sizeof(float),
+    /*init_extra_data1=*/(xnn_init_extra_data_params_fn)xnn_init_qs8_qc8w_scale_fp32_params,
+    /*extra_data1=*/kernel_scale,
+    /*extra_data1_size=*/sizeof(float),
     &params, sizeof(params),
     gemm_config, gemm_ukernels,
     xnn_operator_type_fully_connected_nc_qd8_f16_qc4w,
@@ -659,7 +654,6 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w(
     input_stride, output_stride,
     kernel, bias, flags,
     /*block_size=*/block_size,
-    /*blockwise_kernel_scale_params=*/kernel_scale,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     /*filter_is_nibble=*/true,
@@ -668,8 +662,12 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w(
     /*pack_gemm_goi_w=*/ NULL,
     /*packing_params=*/&packing_params,
     /*extra_weights_bytes=*/sizeof(float),
-    /*init_scale_params=*/NULL, /*scale_params=*/NULL,
-    /*init_kernel_scale_params=*/NULL, /*kernel_scale_params=*/NULL,
+    /*init_extra_data0=*/(xnn_init_extra_data_params_fn)xnn_init_qs8_qc8w_scale_fp32_params, 
+    /*extra_data0=*/bias,
+    /*extra_data0_size=*/sizeof(float),
+    /*init_extra_data1=*/(xnn_init_extra_data_params_fn)xnn_init_blockwise_scale_bf16_params, 
+    /*extra_data1=*/kernel_scale,
+    /*extra_data1_size=*/sizeof(uint16_t),
     &params, sizeof(params),
     gemm_config, &gemm_config->minmax,
     xnn_operator_type_fully_connected_nc_qd8_f16_qb4w,
@@ -749,7 +747,6 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qc4w(
     input_stride, output_stride,
     kernel, /*bias=*/NULL, flags,
     /*block_size=*/0,
-    /*blockwise_kernel_scale_params=*/NULL,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     /*filter_is_nibble=*/true,
@@ -758,10 +755,12 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qc4w(
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
     &packing_params,
     /*extra_weights_bytes=*/sizeof(float) * 2,
-    /*init_scale_params=*/xnn_init_qs8_qc8w_scale_fp32_params,
-    /*scale_params=*/bias,
-    /*init_kernel_scale_params=*/xnn_init_qs8_qc8w_scale_fp32_params,
-    /*kernel_scale_params=*/kernel_scale,
+    /*init_extra_data0=*/(xnn_init_extra_data_params_fn)xnn_init_qs8_qc8w_scale_fp32_params,
+    /*extra_data0=*/bias,
+    /*extra_data_size=*/sizeof(float),
+    /*init_extra_data1=*/(xnn_init_extra_data_params_fn)xnn_init_qs8_qc8w_scale_fp32_params,
+    /*extra_data1=*/kernel_scale,
+    /*extra_data1_size=*/sizeof(float),
     &params, sizeof(params),
     gemm_config, gemm_ukernels,
     expected_operator_type,
@@ -866,7 +865,6 @@ static enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qcxw(
       input_channels, output_channels, input_stride, output_stride, kernel,
       /*bias=*/NULL, flags,
       /*block_size=*/0,
-      /*blockwise_kernel_scale_params=*/NULL,
       /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
       /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
       /*filter_is_nibble=*/filter_is_nibble,
@@ -875,10 +873,13 @@ static enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qcxw(
       (xnn_packw_gemm_goi_ukernel_fn)gemm_config->pack_gemm_goi,
       packing_params,
       /*extra_weights_bytes=*/0,
-      /*init_scale_params=*/NULL,
-      /*scale_params=*/bias,
-      /*init_kernel_scale_params=*/NULL,
-      /*kernel_scale_params=*/kernel_scale, &params, sizeof(params),
+      /*init_extra_data0=*/NULL,
+      /*extra_data0=*/bias,
+      /*extra_data0_size=*/sizeof(float),
+      /*init_extra_data1=*/NULL,
+      /*extra_data1=*/kernel_scale, 
+      /*extra_data1_size=*/sizeof(float), 
+      &params, sizeof(params),
       gemm_config, gemm_ukernels, operator_type,
       /*weights_cache=*/weights_cache, fully_connected_op_out);
 }
@@ -1062,7 +1063,6 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qb4w(
     input_stride, output_stride,
     kernel, bias, flags,
     /*block_size=*/block_size,
-    /*blockwise_kernel_scale_params=*/kernel_scale,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     /*filter_is_nibble=*/true,
@@ -1071,10 +1071,12 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qb4w(
     /*pack_gemm_goi_w=*/ NULL,
     &packing_params,
     /*extra_weights_bytes=*/0,
-    /*init_scale_params=*/NULL,
-    /*scale_params=*/NULL,
-    /*init_kernel_scale_params=*/NULL,
-    /*kernel_scale_params=*/NULL,
+    /*init_extra_data0=*/(xnn_init_extra_data_params_fn)xnn_init_qs8_qc8w_scale_fp32_params, 
+    /*extra_data0=*/bias,
+    /*extra_data0_size=*/sizeof(float),
+    /*init_extra_data1=*/(xnn_init_extra_data_params_fn)xnn_init_blockwise_scale_bf16_params, 
+    /*extra_data1=*/kernel_scale,
+    /*extra_data1_size=*/sizeof(uint16_t),
     &params, sizeof(params),
     gemm_config, gemm_ukernels,
     xnn_operator_type_fully_connected_nc_qp8_f32_qb4w,
@@ -1184,7 +1186,6 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qb4w(
     input_stride, output_stride,
     kernel, bias, flags,
     /*block_size=*/block_size,
-    /*blockwise_kernel_scale_params=*/kernel_scale,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     /*filter_is_nibble=*/true,
@@ -1193,8 +1194,12 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qb4w(
     /*pack_gemm_goi_w=*/ NULL,
     &packing_params,
     /*extra_weights_bytes=*/sizeof(float),
-    /*init_scale_params=*/NULL, /*scale_params=*/NULL,
-    /*init_kernel_scale_params=*/NULL, /*kernel_scale_params=*/NULL,
+    /*init_extra_data0=*/(xnn_init_extra_data_params_fn)xnn_init_qs8_qc8w_scale_fp32_params, 
+    /*extra_data0=*/bias,
+    /*extra_data0_size=*/sizeof(float),
+    /*init_extra_data1=*/(xnn_init_extra_data_params_fn)xnn_init_blockwise_scale_bf16_params, 
+    /*extra_data1=*/kernel_scale,
+    /*extra_data1_size=*/sizeof(uint16_t),
     &params, sizeof(params),
     gemm_config, gemm_ukernels,
     xnn_operator_type_fully_connected_nc_qd8_f32_qb4w,
@@ -1390,7 +1395,6 @@ enum xnn_status create_fully_connected_nc_qdx8_f32_qc8w(
     input_stride, output_stride,
     kernel, NULL, flags,
     /*block_size=*/0,
-    /*blockwise_kernel_scale_params=*/NULL,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*filter_is_nibble=*/false,
@@ -1399,8 +1403,12 @@ enum xnn_status create_fully_connected_nc_qdx8_f32_qc8w(
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
     &packing_params,
     /*extra_weights_bytes=*/sizeof(float) * 2,
-    xnn_init_qs8_qc8w_scale_fp32_params, bias,
-    xnn_init_qs8_qc8w_scale_fp32_params, kernel_scale,
+    /*init_extra_data0=*/(xnn_init_extra_data_params_fn)xnn_init_qs8_qc8w_scale_fp32_params, 
+    /*extra_data0=*/bias,
+    /*extra_data0_size=*/sizeof(float),
+    /*init_extra_data1=*/(xnn_init_extra_data_params_fn)xnn_init_qs8_qc8w_scale_fp32_params, 
+    /*extra_data1=*/kernel_scale,
+    /*extra_data1_size=*/sizeof(float),
     &params, sizeof(params),
     gemm_config, gemm_ukernels,
     expected_operator_type,
@@ -1518,7 +1526,6 @@ enum xnn_status create_fully_connected_nc_qx8_f16_qc8w(
     input_stride, output_stride,
     kernel, NULL, flags,
     /*block_size=*/0,
-    /*blockwise_kernel_scale_params=*/NULL,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*filter_is_nibble=*/false,
@@ -1527,8 +1534,12 @@ enum xnn_status create_fully_connected_nc_qx8_f16_qc8w(
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
     &packing_params,
     /*extra_weights_bytes=*/sizeof(float) * 2,
-    xnn_init_qs8_qc8w_scale_fp32_params, bias,
-    xnn_init_qs8_qc8w_scale_fp32_params, kernel_scale,
+    /*init_extra_data0=*/(xnn_init_extra_data_params_fn)xnn_init_qs8_qc8w_scale_fp32_params, 
+    /*extra_data0=*/bias,
+    /*extra_data0_size=*/sizeof(float),
+    /*init_extra_data1=*/(xnn_init_extra_data_params_fn)xnn_init_qs8_qc8w_scale_fp32_params, 
+    /*extra_data1=*/kernel_scale,
+    /*extra_data1_size=*/sizeof(float),
     &params, sizeof(params),
     gemm_config, gemm_ukernels,
     xnn_operator_type_fully_connected_nc_qd8_f16_qc8w,
@@ -1672,7 +1683,6 @@ enum xnn_status create_fully_connected_nc_f32(
     input_stride, output_stride,
     kernel, bias, flags,
     /*block_size=*/0,
-    /*blockwise_kernel_scale_params=*/NULL,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*filter_is_nibble=*/false,
@@ -1681,8 +1691,12 @@ enum xnn_status create_fully_connected_nc_f32(
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
     /*packing_params=*/NULL,
     /*extra_weights_bytes=*/0,
-    /*init_scale_params=*/NULL, /*scale_params=*/NULL,
-    /*init_kernel_scale_params=*/NULL, /*kernel_scale_params=*/NULL,
+    /*init_extra_data0=*/NULL, 
+    /*extra_data0=*/NULL,
+    /*extra_data0_size=*/0,
+    /*init_extra_data1=*/NULL, 
+    /*extra_data1=*/NULL,
+    /*extra_data1_size=*/0,
     &params, sizeof(params),
     gemm_config, gemm_ukernels,
     expected_operator_type,
@@ -1865,7 +1879,6 @@ enum xnn_status xnn_create_fully_connected_nc_f32_qc4w(
     input_stride, output_stride,
     kernel, bias, flags,
     /*block_size=*/0,
-    /*blockwise_kernel_scale_params=*/NULL,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     // Pass 1 byte even though it is half byte, we handle the division via filter_is_nibble == true.
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
@@ -1875,10 +1888,12 @@ enum xnn_status xnn_create_fully_connected_nc_f32_qc4w(
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
     /*packing_params=*/NULL,
     /*extra_weights_bytes=*/sizeof(float),
-    /*init_scale_params=*/xnn_init_qs8_qc8w_scale_fp32_params,
-    /*scale_params=*/kernel_scale,
-    /*init_kernel_scale_params=*/ NULL,
-    /*kernel_scale_params=*/ NULL,
+    /*init_extra_data0=*/(xnn_init_extra_data_params_fn)xnn_init_qs8_qc8w_scale_fp32_params,
+    /*extra_data0=*/kernel_scale,
+    /*extra_data0_size=*/sizeof(float),
+    /*init_extra_data1=*/ NULL,
+    /*extra_data1=*/ NULL,
+    /*extra_data1_size=*/0,
     &params, sizeof(params),
     gemm_config, gemm_ukernels,
     xnn_operator_type_fully_connected_nc_f32_qc4w,
@@ -1955,7 +1970,6 @@ enum xnn_status xnn_create_fully_connected_nc_f32_qc8w(
     input_stride, output_stride,
     kernel, bias, flags,
     /*block_size=*/0,
-    /*blockwise_kernel_scale_params=*/NULL,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*filter_is_nibble=*/false,
@@ -1964,9 +1978,12 @@ enum xnn_status xnn_create_fully_connected_nc_f32_qc8w(
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
     /*packing_params=*/NULL,
     /*extra_weights_bytes=*/sizeof(float),
-    /*init_scale_params=*/xnn_init_qs8_qc8w_scale_fp32_params,
-    /*scale_params=*/kernel_scale,
-    /*init_kernel_scale_params=*/NULL, /*kernel_scale_params=*/NULL,
+    /*init_extra_data0=*/(xnn_init_extra_data_params_fn)xnn_init_qs8_qc8w_scale_fp32_params,
+    /*extra_data0=*/kernel_scale,
+    /*extra_data0_size=*/sizeof(float),
+    /*init_extra_data1=*/ NULL,
+    /*extra_data1=*/ NULL,
+    /*extra_data1_size=*/0,
     &params, sizeof(params),
     gemm_config, gemm_ukernels,
     xnn_operator_type_fully_connected_nc_f32_qc8w,
@@ -2052,7 +2069,6 @@ enum xnn_status xnn_create_fully_connected_nc_qs8(
     input_stride, output_stride,
     kernel, bias, flags,
     /*block_size=*/0,
-    /*blockwise_kernel_scale_params=*/NULL,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*filter_is_nibble=*/false,
@@ -2061,9 +2077,12 @@ enum xnn_status xnn_create_fully_connected_nc_qs8(
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
     &packing_params,
     /*extra_weights_bytes=*/sizeof(float),
-    /*init_scale_params=*/xnn_init_qs8_to_qs8_qc8w_scale_fp32_params,
-    /*scale_params=*/&requantization_scale,
-    /*init_kernel_scale_params=*/NULL, /*kernel_scale_params=*/NULL,
+    /*init_extra_data0=*/(xnn_init_extra_data_params_fn)xnn_init_qs8_to_qs8_qc8w_scale_fp32_params,
+    /*extra_data0=*/&requantization_scale,
+    /*extra_data0_size=*/sizeof(float),
+    /*init_extra_data1=*/ NULL,
+    /*extra_data1=*/ NULL,
+    /*extra_data1_size=*/0,
     &params, sizeof(params),
     gemm_config, &gemm_config->minmax,
     xnn_operator_type_fully_connected_nc_qs8,
@@ -2156,7 +2175,6 @@ enum xnn_status create_fully_connected_nc_qx8_qc8w(
     input_stride, output_stride,
     kernel, bias, flags,
     /*block_size=*/0,
-    /*blockwise_kernel_scale_params=*/NULL,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     filter_is_nibble,
@@ -2165,9 +2183,12 @@ enum xnn_status create_fully_connected_nc_qx8_qc8w(
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
     packing_params,
     /*extra_weights_bytes=*/sizeof(float),
-    /*init_scale_params=*/xnn_init_qs8_qc8w_scale_fp32_params,
-    /*scale_params=*/requantization_scale,
-    /*init_kernel_scale_params=*/NULL, /*kernel_scale_params=*/NULL,
+    /*init_extra_data0=*/(xnn_init_extra_data_params_fn)xnn_init_qs8_qc8w_scale_fp32_params,
+    /*extra_data0=*/requantization_scale,
+    /*extra_data0_size=*/sizeof(float),
+    /*init_extra_data1=*/ NULL,
+    /*extra_data1=*/ NULL,
+    /*extra_data1_size=*/0,
     &params, sizeof(params),
     gemm_config, &gemm_config->minmax,
     expected_operator_type,
@@ -2341,7 +2362,6 @@ enum xnn_status xnn_create_fully_connected_nc_qu8(
     input_stride, output_stride,
     kernel, bias, flags,
     /*block_size=*/0,
-    /*blockwise_kernel_scale_params=*/NULL,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     /*filter_is_nibble=*/false,
@@ -2350,8 +2370,12 @@ enum xnn_status xnn_create_fully_connected_nc_qu8(
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
     &packing_params,
     /*extra_weights_bytes=*/0,
-    /*init_scale_params=*/NULL, /*scale_params=*/NULL,
-    /*init_kernel_scale_params=*/NULL, /*kernel_scale_params=*/NULL,
+    /*init_extra_data0=*/NULL, 
+    /*extra_data0=*/NULL,
+    /*extra_data0_size=*/0,
+    /*init_extra_data1=*/NULL, 
+    /*extra_data1=*/NULL,
+    /*extra_data1_size=*/0,
     &params, sizeof(params),
     gemm_config, &gemm_config->minmax,
     xnn_operator_type_fully_connected_nc_qu8,
