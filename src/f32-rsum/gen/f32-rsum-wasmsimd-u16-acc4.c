@@ -43,9 +43,9 @@ void xnn_f32_rsum_ukernel__wasmsimd_u16_acc4(
     vacc2 = wasm_f32x4_add(vacc2, vt2);
     vacc3 = wasm_f32x4_add(vacc3, vt3);
   }
-  vacc0 = wasm_f32x4_add(vacc0, vacc1);
-  vacc2 = wasm_f32x4_add(vacc2, vacc3);
   vacc0 = wasm_f32x4_add(vacc0, vacc2);
+  vacc1 = wasm_f32x4_add(vacc1, vacc3);
+  vacc0 = wasm_f32x4_add(vacc0, vacc1);
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const v128_t vt = wasm_v128_load(input);
     input += 4;

@@ -40,13 +40,12 @@ void xnn_f32_rsum_ukernel__scalar_u${BATCH_TILE}${ACC_SUFFIX}(
       $for N in range(BATCH_TILE):
         vacc${N % ACCUMULATORS} += vt${N};
     }
-    $if ACCUMULATORS > 1:
-      $ACC_SLICE = 1
-      $while ACC_SLICE < ACCUMULATORS:
-        $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
-          $if A + ACC_SLICE < ACCUMULATORS:
-            vacc${A} += vacc${A + ACC_SLICE};
-        $ACC_SLICE *= 2
+    $ACC_SLICE = (ACCUMULATORS + 1)//2
+    $while ACC_SLICE > 0:
+      $for A in range(0, ACC_SLICE):
+        $if A + ACC_SLICE < ACCUMULATORS:
+          vacc${A} += vacc${A + ACC_SLICE};
+      $ACC_SLICE //= 2
 
     if XNN_UNLIKELY(batch != 0) {
       $if BATCH_TILE == 2:

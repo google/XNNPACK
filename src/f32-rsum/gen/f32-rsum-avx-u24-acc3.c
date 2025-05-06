@@ -42,8 +42,8 @@ void xnn_f32_rsum_ukernel__avx_u24_acc3(
     vacc1 = _mm256_add_ps(vacc1, vt1);
     vacc2 = _mm256_add_ps(vacc2, vt2);
   }
-  vacc0 = _mm256_add_ps(vacc0, vacc1);
   vacc0 = _mm256_add_ps(vacc0, vacc2);
+  vacc0 = _mm256_add_ps(vacc0, vacc1);
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const __m256 vt = _mm256_loadu_ps(input);
     input += 8;

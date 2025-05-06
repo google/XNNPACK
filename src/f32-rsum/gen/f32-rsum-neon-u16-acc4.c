@@ -42,9 +42,9 @@ void xnn_f32_rsum_ukernel__neon_u16_acc4(
     vacc2 = vaddq_f32(vacc2, vt2);
     vacc3 = vaddq_f32(vacc3, vt3);
   }
-  vacc0 = vaddq_f32(vacc0, vacc1);
-  vacc2 = vaddq_f32(vacc2, vacc3);
   vacc0 = vaddq_f32(vacc0, vacc2);
+  vacc1 = vaddq_f32(vacc1, vacc3);
+  vacc0 = vaddq_f32(vacc0, vacc1);
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const float32x4_t vt = vld1q_f32(input); input += 4;
     vacc0 = vaddq_f32(vacc0, vt);

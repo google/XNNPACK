@@ -40,8 +40,8 @@ void xnn_f32_rsum_ukernel__sse_u12_acc3(
     vacc1 = _mm_add_ps(vacc1, vt1);
     vacc2 = _mm_add_ps(vacc2, vt2);
   }
-  vacc0 = _mm_add_ps(vacc0, vacc1);
   vacc0 = _mm_add_ps(vacc0, vacc2);
+  vacc0 = _mm_add_ps(vacc0, vacc1);
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const __m128 vt = _mm_loadu_ps(input);
     input += 4;

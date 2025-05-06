@@ -41,9 +41,9 @@ void xnn_f32_rsum_ukernel__scalar_u4_acc4(
     vacc2 += vt2;
     vacc3 += vt3;
   }
-  vacc0 += vacc1;
-  vacc2 += vacc3;
   vacc0 += vacc2;
+  vacc1 += vacc3;
+  vacc0 += vacc1;
 
   if XNN_UNLIKELY(batch != 0) {
     do {

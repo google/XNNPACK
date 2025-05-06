@@ -38,8 +38,8 @@ void xnn_f32_rsum_ukernel__scalar_u3_acc3(
     vacc1 += vt1;
     vacc2 += vt2;
   }
-  vacc0 += vacc1;
   vacc0 += vacc2;
+  vacc0 += vacc1;
 
   if XNN_UNLIKELY(batch != 0) {
     do {

@@ -56,9 +56,9 @@ void xnn_f32_rsum_ukernel__hvx_u128_acc4(
     vacc2 = Q6_Vqf32_vadd_Vqf32Vsf(vacc2, vt2);
     vacc3 = Q6_Vqf32_vadd_Vqf32Vsf(vacc3, vt3);
   }
-  vacc0 = Q6_Vqf32_vadd_Vqf32Vqf32(vacc0, vacc1);
-  vacc2 = Q6_Vqf32_vadd_Vqf32Vqf32(vacc2, vacc3);
   vacc0 = Q6_Vqf32_vadd_Vqf32Vqf32(vacc0, vacc2);
+  vacc1 = Q6_Vqf32_vadd_Vqf32Vqf32(vacc1, vacc3);
+  vacc0 = Q6_Vqf32_vadd_Vqf32Vqf32(vacc0, vacc1);
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
     const xnn_simd_f32_t vt = xnn_load_f32(input);
     input += 32;
