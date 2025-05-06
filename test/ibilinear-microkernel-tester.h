@@ -15,8 +15,7 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "next_prime.h"
-#include "xnnpack.h"
+#include "test/next_prime.h"
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/math.h"
