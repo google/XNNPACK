@@ -153,9 +153,6 @@ void xnn_f32_dwconv_minmax_ukernel_4p32c__avx512f_acc2(
       output += 16;
     }
     if XNN_UNLIKELY(c != 0) {
-      assert(c >= 1);
-      assert(c <= 16);
-
       xnn_simd_f32_t vacc0p0 = xnn_load_tail_f32(w, c);
 
       const xnn_simd_f32_t vi0x0 = xnn_load_tail_f32(i0, c);

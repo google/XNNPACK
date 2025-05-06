@@ -60,11 +60,11 @@ void xnn_f32_vsub_ukernel__hvx_u128(
     output += 32;
   }
   if XNN_UNLIKELY(batch != 0) {
-     HVX_Vector va = xnn_load_tail_f32(input_a, batch >> 2);
-     HVX_Vector vb = xnn_load_tail_f32(input_b, batch >> 2);
+    HVX_Vector va = xnn_load_tail_f32(input_a, batch >> XNN_LOG2_SIZEOF_FLOAT);
+    HVX_Vector vb = xnn_load_tail_f32(input_b, batch >> XNN_LOG2_SIZEOF_FLOAT);
 
-     HVX_Vector vacc = xnn_sub_f32(va, vb);
+    HVX_Vector vacc = xnn_sub_f32(va, vb);
 
-     Q6_V_vstu_variable(output, batch, vacc);
+    Q6_V_vstu_variable(output, batch, vacc);
   }
 }

@@ -49,7 +49,7 @@ void xnn_f32_vrsubc_ukernel__hvx_u64(
     output+= 32;
   }
   if XNN_UNLIKELY(batch != 0) {
-    HVX_Vector va = xnn_load_tail_f32(input_a, batch >> 2);
+    HVX_Vector va = xnn_load_tail_f32(input_a, batch >> XNN_LOG2_SIZEOF_FLOAT);
 
     HVX_Vector vacc = xnn_sub_f32(vb, va);
 

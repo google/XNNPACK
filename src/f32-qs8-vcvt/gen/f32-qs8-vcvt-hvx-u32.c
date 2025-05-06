@@ -44,7 +44,7 @@ void xnn_f32_qs8_vcvt_ukernel__hvx_u32(
     output += 32;
   }
   if XNN_UNLIKELY(batch != 0) {
-    HVX_Vector vx = xnn_load_tail_f32(input, batch >> 2);
+    HVX_Vector vx = xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
 
     vx = xnn_fmadd_f32(vx, vscale, vmagic_bias);
 

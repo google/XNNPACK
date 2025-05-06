@@ -188,7 +188,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u128_acc2(
   }
 
   if XNN_UNLIKELY(batch != 0) {
-    const HVX_Vector vi = xnn_load_tail_f32(input, batch >> 2);
+    const HVX_Vector vi = xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
 
     const HVX_Vector vx = xnn_sub_f32(vi, vi_max);
 
