@@ -126,60 +126,6 @@
 
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  TEST(F16_RSUM__NEONFP16ARITH_U24_ACC3, batch_eq_24) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    RSumMicrokernelTester()
-      .batch_size(24)
-      .Test(xnn_f16_rsum_ukernel__neonfp16arith_u24_acc3, xnn_init_f16_scale_scalar_params);
-  }
-
-  TEST(F16_RSUM__NEONFP16ARITH_U24_ACC3, batch_div_24) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t batch_size = 48; batch_size < 240; batch_size += 24) {
-      RSumMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_f16_rsum_ukernel__neonfp16arith_u24_acc3, xnn_init_f16_scale_scalar_params);
-    }
-  }
-
-  TEST(F16_RSUM__NEONFP16ARITH_U24_ACC3, batch_lt_24) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t batch_size = 1; batch_size < 24; batch_size++) {
-      RSumMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_f16_rsum_ukernel__neonfp16arith_u24_acc3, xnn_init_f16_scale_scalar_params);
-    }
-  }
-
-  TEST(F16_RSUM__NEONFP16ARITH_U24_ACC3, batch_gt_24) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t batch_size = 25; batch_size < 48; batch_size++) {
-      RSumMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_f16_rsum_ukernel__neonfp16arith_u24_acc3, xnn_init_f16_scale_scalar_params);
-    }
-  }
-
-  TEST(F16_RSUM__NEONFP16ARITH_U24_ACC3, scale) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (float scale = 0.3f; scale < 5.0f; scale *= 3.0f) {
-      RSumMicrokernelTester()
-        .batch_size(25)
-        .scale(scale)
-        .Test(xnn_f16_rsum_ukernel__neonfp16arith_u24_acc3, xnn_init_f16_scale_scalar_params);
-    }
-  }
-
-  TEST(F16_RSUM__NEONFP16ARITH_U24_ACC3, overflow_accumulator) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    RSumMicrokernelTester()
-      .batch_size(3072)
-      .Test(xnn_f16_rsum_ukernel__neonfp16arith_u24_acc3, xnn_init_f16_scale_scalar_params);
-  }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-
-
-#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_RSUM__NEONFP16ARITH_U32_ACC2, batch_eq_32) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     RSumMicrokernelTester()
@@ -391,60 +337,6 @@
     RSumMicrokernelTester()
       .batch_size(8192)
       .Test(xnn_f16_rsum_ukernel__avx512fp16_u64_acc2, xnn_init_f16_scale_scalar_params);
-  }
-#endif  // XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
-
-
-#if XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
-  TEST(F16_RSUM__AVX512FP16_U96_ACC3, batch_eq_96) {
-    TEST_REQUIRES_X86_AVX512FP16;
-    RSumMicrokernelTester()
-      .batch_size(96)
-      .Test(xnn_f16_rsum_ukernel__avx512fp16_u96_acc3, xnn_init_f16_scale_scalar_params);
-  }
-
-  TEST(F16_RSUM__AVX512FP16_U96_ACC3, batch_div_96) {
-    TEST_REQUIRES_X86_AVX512FP16;
-    for (size_t batch_size = 192; batch_size < 960; batch_size += 96) {
-      RSumMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_f16_rsum_ukernel__avx512fp16_u96_acc3, xnn_init_f16_scale_scalar_params);
-    }
-  }
-
-  TEST(F16_RSUM__AVX512FP16_U96_ACC3, batch_lt_96) {
-    TEST_REQUIRES_X86_AVX512FP16;
-    for (size_t batch_size = 1; batch_size < 96; batch_size++) {
-      RSumMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_f16_rsum_ukernel__avx512fp16_u96_acc3, xnn_init_f16_scale_scalar_params);
-    }
-  }
-
-  TEST(F16_RSUM__AVX512FP16_U96_ACC3, batch_gt_96) {
-    TEST_REQUIRES_X86_AVX512FP16;
-    for (size_t batch_size = 97; batch_size < 192; batch_size++) {
-      RSumMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_f16_rsum_ukernel__avx512fp16_u96_acc3, xnn_init_f16_scale_scalar_params);
-    }
-  }
-
-  TEST(F16_RSUM__AVX512FP16_U96_ACC3, scale) {
-    TEST_REQUIRES_X86_AVX512FP16;
-    for (float scale = 0.3f; scale < 5.0f; scale *= 3.0f) {
-      RSumMicrokernelTester()
-        .batch_size(97)
-        .scale(scale)
-        .Test(xnn_f16_rsum_ukernel__avx512fp16_u96_acc3, xnn_init_f16_scale_scalar_params);
-    }
-  }
-
-  TEST(F16_RSUM__AVX512FP16_U96_ACC3, overflow_accumulator) {
-    TEST_REQUIRES_X86_AVX512FP16;
-    RSumMicrokernelTester()
-      .batch_size(12288)
-      .Test(xnn_f16_rsum_ukernel__avx512fp16_u96_acc3, xnn_init_f16_scale_scalar_params);
   }
 #endif  // XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 

@@ -644,7 +644,6 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-rminmax/gen/f32-rminmax-wasmsimd-pminmax-u16-acc4.c
   src/f32-rsum/gen/f32-rsum-wasmsimd-u4.c
   src/f32-rsum/gen/f32-rsum-wasmsimd-u8-acc2.c
-  src/f32-rsum/gen/f32-rsum-wasmsimd-u12-acc3.c
   src/f32-rsum/gen/f32-rsum-wasmsimd-u16-acc2.c
   src/f32-spmm/gen/f32-spmm-4x1-minmax-wasmsimd-arm-pipelined-x2.c
   src/f32-spmm/gen/f32-spmm-4x1-minmax-wasmsimd-arm-pipelined.c

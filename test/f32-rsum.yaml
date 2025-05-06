@@ -8,8 +8,6 @@
   init: xnn_init_f32_scale_scalar_params
 - name: xnn_f32_rsum_ukernel__neon_u8_acc2
   init: xnn_init_f32_scale_scalar_params
-- name: xnn_f32_rsum_ukernel__neon_u12_acc3
-  init: xnn_init_f32_scale_scalar_params
 - name: xnn_f32_rsum_ukernel__neon_u16_acc2
   init: xnn_init_f32_scale_scalar_params
 - name: xnn_f32_rsum_ukernel__neon_u16_acc4
@@ -19,8 +17,6 @@
 - name: xnn_f32_rsum_ukernel__sse_u4
   init: xnn_init_f32_scale_scalar_params
 - name: xnn_f32_rsum_ukernel__sse_u8_acc2
-  init: xnn_init_f32_scale_scalar_params
-- name: xnn_f32_rsum_ukernel__sse_u12_acc3
   init: xnn_init_f32_scale_scalar_params
 - name: xnn_f32_rsum_ukernel__sse_u16_acc2
   init: xnn_init_f32_scale_scalar_params
@@ -32,8 +28,6 @@
   init: xnn_init_f32_scale_scalar_params
 - name: xnn_f32_rsum_ukernel__avx_u16_acc2
   init: xnn_init_f32_scale_scalar_params
-- name: xnn_f32_rsum_ukernel__avx_u24_acc3
-  init: xnn_init_f32_scale_scalar_params
 - name: xnn_f32_rsum_ukernel__avx_u32_acc2
   init: xnn_init_f32_scale_scalar_params
 - name: xnn_f32_rsum_ukernel__avx_u32_acc4
@@ -43,8 +37,6 @@
 - name: xnn_f32_rsum_ukernel__avx512f_u16
   init: xnn_init_f32_scale_scalar_params
 - name: xnn_f32_rsum_ukernel__avx512f_u32_acc2
-  init: xnn_init_f32_scale_scalar_params
-- name: xnn_f32_rsum_ukernel__avx512f_u48_acc3
   init: xnn_init_f32_scale_scalar_params
 - name: xnn_f32_rsum_ukernel__avx512f_u64_acc2
   init: xnn_init_f32_scale_scalar_params
@@ -56,8 +48,6 @@
   init: xnn_init_f32_scale_scalar_params
 - name: xnn_f32_rsum_ukernel__hvx_u64_acc2
   init: xnn_init_f32_scale_scalar_params
-- name: xnn_f32_rsum_ukernel__hvx_u96_acc3
-  init: xnn_init_f32_scale_scalar_params
 - name: xnn_f32_rsum_ukernel__hvx_u128_acc2
   init: xnn_init_f32_scale_scalar_params
 - name: xnn_f32_rsum_ukernel__hvx_u128_acc4
@@ -67,8 +57,6 @@
 - name: xnn_f32_rsum_ukernel__wasmsimd_u4
   init: xnn_init_f32_scale_scalar_params
 - name: xnn_f32_rsum_ukernel__wasmsimd_u8_acc2
-  init: xnn_init_f32_scale_scalar_params
-- name: xnn_f32_rsum_ukernel__wasmsimd_u12_acc3
   init: xnn_init_f32_scale_scalar_params
 - name: xnn_f32_rsum_ukernel__wasmsimd_u16_acc2
   init: xnn_init_f32_scale_scalar_params
@@ -83,8 +71,6 @@
 - name: xnn_f32_rsum_ukernel__scalar_u1
   init: xnn_init_f32_scale_scalar_params
 - name: xnn_f32_rsum_ukernel__scalar_u2_acc2
-  init: xnn_init_f32_scale_scalar_params
-- name: xnn_f32_rsum_ukernel__scalar_u3_acc3
   init: xnn_init_f32_scale_scalar_params
 - name: xnn_f32_rsum_ukernel__scalar_u4_acc2
   init: xnn_init_f32_scale_scalar_params

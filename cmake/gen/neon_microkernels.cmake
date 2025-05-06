@@ -361,7 +361,6 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/f32-rminmax/gen/f32-rminmax-neon-u16-acc2.c
   src/f32-rsum/gen/f32-rsum-neon-u4.c
   src/f32-rsum/gen/f32-rsum-neon-u8-acc2.c
-  src/f32-rsum/gen/f32-rsum-neon-u12-acc3.c
   src/f32-rsum/gen/f32-rsum-neon-u16-acc2.c
   src/f32-spmm/gen/f32-spmm-4x1-minmax-neon-pipelined.c
   src/f32-spmm/gen/f32-spmm-4x1-minmax-neon-x2.c
