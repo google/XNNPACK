@@ -43,13 +43,12 @@ void xnn_f16_f32acc_rsum_ukernel__avx512skx_u${BATCH_TILE}${ACC_SUFFIX}(
       $for N in range(SIMD_TILE):
         vacc${N % ACCUMULATORS} = _mm512_add_ps(vacc${N % ACCUMULATORS}, vt${N});
     }
-    $if ACCUMULATORS > 1:
-      $ACC_SLICE = 1
-      $while ACC_SLICE < ACCUMULATORS:
-        $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
-          $if A + ACC_SLICE < ACCUMULATORS:
-            vacc${A} = _mm512_add_ps(vacc${A}, vacc${A + ACC_SLICE});
-        $ACC_SLICE *= 2
+    $REDUCE_ACC = (ACCUMULATORS + 1)//2
+    $while REDUCE_ACC > 0:
+      $for A in range(0, REDUCE_ACC):
+        $if A + REDUCE_ACC < ACCUMULATORS:
+          vacc${A} = _mm512_add_ps(vacc${A}, vacc${A + REDUCE_ACC});
+      $REDUCE_ACC //= 2
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
     const __m512 vt = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) i));
     i += 16;

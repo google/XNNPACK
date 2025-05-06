@@ -43,13 +43,12 @@ void xnn_f16_f32acc_rsum_ukernel__neonfp16arith_u${BATCH_TILE}${ACC_SUFFIX}(
       $for N in range(SIMD_TILE):
         vacc${N % ACCUMULATORS} = vaddq_f32(vacc${N % ACCUMULATORS}, vt${N});
     }
-    $if ACCUMULATORS > 1:
-      $ACC_SLICE = 1
-      $while ACC_SLICE < ACCUMULATORS:
-        $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
-          $if A + ACC_SLICE < ACCUMULATORS:
-            vacc${A} = vaddq_f32(vacc${A}, vacc${A + ACC_SLICE});
-        $ACC_SLICE *= 2
+    $REDUCE_ACC = (ACCUMULATORS + 1)//2
+    $while REDUCE_ACC > 0:
+      $for A in range(0, REDUCE_ACC):
+        $if A + REDUCE_ACC < ACCUMULATORS:
+          vacc${A} = vaddq_f32(vacc${A}, vacc${A + REDUCE_ACC});
+      $REDUCE_ACC //= 2
   for (; batch >= 4 * sizeof(uint16_t); batch -= 4 * sizeof(uint16_t)) {
     const float16x4_t vh = vreinterpret_f16_u16(vld1_u16(i)); i += 4;
     const float32x4_t vt = vcvt_f32_f16(vh);

@@ -56,9 +56,9 @@ void xnn_f16_f32acc_rsum_ukernel__neonfp16arith_u32_acc4(
     vacc2 = vaddq_f32(vacc2, vt6);
     vacc3 = vaddq_f32(vacc3, vt7);
   }
-  vacc0 = vaddq_f32(vacc0, vacc1);
-  vacc2 = vaddq_f32(vacc2, vacc3);
   vacc0 = vaddq_f32(vacc0, vacc2);
+  vacc1 = vaddq_f32(vacc1, vacc3);
+  vacc0 = vaddq_f32(vacc0, vacc1);
   for (; batch >= 4 * sizeof(uint16_t); batch -= 4 * sizeof(uint16_t)) {
     const float16x4_t vh = vreinterpret_f16_u16(vld1_u16(i)); i += 4;
     const float32x4_t vt = vcvt_f32_f16(vh);
