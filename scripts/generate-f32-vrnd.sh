@@ -105,4 +105,8 @@ tools/xngen src/f32-vrnd/avx512f.c.in -D OP=RNDU  -D BATCH_TILE=32 -o src/f32-vr
 tools/xngen src/f32-vrnd/avx512f.c.in -D OP=RNDD  -D BATCH_TILE=16 -o src/f32-vrnd/gen/f32-vrndd-avx512f-u16.c &
 tools/xngen src/f32-vrnd/avx512f.c.in -D OP=RNDD  -D BATCH_TILE=32 -o src/f32-vrnd/gen/f32-vrndd-avx512f-u32.c &
 
+################################## Hexagon HVX ##################################
+tools/xngen src/f32-vrnd/simd.c.in -D BATCH_TILE=32 -D OP=RNDNE -D ARCH=hvx -o src/f32-vrnd/gen/f32-vrndne-hvx-u32.c &
+tools/xngen src/f32-vrnd/simd.c.in -D BATCH_TILE=64 -D OP=RNDNE -D ARCH=hvx -o src/f32-vrnd/gen/f32-vrndne-hvx-u64.c &
+
 wait
