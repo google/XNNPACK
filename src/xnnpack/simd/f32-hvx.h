@@ -135,6 +135,30 @@ static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
 }
 #endif  // __HVX_ARCH__ >= 73
 
+#if __HVX_ARCH__ >= 73
+static XNN_INLINE xnn_simd_f32_t xnn_trunc_f32(xnn_simd_f32_t a) {
+  const HVX_Vector vmax_non_int_val =
+      Q6_V_vsplat_R(float_as_uint32(8388608.0f));  // 2^23.
+
+  const HVX_VectorPred vfilter = Q6_Q_vcmp_gt_VsfVsf(
+      Q6_V_vand_VV(a, Q6_V_vsplat_R(0x7FFFFFFF)), vmax_non_int_val);
+
+  const HVX_Vector vresult = Q6_Vsf_equals_Vw(Q6_Vw_equals_Vsf(a));
+
+  return Q6_V_vmux_QVV(vfilter, a, vresult);
+}
+#else
+static XNN_INLINE xnn_simd_f32_t xnn_trunc_f32(xnn_simd_f32_t a) {
+  XNN_ALIGN(128) float input[xnn_simd_size_f32];
+  XNN_ALIGN(128) float output[xnn_simd_size_f32];
+  *((HVX_Vector*)input) = a;
+  for (size_t k = 0; k < xnn_simd_size_f32; ++k) {
+    output[k] = truncf(input[k]);
+  }
+  return *((HVX_Vector*)output);
+}
+#endif  // __HVX_ARCH__ >= 73
+
 // Logical operations.
 
 static XNN_INLINE xnn_simd_f32_t xnn_and_f32(xnn_simd_f32_t a,
