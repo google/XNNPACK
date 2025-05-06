@@ -1335,6 +1335,33 @@ typedef void (*xnn_pack_weights_and_biases_fn)(
     void* packed_weights_ptr,                      //
     const void* params);
 
+struct xnn_pack_weights_and_biases_params {
+  uint32_t flags;
+  const struct xnn_gemm_config* gemm_config;
+  size_t input_channels;
+  size_t output_channels;
+  size_t groups;
+  size_t block_size;
+  size_t k_stride;
+  const void* accumulator_init;
+  const void* weights;
+  xnn_init_scale_params_fn init_extra_data0_fn;
+  const void* extra_data0;
+  xnn_init_scale_params_fn init_extra_data1_fn;
+  const void* extra_data1;
+  void* packed_weights_ptr;
+  struct xnn_packing_params packing_params;
+  xnn_packw_gemm_gio_ukernel_fn pack_gemm_gio_w;
+  xnn_packw_gemm_goi_ukernel_fn pack_gemm_goi_w;
+  size_t extra_weights_bytes;
+  size_t log2_filter_element_size;
+  size_t bias_element_size;
+  size_t weights_stride;
+  xnn_operator_t fully_connected_op;
+  struct xnn_weights_cache_look_up_key cache_key;
+  size_t aligned_total_weights_size;
+};
+
 // Computes the stride of the packing used by a corresponding
 // `xnn_pack_weights_and_biases_fn`. The `k_stride` parameter is provided for
 // our older packing functions, new wrappers should rely on `gemm_config` and

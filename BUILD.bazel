@@ -1013,6 +1013,7 @@ xnnpack_cc_library(
         ":params",
         ":quantization",
         ":reference_ukernels",
+        ":task",
         ":xnnpack_h",
         "@pthreadpool",
     ],
@@ -1076,6 +1077,7 @@ xnnpack_cc_library(
         ":params",
         ":requantization",
         ":subgraph_h",
+        ":task",
         ":xnnpack_h",
         "@pthreadpool",
     ] + xnnpack_slinky_deps(),
@@ -1093,6 +1095,20 @@ xnnpack_cc_library(
         ":common",
         ":logging",
         ":xnnpack_h",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "task",
+    srcs = [
+        "src/xnnpack/task.c",
+    ],
+    hdrs = [
+        "src/xnnpack/task.h",
+    ],
+    compatible_with = [],
+    deps = [
+        ":common",
     ],
 )
 

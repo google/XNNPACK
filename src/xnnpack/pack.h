@@ -21,15 +21,6 @@
 extern "C" {
 #endif
 
-struct xnn_qu8_packing_params {
-  uint8_t input_zero_point;
-  uint8_t kernel_zero_point;
-};
-
-struct xnn_qs8_packing_params {
-  int8_t input_zero_point;
-};
-
 typedef void (*xnn_pack_f32_gemm_fn)(size_t g, size_t nc, size_t kc, size_t nr,
                                      size_t kr, size_t sr, const float* kernel,
                                      const float* bias, const void* scale,

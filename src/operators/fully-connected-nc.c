@@ -19,6 +19,7 @@
 #include "src/xnnpack/cache.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/compute.h"
+#include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/math.h"
@@ -33,38 +34,108 @@
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/packq.h"
 #include "src/xnnpack/params.h"
+#include "src/xnnpack/task.h"
 #include <pthreadpool.h>
 
+static void* pack_weights_and_biases_task_fn(
+    struct xnn_pack_weights_and_biases_params* params) {
+  // Unpack some common values.
+  const struct xnn_gemm_config* gemm_config = params->gemm_config;
+  const size_t input_channels = params->input_channels;
+  const size_t output_channels = params->output_channels;
+  const uint32_t nr = gemm_config->nr;
+  const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
+  const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
+  const size_t k_stride = params->k_stride;
+
+  // Call the packing function.
+  if (gemm_config->pack_weights_and_biases) {
+    gemm_config->pack_weights_and_biases(
+        params->flags, gemm_config, input_channels, output_channels,
+        params->groups, params->block_size, params->k_stride,
+        params->accumulator_init, params->weights, params->init_extra_data0_fn,
+        params->extra_data0,
+        /*extra_data0_size=*/params->init_extra_data0_fn != NULL ? sizeof(float)
+                                                                 : 0,
+        params->init_extra_data1_fn, params->extra_data1,
+        /*extra_data1_size=*/params->init_extra_data1_fn != NULL ? sizeof(float)
+                                                                 : 0,
+        params->packed_weights_ptr, &params->packing_params);
+  } else {
+    if (params->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+      params->pack_gemm_gio_w(
+          /*groups=*/1, output_channels, input_channels, nr, kr, sr,
+          output_channels, params->weights, params->accumulator_init,
+          /*scale=*/NULL, params->packed_weights_ptr,
+          nr * params->extra_weights_bytes, &params->packing_params);
+    } else {
+      params->pack_gemm_goi_w(
+          /*groups=*/1, output_channels, input_channels, nr, kr, sr,
+          params->weights, params->accumulator_init, /*scale=*/NULL,
+          params->packed_weights_ptr, nr * params->extra_weights_bytes,
+          &params->packing_params);
+    }
+    if (params->init_extra_data1_fn != NULL) {
+      void* weights =
+          (void*)((uintptr_t)params->packed_weights_ptr +
+                  nr * ((k_stride << params->log2_filter_element_size) +
+                        params->bias_element_size));
+      params->init_extra_data1_fn(output_channels, nr,
+                                  nr * params->weights_stride,
+                                  params->extra_data1, weights);
+    }
+
+    if (params->extra_data0 != NULL) {
+      assert(params->init_extra_data0_fn != NULL);
+      void* weights =
+          (void*)((uintptr_t)params->packed_weights_ptr +
+                  nr * ((k_stride << params->log2_filter_element_size) +
+                        params->bias_element_size));
+      if (params->extra_data1 != NULL) {
+        weights = (void*)((uintptr_t)weights + nr * sizeof(float));
+      }
+      params->init_extra_data0_fn(output_channels, nr,
+                                  nr * params->weights_stride,
+                                  params->extra_data0, weights);
+    }
+  }
+
+  if (use_weights_cache(params->fully_connected_op)) {
+    params->fully_connected_op->packed_weights.offset =
+        xnn_look_up_or_insert_weights_cache(
+            params->fully_connected_op->weights_cache, &params->cache_key,
+            params->packed_weights_ptr, params->aligned_total_weights_size);
+  }
+
+  // Free the memory allocated for the packing parameters.
+  if (params->packing_params.cleanup) {
+    xnn_release_simd_memory(params->packing_params.cleanup);
+  }
+  xnn_release_memory(params);
+
+  // Decrease the create function counter.
+  xnn_task_done();
+
+  return NULL;
+}
+
 static enum xnn_status create_fully_connected_nc(
-    size_t input_channels,
-    size_t output_channels,
-    size_t input_stride,
-    size_t output_stride,
-    const void* kernel,
-    const void* bias,
-    uint32_t flags,
-    size_t block_size,
-    const uint16_t* blockwise_kernel_scale_params,
-    uint32_t log2_input_element_size,
-    uint32_t log2_filter_element_size,
-    bool filter_is_nibble,
-    uint32_t bias_element_size,
+    size_t input_channels, size_t output_channels, size_t input_stride,
+    size_t output_stride, const void* kernel, const void* bias, uint32_t flags,
+    size_t block_size, const uint16_t* blockwise_kernel_scale_params,
+    uint32_t log2_input_element_size, uint32_t log2_filter_element_size,
+    bool filter_is_nibble, uint32_t bias_element_size,
     xnn_packw_gemm_gio_ukernel_fn pack_gemm_gio_w,
     xnn_packw_gemm_goi_ukernel_fn pack_gemm_goi_w,
-    const void* packing_params,
-    size_t extra_weights_bytes,
+    const struct xnn_packing_params* packing_params, size_t extra_weights_bytes,
     xnn_init_qs8_qc8w_scale_params_fn init_scale_params,
     const float* scale_params,
     xnn_init_qs8_qc8w_scale_params_fn init_kernel_scale_params,
-    const float* kernel_scale_params,
-    const void* params,
-    size_t params_size,
+    const float* kernel_scale_params, const void* params, size_t params_size,
     const struct xnn_gemm_config* gemm_config,
     const struct gemm_fused_ukernels* gemm_ukernels,
-    enum xnn_operator_type operator_type,
-    xnn_weights_cache_t weights_cache,
-    xnn_operator_t* fully_connected_op_out)
-{
+    enum xnn_operator_type operator_type, xnn_weights_cache_t weights_cache,
+    xnn_operator_t* fully_connected_op_out) {
   xnn_operator_t fully_connected_op = NULL;
   enum xnn_status status = xnn_status_uninitialized;
 
@@ -189,71 +260,42 @@ static enum xnn_status create_fully_connected_nc(
       memset(weights_ptr, 0, aligned_total_weights_size);
     }
 
-    if (gemm_config->pack_weights_and_biases) {
-      gemm_config->pack_weights_and_biases(
-          flags, gemm_config, input_channels, output_channels,
-          /*groups=*/1,
-          /*block_wise=*/block_size,
-          /*kstride=*/k_stride,
-          /*accumulator_init=*/bias,
-          /*weights=*/kernel,
-          /*int_extra_data0_fn=*/(xnn_init_scale_params_fn)init_scale_params,
-          /*extra_data0=*/scale_params,
-          /*extra_data0_size=*/init_scale_params != NULL ? sizeof(float) : 0,
-          /*init_extra_data1_fn=*/
-          (xnn_init_scale_params_fn)init_kernel_scale_params,
-          /*extra_data1=*/block_wise ? (const void *) blockwise_kernel_scale_params : (const void *) kernel_scale_params,
-          /*extra_data1_size=*/init_kernel_scale_params != NULL ? sizeof(float)
-                                                                : 0,
-          /*packed_weights_ptr=*/weights_ptr, packing_params);
-    } else {
-      if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
-        pack_gemm_gio_w(
-          /*groups=*/1, output_channels, input_channels,
-          nr, kr, sr,
-          output_channels,
-          kernel, bias, /*scale=*/NULL,
-          weights_ptr,
-          gemm_config->nr * extra_weights_bytes,
-          packing_params);
-      } else {
-        pack_gemm_goi_w(
-          /*groups=*/1, output_channels, input_channels,
-          nr, kr, sr,
-          kernel, bias, /*scale=*/NULL,
-          weights_ptr,
-          gemm_config->nr * extra_weights_bytes,
-          packing_params);
-      }
-      if (kernel_scale_params != NULL) {
-        assert(init_kernel_scale_params != NULL);
+    // Launch the weights packing in a separate thread.
+    struct xnn_pack_weights_and_biases_params* packing_function_params =
+        xnn_allocate_zero_simd_memory(
+            sizeof(struct xnn_pack_weights_and_biases_params));
+    *packing_function_params = (struct xnn_pack_weights_and_biases_params){
+        .flags = flags,
+        .gemm_config = gemm_config,
+        .input_channels = input_channels,
+        .output_channels = output_channels,
+        .groups = 1,
+        .block_size = block_size,
+        .k_stride = k_stride,
+        .accumulator_init = bias,
+        .weights = kernel,
+        .init_extra_data0_fn = (xnn_init_scale_params_fn)init_scale_params,
+        .extra_data0 = scale_params,
+        .init_extra_data1_fn =
+            (xnn_init_scale_params_fn)init_kernel_scale_params,
+        .extra_data1 = block_wise ? (const void*)blockwise_kernel_scale_params
+                                  : (const void*)kernel_scale_params,
+        .packed_weights_ptr = weights_ptr,
+        .pack_gemm_gio_w = pack_gemm_gio_w,
+        .pack_gemm_goi_w = pack_gemm_goi_w,
+        .extra_weights_bytes = extra_weights_bytes,
+        .log2_filter_element_size = log2_filter_element_size,
+        .bias_element_size = bias_element_size,
+        .weights_stride = weights_stride,
+        .packing_params =
+            packing_params ? *packing_params : (struct xnn_packing_params){0},
+        .fully_connected_op = fully_connected_op,
+        .cache_key = cache_key,
+        .aligned_total_weights_size = aligned_total_weights_size,
+    };
+    xnn_task_launch((xnn_task_fn)pack_weights_and_biases_task_fn,
+                    packing_function_params);
 
-        void* weights = (void*) ((uintptr_t) weights_ptr +
-          gemm_config->nr * ((k_stride << log2_filter_element_size) + bias_element_size));
-        init_kernel_scale_params(
-            output_channels, gemm_config->nr,
-            gemm_config->nr * weights_stride,
-            kernel_scale_params, weights);
-      }
-
-      if (scale_params != NULL) {
-        assert(init_scale_params != NULL);
-        void* weights = (void*) ((uintptr_t) weights_ptr +
-          gemm_config->nr * ((k_stride << log2_filter_element_size) + bias_element_size));
-        if (kernel_scale_params != NULL) {
-          weights = (void*) ((uintptr_t) weights + gemm_config->nr * sizeof(float));
-        }
-        init_scale_params(
-            output_channels, gemm_config->nr,
-            gemm_config->nr * weights_stride,
-            scale_params, weights);
-      }
-    }
-
-    if (use_weights_cache(fully_connected_op)) {
-      fully_connected_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
-          fully_connected_op->weights_cache, &cache_key, weights_ptr, aligned_total_weights_size);
-    }
   } else {
     fully_connected_op->packed_weights.offset = cache_offset;
   }
@@ -479,8 +521,10 @@ enum xnn_status create_fully_connected_nc_qx8_f16_qc4w(
     gemm_config->init.f16_qc4w(&params, fp16_output_min, fp16_output_max, kernel_zero_point);
   }
 
-  // We don't know input zero point until runtime, row sum is multiplied by it during packing, so set it to 1.
-  const struct xnn_qs8_qc4w_packing_params packing_params = { /*input_zero_point=*/1, kernel_zero_point };
+  // We don't know input zero point until runtime, row sum is multiplied by it
+  // during packing, so set it to 1.
+  const struct xnn_packing_params packing_params = {
+      .qs8_qc4w_packing_params = {/*input_zero_point=*/1, kernel_zero_point}};
 
   return create_fully_connected_nc(
     input_channels, output_channels,
@@ -651,8 +695,10 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w(
     gemm_config->init.f16_qb4w(&params, fp16_output_min, fp16_output_max, kernel_zero_point, block_size);
   }
 
-  // We don't know input zero point until runtime, row sum is multiplied by it during packing, so set it to 1.
-  const struct xnn_qs8_qc4w_packing_params packing_params = { /*input_zero_point=*/1, kernel_zero_point };
+  // We don't know input zero point until runtime, row sum is multiplied by it
+  // during packing, so set it to 1.
+  const struct xnn_packing_params packing_params = {
+      .qs8_qc4w_packing_params = {/*input_zero_point=*/1, kernel_zero_point}};
 
   return create_fully_connected_nc(
     input_channels, output_channels,
@@ -741,8 +787,10 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qc4w(
     gemm_config->init.f32_qc4w(&params, output_min, output_max, kernel_zero_point);
   }
 
-  // We don't know input zero point until runtime, row sum is multiplied by it during packing, so set it to 1.
-  const struct xnn_qs8_qc4w_packing_params packing_params = { /*input_zero_point=*/1, kernel_zero_point };
+  // We don't know input zero point until runtime, row sum is multiplied by it
+  // during packing, so set it to 1.
+  const struct xnn_packing_params packing_params = {
+      .qs8_qc4w_packing_params = {/*input_zero_point=*/1, kernel_zero_point}};
 
   return create_fully_connected_nc(
     input_channels, output_channels,
@@ -911,8 +959,8 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qc4w(
 
   // We don't know input zero point until runtime, row sum is multiplied by it
   // during packing, so set it to 1.
-  const struct xnn_qs8_qc4w_packing_params packing_params = {
-      /*input_zero_point=*/1, kernel_zero_point};
+  const struct xnn_packing_params packing_params = {
+      .qs8_qc4w_packing_params = {/*input_zero_point=*/1, kernel_zero_point}};
 
   return xnn_create_fully_connected_nc_qp8_f32_qcxw(
       input_channels, output_channels, input_stride, output_stride,
@@ -949,8 +997,8 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qc8w(
 
   // We don't know input zero point until runtime, row sum is multiplied by it
   // during packing, so set it to 1.
-  const struct xnn_qs8_qc8w_packing_params packing_params = {
-      /*input_zero_point=*/1, 1.0f};
+  const struct xnn_packing_params packing_params = {
+      .qs8_qc8w_packing_params = {/*input_zero_point=*/1, 1.0f}};
 
   return xnn_create_fully_connected_nc_qp8_f32_qcxw(
       input_channels, output_channels, input_stride, output_stride,
@@ -1054,8 +1102,10 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qb4w(
     gemm_config->init.f32_qb4w(&params, output_min, output_max, kernel_zero_point, block_size);
   }
 
-  // We don't know input zero point until runtime, row sum is multiplied by it during packing, so set it to 1.
-  const struct xnn_qs8_qc4w_packing_params packing_params = { /*input_zero_point=*/1, kernel_zero_point };
+  // We don't know input zero point until runtime, row sum is multiplied by it
+  // during packing, so set it to 1.
+  const struct xnn_packing_params packing_params = {
+      .qs8_qc4w_packing_params = {/*input_zero_point=*/1, kernel_zero_point}};
 
   return create_fully_connected_nc(
     input_channels, output_channels,
@@ -1176,8 +1226,10 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qb4w(
     gemm_config->init.f32_qb4w(&params, output_min, output_max, kernel_zero_point, block_size);
   }
 
-  // We don't know input zero point until runtime, row sum is multiplied by it during packing, so set it to 1.
-  const struct xnn_qs8_qc4w_packing_params packing_params = { /*input_zero_point=*/1, kernel_zero_point };
+  // We don't know input zero point until runtime, row sum is multiplied by it
+  // during packing, so set it to 1.
+  const struct xnn_packing_params packing_params = {
+      .qs8_qc4w_packing_params = {/*input_zero_point=*/1, kernel_zero_point}};
 
   return create_fully_connected_nc(
     input_channels, output_channels,
@@ -1383,7 +1435,8 @@ enum xnn_status create_fully_connected_nc_qdx8_f32_qc8w(
     gemm_config->init.f32(&params, output_min, output_max);
   }
 
-  const struct xnn_qs8_packing_params packing_params = { /*input_zero_point=*/1 };
+  const struct xnn_packing_params packing_params = {
+      .qs8_packing_params = {/*input_zero_point=*/1}};
 
   return create_fully_connected_nc(
     input_channels, output_channels,
@@ -1511,7 +1564,8 @@ enum xnn_status create_fully_connected_nc_qx8_f16_qc8w(
     gemm_config->init.f16(&params, fp16_output_min, fp16_output_max);
   }
 
-  const struct xnn_qs8_packing_params packing_params = { /*input_zero_point=*/1 };
+  const struct xnn_packing_params packing_params = {
+      .qs8_packing_params = {/*input_zero_point=*/1}};
 
   return create_fully_connected_nc(
     input_channels, output_channels,
@@ -2044,9 +2098,11 @@ enum xnn_status xnn_create_fully_connected_nc_qs8(
   if XNN_LIKELY(gemm_config->init.qs8_qc8w != NULL) {
     gemm_config->init.qs8_qc8w(&params, output_zero_point, output_min, output_max);
   }
-  const struct xnn_qs8_packing_params packing_params = {
-    .input_zero_point = input_zero_point,
-  };
+  const struct xnn_packing_params packing_params = {
+      .qs8_packing_params = {
+          .input_zero_point = input_zero_point,
+      }};
+
   return create_fully_connected_nc(
     input_channels, output_channels,
     input_stride, output_stride,
@@ -2072,27 +2128,15 @@ enum xnn_status xnn_create_fully_connected_nc_qs8(
 }
 
 enum xnn_status create_fully_connected_nc_qx8_qc8w(
-  size_t input_channels,
-  size_t output_channels,
-  size_t input_stride,
-  size_t output_stride,
-  float input_scale,
-  const float* kernel_scale,
-  const int8_t* kernel,
-  const int32_t* bias,
-  int8_t output_zero_point,
-  float output_scale,
-  int8_t output_min,
-  int8_t output_max,
-  uint32_t flags,
-  xnn_code_cache_t code_cache,
-  xnn_weights_cache_t weights_cache,
-  const struct xnn_gemm_config *gemm_config,
-  enum xnn_operator_type expected_operator_type,
-  bool filter_is_nibble,
-  const void *packing_params,
-  xnn_operator_t* fully_connected_op_out)
-{
+    size_t input_channels, size_t output_channels, size_t input_stride,
+    size_t output_stride, float input_scale, const float* kernel_scale,
+    const int8_t* kernel, const int32_t* bias, int8_t output_zero_point,
+    float output_scale, int8_t output_min, int8_t output_max, uint32_t flags,
+    xnn_code_cache_t code_cache, xnn_weights_cache_t weights_cache,
+    const struct xnn_gemm_config* gemm_config,
+    enum xnn_operator_type expected_operator_type, bool filter_is_nibble,
+    struct xnn_packing_params* packing_params,
+    xnn_operator_t* fully_connected_op_out) {
   if (input_scale <= 0.0f || !isnormal(input_scale)) {
     xnn_log_error(
       "failed to create %s operator with %.7g input scale: scale must be finite, normalized, and positive",
@@ -2128,6 +2172,7 @@ enum xnn_status create_fully_connected_nc_qx8_qc8w(
       xnn_operator_type_to_string(expected_operator_type));
     return xnn_status_out_of_memory;
   }
+  packing_params->cleanup = requantization_scale;
 
   for (size_t output_channel = 0; output_channel < output_channels; output_channel++) {
     requantization_scale[output_channel] = input_scale * kernel_scale[output_channel] / output_scale;
@@ -2174,7 +2219,6 @@ enum xnn_status create_fully_connected_nc_qx8_qc8w(
     /*weights_cache=*/weights_cache,
     fully_connected_op_out);
 
-  xnn_release_simd_memory(requantization_scale);
   return status;
 }
 
@@ -2199,13 +2243,15 @@ enum xnn_status xnn_create_fully_connected_nc_qs8_qc4w(
   xnn_operator_t* fully_connected_op_out)
 {
   const struct xnn_gemm_config* gemm_config = xnn_init_qs8_qc4w_gemm_config();
-  const struct xnn_qs8_qc4w_packing_params packing_params = { .input_zero_point = input_zero_point, .kernel_zero_point = kernel_zero_point };
-  return create_fully_connected_nc_qx8_qc8w(input_channels, output_channels, input_stride, output_stride,
-                                            input_scale, kernel_scale, kernel,
-                                            bias, output_zero_point, output_scale, output_min,
-                                            output_max, flags, code_cache, weights_cache,
-                                            gemm_config, xnn_operator_type_fully_connected_nc_qs8_qc4w, /*filter_is_nibble=*/true, &packing_params,
-                                            fully_connected_op_out);
+  struct xnn_packing_params packing_params = {
+      .qs8_qc4w_packing_params = {.input_zero_point = input_zero_point,
+                                  .kernel_zero_point = kernel_zero_point}};
+  return create_fully_connected_nc_qx8_qc8w(
+      input_channels, output_channels, input_stride, output_stride, input_scale,
+      kernel_scale, kernel, bias, output_zero_point, output_scale, output_min,
+      output_max, flags, code_cache, weights_cache, gemm_config,
+      xnn_operator_type_fully_connected_nc_qs8_qc4w, /*filter_is_nibble=*/true,
+      &packing_params, fully_connected_op_out);
 }
 
 enum xnn_status xnn_create_fully_connected_nc_qs8_qc8w(
@@ -2228,13 +2274,14 @@ enum xnn_status xnn_create_fully_connected_nc_qs8_qc8w(
   xnn_operator_t* fully_connected_op_out)
 {
   const struct xnn_gemm_config* gemm_config = xnn_init_qs8_qc8w_gemm_config();
-  const struct xnn_qs8_packing_params packing_params = { .input_zero_point = input_zero_point};
-  return create_fully_connected_nc_qx8_qc8w(input_channels, output_channels, input_stride, output_stride,
-                                            input_scale, kernel_scale, kernel,
-                                            bias, output_zero_point, output_scale, output_min,
-                                            output_max, flags, code_cache, weights_cache,
-                                            gemm_config, xnn_operator_type_fully_connected_nc_qs8_qc8w, /*filter_is_nibble=*/false,
-                                            &packing_params, fully_connected_op_out);
+  struct xnn_packing_params packing_params = {
+      .qs8_packing_params = {.input_zero_point = input_zero_point}};
+  return create_fully_connected_nc_qx8_qc8w(
+      input_channels, output_channels, input_stride, output_stride, input_scale,
+      kernel_scale, kernel, bias, output_zero_point, output_scale, output_min,
+      output_max, flags, code_cache, weights_cache, gemm_config,
+      xnn_operator_type_fully_connected_nc_qs8_qc8w, /*filter_is_nibble=*/false,
+      &packing_params, fully_connected_op_out);
 }
 
 enum xnn_status xnn_create_fully_connected_nc_pqs8_qc8w(
@@ -2257,13 +2304,14 @@ enum xnn_status xnn_create_fully_connected_nc_pqs8_qc8w(
   xnn_operator_t* fully_connected_op_out)
 {
   const struct xnn_gemm_config* gemm_config = xnn_init_pqs8_qc8w_gemm_config();
-  const struct xnn_qs8_packing_params packing_params = { .input_zero_point = input_zero_point};
-  return create_fully_connected_nc_qx8_qc8w(input_channels, output_channels, input_stride, output_stride,
-                                            input_scale, kernel_scale, kernel,
-                                            bias, output_zero_point, output_scale, output_min,
-                                            output_max, flags, code_cache, weights_cache,
-                                            gemm_config, xnn_operator_type_fully_connected_nc_pqs8_qc8w, /*filter_is_nibble=*/false,
-                                            &packing_params, fully_connected_op_out);
+  struct xnn_packing_params packing_params = {
+      .qs8_packing_params = {.input_zero_point = input_zero_point}};
+  return create_fully_connected_nc_qx8_qc8w(
+      input_channels, output_channels, input_stride, output_stride, input_scale,
+      kernel_scale, kernel, bias, output_zero_point, output_scale, output_min,
+      output_max, flags, code_cache, weights_cache, gemm_config,
+      xnn_operator_type_fully_connected_nc_pqs8_qc8w,
+      /*filter_is_nibble=*/false, &packing_params, fully_connected_op_out);
 }
 
 enum xnn_status xnn_create_fully_connected_nc_qu8(
@@ -2332,10 +2380,11 @@ enum xnn_status xnn_create_fully_connected_nc_qu8(
     gemm_config->init.qu8(&params,
       kernel_zero_point, requantization_scale, output_zero_point, output_min, output_max);
   }
-  const struct xnn_qu8_packing_params packing_params = {
-    .input_zero_point = input_zero_point,
-    .kernel_zero_point = kernel_zero_point,
-  };
+  const struct xnn_packing_params packing_params = {
+      .qu8_packing_params = {
+          .input_zero_point = input_zero_point,
+          .kernel_zero_point = kernel_zero_point,
+      }};
   return create_fully_connected_nc(
     input_channels, output_channels,
     input_stride, output_stride,

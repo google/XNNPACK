@@ -39,6 +39,7 @@
 #include "src/xnnpack/operator.h"
 #include "src/xnnpack/params.h"
 #include "src/xnnpack/subgraph.h"
+#include "src/xnnpack/task.h"
 #include <pthreadpool.h>
 
 enum xnn_status xnn_reshape_external_value(
@@ -1041,7 +1042,10 @@ enum xnn_status xnn_get_runtime_profiling_info(xnn_runtime_t runtime,
 enum xnn_status xnn_invoke_runtime(
   xnn_runtime_t runtime)
 {
-  #ifdef XNN_SLINKY_AVAILABLE
+  // Wait for any asynchronous setup tasks.
+  xnn_task_wait_on_running();
+
+#ifdef XNN_SLINKY_AVAILABLE
   if (runtime->slinky_pipeline) {
     return slinky_invoke_pipeline(runtime);
   }
