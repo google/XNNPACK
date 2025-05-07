@@ -579,6 +579,27 @@ struct xnn_x32_packb_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
+struct xnn_qu8_packing_params {
+  uint8_t input_zero_point;
+  uint8_t kernel_zero_point;
+};
+
+struct xnn_qs8_packing_params {
+  int8_t input_zero_point;
+};
+
+struct xnn_packing_params {
+  union {
+    struct xnn_qs8_packw_params qs8_packw_params;
+    struct xnn_qs8_qc4w_packing_params qs8_qc4w_packing_params;
+    struct xnn_qs8_qc8w_packing_params qs8_qc8w_packing_params;
+    struct xnn_x32_packb_params x32_packb_params;
+    struct xnn_qu8_packing_params qu8_packing_params;
+    struct xnn_qs8_packing_params qs8_packing_params;
+  };
+  void* cleanup;
+};
+
 struct xnn_unary_reference_params {
   float x_scale;
   float x_zero_point;
