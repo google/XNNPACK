@@ -1209,19 +1209,6 @@ XNN_DEPRECATED enum xnn_status xnn_define_multiply2(
   uint32_t output_id,
   uint32_t flags);
 
-// Cap operations applied to logits (Q * K) of attention operator.
-enum xnn_attention_logits_cap_type {
-  // No capping.
-  xnn_attention_logits_cap_type_none = 0,
-  // Cap the absolute values of logits by tanh: tanh(logits / cap) * cap
-  xnn_attention_logits_cap_type_tanh
-};
-
-// Params when the cap type is xnn_attention_logits_cap_type_tanh.
-struct xnn_attention_logits_cap_tanh_params {
-  float cap;
-};
-
 /// Define a Subtract Node and add it to a Subgraph.
 ///
 /// The Subtract Node computes elementwise subtraction of two tensor inputs with numpy broadcasting rules.
