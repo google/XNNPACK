@@ -893,7 +893,10 @@ IF(XNNPACK_BUILD_LIBRARY)
   TARGET_LINK_LIBRARIES(subgraph PRIVATE xnnpack-base allocator logging memory mutex operators operator-run datatype)
   TARGET_LINK_LIBRARIES(XNNPACK PRIVATE xnnpack-base allocator cache hardware-config indirection memory microkernel-utils microparams-init mutex normalization operators operator-run operator-utils packing microkernels-prod subgraph datatype reference-ukernels)
   TARGET_LINK_LIBRARIES(XNNPACK PUBLIC pthreadpool logging)
-  SET_TARGET_PROPERTIES(XNNPACK PROPERTIES C_EXTENSIONS YES)
+  SET_TARGET_PROPERTIES(XNNPACK PROPERTIES
+    C_EXTENSIONS YES
+    VERSION 0.0
+    SOVERSION 0)
 ENDIF()
 IF(NOT MSVC)
   SET_PROPERTY(SOURCE ${ALL_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -fno-math-errno ")
