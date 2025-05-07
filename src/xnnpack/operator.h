@@ -55,9 +55,10 @@ struct xnn_ukernel_dwconv2d {
 
 struct xnn_ukernel_gemm {
   struct xnn_hmp_gemm_ukernel gemm_cases[XNN_MAX_MR];
-  // Attention operator uses both types of packing.
-  xnn_packw_gemm_goi_ukernel_fn packw_gemm_goi;
-  xnn_packw_gemm_gio_ukernel_fn packw_gemm_gio;
+  union {
+    xnn_packw_gemm_goi_ukernel_fn packw_gemm_goi;
+    xnn_packw_gemm_gio_ukernel_fn packw_gemm_gio;
+  };
   uint8_t mr;
   uint8_t mr_packed;
   uint8_t nr;
@@ -133,7 +134,7 @@ enum xnn_run_state {
 };
 
 struct xnn_operator {
-  size_t batch_size;
+  uint32_t batch_size;
   uint32_t padding_top;
   uint32_t padding_right;
   uint32_t padding_bottom;
@@ -145,26 +146,26 @@ struct xnn_operator {
   uint32_t dilation_height;
   uint32_t dilation_width;
   uint32_t groups;
-  size_t group_channels;
-  size_t group_input_channels;
-  size_t group_output_channels;
-  size_t channels;
+  uint32_t group_channels;
+  uint32_t group_input_channels;
+  uint32_t group_output_channels;
+  uint32_t channels;
 
   uint32_t pad_value;
 
-  size_t input_height;
-  size_t input_width;
-  size_t input_pixel_stride;
+  uint32_t input_height;
+  uint32_t input_width;
+  uint32_t input_pixel_stride;
   const void* input;
   const void** indirection_buffer;
 
-  size_t output_height;
-  size_t output_width;
-  size_t output_pixel_stride;
+  uint32_t output_height;
+  uint32_t output_width;
+  uint32_t output_pixel_stride;
   void* output;
   const void* quantization_params;
 
-  size_t k_block_size;
+  uint32_t k_block_size;
 
   union {
     // Pointer to allocated packed weights. Use this if weights_cache is NULL.
@@ -174,29 +175,28 @@ struct xnn_operator {
     size_t offset;
   } packed_weights;
   // Stride between each set of packed weights.
-  size_t weights_stride;
+  uint32_t weights_stride;
   // Total number of non-zero kernel elements when weights use sparse
   // representation.
-  size_t num_nonzero_values;
+  uint32_t num_nonzero_values;
   // Total number of non-zero kernel blocks when weights use sparse
   // representation.
-  size_t num_nonzero_blocks;
+  uint32_t num_nonzero_blocks;
   // Total number of output channel blocks when weights use sparse
   // representation.
-  size_t num_output_channel_blocks;
+  uint32_t num_output_channel_blocks;
   // Input channel corresponding to the first non-zero kernel element.
-  size_t first_input_channel;
+  uint32_t first_input_channel;
 
   float input_scale;
-  float output_scale;
 
-  size_t valid_batch_size;
-  size_t last_input_height;
-  size_t last_input_width;
-  size_t last_input_channels;
+  uint32_t valid_batch_size;
+  uint32_t last_input_height;
+  uint32_t last_input_width;
+  uint32_t last_input_channels;
   const void* last_input;
-  size_t last_output_height;
-  size_t last_output_width;
+  uint32_t last_output_height;
+  uint32_t last_output_width;
   void* last_output;
   uint32_t last_mr;
 
@@ -204,7 +204,7 @@ struct xnn_operator {
 
   void* zero_buffer;
   void** zero_buffers;
-  size_t zero_size;
+  uint32_t zero_size;
   void* lookup_table;
   void* pixelwise_buffer;
   struct subconvolution_params* subconvolution_buffer;
@@ -309,16 +309,6 @@ struct xnn_operator {
       const struct xnn_gemm_config*
           gemm_config;  // For dynamic quantization convert operator.
     };  // For unary elementwise operators.
-    struct {
-      const struct xnn_reduce_config* rmax_config;
-      const struct xnn_raddstoreexpminusmax_config* raddstoreexpminusmax_config;
-      const struct xnn_binary_elementwise_config* vadd_config;
-      const struct xnn_binary_elementwise_config* vmul_config;
-      const struct xnn_unary_elementwise_config* vtanh_config;
-      const struct xnn_binary_elementwise_config* vprelu_config;
-      enum xnn_attention_logits_cap_type cap_type;
-      struct xnn_attention_logits_cap_tanh_params cap_params;
-    } attention;  // For attention operator.
     const struct xnn_pack_lh_config* pack_lh_config;
   };
 
@@ -338,8 +328,10 @@ struct xnn_operator {
       union {
         struct gemm_context gemm;
       } gemm;
-      struct packw_gemm_goi_context packw_gemm_goi;
-      struct packw_gemm_gio_context packw_gemm_gio;
+      union {
+        struct packw_gemm_goi_context packw_gemm_goi;
+        struct packw_gemm_gio_context packw_gemm_gio;
+      };
       bool const_weights;
     } gemm;
     struct {
@@ -376,7 +368,6 @@ struct xnn_operator {
     struct pack_lh_context pack_lh;
   } context;
 
-  struct xnn_code_cache* code_cache;
   xnn_weights_cache_t weights_cache;
   enum xnn_run_state state;
 };
