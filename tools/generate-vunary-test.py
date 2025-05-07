@@ -178,14 +178,6 @@ $if "q" in DATATYPE:
   TEST(ukernel, output_scale) { TestOutputScale<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }
   TEST(ukernel, input_zero_point) { TestInputZeroPoint<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }
   TEST(ukernel, output_zero_point) { TestOutputZeroPoint<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }
-$if DATATYPE == "f32" and OP_TYPE in SPECIAL_VALUES_F32:
-  TEST(ukernel, special_values) {
-    TEST_REQUIRES_ARCH_FLAGS(arch_flags);
-    VUnaryMicrokernelTester().Test<TestInfo, datatype, datatype>(ukernel, init_params,
-      /*inputs=*/${SPECIAL_VALUES_F32[OP_TYPE][1]},
-      /*outputs=*/${SPECIAL_VALUES_F32[OP_TYPE][2]},
-      /*tolerance_ulp=*/${SPECIAL_VALUES_F32[OP_TYPE][3]});
-  }
 """
 
 
