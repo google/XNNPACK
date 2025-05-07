@@ -15,6 +15,16 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/vunary.h"
 
+// The AVX512 rsqrt instruction produces different results than the AVX and
+// lower instruction. Use the AVX instruction to avoid numerical inconsistency.
+static __m512 mm512_rsqrt_ps(__m512 x) {
+  __m256 lo = _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(x), 0));
+  __m256 hi = _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(x), 1));
+  lo = _mm256_rsqrt_ps(lo);
+  hi = _mm256_rsqrt_ps(hi);
+  return _mm512_castpd_ps(_mm512_insertf64x4(_mm512_castps_pd(_mm512_castps256_ps512(lo)), _mm256_castps_pd(hi), 1));
+}
+
 // In the following, we do a single Newton-Raphson step on the equation
 // $x^{-2} - a$, which expands to:
 //
@@ -55,10 +65,10 @@ void xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u64(
     input += 64;
 
     // Generate the initial 14-bit approximation.
-    const __m512 vt0_0 = _mm512_rsqrt14_ps(vx0);
-    const __m512 vt0_1 = _mm512_rsqrt14_ps(vx1);
-    const __m512 vt0_2 = _mm512_rsqrt14_ps(vx2);
-    const __m512 vt0_3 = _mm512_rsqrt14_ps(vx3);
+    const __m512 vt0_0 = mm512_rsqrt_ps(vx0);
+    const __m512 vt0_1 = mm512_rsqrt_ps(vx1);
+    const __m512 vt0_2 = mm512_rsqrt_ps(vx2);
+    const __m512 vt0_3 = mm512_rsqrt_ps(vx3);
 
     // Do a single Newton-Raphson step as described above.
     const __m512 vt1_0 = _mm512_mul_ps(vt0_0, vt0_0);
@@ -90,7 +100,7 @@ void xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u64(
     input += 16;
 
     // Generate the initial 14-bit approximation.
-    const __m512 vt0 = _mm512_rsqrt14_ps(vx);
+    const __m512 vt0 = mm512_rsqrt_ps(vx);
 
     // Do a single Newton-Raphson step as described above.
     const __m512 vt1 = _mm512_mul_ps(vt0, vt0);
@@ -110,7 +120,7 @@ void xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u64(
     const __m512 vx = _mm512_maskz_loadu_ps(vmask, input);
 
     // Generate the initial 14-bit approximation.
-    const __m512 vt0 = _mm512_rsqrt14_ps(vx);
+    const __m512 vt0 = mm512_rsqrt_ps(vx);
 
     // Do a single Newton-Raphson step as described above.
     const __m512 vt1 = _mm512_mul_ps(vt0, vt0);
