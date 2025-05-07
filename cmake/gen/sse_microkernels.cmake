@@ -31,7 +31,6 @@ SET(PROD_SSE_MICROKERNEL_SRCS
   src/f32-rminmax/gen/f32-rmax-sse-u16-acc4.c
   src/f32-rminmax/gen/f32-rmin-sse-u16-acc4.c
   src/f32-rminmax/gen/f32-rminmax-sse-u16-acc4.c
-  src/f32-rsum/gen/f32-rsum-sse-u16-acc4.c
   src/f32-spmm/gen/f32-spmm-32x1-minmax-sse.c
   src/f32-vbinary/gen/f32-vadd-sse-u8.c
   src/f32-vbinary/gen/f32-vaddc-sse-u8.c
@@ -167,10 +166,6 @@ SET(NON_PROD_SSE_MICROKERNEL_SRCS
   src/f32-rminmax/gen/f32-rminmax-sse-u8-acc2.c
   src/f32-rminmax/gen/f32-rminmax-sse-u12-acc3.c
   src/f32-rminmax/gen/f32-rminmax-sse-u16-acc2.c
-  src/f32-rsum/gen/f32-rsum-sse-u4.c
-  src/f32-rsum/gen/f32-rsum-sse-u8-acc2.c
-  src/f32-rsum/gen/f32-rsum-sse-u12-acc3.c
-  src/f32-rsum/gen/f32-rsum-sse-u16-acc2.c
   src/f32-spmm/gen/f32-spmm-4x1-minmax-sse.c
   src/f32-spmm/gen/f32-spmm-8x1-minmax-sse.c
   src/f32-spmm/gen/f32-spmm-16x1-minmax-sse.c

@@ -16,15 +16,15 @@
   init: xnn_init_f32_scale_scalar_params
 
 # x86 SSE
-- name: xnn_f32_rsum_ukernel__sse_u4
+- name: xnn_f32_rsum_ukernel__sse2_u4
   init: xnn_init_f32_scale_scalar_params
-- name: xnn_f32_rsum_ukernel__sse_u8_acc2
+- name: xnn_f32_rsum_ukernel__sse2_u8_acc2
   init: xnn_init_f32_scale_scalar_params
-- name: xnn_f32_rsum_ukernel__sse_u12_acc3
+- name: xnn_f32_rsum_ukernel__sse2_u12_acc3
   init: xnn_init_f32_scale_scalar_params
-- name: xnn_f32_rsum_ukernel__sse_u16_acc2
+- name: xnn_f32_rsum_ukernel__sse2_u16_acc2
   init: xnn_init_f32_scale_scalar_params
-- name: xnn_f32_rsum_ukernel__sse_u16_acc4
+- name: xnn_f32_rsum_ukernel__sse2_u16_acc4
   init: xnn_init_f32_scale_scalar_params
 
 # x86 AVX

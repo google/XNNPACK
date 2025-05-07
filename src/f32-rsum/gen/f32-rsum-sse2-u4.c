@@ -16,7 +16,7 @@
 #include "src/xnnpack/reduce.h"
 
 
-void xnn_f32_rsum_ukernel__sse_u4(
+void xnn_f32_rsum_ukernel__sse2_u4(
     size_t batch,
     const float* input,
     float* output,

@@ -16,7 +16,7 @@
 #include "src/xnnpack/reduce.h"
 
 
-void xnn_f32_rsum_ukernel__sse_u12_acc3(
+void xnn_f32_rsum_ukernel__sse2_u8_acc2(
     size_t batch,
     const float* input,
     float* output,
@@ -29,18 +29,14 @@ void xnn_f32_rsum_ukernel__sse_u12_acc3(
 
   __m128 vacc0 = _mm_setzero_ps();
   __m128 vacc1 = _mm_setzero_ps();
-  __m128 vacc2 = _mm_setzero_ps();
-  for (; batch >= 12 * sizeof(float); batch -= 12 * sizeof(float)) {
+  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const __m128 vt0 = _mm_loadu_ps(input);
     const __m128 vt1 = _mm_loadu_ps(input + 4);
-    const __m128 vt2 = _mm_loadu_ps(input + 8);
-    input += 12;
+    input += 8;
 
     vacc0 = _mm_add_ps(vacc0, vt0);
     vacc1 = _mm_add_ps(vacc1, vt1);
-    vacc2 = _mm_add_ps(vacc2, vt2);
   }
-  vacc0 = _mm_add_ps(vacc0, vacc2);
   vacc0 = _mm_add_ps(vacc0, vacc1);
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const __m128 vt = _mm_loadu_ps(input);

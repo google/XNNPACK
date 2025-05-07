@@ -72,7 +72,7 @@
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_rsum, sse_u4,
-                    xnn_f32_rsum_ukernel__sse_u4,
+                    xnn_f32_rsum_ukernel__sse2_u4,
                     xnn_init_f32_scale_scalar_params)
     ->Apply(BenchmarkRSUM)
     ->UseRealTime();
@@ -81,7 +81,7 @@
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_rsum, sse_u8_acc2,
-                    xnn_f32_rsum_ukernel__sse_u8_acc2,
+                    xnn_f32_rsum_ukernel__sse2_u8_acc2,
                     xnn_init_f32_scale_scalar_params)
     ->Apply(BenchmarkRSUM)
     ->UseRealTime();
@@ -90,7 +90,7 @@
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_rsum, sse_u12_acc3,
-                    xnn_f32_rsum_ukernel__sse_u12_acc3,
+                    xnn_f32_rsum_ukernel__sse2_u12_acc3,
                     xnn_init_f32_scale_scalar_params)
     ->Apply(BenchmarkRSUM)
     ->UseRealTime();
@@ -99,7 +99,7 @@
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_rsum, sse_u16_acc2,
-                    xnn_f32_rsum_ukernel__sse_u16_acc2,
+                    xnn_f32_rsum_ukernel__sse2_u16_acc2,
                     xnn_init_f32_scale_scalar_params)
     ->Apply(BenchmarkRSUM)
     ->UseRealTime();
@@ -108,7 +108,7 @@
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_rsum, sse_u16_acc4,
-                    xnn_f32_rsum_ukernel__sse_u16_acc4,
+                    xnn_f32_rsum_ukernel__sse2_u16_acc4,
                     xnn_init_f32_scale_scalar_params)
     ->Apply(BenchmarkRSUM)
     ->UseRealTime();
