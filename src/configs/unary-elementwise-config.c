@@ -1378,7 +1378,9 @@ static void init_f32_sqrt_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+      // TODO: b/404616456 - This kernel should only be enabled if we allow
+      // numerically inconsistent results across microarchitectures.
+      if (false && !XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
         f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqrt_ukernel__avx512f_rsqrt_u16;
       } else
     #endif
@@ -1409,7 +1411,9 @@ static void init_f32_rsqrt_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+      // TODO: b/404616456 - This kernel should only be enabled if we allow
+      // numerically inconsistent results across microarchitectures.
+      if (false && !XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
         f32_rsqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u32;
       } else
     #endif
