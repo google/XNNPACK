@@ -1,6 +1,6 @@
 // clang-format off
 // Auto-generated file. Do not edit!
-//   Template: src/f32-rsum/avx.c.in
+//   Template: src/f32-rsum/simd.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2023 Google LLC
@@ -10,11 +10,20 @@
 
 #include <assert.h>
 
-#include <immintrin.h>
-
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/reduce.h"
+#include "src/xnnpack/simd/f32-avx.h"
 
+static XNN_INLINE float load_tail_reduce_add_f32(xnn_simd_f32_t acc,
+                                                 const float* input,
+                                                 size_t num_elements) {
+  assert(num_elements < xnn_simd_size_f32);
+  if (num_elements != 0) {
+    xnn_simd_f32_t tail = xnn_load_tail_safe_f32(input, num_elements);
+    acc = xnn_add_f32(acc, tail);
+  }
+  return xnn_reduce_add_f32(acc);
+}
 
 void xnn_f32_rsum_ukernel__avx_u32_acc2(
     size_t batch,
@@ -22,44 +31,33 @@ void xnn_f32_rsum_ukernel__avx_u32_acc2(
     float* output,
     const struct xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
-
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  __m256 vacc0 = _mm256_setzero_ps();
-  __m256 vacc1 = _mm256_setzero_ps();
+  xnn_simd_f32_t vacc0 = xnn_zero_f32();
+  xnn_simd_f32_t vacc1 = xnn_zero_f32();
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
-    const __m256 vt0 = _mm256_loadu_ps(input);
-    const __m256 vt1 = _mm256_loadu_ps(input + 8);
-    const __m256 vt2 = _mm256_loadu_ps(input + 16);
-    const __m256 vt3 = _mm256_loadu_ps(input + 24);
+    const xnn_simd_f32_t vt0 = xnn_loadu_f32(input);
+    const xnn_simd_f32_t vt1 = xnn_loadu_f32(input + 1 * xnn_simd_size_f32);
+    const xnn_simd_f32_t vt2 = xnn_loadu_f32(input + 2 * xnn_simd_size_f32);
+    const xnn_simd_f32_t vt3 = xnn_loadu_f32(input + 3 * xnn_simd_size_f32);
     input += 32;
 
-    vacc0 = _mm256_add_ps(vacc0, vt0);
-    vacc1 = _mm256_add_ps(vacc1, vt1);
-    vacc0 = _mm256_add_ps(vacc0, vt2);
-    vacc1 = _mm256_add_ps(vacc1, vt3);
+    vacc0 = xnn_add_f32(vacc0, vt0);
+    vacc1 = xnn_add_f32(vacc1, vt1);
+    vacc0 = xnn_add_f32(vacc0, vt2);
+    vacc1 = xnn_add_f32(vacc1, vt3);
   }
-  vacc0 = _mm256_add_ps(vacc0, vacc1);
-  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const __m256 vt = _mm256_loadu_ps(input);
-    input += 8;
+  vacc0 = xnn_add_f32(vacc0, vacc1);
+  for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
+    const xnn_simd_f32_t vt = xnn_loadu_f32(input);
+    input += xnn_simd_size_f32;
 
-    vacc0 = _mm256_add_ps(vacc0, vt);
+    vacc0 = xnn_add_f32(vacc0, vt);
   }
-  if XNN_UNLIKELY(batch != 0) {
-    assert(batch >= 1 * sizeof(float));
-    assert(batch <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - batch));
-    const __m256 vt = _mm256_maskload_ps(input, vmask);
-    vacc0 = _mm256_add_ps(vacc0, vt);
-  }
-  __m128 vacc = _mm_add_ps(_mm256_castps256_ps128(vacc0), _mm256_extractf128_ps(vacc0, 1));
-  vacc = _mm_add_ps(vacc, _mm_movehl_ps(vacc, vacc));
-  vacc = _mm_add_ss(vacc, _mm_movehdup_ps(vacc));
-  vacc = _mm_mul_ss(vacc, _mm_load_ss(&params->scalar.scale));
-  *output += _mm_cvtss_f32(vacc);
+  const float vscale = params->scalar.scale;
+  float vresult = load_tail_reduce_add_f32(vacc0, input, batch >> XNN_LOG2_SIZEOF_FLOAT);
+  *output += vresult * vscale;
 }

@@ -1,6 +1,6 @@
 // clang-format off
 // Auto-generated file. Do not edit!
-//   Template: src/f32-rsum/scalar.c.in
+//   Template: src/f32-rsum/simd.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2023 Google LLC
@@ -12,7 +12,18 @@
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/reduce.h"
+#include "src/xnnpack/simd/f32-scalar.h"
 
+static XNN_INLINE float load_tail_reduce_add_f32(xnn_simd_f32_t acc,
+                                                 const float* input,
+                                                 size_t num_elements) {
+  assert(num_elements < xnn_simd_size_f32);
+  if (num_elements != 0) {
+    xnn_simd_f32_t tail = xnn_load_tail_safe_f32(input, num_elements);
+    acc = xnn_add_f32(acc, tail);
+  }
+  return xnn_reduce_add_f32(acc);
+}
 
 void xnn_f32_rsum_ukernel__scalar_u1(
     size_t batch,
@@ -25,13 +36,14 @@ void xnn_f32_rsum_ukernel__scalar_u1(
   assert(input != NULL);
   assert(output != NULL);
 
-  float vacc0 = 0.0f;
-  do {
-    const float vt = *input++;
-    vacc0 += vt;
-    batch -= sizeof(float);
-  } while (batch != 0);
+  xnn_simd_f32_t vacc0 = xnn_zero_f32();
+  for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
+    const xnn_simd_f32_t vt = xnn_loadu_f32(input);
+    input += xnn_simd_size_f32;
+
+    vacc0 = xnn_add_f32(vacc0, vt);
+  }
   const float vscale = params->scalar.scale;
-  vacc0 *= vscale;
-  *output += vacc0;
+  float vresult = load_tail_reduce_add_f32(vacc0, input, batch >> XNN_LOG2_SIZEOF_FLOAT);
+  *output += vresult * vscale;
 }

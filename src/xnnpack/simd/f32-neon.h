@@ -125,6 +125,16 @@ static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
   return vnegq_f32(a);
 }
 
+static XNN_INLINE float xnn_reduce_add_f32(xnn_simd_f32_t a) {
+#if XNN_ARCH_ARM64
+  return vaddvq_f32(a);
+#else
+  float32x2_t b = vpadd_f32(vget_low_f32(a), vget_high_f32(a));
+  b = vpadd_f32(b, b);
+  return vget_lane_f32(b, 0);
+#endif
+}
+
 // Logical operations.
 static XNN_INLINE xnn_simd_f32_t xnn_and_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {

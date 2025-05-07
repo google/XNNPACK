@@ -93,6 +93,19 @@ static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
   return _mm512_roundscale_ps(a, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
 }
 
+static XNN_INLINE float xnn_reduce_add_f32(xnn_simd_f32_t a) {
+  // Not using _mm512_reduce_add_ps because we're trying to produce numerically
+  // consistent results with AVX.
+  __m256 a256 = _mm256_add_ps(
+      _mm512_castps512_ps256(a),
+      _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(a), 1)));
+  __m128 a128 =
+      _mm_add_ps(_mm256_castps256_ps128(a256), _mm256_extractf128_ps(a256, 1));
+  a128 = _mm_add_ps(a128, _mm_movehl_ps(a128, a128));
+  a128 = _mm_add_ss(a128, _mm_movehdup_ps(a128));
+  return _mm_cvtss_f32(a128);
+}
+
 // Logical operations.
 static XNN_INLINE xnn_simd_f32_t xnn_and_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {

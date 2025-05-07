@@ -1,0 +1,102 @@
+// Copyright 2023 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % SIMD_SIZE == 0
+$assert BATCH_TILE >= SIMD_SIZE
+$SIMD_TILE = BATCH_TILE // SIMD_SIZE
+$assert ACCUMULATORS <= SIMD_TILE
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/reduce.h"
+#include "src/xnnpack/simd/f32-${ARCH}.h"
+
+static XNN_INLINE float load_tail_reduce_add_f32(xnn_simd_f32_t acc,
+                                                 const float* input,
+                                                 size_t num_elements) {
+  assert(num_elements < xnn_simd_size_f32);
+  $if ARCH == "neon":
+    float32x2_t result =
+        vadd_f32(vget_low_f32(acc), vget_high_f32(acc));
+    if XNN_UNLIKELY (num_elements & 2) {
+      const float32x2_t vt = vld1_f32(input);
+      input += 2;
+      result = vadd_f32(result, vt);
+    }
+    result = vpadd_f32(result, result);
+    if XNN_UNLIKELY (num_elements & 1) {
+      const float32x2_t vt = vld1_dup_f32(input);
+      result = vadd_f32(result, vt);
+    }
+    return vget_lane_f32(result, 0);
+  $elif ARCH == "sse2":
+    for (; num_elements > 0; num_elements -= 1) {
+      const __m128 vt = _mm_load_ss(input);
+      input += 1;
+      acc = _mm_add_ss(acc, vt);
+    }
+    return xnn_reduce_add_f32(acc);
+  $elif ARCH == "wasmsimd":
+    acc = wasm_f32x4_add(acc, wasm_v64x2_shuffle(acc, acc, 1, 1));
+    if XNN_UNLIKELY(num_elements & 2) {
+      const v128_t vt = wasm_v128_load64_zero(input);
+      input += 2;
+      acc = wasm_f32x4_add(acc, vt);
+    }
+    acc = wasm_f32x4_add(acc, wasm_v32x4_shuffle(acc, acc, 1, 1, 1, 1));
+    if XNN_UNLIKELY(num_elements & 1) {
+      const v128_t vt = wasm_v128_load32_zero(input);
+      acc = wasm_f32x4_add(acc, vt);
+    }
+    return wasm_f32x4_extract_lane(acc, 0);
+  $else:
+    if (num_elements != 0) {
+      xnn_simd_f32_t tail = xnn_load_tail_safe_f32(input, num_elements);
+      acc = xnn_add_f32(acc, tail);
+    }
+    return xnn_reduce_add_f32(acc);
+}
+
+$ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
+void xnn_f32_rsum_ukernel__${"sse" if ARCH == "sse2" else ARCH}_u${BATCH_TILE}${ACC_SUFFIX}(
+    size_t batch,
+    const float* input,
+    float* output,
+    const struct xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  $for A in range(ACCUMULATORS):
+    xnn_simd_f32_t vacc${A} = xnn_zero_f32();
+  $if SIMD_TILE > 1:
+    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+      const xnn_simd_f32_t vt0 = xnn_loadu_f32(input);
+      $for N in range(1, SIMD_TILE):
+        const xnn_simd_f32_t vt${N} = xnn_loadu_f32(input + ${N} * xnn_simd_size_f32);
+      input += ${BATCH_TILE};
+
+      $for N in range(SIMD_TILE):
+        vacc${N % ACCUMULATORS} = xnn_add_f32(vacc${N % ACCUMULATORS}, vt${N});
+    }
+    $ACC_SLICE = (ACCUMULATORS + 1)//2
+    $while ACC_SLICE > 0:
+      $for A in range(0, ACC_SLICE):
+        $if A + ACC_SLICE < ACCUMULATORS:
+          vacc${A} = xnn_add_f32(vacc${A}, vacc${A + ACC_SLICE});
+      $ACC_SLICE //= 2
+  for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
+    const xnn_simd_f32_t vt = xnn_loadu_f32(input);
+    input += xnn_simd_size_f32;
+
+    vacc0 = xnn_add_f32(vacc0, vt);
+  }
+  const float vscale = params->scalar.scale;
+  float vresult = load_tail_reduce_add_f32(vacc0, input, batch >> XNN_LOG2_SIZEOF_FLOAT);
+  *output += vresult * vscale;
+}
