@@ -54,13 +54,13 @@ void xnn_f32_rsum_ukernel__neon_u8_acc2(
     vacc0 = xnn_add_f32(vacc0, vt0);
     vacc1 = xnn_add_f32(vacc1, vt1);
   }
-  vacc0 = xnn_add_f32(vacc0, vacc1);
-  for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
+  if (batch >= 16) {
     const xnn_simd_f32_t vt = xnn_loadu_f32(input);
-    input += xnn_simd_size_f32;
-
+    input += 4;
+    batch -= 16;
     vacc0 = xnn_add_f32(vacc0, vt);
   }
+  vacc0 = xnn_add_f32(vacc0, vacc1);
   const float vscale = params->scalar.scale;
   float vresult = load_tail_reduce_add_f32(vacc0, input, batch >> XNN_LOG2_SIZEOF_FLOAT);
   *output += vresult * vscale;

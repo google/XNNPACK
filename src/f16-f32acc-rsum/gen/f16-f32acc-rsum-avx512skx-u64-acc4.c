@@ -46,15 +46,27 @@ void xnn_f16_f32acc_rsum_ukernel__avx512skx_u64_acc4(
     vacc2 = _mm512_add_ps(vacc2, vt2);
     vacc3 = _mm512_add_ps(vacc3, vt3);
   }
+  if (batch >= 16 * sizeof(uint16_t)) {
+    const __m512 vt = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) i));
+    i += 16;
+    batch -= 16 * sizeof(uint16_t);
+    vacc0 = _mm512_add_ps(vacc0, vt);
+  }
+  if (batch >= 16 * sizeof(uint16_t)) {
+    const __m512 vt = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) i));
+    i += 16;
+    batch -= 16 * sizeof(uint16_t);
+    vacc1 = _mm512_add_ps(vacc1, vt);
+  }
+  if (batch >= 16 * sizeof(uint16_t)) {
+    const __m512 vt = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) i));
+    i += 16;
+    batch -= 16 * sizeof(uint16_t);
+    vacc2 = _mm512_add_ps(vacc2, vt);
+  }
   vacc0 = _mm512_add_ps(vacc0, vacc2);
   vacc1 = _mm512_add_ps(vacc1, vacc3);
   vacc0 = _mm512_add_ps(vacc0, vacc1);
-  for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
-    const __m512 vt = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) i));
-    i += 16;
-
-    vacc0 = _mm512_add_ps(vacc0, vt);
-  }
   if XNN_UNLIKELY(batch != 0) {
     assert(batch >= 1 * sizeof(uint16_t));
     assert(batch <= 15 * sizeof(uint16_t));

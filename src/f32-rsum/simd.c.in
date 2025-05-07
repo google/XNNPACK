@@ -74,28 +74,28 @@ void xnn_f32_rsum_ukernel__${"sse" if ARCH == "sse2" else ARCH}_u${BATCH_TILE}${
 
   $for A in range(ACCUMULATORS):
     xnn_simd_f32_t vacc${A} = xnn_zero_f32();
-  $if SIMD_TILE > 1:
-    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
-      const xnn_simd_f32_t vt0 = xnn_loadu_f32(input);
-      $for N in range(1, SIMD_TILE):
-        const xnn_simd_f32_t vt${N} = xnn_loadu_f32(input + ${N} * xnn_simd_size_f32);
-      input += ${BATCH_TILE};
+  for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+    const xnn_simd_f32_t vt0 = xnn_loadu_f32(input);
+    $for N in range(1, SIMD_TILE):
+      const xnn_simd_f32_t vt${N} = xnn_loadu_f32(input + ${N} * xnn_simd_size_f32);
+    input += ${BATCH_TILE};
 
-      $for N in range(SIMD_TILE):
-        vacc${N % ACCUMULATORS} = xnn_add_f32(vacc${N % ACCUMULATORS}, vt${N});
-    }
-    $ACC_SLICE = (ACCUMULATORS + 1)//2
-    $while ACC_SLICE > 0:
-      $for A in range(0, ACC_SLICE):
-        $if A + ACC_SLICE < ACCUMULATORS:
-          vacc${A} = xnn_add_f32(vacc${A}, vacc${A + ACC_SLICE});
-      $ACC_SLICE //= 2
-  for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
-    const xnn_simd_f32_t vt = xnn_loadu_f32(input);
-    input += xnn_simd_size_f32;
-
-    vacc0 = xnn_add_f32(vacc0, vt);
+    $for N in range(SIMD_TILE):
+      vacc${N % ACCUMULATORS} = xnn_add_f32(vacc${N % ACCUMULATORS}, vt${N});
   }
+  $for N in range(0, SIMD_TILE - 1):
+    if (batch >= ${SIMD_SIZE * 4}) {
+      const xnn_simd_f32_t vt = xnn_loadu_f32(input);
+      input += ${SIMD_SIZE};
+      batch -= ${SIMD_SIZE * 4};
+      vacc${N % ACCUMULATORS} = xnn_add_f32(vacc${N % ACCUMULATORS}, vt);
+    }
+  $ACC_SLICE = (ACCUMULATORS + 1)//2
+  $while ACC_SLICE > 0:
+    $for A in range(0, ACC_SLICE):
+      $if A + ACC_SLICE < ACCUMULATORS:
+        vacc${A} = xnn_add_f32(vacc${A}, vacc${A + ACC_SLICE});
+    $ACC_SLICE //= 2
   const float vscale = params->scalar.scale;
   float vresult = load_tail_reduce_add_f32(vacc0, input, batch >> XNN_LOG2_SIZEOF_FLOAT);
   *output += vresult * vscale;

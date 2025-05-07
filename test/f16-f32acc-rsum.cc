@@ -18,60 +18,6 @@
 
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  TEST(F16_F32ACC_RSUM__NEONFP16ARITH_U4, batch_eq_4) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    RSumMicrokernelTester()
-      .batch_size(4)
-      .Test(xnn_f16_f32acc_rsum_ukernel__neonfp16arith_u4, xnn_init_f16_f32acc_scale_scalar_params);
-  }
-
-  TEST(F16_F32ACC_RSUM__NEONFP16ARITH_U4, batch_div_4) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t batch_size = 8; batch_size < 40; batch_size += 4) {
-      RSumMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_f16_f32acc_rsum_ukernel__neonfp16arith_u4, xnn_init_f16_f32acc_scale_scalar_params);
-    }
-  }
-
-  TEST(F16_F32ACC_RSUM__NEONFP16ARITH_U4, batch_lt_4) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t batch_size = 1; batch_size < 4; batch_size++) {
-      RSumMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_f16_f32acc_rsum_ukernel__neonfp16arith_u4, xnn_init_f16_f32acc_scale_scalar_params);
-    }
-  }
-
-  TEST(F16_F32ACC_RSUM__NEONFP16ARITH_U4, batch_gt_4) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t batch_size = 5; batch_size < 8; batch_size++) {
-      RSumMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_f16_f32acc_rsum_ukernel__neonfp16arith_u4, xnn_init_f16_f32acc_scale_scalar_params);
-    }
-  }
-
-  TEST(F16_F32ACC_RSUM__NEONFP16ARITH_U4, scale) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (float scale = 0.3f; scale < 5.0f; scale *= 3.0f) {
-      RSumMicrokernelTester()
-        .batch_size(5)
-        .scale(scale)
-        .Test(xnn_f16_f32acc_rsum_ukernel__neonfp16arith_u4, xnn_init_f16_f32acc_scale_scalar_params);
-    }
-  }
-
-  TEST(F16_F32ACC_RSUM__NEONFP16ARITH_U4, overflow_accumulator) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    RSumMicrokernelTester()
-      .batch_size(512)
-      .Test(xnn_f16_f32acc_rsum_ukernel__neonfp16arith_u4, xnn_init_f16_f32acc_scale_scalar_params);
-  }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-
-
-#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_F32ACC_RSUM__NEONFP16ARITH_U8, batch_eq_8) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     RSumMicrokernelTester()

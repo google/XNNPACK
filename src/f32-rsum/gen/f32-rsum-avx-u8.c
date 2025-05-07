@@ -37,11 +37,11 @@ void xnn_f32_rsum_ukernel__avx_u8(
   assert(output != NULL);
 
   xnn_simd_f32_t vacc0 = xnn_zero_f32();
-  for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
-    const xnn_simd_f32_t vt = xnn_loadu_f32(input);
-    input += xnn_simd_size_f32;
+  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
+    const xnn_simd_f32_t vt0 = xnn_loadu_f32(input);
+    input += 8;
 
-    vacc0 = xnn_add_f32(vacc0, vt);
+    vacc0 = xnn_add_f32(vacc0, vt0);
   }
   const float vscale = params->scalar.scale;
   float vresult = load_tail_reduce_add_f32(vacc0, input, batch >> XNN_LOG2_SIZEOF_FLOAT);

@@ -35,28 +35,28 @@ void xnn_f16_f32acc_rsum_ukernel__f16c_u${BATCH_TILE}${ACC_SUFFIX}(
   const uint16_t* i = (const uint16_t*) input;
   $for A in range(ACCUMULATORS):
     __m256 vacc${A} = _mm256_setzero_ps();
-  $if BATCH_TILE > 8:
-    for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {
-      const __m256 vt0 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
-      $for N in range(1, SIMD_TILE):
-        const __m256 vt${N} = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (i + ${N * 8})));
-      i += ${BATCH_TILE};
+  for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {
+    const __m256 vt0 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
+    $for N in range(1, SIMD_TILE):
+      const __m256 vt${N} = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (i + ${N * 8})));
+    i += ${BATCH_TILE};
 
-      $for N in range(SIMD_TILE):
-        vacc${N % ACCUMULATORS} = _mm256_add_ps(vacc${N % ACCUMULATORS}, vt${N});
-    }
-    $REDUCE_ACC = (ACCUMULATORS + 1)//2
-    $while REDUCE_ACC > 0:
-      $for A in range(0, REDUCE_ACC):
-        $if A + REDUCE_ACC < ACCUMULATORS:
-          vacc${A} = _mm256_add_ps(vacc${A}, vacc${A + REDUCE_ACC});
-      $REDUCE_ACC //= 2
-  for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
-    const __m256 vt = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
-    i += 8;
-
-    vacc0 = _mm256_add_ps(vacc0, vt);
+    $for N in range(SIMD_TILE):
+      vacc${N % ACCUMULATORS} = _mm256_add_ps(vacc${N % ACCUMULATORS}, vt${N});
   }
+  $for N in range(0, SIMD_TILE - 1):
+    if (batch >= 8 * sizeof(uint16_t)) {
+      const __m256 vt = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
+      i += 8;
+      batch -= 8 * sizeof(uint16_t);
+      vacc${N % ACCUMULATORS} = _mm256_add_ps(vacc${N % ACCUMULATORS}, vt);
+    }
+  $REDUCE_ACC = (ACCUMULATORS + 1)//2
+  $while REDUCE_ACC > 0:
+    $for A in range(0, REDUCE_ACC):
+      $if A + REDUCE_ACC < ACCUMULATORS:
+        vacc${A} = _mm256_add_ps(vacc${A}, vacc${A + REDUCE_ACC});
+    $REDUCE_ACC //= 2
   if XNN_UNLIKELY(batch != 0) {
     assert(batch >= 1 * sizeof(uint16_t));
     assert(batch <= 7 * sizeof(uint16_t));
