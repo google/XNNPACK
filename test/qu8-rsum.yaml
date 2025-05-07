@@ -27,10 +27,10 @@
 - name: xnn_qu8_rsum_ukernel__avx2_u128_acc4
 
 # WASMSIMD
-- name: xnn_qs8_rsum_ukernel__wasmsimd_u8
-- name: xnn_qs8_rsum_ukernel__wasmsimd_u16_acc2
-- name: xnn_qs8_rsum_ukernel__wasmsimd_u32_acc2
-- name: xnn_qs8_rsum_ukernel__wasmsimd_u32_acc4
+- name: xnn_qu8_rsum_ukernel__wasmsimd_u8
+- name: xnn_qu8_rsum_ukernel__wasmsimd_u16_acc2
+- name: xnn_qu8_rsum_ukernel__wasmsimd_u32_acc2
+- name: xnn_qu8_rsum_ukernel__wasmsimd_u32_acc4
 
 # RISC-V Vector
 - name: xnn_qu8_rsum_ukernel__rvv_u1v
