@@ -70,7 +70,9 @@ static struct xnn_unary_elementwise_config qs8_cvt_config = {0};
 static struct xnn_unary_elementwise_config qs8_lrelu_config = {0};
 static struct xnn_unary_elementwise_config qs8_to_f16_cvt_config = {0};
 static struct xnn_unary_elementwise_config qs8_to_f32_cvt_config = {0};
+static struct xnn_unary_elementwise_config qs8_vhswish_config = {0};
 static struct xnn_unary_elementwise_config qu8_cvt_config = {0};
+static struct xnn_unary_elementwise_config qu8_vhswish_config = {0};
 static struct xnn_unary_elementwise_config qu8_lrelu_config = {0};
 static struct xnn_unary_elementwise_config qu8_to_f32_cvt_config = {0};
 static struct xnn_unary_elementwise_config s8_clamp_config = {0};
@@ -131,7 +133,9 @@ XNN_INIT_ONCE_GUARD(qs8_cvt);
 XNN_INIT_ONCE_GUARD(qs8_lrelu);
 XNN_INIT_ONCE_GUARD(qs8_to_f16_cvt);
 XNN_INIT_ONCE_GUARD(qs8_to_f32_cvt);
+XNN_INIT_ONCE_GUARD(qs8_vhswish);
 XNN_INIT_ONCE_GUARD(qu8_cvt);
+XNN_INIT_ONCE_GUARD(qu8_vhswish);
 XNN_INIT_ONCE_GUARD(qu8_lrelu);
 XNN_INIT_ONCE_GUARD(qu8_to_f32_cvt);
 XNN_INIT_ONCE_GUARD(s8_clamp);
@@ -1917,6 +1921,23 @@ static void init_qs8_to_f32_cvt_config(void) {
   #endif
 }
 
+static void init_qs8_vhswish_config(void) {
+  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->use_x86_avx2) {
+      qs8_vhswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vhswish_ukernel__avx2_u16;
+      qs8_vhswish_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_vhswish_scalar_params;
+    } else {
+    qs8_vhswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vhswish_ukernel__scalar_u8;
+    qs8_vhswish_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_vhswish_scalar_params;
+    }
+  #else
+  qs8_vhswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vhswish_ukernel__scalar_u8;
+  qs8_vhswish_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_vhswish_scalar_params;
+  #endif
+}
+
 static void init_qu8_cvt_config(void) {
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -2099,6 +2120,23 @@ static void init_qu8_to_f32_cvt_config(void) {
   #else
     qu8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_f32_vcvt_ukernel__scalar_u4;
     qu8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_f32_cvt_scalar_params;
+  #endif
+}
+
+static void init_qu8_vhswish_config(void) {
+  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->use_x86_avx2) {
+      qu8_vhswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vhswish_ukernel__avx2_u16;
+      qu8_vhswish_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_vhswish_scalar_params;
+    } else {
+    qu8_vhswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vhswish_ukernel__scalar_u8;
+    qu8_vhswish_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_vhswish_scalar_params;
+    }
+  #else
+  qs8_vhswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vhswish_ukernel__scalar_u8;
+  qs8_vhswish_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_vhswish_scalar_params;
   #endif
 }
 
@@ -2689,6 +2727,15 @@ const struct xnn_unary_elementwise_config* xnn_init_qs8_to_f32_cvt_config() {
   return &qs8_to_f32_cvt_config;
 }
 
+const struct xnn_unary_elementwise_config* xnn_init_qs8_vhswish_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == NULL) {
+    return NULL;
+  }
+  XNN_INIT_ONCE(qs8_vhswish);
+  return &qs8_vhswish_config;
+}
+
 const struct xnn_unary_elementwise_config* xnn_init_qu8_cvt_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL) {
@@ -2714,6 +2761,15 @@ const struct xnn_unary_elementwise_config* xnn_init_qu8_to_f32_cvt_config() {
   }
   XNN_INIT_ONCE(qu8_to_f32_cvt);
   return &qu8_to_f32_cvt_config;
+}
+
+const struct xnn_unary_elementwise_config* xnn_init_qu8_vhswish_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == NULL) {
+    return NULL;
+  }
+  XNN_INIT_ONCE(qu8_vhswish);
+  return &qu8_vhswish_config;
 }
 
 const struct xnn_unary_elementwise_config* xnn_init_s8_clamp_config() {

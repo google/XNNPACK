@@ -60,6 +60,7 @@ SET(PROD_AVX2_MICROKERNEL_SRCS
   src/qs8-vadd/gen/qs8-vadd-minmax-avx2-mul32-ld64-u16.c
   src/qs8-vaddc/gen/qs8-vaddc-minmax-avx2-mul32-ld64-u16.c
   src/qs8-vcvt/gen/qs8-vcvt-avx2-u32.c
+  src/qs8-vhswish/gen/qs8-vhswish-avx2-u16.c
   src/qs8-vlrelu/gen/qs8-vlrelu-avx2-u32.c
   src/qs8-vprelu/gen/qs8-vprelu-avx2-u16.c
   src/qs8-vpreluc/gen/qs8-vpreluc-avx2-u16.c
@@ -75,6 +76,7 @@ SET(PROD_AVX2_MICROKERNEL_SRCS
   src/qu8-vadd/gen/qu8-vadd-minmax-avx2-mul32-ld64-u16.c
   src/qu8-vaddc/gen/qu8-vaddc-minmax-avx2-mul32-ld64-u16.c
   src/qu8-vcvt/gen/qu8-vcvt-avx2-u32.c
+  src/qu8-vhswish/gen/qu8-vhswish-avx2-u16.c
   src/qu8-vlrelu/gen/qu8-vlrelu-avx2-u32.c
   src/qu8-vprelu/gen/qu8-vprelu-avx2-u16.c
   src/qu8-vpreluc/gen/qu8-vpreluc-avx2-u16.c
