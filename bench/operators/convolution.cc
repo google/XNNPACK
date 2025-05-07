@@ -21,6 +21,7 @@
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/operator.h"
 #include <benchmark/benchmark.h>
 #include <pthreadpool.h>
 

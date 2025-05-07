@@ -18,6 +18,7 @@
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/operator.h"
 #include <benchmark/benchmark.h>
 
 #ifdef BENCHMARK_TENSORFLOW_LITE

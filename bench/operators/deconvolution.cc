@@ -17,6 +17,7 @@
 #include "bench/utils.h"
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/operator.h"
 #include <benchmark/benchmark.h>
 #include <pthreadpool.h>
 

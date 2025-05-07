@@ -16,6 +16,7 @@
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/node-type.h"
+#include "src/xnnpack/operator.h"
 #include <pthreadpool.h>
 
 #if defined(EMSCRIPTEN)

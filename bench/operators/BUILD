@@ -20,6 +20,7 @@ OPERATOR_BENCHMARK_DEPS = [
     "//:common",
     "//:datatype",
     "//:math",
+    "//:operators",
 ]
 
 xnnpack_benchmark(

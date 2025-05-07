@@ -19,6 +19,7 @@
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/operator.h"
 
 inline size_t reference_index(const size_t* input_stride,
                               const size_t* output_stride, const size_t* perm,

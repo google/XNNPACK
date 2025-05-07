@@ -20,6 +20,7 @@
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
 #include <benchmark/benchmark.h>
+#include "src/xnnpack/operator.h"
 
 #define XNN_INVALID_NODE_ID UINT32_MAX
 void xnnpack_fully_connected_qd8_f32_qc4w(benchmark::State& state,
