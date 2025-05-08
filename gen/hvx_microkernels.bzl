@@ -203,6 +203,8 @@ NON_PROD_HVX_MICROKERNEL_SRCS = [
     "src/f32-vbinary/gen/f32-vsubc-hvx-u32.c",
     "src/f32-vbinary/gen/f32-vsubc-hvx-u64.c",
     "src/f32-vgelu/gen/f32-vgelu-hvx-rational-12-10-nr.c",
+    "src/f32-vrnd/gen/f32-vrndd-hvx-u32.c",
+    "src/f32-vrnd/gen/f32-vrndd-hvx-u64.c",
     "src/f32-vrnd/gen/f32-vrndne-hvx-u32.c",
     "src/f32-vrnd/gen/f32-vrndne-hvx-u64.c",
     "src/f32-vrnd/gen/f32-vrndu-hvx-u32.c",

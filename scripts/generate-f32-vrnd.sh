@@ -112,5 +112,7 @@ tools/xngen src/f32-vrnd/simd.c.in -D BATCH_TILE=32 -D OP=RNDZ  -D ARCH=hvx -o s
 tools/xngen src/f32-vrnd/simd.c.in -D BATCH_TILE=64 -D OP=RNDZ  -D ARCH=hvx -o src/f32-vrnd/gen/f32-vrndz-hvx-u64.c &
 tools/xngen src/f32-vrnd/simd.c.in -D BATCH_TILE=32 -D OP=RNDU  -D ARCH=hvx -o src/f32-vrnd/gen/f32-vrndu-hvx-u32.c &
 tools/xngen src/f32-vrnd/simd.c.in -D BATCH_TILE=64 -D OP=RNDU  -D ARCH=hvx -o src/f32-vrnd/gen/f32-vrndu-hvx-u64.c &
+tools/xngen src/f32-vrnd/simd.c.in -D BATCH_TILE=32 -D OP=RNDD  -D ARCH=hvx -o src/f32-vrnd/gen/f32-vrndd-hvx-u32.c &
+tools/xngen src/f32-vrnd/simd.c.in -D BATCH_TILE=64 -D OP=RNDD  -D ARCH=hvx -o src/f32-vrnd/gen/f32-vrndd-hvx-u64.c &
 
 wait
