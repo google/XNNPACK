@@ -5,7 +5,7 @@
 
 $assert BATCH_TILE % 32 == 0
 $assert BATCH_TILE >= 32
-$assert OP in ["RNDNE", "RNDZ"]
+$assert OP in ["RNDNE", "RNDZ", "RNDU"]
 #include <assert.h>
 
 #include "src/xnnpack/simd/f32-${ARCH}.h"
