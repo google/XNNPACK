@@ -74,10 +74,8 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x4-minmax-scalar.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x4-minmax-scalar.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x4-minmax-scalar.c
-  src/f32-qs8-vcvt/gen/f32-qs8-vcvt-scalar-imagic-u1.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-scalar-imagic-u4.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-scalar-lrintf-u4.c
-  src/f32-qu8-vcvt/gen/f32-qu8-vcvt-scalar-imagic-u1.c
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-scalar-imagic-u4.c
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-scalar-lrintf-u4.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-scalar-rr2-p5-u4-acc2.c
@@ -117,7 +115,6 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-vcopysign/gen/f32-vcopysignc-scalar.c
   src/f32-vcopysign/gen/f32-vrcopysignc-scalar.c
   src/f32-vcos/gen/f32-vcos-scalar-rational-5-4-div.c
-  src/f32-velu/gen/f32-velu-scalar-rr2-lut16-p3-u2.c
   src/f32-velu/gen/f32-velu-scalar-rr2-lut16-p3-u4.c
   src/f32-vexp/gen/f32-vexp-scalar-rational-3-2-div.c
   src/f32-vgelu/gen/f32-vgelu-scalar-rational-12-10-div.c
@@ -394,6 +391,7 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-scalar-fmagic-u2.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-scalar-fmagic-u3.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-scalar-fmagic-u4.c
+  src/f32-qs8-vcvt/gen/f32-qs8-vcvt-scalar-imagic-u1.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-scalar-imagic-u2.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-scalar-imagic-u3.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-scalar-lrintf-u1.c
@@ -403,6 +401,7 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-scalar-fmagic-u2.c
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-scalar-fmagic-u3.c
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-scalar-fmagic-u4.c
+  src/f32-qu8-vcvt/gen/f32-qu8-vcvt-scalar-imagic-u1.c
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-scalar-imagic-u2.c
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-scalar-imagic-u3.c
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-scalar-lrintf-u1.c
@@ -500,6 +499,7 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-vcmul/gen/f32-vcmul-scalar-u2.c
   src/f32-vcmul/gen/f32-vcmul-scalar-u8.c
   src/f32-velu/gen/f32-velu-scalar-rr2-lut16-p3-u1.c
+  src/f32-velu/gen/f32-velu-scalar-rr2-lut16-p3-u2.c
   src/f32-velu/gen/f32-velu-scalar-rr2-lut16-p3-u3.c
   src/f32-velu/gen/f32-velu-scalar-rr2-lut16-p3-u5.c
   src/f32-velu/gen/f32-velu-scalar-rr2-lut16-p3-u6.c

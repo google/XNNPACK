@@ -153,25 +153,6 @@ tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=3 -D DATATYPE=F32 -D ACCUM
 tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=4 -D DATATYPE=F32 -D ACCUMULATORS=2 -D OP=MIN -D WASM=0 -o src/f32-rminmax/gen/f32-rmin-scalar-u4-acc2.c &
 tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=4 -D DATATYPE=F32 -D ACCUMULATORS=4 -D OP=MIN -D WASM=0 -o src/f32-rminmax/gen/f32-rmin-scalar-u4-acc4.c &
 
-### Wasm-specific micro-kernels
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=1 -D DATATYPE=F32 -D ACCUMULATORS=1 -D OP=MAX -D WASM=1 -o src/f32-rminmax/gen/f32-rmax-wasm-u1.c &
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=2 -D DATATYPE=F32 -D ACCUMULATORS=2 -D OP=MAX -D WASM=1 -o src/f32-rminmax/gen/f32-rmax-wasm-u2-acc2.c &
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=3 -D DATATYPE=F32 -D ACCUMULATORS=3 -D OP=MAX -D WASM=1 -o src/f32-rminmax/gen/f32-rmax-wasm-u3-acc3.c &
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=4 -D DATATYPE=F32 -D ACCUMULATORS=2 -D OP=MAX -D WASM=1 -o src/f32-rminmax/gen/f32-rmax-wasm-u4-acc2.c &
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=4 -D DATATYPE=F32 -D ACCUMULATORS=4 -D OP=MAX -D WASM=1 -o src/f32-rminmax/gen/f32-rmax-wasm-u4-acc4.c &
-
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=1 -D DATATYPE=F32 -D ACCUMULATORS=1 -D OP=MIN -D WASM=1 -o src/f32-rminmax/gen/f32-rmin-wasm-u1.c &
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=2 -D DATATYPE=F32 -D ACCUMULATORS=2 -D OP=MIN -D WASM=1 -o src/f32-rminmax/gen/f32-rmin-wasm-u2-acc2.c &
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=3 -D DATATYPE=F32 -D ACCUMULATORS=3 -D OP=MIN -D WASM=1 -o src/f32-rminmax/gen/f32-rmin-wasm-u3-acc3.c &
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=4 -D DATATYPE=F32 -D ACCUMULATORS=2 -D OP=MIN -D WASM=1 -o src/f32-rminmax/gen/f32-rmin-wasm-u4-acc2.c &
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=4 -D DATATYPE=F32 -D ACCUMULATORS=4 -D OP=MIN -D WASM=1 -o src/f32-rminmax/gen/f32-rmin-wasm-u4-acc4.c &
-
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=1 -D DATATYPE=F32 -D ACCUMULATORS=1 -D OP=MINMAX -D WASM=1 -o src/f32-rminmax/gen/f32-rminmax-wasm-u1.c &
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=2 -D DATATYPE=F32 -D ACCUMULATORS=2 -D OP=MINMAX -D WASM=1 -o src/f32-rminmax/gen/f32-rminmax-wasm-u2-acc2.c &
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=3 -D DATATYPE=F32 -D ACCUMULATORS=3 -D OP=MINMAX -D WASM=1 -o src/f32-rminmax/gen/f32-rminmax-wasm-u3-acc3.c &
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=4 -D DATATYPE=F32 -D ACCUMULATORS=2 -D OP=MINMAX -D WASM=1 -o src/f32-rminmax/gen/f32-rminmax-wasm-u4-acc2.c &
-tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=4 -D DATATYPE=F32 -D ACCUMULATORS=4 -D OP=MINMAX -D WASM=1 -o src/f32-rminmax/gen/f32-rminmax-wasm-u4-acc4.c &
-
 ################################## Hexagon HVX #################################
 tools/xngen src/f32-rminmax/simd.c.in -D BATCH_TILE=32  -D ACCUMULATORS=1 -D OP=MAX -D ARCH=hvx -o src/f32-rminmax/gen/f32-rmax-hvx-u32.c &
 tools/xngen src/f32-rminmax/simd.c.in -D BATCH_TILE=64  -D ACCUMULATORS=2 -D OP=MAX -D ARCH=hvx -o src/f32-rminmax/gen/f32-rmax-hvx-u64-acc2.c &

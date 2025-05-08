@@ -52,14 +52,6 @@ XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rmax_ukernel__scalar_u3_acc3, 3, false, float
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rmax_ukernel__scalar_u4_acc2, 4, false, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rmax_ukernel__scalar_u4_acc4, 4, false, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
 
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rmax_ukernel__wasm_u1, 1, false, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rmax_ukernel__wasm_u2_acc2, 2, false, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rmax_ukernel__wasm_u3_acc3, 3, false, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rmax_ukernel__wasm_u4_acc2, 4, false, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rmax_ukernel__wasm_u4_acc4, 4, false, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
-#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rmax_ukernel__wasmsimd_minmax_u4, 4, false, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rmax_ukernel__wasmsimd_minmax_u8_acc2, 8, false, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
