@@ -130,6 +130,14 @@ static XNN_INLINE float xnn_reduce_add_f32(xnn_simd_f32_t a) {
   return a;
 }
 
+static XNN_INLINE float xnn_reduce_min_f32(xnn_simd_f32_t a) {
+  return a;
+}
+
+static XNN_INLINE float xnn_reduce_max_f32(xnn_simd_f32_t a) {
+  return a;
+}
+
 // Special functions.
 #define XNN_SIMD_HAVE_RCP_F32 0
 #define XNN_SIMD_HAVE_RSQRT_F32 0

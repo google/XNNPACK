@@ -72,6 +72,18 @@ static XNN_INLINE float xnn_reduce_add_f32(xnn_simd_f32_t a) {
   return wasm_f32x4_extract_lane(a, 0);
 }
 
+static XNN_INLINE float xnn_reduce_min_f32(xnn_simd_f32_t a) {
+  a = wasm_f32x4_min(a, wasm_v64x2_shuffle(a, a, 1, 1));
+  a = wasm_f32x4_min(a, wasm_v32x4_shuffle(a, a, 1, 1, 1, 1));
+  return wasm_f32x4_extract_lane(a, 0);
+}
+
+static XNN_INLINE float xnn_reduce_max_f32(xnn_simd_f32_t a) {
+  a = wasm_f32x4_max(a, wasm_v64x2_shuffle(a, a, 1, 1));
+  a = wasm_f32x4_max(a, wasm_v32x4_shuffle(a, a, 1, 1, 1, 1));
+  return wasm_f32x4_extract_lane(a, 0);
+}
+
 // Logical operations.
 static XNN_INLINE xnn_simd_f32_t xnn_and_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {

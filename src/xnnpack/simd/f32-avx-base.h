@@ -95,6 +95,20 @@ static XNN_INLINE float xnn_reduce_add_f32(xnn_simd_f32_t a) {
   return _mm_cvtss_f32(a128);
 }
 
+static XNN_INLINE float xnn_reduce_min_f32(xnn_simd_f32_t a) {
+  __m128 a128 = _mm_min_ps(_mm256_castps256_ps128(a), _mm256_extractf128_ps(a, 1));
+  a128 = _mm_min_ps(a128, _mm_movehl_ps(a128, a128));
+  a128 = _mm_min_ss(a128, _mm_movehdup_ps(a128));
+  return _mm_cvtss_f32(a128);
+}
+
+static XNN_INLINE float xnn_reduce_max_f32(xnn_simd_f32_t a) {
+  __m128 a128 = _mm_max_ps(_mm256_castps256_ps128(a), _mm256_extractf128_ps(a, 1));
+  a128 = _mm_max_ps(a128, _mm_movehl_ps(a128, a128));
+  a128 = _mm_max_ss(a128, _mm_movehdup_ps(a128));
+  return _mm_cvtss_f32(a128);
+}
+
 // Logical operations.
 static XNN_INLINE xnn_simd_f32_t xnn_and_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {

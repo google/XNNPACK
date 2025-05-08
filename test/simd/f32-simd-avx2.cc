@@ -232,6 +232,26 @@ TEST_F(F32SimdAVX2Test, ReduceAdd) {
   ASSERT_NEAR(res, expected, tolerance);
 }
 
+TEST_F(F32SimdAVX2Test, ReduceMin) {
+  const xnn_simd_f32_t a = xnn_loadu_f32(inputs_.data());
+  float res = xnn_reduce_min_f32(a);
+  float expected = std::numeric_limits<float>::infinity();
+  for (size_t i = 0; i < xnn_simd_size_f32; ++i) {
+    expected = std::min(expected, inputs_[i]);
+  }
+  ASSERT_EQ(res, expected);
+}
+
+TEST_F(F32SimdAVX2Test, ReduceMax) {
+  const xnn_simd_f32_t a = xnn_loadu_f32(inputs_.data());
+  float res = xnn_reduce_max_f32(a);
+  float expected = -std::numeric_limits<float>::infinity();
+  for (size_t i = 0; i < xnn_simd_size_f32; ++i) {
+    expected = std::max(expected, inputs_[i]);
+  }
+  ASSERT_EQ(res, expected);
+}
+
 TEST_F(F32SimdAVX2Test, And) {
   const xnn_simd_f32_t a = xnn_loadu_f32(inputs_.data());
   const xnn_simd_f32_t b = xnn_loadu_f32(inputs_.data() + xnn_simd_size_f32);

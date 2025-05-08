@@ -106,6 +106,14 @@ static XNN_INLINE float xnn_reduce_add_f32(xnn_simd_f32_t a) {
   return _mm_cvtss_f32(a128);
 }
 
+static XNN_INLINE float xnn_reduce_min_f32(xnn_simd_f32_t a) {
+  return _mm512_reduce_min_ps(a);
+}
+
+static XNN_INLINE float xnn_reduce_max_f32(xnn_simd_f32_t a) {
+  return _mm512_reduce_max_ps(a);
+}
+
 // Logical operations.
 static XNN_INLINE xnn_simd_f32_t xnn_and_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {

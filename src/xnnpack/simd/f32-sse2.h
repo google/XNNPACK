@@ -148,6 +148,18 @@ static XNN_INLINE float xnn_reduce_add_f32(xnn_simd_f32_t a) {
   return _mm_cvtss_f32(a);
 }
 
+static XNN_INLINE float xnn_reduce_min_f32(xnn_simd_f32_t a) {
+  a = _mm_min_ps(a, _mm_movehl_ps(a, a));
+  a = _mm_min_ss(a, _mm_shuffle_ps(a, a, _MM_SHUFFLE(1, 1, 1, 1)));
+  return _mm_cvtss_f32(a);
+}
+
+static XNN_INLINE float xnn_reduce_max_f32(xnn_simd_f32_t a) {
+  a = _mm_max_ps(a, _mm_movehl_ps(a, a));
+  a = _mm_max_ss(a, _mm_shuffle_ps(a, a, _MM_SHUFFLE(1, 1, 1, 1)));
+  return _mm_cvtss_f32(a);
+}
+
 // Special functions.
 
 #define XNN_SIMD_HAVE_RCP_F32 1
