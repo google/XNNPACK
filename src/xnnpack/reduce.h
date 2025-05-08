@@ -49,12 +49,12 @@ extern "C" {
 #include "src/s8-rminmax/s8-rmin.h"
 #undef XNN_UKERNEL_WITH_PARAMS
 
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, \
-                                datatype_in, datatype_out, params_type,       \
-                                init_params)                                  \
-  XNN_INTERNAL void ukernel(                                                  \
-      size_t rows, size_t channels, const datatype_in* input,                 \
-      size_t input_stride, const datatype_in* zero, datatype_out* output,     \
+#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, row_tile, batch_tile, \
+                                vector_tile, datatype_in, datatype_out,    \
+                                params_type, init_params)                  \
+  XNN_INTERNAL void ukernel(                                               \
+      size_t rows, size_t channels, const datatype_in* input,              \
+      size_t input_stride, const datatype_in* zero, datatype_out* output,  \
       const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 #include "src/f16-f32acc-rdsum/f16-f32acc-rdsum.h"
 #include "src/f32-rdsum/f32-rdsum.h"
@@ -62,17 +62,17 @@ extern "C" {
 #include "src/qu8-rdsum/qu8-rdsum.h"
 #undef XNN_UKERNEL_WITH_PARAMS
 
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, \
-                                datatype_in, datatype_out, params_type,       \
-                                init_params)                                  \
-  XNN_INTERNAL void ukernel(size_t rows, size_t channels,                     \
-                            const datatype_in* input, size_t input_stride,    \
-                            const datatype_in* zero, datatype_out* output,    \
+#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, row_tile, batch_tile, \
+                                vector_tile, datatype_in, datatype_out,    \
+                                params_type, init_params)                  \
+  XNN_INTERNAL void ukernel(size_t rows, size_t channels,                  \
+                            const datatype_in* input, size_t input_stride, \
+                            const datatype_in* zero, datatype_out* output, \
                             const void* params);
-                            #include "src/f32-rdminmax/f32-rdmax.h"
-                            #include "src/f32-rdminmax/f32-rdmin.h"
 #include "src/f16-rdminmax/f16-rdmax.h"
 #include "src/f16-rdminmax/f16-rdmin.h"
+#include "src/f32-rdminmax/f32-rdmax.h"
+#include "src/f32-rdminmax/f32-rdmin.h"
 #include "src/s8-rdminmax/s8-rdmax.h"
 #include "src/s8-rdminmax/s8-rdmin.h"
 #include "src/u8-rdminmax/u8-rdmax.h"

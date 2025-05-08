@@ -277,20 +277,15 @@ xnnpack_benchmark(
     deps = MICROKERNEL_BENCHMARK_DEPS,
 ) for kernel in [
     "f16_raddstoreexpminusmax",
-    "f16_rmax",
-    "f16_rminmax",
-    "f16_rmin",
     "f32_raddexpminusmax",
     "f32_raddextexp",
     "f32_raddstoreexpminusmax",
-    "f32_rmax",
-    "f32_rminmax",
-    "f32_rmin",
     "f32_vscaleexpminusmax",
     "f32_vscaleextexp",
     "f16_vcmul",
     "f32_vcmul",
-    "s8_rminmax",
+    "rdminmax",
+    "rminmax",
     "x8_lut",
 ]]
 
