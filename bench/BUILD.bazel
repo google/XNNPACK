@@ -250,6 +250,19 @@ xnnpack_benchmark(
     ]),
 )
 
+xnnpack_benchmark(
+    name = "pf16_gemm_minmax_bench",
+    srcs = ["pf16-gemm-minmax.cc"],
+    defines = xnnpack_kleidiai_defines(),
+    tags = xnnpack_slow_benchmark_tags(),
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":gemm_benchmark",
+        "//:isa_checks",
+    ] + xnnpack_if_kleidiai_enabled([
+        "@KleidiAI//kai/ukernels/matmul",
+    ]),
+)
+
 [xnnpack_benchmark(
     name = "%s_bench" % kernel,
     srcs = [

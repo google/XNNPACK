@@ -83,8 +83,8 @@ class BenchmarkWrapper {
   int64_t last_n_;
 };
 
-void Configure(benchmark::internal::Benchmark* benchmark,
-               void(setup_method)(BenchmarkWrapper*), bool blockwise) {
+inline void Configure(benchmark::internal::Benchmark* benchmark,
+                      void(setup_method)(BenchmarkWrapper*), bool blockwise) {
   BenchmarkWrapper wrapper(benchmark, blockwise);
   setup_method(&wrapper);
   benchmark->UseRealTime();

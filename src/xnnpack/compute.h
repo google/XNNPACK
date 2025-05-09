@@ -301,6 +301,8 @@ struct gemm_context {
   size_t sr;
   // The inner dimension of the matrix product.
   size_t kc;
+  // The `mr_packed` size of the current GEMM microkernel.
+  size_t mr_packed;
   // GEMM microkernels.
   union {
     struct xnn_hmp_gemm_ukernel ukernel;

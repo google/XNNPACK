@@ -11,7 +11,7 @@
 #include "kai/ukernels/matmul/matmul_clamp_f32_f32_f32p/kai_matmul_clamp_f32_f32_f32p2vlx1b_1x16vl_sme2_mla.h"
 #endif  // XNN_ENABLE_KLEIDIAI
 
-// Wraps the `kai_run_matmul_clamp_f32_f32p2vlx1_f32p2vlx1biasf32_sme2_mopa`
+// Wraps the `kai_run_matmul_clamp_f32_f32_f32p2vlx1b_1x16vl_sme2_mla`
 // GEMM microkernel with a name that is compatible with our tooling.
 void xnn_pf32_gemm_minmax_ukernel_1x32__neonsme2(
     size_t m, size_t n, size_t k, const void* lhs_packed,
