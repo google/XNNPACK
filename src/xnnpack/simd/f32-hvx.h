@@ -167,7 +167,6 @@ static XNN_INLINE xnn_simd_f32_t xnn_ceil_f32(xnn_simd_f32_t a) {
   const HVX_VectorPred vfilter = Q6_Q_vcmp_gt_VsfVsf(vabs_a, vmax_non_int_val);
 
   // Create a vector of `1` where the entries of `a` are positive
-  const HVX_Vector vone = Q6_V_vsplat_R(1);
   const HVX_Vector vzero = Q6_V_vsplat_R(0);
   const HVX_VectorPred vfilterpos = Q6_Q_vcmp_gt_VsfVsf(a, vzero);
 
@@ -177,7 +176,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_ceil_f32(xnn_simd_f32_t a) {
   const HVX_VectorPred vfilterposnotint =
       Q6_Q_and_QQ(vfilterpos, vfilternotint);
 
-  const HVX_Vector vone_zero = Q6_V_vmux_QVV(vfilterposnotint, vone, vzero);
+  const HVX_Vector vone_zero = Q6_V_vand_QR(vfilterposnotint, 1);
   const HVX_Vector vresultup = Q6_Vw_vadd_VwVw(vtruncint, vone_zero);
   const HVX_Vector vresult = Q6_Vsf_equals_Vw(vresultup);
 
@@ -203,7 +202,6 @@ static XNN_INLINE xnn_simd_f32_t xnn_floor_f32(xnn_simd_f32_t a) {
   const HVX_VectorPred vfilter = Q6_Q_vcmp_gt_VsfVsf(vabs_a, vmax_non_int_val);
 
   // Create a vector of `1` where the entries of `a` are negative
-  const HVX_Vector vone = Q6_V_vsplat_R(1);
   const HVX_Vector vzero = Q6_V_vsplat_R(0);
   const HVX_VectorPred vfilterneg = Q6_Q_not_Q(Q6_Q_vcmp_gt_VsfVsf(a, vzero));
 
@@ -213,7 +211,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_floor_f32(xnn_simd_f32_t a) {
   const HVX_VectorPred vfilternegnotint =
       Q6_Q_and_QQ(vfilterneg, vfilternotint);
 
-  const HVX_Vector vone_zero = Q6_V_vmux_QVV(vfilternegnotint, vone, vzero);
+  const HVX_Vector vone_zero = Q6_V_vand_QR(vfilternegnotint, 1);
   const HVX_Vector vresultup = Q6_Vw_vsub_VwVw(vtruncint, vone_zero);
   const HVX_Vector vresult = Q6_Vsf_equals_Vw(vresultup);
 
