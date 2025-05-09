@@ -16,6 +16,23 @@
 #include "src/xnnpack/simd/f32-hvx.h"
 
 
+static XNN_INLINE void load_tail_reduce_minmax_f32(
+  float* min, xnn_simd_f32_t vmin,
+  float* max, xnn_simd_f32_t vmax,
+  const float* input, size_t num_elements
+) {
+  assert(num_elements < xnn_simd_size_f32);
+  if XNN_UNLIKELY(num_elements) {
+    const xnn_simd_f32_t vt = xnn_load_tail_f32(input, num_elements >> XNN_LOG2_SIZEOF_FLOAT);
+    HVX_VectorPred mask = Q6_Q_vsetq_R(num_elements);
+
+    vmin = xnn_min_f32(vmin, Q6_V_vmux_QVV(mask, vt, vmin));
+    vmax = xnn_max_f32(vmax, Q6_V_vmux_QVV(mask, vt, vmax));
+  }
+  *min = xnn_reduce_min_f32(vmin);
+  *max = xnn_reduce_max_f32(vmax);
+}
+
 void xnn_f32_rminmax_ukernel__hvx_u64_acc2(
     size_t batch,
     const float* input,
@@ -51,17 +68,10 @@ void xnn_f32_rminmax_ukernel__hvx_u64_acc2(
     vmax0 = xnn_max_f32(vmax0, vt);
   }
 
-  if XNN_UNLIKELY(batch) {
-    const xnn_simd_f32_t vt = xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
-    HVX_VectorPred mask = Q6_Q_vsetq_R(batch);
+  load_tail_reduce_minmax_f32(
+    &output[0], vmin0,
+    &output[1], vmax0,
+    input, batch >> XNN_LOG2_SIZEOF_FLOAT
+  );
 
-    vmin0 = xnn_min_f32(vmin0, Q6_V_vmux_QVV(mask, vt, vmin0));
-    vmax0 = xnn_max_f32(vmax0, Q6_V_vmux_QVV(mask, vt, vmax0));
-  }
-
-  const float vmin = xnn_reduce_min_f32(vmin0);
-  const float vmax = xnn_reduce_max_f32(vmax0);
-
-  output[0] = vmin;
-  output[1] = vmax;
 }

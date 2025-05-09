@@ -108,7 +108,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
 #if __HVX_ARCH__ >= 73
 static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
   const HVX_Vector vmax_non_int_val =
-      Q6_V_vsplat_R(float_as_uint32(8388608.0f));  // 2^23.
+      Q6_V_vsplat_R(float_as_uint32(8388607.0f));  // 2^23-1
 
   const HVX_VectorPred vfilter = Q6_Q_vcmp_gt_VsfVsf(
       Q6_V_vand_VV(a, Q6_V_vsplat_R(0x7FFFFFFF)), vmax_non_int_val);
@@ -130,6 +130,102 @@ static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
   *((HVX_Vector*)input) = a;
   for (size_t k = 0; k < xnn_simd_size_f32; ++k) {
     output[k] = roundf(input[k]);
+  }
+  return *((HVX_Vector*)output);
+}
+#endif  // __HVX_ARCH__ >= 73
+
+#if __HVX_ARCH__ >= 73
+static XNN_INLINE xnn_simd_f32_t xnn_trunc_f32(xnn_simd_f32_t a) {
+  const HVX_Vector vmax_non_int_val =
+      Q6_V_vsplat_R(float_as_uint32(8388607.0f));  // 2^23-1
+
+  const HVX_VectorPred vfilter = Q6_Q_vcmp_gt_VsfVsf(
+      Q6_V_vand_VV(a, Q6_V_vsplat_R(0x7FFFFFFF)), vmax_non_int_val);
+
+  const HVX_Vector vresult = Q6_Vsf_equals_Vw(Q6_Vw_equals_Vsf(a));
+
+  return Q6_V_vmux_QVV(vfilter, a, vresult);
+}
+#else
+static XNN_INLINE xnn_simd_f32_t xnn_trunc_f32(xnn_simd_f32_t a) {
+  XNN_ALIGN(128) float input[xnn_simd_size_f32];
+  XNN_ALIGN(128) float output[xnn_simd_size_f32];
+  *((HVX_Vector*)input) = a;
+  for (size_t k = 0; k < xnn_simd_size_f32; ++k) {
+    output[k] = truncf(input[k]);
+  }
+  return *((HVX_Vector*)output);
+}
+#endif  // __HVX_ARCH__ >= 73
+
+#if __HVX_ARCH__ >= 73
+static XNN_INLINE xnn_simd_f32_t xnn_ceil_f32(xnn_simd_f32_t a) {
+  const HVX_Vector vmax_non_int_val =
+      Q6_V_vsplat_R(float_as_uint32(8388607.0f));  // 2^23-1.
+  const HVX_Vector vabs_a = Q6_V_vand_VV(a, Q6_V_vsplat_R(0x7FFFFFFF));
+  const HVX_VectorPred vfilter = Q6_Q_vcmp_gt_VsfVsf(vabs_a, vmax_non_int_val);
+
+  // Create a vector of `1` where the entries of `a` are positive
+  const HVX_Vector vone = Q6_V_vsplat_R(1);
+  const HVX_Vector vzero = Q6_V_vsplat_R(0);
+  const HVX_VectorPred vfilterpos = Q6_Q_vcmp_gt_VsfVsf(a, vzero);
+
+  const HVX_Vector vtruncint = Q6_Vw_equals_Vsf(a);
+  const HVX_Vector vtrunc = Q6_Vsf_equals_Vw(vtruncint);
+  const HVX_VectorPred vfilternotint = Q6_Q_not_Q(Q6_Q_vcmp_eq_VwVw(vtrunc, a));
+  const HVX_VectorPred vfilterposnotint =
+      Q6_Q_and_QQ(vfilterpos, vfilternotint);
+
+  const HVX_Vector vone_zero = Q6_V_vmux_QVV(vfilterposnotint, vone, vzero);
+  const HVX_Vector vresultup = Q6_Vw_vadd_VwVw(vtruncint, vone_zero);
+  const HVX_Vector vresult = Q6_Vsf_equals_Vw(vresultup);
+
+  return Q6_V_vmux_QVV(vfilter, a, vresult);
+}
+#else
+static XNN_INLINE xnn_simd_f32_t xnn_ceil_f32(xnn_simd_f32_t a) {
+  XNN_ALIGN(128) float input[xnn_simd_size_f32];
+  XNN_ALIGN(128) float output[xnn_simd_size_f32];
+  *((HVX_Vector*)input) = a;
+  for (size_t k = 0; k < xnn_simd_size_f32; ++k) {
+    output[k] = ceilf(input[k]);
+  }
+  return *((HVX_Vector*)output);
+}
+#endif  // __HVX_ARCH__ >= 73
+
+#if __HVX_ARCH__ >= 73
+static XNN_INLINE xnn_simd_f32_t xnn_floor_f32(xnn_simd_f32_t a) {
+  const HVX_Vector vmax_non_int_val =
+      Q6_V_vsplat_R(float_as_uint32(8388607.0f));  // 2^23-1.
+  const HVX_Vector vabs_a = Q6_V_vand_VV(a, Q6_V_vsplat_R(0x7FFFFFFF));
+  const HVX_VectorPred vfilter = Q6_Q_vcmp_gt_VsfVsf(vabs_a, vmax_non_int_val);
+
+  // Create a vector of `1` where the entries of `a` are negative
+  const HVX_Vector vone = Q6_V_vsplat_R(1);
+  const HVX_Vector vzero = Q6_V_vsplat_R(0);
+  const HVX_VectorPred vfilterneg = Q6_Q_not_Q(Q6_Q_vcmp_gt_VsfVsf(a, vzero));
+
+  const HVX_Vector vtruncint = Q6_Vw_equals_Vsf(a);
+  const HVX_Vector vtrunc = Q6_Vsf_equals_Vw(vtruncint);
+  const HVX_VectorPred vfilternotint = Q6_Q_not_Q(Q6_Q_vcmp_eq_VwVw(vtrunc, a));
+  const HVX_VectorPred vfilternegnotint =
+      Q6_Q_and_QQ(vfilterneg, vfilternotint);
+
+  const HVX_Vector vone_zero = Q6_V_vmux_QVV(vfilternegnotint, vone, vzero);
+  const HVX_Vector vresultup = Q6_Vw_vsub_VwVw(vtruncint, vone_zero);
+  const HVX_Vector vresult = Q6_Vsf_equals_Vw(vresultup);
+
+  return Q6_V_vmux_QVV(vfilter, a, vresult);
+}
+#else
+static XNN_INLINE xnn_simd_f32_t xnn_floor_f32(xnn_simd_f32_t a) {
+  XNN_ALIGN(128) float input[xnn_simd_size_f32];
+  XNN_ALIGN(128) float output[xnn_simd_size_f32];
+  *((HVX_Vector*)input) = a;
+  for (size_t k = 0; k < xnn_simd_size_f32; ++k) {
+    output[k] = floorf(input[k]);
   }
   return *((HVX_Vector*)output);
 }
@@ -211,6 +307,24 @@ static XNN_INLINE float xnn_reduce_add_f32(xnn_simd_f32_t v) {
   v = Q6_Vqf32_vadd_Vqf32Vqf32(v, Q6_V_vror_VR(v, 4));
   v = Q6_Vsf_equals_Vqf32(v);
 #endif
+  return *((float*)&v);
+}
+
+static XNN_INLINE float xnn_reduce_min_f32(xnn_simd_f32_t v) {
+  v = Q6_Vsf_vmin_VsfVsf(v, Q6_V_vror_VR(v, 64));
+  v = Q6_Vsf_vmin_VsfVsf(v, Q6_V_vror_VR(v, 32));
+  v = Q6_Vsf_vmin_VsfVsf(v, Q6_V_vror_VR(v, 16));
+  v = Q6_Vsf_vmin_VsfVsf(v, Q6_V_vror_VR(v, 8));
+  v = Q6_Vsf_vmin_VsfVsf(v, Q6_V_vror_VR(v, 4));
+  return *((float*)&v);
+}
+
+static XNN_INLINE float xnn_reduce_max_f32(xnn_simd_f32_t v) {
+  v = Q6_Vsf_vmax_VsfVsf(v, Q6_V_vror_VR(v, 64));
+  v = Q6_Vsf_vmax_VsfVsf(v, Q6_V_vror_VR(v, 32));
+  v = Q6_Vsf_vmax_VsfVsf(v, Q6_V_vror_VR(v, 16));
+  v = Q6_Vsf_vmax_VsfVsf(v, Q6_V_vror_VR(v, 8));
+  v = Q6_Vsf_vmax_VsfVsf(v, Q6_V_vror_VR(v, 4));
   return *((float*)&v);
 }
 

@@ -142,6 +142,24 @@ static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
   return _mm_or_ps(_mm_and_ps(vfilter, vresult), _mm_andnot_ps(vfilter, a));
 }
 
+static XNN_INLINE float xnn_reduce_add_f32(xnn_simd_f32_t a) {
+  a = _mm_add_ps(a, _mm_movehl_ps(a, a));
+  a = _mm_add_ss(a, _mm_shuffle_ps(a, a, _MM_SHUFFLE(1, 1, 1, 1)));
+  return _mm_cvtss_f32(a);
+}
+
+static XNN_INLINE float xnn_reduce_min_f32(xnn_simd_f32_t a) {
+  a = _mm_min_ps(a, _mm_movehl_ps(a, a));
+  a = _mm_min_ss(a, _mm_shuffle_ps(a, a, _MM_SHUFFLE(1, 1, 1, 1)));
+  return _mm_cvtss_f32(a);
+}
+
+static XNN_INLINE float xnn_reduce_max_f32(xnn_simd_f32_t a) {
+  a = _mm_max_ps(a, _mm_movehl_ps(a, a));
+  a = _mm_max_ss(a, _mm_shuffle_ps(a, a, _MM_SHUFFLE(1, 1, 1, 1)));
+  return _mm_cvtss_f32(a);
+}
+
 // Special functions.
 
 #define XNN_SIMD_HAVE_RCP_F32 1
@@ -193,7 +211,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_load_tail_safe_f32(const float* input,
                                                         size_t num_elements) {
   assert(num_elements <= xnn_simd_size_f32);
 
-  XNN_ALIGN(16) float padded[4];
+  XNN_ALIGN(16) float padded[4] = {0.0f};
   float* dst = padded;
   switch (num_elements) {
     case 4:

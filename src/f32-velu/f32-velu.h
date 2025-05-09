@@ -132,21 +132,6 @@ XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_p6_u12, 12,
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_p6_u16, 16, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
 #endif  // XNN_ARCH_WASMRELAXEDSIMD
 
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_velu_ukernel__wasm_rr2_lut16_p3_u1, 1, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_velu_ukernel__wasm_rr2_lut16_p3_u2, 2, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_velu_ukernel__wasm_rr2_lut16_p3_u3, 3, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_velu_ukernel__wasm_rr2_lut16_p3_u4, 4, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_velu_ukernel__wasm_rr2_lut16_p3_u5, 5, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_velu_ukernel__wasm_rr2_lut16_p3_u6, 6, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_velu_ukernel__wasm_rr2_p6_u1, 1, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_velu_ukernel__wasm_rr2_p6_u2, 2, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_velu_ukernel__wasm_rr2_p6_u3, 3, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_velu_ukernel__wasm_rr2_p6_u4, 4, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_velu_ukernel__wasm_rr2_p6_u5, 5, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_velu_ukernel__wasm_rr2_p6_u6, 6, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
-#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_u1, 1, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_u2, 2, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_u3, 3, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)

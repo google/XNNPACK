@@ -4,8 +4,6 @@
 # LICENSE file in the root directory of this source tree.
 
 # ARM NEONFP16
-- name: xnn_f16_f32acc_rsum_ukernel__neonfp16arith_u4
-  init: xnn_init_f16_f32acc_scale_scalar_params
 - name: xnn_f16_f32acc_rsum_ukernel__neonfp16arith_u8
   init: xnn_init_f16_f32acc_scale_scalar_params
 - name: xnn_f16_f32acc_rsum_ukernel__neonfp16arith_u16_acc2

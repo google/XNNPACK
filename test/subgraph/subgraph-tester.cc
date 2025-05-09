@@ -203,6 +203,22 @@ SubgraphTester& SubgraphTester::AddInputTensorF32(const TensorShape& shape,
   return *this;
 }
 
+SubgraphTester& SubgraphTester::AddInputOutputTensorF32(
+    const TensorShape& shape, uint32_t external_id) {
+  AddDynamicTensorF32(
+      shape, external_id,
+      XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT);
+  size_t num_elements = shape.NumElements();
+  xnnpack::Buffer<char> input(num_elements * sizeof(float),
+                              xnnpack::XnnExtraBytes);
+  float* data = reinterpret_cast<float*>(input.data());
+  std::generate(data, data + num_elements, [&]() { return f32dist(rng_); });
+  auto it = external_tensors_.insert({external_id, data});
+  buffers_[external_id] = std::move(input);
+  EXPECT_TRUE(it.second);
+  return *this;
+}
+
 SubgraphTester& SubgraphTester::AddInputTensorQS8(int32_t zero_point,
                                                   float scale,
                                                   const TensorShape& shape,

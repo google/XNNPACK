@@ -1,20 +1,35 @@
 // clang-format off
 // Auto-generated file. Do not edit!
-//   Template: src/f32-rminmax/sse.c.in
+//   Template: src/f32-rminmax/simd.c.in
 //   Generator: tools/xngen
 //
-// Copyright 2023 Google LLC
+// Copyright 2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
 
-#include <xmmintrin.h>
-
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/reduce.h"
 
+#include "src/xnnpack/simd/f32-sse2.h"
+
+
+static XNN_INLINE void load_tail_reduce_minmax_f32(
+  float* min, xnn_simd_f32_t vmin,
+  const float* input, size_t num_elements
+) {
+  assert(num_elements < xnn_simd_size_f32);
+  for (; num_elements > 0; num_elements -= 1) {
+    const __m128 vt = _mm_load_ss(input);
+    input += 1;
+
+    vmin = _mm_min_ss(vmin, vt);
+  }
+
+  *min = xnn_reduce_min_f32(vmin);
+}
 
 void xnn_f32_rmin_ukernel__sse_u12_acc3(
     size_t batch,
@@ -27,36 +42,31 @@ void xnn_f32_rmin_ukernel__sse_u12_acc3(
   assert(input != NULL);
   assert(output != NULL);
 
-  __m128 vmin0 = _mm_set1_ps(output[0]);
-  __m128 vmin1 = vmin0;
-  __m128 vmin2 = vmin0;
+  xnn_simd_f32_t vmin0 = xnn_set1_f32(output[0]);
+  xnn_simd_f32_t vmin1 = vmin0;
+  xnn_simd_f32_t vmin2 = vmin0;
   for (; batch >= 12 * sizeof(float); batch -= 12 * sizeof(float)) {
-    const __m128 vt0 = _mm_loadu_ps(input);
-    const __m128 vt1 = _mm_loadu_ps(input + 4);
-    const __m128 vt2 = _mm_loadu_ps(input + 8);
+    const xnn_simd_f32_t vt0 = xnn_loadu_f32(input + 0);
+    const xnn_simd_f32_t vt1 = xnn_loadu_f32(input + 4);
+    const xnn_simd_f32_t vt2 = xnn_loadu_f32(input + 8);
     input += 12;
 
-    vmin0 = _mm_min_ps(vmin0, vt0);
-    vmin1 = _mm_min_ps(vmin1, vt1);
-    vmin2 = _mm_min_ps(vmin2, vt2);
+    vmin0 = xnn_min_f32(vmin0, vt0);
+    vmin1 = xnn_min_f32(vmin1, vt1);
+    vmin2 = xnn_min_f32(vmin2, vt2);
   }
-  vmin0 = _mm_min_ps(vmin0, vmin1);
-  vmin0 = _mm_min_ps(vmin0, vmin2);
+  vmin0 = xnn_min_f32(vmin0, vmin1);
+  vmin0 = xnn_min_f32(vmin0, vmin2);
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
-    const __m128 vt = _mm_loadu_ps(input);
+    const xnn_simd_f32_t vt = xnn_loadu_f32(input);
     input += 4;
 
-    vmin0 = _mm_min_ps(vmin0, vt);
+    vmin0 = xnn_min_f32(vmin0, vt);
   }
-  if XNN_UNLIKELY(batch != 0) {
-    do {
-      const __m128 vt = _mm_load_ss(input);
-      input += 1;
-      vmin0 = _mm_min_ss(vmin0, vt);
-      batch -= sizeof(float);
-    } while (batch != 0);
-  }
-  vmin0 = _mm_min_ps(vmin0, _mm_movehl_ps(vmin0, vmin0));
-  vmin0 = _mm_min_ss(vmin0, _mm_shuffle_ps(vmin0, vmin0, _MM_SHUFFLE(1, 1, 1, 1)));
-  _mm_store_ss(output, vmin0);
+
+  load_tail_reduce_minmax_f32(
+    &output[0], vmin0,
+    input, batch >> XNN_LOG2_SIZEOF_FLOAT
+  );
+
 }

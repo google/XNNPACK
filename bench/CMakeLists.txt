@@ -55,9 +55,6 @@ SET(MICROKERNEL_BENCHMARKS
     f16-gemm-minmax
     f16-igemm
     f16-raddstoreexpminusmax
-    f16-rmax
-    f16-rmin
-    f16-rminmax
     f16-rsum
     f16-spmm
     f32-bgemm
@@ -75,9 +72,6 @@ SET(MICROKERNEL_BENCHMARKS
     f32-raddextexp
     f32-raddstoreexpminusmax
     f32-rdsum
-    f32-rmax
-    f32-rmin
-    f32-rminmax
     f32-rsum
     f32-softmax
     f32-spmm
@@ -105,6 +99,8 @@ SET(MICROKERNEL_BENCHMARKS
     qu8-gemm
     qu8-gemm-fp32
     qu8-gemm-rndnu
+    rdminmax
+    rminmax
     x16-packw
     x32-packw
     x8-lut

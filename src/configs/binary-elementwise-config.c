@@ -423,11 +423,6 @@ static void init_f32_vadd_config(void) {
     f32_vadd_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vaddc_ukernel__wasmsimd_u16;
     f32_vadd_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vaddc_ukernel__wasmsimd_u16;
     f32_vadd_config.element_tile = 16;
-  #elif XNN_ARCH_WASM
-    f32_vadd_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vadd_ukernel__wasm_u8;
-    f32_vadd_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vaddc_ukernel__wasm_u8;
-    f32_vadd_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vaddc_ukernel__wasm_u8;
-    f32_vadd_config.element_tile = 8;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     f32_vadd_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vadd_ukernel__rvv_u8v;
@@ -556,11 +551,6 @@ static void init_f32_vdiv_config(void) {
     f32_vdiv_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vdivc_ukernel__wasmsimd_u16;
     f32_vdiv_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrdivc_ukernel__wasmsimd_u16;
     f32_vdiv_config.element_tile = 16;
-  #elif XNN_ARCH_WASM
-    f32_vdiv_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vdiv_ukernel__wasm_u8;
-    f32_vdiv_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vdivc_ukernel__wasm_u8;
-    f32_vdiv_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrdivc_ukernel__wasm_u8;
-    f32_vdiv_config.element_tile = 8;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     f32_vdiv_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vdiv_ukernel__rvv_u8v;
@@ -631,11 +621,6 @@ static void init_f32_vmax_config(void) {
       f32_vmax_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmaxc_ukernel__wasmsimd_arm_u16;
       f32_vmax_config.element_tile = 16;
     }
-  #elif XNN_ARCH_WASM
-    f32_vmax_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmax_ukernel__wasm_u8;
-    f32_vmax_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmaxc_ukernel__wasm_u8;
-    f32_vmax_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmaxc_ukernel__wasm_u8;
-    f32_vmax_config.element_tile = 8;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     f32_vmax_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmax_ukernel__rvv_u8v;
@@ -711,11 +696,6 @@ static void init_f32_vmin_config(void) {
       f32_vmin_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vminc_ukernel__wasmsimd_arm_u16;
       f32_vmin_config.element_tile = 16;
     }
-  #elif XNN_ARCH_WASM
-    f32_vmin_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmin_ukernel__wasm_u8;
-    f32_vmin_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vminc_ukernel__wasm_u8;
-    f32_vmin_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vminc_ukernel__wasm_u8;
-    f32_vmin_config.element_tile = 8;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     f32_vmin_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmin_ukernel__rvv_u8v;
@@ -782,11 +762,6 @@ static void init_f32_vmul_config(void) {
     f32_vmul_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmulc_ukernel__wasmsimd_u16;
     f32_vmul_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmulc_ukernel__wasmsimd_u16;
     f32_vmul_config.element_tile = 16;
-  #elif XNN_ARCH_WASM
-    f32_vmul_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmul_ukernel__wasm_u8;
-    f32_vmul_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmulc_ukernel__wasm_u8;
-    f32_vmul_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmulc_ukernel__wasm_u8;
-    f32_vmul_config.element_tile = 8;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     f32_vmul_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmul_ukernel__rvv_u8v;
@@ -853,11 +828,6 @@ static void init_f32_vprelu_config(void) {
     f32_vprelu_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vpreluc_ukernel__wasmsimd_u16;
     f32_vprelu_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrpreluc_ukernel__wasmsimd_u16;
     f32_vprelu_config.element_tile = 16;
-  #elif XNN_ARCH_WASM
-    f32_vprelu_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vprelu_ukernel__wasm_u8;
-    f32_vprelu_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vpreluc_ukernel__wasm_u8;
-    f32_vprelu_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrpreluc_ukernel__wasm_u8;
-    f32_vprelu_config.element_tile = 8;
   #else
     f32_vprelu_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vprelu_ukernel__scalar_u8;
     f32_vprelu_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vpreluc_ukernel__scalar_u8;
@@ -913,11 +883,6 @@ static void init_f32_vsub_config(void) {
     f32_vsub_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsubc_ukernel__wasmsimd_u16;
     f32_vsub_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrsubc_ukernel__wasmsimd_u16;
     f32_vsub_config.element_tile = 16;
-  #elif XNN_ARCH_WASM
-    f32_vsub_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsub_ukernel__wasm_u8;
-    f32_vsub_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsubc_ukernel__wasm_u8;
-    f32_vsub_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrsubc_ukernel__wasm_u8;
-    f32_vsub_config.element_tile = 8;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     f32_vsub_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsub_ukernel__rvv_u8v;

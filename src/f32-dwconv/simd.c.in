@@ -115,9 +115,6 @@ void xnn_f32_dwconv_minmax_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__${ARCH}${"" 
         output += ${SIMD_SIZE};
       }
     if XNN_UNLIKELY(c != 0) {
-      assert(c >= 1);
-      assert(c <= ${SIMD_SIZE});
-
       xnn_simd_f32_t vacc0p0 = xnn_load_tail_f32(w, c);
       $for K in range(KERNEL_TILE):
 

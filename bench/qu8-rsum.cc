@@ -155,8 +155,8 @@ BENCHMARK_CAPTURE(qu8_rsum, scalar_u4,
 
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(qs8_rsum, wasmsimd_u8,
-                    xnn_qs8_rsum_ukernel__wasmsimd_u8,
+  BENCHMARK_CAPTURE(qu8_rsum, wasmsimd_u8,
+                    xnn_qu8_rsum_ukernel__wasmsimd_u8,
                     /*init_params=*/nullptr)
     ->Apply(BenchmarkRSUM)
     ->UseRealTime();
@@ -164,8 +164,8 @@ BENCHMARK_CAPTURE(qu8_rsum, scalar_u4,
 
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(qs8_rsum, wasmsimd_u16_acc2,
-                    xnn_qs8_rsum_ukernel__wasmsimd_u16_acc2,
+  BENCHMARK_CAPTURE(qu8_rsum, wasmsimd_u16_acc2,
+                    xnn_qu8_rsum_ukernel__wasmsimd_u16_acc2,
                     /*init_params=*/nullptr)
     ->Apply(BenchmarkRSUM)
     ->UseRealTime();
@@ -173,8 +173,8 @@ BENCHMARK_CAPTURE(qu8_rsum, scalar_u4,
 
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(qs8_rsum, wasmsimd_u32_acc2,
-                    xnn_qs8_rsum_ukernel__wasmsimd_u32_acc2,
+  BENCHMARK_CAPTURE(qu8_rsum, wasmsimd_u32_acc2,
+                    xnn_qu8_rsum_ukernel__wasmsimd_u32_acc2,
                     /*init_params=*/nullptr)
     ->Apply(BenchmarkRSUM)
     ->UseRealTime();
@@ -182,8 +182,8 @@ BENCHMARK_CAPTURE(qu8_rsum, scalar_u4,
 
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(qs8_rsum, wasmsimd_u32_acc4,
-                    xnn_qs8_rsum_ukernel__wasmsimd_u32_acc4,
+  BENCHMARK_CAPTURE(qu8_rsum, wasmsimd_u32_acc4,
+                    xnn_qu8_rsum_ukernel__wasmsimd_u32_acc4,
                     /*init_params=*/nullptr)
     ->Apply(BenchmarkRSUM)
     ->UseRealTime();

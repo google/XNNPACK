@@ -626,20 +626,6 @@ DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
 DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_igemm_minmax_ukernel_4x2c4__wasmsimd_x86)
 
-DECLARE_F32_IGEMM_RELU_UKERNEL_FUNCTION(xnn_f32_igemm_relu_ukernel_1x4__wasm)
-DECLARE_F32_IGEMM_RELU_UKERNEL_FUNCTION(xnn_f32_igemm_relu_ukernel_2x4__wasm)
-DECLARE_F32_IGEMM_RELU_UKERNEL_FUNCTION(xnn_f32_igemm_relu_ukernel_4x2__wasm)
-DECLARE_F32_IGEMM_RELU_UKERNEL_FUNCTION(xnn_f32_igemm_relu_ukernel_4x4__wasm)
-
-DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_f32_igemm_minmax_ukernel_1x4__wasm)
-DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_f32_igemm_minmax_ukernel_2x4__wasm)
-DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_f32_igemm_minmax_ukernel_4x2__wasm)
-DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_f32_igemm_minmax_ukernel_4x4__wasm)
-
 DECLARE_F32_IGEMM_UKERNEL_FUNCTION(xnn_f32_igemm_ukernel_1x4__scalar)
 DECLARE_F32_IGEMM_UKERNEL_FUNCTION(xnn_f32_igemm_ukernel_2x4__scalar)
 DECLARE_F32_IGEMM_UKERNEL_FUNCTION(xnn_f32_igemm_ukernel_4x2__scalar)
@@ -1179,23 +1165,6 @@ DECLARE_QU8_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qu8_igemm_minmax_fp32_ukernel_4x4c8__wasmsimd_dot16x2_ld128)
 
 DECLARE_QU8_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_qu8_igemm_minmax_fp32_ukernel_1x2__wasm_fmagic)
-DECLARE_QU8_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_qu8_igemm_minmax_fp32_ukernel_1x4__wasm_fmagic)
-DECLARE_QU8_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_qu8_igemm_minmax_fp32_ukernel_2x2__wasm_fmagic)
-DECLARE_QU8_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_qu8_igemm_minmax_fp32_ukernel_2x4__wasm_fmagic)
-DECLARE_QU8_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_qu8_igemm_minmax_fp32_ukernel_3x2__wasm_fmagic)
-DECLARE_QU8_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_qu8_igemm_minmax_fp32_ukernel_3x4__wasm_fmagic)
-DECLARE_QU8_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_qu8_igemm_minmax_fp32_ukernel_4x2__wasm_fmagic)
-DECLARE_QU8_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_qu8_igemm_minmax_fp32_ukernel_4x4__wasm_fmagic)
-
-DECLARE_QU8_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qu8_igemm_minmax_fp32_ukernel_1x1c4__armsimd32)
 DECLARE_QU8_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qu8_igemm_minmax_fp32_ukernel_1x2c4__armsimd32)
@@ -1585,21 +1554,6 @@ DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qd8_f32_qc8w_igemm_minmax_ukernel_7x16c8__avx512skx_prfm)
 DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qd8_f32_qc8w_igemm_minmax_ukernel_8x16c8__avx512skx_prfm)
-
-DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x2__wasm)
-DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x4__wasm)
-DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x8__wasm)
-DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_qd8_f32_qc8w_igemm_minmax_ukernel_2x2__wasm)
-DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_qd8_f32_qc8w_igemm_minmax_ukernel_2x4__wasm)
-DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_qd8_f32_qc8w_igemm_minmax_ukernel_2x8__wasm)
-DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x4__wasm)
 
 DECLARE_QD8_F32_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x4c16__wasmsdot)
@@ -2588,23 +2542,6 @@ DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_3x16c4__wasmsdot_u2_acc2)
 DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x16c4__wasmsdot_u2_acc2)
-
-DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x2__wasm_fmagic)
-DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x4__wasm_fmagic)
-DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_2x2__wasm_fmagic)
-DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_2x4__wasm_fmagic)
-DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_3x2__wasm_fmagic)
-DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_3x4__wasm_fmagic)
-DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x2__wasm_fmagic)
-DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4__wasm_fmagic)
 
 DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x1c4__armsimd32)

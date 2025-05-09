@@ -150,7 +150,6 @@ SET(NON_PROD_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-dwconv2d-chw/gen/f16-dwconv2d-chw-5x5s2p2-minmax-neonfp16arith-3x8.c
   src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-minmax-neonfp16arith-c32.c
   src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-minmax-neonfp16arith-c64.c
-  src/f16-f32acc-rsum/gen/f16-f32acc-rsum-neonfp16arith-u4.c
   src/f16-f32acc-rsum/gen/f16-f32acc-rsum-neonfp16arith-u8.c
   src/f16-f32acc-rsum/gen/f16-f32acc-rsum-neonfp16arith-u16-acc2.c
   src/f16-f32acc-rsum/gen/f16-f32acc-rsum-neonfp16arith-u24-acc3.c
