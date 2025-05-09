@@ -298,12 +298,9 @@ xnnpack_cxx_library(
     ],
     deps = MICROKERNEL_TEST_DEPS,
 ) for kernel in [
-    "f32_ibilinear",
+    "ibilinear",
     "f32_ibilinear_chw",
-    "f16_ibilinear",
     "f16_ibilinear_chw",
-    "s8_ibilinear",
-    "u8_ibilinear",
 ]]
 
 [xnnpack_unit_test(

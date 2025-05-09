@@ -95,7 +95,6 @@ SET(MICROKERNEL_UNIT_TESTS
     f16-conv-hwc2chw
     f16-f32acc-rdsum
     f16-f32acc-rsum
-    f16-ibilinear
     f16-ibilinear-chw
     f16-raddstoreexpminusmax
     f16-rsum
@@ -105,7 +104,6 @@ SET(MICROKERNEL_UNIT_TESTS
     f32-argmaxpool
     f32-conv-hwc
     f32-conv-hwc2chw
-    f32-ibilinear
     f32-ibilinear-chw
     f32-raddexpminusmax
     f32-raddextexp
@@ -117,6 +115,7 @@ SET(MICROKERNEL_UNIT_TESTS
     f32-vmulcaddc-minmax
     f32-vscaleexpminusmax
     f32-vscaleextexp
+    ibilinear
     indirection
     packing
     qs8-packw
@@ -128,8 +127,6 @@ SET(MICROKERNEL_UNIT_TESTS
     qu8-vlrelu
     rdminmax
     rminmax
-    s8-ibilinear
-    u8-ibilinear
     u8-lut32norm
     x16-packw
     x32-packw

@@ -234,12 +234,6 @@ tools/generate-dwconv2d-chw-test.py --spec test/f32-dwconv2d-chw.yaml --output t
 tools/generate-vunary-test.py --ukernel f16-vhswish --output test/f16-vhswish.cc &
 tools/generate-vunary-test.py --ukernel f32-vhswish --output test/f32-vhswish.cc &
 
-### Tests for IBilinear micro-kernels
-tools/generate-ibilinear-test.py --spec test/f16-ibilinear.yaml --output test/f16-ibilinear.cc &
-tools/generate-ibilinear-test.py --spec test/f32-ibilinear.yaml --output test/f32-ibilinear.cc &
-tools/generate-ibilinear-test.py --spec test/s8-ibilinear.yaml --output test/s8-ibilinear.cc &
-tools/generate-ibilinear-test.py --spec test/u8-ibilinear.yaml --output test/u8-ibilinear.cc &
-
 ### Tests for IBilinear CHW layout micro-kernels
 tools/generate-ibilinear-chw-test.py --spec test/f16-ibilinear-chw.yaml --output test/f16-ibilinear-chw.cc &
 tools/generate-ibilinear-chw-test.py --spec test/f32-ibilinear-chw.yaml --output test/f32-ibilinear-chw.cc &
