@@ -709,7 +709,7 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_bf16_qb4w(
   if (output_min > output_max) {
     xnn_log_error(
       "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be less than or equal to upper bound",
-      xnn_operator_type_to_string(expected_operator_type), output_min, output_max);
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_qd8_bf16_qb4w), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
 
