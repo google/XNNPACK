@@ -1478,47 +1478,6 @@ std::vector<GemmTestParams> CreateTests1(
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  INSTANTIATE_TEST_SUITE_P(
-      QU8_IGEMM_MINMAX_FP32_3X2__WASM_FMAGIC, GemmTest,
-      testing::ValuesIn(CreateTests1(
-          /*k_block=*/1,
-          /*adj_k_block=*/1,
-          /*mr=*/3, /*nr=*/2, /*kr=*/1, /*sr=*/1,
-          /*is_igemm=*/true,
-          /*unsigned_inputs=*/false,
-          /*planes=*/1,
-          [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x2__wasm_fmagic,
-                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
-                        xnn_pack_qu8_conv_goki_w,
-                        xnn_qu8_requantize_fp32);
-          })),
-      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-
-  INSTANTIATE_TEST_SUITE_P(
-      QU8_IGEMM_MINMAX_FP32_3X4__WASM_FMAGIC, GemmTest,
-      testing::ValuesIn(CreateTests1(
-          /*k_block=*/1,
-          /*adj_k_block=*/1,
-          /*mr=*/3, /*nr=*/4, /*kr=*/1, /*sr=*/1,
-          /*is_igemm=*/true,
-          /*unsigned_inputs=*/false,
-          /*planes=*/1,
-          [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4__wasm_fmagic,
-                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
-                        xnn_pack_qu8_conv_goki_w,
-                        xnn_qu8_requantize_fp32);
-          })),
-      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-
 INSTANTIATE_TEST_SUITE_P(
     QU8_IGEMM_MINMAX_FP32_1X2__SCALAR_IMAGIC, GemmTest,
     testing::ValuesIn(CreateTests1(

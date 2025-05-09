@@ -217,6 +217,41 @@ TEST_F(F32SimdSSE2Test, Round) {
   }
 }
 
+TEST_F(F32SimdSSE2Test, ReduceAdd) {
+  const xnn_simd_f32_t a = xnn_loadu_f32(inputs_.data());
+  float res = xnn_reduce_add_f32(a);
+  float expected = 0.0f;
+  float max_abs_input = 0.0f;
+  for (size_t i = 0; i < xnn_simd_size_f32; ++i) {
+    expected += inputs_[i];
+    max_abs_input = std::max(max_abs_input, std::abs(inputs_[i]));
+  }
+  // Don't expect an exact result due to implementation-defined behavior.
+  float tolerance =
+      std::numeric_limits<float>::epsilon() * max_abs_input * xnn_simd_size_f32 * 2.0f;
+  ASSERT_NEAR(res, expected, tolerance);
+}
+
+TEST_F(F32SimdSSE2Test, ReduceMin) {
+  const xnn_simd_f32_t a = xnn_loadu_f32(inputs_.data());
+  float res = xnn_reduce_min_f32(a);
+  float expected = std::numeric_limits<float>::infinity();
+  for (size_t i = 0; i < xnn_simd_size_f32; ++i) {
+    expected = std::min(expected, inputs_[i]);
+  }
+  ASSERT_EQ(res, expected);
+}
+
+TEST_F(F32SimdSSE2Test, ReduceMax) {
+  const xnn_simd_f32_t a = xnn_loadu_f32(inputs_.data());
+  float res = xnn_reduce_max_f32(a);
+  float expected = -std::numeric_limits<float>::infinity();
+  for (size_t i = 0; i < xnn_simd_size_f32; ++i) {
+    expected = std::max(expected, inputs_[i]);
+  }
+  ASSERT_EQ(res, expected);
+}
+
 TEST_F(F32SimdSSE2Test, And) {
   const xnn_simd_f32_t a = xnn_loadu_f32(inputs_.data());
   const xnn_simd_f32_t b = xnn_loadu_f32(inputs_.data() + xnn_simd_size_f32);

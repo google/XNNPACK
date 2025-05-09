@@ -1,20 +1,35 @@
 // clang-format off
 // Auto-generated file. Do not edit!
-//   Template: src/f32-rminmax/sse.c.in
+//   Template: src/f32-rminmax/simd.c.in
 //   Generator: tools/xngen
 //
-// Copyright 2023 Google LLC
+// Copyright 2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
 
-#include <xmmintrin.h>
-
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/reduce.h"
 
+#include "src/xnnpack/simd/f32-sse2.h"
+
+
+static XNN_INLINE void load_tail_reduce_minmax_f32(
+  float* max, xnn_simd_f32_t vmax,
+  const float* input, size_t num_elements
+) {
+  assert(num_elements < xnn_simd_size_f32);
+  for (; num_elements > 0; num_elements -= 1) {
+    const __m128 vt = _mm_load_ss(input);
+    input += 1;
+
+    vmax = _mm_max_ss(vmax, vt);
+  }
+
+  *max = xnn_reduce_max_f32(vmax);
+}
 
 void xnn_f32_rmax_ukernel__sse_u4(
     size_t batch,
@@ -27,22 +42,17 @@ void xnn_f32_rmax_ukernel__sse_u4(
   assert(input != NULL);
   assert(output != NULL);
 
-  __m128 vmax0 = _mm_set1_ps(output[0]);
+  xnn_simd_f32_t vmax0 = xnn_set1_f32(output[0]);
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
-    const __m128 vt = _mm_loadu_ps(input);
+    const xnn_simd_f32_t vt = xnn_loadu_f32(input);
     input += 4;
 
-    vmax0 = _mm_max_ps(vmax0, vt);
+    vmax0 = xnn_max_f32(vmax0, vt);
   }
-  if XNN_UNLIKELY(batch != 0) {
-    do {
-      const __m128 vt = _mm_load_ss(input);
-      input += 1;
-      vmax0 = _mm_max_ss(vmax0, vt);
-      batch -= sizeof(float);
-    } while (batch != 0);
-  }
-  vmax0 = _mm_max_ps(vmax0, _mm_movehl_ps(vmax0, vmax0));
-  vmax0 = _mm_max_ss(vmax0, _mm_shuffle_ps(vmax0, vmax0, _MM_SHUFFLE(1, 1, 1, 1)));
-  _mm_store_ss(output, vmax0);
+
+  load_tail_reduce_minmax_f32(
+    &output[0], vmax0,
+    input, batch >> XNN_LOG2_SIZEOF_FLOAT
+  );
+
 }

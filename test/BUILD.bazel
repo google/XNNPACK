@@ -21,6 +21,7 @@ MICROKERNEL_TEST_DEPS = [
     "//:common",
     "//:datatype",
     "//:fp16",
+    "//:hardware_config",
     "//:isa_checks",
     "//:math",
     "//:memory",
@@ -266,33 +267,12 @@ xnnpack_cxx_library(
 ]]
 
 [xnnpack_unit_test(
-    name = "%s_test" % kernel,
-    srcs = [
-        "%s.cc" % kernel.replace("_", "-"),
-        "reduce-microkernel-tester.h",
-    ],
+    name = "%s_test" % test,
+    srcs = ["%s.cc" % test.replace("_", "-")],
     deps = MICROKERNEL_TEST_DEPS,
-) for kernel in [
-    "f16_rmax",
-    "f16_rmin",
-    "f16_rminmax",
-    "f32_rmax",
-    "f32_rmin",
-    "f32_rminmax",
-    "f32_rdmin",
-    "f32_rdmax",
-    "f16_rdmin",
-    "f16_rdmax",
-    "s8_rmin",
-    "s8_rmax",
-    "s8_rminmax",
-    "s8_rdmin",
-    "s8_rdmax",
-    "u8_rmin",
-    "u8_rmax",
-    "u8_rdmin",
-    "u8_rdmax",
-    "u8_rminmax",
+) for test in [
+    "rminmax",
+    "rdminmax",
 ]]
 
 [xnnpack_unit_test(

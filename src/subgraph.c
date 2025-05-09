@@ -1296,6 +1296,23 @@ static bool has_clamp(const struct xnn_node* node)
   }
 }
 
+// Can we reorder the use of a value from the producer to the consumer?
+// We can if no nodes betwen the producer and the consumer use the value.
+static bool can_reorder_use(xnn_subgraph_t subgraph, uint32_t value_id,
+                            uint32_t producer_id, uint32_t consumer_id) {
+  assert(producer_id < consumer_id);
+  for (uint32_t i = producer_id + 1; i < consumer_id; i++) {
+    const struct xnn_node* node = &subgraph->nodes[i];
+    for (uint32_t j = 0; j < node->num_inputs; j++) {
+      if (node->inputs[j] == value_id) return false;
+    }
+    for (uint32_t j = 0; j < node->num_outputs; j++) {
+      if (node->outputs[j] == value_id) return false;
+    }
+  }
+  return true;
+}
+
 enum xnn_status xnn_subgraph_fusion(
     xnn_subgraph_t subgraph)
 {
@@ -1424,7 +1441,8 @@ enum xnn_status xnn_subgraph_fusion(
       // E.g. ---> (N1) --- value ---> (Copy) ---> v1
       // If value is persistent or external, fusing copy upstream into N1 will skip the write to value, N1 will write to
       // v1 instead, which is wrong.
-      if (consumer->type == xnn_node_type_copy && xnn_value_is_valid(value) && xnn_value_is_internal(value)) {
+      if (consumer->type == xnn_node_type_copy && xnn_value_is_valid(value) && xnn_value_is_internal(value) &&
+          can_reorder_use(subgraph, consumer->outputs[0], producer_id, consumer_id)) {
         xnn_log_info(
           "value %d fuse Copy Node #%" PRIu32 " into upstream %s Node #%" PRIu32, value->id, consumer->id,
           xnn_node_type_to_string(producer->type), producer->id);
@@ -1441,7 +1459,8 @@ enum xnn_status xnn_subgraph_fusion(
       // Try to fuse copy downstream.
       // E.g. --- v1 ---> (copy) --- value ---> (n2)
       // If value is external or persistent, we cannot simply remove the copy, since we need to write to value.
-      if (producer->type == xnn_node_type_copy && xnn_value_is_valid(value) && xnn_value_is_internal(value)) {
+      if (producer->type == xnn_node_type_copy && xnn_value_is_valid(value) && xnn_value_is_internal(value) &&
+          can_reorder_use(subgraph, producer->inputs[0], producer_id, consumer_id)) {
         // We need to check that value is valid here because value could have been cleared by a previous optimization,
         // this can happen if we have a chain of Copy(s), e.g.:
         // ---v1--> (Copy1) ---v2--> (Copy2) ---v3--> (Copy3) ---v4-->

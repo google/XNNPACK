@@ -68,5 +68,6 @@ void xnn_f16_rsum_ukernel__neonfp16arith_u${BATCH_TILE}${ACC_SUFFIX}(
     vacc = vadd_f16(vacc, vt);
   }
   vacc = vmul_f16(vacc, vscale);
+  vacc = vadd_f16(vacc, vreinterpret_f16_u16(vld1_dup_u16(o)));
   vst1_lane_u16(o, vreinterpret_u16_f16(vacc), 0);
 }
