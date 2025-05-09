@@ -1,6 +1,6 @@
 // clang-format off
 // Auto-generated file. Do not edit!
-//   Template: src/f32-rdsum/wasm-simd.c.in
+//   Template: src/f32-rdsum/wasmsimd.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2024 Google LLC //

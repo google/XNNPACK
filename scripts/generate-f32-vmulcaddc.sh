@@ -10,11 +10,6 @@ tools/xngen src/f32-vmulcaddc/scalar.c.in -D CHANNEL_TILE=1 -D ROW_TILE=2 -D WAS
 tools/xngen src/f32-vmulcaddc/scalar.c.in -D CHANNEL_TILE=2 -D ROW_TILE=2 -D WASM=0 -o src/f32-vmulcaddc/gen/f32-vmulcaddc-c2-minmax-scalar-2x.c &
 tools/xngen src/f32-vmulcaddc/scalar.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -D WASM=0 -o src/f32-vmulcaddc/gen/f32-vmulcaddc-c4-minmax-scalar-2x.c &
 
-### WAsm-specific micro-kernels
-tools/xngen src/f32-vmulcaddc/scalar.c.in -D CHANNEL_TILE=1 -D ROW_TILE=2 -D WASM=1 -o src/f32-vmulcaddc/gen/f32-vmulcaddc-c1-minmax-wasm-2x.c &
-tools/xngen src/f32-vmulcaddc/scalar.c.in -D CHANNEL_TILE=2 -D ROW_TILE=2 -D WASM=1 -o src/f32-vmulcaddc/gen/f32-vmulcaddc-c2-minmax-wasm-2x.c &
-tools/xngen src/f32-vmulcaddc/scalar.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -D WASM=1 -o src/f32-vmulcaddc/gen/f32-vmulcaddc-c4-minmax-wasm-2x.c &
-
 ################################## WAsm SIMD ##################################
 tools/xngen src/f32-vmulcaddc/wasmsimd.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -D ARCH=ARM     -D FMA=0 -o src/f32-vmulcaddc/gen/f32-vmulcaddc-c4-minmax-wasmsimd-arm-2x.c &
 tools/xngen src/f32-vmulcaddc/wasmsimd.c.in -D CHANNEL_TILE=8 -D ROW_TILE=2 -D ARCH=ARM     -D FMA=0 -o src/f32-vmulcaddc/gen/f32-vmulcaddc-c8-minmax-wasmsimd-arm-2x.c &
