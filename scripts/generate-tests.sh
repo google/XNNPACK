@@ -194,40 +194,17 @@ tools/generate-vunary-test.py --ukernel qs8-vlrelu --output test/qs8-vlrelu.cc &
 tools/generate-vunary-test.py --ukernel qu8-vlrelu --output test/qu8-vlrelu.cc &
 
 ### Tests for Reduce micro-kernels
-tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/f16-rmax.yaml --output test/f16-rmax.cc &
-tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/f16-rmin.yaml --output test/f16-rmin.cc &
 tools/generate-reduce-test.py --tester RSumMicrokernelTester --spec test/f16-rsum.yaml --output test/f16-rsum.cc &
 tools/generate-reduce-test.py --tester RSumMicrokernelTester --spec test/f16-f32acc-rsum.yaml --output test/f16-f32acc-rsum.cc &
-tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/f16-rminmax.yaml --output test/f16-rminmax.cc &
-
-tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/f32-rmax.yaml --output test/f32-rmax.cc &
-tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/f32-rmin.yaml --output test/f32-rmin.cc &
-tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/f32-rminmax.yaml --output test/f32-rminmax.cc &
 
 tools/generate-reduce-test.py --tester RSumMicrokernelTester --spec test/qs8-rsum.yaml --output test/qs8-rsum.cc &
 tools/generate-reduce-test.py --tester RSumMicrokernelTester --spec test/qu8-rsum.yaml --output test/qu8-rsum.cc &
 tools/generate-reduce-test.py --tester RSumMicrokernelTester --spec test/f32-rsum.yaml --output test/f32-rsum.cc &
 
-tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/s8-rmin.yaml --output test/s8-rmin.cc &
-tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/s8-rmax.yaml --output test/s8-rmax.cc &
-tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/s8-rminmax.yaml --output test/s8-rminmax.cc &
-tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/u8-rmin.yaml --output test/u8-rmin.cc &
-tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/u8-rmax.yaml --output test/u8-rmax.cc &
-tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/u8-rminmax.yaml --output test/u8-rminmax.cc &
-
 tools/generate-reduce-discontiguous-test.py --tester RDSumMicrokernelTester --spec test/f16-f32acc-rdsum.yaml --output test/f16-f32acc-rdsum.cc &
 tools/generate-reduce-discontiguous-test.py --tester RDSumMicrokernelTester --spec test/f32-rdsum.yaml --output test/f32-rdsum.cc &
 tools/generate-reduce-discontiguous-test.py --tester RDSumMicrokernelTester --spec test/qs8-rdsum-minmax-fp32.yaml --output test/qs8-rdsum-minmax-fp32.cc &
 tools/generate-reduce-discontiguous-test.py --tester RDSumMicrokernelTester --spec test/qu8-rdsum.yaml --output test/qu8-rdsum.cc &
-
-tools/generate-reduce-discontiguous-test.py --tester ReduceMicrokernelTester --spec test/f32-rdmin.yaml --output test/f32-rdmin.cc &
-tools/generate-reduce-discontiguous-test.py --tester ReduceMicrokernelTester --spec test/f32-rdmax.yaml --output test/f32-rdmax.cc &
-tools/generate-reduce-discontiguous-test.py --tester ReduceMicrokernelTester --spec test/f16-rdmin.yaml --output test/f16-rdmin.cc &
-tools/generate-reduce-discontiguous-test.py --tester ReduceMicrokernelTester --spec test/f16-rdmax.yaml --output test/f16-rdmax.cc &
-tools/generate-reduce-discontiguous-test.py --tester ReduceMicrokernelTester --spec test/s8-rdmin.yaml --output test/s8-rdmin.cc &
-tools/generate-reduce-discontiguous-test.py --tester ReduceMicrokernelTester --spec test/s8-rdmax.yaml --output test/s8-rdmax.cc &
-tools/generate-reduce-discontiguous-test.py --tester ReduceMicrokernelTester --spec test/u8-rdmin.yaml --output test/u8-rdmin.cc &
-tools/generate-reduce-discontiguous-test.py --tester ReduceMicrokernelTester --spec test/u8-rdmax.yaml --output test/u8-rdmax.cc &
 
 ### Tests for LUT micro-kernels
 tools/generate-lut-test.py --spec test/x8-lut.yaml --output test/x8-lut.cc &

@@ -21,16 +21,6 @@
 
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  BENCHMARK_CAPTURE(f16_f32acc_rsum, neonfp16arith_u4,
-                    xnn_f16_f32acc_rsum_ukernel__neonfp16arith_u4,
-                    xnn_init_f16_f32acc_scale_scalar_params,
-                    benchmark::utils::CheckNEONFP16ARITH)
-    ->Apply(BenchmarkRSUM)
-    ->UseRealTime();
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-
-
-#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   BENCHMARK_CAPTURE(f16_f32acc_rsum, neonfp16arith_u8,
                     xnn_f16_f32acc_rsum_ukernel__neonfp16arith_u8,
                     xnn_init_f16_f32acc_scale_scalar_params,

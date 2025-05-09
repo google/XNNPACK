@@ -173,7 +173,7 @@ class RSumMicrokernelTester {
       init_params(&params, static_cast<xnn_float16>(scale()));
 
       // Call optimized micro-kernel.
-      xnn_float16 output;
+      xnn_float16 output = 0.0f;
       rsum(batch_size() * sizeof(xnn_float16), input.data(), &output, &params);
 
       // Verify results.

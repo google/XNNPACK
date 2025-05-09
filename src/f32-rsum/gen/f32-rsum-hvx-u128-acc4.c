@@ -21,7 +21,7 @@ void xnn_f32_rsum_ukernel__hvx_u128_acc4(
     size_t batch,
     const float* input,
     float* output,
-    const struct xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -56,9 +56,9 @@ void xnn_f32_rsum_ukernel__hvx_u128_acc4(
     vacc2 = Q6_Vqf32_vadd_Vqf32Vsf(vacc2, vt2);
     vacc3 = Q6_Vqf32_vadd_Vqf32Vsf(vacc3, vt3);
   }
-  vacc0 = Q6_Vqf32_vadd_Vqf32Vqf32(vacc0, vacc1);
-  vacc2 = Q6_Vqf32_vadd_Vqf32Vqf32(vacc2, vacc3);
   vacc0 = Q6_Vqf32_vadd_Vqf32Vqf32(vacc0, vacc2);
+  vacc1 = Q6_Vqf32_vadd_Vqf32Vqf32(vacc1, vacc3);
+  vacc0 = Q6_Vqf32_vadd_Vqf32Vqf32(vacc0, vacc1);
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
     const xnn_simd_f32_t vt = xnn_load_f32(input);
     input += 32;
@@ -67,7 +67,7 @@ void xnn_f32_rsum_ukernel__hvx_u128_acc4(
   }
 
   if XNN_UNLIKELY(batch) {
-    const xnn_simd_f32_t vt = xnn_load_f32(input);
+    const xnn_simd_f32_t vt = xnn_load_tail_f32(input, batch >> 2);
     HVX_VectorPred mask = Q6_Q_vsetq_R(batch);
 
     vacc0 = Q6_Vqf32_vadd_Vqf32Vsf(vacc0, Q6_V_vand_QV(mask, vt));

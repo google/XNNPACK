@@ -278,7 +278,9 @@ class SubgraphTester {
   }
 
   SubgraphTester& AddInputTensorF32(const TensorShape& shape,
-                                    uint32_t external_id);
+    uint32_t external_id);
+    SubgraphTester& AddInputOutputTensorF32(const TensorShape& shape,
+                                      uint32_t external_id);
 
   SubgraphTester& AddInputTensorQS8(int32_t zero_point, float scale,
                                     const TensorShape& shape,

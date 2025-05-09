@@ -1,20 +1,35 @@
 // clang-format off
 // Auto-generated file. Do not edit!
-//   Template: src/f32-rminmax/avx512f.c.in
+//   Template: src/f32-rminmax/simd.c.in
 //   Generator: tools/xngen
 //
-// Copyright 2023 Google LLC
+// Copyright 2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
 
-#include <immintrin.h>
-
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/reduce.h"
 
+#include "src/xnnpack/simd/f32-avx512f.h"
+
+
+static XNN_INLINE void load_tail_reduce_minmax_f32(
+  float* max, xnn_simd_f32_t vmax,
+  const float* input, size_t num_elements
+) {
+  assert(num_elements < xnn_simd_size_f32);
+  for (; num_elements != 0; num_elements--) {
+    const xnn_simd_f32_t vt = xnn_set1_f32(input[0]);
+    input += 1;
+
+    vmax = xnn_max_f32(vmax, vt);
+  }
+
+  *max = xnn_reduce_max_f32(vmax);
+}
 
 void xnn_f32_rmax_ukernel__avx512f_u64_acc2(
     size_t batch,
@@ -27,42 +42,31 @@ void xnn_f32_rmax_ukernel__avx512f_u64_acc2(
   assert(input != NULL);
   assert(output != NULL);
 
-  __m512 vmax0 = _mm512_set1_ps(output[0]);
-  __m512 vmax1 = vmax0;
+  xnn_simd_f32_t vmax0 = xnn_set1_f32(output[0]);
+  xnn_simd_f32_t vmax1 = vmax0;
   for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
-    const __m512 vt0 = _mm512_loadu_ps(input);
-    const __m512 vt1 = _mm512_loadu_ps(input + 16);
-    const __m512 vt2 = _mm512_loadu_ps(input + 32);
-    const __m512 vt3 = _mm512_loadu_ps(input + 48);
+    const xnn_simd_f32_t vt0 = xnn_loadu_f32(input + 0);
+    const xnn_simd_f32_t vt1 = xnn_loadu_f32(input + 16);
+    const xnn_simd_f32_t vt2 = xnn_loadu_f32(input + 32);
+    const xnn_simd_f32_t vt3 = xnn_loadu_f32(input + 48);
     input += 64;
 
-    vmax0 = _mm512_max_ps(vmax0, vt0);
-    vmax1 = _mm512_max_ps(vmax1, vt1);
-    vmax0 = _mm512_max_ps(vmax0, vt2);
-    vmax1 = _mm512_max_ps(vmax1, vt3);
+    vmax0 = xnn_max_f32(vmax0, vt0);
+    vmax1 = xnn_max_f32(vmax1, vt1);
+    vmax0 = xnn_max_f32(vmax0, vt2);
+    vmax1 = xnn_max_f32(vmax1, vt3);
   }
-  vmax0 = _mm512_max_ps(vmax0, vmax1);
+  vmax0 = xnn_max_f32(vmax0, vmax1);
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const __m512 vt = _mm512_loadu_ps(input);
+    const xnn_simd_f32_t vt = xnn_loadu_f32(input);
     input += 16;
 
-    vmax0 = _mm512_max_ps(vmax0, vt);
+    vmax0 = xnn_max_f32(vmax0, vt);
   }
-  if XNN_UNLIKELY(batch != 0) {
-    assert(batch >= 1 * sizeof(float));
-    assert(batch <= 15 * sizeof(float));
 
-    // Prepare mask for valid elements (depends on batch).
-    batch >>= XNN_LOG2_SIZEOF_FLOAT;
-    const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
+  load_tail_reduce_minmax_f32(
+    &output[0], vmax0,
+    input, batch >> XNN_LOG2_SIZEOF_FLOAT
+  );
 
-    const __m512 vt = _mm512_maskz_loadu_ps(vmask, input);
-
-    vmax0 = _mm512_mask_max_ps(vmax0, vmask, vmax0, vt);
-  }
-  __m256 vmax256 = _mm256_max_ps(_mm512_castps512_ps256(vmax0), _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(vmax0), 1)));
-  __m128 vmax = _mm_max_ps(_mm256_castps256_ps128(vmax256), _mm256_extractf128_ps(vmax256, 1));
-  vmax = _mm_max_ps(vmax, _mm_movehl_ps(vmax, vmax));
-  vmax = _mm_max_ss(vmax, _mm_movehdup_ps(vmax));
-  _mm_store_ss(output, vmax);
 }

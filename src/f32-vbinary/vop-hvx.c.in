@@ -13,8 +13,8 @@ $assert OP in ["ADD", "MAX", "MIN", "MUL", "SUB", "SQRDIFF"]
 $_HEXAGON_OP_HVX = {
 $  "ADD": "xnn_add_f32",
 $  "MAX": "xnn_max_f32",
-$  "MIN": "xnn_min_f32", 
-$  "MUL": "xnn_mul_f32", 
+$  "MIN": "xnn_min_f32",
+$  "MUL": "xnn_mul_f32",
 $  "SUB": "xnn_sub_f32",
 $  "SQRDIFF": "xnn_sub_f32",
 $}[OP]
@@ -23,7 +23,7 @@ void xnn_f32_v${OP.lower()}_ukernel__hvx_u${BATCH_TILE}(
     const float* input_a,
     const float* input_b,
     float* output,
-    const struct xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -65,13 +65,13 @@ void xnn_f32_v${OP.lower()}_ukernel__hvx_u${BATCH_TILE}(
     output += 32;
   }
   if XNN_UNLIKELY(batch != 0) {
-     HVX_Vector va = xnn_loadu_f32(input_a);
-     HVX_Vector vb = xnn_loadu_f32(input_b);
+    HVX_Vector va = xnn_load_tail_f32(input_a, batch >> XNN_LOG2_SIZEOF_FLOAT);
+    HVX_Vector vb = xnn_load_tail_f32(input_b, batch >> XNN_LOG2_SIZEOF_FLOAT);
 
-     HVX_Vector vacc = ${_HEXAGON_OP_HVX}(va, vb);
-     $if OP == "SQRDIFF":
-       vacc = xnn_mul_f32(vacc, vacc);
+    HVX_Vector vacc = ${_HEXAGON_OP_HVX}(va, vb);
+    $if OP == "SQRDIFF":
+      vacc = xnn_mul_f32(vacc, vacc);
 
-     Q6_V_vstu_variable(output, batch, vacc);
+    Q6_V_vstu_variable(output, batch, vacc);
   }
 }

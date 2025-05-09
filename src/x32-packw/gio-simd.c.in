@@ -102,9 +102,6 @@ $for NR in BATCH_TILES:
 
       // NC remainder (1..${NR-1})
       if XNN_UNLIKELY(n != 0) {
-        assert(n >= 1);
-        assert(n <= ${NR-1});
-
         // Prepare count for valid 32-bit elements (depends on n).
         $for N in range(SIMD_TILE):
           $if SIMD_TILE == 1:

@@ -687,36 +687,6 @@
   k-block: 16
   unsigned-inputs: True
 
-# WAsm
-- name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x2__wasm
-  init: xnn_init_f32_minmax_scalar_params
-  pack: xnn_pack_qs8_conv_goki_w
-  k-block: 2
-- name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x4__wasm
-  init: xnn_init_f32_minmax_scalar_params
-  pack: xnn_pack_qs8_conv_goki_w
-  k-block: 2
-- name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x8__wasm
-  init: xnn_init_f32_minmax_scalar_params
-  pack: xnn_pack_qs8_conv_goki_w
-  k-block: 2
-- name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_2x2__wasm
-  init: xnn_init_f32_minmax_scalar_params
-  pack: xnn_pack_qs8_conv_goki_w
-  k-block: 2
-- name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_2x4__wasm
-  init: xnn_init_f32_minmax_scalar_params
-  pack: xnn_pack_qs8_conv_goki_w
-  k-block: 2
-- name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_2x8__wasm
-  init: xnn_init_f32_minmax_scalar_params
-  pack: xnn_pack_qs8_conv_goki_w
-  k-block: 2
-- name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x4__wasm
-  init: xnn_init_f32_minmax_scalar_params
-  pack: xnn_pack_qs8_conv_goki_w
-  k-block: 2
-
 # WAsm Relaxed SIMD
 - name: xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c4__wasmusdot
   init: xnn_init_f32_minmax_scalar_params
