@@ -227,8 +227,8 @@ tools/generate-dwconv-test.py --ukernel qs8-dwconv-minmax-rndnu --output test/qs
 tools/generate-dwconv-test.py --ukernel qu8-dwconv-minmax-rndnu --output test/qu8-dwconv-minmax-rndnu.cc &
 
 ### Tests for DWConv CHW layout micro-kernels
-tools/generate-dwconv2d-chw-test.py --spec test/f16-dwconv2d-chw.yaml --output test/f16-dwconv2d-chw.cc &
-tools/generate-dwconv2d-chw-test.py --spec test/f32-dwconv2d-chw.yaml --output test/f32-dwconv2d-chw.cc &
+tools/generate-dwconv2d-chw-test.py --tester DWConv2DMicrokernelTester --ukernel f16-dwconv2d-chw --output test/f16-dwconv2d-chw.cc &
+tools/generate-dwconv2d-chw-test.py --tester DWConv2DMicrokernelTester --ukernel f32-dwconv2d-chw --output test/f32-dwconv2d-chw.cc &
 
 ### Tests for VHSwish micro-kernels
 tools/generate-vunary-test.py --ukernel f16-vhswish --output test/f16-vhswish.cc &
