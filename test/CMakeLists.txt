@@ -93,12 +93,9 @@ SET(MICROKERNEL_UNIT_TESTS
     avgpool-minmax
     maxpool-minmax
     f16-conv-hwc2chw
-    f16-f32acc-rdsum
-    f16-f32acc-rsum
     f16-ibilinear
     f16-ibilinear-chw
     f16-raddstoreexpminusmax
-    f16-rsum
     f16-spmm-minmax
     f16-vcmul
     f16-vmulcaddc-minmax
@@ -110,8 +107,6 @@ SET(MICROKERNEL_UNIT_TESTS
     f32-raddexpminusmax
     f32-raddextexp
     f32-raddstoreexpminusmax
-    f32-rdsum
-    f32-rsum
     f32-spmm-minmax
     f32-vcmul
     f32-vmulcaddc-minmax
@@ -121,13 +116,11 @@ SET(MICROKERNEL_UNIT_TESTS
     packing
     qs8-packw
     qs8-qc4w-packw
-    qs8-rdsum-minmax-fp32
-    qs8-rsum
-    qu8-rdsum
-    qu8-rsum
     qu8-vlrelu
     rdminmax
+    rdsum
     rminmax
+    rsum
     s8-ibilinear
     u8-ibilinear
     u8-lut32norm
@@ -160,7 +153,7 @@ SHARD_TEST(avgpool-minmax-test 10)
 SHARD_TEST(maxpool-minmax-test 10)
 IF(XNNPACK_TARGET_PROCESSOR MATCHES "^riscv")
   SHARD_TEST(f32-argmaxpool-test 20)
-  SHARD_TEST(f32-rdsum-test 10)
+  SHARD_TEST(rdsum-test 10)
 ENDIF()
 
 SET(MICROKERNEL_DWCONV_UNIT_TESTS

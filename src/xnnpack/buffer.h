@@ -964,6 +964,8 @@ class DatatypeGenerator {
       reinterpret_ = true;
     } else {
       reinterpret_ = false;
+      min = std::max<float>(min, NumericLimits<T>::min());
+      max = std::min<float>(max, NumericLimits<T>::max());
       dist_ = std::uniform_real_distribution<float>(min, max);
     }
   }

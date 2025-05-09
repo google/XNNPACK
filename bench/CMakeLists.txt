@@ -49,13 +49,10 @@ SET(MICROKERNEL_BENCHMARKS
     f16-dwconv2d-chw
     f16-f32acc-gemm
     f16-f32acc-igemm
-    f16-f32acc-rdsum
-    f16-f32acc-rsum
     f16-gemm
     f16-gemm-minmax
     f16-igemm
     f16-raddstoreexpminusmax
-    f16-rsum
     f16-spmm
     f32-bgemm
     f32-conv-hwc
@@ -71,8 +68,6 @@ SET(MICROKERNEL_BENCHMARKS
     f32-raddexpminusmax
     f32-raddextexp
     f32-raddstoreexpminusmax
-    f32-rdsum
-    f32-rsum
     f32-softmax
     f32-spmm
     f16-vcmul
@@ -92,15 +87,13 @@ SET(MICROKERNEL_BENCHMARKS
     qs8-dwconv
     qs8-gemm
     qs8-qc8w-gemm-fp32
-    qs8-rdsum
-    qu8-rdsum
-    qs8-rsum
-    qu8-rsum
     qu8-gemm
     qu8-gemm-fp32
     qu8-gemm-rndnu
     rdminmax
+    rdsum
     rminmax
+    rsum
     x16-packw
     x32-packw
     x8-lut

@@ -988,8 +988,7 @@ typedef void (*xnn_qu8_vmul_minmax_ukernel_fn)(
     const union xnn_qu8_mul_minmax_params
         params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-
- // VPRELU: Vector PRELU elementwise 
+// VPRELU: Vector PRELU elementwise
 
 typedef void (*xnn_qs8_vprelu_ukernel_fn)(
     size_t batch, const int8_t* input_x, const int8_t* input_y,
@@ -1176,7 +1175,7 @@ typedef size_t (*xnn_init_qu8_conv_minmax_params_fn)(
     uint8_t output_min, uint8_t output_max);
 
 typedef size_t (*xnn_init_qs8_rsum_params_fn)(
-    struct xnn_qs8_rsum_params params[XNN_MIN_ELEMENTS(1)]);
+    struct xnn_qs8_rsum_params params[XNN_MIN_ELEMENTS(1)], float scale);
 
 typedef size_t (*xnn_init_qs8_add_minmax_params_fn)(
     struct xnn_qs8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],

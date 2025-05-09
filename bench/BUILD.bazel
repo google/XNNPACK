@@ -254,25 +254,6 @@ xnnpack_benchmark(
     name = "%s_bench" % kernel,
     srcs = [
         "%s.cc" % kernel.replace("_", "-"),
-        "rsum-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-) for kernel in [
-    "qs8_rdsum",
-    "qu8_rdsum",
-    "qs8_rsum",
-    "qu8_rsum",
-    "f16_rsum",
-    "f16_f32acc_rsum",
-    "f32_rsum",
-    "f16_f32acc_rdsum",
-    "f32_rdsum",
-]]
-
-[xnnpack_benchmark(
-    name = "%s_bench" % kernel,
-    srcs = [
-        "%s.cc" % kernel.replace("_", "-"),
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 ) for kernel in [
@@ -285,7 +266,9 @@ xnnpack_benchmark(
     "f16_vcmul",
     "f32_vcmul",
     "rdminmax",
+    "rdsum",
     "rminmax",
+    "rsum",
     "x8_lut",
 ]]
 
