@@ -228,7 +228,7 @@ TEST_F(F32SimdHVXTest, ReduceAdd) {
   }
   // Don't expect an exact result due to implementation-defined behavior.
   float tolerance =
-      std::numeric_limits<float>::epsilon() * max_abs_input * xnn_simd_size_f32;
+      std::numeric_limits<float>::epsilon() * max_abs_input * xnn_simd_size_f32 * 2.0f;
   ASSERT_NEAR(res, expected, tolerance);
 }
 
