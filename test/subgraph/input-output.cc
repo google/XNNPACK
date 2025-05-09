@@ -5,8 +5,8 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <numeric>
 #include <vector>
 
@@ -20,7 +20,19 @@
 
 namespace xnnpack {
 
-TEST(InputOutput, ConditionalReadWrite) {
+class InputOutput : public testing::TestWithParam<bool> {};
+
+INSTANTIATE_TEST_SUITE_P(
+    InputOutput, InputOutput, testing::Bool(),
+    [](const testing::TestParamInfo<InputOutput::ParamType>& info) {
+      const bool rewrite_for_fp16 = info.param;
+      return rewrite_for_fp16 ? "input_output_and_rewrite_for_fp16"
+                              : "input_output";
+    });
+
+TEST_P(InputOutput, ConditionalReadWrite) {
+  const bool rewrite_for_fp16 = GetParam();
+
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
   std::vector<size_t> dims = {5};
@@ -54,6 +66,12 @@ TEST(InputOutput, ConditionalReadWrite) {
       .AddBinary(xnn_binary_add, nullptr, persistent_a_id, input_b_id,
                  persistent_id)
       .AddCopy(persistent_id, output_id);
+
+  // Rewrite the subgraph for `fp16` if requested.
+  if (rewrite_for_fp16) {
+    subgraph.RewriteForFp16();
+  }
+
   ASSERT_EQ(xnn_status_success, subgraph.CreateRuntime());
 
   Tensor<float> input(dims, xnnpack::XnnExtraBytes);
@@ -93,7 +111,9 @@ TEST(InputOutput, ConditionalReadWrite) {
   ASSERT_THAT(add, testing::ElementsAre(2.0f, 3.0f, 4.0f, 5.0f, 6.0f));
 }
 
-TEST(InputOutput, SlidingWindow) {
+TEST_P(InputOutput, SlidingWindow) {
+  const bool rewrite_for_fp16 = GetParam();
+
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
   const size_t slices = 20;
@@ -119,6 +139,12 @@ TEST(InputOutput, SlidingWindow) {
   subgraph.AddSlice({0, 0}, {-1, 0}, {1, 1}, persistent_id, prev_id)
       .AddConcatenate(0, {input_id, prev_id}, persistent_id)
       .AddCopy(persistent_id, output_id);
+
+  // Rewrite the subgraph for `fp16` if requested.
+  if (rewrite_for_fp16) {
+    subgraph.RewriteForFp16();
+  }
+
   ASSERT_EQ(xnn_status_success, subgraph.CreateRuntime());
 
   // If we are using an input-output tensor as the persistent tensor, we need
@@ -147,6 +173,54 @@ TEST(InputOutput, SlidingWindow) {
       }
     }
   }
+}
+
+TEST(InputOutput, MultipleWrites) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  std::vector<size_t> dims = {5};
+
+  // Define subgraph
+  SubgraphTester subgraph(2);
+  const uint32_t persistent_id = 0;
+  const uint32_t a_id = 1;
+  // This subgraph computes:
+  //   (persistent) = (persistent) * (a)
+  //   (persistent) = (persistent) * (a)
+  //   (persistent) = (persistent) * (a)
+  //   (persistent) = (persistent) * (a)
+  //   (persistent) = (persistent) * (a)
+  subgraph
+      .AddDynamicTensor(
+          dims, persistent_id, xnn_datatype_of<float>(),
+          XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT)
+      .AddInputTensor({}, xnn_datatype_of<float>(), a_id);
+
+  subgraph
+      .AddBinary(xnn_binary_multiply, nullptr, persistent_id, a_id,
+                 persistent_id)
+      .AddBinary(xnn_binary_multiply, nullptr, persistent_id, a_id,
+                 persistent_id)
+      .AddBinary(xnn_binary_multiply, nullptr, persistent_id, a_id,
+                 persistent_id)
+      .AddBinary(xnn_binary_multiply, nullptr, persistent_id, a_id,
+                 persistent_id)
+      .AddBinary(xnn_binary_multiply, nullptr, persistent_id, a_id,
+                 persistent_id);
+  ASSERT_EQ(xnn_status_success, subgraph.CreateRuntime());
+
+  // If we are using an input-output tensor as the persistent tensor, we need
+  // to provide the storage for it.
+  Tensor<float> persistent(dims, xnnpack::XnnExtraBytes);
+  persistent.fill(1.0f);
+
+  subgraph.ReshapeExternalTensor(dims, persistent.base(), persistent_id)
+      .ReshapeRuntime();
+
+  float a = 0.9f;
+  subgraph.SetupExternalTensor(&a, a_id).SetupRuntime().InvokeRuntime();
+
+  ASSERT_THAT(persistent, testing::Each(a * a * a * a * a));
 }
 
 }  // namespace xnnpack
