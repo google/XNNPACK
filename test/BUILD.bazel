@@ -942,7 +942,6 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "u8_lut32norm_test",
     srcs = [
-        "lut-norm-microkernel-tester.h",
         "u8-lut32norm.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS,

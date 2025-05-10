@@ -221,6 +221,7 @@ MICROKERNEL_DEFS = [
     "src/s8-rminmax/s8-rmin.h",
     "src/s8-rminmax/s8-rminmax.h",
     "src/s8-vclamp/s8-vclamp.h",
+    "src/u8-lut32norm/u8-lut32norm.h",
     "src/u8-maxpool/u8-maxpool-minmax.h",
     "src/u8-rdminmax/u8-rdmax.h",
     "src/u8-rdminmax/u8-rdmin.h",
