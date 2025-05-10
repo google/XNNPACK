@@ -41,7 +41,7 @@ xnnpack_cxx_library(
     name = "replicable_random_device",
     testonly = True,
     hdrs = ["replicable_random_device.h"],
-    deps = xnnpack_test_deps_for_library(),
+    deps = xnnpack_test_deps_for_library() + ["//:common"],
 )
 
 xnnpack_cxx_library(
