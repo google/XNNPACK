@@ -15,6 +15,7 @@
 #include <emmintrin.h>
 
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/simd/f32-common.h"
 
 // SIMD vector type for f32 using SSE2.
 typedef __m128 xnn_simd_f32_t;
@@ -99,6 +100,11 @@ static XNN_INLINE xnn_simd_f32_t xnn_and_f32(xnn_simd_f32_t a,
   return _mm_and_ps(a, b);
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_andnot_f32(xnn_simd_f32_t a,
+                                                xnn_simd_f32_t b) {
+  return _mm_andnot_ps(a, b);
+}
+
 static XNN_INLINE xnn_simd_f32_t xnn_or_f32(xnn_simd_f32_t a,
                                             xnn_simd_f32_t b) {
   return _mm_or_ps(a, b);
@@ -172,6 +178,16 @@ static XNN_INLINE xnn_simd_f32_t xnn_rcp_f32(xnn_simd_f32_t a) {
 #define XNN_SIMD_NUM_RSQRT_ITER_F32 1
 static XNN_INLINE xnn_simd_f32_t xnn_rsqrt_f32(xnn_simd_f32_t a) {
   return _mm_rsqrt_ps(a);
+}
+
+// This is not faster than _mm_rsqrt_ps, but it is numerically consistent
+// across all CPUs.
+static XNN_INLINE xnn_simd_f32_t
+xnn_approx_reciprocal_sqrt_f32(xnn_simd_f32_t a) {
+  const __m128i magic =
+      _mm_load_si128((const __m128i*)approx_reciprocal_sqrt_magic);
+  return _mm_castsi128_ps(
+      _mm_sub_epi32(magic, _mm_srai_epi32(_mm_castps_si128(a), 1)));
 }
 
 // Load/store operations.
