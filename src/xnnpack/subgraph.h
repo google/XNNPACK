@@ -147,7 +147,6 @@ struct xnn_value {
   /// Binary features of the tensor. Supported values are any combination of:
   /// - XNN_VALUE_FLAG_EXTERNAL_INPUT
   /// - XNN_VALUE_FLAG_EXTERNAL_OUTPUT
-  /// - XNN_VALUE_FLAG_PERSISTENT
   uint32_t flags;
   /// Static initialization data. Must be null for non-static values.
   void* data;
@@ -206,18 +205,8 @@ XNN_INLINE static bool xnn_value_is_external_input(
 }
 
 XNN_INLINE static bool xnn_value_is_internal(const struct xnn_value* value) {
-  return ((value->flags &
-           (XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT |
-            XNN_VALUE_FLAG_PERSISTENT)) == 0);
-}
-
-XNN_INLINE static bool xnn_value_is_persistent(const struct xnn_value* value) {
-  // Treat a value that is both input and output as persistent.
-  const uint32_t input_output =
-      XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT;
-  return
-      (value->flags & input_output) == input_output ||
-      value->allocation_type == xnn_allocation_type_persistent;
+  return (value->flags & (XNN_VALUE_FLAG_EXTERNAL_INPUT |
+                          XNN_VALUE_FLAG_EXTERNAL_OUTPUT)) == 0;
 }
 
 XNN_INLINE static bool xnn_value_is_valid(const struct xnn_value* value) {
@@ -584,7 +573,6 @@ struct xnn_workspace {
   // Workspace will be destroyed in xnn_delete_runtime or xnn_delete_workspace
   // if num_users reaches 0.
   size_t ref_count;
-  size_t persistent_size;
 };
 
 void xnn_subgraph_analyze_consumers_and_producers(xnn_subgraph_t subgraph);

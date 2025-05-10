@@ -349,36 +349,6 @@ TEST(MemoryPlanner, ExternalInputsCannotBeInPlace) {
                 MEMORY_ARENA_EXTRA_BYTES);
 }
 
-TEST(MemoryPlanner, PersistentValuesCannotReuseInternalValues) {
-  uint32_t input_id = 0;
-  uint32_t clamp_out_id = 1;
-  uint32_t leaky_relu_out_id = 2;
-  uint32_t output_id = 3;
-
-  // Clamp -> Leaky Relu -> Clamp
-  RuntimeTester tester(4);
-  tester.AddInputTensorF32({1, 3, 3, 3}, input_id)
-      .AddDynamicTensorF32({1, 3, 3, 3}, clamp_out_id,
-                           /*flags=*/0)  // 108 bytes.
-      .AddDynamicTensorF32({1, 3, 3, 3}, leaky_relu_out_id,
-                           XNN_VALUE_FLAG_PERSISTENT)  // 108 bytes.
-      .AddOutputTensorF32({1, 3, 3, 3}, output_id)
-      .AddClamp(0.0f, 1.0f, input_id, clamp_out_id)
-      .AddLeakyRelu(1.0f, clamp_out_id, leaky_relu_out_id)
-      .AddClamp(0.0f, 1.0f, leaky_relu_out_id, output_id);
-  tester.CreateRuntime(xnn_test_runtime_flags());
-  tester.SetupRuntime();
-
-  xnn_runtime_t runtime = tester.Runtime();
-
-  // Persistent values need to be allocated their own space.
-  ASSERT_EQ(
-      runtime->workspace->size,
-      xnn_tensor_get_rounded_size(&runtime->values[clamp_out_id]) +
-          xnn_tensor_get_rounded_size(&runtime->values[leaky_relu_out_id]) +
-          MEMORY_ARENA_EXTRA_BYTES);
-}
-
 TEST(MemoryPlanner, CannotReuseStaticValues) {
   uint32_t static_id = 0;
   uint32_t clamp_out_id = 1;

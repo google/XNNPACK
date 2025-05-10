@@ -28,8 +28,6 @@ static void set_allocation_type(struct xnn_value* value)
     value->allocation_type = xnn_allocation_type_static;
   } else if ((value->flags & (XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT)) != 0) {
     value->allocation_type = xnn_allocation_type_external;
-  } else if ((value->flags & XNN_VALUE_FLAG_PERSISTENT) != 0) {
-    value->allocation_type = xnn_allocation_type_persistent;
   } else {
     value->allocation_type = xnn_allocation_type_workspace;
   }

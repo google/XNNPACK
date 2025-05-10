@@ -13,7 +13,6 @@ XNN_ENUM_ITEM_0(xnn_allocation_type_invalid, "invalid")
 XNN_ENUM_ITEM(xnn_allocation_type_static, "static")
 XNN_ENUM_ITEM(xnn_allocation_type_workspace, "workspace")
 XNN_ENUM_ITEM(xnn_allocation_type_external, "external")
-XNN_ENUM_ITEM(xnn_allocation_type_persistent, "persistent")
 XNN_ENUM_ITEM(xnn_allocation_type_dynamic, "dynamic")
 
 #ifdef XNN_DEFINED_ENUM_ITEM_0

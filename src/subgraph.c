@@ -298,8 +298,8 @@ void xnn_subgraph_analyze_consumers_and_producers(xnn_subgraph_t subgraph)
       const uint32_t output_id = node->outputs[o];
       assert(output_id < subgraph->num_values);
 
-      // Persistent values can be produced by multiple nodes, e.g. copy nodes writing to the same persistent value.
-      assert(xnn_value_is_persistent(&subgraph->values[output_id]) ||
+      // Output values can be produced by multiple nodes, e.g. copy nodes writing to the same persistent value.
+      assert(xnn_value_is_external_output(&subgraph->values[output_id]) ||
              subgraph->values[output_id].producer == XNN_INVALID_NODE_ID);
       subgraph->values[output_id].producer = n;
     }
@@ -1687,7 +1687,7 @@ enum xnn_status xnn_subgraph_optimize(
       continue;
     }
 
-    if (!xnn_value_is_external_input(value) && value->num_consumers == 0 && !xnn_value_is_persistent(value)) {
+    if (!xnn_value_is_external_input(value) && value->num_consumers == 0) {
       if (value->producer != XNN_INVALID_NODE_ID) {
         struct xnn_node* producer = &subgraph->nodes[value->producer];
         if (producer->num_outputs == 1) {
