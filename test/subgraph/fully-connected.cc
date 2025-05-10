@@ -15,6 +15,7 @@
 #include <limits>
 #include <numeric>
 #include <random>
+#include <type_traits>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -79,8 +80,8 @@ class NumericLimits<qcint4> {
 template <>
 class NumericLimits<qcuint4> {
  public:
-  static int32_t min() { return -8; }
-  static int32_t max() { return 7; }
+  static int32_t min() { return 0; }
+  static int32_t max() { return 15; }
   static int32_t smallest_normal() { return 0; }
   static int32_t min_identity() { return max(); }
   static int32_t max_identity() { return min(); }
@@ -203,14 +204,14 @@ Tensor<float> ReferenceImpl(Tensor<Input> input, Tensor<Filter> filter,
   Tensor<Input> input_batches = input.slice(input.rank() - 1, 0);
   Tensor<float> output_batches = output.slice(output.rank() - 1, 0);
 
-  for (const auto& i : EnumerateIndices(output_batches.extents())) {
+  for (const auto& i : EnumerateIndices(output_batches.shape())) {
     MatrixVectorMultiply(&input_batches(i), filter, bias, input_quantization,
                          filter_zero_point, filter_scale, filter_ic_block_size,
                          bias_quantization, &output_batches(i));
   }
 
   if (flags & XNN_FLAG_TENSORFLOW_RESHAPE_2D) {
-    output = output.reshape(Reshape2D(output.extents()));
+    output = output.reshape(Reshape2D(output.shape()));
   }
 
   return output;
@@ -344,7 +345,7 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
   auto output_gen = MakeDatatypeGenerator(Output());
   std::uniform_int_distribution<> channels_dist{1, 100};
   // TODO(b/408280445): The rank should go down to 1, but hits a bug in QP8
-  // codepaths that assume the LHS has rank >= 2.
+  // code paths that assume the LHS has rank >= 2.
   std::uniform_int_distribution<> rank_dist{2, XNN_MAX_TENSOR_DIMS - 1};
 
   for (auto _ : FuzzTest(std::chrono::milliseconds(500))) {
@@ -439,7 +440,7 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
       subgraph.AddConvert(input_id, fc_input_id);
     }
 
-    std::vector<size_t> filter_dims = filter.extents();
+    std::vector<size_t> filter_dims = filter.shape();
     filter_dims[1] *= filter_channel_factor;
     if (block_size != no_blockwise) {
       filter_quantization.zero_point = 8;
@@ -464,7 +465,7 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
                                filter_quantization);
     }
     if (bias_id != XNN_INVALID_VALUE_ID) {
-      subgraph.AddStaticTensor(bias.extents(), bias_id, bias.base(),
+      subgraph.AddStaticTensor(bias.shape(), bias_id, bias.base(),
                                bias_quantization);
     }
     subgraph
@@ -496,7 +497,7 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
         // If we are dynamically quantizing, preprocess the data to have zero
         // error when it will be quantized, which allows us to use a much
         // smaller tolerance for error for testing purposes.
-        std::vector<size_t> input_batches = input.extents();
+        std::vector<size_t> input_batches = input.shape();
         input_batches.pop_back();
         for (const auto& i : EnumerateIndices(input_batches)) {
           FakeDynamicQuantize(input.slice_leading(i), convert_to);
@@ -524,9 +525,9 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
         i = std::min(i, output_max);
       }
 
-      ASSERT_EQ(expected.extents(), output.extents());
+      ASSERT_EQ(expected.shape(), output.shape());
       if (xnn_datatype_is_quantized(datatype_of<Output>())) {
-        for (const auto& i : EnumerateIndices(output.extents())) {
+        for (const auto& i : EnumerateIndices(output.shape())) {
           ASSERT_NEAR(output(i),
                       quantize<Output>(expected(i), output_quantization), 1)
               << "input_shape=" << index_to_string(input_shape)
@@ -538,7 +539,7 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
         const float max_b = MaxOfDatatype(Filter()) * filter_quantization.scale;
         const float tolerance = xnnpack::epsilon(xnn_datatype_of<Output>()) *
                                 input_channels * max_a * max_b * 4.0f;
-        for (const auto& i : EnumerateIndices(output.extents())) {
+        for (const auto& i : EnumerateIndices(output.shape())) {
           ASSERT_NEAR(static_cast<float>(output(i)), expected(i), tolerance)
               << "input_shape=" << index_to_string(input_shape)
               << ", output_shape=" << index_to_string(output_shape)
@@ -698,9 +699,9 @@ void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid,
         i = std::min(i, output_max);
       }
 
-      ASSERT_EQ(expected.extents(), output.extents());
+      ASSERT_EQ(expected.shape(), output.shape());
       if (xnn_datatype_is_quantized(datatype_of<Output>())) {
-        for (const auto& i : EnumerateIndices(output.extents())) {
+        for (const auto& i : EnumerateIndices(output.shape())) {
           ASSERT_NEAR(output(i),
                       quantize<Output>(expected(i), output_quantization), 1)
               << "input_shape=" << index_to_string(input_shape)
@@ -712,7 +713,7 @@ void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid,
         const float max_b = MaxOfDatatype(Filter()) * filter_quantization.scale;
         const float tolerance = xnnpack::epsilon(xnn_datatype_of<Output>()) *
                                 input_channels * max_a * max_b * 4.0f;
-        for (const auto& i : EnumerateIndices(output.extents())) {
+        for (const auto& i : EnumerateIndices(output.shape())) {
           ASSERT_NEAR(static_cast<float>(output(i)), expected(i), tolerance)
               << "input_shape=" << index_to_string(input_shape)
               << ", output_shape=" << index_to_string(output_shape)

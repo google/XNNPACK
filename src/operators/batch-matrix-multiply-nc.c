@@ -62,10 +62,11 @@ enum xnn_status create_batch_matrix_multiply_nc(
   batch_matrix_multiply_op->gemm_config = gemm_config;
 
   const size_t mr = gemm_config->mr;
+  const size_t mr_packed = gemm_config->mr_packed ? gemm_config->mr_packed : mr;
   batch_matrix_multiply_op->ukernel.type = xnn_microkernel_type_gemm;
   batch_matrix_multiply_op->ukernel.gemm = (struct xnn_ukernel_gemm){
       .mr = mr,
-      .mr_packed = gemm_config->mr_packed,
+      .mr_packed = mr_packed,
       .nr = gemm_config->nr,
       .kr = UINT32_C(1) << gemm_config->log2_kr,
       .sr = UINT32_C(1) << gemm_config->log2_sr,
@@ -300,21 +301,21 @@ enum xnn_status create_batch_matrix_multiply_nc_fx_const_weights(
 
     // Pack the weights.
     if (gemm_config->pack_weights_and_biases) {
-      gemm_config->pack_weights_and_biases(flags, gemm_config, k, n,
-                                           /*groups=*/batch_size_b,
-                                           /*unused_block_size=*/0,
-                                           /*kstride=*/k_stride,
-                                           /*accumulator_init=*/NULL,
-                                           /*weights=*/data_b,
-                                           /*int_extra_data0_fn=*/NULL,
-                                           /*extra_data0=*/NULL,
-                                           /*extra_data0_size=*/0,
-                                           /*init_extra_data1_fn=*/
-                                           NULL,
-                                           /*extra_data1=*/NULL,
-                                           /*extra_data1_size=*/0,
-                                           /*packed_weights_ptr=*/packed_data,
-                                           /*packing_params=*/NULL);
+      gemm_config->pack_weights_and_biases(
+          (flags ^ XNN_FLAG_TRANSPOSE_WEIGHTS), gemm_config, k, n,
+          /*groups=*/batch_size_b,
+          /*unused_block_size=*/0,
+          /*kstride=*/(flags & XNN_FLAG_TRANSPOSE_WEIGHTS) ? k : n,
+          /*accumulator_init=*/NULL,
+          /*weights=*/data_b,
+          /*int_extra_data0_fn=*/NULL,
+          /*extra_data0=*/NULL,
+          /*extra_data0_size=*/0,
+          /*init_extra_data1_fn=*/NULL,
+          /*extra_data1=*/NULL,
+          /*extra_data1_size=*/0,
+          /*packed_weights_ptr=*/packed_data,
+          /*packing_params=*/NULL);
     } else {
       if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
         batch_matrix_multiply_op->ukernel.gemm.packw_gemm_goi(
@@ -843,6 +844,8 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
       .sr = sr,
       .ukernel = gemm_ukernel,
       .kc = k,
+      .mr_packed =
+          m == 1 ? 1 : batch_matrix_multiply_op->ukernel.gemm.mr_packed,
   };
 
   if (packed_lhs) {

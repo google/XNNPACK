@@ -62,11 +62,11 @@ Tensor<T> slice_batches(Tensor<T> tensor, std::vector<size_t> at) {
   }
   std::reverse(at.begin(), at.end());
   tensor = tensor.slice_leading(at);
-  std::vector<size_t> extents = tensor.extents();
+  std::vector<size_t> shape = tensor.shape();
   std::vector<size_t> strides = tensor.strides();
-  extents.erase(extents.begin(), extents.begin() + at.size());
+  shape.erase(shape.begin(), shape.begin() + at.size());
   strides.erase(strides.begin(), strides.begin() + at.size());
-  tensor.set_shape(extents, strides);
+  tensor.set_shape(shape, strides);
   return tensor;
 }
 
@@ -103,22 +103,22 @@ Tensor<float> ReferenceImpl(Tensor<InputA> input_a, Tensor<InputB> input_b,
   size_t a_m = input_a.extent(input_a.rank() - 2);
   size_t b_n = input_b.extent(input_b.rank() - 1);
 
-  std::vector<size_t> a_extents = input_a.extents();
-  std::vector<size_t> b_extents = input_b.extents();
-  std::reverse(a_extents.begin(), a_extents.end());
-  std::reverse(b_extents.begin(), b_extents.end());
+  std::vector<size_t> a_shape = input_a.shape();
+  std::vector<size_t> b_shape = input_b.shape();
+  std::reverse(a_shape.begin(), a_shape.end());
+  std::reverse(b_shape.begin(), b_shape.end());
 
   size_t output_rank = std::max(input_a.rank(), input_b.rank());
   std::vector<size_t> output_shape(output_rank);
   for (size_t i = 0; i < output_rank; i++) {
-    output_shape[i] = std::max(i < a_extents.size() ? a_extents[i] : 1,
-                               i < b_extents.size() ? b_extents[i] : 1);
+    output_shape[i] = std::max(i < a_shape.size() ? a_shape[i] : 1,
+                               i < b_shape.size() ? b_shape[i] : 1);
   }
   std::reverse(output_shape.begin(), output_shape.end());
   output_shape[output_rank - 2] = a_m;
   output_shape[output_rank - 1] = b_n;
   Tensor<float> output(output_shape);
-  std::vector<size_t> output_batches = output.extents();
+  std::vector<size_t> output_batches = output.shape();
   output_batches.pop_back();
   output_batches.pop_back();
 
@@ -269,11 +269,11 @@ void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid) {
           .InvokeRuntime();
 
       // Verify results.
-      ASSERT_EQ(expected.extents(), output.extents());
+      ASSERT_EQ(expected.shape(), output.shape());
       // In this case, both inputs should be in the range [-1, 1].
       const float tolerance =
           xnnpack::epsilon(xnn_datatype_of<Output>()) * k * 2.0f;
-      for (const auto& i : EnumerateIndices(output.extents())) {
+      for (const auto& i : EnumerateIndices(output.shape())) {
         ASSERT_NEAR(static_cast<float>(output(i)), expected(i), tolerance)
             << "a_shape=" << index_to_string(a_shape)
             << ", b_shape=" << index_to_string(b_shape)
@@ -332,20 +332,20 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid) {
     xnn_quantization_params input_b_quantization =
         random_quantization(xnn_datatype_of<InputB>(), rng, 0.001f, 2.0f);
     if (xnn_datatype_is_channelwise_quantized(xnn_datatype_of<InputB>())) {
-      std::vector<size_t> scales_shape = input_b.extents();
+      std::vector<size_t> scales_shape = input_b.shape();
       scales_shape[input_b.rank() - 2] = 1;
       std::uniform_real_distribution<float> b_scale_dist(0.001f,
                                                     input_b_quantization.scale);
       b_scales = Tensor<float>({scales_shape});
       b_scales.generate([&]() { return b_scale_dist(rng); });
-      subgraph.AddStaticTensorQS8(input_b.extents(), input_b.rank() - 1,
+      subgraph.AddStaticTensorQS8(input_b.shape(), input_b.rank() - 1,
                                   TensorType::kDense, b_scales.base(),
                                   input_b_id, /*flags=*/0,
                                   reinterpret_cast<int8_t*>(input_b.data()));
     } else {
       b_scales = Tensor<float>({1, 1});
       b_scales.fill(1.0f);
-      subgraph.AddStaticTensor(input_b.extents(), input_b_id, input_b.base());
+      subgraph.AddStaticTensor(input_b.shape(), input_b_id, input_b.base());
     }
     broadcast_extent_1(b_scales);
 
@@ -377,7 +377,7 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid) {
         // If we are dynamically quantizing, preprocess the data to have zero
         // error when it will be quantized, which allows us to use a much
         // smaller tolerance for error for testing purposes.
-        std::vector<size_t> input_batches = input_a.extents();
+        std::vector<size_t> input_batches = input_a.shape();
         input_batches.pop_back();
         for (const auto& i : EnumerateIndices(input_batches)) {
           FakeDynamicQuantize(input_a.slice_leading(i), convert_to);
@@ -391,7 +391,7 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid) {
           .ReshapeRuntime();
       ASSERT_EQ(subgraph.GetExternalTensorShape(output_id), expected.shape())
           << "a_shape=" << index_to_string(a_shape)
-          << ", b_shape=" << index_to_string(input_b.extents());
+          << ", b_shape=" << index_to_string(input_b.shape());
 
       // Run subgraph
       Tensor<Output> output(expected.shape());
@@ -400,15 +400,15 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid) {
           .InvokeRuntime();
 
       // Verify results.
-      ASSERT_EQ(expected.extents(), output.extents());
+      ASSERT_EQ(expected.shape(), output.shape());
       const float max_a = MaxDatatype(InputA());
       const float max_b = MaxDatatype(InputB()) * input_b_quantization.scale;
       const float tolerance = xnnpack::epsilon(xnn_datatype_of<Output>()) * k *
                               max_a * max_b * 3.0f;
-      for (const auto& i : EnumerateIndices(output.extents())) {
+      for (const auto& i : EnumerateIndices(output.shape())) {
         ASSERT_NEAR(static_cast<float>(output(i)), expected(i), tolerance)
             << "a_shape=" << index_to_string(a_shape)
-            << ", b_shape=" << index_to_string(input_b.extents())
+            << ", b_shape=" << index_to_string(input_b.shape())
             << ", output_shape=" << index_to_string(expected.shape());
       }
     }

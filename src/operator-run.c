@@ -305,39 +305,33 @@ void xnn_compute_transposev_6d(
 void xnn_compute_batched_packw_gemm_gio(
     const struct packw_gemm_gio_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index, size_t n_block_start, size_t n_block_size) {
-  while (n_block_size > 0) {
-    const size_t n_step = min(n_block_size, context->nr);
+  const void* kernel = (const void*)((uintptr_t)context->kernel +
+                                     n_block_start * context->n_stride +
+                                     batch_index * context->gk_stride);
+  const void* bias = context->bias;
+  if (bias != NULL) {
+    bias = (const void*)((uintptr_t)bias + n_block_start * context->b_stride +
+                         batch_index * context->gb_stride);
+  }
+  void* packed_weights = (void*)((uintptr_t)context->packed_weights +
+                                 n_block_start * context->w_stride +
+                                 batch_index * context->gc_stride);
 
-    const void* kernel = (const void*)((uintptr_t)context->kernel +
-                                       n_block_start * context->n_stride +
-                                       batch_index * context->gk_stride);
-    const void* bias = context->bias;
-    if (bias != NULL) {
-      bias = (const void*)((uintptr_t)bias + n_block_start * context->b_stride +
-                           batch_index * context->gb_stride);
-    }
-    void* packed_weights = (void*)((uintptr_t)context->packed_weights +
-                                   n_block_start * context->w_stride +
-                                   batch_index * context->gc_stride);
-
-    if (context->pack_weights_and_biases) {
-      context->pack_weights_and_biases(
-          /*flags=*/XNN_FLAG_TRANSPOSE_WEIGHTS, context->gemm_config,
-          context->kc, n_step,
-          /*groups=*/1, /*block_size=*/0, /*k_stride=*/0,
-          /*accumulator_init=*/bias, kernel,
-          /*init_extra_data0_fn=*/NULL,
-          /*extra_data0=*/NULL, /*extra_data0_element_size=*/0,
-          /*init_extra_data1_fn=*/NULL, /*extra_data1=*/NULL,
-          /*extra_data1_element_size=*/0, packed_weights, /*params=*/NULL);
-    } else {
-      context->packw_gemm_gio(
-          /*groups=*/1, n_step, context->kc, context->nr, context->kr,
-          context->sr, context->k_stride_elements, kernel, bias, /*scale=*/NULL,
-          packed_weights, /*extra_bytes=*/0, /*params=*/NULL);
-    }
-    n_block_size -= n_step;
-    n_block_start += n_step;
+  if (context->pack_weights_and_biases) {
+    context->pack_weights_and_biases(
+        /*flags=*/XNN_FLAG_TRANSPOSE_WEIGHTS, context->gemm_config, context->kc,
+        n_block_size,
+        /*groups=*/1, /*block_size=*/0, /*k_stride=*/context->k_stride_elements,
+        /*accumulator_init=*/bias, kernel,
+        /*init_extra_data0_fn=*/NULL,
+        /*extra_data0=*/NULL, /*extra_data0_element_size=*/0,
+        /*init_extra_data1_fn=*/NULL, /*extra_data1=*/NULL,
+        /*extra_data1_element_size=*/0, packed_weights, /*params=*/NULL);
+  } else {
+    context->packw_gemm_gio(
+        /*groups=*/1, n_block_size, context->kc, context->nr, context->kr,
+        context->sr, context->k_stride_elements, kernel, bias, /*scale=*/NULL,
+        packed_weights, /*extra_bytes=*/0, /*params=*/NULL);
   }
 }
 
@@ -353,38 +347,32 @@ void xnn_compute_packw_gemm_gio(
 void xnn_compute_batched_packw_gemm_goi(
     const struct packw_gemm_goi_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index, size_t n_block_start, size_t n_block_size) {
-  while (n_block_size > 0) {
-    const size_t n_step = min(n_block_size, context->nr);
+  const void* kernel = (const void*)((uintptr_t)context->kernel +
+                                     context->k_stride * n_block_start +
+                                     batch_index * context->gk_stride);
+  const void* bias = context->bias;
+  if (bias != NULL) {
+    bias = (const void*)((uintptr_t)bias + n_block_start * context->b_stride +
+                         batch_index * context->gb_stride);
+  }
+  void* packed_weights = (void*)((uintptr_t)context->packed_weights +
+                                 context->w_stride * n_block_start +
+                                 batch_index * context->gc_stride);
 
-    const void* kernel = (const void*)((uintptr_t)context->kernel +
-                                       context->k_stride * n_block_start +
-                                       batch_index * context->gk_stride);
-    const void* bias = context->bias;
-    if (bias != NULL) {
-      bias = (const void*)((uintptr_t)bias + n_block_start * context->b_stride +
-                           batch_index * context->gb_stride);
-    }
-    void* packed_weights = (void*)((uintptr_t)context->packed_weights +
-                                   context->w_stride * n_block_start +
-                                   batch_index * context->gc_stride);
-
-    if (context->pack_weights_and_biases) {
-      context->pack_weights_and_biases(
-          /*flags=*/0, context->gemm_config, context->kc, n_step,
-          /*groups=*/1, /*block_size=*/0, /*k_stride=*/context->k_stride,
-          /*accumulator_init=*/bias, kernel,
-          /*init_extra_data0_fn=*/NULL,
-          /*extra_data0=*/NULL, /*extra_data0_element_size=*/0,
-          /*init_extra_data1_fn=*/NULL, /*extra_data1=*/NULL,
-          /*extra_data1_element_size=*/0, packed_weights, /*params=*/NULL);
-    } else {
-      context->packw_gemm_goi(
-          /*groups=*/1, n_step, context->kc, context->nr, context->kr,
-          context->sr, kernel, bias, /*scale=*/NULL, packed_weights,
-          /*extra_bytes=*/0, /*params=*/NULL);
-    }
-    n_block_size -= n_step;
-    n_block_start += n_step;
+  if (context->pack_weights_and_biases) {
+    context->pack_weights_and_biases(
+        /*flags=*/0, context->gemm_config, context->kc, n_block_size,
+        /*groups=*/1, /*block_size=*/0, /*k_stride=*/context->kc,
+        /*accumulator_init=*/bias, kernel,
+        /*init_extra_data0_fn=*/NULL,
+        /*extra_data0=*/NULL, /*extra_data0_element_size=*/0,
+        /*init_extra_data1_fn=*/NULL, /*extra_data1=*/NULL,
+        /*extra_data1_element_size=*/0, packed_weights, /*params=*/NULL);
+  } else {
+    context->packw_gemm_goi(
+        /*groups=*/1, n_block_size, context->kc, context->nr, context->kr,
+        context->sr, kernel, bias, /*scale=*/NULL, packed_weights,
+        /*extra_bytes=*/0, /*params=*/NULL);
   }
 }
 
@@ -557,7 +545,8 @@ void xnn_compute_hmp_grouped_qp8gemm(
   while (mr_block_size > 0) {
     const size_t mr_step = min(mr_block_size, context->mr);
     const size_t a_offset = context->packed_lh_offset_fn(
-        mr_block_start, context->kc, context->mr, context->kr, context->sr);
+        mr_block_start, context->kc, context->mr_packed, context->kr,
+        context->sr);
 
     context->qp8_ukernel.function[uarch_index](
         mr_step, nr_block_size, context->k_scaled,
@@ -594,7 +583,8 @@ XNN_INLINE static void compute_hmp_qp8gemm(
   while (mr_block_size > 0) {
     const size_t mr_step = min(mr_block_size, context->mr);
     const size_t a_offset = context->packed_lh_offset_fn(
-        mr_block_start, context->kc, context->mr, context->kr, context->sr);
+        mr_block_start, context->kc, context->mr_packed, context->kr,
+        context->sr);
 
     context->qp8_ukernel.function[uarch_index](
         mr_step, nr_block_size, context->k_scaled,
