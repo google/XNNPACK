@@ -114,6 +114,10 @@ static XNN_INLINE float xnn_reduce_max_f32(xnn_simd_f32_t a) {
   return _mm512_reduce_max_ps(a);
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_sqrt_f32(xnn_simd_f32_t a) {
+  return _mm512_sqrt_ps(a);
+}
+
 // Logical operations.
 static XNN_INLINE xnn_simd_f32_t xnn_and_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {

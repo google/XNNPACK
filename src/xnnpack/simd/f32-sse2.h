@@ -92,6 +92,10 @@ static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
   return xnn_sub_f32(xnn_zero_f32(), a);
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_sqrt_f32(xnn_simd_f32_t a) {
+  return _mm_sqrt_ps(a);
+}
+
 // Logical operations.
 
 static XNN_INLINE xnn_simd_f32_t xnn_and_f32(xnn_simd_f32_t a,

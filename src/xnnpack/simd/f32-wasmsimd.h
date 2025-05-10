@@ -43,4 +43,8 @@ static XNN_INLINE xnn_simd_f32_t xnn_min_f32(xnn_simd_f32_t a,
   return wasm_f32x4_min(a, b);
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_sqrt_f32(xnn_simd_f32_t a) {
+  return wasm_f32x4_sqrt(a);
+}
+
 #endif  // __XNNPACK_SRC_XNNPACK_SIMD_F32_WASMSIMD_H_
