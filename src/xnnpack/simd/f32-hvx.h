@@ -107,20 +107,17 @@ static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
 
 #if __HVX_ARCH__ >= 73
 static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
+  const HVX_Vector vabs_a = Q6_V_vand_VV(a, Q6_V_vsplat_R(0x7FFFFFFF));
+  const HVX_Vector vhalf = Q6_V_vsplat_R(float_as_uint32(0.5f));
+  const HVX_Vector vroundup =
+      Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_VsfVsf(vabs_a, vhalf));
+
+  const HVX_Vector vsign_a = Q6_V_vand_VV(a, Q6_V_vsplat_R(0x80000000));
+  const HVX_Vector vresult = Q6_V_vor_VV(vroundup, vsign_a);
+
   const HVX_Vector vmax_non_int_val =
       Q6_V_vsplat_R(float_as_uint32(8388607.0f));  // 2^23-1
-
-  const HVX_VectorPred vfilter = Q6_Q_vcmp_gt_VsfVsf(
-      Q6_V_vand_VV(a, Q6_V_vsplat_R(0x7FFFFFFF)), vmax_non_int_val);
-
-  // Create a vector of `0.5f` with the same sign as the entries of `a`.
-  const HVX_Vector vhalf = Q6_V_vsplat_R(float_as_uint32(0.5f));
-  const HVX_Vector vsign_mask = Q6_V_vsplat_R(0x80000000);
-  const HVX_Vector vsigned_half =
-      Q6_V_vor_VV(Q6_V_vand_VV(a, vsign_mask), vhalf);
-  const HVX_Vector vresult = Q6_Vsf_equals_Vw(Q6_Vw_equals_Vsf(
-      Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_VsfVsf(a, vsigned_half))));
-
+  const HVX_VectorPred vfilter = Q6_Q_vcmp_gt_VsfVsf(vabs_a, vmax_non_int_val);
   return Q6_V_vmux_QVV(vfilter, a, vresult);
 }
 #else
