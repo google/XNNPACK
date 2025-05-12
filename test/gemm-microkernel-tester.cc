@@ -3270,7 +3270,7 @@ void GemmMicrokernelTester::Test(xnn_f32_ppmm_minmax_ukernel_fn ppmm_minmax,
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
-  xnnpack::Buffer<float> a(packed_k() * mr());
+  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> a(packed_k() * mr());
   xnnpack::Buffer<float> b(n() * k());
   xnnpack::Buffer<float> bias(n());
   xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> packed_w(
