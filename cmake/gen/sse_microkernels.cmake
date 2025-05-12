@@ -53,7 +53,7 @@ SET(PROD_SSE_MICROKERNEL_SRCS
   src/f32-vlrelu/gen/f32-vlrelu-sse-u8.c
   src/f32-vmulcaddc/gen/f32-vmulcaddc-c4-minmax-sse-2x.c
   src/f32-vrsqrt/gen/f32-vrsqrt-sse-rsqrt-u8.c
-  src/f32-vsqrt/gen/f32-vsqrt-sse-rsqrt-u12.c
+  src/f32-vsqrt/gen/f32-vsqrt-sse-sqrt-u8.c
   src/x32-transposec/x32-transposec-4x4-sse.c)
 
 SET(NON_PROD_SSE_MICROKERNEL_SRCS
@@ -199,8 +199,8 @@ SET(NON_PROD_SSE_MICROKERNEL_SRCS
   src/f32-vrsqrt/gen/f32-vrsqrt-sse-rsqrt-u16.c
   src/f32-vsqrt/gen/f32-vsqrt-sse-rsqrt-u4.c
   src/f32-vsqrt/gen/f32-vsqrt-sse-rsqrt-u8.c
+  src/f32-vsqrt/gen/f32-vsqrt-sse-rsqrt-u12.c
   src/f32-vsqrt/gen/f32-vsqrt-sse-sqrt-u4.c
-  src/f32-vsqrt/gen/f32-vsqrt-sse-sqrt-u8.c
   src/f32-vsqrt/gen/f32-vsqrt-sse-sqrt-u16.c
   src/x32-packx/x32-packx-4x-sse.c)
 

@@ -1342,32 +1342,25 @@ static void init_f32_sqr_config(void) {
 }
 
 static void init_f32_sqrt_config(void) {
-  #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    if (hardware_config->use_arm_neon) {
-      f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqrt_ukernel__scalar_sqrt_u1;
-    } else if (!XNN_PLATFORM_MOBILE) {
-      f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqrt_ukernel__scalar_sqrt_u1;
-    }
-  #elif XNN_ARCH_ARM64
+  #if XNN_ARCH_ARM64
     f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqrt_ukernel__aarch64_neon_sqrt_u4;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
+    // TODO: b/404616456 - These kernels are faster, but they use rsqrt(14)ps,
+    // which is numerically inconsistent across CPUs.
+    // xnn_f32_vsqrt_ukernel__avx512f_rsqrt_u16;
+    // xnn_f32_vsqrt_ukernel__fma3_rsqrt_u16;
+    // xnn_f32_vsqrt_ukernel__avx_rsqrt_u16;
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
-      // TODO: b/404616456 - This kernel should only be enabled if we allow
-      // numerically inconsistent results across microarchitectures.
       if (false && !XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
         f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqrt_ukernel__avx512f_rsqrt_u16;
       } else
     #endif
-    if (hardware_config->use_x86_fma3) {
-      f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqrt_ukernel__fma3_rsqrt_u16;
-    } else if (hardware_config->use_x86_avx) {
-      f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqrt_ukernel__avx_rsqrt_u16;
+    if (hardware_config->use_x86_avx) {
+      f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqrt_ukernel__avx_sqrt_u8;
     } else {
-      f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqrt_ukernel__sse_rsqrt_u12;
+      f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqrt_ukernel__sse_sqrt_u8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqrt_ukernel__wasmsimd_sqrt_u8;
