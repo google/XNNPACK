@@ -11,12 +11,12 @@ tools/xngen src/f32-rsum/simd.c.in -D ARCH=neon -D SIMD_SIZE=4 -D BATCH_TILE=12 
 tools/xngen src/f32-rsum/simd.c.in -D ARCH=neon -D SIMD_SIZE=4 -D BATCH_TILE=16 -D ACCUMULATORS=2 -o src/f32-rsum/gen/f32-rsum-neon-u16-acc2.c &
 tools/xngen src/f32-rsum/simd.c.in -D ARCH=neon -D SIMD_SIZE=4 -D BATCH_TILE=16 -D ACCUMULATORS=4 -o src/f32-rsum/gen/f32-rsum-neon-u16-acc4.c &
 
-################################### x86 SSE ###################################
-tools/xngen src/f32-rsum/simd.c.in -D ARCH=sse2 -D SIMD_SIZE=4 -D BATCH_TILE=4  -D ACCUMULATORS=1 -o src/f32-rsum/gen/f32-rsum-sse-u4.c &
-tools/xngen src/f32-rsum/simd.c.in -D ARCH=sse2 -D SIMD_SIZE=4 -D BATCH_TILE=8  -D ACCUMULATORS=2 -o src/f32-rsum/gen/f32-rsum-sse-u8-acc2.c &
-tools/xngen src/f32-rsum/simd.c.in -D ARCH=sse2 -D SIMD_SIZE=4 -D BATCH_TILE=12 -D ACCUMULATORS=3 -o src/f32-rsum/gen/f32-rsum-sse-u12-acc3.c &
-tools/xngen src/f32-rsum/simd.c.in -D ARCH=sse2 -D SIMD_SIZE=4 -D BATCH_TILE=16 -D ACCUMULATORS=2 -o src/f32-rsum/gen/f32-rsum-sse-u16-acc2.c &
-tools/xngen src/f32-rsum/simd.c.in -D ARCH=sse2 -D SIMD_SIZE=4 -D BATCH_TILE=16 -D ACCUMULATORS=4 -o src/f32-rsum/gen/f32-rsum-sse-u16-acc4.c &
+################################### x86 SSE2 ###################################
+tools/xngen src/f32-rsum/simd.c.in -D ARCH=sse2 -D SIMD_SIZE=4 -D BATCH_TILE=4  -D ACCUMULATORS=1 -o src/f32-rsum/gen/f32-rsum-sse2-u4.c &
+tools/xngen src/f32-rsum/simd.c.in -D ARCH=sse2 -D SIMD_SIZE=4 -D BATCH_TILE=8  -D ACCUMULATORS=2 -o src/f32-rsum/gen/f32-rsum-sse2-u8-acc2.c &
+tools/xngen src/f32-rsum/simd.c.in -D ARCH=sse2 -D SIMD_SIZE=4 -D BATCH_TILE=12 -D ACCUMULATORS=3 -o src/f32-rsum/gen/f32-rsum-sse2-u12-acc3.c &
+tools/xngen src/f32-rsum/simd.c.in -D ARCH=sse2 -D SIMD_SIZE=4 -D BATCH_TILE=16 -D ACCUMULATORS=2 -o src/f32-rsum/gen/f32-rsum-sse2-u16-acc2.c &
+tools/xngen src/f32-rsum/simd.c.in -D ARCH=sse2 -D SIMD_SIZE=4 -D BATCH_TILE=16 -D ACCUMULATORS=4 -o src/f32-rsum/gen/f32-rsum-sse2-u16-acc4.c &
 
 ################################### x86 AVX ###################################
 tools/xngen src/f32-rsum/simd.c.in -D ARCH=avx -D SIMD_SIZE=8 -D BATCH_TILE=8  -D ACCUMULATORS=1 -o src/f32-rsum/gen/f32-rsum-avx-u8.c &

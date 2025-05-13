@@ -26,11 +26,11 @@ XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_rsum_ukernel__neon_u16_acc4, 
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rsum_ukernel__sse_u4, 4, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rsum_ukernel__sse_u8_acc2, 8, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rsum_ukernel__sse_u12_acc3, 12, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rsum_ukernel__sse_u16_acc2, 16, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rsum_ukernel__sse_u16_acc4, 16, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rsum_ukernel__sse2_u4, 4, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rsum_ukernel__sse2_u8_acc2, 8, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rsum_ukernel__sse2_u12_acc3, 12, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rsum_ukernel__sse2_u16_acc2, 16, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rsum_ukernel__sse2_u16_acc4, 16, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx, xnn_f32_rsum_ukernel__avx_u8, 8, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx, xnn_f32_rsum_ukernel__avx_u16_acc2, 16, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx, xnn_f32_rsum_ukernel__avx_u24_acc3, 24, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)

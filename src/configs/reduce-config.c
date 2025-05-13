@@ -1318,7 +1318,7 @@ static void init_f32_rsum_config(void) {
       // A hypothetical u32_acc8 kernel would produce results numerically
       // consistent with avx and avx512f.
       f32_rsum_config = (struct xnn_reduce_config) {
-        .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__sse_u16_acc4,
+        .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__sse2_u16_acc4,
         .init.reduce = NULL,
         .update = xnn_update_f32_reduce_scalar_params,
       };

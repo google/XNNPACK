@@ -22,6 +22,7 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-sse2-rr2-p5-u16-acc2.c
   src/f32-rdminmax/gen/f32-rdmax-2p2x-sse2-c32.c
   src/f32-rdminmax/gen/f32-rdmin-2p2x-sse2-c32.c
+  src/f32-rsum/gen/f32-rsum-sse2-u16-acc4.c
   src/f32-vapproxgelu/gen/f32-vapproxgelu-sse2-rational-12-10-div.c
   src/f32-vbinary/gen/f32-vprelu-sse2-u8.c
   src/f32-vbinary/gen/f32-vpreluc-sse2-u8.c
@@ -126,6 +127,10 @@ SET(NON_PROD_SSE2_MICROKERNEL_SRCS
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-sse2-rr2-p5-u4.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-sse2-rr2-p5-u8-acc2.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-sse2-rr2-p5-u16-acc4.c
+  src/f32-rsum/gen/f32-rsum-sse2-u4.c
+  src/f32-rsum/gen/f32-rsum-sse2-u8-acc2.c
+  src/f32-rsum/gen/f32-rsum-sse2-u12-acc3.c
+  src/f32-rsum/gen/f32-rsum-sse2-u16-acc2.c
   src/f32-vbinary/gen/f32-vprelu-sse2-u4.c
   src/f32-vbinary/gen/f32-vpreluc-sse2-u4.c
   src/f32-vbinary/gen/f32-vrpreluc-sse2-u4.c

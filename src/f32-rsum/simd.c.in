@@ -61,7 +61,7 @@ static XNN_INLINE float load_tail_reduce_add_f32(xnn_simd_f32_t acc,
 }
 
 $ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
-void xnn_f32_rsum_ukernel__${"sse" if ARCH == "sse2" else ARCH}_u${BATCH_TILE}${ACC_SUFFIX}(
+void xnn_f32_rsum_ukernel__${ARCH}_u${BATCH_TILE}${ACC_SUFFIX}(
     size_t batch,
     const float* input,
     float* output,
