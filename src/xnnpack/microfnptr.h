@@ -1293,13 +1293,9 @@ typedef size_t (*xnn_init_f32_scaleminmax_params_fn)(
 typedef void (*xnn_update_f32_scaleminmax_params_fn)(
     struct xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)], float scale);
 
-typedef void (*xnn_init_scale_params_fn)(size_t channels, size_t channels_tile,
+typedef void (*xnn_init_extra_data_params_fn)(size_t channels, size_t channels_tile,
                                          size_t stride, const void* scale,
                                          void* packed_w);
-
-typedef void (*xnn_init_qs8_qc8w_scale_params_fn)(
-    size_t channels, size_t channels_tile, size_t stride,
-    const float scale[XNN_MIN_ELEMENTS(1)], void* packed_w);
 
 struct xnn_gemm_config;
 
@@ -1325,10 +1321,10 @@ typedef void (*xnn_pack_weights_and_biases_fn)(
     size_t k_stride,                               //
     const void* accumulator_init,                  //
     const void* weights,                           //
-    xnn_init_scale_params_fn init_extra_data0_fn,  //
+    xnn_init_extra_data_params_fn init_extra_data0_fn,  //
     const void* extra_data0,                       //
     size_t extra_data0_element_size,               //
-    xnn_init_scale_params_fn init_extra_data1_fn,  //
+    xnn_init_extra_data_params_fn init_extra_data1_fn,  //
     const void* extra_data1,                       //
     size_t extra_data1_element_size,               //
     void* packed_weights_ptr,                      //
