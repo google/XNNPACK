@@ -30,13 +30,16 @@ void xnn_f32_qu8_vcvt_ukernel__avx2_u64(
 
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
+  // *cvtps_epi32 maps all floats out of bounds of int to INT_MIN, so we need to clamp at the max to avoid overflow.
+  // INT16_MAX is exactly representable as a float, and is plenty large (this clamp is applied after scaling).
+  const __m256 voverflow_max = _mm256_set1_ps((float) INT16_MAX);
+  XNN_FORCE_REALIZATION(voverflow_max);
+
   const __m256 vscale = _mm256_set1_ps(params->scalar.scale);
-  const __m256 voutput_max_less_zero_point = _mm256_set1_ps((float) ((int32_t) 255 - (int32_t) params->scalar.output_zero_point));
   const __m256i voutput_zero_point = _mm256_set1_epi16(params->scalar.output_zero_point);
   XNN_ALIGN(32) static const uint32_t shuffle_mask[8] = {0, 4, 1, 5, 2, 6, 3, 7};
   const __m256i vshuffle_mask = _mm256_load_si256((const __m256i*) shuffle_mask);
   XNN_FORCE_REALIZATION(vscale);
-  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
   XNN_FORCE_REALIZATION(voutput_zero_point);
 
   for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
@@ -59,14 +62,14 @@ void xnn_f32_qu8_vcvt_ukernel__avx2_u64(
     vxCD = _mm256_mul_ps(vxCD, vscale);
     vxEF = _mm256_mul_ps(vxEF, vscale);
 
-    vx01 = _mm256_min_ps(vx01, voutput_max_less_zero_point);
-    vx23 = _mm256_min_ps(vx23, voutput_max_less_zero_point);
-    vx45 = _mm256_min_ps(vx45, voutput_max_less_zero_point);
-    vx67 = _mm256_min_ps(vx67, voutput_max_less_zero_point);
-    vx89 = _mm256_min_ps(vx89, voutput_max_less_zero_point);
-    vxAB = _mm256_min_ps(vxAB, voutput_max_less_zero_point);
-    vxCD = _mm256_min_ps(vxCD, voutput_max_less_zero_point);
-    vxEF = _mm256_min_ps(vxEF, voutput_max_less_zero_point);
+    vx01 = _mm256_min_ps(vx01, voverflow_max);
+    vx23 = _mm256_min_ps(vx23, voverflow_max);
+    vx45 = _mm256_min_ps(vx45, voverflow_max);
+    vx67 = _mm256_min_ps(vx67, voverflow_max);
+    vx89 = _mm256_min_ps(vx89, voverflow_max);
+    vxAB = _mm256_min_ps(vxAB, voverflow_max);
+    vxCD = _mm256_min_ps(vxCD, voverflow_max);
+    vxEF = _mm256_min_ps(vxEF, voverflow_max);
 
     const __m256i vacc01 = _mm256_cvtps_epi32(vx01);
     const __m256i vacc23 = _mm256_cvtps_epi32(vx23);
@@ -100,7 +103,7 @@ void xnn_f32_qu8_vcvt_ukernel__avx2_u64(
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     __m256 vx = _mm256_loadu_ps(input);
     vx = _mm256_mul_ps(vx, vscale);
-    vx = _mm256_min_ps(vx, voutput_max_less_zero_point);
+    vx = _mm256_min_ps(vx, voverflow_max);
     input += 8;
 
     const __m256i vacc = _mm256_cvtps_epi32(vx);
@@ -119,7 +122,7 @@ void xnn_f32_qu8_vcvt_ukernel__avx2_u64(
 
     __m256 vx = _mm256_maskload_ps(input, vmask);
     vx = _mm256_mul_ps(vx, vscale);
-    vx = _mm256_min_ps(vx, voutput_max_less_zero_point);
+    vx = _mm256_min_ps(vx, voverflow_max);
 
     const __m256i vacc = _mm256_cvtps_epi32(vx);
 
