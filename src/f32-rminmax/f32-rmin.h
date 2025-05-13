@@ -65,20 +65,20 @@ XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rmin_ukernel__wasmsimd_pminmax_u16_acc2, 16, 
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rmin_ukernel__wasmsimd_pminmax_u16_acc4, 16, false, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-#if XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_f32_rmin_ukernel__rvv_u1v, 1, true, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_f32_rmin_ukernel__rvv_u2v, 2, true, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_f32_rmin_ukernel__rvv_u4v, 4, true, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_f32_rmin_ukernel__rvv_u8v, 8, true, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
-#endif  // XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
-#if XNN_ENABLE_HVX && (XNN_ARCH_HEXAGON)
+#if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_hvx, xnn_f32_rmin_ukernel__hvx_u32, 32, false, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_hvx, xnn_f32_rmin_ukernel__hvx_u64_acc2, 64, false, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_hvx, xnn_f32_rmin_ukernel__hvx_u96_acc3, 96, false, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_hvx, xnn_f32_rmin_ukernel__hvx_u128_acc2, 128, false, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_hvx, xnn_f32_rmin_ukernel__hvx_u128_acc4, 128, false, float, float, struct xnn_f32_default_params, ((struct xnn_init_f32_default_params_fn) NULL))
-#endif  // XNN_ENABLE_HVX && (XNN_ARCH_HEXAGON)
+#endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 
 
 #ifdef XNN_DEFINED_UKERNEL_WITH_PARAMS

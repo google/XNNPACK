@@ -131,6 +131,10 @@ static void init_s8_rdmax_config(void) {
     s8_rdmax_config = (struct xnn_reduce_config) {
       .rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_s8_rdmax_ukernel_2p2x__wasmsimd_c32,
     };
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    s8_rdmax_config = (struct xnn_reduce_config) {
+      .rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_s8_rdmax_ukernel_2p2x__hvx_c128,
+    };
   #else
     s8_rdmax_config = (struct xnn_reduce_config) {
       .rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_s8_rdmax_ukernel_2p2x__scalar_c2,
@@ -172,6 +176,10 @@ static void init_s8_rdmin_config(void) {
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     s8_rdmin_config = (struct xnn_reduce_config) {
       .rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32,
+    };
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    s8_rdmin_config = (struct xnn_reduce_config) {
+      .rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_s8_rdmin_ukernel_2p2x__hvx_c128,
     };
   #else
     s8_rdmin_config = (struct xnn_reduce_config) {
@@ -343,6 +351,10 @@ static void init_u8_rdmax_config(void) {
     u8_rdmax_config = (struct xnn_reduce_config) {
       .rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_u8_rdmax_ukernel_2p2x__wasmsimd_c32,
     };
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    u8_rdmax_config = (struct xnn_reduce_config) {
+      .rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_u8_rdmax_ukernel_2p2x__hvx_c128,
+    };
   #else
     u8_rdmax_config = (struct xnn_reduce_config) {
       .rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_u8_rdmax_ukernel_2p2x__scalar_c2,
@@ -376,6 +388,10 @@ static void init_u8_rdmin_config(void) {
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     u8_rdmin_config = (struct xnn_reduce_config) {
       .rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_u8_rdmin_ukernel_2p2x__wasmsimd_c32,
+    };
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    u8_rdmin_config = (struct xnn_reduce_config) {
+      .rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_u8_rdmin_ukernel_2p2x__hvx_c128,
     };
   #else
     u8_rdmin_config = (struct xnn_reduce_config) {

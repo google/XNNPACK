@@ -34,9 +34,9 @@ XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_f32_rdmin_ukernel_2p2x__avx512
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rdmin_ukernel_2p2x__wasmsimd_c32, 2, 32, false, float, float, void*, NULL)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-#if XNN_ENABLE_HVX && (XNN_ARCH_HEXAGON)
+#if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_hvx, xnn_f32_rdmin_ukernel_2p2x__hvx_c32, 2, 32, false, float, float, void*, NULL)
-#endif  // XNN_ENABLE_HVX && (XNN_ARCH_HEXAGON)
+#endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rdmin_ukernel_2p2x__scalar_c2, 2, 2, false, float, float, void*, NULL)
 

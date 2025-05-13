@@ -30,6 +30,9 @@ XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_sse4_1, xnn_s8_rdmax_ukernel_2p2x__sse41_c3
 XNN_UKERNEL_WITH_PARAMS(0, xnn_s8_rdmax_ukernel_2p2x__wasmsimd_c32, 2, 32, false, int8_t, int8_t, void*, NULL)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+XNN_UKERNEL_WITH_PARAMS(0, xnn_s8_rdmax_ukernel_2p2x__hvx_c128, 2, 128, false, int8_t, int8_t, void*, NULL)
+#endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 
 #ifdef XNN_DEFINED_UKERNEL_WITH_PARAMS
 #undef XNN_DEFINED_UKERNEL_WITH_PARAMS

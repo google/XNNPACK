@@ -19,6 +19,11 @@ tools/xngen src/s8-rdminmax/simd.c.in -D CHANNELS=32 -D DATATYPE=S8 -D ACCUMULAT
 
 tools/xngen src/s8-rdminmax/simd.c.in -D CHANNELS=32 -D DATATYPE=S8 -D ACCUMULATORS=2 -D OP=MIN -D ARCH=wasmsimd -o src/s8-rdminmax/gen/s8-rdmin-2p2x-wasmsimd-c32.c &
 
+################################## Hexagon HVX ################################
+tools/xngen src/s8-rdminmax/simd.c.in -D CHANNELS=128 -D DATATYPE=S8 -D ACCUMULATORS=2 -D OP=MAX -D ARCH=hvx -o src/s8-rdminmax/gen/s8-rdmax-2p2x-hvx-c128.c &
+
+tools/xngen src/s8-rdminmax/simd.c.in -D CHANNELS=128 -D DATATYPE=S8 -D ACCUMULATORS=2 -D OP=MIN -D ARCH=hvx -o src/s8-rdminmax/gen/s8-rdmin-2p2x-hvx-c128.c &
+
 #################################### Scalar ###################################
 tools/xngen src/s8-rdminmax/simd.c.in -D CHANNELS=2 -D DATATYPE=S8 -D ACCUMULATORS=2 -D OP=MAX -D ARCH=scalar -o src/s8-rdminmax/gen/s8-rdmax-2p2x-scalar-c2.c &
 
