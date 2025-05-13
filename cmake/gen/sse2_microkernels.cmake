@@ -42,6 +42,7 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/f32-vrnd/gen/f32-vrndne-sse2-u8.c
   src/f32-vrnd/gen/f32-vrndu-sse2-u8.c
   src/f32-vrnd/gen/f32-vrndz-sse2-u8.c
+  src/f32-vrsqrt/gen/f32-vrsqrt-sse2-approx-rsqrt.c
   src/f32-vsigmoid/gen/f32-vsigmoid-sse2-rr2-lut64-p2-div-u8.c
   src/f32-vsin/gen/f32-vsin-sse2-rational-5-4-div.c
   src/f32-vtanh/gen/f32-vtanh-sse2-rational-9-8-div.c
