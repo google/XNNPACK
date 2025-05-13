@@ -483,7 +483,7 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
       (dynamic_fully_connected_op->type ==
        xnn_operator_type_dynamic_fully_connected_nc_pf32);
 
-  dynamic_fully_connected_op->context.gemm.gemm.gemm = (struct gemm_context){
+  dynamic_fully_connected_op->context.gemm.gemm = (struct gemm_context){
       .k_scaled = input_channels << log2_input_element_size,
       .w_stride = weights_stride,
       .a_stride = packed_lhs ? xnn_x8_packq_f32qp8_packed_offset(
@@ -503,23 +503,23 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
   };
 
   if (use_gemm_nr2) {
-    memcpy(&dynamic_fully_connected_op->context.gemm.gemm.gemm.params, params2,
+    memcpy(&dynamic_fully_connected_op->context.gemm.gemm.params, params2,
            params2_size);
   } else {
-    memcpy(&dynamic_fully_connected_op->context.gemm.gemm.gemm.params, params,
+    memcpy(&dynamic_fully_connected_op->context.gemm.gemm.params, params,
            params_size);
   }
-  dynamic_fully_connected_op->context.gemm.gemm.gemm.fused_params =
-      &dynamic_fully_connected_op->context.gemm.gemm.gemm.params;
+  dynamic_fully_connected_op->context.gemm.gemm.fused_params =
+      &dynamic_fully_connected_op->context.gemm.gemm.params;
 
   if (packed_lhs) {
     switch (dynamic_fully_connected_op->type) {
       case xnn_operator_type_dynamic_fully_connected_nc_pf16:
-        dynamic_fully_connected_op->context.gemm.gemm.gemm.packed_lh_offset_fn =
+        dynamic_fully_connected_op->context.gemm.gemm.packed_lh_offset_fn =
             xnn_init_x16_pack_lh_config()->offset_fn;
         break;
       case xnn_operator_type_dynamic_fully_connected_nc_pf32:
-        dynamic_fully_connected_op->context.gemm.gemm.gemm.packed_lh_offset_fn =
+        dynamic_fully_connected_op->context.gemm.gemm.packed_lh_offset_fn =
             xnn_init_x32_pack_lh_config()->offset_fn;
         break;
       default:
@@ -530,10 +530,10 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
   // Compute the optimal tile size for this GEMM.
   const size_t nc = xnn_gemm_best_tile_size(
       /*num_groups=*/1, /*m=*/batch_size, /*n=*/output_channels,
-      /*m_stride=*/dynamic_fully_connected_op->context.gemm.gemm.gemm.a_stride,
-      /*n_stride=*/dynamic_fully_connected_op->context.gemm.gemm.gemm.w_stride,
+      /*m_stride=*/dynamic_fully_connected_op->context.gemm.gemm.a_stride,
+      /*n_stride=*/dynamic_fully_connected_op->context.gemm.gemm.w_stride,
       /*cm_stride=*/
-      dynamic_fully_connected_op->context.gemm.gemm.gemm.cm_stride,
+      dynamic_fully_connected_op->context.gemm.gemm.cm_stride,
       /*cn_stride=*/1 << log2_output_element_size, mr, nr,
       /*num_threads=*/pthreadpool_get_threads_count(threadpool));
 
@@ -726,9 +726,9 @@ static enum xnn_status setup_dynamic_fully_connected_nc(
     dynamic_fully_connected_op->context.gemm.packw_gemm_goi.packed_weights = workspace;
   }
 
-  dynamic_fully_connected_op->context.gemm.gemm.gemm.a = input;
-  dynamic_fully_connected_op->context.gemm.gemm.gemm.packed_w = workspace;
-  dynamic_fully_connected_op->context.gemm.gemm.gemm.c = output;
+  dynamic_fully_connected_op->context.gemm.gemm.a = input;
+  dynamic_fully_connected_op->context.gemm.gemm.packed_w = workspace;
+  dynamic_fully_connected_op->context.gemm.gemm.c = output;
 
   dynamic_fully_connected_op->state = xnn_run_state_ready;
 
