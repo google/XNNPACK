@@ -55,9 +55,10 @@ struct xnn_ukernel_dwconv2d {
 
 struct xnn_ukernel_gemm {
   struct xnn_hmp_gemm_ukernel gemm_cases[XNN_MAX_MR];
-  // Attention operator uses both types of packing.
-  xnn_packw_gemm_goi_ukernel_fn packw_gemm_goi;
-  xnn_packw_gemm_gio_ukernel_fn packw_gemm_gio;
+  union {
+    xnn_packw_gemm_goi_ukernel_fn packw_gemm_goi;
+    xnn_packw_gemm_gio_ukernel_fn packw_gemm_gio;
+  };
   uint8_t mr;
   uint8_t mr_packed;
   uint8_t nr;
@@ -311,16 +312,6 @@ struct xnn_operator {
       const struct xnn_gemm_config*
           gemm_config;  // For dynamic quantization convert operator.
     };  // For unary elementwise operators.
-    struct {
-      const struct xnn_reduce_config* rmax_config;
-      const struct xnn_raddstoreexpminusmax_config* raddstoreexpminusmax_config;
-      const struct xnn_binary_elementwise_config* vadd_config;
-      const struct xnn_binary_elementwise_config* vmul_config;
-      const struct xnn_unary_elementwise_config* vtanh_config;
-      const struct xnn_binary_elementwise_config* vprelu_config;
-      enum xnn_attention_logits_cap_type cap_type;
-      struct xnn_attention_logits_cap_tanh_params cap_params;
-    } attention;  // For attention operator.
     const struct xnn_pack_lh_config* pack_lh_config;
   };
 
@@ -335,13 +326,14 @@ struct xnn_operator {
       struct dwconv_indirection_init_context dwconv_indirection_init;
     } dwconv;
     struct elementwise_binary_context elementwise_binary;
-    // PACKW GEMM GOI + GEMM are used together in Dynamic Fully Connected.
     struct {
       union {
         struct gemm_context gemm;
       } gemm;
-      struct packw_gemm_goi_context packw_gemm_goi;
-      struct packw_gemm_gio_context packw_gemm_gio;
+      union {
+        struct packw_gemm_goi_context packw_gemm_goi;
+        struct packw_gemm_gio_context packw_gemm_gio;
+      };
       bool const_weights;
     } gemm;
     struct {
@@ -378,7 +370,6 @@ struct xnn_operator {
     struct pack_lh_context pack_lh;
   } context;
 
-  struct xnn_code_cache* code_cache;
   xnn_weights_cache_t weights_cache;
   enum xnn_run_state state;
 };
