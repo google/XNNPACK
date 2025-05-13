@@ -10,8 +10,10 @@
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/simd/f32-common.h"
 
 // SIMD vector type for f32 using SCALAR.
 typedef float xnn_simd_f32_t;
@@ -141,6 +143,16 @@ static XNN_INLINE float xnn_reduce_max_f32(xnn_simd_f32_t a) {
 // Special functions.
 #define XNN_SIMD_HAVE_RCP_F32 0
 #define XNN_SIMD_HAVE_RSQRT_F32 0
+
+static XNN_INLINE xnn_simd_f32_t
+xnn_approx_reciprocal_sqrt_f32(xnn_simd_f32_t a) {
+  const int32_t magic = approx_reciprocal_sqrt_magic[0];
+  int32_t a_int;
+  memcpy(&a_int, &a, 4);
+  a_int = magic - (a_int >> 1);
+  memcpy(&a, &a_int, 4);
+  return a;
+}
 
 // Load/store operations.
 static XNN_INLINE xnn_simd_f32_t xnn_loadu_f32(const float *ptr) {
