@@ -60,6 +60,14 @@ static enum xnn_status create_dynamic_fully_connected_nc(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
     goto error;
   }
+  dynamic_fully_connected_op->ukernel.gemm_ukernels = xnn_allocate_zero_simd_memory(sizeof(struct gemm_types));
+  if (dynamic_fully_connected_op->ukernel.gemm_ukernels == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(struct gemm_types),
+                  xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
+
 
   memcpy(&dynamic_fully_connected_op->params, params, params_size);
   memcpy(&dynamic_fully_connected_op->params2, params2, params2_size);
@@ -70,27 +78,27 @@ static enum xnn_status create_dynamic_fully_connected_nc(
   const size_t mr = gemm_config->mr;
   const size_t mr_packed = gemm_config->mr_packed ? gemm_config->mr_packed : mr;
   dynamic_fully_connected_op->ukernel.type = xnn_microkernel_type_gemm;
-  dynamic_fully_connected_op->ukernel.gemm = (struct xnn_ukernel_gemm){
-      .mr = mr,
-      .nr = nr,
-      .kr = UINT32_C(1) << gemm_config->log2_kr,
-      .sr = UINT32_C(1) << gemm_config->log2_sr,
-      .mr_packed = mr_packed,
+  dynamic_fully_connected_op->ukernel.gemm_ukernels->gemm = (struct xnn_ukernel_gemm) {
+    .mr = mr,
+    .nr = nr,
+    .kr = UINT32_C(1) << gemm_config->log2_kr,
+    .sr = UINT32_C(1) << gemm_config->log2_sr,
+    .mr_packed = mr_packed,
   };
   dynamic_fully_connected_op->gemm_config = gemm_config;
 
   assert(mr <= XNN_MAX_MR);
   for (size_t i = 0; i < mr; i++) {
-    dynamic_fully_connected_op->ukernel.gemm.gemm_cases[i] = gemm_ukernels->gemm[i];
+    dynamic_fully_connected_op->ukernel.gemm_ukernels->gemm.gemm_cases[i] = gemm_ukernels->gemm[i];
   }
   if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
-    dynamic_fully_connected_op->ukernel.gemm.packw_gemm_gio = gemm_config->pack_gemm_gio;
+    dynamic_fully_connected_op->ukernel.gemm_ukernels->gemm.packw_gemm_gio = gemm_config->pack_gemm_gio;
   } else {
-    dynamic_fully_connected_op->ukernel.gemm.packw_gemm_goi = gemm_config->pack_gemm_goi;
+    dynamic_fully_connected_op->ukernel.gemm_ukernels->gemm.packw_gemm_goi = gemm_config->pack_gemm_goi;
   }
 
   if (gemm_nr2_config != NULL) {
-    dynamic_fully_connected_op->ukernel.gemm_nr2 = (struct xnn_ukernel_gemm) {
+    dynamic_fully_connected_op->ukernel.gemm_ukernels->gemm_nr2 = (struct xnn_ukernel_gemm) {
       .mr = gemm_nr2_config->mr,
       .nr = gemm_nr2_config->nr,
       .kr = UINT32_C(1) << gemm_nr2_config->log2_kr,
@@ -98,12 +106,12 @@ static enum xnn_status create_dynamic_fully_connected_nc(
     };
     assert(gemm_nr2_config->mr <= XNN_MAX_MR);
     for (size_t i = 0; i < gemm_nr2_config->mr; i++) {
-      dynamic_fully_connected_op->ukernel.gemm_nr2.gemm_cases[i] = gemm_nr2_ukernels->gemm[i];
+      dynamic_fully_connected_op->ukernel.gemm_ukernels->gemm_nr2.gemm_cases[i] = gemm_nr2_ukernels->gemm[i];
     }
     if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
-      dynamic_fully_connected_op->ukernel.gemm_nr2.packw_gemm_gio = gemm_nr2_config->pack_gemm_gio;
+      dynamic_fully_connected_op->ukernel.gemm_ukernels->gemm_nr2.packw_gemm_gio = gemm_nr2_config->pack_gemm_gio;
     } else {
-      dynamic_fully_connected_op->ukernel.gemm_nr2.packw_gemm_goi = gemm_nr2_config->pack_gemm_goi;
+      dynamic_fully_connected_op->ukernel.gemm_ukernels->gemm_nr2.packw_gemm_goi = gemm_nr2_config->pack_gemm_goi;
     }
   }
 
@@ -382,14 +390,14 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
     return xnn_status_success;
   }
 
-  struct xnn_ukernel_gemm* ukernel = &dynamic_fully_connected_op->ukernel.gemm;
+  struct xnn_ukernel_gemm* ukernel = &dynamic_fully_connected_op->ukernel.gemm_ukernels->gemm;
   bool use_gemm_nr2 = false;
   if (ukernel->nr > output_channels) {
-    uint32_t gemm_nr2_mr = dynamic_fully_connected_op->ukernel.gemm_nr2.mr;
+    uint32_t gemm_nr2_mr = dynamic_fully_connected_op->ukernel.gemm_ukernels->gemm_nr2.mr;
     // Default microkernel is suboptimal, use a microkernel that better supports less output channels.
-    if (gemm_nr2_mr != 0 && dynamic_fully_connected_op->ukernel.gemm_nr2.gemm_cases[gemm_nr2_mr-1].function[XNN_UARCH_DEFAULT] != NULL) {
+    if (gemm_nr2_mr != 0 && dynamic_fully_connected_op->ukernel.gemm_ukernels->gemm_nr2.gemm_cases[gemm_nr2_mr-1].function[XNN_UARCH_DEFAULT] != NULL) {
       use_gemm_nr2 = true;
-      ukernel = &dynamic_fully_connected_op->ukernel.gemm_nr2;
+      ukernel = &dynamic_fully_connected_op->ukernel.gemm_ukernels->gemm_nr2;
     }
   }
 
@@ -491,7 +499,7 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
       .kc = input_channels,
       .mr_packed = batch_size == 1
                        ? 1
-                       : dynamic_fully_connected_op->ukernel.gemm.mr_packed,
+                       : dynamic_fully_connected_op->ukernel.gemm_ukernels->gemm.mr_packed,
   };
 
   if (use_gemm_nr2) {

@@ -96,6 +96,11 @@ struct xnn_ukernel_vunary {
   xnn_vunary_ukernel_fn function;
 };
 
+struct gemm_types {
+  struct xnn_ukernel_gemm gemm;
+  struct xnn_ukernel_gemm gemm_nr2;
+};
+
 struct xnn_ukernel {
   enum xnn_microkernel_type type;
   // Used by subconv2d whether it is a GEMM or IGEMM.
@@ -104,16 +109,13 @@ struct xnn_ukernel {
     struct xnn_ukernel_conv2d conv2d;
     struct xnn_ukernel_dwconv dwconv;
     struct xnn_ukernel_dwconv2d dwconv2d;
-    struct {
-      struct xnn_ukernel_gemm gemm;
-      struct xnn_ukernel_gemm gemm_nr2;
-    };
-    struct xnn_ukernel_igemm igemm;
     struct xnn_ukernel_spmm spmm;
     struct xnn_ukernel_vmulcaddc vmulcaddc;
     struct xnn_ukernel_vbinary vbinary;
     struct xnn_ukernel_vunary vunary;
   };
+  struct gemm_types *gemm_ukernels;
+  struct xnn_ukernel_igemm *igemm;
 };
 
 // Valid state transitions:

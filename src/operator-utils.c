@@ -175,6 +175,8 @@ enum xnn_status xnn_destroy_operator(xnn_operator_t op)
   xnn_release_memory(op->pixelwise_buffer);
   xnn_release_memory(op->subconvolution_buffer);
   xnn_release_simd_memory(op->lookup_table);
+  xnn_release_simd_memory(op->ukernel.gemm_ukernels);
+  xnn_release_simd_memory(op->ukernel.igemm);
   return xnn_status_success;
 }
 

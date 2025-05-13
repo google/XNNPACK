@@ -115,6 +115,13 @@ static enum xnn_status create_fully_connected_nc(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
     goto error;
   }
+  fully_connected_op->ukernel.gemm_ukernels = xnn_allocate_zero_simd_memory(sizeof(struct gemm_types));
+  if (fully_connected_op->ukernel.gemm_ukernels == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(struct gemm_types),
+                  xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
 
   fully_connected_op->weights_cache = weights_cache;
 
@@ -274,7 +281,7 @@ static enum xnn_status create_fully_connected_nc(
   const size_t mr = gemm_config->mr;
   const size_t mr_packed = gemm_config->mr_packed ? gemm_config->mr_packed : mr;
   fully_connected_op->ukernel.type = xnn_microkernel_type_gemm;
-  fully_connected_op->ukernel.gemm = (struct xnn_ukernel_gemm){
+  fully_connected_op->ukernel.gemm_ukernels->gemm = (struct xnn_ukernel_gemm){
       .mr = mr,
       .nr = nr,
       .kr = kr,
@@ -284,7 +291,7 @@ static enum xnn_status create_fully_connected_nc(
   };
   assert(XNN_MAX_MR >= mr);
   for (size_t i = 0; i < mr; i++) {
-    fully_connected_op->ukernel.gemm.gemm_cases[i] = gemm_ukernels->gemm[i];
+    fully_connected_op->ukernel.gemm_ukernels->gemm.gemm_cases[i] = gemm_ukernels->gemm[i];
   }
 
   fully_connected_op->state = xnn_run_state_invalid;
@@ -2402,18 +2409,18 @@ static enum xnn_status reshape_fully_connected_nc(
   size_t input_channels = fully_connected_op->group_input_channels;
   const size_t output_channels = fully_connected_op->group_output_channels;
 
-  uint32_t mr = fully_connected_op->ukernel.gemm.mr;
-  const uint32_t nr = fully_connected_op->ukernel.gemm.nr;
-  struct xnn_hmp_gemm_ukernel *gemm_cases = fully_connected_op->ukernel.gemm.gemm_cases;
+  uint32_t mr = fully_connected_op->ukernel.gemm_ukernels->gemm.mr;
+  const uint32_t nr = fully_connected_op->ukernel.gemm_ukernels->gemm.nr;
+  struct xnn_hmp_gemm_ukernel *gemm_cases = fully_connected_op->ukernel.gemm_ukernels->gemm.gemm_cases;
 
-  if (batch_size == 1 && fully_connected_op->ukernel.gemm.gemm_cases[0].function[XNN_UARCH_DEFAULT] != NULL) {
+  if (batch_size == 1 && fully_connected_op->ukernel.gemm_ukernels->gemm.gemm_cases[0].function[XNN_UARCH_DEFAULT] != NULL) {
     mr = 1;
   }
 
   assert(mr != 0 && mr <= XNN_MAX_MR);
   struct xnn_hmp_gemm_ukernel gemm_ukernel = gemm_cases[mr - 1];
   if (filter_is_nibble) {
-    const uint32_t planes = fully_connected_op->ukernel.gemm.kp;
+    const uint32_t planes = fully_connected_op->ukernel.gemm_ukernels->gemm.kp;
     input_channels = round_up_po2(input_channels, planes);
   }
 
@@ -2443,11 +2450,11 @@ static enum xnn_status reshape_fully_connected_nc(
       .log2_csize = log2_output_element_size,
       .ukernel = gemm_ukernel,
       .mr = mr,
-      .kr = fully_connected_op->ukernel.gemm.kr,
-      .sr = fully_connected_op->ukernel.gemm.sr,
+      .kr = fully_connected_op->ukernel.gemm_ukernels->gemm.kr,
+      .sr = fully_connected_op->ukernel.gemm_ukernels->gemm.sr,
       .kc = input_channels,
       .mr_packed =
-          batch_size == 1 ? 1 : fully_connected_op->ukernel.gemm.mr_packed,
+          batch_size == 1 ? 1 : fully_connected_op->ukernel.gemm_ukernels->gemm.mr_packed,
   };
 
   if (packed_lhs) {

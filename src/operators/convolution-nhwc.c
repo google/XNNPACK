@@ -331,16 +331,14 @@ static enum xnn_status create_igemm(
               kernel, bias, /*scale=*/NULL, weights_ptr, gemm_config->nr * extra_weights_bytes, packing_params);
         }
       }
-      convolution_op->ukernel.igemm = (struct xnn_ukernel_igemm) {
-        .mr = mr,
-        .nr = nr,
-        .kr = kr,
-        .sr = sr,
-      };
+      convolution_op->ukernel.igemm->mr = mr;
+      convolution_op->ukernel.igemm->nr = nr;
+      convolution_op->ukernel.igemm->kr = kr;
+      convolution_op->ukernel.igemm->sr = sr;
 
       assert(XNN_MAX_MR >= mr);
       for (size_t i = 0; i < mr; i++) {
-        convolution_op->ukernel.igemm.igemm_cases[i] = gemm_ukernels->igemm[i];
+        convolution_op->ukernel.igemm->igemm_cases[i] = gemm_ukernels->igemm[i];
       }
 
       break;
@@ -558,6 +556,13 @@ static enum xnn_status create_convolution2d_nhwc(
     xnn_log_error(
       "failed to allocate %zu bytes for %s operator descriptor",
       sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
+  convolution_op->ukernel.igemm = xnn_allocate_zero_simd_memory(sizeof(struct xnn_ukernel_igemm));
+  if (convolution_op->ukernel.igemm == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(struct xnn_ukernel_igemm),
+                  xnn_operator_type_to_string(operator_type));
     goto error;
   }
 
@@ -1903,10 +1908,10 @@ static enum xnn_status reshape_igemm(
   const size_t output_width = convolution_op->output_width;
   const size_t output_size = output_height * output_width;
 
-  const uint32_t nr = convolution_op->ukernel.igemm.nr;
-  struct xnn_hmp_igemm_ukernel* igemm_cases = convolution_op->ukernel.igemm.igemm_cases;
+  const uint32_t nr = convolution_op->ukernel.igemm->nr;
+  struct xnn_hmp_igemm_ukernel* igemm_cases = convolution_op->ukernel.igemm->igemm_cases;
   const uint32_t mr =
-      xnn_get_heuristic_mr_igemm(output_size, convolution_op->ukernel.igemm.mr, nr, igemm_cases);
+      xnn_get_heuristic_mr_igemm(output_size, convolution_op->ukernel.igemm->mr, nr, igemm_cases);
 
   struct xnn_hmp_igemm_ukernel igemm_ukernel = igemm_cases[mr - 1];
 
@@ -1987,7 +1992,7 @@ static enum xnn_status reshape_igemm(
 
   const size_t group_input_channels = convolution_op->group_input_channels;
   const size_t w_stride = extra_weights_elements_size +
-    (round_up_po2(group_input_channels, convolution_op->ukernel.igemm.kr * convolution_op->ukernel.igemm.sr) * kernel_size << log2_filter_element_size);
+    (round_up_po2(group_input_channels, convolution_op->ukernel.igemm->kr * convolution_op->ukernel.igemm->sr) * kernel_size << log2_filter_element_size);
   const size_t group_output_channels = convolution_op->group_output_channels;
   convolution_op->context.igemm.igemm = (struct igemm_context){
       .ks = kernel_size,
