@@ -37,7 +37,7 @@
 // 24-bit approximation $x_{k+1}$.
 
 
-void xnn_f32_vsqrt_ukernel__sse_rsqrt_u12(
+void xnn_f32_vsqrt_ukernel__sse_rsqrt_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -52,50 +52,61 @@ void xnn_f32_vsqrt_ukernel__sse_rsqrt_u12(
   const __m128 vthree = _mm_set1_ps(3.0f);
   const __m128 vhalf = _mm_set1_ps(0.5f);
 
-  for (; batch >= 12 * sizeof(float); batch -= 12 * sizeof(float)) {
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const __m128 vx0 = _mm_loadu_ps(input);
     const __m128 vx1 = _mm_loadu_ps(input + 4);
     const __m128 vx2 = _mm_loadu_ps(input + 8);
-    input += 12;
+    const __m128 vx3 = _mm_loadu_ps(input + 12);
+    input += 16;
 
     // Create a mask of the +/-0 inputs, which will be flushed to zero later.
     const __m128 vmask0 = _mm_cmpeq_ps(vx0, _mm_setzero_ps());
     const __m128 vmask1 = _mm_cmpeq_ps(vx1, _mm_setzero_ps());
     const __m128 vmask2 = _mm_cmpeq_ps(vx2, _mm_setzero_ps());
+    const __m128 vmask3 = _mm_cmpeq_ps(vx3, _mm_setzero_ps());
 
     // Generate the initial 12-bit approximation.
     const __m128 vt0_0 = _mm_rsqrt_ps(vx0);
     const __m128 vt0_1 = _mm_rsqrt_ps(vx1);
     const __m128 vt0_2 = _mm_rsqrt_ps(vx2);
+    const __m128 vt0_3 = _mm_rsqrt_ps(vx3);
 
     // Do a single Newton-Raphson step as described above.
     const __m128 vt1_0 = _mm_mul_ps(vt0_0, vt0_0);
     const __m128 vt1_1 = _mm_mul_ps(vt0_1, vt0_1);
     const __m128 vt1_2 = _mm_mul_ps(vt0_2, vt0_2);
+    const __m128 vt1_3 = _mm_mul_ps(vt0_3, vt0_3);
     const __m128 vt2_0 = _mm_mul_ps(vx0, vt1_0);
     const __m128 vt2_1 = _mm_mul_ps(vx1, vt1_1);
     const __m128 vt2_2 = _mm_mul_ps(vx2, vt1_2);
+    const __m128 vt2_3 = _mm_mul_ps(vx3, vt1_3);
     const __m128 vt3_0 = _mm_sub_ps(vthree, vt2_0);
     const __m128 vt3_1 = _mm_sub_ps(vthree, vt2_1);
     const __m128 vt3_2 = _mm_sub_ps(vthree, vt2_2);
+    const __m128 vt3_3 = _mm_sub_ps(vthree, vt2_3);
     const __m128 vt4_0 = _mm_mul_ps(vhalf, vt0_0);
     const __m128 vt4_1 = _mm_mul_ps(vhalf, vt0_1);
     const __m128 vt4_2 = _mm_mul_ps(vhalf, vt0_2);
+    const __m128 vt4_3 = _mm_mul_ps(vhalf, vt0_3);
     const __m128 vt5_0 = _mm_mul_ps(vt3_0, vt4_0);
     const __m128 vt5_1 = _mm_mul_ps(vt3_1, vt4_1);
     const __m128 vt5_2 = _mm_mul_ps(vt3_2, vt4_2);
+    const __m128 vt5_3 = _mm_mul_ps(vt3_3, vt4_3);
     const __m128 vt6_0 = _mm_andnot_ps(vmask0, vt5_0);
     const __m128 vt6_1 = _mm_andnot_ps(vmask1, vt5_1);
     const __m128 vt6_2 = _mm_andnot_ps(vmask2, vt5_2);
+    const __m128 vt6_3 = _mm_andnot_ps(vmask3, vt5_3);
     const __m128 vy0 = _mm_mul_ps(vx0, vt6_0);
     const __m128 vy1 = _mm_mul_ps(vx1, vt6_1);
     const __m128 vy2 = _mm_mul_ps(vx2, vt6_2);
+    const __m128 vy3 = _mm_mul_ps(vx3, vt6_3);
 
     // Store the results.
     _mm_storeu_ps(output, vy0);
     _mm_storeu_ps(output + 4, vy1);
     _mm_storeu_ps(output + 8, vy2);
-    output += 12;
+    _mm_storeu_ps(output + 12, vy3);
+    output += 16;
   }
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const __m128 vx = _mm_loadu_ps(input);

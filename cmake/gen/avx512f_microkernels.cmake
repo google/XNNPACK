@@ -71,7 +71,7 @@ SET(PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-vrsqrt/gen/f32-vrsqrt-avx512f-rsqrt-u32.c
   src/f32-vsigmoid/gen/f32-vsigmoid-avx512f-rr2-lut32-p2-perm2-scalef-div-u64.c
   src/f32-vsin/gen/f32-vsin-avx512f-rational-5-4-div.c
-  src/f32-vsqrt/gen/f32-vsqrt-avx512f-rsqrt-u16.c
+  src/f32-vsqrt/gen/f32-vsqrt-avx512f-sqrt-u16.c
   src/f32-vtanh/gen/f32-vtanh-avx512f-rational-9-8-div.c
   src/f32-vunary/gen/f32-vabs-avx512f.c
   src/f32-vunary/gen/f32-vneg-avx512f.c
@@ -275,8 +275,11 @@ SET(NON_PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-vsigmoid/gen/f32-vsigmoid-avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-u48.c
   src/f32-vsigmoid/gen/f32-vsigmoid-avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-u64.c
   src/f32-vsin/gen/f32-vsin-avx512f-rational-5-4-nr.c
+  src/f32-vsqrt/gen/f32-vsqrt-avx512f-rsqrt-u16.c
   src/f32-vsqrt/gen/f32-vsqrt-avx512f-rsqrt-u32.c
-  src/f32-vsqrt/gen/f32-vsqrt-avx512f-rsqrt-u48.c
+  src/f32-vsqrt/gen/f32-vsqrt-avx512f-rsqrt-u64.c
+  src/f32-vsqrt/gen/f32-vsqrt-avx512f-sqrt-u32.c
+  src/f32-vsqrt/gen/f32-vsqrt-avx512f-sqrt-u64.c
   src/f32-vtanh/gen/f32-vtanh-avx512f-rational-9-8-nr.c
   src/x32-packw/gen/x32-packw-x16-gemm-gio-avx512f-u1-prfm.c
   src/x32-packw/gen/x32-packw-x16-gemm-gio-avx512f-u1.c
