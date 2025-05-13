@@ -36,7 +36,7 @@
 // Where $x_k$ is the original 14-bit approximation and `t5` contains the final
 // 24-bit approximation $x_{k+1}$.
 
-void xnn_f32_vsqrt_ukernel__avx512f_rsqrt_u48(
+void xnn_f32_vsqrt_ukernel__avx512f_rsqrt_u64(
     size_t batch, const float* input, float* output,
     const struct xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)]) {
   assert(batch != 0);
@@ -48,11 +48,12 @@ void xnn_f32_vsqrt_ukernel__avx512f_rsqrt_u48(
   const __m512 vneg_three = _mm512_set1_ps(-3.0f);
   const __m512 vneg_half = _mm512_set1_ps(-0.5f);
 
-  for (; batch >= 48 * sizeof(float); batch -= 48 * sizeof(float)) {
+  for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
     const __m512 vx0 = _mm512_loadu_ps(input);
     const __m512 vx1 = _mm512_loadu_ps(input + 16);
     const __m512 vx2 = _mm512_loadu_ps(input + 32);
-    input += 48;
+    const __m512 vx3 = _mm512_loadu_ps(input + 48);
+    input += 64;
 
     // Create a mask of the +/-0 inputs, which will be flushed to zero later.
     const __mmask16 vinf_mask_0 = 
@@ -61,37 +62,47 @@ void xnn_f32_vsqrt_ukernel__avx512f_rsqrt_u48(
         _mm512_cmp_ps_mask(vx1, _mm512_setzero_ps(), _CMP_EQ_OQ);
     const __mmask16 vinf_mask_2 = 
         _mm512_cmp_ps_mask(vx2, _mm512_setzero_ps(), _CMP_EQ_OQ);
+    const __mmask16 vinf_mask_3 = 
+        _mm512_cmp_ps_mask(vx3, _mm512_setzero_ps(), _CMP_EQ_OQ);
 
     // Generate the initial 14-bit approximation.
     const __m512 vt0_0 = _mm512_rsqrt14_ps(vx0);
     const __m512 vt0_1 = _mm512_rsqrt14_ps(vx1);
     const __m512 vt0_2 = _mm512_rsqrt14_ps(vx2);
+    const __m512 vt0_3 = _mm512_rsqrt14_ps(vx3);
 
     // Do a single Newton-Raphson step as described above.
     const __m512 vt1_0 = _mm512_mul_ps(vt0_0, vt0_0);
     const __m512 vt1_1 = _mm512_mul_ps(vt0_1, vt0_1);
     const __m512 vt1_2 = _mm512_mul_ps(vt0_2, vt0_2);
+    const __m512 vt1_3 = _mm512_mul_ps(vt0_3, vt0_3);
     const __m512 vt3_0 = _mm512_fmadd_ps(vx0, vt1_0, vneg_three);
     const __m512 vt3_1 = _mm512_fmadd_ps(vx1, vt1_1, vneg_three);
     const __m512 vt3_2 = _mm512_fmadd_ps(vx2, vt1_2, vneg_three);
+    const __m512 vt3_3 = _mm512_fmadd_ps(vx3, vt1_3, vneg_three);
     const __m512 vt4_0 = _mm512_mul_ps(vneg_half, vt0_0);
     const __m512 vt4_1 = _mm512_mul_ps(vneg_half, vt0_1);
     const __m512 vt4_2 = _mm512_mul_ps(vneg_half, vt0_2);
+    const __m512 vt4_3 = _mm512_mul_ps(vneg_half, vt0_3);
     const __m512 vt5_0 = _mm512_mul_ps(vt3_0, vt4_0);
     const __m512 vt5_1 = _mm512_mul_ps(vt3_1, vt4_1);
     const __m512 vt5_2 = _mm512_mul_ps(vt3_2, vt4_2);
+    const __m512 vt5_3 = _mm512_mul_ps(vt3_3, vt4_3);
     const __m512 vt6_0 = _mm512_mask_blend_ps(vinf_mask_0, vt5_0, _mm512_setzero_ps());
     const __m512 vt6_1 = _mm512_mask_blend_ps(vinf_mask_1, vt5_1, _mm512_setzero_ps());
     const __m512 vt6_2 = _mm512_mask_blend_ps(vinf_mask_2, vt5_2, _mm512_setzero_ps());
+    const __m512 vt6_3 = _mm512_mask_blend_ps(vinf_mask_3, vt5_3, _mm512_setzero_ps());
     const __m512 vy0 = _mm512_mul_ps(vx0, vt6_0);
     const __m512 vy1 = _mm512_mul_ps(vx1, vt6_1);
     const __m512 vy2 = _mm512_mul_ps(vx2, vt6_2);
+    const __m512 vy3 = _mm512_mul_ps(vx3, vt6_3);
 
     // Store the results.
     _mm512_storeu_ps(output, vy0);
     _mm512_storeu_ps(output + 16, vy1);
     _mm512_storeu_ps(output + 32, vy2);
-    output += 48;
+    _mm512_storeu_ps(output + 48, vy3);
+    output += 64;
   }
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const __m512 vx = _mm512_loadu_ps(input);
