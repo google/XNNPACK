@@ -122,7 +122,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-vrnd/gen/f32-vrndu-scalar-libm-u1.c
   src/f32-vrnd/gen/f32-vrndz-scalar-libm-u1.c
   src/f32-vrsqrt/gen/f32-vrsqrt-scalar-rsqrt-u1.c
-  src/f32-vrsqrt/gen/f32-vrsqrt-scalar-rsqrt-u4.c
+  src/f32-vrsqrt/gen/f32-vrsqrt-scalar-sqrt.c
   src/f32-vsigmoid/gen/f32-vsigmoid-scalar-rr2-lut64-p2-div-u2.c
   src/f32-vsin/gen/f32-vsin-scalar-rational-5-4-div.c
   src/f32-vsqrt/gen/f32-vsqrt-scalar-sqrt-u1.c
@@ -498,6 +498,7 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-vrnd/gen/f32-vrndz-scalar-libm-u2.c
   src/f32-vrnd/gen/f32-vrndz-scalar-libm-u4.c
   src/f32-vrsqrt/gen/f32-vrsqrt-scalar-rsqrt-u2.c
+  src/f32-vrsqrt/gen/f32-vrsqrt-scalar-rsqrt-u4.c
   src/f32-vsigmoid/gen/f32-vsigmoid-scalar-rr2-lut64-p2-div-u1.c
   src/f32-vsigmoid/gen/f32-vsigmoid-scalar-rr2-lut64-p2-div-u4.c
   src/f32-vsigmoid/gen/f32-vsigmoid-scalar-rr2-lut2048-p1-div-u1.c
