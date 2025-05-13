@@ -188,19 +188,19 @@ tools/xngen src/f32-spmm/wasmsimd-pipelined.c.in -D MR=32 -D NR=1 -D UNROLL=2 -D
 
 ################################### Hexagon HVX ##################################
 ### Microkernels without unrolling
-tools/xngen src/f32-spmm/hvx.c.in -D MR=32   -D NR=1 -D UNROLL=1 -o src/f32-spmm/gen/f32-spmm-32x1-minmax-hvx.c &
-tools/xngen src/f32-spmm/hvx.c.in -D MR=64   -D NR=1 -D UNROLL=1 -o src/f32-spmm/gen/f32-spmm-64x1-minmax-hvx.c &
-tools/xngen src/f32-spmm/hvx.c.in -D MR=128  -D NR=1 -D UNROLL=1 -o src/f32-spmm/gen/f32-spmm-128x1-minmax-hvx.c &
+tools/xngen src/f32-spmm/hvx.c.in -D MR=32   -D NR=1 -D UNROLL=1 -D ARCH=hvx -o src/f32-spmm/gen/f32-spmm-32x1-minmax-hvx.c &
+tools/xngen src/f32-spmm/hvx.c.in -D MR=64   -D NR=1 -D UNROLL=1 -D ARCH=hvx -o src/f32-spmm/gen/f32-spmm-64x1-minmax-hvx.c &
+tools/xngen src/f32-spmm/hvx.c.in -D MR=128  -D NR=1 -D UNROLL=1 -D ARCH=hvx -o src/f32-spmm/gen/f32-spmm-128x1-minmax-hvx.c &
 
 ### Microkernels with 2X unrolling
-tools/xngen src/f32-spmm/hvx.c.in -D MR=32   -D NR=1 -D UNROLL=2 -o src/f32-spmm/gen/f32-spmm-32x1-minmax-hvx-x2.c &
-tools/xngen src/f32-spmm/hvx.c.in -D MR=64   -D NR=1 -D UNROLL=2 -o src/f32-spmm/gen/f32-spmm-64x1-minmax-hvx-x2.c &
-tools/xngen src/f32-spmm/hvx.c.in -D MR=128  -D NR=1 -D UNROLL=2 -o src/f32-spmm/gen/f32-spmm-128x1-minmax-hvx-x2.c &
+tools/xngen src/f32-spmm/hvx.c.in -D MR=32   -D NR=1 -D UNROLL=2 -D ARCH=hvx -o src/f32-spmm/gen/f32-spmm-32x1-minmax-hvx-x2.c &
+tools/xngen src/f32-spmm/hvx.c.in -D MR=64   -D NR=1 -D UNROLL=2 -D ARCH=hvx -o src/f32-spmm/gen/f32-spmm-64x1-minmax-hvx-x2.c &
+tools/xngen src/f32-spmm/hvx.c.in -D MR=128  -D NR=1 -D UNROLL=2 -D ARCH=hvx -o src/f32-spmm/gen/f32-spmm-128x1-minmax-hvx-x2.c &
 
 ### Microkernels with 4X unrolling
-tools/xngen src/f32-spmm/hvx.c.in -D MR=32   -D NR=1 -D UNROLL=4 -o src/f32-spmm/gen/f32-spmm-32x1-minmax-hvx-x4.c &
-tools/xngen src/f32-spmm/hvx.c.in -D MR=64   -D NR=1 -D UNROLL=4 -o src/f32-spmm/gen/f32-spmm-64x1-minmax-hvx-x4.c &
-tools/xngen src/f32-spmm/hvx.c.in -D MR=128  -D NR=1 -D UNROLL=4 -o src/f32-spmm/gen/f32-spmm-128x1-minmax-hvx-x4.c &
+tools/xngen src/f32-spmm/hvx.c.in -D MR=32   -D NR=1 -D UNROLL=4 -D ARCH=hvx -o src/f32-spmm/gen/f32-spmm-32x1-minmax-hvx-x4.c &
+tools/xngen src/f32-spmm/hvx.c.in -D MR=64   -D NR=1 -D UNROLL=4 -D ARCH=hvx -o src/f32-spmm/gen/f32-spmm-64x1-minmax-hvx-x4.c &
+tools/xngen src/f32-spmm/hvx.c.in -D MR=128  -D NR=1 -D UNROLL=4 -D ARCH=hvx -o src/f32-spmm/gen/f32-spmm-128x1-minmax-hvx-x4.c &
 
 ### Microkernels with software pipelining
 tools/xngen src/f32-spmm/hvx-pipelined.c.in -D MR=32  -D NR=1 -D UNROLL=1 -o src/f32-spmm/gen/f32-spmm-32x1-minmax-hvx-pipelined.c &
