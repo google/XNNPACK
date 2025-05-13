@@ -426,6 +426,13 @@ void xnn_pack_kai_qs8_qc8w_weights_and_biases_sme2(
     size_t extra_data1_element_size, void* packed_weights_ptr,
     const void* params);
 
+void xnn_pack_kai_qs8_conv_goki_w_sme2(
+    size_t g, size_t nc, size_t ks, size_t kc,
+    size_t nr, size_t kr, size_t sr, const int8_t* k,
+    const int32_t* b, const float* scale,
+    void* packed_weights, size_t extra_bytes,
+    const struct xnn_qs8_packing_params* params);
+
 void xnn_pack_kai_f16_weights_and_biases(
     uint32_t flags,                                //
     const struct xnn_gemm_config* gemm_config,     //

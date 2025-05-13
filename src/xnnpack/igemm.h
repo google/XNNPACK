@@ -2197,6 +2197,12 @@ DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
 DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x8__asm_aarch32_neonv8_mlal_lane_ld64_prfm)
 
+XNN_INTERNAL size_t xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_32x32__neonsme2_get_mr(void);
+XNN_INTERNAL size_t xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_32x32__neonsme2_get_nr(void);
+
+DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_32x32__neonsme2)
+
 DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x4c2__sse2_ld64)
 DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(
