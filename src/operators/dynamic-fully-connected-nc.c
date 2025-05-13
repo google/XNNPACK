@@ -68,12 +68,14 @@ static enum xnn_status create_dynamic_fully_connected_nc(
 
   const size_t nr = gemm_config->nr;
   const size_t mr = gemm_config->mr;
+  const size_t mr_packed = gemm_config->mr_packed ? gemm_config->mr_packed : mr;
   dynamic_fully_connected_op->ukernel.type = xnn_microkernel_type_gemm;
-  dynamic_fully_connected_op->ukernel.gemm = (struct xnn_ukernel_gemm) {
-    .mr = mr,
-    .nr = nr,
-    .kr = UINT32_C(1) << gemm_config->log2_kr,
-    .sr = UINT32_C(1) << gemm_config->log2_sr,
+  dynamic_fully_connected_op->ukernel.gemm = (struct xnn_ukernel_gemm){
+      .mr = mr,
+      .nr = nr,
+      .kr = UINT32_C(1) << gemm_config->log2_kr,
+      .sr = UINT32_C(1) << gemm_config->log2_sr,
+      .mr_packed = mr_packed,
   };
   dynamic_fully_connected_op->gemm_config = gemm_config;
 
@@ -187,7 +189,7 @@ enum xnn_status xnn_create_dynamic_fully_connected_nc_pf16(
   uint32_t flags,
   xnn_operator_t* dynamic_fully_connected_op_out)
 {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f16_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_pf16_gemm_config();
   if (gemm_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_dynamic_fully_connected_nc_pf16));
@@ -432,7 +434,7 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
             .w_stride = weights_stride,
             .packw_gemm_gio = ukernel->packw_gemm_gio,
             .pack_weights_and_biases = gemm_config->pack_weights_and_biases,
-                .gemm_config = gemm_config,
+            .gemm_config = gemm_config,
         };
 
     dynamic_fully_connected_op->compute[0].task_1d_tile_1d_dynamic =
@@ -487,6 +489,9 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
       .kr = kr,
       .sr = sr,
       .kc = input_channels,
+      .mr_packed = batch_size == 1
+                       ? 1
+                       : dynamic_fully_connected_op->ukernel.gemm.mr_packed,
   };
 
   if (use_gemm_nr2) {

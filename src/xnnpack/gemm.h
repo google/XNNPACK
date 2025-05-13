@@ -300,7 +300,9 @@ DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(
                                 params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_PF16_GEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_pf16_gemm_minmax_ukernel_32x32__neonsme2)
+    xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme2)
+DECLARE_PF16_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2)
 
 #define DECLARE_PF32_GEMM_MINMAX_UKERNEL_FUNCTION(fn_name)                  \
                                                                             \

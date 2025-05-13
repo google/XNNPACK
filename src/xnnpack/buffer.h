@@ -7,6 +7,7 @@
 #define __XNNPACK_TEST_BUFFER_H_
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
@@ -21,6 +22,7 @@
 #include <numeric>
 #include <random>
 #include <sstream>
+#include <string>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -28,6 +30,7 @@
 #include "include/xnnpack.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/datatype.h"
+#include "src/xnnpack/log.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/reference-utils.h"
 
@@ -158,9 +161,115 @@ static constexpr PaddingBytes XnnExtraBytes = {XNN_EXTRA_BYTES};
 template <typename T, size_t Alignment = alignof(T)>
 class Buffer {
   static_assert(std::is_trivial<T>::value, "");
-  T* data_;
-  size_t size_;
 
+ public:
+  using value_type = T;
+  using iterator = T*;
+  using const_iterator = const T*;
+
+  Buffer() : data_(nullptr), size_(0) {}
+  explicit Buffer(size_t size, PaddingBytes extra_bytes = {0},
+                  const char* name = nullptr)
+      : data_(reinterpret_cast<T*>(
+            allocate(size * sizeof(T) + guard_bytes +
+                     std::max<size_t>(guard_bytes, extra_bytes.value)))),
+        size_(size),
+        name_(name) {
+    // Fill the region before the allocation with the guard bytes, and poison it
+    // for sanitizers.
+    uint8_t* before = reinterpret_cast<uint8_t*>(data_);
+    fill_guard_bytes(before);
+    XNN_MSAN_POISON(before, guard_bytes);
+    XNN_ASAN_POISON(before, guard_bytes);
+
+    // The actual allocation is after the guard bytes.
+    data_ =
+        reinterpret_cast<T*>(reinterpret_cast<uint8_t*>(data_) + guard_bytes);
+
+    // Fill the region after the allocation with the guard bytes.
+    uint8_t* after = reinterpret_cast<uint8_t*>(data_ + size_);
+    fill_guard_bytes(after);
+    // Here, we only want to poison the memory for sanitizers after the extra
+    // bytes. We want to allow reads past the end to not crash (in asan or
+    // otherwise), but we don't want that memory to be considered initialized by
+    // msan.
+    XNN_ASAN_POISON(after + extra_bytes.value, guard_bytes - extra_bytes.value);
+    XNN_MSAN_POISON(after, guard_bytes);
+  }
+  Buffer(size_t size, T value, PaddingBytes extra_bytes = {0},
+         const char* name = nullptr)
+      : Buffer(size, extra_bytes, name) {
+    std::fill(begin(), end(), value);
+  }
+  Buffer(std::initializer_list<T> init) : Buffer(init.size()) {
+    std::copy(init.begin(), init.end(), begin());
+  }
+  Buffer(const Buffer& other) = delete;
+  Buffer(Buffer&& other) : Buffer() {
+    std::swap(data_, other.data_);
+    std::swap(size_, other.size_);
+    std::swap(name_, other.name_);
+  }
+  ~Buffer() {
+    if (data_) {
+      // Check that the guard bytes after the buffer have not been modified. We
+      // need to unpoison the memory first so we can read it.
+      const uint8_t* after = reinterpret_cast<uint8_t*>(data_ + size_);
+      XNN_ASAN_UNPOISON(after, guard_bytes);
+      XNN_MSAN_UNPOISON(after, guard_bytes);
+      if (!check_guard_bytes(after)) {
+        xnn_log_fatal(
+            "Buffer%s%s%s: guard bytes after allocation were corrupted, "
+            "aborting.",
+            name_ ? " '" : "", name_ ? name_ : "", name_ ? "'" : "");
+      }
+      data_ =
+          reinterpret_cast<T*>(reinterpret_cast<uint8_t*>(data_) - guard_bytes);
+
+      // Check that the guard bytes before the buffer have not been modified.
+      const uint8_t* before = reinterpret_cast<uint8_t*>(data_);
+      XNN_ASAN_UNPOISON(before, guard_bytes);
+      XNN_MSAN_UNPOISON(before, guard_bytes);
+      if (!check_guard_bytes(before)) {
+        xnn_log_fatal(
+            "Buffer%s%s%s: guard bytes before allocation were corrupted, "
+            "aborting.",
+            name_ ? " '" : "", name_ ? name_ : "", name_ ? "'" : "");
+      }
+
+      free(data_);
+    }
+  }
+
+  Buffer& operator=(const Buffer&) = delete;
+  Buffer& operator=(Buffer&& other) {
+    std::swap(data_, other.data_);
+    std::swap(size_, other.size_);
+    return *this;
+  }
+
+  size_t size() const { return size_; }
+  bool empty() const { return size_ == 0; }
+
+  T* data() { return data_; }
+  const T* data() const { return data_; }
+  T* begin() { return data_; }
+  T* end() { return data_ + size_; }
+  const T* begin() const { return data_; }
+  const T* end() const { return data_ + size_; }
+  const T* cbegin() const { return data_; }
+  const T* cend() const { return data_ + size_; }
+  T& operator[](size_t index) { return data_[index]; }
+  const T& operator[](size_t index) const { return data_[index]; }
+
+  bool operator==(const Buffer& other) const {
+    return size_ == other.size_ && std::equal(begin(), end(), other.begin());
+  }
+  bool operator!=(const Buffer& other) const {
+    return size_ != other.size_ || !std::equal(begin(), end(), other.begin());
+  }
+
+ private:
   static void* allocate(size_t bytes) {
     size_t alignment = std::max(Alignment, sizeof(void*));
 #if defined(_WIN32)
@@ -221,105 +330,9 @@ class Buffer {
     return true;
   }
 
- public:
-  using value_type = T;
-  using iterator = T*;
-  using const_iterator = const T*;
-
-  Buffer() : data_(nullptr), size_(0) {}
-  explicit Buffer(size_t size, PaddingBytes extra_bytes = {0})
-      : data_(reinterpret_cast<T*>(
-            allocate(size * sizeof(T) + guard_bytes +
-                     std::max<size_t>(guard_bytes, extra_bytes.value)))),
-        size_(size) {
-    // Fill the region before the allocation with the guard bytes, and poison it
-    // for sanitizers.
-    uint8_t* before = reinterpret_cast<uint8_t*>(data_);
-    fill_guard_bytes(before);
-    XNN_MSAN_POISON(before, guard_bytes);
-    XNN_ASAN_POISON(before, guard_bytes);
-
-    // The actual allocation is after the guard bytes.
-    data_ =
-        reinterpret_cast<T*>(reinterpret_cast<uint8_t*>(data_) + guard_bytes);
-
-    // Fill the region after the allocation with the guard bytes.
-    uint8_t* after = reinterpret_cast<uint8_t*>(data_ + size_);
-    fill_guard_bytes(after);
-    // Here, we only want to poison the memory for sanitizers after the extra
-    // bytes. We want to allow reads past the end to not crash (in asan or
-    // otherwise), but we don't want that memory to be considered initialized by
-    // msan.
-    XNN_ASAN_POISON(after + extra_bytes.value, guard_bytes - extra_bytes.value);
-    XNN_MSAN_POISON(after, guard_bytes);
-  }
-  Buffer(size_t size, T value, PaddingBytes extra_bytes = {0})
-      : Buffer(size, extra_bytes) {
-    std::fill(begin(), end(), value);
-  }
-  Buffer(std::initializer_list<T> init) : Buffer(init.size()) {
-    std::copy(init.begin(), init.end(), begin());
-  }
-  Buffer(const Buffer& other) = delete;
-  Buffer(Buffer&& other) : Buffer() {
-    std::swap(data_, other.data_);
-    std::swap(size_, other.size_);
-  }
-  ~Buffer() {
-    if (data_) {
-      // Check that the guard bytes after the buffer have not been modified. We
-      // need to unpoison the memory first so we can read it.
-      const uint8_t* after = reinterpret_cast<uint8_t*>(data_ + size_);
-      XNN_ASAN_UNPOISON(after, guard_bytes);
-      XNN_MSAN_UNPOISON(after, guard_bytes);
-      if (!check_guard_bytes(after)) {
-        std::cerr << "guard bytes after allocation were corrupted" << std::endl;
-        std::abort();
-      }
-      data_ =
-          reinterpret_cast<T*>(reinterpret_cast<uint8_t*>(data_) - guard_bytes);
-
-      // Check that the guard bytes before the buffer have not been modified.
-      const uint8_t* before = reinterpret_cast<uint8_t*>(data_);
-      XNN_ASAN_UNPOISON(before, guard_bytes);
-      XNN_MSAN_UNPOISON(before, guard_bytes);
-      if (!check_guard_bytes(before)) {
-        std::cerr << "guard bytes before allocation were corrupted"
-                  << std::endl;
-        std::abort();
-      }
-
-      free(data_);
-    }
-  }
-
-  Buffer& operator=(const Buffer&) = delete;
-  Buffer& operator=(Buffer&& other) {
-    std::swap(data_, other.data_);
-    std::swap(size_, other.size_);
-    return *this;
-  }
-
-  size_t size() const { return size_; }
-  bool empty() const { return size_ == 0; }
-
-  T* data() { return data_; }
-  const T* data() const { return data_; }
-  T* begin() { return data_; }
-  T* end() { return data_ + size_; }
-  const T* begin() const { return data_; }
-  const T* end() const { return data_ + size_; }
-  const T* cbegin() const { return data_; }
-  const T* cend() const { return data_ + size_; }
-  T& operator[](size_t index) { return data_[index]; }
-  const T& operator[](size_t index) const { return data_[index]; }
-
-  bool operator==(const Buffer& other) const {
-    return size_ == other.size_ && std::equal(begin(), end(), other.begin());
-  }
-  bool operator!=(const Buffer& other) const {
-    return size_ != other.size_ || !std::equal(begin(), end(), other.begin());
-  }
+  T* data_;
+  size_t size_;
+  const char* name_;
 };
 
 // This is a faster way of generating random numbers, by generating as many
@@ -969,7 +982,7 @@ class DatatypeGenerator {
       dist_ = std::uniform_real_distribution<float>(min, max);
     }
   }
-  DatatypeGenerator(const xnn_quantization_params& = {})
+  explicit DatatypeGenerator(const xnn_quantization_params& = {})
       : DatatypeGenerator(NumericLimits<T>::min(), NumericLimits<T>::max()) {}
 
   template <typename Rng>

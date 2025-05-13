@@ -23,6 +23,7 @@ MICROKERNEL_TEST_DEPS = [
     "//:fp16",
     "//:hardware_config",
     "//:isa_checks",
+    "//:logging",
     "//:math",
     "//:memory",
     "//:microkernels_h",
@@ -366,6 +367,17 @@ xnnpack_unit_test(
     srcs = [
         "f16-gemm-minmax.cc",
     ],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "pf16_gemm_minmax_test",
+    srcs = [
+        "pf16-gemm-minmax.cc",
+    ],
+    defines = xnnpack_kleidiai_defines(),
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -787,6 +799,18 @@ xnnpack_unit_test(
     timeout = "moderate",
     srcs = [
         "qp8-f32-qc4w-gemm-minmax.cc",
+    ],
+    defines = xnnpack_kleidiai_defines(),
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "qp8_f32_qb4w_gemm_minmax_test",
+    timeout = "moderate",
+    srcs = [
+        "qp8-f32-qb4w-gemm-minmax.cc",
     ],
     defines = xnnpack_kleidiai_defines(),
     deps = MICROKERNEL_TEST_DEPS + [

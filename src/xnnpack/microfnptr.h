@@ -231,7 +231,7 @@ typedef void (*xnn_pf16_gemm_minmax_ukernel_fn)(
     void* c,           //
     size_t cm_stride,  //
     size_t cn_stride,  //
-    const struct xnn_f32_minmax_params
+    const struct xnn_f16_minmax_params
         params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_pqs8_qc8w_gemm_minmax_ukernel_fn)(

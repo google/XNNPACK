@@ -194,7 +194,9 @@ static enum xnn_status create_fully_connected_nc(
           flags, gemm_config, input_channels, output_channels,
           /*groups=*/1,
           /*block_wise=*/block_size,
-          /*kstride=*/k_stride,
+          /*k_stride=*/
+          (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) ? output_channels
+                                               : input_channels,
           /*accumulator_init=*/bias,
           /*weights=*/kernel,
           /*int_extra_data0_fn=*/(xnn_init_scale_params_fn)init_scale_params,
@@ -202,7 +204,9 @@ static enum xnn_status create_fully_connected_nc(
           /*extra_data0_size=*/init_scale_params != NULL ? sizeof(float) : 0,
           /*init_extra_data1_fn=*/
           (xnn_init_scale_params_fn)init_kernel_scale_params,
-          /*extra_data1=*/block_wise ? (const void *) blockwise_kernel_scale_params : (const void *) kernel_scale_params,
+          /*extra_data1=*/
+          block_wise ? (const void*)blockwise_kernel_scale_params
+                     : (const void*)kernel_scale_params,
           /*extra_data1_size=*/init_kernel_scale_params != NULL ? sizeof(float)
                                                                 : 0,
           /*packed_weights_ptr=*/weights_ptr, packing_params);
@@ -268,6 +272,7 @@ static enum xnn_status create_fully_connected_nc(
   fully_connected_op->flags = flags;
 
   const size_t mr = gemm_config->mr;
+  const size_t mr_packed = gemm_config->mr_packed ? gemm_config->mr_packed : mr;
   fully_connected_op->ukernel.type = xnn_microkernel_type_gemm;
   fully_connected_op->ukernel.gemm = (struct xnn_ukernel_gemm){
       .mr = mr,
@@ -275,6 +280,7 @@ static enum xnn_status create_fully_connected_nc(
       .kr = kr,
       .sr = sr,
       .kp = planes,
+      .mr_packed = mr_packed,
   };
   assert(XNN_MAX_MR >= mr);
   for (size_t i = 0; i < mr; i++) {
@@ -2440,6 +2446,8 @@ static enum xnn_status reshape_fully_connected_nc(
       .kr = fully_connected_op->ukernel.gemm.kr,
       .sr = fully_connected_op->ukernel.gemm.sr,
       .kc = input_channels,
+      .mr_packed =
+          batch_size == 1 ? 1 : fully_connected_op->ukernel.gemm.mr_packed,
   };
 
   if (packed_lhs) {
