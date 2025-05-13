@@ -35,12 +35,12 @@ static XNN_INLINE xnn_simd_f32_t xnn_fmsub_f32(xnn_simd_f32_t a,
 
 static XNN_INLINE xnn_simd_f32_t xnn_max_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {
-  return wasm_f32x4_max(a, b);
+  return wasm_f32x4_pmax(a, b);
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_min_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {
-  return wasm_f32x4_min(a, b);
+  return wasm_f32x4_pmin(a, b);
 }
 
 #endif  // __XNNPACK_SRC_XNNPACK_SIMD_F32_WASMSIMD_H_

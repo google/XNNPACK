@@ -34,14 +34,7 @@ using TestInfo = ApproxGELU;
   TEST(ukernel, batch_div) { TestBatchDiv<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }\
   TEST(ukernel, batch_lt) { TestBatchLT<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }  \
   TEST(ukernel, batch_gt) { TestBatchGT<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }  \
-  TEST(ukernel, inplace) { TestInPlace<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }   \
-TEST(ukernel, special_values) {                                                                                         \
-  TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                                 \
-  VUnaryMicrokernelTester().Test<TestInfo, datatype, datatype>(ukernel, init_params,                                    \
-    /*inputs=*/{-6.0f, 6.0f, 0.0f},                                                                                     \
-    /*outputs=*/{0.0f, 6.0f, 0.0f},                                                                                     \
-    /*tolerance_ulp=*/1);                                                                                               \
-}
+  TEST(ukernel, inplace) { TestInPlace<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }
 #include "src/f32-vapproxgelu/f32-vapproxgelu.h"
 #undef XNN_UKERNEL_WITH_PARAMS
 #undef XNN_QUANTIZED

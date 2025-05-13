@@ -84,9 +84,9 @@ $for BATCH_TILE in BATCH_TILES:
 
         // Clamp the inputs to the interpolation range.
         $for N in range(SIMD_TILE):
-          vx_${N} = xnn_min_f32(vmax_x, vx_${N});
+          vx_${N} = xnn_min_f32(vx_${N}, vmax_x);
         $for N in range(SIMD_TILE):
-          vx_${N} = xnn_max_f32(vmin_x, vx_${N});
+          vx_${N} = xnn_max_f32(vx_${N}, vmin_x);
 
         // Since the polynomials are odd/even, we need x^2.
         $for N in range(SIMD_TILE):
@@ -137,8 +137,8 @@ $for BATCH_TILE in BATCH_TILES:
       input += xnn_simd_size_f32;
 
       // Clamp the inputs to the interpolation range.
-      vx = xnn_min_f32(vmax_x, vx);
-      vx = xnn_max_f32(vmin_x, vx);
+      vx = xnn_min_f32(vx, vmax_x);
+      vx = xnn_max_f32(vx, vmin_x);
 
       // Since the polynomials are odd/even, we need x^2.
       const xnn_simd_f32_t vx2 = xnn_mul_f32(vx, vx);
@@ -174,8 +174,8 @@ $for BATCH_TILE in BATCH_TILES:
         xnn_simd_f32_t vx = xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
 
         // Clamp the inputs to the interpolation range.
-        vx = xnn_min_f32(vmax_x, vx);
-        vx = xnn_max_f32(vmin_x, vx);
+        vx = xnn_min_f32(vx, vmax_x);
+        vx = xnn_max_f32(vx, vmin_x);
 
         // Since the polynomials are odd/even, we need x^2.
         const xnn_simd_f32_t vx2 = xnn_mul_f32(vx, vx);

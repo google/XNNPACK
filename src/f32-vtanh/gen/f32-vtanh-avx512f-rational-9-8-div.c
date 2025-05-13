@@ -65,8 +65,8 @@ void xnn_f32_vtanh_ukernel__avx512f_rational_9_8_div_u16(
     input += xnn_simd_size_f32;
 
     // Clamp the inputs to the interpolation range.
-    vx = xnn_min_f32(vmax_x, vx);
-    vx = xnn_max_f32(vmin_x, vx);
+    vx = xnn_min_f32(vx, vmax_x);
+    vx = xnn_max_f32(vx, vmin_x);
 
     // Since the polynomials are odd/even, we need x^2.
     const xnn_simd_f32_t vx2 = xnn_mul_f32(vx, vx);
@@ -94,8 +94,8 @@ void xnn_f32_vtanh_ukernel__avx512f_rational_9_8_div_u16(
     xnn_simd_f32_t vx = xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
 
     // Clamp the inputs to the interpolation range.
-    vx = xnn_min_f32(vmax_x, vx);
-    vx = xnn_max_f32(vmin_x, vx);
+    vx = xnn_min_f32(vx, vmax_x);
+    vx = xnn_max_f32(vx, vmin_x);
 
     // Since the polynomials are odd/even, we need x^2.
     const xnn_simd_f32_t vx2 = xnn_mul_f32(vx, vx);
@@ -167,10 +167,10 @@ void xnn_f32_vtanh_ukernel__avx512f_rational_9_8_div_u32(
     input += 32;
 
     // Clamp the inputs to the interpolation range.
-    vx_0 = xnn_min_f32(vmax_x, vx_0);
-    vx_1 = xnn_min_f32(vmax_x, vx_1);
-    vx_0 = xnn_max_f32(vmin_x, vx_0);
-    vx_1 = xnn_max_f32(vmin_x, vx_1);
+    vx_0 = xnn_min_f32(vx_0, vmax_x);
+    vx_1 = xnn_min_f32(vx_1, vmax_x);
+    vx_0 = xnn_max_f32(vx_0, vmin_x);
+    vx_1 = xnn_max_f32(vx_1, vmin_x);
 
     // Since the polynomials are odd/even, we need x^2.
     const xnn_simd_f32_t vx2_0 = xnn_mul_f32(vx_0, vx_0);
@@ -211,8 +211,8 @@ void xnn_f32_vtanh_ukernel__avx512f_rational_9_8_div_u32(
     input += xnn_simd_size_f32;
 
     // Clamp the inputs to the interpolation range.
-    vx = xnn_min_f32(vmax_x, vx);
-    vx = xnn_max_f32(vmin_x, vx);
+    vx = xnn_min_f32(vx, vmax_x);
+    vx = xnn_max_f32(vx, vmin_x);
 
     // Since the polynomials are odd/even, we need x^2.
     const xnn_simd_f32_t vx2 = xnn_mul_f32(vx, vx);
@@ -240,8 +240,8 @@ void xnn_f32_vtanh_ukernel__avx512f_rational_9_8_div_u32(
     xnn_simd_f32_t vx = xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
 
     // Clamp the inputs to the interpolation range.
-    vx = xnn_min_f32(vmax_x, vx);
-    vx = xnn_max_f32(vmin_x, vx);
+    vx = xnn_min_f32(vx, vmax_x);
+    vx = xnn_max_f32(vx, vmin_x);
 
     // Since the polynomials are odd/even, we need x^2.
     const xnn_simd_f32_t vx2 = xnn_mul_f32(vx, vx);
@@ -314,12 +314,12 @@ void xnn_f32_vtanh_ukernel__avx512f_rational_9_8_div_u48(
     input += 48;
 
     // Clamp the inputs to the interpolation range.
-    vx_0 = xnn_min_f32(vmax_x, vx_0);
-    vx_1 = xnn_min_f32(vmax_x, vx_1);
-    vx_2 = xnn_min_f32(vmax_x, vx_2);
-    vx_0 = xnn_max_f32(vmin_x, vx_0);
-    vx_1 = xnn_max_f32(vmin_x, vx_1);
-    vx_2 = xnn_max_f32(vmin_x, vx_2);
+    vx_0 = xnn_min_f32(vx_0, vmax_x);
+    vx_1 = xnn_min_f32(vx_1, vmax_x);
+    vx_2 = xnn_min_f32(vx_2, vmax_x);
+    vx_0 = xnn_max_f32(vx_0, vmin_x);
+    vx_1 = xnn_max_f32(vx_1, vmin_x);
+    vx_2 = xnn_max_f32(vx_2, vmin_x);
 
     // Since the polynomials are odd/even, we need x^2.
     const xnn_simd_f32_t vx2_0 = xnn_mul_f32(vx_0, vx_0);
@@ -372,8 +372,8 @@ void xnn_f32_vtanh_ukernel__avx512f_rational_9_8_div_u48(
     input += xnn_simd_size_f32;
 
     // Clamp the inputs to the interpolation range.
-    vx = xnn_min_f32(vmax_x, vx);
-    vx = xnn_max_f32(vmin_x, vx);
+    vx = xnn_min_f32(vx, vmax_x);
+    vx = xnn_max_f32(vx, vmin_x);
 
     // Since the polynomials are odd/even, we need x^2.
     const xnn_simd_f32_t vx2 = xnn_mul_f32(vx, vx);
@@ -401,8 +401,8 @@ void xnn_f32_vtanh_ukernel__avx512f_rational_9_8_div_u48(
     xnn_simd_f32_t vx = xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
 
     // Clamp the inputs to the interpolation range.
-    vx = xnn_min_f32(vmax_x, vx);
-    vx = xnn_max_f32(vmin_x, vx);
+    vx = xnn_min_f32(vx, vmax_x);
+    vx = xnn_max_f32(vx, vmin_x);
 
     // Since the polynomials are odd/even, we need x^2.
     const xnn_simd_f32_t vx2 = xnn_mul_f32(vx, vx);
@@ -476,14 +476,14 @@ void xnn_f32_vtanh_ukernel__avx512f_rational_9_8_div_u64(
     input += 64;
 
     // Clamp the inputs to the interpolation range.
-    vx_0 = xnn_min_f32(vmax_x, vx_0);
-    vx_1 = xnn_min_f32(vmax_x, vx_1);
-    vx_2 = xnn_min_f32(vmax_x, vx_2);
-    vx_3 = xnn_min_f32(vmax_x, vx_3);
-    vx_0 = xnn_max_f32(vmin_x, vx_0);
-    vx_1 = xnn_max_f32(vmin_x, vx_1);
-    vx_2 = xnn_max_f32(vmin_x, vx_2);
-    vx_3 = xnn_max_f32(vmin_x, vx_3);
+    vx_0 = xnn_min_f32(vx_0, vmax_x);
+    vx_1 = xnn_min_f32(vx_1, vmax_x);
+    vx_2 = xnn_min_f32(vx_2, vmax_x);
+    vx_3 = xnn_min_f32(vx_3, vmax_x);
+    vx_0 = xnn_max_f32(vx_0, vmin_x);
+    vx_1 = xnn_max_f32(vx_1, vmin_x);
+    vx_2 = xnn_max_f32(vx_2, vmin_x);
+    vx_3 = xnn_max_f32(vx_3, vmin_x);
 
     // Since the polynomials are odd/even, we need x^2.
     const xnn_simd_f32_t vx2_0 = xnn_mul_f32(vx_0, vx_0);
@@ -548,8 +548,8 @@ void xnn_f32_vtanh_ukernel__avx512f_rational_9_8_div_u64(
     input += xnn_simd_size_f32;
 
     // Clamp the inputs to the interpolation range.
-    vx = xnn_min_f32(vmax_x, vx);
-    vx = xnn_max_f32(vmin_x, vx);
+    vx = xnn_min_f32(vx, vmax_x);
+    vx = xnn_max_f32(vx, vmin_x);
 
     // Since the polynomials are odd/even, we need x^2.
     const xnn_simd_f32_t vx2 = xnn_mul_f32(vx, vx);
@@ -577,8 +577,8 @@ void xnn_f32_vtanh_ukernel__avx512f_rational_9_8_div_u64(
     xnn_simd_f32_t vx = xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
 
     // Clamp the inputs to the interpolation range.
-    vx = xnn_min_f32(vmax_x, vx);
-    vx = xnn_max_f32(vmin_x, vx);
+    vx = xnn_min_f32(vx, vmax_x);
+    vx = xnn_max_f32(vx, vmin_x);
 
     // Since the polynomials are odd/even, we need x^2.
     const xnn_simd_f32_t vx2 = xnn_mul_f32(vx, vx);
