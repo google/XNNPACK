@@ -151,6 +151,12 @@ static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
       _mm512_cmp_ps_mask(a, b, _CMP_EQ_OQ), 0xFFFFFFFF));
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_cmpneq_f32(xnn_simd_f32_t a,
+                                                xnn_simd_f32_t b) {
+  return _mm512_castsi512_ps(_mm512_maskz_set1_epi32(
+      _mm512_cmp_ps_mask(a, b, _CMP_NEQ_OQ), 0xFFFFFFFF));
+}
+
 // Special functions.
 #define XNN_SIMD_HAVE_RCP_F32 1
 #define XNN_SIMD_NUM_RCP_ITER_F32 1

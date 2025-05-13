@@ -127,6 +127,11 @@ static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
       _mm_cmpeq_epi32(_mm_castps_si128(a), _mm_castps_si128(b)));
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_cmpneq_f32(xnn_simd_f32_t a,
+                                                xnn_simd_f32_t b) {
+  return _mm_cmpneq_ps(a, b);
+}
+
 static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
   // Any input larger than 2^23 is already an integer value since its fractional
   // bits will no longer fit in the mantissa. We create a filter for these that

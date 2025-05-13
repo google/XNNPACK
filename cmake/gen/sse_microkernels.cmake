@@ -51,8 +51,6 @@ SET(PROD_SSE_MICROKERNEL_SRCS
   src/f32-vcmul/gen/f32-vcmul-sse-u8.c
   src/f32-vlrelu/gen/f32-vlrelu-sse-u8.c
   src/f32-vmulcaddc/gen/f32-vmulcaddc-c4-minmax-sse-2x.c
-  src/f32-vrsqrt/gen/f32-vrsqrt-sse-rsqrt-u8.c
-  src/f32-vsqrt/gen/f32-vsqrt-sse-sqrt-u8.c
   src/x32-transposec/x32-transposec-4x4-sse.c)
 
 SET(NON_PROD_SSE_MICROKERNEL_SRCS
@@ -166,6 +164,11 @@ SET(NON_PROD_SSE_MICROKERNEL_SRCS
   src/f32-rminmax/gen/f32-rminmax-sse-u8-acc2.c
   src/f32-rminmax/gen/f32-rminmax-sse-u12-acc3.c
   src/f32-rminmax/gen/f32-rminmax-sse-u16-acc2.c
+  src/f32-rsum/gen/f32-rsum-sse-u4.c
+  src/f32-rsum/gen/f32-rsum-sse-u8-acc2.c
+  src/f32-rsum/gen/f32-rsum-sse-u12-acc3.c
+  src/f32-rsum/gen/f32-rsum-sse-u16-acc2.c
+  src/f32-rsum/gen/f32-rsum-sse-u16-acc4.c
   src/f32-spmm/gen/f32-spmm-4x1-minmax-sse.c
   src/f32-spmm/gen/f32-spmm-8x1-minmax-sse.c
   src/f32-spmm/gen/f32-spmm-16x1-minmax-sse.c
@@ -190,12 +193,8 @@ SET(NON_PROD_SSE_MICROKERNEL_SRCS
   src/f32-vcmul/gen/f32-vcmul-sse-u16.c
   src/f32-vlrelu/gen/f32-vlrelu-sse-u4.c
   src/f32-vmulcaddc/gen/f32-vmulcaddc-c8-minmax-sse-2x.c
-  src/f32-vrsqrt/gen/f32-vrsqrt-sse-rsqrt-u4.c
-  src/f32-vrsqrt/gen/f32-vrsqrt-sse-rsqrt-u16.c
-  src/f32-vsqrt/gen/f32-vsqrt-sse-rsqrt-u4.c
-  src/f32-vsqrt/gen/f32-vsqrt-sse-rsqrt-u8.c
-  src/f32-vsqrt/gen/f32-vsqrt-sse-rsqrt-u12.c
   src/f32-vsqrt/gen/f32-vsqrt-sse-sqrt-u4.c
+  src/f32-vsqrt/gen/f32-vsqrt-sse-sqrt-u8.c
   src/f32-vsqrt/gen/f32-vsqrt-sse-sqrt-u16.c
   src/x32-packx/x32-packx-4x-sse.c)
 

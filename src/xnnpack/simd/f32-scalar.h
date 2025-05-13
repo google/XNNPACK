@@ -126,6 +126,12 @@ static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
   return a == b ? ones : 0.0f;
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_cmpneq_f32(xnn_simd_f32_t a,
+                                                xnn_simd_f32_t b) {
+  XNN_SIMD_CONST_F32_FROM_INT32(ones, 0xFFFFFFFF)
+  return a != b ? ones : 0.0f;
+}
+
 static XNN_INLINE float xnn_reduce_add_f32(xnn_simd_f32_t a) {
   return a;
 }

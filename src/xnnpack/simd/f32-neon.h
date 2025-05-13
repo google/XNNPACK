@@ -183,6 +183,11 @@ static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
   return vreinterpretq_f32_u32(vceqq_f32(a, b));
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_cmpneq_f32(xnn_simd_f32_t a,
+                                                xnn_simd_f32_t b) {
+  return vreinterpretq_f32_u32(vmvnq_u32(vceqq_f32(a, b)));
+}
+
 static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
 #if defined(__ARM_ARCH) && __ARM_ARCH < 8
   // Any input larger than 2^23 is already an integer value since its fractional

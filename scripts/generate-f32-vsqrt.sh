@@ -30,26 +30,15 @@ tools/xngen src/f32-vsqrt/sse-sqrt.c.in -D BATCH_TILE=4  -o src/f32-vsqrt/gen/f3
 tools/xngen src/f32-vsqrt/sse-sqrt.c.in -D BATCH_TILE=8  -o src/f32-vsqrt/gen/f32-vsqrt-sse-sqrt-u8.c &
 tools/xngen src/f32-vsqrt/sse-sqrt.c.in -D BATCH_TILE=16 -o src/f32-vsqrt/gen/f32-vsqrt-sse-sqrt-u16.c &
 
-tools/xngen src/f32-vsqrt/sse-rsqrt.c.in -D BATCH_TILE=4 -o src/f32-vsqrt/gen/f32-vsqrt-sse-rsqrt-u4.c &
-tools/xngen src/f32-vsqrt/sse-rsqrt.c.in -D BATCH_TILE=8 -o src/f32-vsqrt/gen/f32-vsqrt-sse-rsqrt-u8.c &
-tools/xngen src/f32-vsqrt/sse-rsqrt.c.in -D BATCH_TILE=12 -o src/f32-vsqrt/gen/f32-vsqrt-sse-rsqrt-u12.c &
-
 ################################# x86 256-bit #################################
 tools/xngen src/f32-vsqrt/avx-sqrt.c.in -D BATCH_TILE=8  -o src/f32-vsqrt/gen/f32-vsqrt-avx-sqrt-u8.c &
 tools/xngen src/f32-vsqrt/avx-sqrt.c.in -D BATCH_TILE=16 -o src/f32-vsqrt/gen/f32-vsqrt-avx-sqrt-u16.c &
 tools/xngen src/f32-vsqrt/avx-sqrt.c.in -D BATCH_TILE=32 -o src/f32-vsqrt/gen/f32-vsqrt-avx-sqrt-u32.c &
 
-tools/xngen src/f32-vsqrt/avx-rsqrt.c.in -D BATCH_TILE=8 -o src/f32-vsqrt/gen/f32-vsqrt-avx-rsqrt-u8.c &
-tools/xngen src/f32-vsqrt/avx-rsqrt.c.in -D BATCH_TILE=16 -o src/f32-vsqrt/gen/f32-vsqrt-avx-rsqrt-u16.c &
-tools/xngen src/f32-vsqrt/avx-rsqrt.c.in -D BATCH_TILE=32 -o src/f32-vsqrt/gen/f32-vsqrt-avx-rsqrt-u32.c &
-
-tools/xngen src/f32-vsqrt/fma3-rsqrt.c.in -D BATCH_TILE=8 -o src/f32-vsqrt/gen/f32-vsqrt-fma3-rsqrt-u8.c &
-tools/xngen src/f32-vsqrt/fma3-rsqrt.c.in -D BATCH_TILE=16 -o src/f32-vsqrt/gen/f32-vsqrt-fma3-rsqrt-u16.c &
-tools/xngen src/f32-vsqrt/fma3-rsqrt.c.in -D BATCH_TILE=32 -o src/f32-vsqrt/gen/f32-vsqrt-fma3-rsqrt-u32.c &
-
-################################# x86 512-bit #################################
-tools/xngen src/f32-vsqrt/avx512f-rsqrt.c.in -D BATCH_TILE=16 -o src/f32-vsqrt/gen/f32-vsqrt-avx512f-rsqrt-u16.c &
-tools/xngen src/f32-vsqrt/avx512f-rsqrt.c.in -D BATCH_TILE=32 -o src/f32-vsqrt/gen/f32-vsqrt-avx512f-rsqrt-u32.c &
-tools/xngen src/f32-vsqrt/avx512f-rsqrt.c.in -D BATCH_TILE=48 -o src/f32-vsqrt/gen/f32-vsqrt-avx512f-rsqrt-u48.c &
+################################## SIMD rsqrt ##################################
+tools/xngen src/f32-vsqrt/simd-rsqrt.c.in -D ARCH=neon    -D BATCH_TILES=4,8,16   -o src/f32-vsqrt/gen/f32-vsqrt-neon-rsqrt.c &
+tools/xngen src/f32-vsqrt/simd-rsqrt.c.in -D ARCH=sse2    -D BATCH_TILES=4,8,16   -o src/f32-vsqrt/gen/f32-vsqrt-sse2-rsqrt.c &
+tools/xngen src/f32-vsqrt/simd-rsqrt.c.in -D ARCH=avx     -D BATCH_TILES=8,16,32  -o src/f32-vsqrt/gen/f32-vsqrt-avx-rsqrt.c &
+tools/xngen src/f32-vsqrt/simd-rsqrt.c.in -D ARCH=avx512f -D BATCH_TILES=16,32,48 -o src/f32-vsqrt/gen/f32-vsqrt-avx512f-rsqrt.c &
 
 wait
