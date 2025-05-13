@@ -38,4 +38,15 @@ tools/xngen src/f32-vrsqrt/avx512f-rsqrt.c.in -D BATCH_TILE=16  -o src/f32-vrsqr
 tools/xngen src/f32-vrsqrt/avx512f-rsqrt.c.in -D BATCH_TILE=32  -o src/f32-vrsqrt/gen/f32-vrsqrt-avx512f-rsqrt-u32.c &
 tools/xngen src/f32-vrsqrt/avx512f-rsqrt.c.in -D BATCH_TILE=64  -o src/f32-vrsqrt/gen/f32-vrsqrt-avx512f-rsqrt-u64.c &
 
+################################## Hexagon HVX #################################
+tools/xngen src/f32-vrsqrt/simd.c.in -D BATCH_TILE=32  -D ARCH=hvx -o src/f32-vrsqrt/gen/f32-vrsqrt-hvx-u32.c &
+tools/xngen src/f32-vrsqrt/simd.c.in -D BATCH_TILE=64  -D ARCH=hvx -o src/f32-vrsqrt/gen/f32-vrsqrt-hvx-u64.c &
+tools/xngen src/f32-vrsqrt/simd.c.in -D BATCH_TILE=128 -D ARCH=hvx -o src/f32-vrsqrt/gen/f32-vrsqrt-hvx-u128.c &
+
+##################################### SIMD #####################################
+tools/xngen src/f32-vrsqrt/simd-approx-rsqrt.c.in -D ARCH=scalar   -D BATCH_TILES=1,2,4,8   -o src/f32-vrsqrt/gen/f32-vrsqrt-scalar-approx-rsqrt.c &
+tools/xngen src/f32-vrsqrt/simd-approx-rsqrt.c.in -D ARCH=sse2     -D BATCH_TILES=4,8,16    -o src/f32-vrsqrt/gen/f32-vrsqrt-sse2-approx-rsqrt.c &
+tools/xngen src/f32-vrsqrt/simd-approx-rsqrt.c.in -D ARCH=avx      -D BATCH_TILES=8,16,32   -o src/f32-vrsqrt/gen/f32-vrsqrt-avx-approx-rsqrt.c &
+tools/xngen src/f32-vrsqrt/simd-approx-rsqrt.c.in -D ARCH=avx2     -D BATCH_TILES=8,16,32   -o src/f32-vrsqrt/gen/f32-vrsqrt-avx2-approx-rsqrt.c &
+
 wait
