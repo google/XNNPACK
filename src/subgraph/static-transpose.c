@@ -50,8 +50,8 @@ static enum xnn_status create_transpose_operator(
   }
 
   if (status == xnn_status_success) {
-    opdata->shape2.num_dims = node->params.transpose.num_dims;
-    memcpy(opdata->shape2.dim, node->params.transpose.perm, opdata->shape2.num_dims * sizeof(size_t));
+    opdata->shape1.num_dims = node->params.transpose.num_dims;
+    memcpy(opdata->shape1.dim, node->params.transpose.perm, opdata->shape1.num_dims * sizeof(size_t));
   }
 
   return status;
@@ -73,9 +73,8 @@ static enum xnn_status reshape_transpose_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  const size_t num_dims = opdata->shape2.num_dims;
+  const size_t num_dims = opdata->shape1.num_dims;
   assert(input->shape.num_dims == num_dims);
-  memcpy(opdata->shape1.dim, input->shape.dim, num_dims * sizeof(size_t));
 
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_transpose_nd_x16: {
@@ -83,7 +82,7 @@ static enum xnn_status reshape_transpose_operator(
         opdata->operator_objects[0],
         num_dims,
         input->shape.dim,
-        opdata->shape2.dim,
+        opdata->shape1.dim,
         threadpool);
       break;
     }
@@ -92,7 +91,7 @@ static enum xnn_status reshape_transpose_operator(
         opdata->operator_objects[0],
         num_dims,
         input->shape.dim,
-        opdata->shape2.dim,
+        opdata->shape1.dim,
         threadpool);
       break;
     }
@@ -101,7 +100,7 @@ static enum xnn_status reshape_transpose_operator(
         opdata->operator_objects[0],
         num_dims,
         input->shape.dim,
-        opdata->shape2.dim,
+        opdata->shape1.dim,
         threadpool);
       break;
     }
@@ -117,7 +116,7 @@ static enum xnn_status reshape_transpose_operator(
 
   output->shape.num_dims = num_dims;
   for (size_t cur_dim = 0; cur_dim < num_dims; cur_dim++) {
-    output->shape.dim[cur_dim] = input->shape.dim[opdata->shape2.dim[cur_dim]];
+    output->shape.dim[cur_dim] = input->shape.dim[opdata->shape1.dim[cur_dim]];
   }
   const size_t new_size = xnn_tensor_get_size(output);
   if (new_size > output->size) {

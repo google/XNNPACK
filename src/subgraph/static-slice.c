@@ -52,7 +52,6 @@ static enum xnn_status create_slice_operator(
 
   if (status == xnn_status_success) {
     const int num_dims = node->params.slice.num_dims;
-    opdata->shape2.num_dims = num_dims;
     memcpy(opdata->begins, node->params.slice.begins, num_dims * sizeof(int64_t));
     memcpy(opdata->ends, node->params.slice.ends, num_dims * sizeof(int64_t));
   }
@@ -73,7 +72,6 @@ static enum xnn_status reshape_slice_operator(
   struct xnn_value* output_value = values + output_id;
   struct xnn_value* input_value = values + input_id;
   const size_t num_dims = input_value->shape.num_dims;
-  assert(num_dims == opdata->shape2.num_dims);
   enum xnn_status status = xnn_status_invalid_state;
   const size_t old_workspace_size = opdata->workspace_size;
   size_t offsets[XNN_MAX_TENSOR_DIMS], sizes[XNN_MAX_TENSOR_DIMS];

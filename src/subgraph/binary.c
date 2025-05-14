@@ -70,8 +70,9 @@ static enum xnn_status reshape_binary_operator(
   const uint32_t output_id = opdata->outputs[0];
   assert(output_id < num_values);
 
+  struct xnn_shape shape2;
   opdata->shape1.num_dims = values[input1_id].shape.num_dims;
-  opdata->shape2.num_dims = values[input2_id].shape.num_dims;
+  shape2.num_dims = values[input2_id].shape.num_dims;
   if (values[output_id].layout == xnn_layout_type_nchw) {
     assert(values[input1_id].layout == xnn_layout_type_nchw);
     assert(values[input2_id].layout == xnn_layout_type_nchw);
@@ -80,17 +81,17 @@ static enum xnn_status reshape_binary_operator(
     if (values[input1_id].shape.num_dims > 2) {
       memcpy(&opdata->shape1.dim[2], &values[input1_id].shape.dim[1], (values[input1_id].shape.num_dims - 2) * sizeof(size_t));
     }
-    opdata->shape2.dim[0] = values[input2_id].shape.dim[0];
-    opdata->shape2.dim[1] = values[input2_id].shape.dim[values[input2_id].shape.num_dims - 1];
+    shape2.dim[0] = values[input2_id].shape.dim[0];
+    shape2.dim[1] = values[input2_id].shape.dim[values[input2_id].shape.num_dims - 1];
     if (values[input1_id].shape.num_dims > 2) {
-      memcpy(&opdata->shape2.dim[2], &values[input2_id].shape.dim[1], (values[input2_id].shape.num_dims - 2) * sizeof(size_t));
+      memcpy(&shape2.dim[2], &values[input2_id].shape.dim[1], (values[input2_id].shape.num_dims - 2) * sizeof(size_t));
     }
   } else {
     assert(values[output_id].layout == xnn_layout_type_nhwc);
     assert(values[input1_id].layout == xnn_layout_type_nhwc);
     assert(values[input2_id].layout == xnn_layout_type_nhwc);
     memcpy(opdata->shape1.dim, values[input1_id].shape.dim, values[input1_id].shape.num_dims * sizeof(size_t));
-    memcpy(opdata->shape2.dim, values[input2_id].shape.dim, values[input2_id].shape.num_dims * sizeof(size_t));
+    memcpy(shape2.dim, values[input2_id].shape.dim, values[input2_id].shape.num_dims * sizeof(size_t));
   }
 
   // Handle scalars. Although the output shape is dimensionless, the reshape
@@ -99,17 +100,17 @@ static enum xnn_status reshape_binary_operator(
     opdata->shape1.num_dims = 1;
     opdata->shape1.dim[0] = 1;
   }
-  if (opdata->shape2.num_dims == 0) {
-    opdata->shape2.num_dims = 1;
-    opdata->shape2.dim[0] = 1;
+  if (shape2.num_dims == 0) {
+    shape2.num_dims = 1;
+    shape2.dim[0] = 1;
   }
   const size_t old_workspace_size = opdata->workspace_size;
   enum xnn_status status = xnn_reshape_binary_elementwise_nd(
     opdata->operator_objects[0],
     opdata->shape1.num_dims,
     opdata->shape1.dim,
-    opdata->shape2.num_dims,
-    opdata->shape2.dim,
+    shape2.num_dims,
+    shape2.dim,
     threadpool);
   if (status != xnn_status_success) {
     return status;

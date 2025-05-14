@@ -406,7 +406,6 @@ struct xnn_operator_data {
   size_t input_channels;
   size_t output_channels;
   struct xnn_shape shape1;
-  struct xnn_shape shape2;
   union {
     // Used for reduction.
     struct {
