@@ -309,7 +309,14 @@ class Buffer {
 
   // Some compilers can't handle static constexpr member variables.
   enum { guard_bytes = std::max<size_t>(64, Alignment) };
-  enum { guard_signal = 0xB8AEBCB293DCA04F };
+  // This value is chosen such that in the 16 bytes we have:
+  // - float32 NaN (upper 32 bits)
+  // - float16 NaN (lower 16 bits, the mantissa of the negative float32)
+  // - Negative float32 (lower 32 bits)
+  // - Negative float16 (bits 32-48, the mantissa of the float32 NaN)
+  // This way, we'll detect kernels that fault due to loading and doing
+  // arithmetic on junk data (that could be NaN).
+  enum { guard_signal = 0x7FBF8234B3307C7F };
 
   static void fill_guard_bytes(uint8_t* x) {
     assert(guard_bytes % sizeof(guard_signal) == 0);
