@@ -61,6 +61,7 @@ SUBGRAPH_SRCS = [
     "src/subgraph/static-resize-bilinear-2d.c",
     "src/subgraph/static-slice.c",
     "src/subgraph/static-transpose.c",
+    "src/subgraph/subgraph-utils.c",
     "src/subgraph/unary.c",
     "src/subgraph/unpooling-2d.c",
     "src/subgraph/validation.c",

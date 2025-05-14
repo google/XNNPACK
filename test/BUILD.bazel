@@ -21,7 +21,9 @@ MICROKERNEL_TEST_DEPS = [
     "//:common",
     "//:datatype",
     "//:fp16",
+    "//:hardware_config",
     "//:isa_checks",
+    "//:logging",
     "//:math",
     "//:memory",
     "//:microkernels_h",
@@ -40,7 +42,7 @@ xnnpack_cxx_library(
     name = "replicable_random_device",
     testonly = True,
     hdrs = ["replicable_random_device.h"],
-    deps = xnnpack_test_deps_for_library(),
+    deps = xnnpack_test_deps_for_library() + ["//:common"],
 )
 
 xnnpack_cxx_library(
@@ -266,48 +268,14 @@ xnnpack_cxx_library(
 ]]
 
 [xnnpack_unit_test(
-    name = "%s_test" % kernel,
-    srcs = [
-        "%s.cc" % kernel.replace("_", "-"),
-        "reduce-microkernel-tester.h",
-    ],
+    name = "%s_test" % test,
+    srcs = ["%s.cc" % test.replace("_", "-")],
     deps = MICROKERNEL_TEST_DEPS,
-) for kernel in [
-    "f16_rmax",
-    "f16_rmin",
-    "f16_rminmax",
-    "f32_rmax",
-    "f32_rmin",
-    "f32_rminmax",
-    "f32_rdmin",
-    "f32_rdmax",
-    "f16_rdmin",
-    "f16_rdmax",
-    "s8_rmin",
-    "s8_rmax",
-    "s8_rminmax",
-    "s8_rdmin",
-    "s8_rdmax",
-    "u8_rmin",
-    "u8_rmax",
-    "u8_rdmin",
-    "u8_rdmax",
-    "u8_rminmax",
-]]
-
-[xnnpack_unit_test(
-    name = "%s_test" % kernel,
-    srcs = [
-        "%s.cc" % kernel.replace("_", "-"),
-        "rsum-microkernel-tester.h",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-) for kernel in [
-    "f16_rsum",
-    "f16_f32acc_rsum",
-    "f32_rsum",
-    "qs8_rsum",
-    "qu8_rsum",
+) for test in [
+    "rminmax",
+    "rsum",
+    "rdminmax",
+    "rdsum",
 ]]
 
 [xnnpack_unit_test(
@@ -399,6 +367,17 @@ xnnpack_unit_test(
     srcs = [
         "f16-gemm-minmax.cc",
     ],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "pf16_gemm_minmax_test",
+    srcs = [
+        "pf16-gemm-minmax.cc",
+    ],
+    defines = xnnpack_kleidiai_defines(),
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -680,22 +659,6 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "f16_f32acc_rdsum_test",
-    srcs = [
-        "f16-f32acc-rdsum.cc",
-    ],
-    deps = MICROKERNEL_TEST_DEPS + [":rdsum_microkernel_tester"],
-)
-
-xnnpack_unit_test(
-    name = "f32_rdsum_test",
-    srcs = [
-        "f32-rdsum.cc",
-    ],
-    deps = MICROKERNEL_TEST_DEPS + [":rdsum_microkernel_tester"],
-)
-
-xnnpack_unit_test(
     name = "f32_spmm_minmax_test",
     srcs = [
         "f32-spmm-minmax.cc",
@@ -841,6 +804,18 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "qp8_f32_qb4w_gemm_minmax_test",
+    timeout = "moderate",
+    srcs = [
+        "qp8-f32-qb4w-gemm-minmax.cc",
+    ],
+    defines = xnnpack_kleidiai_defines(),
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
     name = "qp8_f32_qc8w_gemm_minmax_test",
     timeout = "moderate",
     srcs = [
@@ -932,22 +907,6 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qs8_rdsum_minmax_fp32_test",
-    srcs = [
-        "qs8-rdsum-minmax-fp32.cc",
-    ],
-    deps = MICROKERNEL_TEST_DEPS + [":rdsum_microkernel_tester"],
-)
-
-xnnpack_unit_test(
-    name = "qu8_rdsum_test",
-    srcs = [
-        "qu8-rdsum.cc",
-    ],
-    deps = MICROKERNEL_TEST_DEPS + [":rdsum_microkernel_tester"],
-)
-
-xnnpack_unit_test(
     name = "qu8_gemm_minmax_fp32_test",
     srcs = [
         "qu8-gemm-minmax-fp32.cc",
@@ -1004,7 +963,6 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "u8_lut32norm_test",
     srcs = [
-        "lut-norm-microkernel-tester.h",
         "u8-lut32norm.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS,

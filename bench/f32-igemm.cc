@@ -1284,14 +1284,6 @@ static void f32_igemm_1x32__hvx_broadcast(benchmark::State& state,
       benchmark::utils::CheckHVX);
   }
 
-  static void f32_igemm_16x32__hvx_broadcast(benchmark::State& state, const char* net) {
-    f32_igemm(state,
-      xnn_f32_igemm_minmax_ukernel_16x32__hvx_broadcast,
-      xnn_init_f32_minmax_scalar_params,
-      /*mr=*/16, /*nr=*/32, /*kr=*/1, /*sr=*/1,
-      benchmark::utils::CheckHVX);
-  }
-
   static void f32_igemm_1x64__hvx_broadcast(benchmark::State& state, const char* net) {
     f32_igemm(state,
       xnn_f32_igemm_minmax_ukernel_1x64__hvx_broadcast,
@@ -1334,7 +1326,6 @@ static void f32_igemm_1x32__hvx_broadcast(benchmark::State& state,
 
   BENCHMARK_CONV(f32_igemm_1x32__hvx_broadcast)
   BENCHMARK_CONV(f32_igemm_8x32__hvx_broadcast)
-  BENCHMARK_CONV(f32_igemm_16x32__hvx_broadcast)
   BENCHMARK_CONV(f32_igemm_1x64__hvx_broadcast)
   BENCHMARK_CONV(f32_igemm_4x64__hvx_broadcast)
   BENCHMARK_CONV(f32_igemm_7x64__hvx_broadcast)

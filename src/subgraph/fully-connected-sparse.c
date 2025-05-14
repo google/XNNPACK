@@ -24,7 +24,6 @@ static enum xnn_status create_fully_connected_operator(
   const struct xnn_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
-  struct xnn_code_cache* code_cache,
   xnn_weights_cache_t weights_cache)
 {
   assert(node->num_inputs >= 2);
@@ -85,7 +84,6 @@ static enum xnn_status create_fully_connected_operator(
         node->activation.output_min,
         node->activation.output_max,
         node->flags | XNN_FLAG_FP32_STATIC_WEIGHTS,
-        code_cache,
         weights_cache,
         &opdata->operator_objects[0]);
       break;
@@ -110,7 +108,7 @@ static enum xnn_status create_fully_connected_operator(
               /*input_channel_stride=*/input_channels,
               /*output_channel_stride=*/output_channels, kernel_data, bias_data,
               node->activation.output_min, node->activation.output_max,
-              node->flags, code_cache, weights_cache,
+              node->flags, weights_cache,
               &opdata->operator_objects[0]);
           break;
         case xnn_datatype_fp16: {
@@ -135,7 +133,7 @@ static enum xnn_status create_fully_connected_operator(
               /*input_channel_stride=*/input_channels,
               /*output_channel_stride=*/output_channels, kernel_data, bias_data,
               node->activation.output_min, node->activation.output_max,
-              flags, code_cache, weights_cache,
+              flags, weights_cache,
               &opdata->operator_objects[0]);
           break;
         }

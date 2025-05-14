@@ -15,10 +15,12 @@
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/hardware-config.h"  // IWYU pragma: keep
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"  // IWYU pragma: keep
 #include "src/xnnpack/microparams.h"
-#include "src/xnnpack/vcvt.h"
+#include "src/xnnpack/vcvt.h"  // IWYU pragma: keep
 #include <benchmark/benchmark.h>
 
 template <typename T>

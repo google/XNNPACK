@@ -21,6 +21,10 @@
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_vsqrt_ukernel__aarch64_neon_sqrt_u4, 4, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_vsqrt_ukernel__aarch64_neon_sqrt_u8, 8, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_vsqrt_ukernel__aarch64_neon_sqrt_u16, 16, false, float, struct xnn_f32_default_params, NULL)
+
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_vsqrt_ukernel__neon_rsqrt_u4, 4, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_vsqrt_ukernel__neon_rsqrt_u8, 4, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_vsqrt_ukernel__neon_rsqrt_u16, 4, false, float, struct xnn_f32_default_params, NULL)
 #endif  // XNN_ARCH_ARM64
 
 #if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
@@ -34,18 +38,15 @@ XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_f32_vsqrt_ukernel__rvv_sqrt_u
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vsqrt_ukernel__sse_sqrt_u4, 4, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vsqrt_ukernel__sse_sqrt_u8, 8, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vsqrt_ukernel__sse_sqrt_u16, 16, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vsqrt_ukernel__sse_rsqrt_u4, 4, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vsqrt_ukernel__sse_rsqrt_u8, 8, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vsqrt_ukernel__sse_rsqrt_u12, 12, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vsqrt_ukernel__sse2_rsqrt_u4, 4, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vsqrt_ukernel__sse2_rsqrt_u8, 8, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vsqrt_ukernel__sse2_rsqrt_u16, 16, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx, xnn_f32_vsqrt_ukernel__avx_sqrt_u8, 8, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx, xnn_f32_vsqrt_ukernel__avx_sqrt_u16, 16, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx, xnn_f32_vsqrt_ukernel__avx_sqrt_u32, 32, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx, xnn_f32_vsqrt_ukernel__avx_rsqrt_u8, 8, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx, xnn_f32_vsqrt_ukernel__avx_rsqrt_u16, 16, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx, xnn_f32_vsqrt_ukernel__avx_rsqrt_u32, 32, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_fma3, xnn_f32_vsqrt_ukernel__fma3_rsqrt_u8, 8, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_fma3, xnn_f32_vsqrt_ukernel__fma3_rsqrt_u16, 16, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_fma3, xnn_f32_vsqrt_ukernel__fma3_rsqrt_u32, 32, false, float, struct xnn_f32_default_params, NULL)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)

@@ -487,13 +487,7 @@ struct SquareRoot : public UnaryOpInfo {
   float Tolerance(float y_ref, xnn_datatype datatype) const override {
     switch (datatype) {
       case xnn_datatype_fp32:
-        if (y_ref > std::sqrt(std::numeric_limits<float>::epsilon() *
-                              std::numeric_limits<float>::max())) {
-          // When we use reciprocal sqrt to compute sqrt, the error is huge when
-          // the input is near the max float (b/401455604).
-          return std::numeric_limits<float>::max();
-        }
-        return TolRelative(y_ref, 3.0f * std::numeric_limits<float>::epsilon());
+        return TolRelative(y_ref, 2.0f * std::numeric_limits<float>::epsilon());
       case xnn_datatype_fp16:
       case xnn_datatype_bf16:
         return TolRelative(y_ref, 3.0f * xnnpack::epsilon(datatype));
@@ -506,10 +500,19 @@ struct SquareRoot : public UnaryOpInfo {
   }
 
   Interval Domain(xnn_datatype datatype) const override {
-    if (datatype == xnn_datatype_fp16) {
-      return {0.001f, 10.0f};
-    } else {
-      return Interval::Positive(datatype);
+    switch (datatype) {
+      case xnn_datatype_fp16:
+        return {1.0e-4f, 10.0f};
+      case xnn_datatype_fp32:
+        // The reciprocal square root estimate instructions (e.g. `vrsqrteq_f32`
+        // for Arm or `_m*_rsqrt_ps` for Intel) seem to fail for values larger
+        // than the inverse of the minimum normalized number when denormals are
+        // switched off, so limit the range to that of normally inversible
+        // numbers.
+        return {std::numeric_limits<float>::epsilon(),
+                std::numeric_limits<float>::max() / 4};
+      default:
+        return Interval::Positive(datatype);
     }
   }
 
@@ -555,8 +558,7 @@ struct ReciprocalSquareRoot : public UnaryOpInfo {
   float Tolerance(float y_ref, xnn_datatype datatype) const override {
     switch (datatype) {
       case xnn_datatype_fp32:
-        return TolMixed(y_ref, std::numeric_limits<float>::epsilon(),
-                        4 * std::numeric_limits<float>::epsilon());
+        return TolRelative(y_ref, 2 * std::numeric_limits<float>::epsilon());
       case xnn_datatype_fp16:
       case xnn_datatype_bf16:
         return TolMixed(y_ref, 1.0e-4f, 5.0e-3f);
@@ -569,10 +571,19 @@ struct ReciprocalSquareRoot : public UnaryOpInfo {
   }
 
   Interval Domain(xnn_datatype datatype) const override {
-    if (datatype == xnn_datatype_fp16) {
-      return {1.0e-4f, 10.0f};
-    } else {
-      return Interval::Positive(datatype);
+    switch (datatype) {
+      case xnn_datatype_fp16:
+        return {1.0e-4f, 10.0f};
+      case xnn_datatype_fp32:
+        // The reciprocal square root estimate instructions (e.g. `vrsqrteq_f32`
+        // for Arm or `_m*_rsqrt_ps` for Intel) seem to fail for values larger
+        // than the inverse of the minimum normalized number when denormals are
+        // switched off, so limit the range to that of normally inversible
+        // numbers.
+        return {std::numeric_limits<float>::epsilon(),
+                std::numeric_limits<float>::max() / 4};
+      default:
+        return Interval::Positive(datatype);
     }
   }
 

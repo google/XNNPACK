@@ -62,25 +62,25 @@ uint64_t GetCurrentCpuFrequency();
 // Can overestimate, but not underestimate LLC size.
 size_t GetMaxCacheSize();
 
-// Set number of elements for a reduction microkernel such that:
-// - It is divisible by 2, 3, 4, 5, 6.
-// - It is divisible by AVX512 width.
-// - Total memory footprint does not exceed the characteristic cache size for
-//   the architecture.
 template <class InType>
-void ReductionParameters(benchmark::internal::Benchmark* benchmark) {
-  benchmark->ArgName("N");
+static void ReduceParameters(benchmark::internal::Benchmark* b) {
+  b->ArgNames({"channels", "rows"});
+  b->Args({1, 512});
+  b->Args({1, 1024});
+  b->Args({1, 8000});
+  b->Args({512, 512});
+  b->Args({512, 1024});
+  b->Args({512, 8000});
+  b->Args({1024, 64});
+  b->Args({32768, 1});
+}
 
-  size_t characteristic_l1 = 32 * 1024;
-  size_t characteristic_l2 = 256 * 1024;
-#if XNN_ARCH_ARM
-  characteristic_l1 = 16 * 1024;
-  characteristic_l2 = 128 * 1024;
-#endif  // XNN_ARCH_ARM
-
-  const size_t elementwise_size = sizeof(InType);
-  benchmark->Arg(characteristic_l1 / elementwise_size / 960 * 960);
-  benchmark->Arg(characteristic_l2 / elementwise_size / 960 * 960);
+template <class InType>
+static void ReduceDiscontiguousParameters(benchmark::internal::Benchmark* b) {
+  b->ArgNames({"rows", "channels"});
+  b->Args({8, 1024});
+  b->Args({16, 1024});
+  b->Args({1024, 1024});
 }
 
 // Set number of elements for a unary elementwise microkernel such that:

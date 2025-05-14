@@ -131,6 +131,10 @@ static void init_s8_rdmax_config(void) {
     s8_rdmax_config = (struct xnn_reduce_config) {
       .rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_s8_rdmax_ukernel_2p2x__wasmsimd_c32,
     };
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    s8_rdmax_config = (struct xnn_reduce_config) {
+      .rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_s8_rdmax_ukernel_2p2x__hvx_c128,
+    };
   #else
     s8_rdmax_config = (struct xnn_reduce_config) {
       .rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_s8_rdmax_ukernel_2p2x__scalar_c2,
@@ -172,6 +176,10 @@ static void init_s8_rdmin_config(void) {
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     s8_rdmin_config = (struct xnn_reduce_config) {
       .rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_s8_rdmin_ukernel_2p2x__wasmsimd_c32,
+    };
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    s8_rdmin_config = (struct xnn_reduce_config) {
+      .rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_s8_rdmin_ukernel_2p2x__hvx_c128,
     };
   #else
     s8_rdmin_config = (struct xnn_reduce_config) {
@@ -343,6 +351,10 @@ static void init_u8_rdmax_config(void) {
     u8_rdmax_config = (struct xnn_reduce_config) {
       .rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_u8_rdmax_ukernel_2p2x__wasmsimd_c32,
     };
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    u8_rdmax_config = (struct xnn_reduce_config) {
+      .rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_u8_rdmax_ukernel_2p2x__hvx_c128,
+    };
   #else
     u8_rdmax_config = (struct xnn_reduce_config) {
       .rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_u8_rdmax_ukernel_2p2x__scalar_c2,
@@ -376,6 +388,10 @@ static void init_u8_rdmin_config(void) {
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     u8_rdmin_config = (struct xnn_reduce_config) {
       .rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_u8_rdmin_ukernel_2p2x__wasmsimd_c32,
+    };
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    u8_rdmin_config = (struct xnn_reduce_config) {
+      .rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_u8_rdmin_ukernel_2p2x__hvx_c128,
     };
   #else
     u8_rdmin_config = (struct xnn_reduce_config) {
@@ -774,7 +790,10 @@ static void init_f16_f32acc_rsum_config(void) {
     #if XNN_ENABLE_AVX512SKX
       if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
         f16_f32acc_rsum_config = (struct xnn_reduce_config) {
-          .ukernel = (xnn_reduce_ukernel_fn) xnn_f16_f32acc_rsum_ukernel__avx512skx_u64_acc4,
+          // We use a kernel with the same unroll factor as avx, because that
+          // produces numerically consistent results at negligible performance
+          // cost.
+          .ukernel = (xnn_reduce_ukernel_fn) xnn_f16_f32acc_rsum_ukernel__avx512skx_u32_acc2,
           .init.reduce = NULL,
           .update = xnn_update_f32_reduce_scalar_params,
         };
@@ -1122,10 +1141,6 @@ static void init_f32_rmax_config(void) {
     f32_rmax_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rmax_ukernel__wasmsimd_pminmax_u16_acc4,
     };
-  #elif XNN_ARCH_WASM
-    f32_rmax_config = (struct xnn_reduce_config) {
-      .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rmax_ukernel__wasm_u4_acc4,
-    };
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     f32_rmax_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rmax_ukernel__rvv_u8v,
@@ -1183,10 +1198,6 @@ static void init_f32_rminmax_config(void) {
     f32_rminmax_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rminmax_ukernel__wasmsimd_minmax_u16_acc4,
     };
-  #elif XNN_ARCH_WASM
-    f32_rminmax_config = (struct xnn_reduce_config) {
-      .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rminmax_ukernel__wasm_u4_acc4,
-    };
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     f32_rminmax_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rminmax_ukernel__rvv_u8v,
@@ -1242,10 +1253,6 @@ static void init_f32_rmin_config(void) {
     f32_rmin_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rmin_ukernel__wasmsimd_minmax_u16_acc4,
     };
-  #elif XNN_ARCH_WASM
-    f32_rmin_config = (struct xnn_reduce_config) {
-      .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rmin_ukernel__wasm_u4_acc4,
-    };
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     f32_rmin_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rmin_ukernel__rvv_u8v,
@@ -1292,7 +1299,10 @@ static void init_f32_rsum_config(void) {
     #if XNN_ENABLE_AVX512F
       if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
         f32_rsum_config = (struct xnn_reduce_config) {
-          .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__avx512f_u64_acc4,
+          // We use a kernel with the same unroll factor as avx, because that
+          // produces numerically consistent results at negligible performance
+          // cost.
+          .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__avx512f_u32_acc2,
           .init.reduce = NULL,
           .update = xnn_update_f32_reduce_scalar_params,
         };
@@ -1305,8 +1315,10 @@ static void init_f32_rsum_config(void) {
         .update = xnn_update_f32_reduce_scalar_params,
       };
     } else {
+      // A hypothetical u32_acc8 kernel would produce results numerically
+      // consistent with avx and avx512f.
       f32_rsum_config = (struct xnn_reduce_config) {
-        .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__sse_u16_acc4,
+        .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__sse2_u16_acc4,
         .init.reduce = NULL,
         .update = xnn_update_f32_reduce_scalar_params,
       };

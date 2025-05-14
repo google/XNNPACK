@@ -66,15 +66,6 @@ XNN_UKERNEL(0, xnn_qu8_dwconv_minmax_fp32_ukernel_25p8c__wasmsimd_mul16, 8, fals
 XNN_UKERNEL(0, xnn_qu8_dwconv_minmax_fp32_ukernel_25p16c__wasmsimd_mul16, 16, false, 16, 25, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-XNN_UKERNEL(0, xnn_qu8_dwconv_minmax_fp32_ukernel_9p1c__wasm_fmagic, 1, false, 1, 9, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
-XNN_UKERNEL(0, xnn_qu8_dwconv_minmax_fp32_ukernel_9p2c__wasm_fmagic, 2, false, 2, 9, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
-XNN_UKERNEL(0, xnn_qu8_dwconv_minmax_fp32_ukernel_9p4c__wasm_fmagic, 4, false, 4, 9, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
-XNN_UKERNEL(0, xnn_qu8_dwconv_minmax_fp32_ukernel_25p1c__wasm_fmagic, 1, false, 1, 25, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
-XNN_UKERNEL(0, xnn_qu8_dwconv_minmax_fp32_ukernel_25p2c__wasm_fmagic, 2, false, 2, 25, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
-XNN_UKERNEL(0, xnn_qu8_dwconv_minmax_fp32_ukernel_25p4c__wasm_fmagic, 4, false, 4, 25, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
-#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
 #if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 XNN_UKERNEL(0, xnn_qu8_dwconv_minmax_fp32_ukernel_9p8vc__rvv, 8, false, 8 * (xnn_init_hardware_config()->vlenb / sizeof(int32_t)), 9, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
 XNN_UKERNEL(0, xnn_qu8_dwconv_minmax_fp32_ukernel_25p8vc__rvv, 8, false, 8 * (xnn_init_hardware_config()->vlenb / sizeof(int32_t)), 25, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)

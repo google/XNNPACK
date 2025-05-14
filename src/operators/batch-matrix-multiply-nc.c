@@ -55,6 +55,13 @@ enum xnn_status create_batch_matrix_multiply_nc(
                   xnn_operator_type_to_string(operator_type));
     goto error;
   }
+  batch_matrix_multiply_op->ukernel.gemm_ukernels = xnn_allocate_zero_simd_memory(sizeof(struct gemm_types));
+  if (batch_matrix_multiply_op->ukernel.gemm_ukernels == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(struct gemm_types),
+                  xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
 
   memcpy(&batch_matrix_multiply_op->params, params, params_size);
   batch_matrix_multiply_op->type = operator_type;
@@ -62,10 +69,11 @@ enum xnn_status create_batch_matrix_multiply_nc(
   batch_matrix_multiply_op->gemm_config = gemm_config;
 
   const size_t mr = gemm_config->mr;
+  const size_t mr_packed = gemm_config->mr_packed ? gemm_config->mr_packed : mr;
   batch_matrix_multiply_op->ukernel.type = xnn_microkernel_type_gemm;
-  batch_matrix_multiply_op->ukernel.gemm = (struct xnn_ukernel_gemm){
+  batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm = (struct xnn_ukernel_gemm){
       .mr = mr,
-      .mr_packed = gemm_config->mr_packed,
+      .mr_packed = mr_packed,
       .nr = gemm_config->nr,
       .kr = UINT32_C(1) << gemm_config->log2_kr,
       .sr = UINT32_C(1) << gemm_config->log2_sr,
@@ -73,14 +81,14 @@ enum xnn_status create_batch_matrix_multiply_nc(
 
   assert(mr <= XNN_MAX_MR);
   for (size_t i = 0; i < mr; i++) {
-    batch_matrix_multiply_op->ukernel.gemm.gemm_cases[i] =
+    batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.gemm_cases[i] =
         gemm_ukernels->gemm[i];
   }
   if (batch_matrix_multiply_op->flags & XNN_FLAG_TRANSPOSE_B) {
-    batch_matrix_multiply_op->ukernel.gemm.packw_gemm_goi =
+    batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.packw_gemm_goi =
         gemm_config->pack_gemm_goi;
   } else {
-    batch_matrix_multiply_op->ukernel.gemm.packw_gemm_gio =
+    batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.packw_gemm_gio =
         gemm_config->pack_gemm_gio;
   }
 
@@ -247,8 +255,8 @@ enum xnn_status create_batch_matrix_multiply_nc_fx_const_weights(
 
   // Check if we've already cached the packed data for `B`.
   uint32_t cache_seed = murmur_hash3(
-      &batch_matrix_multiply_op->context.gemm.gemm.gemm,
-      sizeof(batch_matrix_multiply_op->context.gemm.gemm.gemm), k * n);
+      &batch_matrix_multiply_op->context.gemm.gemm,
+      sizeof(batch_matrix_multiply_op->context.gemm.gemm), k * n);
   if (batch_matrix_multiply_op->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
     cache_seed = ~cache_seed;
   }
@@ -263,8 +271,8 @@ enum xnn_status create_batch_matrix_multiply_nc_fx_const_weights(
   }
 
   // Compute the shape and size of the packed data.
-  const uint32_t kr = batch_matrix_multiply_op->ukernel.gemm.kr;
-  const uint32_t sr = batch_matrix_multiply_op->ukernel.gemm.sr;
+  const uint32_t kr = batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.kr;
+  const uint32_t sr = batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.sr;
   const size_t k_stride = round_up_po2(k, kr * sr);
   const size_t weights_stride =
       gemm_config->packed_stride_weights_and_biases
@@ -276,7 +284,7 @@ enum xnn_status create_batch_matrix_multiply_nc_fx_const_weights(
 
   // If the packed data has not been cached, pack and cache it.
   if (cache_offset == XNN_CACHE_NOT_FOUND) {
-    const uint32_t nr = batch_matrix_multiply_op->ukernel.gemm.nr;
+    const uint32_t nr = batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.nr;
     const size_t n_stride = round_up(n, nr);
     const size_t packed_size = batch_size_b * n_stride * weights_stride;
     const size_t aligned_size =
@@ -300,29 +308,29 @@ enum xnn_status create_batch_matrix_multiply_nc_fx_const_weights(
 
     // Pack the weights.
     if (gemm_config->pack_weights_and_biases) {
-      gemm_config->pack_weights_and_biases(flags, gemm_config, k, n,
-                                           /*groups=*/batch_size_b,
-                                           /*unused_block_size=*/0,
-                                           /*kstride=*/k_stride,
-                                           /*accumulator_init=*/NULL,
-                                           /*weights=*/data_b,
-                                           /*int_extra_data0_fn=*/NULL,
-                                           /*extra_data0=*/NULL,
-                                           /*extra_data0_size=*/0,
-                                           /*init_extra_data1_fn=*/
-                                           NULL,
-                                           /*extra_data1=*/NULL,
-                                           /*extra_data1_size=*/0,
-                                           /*packed_weights_ptr=*/packed_data,
-                                           /*packing_params=*/NULL);
+      gemm_config->pack_weights_and_biases(
+          (flags ^ XNN_FLAG_TRANSPOSE_WEIGHTS), gemm_config, k, n,
+          /*groups=*/batch_size_b,
+          /*unused_block_size=*/0,
+          /*kstride=*/(flags & XNN_FLAG_TRANSPOSE_WEIGHTS) ? k : n,
+          /*accumulator_init=*/NULL,
+          /*weights=*/data_b,
+          /*int_extra_data0_fn=*/NULL,
+          /*extra_data0=*/NULL,
+          /*extra_data0_size=*/0,
+          /*init_extra_data1_fn=*/NULL,
+          /*extra_data1=*/NULL,
+          /*extra_data1_size=*/0,
+          /*packed_weights_ptr=*/packed_data,
+          /*packing_params=*/NULL);
     } else {
       if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
-        batch_matrix_multiply_op->ukernel.gemm.packw_gemm_goi(
+        batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.packw_gemm_goi(
             /*groups=*/batch_size_b, n, k, nr, kr, sr, data_b,
             /*bias=*/NULL, /*scale=*/NULL, packed_data,
             /*extra_bytes=*/0, /*packing_params=*/NULL);
       } else {
-        batch_matrix_multiply_op->ukernel.gemm.packw_gemm_gio(
+        batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.packw_gemm_gio(
             /*groups=*/batch_size_b, n, k, nr, kr, sr, n, data_b,
             /*bias=*/NULL,
             /*scale=*/NULL, packed_data,
@@ -442,8 +450,8 @@ enum xnn_status create_batch_matrix_multiply_nc_qx8_f32_qc8w(
 
   // Check if we've already cached the packed data for `B`.
   uint32_t cache_seed = murmur_hash3(
-      &batch_matrix_multiply_op->context.gemm.gemm.gemm,
-      sizeof(batch_matrix_multiply_op->context.gemm.gemm.gemm), k * n);
+      &batch_matrix_multiply_op->context.gemm.gemm,
+      sizeof(batch_matrix_multiply_op->context.gemm.gemm), k * n);
   if (batch_matrix_multiply_op->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
     cache_seed = ~cache_seed;
   }
@@ -457,8 +465,8 @@ enum xnn_status create_batch_matrix_multiply_nc_qx8_f32_qc8w(
         batch_matrix_multiply_op->weights_cache, &cache_key);
   }
 
-  const uint32_t kr = batch_matrix_multiply_op->ukernel.gemm.kr;
-  const uint32_t sr = batch_matrix_multiply_op->ukernel.gemm.sr;
+  const uint32_t kr = batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.kr;
+  const uint32_t sr = batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.sr;
   const size_t extra_bytes = 2 * sizeof(float);
   const size_t k_stride = round_up_po2(k, kr * sr);
   const size_t weights_stride =
@@ -471,7 +479,7 @@ enum xnn_status create_batch_matrix_multiply_nc_qx8_f32_qc8w(
 
   // If the packed data has not been cached, pack and cache it.
   if (cache_offset == XNN_CACHE_NOT_FOUND) {
-    const uint32_t nr = batch_matrix_multiply_op->ukernel.gemm.nr;
+    const uint32_t nr = batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.nr;
     const size_t n_stride = round_up(n, nr);
     const size_t packed_size = batch_size_b * n_stride * weights_stride;
     const size_t aligned_size =
@@ -521,11 +529,11 @@ enum xnn_status create_batch_matrix_multiply_nc_qx8_f32_qc8w(
       const struct xnn_qs8_packing_params pack_gemm_params = {
           /*input_zero_point=*/1};
       if (batch_matrix_multiply_op->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
-        batch_matrix_multiply_op->ukernel.gemm.packw_gemm_goi(
+        batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.packw_gemm_goi(
             /*groups=*/batch_size_b, n, k, nr, kr, sr, data_b, /*b=*/NULL,
             /*scale=*/NULL, packed_data, nr * extra_bytes, &pack_gemm_params);
       } else {
-        batch_matrix_multiply_op->ukernel.gemm.packw_gemm_gio(
+        batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.packw_gemm_gio(
             /*groups=*/batch_size_b, n, k, nr, kr, sr, n, data_b, /*b=*/NULL,
             /*scale=*/NULL, packed_data, nr * extra_bytes, &pack_gemm_params);
       }
@@ -682,21 +690,21 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
     }
   }
 
-  const uint32_t nr = batch_matrix_multiply_op->ukernel.gemm.nr;
-  const uint32_t kr = batch_matrix_multiply_op->ukernel.gemm.kr;
-  const uint32_t sr = batch_matrix_multiply_op->ukernel.gemm.sr;
+  const uint32_t nr = batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.nr;
+  const uint32_t kr = batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.kr;
+  const uint32_t sr = batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.sr;
 
-  uint32_t mr = batch_matrix_multiply_op->ukernel.gemm.mr;
+  uint32_t mr = batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.mr;
   struct xnn_hmp_gemm_ukernel* gemm_cases =
-      batch_matrix_multiply_op->ukernel.gemm.gemm_cases;
+      batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.gemm_cases;
 
-  if (m == 1 && batch_matrix_multiply_op->ukernel.gemm.gemm_cases[0]
+  if (m == 1 && batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.gemm_cases[0]
                         .function[XNN_UARCH_DEFAULT] != NULL) {
     mr = 1;
   }
 
   const uint32_t mr_packed =
-      m > 1 ? batch_matrix_multiply_op->ukernel.gemm.mr_packed : 1;
+      m > 1 ? batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.mr_packed : 1;
 
   assert(mr != 0 && mr <= XNN_MAX_MR);
   struct xnn_hmp_gemm_ukernel gemm_ukernel = gemm_cases[mr - 1];
@@ -747,7 +755,7 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
       }
 
       if (batch_matrix_multiply_op->flags & XNN_FLAG_TRANSPOSE_B) {
-        assert(batch_matrix_multiply_op->ukernel.gemm.packw_gemm_goi != NULL ||
+        assert(batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.packw_gemm_goi != NULL ||
                gemm_config->pack_weights_and_biases);
         batch_matrix_multiply_op->context.gemm.packw_gemm_goi =
             (struct packw_gemm_goi_context){
@@ -760,7 +768,7 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
                 .b_stride = bias_element_size,
                 .w_stride = weights_stride,
                 .packw_gemm_goi =
-                    batch_matrix_multiply_op->ukernel.gemm.packw_gemm_goi,
+                    batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.packw_gemm_goi,
                 .gk_stride = n * (k << log2_input_b_element_size),
                 .gb_stride = n * bias_element_size,
                 .gc_stride = input_b_batch_stride,
@@ -774,7 +782,7 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
             offsetof(struct xnn_operator, context.gemm.packw_gemm_goi) -
             offsetof(struct xnn_operator, context);
       } else {
-        assert(batch_matrix_multiply_op->ukernel.gemm.packw_gemm_gio != NULL ||
+        assert(batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.packw_gemm_gio != NULL ||
                gemm_config->pack_weights_and_biases);
         batch_matrix_multiply_op->context.gemm.packw_gemm_gio =
             (struct packw_gemm_gio_context){
@@ -788,7 +796,7 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
                 .b_stride = bias_element_size,
                 .w_stride = weights_stride,
                 .packw_gemm_gio =
-                    batch_matrix_multiply_op->ukernel.gemm.packw_gemm_gio,
+                    batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.packw_gemm_gio,
                 .gk_stride = k * (n << log2_input_b_element_size),
                 .gb_stride = n * bias_element_size,
                 .gc_stride = input_b_batch_stride,
@@ -826,7 +834,7 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
       packed_lhs ? xnn_x8_packq_f32qp8_packed_offset(mr, k, mr, kr, sr)
                  : k_scaled;
 
-  batch_matrix_multiply_op->context.gemm.gemm.gemm = (struct gemm_context){
+  batch_matrix_multiply_op->context.gemm.gemm = (struct gemm_context){
       .k_scaled = k_scaled,
       .a_stride = a_stride,
       .ga_stride = m * k_scaled,
@@ -843,26 +851,28 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
       .sr = sr,
       .ukernel = gemm_ukernel,
       .kc = k,
+      .mr_packed =
+          m == 1 ? 1 : batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.mr_packed,
   };
 
   if (packed_lhs) {
     switch (batch_matrix_multiply_op->type) {
       case xnn_operator_type_batch_matrix_multiply_nc_qp8_f32_qc8w:
-        batch_matrix_multiply_op->context.gemm.gemm.gemm.packed_lh_offset_fn =
+        batch_matrix_multiply_op->context.gemm.gemm.packed_lh_offset_fn =
             xnn_x8_packq_f32qp8_packed_offset;
-        batch_matrix_multiply_op->context.gemm.gemm.gemm.ga_stride =
+        batch_matrix_multiply_op->context.gemm.gemm.ga_stride =
             xnn_x8_packq_f32qp8_packed_size(m, k, mr_packed, kr, sr);
         break;
       case xnn_operator_type_batch_matrix_multiply_nc_pf16:
-        batch_matrix_multiply_op->context.gemm.gemm.gemm.packed_lh_offset_fn =
+        batch_matrix_multiply_op->context.gemm.gemm.packed_lh_offset_fn =
             xnn_init_x16_pack_lh_config()->offset_fn;
-        batch_matrix_multiply_op->context.gemm.gemm.gemm.ga_stride =
+        batch_matrix_multiply_op->context.gemm.gemm.ga_stride =
             xnn_init_x16_pack_lh_config()->size_fn(m, k, mr_packed, kr, sr);
         break;
       case xnn_operator_type_batch_matrix_multiply_nc_pf32:
-        batch_matrix_multiply_op->context.gemm.gemm.gemm.packed_lh_offset_fn =
+        batch_matrix_multiply_op->context.gemm.gemm.packed_lh_offset_fn =
             xnn_init_x32_pack_lh_config()->offset_fn;
-        batch_matrix_multiply_op->context.gemm.gemm.gemm.ga_stride =
+        batch_matrix_multiply_op->context.gemm.gemm.ga_stride =
             xnn_init_x32_pack_lh_config()->size_fn(m, k, mr_packed, kr, sr);
         break;
       default:
@@ -873,23 +883,23 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
   // Copy the batch dimensions into the `gemm_context` struct since we don't
   // know if these pointers will be valid by the time the GEMM is actually
   // called.
-  memcpy(batch_matrix_multiply_op->context.gemm.gemm.gemm.batch_dims_a,
+  memcpy(batch_matrix_multiply_op->context.gemm.gemm.batch_dims_a,
          batch_dims_a, sizeof(size_t) * num_batch_dims);
-  memcpy(batch_matrix_multiply_op->context.gemm.gemm.gemm.batch_dims_b,
+  memcpy(batch_matrix_multiply_op->context.gemm.gemm.batch_dims_b,
          batch_dims_b, sizeof(size_t) * num_batch_dims);
-  memcpy(batch_matrix_multiply_op->context.gemm.gemm.gemm.batch_strides_c,
+  memcpy(batch_matrix_multiply_op->context.gemm.gemm.batch_strides_c,
          batch_strides_c, sizeof(size_t) * num_batch_dims);
-  memcpy(&batch_matrix_multiply_op->context.gemm.gemm.gemm.params, params,
+  memcpy(&batch_matrix_multiply_op->context.gemm.gemm.params, params,
          params_size);
-  batch_matrix_multiply_op->context.gemm.gemm.gemm.fused_params =
-      &batch_matrix_multiply_op->context.gemm.gemm.gemm.params;
+  batch_matrix_multiply_op->context.gemm.gemm.fused_params =
+      &batch_matrix_multiply_op->context.gemm.gemm.params;
 
   // Compute the optimal tile size for this GEMM.
   const size_t nc = xnn_gemm_best_tile_size(
       /*num_groups=*/batch_size_c, m, n,
-      /*m_stride=*/batch_matrix_multiply_op->context.gemm.gemm.gemm.a_stride,
-      /*n_stride=*/batch_matrix_multiply_op->context.gemm.gemm.gemm.w_stride,
-      /*cm_stride=*/batch_matrix_multiply_op->context.gemm.gemm.gemm.cm_stride,
+      /*m_stride=*/batch_matrix_multiply_op->context.gemm.gemm.a_stride,
+      /*n_stride=*/batch_matrix_multiply_op->context.gemm.gemm.w_stride,
+      /*cm_stride=*/batch_matrix_multiply_op->context.gemm.gemm.cm_stride,
       /*cn_stride=*/1 << log2_output_element_size, mr, nr, num_threads);
 
 #if XNN_MAX_UARCH_TYPES > 1
@@ -1128,10 +1138,10 @@ static enum xnn_status setup_batch_matrix_multiply_nc(
         packed_weights;
   }
 
-  batch_matrix_multiply_op->context.gemm.gemm.gemm.a = input_a;
-  batch_matrix_multiply_op->context.gemm.gemm.gemm.packed_w = packed_weights;
-  batch_matrix_multiply_op->context.gemm.gemm.gemm.c = output;
-  batch_matrix_multiply_op->context.gemm.gemm.gemm.quantization_params =
+  batch_matrix_multiply_op->context.gemm.gemm.a = input_a;
+  batch_matrix_multiply_op->context.gemm.gemm.packed_w = packed_weights;
+  batch_matrix_multiply_op->context.gemm.gemm.c = output;
+  batch_matrix_multiply_op->context.gemm.gemm.quantization_params =
       (const void*)quantization_params;
 
   batch_matrix_multiply_op->state = xnn_run_state_ready;

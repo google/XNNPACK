@@ -15,6 +15,7 @@
 #include <limits>
 #include <numeric>
 #include <random>
+#include <type_traits>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -79,8 +80,8 @@ class NumericLimits<qcint4> {
 template <>
 class NumericLimits<qcuint4> {
  public:
-  static int32_t min() { return -8; }
-  static int32_t max() { return 7; }
+  static int32_t min() { return 0; }
+  static int32_t max() { return 15; }
   static int32_t smallest_normal() { return 0; }
   static int32_t min_identity() { return max(); }
   static int32_t max_identity() { return min(); }
@@ -203,14 +204,14 @@ Tensor<float> ReferenceImpl(Tensor<Input> input, Tensor<Filter> filter,
   Tensor<Input> input_batches = input.slice(input.rank() - 1, 0);
   Tensor<float> output_batches = output.slice(output.rank() - 1, 0);
 
-  for (const auto& i : EnumerateIndices(output_batches.extents())) {
+  for (const auto& i : EnumerateIndices(output_batches.shape())) {
     MatrixVectorMultiply(&input_batches(i), filter, bias, input_quantization,
                          filter_zero_point, filter_scale, filter_ic_block_size,
                          bias_quantization, &output_batches(i));
   }
 
   if (flags & XNN_FLAG_TENSORFLOW_RESHAPE_2D) {
-    output = output.reshape(Reshape2D(output.extents()));
+    output = output.reshape(Reshape2D(output.shape()));
   }
 
   return output;
@@ -344,7 +345,7 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
   auto output_gen = MakeDatatypeGenerator(Output());
   std::uniform_int_distribution<> channels_dist{1, 100};
   // TODO(b/408280445): The rank should go down to 1, but hits a bug in QP8
-  // codepaths that assume the LHS has rank >= 2.
+  // code paths that assume the LHS has rank >= 2.
   std::uniform_int_distribution<> rank_dist{2, XNN_MAX_TENSOR_DIMS - 1};
 
   for (auto _ : FuzzTest(std::chrono::milliseconds(500))) {

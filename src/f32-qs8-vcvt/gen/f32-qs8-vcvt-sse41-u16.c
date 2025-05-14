@@ -28,11 +28,14 @@ void xnn_f32_qs8_vcvt_ukernel__sse41_u16(
   assert(input != NULL);
   assert(output != NULL);
 
+  // *cvtps_epi32 maps all floats out of bounds of int to INT_MIN, so we need to clamp at the max to avoid overflow.
+  // INT16_MAX is exactly representable as a float, and is plenty large (this clamp is applied after scaling).
+  const __m128 voverflow_max = _mm_set1_ps((float) INT16_MAX);
+  XNN_FORCE_REALIZATION(voverflow_max);
+
   const __m128 vscale = _mm_set1_ps(params->scalar.scale);
-  const __m128 voutput_max_less_zero_point = _mm_set1_ps((float) ((int32_t) 127 - (int32_t) params->scalar.output_zero_point));
   const __m128i voutput_zero_point = _mm_set1_epi16(params->scalar.output_zero_point);
   XNN_FORCE_REALIZATION(vscale);
-  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
   XNN_FORCE_REALIZATION(voutput_zero_point);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
@@ -47,10 +50,10 @@ void xnn_f32_qs8_vcvt_ukernel__sse41_u16(
     vx89AB = _mm_mul_ps(vx89AB, vscale);
     vxCDEF = _mm_mul_ps(vxCDEF, vscale);
 
-    vx0123 = _mm_min_ps(vx0123, voutput_max_less_zero_point);
-    vx4567 = _mm_min_ps(vx4567, voutput_max_less_zero_point);
-    vx89AB = _mm_min_ps(vx89AB, voutput_max_less_zero_point);
-    vxCDEF = _mm_min_ps(vxCDEF, voutput_max_less_zero_point);
+    vx0123 = _mm_min_ps(vx0123, voverflow_max);
+    vx4567 = _mm_min_ps(vx4567, voverflow_max);
+    vx89AB = _mm_min_ps(vx89AB, voverflow_max);
+    vxCDEF = _mm_min_ps(vxCDEF, voverflow_max);
 
     const __m128i vy0123 = _mm_cvtps_epi32(vx0123);
     const __m128i vy4567 = _mm_cvtps_epi32(vx4567);
@@ -76,8 +79,8 @@ void xnn_f32_qs8_vcvt_ukernel__sse41_u16(
     vx_lo = _mm_mul_ps(vx_lo, vscale);
     vx_hi = _mm_mul_ps(vx_hi, vscale);
 
-    vx_lo = _mm_min_ps(vx_lo, voutput_max_less_zero_point);
-    vx_hi = _mm_min_ps(vx_hi, voutput_max_less_zero_point);
+    vx_lo = _mm_min_ps(vx_lo, voverflow_max);
+    vx_hi = _mm_min_ps(vx_hi, voverflow_max);
 
     const __m128i vy_lo = _mm_cvtps_epi32(vx_lo);
     const __m128i vy_hi = _mm_cvtps_epi32(vx_hi);
@@ -97,8 +100,8 @@ void xnn_f32_qs8_vcvt_ukernel__sse41_u16(
     vx_lo = _mm_mul_ps(vx_lo, vscale);
     vx_hi = _mm_mul_ps(vx_hi, vscale);
 
-    vx_lo = _mm_min_ps(vx_lo, voutput_max_less_zero_point);
-    vx_hi = _mm_min_ps(vx_hi, voutput_max_less_zero_point);
+    vx_lo = _mm_min_ps(vx_lo, voverflow_max);
+    vx_hi = _mm_min_ps(vx_hi, voverflow_max);
 
     const __m128i vy_lo = _mm_cvtps_epi32(vx_lo);
     const __m128i vy_hi = _mm_cvtps_epi32(vx_hi);

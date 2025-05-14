@@ -20,7 +20,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u64_acc2(
     const float* max,
     float* output,
     float* sum,
-    const void* params) XNN_OOB_READS
+    const void* params)
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -156,10 +156,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u64_acc2(
   }
 
   if XNN_UNLIKELY(batch != 0) {
-    assert(batch >= 1 * sizeof(float));
-    assert(batch < 32 * sizeof(float));
-
-    const HVX_Vector vi = xnn_loadu_f32(input);
+    const HVX_Vector vi = xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
 
     const HVX_Vector vx = xnn_sub_f32(vi, vi_max);
 

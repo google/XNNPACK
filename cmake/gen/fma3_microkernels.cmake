@@ -48,9 +48,7 @@ SET(PROD_FMA3_MICROKERNEL_SRCS
   src/f32-vgelu/gen/f32-vgelu-fma3-rational-12-10-div.c
   src/f32-vhswish/gen/f32-vhswish-fma3.c
   src/f32-vlog/gen/f32-vlog-fma3-rational-3-3-div.c
-  src/f32-vrsqrt/gen/f32-vrsqrt-fma3-rsqrt-u16.c
   src/f32-vsin/gen/f32-vsin-fma3-rational-5-4-div.c
-  src/f32-vsqrt/gen/f32-vsqrt-fma3-rsqrt-u16.c
   src/f32-vtanh/gen/f32-vtanh-fma3-rational-9-8-div.c)
 
 SET(NON_PROD_FMA3_MICROKERNEL_SRCS
@@ -152,10 +150,6 @@ SET(NON_PROD_FMA3_MICROKERNEL_SRCS
   src/f32-vcmul/gen/f32-vcmul-fma3-u32.c
   src/f32-vcmul/gen/f32-vcmul-fma3-u64.c
   src/f32-vlog/gen/f32-vlog-fma3-rational-3-3-nr.c
-  src/f32-vrsqrt/gen/f32-vrsqrt-fma3-rsqrt-u8.c
-  src/f32-vrsqrt/gen/f32-vrsqrt-fma3-rsqrt-u32.c
-  src/f32-vsqrt/gen/f32-vsqrt-fma3-rsqrt-u8.c
-  src/f32-vsqrt/gen/f32-vsqrt-fma3-rsqrt-u32.c
   src/f32-vtanh/gen/f32-vtanh-fma3-rational-9-8-nr.c)
 
 SET(ALL_FMA3_MICROKERNEL_SRCS ${PROD_FMA3_MICROKERNEL_SRCS} + ${NON_PROD_FMA3_MICROKERNEL_SRCS})

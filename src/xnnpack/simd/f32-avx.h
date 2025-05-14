@@ -69,4 +69,9 @@ static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
   return _mm256_cmp_ps(a, b, _CMP_EQ_OQ);
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_cmpneq_f32(xnn_simd_f32_t a,
+  xnn_simd_f32_t b) {
+return _mm256_cmp_ps(a, b, _CMP_NEQ_OQ);
+}
+
 #endif  // __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX_H_

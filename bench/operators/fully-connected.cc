@@ -201,7 +201,7 @@ void xnnpack_fully_connected_f32(benchmark::State& state, const char* net) {
         input_channels, output_channels, input_channels, output_channels,
         kernel.data(), bias.data(), -std::numeric_limits<float>::infinity(),
         +std::numeric_limits<float>::infinity(),
-        /*flags=*/0, nullptr, nullptr, &op);
+        /*flags=*/0, nullptr, &op);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to create FP32 Fully Connected operator");
       return;

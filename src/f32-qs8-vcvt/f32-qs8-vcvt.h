@@ -76,13 +76,6 @@ XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_f32_qs8_vcvt_ukernel__wasmsimd_magic_u24, 24,
 XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_f32_qs8_vcvt_ukernel__wasmsimd_magic_u32, 32, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_f32_qs8_vcvt_ukernel__wasm_fmagic_u1, 1, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
-XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_f32_qs8_vcvt_ukernel__wasm_fmagic_u2, 2, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
-XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_f32_qs8_vcvt_ukernel__wasm_fmagic_u3, 3, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
-XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_f32_qs8_vcvt_ukernel__wasm_fmagic_u4, 4, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
-#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
 #if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_hvx, xnn_f32_qs8_vcvt_ukernel__hvx_u32, 32, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_hvx, xnn_f32_qs8_vcvt_ukernel__hvx_u64, 64, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)

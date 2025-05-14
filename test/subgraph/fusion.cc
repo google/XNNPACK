@@ -616,8 +616,7 @@ TEST(COPY, not_fused_downstream_due_to_persistent_tensor) {
   const std::vector<size_t> dims = {1, 2, 3, 4};
   RuntimeTester tester(3);
   tester.AddInputTensorF32(dims, input_id)
-      .AddDynamicTensorF32(dims, intermediate_id,
-                           /*flags=*/XNN_VALUE_FLAG_PERSISTENT)
+      .AddInputOutputTensorF32(dims, intermediate_id)
       .AddOutputTensorF32(dims, output_id)
       .AddCopy(input_id, intermediate_id)
       .AddClamp(-0.5f, 0.5f, intermediate_id, output_id);
@@ -715,8 +714,7 @@ TEST(COPY, not_fused_upstream_due_to_persistent_tensor) {
   const std::vector<size_t> dims = {1, 2, 3, 4};
   RuntimeTester tester(3);
   tester.AddInputTensorF32(dims, input_id)
-      .AddDynamicTensorF32(dims, persistent_id,
-                           /*flags=*/XNN_VALUE_FLAG_PERSISTENT)
+      .AddInputOutputTensorF32(dims, persistent_id)
       .AddOutputTensorF32(dims, output_id)
       .AddClamp(-0.5f, 0.5f, input_id, persistent_id)
       .AddCopy(persistent_id, output_id);
@@ -746,8 +744,7 @@ TEST(COPY,
   const std::vector<size_t> dims = {1, 2, 3, 4};
   RuntimeTester tester(4);
   tester.AddInputTensorF32(dims, input_id)
-      .AddDynamicTensorF32(dims, persistent_id,
-                           /*flags=*/XNN_VALUE_FLAG_PERSISTENT)
+      .AddInputOutputTensorF32(dims, persistent_id)
       .AddDynamicTensorF32(dims, copy_out_id)
       .AddOutputTensorF32(dims, output_id)
       .AddClamp(-0.5f, 0.5f, input_id, persistent_id)
@@ -760,16 +757,33 @@ TEST(COPY,
   xnnpack::Buffer<float> optimized_output = tester.RunWithFusion<float>();
   EXPECT_EQ(tester.NumOperators(), 2);
   EXPECT_EQ(unoptimized_output, optimized_output);
+}
 
-  const xnn_node* clamp_node = tester.Node(0);
-  ASSERT_EQ(clamp_node->type, xnn_node_type_unary_elementwise);
-  ASSERT_EQ(clamp_node->unary_operator, xnn_unary_clamp);
-  EXPECT_EQ(clamp_node->outputs[0], persistent_id);
+TEST(COPY, not_fused_upstream_or_downstream_2) {
+  // input -> (Clamp) -> internal
+  // persistent -> (HardSwish) -> output
+  // internal -> (Copy) -> persistent
+  // We cannot fuse Copy because it would write the persistent value
+  // before it is read by HardSwish instead of after.
+  const uint32_t input_id = 0;
+  const uint32_t persistent_id = 1;
+  const uint32_t internal_id = 2;
+  const uint32_t output_id = 3;
+  const std::vector<size_t> dims = {1, 2, 3, 4};
+  RuntimeTester tester(4);
+  tester.AddInputTensorF32(dims, input_id)
+      .AddInputOutputTensorF32(dims, persistent_id)
+      .AddDynamicTensorF32(dims, internal_id)
+      .AddOutputTensorF32(dims, output_id)
+      .AddClamp(-0.5f, 0.5f, input_id, internal_id)
+      .AddHardSwish(persistent_id, output_id)
+      .AddCopy(internal_id, persistent_id);
 
-  const xnn_node* hardswish_node = tester.Node(2);
-  ASSERT_EQ(hardswish_node->type, xnn_node_type_unary_elementwise);
-  ASSERT_EQ(hardswish_node->unary_operator, xnn_unary_hardswish);
-  EXPECT_EQ(hardswish_node->inputs[0], persistent_id);
+  xnnpack::Buffer<float> unoptimized_output = tester.RunWithoutFusion<float>();
+  EXPECT_EQ(tester.NumOperators(), 3);
+
+  xnnpack::Buffer<float> optimized_output = tester.RunWithoutFusion<float>();
+  EXPECT_EQ(tester.NumOperators(), 3);
 }
 
 TEST(COPY, fused_chain_of_copies) {

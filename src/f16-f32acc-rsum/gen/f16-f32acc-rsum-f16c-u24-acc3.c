@@ -45,14 +45,20 @@ void xnn_f16_f32acc_rsum_ukernel__f16c_u24_acc3(
     vacc1 = _mm256_add_ps(vacc1, vt1);
     vacc2 = _mm256_add_ps(vacc2, vt2);
   }
-  vacc0 = _mm256_add_ps(vacc0, vacc1);
-  vacc0 = _mm256_add_ps(vacc0, vacc2);
-  for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
+  if (batch >= 8 * sizeof(uint16_t)) {
     const __m256 vt = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
     i += 8;
-
+    batch -= 8 * sizeof(uint16_t);
     vacc0 = _mm256_add_ps(vacc0, vt);
   }
+  if (batch >= 8 * sizeof(uint16_t)) {
+    const __m256 vt = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
+    i += 8;
+    batch -= 8 * sizeof(uint16_t);
+    vacc1 = _mm256_add_ps(vacc1, vt);
+  }
+  vacc0 = _mm256_add_ps(vacc0, vacc2);
+  vacc0 = _mm256_add_ps(vacc0, vacc1);
   if XNN_UNLIKELY(batch != 0) {
     assert(batch >= 1 * sizeof(uint16_t));
     assert(batch <= 7 * sizeof(uint16_t));

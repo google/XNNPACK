@@ -590,7 +590,6 @@ enum xnn_status xnn_create_runtime_v4(
     }
   }
 
-  struct xnn_code_cache* code_cache = NULL;
   runtime->values = xnn_allocate_zero_memory(sizeof(struct xnn_value) * subgraph->num_values);
   if (runtime->values == NULL) {
     xnn_log_error("failed to allocate %zu bytes for runtime's value descriptors",
@@ -630,7 +629,7 @@ enum xnn_status xnn_create_runtime_v4(
     // Ignore fused nodes
     if (node->type != xnn_node_type_invalid) {
       assert(node->create != NULL);
-      status = node->create(node, runtime->values, runtime->num_values, runtime->opdata + i, code_cache, weights_cache);
+      status = node->create(node, runtime->values, runtime->num_values, runtime->opdata + i, weights_cache);
       if (status != xnn_status_success) {
         xnn_log_error("failed to create node %zu", i);
         goto error;

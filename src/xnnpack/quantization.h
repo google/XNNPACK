@@ -39,15 +39,11 @@ xnn_qd8_asymmetric_quantization_params(float min, float max) {
 
 static inline struct xnn_qd8_quantization_params
 xnn_qdu8_asymmetric_quantization_params(float min, float max) {
-  struct xnn_qd8_quantization_params quantization_params;
-  const float rmin = math_min_f32(0.0f, min);
-  const float rmax = math_max_f32(0.0f, max);
-  const float qmin = 0;
-  const float qmax = UINT8_MAX;
-  const float scale = rmin == rmax ? 1.f : (qmax - qmin) / (rmax - rmin);
-  int32_t zero_point = lrintf(-rmin * scale);
-  quantization_params.inv_scale = scale;
-  quantization_params.zero_point = zero_point;
+  struct xnn_qd8_quantization_params quantization_params =
+      xnn_qd8_asymmetric_quantization_params(min, max);
+  quantization_params.zero_point += 128;
+  assert(quantization_params.zero_point >= 0);
+  assert(quantization_params.zero_point <= UINT8_MAX);
   return quantization_params;
 }
 

@@ -701,8 +701,7 @@ class ConvolutionOperatorTester {
           requantization_scales.data(), kernel.data(),
           has_bias() ? bias.data() : nullptr, output_zero_point,
           1.0f /* output scale */, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
-          flags,
-          /*code_cache=*/nullptr, auto_weights_cache.get(), &convolution_op);
+          flags, auto_weights_cache.get(), &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -765,8 +764,8 @@ class ConvolutionOperatorTester {
             1.0f /* input scale */, requantization_scales.data(), kernel.data(),
             has_bias() ? bias.data() : nullptr, output_zero_point,
             1.0f /* output scale */, int8_t(qmin() - 0x80),
-            int8_t(qmax() - 0x80), flags,
-            /*code_cache=*/nullptr, auto_weights_cache.get(), &convolution_op2);
+            int8_t(qmax() - 0x80), flags, auto_weights_cache.get(),
+            &convolution_op2);
         (void)status;
         ASSERT_NE(nullptr, convolution_op2);
 
@@ -966,7 +965,7 @@ class ConvolutionOperatorTester {
           group_output_channels(), input_channel_stride(),
           output_channel_stride(), kernel_scale.data(), kernel.data(),
           has_bias() ? bias.data() : nullptr, output_min, output_max, flags,
-          /*code_cache=*/nullptr, auto_weights_cache.get(), &convolution_op);
+          auto_weights_cache.get(), &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -1024,20 +1023,20 @@ class ConvolutionOperatorTester {
         size_t old_weights_cache_size =
             internal_weights_cache->cache.weights.size;
 
-        ASSERT_EQ(xnn_status_success,
-                  xnn_create_convolution2d_nhwc_qd8_f16_qc8w(
-                      padding_tf_same() ? 0 : padding_top(),
-                      padding_tf_same() ? 0 : padding_right(),
-                      padding_tf_same() ? 0 : padding_bottom(),
-                      padding_tf_same() ? 0 : padding_left(), kernel_height(),
-                      kernel_width(), subsampling_height(), subsampling_width(),
-                      dilation_height(), dilation_width(), groups(),
-                      group_input_channels(), group_output_channels(),
-                      input_channel_stride(), output_channel_stride(),
-                      kernel_scale.data(), kernel.data(),
-                      has_bias() ? bias.data() : nullptr, output_min,
-                      output_max, flags, /*code_cache=*/nullptr,
-                      auto_weights_cache.get(), &convolution_op2));
+        ASSERT_EQ(
+            xnn_status_success,
+            xnn_create_convolution2d_nhwc_qd8_f16_qc8w(
+                padding_tf_same() ? 0 : padding_top(),
+                padding_tf_same() ? 0 : padding_right(),
+                padding_tf_same() ? 0 : padding_bottom(),
+                padding_tf_same() ? 0 : padding_left(), kernel_height(),
+                kernel_width(), subsampling_height(), subsampling_width(),
+                dilation_height(), dilation_width(), groups(),
+                group_input_channels(), group_output_channels(),
+                input_channel_stride(), output_channel_stride(),
+                kernel_scale.data(), kernel.data(),
+                has_bias() ? bias.data() : nullptr, output_min, output_max,
+                flags, auto_weights_cache.get(), &convolution_op2));
         ASSERT_NE(nullptr, convolution_op2);
 
         // Smart pointer to automatically delete convolution_op.
@@ -1189,7 +1188,7 @@ class ConvolutionOperatorTester {
           group_output_channels(), input_channel_stride(),
           output_channel_stride(), kernel_scale.data(), kernel.data(),
           has_bias() ? bias.data() : nullptr, output_min, output_max, flags,
-          /*code_cache=*/nullptr, auto_weights_cache.get(), &convolution_op);
+          auto_weights_cache.get(), &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -1246,20 +1245,20 @@ class ConvolutionOperatorTester {
         size_t old_weights_cache_size =
             internal_weights_cache->cache.weights.size;
 
-        ASSERT_EQ(xnn_status_success,
-                  xnn_create_convolution2d_nhwc_qd8_f32_qc8w(
-                      padding_tf_same() ? 0 : padding_top(),
-                      padding_tf_same() ? 0 : padding_right(),
-                      padding_tf_same() ? 0 : padding_bottom(),
-                      padding_tf_same() ? 0 : padding_left(), kernel_height(),
-                      kernel_width(), subsampling_height(), subsampling_width(),
-                      dilation_height(), dilation_width(), groups(),
-                      group_input_channels(), group_output_channels(),
-                      input_channel_stride(), output_channel_stride(),
-                      kernel_scale.data(), kernel.data(),
-                      has_bias() ? bias.data() : nullptr, output_min,
-                      output_max, flags, /*code_cache=*/nullptr,
-                      auto_weights_cache.get(), &convolution_op2));
+        ASSERT_EQ(
+            xnn_status_success,
+            xnn_create_convolution2d_nhwc_qd8_f32_qc8w(
+                padding_tf_same() ? 0 : padding_top(),
+                padding_tf_same() ? 0 : padding_right(),
+                padding_tf_same() ? 0 : padding_bottom(),
+                padding_tf_same() ? 0 : padding_left(), kernel_height(),
+                kernel_width(), subsampling_height(), subsampling_width(),
+                dilation_height(), dilation_width(), groups(),
+                group_input_channels(), group_output_channels(),
+                input_channel_stride(), output_channel_stride(),
+                kernel_scale.data(), kernel.data(),
+                has_bias() ? bias.data() : nullptr, output_min, output_max,
+                flags, auto_weights_cache.get(), &convolution_op2));
         ASSERT_NE(nullptr, convolution_op2);
 
         // Smart pointer to automatically delete convolution_op.
@@ -1444,7 +1443,7 @@ class ConvolutionOperatorTester {
           1.0f /* kernel scale */, kernel.data(),
           has_bias() ? bias.data() : nullptr, output_zero_point, output_scale,
           int8_t(qmin() - 0x80), int8_t(qmax() - 0x80), flags,
-          /*code_cache=*/nullptr, auto_weights_cache.get(), &convolution_op);
+          auto_weights_cache.get(), &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -1495,23 +1494,22 @@ class ConvolutionOperatorTester {
         size_t old_weights_cache_size =
             internal_weights_cache->cache.weights.size;
 
-        ASSERT_EQ(xnn_status_success,
-                  xnn_create_convolution2d_nhwc_qs8(
-                      padding_tf_same() ? 0 : padding_top(),
-                      padding_tf_same() ? 0 : padding_right(),
-                      padding_tf_same() ? 0 : padding_bottom(),
-                      padding_tf_same() ? 0 : padding_left(), kernel_height(),
-                      kernel_width(), subsampling_height(), subsampling_width(),
-                      dilation_height(), dilation_width(), groups(),
-                      group_input_channels(), group_output_channels(),
-                      input_channel_stride(), output_channel_stride(),
-                      input_zero_point, 1.0f /* input scale */,
-                      1.0f /* kernel scale */, kernel.data(),
-                      has_bias() ? bias.data() : nullptr, output_zero_point,
-                      output_scale, int8_t(qmin() - 0x80),
-                      int8_t(qmax() - 0x80), flags,
-                      /*code_cache=*/nullptr, auto_weights_cache.get(),
-                      &convolution_op2));
+        ASSERT_EQ(
+            xnn_status_success,
+            xnn_create_convolution2d_nhwc_qs8(
+                padding_tf_same() ? 0 : padding_top(),
+                padding_tf_same() ? 0 : padding_right(),
+                padding_tf_same() ? 0 : padding_bottom(),
+                padding_tf_same() ? 0 : padding_left(), kernel_height(),
+                kernel_width(), subsampling_height(), subsampling_width(),
+                dilation_height(), dilation_width(), groups(),
+                group_input_channels(), group_output_channels(),
+                input_channel_stride(), output_channel_stride(),
+                input_zero_point, 1.0f /* input scale */,
+                1.0f /* kernel scale */, kernel.data(),
+                has_bias() ? bias.data() : nullptr, output_zero_point,
+                output_scale, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
+                flags, auto_weights_cache.get(), &convolution_op2));
         ASSERT_NE(nullptr, convolution_op2);
 
         // Smart pointer to automatically delete convolution_op.
@@ -1753,8 +1751,7 @@ class ConvolutionOperatorTester {
           output_channel_stride(), input_zero_point, 1.0f /* input scale */,
           kernel_zero_point, 1.0f /* kernel scale */, kernel.data(),
           has_bias() ? bias.data() : nullptr, output_zero_point, output_scale,
-          qmin(), qmax(), flags,
-          /*code_cache=*/nullptr, auto_weights_cache.get(), &convolution_op);
+          qmin(), qmax(), flags, auto_weights_cache.get(), &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -1820,8 +1817,7 @@ class ConvolutionOperatorTester {
                       kernel_zero_point, 1.0f /* kernel scale */, kernel.data(),
                       has_bias() ? bias.data() : nullptr, output_zero_point,
                       output_scale, qmin(), qmax(), flags,
-                      /*code_cache=*/nullptr, auto_weights_cache.get(),
-                      &convolution_op2));
+                      auto_weights_cache.get(), &convolution_op2));
         ASSERT_NE(nullptr, convolution_op2);
 
         // Smart pointer to automatically delete convolution_op2.
@@ -2082,8 +2078,6 @@ class ConvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
 
-      xnn_code_cache_t auto_code_cache = nullptr;
-
       struct xnn_internal_weights_cache* internal_weights_cache = nullptr;
       std::unique_ptr<xnn_weights_cache_provider,
                       decltype(&xnn_delete_weights_cache)>
@@ -2118,7 +2112,7 @@ class ConvolutionOperatorTester {
           group_output_channels(), input_channel_stride(),
           output_channel_stride(), kernel.data(),
           has_bias() ? bias.data() : nullptr, output_min, output_max, flags,
-          auto_code_cache, auto_weights_cache.get(), &convolution_op);
+          auto_weights_cache.get(), &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -2165,28 +2159,25 @@ class ConvolutionOperatorTester {
       VerifyNHWCxF32(output, output_ref, output_min, output_max);
 
       if (use_weights_cache()) {
-        // We already finalized the code cache, so create a new code cache if we
-        // are testing JIT.
-        xnn_code_cache_t auto_inner_code_cache = nullptr;
         // To test weights cache, we create the operator with the same
         // parameters, and setup with a different output.
         xnn_operator_t convolution_op2 = nullptr;
         size_t old_weights_cache_size =
             internal_weights_cache->cache.weights.size;
 
-        ASSERT_EQ(xnn_status_success,
-                  xnn_create_convolution2d_nhwc_f32(
-                      padding_tf_same() ? 0 : padding_top(),
-                      padding_tf_same() ? 0 : padding_right(),
-                      padding_tf_same() ? 0 : padding_bottom(),
-                      padding_tf_same() ? 0 : padding_left(), kernel_height(),
-                      kernel_width(), subsampling_height(), subsampling_width(),
-                      dilation_height(), dilation_width(), groups(),
-                      group_input_channels(), group_output_channels(),
-                      input_channel_stride(), output_channel_stride(),
-                      kernel.data(), has_bias() ? bias.data() : nullptr,
-                      output_min, output_max, flags, auto_inner_code_cache,
-                      auto_weights_cache.get(), &convolution_op2));
+        ASSERT_EQ(
+            xnn_status_success,
+            xnn_create_convolution2d_nhwc_f32(
+                padding_tf_same() ? 0 : padding_top(),
+                padding_tf_same() ? 0 : padding_right(),
+                padding_tf_same() ? 0 : padding_bottom(),
+                padding_tf_same() ? 0 : padding_left(), kernel_height(),
+                kernel_width(), subsampling_height(), subsampling_width(),
+                dilation_height(), dilation_width(), groups(),
+                group_input_channels(), group_output_channels(),
+                input_channel_stride(), output_channel_stride(), kernel.data(),
+                has_bias() ? bias.data() : nullptr, output_min, output_max,
+                flags, auto_weights_cache.get(), &convolution_op2));
 
         ASSERT_NE(nullptr, convolution_op2);
 
@@ -2466,7 +2457,6 @@ class ConvolutionOperatorTester {
       // Create, setup, run, and destroy Convolution operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
-      xnn_code_cache_t auto_code_cache = nullptr;
       struct xnn_internal_weights_cache* internal_weights_cache = nullptr;
       std::unique_ptr<xnn_weights_cache_provider,
                       decltype(&xnn_delete_weights_cache)>
@@ -2510,7 +2500,7 @@ class ConvolutionOperatorTester {
           group_output_channels(), input_channel_stride(),
           output_channel_stride(), kernel_data,
           has_bias() ? bias_data : nullptr, output_min, output_max, flags,
-          auto_code_cache, auto_weights_cache.get(), &convolution_op);
+          auto_weights_cache.get(), &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -2559,25 +2549,22 @@ class ConvolutionOperatorTester {
                      output_height(), output_width());
 
       if (use_weights_cache()) {
-        // We already finalized the code cache, so create a new code cache if we
-        // are testing JIT.
-        xnn_code_cache_t auto_inner_code_cache = nullptr;
         xnn_operator_t convolution_op2 = nullptr;
         size_t old_weights_cache_size =
             internal_weights_cache->cache.weights.size;
-        ASSERT_EQ(xnn_status_success,
-                  xnn_create_convolution2d_nhwc_f16(
-                      padding_tf_same() ? 0 : padding_top(),
-                      padding_tf_same() ? 0 : padding_right(),
-                      padding_tf_same() ? 0 : padding_bottom(),
-                      padding_tf_same() ? 0 : padding_left(), kernel_height(),
-                      kernel_width(), subsampling_height(), subsampling_width(),
-                      dilation_height(), dilation_width(), groups(),
-                      group_input_channels(), group_output_channels(),
-                      input_channel_stride(), output_channel_stride(),
-                      kernel_data, has_bias() ? bias_data : nullptr, output_min,
-                      output_max, flags, auto_inner_code_cache,
-                      auto_weights_cache.get(), &convolution_op2));
+        ASSERT_EQ(
+            xnn_status_success,
+            xnn_create_convolution2d_nhwc_f16(
+                padding_tf_same() ? 0 : padding_top(),
+                padding_tf_same() ? 0 : padding_right(),
+                padding_tf_same() ? 0 : padding_bottom(),
+                padding_tf_same() ? 0 : padding_left(), kernel_height(),
+                kernel_width(), subsampling_height(), subsampling_width(),
+                dilation_height(), dilation_width(), groups(),
+                group_input_channels(), group_output_channels(),
+                input_channel_stride(), output_channel_stride(), kernel_data,
+                has_bias() ? bias_data : nullptr, output_min, output_max, flags,
+                auto_weights_cache.get(), &convolution_op2));
         ASSERT_NE(nullptr, convolution_op2);
 
         // Smart pointer to automatically delete convolution_op.
@@ -2929,7 +2916,7 @@ class ConvolutionOperatorTester {
           has_bias() ? bias.data() : nullptr, output_min, output_max,
           (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) |
               (force_nhwc_input() ? XNN_FLAG_INPUT_NHWC : 0),
-          nullptr, auto_weights_cache.get(), &convolution_op);
+          auto_weights_cache.get(), &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -2975,8 +2962,7 @@ class ConvolutionOperatorTester {
                 has_bias() ? bias.data() : nullptr, output_min, output_max,
                 (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) |
                     (force_nhwc_input() ? XNN_FLAG_INPUT_NHWC : 0),
-                /*code_cache=*/nullptr, auto_weights_cache.get(),
-                &convolution_op2));
+                auto_weights_cache.get(), &convolution_op2));
         ASSERT_NE(nullptr, convolution_op2);
 
         // Smart pointer to automatically delete convolution_op2.
@@ -3340,7 +3326,7 @@ class ConvolutionOperatorTester {
           group_input_channels(), group_output_channels(),
           input_channel_stride(), output_channel_stride(), kernel_data,
           has_bias() ? bias_data : nullptr, output_min, output_max, flags,
-          /*code_cache=*/nullptr, auto_weights_cache.get(), &convolution_op);
+          auto_weights_cache.get(), &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -3385,8 +3371,7 @@ class ConvolutionOperatorTester {
                 group_output_channels(), input_channel_stride(),
                 output_channel_stride(), kernel_data,
                 has_bias() ? bias_data : nullptr, output_min, output_max, flags,
-                /*code_cache=*/nullptr, auto_weights_cache.get(),
-                &convolution_op2));
+                auto_weights_cache.get(), &convolution_op2));
 
         ASSERT_NE(nullptr, convolution_op2);
 
@@ -3677,7 +3662,7 @@ class ConvolutionOperatorTester {
           1.0f /* input scale */, requantization_scales.data(), kernel.data(),
           has_bias() ? bias.data() : nullptr, output_zero_point,
           1.0f /* output scale */, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
-          0, nullptr, nullptr, &convolution_op);
+          0, nullptr, &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -4071,7 +4056,7 @@ class ConvolutionOperatorTester {
           input_channel_stride(), output_channel_stride(), input_zero_point,
           1.0f /* input scale */, 1.0f /* kernel scale */, kernel.data(),
           has_bias() ? bias.data() : nullptr, output_zero_point, output_scale,
-          int8_t(qmin() - 0x80), int8_t(qmax() - 0x80), 0, nullptr, nullptr,
+          int8_t(qmin() - 0x80), int8_t(qmax() - 0x80), 0, nullptr,
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -4460,7 +4445,7 @@ class ConvolutionOperatorTester {
           input_channel_stride(), output_channel_stride(), input_zero_point,
           1.0f /* input scale */, kernel_zero_point, 1.0f /* kernel scale */,
           kernel.data(), has_bias() ? bias.data() : nullptr, output_zero_point,
-          output_scale, qmin(), qmax(), 0, nullptr, nullptr, &convolution_op);
+          output_scale, qmin(), qmax(), 0, nullptr, &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -4828,7 +4813,7 @@ class ConvolutionOperatorTester {
           group_input_channels(), group_output_channels(),
           input_channel_stride(), output_channel_stride(), kernel.data(),
           has_bias() ? bias.data() : nullptr, output_min, output_max, 0,
-          nullptr, nullptr, &convolution_op);
+          nullptr, &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -5104,7 +5089,7 @@ class ConvolutionOperatorTester {
           group_input_channels(), group_output_channels(),
           input_channel_stride(), output_channel_stride(), kernel.data(),
           has_bias() ? bias.data() : nullptr, output_min, output_max, 0,
-          nullptr, nullptr, &convolution_op);
+          nullptr, &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }

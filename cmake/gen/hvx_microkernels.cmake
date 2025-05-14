@@ -54,6 +54,10 @@ SET(PROD_HVX_MICROKERNEL_SRCS
   src/f32-vhswish/gen/f32-vhswish-hvx.c
   src/f32-vlog/gen/f32-vlog-hvx-rational-3-3-div.c
   src/f32-vrelu/gen/f32-vrelu-hvx.c
+  src/f32-vrnd/gen/f32-vrndd-hvx-u128.c
+  src/f32-vrnd/gen/f32-vrndne-hvx-u128.c
+  src/f32-vrnd/gen/f32-vrndu-hvx-u128.c
+  src/f32-vrnd/gen/f32-vrndz-hvx-u128.c
   src/f32-vsin/gen/f32-vsin-hvx-rational-5-4-div.c
   src/f32-vtanh/gen/f32-vtanh-hvx-rational-9-8-div.c
   src/f32-vunary/gen/f32-vabs-hvx.c
@@ -67,9 +71,13 @@ SET(PROD_HVX_MICROKERNEL_SRCS
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-3x128c4-minmax-fp32-hvx.c
   src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u128.c
   src/qs8-vaddc/gen/qs8-vaddc-minmax-hvx-u128.c
+  src/s8-rdminmax/gen/s8-rdmax-2p2x-hvx-c128.c
+  src/s8-rdminmax/gen/s8-rdmin-2p2x-hvx-c128.c
   src/s8-rminmax/gen/s8-rmax-hvx-u256-acc2.c
   src/s8-rminmax/gen/s8-rmin-hvx-u256-acc2.c
   src/s8-rminmax/gen/s8-rminmax-hvx-u256-acc2.c
+  src/u8-rdminmax/gen/u8-rdmax-2p2x-hvx-c128.c
+  src/u8-rdminmax/gen/u8-rdmin-2p2x-hvx-c128.c
   src/u8-rminmax/gen/u8-rmax-hvx-u256-acc2.c
   src/u8-rminmax/gen/u8-rmin-hvx-u256-acc2.c
   src/u8-rminmax/gen/u8-rminmax-hvx-u256-acc2.c
@@ -206,6 +214,14 @@ SET(NON_PROD_HVX_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vsubc-hvx-u32.c
   src/f32-vbinary/gen/f32-vsubc-hvx-u64.c
   src/f32-vgelu/gen/f32-vgelu-hvx-rational-12-10-nr.c
+  src/f32-vrnd/gen/f32-vrndd-hvx-u32.c
+  src/f32-vrnd/gen/f32-vrndd-hvx-u64.c
+  src/f32-vrnd/gen/f32-vrndne-hvx-u32.c
+  src/f32-vrnd/gen/f32-vrndne-hvx-u64.c
+  src/f32-vrnd/gen/f32-vrndu-hvx-u32.c
+  src/f32-vrnd/gen/f32-vrndu-hvx-u64.c
+  src/f32-vrnd/gen/f32-vrndz-hvx-u32.c
+  src/f32-vrnd/gen/f32-vrndz-hvx-u64.c
   src/f32-vtanh/gen/f32-vtanh-hvx-rational-9-8-nr.c
   src/qs8-packw/gen/qs8-packw-x96c4-gemm-gio-hvx.c
   src/qs8-packw/gen/qs8-packw-x96c4-gemm-goi-hvx.c

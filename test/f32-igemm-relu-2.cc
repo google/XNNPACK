@@ -772,60 +772,6 @@ std::vector<GemmTestParams> CreateTests1(
 #endif  // XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  INSTANTIATE_TEST_SUITE_P(
-      F32_IGEMM_RELU_2X4__WASM, GemmTest,
-      testing::ValuesIn(CreateTests1(
-          /*k_block=*/1,
-          /*adj_k_block=*/1,
-          /*mr=*/2, /*nr=*/4, /*kr=*/1, /*sr=*/1,
-          /*is_igemm=*/true,
-          /*unsigned_inputs=*/false,
-          /*planes=*/1,
-          [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_f32_igemm_relu_ukernel_2x4__wasm,
-                        xnn_pack_f32_conv_goki_w);
-          })),
-      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-
-  INSTANTIATE_TEST_SUITE_P(
-      F32_IGEMM_RELU_4X2__WASM, GemmTest,
-      testing::ValuesIn(CreateTests1(
-          /*k_block=*/1,
-          /*adj_k_block=*/1,
-          /*mr=*/4, /*nr=*/2, /*kr=*/1, /*sr=*/1,
-          /*is_igemm=*/true,
-          /*unsigned_inputs=*/false,
-          /*planes=*/1,
-          [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_f32_igemm_relu_ukernel_4x2__wasm,
-                        xnn_pack_f32_conv_goki_w);
-          })),
-      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-
-  INSTANTIATE_TEST_SUITE_P(
-      F32_IGEMM_RELU_4X4__WASM, GemmTest,
-      testing::ValuesIn(CreateTests1(
-          /*k_block=*/1,
-          /*adj_k_block=*/1,
-          /*mr=*/4, /*nr=*/4, /*kr=*/1, /*sr=*/1,
-          /*is_igemm=*/true,
-          /*unsigned_inputs=*/false,
-          /*planes=*/1,
-          [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_f32_igemm_relu_ukernel_4x4__wasm,
-                        xnn_pack_f32_conv_goki_w);
-          })),
-      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-
 INSTANTIATE_TEST_SUITE_P(
     F32_IGEMM_RELU_1X4__SCALAR, GemmTest,
     testing::ValuesIn(CreateTests1(

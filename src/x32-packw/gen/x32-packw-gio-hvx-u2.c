@@ -86,9 +86,6 @@ void xnn_x32_packw_gemm_gio_ukernel_x32__hvx_u2(
 
     // NC remainder (1..31)
     if XNN_UNLIKELY(n != 0) {
-      assert(n >= 1);
-      assert(n <= 31);
-
       // Prepare count for valid 32-bit elements (depends on n).
       const size_t vcount0 = n;
 
@@ -189,9 +186,6 @@ void xnn_x32_packw_gemm_gio_ukernel_x64__hvx_u2(
 
     // NC remainder (1..63)
     if XNN_UNLIKELY(n != 0) {
-      assert(n >= 1);
-      assert(n <= 63);
-
       // Prepare count for valid 32-bit elements (depends on n).
       const size_t vcount0 = (int) (n - 0) < 0 ? 0 : ((int) (n - 0) > 32 ? 32 : n - 0);
       const size_t vcount1 = (int) (n - 32) < 0 ? 0 : ((int) (n - 32) > 32 ? 32 : n - 32);
@@ -307,9 +301,6 @@ void xnn_x32_packw_gemm_gio_ukernel_x96__hvx_u2(
 
     // NC remainder (1..95)
     if XNN_UNLIKELY(n != 0) {
-      assert(n >= 1);
-      assert(n <= 95);
-
       // Prepare count for valid 32-bit elements (depends on n).
       const size_t vcount0 = (int) (n - 0) < 0 ? 0 : ((int) (n - 0) > 32 ? 32 : n - 0);
       const size_t vcount1 = (int) (n - 32) < 0 ? 0 : ((int) (n - 32) > 32 ? 32 : n - 32);
@@ -440,9 +431,6 @@ void xnn_x32_packw_gemm_gio_ukernel_x128__hvx_u2(
 
     // NC remainder (1..127)
     if XNN_UNLIKELY(n != 0) {
-      assert(n >= 1);
-      assert(n <= 127);
-
       // Prepare count for valid 32-bit elements (depends on n).
       const size_t vcount0 = (int) (n - 0) < 0 ? 0 : ((int) (n - 0) > 32 ? 32 : n - 0);
       const size_t vcount1 = (int) (n - 32) < 0 ? 0 : ((int) (n - 32) > 32 ? 32 : n - 32);

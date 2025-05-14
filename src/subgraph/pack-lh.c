@@ -25,7 +25,6 @@ static enum xnn_status create_pack_lh_operator(
   const struct xnn_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
-  struct xnn_code_cache* code_cache,
   xnn_weights_cache_t weights_cache)
 {
   assert(node->num_inputs == 1);
@@ -76,8 +75,10 @@ static enum xnn_status reshape_pack_lh_operator(
       num_input_dims < 1 ? 1 : input_value->shape.dim[num_input_dims - 1];
   size_t batch_size =
       num_input_dims < 2 ? 1 : input_value->shape.dim[num_input_dims - 2];
-  size_t num_groups =
-      xnn_shape_multiply_leading_dims(&input_value->shape, num_input_dims - 2);
+  size_t num_groups = (2 <= num_input_dims)
+                          ? xnn_shape_multiply_leading_dims(&input_value->shape,
+                                                            num_input_dims - 2)
+                          : 1;
   const size_t old_workspace_size = opdata->workspace_size;
   enum xnn_status status = xnn_status_invalid_state;
   size_t output_size_bytes = 0;

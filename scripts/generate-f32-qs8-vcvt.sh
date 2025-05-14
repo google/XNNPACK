@@ -111,17 +111,6 @@ tools/xngen src/f32-qs8-vcvt/wasmsimd-magic.c.in -D BATCH_TILE=16 -D DATATYPE=QU
 tools/xngen src/f32-qs8-vcvt/wasmsimd-magic.c.in -D BATCH_TILE=24 -D DATATYPE=QU8 -o src/f32-qu8-vcvt/gen/f32-qu8-vcvt-wasmsimd-magic-u24.c &
 tools/xngen src/f32-qs8-vcvt/wasmsimd-magic.c.in -D BATCH_TILE=32 -D DATATYPE=QU8 -o src/f32-qu8-vcvt/gen/f32-qu8-vcvt-wasmsimd-magic-u32.c &
 
-##################################### WAsm ####################################
-tools/xngen src/f32-qs8-vcvt/scalar-fmagic.c.in -D BATCH_TILE=1 -D IDATATYPE=F32 -D ODATATYPE=QS8 -D WASM=1 -o src/f32-qs8-vcvt/gen/f32-qs8-vcvt-wasm-fmagic-u1.c &
-tools/xngen src/f32-qs8-vcvt/scalar-fmagic.c.in -D BATCH_TILE=2 -D IDATATYPE=F32 -D ODATATYPE=QS8 -D WASM=1 -o src/f32-qs8-vcvt/gen/f32-qs8-vcvt-wasm-fmagic-u2.c &
-tools/xngen src/f32-qs8-vcvt/scalar-fmagic.c.in -D BATCH_TILE=3 -D IDATATYPE=F32 -D ODATATYPE=QS8 -D WASM=1 -o src/f32-qs8-vcvt/gen/f32-qs8-vcvt-wasm-fmagic-u3.c &
-tools/xngen src/f32-qs8-vcvt/scalar-fmagic.c.in -D BATCH_TILE=4 -D IDATATYPE=F32 -D ODATATYPE=QS8 -D WASM=1 -o src/f32-qs8-vcvt/gen/f32-qs8-vcvt-wasm-fmagic-u4.c &
-
-tools/xngen src/f32-qs8-vcvt/scalar-fmagic.c.in -D BATCH_TILE=1 -D IDATATYPE=F32 -D ODATATYPE=QU8 -D WASM=1 -o src/f32-qu8-vcvt/gen/f32-qu8-vcvt-wasm-fmagic-u1.c &
-tools/xngen src/f32-qs8-vcvt/scalar-fmagic.c.in -D BATCH_TILE=2 -D IDATATYPE=F32 -D ODATATYPE=QU8 -D WASM=1 -o src/f32-qu8-vcvt/gen/f32-qu8-vcvt-wasm-fmagic-u2.c &
-tools/xngen src/f32-qs8-vcvt/scalar-fmagic.c.in -D BATCH_TILE=3 -D IDATATYPE=F32 -D ODATATYPE=QU8 -D WASM=1 -o src/f32-qu8-vcvt/gen/f32-qu8-vcvt-wasm-fmagic-u3.c &
-tools/xngen src/f32-qs8-vcvt/scalar-fmagic.c.in -D BATCH_TILE=4 -D IDATATYPE=F32 -D ODATATYPE=QU8 -D WASM=1 -o src/f32-qu8-vcvt/gen/f32-qu8-vcvt-wasm-fmagic-u4.c &
-
 ################################## Hexagon HVX ###################################
 tools/xngen src/f32-qs8-vcvt/hvx.c.in -D BATCH_TILE=32  -D DATATYPE=QS8 -o src/f32-qs8-vcvt/gen/f32-qs8-vcvt-hvx-u32.c &
 tools/xngen src/f32-qs8-vcvt/hvx.c.in -D BATCH_TILE=64  -D DATATYPE=QS8 -o src/f32-qs8-vcvt/gen/f32-qs8-vcvt-hvx-u64.c &

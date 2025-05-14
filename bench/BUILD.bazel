@@ -250,24 +250,18 @@ xnnpack_benchmark(
     ]),
 )
 
-[xnnpack_benchmark(
-    name = "%s_bench" % kernel,
-    srcs = [
-        "%s.cc" % kernel.replace("_", "-"),
-        "rsum-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-) for kernel in [
-    "qs8_rdsum",
-    "qu8_rdsum",
-    "qs8_rsum",
-    "qu8_rsum",
-    "f16_rsum",
-    "f16_f32acc_rsum",
-    "f32_rsum",
-    "f16_f32acc_rdsum",
-    "f32_rdsum",
-]]
+xnnpack_benchmark(
+    name = "pf16_gemm_minmax_bench",
+    srcs = ["pf16-gemm-minmax.cc"],
+    defines = xnnpack_kleidiai_defines(),
+    tags = xnnpack_slow_benchmark_tags(),
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":gemm_benchmark",
+        "//:isa_checks",
+    ] + xnnpack_if_kleidiai_enabled([
+        "@KleidiAI//kai/ukernels/matmul",
+    ]),
+)
 
 [xnnpack_benchmark(
     name = "%s_bench" % kernel,
@@ -277,20 +271,17 @@ xnnpack_benchmark(
     deps = MICROKERNEL_BENCHMARK_DEPS,
 ) for kernel in [
     "f16_raddstoreexpminusmax",
-    "f16_rmax",
-    "f16_rminmax",
-    "f16_rmin",
     "f32_raddexpminusmax",
     "f32_raddextexp",
     "f32_raddstoreexpminusmax",
-    "f32_rmax",
-    "f32_rminmax",
-    "f32_rmin",
     "f32_vscaleexpminusmax",
     "f32_vscaleextexp",
     "f16_vcmul",
     "f32_vcmul",
-    "s8_rminmax",
+    "rdminmax",
+    "rdsum",
+    "rminmax",
+    "rsum",
     "x8_lut",
 ]]
 

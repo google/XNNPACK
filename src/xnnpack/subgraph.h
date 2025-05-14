@@ -234,7 +234,7 @@ struct xnn_operator_data;
 typedef enum xnn_status (*xnn_create_operator_fn)(
     const struct xnn_node* node, const struct xnn_value* values,
     size_t num_values, struct xnn_operator_data* opdata,
-    struct xnn_code_cache* code_cache, xnn_weights_cache_t weights_cache);
+    xnn_weights_cache_t weights_cache);
 
 typedef enum xnn_status (*xnn_reshape_operator_fn)(
     struct xnn_operator_data* opdata, struct xnn_value* values,
@@ -372,8 +372,6 @@ struct xnn_node {
   // cluster. This value is properly initialized only in sparse inference
   // analysis of 1x1 Convolutions.
   size_t num_zeroes;
-  // Pointer to the runtime operator corresponding to this node.
-  struct xnn_operator* op;
   // Factory function to create an operator object from the node.
   xnn_create_operator_fn create;
   // Function to reshape an operator using opdata.

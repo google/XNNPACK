@@ -19,21 +19,6 @@ tools/xngen src/f32-velu/scalar-rr2-p6.c.in -D BATCH_TILE=4 -D WASM=0 -o src/f32
 tools/xngen src/f32-velu/scalar-rr2-p6.c.in -D BATCH_TILE=5 -D WASM=0 -o src/f32-velu/gen/f32-velu-scalar-rr2-p6-u5.c &
 tools/xngen src/f32-velu/scalar-rr2-p6.c.in -D BATCH_TILE=6 -D WASM=0 -o src/f32-velu/gen/f32-velu-scalar-rr2-p6-u6.c &
 
-##################################### WAsm ####################################
-tools/xngen src/f32-velu/scalar-rr2-lut16-p3.c.in -D BATCH_TILE=1 -D WASM=1 -o src/f32-velu/gen/f32-velu-wasm-rr2-lut16-p3-u1.c &
-tools/xngen src/f32-velu/scalar-rr2-lut16-p3.c.in -D BATCH_TILE=2 -D WASM=1 -o src/f32-velu/gen/f32-velu-wasm-rr2-lut16-p3-u2.c &
-tools/xngen src/f32-velu/scalar-rr2-lut16-p3.c.in -D BATCH_TILE=3 -D WASM=1 -o src/f32-velu/gen/f32-velu-wasm-rr2-lut16-p3-u3.c &
-tools/xngen src/f32-velu/scalar-rr2-lut16-p3.c.in -D BATCH_TILE=4 -D WASM=1 -o src/f32-velu/gen/f32-velu-wasm-rr2-lut16-p3-u4.c &
-tools/xngen src/f32-velu/scalar-rr2-lut16-p3.c.in -D BATCH_TILE=5 -D WASM=1 -o src/f32-velu/gen/f32-velu-wasm-rr2-lut16-p3-u5.c &
-tools/xngen src/f32-velu/scalar-rr2-lut16-p3.c.in -D BATCH_TILE=6 -D WASM=1 -o src/f32-velu/gen/f32-velu-wasm-rr2-lut16-p3-u6.c &
-
-tools/xngen src/f32-velu/scalar-rr2-p6.c.in -D BATCH_TILE=1 -D WASM=1 -o src/f32-velu/gen/f32-velu-wasm-rr2-p6-u1.c &
-tools/xngen src/f32-velu/scalar-rr2-p6.c.in -D BATCH_TILE=2 -D WASM=1 -o src/f32-velu/gen/f32-velu-wasm-rr2-p6-u2.c &
-tools/xngen src/f32-velu/scalar-rr2-p6.c.in -D BATCH_TILE=3 -D WASM=1 -o src/f32-velu/gen/f32-velu-wasm-rr2-p6-u3.c &
-tools/xngen src/f32-velu/scalar-rr2-p6.c.in -D BATCH_TILE=4 -D WASM=1 -o src/f32-velu/gen/f32-velu-wasm-rr2-p6-u4.c &
-tools/xngen src/f32-velu/scalar-rr2-p6.c.in -D BATCH_TILE=5 -D WASM=1 -o src/f32-velu/gen/f32-velu-wasm-rr2-p6-u5.c &
-tools/xngen src/f32-velu/scalar-rr2-p6.c.in -D BATCH_TILE=6 -D WASM=1 -o src/f32-velu/gen/f32-velu-wasm-rr2-p6-u6.c &
-
 ################################## WAsm SIMD ##################################
 tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=4  -D ARCH=ARM     -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-lut16-p3-u4.c &
 tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=8  -D ARCH=ARM     -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-lut16-p3-u8.c &

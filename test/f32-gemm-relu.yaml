@@ -101,19 +101,6 @@
 - name: xnn_f32_gemm_relu_ukernel_6x8s4__wasmrelaxedsimd_fma
   pack: xnn_pack_f32_gemm_goi_w
   k-block: 4
-# WAsm
-- name: xnn_f32_gemm_relu_ukernel_1x4__wasm
-  pack: xnn_pack_f32_gemm_goi_w
-  k-block: 1
-- name: xnn_f32_gemm_relu_ukernel_2x4__wasm
-  pack: xnn_pack_f32_gemm_goi_w
-  k-block: 1
-- name: xnn_f32_gemm_relu_ukernel_4x2__wasm
-  pack: xnn_pack_f32_gemm_goi_w
-  k-block: 1
-- name: xnn_f32_gemm_relu_ukernel_4x4__wasm
-  pack: xnn_pack_f32_gemm_goi_w
-  k-block: 1
 # Scalar
 - name: xnn_f32_gemm_relu_ukernel_1x4__scalar
   pack: xnn_pack_f32_gemm_goi_w

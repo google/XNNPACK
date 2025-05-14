@@ -34,10 +34,10 @@ void xnn_f16_f32acc_rsum_ukernel__f16c_u8(
   const uint16_t* i = (const uint16_t*) input;
   __m256 vacc0 = _mm256_setzero_ps();
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
-    const __m256 vt = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
+    const __m256 vt0 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
     i += 8;
 
-    vacc0 = _mm256_add_ps(vacc0, vt);
+    vacc0 = _mm256_add_ps(vacc0, vt0);
   }
   if XNN_UNLIKELY(batch != 0) {
     assert(batch >= 1 * sizeof(uint16_t));
