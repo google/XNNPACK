@@ -19,9 +19,12 @@
 #include "src/xnnpack/spmm.h"
 
 static void f32_spmm(benchmark::State& state,
-  xnn_f32_spmm_minmax_ukernel_fn spmm, uint32_t mr, uint32_t nr, float sparsity,
+  uint64_t arch_flags, xnn_f32_spmm_minmax_ukernel_fn spmm, uint32_t mr, uint32_t nr, float sparsity,
   xnn_init_f32_minmax_params_fn init_params)
 {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
+    return;
+  }
   const size_t mc = state.range(0);
   const size_t nc = state.range(1);
   const size_t kc = state.range(2);

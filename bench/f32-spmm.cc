@@ -17,7 +17,7 @@
 #include "src/xnnpack/microparams-init.h"
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, mr, nr, pipelined, kblock, datatype, params_type, init_params)\
 static void ukernel(benchmark::State& state, const char* net) {                                                    \
-  f32_spmm(state, ukernel, mr, nr,                                                                                 \
+  f32_spmm(state, arch_flags, ukernel, mr, nr,                                                                                 \
     /*sparsity=*/0.8f, init_params);                                                                               \
 }                                                                                                                  \
                                                                                                                    \
