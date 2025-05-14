@@ -372,8 +372,6 @@ struct xnn_node {
   // cluster. This value is properly initialized only in sparse inference
   // analysis of 1x1 Convolutions.
   size_t num_zeroes;
-  // Pointer to the runtime operator corresponding to this node.
-  struct xnn_operator* op;
   // Factory function to create an operator object from the node.
   xnn_create_operator_fn create;
   // Function to reshape an operator using opdata.
