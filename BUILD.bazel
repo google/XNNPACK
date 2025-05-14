@@ -1078,6 +1078,7 @@ xnnpack_cc_library(
     name = "subgraph",
     srcs = SUBGRAPH_SRCS,
     hdrs = [
+        "src/subgraph/subgraph-utils.h",
         "src/xnnpack/memory-planner.h",
         "src/xnnpack/reshape-helpers.h",
         "src/xnnpack/subgraph.h",
