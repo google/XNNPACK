@@ -705,7 +705,6 @@ enum xnn_status create_convolution2d_nhwc_qx8_f16_qc8w(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     const struct xnn_gemm_config *gemm_config,
     enum xnn_operator_type expected_operator_type,
@@ -806,7 +805,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_qd8_f16_qc8w(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
@@ -814,7 +812,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qd8_f16_qc8w(
   return create_convolution2d_nhwc_qx8_f16_qc8w(input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
                                                     kernel_height, kernel_width, subsampling_height, subsampling_width, dilation_height, dilation_width,
                                                     groups, group_input_channels, group_output_channels, input_channel_stride, output_channel_stride,
-                                                    kernel_scale, kernel, bias, output_min, output_max, flags, code_cache, weights_cache, gemm_config,
+                                                    kernel_scale, kernel, bias, output_min, output_max, flags, weights_cache, gemm_config,
                                                     xnn_operator_type_convolution_nhwc_qd8_f16_qc8w, convolution_op_out);
 }
 
@@ -840,7 +838,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_qdu8_f16_qc8w(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
@@ -848,7 +845,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qdu8_f16_qc8w(
   return create_convolution2d_nhwc_qx8_f16_qc8w(input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
                                                     kernel_height, kernel_width, subsampling_height, subsampling_width, dilation_height, dilation_width,
                                                     groups, group_input_channels, group_output_channels, input_channel_stride, output_channel_stride,
-                                                    kernel_scale, kernel, bias, output_min, output_max, flags, code_cache, weights_cache, gemm_config,
+                                                    kernel_scale, kernel, bias, output_min, output_max, flags, weights_cache, gemm_config,
                                                     xnn_operator_type_convolution_nhwc_qdu8_f16_qc8w, convolution_op_out);
 }
 
@@ -874,7 +871,6 @@ enum xnn_status create_convolution2d_nhwc_qx8_f32_qc8w(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     const struct xnn_gemm_config *gemm_config,
     enum xnn_operator_type expected_operator_type,
@@ -969,7 +965,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_qd8_f32_qc8w(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
@@ -980,7 +975,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qd8_f32_qc8w(
                                                 input_padding_left,
                                                 kernel_height, kernel_width, subsampling_height, subsampling_width, dilation_height,
                                                 dilation_width, groups, group_input_channels, group_output_channels, input_channel_stride, output_channel_stride,
-                                                kernel_scale, kernel, bias, output_min, output_max, flags, code_cache,
+                                                kernel_scale, kernel, bias, output_min, output_max, flags,
                                                 weights_cache, gemm_config, xnn_operator_type_convolution_nhwc_qd8_f32_qc8w, convolution_op_out);
 }
 
@@ -1006,7 +1001,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_qdu8_f32_qc8w(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
@@ -1017,7 +1011,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qdu8_f32_qc8w(
                                                 input_padding_left,
                                                 kernel_height, kernel_width, subsampling_height, subsampling_width, dilation_height,
                                                 dilation_width, groups, group_input_channels, group_output_channels, input_channel_stride, output_channel_stride,
-                                                kernel_scale, kernel, bias, output_min, output_max, flags, code_cache,
+                                                kernel_scale, kernel, bias, output_min, output_max, flags,
                                                 weights_cache, gemm_config, xnn_operator_type_convolution_nhwc_qdu8_f32_qc8w, convolution_op_out);
 }
 
@@ -1048,7 +1042,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_qu8(
     uint8_t output_min,
     uint8_t output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
@@ -1181,7 +1174,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8(
     int8_t output_min,
     int8_t output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
@@ -1326,7 +1318,6 @@ enum xnn_status create_convolution2d_nhwc_qx8_qc8w(
     int8_t output_min,
     int8_t output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     const struct xnn_gemm_config *gemm_config,
     xnn_operator_t* convolution_op_out)
@@ -1476,7 +1467,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8_qc8w(
     int8_t output_min,
     int8_t output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out) {
   const struct xnn_gemm_config* gemm_config = xnn_init_qs8_qc8w_gemm_config();
@@ -1485,7 +1475,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8_qc8w(
                                             dilation_width, groups, group_input_channels, group_output_channels,
                                             input_channel_stride, output_channel_stride, input_zero_point, input_scale,
                                             kernel_scale, kernel, bias, output_zero_point, output_scale, output_min, output_max,
-                                            flags, code_cache, weights_cache, gemm_config, convolution_op_out);
+                                            flags, weights_cache, gemm_config, convolution_op_out);
 }
 
 enum xnn_status xnn_create_convolution2d_nhwc_f16(
@@ -1509,7 +1499,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
@@ -1651,7 +1640,6 @@ enum xnn_status create_convolution2d_nhwc_f32(
     float output_max,
     uint32_t flags,
     const struct xnn_gemm_config* gemm_config,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
@@ -1771,7 +1759,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out) {
   const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
@@ -1803,7 +1790,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
                                        group_input_channels, group_output_channels,
                                        input_channel_stride, output_channel_stride,
                                        kernel, bias, output_min, output_max,
-                                       flags, gemm_config, code_cache,
+                                       flags, gemm_config,
                                        weights_cache, convolution_op_out);
 }
 
@@ -1816,7 +1803,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32_f16(
     size_t group_output_channels, size_t input_channel_stride,
     size_t output_channel_stride, const void* kernel, const void* bias,
     float output_min, float output_max, uint32_t flags,
-    xnn_code_cache_t code_cache, xnn_weights_cache_t weights_cache,
+    xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out) {
   // Convert the `f16` kernel and bias to `f32` in temporary buffers.
   const size_t num_kernel_entries = groups * group_input_channels *
@@ -1846,7 +1833,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32_f16(
       subsampling_width, dilation_height, dilation_width, groups,
       group_input_channels, group_output_channels, input_channel_stride,
       output_channel_stride, fp32_kernel_buffer, bias, output_min,
-      output_max, flags, code_cache, weights_cache, convolution_op_out);
+      output_max, flags, weights_cache, convolution_op_out);
 
   // Release temporary `f32` buffers.
   xnn_release_memory(fp32_kernel_buffer);
@@ -1876,7 +1863,6 @@ enum xnn_status xnn_create_fused_convolution2d_nhwc_f32(
     size_t num_post_operations,
     struct xnn_post_operation* post_operations,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {

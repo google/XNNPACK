@@ -430,7 +430,6 @@ enum xnn_status create_deconvolution2d_nhwc_qs8_qc8w(
     int8_t output_min,
     int8_t output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* deconvolution_op_out)
 {
@@ -545,7 +544,6 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qs8_qc8w(
     int8_t output_min,
     int8_t output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* deconvolution_op_out)
 {
@@ -600,7 +598,6 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qs8_qc8w(
     output_min,
     output_max,
     flags,
-    code_cache,
     weights_cache, deconvolution_op_out);
   xnn_release_simd_memory(requantization_scale);
   return status;
@@ -632,7 +629,6 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qs8(
     int8_t output_min,
     int8_t output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* deconvolution_op_out)
 {
@@ -684,7 +680,6 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qs8(
     output_min,
     output_max,
     flags,
-    code_cache,
     weights_cache, deconvolution_op_out
     );
   xnn_release_simd_memory(duplicated_requantization_scale);
@@ -719,7 +714,6 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qu8(
     uint8_t output_min,
     uint8_t output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* deconvolution_op_out)
 {
@@ -821,7 +815,6 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f16(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* deconvolution_op_out)
 {
@@ -924,7 +917,6 @@ enum xnn_status create_deconvolution2d_nhwc_qx8_f32_qc8w(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     const struct xnn_gemm_config * gemm_config,
     enum xnn_operator_type expected_operator_type,
@@ -1008,7 +1000,6 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qd8_f32_qc8w(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* deconvolution_op_out)
 {
@@ -1021,7 +1012,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qd8_f32_qc8w(
                                                   groups, group_input_channels, group_output_channels,
                                                   input_pixel_stride, output_pixel_stride,
                                                   kernel_scale, kernel, bias, output_min, output_max,
-                                                  flags, code_cache, weights_cache,
+                                                  flags, weights_cache,
                                                   gemm_config, xnn_operator_type_deconvolution_nhwc_qd8_f32_qc8w,
                                                   deconvolution_op_out);
 }
@@ -1048,7 +1039,6 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qdu8_f32_qc8w(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* deconvolution_op_out)
 {
@@ -1061,7 +1051,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qdu8_f32_qc8w(
                                                   groups, group_input_channels, group_output_channels,
                                                   input_pixel_stride, output_pixel_stride,
                                                   kernel_scale, kernel, bias, output_min, output_max,
-                                                  flags, code_cache, weights_cache,
+                                                  flags, weights_cache,
                                                   gemm_config, xnn_operator_type_deconvolution_nhwc_qdu8_f32_qc8w,
                                                   deconvolution_op_out);
 }
@@ -1087,7 +1077,6 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* deconvolution_op_out)
 {
@@ -1179,7 +1168,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32_f16(
     uint32_t groups, size_t group_input_channels, size_t group_output_channels,
     size_t input_pixel_stride, size_t output_pixel_stride, const void* kernel,
     const void* bias, float output_min, float output_max, uint32_t flags,
-    xnn_code_cache_t code_cache, xnn_weights_cache_t weights_cache,
+    xnn_weights_cache_t weights_cache,
     xnn_operator_t* deconvolution_op_out) {
   // Convert the `f16` kernel and bias to `f32` in temporary buffers.
   const size_t num_kernel_entries = groups * group_input_channels *
@@ -1209,7 +1198,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32_f16(
       stride_width, dilation_height, dilation_width, groups,
       group_input_channels, group_output_channels, input_pixel_stride,
       output_pixel_stride, fp32_kernel_buffer, bias, output_min, output_max,
-      flags, code_cache, weights_cache, deconvolution_op_out);
+      flags, weights_cache, deconvolution_op_out);
 
   // Release temporary `f32` buffers.
   xnn_release_memory(fp32_kernel_buffer);

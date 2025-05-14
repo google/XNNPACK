@@ -25,7 +25,6 @@ static enum xnn_status create_deconvolution_operator(
   const struct xnn_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
-  struct xnn_code_cache* code_cache,
   xnn_weights_cache_t weights_cache)
 {
   assert(node->num_inputs >= 2);
@@ -92,7 +91,6 @@ static enum xnn_status create_deconvolution_operator(
           node->activation.output_min,
           node->activation.output_max,
           flags,
-          code_cache,
           weights_cache,
           &opdata->operator_objects[0]);
       break;
@@ -124,7 +122,7 @@ static enum xnn_status create_deconvolution_operator(
                   node->params.deconvolution_2d
                       .groups /* output_pixel_stride */,
               filter_data, bias_data, node->activation.output_min,
-              node->activation.output_max, flags, code_cache, weights_cache,
+              node->activation.output_max, flags, weights_cache,
               &opdata->operator_objects[0]);
           break;
         }
@@ -150,7 +148,6 @@ static enum xnn_status create_deconvolution_operator(
               node->activation.output_min,
               node->activation.output_max,
               node->flags,
-              code_cache,
               weights_cache,
               &opdata->operator_objects[0]);
           break;
@@ -179,7 +176,6 @@ static enum xnn_status create_deconvolution_operator(
                   node->activation.output_min,
                   node->activation.output_max,
                   node->flags,
-                  code_cache,
                   weights_cache,
                   &opdata->operator_objects[0]);
               break;
@@ -206,7 +202,6 @@ static enum xnn_status create_deconvolution_operator(
                   node->activation.output_min,
                   node->activation.output_max,
                   node->flags,
-                  code_cache,
                   weights_cache,
                   &opdata->operator_objects[0]);
               break;
@@ -251,7 +246,6 @@ static enum xnn_status create_deconvolution_operator(
               output_min,
               output_max,
               node->flags,
-              code_cache,
               weights_cache,
               &opdata->operator_objects[0]);
           break;
@@ -287,7 +281,6 @@ static enum xnn_status create_deconvolution_operator(
               output_min,
               output_max,
               node->flags,
-              code_cache,
               weights_cache,
               &opdata->operator_objects[0]);
           break;
@@ -328,7 +321,6 @@ static enum xnn_status create_deconvolution_operator(
           output_min,
           output_max,
           node->flags,
-          code_cache,
           weights_cache,
           &opdata->operator_objects[0]);
       break;

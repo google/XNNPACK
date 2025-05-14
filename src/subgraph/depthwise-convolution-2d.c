@@ -25,7 +25,6 @@ static enum xnn_status create_depthwise_convolution_operator(
   const struct xnn_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
-  struct xnn_code_cache* code_cache,
   xnn_weights_cache_t weights_cache)
 {
   assert(node->num_inputs >= 2);
@@ -87,7 +86,6 @@ static enum xnn_status create_depthwise_convolution_operator(
           node->activation.output_min,
           node->activation.output_max,
           node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION,
-          code_cache,
           weights_cache,
           &opdata->operator_objects[0]);
         break;
@@ -120,7 +118,7 @@ static enum xnn_status create_depthwise_convolution_operator(
                     node->params.depthwise_convolution_2d
                         .depth_multiplier /* output_channel_stride */,
                 filter_data, bias_data, node->activation.output_min,
-                node->activation.output_max, flags, code_cache, weights_cache,
+                node->activation.output_max, flags, weights_cache,
                 &opdata->operator_objects[0]);
             break;
           }
@@ -148,7 +146,7 @@ static enum xnn_status create_depthwise_convolution_operator(
                         .depth_multiplier /* output_channel_stride */,
                 filter_data, bias_data, node->activation.output_min,
                 node->activation.output_max,
-                node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION, code_cache,
+                node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION,
                 weights_cache, &opdata->operator_objects[0]);
             break;
           default:
@@ -189,7 +187,7 @@ static enum xnn_status create_depthwise_convolution_operator(
                         .depth_multiplier /* output_channel_stride */,
                 filter_data, bias_data, node->activation.output_min,
                 node->activation.output_max,
-                node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION, NULL, NULL,
+                node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION, NULL,
                 &opdata->operator_objects[0]);
             break;
           case xnn_datatype_fp16:
@@ -216,7 +214,7 @@ static enum xnn_status create_depthwise_convolution_operator(
                         .depth_multiplier /* output_channel_stride */,
                 filter_data, bias_data, node->activation.output_min,
                 node->activation.output_max,
-                node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION, NULL, NULL,
+                node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION, NULL,
                 &opdata->operator_objects[0]);
             break;
           default:
@@ -248,7 +246,6 @@ static enum xnn_status create_depthwise_convolution_operator(
               node->activation.output_max,
               node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION,
               NULL,
-              NULL,
               &opdata->operator_objects[0]);
             break;
           case xnn_datatype_fp16:
@@ -273,7 +270,6 @@ static enum xnn_status create_depthwise_convolution_operator(
               node->activation.output_min,
               node->activation.output_max,
               node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION | XNN_FLAG_FP32_STATIC_WEIGHTS,
-              NULL,
               NULL,
               &opdata->operator_objects[0]);
             break;
@@ -312,7 +308,6 @@ static enum xnn_status create_depthwise_convolution_operator(
           output_scale, output_min, output_max,
           node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION,
           NULL,
-          NULL,
           &opdata->operator_objects[0]);
         break;
       }
@@ -346,7 +341,6 @@ static enum xnn_status create_depthwise_convolution_operator(
           (int8_t) output_zero_point,
           output_scale, output_min, output_max,
           node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION,
-          NULL,
           NULL,
           &opdata->operator_objects[0]);
         break;
@@ -382,7 +376,6 @@ static enum xnn_status create_depthwise_convolution_operator(
           (uint8_t) output_zero_point,
           output_scale, output_min, output_max,
           node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION,
-          NULL,
           NULL,
           &opdata->operator_objects[0]);
         break;

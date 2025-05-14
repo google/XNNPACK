@@ -287,7 +287,6 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
@@ -629,7 +628,6 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
@@ -949,7 +947,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32_f16(
     size_t group_output_channels, size_t input_channel_stride,
     size_t output_channel_stride, const void* kernel, const void* bias,
     float output_min, float output_max, uint32_t flags,
-    xnn_code_cache_t code_cache, xnn_weights_cache_t weights_cache,
+    xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out) {
   // Convert the `f16` kernel and bias to `f32` in temporary buffers.
   const size_t num_kernel_entries = groups * group_input_channels *
@@ -979,7 +977,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32_f16(
       subsampling_width, dilation_height, dilation_width, groups,
       group_input_channels, group_output_channels, input_channel_stride,
       output_channel_stride, fp32_kernel_buffer, bias, output_min, output_max,
-      flags, code_cache, weights_cache, convolution_op_out);
+      flags, weights_cache, convolution_op_out);
 
   // Release temporary `f32` buffers.
   xnn_release_memory(fp32_kernel_buffer);
