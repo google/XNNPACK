@@ -63,6 +63,14 @@ static enum xnn_status create_reduce_nd(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
     goto error;
   }
+  reduce_op->dynamic_context.reduce = xnn_allocate_zero_simd_memory(sizeof(struct reduce_context));
+  if (reduce_op->dynamic_context.reduce == NULL) {
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator descriptor",
+      sizeof(struct reduce_context), xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
+
 
   reduce_op->type = operator_type;
   reduce_op->flags = flags;
@@ -233,7 +241,7 @@ static enum xnn_status reshape_reduce_nd(
                                                   scale);
     }
 
-    reduce_op->context.reduce = (struct reduce_context) {
+    *reduce_op->dynamic_context.reduce = (struct reduce_context) {
       .channels = axis_dim << log2_data_element_size,
       .accumulation_element_size = UINT32_C(1) << log2_accumulator_element_size,
       .output_element_size = UINT32_C(1) << log2_data_element_size,
@@ -242,7 +250,7 @@ static enum xnn_status reshape_reduce_nd(
     };
 
     if (is_minmax) {
-      reduce_op->context.reduce.fill_ukernel = reduce_op->fill_config->ukernel;
+      reduce_op->dynamic_context.reduce->fill_ukernel = reduce_op->fill_config->ukernel;
     }
 
     reduce_op->compute[0].task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_contiguous_reduce;
@@ -251,9 +259,9 @@ static enum xnn_status reshape_reduce_nd(
     reduce_op->compute[0].range[2] = normalized_input_shape[4];
     reduce_op->compute[0].tile[0] = 1;
     reduce_op->compute[0].tile[1] = 2;
-    reduce_op->context.reduce.output_stride[XNN_MAX_TENSOR_DIMS / 2 - 1] = 1;
+    reduce_op->dynamic_context.reduce->output_stride[XNN_MAX_TENSOR_DIMS / 2 - 1] = 1;
     for (int i = XNN_MAX_TENSOR_DIMS / 2 -  2; i >= 0; --i) {
-      reduce_op->context.reduce.output_stride[i] = (reduce_op->context.reduce.output_stride[i + 1] * normalized_input_shape[(i + 1) * 2]);
+      reduce_op->dynamic_context.reduce->output_stride[i] = (reduce_op->dynamic_context.reduce->output_stride[i + 1] * normalized_input_shape[(i + 1) * 2]);
     }
   } else {
     // Reduction along the non-innermost dimension
@@ -287,7 +295,7 @@ static enum xnn_status reshape_reduce_nd(
       reduce_op->channels = channel_like_dim;
     }
 
-    reduce_op->context.reduce = (struct reduce_context) {
+    *reduce_op->dynamic_context.reduce = (struct reduce_context) {
       .zero = reduce_op->zero_buffer,
       .channels = axis_dim,
       .ukernel.discontiguous_reduce =
@@ -298,7 +306,7 @@ static enum xnn_status reshape_reduce_nd(
     };
 
     if (is_minmax) {
-      reduce_op->context.reduce.fill_ukernel = reduce_op->fill_config->ukernel;
+      reduce_op->dynamic_context.reduce->fill_ukernel = reduce_op->fill_config->ukernel;
     }
 
     reduce_op->compute[0].task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_discontiguous_reduce;
@@ -307,16 +315,16 @@ static enum xnn_status reshape_reduce_nd(
     reduce_op->compute[0].range[2] = normalized_input_shape[5];
     reduce_op->compute[0].tile[0] = 1;
     reduce_op->compute[0].tile[1] = normalized_input_shape[5];
-    reduce_op->context.reduce.output_stride[XNN_MAX_TENSOR_DIMS / 2 - 1] = 1;
+    reduce_op->dynamic_context.reduce->output_stride[XNN_MAX_TENSOR_DIMS / 2 - 1] = 1;
     for (int i = XNN_MAX_TENSOR_DIMS / 2 -  2; i >= 0; --i) {
-      reduce_op->context.reduce.output_stride[i] = (reduce_op->context.reduce.output_stride[i + 1] * normalized_input_shape[(i * 2+3)]);
+      reduce_op->dynamic_context.reduce->output_stride[i] = (reduce_op->dynamic_context.reduce->output_stride[i + 1] * normalized_input_shape[(i * 2+3)]);
     }
   }
-  memcpy(&reduce_op->context.reduce.params, &reduce_op->params.reduce, sizeof(reduce_op->params.reduce));
-  memcpy(&reduce_op->context.reduce.cvt_params, &reduce_op->params2.unary, sizeof(reduce_op->params2.unary));
-  reduce_op->context.reduce.input_stride[XNN_MAX_TENSOR_DIMS - 1] = (1 << log2_data_element_size);
+  memcpy(&reduce_op->dynamic_context.reduce->params, &reduce_op->params.reduce, sizeof(reduce_op->params.reduce));
+  memcpy(&reduce_op->dynamic_context.reduce->cvt_params, &reduce_op->params2.unary, sizeof(reduce_op->params2.unary));
+  reduce_op->dynamic_context.reduce->input_stride[XNN_MAX_TENSOR_DIMS - 1] = (1 << log2_data_element_size);
   if (reduce_op->cvt_config) {
-    reduce_op->context.reduce.cvt_ukernel = reduce_op->cvt_config->ukernel;
+    reduce_op->dynamic_context.reduce->cvt_ukernel = reduce_op->cvt_config->ukernel;
     // int32 is not actually a quantized type, so we need to include the input
     // zero point (multiplied by the number of reduction elements) as part of
     // the computation of the output zero point.
@@ -332,17 +340,17 @@ static enum xnn_status reshape_reduce_nd(
     //
     //   inv_y_scale' = x_scale * inv_y_scale
     //   y_zero_point' = y_zero_point - x_zero_point * x_scale * inv_y_scale
-    reduce_op->context.reduce.cvt_params.reference.inv_y_scale =
-        reduce_op->context.reduce.params.qs8.scale;
-    reduce_op->context.reduce.cvt_params.reference.y_zero_point -=
+    reduce_op->dynamic_context.reduce->cvt_params.reference.inv_y_scale =
+        reduce_op->dynamic_context.reduce->params.qs8.scale;
+    reduce_op->dynamic_context.reduce->cvt_params.reference.y_zero_point -=
         ((int32_t) num_reduction_elements *
-        reduce_op->context.reduce.cvt_params.reference.x_zero_point) *
-        reduce_op->context.reduce.cvt_params.reference.inv_y_scale;
+        reduce_op->dynamic_context.reduce->cvt_params.reference.x_zero_point) *
+        reduce_op->dynamic_context.reduce->cvt_params.reference.inv_y_scale;
   }
   for (int i = XNN_MAX_TENSOR_DIMS - 2; i >= 0; --i) {
-    reduce_op->context.reduce.input_stride[i] = (reduce_op->context.reduce.input_stride[i + 1] * normalized_input_shape[i + 1]);
+    reduce_op->dynamic_context.reduce->input_stride[i] = (reduce_op->dynamic_context.reduce->input_stride[i + 1] * normalized_input_shape[i + 1]);
   }
-  memcpy(reduce_op->context.reduce.input_shape, normalized_input_shape, XNN_MAX_TENSOR_DIMS * sizeof(size_t));
+  memcpy(reduce_op->dynamic_context.reduce->input_shape, normalized_input_shape, XNN_MAX_TENSOR_DIMS * sizeof(size_t));
   reduce_op->state = xnn_run_state_needs_setup;
 
   return xnn_status_success;
@@ -379,9 +387,9 @@ static enum xnn_status setup_reduce_nd(
       break;
   }
 
-  reduce_op->context.reduce.input = input;
-  reduce_op->context.reduce.output = output;
-  reduce_op->context.reduce.workspace = workspace;
+  reduce_op->dynamic_context.reduce->input = input;
+  reduce_op->dynamic_context.reduce->output = output;
+  reduce_op->dynamic_context.reduce->workspace = workspace;
   reduce_op->state = xnn_run_state_ready;
 
   return xnn_status_success;
