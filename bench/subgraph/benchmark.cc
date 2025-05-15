@@ -213,6 +213,13 @@ static void FP32LayerNorm(benchmark::State& state) {
   });
 }
 
+static void FP32L2Norm(benchmark::State& state) {
+  BenchmarkInvoke(state, [&state]() {
+    return models::FP32L2Norm(state.range(0), state.range(1), state.range(2),
+                                 state.range(3));
+  });
+}
+
 static void FP32SoftmaxDecomp(benchmark::State& state) {
   BenchmarkInvoke(state, [&state]() {
     return models::FP32Softmax(state.range(0), state.range(1), state.range(2),
@@ -250,6 +257,13 @@ static void AttentionArguments(benchmark::internal::Benchmark* b) {
 }
 
 static void LayerNormArguments(benchmark::internal::Benchmark* b) {
+  b->ArgNames({"M", "N", "K", "NormMask"});
+  for (int norm_mask = 1; norm_mask < 8; norm_mask++) {
+    b->Args({128, 256, 512, norm_mask});
+  }
+}
+
+static void L2NormArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"M", "N", "K", "NormMask"});
   for (int norm_mask = 1; norm_mask < 8; norm_mask++) {
     b->Args({128, 256, 512, norm_mask});
@@ -319,6 +333,11 @@ BENCHMARK(FP32LayerNorm)
     ->Unit(benchmark::kMicrosecond)
     ->UseRealTime()
     ->Apply(LayerNormArguments);
+
+BENCHMARK(FP32L2Norm)
+    ->Unit(benchmark::kMicrosecond)
+    ->UseRealTime()
+    ->Apply(L2NormArguments);
 
 BENCHMARK(FP32SoftmaxDecomp)
     ->Unit(benchmark::kMicrosecond)

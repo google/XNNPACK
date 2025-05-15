@@ -13,6 +13,7 @@ IF(XNNPACK_BUILD_LIBRARY)
     fp32-depthwise-separable.cc
     fp32-elementwise.cc
     fp32-layer-norm.cc
+    fp32-l2-norm.cc
     fp32-mobilenet-v1.cc
     fp32-mobilenet-v2.cc
     fp32-mobilenet-v3-large.cc

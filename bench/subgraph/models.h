@@ -50,6 +50,9 @@ xnn_subgraph_t FP32Elementwise(size_t batch_size, size_t num_elements,
 // `norm_mask`.
 xnn_subgraph_t FP32LayerNorm(size_t m, size_t n, size_t k, uint32_t norm_mask);
 
+// Similar to the above, but computes the L2 norm.
+xnn_subgraph_t FP32L2Norm(size_t m, size_t n, size_t k, uint32_t norm_mask);
+
 // Similar to the above, but computes the softmax instead of the layer norm.
 // If `use_softmax` is `false`, a "decomposed" subgraph which computes the
 // softmax using unary and binary elementwise ops and reduction ops, is used,
