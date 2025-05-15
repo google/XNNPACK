@@ -191,6 +191,15 @@ static enum xnn_status create_deconvolution2d_nhwc(
         subconvolution_buffer_size, xnn_operator_type_to_string(operator_type));
       goto error;
     }
+  } else {
+    deconvolution_op->dynamic_context.igemm = xnn_allocate_zero_simd_memory(sizeof(struct igemm_op_context));
+    if (deconvolution_op->dynamic_context.igemm == NULL) {
+      xnn_log_error(
+          "failed to allocate %zu bytes for %s operator descriptor",
+          sizeof(struct igemm_op_context), xnn_operator_type_to_string(operator_type));
+      goto error;
+    }
+
   }
   const size_t aligned_total_weights_size = round_up_po2(packed_group_weights_size * groups, XNN_ALLOCATION_ALIGNMENT);
   void* weights_ptr = xnn_get_pointer_to_write_weights(
@@ -1283,7 +1292,7 @@ static enum xnn_status reshape_conv_path(
 
   const size_t w_stride = extra_weights_element_size +
     (round_up_po2(group_input_channels, deconvolution_op->ukernel.igemm->kr * deconvolution_op->ukernel.igemm->sr) * kernel_size << log2_filter_element_size);
-  deconvolution_op->context.igemm.igemm = (struct igemm_context){
+  deconvolution_op->dynamic_context.igemm->igemm = (struct igemm_context){
       .ks = kernel_size,
       .ks_scaled = kernel_size * mr * sizeof(void*),
       .kc = group_input_channels << log2_input_element_size,
@@ -1297,8 +1306,7 @@ static enum xnn_status reshape_conv_path(
       .ga_stride = group_input_channels << log2_input_element_size,
       .gw_stride = w_stride * round_up(group_output_channels, nr),
       .gc_stride = group_output_channels << log2_output_element_size,
-      .ba_stride =
-          input_height * input_width * deconvolution_op->input_pixel_stride
+      .ba_stride = input_height * input_width * deconvolution_op->input_pixel_stride
           << log2_input_element_size,
       .bc_stride = output_size * deconvolution_op->output_pixel_stride
                    << log2_output_element_size,
@@ -1306,7 +1314,7 @@ static enum xnn_status reshape_conv_path(
       .ukernel = igemm_ukernel,
       .mr = mr,
   };
-  memcpy(&deconvolution_op->context.igemm.igemm.params, params, params_size);
+  memcpy(&deconvolution_op->dynamic_context.igemm->igemm.params, params, params_size);
 
   // Compute the optimal tile size for this iGEMM.
   const size_t nc = xnn_gemm_best_tile_size(
@@ -1315,8 +1323,8 @@ static enum xnn_status reshape_conv_path(
       /*m_stride=*/kernel_size * sizeof(void*) +
           (input_width * deconvolution_op->input_pixel_stride
            << log2_input_element_size),
-      /*n_stride=*/deconvolution_op->context.igemm.igemm.w_stride,
-      /*cm_stride=*/deconvolution_op->context.igemm.igemm.cm_stride,
+      /*n_stride=*/deconvolution_op->dynamic_context.igemm->igemm.w_stride,
+      /*cm_stride=*/deconvolution_op->dynamic_context.igemm->igemm.cm_stride,
       /*cn_stride=*/1 << log2_output_element_size, mr, nr, num_threads);
 
   size_t igemm_compute_index = 0;
@@ -2079,11 +2087,11 @@ static enum xnn_status setup_conv_path(
 {
   assert(deconvolution_op->ukernel.type == xnn_microkernel_type_igemm);
 
-  deconvolution_op->context.igemm.igemm.a_offset = (size_t) ((uintptr_t) input - (uintptr_t) deconvolution_op->last_input);
-  deconvolution_op->context.igemm.igemm.c = deconvolution_op->output;
-  deconvolution_op->context.igemm.igemm.zero_size = deconvolution_op->zero_size;
-  deconvolution_op->context.igemm.igemm.zero_buffers = deconvolution_op->zero_buffers;
-  deconvolution_op->context.igemm.igemm.quantization_params = deconvolution_op->quantization_params;
+  deconvolution_op->dynamic_context.igemm->igemm.a_offset = (size_t) ((uintptr_t) input - (uintptr_t) deconvolution_op->last_input);
+  deconvolution_op->dynamic_context.igemm->igemm.c = deconvolution_op->output;
+  deconvolution_op->dynamic_context.igemm->igemm.zero_size = deconvolution_op->zero_size;
+  deconvolution_op->dynamic_context.igemm->igemm.zero_buffers = deconvolution_op->zero_buffers;
+  deconvolution_op->dynamic_context.igemm->igemm.quantization_params = deconvolution_op->quantization_params;
 
   deconvolution_op->state = xnn_run_state_ready;
   return xnn_status_success;

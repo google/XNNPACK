@@ -2237,6 +2237,7 @@ enum xnn_status xnn_run_operator_with_index(
     flags |= PTHREADPOOL_FLAG_YIELD_WORKERS;
   }
   for (size_t i = 0; i < XNN_MAX_COMPUTE_INVOCATIONS; i++) {
+    const void* context = op->dynamic_context.gemm ? op->dynamic_context.gemm : (const void*)&op->context;
     switch (op->compute[i].type) {
       case xnn_parallelization_type_invalid:
         break;
@@ -2245,7 +2246,7 @@ enum xnn_status xnn_run_operator_with_index(
         pthreadpool_parallelize_1d(
             threadpool,
             op->compute[i].task_1d,
-            (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
+            (void*) ((uintptr_t) context + op->compute[i].context_offset),
             op->compute[i].range[0],
             flags);
         break;
@@ -2254,7 +2255,7 @@ enum xnn_status xnn_run_operator_with_index(
         pthreadpool_parallelize_1d_with_thread(
             threadpool,
             op->compute[i].task_1d_with_thread,
-            (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
+            (void*) ((uintptr_t) context + op->compute[i].context_offset),
             op->compute[i].range[0],
             flags);
         break;
@@ -2264,7 +2265,7 @@ enum xnn_status xnn_run_operator_with_index(
         pthreadpool_parallelize_1d_tile_1d(
             threadpool,
             op->compute[i].task_1d_tile_1d,
-            (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
+            (void*) ((uintptr_t) context + op->compute[i].context_offset),
             op->compute[i].range[0],
             op->compute[i].tile[0],
             flags);
@@ -2274,7 +2275,7 @@ enum xnn_status xnn_run_operator_with_index(
         assert(op->compute[i].tile[0] != 0);
         pthreadpool_parallelize_1d_tile_1d_dynamic(
             threadpool, op->compute[i].task_1d_tile_1d_dynamic,
-            (void*)((uintptr_t)&op->context + op->compute[i].context_offset),
+            (void*)((uintptr_t)context + op->compute[i].context_offset),
             op->compute[i].range[0], op->compute[i].tile[0], flags);
         break;
       case xnn_parallelization_type_2d:
@@ -2283,7 +2284,7 @@ enum xnn_status xnn_run_operator_with_index(
         pthreadpool_parallelize_2d(
             threadpool,
             op->compute[i].task_2d,
-            (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
+            (void*) ((uintptr_t) context + op->compute[i].context_offset),
             op->compute[i].range[0], op->compute[i].range[1],
             flags);
         break;
@@ -2293,7 +2294,7 @@ enum xnn_status xnn_run_operator_with_index(
         pthreadpool_parallelize_2d_with_thread(
             threadpool,
             op->compute[i].task_2d_with_thread,
-            (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
+            (void*) ((uintptr_t) context + op->compute[i].context_offset),
             op->compute[i].range[0], op->compute[i].range[1],
             flags);
         break;
@@ -2304,7 +2305,7 @@ enum xnn_status xnn_run_operator_with_index(
         pthreadpool_parallelize_2d_tile_1d(
             threadpool,
             op->compute[i].task_2d_tile_1d,
-            (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
+            (void*) ((uintptr_t) context + op->compute[i].context_offset),
             op->compute[i].range[0], op->compute[i].range[1],
             op->compute[i].tile[0],
             flags);
@@ -2317,7 +2318,7 @@ enum xnn_status xnn_run_operator_with_index(
         pthreadpool_parallelize_2d_tile_2d(
             threadpool,
             op->compute[i].task_2d_tile_2d,
-            (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
+            (void*) ((uintptr_t) context + op->compute[i].context_offset),
             op->compute[i].range[0], op->compute[i].range[1],
             op->compute[i].tile[0], op->compute[i].tile[1],
             flags);
@@ -2328,7 +2329,7 @@ enum xnn_status xnn_run_operator_with_index(
         assert(op->compute[i].tile[0] != 0);
         pthreadpool_parallelize_2d_tile_1d_dynamic(
             threadpool, op->compute[i].task_2d_tile_1d_dynamic,
-            (void*)((uintptr_t)&op->context + op->compute[i].context_offset),
+            (void*)((uintptr_t)context + op->compute[i].context_offset),
             op->compute[i].range[0], op->compute[i].range[1],
             op->compute[i].tile[0], flags);
         break;
@@ -2339,7 +2340,7 @@ enum xnn_status xnn_run_operator_with_index(
         assert(op->compute[i].tile[1] != 0);
         pthreadpool_parallelize_2d_tile_2d_dynamic(
             threadpool, op->compute[i].task_2d_tile_2d_dynamic,
-            (void*)((uintptr_t)&op->context + op->compute[i].context_offset),
+            (void*)((uintptr_t)context + op->compute[i].context_offset),
             op->compute[i].range[0], op->compute[i].range[1],
             op->compute[i].tile[0], op->compute[i].tile[1], flags);
         break;
@@ -2350,7 +2351,7 @@ enum xnn_status xnn_run_operator_with_index(
         pthreadpool_parallelize_3d(
             threadpool,
             op->compute[i].task_3d,
-            (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
+            (void*) ((uintptr_t) context + op->compute[i].context_offset),
             op->compute[i].range[0], op->compute[i].range[1], op->compute[i].range[2],
             flags);
         break;
@@ -2362,7 +2363,7 @@ enum xnn_status xnn_run_operator_with_index(
         pthreadpool_parallelize_3d_tile_1d(
             threadpool,
             op->compute[i].task_3d_tile_1d,
-            (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
+            (void*) ((uintptr_t) context + op->compute[i].context_offset),
             op->compute[i].range[0], op->compute[i].range[1], op->compute[i].range[2],
             op->compute[i].tile[0],
             flags);
@@ -2375,7 +2376,7 @@ enum xnn_status xnn_run_operator_with_index(
         pthreadpool_parallelize_3d_tile_1d_with_thread(
             threadpool,
             op->compute[i].task_3d_tile_1d_with_thread,
-            (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
+            (void*) ((uintptr_t) context + op->compute[i].context_offset),
             op->compute[i].range[0], op->compute[i].range[1], op->compute[i].range[2],
             op->compute[i].tile[0],
             flags);
@@ -2389,7 +2390,7 @@ enum xnn_status xnn_run_operator_with_index(
         pthreadpool_parallelize_3d_tile_2d(
             threadpool,
             op->compute[i].task_3d_tile_2d,
-            (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
+            (void*) ((uintptr_t) context + op->compute[i].context_offset),
             op->compute[i].range[0], op->compute[i].range[1], op->compute[i].range[2],
             op->compute[i].tile[0], op->compute[i].tile[1],
             flags);
@@ -2402,7 +2403,7 @@ enum xnn_status xnn_run_operator_with_index(
         assert(op->compute[i].tile[1] != 0);
         pthreadpool_parallelize_3d_tile_2d_dynamic(
             threadpool, op->compute[i].task_3d_tile_2d_dynamic,
-            (void*)((uintptr_t)&op->context + op->compute[i].context_offset),
+            (void*)((uintptr_t)context + op->compute[i].context_offset),
             op->compute[i].range[0], op->compute[i].range[1],
             op->compute[i].range[2], op->compute[i].tile[0],
             op->compute[i].tile[1], flags);
@@ -2415,7 +2416,7 @@ enum xnn_status xnn_run_operator_with_index(
         pthreadpool_parallelize_4d(
             threadpool,
             op->compute[i].task_4d,
-            (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
+            (void*) ((uintptr_t) context + op->compute[i].context_offset),
             op->compute[i].range[0], op->compute[i].range[1], op->compute[i].range[2], op->compute[i].range[3],
             flags);
         break;
@@ -2429,7 +2430,7 @@ enum xnn_status xnn_run_operator_with_index(
         pthreadpool_parallelize_4d_tile_2d(
             threadpool,
             op->compute[i].task_4d_tile_2d,
-            (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
+            (void*) ((uintptr_t) context + op->compute[i].context_offset),
             op->compute[i].range[0], op->compute[i].range[1], op->compute[i].range[2], op->compute[i].range[3],
             op->compute[i].tile[0], op->compute[i].tile[1],
             flags);
@@ -2443,7 +2444,7 @@ enum xnn_status xnn_run_operator_with_index(
         assert(op->compute[i].tile[1] != 0);
         pthreadpool_parallelize_4d_tile_2d_dynamic(
             threadpool, op->compute[i].task_4d_tile_2d_dynamic,
-            (void*)((uintptr_t)&op->context + op->compute[i].context_offset),
+            (void*)((uintptr_t)context + op->compute[i].context_offset),
             op->compute[i].range[0], op->compute[i].range[1],
             op->compute[i].range[2], op->compute[i].range[3],
             op->compute[i].tile[0], op->compute[i].tile[1], flags);
@@ -2457,7 +2458,7 @@ enum xnn_status xnn_run_operator_with_index(
         pthreadpool_parallelize_5d(
             threadpool,
             op->compute[i].task_5d,
-            (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
+            (void*) ((uintptr_t) context + op->compute[i].context_offset),
             op->compute[i].range[0], op->compute[i].range[1], op->compute[i].range[2], op->compute[i].range[3],
               op->compute[i].range[4],
             flags);
@@ -2473,7 +2474,7 @@ enum xnn_status xnn_run_operator_with_index(
         pthreadpool_parallelize_5d_tile_2d(
             threadpool,
             op->compute[i].task_5d_tile_2d,
-            (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
+            (void*) ((uintptr_t) context + op->compute[i].context_offset),
             op->compute[i].range[0], op->compute[i].range[1], op->compute[i].range[2], op->compute[i].range[3],
               op->compute[i].range[4],
             op->compute[i].tile[0], op->compute[i].tile[1],
@@ -2491,7 +2492,7 @@ enum xnn_status xnn_run_operator_with_index(
         pthreadpool_parallelize_6d_tile_2d(
             threadpool,
             op->compute[i].task_6d_tile_2d,
-            (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
+            (void*) ((uintptr_t) context + op->compute[i].context_offset),
             op->compute[i].range[0], op->compute[i].range[1], op->compute[i].range[2], op->compute[i].range[3],
               op->compute[i].range[4], op->compute[i].range[5],
             op->compute[i].tile[0], op->compute[i].tile[1],
@@ -2505,7 +2506,7 @@ enum xnn_status xnn_run_operator_with_index(
         pthreadpool_parallelize_2d_tile_1d_with_uarch(
             threadpool,
             op->compute[i].task_2d_tile_1d_with_id,
-            (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
+            (void*) ((uintptr_t) context + op->compute[i].context_offset),
             0 /* default uarch index */, XNN_MAX_UARCH_TYPES - 1,
             op->compute[i].range[0], op->compute[i].range[1],
             op->compute[i].tile[0],
@@ -2519,7 +2520,7 @@ enum xnn_status xnn_run_operator_with_index(
         pthreadpool_parallelize_2d_tile_2d_with_uarch(
             threadpool,
             op->compute[i].task_2d_tile_2d_with_id,
-            (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
+            (void*) ((uintptr_t) context + op->compute[i].context_offset),
             0 /* default uarch index */, XNN_MAX_UARCH_TYPES - 1,
             op->compute[i].range[0], op->compute[i].range[1],
             op->compute[i].tile[0], op->compute[i].tile[1],
@@ -2532,7 +2533,7 @@ enum xnn_status xnn_run_operator_with_index(
         assert(op->compute[i].tile[1] != 0);
         pthreadpool_parallelize_2d_tile_2d_dynamic_with_uarch(
             threadpool, op->compute[i].task_2d_tile_2d_dynamic_with_id,
-            (void*)((uintptr_t)&op->context + op->compute[i].context_offset),
+            (void*)((uintptr_t)context + op->compute[i].context_offset),
             /*default_uarch_index=*/0, XNN_MAX_UARCH_TYPES - 1,
             op->compute[i].range[0], op->compute[i].range[1],
             op->compute[i].tile[0], op->compute[i].tile[1], flags);
@@ -2545,7 +2546,7 @@ enum xnn_status xnn_run_operator_with_index(
         pthreadpool_parallelize_3d_tile_1d_with_uarch(
             threadpool,
             op->compute[i].task_3d_tile_1d_with_id,
-            (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
+            (void*) ((uintptr_t) context + op->compute[i].context_offset),
             0 /* default uarch index */, XNN_MAX_UARCH_TYPES - 1,
             op->compute[i].range[0], op->compute[i].range[1], op->compute[i].range[2],
             op->compute[i].tile[0],
@@ -2559,7 +2560,7 @@ enum xnn_status xnn_run_operator_with_index(
         pthreadpool_parallelize_3d_tile_1d_with_uarch_with_thread(
             threadpool,
             op->compute[i].task_3d_tile_1d_with_id_with_thread,
-            (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
+            (void*) ((uintptr_t) context + op->compute[i].context_offset),
             0 /* default uarch index */, XNN_MAX_UARCH_TYPES - 1,
             op->compute[i].range[0], op->compute[i].range[1], op->compute[i].range[2],
             op->compute[i].tile[0],
@@ -2574,7 +2575,7 @@ enum xnn_status xnn_run_operator_with_index(
         pthreadpool_parallelize_3d_tile_2d_with_uarch(
             threadpool,
             op->compute[i].task_3d_tile_2d_with_id,
-            (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
+            (void*) ((uintptr_t) context + op->compute[i].context_offset),
             0 /* default uarch index */, XNN_MAX_UARCH_TYPES - 1,
             op->compute[i].range[0], op->compute[i].range[1], op->compute[i].range[2],
             op->compute[i].tile[0], op->compute[i].tile[1],
@@ -2588,7 +2589,7 @@ enum xnn_status xnn_run_operator_with_index(
         assert(op->compute[i].tile[1] != 0);
         pthreadpool_parallelize_3d_tile_2d_dynamic_with_uarch(
             threadpool, op->compute[i].task_3d_tile_2d_dynamic_with_id,
-            (void*)((uintptr_t)&op->context + op->compute[i].context_offset),
+            (void*)((uintptr_t)context + op->compute[i].context_offset),
             /*default_uarch_index=*/0, XNN_MAX_UARCH_TYPES - 1,
             op->compute[i].range[0], op->compute[i].range[1],
             op->compute[i].range[2], op->compute[i].tile[0],
@@ -2604,7 +2605,7 @@ enum xnn_status xnn_run_operator_with_index(
         pthreadpool_parallelize_4d_tile_2d_with_uarch(
             threadpool,
             op->compute[i].task_4d_tile_2d_with_id,
-            (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
+            (void*) ((uintptr_t) context + op->compute[i].context_offset),
             0 /* default uarch index */, XNN_MAX_UARCH_TYPES - 1,
             op->compute[i].range[0], op->compute[i].range[1], op->compute[i].range[2], op->compute[i].range[3],
             op->compute[i].tile[0], op->compute[i].tile[1],
@@ -2619,7 +2620,7 @@ enum xnn_status xnn_run_operator_with_index(
         assert(op->compute[i].tile[1] != 0);
         pthreadpool_parallelize_4d_tile_2d_dynamic_with_uarch(
             threadpool, op->compute[i].task_4d_tile_2d_dynamic_with_id,
-            (void*)((uintptr_t)&op->context + op->compute[i].context_offset),
+            (void*)((uintptr_t)context + op->compute[i].context_offset),
             0 /* default uarch index */, XNN_MAX_UARCH_TYPES - 1,
             op->compute[i].range[0], op->compute[i].range[1],
             op->compute[i].range[2], op->compute[i].range[3],

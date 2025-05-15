@@ -123,6 +123,14 @@ static enum xnn_status create_fully_connected_nc(
     goto error;
   }
 
+  fully_connected_op->dynamic_context.gemm = xnn_allocate_zero_simd_memory(sizeof(struct gemm_op_context));
+  if (fully_connected_op->dynamic_context.gemm == NULL) {
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator descriptor",
+      sizeof(struct gemm_op_context), xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
+
   fully_connected_op->weights_cache = weights_cache;
 
   const uint32_t nr = gemm_config->nr;
@@ -2402,7 +2410,7 @@ static enum xnn_status reshape_fully_connected_nc(
       (fully_connected_op->type ==
        xnn_operator_type_fully_connected_nc_pqs8_qc8w);
 
-  fully_connected_op->context.gemm.gemm = (struct gemm_context){
+  fully_connected_op->dynamic_context.gemm->gemm = (struct gemm_context){
       .k_scaled = input_channels << log2_input_element_size,
       .w_stride = fully_connected_op->weights_stride,
       .a_stride = fully_connected_op->input_pixel_stride
@@ -2426,30 +2434,30 @@ static enum xnn_status reshape_fully_connected_nc(
       case xnn_operator_type_fully_connected_nc_qp8_f32_qb4w:
       case xnn_operator_type_fully_connected_nc_qp8_f32_qc4w:
       case xnn_operator_type_fully_connected_nc_qp8_f32_qc8w:
-        fully_connected_op->context.gemm.gemm.packed_lh_offset_fn = xnn_x8_packq_f32qp8_packed_offset;
+        fully_connected_op->dynamic_context.gemm->gemm.packed_lh_offset_fn = xnn_x8_packq_f32qp8_packed_offset;
         break;
       case xnn_operator_type_fully_connected_nc_pf16:
-        fully_connected_op->context.gemm.gemm.packed_lh_offset_fn = xnn_init_x16_pack_lh_config()->offset_fn;
+        fully_connected_op->dynamic_context.gemm->gemm.packed_lh_offset_fn = xnn_init_x16_pack_lh_config()->offset_fn;
         break;
       case xnn_operator_type_fully_connected_nc_pf32:
-        fully_connected_op->context.gemm.gemm.packed_lh_offset_fn = xnn_init_x32_pack_lh_config()->offset_fn;
+        fully_connected_op->dynamic_context.gemm->gemm.packed_lh_offset_fn = xnn_init_x32_pack_lh_config()->offset_fn;
         break;
       case xnn_operator_type_fully_connected_nc_pqs8_qc8w:
-        fully_connected_op->context.gemm.gemm.packed_lh_offset_fn = xnn_init_x8_pack_lh_config()->offset_fn;
+        fully_connected_op->dynamic_context.gemm->gemm.packed_lh_offset_fn = xnn_init_x8_pack_lh_config()->offset_fn;
         break;
       default:
         XNN_UNREACHABLE;
     }
   }
-  memcpy(&fully_connected_op->context.gemm.gemm.params, params, params_size);
-  fully_connected_op->context.gemm.gemm.fused_params = &fully_connected_op->context.gemm.gemm.params;
+  memcpy(&fully_connected_op->dynamic_context.gemm->gemm.params, params, params_size);
+  fully_connected_op->dynamic_context.gemm->gemm.fused_params = &fully_connected_op->dynamic_context.gemm->gemm.params;
 
   // Compute the optimal tile size for this GEMM.
   const size_t nc = xnn_gemm_best_tile_size(
       /*num_groups=*/1, /*m=*/batch_size, /*n=*/output_channels,
-      /*m_stride=*/fully_connected_op->context.gemm.gemm.a_stride,
-      /*n_stride=*/fully_connected_op->context.gemm.gemm.w_stride,
-      /*cm_stride=*/fully_connected_op->context.gemm.gemm.cm_stride,
+      /*m_stride=*/fully_connected_op->dynamic_context.gemm->gemm.a_stride,
+      /*n_stride=*/fully_connected_op->dynamic_context.gemm->gemm.w_stride,
+      /*cm_stride=*/fully_connected_op->dynamic_context.gemm->gemm.cm_stride,
       /*cn_stride=*/1 << log2_output_element_size, mr, nr,
       /*num_threads=*/pthreadpool_get_threads_count(threadpool));
 
@@ -3021,9 +3029,9 @@ static enum xnn_status setup_fully_connected_nc(
       break;
   }
 
-  fully_connected_op->context.gemm.gemm.a = input;
-  fully_connected_op->context.gemm.gemm.c = output;
-  fully_connected_op->context.gemm.gemm.quantization_params = quantization_params;
+  fully_connected_op->dynamic_context.gemm->gemm.a = input;
+  fully_connected_op->dynamic_context.gemm->gemm.c = output;
+  fully_connected_op->dynamic_context.gemm->gemm.quantization_params = quantization_params;
 
   fully_connected_op->state = xnn_run_state_ready;
 

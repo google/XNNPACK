@@ -135,6 +135,26 @@ enum xnn_run_state {
   xnn_run_state_needs_setup,
 };
 
+struct dwconv_op_context {
+  struct dwconv_context dwconv;
+  struct dwconv_indirection_init_context dwconv_indirection_init;
+};
+
+struct gemm_op_context {
+  struct gemm_context gemm;
+  union {
+    struct packw_gemm_goi_context packw_gemm_goi;
+    struct packw_gemm_gio_context packw_gemm_gio;
+  };
+  bool const_weights;
+};
+
+struct igemm_op_context {
+  struct igemm_context igemm;
+  struct conv2d_igemm_indirection_init_context
+      conv2d_igemm_indirection_init;
+};
+
 struct xnn_operator {
   size_t batch_size;
   uint32_t padding_top;
@@ -321,24 +341,7 @@ struct xnn_operator {
     struct average_pooling_context average_pooling;
     struct conv2d_context conv2d;
     struct dwconv2d_context dwconv2d;
-    struct {
-      struct dwconv_context dwconv;
-      struct dwconv_indirection_init_context dwconv_indirection_init;
-    } dwconv;
     struct elementwise_binary_context elementwise_binary;
-    struct {
-      struct gemm_context gemm;
-      union {
-        struct packw_gemm_goi_context packw_gemm_goi;
-        struct packw_gemm_gio_context packw_gemm_gio;
-      };
-      bool const_weights;
-    } gemm;
-    struct {
-      struct igemm_context igemm;
-      struct conv2d_igemm_indirection_init_context
-          conv2d_igemm_indirection_init;
-    } igemm;
     struct lut_contiguous_context lut_contiguous;
     struct lut_strided_context lut_strided;
     struct max_pooling_context max_pooling;
@@ -367,6 +370,11 @@ struct xnn_operator {
     struct rope_context rope;
     struct pack_lh_context pack_lh;
   } context;
+  union {
+    struct dwconv_op_context *dwconv;
+    struct gemm_op_context *gemm;
+    struct igemm_op_context *igemm;
+  } dynamic_context;
 
   xnn_weights_cache_t weights_cache;
   enum xnn_run_state state;
