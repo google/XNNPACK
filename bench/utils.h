@@ -81,6 +81,7 @@ static void ReduceDiscontiguousParameters(benchmark::internal::Benchmark* b) {
   b->Args({8, 1024});
   b->Args({16, 1024});
   b->Args({1024, 1024});
+  b->Args({32768, 5});
 }
 
 // Set number of elements for a unary elementwise microkernel such that:
