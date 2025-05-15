@@ -528,6 +528,7 @@ static void init_f16_tanh_config(void) {
   #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
+    // TODO: b/404616456 - This isn't disabled, but it probably should be guarded by a TBD numerical consistency flag.
     if (hardware_config->use_x86_fma3) {
       f16_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_u32;
     } else if (hardware_config->use_x86_f16c) {
@@ -649,12 +650,14 @@ static void init_f32_approxgelu_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
+    // TODO: b/404616456 - Re-enable fma and avx512 kernels when we have a numerical consistency flag.
+    const bool enable_inconsistent = false;
     #if XNN_ENABLE_AVX512F
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+      if (enable_inconsistent && !XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
         f32_approxgelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vapproxgelu_ukernel__avx512f_rational_12_10_div_u32;
       } else
     #endif
-    if (hardware_config->use_x86_fma3) {
+    if (enable_inconsistent && hardware_config->use_x86_fma3) {
       f32_approxgelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vapproxgelu_ukernel__fma3_rational_12_10_div_u16;
     } else if (hardware_config->use_x86_avx) {
       f32_approxgelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vapproxgelu_ukernel__avx_rational_12_10_div_u16;
@@ -729,12 +732,14 @@ static void init_f32_cosine_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
+    // TODO: b/404616456 - Re-enable fma and avx512 kernels when we have a numerical consistency flag.
+    const bool enable_inconsistent = false;
     #if XNN_ENABLE_AVX512F
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+      if (enable_inconsistent && !XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
         f32_cosine_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vcos_ukernel__avx512f_rational_5_4_div_u32;
       } else
     #endif
-    if (hardware_config->use_x86_fma3) {
+    if (enable_inconsistent && hardware_config->use_x86_fma3) {
       f32_cosine_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vcos_ukernel__fma3_rational_5_4_div_u16;
     } else if (hardware_config->use_x86_avx) {
       f32_cosine_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vcos_ukernel__avx_rational_5_4_div_u16;
@@ -836,12 +841,14 @@ static void init_f32_gelu_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
+    // TODO: b/404616456 - Re-enable fma and avx512 kernels when we have a numerical consistency flag.
+    const bool enable_inconsistent = false;
     #if XNN_ENABLE_AVX512F
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+      if (enable_inconsistent && !XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
         f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__avx512f_rational_12_10_div_u32;
       } else
     #endif
-    if (hardware_config->use_x86_fma3) {
+    if (enable_inconsistent && hardware_config->use_x86_fma3) {
       f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__fma3_rational_12_10_div_u16;
     } else if (hardware_config->use_x86_avx) {
       f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__avx_rational_12_10_div_u16;
@@ -871,12 +878,14 @@ static void init_f32_hswish_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
+    // TODO: b/404616456 - Re-enable fma and avx512 kernels when we have a numerical consistency flag.
+    const bool enable_inconsistent = false;
     #if XNN_ENABLE_AVX512F
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+      if (enable_inconsistent && !XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
         f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__avx512f_u32;
       } else
     #endif
-    if (hardware_config->use_x86_fma3) {
+    if (enable_inconsistent && hardware_config->use_x86_fma3) {
       f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__fma3_u16;
     } else if (hardware_config->use_x86_avx) {
       f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__avx_u16;
@@ -912,12 +921,14 @@ static void init_f32_exp_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
+    // TODO: b/404616456 - Re-enable fma and avx512 kernels when we have a numerical consistency flag.
+    const bool enable_inconsistent = false;
     #if XNN_ENABLE_AVX512F
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+      if (enable_inconsistent && !XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
         f32_exp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vexp_ukernel__avx512f_rational_3_2_div_u16;
       } else
     #endif
-    if (hardware_config->use_x86_fma3) {
+    if (enable_inconsistent && hardware_config->use_x86_fma3) {
       f32_exp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vexp_ukernel__fma3_rational_3_2_div_u32;
     } else if (hardware_config->use_x86_avx) {
       f32_exp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vexp_ukernel__avx_rational_3_2_div_u24;
@@ -947,12 +958,14 @@ static void init_f32_log_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
+    // TODO: b/404616456 - Re-enable fma and avx512 kernels when we have a numerical consistency flag.
+    const bool enable_inconsistent = false;
     #if XNN_ENABLE_AVX512F
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+      if (enable_inconsistent && !XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
         f32_log_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlog_ukernel__avx512f_rational_3_3_div_u16;
       } else
     #endif
-    if (hardware_config->use_x86_fma3) {
+    if (enable_inconsistent && hardware_config->use_x86_fma3) {
       f32_log_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlog_ukernel__fma3_rational_3_3_div_u16;
     } else if (hardware_config->use_x86_avx2) {
       f32_log_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlog_ukernel__avx2_rational_3_3_div_u16;
@@ -1419,12 +1432,14 @@ static void init_f32_sine_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
+    // TODO: b/404616456 - Re-enable fma and avx512 kernels when we have a numerical consistency flag.
+    const bool enable_inconsistent = false;
     #if XNN_ENABLE_AVX512F
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+      if (enable_inconsistent && !XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
         f32_sine_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsin_ukernel__avx512f_rational_5_4_div_u32;
       } else
     #endif
-    if (hardware_config->use_x86_fma3) {
+    if (enable_inconsistent && hardware_config->use_x86_fma3) {
       f32_sine_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsin_ukernel__fma3_rational_5_4_div_u16;
     } else if (hardware_config->use_x86_avx) {
       f32_sine_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsin_ukernel__avx_rational_5_4_div_u16;
@@ -1460,12 +1475,14 @@ static void init_f32_tanh_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
+    // TODO: b/404616456 - Re-enable fma and avx512 kernels when we have a numerical consistency flag.
+    const bool enable_inconsistent = false;
     #if XNN_ENABLE_AVX512F
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+      if (enable_inconsistent && !XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
         f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__avx512f_rational_9_8_div_u32;
       } else
     #endif
-    if (hardware_config->use_x86_fma3) {
+    if (enable_inconsistent && hardware_config->use_x86_fma3) {
       f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__fma3_rational_9_8_div_u16;
     } else if (hardware_config->use_x86_avx) {
       f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__avx_rational_9_8_div_u16;
