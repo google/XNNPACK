@@ -31,9 +31,9 @@ XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_f32_rdsum_ukernel_7p7x__rvv_u
 #endif  // XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rdsum_ukernel_7p7x__sse_c16, 7, 16, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rdsum_ukernel_7p7x__sse_c32, 7, 32, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rdsum_ukernel_7p7x__sse_c64, 7, 64, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rdsum_ukernel_7p7x__sse2_c16, 7, 16, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rdsum_ukernel_7p7x__sse2_c32, 7, 32, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rdsum_ukernel_7p7x__sse2_c64, 7, 64, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx, xnn_f32_rdsum_ukernel_7p7x__avx_c16, 7, 16, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx, xnn_f32_rdsum_ukernel_7p7x__avx_c32, 7, 32, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx, xnn_f32_rdsum_ukernel_7p7x__avx_c64, 7, 64, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
