@@ -87,6 +87,14 @@ enum xnn_status xnn_create_softmax_nc_qu8(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_softmax_nc_qu8));
     goto error;
   }
+  softmax_op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
+  if (softmax_op->compute == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(struct compute_parameters),
+                  xnn_operator_type_to_string(xnn_operator_type_softmax_nc_qu8));
+    goto error;
+  }
+  softmax_op->num_compute_invocations = 1;
 
   softmax_op->lookup_table = xnn_allocate_simd_memory(256 * sizeof(uint32_t));
   if (softmax_op->lookup_table == NULL) {
@@ -259,6 +267,14 @@ static enum xnn_status create_softmax_nc_floating_point(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
     goto error;
   }
+  softmax_op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
+  if (softmax_op->compute == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(struct compute_parameters),
+                  xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
+  softmax_op->num_compute_invocations = 1;
 
   softmax_op->type = operator_type;
   softmax_op->flags = flags;

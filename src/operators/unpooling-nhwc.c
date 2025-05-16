@@ -64,6 +64,14 @@ enum xnn_status xnn_create_unpooling2d_nhwc_x32(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32));
     goto error;
   }
+  unpooling_op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
+  if (unpooling_op->compute == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(struct compute_parameters),
+                  xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32));
+    goto error;
+  }
+  unpooling_op->num_compute_invocations = 1;
 
   const struct xnn_unpool_config* unpool_config = xnn_init_x32_unpool_config();
   if (unpool_config == NULL) {
