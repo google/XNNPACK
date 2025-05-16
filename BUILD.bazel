@@ -448,6 +448,7 @@ xnnpack_cc_library(
         ":math",
         ":microkernels_h",
         ":microparams_init",
+        ":pack-lh",
         ":packing",
         ":prod_microkernels",
         ":xnnpack_h",
@@ -827,11 +828,28 @@ xnnpack_cxx_library(
         ":microparams",
         ":microparams_init",
         ":params",
+        ":quantization",
         ":unaligned",
         ":xnnpack_h",
     ] + xnnpack_if_kleidiai_enabled([
         "@KleidiAI//kai/ukernels/matmul",
     ]),
+)
+
+xnnpack_cxx_library(
+    name = "pack-lh",
+    srcs = ["src/pack-lh.cc"],
+    hdrs = ["src/xnnpack/pack-lh.h"],
+    compatible_with = [],
+    defines = xnnpack_configurable_defines(),
+    deps = [
+        ":common",
+        ":config_hdrs",
+        ":math",
+        ":microkernels_h",
+        ":microparams",
+        ":quantization",
+    ],
 )
 
 py_binary(
@@ -1039,6 +1057,7 @@ xnnpack_cc_library(
         ":normalization",
         ":operator_type",
         ":operator_utils",
+        ":pack-lh",
         ":packing",
         ":params",
         ":quantization",

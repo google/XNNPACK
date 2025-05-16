@@ -117,7 +117,7 @@ struct TensorShape {
 
 class SubgraphTester {
  public:
-  explicit SubgraphTester(uint32_t external_value_ids);
+  explicit SubgraphTester(uint32_t external_value_ids, uint32_t flags = 0);
 
   SubgraphTester& AddInternalDynamicTensorF32(const TensorShape& shape,
                                               uint32_t* id_out,

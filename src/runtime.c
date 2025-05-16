@@ -527,10 +527,6 @@ enum xnn_status xnn_create_runtime_v4(
   uint32_t flags,
   xnn_runtime_t* runtime_out)
 {
-  printf("value size %zu\n", sizeof(struct xnn_value));
-  printf("node size %zu\n", sizeof(struct xnn_node));
-  printf("num_values size %u\n", subgraph->num_values);
-  printf("num_nodes size %u\n", subgraph->num_nodes);
   propagate_rank(subgraph);
   struct xnn_runtime* runtime = NULL;
   enum xnn_status status = xnn_status_uninitialized;
@@ -540,8 +536,10 @@ enum xnn_status xnn_create_runtime_v4(
     goto error;
   }
 
-  const uint32_t optimization_flags = XNN_FLAG_HINT_SPARSE_INFERENCE | XNN_FLAG_HINT_FP16_INFERENCE |
-    XNN_FLAG_FORCE_FP16_INFERENCE | XNN_FLAG_NO_OPERATOR_FUSION;
+  const uint32_t optimization_flags =
+      XNN_FLAG_HINT_SPARSE_INFERENCE | XNN_FLAG_HINT_FP16_INFERENCE |
+      XNN_FLAG_FORCE_FP16_INFERENCE | XNN_FLAG_NO_OPERATOR_FUSION |
+      XNN_FLAG_DONT_INLINE_LHS_PACKING;
   status = xnn_subgraph_optimize(subgraph, flags & optimization_flags);
   if (status != xnn_status_success) {
     xnn_log_error("failed to optimize subgraph");
