@@ -770,6 +770,32 @@ enum xnn_status create_convert_nc_f16_qx8(
   return status;
 }
 
+enum xnn_status create_convert_nc_bf16_qx8(
+  uint32_t flags,
+  const struct xnn_unary_elementwise_config* cvt_config,
+  enum xnn_operator_type expected_operator_type,
+  xnn_operator_t* convert_op_out)
+{
+  const struct xnn_reduce_config* bf16_rminmax_config = xnn_init_bf16_rminmax_config();
+  if (f16_rminmax_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(expected_operator_type));
+    return xnn_status_unsupported_hardware;
+  }
+
+  struct xnn_bf16_default_params params;
+
+  enum xnn_status status = create_unary_elementwise_nc(
+    flags, cvt_config,
+    &params, sizeof(params),
+    expected_operator_type, convert_op_out);
+  if (status == xnn_status_success) {
+    (*convert_op_out)->contiguous_reduce_config = f16_rminmax_config;
+  }
+  return status;
+}
+
 enum xnn_status create_convert_nc_f32_qx8(
   uint32_t flags,
   const struct xnn_unary_elementwise_config* cvt_config,

@@ -75,6 +75,14 @@ DECLARE_F16_F32ACC_RSUM_UKERNEL_FUNCTION(
 DECLARE_F16_F32ACC_RSUM_UKERNEL_FUNCTION(
     xnn_f16_f32acc_rsum_ukernel__f16c_u32_acc4)
 
+#define DECLARE_BF16_REDUCE_UKERNEL_FUNCTION(fn_name)               \
+  XNN_INTERNAL void fn_name(size_t batch, const uint16_t* input,    \
+                            uint16_t* output,                       \
+                            const struct xnn_f32_default_params     \
+                                params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+DECLARE_BF16_REDUCE_UKERNEL_FUNCTION(xnn_bf16_rminmax_ukernel__neon_u16_acc4)
+
 #define DECLARE_F16_REDUCE_UKERNEL_FUNCTION(fn_name)                \
   XNN_INTERNAL void fn_name(size_t batch, const xnn_float16* input, \
                             xnn_float16* output,                    \

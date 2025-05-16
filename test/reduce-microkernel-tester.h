@@ -129,6 +129,57 @@ class ReduceMicrokernelTester {
     }
   }
 
+  void Test(xnn_bf16_reduce_ukernel_fn reduce, OpType op_type,
+            xnn_init_f32_default_params_fn init_params = nullptr) const {
+    xnnpack::ReplicableRandomDevice rng;
+    std::uniform_real_distribution<float> f32dist(-10.0f, 10.0f);
+
+    xnnpack::Buffer<xnn_bfloat16> input(batch_size(), xnnpack::XnnExtraBytes);
+    std::generate_n(input.begin(), batch_size(),
+                    [&]() { return f32dist(rng); });
+
+    // Compute reference results.
+    xnn_bfloat16 min_value = input[0];
+    xnn_bfloat16 max_value = input[0];
+    for (size_t i = 0; i < batch_size(); ++i) {
+      min_value = std::min<float>(min_value, input[i]);
+      max_value = std::max<float>(max_value, input[i]);
+    }
+
+    // Prepare parameters.
+    xnn_f32_default_params params;
+    if (init_params != nullptr) {
+      init_params(&params);
+    }
+
+    // Call optimized micro-kernel.
+    xnn_bfloat16 output[2];
+    output[0] = f32dist(rng);
+    min_value = std::min<float>(min_value, output[0]);
+    if (op_type == OpType::MinMax) {
+      output[1] = f32dist(rng);
+      max_value = std::max<float>(max_value, output[1]);
+    } else {
+      max_value = std::max<float>(max_value, output[0]);
+    }
+    reduce(batch_size() * sizeof(xnn_bfloat16), (uint16_t*)input.data(), (uint16_t*)output,
+           init_params != nullptr ? &params : nullptr);
+
+    // Verify results.
+    switch (op_type) {
+      case OpType::Max:
+        EXPECT_EQ(output[0], max_value) << "with batch " << batch_size();
+        break;
+      case OpType::Min:
+        EXPECT_EQ(output[0], min_value) << "with batch " << batch_size();
+        break;
+      case OpType::MinMax:
+        EXPECT_EQ(output[0], min_value) << "with batch " << batch_size();
+        EXPECT_EQ(output[1], max_value) << "with batch " << batch_size();
+        break;
+    }
+  }
+
   void Test(xnn_f32_reduce_ukernel_fn reduce, OpType op_type,
             xnn_init_f32_default_params_fn init_params = nullptr) const {
     xnnpack::ReplicableRandomDevice rng;

@@ -47,7 +47,7 @@ parser.set_defaults(defines=list())
 
 def split_ukernel_name(name):
   match = re.fullmatch(
-      r"xnn_(f16|f16_f32acc|f32|qs8|qu8|s8|u8)_r(minmax|max|min|sum)(_minmax_(fp32))?_ukernel__(.+)_u(\d+)(v)?(_acc\d+)?",
+      r"xnn_(f16|bf16|f16_f32acc|f32|qs8|qu8|s8|u8)_r(minmax|max|min|sum)(_minmax_(fp32))?_ukernel__(.+)_u(\d+)(v)?(_acc\d+)?",
       name,
   )
   if match is None:
@@ -202,6 +202,7 @@ def generate_test_cases(
         "qu8": "uint8_t",
         "u8": "uint8_t",
         "f16": "uint16_t",
+        "bf16": "uint16_t",
         "f32": "float",
     }[datatype]
     batch_scale = {

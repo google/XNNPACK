@@ -208,6 +208,7 @@ XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f16_rdmax_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f16_rdmin_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f16_rmax_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f16_rminmax_config();
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_bf16_rminmax_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f16_rmin_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f32_rdmax_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f32_rdmin_config();

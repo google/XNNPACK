@@ -101,6 +101,7 @@ SET(MICROKERNEL_UNIT_TESTS
     f16-rmax
     f16-rmin
     f16-rminmax
+    bf16-rminmax
     f16-rsum
     f16-spmm-minmax
     f16-vcmul
