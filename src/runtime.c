@@ -527,10 +527,6 @@ enum xnn_status xnn_create_runtime_v4(
   uint32_t flags,
   xnn_runtime_t* runtime_out)
 {
-  printf("value size %zu\n", sizeof(struct xnn_value));
-  printf("node size %zu\n", sizeof(struct xnn_node));
-  printf("num_values size %u\n", subgraph->num_values);
-  printf("num_nodes size %u\n", subgraph->num_nodes);
   propagate_rank(subgraph);
   struct xnn_runtime* runtime = NULL;
   enum xnn_status status = xnn_status_uninitialized;
