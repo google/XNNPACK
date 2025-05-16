@@ -35,8 +35,7 @@ static enum xnn_status create_reduce_nd(
     uint32_t log2_data_element_size,
     uint32_t log2_accumulator_element_size,
     enum xnn_operator_type operator_type,
-    const struct xnn_reduce_config* contiguous_reduce_config,
-    const struct xnn_reduce_config* discontiguous_reduce_config,
+    const struct xnn_reduce_config* reduce_config,
     const struct xnn_xx_fill_config* fill_config,
     const struct xnn_unary_elementwise_config* cvt_config,
     const void* params,
@@ -81,14 +80,13 @@ static enum xnn_status create_reduce_nd(
 
   reduce_op->type = operator_type;
   reduce_op->flags = flags;
-  reduce_op->discontiguous_reduce_config = discontiguous_reduce_config;
-  reduce_op->contiguous_reduce_config = contiguous_reduce_config;
+  reduce_op->reduce_config = reduce_config;
   reduce_op->cvt_config = cvt_config;
   reduce_op->fill_config = fill_config;
   reduce_op->reduce.log2_data_element_size = log2_data_element_size;
   reduce_op->reduce.log2_accumulator_element_size = log2_accumulator_element_size;
   reduce_op->reduce.identity_value =
-      reduce_op->contiguous_reduce_config->identity_value;
+      reduce_op->reduce_config->identity_value;
 
   if (params_size != 0) {
     memcpy(&reduce_op->params, params, params_size);
@@ -239,13 +237,12 @@ static enum xnn_status reshape_reduce_nd(
     num_reduction_elements = normalized_input_shape[1] * normalized_input_shape[3] * normalized_input_shape[5];
     const size_t axis_dim = normalized_input_shape[5];
 
-    if (reduce_op->contiguous_reduce_config->update != NULL) {
+    if (reduce_op->reduce_config->update != NULL) {
       float scale = 1.0f;
       if (reduce_op->type == xnn_operator_type_mean_nd) {
         scale = 1.0f / num_reduction_elements;
       }
-      reduce_op->contiguous_reduce_config->update(&reduce_op->params.reduce,
-                                                  scale);
+      reduce_op->reduce_config->update(&reduce_op->params.reduce, scale);
     }
 
     *reduce_op->dynamic_context.reduce = (struct reduce_context) {
@@ -253,7 +250,7 @@ static enum xnn_status reshape_reduce_nd(
       .accumulation_element_size = UINT32_C(1) << log2_accumulator_element_size,
       .output_element_size = UINT32_C(1) << log2_data_element_size,
       .identity_value = reduce_op->reduce.identity_value,
-      .ukernel.contiguous_reduce = reduce_op->contiguous_reduce_config->ukernel,
+      .ukernel.contiguous_reduce = reduce_op->reduce_config->ukernel,
     };
 
     if (is_minmax) {
@@ -280,13 +277,12 @@ static enum xnn_status reshape_reduce_nd(
     num_reduction_elements = normalized_input_shape[0] * normalized_input_shape[2] * normalized_input_shape[4];
     const size_t axis_dim = normalized_input_shape[4];
 
-    if (reduce_op->discontiguous_reduce_config->update != NULL) {
+    if (reduce_op->reduce_config->update != NULL) {
       float scale = 1.0f;
       if (reduce_op->type == xnn_operator_type_mean_nd) {
         scale = 1.0f / num_reduction_elements;
       }
-      reduce_op->discontiguous_reduce_config->update(&reduce_op->params.reduce,
-                                                     scale);
+      reduce_op->reduce_config->update(&reduce_op->params.reduce, scale);
     }
     if (reduce_op->channels != channel_like_dim) {
       const size_t zero_size = (channel_like_dim << log2_data_element_size) + XNN_EXTRA_BYTES;
@@ -305,8 +301,7 @@ static enum xnn_status reshape_reduce_nd(
     *reduce_op->dynamic_context.reduce = (struct reduce_context) {
       .zero = reduce_op->zero_buffer,
       .channels = axis_dim,
-      .ukernel.discontiguous_reduce =
-          reduce_op->discontiguous_reduce_config->rd_ukernel,
+      .ukernel.discontiguous_reduce = reduce_op->reduce_config->rd_ukernel,
       .accumulation_element_size = UINT32_C(1) << log2_accumulator_element_size,
       .output_element_size = UINT32_C(1) << log2_data_element_size,
       .identity_value = reduce_op->reduce.identity_value,
@@ -424,8 +419,7 @@ enum xnn_status xnn_create_reduce_nd(
                           operator_type == xnn_operator_type_reduce_min_nd);
 
   // Load configs.
-  const struct xnn_reduce_config* contiguous_config = NULL;
-  const struct xnn_reduce_config* discontiguous_config = NULL;
+  const struct xnn_reduce_config* config = NULL;
   const struct xnn_unary_elementwise_config* cvt_config = NULL;
   const struct xnn_xx_fill_config* fill_config = NULL;
   uint32_t log2_data_element_size = xnn_datatype_log2_size_bytes(datatype);
@@ -438,16 +432,13 @@ enum xnn_status xnn_create_reduce_nd(
         cvt_config = cvt_unused;
 
         if (operator_type == xnn_operator_type_reduce_min_nd) {
-          contiguous_config = xnn_init_f16_rmin_config();
-          discontiguous_config = xnn_init_f16_rdmin_config();
+          config = xnn_init_f16_rmin_config();
         } else {  // max
-          contiguous_config = xnn_init_f16_rmax_config();
-          discontiguous_config = xnn_init_f16_rdmax_config();
+          config = xnn_init_f16_rmax_config();
         }
       } else {
         log2_accumulator_element_size = 2;
-        contiguous_config = xnn_init_f16_f32acc_rsum_config();
-        discontiguous_config = xnn_init_f16_f32acc_rdsum_config();
+        config = xnn_init_f16_f32acc_rsum_config();
         fill_config = fill_unused;
         cvt_config = xnn_init_f32_to_f16_cvt_config();
       }
@@ -458,15 +449,12 @@ enum xnn_status xnn_create_reduce_nd(
         fill_config = xnn_init_xx_fill_config();
 
         if (operator_type == xnn_operator_type_reduce_min_nd) {
-          contiguous_config = xnn_init_f32_rmin_config();
-          discontiguous_config = xnn_init_f32_rdmin_config();
+          config = xnn_init_f32_rmin_config();
         } else {  // max
-          contiguous_config = xnn_init_f32_rmax_config();
-          discontiguous_config = xnn_init_f32_rdmax_config();
+          config = xnn_init_f32_rmax_config();
         }
       } else {
-        contiguous_config = xnn_init_f32_rsum_config();
-        discontiguous_config = xnn_init_f32_rdsum_config();
+        config = xnn_init_f32_rsum_config();
         fill_config = fill_unused;
       }
 
@@ -484,16 +472,13 @@ enum xnn_status xnn_create_reduce_nd(
         cvt_config = cvt_unused;
 
         if (operator_type == xnn_operator_type_reduce_min_nd) {
-          contiguous_config = xnn_init_s8_rmin_config();
-          discontiguous_config = xnn_init_s8_rdmin_config();
+          config = xnn_init_s8_rmin_config();
         } else {  // max
-          contiguous_config = xnn_init_s8_rmax_config();
-          discontiguous_config = xnn_init_s8_rdmax_config();
+          config = xnn_init_s8_rmax_config();
         }
       } else {
         log2_accumulator_element_size = 2;
-        contiguous_config = xnn_init_qs8_rsum_config();
-        discontiguous_config = xnn_init_qs8_rdsum_config();
+        config = xnn_init_qs8_rsum_config();
         fill_config = fill_unused;
         cvt_config = xnn_init_unary_reference_config(
           xnn_unary_convert, xnn_datatype_int32, xnn_datatype_qint8);
@@ -510,16 +495,13 @@ enum xnn_status xnn_create_reduce_nd(
         cvt_config = cvt_unused;
 
         if (operator_type == xnn_operator_type_reduce_min_nd) {
-          contiguous_config = xnn_init_u8_rmin_config();
-          discontiguous_config = xnn_init_u8_rdmin_config();
+          config = xnn_init_u8_rmin_config();
         } else {  // max
-          contiguous_config = xnn_init_u8_rmax_config();
-          discontiguous_config = xnn_init_u8_rdmax_config();
+          config = xnn_init_u8_rmax_config();
         }
       } else {
         log2_accumulator_element_size = 2;
-        contiguous_config = xnn_init_qu8_rsum_config();
-        discontiguous_config = xnn_init_qu8_rdsum_config();
+        config = xnn_init_qu8_rsum_config();
         // We just use an int32 -> qu8 conversion. This means we effectively
         // only have a 31-bit accumulator instead of 32-bit, but that seems
         // insignificant.
@@ -536,8 +518,7 @@ enum xnn_status xnn_create_reduce_nd(
   };
 
   // Check configs and restore unused pointers to NULL.
-  if (contiguous_config == NULL || discontiguous_config == NULL ||
-      fill_config == NULL || cvt_config == NULL) {
+  if (config == NULL || fill_config == NULL || cvt_config == NULL) {
     xnn_log_error(
         "failed to create %s (%s) operator: unsupported hardware configuration",
         xnn_operator_type_to_string(operator_type), xnn_datatype_to_string(datatype));
@@ -550,8 +531,8 @@ enum xnn_status xnn_create_reduce_nd(
   struct xnn_reduce_params params;
   size_t params_size = 0;
   // Setup parameters
-  if (contiguous_config->init.reduce) {
-    params_size = contiguous_config->init.reduce(&params, input_quantization,
+  if (config->init.reduce) {
+    params_size = config->init.reduce(&params, input_quantization,
                                                  output_quantization);
   }
   union xnn_unary_uparams cvt_params;
@@ -562,7 +543,7 @@ enum xnn_status xnn_create_reduce_nd(
 
   return create_reduce_nd(
     flags, log2_data_element_size, log2_accumulator_element_size, operator_type,
-    contiguous_config, discontiguous_config, fill_config, cvt_config, &params,
+    config, fill_config, cvt_config, &params,
     params_size, &cvt_params, cvt_params_size, reduce_op_out);
 }
 

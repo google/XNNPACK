@@ -114,7 +114,7 @@ enum xnn_status xnn_create_softmax_nc_qu8(
   softmax_op->type = xnn_operator_type_softmax_nc_qu8;
   softmax_op->flags = flags;
   softmax_op->lut32norm_config = lut32norm_config;
-  softmax_op->contiguous_reduce_config = rmax_config;
+  softmax_op->reduce_config = rmax_config;
 
   softmax_op->state = xnn_run_state_invalid;
 
@@ -194,7 +194,7 @@ enum xnn_status xnn_reshape_softmax_nc_qu8(
     .x_stride = softmax_op->input_pixel_stride * sizeof(uint8_t),
     .t = softmax_op->lookup_table,
     .y_stride = softmax_op->output_pixel_stride * sizeof(uint8_t),
-    .rmax_ukernel = (xnn_u8_rmax_ukernel_fn) softmax_op->contiguous_reduce_config->ukernel,
+    .rmax_ukernel = (xnn_u8_rmax_ukernel_fn) softmax_op->reduce_config->ukernel,
     .lut_norm_ukernel = softmax_op->lut32norm_config->lut32norm,
   };
   softmax_op->compute[0].type = xnn_parallelization_type_1d;
@@ -279,7 +279,7 @@ static enum xnn_status create_softmax_nc_floating_point(
   softmax_op->type = operator_type;
   softmax_op->flags = flags;
   softmax_op->raddstoreexpminusmax_config = raddstoreexpminusmax_config;
-  softmax_op->contiguous_reduce_config = rmax_config;
+  softmax_op->reduce_config = rmax_config;
   softmax_op->vmul_config = vmul_config;
 
   softmax_op->state = xnn_run_state_invalid;
@@ -552,7 +552,7 @@ enum xnn_status xnn_reshape_softmax_nc_f16(
     channels, input_stride, output_stride,
     batch_size,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_HALF,
-    softmax_op->contiguous_reduce_config->ukernel,
+    softmax_op->reduce_config->ukernel,
     softmax_op->raddstoreexpminusmax_config, f16_vmul_config,
     (xnn_compute_reciprocal_fn) compute_reciprocal_f16,
     &rmax_init, sizeof(rmax_init),
@@ -580,7 +580,7 @@ enum xnn_status xnn_reshape_softmax_nc_f32(
     channels, input_stride, output_stride,
     batch_size,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    softmax_op->contiguous_reduce_config->ukernel,
+    softmax_op->reduce_config->ukernel,
     softmax_op->raddstoreexpminusmax_config, f32_vmul_config,
     (xnn_compute_reciprocal_fn) compute_reciprocal_f32,
     &rmax_init, sizeof(rmax_init),

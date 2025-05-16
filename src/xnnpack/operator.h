@@ -297,12 +297,7 @@ struct xnn_operator {
 
   union {
     const struct xnn_argmaxpool_config* argmaxpool_config;
-    struct {
-      const struct xnn_avgpool_config* avgpool_config;
-      const struct xnn_reduce_config* discontiguous_reduce_config;
-      const struct xnn_reduce_config* contiguous_reduce_config;
-      const struct xnn_unary_elementwise_config* cvt_config;
-    };
+    const struct xnn_avgpool_config* avgpool_config;
     const struct xnn_ibilinear_chw_config* ibilinear_chw_config;
     const struct xnn_ibilinear_config* ibilinear_config;
     struct {
@@ -316,7 +311,9 @@ struct xnn_operator {
           const struct xnn_binary_elementwise_config* vmul_config;
         };
       };
-    };  // For softmax operator.
+      const struct xnn_reduce_config* reduce_config;
+      const struct xnn_unary_elementwise_config* cvt_config;
+    };  // For softmax and reduce operators.
     const struct xnn_maxpool_config* maxpool_config;
     const struct xnn_unpool_config* unpool_config;
     const struct xnn_zip_config* zip_config;

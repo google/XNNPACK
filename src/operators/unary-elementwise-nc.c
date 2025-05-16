@@ -792,7 +792,7 @@ enum xnn_status create_convert_nc_f16_qx8(
     &params, sizeof(params),
     expected_operator_type, convert_op_out);
   if (status == xnn_status_success) {
-    (*convert_op_out)->contiguous_reduce_config = f16_rminmax_config;
+    (*convert_op_out)->reduce_config = f16_rminmax_config;
   }
   return status;
 }
@@ -818,7 +818,7 @@ enum xnn_status create_convert_nc_f32_qx8(
     &params, sizeof(params),
     expected_operator_type, convert_op_out);
   if (status == xnn_status_success) {
-    (*convert_op_out)->contiguous_reduce_config = f32_rminmax_config;
+    (*convert_op_out)->reduce_config = f32_rminmax_config;
   }
   return status;
 }
@@ -866,7 +866,7 @@ enum xnn_status xnn_create_convert_nc_f32_qp8(
     &params, sizeof(params),
     xnn_operator_type_convert_nc_f32_qp8, convert_op_out);
   if (status == xnn_status_success) {
-    (*convert_op_out)->contiguous_reduce_config = f32_rminmax_config;
+    (*convert_op_out)->reduce_config = f32_rminmax_config;
     (*convert_op_out)->gemm_config = gemm_config;
   }
   return status;
@@ -933,7 +933,7 @@ enum xnn_status reshape_convert_nc_f16_qx8(
     .x_stride = input_stride * sizeof(uint16_t),
     .y_stride = output_stride,
     .batch_size = batch_size,
-    .rminmax_ukernel = convert_op->contiguous_reduce_config->ukernel,
+    .rminmax_ukernel = convert_op->reduce_config->ukernel,
     .convert_ukernel = convert_op->unary_elementwise_config->ukernel,
     .init_params = convert_op->unary_elementwise_config->init,
   };
@@ -995,7 +995,7 @@ enum xnn_status reshape_convert_nc_f32_qx8(
     .x_stride = input_stride * sizeof(float),
     .y_stride = output_stride,
     .batch_size = batch_size,
-    .rminmax_ukernel = convert_op->contiguous_reduce_config->ukernel,
+    .rminmax_ukernel = convert_op->reduce_config->ukernel,
     .convert_ukernel = convert_op->unary_elementwise_config->ukernel,
     .init_params = convert_op->unary_elementwise_config->init,
   };
