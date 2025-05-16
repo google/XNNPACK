@@ -216,7 +216,6 @@ class ConstantPadOperatorTester {
   }
 
   void TestRunX8() const {
-    ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
     ASSERT_EQ(num_dims(), num_pre_paddings());
     ASSERT_EQ(num_dims(), num_post_paddings());
 
@@ -438,7 +437,6 @@ class ConstantPadOperatorTester {
   }
 
   void TestRunX16() const {
-    ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
     ASSERT_EQ(num_dims(), num_pre_paddings());
     ASSERT_EQ(num_dims(), num_post_paddings());
 
@@ -658,7 +656,6 @@ class ConstantPadOperatorTester {
   }
 
   void TestRunX32() const {
-    ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
     ASSERT_EQ(num_dims(), num_pre_paddings());
     ASSERT_EQ(num_dims(), num_post_paddings());
 

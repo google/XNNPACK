@@ -23,6 +23,9 @@
 #include "src/xnnpack/operator-type.h"
 #include <pthreadpool.h>
 
+// Maximum number of pthreadpool parallelization invocations per operator.
+#define XNN_MAX_COMPUTE_INVOCATIONS 3
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -183,7 +186,6 @@ struct xnn_operator {
   const void* quantization_params;
 
   size_t k_block_size;
-  //172 bytes to here.
 
   union {
     // Pointer to allocated packed weights. Use this if weights_cache is NULL.
@@ -208,7 +210,6 @@ struct xnn_operator {
   uint32_t last_mr;
 
   uint32_t block_size;
-  // 72 bytes
 
   void* zero_buffer;
   void** zero_buffers;
@@ -217,8 +218,6 @@ struct xnn_operator {
   void* pixelwise_buffer;
   struct subconvolution_params* subconvolution_buffer;
   uint32_t flags;
-  // 68 bytes.
-  // 336 bytesb to here.
 
   union {
     struct {
@@ -253,7 +252,7 @@ struct xnn_operator {
     struct {
       uint32_t pad_value;
     } padding;
-  }; // 24 bytes.
+  };
 
   union {
     union xnn_binary_uparams binary;
@@ -336,8 +335,7 @@ struct xnn_operator {
     const struct xnn_pack_lh_config* pack_lh_config;
   };
 
-  struct compute_parameters *compute;
-  int num_compute_invocations;
+  struct compute_parameters compute[XNN_MAX_COMPUTE_INVOCATIONS];
   union {
     struct argmax_pooling_context argmax_pooling;
     struct average_pooling_context average_pooling;

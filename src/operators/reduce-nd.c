@@ -70,14 +70,7 @@ static enum xnn_status create_reduce_nd(
       sizeof(struct reduce_context), xnn_operator_type_to_string(operator_type));
     goto error;
   }
-  reduce_op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
-  if (reduce_op->compute == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
-                  sizeof(struct compute_parameters),
-                  xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-  reduce_op->num_compute_invocations = 1;
+
 
   reduce_op->type = operator_type;
   reduce_op->flags = flags;

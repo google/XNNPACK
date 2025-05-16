@@ -65,14 +65,6 @@ static enum xnn_status create_constant_pad_nd(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
     goto error;
   }
-  constant_pad_op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
-  if (constant_pad_op->compute == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
-                  sizeof(struct compute_parameters),
-                  xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-  constant_pad_op->num_compute_invocations = 1;
 
   status = xnn_status_unsupported_hardware;
 
@@ -377,10 +369,6 @@ enum xnn_status run_constant_pad_nd(
 {
   struct xnn_operator constant_pad_op;
   memset(&constant_pad_op, 0, sizeof(constant_pad_op));
-  struct compute_parameters compute;
-  memset(&compute, 0, sizeof(compute));
-  constant_pad_op.compute = &compute;
-  constant_pad_op.num_compute_invocations = 1;
 
   const struct xnn_xx_fill_config* fill_config = xnn_init_xx_fill_config();
   if (fill_config == NULL) {

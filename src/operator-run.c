@@ -2236,7 +2236,7 @@ enum xnn_status xnn_run_operator_with_index(
   if (op->flags & XNN_FLAG_YIELD_WORKERS) {
     flags |= PTHREADPOOL_FLAG_YIELD_WORKERS;
   }
-  for (size_t i = 0; i < op->num_compute_invocations; i++) {
+  for (size_t i = 0; i < XNN_MAX_COMPUTE_INVOCATIONS; i++) {
     const void* context = op->dynamic_context.gemm ? op->dynamic_context.gemm : (const void*)&op->context;
     switch (op->compute[i].type) {
       case xnn_parallelization_type_invalid:

@@ -81,14 +81,6 @@ static enum xnn_status create_transpose_nd(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
     goto error;
   }
-  transpose_op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
-  if (transpose_op->compute == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
-                  sizeof(struct compute_parameters),
-                  xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-  transpose_op->num_compute_invocations = 1;
 
   init_transpose_nd(flags, transpose_config, operator_type, transpose_op);
   *transpose_op_out = transpose_op;
@@ -626,10 +618,6 @@ enum xnn_status run_transpose_nd(
 
   struct xnn_operator transpose_op;
   memset(&transpose_op, 0, sizeof(transpose_op));
-  struct compute_parameters compute;
-  memset(&compute, 0, sizeof(compute));
-  transpose_op.compute = &compute;
-  transpose_op.num_compute_invocations = 1;
 
   const struct xnn_transpose_config* transpose_config = xnn_init_transpose_config();
   if (!transpose_config) {
@@ -754,14 +742,6 @@ enum xnn_status create_depth_to_space_nchw2nhwc(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
     goto error;
   }
-  depth_to_space_op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
-  if (depth_to_space_op->compute == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
-                  sizeof(struct compute_parameters),
-                  xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-  depth_to_space_op->num_compute_invocations = 1;
 
   const struct xnn_transpose_config* transpose_config = xnn_init_transpose_config();
   if (!transpose_config) {
@@ -1020,14 +1000,6 @@ static enum xnn_status create_depth_to_space_nhwc(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
     goto error;
   }
-  depth_to_space_op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
-  if (depth_to_space_op->compute == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
-                  sizeof(struct compute_parameters),
-                  xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-  depth_to_space_op->num_compute_invocations = 1;
 
   const struct xnn_transpose_config* transpose_config = xnn_init_transpose_config();
   if (!transpose_config) {
@@ -1313,14 +1285,6 @@ static enum xnn_status create_space_to_depth_nhwc(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
     goto error;
   }
-  space_to_depth_op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
-  if (space_to_depth_op->compute == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
-                  sizeof(struct compute_parameters),
-                  xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-  space_to_depth_op->num_compute_invocations = 1;
 
   const struct xnn_transpose_config* transpose_config = xnn_init_transpose_config();
   if (!transpose_config) {

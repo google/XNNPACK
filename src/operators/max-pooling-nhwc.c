@@ -111,14 +111,6 @@ static enum xnn_status create_max_pooling2d_nhwc(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
     goto error;
   }
-  max_pooling_op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
-  if (max_pooling_op->compute == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
-                  sizeof(struct compute_parameters),
-                  xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-  max_pooling_op->num_compute_invocations = 1;
 
   max_pooling_op->padding_top = input_padding_top;
   max_pooling_op->padding_right = input_padding_right;

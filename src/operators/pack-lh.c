@@ -48,14 +48,6 @@ enum xnn_status create_pack_lh(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(expected_operator_type));
     return xnn_status_out_of_memory;
   }
-  pack_lh_op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
-  if (pack_lh_op->compute == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
-                  sizeof(struct compute_parameters),
-                  xnn_operator_type_to_string(expected_operator_type));
-    return xnn_status_out_of_memory;
-  }
-  pack_lh_op->num_compute_invocations = 1;
 
   pack_lh_op->pack_lh_config = pack_lh_config;
   pack_lh_op->type = expected_operator_type;

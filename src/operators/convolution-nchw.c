@@ -482,14 +482,6 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
     goto error;
   }
-  convolution_op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
-  if (convolution_op->compute == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
-                  sizeof(struct compute_parameters),
-                  xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-  convolution_op->num_compute_invocations = 1;
 
   if (ukernel_type != xnn_microkernel_type_spmm) {
     convolution_op->weights_cache = weights_cache;
@@ -819,14 +811,6 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
     goto error;
   }
-  convolution_op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
-  if (convolution_op->compute == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
-                  sizeof(struct compute_parameters),
-                  xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-  convolution_op->num_compute_invocations = 1;
 
   if (ukernel_type != xnn_microkernel_type_spmm) {
     convolution_op->weights_cache = weights_cache;

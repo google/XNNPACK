@@ -103,7 +103,6 @@ class TransposeOperatorTester {
   }
 
   void TestRunX8() const {
-    ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
     const size_t count = std::accumulate(dims().cbegin(), dims().cend(),
                                          size_t{1}, std::multiplies<size_t>());
     xnnpack::Buffer<uint8_t> input(count, xnnpack::XnnExtraBytes);

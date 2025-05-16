@@ -558,16 +558,6 @@ static enum xnn_status create_convolution2d_nhwc(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
     goto error;
   }
-  const int num_compute_invocations = 3;
-  convolution_op->compute = xnn_allocate_zero_memory(num_compute_invocations * sizeof(struct compute_parameters));
-  if (convolution_op->compute == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
-                  sizeof(struct compute_parameters),
-                  xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-  convolution_op->num_compute_invocations = num_compute_invocations;
-
   convolution_op->ukernel.igemm = xnn_allocate_zero_simd_memory(sizeof(struct xnn_ukernel_igemm));
   if (convolution_op->ukernel.igemm == NULL) {
     xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",

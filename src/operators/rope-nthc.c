@@ -48,14 +48,6 @@ static enum xnn_status create_rope_nthc(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
     goto error;
   }
-  rope_op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
-  if (rope_op->compute == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
-                  sizeof(struct compute_parameters),
-                  xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-  rope_op->num_compute_invocations = 1;
 
   rope_op->type = operator_type;
   rope_op->flags = flags;

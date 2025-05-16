@@ -242,14 +242,6 @@ enum xnn_status xnn_create_binary_elementwise_nd(
                   xnn_binary_operator_to_string(type));
     return xnn_status_out_of_memory;
   }
-  op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
-  if (op->compute == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
-                  sizeof(struct compute_parameters),
-                  xnn_binary_operator_to_string(type));
-    return xnn_status_out_of_memory;
-  }
-  op->num_compute_invocations = 1;
 
   enum xnn_status status =
       init_binary_elementwise_nd(op, type, datatype, a_quantization,
@@ -531,20 +523,11 @@ enum xnn_status xnn_run_binary_elementwise_nd(
     void* output, pthreadpool_t threadpool) {
   struct xnn_operator op;
   memset(&op, 0, sizeof(op));
-  op.compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
-  if (op.compute == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
-                  sizeof(struct compute_parameters),
-                  xnn_binary_operator_to_string(type));
-    return xnn_status_out_of_memory;
-  }
-  op.num_compute_invocations = 1;
 
   enum xnn_status status = init_binary_elementwise_nd(
       &op, type, datatype, input1_quantization, input2_quantization,
       output_quantization, flags);
   if (status != xnn_status_success) {
-    xnn_destroy_operator(&op);
     return status;
   }
 
@@ -552,17 +535,13 @@ enum xnn_status xnn_run_binary_elementwise_nd(
                                              num_input2_dims, input2_shape,
                                              threadpool);
   if (status != xnn_status_success) {
-    xnn_destroy_operator(&op);
     return status;
   }
 
   status = xnn_setup_binary_elementwise_nd(&op, input1, input2, output);
   if (status != xnn_status_success) {
-    xnn_destroy_operator(&op);
     return status;
   }
 
-  status = xnn_run_operator(&op, threadpool);
-  xnn_destroy_operator(&op);
-  return status;
+  return xnn_run_operator(&op, threadpool);
 }

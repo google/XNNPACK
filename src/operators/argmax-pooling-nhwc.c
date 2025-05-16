@@ -93,14 +93,6 @@ enum xnn_status xnn_create_argmax_pooling2d_nhwc_f32(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32));
     goto error;
   }
-  argmax_pooling_op->num_compute_invocations = 1;
-  argmax_pooling_op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
-  if (argmax_pooling_op->compute == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
-                  sizeof(struct compute_parameters),
-                  xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32));
-    goto error;
-  }
 
   argmax_pooling_op->padding_top = input_padding_top;
   argmax_pooling_op->padding_right = input_padding_right;

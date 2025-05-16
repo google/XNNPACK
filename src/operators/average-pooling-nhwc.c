@@ -156,14 +156,6 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f16(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f16));
     goto error;
   }
-  average_pooling_op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
-  if (average_pooling_op->compute == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
-                  sizeof(struct compute_parameters),
-                  xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f16));
-    goto error;
-  }
-  average_pooling_op->num_compute_invocations = 1;
 
   status = create_average_pooling2d_nhwc(input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
                                          pooling_height, pooling_width, stride_height, stride_width,
@@ -229,14 +221,6 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f32(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f32));
     goto error;
   }
-  average_pooling_op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
-  if (average_pooling_op->compute == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
-                  sizeof(struct compute_parameters),
-                  xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f32));
-    goto error;
-  }
-  average_pooling_op->num_compute_invocations = 1;
 
   status = create_average_pooling2d_nhwc(input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
                                          pooling_height, pooling_width, stride_height, stride_width,
