@@ -113,9 +113,8 @@ static enum xnn_status create_spmm_path(
   xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
     packed_weights_size, xnn_operator_type_to_string(operator_type));
 
-  convolution_op->num_nonzero_values = num_nonzero_values;
-  convolution_op->num_nonzero_blocks = num_nonzero_blocks;
-  convolution_op->num_output_channel_blocks = num_output_channel_blocks;
+  convolution_op->conv.num_nonzero_blocks = num_nonzero_blocks;
+  convolution_op->conv.num_output_channel_blocks = num_output_channel_blocks;
 
   int32_t* input_channel_diffs = (int32_t*) convolution_op->packed_weights.pointer;
   int32_t* input_increments = (int32_t*) (input_channel_diffs + num_nonzero_blocks);
@@ -139,7 +138,7 @@ static enum xnn_status create_spmm_path(
   if (status != xnn_status_success) {
     goto error;
   }
-  convolution_op->first_input_channel = first_ic;
+  convolution_op->conv.first_input_channel = first_ic;
 
   convolution_op->ukernel.spmm = (struct xnn_ukernel_spmm) {
     .function = spmm_config->ukernel,
@@ -1059,13 +1058,10 @@ static enum xnn_status reshape_convolution2d_nchw(
   switch (convolution_op->ukernel.type) {
     case xnn_microkernel_type_spmm:
     {
-      const size_t num_nonzero_values = convolution_op->num_nonzero_values;
-      const size_t num_nonzero_blocks = convolution_op->num_nonzero_blocks;
-      const size_t num_output_channel_blocks = convolution_op->num_output_channel_blocks;
+      const size_t num_nonzero_blocks = convolution_op->conv.num_nonzero_blocks;
+      const size_t num_output_channel_blocks = convolution_op->conv.num_output_channel_blocks;
 
-      convolution_op->num_nonzero_values = num_nonzero_values;
-      convolution_op->num_nonzero_blocks = num_nonzero_blocks;
-      convolution_op->num_output_channel_blocks = num_output_channel_blocks;
+      convolution_op->conv.num_output_channel_blocks = num_output_channel_blocks;
 
       const int32_t* input_channel_diffs = (const int32_t*) packed_weights(convolution_op);
       int32_t* input_increments = ((int32_t*) packed_weights(convolution_op)) + num_nonzero_blocks;
@@ -1295,7 +1291,7 @@ static enum xnn_status setup_convolution2d_nchw(
   switch (convolution_op->ukernel.type) {
     case xnn_microkernel_type_spmm:
     {
-      convolution_op->context.spmm.input = (const void*) ((uintptr_t) input + (convolution_op->first_input_channel *
+      convolution_op->context.spmm.input = (const void*) ((uintptr_t) input + (convolution_op->conv.first_input_channel *
                                                                                convolution_op->context.spmm.scaled_m));
       convolution_op->context.spmm.output = output;
       break;

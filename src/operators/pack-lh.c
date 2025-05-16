@@ -105,8 +105,6 @@ enum xnn_status reshape_pack_lh(xnn_operator_t pack_lh_op, size_t num_groups,
     return xnn_status_success;
   }
 
-  pack_lh_op->batch_size = batch_size;
-
   const uint32_t mr_packed = batch_size == 1          ? 1
                              : gemm_config->mr_packed ? gemm_config->mr_packed
                                                       : gemm_config->mr;

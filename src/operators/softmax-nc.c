@@ -95,7 +95,7 @@ enum xnn_status xnn_create_softmax_nc_qu8(
       xnn_operator_type_to_string(xnn_operator_type_softmax_nc_qu8));
     goto error;
   }
-  softmax_op->input_scale = input_scale;
+  softmax_op->softmax.input_scale = input_scale;
 
   const struct xnn_lut32norm_config* lut32norm_config = xnn_init_u8_lut32norm_config();
   assert(lut32norm_config != NULL);
@@ -177,11 +177,9 @@ enum xnn_status xnn_reshape_softmax_nc_qu8(
   uint32_t* lookup_table = softmax_op->lookup_table;
   const double qscale = fmin(((double) UINT32_MAX) / (double) channels, 8388607.0);
   for (int32_t i = 0; i < 256; i++) {
-    const double scaled_exp_xi = qscale * exp((double) (i - 255) * (double) softmax_op->input_scale);
+    const double scaled_exp_xi = qscale * exp((double) (i - 255) * (double) softmax_op->softmax.input_scale);
     lookup_table[(uint32_t) i] = (uint32_t) lrint(scaled_exp_xi);
   }
-
-  softmax_op->batch_size = batch_size;
 
   softmax_op->context.u8_softmax = (struct u8_softmax_context) {
     .n = softmax_op->channels,
@@ -423,8 +421,6 @@ static enum xnn_status reshape_softmax_nc_floating_point(
     softmax_op->state = xnn_run_state_skip;
     return xnn_status_success;
   }
-
-  softmax_op->batch_size = batch_size;
 
   softmax_op->context.floating_point_softmax = (struct floating_point_softmax_context) {
     .n = softmax_op->channels << log2_element_size,

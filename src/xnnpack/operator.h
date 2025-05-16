@@ -173,8 +173,6 @@ struct xnn_operator {
   size_t group_output_channels;
   size_t channels;
 
-  uint32_t pad_value;
-
   size_t input_height;
   size_t input_width;
   size_t input_pixel_stride;
@@ -198,20 +196,8 @@ struct xnn_operator {
   } packed_weights;
   // Stride between each set of packed weights.
   size_t weights_stride;
-  // Total number of non-zero kernel elements when weights use sparse
-  // representation.
-  size_t num_nonzero_values;
   // Total number of non-zero kernel blocks when weights use sparse
   // representation.
-  size_t num_nonzero_blocks;
-  // Total number of output channel blocks when weights use sparse
-  // representation.
-  size_t num_output_channel_blocks;
-  // Input channel corresponding to the first non-zero kernel element.
-  size_t first_input_channel;
-
-  float input_scale;
-  float output_scale;
 
   size_t valid_batch_size;
   size_t last_input_height;
@@ -252,6 +238,20 @@ struct xnn_operator {
     struct {
       enum xnn_node_type subtype;
     } copy;
+    struct {
+      size_t num_nonzero_blocks;
+      // Total number of output channel blocks when weights use sparse
+      // representation.
+      size_t num_output_channel_blocks;
+      size_t first_input_channel;
+    } conv;
+    // Input channel corresponding to the first non-zero kernel element.
+    struct {
+      float input_scale;
+    } softmax;
+    struct {
+      uint32_t pad_value;
+    } padding;
   };
 
   union {
