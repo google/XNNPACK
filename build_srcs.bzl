@@ -80,32 +80,6 @@ TABLE_SRCS = [
     "src/tables/vlog.c",
 ]
 
-XNNPACK_SRCS = [
-    "src/configs/argmaxpool-config.c",
-    "src/configs/avgpool-config.c",
-    "src/configs/binary-elementwise-config.c",
-    "src/configs/cmul-config.c",
-    "src/configs/conv-hwc2chw-config.c",
-    "src/configs/dwconv-config.c",
-    "src/configs/dwconv2d-chw-config.c",
-    "src/configs/gemm-config.c",
-    "src/configs/ibilinear-chw-config.c",
-    "src/configs/ibilinear-config.c",
-    "src/configs/lut32norm-config.c",
-    "src/configs/maxpool-config.c",
-    "src/configs/pack-lh-config.c",
-    "src/configs/raddstoreexpminusmax-config.c",
-    "src/configs/reduce-config.c",
-    "src/configs/spmm-config.c",
-    "src/configs/transpose-config.c",
-    "src/configs/unary-elementwise-config.c",
-    "src/configs/unpool-config.c",
-    "src/configs/vmulcaddc-config.c",
-    "src/configs/x8-lut-config.c",
-    "src/configs/xx-fill-config.c",
-    "src/configs/xx-pad-config.c",
-]
-
 LOGGING_SRCS = [
     "src/enums/allocation-type.c",
     "src/enums/datatype-strings.c",

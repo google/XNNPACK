@@ -9,13 +9,49 @@
 #include <stdio.h>
 
 #include "include/xnnpack.h"
+#include "src/xnnpack/log.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// Prints a list of the subgraph's values and nodes to the given `out`.
-void xnn_subgraph_dump(xnn_subgraph_t subgraph, FILE* out);
+// Prints a list of the subgraph's values and nodes to the given `out`. We wrap
+// the actual function in a macro so that we can get the location of the caller.
+#define xnn_subgraph_dump(s, o) xnn_subgraph_dump_impl(__FILE__, __LINE__, s, o)
+
+// Log level-specific macros.
+#if XNN_LOG_LEVEL >= XNN_LOG_DEBUG
+#define xnn_subgraph_log_debug(s) \
+  xnn_subgraph_dump_impl(__FILE__, __LINE__, s, stderr)
+#else
+#define xnn_subgraph_log_debug(s)
+#endif
+
+#if XNN_LOG_LEVEL >= XNN_LOG_INFO
+#define xnn_subgraph_log_info(s) \
+  xnn_subgraph_dump_impl(__FILE__, __LINE__, s, stderr)
+#else
+#define xnn_subgraph_log_info(s)
+#endif
+
+#if XNN_LOG_LEVEL >= XNN_LOG_WARNING
+#define xnn_subgraph_log_warning(s) \
+  xnn_subgraph_dump_impl(__FILE__, __LINE__, s, stderr)
+#else
+#define xnn_subgraph_log_warning(s)
+#endif
+
+#if XNN_LOG_LEVEL >= XNN_LOG_ERROR
+#define xnn_subgraph_log_error(s) \
+  xnn_subgraph_dump_impl(__FILE__, __LINE__, s, stderr)
+#else
+#define xnn_subgraph_log_error(s)
+#endif
+
+// The actual implementation of the subgraph logging function, should not be
+// called directly.
+void xnn_subgraph_dump_impl(const char* filename, size_t line_number,
+                            xnn_subgraph_t subgraph, FILE* out);
 
 #ifdef __cplusplus
 }  // extern "C"

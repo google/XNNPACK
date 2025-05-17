@@ -1083,8 +1083,8 @@ xnnpack_unit_test(
     deps = [
         ":replicable_random_device",
         "//:math",
+        "//:microfnptr_h",
         "//:microkernel_utils",
-        "//:params",
     ],
 )
 
