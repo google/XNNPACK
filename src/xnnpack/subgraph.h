@@ -11,7 +11,6 @@
 
 #include "include/xnnpack.h"
 #include "src/xnnpack/allocation-type.h"
-#include "src/xnnpack/cache.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/math.h"
@@ -309,6 +308,9 @@ struct xnn_node {
       int32_t axis;
     } even_split;
     struct {
+      enum xnn_datatype assumed_input_datatype;
+    } fully_connected;
+    struct {
       uint32_t padding_top;
       uint32_t padding_right;
       uint32_t padding_bottom;
@@ -450,6 +452,8 @@ struct xnn_subgraph {
   uint32_t num_reserved_nodes;
   uint32_t num_nodes;
   struct xnn_node* nodes;
+
+  uint32_t flags;
 };
 
 /// Runtime is a combination of an execution plan for subgraph Nodes and a

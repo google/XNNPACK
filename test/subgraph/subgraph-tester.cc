@@ -26,12 +26,12 @@
 
 namespace xnnpack {
 
-SubgraphTester::SubgraphTester(uint32_t external_value_ids) {
+SubgraphTester::SubgraphTester(uint32_t external_value_ids, uint32_t flags) {
   xnn_status status = xnn_initialize(nullptr);
   EXPECT_EQ(status, xnn_status_success);
 
   xnn_subgraph_t subgraph_ptr = nullptr;
-  status = xnn_create_subgraph(external_value_ids, /*flags=*/0, &subgraph_ptr);
+  status = xnn_create_subgraph(external_value_ids, flags, &subgraph_ptr);
   EXPECT_EQ(status, xnn_status_success);
   subgraph_.reset(subgraph_ptr);
 }
@@ -68,8 +68,8 @@ SubgraphTester& SubgraphTester::AddDynamicTensor(
     EXPECT_EQ(status, xnn_status_success);
   } else {
     const xnn_status status = xnn_define_tensor_value(
-        subgraph_.get(), datatype, shape.Rank(), shape.Dims(), nullptr, external_id,
-        flags, &id_out);
+        subgraph_.get(), datatype, shape.Rank(), shape.Dims(), nullptr,
+        external_id, flags, &id_out);
     EXPECT_EQ(status, xnn_status_success);
   }
   EXPECT_EQ(id_out, external_id);

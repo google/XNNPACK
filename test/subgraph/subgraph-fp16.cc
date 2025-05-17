@@ -20,6 +20,7 @@
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/node-type.h"
+#include "src/xnnpack/operator.h"
 #include "src/xnnpack/subgraph.h"
 #include "test/replicable_random_device.h"
 #include "test/subgraph/mock-allocator.h"
@@ -645,7 +646,26 @@ TEST(SUBGRAPH_FP16, fully_connected_qd8_f16_qc8w) {
   xnnpack::Buffer<float> input(15, xnnpack::XnnExtraBytes);
   std::generate(input.begin(), input.end(), std::ref(f32rng));
   xnnpack::Buffer<float> reference_output(10), output(10);
-  ASSERT_EQ(tester.NumNodes(), 4);
+
+  switch (tester.NumNodes()) {
+    case 3:
+      // LHS packing was inlined.
+      ASSERT_EQ(tester.Node(0)->type, xnn_node_type_convert);
+      ASSERT_EQ(tester.Node(1)->type, xnn_node_type_fully_connected);
+      ASSERT_EQ(tester.Node(2)->type, xnn_node_type_convert);
+      ASSERT_TRUE(tester.Node(1)->flags & XNN_FLAG_INLINE_LHS_PACKING);
+      break;
+    case 4:
+      ASSERT_EQ(tester.Node(0)->type, xnn_node_type_convert);
+      ASSERT_EQ(tester.Node(1)->type, xnn_node_type_convert);
+      ASSERT_EQ(tester.Node(2)->type, xnn_node_type_fully_connected);
+      ASSERT_EQ(tester.Node(3)->type, xnn_node_type_convert);
+      break;
+    default:
+      GTEST_FAIL() << "Expected either 3 (inlined LHS packing) or 4 (no "
+                      "inlined LHS packing) nodes, but got "
+                   << tester.NumNodes() << ".";
+  }
 
   xnn_runtime_t fp16_runtime_ptr = nullptr;
   xnn_status status =
