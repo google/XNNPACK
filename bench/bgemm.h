@@ -15,7 +15,8 @@
   BENCHMARK_CAPTURE(bgemm_fn, mobilebert, "MobileBert")->Apply(MobilebertBgemmArguments)->UseRealTime(); \
   BENCHMARK_CAPTURE(bgemm_fn, sd1x_diffusion, "SD1.X Diffusion")->Apply(SD1XDiffusionBgemmArguments)->UseRealTime(); \
   BENCHMARK_CAPTURE(bgemm_fn, sd1x_encoder_decoder, "SD1.X Encoder-Decoder")->Apply(SD1XEncoderDecoderBgemmArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(bgemm_fn, sd1x_text_encoder, "SD1.X Text Encoder")->Apply(SD1XTextEncoderBgemmArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(bgemm_fn, sd1x_text_encoder, "SD1.X Text Encoder")->Apply(SD1XTextEncoderBgemmArguments)->UseRealTime(); \
+  BENCHMARK_CAPTURE(bgemm_fn, llm, "LLM")->Apply(LLMGemmArguments)->UseRealTime();
 
 #define BENCHMARK_CAPTURE_BGEMM(bgemm_fn, name_prefix, ...) \
   BENCHMARK_CAPTURE(bgemm_fn, name_prefix##attention, "Attention", __VA_ARGS__)->Apply(QD8AttentionBgemmArguments)->UseRealTime(); \
@@ -23,7 +24,8 @@
   BENCHMARK_CAPTURE(bgemm_fn, name_prefix##mobilebert, "MobileBert", __VA_ARGS__)->Apply(MobilebertBgemmArguments)->UseRealTime(); \
   BENCHMARK_CAPTURE(bgemm_fn, name_prefix##sd1x_diffusion, "SD1.X Diffusion", __VA_ARGS__)->Apply(SD1XDiffusionBgemmArguments)->UseRealTime(); \
   BENCHMARK_CAPTURE(bgemm_fn, name_prefix##sd1x_encoder_decoder, "SD1.X Encoder-Decoder", __VA_ARGS__)->Apply(SD1XEncoderDecoderBgemmArguments)->UseRealTime(); \
-  BENCHMARK_CAPTURE(bgemm_fn, name_prefix##sd1x_text_encoder, "SD1.X Text Encoder", __VA_ARGS__)->Apply(SD1XTextEncoderBgemmArguments)->UseRealTime();
+  BENCHMARK_CAPTURE(bgemm_fn, name_prefix##sd1x_text_encoder, "SD1.X Text Encoder", __VA_ARGS__)->Apply(SD1XTextEncoderBgemmArguments)->UseRealTime(); \
+  BENCHMARK_CAPTURE(bgemm_fn, name_prefix##llm, "LLM", __VA_ARGS__)->Apply(LLMGemmArguments)->UseRealTime();
 
 
 static void AlbertBgemmArguments(benchmark::internal::Benchmark* b) {
@@ -99,4 +101,13 @@ static void QD8AttentionBgemmArguments(benchmark::internal::Benchmark* b) {
   b->Args({4,     1,  8, 2048});
   b->Args({14,    1,  2, 1536});
   b->Args({10,    1,  2, 2048});
+}
+
+// Large Language Model (Generic)
+static void LLMGemmArguments(benchmark::internal::Benchmark* b) {
+  b->ArgNames({"B", "M", "N", "K"});
+
+  b->Args({1, 128, 16, 1024});
+  b->Args({1, 128, 128, 1024});
+  b->Args({1, 128, 4096, 1024});
 }
