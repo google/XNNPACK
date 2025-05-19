@@ -226,13 +226,13 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_7x4v__rvv(
     vfpacc5 = __riscv_vfmin_vf_f32m4(vfpacc5, voutput_max, vl);
     vfpacc6 = __riscv_vfmin_vf_f32m4(vfpacc6, voutput_max, vl);
 
-    __riscv_vse32_v_f32m4(c0, vfpacc0, vl);
-    __riscv_vse32_v_f32m4(c1, vfpacc1, vl);
-    __riscv_vse32_v_f32m4(c2, vfpacc2, vl);
-    __riscv_vse32_v_f32m4(c3, vfpacc3, vl);
-    __riscv_vse32_v_f32m4(c4, vfpacc4, vl);
-    __riscv_vse32_v_f32m4(c5, vfpacc5, vl);
     __riscv_vse32_v_f32m4(c6, vfpacc6, vl);
+    __riscv_vse32_v_f32m4(c5, vfpacc5, vl);
+    __riscv_vse32_v_f32m4(c4, vfpacc4, vl);
+    __riscv_vse32_v_f32m4(c3, vfpacc3, vl);
+    __riscv_vse32_v_f32m4(c2, vfpacc2, vl);
+    __riscv_vse32_v_f32m4(c1, vfpacc1, vl);
+    __riscv_vse32_v_f32m4(c0, vfpacc0, vl);
 
     c6 = (float*) ((uintptr_t) c6 + cn_stride);
     c5 = (float*) ((uintptr_t) c5 + cn_stride);

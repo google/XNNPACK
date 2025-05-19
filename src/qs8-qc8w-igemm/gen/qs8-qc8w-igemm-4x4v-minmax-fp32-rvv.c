@@ -155,10 +155,10 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4v__rvv(
     vint8m1_t vout82 = __riscv_vncvt_x_x_w_i8m1(vout2, vl);
     vint8m1_t vout83 = __riscv_vncvt_x_x_w_i8m1(vout3, vl);
 
-    __riscv_vse8_v_i8m1(c0, vout80, vl);
-    __riscv_vse8_v_i8m1(c1, vout81, vl);
-    __riscv_vse8_v_i8m1(c2, vout82, vl);
     __riscv_vse8_v_i8m1(c3, vout83, vl);
+    __riscv_vse8_v_i8m1(c2, vout82, vl);
+    __riscv_vse8_v_i8m1(c1, vout81, vl);
+    __riscv_vse8_v_i8m1(c0, vout80, vl);
 
     c3 = (int8_t*) ((uintptr_t) c3 + cn_stride);
     c2 = (int8_t*) ((uintptr_t) c2 + cn_stride);

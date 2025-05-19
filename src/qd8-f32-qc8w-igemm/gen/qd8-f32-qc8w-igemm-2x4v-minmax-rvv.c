@@ -126,8 +126,8 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_2x4v__rvv(
     vfpacc0 = __riscv_vfmin_vf_f32m4(vfpacc0, voutput_max, vl);
     vfpacc1 = __riscv_vfmin_vf_f32m4(vfpacc1, voutput_max, vl);
 
-    __riscv_vse32_v_f32m4(c0, vfpacc0, vl);
     __riscv_vse32_v_f32m4(c1, vfpacc1, vl);
+    __riscv_vse32_v_f32m4(c0, vfpacc0, vl);
 
     c1 = (float*) ((uintptr_t) c1 + cn_stride);
     c0 = (float*) ((uintptr_t) c0 + cn_stride);

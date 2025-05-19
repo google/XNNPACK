@@ -5,7 +5,7 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert DATATYPE in ["QD8", "QC4"] or REQUANTIZATION in ["FP32"]
-$assert DATATYPE in ["QC8", "QD8", "QC4", "QU8", "QS8"] 
+$assert DATATYPE in ["QC8", "QD8", "QC4", "QU8", "QS8"]
 $assert MR >= 1
 $assert NR in ["m2", "m4", "m8"]
 $OUT_LMUL = NR
