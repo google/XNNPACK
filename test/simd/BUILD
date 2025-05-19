@@ -20,12 +20,11 @@ load(
 )
 
 SIMD_TEST_DEPS = [
-    "//test:replicable_random_device",
-    "//:buffer",
     "//:common",
     "//:isa_checks",
     "//:math",
-    "//:microkernels_h",
+    "//:microkernel_hdrs",
+    "//test:replicable_random_device",
 ]
 
 [xnnpack_unit_test(

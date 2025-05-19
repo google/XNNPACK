@@ -15,6 +15,7 @@ load(
     "xnnpack_cxx_library",
     "xnnpack_if_kleidiai_enabled",
     "xnnpack_min_size_copts",
+    "xnnpack_select_if",
     "xnnpack_slinky_deps",
     "xnnpack_source_list_file",
     "xnnpack_transitive_source_list",
@@ -25,9 +26,7 @@ load(
     "xnnpack_archs",
     "xnnpack_cc_library_for_arch",
     "xnnpack_cond_for_arch",
-    "xnnpack_configurable_defines",
     "xnnpack_list_sum",
-    "xnnpack_select_if",
     "xnnpack_simd_f16_archs",
     "xnnpack_simd_f32_archs",
     "xnnpack_simd_s16_archs",
@@ -49,12 +48,13 @@ load(
     "OPERATOR_SRCS",
     "SUBGRAPH_SRCS",
     "TABLE_SRCS",
-    "XNNPACK_SRCS",
 )
+
+package(default_visibility = ["//:__subpackages__"])
 
 licenses(["notice"])
 
-exports_files(["LICENSE"])
+exports_files(["LICENSE"] + glob(["**/*.h"]))
 
 exports_files(["preamble.js.lds"])
 
@@ -286,15 +286,15 @@ MICROKERNEL_HDRS = [
 MICROKERNEL_DEPS = [
     ":assembly",
     ":common",
-    ":hardware_config",
     ":math",
-    ":microkernels_h",
+    ":microkernel_hdrs",
+    ":microparams_h",
     ":microparams_init",
-    ":microparams",
     ":prefetch",
     ":sanitizers",
     ":tables",
     ":unaligned",
+    "//src/configs:hardware_config",
 ]
 
 SIMD_HEADERS = [
@@ -322,13 +322,6 @@ SIMD_HEADERS = [
 
 exports_files(SIMD_HEADERS)
 
-INTERNAL_MICROKERNEL_HDRS = MICROKERNEL_HDRS + SIMD_HEADERS + [
-    "src/xnnpack/cache.h",
-    "src/xnnpack/intrinsics-polyfill.h",
-    "src/xnnpack/requantization-stubs.h",
-    "src/xnnpack/unaligned.h",
-]
-
 ALL_MICROKERNEL_SRCS = xnnpack_list_sum(
     [all_srcs_for_arch(arch) for arch in xnnpack_archs()],
     [],
@@ -348,16 +341,20 @@ filegroup(
 
 # Collection of internal microkernel related headers that declares all the microkernel functions.
 xnnpack_cc_library(
-    name = "microkernels_h",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
+    name = "microkernel_hdrs",
+    textual_hdrs = [
+        "src/xnnpack/intrinsics-polyfill.h",
+        "src/xnnpack/requantization-stubs.h",
+        "src/xnnpack/unaligned.h",
+    ] + MICROKERNEL_HDRS + SIMD_HEADERS,
     deps = [
         ":common",
-        ":config_hdrs",
         ":math",
         ":memory",
-        ":microparams",
+        ":microparams_h",
         ":mutex",
         ":xnnpack_h",
+        "//src/configs:config_hdrs",
     ],
 )
 
@@ -384,89 +381,40 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
-    name = "microparams",
+    name = "microparams_h",
     hdrs = [
         "src/xnnpack/microparams.h",
     ],
     deps = [
         ":common",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "hardware_config",
-    srcs = ["src/configs/hardware-config.c"],
-    hdrs = [
-        "src/xnnpack/hardware-config.h",
-        "src/xnnpack/microfnptr.h",
-        "src/xnnpack/microparams.h",
-    ],
-    defines = xnnpack_configurable_defines(),
-    deps = [
-        ":common",
-        ":init_once",
-        ":logging",
-    ] + select({
-        ":cpuinfo_enabled": ["@cpuinfo"],
-        "//conditions:default": [],
-    }),
-)
-
-xnnpack_cc_library(
-    name = "config_hdrs",
-    hdrs = [
-        "src/xnnpack/config.h",
-        "src/xnnpack/config-types.h",
-    ],
-    deps = [
-        ":hardware_config",
-        ":params",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "microkernel_configs",
-    srcs = XNNPACK_SRCS,
-    hdrs = [
-        "src/xnnpack/config.h",
-        "src/xnnpack/config-types.h",
-        "src/xnnpack/microfnptr.h",
-        "src/xnnpack/microparams.h",
-    ],
-    copts = select({
-        ":cpuinfo_enabled": ["-DXNN_ENABLE_CPUINFO=1"],
-        "//conditions:default": ["-DXNN_ENABLE_CPUINFO=0"],
-    }),
-    defines = xnnpack_configurable_defines(),
-    deps = [
-        ":common",
-        ":config_hdrs",
-        ":hardware_config",
-        ":indirection",
-        ":init_once",
-        ":logging",
         ":math",
-        ":microkernels_h",
-        ":microparams_init",
-        ":packing",
-        ":prod_microkernels",
         ":xnnpack_h",
-    ] + select({
-        ":cpuinfo_enabled": ["@cpuinfo"],
-        "//conditions:default": [],
-    }),
+    ],
+)
+
+xnnpack_cc_library(
+    name = "microfnptr_h",
+    hdrs = [
+        "src/xnnpack/microfnptr.h",
+    ],
+    deps = [
+        ":common",
+        ":math",
+        ":microparams_h",
+        ":xnnpack_h",
+    ],
 )
 
 xnnpack_cc_library(
     name = "params",
     srcs = ["src/params.c"],
     hdrs = [
-        "src/xnnpack/microfnptr.h",
         "src/xnnpack/params.h",
     ],
     deps = [
         ":common",
-        ":microparams",
+        ":microfnptr_h",
+        ":microparams_h",
         ":xnnpack_h",
     ],
 )
@@ -474,7 +422,6 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "fp16",
     hdrs = ["src/xnnpack/fp16.h"],
-    compatible_with = [],
 )
 
 xnnpack_cc_library(
@@ -482,7 +429,6 @@ xnnpack_cc_library(
     hdrs = ["src/xnnpack/math.h"],
     deps = [
         ":common",
-        ":config_hdrs",
         ":fp16",
     ],
 )
@@ -510,7 +456,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
-        ":microparams",
+        ":microparams_h",
         ":requantization",
         ":unaligned",
         ":xnnpack_h",
@@ -521,6 +467,8 @@ xnnpack_cc_library(
     name = "node_type",
     hdrs = [
         "src/xnnpack/node-type.h",
+    ],
+    textual_hdrs = [
         "src/xnnpack/node-type-defs.h",
     ],
     deps = [
@@ -532,6 +480,8 @@ xnnpack_cc_library(
     name = "allocation_type",
     hdrs = [
         "src/xnnpack/allocation-type.h",
+    ],
+    textual_hdrs = [
         "src/xnnpack/allocation-type-defs.h",
     ],
     deps = [
@@ -543,6 +493,8 @@ xnnpack_cc_library(
     name = "operator_type",
     hdrs = [
         "src/xnnpack/operator-type.h",
+    ],
+    textual_hdrs = [
         "src/xnnpack/operator-type-defs.h",
     ],
     deps = [
@@ -554,6 +506,8 @@ xnnpack_cc_library(
     name = "microkernel_type",
     hdrs = [
         "src/xnnpack/microkernel-type.h",
+    ],
+    textual_hdrs = [
         "src/xnnpack/microkernel-type-defs.h",
     ],
     deps = [
@@ -567,6 +521,8 @@ xnnpack_cc_library(
     deps = [
         ":subgraph_h",
         ":xnnpack_h",
+        "//src/configs:config_hdrs",
+        "@pthreadpool",
     ],
 )
 
@@ -612,7 +568,7 @@ xnnpack_cc_library(
     ],
     deps = [
         ":common",
-        ":hardware_config",
+        "//src/configs:hardware_config",
     ],
 )
 
@@ -640,7 +596,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
-        ":microparams",
+        ":microparams_h",
     ],
 )
 
@@ -650,7 +606,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
-        ":microparams",
+        ":microparams_h",
     ],
 )
 
@@ -669,8 +625,7 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "assembly",
-    hdrs = ["src/xnnpack/assembly.h"],
-    compatible_with = [],
+    textual_hdrs = ["src/xnnpack/assembly.h"],
 )
 
 genrule(
@@ -688,9 +643,7 @@ genrule(
     cmd = ("$(location //tools:update_microkernels) " +
            "--output $(RULEDIR)/testdata " +
            "--root_dir %s" % (package_name() if package_name() else ".")),
-    compatible_with = [],
     tools = ["//tools:update_microkernels"],
-    visibility = ["//:__subpackages__"],
 )
 
 filegroup(
@@ -698,7 +651,6 @@ filegroup(
     srcs = glob([
         "cmake/gen/*.cmake",
     ]),
-    visibility = ["//:__subpackages__"],
 )
 
 # Generate the prod/all microkernel libraries for each architecture.
@@ -708,8 +660,6 @@ filegroup(
             name = arch + "_prod_microkernels",
             srcs = prod_asm_srcs_for_arch(arch) + prod_c_srcs_for_arch(arch),
             arch = arch,
-            compatible_with = [],
-            defines = xnnpack_configurable_defines(),
             # Internal build flag.
             tags = ["nobuilder"],
             deps = MICROKERNEL_DEPS,
@@ -718,8 +668,6 @@ filegroup(
             name = arch + "_all_microkernels",
             srcs = non_prod_asm_srcs_for_arch(arch) + non_prod_c_srcs_for_arch(arch),
             arch = arch,
-            compatible_with = [],
-            defines = xnnpack_configurable_defines(),
             tags = ["nobuilder"],
             deps = MICROKERNEL_DEPS + [":" + arch + "_prod_microkernels"],
         ),
@@ -779,13 +727,8 @@ xnnpack_cc_library(
 )
 
 [
-    cc_library(
+    xnnpack_cc_library(
         name = lib + "_microkernels",
-        compatible_with = [],
-        defines = xnnpack_configurable_defines(),
-        hdrs_check = "strict",
-        linkstatic = True,
-        visibility = ["//:__subpackages__"],
         deps = xnnpack_list_sum(
             [
                 xnnpack_select_if(
@@ -807,7 +750,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
-        ":microparams",
+        ":microparams_h",
         ":operator_h",
         ":xnnpack_h",
         "@FXdiv",
@@ -818,17 +761,17 @@ xnnpack_cxx_library(
     name = "packing",
     srcs = ["src/reference/packing.cc"],
     hdrs = ["src/xnnpack/pack.h"],
-    defines = xnnpack_configurable_defines(),
     deps = [
         ":common",
-        ":config_hdrs",
         ":logging",
         ":math",
-        ":microparams",
+        ":microfnptr_h",
+        ":microparams_h",
         ":microparams_init",
         ":params",
         ":unaligned",
         ":xnnpack_h",
+        "//src/configs:config_hdrs",
     ] + xnnpack_if_kleidiai_enabled([
         "@KleidiAI//kai/ukernels/matmul",
     ]),
@@ -864,7 +807,6 @@ xnnpack_transitive_source_list(
 xnnpack_source_list_file(
     name = "build_identifier_ukernel_srcs_list",
     srcs = [":build_identifier_ukernel_srcs"],
-    compatible_with = [],
 )
 
 # When the python script gets executed, the files it has access to are limited
@@ -917,9 +859,12 @@ xnnpack_cc_library(
     ],
     deps = [
         ":common",
-        ":math",
-        ":params",
+        ":microfnptr_h",
+        ":microparams_h",
+        ":operator_type",
         ":xnnpack_h",
+        "//src/configs:config_hdrs",
+        "@pthreadpool",
     ],
 )
 
@@ -929,9 +874,9 @@ xnnpack_cc_library(
     hdrs = ["src/xnnpack/microkernel-utils.h"],
     deps = [
         ":common",
-        ":hardware_config",
         ":logging",
         ":math",
+        "//src/configs:hardware_config",
     ],
 )
 
@@ -945,11 +890,13 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":compute_h",
+        ":microfnptr_h",
         ":microkernel_type",
-        ":microparams",
+        ":microparams_h",
+        ":node_type",
         ":operator_type",
-        ":params",
         ":xnnpack_h",
+        "//src/configs:config_hdrs",
         "@pthreadpool",
     ],
 )
@@ -963,6 +910,7 @@ xnnpack_cc_library(
         ":common",
         ":logging",
         ":math",
+        ":microfnptr_h",
         ":node_type",
         ":operator_h",
         ":operator_type",
@@ -981,15 +929,14 @@ xnnpack_cxx_library(
         "src/xnnpack/reference-config.h",
         "src/xnnpack/reference-utils.h",
     ],
-    compatible_with = [],
-    defines = xnnpack_configurable_defines(),
     deps = [
         ":common",
-        ":config_hdrs",
         ":datatype",
-        ":hardware_config",
         ":math",
+        ":microfnptr_h",
+        ":microparams_h",
         ":xnnpack_h",
+        "//src/configs:config_hdrs",
     ],
 )
 
@@ -997,7 +944,6 @@ xnnpack_cc_library(
     name = "datatype",
     srcs = ["src/datatype.c"],
     hdrs = ["src/xnnpack/datatype.h"],
-    compatible_with = [],
     deps = [
         ":common",
         ":math",
@@ -1019,21 +965,20 @@ xnnpack_cc_library(
         ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
         "//conditions:default": [],
     }),
-    defines = xnnpack_configurable_defines(),
     deps = [
         ":allocator",
         ":cache",
         ":common",
         ":datatype",
-        ":hardware_config",
         ":indirection",
         ":internal",
         ":logging",
         ":math",
-        ":microkernel_configs",
+        ":microfnptr_h",
+        ":microkernel_hdrs",
         ":microkernel_type",
         ":microkernel_utils",
-        ":microkernels_h",
+        ":microparams_h",
         ":microparams_init",
         ":node_type",
         ":normalization",
@@ -1044,6 +989,9 @@ xnnpack_cc_library(
         ":quantization",
         ":reference_ukernels",
         ":xnnpack_h",
+        "//src/configs:config_hdrs",
+        "//src/configs:hardware_config",
+        "//src/configs:microkernel_configs",
         "@pthreadpool",
     ],
 )
@@ -1053,7 +1001,6 @@ xnnpack_cc_library(
     srcs = [
         "src/sanitizers.c",
     ],
-    compatible_with = [],
 )
 
 xnnpack_cc_library(
@@ -1061,15 +1008,14 @@ xnnpack_cc_library(
     hdrs = [
         "src/xnnpack/subgraph.h",
     ],
-    compatible_with = [],
     deps = [
         ":allocation_type",
+        ":cache",
         ":common",
-        ":config_hdrs",
         ":math",
-        ":microkernels_h",
         ":node_type",
         ":xnnpack_h",
+        "//src/configs:config_hdrs",
         "@pthreadpool",
     ],
 )
@@ -1084,22 +1030,19 @@ xnnpack_cc_library(
         "src/xnnpack/subgraph.h",
         "src/xnnpack/subgraph-validation.h",
     ],
-    defines = xnnpack_configurable_defines(),
     deps = [
         ":allocation_type",
         ":allocator",
         ":cache",
         ":common",
-        ":config_hdrs",
         ":datatype",
         ":fp16",
-        ":hardware_config",
         ":internal",
         ":logging",
         ":math",
         ":memory",
+        ":microkernel_hdrs",
         ":microkernel_type",
-        ":microkernels_h",
         ":node_type",
         ":operator_type",
         ":operator_utils",
@@ -1108,6 +1051,9 @@ xnnpack_cc_library(
         ":requantization",
         ":subgraph_h",
         ":xnnpack_h",
+        "//src/configs:config_hdrs",
+        "//src/configs:hardware_config",
+        "//src/configs:microkernel_configs",
         "@pthreadpool",
     ] + xnnpack_slinky_deps(),
 )
@@ -1160,17 +1106,17 @@ xnnpack_cc_library(
         ":allocator",
         ":build_identifier",  # build_cleaner: keep
         ":common",  # build_cleaner: keep
-        ":config_hdrs",  # build_cleaner: keep
-        ":hardware_config",
         ":init_once",
         ":logging",
         ":math",  # build_cleaner: keep
-        ":microkernels_h",  # build_cleaner: keep
-        ":microparams",  # build_cleaner: keep
+        ":microkernel_hdrs",  # build_cleaner: keep
+        ":microparams_h",  # build_cleaner: keep
         ":microparams_init",  # build_cleaner: keep
         ":operators",  # build_cleaner: keep
         ":params",
         ":subgraph",  # build_cleaner: keep
+        "//src/configs:hardware_config",
+        "//src/configs:microkernel_configs",  # build_cleaner: keep
         "@pthreadpool",
     ] + xnnpack_if_kleidiai_enabled([
         "@KleidiAI//:common",
@@ -1195,10 +1141,10 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         ":allocator",
-        ":hardware_config",
         ":init_once",
         ":logging",
         ":params",
+        "//src/configs:hardware_config",
         "@pthreadpool",
     ],
 )
@@ -1221,10 +1167,10 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         ":allocator",
-        ":hardware_config",
         ":init_once",
         ":logging",
         ":params",
+        "//src/configs:hardware_config",
         "@pthreadpool",
     ],
 )

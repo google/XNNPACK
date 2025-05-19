@@ -99,32 +99,46 @@ static XNN_INLINE xnn_simd_u8_t xnn_load_tail_safe_u8(const uint8_t* input,
   switch (num_elements) {
     case 15:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 14:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 13:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 12:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 11:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 10:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 9:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 8:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 7:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 6:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 5:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 4:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 3:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 2:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 1:
       *d++ = *input++;
   }

@@ -11,29 +11,32 @@ load(
     "xnnpack_unit_test",
 )
 
+package(default_visibility = ["//:__subpackages__"])
+
 MICROKERNEL_TEST_DEPS = [
-    "//:buffer",
     ":next_prime",
     ":replicable_random_device",
     "//:aligned_allocator",
     "//:all_microkernels",
     "//:allocator",
+    "//:buffer",
     "//:common",
     "//:datatype",
     "//:fp16",
-    "//:hardware_config",
     "//:isa_checks",
     "//:logging",
     "//:math",
     "//:memory",
-    "//:microkernels_h",
+    "//:microfnptr_h",
+    "//:microparams_h",
     "//:microparams_init",
-    "//:microparams",
+    "//:microkernel_hdrs",
     "//:packing",
     "//:params",
     "//:quantization",
     "//:requantization",
     "//:xnnpack_h",
+    "//src/configs:hardware_config",
 ]
 
 ############################## Testing utilities ###############################
@@ -59,7 +62,7 @@ xnnpack_cxx_library(
     hdrs = ["gemm-microkernel-tester.h"],
     deps = MICROKERNEL_TEST_DEPS + xnnpack_test_deps_for_library() + [
         "//:XNNPACK",
-        "//:config_hdrs",
+        "//src/configs:config_hdrs",
     ],
 )
 
@@ -94,13 +97,6 @@ xnnpack_cxx_library(
     deps = MICROKERNEL_TEST_DEPS + xnnpack_test_deps_for_library() + [
         "//:microkernel_utils",
     ],
-)
-
-xnnpack_cxx_library(
-    name = "rdsum_microkernel_tester",
-    testonly = True,
-    hdrs = ["rdsum-microkernel-tester.h"],
-    deps = MICROKERNEL_TEST_DEPS + xnnpack_test_deps_for_library(),
 )
 
 xnnpack_cxx_library(
@@ -1083,8 +1079,8 @@ xnnpack_unit_test(
     deps = [
         ":replicable_random_device",
         "//:math",
+        "//:microfnptr_h",
         "//:microkernel_utils",
-        "//:params",
     ],
 )
 

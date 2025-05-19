@@ -7,7 +7,7 @@ load(
     ":build_defs.bzl",
     "xnnpack_cc_library",
     "xnnpack_if_kleidiai_enabled",
-    "xnnpack_slinky_defines",
+    "xnnpack_select_if",
 )
 
 # buildifier: disable=out-of-order-load
@@ -24,130 +24,6 @@ def xnnpack_list_sum(values, initial = 0):
     for value in values:
         result += value
     return result
-
-def xnnpack_select_if(cond = None, val_true = [], val_false = []):
-    if cond != None:
-        return select({
-            cond: val_true,
-            "//conditions:default": val_false,
-        })
-    else:
-        return val_true
-
-def xnnpack_configurable_defines():
-    return xnnpack_select_if(
-        "//:cpuinfo_enabled",
-        ["XNN_ENABLE_CPUINFO=1"],
-        ["XNN_ENABLE_CPUINFO=0"],
-    ) + xnnpack_select_if(
-        "//:memopt_enabled",
-        ["XNN_ENABLE_MEMOPT=1"],
-        ["XNN_ENABLE_MEMOPT=1"],
-    ) + xnnpack_select_if(
-        "//:sparse_enabled",
-        ["XNN_ENABLE_SPARSE=1"],
-        ["XNN_ENABLE_SPARSE=0"],
-    ) + xnnpack_select_if(
-        "//:assembly_enabled",
-        ["XNN_ENABLE_ASSEMBLY=1"],
-        ["XNN_ENABLE_ASSEMBLY=0"],
-    ) + xnnpack_select_if(
-        "//:arm_fp16_scalar_enabled",
-        ["XNN_ENABLE_ARM_FP16_SCALAR=1"],
-        ["XNN_ENABLE_ARM_FP16_SCALAR=0"],
-    ) + xnnpack_select_if(
-        "//:arm_fp16_vector_enabled",
-        ["XNN_ENABLE_ARM_FP16_VECTOR=1"],
-        ["XNN_ENABLE_ARM_FP16_VECTOR=0"],
-    ) + xnnpack_select_if(
-        "//:arm_bf16_enabled",
-        ["XNN_ENABLE_ARM_BF16=1"],
-        ["XNN_ENABLE_ARM_BF16=0"],
-    ) + xnnpack_select_if(
-        "//:arm_dotprod_enabled",
-        ["XNN_ENABLE_ARM_DOTPROD=1"],
-        ["XNN_ENABLE_ARM_DOTPROD=0"],
-    ) + xnnpack_select_if(
-        "//:arm_i8mm_enabled",
-        ["XNN_ENABLE_ARM_I8MM=1"],
-        ["XNN_ENABLE_ARM_I8MM=0"],
-    ) + xnnpack_select_if(
-        "//:riscv_fp16_vector_enabled",
-        ["XNN_ENABLE_RISCV_FP16_VECTOR=1"],
-        ["XNN_ENABLE_RISCV_FP16_VECTOR=0"],
-    ) + xnnpack_select_if(
-        "//:avx512amx_enabled",
-        ["XNN_ENABLE_AVX512AMX=1"],
-        ["XNN_ENABLE_AVX512AMX=0"],
-    ) + xnnpack_select_if(
-        "//:avx512fp16_enabled",
-        ["XNN_ENABLE_AVX512FP16=1"],
-        ["XNN_ENABLE_AVX512FP16=0"],
-    ) + xnnpack_select_if(
-        "//:avx512bf16_enabled",
-        ["XNN_ENABLE_AVX512BF16=1"],
-        ["XNN_ENABLE_AVX512BF16=0"],
-    ) + xnnpack_select_if(
-        "//:avxvnni_enabled",
-        ["XNN_ENABLE_AVXVNNI=1"],
-        ["XNN_ENABLE_AVXVNNI=0"],
-    ) + xnnpack_select_if(
-        "//:avxvnniint8_enabled",
-        ["XNN_ENABLE_AVXVNNIINT8=1"],
-        ["XNN_ENABLE_AVXVNNIINT8=0"],
-    ) + xnnpack_select_if(
-        "//:avx512f_enabled",
-        ["XNN_ENABLE_AVX512F=1"],
-        ["XNN_ENABLE_AVX512F=0"],
-    ) + xnnpack_select_if(
-        "//:avx256skx_enabled",
-        ["XNN_ENABLE_AVX256SKX=1"],
-        ["XNN_ENABLE_AVX256SKX=0"],
-    ) + xnnpack_select_if(
-        "//:avx256vnni_enabled",
-        ["XNN_ENABLE_AVX256VNNI=1"],
-        ["XNN_ENABLE_AVX256VNNI=0"],
-    ) + xnnpack_select_if(
-        "//:avx256vnnigfni_enabled",
-        ["XNN_ENABLE_AVX256VNNIGFNI=1"],
-        ["XNN_ENABLE_AVX256VNNIGFNI=0"],
-    ) + xnnpack_select_if(
-        "//:avx512skx_enabled",
-        ["XNN_ENABLE_AVX512SKX=1"],
-        ["XNN_ENABLE_AVX512SKX=0"],
-    ) + xnnpack_select_if(
-        "//:avx512vbmi_enabled",
-        ["XNN_ENABLE_AVX512VBMI=1"],
-        ["XNN_ENABLE_AVX512VBMI=0"],
-    ) + xnnpack_select_if(
-        "//:avx512vnni_enabled",
-        ["XNN_ENABLE_AVX512VNNI=1"],
-        ["XNN_ENABLE_AVX512VNNI=0"],
-    ) + xnnpack_select_if(
-        "//:avx512vnnigfni_enabled",
-        ["XNN_ENABLE_AVX512VNNIGFNI=1"],
-        ["XNN_ENABLE_AVX512VNNIGFNI=0"],
-    ) + xnnpack_select_if(
-        "//:hvx_enabled",
-        ["XNN_ENABLE_HVX=1"],
-        ["XNN_ENABLE_HVX=0"],
-    ) + xnnpack_select_if(
-        "//:kleidiai_enabled",
-        ["XNN_ENABLE_KLEIDIAI=1"],
-        ["XNN_ENABLE_KLEIDIAI=0"],
-    ) + xnnpack_select_if(
-        "//:arm_sme_enabled",
-        ["XNN_ENABLE_ARM_SME=1"],
-        ["XNN_ENABLE_SRM_SME=0"],
-    ) + xnnpack_select_if(
-        "//:arm_sme2_enabled",
-        ["XNN_ENABLE_ARM_SME2=1"],
-        ["XNN_ENABLE_ARM_SME2=0"],
-    ) + xnnpack_select_if(
-        "//:wasm_revectorize_enabled",
-        ["XNN_ENABLE_WASM_REVECTORIZE=1"],
-        ["XNN_ENABLE_WASM_REVECTORIZE=0"],
-    ) + xnnpack_slinky_defines()
 
 def _create_params(
         cond = None,
@@ -335,7 +211,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
             "-ffp-contract=off",
         ],
         extra_deps = [
-            "//:config_hdrs",
+            "//src/configs:config_hdrs",
             "@FXdiv",
         ],
     ),
