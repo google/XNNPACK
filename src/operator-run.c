@@ -2278,6 +2278,14 @@ enum xnn_status xnn_run_operator_with_index(
             (void*)((uintptr_t)context + op->compute[i].context_offset),
             op->compute[i].range[0], op->compute[i].tile[0], flags);
         break;
+      case xnn_parallelization_type_1d_tile_1d_dynamic_with_thread:
+        assert(op->compute[i].range[0] != 0);
+        assert(op->compute[i].tile[0] != 0);
+        pthreadpool_parallelize_1d_tile_1d_dynamic_with_thread(
+            threadpool, op->compute[i].task_1d_tile_1d_dynamic_with_id,
+            (void*)((uintptr_t)context + op->compute[i].context_offset),
+            op->compute[i].range[0], op->compute[i].tile[0], flags);
+        break;
       case xnn_parallelization_type_2d:
         assert(op->compute[i].range[0] != 0);
         assert(op->compute[i].range[1] != 0);
@@ -2333,6 +2341,16 @@ enum xnn_status xnn_run_operator_with_index(
             op->compute[i].range[0], op->compute[i].range[1],
             op->compute[i].tile[0], flags);
         break;
+      case xnn_parallelization_type_2d_tile_1d_dynamic_with_thread:
+        assert(op->compute[i].range[0] != 0);
+        assert(op->compute[i].range[1] != 0);
+        assert(op->compute[i].tile[0] != 0);
+        pthreadpool_parallelize_2d_tile_1d_dynamic_with_thread(
+            threadpool, op->compute[i].task_2d_tile_1d_dynamic_with_id,
+            (void*)((uintptr_t)context + op->compute[i].context_offset),
+            op->compute[i].range[0], op->compute[i].range[1],
+            op->compute[i].tile[0], flags);
+        break;
       case xnn_parallelization_type_2d_tile_2d_dynamic:
         assert(op->compute[i].range[0] != 0);
         assert(op->compute[i].range[1] != 0);
@@ -2340,6 +2358,17 @@ enum xnn_status xnn_run_operator_with_index(
         assert(op->compute[i].tile[1] != 0);
         pthreadpool_parallelize_2d_tile_2d_dynamic(
             threadpool, op->compute[i].task_2d_tile_2d_dynamic,
+            (void*)((uintptr_t)context + op->compute[i].context_offset),
+            op->compute[i].range[0], op->compute[i].range[1],
+            op->compute[i].tile[0], op->compute[i].tile[1], flags);
+        break;
+      case xnn_parallelization_type_2d_tile_2d_dynamic_with_thread:
+        assert(op->compute[i].range[0] != 0);
+        assert(op->compute[i].range[1] != 0);
+        assert(op->compute[i].tile[0] != 0);
+        assert(op->compute[i].tile[1] != 0);
+        pthreadpool_parallelize_2d_tile_2d_dynamic_with_thread(
+            threadpool, op->compute[i].task_2d_tile_2d_dynamic_with_id,
             (void*)((uintptr_t)context + op->compute[i].context_offset),
             op->compute[i].range[0], op->compute[i].range[1],
             op->compute[i].tile[0], op->compute[i].tile[1], flags);
@@ -2381,6 +2410,17 @@ enum xnn_status xnn_run_operator_with_index(
             op->compute[i].tile[0],
             flags);
         break;
+      case xnn_parallelization_type_3d_tile_1d_dynamic_with_thread:
+        assert(op->compute[i].range[0] != 0);
+        assert(op->compute[i].range[1] != 0);
+        assert(op->compute[i].range[2] != 0);
+        assert(op->compute[i].tile[0] != 0);
+        pthreadpool_parallelize_3d_tile_1d_dynamic_with_thread(
+            threadpool, op->compute[i].task_3d_tile_1d_dynamic_with_id,
+            (void*)((uintptr_t)context + op->compute[i].context_offset),
+            op->compute[i].range[0], op->compute[i].range[1],
+            op->compute[i].range[2], op->compute[i].tile[0], flags);
+        break;
       case xnn_parallelization_type_3d_tile_2d:
         assert(op->compute[i].range[0] != 0);
         assert(op->compute[i].range[1] != 0);
@@ -2403,6 +2443,19 @@ enum xnn_status xnn_run_operator_with_index(
         assert(op->compute[i].tile[1] != 0);
         pthreadpool_parallelize_3d_tile_2d_dynamic(
             threadpool, op->compute[i].task_3d_tile_2d_dynamic,
+            (void*)((uintptr_t)context + op->compute[i].context_offset),
+            op->compute[i].range[0], op->compute[i].range[1],
+            op->compute[i].range[2], op->compute[i].tile[0],
+            op->compute[i].tile[1], flags);
+        break;
+      case xnn_parallelization_type_3d_tile_2d_dynamic_with_thread:
+        assert(op->compute[i].range[0] != 0);
+        assert(op->compute[i].range[1] != 0);
+        assert(op->compute[i].range[2] != 0);
+        assert(op->compute[i].tile[0] != 0);
+        assert(op->compute[i].tile[1] != 0);
+        pthreadpool_parallelize_3d_tile_2d_dynamic_with_thread(
+            threadpool, op->compute[i].task_3d_tile_2d_dynamic_with_id,
             (void*)((uintptr_t)context + op->compute[i].context_offset),
             op->compute[i].range[0], op->compute[i].range[1],
             op->compute[i].range[2], op->compute[i].tile[0],
@@ -2511,6 +2564,28 @@ enum xnn_status xnn_run_operator_with_index(
             op->compute[i].range[0], op->compute[i].range[1],
             op->compute[i].tile[0],
             flags);
+        break;
+      case xnn_parallelization_type_1d_tile_1d_dynamic_with_uarch_with_thread:
+        assert(op->compute[i].range[0] != 0);
+        assert(op->compute[i].tile[0] != 0);
+        pthreadpool_parallelize_1d_tile_1d_dynamic_with_uarch_with_thread(
+            threadpool,
+            op->compute[i].task_1d_tile_1d_dynamic_with_id_with_thread,
+            (void*)((uintptr_t)context + op->compute[i].context_offset),
+            /*default_uarch_index=*/0, XNN_MAX_UARCH_TYPES - 1,
+            op->compute[i].range[0], op->compute[i].tile[0], flags);
+        break;
+      case xnn_parallelization_type_2d_tile_1d_dynamic_with_uarch_with_thread:
+        assert(op->compute[i].range[0] != 0);
+        assert(op->compute[i].range[1] != 0);
+        assert(op->compute[i].tile[0] != 0);
+        pthreadpool_parallelize_2d_tile_1d_dynamic_with_uarch_with_thread(
+            threadpool,
+            op->compute[i].task_2d_tile_1d_dynamic_with_id_with_thread,
+            (void*)((uintptr_t)context + op->compute[i].context_offset),
+            /*default_uarch_index=*/0, XNN_MAX_UARCH_TYPES - 1,
+            op->compute[i].range[0], op->compute[i].range[1],
+            op->compute[i].tile[0], flags);
         break;
       case xnn_parallelization_type_2d_tile_2d_with_uarch:
         assert(op->compute[i].range[0] != 0);
