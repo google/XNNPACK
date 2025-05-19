@@ -63,7 +63,8 @@ xnnpack_cxx_library(
     hdrs = ["gemm-microkernel-tester.h"],
     deps = MICROKERNEL_TEST_DEPS + xnnpack_test_deps_for_library() + [
         "//:XNNPACK",
-        "//src/configs:config_hdrs",
+        "//src/configs:config_types",
+        "//src/configs:microkernel_configs",
     ],
 )
 
@@ -1078,7 +1079,7 @@ xnnpack_unit_test(
     ],
     deps = MICROKERNEL_TEST_DEPS + [
         "//:microkernel_utils",
-        "//:operator_utils",
+        "//src/operators:operator_utils",
     ],
 )
 
@@ -1091,9 +1092,9 @@ xnnpack_unit_test(
         "//:buffer",
         "//:indirection",
         "//:math",
-        "//:operator_utils",
-        "//:operators",
         "//:xnnpack_h",
+        "//src/operators",
+        "//src/operators:operator_utils",
     ],
 )
 

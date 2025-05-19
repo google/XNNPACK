@@ -473,7 +473,6 @@ ENDIF()
 INCLUDE("${PROJECT_BINARY_DIR}/cmake/gen/microkernels.cmake")
 
 SET(OPERATOR_SRCS
-  src/operator-delete.c
   src/operators/argmax-pooling-nhwc.c
   src/operators/average-pooling-nhwc.c
   src/operators/batch-matrix-multiply-nc.c
@@ -485,6 +484,7 @@ SET(OPERATOR_SRCS
   src/operators/dynamic-fully-connected-nc.c
   src/operators/fully-connected-nc.c
   src/operators/max-pooling-nhwc.c
+  src/operators/operator-delete.c
   src/operators/pack-lh.c
   src/operators/reduce-nd.c
   src/operators/resize-bilinear-nchw.c
@@ -874,8 +874,8 @@ IF(XNNPACK_BUILD_LIBRARY)
   ADD_LIBRARY(xnnpack-microkernel-utils OBJECT src/microkernel-utils.c)
   ADD_LIBRARY(xnnpack-mutex OBJECT src/mutex.c)
   ADD_LIBRARY(xnnpack-operators OBJECT ${OPERATOR_SRCS})
-  ADD_LIBRARY(xnnpack-operator-run OBJECT src/operator-run.c)
-  ADD_LIBRARY(xnnpack-operator-utils OBJECT src/operator-utils.c)
+  ADD_LIBRARY(xnnpack-operator-run OBJECT src/operators/operator-run.c)
+  ADD_LIBRARY(xnnpack-operator-utils OBJECT src/operators/operator-utils.c)
   ADD_LIBRARY(xnnpack-reference-ukernels OBJECT ${REFERENCE_SRCS})
   ADD_LIBRARY(xnnpack-subgraph OBJECT ${SUBGRAPH_SRCS})
   # Need C_EXTENSIONS to get constants for mmap (MAP_ANONYMOUS).

@@ -12,13 +12,10 @@
 #include <fxdiv.h>
 #include <math.h>
 #include <stddef.h>
-#include <stdint.h>
+#include <stdint.h> 
 
-#include "include/xnnpack.h"
-#include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
-#include "src/xnnpack/operator.h"
 
 void xnn_indirection_init_conv2d(
   size_t output_tile_size,

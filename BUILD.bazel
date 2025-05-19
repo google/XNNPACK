@@ -47,7 +47,6 @@ load(
     "LOGGING_SRCS",
     "MICROKERNEL_DEFS",
     "MICROKERNEL_HDRS",
-    "OPERATOR_SRCS",
     "SUBGRAPH_SRCS",
     "TABLE_SRCS",
 )
@@ -56,7 +55,10 @@ package(default_visibility = ["//:__subpackages__"])
 
 licenses(["notice"])
 
-exports_files(["LICENSE"] + glob(["**/*.h"]))
+exports_files(["LICENSE"] + glob([
+    "**/*.h",
+    "**/*.inc",
+]))
 
 exports_files(["preamble.js.lds"])
 
@@ -288,17 +290,6 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
-    name = "operator_type",
-    hdrs = [
-        "src/xnnpack/operator-type.h",
-        "src/xnnpack/operator-type-defs.inc",
-    ],
-    deps = [
-        ":common",
-    ],
-)
-
-xnnpack_cc_library(
     name = "microkernel_type",
     hdrs = [
         "src/xnnpack/microkernel-type.h",
@@ -514,8 +505,8 @@ xnnpack_cc_library(
         ":common",
         ":microkernel_type",
         ":node_type",
-        ":operator_type",
         ":xnnpack_h",
+        "//src/operators:operator_type",
     ],
 )
 
@@ -544,7 +535,6 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":microparams_h",
-        ":operator_h",
         ":xnnpack_h",
         "@FXdiv",
     ],
@@ -659,24 +649,6 @@ xnnpack_cc_library(
     ],
 )
 
-# Define a library with just the header to remove circular dependencies:
-# operator-run (compute) <-> operators.
-xnnpack_cc_library(
-    name = "compute_h",
-    hdrs = [
-        "src/xnnpack/compute.h",
-    ],
-    deps = [
-        ":common",
-        ":microfnptr_h",
-        ":microparams_h",
-        ":operator_type",
-        ":xnnpack_h",
-        "//src/configs:config_hdrs",
-        "@pthreadpool",
-    ],
-)
-
 xnnpack_cc_library(
     name = "microkernel_utils",
     srcs = ["src/microkernel-utils.c"],
@@ -687,45 +659,6 @@ xnnpack_cc_library(
         ":math",
         "//src/configs:config_hdrs",
         "//src/configs:hardware_config",
-    ],
-)
-
-# Define a library with just the header to remove circular dependencies:
-# indirection <-> operators.
-xnnpack_cc_library(
-    name = "operator_h",
-    hdrs = [
-        "src/xnnpack/operator.h",
-    ],
-    deps = [
-        ":common",
-        ":compute_h",
-        ":microfnptr_h",
-        ":microkernel_type",
-        ":microparams_h",
-        ":node_type",
-        ":operator_type",
-        ":xnnpack_h",
-        "//src/configs:config_hdrs",
-        "@pthreadpool",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "operator_utils",
-    srcs = ["src/operator-utils.c"],
-    hdrs = ["src/xnnpack/operator-utils.h"],
-    deps = [
-        ":allocator",
-        ":common",
-        ":logging",
-        ":math",
-        ":microfnptr_h",
-        ":node_type",
-        ":operator_h",
-        ":operator_type",
-        ":params",
-        ":xnnpack_h",
     ],
 )
 
@@ -758,50 +691,6 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":xnnpack_h",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "operators",
-    srcs = OPERATOR_SRCS,
-    hdrs = [
-        "src/xnnpack/compute.h",
-        "src/xnnpack/operator.h",
-    ],
-    copts = select({
-        ":debug_build": [],
-        "//conditions:default": xnnpack_min_size_copts(),
-    }) + select({
-        ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
-        "//conditions:default": [],
-    }),
-    deps = [
-        ":allocator",
-        ":cache",
-        ":common",
-        ":datatype",
-        ":indirection",
-        ":internal",
-        ":logging",
-        ":math",
-        ":microfnptr_h",
-        ":microkernel_hdrs",
-        ":microkernel_type",
-        ":microkernel_utils",
-        ":microparams_h",
-        ":microparams_init",
-        ":node_type",
-        ":normalization",
-        ":operator_type",
-        ":operator_utils",
-        ":packing",
-        ":params",
-        ":quantization",
-        ":reference_ukernels",
-        ":xnnpack_h",
-        "//src/configs:config_hdrs",
-        "//src/configs:hardware_config",
-        "@pthreadpool",
     ],
 )
 
@@ -852,9 +741,6 @@ xnnpack_cc_library(
         ":microkernel_hdrs",
         ":microkernel_type",
         ":node_type",
-        ":operator_type",
-        ":operator_utils",
-        ":operators",
         ":params",
         ":requantization",
         ":subgraph_h",
@@ -862,6 +748,9 @@ xnnpack_cc_library(
         "//src/configs:config_hdrs",
         "//src/configs:hardware_config",
         "//src/configs:microkernel_configs",
+        "//src/operators",
+        "//src/operators:operator_type",
+        "//src/operators:operator_utils",
         "@pthreadpool",
     ] + xnnpack_slinky_deps(),
 )
@@ -920,11 +809,11 @@ xnnpack_cc_library(
         ":microkernel_hdrs",  # build_cleaner: keep
         ":microparams_h",  # build_cleaner: keep
         ":microparams_init",  # build_cleaner: keep
-        ":operators",  # build_cleaner: keep
         ":params",
         ":subgraph",  # build_cleaner: keep
         "//src/configs:hardware_config",
         "//src/configs:microkernel_configs",  # build_cleaner: keep
+        "//src/operators",  # build_cleaner: keep
         "@pthreadpool",
     ] + xnnpack_if_kleidiai_enabled([
         "@KleidiAI//:common",
