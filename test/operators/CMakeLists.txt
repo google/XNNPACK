@@ -21,6 +21,7 @@ IF(XNNPACK_BUILD_LIBRARY)
     convolution-nchw
     convolution-nhwc
     copy-nc-eager
+    convert-nc
     copy-nc
     deconvolution-nhwc-qd8-f32-qc8w
     deconvolution-nhwc

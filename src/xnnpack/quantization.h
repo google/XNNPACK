@@ -92,3 +92,14 @@ xnn_f16_qd8_asymmetric_quantization_params(xnn_float16 min, xnn_float16 max,
   params.inv_scale = 1.f / params.inv_scale;
   return params;
 }
+
+static inline struct xnn_qd8_quantization_params
+xnn_bf16_qd8_asymmetric_quantization_params(xnn_bfloat16 min, xnn_bfloat16 max,
+                                           float* f32_scale) {
+  struct xnn_qd8_quantization_params params =
+      xnn_qd8_asymmetric_quantization_params(xnn_bfloat16_to_float(min),
+                                             xnn_bfloat16_to_float(max));
+  *f32_scale = params.inv_scale;
+  params.inv_scale = 1.f / params.inv_scale;
+  return params;
+}
