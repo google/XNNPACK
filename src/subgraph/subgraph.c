@@ -6,7 +6,7 @@
 #include "src/xnnpack/subgraph.h"
 
 #include <assert.h>
-#include <inttypes.h>
+#include <inttypes.h>  // IWYU: keep
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -27,6 +27,7 @@
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/params.h"
+#include "src/xnnpack/subgraph_types.h"
 
 #ifndef XNN_ENABLE_SPARSE
   #error "XNN_ENABLE_SPARSE not defined"

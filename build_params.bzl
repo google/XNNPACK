@@ -211,7 +211,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
             "-ffp-contract=off",
         ],
         extra_deps = [
-            "//src/configs:config_hdrs",
+            "//src/configs:config_types",
             "@FXdiv",
         ],
     ),

@@ -62,8 +62,8 @@ xnnpack_unit_test(
     name = "operator_utils_test",
     srcs = ["operator-utils.cc"],
     deps = [
-        "//:operator_utils",
         "//src/configs:microkernel_configs",
+        "//src/operators:operator_utils",
     ],
 )
 
@@ -72,8 +72,8 @@ xnnpack_unit_test(
     timeout = "long",
     srcs = ["unary-elementwise-nc.cc"],
     deps = OPERATOR_TEST_DEPS + [
-        "//:operator_h",
-        "//:operator_utils",
+        "//src/operators:operator_h",
+        "//src/operators:operator_utils",
         "//test:unary_ops",
     ],
 )
@@ -85,8 +85,8 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = OPERATOR_TEST_DEPS + [
         ":operator_test_utils",
-        "//:operator_utils",
         "//:reference_ukernels",
+        "//src/operators:operator_utils",
     ],
 )
 
@@ -158,6 +158,7 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = OPERATOR_TEST_DEPS + [
         ":convolution_test_helpers",
+        "//src/runtime:weights_cache",
     ],
 )
 
@@ -171,6 +172,7 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = OPERATOR_TEST_DEPS + [
         ":convolution_test_helpers",
+        "//src/runtime:weights_cache",
     ],
 )
 
@@ -203,6 +205,7 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = OPERATOR_TEST_DEPS + [
         ":convolution_test_helpers",
+        "//src/runtime:weights_cache",
     ],
 )
 
@@ -239,7 +242,9 @@ xnnpack_unit_test(
         "fully-connected-nc.cc",
         "fully-connected-operator-tester.h",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = OPERATOR_TEST_DEPS + [
+        "//src/runtime:weights_cache",
+    ],
 )
 
 xnnpack_unit_test(

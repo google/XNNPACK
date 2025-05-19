@@ -13,7 +13,7 @@
 
 #include "include/xnnpack.h"
 #include "src/xnnpack/config-types.h"
-#include "src/xnnpack/subgraph.h"
+#include "src/xnnpack/subgraph_types.h"
 #include <pthreadpool.h>
 
 // Runtime values marked with this flag should be cleaned up (i.e. deallocated)

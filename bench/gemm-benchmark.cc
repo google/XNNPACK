@@ -19,16 +19,11 @@
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/config-types.h"
-#include "src/xnnpack/config.h"
-#include "src/xnnpack/gemm.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
-#include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/microparams.h"
-#include "src/xnnpack/pack-lh.h"
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/packq.h"
-#include "src/xnnpack/packw.h"
 #include <benchmark/benchmark.h>
 
 void GEMMBenchmark(benchmark::State& state, xnn_qs8_gemm_minmax_ukernel_fn gemm,
