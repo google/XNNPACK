@@ -298,7 +298,14 @@
 #define XNN_DISABLE_HWASAN
 #endif
 
-#define XNN_OOB_READS XNN_DISABLE_TSAN XNN_DISABLE_MSAN XNN_DISABLE_HWASAN
+#if XNN_COMPILER_HAS_FEATURE(address_sanitizer)
+#define XNN_DISABLE_ASAN __attribute__((__no_sanitize__("address")))
+#else
+#define XNN_DISABLE_ASAN
+#endif
+
+#define XNN_OOB_READS \
+  XNN_DISABLE_TSAN XNN_DISABLE_MSAN XNN_DISABLE_HWASAN XNN_DISABLE_ASAN
 
 #if defined(__GNUC__)
 #define XNN_FALLTHROUGH __attribute__((fallthrough));
