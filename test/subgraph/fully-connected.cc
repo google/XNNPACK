@@ -367,6 +367,9 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
     } else if (rng() & 1) {
       flags |= XNN_FLAG_TRANSPOSE_WEIGHTS;
     }
+    if (rng() & 1) {
+      flags |= XNN_FLAG_TENSORFLOW_RESHAPE_2D;
+    }
 
     // Make a random filter.
     std::vector<size_t> filter_shape = {output_channels,
@@ -614,6 +617,9 @@ void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid,
     uint32_t flags = 0;
     if (rng() & 1) {
       flags |= XNN_FLAG_TRANSPOSE_WEIGHTS;
+    }
+    if (rng() & 1) {
+      flags |= XNN_FLAG_TENSORFLOW_RESHAPE_2D;
     }
 
     float output_min = output_gen(rng);
