@@ -165,7 +165,6 @@ struct xnn_operator {
   uint32_t dilation_height;
   uint32_t dilation_width;
   uint32_t groups;
-  size_t group_channels;
   size_t group_input_channels;
   size_t group_output_channels;
   size_t channels;
@@ -181,9 +180,6 @@ struct xnn_operator {
   size_t output_pixel_stride;
   void* output;
   const void* quantization_params;
-
-  size_t k_block_size;
-  //172 bytes to here.
 
   union {
     // Pointer to allocated packed weights. Use this if weights_cache is NULL.
