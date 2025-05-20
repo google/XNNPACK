@@ -8,6 +8,7 @@ load(
     "xnnpack_benchmark",
     "xnnpack_optional_tflite_copts",
     "xnnpack_optional_tflite_deps",
+    "xnnpack_select_if",
     "xnnpack_slow_benchmark_tags",
 )
 
@@ -53,9 +54,11 @@ xnnpack_benchmark(
     tags = xnnpack_slow_benchmark_tags() + ["nowin32"],
     deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps() + [
         "//test:next_prime",
-        "@cpuinfo",
         "@pthreadpool",
-    ],
+    ] + xnnpack_select_if(
+        "//:cpuinfo_enabled",
+        ["@cpuinfo"],
+    ),
 )
 
 xnnpack_benchmark(

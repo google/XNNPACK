@@ -6,6 +6,7 @@
 load(
     "//:build_defs.bzl",
     "xnnpack_cc_library",
+    "xnnpack_select_if",
 )
 
 package(default_visibility = ["//:__subpackages__"])
@@ -234,8 +235,10 @@ xnnpack_cc_library(
         "//:common",
         "//:init_once",
         "//:logging",
-        "@cpuinfo",
-    ],
+    ] + xnnpack_select_if(
+        "//:cpuinfo_enabled",
+        ["@cpuinfo"],
+    ),
 )
 
 xnnpack_cc_library(
@@ -262,8 +265,10 @@ xnnpack_cc_library(
         "//:microfnptr_h",
         "//:microkernel_hdrs",
         "//:microparams_init",
-        "@cpuinfo",
-    ],
+    ] + xnnpack_select_if(
+        "//:cpuinfo_enabled",
+        ["@cpuinfo"],
+    ),
 )
 
 xnnpack_cc_library(
@@ -279,8 +284,10 @@ xnnpack_cc_library(
         "//:microparams_init",
         "//:packing",
         "//:xnnpack_h",
-        "@cpuinfo",
-    ],
+    ] + xnnpack_select_if(
+        "//:cpuinfo_enabled",
+        ["@cpuinfo"],
+    ),
 )
 
 xnnpack_cc_library(
@@ -361,10 +368,6 @@ xnnpack_cc_library(
     hdrs = [
         "//:src/xnnpack/config.h",
     ],
-    copts = select({
-        "//:cpuinfo_enabled": ["-DXNN_ENABLE_CPUINFO=1"],
-        "//conditions:default": ["-DXNN_ENABLE_CPUINFO=0"],
-    }),
     deps = [
         ":argmaxpool_config",
         ":avgpool_config",
