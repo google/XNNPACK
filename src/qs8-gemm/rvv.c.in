@@ -7,10 +7,10 @@
 $assert DATATYPE in ["QD8", "QC4"] or REQUANTIZATION in ["FP32"]
 $assert DATATYPE in ["QC8", "QD8", "QC4", "QU8", "QS8"]
 $assert MR >= 1
-$assert NR in ["m4", "m8"]
+$assert NR in ["m2", "m4", "m8"]
 $OUT_LMUL = NR
-$IN_LMUL = {"m4": "m1", "m8": "m2"}[OUT_LMUL]
-$INTER_LMUL = {"m4": "m2", "m8": "m4"}[OUT_LMUL]
+$IN_LMUL = {"m2": "mf2", "m4": "m1", "m8": "m2"}[OUT_LMUL]
+$INTER_LMUL = {"m2": "m1", "m4": "m2", "m8": "m4"}[OUT_LMUL]
 #include <assert.h>
 
 #include <riscv_vector.h>
@@ -131,15 +131,15 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${OUT_
 
         $if DATATYPE == "QU8":
           const vuint8${IN_LMUL}_t vb = __riscv_vle8_v_u8${IN_LMUL}((const uint8_t*) w, vl);
-          const vint32${OUT_LMUL}_t vb0 = __riscv_vsub_vx_i32${OUT_LMUL}(__riscv_vreinterpret_i32${OUT_LMUL}(__riscv_vzext_vf4(vb, vl)), vb_zero_point, vl);
+          const vint16${INTER_LMUL}_t vb0 = __riscv_vsub_vx_i16${INTER_LMUL}(__riscv_vreinterpret_i16${INTER_LMUL}(__riscv_vzext_vf2(vb, vl)), vb_zero_point, vl);
         $else:
           const vint8${IN_LMUL}_t vb = __riscv_vle8_v_i8${IN_LMUL}((const int8_t*) w, vl);
-          const vint32${OUT_LMUL}_t vb0 = __riscv_vsext_vf4(vb, vl);
+          const vint16${INTER_LMUL}_t vb0 = __riscv_vsext_vf2(vb, vl);
 
         w = (const ${XINT8_T}*) w + nr;
 
         $for M in range(MR):
-          vacc${M} = __riscv_vmacc_vx_i32${OUT_LMUL}(vacc${M}, va${M}, vb0, vl);
+          vacc${M} = __riscv_vwmacc_vx_i32${OUT_LMUL}(vacc${M}, va${M}, vb0, vl);
 
         k -= sizeof(${XINT8_T});
       } while (k != 0);

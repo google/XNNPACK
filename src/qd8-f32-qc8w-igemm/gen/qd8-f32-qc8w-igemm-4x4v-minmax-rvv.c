@@ -15,19 +15,21 @@
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/igemm.h"
 
-void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4v__rvv(
+void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x4v__rvv(
     size_t mr,
     size_t nc,
     size_t kc,
     size_t ks,
     const int8_t** restrict a,
     const void* restrict w,
-    int8_t* restrict c,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
     const int8_t* zero,
-    const union xnn_qs8_qc8w_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const int8_t* zero_data,
+    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
+    const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= 4);
@@ -39,16 +41,16 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4v__rvv(
   assert(w != NULL);
   assert(c != NULL);
 
-  int8_t* c0 = c;
-  int8_t* c1 = (int8_t*) ((uintptr_t) c0 + cm_stride);
+  float* c0 = c;
+  float* c1 = (float*) ((uintptr_t) c0 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 2) {
     c1 = c0;
   }
-  int8_t* c2 = (int8_t*) ((uintptr_t) c1 + cm_stride);
+  float* c2 = (float*) ((uintptr_t) c1 + cm_stride);
   if XNN_UNPREDICTABLE(mr <= 2) {
     c2 = c1;
   }
-  int8_t* c3 = (int8_t*) ((uintptr_t) c2 + cm_stride);
+  float* c3 = (float*) ((uintptr_t) c2 + cm_stride);
   if XNN_UNPREDICTABLE(mr != 4) {
     c3 = c2;
   }
@@ -56,9 +58,6 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4v__rvv(
   const size_t nr = __riscv_vsetvlmax_e32m4();
   size_t vl = nr;
 
-  const int32_t output_min_less_zero_point = (int32_t) params->fp32_scalar.output_min - (int32_t) params->fp32_scalar.output_zero_point;
-  const int32_t output_max_less_zero_point = (int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point;
-  const int32_t output_zero_point = params->fp32_scalar.output_zero_point;
 
   do {
     if XNN_UNLIKELY(nc < nr) {
@@ -66,10 +65,12 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4v__rvv(
     }
     nc = nc - vl;
 
-    vint32m4_t vacc0 = __riscv_vle32_v_i32m4((const int32_t*)w, vl);
-    vint32m4_t vacc1 = vacc0;
-    vint32m4_t vacc2 = vacc0;
-    vint32m4_t vacc3 = vacc0;
+    vint32m4_t vksum = __riscv_vle32_v_i32m4((const int32_t*)w, vl);
+    const int32_t vinput_zero_point = quantization_params->zero_point;
+    vint32m4_t vacc0 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point, vl);
+    vint32m4_t vacc1 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point, vl);
+    vint32m4_t vacc2 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point, vl);
+    vint32m4_t vacc3 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point, vl);
     w = (const void*) ((const int32_t*) w + nr);
 
     size_t p = ks;
@@ -78,21 +79,29 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4v__rvv(
       assert(a0 != NULL);
       if XNN_UNPREDICTABLE(a0 != zero) {
         a0 = (const int8_t*) ((uintptr_t) a0 + a_offset);
+      } else {
+        a0 = zero_data;
       }
       const int8_t* restrict a1 = a[1];
       assert(a1 != NULL);
       if XNN_UNPREDICTABLE(a1 != zero) {
         a1 = (const int8_t*) ((uintptr_t) a1 + a_offset);
+      } else {
+        a1 = zero_data;
       }
       const int8_t* restrict a2 = a[2];
       assert(a2 != NULL);
       if XNN_UNPREDICTABLE(a2 != zero) {
         a2 = (const int8_t*) ((uintptr_t) a2 + a_offset);
+      } else {
+        a2 = zero_data;
       }
       const int8_t* restrict a3 = a[3];
       assert(a3 != NULL);
       if XNN_UNPREDICTABLE(a3 != zero) {
         a3 = (const int8_t*) ((uintptr_t) a3 + a_offset);
+      } else {
+        a3 = zero_data;
       }
       a += 4;
 
@@ -123,6 +132,12 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4v__rvv(
     vfloat32m4_t vfpacc2 = __riscv_vfcvt_f_x_v_f32m4(vacc2, vl);
     vfloat32m4_t vfpacc3 = __riscv_vfcvt_f_x_v_f32m4(vacc3, vl);
 
+    const float vinput_scale = quantization_params->inv_scale;
+    vfpacc0 = __riscv_vfmul_vf_f32m4(vfpacc0, vinput_scale, vl);
+    vfpacc1 = __riscv_vfmul_vf_f32m4(vfpacc1, vinput_scale, vl);
+    vfpacc2 = __riscv_vfmul_vf_f32m4(vfpacc2, vinput_scale, vl);
+    vfpacc3 = __riscv_vfmul_vf_f32m4(vfpacc3, vinput_scale, vl);
+
     const vfloat32m4_t vscale = __riscv_vle32_v_f32m4((const float*) w, vl);
     vfpacc0 = __riscv_vfmul_vv_f32m4(vfpacc0, vscale, vl);
     vfpacc1 = __riscv_vfmul_vv_f32m4(vfpacc1, vscale, vl);
@@ -131,39 +146,35 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4v__rvv(
 
     w = (const void*) ((const float*) w + nr);
 
-    vfpacc0 = __riscv_vfmax_vf_f32m4(vfpacc0, output_min_less_zero_point, vl);
-    vfpacc1 = __riscv_vfmax_vf_f32m4(vfpacc1, output_min_less_zero_point, vl);
-    vfpacc2 = __riscv_vfmax_vf_f32m4(vfpacc2, output_min_less_zero_point, vl);
-    vfpacc3 = __riscv_vfmax_vf_f32m4(vfpacc3, output_min_less_zero_point, vl);
-    vfpacc0 = __riscv_vfmin_vf_f32m4(vfpacc0, output_max_less_zero_point, vl);
-    vfpacc1 = __riscv_vfmin_vf_f32m4(vfpacc1, output_max_less_zero_point, vl);
-    vfpacc2 = __riscv_vfmin_vf_f32m4(vfpacc2, output_max_less_zero_point, vl);
-    vfpacc3 = __riscv_vfmin_vf_f32m4(vfpacc3, output_max_less_zero_point, vl);
+    const vfloat32m4_t vbias = __riscv_vle32_v_f32m4((const float*) w, vl);
+    vfpacc0 = __riscv_vfadd_vv_f32m4(vfpacc0, vbias, vl);
+    vfpacc1 = __riscv_vfadd_vv_f32m4(vfpacc1, vbias, vl);
+    vfpacc2 = __riscv_vfadd_vv_f32m4(vfpacc2, vbias, vl);
+    vfpacc3 = __riscv_vfadd_vv_f32m4(vfpacc3, vbias, vl);
 
-    vint16m2_t vout0 = __riscv_vfncvt_x(vfpacc0, vl);
-    vint16m2_t vout1 = __riscv_vfncvt_x(vfpacc1, vl);
-    vint16m2_t vout2 = __riscv_vfncvt_x(vfpacc2, vl);
-    vint16m2_t vout3 = __riscv_vfncvt_x(vfpacc3, vl);
+    w = (const void*) ((const float*) w + nr);
 
-    vout0 = __riscv_vadd_vx_i16m2(vout0, (int16_t) output_zero_point, vl);
-    vout1 = __riscv_vadd_vx_i16m2(vout1, (int16_t) output_zero_point, vl);
-    vout2 = __riscv_vadd_vx_i16m2(vout2, (int16_t) output_zero_point, vl);
-    vout3 = __riscv_vadd_vx_i16m2(vout3, (int16_t) output_zero_point, vl);
+    const float voutput_min = params->scalar.min;
+    vfpacc0 = __riscv_vfmax_vf_f32m4(vfpacc0, voutput_min, vl);
+    vfpacc1 = __riscv_vfmax_vf_f32m4(vfpacc1, voutput_min, vl);
+    vfpacc2 = __riscv_vfmax_vf_f32m4(vfpacc2, voutput_min, vl);
+    vfpacc3 = __riscv_vfmax_vf_f32m4(vfpacc3, voutput_min, vl);
 
-    vint8m1_t vout80 = __riscv_vncvt_x_x_w_i8m1(vout0, vl);
-    vint8m1_t vout81 = __riscv_vncvt_x_x_w_i8m1(vout1, vl);
-    vint8m1_t vout82 = __riscv_vncvt_x_x_w_i8m1(vout2, vl);
-    vint8m1_t vout83 = __riscv_vncvt_x_x_w_i8m1(vout3, vl);
+    const float voutput_max = params->scalar.max;
+    vfpacc0 = __riscv_vfmin_vf_f32m4(vfpacc0, voutput_max, vl);
+    vfpacc1 = __riscv_vfmin_vf_f32m4(vfpacc1, voutput_max, vl);
+    vfpacc2 = __riscv_vfmin_vf_f32m4(vfpacc2, voutput_max, vl);
+    vfpacc3 = __riscv_vfmin_vf_f32m4(vfpacc3, voutput_max, vl);
 
-    __riscv_vse8_v_i8m1(c3, vout83, vl);
-    __riscv_vse8_v_i8m1(c2, vout82, vl);
-    __riscv_vse8_v_i8m1(c1, vout81, vl);
-    __riscv_vse8_v_i8m1(c0, vout80, vl);
+    __riscv_vse32_v_f32m4(c3, vfpacc3, vl);
+    __riscv_vse32_v_f32m4(c2, vfpacc2, vl);
+    __riscv_vse32_v_f32m4(c1, vfpacc1, vl);
+    __riscv_vse32_v_f32m4(c0, vfpacc0, vl);
 
-    c3 = (int8_t*) ((uintptr_t) c3 + cn_stride);
-    c2 = (int8_t*) ((uintptr_t) c2 + cn_stride);
-    c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);
-    c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
+    c3 = (float*) ((uintptr_t) c3 + cn_stride);
+    c2 = (float*) ((uintptr_t) c2 + cn_stride);
+    c1 = (float*) ((uintptr_t) c1 + cn_stride);
+    c0 = (float*) ((uintptr_t) c0 + cn_stride);
 
     a = (const int8_t**restrict) ((uintptr_t) a - ks);
 
