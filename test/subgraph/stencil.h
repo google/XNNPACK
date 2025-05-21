@@ -90,7 +90,7 @@ StencilParams random_stencil_params(Rng& rng, int max_dilation = 2,
                                     int max_kernel_size = 7) {
   std::uniform_int_distribution<> size_dist{1, max_kernel_size};
   std::uniform_int_distribution<> dilation_dist{1, max_dilation};
-  std::uniform_int_distribution<> stride_dist{1, 2};
+  std::uniform_int_distribution<> stride_dist{1, 3};
 
   StencilParams result;
   result.size = size_dist(rng);
