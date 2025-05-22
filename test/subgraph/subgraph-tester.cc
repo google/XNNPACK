@@ -103,12 +103,12 @@ SubgraphTester& SubgraphTester::AddDynamicallyQuantizedTensor(
 }
 
 SubgraphTester& SubgraphTester::AddStaticChannelwiseQuantizedTensor(
-    const std::vector<size_t>& dims, size_t channel_dim, xnn_datatype datatype,
+    const TensorShape& shape, size_t channel_dim, xnn_datatype datatype,
     const float* scale, uint32_t external_id, uint32_t flags, void* data) {
   assert(external_id < subgraph_->external_value_ids);
   uint32_t id_out;
   const xnn_status status = xnn_define_channelwise_quantized_tensor_value(
-      subgraph_.get(), datatype, scale, dims.size(), channel_dim, dims.data(),
+      subgraph_.get(), datatype, scale, shape.Rank(), channel_dim, shape.Dims(),
       data, external_id, flags, &id_out);
   EXPECT_EQ(status, xnn_status_success);
   EXPECT_EQ(id_out, external_id);
@@ -116,11 +116,11 @@ SubgraphTester& SubgraphTester::AddStaticChannelwiseQuantizedTensor(
 }
 
 SubgraphTester& SubgraphTester::AddStaticTensorQS8(
-    const std::vector<size_t>& dims, size_t channel_dim, TensorType tensor_type,
+    const TensorShape& shape, size_t channel_dim, TensorType tensor_type,
     const float* scale, uint32_t external_id, uint32_t flags, int8_t* data) {
   assert(external_id < subgraph_->external_value_ids);
   if (data == nullptr) {
-    const size_t num_elements = NumElements(dims);
+    const size_t num_elements = shape.NumElements();
     static_data_.emplace_back(num_elements * sizeof(int8_t));
     data = reinterpret_cast<int8_t*>(static_data_.back().data());
 
@@ -140,19 +140,21 @@ SubgraphTester& SubgraphTester::AddStaticTensorQS8(
 
   uint32_t id_out;
   const xnn_status status = xnn_define_channelwise_quantized_tensor_value(
-      subgraph_.get(), xnn_datatype_qcint8, scale, dims.size(), channel_dim,
-      dims.data(), data, external_id, flags, &id_out);
+      subgraph_.get(), xnn_datatype_qcint8, scale, shape.Rank(), channel_dim,
+      shape.Dims(), data, external_id, flags, &id_out);
   EXPECT_EQ(status, xnn_status_success);
   EXPECT_EQ(id_out, external_id);
   return *this;
 }
 
-SubgraphTester& SubgraphTester::AddStaticTensorF32(
-    const std::vector<size_t>& dims, TensorType tensor_type,
-    uint32_t external_id, uint32_t flags, float* data) {
+SubgraphTester& SubgraphTester::AddStaticTensorF32(const TensorShape& shape,
+                                                   TensorType tensor_type,
+                                                   uint32_t external_id,
+                                                   uint32_t flags,
+                                                   float* data) {
   assert(external_id < subgraph_->external_value_ids);
   if (data == nullptr) {
-    const size_t num_elements = NumElements(dims);
+    const size_t num_elements = shape.NumElements();
     static_data_.emplace_back(num_elements * sizeof(float));
     data = reinterpret_cast<float*>(static_data_.back().data());
 
@@ -172,8 +174,8 @@ SubgraphTester& SubgraphTester::AddStaticTensorF32(
 
   uint32_t id_out;
   const xnn_status status =
-      xnn_define_tensor_value(subgraph_.get(), xnn_datatype_fp32, dims.size(),
-                              dims.data(), data, external_id, flags, &id_out);
+      xnn_define_tensor_value(subgraph_.get(), xnn_datatype_fp32, shape.Rank(),
+                              shape.Dims(), data, external_id, flags, &id_out);
   EXPECT_EQ(status, xnn_status_success);
   EXPECT_EQ(id_out, external_id);
   return *this;

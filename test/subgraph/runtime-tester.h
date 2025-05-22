@@ -16,6 +16,7 @@
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
 #include "src/xnnpack/subgraph.h"
 #include "test/subgraph/runtime-flags.h"
 #include "test/subgraph/subgraph-tester.h"
@@ -30,8 +31,7 @@ class RuntimeTester : public SubgraphTester {
   xnnpack::Buffer<T> RunWithFusion() {
     Run();
     xnnpack::Buffer<char>& tensor = this->buffers_.at(this->output_id_);
-    xnnpack::Buffer<float> output =
-        xnnpack::Buffer<float>(tensor.size() / sizeof(float));
+    xnnpack::Buffer<T> output = xnnpack::Buffer<T>(tensor.size() / sizeof(T));
     std::memcpy(output.data(), tensor.data(), tensor.size());
     return output;
   }
@@ -40,8 +40,7 @@ class RuntimeTester : public SubgraphTester {
   xnnpack::Buffer<T> RunWithoutFusion() {
     Run(XNN_FLAG_NO_OPERATOR_FUSION | xnn_test_runtime_flags());
     xnnpack::Buffer<char>& tensor = this->buffers_.at(this->output_id_);
-    xnnpack::Buffer<float> output =
-        xnnpack::Buffer<float>(tensor.size() / sizeof(float));
+    xnnpack::Buffer<T> output = xnnpack::Buffer<T>(tensor.size() / sizeof(T));
     memcpy(output.data(), tensor.data(), tensor.size());
     return output;
   }
@@ -50,8 +49,7 @@ class RuntimeTester : public SubgraphTester {
   xnnpack::Buffer<T> RepeatRun() {
     xnnpack::Buffer<char>& tensor = this->buffers_.at(this->output_id_);
     xnn_invoke_runtime(Runtime());
-    xnnpack::Buffer<float> output =
-        xnnpack::Buffer<float>(tensor.size() / sizeof(float));
+    xnnpack::Buffer<T> output = xnnpack::Buffer<T>(tensor.size() / sizeof(T));
     memcpy(output.data(), tensor.data(), tensor.size());
     return output;
   }
