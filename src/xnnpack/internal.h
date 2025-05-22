@@ -151,6 +151,14 @@ enum xnn_status xnn_setup_pack_lh_x32(xnn_operator_t pack_lh_op,
 enum xnn_status xnn_define_pack_lh(xnn_subgraph_t subgraph, uint32_t input_id,
                                    uint32_t output_id, uint32_t flags);
 
+// It's a bit weird that a "unary" node has two operands. Unfortunately this
+// seems like the most reasonable way to get LUT data into what is otherwise a
+// unary node.
+enum xnn_status xnn_define_unary_elementwise_lut_in_place(struct xnn_node* node,
+                                                          uint32_t input_id,
+                                                          uint32_t output_id,
+                                                          uint32_t lut_id);
+
 enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qb4w(
     size_t input_channels,              //
     size_t output_channels,             //

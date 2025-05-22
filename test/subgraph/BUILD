@@ -244,6 +244,7 @@ xnnpack_unit_test(
         ":subgraph_tester",
         "//:buffer",
         "//:node_type",
+        "//:subgraph",
         "//:subgraph_h",
         "//:xnnpack_h",
     ],

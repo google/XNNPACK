@@ -19,6 +19,7 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
+#include "src/xnnpack/datatype.h"
 #include "src/xnnpack/fp16.h"
 #include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/internal.h"
@@ -1498,6 +1499,338 @@ enum xnn_status xnn_subgraph_fusion(
   return xnn_status_success;
 }
 
+// Returns true if `value` is a broadcast of a single constant.
+static bool is_broadcasted_static(
+  const struct xnn_value* value)
+{
+  return
+      value->data != NULL &&
+      value->allocation_type == xnn_allocation_type_static &&
+      xnn_shape_multiply_all_dims(&value->shape) == 1;
+}
+
+// Returns the Value ID of a unary input. Binary operators with one constant
+// operand are considered unary operators by this function, and return the non-
+// constant input.
+static uint32_t is_pure_unary_elementwise(
+  xnn_subgraph_t subgraph,
+  const struct xnn_node* node)
+{
+  switch (node->type) {
+    case xnn_node_type_unary_elementwise:
+      assert(node->num_inputs >= 1);
+      return node->inputs[0];
+    case xnn_node_type_binary_elementwise: {
+      const struct xnn_value* input_0 = &subgraph->values[node->inputs[0]];
+      const struct xnn_value* input_1 = &subgraph->values[node->inputs[1]];
+      assert(node->num_inputs == 2);
+      if (is_broadcasted_static(input_0) && !xnn_value_is_static(input_1)) {
+        return node->inputs[0];
+      } else if (is_broadcasted_static(input_1) && !xnn_value_is_static(input_0)) {
+        return node->inputs[1];
+      } else {
+        return XNN_INVALID_VALUE_ID;
+      }
+    }
+    default:
+    return XNN_INVALID_VALUE_ID;
+  }
+}
+
+// We will not fuse more than this many unary elementwise ops into a LUT in the
+// function below.
+#define XNN_MAX_UNARY_FUSION_NODES 10
+#define XNN_MAX_UNARY_FUSION_VALUES (2 * XNN_MAX_UNARY_FUSION_NODES + 1)
+
+// Find the index of `src_id` in `value_map`. Sets `is_new` to `true` if the
+// value was inserted into the map, `false` if it was found in the map.
+static uint32_t map_value_id(
+  uint32_t* value_map,
+  uint32_t src_id,
+  bool* is_new)
+{
+  for (uint32_t dst_id = 0; ; ++dst_id) {
+    if (value_map[dst_id] == src_id) {
+      if (is_new) {
+        *is_new = false;
+      }
+      return dst_id;
+    } else if (value_map[dst_id] == XNN_INVALID_VALUE_ID) {
+      value_map[dst_id] = src_id;
+      if (is_new) {
+        *is_new = true;
+      }
+      return dst_id;
+    }
+  }
+  XNN_UNREACHABLE;
+}
+
+// Copy a value to a new subgraph, if it doesn't exist already.
+static uint32_t copy_value_to_static_subgraph(
+  xnn_subgraph_t src_subgraph,
+  const struct xnn_value* src_value,
+  uint32_t* value_map,
+  xnn_subgraph_t dst_subgraph)
+{
+  bool is_new = false;
+  uint32_t dst_id = map_value_id(value_map, src_value->id, &is_new);
+  if (is_new) {
+    assert(dst_id == dst_subgraph->num_values);
+    assert(dst_id < dst_subgraph->num_reserved_values);
+    struct xnn_value* dst_value = &dst_subgraph->values[dst_id];
+    dst_subgraph->num_values++;
+    *dst_value = *src_value;
+    dst_value->id = dst_id;
+    dst_value->producer = XNN_INVALID_NODE_ID;
+    dst_value->first_consumer = XNN_INVALID_NODE_ID;
+  }
+  return dst_id;
+}
+
+// Copy a Node and its Values to a new subgraph, maintaining a map of Value IDs
+// as it goes.
+static struct xnn_node* copy_node_to_static_subgraph(
+  xnn_subgraph_t src_subgraph,
+  const struct xnn_node* src_node,
+  uint32_t* value_map,
+  xnn_subgraph_t dst_subgraph)
+{
+  assert(dst_subgraph->num_nodes < dst_subgraph->num_reserved_nodes);
+  struct xnn_node* dst_node = &dst_subgraph->nodes[dst_subgraph->num_nodes++];
+  *dst_node = *src_node;
+
+  for (size_t i = 0; i < src_node->num_inputs; i++) {
+    const struct xnn_value* value = &src_subgraph->values[src_node->inputs[i]];
+    const uint32_t dst_id = copy_value_to_static_subgraph(src_subgraph, value, value_map, dst_subgraph);
+    dst_node->inputs[i] = dst_id;
+  }
+  for (size_t i = 0; i < src_node->num_inputs; i++) {
+    const struct xnn_value* value = &src_subgraph->values[src_node->outputs[i]];
+    const uint32_t dst_id = copy_value_to_static_subgraph(src_subgraph, value, value_map, dst_subgraph);
+    dst_node->outputs[i] = dst_id;
+  }
+  return dst_node;
+}
+
+// Pass 0:1:256 to the input of the subgraph representing a unary pure
+// elementwise function, storing the result in `lut`.
+static enum xnn_status run_subgraph_to_make_lut(
+  xnn_subgraph_t subgraph,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint8_t* lut)
+{
+  xnn_log_debug("Running unary subgraph to make LUT");
+
+  xnn_runtime_t runtime;
+  enum xnn_status status =
+      xnn_create_runtime_v4(subgraph, NULL, NULL, NULL, XNN_FLAG_NO_OPERATOR_FUSION, &runtime);
+  if (status != xnn_status_success) {
+    return status;
+  }
+
+  const size_t ramp_size = 256;
+  uint8_t ramp[256];
+  for (size_t i = 0; i < 256; i++) {
+    ramp[i] = i;
+  }
+
+  status = xnn_reshape_external_value(runtime, input_id, 1, &ramp_size);
+  if (status != xnn_status_success) {
+    return status;
+  }
+
+  status = xnn_reshape_runtime(runtime);
+  if (status != xnn_status_success) {
+    return status;
+  }
+
+  struct xnn_external_value externals[2];
+  externals[0].id = input_id;
+  externals[0].data = ramp;
+  externals[1].id = output_id;
+  externals[1].data = lut;
+
+  status = xnn_setup_runtime(runtime, 2, externals);
+  if (status != xnn_status_success) {
+    return status;
+  }
+
+  status = xnn_invoke_runtime(runtime);
+  if (status != xnn_status_success) {
+    return status;
+  }
+
+  xnn_delete_runtime(runtime);
+  return xnn_status_success;
+}
+
+static bool replace_node_with_lut(
+  xnn_subgraph_t subgraph,
+  struct xnn_node* node,
+  uint32_t input_id,
+  uint32_t unary_input_id,
+  xnn_subgraph_t unary_subgraph)
+{
+  const uint32_t unary_output_id = unary_subgraph->nodes[unary_subgraph->num_nodes - 1].outputs[0];
+  assert(unary_input_id != XNN_INVALID_VALUE_ID);
+  assert(unary_output_id != XNN_INVALID_VALUE_ID);
+  unary_subgraph->values[unary_input_id].flags |= XNN_VALUE_FLAG_EXTERNAL_INPUT;
+  unary_subgraph->values[unary_output_id].flags |= XNN_VALUE_FLAG_EXTERNAL_OUTPUT;
+
+  uint8_t* lut = xnn_allocate_memory(256 * sizeof(uint8_t));
+  if (lut == NULL) {
+    xnn_log_error("failed to allocate LUT");
+    return false;
+  }
+  enum xnn_status status =
+      run_subgraph_to_make_lut(unary_subgraph, unary_input_id, unary_output_id, lut);
+  if (status != xnn_status_success) {
+    // Failed to generate the LUT, abandon this fusion.
+    return false;
+  }
+
+  // We don't have any other way to store a dynamic allocation in a subgraph
+  // except in a value.
+  struct xnn_value* lut_value = xnn_subgraph_new_internal_value(subgraph);
+  lut_value->flags |= XNN_VALUE_FLAG_NEEDS_CLEANUP;
+  lut_value->data = lut;
+  lut_value->datatype = xnn_datatype_quint8;
+  lut_value->allocation_type = xnn_allocation_type_static;
+  lut_value->shape.num_dims = 1;
+  lut_value->shape.dim[0] = 256;
+  lut_value->type = xnn_value_type_dense_tensor;
+
+  // Clear the current value of the input, which is now unused.
+  for (uint32_t i = 0; i < node->num_inputs; i++) {
+    xnn_value_clear(&subgraph->values[node->inputs[i]]);
+  }
+
+  xnn_define_unary_elementwise_lut_in_place(node, input_id, node->outputs[0], lut_value->id);
+  return true;
+}
+
+void reshape_for_lut(struct xnn_value* value) {
+  value->shape.num_dims = 1;
+  value->shape.dim[0] = 256;
+}
+
+void xnn_subgraph_fuse_unary_quantized_into_lut(
+  xnn_subgraph_t subgraph)
+{
+  // Find sequences of operators that are unary, quantized, elementwise, and
+  // pure functions. These can be fused into a single LUT op. Examples:
+  // - softsign(x) = 1/(1 + abs(x))
+  // - softplus(x) = log(1 + exp(x))
+  // We allow intermediate values to be datatypes other than quantized (and
+  // allow convert ops), but the input and output values of the sequence must be
+  // quantized.
+
+  // There are examples that we could fuse that we currently do not:
+  // - f(x) = x / (1 + x^2)
+  // This doesn't fuse because while f(x) is unary, some of the constituent ops
+  // (the divide) are not. This is probably doable with a more sophisticated
+  // algorithm.
+
+  for (uint32_t n = 0; n < subgraph->num_nodes; n++) {
+    struct xnn_node* node = &subgraph->nodes[n];
+    if (node->type == xnn_node_type_invalid) {
+      // Node was fused away, skip.
+      continue;
+    }
+
+    const uint32_t input_id = is_pure_unary_elementwise(subgraph, node);
+    if (input_id == XNN_INVALID_VALUE_ID) {
+      continue;
+    }
+    const struct xnn_value* input_value = &subgraph->values[input_id];
+    if (xnn_datatype_size_bytes(input_value->datatype) != 1) {
+      // This value is not a quantized 8-bit value, it can't be the input to a
+      // LUT.
+      continue;
+    }
+
+    // This node is a pure unary elementwise op with a quantized input. Can we
+    // fuse more ops with this one? Here, we assume the ops are in order, so
+    // this op must be the first in a chain we could fuse.
+    // We're going to build a subgraph for all the nodes we want to fuse.
+    struct xnn_subgraph unary_subgraph;
+    memset(&unary_subgraph, 0, sizeof(unary_subgraph));
+    struct xnn_value unary_values[XNN_MAX_UNARY_FUSION_VALUES];
+    uint32_t value_map[XNN_MAX_UNARY_FUSION_VALUES];
+    for (size_t i = 0; i < XNN_MAX_UNARY_FUSION_VALUES; i++) {
+      value_map[i] = XNN_INVALID_VALUE_ID;
+    }
+    struct xnn_node unary_nodes[XNN_MAX_UNARY_FUSION_NODES];
+    unary_subgraph.values = &unary_values[0];
+    unary_subgraph.num_reserved_values = XNN_MAX_UNARY_FUSION_VALUES;
+    unary_subgraph.nodes = &unary_nodes[0];
+    unary_subgraph.num_reserved_nodes = XNN_MAX_UNARY_FUSION_NODES;
+
+    // Remember the nodes we put in the unary subgraph.
+    struct xnn_node* nodes_to_fuse[XNN_MAX_UNARY_FUSION_NODES];
+    for (size_t i = 0; i < XNN_MAX_UNARY_FUSION_NODES; i++) {
+      nodes_to_fuse[i] = NULL;
+    }
+
+    do {
+      // Add the node we have to the unary subgraph.
+      nodes_to_fuse[unary_subgraph.num_nodes] = node;
+      const struct xnn_node* new_node =
+          copy_node_to_static_subgraph(subgraph, node, value_map, &unary_subgraph);
+
+      assert(node->num_outputs == 1);
+      const struct xnn_value* output = &subgraph->values[node->outputs[0]];
+      if (output->num_consumers != 1 || output->first_consumer == XNN_INVALID_NODE_ID) {
+        // Don't try to fuse nodes that don't have exactly one valid consumer.
+        break;
+      }
+
+      reshape_for_lut(&unary_subgraph.values[new_node->outputs[0]]);
+
+      // Include the consumer in the unary subgraph.
+      node = &subgraph->nodes[output->first_consumer];
+    } while (is_pure_unary_elementwise(subgraph, node) != XNN_INVALID_VALUE_ID &&
+             unary_subgraph.num_nodes < XNN_MAX_UNARY_FUSION_NODES);
+
+    // We need the output to be an 8-bit LUT element. Go back through the unary
+    // subgraph until we find one.
+    while (unary_subgraph.num_nodes > 0) {
+      const struct xnn_node* node = &unary_subgraph.nodes[unary_subgraph.num_nodes - 1];
+      const uint32_t output_id = node->outputs[0];
+      const struct xnn_value* output = &unary_subgraph.values[output_id];
+      if (xnn_datatype_size_bytes(output->datatype) == 1) {
+        break;
+      }
+      unary_subgraph.num_nodes--;
+    }
+
+    if (unary_subgraph.num_nodes > 1) {
+      // Replace the fused nodes with a LUT op.
+      const uint32_t unary_input_id = map_value_id(value_map, input_id, NULL);
+      reshape_for_lut(&unary_subgraph.values[unary_input_id]);
+      if (replace_node_with_lut(subgraph, node, input_id, unary_input_id, &unary_subgraph)) {
+        // We replaced this subgraph with a LUT, clear out the old values and nodes.
+        for (uint32_t i = 0; i + 1 < unary_subgraph.num_nodes; i++) {
+          struct xnn_node* node = nodes_to_fuse[i];
+
+          for (uint32_t j = 0; j < node->num_outputs; j++) {
+            xnn_value_clear(&subgraph->values[node->outputs[j]]);
+          }
+          if (i > 0) {
+            // Only clear the inputs of nodes after the first node.
+            for (uint32_t j = 0; j < node->num_inputs; j++) {
+              xnn_value_clear(&subgraph->values[node->inputs[j]]);
+            }
+          }
+          xnn_node_clear(node);
+        }
+      }
+    }
+  }
+}
+
 void xnn_subgraph_optimize_dynamic_quantization_ops(xnn_subgraph_t subgraph) {
   enum xnn_weights_type {
     xnn_weights_type_invalid = 0,
@@ -1700,6 +2033,7 @@ enum xnn_status xnn_subgraph_optimize(
 
   if (!(optimization_flags & XNN_FLAG_NO_OPERATOR_FUSION)) {
     xnn_subgraph_fusion(subgraph);
+    xnn_subgraph_fuse_unary_quantized_into_lut(subgraph);
   }
 
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();

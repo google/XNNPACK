@@ -2579,6 +2579,7 @@ enum xnn_status xnn_create_unary_elementwise_nc(
   enum xnn_datatype input_datatype,
   enum xnn_datatype output_datatype,
   const union xnn_unary_params* params,
+  const void* lut,
   const struct xnn_quantization_params* input_quantization,
   const struct xnn_quantization_params* output_quantization,
   uint32_t flags,

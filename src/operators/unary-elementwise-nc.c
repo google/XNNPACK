@@ -42,11 +42,9 @@ static enum xnn_status check_op_type(xnn_operator_t op,
 }
 
 static enum xnn_status init_lut_op(
-    xnn_operator_t op,
-    const struct xnn_unary_elementwise_config* reference_config,
-    const union xnn_unary_params* params,
-    const struct xnn_quantization_params* input_quantization,
-    const struct xnn_quantization_params* output_quantization) {
+  xnn_operator_t op,
+  const void* lut)
+{
   const int lookup_table_elements = 256;
   op->lookup_table = xnn_allocate_simd_memory(lookup_table_elements * sizeof(uint8_t));
   if (op->lookup_table == NULL) {
@@ -55,23 +53,35 @@ static enum xnn_status init_lut_op(
     return xnn_status_out_of_memory;
   }
 
-  union xnn_unary_uparams uparams;
-  if (reference_config->init) {
-    reference_config->init(&uparams, params, input_quantization, output_quantization);
-  }
-
   // Run the reference kernel on the lookup table itself to initialize it.
   uint8_t* lookup_table = op->lookup_table;
-  for (int i = 0; i < lookup_table_elements; i++) {
-    lookup_table[i] = i;
-  }
-  reference_config->ukernel(lookup_table_elements, lookup_table, lookup_table, &uparams);
+  memcpy(lookup_table, lut, lookup_table_elements);
 
   op->lut_config = xnn_init_x8_lut_config();
 
   op->state = xnn_run_state_invalid;
 
   return xnn_status_success;
+}
+
+static enum xnn_status init_lut_op_with_config(
+    xnn_operator_t op,
+    const struct xnn_unary_elementwise_config* reference_config,
+    const union xnn_unary_params* params,
+    const struct xnn_quantization_params* input_quantization,
+    const struct xnn_quantization_params* output_quantization) {
+  const int lookup_table_elements = 256;
+  uint8_t lookup_table[256];
+  for (int i = 0; i < lookup_table_elements; i++) {
+    lookup_table[i] = i;
+  }
+  union xnn_unary_uparams uparams;
+  if (reference_config->init) {
+    reference_config->init(&uparams, params, input_quantization, output_quantization);
+  }
+  reference_config->ukernel(lookup_table_elements, lookup_table, lookup_table, &uparams);
+
+  return init_lut_op(op, lookup_table);
 }
 
 static const struct xnn_unary_elementwise_config* get_config(
@@ -235,6 +245,7 @@ static enum xnn_status init_op(
     enum xnn_datatype input_datatype,
     enum xnn_datatype output_datatype,
     const union xnn_unary_params* params,
+    const void* lut,
     const struct xnn_quantization_params* input_quantization,
     const struct xnn_quantization_params* output_quantization,
     uint32_t flags) {
@@ -243,6 +254,13 @@ static enum xnn_status init_op(
   op->unary_elementwise.log2_input_size = xnn_datatype_log2_size_bytes(input_datatype);
   op->unary_elementwise.log2_output_size = xnn_datatype_log2_size_bytes(output_datatype);
   op->unary_elementwise.op_type = op_type;
+
+  if (lut) {
+    assert(xnn_datatype_size_bytes(input_datatype) == 1);
+    assert(xnn_datatype_size_bytes(output_datatype) == 1);
+    // This op is a LUT.
+    return init_lut_op(op, lut);
+  }
 
   const struct xnn_unary_elementwise_config* config = get_config(op_type, input_datatype, output_datatype, input_quantization, output_quantization);
   if (config && config->ukernel) {
@@ -261,7 +279,7 @@ static enum xnn_status init_op(
   if (config) {
     if (xnn_datatype_size_bytes(input_datatype) == 1 && xnn_datatype_size_bytes(output_datatype) == 1) {
       // We can use a LUT for this op.
-      return init_lut_op(op, config, params, input_quantization, output_quantization);
+      return init_lut_op_with_config(op, config, params, input_quantization, output_quantization);
     }
 
     xnn_log_debug(
@@ -288,6 +306,7 @@ enum xnn_status xnn_create_unary_elementwise_nc(
     enum xnn_datatype input_datatype,
     enum xnn_datatype output_datatype,
     const union xnn_unary_params* params,
+    const void* lut,
     const struct xnn_quantization_params* input_quantization,
     const struct xnn_quantization_params* output_quantization,
     uint32_t flags,
@@ -315,7 +334,7 @@ enum xnn_status xnn_create_unary_elementwise_nc(
   }
   op->num_compute_invocations = num_compute_invocations;
 
-  enum xnn_status status = init_op(op, op_type, input_datatype, output_datatype, params, input_quantization, output_quantization,flags);
+  enum xnn_status status = init_op(op, op_type, input_datatype, output_datatype, params, lut, input_quantization, output_quantization,flags);
   if (status != xnn_status_success) {
     xnn_delete_operator(op);
     return status;
@@ -516,7 +535,7 @@ enum xnn_status xnn_run_unary_elementwise_nc(
   op.compute = &compute[0];
   op.num_compute_invocations = num_compute_invocations;
 
-  enum xnn_status status = init_op(&op, op_type, input_datatype, output_datatype, params, input_quantization, output_quantization, flags);
+  enum xnn_status status = init_op(&op, op_type, input_datatype, output_datatype, params, /*lut=*/NULL, input_quantization, output_quantization, flags);
   if (status != xnn_status_success) {
     op.compute = NULL;
     xnn_destroy_operator(&op);

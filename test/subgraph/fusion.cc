@@ -4,8 +4,10 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <cstddef>
+#include <cstdlib>
 #include <cstdint>
 #include <limits>
+#include <numeric>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -814,6 +816,121 @@ TEST(COPY, fused_chain_of_copies) {
   ASSERT_EQ(copy_node->type, xnn_node_type_copy);
   EXPECT_EQ(copy_node->inputs[0], input_id);
   EXPECT_EQ(copy_node->outputs[0], output_id);
+}
+
+TEST(UNARY_QUANTIZED_TO_LUT, negate_abs) {
+  // Create the subgraph -|x|, quantized.
+  const uint32_t input_id = 0;
+  const uint32_t output_id = 1;
+  const uint32_t abs_input_id = 2;
+  const TensorShape dims = {2, 4, 32};  // 256 elements.
+  RuntimeTester tester(3);
+  using quint8 = xnnpack::quantized<uint8_t>;
+  xnn_quantization_params quantization = {128, 1.0f};
+  xnn_quantization_params abs_quantization = {0, 1.0f};
+  xnnpack::Buffer<quint8> input_data(dims.NumElements());
+  std::iota(input_data.begin(), input_data.end(), 0);
+  tester
+      .AddInputTensor<quint8>(dims, input_data.data(), quantization,
+                              input_id)
+      .AddOutputTensor<quint8>(dims, quantization,
+                               output_id)
+      .AddDynamicTensor<quint8>(dims, abs_input_id, abs_quantization)
+      .AddUnary(xnn_unary_abs, nullptr, input_id, abs_input_id)
+      .AddUnary(xnn_unary_negate, nullptr, abs_input_id, output_id);
+
+  xnnpack::Buffer<quint8> unoptimized_output =
+      tester.RunWithoutFusion<quint8>();
+  EXPECT_EQ(tester.NumOperators(), 2);
+
+  xnnpack::Buffer<quint8> optimized_output = tester.RunWithFusion<quint8>();
+  EXPECT_EQ(tester.NumOperators(), 1);
+
+  for (int i = 0; i < 256; ++i) {
+    EXPECT_EQ(unoptimized_output[i] - 128, -std::abs(i - 128));
+    EXPECT_EQ(optimized_output[i] - 128, -std::abs(i - 128));
+  }
+}
+
+TEST(UNARY_QUANTIZED_TO_LUT, softsign) {
+  // Create the subgraph 1/(1 + |x|), quantized.
+  const uint32_t input_id = 0;
+  const uint32_t output_id = 1;
+  const uint32_t one_id = 2;
+  const uint32_t abs_input_id = 3;
+  const uint32_t abs_input_plus_one_id = 4;
+  const TensorShape dims = {2, 4, 32};  // 256 elements.
+  RuntimeTester tester(5);
+  using quint8 = xnnpack::quantized<uint8_t>;
+  quint8 one = {255};
+  xnn_quantization_params input_quantization = {128, 1.0f};
+  xnn_quantization_params output_quantization = {0, 1.0f / 256.0f};
+  xnnpack::Buffer<quint8> input_data(dims.NumElements());
+  std::iota(input_data.begin(), input_data.end(), 0);
+  tester
+      .AddInputTensor<quint8>(dims, input_data.data(), input_quantization,
+                              input_id)
+      .AddOutputTensor<quint8>(dims, output_quantization,
+                               output_id)
+      .AddStaticTensor<quint8>({1}, one_id, &one, output_quantization)
+      .AddDynamicTensor<quint8>(dims, abs_input_id, input_quantization)
+      .AddDynamicTensor<quint8>(dims, abs_input_plus_one_id, input_quantization)
+      .AddUnary(xnn_unary_abs, nullptr, input_id, abs_input_id)
+      .AddBinary(xnn_binary_add, nullptr, abs_input_id, one_id,
+                 abs_input_plus_one_id)
+      .AddBinary(xnn_binary_divide, nullptr, one_id, abs_input_plus_one_id,
+                 output_id);
+
+  xnnpack::Buffer<quint8> unoptimized_output =
+      tester.RunWithoutFusion<quint8>();
+  EXPECT_EQ(tester.NumOperators(), 3);
+
+  xnnpack::Buffer<quint8> optimized_output = tester.RunWithFusion<quint8>();
+  EXPECT_EQ(tester.NumOperators(), 1);
+  EXPECT_EQ(unoptimized_output, optimized_output);
+}
+
+TEST(UNARY_QUANTIZED_TO_LUT, softplus) {
+  // Create the subgraph log(1 + exp(x)), where the input and output are
+  // quantized, but the computation is performed in floats.
+  const uint32_t input_id = 0;
+  const uint32_t output_id = 1;
+  const uint32_t one_id = 2;
+  const uint32_t input_float = 3;
+  const uint32_t output_float = 4;
+  const uint32_t exp_input = 5;
+  const uint32_t one_plus_exp_input = 6;
+  const TensorShape dims = {2, 4, 32};  // 256 elements.
+  RuntimeTester tester(7);
+  using quint8 = xnnpack::quantized<uint8_t>;
+  float one = {1.0f};
+  xnn_quantization_params input_quantization = {128, 1.0f};
+  xnn_quantization_params output_quantization = {0, 1.0f / 256.0f};
+  xnnpack::Buffer<quint8> input_data(dims.NumElements());
+  std::iota(input_data.begin(), input_data.end(), 0);
+  tester
+      .AddInputTensor<quint8>(dims, input_data.data(), input_quantization,
+                              input_id)
+      .AddOutputTensor<quint8>(dims, output_quantization,
+                               output_id)
+      .AddStaticTensor<float>({1}, one_id, &one, output_quantization)
+      .AddDynamicTensor<float>(dims, input_float, input_quantization)
+      .AddDynamicTensor<float>(dims, output_float, output_quantization)
+      .AddDynamicTensor<float>(dims, exp_input, output_quantization)
+      .AddDynamicTensor<float>(dims, one_plus_exp_input, output_quantization)
+      .AddUnary(xnn_unary_convert, nullptr, input_id, input_float)
+      .AddUnary(xnn_unary_exp, nullptr, input_float, exp_input)
+      .AddBinary(xnn_binary_add, nullptr, exp_input, one_id, one_plus_exp_input)
+      .AddUnary(xnn_unary_log, nullptr, one_plus_exp_input, output_float)
+      .AddUnary(xnn_unary_convert, nullptr, output_float, output_id);
+
+  xnnpack::Buffer<quint8> unoptimized_output =
+      tester.RunWithoutFusion<quint8>();
+  EXPECT_EQ(tester.NumOperators(), 5);
+
+  xnnpack::Buffer<quint8> optimized_output = tester.RunWithFusion<quint8>();
+  EXPECT_EQ(tester.NumOperators(), 1);
+  EXPECT_EQ(unoptimized_output, optimized_output);
 }
 
 }  // namespace xnnpack

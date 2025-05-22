@@ -194,7 +194,7 @@ class UnaryNCTest : public testing::TestWithParam<Param> {
         xnn_operator_t op = nullptr;
         xnn_status status = xnn_create_unary_elementwise_nc(
             unary_op, input_datatype, output_datatype, &op_params,
-            &input_quantization, &output_quantization,
+            /*lut=*/nullptr, &input_quantization, &output_quantization,
             /*flags=*/0, &op);
         if (status == xnn_status_unsupported_parameter) {
           GTEST_SKIP();

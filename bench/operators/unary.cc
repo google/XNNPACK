@@ -174,7 +174,7 @@ static void benchmark_unary_operator(benchmark::State& state,
 
   xnn_operator_t op = nullptr;
   status = xnn_create_unary_elementwise_nc(
-      op_type, xnn_datatype_of<In>(), xnn_datatype_of<Out>(), &params,
+      op_type, xnn_datatype_of<In>(), xnn_datatype_of<Out>(), &params, nullptr,
       &input_quantization, &output_quantization, 0 /* flags */, &op);
   if (status != xnn_status_success || op == nullptr) {
     state.SkipWithError("failed to create operator");

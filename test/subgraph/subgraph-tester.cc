@@ -241,9 +241,13 @@ SubgraphTester& SubgraphTester::AddInputTensorQS8(int32_t zero_point,
 SubgraphTester& SubgraphTester::AddOutputTensor(
     const TensorShape& shape, xnn_datatype datatype,
     xnn_quantization_params quantization, uint32_t external_id) {
+  output_id_ = external_id;
   AddDynamicTensor(shape, external_id, datatype, quantization,
                    XNN_VALUE_FLAG_EXTERNAL_OUTPUT);
-  auto it = external_tensors_.insert({external_id, nullptr});
+  xnnpack::Buffer<char> output(shape.NumElements() *
+                               xnn_datatype_size_bytes(datatype));
+  auto it = external_tensors_.insert({external_id, output.data()});
+  buffers_[external_id] = std::move(output);
   EXPECT_TRUE(it.second);
   return *this;
 }

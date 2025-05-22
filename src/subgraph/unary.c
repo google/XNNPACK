@@ -91,7 +91,7 @@ static enum xnn_status create_convert_operator(
 
   if (status == xnn_status_uninitialized) {
     status = xnn_create_unary_elementwise_nc(xnn_unary_convert, input_datatype,
-                                             output_datatype, NULL, NULL, NULL,
+                                             output_datatype, NULL, NULL, NULL, NULL,
                                              node->flags,
                                              &opdata->operator_objects[0]);
   }
@@ -276,7 +276,7 @@ static enum xnn_status create_unary_operator(
   struct xnn_operator_data* opdata,
   xnn_weights_cache_t weights_cache)
 {
-  assert(node->num_inputs == 1);
+  assert(node->num_inputs == 1 || node->num_inputs == 2);
   assert(node->num_outputs == 1);
 
   const struct xnn_value* value_in = &values[node->inputs[0]];
@@ -291,15 +291,31 @@ static enum xnn_status create_unary_operator(
     .zero_point = value_out->quantization.zero_point,
   };
 
-  return xnn_create_unary_elementwise_nc(
-    node->unary_operator,
-    value_in->datatype,
-    value_out->datatype,
-    &node->params.unary,
-    &in_quantization,
-    &out_quantization,
-    node->flags,
-    &opdata->operator_objects[0]);
+  if (node->num_inputs == 1) {
+    return xnn_create_unary_elementwise_nc(
+      node->unary_operator,
+      value_in->datatype,
+      value_out->datatype,
+      &node->params.unary,
+      /*lut=*/NULL,
+      &in_quantization,
+      &out_quantization,
+      node->flags,
+      &opdata->operator_objects[0]);
+  } else {
+    const struct xnn_value* lut = &values[node->inputs[1]];
+
+    return xnn_create_unary_elementwise_nc(
+      node->unary_operator,
+      value_in->datatype,
+      value_out->datatype,
+      /*params=*/NULL,
+      lut->data,
+      &in_quantization,
+      &out_quantization,
+      node->flags,
+      &opdata->operator_objects[0]);
+  }
 }
 
 static enum xnn_status reshape_unary_operator(
@@ -432,6 +448,27 @@ enum xnn_status xnn_define_unary(
     node->activation.output_min = params->clamp.min;
     node->activation.output_max = params->clamp.max;
   }
+
+  node->create = create_unary_operator;
+  node->reshape = reshape_unary_operator;
+  node->setup = setup_unary_operator;
+
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_define_unary_elementwise_lut_in_place(
+  struct xnn_node* node,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t lut_id)
+{
+  node->type = xnn_node_type_unary_elementwise;
+  node->unary_operator = xnn_unary_invalid;
+  node->num_inputs = 2;
+  node->inputs[0] = input_id;
+  node->inputs[1] = lut_id;
+  node->num_outputs = 1;
+  node->outputs[0] = output_id;
 
   node->create = create_unary_operator;
   node->reshape = reshape_unary_operator;
