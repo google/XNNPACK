@@ -26,7 +26,7 @@ void xnn_qu8_rdsum_ukernel_7p7x__ssse3_c32(
     size_t input_stride,
     const uint8_t* zero,
     uint32_t* output,
-    const struct xnn_qs8_rsum_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_qs8_rsum_params* restrict params)
 {
   assert(rows != 0);
   assert(channels != 0);

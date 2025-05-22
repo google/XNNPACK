@@ -21,7 +21,7 @@ void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__wasmsimd_u${BATCH_TILE}(
     size_t batch,
     const ${XINT8_T}* input,
     float* output,
-    const struct xnn_${DATATYPE.lower()}_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_${DATATYPE.lower()}_f32_cvt_params* restrict params) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(${XINT8_T}) == 0);

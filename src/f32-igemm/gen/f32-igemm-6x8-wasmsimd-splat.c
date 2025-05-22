@@ -27,7 +27,7 @@ void xnn_f32_igemm_ukernel_6x8__wasmsimd_splat(
     size_t cn_stride,
     size_t a_offset,
     const float* zero,
-    const struct xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_default_params* restrict params)
 {
   assert(mr != 0);
   assert(mr <= 6);

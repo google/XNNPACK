@@ -21,7 +21,7 @@ void xnn_qs8_f32_vcvt_ukernel__rvv_u2v(
     size_t batch,
     const int8_t* input,
     float* output,
-    const struct xnn_qs8_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_qs8_f32_cvt_params* restrict params)
 {
   assert(batch != 0);
   assert(batch % sizeof(int8_t) == 0);

@@ -36,7 +36,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_fp32_ukernel_${MR}x4c2s4__${ISA}_${VARIAN
     size_t cn_stride,
     size_t a_offset,
     const ${XINT8_T}* zero,
-    const ${PARAMS_TYPE} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const ${PARAMS_TYPE}* restrict params) XNN_OOB_READS
 {
   assert(mr != 0);
   assert(mr <= ${MR});

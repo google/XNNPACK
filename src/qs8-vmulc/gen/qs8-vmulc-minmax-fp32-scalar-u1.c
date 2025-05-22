@@ -19,7 +19,7 @@ void xnn_qs8_vmulc_minmax_fp32_ukernel__scalar_u1(
     const int8_t* input_a,
     const int8_t* input_b,
     int8_t* output,
-    const union xnn_qs8_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_qs8_mul_minmax_params* restrict params)
 {
   assert(batch != 0);
   assert(batch % sizeof(int8_t) == 0);

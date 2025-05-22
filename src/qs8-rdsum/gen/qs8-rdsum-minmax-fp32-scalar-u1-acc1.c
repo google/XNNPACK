@@ -22,7 +22,7 @@ void xnn_qs8_rdsum_ukernel_7p7x__scalar_c4(
     size_t input_stride,
     const int8_t* zero,
     int32_t* output,
-    const struct xnn_qs8_rsum_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_qs8_rsum_params* restrict params)
 {
   assert(rows != 0);
   assert(channels != 0);

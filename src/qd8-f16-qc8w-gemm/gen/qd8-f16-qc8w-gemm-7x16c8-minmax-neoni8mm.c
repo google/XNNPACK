@@ -26,7 +26,7 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_7x16c8__neoni8mm(
     xnn_float16* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const struct xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
+    const struct xnn_f16_minmax_params* restrict params,
     const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);

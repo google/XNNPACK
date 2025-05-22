@@ -41,7 +41,7 @@ void xnn_${DATATYPE.lower()}_vprelu_ukernel__scalar_u${BATCH_TILE}(
     const ${XINT8_T}* input_a,
     const ${XINT8_T}* input_b,
     ${XINT8_T}* output,
-    const union xnn_qs8_vprelu_scalar_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_qs8_vprelu_scalar_params* restrict params)
 {
   assert(batch != 0);
   assert(batch % sizeof(${XINT8_T}) == 0);

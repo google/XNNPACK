@@ -23,7 +23,7 @@ void xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16(
     size_t input_stride,
     const float* zero,
     float* output,
-    const struct xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_scale_params* restrict params)
 {
   assert(rows != 0);
   assert(channels != 0);

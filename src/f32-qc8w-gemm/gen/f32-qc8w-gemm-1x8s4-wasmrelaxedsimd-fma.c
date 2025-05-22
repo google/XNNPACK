@@ -25,7 +25,7 @@ void xnn_f32_qc8w_gemm_ukernel_1x8s4__wasmrelaxedsimd_fma(
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const struct xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_default_params* restrict params)
 {
   assert(mr != 0);
   assert(mr <= 1);

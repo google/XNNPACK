@@ -30,7 +30,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_25p1c__scalar_lrintf(
     size_t input_offset,
     size_t input_pixel_stride,
     const int8_t* zero,
-    const union xnn_qs8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_qs8_conv_minmax_params* restrict params)
 {
   assert(channels != 0);
   assert(output_width != 0);

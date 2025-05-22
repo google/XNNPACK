@@ -25,7 +25,7 @@ void xnn_f32_dwconv_ukernel_3p2c__scalar(
     size_t input_offset,
     size_t input_pixel_stride,
     const float* zero,
-    const struct xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_default_params* restrict params)
 {
   assert(channels != 0);
   assert(output_width != 0);

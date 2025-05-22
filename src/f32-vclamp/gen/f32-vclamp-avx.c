@@ -20,7 +20,7 @@ void xnn_f32_vclamp_ukernel__avx_u8(
     size_t batch,
     const float* input,
     float* output,
-    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_minmax_params* restrict params)
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -55,7 +55,7 @@ void xnn_f32_vclamp_ukernel__avx_u16(
     size_t batch,
     const float* input,
     float* output,
-    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_minmax_params* restrict params)
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -105,7 +105,7 @@ void xnn_f32_vclamp_ukernel__avx_u32(
     size_t batch,
     const float* input,
     float* output,
-    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_minmax_params* restrict params)
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);

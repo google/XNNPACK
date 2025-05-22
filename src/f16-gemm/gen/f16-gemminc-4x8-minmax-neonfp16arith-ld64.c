@@ -30,7 +30,7 @@ void xnn_f16_gemminc_minmax_ukernel_4x8__neonfp16arith_ld64(
     size_t cm_stride,
     size_t cn_stride,
     const xnn_float16* restrict acc,
-    const struct xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f16_minmax_params* restrict params)
 {
   assert(mr != 0);
   assert(mr <= 4);

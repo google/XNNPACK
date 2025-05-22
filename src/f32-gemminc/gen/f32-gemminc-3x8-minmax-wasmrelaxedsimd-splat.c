@@ -26,7 +26,7 @@ void xnn_f32_gemminc_minmax_ukernel_3x8__wasmrelaxedsimd_splat(
     size_t cm_stride,
     size_t cn_stride,
     const float* restrict acc,
-    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_minmax_params* restrict params)
 {
   assert(mr != 0);
   assert(mr <= 3);

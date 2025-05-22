@@ -19,7 +19,7 @@ void xnn_f16_qu8_vcvt_ukernel__scalar_imagic_u4(
     size_t batch,
     const xnn_float16* input,
     uint8_t* output,
-    const struct xnn_f16_qu8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f16_qu8_cvt_params* restrict params)
 {
   assert(batch != 0);
   assert(batch % sizeof(xnn_float16) == 0);

@@ -38,7 +38,7 @@ void xnn_${DATATYPE_SPEC}_rsum_ukernel__neon_u${CHANNEL_TILE}${ACC_SUFFIX}(
     size_t batch,
     const ${XINT8}_t* input,
     ${XINT32}_t* output,
-    const struct xnn_qs8_rsum_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_qs8_rsum_params* restrict params) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(input != NULL);

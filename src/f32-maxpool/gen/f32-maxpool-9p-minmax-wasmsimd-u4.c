@@ -35,7 +35,7 @@ void xnn_f32_maxpool_minmax_ukernel_9p__wasmsimd_u4(
     float* output,
     size_t input_increment,
     size_t output_increment,
-    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_minmax_params* restrict params)
 {
   assert(output_pixels != 0);
   assert(channels != 0);

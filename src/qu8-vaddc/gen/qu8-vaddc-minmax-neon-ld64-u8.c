@@ -20,7 +20,7 @@ void xnn_qu8_vaddc_minmax_ukernel__neon_ld64_u8(
     const uint8_t* input_a,
     const uint8_t* input_b,
     uint8_t* output,
-    const struct xnn_qu8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_qu8_add_minmax_params* restrict params) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(uint8_t) == 0);

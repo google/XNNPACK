@@ -37,7 +37,7 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax_fp32_ukernel_${MR}x4c2__${IS
     ${XINT8_T}* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const ${PARAMS_TYPE} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const ${PARAMS_TYPE}* restrict params) XNN_OOB_READS
 {
   assert(mr != 0);
   assert(mr <= ${MR});

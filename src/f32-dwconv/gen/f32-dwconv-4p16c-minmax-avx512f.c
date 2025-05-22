@@ -26,7 +26,7 @@ void xnn_f32_dwconv_minmax_ukernel_4p16c__avx512f(
     size_t input_offset,
     size_t input_pixel_stride,
     const float* zero,
-    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_minmax_params* restrict params)
 {
   assert(channels != 0);
   assert(output_width != 0);

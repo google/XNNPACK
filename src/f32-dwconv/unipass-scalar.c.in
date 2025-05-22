@@ -30,7 +30,7 @@ void xnn_f32_dwconv${SUFFIX}_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__${"wasm" i
     size_t input_offset,
     size_t input_pixel_stride,
     const float* zero,
-    const ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)])
+    const ${PARAMS}* restrict params)
 {
   assert(channels != 0);
   assert(output_width != 0);

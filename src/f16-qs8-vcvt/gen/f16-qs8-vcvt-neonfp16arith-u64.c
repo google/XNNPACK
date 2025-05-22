@@ -21,7 +21,7 @@ void xnn_f16_qs8_vcvt_ukernel__neonfp16arith_u64(
     size_t batch,
     const xnn_float16* input,
     int8_t* output,
-    const struct xnn_f16_qs8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f16_qs8_cvt_params* restrict params) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);

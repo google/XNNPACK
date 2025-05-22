@@ -18,7 +18,7 @@ void xnn_${DATATYPE.lower()}_vmulc_minmax_${REQUANTIZATION.lower()}_ukernel__sca
     const ${XINT8_T}* input_a,
     const ${XINT8_T}* input_b,
     ${XINT8_T}* output,
-    const union xnn_${DATATYPE.lower()}_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_${DATATYPE.lower()}_mul_minmax_params* restrict params)
 {
   assert(batch != 0);
   assert(batch % sizeof(${XINT8_T}) == 0);

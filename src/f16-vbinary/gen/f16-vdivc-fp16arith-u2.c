@@ -23,7 +23,7 @@ void xnn_f16_vdivc_ukernel__fp16arith_u2(
     const xnn_float16* restrict input_a,
     const xnn_float16* restrict input_b,
     xnn_float16* restrict output,
-    const struct xnn_f16_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f16_default_params* restrict params)
 {
   assert(batch != 0);
   assert(batch % sizeof(float16_t) == 0);

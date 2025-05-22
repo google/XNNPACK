@@ -42,10 +42,10 @@ void xnn_${DATATYPE_SPEC}_igemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukern
     const ${XINT8_T}* zero,
     $if DATATYPE in ["QD8"]:
       const int8_t* zero_data,
-      const ${PARAMS_TYPE} params[restrict XNN_MIN_ELEMENTS(1)],
+      const ${PARAMS_TYPE}* restrict params,
       const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
     $else:
-      const ${PARAMS_TYPE} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+      const ${PARAMS_TYPE}* restrict params) XNN_OOB_READS
 {
   assert(mr != 0);
   assert(mr <= ${MR});

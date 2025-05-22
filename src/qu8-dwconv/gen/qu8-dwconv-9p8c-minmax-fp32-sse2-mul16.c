@@ -27,7 +27,7 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_9p8c__sse2_mul16(
     size_t input_offset,
     size_t input_pixel_stride,
     const uint8_t* zero,
-    const union xnn_qu8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_qu8_conv_minmax_params* restrict params) XNN_OOB_READS
 {
   assert(channels != 0);
   assert(output_width != 0);

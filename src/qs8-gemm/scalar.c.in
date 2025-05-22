@@ -56,10 +56,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
     size_t cm_stride,
     size_t cn_stride,
     $if DATATYPE in ["QD8", "QC4", "QB4_F16", "QB4_F32"]:
-      const ${PARAMS_TYPE} params[restrict XNN_MIN_ELEMENTS(1)],
+      const ${PARAMS_TYPE}* restrict params,
       const struct ${SCALING_PARAMS} quantization_params[restrict XNN_MIN_ELEMENTS(1)])
     $else:
-      const ${PARAMS_TYPE} params[restrict XNN_MIN_ELEMENTS(1)])
+      const ${PARAMS_TYPE}* restrict params)
 {
   assert(mr != 0);
   assert(mr <= ${MR});
