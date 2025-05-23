@@ -1638,12 +1638,12 @@ static enum xnn_status run_subgraph_to_make_lut(
 
   status = xnn_reshape_external_value(runtime, input_id, 1, &ramp_size);
   if (status != xnn_status_success) {
-    return status;
+    goto fail;
   }
 
   status = xnn_reshape_runtime(runtime);
   if (status != xnn_status_success) {
-    return status;
+    goto fail;
   }
 
   struct xnn_external_value externals[2];
@@ -1654,16 +1654,14 @@ static enum xnn_status run_subgraph_to_make_lut(
 
   status = xnn_setup_runtime(runtime, 2, externals);
   if (status != xnn_status_success) {
-    return status;
+    goto fail;
   }
 
   status = xnn_invoke_runtime(runtime);
-  if (status != xnn_status_success) {
-    return status;
-  }
 
+fail:
   xnn_delete_runtime(runtime);
-  return xnn_status_success;
+  return status;
 }
 
 static bool replace_node_with_lut(
@@ -1678,6 +1676,8 @@ static bool replace_node_with_lut(
   assert(unary_output_id != XNN_INVALID_VALUE_ID);
   unary_subgraph->values[unary_input_id].flags |= XNN_VALUE_FLAG_EXTERNAL_INPUT;
   unary_subgraph->values[unary_output_id].flags |= XNN_VALUE_FLAG_EXTERNAL_OUTPUT;
+  unary_subgraph->values[unary_input_id].allocation_type = xnn_allocation_type_external;
+  unary_subgraph->values[unary_output_id].allocation_type = xnn_allocation_type_external;
 
   uint8_t* lut = xnn_allocate_memory(256 * sizeof(uint8_t));
   if (lut == NULL) {
@@ -1688,6 +1688,7 @@ static bool replace_node_with_lut(
       run_subgraph_to_make_lut(unary_subgraph, unary_input_id, unary_output_id, lut);
   if (status != xnn_status_success) {
     // Failed to generate the LUT, abandon this fusion.
+    xnn_release_memory(lut);
     return false;
   }
 
@@ -1796,14 +1797,19 @@ void xnn_subgraph_fuse_unary_quantized_into_lut(
 
     // We need the output to be an 8-bit LUT element. Go back through the unary
     // subgraph until we find one.
-    while (unary_subgraph.num_nodes > 0) {
-      const struct xnn_node* node = &unary_subgraph.nodes[unary_subgraph.num_nodes - 1];
-      const uint32_t output_id = node->outputs[0];
-      const struct xnn_value* output = &unary_subgraph.values[output_id];
-      if (xnn_datatype_size_bytes(output->datatype) == 1) {
+    while (unary_subgraph.num_nodes > 1) {
+      const struct xnn_node* unary_node = &unary_subgraph.nodes[unary_subgraph.num_nodes - 1];
+      const uint32_t unary_output_id = unary_node->outputs[0];
+      const struct xnn_value* unary_output = &unary_subgraph.values[unary_output_id];
+      if (xnn_datatype_size_bytes(unary_output->datatype) == 1) {
         break;
       }
+      // Remove the outputs of this node from the subgraph.
+      for (uint32_t j = 0; j < unary_node->num_outputs; j++) {
+        xnn_value_clear(&unary_subgraph.values[unary_node->outputs[j]]);
+      }
       unary_subgraph.num_nodes--;
+      node = nodes_to_fuse[unary_subgraph.num_nodes - 1];
     }
 
     if (unary_subgraph.num_nodes > 1) {
@@ -1815,14 +1821,11 @@ void xnn_subgraph_fuse_unary_quantized_into_lut(
         for (uint32_t i = 0; i + 1 < unary_subgraph.num_nodes; i++) {
           struct xnn_node* node = nodes_to_fuse[i];
 
+          // We only need to clear output values. Input values could be used by
+          // other ops, and the ones that are outputs of another node in the
+          // fusion will be cleared here.
           for (uint32_t j = 0; j < node->num_outputs; j++) {
             xnn_value_clear(&subgraph->values[node->outputs[j]]);
-          }
-          if (i > 0) {
-            // Only clear the inputs of nodes after the first node.
-            for (uint32_t j = 0; j < node->num_inputs; j++) {
-              xnn_value_clear(&subgraph->values[node->inputs[j]]);
-            }
           }
           xnn_node_clear(node);
         }

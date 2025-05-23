@@ -852,6 +852,74 @@ TEST(UNARY_QUANTIZED_TO_LUT, negate_abs) {
   }
 }
 
+TEST(UNARY_QUANTIZED_TO_LUT, cant_fuse_input) {
+  // Create the subgraph -|x| with a float -> quantized conversion of the input.
+  const uint32_t input_id = 0;
+  const uint32_t output_id = 1;
+  const uint32_t quantized_input_id = 2;
+  const uint32_t abs_input_id = 3;
+  const TensorShape dims = {2, 4, 32};  // 256 elements.
+  RuntimeTester tester(4);
+  using quint8 = xnnpack::quantized<uint8_t>;
+  xnn_quantization_params quantization = {128, 1.0f};
+  xnn_quantization_params abs_quantization = {0, 1.0f};
+  xnnpack::Buffer<float> input_data(dims.NumElements());
+  std::iota(input_data.begin(), input_data.end(), -128.0f);
+  tester.AddInputTensor<float>(dims, input_data.data(), input_id)
+      .AddOutputTensor<quint8>(dims, quantization, output_id)
+      .AddDynamicTensor<quint8>(dims, quantized_input_id, quantization)
+      .AddDynamicTensor<quint8>(dims, abs_input_id, abs_quantization)
+      .AddUnary(xnn_unary_convert, nullptr, input_id, quantized_input_id)
+      .AddUnary(xnn_unary_abs, nullptr, quantized_input_id, abs_input_id)
+      .AddUnary(xnn_unary_negate, nullptr, abs_input_id, output_id);
+
+  xnnpack::Buffer<quint8> unoptimized_output =
+      tester.RunWithoutFusion<quint8>();
+  EXPECT_EQ(tester.NumOperators(), 3);
+
+  xnnpack::Buffer<quint8> optimized_output = tester.RunWithFusion<quint8>();
+  EXPECT_EQ(tester.NumOperators(), 2);
+
+  for (int i = 0; i < 256; ++i) {
+    EXPECT_EQ(unoptimized_output[i] - 128, -std::abs(i - 128));
+    EXPECT_EQ(optimized_output[i] - 128, -std::abs(i - 128));
+  }
+}
+
+TEST(UNARY_QUANTIZED_TO_LUT, cant_fuse_output) {
+  // Create the subgraph -|x| with a quantized -> float conversion of the
+  // output.
+  const uint32_t input_id = 0;
+  const uint32_t output_id = 1;
+  const uint32_t abs_input_id = 2;
+  const uint32_t quantized_output_id = 3;
+  const TensorShape dims = {2, 4, 32};  // 256 elements.
+  RuntimeTester tester(4);
+  using quint8 = xnnpack::quantized<uint8_t>;
+  xnn_quantization_params quantization = {128, 1.0f};
+  xnn_quantization_params abs_quantization = {0, 1.0f};
+  xnnpack::Buffer<quint8> input_data(dims.NumElements());
+  std::iota(input_data.begin(), input_data.end(), 0);
+  tester.AddInputTensor<quint8>(dims, input_data.data(), quantization, input_id)
+      .AddOutputTensor<float>(dims, output_id)
+      .AddDynamicTensor<quint8>(dims, abs_input_id, abs_quantization)
+      .AddDynamicTensor<quint8>(dims, quantized_output_id, quantization)
+      .AddUnary(xnn_unary_abs, nullptr, input_id, abs_input_id)
+      .AddUnary(xnn_unary_negate, nullptr, abs_input_id, quantized_output_id)
+      .AddUnary(xnn_unary_convert, nullptr, quantized_output_id, output_id);
+
+  xnnpack::Buffer<float> unoptimized_output = tester.RunWithoutFusion<float>();
+  EXPECT_EQ(tester.NumOperators(), 3);
+
+  xnnpack::Buffer<float> optimized_output = tester.RunWithFusion<float>();
+  EXPECT_EQ(tester.NumOperators(), 2);
+
+  for (int i = 0; i < 256; ++i) {
+    EXPECT_EQ(unoptimized_output[i], -std::abs(i - 128));
+    EXPECT_EQ(optimized_output[i], -std::abs(i - 128));
+  }
+}
+
 TEST(UNARY_QUANTIZED_TO_LUT, softsign) {
   // Create the subgraph 1/(1 + |x|), quantized.
   const uint32_t input_id = 0;
