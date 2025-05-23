@@ -694,7 +694,7 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w(
     /*init_scale_params=*/NULL, /*scale_params=*/NULL,
     /*init_kernel_scale_params=*/NULL, /*kernel_scale_params=*/NULL,
     &params, sizeof(params),
-    gemm_config, &gemm_config->minmax,
+    gemm_config, gemm_ukernels,
     xnn_operator_type_fully_connected_nc_qd8_f16_qb4w,
     /*weights_cache=*/weights_cache,
     fully_connected_op_out);
@@ -957,14 +957,6 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qc8w(
         xnn_operator_type_to_string(
             xnn_operator_type_fully_connected_nc_qp8_f32_qc8w));
     return xnn_status_unsupported_hardware;
-  }
-
-  const struct gemm_fused_ukernels* gemm_ukernels = &gemm_config->minmax;
-  const bool linear_activation =
-      (output_max == INFINITY) && (output_min == -output_max);
-  if (linear_activation && gemm_config->linear.gemm[gemm_config->mr - 1]
-                                   .function[XNN_UARCH_DEFAULT] != NULL) {
-    gemm_ukernels = &gemm_config->linear;
   }
 
   // We don't know input zero point until runtime, row sum is multiplied by it
