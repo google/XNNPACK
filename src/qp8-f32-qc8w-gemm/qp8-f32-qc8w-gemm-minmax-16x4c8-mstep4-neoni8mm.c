@@ -16,8 +16,7 @@ void xnn_qp8_f32_qc8w_gemm_minmax_ukernel_16x4c8__neoni8mm_mstep4(
     size_t m, size_t n, size_t k, const void* lhs_packed,
     const void* rhs_packed, float* dst, size_t dst_stride_row,
     size_t dst_stride_col,
-    struct xnn_f32_minmax_params
-        minmax_params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]) {
+    const struct xnn_f32_minmax_params* minmax_params) {
 #if XNN_ENABLE_KLEIDIAI
   kai_run_matmul_clamp_f32_qai8dxp4x8_qsi8cxp4x8_16x4_neon_i8mm(
       m, n, k, lhs_packed, rhs_packed, dst, dst_stride_row, dst_stride_col,

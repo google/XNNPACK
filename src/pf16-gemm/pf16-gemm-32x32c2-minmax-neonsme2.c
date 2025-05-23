@@ -40,8 +40,7 @@ void xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2(
     size_t m, size_t n, size_t k, const void* lhs_packed,
     const void* rhs_packed, float* dst, size_t dst_stride_row,
     size_t dst_stride_col,
-    struct xnn_f16_minmax_params
-        minmax_params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]) {
+    const struct xnn_f16_minmax_params* minmax_params) {
 #if XNN_ENABLE_KLEIDIAI
   kai_run_matmul_clamp_f16_f16p2vlx2_f16p2vlx2_2vlx2vl_sme2_mopa(
       m, n, k / sizeof(xnn_float16), lhs_packed, rhs_packed, dst, dst_stride_row, /*dst_stride_col=*/sizeof(xnn_float16),
