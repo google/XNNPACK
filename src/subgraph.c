@@ -1506,6 +1506,7 @@ static bool is_broadcasted_static(
   return
       value->data != NULL &&
       value->allocation_type == xnn_allocation_type_static &&
+      !xnn_value_is_external_input(value) &&
       xnn_shape_multiply_all_dims(&value->shape) == 1;
 }
 
@@ -1533,7 +1534,7 @@ static uint32_t is_pure_unary_elementwise(
       }
     }
     default:
-    return XNN_INVALID_VALUE_ID;
+      return XNN_INVALID_VALUE_ID;
   }
 }
 
@@ -1703,9 +1704,12 @@ static bool replace_node_with_lut(
   lut_value->shape.dim[0] = 256;
   lut_value->type = xnn_value_type_dense_tensor;
 
-  // Clear the current value of the input, which is now unused.
+  // Clear the inputs that were replaced by a fused op.
   for (uint32_t i = 0; i < node->num_inputs; i++) {
-    xnn_value_clear(&subgraph->values[node->inputs[i]]);
+    struct xnn_value* input = &subgraph->values[node->inputs[i]];
+    if (input->num_consumers == 1 && input->first_consumer == node->id) {
+      xnn_value_clear(input);
+    }
   }
 
   xnn_define_unary_elementwise_lut_in_place(node, input_id, node->outputs[0], lut_value->id);
@@ -1787,6 +1791,7 @@ void xnn_subgraph_fuse_unary_quantized_into_lut(
         // Don't try to fuse nodes that don't have exactly one valid consumer.
         break;
       }
+      assert(!xnn_value_is_external_output(output));
 
       reshape_for_lut(&unary_subgraph.values[new_node->outputs[0]]);
 
@@ -1799,16 +1804,16 @@ void xnn_subgraph_fuse_unary_quantized_into_lut(
     // subgraph until we find one.
     while (unary_subgraph.num_nodes > 1) {
       const struct xnn_node* unary_node = &unary_subgraph.nodes[unary_subgraph.num_nodes - 1];
+      assert(unary_node->num_outputs == 1);
       const uint32_t unary_output_id = unary_node->outputs[0];
-      const struct xnn_value* unary_output = &unary_subgraph.values[unary_output_id];
+      struct xnn_value* unary_output = &unary_subgraph.values[unary_output_id];
       if (xnn_datatype_size_bytes(unary_output->datatype) == 1) {
         break;
       }
-      // Remove the outputs of this node from the subgraph.
-      for (uint32_t j = 0; j < unary_node->num_outputs; j++) {
-        xnn_value_clear(&unary_subgraph.values[unary_node->outputs[j]]);
-      }
+      // Remove this node from the subgraph.
+      xnn_value_clear(unary_output);
       unary_subgraph.num_nodes--;
+      // Update the last node of the fusion (the node we replace).
       node = nodes_to_fuse[unary_subgraph.num_nodes - 1];
     }
 
@@ -1819,15 +1824,29 @@ void xnn_subgraph_fuse_unary_quantized_into_lut(
       if (replace_node_with_lut(subgraph, node, input_id, unary_input_id, &unary_subgraph)) {
         // We replaced this subgraph with a LUT, clear out the old values and nodes.
         for (uint32_t i = 0; i + 1 < unary_subgraph.num_nodes; i++) {
-          struct xnn_node* node = nodes_to_fuse[i];
+          struct xnn_node* fused_node = nodes_to_fuse[i];
+          assert(fused_node->num_outputs == 1);
+          struct xnn_value* fused_output = &subgraph->values[fused_node->outputs[0]];
+          xnn_log_info("Value %d fuse Node #%" PRIu32 " into downstream quantized LUT Node #%" PRIu32,
+              fused_output->id, fused_node->id, node->id);
+
+          if (i > 0) {
+            // Remove this consumer from the inputs.
+            for (uint32_t i = 0; i < fused_node->num_inputs; i++) {
+              struct xnn_value* fused_input = &subgraph->values[fused_node->inputs[i]];
+              assert (!xnn_value_is_external_input(fused_input));
+              fused_input->num_consumers--;
+              if (fused_input->num_consumers == 0) {
+                xnn_value_clear(fused_input);
+              }
+            }
+          }
 
           // We only need to clear output values. Input values could be used by
           // other ops, and the ones that are outputs of another node in the
           // fusion will be cleared here.
-          for (uint32_t j = 0; j < node->num_outputs; j++) {
-            xnn_value_clear(&subgraph->values[node->outputs[j]]);
-          }
-          xnn_node_clear(node);
+          xnn_value_clear(fused_output);
+          xnn_node_clear(fused_node);
         }
       }
     }
