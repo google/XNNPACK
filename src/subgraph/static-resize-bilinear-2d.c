@@ -108,8 +108,8 @@ static enum xnn_status reshape_resize_bilinear_operator(
     return status;
   }
 
-  const size_t output_height = opdata->operator_objects[0]->output_height;
-  const size_t output_width = opdata->operator_objects[0]->output_width;
+  const size_t output_height = opdata->operator_objects[0]->convolution_op->output_height;
+  const size_t output_width = opdata->operator_objects[0]->convolution_op->output_width;
   const uint32_t output_id = opdata->outputs[0];
   assert(output_id < num_values);
   struct xnn_value* output_value = values + output_id;

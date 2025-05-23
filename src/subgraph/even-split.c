@@ -237,7 +237,7 @@ static enum xnn_status setup_even_split_operator(
   assert(input_data != NULL);
 
   enum xnn_status status = xnn_status_success;
-  
+
   size_t num_splits = opdata->num_outputs;
   int operator_index = 0;
   for (size_t i = 0; i < num_splits; ++i) {

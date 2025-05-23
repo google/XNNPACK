@@ -130,30 +130,32 @@ class IndirectionTester {
     indirection_buffer_ =
         xnnpack::Buffer<const float*>(num_indirection_elements);
     xnn_operator op = {};
-    op.indirection_buffer =
+    xnn_convolution_operator conv_data;
+    op.convolution_op = &conv_data;
+    op.convolution_op->indirection_buffer =
         reinterpret_cast<const void**>(indirection_buffer_.data());
-    op.input = input_.data();
+    op.convolution_op->input = input_.data();
     op.input_pixel_stride = channels_;
     op.zero_buffer = zero_buffer_.data();
-    op.input_height = input_height_;
-    op.input_width = input_width_;
-    op.output_height = output_height;
-    op.output_width = output_width;
-    op.kernel_height = kernel_height_;
-    op.kernel_width = kernel_width_;
-    op.stride_height = subsampling_;
-    op.stride_width = subsampling_;
-    op.dilation_height = dilation_;
-    op.dilation_width = dilation_;
-    op.padding_top = padding_height_ / 2;
-    op.padding_left = padding_width_ / 2;
+    op.convolution_op->input_height = input_height_;
+    op.convolution_op->input_width = input_width_;
+    op.convolution_op->output_height = output_height;
+    op.convolution_op->output_width = output_width;
+    op.convolution_op->kernel_height = kernel_height_;
+    op.convolution_op->kernel_width = kernel_width_;
+    op.convolution_op->stride_height = subsampling_;
+    op.convolution_op->stride_width = subsampling_;
+    op.convolution_op->dilation_height = dilation_;
+    op.convolution_op->dilation_width = dilation_;
+    op.convolution_op->padding_top = padding_height_ / 2;
+    op.convolution_op->padding_left = padding_width_ / 2;
     xnn_indirection_init_dwconv2d(
         /*output_y_start=*/0, /*output_y_end=*/output_height,
-        op.indirection_buffer, op.input,
+        op.convolution_op->indirection_buffer, op.convolution_op->input,
         op.input_pixel_stride << /*log2_input_element_size=*/2, op.zero_buffer,
-        op.input_height, op.input_width, op.output_height, op.output_width,
-        op.kernel_height, op.kernel_width, op.stride_height, op.stride_width,
-        op.dilation_height, op.dilation_width, op.padding_top, op.padding_left,
+        op.convolution_op->input_height, op.convolution_op->input_width, op.convolution_op->output_height, op.convolution_op->output_width,
+        op.convolution_op->kernel_height, op.convolution_op->kernel_width, op.convolution_op->stride_height, op.convolution_op->stride_width,
+        op.convolution_op->dilation_height, op.convolution_op->dilation_width, op.convolution_op->padding_top, op.convolution_op->padding_left,
         step_height, step_width, primary_tile_);
   }
 
@@ -186,30 +188,32 @@ class IndirectionTester {
     indirection_buffer_ =
         xnnpack::Buffer<const float*>(num_indirection_elements);
     xnn_operator op = {};
-    op.indirection_buffer =
+    xnn_convolution_operator conv_data;
+    op.convolution_op = &conv_data;
+    op.convolution_op->indirection_buffer =
         reinterpret_cast<const void**>(indirection_buffer_.data());
-    op.input = input_.data();
+    op.convolution_op->input = input_.data();
     op.input_pixel_stride = channels_;
     op.zero_buffer = zero_buffer_.data();
-    op.input_height = input_height_;
-    op.input_width = input_width_;
-    op.output_height = output_height;
-    op.output_width = output_width;
-    op.kernel_height = kernel_height_;
-    op.kernel_width = kernel_width_;
-    op.stride_height = subsampling_;
-    op.stride_width = subsampling_;
-    op.dilation_height = dilation_;
-    op.dilation_width = dilation_;
-    op.padding_top = padding_height_ / 2;
-    op.padding_left = padding_width_ / 2;
+    op.convolution_op->input_height = input_height_;
+    op.convolution_op->input_width = input_width_;
+    op.convolution_op->output_height = output_height;
+    op.convolution_op->output_width = output_width;
+    op.convolution_op->kernel_height = kernel_height_;
+    op.convolution_op->kernel_width = kernel_width_;
+    op.convolution_op->stride_height = subsampling_;
+    op.convolution_op->stride_width = subsampling_;
+    op.convolution_op->dilation_height = dilation_;
+    op.convolution_op->dilation_width = dilation_;
+    op.convolution_op->padding_top = padding_height_ / 2;
+    op.convolution_op->padding_left = padding_width_ / 2;
     xnn_indirection_init_dwconv2d_compressed(
         /*output_y_start=*/0, /*output_y_end=*/output_height,
-        op.indirection_buffer, op.input,
+        op.convolution_op->indirection_buffer, op.convolution_op->input,
         op.input_pixel_stride << /*log2_input_element_size=*/2, op.zero_buffer,
-        op.input_height, op.input_width, op.output_height, op.output_width,
-        op.kernel_height, op.kernel_width, op.stride_height, op.stride_width,
-        op.dilation_height, op.dilation_width, op.padding_top, op.padding_left,
+        op.convolution_op->input_height, op.convolution_op->input_width, op.convolution_op->output_height, op.convolution_op->output_width,
+        op.convolution_op->kernel_height, op.convolution_op->kernel_width, op.convolution_op->stride_height, op.convolution_op->stride_width,
+        op.convolution_op->dilation_height, op.convolution_op->dilation_width, op.convolution_op->padding_top, op.convolution_op->padding_left,
         step_height, step_width, indirect_top_height, indirect_bot_height,
         primary_tile_);
   }

@@ -123,6 +123,14 @@ static enum xnn_status create_fully_connected_nc(
     goto error;
   }
   fully_connected_op->num_compute_invocations = 1;
+  fully_connected_op->convolution_op = xnn_allocate_zero_memory(sizeof(struct xnn_convolution_operator));
+  if (fully_connected_op->convolution_op == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(struct xnn_convolution_operator),
+                  xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
+
 
   fully_connected_op->ukernel.gemm_ukernels = xnn_allocate_zero_simd_memory(sizeof(struct gemm_types));
   if (fully_connected_op->ukernel.gemm_ukernels == NULL) {
@@ -286,8 +294,8 @@ static enum xnn_status create_fully_connected_nc(
     fully_connected_op->packed_weights.offset = cache_offset;
   }
 
-  fully_connected_op->group_input_channels = input_channels;
-  fully_connected_op->group_output_channels = output_channels;
+  fully_connected_op->convolution_op->group_input_channels = input_channels;
+  fully_connected_op->convolution_op->group_output_channels = output_channels;
   fully_connected_op->input_pixel_stride = input_stride;
   fully_connected_op->output_pixel_stride = output_stride;
 
@@ -2379,8 +2387,8 @@ static enum xnn_status reshape_fully_connected_nc(
     return xnn_status_success;
   }
 
-  size_t input_channels = fully_connected_op->group_input_channels;
-  const size_t output_channels = fully_connected_op->group_output_channels;
+  size_t input_channels = fully_connected_op->convolution_op->group_input_channels;
+  const size_t output_channels = fully_connected_op->convolution_op->group_output_channels;
 
   uint32_t mr = fully_connected_op->ukernel.gemm_ukernels->gemm.mr;
   const uint32_t nr = fully_connected_op->ukernel.gemm_ukernels->gemm.nr;

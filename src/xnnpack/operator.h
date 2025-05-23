@@ -152,8 +152,7 @@ struct igemm_op_context {
       conv2d_igemm_indirection_init;
 };
 
-struct xnn_operator {
-  size_t batch_size;
+struct xnn_convolution_operator {
   uint32_t padding_top;
   uint32_t padding_right;
   uint32_t padding_bottom;
@@ -167,18 +166,35 @@ struct xnn_operator {
   uint32_t groups;
   size_t group_input_channels;
   size_t group_output_channels;
-  size_t channels;
-
   size_t input_height;
   size_t input_width;
-  size_t input_pixel_stride;
   const void* input;
+  void* output;
   const void** indirection_buffer;
-
   size_t output_height;
   size_t output_width;
+  size_t valid_batch_size;
+  size_t last_input_height;
+  size_t last_input_width;
+  size_t last_input_channels;
+  const void* last_input;
+  size_t last_output_height;
+  size_t last_output_width;
+  void* last_output;
+  uint32_t last_mr;
+  void** zero_buffers;
+  size_t zero_size;
+  void* pixelwise_buffer;
+  struct subconvolution_params* subconvolution_buffer;
+};
+
+struct xnn_operator {
+  size_t batch_size;
+  size_t channels;
+  struct xnn_convolution_operator *convolution_op;
+
+  size_t input_pixel_stride;
   size_t output_pixel_stride;
-  void* output;
   const void* quantization_params;
 
   union {
@@ -190,37 +206,19 @@ struct xnn_operator {
   } packed_weights;
   // Stride between each set of packed weights.
   size_t weights_stride;
-  // Total number of non-zero kernel blocks when weights use sparse
-  // representation.
-
-  size_t valid_batch_size;
-  size_t last_input_height;
-  size_t last_input_width;
-  size_t last_input_channels;
-  const void* last_input;
-  size_t last_output_height;
-  size_t last_output_width;
-  void* last_output;
-  uint32_t last_mr;
-
-  uint32_t block_size;
-  // 72 bytes
-
   void* zero_buffer;
-  void** zero_buffers;
-  size_t zero_size;
   void* lookup_table;
-  void* pixelwise_buffer;
-  struct subconvolution_params* subconvolution_buffer;
+
   uint32_t flags;
-  // 68 bytes.
-  // 336 bytesb to here.
 
   union {
     struct {
       uint32_t log2_element_size;
       enum xnn_binary_operator op_type;
     } binary_elementwise;
+    struct {
+      uint32_t block_size;
+    } depth_to_space;
     struct {
       uint8_t num_nonbatch_dims;
       uint8_t log2_input_size;
@@ -249,7 +247,7 @@ struct xnn_operator {
     struct {
       uint32_t pad_value;
     } padding;
-  }; // 24 bytes.
+  };
 
   union {
     union xnn_binary_uparams binary;

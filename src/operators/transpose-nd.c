@@ -770,7 +770,7 @@ enum xnn_status create_depth_to_space_nchw2nhwc(
     return xnn_status_unsupported_hardware;
   }
 
-  depth_to_space_op->block_size = block_size;
+  depth_to_space_op->depth_to_space.block_size = block_size;
 
   depth_to_space_op->type = operator_type;
   depth_to_space_op->flags = flags;
@@ -830,7 +830,7 @@ enum xnn_status reshape_depth_to_space_nchw2nhwc(
     return xnn_status_invalid_parameter;
   }
 
-  const uint32_t block_size = depth_to_space_op->block_size;
+  const uint32_t block_size = depth_to_space_op->depth_to_space.block_size;
   if (input_channels % (block_size * block_size) != 0) {
     xnn_log_error("failed to reshape %s operator with %zu input_channels and %zu block_sizex: "
                   "input channels must be divisible by block_size * block_size",
@@ -1036,7 +1036,7 @@ static enum xnn_status create_depth_to_space_nhwc(
     return xnn_status_unsupported_hardware;
   }
 
-  depth_to_space_op->block_size = block_size;
+  depth_to_space_op->depth_to_space.block_size = block_size;
   depth_to_space_op->type = operator_type;
   depth_to_space_op->flags = flags;
   depth_to_space_op->transpose_config = transpose_config;
@@ -1121,7 +1121,7 @@ static enum xnn_status reshape_depth_to_space_nhwc(
     return xnn_status_invalid_parameter;
   }
 
-  const uint32_t block_size = depth_to_space_op->block_size;
+  const uint32_t block_size = depth_to_space_op->depth_to_space.block_size;
   if (input_channels % (block_size * block_size) != 0) {
     xnn_log_error("failed to reshape %s operator with %zu input_channels and %u block_size: "
                   "input channels must be divisible by block_size * block_size",
@@ -1329,7 +1329,7 @@ static enum xnn_status create_space_to_depth_nhwc(
     return xnn_status_unsupported_hardware;
   }
 
-  space_to_depth_op->block_size = block_size;
+  space_to_depth_op->depth_to_space.block_size = block_size;
 
   space_to_depth_op->type = operator_type;
   space_to_depth_op->flags = flags;
@@ -1415,7 +1415,7 @@ static enum xnn_status reshape_space_to_depth_nhwc(
     return xnn_status_invalid_parameter;
   }
 
-  const uint32_t block_size = space_to_depth_op->block_size;
+  const uint32_t block_size = space_to_depth_op->depth_to_space.block_size;
   const size_t output_channels = input_channels * block_size * block_size;
 
   if (input_width % block_size != 0) {
