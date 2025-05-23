@@ -55,7 +55,7 @@ $for BATCH_TILE in BATCH_TILES:
 
   void xnn_f32_vsqrt_ukernel__${ARCH}_rsqrt_u${BATCH_TILE}(
       size_t batch, const float* input, float* output,
-      const struct xnn_f32_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)]) {
+      const struct xnn_f32_default_params* unused_params) {
     assert(batch != 0);
     assert(batch % sizeof(float) == 0);
     assert(input != NULL);
