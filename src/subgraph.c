@@ -1503,10 +1503,14 @@ enum xnn_status xnn_subgraph_fusion(
 static bool is_broadcasted_static(
   const struct xnn_value* value)
 {
+  // It really shouldn't be possible for a value with static data to also be
+  // an external input or have a producer. But some graphs do this (somehow), so
+  // we need to defend against these malformed cases.
   return
       value->data != NULL &&
       value->allocation_type == xnn_allocation_type_static &&
       !xnn_value_is_external_input(value) &&
+      value->producer == XNN_INVALID_NODE_ID &&
       xnn_shape_multiply_all_dims(&value->shape) == 1;
 }
 
@@ -1526,9 +1530,9 @@ static uint32_t is_pure_unary_elementwise(
       const struct xnn_value* input_1 = &subgraph->values[node->inputs[1]];
       assert(node->num_inputs == 2);
       if (is_broadcasted_static(input_0) && !xnn_value_is_static(input_1)) {
-        return node->inputs[0];
-      } else if (is_broadcasted_static(input_1) && !xnn_value_is_static(input_0)) {
         return node->inputs[1];
+      } else if (is_broadcasted_static(input_1) && !xnn_value_is_static(input_0)) {
+        return node->inputs[0];
       } else {
         return XNN_INVALID_VALUE_ID;
       }
@@ -1750,7 +1754,8 @@ void xnn_subgraph_fuse_unary_quantized_into_lut(
       continue;
     }
     const struct xnn_value* input_value = &subgraph->values[input_id];
-    if (xnn_datatype_size_bytes(input_value->datatype) != 1) {
+    if (input_value->datatype == xnn_datatype_invalid ||
+        xnn_datatype_size_bits(input_value->datatype) != 8) {
       // This value is not a quantized 8-bit value, it can't be the input to a
       // LUT.
       continue;
@@ -1807,17 +1812,19 @@ void xnn_subgraph_fuse_unary_quantized_into_lut(
       assert(unary_node->num_outputs == 1);
       const uint32_t unary_output_id = unary_node->outputs[0];
       struct xnn_value* unary_output = &unary_subgraph.values[unary_output_id];
-      if (xnn_datatype_size_bytes(unary_output->datatype) == 1) {
+      if (unary_output->datatype != xnn_datatype_invalid &&
+          xnn_datatype_size_bits(unary_output->datatype) == 8) {
         break;
       }
       // Remove this node from the subgraph.
       xnn_value_clear(unary_output);
       unary_subgraph.num_nodes--;
-      // Update the last node of the fusion (the node we replace).
-      node = nodes_to_fuse[unary_subgraph.num_nodes - 1];
     }
 
     if (unary_subgraph.num_nodes > 1) {
+      // Update the last node of the fusion (the node we replace).
+      node = nodes_to_fuse[unary_subgraph.num_nodes - 1];
+
       // Replace the fused nodes with a LUT op.
       const uint32_t unary_input_id = map_value_id(value_map, input_id, NULL);
       reshape_for_lut(&unary_subgraph.values[unary_input_id]);
