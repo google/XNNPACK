@@ -21,7 +21,7 @@ void xnn_x8_lut_ukernel__aarch64_neon_tbx128x4_u32(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,
-    const uint8_t table[restrict XNN_MIN_ELEMENTS(256)])
+    const uint8_t* restrict table)
 {
   assert(batch != 0);
   assert(batch % sizeof(uint8_t) == 0);
