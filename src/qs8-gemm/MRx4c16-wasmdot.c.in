@@ -33,7 +33,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
     size_t cn_stride,
     $if DATATYPE == "QD8":
       const ${PARAMS_TYPE}* restrict params,
-      const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+      const struct xnn_qd8_quantization_params* restrict quantization_params) XNN_OOB_READS
     $else:
       const ${PARAMS_TYPE}* restrict params) XNN_OOB_READS
 {

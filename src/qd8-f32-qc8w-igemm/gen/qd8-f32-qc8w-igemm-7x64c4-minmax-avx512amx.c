@@ -37,7 +37,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_7x64c4__avx512amx(
     const int8_t* zero,
     const int8_t* zero_data,
     const struct xnn_f32_minmax_params* restrict params,
-    const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_qd8_quantization_params* restrict quantization_params)
 {
   assert(mr != 0);
   assert(mr <= 7);

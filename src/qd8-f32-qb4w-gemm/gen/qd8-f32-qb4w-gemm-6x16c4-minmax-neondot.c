@@ -27,7 +27,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_6x16c4__neondot(
     size_t cm_stride,
     size_t cn_stride,
     const struct xnn_f32_qb4w_minmax_params* restrict params,
-    const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_qd8_quantization_params* restrict quantization_params) XNN_OOB_READS
 {
   assert(mr != 0);
   assert(mr <= 6);
