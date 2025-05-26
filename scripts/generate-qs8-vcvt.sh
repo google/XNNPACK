@@ -77,6 +77,15 @@ tools/xngen src/qs8-vcvt/armsimd32.c.in -D BATCH_TILE=8 -D DATATYPE=QS8 -o src/q
 tools/xngen src/qs8-vcvt/armsimd32.c.in -D BATCH_TILE=4 -D DATATYPE=QU8 -o src/qu8-vcvt/gen/qu8-vcvt-armsimd32-u4.c &
 tools/xngen src/qs8-vcvt/armsimd32.c.in -D BATCH_TILE=8 -D DATATYPE=QU8 -o src/qu8-vcvt/gen/qu8-vcvt-armsimd32-u8.c &
 
+################################## RISC-V Vector ##############################
+tools/xngen src/qs8-vcvt/rvv.c.in -D LMUL=1 -D DATATYPE=QS8 -o src/qs8-vcvt/gen/qs8-vcvt-rvv-u1v.c &
+tools/xngen src/qs8-vcvt/rvv.c.in -D LMUL=2 -D DATATYPE=QS8 -o src/qs8-vcvt/gen/qs8-vcvt-rvv-u2v.c &
+tools/xngen src/qs8-vcvt/rvv.c.in -D LMUL=4 -D DATATYPE=QS8 -o src/qs8-vcvt/gen/qs8-vcvt-rvv-u4v.c &
+
+tools/xngen src/qs8-vcvt/rvv.c.in -D LMUL=1 -D DATATYPE=QU8 -o src/qu8-vcvt/gen/qu8-vcvt-rvv-u1v.c &
+tools/xngen src/qs8-vcvt/rvv.c.in -D LMUL=2 -D DATATYPE=QU8 -o src/qu8-vcvt/gen/qu8-vcvt-rvv-u2v.c &
+tools/xngen src/qs8-vcvt/rvv.c.in -D LMUL=4 -D DATATYPE=QU8 -o src/qu8-vcvt/gen/qu8-vcvt-rvv-u4v.c &
+
 #################################### Scalar ###################################
 tools/xngen src/qs8-vcvt/scalar.c.in -D BATCH_TILE=1 -D DATATYPE=QS8 -o src/qs8-vcvt/gen/qs8-vcvt-scalar-u1.c &
 tools/xngen src/qs8-vcvt/scalar.c.in -D BATCH_TILE=2 -D DATATYPE=QS8 -o src/qs8-vcvt/gen/qs8-vcvt-scalar-u2.c &
