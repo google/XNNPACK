@@ -560,6 +560,7 @@ void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph);
 bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph);
 
 void xnn_node_clear(struct xnn_node* node);
+void xnn_node_copy(struct xnn_node* dst_node, const struct xnn_node* src_node);
 void xnn_value_clear(struct xnn_value* value);
 
 void xnn_value_copy(struct xnn_value* dst_value,

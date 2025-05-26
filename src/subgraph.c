@@ -184,32 +184,23 @@ void xnn_value_clear(struct xnn_value* value) {
   memset(value, 0, sizeof(struct xnn_value));
 }
 
+// Copies all fields from `src_node` to `dst_node` but leaves the node ID
+// unchanged.
+void xnn_node_copy(struct xnn_node* dst_node, const struct xnn_node* src_node) {
+  const uint32_t node_id = dst_node->id;
+  *dst_node = *src_node;
+  dst_node->id = node_id;
+}
+
+// Copies all fields from `src_value` to `dst_value` but leaves the value ID
+// unchanged.
 void xnn_value_copy(
   struct xnn_value* dst_value,
   const struct xnn_value* src_value)
 {
-  // Note: Value ID stays unchanged
-
-  dst_value->type = src_value->type;
-  dst_value->datatype = src_value->datatype;
-  dst_value->quantization = src_value->quantization;
-  dst_value->shape = src_value->shape;
-  dst_value->size = src_value->size;
-  dst_value->allocation_type = src_value->allocation_type;
-  dst_value->flags = src_value->flags;
-  dst_value->data = src_value->data;
-  dst_value->producer = src_value->producer;
-  dst_value->first_consumer = src_value->first_consumer;
-  dst_value->all_consumers_types_same = src_value->all_consumers_types_same;
-  dst_value->num_consumers = src_value->num_consumers;
-  dst_value->num_nchw_compatible_consumers = src_value->num_nchw_compatible_consumers;
-  dst_value->layout = src_value->layout;
-  dst_value->fp16_compatible = src_value->fp16_compatible;
-  dst_value->fp16_id = src_value->fp16_id;
-  dst_value->fp32_id = src_value->fp32_id;
-  dst_value->fp16_temp_data = src_value->fp16_temp_data;
-  dst_value->fp32_data = src_value->fp32_data;
-  dst_value->gemm_config = src_value->gemm_config;
+  const uint32_t value_id = dst_value->id;
+  *dst_value = *src_value;
+  dst_value->id = value_id;
 }
 
 struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph)
@@ -1603,7 +1594,7 @@ static struct xnn_node* copy_node_to_static_subgraph(
 {
   assert(dst_subgraph->num_nodes < dst_subgraph->num_reserved_nodes);
   struct xnn_node* dst_node = &dst_subgraph->nodes[dst_subgraph->num_nodes++];
-  *dst_node = *src_node;
+  xnn_node_copy(dst_node, src_node);
 
   for (size_t i = 0; i < src_node->num_inputs; i++) {
     const struct xnn_value* value = &src_subgraph->values[src_node->inputs[i]];
