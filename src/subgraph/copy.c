@@ -23,7 +23,7 @@
 
 static enum xnn_status create_copy_operator(
   const struct xnn_node* node,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
   xnn_weights_cache_t weights_cache)
@@ -34,7 +34,7 @@ static enum xnn_status create_copy_operator(
   enum xnn_status status;
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
-  const struct xnn_value *input_value = &values[input_id];
+  const struct xnn_runtime_value *input_value = &values[input_id];
   switch (xnn_datatype_size_bits(input_value->datatype)) {
     case 8:
       status = xnn_create_copy_nc_x8(
@@ -67,14 +67,14 @@ static enum xnn_status create_copy_operator(
 
 static enum xnn_status resize_copy_output_tensor(
   const struct xnn_operator_data* opdata,
-  struct xnn_value* values,
+  struct xnn_runtime_value* values,
   size_t old_workspace_size)
 {
   const uint32_t input_id = opdata->inputs[0];
-  const struct xnn_value* input = &values[input_id];
+  const struct xnn_runtime_value* input = &values[input_id];
 
   const uint32_t output_id = opdata->outputs[0];
-  struct xnn_value* output = (struct xnn_value*) &values[output_id];
+  struct xnn_runtime_value* output = (struct xnn_runtime_value*) &values[output_id];
 
   const size_t num_output_dims = opdata->num_reshape_dims;
   size_t output_axis_dynamic = XNN_MAX_TENSOR_DIMS;
@@ -121,7 +121,7 @@ static enum xnn_status resize_copy_output_tensor(
     }
   }
 
-  const size_t new_size = xnn_tensor_get_size(output);
+  const size_t new_size = xnn_runtime_tensor_get_size(output);
   if (new_size > output->size || old_workspace_size < opdata->workspace_size) {
     output->size = new_size;
     return xnn_status_reallocation_required;
@@ -132,14 +132,14 @@ static enum xnn_status resize_copy_output_tensor(
 
 static enum xnn_status resize_expand_dims_output_tensor(
   const struct xnn_operator_data* opdata,
-  struct xnn_value* values,
+  struct xnn_runtime_value* values,
   size_t old_workspace_size)
 {
   const uint32_t input_id = opdata->inputs[0];
-  const struct xnn_value* input = &values[input_id];
+  const struct xnn_runtime_value* input = &values[input_id];
 
   const uint32_t output_id = opdata->outputs[0];
-  struct xnn_value* output = (struct xnn_value*) &values[output_id];
+  struct xnn_runtime_value* output = (struct xnn_runtime_value*) &values[output_id];
 
   const struct xnn_shape* input_shape = &input->shape;
   struct xnn_shape* output_shape = &output->shape;
@@ -165,7 +165,7 @@ static enum xnn_status resize_expand_dims_output_tensor(
     }
   }
 
-  const size_t new_size = xnn_tensor_get_size(output);
+  const size_t new_size = xnn_runtime_tensor_get_size(output);
   if (new_size > output->size || old_workspace_size < opdata->workspace_size) {
     output->size = new_size;
     return xnn_status_reallocation_required;
@@ -175,13 +175,13 @@ static enum xnn_status resize_expand_dims_output_tensor(
 }
 
 static enum xnn_status resize_fuse_dims_output_tensor(
-    const struct xnn_operator_data* opdata, struct xnn_value* values,
+    const struct xnn_operator_data* opdata, struct xnn_runtime_value* values,
     size_t old_workspace_size) {
   const uint32_t input_id = opdata->inputs[0];
-  const struct xnn_value* input = &values[input_id];
+  const struct xnn_runtime_value* input = &values[input_id];
 
   const uint32_t output_id = opdata->outputs[0];
-  struct xnn_value* output = (struct xnn_value*)&values[output_id];
+  struct xnn_runtime_value* output = (struct xnn_runtime_value*)&values[output_id];
 
   const size_t first_dim = opdata->reshape_dims[0];
   const size_t num_dims = opdata->num_reshape_dims;
@@ -212,7 +212,7 @@ static enum xnn_status resize_fuse_dims_output_tensor(
   }
   output_shape->num_dims = input_shape->num_dims - num_dims + 1;
 
-  const size_t new_size = xnn_tensor_get_size(output);
+  const size_t new_size = xnn_runtime_tensor_get_size(output);
   if (new_size > output->size || old_workspace_size < opdata->workspace_size) {
     output->size = new_size;
     return xnn_status_reallocation_required;
@@ -222,13 +222,13 @@ static enum xnn_status resize_fuse_dims_output_tensor(
 }
 
 static enum xnn_status resize_split_dims_output_tensor(
-    const struct xnn_operator_data* opdata, struct xnn_value* values,
+    const struct xnn_operator_data* opdata, struct xnn_runtime_value* values,
     size_t old_workspace_size) {
   const uint32_t input_id = opdata->inputs[0];
-  const struct xnn_value* input = &values[input_id];
+  const struct xnn_runtime_value* input = &values[input_id];
 
   const uint32_t output_id = opdata->outputs[0];
-  struct xnn_value* output = (struct xnn_value*)&values[output_id];
+  struct xnn_runtime_value* output = (struct xnn_runtime_value*)&values[output_id];
 
   const size_t axis = opdata->axis;
   const size_t num_dims = opdata->num_reshape_dims;
@@ -281,7 +281,7 @@ static enum xnn_status resize_split_dims_output_tensor(
   }
   output_shape->num_dims = input_shape->num_dims + num_dims - 1;
 
-  const size_t new_size = xnn_tensor_get_size(output);
+  const size_t new_size = xnn_runtime_tensor_get_size(output);
   if (new_size > output->size || old_workspace_size < opdata->workspace_size) {
     output->size = new_size;
     return xnn_status_reallocation_required;
@@ -292,7 +292,7 @@ static enum xnn_status resize_split_dims_output_tensor(
 
 static enum xnn_status reshape_copy_operator(
   struct xnn_operator_data* opdata,
-  struct xnn_value* values,
+  struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -352,7 +352,7 @@ static enum xnn_status reshape_copy_operator(
 
 static enum xnn_status setup_copy_operator(
   const struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -364,11 +364,11 @@ static enum xnn_status setup_copy_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  const struct xnn_value* input_value = values + input_id;
+  const struct xnn_runtime_value* input_value = values + input_id;
   const void* input_data = input_value->data;
   assert(input_data != NULL);
 
-  const struct xnn_value* output_value = values + output_id;
+  const struct xnn_runtime_value* output_value = values + output_id;
   void* output_data = output_value->data;
   assert(output_data != NULL);
 

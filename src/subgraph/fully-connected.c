@@ -61,8 +61,8 @@ enum fully_connected_op_type {
 };
 
 enum fully_connected_op_type get_fully_connected_op_type(
-    const struct xnn_value* input_value, const struct xnn_value* filter_value,
-    const struct xnn_value* bias_value, const struct xnn_value* output_value) {
+    const struct xnn_runtime_value* input_value, const struct xnn_runtime_value* filter_value,
+    const struct xnn_runtime_value* bias_value, const struct xnn_runtime_value* output_value) {
   bool has_non_static_weights =
       (filter_value->allocation_type != xnn_allocation_type_static);
   if (bias_value) {
@@ -240,7 +240,7 @@ enum fully_connected_op_type get_fully_connected_op_type(
 }
 
 static enum xnn_status create_fully_connected_operator(
-    const struct xnn_node* node, const struct xnn_value* values,
+    const struct xnn_node* node, const struct xnn_runtime_value* values,
     size_t num_values, struct xnn_operator_data* opdata,
     xnn_weights_cache_t weights_cache) {
   assert(node->num_inputs >= 2);
@@ -249,18 +249,18 @@ static enum xnn_status create_fully_connected_operator(
   const uint32_t input_id = node->inputs[0];
   assert(input_id != XNN_INVALID_VALUE_ID);
   assert(input_id < num_values);
-  const struct xnn_value* input_value = &values[input_id];
+  const struct xnn_runtime_value* input_value = &values[input_id];
 
   const uint32_t filter_id = node->inputs[1];
   assert(filter_id != XNN_INVALID_VALUE_ID);
   assert(filter_id < num_values);
-  const struct xnn_value* filter_value = &values[filter_id];
+  const struct xnn_runtime_value* filter_value = &values[filter_id];
 
   assert(node->num_outputs == 1);
   const uint32_t output_id = node->outputs[0];
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
-  const struct xnn_value* output_value = &values[output_id];
+  const struct xnn_runtime_value* output_value = &values[output_id];
 
   size_t output_channels, input_channels;
   if (node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
@@ -279,7 +279,7 @@ static enum xnn_status create_fully_connected_operator(
   bool has_non_static_weights = (kernel_data == NULL);
 
   const void* bias_data = NULL;
-  const struct xnn_value* bias_value = NULL;
+  const struct xnn_runtime_value* bias_value = NULL;
   uint32_t bias_id = XNN_INVALID_VALUE_ID;
   if (node->num_inputs > 2) {
     bias_id = node->inputs[2];
@@ -292,7 +292,7 @@ static enum xnn_status create_fully_connected_operator(
     has_non_static_weights |= (bias_data == NULL);
   }
 
-  if (output_value->layout == xnn_layout_type_nchw) {
+  if (output_value->flags & XNN_VALUE_FLAG_LAYOUT_NCHW) {
     return create_nchw_convolution(
         /*input_padding_top=*/0,
         /*input_padding_right=*/0,
@@ -717,16 +717,16 @@ static enum xnn_status create_fully_connected_operator(
 }
 
 enum xnn_status resize_fully_connected_output_tensor(
-    const struct xnn_operator_data* opdata, struct xnn_value* values,
+    const struct xnn_operator_data* opdata, struct xnn_runtime_value* values,
     size_t num_values, size_t old_workspace_size, pthreadpool_t threadpool) {
   const uint32_t filter_id = opdata->inputs[1];
-  const struct xnn_value* filter = &values[filter_id];
+  const struct xnn_runtime_value* filter = &values[filter_id];
 
   const uint32_t output_id = opdata->outputs[0];
-  struct xnn_value* output = (struct xnn_value*)&values[output_id];
+  struct xnn_runtime_value* output = (struct xnn_runtime_value*)&values[output_id];
 
   const uint32_t input_id = opdata->inputs[0];
-  const struct xnn_value* input = &values[input_id];
+  const struct xnn_runtime_value* input = &values[input_id];
 
   bool reshape_2d = opdata->flags & XNN_FLAG_TENSORFLOW_RESHAPE_2D;
   if (reshape_2d) {
@@ -755,7 +755,7 @@ enum xnn_status resize_fully_connected_output_tensor(
     }
   }
 
-  const size_t new_size = xnn_tensor_get_size(output);
+  const size_t new_size = xnn_runtime_tensor_get_size(output);
   if (new_size > output->size || old_workspace_size < opdata->workspace_size) {
     output->size = new_size;
     return xnn_status_reallocation_required;
@@ -765,21 +765,21 @@ enum xnn_status resize_fully_connected_output_tensor(
 }
 
 static enum xnn_status reshape_fully_connected_operator(
-    struct xnn_operator_data* opdata, struct xnn_value* values,
+    struct xnn_operator_data* opdata, struct xnn_runtime_value* values,
     size_t num_values, pthreadpool_t threadpool) {
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
-  struct xnn_value* input_value = &values[input_id];
+  struct xnn_runtime_value* input_value = &values[input_id];
 
   const uint32_t output_id = opdata->outputs[0];
   assert(output_id < num_values);
-  struct xnn_value* output_value = &values[output_id];
+  struct xnn_runtime_value* output_value = &values[output_id];
 
   const uint32_t filter_id = opdata->inputs[1];
   assert(filter_id < num_values);
-  struct xnn_value* filter_value = &values[filter_id];
+  struct xnn_runtime_value* filter_value = &values[filter_id];
 
-  if (output_value->layout == xnn_layout_type_nchw) {
+  if (output_value->flags & XNN_VALUE_FLAG_LAYOUT_NCHW) {
     return reshape_convolution_operator(opdata, values, num_values, threadpool);
   }
   const size_t num_input_elements =
@@ -942,7 +942,7 @@ static enum xnn_status reshape_fully_connected_operator(
 }
 
 static enum xnn_status setup_fully_connected_operator(
-    const struct xnn_operator_data* opdata, const struct xnn_value* values,
+    const struct xnn_operator_data* opdata, const struct xnn_runtime_value* values,
     size_t num_values, pthreadpool_t threadpool) {
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id != XNN_INVALID_VALUE_ID);
@@ -958,14 +958,14 @@ static enum xnn_status setup_fully_connected_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  if (values[output_id].layout == xnn_layout_type_nchw) {
+  if (values[output_id].flags & XNN_VALUE_FLAG_LAYOUT_NCHW) {
     return setup_convolution_operator(opdata, values, num_values, threadpool);
   }
-  const struct xnn_value* input_value = values + input_id;
+  const struct xnn_runtime_value* input_value = values + input_id;
   const void* input_data = input_value->data;
   assert(input_data != NULL);
 
-  const struct xnn_value* kernel_value = values + filter_id;
+  const struct xnn_runtime_value* kernel_value = values + filter_id;
   bool has_dynamic_weights =
       kernel_value->allocation_type != xnn_allocation_type_static;
   const void* kernel_data =
@@ -977,7 +977,7 @@ static enum xnn_status setup_fully_connected_operator(
   if (opdata->num_inputs > 2) {
     assert(bias_id != XNN_INVALID_VALUE_ID);
     assert(bias_id < num_values);
-    const struct xnn_value* bias_value = values + bias_id;
+    const struct xnn_runtime_value* bias_value = values + bias_id;
     has_dynamic_weights |=
         bias_value->allocation_type != xnn_allocation_type_static;
     if (has_dynamic_weights) {
@@ -986,7 +986,7 @@ static enum xnn_status setup_fully_connected_operator(
     }
   }
 
-  const struct xnn_value* output_value = values + output_id;
+  const struct xnn_runtime_value* output_value = values + output_id;
   void* output_data = output_value->data;
   assert(output_data != NULL);
 

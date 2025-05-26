@@ -17,7 +17,7 @@
 
 static enum xnn_status create_argmax_pooling_operator(
   const struct xnn_node* node,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
   xnn_weights_cache_t weights_cache)
@@ -44,7 +44,7 @@ static enum xnn_status create_argmax_pooling_operator(
 
 static enum xnn_status reshape_argmax_pooling_operator(
   struct xnn_operator_data* opdata,
-  struct xnn_value* values,
+  struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -75,13 +75,13 @@ static enum xnn_status reshape_argmax_pooling_operator(
   const uint32_t index_id = opdata->outputs[1];
   assert(index_id < num_values);
 
-  struct xnn_value* output_value = values + output_id;
+  struct xnn_runtime_value* output_value = values + output_id;
   output_value->shape.dim[0] = batch_size;
   output_value->shape.dim[1] = output_height;
   output_value->shape.dim[2] = output_width;
   output_value->shape.dim[3] = channel_dim;
 
-  struct xnn_value* output_index = values + index_id;
+  struct xnn_runtime_value* output_index = values + index_id;
   output_index->shape.dim[0] = batch_size;
   output_index->shape.dim[1] = output_height;
   output_index->shape.dim[2] = output_width;
@@ -89,12 +89,12 @@ static enum xnn_status reshape_argmax_pooling_operator(
 
   output_value->shape.num_dims = 4;
   output_index->shape.num_dims = 4;
-  const size_t new_output_size = xnn_tensor_get_size(output_value);
+  const size_t new_output_size = xnn_runtime_tensor_get_size(output_value);
   if (new_output_size > output_value->size) {
     output_value->size = new_output_size;
     return xnn_status_reallocation_required;
   }
-  const size_t new_index_size = xnn_tensor_get_size(output_index);
+  const size_t new_index_size = xnn_runtime_tensor_get_size(output_index);
   if (new_index_size > output_index->size) {
     output_index->size = new_index_size;
     return xnn_status_reallocation_required;
@@ -104,7 +104,7 @@ static enum xnn_status reshape_argmax_pooling_operator(
 
 static enum xnn_status setup_argmax_pooling_operator(
   const struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -120,15 +120,15 @@ static enum xnn_status setup_argmax_pooling_operator(
   assert(output_index_id != XNN_INVALID_VALUE_ID);
   assert(output_index_id < num_values);
 
-  const struct xnn_value* input_value = values + input_id;
+  const struct xnn_runtime_value* input_value = values + input_id;
   const void* input_data = input_value->data;
   assert(input_data != NULL);
 
-  const struct xnn_value* output_value_value = values + output_value_id;
+  const struct xnn_runtime_value* output_value_value = values + output_value_id;
   void* output_value_data = output_value_value->data;
   assert(output_value_data != NULL);
 
-  const struct xnn_value* output_index_value = values + output_index_id;
+  const struct xnn_runtime_value* output_index_value = values + output_index_id;
   void* output_index_data = output_index_value->data;
   assert(output_index_data != NULL);
 

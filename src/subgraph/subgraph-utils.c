@@ -55,10 +55,10 @@ void xnn_subgraph_log_impl(const char* filename, size_t line_number,
       }
     }
     fprintf(out, "]");
-    if (xnn_value_is_external(value)) {
+    if (xnn_value_is_external(value->flags)) {
       fprintf(out, ", external=%s%s",
-              xnn_value_is_external_input(value) ? "input" : "",
-              xnn_value_is_external_output(value) ? "output" : "");
+              xnn_value_is_external_input(value->flags) ? "input" : "",
+              xnn_value_is_external_output(value->flags) ? "output" : "");
     }
     if (value->producer != XNN_INVALID_NODE_ID) {
       fprintf(out, ", producer=%u", value->producer);

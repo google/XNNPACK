@@ -496,17 +496,17 @@ enum xnn_status create_nchw_convolution(
     uint32_t dilation_width, uint32_t groups, size_t group_input_channels,
     size_t group_output_channels, float output_min, float output_max,
     uint32_t flags, uint32_t input_id, uint32_t filter_id, uint32_t bias_id,
-    uint32_t output_id, const struct xnn_value* values, const void* filter_data,
+    uint32_t output_id, const struct xnn_runtime_value* values, const void* filter_data,
     const void* bias_data, xnn_weights_cache_t weights_cache,
     struct xnn_operator_data* opdata);
 
 enum xnn_status reshape_convolution_operator(struct xnn_operator_data* opdata,
-                                             struct xnn_value* values,
+                                             struct xnn_runtime_value* values,
                                              size_t num_values,
                                              pthreadpool_t threadpool);
 
 enum xnn_status setup_convolution_operator(
-    const struct xnn_operator_data* opdata, const struct xnn_value* values,
+    const struct xnn_operator_data* opdata, const struct xnn_runtime_value* values,
     size_t num_values, pthreadpool_t threadpool);
 
 enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w_f16_scales(
