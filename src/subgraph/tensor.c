@@ -21,6 +21,7 @@
 #include "src/xnnpack/packq.h"
 #include "src/xnnpack/params.h"
 #include "src/xnnpack/subgraph.h"
+#include "src/xnnpack/subgraph_types.h"
 
 static void set_allocation_type(struct xnn_value* value)
 {

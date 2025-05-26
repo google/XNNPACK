@@ -468,7 +468,6 @@ ENDIF()
 INCLUDE("${PROJECT_BINARY_DIR}/cmake/gen/microkernels.cmake")
 
 SET(OPERATOR_SRCS
-  src/operator-delete.c
   src/operators/argmax-pooling-nhwc.c
   src/operators/average-pooling-nhwc.c
   src/operators/batch-matrix-multiply-nc.c
@@ -480,6 +479,7 @@ SET(OPERATOR_SRCS
   src/operators/dynamic-fully-connected-nc.c
   src/operators/fully-connected-nc.c
   src/operators/max-pooling-nhwc.c
+  src/operators/operator-delete.c
   src/operators/pack-lh.c
   src/operators/reduce-nd.c
   src/operators/resize-bilinear-nchw.c
@@ -496,9 +496,6 @@ SET(REFERENCE_SRCS
   src/reference/binary-elementwise.cc)
 
 SET(SUBGRAPH_SRCS
-  src/memory-planner.c
-  src/runtime.c
-  src/subgraph.c
   src/subgraph/argmax-pooling-2d.c
   src/subgraph/average-pooling-2d.c
   src/subgraph/batch-matrix-multiply.c
@@ -525,10 +522,16 @@ SET(SUBGRAPH_SRCS
   src/subgraph/static-slice.c
   src/subgraph/static-transpose.c
   src/subgraph/subgraph-utils.c
-  src/subgraph/unpooling-2d.c
+  src/subgraph/subgraph.c
+  src/subgraph/tensor.c
   src/subgraph/unary.c
-  src/subgraph/validation.c
-  src/tensor.c)
+  src/subgraph/unpooling-2d.c
+  src/subgraph/validation.c)
+
+SET(RUNTIME_SRCS
+  src/runtime/memory-planner.c
+  src/runtime/runtime.c
+  src/runtime/weights_cache.c)
 
 SET(LOGGING_SRCS
   src/enums/allocation-type.c
@@ -864,11 +867,12 @@ IF(XNNPACK_BUILD_LIBRARY)
   ADD_LIBRARY(microkernel-utils OBJECT src/microkernel-utils.c)
   ADD_LIBRARY(mutex OBJECT src/mutex.c)
   ADD_LIBRARY(operators OBJECT ${OPERATOR_SRCS})
-  ADD_LIBRARY(operator-run OBJECT src/operator-run.c)
-  ADD_LIBRARY(operator-utils OBJECT src/operator-utils.c)
+  ADD_LIBRARY(operator-run OBJECT src/operators/operator-run.c)
+  ADD_LIBRARY(operator-utils OBJECT src/operators/operator-utils.c)
   ADD_LIBRARY(reference-ukernels OBJECT ${REFERENCE_SRCS})
   ADD_LIBRARY(sanitizers OBJECT src/sanitizers.c)
   ADD_LIBRARY(subgraph OBJECT ${SUBGRAPH_SRCS})
+  ADD_LIBRARY(runtime OBJECT ${RUNTIME_SRCS})
   # Need C_EXTENSIONS to get constants for mmap (MAP_ANONYMOUS).
   SET_TARGET_PROPERTIES(memory PROPERTIES C_EXTENSIONS YES)
   IF(XNNPACK_LIBRARY_TYPE STREQUAL "default")
@@ -892,7 +896,11 @@ IF(XNNPACK_BUILD_LIBRARY)
   TARGET_LINK_LIBRARIES(operator-utils PRIVATE xnnpack-base logging)
   TARGET_LINK_LIBRARIES(reference-ukernels PRIVATE xnnpack-base datatype)
   TARGET_LINK_LIBRARIES(subgraph PRIVATE xnnpack-base allocator logging memory mutex operators operator-run datatype)
-  TARGET_LINK_LIBRARIES(XNNPACK PRIVATE xnnpack-base allocator cache hardware-config indirection memory microkernel-utils microparams-init mutex normalization operators operator-run operator-utils packing microkernels-prod subgraph datatype reference-ukernels)
+  TARGET_LINK_LIBRARIES(runtime PRIVATE xnnpack-base allocator logging memory mutex operators operator-run datatype subgraph)
+  TARGET_LINK_LIBRARIES(XNNPACK PRIVATE xnnpack-base allocator cache
+      hardware-config indirection memory microkernel-utils microparams-init
+      mutex normalization operators operator-run operator-utils packing
+      microkernels-prod subgraph runtime datatype reference-ukernels)
   TARGET_LINK_LIBRARIES(XNNPACK PUBLIC pthreadpool logging)
   SET_TARGET_PROPERTIES(XNNPACK PROPERTIES C_EXTENSIONS YES)
 ENDIF()
@@ -1085,6 +1093,7 @@ IF(MSVC)
     TARGET_COMPILE_OPTIONS(cache PRIVATE "$<$<NOT:$<CONFIG:Debug>>:/O1>")
     TARGET_COMPILE_OPTIONS(mutex PRIVATE "$<$<NOT:$<CONFIG:Debug>>:/O1>")
     TARGET_COMPILE_OPTIONS(subgraph PRIVATE "$<$<NOT:$<CONFIG:Debug>>:/O1>")
+    TARGET_COMPILE_OPTIONS(runtime PRIVATE "$<$<NOT:$<CONFIG:Debug>>:/O1>")
     TARGET_COMPILE_OPTIONS(operators PRIVATE "$<$<NOT:$<CONFIG:Debug>>:/O1>")
     TARGET_COMPILE_OPTIONS(XNNPACK PRIVATE "$<$<NOT:$<CONFIG:Debug>>:/O1>")
   ENDIF()
@@ -1106,6 +1115,7 @@ ELSE()
     TARGET_COMPILE_OPTIONS(cache PRIVATE "$<$<NOT:$<CONFIG:Debug>>:-Os>")
     TARGET_COMPILE_OPTIONS(mutex PRIVATE "$<$<NOT:$<CONFIG:Debug>>:-Os>")
     TARGET_COMPILE_OPTIONS(subgraph PRIVATE "$<$<NOT:$<CONFIG:Debug>>:-Os>")
+    TARGET_COMPILE_OPTIONS(runtime PRIVATE "$<$<NOT:$<CONFIG:Debug>>:-Os>")
     TARGET_COMPILE_OPTIONS(operators PRIVATE "$<$<NOT:$<CONFIG:Debug>>:-Os>")
     TARGET_COMPILE_OPTIONS(XNNPACK PRIVATE "$<$<NOT:$<CONFIG:Debug>>:-Os>")
   ENDIF()
@@ -1134,6 +1144,7 @@ IF(XNNPACK_BUILD_WITH_LIBM)
     TARGET_LINK_LIBRARIES(hardware-config PRIVATE ${LIBM})
     TARGET_LINK_LIBRARIES(indirection PRIVATE ${LIBM})
     TARGET_LINK_LIBRARIES(subgraph PRIVATE ${LIBM})
+    TARGET_LINK_LIBRARIES(runtime PRIVATE ${LIBM})
     IF(XNNPACK_BUILD_LIBRARY)
       TARGET_LINK_LIBRARIES(XNNPACK PRIVATE ${LIBM})
     ENDIF()

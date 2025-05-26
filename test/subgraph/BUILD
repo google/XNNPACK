@@ -14,17 +14,18 @@ load(
 SUBGRAPH_TEST_DEPS = [
     ":runtime_flags",
     ":subgraph_tester",
-    "//:XNNPACK",
     "//:buffer",
     "//:common",
     "//:datatype",
     "//:math",
-    "//:node_type",
-    "//:operators",
-    "//:operator_utils",
     "//:reference_ukernels",
     "//:requantization",
-    "//:subgraph",
+    "//:XNNPACK",
+    "//src/operators:operator_utils",
+    "//src/operators:operators",
+    "//src/runtime:runtime",
+    "//src/subgraph:node_type",
+    "//src/subgraph:subgraph",
     "//test:replicable_random_device",
 ]
 
@@ -68,8 +69,8 @@ xnnpack_cxx_library(
         "//:buffer",
         "//:datatype",
         "//:math",
-        "//:subgraph_h",
         "//:xnnpack_h",
+        "//src/subgraph",
         "//test:replicable_random_device",
         "@pthreadpool",
     ],
@@ -84,8 +85,8 @@ xnnpack_cxx_library(
     deps = xnnpack_test_deps_for_library() + [
         ":runtime_flags",
         ":subgraph_tester",
-        "//:subgraph_h",
         "//:xnnpack_h",
+        "//src/subgraph",
     ],
 )
 
@@ -243,10 +244,9 @@ xnnpack_unit_test(
         ":runtime_tester",
         ":subgraph_tester",
         "//:buffer",
-        "//:node_type",
-        "//:subgraph",
-        "//:subgraph_h",
         "//:xnnpack_h",
+        "//src/subgraph",
+        "//src/subgraph:node_type",
     ],
 )
 
@@ -270,7 +270,7 @@ xnnpack_unit_test(
     deps = [
         ":runtime_tester",
         ":subgraph_tester",
-        "//:subgraph_h",
+        "//src/subgraph",
     ],
 )
 
@@ -283,10 +283,10 @@ xnnpack_unit_test(
         ":runtime_flags",
         ":runtime_tester",
         ":subgraph_tester",
-        "//:node_type",
-        "//:subgraph",
-        "//:subgraph_h",
         "//:xnnpack_h",
+        "//src/runtime:memory_planner",
+        "//src/subgraph",
+        "//src/subgraph:node_type",
     ],
 )
 
@@ -295,8 +295,8 @@ xnnpack_unit_test(
     srcs = ["subgraph-nchw.cc"],
     deps = [
         ":subgraph_tester",
-        "//:node_type",
-        "//:subgraph_h",
+        "//src/subgraph",
+        "//src/subgraph:node_type",
     ],
 )
 
@@ -314,10 +314,10 @@ xnnpack_unit_test(
         "//:allocator",
         "//:buffer",
         "//:math",
-        "//:node_type",
         "//:params",
-        "//:subgraph_h",
         "//:xnnpack_h",
+        "//src/subgraph",
+        "//src/subgraph:node_type",
         "//test:replicable_random_device",
     ],
 )
@@ -328,7 +328,7 @@ xnnpack_unit_test(
     deps = [
         ":stencil",
         "//:buffer",
-        "//:operator_utils",
+        "//src/operators:operator_utils",
         "//test:replicable_random_device",
     ],
 )

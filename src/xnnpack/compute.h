@@ -14,7 +14,6 @@
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams.h"
-#include "src/xnnpack/operator-type.h"
 #include <pthreadpool.h>
 
 enum xnn_parallelization_type {
