@@ -6,7 +6,7 @@
 #include "src/xnnpack/subgraph.h"
 
 #include <assert.h>
-#include <inttypes.h>
+#include <inttypes.h>  // fixdeps: keep
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -202,10 +202,8 @@ void xnn_value_copy(struct xnn_value* dst_value,
   dst_value->id = value_id;
 }
 
-void xnn_runtime_value_copy(
-  struct xnn_runtime_value* dst_value,
-  const struct xnn_value* src_value)
-{
+void xnn_runtime_value_copy(struct xnn_runtime_value* dst_value,
+                            const struct xnn_value* src_value) {
   // Note: Value ID stays unchanged
 
   dst_value->type = src_value->type;
@@ -230,8 +228,7 @@ void xnn_runtime_value_copy(
   dst_value->gemm_config = src_value->gemm_config;
 }
 
-struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph)
-{
+struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph) {
   struct xnn_node* nodes = subgraph->nodes;
   const size_t size = subgraph->num_nodes;
   const size_t capacity = subgraph->num_reserved_nodes;
@@ -254,6 +251,7 @@ struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph)
   }
   subgraph->num_nodes = size + 1;
   struct xnn_node* new_node = nodes + size;
+  xnn_node_clear(new_node);
   new_node->id = size;
   return new_node;
 }
@@ -276,13 +274,13 @@ enum xnn_status xnn_subgraph_add_nodes(xnn_subgraph_t subgraph,
       return xnn_status_out_of_memory;
     }
 
-    memset(nodes + size, 0, (new_capacity - size) * sizeof(struct xnn_node));
     subgraph->num_reserved_nodes = new_capacity;
     subgraph->nodes = nodes;
   }
   subgraph->num_nodes = size + num_nodes;
   struct xnn_node* new_nodes = nodes + size;
   for (size_t i = 0; i < num_nodes; i++) {
+    xnn_node_clear(&new_nodes[i]);
     new_nodes[i].id = size + i;
   }
 
@@ -302,6 +300,10 @@ void xnn_subgraph_analyze_consumers_and_producers(xnn_subgraph_t subgraph) {
   // fields
   for (uint32_t n = 0; n < subgraph->num_nodes; n++) {
     struct xnn_node* node = &subgraph->nodes[n];
+
+    if (node->type == xnn_node_type_invalid) {
+      continue;
+    }
 
     for (uint32_t i = 0; i < node->num_inputs; i++) {
       const uint32_t input_id = node->inputs[i];
@@ -326,7 +328,9 @@ void xnn_subgraph_analyze_consumers_and_producers(xnn_subgraph_t subgraph) {
 
       // Persistent values can be produced by multiple nodes, e.g. copy nodes
       // writing to the same persistent value.
-      assert(xnn_value_is_persistent(subgraph->values[output_id].flags, subgraph->values[output_id].allocation_type) ||
+      assert(xnn_value_is_persistent(
+                 subgraph->values[output_id].flags,
+                 subgraph->values[output_id].allocation_type) ||
              subgraph->values[output_id].producer == XNN_INVALID_NODE_ID);
       subgraph->values[output_id].producer = n;
     }
@@ -1361,7 +1365,8 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
         // Only insert convert nodes if the value actually is an external input.
         // This value could be an external output, if that's the case, we have
         // already inserted a convert node in loop above for outputs.
-        if (xnn_value_is_external_input(subgraph->values[value->fp32_id].flags)) {
+        if (xnn_value_is_external_input(
+                subgraph->values[value->fp32_id].flags)) {
           xnn_log_debug("Inserted FP32->FP16 Convert Node from tensor #%" PRIu32
                         " to tensor #%" PRIu32,
                         value->fp32_id, value->id);
@@ -1472,9 +1477,9 @@ enum xnn_status xnn_subgraph_fusion(xnn_subgraph_t subgraph) {
       struct xnn_node* consumer = &subgraph->nodes[consumer_id];
       if (consumer->type == xnn_node_type_invalid) {
         xnn_log_fatal(
-            "Node %u has no consumers. Should an external output have been "
-            "set?",
-            consumer_id);
+            "Node %u (produced by %s node %u) has no consumers. Should an "
+            "external output have been set?",
+            consumer_id, xnn_node_type_to_string(producer->type), producer_id);
         return xnn_status_invalid_state;
       }
 
@@ -1598,8 +1603,8 @@ enum xnn_status xnn_subgraph_fusion(xnn_subgraph_t subgraph) {
       // value is internal. E.g. ---> (N1) --- value ---> (Copy) ---> v1 If
       // value is persistent or external, fusing copy upstream into N1 will skip
       // the write to value, N1 will write to v1 instead, which is wrong.
-      if (consumer->type == xnn_node_type_copy && xnn_value_is_valid(value->type) &&
-          xnn_value_is_internal(value) &&
+      if (consumer->type == xnn_node_type_copy &&
+          xnn_value_is_valid(value->type) && xnn_value_is_internal(value) &&
           can_reorder_use(subgraph, consumer->outputs[0], producer_id,
                           consumer_id)) {
         xnn_log_info("value %d fuse Copy Node #%" PRIu32
@@ -1620,8 +1625,8 @@ enum xnn_status xnn_subgraph_fusion(xnn_subgraph_t subgraph) {
       // E.g. --- v1 ---> (copy) --- value ---> (n2)
       // If value is external or persistent, we cannot simply remove the copy,
       // since we need to write to value.
-      if (producer->type == xnn_node_type_copy && xnn_value_is_valid(value->type) &&
-          xnn_value_is_internal(value) &&
+      if (producer->type == xnn_node_type_copy &&
+          xnn_value_is_valid(value->type) && xnn_value_is_internal(value) &&
           can_reorder_use(subgraph, producer->inputs[0], producer_id,
                           consumer_id)) {
         // We need to check that value is valid here because value could have
@@ -1693,7 +1698,8 @@ static uint32_t is_pure_unary_elementwise(xnn_subgraph_t subgraph,
       const struct xnn_value* input_0 = &subgraph->values[node->inputs[0]];
       const struct xnn_value* input_1 = &subgraph->values[node->inputs[1]];
       assert(node->num_inputs == 2);
-      if (is_broadcasted_static(input_0) && !xnn_value_is_static(input_1->allocation_type)) {
+      if (is_broadcasted_static(input_0) &&
+          !xnn_value_is_static(input_1->allocation_type)) {
         return node->inputs[1];
       } else if (is_broadcasted_static(input_1) &&
                  !xnn_value_is_static(input_0->allocation_type)) {
@@ -1930,6 +1936,9 @@ void xnn_subgraph_fuse_unary_quantized_into_lut(xnn_subgraph_t subgraph) {
       value_map[i] = XNN_INVALID_VALUE_ID;
     }
     struct xnn_node unary_nodes[XNN_MAX_UNARY_FUSION_NODES];
+    for (size_t i = 0; i < XNN_MAX_UNARY_FUSION_NODES; i++) {
+      unary_nodes[i].id = i;
+    }
     unary_subgraph.values = &unary_values[0];
     unary_subgraph.num_reserved_values = XNN_MAX_UNARY_FUSION_VALUES;
     unary_subgraph.nodes = &unary_nodes[0];
@@ -2204,18 +2213,19 @@ void xnn_subgraph_optimize_dynamic_quantization_ops(xnn_subgraph_t subgraph) {
   }
 }
 
-enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
-                                      uint32_t optimization_flags) {
+void xnn_subgraph_clean_up(xnn_subgraph_t subgraph) {
+  // Count the number of consumers for each value.
   xnn_subgraph_analyze_consumers_and_producers(subgraph);
 
-  // Remove unreferenced values.
+  // Clear unreferenced values.
   for (uint32_t i = 0; i < subgraph->num_values; i++) {
     struct xnn_value* value = &subgraph->values[i];
     if (value->type == xnn_value_type_invalid) {
       continue;
     }
 
-    if (!xnn_value_is_external_input(value->flags) && value->num_consumers == 0 &&
+    if (!xnn_value_is_external_input(value->flags) &&
+        value->num_consumers == 0 &&
         !xnn_value_is_persistent(value->flags, value->allocation_type)) {
       if (value->producer != XNN_INVALID_NODE_ID) {
         struct xnn_node* producer = &subgraph->nodes[value->producer];
@@ -2226,6 +2236,85 @@ enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
       xnn_value_clear(value);
     }
   }
+
+  // Compact the nodes and sort them hierarchically (stably), if needed. The
+  // temporary memory needed for `nodes_map` and `values_ready` is allocated as
+  // a single block to reduce overheads.
+  uint32_t* nodes_map =
+      xnn_allocate_memory(sizeof(uint32_t) * subgraph->num_nodes +
+                          sizeof(bool) * subgraph->num_values);
+  bool* values_ready = (bool*)&nodes_map[subgraph->num_nodes];
+  for (uint32_t i = 0; i < subgraph->num_values; i++) {
+    struct xnn_value* value = &subgraph->values[i];
+    values_ready[i] =
+        value->producer == XNN_INVALID_NODE_ID ||
+        xnn_value_is_external_input(value->flags) ||
+        xnn_value_is_persistent(value->flags, value->allocation_type);
+  }
+  uint32_t left = 0;
+  uint32_t num_invalid_nodes = 0;
+  bool changes = false;
+  while (left + num_invalid_nodes < subgraph->num_nodes) {
+    for (uint32_t i = left; i < subgraph->num_nodes; i++) {
+      struct xnn_node* node = &subgraph->nodes[i];
+
+      // Skip over invalid nodes.
+      if (node->type == xnn_node_type_invalid) {
+        num_invalid_nodes++;
+        continue;
+      }
+
+      // Check whether all inputs to this node have been produced.
+      bool all_values_avail = true;
+      for (uint32_t j = 0; all_values_avail && j < node->num_inputs; j++) {
+        all_values_avail = values_ready[node->inputs[j]];
+      }
+
+      // If so, bubble this node down to the left end of the list of nodes.
+      if (all_values_avail) {
+        nodes_map[node->id] = left;
+        node->id = left;
+        for (uint32_t j = 0; j < node->num_outputs; j++) {
+          values_ready[node->outputs[j]] = true;
+        }
+        if (left < i) {
+          changes = true;
+          struct xnn_node tmp_node = *node;
+          if (subgraph->nodes[left].type == xnn_node_type_invalid) {
+            node->type = xnn_node_type_invalid;
+          } else {
+            memcpy(&subgraph->nodes[left + 1], &subgraph->nodes[left],
+                   (i - left) * sizeof(struct xnn_node));
+          }
+          subgraph->nodes[left] = tmp_node;
+        }
+        left++;
+      }
+    }
+  }
+
+  // Update the node IDs in the subgraph values if they have changed.
+  if (changes) {
+    for (uint32_t i = 0; i < subgraph->num_values; i++) {
+      struct xnn_value* value = &subgraph->values[i];
+      if (value->producer != XNN_INVALID_NODE_ID) {
+        value->producer = nodes_map[value->producer];
+      }
+      if (value->first_consumer != XNN_INVALID_NODE_ID) {
+        value->first_consumer = nodes_map[value->first_consumer];
+      }
+    }
+    subgraph->num_nodes = left;
+  }
+
+  // Release temporarily allocated memory.
+  xnn_release_memory(nodes_map);
+}
+
+enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
+                                      uint32_t optimization_flags) {
+  // Start with a clean and ordered subgraph.
+  xnn_subgraph_clean_up(subgraph);
 
   if (!(optimization_flags & XNN_FLAG_NO_OPERATOR_FUSION)) {
     xnn_subgraph_fusion(subgraph);
