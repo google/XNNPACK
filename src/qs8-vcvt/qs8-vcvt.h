@@ -62,6 +62,12 @@ XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_arm_v6, xnn_qs8_vcvt_ukernel__armsimd32_u4,
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_arm_v6, xnn_qs8_vcvt_ukernel__armsimd32_u8, 8, false, XNN_QUANTIZED(int8_t), XNN_QUANTIZED(int8_t), struct xnn_qs8_cvt_params, xnn_init_qs8_cvt_scalar_params)
 #endif  // XNN_ARCH_ARM
 
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_qs8_vcvt_ukernel__rvv_u1v, 1, true, int8_t, int8_t, struct xnn_qs8_cvt_params, xnn_init_qs8_cvt_scalar_params)
+XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_qs8_vcvt_ukernel__rvv_u2v, 2, true, int8_t, int8_t, struct xnn_qs8_cvt_params, xnn_init_qs8_cvt_scalar_params)
+XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_qs8_vcvt_ukernel__rvv_u4v, 4, true, int8_t, int8_t, struct xnn_qs8_cvt_params, xnn_init_qs8_cvt_scalar_params)
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+
 XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_qs8_vcvt_ukernel__scalar_u1, 1, false, XNN_QUANTIZED(int8_t), XNN_QUANTIZED(int8_t), struct xnn_qs8_cvt_params, xnn_init_qs8_cvt_scalar_params)
 XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_qs8_vcvt_ukernel__scalar_u2, 2, false, XNN_QUANTIZED(int8_t), XNN_QUANTIZED(int8_t), struct xnn_qs8_cvt_params, xnn_init_qs8_cvt_scalar_params)
 XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_qs8_vcvt_ukernel__scalar_u4, 4, false, XNN_QUANTIZED(int8_t), XNN_QUANTIZED(int8_t), struct xnn_qs8_cvt_params, xnn_init_qs8_cvt_scalar_params)
