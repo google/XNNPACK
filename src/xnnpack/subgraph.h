@@ -445,8 +445,6 @@ struct xnn_operator_data {
   xnn_operator_t operator_objects[XNN_MAX_OPERATOR_OBJECTS];
   xnn_reshape_operator_fn reshape;
   xnn_setup_operator_fn setup;
-  size_t batch_size;
-  struct xnn_shape shape1;
   union {
     // Used for reduction.
     struct {
@@ -472,6 +470,7 @@ struct xnn_operator_data {
       uint32_t adjustment_height;
       uint32_t adjustment_width;
     };
+    struct xnn_shape shape1;
   };
   // Used for concatenate and static split dims.
   int32_t axis;
@@ -479,7 +478,7 @@ struct xnn_operator_data {
   uint32_t inputs[XNN_MAX_INPUTS];
   uint32_t num_outputs;
   uint32_t outputs[XNN_MAX_OUTPUTS];
-  xnn_timestamp end_ts[XNN_MAX_OPERATOR_OBJECTS];
+  xnn_timestamp *end_ts;
   void* workspace;
   size_t workspace_size;
   size_t workspace_alignment;

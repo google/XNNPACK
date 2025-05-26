@@ -68,25 +68,26 @@ static enum xnn_status reshape_concatenate_operator_helper(
   size_t channels,
   size_t input_stride,
   size_t output_stride,
+  size_t batch_size,
   pthreadpool_t threadpool)
 {
   switch (opdata->operator_objects[index]->type) {
     case xnn_operator_type_copy_nc_x16:
       return xnn_reshape_copy_nc_x16(
         opdata->operator_objects[index],
-        opdata->batch_size,
+        batch_size,
         channels, input_stride, output_stride,
         threadpool);
     case xnn_operator_type_copy_nc_x32:
       return xnn_reshape_copy_nc_x32(
         opdata->operator_objects[index],
-        opdata->batch_size,
+        batch_size,
         channels, input_stride, output_stride,
         threadpool);
     case xnn_operator_type_copy_nc_x8:
       return xnn_reshape_copy_nc_x8(
         opdata->operator_objects[index],
-        opdata->batch_size,
+        batch_size,
         channels, input_stride, output_stride,
         threadpool);
     default:
@@ -151,10 +152,10 @@ static enum xnn_status reshape_concatenate_operator(
     concatenated_elements += values[input_id[i]].shape.dim[axis];
   }
   output_value->shape.dim[axis] = concatenated_elements;
-  opdata->batch_size = xnn_shape_multiply_leading_dims(&output_value->shape, axis);
+  size_t batch_size = xnn_shape_multiply_leading_dims(&output_value->shape, axis);
   const size_t old_workspace_size = opdata->workspace_size;
   for (size_t i = 0; i < num_inputs; ++i) {
-    status = reshape_concatenate_operator_helper(opdata, i, input_channels[i], input_channels[i], output_stride, threadpool);
+    status = reshape_concatenate_operator_helper(opdata, i, input_channels[i], input_channels[i], output_stride, batch_size, threadpool);
     if (status != xnn_status_success) {
       return status;
     }

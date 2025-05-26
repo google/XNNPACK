@@ -84,6 +84,7 @@ static enum xnn_status reshape_even_split_operator_helper(
   size_t output_index,
   size_t num_splits,
   int32_t axis,
+  size_t batch_size,
   pthreadpool_t threadpool)
 {
   const uint32_t input_id = opdata->inputs[0];
@@ -104,13 +105,13 @@ static enum xnn_status reshape_even_split_operator_helper(
   switch (opdata->operator_objects[operator_index]->type) {
     case xnn_operator_type_copy_nc_x16:
       return xnn_reshape_copy_nc_x16(
-        opdata->operator_objects[operator_index], opdata->batch_size, channels, input_stride, output_stride, threadpool);
+        opdata->operator_objects[operator_index], batch_size, channels, input_stride, output_stride, threadpool);
     case xnn_operator_type_copy_nc_x32:
       return xnn_reshape_copy_nc_x32(
-        opdata->operator_objects[operator_index], opdata->batch_size, channels, input_stride, output_stride, threadpool);
+        opdata->operator_objects[operator_index], batch_size, channels, input_stride, output_stride, threadpool);
     case xnn_operator_type_copy_nc_x8:
       return xnn_reshape_copy_nc_x8(
-        opdata->operator_objects[operator_index], opdata->batch_size, channels, input_stride, output_stride, threadpool);
+        opdata->operator_objects[operator_index], batch_size, channels, input_stride, output_stride, threadpool);
     default:
       XNN_UNREACHABLE;
   }
@@ -142,7 +143,7 @@ static enum xnn_status reshape_even_split_operator(
       input_id, axis, input_value->shape.num_dims);
     return xnn_status_invalid_parameter;
   }
-  opdata->batch_size = xnn_shape_multiply_leading_dims(&input_value->shape, axis);
+  size_t batch_size = xnn_shape_multiply_leading_dims(&input_value->shape, axis);
 
   size_t num_splits = opdata->num_outputs;
   const size_t axis_elements = input_value->shape.dim[axis] / num_splits;
@@ -152,7 +153,7 @@ static enum xnn_status reshape_even_split_operator(
   for (size_t i = 0; i < num_splits; ++i) {
     const uint32_t output_id = opdata->outputs[i];
     if (values[output_id].type == xnn_value_type_invalid)  continue;
-    status = reshape_even_split_operator_helper(values, num_values, opdata, operator_index, i, num_splits, axis, threadpool);
+    status = reshape_even_split_operator_helper(values, num_values, opdata, operator_index, i, num_splits, axis, batch_size, threadpool);
     ++operator_index;
     if (status != xnn_status_success) {
       return status;

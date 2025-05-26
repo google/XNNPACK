@@ -560,6 +560,10 @@ enum xnn_status xnn_create_runtime_v4(
       sizeof(struct xnn_operator_data) * (size_t) subgraph->num_nodes);
     goto error;
   }
+  if (flags & XNN_FLAG_BASIC_PROFILING) {
+    runtime->profiling = true;
+  }
+
   runtime->num_ops = subgraph->num_nodes;
 
   if (flags & XNN_FLAG_YIELD_WORKERS) {
@@ -587,6 +591,11 @@ enum xnn_status xnn_create_runtime_v4(
         default:
           break;
       }
+    }
+  }
+  if (runtime->profiling) {
+    for (size_t i = 0; i < subgraph->num_nodes; i++) {
+      runtime->opdata[i].end_ts = xnn_allocate_zero_memory(sizeof(size_t) * XNN_MAX_OPERATOR_OBJECTS);
     }
   }
 
@@ -670,10 +679,6 @@ enum xnn_status xnn_create_runtime_v4(
   runtime->workspace = workspace;
   runtime->next_workspace_user = runtime->workspace->first_user;
   runtime->workspace->first_user = runtime;
-
-  if (flags & XNN_FLAG_BASIC_PROFILING) {
-    runtime->profiling = true;
-  }
 
   *runtime_out = runtime;
   return xnn_status_success;
@@ -1081,6 +1086,7 @@ enum xnn_status xnn_delete_runtime(
         for (size_t j = 0; j < XNN_MAX_OPERATOR_OBJECTS; j++) {
           xnn_delete_operator(runtime->opdata[i].operator_objects[j]);
         }
+        xnn_release_memory(runtime->opdata[i].end_ts);
       }
       xnn_release_memory(runtime->opdata);
 
