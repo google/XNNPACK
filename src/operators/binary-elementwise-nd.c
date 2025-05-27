@@ -207,7 +207,7 @@ static enum xnn_status init_binary_elementwise_nd(
   }
 
   memcpy(&op->params, &uparams, sizeof(uparams));
-  memcpy(&op->params2, &uparams2, sizeof(uparams2));
+  memcpy(op->params2, &uparams2, sizeof(uparams2));
 
   op->binary_elementwise_config = config;
   op->binary_elementwise.log2_element_size =
@@ -250,6 +250,13 @@ enum xnn_status xnn_create_binary_elementwise_nd(
     return xnn_status_out_of_memory;
   }
   op->num_compute_invocations = 1;
+  op->params2 = xnn_allocate_zero_memory(sizeof(union xnn_params2));
+  if (op->params2 == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(union xnn_params2),
+                  xnn_binary_operator_to_string(type));
+    return xnn_status_out_of_memory;
+  }
 
   enum xnn_status status =
       init_binary_elementwise_nd(op, type, datatype, a_quantization,
@@ -385,8 +392,8 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
         op->binary_elementwise_config->ropc_ukernel;
     compressed_a_shape = compressed_input2_shape;
     compressed_b_shape = compressed_input1_shape;
-    memcpy(&op->context.elementwise_binary.params, &op->params2.binary,
-           sizeof(op->params.binary));
+    memcpy(&op->context.elementwise_binary.params, op->params2,
+           sizeof(op->params2->binary));
   } else if (compressed_input2_shape[0] == 1) {
     op->context.elementwise_binary.ukernel =
         op->binary_elementwise_config->opc_ukernel;
@@ -539,11 +546,15 @@ enum xnn_status xnn_run_binary_elementwise_nd(
     return xnn_status_out_of_memory;
   }
   op.num_compute_invocations = 1;
+  union xnn_params2 params2;
+  memset(&params2, 0, sizeof(params2));
+  op.params2 = &params2;
 
   enum xnn_status status = init_binary_elementwise_nd(
       &op, type, datatype, input1_quantization, input2_quantization,
       output_quantization, flags);
   if (status != xnn_status_success) {
+    op.params2 = NULL;
     xnn_destroy_operator(&op);
     return status;
   }
@@ -552,17 +563,20 @@ enum xnn_status xnn_run_binary_elementwise_nd(
                                              num_input2_dims, input2_shape,
                                              threadpool);
   if (status != xnn_status_success) {
+    op.params2 = NULL;
     xnn_destroy_operator(&op);
     return status;
   }
 
   status = xnn_setup_binary_elementwise_nd(&op, input1, input2, output);
   if (status != xnn_status_success) {
+    op.params2 = NULL;
     xnn_destroy_operator(&op);
     return status;
   }
 
   status = xnn_run_operator(&op, threadpool);
+  op.params2 = NULL;
   xnn_destroy_operator(&op);
   return status;
 }

@@ -69,6 +69,13 @@ static enum xnn_status create_dynamic_fully_connected_nc(
     goto error;
   }
   dynamic_fully_connected_op->num_compute_invocations = num_compute_invocations;
+  dynamic_fully_connected_op->params2 = xnn_allocate_zero_memory(sizeof(union xnn_params2));
+  if (dynamic_fully_connected_op->params2 == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(union xnn_params2),
+                  xnn_operator_type_to_string(operator_type));
+    return xnn_status_out_of_memory;
+  }
 
   dynamic_fully_connected_op->ukernel.gemm_ukernels = xnn_allocate_zero_simd_memory(sizeof(struct gemm_types));
   if (dynamic_fully_connected_op->ukernel.gemm_ukernels == NULL) {
@@ -88,7 +95,7 @@ static enum xnn_status create_dynamic_fully_connected_nc(
 
 
   memcpy(&dynamic_fully_connected_op->params, params, params_size);
-  memcpy(&dynamic_fully_connected_op->params2, params2, params2_size);
+  memcpy(dynamic_fully_connected_op->params2, params2, params2_size);
   dynamic_fully_connected_op->type = operator_type;
   dynamic_fully_connected_op->flags = flags;
 
@@ -663,8 +670,8 @@ enum xnn_status xnn_reshape_dynamic_fully_connected_nc_f32(
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &dynamic_fully_connected_op->params.f32_minmax,
     sizeof(dynamic_fully_connected_op->params.f32_minmax),
-    &dynamic_fully_connected_op->params2.f32_minmax,
-    sizeof(dynamic_fully_connected_op->params2.f32_minmax),
+    &dynamic_fully_connected_op->params2->f32_minmax,
+    sizeof(dynamic_fully_connected_op->params2->f32_minmax),
     threadpool);
 }
 
@@ -688,8 +695,8 @@ enum xnn_status xnn_reshape_dynamic_fully_connected_nc_pf32(
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &dynamic_fully_connected_op->params.f32_minmax,
     sizeof(dynamic_fully_connected_op->params.f32_minmax),
-    &dynamic_fully_connected_op->params2.f32_minmax,
-    sizeof(dynamic_fully_connected_op->params2.f32_minmax),
+    &dynamic_fully_connected_op->params2->f32_minmax,
+    sizeof(dynamic_fully_connected_op->params2->f32_minmax),
     threadpool);
 }
 

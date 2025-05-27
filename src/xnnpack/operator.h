@@ -188,6 +188,16 @@ struct xnn_convolution_operator {
   struct subconvolution_params* subconvolution_buffer;
 };
 
+union xnn_params2 {
+  union xnn_binary_uparams binary;
+  union xnn_unary_uparams unary;
+  struct xnn_f16_default_params f16_default;
+  struct xnn_f32_minmax_params f32_minmax;
+  struct xnn_f32_default_params f32_default;
+  struct xnn_s8_minmax_params s8_minmax;
+  struct xnn_u8_minmax_params u8_minmax;
+};
+
 struct xnn_operator {
   size_t batch_size;
   size_t channels;
@@ -277,15 +287,7 @@ struct xnn_operator {
   // also use this to store parameters to binary operators. For most such
   // operators, this is a copy of params, but params need to be swapped for
   // commutative ops with per-operand params.
-  union {
-    union xnn_binary_uparams binary;
-    union xnn_unary_uparams unary;
-    struct xnn_f16_default_params f16_default;
-    struct xnn_f32_minmax_params f32_minmax;
-    struct xnn_f32_default_params f32_default;
-    struct xnn_s8_minmax_params s8_minmax;
-    struct xnn_u8_minmax_params u8_minmax;
-  } params2;
+  union xnn_params2 *params2;
   enum xnn_operator_type type;
   struct xnn_ukernel ukernel;
 

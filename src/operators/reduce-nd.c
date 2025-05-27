@@ -77,6 +77,13 @@ static enum xnn_status create_reduce_nd(
     goto error;
   }
   reduce_op->num_compute_invocations = 1;
+  reduce_op->params2 = xnn_allocate_zero_memory(sizeof(union xnn_params2));
+  if (reduce_op->params2 == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(union xnn_params2),
+                  xnn_operator_type_to_string(operator_type));
+    return xnn_status_out_of_memory;
+  }
 
   reduce_op->type = operator_type;
   reduce_op->flags = flags;
@@ -92,7 +99,7 @@ static enum xnn_status create_reduce_nd(
     memcpy(&reduce_op->params, params, params_size);
   }
   if (cvt_params_size != 0) {
-    memcpy(&reduce_op->params2, cvt_params, cvt_params_size);
+    memcpy(reduce_op->params2, cvt_params, cvt_params_size);
   }
 
   reduce_op->state = xnn_run_state_invalid;
@@ -318,7 +325,7 @@ static enum xnn_status reshape_reduce_nd(
     }
   }
   memcpy(&reduce_op->dynamic_context.reduce->params, &reduce_op->params.reduce, sizeof(reduce_op->params.reduce));
-  memcpy(&reduce_op->dynamic_context.reduce->cvt_params, &reduce_op->params2.unary, sizeof(reduce_op->params2.unary));
+  memcpy(&reduce_op->dynamic_context.reduce->cvt_params, &reduce_op->params2->unary, sizeof(reduce_op->params2->unary));
   reduce_op->dynamic_context.reduce->input_stride[XNN_MAX_TENSOR_DIMS - 1] = (1 << log2_data_element_size);
   if (reduce_op->cvt_config) {
     reduce_op->dynamic_context.reduce->cvt_ukernel = reduce_op->cvt_config->ukernel;
