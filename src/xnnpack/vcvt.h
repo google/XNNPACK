@@ -15,7 +15,7 @@
 extern "C" {
 #endif
 
-#define XNN_CVT_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile,          \
+#define XNN_UKERNEL(arch_flags, ukernel, batch_tile,          \
                                     vector_tile, type_in, type_out,           \
                                     params_type, init_params)                 \
   XNN_INTERNAL void ukernel(size_t n, const type_in* input, type_out* output, \
@@ -31,7 +31,7 @@ extern "C" {
 #include "src/qs8-vcvt/qs8-vcvt.h"
 #include "src/qu8-f32-vcvt/qu8-f32-vcvt.h"
 #include "src/qu8-vcvt/qu8-vcvt.h"
-#undef XNN_CVT_UKERNEL_WITH_PARAMS
+#undef XNN_UKERNEL
 
 #ifdef __cplusplus
 }  // extern "C"

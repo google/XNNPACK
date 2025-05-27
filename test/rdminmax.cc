@@ -157,7 +157,7 @@ struct KernelInfo {
 
 KernelInfo kernels[] = {
 #define XNN_UKERNEL(arch_flags, ukernel, row_tile, channel_tile, vector_tile, \
-                    datatype_in, datatype_out)                                \
+                    datatype_in, datatype_out, params_type, init_params)      \
   {#ukernel, arch_flags,   Kernel{ukernel}, OpType::Max,                      \
    row_tile, channel_tile, vector_tile,     sizeof(datatype_in)},
 #include "src/f16-rdminmax/f16-rdmax.h"
@@ -167,7 +167,7 @@ KernelInfo kernels[] = {
 #undef XNN_UKERNEL
 
 #define XNN_UKERNEL(arch_flags, ukernel, row_tile, channel_tile, vector_tile, \
-                    datatype_in, datatype_out)                                \
+                    datatype_in, datatype_out, params_type, init_params)      \
   {#ukernel, arch_flags,   Kernel{ukernel}, OpType::Min,                      \
    row_tile, channel_tile, vector_tile,     sizeof(datatype_in)},
 #include "src/f16-rdminmax/f16-rdmin.h"

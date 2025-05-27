@@ -66,13 +66,9 @@ DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__wasmsimd_u32)
 DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__wasmsimd_u48)
 DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__wasmsimd_u64)
 
-
-#define XNN_UKERNEL(arch_flags, fn_name, datatype) \
-  XNN_INTERNAL void fn_name(                       \
-      size_t n,                                    \
-      const uint8_t* x,                            \
-      const uint32_t* t,                           \
-      uint8_t* y);
+#define XNN_UKERNEL(arch_flags, fn_name, datatype, params_type, init_params) \
+  XNN_INTERNAL void fn_name(size_t n, const uint8_t* x, const uint32_t* t,   \
+                            uint8_t* y);
 #include "src/u8-lut32norm/u8-lut32norm.h"
 #undef XNN_UKERNEL
 

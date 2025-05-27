@@ -27,33 +27,21 @@
 //  
 // SPDX-License-Identifier: BSD-3-Clause
 
-#ifndef XNN_UKERNEL_WITH_PARAMS
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, datatype, params_type, init_params) \
-    XNN_UKERNEL(arch_flags, ukernel, batch_tile, vector_tile, datatype)
-#define XNN_DEFINED_UKERNEL_WITH_PARAMS
-#endif
-
-#ifndef XNN_UKERNEL
-#define XNN_UKERNEL(arch_flags, ukernel, batch_tile, vector_tile, datatype) \
-    XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, datatype, void, /*init_params=*/nullptr)
-#define XNN_DEFINED_UKERNEL
-#endif
-
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_qs8_vrpreluc_ukernel__avx2_u16, 16, false, int8_t, union xnn_qs8_vprelu_scalar_params, xnn_init_qs8_vprelu_scalar_params) 
+XNN_UKERNEL(xnn_arch_x86_avx2, xnn_qs8_vrpreluc_ukernel__avx2_u16, 16, false,
+            int8_t, union xnn_qs8_vprelu_scalar_params,
+            xnn_init_qs8_vprelu_scalar_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-XNN_UKERNEL_WITH_PARAMS(0, xnn_qs8_vrpreluc_ukernel__scalar_u1, 1, false, int8_t, union xnn_qs8_vprelu_scalar_params, xnn_init_qs8_vprelu_scalar_params) 
-XNN_UKERNEL_WITH_PARAMS(0, xnn_qs8_vrpreluc_ukernel__scalar_u2, 2, false, int8_t, union xnn_qs8_vprelu_scalar_params, xnn_init_qs8_vprelu_scalar_params) 
-XNN_UKERNEL_WITH_PARAMS(0, xnn_qs8_vrpreluc_ukernel__scalar_u4, 4, false, int8_t, union xnn_qs8_vprelu_scalar_params, xnn_init_qs8_vprelu_scalar_params) 
-XNN_UKERNEL_WITH_PARAMS(0, xnn_qs8_vrpreluc_ukernel__scalar_u8, 8, false, int8_t, union xnn_qs8_vprelu_scalar_params, xnn_init_qs8_vprelu_scalar_params) 
-
-#ifdef XNN_DEFINED_UKERNEL_WITH_PARAMS
-#undef XNN_DEFINED_UKERNEL_WITH_PARAMS
-#undef XNN_UKERNEL_WITH_PARAMS
-#endif
-
-#ifdef XNN_DEFINED_UKERNEL
-#undef XNN_DEFINED_UKERNEL
-#undef XNN_UKERNEL
-#endif
+XNN_UKERNEL(0, xnn_qs8_vrpreluc_ukernel__scalar_u1, 1, false, int8_t,
+            union xnn_qs8_vprelu_scalar_params,
+            xnn_init_qs8_vprelu_scalar_params)
+XNN_UKERNEL(0, xnn_qs8_vrpreluc_ukernel__scalar_u2, 2, false, int8_t,
+            union xnn_qs8_vprelu_scalar_params,
+            xnn_init_qs8_vprelu_scalar_params)
+XNN_UKERNEL(0, xnn_qs8_vrpreluc_ukernel__scalar_u4, 4, false, int8_t,
+            union xnn_qs8_vprelu_scalar_params,
+            xnn_init_qs8_vprelu_scalar_params)
+XNN_UKERNEL(0, xnn_qs8_vrpreluc_ukernel__scalar_u8, 8, false, int8_t,
+            union xnn_qs8_vprelu_scalar_params,
+            xnn_init_qs8_vprelu_scalar_params)

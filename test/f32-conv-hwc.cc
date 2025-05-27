@@ -37,7 +37,7 @@ std::string GetTestName(const testing::TestParamInfo<XnnTest::ParamType>& info) 
   return info.param.name;
 }
 
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, kernel_size, subsampling, padding_right, padding_left, input_channels, output_channels_tile, input_widths, datatype, params_type, init_params) \
+#define XNN_UKERNEL(arch_flags, ukernel, kernel_size, subsampling, padding_right, padding_left, input_channels, output_channels_tile, input_widths, datatype, params_type, init_params) \
 { #ukernel, ConvHWCMicrokernelTester::Kernel{ukernel, init_params}, arch_flags, kernel_size, subsampling, padding_right, padding_left, input_channels, output_channels_tile, input_widths },
 const XnnTestParam xnn_test_params[] = {
 #include "src/f32-conv-hwc/f32-conv-hwc.h"

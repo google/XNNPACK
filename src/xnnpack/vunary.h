@@ -31,24 +31,24 @@ extern "C" {
       size_t n, const float* x, float* y,                  \
       const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-#define XNN_UKERNEL(arch_flags, fn_name, batch_tile, vector_tile, datatype) \
+#define XNN_UKERNEL(arch_flags, fn_name, batch_tile, vector_tile, datatype, \
+                    params_type, init_params)                               \
   XNN_INTERNAL void fn_name(size_t n, const int8_t* x, int8_t* y,           \
                             const struct xnn_s8_minmax_params               \
                                 params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 #include "src/s8-vclamp/s8-vclamp.h"
 #undef XNN_UKERNEL
 
-#define XNN_UKERNEL(arch_flags, fn_name, batch_tile, vector_tile, datatype) \
+#define XNN_UKERNEL(arch_flags, fn_name, batch_tile, vector_tile, datatype, \
+                    params_type, init_params)                               \
   XNN_INTERNAL void fn_name(size_t n, const uint8_t* x, uint8_t* y,         \
                             const struct xnn_u8_minmax_params               \
                                 params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 #include "src/u8-vclamp/u8-vclamp.h"
 #undef XNN_UKERNEL
 
-#define XNN_UKERNEL(arch_flags, fn_name, batch_tile, vector_tile, datatype) \
-  DECLARE_F16_UKERNEL_FUNCTION(fn_name, xnn_f16_default_params);
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, fn_name, batch_tile, vector_tile, \
-                                datatype, params_type, init_params)           \
+#define XNN_UKERNEL(arch_flags, fn_name, batch_tile, vector_tile, datatype, \
+                    params_type, init_params)                               \
   DECLARE_F16_UKERNEL_FUNCTION(fn_name, params_type);
 #include "src/f16-vabs/f16-vabs.h"
 #include "src/f16-vapproxgelu/f16-vapproxgelu.h"
@@ -71,12 +71,10 @@ extern "C" {
 #include "src/f16-vsqrt/f16-vsqrt.h"
 #include "src/f16-vtanh/f16-vtanh.h"
 #undef XNN_UKERNEL
-#undef XNN_UKERNEL_WITH_PARAMS
+#undef XNN_UKERNEL
 
-#define XNN_UKERNEL(arch_flags, fn_name, batch_tile, vector_tile, datatype) \
-  DECLARE_F32_UKERNEL_FUNCTION(fn_name, xnn_f32_default_params);
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, fn_name, batch_tile, vector_tile, \
-                                datatype, params_type, init_params)           \
+#define XNN_UKERNEL(arch_flags, fn_name, batch_tile, vector_tile, datatype, \
+                    params_type, init_params)                               \
   DECLARE_F32_UKERNEL_FUNCTION(fn_name, params_type);
 #include "src/f32-vabs/f32-vabs.h"
 #include "src/f32-vapproxgelu/f32-vapproxgelu.h"
@@ -101,23 +99,23 @@ extern "C" {
 #include "src/f32-vsqrt/f32-vsqrt.h"
 #include "src/f32-vtanh/f32-vtanh.h"
 #undef XNN_UKERNEL
-#undef XNN_UKERNEL_WITH_PARAMS
+#undef XNN_UKERNEL
 
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, fn_name, batch_tile, vector_tile, \
-                                datatype, params_type, init_params)           \
-  XNN_INTERNAL void fn_name(                                                  \
-      size_t n, const int8_t* input, int8_t* output,                          \
+#define XNN_UKERNEL(arch_flags, fn_name, batch_tile, vector_tile, datatype, \
+                    params_type, init_params)                               \
+  XNN_INTERNAL void fn_name(                                                \
+      size_t n, const int8_t* input, int8_t* output,                        \
       const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 #include "src/qs8-vlrelu/qs8-vlrelu.h"
-#undef XNN_UKERNEL_WITH_PARAMS
+#undef XNN_UKERNEL
 
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, fn_name, batch_tile, vector_tile, \
-                                datatype, params_type, init_params)           \
-  XNN_INTERNAL void fn_name(                                                  \
-      size_t n, const uint8_t* input, uint8_t* output,                        \
+#define XNN_UKERNEL(arch_flags, fn_name, batch_tile, vector_tile, datatype, \
+                    params_type, init_params)                               \
+  XNN_INTERNAL void fn_name(                                                \
+      size_t n, const uint8_t* input, uint8_t* output,                      \
       const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 #include "src/qu8-vlrelu/qu8-vlrelu.h"
-#undef XNN_UKERNEL_WITH_PARAMS
+#undef XNN_UKERNEL
 
 #define DECLARE_XX_VUNARY_UKERNEL_FUNCTION(fn_name)           \
   XNN_INTERNAL void fn_name(size_t n, const void* x, void* y, \

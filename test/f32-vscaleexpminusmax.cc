@@ -147,17 +147,17 @@ class VScaleExpMinusMaxMicrokernelTester {
     }                                                                       \
   }
 
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, element_tile, datatype, \
-                                params_type, init_params)                    \
-  XNN_TEST_VSCALEEXPMINUSMAX_ELEMENT_EQ(ukernel, arch_flags, element_tile,   \
-                                        init_params);                        \
-  XNN_TEST_VSCALEEXPMINUSMAX_ELEMENT_DIV(ukernel, arch_flags, element_tile,  \
-                                         init_params);                       \
-  XNN_TEST_VSCALEEXPMINUSMAX_ELEMENT_LT(ukernel, arch_flags, element_tile,   \
-                                        init_params);                        \
-  XNN_TEST_VSCALEEXPMINUSMAX_ELEMENT_GT(ukernel, arch_flags, element_tile,   \
-                                        init_params);                        \
-  XNN_TEST_VSCALEEXPMINUSMAX_SCALE(ukernel, arch_flags, element_tile,        \
+#define XNN_UKERNEL(arch_flags, ukernel, element_tile, datatype, params_type, \
+                    init_params)                                              \
+  XNN_TEST_VSCALEEXPMINUSMAX_ELEMENT_EQ(ukernel, arch_flags, element_tile,    \
+                                        init_params);                         \
+  XNN_TEST_VSCALEEXPMINUSMAX_ELEMENT_DIV(ukernel, arch_flags, element_tile,   \
+                                         init_params);                        \
+  XNN_TEST_VSCALEEXPMINUSMAX_ELEMENT_LT(ukernel, arch_flags, element_tile,    \
+                                        init_params);                         \
+  XNN_TEST_VSCALEEXPMINUSMAX_ELEMENT_GT(ukernel, arch_flags, element_tile,    \
+                                        init_params);                         \
+  XNN_TEST_VSCALEEXPMINUSMAX_SCALE(ukernel, arch_flags, element_tile,         \
                                    init_params);
 #include "src/f32-vscaleexpminusmax/f32-vscaleexpminusmax.h"
-#undef XNN_UKERNEL_WITH_PARAMS
+#undef XNN_UKERNEL

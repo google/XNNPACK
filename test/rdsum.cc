@@ -161,16 +161,15 @@ struct KernelInfo {
 };
 
 KernelInfo kernels[] = {
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, row_tile, channel_tile, \
-                                vector_tile, datatype_in, datatype_out,      \
-                                params_type, init_params)                    \
-  {#ukernel,     arch_flags,  Kernel{ukernel, init_params}, row_tile,        \
+#define XNN_UKERNEL(arch_flags, ukernel, row_tile, channel_tile, vector_tile, \
+                    datatype_in, datatype_out, params_type, init_params)      \
+  {#ukernel,     arch_flags,  Kernel{ukernel, init_params}, row_tile,         \
    channel_tile, vector_tile, sizeof(datatype_in)},
 #include "src/f16-f32acc-rdsum/f16-f32acc-rdsum.h"
 #include "src/f32-rdsum/f32-rdsum.h"
 #include "src/qs8-rdsum/qs8-rdsum-minmax-fp32.h"
 #include "src/qu8-rdsum/qu8-rdsum.h"
-#undef XNN_UKERNEL_WITH_PARAMS
+#undef XNN_UKERNEL
 };
 
 class Test : public testing::TestWithParam<KernelInfo> {};

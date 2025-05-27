@@ -14,8 +14,9 @@
 extern "C" {
 #endif
 
-#define XNN_UKERNEL(arch_flags, fn_name, element_tile, datatype)         \
-  XNN_INTERNAL void fn_name(size_t n, const float* input, float* output, \
+#define XNN_UKERNEL(arch_flags, fn_name, element_tile, datatype, params_type, \
+                    init_params)                                              \
+  XNN_INTERNAL void fn_name(size_t n, const float* input, float* output,      \
                             float scale_mantissa, float scale_exponent);
 #include "src/f32-vscaleextexp/f32-vscaleextexp.h"
 #undef XNN_UKERNEL

@@ -35,10 +35,9 @@ std::string GetTestName(
   return info.param.name;
 }
 
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, channel_tile,   \
-                                primary_tile, datatype, params_type, \
-                                init_params)                         \
-  {#ukernel, MaxPoolMicrokernelTester::Kernel{ukernel, init_params}, \
+#define XNN_UKERNEL(arch_flags, ukernel, channel_tile, primary_tile, datatype, \
+                    params_type, init_params)                                  \
+  {#ukernel, MaxPoolMicrokernelTester::Kernel{ukernel, init_params},           \
    arch_flags, channel_tile, primary_tile},
 
 const XnnTestParam xnn_test_params[] = {
@@ -48,7 +47,7 @@ const XnnTestParam xnn_test_params[] = {
 #include "src/u8-maxpool/u8-maxpool-minmax.h"
 };
 
-#undef XNN_UKERNEL_WITH_PARAMS
+#undef XNN_UKERNEL
 
 }  // namespace
 

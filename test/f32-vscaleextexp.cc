@@ -121,15 +121,15 @@ class VScaleExtExpMicrokernelTester {
     }                                                                        \
   }
 
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, element_tile, datatype, \
-                                params_type, init_params)                    \
-  XNN_TEST_VSCALEEXTEXP_ELEMENT_EQ(ukernel, arch_flags, element_tile,        \
-                                   init_params);                             \
-  XNN_TEST_VSCALEEXTEXP_ELEMENT_DIV(ukernel, arch_flags, element_tile,       \
-                                    init_params);                            \
-  XNN_TEST_VSCALEEXTEXP_ELEMENT_LT(ukernel, arch_flags, element_tile,        \
-                                   init_params);                             \
-  XNN_TEST_VSCALEEXTEXP_ELEMENT_GT(ukernel, arch_flags, element_tile,        \
+#define XNN_UKERNEL(arch_flags, ukernel, element_tile, datatype, params_type, \
+                    init_params)                                              \
+  XNN_TEST_VSCALEEXTEXP_ELEMENT_EQ(ukernel, arch_flags, element_tile,         \
+                                   init_params);                              \
+  XNN_TEST_VSCALEEXTEXP_ELEMENT_DIV(ukernel, arch_flags, element_tile,        \
+                                    init_params);                             \
+  XNN_TEST_VSCALEEXTEXP_ELEMENT_LT(ukernel, arch_flags, element_tile,         \
+                                   init_params);                              \
+  XNN_TEST_VSCALEEXTEXP_ELEMENT_GT(ukernel, arch_flags, element_tile,         \
                                    init_params);
 #include "src/f32-vscaleextexp/f32-vscaleextexp.h"
-#undef XNN_UKERNEL_WITH_PARAMS
+#undef XNN_UKERNEL

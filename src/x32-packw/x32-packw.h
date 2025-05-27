@@ -4,18 +4,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#ifndef XNN_UKERNEL_WITH_PARAMS
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale, params_type, init_params) \
-    XNN_UKERNEL(arch_flags, ukernel, unroll)
-#define XNN_DEFINED_UKERNEL_WITH_PARAMS
-#endif
-
-#ifndef XNN_UKERNEL
-#define XNN_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale) \
-    XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale, void, /*init_params=*/nullptr)
-#define XNN_DEFINED_UKERNEL
-#endif
-
 // arch_flags, ukernel, nr, kr, sr, kblock, nr_scale
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
@@ -161,14 +149,4 @@ XNN_GIO_UKERNEL(xnn_arch_hvx, xnn_x32_packw_gemm_gio_ukernel_x64__hvx_u2, 64, 1,
 XNN_GIO_UKERNEL(xnn_arch_hvx, xnn_x32_packw_gemm_gio_ukernel_x96__hvx_u2, 96, 1, 1, 1, 1)
 XNN_GIO_UKERNEL(xnn_arch_hvx, xnn_x32_packw_gemm_gio_ukernel_x128__hvx_u2, 128, 1, 1, 1, 1)
 #endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
-
-#ifdef XNN_DEFINED_UKERNEL_WITH_PARAMS
-#undef XNN_DEFINED_UKERNEL_WITH_PARAMS
-#undef XNN_UKERNEL_WITH_PARAMS
-#endif
-
-#ifdef XNN_DEFINED_UKERNEL
-#undef XNN_DEFINED_UKERNEL
-#undef XNN_UKERNEL
-#endif
 

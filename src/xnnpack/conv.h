@@ -18,16 +18,17 @@
 extern "C" {
 #endif
 
-#define XNN_UKERNEL(arch_flags, fn_name, kernel_size, subsampling,    \
-                    padding_right, padding_left, input_channels,      \
-                    output_channels_tile, input_widths, datatype)     \
-  XNN_INTERNAL void fn_name(                                          \
-      size_t input_height, size_t input_width, size_t output_y_start, \
-      size_t output_y_end, const float* input, const float* zero,     \
-      const float* weights, float* output, size_t input_padding_top,  \
-      size_t output_channels, size_t output_height_stride,            \
-      size_t output_width_stride,                                     \
-      const struct xnn_f32_minmax_params                              \
+#define XNN_UKERNEL(arch_flags, fn_name, kernel_size, subsampling,             \
+                    padding_right, padding_left, input_channels,               \
+                    output_channels_tile, input_widths, datatype, params_type, \
+                    init_params)                                               \
+  XNN_INTERNAL void fn_name(                                                   \
+      size_t input_height, size_t input_width, size_t output_y_start,          \
+      size_t output_y_end, const float* input, const float* zero,              \
+      const float* weights, float* output, size_t input_padding_top,           \
+      size_t output_channels, size_t output_height_stride,                     \
+      size_t output_width_stride,                                              \
+      const struct xnn_f32_minmax_params                                       \
           params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 #include "src/f32-conv-hwc/f32-conv-hwc.h"
 #undef XNN_UKERNEL
