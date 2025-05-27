@@ -1699,8 +1699,6 @@ static enum xnn_status reshape_subconv2d_path(
 
   size_t igemm_compute_index = 0;
   if (dynamic_quantization) {
-    assert(deconvolution_op->ukernel.subtype == xnn_microkernel_type_igemm);
-
     deconvolution_op->compute[igemm_compute_index].type = xnn_parallelization_type_1d;
     deconvolution_op->compute[igemm_compute_index].task_1d = (pthreadpool_task_1d_t) xnn_compute_dq_zero_buffer_subconv;
     deconvolution_op->compute[igemm_compute_index].range[0] = batch_size;
@@ -1829,7 +1827,6 @@ static enum xnn_status reshape_deconvolution2d_nhwc(
         params, params_size, num_threads);
     case xnn_microkernel_type_subconv2d:
     {
-      deconvolution_op->ukernel.subtype = xnn_microkernel_type_igemm;
       return reshape_subconv2d_path(
         deconvolution_op,
         batch_size,
