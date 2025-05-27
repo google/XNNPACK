@@ -325,9 +325,9 @@ class BinaryElementwiseOperatorTester {
       xnnpack::randomize_buffer(datatype(), rng, limits.min, limits.max,
                                 input2);
 
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       if (mode == RunMode::kCreateReshapeRun) {
         // Create, setup, run, and destroy a binary elementwise operator.
-        ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
         xnn_operator_t binary_elementwise_op = nullptr;
         xnn_status status = xnn_create_binary_elementwise_nd(
             operation_type(), xnn_datatype_of<T>(), &input1_quantization(),

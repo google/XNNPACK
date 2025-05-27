@@ -155,11 +155,11 @@ static void vbinary(benchmark::State& state, uint64_t arch_flags,
                          benchmark::Counter::kIsRate);
 }
 
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, \
-                                datatype, params_type, init_params)           \
-  BENCHMARK_CAPTURE(vbinary, ukernel, arch_flags, ukernel)                    \
-      ->Apply(                                                                \
-          benchmark::utils::BinaryElementwiseParameters<datatype, datatype>)  \
+#define XNN_UKERNEL(arch_flags, ukernel, batch_tile, vector_tile, datatype,  \
+                    params_type, init_params)                                \
+  BENCHMARK_CAPTURE(vbinary, ukernel, arch_flags, ukernel)                   \
+      ->Apply(                                                               \
+          benchmark::utils::BinaryElementwiseParameters<datatype, datatype>) \
       ->UseRealTime();
 #include "src/f16-vbinary/f16-vadd.h"
 #include "src/f16-vbinary/f16-vaddc.h"
@@ -214,7 +214,7 @@ static void vbinary(benchmark::State& state, uint64_t arch_flags,
 #include "src/qu8-vmul/qu8-vmul-minmax-rndnu.h"
 #include "src/qu8-vmulc/qu8-vmulc-minmax-fp32.h"
 #include "src/qu8-vmulc/qu8-vmulc-minmax-rndnu.h"
-#undef XNN_UKERNEL_WITH_PARAMS
+#undef XNN_UKERNEL
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();

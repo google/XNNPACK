@@ -43,7 +43,7 @@ static void rewrite_reduction_axes_for_nchw(size_t num_reduction_axes,
 
 static enum xnn_status create_reduce_operator(
   const struct xnn_node* node,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
   xnn_weights_cache_t weights_cache)
@@ -55,7 +55,7 @@ static enum xnn_status create_reduce_operator(
   const uint32_t input_id = node->inputs[0];
   assert(input_id != XNN_INVALID_VALUE_ID);
   assert(input_id < num_values);
-  const struct xnn_value *input_value = &values[input_id];
+  const struct xnn_runtime_value *input_value = &values[input_id];
 
   assert(node->num_outputs == 1);
   const uint32_t output_id = node->outputs[0];
@@ -94,7 +94,7 @@ static enum xnn_status create_reduce_operator(
 
 static enum xnn_status reshape_reduce_operator(
   struct xnn_operator_data* opdata,
-  struct xnn_value* values,
+  struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -102,7 +102,7 @@ static enum xnn_status reshape_reduce_operator(
   assert(input_id != XNN_INVALID_VALUE_ID);
   assert(input_id < num_values);
 
-  const struct xnn_value* input_value = values + input_id;
+  const struct xnn_runtime_value* input_value = values + input_id;
   assert(input_value->type == xnn_value_type_dense_tensor);
 
   const uint32_t output_id = opdata->outputs[0];
@@ -110,11 +110,9 @@ static enum xnn_status reshape_reduce_operator(
   assert(output_id < num_values);
 
   void* workspace_size = &opdata->workspace_size;
-  void* workspace_alignment = &opdata->workspace_alignment;
 
   if(input_value->datatype == xnn_datatype_fp32) {
     workspace_size = NULL;
-    workspace_alignment = NULL;
   }
 
   enum xnn_status status = xnn_status_invalid_state;
@@ -131,7 +129,7 @@ static enum xnn_status reshape_reduce_operator(
   }
   size_t input_dims[XNN_MAX_TENSOR_DIMS];
   memcpy(input_dims, input_value->shape.dim, input_num_dims * sizeof(size_t));
-  if (input_value->shape.num_dims == 4 && input_value->layout == xnn_layout_type_nchw) {
+  if (input_value->shape.num_dims == 4 && input_value->flags & XNN_VALUE_FLAG_LAYOUT_NCHW) {
     rewrite_reduction_axes_for_nchw(num_reduction_axes, reduction_axes);
 
     for (size_t idx = 0; idx < input_num_dims; ++idx) {
@@ -146,26 +144,25 @@ static enum xnn_status reshape_reduce_operator(
       input_num_dims,
       input_dims,
       workspace_size,
-      workspace_alignment,
       threadpool);
 
-  struct xnn_value* output_value = values + output_id;
+  struct xnn_runtime_value* output_value = values + output_id;
   if (opdata->operator_objects[0]->flags & XNN_FLAG_KEEP_DIMS) {
     output_value->shape.num_dims = input_num_dims;
     for (size_t input_idx = 0; input_idx < input_num_dims; ++input_idx) {
       bool is_axis = false;
       size_t mapped_input_idx = input_idx;
       size_t mapped_output_idx = input_idx;
-      if (input_value->layout == xnn_layout_type_nchw) {
+      if (input_value->flags & XNN_VALUE_FLAG_LAYOUT_NCHW) {
         mapped_input_idx = INVERSE_NCHW_AXES_MAPPING[input_idx];
       }
-      if (output_value->layout == xnn_layout_type_nchw) {
+      if (output_value->flags & XNN_VALUE_FLAG_LAYOUT_NCHW) {
         mapped_output_idx = NCHW_AXES_MAPPING[mapped_input_idx];
       }
 
       for (size_t axis_idx = 0; axis_idx < num_reduction_axes; ++axis_idx) {
         size_t reduction_axis = reduction_axes[axis_idx];
-        if (output_value->layout == xnn_layout_type_nchw) {
+        if (output_value->flags & XNN_VALUE_FLAG_LAYOUT_NCHW) {
           reduction_axis = NCHW_AXES_MAPPING[reduction_axis];
         }
 
@@ -187,10 +184,10 @@ static enum xnn_status reshape_reduce_operator(
       bool is_axis = false;
       size_t mapped_input_idx = input_idx;
       size_t mapped_output_idx = input_idx;
-      if (input_value->layout == xnn_layout_type_nchw) {
+      if (input_value->flags & XNN_VALUE_FLAG_LAYOUT_NCHW) {
         mapped_input_idx = INVERSE_NCHW_AXES_MAPPING[input_idx];
       }
-      if (output_value->layout == xnn_layout_type_nchw) {
+      if (output_value->flags == XNN_VALUE_FLAG_LAYOUT_NCHW) {
         mapped_output_idx = NCHW_AXES_MAPPING[mapped_input_idx];
       }
 
@@ -207,7 +204,7 @@ static enum xnn_status reshape_reduce_operator(
     }
     output_value->shape.num_dims = input_num_dims - num_skip_axis;
   }
-  const size_t new_size = xnn_tensor_get_size(output_value);
+  const size_t new_size = xnn_runtime_tensor_get_size(output_value);
   if (new_size > output_value->size) {
     output_value->size = new_size;
     return xnn_status_reallocation_required;
@@ -217,7 +214,7 @@ static enum xnn_status reshape_reduce_operator(
 
 static enum xnn_status setup_reduce_operator(
   const struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -229,12 +226,12 @@ static enum xnn_status setup_reduce_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  const struct xnn_value* input_value = values + input_id;
+  const struct xnn_runtime_value* input_value = values + input_id;
   assert(input_value->type == xnn_value_type_dense_tensor);
   const void* input_data = input_value->data;
   assert(input_data != NULL);
 
-  const struct xnn_value* output_value = values + output_id;
+  const struct xnn_runtime_value* output_value = values + output_id;
   assert(output_value->type == xnn_value_type_dense_tensor);
   void* output_data = output_value->data;
   assert(output_data != NULL);

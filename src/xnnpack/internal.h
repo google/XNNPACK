@@ -205,7 +205,7 @@ enum xnn_status xnn_create_dynamic_fully_connected_nc_pf16(
 enum xnn_status xnn_reshape_dynamic_fully_connected_nc_pf16(
     xnn_operator_t dynamic_fully_connected_op, size_t batch_size,
     size_t input_channels, size_t output_channels, size_t input_stride,
-    size_t output_stride, size_t* workspace_size, size_t* workspace_alignment,
+    size_t output_stride, size_t* workspace_size,
     pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_dynamic_fully_connected_nc_pf16(
@@ -219,7 +219,7 @@ enum xnn_status xnn_create_dynamic_fully_connected_nc_pf32(
 enum xnn_status xnn_reshape_dynamic_fully_connected_nc_pf32(
     xnn_operator_t dynamic_fully_connected_op, size_t batch_size,
     size_t input_channels, size_t output_channels, size_t input_stride,
-    size_t output_stride, size_t* workspace_size, size_t* workspace_alignment,
+    size_t output_stride, size_t* workspace_size,
     pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_dynamic_fully_connected_nc_pf32(
@@ -236,7 +236,7 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_pf32_const_weights(
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_pf32(
     xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
     const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
-    size_t n, size_t* workspace_size, size_t* workspace_alignment,
+    size_t n, size_t* workspace_size,
     pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_batch_matrix_multiply_nc_pf32(
@@ -253,7 +253,7 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_pf16_const_weights(
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_pf16(
     xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
     const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
-    size_t n, size_t* workspace_size, size_t* workspace_alignment,
+    size_t n, size_t* workspace_size,
     pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_batch_matrix_multiply_nc_pf16(
@@ -350,7 +350,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qdu8_f32_qc8w(
 
 enum xnn_status xnn_reshape_convolution2d_nhwc_qdu8_f32_qc8w(
     xnn_operator_t convolution_op, size_t batch_size, size_t input_height,
-    size_t input_width, size_t* workspace_size, size_t* workspace_alignment,
+    size_t input_width, size_t* workspace_size,
     size_t* output_height_out, size_t* output_width_out,
     pthreadpool_t threadpool);
 
@@ -372,7 +372,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qdu8_f16_qc8w(
 
 enum xnn_status xnn_reshape_convolution2d_nhwc_qdu8_f16_qc8w(
     xnn_operator_t convolution_op, size_t batch_size, size_t input_height,
-    size_t input_width, size_t* workspace_size, size_t* workspace_alignment,
+    size_t input_width, size_t* workspace_size,
     size_t* output_height_out, size_t* output_width_out,
     pthreadpool_t threadpool);
 
@@ -496,17 +496,17 @@ enum xnn_status create_nchw_convolution(
     uint32_t dilation_width, uint32_t groups, size_t group_input_channels,
     size_t group_output_channels, float output_min, float output_max,
     uint32_t flags, uint32_t input_id, uint32_t filter_id, uint32_t bias_id,
-    uint32_t output_id, const struct xnn_value* values, const void* filter_data,
+    uint32_t output_id, const struct xnn_runtime_value* values, const void* filter_data,
     const void* bias_data, xnn_weights_cache_t weights_cache,
     struct xnn_operator_data* opdata);
 
 enum xnn_status reshape_convolution_operator(struct xnn_operator_data* opdata,
-                                             struct xnn_value* values,
+                                             struct xnn_runtime_value* values,
                                              size_t num_values,
                                              pthreadpool_t threadpool);
 
 enum xnn_status setup_convolution_operator(
-    const struct xnn_operator_data* opdata, const struct xnn_value* values,
+    const struct xnn_operator_data* opdata, const struct xnn_runtime_value* values,
     size_t num_values, pthreadpool_t threadpool);
 
 enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w_f16_scales(

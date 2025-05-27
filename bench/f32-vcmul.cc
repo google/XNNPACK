@@ -69,15 +69,15 @@ static void f32_vcmul(benchmark::State& state, uint64_t arch_flags,
                          benchmark::Counter::kIsRate);
 }
 
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, \
-                                datatype, params_type, init_params)           \
+#define XNN_UKERNEL(arch_flags, ukernel, batch_tile, vector_tile, datatype,   \
+                    params_type, init_params)                                 \
   BENCHMARK_CAPTURE(f32_vcmul, ukernel, arch_flags, ukernel, init_params)     \
       ->Apply(                                                                \
           benchmark::utils::BinaryElementwiseParameters<std::complex<float>,  \
                                                         std::complex<float>>) \
       ->UseRealTime();
 #include "src/f32-vbinary/f32-vcmul.h"
-#undef XNN_UKERNEL_WITH_PARAMS
+#undef XNN_UKERNEL
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();

@@ -77,6 +77,13 @@ static enum xnn_status create_reduce_nd(
     goto error;
   }
   reduce_op->num_compute_invocations = 1;
+  reduce_op->params2 = xnn_allocate_zero_memory(sizeof(union xnn_params2));
+  if (reduce_op->params2 == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(union xnn_params2),
+                  xnn_operator_type_to_string(operator_type));
+    return xnn_status_out_of_memory;
+  }
 
   reduce_op->type = operator_type;
   reduce_op->flags = flags;
@@ -92,7 +99,7 @@ static enum xnn_status create_reduce_nd(
     memcpy(&reduce_op->params, params, params_size);
   }
   if (cvt_params_size != 0) {
-    memcpy(&reduce_op->params2, cvt_params, cvt_params_size);
+    memcpy(reduce_op->params2, cvt_params, cvt_params_size);
   }
 
   reduce_op->state = xnn_run_state_invalid;
@@ -115,7 +122,6 @@ static enum xnn_status reshape_reduce_nd(
     xnn_operator_t reduce_op, size_t num_reduction_axes,
     const int64_t* reduction_axes, size_t num_input_dims,
     const size_t* input_shape, size_t* workspace_size,
-    size_t* workspace_alignment,
     enum xnn_operator_type expected_operator_type,
     pthreadpool_t threadpool) {
   if (reduce_op->type != expected_operator_type) {
@@ -221,10 +227,6 @@ static enum xnn_status reshape_reduce_nd(
   reduce_op->compute[0].type = xnn_parallelization_type_3d_tile_2d;
   reduce_op->ukernel.type = xnn_microkernel_type_reduce;
   // Reduction along the innermost dimension.
-  if (workspace_alignment != NULL) {
-    *workspace_alignment = XNN_ALLOCATION_ALIGNMENT;
-  }
-
   const bool is_minmax = (reduce_op->type == xnn_operator_type_reduce_max_nd ||
                           reduce_op->type == xnn_operator_type_reduce_min_nd);
 
@@ -323,7 +325,7 @@ static enum xnn_status reshape_reduce_nd(
     }
   }
   memcpy(&reduce_op->dynamic_context.reduce->params, &reduce_op->params.reduce, sizeof(reduce_op->params.reduce));
-  memcpy(&reduce_op->dynamic_context.reduce->cvt_params, &reduce_op->params2.unary, sizeof(reduce_op->params2.unary));
+  memcpy(&reduce_op->dynamic_context.reduce->cvt_params, &reduce_op->params2->unary, sizeof(reduce_op->params2->unary));
   reduce_op->dynamic_context.reduce->input_stride[XNN_MAX_TENSOR_DIMS - 1] = (1 << log2_data_element_size);
   if (reduce_op->cvt_config) {
     reduce_op->dynamic_context.reduce->cvt_ukernel = reduce_op->cvt_config->ukernel;
@@ -551,10 +553,10 @@ enum xnn_status xnn_reshape_reduce_nd(
     xnn_operator_t reduce_op,
     size_t num_reduction_axes, const int64_t* reduction_axes,
     size_t num_input_dims, const size_t* input_shape, size_t* workspace_size,
-    size_t* workspace_alignment, pthreadpool_t threadpool) {
+    pthreadpool_t threadpool) {
   return reshape_reduce_nd(
       reduce_op, num_reduction_axes, reduction_axes, num_input_dims, input_shape,
-      workspace_size, workspace_alignment,
+      workspace_size,
       reduce_op->type,
       threadpool);
 }

@@ -23,7 +23,7 @@
 
 static enum xnn_status create_convert_operator(
   const struct xnn_node* node,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
   xnn_weights_cache_t weights_cache)
@@ -31,13 +31,13 @@ static enum xnn_status create_convert_operator(
   assert(node->num_inputs == 1);
   const uint32_t input_id = node->inputs[0];
   assert(input_id < num_values);
-  const struct xnn_value* input_value = values + input_id;
+  const struct xnn_runtime_value* input_value = values + input_id;
 
   assert(node->num_outputs == 1);
   const uint32_t output_id = node->outputs[0];
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
-  const struct xnn_value* output_value = values + output_id;
+  const struct xnn_runtime_value* output_value = values + output_id;
 
   enum xnn_status status = xnn_status_uninitialized;
   const enum xnn_datatype input_datatype = input_value->datatype;
@@ -100,13 +100,13 @@ static enum xnn_status create_convert_operator(
 
 static enum xnn_status reshape_convert_operator(
   struct xnn_operator_data* opdata,
-  struct xnn_value* values,
+  struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
-  const struct xnn_value* input_value = values + input_id;
+  const struct xnn_runtime_value* input_value = values + input_id;
   const size_t batch_size = xnn_shape_multiply_non_channel_dims(&input_value->shape);
   const size_t num_input_dims = input_value->shape.num_dims;
   const size_t channel_dim = num_input_dims == 0 ? 1 : input_value->shape.dim[num_input_dims - 1];
@@ -115,7 +115,7 @@ static enum xnn_status reshape_convert_operator(
 
   const uint32_t output_id = opdata->outputs[0];
   assert(output_id < num_values);
-  const struct xnn_value* output_value = values + output_id;
+  const struct xnn_runtime_value* output_value = values + output_id;
   // Channel stride depends on number of non batch dims.
   size_t num_nonbatch_dims = output_value->quantization.num_nonbatch_dims;
   size_t dq_batch_size = xnn_shape_multiply_batch_dims(&input_value->shape, num_nonbatch_dims);
@@ -182,7 +182,7 @@ static enum xnn_status reshape_convert_operator(
 
 static enum xnn_status setup_convert_operator(
   const struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -194,11 +194,11 @@ static enum xnn_status setup_convert_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  const struct xnn_value* input_value = values + input_id;
+  const struct xnn_runtime_value* input_value = values + input_id;
   const void* input_data = input_value->data;
   assert(input_data != NULL);
 
-  const struct xnn_value* output_value = values + output_id;
+  const struct xnn_runtime_value* output_value = values + output_id;
   void* output_data = output_value->data;
   assert(output_data != NULL);
 
@@ -271,7 +271,7 @@ void xnn_init_convert_node(
 
 static enum xnn_status create_unary_operator(
   const struct xnn_node* node,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
   xnn_weights_cache_t weights_cache)
@@ -279,8 +279,8 @@ static enum xnn_status create_unary_operator(
   assert(node->num_inputs == 1 || node->num_inputs == 2);
   assert(node->num_outputs == 1);
 
-  const struct xnn_value* value_in = &values[node->inputs[0]];
-  const struct xnn_value* value_out = &values[node->outputs[0]];
+  const struct xnn_runtime_value* value_in = &values[node->inputs[0]];
+  const struct xnn_runtime_value* value_out = &values[node->outputs[0]];
 
   struct xnn_quantization_params in_quantization = {
     .scale = value_in->quantization.scale,
@@ -303,7 +303,7 @@ static enum xnn_status create_unary_operator(
       node->flags,
       &opdata->operator_objects[0]);
   } else {
-    const struct xnn_value* lut = &values[node->inputs[1]];
+    const struct xnn_runtime_value* lut = &values[node->inputs[1]];
 
     return xnn_create_unary_elementwise_nc(
       node->unary_operator,
@@ -320,7 +320,7 @@ static enum xnn_status create_unary_operator(
 
 static enum xnn_status reshape_unary_operator(
   struct xnn_operator_data* opdata,
-  struct xnn_value* values,
+  struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -341,7 +341,7 @@ static enum xnn_status reshape_unary_operator(
 
 static enum xnn_status setup_unary_operator(
   const struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -353,11 +353,11 @@ static enum xnn_status setup_unary_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  const struct xnn_value* input_value = values + input_id;
+  const struct xnn_runtime_value* input_value = values + input_id;
   const void* input_data = input_value->data;
   assert(input_data != NULL);
 
-  const struct xnn_value* output_value = values + output_id;
+  const struct xnn_runtime_value* output_value = values + output_id;
   void* output_data = output_value->data;
   assert(output_data != NULL);
 

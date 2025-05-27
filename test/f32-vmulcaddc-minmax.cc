@@ -13,8 +13,8 @@
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/vmulcaddc.h"
 #include "test/vmulcaddc-microkernel-tester.h"
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, row_tile, channel_tile,   \
-                                datatype, params_type, init_params)            \
+#define XNN_UKERNEL(arch_flags, ukernel, row_tile, channel_tile, datatype,     \
+                    params_type, init_params)                                  \
   XNN_TEST_VMULCADDC_ROW_DIV(ukernel, arch_flags, row_tile, channel_tile,      \
                              datatype, params_type, init_params);              \
   XNN_TEST_VMULCADDC_ROW_LT(ukernel, arch_flags, row_tile, channel_tile,       \
@@ -41,4 +41,4 @@
   XNN_TEST_VMULCADDC_QMIN(ukernel, arch_flags, row_tile, channel_tile,         \
                           datatype, params_type, init_params);
 #include "src/f32-vmulcaddc/f32-vmulcaddc.h"
-#undef XNN_UKERNEL_WITH_PARAMS
+#undef XNN_UKERNEL

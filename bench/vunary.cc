@@ -172,11 +172,11 @@ void vunary(benchmark::State& state, uint64_t arch_flags,
       benchmark::Counter::kIsRate);
 }
 
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, \
-                                datatype, params_type, init_params)           \
-  BENCHMARK_CAPTURE(vunary, ukernel, arch_flags, ukernel, init_params)        \
-      ->Apply(                                                                \
-          benchmark::utils::UnaryElementwiseParameters<datatype, datatype>)   \
+#define XNN_UKERNEL(arch_flags, ukernel, batch_tile, vector_tile, datatype, \
+                    params_type, init_params)                               \
+  BENCHMARK_CAPTURE(vunary, ukernel, arch_flags, ukernel, init_params)      \
+      ->Apply(                                                              \
+          benchmark::utils::UnaryElementwiseParameters<datatype, datatype>) \
       ->UseRealTime();
 #include "src/f16-vabs/f16-vabs.h"
 #include "src/f16-vapproxgelu/f16-vapproxgelu.h"
@@ -214,7 +214,7 @@ void vunary(benchmark::State& state, uint64_t arch_flags,
 #include "src/f32-vsqr/f32-vsqr.h"
 #include "src/f32-vsqrt/f32-vsqrt.h"
 #include "src/f32-vtanh/f32-vtanh.h"
-#undef XNN_UKERNEL_WITH_PARAMS
+#undef XNN_UKERNEL
 
 template <typename TIn, typename TOut, typename UKernelParams>
 void velu(benchmark::State& state, uint64_t arch_flags,
@@ -225,15 +225,15 @@ void velu(benchmark::State& state, uint64_t arch_flags,
   vunary(state, arch_flags, ukernel, init_params, &params);
 }
 
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, \
-                                datatype, params_type, init_params)           \
-  BENCHMARK_CAPTURE(velu, ukernel, arch_flags, ukernel, init_params)          \
-      ->Apply(                                                                \
-          benchmark::utils::UnaryElementwiseParameters<datatype, datatype>)   \
+#define XNN_UKERNEL(arch_flags, ukernel, batch_tile, vector_tile, datatype, \
+                    params_type, init_params)                               \
+  BENCHMARK_CAPTURE(velu, ukernel, arch_flags, ukernel, init_params)        \
+      ->Apply(                                                              \
+          benchmark::utils::UnaryElementwiseParameters<datatype, datatype>) \
       ->UseRealTime();
 #include "src/f16-velu/f16-velu.h"
 #include "src/f32-velu/f32-velu.h"
-#undef XNN_UKERNEL_WITH_PARAMS
+#undef XNN_UKERNEL
 
 template <typename TIn, typename TOut, typename UKernelParams>
 void vclamp(benchmark::State& state, uint64_t arch_flags,
@@ -249,17 +249,17 @@ void vclamp(benchmark::State& state, uint64_t arch_flags,
          output_quantization);
 }
 
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, \
-                                datatype, params_type, init_params)           \
-  BENCHMARK_CAPTURE(vclamp, ukernel, arch_flags, ukernel, init_params)        \
-      ->Apply(                                                                \
-          benchmark::utils::UnaryElementwiseParameters<datatype, datatype>)   \
+#define XNN_UKERNEL(arch_flags, ukernel, batch_tile, vector_tile, datatype, \
+                    params_type, init_params)                               \
+  BENCHMARK_CAPTURE(vclamp, ukernel, arch_flags, ukernel, init_params)      \
+      ->Apply(                                                              \
+          benchmark::utils::UnaryElementwiseParameters<datatype, datatype>) \
       ->UseRealTime();
 #include "src/f16-vclamp/f16-vclamp.h"
 #include "src/f32-vclamp/f32-vclamp.h"
 #include "src/s8-vclamp/s8-vclamp.h"
 #include "src/u8-vclamp/u8-vclamp.h"
-#undef XNN_UKERNEL_WITH_PARAMS
+#undef XNN_UKERNEL
 
 template <typename TIn, typename TOut, typename UKernelParams>
 void vlrelu(benchmark::State& state, uint64_t arch_flags,
@@ -270,19 +270,19 @@ void vlrelu(benchmark::State& state, uint64_t arch_flags,
   vunary(state, arch_flags, ukernel, init_params, &params);
 }
 
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, \
-                                datatype, params_type, init_params)           \
-  BENCHMARK_CAPTURE(vlrelu, ukernel, arch_flags, ukernel, init_params)        \
-      ->Apply(                                                                \
-          benchmark::utils::UnaryElementwiseParameters<datatype, datatype>)   \
+#define XNN_UKERNEL(arch_flags, ukernel, batch_tile, vector_tile, datatype, \
+                    params_type, init_params)                               \
+  BENCHMARK_CAPTURE(vlrelu, ukernel, arch_flags, ukernel, init_params)      \
+      ->Apply(                                                              \
+          benchmark::utils::UnaryElementwiseParameters<datatype, datatype>) \
       ->UseRealTime();
 #include "src/f16-vlrelu/f16-vlrelu.h"
 #include "src/f32-vlrelu/f32-vlrelu.h"
 #include "src/qs8-vlrelu/qs8-vlrelu.h"
 #include "src/qu8-vlrelu/qu8-vlrelu.h"
-#undef XNN_UKERNEL_WITH_PARAMS
+#undef XNN_UKERNEL
 
-#define XNN_CVT_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile,        \
+#define XNN_UKERNEL(arch_flags, ukernel, batch_tile,        \
                                     vector_tile, datatype_in, datatype_out, \
                                     params_type, init_params)               \
   BENCHMARK_CAPTURE(vunary, ukernel, arch_flags, ukernel, init_params)      \
@@ -299,7 +299,7 @@ void vlrelu(benchmark::State& state, uint64_t arch_flags,
 #include "src/qs8-vcvt/qs8-vcvt.h"
 #include "src/qu8-f32-vcvt/qu8-f32-vcvt.h"
 #include "src/qu8-vcvt/qu8-vcvt.h"
-#undef XNN_CVT_UKERNEL_WITH_PARAMS
+#undef XNN_UKERNEL
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();

@@ -7,7 +7,7 @@
 #include "src/xnnpack/vcvt.h"
 #include "test/vunary-microkernel-tester.h"
 
-#define XNN_CVT_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile,         \
+#define XNN_UKERNEL(arch_flags, ukernel, batch_tile,         \
                                     vector_tile, datatype_in, datatype_out,  \
                                     params_type, init_params)                \
   TEST(ukernel, batch_eq) {                                                  \
@@ -27,4 +27,4 @@
                                                     ukernel, init_params);   \
   }
 #include "src/f16-f32-vcvt/f16-f32-vcvt.h"
-#undef XNN_CVT_UKERNEL_WITH_PARAMS
+#undef XNN_UKERNEL

@@ -16,21 +16,25 @@
 
 enum xnn_status resize_unary_elementwise_output_tensor(
   const struct xnn_operator_data* opdata,
-  struct xnn_value* values,
+  struct xnn_runtime_value* values,
   size_t num_values,
   size_t old_workspace_size,
   pthreadpool_t threadpool)
 {
   const uint32_t output_id = opdata->outputs[0];
-  struct xnn_value* output = &values[output_id];
+  struct xnn_runtime_value* output = &values[output_id];
 
   // Propagate input shape to output.
-  const struct xnn_value* input = &values[opdata->inputs[0]];
+  const struct xnn_runtime_value* input = &values[opdata->inputs[0]];
   output->shape.num_dims = input->shape.num_dims;
-  size_t old_dynamic_quant_params_size = xnn_tensor_get_dynamic_quant_param_size(output);
+  size_t old_dynamic_quant_params_size =
+      xnn_tensor_get_dynamic_quant_param_size(output->datatype, &output->shape,
+                                              output->quantization.num_nonbatch_dims);
   memcpy(&output->shape.dim[0], &input->shape.dim[0], input->shape.num_dims * sizeof(size_t));
-  output->quantization.dynamic_params_size = xnn_tensor_get_dynamic_quant_param_size(output);
-  const size_t new_size = xnn_tensor_get_size(output);
+  output->quantization.dynamic_params_size =
+      xnn_tensor_get_dynamic_quant_param_size(output->datatype, &output->shape,
+                                              output->quantization.num_nonbatch_dims);
+  const size_t new_size = xnn_runtime_tensor_get_size(output);
   if (new_size > output->size ||
       output->quantization.dynamic_params_size > old_dynamic_quant_params_size ||
       opdata->workspace_size > old_workspace_size) {
@@ -42,7 +46,7 @@ enum xnn_status resize_unary_elementwise_output_tensor(
 
 enum xnn_status resize_binary_elementwise_output_tensor(
   const struct xnn_operator_data* opdata,
-  struct xnn_value* values,
+  struct xnn_runtime_value* values,
   size_t num_values,
   size_t old_workspace_size,
   pthreadpool_t threadpool)
@@ -50,11 +54,11 @@ enum xnn_status resize_binary_elementwise_output_tensor(
   const uint32_t input0_id = opdata->inputs[0];
   const uint32_t input1_id = opdata->inputs[1];
   const uint32_t output_id = opdata->outputs[0];
-  struct xnn_value* output = &values[output_id];
+  struct xnn_runtime_value* output = &values[output_id];
 
 
-  const struct xnn_value* input0 = &values[input0_id];
-  const struct xnn_value* input1 = &values[input1_id];
+  const struct xnn_runtime_value* input0 = &values[input0_id];
+  const struct xnn_runtime_value* input1 = &values[input1_id];
   const size_t dims0 = input0->shape.num_dims;
   const size_t dims1 = input1->shape.num_dims;
   const size_t out_dims = max(dims0, dims1);
@@ -85,7 +89,7 @@ enum xnn_status resize_binary_elementwise_output_tensor(
     }
   }
 
-  const size_t new_size = xnn_tensor_get_size(output);
+  const size_t new_size = xnn_runtime_tensor_get_size(output);
   if (new_size > output->size || old_workspace_size > opdata->workspace_size) {
     output->size = new_size;
     return xnn_status_reallocation_required;

@@ -17,7 +17,7 @@
 
 static enum xnn_status create_unpooling_operator(
   const struct xnn_node* node,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
   xnn_weights_cache_t weights_cache)
@@ -39,7 +39,7 @@ static enum xnn_status create_unpooling_operator(
 
 static enum xnn_status reshape_unpooling_operator(
   struct xnn_operator_data* opdata,
-  struct xnn_value* values,
+  struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -56,7 +56,7 @@ static enum xnn_status reshape_unpooling_operator(
   const size_t input_width = values[input_id].shape.dim[2];
   const size_t channel_dim = values[input_id].shape.dim[3];
 
-  struct xnn_value* output_value = values + output_id;
+  struct xnn_runtime_value* output_value = values + output_id;
   enum xnn_status status = xnn_status_invalid_state;
   const size_t old_workspace_size = opdata->workspace_size;
   size_t output_height, output_width;
@@ -84,7 +84,7 @@ static enum xnn_status reshape_unpooling_operator(
   output_value->shape.dim[2] = output_width;
   output_value->shape.dim[3] = channel_dim;
 
-  const size_t new_size = xnn_tensor_get_size(output_value);
+  const size_t new_size = xnn_runtime_tensor_get_size(output_value);
   if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
     output_value->size = new_size;
     return xnn_status_reallocation_required;
@@ -94,7 +94,7 @@ static enum xnn_status reshape_unpooling_operator(
 
 static enum xnn_status setup_unpooling_operator(
   const struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -110,15 +110,15 @@ static enum xnn_status setup_unpooling_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  const struct xnn_value* input_value_value = values + input_value_id;
+  const struct xnn_runtime_value* input_value_value = values + input_value_id;
   const void* input_value_data = input_value_value->data;
   assert(input_value_data != NULL);
 
-  const struct xnn_value* input_index_value = values + input_index_id;
+  const struct xnn_runtime_value* input_index_value = values + input_index_id;
   const void* input_index_data = input_index_value->data;
   assert(input_index_data != NULL);
 
-  const struct xnn_value* output_value = values + output_id;
+  const struct xnn_runtime_value* output_value = values + output_id;
   void* output_data = output_value->data;
   assert(output_data != NULL);
 

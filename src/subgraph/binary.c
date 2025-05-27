@@ -24,7 +24,7 @@
 
 static enum xnn_status create_binary_operator(
   const struct xnn_node* node,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
   xnn_weights_cache_t weights_cache)
@@ -59,7 +59,7 @@ static enum xnn_status create_binary_operator(
 
 static enum xnn_status reshape_binary_operator(
   struct xnn_operator_data* opdata,
-  struct xnn_value* values,
+  struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -73,9 +73,9 @@ static enum xnn_status reshape_binary_operator(
   struct xnn_shape shape2;
   opdata->shape1.num_dims = values[input1_id].shape.num_dims;
   shape2.num_dims = values[input2_id].shape.num_dims;
-  if (values[output_id].layout == xnn_layout_type_nchw) {
-    assert(values[input1_id].layout == xnn_layout_type_nchw);
-    assert(values[input2_id].layout == xnn_layout_type_nchw);
+  if (values[output_id].flags & XNN_VALUE_FLAG_LAYOUT_NCHW) {
+    assert(values[input1_id].flags & XNN_VALUE_FLAG_LAYOUT_NCHW);
+    assert(values[input2_id].flags & XNN_VALUE_FLAG_LAYOUT_NCHW);
     opdata->shape1.dim[0] = values[input1_id].shape.dim[0];
     opdata->shape1.dim[1] = values[input1_id].shape.dim[values[input1_id].shape.num_dims - 1];
     if (values[input1_id].shape.num_dims > 2) {
@@ -87,9 +87,9 @@ static enum xnn_status reshape_binary_operator(
       memcpy(&shape2.dim[2], &values[input2_id].shape.dim[1], (values[input2_id].shape.num_dims - 2) * sizeof(size_t));
     }
   } else {
-    assert(values[output_id].layout == xnn_layout_type_nhwc);
-    assert(values[input1_id].layout == xnn_layout_type_nhwc);
-    assert(values[input2_id].layout == xnn_layout_type_nhwc);
+    assert((values[output_id].flags & XNN_VALUE_FLAG_LAYOUT_NCHW) == 0);
+    assert((values[input1_id].flags & XNN_VALUE_FLAG_LAYOUT_NCHW) == 0);
+    assert((values[input2_id].flags & XNN_VALUE_FLAG_LAYOUT_NCHW) == 0);
     memcpy(opdata->shape1.dim, values[input1_id].shape.dim, values[input1_id].shape.num_dims * sizeof(size_t));
     memcpy(shape2.dim, values[input2_id].shape.dim, values[input2_id].shape.num_dims * sizeof(size_t));
   }
@@ -120,7 +120,7 @@ static enum xnn_status reshape_binary_operator(
 
 static enum xnn_status setup_binary_operator(
   const struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -136,15 +136,15 @@ static enum xnn_status setup_binary_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  const struct xnn_value* input1_value = values + input1_id;
+  const struct xnn_runtime_value* input1_value = values + input1_id;
   const void* input1_data = input1_value->data;
   assert(input1_data != NULL);
 
-  const struct xnn_value* input2_value = values + input2_id;
+  const struct xnn_runtime_value* input2_value = values + input2_id;
   const void* input2_data = input2_value->data;
   assert(input2_data != NULL);
 
-  const struct xnn_value* output_value = values + output_id;
+  const struct xnn_runtime_value* output_value = values + output_id;
   void* output_data = output_value->data;
   assert(output_data != NULL);
 

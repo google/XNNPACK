@@ -624,7 +624,7 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
     xnn_operator_t batch_matrix_multiply_op,
     enum xnn_operator_type expected_operator_type, size_t num_batch_dims,
     const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
-    size_t n, size_t* workspace_size, size_t* workspace_alignment,
+    size_t n, size_t* workspace_size,
     uint32_t log2_input_a_element_size, uint32_t log2_input_b_element_size,
     uint32_t bias_element_size, uint32_t w_stride_extra_bytes,
     uint32_t log2_output_element_size, const void* params, size_t params_size,
@@ -769,10 +769,6 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
       if (workspace_size != NULL) {
         *workspace_size = batch_size_b * input_b_batch_stride;
       }
-      if (workspace_alignment != NULL) {
-        *workspace_alignment = XNN_ALLOCATION_ALIGNMENT;
-      }
-
       if (batch_matrix_multiply_op->flags & XNN_FLAG_TRANSPOSE_B) {
         assert(batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.packw_gemm_goi != NULL ||
                gemm_config->pack_weights_and_biases);
@@ -964,12 +960,11 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_f16(
     xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
     const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
-    size_t n, size_t* workspace_size, size_t* workspace_alignment,
+    size_t n, size_t* workspace_size,
     pthreadpool_t threadpool) {
   return reshape_batch_matrix_multiply_nc(
       batch_matrix_multiply_op, xnn_operator_type_batch_matrix_multiply_nc_f16,
       num_batch_dims, batch_dims_a, batch_dims_b, m, k, n, workspace_size,
-      workspace_alignment,
       /*log2_input_a_element_size=*/XNN_LOG2_SIZEOF_HALF,
       /*log2_input_b_element_size=*/XNN_LOG2_SIZEOF_HALF,
       /*bias_element_size=*/sizeof(uint16_t),
@@ -983,12 +978,11 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_f16(
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_pf16(
     xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
     const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
-    size_t n, size_t* workspace_size, size_t* workspace_alignment,
+    size_t n, size_t* workspace_size,
     pthreadpool_t threadpool) {
   return reshape_batch_matrix_multiply_nc(
       batch_matrix_multiply_op, xnn_operator_type_batch_matrix_multiply_nc_pf16,
       num_batch_dims, batch_dims_a, batch_dims_b, m, k, n, workspace_size,
-      workspace_alignment,
       /*log2_input_a_element_size=*/XNN_LOG2_SIZEOF_HALF,
       /*log2_input_b_element_size=*/XNN_LOG2_SIZEOF_HALF,
       /*bias_element_size=*/sizeof(uint16_t),
@@ -1002,12 +996,11 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_pf16(
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_bf16_f32(
     xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
     const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
-    size_t n, size_t* workspace_size, size_t* workspace_alignment,
+    size_t n, size_t* workspace_size,
     pthreadpool_t threadpool) {
   return reshape_batch_matrix_multiply_nc(
       batch_matrix_multiply_op, xnn_operator_type_batch_matrix_multiply_nc_bf16_f32,
       num_batch_dims, batch_dims_a, batch_dims_b, m, k, n, workspace_size,
-      workspace_alignment,
       /*log2_input_a_element_size=*/XNN_LOG2_SIZEOF_HALF,
       /*log2_input_b_element_size=*/XNN_LOG2_SIZEOF_HALF,
       /*bias_element_size=*/sizeof(float),
@@ -1021,12 +1014,11 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_bf16_f32(
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_f32(
     xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
     const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
-    size_t n, size_t* workspace_size, size_t* workspace_alignment,
+    size_t n, size_t* workspace_size,
     pthreadpool_t threadpool) {
   return reshape_batch_matrix_multiply_nc(
       batch_matrix_multiply_op, xnn_operator_type_batch_matrix_multiply_nc_f32,
       num_batch_dims, batch_dims_a, batch_dims_b, m, k, n, workspace_size,
-      workspace_alignment,
       /*log2_input_a_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
       /*log2_input_b_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
       /*bias_element_size=*/sizeof(float),
@@ -1040,12 +1032,11 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_f32(
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_pf32(
     xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
     const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
-    size_t n, size_t* workspace_size, size_t* workspace_alignment,
+    size_t n, size_t* workspace_size,
     pthreadpool_t threadpool) {
   return reshape_batch_matrix_multiply_nc(
       batch_matrix_multiply_op, xnn_operator_type_batch_matrix_multiply_nc_pf32,
       num_batch_dims, batch_dims_a, batch_dims_b, m, k, n, workspace_size,
-      workspace_alignment,
       /*log2_input_a_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
       /*log2_input_b_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
       /*bias_element_size=*/sizeof(float),
@@ -1064,7 +1055,6 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_qd8_f32_qc8w(
       batch_matrix_multiply_op,
       xnn_operator_type_batch_matrix_multiply_nc_qd8_f32_qc8w, num_batch_dims,
       batch_dims_a, batch_dims_b, m, k, n, /*workspace_size=*/NULL,
-      /*workspace_alignment=*/NULL,
       /*log2_input_a_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
       /*log2_input_b_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
       /*bias_element_size=*/sizeof(int32_t),
@@ -1083,7 +1073,6 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_qp8_f32_qc8w(
       batch_matrix_multiply_op,
       xnn_operator_type_batch_matrix_multiply_nc_qp8_f32_qc8w, num_batch_dims,
       batch_dims_a, batch_dims_b, m, k, n, /*workspace_size=*/NULL,
-      /*workspace_alignment=*/NULL,
       /*log2_input_a_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
       /*log2_input_b_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
       /*bias_element_size=*/sizeof(int32_t),
@@ -1102,7 +1091,6 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_qdu8_f32_qc8w(
       batch_matrix_multiply_op,
       xnn_operator_type_batch_matrix_multiply_nc_qdu8_f32_qc8w, num_batch_dims,
       batch_dims_a, batch_dims_b, m, k, n, /*workspace_size=*/NULL,
-      /*workspace_alignment=*/NULL,
       /*log2_input_a_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
       /*log2_input_b_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
       /*bias_element_size=*/sizeof(int32_t),

@@ -718,11 +718,10 @@ class ConvolutionOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
           auto_convolution_op(convolution_op, xnn_delete_operator);
       size_t workspace_size = SIZE_MAX;
-      size_t workspace_alignment = SIZE_MAX;
       ASSERT_EQ(xnn_status_success,
                 xnn_reshape_convolution2d_nhwc_qs8_qc8w(
                     convolution_op, batch_size(), input_height(), input_width(),
-                    &workspace_size, &workspace_alignment,
+                    &workspace_size,
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                     auto_threadpool.get()));
       xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
@@ -730,13 +729,11 @@ class ConvolutionOperatorTester {
       if (transient_indirection_buffer()) {
         ASSERT_NE(workspace_size, 0);
         ASSERT_NE(workspace_size, SIZE_MAX);
-        ASSERT_EQ(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
         ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qs8_qc8w(
                                           convolution_op, workspace.data(),
                                           input.data(), output.data()));
       } else {
         ASSERT_NE(workspace_size, SIZE_MAX);
-        ASSERT_NE(workspace_alignment, SIZE_MAX);
         ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qs8_qc8w(
                                           convolution_op, workspace.data(),
                                           input.data(), output.data()));
@@ -774,11 +771,10 @@ class ConvolutionOperatorTester {
             auto_convolution_op(convolution_op2, xnn_delete_operator);
         xnnpack::Buffer<int8_t> output2(output.size(), INT8_C(0xA5));
         size_t workspace_size = SIZE_MAX;
-        size_t workspace_alignment = SIZE_MAX;
         ASSERT_EQ(xnn_status_success,
                   xnn_reshape_convolution2d_nhwc_qs8_qc8w(
                       convolution_op2, batch_size(), input_height(),
-                      input_width(), &workspace_size, &workspace_alignment,
+                      input_width(), &workspace_size,
                       /*output_height_out=*/nullptr,
                       /*output_width_out=*/nullptr, auto_threadpool.get()));
         xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(
@@ -787,13 +783,11 @@ class ConvolutionOperatorTester {
         if (transient_indirection_buffer()) {
           ASSERT_NE(workspace_size, 0);
           ASSERT_NE(workspace_size, SIZE_MAX);
-          ASSERT_EQ(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
           ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qs8_qc8w(
                                             convolution_op2, workspace.data(),
                                             input.data(), output2.data()));
         } else {
           ASSERT_NE(workspace_size, SIZE_MAX);
-          ASSERT_NE(workspace_alignment, SIZE_MAX);
           ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qs8_qc8w(
                                             convolution_op2, workspace.data(),
                                             input.data(), output2.data()));
@@ -983,11 +977,10 @@ class ConvolutionOperatorTester {
           auto_convolution_op(convolution_op, xnn_delete_operator);
 
       size_t workspace_size = SIZE_MAX;
-      size_t workspace_alignment = SIZE_MAX;
       ASSERT_EQ(xnn_status_success,
                 xnn_reshape_convolution2d_nhwc_qd8_f16_qc8w(
                     convolution_op, batch_size(), input_height(), input_width(),
-                    &workspace_size, &workspace_alignment,
+                    &workspace_size,
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                     auto_threadpool.get()));
       xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
@@ -995,7 +988,6 @@ class ConvolutionOperatorTester {
       if (transient_indirection_buffer()) {
         ASSERT_NE(workspace_size, 0);
         ASSERT_NE(workspace_size, SIZE_MAX);
-        ASSERT_EQ(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
         ASSERT_EQ(
             xnn_status_success,
             xnn_setup_convolution2d_nhwc_qd8_f16_qc8w(
@@ -1004,7 +996,6 @@ class ConvolutionOperatorTester {
                     quantization_params.data())));
       } else {
         ASSERT_NE(workspace_size, SIZE_MAX);
-        ASSERT_NE(workspace_alignment, SIZE_MAX);
         ASSERT_EQ(
             xnn_status_success,
             xnn_setup_convolution2d_nhwc_qd8_f16_qc8w(
@@ -1045,11 +1036,10 @@ class ConvolutionOperatorTester {
 
         xnnpack::Buffer<xnn_float16> output2(output.size());
         size_t workspace_size = SIZE_MAX;
-        size_t workspace_alignment = SIZE_MAX;
         ASSERT_EQ(xnn_status_success,
                   xnn_reshape_convolution2d_nhwc_qd8_f16_qc8w(
                       convolution_op2, batch_size(), input_height(),
-                      input_width(), &workspace_size, &workspace_alignment,
+                      input_width(), &workspace_size,
                       /*output_height_out=*/nullptr,
                       /*output_width_out=*/nullptr, auto_threadpool.get()));
         xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(
@@ -1058,7 +1048,6 @@ class ConvolutionOperatorTester {
         if (transient_indirection_buffer()) {
           ASSERT_NE(workspace_size, 0);
           ASSERT_NE(workspace_size, SIZE_MAX);
-          ASSERT_EQ(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
           ASSERT_EQ(xnn_status_success,
                     xnn_setup_convolution2d_nhwc_qd8_f16_qc8w(
                         convolution_op2, workspace.data(), input.data(),
@@ -1067,7 +1056,6 @@ class ConvolutionOperatorTester {
                             quantization_params.data())));
         } else {
           ASSERT_NE(workspace_size, SIZE_MAX);
-          ASSERT_NE(workspace_alignment, SIZE_MAX);
           ASSERT_EQ(xnn_status_success,
                     xnn_setup_convolution2d_nhwc_qd8_f16_qc8w(
                         convolution_op2, workspace.data(), input.data(),
@@ -1206,11 +1194,10 @@ class ConvolutionOperatorTester {
           auto_convolution_op(convolution_op, xnn_delete_operator);
 
       size_t workspace_size = SIZE_MAX;
-      size_t workspace_alignment = SIZE_MAX;
       ASSERT_EQ(xnn_status_success,
                 xnn_reshape_convolution2d_nhwc_qd8_f32_qc8w(
                     convolution_op, batch_size(), input_height(), input_width(),
-                    &workspace_size, &workspace_alignment,
+                    &workspace_size,
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                     auto_threadpool.get()));
       xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
@@ -1218,7 +1205,6 @@ class ConvolutionOperatorTester {
       if (transient_indirection_buffer()) {
         ASSERT_NE(workspace_size, 0);
         ASSERT_NE(workspace_size, SIZE_MAX);
-        ASSERT_EQ(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
         ASSERT_EQ(
             xnn_status_success,
             xnn_setup_convolution2d_nhwc_qd8_f32_qc8w(
@@ -1227,7 +1213,6 @@ class ConvolutionOperatorTester {
                     quantization_params.data())));
       } else {
         ASSERT_NE(workspace_size, SIZE_MAX);
-        ASSERT_NE(workspace_alignment, SIZE_MAX);
         ASSERT_EQ(
             xnn_status_success,
             xnn_setup_convolution2d_nhwc_qd8_f32_qc8w(
@@ -1267,11 +1252,10 @@ class ConvolutionOperatorTester {
 
         xnnpack::Buffer<float> output2(output.size());
         size_t workspace_size = SIZE_MAX;
-        size_t workspace_alignment = SIZE_MAX;
         ASSERT_EQ(xnn_status_success,
                   xnn_reshape_convolution2d_nhwc_qd8_f32_qc8w(
                       convolution_op2, batch_size(), input_height(),
-                      input_width(), &workspace_size, &workspace_alignment,
+                      input_width(), &workspace_size,
                       /*output_height_out=*/nullptr,
                       /*output_width_out=*/nullptr, auto_threadpool.get()));
         xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(
@@ -1280,7 +1264,6 @@ class ConvolutionOperatorTester {
         if (transient_indirection_buffer()) {
           ASSERT_NE(workspace_size, 0);
           ASSERT_NE(workspace_size, SIZE_MAX);
-          ASSERT_EQ(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
           ASSERT_EQ(xnn_status_success,
                     xnn_setup_convolution2d_nhwc_qd8_f32_qc8w(
                         convolution_op2, workspace.data(), input.data(),
@@ -1289,7 +1272,6 @@ class ConvolutionOperatorTester {
                             quantization_params.data())));
         } else {
           ASSERT_NE(workspace_size, SIZE_MAX);
-          ASSERT_NE(workspace_alignment, SIZE_MAX);
           ASSERT_EQ(xnn_status_success,
                     xnn_setup_convolution2d_nhwc_qd8_f32_qc8w(
                         convolution_op2, workspace.data(), input.data(),
@@ -1461,11 +1443,10 @@ class ConvolutionOperatorTester {
           auto_convolution_op(convolution_op, xnn_delete_operator);
 
       size_t workspace_size = SIZE_MAX;
-      size_t workspace_alignment = SIZE_MAX;
       ASSERT_EQ(xnn_status_success,
                 xnn_reshape_convolution2d_nhwc_qs8(
                     convolution_op, batch_size(), input_height(), input_width(),
-                    &workspace_size, &workspace_alignment,
+                    &workspace_size,
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                     auto_threadpool.get()));
       xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
@@ -1473,13 +1454,11 @@ class ConvolutionOperatorTester {
       if (transient_indirection_buffer()) {
         ASSERT_NE(workspace_size, 0);
         ASSERT_NE(workspace_size, SIZE_MAX);
-        ASSERT_EQ(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
         ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qs8(
                                           convolution_op, workspace.data(),
                                           input.data(), output.data()));
       } else {
         ASSERT_NE(workspace_size, SIZE_MAX);
-        ASSERT_NE(workspace_alignment, SIZE_MAX);
         ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qs8(
                                           convolution_op, workspace.data(),
                                           input.data(), output.data()));
@@ -1518,11 +1497,10 @@ class ConvolutionOperatorTester {
 
         xnnpack::Buffer<int8_t> output2(output.size(), INT8_C(0xA5));
         size_t workspace_size = SIZE_MAX;
-        size_t workspace_alignment = SIZE_MAX;
         ASSERT_EQ(xnn_status_success,
                   xnn_reshape_convolution2d_nhwc_qs8(
                       convolution_op2, batch_size(), input_height(),
-                      input_width(), &workspace_size, &workspace_alignment,
+                      input_width(), &workspace_size,
                       /*output_height_out=*/nullptr,
                       /*output_width_out=*/nullptr, auto_threadpool.get()));
         xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(
@@ -1531,13 +1509,11 @@ class ConvolutionOperatorTester {
         if (transient_indirection_buffer()) {
           ASSERT_NE(workspace_size, 0);
           ASSERT_NE(workspace_size, SIZE_MAX);
-          ASSERT_EQ(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
           ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qs8(
                                             convolution_op2, workspace.data(),
                                             input.data(), output2.data()));
         } else {
           ASSERT_NE(workspace_size, SIZE_MAX);
-          ASSERT_NE(workspace_alignment, SIZE_MAX);
           ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qs8(
                                             convolution_op2, workspace.data(),
                                             input.data(), output2.data()));
@@ -1769,11 +1745,10 @@ class ConvolutionOperatorTester {
           auto_convolution_op(convolution_op, xnn_delete_operator);
 
       size_t workspace_size = SIZE_MAX;
-      size_t workspace_alignment = SIZE_MAX;
       ASSERT_EQ(xnn_status_success,
                 xnn_reshape_convolution2d_nhwc_qu8(
                     convolution_op, batch_size(), input_height(), input_width(),
-                    &workspace_size, &workspace_alignment,
+                    &workspace_size,
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                     auto_threadpool.get()));
       xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
@@ -1781,13 +1756,11 @@ class ConvolutionOperatorTester {
       if (transient_indirection_buffer()) {
         ASSERT_NE(workspace_size, 0);
         ASSERT_NE(workspace_size, SIZE_MAX);
-        ASSERT_EQ(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
         ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qu8(
                                           convolution_op, workspace.data(),
                                           input.data(), output.data()));
       } else {
         ASSERT_NE(workspace_size, SIZE_MAX);
-        ASSERT_NE(workspace_alignment, SIZE_MAX);
         ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qu8(
                                           convolution_op, workspace.data(),
                                           input.data(), output.data()));
@@ -1826,11 +1799,10 @@ class ConvolutionOperatorTester {
         xnnpack::Buffer<uint8_t> output2(output.size(), UINT8_C(0xA5));
 
         size_t workspace_size = SIZE_MAX;
-        size_t workspace_alignment = SIZE_MAX;
         ASSERT_EQ(xnn_status_success,
                   xnn_reshape_convolution2d_nhwc_qu8(
                       convolution_op2, batch_size(), input_height(),
-                      input_width(), &workspace_size, &workspace_alignment,
+                      input_width(), &workspace_size,
                       /*output_height_out=*/nullptr,
                       /*output_width_out=*/nullptr, auto_threadpool.get()));
         xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(
@@ -1839,13 +1811,11 @@ class ConvolutionOperatorTester {
         if (transient_indirection_buffer()) {
           ASSERT_NE(workspace_size, 0);
           ASSERT_NE(workspace_size, SIZE_MAX);
-          ASSERT_EQ(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
           ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qu8(
                                             convolution_op2, workspace.data(),
                                             input.data(), output2.data()));
         } else {
           ASSERT_NE(workspace_size, SIZE_MAX);
-          ASSERT_NE(workspace_alignment, SIZE_MAX);
           ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qu8(
                                             convolution_op2, workspace.data(),
                                             input.data(), output2.data()));
@@ -2130,11 +2100,10 @@ class ConvolutionOperatorTester {
           auto_convolution_op(convolution_op, xnn_delete_operator);
 
       size_t workspace_size = SIZE_MAX;
-      size_t workspace_alignment = SIZE_MAX;
       ASSERT_EQ(xnn_status_success,
                 xnn_reshape_convolution2d_nhwc_f32(
                     convolution_op, batch_size(), input_height(), input_width(),
-                    &workspace_size, &workspace_alignment,
+                    &workspace_size,
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                     auto_threadpool.get()));
       xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
@@ -2142,13 +2111,11 @@ class ConvolutionOperatorTester {
       if (transient_indirection_buffer()) {
         ASSERT_NE(workspace_size, 0);
         ASSERT_NE(workspace_size, SIZE_MAX);
-        ASSERT_EQ(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
         ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f32(
                                           convolution_op, workspace.data(),
                                           input.data(), output.data()));
       } else {
         ASSERT_NE(workspace_size, SIZE_MAX);
-        ASSERT_NE(workspace_alignment, SIZE_MAX);
         ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f32(
                                           convolution_op, workspace.data(),
                                           input.data(), output.data()));
@@ -2183,11 +2150,10 @@ class ConvolutionOperatorTester {
 
         xnnpack::Buffer<float> output2(output.size());
         size_t workspace_size = SIZE_MAX;
-        size_t workspace_alignment = SIZE_MAX;
         ASSERT_EQ(xnn_status_success,
                   xnn_reshape_convolution2d_nhwc_f32(
                       convolution_op2, batch_size(), input_height(),
-                      input_width(), &workspace_size, &workspace_alignment,
+                      input_width(), &workspace_size,
                       /*output_height_out=*/nullptr,
                       /*output_width_out=*/nullptr, auto_threadpool.get()));
         xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(
@@ -2196,14 +2162,11 @@ class ConvolutionOperatorTester {
         if (transient_indirection_buffer()) {
           ASSERT_NE(workspace_size, 0);
           ASSERT_NE(workspace_size, SIZE_MAX);
-          ASSERT_EQ(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
           ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f32(
                                             convolution_op2, workspace.data(),
                                             input.data(), output2.data()));
         } else {
           ASSERT_NE(workspace_size, SIZE_MAX);
-          ASSERT_NE(workspace_alignment, SIZE_MAX);
-          ASSERT_EQ(workspace_alignment, 1);
           ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f32(
                                             convolution_op2, workspace.data(),
                                             input.data(), output2.data()));
@@ -2518,11 +2481,10 @@ class ConvolutionOperatorTester {
           auto_convolution_op(convolution_op, xnn_delete_operator);
 
       size_t workspace_size = SIZE_MAX;
-      size_t workspace_alignment = SIZE_MAX;
       ASSERT_EQ(xnn_status_success,
                 xnn_reshape_convolution2d_nhwc_f16(
                     convolution_op, batch_size(), input_height(), input_width(),
-                    &workspace_size, &workspace_alignment,
+                    &workspace_size,
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                     auto_threadpool.get()));
       xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
@@ -2530,14 +2492,11 @@ class ConvolutionOperatorTester {
       if (transient_indirection_buffer()) {
         ASSERT_NE(workspace_size, 0);
         ASSERT_NE(workspace_size, SIZE_MAX);
-        ASSERT_EQ(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
         ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f16(
                                           convolution_op, workspace.data(),
                                           input.data(), output.data()));
       } else {
         ASSERT_NE(workspace_size, SIZE_MAX);
-        ASSERT_NE(workspace_alignment, SIZE_MAX);
-        ASSERT_EQ(workspace_alignment, 1);
         ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f16(
                                           convolution_op, workspace.data(),
                                           input.data(), output.data()));
@@ -2573,11 +2532,10 @@ class ConvolutionOperatorTester {
 
         xnnpack::Buffer<xnn_float16> output2(output.size());
         size_t workspace_size = SIZE_MAX;
-        size_t workspace_alignment = SIZE_MAX;
         ASSERT_EQ(xnn_status_success,
                   xnn_reshape_convolution2d_nhwc_f16(
                       convolution_op2, batch_size(), input_height(),
-                      input_width(), &workspace_size, &workspace_alignment,
+                      input_width(), &workspace_size,
                       /*output_height_out=*/nullptr,
                       /*output_width_out=*/nullptr, auto_threadpool.get()));
         xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(
@@ -2586,13 +2544,11 @@ class ConvolutionOperatorTester {
         if (transient_indirection_buffer()) {
           ASSERT_NE(workspace_size, 0);
           ASSERT_NE(workspace_size, SIZE_MAX);
-          ASSERT_EQ(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
           ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f16(
                                             convolution_op2, workspace.data(),
                                             input.data(), output2.data()));
         } else {
           ASSERT_NE(workspace_size, SIZE_MAX);
-          ASSERT_NE(workspace_alignment, SIZE_MAX);
           ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f16(
                                             convolution_op2, workspace.data(),
                                             input.data(), output2.data()));
@@ -3674,17 +3630,15 @@ class ConvolutionOperatorTester {
           auto_convolution_op(convolution_op, xnn_delete_operator);
 
       size_t workspace_size = SIZE_MAX;
-      size_t workspace_alignment = SIZE_MAX;
       ASSERT_EQ(xnn_status_success,
                 xnn_reshape_convolution2d_nhwc_qs8_qc8w(
                     convolution_op, batch_size(), input_height(), input_width(),
-                    &workspace_size, &workspace_alignment,
+                    &workspace_size,
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                     auto_threadpool.get()));
       xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
       std::iota(workspace.begin(), workspace.end(), 0);
       ASSERT_NE(workspace_size, SIZE_MAX);
-      ASSERT_NE(workspace_alignment, SIZE_MAX);
       ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qs8_qc8w(
                                         convolution_op, workspace.data(),
                                         input.data(), output.data()));
@@ -3826,15 +3780,13 @@ class ConvolutionOperatorTester {
       // Setup and run Convolution operator the second time, and destroy the
       // operator.
       workspace_size = SIZE_MAX;
-      workspace_alignment = SIZE_MAX;
       ASSERT_EQ(xnn_status_success,
                 xnn_reshape_convolution2d_nhwc_qs8_qc8w(
                     convolution_op, next_batch_size(), next_input_height(),
-                    next_input_width(), &workspace_size, &workspace_alignment,
+                    next_input_width(), &workspace_size,
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                     auto_threadpool.get()));
       ASSERT_NE(workspace_size, SIZE_MAX);
-      ASSERT_NE(workspace_alignment, SIZE_MAX);
       ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qs8_qc8w(
                                         convolution_op, workspace.data(),
                                         input.data(), output.data()));
@@ -4069,17 +4021,15 @@ class ConvolutionOperatorTester {
           auto_convolution_op(convolution_op, xnn_delete_operator);
 
       size_t workspace_size = SIZE_MAX;
-      size_t workspace_alignment = SIZE_MAX;
       ASSERT_EQ(xnn_status_success,
                 xnn_reshape_convolution2d_nhwc_qs8(
                     convolution_op, batch_size(), input_height(), input_width(),
-                    &workspace_size, &workspace_alignment,
+                    &workspace_size,
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                     auto_threadpool.get()));
       xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
       std::iota(workspace.begin(), workspace.end(), 0);
       ASSERT_NE(workspace_size, SIZE_MAX);
-      ASSERT_NE(workspace_alignment, SIZE_MAX);
       ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qs8(
                                         convolution_op, workspace.data(),
                                         input.data(), output.data()));
@@ -4212,17 +4162,15 @@ class ConvolutionOperatorTester {
           });
 
       workspace_size = SIZE_MAX;
-      workspace_alignment = SIZE_MAX;
       // Setup and run Convolution operator the second time, and destroy the
       // operator.
       ASSERT_EQ(xnn_status_success,
                 xnn_reshape_convolution2d_nhwc_qs8(
                     convolution_op, next_batch_size(), next_input_height(),
-                    next_input_width(), &workspace_size, &workspace_alignment,
+                    next_input_width(), &workspace_size,
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                     auto_threadpool.get()));
       ASSERT_NE(workspace_size, SIZE_MAX);
-      ASSERT_NE(workspace_alignment, SIZE_MAX);
       ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qs8(
                                         convolution_op, workspace.data(),
                                         input.data(), output.data()));
@@ -4457,17 +4405,15 @@ class ConvolutionOperatorTester {
           auto_convolution_op(convolution_op, xnn_delete_operator);
 
       size_t workspace_size = SIZE_MAX;
-      size_t workspace_alignment = SIZE_MAX;
       ASSERT_EQ(xnn_status_success,
                 xnn_reshape_convolution2d_nhwc_qu8(
                     convolution_op, batch_size(), input_height(), input_width(),
-                    &workspace_size, &workspace_alignment,
+                    &workspace_size,
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                     auto_threadpool.get()));
       xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
       std::iota(workspace.begin(), workspace.end(), 0);
       ASSERT_NE(workspace_size, SIZE_MAX);
-      ASSERT_NE(workspace_alignment, SIZE_MAX);
       ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qu8(
                                         convolution_op, workspace.data(),
                                         input.data(), output.data()));
@@ -4601,17 +4547,15 @@ class ConvolutionOperatorTester {
           });
 
       workspace_size = SIZE_MAX;
-      workspace_alignment = SIZE_MAX;
       // Setup and run Convolution operator the second time, and destroy the
       // operator.
       ASSERT_EQ(xnn_status_success,
                 xnn_reshape_convolution2d_nhwc_qu8(
                     convolution_op, next_batch_size(), next_input_height(),
-                    next_input_width(), &workspace_size, &workspace_alignment,
+                    next_input_width(), &workspace_size,
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                     auto_threadpool.get()));
       ASSERT_NE(workspace_size, SIZE_MAX);
-      ASSERT_NE(workspace_alignment, SIZE_MAX);
       ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qu8(
                                         convolution_op, workspace.data(),
                                         input.data(), output.data()));
@@ -4825,17 +4769,15 @@ class ConvolutionOperatorTester {
           auto_convolution_op(convolution_op, xnn_delete_operator);
 
       size_t workspace_size = SIZE_MAX;
-      size_t workspace_alignment = SIZE_MAX;
       ASSERT_EQ(xnn_status_success,
                 xnn_reshape_convolution2d_nhwc_f16(
                     convolution_op, batch_size(), input_height(), input_width(),
-                    &workspace_size, &workspace_alignment,
+                    &workspace_size,
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                     auto_threadpool.get()));
       xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
       std::iota(workspace.begin(), workspace.end(), 0);
       ASSERT_NE(workspace_size, SIZE_MAX);
-      ASSERT_NE(workspace_alignment, SIZE_MAX);
       ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f16(
                                         convolution_op, workspace.data(),
                                         input.data(), output.data()));
@@ -4919,17 +4861,15 @@ class ConvolutionOperatorTester {
       }
 
       workspace_size = SIZE_MAX;
-      workspace_alignment = SIZE_MAX;
       // Setup and run Convolution operator the second time, and destroy the
       // operator.
       ASSERT_EQ(xnn_status_success,
                 xnn_reshape_convolution2d_nhwc_f16(
                     convolution_op, next_batch_size(), next_input_height(),
-                    next_input_width(), &workspace_size, &workspace_alignment,
+                    next_input_width(), &workspace_size,
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                     auto_threadpool.get()));
       ASSERT_NE(workspace_size, SIZE_MAX);
-      ASSERT_NE(workspace_alignment, SIZE_MAX);
       ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f16(
                                         convolution_op, workspace.data(),
                                         input.data(), output.data()));
@@ -5101,17 +5041,15 @@ class ConvolutionOperatorTester {
           auto_convolution_op(convolution_op, xnn_delete_operator);
 
       size_t workspace_size = SIZE_MAX;
-      size_t workspace_alignment = SIZE_MAX;
       ASSERT_EQ(xnn_status_success,
                 xnn_reshape_convolution2d_nhwc_f32(
                     convolution_op, batch_size(), input_height(), input_width(),
-                    &workspace_size, &workspace_alignment,
+                    &workspace_size,
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                     auto_threadpool.get()));
       xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
       std::iota(workspace.begin(), workspace.end(), 0);
       ASSERT_NE(workspace_size, SIZE_MAX);
-      ASSERT_NE(workspace_alignment, SIZE_MAX);
       ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f32(
                                         convolution_op, workspace.data(),
                                         input.data(), output.data()));
@@ -5236,17 +5174,15 @@ class ConvolutionOperatorTester {
       }
 
       workspace_size = SIZE_MAX;
-      workspace_alignment = SIZE_MAX;
       // Setup and run Convolution operator the second time, and destroy the
       // operator.
       ASSERT_EQ(xnn_status_success,
                 xnn_reshape_convolution2d_nhwc_f32(
                     convolution_op, next_batch_size(), next_input_height(),
-                    next_input_width(), &workspace_size, &workspace_alignment,
+                    next_input_width(), &workspace_size,
                     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                     auto_threadpool.get()));
       ASSERT_NE(workspace_size, SIZE_MAX);
-      ASSERT_NE(workspace_alignment, SIZE_MAX);
       ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f32(
                                         convolution_op, workspace.data(),
                                         input.data(), output.data()));

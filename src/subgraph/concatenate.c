@@ -40,7 +40,7 @@ static enum xnn_status create_concatenate_operator_helper(
 
 static enum xnn_status create_concatenate_operator(
   const struct xnn_node* node,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
   xnn_weights_cache_t weights_cache)
@@ -51,7 +51,7 @@ static enum xnn_status create_concatenate_operator(
   opdata->axis = axis;
   const uint32_t input1_id = opdata->inputs[0];
   assert(input1_id < num_values);
-  const struct xnn_value *input1_value = &values[input1_id];
+  const struct xnn_runtime_value *input1_value = &values[input1_id];
   for (size_t i = 0; i < num_inputs; ++i) {
     status = create_concatenate_operator_helper(node, opdata, input1_value->datatype, i);
     if (status != xnn_status_success) {
@@ -68,25 +68,26 @@ static enum xnn_status reshape_concatenate_operator_helper(
   size_t channels,
   size_t input_stride,
   size_t output_stride,
+  size_t batch_size,
   pthreadpool_t threadpool)
 {
   switch (opdata->operator_objects[index]->type) {
     case xnn_operator_type_copy_nc_x16:
       return xnn_reshape_copy_nc_x16(
         opdata->operator_objects[index],
-        opdata->batch_size,
+        batch_size,
         channels, input_stride, output_stride,
         threadpool);
     case xnn_operator_type_copy_nc_x32:
       return xnn_reshape_copy_nc_x32(
         opdata->operator_objects[index],
-        opdata->batch_size,
+        batch_size,
         channels, input_stride, output_stride,
         threadpool);
     case xnn_operator_type_copy_nc_x8:
       return xnn_reshape_copy_nc_x8(
         opdata->operator_objects[index],
-        opdata->batch_size,
+        batch_size,
         channels, input_stride, output_stride,
         threadpool);
     default:
@@ -96,7 +97,7 @@ static enum xnn_status reshape_concatenate_operator_helper(
 
 static enum xnn_status reshape_concatenate_operator(
   struct xnn_operator_data* opdata,
-  struct xnn_value* values,
+  struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -133,8 +134,8 @@ static enum xnn_status reshape_concatenate_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  const struct xnn_value* input0_value = values + input_id[0];
-  struct xnn_value* output_value = values + output_id;
+  const struct xnn_runtime_value* input0_value = values + input_id[0];
+  struct xnn_runtime_value* output_value = values + output_id;
 
   output_value->shape.num_dims = input0_value->shape.num_dims;
   if (axis >= output_value->shape.num_dims) {
@@ -151,15 +152,15 @@ static enum xnn_status reshape_concatenate_operator(
     concatenated_elements += values[input_id[i]].shape.dim[axis];
   }
   output_value->shape.dim[axis] = concatenated_elements;
-  opdata->batch_size = xnn_shape_multiply_leading_dims(&output_value->shape, axis);
+  size_t batch_size = xnn_shape_multiply_leading_dims(&output_value->shape, axis);
   const size_t old_workspace_size = opdata->workspace_size;
   for (size_t i = 0; i < num_inputs; ++i) {
-    status = reshape_concatenate_operator_helper(opdata, i, input_channels[i], input_channels[i], output_stride, threadpool);
+    status = reshape_concatenate_operator_helper(opdata, i, input_channels[i], input_channels[i], output_stride, batch_size, threadpool);
     if (status != xnn_status_success) {
       return status;
     }
   }
-  const size_t new_size = xnn_tensor_get_size(output_value);
+  const size_t new_size = xnn_runtime_tensor_get_size(output_value);
   if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
     output_value->size = new_size;
     return xnn_status_reallocation_required;
@@ -206,7 +207,7 @@ static enum xnn_status setup_concatenate_operator_helper(
 
 static enum xnn_status setup_concatenate_operator(
   const struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -222,7 +223,7 @@ static enum xnn_status setup_concatenate_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  const struct xnn_value* input_value[XNN_MAX_OPERATOR_OBJECTS];
+  const struct xnn_runtime_value* input_value[XNN_MAX_OPERATOR_OBJECTS];
   const void * input_data[XNN_MAX_OPERATOR_OBJECTS];
   for (size_t i = 0; i < num_inputs; ++i) {
     input_value[i] = values + input_id[i];
@@ -230,7 +231,7 @@ static enum xnn_status setup_concatenate_operator(
     assert(input_data[i] != NULL);
   }
 
-  const struct xnn_value* output_value = values + output_id;
+  const struct xnn_runtime_value* output_value = values + output_id;
   void* output_data = output_value->data;
   assert(output_data != NULL);
 

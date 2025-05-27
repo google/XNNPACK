@@ -227,4 +227,4 @@ INSTANTIATE_TEST_SUITE_P(                                                       
       return info.param.test_name;                                                                                       \
     });
 #include "src/qu8-dwconv/qu8-dwconv-minmax-rndnu.h"
-#undef XNN_UKERNEL_WITH_PARAMS
+#undef XNN_UKERNEL

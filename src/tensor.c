@@ -280,7 +280,7 @@ enum xnn_status xnn_define_dynamically_quantized_tensor_value(
   value->quantization.num_nonbatch_dims = num_nonbatch_dims;
   set_shape(value, num_dims, dims);
   value->size = xnn_tensor_get_size_by_id(subgraph, value->id);
-  value->quantization.dynamic_params_size =  xnn_tensor_get_dynamic_quant_param_size(value);
+  value->quantization.dynamic_params_size =  xnn_tensor_get_dynamic_quant_param_size(value->datatype, &value->shape, value->quantization.num_nonbatch_dims);
   value->flags = flags;
   value->data = NULL;
   set_allocation_type(value);
@@ -658,28 +658,28 @@ size_t xnn_shape_multiply_trailing_dims(
   return product;
 }
 
-size_t xnn_tensor_get_size(const struct xnn_value* value)
-{
-  assert(value->type == xnn_value_type_dense_tensor);
-  assert(value->datatype != xnn_datatype_invalid);
+size_t get_tensor_size(const struct xnn_gemm_config* gemm_config, enum xnn_value_type type,
+                 enum xnn_datatype datatype, const struct xnn_shape *shape, uint32_t flags) {
+  assert(type == xnn_value_type_dense_tensor);
+  assert(datatype != xnn_datatype_invalid);
 
   // Special handling for packed quantized types.
-  if (value->datatype == xnn_datatype_qpint8) {
-    assert(value->gemm_config != NULL);
-    size_t num_groups = xnn_shape_multiply_batch_dims(&value->shape, 2);
-    size_t m = value->shape.dim[value->shape.num_dims - 2];
-    const size_t k = value->shape.dim[value->shape.num_dims - 1];
-    if (value->flags & XNN_FLAG_SQUASH_GROUPS) {
+  if (datatype == xnn_datatype_qpint8) {
+    assert(gemm_config != NULL);
+    size_t num_groups = xnn_shape_multiply_batch_dims(shape, 2);
+    size_t m = shape->dim[shape->num_dims - 2];
+    const size_t k = shape->dim[shape->num_dims - 1];
+    if (flags & XNN_FLAG_SQUASH_GROUPS) {
       m *= num_groups;
       num_groups = 1;
     }
     return num_groups *
-           xnn_x8_packq_f32qp8_gemm_packed_size(value->gemm_config, m, k);
+           xnn_x8_packq_f32qp8_gemm_packed_size(gemm_config, m, k);
   }
 
-  uint64_t size_bits = xnn_datatype_size_bits(value->datatype);
+  uint64_t size_bits = xnn_datatype_size_bits(datatype);
 
-  size_bits *= xnn_shape_multiply_all_dims(&value->shape);
+  size_bits *= xnn_shape_multiply_all_dims(shape);
 
   // Round size up to the nearest byte.
   // TODO: We should not be using this helper for non-byte-addressable types,
@@ -687,14 +687,26 @@ size_t xnn_tensor_get_size(const struct xnn_value* value)
   return round_up_po2(size_bits, 8) >> 3;
 }
 
-// Return size of the dynamic quantization params in this value
-size_t xnn_tensor_get_dynamic_quant_param_size(const struct xnn_value* value)
+size_t xnn_runtime_tensor_get_size(const struct xnn_runtime_value* value)
 {
-  switch (value->datatype) {
+  return get_tensor_size(value->gemm_config, value->type, value->datatype, &value->shape, value->flags);
+}
+
+size_t xnn_tensor_get_size(const struct xnn_value* value)
+{
+  return get_tensor_size(value->gemm_config, value->type, value->datatype, &value->shape, value->flags);
+}
+
+// Return size of the dynamic quantization params in this value
+size_t xnn_tensor_get_dynamic_quant_param_size(enum xnn_datatype datatype,
+                                               const struct xnn_shape *shape,
+                                               size_t num_nonbatch_dims)
+{
+  switch (datatype) {
     case xnn_datatype_qdint8:
     case xnn_datatype_qduint8: {
       const size_t batch_dims_size = xnn_shape_multiply_batch_dims(
-          &value->shape, value->quantization.num_nonbatch_dims);
+          shape, num_nonbatch_dims);
       return batch_dims_size * sizeof(struct xnn_quantization_params);
     }
     default:

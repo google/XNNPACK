@@ -102,10 +102,8 @@ void xnnpack_convolution_qu8(benchmark::State& state, const char* net) {
   pthreadpool_t threadpool = pthreadpool_create(FLAGS_num_threads);
 
   size_t workspace_size = 0;
-  size_t workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_qu8(
       convolution_op, batch_size, input_height, input_width, &workspace_size,
-      &workspace_alignment,
       /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, threadpool);
 
   if (status != xnn_status_success) {
@@ -224,10 +222,8 @@ void xnnpack_convolution_qs8(benchmark::State& state, const char* net) {
   pthreadpool_t threadpool = pthreadpool_create(FLAGS_num_threads);
 
   size_t workspace_size = 0;
-  size_t workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_qs8(
       convolution_op, batch_size, input_height, input_width, &workspace_size,
-      &workspace_alignment,
       /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, threadpool);
 
   if (status != xnn_status_success) {
@@ -347,10 +343,8 @@ void xnnpack_convolution_f16(benchmark::State& state, const char* net) {
   pthreadpool_t threadpool = pthreadpool_create(FLAGS_num_threads);
 
   size_t workspace_size = 0;
-  size_t workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f16(
       convolution_op, batch_size, input_height, input_width, &workspace_size,
-      &workspace_alignment,
       /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, threadpool);
 
   if (status != xnn_status_success) {
@@ -470,10 +464,8 @@ void xnnpack_convolution_f32(benchmark::State& state, const char* net) {
   pthreadpool_t threadpool = pthreadpool_create(FLAGS_num_threads);
 
   size_t workspace_size = 0;
-  size_t workspace_alignment = 0;
   status = xnn_reshape_convolution2d_nhwc_f32(
       convolution_op, batch_size, input_height, input_width, &workspace_size,
-      &workspace_alignment,
       /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, threadpool);
 
   if (status != xnn_status_success) {

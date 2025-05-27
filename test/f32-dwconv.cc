@@ -153,4 +153,4 @@ INSTANTIATE_TEST_SUITE_P(                                                       
       return info.param.test_name;                                                                                       \
     });
 #include "src/f32-dwconv/f32-dwconv.h"
-#undef XNN_UKERNEL_WITH_PARAMS
+#undef XNN_UKERNEL

@@ -219,15 +219,13 @@ class DynamicFullyConnectedOperatorTester {
                                           xnn_delete_operator);
 
       size_t workspace_size = 0;
-      size_t workspace_alignment = 0;
       ASSERT_EQ(
           xnn_status_success,
           xnn_reshape_dynamic_fully_connected_nc_f16(
               dynamic_fully_connected_op, batch_size(), input_channels(),
               output_channels(), input_stride(), output_stride(),
-              &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
+              &workspace_size, /*threadpool=*/nullptr));
       ASSERT_NE(workspace_size, 0);
-      ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
       xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
       // TODO(b/372731180): This should probably be initialized by the operator.
       std::fill(workspace.begin(), workspace.end(), 0);
@@ -352,15 +350,13 @@ class DynamicFullyConnectedOperatorTester {
                                           xnn_delete_operator);
 
       size_t workspace_size = 0;
-      size_t workspace_alignment = 0;
       ASSERT_EQ(
           xnn_status_success,
           xnn_reshape_dynamic_fully_connected_nc_f32(
               dynamic_fully_connected_op, batch_size(), input_channels(),
               output_channels(), input_stride(), output_stride(),
-              &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
+              &workspace_size, /*threadpool=*/nullptr));
       ASSERT_NE(workspace_size, 0);
-      ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
       xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
       // TODO(b/372731180): This should probably be initialized by the operator.
       std::fill(workspace.begin(), workspace.end(), 0);

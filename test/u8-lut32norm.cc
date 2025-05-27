@@ -137,12 +137,12 @@ class LUTNormMicrokernelTester {
     }                                                                                                                  \
   }
 
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, datatype, params_type, init_params)                               \
-  XNN_TEST_LUTNORM_N_EQ_1(ukernel, arch_flags, init_params);                                                           \
-  XNN_TEST_LUTNORM_SMALL_N(ukernel, arch_flags, init_params);                                                          \
-  XNN_TEST_LUTNORM_LARGE_N(ukernel, arch_flags, init_params);                                                          \
-  XNN_TEST_LUTNORM_N_EQ_1_INPLACE(ukernel, arch_flags, init_params);                                                   \
-  XNN_TEST_LUTNORM_SMALL_N_INPLACE(ukernel, arch_flags, init_params);                                                  \
+#define XNN_UKERNEL(arch_flags, ukernel, datatype, params_type, init_params) \
+  XNN_TEST_LUTNORM_N_EQ_1(ukernel, arch_flags, init_params);                 \
+  XNN_TEST_LUTNORM_SMALL_N(ukernel, arch_flags, init_params);                \
+  XNN_TEST_LUTNORM_LARGE_N(ukernel, arch_flags, init_params);                \
+  XNN_TEST_LUTNORM_N_EQ_1_INPLACE(ukernel, arch_flags, init_params);         \
+  XNN_TEST_LUTNORM_SMALL_N_INPLACE(ukernel, arch_flags, init_params);        \
   XNN_TEST_LUTNORM_LARGE_N_INPLACE(ukernel, arch_flags, init_params);
 #include "src/u8-lut32norm/u8-lut32norm.h"
-#undef XNN_UKERNEL_WITH_PARAMS
+#undef XNN_UKERNEL

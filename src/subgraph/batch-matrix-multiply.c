@@ -26,7 +26,7 @@
 
 static enum xnn_status create_batch_matrix_multiply_operator(
   const struct xnn_node* node,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
   xnn_weights_cache_t weights_cache)
@@ -45,12 +45,12 @@ static enum xnn_status create_batch_matrix_multiply_operator(
   const enum xnn_datatype inputa_datatype = values[input_a_id].datatype;
   const enum xnn_datatype inputb_datatype = values[input_b_id].datatype;
 
-  const struct xnn_value* input_b = values + input_b_id;
+  const struct xnn_runtime_value* input_b = values + input_b_id;
   // Get the shape and size of the second input.
   size_t batch_size_b = 1;
   size_t k = 0;
   size_t n = 0;
-  if (xnn_value_is_static(input_b)) {
+  if (xnn_value_is_static(input_b->allocation_type)) {
     if (input_b->shape.num_dims < 2) {
       xnn_log_error(
           "failed to create %s operator with input_b ID #%" PRIu32
@@ -86,7 +86,7 @@ static enum xnn_status create_batch_matrix_multiply_operator(
       switch (inputb_datatype) {
         case xnn_datatype_fp16: {
           // Get the shape and size of the second input.
-          if (xnn_value_is_static(input_b)) {
+          if (xnn_value_is_static(input_b->allocation_type)) {
             return xnn_create_batch_matrix_multiply_nc_f16_const_weights(
                 batch_size_b, k, n, input_b->data, node->flags,
                 &opdata->operator_objects[0]);
@@ -103,7 +103,7 @@ static enum xnn_status create_batch_matrix_multiply_operator(
       switch (inputb_datatype) {
         case xnn_datatype_fp16: {
           // Get the shape and size of the second input.
-          if (xnn_value_is_static(input_b)) {
+          if (xnn_value_is_static(input_b->allocation_type)) {
             return xnn_create_batch_matrix_multiply_nc_pf16_const_weights(
                 batch_size_b, k, n, input_b->data, node->flags,
                 &opdata->operator_objects[0]);
@@ -120,7 +120,7 @@ static enum xnn_status create_batch_matrix_multiply_operator(
       switch (inputb_datatype) {
         case xnn_datatype_fp32: {
           // Get the shape and size of the second input.
-          if (xnn_value_is_static(input_b)) {
+          if (xnn_value_is_static(input_b->allocation_type)) {
             return xnn_create_batch_matrix_multiply_nc_f32_const_weights(
                 batch_size_b, k, n, input_b->data, node->flags,
                 &opdata->operator_objects[0]);
@@ -137,7 +137,7 @@ static enum xnn_status create_batch_matrix_multiply_operator(
       switch (inputb_datatype) {
         case xnn_datatype_fp32: {
           // Get the shape and size of the second input.
-          if (xnn_value_is_static(input_b)) {
+          if (xnn_value_is_static(input_b->allocation_type)) {
             return xnn_create_batch_matrix_multiply_nc_pf32_const_weights(
                 batch_size_b, k, n, input_b->data, node->flags,
                 &opdata->operator_objects[0]);
@@ -197,7 +197,7 @@ static enum xnn_status create_batch_matrix_multiply_operator(
 
 static enum xnn_status reshape_batch_matrix_multiply_operator(
   struct xnn_operator_data* opdata,
-  struct xnn_value* values,
+  struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -212,9 +212,9 @@ static enum xnn_status reshape_batch_matrix_multiply_operator(
   assert(output_id < num_values);
 
   // Get the inputs and outputs.
-  const struct xnn_value* input_a = values + input_a_id;
-  const struct xnn_value* input_b = values + input_b_id;
-  struct xnn_value* output = values + output_id;
+  const struct xnn_runtime_value* input_a = values + input_a_id;
+  const struct xnn_runtime_value* input_b = values + input_b_id;
+  struct xnn_runtime_value* output = values + output_id;
 
   // Verify some basic shape properties of the inputs.
   if (input_a->shape.num_dims < 2) {
@@ -293,31 +293,31 @@ static enum xnn_status reshape_batch_matrix_multiply_operator(
       status = xnn_reshape_batch_matrix_multiply_nc_bf16_f32(
           opdata->operator_objects[0], num_batch_dims, padded_dims_a,
           padded_dims_b, m, k, n, &opdata->workspace_size,
-          &opdata->workspace_alignment, threadpool);
+          threadpool);
       break;
     case xnn_operator_type_batch_matrix_multiply_nc_f16:
       status = xnn_reshape_batch_matrix_multiply_nc_f16(
           opdata->operator_objects[0], num_batch_dims, padded_dims_a,
           padded_dims_b, m, k, n, &opdata->workspace_size,
-          &opdata->workspace_alignment, threadpool);
+          threadpool);
       break;
     case xnn_operator_type_batch_matrix_multiply_nc_f32:
       status = xnn_reshape_batch_matrix_multiply_nc_f32(
           opdata->operator_objects[0], num_batch_dims, padded_dims_a,
           padded_dims_b, m, k, n, &opdata->workspace_size,
-          &opdata->workspace_alignment, threadpool);
+          threadpool);
       break;
     case xnn_operator_type_batch_matrix_multiply_nc_pf16:
       status = xnn_reshape_batch_matrix_multiply_nc_pf16(
           opdata->operator_objects[0], num_batch_dims, padded_dims_a,
           padded_dims_b, m, k, n, &opdata->workspace_size,
-          &opdata->workspace_alignment, threadpool);
+          threadpool);
       break;
     case xnn_operator_type_batch_matrix_multiply_nc_pf32:
       status = xnn_reshape_batch_matrix_multiply_nc_pf32(
           opdata->operator_objects[0], num_batch_dims, padded_dims_a,
           padded_dims_b, m, k, n, &opdata->workspace_size,
-          &opdata->workspace_alignment, threadpool);
+          threadpool);
       break;
     case xnn_operator_type_batch_matrix_multiply_nc_qd8_f32_qc8w:
       status = xnn_reshape_batch_matrix_multiply_nc_qd8_f32_qc8w(
@@ -348,7 +348,7 @@ static enum xnn_status reshape_batch_matrix_multiply_operator(
   output->shape.num_dims = num_output_dims;
   output->shape.dim[num_output_dims - 2] = m;
   output->shape.dim[num_output_dims - 1] = n;
-  const size_t new_size = xnn_tensor_get_size(output);
+  const size_t new_size = xnn_runtime_tensor_get_size(output);
   if (new_size > output->size || opdata->workspace_size > old_workspace_size) {
     output->size = new_size;
     return xnn_status_reallocation_required;
@@ -358,7 +358,7 @@ static enum xnn_status reshape_batch_matrix_multiply_operator(
 
 static enum xnn_status setup_batch_matrix_multiply_operator(
   const struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -374,15 +374,15 @@ static enum xnn_status setup_batch_matrix_multiply_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  const struct xnn_value* input_a = values + input_a_id;
+  const struct xnn_runtime_value* input_a = values + input_a_id;
   const void* input_a_data = input_a->data;
   assert(input_a_data != NULL);
 
-  const struct xnn_value* input_b = values + input_b_id;
+  const struct xnn_runtime_value* input_b = values + input_b_id;
   const void* input_b_data = input_b->data;
   assert(input_b_data != NULL);
 
-  const struct xnn_value* output_value = values + output_id;
+  const struct xnn_runtime_value* output_value = values + output_id;
   void* output_data = output_value->data;
   assert(output_data != NULL);
 
@@ -533,7 +533,7 @@ enum xnn_status xnn_define_batch_matrix_multiply(
       break;
     case xnn_datatype_qcint8:
       // Check that `input2` is static, which is required for this variant.
-      if (!xnn_value_is_static(input2_value)) {
+      if (!xnn_value_is_static(input2_value->allocation_type)) {
         xnn_log_error(
             "failed to define %s operator with input ID #%" PRIu32
             ": %s input must be static (got %s)",

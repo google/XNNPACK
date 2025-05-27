@@ -49,7 +49,7 @@ static enum xnn_status create_even_split_operator_helper(
 
 static enum xnn_status create_even_split_operator(
   const struct xnn_node* node,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
   xnn_weights_cache_t weights_cache)
@@ -77,13 +77,14 @@ static enum xnn_status create_even_split_operator(
 }
 
 static enum xnn_status reshape_even_split_operator_helper(
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   const uint32_t num_values,
   struct xnn_operator_data* opdata,
   size_t operator_index,
   size_t output_index,
   size_t num_splits,
   int32_t axis,
+  size_t batch_size,
   pthreadpool_t threadpool)
 {
   const uint32_t input_id = opdata->inputs[0];
@@ -104,13 +105,13 @@ static enum xnn_status reshape_even_split_operator_helper(
   switch (opdata->operator_objects[operator_index]->type) {
     case xnn_operator_type_copy_nc_x16:
       return xnn_reshape_copy_nc_x16(
-        opdata->operator_objects[operator_index], opdata->batch_size, channels, input_stride, output_stride, threadpool);
+        opdata->operator_objects[operator_index], batch_size, channels, input_stride, output_stride, threadpool);
     case xnn_operator_type_copy_nc_x32:
       return xnn_reshape_copy_nc_x32(
-        opdata->operator_objects[operator_index], opdata->batch_size, channels, input_stride, output_stride, threadpool);
+        opdata->operator_objects[operator_index], batch_size, channels, input_stride, output_stride, threadpool);
     case xnn_operator_type_copy_nc_x8:
       return xnn_reshape_copy_nc_x8(
-        opdata->operator_objects[operator_index], opdata->batch_size, channels, input_stride, output_stride, threadpool);
+        opdata->operator_objects[operator_index], batch_size, channels, input_stride, output_stride, threadpool);
     default:
       XNN_UNREACHABLE;
   }
@@ -118,7 +119,7 @@ static enum xnn_status reshape_even_split_operator_helper(
 
 static enum xnn_status reshape_even_split_operator(
   struct xnn_operator_data* opdata,
-  struct xnn_value* values,
+  struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -128,8 +129,8 @@ static enum xnn_status reshape_even_split_operator(
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id != XNN_INVALID_VALUE_ID);
   assert(input_id < num_values);
-  const struct xnn_value* input_value = values + input_id;
-  
+  const struct xnn_runtime_value* input_value = values + input_id;
+
   int32_t axis = opdata->axis;
   if (axis < 0) {
     axis += input_value->shape.num_dims;
@@ -142,8 +143,8 @@ static enum xnn_status reshape_even_split_operator(
       input_id, axis, input_value->shape.num_dims);
     return xnn_status_invalid_parameter;
   }
-  opdata->batch_size = xnn_shape_multiply_leading_dims(&input_value->shape, axis);
-  
+  size_t batch_size = xnn_shape_multiply_leading_dims(&input_value->shape, axis);
+
   size_t num_splits = opdata->num_outputs;
   const size_t axis_elements = input_value->shape.dim[axis] / num_splits;
   const size_t old_workspace_size = opdata->workspace_size;
@@ -152,7 +153,7 @@ static enum xnn_status reshape_even_split_operator(
   for (size_t i = 0; i < num_splits; ++i) {
     const uint32_t output_id = opdata->outputs[i];
     if (values[output_id].type == xnn_value_type_invalid)  continue;
-    status = reshape_even_split_operator_helper(values, num_values, opdata, operator_index, i, num_splits, axis, threadpool);
+    status = reshape_even_split_operator_helper(values, num_values, opdata, operator_index, i, num_splits, axis, batch_size, threadpool);
     ++operator_index;
     if (status != xnn_status_success) {
       return status;
@@ -160,7 +161,7 @@ static enum xnn_status reshape_even_split_operator(
     const uint32_t output_n_id = opdata->outputs[i];
     assert(output_n_id != XNN_INVALID_VALUE_ID);
     assert(output_n_id < num_values);
-    struct xnn_value* output_n_value = values + output_n_id;
+    struct xnn_runtime_value* output_n_value = values + output_n_id;
     if (output_n_value->allocation_type == xnn_allocation_type_invalid) {
       // output_id was removed during optimization.
       continue;
@@ -168,7 +169,7 @@ static enum xnn_status reshape_even_split_operator(
     memcpy(output_n_value->shape.dim, input_value->shape.dim, input_value->shape.num_dims * sizeof(size_t));
     output_n_value->shape.num_dims = input_value->shape.num_dims;
     output_n_value->shape.dim[axis] = axis_elements;
-    const size_t new_size = xnn_tensor_get_size(output_n_value);
+    const size_t new_size = xnn_runtime_tensor_get_size(output_n_value);
     if (new_size > output_n_value->size) {
       output_n_value->size = new_size;
       reallocation_required = true;
@@ -181,7 +182,7 @@ static enum xnn_status reshape_even_split_operator(
 }
 
 static enum xnn_status setup_even_split_operator_helper(
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   const uint32_t num_values,
   const struct xnn_operator_data* opdata,
   size_t output_index,
@@ -200,7 +201,7 @@ static enum xnn_status setup_even_split_operator_helper(
   const size_t channels = opdata->operator_objects[operator_index]->channels;
 
   assert(output_id < num_values);
-  const struct xnn_value* output_value = values + output_id;
+  const struct xnn_runtime_value* output_value = values + output_id;
   void* output_data = output_value->data;
   assert(output_data != NULL);
 
@@ -224,7 +225,7 @@ static enum xnn_status setup_even_split_operator_helper(
 
 static enum xnn_status setup_even_split_operator(
   const struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -232,7 +233,7 @@ static enum xnn_status setup_even_split_operator(
   assert(input_id != XNN_INVALID_VALUE_ID);
   assert(input_id < num_values);
 
-  const struct xnn_value* input_value = values + input_id;
+  const struct xnn_runtime_value* input_value = values + input_id;
   const void* input_data = input_value->data;
   assert(input_data != NULL);
 

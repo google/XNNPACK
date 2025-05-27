@@ -21,7 +21,7 @@
 
 static enum xnn_status create_max_pooling_operator(
   const struct xnn_node* node,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
   xnn_weights_cache_t weights_cache)
@@ -34,7 +34,7 @@ static enum xnn_status create_max_pooling_operator(
 
   const uint32_t input_id = node->inputs[0];
   assert(input_id < num_values);
-  const struct xnn_value *input_value = &values[input_id];
+  const struct xnn_runtime_value *input_value = &values[input_id];
   const enum xnn_datatype datatype = input_value->datatype;
 
   enum xnn_status status;
@@ -127,7 +127,7 @@ static enum xnn_status create_max_pooling_operator(
 
 static enum xnn_status reshape_max_pooling_operator(
   struct xnn_operator_data* opdata,
-  struct xnn_value* values,
+  struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -137,7 +137,7 @@ static enum xnn_status reshape_max_pooling_operator(
   const uint32_t output_id = opdata->outputs[0];
   assert(output_id < num_values);
 
-  struct xnn_value* output_value = values + output_id;
+  struct xnn_runtime_value* output_value = values + output_id;
 
   const size_t batch_size = values[input_id].shape.dim[0];
   const size_t input_height = values[input_id].shape.dim[1];
@@ -213,7 +213,7 @@ static enum xnn_status reshape_max_pooling_operator(
   output_value->shape.dim[3] = channels;
 
   output_value->shape.num_dims = 4;
-  const size_t new_size = xnn_tensor_get_size(output_value);
+  const size_t new_size = xnn_runtime_tensor_get_size(output_value);
   if (new_size > output_value->size) {
     output_value->size = new_size;
     return xnn_status_reallocation_required;
@@ -223,7 +223,7 @@ static enum xnn_status reshape_max_pooling_operator(
 
 static enum xnn_status setup_max_pooling_operator(
   const struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -235,11 +235,11 @@ static enum xnn_status setup_max_pooling_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  const struct xnn_value* input_value = values + input_id;
+  const struct xnn_runtime_value* input_value = values + input_id;
   const void* input_data = input_value->data;
   assert(input_data != NULL);
 
-  const struct xnn_value* output_value = values + output_id;
+  const struct xnn_runtime_value* output_value = values + output_id;
   void* output_data = output_value->data;
   assert(output_data != NULL);
 

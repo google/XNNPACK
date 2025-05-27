@@ -51,7 +51,7 @@ enum xnn_status xnn_reshape_external_value(
                   external_id);
     return xnn_status_invalid_parameter;
   }
-  struct xnn_value* value = &runtime->values[external_id];
+  struct xnn_runtime_value* value = &runtime->values[external_id];
   if (value->allocation_type != xnn_allocation_type_external) {
     xnn_log_error("failed to reshape runtime: Value %" PRIu32 " is not external (%d)",
                   external_id, value->allocation_type);
@@ -62,7 +62,7 @@ enum xnn_status xnn_reshape_external_value(
   for (size_t i = 0; i < num_dims; ++i) {
     shape->dim[i] = dims[i];
   }
-  value->size = xnn_tensor_get_size(value);
+  value->size = xnn_runtime_tensor_get_size(value);
   return xnn_status_success;
 }
 
@@ -73,7 +73,7 @@ xnn_get_external_value_shape(xnn_runtime_t runtime, uint32_t external_id, size_t
     xnn_log_error("failed to get external value shape: out-of-bounds ID %" PRIu32 " in external value", external_id);
     return xnn_status_invalid_parameter;
   }
-  struct xnn_value* value = &runtime->values[external_id];
+  struct xnn_runtime_value* value = &runtime->values[external_id];
   if (value->allocation_type != xnn_allocation_type_external) {
     xnn_log_error(
       "failed to get external value shape: Value %" PRIu32 " is not external (%d)", external_id,
@@ -258,8 +258,8 @@ static enum xnn_status initialize_workspace_values(
   // Initialize current runtime's value pointers.
   size_t persistent_offset = 0;
   for (size_t i = 0; i < runtime->num_values; i++) {
-    struct xnn_value* value = &runtime->values[i];
-    if (!xnn_value_is_valid(value)) {
+    struct xnn_runtime_value* value = &runtime->values[i];
+    if (!xnn_value_is_valid(value->type)) {
       continue;
     }
 
@@ -306,7 +306,7 @@ static enum xnn_status initialize_workspace_values(
 
       // Adjust offsets of values in workspace.
       for (size_t i = 0; i < rt->num_values; i++) {
-        struct xnn_value* value = &rt->values[i];
+        struct xnn_runtime_value* value = &rt->values[i];
         if (value->allocation_type == xnn_allocation_type_workspace ||
             value->allocation_type == xnn_allocation_type_persistent) {
           if (value->data != NULL) {
@@ -368,13 +368,13 @@ static bool input_memory_can_be_reused(const xnn_runtime_t runtime, size_t input
   if (input_id == XNN_INVALID_VALUE_ID || output_id == XNN_INVALID_VALUE_ID) {
     return false;
   }
-  const struct xnn_value* input = &runtime->values[input_id];
-  const struct xnn_value* output = &runtime->values[output_id];
-  const bool output_memory_fits = xnn_tensor_get_size(input) == xnn_tensor_get_size(output);
-  assert(input->num_consumers != 0);
+  const struct xnn_runtime_value* input = &runtime->values[input_id];
+  const struct xnn_runtime_value* output = &runtime->values[output_id];
+  const bool output_memory_fits = xnn_runtime_tensor_get_size(input) == xnn_runtime_tensor_get_size(output);
+  //assert(input->num_consumers != 0);
   return input->allocation_type == xnn_allocation_type_workspace &&
       output->allocation_type == xnn_allocation_type_workspace &&
-      input->num_consumers == 1 && output_memory_fits;
+      (input->flags & XNN_VALUE_FLAG_ONE_CONSUMER) && output_memory_fits;
 }
 
 // An in-place operation reuses the input tensor's memory for its output. Examples are element-wise unary operations
@@ -415,8 +415,8 @@ static void optimize_tensor_allocation_for_in_place_operations(
     }
 
     // TODO(zhin): consider aliasing input to output rather than output to input.
-    struct xnn_value* output = &runtime->values[node->outputs[0]];
-    if (output->num_consumers == 1) {
+    struct xnn_runtime_value* output = &runtime->values[node->outputs[0]];
+    if (output->flags & XNN_VALUE_FLAG_ONE_CONSUMER) {
       uint32_t reuse_id = input_id;
       // If the tensor we are reusing is itself reused, find the "root tensor" to be reused.
       while (tracker->usage[reuse_id].reuse_value_id != XNN_INVALID_VALUE_ID) {
@@ -560,6 +560,10 @@ enum xnn_status xnn_create_runtime_v4(
       sizeof(struct xnn_operator_data) * (size_t) subgraph->num_nodes);
     goto error;
   }
+  if (flags & XNN_FLAG_BASIC_PROFILING) {
+    runtime->profiling = true;
+  }
+
   runtime->num_ops = subgraph->num_nodes;
 
   if (flags & XNN_FLAG_YIELD_WORKERS) {
@@ -589,11 +593,16 @@ enum xnn_status xnn_create_runtime_v4(
       }
     }
   }
+  if (runtime->profiling) {
+    for (size_t i = 0; i < subgraph->num_nodes; i++) {
+      runtime->opdata[i].end_ts = xnn_allocate_zero_memory(sizeof(size_t) * XNN_MAX_OPERATOR_OBJECTS);
+    }
+  }
 
-  runtime->values = xnn_allocate_zero_memory(sizeof(struct xnn_value) * subgraph->num_values);
+  runtime->values = xnn_allocate_zero_memory(sizeof(struct xnn_runtime_value) * subgraph->num_values);
   if (runtime->values == NULL) {
     xnn_log_error("failed to allocate %zu bytes for runtime's value descriptors",
-      sizeof(struct xnn_value) * (size_t) subgraph->num_values);
+      sizeof(struct xnn_runtime_value) * (size_t) subgraph->num_values);
     goto error;
   }
 
@@ -601,7 +610,7 @@ enum xnn_status xnn_create_runtime_v4(
   xnn_subgraph_analyze_consumers_and_producers(subgraph);
   // Make a copy of subgraph values since we can change them and runtime can outlive subgraph.
   for (size_t i = 0; i < subgraph->num_values; i++) {
-    xnn_value_copy(runtime->values + i, subgraph->values + i);
+    xnn_runtime_value_copy(runtime->values + i, subgraph->values + i);
     // Value copy doesn't copy the id, but we want the same ID.
     runtime->values[i].id = subgraph->values[i].id;
   }
@@ -642,12 +651,12 @@ enum xnn_status xnn_create_runtime_v4(
   runtime->threadpool = threadpool;
 
   for (uint32_t i = 0; i < runtime->num_values; i++) {
-    struct xnn_value* value = &runtime->values[i];
-    if (!xnn_value_is_valid(value)) {
+    struct xnn_runtime_value* value = &runtime->values[i];
+    if (!xnn_value_is_valid(value->type)) {
       continue;
     }
 
-    if (value->fp16_compatible && xnn_value_is_static(value)) {
+    if (value->flags & XNN_VALUE_FLAG_FP16_COMPATIBLE && xnn_value_is_static(value->allocation_type)) {
       // Value is static and has been converted to FP16 in a new buffer.
       value->flags |= XNN_VALUE_FLAG_NEEDS_CLEANUP;
       // Runtime takes ownership of the data from subgraph.
@@ -671,10 +680,6 @@ enum xnn_status xnn_create_runtime_v4(
   runtime->next_workspace_user = runtime->workspace->first_user;
   runtime->workspace->first_user = runtime;
 
-  if (flags & XNN_FLAG_BASIC_PROFILING) {
-    runtime->profiling = true;
-  }
-
   *runtime_out = runtime;
   return xnn_status_success;
 
@@ -692,8 +697,8 @@ enum xnn_status xnn_plan_memory(
   size_t persistent_size = 0;
 
   for (uint32_t i = 0; i < runtime->num_values; i++) {
-    const struct xnn_value* value = &runtime->values[i];
-    if (!xnn_value_is_valid(value)) {
+    const struct xnn_runtime_value* value = &runtime->values[i];
+    if (!xnn_value_is_valid(value->type)) {
       continue;
     }
 
@@ -803,7 +808,7 @@ static enum xnn_status set_external_values(
       return xnn_status_invalid_parameter;
     }
 
-    const struct xnn_value* value = &runtime->values[value_id];
+    const struct xnn_runtime_value* value = &runtime->values[value_id];
     if (value->allocation_type != xnn_allocation_type_external) {
       xnn_log_error("failed to setup runtime: Value %" PRIu32 " is not external (%d)", value_id, value->allocation_type);
       return xnn_status_invalid_parameter;
@@ -814,7 +819,7 @@ static enum xnn_status set_external_values(
   for (size_t i = 0; i < num_external_values; i++) {
     const struct xnn_external_value* external_value = &external_values[i];
     const uint32_t value_id = external_value->id;
-    struct xnn_value* value = &runtime->values[value_id];
+    struct xnn_runtime_value* value = &runtime->values[value_id];
     value->data = external_value->data;
   }
   return xnn_status_success;
@@ -1081,13 +1086,14 @@ enum xnn_status xnn_delete_runtime(
         for (size_t j = 0; j < XNN_MAX_OPERATOR_OBJECTS; j++) {
           xnn_delete_operator(runtime->opdata[i].operator_objects[j]);
         }
+        xnn_release_memory(runtime->opdata[i].end_ts);
       }
       xnn_release_memory(runtime->opdata);
 
       if (runtime->values != NULL) {
         // Release the buffers created during FP16 rewrite.
         for (size_t i = 0; i < runtime->num_values; i++) {
-          struct xnn_value* value = &runtime->values[i];
+          struct xnn_runtime_value* value = &runtime->values[i];
           if (value->allocation_type == xnn_allocation_type_dynamic ||
               value->flags & XNN_VALUE_FLAG_NEEDS_CLEANUP) {
             xnn_release_memory(value->data);

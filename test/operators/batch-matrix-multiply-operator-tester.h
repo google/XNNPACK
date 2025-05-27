@@ -269,18 +269,16 @@ class BatchMatMulOperatorTester {
                                         xnn_delete_operator);
 
       size_t workspace_size = 0;
-      size_t workspace_alignment = 0;
       ASSERT_EQ(expected_status_reshape(),
                 xnn_reshape_batch_matrix_multiply_nc_f16(
                     batch_matrix_multiply_op, num_batch_dims,
                     batch_dims_a().data(), batch_dims_b().data(), m(), k(), n(),
-                    &workspace_size, &workspace_alignment,
+                    &workspace_size,
                     /*threadpool=*/nullptr));
       if (expected_status_reshape() != xnn_status_success) {
         return;
       }
       ASSERT_NE(workspace_size, 0);
-      ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
       xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
       // TODO(b/372731180): This should probably be initialized by the operator.
       std::fill(workspace.begin(), workspace.end(), 0);
@@ -354,18 +352,16 @@ class BatchMatMulOperatorTester {
                                         xnn_delete_operator);
 
       size_t workspace_size = 0;
-      size_t workspace_alignment = 0;
       ASSERT_EQ(expected_status_reshape(),
                 xnn_reshape_batch_matrix_multiply_nc_bf16_f32(
                     batch_matrix_multiply_op, num_batch_dims,
                     batch_dims_a().data(), batch_dims_b().data(), m(), k(), n(),
-                    &workspace_size, &workspace_alignment,
+                    &workspace_size,
                     /*threadpool=*/nullptr));
       if (expected_status_reshape() != xnn_status_success) {
         return;
       }
       ASSERT_NE(workspace_size, 0);
-      ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
       xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
       // TODO(b/372731180): This should probably be initialized by the operator.
       std::fill(workspace.begin(), workspace.end(), 0);
@@ -447,19 +443,17 @@ class BatchMatMulOperatorTester {
                                           xnn_delete_operator);
 
         size_t workspace_size = 0;
-        size_t workspace_alignment = 0;
         ASSERT_EQ(expected_status_reshape(),
                   xnn_reshape_batch_matrix_multiply_nc_f32(
                       batch_matrix_multiply_op, num_batch_dims,
                       batch_dims_a().data(), batch_dims_b().data(), m(), k(),
-                      n(), &workspace_size, &workspace_alignment,
+                      n(), &workspace_size,
                       /*threadpool=*/nullptr));
         if (expected_status_reshape() != xnn_status_success) {
           return;
         }
         if (!const_weights) {
           ASSERT_NE(workspace_size, 0);
-          ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
         }
         xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(
             workspace_size);

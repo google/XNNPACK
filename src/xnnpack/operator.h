@@ -101,8 +101,6 @@ struct gemm_types {
 
 struct xnn_ukernel {
   enum xnn_microkernel_type type;
-  // Used by subconv2d whether it is a GEMM or IGEMM.
-  enum xnn_microkernel_type subtype;
   union {
     struct xnn_ukernel_conv2d conv2d;
     struct xnn_ukernel_dwconv dwconv;
@@ -112,8 +110,10 @@ struct xnn_ukernel {
     struct xnn_ukernel_vbinary vbinary;
     struct xnn_ukernel_vunary vunary;
   };
-  struct gemm_types *gemm_ukernels;
-  struct xnn_ukernel_igemm *igemm;
+  union {
+    struct gemm_types *gemm_ukernels;
+    struct xnn_ukernel_igemm *igemm;
+  };
 };
 
 // Valid state transitions:
@@ -186,6 +186,16 @@ struct xnn_convolution_operator {
   size_t zero_size;
   void* pixelwise_buffer;
   struct subconvolution_params* subconvolution_buffer;
+};
+
+union xnn_params2 {
+  union xnn_binary_uparams binary;
+  union xnn_unary_uparams unary;
+  struct xnn_f16_default_params f16_default;
+  struct xnn_f32_minmax_params f32_minmax;
+  struct xnn_f32_default_params f32_default;
+  struct xnn_s8_minmax_params s8_minmax;
+  struct xnn_u8_minmax_params u8_minmax;
 };
 
 struct xnn_operator {
@@ -277,15 +287,7 @@ struct xnn_operator {
   // also use this to store parameters to binary operators. For most such
   // operators, this is a copy of params, but params need to be swapped for
   // commutative ops with per-operand params.
-  union {
-    union xnn_binary_uparams binary;
-    union xnn_unary_uparams unary;
-    struct xnn_f16_default_params f16_default;
-    struct xnn_f32_minmax_params f32_minmax;
-    struct xnn_f32_default_params f32_default;
-    struct xnn_s8_minmax_params s8_minmax;
-    struct xnn_u8_minmax_params u8_minmax;
-  } params2;
+  union xnn_params2 *params2;
   enum xnn_operator_type type;
   struct xnn_ukernel ukernel;
 
@@ -334,11 +336,9 @@ struct xnn_operator {
     struct average_pooling_context average_pooling;
     struct conv2d_context conv2d;
     struct dwconv2d_context dwconv2d;
-    struct elementwise_binary_context elementwise_binary;
     struct lut_contiguous_context lut_contiguous;
     struct lut_strided_context lut_strided;
     struct max_pooling_context max_pooling;
-    struct pad_context pad;
     struct {
       struct resize_bilinear_context resize_bilinear;
       struct resize_bilinear_nhwc_indirection_init_context
@@ -364,8 +364,10 @@ struct xnn_operator {
   } context;
   union {
     struct dwconv_op_context *dwconv;
+    struct elementwise_binary_context *elementwise_binary;
     struct gemm_op_context *gemm;
     struct igemm_op_context *igemm;
+    struct pad_context *pad;
     struct reduce_context *reduce;
   } dynamic_context;
 

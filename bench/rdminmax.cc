@@ -60,7 +60,7 @@ static void reduce(benchmark::State& state, uint64_t arch_flags,
 }
 
 #define XNN_UKERNEL(arch_flags, ukernel, row_tile, batch_tile, vector_tile, \
-                    datatype_in, datatype_out)                              \
+                    datatype_in, datatype_out, params_type, init_params)    \
   BENCHMARK_CAPTURE(reduce, ukernel, arch_flags, ukernel)                   \
       ->Apply(benchmark::utils::ReduceDiscontiguousParameters<datatype_in>) \
       ->UseRealTime();
