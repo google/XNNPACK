@@ -112,8 +112,10 @@ struct xnn_ukernel {
     struct xnn_ukernel_vbinary vbinary;
     struct xnn_ukernel_vunary vunary;
   };
-  struct gemm_types *gemm_ukernels;
-  struct xnn_ukernel_igemm *igemm;
+  union {
+    struct gemm_types *gemm_ukernels;
+    struct xnn_ukernel_igemm *igemm;
+  };
 };
 
 // Valid state transitions:
