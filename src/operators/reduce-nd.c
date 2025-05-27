@@ -115,7 +115,6 @@ static enum xnn_status reshape_reduce_nd(
     xnn_operator_t reduce_op, size_t num_reduction_axes,
     const int64_t* reduction_axes, size_t num_input_dims,
     const size_t* input_shape, size_t* workspace_size,
-    size_t* workspace_alignment,
     enum xnn_operator_type expected_operator_type,
     pthreadpool_t threadpool) {
   if (reduce_op->type != expected_operator_type) {
@@ -221,10 +220,6 @@ static enum xnn_status reshape_reduce_nd(
   reduce_op->compute[0].type = xnn_parallelization_type_3d_tile_2d;
   reduce_op->ukernel.type = xnn_microkernel_type_reduce;
   // Reduction along the innermost dimension.
-  if (workspace_alignment != NULL) {
-    *workspace_alignment = XNN_ALLOCATION_ALIGNMENT;
-  }
-
   const bool is_minmax = (reduce_op->type == xnn_operator_type_reduce_max_nd ||
                           reduce_op->type == xnn_operator_type_reduce_min_nd);
 
@@ -551,10 +546,10 @@ enum xnn_status xnn_reshape_reduce_nd(
     xnn_operator_t reduce_op,
     size_t num_reduction_axes, const int64_t* reduction_axes,
     size_t num_input_dims, const size_t* input_shape, size_t* workspace_size,
-    size_t* workspace_alignment, pthreadpool_t threadpool) {
+    pthreadpool_t threadpool) {
   return reshape_reduce_nd(
       reduce_op, num_reduction_axes, reduction_axes, num_input_dims, input_shape,
-      workspace_size, workspace_alignment,
+      workspace_size,
       reduce_op->type,
       threadpool);
 }

@@ -428,7 +428,7 @@ static enum xnn_status reshape_depthwise_convolution_operator(
         batch_size,
         input_height,
         input_width,
-        &opdata->workspace_size, &opdata->workspace_alignment,
+        &opdata->workspace_size,
         &output_height,
         &output_width,
         threadpool);
@@ -439,7 +439,7 @@ static enum xnn_status reshape_depthwise_convolution_operator(
         batch_size,
         input_height,
         input_width,
-        &opdata->workspace_size, &opdata->workspace_alignment,
+        &opdata->workspace_size,
         &output_height,
         &output_width,
         threadpool);
@@ -450,7 +450,7 @@ static enum xnn_status reshape_depthwise_convolution_operator(
         batch_size,
         input_height,
         input_width,
-        &opdata->workspace_size, &opdata->workspace_alignment,
+        &opdata->workspace_size,
         &output_height,
         &output_width,
         threadpool);
@@ -461,7 +461,7 @@ static enum xnn_status reshape_depthwise_convolution_operator(
         batch_size,
         input_height,
         input_width,
-        &opdata->workspace_size, &opdata->workspace_alignment,
+        &opdata->workspace_size,
         &output_height,
         &output_width,
         threadpool);
@@ -472,7 +472,7 @@ static enum xnn_status reshape_depthwise_convolution_operator(
         batch_size,
         input_height,
         input_width,
-        &opdata->workspace_size, &opdata->workspace_alignment,
+        &opdata->workspace_size,
         &output_height,
         &output_width,
         threadpool);

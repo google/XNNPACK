@@ -110,11 +110,9 @@ static enum xnn_status reshape_reduce_operator(
   assert(output_id < num_values);
 
   void* workspace_size = &opdata->workspace_size;
-  void* workspace_alignment = &opdata->workspace_alignment;
 
   if(input_value->datatype == xnn_datatype_fp32) {
     workspace_size = NULL;
-    workspace_alignment = NULL;
   }
 
   enum xnn_status status = xnn_status_invalid_state;
@@ -146,7 +144,6 @@ static enum xnn_status reshape_reduce_operator(
       input_num_dims,
       input_dims,
       workspace_size,
-      workspace_alignment,
       threadpool);
 
   struct xnn_runtime_value* output_value = values + output_id;

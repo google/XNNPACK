@@ -382,27 +382,23 @@ class ReduceOperatorTester {
           auto_reduce_op(reduce_op, xnn_delete_operator);
 
       size_t workspace_size = SIZE_MAX;
-      size_t workspace_alignment = SIZE_MAX;
 
       size_t* workspace_size_ptr = nullptr;
-      size_t* workspace_alignment_ptr = nullptr;
       if (Config::GetXNNDatatype() != xnn_datatype_fp32 && !is_minmax) {
         workspace_size_ptr = &workspace_size;
-        workspace_alignment_ptr = &workspace_alignment;
       }
 
       ASSERT_EQ(xnn_status_success,
                 xnn_reshape_reduce_nd(
                     reduce_op, num_reduction_axes(), reduction_axes().data(),
                     num_input_dims(), input_shape().data(), workspace_size_ptr,
-                    workspace_alignment_ptr, auto_threadpool.get()));
+                    auto_threadpool.get()));
 
       std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>>
           workspace;
       void* workspace_ptr = nullptr;
       if (Config::GetXNNDatatype() != xnn_datatype_fp32 && !is_minmax) {
         ASSERT_NE(workspace_size, SIZE_MAX);
-        ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
         workspace.resize(workspace_size);
         workspace_ptr = workspace.data();
       }

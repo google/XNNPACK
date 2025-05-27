@@ -123,7 +123,6 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nhwc(
     size_t input_pixel_stride,
     size_t output_pixel_stride,
     size_t* workspace_size,
-    size_t* workspace_alignment,
     pthreadpool_t threadpool)
 {
   if (resize_op->type != xnn_operator_type_resize_bilinear_nhwc) {
@@ -202,7 +201,6 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nhwc(
     // Round up to a multiple of pointer size
     const size_t indirect_input_offset = (packed_weights_size + sizeof(void*) - 1) & ~(sizeof(void*) - 1);
     *workspace_size = indirection_buffer_size + indirect_input_offset;
-    *workspace_alignment = XNN_ALLOCATION_ALIGNMENT;
 
     resize_bilinear_compute_index++;
     resize_op->context.resize_nhwc_indirection_init = (struct resize_bilinear_nhwc_indirection_init_context) {
@@ -227,7 +225,6 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nhwc(
     }
   } else {
     *workspace_size = 0;
-    *workspace_alignment = 1;
 
     if (output_height * output_width != resize_op->convolution_op->last_output_height * resize_op->convolution_op->last_output_width ||
         channels != resize_op->convolution_op->last_input_channels) {

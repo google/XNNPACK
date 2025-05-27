@@ -601,7 +601,6 @@ enum xnn_status reshape_convolution_operator(
         input_height,
         input_width,
         &opdata->workspace_size,
-        &opdata->workspace_alignment,
         &output_height,
         &output_width,
         threadpool);
@@ -613,7 +612,6 @@ enum xnn_status reshape_convolution_operator(
         input_height,
         input_width,
         &opdata->workspace_size,
-        &opdata->workspace_alignment,
         &output_height,
         &output_width,
         threadpool);
@@ -625,7 +623,6 @@ enum xnn_status reshape_convolution_operator(
         input_height,
         input_width,
         &opdata->workspace_size,
-        &opdata->workspace_alignment,
         &output_height,
         &output_width,
         threadpool);
@@ -637,7 +634,6 @@ enum xnn_status reshape_convolution_operator(
         input_height,
         input_width,
         &opdata->workspace_size,
-        &opdata->workspace_alignment,
         &output_height,
         &output_width,
         threadpool);
@@ -649,7 +645,6 @@ enum xnn_status reshape_convolution_operator(
         input_height,
         input_width,
         &opdata->workspace_size,
-        &opdata->workspace_alignment,
         &output_height,
         &output_width,
         threadpool);
@@ -661,7 +656,6 @@ enum xnn_status reshape_convolution_operator(
         input_height,
         input_width,
         &opdata->workspace_size,
-        &opdata->workspace_alignment,
         &output_height,
         &output_width,
         threadpool);
@@ -673,7 +667,6 @@ enum xnn_status reshape_convolution_operator(
         input_height,
         input_width,
         &opdata->workspace_size,
-        &opdata->workspace_alignment,
         &output_height,
         &output_width,
         threadpool);
@@ -685,7 +678,6 @@ enum xnn_status reshape_convolution_operator(
         input_height,
         input_width,
         &opdata->workspace_size,
-        &opdata->workspace_alignment,
         &output_height,
         &output_width,
         threadpool);
@@ -697,7 +689,6 @@ enum xnn_status reshape_convolution_operator(
         input_height,
         input_width,
         &opdata->workspace_size,
-        &opdata->workspace_alignment,
         &output_height,
         &output_width,
         threadpool);

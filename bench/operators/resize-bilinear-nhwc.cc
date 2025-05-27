@@ -49,10 +49,9 @@ static void xnnpack_resize_bilinear(benchmark::State& state) {
   }
 
   size_t workspace_size = 0;
-  size_t workspace_alignment = 1;
   status = xnn_reshape_resize_bilinear2d_nhwc(
       op, 1, in_height, in_width, channels, channels, channels, &workspace_size,
-      &workspace_alignment, /*threadpool=*/nullptr);
+      /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape ResizeBilinear operator");
     return;

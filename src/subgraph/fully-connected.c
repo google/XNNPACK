@@ -810,25 +810,25 @@ static enum xnn_status reshape_fully_connected_operator(
       status = xnn_reshape_dynamic_fully_connected_nc_f16(
           fully_connected_op, batch_size, input_channels, output_channels,
           input_channels, output_channels, &opdata->workspace_size,
-          &opdata->workspace_alignment, threadpool);
+          threadpool);
       break;
     case xnn_operator_type_dynamic_fully_connected_nc_pf16:
       status = xnn_reshape_dynamic_fully_connected_nc_pf16(
           fully_connected_op, batch_size, input_channels, output_channels,
           input_channels, output_channels, &opdata->workspace_size,
-          &opdata->workspace_alignment, threadpool);
+          threadpool);
       break;
     case xnn_operator_type_dynamic_fully_connected_nc_f32:
       status = xnn_reshape_dynamic_fully_connected_nc_f32(
           fully_connected_op, batch_size, input_channels, output_channels,
           input_channels, output_channels, &opdata->workspace_size,
-          &opdata->workspace_alignment, threadpool);
+          threadpool);
       break;
     case xnn_operator_type_dynamic_fully_connected_nc_pf32:
       status = xnn_reshape_dynamic_fully_connected_nc_pf32(
           fully_connected_op, batch_size, input_channels, output_channels,
           input_channels, output_channels, &opdata->workspace_size,
-          &opdata->workspace_alignment, threadpool);
+          threadpool);
       break;
     case xnn_operator_type_fully_connected_nc_f16:
       status = xnn_reshape_fully_connected_nc_f16(fully_connected_op,

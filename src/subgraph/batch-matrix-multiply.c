@@ -293,31 +293,31 @@ static enum xnn_status reshape_batch_matrix_multiply_operator(
       status = xnn_reshape_batch_matrix_multiply_nc_bf16_f32(
           opdata->operator_objects[0], num_batch_dims, padded_dims_a,
           padded_dims_b, m, k, n, &opdata->workspace_size,
-          &opdata->workspace_alignment, threadpool);
+          threadpool);
       break;
     case xnn_operator_type_batch_matrix_multiply_nc_f16:
       status = xnn_reshape_batch_matrix_multiply_nc_f16(
           opdata->operator_objects[0], num_batch_dims, padded_dims_a,
           padded_dims_b, m, k, n, &opdata->workspace_size,
-          &opdata->workspace_alignment, threadpool);
+          threadpool);
       break;
     case xnn_operator_type_batch_matrix_multiply_nc_f32:
       status = xnn_reshape_batch_matrix_multiply_nc_f32(
           opdata->operator_objects[0], num_batch_dims, padded_dims_a,
           padded_dims_b, m, k, n, &opdata->workspace_size,
-          &opdata->workspace_alignment, threadpool);
+          threadpool);
       break;
     case xnn_operator_type_batch_matrix_multiply_nc_pf16:
       status = xnn_reshape_batch_matrix_multiply_nc_pf16(
           opdata->operator_objects[0], num_batch_dims, padded_dims_a,
           padded_dims_b, m, k, n, &opdata->workspace_size,
-          &opdata->workspace_alignment, threadpool);
+          threadpool);
       break;
     case xnn_operator_type_batch_matrix_multiply_nc_pf32:
       status = xnn_reshape_batch_matrix_multiply_nc_pf32(
           opdata->operator_objects[0], num_batch_dims, padded_dims_a,
           padded_dims_b, m, k, n, &opdata->workspace_size,
-          &opdata->workspace_alignment, threadpool);
+          threadpool);
       break;
     case xnn_operator_type_batch_matrix_multiply_nc_qd8_f32_qc8w:
       status = xnn_reshape_batch_matrix_multiply_nc_qd8_f32_qc8w(

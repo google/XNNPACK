@@ -481,7 +481,6 @@ struct xnn_operator_data {
   xnn_timestamp *end_ts;
   void* workspace;
   size_t workspace_size;
-  size_t workspace_alignment;
   uint32_t flags;
 };
 

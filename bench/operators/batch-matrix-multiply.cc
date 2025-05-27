@@ -74,11 +74,10 @@ void xnnpack_batch_matrix_multiply_f32(benchmark::State& state,
   pthreadpool_t threadpool = pthreadpool_create(num_threads);
 
   size_t workspace_size = 0;
-  size_t workspace_alignment = 0;
   status = xnn_reshape_batch_matrix_multiply_nc_f32(
       op, /*num_batch_dims=*/1, /*batch_dims_a=*/&batch_size,
       /*batch_dims_b=*/&batch_size, m, k, n, &workspace_size,
-      &workspace_alignment, threadpool);
+      threadpool);
 
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape FP32 BatchMatrixMultiply operator");

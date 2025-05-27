@@ -338,7 +338,6 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
     size_t input_stride,
     size_t output_stride,
     size_t* workspace_size,
-    size_t* workspace_alignment,
     uint32_t log2_input_element_size,
     uint32_t log2_filter_element_size,
     uint32_t bias_element_size,
@@ -444,7 +443,6 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
 
   // TODO(zhin): fast path to query workspace size when workspace_size != NULL?
   *workspace_size = n_stride * weights_stride;
-  *workspace_alignment = XNN_ALLOCATION_ALIGNMENT;
 
   if (dynamic_fully_connected_op->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
     assert(ukernel->packw_gemm_gio || gemm_config->pack_weights_and_biases);
@@ -603,13 +601,12 @@ enum xnn_status xnn_reshape_dynamic_fully_connected_nc_f16(
     size_t input_stride,
     size_t output_stride,
     size_t* workspace_size,
-    size_t* workspace_alignment,
     pthreadpool_t threadpool)
 {
   return reshape_dynamic_fully_connected_nc(
     dynamic_fully_connected_op, xnn_operator_type_dynamic_fully_connected_nc_f16,
     batch_size, input_channels, output_channels, input_stride, output_stride,
-    workspace_size, workspace_alignment,
+    workspace_size,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_HALF,
     /*bias_element_size=*/sizeof(uint16_t),
@@ -629,13 +626,12 @@ enum xnn_status xnn_reshape_dynamic_fully_connected_nc_pf16(
     size_t input_stride,
     size_t output_stride,
     size_t* workspace_size,
-    size_t* workspace_alignment,
     pthreadpool_t threadpool)
 {
   return reshape_dynamic_fully_connected_nc(
     dynamic_fully_connected_op, xnn_operator_type_dynamic_fully_connected_nc_pf16,
     batch_size, input_channels, output_channels, input_stride, output_stride,
-    workspace_size, workspace_alignment,
+    workspace_size,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_HALF,
     /*bias_element_size=*/sizeof(uint16_t),
@@ -655,13 +651,12 @@ enum xnn_status xnn_reshape_dynamic_fully_connected_nc_f32(
     size_t input_stride,
     size_t output_stride,
     size_t* workspace_size,
-    size_t* workspace_alignment,
     pthreadpool_t threadpool)
 {
   return reshape_dynamic_fully_connected_nc(
     dynamic_fully_connected_op, xnn_operator_type_dynamic_fully_connected_nc_f32,
     batch_size, input_channels, output_channels, input_stride, output_stride,
-    workspace_size, workspace_alignment,
+    workspace_size,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*bias_element_size=*/sizeof(float),
@@ -681,13 +676,12 @@ enum xnn_status xnn_reshape_dynamic_fully_connected_nc_pf32(
     size_t input_stride,
     size_t output_stride,
     size_t* workspace_size,
-    size_t* workspace_alignment,
     pthreadpool_t threadpool)
 {
   return reshape_dynamic_fully_connected_nc(
     dynamic_fully_connected_op, xnn_operator_type_dynamic_fully_connected_nc_pf32,
     batch_size, input_channels, output_channels, input_stride, output_stride,
-    workspace_size, workspace_alignment,
+    workspace_size,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*bias_element_size=*/sizeof(float),

@@ -98,7 +98,6 @@ static enum xnn_status reshape_resize_bilinear_operator(
         channel_dim,
         channel_dim,
         &opdata->workspace_size,
-        &opdata->workspace_alignment,
         threadpool);
       break;
     default:
