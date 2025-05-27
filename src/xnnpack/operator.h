@@ -340,7 +340,6 @@ struct xnn_operator {
     struct lut_contiguous_context lut_contiguous;
     struct lut_strided_context lut_strided;
     struct max_pooling_context max_pooling;
-    struct pad_context pad;
     struct {
       struct resize_bilinear_context resize_bilinear;
       struct resize_bilinear_nhwc_indirection_init_context
@@ -369,6 +368,7 @@ struct xnn_operator {
     struct gemm_op_context *gemm;
     struct igemm_op_context *igemm;
     struct reduce_context *reduce;
+    struct pad_context *pad;
   } dynamic_context;
 
   xnn_weights_cache_t weights_cache;
