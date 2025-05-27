@@ -455,6 +455,8 @@ struct xnn_operator_data {
     struct {
       size_t num_reshape_dims;
       size_t reshape_dims[XNN_MAX_TENSOR_DIMS];
+      // Used for concatenate, copy and static split dims.
+      int32_t axis;
     };
     // Used for static constant pad.
     struct {
@@ -472,8 +474,6 @@ struct xnn_operator_data {
     };
     struct xnn_shape shape1;
   };
-  // Used for concatenate and static split dims.
-  int32_t axis;
   uint32_t num_inputs;
   uint32_t inputs[XNN_MAX_INPUTS];
   uint32_t num_outputs;
