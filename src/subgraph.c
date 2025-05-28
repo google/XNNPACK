@@ -1685,25 +1685,46 @@ static bool is_broadcasted_static(const struct xnn_value* value) {
          xnn_shape_multiply_all_dims(&value->shape) == 1;
 }
 
+static bool set_contains(const uint32_t* set, uint32_t set_size, uint32_t x) {
+  for (uint32_t i = 0; i < set_size; i++) {
+    if (set[i] == x) {
+      return true;
+    }
+  }
+  return false;
+}
+
 // Returns the Value ID of a unary input. Binary operators with one constant
 // operand are considered unary operators by this function, and return the non-
-// constant input.
+// constant input. `unary_values` is a set of values that have already been
+// determined to be part of a unary elementwise function.
 static uint32_t is_pure_unary_elementwise(xnn_subgraph_t subgraph,
-                                          const struct xnn_node* node) {
+                                          const struct xnn_node* node,
+                                          const uint32_t* unary_values,
+                                          uint32_t num_unary_values) {
   switch (node->type) {
     case xnn_node_type_unary_elementwise:
       assert(node->num_inputs >= 1);
       return node->inputs[0];
     case xnn_node_type_binary_elementwise: {
-      const struct xnn_value* input_0 = &subgraph->values[node->inputs[0]];
-      const struct xnn_value* input_1 = &subgraph->values[node->inputs[1]];
+      const uint32_t input_0_id = node->inputs[0];
+      const uint32_t input_1_id = node->inputs[1];
+      const struct xnn_value* input_0 = &subgraph->values[input_0_id];
+      const struct xnn_value* input_1 = &subgraph->values[input_1_id];
       assert(node->num_inputs == 2);
       if (is_broadcasted_static(input_0) &&
           !xnn_value_is_static(input_1->allocation_type)) {
-        return node->inputs[1];
+        return input_1_id;
       } else if (is_broadcasted_static(input_1) &&
                  !xnn_value_is_static(input_0->allocation_type)) {
-        return node->inputs[0];
+        return input_0_id;
+      } else if (set_contains(unary_values, num_unary_values, input_0_id) &&
+                 set_contains(unary_values, num_unary_values, input_1_id)) {
+        // This is a unary elementwise operator if we've determined that both
+        // inputs are part of the same unary elementwise function. It doesn't
+        // matter which operand we return as long as it is in the `unary_values`
+        // set (which both are).
+        return input_0_id;
       } else {
         return XNN_INVALID_VALUE_ID;
       }
@@ -1893,17 +1914,11 @@ void reshape_for_lut(struct xnn_value* value) {
 void xnn_subgraph_fuse_unary_quantized_into_lut(xnn_subgraph_t subgraph) {
   // Find sequences of operators that are unary, quantized, elementwise, and
   // pure functions. These can be fused into a single LUT op. Examples:
-  // - softsign(x) = 1/(1 + abs(x))
+  // - softsign(x) = x/(1 + abs(x))
   // - softplus(x) = log(1 + exp(x))
   // We allow intermediate values to be datatypes other than quantized (and
   // allow convert ops), but the input and output values of the sequence must be
   // quantized.
-
-  // There are examples that we could fuse that we currently do not:
-  // - f(x) = x / (1 + x^2)
-  // This doesn't fuse because while f(x) is unary, some of the constituent ops
-  // (the divide) are not. This is probably doable with a more sophisticated
-  // algorithm.
 
   for (uint32_t n = 0; n < subgraph->num_nodes; n++) {
     struct xnn_node* node = &subgraph->nodes[n];
@@ -1912,7 +1927,8 @@ void xnn_subgraph_fuse_unary_quantized_into_lut(xnn_subgraph_t subgraph) {
       continue;
     }
 
-    const uint32_t input_id = is_pure_unary_elementwise(subgraph, node);
+    const uint32_t input_id =
+        is_pure_unary_elementwise(subgraph, node, NULL, 0);
     if (input_id == XNN_INVALID_VALUE_ID) {
       continue;
     }
@@ -1969,7 +1985,8 @@ void xnn_subgraph_fuse_unary_quantized_into_lut(xnn_subgraph_t subgraph) {
 
       // Include the consumer in the unary subgraph.
       node = &subgraph->nodes[output->first_consumer];
-    } while (is_pure_unary_elementwise(subgraph, node) !=
+    } while (is_pure_unary_elementwise(subgraph, node, value_map,
+                                       XNN_MAX_UNARY_FUSION_VALUES) !=
                  XNN_INVALID_VALUE_ID &&
              unary_subgraph.num_nodes < XNN_MAX_UNARY_FUSION_NODES);
 

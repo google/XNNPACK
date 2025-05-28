@@ -921,7 +921,7 @@ TEST(UNARY_QUANTIZED_TO_LUT, cant_fuse_output) {
 }
 
 TEST(UNARY_QUANTIZED_TO_LUT, softsign) {
-  // Create the subgraph 1/(1 + |x|), quantized.
+  // Create the subgraph x/(1 + |x|), quantized.
   const uint32_t input_id = 0;
   const uint32_t output_id = 1;
   const uint32_t one_id = 2;
@@ -938,15 +938,14 @@ TEST(UNARY_QUANTIZED_TO_LUT, softsign) {
   tester
       .AddInputTensor<quint8>(dims, input_data.data(), input_quantization,
                               input_id)
-      .AddOutputTensor<quint8>(dims, output_quantization,
-                               output_id)
+      .AddOutputTensor<quint8>(dims, output_quantization, output_id)
       .AddStaticTensor<quint8>({1}, one_id, &one, output_quantization)
       .AddDynamicTensor<quint8>(dims, abs_input_id, input_quantization)
       .AddDynamicTensor<quint8>(dims, abs_input_plus_one_id, input_quantization)
       .AddUnary(xnn_unary_abs, nullptr, input_id, abs_input_id)
       .AddBinary(xnn_binary_add, nullptr, abs_input_id, one_id,
                  abs_input_plus_one_id)
-      .AddBinary(xnn_binary_divide, nullptr, one_id, abs_input_plus_one_id,
+      .AddBinary(xnn_binary_divide, nullptr, input_id, abs_input_plus_one_id,
                  output_id);
 
   xnnpack::Buffer<quint8> unoptimized_output =
@@ -1031,6 +1030,37 @@ TEST(UNARY_QUANTIZED_TO_LUT, binary_first) {
 
   xnnpack::Buffer<quint8> optimized_output = tester.RunWithFusion<quint8>();
   EXPECT_EQ(tester.NumOperators(), 1);
+  EXPECT_EQ(unoptimized_output, optimized_output);
+}
+
+TEST(UNARY_QUANTIZED_TO_LUT, binary_not_unary) {
+  // Create the subgraph x + max(x, y)
+  const uint32_t x_id = 0;
+  const uint32_t y_id = 1;
+  const uint32_t output_id = 2;
+  const uint32_t max_id = 3;
+  const TensorShape dims = {2, 4, 32};  // 256 elements.
+  RuntimeTester tester(4);
+  using quint8 = xnnpack::quantized<uint8_t>;
+  xnn_quantization_params input_quantization = {128, 1.0f};
+  xnn_quantization_params output_quantization = {128, 1.0f};
+  xnnpack::Buffer<quint8> x_data(dims.NumElements());
+  xnnpack::Buffer<quint8> y_data(dims.NumElements());
+  std::iota(x_data.begin(), x_data.end(), 0);
+  std::iota(y_data.begin(), y_data.end(), 3);
+  tester.AddInputTensor<quint8>(dims, x_data.data(), input_quantization, x_id)
+      .AddInputTensor<quint8>(dims, y_data.data(), input_quantization, y_id)
+      .AddOutputTensor<quint8>(dims, output_quantization, output_id)
+      .AddDynamicTensor<quint8>(dims, max_id, input_quantization)
+      .AddBinary(xnn_binary_maximum, nullptr, x_id, y_id, max_id)
+      .AddBinary(xnn_binary_add, nullptr, x_id, max_id, output_id);
+
+  xnnpack::Buffer<quint8> unoptimized_output =
+      tester.RunWithoutFusion<quint8>();
+  EXPECT_EQ(tester.NumOperators(), 2);
+
+  xnnpack::Buffer<quint8> optimized_output = tester.RunWithFusion<quint8>();
+  EXPECT_EQ(tester.NumOperators(), 2);
   EXPECT_EQ(unoptimized_output, optimized_output);
 }
 
