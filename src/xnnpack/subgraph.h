@@ -569,22 +569,22 @@ XNN_INLINE static size_t xnn_tensor_get_rounded_size(
 }
 
 // Product of all shape dimensions
-size_t xnn_shape_multiply_all_dims(const struct xnn_shape shape[1]);
+size_t xnn_shape_multiply_all_dims(const struct xnn_shape* shape);
 
 // Product of all shape dimensions, except for the specified number of the last
 // dimensions
-size_t xnn_shape_multiply_batch_dims(const struct xnn_shape shape[1],
+size_t xnn_shape_multiply_batch_dims(const struct xnn_shape* shape,
                                      size_t num_nonbatch_dims);
 
 // Product of all shape dimensions, except for the last (channel) one
-size_t xnn_shape_multiply_non_channel_dims(const struct xnn_shape shape[1]);
+size_t xnn_shape_multiply_non_channel_dims(const struct xnn_shape* shape);
 
 // Product of n leading dimensions.
-size_t xnn_shape_multiply_leading_dims(const struct xnn_shape shape[1],
+size_t xnn_shape_multiply_leading_dims(const struct xnn_shape* shape,
                                        size_t num_leading_dims);
 
 // Product of trailing dimensions starting from start_dim.
-size_t xnn_shape_multiply_trailing_dims(const struct xnn_shape shape[1],
+size_t xnn_shape_multiply_trailing_dims(const struct xnn_shape* shape,
                                         size_t start_dim);
 
 // Get the size in bytes to hold dynamic quant params

@@ -24,14 +24,12 @@ extern "C" {
 // and sizes { 4, 1, 3 }, the innermost dimension is a full slice, and so can be
 // merged with its outer dimension, to give normalized input shape of { 4, 15 },
 // output shape { 4, 3 } with offsets { 0, 6 }.
-void xnn_normalize_slice(
-    size_t num_dims, const size_t offsets[XNN_MIN_ELEMENTS(1)],
-    const size_t sizes[XNN_MIN_ELEMENTS(1)],
-    const size_t input_shape[XNN_MIN_ELEMENTS(1)],
-    size_t normalized_offsets[XNN_MIN_ELEMENTS(XNN_MAX_TENSOR_DIMS)],
-    size_t normalized_input_shape[XNN_MIN_ELEMENTS(XNN_MAX_TENSOR_DIMS)],
-    size_t normalized_output_shape[XNN_MIN_ELEMENTS(XNN_MAX_TENSOR_DIMS)],
-    size_t* num_normalized_dims);
+void xnn_normalize_slice(size_t num_dims, const size_t* offsets,
+                         const size_t* sizes, const size_t* input_shape,
+                         size_t* normalized_offsets,
+                         size_t* normalized_input_shape,
+                         size_t* normalized_output_shape,
+                         size_t* num_normalized_dims);
 
 void xnn_normalize_transpose_permutation(
     size_t num_dims, size_t element_size, const size_t* perm,

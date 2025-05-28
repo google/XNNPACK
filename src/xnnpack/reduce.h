@@ -17,9 +17,8 @@ extern "C" {
 
 #define XNN_UKERNEL(arch_flags, ukernel, batch_tile, vector_tile, datatype_in, \
                     datatype_out, params_type, init_params)                    \
-  XNN_INTERNAL void ukernel(                                                   \
-      size_t batch, const datatype_in* input, datatype_out* output,            \
-      const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+  XNN_INTERNAL void ukernel(size_t batch, const datatype_in* input,            \
+                            datatype_out* output, const params_type* params);
 #include "src/f16-f32acc-rsum/f16-f32acc-rsum.h"
 #include "src/f16-rminmax/f16-rmax.h"
 #include "src/f16-rminmax/f16-rmin.h"
@@ -48,10 +47,10 @@ extern "C" {
 
 #define XNN_UKERNEL(arch_flags, ukernel, row_tile, batch_tile, vector_tile, \
                     datatype_in, datatype_out, params_type, init_params)    \
-  XNN_INTERNAL void ukernel(                                                \
-      size_t rows, size_t channels, const datatype_in* input,               \
-      size_t input_stride, const datatype_in* zero, datatype_out* output,   \
-      const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+  XNN_INTERNAL void ukernel(size_t rows, size_t channels,                   \
+                            const datatype_in* input, size_t input_stride,  \
+                            const datatype_in* zero, datatype_out* output,  \
+                            const params_type* params);
 #include "src/f16-f32acc-rdsum/f16-f32acc-rdsum.h"
 #include "src/f32-rdsum/f32-rdsum.h"
 #include "src/qs8-rdsum/qs8-rdsum-minmax-fp32.h"

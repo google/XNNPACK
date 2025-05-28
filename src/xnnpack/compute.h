@@ -212,14 +212,12 @@ struct packw_gemm_goi_context {
   const struct xnn_gemm_config* gemm_config;
 };
 
-#ifndef __cplusplus
 XNN_PRIVATE void xnn_compute_packw_gemm_goi(
-    const struct packw_gemm_goi_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t n_block_start, size_t n_block_size);
+    const struct packw_gemm_goi_context* context, size_t n_block_start,
+    size_t n_block_size);
 XNN_PRIVATE void xnn_compute_batched_packw_gemm_goi(
-    const struct packw_gemm_goi_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index, size_t n_block_start, size_t n_block_size);
-#endif
+    const struct packw_gemm_goi_context* context, size_t batch_index,
+    size_t n_block_start, size_t n_block_size);
 
 // Context for Packing Weights (packw) for GEMM microkernels in
 // Groups-InputChannels-OutputChannels layout. Kernel has shape GxKxN, bias has
@@ -264,14 +262,12 @@ struct packw_gemm_gio_context {
   const struct xnn_gemm_config* gemm_config;
 };
 
-#ifndef __cplusplus
 XNN_PRIVATE void xnn_compute_packw_gemm_gio(
-    const struct packw_gemm_gio_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t n_block_start, size_t n_block_size);
+    const struct packw_gemm_gio_context* context, size_t n_block_start,
+    size_t n_block_size);
 XNN_PRIVATE void xnn_compute_batched_packw_gemm_gio(
-    const struct packw_gemm_gio_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index, size_t n_block_start, size_t n_block_size);
-#endif
+    const struct packw_gemm_gio_context* context, size_t batch_index,
+    size_t n_block_start, size_t n_block_size);
 
 // Context for Dense Matrix Multiplication.
 // C [GxMxN] := A [GxMxK] * B[GxKxN] + bias [GxN]
@@ -342,58 +338,66 @@ struct gemm_context {
   xnn_pack_lh_offset_fn packed_lh_offset_fn;
 };
 
-#ifndef __cplusplus
-XNN_PRIVATE void xnn_compute_grouped_gemm(
-    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t group_index, size_t nr_block_start, size_t mr_block_start,
-    size_t nr_block_size, size_t mr_block_size);
+XNN_PRIVATE void xnn_compute_grouped_gemm(const struct gemm_context* context,
+                                          size_t group_index,
+                                          size_t nr_block_start,
+                                          size_t mr_block_start,
+                                          size_t nr_block_size,
+                                          size_t mr_block_size);
 
-XNN_PRIVATE void xnn_compute_grouped_qp8gemm(
-    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t group_index, size_t nr_block_start, size_t mr_block_start,
-    size_t nr_block_size, size_t mr_block_size);
+XNN_PRIVATE void xnn_compute_grouped_qp8gemm(const struct gemm_context* context,
+                                             size_t group_index,
+                                             size_t nr_block_start,
+                                             size_t mr_block_start,
+                                             size_t nr_block_size,
+                                             size_t mr_block_size);
 
-XNN_PRIVATE void xnn_compute_dqgemm(
-    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
-    size_t mr_block_size);
+XNN_PRIVATE void xnn_compute_dqgemm(const struct gemm_context* context,
+                                    size_t nr_block_start,
+                                    size_t mr_block_start, size_t nr_block_size,
+                                    size_t mr_block_size);
 
-XNN_PRIVATE void xnn_compute_gemm(
-    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
-    size_t mr_block_size);
+XNN_PRIVATE void xnn_compute_gemm(const struct gemm_context* context,
+                                  size_t nr_block_start, size_t mr_block_start,
+                                  size_t nr_block_size, size_t mr_block_size);
 
-XNN_PRIVATE void xnn_compute_qp8gemm(
-    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
-    size_t mr_block_size);
+XNN_PRIVATE void xnn_compute_qp8gemm(const struct gemm_context* context,
+                                     size_t nr_block_start,
+                                     size_t mr_block_start,
+                                     size_t nr_block_size,
+                                     size_t mr_block_size);
 #if XNN_MAX_UARCH_TYPES > 1
 XNN_PRIVATE void xnn_compute_hmp_grouped_gemm(
-    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    uint32_t uarch_index, size_t group_index, size_t nr_block_start,
-    size_t mr_block_start, size_t nr_block_size, size_t mr_block_size);
+    const struct gemm_context* context, uint32_t uarch_index,
+    size_t group_index, size_t nr_block_start, size_t mr_block_start,
+    size_t nr_block_size, size_t mr_block_size);
 
 XNN_PRIVATE void xnn_compute_hmp_grouped_qp8gemm(
-    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    uint32_t uarch_index, size_t group_index, size_t mr_block_start,
-    size_t nr_block_start, size_t mr_block_size, size_t nr_block_size);
+    const struct gemm_context* context, uint32_t uarch_index,
+    size_t group_index, size_t mr_block_start, size_t nr_block_start,
+    size_t mr_block_size, size_t nr_block_size);
 
-XNN_PRIVATE void xnn_compute_hmp_gemm(
-    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    uint32_t uarch_index, size_t nr_block_start, size_t mr_block_start,
-    size_t nr_block_size, size_t mr_block_size);
+XNN_PRIVATE void xnn_compute_hmp_gemm(const struct gemm_context* context,
+                                      uint32_t uarch_index,
+                                      size_t nr_block_start,
+                                      size_t mr_block_start,
+                                      size_t nr_block_size,
+                                      size_t mr_block_size);
 
-XNN_PRIVATE void xnn_compute_hmp_dqgemm(
-    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    uint32_t uarch_index, size_t nr_block_start, size_t mr_block_start,
-    size_t nr_block_size, size_t mr_block_size);
+XNN_PRIVATE void xnn_compute_hmp_dqgemm(const struct gemm_context* context,
+                                        uint32_t uarch_index,
+                                        size_t nr_block_start,
+                                        size_t mr_block_start,
+                                        size_t nr_block_size,
+                                        size_t mr_block_size);
 
-XNN_PRIVATE void xnn_compute_hmp_qp8gemm(
-    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    uint32_t uarch_index, size_t nr_block_start, size_t mr_block_start,
-    size_t nr_block_size, size_t mr_block_size);
+XNN_PRIVATE void xnn_compute_hmp_qp8gemm(const struct gemm_context* context,
+                                         uint32_t uarch_index,
+                                         size_t nr_block_start,
+                                         size_t mr_block_start,
+                                         size_t nr_block_size,
+                                         size_t mr_block_size);
 #endif  // XNN_MAX_UARCH_TYPES > 1
-#endif
 
 // Context for Sparse Matrix-Dense Matrix Multiplication.
 // C [MxN] := A [MxK] * B [KxN] + bias [N]
@@ -432,11 +436,9 @@ struct spmm_context {
   } params;
 };
 
-#ifndef __cplusplus
-XNN_PRIVATE void xnn_compute_spmm(
-    const struct spmm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index, size_t mr_block_start, size_t mr_block_size);
-#endif
+XNN_PRIVATE void xnn_compute_spmm(const struct spmm_context* context,
+                                  size_t batch_index, size_t mr_block_start,
+                                  size_t mr_block_size);
 
 // Context for initializing the indirection buffer for conv2d igemm.
 struct conv2d_igemm_indirection_init_context {
@@ -516,100 +518,104 @@ struct igemm_context {
   } params;
 };
 
-#ifndef __cplusplus
 XNN_PRIVATE void xnn_compute_grouped_dqigemm(
-    const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t group_index, size_t nr_block_start, size_t mr_block_start,
-    size_t nr_block_size, size_t mr_block_size);
+    const struct igemm_context* context, size_t group_index,
+    size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
+    size_t mr_block_size);
 
-XNN_PRIVATE void xnn_compute_grouped_igemm(
-    const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t group_index, size_t nr_block_start, size_t mr_block_start,
-    size_t nr_block_size, size_t mr_block_size);
+XNN_PRIVATE void xnn_compute_grouped_igemm(const struct igemm_context* context,
+                                           size_t group_index,
+                                           size_t nr_block_start,
+                                           size_t mr_block_start,
+                                           size_t nr_block_size,
+                                           size_t mr_block_size);
 
 XNN_PRIVATE void xnn_compute_grouped_batch_dqigemm(
-    const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index, size_t group_index, size_t nr_block_start,
-    size_t mr_block_start, size_t nr_block_size, size_t mr_block_size);
+    const struct igemm_context* context, size_t batch_index, size_t group_index,
+    size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
+    size_t mr_block_size);
 
 XNN_PRIVATE void xnn_compute_grouped_batch_igemm(
-    const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index, size_t group_index, size_t nr_block_start,
-    size_t mr_block_start, size_t nr_block_size, size_t mr_block_size);
+    const struct igemm_context* context, size_t batch_index, size_t group_index,
+    size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
+    size_t mr_block_size);
 
 XNN_PRIVATE void xnn_compute_dq_zero_buffer_igemm(
-    const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t size);
+    const struct igemm_context* context, size_t size);
 
-XNN_PRIVATE void xnn_compute_dqigemm(
-    const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
-    size_t mr_block_size);
+XNN_PRIVATE void xnn_compute_dqigemm(const struct igemm_context* context,
+                                     size_t nr_block_start,
+                                     size_t mr_block_start,
+                                     size_t nr_block_size,
+                                     size_t mr_block_size);
 
-XNN_PRIVATE void xnn_compute_igemm(
-    const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
-    size_t mr_block_size);
+XNN_PRIVATE void xnn_compute_igemm(const struct igemm_context* context,
+                                   size_t nr_block_start, size_t mr_block_start,
+                                   size_t nr_block_size, size_t mr_block_size);
 
 XNN_PRIVATE void xnn_compute_conv2d_igemm_indirection(
-    const struct conv2d_igemm_indirection_init_context
-        context[restrict XNN_MIN_ELEMENTS(1)],
+    const struct conv2d_igemm_indirection_init_context* context,
     size_t output_tile_start, size_t output_tile_size);
 
-XNN_PRIVATE void xnn_compute_batch_dqigemm(
-    const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index, size_t nr_block_start, size_t mr_block_start,
-    size_t nr_block_size, size_t mr_block_size);
+XNN_PRIVATE void xnn_compute_batch_dqigemm(const struct igemm_context* context,
+                                           size_t batch_index,
+                                           size_t nr_block_start,
+                                           size_t mr_block_start,
+                                           size_t nr_block_size,
+                                           size_t mr_block_size);
 
-XNN_PRIVATE void xnn_compute_batch_igemm(
-    const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index, size_t nr_block_start, size_t mr_block_start,
-    size_t nr_block_size, size_t mr_block_size);
+XNN_PRIVATE void xnn_compute_batch_igemm(const struct igemm_context* context,
+                                         size_t batch_index,
+                                         size_t nr_block_start,
+                                         size_t mr_block_start,
+                                         size_t nr_block_size,
+                                         size_t mr_block_size);
 
 #if XNN_MAX_UARCH_TYPES > 1
 XNN_PRIVATE void xnn_compute_hmp_grouped_igemm(
-    const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    uint32_t uarch_index, size_t group_index, size_t nr_block_start,
-    size_t mr_block_start, size_t nr_block_size, size_t mr_block_size);
+    const struct igemm_context* context, uint32_t uarch_index,
+    size_t group_index, size_t nr_block_start, size_t mr_block_start,
+    size_t nr_block_size, size_t mr_block_size);
 
 XNN_PRIVATE void xnn_compute_hmp_grouped_dqigemm(
-    const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    uint32_t uarch_index, size_t group_index, size_t nr_block_start,
-    size_t mr_block_start, size_t nr_block_size, size_t mr_block_size);
+    const struct igemm_context* context, uint32_t uarch_index,
+    size_t group_index, size_t nr_block_start, size_t mr_block_start,
+    size_t nr_block_size, size_t mr_block_size);
 
 XNN_PRIVATE void xnn_compute_hmp_grouped_batch_dqigemm(
-    const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    uint32_t uarch_index, size_t batch_index, size_t group_index,
-    size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
-    size_t mr_block_size);
+    const struct igemm_context* context, uint32_t uarch_index,
+    size_t batch_index, size_t group_index, size_t nr_block_start,
+    size_t mr_block_start, size_t nr_block_size, size_t mr_block_size);
 
 XNN_PRIVATE void xnn_compute_hmp_grouped_batch_igemm(
-    const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    uint32_t uarch_index, size_t batch_index, size_t group_index,
-    size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
-    size_t mr_block_size);
+    const struct igemm_context* context, uint32_t uarch_index,
+    size_t batch_index, size_t group_index, size_t nr_block_start,
+    size_t mr_block_start, size_t nr_block_size, size_t mr_block_size);
 
-XNN_PRIVATE void xnn_compute_hmp_dqigemm(
-    const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    uint32_t uarch_index, size_t nr_block_start, size_t mr_block_start,
-    size_t nr_block_size, size_t mr_block_size);
+XNN_PRIVATE void xnn_compute_hmp_dqigemm(const struct igemm_context* context,
+                                         uint32_t uarch_index,
+                                         size_t nr_block_start,
+                                         size_t mr_block_start,
+                                         size_t nr_block_size,
+                                         size_t mr_block_size);
 
-XNN_PRIVATE void xnn_compute_hmp_igemm(
-    const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    uint32_t uarch_index, size_t nr_block_start, size_t mr_block_start,
-    size_t nr_block_size, size_t mr_block_size);
+XNN_PRIVATE void xnn_compute_hmp_igemm(const struct igemm_context* context,
+                                       uint32_t uarch_index,
+                                       size_t nr_block_start,
+                                       size_t mr_block_start,
+                                       size_t nr_block_size,
+                                       size_t mr_block_size);
 
 XNN_PRIVATE void xnn_compute_batch_hmp_dqigemm(
-    const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    uint32_t uarch_index, size_t batch_index, size_t nr_block_start,
-    size_t mr_block_start, size_t nr_block_size, size_t mr_block_size);
+    const struct igemm_context* context, uint32_t uarch_index,
+    size_t batch_index, size_t nr_block_start, size_t mr_block_start,
+    size_t nr_block_size, size_t mr_block_size);
 
 XNN_PRIVATE void xnn_compute_batch_hmp_igemm(
-    const struct igemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    uint32_t uarch_index, size_t batch_index, size_t nr_block_start,
-    size_t mr_block_start, size_t nr_block_size, size_t mr_block_size);
+    const struct igemm_context* context, uint32_t uarch_index,
+    size_t batch_index, size_t nr_block_start, size_t mr_block_start,
+    size_t nr_block_size, size_t mr_block_size);
 #endif  // XNN_MAX_UARCH_TYPES > 1
-#endif
 
 struct subgemm_context {
   const struct subconvolution_params* subconvolution_params;
@@ -635,13 +641,11 @@ struct subgemm_context {
   } params;
 };
 
-#ifndef __cplusplus
 XNN_PRIVATE void xnn_compute_grouped_subgemm2d(
-    const struct subgemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index, size_t group_index, size_t subkernel_index,
-    size_t slice_y, size_t slice_x_start, size_t nc_block_start,
-    size_t slice_x_max, size_t nc_block_size);
-#endif
+    const struct subgemm_context* context, size_t batch_index,
+    size_t group_index, size_t subkernel_index, size_t slice_y,
+    size_t slice_x_start, size_t nc_block_start, size_t slice_x_max,
+    size_t nc_block_size);
 
 struct subconv_context {
   const struct subconvolution_params* subconvolution_params;
@@ -675,35 +679,30 @@ struct subconv_context {
   } params;
 };
 
-#ifndef __cplusplus
 XNN_PRIVATE void xnn_compute_dq_zero_buffer_subconv(
-    const struct subconv_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t size);
+    const struct subconv_context* context, size_t size);
 
 XNN_PRIVATE void xnn_compute_grouped_subconv2d(
-    const struct subconv_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index, size_t group_index, size_t subkernel_index,
-    size_t slice_y, size_t slice_x_start, size_t nr_block_start,
-    size_t slice_x_max, size_t nr_block_size);
+    const struct subconv_context* context, size_t batch_index,
+    size_t group_index, size_t subkernel_index, size_t slice_y,
+    size_t slice_x_start, size_t nr_block_start, size_t slice_x_max,
+    size_t nr_block_size);
 
 XNN_PRIVATE void xnn_compute_grouped_dqsubconv2d(
-    const struct subconv_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index, size_t group_index, size_t subkernel_index,
-    size_t slice_y, size_t slice_x_start, size_t nr_block_start,
-    size_t slice_x_max, size_t nr_block_size);
+    const struct subconv_context* context, size_t batch_index,
+    size_t group_index, size_t subkernel_index, size_t slice_y,
+    size_t slice_x_start, size_t nr_block_start, size_t slice_x_max,
+    size_t nr_block_size);
 
 XNN_PRIVATE void xnn_compute_subconv2d(
-    const struct subconv_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index, size_t subkernel_index, size_t slice_y,
-    size_t slice_x_start, size_t nr_block_start, size_t slice_x_max,
-    size_t nr_block_size);
+    const struct subconv_context* context, size_t batch_index,
+    size_t subkernel_index, size_t slice_y, size_t slice_x_start,
+    size_t nr_block_start, size_t slice_x_max, size_t nr_block_size);
 
 XNN_PRIVATE void xnn_compute_dqsubconv2d(
-    const struct subconv_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index, size_t subkernel_index, size_t slice_y,
-    size_t slice_x_start, size_t nr_block_start, size_t slice_x_max,
-    size_t nr_block_size);
-#endif
+    const struct subconv_context* context, size_t batch_index,
+    size_t subkernel_index, size_t slice_y, size_t slice_x_start,
+    size_t nr_block_start, size_t slice_x_max, size_t nr_block_size);
 
 struct conv2d_context {
   size_t input_height;
@@ -726,11 +725,9 @@ struct conv2d_context {
   } params;
 };
 
-#ifndef __cplusplus
 XNN_PRIVATE void xnn_compute_conv2d_hwc2chw(
-    const struct conv2d_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index, size_t output_y_start, size_t output_y_slice);
-#endif
+    const struct conv2d_context* context, size_t batch_index,
+    size_t output_y_start, size_t output_y_slice);
 
 // Context for initializing the indirection buffer for dwconv.
 struct dwconv_indirection_init_context {
@@ -783,16 +780,12 @@ struct dwconv_context {
   xnn_dwconv_ukernel_fn ukernel;
 };
 
-#ifndef __cplusplus
 XNN_PRIVATE void xnn_compute_dwconv_indirection(
-    const struct dwconv_indirection_init_context
-        context[restrict XNN_MIN_ELEMENTS(1)],
+    const struct dwconv_indirection_init_context* context,
     size_t output_y_start, size_t output_y_tile);
 XNN_PRIVATE void xnn_compute_dwconv_unipass(
-    const struct dwconv_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index, size_t output_y, size_t output_c_start,
-    size_t output_c_tile);
-#endif
+    const struct dwconv_context* context, size_t batch_index, size_t output_y,
+    size_t output_c_start, size_t output_c_tile);
 
 struct dwconv2d_context {
   size_t input_height;
@@ -815,11 +808,8 @@ struct dwconv2d_context {
   };
 };
 
-#ifndef __cplusplus
 XNN_PRIVATE void xnn_compute_dwconv2d_chw(
-    const struct dwconv2d_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index, size_t channel);
-#endif
+    const struct dwconv2d_context* context, size_t batch_index, size_t channel);
 
 struct max_pooling_context {
   const void** indirect_input;
@@ -843,11 +833,9 @@ struct max_pooling_context {
   xnn_maxpool_ukernel_fn ukernel;
 };
 
-#ifndef __cplusplus
 XNN_PRIVATE void xnn_compute_max_pooling(
-    const struct max_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index, size_t output_y);
-#endif
+    const struct max_pooling_context* context, size_t batch_index,
+    size_t output_y);
 
 struct unpooling_context {
   const void* input;
@@ -865,11 +853,8 @@ struct unpooling_context {
   xnn_unpool_ukernel_fn ukernel;
 };
 
-#ifndef __cplusplus
-XNN_PRIVATE void xnn_compute_unpooling(
-    const struct unpooling_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t input_y, size_t input_x);
-#endif
+XNN_PRIVATE void xnn_compute_unpooling(const struct unpooling_context* context,
+                                       size_t input_y, size_t input_x);
 
 struct argmax_pooling_context {
   const void** indirect_input;
@@ -892,11 +877,9 @@ struct argmax_pooling_context {
   xnn_argmaxpool_unipass_ukernel_fn ukernel;
 };
 
-#ifndef __cplusplus
 XNN_PRIVATE void xnn_compute_argmax_pooling(
-    const struct argmax_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index, size_t output_y);
-#endif
+    const struct argmax_pooling_context* context, size_t batch_index,
+    size_t output_y);
 
 struct average_pooling_context {
   const void** indirect_input;
@@ -931,11 +914,9 @@ struct average_pooling_context {
   xnn_avgpool_ukernel_fn ukernel;
 };
 
-#ifndef __cplusplus
 XNN_PRIVATE void xnn_compute_average_pooling(
-    const struct average_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index, size_t output_y);
-#endif
+    const struct average_pooling_context* context, size_t batch_index,
+    size_t output_y);
 
 struct resize_bilinear_nhwc_indirection_init_context {
   const void** buffer;
@@ -1000,19 +981,15 @@ struct resize_bilinear_chw_context {
   xnn_ibilinear_chw_ukernel_fn ukernel;
 };
 
-#ifndef __cplusplus
 XNN_PRIVATE void xnn_compute_resize_bilinear_indirection(
-    const struct resize_bilinear_nhwc_indirection_init_context
-        context[restrict XNN_MIN_ELEMENTS(1)],
+    const struct resize_bilinear_nhwc_indirection_init_context* context,
     size_t output_y_start, size_t output_y_tile);
 XNN_PRIVATE void xnn_compute_resize_bilinear(
-    const struct resize_bilinear_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index, size_t pixel_start, size_t pixel_range);
+    const struct resize_bilinear_context* context, size_t batch_index,
+    size_t pixel_start, size_t pixel_range);
 XNN_PRIVATE void xnn_compute_resize_bilinear_chw(
-    const struct resize_bilinear_chw_context
-        context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index, size_t pixel_start, size_t pixel_range);
-#endif
+    const struct resize_bilinear_chw_context* context, size_t batch_index,
+    size_t pixel_start, size_t pixel_range);
 
 struct elementwise_binary_context {
   const void* a;
@@ -1027,33 +1004,24 @@ struct elementwise_binary_context {
   bool flip_a_b;
 };
 
-#ifndef __cplusplus
 XNN_PRIVATE void xnn_compute_elementwise_binary_1d_tile(
-    const struct elementwise_binary_context
-        context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t offset, size_t tile);
+    const struct elementwise_binary_context* context, size_t offset,
+    size_t tile);
 XNN_PRIVATE void xnn_compute_elementwise_binary_1d(
-    const struct elementwise_binary_context
-        context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t offset, size_t count);
+    const struct elementwise_binary_context* context, size_t offset,
+    size_t count);
 XNN_PRIVATE void xnn_compute_elementwise_binary_2d(
-    const struct elementwise_binary_context
-        context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t i, size_t offset, size_t count);
+    const struct elementwise_binary_context* context, size_t i, size_t offset,
+    size_t count);
 XNN_PRIVATE void xnn_compute_elementwise_binary_3d(
-    const struct elementwise_binary_context
-        context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t i, size_t offset_j, size_t offset_k, size_t count_j, size_t count_k);
+    const struct elementwise_binary_context* context, size_t i, size_t offset_j,
+    size_t offset_k, size_t count_j, size_t count_k);
 XNN_PRIVATE void xnn_compute_elementwise_binary_4d(
-    const struct elementwise_binary_context
-        context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t i, size_t j, size_t offset_k, size_t offset_l, size_t count_k,
-    size_t count_l);
+    const struct elementwise_binary_context* context, size_t i, size_t j,
+    size_t offset_k, size_t offset_l, size_t count_k, size_t count_l);
 XNN_PRIVATE void xnn_compute_elementwise_binary_5d(
-    const struct elementwise_binary_context
-        context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t i, size_t j, size_t k, size_t l, size_t m);
-#endif
+    const struct elementwise_binary_context* context, size_t i, size_t j,
+    size_t k, size_t l, size_t m);
 
 struct lut_strided_context {
   size_t n;
@@ -1065,11 +1033,9 @@ struct lut_strided_context {
   xnn_x8_lut_ukernel_fn ukernel;
 };
 
-#ifndef __cplusplus
 XNN_PRIVATE void xnn_compute_lut_strided(
-    const struct lut_strided_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_offset, size_t batch_range);
-#endif
+    const struct lut_strided_context* context, size_t batch_offset,
+    size_t batch_range);
 
 struct lut_contiguous_context {
   const void* x;
@@ -1080,11 +1046,8 @@ struct lut_contiguous_context {
   xnn_x8_lut_ukernel_fn ukernel;
 };
 
-#ifndef __cplusplus
 XNN_PRIVATE void xnn_compute_lut_contiguous(
-    const struct lut_contiguous_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t offset, size_t size);
-#endif
+    const struct lut_contiguous_context* context, size_t offset, size_t size);
 
 struct univector_strided_context {
   size_t n;
@@ -1096,12 +1059,9 @@ struct univector_strided_context {
   union xnn_unary_uparams params;
 };
 
-#ifndef __cplusplus
 XNN_PRIVATE void xnn_compute_univector_strided(
-    const struct univector_strided_context
-        context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index, size_t batch_range);
-#endif
+    const struct univector_strided_context* context, size_t batch_index,
+    size_t batch_range);
 
 struct univector_contiguous_context {
   const void* x;
@@ -1112,12 +1072,9 @@ struct univector_contiguous_context {
   union xnn_unary_uparams params;
 };
 
-#ifndef __cplusplus
 XNN_PRIVATE void xnn_compute_univector_contiguous(
-    const struct univector_contiguous_context
-        context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t offset, size_t size);
-#endif
+    const struct univector_contiguous_context* context, size_t offset,
+    size_t size);
 
 struct reduce_context {
   const void* input;
@@ -1141,23 +1098,19 @@ struct reduce_context {
   union xnn_unary_uparams cvt_params;
 };
 
-#ifndef __cplusplus
 // Compute contiguous reduction over the 1st, 3rd and 5th dimensions of the
 // input tensor.
 XNN_PRIVATE void xnn_compute_contiguous_reduce(
-    const struct reduce_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t output_idx0, size_t output_idx1, size_t output_idx2,
-    size_t output1_block_size, size_t output2_block_size);
-#endif
+    const struct reduce_context* context, size_t output_idx0,
+    size_t output_idx1, size_t output_idx2, size_t output1_block_size,
+    size_t output2_block_size);
 
-#ifndef __cplusplus
 // Compute discontiguous reduction over the 0st, 2rd and 4th dimensions of the
 // input tensor.
 XNN_PRIVATE void xnn_compute_discontiguous_reduce(
-    const struct reduce_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t output_idx0, size_t output_idx1, size_t output_idx2,
-    size_t output1_block_size, size_t output2_block_size);
-#endif
+    const struct reduce_context* context, size_t output_idx0,
+    size_t output_idx1, size_t output_idx2, size_t output1_block_size,
+    size_t output2_block_size);
 
 struct vmulcaddc_context {
   size_t n;
@@ -1173,11 +1126,8 @@ struct vmulcaddc_context {
   } params;
 };
 
-#ifndef __cplusplus
-XNN_PRIVATE void xnn_compute_vmulcaddc(
-    const struct vmulcaddc_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_start, size_t batch_size);
-#endif
+XNN_PRIVATE void xnn_compute_vmulcaddc(const struct vmulcaddc_context* context,
+                                       size_t batch_start, size_t batch_size);
 
 struct pad_context {
   const void* input;
@@ -1193,11 +1143,8 @@ struct pad_context {
   xnn_fill_ukernel_fn fill_ukernel;
 };
 
-#ifndef __cplusplus
-XNN_PRIVATE void xnn_compute_pad_5d(
-    const struct pad_context context[restrict XNN_MIN_ELEMENTS(1)], size_t i,
-    size_t j, size_t k, size_t l, size_t m);
-#endif
+XNN_PRIVATE void xnn_compute_pad_5d(const struct pad_context* context, size_t i,
+                                    size_t j, size_t k, size_t l, size_t m);
 
 struct slice_context {
   const void* input;
@@ -1210,22 +1157,17 @@ struct slice_context {
   size_t num_normalized_dims;
 };
 
-#ifndef __cplusplus
-XNN_PRIVATE void xnn_compute_slice_1d(
-    const struct slice_context context[restrict XNN_MIN_ELEMENTS(1)], size_t i);
-XNN_PRIVATE void xnn_compute_slice_2d(
-    const struct slice_context context[restrict XNN_MIN_ELEMENTS(1)], size_t i,
-    size_t j);
-XNN_PRIVATE void xnn_compute_slice_3d(
-    const struct slice_context context[restrict XNN_MIN_ELEMENTS(1)], size_t i,
-    size_t j, size_t k);
-XNN_PRIVATE void xnn_compute_slice_4d(
-    const struct slice_context context[restrict XNN_MIN_ELEMENTS(1)], size_t i,
-    size_t j, size_t k, size_t l);
-XNN_PRIVATE void xnn_compute_slice_5d(
-    const struct slice_context context[restrict XNN_MIN_ELEMENTS(1)], size_t i,
-    size_t j, size_t k, size_t l, size_t m);
-#endif
+XNN_PRIVATE void xnn_compute_slice_1d(const struct slice_context* context,
+                                      size_t i);
+XNN_PRIVATE void xnn_compute_slice_2d(const struct slice_context* context,
+                                      size_t i, size_t j);
+XNN_PRIVATE void xnn_compute_slice_3d(const struct slice_context* context,
+                                      size_t i, size_t j, size_t k);
+XNN_PRIVATE void xnn_compute_slice_4d(const struct slice_context* context,
+                                      size_t i, size_t j, size_t k, size_t l);
+XNN_PRIVATE void xnn_compute_slice_5d(const struct slice_context* context,
+                                      size_t i, size_t j, size_t k, size_t l,
+                                      size_t m);
 
 struct f16_qd8_convert_context {
   size_t n;
@@ -1259,27 +1201,24 @@ struct f32_qd8_convert_context {
   } params;
 };
 
-#ifndef __cplusplus
 XNN_PRIVATE void xnn_compute_f16_qd8_convert(
-    const struct f16_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_offset, size_t batch_range);
+    const struct f16_qd8_convert_context* context, size_t batch_offset,
+    size_t batch_range);
 
 XNN_PRIVATE void xnn_compute_f16_qdu8_convert(
-    const struct f16_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_offset, size_t batch_range);
+    const struct f16_qd8_convert_context* context, size_t batch_offset,
+    size_t batch_range);
 
 XNN_PRIVATE void xnn_compute_f32_qd8_convert(
-    const struct f32_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_offset, size_t batch_range);
+    const struct f32_qd8_convert_context* context, size_t batch_offset,
+    size_t batch_range);
 
 XNN_PRIVATE void xnn_compute_f32_qdu8_convert(
-    const struct f32_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_offset, size_t batch_range);
+    const struct f32_qd8_convert_context* context, size_t batch_offset,
+    size_t batch_range);
 
 XNN_PRIVATE void xnn_compute_pad_qd8_params(
-    const struct f32_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index);
-#endif
+    const struct f32_qd8_convert_context* context, size_t batch_index);
 
 struct pack_lh_context {
   size_t m;
@@ -1296,11 +1235,9 @@ struct pack_lh_context {
   xnn_pack_lh_offset_fn packed_offset_fn;
 };
 
-#ifndef __cplusplus
-XNN_PRIVATE void xnn_compute_pack_lh(
-    const struct pack_lh_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t group_idx, size_t m_idx_start, size_t tile);
-#endif
+XNN_PRIVATE void xnn_compute_pack_lh(const struct pack_lh_context* context,
+                                     size_t group_idx, size_t m_idx_start,
+                                     size_t tile);
 
 struct f32_qp8_convert_context {
   size_t m;
@@ -1315,11 +1252,9 @@ struct f32_qp8_convert_context {
   xnn_x8_packq_f32qp8_ukernel_fn packq_ukernel;
 };
 
-#ifndef __cplusplus
 XNN_PRIVATE void xnn_compute_f32_qp8_convert(
-    const struct f32_qp8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t group_idx, size_t m_idx_start, size_t m_tile);
-#endif
+    const struct f32_qp8_convert_context* context, size_t group_idx,
+    size_t m_idx_start, size_t m_tile);
 
 struct u8_softmax_context {
   size_t n;
@@ -1332,11 +1267,8 @@ struct u8_softmax_context {
   xnn_u8_lut32norm_ukernel_fn lut_norm_ukernel;
 };
 
-#ifndef __cplusplus
 XNN_PRIVATE void xnn_compute_u8_softmax(
-    const struct u8_softmax_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index);
-#endif
+    const struct u8_softmax_context* context, size_t batch_index);
 
 typedef void (*xnn_compute_reciprocal_fn)(const void* input, void* output);
 
@@ -1368,12 +1300,8 @@ struct floating_point_softmax_context {
   } rmax_init;
 };
 
-#ifndef __cplusplus
 XNN_PRIVATE void xnn_compute_floating_point_softmax(
-    const struct floating_point_softmax_context
-        context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index);
-#endif
+    const struct floating_point_softmax_context* context, size_t batch_index);
 
 struct rope_context {
   size_t scaled_channels;
@@ -1389,10 +1317,8 @@ struct rope_context {
   } params;
 };
 
-#ifndef __cplusplus
-XNN_PRIVATE void xnn_compute_rope(
-    const struct rope_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index, size_t head_index, size_t sequence_index);
-#endif
+XNN_PRIVATE void xnn_compute_rope(const struct rope_context* context,
+                                  size_t batch_index, size_t head_index,
+                                  size_t sequence_index);
 
 #endif  // THIRD_PARTY_XNNPACK_SRC_XNNPACK_COMPUTE_H_

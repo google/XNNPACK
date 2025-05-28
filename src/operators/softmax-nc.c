@@ -375,7 +375,7 @@ static enum xnn_status reshape_softmax_nc_floating_point(
     size_t batch_size,
     uint32_t log2_element_size,
     xnn_rmax_ukernel_fn rmax,
-    const struct xnn_raddstoreexpminusmax_config raddstoreexpminusmax[restrict XNN_MIN_ELEMENTS(1)],
+    const struct xnn_raddstoreexpminusmax_config* raddstoreexpminusmax,
     const struct xnn_binary_elementwise_config* vmul,
     xnn_compute_reciprocal_fn compute_reciprocal,
     const void* rmax_init,
@@ -500,8 +500,8 @@ static enum xnn_status setup_softmax_nc_floating_point(
 }
 
 static void compute_reciprocal_f16(
-    const xnn_float16 input[XNN_MIN_ELEMENTS(1)],
-    xnn_float16 output[XNN_MIN_ELEMENTS(1)])
+    const xnn_float16* input,
+    xnn_float16* output)
 {
   *output = xnn_float16_from_float(1.0f / xnn_float16_to_float(*input));
 }
@@ -517,8 +517,8 @@ enum xnn_status xnn_setup_softmax_nc_f16(
 }
 
 static void compute_reciprocal_f32(
-    const float input[XNN_MIN_ELEMENTS(1)],
-    float output[XNN_MIN_ELEMENTS(1)])
+    const float* input,
+    float* output)
 {
   *output = 1.0f / *input;
 }

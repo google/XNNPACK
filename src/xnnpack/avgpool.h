@@ -25,7 +25,7 @@ extern "C" {
       const datatype** input, size_t input_offset, size_t input_pixel_stride,  \
       const datatype* zero, const datatype* multiplier, datatype* output,      \
       size_t input_increment, size_t output_increment,                         \
-      const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const params_type* params);
 
 #include "src/f16-avgpool/f16-avgpool-minmax.h"
 #include "src/f32-avgpool/f32-avgpool-minmax.h"

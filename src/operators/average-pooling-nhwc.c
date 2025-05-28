@@ -302,7 +302,7 @@ static enum xnn_status reshape_average_pooling2d(
   uint32_t log2_weight_element_size,
   uint32_t log2_accumulator_element_size,
   xnn_indirection_init_pavgpool2d_fn indirection_init_pavgpool2d,
-  const struct xnn_avgpool_config avgpool[restrict XNN_MIN_ELEMENTS(1)],
+  const struct xnn_avgpool_config* avgpool,
   const void* params,
   size_t params_size,
   size_t* output_height_out,

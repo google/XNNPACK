@@ -90,7 +90,7 @@ static void init_f32_raddstoreexpminusmax_config(void) {
   #endif
 }
 
-static bool is_f16_compatible_config(const struct xnn_hardware_config hardware_config[restrict XNN_MIN_ELEMENTS(1)]) {
+static bool is_f16_compatible_config(const struct xnn_hardware_config* hardware_config) {
   #if (XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR) || (XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR)
     return hardware_config->use_arm_neon_fp16_arith;
   #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE

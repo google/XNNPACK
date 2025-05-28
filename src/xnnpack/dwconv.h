@@ -24,8 +24,7 @@ extern "C" {
       size_t channels, size_t output_width, const datatype** input,            \
       const weights_type* weights, datatype* output, intptr_t input_stride,    \
       size_t output_increment, size_t input_offset, size_t input_pixel_stride, \
-      const datatype* zero,                                                    \
-      const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const datatype* zero, const params_type* params);
 #include "src/f16-dwconv/f16-dwconv-minmax.h"
 #include "src/f32-dwconv/f32-dwconv-minmax.h"
 #include "src/f32-dwconv/f32-dwconv.h"
@@ -36,13 +35,11 @@ extern "C" {
 #include "src/qu8-dwconv/qu8-dwconv-minmax-rndnu.h"
 #undef XNN_UKERNEL
 
-#define DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(fn_name)     \
-  XNN_INTERNAL void fn_name(size_t input_height, size_t input_width,  \
-                            const float* input, const float* weights, \
-                            const float* zero, float* output,         \
-                            uint32_t padding_top,                     \
-                            const struct xnn_f32_minmax_params        \
-                                params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+#define DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(fn_name)  \
+  XNN_INTERNAL void fn_name(                                       \
+      size_t input_height, size_t input_width, const float* input, \
+      const float* weights, const float* zero, float* output,      \
+      uint32_t padding_top, const struct xnn_f32_minmax_params* params);
 
 DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_dwconv2d_chw_ukernel_3x3p1__aarch64_neonfma_1x4)
@@ -759,8 +756,7 @@ DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(
       size_t input_height, size_t input_width, const xnn_float16* input, \
       const xnn_float16* weights, const xnn_float16* zero,               \
       xnn_float16* output, uint32_t padding_top,                         \
-      const struct xnn_f16_minmax_params                                 \
-          params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const struct xnn_f16_minmax_params* params);
 
 DECLARE_F16_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(
     xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8)
@@ -783,16 +779,12 @@ DECLARE_F16_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(
 DECLARE_F16_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(
     xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_6x8)
 
-#define DECLARE_F16_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                                      \
-    size_t input_height,                                          \
-    size_t input_width,                                           \
-    const xnn_float16* input,                            \
-    const xnn_float16* weights,                          \
-    const xnn_float16* zero,                             \
-    xnn_float16* output,                                 \
-    uint32_t padding_top,                                         \
-    const struct xnn_f16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+#define DECLARE_F16_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(fn_name)        \
+  XNN_INTERNAL void fn_name(                                             \
+      size_t input_height, size_t input_width, const xnn_float16* input, \
+      const xnn_float16* weights, const xnn_float16* zero,               \
+      xnn_float16* output, uint32_t padding_top,                         \
+      const struct xnn_f16_minmax_params* params);
 
 DECLARE_F16_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(
     xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8)

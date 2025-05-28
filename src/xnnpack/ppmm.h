@@ -19,8 +19,7 @@ extern "C" {
   XNN_INTERNAL void fn_name(size_t mr, size_t nc, size_t kc, const float* a, \
                             const float* w, float* c, size_t cm_stride,      \
                             size_t cn_stride,                                \
-                            const struct xnn_f32_minmax_params               \
-                                params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+                            const struct xnn_f32_minmax_params* params);
 
 DECLARE_F32_PPMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_ppmm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a75)
