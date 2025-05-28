@@ -247,16 +247,6 @@
 
 #define XNN_COUNT_OF(array) (sizeof(array) / sizeof(0 [array]))
 
-#if defined(__cplusplus) || XNN_COMPILER_MSVC || XNN_COMPILER_CLANG
-// static as array indices in function parameter declaration is a C99 feature,
-// not supported in C++. MSVC does not support this feature, even in C mode.
-// Clang generates suboptimal code, see
-// https://github.com/llvm/llvm-project/issues/59120
-#define XNN_MIN_ELEMENTS(count) count
-#else
-#define XNN_MIN_ELEMENTS(count) static count
-#endif
-
 #if defined(__cplusplus) || XNN_COMPILER_MSVC
 #define XNN_RESTRICT
 #else
