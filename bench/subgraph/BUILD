@@ -12,6 +12,7 @@ load(
 
 xnnpack_cxx_library(
     name = "models",
+    testonly = 1,
     srcs = [
         "fp32-attention.cc",
         "fp32-depthwise-separable.cc",
@@ -23,7 +24,9 @@ xnnpack_cxx_library(
         "fp32-mobilenet-v3-large.cc",
         "fp32-mobilenet-v3-small.cc",
         "fp32-softmax.cc",
+        "fp32-transformer.cc",
         "qd8-attention.cc",
+        "qd8-transformer.cc",
         "qs8-mobilenet-v2.cc",
     ],
     hdrs = [

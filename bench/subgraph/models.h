@@ -74,6 +74,14 @@ xnn_subgraph_t FP32DepthwiseSeparable(size_t w, size_t h, size_t kw, size_t ci,
                                       size_t co,
                                       FP32DepthwiseSeparableWeights& weights);
 
+// Creates a single Gemma3-like Transformer block.
+xnn_subgraph_t QD8TransformerBlock(size_t batch_size, size_t sequence_length,
+                                   size_t embedding_dim, size_t num_heads,
+                                   size_t head_dim, size_t hidden_dim);
+xnn_subgraph_t FP32TransformerBlock(size_t batch_size, size_t sequence_length,
+                                    size_t embedding_dim, size_t num_heads,
+                                    size_t head_dim, size_t hidden_dim);
+
 }  // namespace models
 
 #endif  // THIRD_PARTY_XNNPACK_BENCH_MODELS_MODELS_H_

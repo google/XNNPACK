@@ -85,6 +85,10 @@ static enum xnn_status resize_copy_output_tensor(
     size_t hint_cur_dim = opdata->reshape_dims[dim_idx];
     if (hint_cur_dim == 0) {
       if (output_axis_dynamic < XNN_MAX_TENSOR_DIMS) {
+        xnn_log_error(
+            "Cannot infer output shape given more than one dynamic dimension "
+            "(found %zu and %zu)",
+            output_axis_dynamic, dim_idx);
         return xnn_status_invalid_parameter;
       }
       output_axis_dynamic = dim_idx;

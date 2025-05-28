@@ -243,6 +243,36 @@ static void FP32DepthwiseSeparable(benchmark::State& state) {
   });
 }
 
+static void QD8TransformerBlock(benchmark::State& state) {
+  BenchmarkInvoke(state, [&state]() {
+    return models::QD8TransformerBlock(
+        FLAGS_batch_size, /*sequence_length=*/state.range(0),
+        /*embedding_dim=*/state.range(1), /*num_heads=*/state.range(2),
+        /*head_dim=*/state.range(3), /*hidden_dim=*/state.range(4));
+  });
+}
+
+static void FP32TransformerBlock(benchmark::State& state) {
+  BenchmarkInvoke(state, [&state]() {
+    return models::FP32TransformerBlock(
+        FLAGS_batch_size, /*sequence_length=*/state.range(0),
+        /*embedding_dim=*/state.range(1), /*num_heads=*/state.range(2),
+        /*head_dim=*/state.range(3), /*hidden_dim=*/state.range(4));
+  });
+}
+
+static void FP16TransformerBlock(benchmark::State& state) {
+  BenchmarkInvoke(
+      state,
+      [&state]() {
+        return models::FP32TransformerBlock(
+            FLAGS_batch_size, /*sequence_length=*/state.range(0),
+            /*embedding_dim=*/state.range(1), /*num_heads=*/state.range(2),
+            /*head_dim=*/state.range(3), /*hidden_dim=*/state.range(4));
+      },
+      XNN_FLAG_FORCE_FP16_INFERENCE);
+}
+
 static void AttentionArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"T", "H", "N", "S"});
   b->Args({16, 25, 24, 4});
@@ -291,6 +321,22 @@ static void DepthwiseSeparableArguments(benchmark::internal::Benchmark* b) {
 
   // Bigger
   b->Args({512, 512, 3, 128, 128});
+}
+
+static void TransformerBlockArguments(benchmark::internal::Benchmark* b) {
+  b->ArgNames({"T", "D", "N", "H", "F"});
+
+  // GeminiXXS parameters.
+  b->Args({128, 1536, 6, 256, 8 * 1536});
+
+  // GeminiV3- NanoV3 parameters.
+  b->Args({128, 2048, 8, 256, 8 * 2048});
+
+  // Gemma2-2B parameters.
+  b->Args({128, 2304, 8, 256, 9216});
+
+  // Gemma3-1B parameters.
+  b->Args({128, 1152, 4, 256, 6 * 1152});
 }
 
 BENCHMARK(FP32Attention)
@@ -353,5 +399,20 @@ BENCHMARK(FP32DepthwiseSeparable)
     ->Unit(benchmark::kMicrosecond)
     ->UseRealTime()
     ->Apply(DepthwiseSeparableArguments);
+
+BENCHMARK(QD8TransformerBlock)
+    ->Unit(benchmark::kMicrosecond)
+    ->UseRealTime()
+    ->Apply(TransformerBlockArguments);
+
+BENCHMARK(FP32TransformerBlock)
+    ->Unit(benchmark::kMicrosecond)
+    ->UseRealTime()
+    ->Apply(TransformerBlockArguments);
+
+BENCHMARK(FP16TransformerBlock)
+    ->Unit(benchmark::kMicrosecond)
+    ->UseRealTime()
+    ->Apply(TransformerBlockArguments);
 
 XNN_BENCHMARK_MAIN();
