@@ -804,11 +804,9 @@ enum xnn_status create_convert_nc_f16_qx8(
     return xnn_status_unsupported_hardware;
   }
 
-  struct xnn_f16_default_params params;
-
   enum xnn_status status = create_unary_elementwise_nc(
     flags, cvt_config,
-    &params, sizeof(params),
+    /*params=*/NULL, /*params_size=*/0,
     expected_operator_type, convert_op_out);
   if (status == xnn_status_success) {
     (*convert_op_out)->reduce_config = f16_rminmax_config;
@@ -830,11 +828,9 @@ enum xnn_status create_convert_nc_f32_qx8(
     return xnn_status_unsupported_hardware;
   }
 
-  struct xnn_f32_default_params params;
-
   enum xnn_status status = create_unary_elementwise_nc(
     flags, cvt_config,
-    &params, sizeof(params),
+    /*params=*/NULL, /*params_size=*/0,
     expected_operator_type, convert_op_out);
   if (status == xnn_status_success) {
     (*convert_op_out)->reduce_config = f32_rminmax_config;
@@ -878,11 +874,9 @@ enum xnn_status xnn_create_convert_nc_f32_qp8(
     return xnn_status_unsupported_hardware;
   }
 
-  struct xnn_f32_default_params params;
-
   enum xnn_status status = create_unary_elementwise_nc(
     flags, xnn_init_f32_to_qp8_cvt_config(),
-    &params, sizeof(params),
+    /*params=*/NULL, /*params_size=*/0,
     xnn_operator_type_convert_nc_f32_qp8, convert_op_out);
   if (status == xnn_status_success) {
     (*convert_op_out)->reduce_config = f32_rminmax_config;

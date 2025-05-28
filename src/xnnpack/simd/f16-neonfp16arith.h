@@ -205,8 +205,8 @@ xnn_load_tail_f16(const xnn_float16 *input, size_t num_elements) XNN_OOB_READS {
   return vreinterpretq_f16_u16(vld1q_u16((const uint16_t *)input));
 }
 
-static xnn_simd_f16_t xnn_load_tail_safe_f16(const xnn_float16 *input,
-                                             size_t num_elements) {
+static XNN_INLINE xnn_simd_f16_t
+xnn_load_tail_safe_f16(const xnn_float16 *input, size_t num_elements) {
   assert(num_elements > 0);
   assert(num_elements < xnn_simd_size_f16);
 

@@ -77,7 +77,7 @@ void xnn_x32_packx_ukernel_${MR}x__neon_st4_x${KBLOCK}${"_prfm" if PREFETCH else
 
       $for K in range(0, KBLOCK, 4):
         $for L in range(0, 2):
-          const uint32x4x4_t vy${ABC[K:K+4]}x${L} = { vz${ABC[K:K+4]}x0.val[${L}], vz${ABC[K:K+4]}x1.val[${L}], vz${ABC[K:K+4]}x2.val[${L}], vz${ABC[K:K+4]}x3.val[${L}] };
+          const uint32x4x4_t vy${ABC[K:K+4]}x${L} = {{ vz${ABC[K:K+4]}x0.val[${L}], vz${ABC[K:K+4]}x1.val[${L}], vz${ABC[K:K+4]}x2.val[${L}], vz${ABC[K:K+4]}x3.val[${L}] }};
       $for K in range(0, KBLOCK, 4):
         $for L in range(0, 2):
           vst4q_u32(y, vy${ABC[K:K+4]}x${L}); y += 16;

@@ -543,10 +543,7 @@ enum xnn_status xnn_reshape_softmax_nc_f16(
 {
   const struct xnn_binary_elementwise_config* f16_vmul_config = softmax_op->vmul_config;
 
-  xnn_float16 rmax_init = xnn_float16_from_float(-INFINITY);;
-  struct xnn_f16_default_params rmax_params;
-  struct xnn_f16_default_params expminus_params;
-  struct xnn_f16_default_params mul_params;
+  xnn_float16 rmax_init = xnn_float16_from_float(-INFINITY);
   return reshape_softmax_nc_floating_point(
     softmax_op, xnn_operator_type_softmax_nc_f16,
     channels, input_stride, output_stride,
@@ -556,9 +553,9 @@ enum xnn_status xnn_reshape_softmax_nc_f16(
     softmax_op->raddstoreexpminusmax_config, f16_vmul_config,
     (xnn_compute_reciprocal_fn) compute_reciprocal_f16,
     &rmax_init, sizeof(rmax_init),
-    &rmax_params, sizeof(rmax_params),
-    &expminus_params, sizeof(expminus_params),
-    &mul_params, sizeof(mul_params));
+    /*rmax_params=*/NULL, /*rmax_params_size=*/0,
+    /*expminus_params=*/NULL, /*expminus_params_size=*/0,
+    /*minmax_params=*/NULL, /*minmax_params_size=*/0);
 }
 
 enum xnn_status xnn_reshape_softmax_nc_f32(
@@ -572,9 +569,6 @@ enum xnn_status xnn_reshape_softmax_nc_f32(
   const struct xnn_binary_elementwise_config* f32_vmul_config = softmax_op->vmul_config;
 
   float rmax_init = -INFINITY;
-  struct xnn_f32_default_params rmax_params;
-  struct xnn_f32_default_params expminus_params;
-  struct xnn_f32_default_params mul_params;
   return reshape_softmax_nc_floating_point(
     softmax_op, xnn_operator_type_softmax_nc_f32,
     channels, input_stride, output_stride,
@@ -584,7 +578,7 @@ enum xnn_status xnn_reshape_softmax_nc_f32(
     softmax_op->raddstoreexpminusmax_config, f32_vmul_config,
     (xnn_compute_reciprocal_fn) compute_reciprocal_f32,
     &rmax_init, sizeof(rmax_init),
-    &rmax_params, sizeof(rmax_params),
-    &expminus_params, sizeof(expminus_params),
-    &mul_params, sizeof(mul_params));
+    /*rmax_params=*/NULL, /*rmax_params_size=*/0,
+    /*expminus_params=*/NULL, /*expminus_params_size=*/0,
+    /*minmax_params=*/NULL, /*minmax_params_size=*/0);
 }

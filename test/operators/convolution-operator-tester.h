@@ -5296,7 +5296,6 @@ class ConvolutionOperatorTester {
   bool has_bias_{true};
   WeightsType weights_type_{WeightsType::Default};
   bool multithreaded_{false};
-  size_t iterations_{1};
   bool use_weights_cache_{false};
   bool transient_indirection_buffer_{false};
 };

@@ -671,12 +671,10 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
 
   // Compute the batch sizes of the A and B tensors.
   size_t batch_dims_c[XNN_MAX_TENSOR_DIMS];
-  size_t batch_size_a = 1;
   size_t batch_size_b = 1;
   size_t batch_size_c = 1;
   for (int k = 0; k < num_batch_dims; k++) {
     batch_dims_c[k] = max(batch_dims_a[k], batch_dims_b[k]);
-    batch_size_a *= batch_dims_a[k];
     batch_size_b *= batch_dims_b[k];
     batch_size_c *= batch_dims_c[k];
   }

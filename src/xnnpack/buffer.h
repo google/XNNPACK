@@ -973,7 +973,7 @@ class DatatypeGenerator {
   bool reinterpret_ = false;
 
  public:
-  DatatypeGenerator(float min, float max, const xnn_quantization_params& = {}) {
+  DatatypeGenerator(double min, double max, const xnn_quantization_params& = {}) {
     if (min <= NumericLimits<T>::min() && max >= NumericLimits<T>::max()) {
       // The caller wants a full range of random value. Rather than generate
       // floats uniformly distributed across the range of floats, where a
@@ -984,8 +984,8 @@ class DatatypeGenerator {
       reinterpret_ = true;
     } else {
       reinterpret_ = false;
-      min = std::max<float>(min, NumericLimits<T>::min());
-      max = std::min<float>(max, NumericLimits<T>::max());
+      min = std::max<double>(min, NumericLimits<T>::min());
+      max = std::min<double>(max, NumericLimits<T>::max());
       dist_ = std::uniform_real_distribution<float>(min, max);
     }
   }

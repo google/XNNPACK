@@ -850,6 +850,5 @@ class BatchMatMulOperatorTester {
   std::vector<size_t> batch_dims_b_ = {1};
   std::pair<float, float> range_f32_ = {-1.0f, 1.0f};
   bool transpose_b_{false};
-  size_t iterations_{1};
   enum xnn_status expected_status_reshape_ = xnn_status_success;
 };

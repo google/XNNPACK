@@ -3544,5 +3544,4 @@ class DeconvolutionOperatorTester {
   bool has_bias_{true};
   WeightsType weights_type_{WeightsType::Default};
   bool use_weights_cache_{false};
-  size_t iterations_{1};
 };
