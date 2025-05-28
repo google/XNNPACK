@@ -257,13 +257,6 @@ enum xnn_status xnn_create_binary_elementwise_nd(
                   xnn_binary_operator_to_string(type));
     return xnn_status_out_of_memory;
   }
-  op->dynamic_context.elementwise_binary = xnn_allocate_zero_simd_memory(sizeof(struct elementwise_binary_context));
-  if (op->dynamic_context.elementwise_binary == NULL) {
-    xnn_log_error(
-      "failed to allocate %zu bytes for %s operator descriptor",
-      sizeof(struct elementwise_binary_context), xnn_binary_operator_to_string(type));
-    return xnn_status_out_of_memory;
-  }
 
   enum xnn_status status =
       init_binary_elementwise_nd(op, type, datatype, a_quantization,
@@ -385,27 +378,27 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
   }
 
   const uint32_t log2_element_size = op->binary_elementwise.log2_element_size;
-  *op->dynamic_context.elementwise_binary = (struct elementwise_binary_context){
+  op->context.elementwise_binary = (struct elementwise_binary_context){
       .elements = compressed_output_shape[0] << log2_element_size,
   };
-  memcpy(&op->dynamic_context.elementwise_binary->params, &op->params.binary,
+  memcpy(&op->context.elementwise_binary.params, &op->params.binary,
          sizeof(op->params.binary));
 
   const size_t* compressed_a_shape = compressed_input1_shape;
   const size_t* compressed_b_shape = compressed_input2_shape;
   if (compressed_input1_shape[0] == 1) {
-    op->dynamic_context.elementwise_binary->flip_a_b = true;
-    op->dynamic_context.elementwise_binary->ukernel =
+    op->context.elementwise_binary.flip_a_b = true;
+    op->context.elementwise_binary.ukernel =
         op->binary_elementwise_config->ropc_ukernel;
     compressed_a_shape = compressed_input2_shape;
     compressed_b_shape = compressed_input1_shape;
-    memcpy(&op->dynamic_context.elementwise_binary->params, op->params2,
+    memcpy(&op->context.elementwise_binary.params, op->params2,
            sizeof(op->params2->binary));
   } else if (compressed_input2_shape[0] == 1) {
-    op->dynamic_context.elementwise_binary->ukernel =
+    op->context.elementwise_binary.ukernel =
         op->binary_elementwise_config->opc_ukernel;
   } else if (compressed_input1_shape[0] == compressed_input2_shape[0]) {
-    op->dynamic_context.elementwise_binary->ukernel =
+    op->context.elementwise_binary.ukernel =
         op->binary_elementwise_config->op_ukernel;
   }
   size_t a_stride = compressed_a_shape[0];
@@ -413,14 +406,14 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
   size_t y_stride = compressed_output_shape[0];
   for (size_t i = 1; i < num_compressed_dims; i++) {
     if (compressed_a_shape[i] != 1) {
-      op->dynamic_context.elementwise_binary->a_stride[XNN_MAX_TENSOR_DIMS - 1 - i] =
+      op->context.elementwise_binary.a_stride[XNN_MAX_TENSOR_DIMS - 1 - i] =
           a_stride << log2_element_size;
     }
     if (compressed_b_shape[i] != 1) {
-      op->dynamic_context.elementwise_binary->b_stride[XNN_MAX_TENSOR_DIMS - 1 - i] =
+      op->context.elementwise_binary.b_stride[XNN_MAX_TENSOR_DIMS - 1 - i] =
           b_stride << log2_element_size;
     }
-    op->dynamic_context.elementwise_binary->y_stride[XNN_MAX_TENSOR_DIMS - 1 - i] =
+    op->context.elementwise_binary.y_stride[XNN_MAX_TENSOR_DIMS - 1 - i] =
         y_stride << log2_element_size;
     a_stride *= compressed_a_shape[i];
     b_stride *= compressed_b_shape[i];
@@ -433,13 +426,13 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
       if (compressed_output_shape[3] == 1) {
         if (compressed_output_shape[2] == 1) {
           if (compressed_output_shape[1] == 1) {
-            op->dynamic_context.elementwise_binary->a_stride[4] =
+            op->context.elementwise_binary.a_stride[4] =
                 compressed_a_shape[0] == 1 ? 0 : (1 << log2_element_size);
-            op->dynamic_context.elementwise_binary->b_stride[4] =
+            op->context.elementwise_binary.b_stride[4] =
                 compressed_b_shape[0] == 1 ? 0 : (1 << log2_element_size);
-            op->dynamic_context.elementwise_binary->y_stride[4] =
+            op->context.elementwise_binary.y_stride[4] =
                 (1 << log2_element_size);
-            op->dynamic_context.elementwise_binary->elements = (1 << log2_element_size);
+            op->context.elementwise_binary.elements = (1 << log2_element_size);
             op->compute[0].type = xnn_parallelization_type_1d_tile_1d_dynamic;
             op->compute[0].task_1d_tile_1d_dynamic =
                 (pthreadpool_task_1d_tile_1d_dynamic_t)
@@ -521,13 +514,13 @@ enum xnn_status xnn_setup_binary_elementwise_nd(xnn_operator_t op,
       break;
   }
 
-  op->dynamic_context.elementwise_binary->a = input1;
-  op->dynamic_context.elementwise_binary->b = input2;
-  op->dynamic_context.elementwise_binary->y = output;
+  op->context.elementwise_binary.a = input1;
+  op->context.elementwise_binary.b = input2;
+  op->context.elementwise_binary.y = output;
 
-  if (op->dynamic_context.elementwise_binary->flip_a_b) {
-    op->dynamic_context.elementwise_binary->a = input2;
-    op->dynamic_context.elementwise_binary->b = input1;
+  if (op->context.elementwise_binary.flip_a_b) {
+    op->context.elementwise_binary.a = input2;
+    op->context.elementwise_binary.b = input1;
   }
 
   op->state = xnn_run_state_ready;
@@ -564,15 +557,6 @@ enum xnn_status xnn_run_binary_elementwise_nd(
     op.params2 = NULL;
     xnn_destroy_operator(&op);
     return status;
-  }
-  op.dynamic_context.elementwise_binary = xnn_allocate_zero_simd_memory(sizeof(struct elementwise_binary_context));
-  if (op.dynamic_context.elementwise_binary == NULL) {
-    xnn_log_error(
-      "failed to allocate %zu bytes for %s operator descriptor",
-      sizeof(struct elementwise_binary_context), xnn_binary_operator_to_string(type));
-    op.params2 = NULL;
-    xnn_destroy_operator(&op);
-    return xnn_status_out_of_memory;
   }
 
   status = xnn_reshape_binary_elementwise_nd(&op, num_input1_dims, input1_shape,
