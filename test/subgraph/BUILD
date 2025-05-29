@@ -205,6 +205,7 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "static_reduce_test",
     srcs = ["static-reduce.cc"],
+    shard_count = 5,
     deps = SUBGRAPH_TEST_DEPS,
 )
 
