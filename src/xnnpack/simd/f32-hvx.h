@@ -4,6 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 //
 
+#error HVX
+
 #ifndef __XNNPACK_SRC_XNNPACK_SIMD_F32_HVX_H_
 #define __XNNPACK_SRC_XNNPACK_SIMD_F32_HVX_H_
 
