@@ -528,6 +528,18 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "qb4_packw_bench",
+    srcs = [
+        "qb4-packw.cc",
+    ],
+    tags = xnnpack_slow_benchmark_tags(),
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":bgemm",
+        ":packw_benchmark",
+    ],
+)
+
+xnnpack_benchmark(
     name = "x16_packw_bench",
     srcs = [
         "x16-packw.cc",
