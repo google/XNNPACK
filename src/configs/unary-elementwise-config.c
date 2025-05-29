@@ -1689,9 +1689,9 @@ static void init_qs8_cvt_config(void) {
       qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__wasmsimd_u16;
       qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_cvt_scalar_params;
     #endif
-  #elif XNN_ARCH_RISCV
-    qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__scalar_u4;
-    qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_cvt_scalar_params;
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__rvv_u4v;
+    qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_cvt_scalar_params;   
   #else
     qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__scalar_u4;
     qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_cvt_scalar_params;
@@ -1869,8 +1869,8 @@ static void init_qu8_cvt_config(void) {
       qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vcvt_ukernel__wasmsimd_u16;
       qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_cvt_scalar_params;
     #endif
-  #elif XNN_ARCH_RISCV
-    qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vcvt_ukernel__scalar_u4;
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vcvt_ukernel__rvv_u4v;
     qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_cvt_scalar_params;
   #else
     qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vcvt_ukernel__scalar_u4;
