@@ -185,7 +185,7 @@ static void init_u8_rmax_config(void) {
     if (hardware_config->use_arm_neon) {
       u8_rmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_u8_rmax_ukernel__neon_u32_acc2;
       u8_rmax_config.rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_u8_rdmax_ukernel_2p2x__neon_c32;
-    } else if (!XNN_PLATFORM_MOBILE) {
+    } else {
       u8_rmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_u8_rmax_ukernel__scalar_u2_acc2;
       u8_rmax_config.rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_u8_rdmax_ukernel_2p2x__scalar_c2;
     }
@@ -215,7 +215,7 @@ static void init_u8_rminmax_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon) {
       u8_rminmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_u8_rminmax_ukernel__neon_u32_acc2;
-    } else if (!XNN_PLATFORM_MOBILE) {
+    } else {
       u8_rminmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_u8_rminmax_ukernel__scalar_u2_acc2;
     }
   #elif XNN_ARCH_ARM64
@@ -238,7 +238,7 @@ static void init_u8_rmin_config(void) {
     if (hardware_config->use_arm_neon) {
       u8_rmin_config.ukernel = (xnn_reduce_ukernel_fn) xnn_u8_rmin_ukernel__neon_u32_acc2;
       u8_rmin_config.rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_u8_rdmin_ukernel_2p2x__neon_c32;
-    } else if (!XNN_PLATFORM_MOBILE) {
+    } else {
       u8_rmin_config.ukernel = (xnn_reduce_ukernel_fn) xnn_u8_rmin_ukernel__scalar_u2_acc2;
       u8_rmin_config.rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_u8_rdmin_ukernel_2p2x__scalar_c2;
     }
@@ -298,22 +298,22 @@ static void init_qs8_rsum_config(void) {
     assert(hardware_config != NULL);
 
     #if XNN_ENABLE_AVX512VNNI
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512vnni) {
+      if (hardware_config->use_x86_avx512vnni) {
         qs8_rsum_config.ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__avx512vnni_u128_acc2;
       } else
     #endif
     #if XNN_ENABLE_AVXVNNI
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avxvnni) {
+      if (hardware_config->use_x86_avxvnni) {
         qs8_rsum_config.ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__avxvnni_u128_acc2;
       } else
     #endif
     #if XNN_ENABLE_AVX512SKX
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
+      if (hardware_config->use_x86_avx512skx) {
         qs8_rsum_config.ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__avx512skx_u128_acc2;
       } else
     #endif
     #if XNN_ENABLE_AVX256SKX
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx256skx) {
+      if (hardware_config->use_x86_avx256skx) {
           qs8_rsum_config.ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__avx256skx_u64_acc2;
       } else
     #endif
@@ -410,7 +410,7 @@ static void init_f16_f32acc_rsum_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512SKX
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
+      if (hardware_config->use_x86_avx512skx) {
         // We use a kernel with the same unroll factor as avx, because that
         // produces numerically consistent results at negligible performance
         // cost.
@@ -421,7 +421,7 @@ static void init_f16_f32acc_rsum_config(void) {
       f16_f32acc_rsum_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f16_f32acc_rsum_ukernel__f16c_u32_acc4;
     }
     #if XNN_ENABLE_AVX512SKX
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
+      if (hardware_config->use_x86_avx512skx) {
         f16_f32acc_rsum_config.rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c64;
       } else
     #endif
@@ -459,7 +459,7 @@ static void init_f16_rmax_config(void) {
       f16_rmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f16_rmax_ukernel__f16c_u32;
     }
     #if XNN_ENABLE_AVX512SKX
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
+      if (hardware_config->use_x86_avx512skx) {
         f16_rmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f16_rmax_ukernel__avx512skx_u64_acc4;
       } else
     #endif
@@ -495,7 +495,7 @@ static void init_f16_rminmax_config(void) {
       } else
     #endif
     #if XNN_ENABLE_AVX512SKX
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
+      if (hardware_config->use_x86_avx512skx) {
         f16_rminmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f16_rminmax_ukernel__avx512skx_u64_acc4;
       } else
     #endif
@@ -529,7 +529,7 @@ static void init_f16_rmin_config(void) {
       } else
     #endif
     #if XNN_ENABLE_AVX512SKX
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
+      if (hardware_config->use_x86_avx512skx) {
         f16_rmin_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f16_rmin_ukernel__avx512skx_u64_acc4;
       } else
     #endif
@@ -563,7 +563,7 @@ static void init_f32_rmax_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+      if (hardware_config->use_x86_avx512f) {
         f32_rmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rmax_ukernel__avx512f_u64_acc4;
       } else
     #endif
@@ -573,7 +573,7 @@ static void init_f32_rmax_config(void) {
       f32_rmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rmax_ukernel__sse_u16_acc4;
     }
     #if XNN_ENABLE_AVX512F
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+      if (hardware_config->use_x86_avx512f) {
         f32_rmax_config.rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_f32_rdmax_ukernel_2p2x__avx512f_c32;
       } else
     #endif
@@ -614,7 +614,7 @@ static void init_f32_rminmax_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+      if (hardware_config->use_x86_avx512f) {
         f32_rminmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rminmax_ukernel__avx512f_u64_acc4;
       } else
     #endif
@@ -652,7 +652,7 @@ static void init_f32_rmin_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+      if (hardware_config->use_x86_avx512f) {
         f32_rmin_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rmin_ukernel__avx512f_u64_acc4;
       } else
     #endif
@@ -662,7 +662,7 @@ static void init_f32_rmin_config(void) {
       f32_rmin_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rmin_ukernel__sse_u16_acc4;
     }
     #if XNN_ENABLE_AVX512F
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+      if (hardware_config->use_x86_avx512f) {
         f32_rmin_config.rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_f32_rdmin_ukernel_2p2x__avx512f_c32;
       } else
     #endif
@@ -706,7 +706,7 @@ static void init_f32_rsum_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+      if (hardware_config->use_x86_avx512f) {
         // We use a kernel with the same unroll factor as avx, because that
         // produces numerically consistent results at negligible performance
         // cost.
@@ -721,7 +721,7 @@ static void init_f32_rsum_config(void) {
       f32_rsum_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__sse2_u16_acc4;
     }
     #if XNN_ENABLE_AVX512F
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+      if (hardware_config->use_x86_avx512f) {
         f32_rsum_config.rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_f32_rdsum_ukernel_7p7x__avx512f_c64;
       } else
     #endif

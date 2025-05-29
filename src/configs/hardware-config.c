@@ -464,22 +464,15 @@ const struct xnn_hardware_config* xnn_init_hardware_config() {
     }
   #endif  // !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV && !XNN_ARCH_PPC64
   #if XNN_ARCH_ARM
-    #if XNN_PLATFORM_MOBILE
-      if (!cpuinfo_has_arm_neon()) {
-        xnn_log_debug("unsupported hardware: ARM NEON not detected");
-        return NULL;
-      }
-    #else
-      if (!cpuinfo_has_arm_v6()) {
-        xnn_log_debug("unsupported hardware: ARMv6 not detected");
-        return NULL;
-      }
+    if (!cpuinfo_has_arm_v6()) {
+      xnn_log_debug("unsupported hardware: ARMv6 not detected");
+      return NULL;
+    }
 
-      if (!cpuinfo_has_arm_vfpv2() && !cpuinfo_has_arm_vfpv3()) {
-        xnn_log_debug("unsupported hardware: VFP FPU not detected");
-        return NULL;
-      }
-    #endif
+    if (!cpuinfo_has_arm_vfpv2() && !cpuinfo_has_arm_vfpv3()) {
+      xnn_log_debug("unsupported hardware: VFP FPU not detected");
+      return NULL;
+    }
   #endif  // XNN_ARCH_ARM
   #if XNN_ARCH_X86
     if (!cpuinfo_has_x86_sse2()) {

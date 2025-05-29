@@ -83,7 +83,7 @@ static void init_f32_dwconv2d_chw_config(void) {
       f32_dwconv2d_chw_config.dwconv2d_chw_5x5s2.ukernel = (xnn_dwconv2d_chw_ukernel_fn) xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__neon_1x4;
       f32_dwconv2d_chw_config.dwconv2d_chw_5x5s2.init.f32 = xnn_init_f32_minmax_scalar_params;
       f32_dwconv2d_chw_config.dwconv2d_chw_5x5s2.output_width_tile = 4;
-    } else if (!XNN_PLATFORM_MOBILE) {
+    } else {
       f32_dwconv2d_chw_config.dwconv2d_chw_3x3.ukernel = (xnn_dwconv2d_chw_ukernel_fn) xnn_f32_dwconv2d_chw_ukernel_3x3p1__scalar_4x1;
       f32_dwconv2d_chw_config.dwconv2d_chw_3x3.init.f32 = xnn_init_f32_minmax_scalar_params;
       f32_dwconv2d_chw_config.dwconv2d_chw_3x3.output_width_tile = 1;

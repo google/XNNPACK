@@ -26,12 +26,12 @@ static void init_x8_lut_config(void) {
     assert(hardware_config != NULL);
 
     #if XNN_ENABLE_AVX256VBMI
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512vbmi) {
+      if (hardware_config->use_x86_avx512vbmi) {
         x8_lut_config.microkernel = xnn_x8_lut_ukernel__avx512vbmi_vpermx2b_u128;
       } else
     #endif
     #if XNN_ENABLE_AVX512SKX
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
+      if (hardware_config->use_x86_avx512skx) {
         x8_lut_config.microkernel = xnn_x8_lut_ukernel__avx512skx_vpshufb_u64;
       } else
     #endif

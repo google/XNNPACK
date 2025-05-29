@@ -22,7 +22,7 @@ static void init_x32_unpool_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon) {
       x32_unpool_config.unpool = (xnn_unpool_ukernel_fn) xnn_x32_unpool_ukernel__neon;
-    } else if (!XNN_PLATFORM_MOBILE) {
+    } else {
       x32_unpool_config.unpool = (xnn_unpool_ukernel_fn) xnn_x32_unpool_ukernel__scalar;
     }
   #elif XNN_ARCH_ARM64

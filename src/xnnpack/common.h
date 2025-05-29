@@ -106,13 +106,6 @@
 #define XNN_PLATFORM_MAC 0
 #endif
 
-// Mobile build x86 versions for debugging
-#if XNN_PLATFORM_ANDROID || XNN_PLATFORM_IOS
-#define XNN_PLATFORM_MOBILE 1
-#else
-#define XNN_PLATFORM_MOBILE 0
-#endif
-
 #if defined(__EMSCRIPTEN__) || defined(__wasm__)
 #define XNN_PLATFORM_WEB 1
 #else
@@ -358,11 +351,7 @@
 #if XNN_ARCH_WASM
 #define XNN_ALLOCATION_ALIGNMENT 4
 #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_PLATFORM_MOBILE
-#define XNN_ALLOCATION_ALIGNMENT 32
-#else
 #define XNN_ALLOCATION_ALIGNMENT 64
-#endif
 #elif XNN_ARCH_HEXAGON
 #define XNN_ALLOCATION_ALIGNMENT 128
 #else

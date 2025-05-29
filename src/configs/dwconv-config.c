@@ -78,7 +78,7 @@ static void init_f16_dwconv_config(void) {
       f16_dwconv_config[3].channel_tile = 8;
       f16_dwconv_config[3].primary_tile = 25;
     }
-  #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
+  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_avx2) {
@@ -129,7 +129,7 @@ static void init_f32_dwconv_config(void) {
       f32_dwconv_config[3].init.f32 = xnn_init_f32_minmax_scalar_params;
       f32_dwconv_config[3].channel_tile = 8;
       f32_dwconv_config[3].primary_tile = 25;
-    } else if (!XNN_PLATFORM_MOBILE) {
+    } else {
       f32_dwconv_config[0].minmax = (xnn_dwconv_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_3p1c__scalar_acc2;
       f32_dwconv_config[0].linear = (xnn_dwconv_ukernel_fn) xnn_f32_dwconv_ukernel_3p1c__scalar_acc2;
       f32_dwconv_config[0].init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -205,7 +205,7 @@ static void init_f32_dwconv_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+      if (hardware_config->use_x86_avx512f) {
         f32_dwconv_config[0].minmax = (xnn_dwconv_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_3p16c__avx512f;
         f32_dwconv_config[0].init.f32 = xnn_init_f32_minmax_scalar_params;
         f32_dwconv_config[0].channel_tile = 16;
@@ -500,7 +500,7 @@ static void init_qs8_qc8w_dwconv_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512SKX
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
+      if (hardware_config->use_x86_avx512skx) {
         qs8_qc8w_dwconv_config[0].minmax = (xnn_dwconv_ukernel_fn) xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p32c__avx512skx_mul32;
         qs8_qc8w_dwconv_config[0].init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
         qs8_qc8w_dwconv_config[0].channel_tile = 32;
@@ -635,7 +635,7 @@ static void init_qs8_dwconv_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512SKX
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
+      if (hardware_config->use_x86_avx512skx) {
         qs8_dwconv_config[0].minmax = (xnn_dwconv_ukernel_fn) xnn_qs8_dwconv_minmax_fp32_ukernel_9p32c__avx512skx_mul32;
         qs8_dwconv_config[0].init.qs8 = xnn_init_qs8_conv_minmax_fp32_scalar_params;
         qs8_dwconv_config[0].channel_tile = 32;
@@ -742,7 +742,7 @@ static void init_qu8_dwconv_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512SKX
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
+      if (hardware_config->use_x86_avx512skx) {
         qu8_dwconv_config[0].minmax = (xnn_dwconv_ukernel_fn) xnn_qu8_dwconv_minmax_fp32_ukernel_9p32c__avx512skx_mul32;
         qu8_dwconv_config[0].init.qu8 = xnn_init_qu8_conv_minmax_fp32_scalar_params;
         qu8_dwconv_config[0].channel_tile = 32;

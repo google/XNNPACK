@@ -54,7 +54,7 @@ static void init_f32_spmm_config(void) {
       f32_spmm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
       f32_spmm_config.mr = 32;
       f32_spmm_config.nr = 1;
-    } else if (!XNN_PLATFORM_MOBILE) {
+    } else {
       f32_spmm_config.ukernel = (xnn_spmm_ukernel_fn) xnn_f32_spmm_minmax_ukernel_8x1__scalar;
       f32_spmm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
       f32_spmm_config.mr = 8;
@@ -148,12 +148,10 @@ static void init_f32_spmm2_config(void) {
 
 static void init_f32_spmm4_config(void) {
   #if XNN_ARCH_ARM
-    if (!XNN_PLATFORM_MOBILE) {
-      f32_spmm4_config.ukernel = (xnn_spmm_ukernel_fn) xnn_f32_spmm_minmax_ukernel_8x4__scalar;
-      f32_spmm4_config.init.f32 = xnn_init_f32_minmax_scalar_params;
-      f32_spmm4_config.mr = 8;
-      f32_spmm4_config.nr = 4;
-    }
+    f32_spmm4_config.ukernel = (xnn_spmm_ukernel_fn) xnn_f32_spmm_minmax_ukernel_8x4__scalar;
+    f32_spmm4_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+    f32_spmm4_config.mr = 8;
+    f32_spmm4_config.nr = 4;
   #elif XNN_ARCH_ARM64
     f32_spmm4_config.ukernel = (xnn_spmm_ukernel_fn) xnn_f32_spmm_minmax_ukernel_32x4__aarch64_neonfma;
     f32_spmm4_config.init.f32 = xnn_init_f32_minmax_scalar_params;

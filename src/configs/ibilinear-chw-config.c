@@ -48,7 +48,7 @@ static void init_f32_ibilinear_chw_config(void) {
     if (hardware_config->use_arm_neon) {
       f32_ibilinear_chw_config.ukernel = (xnn_ibilinear_chw_ukernel_fn) xnn_f32_ibilinear_chw_ukernel__neon_p8;
       f32_ibilinear_chw_config.channel_tile = 1;
-    } else if (!XNN_PLATFORM_MOBILE) {
+    } else {
       f32_ibilinear_chw_config.ukernel = (xnn_ibilinear_chw_ukernel_fn) xnn_f32_ibilinear_chw_ukernel__scalar_p4;
       f32_ibilinear_chw_config.channel_tile = 1;
     }

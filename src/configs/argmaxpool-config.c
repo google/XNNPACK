@@ -26,7 +26,7 @@ static void init_f32_argmaxpool_config(void) {
         .ukernel = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9p8x__neon_c4,
         .primary_tile = 9,
       };
-    } else if (!XNN_PLATFORM_MOBILE) {
+    } else {
       f32_argmaxpool_config = (struct xnn_argmaxpool_config) {
         .ukernel = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1,
         .primary_tile = 9,
