@@ -554,7 +554,12 @@ TEST(FullyConnectedQC8, static_b) { TestStaticB<qint8, qcint8, qint32>(); }
 TEST(FullyConnectedQU8, static_b) { TestStaticB<quint8, quint8, qint32>(); }
 TEST(FullyConnectedQS8QC8W, static_b) { TestStaticB<qint8, qcint8, qint32>(); }
 TEST(FullyConnectedQS8QC4W, static_b) { TestStaticB<qint8, qcint4, qint32>(); }
-TEST(FullyConnectedF16, static_b) { TestStaticB<xnn_float16, float, float>(); }
+TEST(FullyConnectedF16F32F16, static_b) {
+  TestStaticB<xnn_float16, float, float>();
+}
+TEST(FullyConnectedF16, static_b) {
+  TestStaticB<xnn_float16, xnn_float16, xnn_float16>();
+}
 TEST(FullyConnectedF32, static_b) { TestStaticB<float, float, float>(); }
 // TODO(b/407771627): Either add xnn_datatype_qcuint4, or remove F32QC4W.
 TEST(FullyConnectedF32QC4W, static_b) { TestStaticB<float, qcuint4, float>(); }

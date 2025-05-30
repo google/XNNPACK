@@ -273,12 +273,13 @@ static enum xnn_status create_fully_connected_operator(
     input_channels = filter_value->shape.dim[filter_value->shape.num_dims - 1];
   }
 
-  const void* kernel_data = filter_value->fp32_data != NULL
-                                ? filter_value->fp32_data
-                                : filter_value->data;
+  const void* kernel_data = filter_value->data;
+  const void* kernel_fp32_data =
+      filter_value->fp32_data ? filter_value->fp32_data : kernel_data;
   bool has_non_static_weights = (kernel_data == NULL);
 
   const void* bias_data = NULL;
+  const void* bias_fp32_data = NULL;
   const struct xnn_runtime_value* bias_value = NULL;
   uint32_t bias_id = XNN_INVALID_VALUE_ID;
   if (node->num_inputs > 2) {
@@ -287,8 +288,8 @@ static enum xnn_status create_fully_connected_operator(
     assert(bias_id < num_values);
     bias_value = &values[bias_id];
 
-    bias_data = bias_value->fp32_data != NULL ? bias_value->fp32_data
-                                              : bias_value->data;
+    bias_data = bias_value->data;
+    bias_fp32_data = bias_value->fp32_data ? bias_value->fp32_data : bias_data;
     has_non_static_weights |= (bias_data == NULL);
   }
 
@@ -341,7 +342,7 @@ static enum xnn_status create_fully_connected_operator(
       status = xnn_create_fully_connected_nc_f16(
           input_channels, output_channels,
           /*input_stride=*/input_channels,
-          /*output_stride=*/output_channels, kernel_data, bias_data,
+          /*output_stride=*/output_channels, kernel_fp32_data, bias_fp32_data,
           node->activation.output_min, node->activation.output_max,
           node->flags | XNN_FLAG_FP32_STATIC_WEIGHTS, weights_cache,
           fully_connected_op_ptr);
