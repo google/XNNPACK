@@ -69,6 +69,7 @@ _ISA_LIST = frozenset({
     'scalar',
     'sse',
     'sse2',
+    'sse2fma',
     'sse41',
     'ssse3',
     'wasmblendvps',
@@ -196,6 +197,8 @@ def main(args):
       if name.endswith('.in'):
         continue
       if name.endswith('.h'):
+        continue
+      if name.endswith('.inc'):
         continue
       basename, ext = os.path.splitext(name)
       if ext == '.sollya':
