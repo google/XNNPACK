@@ -536,8 +536,10 @@ enum xnn_status xnn_create_runtime_v4(
     goto error;
   }
 
-  const uint32_t optimization_flags = XNN_FLAG_HINT_SPARSE_INFERENCE | XNN_FLAG_HINT_FP16_INFERENCE |
-    XNN_FLAG_FORCE_FP16_INFERENCE | XNN_FLAG_NO_OPERATOR_FUSION;
+  const uint32_t optimization_flags =
+      XNN_FLAG_HINT_SPARSE_INFERENCE | XNN_FLAG_HINT_FP16_INFERENCE |
+      XNN_FLAG_FORCE_FP16_INFERENCE | XNN_FLAG_NO_OPERATOR_FUSION |
+      XNN_FLAG_DONT_INLINE_LHS_PACKING;
   status = xnn_subgraph_optimize(subgraph, flags & optimization_flags);
   if (status != xnn_status_success) {
     xnn_log_error("failed to optimize subgraph");
@@ -773,7 +775,7 @@ enum xnn_status xnn_reshape_runtime(
       continue;
     }
     assert(opdata->reshape != NULL);
-    xnn_log_debug("reshaping operator %u (%s)", opdata_id,
+    xnn_log_info("reshaping operator %u (%s)", opdata_id,
                   xnn_operator_type_to_string_v2(opdata->operator_objects[0]));
     enum xnn_status status = opdata->reshape(opdata, runtime->values, runtime->num_values, runtime->threadpool);
     if (status == xnn_status_reallocation_required) {

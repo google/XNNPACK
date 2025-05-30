@@ -22,8 +22,10 @@ void xnn_subgraph_log_impl(const char* filename, size_t line_number,
   fprintf(out, "  Nodes:\n");
   for (int node_id = 0; node_id < subgraph->num_nodes; node_id++) {
     const struct xnn_node* node = &subgraph->nodes[node_id];
-    fprintf(out, "    %03i: type=%s", node_id,
-            xnn_node_type_to_string(node->type));
+    fprintf(out, "    %03i: type=%s (%s)", node_id,
+            xnn_node_type_to_string(node->type),
+            xnn_datatype_to_string(
+                node->params.fully_connected.assumed_input_datatype));
     if (node->num_inputs) {
       fprintf(out, ", inputs=[%i", node->inputs[0]);
       for (int i = 1; i < node->num_inputs; i++) {

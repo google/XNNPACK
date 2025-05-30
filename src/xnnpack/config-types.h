@@ -101,6 +101,8 @@ struct xnn_pack_lh_config {
   xnn_pack_lh_ukernel_fn ukernel;
   xnn_pack_lh_size_fn size_fn;
   xnn_pack_lh_offset_fn offset_fn;
+  uint32_t log2_input_element_size;
+  uint32_t log2_packed_element_size;
 };
 
 struct xnn_dwconv_config {

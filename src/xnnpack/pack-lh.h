@@ -9,6 +9,7 @@
 #include <stdint.h>
 
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,6 +59,26 @@ extern "C" {
 #include "src/x8-pack-lh/x8-pack-lh.inc"
 
 #undef XNN_UKERNEL
+
+// The following are `pack-lh` kernel functions wrapping the `qdint8` and
+// `qduint8` conversion functions.
+size_t xnn_pack_lh_fx_qd8_packed_size(size_t m, size_t k, size_t mr_packed,
+                                      size_t kr, size_t sr);
+size_t xnn_pack_lh_fx_qd8_packed_offset(size_t m, size_t k, size_t mr_packed,
+                                        size_t kr, size_t sr);
+
+void xnn_pack_lh_f32_qdint8(size_t m, size_t k, size_t mr_packed, size_t kr,
+                            size_t sr, size_t m_idx_start, const void* lhs,
+                            size_t lhs_stride, void* lhs_packed);
+void xnn_pack_lh_f32_qduint8(size_t m, size_t k, size_t mr_packed, size_t kr,
+                             size_t sr, size_t m_idx_start, const void* lhs,
+                             size_t lhs_stride, void* lhs_packed);
+void xnn_pack_lh_f16_qdint8(size_t m, size_t k, size_t mr_packed, size_t kr,
+                            size_t sr, size_t m_idx_start, const void* lhs,
+                            size_t lhs_stride, void* lhs_packed);
+void xnn_pack_lh_f16_qduint8(size_t m, size_t k, size_t mr_packed, size_t kr,
+                             size_t sr, size_t m_idx_start, const void* lhs,
+                             size_t lhs_stride, void* lhs_packed);
 
 #ifdef __cplusplus
 }  // extern "C"

@@ -27,6 +27,9 @@
 extern "C" {
 #endif
 
+/// Pack the LHS data on the fly in a temporary buffer in the consuming op.
+#define XNN_FLAG_INLINE_LHS_PACKING 0x00000200
+
 struct xnn_ukernel_conv2d {
   union {
     xnn_conv_hwc2chw_ukernel_fn hwc2chw_fn;
