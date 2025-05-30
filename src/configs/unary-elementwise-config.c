@@ -138,6 +138,10 @@ XNN_INIT_ONCE_GUARD(s8_clamp);
 XNN_INIT_ONCE_GUARD(u8_clamp);
 XNN_INIT_ONCE_GUARD(xx_copy);
 
+// TODO: This should be a flag (b/404616456). Until we have a flag to control
+// it, assume we want consistent arithmetic.
+const bool consistent_arithmetic = true;
+
 static void init_f16_abs_config(void) {
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -656,10 +660,12 @@ static void init_f32_approxgelu_config(void) {
     #endif
     if (hardware_config->use_x86_fma3) {
       f32_approxgelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vapproxgelu_ukernel__fma3_rational_12_10_div_u16;
-    } else if (hardware_config->use_x86_avx) {
+    } else if (!consistent_arithmetic && hardware_config->use_x86_avx) {
       f32_approxgelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vapproxgelu_ukernel__avx_rational_12_10_div_u16;
-    } else {
+    } else if (!consistent_arithmetic) {
       f32_approxgelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vapproxgelu_ukernel__sse2_rational_12_10_div_u12;
+    } else {
+      f32_approxgelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vapproxgelu_ukernel__sse2fma_rational_12_10_div_u8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_approxgelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vapproxgelu_ukernel__wasmsimd_rational_12_10_div_u12;
@@ -736,10 +742,12 @@ static void init_f32_cosine_config(void) {
     #endif
     if (hardware_config->use_x86_fma3) {
       f32_cosine_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vcos_ukernel__fma3_rational_5_4_div_u16;
-    } else if (hardware_config->use_x86_avx) {
+    } else if (!consistent_arithmetic && hardware_config->use_x86_avx) {
       f32_cosine_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vcos_ukernel__avx_rational_5_4_div_u16;
-    } else {
+    } else if (!consistent_arithmetic) {
       f32_cosine_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vcos_ukernel__sse2_rational_5_4_div_u8;
+    } else {
+      f32_cosine_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vcos_ukernel__sse2fma_rational_5_4_div_u8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -779,7 +787,7 @@ static void init_f32_elu_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
-      if (hardware_config->use_x86_avx512f) {
+      if (!consistent_arithmetic && hardware_config->use_x86_avx512f) {
         f32_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__avx512f_rr1_p6_u64;
         f32_elu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_elu_scalar_params;
       } else
@@ -843,10 +851,12 @@ static void init_f32_gelu_config(void) {
     #endif
     if (hardware_config->use_x86_fma3) {
       f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__fma3_rational_12_10_div_u16;
-    } else if (hardware_config->use_x86_avx) {
+    } else if (!consistent_arithmetic && hardware_config->use_x86_avx) {
       f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__avx_rational_12_10_div_u16;
-    } else {
+    } else if (!consistent_arithmetic) {
       f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__sse2_rational_12_10_div_u12;
+    } else {
+      f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__sse2fma_rational_12_10_div_u8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__wasmsimd_rational_12_10_div_u12;
@@ -872,11 +882,11 @@ static void init_f32_hswish_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
-      if (hardware_config->use_x86_avx512f) {
+      if (!consistent_arithmetic && hardware_config->use_x86_avx512f) {
         f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__avx512f_u32;
       } else
     #endif
-    if (hardware_config->use_x86_fma3) {
+    if (!consistent_arithmetic && hardware_config->use_x86_fma3) {
       f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__fma3_u16;
     } else if (hardware_config->use_x86_avx) {
       f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__avx_u16;
@@ -913,11 +923,11 @@ static void init_f32_exp_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
-      if (hardware_config->use_x86_avx512f) {
+      if (!consistent_arithmetic && hardware_config->use_x86_avx512f) {
         f32_exp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vexp_ukernel__avx512f_rational_3_2_div_u16;
       } else
     #endif
-    if (hardware_config->use_x86_fma3) {
+    if (!consistent_arithmetic && hardware_config->use_x86_fma3) {
       f32_exp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vexp_ukernel__fma3_rational_3_2_div_u32;
     } else if (hardware_config->use_x86_avx) {
       f32_exp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vexp_ukernel__avx_rational_3_2_div_u24;
@@ -948,11 +958,11 @@ static void init_f32_log_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
-      if (hardware_config->use_x86_avx512f) {
+      if (!consistent_arithmetic && hardware_config->use_x86_avx512f) {
         f32_log_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlog_ukernel__avx512f_rational_3_3_div_u16;
       } else
     #endif
-    if (hardware_config->use_x86_fma3) {
+    if (!consistent_arithmetic && hardware_config->use_x86_fma3) {
       f32_log_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlog_ukernel__fma3_rational_3_3_div_u16;
     } else if (hardware_config->use_x86_avx2) {
       f32_log_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlog_ukernel__avx2_rational_3_3_div_u16;
@@ -1284,11 +1294,11 @@ static void init_f32_sigmoid_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
-      if (hardware_config->use_x86_avx512f) {
+      if (!consistent_arithmetic && hardware_config->use_x86_avx512f) {
         f32_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__avx512f_rr2_lut32_p2_perm2_scalef_div_u64;
       } else
     #endif
-    if (hardware_config->use_x86_avx2) {
+    if (!consistent_arithmetic && hardware_config->use_x86_avx2) {
       f32_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__avx2_rr1_p5_div_u16;
     } else if (hardware_config->use_x86_avx) {
       f32_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__avx_rr2_p5_nr2_u16;
@@ -1426,10 +1436,12 @@ static void init_f32_sine_config(void) {
     #endif
     if (hardware_config->use_x86_fma3) {
       f32_sine_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsin_ukernel__fma3_rational_5_4_div_u16;
-    } else if (hardware_config->use_x86_avx) {
+    } else if (!consistent_arithmetic && hardware_config->use_x86_avx) {
       f32_sine_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsin_ukernel__avx_rational_5_4_div_u16;
-    } else {
+    } else if (!consistent_arithmetic) {
       f32_sine_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsin_ukernel__sse2_rational_5_4_div_u8;
+    } else {
+      f32_sine_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsin_ukernel__sse2fma_rational_5_4_div_u8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -1461,11 +1473,11 @@ static void init_f32_tanh_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
-      if (hardware_config->use_x86_avx512f) {
+      if (!consistent_arithmetic && hardware_config->use_x86_avx512f) {
         f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__avx512f_rational_9_8_div_u32;
       } else
     #endif
-    if (hardware_config->use_x86_fma3) {
+    if (!consistent_arithmetic && hardware_config->use_x86_fma3) {
       f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__fma3_rational_9_8_div_u16;
     } else if (hardware_config->use_x86_avx) {
       f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__avx_rational_9_8_div_u16;
