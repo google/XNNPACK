@@ -165,10 +165,10 @@ KernelInfo kernels[] = {
                     datatype_in, datatype_out, params_type, init_params)      \
   {#ukernel,     arch_flags,  Kernel{ukernel, init_params}, row_tile,         \
    channel_tile, vector_tile, sizeof(datatype_in)},
-#include "src/f16-f32acc-rdsum/f16-f32acc-rdsum.h"
-#include "src/f32-rdsum/f32-rdsum.h"
-#include "src/qs8-rdsum/qs8-rdsum-minmax-fp32.h"
-#include "src/qu8-rdsum/qu8-rdsum.h"
+#include "src/f16-f32acc-rdsum/f16-f32acc-rdsum.inc"
+#include "src/f32-rdsum/f32-rdsum.inc"
+#include "src/qs8-rdsum/qs8-rdsum-minmax-fp32.inc"
+#include "src/qu8-rdsum/qu8-rdsum.inc"
 #undef XNN_UKERNEL
 };
 

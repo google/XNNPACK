@@ -160,20 +160,20 @@ KernelInfo kernels[] = {
                     datatype_in, datatype_out, params_type, init_params)      \
   {#ukernel, arch_flags,   Kernel{ukernel}, OpType::Max,                      \
    row_tile, channel_tile, vector_tile,     sizeof(datatype_in)},
-#include "src/f16-rdminmax/f16-rdmax.h"
-#include "src/f32-rdminmax/f32-rdmax.h"
-#include "src/s8-rdminmax/s8-rdmax.h"
-#include "src/u8-rdminmax/u8-rdmax.h"
+#include "src/f16-rdminmax/f16-rdmax.inc"
+#include "src/f32-rdminmax/f32-rdmax.inc"
+#include "src/s8-rdminmax/s8-rdmax.inc"
+#include "src/u8-rdminmax/u8-rdmax.inc"
 #undef XNN_UKERNEL
 
 #define XNN_UKERNEL(arch_flags, ukernel, row_tile, channel_tile, vector_tile, \
                     datatype_in, datatype_out, params_type, init_params)      \
   {#ukernel, arch_flags,   Kernel{ukernel}, OpType::Min,                      \
    row_tile, channel_tile, vector_tile,     sizeof(datatype_in)},
-#include "src/f16-rdminmax/f16-rdmin.h"
-#include "src/f32-rdminmax/f32-rdmin.h"
-#include "src/s8-rdminmax/s8-rdmin.h"
-#include "src/u8-rdminmax/u8-rdmin.h"
+#include "src/f16-rdminmax/f16-rdmin.inc"
+#include "src/f32-rdminmax/f32-rdmin.inc"
+#include "src/s8-rdminmax/s8-rdmin.inc"
+#include "src/u8-rdminmax/u8-rdmin.inc"
 #undef XNN_UKERNEL
 };
 

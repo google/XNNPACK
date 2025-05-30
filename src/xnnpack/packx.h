@@ -18,7 +18,7 @@ extern "C" {
   XNN_INTERNAL void ukernel(size_t m, size_t k, const uint32_t* x, \
                             size_t x_stride, uint32_t* y);
 
-#include "src/x32-packx/x32-packx.h"
+#include "src/x32-packx/x32-packx.inc"
 
 #undef XNN_UKERNEL
 

@@ -14,7 +14,7 @@ extern "C" {
 enum xnn_node_type {
 #define XNN_ENUM_ITEM_0(enum_name, enum_string) enum_name = 0,
 #define XNN_ENUM_ITEM(enum_name, enum_string) enum_name,
-#include "src/xnnpack/node-type-defs.h"
+#include "src/xnnpack/node-type-defs.inc"
 #undef XNN_ENUM_ITEM_0
 #undef XNN_ENUM_ITEM
 };

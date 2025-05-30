@@ -2,10 +2,6 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
-//
-// Auto-generated file. Do not edit!
-//   Specification: f16-vmulcaddc
-//   Generator: tools/generate-vmulcaddc-test.py
 
 #include <gtest/gtest.h>
 #include "src/xnnpack/common.h"
@@ -40,5 +36,5 @@
                           datatype, params_type, init_params);                 \
   XNN_TEST_VMULCADDC_QMIN(ukernel, arch_flags, row_tile, channel_tile,         \
                           datatype, params_type, init_params);
-#include "src/f16-vmulcaddc/f16-vmulcaddc.h"
+#include "src/f16-vmulcaddc/f16-vmulcaddc.inc"
 #undef XNN_UKERNEL

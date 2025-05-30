@@ -76,7 +76,7 @@ static void f32_vcmul(benchmark::State& state, uint64_t arch_flags,
           benchmark::utils::BinaryElementwiseParameters<std::complex<float>,  \
                                                         std::complex<float>>) \
       ->UseRealTime();
-#include "src/f32-vbinary/f32-vcmul.h"
+#include "src/f32-vbinary/f32-vcmul.inc"
 #undef XNN_UKERNEL
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

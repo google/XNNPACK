@@ -32,6 +32,7 @@ MICROKERNEL_BENCHMARK_DEPS = [
     "//:isa_checks",
     "//:math",
     "//:microfnptr_h",
+    "//:microkernel_defs",
     "//:microkernel_hdrs",
     "//:microparams_init",
     "//:packing",

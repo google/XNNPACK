@@ -34,7 +34,7 @@ static void x32_gio_packw(benchmark::State& state, const char* net,
   BENCHMARK_CAPTURE_BGEMM(x32_gio_packw, ukernel##_, ukernel, arch_flags, nr, \
                           kr, sr);
 
-#include "src/x32-packw/x32-packw.h"
+#include "src/x32-packw/x32-packw.inc"
 
 #undef XNN_UKERNEL
 

@@ -25,7 +25,7 @@ static void x16_x32_packw(benchmark::State& state, const char* net,
 
 #define XNN_GIO_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale)
 
-#include "src/x16-x32-packw/x16-x32-packw.h"
+#include "src/x16-x32-packw/x16-x32-packw.inc"
 
 #undef XNN_UKERNEL
 #undef XNN_GIO_UKERNEL

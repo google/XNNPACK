@@ -23,7 +23,7 @@ static void qs8_qc4w_packw(benchmark::State& state, const char* net,
   BENCHMARK_CAPTURE_BGEMM(qs8_qc4w_packw, ukernel##_, ukernel, arch_flags, nr, \
                           kr, sr);
 
-#include "src/qs8-qc4w-packw/qs8-qc4w-packw.h"
+#include "src/qs8-qc4w-packw/qs8-qc4w-packw.inc"
 
 #undef XNN_UKERNEL
 

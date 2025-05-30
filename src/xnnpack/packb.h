@@ -23,7 +23,7 @@ extern "C" {
                             size_t channel_subtile_stride,                  \
                             const struct xnn_x32_packb_params* params);
 
-#include "src/x32-packb/x32-packb.h"
+#include "src/x32-packb/x32-packb.inc"
 
 #undef XNN_UKERNEL
 

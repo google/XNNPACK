@@ -35,6 +35,6 @@
     TestInputZeroPoint<Convert, datatype_in, datatype_out>(                    \
         arch_flags, batch_tile, ukernel, init_params);                         \
   }
-#include "src/qu8-f32-vcvt/qu8-f32-vcvt.h"
+#include "src/qu8-f32-vcvt/qu8-f32-vcvt.inc"
 #undef XNN_UKERNEL
 #undef XNN_QUANTIZED

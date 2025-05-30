@@ -122,30 +122,30 @@ KernelInfo kernels[] = {
                     datatype_out, params_type, init_params)                    \
   {#ukernel,   arch_flags,  Kernel{ukernel},    OpType::Max,                   \
    batch_tile, vector_tile, sizeof(datatype_in)},
-#include "src/f16-rminmax/f16-rmax.h"
-#include "src/f32-rminmax/f32-rmax.h"
-#include "src/s8-rminmax/s8-rmax.h"
-#include "src/u8-rminmax/u8-rmax.h"
+#include "src/f16-rminmax/f16-rmax.inc"
+#include "src/f32-rminmax/f32-rmax.inc"
+#include "src/s8-rminmax/s8-rmax.inc"
+#include "src/u8-rminmax/u8-rmax.inc"
 #undef XNN_UKERNEL
 
 #define XNN_UKERNEL(arch_flags, ukernel, batch_tile, vector_tile, datatype_in, \
                     datatype_out, params_type, init_params)                    \
   {#ukernel,   arch_flags,  Kernel{ukernel},    OpType::Min,                   \
    batch_tile, vector_tile, sizeof(datatype_in)},
-#include "src/f16-rminmax/f16-rmin.h"
-#include "src/f32-rminmax/f32-rmin.h"
-#include "src/s8-rminmax/s8-rmin.h"
-#include "src/u8-rminmax/u8-rmin.h"
+#include "src/f16-rminmax/f16-rmin.inc"
+#include "src/f32-rminmax/f32-rmin.inc"
+#include "src/s8-rminmax/s8-rmin.inc"
+#include "src/u8-rminmax/u8-rmin.inc"
 #undef XNN_UKERNEL
 
 #define XNN_UKERNEL(arch_flags, ukernel, batch_tile, vector_tile, datatype_in, \
                     datatype_out, params_type, init_params)                    \
   {#ukernel,   arch_flags,  Kernel{ukernel},    OpType::MinMax,                \
    batch_tile, vector_tile, sizeof(datatype_in)},
-#include "src/f16-rminmax/f16-rminmax.h"
-#include "src/f32-rminmax/f32-rminmax.h"
-#include "src/s8-rminmax/s8-rminmax.h"
-#include "src/u8-rminmax/u8-rminmax.h"
+#include "src/f16-rminmax/f16-rminmax.inc"
+#include "src/f32-rminmax/f32-rminmax.inc"
+#include "src/s8-rminmax/s8-rminmax.inc"
+#include "src/u8-rminmax/u8-rminmax.inc"
 #undef XNN_UKERNEL
 };
 

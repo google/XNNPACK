@@ -40,5 +40,5 @@
                           datatype, params_type, init_params);                 \
   XNN_TEST_VMULCADDC_QMIN(ukernel, arch_flags, row_tile, channel_tile,         \
                           datatype, params_type, init_params);
-#include "src/f32-vmulcaddc/f32-vmulcaddc.h"
+#include "src/f32-vmulcaddc/f32-vmulcaddc.inc"
 #undef XNN_UKERNEL

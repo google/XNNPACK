@@ -28,7 +28,7 @@ extern "C" {
                             const void* scale, int8_t* packed_weights,        \
                             size_t extra_bytes, const void* params);
 
-#include "src/x8-packw/x8-packw.h"
+#include "src/x8-packw/x8-packw.inc"
 
 #undef XNN_UKERNEL
 #undef XNN_GIO_UKERNEL
@@ -48,7 +48,7 @@ extern "C" {
                             const void* scale, int8_t* packed_weights,  \
                             size_t extra_bytes, const void* params);
 
-#include "src/qs8-packw/qs8-packw.h"
+#include "src/qs8-packw/qs8-packw.inc"
 
 #undef XNN_QS8_UKERNEL
 #undef XNN_QS8_GIO_UKERNEL
@@ -59,7 +59,7 @@ extern "C" {
       const uint16_t* weights, const uint16_t* bias, const void* scale,   \
       uint16_t* packed_weights, size_t extra_bytes, const void* params);
 
-#include "src/x16-packw/x16-packw.h"
+#include "src/x16-packw/x16-packw.inc"
 
 #undef XNN_UKERNEL
 
@@ -76,7 +76,7 @@ extern "C" {
                             const void* scale, uint16_t* packed_weights,      \
                             size_t extra_bytes, const void* params);
 
-#include "src/x16-x32-packw/x16-x32-packw.h"
+#include "src/x16-x32-packw/x16-x32-packw.inc"
 
 #undef XNN_UKERNEL
 #undef XNN_GIO_UKERNEL
@@ -94,7 +94,7 @@ extern "C" {
                             const void* scale, uint32_t* packed_weights,      \
                             size_t extra_bytes, const void* params);
 
-#include "src/x32-packw/x32-packw.h"
+#include "src/x32-packw/x32-packw.inc"
 
 #undef XNN_UKERNEL
 #undef XNN_GIO_UKERNEL
@@ -106,7 +106,7 @@ extern "C" {
                             void* packed_weights, size_t extra_bytes,     \
                             const struct xnn_qs8_qc4w_packing_params* params);
 
-#include "src/qs8-qc4w-packw/qs8-qc4w-packw.h"
+#include "src/qs8-qc4w-packw/qs8-qc4w-packw.inc"
 
 #undef XNN_UKERNEL
 

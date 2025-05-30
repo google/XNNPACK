@@ -63,18 +63,18 @@ static void reduce(benchmark::State& state, uint64_t arch_flags,
   BENCHMARK_CAPTURE(reduce, ukernel, arch_flags, ukernel)                      \
       ->Apply(benchmark::utils::ReduceParameters<datatype_in>)                 \
       ->UseRealTime();
-#include "src/f16-rminmax/f16-rmax.h"
-#include "src/f16-rminmax/f16-rmin.h"
-#include "src/f16-rminmax/f16-rminmax.h"
-#include "src/f32-rminmax/f32-rmax.h"
-#include "src/f32-rminmax/f32-rmin.h"
-#include "src/f32-rminmax/f32-rminmax.h"
-#include "src/s8-rminmax/s8-rmax.h"
-#include "src/s8-rminmax/s8-rmin.h"
-#include "src/s8-rminmax/s8-rminmax.h"
-#include "src/u8-rminmax/u8-rmax.h"
-#include "src/u8-rminmax/u8-rmin.h"
-#include "src/u8-rminmax/u8-rminmax.h"
+#include "src/f16-rminmax/f16-rmax.inc"
+#include "src/f16-rminmax/f16-rmin.inc"
+#include "src/f16-rminmax/f16-rminmax.inc"
+#include "src/f32-rminmax/f32-rmax.inc"
+#include "src/f32-rminmax/f32-rmin.inc"
+#include "src/f32-rminmax/f32-rminmax.inc"
+#include "src/s8-rminmax/s8-rmax.inc"
+#include "src/s8-rminmax/s8-rmin.inc"
+#include "src/s8-rminmax/s8-rminmax.inc"
+#include "src/u8-rminmax/u8-rmax.inc"
+#include "src/u8-rminmax/u8-rmin.inc"
+#include "src/u8-rminmax/u8-rminmax.inc"
 #undef XNN_UKERNEL
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

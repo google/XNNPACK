@@ -179,8 +179,8 @@ static void bench_impl(uint64_t arch_flags, benchmark::State& state,
   }                                                                     \
   BENCHMARK_DWCONV(BM_##ukernel);
 
-#include "src/qs8-dwconv/qs8-dwconv-minmax-fp32.h"
-#include "src/qs8-dwconv/qs8-dwconv-minmax-rndnu.h"
+#include "src/qs8-dwconv/qs8-dwconv-minmax-fp32.inc"
+#include "src/qs8-dwconv/qs8-dwconv-minmax-rndnu.inc"
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();

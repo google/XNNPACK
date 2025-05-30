@@ -18,7 +18,7 @@ extern "C" {
   XNN_INTERNAL void fn_name(size_t kernel_elements, size_t channels, \
                             void* output, size_t output_stride,      \
                             const uint32_t fill_pattern);
-#include "src/xx-fill/xx-fill.h"
+#include "src/xx-fill/xx-fill.inc"
 #undef XNN_FILL_UKERNEL
 
 #ifdef __cplusplus

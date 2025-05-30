@@ -26,5 +26,5 @@
     TestBatchGT<Convert, datatype_in, datatype_out>(arch_flags, batch_tile,  \
                                                     ukernel, init_params);   \
   }
-#include "src/f16-f32-vcvt/f16-f32-vcvt.h"
+#include "src/f16-f32-vcvt/f16-f32-vcvt.inc"
 #undef XNN_UKERNEL

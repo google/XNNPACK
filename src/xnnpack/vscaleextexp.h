@@ -18,7 +18,7 @@ extern "C" {
                     init_params)                                              \
   XNN_INTERNAL void fn_name(size_t n, const float* input, float* output,      \
                             float scale_mantissa, float scale_exponent);
-#include "src/f32-vscaleextexp/f32-vscaleextexp.h"
+#include "src/f32-vscaleextexp/f32-vscaleextexp.inc"
 #undef XNN_UKERNEL
 
 #ifdef __cplusplus

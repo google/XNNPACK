@@ -31,7 +31,7 @@ std::string GetTestName(
   {#ukernel, ukernel, arch_flags, nr, kr, sr, kblock, nr_scale},
 
 const XnnTestParam xnn_test_params[] = {
-#include "src/x16-packw/x16-packw.h"
+#include "src/x16-packw/x16-packw.inc"
 };
 
 #undef XNN_UKERNEL

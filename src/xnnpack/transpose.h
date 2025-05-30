@@ -20,18 +20,18 @@ extern "C" {
                             size_t input_element_stride,                       \
                             size_t output_element_stride, size_t element_size, \
                             size_t block_width, size_t block_height);
-#include "src/xx-transposev/xx-transposev.h"
+#include "src/xx-transposev/xx-transposev.inc"
 #undef XNN_TRANSPOSE_UKERNEL
 
 #define XNN_TRANSPOSE_UKERNEL(arch_flags, fn_name, datasize, datatype, ...) \
   XNN_INTERNAL void fn_name(const datatype* input, datatype* output,        \
                             size_t input_stride, size_t output_stride,      \
                             size_t block_width, size_t block_height);
-#include "src/x16-transposec/x16-transposec.h"
-#include "src/x24-transposec/x24-transposec.h"
-#include "src/x32-transposec/x32-transposec.h"
-#include "src/x64-transposec/x64-transposec.h"
-#include "src/x8-transposec/x8-transposec.h"
+#include "src/x16-transposec/x16-transposec.inc"
+#include "src/x24-transposec/x24-transposec.inc"
+#include "src/x32-transposec/x32-transposec.inc"
+#include "src/x64-transposec/x64-transposec.inc"
+#include "src/x8-transposec/x8-transposec.inc"
 #undef XNN_TRANSPOSE_UKERNEL
 
 #ifdef __cplusplus

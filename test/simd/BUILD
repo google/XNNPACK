@@ -24,6 +24,7 @@ SIMD_TEST_DEPS = [
     "//:isa_checks",
     "//:math",
     "//:microkernel_hdrs",
+    "//:simd_hdrs",
     "//test:replicable_random_device",
 ]
 

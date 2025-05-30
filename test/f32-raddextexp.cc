@@ -115,5 +115,5 @@ class RAddExtExpMicrokernelTester {
                                  init_params);                                \
   XNN_TEST_RADDEXTEXP_ELEMENT_GT(ukernel, arch_flags, element_tile,           \
                                  init_params);
-#include "src/f32-raddextexp/f32-raddextexp.h"
+#include "src/f32-raddextexp/f32-raddextexp.inc"
 #undef XNN_UKERNEL

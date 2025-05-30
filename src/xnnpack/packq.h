@@ -144,7 +144,7 @@ XNN_INLINE static float xnn_x8_packq_f32qp8_get_dequantized(
                             const float* XNN_RESTRICT lhs, size_t lhs_stride, \
                             void* XNN_RESTRICT lhs_packed);
 
-#include "src/x8-packq/x8-packq.h"
+#include "src/x8-packq/x8-packq.inc"
 
 #undef XNN_UKERNEL
 

@@ -262,7 +262,9 @@ using TestInfo = {op_type};
   if "rnd" in folder:
     folder = folder[0:8]
 
-  tests += f'#include "src/{folder}/{options.ukernel}.h"\n'
+  tests += (
+      f'#include "src/{folder}/{options.ukernel}.inc"\n'
+  )
   tests += "#undef XNN_UKERNEL\n"
   tests += "#undef XNN_QUANTIZED\n"
 

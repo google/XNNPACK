@@ -32,7 +32,7 @@ std::string GetTestName(
   {#ukernel, ukernel, arch_flags, unroll},
 
 const XnnTestParam xnn_test_params[] = {
-#include "src/x8-packq/x8-packq.h"
+#include "src/x8-packq/x8-packq.inc"
 };
 
 #undef XNN_UKERNEL

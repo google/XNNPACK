@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cfloat>
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <random>
@@ -23,6 +24,7 @@
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microkernel-utils.h"
 #include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/pack.h"
 #include <benchmark/benchmark.h>
 
@@ -167,8 +169,8 @@ static void bench_impl(uint64_t arch_flags, benchmark::State& state,
   }                                                                     \
   BENCHMARK_DWCONV(BM_##ukernel);
 
-// #include "src/f16-dwconv/f16-dwconv.h"
-#include "src/f16-dwconv/f16-dwconv-minmax.h"
+// #include "src/f16-dwconv/f16-dwconv.inc"
+#include "src/f16-dwconv/f16-dwconv-minmax.inc"
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();

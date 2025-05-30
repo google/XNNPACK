@@ -33,7 +33,7 @@ std::string GetTestName(
 #define XNN_GIO_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale)
 
 const XnnTestParam xnn_test_params[] = {
-#include "src/x32-packw/x32-packw.h"
+#include "src/x32-packw/x32-packw.inc"
 };
 
 #undef XNN_UKERNEL
@@ -277,7 +277,7 @@ std::string GetTestGIOName(
 #define XNN_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale)
 
 const XnnTestGIOParam xnn_test_gio_params[] = {
-#include "src/x32-packw/x32-packw.h"
+#include "src/x32-packw/x32-packw.inc"
 };
 
 #undef XNN_UKERNEL

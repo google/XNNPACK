@@ -66,11 +66,11 @@ static void reduce(benchmark::State& state, uint64_t arch_flags,
   BENCHMARK_CAPTURE(reduce, ukernel, arch_flags, ukernel)                      \
       ->Apply(benchmark::utils::ReduceParameters<datatype_in>)                 \
       ->UseRealTime();
-#include "src/f16-f32acc-rsum/f16-f32acc-rsum.h"
-#include "src/f16-rsum/f16-rsum.h"
-#include "src/f32-rsum/f32-rsum.h"
-#include "src/qs8-rsum/qs8-rsum.h"
-#include "src/qu8-rsum/qu8-rsum.h"
+#include "src/f16-f32acc-rsum/f16-f32acc-rsum.inc"
+#include "src/f16-rsum/f16-rsum.inc"
+#include "src/f32-rsum/f32-rsum.inc"
+#include "src/qs8-rsum/qs8-rsum.inc"
+#include "src/qu8-rsum/qu8-rsum.inc"
 #undef XNN_UKERNEL
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

@@ -64,14 +64,14 @@ static void reduce(benchmark::State& state, uint64_t arch_flags,
   BENCHMARK_CAPTURE(reduce, ukernel, arch_flags, ukernel)                   \
       ->Apply(benchmark::utils::ReduceDiscontiguousParameters<datatype_in>) \
       ->UseRealTime();
-#include "src/f16-rdminmax/f16-rdmax.h"
-#include "src/f16-rdminmax/f16-rdmin.h"
-#include "src/f32-rdminmax/f32-rdmax.h"
-#include "src/f32-rdminmax/f32-rdmin.h"
-#include "src/s8-rdminmax/s8-rdmax.h"
-#include "src/s8-rdminmax/s8-rdmin.h"
-#include "src/u8-rdminmax/u8-rdmax.h"
-#include "src/u8-rdminmax/u8-rdmin.h"
+#include "src/f16-rdminmax/f16-rdmax.inc"
+#include "src/f16-rdminmax/f16-rdmin.inc"
+#include "src/f32-rdminmax/f32-rdmax.inc"
+#include "src/f32-rdminmax/f32-rdmin.inc"
+#include "src/s8-rdminmax/s8-rdmax.inc"
+#include "src/s8-rdminmax/s8-rdmin.inc"
+#include "src/u8-rdminmax/u8-rdmax.inc"
+#include "src/u8-rdminmax/u8-rdmin.inc"
 #undef XNN_UKERNEL
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

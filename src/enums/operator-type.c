@@ -14,7 +14,7 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type operator_type) {
 #define XNN_ENUM_ITEM(enum_name, enum_string) \
   case enum_name:                             \
     return enum_string;
-#include "src/xnnpack/operator-type-defs.h"
+#include "src/xnnpack/operator-type-defs.inc"
     default:
       XNN_UNREACHABLE;
 #undef XNN_ENUM_ITEM

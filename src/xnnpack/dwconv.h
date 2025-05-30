@@ -12,6 +12,7 @@
 #include <stdint.h>
 
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
 
 #ifdef __cplusplus
@@ -25,14 +26,14 @@ extern "C" {
       const weights_type* weights, datatype* output, intptr_t input_stride,    \
       size_t output_increment, size_t input_offset, size_t input_pixel_stride, \
       const datatype* zero, const params_type* params);
-#include "src/f16-dwconv/f16-dwconv-minmax.h"
-#include "src/f32-dwconv/f32-dwconv-minmax.h"
-#include "src/f32-dwconv/f32-dwconv.h"
-#include "src/qs8-dwconv/qs8-dwconv-minmax-fp32.h"
-#include "src/qs8-dwconv/qs8-dwconv-minmax-rndnu.h"
-#include "src/qs8-qc8w-dwconv/qs8-qc8w-dwconv-minmax-fp32.h"
-#include "src/qu8-dwconv/qu8-dwconv-minmax-fp32.h"
-#include "src/qu8-dwconv/qu8-dwconv-minmax-rndnu.h"
+#include "src/f16-dwconv/f16-dwconv-minmax.inc"
+#include "src/f32-dwconv/f32-dwconv-minmax.inc"
+#include "src/f32-dwconv/f32-dwconv.inc"
+#include "src/qs8-dwconv/qs8-dwconv-minmax-fp32.inc"
+#include "src/qs8-dwconv/qs8-dwconv-minmax-rndnu.inc"
+#include "src/qs8-qc8w-dwconv/qs8-qc8w-dwconv-minmax-fp32.inc"
+#include "src/qu8-dwconv/qu8-dwconv-minmax-fp32.inc"
+#include "src/qu8-dwconv/qu8-dwconv-minmax-rndnu.inc"
 #undef XNN_UKERNEL
 
 #define DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(fn_name)  \

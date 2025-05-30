@@ -327,7 +327,9 @@ def main(args):
       )
   )
 
-  tests += f'#include "src/{folder}/{options.ukernel}.h"\n'
+  tests += (
+      f'#include "src/{folder}/{options.ukernel}.inc"\n'
+  )
   tests += "#undef XNN_UKERNEL\n"
 
   xnncommon.overwrite_if_changed(options.output, tests)

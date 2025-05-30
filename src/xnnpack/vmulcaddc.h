@@ -20,8 +20,8 @@ extern "C" {
   XNN_INTERNAL void fn_name(size_t m, size_t c, const datatype* x,           \
                             size_t x_stride, const datatype* w, datatype* y, \
                             size_t y_stride, const params_type* params);
-#include "src/f16-vmulcaddc/f16-vmulcaddc.h"
-#include "src/f32-vmulcaddc/f32-vmulcaddc.h"
+#include "src/f16-vmulcaddc/f16-vmulcaddc.inc"
+#include "src/f32-vmulcaddc/f32-vmulcaddc.inc"
 #undef XNN_UKERNEL
 
 #ifdef __cplusplus

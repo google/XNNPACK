@@ -161,8 +161,8 @@ static void bench_impl(uint64_t arch_flags, benchmark::State& state,
   }                                                                     \
   BENCHMARK_DWCONV(BM_##ukernel);
 
-// #include "src/f32-dwconv/f32-dwconv.h"
-#include "src/f32-dwconv/f32-dwconv-minmax.h"
+// #include "src/f32-dwconv/f32-dwconv.inc"
+#include "src/f32-dwconv/f32-dwconv-minmax.inc"
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();

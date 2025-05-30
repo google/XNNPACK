@@ -43,6 +43,6 @@
     TestOutputOverflow<Convert, datatype_in, datatype_out>(                  \
         arch_flags, batch_tile, ukernel, init_params);                       \
   }
-#include "src/f32-qs8-vcvt/f32-qs8-vcvt.h"
+#include "src/f32-qs8-vcvt/f32-qs8-vcvt.inc"
 #undef XNN_UKERNEL
 #undef XNN_QUANTIZED

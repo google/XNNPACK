@@ -28,7 +28,7 @@ extern "C" {
       const float* weights, float* output, size_t input_padding_top,           \
       size_t output_channels, size_t output_height_stride,                     \
       size_t output_width_stride, const struct xnn_f32_minmax_params* params);
-#include "src/f32-conv-hwc/f32-conv-hwc.h"
+#include "src/f32-conv-hwc/f32-conv-hwc.inc"
 #undef XNN_UKERNEL
 
 #define DECLARE_F32_CONV_HWC2CHW_UKERNEL_FUNCTION(fn_name)            \

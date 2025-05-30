@@ -32,7 +32,7 @@ std::string GetTestName(
   {#ukernel, ukernel, arch_flags, nr, kr, sr, kblock, nr_scale},
 
 const XnnTestParam xnn_test_qs8_qc4w_params[] = {
-#include "src/qs8-qc4w-packw/qs8-qc4w-packw.h"
+#include "src/qs8-qc4w-packw/qs8-qc4w-packw.inc"
 };
 
 #undef XNN_UKERNEL

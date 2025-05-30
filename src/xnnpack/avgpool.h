@@ -27,8 +27,8 @@ extern "C" {
       size_t input_increment, size_t output_increment,                         \
       const params_type* params);
 
-#include "src/f16-avgpool/f16-avgpool-minmax.h"
-#include "src/f32-avgpool/f32-avgpool-minmax.h"
+#include "src/f16-avgpool/f16-avgpool-minmax.inc"
+#include "src/f32-avgpool/f32-avgpool-minmax.inc"
 
 #undef XNN_UKERNEL
 

@@ -33,7 +33,7 @@ static void x8_gio_packw(benchmark::State& state, const char* net,
   BENCHMARK_CAPTURE_BGEMM(x8_gio_packw, ukernel##_, ukernel, arch_flags, nr, \
                           kr, sr);
 
-#include "src/x8-packw/x8-packw.h"
+#include "src/x8-packw/x8-packw.inc"
 #undef XNN_UKERNEL
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

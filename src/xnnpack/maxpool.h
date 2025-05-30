@@ -26,10 +26,10 @@ extern "C" {
       datatype* output, size_t input_increment, size_t output_increment,       \
       const params_type* params);
 
-#include "src/f16-maxpool/f16-maxpool-minmax.h"
-#include "src/f32-maxpool/f32-maxpool-minmax.h"
-#include "src/s8-maxpool/s8-maxpool-minmax.h"
-#include "src/u8-maxpool/u8-maxpool-minmax.h"
+#include "src/f16-maxpool/f16-maxpool-minmax.inc"
+#include "src/f32-maxpool/f32-maxpool-minmax.inc"
+#include "src/s8-maxpool/s8-maxpool-minmax.inc"
+#include "src/u8-maxpool/u8-maxpool-minmax.inc"
 
 #undef XNN_UKERNEL
 

@@ -63,11 +63,11 @@ static void BenchmarkKernelSize(benchmark::internal::Benchmark* b) {
                     element_size)                                         \
       ->Apply(BenchmarkKernelSize)                                        \
       ->UseRealTime();
-#include "src/x16-transposec/x16-transposec.h"
-#include "src/x24-transposec/x24-transposec.h"
-#include "src/x32-transposec/x32-transposec.h"
-#include "src/x64-transposec/x64-transposec.h"
-#include "src/x8-transposec/x8-transposec.h"
+#include "src/x16-transposec/x16-transposec.inc"
+#include "src/x24-transposec/x24-transposec.inc"
+#include "src/x32-transposec/x32-transposec.inc"
+#include "src/x64-transposec/x64-transposec.inc"
+#include "src/x8-transposec/x8-transposec.inc"
 #undef XNN_TRANSPOSE_UKERNEL
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
