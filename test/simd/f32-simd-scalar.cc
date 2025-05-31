@@ -76,11 +76,8 @@ TEST_F(F32SimdSCALARTest, Fmadd) {
   for (size_t k = 0; k < xnn_simd_size_f32; k++) {
 #if XNN_SIMD_HAS_NATIVE_FMA
     // If an arch claims to support FMA, it better also round things correctly.
-    ASSERT_EQ(output_[k],
-              static_cast<float>(
-                  static_cast<double>(inputs_[k]) *
-                      static_cast<double>(inputs_[k + xnn_simd_size_f32]) +
-                  static_cast<double>(inputs_[k + 2 * xnn_simd_size_f32])));
+    ASSERT_EQ(output_[k], std::fma(inputs_[k], inputs_[k + xnn_simd_size_f32],
+                                  inputs_[k + 2 * xnn_simd_size_f32]));
 #else
     ASSERT_EQ(output_[k],
               inputs_[k] * inputs_[k + xnn_simd_size_f32] +
@@ -99,11 +96,8 @@ TEST_F(F32SimdSCALARTest, Fmsub) {
   for (size_t k = 0; k < xnn_simd_size_f32; k++) {
 #if XNN_SIMD_HAS_NATIVE_FMA
     // If an arch claims to support FMA, it better also round things correctly.
-    ASSERT_EQ(output_[k],
-              static_cast<float>(
-                  static_cast<double>(inputs_[k]) *
-                      static_cast<double>(inputs_[k + xnn_simd_size_f32]) -
-                  static_cast<double>(inputs_[k + 2 * xnn_simd_size_f32])));
+    ASSERT_EQ(output_[k], std::fma(inputs_[k], inputs_[k + xnn_simd_size_f32],
+                                   -inputs_[k + 2 * xnn_simd_size_f32]));
 #else
     ASSERT_EQ(output_[k],
               inputs_[k] * inputs_[k + xnn_simd_size_f32] -
@@ -122,11 +116,8 @@ TEST_F(F32SimdSCALARTest, Fnmadd) {
   for (size_t k = 0; k < xnn_simd_size_f32; k++) {
 #if XNN_SIMD_HAS_NATIVE_FMA
     // If an arch claims to support FMA, it better also round things correctly.
-    ASSERT_EQ(output_[k],
-              static_cast<float>(
-                  static_cast<double>(-inputs_[k]) *
-                      static_cast<double>(inputs_[k + xnn_simd_size_f32]) +
-                  static_cast<double>(inputs_[k + 2 * xnn_simd_size_f32])));
+    ASSERT_EQ(output_[k], std::fma(-inputs_[k], inputs_[k + xnn_simd_size_f32],
+                                   inputs_[k + 2 * xnn_simd_size_f32]));
 #else
     ASSERT_EQ(output_[k],
               -inputs_[k] * inputs_[k + xnn_simd_size_f32] +
