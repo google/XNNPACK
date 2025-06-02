@@ -197,6 +197,8 @@ def main(args):
         continue
       if name.endswith('.h'):
         continue
+      if name.endswith('.inc'):
+        continue
       basename, ext = os.path.splitext(name)
       if ext == '.sollya':
         continue
