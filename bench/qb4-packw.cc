@@ -22,7 +22,7 @@ static void qb4_packw(benchmark::State& state, const char* net,
 #define XNN_QB4_UKERNEL(arch_flags, ukernel, nr, kr, sr, bl, kblock, nr_scale, izp)       \
 BENCHMARK_CAPTURE_BGEMM(qb4_packw, ukernel##_, ukernel, arch_flags, nr, kr, sr, bl);
 
-#include "src/qb4-packw/qb4-packw.h"
+#include "src/qb4-packw/qb4-packw.inc"
 
 #undef XNN_QB4_UKERNEL
 

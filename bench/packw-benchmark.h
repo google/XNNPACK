@@ -149,8 +149,8 @@ static void x8_gio_packw(
 static void qb4_packw(benchmark::State& state,
                       xnn_qb4_packw_gemm_goi_ukernel_fn packw, size_t nr,
                       size_t kr, size_t sr, size_t bl, bool null_bias,
-                      benchmark::utils::IsaCheckFunction isa_check = nullptr) {
-  if (isa_check != nullptr && !isa_check(state)) {
+                      uint64_t arch_flags = 0) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
 

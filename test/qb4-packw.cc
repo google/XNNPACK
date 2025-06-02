@@ -33,7 +33,7 @@ std::string GetTestQB4Name(const testing::TestParamInfo<XnnTestQB4::ParamType>& 
   { #ukernel, ukernel, arch_flags, nr, kr, sr, kblock, bl, nr_scale, izp },
 
 const XnnTestQB4Param xnn_test_qb4_params[] = {
-#include "src/qb4-packw/qb4-packw.h"
+#include "src/qb4-packw/qb4-packw.inc"
 };
 
 #undef XNN_QB4_UKERNEL

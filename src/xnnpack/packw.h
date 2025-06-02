@@ -61,7 +61,7 @@ extern "C" {
       const void* scale, int8_t* packed_weights, size_t extra_bytes_bl,      \
       size_t extra_bytes_n, const void* params);
 
-#include "src/qb4-packw/qb4-packw.h"
+#include "src/qb4-packw/qb4-packw.inc"
 
 #undef XNN_QB4_UKERNEL
 
