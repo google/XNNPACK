@@ -2155,6 +2155,10 @@ void xnn_pack_kai_qs8_weights_and_biases(
                      /*unused_k_stride=*/0,
                      extra_data0_element_size + extra_data1_element_size);
 
+  xnn_log_debug(
+      "called with input_channels=%zu, output_channels=%zu, groups=%zu.",
+      input_channels, output_channels, groups);
+
   if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
     for (size_t group = 0; group < groups; group++) {
       kai_run_rhs_pack_kxn_qsi8cxp_qsi8cx_neon(

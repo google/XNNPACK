@@ -611,19 +611,23 @@ class BatchMatMulOperatorTester {
           auto_batch_matrix_multiply_op(batch_matrix_multiply_op,
                                         xnn_delete_operator);
 
+      size_t workspace_size = 0;
       ASSERT_EQ(expected_status_reshape(),
                 xnn_reshape_batch_matrix_multiply_nc_qd8_f32_qc8w(
                     batch_matrix_multiply_op, num_batch_dims,
                     batch_dims_a().data(), batch_dims_b().data(), m(), k(), n(),
-                    /*threadpool=*/nullptr));
+                    &workspace_size, /*threadpool=*/nullptr));
       if (expected_status_reshape() != xnn_status_success) {
         return;
       }
+      xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> workspace(
+          workspace_size);
 
-      ASSERT_EQ(xnn_status_success,
-                xnn_setup_batch_matrix_multiply_nc_qd8_f32_qc8w(
-                    batch_matrix_multiply_op, input_a_qd8.data(),
-                    quantization_params.data(), output.data()));
+      ASSERT_EQ(
+          xnn_status_success,
+          xnn_setup_batch_matrix_multiply_nc_qd8_f32_qc8w(
+              batch_matrix_multiply_op, workspace.data(), input_a_qd8.data(),
+              /*input_b=*/nullptr, quantization_params.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success, xnn_run_operator(batch_matrix_multiply_op,
                                                      /*threadpool=*/nullptr));
@@ -728,19 +732,22 @@ class BatchMatMulOperatorTester {
           auto_batch_matrix_multiply_op(batch_matrix_multiply_op,
                                         xnn_delete_operator);
 
+      size_t workspace_size = 0;
       ASSERT_EQ(expected_status_reshape(),
                 xnn_reshape_batch_matrix_multiply_nc_qp8_f32_qc8w(
                     batch_matrix_multiply_op, num_batch_dims,
                     batch_dims_a().data(), batch_dims_b().data(), m(), k(), n(),
-                    /*threadpool=*/nullptr));
+                    &workspace_size, /*threadpool=*/nullptr));
       if (expected_status_reshape() != xnn_status_success) {
         return;
       }
+      xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> workspace(
+          workspace_size);
 
-      ASSERT_EQ(
-          xnn_status_success,
-          xnn_setup_batch_matrix_multiply_nc_qp8_f32_qc8w(
-              batch_matrix_multiply_op, input_a_qp8.data(), output.data()));
+      ASSERT_EQ(xnn_status_success,
+                xnn_setup_batch_matrix_multiply_nc_qp8_f32_qc8w(
+                    batch_matrix_multiply_op, workspace.data(),
+                    input_a_qp8.data(), /*input_b=*/nullptr, output.data()));
 
       ASSERT_EQ(xnn_status_success, xnn_run_operator(batch_matrix_multiply_op,
                                                      /*threadpool=*/nullptr));

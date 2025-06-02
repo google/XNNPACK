@@ -25,7 +25,7 @@ void xnn_subgraph_log_impl(const char* filename, size_t line_number,
     fprintf(out, "    %03i: type=%s (%s)", node_id,
             xnn_node_type_to_string(node->type),
             xnn_datatype_to_string(
-                node->params.fully_connected.assumed_input_datatype));
+                node->params.inlined_lhs_packing.packed_input_datatype));
     if (node->num_inputs) {
       fprintf(out, ", inputs=[%i", node->inputs[0]);
       for (int i = 1; i < node->num_inputs; i++) {

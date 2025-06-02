@@ -141,6 +141,7 @@ static void init_x32_pack_lh_config(void) {
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
   x32_pack_lh_config.log2_input_element_size = 2;
   x32_pack_lh_config.log2_packed_element_size = 2;
+  x32_pack_lh_config.gemv_noop = true;
 }
 
 const struct xnn_pack_lh_config* xnn_init_x32_pack_lh_config() {
@@ -166,6 +167,7 @@ static void init_x16_pack_lh_config(void) {
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
   x16_pack_lh_config.log2_input_element_size = 1;
   x16_pack_lh_config.log2_packed_element_size = 1;
+  x16_pack_lh_config.gemv_noop = true;
 }
 
 const struct xnn_pack_lh_config* xnn_init_x16_pack_lh_config() {
@@ -191,6 +193,7 @@ static void init_x8_pack_lh_config(void) {
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
   x8_pack_lh_config.log2_input_element_size = 0;
   x8_pack_lh_config.log2_packed_element_size = 0;
+  x8_pack_lh_config.gemv_noop = true;
 }
 
 const struct xnn_pack_lh_config* xnn_init_x8_pack_lh_config() {
