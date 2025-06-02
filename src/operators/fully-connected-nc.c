@@ -1141,8 +1141,9 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qb4w(
   }
 
   if (gemm_config == NULL) {
-    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
-                  xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_qd8_f32_qb4w));
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(expected_operator_type));
     return xnn_status_unsupported_hardware;
   }
 
@@ -1154,15 +1155,19 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qb4w(
 
   if (block_size < XNN_MIN_BLOCKSIZE || block_size % XNN_MIN_BLOCKSIZE != 0) {
     xnn_log_error(
-        "failed to create %s operator with block_size: %zu: expecting block_size to be a multiple of %d.",
-        xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_qd8_f32_qb4w), block_size, XNN_MIN_BLOCKSIZE);
+        "failed to create %s operator with block_size: %zu: expecting "
+        "block_size to be a multiple of %d.",
+        xnn_operator_type_to_string(expected_operator_type), block_size,
+        XNN_MIN_BLOCKSIZE);
     return xnn_status_invalid_parameter;
   }
 
   if (input_channels % block_size != 0) {
     xnn_log_error(
-      "failed to create %s operator with input_channels: %zu, and block_size: %zu: expecting input_channels %% block_size == 0.",
-      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_qd8_f32_qb4w), input_channels, block_size);
+        "failed to create %s operator with input_channels: %zu, and "
+        "block_size: %zu: expecting input_channels %% block_size == 0.",
+        xnn_operator_type_to_string(expected_operator_type), input_channels,
+        block_size);
     return xnn_status_invalid_parameter;
   }
 
@@ -1181,9 +1186,10 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qb4w(
       float fp32_scale = math_cvt_fp32_bf16(kernel_scale[scale_index]);
       if (fp32_scale <= 0.0f || !isnormal(fp32_scale)) {
         xnn_log_error(
-          "failed to create %s operator with %.7g kernel scale in output channel #%zu, block #%zu: scale must be finite and positive",
-          xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_qd8_f32_qb4w),
-          fp32_scale, output_channel, block_index);
+            "failed to create %s operator with %.7g kernel scale in output "
+            "channel #%zu, block #%zu: scale must be finite and positive",
+            xnn_operator_type_to_string(expected_operator_type), fp32_scale,
+            output_channel, block_index);
         return xnn_status_invalid_parameter;
       }
     }
@@ -1198,26 +1204,21 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qb4w(
   const struct xnn_qs8_qc4w_packing_params packing_params = { /*input_zero_point=*/1, kernel_zero_point };
 
   return create_fully_connected_nc(
-    input_channels, output_channels,
-    input_stride, output_stride,
-    kernel, bias, flags,
-    /*block_size=*/block_size,
-    /*blockwise_kernel_scale_params=*/kernel_scale,
-    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
-    /*filter_is_nibble=*/true,
-    /*bias_element_size=*/sizeof(float),
-    /*pack_gemm_gio_w,=*/ NULL,
-    /*pack_gemm_goi_w=*/ NULL,
-    &packing_params,
-    /*extra_weights_bytes=*/sizeof(float),
-    /*init_scale_params=*/NULL, /*scale_params=*/NULL,
-    /*init_kernel_scale_params=*/NULL, /*kernel_scale_params=*/NULL,
-    &params, sizeof(params),
-    gemm_config, gemm_ukernels,
-    xnn_operator_type_fully_connected_nc_qd8_f32_qb4w,
-    /*weights_cache=*/weights_cache,
-    fully_connected_op_out);
+      input_channels, output_channels, input_stride, output_stride, kernel,
+      bias, flags,
+      /*block_size=*/block_size,
+      /*blockwise_kernel_scale_params=*/kernel_scale,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
+      /*filter_is_nibble=*/true,
+      /*bias_element_size=*/sizeof(float),
+      /*pack_gemm_gio_w,=*/NULL,
+      /*pack_gemm_goi_w=*/NULL, &packing_params,
+      /*extra_weights_bytes=*/sizeof(float),
+      /*init_scale_params=*/NULL, /*scale_params=*/NULL,
+      /*init_kernel_scale_params=*/NULL, /*kernel_scale_params=*/NULL, &params,
+      sizeof(params), gemm_config, gemm_ukernels, expected_operator_type,
+      /*weights_cache=*/weights_cache, fully_connected_op_out);
 }
 
 enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w(
