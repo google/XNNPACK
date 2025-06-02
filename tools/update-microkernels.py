@@ -69,6 +69,7 @@ _ISA_LIST = frozenset({
     'scalar',
     'sse',
     'sse2',
+    'sse2fma',
     'sse41',
     'ssse3',
     'wasmblendvps',

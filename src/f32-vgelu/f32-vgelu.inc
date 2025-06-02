@@ -17,6 +17,8 @@ XNN_UKERNEL(0, xnn_f32_vgelu_ukernel__sse2_rational_12_10_div_u4, 4, false, floa
 XNN_UKERNEL(0, xnn_f32_vgelu_ukernel__sse2_rational_12_10_div_u8, 8, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(0, xnn_f32_vgelu_ukernel__sse2_rational_12_10_div_u12, 12, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(0, xnn_f32_vgelu_ukernel__sse2_rational_12_10_div_u16, 16, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(0, xnn_f32_vgelu_ukernel__sse2fma_rational_12_10_div_u4, 4, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(0, xnn_f32_vgelu_ukernel__sse2fma_rational_12_10_div_u8, 8, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_vgelu_ukernel__avx_rational_12_10_div_u8, 8, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_vgelu_ukernel__avx_rational_12_10_div_u16, 16, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_vgelu_ukernel__avx_rational_12_10_div_u24, 24, false, float, struct xnn_f32_default_params, NULL)

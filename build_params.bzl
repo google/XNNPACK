@@ -155,7 +155,7 @@ def xnnpack_simd_copts_for_arch(arch):
     return _XNNPACK_SIMD_ARCH_COPT_MAPPING.get(arch, [])
 
 def xnnpack_simd_f32_archs():
-    return ["avx", "avx2", "avx512f", "fma3", "hvx", "neon", "scalar", "sse2", "wasmsimd", "wasmrelaxedsimd"]
+    return ["avx", "avx2", "avx512f", "fma3", "hvx", "neon", "scalar", "sse2", "sse2fma", "wasmsimd", "wasmrelaxedsimd"]
 
 def xnnpack_simd_f16_archs():
     return ["scalar", "neonfp16arith", "avx512fp16"]
@@ -431,6 +431,16 @@ XNNPACK_PARAMS_FOR_ARCH = {
         msvc_x86_64_copts = ["/arch:SSE"],
     ),
     "sse2": _create_params(
+        cond = "//build_config:x86",
+        copts = _x86_align_stack(16),
+        gcc_x86_copts = [
+            "-msse2",
+            "-mno-sse3",
+        ],
+        msvc_x86_32_copts = ["/arch:SSE2"],
+        msvc_x86_64_copts = ["/arch:SSE2"],
+    ),
+    "sse2fma": _create_params(
         cond = "//build_config:x86",
         copts = _x86_align_stack(16),
         gcc_x86_copts = [

@@ -22,6 +22,8 @@ XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vhswish_ukernel__rvv_u8v, 8, true, fl
 XNN_UKERNEL(0, xnn_f32_vhswish_ukernel__sse2_u4, 4, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(0, xnn_f32_vhswish_ukernel__sse2_u8, 8, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(0, xnn_f32_vhswish_ukernel__sse2_u16, 16, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(0, xnn_f32_vhswish_ukernel__sse2fma_u4, 4, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(0, xnn_f32_vhswish_ukernel__sse2fma_u8, 8, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_vhswish_ukernel__avx_u8, 8, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_vhswish_ukernel__avx_u16, 16, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_vhswish_ukernel__avx_u32, 32, false, float, struct xnn_f32_default_params, NULL)
