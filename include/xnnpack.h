@@ -100,7 +100,10 @@ extern "C" {
 /// Retain reduced dimensions with length 1.
 #define XNN_FLAG_KEEP_DIMS 0x00000040
 
-// Next unused flag value: 0x00000200.
+/// Indicates that length 1 dimensions should not be implicitly broadcasted if needed.
+/// Operations that expect to broadcast length 1 dimensions to match a dimension with length != 1
+/// may fail with an error.
+#define XNN_FLAG_NO_BROADCAST 0x00001000
 
 /// The number of entries in an array of xnn_quantization_params that XNNPACK may read beyond array bounds.
 /// The caller must allocate at least this many extra xnn_quantization_params before passing the array to XNNPACK.
@@ -1145,7 +1148,8 @@ struct xnn_binary_params {
 /// @param output_id - Value ID for the output tensor. The output tensor must be a max(N,M)-dimensional tensor defined
 ///                    in the @a subgraph with each dimension equal to the maximum between the corresponding dimension
 ///                    of the two inputs.
-/// @param flags - binary features of the Node. No supported flags are currently defined.
+/// @param flags - binary features of the Node. The only flag supported is XNN_FLAG_NO_BROADCAST, indicating that the
+///                binary operator can assume that no broadcasting is required.
 enum xnn_status xnn_define_binary(
   xnn_subgraph_t subgraph,
   enum xnn_binary_operator type,
@@ -1933,8 +1937,8 @@ XNN_DEPRECATED enum xnn_status xnn_define_bankers_rounding(
 /// @param output_id - Value ID for the output tensor. The output tensor must be an N-dimensional tensor defined in the
 ///                    @a subgraph. It must be at least 3D. The first N-2 dimensions must match the first and second
 ///                    input tensors . The last 2 dimensions must be [M, N].
-/// @param flags - binary features of the Batch Matrix Multiply Node. The only currently supported value is
-///                XNN_FLAG_TRANSPOSE_B.
+/// @param flags - binary features of the Batch Matrix Multiply Node. The only currently supported values are
+///                XNN_FLAG_TRANSPOSE_B and XNN_FLAG_NO_BROADCAST.
 enum xnn_status xnn_define_batch_matrix_multiply(
   xnn_subgraph_t subgraph,
   uint32_t input1_id,
