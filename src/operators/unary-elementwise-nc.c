@@ -85,11 +85,10 @@ static enum xnn_status init_lut_op_with_config(
 }
 
 static const struct xnn_unary_elementwise_config* get_config(
-    enum xnn_unary_operator op_type,
-    enum xnn_datatype input_datatype,
+    enum xnn_unary_operator op_type, enum xnn_datatype input_datatype,
     enum xnn_datatype output_datatype,
     const struct xnn_quantization_params* input_quantization,
-    const struct xnn_quantization_params* output_quantization) {
+    const struct xnn_quantization_params* output_quantization, uint32_t flags) {
   if (input_datatype != output_datatype) {
     if (op_type == xnn_unary_convert) {
       if (input_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_fp16) {
@@ -195,7 +194,7 @@ static const struct xnn_unary_elementwise_config* get_config(
       case xnn_unary_abs:
         return xnn_init_f32_abs_config();
       case xnn_unary_approxgelu:
-        return xnn_init_f32_approxgelu_config();
+        return xnn_init_f32_approxgelu_config(flags);
       case xnn_unary_bankers_rounding:
         return xnn_init_f32_rndne_config();
       case xnn_unary_ceiling:
@@ -203,35 +202,35 @@ static const struct xnn_unary_elementwise_config* get_config(
       case xnn_unary_clamp:
         return xnn_init_f32_clamp_config();
       case xnn_unary_cosine:
-        return xnn_init_f32_cosine_config();
+        return xnn_init_f32_cosine_config(flags);
       case xnn_unary_elu:
         return xnn_init_f32_elu_config();
       case xnn_unary_exp:
-        return xnn_init_f32_exp_config();
+        return xnn_init_f32_exp_config(flags);
       case xnn_unary_floor:
         return xnn_init_f32_rndd_config();
       case xnn_unary_gelu:
-        return xnn_init_f32_gelu_config();
+        return xnn_init_f32_gelu_config(flags);
       case xnn_unary_hardswish:
-        return xnn_init_f32_hswish_config();
+        return xnn_init_f32_hswish_config(flags);
       case xnn_unary_leaky_relu:
         return xnn_init_f32_lrelu_config();
       case xnn_unary_log:
-        return xnn_init_f32_log_config();
+        return xnn_init_f32_log_config(flags);
       case xnn_unary_negate:
         return xnn_init_f32_neg_config();
       case xnn_unary_reciprocal_square_root:
-        return xnn_init_f32_rsqrt_config();
+        return xnn_init_f32_rsqrt_config(flags);
       case xnn_unary_sigmoid:
         return xnn_init_f32_sigmoid_config();
       case xnn_unary_sine:
-        return xnn_init_f32_sine_config();
+        return xnn_init_f32_sine_config(flags);
       case xnn_unary_square_root:
-        return xnn_init_f32_sqrt_config();
+        return xnn_init_f32_sqrt_config(flags);
       case xnn_unary_square:
         return xnn_init_f32_sqr_config();
       case xnn_unary_tanh:
-        return xnn_init_f32_tanh_config();
+        return xnn_init_f32_tanh_config(flags);
       default:
         return NULL;
     }
@@ -262,7 +261,9 @@ static enum xnn_status init_op(
     return init_lut_op(op, lut);
   }
 
-  const struct xnn_unary_elementwise_config* config = get_config(op_type, input_datatype, output_datatype, input_quantization, output_quantization);
+  const struct xnn_unary_elementwise_config* config =
+      get_config(op_type, input_datatype, output_datatype, input_quantization,
+                 output_quantization, flags);
   if (config && config->ukernel) {
     // We have an elementwise config, use it.
     op->unary_elementwise_config = config;

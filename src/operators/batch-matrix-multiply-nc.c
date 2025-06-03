@@ -209,7 +209,7 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_bf16_f32(
 
 enum xnn_status xnn_create_batch_matrix_multiply_nc_f32(
     uint32_t flags, xnn_operator_t* batch_matrix_multiply_op_out) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config(flags);
   if (gemm_config == NULL) {
     xnn_log_error(
         "failed to create %s operator: unsupported hardware configuration",
