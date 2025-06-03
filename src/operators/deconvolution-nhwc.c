@@ -1340,7 +1340,6 @@ static enum xnn_status reshape_conv_path(
           (input_width * deconvolution_op->input_pixel_stride
            << log2_input_element_size),
       /*n_stride=*/deconvolution_op->dynamic_context.igemm->igemm.w_stride,
-      /*cm_stride=*/deconvolution_op->dynamic_context.igemm->igemm.cm_stride,
       /*cn_stride=*/1 << log2_output_element_size, mr, nr, num_threads);
 
   size_t igemm_compute_index = 0;

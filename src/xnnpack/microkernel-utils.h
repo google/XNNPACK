@@ -8,8 +8,6 @@
 
 #include <stddef.h>
 
-#include "src/xnnpack/common.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -23,8 +21,8 @@ extern "C" {
 // fits in either the L1 or L2 cache.
 size_t xnn_gemm_best_tile_size(size_t num_groups, size_t m, size_t n,
                                size_t m_stride, size_t n_stride,
-                               size_t cm_stride, size_t cn_stride, size_t mr,
-                               size_t nr, size_t num_threads);
+                               size_t cn_stride, size_t mr, size_t nr,
+                               size_t num_threads);
 
 #ifdef __cplusplus
 }

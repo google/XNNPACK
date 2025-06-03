@@ -14,7 +14,7 @@
 #include "src/xnnpack/math.h"
 
 static bool fits_in_cache(size_t mr, size_t nc, size_t m_stride,
-                          size_t n_stride, size_t cm_stride, size_t cn_stride,
+                          size_t n_stride, size_t cn_stride,
                           size_t cache_size, size_t cache_line_size) {
   // Check if the bytes fit.
   const size_t lines_mr = divide_round_up(mr * m_stride, cache_line_size);
@@ -32,7 +32,7 @@ static bool fits_in_cache(size_t mr, size_t nc, size_t m_stride,
 
 size_t xnn_gemm_best_tile_size(size_t num_groups, size_t m, size_t n,
                                size_t m_stride, size_t n_stride,
-                               size_t cm_stride, size_t cn_stride, size_t mr,
+                               size_t cn_stride, size_t mr,
                                size_t nr, size_t num_threads) {
   // Adjust `mr` and `nr` if they are larger than `m` and `n`, respectively.
   mr = min(mr, m);
@@ -55,11 +55,11 @@ size_t xnn_gemm_best_tile_size(size_t num_groups, size_t m, size_t n,
   size_t cache_size = hardware_config->l1_data_cache_bytes;
   size_t cache_line_size = hardware_config->l1_data_cache_line_size;
   if (XNN_ARCH_X86 || XNN_ARCH_X86_64 ||
-      (cache_size && !fits_in_cache(mr, nr, m_stride, n_stride, cm_stride,
+      (cache_size && !fits_in_cache(mr, nr, m_stride, n_stride, 
                                     cn_stride, cache_size, cache_line_size))) {
     cache_size = hardware_config->l2_data_cache_bytes;
     cache_line_size = hardware_config->l2_data_cache_line_size;
-    if (cache_size && !fits_in_cache(mr, nr, m_stride, n_stride, cm_stride,
+    if (cache_size && !fits_in_cache(mr, nr, m_stride, n_stride, 
                                      cn_stride, cache_size, cache_line_size)) {
       // Don't check for cache fit.
       cache_size = 0;
@@ -80,7 +80,7 @@ size_t xnn_gemm_best_tile_size(size_t num_groups, size_t m, size_t n,
     // If, however, we have more than one tile row, then we want the data used
     // to compute a tile of size `mr`x`j*nr` to fit in the cache.
     if (mr < m && cache_size &&
-        !fits_in_cache(mr, j * nr, m_stride, n_stride, cm_stride, cn_stride,
+        !fits_in_cache(mr, j * nr, m_stride, n_stride, cn_stride,
                        cache_size, cache_line_size)) {
       break;
     }

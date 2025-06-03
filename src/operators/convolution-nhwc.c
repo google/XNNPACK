@@ -2044,7 +2044,6 @@ static enum xnn_status reshape_igemm(
           (input_width * convolution_op->input_pixel_stride
            << log2_input_element_size),
       /*n_stride=*/convolution_op->dynamic_context.igemm->igemm.w_stride,
-      /*cm_stride=*/convolution_op->dynamic_context.igemm->igemm.cm_stride,
       /*cn_stride=*/1 << log2_output_element_size, mr, nr, num_threads);
 
   if (dynamic_quantization && convolution_op->convolution_op->zero_size > 0) {

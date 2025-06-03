@@ -908,9 +908,10 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
   // Compute the optimal tile size for this GEMM.
   const size_t nc = xnn_gemm_best_tile_size(
       /*num_groups=*/batch_size_c, m, n,
-      /*m_stride=*/batch_matrix_multiply_op->dynamic_context.gemm->gemm.a_stride,
-      /*n_stride=*/batch_matrix_multiply_op->dynamic_context.gemm->gemm.w_stride,
-      /*cm_stride=*/batch_matrix_multiply_op->dynamic_context.gemm->gemm.cm_stride,
+      /*m_stride=*/
+      batch_matrix_multiply_op->dynamic_context.gemm->gemm.a_stride,
+      /*n_stride=*/
+      batch_matrix_multiply_op->dynamic_context.gemm->gemm.w_stride,
       /*cn_stride=*/1 << log2_output_element_size, mr, nr, num_threads);
 
 #if XNN_MAX_UARCH_TYPES > 1

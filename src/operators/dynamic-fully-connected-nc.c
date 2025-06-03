@@ -551,10 +551,10 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
   // Compute the optimal tile size for this GEMM.
   const size_t nc = xnn_gemm_best_tile_size(
       /*num_groups=*/1, /*m=*/batch_size, /*n=*/output_channels,
-      /*m_stride=*/dynamic_fully_connected_op->dynamic_context.gemm->gemm.a_stride,
-      /*n_stride=*/dynamic_fully_connected_op->dynamic_context.gemm->gemm.w_stride,
-      /*cm_stride=*/
-      dynamic_fully_connected_op->dynamic_context.gemm->gemm.cm_stride,
+      /*m_stride=*/
+      dynamic_fully_connected_op->dynamic_context.gemm->gemm.a_stride,
+      /*n_stride=*/
+      dynamic_fully_connected_op->dynamic_context.gemm->gemm.w_stride,
       /*cn_stride=*/1 << log2_output_element_size, mr, nr,
       /*num_threads=*/pthreadpool_get_threads_count(threadpool));
 
