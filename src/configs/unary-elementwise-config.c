@@ -1353,8 +1353,8 @@ static void init_f32_sqrt_config(void) {
       const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
       assert(hardware_config != NULL);
       #if XNN_ENABLE_AVX512F
-        if (false && hardware_config->use_x86_avx512f) {
-          f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqrt_ukernel__avx512f_rsqrt_u16;
+        if (hardware_config->use_x86_avx512f) {
+          f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqrt_ukernel__avx512f_sqrt_u16;
         } else
       #endif
       if (hardware_config->use_x86_avx) {
