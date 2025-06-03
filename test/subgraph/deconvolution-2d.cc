@@ -35,9 +35,12 @@ Tensor<float> ReferenceImpl(Tensor<Data> input, Tensor<Filter> filter,
                             const xnn_quantization_params& bias_quantization,
                             size_t groups, size_t group_input_channels,
                             size_t group_output_channels,
-                            const StencilParams& kh, const StencilParams& kw) {
-  Tensor<float> output({input.extent(0), kh.input_extent(input.extent(1)),
-                        kw.input_extent(input.extent(2)),
+                            const StencilParams& kh, const StencilParams& kw,
+                            const Adjustment& adjustment) {
+  Tensor<float> output({input.extent(0), kh.input_extent(input.extent(1), false,
+                                                         adjustment.height),
+                        kw.input_extent(input.extent(2), false,
+                                        adjustment.width),
                         groups * group_output_channels});
 
   input = input.split(3, {groups, group_input_channels});
@@ -232,11 +235,22 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
     DeconvolutionParams params = StencilToDeconvolutionParams(kh, kw);
     std::uniform_int_distribution<> channels_dist{1, 10};
     std::uniform_int_distribution<> groups_dist{1, 3};
+    std::uniform_int_distribution<>
+        height_adjustment_dist{0, static_cast<int>(kh.stride) - 1};
+    std::uniform_int_distribution<>
+        width_adjustment_dist{0, static_cast<int>(kw.stride) - 1};
     params.groups = groups_dist(rng);
     params.group_input_channels = channels_dist(rng);
     params.group_output_channels = channels_dist(rng);
     params.adjustment.height = 0;
     params.adjustment.width = 0;
+
+    // Padding mode is `Valid`.
+    if (kw.padding_min == 0 && kw.padding_max == 0 &&
+        kh.padding_min == 0 && kh.padding_max == 0) {
+      params.adjustment.height = height_adjustment_dist(rng);
+      params.adjustment.width = width_adjustment_dist(rng);
+    }
 
     // Make a random filter.
     std::vector<size_t> filter_shape = {
@@ -340,8 +354,8 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
       std::vector<size_t> input_shape = random_shape(rng, 4);
       std::vector<size_t> output_shape = {
           input_shape[0],
-          kh.input_extent(input_shape[1]),
-          kw.input_extent(input_shape[2]),
+          kh.input_extent(input_shape[1], false, params.adjustment.height),
+          kw.input_extent(input_shape[2], false, params.adjustment.width),
           params.groups * params.group_output_channels,
       };
       input_shape[3] = params.groups * params.group_input_channels;
@@ -375,7 +389,7 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
           input, filter, bias, input_quantization,
           filter_quantization.zero_point, filter_scale, bias_quantization,
           params.groups, params.group_input_channels,
-          params.group_output_channels, kh, kw);
+          params.group_output_channels, kh, kw, params.adjustment);
       for (float& i : expected) {
         i = std::max(i, params.output_min);
         i = std::min(i, params.output_max);

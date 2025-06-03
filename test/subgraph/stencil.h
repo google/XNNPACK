@@ -48,12 +48,12 @@ struct StencilParams {
     }
   }
 
-  size_t input_extent(size_t output_extent, bool same_padding = false) const {
+  size_t input_extent(size_t output_extent, bool same_padding = false, size_t adjustment = 0) const {
     if (same_padding) {
       return output_extent * stride;
     } else {
       assert(output_extent > 0);
-      size_t unpadded = stride * (output_extent - 1) + dilated_kernel_extent();
+      size_t unpadded = stride * (output_extent - 1) + adjustment + dilated_kernel_extent();
       return std::max<size_t>(1, doz(unpadded, padding()));
     }
   }
