@@ -338,6 +338,7 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
       divide_round_up(8, xnn_datatype_size_bits(datatype_of<Filter>()));
 
   ReplicableRandomDevice rng;
+  std::bernoulli_distribution flag_dist(0.5);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
@@ -364,8 +365,11 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
     uint32_t flags = 0;
     if (filter_channel_factor > 1) {
       // Sub-byte datatypes don't support transposed weights
-    } else if (rng() & 1) {
+    } else if (flag_dist(rng)) {
       flags |= XNN_FLAG_TRANSPOSE_WEIGHTS;
+    }
+    if (flag_dist(rng)) {
+      flags |= XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC;
     }
 
     // Make a random filter.
@@ -596,6 +600,7 @@ template <typename Input, typename Filter, typename Bias,
 void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid,
                   size_t block_size = no_blockwise) {
   ReplicableRandomDevice rng;
+  std::bernoulli_distribution flag_dist(0.5);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
@@ -617,8 +622,11 @@ void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid,
     const size_t rank = rank_dist(rng);
 
     uint32_t flags = 0;
-    if (rng() & 1) {
+    if (flag_dist(rng)) {
       flags |= XNN_FLAG_TRANSPOSE_WEIGHTS;
+    }
+    if (flag_dist(rng)) {
+      flags |= XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC;
     }
 
     float output_min = output_gen(rng);

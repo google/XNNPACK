@@ -7,6 +7,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <random>
 #include <sstream>
 #include <string>
 #include <tuple>
@@ -70,6 +71,7 @@ void TestImpl(size_t rank, xnn_unary_operator op) {
   const xnn_datatype datatype_out = xnn_datatype_of<Out>();
 
   ReplicableRandomDevice rng;
+  std::bernoulli_distribution flag_dist(0.5);
 
   // We want the total number of elements to be reasonable, so choose max_dim
   // such that a random shape of rank `rank` produces this max size.
@@ -85,6 +87,8 @@ void TestImpl(size_t rank, xnn_unary_operator op) {
       op_info->InputQuantizationParams(datatype_in);
   xnn_quantization_params output_quantization =
       op_info->OutputQuantizationParams(datatype_out);
+  const uint32_t flags =
+      flag_dist(rng) ? XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC : 0;
 
   Interval domain = op_info->Domain(datatype_in);
   xnn_unary_params params = op_info->DefaultParams();
@@ -92,7 +96,7 @@ void TestImpl(size_t rank, xnn_unary_operator op) {
   SubgraphTester subgraph(3);
   subgraph.AddInputTensor(rank, datatype_in, input_quantization, 0)
       .AddOutputTensor(rank, datatype_out, output_quantization, 1)
-      .AddUnary(op, &params, 0, 1);
+      .AddUnary(op, &params, 0, 1, flags);
   xnn_status status = subgraph.CreateRuntime();
   ASSERT_EQ(status, xnn_status_success);
 

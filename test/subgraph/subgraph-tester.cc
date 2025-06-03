@@ -411,10 +411,10 @@ SubgraphTester& SubgraphTester::AddBinary(xnn_binary_operator op,
 
 SubgraphTester& SubgraphTester::AddUnary(xnn_unary_operator op,
                                          xnn_unary_params* params,
-                                         uint32_t input_id,
-                                         uint32_t output_id) {
-  const xnn_status status = xnn_define_unary(subgraph_.get(), op, params,
-                                             input_id, output_id, /*flags=*/0);
+                                         uint32_t input_id, uint32_t output_id,
+                                         uint32_t flags) {
+  const xnn_status status =
+      xnn_define_unary(subgraph_.get(), op, params, input_id, output_id, flags);
   EXPECT_EQ(status, xnn_status_success);
   return *this;
 }

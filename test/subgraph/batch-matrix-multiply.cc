@@ -187,6 +187,8 @@ void FakeDynamicQuantize(const Tensor<quantized<Data>>& input, xnn_datatype) {}
 template <typename Input, typename Output = Input>
 void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid) {
   ReplicableRandomDevice rng;
+  std::bernoulli_distribution flag_dist(0.5);
+  std::uniform_int_distribution<> rank_dist{2, XNN_MAX_TENSOR_DIMS - 1};
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
@@ -196,14 +198,16 @@ void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid) {
   broadcast_extent_1(b_scales);
 
   for (auto _ : FuzzTest(std::chrono::milliseconds(1000))) {
-    std::uniform_int_distribution<> rank_dist{2, XNN_MAX_TENSOR_DIMS - 1};
     size_t input_a_rank = rank_dist(rng);
     size_t input_b_rank = rank_dist(rng);
     size_t output_rank = std::max(input_a_rank, input_b_rank);
 
     uint32_t flags = 0;
-    if (rng() & 1) {
+    if (flag_dist(rng)) {
       flags |= XNN_FLAG_TRANSPOSE_B;
+    }
+    if (flag_dist(rng)) {
+      flags |= XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC;
     }
 
     SubgraphTester subgraph(3);
@@ -294,17 +298,21 @@ TEST(BatchMatrixMultiplyBF16F32, dynamic_b) {
 template <typename InputA, typename InputB, typename Output = InputA>
 void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid) {
   ReplicableRandomDevice rng;
+  std::bernoulli_distribution flag_dist(0.5);
   std::uniform_int_distribution<> dim_dist{1, 100};
+  std::uniform_int_distribution<> rank_dist{2, XNN_MAX_TENSOR_DIMS - 1};
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
   for (auto _ : FuzzTest(std::chrono::milliseconds(1000))) {
-    std::uniform_int_distribution<> rank_dist{2, XNN_MAX_TENSOR_DIMS - 1};
     size_t input_a_rank = rank_dist(rng);
     size_t input_b_rank = rank_dist(rng);
     size_t output_rank = std::max(input_a_rank, input_b_rank);
 
     uint32_t flags = 0;
+    if (flag_dist(rng)) {
+      flags |= XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC;
+    }
 
     SubgraphTester subgraph(3);
     const uint32_t input_a_id = 0;

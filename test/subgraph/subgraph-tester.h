@@ -391,7 +391,8 @@ class SubgraphTester {
                             uint32_t output_id);
 
   SubgraphTester& AddUnary(xnn_unary_operator op, xnn_unary_params* params,
-                           uint32_t input_id, uint32_t output_id);
+                           uint32_t input_id, uint32_t output_id,
+                           uint32_t flags = 0);
 
   SubgraphTester& AddConvolution2D(ConvolutionParams params, uint32_t input_id,
                                    uint32_t filter_id, uint32_t bias_id,

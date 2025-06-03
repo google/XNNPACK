@@ -105,6 +105,11 @@ extern "C" {
 /// may fail with an error.
 #define XNN_FLAG_NO_BROADCAST 0x00001000
 
+/// This flag indicates that XNNPACK should attempt to produce numerically consistent results from a specific
+/// build of XNNPACK. This causes XNNPACK to avoid using faster codepaths that are numerically inconsistent
+/// with any other codepath that could be used in the same compiled XNNPACK library.
+#define XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC 0x00002000
+
 /// The number of entries in an array of xnn_quantization_params that XNNPACK may read beyond array bounds.
 /// The caller must allocate at least this many extra xnn_quantization_params before passing the array to XNNPACK.
 ///
