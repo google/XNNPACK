@@ -53,7 +53,6 @@ SET(PROD_HVX_MICROKERNEL_SRCS
   src/f32-vgelu/gen/f32-vgelu-hvx-rational-12-10-div.c
   src/f32-vhswish/gen/f32-vhswish-hvx.c
   src/f32-vlog/gen/f32-vlog-hvx-rational-3-3-div.c
-  src/f32-vrelu/gen/f32-vrelu-hvx.c
   src/f32-vrnd/gen/f32-vrndd-hvx-u128.c
   src/f32-vrnd/gen/f32-vrndne-hvx-u128.c
   src/f32-vrnd/gen/f32-vrndu-hvx-u128.c

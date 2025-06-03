@@ -201,7 +201,6 @@ MICROKERNEL_DEFS = [
     "src/f32-vlrelu/f32-vlrelu.inc",
     "src/f32-vmulcaddc/f32-vmulcaddc.inc",
     "src/f32-vneg/f32-vneg.inc",
-    "src/f32-vrelu/f32-vrelu.inc",
     "src/f32-vrnd/f32-vrndd.inc",
     "src/f32-vrnd/f32-vrndne.inc",
     "src/f32-vrnd/f32-vrndu.inc",

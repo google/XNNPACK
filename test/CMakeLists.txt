@@ -399,7 +399,6 @@ SET(MICROKERNEL_VUNARY_TESTS
     f32-vlog
     f32-vlrelu
     f32-vneg
-    f32-vrelu
     f32-vrndd
     f32-vrndne
     f32-vrndu

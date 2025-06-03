@@ -63,7 +63,6 @@ SET(PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-vhswish/gen/f32-vhswish-avx512f.c
   src/f32-vlog/gen/f32-vlog-avx512f-rational-3-3-div.c
   src/f32-vlrelu/gen/f32-vlrelu-avx512f-u16.c
-  src/f32-vrelu/gen/f32-vrelu-avx512f.c
   src/f32-vrnd/gen/f32-vrndd-avx512f-u16.c
   src/f32-vrnd/gen/f32-vrndne-avx512f-u16.c
   src/f32-vrnd/gen/f32-vrndu-avx512f-u16.c

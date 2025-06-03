@@ -146,15 +146,6 @@ struct Convert : public UnaryOpInfo {
   }
 };
 
-struct ReLU : public UnaryOpInfo {
-  float ReferenceImpl(float x, const xnn_unary_params&) const override {
-    return std::max(x, 0.0f);
-  }
-  int32_t ReferenceImpl(int32_t x, const xnn_unary_params&) const override {
-    return std::max<int32_t>(x, 0);
-  }
-};
-
 struct Abs : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return std::abs(x);

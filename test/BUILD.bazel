@@ -175,7 +175,6 @@ xnnpack_cxx_library(
     "f32_vlog",
     "f32_vlrelu",
     "f32_vneg",
-    "f32_vrelu",
     "f32_vrndd",
     "f32_vrndne",
     "f32_vrndu",

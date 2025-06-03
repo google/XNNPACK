@@ -112,7 +112,6 @@ PROD_SCALAR_MICROKERNEL_SRCS = [
     "src/f32-vlog/gen/f32-vlog-scalar-rational-3-3-div.c",
     "src/f32-vlrelu/gen/f32-vlrelu-scalar-u4.c",
     "src/f32-vmulcaddc/gen/f32-vmulcaddc-c1-minmax-scalar-2x.c",
-    "src/f32-vrelu/gen/f32-vrelu-scalar.c",
     "src/f32-vrnd/gen/f32-vrndd-scalar-libm-u1.c",
     "src/f32-vrnd/gen/f32-vrndne-scalar-libm-u1.c",
     "src/f32-vrnd/gen/f32-vrndu-scalar-libm-u1.c",

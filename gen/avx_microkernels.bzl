@@ -64,7 +64,6 @@ PROD_AVX_MICROKERNEL_SRCS = [
     "src/f32-vgelu/gen/f32-vgelu-avx-rational-12-10-div.c",
     "src/f32-vhswish/gen/f32-vhswish-avx.c",
     "src/f32-vlrelu/gen/f32-vlrelu-avx-u16.c",
-    "src/f32-vrelu/gen/f32-vrelu-avx.c",
     "src/f32-vrnd/gen/f32-vrndd-avx-u16.c",
     "src/f32-vrnd/gen/f32-vrndne-avx-u16.c",
     "src/f32-vrnd/gen/f32-vrndu-avx-u16.c",

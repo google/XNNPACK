@@ -82,7 +82,6 @@ extern "C" {
 #include "src/f32-vlog/f32-vlog.inc"
 #include "src/f32-vlrelu/f32-vlrelu.inc"
 #include "src/f32-vneg/f32-vneg.inc"
-#include "src/f32-vrelu/f32-vrelu.inc"
 #include "src/f32-vrnd/f32-vrndd.inc"
 #include "src/f32-vrnd/f32-vrndne.inc"
 #include "src/f32-vrnd/f32-vrndu.inc"

@@ -173,7 +173,6 @@ tools/generate-vunary-test.py --ukernel f32-vgelu --output test/f32-vgelu.cc &
 tools/generate-vunary-test.py --ukernel f32-vexp --output test/f32-vexp.cc &
 tools/generate-vunary-test.py --ukernel f32-vlog --output test/f32-vlog.cc &
 tools/generate-vunary-test.py --ukernel f32-vneg --output test/f32-vneg.cc &
-tools/generate-vunary-test.py --ukernel f32-vrelu --output test/f32-vrelu.cc &
 tools/generate-vunary-test.py --ukernel f32-vrndd  --output test/f32-vrndd.cc &
 tools/generate-vunary-test.py --ukernel f32-vrndne --output test/f32-vrndne.cc &
 tools/generate-vunary-test.py --ukernel f32-vrndu  --output test/f32-vrndu.cc &
