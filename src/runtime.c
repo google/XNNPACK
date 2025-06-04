@@ -39,6 +39,7 @@
 #include "src/xnnpack/operator.h"
 #include "src/xnnpack/params.h"
 #include "src/xnnpack/subgraph.h"
+#include "src/subgraph/subgraph-utils.h"
 #include <pthreadpool.h>
 
 enum xnn_status xnn_reshape_external_value(

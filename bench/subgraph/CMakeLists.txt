@@ -26,10 +26,27 @@ IF(XNNPACK_BUILD_LIBRARY)
   SET_TARGET_PROPERTIES(models PROPERTIES CXX_EXTENSIONS YES)
   TARGET_LINK_LIBRARIES(models PRIVATE XNNPACK)
 
+  ADD_LIBRARY(model_runtime STATIC
+    model_runtime.cc)
+  SET_TARGET_PROPERTIES(model_runtime PROPERTIES CXX_EXTENSIONS YES)
+  TARGET_LINK_LIBRARIES(model_runtime PRIVATE
+    bench-utils
+    benchmark::benchmark
+    XNNPACK)
+
   ADD_EXECUTABLE(bench-models benchmark.cc)
   TARGET_LINK_LIBRARIES(bench-models PRIVATE
     bench-utils
     benchmark::benchmark
     models
+    model_runtime
+    XNNPACK)
+
+  ADD_EXECUTABLE(bench-fully-connected fully_connected.cc)
+  TARGET_LINK_LIBRARIES(bench-fully-connected PRIVATE
+    bench-utils
+    benchmark::benchmark
+    model_runtime
+    next-prime
     XNNPACK)
 ENDIF()

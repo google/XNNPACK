@@ -11,6 +11,20 @@ load(
 )
 
 xnnpack_cxx_library(
+    name = "model_runtime",
+    srcs = ["model_runtime.cc"],
+    hdrs = ["model_runtime.h"],
+    deps = [
+        "//:XNNPACK",
+        "//:allocator",
+        "//:subgraph_h",
+        "//bench:bench_utils",
+        "@com_google_benchmark//:benchmark",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cxx_library(
     name = "models",
     testonly = 1,
     srcs = [
@@ -42,11 +56,21 @@ xnnpack_benchmark(
     srcs = ["benchmark.cc"],
     tags = xnnpack_slow_benchmark_tags(),
     deps = [
+        ":model_runtime",
         ":models",
-        "//:allocator",
-        "//:subgraph",
         "//:xnnpack_h",
         "//bench:bench_utils",
-        "@pthreadpool",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "fully_connected",
+    srcs = ["fully_connected.cc"],
+    tags = xnnpack_slow_benchmark_tags(),
+    deps = [
+        ":model_runtime",
+        "//:xnnpack_h",
+        "//bench:bench_utils",
+        "//test:next_prime",
     ],
 )
