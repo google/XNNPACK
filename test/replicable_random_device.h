@@ -26,7 +26,13 @@ class Xoshiro128Plus {
  public:
   using result_type = uint64_t;
 
-  explicit Xoshiro128Plus(uint64_t s1) : state_{s1, 0} {}
+  explicit Xoshiro128Plus(uint64_t s1) : state_{s1, 0} {
+    // The seed might not have 64 bits of entropy, which some <random> functions
+    // require to give good random data.
+    for (int i = 0; i < 10; ++i) {
+      (*this)();
+    }
+  }
 
   uint64_t operator()() {
     uint64_t s1 = state_[0];
