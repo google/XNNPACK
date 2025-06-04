@@ -26,7 +26,9 @@ class Xoshiro128Plus {
  public:
   using result_type = uint64_t;
 
-  explicit Xoshiro128Plus(uint64_t s1) : state_{s1, 0} {}
+  explicit Xoshiro128Plus(uint64_t s1)
+      : state_{(s1 << 32) + (s1 & 0xFFFFFFFF), (s1 << 32) + (s1 & 0xFFFFFFFF)} {
+  }
 
   uint64_t operator()() {
     uint64_t s1 = state_[0];
