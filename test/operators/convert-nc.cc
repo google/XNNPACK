@@ -317,7 +317,8 @@ class ConvertOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
 
     // The parameters of the GEMM config are used as packing parameters.
-    const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_nr2_config();
+    const struct xnn_gemm_config* gemm_config =
+        xnn_init_f32_gemm_nr2_config(/*flags=*/0);
 
     xnnpack::Buffer<float> input(
         (batch_size() - 1) * input_stride() + channels(),

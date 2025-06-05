@@ -72,6 +72,7 @@ xnnpack_cc_library(
         "//:microfnptr_h",
         "//:microkernel_hdrs",
         "//:microparams_init",
+        "//:xnnpack_h",
     ],
 )
 
