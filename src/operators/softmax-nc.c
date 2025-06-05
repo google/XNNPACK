@@ -450,10 +450,22 @@ static enum xnn_status reshape_softmax_nc_floating_point(
   if (vmul->opc_ukernel != NULL) {
     softmax_op->context.floating_point_softmax.vmulc_ukernel = vmul->opc_ukernel;
   };
-  memcpy(&softmax_op->context.floating_point_softmax.rmax_init, rmax_init, rmax_init_size);
-  memcpy(&softmax_op->context.floating_point_softmax.rmax_params, rmax_params, rmax_params_size);
-  memcpy(&softmax_op->context.floating_point_softmax.expminus_params, expminus_params, expminus_params_size);
-  memcpy(&softmax_op->context.floating_point_softmax.minmax_params, minmax_params, minmax_params_size);
+  if (rmax_init_size > 0) {
+    memcpy(&softmax_op->context.floating_point_softmax.rmax_init, rmax_init,
+           rmax_init_size);
+  }
+  if (rmax_params_size > 0) {
+    memcpy(&softmax_op->context.floating_point_softmax.rmax_params, rmax_params,
+           rmax_params_size);
+  }
+  if (expminus_params_size > 0) {
+    memcpy(&softmax_op->context.floating_point_softmax.expminus_params,
+           expminus_params, expminus_params_size);
+  }
+  if (minmax_params_size > 0) {
+    memcpy(&softmax_op->context.floating_point_softmax.minmax_params,
+           minmax_params, minmax_params_size);
+  }
   softmax_op->compute[0].type = xnn_parallelization_type_1d;
   softmax_op->compute[0].task_1d = (pthreadpool_task_1d_t) xnn_compute_floating_point_softmax;
   softmax_op->compute[0].range[0] = batch_size;
