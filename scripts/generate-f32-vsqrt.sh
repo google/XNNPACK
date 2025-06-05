@@ -14,6 +14,7 @@ tools/xngen src/f32-vsqrt/rvv-sqrt.c.in -D LMUL=8 -o src/f32-vsqrt/gen/f32-vsqrt
 tools/xngen src/f32-vsqrt/simd-sqrt.c.in -D ARCH=scalar   -D BATCH_TILES=1,2,4,8   -o src/f32-vsqrt/gen/f32-vsqrt-scalar-sqrt.c &
 tools/xngen src/f32-vsqrt/simd-sqrt.c.in -D ARCH=sse2     -D BATCH_TILES=4,8,16    -o src/f32-vsqrt/gen/f32-vsqrt-sse2-sqrt.c &
 tools/xngen src/f32-vsqrt/simd-sqrt.c.in -D ARCH=avx      -D BATCH_TILES=8,16,32   -o src/f32-vsqrt/gen/f32-vsqrt-avx-sqrt.c &
+tools/xngen src/f32-vsqrt/simd-sqrt.c.in -D ARCH=avx512f  -D BATCH_TILES=16,32,48 -o src/f32-vsqrt/gen/f32-vsqrt-avx512f-sqrt.c &
 tools/xngen src/f32-vsqrt/simd-sqrt.c.in -D ARCH=neon     -D BATCH_TILES=4,8,16  -o src/f32-vsqrt/gen/f32-vsqrt-aarch64-neon-sqrt.c &
 tools/xngen src/f32-vsqrt/simd-sqrt.c.in -D ARCH=wasmsimd -D BATCH_TILES=4,8,16  -o src/f32-vsqrt/gen/f32-vsqrt-wasmsimd-sqrt.c &
 

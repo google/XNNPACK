@@ -72,6 +72,7 @@ SET(PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-vsigmoid/gen/f32-vsigmoid-avx512f-rr2-lut32-p2-perm2-scalef-div-u64.c
   src/f32-vsin/gen/f32-vsin-avx512f-rational-5-4-div.c
   src/f32-vsqrt/gen/f32-vsqrt-avx512f-rsqrt.c
+  src/f32-vsqrt/gen/f32-vsqrt-avx512f-sqrt.c
   src/f32-vtanh/gen/f32-vtanh-avx512f-rational-9-8-div.c
   src/f32-vunary/gen/f32-vabs-avx512f.c
   src/f32-vunary/gen/f32-vneg-avx512f.c
