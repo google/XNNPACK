@@ -326,6 +326,16 @@ SubgraphTester& SubgraphTester::AddReshape(const std::vector<size_t>& new_dims,
   return *this;
 }
 
+SubgraphTester& SubgraphTester::AddBroadcast(
+    const std::vector<size_t>& new_dims, uint32_t input_id,
+    uint32_t output_id) {
+  const xnn_status status = xnn_define_static_broadcast(
+      subgraph_.get(), new_dims.size(), new_dims.data(), input_id, output_id,
+      /*flags=*/0);
+  EXPECT_EQ(status, xnn_status_success);
+  return *this;
+}
+
 SubgraphTester& SubgraphTester::AddResizeBilinear(size_t new_height,
                                                   size_t new_width,
                                                   uint32_t input_id,
@@ -776,27 +786,26 @@ xnn_status SubgraphTester::CreateRuntime(xnn_weights_cache_t weights_cache,
 }
 
 SubgraphTester& SubgraphTester::ReshapeRuntime() {
-  const xnn_status status = xnn_reshape_runtime(runtime_.get());
-  EXPECT_EQ(status, xnn_status_success);
+  EXPECT_EQ(status_, xnn_status_success);
+  status_ = xnn_reshape_runtime(runtime_.get());
   return *this;
 }
 
 SubgraphTester& SubgraphTester::SetupRuntime() {
+  EXPECT_EQ(status_, xnn_status_success);
   std::vector<xnn_external_value> values;
   values.reserve(external_tensors_.size());
   for (const std::pair<uint32_t, void*> i : external_tensors_) {
     values.push_back({i.first, i.second});
   }
-  const xnn_status status =
-      xnn_setup_runtime_v2(runtime_.get(), values.size(), values.data());
-  EXPECT_EQ(status, xnn_status_success);
+  status_ = xnn_setup_runtime_v2(runtime_.get(), values.size(), values.data());
   return *this;
 }
 
-SubgraphTester& SubgraphTester::InvokeRuntime() {
-  const xnn_status status = xnn_invoke_runtime(runtime_.get());
-  EXPECT_EQ(status, xnn_status_success);
-  return *this;
+xnn_status SubgraphTester::InvokeRuntime() {
+  EXPECT_EQ(status_, xnn_status_success);
+  status_ = xnn_invoke_runtime(runtime_.get());
+  return status_;
 }
 
 }  // namespace xnnpack

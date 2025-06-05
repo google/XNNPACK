@@ -103,6 +103,7 @@ xnnpack_unit_test(
     deps = SUBGRAPH_TEST_DEPS,
 ) for operator in [
     "copy",
+    "broadcast",
     "softmax",
     "space_to_depth_2d",
     "depth_to_space_2d",

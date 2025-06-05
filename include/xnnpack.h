@@ -1843,6 +1843,24 @@ enum xnn_status xnn_define_static_reshape(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a Broadcast Node with static shape specification and add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param num_dims - number of shape dimensions in the output tensor.
+/// @param new_shape - shape dimensions of the output tensor, or 0 to keep the dimension of the input.
+/// @param input_id - Value ID for the input tensor. The input tensor must be defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
+///                    shape must match the shape of the input tensor where @a new_shape is 0, or match @a new_shape
+///                    where it is non-zero.
+/// @param flags - binary features of the Reshape Node. No supported flags are currently defined.
+enum xnn_status xnn_define_static_broadcast(
+  xnn_subgraph_t subgraph,
+  size_t num_dims,
+  const size_t* new_shape,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags);
+
 /// Define a 2D Resize Bilinear Node with static output height & width specification and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.

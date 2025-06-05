@@ -43,6 +43,7 @@ IF(XNNPACK_BUILD_LIBRARY)
       average-pooling-2d
       batch-matrix-multiply
       binary
+      broadcast
       concatenate
       copy
       depth-to-space-2d

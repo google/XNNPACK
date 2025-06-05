@@ -501,6 +501,7 @@ void propagate_rank(
         }
         break;
       case xnn_node_type_static_reshape:
+      case xnn_node_type_static_broadcast:
         output_value->shape.num_dims = node->params.static_reshape.new_shape.num_dims;
         break;
       case xnn_node_type_fuse_dims:

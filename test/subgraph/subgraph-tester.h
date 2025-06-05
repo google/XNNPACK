@@ -362,6 +362,8 @@ class SubgraphTester {
 
   SubgraphTester& AddReshape(const std::vector<size_t>& new_dims,
                              uint32_t input_id, uint32_t output_id);
+  SubgraphTester& AddBroadcast(const std::vector<size_t>& new_dims,
+                               uint32_t input_id, uint32_t output_id);
 
   SubgraphTester& AddResizeBilinear(size_t new_height, size_t new_width,
                                     uint32_t input_id, uint32_t output_id,
@@ -518,7 +520,8 @@ class SubgraphTester {
     return CreateRuntime(nullptr, nullptr, threadpool, flags);
   }
 
-  SubgraphTester& InvokeRuntime();
+  xnn_status InvokeRuntime();
+  xnn_status Status() const { return status_; }
 
   xnn_layout_type GetLayout(uint32_t value_id) const {
     return subgraph_->values[value_id].layout;
@@ -569,6 +572,8 @@ class SubgraphTester {
       std::uniform_int_distribution<int32_t>(
           -std::numeric_limits<int8_t>::max(),
           std::numeric_limits<int8_t>::max());
+
+  xnn_status status_ = xnn_status_success;
 
  private:
   std::vector<xnnpack::Buffer<char>> static_data_;
