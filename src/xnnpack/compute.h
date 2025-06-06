@@ -379,6 +379,10 @@ XNN_PRIVATE void xnn_compute_inline_packed_qp8gemm(
     const struct gemm_context* context, uint32_t thread_id,
     size_t mr_block_start, size_t mr_block_size);
 
+XNN_PRIVATE void xnn_compute_grouped_inline_packed_qp8gemm(
+    const struct gemm_context* context, uint32_t thread_id, size_t group_index,
+    size_t mr_block_start, size_t mr_block_size);
+
 #if XNN_MAX_UARCH_TYPES > 1
 XNN_PRIVATE void xnn_compute_hmp_grouped_gemm(
     const struct gemm_context* context, uint32_t uarch_index,
@@ -390,30 +394,17 @@ XNN_PRIVATE void xnn_compute_hmp_grouped_qp8gemm(
     size_t group_index, size_t mr_block_start, size_t nr_block_start,
     size_t mr_block_size, size_t nr_block_size);
 
+XNN_PRIVATE void xnn_compute_hmp_grouped_inline_packed_qp8gemm(
+    const struct gemm_context* context, uint32_t uarch_index,
+    uint32_t thread_id, size_t group_index, size_t mr_block_start,
+    size_t mr_block_size);
+
 XNN_PRIVATE void xnn_compute_hmp_gemm(const struct gemm_context* context,
                                       uint32_t uarch_index,
                                       size_t nr_block_start,
                                       size_t mr_block_start,
                                       size_t nr_block_size,
                                       size_t mr_block_size);
-
-XNN_PRIVATE void xnn_compute_qp8gemm(const struct gemm_context* context,
-                                     size_t nr_block_start,
-                                     size_t mr_block_start,
-                                     size_t nr_block_size,
-                                     size_t mr_block_size);
-
-XNN_PRIVATE void xnn_compute_hmp_grouped_gemm(
-    const struct gemm_context* context, uint32_t uarch_index,
-    size_t group_index, size_t nr_block_start, size_t mr_block_start,
-    size_t nr_block_size, size_t mr_block_size);
-
-XNN_PRIVATE void xnn_compute_hmp_dqgemm(const struct gemm_context* context,
-                                        uint32_t uarch_index,
-                                        size_t nr_block_start,
-                                        size_t mr_block_start,
-                                        size_t nr_block_size,
-                                        size_t mr_block_size);
 
 XNN_PRIVATE void xnn_compute_hmp_dqgemm(const struct gemm_context* context,
                                         uint32_t uarch_index,

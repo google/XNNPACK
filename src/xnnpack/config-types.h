@@ -103,6 +103,7 @@ struct xnn_pack_lh_config {
   xnn_pack_lh_offset_fn offset_fn;
   uint32_t log2_input_element_size;
   uint32_t log2_packed_element_size;
+  bool gemv_noop;
 };
 
 struct xnn_dwconv_config {

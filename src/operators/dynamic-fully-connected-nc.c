@@ -562,8 +562,14 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
           /*cn_stride=*/1 << log2_output_element_size, /*mc=*/batch_size,
           /*nc=*/output_channels);
 
-      if (!should_inline_lhs_packing ||
-          num_threads * mr > round_up(batch_size, mr)) {
+      if (packed_lh_config->gemv_noop && mr == 1) {
+        xnn_log_debug(
+            "Skipping inline packing for %s with m=%zu, n=%zu, and k=%zu since "
+            "it is a no-op for GEMV.",
+            xnn_operator_type_to_string(dynamic_fully_connected_op->type),
+            batch_size, output_channels, input_channels);
+      } else if (!should_inline_lhs_packing ||
+                 num_threads * mr > round_up(batch_size, mr)) {
         xnn_log_debug(
             "Pre-packing LHS of %s with m=%zu, n=%zu, and k=%zu despite "
             "request to inline because %s.",
