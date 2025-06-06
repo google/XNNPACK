@@ -272,6 +272,7 @@ static void init_pf16_gemm_config(void) {
     #if XNN_ENABLE_ARM_SME2
       const size_t mr = xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2_get_mr();
       const size_t nr = xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2_get_nr();
+      pf16_gemm_config.arch = xnn_arch_arm_sme2;
       pf16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme2);
       pf16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(mr)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2);
       pf16_gemm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
@@ -316,6 +317,7 @@ static void init_pf32_gemm_config(void) {
     #if XNN_ENABLE_ARM_SME2
       const size_t mr = xnn_pf32_gemm_minmax_ukernel_32x32__neonsme2_get_mr();
       const size_t nr = xnn_pf32_gemm_minmax_ukernel_32x32__neonsme2_get_nr();
+      pf32_gemm_config.arch = xnn_arch_arm_sme2;
       pf32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_pf32_gemm_minmax_ukernel_1x32__neonsme2);
       pf32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(mr)] =
           xnn_init_hmp_gemm_ukernel((
@@ -344,6 +346,7 @@ static void init_pqs8_qc8w_gemm_config(void) {
         xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme2_get_mr();
     const size_t nr =
         xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32c4__neonsme2_get_nr();
+    pqs8_qc8w_gemm_config.arch = xnn_arch_arm_sme2;
     pqs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(mr)] =
         xnn_init_hmp_gemm_ukernel(
             (xnn_gemm_ukernel_fn)

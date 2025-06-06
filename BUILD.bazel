@@ -549,6 +549,22 @@ xnnpack_cc_library(
 )
 
 xnnpack_cxx_library(
+    name = "pack_lh",
+    srcs = ["src/pack-lh.cc"],
+    deps = [
+        ":logging",
+        ":math",
+        ":microfnptr_h",
+        ":microkernel_hdrs",
+        ":microparams_h",
+        ":quantization",
+        "//src/configs:config_hdrs",
+    ] + xnnpack_if_kleidiai_enabled([
+        "@KleidiAI//kai/ukernels/matmul",
+    ]),
+)
+
+xnnpack_cxx_library(
     name = "packing",
     srcs = ["src/reference/packing.cc"],
     hdrs = ["src/xnnpack/pack.h"],
@@ -560,6 +576,7 @@ xnnpack_cxx_library(
         ":microparams_h",
         ":microparams_init",
         ":params",
+        ":quantization",
         ":unaligned",
         ":xnnpack_h",
         "//src/configs:config_hdrs",
@@ -667,6 +684,7 @@ xnnpack_cc_library(
         ":common",
         ":logging",
         ":math",
+        "//src/configs:config_hdrs",
         "//src/configs:hardware_config",
     ],
 )

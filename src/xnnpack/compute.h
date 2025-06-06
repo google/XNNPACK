@@ -296,6 +296,10 @@ struct gemm_context {
   size_t cn_stride;
   // Stride, in bytes, between each group (G) of C.
   size_t gc_stride;
+  // Pointer to additional workspace, if required.
+  void* workspace;
+  // Offset of the per-thread chunks from the start of the workspace pointer.
+  size_t workspace_offset;
   // Size, in bytes, of each element of C.
   uint32_t log2_csize;
   // Number of batch dimensions in A, B, and C.
@@ -312,10 +316,12 @@ struct gemm_context {
   size_t kr;
   // The `sr` size of the current GEMM microkernel.
   size_t sr;
-  // The inner dimension of the matrix product.
-  size_t kc;
   // The `mr_packed` size of the current GEMM microkernel.
   size_t mr_packed;
+  // The inner dimension of the matrix product.
+  size_t kc;
+  // The number of columns.
+  size_t nc;
   // GEMM microkernels.
   union {
     struct xnn_hmp_gemm_ukernel ukernel;
@@ -335,7 +341,9 @@ struct gemm_context {
     struct xnn_f16_scaleminmax_params f16;
     struct xnn_f32_minmax_params f32;
   } params;
-  xnn_pack_lh_offset_fn packed_lh_offset_fn;
+  const struct xnn_pack_lh_config* packed_lh_config;
+  // Whether to use the `dq_kernel` or not.
+  bool dynamic_quantization;
 };
 
 XNN_PRIVATE void xnn_compute_grouped_gemm(const struct gemm_context* context,
@@ -366,6 +374,11 @@ XNN_PRIVATE void xnn_compute_qp8gemm(const struct gemm_context* context,
                                      size_t mr_block_start,
                                      size_t nr_block_size,
                                      size_t mr_block_size);
+
+XNN_PRIVATE void xnn_compute_inline_packed_qp8gemm(
+    const struct gemm_context* context, uint32_t thread_id,
+    size_t mr_block_start, size_t mr_block_size);
+
 #if XNN_MAX_UARCH_TYPES > 1
 XNN_PRIVATE void xnn_compute_hmp_grouped_gemm(
     const struct gemm_context* context, uint32_t uarch_index,
@@ -384,6 +397,24 @@ XNN_PRIVATE void xnn_compute_hmp_gemm(const struct gemm_context* context,
                                       size_t nr_block_size,
                                       size_t mr_block_size);
 
+XNN_PRIVATE void xnn_compute_qp8gemm(const struct gemm_context* context,
+                                     size_t nr_block_start,
+                                     size_t mr_block_start,
+                                     size_t nr_block_size,
+                                     size_t mr_block_size);
+
+XNN_PRIVATE void xnn_compute_hmp_grouped_gemm(
+    const struct gemm_context* context, uint32_t uarch_index,
+    size_t group_index, size_t nr_block_start, size_t mr_block_start,
+    size_t nr_block_size, size_t mr_block_size);
+
+XNN_PRIVATE void xnn_compute_hmp_dqgemm(const struct gemm_context* context,
+                                        uint32_t uarch_index,
+                                        size_t nr_block_start,
+                                        size_t mr_block_start,
+                                        size_t nr_block_size,
+                                        size_t mr_block_size);
+
 XNN_PRIVATE void xnn_compute_hmp_dqgemm(const struct gemm_context* context,
                                         uint32_t uarch_index,
                                         size_t nr_block_start,
@@ -397,6 +428,10 @@ XNN_PRIVATE void xnn_compute_hmp_qp8gemm(const struct gemm_context* context,
                                          size_t mr_block_start,
                                          size_t nr_block_size,
                                          size_t mr_block_size);
+
+XNN_PRIVATE void xnn_compute_hmp_inline_packed_qp8gemm(
+    const struct gemm_context* context, uint32_t uarch_index, size_t thread_id,
+    size_t mr_block_start, size_t mr_block_size);
 #endif  // XNN_MAX_UARCH_TYPES > 1
 
 // Context for Sparse Matrix-Dense Matrix Multiplication.
@@ -502,6 +537,8 @@ struct igemm_context {
   size_t zero_size;
   // Value of mr in the microkernel.
   size_t mr;
+  // Value of nc in the weights.
+  size_t nc;
   // IGEMM microkernels.
   union {
     struct xnn_hmp_igemm_ukernel ukernel;
@@ -1233,6 +1270,7 @@ struct pack_lh_context {
   void* XNN_RESTRICT lhs_packed;
   xnn_pack_lh_ukernel_fn pack_lh_ukernel;
   xnn_pack_lh_offset_fn packed_offset_fn;
+  size_t workspace_offset;
 };
 
 XNN_PRIVATE void xnn_compute_pack_lh(const struct pack_lh_context* context,

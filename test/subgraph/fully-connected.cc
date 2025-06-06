@@ -24,7 +24,9 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/subgraph.h"
 #include "test/replicable_random_device.h"
+#include "test/subgraph/runtime-flags.h"
 #include "test/subgraph/subgraph-tester.h"
 
 namespace xnnpack {
@@ -329,7 +331,8 @@ const size_t no_blockwise = std::numeric_limits<size_t>::max();
 template <typename Input, typename Filter, typename Bias,
           typename Output = Input, typename Scale = float>
 void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
-                 size_t block_size = no_blockwise) {
+                 size_t block_size = no_blockwise,
+                 uint32_t subgraph_flags = xnn_test_runtime_flags()) {
   const bool channelwise_quantization =
       xnn_datatype_is_channelwise_quantized(datatype_of<Filter>());
   // If the filter datatype is sub-byte, we have more than one filter element
@@ -429,7 +432,7 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
       output_max = std::numeric_limits<float>::infinity();
     }
 
-    SubgraphTester subgraph(4);
+    SubgraphTester subgraph(4, subgraph_flags);
     const uint32_t input_id = 0;
     const uint32_t filter_id = 1;
     const uint32_t bias_id = bias.empty() ? XNN_INVALID_VALUE_ID : 2;
@@ -595,10 +598,54 @@ TEST(FullyConnectedQD8F32QB4W, static_b) {
       /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
 }
 
+TEST(FullyConnectedQC8, dont_inline_pack_static_b) {
+  TestStaticB<qint8, qcint8, qint32>(
+      /*convert_to=*/xnn_datatype_invalid, /*block_size=*/no_blockwise,
+      /*subgraph_flags=*/xnn_test_runtime_flags() |
+          XNN_FLAG_NO_INLINED_LHS_PACKING);
+}
+TEST(FullyConnectedF16, dont_inline_pack_static_b) {
+  TestStaticB<xnn_float16, float, float>(
+      /*convert_to=*/xnn_datatype_invalid, /*block_size=*/no_blockwise,
+      /*subgraph_flags=*/xnn_test_runtime_flags() |
+          XNN_FLAG_NO_INLINED_LHS_PACKING);
+}
+TEST(FullyConnectedF32, dont_inline_pack_static_b) {
+  TestStaticB<float, float, float>(
+      /*convert_to=*/xnn_datatype_invalid, /*block_size=*/no_blockwise,
+      /*subgraph_flags=*/xnn_test_runtime_flags() |
+          XNN_FLAG_NO_INLINED_LHS_PACKING);
+}
+TEST(FullyConnectedQD8F16QC4W, dont_inline_pack_static_b) {
+  TestStaticB<xnn_float16, qcint4, xnn_float16>(
+      /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/no_blockwise,
+      /*subgraph_flags=*/xnn_test_runtime_flags() |
+          XNN_FLAG_NO_INLINED_LHS_PACKING);
+}
+TEST(FullyConnectedQD8F16QC8W, dont_inline_pack_static_b) {
+  TestStaticB<xnn_float16, qcint8, xnn_float16>(
+      /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/no_blockwise,
+      /*subgraph_flags=*/xnn_test_runtime_flags() |
+          XNN_FLAG_NO_INLINED_LHS_PACKING);
+}
+TEST(FullyConnectedQD8F32QC4W, dont_inline_pack_static_b) {
+  TestStaticB<float, qcint4, float>(
+      /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/no_blockwise,
+      /*subgraph_flags=*/xnn_test_runtime_flags() |
+          XNN_FLAG_NO_INLINED_LHS_PACKING);
+}
+TEST(FullyConnectedQD8F32QC8W, dont_inline_pack_static_b) {
+  TestStaticB<float, qcint8, float>(
+      /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/no_blockwise,
+      /*subgraph_flags=*/xnn_test_runtime_flags() |
+          XNN_FLAG_NO_INLINED_LHS_PACKING);
+}
+
 template <typename Input, typename Filter, typename Bias,
           typename Output = Input>
 void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid,
-                  size_t block_size = no_blockwise) {
+                  size_t block_size = no_blockwise,
+                  uint32_t subgraph_flags = xnn_test_runtime_flags()) {
   ReplicableRandomDevice rng;
   std::bernoulli_distribution flag_dist(0.5);
 
@@ -637,7 +684,7 @@ void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid,
       output_max = std::numeric_limits<float>::infinity();
     }
 
-    SubgraphTester subgraph(4);
+    SubgraphTester subgraph(4, subgraph_flags);
     const uint32_t input_id = 0;
     const uint32_t filter_id = 1;
     const uint32_t bias_id = rng() & 1 ? XNN_INVALID_VALUE_ID : 2;
@@ -742,6 +789,19 @@ TEST(FullyConnectedF16, dynamic_b) {
 }
 TEST(FullyConnectedF32, dynamic_b) {
   TestDynamicB<float, float, float, float>();
+}
+
+TEST(FullyConnectedF16, dont_inline_pack_dynamic_b) {
+  TestDynamicB<xnn_float16, xnn_float16, xnn_float16, xnn_float16>(
+      /*convert_to=*/xnn_datatype_invalid, /*block_size=*/no_blockwise,
+      /*subgraph_flags=*/xnn_test_runtime_flags() |
+          XNN_FLAG_NO_INLINED_LHS_PACKING);
+}
+TEST(FullyConnectedF32, dont_inline_pack_dynamic_b) {
+  TestDynamicB<float, float, float, float>(
+      /*convert_to=*/xnn_datatype_invalid, /*block_size=*/no_blockwise,
+      /*subgraph_flags=*/xnn_test_runtime_flags() |
+          XNN_FLAG_NO_INLINED_LHS_PACKING);
 }
 
 }  // namespace xnnpack

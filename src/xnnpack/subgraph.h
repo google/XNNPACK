@@ -57,6 +57,12 @@
 #define XNN_VALUE_FLAG_FP16_COMPATIBLE 0x00000400
 #define XNN_VALUE_FLAG_LAYOUT_NCHW 0x00000800
 
+/// Create explicit `pack-lh` nodes, instead of pack the data on the fly
+/// in a temporary buffer in the consuming op. Inline packing reduces memory
+/// consumption and improves memory locality but may lead to slower GEMMs
+/// because of tiling.
+#define XNN_FLAG_NO_INLINED_LHS_PACKING 0x00004000
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -354,6 +360,9 @@ struct xnn_node {
       int32_t axis;
     } even_split;
     struct {
+      enum xnn_datatype assumed_input_datatype;
+    } fully_connected;
+    struct {
       uint32_t padding_top;
       uint32_t padding_right;
       uint32_t padding_bottom;
@@ -493,6 +502,8 @@ struct xnn_subgraph {
   uint32_t num_reserved_nodes;
   uint32_t num_nodes;
   struct xnn_node* nodes;
+
+  uint32_t flags;
 };
 
 /// Runtime is a combination of an execution plan for subgraph Nodes and a
