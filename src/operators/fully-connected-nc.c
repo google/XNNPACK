@@ -2501,11 +2501,16 @@ static enum xnn_status reshape_fully_connected_nc(
           /*cn_stride=*/1 << log2_output_element_size, /*mc=*/batch_size,
           /*nc=*/output_channels);
 
-      if (!should_inline_lhs_packing ||
-          num_threads * mr > round_up(batch_size, mr)) {
+      if (packed_lh_config->gemv_noop && mr == 1) {
         xnn_log_debug(
-            "Pre-packing LHS of %s with m=%zu, n=%zu, and k=%zu despite "
-            "request to inline because %s.",
+            "Skipping inline packing for %s with m=%zu, n=%zu, and k=%zu since "
+            "it is a no-op for GEMV.",
+            xnn_operator_type_to_string(fully_connected_op->type), batch_size,
+            output_channels, input_channels);
+      } else if (!should_inline_lhs_packing ||
+                 num_threads * mr > round_up(batch_size, mr)) {
+        xnn_log_debug(
+            "Pre-packing LHS of %s despite request to inline because %s.",
             xnn_operator_type_to_string(fully_connected_op->type), batch_size,
             output_channels, input_channels,
             !should_inline_lhs_packing
@@ -2543,6 +2548,8 @@ static enum xnn_status reshape_fully_connected_nc(
         gemm_compute = &fully_connected_op->compute[1];
         log2_input_element_size = packed_lh_config->log2_packed_element_size;
         inline_lhs_packing = false;
+        xnn_log_debug("Requesting workspace of size %zu bytes for LHS packing.",
+                      *workspace_size);
       } else {
         xnn_log_debug(
             "Inlining LHS packing for %s with m=%zu, n=%zu, and k=%zu.",
@@ -2552,9 +2559,10 @@ static enum xnn_status reshape_fully_connected_nc(
         // LHS packing.
         *workspace_size = num_threads * per_thread_workspace_size;
         log2_input_element_size = packed_lh_config->log2_input_element_size;
+        xnn_log_debug(
+            "Requesting workspace of size %zu x %zu bytes for LHS packing.",
+            num_threads, *workspace_size);
       }
-      xnn_log_debug("Requesting workspace of %zu x %zu bytes for LHS packing.",
-                    num_threads, *workspace_size);
     } else {
       log2_input_element_size = packed_lh_config->log2_packed_element_size;
     }

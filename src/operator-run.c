@@ -677,35 +677,46 @@ static void compute_hmp_inline_packed_qp8gemm(
   const uintptr_t c = (uintptr_t)context->c;
   const size_t k_scaled =
       context->kc << context->packed_lh_config->log2_packed_element_size;
+  const void* packed_w = context->packed_w;
+
+  const bool skip_lhs_packing = context->packed_lh_config->gemv_noop && mr == 1;
   void* workspace =
-      (void*)((uintptr_t)context->workspace + context->workspace_offset +
-              context->packed_lh_config->offset_fn(thread_id * mr, kc,
-                                                   mr_packed, kr, sr));
+      skip_lhs_packing
+          ? NULL
+          : (void*)((uintptr_t)context->workspace + context->workspace_offset +
+                    context->packed_lh_config->offset_fn(thread_id * mr, kc,
+                                                         mr_packed, kr, sr));
+  const void* packed_lhs = workspace;
 
   while (mr_block_size > 0) {
     const size_t mr_step = min(mr_block_size, mr);
 
     // Pack the `mr_step` rows of the left-hand operand into the workspace.
-    context->packed_lh_config->ukernel(
-        /*m=*/mr_step, kc, mr_packed, kr, sr,
-        /*m_idx_start=*/0, (const void*)(a + mr_block_start * a_stride),
-        a_stride, workspace);
+    if (skip_lhs_packing) {
+      packed_lhs = (const void*)(a + mr_block_start * a_stride);
+    } else {
+      context->packed_lh_config->ukernel(
+          /*m=*/mr_step, kc, mr_packed, kr, sr,
+          /*m_idx_start=*/0, (const void*)(a + mr_block_start * a_stride),
+          a_stride, workspace);
+    }
 
     // Call the appropriate GEMM kernel.
     if (context->dynamic_quantization) {
-      const struct xnn_qd8_quantization_params* quantization_params = workspace;
+      const struct xnn_qd8_quantization_params* quantization_params =
+          packed_lhs;
       const void* packed_inputs =
-          (const void*)((uintptr_t)workspace +
-                        mr_packed * sizeof(struct xnn_qd8_quantization_params));
+          (const void*)((uintptr_t)packed_lhs +
+                        mr * sizeof(struct xnn_qd8_quantization_params));
       const uintptr_t packed_input_stride =
           round_up(kc, kr * sr) * sizeof(int8_t);
       context->dq_ukernel.function[uarch_index](
-          mr_step, nc, k_scaled, packed_inputs, packed_input_stride,
-          context->packed_w, (void*)(c + mr_block_start * cm_stride), cm_stride,
-          cn_stride, context->fused_params, quantization_params);
+          mr_step, nc, k_scaled, packed_inputs, packed_input_stride, packed_w,
+          (void*)(c + mr_block_start * cm_stride), cm_stride, cn_stride,
+          context->fused_params, quantization_params);
     } else {
       context->qp8_ukernel.function[uarch_index](
-          mr_step, nc, k_scaled, workspace, context->packed_w,
+          mr_step, nc, k_scaled, packed_lhs, packed_w,
           (void*)(c + mr_block_start * cm_stride), cm_stride,
           /*dst_stride_col=*/1 << context->log2_csize, context->fused_params);
     }
