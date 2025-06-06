@@ -24,6 +24,7 @@ void xnn_x8_packw_gemm_goi_ukernel_x2__scalar_u4(
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t n_stride,
   const int8_t* weights,
   const uint32_t* bias,
   const void* scale,
@@ -58,7 +59,7 @@ void xnn_x8_packw_gemm_goi_ukernel_x2__scalar_u4(
       }
       out += 2 * sizeof(uint32_t);
 
-      const int8_t* w1 = w0 + kc;
+      const int8_t* w1 = w0 + n_stride;
 
       // KC main loop multiple of 2x4
       size_t k = kc;
