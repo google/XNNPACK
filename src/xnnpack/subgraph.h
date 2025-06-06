@@ -264,13 +264,6 @@ XNN_INLINE static bool xnn_value_is_internal(const struct xnn_value* value) {
                           XNN_VALUE_FLAG_EXTERNAL_OUTPUT)) == 0;
 }
 
-XNN_INLINE static bool xnn_value_is_persistent(uint32_t flags) {
-  // Treat a value that is both input and output as persistent.
-  const uint32_t input_output =
-      XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT;
-  return (flags & input_output) == input_output;
-}
-
 XNN_INLINE static bool xnn_value_is_valid(enum xnn_value_type value_type) {
   return value_type != xnn_value_type_invalid;
 }
