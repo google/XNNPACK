@@ -218,12 +218,10 @@ enum xnn_status xnn_create_runtime_v3(
 
 static enum xnn_status initialize_workspace_values(
     xnn_runtime_t runtime,
-    struct xnn_value_allocation_tracker* mem_alloc_tracker,
-    size_t old_persistent_size)
+    struct xnn_value_allocation_tracker* mem_alloc_tracker)
 {
   assert(runtime->workspace != NULL);
-  const size_t persistent_size = runtime->workspace->persistent_size;
-  size_t mem_arena_size = mem_alloc_tracker->mem_arena_size + persistent_size;
+  size_t mem_arena_size = mem_alloc_tracker->mem_arena_size;
   if (mem_arena_size == 0) {
     return xnn_status_success;
   }
@@ -245,8 +243,6 @@ static enum xnn_status initialize_workspace_values(
     // Keep track of how much the workspace data moved.
     if (old_workspace_data != NULL) {
       workspace_data_delta = (uintptr_t) new_workspace_data - (uintptr_t) old_workspace_data;
-      // Persistent data needs to be copied if workspace grew.
-      memcpy(new_workspace_data, old_workspace_data, old_persistent_size);
       xnn_release_simd_memory(old_workspace_data);
     }
     xnn_log_debug("created workspace of size %zu, old workspace %p, new workspace %p, delta %td",
@@ -256,7 +252,6 @@ static enum xnn_status initialize_workspace_values(
   assert(runtime->workspace->size >= mem_arena_size);
 
   // Initialize current runtime's value pointers.
-  size_t persistent_offset = 0;
   for (size_t i = 0; i < runtime->num_values; i++) {
     struct xnn_runtime_value* value = &runtime->values[i];
     if (!xnn_value_is_valid(value->type)) {
@@ -266,20 +261,16 @@ static enum xnn_status initialize_workspace_values(
     if (value->allocation_type == xnn_allocation_type_workspace) {
       // Value is purely internal to the runtime, allocate it in the workspace.
       value->data =
-        (void*) ((uintptr_t) runtime->workspace->data + persistent_size + mem_alloc_tracker->usage[i].alloc_offset);
+        (void*) ((uintptr_t) runtime->workspace->data + mem_alloc_tracker->usage[i].alloc_offset);
       if (value->datatype == xnn_datatype_qdint8 ||
           value->datatype == xnn_datatype_qduint8) {
         value->quantization.dynamic_params =
-          (void*) ((uintptr_t) runtime->workspace->data + persistent_size + mem_alloc_tracker->usage[i].alloc_offset
+          (void*) ((uintptr_t) runtime->workspace->data + mem_alloc_tracker->usage[i].alloc_offset
                    + xnn_tensor_get_rounded_size(value));
 
       }
-    } else if (value->allocation_type == xnn_allocation_type_persistent) {
-      value->data = (void*) ((uintptr_t) runtime->workspace->data + persistent_offset);
-      persistent_offset += xnn_tensor_get_rounded_size(value);
     }
   }
-  assert(persistent_offset == persistent_size);
 
   // Initialize operator workspace values.
   for (size_t i = 0; i < runtime->num_ops; i++) {
@@ -288,7 +279,7 @@ static enum xnn_status initialize_workspace_values(
       continue;
     }
     struct xnn_operator_data* opdata = &runtime->opdata[usage->opdata_id];
-    opdata->workspace = (void*) ((uintptr_t) runtime->workspace->data + persistent_size + usage->alloc_offset);
+    opdata->workspace = (void*) ((uintptr_t) runtime->workspace->data + usage->alloc_offset);
   }
 
   // Adjust the value pointers of all runtimes that share this workspace.
@@ -307,8 +298,7 @@ static enum xnn_status initialize_workspace_values(
       // Adjust offsets of values in workspace.
       for (size_t i = 0; i < rt->num_values; i++) {
         struct xnn_runtime_value* value = &rt->values[i];
-        if (value->allocation_type == xnn_allocation_type_workspace ||
-            value->allocation_type == xnn_allocation_type_persistent) {
+        if (value->allocation_type == xnn_allocation_type_workspace) {
           if (value->data != NULL) {
             // Data can be null as the runtime using this workspace might not have been set up.
             value->data = (void*) ((uintptr_t) value->data + workspace_data_delta);
@@ -695,8 +685,6 @@ enum xnn_status xnn_plan_memory(
   struct xnn_value_allocation_tracker mem_alloc_tracker;
   xnn_init_value_allocation_tracker(&mem_alloc_tracker, runtime);
 
-  size_t persistent_size = 0;
-
   for (uint32_t i = 0; i < runtime->num_values; i++) {
     const struct xnn_runtime_value* value = &runtime->values[i];
     if (!xnn_value_is_valid(value->type)) {
@@ -710,12 +698,8 @@ enum xnn_status xnn_plan_memory(
         tensor_size += xnn_tensor_get_rounded_dynamic_quant_param_size(value);
       }
       xnn_add_value_allocation_tracker(&mem_alloc_tracker, i, tensor_size);
-    } else if (value->allocation_type == xnn_allocation_type_persistent) {
-      persistent_size += xnn_tensor_get_rounded_size(value);
     }
   }
-  size_t old_persistent_size = runtime->workspace->persistent_size;
-  runtime->workspace->persistent_size = persistent_size;
 
   for (uint32_t opdata_id = 0; opdata_id < runtime->num_ops; opdata_id++) {
     struct xnn_operator_data* opdata = &runtime->opdata[opdata_id];
@@ -727,7 +711,7 @@ enum xnn_status xnn_plan_memory(
   optimize_tensor_allocation_for_in_place_operations(&mem_alloc_tracker, runtime);
   xnn_plan_value_allocation_tracker(&mem_alloc_tracker);
 
-  status = initialize_workspace_values(runtime, &mem_alloc_tracker, old_persistent_size);
+  status = initialize_workspace_values(runtime, &mem_alloc_tracker);
   if (status != xnn_status_success) {
     xnn_log_debug("failed to initialize_workspace_values");
     goto error;

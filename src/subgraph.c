@@ -326,11 +326,8 @@ void xnn_subgraph_analyze_consumers_and_producers(xnn_subgraph_t subgraph) {
       const uint32_t output_id = node->outputs[o];
       assert(output_id < subgraph->num_values);
 
-      // Persistent values can be produced by multiple nodes, e.g. copy nodes
-      // writing to the same persistent value.
-      assert(xnn_value_is_persistent(
-                 subgraph->values[output_id].flags,
-                 subgraph->values[output_id].allocation_type) ||
+      // Output values can be produced by multiple nodes, e.g. copy nodes writing to the same persistent value.
+      assert(xnn_value_is_external_output(subgraph->values[output_id].flags) ||
              subgraph->values[output_id].producer == XNN_INVALID_NODE_ID);
       subgraph->values[output_id].producer = n;
     }
@@ -2241,9 +2238,7 @@ void xnn_subgraph_clean_up(xnn_subgraph_t subgraph) {
       continue;
     }
 
-    if (!xnn_value_is_external_input(value->flags) &&
-        value->num_consumers == 0 &&
-        !xnn_value_is_persistent(value->flags, value->allocation_type)) {
+    if (!xnn_value_is_external_input(value->flags) && value->num_consumers == 0) {
       if (value->producer != XNN_INVALID_NODE_ID) {
         struct xnn_node* producer = &subgraph->nodes[value->producer];
         if (producer->num_outputs == 1) {
@@ -2266,7 +2261,7 @@ void xnn_subgraph_clean_up(xnn_subgraph_t subgraph) {
     values_ready[i] =
         value->producer == XNN_INVALID_NODE_ID ||
         xnn_value_is_external_input(value->flags) ||
-        xnn_value_is_persistent(value->flags, value->allocation_type);
+        xnn_value_is_persistent(value->flags);
   }
   uint32_t left = 0;
   uint32_t num_invalid_nodes = 0;

@@ -120,9 +120,9 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "persistent_test",
-    srcs = ["persistent.cc"],
-    deps = SUBGRAPH_TEST_DEPS + ["//:allocation_type"],
+    name = "input_output_test",
+    srcs = ["input-output.cc"],
+    deps = SUBGRAPH_TEST_DEPS,
 )
 
 xnnpack_unit_test(
