@@ -149,4 +149,52 @@ TEST(InputOutput, SlidingWindow) {
   }
 }
 
+TEST(InputOutput, MultipleWrites) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  std::vector<size_t> dims = {5};
+
+  // Define subgraph
+  SubgraphTester subgraph(2);
+  const uint32_t persistent_id = 0;
+  const uint32_t a_id = 1;
+  // This subgraph computes:
+  //   (persistent) = (persistent) * (a)
+  //   (persistent) = (persistent) * (a)
+  //   (persistent) = (persistent) * (a)
+  //   (persistent) = (persistent) * (a)
+  //   (persistent) = (persistent) * (a)
+  subgraph
+      .AddDynamicTensor(
+          dims, persistent_id, xnn_datatype_of<float>(),
+          XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT)
+      .AddInputTensor({}, xnn_datatype_of<float>(), a_id);
+
+  subgraph
+      .AddBinary(xnn_binary_multiply, nullptr, persistent_id, a_id,
+                 persistent_id)
+      .AddBinary(xnn_binary_multiply, nullptr, persistent_id, a_id,
+                 persistent_id)
+      .AddBinary(xnn_binary_multiply, nullptr, persistent_id, a_id,
+                 persistent_id)
+      .AddBinary(xnn_binary_multiply, nullptr, persistent_id, a_id,
+                 persistent_id)
+      .AddBinary(xnn_binary_multiply, nullptr, persistent_id, a_id,
+                 persistent_id);
+  ASSERT_EQ(xnn_status_success, subgraph.CreateRuntime());
+
+  // If we are using an input-output tensor as the persistent tensor, we need
+  // to provide the storage for it.
+  Tensor<float> persistent(dims, xnnpack::XnnExtraBytes);
+  persistent.fill(1.0f);
+
+  subgraph.ReshapeExternalTensor(dims, persistent.base(), persistent_id)
+      .ReshapeRuntime();
+
+  float a = 0.9f;
+  subgraph.SetupExternalTensor(&a, a_id).SetupRuntime().InvokeRuntime();
+
+  ASSERT_THAT(persistent, testing::Each(a * a * a * a * a));
+}
+
 }  // namespace xnnpack

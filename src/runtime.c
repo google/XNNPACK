@@ -527,6 +527,8 @@ enum xnn_status xnn_create_runtime_v4(
     goto error;
   }
 
+  xnn_subgraph_rewrite_ssa(subgraph);
+
   const uint32_t optimization_flags =
       XNN_FLAG_HINT_SPARSE_INFERENCE | XNN_FLAG_HINT_FP16_INFERENCE |
       XNN_FLAG_FORCE_FP16_INFERENCE | XNN_FLAG_NO_OPERATOR_FUSION |

@@ -344,9 +344,7 @@ void xnn_subgraph_analyze_consumers_and_producers(xnn_subgraph_t subgraph) {
       const uint32_t output_id = node->outputs[o];
       assert(output_id < subgraph->num_values);
 
-      // Output values can be produced by multiple nodes, e.g. copy nodes writing to the same persistent value.
-      assert(xnn_value_is_external_output(subgraph->values[output_id].flags) ||
-             subgraph->values[output_id].producer == XNN_INVALID_NODE_ID);
+      assert(subgraph->values[output_id].producer == XNN_INVALID_NODE_ID);
       subgraph->values[output_id].producer = n;
     }
   }
@@ -2099,7 +2097,8 @@ void xnn_subgraph_clean_up(xnn_subgraph_t subgraph) {
       continue;
     }
 
-    if (!xnn_value_is_external_input(value->flags) && value->num_consumers == 0) {
+    if (!xnn_value_is_external_input(value->flags) &&
+        value->num_consumers == 0) {
       if (value->producer != XNN_INVALID_NODE_ID) {
         struct xnn_node* producer = &subgraph->nodes[value->producer];
         if (producer->num_outputs == 1) {
@@ -2119,10 +2118,8 @@ void xnn_subgraph_clean_up(xnn_subgraph_t subgraph) {
   bool* values_ready = (bool*)&nodes_map[subgraph->num_nodes];
   for (uint32_t i = 0; i < subgraph->num_values; i++) {
     struct xnn_value* value = &subgraph->values[i];
-    values_ready[i] =
-        value->producer == XNN_INVALID_NODE_ID ||
-        xnn_value_is_external_input(value->flags) ||
-        xnn_value_is_persistent(value->flags);
+    values_ready[i] = value->producer == XNN_INVALID_NODE_ID ||
+                      xnn_value_is_external_input(value->flags);
   }
   uint32_t left = 0;
   uint32_t num_invalid_nodes = 0;
@@ -2457,6 +2454,101 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph) {
   }
 
   return xnn_status_success;
+}
+
+static void replace_in_set(uint32_t* set, uint32_t size, uint32_t old_value,
+                           uint32_t new_value) {
+  for (uint32_t i = 0; i < size; i++) {
+    if (set[i] == old_value) {
+      set[i] = new_value;
+    }
+  }
+}
+
+// Persistent values are values that can be read or written repeatedly. This
+// isn't compatible with our graph model. To work around this, we implement
+// persistent values with an [SSA] approach:
+//  - Persistent values are passed in as inputs
+//  - Writes to the persistent value creates a new value
+//  - Reads read the last value written to (or the input if none).
+//  - The last written value (if any) is passed out as an output.
+//
+// [SSA]. https://en.wikipedia.org/wiki/Static_single-assignment_form
+void xnn_subgraph_rewrite_ssa(xnn_subgraph_t subgraph) {
+  bool* values_written =
+      (bool*)xnn_allocate_memory(sizeof(bool) * subgraph->num_values);
+  for (uint32_t i = 0; i < subgraph->num_values; i++) {
+    values_written[i] = false;
+  }
+  for (uint32_t i = 0; i < subgraph->num_nodes; i++) {
+    struct xnn_node* node = &subgraph->nodes[i];
+    for (uint32_t j = 0; j < node->num_outputs; j++) {
+      const uint32_t output_id = node->outputs[j];
+      const struct xnn_value* value = &subgraph->values[output_id];
+      if (!xnn_value_is_external_output(value->flags)) {
+        // We only care to rewrite external outputs. Internal values should
+        // already be SSA.
+        continue;
+      }
+      if (!values_written[output_id]) {
+        // This is the first time we've seen this output.
+      } else {
+        // We already wrote this value. Make a new value to replace the previous
+        // value with (so the external output remains the last write).
+        struct xnn_value* new_value = xnn_subgraph_new_internal_value(subgraph);
+        // xnn_subgraph_new_internal_value may have invalidated `value` pointer.
+        value = &subgraph->values[output_id];
+        xnn_value_copy(new_value, value);
+        xnn_log_debug("Adding new value #%" PRIu32
+                      " for already produced output #%" PRIu32,
+                      new_value->id, output_id);
+
+        // For outputs, we want only the last value to be the original output.
+        // The new value is not an output, and its an internal allocation.
+        new_value->flags &=
+            ~(XNN_VALUE_FLAG_EXTERNAL_OUTPUT | XNN_VALUE_FLAG_EXTERNAL_INPUT);
+        new_value->allocation_type = xnn_allocation_type_workspace;
+
+        // Since we want to rewrite the previous write's value, we need to go
+        // back and update previously visited nodes. We only want to do the
+        // mapping after we find the first time this value is written.
+        bool found = false;
+        for (uint32_t k = 0; k < i; ++k) {
+          struct xnn_node* node_k = &subgraph->nodes[k];
+          if (found) {
+            // We've written the new value, update all subsequent reads to point
+            // to the new value.
+            replace_in_set(node_k->inputs, node_k->num_inputs, output_id,
+                           new_value->id);
+            replace_in_set(node_k->outputs, node_k->num_outputs, output_id,
+                           new_value->id);
+          } else if (set_contains(node_k->outputs, node_k->num_outputs,
+                                  output_id)) {
+            // We found where this value is written. Replace only the output
+            // use.
+            replace_in_set(node_k->outputs, node_k->num_outputs, output_id,
+                           new_value->id);
+            found = true;
+          } else {
+            // We're still using the old value.
+          }
+        }
+        // Replace all subsequent reads with the new value, until we find
+        // another write (because subsequent reads from there need the
+        // replacement for that value).
+        for (uint32_t k = i; k < subgraph->num_nodes; ++k) {
+          struct xnn_node* node_k = &subgraph->nodes[k];
+          replace_in_set(node_k->inputs, node_k->num_inputs, output_id,
+                         new_value->id);
+          if (set_contains(node_k->outputs, node_k->num_outputs, output_id)) {
+            break;
+          }
+        }
+      }
+      values_written[output_id] = true;
+    }
+  }
+  xnn_release_memory(values_written);
 }
 
 enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
