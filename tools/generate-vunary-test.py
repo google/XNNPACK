@@ -44,7 +44,6 @@ OP_TYPES = {
     "vlog": "Log",
     "vlrelu": "LeakyReLU",
     "vneg": "Negate",
-    "vrelu": "ReLU",
     "vrndd": "RoundDown",
     "vrndne": "RoundToNearestEven",
     "vrndu": "RoundUp",
