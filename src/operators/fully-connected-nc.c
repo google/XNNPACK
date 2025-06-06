@@ -335,10 +335,14 @@ static XNN_NO_SANITIZE_FUNCTION enum xnn_status create_fully_connected_nc(
             output_channels, kernel, bias, /*scale=*/NULL, weights_ptr,
             nr * extra_weights_bytes, packing_params);
       } else {
+        const size_t n_stride = filter_is_crumb
+            ? round_up_po2(input_channels, 4)
+            : (filter_is_nibble ? round_up_po2(input_channels, 2)
+                                : input_channels);
         pack_gemm_goi_w(
-            /*groups=*/1, output_channels, input_channels, nr, kr, sr, kernel,
-            bias, /*scale=*/NULL, weights_ptr, nr * extra_weights_bytes,
-            packing_params);
+            /*groups=*/1, output_channels, input_channels, nr, kr, sr,
+            n_stride, kernel, bias, /*scale=*/NULL, weights_ptr,
+            nr * extra_weights_bytes, packing_params);
       }
       if (kernel_scale_params != NULL) {
         assert(init_kernel_scale_params != NULL);

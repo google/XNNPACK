@@ -70,9 +70,9 @@ static void GEMMBenchmark(
                                      sizeof(float) * (w_elements + c_elements));
 
   xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> w(w_elements * num_buffers);
-  xnn_pack_f32_gemm_goi_w(/*groups=*/1, nc, kc, nr, kr, sr, k.data(), b.data(),
-                          /*scale=*/nullptr, w.data(), /*extra_bytes=*/0,
-                          /*params=*/nullptr);
+  xnn_pack_f32_gemm_goi_w(/*groups=*/1, nc, kc, nr, kr, sr, /*n_stride=*/kc,
+                          k.data(), b.data(), /*scale=*/nullptr, w.data(),
+                          /*extra_bytes=*/0, /*params=*/nullptr);
   xnnpack::Buffer<float> c(c_elements * num_buffers);
 
   xnn_f32_minmax_params params;
@@ -210,7 +210,7 @@ static void PPMM1PBenchmark(
 
   xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> w(w_elements * num_buffers);
   xnn_pack_f32_gemm_goi_w(/*groups=*/1, nc, kc, nr, /*kr=*/1, /*sr=*/1,
-                          k.data(), b.data(), /*scale=*/nullptr, w.data(),
+                          /*n_stride=*/kc, k.data(), b.data(), /*scale=*/nullptr, w.data(),
                           /*extra_bytes=*/0, /*params=*/nullptr);
   xnnpack::Buffer<float> c(c_elements * num_buffers);
 
@@ -288,7 +288,7 @@ static void PPMM2PBenchmark(
 
   xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> w(w_elements * num_buffers);
   xnn_pack_f32_gemm_goi_w(/*groups=*/1, nc, kc, nr, /*kr=*/1, /*sr=*/1,
-                          k.data(), b.data(), /*scale=*/nullptr, w.data(),
+                          /*n_stride=*/kc, k.data(), b.data(), /*scale=*/nullptr, w.data(),
                           /*extra_bytes=*/0, /*params=*/nullptr);
   xnnpack::Buffer<float> c(c_elements * num_buffers);
 

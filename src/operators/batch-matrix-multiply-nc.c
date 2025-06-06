@@ -485,7 +485,7 @@ XNN_NO_SANITIZE_FUNCTION enum xnn_status create_batch_matrix_multiply_nc_const_w
     } else {
       if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
         batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.packw_gemm_goi(
-            /*groups=*/batch_size_b, n, k, nr, kr, sr, data_b, /*bias=*/NULL,
+            /*groups=*/batch_size_b, n, k, nr, kr, sr, k, data_b, /*bias=*/NULL,
             /*scale=*/NULL, packed_data, /*extra_bytes=*/nr * extra_bytes,
             packing_params);
       } else {

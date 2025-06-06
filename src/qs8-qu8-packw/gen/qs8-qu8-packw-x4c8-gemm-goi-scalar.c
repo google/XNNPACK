@@ -23,6 +23,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x4c8__scalar(
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t n_stride,
   const int8_t* weights,
   const int32_t* bias,
   const void* scale,
@@ -63,9 +64,9 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x4c8__scalar(
       }
       out += 4 * sizeof(int32_t);
 
-      const int8_t* w1 = w0 + kc;
-      const int8_t* w2 = w1 + kc;
-      const int8_t* w3 = w2 + kc;
+      const int8_t* w1 = w0 + n_stride;
+      const int8_t* w2 = w1 + n_stride;
+      const int8_t* w3 = w2 + n_stride;
       uint32_t ksum0 = 0;
       uint32_t ksum1 = 0;
       uint32_t ksum2 = 0;
@@ -310,15 +311,14 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x4c8__scalar(
       out += (4 - n) * sizeof(int32_t);
 
       // NR remainder has less than 4 rows so last row is not loaded
-      const int8_t* w1 = w0 + kc;
+      const int8_t* w1 = w0 + n_stride;
       if XNN_UNPREDICTABLE(n < 2) {
         w1 = w0;
       }
-      const int8_t* w2 = w1 + kc;
+      const int8_t* w2 = w1 + n_stride;
       if XNN_UNPREDICTABLE(n <= 2) {
         w2 = w1;
       }
-
       uint32_t ksum0 = 0;
       uint32_t ksum1 = 0;
       uint32_t ksum2 = 0;

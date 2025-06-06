@@ -58,7 +58,7 @@ static void x8_packw(benchmark::State& state,
       buffer_index = 0;
     }
 
-    packw(batch, dim_n, dim_k, nr, kr, sr,
+    packw(batch, dim_n, dim_k, nr, kr, sr, /*n_stride=*/dim_k,
           weights.data() + buffer_index * batch * dim_n * dim_k,
           /*bias=*/nullptr, /*scale=*/nullptr,
           packed_weights.data() + buffer_index * batch * rounded_size,
@@ -197,7 +197,7 @@ static void qb4_packw(benchmark::State& state,
     int32_t* bias_ptr =
         null_bias ? nullptr : bias.data() + (buffer_index * batch * dim_n);
 
-    packw(batch, dim_n, dim_k, nr, kr, sr, bl,
+    packw(batch, dim_n, dim_k, nr, kr, sr, bl, /*k_stride=*/(dim_k + 1) / 2,
           weights.data() + buffer_index * (batch * (dim_n * dim_k + 1) / 2),
           /*bias=*/bias_ptr,
           /*scale=*/bf16_scales.data() +
@@ -262,7 +262,7 @@ static void qs8_packw(benchmark::State& state,
       buffer_index = 0;
     }
 
-    packw(batch, dim_n, dim_k, nr, kr, sr,
+    packw(batch, dim_n, dim_k, nr, kr, sr, /*n_stride=*/dim_k,
           weights.data() + buffer_index * batch * dim_n * dim_k,
           /*bias=*/nullptr, /*scale=*/nullptr,
           packed_weights.data() + buffer_index * batch * rounded_size,
@@ -388,7 +388,7 @@ static void qs8_qc4w_packw(benchmark::State& state,
       buffer_index = 0;
     }
 
-    packw(batch, dim_n, dim_k, nr, kr, sr,
+    packw(batch, dim_n, dim_k, nr, kr, sr, /*n_stride=*/(dim_k + 1) / 2,
           weights.data() + buffer_index * batch * (dim_n * dim_k + 1) / 2,
           /*bias=*/nullptr, /*scale=*/nullptr,
           packed_weights.data() + buffer_index * batch * rounded_size,
@@ -447,7 +447,7 @@ static void x16_packw(benchmark::State& state,
       buffer_index = 0;
     }
 
-    packw(batch, dim_n, dim_k, nr, kr, sr,
+    packw(batch, dim_n, dim_k, nr, kr, sr, /*n_stride=*/dim_k,
           reinterpret_cast<uint16_t*>(weights.data() +
                                       buffer_index * batch * dim_n * dim_k),
           /*bias=*/nullptr, /*scale=*/nullptr,
@@ -511,7 +511,7 @@ static void x16_x32_packw(benchmark::State& state,
       buffer_index = 0;
     }
 
-    packw(batch, dim_n, dim_k, nr, kr, sr,
+    packw(batch, dim_n, dim_k, nr, kr, sr, /*n_stride=*/dim_k,
           reinterpret_cast<uint16_t*>(weights.data() +
                                       buffer_index * batch * dim_n * dim_k),
           /*bias=*/nullptr, /*scale=*/nullptr,
@@ -576,7 +576,7 @@ static void x32_packw(benchmark::State& state,
       buffer_index = 0;
     }
 
-    packw(batch, dim_n, dim_k, nr, kr, sr,
+    packw(batch, dim_n, dim_k, nr, kr, sr, /*n_stride=*/dim_k,
           reinterpret_cast<uint32_t*>(weights.data() +
                                       buffer_index * batch * dim_n * dim_k),
           /*bias=*/nullptr,
@@ -736,9 +736,10 @@ static void x16_gio_packw(benchmark::State& state,
 
 static void x8_packw__reference(size_t batch, size_t dim_n, size_t dim_k,
                                 size_t nr, size_t kr, size_t sr,
-                                const int8_t* weights, const uint32_t* bias,
-                                const void* scale, int8_t* packed_weights,
-                                size_t extra_bytes, const void* params) {
+                                size_t n_stride, const int8_t* weights,
+                                const uint32_t* bias, const void* scale,
+                                int8_t* packed_weights, size_t extra_bytes,
+                                const void* params) {
   xnn_pack_f32_qs8w_gemm_goi_w(
       batch, dim_n, dim_k, nr, kr, sr, reinterpret_cast<const int8_t*>(weights),
       reinterpret_cast<const float*>(bias), static_cast<const float*>(scale),
@@ -774,40 +775,41 @@ BENCHMARK_BGEMM(x8_packw_x32__reference)
 
 static void x8_packw_gio__reference(size_t batch, size_t dim_n, size_t dim_k,
                                     size_t nr, size_t kr, size_t sr,
-                                    const int8_t* weights, const uint32_t* bias,
-                                    const void* scale, int8_t* packed_weights,
-                                    size_t extra_bytes, const void* params) {
+                                    size_t k_stride, const int8_t* weights,
+                                    const uint32_t* bias, const void* scale,
+                                    int8_t* packed_weights, size_t extra_bytes,
+                                    const void* params) {
   xnn_pack_f32_qs8w_gemm_gio_w(
-      batch, dim_n, dim_k, nr, kr, sr, dim_n,
+      batch, dim_n, dim_k, nr, kr, sr, k_stride,
       reinterpret_cast<const int8_t*>(weights),
       reinterpret_cast<const float*>(bias), static_cast<const float*>(scale),
       static_cast<void*>(packed_weights), extra_bytes, params);
 }
 
 static void x8_packw_gio_x2__reference(benchmark::State& state) {
-  x8_packw(state, x8_packw_gio__reference,
-           /*nr=*/2, /*kr=*/1, /*sr=*/1);
+  x8_gio_packw(state, x8_packw_gio__reference,
+               /*nr=*/2, /*kr=*/1, /*sr=*/1);
 }
 static void x8_packw_gio_x4__reference(benchmark::State& state) {
-  x8_packw(state, x8_packw_gio__reference,
-           /*nr=*/4, /*kr=*/1, /*sr=*/1);
+  x8_gio_packw(state, x8_packw_gio__reference,
+               /*nr=*/4, /*kr=*/1, /*sr=*/1);
 }
 static void x8_packw_gio_x8__reference(benchmark::State& state) {
-  x8_packw(state, x8_packw_gio__reference,
-           /*nr=*/8, /*kr=*/1, /*sr=*/1);
+  x8_gio_packw(state, x8_packw_gio__reference,
+               /*nr=*/8, /*kr=*/1, /*sr=*/1);
 }
 static void x8_packw_gio_x16__reference(benchmark::State& state) {
-  x8_packw(state, x8_packw_gio__reference,
-           /*nr=*/16, /*kr=*/1, /*sr=*/1);
+  x8_gio_packw(state, x8_packw_gio__reference,
+               /*nr=*/16, /*kr=*/1, /*sr=*/1);
 }
 static void x8_packw_gio_x32__reference(benchmark::State& state) {
-  x8_packw(state, x8_packw_gio__reference,
-           /*nr=*/32, /*kr=*/1, /*sr=*/1);
+  x8_gio_packw(state, x8_packw_gio__reference,
+               /*nr=*/32, /*kr=*/1, /*sr=*/1);
 }
 
 static void x8_packw_gio_x8c8__reference(benchmark::State& state) {
-  x8_packw(state, x8_packw_gio__reference,
-           /*nr=*/8, /*kr=*/8, /*sr=*/1);
+  x8_gio_packw(state, x8_packw_gio__reference,
+               /*nr=*/8, /*kr=*/8, /*sr=*/1);
 }
 
 BENCHMARK_BGEMM(x8_packw_gio_x2__reference)
@@ -819,11 +821,13 @@ BENCHMARK_BGEMM(x8_packw_gio_x8c8__reference)
 
 static void qs8_packw__reference(size_t batch, size_t dim_n, size_t dim_k,
                                  size_t nr, size_t kr, size_t sr,
-                                 const int8_t* weights, const int32_t* bias,
-                                 const void* scale, int8_t* packed_weights,
-                                 size_t extra_bytes, const void* params) {
+                                 size_t n_stride, const int8_t* weights,
+                                 const int32_t* bias, const void* scale,
+                                 int8_t* packed_weights, size_t extra_bytes,
+                                 const void* params) {
   xnn_pack_qs8_gemm_goi_w(
-      batch, dim_n, dim_k, nr, kr, sr, reinterpret_cast<const int8_t*>(weights),
+      batch, dim_n, dim_k, nr, kr, sr, n_stride,
+      reinterpret_cast<const int8_t*>(weights),
       reinterpret_cast<const int32_t*>(bias), static_cast<const float*>(scale),
       static_cast<void*>(packed_weights), extra_bytes,
       reinterpret_cast<const struct xnn_qs8_packing_params*>(params));
@@ -865,11 +869,12 @@ BENCHMARK_BGEMM(qs8_packw_x16c8__reference)
 
 static void qs8_packw_gio__reference(size_t batch, size_t dim_n, size_t dim_k,
                                      size_t nr, size_t kr, size_t sr,
-                                     const int8_t* weights, const int32_t* bias,
-                                     const void* scale, int8_t* packed_weights,
-                                     size_t extra_bytes, const void* params) {
+                                     size_t k_stride, const int8_t* weights,
+                                     const int32_t* bias, const void* scale,
+                                     int8_t* packed_weights, size_t extra_bytes,
+                                     const void* params) {
   xnn_pack_qs8_gemm_gio_w(
-      batch, dim_n, dim_k, nr, kr, sr, dim_n,
+      batch, dim_n, dim_k, nr, kr, sr, k_stride,
       reinterpret_cast<const int8_t*>(weights),
       reinterpret_cast<const int32_t*>(bias), static_cast<const float*>(scale),
       static_cast<void*>(packed_weights), extra_bytes,
@@ -877,12 +882,12 @@ static void qs8_packw_gio__reference(size_t batch, size_t dim_n, size_t dim_k,
 }
 
 static void qs8_packw_gio_x8c8__reference(benchmark::State& state) {
-  qs8_packw(state, qs8_packw_gio__reference,
-            /*nr=*/8, /*kr=*/8, /*sr=*/1);
+  qs8_gio_packw(state, qs8_packw_gio__reference,
+                /*nr=*/8, /*kr=*/8, /*sr=*/1);
 }
 static void qs8_packw_gio_x16c8__reference(benchmark::State& state) {
-  qs8_packw(state, qs8_packw_gio__reference,
-            /*nr=*/16, /*kr=*/8, /*sr=*/1);
+  qs8_gio_packw(state, qs8_packw_gio__reference,
+                /*nr=*/16, /*kr=*/8, /*sr=*/1);
 }
 
 BENCHMARK_BGEMM(qs8_packw_gio_x8c8__reference)
@@ -890,11 +895,11 @@ BENCHMARK_BGEMM(qs8_packw_gio_x16c8__reference)
 
 static void qs8_qc4w_packw__reference(
     size_t batch, size_t dim_n, size_t dim_k, size_t nr, size_t kr, size_t sr,
-    const uint8_t* weights, const int32_t* bias, const float* scale,
-    void* packed_weights, size_t extra_bytes,
+    size_t n_stride, const uint8_t* weights, const int32_t* bias,
+    const float* scale, void* packed_weights, size_t extra_bytes,
     const xnn_qs8_qc4w_packing_params* params) {
   xnn_pack_qs8_qc4w_gemm_goi_w(
-      batch, dim_n, dim_k, nr, kr, sr,
+      batch, dim_n, dim_k, nr, kr, sr, n_stride,
       reinterpret_cast<const uint8_t*>(weights),
       reinterpret_cast<const int32_t*>(bias), static_cast<const float*>(scale),
       static_cast<void*>(packed_weights), extra_bytes,
@@ -920,11 +925,12 @@ BENCHMARK_BGEMM(qs8_qc4w_packw_x32c8__reference)
 
 static void x16_packw__reference(size_t batch, size_t dim_n, size_t dim_k,
                                  size_t nr, size_t kr, size_t sr,
-                                 const uint16_t* weights, const uint16_t* bias,
-                                 const void* scale, uint16_t* packed_weights,
-                                 size_t extra_bytes, const void* params) {
-  xnn_pack_f16_gemm_goi_w(batch, dim_n, dim_k, nr, kr, sr, weights, bias, scale,
-                          packed_weights, extra_bytes, params);
+                                 size_t n_stride, const uint16_t* weights,
+                                 const uint16_t* bias, const void* scale,
+                                 uint16_t* packed_weights, size_t extra_bytes,
+                                 const void* params) {
+  xnn_pack_f16_gemm_goi_w(batch, dim_n, dim_k, nr, kr, sr, n_stride, weights,
+                          bias, scale, packed_weights, extra_bytes, params);
 }
 
 static void x16_packw_x8__reference(benchmark::State& state) {
@@ -936,13 +942,15 @@ BENCHMARK_BGEMM(x16_packw_x8__reference)
 
 static void x32_packw__reference(size_t batch, size_t dim_n, size_t dim_k,
                                  size_t nr, size_t kr, size_t sr,
-                                 const uint32_t* weights, const uint32_t* bias,
-                                 const void* scale, uint32_t* packed_weights,
-                                 size_t extra_bytes, const void* params) {
-  xnn_pack_f32_gemm_goi_w(
-      batch, dim_n, dim_k, nr, kr, sr, reinterpret_cast<const float*>(weights),
-      reinterpret_cast<const float*>(bias), scale,
-      reinterpret_cast<float*>(packed_weights), extra_bytes, params);
+                                 size_t n_stride, const uint32_t* weights,
+                                 const uint32_t* bias, const void* scale,
+                                 uint32_t* packed_weights, size_t extra_bytes,
+                                 const void* params) {
+  xnn_pack_f32_gemm_goi_w(batch, dim_n, dim_k, nr, kr, sr, n_stride,
+                          reinterpret_cast<const float*>(weights),
+                          reinterpret_cast<const float*>(bias), scale,
+                          reinterpret_cast<float*>(packed_weights), extra_bytes,
+                          params);
 }
 
 static void x32_packw_x2c4__reference(benchmark::State& state) {
@@ -984,11 +992,11 @@ BENCHMARK_BGEMM(x32_packw_x64__reference)
 
 static void x32_packw_gio__reference(size_t batch, size_t dim_n, size_t dim_k,
                                      size_t nr, size_t kr, size_t sr,
-                                     const uint32_t* weights,
+                                     size_t k_stride, const uint32_t* weights,
                                      const uint32_t* bias, const void* scale,
                                      uint32_t* packed_weights,
                                      size_t extra_bytes, const void* params) {
-  xnn_pack_f32_gemm_gio_w(batch, dim_n, dim_k, nr, kr, sr, dim_n,
+  xnn_pack_f32_gemm_gio_w(batch, dim_n, dim_k, nr, kr, sr, k_stride,
                           reinterpret_cast<const float*>(weights),
                           reinterpret_cast<const float*>(bias), scale,
                           reinterpret_cast<float*>(packed_weights), extra_bytes,
@@ -996,20 +1004,20 @@ static void x32_packw_gio__reference(size_t batch, size_t dim_n, size_t dim_k,
 }
 
 static void x32_packw_x8_gio__reference(benchmark::State& state) {
-  x32_packw(state, x32_packw_gio__reference,
-            /*nr=*/8, /*kr=*/1, /*sr=*/1);
+  x32_gio_packw(state, x32_packw_gio__reference,
+                /*nr=*/8, /*kr=*/1, /*sr=*/1);
 }
 static void x32_packw_x16_gio__reference(benchmark::State& state) {
-  x32_packw(state, x32_packw_gio__reference,
-            /*nr=*/16, /*kr=*/1, /*sr=*/1);
+  x32_gio_packw(state, x32_packw_gio__reference,
+                /*nr=*/16, /*kr=*/1, /*sr=*/1);
 }
 static void x32_packw_x32_gio__reference(benchmark::State& state) {
-  x32_packw(state, x32_packw_gio__reference,
-            /*nr=*/32, /*kr=*/1, /*sr=*/1);
+  x32_gio_packw(state, x32_packw_gio__reference,
+                /*nr=*/32, /*kr=*/1, /*sr=*/1);
 }
 static void x32_packw_x64_gio__reference(benchmark::State& state) {
-  x32_packw(state, x32_packw_gio__reference,
-            /*nr=*/64, /*kr=*/1, /*sr=*/1);
+  x32_gio_packw(state, x32_packw_gio__reference,
+                /*nr=*/64, /*kr=*/1, /*sr=*/1);
 }
 
 BENCHMARK_BGEMM(x32_packw_x8_gio__reference)
@@ -1019,13 +1027,13 @@ BENCHMARK_BGEMM(x32_packw_x64_gio__reference)
 
 static void qb4_packw_goi__reference(size_t batch, size_t dim_n, size_t dim_k,
                                      size_t nr, size_t kr, size_t sr, size_t bl,
-                                     const uint32_t* weights,
+                                     size_t n_stride, const uint32_t* weights,
                                      const uint32_t* bias, const void* scale,
                                      uint32_t* packed_weights,
                                      size_t extra_bytes_bl,
                                      size_t extra_bytes_n, const void* params) {
   xnn_pack_qs8_qb4w_gemm_goi_w(
-      batch, dim_n, dim_k, nr, kr, sr, bl,
+      batch, dim_n, dim_k, nr, kr, sr, bl, n_stride,
       reinterpret_cast<const uint8_t*>(weights),
       reinterpret_cast<const float*>(bias),
       reinterpret_cast<const xnn_bfloat16*>(scale), packed_weights,
