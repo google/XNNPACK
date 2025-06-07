@@ -22,6 +22,7 @@ void xnn_qs8_packw_gemm_goi_ukernel_x32c4__scalar(
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t n_stride,
   const int8_t* weights,
   const int32_t* bias,
   const void* scale,
@@ -118,37 +119,37 @@ void xnn_qs8_packw_gemm_goi_ukernel_x32c4__scalar(
       }
       out += 32 * sizeof(int32_t);
 
-      const int8_t* w1 = w0 + kc;
-      const int8_t* w2 = w1 + kc;
-      const int8_t* w3 = w2 + kc;
-      const int8_t* w4 = w3 + kc;
-      const int8_t* w5 = w4 + kc;
-      const int8_t* w6 = w5 + kc;
-      const int8_t* w7 = w6 + kc;
-      const int8_t* w8 = w7 + kc;
-      const int8_t* w9 = w8 + kc;
-      const int8_t* w10 = w9 + kc;
-      const int8_t* w11 = w10 + kc;
-      const int8_t* w12 = w11 + kc;
-      const int8_t* w13 = w12 + kc;
-      const int8_t* w14 = w13 + kc;
-      const int8_t* w15 = w14 + kc;
-      const int8_t* w16 = w15 + kc;
-      const int8_t* w17 = w16 + kc;
-      const int8_t* w18 = w17 + kc;
-      const int8_t* w19 = w18 + kc;
-      const int8_t* w20 = w19 + kc;
-      const int8_t* w21 = w20 + kc;
-      const int8_t* w22 = w21 + kc;
-      const int8_t* w23 = w22 + kc;
-      const int8_t* w24 = w23 + kc;
-      const int8_t* w25 = w24 + kc;
-      const int8_t* w26 = w25 + kc;
-      const int8_t* w27 = w26 + kc;
-      const int8_t* w28 = w27 + kc;
-      const int8_t* w29 = w28 + kc;
-      const int8_t* w30 = w29 + kc;
-      const int8_t* w31 = w30 + kc;
+      const int8_t* w1 = w0 + n_stride;
+      const int8_t* w2 = w1 + n_stride;
+      const int8_t* w3 = w2 + n_stride;
+      const int8_t* w4 = w3 + n_stride;
+      const int8_t* w5 = w4 + n_stride;
+      const int8_t* w6 = w5 + n_stride;
+      const int8_t* w7 = w6 + n_stride;
+      const int8_t* w8 = w7 + n_stride;
+      const int8_t* w9 = w8 + n_stride;
+      const int8_t* w10 = w9 + n_stride;
+      const int8_t* w11 = w10 + n_stride;
+      const int8_t* w12 = w11 + n_stride;
+      const int8_t* w13 = w12 + n_stride;
+      const int8_t* w14 = w13 + n_stride;
+      const int8_t* w15 = w14 + n_stride;
+      const int8_t* w16 = w15 + n_stride;
+      const int8_t* w17 = w16 + n_stride;
+      const int8_t* w18 = w17 + n_stride;
+      const int8_t* w19 = w18 + n_stride;
+      const int8_t* w20 = w19 + n_stride;
+      const int8_t* w21 = w20 + n_stride;
+      const int8_t* w22 = w21 + n_stride;
+      const int8_t* w23 = w22 + n_stride;
+      const int8_t* w24 = w23 + n_stride;
+      const int8_t* w25 = w24 + n_stride;
+      const int8_t* w26 = w25 + n_stride;
+      const int8_t* w27 = w26 + n_stride;
+      const int8_t* w28 = w27 + n_stride;
+      const int8_t* w29 = w28 + n_stride;
+      const int8_t* w30 = w29 + n_stride;
+      const int8_t* w31 = w30 + n_stride;
       uint32_t ksum0 = 0;
       uint32_t ksum1 = 0;
       uint32_t ksum2 = 0;
@@ -1081,123 +1082,123 @@ void xnn_qs8_packw_gemm_goi_ukernel_x32c4__scalar(
       out += (32 - n) * sizeof(int32_t);
 
      // NR remainder has less than 32 rows so last row is not loaded
-      const int8_t* w1 = w0 + kc;
+      const int8_t* w1 = w0 + n_stride;
       if XNN_UNPREDICTABLE(n < 2) {
         w1 = w0;
       }
-      const int8_t* w2 = w1 + kc;
+      const int8_t* w2 = w1 + n_stride;
       if XNN_UNPREDICTABLE(n <= 2) {
         w2 = w1;
       }
-      const int8_t* w3 = w2 + kc;
+      const int8_t* w3 = w2 + n_stride;
       if XNN_UNPREDICTABLE(n < 4) {
         w3 = w2;
       }
-      const int8_t* w4 = w3 + kc;
+      const int8_t* w4 = w3 + n_stride;
       if XNN_UNPREDICTABLE(n <= 4) {
         w4 = w3;
       }
-      const int8_t* w5 = w4 + kc;
+      const int8_t* w5 = w4 + n_stride;
       if XNN_UNPREDICTABLE(n < 6) {
         w5 = w4;
       }
-      const int8_t* w6 = w5 + kc;
+      const int8_t* w6 = w5 + n_stride;
       if XNN_UNPREDICTABLE(n <= 6) {
         w6 = w5;
       }
-      const int8_t* w7 = w6 + kc;
+      const int8_t* w7 = w6 + n_stride;
       if XNN_UNPREDICTABLE(n < 8) {
         w7 = w6;
       }
-      const int8_t* w8 = w7 + kc;
+      const int8_t* w8 = w7 + n_stride;
       if XNN_UNPREDICTABLE(n <= 8) {
         w8 = w7;
       }
-      const int8_t* w9 = w8 + kc;
+      const int8_t* w9 = w8 + n_stride;
       if XNN_UNPREDICTABLE(n < 10) {
         w9 = w8;
       }
-      const int8_t* w10 = w9 + kc;
+      const int8_t* w10 = w9 + n_stride;
       if XNN_UNPREDICTABLE(n <= 10) {
         w10 = w9;
       }
-      const int8_t* w11 = w10 + kc;
+      const int8_t* w11 = w10 + n_stride;
       if XNN_UNPREDICTABLE(n < 12) {
         w11 = w10;
       }
-      const int8_t* w12 = w11 + kc;
+      const int8_t* w12 = w11 + n_stride;
       if XNN_UNPREDICTABLE(n <= 12) {
         w12 = w11;
       }
-      const int8_t* w13 = w12 + kc;
+      const int8_t* w13 = w12 + n_stride;
       if XNN_UNPREDICTABLE(n < 14) {
         w13 = w12;
       }
-      const int8_t* w14 = w13 + kc;
+      const int8_t* w14 = w13 + n_stride;
       if XNN_UNPREDICTABLE(n <= 14) {
         w14 = w13;
       }
-      const int8_t* w15 = w14 + kc;
+      const int8_t* w15 = w14 + n_stride;
       if XNN_UNPREDICTABLE(n < 16) {
         w15 = w14;
       }
-      const int8_t* w16 = w15 + kc;
+      const int8_t* w16 = w15 + n_stride;
       if XNN_UNPREDICTABLE(n <= 16) {
         w16 = w15;
       }
-      const int8_t* w17 = w16 + kc;
+      const int8_t* w17 = w16 + n_stride;
       if XNN_UNPREDICTABLE(n < 18) {
         w17 = w16;
       }
-      const int8_t* w18 = w17 + kc;
+      const int8_t* w18 = w17 + n_stride;
       if XNN_UNPREDICTABLE(n <= 18) {
         w18 = w17;
       }
-      const int8_t* w19 = w18 + kc;
+      const int8_t* w19 = w18 + n_stride;
       if XNN_UNPREDICTABLE(n < 20) {
         w19 = w18;
       }
-      const int8_t* w20 = w19 + kc;
+      const int8_t* w20 = w19 + n_stride;
       if XNN_UNPREDICTABLE(n <= 20) {
         w20 = w19;
       }
-      const int8_t* w21 = w20 + kc;
+      const int8_t* w21 = w20 + n_stride;
       if XNN_UNPREDICTABLE(n < 22) {
         w21 = w20;
       }
-      const int8_t* w22 = w21 + kc;
+      const int8_t* w22 = w21 + n_stride;
       if XNN_UNPREDICTABLE(n <= 22) {
         w22 = w21;
       }
-      const int8_t* w23 = w22 + kc;
+      const int8_t* w23 = w22 + n_stride;
       if XNN_UNPREDICTABLE(n < 24) {
         w23 = w22;
       }
-      const int8_t* w24 = w23 + kc;
+      const int8_t* w24 = w23 + n_stride;
       if XNN_UNPREDICTABLE(n <= 24) {
         w24 = w23;
       }
-      const int8_t* w25 = w24 + kc;
+      const int8_t* w25 = w24 + n_stride;
       if XNN_UNPREDICTABLE(n < 26) {
         w25 = w24;
       }
-      const int8_t* w26 = w25 + kc;
+      const int8_t* w26 = w25 + n_stride;
       if XNN_UNPREDICTABLE(n <= 26) {
         w26 = w25;
       }
-      const int8_t* w27 = w26 + kc;
+      const int8_t* w27 = w26 + n_stride;
       if XNN_UNPREDICTABLE(n < 28) {
         w27 = w26;
       }
-      const int8_t* w28 = w27 + kc;
+      const int8_t* w28 = w27 + n_stride;
       if XNN_UNPREDICTABLE(n <= 28) {
         w28 = w27;
       }
-      const int8_t* w29 = w28 + kc;
+      const int8_t* w29 = w28 + n_stride;
       if XNN_UNPREDICTABLE(n < 30) {
         w29 = w28;
       }
-      const int8_t* w30 = w29 + kc;
+      const int8_t* w30 = w29 + n_stride;
       if XNN_UNPREDICTABLE(n <= 30) {
         w30 = w29;
       }

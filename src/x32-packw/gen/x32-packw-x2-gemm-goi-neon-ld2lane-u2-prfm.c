@@ -26,6 +26,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__neon_ld2lane_u2_prfm(
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t n_stride,
   const uint32_t* weights,
   const uint32_t* bias,
   const void* scale,
@@ -60,7 +61,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__neon_ld2lane_u2_prfm(
         vst1_u32(packed_weights, vzero); packed_weights += 2;
       }
 
-      const uint32_t* w1 = w0 + kc;
+      const uint32_t* w1 = w0 + n_stride;
       xnn_prefetch_to_l1((const int8_t*) w0);
       xnn_prefetch_to_l1((const int8_t*) w0 + 64);
       xnn_prefetch_to_l1((const int8_t*) w1);

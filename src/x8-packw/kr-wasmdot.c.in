@@ -35,6 +35,7 @@ void xnn_qs8${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${NR}c${K
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t n_stride,
   const ${WTYPE}* weights,
   const int32_t* bias,
   const void* scale,
@@ -78,7 +79,7 @@ void xnn_qs8${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${NR}c${K
       out += ${NR} * sizeof(${BTYPE});
 
       $for N in range(1, NR):
-        const ${TYPE}* w${N} = w${N-1} + kc;
+        const ${TYPE}* w${N} = w${N-1} + n_stride;
 
       $for N in range(0, NR, 2):
         v128_t vacc${ABC[N:N+2]} = wasm_i32x4_splat(0);
@@ -183,7 +184,7 @@ void xnn_qs8${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${NR}c${K
       out += (${NR} - n) * sizeof(${BTYPE});
 
       $for N in range(1, NR):
-        const ${TYPE}* w${N} = w${N-1} + kc;
+        const ${TYPE}* w${N} = w${N-1} + n_stride;
         $if N % 2 == 0:
           if XNN_UNPREDICTABLE(n <= ${N}) {
             w${N} = w${N-1};

@@ -589,13 +589,13 @@ typedef void (*xnn_x8_packq_f32qp8_ukernel_fn)(
 
 typedef void (*xnn_packw_gemm_goi_ukernel_fn)(
     size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
-    const void* k, const void* b, const void* scale, void* packed_weights,
+    size_t n_stride, const void* k, const void* b, const void* scale, void* packed_weights,
     size_t extra_bytes, const void* params);
 
 // TODO - Consolidate packing w/ per_channel and blockwise quant
 typedef void (*xnn_packw_gemm_goi_bl_ukernel_fn)(
     size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr, size_t bl,
-    const void* k, const void* b, const void* scale, void* packed_weights,
+    size_t k_stride, const void* k, const void* b, const void* scale, void* packed_weights,
     size_t extra_bytes_bl, size_t extra_bytes_n, const void* params);
 
 typedef void (*xnn_x8_packw_gemm_goi_ukernel_fn)(

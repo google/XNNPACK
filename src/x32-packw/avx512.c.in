@@ -27,6 +27,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__avx512f_u${KBLOCK}${"_prfm" if PREFE
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t n_stride,
   const uint32_t* weights,
   const uint32_t* bias,
   const void* scale,
@@ -68,7 +69,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__avx512f_u${KBLOCK}${"_prfm" if PREFE
       packed_w += ${NR};
 
       $for N in range(1, NR):
-        const float* w${N} = w${N-1} + kc;
+        const float* w${N} = w${N-1} + n_stride;
       $if PREFETCH:
         $for N in range(0, NR):
           xnn_prefetch_to_l1((const int8_t*) w${N});
@@ -202,7 +203,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__avx512f_u${KBLOCK}${"_prfm" if PREFE
       // NR remainder has less than ${NR} rows so last row is not loaded
       // For SR=4 the
       $for N in range(1, NR-1):
-        const float* w${N} = w${N-1} + kc;
+        const float* w${N} = w${N-1} + n_stride;
         $if N % 2 == 0:
           if XNN_UNPREDICTABLE(n <= ${N}) {
             w${N} = w${N-1};

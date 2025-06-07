@@ -26,6 +26,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__wasmsimd_u4(
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t n_stride,
   const uint32_t* weights,
   const uint32_t* bias,
   const void* scale,
@@ -62,13 +63,13 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__wasmsimd_u4(
       }
       packed_weights += 8;
 
-      const uint32_t* w1 = w0 + kc;
-      const uint32_t* w2 = w1 + kc;
-      const uint32_t* w3 = w2 + kc;
-      const uint32_t* w4 = w3 + kc;
-      const uint32_t* w5 = w4 + kc;
-      const uint32_t* w6 = w5 + kc;
-      const uint32_t* w7 = w6 + kc;
+      const uint32_t* w1 = w0 + n_stride;
+      const uint32_t* w2 = w1 + n_stride;
+      const uint32_t* w3 = w2 + n_stride;
+      const uint32_t* w4 = w3 + n_stride;
+      const uint32_t* w5 = w4 + n_stride;
+      const uint32_t* w6 = w5 + n_stride;
+      const uint32_t* w7 = w6 + n_stride;
 
       // KC main loop multiple of 8x4
       size_t k = kc;
@@ -271,27 +272,27 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__wasmsimd_u4(
         packed_weights += 8;
       }
 
-      const uint32_t* w1 = w0 + kc;
+      const uint32_t* w1 = w0 + n_stride;
       if XNN_UNPREDICTABLE(n < 2) {
         w1 = w0;
       }
-      const uint32_t* w2 = w1 + kc;
+      const uint32_t* w2 = w1 + n_stride;
       if XNN_UNPREDICTABLE(n <= 2) {
         w2 = w1;
       }
-      const uint32_t* w3 = w2 + kc;
+      const uint32_t* w3 = w2 + n_stride;
       if XNN_UNPREDICTABLE(n < 4) {
         w3 = w2;
       }
-      const uint32_t* w4 = w3 + kc;
+      const uint32_t* w4 = w3 + n_stride;
       if XNN_UNPREDICTABLE(n <= 4) {
         w4 = w3;
       }
-      const uint32_t* w5 = w4 + kc;
+      const uint32_t* w5 = w4 + n_stride;
       if XNN_UNPREDICTABLE(n < 6) {
         w5 = w4;
       }
-      const uint32_t* w6 = w5 + kc;
+      const uint32_t* w6 = w5 + n_stride;
       if XNN_UNPREDICTABLE(n <= 6) {
         w6 = w5;
       }

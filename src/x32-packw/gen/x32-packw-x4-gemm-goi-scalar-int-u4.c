@@ -25,6 +25,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x4__scalar_int_u4(
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t n_stride,
   const uint32_t* weights,
   const uint32_t* bias,
   const void* scale,
@@ -63,9 +64,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x4__scalar_int_u4(
       }
       out += 4;
 
-      const uint32_t* w1 = w0 + kc;
-      const uint32_t* w2 = w1 + kc;
-      const uint32_t* w3 = w2 + kc;
+      const uint32_t* w1 = w0 + n_stride;
+      const uint32_t* w2 = w1 + n_stride;
+      const uint32_t* w3 = w2 + n_stride;
 
       // KC main loop multiple of 4x4
       size_t k = kc;
@@ -141,11 +142,11 @@ void xnn_x32_packw_gemm_goi_ukernel_x4__scalar_int_u4(
       out += (4 - n);
 
       // NR remainder has less than 4 rows so last row is not loaded
-      const uint32_t* w1 = w0 + kc;
+      const uint32_t* w1 = w0 + n_stride;
       if XNN_UNPREDICTABLE(n < 2) {
         w1 = w0;
       }
-      const uint32_t* w2 = w1 + kc;
+      const uint32_t* w2 = w1 + n_stride;
       if XNN_UNPREDICTABLE(n <= 2) {
         w2 = w1;
       }

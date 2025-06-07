@@ -1692,7 +1692,7 @@ static void pack_weights_and_biases(
                     params);
   } else {
     pack_gemm_goi_w(groups, output_channels, input_channels, nr, kr, sr,
-                    weights, accumulator_init, /*scale=*/nullptr,
+                    input_channels, weights, accumulator_init, /*scale=*/nullptr,
                     packed_weights_ptr, nr * extra_bytes, params);
   }
   if (extra_data1 != nullptr) {

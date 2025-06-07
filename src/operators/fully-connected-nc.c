@@ -257,6 +257,7 @@ static enum xnn_status create_fully_connected_nc(
         pack_gemm_goi_w(
           /*groups=*/1, output_channels, input_channels,
           nr, kr, sr,
+          input_channels,
           kernel, bias, /*scale=*/NULL,
           weights_ptr,
           gemm_config->nr * extra_weights_bytes,

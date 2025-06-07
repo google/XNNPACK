@@ -25,6 +25,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__wasmsimd_u${KBLOCK}(
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t n_stride,
   const uint32_t* weights,
   const uint32_t* bias,
   const void* scale,
@@ -65,16 +66,16 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__wasmsimd_u${KBLOCK}(
       packed_weights += ${NR};
 
       $for N in range(1, NR):
-        const uint32_t* w${ABC[N]} = w${ABC[N-1]} + kc;
+        const uint32_t* w${N} = w${N-1} + n_stride;
 
       // KC main loop multiple of ${NR}x${KBLOCK}
       size_t k = kc;
       for (; k >= ${KBLOCK}; k -= ${KBLOCK}) {
         $for N in range(NR):
-          const v128_t v${ABC[N]}x${ABC[0:4]} = wasm_v128_load(w${ABC[N]});
+          const v128_t v${ABC[N]}x${ABC[0:4]} = wasm_v128_load(w${N});
           $for K in range(4, KBLOCK, 4):
-            const v128_t v${ABC[N]}x${ABC[K:K+4]} = wasm_v128_load(w${ABC[N]} + ${K});
-          w${ABC[N]} += ${KBLOCK};
+            const v128_t v${ABC[N]}x${ABC[K:K+4]} = wasm_v128_load(w${N} + ${K});
+          w${N} += ${KBLOCK};
 
         $for N in range(0, NR, 4):
           $for K in range(0, KBLOCK, 4):
@@ -106,8 +107,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__wasmsimd_u${KBLOCK}(
           case 1:
           {
             $for N in range(0, NR, 4):
-              v128_t v${ABC[N:N+4]}x0 = wasm_v128_load32_zero(w${ABC[N]});
-              w${ABC[N]} += 1;
+              v128_t v${ABC[N:N+4]}x0 = wasm_v128_load32_zero(w${N});
+              w${N} += 1;
 
             $for L in range(1, 4):
               $for N in range(0, NR, 4):
@@ -124,8 +125,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__wasmsimd_u${KBLOCK}(
           case 2:
           {
             $for N in range(NR):
-              const v128_t v${ABC[N]}x01 = wasm_v128_load64_zero(w${ABC[N]});
-              w${ABC[N]} += 2;
+              const v128_t v${ABC[N]}x01 = wasm_v128_load64_zero(w${N});
+              w${N} += 2;
 
             $for N in range(0, NR, 4):
               $for K in range(0, KBLOCK, 4):
@@ -147,12 +148,12 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__wasmsimd_u${KBLOCK}(
           case 3:
           {
             $for N in range(NR):
-              v128_t v${ABC[N]}x012 = wasm_v128_load64_zero(w${ABC[N]});
-              w${ABC[N]} += 2;
+              v128_t v${ABC[N]}x012 = wasm_v128_load64_zero(w${N});
+              w${N} += 2;
 
             $for N in range(NR):
-              v${ABC[N]}x012 = wasm_v128_load32_lane(w${ABC[N]}, v${ABC[N]}x012, 2);
-              w${ABC[N]} += 1;
+              v${ABC[N]}x012 = wasm_v128_load32_lane(w${N}, v${ABC[N]}x012, 2);
+              w${N} += 1;
 
             $for N in range(0, NR, 4):
               const v128_t v${ABC[N:N+2]}x0_${ABC[N:N+2]}x1 = wasm_v32x4_shuffle(v${ABC[N]}x012, v${ABC[N+1]}x012, 0, 4, 1, 5);
@@ -200,23 +201,23 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__wasmsimd_u${KBLOCK}(
       }
 
       $for N in range(1, NR-1):
-        const uint32_t* w${ABC[N]} = w${ABC[N-1]} + kc;
+        const uint32_t* w${N} = w${N-1} + n_stride;
         $if N % 2 == 0:
           if XNN_UNPREDICTABLE(n <= ${N}) {
-            w${ABC[N]} = w${ABC[N-1]};
+            w${N} = w${N-1};
           }
         $else:
           if XNN_UNPREDICTABLE(n < ${N+1}) {
-            w${ABC[N]} = w${ABC[N-1]};
+            w${N} = w${N-1};
           }
 
       size_t k = kc;
       for (; k >= ${KBLOCK}; k -= ${KBLOCK}) {
         $for N in range(NR-1):
-          const v128_t v${ABC[N]}x${ABC[0:4]} = wasm_v128_load(w${ABC[N]});
+          const v128_t v${ABC[N]}x${ABC[0:4]} = wasm_v128_load(w${N});
           $for K in range(4, KBLOCK, 4):
-            const v128_t v${ABC[N]}x${ABC[K:K+4]} = wasm_v128_load(w${ABC[N]} + ${K});
-          w${ABC[N]} += ${KBLOCK};
+            const v128_t v${ABC[N]}x${ABC[K:K+4]} = wasm_v128_load(w${N} + ${K});
+          w${N} += ${KBLOCK};
 
         $for N in range(0, NR, 4):
           $for K in range(0, KBLOCK, 4):
@@ -248,8 +249,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__wasmsimd_u${KBLOCK}(
           case 1:
           {
             $for N in range(0, NR, 4):
-              v128_t v${ABC[N:N+4]}x0 = wasm_v128_load32_zero(w${ABC[N]});
-              w${ABC[N]} += 1;
+              v128_t v${ABC[N:N+4]}x0 = wasm_v128_load32_zero(w${N});
+              w${N} += 1;
 
             $for L in range(1, 4):
               $for N in range(0, NR, 4):
@@ -267,8 +268,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__wasmsimd_u${KBLOCK}(
           case 2:
           {
             $for N in range(NR-1):
-              const v128_t v${ABC[N]}x01 = wasm_v128_load64_zero(w${ABC[N]});
-              w${ABC[N]} += 2;
+              const v128_t v${ABC[N]}x01 = wasm_v128_load64_zero(w${N});
+              w${N} += 2;
 
             $for N in range(0, NR, 4):
               $for K in range(0, KBLOCK, 4):
@@ -290,12 +291,12 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__wasmsimd_u${KBLOCK}(
           case 3:
           {
             $for N in range(NR-1):
-              v128_t v${ABC[N]}x012 = wasm_v128_load64_zero(w${ABC[N]});
-              w${ABC[N]} += 2;
+              v128_t v${ABC[N]}x012 = wasm_v128_load64_zero(w${N});
+              w${N} += 2;
 
             $for N in range(NR-1):
-              v${ABC[N]}x012 = wasm_v128_load32_lane(w${ABC[N]}, v${ABC[N]}x012, 2);
-              w${ABC[N]} += 1;
+              v${ABC[N]}x012 = wasm_v128_load32_lane(w${N}, v${ABC[N]}x012, 2);
+              w${N} += 1;
 
             $for N in range(0, NR, 4):
               const v128_t v${ABC[N:N+2]}x0_${ABC[N:N+2]}x1 = wasm_v32x4_shuffle(v${ABC[N]}x012, v${ABC[N+1]}x012, 0, 4, 1, 5);

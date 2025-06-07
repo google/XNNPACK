@@ -18,7 +18,7 @@ extern "C" {
 #define XNN_UKERNEL(arch_flags, ukernel, nr_, kr_, sr_, kblock, nr_scale) \
   XNN_INTERNAL void ukernel(                                              \
       size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,    \
-      const int8_t* weights, const uint32_t* bias, const void* scale,     \
+      size_t n_stride, const int8_t* weights, const uint32_t* bias, const void* scale,     \
       int8_t* packed_weights, size_t extra_bytes, const void* params);
 
 #define XNN_GIO_UKERNEL(arch_flags, ukernel, nr_, kr_, sr_, kblock, nr_scale) \
@@ -37,7 +37,7 @@ extern "C" {
                         izp)                                                  \
   XNN_INTERNAL void ukernel(                                                  \
       size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,        \
-      const int8_t* weights, const int32_t* bias, const void* scale,          \
+      size_t n_stride, const int8_t* weights, const int32_t* bias, const void* scale,          \
       int8_t* packed_weights, size_t extra_bytes, const void* params);
 
 #define XNN_QS8_GIO_UKERNEL(arch_flags, ukernel, nr_, kr_, sr_, kblock, \
@@ -56,7 +56,7 @@ extern "C" {
 #define XNN_UKERNEL(arch_flags, ukernel, nr_, kr_, sr_, kblock, nr_scale) \
   XNN_INTERNAL void ukernel(                                              \
       size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,    \
-      const uint16_t* weights, const uint16_t* bias, const void* scale,   \
+      size_t n_stride, const uint16_t* weights, const uint16_t* bias, const void* scale,   \
       uint16_t* packed_weights, size_t extra_bytes, const void* params);
 
 #include "src/x16-packw/x16-packw.inc"
@@ -66,7 +66,7 @@ extern "C" {
 #define XNN_UKERNEL(arch_flags, ukernel, nr_, kr_, sr_, kblock, nr_scale) \
   XNN_INTERNAL void ukernel(                                              \
       size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,    \
-      const uint16_t* weights, const uint32_t* bias, const void* scale,   \
+      size_t n_stride, const uint16_t* weights, const uint32_t* bias, const void* scale,   \
       uint16_t* packed_weights, size_t extra_bytes, const void* params);
 
 #define XNN_GIO_UKERNEL(arch_flags, ukernel, nr_, kr_, sr_, kblock, nr_scale) \
@@ -84,7 +84,7 @@ extern "C" {
 #define XNN_UKERNEL(arch_flags, ukernel, nr_, kr_, sr_, kblock, nr_scale) \
   XNN_INTERNAL void ukernel(                                              \
       size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,    \
-      const uint32_t* weights, const uint32_t* bias, const void* scale,   \
+      size_t n_stride, const uint32_t* weights, const uint32_t* bias, const void* scale,   \
       uint32_t* packed_weights, size_t extra_bytes, const void* params);
 
 #define XNN_GIO_UKERNEL(arch_flags, ukernel, nr_, kr_, sr_, kblock, nr_scale) \
@@ -101,7 +101,7 @@ extern "C" {
 
 #define XNN_UKERNEL(arch_flags, ukernel, nr_, kr_, sr_, kblock, nr_scale) \
   XNN_INTERNAL void ukernel(size_t g, size_t nc, size_t kc, size_t nr,    \
-                            size_t kr, size_t sr, const uint8_t* k,       \
+                            size_t kr, size_t sr, size_t n_stride, const uint8_t* k,       \
                             const int32_t* b, const float* scale,         \
                             void* packed_weights, size_t extra_bytes,     \
                             const struct xnn_qs8_qc4w_packing_params* params);

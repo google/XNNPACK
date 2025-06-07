@@ -22,6 +22,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}c${KR}__wasmsimd_u4(
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t n_stride,
   const uint32_t* weights,
   const uint32_t* bias,
   const void* scale,
@@ -55,7 +56,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}c${KR}__wasmsimd_u4(
       packed_weights += ${NR};
 
       $for N in range(1, NR):
-        const uint32_t* w${N} = w${N-1} + kc;
+        const uint32_t* w${N} = w${N-1} + n_stride;
 
       // KC main loop multiple of ${NR}x${KR}
       size_t k = kc;
@@ -147,7 +148,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}c${KR}__wasmsimd_u4(
 
       // NR remainder has less than ${NR} rows so last row is not loaded
       $for N in range(1, NR-1):
-        const uint32_t* w${N} = w${N-1} + kc;
+        const uint32_t* w${N} = w${N-1} + n_stride;
         $if N % 2 == 0:
           if XNN_UNPREDICTABLE(n <= ${N}) {
             w${N} = w${N-1};
