@@ -82,6 +82,10 @@ xnn_subgraph_t FP32TransformerBlock(size_t batch_size, size_t sequence_length,
                                     size_t embedding_dim, size_t num_heads,
                                     size_t head_dim, size_t hidden_dim);
 
+xnn_subgraph_t FP32FullyConnected(size_t batch_size, size_t input_channels,
+                                  size_t output_channels);
+xnn_subgraph_t QD8FullyConnected(size_t batch_size, size_t input_channels,
+                                 size_t output_channels);
 }  // namespace models
 
 #endif  // THIRD_PARTY_XNNPACK_BENCH_MODELS_MODELS_H_
