@@ -42,6 +42,10 @@
   #include <sys/auxv.h>
 #endif
 
+#if XNN_ARCH_LOONGARCH
+  #include <sys/auxv.h>
+#endif
+
 #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 #include <math.h>
 #endif
@@ -236,6 +240,13 @@ static void init_hardware_config(void) {
     }
   #endif
 
+  #if XNN_ARCH_LOONGARCH
+    const long loong_hwcap = getauxval(AT_HWCAP);
+    xnn_log_debug("getauxval(AT_HWCAP) = %08lX", loong_hwcap);
+    hardware_config.use_lsx = (loong_hwcap & HWCAP_LOONGARCH_LSX) != 0;
+    hardware_config.use_lasx = (loong_hwcap & HWCAP_LOONGARCH_LASX) != 0;
+  #endif
+
   #if XNN_ARCH_PPC64
     const unsigned long HWCAPs = getauxval(AT_HWCAP);
     const unsigned long HWCAPs_2 = getauxval(AT_HWCAP2);
@@ -378,6 +389,10 @@ static void init_hardware_config(void) {
     if (hardware_config.use_vsx) hardware_config.arch_flags |= xnn_arch_vsx;
     if (hardware_config.use_vsx3) hardware_config.arch_flags |= xnn_arch_vsx3;
     if (hardware_config.use_mma) hardware_config.arch_flags |= xnn_arch_mma;
+  #endif
+  #if XNN_ARCH_LOONGARCH
+    if (hardware_config.use_lsx) hardware_config.arch_flags |= xnn_arch_loongarch_sx;
+    if (hardware_config.use_lasx) hardware_config.arch_flags |= xnn_arch_loongarch_asx;
   #endif
   #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     if (hardware_config.is_x86) hardware_config.arch_flags |= xnn_arch_wasm_is_x86;
