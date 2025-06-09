@@ -23,7 +23,7 @@ IF(XNNPACK_BUILD_LIBRARY)
   FOREACH(BENCH ${LIBRARY_OPERATOR_BENCHMARKS})
     ADD_EXECUTABLE(${BENCH}-bench ${BENCH}.cc)
     TARGET_LINK_LIBRARIES(${BENCH}-bench PRIVATE
-      bench-utils
+      xnnpack-bench-utils
       benchmark::benchmark
       datatype
       XNNPACK
