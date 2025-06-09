@@ -20,9 +20,9 @@ ENDIF()
 
 ADD_LIBRARY(bench-utils STATIC utils.cc)
 TARGET_LINK_LIBRARIES(bench-utils PRIVATE benchmark::benchmark cpuinfo pthreadpool)
-TARGET_LINK_LIBRARIES(bench-utils PRIVATE xnnpack-base hardware-config)
+TARGET_LINK_LIBRARIES(bench-utils PRIVATE xnnpack-base xnnpack-hardware-config)
 IF(XNNPACK_BUILD_LIBRARY)
-  TARGET_LINK_LIBRARIES(bench-utils PRIVATE logging memory)
+  TARGET_LINK_LIBRARIES(bench-utils PRIVATE xnnpack-logging xnnpack-memory)
 ENDIF()
 
 # Helper libraries
@@ -115,12 +115,12 @@ FOREACH(BENCH ${MICROKERNEL_BENCHMARKS})
     bench-utils
     benchmark::benchmark
     gemm-benchmark
-    hardware-config
-    indirection
-    logging
+    xnnpack-hardware-config
+    xnnpack-indirection
+    xnnpack-logging
     microkernels-all
-    microparams-init
-    packing
+    xnnpack-microparams-init
+    xnnpack-packing
     packq-benchmark
     pthreadpool)
   SET_TARGET_PROPERTIES(${BENCH}-bench PROPERTIES CXX_EXTENSIONS YES)
