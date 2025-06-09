@@ -8,6 +8,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/config-types.h"
@@ -135,21 +136,21 @@ xnn_init_f16_to_qu8_cvt_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_f32_abs_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
-xnn_init_f32_approxgelu_config();
+xnn_init_f32_approxgelu_config(uint32_t flags);
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_f32_clamp_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
-xnn_init_f32_cosine_config();
+xnn_init_f32_cosine_config(uint32_t flags);
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_f32_elu_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
-xnn_init_f32_exp_config();
+xnn_init_f32_exp_config(uint32_t flags);
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
-xnn_init_f32_gelu_config();
+xnn_init_f32_gelu_config(uint32_t flags);
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
-xnn_init_f32_hswish_config();
+xnn_init_f32_hswish_config(uint32_t flags);
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
-xnn_init_f32_log_config();
+xnn_init_f32_log_config(uint32_t flags);
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_f32_lrelu_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
@@ -163,17 +164,17 @@ xnn_init_f32_rndu_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_f32_rndz_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
-xnn_init_f32_rsqrt_config();
+xnn_init_f32_rsqrt_config(uint32_t flags);
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_f32_sigmoid_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
-xnn_init_f32_sine_config();
+xnn_init_f32_sine_config(uint32_t flags);
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_f32_sqr_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
-xnn_init_f32_sqrt_config();
+xnn_init_f32_sqrt_config(uint32_t flags);
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
-xnn_init_f32_tanh_config();
+xnn_init_f32_tanh_config(uint32_t flags);
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_f32_to_f16_cvt_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config*
@@ -353,8 +354,8 @@ static inline bool xnn_is_hmp_igemm_ukernel(
 
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_bf16_f32_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f16_gemm_config();
-XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_gemm_config();
-XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_gemm_nr2_config();
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_gemm_config(uint32_t flags);
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_gemm_nr2_config(uint32_t flags);
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_igemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_qc8w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_qc4w_gemm_config();

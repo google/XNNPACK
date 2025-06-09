@@ -574,6 +574,16 @@ enum xnn_status xnn_create_runtime_v4(
     }
   }
 
+  if (flags & XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC) {
+    xnn_log_warning(
+        "XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC is enabled: performance will be "
+        "degraded! %d", flags);
+    for (size_t i = 0; i < subgraph->num_nodes; i++) {
+      struct xnn_node* node = subgraph->nodes + i;
+      node->flags |= XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC;
+    }
+  }
+
   if (flags & XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER) {
     for (size_t i = 0; i < subgraph->num_nodes; i++) {
       struct xnn_node* node = subgraph->nodes + i;

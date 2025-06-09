@@ -1735,14 +1735,14 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
     uint32_t flags,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config(flags);
   if (gemm_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f32));
     return xnn_status_unsupported_hardware;
   }
 
-  const struct xnn_gemm_config* gemm_nr2_config = xnn_init_f32_gemm_nr2_config();
+  const struct xnn_gemm_config* gemm_nr2_config = xnn_init_f32_gemm_nr2_config(flags);
 
   // Select microkernel configuration based on output channels
   if (gemm_nr2_config != NULL) {
