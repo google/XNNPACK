@@ -836,6 +836,7 @@ ADD_CUSTOM_COMMAND(
 # all other XNNPACK targets.
 ADD_LIBRARY(xnnpack-base INTERFACE)
 
+ADD_LIBRARY(xnnpack-sanitizers OBJECT src/sanitizers.c)
 ADD_LIBRARY(xnnpack-microkernels-prod STATIC ${PROD_MICROKERNEL_SRCS} ${TABLE_SRCS})
 TARGET_LINK_LIBRARIES(xnnpack-microkernels-prod PUBLIC xnnpack-sanitizers)
 IF(XNNPACK_BUILD_ALL_MICROKERNELS)
@@ -871,7 +872,6 @@ IF(XNNPACK_BUILD_LIBRARY)
   ADD_LIBRARY(xnnpack-operator-run OBJECT src/operator-run.c)
   ADD_LIBRARY(xnnpack-operator-utils OBJECT src/operator-utils.c)
   ADD_LIBRARY(xnnpack-reference-ukernels OBJECT ${REFERENCE_SRCS})
-  ADD_LIBRARY(xnnpack-sanitizers OBJECT src/sanitizers.c)
   ADD_LIBRARY(xnnpack-subgraph OBJECT ${SUBGRAPH_SRCS})
   # Need C_EXTENSIONS to get constants for mmap (MAP_ANONYMOUS).
   SET_TARGET_PROPERTIES(xnnpack-memory PROPERTIES C_EXTENSIONS YES)

@@ -79,7 +79,7 @@ SET(NORMALIZATION_UNIT_TESTS
     transpose-normalization)
 FOREACH(TEST ${NORMALIZATION_UNIT_TESTS})
   ADD_EXECUTABLE(${TEST}-test ${TEST}.cc)
-  TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE xnnpack-test pthreadpool normalization)
+  TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE xnnpack-test pthreadpool xnnpack-normalization)
   ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
 ENDFOREACH()
 

@@ -65,8 +65,8 @@ IF(XNNPACK_BUILD_LIBRARY)
   FOREACH(TEST ${LIBRARY_SUBGRAPH_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test ${TEST}.cc)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-      datatype
-      logging
+      xnnpack-datatype
+      xnnpack-logging
       runtime-flags
       subgraph-tester
       unary-ops

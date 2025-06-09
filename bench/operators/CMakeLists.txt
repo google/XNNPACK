@@ -25,7 +25,7 @@ IF(XNNPACK_BUILD_LIBRARY)
     TARGET_LINK_LIBRARIES(${BENCH}-bench PRIVATE
       xnnpack-bench-utils
       benchmark::benchmark
-      datatype
+      xnnpack-datatype
       XNNPACK
     )
   ENDFOREACH()

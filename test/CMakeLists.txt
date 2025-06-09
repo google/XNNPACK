@@ -350,7 +350,7 @@ LIST(REMOVE_ITEM MICROKERNEL_VCVT_TESTS ${SHARDED_TESTS})
 FOREACH(TEST ${MICROKERNEL_VCVT_TESTS})
   ADD_EXECUTABLE(${TEST}-test ${TEST}.cc)
   TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-      datatype
+      xnnpack-datatype
       xnnpack-hardware-config
       xnnpack-logging
       xnnpack-microkernels-all
@@ -444,7 +444,7 @@ ENDIF()
 ADD_EXECUTABLE(buffer-test buffer.cc)
 TARGET_LINK_LIBRARIES(buffer-test PRIVATE
   xnnpack-test
-  datatype)
+  xnnpack-datatype)
 ADD_TEST(NAME buffer-test COMMAND buffer-test)
 SET_TARGET_PROPERTIES(buffer-test PROPERTIES CXX_EXTENSIONS YES)
 
@@ -454,8 +454,8 @@ IF(XNNPACK_BUILD_LIBRARY)
 
   ADD_EXECUTABLE(mutex-test mutex.cc)
   TARGET_LINK_LIBRARIES(mutex-test PRIVATE GTest::gtest GTest::gtest_main pthreadpool)
-  TARGET_LINK_LIBRARIES(mutex-test PRIVATE logging mutex)
+  TARGET_LINK_LIBRARIES(mutex-test PRIVATE xnnpack-logging xnnpack-mutex)
 
   ADD_EXECUTABLE(microkernel-utils-test microkernel-utils.cc)
-  TARGET_LINK_LIBRARIES(microkernel-utils-test PRIVATE microkernel-utils hardware-config logging GTest::gtest GTest::gtest_main pthreadpool)
+  TARGET_LINK_LIBRARIES(microkernel-utils-test PRIVATE xnnpack-microkernel-utils xnnpack-hardware-config xnnpack-logging GTest::gtest GTest::gtest_main pthreadpool)
 ENDIF()
