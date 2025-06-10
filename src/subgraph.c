@@ -1030,6 +1030,8 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
       case xnn_node_type_static_mean:
       case xnn_node_type_static_slice:
       case xnn_node_type_static_sum:
+      case xnn_node_type_static_reduce_min:
+      case xnn_node_type_static_reduce_max:
       case xnn_node_type_static_reshape:
       case xnn_node_type_static_resize_bilinear_2d:
       case xnn_node_type_static_transpose:
