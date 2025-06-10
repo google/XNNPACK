@@ -1077,11 +1077,11 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
           subgraph->values[node->outputs[0]].fp16_compatible = true;
         } else if (subgraph->values[node->inputs[0]].datatype ==
                        xnn_datatype_fp32 &&
-                   (node->params.fully_connected.assumed_input_datatype ==
+                   (node->params.inlined_lhs_packing.packed_input_datatype ==
                         xnn_datatype_qdint8 ||
-                    node->params.fully_connected.assumed_input_datatype ==
+                    node->params.inlined_lhs_packing.packed_input_datatype ==
                         xnn_datatype_qduint8 ||
-                    node->params.fully_connected.assumed_input_datatype ==
+                    node->params.inlined_lhs_packing.packed_input_datatype ==
                         xnn_datatype_qpint8)) {
           subgraph->values[node->inputs[0]].fp16_compatible = true;
           subgraph->values[node->outputs[0]].fp16_compatible = true;
@@ -1330,16 +1330,16 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
     } else if (node->type == xnn_node_type_fully_connected) {
       // Patch up any LHS packing of fully-connected nodes, if needed.
       if (node->flags & XNN_FLAG_INLINE_LHS_PACKING) {
-        switch (node->params.fully_connected.assumed_input_datatype) {
+        switch (node->params.inlined_lhs_packing.packed_input_datatype) {
           case xnn_datatype_pfp32:
             // Switch from packed `fp32` to packed `fp16`.
-            node->params.fully_connected.assumed_input_datatype =
+            node->params.inlined_lhs_packing.packed_input_datatype =
                 xnn_datatype_pfp16;
             break;
           case xnn_datatype_qpint8:
             // Convert from `qpint8` back to `qdint8` since we don't have a
             // `qpint8` packing function for `f16` inputs.
-            node->params.fully_connected.assumed_input_datatype =
+            node->params.inlined_lhs_packing.packed_input_datatype =
                 xnn_datatype_qdint8;
             break;
           default:
@@ -2255,8 +2255,9 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph) {
   for (uint32_t node_id = 0; node_id < subgraph->num_nodes; node_id++) {
     struct xnn_node* node = &subgraph->nodes[node_id];
 
-    // Skip anything that is not a `fully-connected` node.
-    if (node->type != xnn_node_type_fully_connected) {
+    // Skip anything that is not a fully-connected node.
+    if (!(node->type == xnn_node_type_fully_connected ||
+          node->type == xnn_node_type_batch_matrix_multiply)) {
       continue;
     }
 
@@ -2365,8 +2366,10 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph) {
         }
         // If this is a fully-connected op, we need to coerce the shape of the
         // inputs from `[B, M, K]` to `[B * M, K]` to avoid batch-wise packing.
-        subgraph->values[subgraph->nodes[node_id].inputs[0]].flags |=
-            XNN_FLAG_SQUASH_GROUPS;
+        if (node->type == xnn_node_type_fully_connected) {
+          subgraph->values[subgraph->nodes[node_id].inputs[0]].flags |=
+              XNN_FLAG_SQUASH_GROUPS;
+        }
       } else {
         if (input_datatype == xnn_datatype_qdint8) {
           // Short-circuit the inputs of the producer of the `qdint8` values.
@@ -2402,7 +2405,8 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph) {
         xnn_log_debug("Setting assumed_datatype=%s for node #%u (%s).",
                       xnn_datatype_to_string(assumed_datatype), node_id,
                       xnn_node_type_to_string(node->type));
-        node->params.fully_connected.assumed_input_datatype = assumed_datatype;
+        node->params.inlined_lhs_packing.packed_input_datatype =
+            assumed_datatype;
         node->flags |= XNN_FLAG_INLINE_LHS_PACKING;
       }
     }

@@ -762,7 +762,7 @@ TEST(WORKSPACE, internally_allocated_dynamic_quantization_parameters) {
       const xnn_node* node = &subgraph->nodes[i];
       if (node->type == xnn_node_type_fully_connected) {
         EXPECT_TRUE(node->flags & XNN_FLAG_INLINE_LHS_PACKING);
-        EXPECT_THAT(node->params.fully_connected.assumed_input_datatype,
+        EXPECT_THAT(node->params.inlined_lhs_packing.packed_input_datatype,
                     testing::AnyOf(xnn_datatype_qdint8, xnn_datatype_qduint8,
                                    xnn_datatype_qpint8));
       }

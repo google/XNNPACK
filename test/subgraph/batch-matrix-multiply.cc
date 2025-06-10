@@ -21,7 +21,9 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/subgraph.h"
 #include "test/replicable_random_device.h"
+#include "test/subgraph/runtime-flags.h"
 #include "test/subgraph/subgraph-tester.h"
 
 namespace xnnpack {
@@ -185,7 +187,7 @@ template <typename Data>
 void FakeDynamicQuantize(const Tensor<quantized<Data>>& input, xnn_datatype) {}
 
 template <typename Input, typename Output = Input>
-void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid) {
+void TestDynamicB(uint64_t subgraph_flags = xnn_test_runtime_flags()) {
   ReplicableRandomDevice rng;
   std::bernoulli_distribution flag_dist(0.5);
   std::uniform_int_distribution<> rank_dist{2, XNN_MAX_TENSOR_DIMS - 1};
@@ -210,7 +212,7 @@ void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid) {
       flags |= XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC;
     }
 
-    SubgraphTester subgraph(3);
+    SubgraphTester subgraph(3, subgraph_flags);
     const uint32_t input_a_id = 0;
     const uint32_t input_b_id = 1;
     const uint32_t output_id = 2;
@@ -279,7 +281,8 @@ void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid) {
           xnnpack::epsilon(xnn_datatype_of<Output>()) * k * 2.0f;
       for (const auto& i : EnumerateIndices(output.shape())) {
         ASSERT_NEAR(static_cast<float>(output(i)), expected(i), tolerance)
-            << "a_shape=" << index_to_string(a_shape)
+            << "i=" << index_to_string(i)
+            << ", a_shape=" << index_to_string(a_shape)
             << ", b_shape=" << index_to_string(b_shape)
             << ", output_shape=" << index_to_string(expected.shape());
       }
@@ -295,8 +298,24 @@ TEST(BatchMatrixMultiplyBF16F32, dynamic_b) {
   TestDynamicB<xnn_bfloat16, float>();
 }
 
+TEST(BatchMatrixMultiplyF16, dont_inline_lhs_dynamic_b) {
+  TestDynamicB<xnn_float16, xnn_float16>(
+      /*subgraph_flags=*/xnn_test_runtime_flags() |
+      XNN_FLAG_NO_INLINED_LHS_PACKING);
+}
+TEST(BatchMatrixMultiplyF32, dont_inline_lhs_dynamic_b) {
+  TestDynamicB<float, float>(/*subgraph_flags=*/xnn_test_runtime_flags() |
+                             XNN_FLAG_NO_INLINED_LHS_PACKING);
+}
+TEST(BatchMatrixMultiplyBF16F32, dont_inline_lhs_dynamic_b) {
+  TestDynamicB<xnn_bfloat16, float>(
+      /*subgraph_flags=*/xnn_test_runtime_flags() |
+      XNN_FLAG_NO_INLINED_LHS_PACKING);
+}
+
 template <typename InputA, typename InputB, typename Output = InputA>
-void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid) {
+void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
+                 uint64_t subgraph_flags = xnn_test_runtime_flags()) {
   ReplicableRandomDevice rng;
   std::bernoulli_distribution flag_dist(0.5);
   std::uniform_int_distribution<> dim_dist{1, 100};
@@ -314,7 +333,7 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid) {
       flags |= XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC;
     }
 
-    SubgraphTester subgraph(3);
+    SubgraphTester subgraph(3, subgraph_flags);
     const uint32_t input_a_id = 0;
     const uint32_t input_b_id = 1;
     const uint32_t output_id = 2;
@@ -415,7 +434,8 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid) {
                               max_a * max_b * 3.0f;
       for (const auto& i : EnumerateIndices(output.shape())) {
         ASSERT_NEAR(static_cast<float>(output(i)), expected(i), tolerance)
-            << "a_shape=" << index_to_string(a_shape)
+            << "i=" << index_to_string(i)
+            << ", a_shape=" << index_to_string(a_shape)
             << ", b_shape=" << index_to_string(input_b.shape())
             << ", output_shape=" << index_to_string(expected.shape());
       }
@@ -429,6 +449,22 @@ TEST(BatchMatrixMultiplyF16, static_b) {
 TEST(BatchMatrixMultiplyF32, static_b) { TestStaticB<float, float>(); }
 TEST(BatchMatrixMultiplyBF16F32, static_b) {
   TestStaticB<xnn_bfloat16, xnn_bfloat16, float>();
+}
+
+TEST(BatchMatrixMultiplyF16, dont_inline_lhs_static_b) {
+  TestStaticB<xnn_float16, xnn_float16>(
+      /*convert_to=*/xnn_datatype_invalid,
+      /*subgraph_flags=*/XNN_FLAG_NO_INLINED_LHS_PACKING);
+}
+TEST(BatchMatrixMultiplyF32, dont_inline_lhs_static_b) {
+  TestStaticB<float, float>(
+      /*convert_to=*/xnn_datatype_invalid,
+      /*subgraph_flags=*/XNN_FLAG_NO_INLINED_LHS_PACKING);
+}
+TEST(BatchMatrixMultiplyBF16F32, dont_inline_lhs_static_b) {
+  TestStaticB<xnn_bfloat16, xnn_bfloat16, float>(
+      /*convert_to=*/xnn_datatype_invalid,
+      /*subgraph_flags=*/XNN_FLAG_NO_INLINED_LHS_PACKING);
 }
 
 using qcint8 = quantized<int8_t, channelwise>;

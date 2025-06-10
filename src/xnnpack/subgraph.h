@@ -352,9 +352,10 @@ struct xnn_node {
     struct {
       int32_t axis;
     } even_split;
+    // Used by the `fully-connected` and `batch-matrix-multiply` ops.
     struct {
-      enum xnn_datatype assumed_input_datatype;
-    } fully_connected;
+      enum xnn_datatype packed_input_datatype;
+    } inlined_lhs_packing;
     struct {
       uint32_t padding_top;
       uint32_t padding_right;

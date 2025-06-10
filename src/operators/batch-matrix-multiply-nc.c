@@ -31,6 +31,12 @@
 #include "src/xnnpack/params.h"
 #include <pthreadpool.h>
 
+// This op has at most three `compute`s:
+//  * Dynamic weights packing,
+//  * Inlined LHS packing,
+//  * The GEMM.
+#define XNN_BATCH_MATMUL_MAX_COMPUTE_INVOCATIONS 3
+
 enum xnn_status create_batch_matrix_multiply_nc(
     uint32_t flags, const void* params, size_t params_size,
     const struct xnn_gemm_config* gemm_config,
@@ -55,15 +61,18 @@ enum xnn_status create_batch_matrix_multiply_nc(
                   xnn_operator_type_to_string(operator_type));
     goto error;
   }
-  const int num_compute_invocations = 2;
-  batch_matrix_multiply_op->compute = xnn_allocate_zero_memory(num_compute_invocations * sizeof(struct compute_parameters));
+  batch_matrix_multiply_op->compute =
+      xnn_allocate_zero_memory(XNN_BATCH_MATMUL_MAX_COMPUTE_INVOCATIONS *
+                               sizeof(struct compute_parameters));
   if (batch_matrix_multiply_op->compute == NULL) {
     xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
                   sizeof(struct compute_parameters),
                   xnn_operator_type_to_string(operator_type));
     goto error;
   }
-  batch_matrix_multiply_op->num_compute_invocations = num_compute_invocations;
+  // This will be set to the appropriate value in
+  // `reshape_batch_matrix_multiply_nc`.
+  batch_matrix_multiply_op->num_compute_invocations = 0;
 
   batch_matrix_multiply_op->ukernel.gemm_ukernels = xnn_allocate_zero_simd_memory(sizeof(struct gemm_types));
   if (batch_matrix_multiply_op->ukernel.gemm_ukernels == NULL) {
@@ -467,6 +476,9 @@ enum xnn_status create_batch_matrix_multiply_nc_qx8_f32_qc8w(
   }
   xnn_operator_t batch_matrix_multiply_op = *batch_matrix_multiply_op_out;
 
+  // We only allow static `qcint8` weights.
+  batch_matrix_multiply_op->dynamic_context.gemm->const_weights = true;
+
   // Check if we've already cached the packed data for `B`.
   uint32_t cache_seed = murmur_hash3(
       &batch_matrix_multiply_op->dynamic_context.gemm->gemm,
@@ -671,10 +683,12 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
 
   // Compute the batch sizes of the A and B tensors.
   size_t batch_dims_c[XNN_MAX_TENSOR_DIMS];
+  size_t batch_size_a = 1;
   size_t batch_size_b = 1;
   size_t batch_size_c = 1;
   for (int k = 0; k < num_batch_dims; k++) {
     batch_dims_c[k] = max(batch_dims_a[k], batch_dims_b[k]);
+    batch_size_a *= batch_dims_a[k];
     batch_size_b *= batch_dims_b[k];
     batch_size_c *= batch_dims_c[k];
   }
@@ -726,114 +740,119 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
   assert(mr != 0 && mr <= XNN_MAX_MR);
   struct xnn_hmp_gemm_ukernel gemm_ukernel = gemm_cases[mr - 1];
 
+  // Clear the operator's compute data to avoid accidentally reusing values from
+  // a previous reshape (this was an interesting bug to track down).
+  memset(batch_matrix_multiply_op->compute, 0,
+         XNN_BATCH_MATMUL_MAX_COMPUTE_INVOCATIONS *
+             sizeof(struct compute_parameters));
+  batch_matrix_multiply_op->num_compute_invocations = 1;
   struct compute_parameters* gemm_compute =
       &batch_matrix_multiply_op->compute[0];
+  struct gemm_op_context* gemm_context =
+      batch_matrix_multiply_op->dynamic_context.gemm;
 
-  switch (batch_matrix_multiply_op->type) {
-    case xnn_operator_type_batch_matrix_multiply_nc_qd8_f32_qc8w:
-    case xnn_operator_type_batch_matrix_multiply_nc_qdu8_f32_qc8w:
-    case xnn_operator_type_batch_matrix_multiply_nc_qp8_f32_qc8w:
-      // Nothing to do here, the `B` matrix has already been packed.
-      break;
+  // Do nothing if the weights don't need to be packed.
+  if (!gemm_context->const_weights) {
+    gemm_compute++;
+    batch_matrix_multiply_op->num_compute_invocations++;
 
-    case xnn_operator_type_batch_matrix_multiply_nc_bf16_f32:
-    case xnn_operator_type_batch_matrix_multiply_nc_f16:
-    case xnn_operator_type_batch_matrix_multiply_nc_f32:
-    case xnn_operator_type_batch_matrix_multiply_nc_pf16:
-    case xnn_operator_type_batch_matrix_multiply_nc_pf32: {
-      // Do nothing if the weights don't need to be packed.
-      if (batch_matrix_multiply_op->dynamic_context.gemm->const_weights) {
-        break;
-      }
+    const size_t n_stride = round_up(n, nr);
+    const size_t k_stride = round_up_po2(k, kr * sr);
+    const struct xnn_gemm_config* gemm_config =
+        batch_matrix_multiply_op->gemm_config;
+    const size_t weights_stride =
+        gemm_config->packed_stride_weights_and_biases
+            ? gemm_config->packed_stride_weights_and_biases(
+                  gemm_config, k, /*block_size=*/k_stride, k_stride,
+                  /*extra_bytes=*/0)
+            : (k_stride << log2_input_b_element_size) + bias_element_size;
+    const size_t input_b_batch_stride = n_stride * weights_stride;
 
-      gemm_compute = &batch_matrix_multiply_op->compute[1];
+    // Store the computed weights stride in the op for later use.
+    batch_matrix_multiply_op->weights_stride = weights_stride;
 
-      const size_t n_stride = round_up(n, nr);
-      const size_t k_stride = round_up_po2(k, kr * sr);
-      const struct xnn_gemm_config* gemm_config =
-          batch_matrix_multiply_op->gemm_config;
-      const size_t weights_stride =
-          gemm_config->packed_stride_weights_and_biases
-              ? gemm_config->packed_stride_weights_and_biases(
-                    gemm_config, k, /*block_size=*/k_stride, k_stride,
-                    /*extra_bytes=*/0)
-              : (k_stride << log2_input_b_element_size) + bias_element_size;
-      const size_t input_b_batch_stride = n_stride * weights_stride;
-
-      // Store the computed weights stride in the op for later use.
-      batch_matrix_multiply_op->weights_stride = weights_stride;
-
-      // Compute the required workspace size.
-      if (workspace_size != NULL) {
-        *workspace_size = batch_size_b * input_b_batch_stride;
-      }
-      if (batch_matrix_multiply_op->flags & XNN_FLAG_TRANSPOSE_B) {
-        assert(batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.packw_gemm_goi != NULL ||
-               gemm_config->pack_weights_and_biases);
-        batch_matrix_multiply_op->dynamic_context.gemm->packw_gemm_goi =
-            (struct packw_gemm_goi_context){
-                .kc = k,
-                .nr = nr,
-                .kr = kr,
-                .sr = sr,
-                .k_stride = k << log2_input_b_element_size,
-                .bias = NULL,
-                .b_stride = bias_element_size,
-                .w_stride = weights_stride,
-                .packw_gemm_goi =
-                    batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.packw_gemm_goi,
-                .gk_stride = n * (k << log2_input_b_element_size),
-                .gb_stride = n * bias_element_size,
-                .gc_stride = input_b_batch_stride,
-                .pack_weights_and_biases = gemm_config->pack_weights_and_biases,
-                .gemm_config = gemm_config,
-            };
-        batch_matrix_multiply_op->compute[0].task_2d_tile_1d_dynamic =
-            (pthreadpool_task_2d_tile_1d_dynamic_t)
-                xnn_compute_batched_packw_gemm_goi;
-        batch_matrix_multiply_op->compute[0].context_offset =
-            offsetof(struct gemm_op_context, packw_gemm_goi);
-      } else {
-        assert(batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.packw_gemm_gio != NULL ||
-               gemm_config->pack_weights_and_biases);
-        batch_matrix_multiply_op->dynamic_context.gemm->packw_gemm_gio =
-            (struct packw_gemm_gio_context){
-                .n_stride = 1 << log2_input_b_element_size,
-                .k_stride_elements = n,
-                .kc = k,
-                .nr = nr,
-                .kr = kr,
-                .sr = sr,
-                .bias = NULL,
-                .b_stride = bias_element_size,
-                .w_stride = weights_stride,
-                .packw_gemm_gio =
-                    batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.packw_gemm_gio,
-                .gk_stride = k * (n << log2_input_b_element_size),
-                .gb_stride = n * bias_element_size,
-                .gc_stride = input_b_batch_stride,
-                .pack_weights_and_biases = gemm_config->pack_weights_and_biases,
-                .gemm_config = gemm_config,
-            };
-        batch_matrix_multiply_op->compute[0].task_2d_tile_1d_dynamic =
-            (pthreadpool_task_2d_tile_1d_dynamic_t)
-                xnn_compute_batched_packw_gemm_gio;
-        batch_matrix_multiply_op->compute[0].context_offset =
-            offsetof(struct gemm_op_context, packw_gemm_gio);
-      }
-      batch_matrix_multiply_op->compute[0].type =
-          xnn_parallelization_type_2d_tile_1d_dynamic;
-      batch_matrix_multiply_op->compute[0].range[0] = batch_size_b;
-      batch_matrix_multiply_op->compute[0].range[1] = n;
-      batch_matrix_multiply_op->compute[0].tile[0] = nr;
-      break;
+    // Compute the required workspace size.
+    if (workspace_size != NULL) {
+      *workspace_size = batch_size_b * input_b_batch_stride;
     }
-    default:
-      XNN_UNREACHABLE;
+    xnn_log_debug("Requesting workspace of size %zu for packed weights.",
+                  *workspace_size);
+
+    if (batch_matrix_multiply_op->flags & XNN_FLAG_TRANSPOSE_B) {
+      assert(batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm
+                     .packw_gemm_goi != NULL ||
+             gemm_config->pack_weights_and_biases);
+      gemm_context->packw_gemm_goi = (struct packw_gemm_goi_context){
+          .kc = k,
+          .nr = nr,
+          .kr = kr,
+          .sr = sr,
+          .k_stride = k << log2_input_b_element_size,
+          .bias = NULL,
+          .b_stride = bias_element_size,
+          .w_stride = weights_stride,
+          .packw_gemm_goi = batch_matrix_multiply_op->ukernel.gemm_ukernels
+                                ->gemm.packw_gemm_goi,
+          .gk_stride = n * (k << log2_input_b_element_size),
+          .gb_stride = n * bias_element_size,
+          .gc_stride = input_b_batch_stride,
+          .pack_weights_and_biases = gemm_config->pack_weights_and_biases,
+          .gemm_config = gemm_config,
+      };
+      batch_matrix_multiply_op->compute[0].task_2d_tile_1d_dynamic =
+          (pthreadpool_task_2d_tile_1d_dynamic_t)
+              xnn_compute_batched_packw_gemm_goi;
+      batch_matrix_multiply_op->compute[0].context_offset =
+          offsetof(struct gemm_op_context, packw_gemm_goi);
+    } else {
+      assert(batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm
+                     .packw_gemm_gio != NULL ||
+             gemm_config->pack_weights_and_biases);
+      gemm_context->packw_gemm_gio = (struct packw_gemm_gio_context){
+          .n_stride = 1 << log2_input_b_element_size,
+          .k_stride_elements = n,
+          .kc = k,
+          .nr = nr,
+          .kr = kr,
+          .sr = sr,
+          .bias = NULL,
+          .b_stride = bias_element_size,
+          .w_stride = weights_stride,
+          .packw_gemm_gio = batch_matrix_multiply_op->ukernel.gemm_ukernels
+                                ->gemm.packw_gemm_gio,
+          .gk_stride = k * (n << log2_input_b_element_size),
+          .gb_stride = n * bias_element_size,
+          .gc_stride = input_b_batch_stride,
+          .pack_weights_and_biases = gemm_config->pack_weights_and_biases,
+          .gemm_config = gemm_config,
+      };
+      batch_matrix_multiply_op->compute[0].task_2d_tile_1d_dynamic =
+          (pthreadpool_task_2d_tile_1d_dynamic_t)
+              xnn_compute_batched_packw_gemm_gio;
+      batch_matrix_multiply_op->compute[0].context_offset =
+          offsetof(struct gemm_op_context, packw_gemm_gio);
+    }
+    batch_matrix_multiply_op->compute[0].type =
+        xnn_parallelization_type_2d_tile_1d_dynamic;
+    batch_matrix_multiply_op->compute[0].range[0] = batch_size_b;
+    batch_matrix_multiply_op->compute[0].range[1] = n;
+    batch_matrix_multiply_op->compute[0].tile[0] = nr;
   }
 
   const struct xnn_pack_lh_config* packed_lh_config = NULL;
+  bool inline_lhs_packing =
+      batch_matrix_multiply_op->flags & XNN_FLAG_INLINE_LHS_PACKING;
   switch (batch_matrix_multiply_op->type) {
+    case xnn_operator_type_batch_matrix_multiply_nc_qd8_f32_qc8w:
+      if (inline_lhs_packing) {
+        packed_lh_config = xnn_init_f32_qdint8_pack_lh_config();
+      }
+      break;
+    case xnn_operator_type_batch_matrix_multiply_nc_qdu8_f32_qc8w:
+      if (inline_lhs_packing) {
+        packed_lh_config = xnn_init_f32_qduint8_pack_lh_config();
+      }
+      break;
     case xnn_operator_type_batch_matrix_multiply_nc_qp8_f32_qc8w:
       packed_lh_config = xnn_init_qp8_pack_lh_config();
       break;
@@ -846,17 +865,125 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
     default:
       break;
   }
-  const size_t k_scaled = k << log2_input_a_element_size;
-  const size_t a_stride =
-      packed_lh_config ? xnn_x8_packq_f32qp8_packed_offset(mr, k, mr, kr, sr)
-                       : k_scaled;
 
-  batch_matrix_multiply_op->dynamic_context.gemm->gemm = (struct gemm_context){
-      .k_scaled = k_scaled,
-      .a_stride = a_stride,
-      .ga_stride = packed_lh_config
-                       ? packed_lh_config->size_fn(m, k, mr_packed, kr, sr)
-                       : m * k_scaled,
+  // Compute the optimal tile size for this GEMM.
+  const size_t nc = xnn_gemm_best_tile_size(
+      /*num_groups=*/batch_size_c, m, n,
+      /*m_stride=*/k << (packed_lh_config
+                             ? packed_lh_config->log2_packed_element_size
+                             : log2_input_a_element_size),
+      /*n_stride=*/batch_matrix_multiply_op->weights_stride,
+      /*cn_stride=*/1 << log2_output_element_size, mr, nr, num_threads);
+
+  // If we are packing the LHS, provide a per-thread workspace to do so inline.
+  size_t workspace_offset = 0;
+  size_t ga_stride = (m * k) << log2_input_a_element_size;
+  memset(&gemm_context->pack_lh, 0, sizeof(struct pack_lh_context));
+  if (packed_lh_config) {
+    ga_stride = packed_lh_config->size_fn(m, k, mr_packed, kr, sr);
+    log2_input_a_element_size = packed_lh_config->log2_packed_element_size;
+    if (inline_lhs_packing) {
+      assert(workspace_size);
+      const size_t per_thread_workspace_size =
+          packed_lh_config->size_fn(mr, k, mr_packed, kr, sr);
+
+      // If the batch size of the LHS is smaller than that of the output, then
+      // it does not make sense to inline the LHS packing, as this would mean
+      // packing the same LHS several times.
+      //
+      // Similarly, inlining the packing also doesn't make sense if the number
+      // of threads exceeds the number of tiles that we can parallelize over.
+      //
+      // Finally, if the packed LHS data will not stay in cache for the duration
+      // of a GEMM tile computation, it does not make sense to inline the LHS
+      // packing either, as it makes more sense to loop over `m` with chunks of
+      // `nc < n`.
+      //
+      // In any of these cases, we pack the entire LHS into the workspace in a
+      // separate `compute`, just as if it were a separate op.
+      const bool should_inline_lhs_packing = xnn_should_inline_lhs_packing(
+          batch_matrix_multiply_op->gemm_config,
+          /*m_packed_stride=*/divide_round_up(per_thread_workspace_size, mr),
+          /*n_stride=*/batch_matrix_multiply_op->weights_stride,
+          /*cn_stride=*/1 << log2_output_element_size, /*mc=*/m,
+          /*nc=*/n);
+
+      if (packed_lh_config->gemv_noop && mr == 1) {
+        xnn_log_debug(
+            "Skipping inline packing for %s with batch_size=%zu, m=%zu, n=%zu, "
+            "and k=%zu since it is a no-op for GEMV.",
+            xnn_operator_type_to_string(batch_matrix_multiply_op->type),
+            batch_size_c, m, n, k);
+      } else if (batch_size_a < batch_size_c || !should_inline_lhs_packing ||
+                 num_threads * mr > round_up(batch_size_a, mr)) {
+        xnn_log_debug(
+            "Pre-packing LHS of %s with batch_size=%zu, m=%zu, n=%zu, and "
+            "k=%zu despite request to inline because %s.",
+            xnn_operator_type_to_string(batch_matrix_multiply_op->type),
+            batch_size_c, m, n, k,
+            (batch_size_a < batch_size_c)
+                ? "broadcasting reuses rows of the lhs"
+                : (!should_inline_lhs_packing
+                       ? "packed lhs will likely not stay in cache"
+                       : "batch size does not parallelize well over the number "
+                         "of threads"));
+
+        // Allocate a workspace for the entire LHS.
+        workspace_offset =
+            round_up_po2(*workspace_size, XNN_ALLOCATION_ALIGNMENT);
+        *workspace_size = workspace_offset + batch_size_a * ga_stride;
+
+        // Set up the LHS packing as a separate compute.
+        gemm_context->pack_lh = (struct pack_lh_context){
+            .m = m,
+            .k = k,
+            .mr = mr_packed,
+            .kr = kr,
+            .sr = sr,
+            .lhs_stride = k << packed_lh_config->log2_input_element_size,
+            .gi_stride = m * k << packed_lh_config->log2_input_element_size,
+            .gp_stride = ga_stride,
+            .packed_offset_fn = packed_lh_config->offset_fn,
+            .pack_lh_ukernel = packed_lh_config->ukernel,
+            .workspace_offset = workspace_offset,
+        };
+
+        struct compute_parameters* pack_compute = gemm_compute++;
+        batch_matrix_multiply_op->num_compute_invocations++;
+
+        pack_compute->context_offset =
+            offsetof(struct gemm_op_context, pack_lh);
+        pack_compute->type = xnn_parallelization_type_2d_tile_1d_dynamic;
+        pack_compute->task_2d_tile_1d_dynamic =
+            (pthreadpool_task_2d_tile_1d_dynamic_t)xnn_compute_pack_lh;
+        pack_compute->range[0] = batch_size_a;
+        pack_compute->range[1] = m;
+        pack_compute->tile[0] = mr_packed;
+
+        inline_lhs_packing = false;
+      } else {
+        xnn_log_debug(
+            "Inlining LHS packing for %s with batch_size=%zu, m=%zu, n=%zu, "
+            "and k=%zu.",
+            xnn_operator_type_to_string(batch_matrix_multiply_op->type),
+            batch_size_c, m, n, k);
+        workspace_offset =
+            round_up_po2(*workspace_size, XNN_ALLOCATION_ALIGNMENT);
+        *workspace_size =
+            workspace_offset + num_threads * per_thread_workspace_size;
+        xnn_log_debug(
+            "Requesting workspace of %zu x %zu bytes for LHS packing.",
+            num_threads, per_thread_workspace_size);
+        log2_input_a_element_size = packed_lh_config->log2_input_element_size;
+        ga_stride = (m * k) << log2_input_a_element_size;
+      }
+    }
+  }
+
+  gemm_context->gemm = (struct gemm_context){
+      .k_scaled = k << log2_input_a_element_size,
+      .a_stride = k << log2_input_a_element_size,
+      .ga_stride = ga_stride,
       .w_stride = batch_matrix_multiply_op->weights_stride,
       .gw_stride = batch_matrix_multiply_op->weights_stride * round_up(n, nr),
       .cm_stride = n << log2_output_element_size,
@@ -870,71 +997,84 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
       .sr = sr,
       .ukernel = gemm_ukernel,
       .kc = k,
-      .mr_packed =
-          m == 1
-              ? 1
-              : batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.mr_packed,
+      .nc = n,
+      .mr_packed = mr_packed,
       .packed_lh_config = packed_lh_config,
+      .workspace_offset = workspace_offset,
+      .dynamic_quantization =
+          (batch_matrix_multiply_op->type ==
+               xnn_operator_type_batch_matrix_multiply_nc_qd8_f32_qc8w ||
+           batch_matrix_multiply_op->type ==
+               xnn_operator_type_batch_matrix_multiply_nc_qdu8_f32_qc8w),
   };
 
   // Copy the batch dimensions into the `gemm_context` struct since we don't
   // know if these pointers will be valid by the time the GEMM is actually
   // called.
-  memcpy(batch_matrix_multiply_op->dynamic_context.gemm->gemm.batch_dims_a,
-         batch_dims_a, sizeof(size_t) * num_batch_dims);
-  memcpy(batch_matrix_multiply_op->dynamic_context.gemm->gemm.batch_dims_b,
-         batch_dims_b, sizeof(size_t) * num_batch_dims);
-  memcpy(batch_matrix_multiply_op->dynamic_context.gemm->gemm.batch_strides_c,
-         batch_strides_c, sizeof(size_t) * num_batch_dims);
-  memcpy(&batch_matrix_multiply_op->dynamic_context.gemm->gemm.params, params,
-         params_size);
-  batch_matrix_multiply_op->dynamic_context.gemm->gemm.fused_params =
-      &batch_matrix_multiply_op->dynamic_context.gemm->gemm.params;
-
-  // Compute the optimal tile size for this GEMM.
-  const size_t nc = xnn_gemm_best_tile_size(
-      /*num_groups=*/batch_size_c, m, n,
-      /*m_stride=*/batch_matrix_multiply_op->dynamic_context.gemm->gemm.a_stride,
-      /*n_stride=*/batch_matrix_multiply_op->dynamic_context.gemm->gemm.w_stride,
-      /*cn_stride=*/1 << log2_output_element_size, mr, nr, num_threads);
+  memcpy(gemm_context->gemm.batch_dims_a, batch_dims_a,
+         sizeof(size_t) * num_batch_dims);
+  memcpy(gemm_context->gemm.batch_dims_b, batch_dims_b,
+         sizeof(size_t) * num_batch_dims);
+  memcpy(gemm_context->gemm.batch_strides_c, batch_strides_c,
+         sizeof(size_t) * num_batch_dims);
+  memcpy(&gemm_context->gemm.params, params, params_size);
+  gemm_context->gemm.fused_params = &gemm_context->gemm.params;
 
 #if XNN_MAX_UARCH_TYPES > 1
   if (xnn_is_hmp_gemm_ukernel(gemm_ukernel)) {
-    gemm_compute->type = xnn_parallelization_type_3d_tile_2d_dynamic_with_uarch;
     if (packed_lh_config) {
-      gemm_compute->task_3d_tile_2d_dynamic_with_id =
-          (pthreadpool_task_3d_tile_2d_dynamic_with_id_t)
-              xnn_compute_hmp_grouped_qp8gemm;
+      if (inline_lhs_packing) {
+        gemm_compute->type =
+            xnn_parallelization_type_2d_tile_1d_dynamic_with_uarch_with_thread;
+        gemm_compute->task_2d_tile_1d_dynamic_with_id_with_thread =
+            (pthreadpool_task_2d_tile_1d_dynamic_with_id_with_thread_t)
+                xnn_compute_hmp_grouped_inline_packed_qp8gemm;
+      } else {
+        gemm_compute->type =
+            xnn_parallelization_type_3d_tile_2d_dynamic_with_uarch;
+        gemm_compute->task_3d_tile_2d_dynamic_with_id =
+            (pthreadpool_task_3d_tile_2d_dynamic_with_id_t)
+                xnn_compute_hmp_grouped_qp8gemm;
+      }
     } else {
+      gemm_compute->type =
+          xnn_parallelization_type_3d_tile_2d_dynamic_with_uarch;
       gemm_compute->task_3d_tile_2d_dynamic_with_id =
           (pthreadpool_task_3d_tile_2d_dynamic_with_id_t)
               xnn_compute_hmp_grouped_gemm;
     }
-  } else {
-    gemm_compute->type = xnn_parallelization_type_3d_tile_2d_dynamic;
+  } else
+#endif  // XNN_MAX_UARCH_TYPES > 1
     if (packed_lh_config) {
-      gemm_compute->task_3d_tile_2d_dynamic =
-          (pthreadpool_task_3d_tile_2d_dynamic_t)xnn_compute_grouped_qp8gemm;
+      if (inline_lhs_packing) {
+        gemm_compute->type =
+            xnn_parallelization_type_2d_tile_1d_dynamic_with_thread;
+        gemm_compute->task_2d_tile_1d_dynamic_with_id =
+            (pthreadpool_task_2d_tile_1d_dynamic_with_id_t)
+                xnn_compute_grouped_inline_packed_qp8gemm;
+      } else {
+        gemm_compute->type = xnn_parallelization_type_3d_tile_2d_dynamic;
+        gemm_compute->task_3d_tile_2d_dynamic =
+            (pthreadpool_task_3d_tile_2d_dynamic_t)xnn_compute_grouped_qp8gemm;
+      }
     } else {
+      gemm_compute->type = xnn_parallelization_type_3d_tile_2d_dynamic;
       gemm_compute->task_3d_tile_2d_dynamic =
           (pthreadpool_task_3d_tile_2d_dynamic_t)xnn_compute_grouped_gemm;
     }
-  }
-#else
-  gemm_compute->type = xnn_parallelization_type_3d_tile_2d_dynamic;
-  if (packed_lh_config) {
-    gemm_compute->task_3d_tile_2d_dynamic =
-        (pthreadpool_task_3d_tile_2d_dynamic_t)xnn_compute_grouped_qp8gemm;
+
+  if (packed_lh_config && inline_lhs_packing) {
+    gemm_compute->range[0] = batch_size_c;
+    gemm_compute->range[1] = m;
+    gemm_compute->tile[0] = mr;
   } else {
-    gemm_compute->task_3d_tile_2d_dynamic =
-        (pthreadpool_task_3d_tile_2d_dynamic_t)xnn_compute_grouped_gemm;
+    gemm_compute->range[0] = batch_size_c;
+    gemm_compute->range[1] = n;
+    gemm_compute->range[2] = m;
+    gemm_compute->tile[0] = nc;
+    gemm_compute->tile[1] = mr;
   }
-#endif
-  gemm_compute->range[0] = batch_size_c;
-  gemm_compute->range[2] = m;
-  gemm_compute->range[1] = n;
-  gemm_compute->tile[1] = mr;
-  gemm_compute->tile[0] = nc;
+
   batch_matrix_multiply_op->state = xnn_run_state_needs_setup;
 
   return xnn_status_success;
@@ -1033,11 +1173,11 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_pf32(
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_qd8_f32_qc8w(
     xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
     const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
-    size_t n, pthreadpool_t threadpool) {
+    size_t n, size_t* workspace_size, pthreadpool_t threadpool) {
   return reshape_batch_matrix_multiply_nc(
       batch_matrix_multiply_op,
       xnn_operator_type_batch_matrix_multiply_nc_qd8_f32_qc8w, num_batch_dims,
-      batch_dims_a, batch_dims_b, m, k, n, /*workspace_size=*/NULL,
+      batch_dims_a, batch_dims_b, m, k, n, workspace_size,
       /*log2_input_a_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
       /*log2_input_b_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
       /*bias_element_size=*/sizeof(int32_t),
@@ -1051,11 +1191,11 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_qd8_f32_qc8w(
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_qp8_f32_qc8w(
     xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
     const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
-    size_t n, pthreadpool_t threadpool) {
+    size_t n, size_t* workspace_size, pthreadpool_t threadpool) {
   return reshape_batch_matrix_multiply_nc(
       batch_matrix_multiply_op,
       xnn_operator_type_batch_matrix_multiply_nc_qp8_f32_qc8w, num_batch_dims,
-      batch_dims_a, batch_dims_b, m, k, n, /*workspace_size=*/NULL,
+      batch_dims_a, batch_dims_b, m, k, n, workspace_size,
       /*log2_input_a_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
       /*log2_input_b_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
       /*bias_element_size=*/sizeof(int32_t),
@@ -1069,11 +1209,11 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_qp8_f32_qc8w(
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_qdu8_f32_qc8w(
     xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
     const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
-    size_t n, pthreadpool_t threadpool) {
+    size_t n, size_t* workspace_size, pthreadpool_t threadpool) {
   return reshape_batch_matrix_multiply_nc(
       batch_matrix_multiply_op,
       xnn_operator_type_batch_matrix_multiply_nc_qdu8_f32_qc8w, num_batch_dims,
-      batch_dims_a, batch_dims_b, m, k, n, /*workspace_size=*/NULL,
+      batch_dims_a, batch_dims_b, m, k, n, workspace_size,
       /*log2_input_a_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
       /*log2_input_b_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
       /*bias_element_size=*/sizeof(int32_t),
@@ -1088,7 +1228,7 @@ static enum xnn_status setup_batch_matrix_multiply_nc(
     xnn_operator_t batch_matrix_multiply_op,
     enum xnn_operator_type expected_operator_type, const void* input_a,
     const struct xnn_quantization_params* quantization_params,
-    const void* input_b, void* packed_weights, void* output) {
+    const void* input_b, void* packed_weights, void* workspace, void* output) {
   if (batch_matrix_multiply_op->type != expected_operator_type) {
     xnn_log_error(
         "failed to setup operator: operator type mismatch (expected %s, got "
@@ -1114,23 +1254,32 @@ static enum xnn_status setup_batch_matrix_multiply_nc(
       break;
   }
 
+  struct gemm_op_context* gemm_context =
+      batch_matrix_multiply_op->dynamic_context.gemm;
+
   if (batch_matrix_multiply_op->flags & XNN_FLAG_TRANSPOSE_B) {
-    batch_matrix_multiply_op->dynamic_context.gemm->packw_gemm_goi.kernel = input_b;
-    batch_matrix_multiply_op->dynamic_context.gemm->packw_gemm_goi.bias = NULL;
-    batch_matrix_multiply_op->dynamic_context.gemm->packw_gemm_goi.packed_weights =
-        packed_weights;
+    gemm_context->packw_gemm_goi.kernel = input_b;
+    gemm_context->packw_gemm_goi.bias = NULL;
+    gemm_context->packw_gemm_goi.packed_weights = packed_weights;
   } else {
-    batch_matrix_multiply_op->dynamic_context.gemm->packw_gemm_gio.kernel = input_b;
-    batch_matrix_multiply_op->dynamic_context.gemm->packw_gemm_gio.bias = NULL;
-    batch_matrix_multiply_op->dynamic_context.gemm->packw_gemm_gio.packed_weights =
-        packed_weights;
+    gemm_context->packw_gemm_gio.kernel = input_b;
+    gemm_context->packw_gemm_gio.bias = NULL;
+    gemm_context->packw_gemm_gio.packed_weights = packed_weights;
   }
 
-  batch_matrix_multiply_op->dynamic_context.gemm->gemm.a = input_a;
-  batch_matrix_multiply_op->dynamic_context.gemm->gemm.packed_w = packed_weights;
-  batch_matrix_multiply_op->dynamic_context.gemm->gemm.c = output;
-  batch_matrix_multiply_op->dynamic_context.gemm->gemm.quantization_params =
-      (const void*)quantization_params;
+  if (gemm_context->pack_lh.m > 0) {
+    gemm_context->pack_lh.lhs = input_a;
+    void* pack_lh_workspace =
+        (void*)((uintptr_t)workspace + gemm_context->pack_lh.workspace_offset);
+    gemm_context->pack_lh.lhs_packed = pack_lh_workspace;
+    gemm_context->gemm.a = pack_lh_workspace;
+  } else {
+    gemm_context->gemm.a = input_a;
+    gemm_context->gemm.workspace = workspace;
+  }
+  gemm_context->gemm.packed_w = packed_weights;
+  gemm_context->gemm.c = output;
+  gemm_context->gemm.quantization_params = (const void*)quantization_params;
 
   batch_matrix_multiply_op->state = xnn_run_state_ready;
 
@@ -1147,7 +1296,7 @@ enum xnn_status xnn_setup_batch_matrix_multiply_nc_f16(
       batch_matrix_multiply_op->dynamic_context.gemm->const_weights
           ? packed_weights(batch_matrix_multiply_op)
           : workspace,
-      output);
+      workspace, output);
 }
 
 enum xnn_status xnn_setup_batch_matrix_multiply_nc_pf16(
@@ -1160,20 +1309,21 @@ enum xnn_status xnn_setup_batch_matrix_multiply_nc_pf16(
       batch_matrix_multiply_op->dynamic_context.gemm->const_weights
           ? packed_weights(batch_matrix_multiply_op)
           : workspace,
-      output);
+      workspace, output);
 }
 
 enum xnn_status xnn_setup_batch_matrix_multiply_nc_bf16_f32(
     xnn_operator_t batch_matrix_multiply_op, void* workspace,
     const void* input_a, const void* input_b, void* output) {
   return setup_batch_matrix_multiply_nc(
-      batch_matrix_multiply_op, xnn_operator_type_batch_matrix_multiply_nc_bf16_f32,
-      input_a, /*quantization_params=*/NULL, input_b,
+      batch_matrix_multiply_op,
+      xnn_operator_type_batch_matrix_multiply_nc_bf16_f32, input_a,
+      /*quantization_params=*/NULL, input_b,
       /*packed_weights=*/
       batch_matrix_multiply_op->dynamic_context.gemm->const_weights
           ? packed_weights(batch_matrix_multiply_op)
           : workspace,
-      output);
+      workspace, output);
 }
 
 enum xnn_status xnn_setup_batch_matrix_multiply_nc_f32(
@@ -1186,7 +1336,7 @@ enum xnn_status xnn_setup_batch_matrix_multiply_nc_f32(
       batch_matrix_multiply_op->dynamic_context.gemm->const_weights
           ? packed_weights(batch_matrix_multiply_op)
           : workspace,
-      output);
+      workspace, output);
 }
 
 enum xnn_status xnn_setup_batch_matrix_multiply_nc_pf32(
@@ -1199,35 +1349,37 @@ enum xnn_status xnn_setup_batch_matrix_multiply_nc_pf32(
       batch_matrix_multiply_op->dynamic_context.gemm->const_weights
           ? packed_weights(batch_matrix_multiply_op)
           : workspace,
-      output);
+      workspace, output);
 }
 
 enum xnn_status xnn_setup_batch_matrix_multiply_nc_qd8_f32_qc8w(
-    xnn_operator_t batch_matrix_multiply_op, const int8_t* input_a,
+    xnn_operator_t batch_matrix_multiply_op, void* workspace,
+    const int8_t* input_a, const int8_t* input_b,
     const struct xnn_quantization_params* quantization_params, float* output) {
   return setup_batch_matrix_multiply_nc(
       batch_matrix_multiply_op,
       xnn_operator_type_batch_matrix_multiply_nc_qd8_f32_qc8w, input_a,
-      quantization_params, /*input_b=*/NULL,
-      packed_weights(batch_matrix_multiply_op), output);
+      quantization_params, input_b, packed_weights(batch_matrix_multiply_op),
+      workspace, output);
 }
 
 enum xnn_status xnn_setup_batch_matrix_multiply_nc_qp8_f32_qc8w(
-    xnn_operator_t batch_matrix_multiply_op, const int8_t* input_a,
-    float* output) {
+    xnn_operator_t batch_matrix_multiply_op, void* workspace,
+    const int8_t* input_a, const float* input_b, float* output) {
   return setup_batch_matrix_multiply_nc(
       batch_matrix_multiply_op,
       xnn_operator_type_batch_matrix_multiply_nc_qp8_f32_qc8w, input_a,
-      /*quantization_params=*/NULL, /*input_b=*/NULL,
-      packed_weights(batch_matrix_multiply_op), output);
+      /*quantization_params=*/NULL, input_b,
+      packed_weights(batch_matrix_multiply_op), workspace, output);
 }
 
 enum xnn_status xnn_setup_batch_matrix_multiply_nc_qdu8_f32_qc8w(
-    xnn_operator_t batch_matrix_multiply_op, const int8_t* input_a,
+    xnn_operator_t batch_matrix_multiply_op, void* workspace,
+    const int8_t* input_a, const float* input_b,
     const struct xnn_quantization_params* quantization_params, float* output) {
   return setup_batch_matrix_multiply_nc(
       batch_matrix_multiply_op,
       xnn_operator_type_batch_matrix_multiply_nc_qdu8_f32_qc8w, input_a,
-      quantization_params, /*input_b=*/NULL,
-      packed_weights(batch_matrix_multiply_op), output);
+      quantization_params, input_b, packed_weights(batch_matrix_multiply_op),
+      workspace, output);
 }

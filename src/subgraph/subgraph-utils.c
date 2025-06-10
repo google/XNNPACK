@@ -77,9 +77,9 @@ void xnn_subgraph_log_impl(const char* filename, size_t line_number,
         fprintf(
             out, " (%s, %s, %s)",
             xnn_datatype_to_string(
-                node->params.fully_connected.assumed_input_datatype !=
+                node->params.inlined_lhs_packing.packed_input_datatype !=
                         xnn_datatype_invalid
-                    ? node->params.fully_connected.assumed_input_datatype
+                    ? node->params.inlined_lhs_packing.packed_input_datatype
                     : subgraph->values[node->inputs[0]].datatype),
             xnn_datatype_to_string(subgraph->values[node->outputs[0]].datatype),
             xnn_datatype_to_string(subgraph->values[node->inputs[1]].datatype));

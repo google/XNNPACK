@@ -2510,7 +2510,8 @@ static enum xnn_status reshape_fully_connected_nc(
       } else if (!should_inline_lhs_packing ||
                  num_threads * mr > round_up(batch_size, mr)) {
         xnn_log_debug(
-            "Pre-packing LHS of %s despite request to inline because %s.",
+            "Pre-packing LHS of %s with m=%zu, n=%zu, and k=%zu despite "
+            "request to inline because %s.",
             xnn_operator_type_to_string(fully_connected_op->type), batch_size,
             output_channels, input_channels,
             !should_inline_lhs_packing
