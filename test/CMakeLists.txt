@@ -96,7 +96,6 @@ SET(MICROKERNEL_UNIT_TESTS
     f16-ibilinear
     f16-ibilinear-chw
     f16-raddstoreexpminusmax
-    f16-spmm-minmax
     f16-vcmul
     f16-vmulcaddc-minmax
     f32-argmaxpool
@@ -107,7 +106,6 @@ SET(MICROKERNEL_UNIT_TESTS
     f32-raddexpminusmax
     f32-raddextexp
     f32-raddstoreexpminusmax
-    f32-spmm-minmax
     f32-vcmul
     f32-vmulcaddc-minmax
     f32-vscaleexpminusmax
@@ -121,6 +119,7 @@ SET(MICROKERNEL_UNIT_TESTS
     rdsum
     rminmax
     rsum
+    spmm-minmax
     s8-ibilinear
     u8-ibilinear
     u8-lut32norm

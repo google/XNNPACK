@@ -436,25 +436,10 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
-    name = "f32_spmm_bench",
-    srcs = [
-        "f32-spmm.cc",
-        "spmm-benchmark.h",
-    ],
+    name = "spmm_bench",
+    srcs = ["spmm.cc"],
     tags = xnnpack_slow_benchmark_tags(),
-    deps = MICROKERNEL_BENCHMARK_DEPS + [
-        ":spmm",
-    ],
-)
-
-xnnpack_benchmark(
-    name = "f16_spmm_bench",
-    srcs = [
-        "f16-spmm.cc",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS + [
-        ":spmm",
-    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [":spmm"],
 )
 
 xnnpack_benchmark(
