@@ -18,8 +18,8 @@
 #include <benchmark/benchmark.h>
 
 void transpose(benchmark::State& state, xnn_transposev_ukernel_fn transpose,
-               benchmark::utils::IsaCheckFunction isa_check = nullptr) {
-  if (isa_check != nullptr && !isa_check(state)) {
+               uint64_t arch_flags = 0) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
   const size_t height = state.range(0);

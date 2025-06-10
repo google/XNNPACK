@@ -34,7 +34,7 @@ namespace xnnpack {
 class S16SimdNEONTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     inputs_.resize(3 * xnn_simd_size_s16);
     output_.resize(xnn_simd_size_s16);
     std::uniform_int_distribution<int16_t> s16(-100, 100);

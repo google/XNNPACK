@@ -31,7 +31,7 @@ namespace xnnpack {
 class F16SimdNEONFP16ARITHTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    TEST_REQUIRES_ARM_FP16_ARITH;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_fp16_arith);
     inputs_.resize(3 * xnn_simd_size_f16);
     output_.resize(xnn_simd_size_f16);
     std::uniform_real_distribution<float> f32dist(-10.0f, 10.0f);

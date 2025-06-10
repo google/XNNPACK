@@ -8,10 +8,8 @@
 #include <chrono>
 #include <cmath>
 #include <functional>
-#include <limits>
 #include <mutex>
 #include <random>
-#include <vector>
 
 #include "bench/gemm-benchmark.h"
 #include "bench/utils.h"
@@ -22,9 +20,6 @@
 
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/gemm.h"
-#include "src/xnnpack/isa-checks.h"
-#include "src/xnnpack/microfnptr.h"
-#include "src/xnnpack/microparams-init.h"
 
 #ifdef BENCHMARK_RUY
 static void RuyBenchmark(benchmark::State& state, size_t threads) {

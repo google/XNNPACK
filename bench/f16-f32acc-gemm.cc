@@ -20,6 +20,7 @@
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/gemm.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
@@ -30,8 +31,8 @@ static void f16_gemm(benchmark::State& state,
                      xnn_f16_gemm_minmax_ukernel_fn gemm, size_t mr, size_t nr,
                      size_t kr, size_t sr,
                      xnn_init_f16_minmax_params_fn init_params,
-                     benchmark::utils::IsaCheckFunction isa_check = nullptr) {
-  if (isa_check != nullptr && !isa_check(state)) {
+                     uint64_t arch_flags = 0) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
 
@@ -116,55 +117,55 @@ static void f16_f32acc_gemm_1x8__avx2_broadcast(benchmark::State& state,
                                                 const char* net) {
   f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_1x8__avx2_broadcast, 1, 8,
            1, 1, xnn_init_f16_minmax_scalar_params,
-           benchmark::utils::CheckAVX2);
+           xnn_arch_x86_avx2);
 }
 static void f16_f32acc_gemm_4x8__avx2_broadcast(benchmark::State& state,
                                                 const char* net) {
   f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_4x8__avx2_broadcast, 4, 8,
            1, 1, xnn_init_f16_minmax_scalar_params,
-           benchmark::utils::CheckAVX2);
+           xnn_arch_x86_avx2);
 }
 static void f16_f32acc_gemm_5x8__avx2_broadcast(benchmark::State& state,
                                                 const char* net) {
   f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_5x8__avx2_broadcast, 5, 8,
            1, 1, xnn_init_f16_minmax_scalar_params,
-           benchmark::utils::CheckAVX2);
+           xnn_arch_x86_avx2);
 }
 static void f16_f32acc_gemm_6x8__avx2_broadcast(benchmark::State& state,
                                                 const char* net) {
   f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_6x8__avx2_broadcast, 6, 8,
            1, 1, xnn_init_f16_minmax_scalar_params,
-           benchmark::utils::CheckAVX2);
+           xnn_arch_x86_avx2);
 }
 static void f16_f32acc_gemm_7x8__avx2_broadcast(benchmark::State& state,
                                                 const char* net) {
   f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_7x8__avx2_broadcast, 7, 8,
            1, 1, xnn_init_f16_minmax_scalar_params,
-           benchmark::utils::CheckAVX2);
+           xnn_arch_x86_avx2);
 }
 static void f16_f32acc_gemm_1x16__avx2_broadcast(benchmark::State& state,
                                                  const char* net) {
   f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_1x16__avx2_broadcast, 1,
            16, 1, 1, xnn_init_f16_minmax_scalar_params,
-           benchmark::utils::CheckAVX2);
+           xnn_arch_x86_avx2);
 }
 static void f16_f32acc_gemm_3x16__avx2_broadcast(benchmark::State& state,
                                                  const char* net) {
   f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_3x16__avx2_broadcast, 3,
            16, 1, 1, xnn_init_f16_minmax_scalar_params,
-           benchmark::utils::CheckAVX2);
+           xnn_arch_x86_avx2);
 }
 static void f16_f32acc_gemm_4x16__avx2_broadcast(benchmark::State& state,
                                                  const char* net) {
   f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_4x16__avx2_broadcast, 4,
            16, 1, 1, xnn_init_f16_minmax_scalar_params,
-           benchmark::utils::CheckAVX2);
+           xnn_arch_x86_avx2);
 }
 static void f16_f32acc_gemm_5x16__avx2_broadcast(benchmark::State& state,
                                                  const char* net) {
   f16_gemm(state, xnn_f16_f32acc_gemm_minmax_ukernel_5x16__avx2_broadcast, 5,
            16, 1, 1, xnn_init_f16_minmax_scalar_params,
-           benchmark::utils::CheckAVX2);
+           xnn_arch_x86_avx2);
 }
 
 BENCHMARK_GEMM(f16_f32acc_gemm_1x8__avx2_broadcast)

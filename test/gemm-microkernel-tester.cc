@@ -16,6 +16,7 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
+#include "src/xnnpack/isa-checks.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
@@ -37,11 +38,9 @@ TEST_P(GemmTest, Test) {
   size_t num_tests_invocations = 0;
 
   // Make sure that we can execute this test.
-  if (params.isa_check) {
-    params.isa_check();
-    if (IsSkipped()) {
-      return;
-    }
+  TEST_REQUIRES_ARCH_FLAGS(params.arch_flags);
+  if (IsSkipped()) {
+    return;
   }
 
   // Loop over the `k`, `m`, and `n` values, if required.

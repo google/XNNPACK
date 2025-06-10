@@ -432,11 +432,11 @@ inline std::ostream& operator<<(std::ostream& outs,
 struct GemmTestParams {
   GemmTestParams(std::string test_name, GemmMicrokernelTester tester,
                  std::function<void(GemmMicrokernelTester& tester)> test_func,
-                 std::function<void(void)> isa_check = nullptr)
+                 uint64_t arch_flags = 0)
       : test_name(test_name),
         tester(tester),
         test_func(test_func),
-        isa_check(isa_check) {}
+        arch_flags(arch_flags) {}
 
   // Setters for the loops over `k`, `m`, and `n`.
   GemmTestParams& loop_k(size_t from, size_t to, size_t step = 1,
@@ -473,7 +473,7 @@ struct GemmTestParams {
   std::string test_name;
   GemmMicrokernelTester tester;
   std::function<void(GemmMicrokernelTester& tester)> test_func;
-  std::function<void(void)> isa_check;
+  uint64_t arch_flags;
   LoopParams loop_k_;
   LoopParams loop_m_;
   LoopParams loop_n_;

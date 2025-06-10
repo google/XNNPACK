@@ -22,8 +22,8 @@ static void f32_spmm(benchmark::State& state,
                      xnn_f32_spmm_minmax_ukernel_fn spmm, uint32_t mr,
                      uint32_t nr, float sparsity,
                      xnn_init_f32_minmax_params_fn init_params,
-                     benchmark::utils::IsaCheckFunction isa_check = nullptr) {
-  if (isa_check != nullptr && !isa_check(state)) {
+                     uint64_t arch_flags = 0) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
 

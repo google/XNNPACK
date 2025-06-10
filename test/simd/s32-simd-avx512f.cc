@@ -33,7 +33,7 @@ namespace xnnpack {
 class S32SimdAVX512FTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    TEST_REQUIRES_X86_AVX512F;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx512f);
     inputs_.resize(3 * xnn_simd_size_s32);
     output_.resize(xnn_simd_size_s32);
     std::uniform_int_distribution<int32_t> s32dist(-10000, 10000);

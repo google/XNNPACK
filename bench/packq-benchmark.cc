@@ -18,9 +18,8 @@
 #include <benchmark/benchmark.h>
 
 void x8_packq(benchmark::State& state, xnn_x8_packq_f32qp8_ukernel_fn packq,
-              size_t mr, size_t kr, size_t sr,
-              benchmark::utils::IsaCheckFunction isa_check) {
-  if (isa_check != nullptr && !isa_check(state)) {
+              size_t mr, size_t kr, size_t sr, uint64_t arch_flags) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
 

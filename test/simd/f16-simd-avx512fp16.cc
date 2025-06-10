@@ -31,7 +31,7 @@ namespace xnnpack {
 class F16SimdAVX512FP16Test : public ::testing::Test {
  protected:
   void SetUp() override {
-    TEST_REQUIRES_X86_AVX512FP16;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx512fp16);
     inputs_.resize(3 * xnn_simd_size_f16);
     output_.resize(xnn_simd_size_f16);
     std::uniform_real_distribution<float> f32dist(-10.0f, 10.0f);

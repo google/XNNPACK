@@ -19,8 +19,8 @@
 static void x8_packw(benchmark::State& state,
                      xnn_x8_packw_gemm_goi_ukernel_fn packw, size_t nr,
                      size_t kr, size_t sr,
-                     benchmark::utils::IsaCheckFunction isa_check = nullptr) {
-  if (isa_check != nullptr && !isa_check(state)) {
+                     uint64_t arch_flags = 0) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
 
@@ -83,8 +83,8 @@ static void x8_packw(benchmark::State& state,
 static void x8_gio_packw(
     benchmark::State& state, xnn_x8_packw_gemm_gio_ukernel_fn packw, size_t nr,
     size_t kr, size_t sr,
-    benchmark::utils::IsaCheckFunction isa_check = nullptr) {
-  if (isa_check != nullptr && !isa_check(state)) {
+    uint64_t arch_flags = 0) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
 
@@ -148,8 +148,8 @@ static void x8_gio_packw(
 static void qs8_packw(benchmark::State& state,
                       xnn_qs8_packw_gemm_goi_ukernel_fn packw, size_t nr,
                       size_t kr, size_t sr,
-                      benchmark::utils::IsaCheckFunction isa_check = nullptr) {
-  if (isa_check != nullptr && !isa_check(state)) {
+                      uint64_t arch_flags = 0) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
 
@@ -212,8 +212,8 @@ static void qs8_packw(benchmark::State& state,
 static void qs8_gio_packw(
     benchmark::State& state, xnn_qs8_packw_gemm_gio_ukernel_fn packw, size_t nr,
     size_t kr, size_t sr,
-    benchmark::utils::IsaCheckFunction isa_check = nullptr) {
-  if (isa_check != nullptr && !isa_check(state)) {
+    uint64_t arch_flags = 0) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
 
@@ -277,8 +277,8 @@ static void qs8_gio_packw(
 static void qs8_qc4w_packw(
     benchmark::State& state, xnn_qs8_qc4w_packw_gemm_goi_ukernel_fn packw,
     size_t nr, size_t kr, size_t sr,
-    benchmark::utils::IsaCheckFunction isa_check = nullptr) {
-  if (isa_check != nullptr && !isa_check(state)) {
+    uint64_t arch_flags = 0) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
 
@@ -341,8 +341,8 @@ static void qs8_qc4w_packw(
 static void x16_packw(benchmark::State& state,
                       xnn_x16_packw_gemm_goi_ukernel_fn packw, size_t nr,
                       size_t kr, size_t sr,
-                      benchmark::utils::IsaCheckFunction isa_check = nullptr) {
-  if (isa_check != nullptr && !isa_check(state)) {
+                      uint64_t arch_flags = 0) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
 
@@ -406,8 +406,8 @@ static void x16_packw(benchmark::State& state,
 static void x16_x32_packw(
     benchmark::State& state, xnn_x16_x32_packw_gemm_goi_ukernel_fn packw,
     size_t nr, size_t kr, size_t sr,
-    benchmark::utils::IsaCheckFunction isa_check = nullptr) {
-  if (isa_check != nullptr && !isa_check(state)) {
+    uint64_t arch_flags = 0) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
 
@@ -471,8 +471,8 @@ static void x16_x32_packw(
 static void x32_packw(benchmark::State& state,
                       xnn_x32_packw_gemm_goi_ukernel_fn packw, size_t nr,
                       size_t kr, size_t sr,
-                      benchmark::utils::IsaCheckFunction isa_check = nullptr) {
-  if (isa_check != nullptr && !isa_check(state)) {
+                      uint64_t arch_flags = 0) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
 
@@ -539,8 +539,8 @@ static void x32_packw(benchmark::State& state,
 static void x32_gio_packw(
     benchmark::State& state, xnn_x32_packw_gemm_gio_ukernel_fn packw, size_t nr,
     size_t kr, size_t sr,
-    benchmark::utils::IsaCheckFunction isa_check = nullptr) {
-  if (isa_check != nullptr && !isa_check(state)) {
+    uint64_t arch_flags = 0) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
 

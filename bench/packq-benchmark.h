@@ -18,6 +18,6 @@
 
 void x8_packq(benchmark::State& state, xnn_x8_packq_f32qp8_ukernel_fn packq,
               size_t mr, size_t kr, size_t sr,
-              benchmark::utils::IsaCheckFunction isa_check = nullptr);
+              uint64_t arch_flags = 0);
 
 #endif  // __XNNPACK_TEST_PACKQ_MICROKERNEL_TESTER_H

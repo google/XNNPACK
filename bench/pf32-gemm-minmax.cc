@@ -13,7 +13,7 @@
 #include "bench/utils.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/gemm.h"
-#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/pack.h"
@@ -30,7 +30,7 @@
       xnn_packed_stride_kai_f32_weights_and_biases,
       /*mr=*/1, /*nr=*/32, /*kr=*/1, /*sr=*/1,
       /*mr_packed=*/1,
-      benchmark::utils::CheckNEONSME2);
+      /*arch_flags=*/xnn_arch_arm_sme2);
   }
 
   BENCHMARK_GEMM(pf32_gemm_minmax_ukernel_1x32__neonsme2)
@@ -43,7 +43,7 @@
       xnn_packed_stride_kai_f32_weights_and_biases,
       /*mr=*/32, /*nr=*/32, /*kr=*/1, /*sr=*/1,
       /*mr_packed=*/32,
-      benchmark::utils::CheckNEONSME2);
+      /*arch_flags=*/xnn_arch_arm_sme2);
   }
 
   BENCHMARK_GEMM(pf32_gemm_minmax_ukernel_32x32__neonsme2)

@@ -19,7 +19,7 @@
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_SPMM_MINMAX_4X1__NEON, k_eq_1) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     SpMMMicrokernelTester()
       .mr(4)
       .nr(1)
@@ -31,7 +31,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__NEON, k_gt_1) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (size_t k = 2; k < 10; k++) {
       SpMMMicrokernelTester()
         .mr(4)
@@ -45,7 +45,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__NEON, n_gt_1) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -61,7 +61,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__NEON, m_lt_4) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t m = 1; m < 4; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -79,7 +79,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__NEON, m_div_4) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t m = 8; m <= 12; m += 4) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -97,7 +97,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__NEON, m_gt_4) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t m = 5; m < 8; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -115,7 +115,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__NEON, output_stride) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -132,7 +132,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__NEON, qmin) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -149,7 +149,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__NEON, qmax) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -166,7 +166,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__NEON, half_sparse) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -182,7 +182,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__NEON, zero_weights) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -201,7 +201,7 @@
 
 #if XNN_ARCH_ARM64
   TEST(F32_SPMM_MINMAX_4X4__AARCH64_NEONFMA, k_eq_1) {
-    TEST_REQUIRES_ARM_NEON_FMA;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fma);
     SpMMMicrokernelTester()
       .mr(4)
       .nr(4)
@@ -213,7 +213,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X4__AARCH64_NEONFMA, k_eq_1_subtile) {
-    TEST_REQUIRES_ARM_NEON_FMA;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fma);
     for (uint32_t n = 1; n <= 4; n++) {
       SpMMMicrokernelTester()
         .mr(4)
@@ -227,7 +227,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X4__AARCH64_NEONFMA, k_gt_1) {
-    TEST_REQUIRES_ARM_NEON_FMA;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fma);
     for (size_t k = 2; k < 10; k++) {
       SpMMMicrokernelTester()
         .mr(4)
@@ -241,7 +241,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X4__AARCH64_NEONFMA, k_gt_1_subtile) {
-    TEST_REQUIRES_ARM_NEON_FMA;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fma);
     for (size_t k = 2; k < 10; k++) {
       for (uint32_t n = 1; n <= 4; n++) {
         SpMMMicrokernelTester()
@@ -257,7 +257,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X4__AARCH64_NEONFMA, n_gt_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fma);
     for (uint32_t n = 5; n < 10; n++) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -273,7 +273,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X4__AARCH64_NEONFMA, n_div_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fma);
     for (uint32_t n = 8; n <= 12; n += 4) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -288,7 +288,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X4__AARCH64_NEONFMA, m_lt_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fma);
     for (uint32_t m = 1; m < 4; m++) {
       for (uint32_t n = 1; n < 20; n += 5) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -306,7 +306,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X4__AARCH64_NEONFMA, m_div_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fma);
     for (uint32_t m = 8; m <= 12; m += 4) {
       for (uint32_t n = 1; n < 20; n += 5) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -324,7 +324,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X4__AARCH64_NEONFMA, m_gt_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fma);
     for (uint32_t m = 5; m < 8; m++) {
       for (uint32_t n = 1; n < 20; n += 5) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -342,7 +342,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X4__AARCH64_NEONFMA, output_stride) {
-    TEST_REQUIRES_ARM_NEON_FMA;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fma);
     for (uint32_t n = 1; n < 20; n += 5) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -359,7 +359,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X4__AARCH64_NEONFMA, qmin) {
-    TEST_REQUIRES_ARM_NEON_FMA;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fma);
     for (uint32_t n = 1; n < 20; n += 5) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -376,7 +376,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X4__AARCH64_NEONFMA, qmax) {
-    TEST_REQUIRES_ARM_NEON_FMA;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fma);
     for (uint32_t n = 1; n < 20; n += 5) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -393,7 +393,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X4__AARCH64_NEONFMA, half_sparse) {
-    TEST_REQUIRES_ARM_NEON_FMA;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fma);
     for (uint32_t n = 1; n < 20; n += 5) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -409,7 +409,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X4__AARCH64_NEONFMA, zero_weights) {
-    TEST_REQUIRES_ARM_NEON_FMA;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fma);
     for (uint32_t n = 1; n < 20; n += 5) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -428,7 +428,7 @@
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_SPMM_MINMAX_8X1__NEON, k_eq_1) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     SpMMMicrokernelTester()
       .mr(8)
       .nr(1)
@@ -440,7 +440,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__NEON, k_gt_1) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (size_t k = 2; k < 10; k++) {
       SpMMMicrokernelTester()
         .mr(8)
@@ -454,7 +454,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__NEON, n_gt_1) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -470,7 +470,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__NEON, m_lt_8) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t m = 1; m < 8; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -488,7 +488,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__NEON, m_div_8) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t m = 16; m <= 24; m += 8) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -506,7 +506,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__NEON, m_gt_8) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t m = 9; m < 16; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -524,7 +524,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__NEON, output_stride) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -541,7 +541,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__NEON, qmin) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -558,7 +558,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__NEON, qmax) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -575,7 +575,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__NEON, half_sparse) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -591,7 +591,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__NEON, zero_weights) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -610,7 +610,7 @@
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_SPMM_MINMAX_16X1__NEON_X2, k_eq_2) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     SpMMMicrokernelTester()
       .mr(16)
       .nr(1)
@@ -622,7 +622,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__NEON_X2, k_lt_2) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (size_t k = 1; k < 2; k++) {
       SpMMMicrokernelTester()
         .mr(16)
@@ -636,7 +636,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__NEON_X2, k_gt_2) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (size_t k = 3; k < 4; k++) {
       SpMMMicrokernelTester()
         .mr(16)
@@ -650,7 +650,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__NEON_X2, k_div_2) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (size_t k = 4; k <= 20; k += 2) {
       SpMMMicrokernelTester()
         .mr(16)
@@ -664,7 +664,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__NEON_X2, n_gt_1) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -680,7 +680,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__NEON_X2, m_lt_16) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t m = 1; m < 16; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -698,7 +698,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__NEON_X2, m_div_16) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t m = 32; m <= 48; m += 16) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -716,7 +716,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__NEON_X2, m_gt_16) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t m = 17; m < 32; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -734,7 +734,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__NEON_X2, output_stride) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -751,7 +751,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__NEON_X2, qmin) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -768,7 +768,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__NEON_X2, qmax) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -785,7 +785,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__NEON_X2, half_sparse) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -801,7 +801,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__NEON_X2, zero_weights) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -820,7 +820,7 @@
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_SPMM_MINMAX_32X1__NEON_X2, k_eq_2) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     SpMMMicrokernelTester()
       .mr(32)
       .nr(1)
@@ -832,7 +832,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__NEON_X2, k_lt_2) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (size_t k = 1; k < 2; k++) {
       SpMMMicrokernelTester()
         .mr(32)
@@ -846,7 +846,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__NEON_X2, k_gt_2) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (size_t k = 3; k < 4; k++) {
       SpMMMicrokernelTester()
         .mr(32)
@@ -860,7 +860,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__NEON_X2, k_div_2) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (size_t k = 4; k <= 20; k += 2) {
       SpMMMicrokernelTester()
         .mr(32)
@@ -874,7 +874,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__NEON_X2, n_gt_1) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -890,7 +890,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__NEON_X2, m_lt_32) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t m = 1; m < 32; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -908,7 +908,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__NEON_X2, m_div_32) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t m = 64; m <= 96; m += 32) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -926,7 +926,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__NEON_X2, m_gt_32) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t m = 33; m < 64; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -944,7 +944,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__NEON_X2, output_stride) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -961,7 +961,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__NEON_X2, qmin) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -978,7 +978,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__NEON_X2, qmax) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -995,7 +995,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__NEON_X2, half_sparse) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -1011,7 +1011,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__NEON_X2, zero_weights) {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -1030,7 +1030,7 @@
 
 #if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
   TEST(F32_SPMM_MINMAX_1VX2__RVV, k_eq_1) {
-    TEST_REQUIRES_RISCV_VECTOR;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     SpMMMicrokernelTester()
       .mr(1 * xnn_init_hardware_config()->vlenb / sizeof(float))
       .nr(2)
@@ -1042,7 +1042,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_1VX2__RVV, k_eq_1_subtile) {
-    TEST_REQUIRES_RISCV_VECTOR;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     for (uint32_t n = 1; n <= 2; n++) {
       SpMMMicrokernelTester()
         .mr(1 * xnn_init_hardware_config()->vlenb / sizeof(float))
@@ -1056,7 +1056,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_1VX2__RVV, k_gt_1) {
-    TEST_REQUIRES_RISCV_VECTOR;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     for (size_t k = 2; k < 10; k++) {
       SpMMMicrokernelTester()
         .mr(1 * xnn_init_hardware_config()->vlenb / sizeof(float))
@@ -1070,7 +1070,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_1VX2__RVV, k_gt_1_subtile) {
-    TEST_REQUIRES_RISCV_VECTOR;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     for (size_t k = 2; k < 10; k++) {
       for (uint32_t n = 1; n <= 2; n++) {
         SpMMMicrokernelTester()
@@ -1086,7 +1086,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_1VX2__RVV, n_gt_2) {
-    TEST_REQUIRES_RISCV_VECTOR;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     for (uint32_t n = 3; n < 10; n++) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -1102,7 +1102,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_1VX2__RVV, n_div_2) {
-    TEST_REQUIRES_RISCV_VECTOR;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     for (uint32_t n = 4; n <= 6; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -1117,7 +1117,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_1VX2__RVV, m_lt_1v) {
-    TEST_REQUIRES_RISCV_VECTOR;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     for (uint32_t m = 1; m < 1 * xnn_init_hardware_config()->vlenb / sizeof(float); m++) {
       for (uint32_t n = 1; n < 10; n += 3) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -1135,7 +1135,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_1VX2__RVV, m_div_1v) {
-    TEST_REQUIRES_RISCV_VECTOR;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     for (uint32_t m = 2 * xnn_init_hardware_config()->vlenb / sizeof(float); m <= 3 * xnn_init_hardware_config()->vlenb / sizeof(float); m += 1 * xnn_init_hardware_config()->vlenb / sizeof(float)) {
       for (uint32_t n = 1; n < 10; n += 3) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -1153,7 +1153,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_1VX2__RVV, m_gt_1v) {
-    TEST_REQUIRES_RISCV_VECTOR;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     size_t vl = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
     for (uint32_t m = vl + 1; m < 2 * xnn_init_hardware_config()->vlenb / sizeof(float); m++) {
       for (uint32_t n = 1; n < 10; n += 3) {
@@ -1172,7 +1172,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_1VX2__RVV, output_stride) {
-    TEST_REQUIRES_RISCV_VECTOR;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     for (uint32_t n = 1; n < 10; n += 3) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -1189,7 +1189,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_1VX2__RVV, qmin) {
-    TEST_REQUIRES_RISCV_VECTOR;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     for (uint32_t n = 1; n < 10; n += 3) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -1206,7 +1206,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_1VX2__RVV, qmax) {
-    TEST_REQUIRES_RISCV_VECTOR;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     for (uint32_t n = 1; n < 10; n += 3) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -1223,7 +1223,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_1VX2__RVV, half_sparse) {
-    TEST_REQUIRES_RISCV_VECTOR;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     for (uint32_t n = 1; n < 10; n += 3) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -1239,7 +1239,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_1VX2__RVV, zero_weights) {
-    TEST_REQUIRES_RISCV_VECTOR;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     for (uint32_t n = 1; n < 10; n += 3) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -1258,7 +1258,7 @@
 
 #if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
   TEST(F32_SPMM_MINMAX_2VX4__RVV, k_eq_1) {
-    TEST_REQUIRES_RISCV_VECTOR;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     SpMMMicrokernelTester()
       .mr(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
       .nr(4)
@@ -1270,7 +1270,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_2VX4__RVV, k_eq_1_subtile) {
-    TEST_REQUIRES_RISCV_VECTOR;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     for (uint32_t n = 1; n <= 4; n++) {
       SpMMMicrokernelTester()
         .mr(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
@@ -1284,7 +1284,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_2VX4__RVV, k_gt_1) {
-    TEST_REQUIRES_RISCV_VECTOR;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     for (size_t k = 2; k < 10; k++) {
       SpMMMicrokernelTester()
         .mr(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
@@ -1298,7 +1298,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_2VX4__RVV, k_gt_1_subtile) {
-    TEST_REQUIRES_RISCV_VECTOR;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     for (size_t k = 2; k < 10; k++) {
       for (uint32_t n = 1; n <= 4; n++) {
         SpMMMicrokernelTester()
@@ -1314,7 +1314,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_2VX4__RVV, n_gt_4) {
-    TEST_REQUIRES_RISCV_VECTOR;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     for (uint32_t n = 5; n < 10; n++) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -1330,7 +1330,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_2VX4__RVV, n_div_4) {
-    TEST_REQUIRES_RISCV_VECTOR;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     for (uint32_t n = 8; n <= 12; n += 4) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -1345,7 +1345,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_2VX4__RVV, m_lt_2v) {
-    TEST_REQUIRES_RISCV_VECTOR;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     for (uint32_t m = 1; m < 2 * xnn_init_hardware_config()->vlenb / sizeof(float); m++) {
       for (uint32_t n = 1; n < 20; n += 5) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -1363,7 +1363,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_2VX4__RVV, m_div_2v) {
-    TEST_REQUIRES_RISCV_VECTOR;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     for (uint32_t m = 4 * xnn_init_hardware_config()->vlenb / sizeof(float); m <= 6 * xnn_init_hardware_config()->vlenb / sizeof(float); m += 2 * xnn_init_hardware_config()->vlenb / sizeof(float)) {
       for (uint32_t n = 1; n < 20; n += 5) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -1381,7 +1381,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_2VX4__RVV, m_gt_2v) {
-    TEST_REQUIRES_RISCV_VECTOR;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     size_t vl = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
     for (uint32_t m = vl + 1; m < 4 * xnn_init_hardware_config()->vlenb / sizeof(float); m++) {
       for (uint32_t n = 1; n < 20; n += 5) {
@@ -1400,7 +1400,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_2VX4__RVV, output_stride) {
-    TEST_REQUIRES_RISCV_VECTOR;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     for (uint32_t n = 1; n < 20; n += 5) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -1417,7 +1417,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_2VX4__RVV, qmin) {
-    TEST_REQUIRES_RISCV_VECTOR;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     for (uint32_t n = 1; n < 20; n += 5) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -1434,7 +1434,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_2VX4__RVV, qmax) {
-    TEST_REQUIRES_RISCV_VECTOR;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     for (uint32_t n = 1; n < 20; n += 5) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -1451,7 +1451,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_2VX4__RVV, half_sparse) {
-    TEST_REQUIRES_RISCV_VECTOR;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     for (uint32_t n = 1; n < 20; n += 5) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -1467,7 +1467,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_2VX4__RVV, zero_weights) {
-    TEST_REQUIRES_RISCV_VECTOR;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     for (uint32_t n = 1; n < 20; n += 5) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -1486,6 +1486,7 @@
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM, k_eq_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     SpMMMicrokernelTester()
       .mr(4)
       .nr(1)
@@ -1497,6 +1498,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM, k_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 2; k < 10; k++) {
       SpMMMicrokernelTester()
         .mr(4)
@@ -1510,6 +1512,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM, n_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -1525,6 +1528,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM, m_lt_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 1; m < 4; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -1542,6 +1546,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM, m_div_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 8; m <= 12; m += 4) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -1559,6 +1564,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM, m_gt_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 5; m < 8; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -1576,6 +1582,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM, output_stride) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -1592,6 +1599,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM, qmin) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -1608,6 +1616,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM, qmax) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -1624,6 +1633,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM, half_sparse) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -1639,6 +1649,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM, zero_weights) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -1657,6 +1668,7 @@
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM_PIPELINED_X2, k_eq_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     SpMMMicrokernelTester()
       .mr(4)
       .nr(1)
@@ -1668,6 +1680,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM_PIPELINED_X2, k_lt_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 1; k < 2; k++) {
       SpMMMicrokernelTester()
         .mr(4)
@@ -1681,6 +1694,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM_PIPELINED_X2, k_gt_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 3; k < 4; k++) {
       SpMMMicrokernelTester()
         .mr(4)
@@ -1694,6 +1708,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM_PIPELINED_X2, k_div_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 4; k <= 20; k += 2) {
       SpMMMicrokernelTester()
         .mr(4)
@@ -1707,6 +1722,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM_PIPELINED_X2, n_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -1722,6 +1738,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM_PIPELINED_X2, m_lt_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 1; m < 4; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -1739,6 +1756,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM_PIPELINED_X2, m_div_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 8; m <= 12; m += 4) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -1756,6 +1774,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM_PIPELINED_X2, m_gt_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 5; m < 8; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -1773,6 +1792,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM_PIPELINED_X2, output_stride) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -1789,6 +1809,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM_PIPELINED_X2, qmin) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -1805,6 +1826,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM_PIPELINED_X2, qmax) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -1821,6 +1843,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM_PIPELINED_X2, half_sparse) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -1836,6 +1859,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM_PIPELINED_X2, zero_weights) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -1854,6 +1878,7 @@
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM_X4, k_eq_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     SpMMMicrokernelTester()
       .mr(4)
       .nr(1)
@@ -1865,6 +1890,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM_X4, k_lt_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 1; k < 4; k++) {
       SpMMMicrokernelTester()
         .mr(4)
@@ -1878,6 +1904,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM_X4, k_gt_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 5; k < 8; k++) {
       SpMMMicrokernelTester()
         .mr(4)
@@ -1891,6 +1918,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM_X4, k_div_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 8; k <= 40; k += 4) {
       SpMMMicrokernelTester()
         .mr(4)
@@ -1904,6 +1932,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM_X4, n_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
         SpMMMicrokernelTester()
@@ -1919,6 +1948,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM_X4, m_lt_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 1; m < 4; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 20; k += 5) {
@@ -1936,6 +1966,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM_X4, m_div_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 8; m <= 12; m += 4) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 20; k += 5) {
@@ -1953,6 +1984,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM_X4, m_gt_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 5; m < 8; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 20; k += 5) {
@@ -1970,6 +2002,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM_X4, output_stride) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 20; k += 5) {
         SpMMMicrokernelTester()
@@ -1986,6 +2019,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM_X4, qmin) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 20; k += 5) {
         SpMMMicrokernelTester()
@@ -2002,6 +2036,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM_X4, qmax) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 20; k += 5) {
         SpMMMicrokernelTester()
@@ -2018,6 +2053,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM_X4, half_sparse) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 20; k += 5) {
         SpMMMicrokernelTester()
@@ -2033,6 +2069,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_ARM_X4, zero_weights) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 20; k += 5) {
         SpMMMicrokernelTester()
@@ -2051,6 +2088,7 @@
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86, k_eq_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     SpMMMicrokernelTester()
       .mr(4)
       .nr(1)
@@ -2062,6 +2100,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86, k_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 2; k < 10; k++) {
       SpMMMicrokernelTester()
         .mr(4)
@@ -2075,6 +2114,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86, n_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -2090,6 +2130,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86, m_lt_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 1; m < 4; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -2107,6 +2148,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86, m_div_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 8; m <= 12; m += 4) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -2124,6 +2166,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86, m_gt_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 5; m < 8; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -2141,6 +2184,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86, output_stride) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -2157,6 +2201,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86, qmin) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -2173,6 +2218,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86, qmax) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -2189,6 +2235,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86, half_sparse) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -2204,6 +2251,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86, zero_weights) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -2222,6 +2270,7 @@
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86_PIPELINED, k_eq_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     SpMMMicrokernelTester()
       .mr(4)
       .nr(1)
@@ -2233,6 +2282,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86_PIPELINED, k_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 2; k < 10; k++) {
       SpMMMicrokernelTester()
         .mr(4)
@@ -2246,6 +2296,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86_PIPELINED, n_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -2261,6 +2312,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86_PIPELINED, m_lt_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 1; m < 4; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -2278,6 +2330,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86_PIPELINED, m_div_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 8; m <= 12; m += 4) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -2295,6 +2348,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86_PIPELINED, m_gt_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 5; m < 8; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -2312,6 +2366,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86_PIPELINED, output_stride) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -2328,6 +2383,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86_PIPELINED, qmin) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -2344,6 +2400,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86_PIPELINED, qmax) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -2360,6 +2417,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86_PIPELINED, half_sparse) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -2375,6 +2433,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86_PIPELINED, zero_weights) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -2393,6 +2452,7 @@
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86_X4, k_eq_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     SpMMMicrokernelTester()
       .mr(4)
       .nr(1)
@@ -2404,6 +2464,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86_X4, k_lt_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 1; k < 4; k++) {
       SpMMMicrokernelTester()
         .mr(4)
@@ -2417,6 +2478,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86_X4, k_gt_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 5; k < 8; k++) {
       SpMMMicrokernelTester()
         .mr(4)
@@ -2430,6 +2492,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86_X4, k_div_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 8; k <= 40; k += 4) {
       SpMMMicrokernelTester()
         .mr(4)
@@ -2443,6 +2506,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86_X4, n_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
         SpMMMicrokernelTester()
@@ -2458,6 +2522,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86_X4, m_lt_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 1; m < 4; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 20; k += 5) {
@@ -2475,6 +2540,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86_X4, m_div_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 8; m <= 12; m += 4) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 20; k += 5) {
@@ -2492,6 +2558,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86_X4, m_gt_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 5; m < 8; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 20; k += 5) {
@@ -2509,6 +2576,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86_X4, output_stride) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 20; k += 5) {
         SpMMMicrokernelTester()
@@ -2525,6 +2593,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86_X4, qmin) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 20; k += 5) {
         SpMMMicrokernelTester()
@@ -2541,6 +2610,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86_X4, qmax) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 20; k += 5) {
         SpMMMicrokernelTester()
@@ -2557,6 +2627,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86_X4, half_sparse) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 20; k += 5) {
         SpMMMicrokernelTester()
@@ -2572,6 +2643,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMSIMD_X86_X4, zero_weights) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 20; k += 5) {
         SpMMMicrokernelTester()
@@ -2590,6 +2662,7 @@
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_ARM_PIPELINED, k_eq_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     SpMMMicrokernelTester()
       .mr(8)
       .nr(1)
@@ -2601,6 +2674,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_ARM_PIPELINED, k_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 2; k < 10; k++) {
       SpMMMicrokernelTester()
         .mr(8)
@@ -2614,6 +2688,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_ARM_PIPELINED, n_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -2629,6 +2704,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_ARM_PIPELINED, m_lt_8) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 1; m < 8; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -2646,6 +2722,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_ARM_PIPELINED, m_div_8) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 16; m <= 24; m += 8) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -2663,6 +2740,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_ARM_PIPELINED, m_gt_8) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 9; m < 16; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -2680,6 +2758,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_ARM_PIPELINED, output_stride) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -2696,6 +2775,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_ARM_PIPELINED, qmin) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -2712,6 +2792,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_ARM_PIPELINED, qmax) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -2728,6 +2809,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_ARM_PIPELINED, half_sparse) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -2743,6 +2825,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMSIMD_ARM_PIPELINED, zero_weights) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -2761,6 +2844,7 @@
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_ARM_PIPELINED, k_eq_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     SpMMMicrokernelTester()
       .mr(16)
       .nr(1)
@@ -2772,6 +2856,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_ARM_PIPELINED, k_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 2; k < 10; k++) {
       SpMMMicrokernelTester()
         .mr(16)
@@ -2785,6 +2870,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_ARM_PIPELINED, n_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -2800,6 +2886,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_ARM_PIPELINED, m_lt_16) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 1; m < 16; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -2817,6 +2904,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_ARM_PIPELINED, m_div_16) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 32; m <= 48; m += 16) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -2834,6 +2922,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_ARM_PIPELINED, m_gt_16) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 17; m < 32; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -2851,6 +2940,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_ARM_PIPELINED, output_stride) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -2867,6 +2957,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_ARM_PIPELINED, qmin) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -2883,6 +2974,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_ARM_PIPELINED, qmax) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -2899,6 +2991,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_ARM_PIPELINED, half_sparse) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -2914,6 +3007,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMSIMD_ARM_PIPELINED, zero_weights) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -2932,6 +3026,7 @@
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_SPMM_MINMAX_32X1__WASMSIMD_X86_PIPELINED, k_eq_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     SpMMMicrokernelTester()
       .mr(32)
       .nr(1)
@@ -2943,6 +3038,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMSIMD_X86_PIPELINED, k_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 2; k < 10; k++) {
       SpMMMicrokernelTester()
         .mr(32)
@@ -2956,6 +3052,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMSIMD_X86_PIPELINED, n_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -2971,6 +3068,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMSIMD_X86_PIPELINED, m_lt_32) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 1; m < 32; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -2988,6 +3086,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMSIMD_X86_PIPELINED, m_div_32) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 64; m <= 96; m += 32) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -3005,6 +3104,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMSIMD_X86_PIPELINED, m_gt_32) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 33; m < 64; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -3022,6 +3122,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMSIMD_X86_PIPELINED, output_stride) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -3038,6 +3139,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMSIMD_X86_PIPELINED, qmin) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -3054,6 +3156,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMSIMD_X86_PIPELINED, qmax) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -3070,6 +3173,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMSIMD_X86_PIPELINED, half_sparse) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -3085,6 +3189,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMSIMD_X86_PIPELINED, zero_weights) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -3103,6 +3208,7 @@
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_SPMM_MINMAX_32X1__WASMSIMD_X86_PIPELINED_X2, k_eq_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     SpMMMicrokernelTester()
       .mr(32)
       .nr(1)
@@ -3114,6 +3220,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMSIMD_X86_PIPELINED_X2, k_lt_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 1; k < 2; k++) {
       SpMMMicrokernelTester()
         .mr(32)
@@ -3127,6 +3234,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMSIMD_X86_PIPELINED_X2, k_gt_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 3; k < 4; k++) {
       SpMMMicrokernelTester()
         .mr(32)
@@ -3140,6 +3248,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMSIMD_X86_PIPELINED_X2, k_div_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 4; k <= 20; k += 2) {
       SpMMMicrokernelTester()
         .mr(32)
@@ -3153,6 +3262,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMSIMD_X86_PIPELINED_X2, n_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -3168,6 +3278,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMSIMD_X86_PIPELINED_X2, m_lt_32) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 1; m < 32; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -3185,6 +3296,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMSIMD_X86_PIPELINED_X2, m_div_32) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 64; m <= 96; m += 32) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -3202,6 +3314,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMSIMD_X86_PIPELINED_X2, m_gt_32) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 33; m < 64; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -3219,6 +3332,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMSIMD_X86_PIPELINED_X2, output_stride) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -3235,6 +3349,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMSIMD_X86_PIPELINED_X2, qmin) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -3251,6 +3366,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMSIMD_X86_PIPELINED_X2, qmax) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -3267,6 +3383,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMSIMD_X86_PIPELINED_X2, half_sparse) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -3282,6 +3399,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMSIMD_X86_PIPELINED_X2, zero_weights) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -3300,6 +3418,7 @@
 
 #if XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_SPMM_MINMAX_4X1__WASMRELAXEDSIMD_ARM, k_eq_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     SpMMMicrokernelTester()
       .mr(4)
       .nr(1)
@@ -3311,6 +3430,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMRELAXEDSIMD_ARM, k_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 2; k < 10; k++) {
       SpMMMicrokernelTester()
         .mr(4)
@@ -3324,6 +3444,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMRELAXEDSIMD_ARM, n_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -3339,6 +3460,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMRELAXEDSIMD_ARM, m_lt_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 1; m < 4; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -3356,6 +3478,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMRELAXEDSIMD_ARM, m_div_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 8; m <= 12; m += 4) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -3373,6 +3496,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMRELAXEDSIMD_ARM, m_gt_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 5; m < 8; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -3390,6 +3514,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMRELAXEDSIMD_ARM, output_stride) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -3406,6 +3531,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMRELAXEDSIMD_ARM, qmin) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -3422,6 +3548,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMRELAXEDSIMD_ARM, qmax) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -3438,6 +3565,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMRELAXEDSIMD_ARM, half_sparse) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -3453,6 +3581,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMRELAXEDSIMD_ARM, zero_weights) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -3471,6 +3600,7 @@
 
 #if XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_SPMM_MINMAX_4X1__WASMRELAXEDSIMD_X86, k_eq_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     SpMMMicrokernelTester()
       .mr(4)
       .nr(1)
@@ -3482,6 +3612,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMRELAXEDSIMD_X86, k_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 2; k < 10; k++) {
       SpMMMicrokernelTester()
         .mr(4)
@@ -3495,6 +3626,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMRELAXEDSIMD_X86, n_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -3510,6 +3642,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMRELAXEDSIMD_X86, m_lt_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 1; m < 4; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -3527,6 +3660,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMRELAXEDSIMD_X86, m_div_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 8; m <= 12; m += 4) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -3544,6 +3678,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMRELAXEDSIMD_X86, m_gt_4) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 5; m < 8; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -3561,6 +3696,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMRELAXEDSIMD_X86, output_stride) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -3577,6 +3713,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMRELAXEDSIMD_X86, qmin) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -3593,6 +3730,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMRELAXEDSIMD_X86, qmax) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -3609,6 +3747,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMRELAXEDSIMD_X86, half_sparse) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -3624,6 +3763,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_4X1__WASMRELAXEDSIMD_X86, zero_weights) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -3642,6 +3782,7 @@
 
 #if XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_ARM_PIPELINED_X2, k_eq_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     SpMMMicrokernelTester()
       .mr(8)
       .nr(1)
@@ -3653,6 +3794,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_ARM_PIPELINED_X2, k_lt_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 1; k < 2; k++) {
       SpMMMicrokernelTester()
         .mr(8)
@@ -3666,6 +3808,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_ARM_PIPELINED_X2, k_gt_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 3; k < 4; k++) {
       SpMMMicrokernelTester()
         .mr(8)
@@ -3679,6 +3822,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_ARM_PIPELINED_X2, k_div_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 4; k <= 20; k += 2) {
       SpMMMicrokernelTester()
         .mr(8)
@@ -3692,6 +3836,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_ARM_PIPELINED_X2, n_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -3707,6 +3852,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_ARM_PIPELINED_X2, m_lt_8) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 1; m < 8; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -3724,6 +3870,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_ARM_PIPELINED_X2, m_div_8) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 16; m <= 24; m += 8) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -3741,6 +3888,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_ARM_PIPELINED_X2, m_gt_8) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 9; m < 16; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -3758,6 +3906,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_ARM_PIPELINED_X2, output_stride) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -3774,6 +3923,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_ARM_PIPELINED_X2, qmin) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -3790,6 +3940,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_ARM_PIPELINED_X2, qmax) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -3806,6 +3957,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_ARM_PIPELINED_X2, half_sparse) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -3821,6 +3973,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_ARM_PIPELINED_X2, zero_weights) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -3839,6 +3992,7 @@
 
 #if XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_ARM_X2, k_eq_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     SpMMMicrokernelTester()
       .mr(8)
       .nr(1)
@@ -3850,6 +4004,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_ARM_X2, k_lt_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 1; k < 2; k++) {
       SpMMMicrokernelTester()
         .mr(8)
@@ -3863,6 +4018,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_ARM_X2, k_gt_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 3; k < 4; k++) {
       SpMMMicrokernelTester()
         .mr(8)
@@ -3876,6 +4032,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_ARM_X2, k_div_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 4; k <= 20; k += 2) {
       SpMMMicrokernelTester()
         .mr(8)
@@ -3889,6 +4046,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_ARM_X2, n_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -3904,6 +4062,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_ARM_X2, m_lt_8) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 1; m < 8; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -3921,6 +4080,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_ARM_X2, m_div_8) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 16; m <= 24; m += 8) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -3938,6 +4098,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_ARM_X2, m_gt_8) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 9; m < 16; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -3955,6 +4116,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_ARM_X2, output_stride) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -3971,6 +4133,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_ARM_X2, qmin) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -3987,6 +4150,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_ARM_X2, qmax) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -4003,6 +4167,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_ARM_X2, half_sparse) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -4018,6 +4183,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_ARM_X2, zero_weights) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -4036,6 +4202,7 @@
 
 #if XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_X86_PIPELINED, k_eq_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     SpMMMicrokernelTester()
       .mr(8)
       .nr(1)
@@ -4047,6 +4214,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_X86_PIPELINED, k_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 2; k < 10; k++) {
       SpMMMicrokernelTester()
         .mr(8)
@@ -4060,6 +4228,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_X86_PIPELINED, n_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -4075,6 +4244,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_X86_PIPELINED, m_lt_8) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 1; m < 8; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -4092,6 +4262,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_X86_PIPELINED, m_div_8) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 16; m <= 24; m += 8) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -4109,6 +4280,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_X86_PIPELINED, m_gt_8) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 9; m < 16; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -4126,6 +4298,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_X86_PIPELINED, output_stride) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -4142,6 +4315,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_X86_PIPELINED, qmin) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -4158,6 +4332,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_X86_PIPELINED, qmax) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -4174,6 +4349,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_X86_PIPELINED, half_sparse) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -4189,6 +4365,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_X86_PIPELINED, zero_weights) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -4207,6 +4384,7 @@
 
 #if XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_X86_X2, k_eq_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     SpMMMicrokernelTester()
       .mr(8)
       .nr(1)
@@ -4218,6 +4396,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_X86_X2, k_lt_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 1; k < 2; k++) {
       SpMMMicrokernelTester()
         .mr(8)
@@ -4231,6 +4410,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_X86_X2, k_gt_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 3; k < 4; k++) {
       SpMMMicrokernelTester()
         .mr(8)
@@ -4244,6 +4424,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_X86_X2, k_div_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 4; k <= 20; k += 2) {
       SpMMMicrokernelTester()
         .mr(8)
@@ -4257,6 +4438,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_X86_X2, n_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -4272,6 +4454,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_X86_X2, m_lt_8) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 1; m < 8; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -4289,6 +4472,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_X86_X2, m_div_8) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 16; m <= 24; m += 8) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -4306,6 +4490,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_X86_X2, m_gt_8) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 9; m < 16; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -4323,6 +4508,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_X86_X2, output_stride) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -4339,6 +4525,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_X86_X2, qmin) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -4355,6 +4542,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_X86_X2, qmax) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -4371,6 +4559,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_X86_X2, half_sparse) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -4386,6 +4575,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_8X1__WASMRELAXEDSIMD_X86_X2, zero_weights) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -4404,6 +4594,7 @@
 
 #if XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_ARM_X2, k_eq_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     SpMMMicrokernelTester()
       .mr(16)
       .nr(1)
@@ -4415,6 +4606,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_ARM_X2, k_lt_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 1; k < 2; k++) {
       SpMMMicrokernelTester()
         .mr(16)
@@ -4428,6 +4620,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_ARM_X2, k_gt_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 3; k < 4; k++) {
       SpMMMicrokernelTester()
         .mr(16)
@@ -4441,6 +4634,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_ARM_X2, k_div_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 4; k <= 20; k += 2) {
       SpMMMicrokernelTester()
         .mr(16)
@@ -4454,6 +4648,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_ARM_X2, n_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -4469,6 +4664,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_ARM_X2, m_lt_16) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 1; m < 16; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -4486,6 +4682,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_ARM_X2, m_div_16) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 32; m <= 48; m += 16) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -4503,6 +4700,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_ARM_X2, m_gt_16) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 17; m < 32; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -4520,6 +4718,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_ARM_X2, output_stride) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -4536,6 +4735,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_ARM_X2, qmin) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -4552,6 +4752,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_ARM_X2, qmax) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -4568,6 +4769,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_ARM_X2, half_sparse) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -4583,6 +4785,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_ARM_X2, zero_weights) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -4601,6 +4804,7 @@
 
 #if XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_X86_PIPELINED_X2, k_eq_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     SpMMMicrokernelTester()
       .mr(16)
       .nr(1)
@@ -4612,6 +4816,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_X86_PIPELINED_X2, k_lt_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 1; k < 2; k++) {
       SpMMMicrokernelTester()
         .mr(16)
@@ -4625,6 +4830,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_X86_PIPELINED_X2, k_gt_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 3; k < 4; k++) {
       SpMMMicrokernelTester()
         .mr(16)
@@ -4638,6 +4844,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_X86_PIPELINED_X2, k_div_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 4; k <= 20; k += 2) {
       SpMMMicrokernelTester()
         .mr(16)
@@ -4651,6 +4858,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_X86_PIPELINED_X2, n_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -4666,6 +4874,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_X86_PIPELINED_X2, m_lt_16) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 1; m < 16; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -4683,6 +4892,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_X86_PIPELINED_X2, m_div_16) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 32; m <= 48; m += 16) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -4700,6 +4910,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_X86_PIPELINED_X2, m_gt_16) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 17; m < 32; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -4717,6 +4928,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_X86_PIPELINED_X2, output_stride) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -4733,6 +4945,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_X86_PIPELINED_X2, qmin) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -4749,6 +4962,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_X86_PIPELINED_X2, qmax) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -4765,6 +4979,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_X86_PIPELINED_X2, half_sparse) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -4780,6 +4995,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_X86_PIPELINED_X2, zero_weights) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -4798,6 +5014,7 @@
 
 #if XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_X86_X2, k_eq_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     SpMMMicrokernelTester()
       .mr(16)
       .nr(1)
@@ -4809,6 +5026,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_X86_X2, k_lt_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 1; k < 2; k++) {
       SpMMMicrokernelTester()
         .mr(16)
@@ -4822,6 +5040,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_X86_X2, k_gt_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 3; k < 4; k++) {
       SpMMMicrokernelTester()
         .mr(16)
@@ -4835,6 +5054,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_X86_X2, k_div_2) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 4; k <= 20; k += 2) {
       SpMMMicrokernelTester()
         .mr(16)
@@ -4848,6 +5068,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_X86_X2, n_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -4863,6 +5084,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_X86_X2, m_lt_16) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 1; m < 16; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -4880,6 +5102,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_X86_X2, m_div_16) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 32; m <= 48; m += 16) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -4897,6 +5120,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_X86_X2, m_gt_16) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 17; m < 32; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -4914,6 +5138,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_X86_X2, output_stride) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -4930,6 +5155,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_X86_X2, qmin) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -4946,6 +5172,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_X86_X2, qmax) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -4962,6 +5189,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_X86_X2, half_sparse) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -4977,6 +5205,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_16X1__WASMRELAXEDSIMD_X86_X2, zero_weights) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -4995,6 +5224,7 @@
 
 #if XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_SPMM_MINMAX_32X1__WASMRELAXEDSIMD_ARM_PIPELINED, k_eq_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     SpMMMicrokernelTester()
       .mr(32)
       .nr(1)
@@ -5006,6 +5236,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMRELAXEDSIMD_ARM_PIPELINED, k_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (size_t k = 2; k < 10; k++) {
       SpMMMicrokernelTester()
         .mr(32)
@@ -5019,6 +5250,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMRELAXEDSIMD_ARM_PIPELINED, n_gt_1) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -5034,6 +5266,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMRELAXEDSIMD_ARM_PIPELINED, m_lt_32) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 1; m < 32; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -5051,6 +5284,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMRELAXEDSIMD_ARM_PIPELINED, m_div_32) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 64; m <= 96; m += 32) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -5068,6 +5302,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMRELAXEDSIMD_ARM_PIPELINED, m_gt_32) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t m = 33; m < 64; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -5085,6 +5320,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMRELAXEDSIMD_ARM_PIPELINED, output_stride) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -5101,6 +5337,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMRELAXEDSIMD_ARM_PIPELINED, qmin) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -5117,6 +5354,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMRELAXEDSIMD_ARM_PIPELINED, qmax) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -5133,6 +5371,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMRELAXEDSIMD_ARM_PIPELINED, half_sparse) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -5148,6 +5387,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__WASMRELAXEDSIMD_ARM_PIPELINED, zero_weights) {
+    TEST_REQUIRES_ARCH_FLAGS(0);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -5166,7 +5406,7 @@
 
 #if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
   TEST(F32_SPMM_MINMAX_32X1__HVX_PIPELINED_X4, k_eq_4) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     SpMMMicrokernelTester()
       .mr(32)
       .nr(1)
@@ -5178,7 +5418,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__HVX_PIPELINED_X4, k_lt_4) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (size_t k = 1; k < 4; k++) {
       SpMMMicrokernelTester()
         .mr(32)
@@ -5192,7 +5432,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__HVX_PIPELINED_X4, k_gt_4) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (size_t k = 5; k < 8; k++) {
       SpMMMicrokernelTester()
         .mr(32)
@@ -5206,7 +5446,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__HVX_PIPELINED_X4, k_div_4) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (size_t k = 8; k <= 40; k += 4) {
       SpMMMicrokernelTester()
         .mr(32)
@@ -5220,7 +5460,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__HVX_PIPELINED_X4, n_gt_1) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
         SpMMMicrokernelTester()
@@ -5236,7 +5476,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__HVX_PIPELINED_X4, m_lt_32) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t m = 1; m < 32; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 20; k += 5) {
@@ -5254,7 +5494,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__HVX_PIPELINED_X4, m_div_32) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t m = 64; m <= 96; m += 32) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 20; k += 5) {
@@ -5272,7 +5512,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__HVX_PIPELINED_X4, m_gt_32) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t m = 33; m < 64; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 20; k += 5) {
@@ -5290,7 +5530,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__HVX_PIPELINED_X4, output_stride) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 20; k += 5) {
         SpMMMicrokernelTester()
@@ -5307,7 +5547,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__HVX_PIPELINED_X4, qmin) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 20; k += 5) {
         SpMMMicrokernelTester()
@@ -5324,7 +5564,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__HVX_PIPELINED_X4, qmax) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 20; k += 5) {
         SpMMMicrokernelTester()
@@ -5341,7 +5581,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__HVX_PIPELINED_X4, half_sparse) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 20; k += 5) {
         SpMMMicrokernelTester()
@@ -5357,7 +5597,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_32X1__HVX_PIPELINED_X4, zero_weights) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 20; k += 5) {
         SpMMMicrokernelTester()
@@ -5376,7 +5616,7 @@
 
 #if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
   TEST(F32_SPMM_MINMAX_64X1__HVX_X4, k_eq_4) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     SpMMMicrokernelTester()
       .mr(64)
       .nr(1)
@@ -5388,7 +5628,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_64X1__HVX_X4, k_lt_4) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (size_t k = 1; k < 4; k++) {
       SpMMMicrokernelTester()
         .mr(64)
@@ -5402,7 +5642,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_64X1__HVX_X4, k_gt_4) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (size_t k = 5; k < 8; k++) {
       SpMMMicrokernelTester()
         .mr(64)
@@ -5416,7 +5656,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_64X1__HVX_X4, k_div_4) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (size_t k = 8; k <= 40; k += 4) {
       SpMMMicrokernelTester()
         .mr(64)
@@ -5430,7 +5670,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_64X1__HVX_X4, n_gt_1) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
         SpMMMicrokernelTester()
@@ -5446,7 +5686,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_64X1__HVX_X4, m_lt_64) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t m = 1; m < 64; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 20; k += 5) {
@@ -5464,7 +5704,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_64X1__HVX_X4, m_div_64) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t m = 128; m <= 192; m += 64) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 20; k += 5) {
@@ -5482,7 +5722,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_64X1__HVX_X4, m_gt_64) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t m = 65; m < 128; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 20; k += 5) {
@@ -5500,7 +5740,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_64X1__HVX_X4, output_stride) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 20; k += 5) {
         SpMMMicrokernelTester()
@@ -5517,7 +5757,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_64X1__HVX_X4, qmin) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 20; k += 5) {
         SpMMMicrokernelTester()
@@ -5534,7 +5774,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_64X1__HVX_X4, qmax) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 20; k += 5) {
         SpMMMicrokernelTester()
@@ -5551,7 +5791,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_64X1__HVX_X4, half_sparse) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 20; k += 5) {
         SpMMMicrokernelTester()
@@ -5567,7 +5807,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_64X1__HVX_X4, zero_weights) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 20; k += 5) {
         SpMMMicrokernelTester()
@@ -5586,7 +5826,7 @@
 
 #if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
   TEST(F32_SPMM_MINMAX_128X1__HVX, k_eq_1) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     SpMMMicrokernelTester()
       .mr(128)
       .nr(1)
@@ -5598,7 +5838,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_128X1__HVX, k_gt_1) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (size_t k = 2; k < 10; k++) {
       SpMMMicrokernelTester()
         .mr(128)
@@ -5612,7 +5852,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_128X1__HVX, n_gt_1) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -5628,7 +5868,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_128X1__HVX, m_lt_128) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t m = 1; m < 128; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -5646,7 +5886,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_128X1__HVX, m_div_128) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t m = 256; m <= 384; m += 128) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -5664,7 +5904,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_128X1__HVX, m_gt_128) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t m = 129; m < 256; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 5; k += 2) {
@@ -5682,7 +5922,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_128X1__HVX, output_stride) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -5699,7 +5939,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_128X1__HVX, qmin) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -5716,7 +5956,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_128X1__HVX, qmax) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -5733,7 +5973,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_128X1__HVX, half_sparse) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -5749,7 +5989,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_128X1__HVX, zero_weights) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
         SpMMMicrokernelTester()
@@ -5768,7 +6008,7 @@
 
 #if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
   TEST(F32_SPMM_MINMAX_128X1__HVX_X2, k_eq_2) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     SpMMMicrokernelTester()
       .mr(128)
       .nr(1)
@@ -5780,7 +6020,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_128X1__HVX_X2, k_lt_2) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (size_t k = 1; k < 2; k++) {
       SpMMMicrokernelTester()
         .mr(128)
@@ -5794,7 +6034,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_128X1__HVX_X2, k_gt_2) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (size_t k = 3; k < 4; k++) {
       SpMMMicrokernelTester()
         .mr(128)
@@ -5808,7 +6048,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_128X1__HVX_X2, k_div_2) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (size_t k = 4; k <= 20; k += 2) {
       SpMMMicrokernelTester()
         .mr(128)
@@ -5822,7 +6062,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_128X1__HVX_X2, n_gt_1) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t n = 2; n < 10; n++) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -5838,7 +6078,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_128X1__HVX_X2, m_lt_128) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t m = 1; m < 128; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -5856,7 +6096,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_128X1__HVX_X2, m_div_128) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t m = 256; m <= 384; m += 128) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -5874,7 +6114,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_128X1__HVX_X2, m_gt_128) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t m = 129; m < 256; m++) {
       for (uint32_t n = 1; n < 10; n += 2) {
         for (size_t k = 1; k <= 10; k += 3) {
@@ -5892,7 +6132,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_128X1__HVX_X2, output_stride) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -5909,7 +6149,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_128X1__HVX_X2, qmin) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -5926,7 +6166,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_128X1__HVX_X2, qmax) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -5943,7 +6183,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_128X1__HVX_X2, half_sparse) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -5959,7 +6199,7 @@
   }
 
   TEST(F32_SPMM_MINMAX_128X1__HVX_X2, zero_weights) {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 10; k += 3) {
         SpMMMicrokernelTester()
@@ -5977,6 +6217,7 @@
 
 
 TEST(F32_SPMM_MINMAX_1X1__SCALAR_PIPELINED, k_eq_1) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   SpMMMicrokernelTester()
     .mr(1)
     .nr(1)
@@ -5988,6 +6229,7 @@ TEST(F32_SPMM_MINMAX_1X1__SCALAR_PIPELINED, k_eq_1) {
 }
 
 TEST(F32_SPMM_MINMAX_1X1__SCALAR_PIPELINED, k_gt_1) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (size_t k = 2; k < 10; k++) {
     SpMMMicrokernelTester()
       .mr(1)
@@ -6001,6 +6243,7 @@ TEST(F32_SPMM_MINMAX_1X1__SCALAR_PIPELINED, k_gt_1) {
 }
 
 TEST(F32_SPMM_MINMAX_1X1__SCALAR_PIPELINED, n_gt_1) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t n = 2; n < 10; n++) {
     for (size_t k = 1; k <= 5; k += 2) {
       SpMMMicrokernelTester()
@@ -6016,6 +6259,7 @@ TEST(F32_SPMM_MINMAX_1X1__SCALAR_PIPELINED, n_gt_1) {
 }
 
 TEST(F32_SPMM_MINMAX_1X1__SCALAR_PIPELINED, m_lt_1) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t m = 1; m < 1; m++) {
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
@@ -6033,6 +6277,7 @@ TEST(F32_SPMM_MINMAX_1X1__SCALAR_PIPELINED, m_lt_1) {
 }
 
 TEST(F32_SPMM_MINMAX_1X1__SCALAR_PIPELINED, m_div_1) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t m = 2; m <= 3; m += 1) {
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
@@ -6050,6 +6295,7 @@ TEST(F32_SPMM_MINMAX_1X1__SCALAR_PIPELINED, m_div_1) {
 }
 
 TEST(F32_SPMM_MINMAX_1X1__SCALAR_PIPELINED, m_gt_1) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t m = 2; m < 2; m++) {
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
@@ -6067,6 +6313,7 @@ TEST(F32_SPMM_MINMAX_1X1__SCALAR_PIPELINED, m_gt_1) {
 }
 
 TEST(F32_SPMM_MINMAX_1X1__SCALAR_PIPELINED, output_stride) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t n = 1; n < 10; n += 2) {
     for (size_t k = 1; k <= 5; k += 2) {
       SpMMMicrokernelTester()
@@ -6083,6 +6330,7 @@ TEST(F32_SPMM_MINMAX_1X1__SCALAR_PIPELINED, output_stride) {
 }
 
 TEST(F32_SPMM_MINMAX_1X1__SCALAR_PIPELINED, qmin) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t n = 1; n < 10; n += 2) {
     for (size_t k = 1; k <= 5; k += 2) {
       SpMMMicrokernelTester()
@@ -6099,6 +6347,7 @@ TEST(F32_SPMM_MINMAX_1X1__SCALAR_PIPELINED, qmin) {
 }
 
 TEST(F32_SPMM_MINMAX_1X1__SCALAR_PIPELINED, qmax) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t n = 1; n < 10; n += 2) {
     for (size_t k = 1; k <= 5; k += 2) {
       SpMMMicrokernelTester()
@@ -6115,6 +6364,7 @@ TEST(F32_SPMM_MINMAX_1X1__SCALAR_PIPELINED, qmax) {
 }
 
 TEST(F32_SPMM_MINMAX_1X1__SCALAR_PIPELINED, half_sparse) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t n = 1; n < 10; n += 2) {
     for (size_t k = 1; k <= 5; k += 2) {
       SpMMMicrokernelTester()
@@ -6130,6 +6380,7 @@ TEST(F32_SPMM_MINMAX_1X1__SCALAR_PIPELINED, half_sparse) {
 }
 
 TEST(F32_SPMM_MINMAX_1X1__SCALAR_PIPELINED, zero_weights) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t n = 1; n < 10; n += 2) {
     for (size_t k = 1; k <= 5; k += 2) {
       SpMMMicrokernelTester()
@@ -6145,6 +6396,7 @@ TEST(F32_SPMM_MINMAX_1X1__SCALAR_PIPELINED, zero_weights) {
 }
 
 TEST(F32_SPMM_MINMAX_2X1__SCALAR, k_eq_1) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   SpMMMicrokernelTester()
     .mr(2)
     .nr(1)
@@ -6156,6 +6408,7 @@ TEST(F32_SPMM_MINMAX_2X1__SCALAR, k_eq_1) {
 }
 
 TEST(F32_SPMM_MINMAX_2X1__SCALAR, k_gt_1) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (size_t k = 2; k < 10; k++) {
     SpMMMicrokernelTester()
       .mr(2)
@@ -6169,6 +6422,7 @@ TEST(F32_SPMM_MINMAX_2X1__SCALAR, k_gt_1) {
 }
 
 TEST(F32_SPMM_MINMAX_2X1__SCALAR, n_gt_1) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t n = 2; n < 10; n++) {
     for (size_t k = 1; k <= 5; k += 2) {
       SpMMMicrokernelTester()
@@ -6184,6 +6438,7 @@ TEST(F32_SPMM_MINMAX_2X1__SCALAR, n_gt_1) {
 }
 
 TEST(F32_SPMM_MINMAX_2X1__SCALAR, m_lt_2) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t m = 1; m < 2; m++) {
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
@@ -6201,6 +6456,7 @@ TEST(F32_SPMM_MINMAX_2X1__SCALAR, m_lt_2) {
 }
 
 TEST(F32_SPMM_MINMAX_2X1__SCALAR, m_div_2) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t m = 4; m <= 6; m += 2) {
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
@@ -6218,6 +6474,7 @@ TEST(F32_SPMM_MINMAX_2X1__SCALAR, m_div_2) {
 }
 
 TEST(F32_SPMM_MINMAX_2X1__SCALAR, m_gt_2) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t m = 3; m < 4; m++) {
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
@@ -6235,6 +6492,7 @@ TEST(F32_SPMM_MINMAX_2X1__SCALAR, m_gt_2) {
 }
 
 TEST(F32_SPMM_MINMAX_2X1__SCALAR, output_stride) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t n = 1; n < 10; n += 2) {
     for (size_t k = 1; k <= 5; k += 2) {
       SpMMMicrokernelTester()
@@ -6251,6 +6509,7 @@ TEST(F32_SPMM_MINMAX_2X1__SCALAR, output_stride) {
 }
 
 TEST(F32_SPMM_MINMAX_2X1__SCALAR, qmin) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t n = 1; n < 10; n += 2) {
     for (size_t k = 1; k <= 5; k += 2) {
       SpMMMicrokernelTester()
@@ -6267,6 +6526,7 @@ TEST(F32_SPMM_MINMAX_2X1__SCALAR, qmin) {
 }
 
 TEST(F32_SPMM_MINMAX_2X1__SCALAR, qmax) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t n = 1; n < 10; n += 2) {
     for (size_t k = 1; k <= 5; k += 2) {
       SpMMMicrokernelTester()
@@ -6283,6 +6543,7 @@ TEST(F32_SPMM_MINMAX_2X1__SCALAR, qmax) {
 }
 
 TEST(F32_SPMM_MINMAX_2X1__SCALAR, half_sparse) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t n = 1; n < 10; n += 2) {
     for (size_t k = 1; k <= 5; k += 2) {
       SpMMMicrokernelTester()
@@ -6298,6 +6559,7 @@ TEST(F32_SPMM_MINMAX_2X1__SCALAR, half_sparse) {
 }
 
 TEST(F32_SPMM_MINMAX_2X1__SCALAR, zero_weights) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t n = 1; n < 10; n += 2) {
     for (size_t k = 1; k <= 5; k += 2) {
       SpMMMicrokernelTester()
@@ -6313,6 +6575,7 @@ TEST(F32_SPMM_MINMAX_2X1__SCALAR, zero_weights) {
 }
 
 TEST(F32_SPMM_MINMAX_8X1__SCALAR, k_eq_1) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   SpMMMicrokernelTester()
     .mr(8)
     .nr(1)
@@ -6324,6 +6587,7 @@ TEST(F32_SPMM_MINMAX_8X1__SCALAR, k_eq_1) {
 }
 
 TEST(F32_SPMM_MINMAX_8X1__SCALAR, k_gt_1) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (size_t k = 2; k < 10; k++) {
     SpMMMicrokernelTester()
       .mr(8)
@@ -6337,6 +6601,7 @@ TEST(F32_SPMM_MINMAX_8X1__SCALAR, k_gt_1) {
 }
 
 TEST(F32_SPMM_MINMAX_8X1__SCALAR, n_gt_1) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t n = 2; n < 10; n++) {
     for (size_t k = 1; k <= 5; k += 2) {
       SpMMMicrokernelTester()
@@ -6352,6 +6617,7 @@ TEST(F32_SPMM_MINMAX_8X1__SCALAR, n_gt_1) {
 }
 
 TEST(F32_SPMM_MINMAX_8X1__SCALAR, m_lt_8) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t m = 1; m < 8; m++) {
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
@@ -6369,6 +6635,7 @@ TEST(F32_SPMM_MINMAX_8X1__SCALAR, m_lt_8) {
 }
 
 TEST(F32_SPMM_MINMAX_8X1__SCALAR, m_div_8) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t m = 16; m <= 24; m += 8) {
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
@@ -6386,6 +6653,7 @@ TEST(F32_SPMM_MINMAX_8X1__SCALAR, m_div_8) {
 }
 
 TEST(F32_SPMM_MINMAX_8X1__SCALAR, m_gt_8) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t m = 9; m < 16; m++) {
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
@@ -6403,6 +6671,7 @@ TEST(F32_SPMM_MINMAX_8X1__SCALAR, m_gt_8) {
 }
 
 TEST(F32_SPMM_MINMAX_8X1__SCALAR, output_stride) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t n = 1; n < 10; n += 2) {
     for (size_t k = 1; k <= 5; k += 2) {
       SpMMMicrokernelTester()
@@ -6419,6 +6688,7 @@ TEST(F32_SPMM_MINMAX_8X1__SCALAR, output_stride) {
 }
 
 TEST(F32_SPMM_MINMAX_8X1__SCALAR, qmin) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t n = 1; n < 10; n += 2) {
     for (size_t k = 1; k <= 5; k += 2) {
       SpMMMicrokernelTester()
@@ -6435,6 +6705,7 @@ TEST(F32_SPMM_MINMAX_8X1__SCALAR, qmin) {
 }
 
 TEST(F32_SPMM_MINMAX_8X1__SCALAR, qmax) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t n = 1; n < 10; n += 2) {
     for (size_t k = 1; k <= 5; k += 2) {
       SpMMMicrokernelTester()
@@ -6451,6 +6722,7 @@ TEST(F32_SPMM_MINMAX_8X1__SCALAR, qmax) {
 }
 
 TEST(F32_SPMM_MINMAX_8X1__SCALAR, half_sparse) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t n = 1; n < 10; n += 2) {
     for (size_t k = 1; k <= 5; k += 2) {
       SpMMMicrokernelTester()
@@ -6466,6 +6738,7 @@ TEST(F32_SPMM_MINMAX_8X1__SCALAR, half_sparse) {
 }
 
 TEST(F32_SPMM_MINMAX_8X1__SCALAR, zero_weights) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t n = 1; n < 10; n += 2) {
     for (size_t k = 1; k <= 5; k += 2) {
       SpMMMicrokernelTester()
@@ -6481,6 +6754,7 @@ TEST(F32_SPMM_MINMAX_8X1__SCALAR, zero_weights) {
 }
 
 TEST(F32_SPMM_MINMAX_8X1__SCALAR_PIPELINED, k_eq_1) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   SpMMMicrokernelTester()
     .mr(8)
     .nr(1)
@@ -6492,6 +6766,7 @@ TEST(F32_SPMM_MINMAX_8X1__SCALAR_PIPELINED, k_eq_1) {
 }
 
 TEST(F32_SPMM_MINMAX_8X1__SCALAR_PIPELINED, k_gt_1) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (size_t k = 2; k < 10; k++) {
     SpMMMicrokernelTester()
       .mr(8)
@@ -6505,6 +6780,7 @@ TEST(F32_SPMM_MINMAX_8X1__SCALAR_PIPELINED, k_gt_1) {
 }
 
 TEST(F32_SPMM_MINMAX_8X1__SCALAR_PIPELINED, n_gt_1) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t n = 2; n < 10; n++) {
     for (size_t k = 1; k <= 5; k += 2) {
       SpMMMicrokernelTester()
@@ -6520,6 +6796,7 @@ TEST(F32_SPMM_MINMAX_8X1__SCALAR_PIPELINED, n_gt_1) {
 }
 
 TEST(F32_SPMM_MINMAX_8X1__SCALAR_PIPELINED, m_lt_8) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t m = 1; m < 8; m++) {
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
@@ -6537,6 +6814,7 @@ TEST(F32_SPMM_MINMAX_8X1__SCALAR_PIPELINED, m_lt_8) {
 }
 
 TEST(F32_SPMM_MINMAX_8X1__SCALAR_PIPELINED, m_div_8) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t m = 16; m <= 24; m += 8) {
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
@@ -6554,6 +6832,7 @@ TEST(F32_SPMM_MINMAX_8X1__SCALAR_PIPELINED, m_div_8) {
 }
 
 TEST(F32_SPMM_MINMAX_8X1__SCALAR_PIPELINED, m_gt_8) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t m = 9; m < 16; m++) {
     for (uint32_t n = 1; n < 10; n += 2) {
       for (size_t k = 1; k <= 5; k += 2) {
@@ -6571,6 +6850,7 @@ TEST(F32_SPMM_MINMAX_8X1__SCALAR_PIPELINED, m_gt_8) {
 }
 
 TEST(F32_SPMM_MINMAX_8X1__SCALAR_PIPELINED, output_stride) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t n = 1; n < 10; n += 2) {
     for (size_t k = 1; k <= 5; k += 2) {
       SpMMMicrokernelTester()
@@ -6587,6 +6867,7 @@ TEST(F32_SPMM_MINMAX_8X1__SCALAR_PIPELINED, output_stride) {
 }
 
 TEST(F32_SPMM_MINMAX_8X1__SCALAR_PIPELINED, qmin) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t n = 1; n < 10; n += 2) {
     for (size_t k = 1; k <= 5; k += 2) {
       SpMMMicrokernelTester()
@@ -6603,6 +6884,7 @@ TEST(F32_SPMM_MINMAX_8X1__SCALAR_PIPELINED, qmin) {
 }
 
 TEST(F32_SPMM_MINMAX_8X1__SCALAR_PIPELINED, qmax) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t n = 1; n < 10; n += 2) {
     for (size_t k = 1; k <= 5; k += 2) {
       SpMMMicrokernelTester()
@@ -6619,6 +6901,7 @@ TEST(F32_SPMM_MINMAX_8X1__SCALAR_PIPELINED, qmax) {
 }
 
 TEST(F32_SPMM_MINMAX_8X1__SCALAR_PIPELINED, half_sparse) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t n = 1; n < 10; n += 2) {
     for (size_t k = 1; k <= 5; k += 2) {
       SpMMMicrokernelTester()
@@ -6634,6 +6917,7 @@ TEST(F32_SPMM_MINMAX_8X1__SCALAR_PIPELINED, half_sparse) {
 }
 
 TEST(F32_SPMM_MINMAX_8X1__SCALAR_PIPELINED, zero_weights) {
+  TEST_REQUIRES_ARCH_FLAGS(0);
   for (uint32_t n = 1; n < 10; n += 2) {
     for (size_t k = 1; k <= 5; k += 2) {
       SpMMMicrokernelTester()

@@ -13,7 +13,7 @@
 #include "bench/utils.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/gemm.h"
-#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/pack.h"
@@ -30,7 +30,7 @@
       xnn_packed_stride_kai_qs4_weights_and_biases,
       /*mr=*/4, /*nr=*/4, /*kr=*/16, /*sr=*/2,
       /*mr_packed=*/4,
-      benchmark::utils::CheckNEONI8MM);
+      /*arch_flags=*/xnn_arch_arm_neon_i8mm);
   }
 
   BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_4x4c16s2__neoni8mm)
@@ -43,7 +43,7 @@
       xnn_packed_stride_kai_qs4_weights_and_biases,
       /*mr=*/4, /*nr=*/8, /*kr=*/16, /*sr=*/2,
       /*mr_packed=*/4,
-      benchmark::utils::CheckNEONI8MM);
+      /*arch_flags=*/xnn_arch_arm_neon_i8mm);
   }
 
   BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_4x8c16s2__neoni8mm)
@@ -56,7 +56,7 @@
       xnn_packed_stride_kai_qs4_weights_and_biases,
       /*mr=*/8, /*nr=*/4, /*kr=*/16, /*sr=*/2,
       /*mr_packed=*/4,
-      benchmark::utils::CheckNEONI8MM);
+      /*arch_flags=*/xnn_arch_arm_neon_i8mm);
   }
 
   BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_8x4c16s2__neoni8mm_mstep2)
@@ -69,7 +69,7 @@
       xnn_packed_stride_kai_qs4_weights_and_biases,
       /*mr=*/8, /*nr=*/8, /*kr=*/16, /*sr=*/2,
       /*mr_packed=*/4,
-      benchmark::utils::CheckNEONI8MM);
+      /*arch_flags=*/xnn_arch_arm_neon_i8mm);
   }
 
   BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_8x8c16s2__neoni8mm_mstep2)
@@ -87,7 +87,7 @@
       xnn_packed_stride_kai_qs4_weights_and_biases,
       /*mr=*/1, /*nr=*/4, /*kr=*/16, /*sr=*/2,
       /*mr_packed=*/1,
-      benchmark::utils::CheckNEONDOT);
+      /*arch_flags=*/xnn_arch_arm_neon_dot);
   }
 
   BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_1x4c16s2__aarch64_neondot)
@@ -100,7 +100,7 @@
       xnn_packed_stride_kai_qs4_weights_and_biases,
       /*mr=*/1, /*nr=*/8, /*kr=*/16, /*sr=*/2,
       /*mr_packed=*/1,
-      benchmark::utils::CheckNEONDOT);
+      /*arch_flags=*/xnn_arch_arm_neon_dot);
   }
 
   BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_1x8c16s2__aarch64_neondot)
@@ -113,7 +113,7 @@
       xnn_packed_stride_kai_qs4_weights_and_biases,
       /*mr=*/1, /*nr=*/4, /*kr=*/8, /*sr=*/2,
       /*mr_packed=*/1,
-      benchmark::utils::CheckNEONDOT);
+      /*arch_flags=*/xnn_arch_arm_neon_dot);
   }
 
   BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_1x4c8s2__aarch64_neondot)
@@ -126,7 +126,7 @@
       xnn_packed_stride_kai_qs4_weights_and_biases,
       /*mr=*/16, /*nr=*/4, /*kr=*/8, /*sr=*/2,
       /*mr_packed=*/4,
-      benchmark::utils::CheckNEONDOT);
+      /*arch_flags=*/xnn_arch_arm_neon_dot);
   }
 
   BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_16x4c8s2__aarch64_neondot_mstep4)
@@ -144,7 +144,7 @@
       xnn_packed_stride_kai_qs4_weights_and_biases_sme,
       /*mr=*/1, /*nr=*/128, /*kr=*/4, /*sr=*/1,
       /*mr_packed=*/1,
-      benchmark::utils::CheckNEONSME2);
+      /*arch_flags=*/xnn_arch_arm_sme2);
   }
 
   BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_1x128c4__neonsme2)
@@ -157,7 +157,7 @@
       xnn_packed_stride_kai_qs4_weights_and_biases_sme,
       /*mr=*/32, /*nr=*/128, /*kr=*/4, /*sr=*/1,
       /*mr_packed=*/32,
-      benchmark::utils::CheckNEONSME2);
+      /*arch_flags=*/xnn_arch_arm_sme2);
   }
 
   BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_32x128c4__neonsme2)

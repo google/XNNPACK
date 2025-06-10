@@ -13,7 +13,7 @@
 #include "bench/utils.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/gemm.h"
-#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/pack.h"
@@ -26,7 +26,7 @@
       xnn_f32_gemm_goi_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128,
       xnn_init_f32_minmax_scalar_params,
       /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-      benchmark::utils::CheckNEONFMA);
+      /*arch_flags=*/xnn_arch_arm_neon_fma);
   }
 
   BENCHMARK_GEMM(f32_gemm_goi_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128)
@@ -36,7 +36,7 @@
       xnn_f32_gemm_goi_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_prfm,
       xnn_init_f32_minmax_scalar_params,
       /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-      benchmark::utils::CheckNEONFMA);
+      /*arch_flags=*/xnn_arch_arm_neon_fma);
   }
 
   BENCHMARK_GEMM(f32_gemm_goi_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_prfm)
@@ -46,7 +46,7 @@
       xnn_f32_gemm_goi_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128,
       xnn_init_f32_minmax_scalar_params,
       /*mr=*/4, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-      benchmark::utils::CheckNEONFMA);
+      /*arch_flags=*/xnn_arch_arm_neon_fma);
   }
 
   BENCHMARK_GEMM(f32_gemm_goi_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128)
