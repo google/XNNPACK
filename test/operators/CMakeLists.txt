@@ -46,10 +46,10 @@ IF(XNNPACK_BUILD_LIBRARY)
     ADD_EXECUTABLE(${TEST}-test ${TEST}.cc)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
       convolution-test-helpers
-      hardware-config
-      logging
-      microkernels-all
-      microparams-init
+      xnnpack-hardware-config
+      xnnpack-logging
+      xnnpack-microkernels-all
+      xnnpack-microparams-init
       next-prime
       pthreadpool
       unary-ops
