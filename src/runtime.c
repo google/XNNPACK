@@ -484,11 +484,7 @@ void propagate_rank(
         break;
       case xnn_node_type_fully_connected:
       case xnn_node_type_fully_connected_sparse:
-        if (flags & XNN_FLAG_TENSORFLOW_RESHAPE_2D) {
-          output_value->shape.num_dims = 2;
-        } else {
-          output_value->shape.num_dims = input_value->shape.num_dims;
-        }
+        output_value->shape.num_dims = input_value->shape.num_dims;
         break;
       case xnn_node_type_static_reshape:
       case xnn_node_type_static_broadcast:

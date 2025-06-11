@@ -100,14 +100,6 @@ xnn_datatype datatype_of() {
   }
 }
 
-// Implements XNN_FLAG_TENSORFLOW_RESHAPE_2D
-std::vector<size_t> Reshape2D(const std::vector<size_t>& shape) {
-  size_t total =
-      std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<size_t>());
-  size_t channels = shape.back();
-  return {total / channels, channels};
-}
-
 // Compute output(oc) = bias(oc) + sum(input'(ic) * filter'(oc, ic)), where the
 // input, filter, and bias are potentially quantized.
 template <typename Input, typename Filter, typename Bias, typename Scale>
@@ -210,10 +202,6 @@ Tensor<float> ReferenceImpl(Tensor<Input> input, Tensor<Filter> filter,
     MatrixVectorMultiply(&input_batches(i), filter, bias, input_quantization,
                          filter_zero_point, filter_scale, filter_ic_block_size,
                          bias_quantization, &output_batches(i));
-  }
-
-  if (flags & XNN_FLAG_TENSORFLOW_RESHAPE_2D) {
-    output = output.reshape(Reshape2D(output.shape()));
   }
 
   return output;
@@ -494,9 +482,6 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
       std::vector<size_t> output_shape = input_shape;
       input_shape.back() = input_channels;
       output_shape.back() = output_channels;
-      if (flags & XNN_FLAG_TENSORFLOW_RESHAPE_2D) {
-        output_shape = Reshape2D(output_shape);
-      }
 
       Tensor<Input> input(input_shape, XnnExtraBytes);
       input.generate([&]() { return input_gen(rng); });
@@ -722,9 +707,6 @@ void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid,
       std::vector<size_t> output_shape = input_shape;
       input_shape.back() = input_channels;
       output_shape.back() = output_channels;
-      if (flags & XNN_FLAG_TENSORFLOW_RESHAPE_2D) {
-        output_shape = Reshape2D(output_shape);
-      }
 
       Tensor<Input> input(input_shape, XnnExtraBytes);
       input.generate([&]() { return input_gen(rng); });
