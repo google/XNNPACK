@@ -20,6 +20,7 @@
 #include <gtest/gtest.h>
 #include "src/xnnpack/allocator.h"
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/config.h"
 #include "src/xnnpack/gemm.h"
 #include "src/xnnpack/igemm.h"
 #include "src/xnnpack/hardware-config.h"

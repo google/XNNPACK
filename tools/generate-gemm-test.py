@@ -662,6 +662,7 @@ def generate_test_cases(
     vector_tile,
     init_fn,
     pack_fn,
+    pack_lh_config,
     packed_stride_fn,
     requantization,
     is_pipelined,
@@ -686,6 +687,8 @@ def generate_test_cases(
       than elements.
     init_fn: C name of the function to initialize microkernel parameters.
     pack_fn: C name of the function to pack the weights.
+    pack_lh_config: Optional name of the config for the LHS packing used by
+      this kernel.
     packed_stride_fn: C name of the function to compute the packed weights
       stride.
     requantization: name of the requantization scheme used by the microkernel.
@@ -749,13 +752,18 @@ def generate_test_cases(
   if init_fn:
     test_args.append(init_fn)
 
+  if pack_lh_config:
+    test_args.append(f"{pack_lh_config}()")
+
   if pack_fn:
     test_args.append(pack_fn)
   if packed_stride_fn:
     test_args.append(packed_stride_fn)
 
   if init_fn and requantization:
-    requantization_datatype = {"qc8": "qs8"}.get(input_datatype, input_datatype)
+    requantization_datatype = {"qc8": "qs8", "pqs8": "qs8"}.get(
+        input_datatype, input_datatype
+    )
     test_args.append(
         "xnn_%s_requantize_%s" % (requantization_datatype, requantization)
     )
@@ -871,6 +879,7 @@ def main(args):
 #include <gtest/gtest.h>
 #include "src/xnnpack/allocator.h"
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/config.h"
 #include "src/xnnpack/gemm.h"
 #include "src/xnnpack/igemm.h"
 #include "src/xnnpack/hardware-config.h"
@@ -932,6 +941,7 @@ def main(args):
         planes = 1
       init_fn = ukernel_spec.get("init")
       pack_fn = ukernel_spec.get("pack")
+      pack_lh_config = ukernel_spec.get('pack-lh-config')
       packed_stride_fn = ukernel_spec.get("packed-stride")
       pipelined = bool(ukernel_spec.get("pipelined", False))
       cpp_check = ukernel_spec.get("cpp-check", False)
@@ -962,6 +972,7 @@ def main(args):
           vector_tile,
           init_fn,
           pack_fn,
+          pack_lh_config,
           packed_stride_fn,
           requantization,
           pipelined,

@@ -230,15 +230,15 @@ class GemmMicrokernelTester {
 
   void Test(xnn_qs8_qc4w_gemm_minmax_ukernel_fn gemm,
             xnn_init_qs8_qc8w_conv_minmax_params_fn init_params,
-            xnn_pack_qs8_qc4w_gemm_fn pack, xnn_qs8_requantize_fn requantize) ;
+            xnn_pack_qs8_qc4w_gemm_fn pack, xnn_qs8_requantize_fn requantize);
 
   void Test(xnn_qs8_qc8w_gemm_minmax_ukernel_fn gemm,
             xnn_init_qs8_qc8w_conv_minmax_params_fn init_params,
             xnn_pack_qs8_gemm_fn pack, xnn_qs8_requantize_fn requantize) const;
 
-  void Test(xnn_qs8_qc8w_igemm_minmax_ukernel_fn igemm,
-            xnn_init_qs8_qc8w_conv_minmax_params_fn init_params,
-            xnn_pack_qs8_igemm_fn pack, xnn_qs8_requantize_fn requantize) const;
+    void Test(xnn_qs8_qc8w_igemm_minmax_ukernel_fn igemm,
+              xnn_init_qs8_qc8w_conv_minmax_params_fn init_params,
+              xnn_pack_qs8_igemm_fn pack, xnn_qs8_requantize_fn requantize) const;
 
   void Test(xnn_qs8_gemm_minmax_ukernel_fn gemm,
             xnn_init_qs8_conv_minmax_params_fn init_params,
@@ -357,6 +357,12 @@ class GemmMicrokernelTester {
                  xnn_init_qs8_qc8w_conv_minmax_params_fn init_minmax_params,
                  xnn_pack_weights_and_biases_fn pack,
                  xnn_packed_stride_weights_and_biases_fn packed_stride) const;
+
+  void Test_PQS8(xnn_packed_lhs_igemm_ukernel_fn packed_igemm,
+                 xnn_init_qs8_qc8w_conv_minmax_params_fn init_minmax_params,
+                 const struct xnn_pack_lh_config* pack_lh_config,
+                 xnn_pack_qs8_igemm_fn pack_rhs,
+                 xnn_qs8_requantize_fn requantize) const;
 
  private:
   size_t mr_{1};
