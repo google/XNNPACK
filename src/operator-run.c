@@ -326,7 +326,8 @@ void xnn_compute_batched_packw_gemm_gio(
         /*init_extra_data0_fn=*/NULL,
         /*extra_data0=*/NULL, /*extra_data0_element_size=*/0,
         /*init_extra_data1_fn=*/NULL, /*extra_data1=*/NULL,
-        /*extra_data1_element_size=*/0, packed_weights, /*params=*/NULL);
+        /*extra_data1_element_size=*/0, packed_weights,
+        /*params=*/NULL);
   } else {
     context->packw_gemm_gio(
         /*groups=*/1, n_block_size, context->kc, context->nr, context->kr,
@@ -367,7 +368,8 @@ void xnn_compute_batched_packw_gemm_goi(
         /*init_extra_data0_fn=*/NULL,
         /*extra_data0=*/NULL, /*extra_data0_element_size=*/0,
         /*init_extra_data1_fn=*/NULL, /*extra_data1=*/NULL,
-        /*extra_data1_element_size=*/0, packed_weights, /*params=*/NULL);
+        /*extra_data1_element_size=*/0, packed_weights,
+        /*params=*/NULL);
   } else {
     context->packw_gemm_goi(
         /*groups=*/1, n_block_size, context->kc, context->nr, context->kr,
@@ -385,6 +387,25 @@ void xnn_compute_packw_gemm_goi(
                                      n_block_size);
 }
 
+static void compute_group_indices(const struct gemm_context* context,
+                                  size_t group_index, size_t* group_index_a,
+                                  size_t* group_index_b) {
+  const size_t num_batch_dims = context->num_batch_dims;
+  *group_index_a = 0;
+  *group_index_b = 0;
+  for (int k = 0; k < num_batch_dims; k++) {
+    // Extract the kth batch index from the group_index.
+    const size_t index = group_index / context->batch_strides_c[k];
+    group_index %= context->batch_strides_c[k];
+
+    // Compute the corresponding kth group index offsets into A and B.
+    *group_index_a = (index % context->batch_dims_a[k]) +
+                     context->batch_dims_a[k] * *group_index_a;
+    *group_index_b = (index % context->batch_dims_b[k]) +
+                     context->batch_dims_b[k] * *group_index_b;
+  }
+}
+
 void xnn_compute_hmp_grouped_gemm(
     const struct gemm_context* restrict context,
     uint32_t uarch_index, size_t group_index, size_t nr_block_start,
@@ -392,23 +413,12 @@ void xnn_compute_hmp_grouped_gemm(
   const size_t k_scaled  = context->k_scaled;
   const size_t a_stride  = context->a_stride;
   const size_t cm_stride = context->cm_stride;
-  const size_t num_batch_dims = context->num_batch_dims;
   const size_t group_index_c = group_index;
 
   // Compute the group index offsets into A and B.
   size_t group_index_a = 0;
   size_t group_index_b = 0;
-  for (int k = 0; k < num_batch_dims; k++) {
-    // Extract the kth batch index from the group_index.
-    const size_t index = group_index / context->batch_strides_c[k];
-    group_index %= context->batch_strides_c[k];
-
-    // Compute the corresponding kth group index offsets into A and B.
-    group_index_a = (index % context->batch_dims_a[k]) +
-                    context->batch_dims_a[k] * group_index_a;
-    group_index_b = (index % context->batch_dims_b[k]) +
-                    context->batch_dims_b[k] * group_index_b;
-  }
+  compute_group_indices(context, group_index, &group_index_a, &group_index_b);
 
   while (mr_block_size > 0) {
     const size_t mr_step = min(mr_block_size, context->mr);
@@ -524,42 +534,53 @@ void xnn_compute_hmp_grouped_qp8gemm(
     uint32_t uarch_index, size_t group_index, size_t nr_block_start,
     size_t mr_block_start, size_t nr_block_size, size_t mr_block_size) {
   const size_t cm_stride = context->cm_stride;
-  const size_t num_batch_dims = context->num_batch_dims;
+  const size_t cn_stride = context->cn_stride;
 
   // Compute the group index offsets into A and B.
   const size_t group_index_c = group_index;
   size_t group_index_a = 0;
   size_t group_index_b = 0;
-  for (int k = 0; k < num_batch_dims; k++) {
-    // Extract the kth batch index from the group_index.
-    const size_t index = group_index / context->batch_strides_c[k];
-    group_index %= context->batch_strides_c[k];
+  compute_group_indices(context, group_index, &group_index_a, &group_index_b);
 
-    // Compute the corresponding kth group index offsets into A and B.
-    group_index_a = (index % context->batch_dims_a[k]) +
-                    context->batch_dims_a[k] * group_index_a;
-    group_index_b = (index % context->batch_dims_b[k]) +
-                    context->batch_dims_b[k] * group_index_b;
-  }
+  const size_t mr = context->mr;
+  const size_t mr_packed = context->mr_packed;
+  const size_t kr = context->kr;
+  const size_t sr = context->sr;
+  const size_t kc = context->kc;
+  const size_t k_scaled =
+      kc << context->packed_lh_config->log2_packed_element_size;
+  const uintptr_t a =
+      (uintptr_t)context->a + group_index_a * context->ga_stride;
+  const uintptr_t c = (uintptr_t)context->c +
+                      group_index_c * context->gc_stride +
+                      (nr_block_start << context->log2_csize);
+  const void* packed_w = (const void*)((uintptr_t)context->packed_w +
+                                       group_index_b * context->gw_stride +
+                                       nr_block_start * context->w_stride);
+  const uintptr_t packed_input_stride = round_up(kc, kr * sr) * sizeof(int8_t);
 
   while (mr_block_size > 0) {
-    const size_t mr_step = min(mr_block_size, context->mr);
+    const size_t mr_step = min(mr_block_size, mr);
     const size_t a_offset = context->packed_lh_config->offset_fn(
-        mr_block_start, context->kc, context->mr_packed, context->kr,
-        context->sr);
+        mr_block_start, kc, mr_packed, kr, sr);
 
-    context->qp8_ukernel.function[uarch_index](
-        mr_step, nr_block_size, context->k_scaled,
-        (const void*)((uintptr_t)context->a +
-                      group_index_a * context->ga_stride + a_offset),
-        (const void*)((uintptr_t)context->packed_w +
-                      group_index_b * context->gw_stride +
-                      nr_block_start * context->w_stride),
-        (void*)((uintptr_t)context->c + group_index_c * context->gc_stride +
-                mr_block_start * cm_stride +
-                (nr_block_start << context->log2_csize)),
-        cm_stride,
-        /*dst_stride_col=*/sizeof(float), context->fused_params);
+    if (context->dynamic_quantization) {
+      const void* workspace = (const void*)((uintptr_t)a + a_offset);
+      const struct xnn_qd8_quantization_params* quantization_params = workspace;
+      const void* packed_inputs =
+          (const void*)((uintptr_t)workspace +
+                        mr * sizeof(struct xnn_qd8_quantization_params));
+
+      context->dq_ukernel.function[uarch_index](
+          mr_step, nr_block_size, k_scaled, packed_inputs, packed_input_stride,
+          packed_w, (void*)(c + mr_block_start * cm_stride), cm_stride,
+          cn_stride, context->fused_params, quantization_params);
+    } else {
+      context->qp8_ukernel.function[uarch_index](
+          mr_step, nr_block_size, k_scaled, (const void*)(a + a_offset),
+          packed_w, (void*)(c + mr_block_start * cm_stride), cm_stride,
+          /*dst_stride_col=*/sizeof(float), context->fused_params);
+    }
     mr_block_size -= mr_step;
     mr_block_start += mr_step;
   }
@@ -586,7 +607,7 @@ XNN_INLINE static void compute_hmp_qp8gemm(
   const size_t sr = context->sr;
   const size_t kc = context->kc;
   const size_t k_scaled =
-      context->kc << context->packed_lh_config->log2_packed_element_size;
+      kc << context->packed_lh_config->log2_packed_element_size;
   const uintptr_t a = (uintptr_t)context->a;
   const uintptr_t c =
       (uintptr_t)context->c + (nr_block_start << context->log2_csize);
@@ -604,7 +625,7 @@ XNN_INLINE static void compute_hmp_qp8gemm(
       const struct xnn_qd8_quantization_params* quantization_params = workspace;
       const void* packed_inputs =
           (const void*)((uintptr_t)workspace +
-                        mr_packed * sizeof(struct xnn_qd8_quantization_params));
+                        mr * sizeof(struct xnn_qd8_quantization_params));
 
       context->dq_ukernel.function[uarch_index](
           mr_step, nr_block_size, k_scaled, packed_inputs, packed_input_stride,
@@ -657,8 +678,9 @@ void xnn_compute_spmm(
       &context->params);
 }
 
-static void compute_hmp_inline_packed_qp8gemm(
+XNN_INLINE static void compute_inline_packed_qp8gemm(
     const struct gemm_context* context, uint32_t uarch_index, size_t thread_id,
+    size_t group_index_a, size_t group_index_b, size_t group_index_c,
     size_t mr_block_start, size_t mr_block_size) {
   assert(context->packed_lh_config != NULL);
   assert(context->packed_lh_config->offset_fn != NULL);
@@ -672,12 +694,16 @@ static void compute_hmp_inline_packed_qp8gemm(
   const size_t sr = context->sr;
   const size_t kc = context->kc;
   const size_t nc = context->nc;
-  const uintptr_t a = (uintptr_t)context->a;
+  const uintptr_t a =
+      (uintptr_t)context->a + group_index_a * context->ga_stride;
   const size_t a_stride = context->a_stride;
-  const uintptr_t c = (uintptr_t)context->c;
+  const void* packed_w = (const void*)((uintptr_t)context->packed_w +
+                                       group_index_b * context->gw_stride);
+  const uintptr_t c =
+      (uintptr_t)context->c + group_index_c * context->gc_stride;
   const size_t k_scaled =
       context->kc << context->packed_lh_config->log2_packed_element_size;
-  const void* packed_w = context->packed_w;
+  const uintptr_t packed_input_stride = round_up(kc, kr * sr) * sizeof(int8_t);
 
   const bool skip_lhs_packing = context->packed_lh_config->gemv_noop && mr == 1;
   void* workspace =
@@ -708,8 +734,6 @@ static void compute_hmp_inline_packed_qp8gemm(
       const void* packed_inputs =
           (const void*)((uintptr_t)packed_lhs +
                         mr * sizeof(struct xnn_qd8_quantization_params));
-      const uintptr_t packed_input_stride =
-          round_up(kc, kr * sr) * sizeof(int8_t);
       context->dq_ukernel.function[uarch_index](
           mr_step, nc, k_scaled, packed_inputs, packed_input_stride, packed_w,
           (void*)(c + mr_block_start * cm_stride), cm_stride, cn_stride,
@@ -731,16 +755,47 @@ void xnn_compute_hmp_inline_packed_qp8gemm(const struct gemm_context* context,
                                            size_t thread_id,
                                            size_t mr_block_start,
                                            size_t mr_block_size) {
-  compute_hmp_inline_packed_qp8gemm(context, uarch_index, thread_id,
-                                    mr_block_start, mr_block_size);
+  compute_inline_packed_qp8gemm(context, uarch_index, thread_id,
+                                /*group_index_a=*/0, /*group_index_b=*/0,
+                                /*group_index_c=*/0, mr_block_start,
+                                mr_block_size);
 }
 
 void xnn_compute_inline_packed_qp8gemm(const struct gemm_context* context,
                                        uint32_t thread_id,
                                        size_t mr_block_start,
                                        size_t mr_block_size) {
-  compute_hmp_inline_packed_qp8gemm(context, XNN_UARCH_DEFAULT, thread_id,
-                                    mr_block_start, mr_block_size);
+  compute_inline_packed_qp8gemm(context, XNN_UARCH_DEFAULT, thread_id,
+                                /*group_index_a=*/0, /*group_index_b=*/0,
+                                /*group_index_c=*/0, mr_block_start,
+                                mr_block_size);
+}
+
+void xnn_compute_hmp_grouped_inline_packed_qp8gemm(
+    const struct gemm_context* context, uint32_t uarch_index,
+    uint32_t thread_id, size_t group_index, size_t mr_block_start,
+    size_t mr_block_size) {
+  // Compute the group index offsets into A and B.
+  size_t group_index_a = 0;
+  size_t group_index_b = 0;
+  compute_group_indices(context, group_index, &group_index_a, &group_index_b);
+
+  compute_inline_packed_qp8gemm(context, uarch_index, thread_id, group_index_a,
+                                group_index_b, group_index, mr_block_start,
+                                mr_block_size);
+}
+
+void xnn_compute_grouped_inline_packed_qp8gemm(
+    const struct gemm_context* context, uint32_t thread_id, size_t group_index,
+    size_t mr_block_start, size_t mr_block_size) {
+  // Compute the group index offsets into A and B.
+  size_t group_index_a = 0;
+  size_t group_index_b = 0;
+  compute_group_indices(context, group_index, &group_index_a, &group_index_b);
+
+  compute_inline_packed_qp8gemm(context, XNN_UARCH_DEFAULT, thread_id,
+                                group_index_a, group_index_b, group_index,
+                                mr_block_start, mr_block_size);
 }
 
 void xnn_compute_grouped_batch_igemm(

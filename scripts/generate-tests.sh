@@ -69,10 +69,6 @@ tools/generate-gemm-test.py --spec test/qs8-qc8w-igemm-minmax-fp32.yaml --output
 ### Tests for PPMM micro-kernels
 tools/generate-gemm-test.py --spec test/f32-ppmm-minmax.yaml --output-test test/f32-ppmm-minmax.cc &
 
-### Tests for SPMM micro-kernels
-tools/generate-spmm-test.py --spec test/f16-spmm-minmax.yaml --output-test test/f16-spmm-minmax.cc &
-tools/generate-spmm-test.py --spec test/f32-spmm-minmax.yaml --output-test test/f32-spmm-minmax.cc  --output-test test/f32-spmm-minmax-2.cc  --output-test test/f32-spmm-minmax-3.cc  --output-test test/f32-spmm-minmax-4.cc --output-bench bench/f32-spmm.cc &
-
 ### Tests for VBinary micro-kernels
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel f16-vadd --output test/f16-vadd.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel f16-vdiv --output test/f16-vdiv.cc &
@@ -240,46 +236,46 @@ tools/generate-raddstoreexpminusmax-test.py --spec test/f32-raddstoreexpminusmax
 
 ### Tests for the portable SIMD wrappers.
 tools/xngen test/simd/f32-simd.cc.in -D ARCH=scalar -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/simd/f32-simd-scalar.cc &
-tools/xngen test/simd/f32-simd.cc.in -D ARCH=neon -D ARCH_MACRO="XNN_ARCH_ARM || XNN_ARCH_ARM64" -D TEST_REQUIRES=TEST_REQUIRES_ARM_NEON -o test/simd/f32-simd-neon.cc &
-tools/xngen test/simd/f32-simd.cc.in -D ARCH=sse2 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES=TEST_REQUIRES_X86_SSE2 -o test/simd/f32-simd-sse2.cc &
-tools/xngen test/simd/f32-simd.cc.in -D ARCH=sse2fma -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES=TEST_REQUIRES_X86_SSE2 -o test/simd/f32-simd-sse2fma.cc &
-tools/xngen test/simd/f32-simd.cc.in -D ARCH=avx -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES=TEST_REQUIRES_X86_AVX -o test/simd/f32-simd-avx.cc &
-tools/xngen test/simd/f32-simd.cc.in -D ARCH=avx2 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES=TEST_REQUIRES_X86_AVX2 -o test/simd/f32-simd-avx2.cc &
-tools/xngen test/simd/f32-simd.cc.in -D ARCH=fma3 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES=TEST_REQUIRES_X86_FMA3 -o test/simd/f32-simd-fma3.cc &
-tools/xngen test/simd/f32-simd.cc.in -D ARCH=avx512f -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES=TEST_REQUIRES_X86_AVX512F -o test/simd/f32-simd-avx512f.cc &
+tools/xngen test/simd/f32-simd.cc.in -D ARCH=neon -D ARCH_MACRO="XNN_ARCH_ARM || XNN_ARCH_ARM64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon)" -o test/simd/f32-simd-neon.cc &
+tools/xngen test/simd/f32-simd.cc.in -D ARCH=sse2 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES="" -o test/simd/f32-simd-sse2.cc &
+tools/xngen test/simd/f32-simd.cc.in -D ARCH=sse2fma -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES="" -o test/simd/f32-simd-sse2fma.cc &
+tools/xngen test/simd/f32-simd.cc.in -D ARCH=avx -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx)" -o test/simd/f32-simd-avx.cc &
+tools/xngen test/simd/f32-simd.cc.in -D ARCH=avx2 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx2)" -o test/simd/f32-simd-avx2.cc &
+tools/xngen test/simd/f32-simd.cc.in -D ARCH=fma3 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3)" -o test/simd/f32-simd-fma3.cc &
+tools/xngen test/simd/f32-simd.cc.in -D ARCH=avx512f -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx512f)" -o test/simd/f32-simd-avx512f.cc &
 tools/xngen test/simd/f32-simd.cc.in -D ARCH=wasmsimd -D ARCH_MACRO="XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD" -D TEST_REQUIRES="" -o test/simd/f32-simd-wasmsimd.cc &
 tools/xngen test/simd/f32-simd.cc.in -D ARCH=wasmrelaxedsimd -D ARCH_MACRO="XNN_ARCH_WASMRELAXEDSIMD" -D TEST_REQUIRES="" -o test/simd/f32-simd-wasmrelaxedsimd.cc &
-tools/xngen test/simd/f32-simd.cc.in -D ARCH=hvx -D ARCH_MACRO=XNN_ARCH_HEXAGON -D TEST_REQUIRES=TEST_REQUIRES_HVX -o test/simd/f32-simd-hvx.cc &
+tools/xngen test/simd/f32-simd.cc.in -D ARCH=hvx -D ARCH_MACRO=XNN_ARCH_HEXAGON -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx)" -o test/simd/f32-simd-hvx.cc &
 
 tools/xngen test/simd/f16-simd.cc.in -D ARCH=scalar -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/simd/f16-simd-scalar.cc &
-tools/xngen test/simd/f16-simd.cc.in -D ARCH=neonfp16arith -D ARCH_MACRO=XNN_ARCH_ARM64 -D TEST_REQUIRES=TEST_REQUIRES_ARM_FP16_ARITH -o test/simd/f16-simd-neonfp16arith.cc &
-tools/xngen test/simd/f16-simd.cc.in -D ARCH=avx512fp16 -D ARCH_MACRO="(XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNNPACK_ENABLE_AVX512FP16" -D TEST_REQUIRES=TEST_REQUIRES_X86_AVX512FP16 -o test/simd/f16-simd-avx512fp16.cc &
+tools/xngen test/simd/f16-simd.cc.in -D ARCH=neonfp16arith -D ARCH_MACRO=XNN_ARCH_ARM64 -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_fp16_arith)" -o test/simd/f16-simd-neonfp16arith.cc &
+tools/xngen test/simd/f16-simd.cc.in -D ARCH=avx512fp16 -D ARCH_MACRO="(XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNNPACK_ENABLE_AVX512FP16" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx512fp16)" -o test/simd/f16-simd-avx512fp16.cc &
 
 tools/xngen test/simd/s16-simd.cc.in -D ARCH=scalar -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/simd/s16-simd-scalar.cc &
-tools/xngen test/simd/s16-simd.cc.in -D ARCH=neon -D ARCH_MACRO="XNN_ARCH_ARM || XNN_ARCH_ARM64" -D TEST_REQUIRES=TEST_REQUIRES_ARM_NEON -o test/simd/s16-simd-neon.cc &
-tools/xngen test/simd/s16-simd.cc.in -D ARCH=sse41 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES=TEST_REQUIRES_X86_SSE41 -o test/simd/s16-simd-sse41.cc &
-tools/xngen test/simd/s16-simd.cc.in -D ARCH=avx2 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES=TEST_REQUIRES_X86_AVX2 -o test/simd/s16-simd-avx2.cc &
-tools/xngen test/simd/s16-simd.cc.in -D ARCH=avx512skx -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES=TEST_REQUIRES_X86_AVX512SKX -o test/simd/s16-simd-avx512skx.cc &
+tools/xngen test/simd/s16-simd.cc.in -D ARCH=neon -D ARCH_MACRO="XNN_ARCH_ARM || XNN_ARCH_ARM64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon)" -o test/simd/s16-simd-neon.cc &
+tools/xngen test/simd/s16-simd.cc.in -D ARCH=sse41 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse4_1)" -o test/simd/s16-simd-sse41.cc &
+tools/xngen test/simd/s16-simd.cc.in -D ARCH=avx2 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx2)" -o test/simd/s16-simd-avx2.cc &
+tools/xngen test/simd/s16-simd.cc.in -D ARCH=avx512skx -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx512skx)" -o test/simd/s16-simd-avx512skx.cc &
 tools/xngen test/simd/s16-simd.cc.in -D ARCH=wasmsimd -D ARCH_MACRO="XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD" -D TEST_REQUIRES="" -o test/simd/s16-simd-wasmsimd.cc &
 
 tools/xngen test/simd/s32-simd.cc.in -D ARCH=scalar -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/simd/s32-simd-scalar.cc &
-tools/xngen test/simd/s32-simd.cc.in -D ARCH=neon -D ARCH_MACRO="XNN_ARCH_ARM || XNN_ARCH_ARM64" -D TEST_REQUIRES=TEST_REQUIRES_ARM_NEON -o test/simd/s32-simd-neon.cc &
-tools/xngen test/simd/s32-simd.cc.in -D ARCH=sse41 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES=TEST_REQUIRES_X86_SSE41 -o test/simd/s32-simd-sse41.cc &
-tools/xngen test/simd/s32-simd.cc.in -D ARCH=avx2 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES=TEST_REQUIRES_X86_AVX2 -o test/simd/s32-simd-avx2.cc &
-tools/xngen test/simd/s32-simd.cc.in -D ARCH=avx512f -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES=TEST_REQUIRES_X86_AVX512F -o test/simd/s32-simd-avx512f.cc &
+tools/xngen test/simd/s32-simd.cc.in -D ARCH=neon -D ARCH_MACRO="XNN_ARCH_ARM || XNN_ARCH_ARM64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon)" -o test/simd/s32-simd-neon.cc &
+tools/xngen test/simd/s32-simd.cc.in -D ARCH=sse41 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse4_1)" -o test/simd/s32-simd-sse41.cc &
+tools/xngen test/simd/s32-simd.cc.in -D ARCH=avx2 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx2)" -o test/simd/s32-simd-avx2.cc &
+tools/xngen test/simd/s32-simd.cc.in -D ARCH=avx512f -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx512f)" -o test/simd/s32-simd-avx512f.cc &
 tools/xngen test/simd/s32-simd.cc.in -D ARCH=wasmsimd -D ARCH_MACRO="XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD" -D TEST_REQUIRES="" -o test/simd/s32-simd-wasmsimd.cc &
-tools/xngen test/simd/s32-simd.cc.in -D ARCH=hvx -D ARCH_MACRO="XNN_ENABLE_HVX && XNN_ARCH_HEXAGON" -D TEST_REQUIRES=TEST_REQUIRES_HVX -o test/simd/s32-simd-hvx.cc &
+tools/xngen test/simd/s32-simd.cc.in -D ARCH=hvx -D ARCH_MACRO="XNN_ENABLE_HVX && XNN_ARCH_HEXAGON" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx)" -o test/simd/s32-simd-hvx.cc &
 
 tools/xngen test/simd/s8-simd.cc.in -D ARCH=scalar -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/simd/s8-simd-scalar.cc &
-tools/xngen test/simd/s8-simd.cc.in -D ARCH=sse41 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES=TEST_REQUIRES_X86_SSE41 -o test/simd/s8-simd-sse41.cc &
-tools/xngen test/simd/s8-simd.cc.in -D ARCH=neon -D ARCH_MACRO="XNN_ARCH_ARM || XNN_ARCH_ARM64" -D TEST_REQUIRES=TEST_REQUIRES_ARM_NEON -o test/simd/s8-simd-neon.cc &
+tools/xngen test/simd/s8-simd.cc.in -D ARCH=sse41 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse4_1)" -o test/simd/s8-simd-sse41.cc &
+tools/xngen test/simd/s8-simd.cc.in -D ARCH=neon -D ARCH_MACRO="XNN_ARCH_ARM || XNN_ARCH_ARM64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon)" -o test/simd/s8-simd-neon.cc &
 tools/xngen test/simd/s8-simd.cc.in -D ARCH=wasmsimd -D ARCH_MACRO="XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD" -D TEST_REQUIRES="" -o test/simd/s8-simd-wasmsimd.cc &
-tools/xngen test/simd/s8-simd.cc.in -D ARCH=hvx -D ARCH_MACRO="XNN_ENABLE_HVX && XNN_ARCH_HEXAGON" -D TEST_REQUIRES=TEST_REQUIRES_HVX -o test/simd/s8-simd-hvx.cc &
+tools/xngen test/simd/s8-simd.cc.in -D ARCH=hvx -D ARCH_MACRO="XNN_ENABLE_HVX && XNN_ARCH_HEXAGON" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx)" -o test/simd/s8-simd-hvx.cc &
 
 tools/xngen test/simd/u8-simd.cc.in -D ARCH=scalar -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/simd/u8-simd-scalar.cc &
-tools/xngen test/simd/u8-simd.cc.in -D ARCH=sse2 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES=TEST_REQUIRES_X86_SSE2 -o test/simd/u8-simd-sse2.cc &
-tools/xngen test/simd/u8-simd.cc.in -D ARCH=neon -D ARCH_MACRO="XNN_ARCH_ARM || XNN_ARCH_ARM64" -D TEST_REQUIRES=TEST_REQUIRES_ARM_NEON -o test/simd/u8-simd-neon.cc &
+tools/xngen test/simd/u8-simd.cc.in -D ARCH=sse2 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES="" -o test/simd/u8-simd-sse2.cc &
+tools/xngen test/simd/u8-simd.cc.in -D ARCH=neon -D ARCH_MACRO="XNN_ARCH_ARM || XNN_ARCH_ARM64" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon)" -o test/simd/u8-simd-neon.cc &
 tools/xngen test/simd/u8-simd.cc.in -D ARCH=wasmsimd -D ARCH_MACRO="XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD" -D TEST_REQUIRES="" -o test/simd/u8-simd-wasmsimd.cc &
-tools/xngen test/simd/u8-simd.cc.in -D ARCH=hvx -D ARCH_MACRO="XNN_ENABLE_HVX && XNN_ARCH_HEXAGON" -D TEST_REQUIRES=TEST_REQUIRES_HVX -o test/simd/u8-simd-hvx.cc &
+tools/xngen test/simd/u8-simd.cc.in -D ARCH=hvx -D ARCH_MACRO="XNN_ENABLE_HVX && XNN_ARCH_HEXAGON" -D TEST_REQUIRES="TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx)" -o test/simd/u8-simd-hvx.cc &
 
 wait

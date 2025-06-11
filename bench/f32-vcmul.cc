@@ -22,8 +22,7 @@
 
 static void f32_vcmul(benchmark::State& state, uint64_t arch_flags,
                       xnn_f32_vbinary_ukernel_fn vcmul,
-                      xnn_init_f32_default_params_fn init_params = nullptr,
-                      benchmark::utils::IsaCheckFunction isa_check = nullptr) {
+                      xnn_init_f32_default_params_fn init_params = nullptr) {
   if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }

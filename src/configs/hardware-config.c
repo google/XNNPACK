@@ -369,6 +369,7 @@ static void init_hardware_config(void) {
     if (hardware_config.use_x86_avx512vnnigfni) hardware_config.arch_flags |= xnn_arch_x86_avx512vnnigfni;
     if (hardware_config.use_x86_avx512amx) hardware_config.arch_flags |= xnn_arch_x86_avx512amx;
     if (hardware_config.use_x86_avx512fp16) hardware_config.arch_flags |= xnn_arch_x86_avx512fp16;
+    if (hardware_config.use_x86_avx512bf16) hardware_config.arch_flags |= xnn_arch_x86_avx512bf16;
   #endif
   #if XNN_ARCH_RISCV
     if (hardware_config.use_riscv_vector) hardware_config.arch_flags |= xnn_arch_riscv_vector;

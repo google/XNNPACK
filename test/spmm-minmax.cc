@@ -1,9 +1,7 @@
-// Copyright 2019 Google LLC
+// Copyright 2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
-
-#pragma once
 
 #include <algorithm>
 #include <cassert>
@@ -11,54 +9,62 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <functional>
 #include <random>
-#include <vector>
 
 #include <gtest/gtest.h>
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"  // IWYU pragma: keep
+#include "src/xnnpack/hardware-config.h"  // IWYU pragma: keep
+#include "src/xnnpack/isa-checks.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams-init.h"  // IWYU pragma: keep
 #include "src/xnnpack/microparams.h"
+#include "src/xnnpack/spmm.h"  // IWYU pragma: keep
+#include "test/next_prime.h"
 #include "test/replicable_random_device.h"
 
-class SpMMMicrokernelTester {
+struct Kernel;
+
+class Tester {
  public:
-  SpMMMicrokernelTester& mr(size_t mr) {
+  Tester& mr(size_t mr) {
     this->mr_ = mr;
     return *this;
   }
 
   size_t mr() const { return this->mr_; }
 
-  SpMMMicrokernelTester& nr(size_t nr) {
+  Tester& nr(size_t nr) {
     this->nr_ = nr;
     return *this;
   }
 
   size_t nr() const { return this->nr_; }
 
-  SpMMMicrokernelTester& m(size_t m) {
+  Tester& m(size_t m) {
     this->m_ = m;
     return *this;
   }
 
   size_t m() const { return this->m_; }
 
-  SpMMMicrokernelTester& n(size_t n) {
+  Tester& n(size_t n) {
     this->n_ = n;
     return *this;
   }
 
   size_t n() const { return this->n_; }
 
-  SpMMMicrokernelTester& k(size_t k) {
+  Tester& k(size_t k) {
     this->k_ = k;
     return *this;
   }
 
   size_t k() const { return this->k_; }
 
-  SpMMMicrokernelTester& output_stride(size_t output_stride) {
+  Tester& output_stride(size_t output_stride) {
     assert(output_stride != 0);
     this->output_stride_ = output_stride;
     return *this;
@@ -73,28 +79,28 @@ class SpMMMicrokernelTester {
     }
   }
 
-  SpMMMicrokernelTester& sparsity(float sparsity) {
+  Tester& sparsity(float sparsity) {
     this->sparsity_ = sparsity;
     return *this;
   }
 
   float sparsity() const { return this->sparsity_; }
 
-  SpMMMicrokernelTester& qmin(uint8_t qmin) {
+  Tester& qmin(uint8_t qmin) {
     this->qmin_ = qmin;
     return *this;
   }
 
   uint8_t qmin() const { return this->qmin_; }
 
-  SpMMMicrokernelTester& qmax(uint8_t qmax) {
+  Tester& qmax(uint8_t qmax) {
     this->qmax_ = qmax;
     return *this;
   }
 
   uint8_t qmax() const { return this->qmax_; }
 
-  SpMMMicrokernelTester& iterations(size_t iterations) {
+  Tester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
@@ -443,6 +449,8 @@ class SpMMMicrokernelTester {
     }
   }
 
+  void Test(const Kernel& kernel) const;
+
  private:
   size_t mr_{1};
   size_t nr_{1};
@@ -455,3 +463,343 @@ class SpMMMicrokernelTester {
   uint8_t qmax_{255};
   size_t iterations_{1};
 };
+
+struct Kernel {
+  explicit Kernel(xnn_f32_spmm_minmax_ukernel_fn fn,
+                  xnn_init_f32_minmax_params_fn init_params) {
+    dispatch = [=](const Tester& tester) { tester.Test(fn, init_params); };
+  }
+  explicit Kernel(xnn_f16_spmm_minmax_ukernel_fn fn,
+                  xnn_init_f16_minmax_params_fn init_params) {
+    dispatch = [=](const Tester& tester) { tester.Test(fn, init_params); };
+  }
+  std::function<void(const Tester&)> dispatch;
+};
+
+void Tester::Test(const Kernel& kernel) const { kernel.dispatch(*this); }
+
+struct KernelInfo {
+  const char* name;
+  uint64_t arch_flags;
+  Kernel kernel;
+  size_t mr;
+  size_t nr;
+  size_t k_block;
+  size_t adj_kblock;
+  bool vector_tile;
+  size_t elem_size;
+};
+
+KernelInfo kernels[] = {
+#define XNN_UKERNEL(arch_flags, ukernel, mr, nr, k_block, vector_tile, \
+                    pipelined, datatype, params_type, init_params)     \
+  {                                                                    \
+      #ukernel,                                                        \
+      arch_flags,                                                      \
+      Kernel{ukernel, init_params},                                    \
+      mr,                                                              \
+      nr,                                                              \
+      k_block,                                                         \
+      k_block * (pipelined ? 2 : 1),                                   \
+      vector_tile,                                                     \
+      sizeof(datatype),                                                \
+  },
+#include "src/f16-spmm/f16-spmm-minmax.inc"
+#include "src/f32-spmm/f32-spmm-minmax.inc"
+#undef XNN_UKERNEL
+};
+
+class Test : public testing::TestWithParam<KernelInfo> {};
+
+INSTANTIATE_TEST_SUITE_P(
+    rminmax, Test, testing::ValuesIn(kernels),
+    [](const testing::TestParamInfo<Test::ParamType>& info) {
+      return info.param.name;
+    });
+
+TEST_P(Test, k_eq_kblock) {
+  const KernelInfo& params = GetParam();
+  TEST_REQUIRES_ARCH_FLAGS(params.arch_flags);
+  const size_t mr = params.mr * get_batch_scale(params.elem_size);
+  Tester()
+      .mr(mr)
+      .nr(params.nr)
+      .m(mr)
+      .n(params.nr)
+      .k(params.k_block)
+      .sparsity(0.0f)
+      .Test(params.kernel);
+}
+
+TEST_P(Test, k_eq_kblock_subtile) {
+  const KernelInfo& params = GetParam();
+  TEST_REQUIRES_ARCH_FLAGS(params.arch_flags);
+  const size_t mr = params.mr * get_batch_scale(params.elem_size);
+  for (uint32_t n = 1; n <= params.nr; n++) {
+    Tester()
+        .mr(mr)
+        .nr(params.nr)
+        .m(mr)
+        .n(n)
+        .k(params.k_block)
+        .sparsity(0.0f)
+        .Test(params.kernel);
+  }
+}
+
+TEST_P(Test, k_eq_2xkblock) {
+  const KernelInfo& params = GetParam();
+  TEST_REQUIRES_ARCH_FLAGS(params.arch_flags);
+  const size_t mr = params.mr * get_batch_scale(params.elem_size);
+  Tester()
+      .mr(mr)
+      .nr(params.nr)
+      .m(mr)
+      .n(params.nr)
+      .k(params.k_block * 2)
+      .sparsity(0.0f)
+      .Test(params.kernel);
+}
+
+TEST_P(Test, k_eq_2xkblock_subtile) {
+  const KernelInfo& params = GetParam();
+  TEST_REQUIRES_ARCH_FLAGS(params.arch_flags);
+  const size_t mr = params.mr * get_batch_scale(params.elem_size);
+  for (uint32_t n = 1; n <= params.nr; n++) {
+    Tester()
+        .mr(mr)
+        .nr(params.nr)
+        .m(mr)
+        .n(n)
+        .k(params.k_block * 2)
+        .sparsity(0.0f)
+        .Test(params.kernel);
+  }
+}
+
+TEST_P(Test, k_ltkblock) {
+  const KernelInfo& params = GetParam();
+  TEST_REQUIRES_ARCH_FLAGS(params.arch_flags);
+  const size_t mr = params.mr * get_batch_scale(params.elem_size);
+  for (size_t k = 1; k < params.adj_kblock; k++) {
+    Tester().mr(mr).nr(params.nr).m(mr).n(params.nr).k(k).sparsity(0.0f).Test(
+        params.kernel);
+  }
+}
+
+TEST_P(Test, k_ltkblock_subtile) {
+  const KernelInfo& params = GetParam();
+  TEST_REQUIRES_ARCH_FLAGS(params.arch_flags);
+  const size_t mr = params.mr * get_batch_scale(params.elem_size);
+  for (size_t k = 1; k < params.adj_kblock; k++) {
+    for (uint32_t n = 1; n <= params.nr; n++) {
+      Tester().mr(mr).nr(params.nr).m(mr).n(n).k(k).sparsity(0.0f).Test(
+          params.kernel);
+    }
+  }
+}
+
+TEST_P(Test, k_gtkblock) {
+  const KernelInfo& params = GetParam();
+  TEST_REQUIRES_ARCH_FLAGS(params.arch_flags);
+  const size_t mr = params.mr * get_batch_scale(params.elem_size);
+  for (size_t k = params.adj_kblock + 1;
+       k < (params.k_block * (params.k_block == 1 ? 10 : 2)); k++) {
+    Tester().mr(mr).nr(params.nr).m(mr).n(params.nr).k(k).sparsity(0.0f).Test(
+        params.kernel);
+  }
+}
+
+TEST_P(Test, k_gt_kblock_subtile) {
+  const KernelInfo& params = GetParam();
+  TEST_REQUIRES_ARCH_FLAGS(params.arch_flags);
+  const size_t mr = params.mr * get_batch_scale(params.elem_size);
+  for (size_t k = params.adj_kblock + 1;
+       k < (params.k_block == 1 ? 10 : params.k_block * 2); k++) {
+    for (uint32_t n = 1; n <= params.nr; n++) {
+      Tester().mr(mr).nr(params.nr).m(mr).n(n).k(k).sparsity(0.0f).Test(
+          params.kernel);
+    }
+  }
+}
+
+TEST_P(Test, k_div_kblock) {
+  const KernelInfo& params = GetParam();
+  TEST_REQUIRES_ARCH_FLAGS(params.arch_flags);
+  const size_t mr = params.mr * get_batch_scale(params.elem_size);
+  for (size_t k = params.adj_kblock + params.k_block; k <= params.k_block * 10;
+       k += params.k_block) {
+    Tester().mr(mr).nr(params.nr).m(mr).n(params.nr).k(k).sparsity(0.0f).Test(
+        params.kernel);
+  }
+}
+
+TEST_P(Test, k_div_kblock_subtile) {
+  const KernelInfo& params = GetParam();
+  TEST_REQUIRES_ARCH_FLAGS(params.arch_flags);
+  const size_t mr = params.mr * get_batch_scale(params.elem_size);
+  for (size_t k = params.adj_kblock + params.k_block; k <= params.k_block * 10;
+       k += params.k_block) {
+    for (uint32_t n = 1; n <= params.nr; n++) {
+      Tester().mr(mr).nr(params.nr).m(mr).n(n).k(k).sparsity(0.0f).Test(
+          params.kernel);
+    }
+  }
+}
+
+TEST_P(Test, n_gt_nr) {
+  const KernelInfo& params = GetParam();
+  TEST_REQUIRES_ARCH_FLAGS(params.arch_flags);
+  const size_t mr = params.mr * get_batch_scale(params.elem_size);
+  for (uint32_t n = params.nr + 1; n < std::max<size_t>(10, params.nr * 2);
+       n++) {
+    for (size_t k = 1; k <= params.k_block * 5; k += params.k_block + 1) {
+      Tester().mr(mr).nr(params.nr).m(mr).n(n).k(k).sparsity(0.0f).Test(
+          params.kernel);
+    }
+  }
+}
+
+TEST_P(Test, n_div_nr) {
+  const KernelInfo& params = GetParam();
+  TEST_REQUIRES_ARCH_FLAGS(params.arch_flags);
+  const size_t mr = params.mr * get_batch_scale(params.elem_size);
+  for (uint32_t n = params.nr * 2; n <= params.nr * 3; n += params.nr) {
+    for (size_t k = 1; k <= params.k_block * 5; k += params.k_block + 1) {
+      Tester().mr(mr).nr(params.nr).m(mr).n(n).k(k).Test(params.kernel);
+    }
+  }
+}
+
+TEST_P(Test, m_lt_mr) {
+  const KernelInfo& params = GetParam();
+  TEST_REQUIRES_ARCH_FLAGS(params.arch_flags);
+  const size_t mr = params.mr * get_batch_scale(params.elem_size);
+  for (uint32_t m = 1; m < mr; m++) {
+    for (uint32_t n = 1; n < std::max<size_t>(10, params.nr * 5);
+         n += params.nr + 1) {
+      for (size_t k = 1; k <= params.k_block * 5; k += params.k_block + 1) {
+        Tester().mr(mr).nr(params.nr).m(m).n(n).k(k).sparsity(0.0f).Test(
+            params.kernel);
+      }
+    }
+  }
+}
+
+TEST_P(Test, m_div_mr) {
+  const KernelInfo& params = GetParam();
+  TEST_REQUIRES_ARCH_FLAGS(params.arch_flags);
+  const size_t mr = params.mr * get_batch_scale(params.elem_size);
+  for (uint32_t m = 2 * mr; m <= 3 * mr; m += mr) {
+    for (uint32_t n = 1; n < std::max<size_t>(10, params.nr * 5);
+         n += params.nr + 1) {
+      for (size_t k = 1; k <= params.k_block * 5; k += params.k_block + 1) {
+        Tester().mr(mr).nr(params.nr).m(m).n(n).k(k).sparsity(0.0f).Test(
+            params.kernel);
+      }
+    }
+  }
+}
+
+TEST_P(Test, m_gt_mr) {
+  const KernelInfo& params = GetParam();
+  TEST_REQUIRES_ARCH_FLAGS(params.arch_flags);
+  const size_t mr = params.mr * get_batch_scale(params.elem_size);
+  for (uint32_t m = mr + 1; m < 2 * mr; m++) {
+    for (uint32_t n = 1; n < std::max<size_t>(10, params.nr * 5);
+         n += params.nr + 1) {
+      for (size_t k = 1; k <= params.k_block * 5; k += params.k_block + 1) {
+        Tester().mr(mr).nr(params.nr).m(m).n(n).k(k).sparsity(0.0f).Test(
+            params.kernel);
+      }
+    }
+  }
+}
+
+TEST_P(Test, output_stride) {
+  const KernelInfo& params = GetParam();
+  TEST_REQUIRES_ARCH_FLAGS(params.arch_flags);
+
+  const size_t mr = params.mr * get_batch_scale(params.elem_size);
+  const size_t m = 2 * mr;
+  for (uint32_t n = 1; n < std::max<size_t>(10, params.nr * 5);
+       n += params.nr + 1) {
+    for (size_t k = 1; k <= params.k_block * 5; k += params.k_block + 1) {
+      Tester()
+          .mr(mr)
+          .nr(params.nr)
+          .m(m)
+          .n(n)
+          .k(k)
+          .output_stride(xnnpack::NextPrime(m + 1))
+          .sparsity(0.0f)
+          .Test(params.kernel);
+    }
+  }
+}
+
+TEST_P(Test, qmin) {
+  const KernelInfo& params = GetParam();
+  TEST_REQUIRES_ARCH_FLAGS(params.arch_flags);
+  const size_t mr = params.mr * get_batch_scale(params.elem_size);
+  for (uint32_t n = 1; n < std::max<size_t>(10, params.nr * 5);
+       n += params.nr + 1) {
+    for (size_t k = 1; k <= params.k_block * 5; k += params.k_block + 1) {
+      Tester()
+          .mr(mr)
+          .nr(params.nr)
+          .m(2 * mr)
+          .n(n)
+          .k(k)
+          .sparsity(0.0f)
+          .qmin(128)
+          .Test(params.kernel);
+    }
+  }
+}
+
+TEST_P(Test, qmax) {
+  const KernelInfo& params = GetParam();
+  TEST_REQUIRES_ARCH_FLAGS(params.arch_flags);
+  const size_t mr = params.mr * get_batch_scale(params.elem_size);
+  for (uint32_t n = 1; n < std::max<size_t>(10, params.nr * 5);
+       n += params.nr + 1) {
+    for (size_t k = 1; k <= params.k_block * 5; k += params.k_block + 1) {
+      Tester()
+          .mr(mr)
+          .nr(params.nr)
+          .m(2 * mr)
+          .n(n)
+          .k(k)
+          .sparsity(0.0f)
+          .qmax(128)
+          .Test(params.kernel);
+    }
+  }
+}
+
+TEST_P(Test, half_sparse) {
+  const KernelInfo& params = GetParam();
+  TEST_REQUIRES_ARCH_FLAGS(params.arch_flags);
+  const size_t mr = params.mr * get_batch_scale(params.elem_size);
+  for (uint32_t n = 1; n < std::max<size_t>(10, params.nr * 5);
+       n += params.nr + 1) {
+    for (size_t k = 1; k <= params.k_block * 5; k += params.k_block + 1) {
+      Tester().mr(mr).nr(params.nr).m(2 * mr).n(n).k(k).sparsity(0.5f).Test(
+          params.kernel);
+    }
+  }
+}
+
+TEST_P(Test, zero_weights) {
+  const KernelInfo& params = GetParam();
+  TEST_REQUIRES_ARCH_FLAGS(params.arch_flags);
+  const size_t mr = params.mr * get_batch_scale(params.elem_size);
+  for (uint32_t n = 1; n < std::max<size_t>(10, params.nr * 5);
+       n += params.nr + 1) {
+    for (size_t k = 1; k <= params.k_block * 5; k += params.k_block + 1) {
+      Tester().mr(mr).nr(params.nr).m(2 * mr).n(n).k(k).sparsity(1.0f).Test(
+          params.kernel);
+    }
+  }
+}

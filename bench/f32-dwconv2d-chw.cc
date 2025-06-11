@@ -17,6 +17,7 @@
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/indirection.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
@@ -27,8 +28,8 @@ static void f32_dwconv2d_chw(
     benchmark::State& state, xnn_f32_dwconv2d_chw_ukernel_fn dwconv,
     xnn_init_f32_minmax_params_fn init_params, uint32_t kernel_height,
     uint32_t kernel_width, uint32_t padding_width, uint32_t stride,
-    benchmark::utils::IsaCheckFunction isa_check = nullptr) {
-  if (isa_check != nullptr && !isa_check(state)) {
+    uint64_t arch_flags = 0) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
 
@@ -162,70 +163,70 @@ static void dwconv2d_chw_3x3p1__neon_1x4(benchmark::State& state,
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__neon_1x4,
                    xnn_init_f32_minmax_scalar_params, 3 /* kernel height */,
                    3 /* kernel width */, 1 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_3x3p1__neon_2x4(benchmark::State& state,
                                          const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__neon_2x4,
                    xnn_init_f32_minmax_scalar_params, 3 /* kernel height */,
                    3 /* kernel width */, 1 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_3x3p1__neon_3x4(benchmark::State& state,
                                          const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__neon_3x4,
                    xnn_init_f32_minmax_scalar_params, 3 /* kernel height */,
                    3 /* kernel width */, 1 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_3x3p1__neon_4x4(benchmark::State& state,
                                          const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__neon_4x4,
                    xnn_init_f32_minmax_scalar_params, 3 /* kernel height */,
                    3 /* kernel width */, 1 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_3x3p1__neon_5x4(benchmark::State& state,
                                          const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__neon_5x4,
                    xnn_init_f32_minmax_scalar_params, 3 /* kernel height */,
                    3 /* kernel width */, 1 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_3x3p1__neon_6x4(benchmark::State& state,
                                          const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__neon_6x4,
                    xnn_init_f32_minmax_scalar_params, 3 /* kernel height */,
                    3 /* kernel width */, 1 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_3x3p1__neon_1x4_acc2(benchmark::State& state,
                                               const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__neon_1x4_acc2,
                    xnn_init_f32_minmax_scalar_params, 3 /* kernel height */,
                    3 /* kernel width */, 1 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_3x3p1__neon_1x4_acc3(benchmark::State& state,
                                               const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__neon_1x4_acc3,
                    xnn_init_f32_minmax_scalar_params, 3 /* kernel height */,
                    3 /* kernel width */, 1 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_3x3p1__neon_1x4_acc4(benchmark::State& state,
                                               const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__neon_1x4_acc4,
                    xnn_init_f32_minmax_scalar_params, 3 /* kernel height */,
                    3 /* kernel width */, 1 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_3x3p1__neon_2x4_acc2(benchmark::State& state,
                                               const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__neon_2x4_acc2,
                    xnn_init_f32_minmax_scalar_params, 3 /* kernel height */,
                    3 /* kernel width */, 1 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 
 static void dwconv2d_chw_3x3s2p1__neon_1x4(benchmark::State& state,
@@ -233,56 +234,56 @@ static void dwconv2d_chw_3x3s2p1__neon_1x4(benchmark::State& state,
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__neon_1x4,
                    xnn_init_f32_minmax_scalar_params, 3 /* kernel height */,
                    3 /* kernel width */, 1 /* width padding */, 2 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_3x3s2p1__neon_2x4(benchmark::State& state,
                                            const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__neon_2x4,
                    xnn_init_f32_minmax_scalar_params, 3 /* kernel height */,
                    3 /* kernel width */, 1 /* width padding */, 2 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_3x3s2p1__neon_3x4(benchmark::State& state,
                                            const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__neon_3x4,
                    xnn_init_f32_minmax_scalar_params, 3 /* kernel height */,
                    3 /* kernel width */, 1 /* width padding */, 2 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_3x3s2p1__neon_4x4(benchmark::State& state,
                                            const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__neon_4x4,
                    xnn_init_f32_minmax_scalar_params, 3 /* kernel height */,
                    3 /* kernel width */, 1 /* width padding */, 2 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_3x3s2p1__neon_1x4_acc2(benchmark::State& state,
                                                 const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__neon_1x4_acc2,
                    xnn_init_f32_minmax_scalar_params, 3 /* kernel height */,
                    3 /* kernel width */, 1 /* width padding */, 2 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_3x3s2p1__neon_1x4_acc3(benchmark::State& state,
                                                 const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__neon_1x4_acc3,
                    xnn_init_f32_minmax_scalar_params, 3 /* kernel height */,
                    3 /* kernel width */, 1 /* width padding */, 2 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_3x3s2p1__neon_1x4_acc4(benchmark::State& state,
                                                 const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__neon_1x4_acc4,
                    xnn_init_f32_minmax_scalar_params, 3 /* kernel height */,
                    3 /* kernel width */, 1 /* width padding */, 2 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_3x3s2p1__neon_2x4_acc2(benchmark::State& state,
                                                 const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__neon_2x4_acc2,
                    xnn_init_f32_minmax_scalar_params, 3 /* kernel height */,
                    3 /* kernel width */, 1 /* width padding */, 2 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 
 static void dwconv2d_chw_5x5p2__neon_1x4(benchmark::State& state,
@@ -290,91 +291,91 @@ static void dwconv2d_chw_5x5p2__neon_1x4(benchmark::State& state,
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_5x5p2__neon_1x4,
                    xnn_init_f32_minmax_scalar_params, 5 /* kernel height */,
                    5 /* kernel width */, 2 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_5x5p2__neon_2x4(benchmark::State& state,
                                          const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_5x5p2__neon_2x4,
                    xnn_init_f32_minmax_scalar_params, 5 /* kernel height */,
                    5 /* kernel width */, 2 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_5x5p2__neon_3x4(benchmark::State& state,
                                          const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_5x5p2__neon_3x4,
                    xnn_init_f32_minmax_scalar_params, 5 /* kernel height */,
                    5 /* kernel width */, 2 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_5x5p2__neon_4x4(benchmark::State& state,
                                          const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_5x5p2__neon_4x4,
                    xnn_init_f32_minmax_scalar_params, 5 /* kernel height */,
                    5 /* kernel width */, 2 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_5x5p2__neon_5x4(benchmark::State& state,
                                          const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_5x5p2__neon_5x4,
                    xnn_init_f32_minmax_scalar_params, 5 /* kernel height */,
                    5 /* kernel width */, 2 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_5x5p2__neon_1x4_acc2(benchmark::State& state,
                                               const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_5x5p2__neon_1x4_acc2,
                    xnn_init_f32_minmax_scalar_params, 5 /* kernel height */,
                    5 /* kernel width */, 2 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_5x5p2__neon_1x4_acc3(benchmark::State& state,
                                               const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_5x5p2__neon_1x4_acc3,
                    xnn_init_f32_minmax_scalar_params, 5 /* kernel height */,
                    5 /* kernel width */, 2 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_5x5p2__neon_1x4_acc4(benchmark::State& state,
                                               const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_5x5p2__neon_1x4_acc4,
                    xnn_init_f32_minmax_scalar_params, 5 /* kernel height */,
                    5 /* kernel width */, 2 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_5x5p2__neon_1x4_acc5(benchmark::State& state,
                                               const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_5x5p2__neon_1x4_acc5,
                    xnn_init_f32_minmax_scalar_params, 5 /* kernel height */,
                    5 /* kernel width */, 2 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_5x5p2__neon_2x4_acc2(benchmark::State& state,
                                               const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_5x5p2__neon_2x4_acc2,
                    xnn_init_f32_minmax_scalar_params, 5 /* kernel height */,
                    5 /* kernel width */, 2 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_5x5p2__neon_2x4_acc3(benchmark::State& state,
                                               const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_5x5p2__neon_2x4_acc3,
                    xnn_init_f32_minmax_scalar_params, 5 /* kernel height */,
                    5 /* kernel width */, 2 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_5x5p2__neon_3x4_acc2(benchmark::State& state,
                                               const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_5x5p2__neon_3x4_acc2,
                    xnn_init_f32_minmax_scalar_params, 5 /* kernel height */,
                    5 /* kernel width */, 2 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_5x5p2__neon_4x4_acc2(benchmark::State& state,
                                               const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_5x5p2__neon_4x4_acc2,
                    xnn_init_f32_minmax_scalar_params, 5 /* kernel height */,
                    5 /* kernel width */, 2 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 
 static void dwconv2d_chw_5x5s2p2__neon_1x4(benchmark::State& state,
@@ -382,70 +383,70 @@ static void dwconv2d_chw_5x5s2p2__neon_1x4(benchmark::State& state,
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__neon_1x4,
                    xnn_init_f32_minmax_scalar_params, 5 /* kernel height */,
                    5 /* kernel width */, 2 /* width padding */, 2 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_5x5s2p2__neon_2x4(benchmark::State& state,
                                            const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__neon_2x4,
                    xnn_init_f32_minmax_scalar_params, 5 /* kernel height */,
                    5 /* kernel width */, 2 /* width padding */, 2 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_5x5s2p2__neon_3x4(benchmark::State& state,
                                            const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__neon_3x4,
                    xnn_init_f32_minmax_scalar_params, 5 /* kernel height */,
                    5 /* kernel width */, 2 /* width padding */, 2 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_5x5s2p2__neon_1x4_acc2(benchmark::State& state,
                                                 const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__neon_1x4_acc2,
                    xnn_init_f32_minmax_scalar_params, 5 /* kernel height */,
                    5 /* kernel width */, 2 /* width padding */, 2 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_5x5s2p2__neon_1x4_acc3(benchmark::State& state,
                                                 const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__neon_1x4_acc3,
                    xnn_init_f32_minmax_scalar_params, 5 /* kernel height */,
                    5 /* kernel width */, 2 /* width padding */, 2 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_5x5s2p2__neon_1x4_acc4(benchmark::State& state,
                                                 const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__neon_1x4_acc4,
                    xnn_init_f32_minmax_scalar_params, 5 /* kernel height */,
                    5 /* kernel width */, 2 /* width padding */, 2 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_5x5s2p2__neon_1x4_acc5(benchmark::State& state,
                                                 const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__neon_1x4_acc5,
                    xnn_init_f32_minmax_scalar_params, 5 /* kernel height */,
                    5 /* kernel width */, 2 /* width padding */, 2 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_5x5s2p2__neon_2x4_acc2(benchmark::State& state,
                                                 const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__neon_2x4_acc2,
                    xnn_init_f32_minmax_scalar_params, 5 /* kernel height */,
                    5 /* kernel width */, 2 /* width padding */, 2 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_5x5s2p2__neon_2x4_acc3(benchmark::State& state,
                                                 const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__neon_2x4_acc3,
                    xnn_init_f32_minmax_scalar_params, 5 /* kernel height */,
                    5 /* kernel width */, 2 /* width padding */, 2 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 static void dwconv2d_chw_5x5s2p2__neon_3x4_acc2(benchmark::State& state,
                                                 const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__neon_1x4_acc5,
                    xnn_init_f32_minmax_scalar_params, 5 /* kernel height */,
                    5 /* kernel width */, 2 /* width padding */, 2 /* stride */,
-                   benchmark::utils::CheckNEON);
+                   xnn_arch_arm_neon);
 }
 
 BENCHMARK_DWCONV(dwconv2d_chw_3x3p1__neon_1x4)
@@ -879,70 +880,70 @@ static void dwconv2d_chw_3x3p1__ssse3_1x4(benchmark::State& state,
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__ssse3_1x4,
                    xnn_init_f32_minmax_scalar_params, 3 /* kernel height */,
                    3 /* kernel width */, 1 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckSSSE3);
+                   xnn_arch_x86_ssse3);
 }
 static void dwconv2d_chw_3x3p1__ssse3_2x4(benchmark::State& state,
                                           const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__ssse3_2x4,
                    xnn_init_f32_minmax_scalar_params, 3 /* kernel height */,
                    3 /* kernel width */, 1 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckSSSE3);
+                   xnn_arch_x86_ssse3);
 }
 static void dwconv2d_chw_3x3p1__ssse3_3x4(benchmark::State& state,
                                           const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__ssse3_3x4,
                    xnn_init_f32_minmax_scalar_params, 3 /* kernel height */,
                    3 /* kernel width */, 1 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckSSSE3);
+                   xnn_arch_x86_ssse3);
 }
 static void dwconv2d_chw_3x3p1__ssse3_4x4(benchmark::State& state,
                                           const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__ssse3_4x4,
                    xnn_init_f32_minmax_scalar_params, 3 /* kernel height */,
                    3 /* kernel width */, 1 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckSSSE3);
+                   xnn_arch_x86_ssse3);
 }
 static void dwconv2d_chw_3x3p1__ssse3_5x4(benchmark::State& state,
                                           const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__ssse3_5x4,
                    xnn_init_f32_minmax_scalar_params, 3 /* kernel height */,
                    3 /* kernel width */, 1 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckSSSE3);
+                   xnn_arch_x86_ssse3);
 }
 static void dwconv2d_chw_3x3p1__ssse3_6x4(benchmark::State& state,
                                           const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__ssse3_6x4,
                    xnn_init_f32_minmax_scalar_params, 3 /* kernel height */,
                    3 /* kernel width */, 1 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckSSSE3);
+                   xnn_arch_x86_ssse3);
 }
 static void dwconv2d_chw_3x3p1__ssse3_1x4_acc2(benchmark::State& state,
                                                const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__ssse3_1x4_acc2,
                    xnn_init_f32_minmax_scalar_params, 3 /* kernel height */,
                    3 /* kernel width */, 1 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckSSSE3);
+                   xnn_arch_x86_ssse3);
 }
 static void dwconv2d_chw_3x3p1__ssse3_1x4_acc3(benchmark::State& state,
                                                const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__ssse3_1x4_acc3,
                    xnn_init_f32_minmax_scalar_params, 3 /* kernel height */,
                    3 /* kernel width */, 1 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckSSSE3);
+                   xnn_arch_x86_ssse3);
 }
 static void dwconv2d_chw_3x3p1__ssse3_1x4_acc4(benchmark::State& state,
                                                const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__ssse3_1x4_acc4,
                    xnn_init_f32_minmax_scalar_params, 3 /* kernel height */,
                    3 /* kernel width */, 1 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckSSSE3);
+                   xnn_arch_x86_ssse3);
 }
 static void dwconv2d_chw_3x3p1__ssse3_2x4_acc2(benchmark::State& state,
                                                const char* net) {
   f32_dwconv2d_chw(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__ssse3_2x4_acc2,
                    xnn_init_f32_minmax_scalar_params, 3 /* kernel height */,
                    3 /* kernel width */, 1 /* width padding */, 1 /* stride */,
-                   benchmark::utils::CheckSSSE3);
+                   xnn_arch_x86_ssse3);
 }
 
 static void dwconv2d_chw_3x3p1__sse_1x4(benchmark::State& state,

@@ -33,7 +33,7 @@ namespace xnnpack {
 class U8SimdNEONTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    TEST_REQUIRES_ARM_NEON;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon);
     inputs_.resize(3 * xnn_simd_size_u8);
     output_.resize(xnn_simd_size_u8);
     std::uniform_int_distribution<uint8_t> u8(-100, 100);

@@ -33,7 +33,7 @@ namespace xnnpack {
 class S32SimdHVXTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    TEST_REQUIRES_HVX;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_hvx);
     inputs_.resize(3 * xnn_simd_size_s32);
     output_.resize(xnn_simd_size_s32);
     std::uniform_int_distribution<int32_t> s32dist(-10000, 10000);

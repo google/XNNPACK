@@ -10,13 +10,13 @@
 #include <cstdlib>
 #include <cstring>
 #include <functional>
-#include <limits>
 #include <memory>
 #include <random>
 
 #include "bench/utils.h"
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
 #include <benchmark/benchmark.h>
 #include <pthreadpool.h>
 
@@ -180,9 +180,10 @@ void xnnpack_batch_matrix_multiply_qd8_f32_qc8w(benchmark::State& state,
 
   pthreadpool_t threadpool = pthreadpool_create(num_threads);
 
+  size_t workspace_size = 0;
   status = xnn_reshape_batch_matrix_multiply_nc_qd8_f32_qc8w(
       op, /*num_batch_dims=*/1, /*batch_dims_a=*/&batch_size,
-      /*batch_dims_b=*/&batch_size, m, k, n, threadpool);
+      /*batch_dims_b=*/&batch_size, m, k, n, &workspace_size, threadpool);
 
   if (status != xnn_status_success) {
     state.SkipWithError(
@@ -190,8 +191,12 @@ void xnnpack_batch_matrix_multiply_qd8_f32_qc8w(benchmark::State& state,
     return;
   }
 
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> workspace(
+    workspace_size);
+
   status = xnn_setup_batch_matrix_multiply_nc_qd8_f32_qc8w(
-      op, input1.data(), quantization_params.data(), output.data());
+      op, workspace.data(), input1.data(), /*input_b=*/nullptr,
+      quantization_params.data(), output.data());
 
   if (status != xnn_status_success) {
     state.SkipWithError(

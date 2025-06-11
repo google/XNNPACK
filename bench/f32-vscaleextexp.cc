@@ -10,6 +10,7 @@
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/raddextexp.h"
 #include "src/xnnpack/vscaleextexp.h"
@@ -18,8 +19,8 @@
 static void f32_vscaleextexp(
     benchmark::State& state, xnn_f32_raddextexp_ukernel_fn raddextexp,
     xnn_f32_vscaleextexp_ukernel_fn vscaleextexp,
-    benchmark::utils::IsaCheckFunction isa_check = nullptr) {
-  if (isa_check != nullptr && !isa_check(state)) {
+    uint64_t arch_flags = 0) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
 
@@ -80,25 +81,25 @@ static void f32_vscaleextexp(
 BENCHMARK_CAPTURE(f32_vscaleextexp, avx512f_p5_scalef_u16,
                   xnn_f32_raddextexp_ukernel__avx512f_p5_scalef_u128_acc2,
                   xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_u16,
-                  benchmark::utils::CheckAVX512F)
+                  xnn_arch_x86_avx512f)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 BENCHMARK_CAPTURE(f32_vscaleextexp, avx512f_p5_scalef_u32,
                   xnn_f32_raddextexp_ukernel__avx512f_p5_scalef_u128_acc2,
                   xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_u32,
-                  benchmark::utils::CheckAVX512F)
+                  xnn_arch_x86_avx512f)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 BENCHMARK_CAPTURE(f32_vscaleextexp, avx512f_p5_scalef_u48,
                   xnn_f32_raddextexp_ukernel__avx512f_p5_scalef_u128_acc2,
                   xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_u48,
-                  benchmark::utils::CheckAVX512F)
+                  xnn_arch_x86_avx512f)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 BENCHMARK_CAPTURE(f32_vscaleextexp, avx512f_p5_scalef_u64,
                   xnn_f32_raddextexp_ukernel__avx512f_p5_scalef_u128_acc2,
                   xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_u64,
-                  benchmark::utils::CheckAVX512F)
+                  xnn_arch_x86_avx512f)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 #endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
@@ -107,25 +108,25 @@ BENCHMARK_CAPTURE(f32_vscaleextexp, avx512f_p5_scalef_u64,
 BENCHMARK_CAPTURE(f32_vscaleextexp, avx2_p5_u8,
                   xnn_f32_raddextexp_ukernel__avx2_p5_u80_acc2,
                   xnn_f32_vscaleextexp_ukernel__avx2_p5_u8,
-                  benchmark::utils::CheckAVX2)
+                  xnn_arch_x86_avx2)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 BENCHMARK_CAPTURE(f32_vscaleextexp, avx2_p5_u16,
                   xnn_f32_raddextexp_ukernel__avx2_p5_u80_acc2,
                   xnn_f32_vscaleextexp_ukernel__avx2_p5_u16,
-                  benchmark::utils::CheckAVX2)
+                  xnn_arch_x86_avx2)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 BENCHMARK_CAPTURE(f32_vscaleextexp, avx2_p5_u24,
                   xnn_f32_raddextexp_ukernel__avx2_p5_u80_acc2,
                   xnn_f32_vscaleextexp_ukernel__avx2_p5_u24,
-                  benchmark::utils::CheckAVX2)
+                  xnn_arch_x86_avx2)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 BENCHMARK_CAPTURE(f32_vscaleextexp, avx2_p5_u32,
                   xnn_f32_raddextexp_ukernel__avx2_p5_u80_acc2,
                   xnn_f32_vscaleextexp_ukernel__avx2_p5_u32,
-                  benchmark::utils::CheckAVX2)
+                  xnn_arch_x86_avx2)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64

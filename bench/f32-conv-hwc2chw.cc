@@ -26,8 +26,8 @@
 static void f32_conv_hwc2chw(
     benchmark::State& state, xnn_f32_conv_hwc2chw_ukernel_fn conv,
     xnn_init_f32_minmax_params_fn init_params, uint32_t output_channels_tile,
-    benchmark::utils::IsaCheckFunction isa_check = nullptr) {
-  if (isa_check && !isa_check(state)) {
+    uint64_t arch_flags = 0) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
 
@@ -121,7 +121,7 @@ static void f32_conv_hwc2chw_3x3s2p1c3x4__aarch64_neonfma_2x2(
   f32_conv_hwc2chw(
       state, xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x2,
       xnn_init_f32_minmax_scalar_params, 4 /* output channel tile */,
-      benchmark::utils::CheckNEONFMA);
+      xnn_arch_arm_neon_fma);
 }
 
 BENCHMARK_DCONV(f32_conv_hwc2chw_3x3s2p1c3x4__aarch64_neonfma_2x2);

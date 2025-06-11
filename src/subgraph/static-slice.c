@@ -87,6 +87,8 @@ static enum xnn_status reshape_slice_operator(
     } else {
       sizes[i] = doz(opdata->ends[i], offsets[i]);
     }
+    offsets[i] = max(min(offsets[i], input_value->shape.dim[i]), 0);
+    sizes[i] = max(min(sizes[i], doz(input_value->shape.dim[i], offsets[i])), 0);
     output_value->shape.dim[i] = sizes[i];
   }
   switch (opdata->operator_objects[0]->type) {

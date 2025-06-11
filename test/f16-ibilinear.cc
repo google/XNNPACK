@@ -18,7 +18,7 @@
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_IBILINEAR__NEONFP16ARITH_C8, channels_eq_8) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
     IBilinearMicrokernelTester()
       .pixels(1)
       .channels(8)
@@ -26,7 +26,7 @@
   }
 
   TEST(F16_IBILINEAR__NEONFP16ARITH_C8, channels_div_8) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
     for (size_t channels = 16; channels < 80; channels += 8) {
       IBilinearMicrokernelTester()
         .pixels(1)
@@ -36,7 +36,7 @@
   }
 
   TEST(F16_IBILINEAR__NEONFP16ARITH_C8, channels_lt_8) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
     for (size_t channels = 1; channels < 8; channels++) {
       IBilinearMicrokernelTester()
         .pixels(1)
@@ -46,7 +46,7 @@
   }
 
   TEST(F16_IBILINEAR__NEONFP16ARITH_C8, channels_gt_8) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
     for (size_t channels = 9; channels < 16; channels++) {
       IBilinearMicrokernelTester()
         .pixels(1)
@@ -56,7 +56,7 @@
   }
 
   TEST(F16_IBILINEAR__NEONFP16ARITH_C8, pixels_gt_1) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
     for (size_t pixels = 2; pixels < 3; pixels++) {
       for (size_t channels = 1; channels <= 40; channels += 7) {
         IBilinearMicrokernelTester()
@@ -68,7 +68,7 @@
   }
 
   TEST(F16_IBILINEAR__NEONFP16ARITH_C8, input_offset) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
     for (size_t pixels = 1; pixels < 5; pixels += 1) {
       for (size_t channels = 1; channels <= 40; channels += 7) {
         IBilinearMicrokernelTester()
@@ -81,7 +81,7 @@
   }
 
   TEST(F16_IBILINEAR__NEONFP16ARITH_C8, output_stride) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
     for (size_t pixels = 1; pixels < 5; pixels += 1) {
       for (size_t channels = 1; channels <= 40; channels += 7) {
         IBilinearMicrokernelTester()
@@ -97,7 +97,7 @@
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_IBILINEAR__NEONFP16ARITH_C16, channels_eq_16) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
     IBilinearMicrokernelTester()
       .pixels(1)
       .channels(16)
@@ -105,7 +105,7 @@
   }
 
   TEST(F16_IBILINEAR__NEONFP16ARITH_C16, channels_div_16) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
     for (size_t channels = 32; channels < 160; channels += 16) {
       IBilinearMicrokernelTester()
         .pixels(1)
@@ -115,7 +115,7 @@
   }
 
   TEST(F16_IBILINEAR__NEONFP16ARITH_C16, channels_lt_16) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
     for (size_t channels = 1; channels < 16; channels++) {
       IBilinearMicrokernelTester()
         .pixels(1)
@@ -125,7 +125,7 @@
   }
 
   TEST(F16_IBILINEAR__NEONFP16ARITH_C16, channels_gt_16) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
     for (size_t channels = 17; channels < 32; channels++) {
       IBilinearMicrokernelTester()
         .pixels(1)
@@ -135,7 +135,7 @@
   }
 
   TEST(F16_IBILINEAR__NEONFP16ARITH_C16, pixels_gt_1) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
     for (size_t pixels = 2; pixels < 3; pixels++) {
       for (size_t channels = 1; channels <= 80; channels += 15) {
         IBilinearMicrokernelTester()
@@ -147,7 +147,7 @@
   }
 
   TEST(F16_IBILINEAR__NEONFP16ARITH_C16, input_offset) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
     for (size_t pixels = 1; pixels < 5; pixels += 1) {
       for (size_t channels = 1; channels <= 80; channels += 15) {
         IBilinearMicrokernelTester()
@@ -160,7 +160,7 @@
   }
 
   TEST(F16_IBILINEAR__NEONFP16ARITH_C16, output_stride) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
     for (size_t pixels = 1; pixels < 5; pixels += 1) {
       for (size_t channels = 1; channels <= 80; channels += 15) {
         IBilinearMicrokernelTester()
@@ -176,7 +176,7 @@
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F16_IBILINEAR__FMA3_C8, channels_eq_8) {
-    TEST_REQUIRES_X86_FMA3;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     IBilinearMicrokernelTester()
       .pixels(1)
       .channels(8)
@@ -184,7 +184,7 @@
   }
 
   TEST(F16_IBILINEAR__FMA3_C8, channels_div_8) {
-    TEST_REQUIRES_X86_FMA3;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     for (size_t channels = 16; channels < 80; channels += 8) {
       IBilinearMicrokernelTester()
         .pixels(1)
@@ -194,7 +194,7 @@
   }
 
   TEST(F16_IBILINEAR__FMA3_C8, channels_lt_8) {
-    TEST_REQUIRES_X86_FMA3;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     for (size_t channels = 1; channels < 8; channels++) {
       IBilinearMicrokernelTester()
         .pixels(1)
@@ -204,7 +204,7 @@
   }
 
   TEST(F16_IBILINEAR__FMA3_C8, channels_gt_8) {
-    TEST_REQUIRES_X86_FMA3;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     for (size_t channels = 9; channels < 16; channels++) {
       IBilinearMicrokernelTester()
         .pixels(1)
@@ -214,7 +214,7 @@
   }
 
   TEST(F16_IBILINEAR__FMA3_C8, pixels_gt_1) {
-    TEST_REQUIRES_X86_FMA3;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     for (size_t pixels = 2; pixels < 3; pixels++) {
       for (size_t channels = 1; channels <= 40; channels += 7) {
         IBilinearMicrokernelTester()
@@ -226,7 +226,7 @@
   }
 
   TEST(F16_IBILINEAR__FMA3_C8, input_offset) {
-    TEST_REQUIRES_X86_FMA3;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     for (size_t pixels = 1; pixels < 5; pixels += 1) {
       for (size_t channels = 1; channels <= 40; channels += 7) {
         IBilinearMicrokernelTester()
@@ -239,7 +239,7 @@
   }
 
   TEST(F16_IBILINEAR__FMA3_C8, output_stride) {
-    TEST_REQUIRES_X86_FMA3;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     for (size_t pixels = 1; pixels < 5; pixels += 1) {
       for (size_t channels = 1; channels <= 40; channels += 7) {
         IBilinearMicrokernelTester()
@@ -255,7 +255,7 @@
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(F16_IBILINEAR__FMA3_C16, channels_eq_16) {
-    TEST_REQUIRES_X86_FMA3;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     IBilinearMicrokernelTester()
       .pixels(1)
       .channels(16)
@@ -263,7 +263,7 @@
   }
 
   TEST(F16_IBILINEAR__FMA3_C16, channels_div_16) {
-    TEST_REQUIRES_X86_FMA3;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     for (size_t channels = 32; channels < 160; channels += 16) {
       IBilinearMicrokernelTester()
         .pixels(1)
@@ -273,7 +273,7 @@
   }
 
   TEST(F16_IBILINEAR__FMA3_C16, channels_lt_16) {
-    TEST_REQUIRES_X86_FMA3;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     for (size_t channels = 1; channels < 16; channels++) {
       IBilinearMicrokernelTester()
         .pixels(1)
@@ -283,7 +283,7 @@
   }
 
   TEST(F16_IBILINEAR__FMA3_C16, channels_gt_16) {
-    TEST_REQUIRES_X86_FMA3;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     for (size_t channels = 17; channels < 32; channels++) {
       IBilinearMicrokernelTester()
         .pixels(1)
@@ -293,7 +293,7 @@
   }
 
   TEST(F16_IBILINEAR__FMA3_C16, pixels_gt_1) {
-    TEST_REQUIRES_X86_FMA3;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     for (size_t pixels = 2; pixels < 3; pixels++) {
       for (size_t channels = 1; channels <= 80; channels += 15) {
         IBilinearMicrokernelTester()
@@ -305,7 +305,7 @@
   }
 
   TEST(F16_IBILINEAR__FMA3_C16, input_offset) {
-    TEST_REQUIRES_X86_FMA3;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     for (size_t pixels = 1; pixels < 5; pixels += 1) {
       for (size_t channels = 1; channels <= 80; channels += 15) {
         IBilinearMicrokernelTester()
@@ -318,7 +318,7 @@
   }
 
   TEST(F16_IBILINEAR__FMA3_C16, output_stride) {
-    TEST_REQUIRES_X86_FMA3;
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     for (size_t pixels = 1; pixels < 5; pixels += 1) {
       for (size_t channels = 1; channels <= 80; channels += 15) {
         IBilinearMicrokernelTester()
