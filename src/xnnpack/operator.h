@@ -74,6 +74,7 @@ struct xnn_ukernel_igemm {
   uint8_t nr;
   uint8_t kr;
   uint8_t sr;
+  uint8_t mr_packed;
 };
 
 struct xnn_ukernel_spmm {

@@ -327,6 +327,19 @@ DECLARE_PQS8_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
 DECLARE_PQS8_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_pqs8_qc8w_gemm_minmax_ukernel_1x32c4__neonsme2)
 
+#define DECLARE_PQS8_QC8W_PACKED_IGEMM_MINMAX_UKERNEL_FUNCTION(fn_name)   \
+                                                                          \
+  XNN_INTERNAL size_t fn_name##_get_mr();                                 \
+  XNN_INTERNAL size_t fn_name##_get_nr();                                 \
+                                                                          \
+  XNN_INTERNAL void fn_name(                                              \
+      size_t mr, size_t nc, size_t kc, size_t ks, const void* packed_lhs, \
+      const void* restrict w, int8_t* restrict c, size_t cm_stride,       \
+      const union xnn_qs8_qc8w_conv_minmax_params* params);
+
+DECLARE_PQS8_QC8W_PACKED_IGEMM_MINMAX_UKERNEL_FUNCTION(
+  xnn_pqs8_qc8w_igemm_minmax_fp32_ukernel_32x32__neonsme2)
+
 #define DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(fn_name)                    \
   XNN_INTERNAL void fn_name(size_t mr, size_t nc, size_t kc, const float* a, \
                             size_t a_stride, const float* w, float* c,       \

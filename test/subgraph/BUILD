@@ -161,7 +161,11 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "convolution_2d_test",
     srcs = ["convolution-2d.cc"],
-    deps = SUBGRAPH_TEST_DEPS + [":stencil"],
+    deps = SUBGRAPH_TEST_DEPS + [
+        ":stencil",
+        "@absl//log:absl_log",
+        "@absl//strings",
+    ],
 )
 
 xnnpack_unit_test(

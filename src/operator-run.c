@@ -798,6 +798,8 @@ void xnn_compute_grouped_inline_packed_qp8gemm(
                                 mr_block_start, mr_block_size);
 }
 
+#define A(a, o, z, i) ((a[i] == z) ? *a[i] : *(a[i] + o))
+
 void xnn_compute_grouped_batch_igemm(
     const struct igemm_context* restrict context,
     size_t batch_index, size_t group_index, size_t nr_block_start,
@@ -807,6 +809,56 @@ void xnn_compute_grouped_batch_igemm(
 
   while (mr_block_size > 0) {
     const size_t mr_step = min(mr_block_size, context->mr);
+
+    if (batch_index == 0 && group_index == 0) {
+      // const uint8_t** a =
+      //     (const uint8_t**)((uintptr_t)context->indirect_a +
+      //                       mr_block_start * ks * sizeof(void*));
+      // const size_t o = context->a_offset + group_index * context->ga_stride +
+      //                  batch_index * context->ba_stride;
+      // const uint8_t* z = context->zero;
+      // xnn_log_info(
+      //     "mr_block_start=%zu, nr_block_start=%zu, a=%p, a_offset=%zu.",
+      //     mr_block_start, nr_block_start, a[0] + o, o);
+      // for (int i = 0; i * 16 + 15 < mr_step * context->kc * ks; i++) {
+      //   xnn_log_info(
+      //       "a: [%p, %p, %p, %p, %p, %p, %p, %p, %p, %p, %p, %p, %p, %p, %p,
+      //       "
+      //       "%p].",
+      //       a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9],
+      //       a[10], a[11], a[12], a[13], a[14], a[15]);
+      //   xnn_log_info(
+      //       "unpacked inputs: [%02x, %02x, %02x, %02x, %02x, %02x, %02x,
+      //       %02x, "
+      //       "%02x, %02x, %02x, %02x, %02x, %02x, %02x, %02x]",
+      //       A(a, o, z, 0), A(a, o, z, 1), A(a, o, z, 2), A(a, o, z, 3),
+      //       A(a, o, z, 4), A(a, o, z, 5), A(a, o, z, 6), A(a, o, z, 7),
+      //       A(a, o, z, 8), A(a, o, z, 9), A(a, o, z, 10), A(a, o, z, 11),
+      //       A(a, o, z, 12), A(a, o, z, 13), A(a, o, z, 14), A(a, o, z, 15));
+      //   a += 16;
+      // }
+
+      const uint8_t* w = (const uint8_t*)((uintptr_t)context->packed_w +
+                                          nr_block_start * context->w_stride +
+                                          group_index * context->gw_stride);
+      xnn_log_info("packed_w=%p.", w);
+      for (int i = 0; i * 16 + 15 < nr_block_size * context->kc * ks; i++) {
+        xnn_log_info(
+            "packed weights: [%02x, %02x, %02x, %02x, %02x, %02x, %02x, %02x, "
+            "%02x, %02x, %02x, %02x, %02x, %02x, %02x, %02x]",
+            w[0], w[1], w[2], w[3], w[4], w[5], w[6], w[7], w[8], w[9], w[10],
+            w[11], w[12], w[13], w[14], w[15]);
+        w += 16;
+      }
+
+      const union xnn_qs8_qc8w_conv_minmax_params* params =
+          &context->params.qs8_qc8w;
+      xnn_log_info("zero_point=%i, min_value=%i, max_value=%i.",
+                   params->fp32_neonv8.output_zero_point,
+                   params->fp32_neonv8.output_min,
+                   params->fp32_neonv8.output_max);
+    }
+
     context->ukernel.function[XNN_UARCH_DEFAULT](
         mr_step, nr_block_size, context->kc, context->ks_scaled,
         (const void**)((uintptr_t)context->indirect_a +
@@ -924,6 +976,172 @@ void xnn_compute_grouped_dqigemm(
     mr_block_size -= mr_step;
     mr_block_start += mr_step;
   }
+}
+
+static void compute_batch_inline_packed_igemm(
+    const struct igemm_context* restrict context, uint32_t uarch_index,
+    uint32_t thread_id, size_t batch_index, size_t group_index,
+    size_t mr_block_start, size_t mr_block_size) {
+  const size_t mr = context->mr;
+  const size_t mr_packed = context->mr_packed;
+  const size_t kc = context->kc;
+  const size_t ks = context->ks;
+  const size_t cm_stride = context->cm_stride;
+  const size_t a_offset = context->a_offset + batch_index * context->ba_stride +
+                          group_index * context->ga_stride;
+  const void* packed_w = (const void*)((uintptr_t)context->packed_w +
+                                       group_index * context->gw_stride);
+  const uintptr_t c = (uintptr_t)context->c + batch_index * context->bc_stride +
+                      group_index * context->gc_stride;
+  const size_t workspace_size = context->packed_lh_config->igemm_offset_fn(
+      mr, kc, context->ks, mr_packed, context->kr, context->sr);
+  void* workspace =
+      (void*)((uintptr_t)context->workspace + context->workspace_offset +
+              thread_id * workspace_size);
+
+  while (mr_block_size > 0) {
+    const size_t mr_step = min(mr_block_size, mr);
+
+    // if (batch_index == 0 && group_index == 0) {
+    //   const uint8_t** a =
+    //       (const uint8_t**)((uintptr_t)context->indirect_a +
+    //                         mr_block_start * ks * sizeof(void*));
+    //   const size_t o = a_offset;
+    //   const uint8_t* z = context->zero;
+    //   xnn_log_info(
+    //       "mr_block_start=%zu, nr_block_start=%zu, a=%p, a_offset=%zu.",
+    //       mr_block_start, 0UL, a[0] + o, o);
+    //   for (int i = 0; i * 16 + 15 < mr_step * kc * ks; i++) {
+    //     xnn_log_info(
+    //         "a: [%p, %p, %p, %p, %p, %p, %p, %p, %p, %p, %p, %p, %p, %p, %p,
+    //         "
+    //         "%p].",
+    //         a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9],
+    //         a[10], a[11], a[12], a[13], a[14], a[15]);
+    //     xnn_log_info(
+    //         "unpacked inputs: [%02x, %02x, %02x, %02x, %02x, %02x, %02x,
+    //         %02x, "
+    //         "%02x, %02x, %02x, %02x, %02x, %02x, %02x, %02x]",
+    //         A(a, o, z, 0), A(a, o, z, 1), A(a, o, z, 2), A(a, o, z, 3),
+    //         A(a, o, z, 4), A(a, o, z, 5), A(a, o, z, 6), A(a, o, z, 7),
+    //         A(a, o, z, 8), A(a, o, z, 9), A(a, o, z, 10), A(a, o, z, 11),
+    //         A(a, o, z, 12), A(a, o, z, 13), A(a, o, z, 14), A(a, o, z, 15));
+    //     a += 16;
+    //   }
+
+    //   // Mark the first few bytes of the workspace.
+    //   uint8_t* in = (uint8_t*)workspace;
+    //   for (int i = 0; i < kc * ks; i++) {
+    //     in[i] = i;
+    //   }
+    // }
+
+    // Pack the LHS data into the workspace.
+    context->packed_lh_config->igemm_ukernel(
+        mr_step, kc, ks, mr_packed, context->kr, context->sr,
+        /*a=*/
+        (const void**)((uintptr_t)context->indirect_a +
+                       mr_block_start * ks * sizeof(void*)),
+        a_offset, context->zero, workspace);
+
+    if (batch_index == 0) {
+      // const uint8_t* in = (const uint8_t*)workspace;
+      // for (int i = 0; i * 16 + 15 < workspace_size; i++) {
+      //   xnn_log_info(
+      //       "packed inputs: [%02x, %02x, %02x, %02x, %02x, %02x, %02x, %02x,
+      //       "
+      //       "%02x, %02x, %02x, %02x, %02x, %02x, %02x, %02x]",
+      //       in[0], in[1], in[2], in[3], in[4], in[5], in[6], in[7], in[8],
+      //       in[9], in[10], in[11], in[12], in[13], in[14], in[15]);
+      //   in += 16;
+      // }
+
+      const uint8_t* w = (const uint8_t*)packed_w;
+      xnn_log_info("packed_w=%p.", w);
+      for (int i = 0; i * 16 + 15 < context->nc * kc * ks; i++) {
+        xnn_log_info(
+            "packed weights: [%02x, %02x, %02x, %02x, %02x, %02x, %02x, %02x, "
+            "%02x, %02x, %02x, %02x, %02x, %02x, %02x, %02x]",
+            w[0], w[1], w[2], w[3], w[4], w[5], w[6], w[7], w[8], w[9], w[10],
+            w[11], w[12], w[13], w[14], w[15]);
+        w += 16;
+      }
+
+      const uint8_t* o = (const uint8_t*)(c + mr_block_start * cm_stride);
+      xnn_log_info("output=%p, group_index=%zu.", o, group_index);
+      for (int i = 0; i * 16 + 15 < mr_step * cm_stride; i++) {
+        xnn_log_info(
+            "output[%p]: [%02x, %02x, %02x, %02x, %02x, %02x, %02x, "
+            "%02x, %02x, %02x, %02x, %02x, %02x, %02x, %02x, %02x]", o,
+            o[0], o[1], o[2], o[3], o[4], o[5], o[6], o[7], o[8], o[9], o[10],
+            o[11], o[12], o[13], o[14], o[15]);
+        o += 16;
+      }
+
+      const union xnn_qs8_qc8w_conv_minmax_params* params =
+          &context->params.qs8_qc8w;
+      xnn_log_info("zero_point=%i, min_value=%i, max_value=%i.",
+                   params->fp32_neonv8.output_zero_point,
+                   params->fp32_neonv8.output_min,
+                   params->fp32_neonv8.output_max);
+    }
+
+    // Compute the iGEMM on the packed LHS data.
+    context->ukernel.packed_lhs_function[uarch_index](
+        mr_step, context->nc, kc, ks, /*packed_lhs=*/workspace, packed_w,
+        (void*)(c + mr_block_start * cm_stride), cm_stride, &context->params);
+
+    if (batch_index == 0) {
+      const uint8_t* o = (const uint8_t*)(c + mr_block_start * cm_stride);
+      xnn_log_info("output=%p, group_index=%zu.", o, group_index);
+      for (int i = 0; i * 16 + 15 < mr_step * cm_stride; i++) {
+        xnn_log_info(
+            "output[%p]: [%02x, %02x, %02x, %02x, %02x, %02x, %02x, "
+            "%02x, %02x, %02x, %02x, %02x, %02x, %02x, %02x, %02x]", o,
+            o[0], o[1], o[2], o[3], o[4], o[5], o[6], o[7], o[8], o[9], o[10],
+            o[11], o[12], o[13], o[14], o[15]);
+        o += 16;
+      }
+    }
+
+    mr_block_size -= mr_step;
+    mr_block_start += mr_step;
+  }
+}
+
+void xnn_compute_batch_inline_packed_igemm(
+    const struct igemm_context* restrict context, uint32_t thread_id,
+    size_t batch_index, size_t mr_block_start, size_t mr_block_size) {
+  compute_batch_inline_packed_igemm(context, XNN_UARCH_DEFAULT, thread_id,
+                                    batch_index, /*group_index=*/0,
+                                    mr_block_start, mr_block_size);
+}
+
+void xnn_compute_batch_hmp_inline_packed_igemm(
+    const struct igemm_context* restrict context, uint32_t uarch_index,
+    size_t thread_id, size_t batch_index, size_t mr_block_start,
+    size_t mr_block_size) {
+  compute_batch_inline_packed_igemm(context, uarch_index, thread_id,
+                                    batch_index, /*group_index=*/0,
+                                    mr_block_start, mr_block_size);
+}
+
+void xnn_compute_grouped_batch_inline_packed_igemm(
+    const struct igemm_context* restrict context, uint32_t thread_id,
+    size_t batch_index, size_t group_index, size_t mr_block_start,
+    size_t mr_block_size) {
+  compute_batch_inline_packed_igemm(context, XNN_UARCH_DEFAULT, thread_id,
+                                    batch_index, group_index, mr_block_start,
+                                    mr_block_size);
+}
+
+void xnn_compute_grouped_batch_hmp_inline_packed_igemm(
+    const struct igemm_context* restrict context, uint32_t uarch_index,
+    size_t thread_id, size_t batch_index, size_t group_index,
+    size_t mr_block_start, size_t mr_block_size) {
+  compute_batch_inline_packed_igemm(context, uarch_index, thread_id,
+                                    batch_index, group_index, mr_block_start,
+                                    mr_block_size);
 }
 
 void xnn_compute_batch_igemm(
