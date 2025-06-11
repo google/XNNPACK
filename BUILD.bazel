@@ -570,6 +570,7 @@ xnnpack_cxx_library(
     srcs = ["src/reference/packing.cc"],
     hdrs = ["src/xnnpack/pack.h"],
     deps = [
+        ":allocator",
         ":common",
         ":logging",
         ":math",
