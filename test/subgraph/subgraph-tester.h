@@ -500,7 +500,12 @@ class SubgraphTester {
   SubgraphTester& AddSoftmax(uint32_t input_id, uint32_t output_id,
                              uint32_t flags = 0);
 
-  SubgraphTester& Optimize();
+  // This (xnn_subgraph_optimize) is normally called by xnn_create_runtime,
+  // which passes the runtime flags to xnn_subgraph_optimize. When we call it
+  // "standalone", we need to pass the same flags. Unfortunately, while we can
+  // make the defaults with `CreateRuntime` below consistent, we rely on the
+  // caller to maintain this consistency.
+  SubgraphTester& Optimize(uint32_t flags = xnn_test_runtime_flags());
 
   SubgraphTester& RewriteForNchw();
 
