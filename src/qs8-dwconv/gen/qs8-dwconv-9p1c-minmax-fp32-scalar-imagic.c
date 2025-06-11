@@ -27,8 +27,9 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_9p1c__scalar_imagic(
     intptr_t input_stride,
     size_t output_increment,
     size_t input_offset,
+    size_t input_pixel_stride,
     const int8_t* zero,
-    const union xnn_qs8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_qs8_conv_minmax_params* restrict params)
 {
   assert(channels != 0);
   assert(output_width != 0);
@@ -134,6 +135,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_9p1c__scalar_imagic(
       *output++ = (int8_t) vout;
     } while (--c != 0);
 
+    input_offset += input_pixel_stride;
     output = (int8_t*) ((uintptr_t) output + output_increment);
   } while (--output_width != 0);
 }

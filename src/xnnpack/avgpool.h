@@ -18,17 +18,17 @@
 extern "C" {
 #endif
 
-#define XNN_UKERNEL(arch_flags, ukernel, channel_tile, primary_tile,        \
-                    datatype, params_type, init_params)                     \
-  XNN_INTERNAL void ukernel(                                                \
-      size_t output_pixels, size_t kernel_elements, size_t channels,        \
-      const datatype** input, size_t input_offset, const datatype* zero,    \
-      const datatype* multiplier, datatype* output, size_t input_increment, \
-      size_t output_increment,                                              \
-      const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+#define XNN_UKERNEL(arch_flags, ukernel, channel_tile, primary_tile, datatype, \
+                    params_type, init_params)                                  \
+  XNN_INTERNAL void ukernel(                                                   \
+      size_t output_pixels, size_t kernel_elements, size_t channels,           \
+      const datatype** input, size_t input_offset, size_t input_pixel_stride,  \
+      const datatype* zero, const datatype* multiplier, datatype* output,      \
+      size_t input_increment, size_t output_increment,                         \
+      const params_type* params);
 
-#include "src/f16-avgpool/f16-avgpool-minmax.h"
-#include "src/f32-avgpool/f32-avgpool-minmax.h"
+#include "src/f16-avgpool/f16-avgpool-minmax.inc"
+#include "src/f32-avgpool/f32-avgpool-minmax.inc"
 
 #undef XNN_UKERNEL
 

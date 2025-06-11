@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   cmake-linux-x86_64:
-    runs-on: ubuntu-22.04-8core
+    runs-on: 'ubuntu-24.04-8core'
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -104,7 +104,7 @@ jobs:
         working-directory: ${{ github.workspace }}/build/linux/armhf
 
   cmake-linux-riscv64:
-    runs-on: ubuntu-22.04-16core
+    runs-on: 'ubuntu-24.04-16core'
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -134,7 +134,7 @@ jobs:
         working-directory: ${{ github.workspace }}/build/linux/riscv64
 
   cmake-linux-riscv64-rvv:
-    runs-on: ubuntu-22.04-16core
+    runs-on: 'ubuntu-24.04-16core'
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -147,8 +147,8 @@ jobs:
         run: sudo apt install ninja-build
       - name: Download and Install riscv64 cross-toolchain tarball
         run: |
-          wget -nv https://github.com/riscv-collab/riscv-gnu-toolchain/releases/download/2025.01.20/riscv64-glibc-ubuntu-22.04-llvm-nightly-2025.01.20-nightly.tar.xz
-          tar xJf riscv64-glibc-ubuntu-22.04-llvm-nightly-2025.01.20-nightly.tar.xz
+          wget -nv https://github.com/riscv-collab/riscv-gnu-toolchain/releases/download/2025.01.20/riscv64-glibc-ubuntu-24.04-llvm-nightly-2025.01.20-nightly.tar.xz
+          tar xJf riscv64-glibc-ubuntu-24.04-llvm-nightly-2025.01.20-nightly.tar.xz
         working-directory: ${{ github.workspace }}
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
@@ -308,7 +308,7 @@ jobs:
     strategy:
       matrix:
         arch: [arm64, armv7, x86]
-    runs-on: ubuntu-22.04-8core
+    runs-on: 'ubuntu-24.04-8core'
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -377,7 +377,7 @@ jobs:
         working-directory: ${{ github.workspace }}
 
   bazel-linux-x86_64-clang-18:
-    runs-on: ubuntu-22.04-8core
+    runs-on: 'ubuntu-24.04-8core'
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -404,7 +404,7 @@ jobs:
           CC: clang-18
           CXX: clang++-18
         run: |
-            bazel build test:all
+            bazel build //test/... //bench/...
         working-directory: ${{ github.workspace }}
       - name: Run tests
         if: ${{ inputs.run-tests }}
@@ -412,7 +412,7 @@ jobs:
           CC: clang-18
           CXX: clang++-18
         run: |
-            bazel test --test_output=errors test:all
+            bazel test --test_output=errors //test/... //bench/...
         working-directory: ${{ github.workspace }}
       - name: Compress disk cache
         # Bazel's `--disk-cache` currently grows without bounds, so we remove files
@@ -427,7 +427,7 @@ jobs:
           key: ${{ github.job }}-${{ github.sha }}
 
   bazel-linux-x86_64-gcc-9:
-    runs-on: ubuntu-22.04-8core
+    runs-on: 'ubuntu-24.04-8core'
     timeout-minutes: 60
     env:
       CC: gcc-9
@@ -453,12 +453,12 @@ jobs:
             ${{ github.job }}-
       - name: Build tests
         run: |
-            bazel build ${BAZEL_DEFINES} test:all
+            bazel build ${BAZEL_DEFINES} //test/... //bench/...
         working-directory: ${{ github.workspace }}
-      - name: Run tests
+      - name: Build XNNPack
         if: ${{ inputs.run-tests }}
         run: |
-            bazel test ${BAZEL_DEFINES} --test_output=errors test:all
+            bazel build ${BAZEL_DEFINES} //test/...
         working-directory: ${{ github.workspace }}
       - name: Compress disk cache
         # Bazel's `--disk-cache` currently grows without bounds, so we remove files
@@ -500,7 +500,7 @@ jobs:
           CC: clang-18
           CXX: clang++-18
         run: |
-            bazel build test:all
+            bazel build //test/... //bench/...
         working-directory: ${{ github.workspace }}
       - name: Run tests
         if: ${{ inputs.run-tests }}
@@ -556,7 +556,7 @@ jobs:
           CC: gcc-13
           CXX: g++-13
         run: |
-            bazel build test:all
+            bazel build //test/... //bench/...
         working-directory: ${{ github.workspace }}
       - name: Run tests
         if: ${{ inputs.run-tests }}

@@ -20,7 +20,7 @@ void xnn_f16_rsum_ukernel__neonfp16arith_u32_acc4(
     size_t batch,
     const xnn_float16* input,
     xnn_float16* output,
-    const struct xnn_f16_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f16_scale_params* restrict params)
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
@@ -68,5 +68,6 @@ void xnn_f16_rsum_ukernel__neonfp16arith_u32_acc4(
     vacc = vadd_f16(vacc, vt);
   }
   vacc = vmul_f16(vacc, vscale);
+  vacc = vadd_f16(vacc, vreinterpret_f16_u16(vld1_dup_u16(o)));
   vst1_lane_u16(o, vreinterpret_u16_f16(vacc), 0);
 }

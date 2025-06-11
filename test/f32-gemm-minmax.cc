@@ -33,6 +33,7 @@
 
 namespace {
 
+// NOLINTNEXTLINE(clang-diagnostic-unused-function)
 std::vector<GemmTestParams> CreateTests1(
     size_t k_block, size_t adj_k_block,
     size_t mr, size_t nr, size_t kr, size_t sr,
@@ -259,14 +260,14 @@ std::vector<GemmTestParams> CreateTests1(
         .loop_zi(0, mr - 1));
   }
   gemm_tests.push_back(GemmTestParams(
-      "qmin",
+      "min",
       tester.clone()
-          .m(mr).n(nr).k(k_block).qmin(128)
+          .m(mr).n(nr).k(k_block).min(0.0f)
       , test_func, isa_check));
   gemm_tests.push_back(GemmTestParams(
-      "qmax",
+      "max",
       tester.clone()
-          .m(mr).n(nr).k(k_block).qmax(128)
+          .m(mr).n(nr).k(k_block).max(0.0f)
       , test_func, isa_check));
   gemm_tests.push_back(GemmTestParams(
       "strided_cm",
@@ -278,6 +279,7 @@ std::vector<GemmTestParams> CreateTests1(
   return gemm_tests;
 }
 
+// NOLINTNEXTLINE(clang-diagnostic-unused-function)
 std::vector<GemmTestParams> CreateTests2(
     size_t k_block, size_t adj_k_block,
     size_t mr, size_t nr, size_t kr, size_t sr,
@@ -524,14 +526,14 @@ std::vector<GemmTestParams> CreateTests2(
         .loop_zi(0, mr - 1));
   }
   gemm_tests.push_back(GemmTestParams(
-      "qmin",
+      "min",
       tester.clone()
-          .m(mr).n(nr).k(k_block).qmin(128)
+          .m(mr).n(nr).k(k_block).min(0.0f)
       , test_func, isa_check));
   gemm_tests.push_back(GemmTestParams(
-      "qmax",
+      "max",
       tester.clone()
-          .m(mr).n(nr).k(k_block).qmax(128)
+          .m(mr).n(nr).k(k_block).max(0.0f)
       , test_func, isa_check));
   gemm_tests.push_back(GemmTestParams(
       "strided_cm",
@@ -544,6 +546,7 @@ std::vector<GemmTestParams> CreateTests2(
 }
 
 #if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  // NOLINTNEXTLINE(clang-diagnostic-unused-function)
   std::vector<GemmTestParams> CreateTests3(
       size_t k_block, size_t adj_k_block,
       size_t mr, size_t nr, size_t kr, size_t sr,
@@ -771,14 +774,14 @@ std::vector<GemmTestParams> CreateTests2(
           .loop_zi(0, mr - 1));
     }
     gemm_tests.push_back(GemmTestParams(
-        "qmin",
+        "min",
         tester.clone()
-            .m(mr).n(nr).k(k_block).qmin(128)
+            .m(mr).n(nr).k(k_block).min(0.0f)
         , test_func, isa_check));
     gemm_tests.push_back(GemmTestParams(
-        "qmax",
+        "max",
         tester.clone()
-            .m(mr).n(nr).k(k_block).qmax(128)
+            .m(mr).n(nr).k(k_block).max(0.0f)
         , test_func, isa_check));
     gemm_tests.push_back(GemmTestParams(
         "strided_cm",
@@ -2837,6 +2840,93 @@ std::vector<GemmTestParams> CreateTests2(
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
+#if XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+  INSTANTIATE_TEST_SUITE_P(
+      F32_GEMM_MINMAX_4X8__ASM_AMD64_FMA3_BROADCAST, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/1,
+          /*adj_k_block=*/1,
+          /*mr=*/4, /*nr=*/8, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_f32_gemm_minmax_ukernel_4x8__asm_amd64_fma3_broadcast,
+                        xnn_init_f32_minmax_scalar_params,
+                        xnn_pack_f32_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_X86_FMA3;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      F32_GEMM_MINMAX_5X8__ASM_AMD64_FMA3_BROADCAST, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/1,
+          /*adj_k_block=*/1,
+          /*mr=*/5, /*nr=*/8, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_f32_gemm_minmax_ukernel_5x8__asm_amd64_fma3_broadcast,
+                        xnn_init_f32_minmax_scalar_params,
+                        xnn_pack_f32_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_X86_FMA3;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      F32_GEMM_MINMAX_6X8__ASM_AMD64_FMA3_BROADCAST, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/1,
+          /*adj_k_block=*/1,
+          /*mr=*/6, /*nr=*/8, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_f32_gemm_minmax_ukernel_6x8__asm_amd64_fma3_broadcast,
+                        xnn_init_f32_minmax_scalar_params,
+                        xnn_pack_f32_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_X86_FMA3;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      F32_GEMM_MINMAX_7X8__ASM_AMD64_FMA3_BROADCAST, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/1,
+          /*adj_k_block=*/1,
+          /*mr=*/7, /*nr=*/8, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_f32_gemm_minmax_ukernel_7x8__asm_amd64_fma3_broadcast,
+                        xnn_init_f32_minmax_scalar_params,
+                        xnn_pack_f32_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_X86_FMA3;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+#endif  // XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+
+
 #if XNN_ENABLE_AVX512F && XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
   INSTANTIATE_TEST_SUITE_P(
       F32_GEMM_MINMAX_2X16__ASM_AMD64_AVX512F_BROADCAST, GemmTest,
@@ -4271,63 +4361,6 @@ std::vector<GemmTestParams> CreateTests2(
 #endif  // XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  INSTANTIATE_TEST_SUITE_P(
-      F32_GEMM_MINMAX_2X4__WASM, GemmTest,
-      testing::ValuesIn(CreateTests1(
-          /*k_block=*/1,
-          /*adj_k_block=*/1,
-          /*mr=*/2, /*nr=*/4, /*kr=*/1, /*sr=*/1,
-          /*is_igemm=*/false,
-          /*unsigned_inputs=*/false,
-          /*planes=*/1,
-          [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_f32_gemm_minmax_ukernel_2x4__wasm,
-                        xnn_init_f32_minmax_scalar_params,
-                        xnn_pack_f32_gemm_goi_w);
-          })),
-      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-
-  INSTANTIATE_TEST_SUITE_P(
-      F32_GEMM_MINMAX_4X2__WASM, GemmTest,
-      testing::ValuesIn(CreateTests1(
-          /*k_block=*/1,
-          /*adj_k_block=*/1,
-          /*mr=*/4, /*nr=*/2, /*kr=*/1, /*sr=*/1,
-          /*is_igemm=*/false,
-          /*unsigned_inputs=*/false,
-          /*planes=*/1,
-          [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_f32_gemm_minmax_ukernel_4x2__wasm,
-                        xnn_init_f32_minmax_scalar_params,
-                        xnn_pack_f32_gemm_goi_w);
-          })),
-      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-
-  INSTANTIATE_TEST_SUITE_P(
-      F32_GEMM_MINMAX_4X4__WASM, GemmTest,
-      testing::ValuesIn(CreateTests1(
-          /*k_block=*/1,
-          /*adj_k_block=*/1,
-          /*mr=*/4, /*nr=*/4, /*kr=*/1, /*sr=*/1,
-          /*is_igemm=*/false,
-          /*unsigned_inputs=*/false,
-          /*planes=*/1,
-          [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_f32_gemm_minmax_ukernel_4x4__wasm,
-                        xnn_init_f32_minmax_scalar_params,
-                        xnn_pack_f32_gemm_goi_w);
-          })),
-      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-
 INSTANTIATE_TEST_SUITE_P(
     F32_GEMM_MINMAX_1X4__SCALAR, GemmTest,
     testing::ValuesIn(CreateTests1(
@@ -4432,16 +4465,16 @@ INSTANTIATE_TEST_SUITE_P(
 
 #if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
   INSTANTIATE_TEST_SUITE_P(
-      F32_GEMM_MINMAX_1X128__HVX_BROADCAST, GemmTest,
+      F32_GEMM_MINMAX_2X32__HVX_BROADCAST, GemmTest,
       testing::ValuesIn(CreateTests1(
           /*k_block=*/1,
           /*adj_k_block=*/1,
-          /*mr=*/1, /*nr=*/128, /*kr=*/1, /*sr=*/1,
+          /*mr=*/2, /*nr=*/32, /*kr=*/1, /*sr=*/1,
           /*is_igemm=*/false,
           /*unsigned_inputs=*/false,
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_f32_gemm_minmax_ukernel_1x128__hvx_broadcast,
+            tester.Test(xnn_f32_gemm_minmax_ukernel_2x32__hvx_broadcast,
                         xnn_init_f32_minmax_scalar_params,
                         xnn_pack_f32_gemm_goi_w);
           },
@@ -4453,16 +4486,16 @@ INSTANTIATE_TEST_SUITE_P(
       });
 
   INSTANTIATE_TEST_SUITE_P(
-      F32_GEMM_MINMAX_2X128__HVX_BROADCAST, GemmTest,
+      F32_GEMM_MINMAX_3X32__HVX_BROADCAST, GemmTest,
       testing::ValuesIn(CreateTests1(
           /*k_block=*/1,
           /*adj_k_block=*/1,
-          /*mr=*/2, /*nr=*/128, /*kr=*/1, /*sr=*/1,
+          /*mr=*/3, /*nr=*/32, /*kr=*/1, /*sr=*/1,
           /*is_igemm=*/false,
           /*unsigned_inputs=*/false,
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_f32_gemm_minmax_ukernel_2x128__hvx_broadcast,
+            tester.Test(xnn_f32_gemm_minmax_ukernel_3x32__hvx_broadcast,
                         xnn_init_f32_minmax_scalar_params,
                         xnn_pack_f32_gemm_goi_w);
           },
@@ -4474,16 +4507,16 @@ INSTANTIATE_TEST_SUITE_P(
       });
 
   INSTANTIATE_TEST_SUITE_P(
-      F32_GEMM_MINMAX_7X64__HVX_BROADCAST, GemmTest,
+      F32_GEMM_MINMAX_6X32__HVX_BROADCAST, GemmTest,
       testing::ValuesIn(CreateTests1(
           /*k_block=*/1,
           /*adj_k_block=*/1,
-          /*mr=*/7, /*nr=*/64, /*kr=*/1, /*sr=*/1,
+          /*mr=*/6, /*nr=*/32, /*kr=*/1, /*sr=*/1,
           /*is_igemm=*/false,
           /*unsigned_inputs=*/false,
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_f32_gemm_minmax_ukernel_7x64__hvx_broadcast,
+            tester.Test(xnn_f32_gemm_minmax_ukernel_6x32__hvx_broadcast,
                         xnn_init_f32_minmax_scalar_params,
                         xnn_pack_f32_gemm_goi_w);
           },
@@ -4537,16 +4570,205 @@ INSTANTIATE_TEST_SUITE_P(
       });
 
   INSTANTIATE_TEST_SUITE_P(
-      F32_GEMM_MINMAX_16X32__HVX_BROADCAST, GemmTest,
+      F32_GEMM_MINMAX_9X32__HVX_BROADCAST, GemmTest,
       testing::ValuesIn(CreateTests1(
           /*k_block=*/1,
           /*adj_k_block=*/1,
-          /*mr=*/16, /*nr=*/32, /*kr=*/1, /*sr=*/1,
+          /*mr=*/9, /*nr=*/32, /*kr=*/1, /*sr=*/1,
           /*is_igemm=*/false,
           /*unsigned_inputs=*/false,
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_f32_gemm_minmax_ukernel_16x32__hvx_broadcast,
+            tester.Test(xnn_f32_gemm_minmax_ukernel_9x32__hvx_broadcast,
+                        xnn_init_f32_minmax_scalar_params,
+                        xnn_pack_f32_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_HVX;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      F32_GEMM_MINMAX_2X64__HVX_BROADCAST, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/1,
+          /*adj_k_block=*/1,
+          /*mr=*/2, /*nr=*/64, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_f32_gemm_minmax_ukernel_2x64__hvx_broadcast,
+                        xnn_init_f32_minmax_scalar_params,
+                        xnn_pack_f32_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_HVX;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      F32_GEMM_MINMAX_3X64__HVX_BROADCAST, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/1,
+          /*adj_k_block=*/1,
+          /*mr=*/3, /*nr=*/64, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_f32_gemm_minmax_ukernel_3x64__hvx_broadcast,
+                        xnn_init_f32_minmax_scalar_params,
+                        xnn_pack_f32_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_HVX;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      F32_GEMM_MINMAX_6X64__HVX_BROADCAST, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/1,
+          /*adj_k_block=*/1,
+          /*mr=*/6, /*nr=*/64, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_f32_gemm_minmax_ukernel_6x64__hvx_broadcast,
+                        xnn_init_f32_minmax_scalar_params,
+                        xnn_pack_f32_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_HVX;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      F32_GEMM_MINMAX_7X64__HVX_BROADCAST, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/1,
+          /*adj_k_block=*/1,
+          /*mr=*/7, /*nr=*/64, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_f32_gemm_minmax_ukernel_7x64__hvx_broadcast,
+                        xnn_init_f32_minmax_scalar_params,
+                        xnn_pack_f32_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_HVX;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      F32_GEMM_MINMAX_8X64__HVX_BROADCAST, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/1,
+          /*adj_k_block=*/1,
+          /*mr=*/8, /*nr=*/64, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_f32_gemm_minmax_ukernel_8x64__hvx_broadcast,
+                        xnn_init_f32_minmax_scalar_params,
+                        xnn_pack_f32_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_HVX;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      F32_GEMM_MINMAX_9X64__HVX_BROADCAST, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/1,
+          /*adj_k_block=*/1,
+          /*mr=*/9, /*nr=*/64, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_f32_gemm_minmax_ukernel_9x64__hvx_broadcast,
+                        xnn_init_f32_minmax_scalar_params,
+                        xnn_pack_f32_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_HVX;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      F32_GEMM_MINMAX_1X128__HVX_BROADCAST, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/1,
+          /*adj_k_block=*/1,
+          /*mr=*/1, /*nr=*/128, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_f32_gemm_minmax_ukernel_1x128__hvx_broadcast,
+                        xnn_init_f32_minmax_scalar_params,
+                        xnn_pack_f32_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_HVX;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      F32_GEMM_MINMAX_2X128__HVX_BROADCAST, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/1,
+          /*adj_k_block=*/1,
+          /*mr=*/2, /*nr=*/128, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_f32_gemm_minmax_ukernel_2x128__hvx_broadcast,
+                        xnn_init_f32_minmax_scalar_params,
+                        xnn_pack_f32_gemm_goi_w);
+          },
+          []() {
+            TEST_REQUIRES_HVX;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      F32_GEMM_MINMAX_3X128__HVX_BROADCAST, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/1,
+          /*adj_k_block=*/1,
+          /*mr=*/3, /*nr=*/128, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_f32_gemm_minmax_ukernel_3x128__hvx_broadcast,
                         xnn_init_f32_minmax_scalar_params,
                         xnn_pack_f32_gemm_goi_w);
           },

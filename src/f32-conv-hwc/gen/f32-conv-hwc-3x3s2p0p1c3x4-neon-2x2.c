@@ -30,7 +30,7 @@ void xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x2(
     size_t output_channels,
     size_t output_height_stride,
     size_t output_width_stride,
-    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f32_minmax_params* restrict params) XNN_OOB_READS
 {
   assert(input_width != 0);
   assert(output_y_end > output_y_start);

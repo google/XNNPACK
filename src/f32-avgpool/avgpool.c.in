@@ -20,12 +20,13 @@ void xnn_${DATATYPE}_avgpool_minmax_ukernel_9p__${ARCH}_u${SIMD_SIZE}(
     size_t channels,
     const ${CTYPE}** input,
     size_t input_offset,
+    size_t input_pixel_stride,
     const ${CTYPE}* zero,
     const ${CTYPE}* multiplier,
     ${CTYPE}* output,
     size_t input_increment,
     size_t output_increment,
-    const struct xnn_${DATATYPE}_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_${DATATYPE}_scaleminmax_params* restrict params)
 {
   assert(output_pixels != 0);
   assert(channels != 0);
@@ -153,6 +154,7 @@ void xnn_${DATATYPE}_avgpool_minmax_ukernel_9p__${ARCH}_u${SIMD_SIZE}(
       }
 
     input = (const ${CTYPE}**) ((uintptr_t) input + input_increment);
+    input_offset += input_pixel_stride;
     output = (${CTYPE}*) ((uintptr_t) output + output_increment);
   } while (--output_pixels != 0);
 }

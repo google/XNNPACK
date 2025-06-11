@@ -33,6 +33,7 @@
 
 namespace {
 
+// NOLINTNEXTLINE(clang-diagnostic-unused-function)
 std::vector<GemmTestParams> CreateTests1(
     size_t k_block, size_t adj_k_block,
     size_t mr, size_t nr, size_t kr, size_t sr,
@@ -1604,123 +1605,6 @@ std::vector<GemmTestParams> CreateTests1(
         return info.param.test_name;
       });
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  INSTANTIATE_TEST_SUITE_P(
-      QU8_GEMM_MINMAX_FP32_1X2__WASM_FMAGIC, GemmTest,
-      testing::ValuesIn(CreateTests1(
-          /*k_block=*/1,
-          /*adj_k_block=*/1,
-          /*mr=*/1, /*nr=*/2, /*kr=*/1, /*sr=*/1,
-          /*is_igemm=*/false,
-          /*unsigned_inputs=*/false,
-          /*planes=*/1,
-          [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_1x2__wasm_fmagic,
-                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
-                        xnn_pack_qu8_gemm_goi_w,
-                        xnn_qu8_requantize_fp32);
-          })),
-      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-
-  INSTANTIATE_TEST_SUITE_P(
-      QU8_GEMM_MINMAX_FP32_1X4__WASM_FMAGIC, GemmTest,
-      testing::ValuesIn(CreateTests1(
-          /*k_block=*/1,
-          /*adj_k_block=*/1,
-          /*mr=*/1, /*nr=*/4, /*kr=*/1, /*sr=*/1,
-          /*is_igemm=*/false,
-          /*unsigned_inputs=*/false,
-          /*planes=*/1,
-          [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_1x4__wasm_fmagic,
-                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
-                        xnn_pack_qu8_gemm_goi_w,
-                        xnn_qu8_requantize_fp32);
-          })),
-      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-
-  INSTANTIATE_TEST_SUITE_P(
-      QU8_GEMM_MINMAX_FP32_2X2__WASM_FMAGIC, GemmTest,
-      testing::ValuesIn(CreateTests1(
-          /*k_block=*/1,
-          /*adj_k_block=*/1,
-          /*mr=*/2, /*nr=*/2, /*kr=*/1, /*sr=*/1,
-          /*is_igemm=*/false,
-          /*unsigned_inputs=*/false,
-          /*planes=*/1,
-          [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_2x2__wasm_fmagic,
-                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
-                        xnn_pack_qu8_gemm_goi_w,
-                        xnn_qu8_requantize_fp32);
-          })),
-      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-
-  INSTANTIATE_TEST_SUITE_P(
-      QU8_GEMM_MINMAX_FP32_2X4__WASM_FMAGIC, GemmTest,
-      testing::ValuesIn(CreateTests1(
-          /*k_block=*/1,
-          /*adj_k_block=*/1,
-          /*mr=*/2, /*nr=*/4, /*kr=*/1, /*sr=*/1,
-          /*is_igemm=*/false,
-          /*unsigned_inputs=*/false,
-          /*planes=*/1,
-          [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_2x4__wasm_fmagic,
-                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
-                        xnn_pack_qu8_gemm_goi_w,
-                        xnn_qu8_requantize_fp32);
-          })),
-      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-
-  INSTANTIATE_TEST_SUITE_P(
-      QU8_GEMM_MINMAX_FP32_4X2__WASM_FMAGIC, GemmTest,
-      testing::ValuesIn(CreateTests1(
-          /*k_block=*/1,
-          /*adj_k_block=*/1,
-          /*mr=*/4, /*nr=*/2, /*kr=*/1, /*sr=*/1,
-          /*is_igemm=*/false,
-          /*unsigned_inputs=*/false,
-          /*planes=*/1,
-          [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_4x2__wasm_fmagic,
-                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
-                        xnn_pack_qu8_gemm_goi_w,
-                        xnn_qu8_requantize_fp32);
-          })),
-      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-
-  INSTANTIATE_TEST_SUITE_P(
-      QU8_GEMM_MINMAX_FP32_4X4__WASM_FMAGIC, GemmTest,
-      testing::ValuesIn(CreateTests1(
-          /*k_block=*/1,
-          /*adj_k_block=*/1,
-          /*mr=*/4, /*nr=*/4, /*kr=*/1, /*sr=*/1,
-          /*is_igemm=*/false,
-          /*unsigned_inputs=*/false,
-          /*planes=*/1,
-          [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_4x4__wasm_fmagic,
-                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
-                        xnn_pack_qu8_gemm_goi_w,
-                        xnn_qu8_requantize_fp32);
-          })),
-      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 INSTANTIATE_TEST_SUITE_P(

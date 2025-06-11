@@ -22,10 +22,9 @@
 
 static enum xnn_status create_deconvolution_operator(
   const struct xnn_node* node,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
-  struct xnn_code_cache* code_cache,
   xnn_weights_cache_t weights_cache)
 {
   assert(node->num_inputs >= 2);
@@ -92,7 +91,6 @@ static enum xnn_status create_deconvolution_operator(
           node->activation.output_min,
           node->activation.output_max,
           flags,
-          code_cache,
           weights_cache,
           &opdata->operator_objects[0]);
       break;
@@ -124,7 +122,7 @@ static enum xnn_status create_deconvolution_operator(
                   node->params.deconvolution_2d
                       .groups /* output_pixel_stride */,
               filter_data, bias_data, node->activation.output_min,
-              node->activation.output_max, flags, code_cache, weights_cache,
+              node->activation.output_max, flags, weights_cache,
               &opdata->operator_objects[0]);
           break;
         }
@@ -150,7 +148,6 @@ static enum xnn_status create_deconvolution_operator(
               node->activation.output_min,
               node->activation.output_max,
               node->flags,
-              code_cache,
               weights_cache,
               &opdata->operator_objects[0]);
           break;
@@ -179,7 +176,6 @@ static enum xnn_status create_deconvolution_operator(
                   node->activation.output_min,
                   node->activation.output_max,
                   node->flags,
-                  code_cache,
                   weights_cache,
                   &opdata->operator_objects[0]);
               break;
@@ -206,7 +202,6 @@ static enum xnn_status create_deconvolution_operator(
                   node->activation.output_min,
                   node->activation.output_max,
                   node->flags,
-                  code_cache,
                   weights_cache,
                   &opdata->operator_objects[0]);
               break;
@@ -251,7 +246,6 @@ static enum xnn_status create_deconvolution_operator(
               output_min,
               output_max,
               node->flags,
-              code_cache,
               weights_cache,
               &opdata->operator_objects[0]);
           break;
@@ -287,7 +281,6 @@ static enum xnn_status create_deconvolution_operator(
               output_min,
               output_max,
               node->flags,
-              code_cache,
               weights_cache,
               &opdata->operator_objects[0]);
           break;
@@ -328,7 +321,6 @@ static enum xnn_status create_deconvolution_operator(
           output_min,
           output_max,
           node->flags,
-          code_cache,
           weights_cache,
           &opdata->operator_objects[0]);
       break;
@@ -345,7 +337,7 @@ static enum xnn_status create_deconvolution_operator(
 
 static enum xnn_status reshape_deconvolution_operator(
   struct xnn_operator_data* opdata,
-  struct xnn_value* values,
+  struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -450,7 +442,7 @@ static enum xnn_status reshape_deconvolution_operator(
   }
   const uint32_t output_id = opdata->outputs[0];
   assert(output_id < num_values);
-  struct xnn_value* output_value = values + output_id;
+  struct xnn_runtime_value* output_value = values + output_id;
 
   const size_t output_pixel_stride = opdata->operator_objects[0]->output_pixel_stride;
   output_value->shape.dim[0] = batch_size;
@@ -458,7 +450,7 @@ static enum xnn_status reshape_deconvolution_operator(
   output_value->shape.dim[2] = output_width;
   output_value->shape.dim[3] = output_pixel_stride;
   output_value->shape.num_dims = 4;
-  const size_t new_size = xnn_tensor_get_size(output_value);
+  const size_t new_size = xnn_runtime_tensor_get_size(output_value);
   if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
     output_value->size = new_size;
     return xnn_status_reallocation_required;
@@ -468,7 +460,7 @@ static enum xnn_status reshape_deconvolution_operator(
 
 static enum xnn_status setup_deconvolution_operator(
   const struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -480,11 +472,11 @@ static enum xnn_status setup_deconvolution_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  const struct xnn_value* input_value = values + input_id;
+  const struct xnn_runtime_value* input_value = values + input_id;
   const void* input_data = input_value->data;
   assert(input_data != NULL);
 
-  const struct xnn_value* output_value = values + output_id;
+  const struct xnn_runtime_value* output_value = values + output_id;
   void* output_data = output_value->data;
   assert(output_data != NULL);
 

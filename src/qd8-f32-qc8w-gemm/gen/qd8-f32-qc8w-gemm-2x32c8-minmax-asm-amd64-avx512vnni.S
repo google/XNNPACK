@@ -73,7 +73,6 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x32c8__asm_amd64_avx512vnni
       cmp rdi, 1
       cmovle rax, rcx
       cmovle r13, r10
-
       # Load quantization_params pointer from stack
       mov r11, [rsp + 200]
       mov edi, [r11 + 0]
@@ -128,6 +127,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x32c8__asm_amd64_avx512vnni
       add r11, 8
       cmp rdx, r11
       jne .Linner_loop
+
 .Linner_loop_end:
       vpsrlq zmm6, zmm5, 32
       vpaddd zmm5, zmm5, zmm6
@@ -174,12 +174,12 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x32c8__asm_amd64_avx512vnni
       vfmadd213ps zmm15, zmm11, zmm7
       # Min/max clamping.
       vminps  zmm5, zmm1, zmm5
-      vminps  zmm12, zmm1, zmm12
       vminps  zmm14, zmm1, zmm14
+      vminps  zmm12, zmm1, zmm12
       vminps  zmm15, zmm1, zmm15
       vmaxps  zmm5, zmm0, zmm5
-      vmaxps  zmm12, zmm0, zmm12
       vmaxps  zmm14, zmm0, zmm14
+      vmaxps  zmm12, zmm0, zmm12
       vmaxps  zmm15, zmm0, zmm15
 
       # Check whether full or partial store.

@@ -7,17 +7,22 @@
 #define __XNNPACK_TEST_BUFFER_H_
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <cstring>
+#include <functional>
 #include <initializer_list>
+#include <iostream>
 #include <limits>
 #include <memory>
 #include <numeric>
 #include <random>
 #include <sstream>
+#include <string>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -25,8 +30,27 @@
 #include "include/xnnpack.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/datatype.h"
+#include "src/xnnpack/log.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/reference-utils.h"
+
+#if XNN_COMPILER_HAS_FEATURE(memory_sanitizer)
+#include <sanitizer/msan_interface.h>
+#define XNN_MSAN_POISON(x, size) __msan_poison(x, size)
+#define XNN_MSAN_UNPOISON(x, size) __msan_unpoison(x, size)
+#else
+#define XNN_MSAN_POISON(x, size)
+#define XNN_MSAN_UNPOISON(x, size)
+#endif
+
+#if XNN_COMPILER_HAS_FEATURE(address_sanitizer)
+#include <sanitizer/asan_interface.h>
+#define XNN_ASAN_POISON(x, size) __asan_poison_memory_region(x, size)
+#define XNN_ASAN_UNPOISON(x, size) __asan_unpoison_memory_region(x, size)
+#else
+#define XNN_ASAN_POISON(x, size)
+#define XNN_ASAN_UNPOISON(x, size)
+#endif
 
 namespace xnnpack {
 
@@ -37,6 +61,12 @@ class NumericLimits {
   static constexpr T infinity() { return std::numeric_limits<T>::infinity(); }
   static constexpr T min() { return std::numeric_limits<T>::lowest(); }
   static constexpr T max() { return std::numeric_limits<T>::max(); }
+  static constexpr T smallest_normal() { return std::numeric_limits<T>::min(); }
+
+  // These are the identity values (values such that f(x, identity) = x) for a
+  // min or max operation.
+  static constexpr T min_identity() { return infinity(); }
+  static constexpr T max_identity() { return -infinity(); }
 };
 
 template <>
@@ -48,6 +78,11 @@ class NumericLimits<xnn_float16> {
   static xnn_float16 infinity() { return xnn_float16_from_bits(0x7c00); }
   static xnn_float16 min() { return xnn_float16_from_bits(0xfbff); }
   static xnn_float16 max() { return xnn_float16_from_bits(0x7bff); }
+  static xnn_float16 smallest_normal() {
+    return xnn_float16_from_bits(0x0400);  // 2^-14
+  }
+  static xnn_float16 min_identity() { return infinity(); }
+  static xnn_float16 max_identity() { return -infinity(); }
 };
 
 template <>
@@ -59,42 +94,182 @@ class NumericLimits<xnn_bfloat16> {
   static xnn_bfloat16 infinity() { return xnn_bfloat16_from_bits(0x7f80); }
   static xnn_bfloat16 min() { return xnn_bfloat16_from_bits(0xff7f); }
   static xnn_bfloat16 max() { return xnn_bfloat16_from_bits(0x7f7f); }
+  static xnn_bfloat16 smallest_normal() {
+    return xnn_bfloat16_from_bits(0x0080);  // 2^-126
+  }
+  static xnn_bfloat16 min_identity() { return infinity(); }
+  static xnn_bfloat16 max_identity() { return -infinity(); }
 };
 
-template <typename T>
-class NumericLimits<quantized<T>> {
+template <typename T, typename Kind>
+class NumericLimits<quantized<T, Kind>> {
  public:
-  static quantized<T> min() {
-    return {std::numeric_limits<T>::lowest()};
-  }
-  static quantized<T> max() {
-    return {std::numeric_limits<T>::max()};
-  }
+  static quantized<T> min() { return {std::numeric_limits<T>::lowest()}; }
+  static quantized<T> max() { return {std::numeric_limits<T>::max()}; }
+  static quantized<T> smallest_normal() { return {0}; }
+  static quantized<T> min_identity() { return max(); }
+  static quantized<T> max_identity() { return min(); }
 };
 
 inline float epsilon(xnn_datatype datatype) {
   switch (datatype) {
-    case xnn_datatype_fp32: return NumericLimits<float>::epsilon();
-    case xnn_datatype_fp16: return NumericLimits<xnn_float16>::epsilon();
-    case xnn_datatype_bf16: return NumericLimits<xnn_bfloat16>::epsilon();
-    default: return 1.0f;
+    case xnn_datatype_fp32:
+      return NumericLimits<float>::epsilon();
+    case xnn_datatype_fp16:
+      return NumericLimits<xnn_float16>::epsilon();
+    case xnn_datatype_bf16:
+      return NumericLimits<xnn_bfloat16>::epsilon();
+    default:
+      return 1.0f;
   }
 }
 
+template <typename T>
+T get_reduce_identity(xnn_reduce_operator op) {
+  switch (op) {
+    case xnn_reduce_sum:
+    case xnn_reduce_mean:
+      return 0;
+    case xnn_reduce_max:
+      return NumericLimits<T>::max_identity();
+    case xnn_reduce_min:
+      return NumericLimits<T>::min_identity();
+    case xnn_reduce_invalid:
+      break;
+  }
+  XNN_UNREACHABLE;
+  return 0;
+}
+
 struct PaddingBytes {
-  size_t value;
+  int value;
 };
 
-// This is a container similar to std::vector, but it leaves the memory
-// uninitialized, supports alignment.
-// TODO: It would be good if this also managed padding in a way that allowed
-// the client code to see the unpadded data, and the padding was hidden.
+static constexpr PaddingBytes XnnExtraBytes = {XNN_EXTRA_BYTES};
+
+// This is a container similar to std::vector, but:
+// - It is move-only
+// - It does not initialize its memory. This helps detect bugs with msan, and
+//   speeds up tests/benchmarks (especially on slow emulators).
+// - It supports allocating some extra bytes past the end, but does not consider
+//   those bytes to be part of the container (size() and end() do not include
+//   these bytes).
+// - It allocates extra bytes before and after the buffer to detect memory
+//   corruption. This is necessary because we have some code that only runs on
+//   targets where we have no other reasonable way to detect out of bounds
+//   memory writes (e.g. arm 32-bit assembly, which doesn't support asan).
 template <typename T, size_t Alignment = alignof(T)>
 class Buffer {
   static_assert(std::is_trivial<T>::value, "");
-  T* data_;
-  size_t size_;
 
+ public:
+  using value_type = T;
+  using iterator = T*;
+  using const_iterator = const T*;
+
+  Buffer() : data_(nullptr), size_(0) {}
+  explicit Buffer(size_t size, PaddingBytes extra_bytes = {0},
+                  const char* name = nullptr)
+      : data_(reinterpret_cast<T*>(
+            allocate(size * sizeof(T) + guard_bytes +
+                     std::max<size_t>(guard_bytes, extra_bytes.value)))),
+        size_(size),
+        name_(name) {
+    // Fill the region before the allocation with the guard bytes, and poison it
+    // for sanitizers.
+    uint8_t* before = reinterpret_cast<uint8_t*>(data_);
+    fill_guard_bytes(before);
+    XNN_MSAN_POISON(before, guard_bytes);
+    XNN_ASAN_POISON(before, guard_bytes);
+
+    // The actual allocation is after the guard bytes.
+    data_ =
+        reinterpret_cast<T*>(reinterpret_cast<uint8_t*>(data_) + guard_bytes);
+
+    // Fill the region after the allocation with the guard bytes.
+    uint8_t* after = reinterpret_cast<uint8_t*>(data_ + size_);
+    fill_guard_bytes(after);
+    // Here, we only want to poison the memory for sanitizers after the extra
+    // bytes. We want to allow reads past the end to not crash (in asan or
+    // otherwise), but we don't want that memory to be considered initialized by
+    // msan.
+    XNN_ASAN_POISON(after + extra_bytes.value, guard_bytes - extra_bytes.value);
+    XNN_MSAN_POISON(after, guard_bytes);
+  }
+  Buffer(size_t size, T value, PaddingBytes extra_bytes = {0},
+         const char* name = nullptr)
+      : Buffer(size, extra_bytes, name) {
+    std::fill(begin(), end(), value);
+  }
+  Buffer(std::initializer_list<T> init) : Buffer(init.size()) {
+    std::copy(init.begin(), init.end(), begin());
+  }
+  Buffer(const Buffer& other) = delete;
+  Buffer(Buffer&& other) : Buffer() {
+    std::swap(data_, other.data_);
+    std::swap(size_, other.size_);
+    std::swap(name_, other.name_);
+  }
+  ~Buffer() {
+    if (data_) {
+      // Check that the guard bytes after the buffer have not been modified. We
+      // need to unpoison the memory first so we can read it.
+      const uint8_t* after = reinterpret_cast<uint8_t*>(data_ + size_);
+      XNN_ASAN_UNPOISON(after, guard_bytes);
+      XNN_MSAN_UNPOISON(after, guard_bytes);
+      if (!check_guard_bytes(after)) {
+        xnn_log_fatal(
+            "Buffer%s%s%s: guard bytes after allocation were corrupted, "
+            "aborting.",
+            name_ ? " '" : "", name_ ? name_ : "", name_ ? "'" : "");
+      }
+      data_ =
+          reinterpret_cast<T*>(reinterpret_cast<uint8_t*>(data_) - guard_bytes);
+
+      // Check that the guard bytes before the buffer have not been modified.
+      const uint8_t* before = reinterpret_cast<uint8_t*>(data_);
+      XNN_ASAN_UNPOISON(before, guard_bytes);
+      XNN_MSAN_UNPOISON(before, guard_bytes);
+      if (!check_guard_bytes(before)) {
+        xnn_log_fatal(
+            "Buffer%s%s%s: guard bytes before allocation were corrupted, "
+            "aborting.",
+            name_ ? " '" : "", name_ ? name_ : "", name_ ? "'" : "");
+      }
+
+      free(data_);
+    }
+  }
+
+  Buffer& operator=(const Buffer&) = delete;
+  Buffer& operator=(Buffer&& other) {
+    std::swap(data_, other.data_);
+    std::swap(size_, other.size_);
+    return *this;
+  }
+
+  size_t size() const { return size_; }
+  bool empty() const { return size_ == 0; }
+
+  T* data() { return data_; }
+  const T* data() const { return data_; }
+  T* begin() { return data_; }
+  T* end() { return data_ + size_; }
+  const T* begin() const { return data_; }
+  const T* end() const { return data_ + size_; }
+  const T* cbegin() const { return data_; }
+  const T* cend() const { return data_ + size_; }
+  T& operator[](size_t index) { return data_[index]; }
+  const T& operator[](size_t index) const { return data_[index]; }
+
+  bool operator==(const Buffer& other) const {
+    return size_ == other.size_ && std::equal(begin(), end(), other.begin());
+  }
+  bool operator!=(const Buffer& other) const {
+    return size_ != other.size_ || !std::equal(begin(), end(), other.begin());
+  }
+
+ private:
   static void* allocate(size_t bytes) {
     size_t alignment = std::max(Alignment, sizeof(void*));
 #if defined(_WIN32)
@@ -132,58 +307,39 @@ class Buffer {
 #endif
   }
 
- public:
-  using value_type = T;
-  using iterator = T*;
-  using const_iterator = const T*;
+  // Some compilers can't handle static constexpr member variables.
+  enum { guard_bytes = std::max<size_t>(64, Alignment) };
+  // This value is chosen such that in the 16 bytes we have:
+  // - float32 NaN (upper 32 bits)
+  // - float16 NaN (lower 16 bits, the mantissa of the negative float32)
+  // - Negative float32 (lower 32 bits)
+  // - Negative float16 (bits 32-48, the mantissa of the float32 NaN)
+  // This way, we'll detect kernels that fault due to loading and doing
+  // arithmetic on junk data (that could be NaN).
+  enum { guard_signal = 0x7FBF8234B3307C7F };
 
-  Buffer() : data_(nullptr), size_(0) {}
-  explicit Buffer(size_t size, PaddingBytes extra_bytes = {0})
-      : data_(reinterpret_cast<T*>(
-            allocate(size * sizeof(T) + extra_bytes.value))),
-        size_(size) {}
-  Buffer(size_t size, T value) : Buffer(size) {
-    std::fill(begin(), end(), value);
-  }
-  Buffer(std::initializer_list<T> init) : Buffer(init.size()) {
-    std::copy(init.begin(), init.end(), begin());
-  }
-  Buffer(const Buffer& other) = delete;
-  Buffer(Buffer&& other) : Buffer() {
-    std::swap(data_, other.data_);
-    std::swap(size_, other.size_);
-  }
-  ~Buffer() {
-    if (data_) free(data_);
+  static void fill_guard_bytes(uint8_t* x) {
+    assert(guard_bytes % sizeof(guard_signal) == 0);
+    const auto guard_signal_with_addr = guard_signal;
+    for (size_t i = 0; i < guard_bytes; i += sizeof(guard_signal)) {
+      memcpy(x + i, &guard_signal_with_addr, sizeof(guard_signal));
+    }
   }
 
-  Buffer& operator=(const Buffer&) = delete;
-  Buffer& operator=(Buffer&& other) {
-    std::swap(data_, other.data_);
-    std::swap(size_, other.size_);
-    return *this;
+  static bool check_guard_bytes(const uint8_t* x) {
+    assert(guard_bytes % sizeof(guard_signal) == 0);
+    const auto guard_signal_with_addr = guard_signal;
+    for (size_t i = 0; i < guard_bytes; i += sizeof(guard_signal)) {
+      if (memcmp(x + i, &guard_signal_with_addr, sizeof(guard_signal)) != 0) {
+        return false;
+      }
+    }
+    return true;
   }
 
-  size_t size() const { return size_; }
-  bool empty() const { return size_ == 0; }
-
-  T* data() { return data_; }
-  const T* data() const { return data_; }
-  T* begin() { return data_; }
-  T* end() { return data_ + size_; }
-  const T* begin() const { return data_; }
-  const T* end() const { return data_ + size_; }
-  const T* cbegin() const { return data_; }
-  const T* cend() const { return data_ + size_; }
-  T& operator[](size_t index) { return data_[index]; }
-  const T& operator[](size_t index) const { return data_[index]; }
-
-  bool operator==(const Buffer& other) const {
-    return size_ == other.size_ && std::equal(begin(), end(), other.begin());
-  }
-  bool operator!=(const Buffer& other) const {
-    return size_ != other.size_ || !std::equal(begin(), end(), other.begin());
-  }
+  T* data_;
+  size_t size_;
+  const char* name_;
 };
 
 // This is a faster way of generating random numbers, by generating as many
@@ -264,6 +420,9 @@ class Tensor {
       if (extents_[i - 1] == 1) {
         // We don't care about the stride of extent 1 dimensions.
         continue;
+      } else if (extents_[i - 1] == 0) {
+        // Tensor is empty, it's contiguous.
+        return true;
       }
       if (strides_[i - 1] != stride) {
         return false;
@@ -274,6 +433,7 @@ class Tensor {
   }
 
   const index_type& extents() const { return extents_; }
+  const index_type& shape() const { return extents_; }
   const index_type& strides() const { return strides_; }
   size_t extent(size_t dim) const { return extents_[dim]; }
   size_t stride(size_t dim) const { return strides_[dim]; }
@@ -284,12 +444,12 @@ class Tensor {
     strides_ = std::move(strides);
   }
 
-  size_t rank() const { return extents_.size(); }
-  bool empty() const { return begin_ >= end_; }
+  XNN_INLINE size_t rank() const { return extents_.size(); }
+  XNN_INLINE bool empty() const { return begin_ >= end_; }
 
   // Returns a pointer to the element {0,...}
-  T* base() { return begin_; }
-  const T* base() const { return begin_; }
+  XNN_INLINE T* base() { return begin_; }
+  XNN_INLINE const T* base() const { return begin_; }
 
   // Form a reference to an element at a particular index.
   T& operator()(const index_type& indices) {
@@ -301,11 +461,13 @@ class Tensor {
 
   template <typename... Args>
   T& operator()(Args... args) {
-    return operator()(index_type{static_cast<size_t>(args)...});
+    assert(sizeof...(args) >= rank());
+    return *(begin_ + flat_offset_variadic(sizeof...(args) - rank(), args...));
   }
   template <typename... Args>
   const T& operator()(Args... args) const {
-    return operator()(index_type{static_cast<size_t>(args)...});
+    assert(sizeof...(args) >= rank());
+    return *(begin_ + flat_offset_variadic(sizeof...(args) - rank(), args...));
   }
 
   // The following functions produce iterators or accessors to the "flat" array
@@ -320,7 +482,7 @@ class Tensor {
   }
   size_t size() const {
     assert(is_contiguous());
-    return data_->size();
+    return end_ - begin_;
   }
   T* begin() { return data(); }
   T* end() { return end_; }
@@ -335,12 +497,18 @@ class Tensor {
   // Tensor, they do not affect the memory addressed by the Tensor. To realize
   // the effect of these operations, make a copy with `deep_copy`.
 
-  // Reorder the dimensions to extents = {extent(i) for i in perm}, and similar
-  // for strides.
-  Tensor<T, Alignment> transpose(const std::vector<size_t>& perm) const {
+  // Reorder the dimensions in `dims`. Dimensions not in dims maintain their
+  // relative ordering.
+  Tensor<T, Alignment> transpose(std::vector<size_t> perm) const {
+    // Sort idx to get the new locations
+    std::vector<size_t> sorted = perm;
+    std::sort(sorted.begin(), sorted.end());
+
     Tensor<T, Alignment> result(*this);
-    result.extents_ = permute(perm, extents_);
-    result.strides_ = permute(perm, strides_);
+    for (size_t i = 0; i < sorted.size(); i++) {
+      result.extents_[sorted[i]] = extent(perm[i]);
+      result.strides_[sorted[i]] = stride(perm[i]);
+    }
     return result;
   }
 
@@ -390,14 +558,18 @@ class Tensor {
 
     Tensor<T, Alignment> result(*this);
     std::vector<size_t> offsets(rank());
+    std::vector<size_t> maxs(rank());
     for (size_t i = 0; i < rank(); ++i) {
       offsets[i] = begins[i] < 0 ? extents_[i] + begins[i] : begins[i];
-      result.extents_[i] =
-          (ends[i] <= 0 ? extents_[i] + ends[i] : ends[i]) - offsets[i];
+      result.extents_[i] = std::max<int64_t>(
+          0, (ends[i] <= 0 ? static_cast<int64_t>(extents_[i]) + ends[i]
+                           : ends[i]) -
+                 static_cast<int64_t>(offsets[i]));
+      maxs[i] = doz(result.extents_[i], 1);
     }
 
     result.begin_ = begin_ + flat_offset(offsets);
-    result.end_ = result.begin_ + result.flat_offset(result.extents_);
+    result.end_ = result.begin_ + result.flat_offset(maxs) + 1;
 
     return result;
   }
@@ -421,6 +593,71 @@ class Tensor {
     return slice(dim, at, at + 1);
   }
 
+  // Slice the leading dimensions at the indices of `at`.
+  Tensor<T, Alignment> slice_leading(std::vector<size_t> at) const {
+    std::vector<int64_t> begins(rank());
+    std::vector<int64_t> ends(rank());
+    std::copy(at.begin(), at.end(), begins.begin());
+    std::copy(at.begin(), at.end(), ends.begin());
+    for (size_t i = 0; i < at.size(); ++i) {
+      ends[i] += 1;
+    }
+    return slice(begins, ends);
+  }
+
+  // Split a dimension dim into dimensions of extent `split_extents`. The first
+  // split extent of 0 will be replaced with
+  // extent(dim) / product(non-zero split extents). The product of split_extents
+  // must be equal to extent(dim).
+  Tensor<T, Alignment> split(size_t dim,
+                             std::vector<size_t> split_extents) const {
+    assert(dim < rank());
+    size_t splits_size = 1;
+    for (size_t i : split_extents) {
+      if (i != 0) {
+        splits_size *= i;
+      }
+    }
+    for (size_t& i : split_extents) {
+      if (i == 0) {
+        assert(extent(dim) % splits_size == 0);
+        i = extent(dim) / splits_size;
+        splits_size *= i;
+      }
+    }
+    assert(splits_size == extent(dim) || stride(dim) == 0);
+    std::vector<size_t> new_dims(split_extents.size() - 1);
+    std::iota(new_dims.begin(), new_dims.end(), dim + 1);
+    Tensor<T, Alignment> result = expand_dims(new_dims);
+    for (size_t i = 0; i < split_extents.size(); ++i) {
+      result.extents_[dim + i] = split_extents[i];
+      splits_size /= split_extents[i];
+      result.strides_[dim + i] = stride(dim) * splits_size;
+    }
+    return result;
+  }
+
+  // Fuse two dimensions into one, where the new dimension's extent is the
+  // product of the extents of the two dimensions. The stride of the outer
+  // dimension must match the product of the stride and extent of the inner
+  // dimension.
+  Tensor<T, Alignment> fuse(std::vector<size_t> dims) const {
+    assert(!dims.empty());
+    size_t a = dims.front();
+    assert(a < rank());
+    dims.erase(dims.begin());
+    Tensor<T, Alignment> result(*this);
+    for (size_t b : dims) {
+      assert(b < rank());
+      assert(stride(b) * extent(b) == stride(a));
+      result.extents_[a] *= result.extent(b);
+      result.strides_[a] = result.stride(b);
+      result.extents_.erase(result.extents_.begin() + b);
+      result.strides_.erase(result.strides_.begin() + b);
+    }
+    return result;
+  }
+
   // Remove `pre` elements from the beginning of each dimension, and `post`
   // elements from the end of each dimension.
   Tensor<T, Alignment> crop_padding(const index_type& pre,
@@ -437,9 +674,76 @@ class Tensor {
     return result;
   }
 
+  // Add `pre` indices before, `post` indices after, of padding of `value` to
+  // the tensor.
+  Tensor<T, Alignment> pad(T value, const index_type& pre,
+                           const index_type& post) const {
+    assert(rank() == pre.size());
+    assert(rank() == post.size());
+
+    std::vector<size_t> extents = extents_;
+    for (size_t i = 0; i < rank(); ++i) {
+      extents[i] += pre[i] + post[i];
+    }
+
+    Tensor<T, Alignment> result(extents);
+    result.fill(value);
+    result.crop_padding(pre, post).assign(*this);
+    return result;
+  }
+
+  // Similar to the above, but repeats the edge value of the tensor instead of
+  // padding with a constant value.
+  Tensor<T, Alignment> pad(const index_type& pre,
+                           const index_type& post) const {
+    assert(rank() == pre.size());
+    assert(rank() == post.size());
+
+    std::vector<size_t> extents = extents_;
+    for (size_t i = 0; i < rank(); ++i) {
+      extents[i] += pre[i] + post[i];
+    }
+
+    Tensor<T, Alignment> result(extents);
+    result.crop_padding(pre, post).assign(*this);
+    // Implementing "repeat edge" is tricky. For each dimension, we need to
+    // slice the padding in that dimension, and copy from the edge of the valid
+    // data. This starts by copying junk padding from the result, but each
+    // dimension fills in more of this junk data (the regions in the "corners"
+    // gets copied more than once).
+    for (size_t dim = 0; dim < rank(); ++dim) {
+      int64_t valid_begin = pre[dim];
+      int64_t valid_end = valid_begin + extents_[dim];
+      // Make a broadcasting set of strides in this dimension.
+      std::vector<size_t> strides = result.strides();
+      strides[dim] = 0;
+
+      if (pre[dim] != 0) {
+        // Copy the pre-padding.
+        Tensor<T, Alignment> valid_pre =
+            result.slice(dim, valid_begin, valid_begin + 1);
+        valid_pre.set_shape(valid_pre.extents(), strides);
+        Tensor<T, Alignment> padding = result.slice(dim, 0, valid_begin);
+        padding.assign(valid_pre);
+      }
+
+      if (post[dim] != 0) {
+        // Copy the post padding.
+        Tensor<T, Alignment> valid_post =
+            result.slice(dim, valid_end - 1, valid_end);
+        valid_post.set_shape(valid_post.extents(), strides);
+        result.slice(dim, valid_end, 0).assign(valid_post);
+      }
+    }
+    return result;
+  }
+
   // Copy the contents from other to this. The extents must match.
   void assign(const Tensor<T, Alignment>& other) {
-    assert(extents_ == other.extents_);
+    assert(rank() == other.rank());
+    for (size_t i = 0; i < rank(); ++i) {
+      assert(other.stride(i) == 0 || other.extent(i) == extent(i));
+    }
     copy_impl(rank(), extents_.data(), other.strides_.data(), other.base(),
               strides_.data(), base());
   }
@@ -517,12 +821,53 @@ class Tensor {
   // `indices` corresponds to the last dimension of this tensor. Missing
   // dimensions are treated as stride 0.
   size_t flat_offset(const index_type& indices) const {
+    const size_t rank = this->rank();
+    const size_t indices_rank = indices.size();
+    assert(indices_rank >= rank);
     size_t result = 0;
-    assert(indices.size() >= rank());
-    for (size_t i = 0; i < rank(); ++i) {
-      result += strides_[i] * indices[i + indices.size() - rank()];
+    const size_t* strides = strides_.data();
+    const size_t* indices_offset = indices.data() + indices_rank - rank;
+    for (size_t i = 0; i < rank; ++i) {
+      result += strides[i] * indices_offset[i];
     }
     return result;
+  }
+
+  XNN_INLINE size_t flat_offset_variadic(size_t /*dim0*/) const { return 0; }
+
+  XNN_INLINE size_t flat_offset_variadic(size_t dim0, size_t idx0) const {
+    if (dim0 > 0) {
+      // We need to skip the leading dimensions that are broadcasts.
+      return 0;
+    } else {
+      // We now have as many indices as there are dimensions.
+      return flat_offset_no_broadcast(strides_.data(), idx0);
+    }
+  }
+
+  template <typename... Args>
+  XNN_INLINE size_t flat_offset_variadic(size_t dim0, size_t idx0,
+                                         Args... idxs) const {
+    if (dim0 > 0) {
+      // We need to skip the leading dimensions that are broadcasts.
+      return flat_offset_variadic(dim0 - 1, idxs...);
+    } else {
+      // We now have as many indices as there are dimensions.
+      return flat_offset_no_broadcast(strides_.data(), idx0, idxs...);
+    }
+  }
+
+  XNN_INLINE size_t flat_offset_no_broadcast(const size_t* strides) const {
+    return 0;
+  }
+  XNN_INLINE size_t flat_offset_no_broadcast(const size_t* strides,
+                                             size_t idx0) const {
+    return *strides * idx0;
+  }
+  template <typename... Args>
+  XNN_INLINE size_t flat_offset_no_broadcast(const size_t* strides, size_t idx0,
+                                             Args... idxs) const {
+    return *strides * idx0 + flat_offset_no_broadcast(strides + 1, idxs...);
   }
 
   index_type extents_;
@@ -580,15 +925,18 @@ void broadcast_extent_1(Tensor<T>& tensor) {
 
 // Generate random quantization parameters for a given datatype.
 template <typename Rng>
-xnn_quantization_params random_quantization(xnn_datatype datatype, Rng& rng) {
-  std::uniform_int_distribution<> i8_dist{std::numeric_limits<int8_t>::min(),
-                                          std::numeric_limits<int8_t>::max()};
+xnn_quantization_params random_quantization(xnn_datatype datatype, Rng& rng,
+                                            float min_scale = 0.25f,
+                                            float max_scale = 8.0f) {
   std::uniform_int_distribution<> u8_dist{std::numeric_limits<uint8_t>::min(),
                                           std::numeric_limits<uint8_t>::max()};
-  std::uniform_real_distribution<float> scale_dist{0.25f, 8.0f};
+  std::uniform_real_distribution<float> scale_dist{min_scale, max_scale};
   switch (datatype) {
     case xnn_datatype_qint8:
-      return {i8_dist(rng), scale_dist(rng)};
+    case xnn_datatype_qcint8:
+    case xnn_datatype_qcint4:
+      // signed integer quantization assumes zero point is 0.
+      return {0, scale_dist(rng)};
     case xnn_datatype_quint8:
       return {u8_dist(rng), scale_dist(rng)};
     default:
@@ -622,23 +970,45 @@ float dequantize(T x, xnn_quantization_params params) {
 template <typename T>
 class DatatypeGenerator {
   std::uniform_real_distribution<float> dist_;
+  bool reinterpret_ = false;
 
  public:
-  DatatypeGenerator(float min, float max, const xnn_quantization_params& = {})
-      : dist_(std::max<float>(min, NumericLimits<T>::min()),
-              std::min<float>(max, NumericLimits<T>::max())) {}
+  DatatypeGenerator(double min, double max, const xnn_quantization_params& = {}) {
+    if (min <= NumericLimits<T>::min() && max >= NumericLimits<T>::max()) {
+      // The caller wants a full range of random value. Rather than generate
+      // floats uniformly distributed across the range of floats, where a
+      // negligible fraction of the range contains the "interesting" region near
+      // 0, we generate random bits reinterpreted as a float instead. This
+      // distribution more accurately reflects the numbers we want to test in
+      // typical code.
+      reinterpret_ = true;
+    } else {
+      reinterpret_ = false;
+      min = std::max<double>(min, NumericLimits<T>::min());
+      max = std::min<double>(max, NumericLimits<T>::max());
+      dist_ = std::uniform_real_distribution<float>(min, max);
+    }
+  }
   explicit DatatypeGenerator(const xnn_quantization_params& = {})
-      : dist_(NumericLimits<T>::min(), NumericLimits<T>::max()) {}
+      : DatatypeGenerator(NumericLimits<T>::min(), NumericLimits<T>::max()) {}
 
   template <typename Rng>
   T operator()(Rng& rng) {
-    while (true) {
-      float result = dist_(rng);
-      if (!std::isnan(result)) {
-        return static_cast<T>(result);
+    if (reinterpret_) {
+      static_assert(Rng::min() == 0, "");
+      static_assert(Rng::max() >= (1ull << (sizeof(T) * 8)) - 1, "");
+      auto bits = rng();
+      T result;
+      memcpy(&result, &bits, sizeof(T));
+      if (std::abs(static_cast<float>(result)) >
+          NumericLimits<T>::smallest_normal()) {
+        return result;
       } else {
-        // Don't allow generating NaN
+        // Flush denormals (and NaN) to 0.
+        return static_cast<T>(0.0f);
       }
+    } else {
+      return dist_(rng);
     }
   }
 };

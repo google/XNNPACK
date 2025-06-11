@@ -6,6 +6,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+// clang-format off
+
 #pragma once
 
 #include <benchmark/benchmark.h>
@@ -19,7 +21,7 @@
 
 
 // ShuffleNet v1/v2.
-static void ShuffleNetConvArguments(benchmark::internal::Benchmark* b) {
+inline void ShuffleNetConvArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"H", "W", "Cout"});
 
   /********* Conv 1 ********/
@@ -28,7 +30,7 @@ static void ShuffleNetConvArguments(benchmark::internal::Benchmark* b) {
 }
 
 // MobileNet v1/v2.
-static void MobileNetConvArguments(benchmark::internal::Benchmark* b) {
+inline void MobileNetConvArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"H", "W", "Cout"});
 
   /*        H    W   GCout */
@@ -36,7 +38,7 @@ static void MobileNetConvArguments(benchmark::internal::Benchmark* b) {
 }
 
 // MobileNet v3 Small/Large.
-static void MobileNetV3ConvArguments(benchmark::internal::Benchmark* b) {
+inline void MobileNetV3ConvArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"H", "W", "Cout"});
 
   /******************* Initial Stage *******************/
@@ -45,7 +47,7 @@ static void MobileNetV3ConvArguments(benchmark::internal::Benchmark* b) {
 }
 
 // SqueezeNet 1.1
-static void SqueezeNetV11ConvArguments(benchmark::internal::Benchmark* b) {
+inline void SqueezeNetV11ConvArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"H", "W", "GCout"});
 
   /*********************** Conv 1 **********************/

@@ -33,6 +33,7 @@
 
 namespace {
 
+// NOLINTNEXTLINE(clang-diagnostic-unused-function)
 std::vector<GemmTestParams> CreateTests1(
     size_t k_block, size_t adj_k_block,
     size_t mr, size_t nr, size_t kr, size_t sr,
@@ -269,6 +270,7 @@ std::vector<GemmTestParams> CreateTests1(
 }
 
 #if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  // NOLINTNEXTLINE(clang-diagnostic-unused-function)
   std::vector<GemmTestParams> CreateTests2(
       size_t k_block, size_t adj_k_block,
       size_t mr, size_t nr, size_t kr, size_t sr,

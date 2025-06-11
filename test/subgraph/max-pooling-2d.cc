@@ -3,800 +3,155 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>  // For std::generate, std::min.
-#include <array>      // For std::array.
-#include <cmath>      // For std::lrintf.
-#include <cstddef>    // For size_t.
-#include <cstdint>    // For uint32_t.
-#include <limits>     // For std::numeric_limits.
-#include <memory>     // For std::unique_ptr.
-#include <random>     // For std::uniform_real_distribution.
-#include <vector>     // For std::vector.
+#include <algorithm>
+#include <cassert>
+#include <chrono>
+#include <cstddef>
+#include <cstdint>
+#include <random>
+#include <vector>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
-#include "src/xnnpack/node-type.h"
-#include "src/xnnpack/operator-utils.h"
-#include "src/xnnpack/operator.h"
-#include "src/xnnpack/requantization.h"
-#include "src/xnnpack/subgraph.h"
 #include "test/replicable_random_device.h"
-#include "test/subgraph/runtime-flags.h"
+#include "test/subgraph/stencil.h"
+#include "test/subgraph/subgraph-tester.h"
 
-template <class T> class MaxPooling2DTestBase : public ::testing::Test {
- protected:
-  MaxPooling2DTestBase() {
-    input_size_dist = std::uniform_int_distribution<uint32_t>(10, 15);
-    kernel_size_dist = std::uniform_int_distribution<uint32_t>(2, 5);
-    f32dist = std::uniform_real_distribution<float>();
-    scale_dist = std::uniform_real_distribution<float>(1.0f, 5.0f);
-    i32dist = std::uniform_int_distribution<int32_t>(-10000, 10000);
-    dilation_dist = std::uniform_int_distribution<uint32_t>(1, 2);
-    i8dist =
-      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
-    u8dist =
-      std::uniform_int_distribution<int32_t>(std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
+using testing::FloatNear;
+using testing::Pointwise;
 
-    batch_size = input_size_dist(rng);
-    input_height = input_size_dist(rng);
-    input_width = input_size_dist(rng);
-    channels = input_size_dist(rng);
-    pooling_height = kernel_size_dist(rng);
-    pooling_width = kernel_size_dist(rng);
-    padding_top = std::uniform_int_distribution<uint32_t>(0, pooling_height - 1)(rng);
-    padding_bottom = std::uniform_int_distribution<uint32_t>(0, pooling_height - 1)(rng);
-    padding_left = std::uniform_int_distribution<uint32_t>(0, pooling_width - 1)(rng);
-    padding_right = std::uniform_int_distribution<uint32_t>(0, pooling_width - 1)(rng);
-    dilation_height = dilation_dist(rng);
-    dilation_width = dilation_height;
-    // stride dimension must be <= filter dimension
-    stride_height = std::uniform_int_distribution<uint32_t>(1, pooling_height)(rng);
-    stride_width = std::uniform_int_distribution<uint32_t>(1, pooling_width)(rng);
-    output_min = -std::numeric_limits<float>::infinity();
-    output_max = std::numeric_limits<float>::infinity();
-    output_height = xnn_compute_convolution_output_dimension(
-      padding_top + input_height + padding_bottom, pooling_height, dilation_height, stride_height);
-    output_width = xnn_compute_convolution_output_dimension(
-      padding_left + input_width + padding_right, pooling_width, dilation_width, stride_width);
+namespace xnnpack {
 
-    input_dims = {{batch_size, input_height, input_width, channels}};
-    output_dims = {{batch_size, output_height, output_width, channels}};
+template <typename T>
+Tensor<T> ReferenceImpl(Tensor<T> input, const StencilParams& kh,
+                        const StencilParams& kw) {
+  Tensor<T> output({input.extent(0), kh.output_extent(input.extent(1)),
+                    kw.output_extent(input.extent(2)), input.extent(3)});
 
-    input = xnnpack::Buffer<T>(XNN_EXTRA_BYTES / sizeof(T) + batch_size * input_height * input_width * channels);
-    operator_output =
-      xnnpack::Buffer<T>(XNN_EXTRA_BYTES / sizeof(T) + batch_size * output_height * output_width * channels);
-    subgraph_output =
-      xnnpack::Buffer<T>(XNN_EXTRA_BYTES / sizeof(T) + batch_size * output_height * output_width * channels);
+  // Pad the input
+  size_t h_padding_max =
+      std::max(kh.padding_max, kh.dilated_kernel_extent() - 1 - kh.padding_min);
+  size_t w_padding_max =
+      std::max(kw.padding_max, kw.dilated_kernel_extent() - 1 - kw.padding_min);
+  Tensor<T> padded =
+      input.pad(NumericLimits<T>::min(), {0, kh.padding_min, kw.padding_min, 0},
+                {0, h_padding_max, w_padding_max, 0});
+
+  padded = make_stencil_dim(padded, 2, kw);
+  padded = make_stencil_dim(padded, 1, kh);
+  for (size_t n = 0; n < output.extent(0); ++n) {
+    for (size_t y = 0; y < output.extent(1); ++y) {
+      for (size_t x = 0; x < output.extent(2); ++x) {
+        for (size_t c = 0; c < output.extent(3); ++c) {
+          T& output_nyxc = output(n, y, x, c);
+          output_nyxc = NumericLimits<T>::max_identity();
+          for (size_t dy = 0; dy < kh.size; ++dy) {
+            for (size_t dx = 0; dx < kw.size; ++dx) {
+              output_nyxc = std::max(output_nyxc, padded(n, y, dy, x, dx, c));
+            }
+          }
+        }
+      }
+    }
   }
 
-  xnnpack::ReplicableRandomDevice rng;
-  std::uniform_int_distribution<uint32_t> input_size_dist;
-  std::uniform_int_distribution<uint32_t> kernel_size_dist;
-  std::uniform_int_distribution<int32_t> i32dist;
-  std::uniform_real_distribution<float> f32dist;
-  std::uniform_real_distribution<float> scale_dist;
-  std::uniform_int_distribution<uint32_t> dilation_dist;
-  std::uniform_int_distribution<int32_t> i8dist;
-  std::uniform_int_distribution<int32_t> u8dist;
-
-  uint32_t padding_top;
-  uint32_t padding_right;
-  uint32_t padding_bottom;
-  uint32_t padding_left;
-  uint32_t batch_size;
-  uint32_t input_height;
-  uint32_t input_width;
-  uint32_t pooling_height;
-  uint32_t pooling_width;
-  uint32_t stride_height;
-  uint32_t stride_width;
-  uint32_t dilation_height;
-  uint32_t dilation_width;
-  uint32_t channels;
-  float output_min;
-  float output_max;
-  uint32_t output_height;
-  uint32_t output_width;
-
-  std::array<size_t, 4> input_dims;
-  std::array<size_t, 4> output_dims;
-
-  xnnpack::Buffer<T> input;
-  xnnpack::Buffer<T> operator_output;
-  xnnpack::Buffer<T> subgraph_output;
-};
-
-using MaxPooling2DTestQS8 = MaxPooling2DTestBase<int8_t>;
-using MaxPooling2DTestQU8 = MaxPooling2DTestBase<uint8_t>;
-using MaxPooling2DTestF16 = MaxPooling2DTestBase<xnn_float16>;
-using MaxPooling2DTestF32 = MaxPooling2DTestBase<float>;
-
-TEST_F(MaxPooling2DTestQS8, define)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_qint8, 0, 1.0f, input_dims.size(), input_dims.data(), nullptr,
-                          /*external_id=*/0, /*flags=*/0, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_qint8, 0, 1.0f, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/1, /*flags=*/0, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_max_pooling_2d(
-      subgraph, padding_top, padding_right, padding_bottom, padding_left, pooling_height, pooling_width, stride_height,
-      stride_width, dilation_height, dilation_width, output_min, output_max, input_id, output_id, /*flags=*/0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_max_pooling_2d);
-  ASSERT_EQ(node->params.pooling_2d.padding_top, padding_top);
-  ASSERT_EQ(node->params.pooling_2d.padding_right, padding_right);
-  ASSERT_EQ(node->params.pooling_2d.padding_bottom, padding_bottom);
-  ASSERT_EQ(node->params.pooling_2d.padding_left, padding_left);
-  ASSERT_EQ(node->params.pooling_2d.pooling_height, pooling_height);
-  ASSERT_EQ(node->params.pooling_2d.pooling_width, pooling_width);
-  ASSERT_EQ(node->params.pooling_2d.stride_height, stride_height);
-  ASSERT_EQ(node->params.pooling_2d.stride_width, stride_width);
-  ASSERT_EQ(node->params.pooling_2d.dilation_height, dilation_height);
-  ASSERT_EQ(node->params.pooling_2d.dilation_width, dilation_width);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
-  ASSERT_EQ(node->num_inputs, 1);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
+  return output;
 }
 
-TEST_F(MaxPooling2DTestQU8, define)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+template <typename T>
+void TestImpl() {
+  ReplicableRandomDevice rng;
+  std::bernoulli_distribution bool_dist(0.5);
 
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_quint8, 0, 1.0f, input_dims.size(), input_dims.data(), nullptr,
-                          /*external_id=*/0, /*flags=*/0, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
+  xnn_quantization_params quantization = {0, 1.0f};
 
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_quint8, 0, 1.0f, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/1, /*flags=*/0, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
+  for (auto _ : FuzzTest(std::chrono::milliseconds(1000))) {
+    StencilParams kw = random_stencil_params(rng);
+    StencilParams kh = random_stencil_params(rng);
 
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_max_pooling_2d(
-      subgraph, padding_top, padding_right, padding_bottom, padding_left, pooling_height, pooling_width, stride_height,
-      stride_width, dilation_height, dilation_width, output_min, output_max, input_id, output_id,
-      /*flags=*/0));
+    const bool same_padding = bool_dist(rng);
 
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_max_pooling_2d);
-  ASSERT_EQ(node->params.pooling_2d.padding_top, padding_top);
-  ASSERT_EQ(node->params.pooling_2d.padding_right, padding_right);
-  ASSERT_EQ(node->params.pooling_2d.padding_bottom, padding_bottom);
-  ASSERT_EQ(node->params.pooling_2d.padding_left, padding_left);
-  ASSERT_EQ(node->params.pooling_2d.pooling_height, pooling_height);
-  ASSERT_EQ(node->params.pooling_2d.pooling_width, pooling_width);
-  ASSERT_EQ(node->params.pooling_2d.stride_height, stride_height);
-  ASSERT_EQ(node->params.pooling_2d.stride_width, stride_width);
-  ASSERT_EQ(node->params.pooling_2d.dilation_height, dilation_height);
-  ASSERT_EQ(node->params.pooling_2d.dilation_width, dilation_width);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
-  ASSERT_EQ(node->num_inputs, 1);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-}
+    uint32_t flags = 0;
+    if (same_padding) {
+      flags |= XNN_FLAG_TENSORFLOW_SAME_PADDING;
+      kw.padding_min = kw.padding_max = 0;
+      kh.padding_min = kh.padding_max = 0;
+    }
 
-TEST_F(MaxPooling2DTestF16, define)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+    // Define subgraph
+    SubgraphTester subgraph(2);
+    subgraph.AddInputTensor(4, xnn_datatype_of<T>(), quantization, 0)
+        .AddOutputTensor(4, xnn_datatype_of<T>(), quantization, 1)
+        .AddMaxPooling2D(kh.padding_min, kw.padding_max, kh.padding_max,
+                         kw.padding_min, kh.size, kw.size, kh.stride, kw.stride,
+                         kh.dilation, kw.dilation, 0, 1, flags);
+    xnn_status status = subgraph.CreateRuntime();
+    if (status == xnn_status_unsupported_hardware) {
+      GTEST_SKIP();
+      return;
+    }
 
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+    for (int reshape = 0; reshape < 2; ++reshape) {
+      std::vector<size_t> output_shape = random_shape(rng, 4);
 
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, input_dims.size(), input_dims.data(), nullptr,
-                          /*external_id=*/0, /*flags=*/0, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
+      std::vector<size_t> input_shape = {
+          output_shape[0],
+          kh.input_extent(output_shape[1], same_padding),
+          kw.input_extent(output_shape[2], same_padding),
+          output_shape[3],
+      };
 
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/1, /*flags=*/0, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
+      if (same_padding) {
+        kh.compute_tf_same_padding(input_shape[1]);
+        kw.compute_tf_same_padding(input_shape[2]);
+      }
 
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_max_pooling_2d(
-      subgraph, padding_top, padding_right, padding_bottom, padding_left, pooling_height, pooling_width, stride_height,
-      stride_width, dilation_height, dilation_width, output_min, output_max, input_id, output_id, /*flags=*/0));
+      // TODO(b/404587443): Fix XNNPACK's pooling implementation so this hack is
+      // not necessary.
+      if (kh.result_is_identity(input_shape[1], output_shape[1]) ||
+          kw.result_is_identity(input_shape[2], output_shape[2])) {
+        continue;
+      }
 
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_max_pooling_2d);
-  ASSERT_EQ(node->params.pooling_2d.padding_top, padding_top);
-  ASSERT_EQ(node->params.pooling_2d.padding_right, padding_right);
-  ASSERT_EQ(node->params.pooling_2d.padding_bottom, padding_bottom);
-  ASSERT_EQ(node->params.pooling_2d.padding_left, padding_left);
-  ASSERT_EQ(node->params.pooling_2d.pooling_height, pooling_height);
-  ASSERT_EQ(node->params.pooling_2d.pooling_width, pooling_width);
-  ASSERT_EQ(node->params.pooling_2d.stride_height, stride_height);
-  ASSERT_EQ(node->params.pooling_2d.stride_width, stride_width);
-  ASSERT_EQ(node->params.pooling_2d.dilation_height, dilation_height);
-  ASSERT_EQ(node->params.pooling_2d.dilation_width, dilation_width);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
-  ASSERT_EQ(node->num_inputs, 1);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-}
+      Tensor<T> input(input_shape, XnnExtraBytes);
+      DatatypeGenerator<T> gen(-100.0f, 100.0f, quantization);
+      input.generate([&]() { return gen(rng); });
 
-TEST_F(MaxPooling2DTestF32, define)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+      subgraph.ReshapeExternalTensor(input_shape, input.base(), 0)
+          .ReshapeRuntime();
+      ASSERT_EQ(subgraph.GetExternalTensorShape(1), output_shape)
+          << ", input_shape=" << index_to_string(input_shape) << ", kh=" << kh
+          << ", kw=" << kw;
 
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+      // Run subgraph
+      Tensor<T> output(output_shape);
+      subgraph.SetupExternalTensor(output.base(), 1)
+          .SetupRuntime()
+          .InvokeRuntime();
 
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(), nullptr,
-                          /*external_id=*/0, /*flags=*/0, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/1, /*flags=*/0, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_max_pooling_2d(
-      subgraph, padding_top, padding_right, padding_bottom, padding_left, pooling_height, pooling_width, stride_height,
-      stride_width, dilation_height, dilation_width, output_min, output_max, input_id, output_id, /*flags=*/0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_max_pooling_2d);
-  ASSERT_EQ(node->params.pooling_2d.padding_top, padding_top);
-  ASSERT_EQ(node->params.pooling_2d.padding_right, padding_right);
-  ASSERT_EQ(node->params.pooling_2d.padding_bottom, padding_bottom);
-  ASSERT_EQ(node->params.pooling_2d.padding_left, padding_left);
-  ASSERT_EQ(node->params.pooling_2d.pooling_height, pooling_height);
-  ASSERT_EQ(node->params.pooling_2d.pooling_width, pooling_width);
-  ASSERT_EQ(node->params.pooling_2d.stride_height, stride_height);
-  ASSERT_EQ(node->params.pooling_2d.stride_width, stride_width);
-  ASSERT_EQ(node->params.pooling_2d.dilation_height, dilation_height);
-  ASSERT_EQ(node->params.pooling_2d.dilation_width, dilation_width);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
-  ASSERT_EQ(node->num_inputs, 1);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-}
-
-TEST_F(MaxPooling2DTestQS8, matches_operator_api)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-  std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-  const int8_t input_zero_point = i8dist(rng);
-  const float input_scale = scale_dist(rng);
-  const int8_t output_zero_point = input_zero_point;
-  const float output_scale = input_scale;
-  const int8_t quantized_output_min = xnn_qs8_quantize(output_min, output_scale, output_zero_point);
-  const int8_t quantized_output_max = xnn_qs8_quantize(output_max, output_scale, output_zero_point);
-
-  // Call operator API.
-  xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_max_pooling2d_nhwc_s8(
-    padding_top, padding_right, padding_bottom, padding_left, pooling_height, pooling_width, stride_height,
-    stride_width, dilation_height, dilation_width, quantized_output_min, quantized_output_max, /*flags=*/0, &op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
-
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
-  }
-
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-  ASSERT_EQ(
-    xnn_status_success, xnn_reshape_max_pooling2d_nhwc_s8(
-                          op, batch_size, input_height, input_width, channels, /*input_pixel_stride=*/channels,
-                          /*output_pixel_stride=*/channels, /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-                          /*threadpool=*/nullptr));
-  ASSERT_EQ(xnn_status_success, xnn_setup_max_pooling2d_nhwc_s8(op, input.data(), operator_output.data()));
-
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_qint8, input_zero_point, input_scale, input_dims.size(),
-                          input_dims.data(), nullptr, /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_qint8, output_zero_point, output_scale, output_dims.size(),
-                          output_dims.data(), nullptr, /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_max_pooling_2d(
-      subgraph, padding_top, padding_right, padding_bottom, padding_left, pooling_height, pooling_width, stride_height,
-      stride_width, dilation_height, dilation_width, output_min, output_max, input_id, output_id, /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  for (size_t i = 0; i < batch_size * output_height * output_width * channels; i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]);
+      // Verify results.
+      Tensor<T> expected = ReferenceImpl(input, kh, kw);
+      // This test should be exact, but it needs a tolerance because kernels
+      // that use fp16 arithmetic might flush denormals to 0, but our reference
+      // code might not.
+      ASSERT_THAT(output,
+                  Pointwise(FloatNear(epsilon(xnn_datatype_of<T>())), expected))
+          << "output_shape=" << index_to_string(output_shape)
+          << ", input_shape=" << index_to_string(input_shape) << ", kh=" << kh
+          << ", kw=" << kw;
+    }
   }
 }
 
-TEST_F(MaxPooling2DTestQU8, matches_operator_api)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-  std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-  const uint8_t input_zero_point = u8dist(rng);
-  const float input_scale = scale_dist(rng);
-  const uint8_t output_zero_point = input_zero_point;
-  const float output_scale = input_scale;
-  const uint8_t quantized_output_min = xnn_qu8_quantize(output_min, output_scale, output_zero_point);
-  const uint8_t quantized_output_max = xnn_qu8_quantize(output_max, output_scale, output_zero_point);
+TEST(MaxPooling2DQS8, test) { TestImpl<quantized<int8_t>>(); }
+TEST(MaxPooling2DQU8, test) { TestImpl<quantized<uint8_t>>(); }
+TEST(MaxPooling2DF16, test) { TestImpl<xnn_float16>(); }
+TEST(MaxPooling2DF32, test) { TestImpl<float>(); }
 
-  // Call operator API.
-  xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_max_pooling2d_nhwc_u8(
-    padding_top, padding_right, padding_bottom, padding_left, pooling_height, pooling_width, stride_height,
-    stride_width, dilation_height, dilation_width, quantized_output_min, quantized_output_max, /*flags=*/0, &op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
-
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
-  }
-
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-  ASSERT_EQ(
-    xnn_status_success, xnn_reshape_max_pooling2d_nhwc_u8(
-                          op, batch_size, input_height, input_width, channels, /*input_pixel_stride=*/channels,
-                          /*output_pixel_stride=*/channels, /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-                          /*threadpool=*/nullptr));
-  ASSERT_EQ(xnn_status_success, xnn_setup_max_pooling2d_nhwc_u8(op, input.data(), operator_output.data()));
-
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_quint8, input_zero_point, input_scale, input_dims.size(),
-                          input_dims.data(), nullptr, /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_quint8, output_zero_point, output_scale, output_dims.size(),
-                          output_dims.data(), nullptr, /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_max_pooling_2d(
-      subgraph, padding_top, padding_right, padding_bottom, padding_left, pooling_height, pooling_width, stride_height,
-      stride_width, dilation_height, dilation_width, output_min, output_max, input_id, output_id, /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  for (size_t i = 0; i < batch_size * output_height * output_width * channels; i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]);
-  }
-}
-
-TEST_F(MaxPooling2DTestF16, matches_operator_api)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-
-  // Call operator API.
-  xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_max_pooling2d_nhwc_f16(
-    padding_top, padding_right, padding_bottom, padding_left, pooling_height, pooling_width, stride_height,
-    stride_width, dilation_height, dilation_width, output_min, output_max, /*flags=*/0,
-    &op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
-
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
-  }
-
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-  ASSERT_EQ(
-    xnn_status_success, xnn_reshape_max_pooling2d_nhwc_f16(
-                          op, batch_size, input_height, input_width, channels, channels, channels,
-                          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-                          /*threadpool=*/nullptr));
-  ASSERT_EQ(xnn_status_success, xnn_setup_max_pooling2d_nhwc_f16(op, input.data(), operator_output.data()));
-
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, input_dims.size(), input_dims.data(), nullptr,
-                          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_max_pooling_2d(
-      subgraph, padding_top, padding_right, padding_bottom, padding_left, pooling_height, pooling_width, stride_height,
-      stride_width, dilation_height, dilation_width, output_min, output_max, input_id, output_id, /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  for (size_t i = 0; i < batch_size * output_height * output_width * channels; i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]);
-  }
-}
-
-TEST_F(MaxPooling2DTestF32, matches_operator_api)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-
-  // Call operator API.
-  xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_max_pooling2d_nhwc_f32(
-    padding_top, padding_right, padding_bottom, padding_left, pooling_height, pooling_width, stride_height,
-    stride_width, dilation_height, dilation_width, output_min, output_max, /*flags=*/0, &op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
-
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
-  }
-
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-  ASSERT_EQ(
-    xnn_status_success, xnn_reshape_max_pooling2d_nhwc_f32(
-                          op, batch_size, input_height, input_width, channels, /*input_pixel_stride=*/channels,
-                          /*output_pixel_stride=*/channels, /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-                          /*threadpool=*/nullptr));
-  ASSERT_EQ(xnn_status_success, xnn_setup_max_pooling2d_nhwc_f32(op, input.data(), operator_output.data()));
-
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(), nullptr,
-                          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_max_pooling_2d(
-      subgraph, padding_top, padding_right, padding_bottom, padding_left, pooling_height, pooling_width, stride_height,
-      stride_width, dilation_height, dilation_width, output_min, output_max, input_id, output_id, /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  for (size_t i = 0; i < batch_size * output_height * output_width * channels; i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]);
-  }
-}
-
-TEST_F(MaxPooling2DTestF32, Reshape)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  // Call Subgraph APIs
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  std::vector<size_t> input_dims{2, 3, 4, 5};
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(), nullptr,
-                          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  std::vector<size_t> output_dims{2, 1, 2, 5};
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  const size_t pooling_height = 2;
-  const size_t pooling_width = 2;
-  const size_t stride_height = 2;
-  const size_t stride_width = 2;
-  const size_t dilation_height = 1;
-  const size_t dilation_width = 1;
-  const float output_min = -std::numeric_limits<float>::infinity();
-  const float output_max = std::numeric_limits<float>::infinity();
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_max_pooling_2d(
-        subgraph,/*input_padding_top=*/0, /*input_padding_right=*/0, /*input_padding_bottom=*/0, /*input_padding_left=*/0, pooling_height,
-      pooling_width, stride_height, stride_width, dilation_height, dilation_width, output_min, output_max, input_id, output_id,
-      /*flags=*/0
-    ));
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_max_pooling_2d);
-  ASSERT_EQ(node->num_inputs, 1);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], subgraph->values, subgraph->num_values, /*threadpool=*/nullptr), xnn_status_success);
-
-  input_dims[0] += 1;
-  input_dims[1] += 1;
-  input_dims[2] += 1;
-  input_dims[3] += 1;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, 0, input_dims.size(), input_dims.data()));
-
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
-  const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
-
-  ASSERT_EQ(output_shape->dim[0], input_dims[0]);
-  ASSERT_EQ(output_shape->dim[1], 2);
-  ASSERT_EQ(output_shape->dim[2], 2);
-  ASSERT_EQ(output_shape->dim[3], input_dims[3]);
-}
-
-
-TEST_F(MaxPooling2DTestF32, ReshapeWithPadding)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  // Call Subgraph APIs
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  std::vector<size_t> input_dims{2, 3, 4, 5};
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(), nullptr,
-                          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  std::vector<size_t> output_dims{2, 3, 5, 5};
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  const size_t pooling_height = 2;
-  const size_t pooling_width = 2;
-  const size_t stride_height = 2;
-  const size_t stride_width = 2;
-  const size_t dilation_height = 1;
-  const size_t dilation_width = 1;
-  const float output_min = -std::numeric_limits<float>::infinity();
-  const float output_max = std::numeric_limits<float>::infinity();
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_max_pooling_2d(
-        subgraph,/*input_padding_top=*/3, /*input_padding_right=*/2, /*input_padding_bottom=*/1, /*input_padding_left=*/4, pooling_height,
-      pooling_width, stride_height, stride_width, dilation_height, dilation_width, output_min, output_max, input_id, output_id,
-      /*flags=*/0
-    ));
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_max_pooling_2d);
-  ASSERT_EQ(node->num_inputs, 1);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], subgraph->values, subgraph->num_values, /*threadpool=*/nullptr), xnn_status_success);
-
-  input_dims[0] = 2;
-  input_dims[1] = 2;
-  input_dims[2] = 8;
-  input_dims[3] = 17;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, 0, input_dims.size(), input_dims.data()));
-
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
-  const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
-
-  ASSERT_EQ(output_shape->dim[0], input_dims[0]);
-  ASSERT_EQ(output_shape->dim[1], 3);
-  ASSERT_EQ(output_shape->dim[2], 7);
-  ASSERT_EQ(output_shape->dim[3], input_dims[3]);
-}
-
-TEST_F(MaxPooling2DTestF32, ReshapeWithPaddingAndDilation)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  // Call Subgraph APIs
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  std::vector<size_t> input_dims{2, 3, 4, 5};
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(), nullptr,
-                          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  std::vector<size_t> output_dims{2, 3, 4, 5};
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  const size_t pooling_height = 2;
-  const size_t pooling_width = 2;
-  const size_t stride_height = 2;
-  const size_t stride_width = 2;
-  const size_t dilation_height = 2;
-  const size_t dilation_width = 3;
-  const float output_min = -std::numeric_limits<float>::infinity();
-  const float output_max = std::numeric_limits<float>::infinity();
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_max_pooling_2d(
-        subgraph,/*input_padding_top=*/3, /*input_padding_right=*/2, /*input_padding_bottom=*/1, /*input_padding_left=*/4, pooling_height,
-      pooling_width, stride_height, stride_width, dilation_height, dilation_width, output_min, output_max, input_id, output_id,
-      /*flags=*/0
-    ));
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_max_pooling_2d);
-  ASSERT_EQ(node->num_inputs, 1);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], subgraph->values, subgraph->num_values, /*threadpool=*/nullptr), xnn_status_success);
-
-  input_dims[0] = 2;
-  input_dims[1] = 2;
-  input_dims[2] = 8;
-  input_dims[3] = 17;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, 0, input_dims.size(), input_dims.data()));
-
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
-  const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
-
-  ASSERT_EQ(output_shape->dim[0], input_dims[0]);
-  ASSERT_EQ(output_shape->dim[1], 2);
-  ASSERT_EQ(output_shape->dim[2], 6);
-  ASSERT_EQ(output_shape->dim[3], input_dims[3]);
-}
+}  // namespace xnnpack

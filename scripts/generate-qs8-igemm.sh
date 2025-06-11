@@ -83,35 +83,6 @@ tools/xngen src/qs8-igemm/scalar.c.in -D MR=2 -D NR=4 -D REQUANTIZATION=RNDNU -D
 tools/xngen src/qs8-igemm/scalar.c.in -D MR=3 -D NR=4 -D REQUANTIZATION=RNDNU -D VARIANT=      -D DATATYPE=QU8 -D WASM=0 -o src/qu8-igemm/gen/qu8-igemm-3x4-minmax-rndnu-scalar.c &
 tools/xngen src/qs8-igemm/scalar.c.in -D MR=4 -D NR=4 -D REQUANTIZATION=RNDNU -D VARIANT=      -D DATATYPE=QU8 -D WASM=0 -o src/qu8-igemm/gen/qu8-igemm-4x4-minmax-rndnu-scalar.c &
 
-##################################### WAsm ####################################
-tools/xngen src/qs8-igemm/scalar.c.in -D MR=1 -D NR=2 -D REQUANTIZATION= -D VARIANT= -D DATATYPE=QD8 -D WASM=1 -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-1x2-minmax-wasm.c &
-tools/xngen src/qs8-igemm/scalar.c.in -D MR=1 -D NR=4 -D REQUANTIZATION= -D VARIANT= -D DATATYPE=QD8 -D WASM=1 -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-1x4-minmax-wasm.c &
-tools/xngen src/qs8-igemm/scalar.c.in -D MR=1 -D NR=8 -D REQUANTIZATION= -D VARIANT= -D DATATYPE=QD8 -D WASM=1 -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-1x8-minmax-wasm.c &
-tools/xngen src/qs8-igemm/scalar.c.in -D MR=2 -D NR=2 -D REQUANTIZATION= -D VARIANT= -D DATATYPE=QD8 -D WASM=1 -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-2x2-minmax-wasm.c &
-tools/xngen src/qs8-igemm/scalar.c.in -D MR=2 -D NR=4 -D REQUANTIZATION= -D VARIANT= -D DATATYPE=QD8 -D WASM=1 -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-2x4-minmax-wasm.c &
-tools/xngen src/qs8-igemm/scalar.c.in -D MR=2 -D NR=8 -D REQUANTIZATION= -D VARIANT= -D DATATYPE=QD8 -D WASM=1 -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-2x8-minmax-wasm.c &
-tools/xngen src/qs8-igemm/scalar.c.in -D MR=4 -D NR=4 -D REQUANTIZATION= -D VARIANT= -D DATATYPE=QD8 -D WASM=1 -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-4x4-minmax-wasm.c &
-
-tools/xngen src/qs8-igemm/scalar.c.in -D MR=1 -D NR=2 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D DATATYPE=QC8 -D WASM=1 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x2-minmax-fp32-wasm-fmagic.c &
-tools/xngen src/qs8-igemm/scalar.c.in -D MR=2 -D NR=2 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D DATATYPE=QC8 -D WASM=1 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x2-minmax-fp32-wasm-fmagic.c &
-tools/xngen src/qs8-igemm/scalar.c.in -D MR=3 -D NR=2 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D DATATYPE=QC8 -D WASM=1 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-3x2-minmax-fp32-wasm-fmagic.c &
-tools/xngen src/qs8-igemm/scalar.c.in -D MR=4 -D NR=2 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D DATATYPE=QC8 -D WASM=1 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x2-minmax-fp32-wasm-fmagic.c &
-
-tools/xngen src/qs8-igemm/scalar.c.in -D MR=1 -D NR=2 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D DATATYPE=QU8 -D WASM=1 -o src/qu8-igemm/gen/qu8-igemm-1x2-minmax-fp32-wasm-fmagic.c &
-tools/xngen src/qs8-igemm/scalar.c.in -D MR=2 -D NR=2 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D DATATYPE=QU8 -D WASM=1 -o src/qu8-igemm/gen/qu8-igemm-2x2-minmax-fp32-wasm-fmagic.c &
-tools/xngen src/qs8-igemm/scalar.c.in -D MR=3 -D NR=2 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D DATATYPE=QU8 -D WASM=1 -o src/qu8-igemm/gen/qu8-igemm-3x2-minmax-fp32-wasm-fmagic.c &
-tools/xngen src/qs8-igemm/scalar.c.in -D MR=4 -D NR=2 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D DATATYPE=QU8 -D WASM=1 -o src/qu8-igemm/gen/qu8-igemm-4x2-minmax-fp32-wasm-fmagic.c &
-
-tools/xngen src/qs8-igemm/scalar.c.in -D MR=1 -D NR=4 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D DATATYPE=QC8 -D WASM=1 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x4-minmax-fp32-wasm-fmagic.c &
-tools/xngen src/qs8-igemm/scalar.c.in -D MR=2 -D NR=4 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D DATATYPE=QC8 -D WASM=1 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x4-minmax-fp32-wasm-fmagic.c &
-tools/xngen src/qs8-igemm/scalar.c.in -D MR=3 -D NR=4 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D DATATYPE=QC8 -D WASM=1 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-3x4-minmax-fp32-wasm-fmagic.c &
-tools/xngen src/qs8-igemm/scalar.c.in -D MR=4 -D NR=4 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D DATATYPE=QC8 -D WASM=1 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4-minmax-fp32-wasm-fmagic.c &
-
-tools/xngen src/qs8-igemm/scalar.c.in -D MR=1 -D NR=4 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D DATATYPE=QU8 -D WASM=1 -o src/qu8-igemm/gen/qu8-igemm-1x4-minmax-fp32-wasm-fmagic.c &
-tools/xngen src/qs8-igemm/scalar.c.in -D MR=2 -D NR=4 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D DATATYPE=QU8 -D WASM=1 -o src/qu8-igemm/gen/qu8-igemm-2x4-minmax-fp32-wasm-fmagic.c &
-tools/xngen src/qs8-igemm/scalar.c.in -D MR=3 -D NR=4 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D DATATYPE=QU8 -D WASM=1 -o src/qu8-igemm/gen/qu8-igemm-3x4-minmax-fp32-wasm-fmagic.c &
-tools/xngen src/qs8-igemm/scalar.c.in -D MR=4 -D NR=4 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D DATATYPE=QU8 -D WASM=1 -o src/qu8-igemm/gen/qu8-igemm-4x4-minmax-fp32-wasm-fmagic.c &
-
 ################################## WAsm SIMD ##################################
 ### C2 micro-kernels
 tools/xngen src/qs8-igemm/MRx4c2-wasmsimd-dot16x2.c.in -D MR=1 -D VARIANT=LD64    -D REQUANTIZATION=     -D DATATYPE=QD8 -o src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-1x4c2-minmax-wasmsimd-dot16x2-ld64.c &
@@ -1178,5 +1149,49 @@ tools/xngen src/qs8-igemm/rvv.c.in -D MR=1 -D NR=m4 -D REQUANTIZATION=FP32 -D DA
 tools/xngen src/qs8-igemm/rvv.c.in -D MR=4 -D NR=m4 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-igemm/gen/qu8-igemm-4x4v-minmax-fp32-rvv.c &
 tools/xngen src/qs8-igemm/rvv.c.in -D MR=7 -D NR=m4 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-igemm/gen/qu8-igemm-7x4v-minmax-fp32-rvv.c &
 
+################################## Hexagon HVX #################################
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=1  -D NR=32  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x32c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=2  -D NR=32  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x32c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=3  -D NR=32  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-3x32c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=4  -D NR=32  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x32c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=5  -D NR=32  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-5x32c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=6  -D NR=32  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-6x32c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=7  -D NR=32  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-7x32c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=8  -D NR=32  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-8x32c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=9  -D NR=32  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-9x32c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=10 -D NR=32  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-10x32c4-minmax-fp32-hvx.c &
+
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=1  -D NR=64  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x64c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=2  -D NR=64  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x64c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=3  -D NR=64  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-3x64c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=4  -D NR=64  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x64c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=5  -D NR=64  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-5x64c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=6  -D NR=64  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-6x64c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=7  -D NR=64  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-7x64c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=8  -D NR=64  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-8x64c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=9  -D NR=64  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-9x64c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=10 -D NR=64  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-10x64c4-minmax-fp32-hvx.c &
+
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=1  -D NR=96  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x96c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=2  -D NR=96  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x96c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=3  -D NR=96  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-3x96c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=4  -D NR=96  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x96c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=5  -D NR=96  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-5x96c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=6  -D NR=96  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-6x96c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=7  -D NR=96  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-7x96c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=8  -D NR=96  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-8x96c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=9  -D NR=96  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-9x96c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=10 -D NR=96  -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-10x96c4-minmax-fp32-hvx.c &
+
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=1  -D NR=128 -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x128c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=2  -D NR=128 -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x128c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=3  -D NR=128 -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-3x128c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=4  -D NR=128 -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x128c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=5  -D NR=128 -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-5x128c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=6  -D NR=128 -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-6x128c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=7  -D NR=128 -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-7x128c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=8  -D NR=128 -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-8x128c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=9  -D NR=128 -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-9x128c4-minmax-fp32-hvx.c &
+tools/xngen src/qs8-igemm/c4-hvx.c.in -D MR=10 -D NR=128 -D DATATYPE=QC8 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-10x128c4-minmax-fp32-hvx.c &
 
 wait

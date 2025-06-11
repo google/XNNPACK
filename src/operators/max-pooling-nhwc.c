@@ -76,13 +76,6 @@ static enum xnn_status create_max_pooling2d_nhwc(
     goto error;
   }
 
-  if (pooling_size == 1) {
-    xnn_log_error(
-      "failed to create %s operator with 1 pooling element: 1x1 pooling is meaningless",
-      xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-
   if (stride_height == 0 || stride_width == 0) {
     xnn_log_error(
       "failed to create %s operator with %" PRIu32 "x%" PRIu32 " stride: stride dimensions must be non-zero",
@@ -95,20 +88,6 @@ static enum xnn_status create_max_pooling2d_nhwc(
       "failed to create %s operator with %" PRIu32 "x%" PRIu32 " dilation: dilation dimensions must be non-zero",
       xnn_operator_type_to_string(operator_type), dilation_width, dilation_height);
     goto error;
-  }
-
-  if (stride_height > pooling_height) {
-    xnn_log_error(
-      "failed to create %s operator with %" PRIu32 " stride height: must be less than pooling height %" PRIu32,
-      xnn_operator_type_to_string(operator_type), stride_height, pooling_height);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (stride_width > pooling_width) {
-    xnn_log_error(
-      "failed to create %s operator with %" PRIu32 " stride width: must be less than pooling width %" PRIu32,
-      xnn_operator_type_to_string(operator_type), stride_width, pooling_width);
-    return xnn_status_invalid_parameter;
   }
 
   const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
@@ -132,18 +111,33 @@ static enum xnn_status create_max_pooling2d_nhwc(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
     goto error;
   }
+  max_pooling_op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
+  if (max_pooling_op->compute == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(struct compute_parameters),
+                  xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
+  max_pooling_op->num_compute_invocations = 1;
+  max_pooling_op->convolution_op = xnn_allocate_zero_memory(sizeof(struct xnn_convolution_operator));
+  if (max_pooling_op->convolution_op == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(struct xnn_convolution_operator),
+                  xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
 
-  max_pooling_op->padding_top = input_padding_top;
-  max_pooling_op->padding_right = input_padding_right;
-  max_pooling_op->padding_bottom = input_padding_bottom;
-  max_pooling_op->padding_left = input_padding_left;
+  max_pooling_op->convolution_op->padding_top = input_padding_top;
+  max_pooling_op->convolution_op->padding_right = input_padding_right;
+  max_pooling_op->convolution_op->padding_bottom = input_padding_bottom;
+  max_pooling_op->convolution_op->padding_left = input_padding_left;
 
-  max_pooling_op->kernel_height = pooling_height;
-  max_pooling_op->kernel_width = pooling_width;
-  max_pooling_op->stride_height = stride_height;
-  max_pooling_op->stride_width = stride_width;
-  max_pooling_op->dilation_height = dilation_height;
-  max_pooling_op->dilation_width = dilation_width;
+  max_pooling_op->convolution_op->kernel_height = pooling_height;
+  max_pooling_op->convolution_op->kernel_width = pooling_width;
+  max_pooling_op->convolution_op->stride_height = stride_height;
+  max_pooling_op->convolution_op->stride_width = stride_width;
+  max_pooling_op->convolution_op->dilation_height = dilation_height;
+  max_pooling_op->convolution_op->dilation_width = dilation_width;
 
   memcpy(&max_pooling_op->params, params, params_size);
   max_pooling_op->type = operator_type;
@@ -371,7 +365,7 @@ static enum xnn_status reshape_max_pooling2d_nhwc(
   size_t output_pixel_stride,
   uint32_t log2_input_element_size,
   uint32_t log2_output_element_size,
-  const struct xnn_maxpool_config maxpool[restrict XNN_MIN_ELEMENTS(1)],
+  const struct xnn_maxpool_config* maxpool,
   const void* params,
   size_t params_size,
   size_t* output_height_out,
@@ -435,61 +429,62 @@ static enum xnn_status reshape_max_pooling2d_nhwc(
     return xnn_status_success;
   }
 
-  max_pooling_op->input_height = input_height;
-  max_pooling_op->input_width = input_width;
+  max_pooling_op->convolution_op->input_height = input_height;
+  max_pooling_op->convolution_op->input_width = input_width;
 
   if (max_pooling_op->flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) {
-    max_pooling_op->output_height = compute_output_dimension_with_tf_same_padding(
-        input_height, max_pooling_op->stride_height);
-    max_pooling_op->output_width = compute_output_dimension_with_tf_same_padding(
-        input_width, max_pooling_op->stride_width);
+    max_pooling_op->convolution_op->output_height = compute_output_dimension_with_tf_same_padding(
+        input_height, max_pooling_op->convolution_op->stride_height);
+    max_pooling_op->convolution_op->output_width = compute_output_dimension_with_tf_same_padding(
+        input_width, max_pooling_op->convolution_op->stride_width);
 
-    const uint32_t effective_kernel_height = (max_pooling_op->kernel_height - 1) * max_pooling_op->dilation_height + 1;
-    const uint32_t effective_kernel_width = (max_pooling_op->kernel_width - 1) * max_pooling_op->dilation_width + 1;
+    const uint32_t effective_kernel_height = (max_pooling_op->convolution_op->kernel_height - 1) * max_pooling_op->convolution_op->dilation_height + 1;
+    const uint32_t effective_kernel_width = (max_pooling_op->convolution_op->kernel_width - 1) * max_pooling_op->convolution_op->dilation_width + 1;
     const uint32_t total_padding_height =
-      doz((max_pooling_op->output_height - 1) * max_pooling_op->stride_height + effective_kernel_height, input_height);
+      doz((max_pooling_op->convolution_op->output_height - 1) * max_pooling_op->convolution_op->stride_height + effective_kernel_height, input_height);
     const uint32_t total_padding_width =
-      doz((max_pooling_op->output_width - 1) * max_pooling_op->stride_width + effective_kernel_width, input_width);
-    max_pooling_op->padding_top = total_padding_height / 2;
-    max_pooling_op->padding_left = total_padding_width / 2;
-    max_pooling_op->padding_bottom = total_padding_height - max_pooling_op->padding_top;
-    max_pooling_op->padding_right = total_padding_width - max_pooling_op->padding_left;
+      doz((max_pooling_op->convolution_op->output_width - 1) * max_pooling_op->convolution_op->stride_width + effective_kernel_width, input_width);
+    max_pooling_op->convolution_op->padding_top = total_padding_height / 2;
+    max_pooling_op->convolution_op->padding_left = total_padding_width / 2;
+    max_pooling_op->convolution_op->padding_bottom = total_padding_height - max_pooling_op->convolution_op->padding_top;
+    max_pooling_op->convolution_op->padding_right = total_padding_width - max_pooling_op->convolution_op->padding_left;
   } else {
-    max_pooling_op->output_height = xnn_compute_convolution_output_dimension(
-        max_pooling_op->padding_top + input_height + max_pooling_op->padding_bottom,
-        max_pooling_op->kernel_height,
-        max_pooling_op->dilation_height,
-        max_pooling_op->stride_height);
-    max_pooling_op->output_width = xnn_compute_convolution_output_dimension(
-        max_pooling_op->padding_left + input_width + max_pooling_op->padding_right,
-        max_pooling_op->kernel_width,
-        max_pooling_op->dilation_width,
-        max_pooling_op->stride_width);
+    max_pooling_op->convolution_op->output_height = xnn_compute_convolution_output_dimension(
+        max_pooling_op->convolution_op->padding_top + input_height + max_pooling_op->convolution_op->padding_bottom,
+        max_pooling_op->convolution_op->kernel_height,
+        max_pooling_op->convolution_op->dilation_height,
+        max_pooling_op->convolution_op->stride_height);
+    max_pooling_op->convolution_op->output_width = xnn_compute_convolution_output_dimension(
+        max_pooling_op->convolution_op->padding_left + input_width + max_pooling_op->convolution_op->padding_right,
+        max_pooling_op->convolution_op->kernel_width,
+        max_pooling_op->convolution_op->dilation_width,
+        max_pooling_op->convolution_op->stride_width);
   }
 
   if (output_height_out != NULL) {
-    *output_height_out = max_pooling_op->output_height;
+    *output_height_out = max_pooling_op->convolution_op->output_height;
   }
   if (output_width_out != NULL) {
-    *output_width_out = max_pooling_op->output_width;
+    *output_width_out = max_pooling_op->convolution_op->output_width;
   }
 
-  const size_t pooling_height = max_pooling_op->kernel_height;
-  const size_t pooling_width = max_pooling_op->kernel_width;
+  const size_t pooling_height = max_pooling_op->convolution_op->kernel_height;
+  const size_t pooling_width = max_pooling_op->convolution_op->kernel_width;
   const size_t pooling_size = pooling_height * pooling_width;
-  const size_t output_height = max_pooling_op->output_height;
-  const size_t output_width = max_pooling_op->output_width;
+  const size_t output_height = max_pooling_op->convolution_op->output_height;
+  const size_t output_width = max_pooling_op->convolution_op->output_width;
 
   const size_t step_width =
-    max_pooling_op->dilation_width > 1 ? pooling_width : min(max_pooling_op->stride_width, pooling_width);
+    max_pooling_op->convolution_op->dilation_width > 1 ? pooling_width : min(max_pooling_op->convolution_op->stride_width, pooling_width);
   const size_t step_height = pooling_size + (output_width - 1) * step_width * pooling_height;
 
-  if (input_height != max_pooling_op->last_input_height ||
-      input_width != max_pooling_op->last_input_width)
+  if (input_height != max_pooling_op->convolution_op->last_input_height ||
+      input_width != max_pooling_op->convolution_op->last_input_width ||
+      channels != max_pooling_op->convolution_op->last_input_channels)
   {
     const size_t indirection_buffer_size = sizeof(void*) * ((pooling_size - 1) + output_height * step_height);
     const void** indirection_buffer =
-      (const void**) xnn_reallocate_memory(max_pooling_op->indirection_buffer, indirection_buffer_size);
+      (const void**) xnn_reallocate_memory(max_pooling_op->convolution_op->indirection_buffer, indirection_buffer_size);
     if (indirection_buffer == NULL) {
       xnn_log_error(
           "failed to allocate %zu bytes for %s operator indirection buffer",
@@ -497,28 +492,29 @@ static enum xnn_status reshape_max_pooling2d_nhwc(
           xnn_operator_type_to_string_v2(max_pooling_op));
       return xnn_status_out_of_memory;
     }
-    max_pooling_op->indirection_buffer = indirection_buffer;
+    max_pooling_op->convolution_op->indirection_buffer = indirection_buffer;
     xnn_log_debug("allocated %zu bytes for indirection buffer in %s operator",
                   indirection_buffer_size,
                   xnn_operator_type_to_string_v2(max_pooling_op));
 
     // Set a dummy input first, the actual input offset is calculated in setup when we have the input pointer.
-    max_pooling_op->input = NULL;
+    max_pooling_op->convolution_op->input = NULL;
 
     xnn_indirection_init_maxpool2d(
-      max_pooling_op->indirection_buffer, max_pooling_op->input,
+      max_pooling_op->convolution_op->indirection_buffer, max_pooling_op->convolution_op->input,
       max_pooling_op->input_pixel_stride << log2_input_element_size,
-      max_pooling_op->input_height, max_pooling_op->input_width,
-      max_pooling_op->output_height, max_pooling_op->output_width,
-      max_pooling_op->kernel_height, max_pooling_op->kernel_width,
-      max_pooling_op->stride_height, max_pooling_op->stride_width,
-      max_pooling_op->dilation_height, max_pooling_op->dilation_width,
-      max_pooling_op->padding_top, max_pooling_op->padding_left,
+      max_pooling_op->convolution_op->input_height, max_pooling_op->convolution_op->input_width,
+      max_pooling_op->convolution_op->output_height, max_pooling_op->convolution_op->output_width,
+      max_pooling_op->convolution_op->kernel_height, max_pooling_op->convolution_op->kernel_width,
+      max_pooling_op->convolution_op->stride_height, max_pooling_op->convolution_op->stride_width,
+      max_pooling_op->convolution_op->dilation_height, max_pooling_op->convolution_op->dilation_width,
+      max_pooling_op->convolution_op->padding_top, max_pooling_op->convolution_op->padding_left,
       step_height, step_width);
 
-    max_pooling_op->last_input = max_pooling_op->input;
-    max_pooling_op->last_input_height = input_height;
-    max_pooling_op->last_input_width = input_width;
+    max_pooling_op->convolution_op->last_input = max_pooling_op->convolution_op->input;
+    max_pooling_op->convolution_op->last_input_channels = channels;
+    max_pooling_op->convolution_op->last_input_height = input_height;
+    max_pooling_op->convolution_op->last_input_width = input_width;
   }
 
   const size_t indirect_input_height_stride = step_height * sizeof(void*);
@@ -526,7 +522,7 @@ static enum xnn_status reshape_max_pooling2d_nhwc(
   const size_t output_height_stride = output_width * output_width_stride;
 
   max_pooling_op->context.max_pooling = (struct max_pooling_context) {
-    .indirect_input = max_pooling_op->indirection_buffer,
+    .indirect_input = max_pooling_op->convolution_op->indirection_buffer,
     .indirect_input_height_stride = indirect_input_height_stride,
     .input_batch_stride = (input_height * input_width * max_pooling_op->input_pixel_stride) << log2_input_element_size,
     .output_batch_stride = output_height * output_height_stride,
@@ -675,7 +671,7 @@ static enum xnn_status setup_max_pooling2d_nhwc(
       break;
   }
 
-  max_pooling_op->context.max_pooling.input_offset = (size_t) ((uintptr_t) input - (uintptr_t) max_pooling_op->last_input);
+  max_pooling_op->context.max_pooling.input_offset = (size_t) ((uintptr_t) input - (uintptr_t) max_pooling_op->convolution_op->last_input);
   max_pooling_op->context.max_pooling.output = output;
 
   max_pooling_op->state = xnn_run_state_ready;

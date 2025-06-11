@@ -91,13 +91,14 @@ class VUnaryMicrokernelTester {
     auto domain = test_info.Domain(xnn_datatype_of<In>());
     xnnpack::ReplicableRandomDevice rng;
 
-    xnnpack::Buffer<In> x(batch_size() + XNN_EXTRA_BYTES / sizeof(In));
+    xnnpack::Buffer<In> x(batch_size(), xnnpack::XnnExtraBytes);
     xnnpack::Buffer<Out> y(batch_size());
     xnnpack::Buffer<Out> y_ref(batch_size());
+    xnnpack::DatatypeGenerator<In> input_generator(domain.min, domain.max,
+                                                   input_quantization_);
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      // This should only fill batch_size() elements, but some kernels trigger
-      // msan errors if we don't initialize the XNN_EXTRA_BYTES.
-      FillRandom(rng, x.data(), x.size(), domain, input_quantization_);
+      std::generate_n(x.data(), x.size(),
+                      [&]() { return input_generator(rng); });
 
       // Compute reference results.
       UnaryReferenceImpl(x.data(), batch_size(), y_ref.data(), test_info,
@@ -116,10 +117,16 @@ class VUnaryMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_NEAR(y[i], y_ref[i],
-                    test_info.Tolerance(y_ref[i], xnn_datatype_of<Out>()))
-            << "at " << i << " / " << batch_size() << ", x[" << i
-            << "] = " << std::scientific << (float)x[i];
+        if (test_info.IsInSupportedRange(y_ref[i])) {
+          if (std::isnan(static_cast<float>(y_ref[i]))) {
+            ASSERT_TRUE(std::isnan(static_cast<float>(y[i])));
+          } else {
+            ASSERT_NEAR(y[i], y_ref[i],
+                        test_info.Tolerance(y_ref[i], xnn_datatype_of<Out>()))
+                << "at " << i << " / " << batch_size() << ", x[" << i
+                << "] = " << std::scientific << (float)x[i];
+          }
+        }
       }
     }
   }
@@ -141,13 +148,14 @@ class VUnaryMicrokernelTester {
     auto domain = test_info.Domain(xnn_datatype_of<In>());
     xnnpack::ReplicableRandomDevice rng;
 
-    xnnpack::Buffer<In> x(batch_size() + XNN_EXTRA_BYTES / sizeof(In));
+    xnnpack::Buffer<In> x(batch_size(), xnnpack::XnnExtraBytes);
     Out* y = reinterpret_cast<Out*>(x.data());
     xnnpack::Buffer<Out> y_ref(batch_size());
+    xnnpack::DatatypeGenerator<In> input_generator(domain.min, domain.max,
+                                                   input_quantization_);
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      // This should only fill batch_size() elements, but some kernels trigger
-      // msan errors if we don't initialize the XNN_EXTRA_BYTES.
-      FillRandom(rng, x.data(), x.size(), domain, input_quantization_);
+      std::generate_n(x.data(), x.size(),
+                      [&]() { return input_generator(rng); });
 
       // Make a copy of the original input data for debugging output.
       xnnpack::Buffer<In> x_orig(x.size());
@@ -170,10 +178,16 @@ class VUnaryMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_NEAR(x[i], y_ref[i],
-                    test_info.Tolerance(y_ref[i], xnn_datatype_of<Out>()))
-            << "at " << i << " / " << batch_size() << ", x[" << i
-            << "] = " << std::scientific << (float)x_orig[i];
+        if (test_info.IsInSupportedRange(y_ref[i])) {
+          if (std::isnan(static_cast<float>(y_ref[i]))) {
+            ASSERT_TRUE(std::isnan(static_cast<float>(x[i])));
+          } else {
+            ASSERT_NEAR(x[i], y_ref[i],
+                        test_info.Tolerance(y_ref[i], xnn_datatype_of<Out>()))
+                << "at " << i << " / " << batch_size() << ", x[" << i
+                << "] = " << std::scientific << (float)x_orig[i];
+          }
+        }
       }
     }
   }

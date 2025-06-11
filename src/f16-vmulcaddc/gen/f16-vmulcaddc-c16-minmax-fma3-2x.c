@@ -25,7 +25,7 @@ void xnn_f16_vmulcaddc_minmax_ukernel_c16__fma3_2x(
     const xnn_float16* restrict weights,
     xnn_float16* restrict output,
     size_t output_stride,
-    const struct xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f16_minmax_params* restrict params) XNN_OOB_READS
 {
   assert(rows != 0);
   assert(channels != 0);

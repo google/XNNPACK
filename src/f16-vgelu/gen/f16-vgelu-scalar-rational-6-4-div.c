@@ -23,7 +23,7 @@ void xnn_f16_vgelu_ukernel__scalar_rational_6_4_div_u1(
     size_t batch,
     const xnn_float16* input,
     xnn_float16* output,
-    const struct xnn_f16_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f16_default_params* unused_params)
 {
   assert(batch != 0);
   assert(batch % sizeof(xnn_float16) == 0);
@@ -90,7 +90,7 @@ void xnn_f16_vgelu_ukernel__scalar_rational_6_4_div_u2(
     size_t batch,
     const xnn_float16* input,
     xnn_float16* output,
-    const struct xnn_f16_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f16_default_params* unused_params)
 {
   assert(batch != 0);
   assert(batch % sizeof(xnn_float16) == 0);
@@ -121,7 +121,7 @@ void xnn_f16_vgelu_ukernel__scalar_rational_6_4_div_u2(
   XNN_SIMD_CONST_F16_FROM_FLOAT(vhalf, 0.5f);
 
   for (; batch >= 2 * sizeof(xnn_float16); batch -= 2 * sizeof(xnn_float16)) {
-    const xnn_simd_f16_t vx_orig_0 = xnn_loadu_f16(input);
+    const xnn_simd_f16_t vx_orig_0 = xnn_loadu_f16(input + 0 * xnn_simd_size_f16);
     const xnn_simd_f16_t vx_orig_1 = xnn_loadu_f16(input + 1 * xnn_simd_size_f16);
     input += 2;
 
@@ -160,7 +160,7 @@ void xnn_f16_vgelu_ukernel__scalar_rational_6_4_div_u2(
     const xnn_simd_f16_t vy_1 = xnn_mul_f16(xnn_mul_f16(vx_orig_1, vhalf),
                                         xnn_add_f16(verf_1, vone));
 
-    xnn_storeu_f16(output, vy_0);
+    xnn_storeu_f16(output + 0 * xnn_simd_size_f16, vy_0);
     xnn_storeu_f16(output + 1 * xnn_simd_size_f16, vy_1);
     output += 2;
   }
@@ -201,7 +201,7 @@ void xnn_f16_vgelu_ukernel__scalar_rational_6_4_div_u4(
     size_t batch,
     const xnn_float16* input,
     xnn_float16* output,
-    const struct xnn_f16_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f16_default_params* unused_params)
 {
   assert(batch != 0);
   assert(batch % sizeof(xnn_float16) == 0);
@@ -232,7 +232,7 @@ void xnn_f16_vgelu_ukernel__scalar_rational_6_4_div_u4(
   XNN_SIMD_CONST_F16_FROM_FLOAT(vhalf, 0.5f);
 
   for (; batch >= 4 * sizeof(xnn_float16); batch -= 4 * sizeof(xnn_float16)) {
-    const xnn_simd_f16_t vx_orig_0 = xnn_loadu_f16(input);
+    const xnn_simd_f16_t vx_orig_0 = xnn_loadu_f16(input + 0 * xnn_simd_size_f16);
     const xnn_simd_f16_t vx_orig_1 = xnn_loadu_f16(input + 1 * xnn_simd_size_f16);
     const xnn_simd_f16_t vx_orig_2 = xnn_loadu_f16(input + 2 * xnn_simd_size_f16);
     const xnn_simd_f16_t vx_orig_3 = xnn_loadu_f16(input + 3 * xnn_simd_size_f16);
@@ -295,7 +295,7 @@ void xnn_f16_vgelu_ukernel__scalar_rational_6_4_div_u4(
     const xnn_simd_f16_t vy_3 = xnn_mul_f16(xnn_mul_f16(vx_orig_3, vhalf),
                                         xnn_add_f16(verf_3, vone));
 
-    xnn_storeu_f16(output, vy_0);
+    xnn_storeu_f16(output + 0 * xnn_simd_size_f16, vy_0);
     xnn_storeu_f16(output + 1 * xnn_simd_size_f16, vy_1);
     xnn_storeu_f16(output + 2 * xnn_simd_size_f16, vy_2);
     xnn_storeu_f16(output + 3 * xnn_simd_size_f16, vy_3);
@@ -338,7 +338,7 @@ void xnn_f16_vgelu_ukernel__scalar_rational_6_4_div_u8(
     size_t batch,
     const xnn_float16* input,
     xnn_float16* output,
-    const struct xnn_f16_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f16_default_params* unused_params)
 {
   assert(batch != 0);
   assert(batch % sizeof(xnn_float16) == 0);
@@ -369,7 +369,7 @@ void xnn_f16_vgelu_ukernel__scalar_rational_6_4_div_u8(
   XNN_SIMD_CONST_F16_FROM_FLOAT(vhalf, 0.5f);
 
   for (; batch >= 8 * sizeof(xnn_float16); batch -= 8 * sizeof(xnn_float16)) {
-    const xnn_simd_f16_t vx_orig_0 = xnn_loadu_f16(input);
+    const xnn_simd_f16_t vx_orig_0 = xnn_loadu_f16(input + 0 * xnn_simd_size_f16);
     const xnn_simd_f16_t vx_orig_1 = xnn_loadu_f16(input + 1 * xnn_simd_size_f16);
     const xnn_simd_f16_t vx_orig_2 = xnn_loadu_f16(input + 2 * xnn_simd_size_f16);
     const xnn_simd_f16_t vx_orig_3 = xnn_loadu_f16(input + 3 * xnn_simd_size_f16);
@@ -480,7 +480,7 @@ void xnn_f16_vgelu_ukernel__scalar_rational_6_4_div_u8(
     const xnn_simd_f16_t vy_7 = xnn_mul_f16(xnn_mul_f16(vx_orig_7, vhalf),
                                         xnn_add_f16(verf_7, vone));
 
-    xnn_storeu_f16(output, vy_0);
+    xnn_storeu_f16(output + 0 * xnn_simd_size_f16, vy_0);
     xnn_storeu_f16(output + 1 * xnn_simd_size_f16, vy_1);
     xnn_storeu_f16(output + 2 * xnn_simd_size_f16, vy_2);
     xnn_storeu_f16(output + 3 * xnn_simd_size_f16, vy_3);

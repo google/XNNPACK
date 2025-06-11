@@ -21,7 +21,7 @@ void xnn_x64_transposec_ukernel__1x2_scalar_float(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height) XNN_OOB_READS
+    size_t block_height)
 {
   assert(block_width == 1 || output_stride >= block_height * sizeof(double));
   assert(block_height == 1 || input_stride >= block_width * sizeof(double));

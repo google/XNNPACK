@@ -44,8 +44,8 @@ class X64(base_architecture.BaseArchitecture):
         'rax',
         'r15',
         'r14',
-        'r12',
         'r10',
+        'r12',
         'r13',
         'rbx',
         'rbp',
@@ -61,32 +61,6 @@ class X64(base_architecture.BaseArchitecture):
 
   def cm_registers(self):
     return self.am_registers()
-
-  def acc_registers(self):
-    return [
-        'mm11',
-        'mm12',
-        'mm13',
-        'mm14',
-        'mm15',
-        'mm16',
-        'mm17',
-        'mm18',
-        'mm19',
-        'mm20',
-        'mm21',
-        'mm22',
-        'mm23',
-        'mm24',
-        'mm25',
-        'mm26',
-        'mm27',
-        'mm28',
-        'mm29',
-        'mm30',
-        'mm9',
-        'mm10',
-    ]
 
   def bias_registers(self):
     return self.acc_registers()
@@ -166,10 +140,10 @@ class X64(base_architecture.BaseArchitecture):
     return 96
 
   def pre_header(self):
-    return ''
+    return
 
   def copyright(self):
-    return """// Copyright 2025 Google LLC
+    self.asm_string += """// Copyright 2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -178,9 +152,9 @@ class X64(base_architecture.BaseArchitecture):
 """
 
   def header(self):
-    header = self.copyright()
-    header += self.pre_header()
-    header += """
+    self.copyright()
+    self.pre_header()
+    self.asm_string += """
 BEGIN_FUNCTION {function_name}
 
       .intel_syntax noprefix
@@ -209,7 +183,6 @@ BEGIN_FUNCTION {function_name}
         prefix=self.prefix(),
         params_offset=self.params_offset(),
     )
-    return header
 
   # Quantization parameters are pushed to the stack at this offset.
   def quantization_params_offset(self):
@@ -237,33 +210,42 @@ BEGIN_FUNCTION {function_name}
     push_string = """
       mov [rsp + {a_rsp_offset}], {aM}
       mov [rsp + {c_rsp_offset}], {cM}\n"""
-    ret = ''
     if self.quantization_params_offset() != 0:
-      ret += '\n# Move stack parameters which have not yet been loaded\n'
-      ret += 'mov r12, [rsp + {stack_params_offset}]\n'.format(
+      self.asm_string += (
+          '\n# Move stack parameters which have not yet been loaded\n'
+      )
+      self.asm_string += 'mov r12, [rsp + {stack_params_offset}]\n'.format(
           stack_params_offset=self.params_offset() + 8
       )
-    ret += '\n# Align the stack pointer.\n'
-    ret += 'mov r13, rsp\n'
-    ret += 'sub rsp, 64\n'
-    ret += 'and rsp, 0xFFFFFFFFFFFFFFC0\n'
-    ret += '# Store the old stack pointer containing the return address\n'
-    ret += 'mov [rsp], r13\n'
+    self.asm_string += '\n# Align the stack pointer.\n'
+    self.asm_string += 'mov r13, rsp\n'
+    self.asm_string += 'sub rsp, 64\n'
+    self.asm_string += 'and rsp, 0xFFFFFFFFFFFFFFC0\n'
+    self.asm_string += (
+        '# Store the old stack pointer containing the return address\n'
+    )
+    self.asm_string += 'mov [rsp], r13\n'
     if self.quantization_params_offset() != 0:
-      ret += '# Push additional stack parameters to the new stack\n'
+      self.asm_string += '# Push additional stack parameters to the new stack\n'
       offset = self.quantization_params_offset()
-      ret += f'mov [rsp + {offset}], r12\n'
+      self.asm_string += f'mov [rsp + {offset}], r12\n'
     if self.stack_size() != 0:
-      ret += '\n# Allocate some space on the stack.\n'
-      ret += """sub rsp, {stack_size}\n""".format(stack_size=self.stack_size())
+      self.asm_string += '\n# Allocate some space on the stack.\n'
+      self.asm_string += """sub rsp, {stack_size}\n""".format(
+          stack_size=self.stack_size()
+      )
     # Write rsi & r10 if required to the stack.
     if self.m > self.max_m_before_spilling():
       offset = self.a_ptr_stack_offset()
-      ret += '# Write rsi (a pointer) to the stack as we need the register.\n'
-      ret += f'mov [rsp + {offset}], rcx\n'
+      self.asm_string += (
+          '# Write rsi (a pointer) to the stack as we need the register.\n'
+      )
+      self.asm_string += f'mov [rsp + {offset}], rcx\n'
       offset = self.c_ptr_stack_offset()
-      ret += '# Write r10 (c pointer) to the stack as we need the register.\n'
-      ret += f'mov [rsp + {offset}], r10\n'
+      self.asm_string += (
+          '# Write r10 (c pointer) to the stack as we need the register.\n'
+      )
+      self.asm_string += f'mov [rsp + {offset}], r10\n'
     for mr in range(1, self.m):
       # cycle size of 2 if required
       if self.m > self.max_m_before_spilling():
@@ -277,7 +259,7 @@ BEGIN_FUNCTION {function_name}
         a_pos_1 = a_pos - 1
         c_pos_1 = c_pos - 1
       a_rsp_offset = 32 + (mr - 1) * 16
-      ret += setup_string.format(
+      self.asm_string += setup_string.format(
           M=mr,
           aM=registers[a_pos],
           aM_1=registers[a_pos_1],
@@ -290,7 +272,7 @@ BEGIN_FUNCTION {function_name}
           c_rsp_offset=a_rsp_offset + 8,
       )
       if self.m > self.max_m_before_spilling():
-        ret += push_string.format(
+        self.asm_string += push_string.format(
             M=mr,
             aM=registers[a_pos],
             aM_1=registers[a_pos_1],
@@ -303,28 +285,24 @@ BEGIN_FUNCTION {function_name}
             c_rsp_offset=a_rsp_offset + 8,
         )
 
-    return ret
-
-  def max_m_before_spilling(self):
-    return 5
-
   def read_a_registers(self):
     registers = self.am_registers()
     if self.m <= self.max_m_before_spilling():
-      return ''
-    ret = '# Read a pointers from stack into GP registers.\n'
+      return
+    self.asm_string += '# Read a pointers from stack into GP registers.\n'
     pop_a = 'mov {aM}, [rsp + {a_rsp_offset}]\n'
     for mr in range(0, self.m):
       a_rsp_offset = mr * 16 + self.a_ptr_stack_offset()
-      ret += pop_a.format(aM=registers[mr], a_rsp_offset=a_rsp_offset)
-    ret += '\n'
-    return ret
+      self.asm_string += pop_a.format(
+          aM=registers[mr], a_rsp_offset=a_rsp_offset
+      )
+    self.asm_string += '\n'
 
   def increment_ptr(self, ptr, step):
-    return f'add {ptr}, {step}\n'
+    self.asm_string += f'add {ptr}, {step}\n'
 
   def initialize_k_register(self):
-    return f'mov {self.k_register()}, 0\n'
+    self.asm_string += f'mov {self.k_register()}, 0\n'
 
   def inner_loop_increment(self):
     return self._c * self.element_size()
@@ -333,7 +311,7 @@ BEGIN_FUNCTION {function_name}
     kc_register = self.kc_register()
     k_register = self.k_register()
     increment_bytes = self.inner_loop_increment()
-    return f"""
+    self.asm_string += f"""
       add {k_register}, {increment_bytes}
       cmp {kc_register}, {k_register}
       jne {label}\n"""
@@ -381,14 +359,14 @@ END_FUNCTION {function_name}.dfsan
 .section .note.GNU-stack, "", @progbits
 #endif  // __ELF__
 """.format(function_name=self.function_name(), sizeof_c=4)
-    return restore_stack
+    self.asm_string += restore_stack
 
   def stack_size(self):
     """Returns the required stack storage space."""
     return 0
 
   def inner_loop_tail(self):
-    return ''
+    return
 
   @abc.abstractmethod
   def inner_loop_spill_gp(self, tail=False):
@@ -399,13 +377,119 @@ END_FUNCTION {function_name}.dfsan
     raise NotImplementedError
 
   def inner_loop(self):
-    asm_string = '\n.Linner_loop:\n'
+    self.label('inner_loop')
     if self.m > self.max_m_before_spilling():
-      asm_string += self.inner_loop_spill_gp()
+      self.inner_loop_spill_gp()
     else:
-      asm_string += self.inner_loop_small_M_N()
+      self.inner_loop_small_M_N()
     # loop counter
-    asm_string += self.cmp_k_and_jump_if_less(label='.Linner_loop')
-    asm_string += self.inner_loop_tail()
+    self.cmp_k_and_jump_if_less(label='.Linner_loop')
+    self.inner_loop_tail()
 
-    return asm_string
+  def _inner_loop_small_M_N(self, n: int, tail: bool = False) -> str:
+    # input
+    if 'before' in self.input_asm():
+      self.asm_string += self.input_asm()['before']
+    if 'after' in self.input_asm():
+      self.asm_string += self.input_asm()['after']
+
+    # weights
+    if 'before' in self.weights_asm():
+      self.asm_string += self.weights_asm()['before']
+    if 'loop_2' in self.weights_asm():
+      for l in self.weights_asm()['loop_2']:
+        for nr in range(0, n, 2):
+          self.asm_string += l.format(
+              W_ptr=self.w_ptr_register(),
+              W=self.w_registers()[nr],
+              W_1=self.w_registers()[nr + 1],
+              offset=self.register_bytes() * nr // 2,
+              w_step=self.register_bytes() * self.n,
+              mask=self.mask_register(),
+          )
+    for l in self.weights_asm()['loop']:
+      for nr in range(0, n):
+        self.asm_string += l.format(
+            W_ptr=self.w_ptr_register(),
+            W=self.w_registers()[nr],
+            offset=self.register_bytes() * nr,
+            w_step=self.register_bytes() * n,
+            mask=self.mask_register(),
+        )
+    if 'after' in self.weights_asm():
+      for l in self.weights_asm()['after']:
+        self.asm_string += l.format(
+            W=self.w_ptr_register(), w_step=self.w_register_bytes() * n
+        )
+
+    loop = 'loop_tail' if tail else 'loop'
+    for mr in range(0, self.m):
+      for l in self.input_asm()['loop']:
+        self.asm_string += l.format(
+            AM_ptr=self.am_registers()[mr],
+            AM=self.a_registers(mr),
+            a_offset=self.k_register(),
+            A=self.a_registers(mr),
+        )
+      for m in self.compute_asm()[loop]:
+        for nr in range(0, n):
+          self.asm_string += m.format(
+              W=self.w_registers()[nr],
+              A=self.a_registers(mr),
+              ACC=self.acc_registers()[self.m * nr + mr],
+              mask=self.mask(),
+          )
+
+  def _inner_loop_spill_gp(self, n: int, tail: bool = False) -> str:
+    # weights
+    if 'before' in self.weights_asm():
+      self.asm_string += self.weights_asm()['before']
+    if 'loop_2' in self.weights_asm():
+      for l in self.weights_asm()['loop_2']:
+        for nr in range(0, n, 2):
+          self.asm_string += l.format(
+              W_ptr=self.w_ptr_register(),
+              W=self.w_registers()[nr],
+              W_1=self.w_registers()[nr + 1],
+              offset=self.register_bytes() * nr // 2,
+              w_step=self.register_bytes() * self.n,
+              mask=self.mask_register(),
+          )
+    for l in self.weights_asm()['loop']:
+      for nr in range(0, n):
+        self.asm_string += l.format(
+            W_ptr=self.w_ptr_register(),
+            W=self.w_registers()[nr],
+            offset=self.register_bytes() * nr,
+            w_step=self.register_bytes() * n,
+            mask=self.mask_register(),
+        )
+
+    # input
+    if 'before' in self.input_asm():
+      self.asm_string += self.input_asm()['before']
+    if 'after' in self.input_asm():
+      self.asm_string += self.input_asm()['after']
+    if 'after' in self.weights_asm():
+      for l in self.weights_asm()['after']:
+        self.asm_string += l.format(
+            W=self.w_ptr_register(), w_step=self.w_register_bytes() * n
+        )
+
+    for mr in range(0, self.m):
+      for l in self.input_asm()['loop']:
+        self.asm_string += l.format(
+            AM_ptr=self.am_registers()[mr],
+            AM=self.a_registers(0),
+            a_offset=self.k_register(),
+            A=self.a_registers(0),
+        )
+        loop = 'loop_tail' if tail else 'loop'
+        for m in self.compute_asm()[loop]:
+          for nr in range(0, n):
+            self.asm_string += m.format(
+                W=self.w_registers()[nr],
+                A=self.a_registers(0),
+                ACC=self.acc_registers()[self.m * nr + mr],
+                mask=self.mask(),
+            )

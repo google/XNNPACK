@@ -14,16 +14,12 @@
 extern "C" {
 #endif
 
-#define XNN_UKERNEL(arch_flags, fn_name, element_tile, datatype) \
-  XNN_INTERNAL void fn_name(                               \
-      size_t n,                                            \
-      const float* input,                                  \
-      float* output,                                       \
-      float scale,                                         \
-      float max);
-#include "src/f32-vscaleexpminusmax/f32-vscaleexpminusmax.h"
+#define XNN_UKERNEL(arch_flags, fn_name, element_tile, datatype, params_type, \
+                    init_params)                                              \
+  XNN_INTERNAL void fn_name(size_t n, const float* input, float* output,      \
+                            float scale, float max);
+#include "src/f32-vscaleexpminusmax/f32-vscaleexpminusmax.inc"
 #undef XNN_UKERNEL
-
 
 #ifdef __cplusplus
 } /* extern "C" */

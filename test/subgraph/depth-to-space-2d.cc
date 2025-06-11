@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <cassert>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <vector>
@@ -42,38 +43,40 @@ void TestImpl(size_t block_size) {
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
-  xnn_quantization_params quantization =
-      random_quantization(xnn_datatype_of<T>(), rng);
+  for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
+    xnn_quantization_params quantization =
+        random_quantization(xnn_datatype_of<T>(), rng);
 
-  // Define subgraph
-  SubgraphTester subgraph(2);
-  subgraph.AddInputTensor(4, xnn_datatype_of<T>(), quantization, 0)
-      .AddOutputTensor(4, xnn_datatype_of<T>(), quantization, 1)
-      .AddDepthToSpace2D(block_size, 0, 1)
-      .CreateRuntime();
+    // Define subgraph
+    SubgraphTester subgraph(2);
+    subgraph.AddInputTensor(4, xnn_datatype_of<T>(), quantization, 0)
+        .AddOutputTensor(4, xnn_datatype_of<T>(), quantization, 1)
+        .AddDepthToSpace2D(block_size, 0, 1)
+        .CreateRuntime();
 
-  for (int reshape = 0; reshape < 2; ++reshape) {
-    std::vector<size_t> shape = random_shape(rng, 4, 1, 3);
-    shape[3] *= block_size * block_size;
+    for (int reshape = 0; reshape < 2; ++reshape) {
+      std::vector<size_t> shape = random_shape(rng, 4, 1, 3);
+      shape[3] *= block_size * block_size;
 
-    Tensor<T> input(shape, PaddingBytes{XNN_EXTRA_BYTES});
-    DatatypeGenerator<T> generator(quantization);
-    input.generate([&]() { return generator(rng); });
+      Tensor<T> input(shape, XnnExtraBytes);
+      DatatypeGenerator<T> generator(quantization);
+      input.generate([&]() { return generator(rng); });
 
-    Tensor<T> expected = depth_to_space(input, block_size);
+      Tensor<T> expected = depth_to_space(input, block_size);
 
-    // Check reshaped shape is correct
-    subgraph.ReshapeExternalTensor(shape, input.base(), 0).ReshapeRuntime();
-    ASSERT_EQ(subgraph.GetExternalTensorShape(1), expected.extents());
+      // Check reshaped shape is correct
+      subgraph.ReshapeExternalTensor(shape, input.base(), 0).ReshapeRuntime();
+      ASSERT_EQ(subgraph.GetExternalTensorShape(1), expected.extents());
 
-    // Run subgraph
-    Tensor<T> output(expected.extents());
-    subgraph.SetupExternalTensor(output.base(), 1)
-        .SetupRuntime()
-        .InvokeRuntime();
+      // Run subgraph
+      Tensor<T> output(expected.extents());
+      subgraph.SetupExternalTensor(output.base(), 1)
+          .SetupRuntime()
+          .InvokeRuntime();
 
-    // Verify results.
-    ASSERT_THAT(output, testing::ElementsAreArray(expected));
+      // Verify results.
+      ASSERT_THAT(output, testing::ElementsAreArray(expected));
+    }
   }
 }
 

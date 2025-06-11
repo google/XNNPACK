@@ -38,7 +38,7 @@ static void init_f16_maxpool_config(void) {
       f16_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_f16_maxpool_minmax_ukernel_9p__neonfp16arith_u8;
       f16_maxpool_config.init.f16 = xnn_init_f16_minmax_scalar_params;
     }
-  #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
+  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_avx2) {
@@ -58,7 +58,7 @@ static void init_f32_maxpool_config(void) {
     if (hardware_config->use_arm_neon) {
       f32_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p__neon_u4;
       f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
-    } else if (!XNN_PLATFORM_MOBILE) {
+    } else {
       f32_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p__scalar_u1;
       f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     }
@@ -70,9 +70,6 @@ static void init_f32_maxpool_config(void) {
     f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p__wasmsimd_u4;
-    f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
-  #elif XNN_ARCH_WASM
-    f32_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p__scalar_u1;
     f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     f32_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p__rvv_u2v;
@@ -90,7 +87,7 @@ static void init_s8_maxpool_config(void) {
     if (hardware_config->use_arm_neon) {
       s8_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_s8_maxpool_minmax_ukernel_9p__neon_u16;
       s8_maxpool_config.init.s8 = xnn_init_s8_minmax_scalar_params;
-    } else if (!XNN_PLATFORM_MOBILE) {
+    } else {
       s8_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_s8_maxpool_minmax_ukernel_9p__scalar_u1;
       s8_maxpool_config.init.s8 = xnn_init_s8_minmax_scalar_params;
     }
@@ -123,7 +120,7 @@ static void init_u8_maxpool_config(void) {
     if (hardware_config->use_arm_neon) {
       u8_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_u8_maxpool_minmax_ukernel_9p__neon_u16;
       u8_maxpool_config.init.u8 = xnn_init_u8_minmax_scalar_params;
-    } else if (!XNN_PLATFORM_MOBILE) {
+    } else {
       u8_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_u8_maxpool_minmax_ukernel_9p__scalar_u1;
       u8_maxpool_config.init.u8 = xnn_init_u8_minmax_scalar_params;
     }

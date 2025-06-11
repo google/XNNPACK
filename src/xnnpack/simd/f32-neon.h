@@ -7,13 +7,11 @@
 #ifndef __XNNPACK_SRC_XNNPACK_SIMD_F32_NEON_H_
 #define __XNNPACK_SRC_XNNPACK_SIMD_F32_NEON_H_
 
+#include <arm_neon.h>
 #include <assert.h>
 #include <stddef.h>
 
-#include <arm_neon.h>
-
 #include "src/xnnpack/common.h"
-
 
 // SIMD vector type for f32 using NEON.
 typedef float32x4_t xnn_simd_f32_t;
@@ -21,8 +19,7 @@ typedef float32x4_t xnn_simd_f32_t;
 #define xnn_simd_log2_size_f32 2
 #define xnn_simd_bytes_f32 (xnn_simd_size_f32 * sizeof(float))
 
-#define XNN_SIMD_CONST_F32(var, val) \
-  const float32x4_t var = vdupq_n_f32(val);
+#define XNN_SIMD_CONST_F32(var, val) const float32x4_t var = vdupq_n_f32(val);
 
 #define XNN_SIMD_CONST_F32_FROM_INT32(var, val) \
   const float32x4_t var = vreinterpretq_f32_u32(vdupq_n_u32(val));
@@ -49,10 +46,6 @@ typedef float32x4_t xnn_simd_f32_t;
 // compile-time constant.
 #define xnn_sra_f32(a, bits) \
   vreinterpretq_f32_s32(vshrq_n_s32(vreinterpretq_s32_f32(a), bits))
-
-// Include the header for generic functions _after_ declaring the arch-specific
-// types and sizes.
-#include "src/xnnpack/simd/f32-generic-functions.h"
 
 // Arithmetic operations.
 static XNN_INLINE xnn_simd_f32_t xnn_zero_f32() { return vdupq_n_f32(0.f); }
@@ -132,6 +125,36 @@ static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
   return vnegq_f32(a);
 }
 
+static XNN_INLINE float xnn_reduce_add_f32(xnn_simd_f32_t a) {
+#if XNN_ARCH_ARM64
+  return vaddvq_f32(a);
+#else
+  float32x2_t b = vpadd_f32(vget_low_f32(a), vget_high_f32(a));
+  b = vpadd_f32(b, b);
+  return vget_lane_f32(b, 0);
+#endif
+}
+
+static XNN_INLINE float xnn_reduce_min_f32(xnn_simd_f32_t a) {
+#if XNN_ARCH_ARM64
+  return vminvq_f32(a);
+#else
+  float32x2_t b = vpmin_f32(vget_low_f32(a), vget_high_f32(a));
+  b = vpmin_f32(b, b);
+  return vget_lane_f32(b, 0);
+#endif
+}
+
+static XNN_INLINE float xnn_reduce_max_f32(xnn_simd_f32_t a) {
+#if XNN_ARCH_ARM64
+  return vmaxvq_f32(a);
+#else
+  float32x2_t b = vpmax_f32(vget_low_f32(a), vget_high_f32(a));
+  b = vpmax_f32(b, b);
+  return vget_lane_f32(b, 0);
+#endif
+}
+
 // Logical operations.
 static XNN_INLINE xnn_simd_f32_t xnn_and_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {
@@ -152,8 +175,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_xor_f32(xnn_simd_f32_t a,
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_not_f32(xnn_simd_f32_t a) {
-  return vreinterpretq_f32_u32(
-      vmvnq_u32(vreinterpretq_u32_f32(a)));
+  return vreinterpretq_f32_u32(vmvnq_u32(vreinterpretq_u32_f32(a)));
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
@@ -161,24 +183,32 @@ static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
   return vreinterpretq_f32_u32(vceqq_f32(a, b));
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_cmpneq_f32(xnn_simd_f32_t a,
+                                                xnn_simd_f32_t b) {
+  return vreinterpretq_f32_u32(vmvnq_u32(vceqq_f32(a, b)));
+}
+
 static XNN_INLINE xnn_simd_f32_t xnn_round_f32(xnn_simd_f32_t a) {
 #if defined(__ARM_ARCH) && __ARM_ARCH < 8
-  // Create a filter for all non-finite values in `a` (all exponent bits set).
-  XNN_SIMD_CONST_F32_FROM_INT32(vexp_bits, 0x7f800000);
+  // Any input larger than 2^23 is already an integer value since its fractional
+  // bits will no longer fit in the mantissa. We create a filter for these that
+  // also catches all non-finite values in `a` (compares with NaN are always
+  // `false`).
+  XNN_SIMD_CONST_F32(vmax_non_int_val, 8388608.0f);  // 2^23.
   const xnn_simd_f32_t vfilter =
-      xnn_cmpeq_f32(xnn_and_f32(a, vexp_bits), vexp_bits);
+      vreinterpretq_f32_u32(vcaltq_f32(a, vmax_non_int_val));
 
   // Create a vector of `0.5f` with the same sign as the entries of `a`.
   XNN_SIMD_CONST_F32(vhalf, 0.5f);
-  XNN_SIMD_CONST_F32(vsign_mask, -0.0);
+  XNN_SIMD_CONST_F32(vsign_mask, -0.0f);
   const xnn_simd_f32_t vsigned_half =
       xnn_or_f32(xnn_and_f32(a, vsign_mask), vhalf);
   const xnn_simd_f32_t vresult =
       vcvtq_f32_s32(vcvtq_s32_f32(xnn_add_f32(a, vsigned_half)));
 
-  // Apply the non-finite value filter to repace any non-finite input with `a`.
-  return xnn_or_f32(xnn_and_f32(xnn_not_f32(vfilter), vresult),
-                    xnn_and_f32(vfilter, a));
+  // Apply the non-finite value filter to replace any non-finite input with `a`.
+  return xnn_or_f32(xnn_and_f32(vfilter, vresult),
+                    xnn_and_f32(xnn_not_f32(vfilter), a));
 #else
   return vrndnq_f32(a);
 #endif  // defined(__ARM_ARCH) && __ARM_ARCH == 7
@@ -195,10 +225,6 @@ static XNN_INLINE xnn_simd_f32_t xnn_rcp_f32(xnn_simd_f32_t a) {
 #define XNN_SIMD_NUM_RSQRT_ITER_F32 2
 static XNN_INLINE xnn_simd_f32_t xnn_rsqrt_f32(xnn_simd_f32_t a) {
   return vrsqrteq_f32(a);
-}
-
-static XNN_INLINE xnn_simd_f32_t xnn_getexp_f32(xnn_simd_f32_t a) {
-  return xnn_generic_getexp_f32(a);
 }
 
 // Load/store operations.
@@ -222,10 +248,6 @@ static XNN_INLINE xnn_simd_f32_t xnn_set1_f32(float v) {
   return vld1q_dup_f32(&v);
 }
 
-static XNN_INLINE xnn_simd_f32_t xnn_set1_or_load_f32(const float* v) {
-  return vld1q_dup_f32(v);
-}
-
 // Tail load/store operations.
 static XNN_INLINE xnn_simd_f32_t
 xnn_load_tail_f32(const float* input, size_t num_elements) XNN_OOB_READS {
@@ -234,20 +256,25 @@ xnn_load_tail_f32(const float* input, size_t num_elements) XNN_OOB_READS {
   return vld1q_f32(input);
 }
 
+// TODO: Use direct load of 1,2 or 3 floats
+// Consider clearing pad values to 0
 static XNN_INLINE xnn_simd_f32_t xnn_load_tail_safe_f32(const float* input,
                                                         size_t num_elements) {
-  assert(num_elements > 0);
-  assert(num_elements < xnn_simd_size_f32);
+  assert(num_elements <= xnn_simd_size_f32);
 
   XNN_ALIGN(16) float padded[4];
   float* dst = padded;
   switch (num_elements) {
+    case 4:
+      *dst++ = *input++;
     case 3:
       *dst++ = *input++;
     case 2:
       *dst++ = *input++;
-    default:
+    case 1:
       *dst++ = *input++;
+    default: {
+    }
   }
   return vld1q_f32(padded);
 }

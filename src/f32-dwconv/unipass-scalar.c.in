@@ -28,8 +28,9 @@ void xnn_f32_dwconv${SUFFIX}_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__${"wasm" i
     intptr_t input_stride,
     size_t output_increment,
     size_t input_offset,
+    size_t input_pixel_stride,
     const float* zero,
-    const ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)])
+    const ${PARAMS}* restrict params)
 {
   assert(channels != 0);
   assert(output_width != 0);
@@ -148,6 +149,7 @@ void xnn_f32_dwconv${SUFFIX}_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__${"wasm" i
           *output++ = vacc0p0;
       } while (--c != 0);
 
+    input_offset += input_pixel_stride;
     output = (float*) ((uintptr_t) output + output_increment);
   } while (--output_width != 0);
 }

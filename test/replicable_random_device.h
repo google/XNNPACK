@@ -6,11 +6,14 @@
 #ifndef __XNNPACK_TEST_REPLICABLE_RANDOM_NUMBER_GENERATOR_H_
 #define __XNNPACK_TEST_REPLICABLE_RANDOM_NUMBER_GENERATOR_H_
 
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <string>
 
 #include <gtest/gtest.h>
+#include "src/xnnpack/common.h"
 
 namespace xnnpack {
 
@@ -23,7 +26,13 @@ class Xoshiro128Plus {
  public:
   using result_type = uint64_t;
 
-  explicit Xoshiro128Plus(uint64_t s1) : state_{s1, 0} {}
+  explicit Xoshiro128Plus(uint64_t s1) : state_{s1, 0} {
+    // The seed might not have 64 bits of entropy, which some <random> functions
+    // require to give good random data.
+    for (int i = 0; i < 10; ++i) {
+      (*this)();
+    }
+  }
 
   uint64_t operator()() {
     uint64_t s1 = state_[0];
@@ -82,6 +91,56 @@ class ReplicableRandomDevice {
   const int random_seed_;
   BaseRandomDevice random_generator_;
   testing::ScopedTrace scoped_trace_;
+};
+
+// ReplicableRandomDevice is used in randomized tests, which also often want to
+// run for an amount of time (instead of a fixed number of iterations). This
+// small helper helps with that.
+// Usage example:
+// for (auto _ : FuzzTest(std::chrono::seconds(1))) {...}
+class FuzzTest {
+ public:
+  class FuzzIterator {
+   public:
+    explicit FuzzIterator(FuzzTest* parent) : parent_(parent) {}
+
+    void operator++() { parent_->iters_++; }
+
+    bool operator!=(const FuzzIterator& other) const {
+      return !parent_->Done();
+    }
+
+    struct XNN_UNUSED DummyValue {};
+    DummyValue operator*() const { return {}; }
+
+   private:
+    FuzzTest* parent_;
+  };
+
+  template <typename Duration>
+  explicit FuzzTest(Duration duration, int min_iters = 1,
+                    int max_iters = std::numeric_limits<int>::max())
+      : expire_at_(clock::now() + duration),
+        min_iters_(min_iters),
+        max_iters_(max_iters) {}
+
+  auto begin() { return FuzzIterator(this); }
+  auto end() { return FuzzIterator(this); }
+
+  bool Done() const {
+    if (iters_ >= max_iters_) {
+      return true;
+    } else {
+      return iters_ >= min_iters_ && clock::now() >= expire_at_;
+    }
+  }
+
+ private:
+  using clock = std::chrono::steady_clock;
+  clock::time_point expire_at_;
+  int min_iters_;
+  int max_iters_;
+  int iters_ = 0;
 };
 
 }  // namespace xnnpack

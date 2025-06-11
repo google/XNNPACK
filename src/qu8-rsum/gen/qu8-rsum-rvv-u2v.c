@@ -18,7 +18,7 @@ void xnn_qu8_rsum_ukernel__rvv_u2v(
     size_t batch,
     const uint8_t* restrict input,
     uint32_t* restrict output,
-    const struct xnn_qs8_rsum_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_qs8_rsum_params* restrict params)
 {
   assert(batch != 0);
   assert(input != NULL);

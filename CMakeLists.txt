@@ -363,6 +363,26 @@ IF(CMAKE_SYSTEM_NAME MATCHES "Windows")
   ADD_COMPILE_DEFINITIONS("NOMINMAX")
 ENDIF()
 
+IF(CMAKE_SYSTEM_NAME MATCHES "^(Android)$")
+  IF(XNNPACK_TARGET_PROCESSOR MATCHES "^arm64")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-z,force-bti")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-z,force-bti")
+  ENDIF()
+ENDIF()
+
+IF(CMAKE_SYSTEM_NAME MATCHES "^(Android|Linux)$")
+  IF(XNNPACK_TARGET_PROCESSOR MATCHES "^arm64")
+    IF(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mbranch-protection=bti")
+      set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -mbranch-protection=bti")
+      # GCC doesn't support this flag yet
+      set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -mmark-bti-property")
+    ELSE()
+      MESSAGE(WARNING "Security: XNNPACK doesn't support BTI control flow integrity with GCC. Continuing.")
+    ENDIF()
+  ENDIF()
+ENDIF()
+
 # ---[ Download deps
 IF(NOT XNNPACK_USE_SYSTEM_LIBS)
   IF(NOT DEFINED CPUINFO_SOURCE_DIR)
@@ -465,7 +485,6 @@ SET(OPERATOR_SRCS
   src/operators/resize-bilinear-nchw.c
   src/operators/resize-bilinear-nhwc.c
   src/operators/rope-nthc.c
-  src/operators/scaled-dot-product-attention-nhtc.c
   src/operators/slice-nd.c
   src/operators/softmax-nc.c
   src/operators/transpose-nd.c
@@ -497,7 +516,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/max-pooling-2d.c
   src/subgraph/pack-lh.c
   src/subgraph/reshape-helpers.c
-  src/subgraph/scaled-dot-product-attention.c
+  src/subgraph/rope.c
   src/subgraph/softmax.c
   src/subgraph/space-to-depth-2d.c
   src/subgraph/static-constant-pad.c
@@ -505,6 +524,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/static-resize-bilinear-2d.c
   src/subgraph/static-slice.c
   src/subgraph/static-transpose.c
+  src/subgraph/subgraph-utils.c
   src/subgraph/unpooling-2d.c
   src/subgraph/unary.c
   src/subgraph/validation.c
@@ -534,7 +554,6 @@ SET(XNNPACK_SRCS
   src/configs/pack-lh-config.c
   src/configs/raddstoreexpminusmax-config.c
   src/configs/reduce-config.c
-  src/configs/rmax-config.c
   src/configs/spmm-config.c
   src/configs/transpose-config.c
   src/configs/unary-elementwise-config.c
@@ -673,6 +692,7 @@ ENDIF()
 IF(XNNPACK_TARGET_PROCESSOR MATCHES "^x86(_64)?$")
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_SSE_MICROKERNEL_SRCS})
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_SSE2_MICROKERNEL_SRCS})
+  LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_SSE2FMA_MICROKERNEL_SRCS})
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_SSSE3_MICROKERNEL_SRCS})
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_SSE41_MICROKERNEL_SRCS})
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_AVX_MICROKERNEL_SRCS})
@@ -726,6 +746,7 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^x86(_64)?$")
   ENDIF()
   LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_SSE_MICROKERNEL_SRCS})
   LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_SSE2_MICROKERNEL_SRCS})
+  LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_SSE2FMA_MICROKERNEL_SRCS})
   LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_SSSE3_MICROKERNEL_SRCS})
   LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_SSE41_MICROKERNEL_SRCS})
   LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_AVX_MICROKERNEL_SRCS})
@@ -777,8 +798,10 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^x86(_64)?$")
 ENDIF()
 IF(XNNPACK_TARGET_PROCESSOR MATCHES "Hexagon")
   LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_HEXAGON_MICROKERNEL_SRCS})
+  LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_HEXAGON_MICROKERNEL_SRCS})
   IF(XNNPACK_ENABLE_HVX)
     LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_HVX_MICROKERNEL_SRCS})
+    LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_HVX_MICROKERNEL_SRCS})
   ENDIF()
 ENDIF()
 IF(XNNPACK_TARGET_PROCESSOR MATCHES "^ppc64")
@@ -787,7 +810,6 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^ppc64")
   ENDIF()
 ENDIF()
 IF(XNNPACK_TARGET_PROCESSOR MATCHES "^riscv")
-  LIST(APPEND PROD_MICROKERNEL_SRCS)
   IF(XNNPACK_ENABLE_RISCV_VECTOR)
     LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_RVV_MICROKERNEL_SRCS})
     LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_RVV_MICROKERNEL_SRCS})
@@ -825,6 +847,7 @@ ADD_LIBRARY(indirection OBJECT src/indirection.c)
 ADD_LIBRARY(logging OBJECT ${LOGGING_SRCS})
 ADD_LIBRARY(microparams-init OBJECT src/microparams-init.c)
 ADD_LIBRARY(normalization OBJECT src/normalization.c)
+ADD_LIBRARY(pack-lh OBJECT src/pack-lh.cc)
 ADD_LIBRARY(packing OBJECT src/reference/packing.cc)
 TARGET_LINK_LIBRARIES(hardware-config PRIVATE xnnpack-base logging)
 TARGET_LINK_LIBRARIES(indirection PRIVATE xnnpack-base)
@@ -835,6 +858,7 @@ ENDIF()
 TARGET_LINK_LIBRARIES(microkernels-prod PRIVATE xnnpack-base)
 TARGET_LINK_LIBRARIES(microparams-init PRIVATE xnnpack-base)
 TARGET_LINK_LIBRARIES(normalization PRIVATE xnnpack-base)
+TARGET_LINK_LIBRARIES(pack-lh PRIVATE xnnpack-base logging)
 TARGET_LINK_LIBRARIES(packing PRIVATE xnnpack-base logging)
 IF(XNNPACK_BUILD_LIBRARY)
   ADD_LIBRARY(allocator OBJECT src/allocator.c)
@@ -867,12 +891,17 @@ IF(XNNPACK_BUILD_LIBRARY)
   TARGET_LINK_LIBRARIES(memory PRIVATE xnnpack-base logging)
   TARGET_LINK_LIBRARIES(microkernel-utils PRIVATE xnnpack-base hardware-config logging)
   TARGET_LINK_LIBRARIES(mutex PRIVATE xnnpack-base logging)
-  TARGET_LINK_LIBRARIES(operators PRIVATE xnnpack-base allocator indirection logging microkernel-utils normalization operator-utils packing reference-ukernels datatype)
+  TARGET_LINK_LIBRARIES(operators PRIVATE xnnpack-base allocator indirection
+      logging microkernel-utils normalization operator-utils pack-lh packing
+      reference-ukernels datatype)
   TARGET_LINK_LIBRARIES(operator-run PRIVATE xnnpack-base logging)
   TARGET_LINK_LIBRARIES(operator-utils PRIVATE xnnpack-base logging)
   TARGET_LINK_LIBRARIES(reference-ukernels PRIVATE xnnpack-base datatype)
   TARGET_LINK_LIBRARIES(subgraph PRIVATE xnnpack-base allocator logging memory mutex operators operator-run datatype)
-  TARGET_LINK_LIBRARIES(XNNPACK PRIVATE xnnpack-base allocator cache hardware-config indirection memory microkernel-utils microparams-init mutex normalization operators operator-run operator-utils packing microkernels-prod subgraph datatype reference-ukernels)
+  TARGET_LINK_LIBRARIES(XNNPACK PRIVATE xnnpack-base allocator cache
+      hardware-config indirection memory microkernel-utils microparams-init
+      mutex normalization operators operator-run operator-utils pack-lh packing
+      microkernels-prod subgraph datatype reference-ukernels)
   TARGET_LINK_LIBRARIES(XNNPACK PUBLIC pthreadpool logging)
   SET_TARGET_PROPERTIES(XNNPACK PROPERTIES C_EXTENSIONS YES)
 ENDIF()
@@ -1057,6 +1086,7 @@ IF(MSVC)
   TARGET_COMPILE_OPTIONS(indirection PRIVATE "$<$<NOT:$<CONFIG:Debug>>:/O2>")
   TARGET_COMPILE_OPTIONS(microparams-init PRIVATE "$<$<NOT:$<CONFIG:Debug>>:/O2>")
   TARGET_COMPILE_OPTIONS(normalization PRIVATE "$<$<NOT:$<CONFIG:Debug>>:/O1>")
+  TARGET_COMPILE_OPTIONS(pack-lh PRIVATE "$<$<NOT:$<CONFIG:Debug>>:/O2>")
   TARGET_COMPILE_OPTIONS(packing PRIVATE "$<$<NOT:$<CONFIG:Debug>>:/O2>")
   IF(XNNPACK_BUILD_LIBRARY)
     TARGET_COMPILE_OPTIONS(microkernel-utils PRIVATE "$<$<NOT:$<CONFIG:Debug>>:/O2>")
@@ -1078,6 +1108,7 @@ ELSE()
   TARGET_COMPILE_OPTIONS(indirection PRIVATE "$<$<NOT:$<CONFIG:Debug>>:-O2>")
   TARGET_COMPILE_OPTIONS(microparams-init PRIVATE "$<$<NOT:$<CONFIG:Debug>>:-O2>")
   TARGET_COMPILE_OPTIONS(normalization PRIVATE "$<$<NOT:$<CONFIG:Debug>>:-Os>")
+  TARGET_COMPILE_OPTIONS(pack-lh PRIVATE "$<$<NOT:$<CONFIG:Debug>>:-O2>")
   TARGET_COMPILE_OPTIONS(packing PRIVATE "$<$<NOT:$<CONFIG:Debug>>:-O2>")
   IF(XNNPACK_BUILD_LIBRARY)
     TARGET_COMPILE_OPTIONS(microkernel-utils PRIVATE "$<$<NOT:$<CONFIG:Debug>>:-O2>")
@@ -1228,826 +1259,10 @@ ENDIF()
 
 # ---[ XNNPACK unit tests
 IF(XNNPACK_BUILD_TESTS)
-  # ---[ Macro to shard a test.
-  MACRO(SHARD_TEST TEST_NAME NUM_SHARDS)
-    MATH(EXPR TEST_COST "${NUM_SHARDS} * 1000")
-    GET_PROPERTY(TEST_LABELS TEST ${TEST_NAME} PROPERTY LABELS)
-    SET_PROPERTY(
-        TEST ${TEST_NAME}
-          APPEND
-          PROPERTY ENVIRONMENT "GTEST_TOTAL_SHARDS=${NUM_SHARDS};"
-                  "GTEST_SHARD_INDEX=0")
-    SET_PROPERTY(
-        TEST ${TEST_NAME} PROPERTY COST ${TEST_COST})
-    MATH(EXPR NUM_SHARDS_MINUS_ONE "${NUM_SHARDS} - 1")
-    FOREACH(SHARD RANGE 1 ${NUM_SHARDS_MINUS_ONE})
-      ADD_TEST(NAME ${TEST_NAME}-${SHARD} COMMAND ${TEST_NAME})
-      SET_PROPERTY(
-          TEST ${TEST_NAME}-${SHARD}
-            APPEND
-            PROPERTY ENVIRONMENT "GTEST_TOTAL_SHARDS=${NUM_SHARDS};"
-                    "GTEST_SHARD_INDEX=${SHARD}")
-      SET_PROPERTY(
-          TEST ${TEST_NAME}-${SHARD} PROPERTY COST ${TEST_COST})
-      SET_PROPERTY(TEST ${TEST_NAME}-${SHARD} PROPERTY LABELS ${TEST_LABELS})
-    ENDFOREACH()
-  ENDMACRO()
-
-  # ---[ Build google test
-  IF(NOT TARGET gtest)
-    IF(XNNPACK_USE_SYSTEM_LIBS)
-      FIND_PACKAGE(GTest REQUIRED)
-    ELSE()
-      SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-      ADD_SUBDIRECTORY(
-        "${GOOGLETEST_SOURCE_DIR}"
-        "${CMAKE_BINARY_DIR}/googletest")
-    ENDIF()
-  ENDIF()
-
-  # Helper libraries
-  ADD_LIBRARY(next-prime STATIC test/next_prime.cc)
-  ADD_LIBRARY(runtime-flags STATIC test/subgraph/runtime-flags.cc)
-  TARGET_LINK_LIBRARIES(runtime-flags PRIVATE GTest::gtest)
-
-  ADD_LIBRARY(gemm-microkernel-tester STATIC test/gemm-microkernel-tester.cc)
-  TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE XNNPACK packing)
-  TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE pthreadpool GTest::gtest)
-  TARGET_LINK_LIBRARIES(gemm-microkernel-tester PUBLIC next-prime)
-  IF(XNNPACK_ENABLE_KLEIDIAI)
-    TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE kleidiai)
-  ENDIF()
-
-  ADD_LIBRARY(dwconv-microkernel-tester STATIC test/dwconv-microkernel-tester.cc)
-  TARGET_LINK_LIBRARIES(dwconv-microkernel-tester PRIVATE XNNPACK pthreadpool GTest::gtest)
-  TARGET_LINK_LIBRARIES(dwconv-microkernel-tester PUBLIC next-prime)
-
-  ADD_LIBRARY(vbinary-microkernel-tester STATIC test/vbinary-microkernel-tester.cc)
-  SET_TARGET_PROPERTIES(vbinary-microkernel-tester PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_LINK_LIBRARIES(vbinary-microkernel-tester PRIVATE XNNPACK pthreadpool GTest::gtest)
-
-  ADD_LIBRARY(unary-ops STATIC test/unary-ops.cc)
-  TARGET_LINK_LIBRARIES(unary-ops PRIVATE XNNPACK)
-
-  ADD_LIBRARY(convolution-test-helpers OBJECT test/operators/convolution-test-helpers.cc)
-  TARGET_LINK_LIBRARIES(convolution-test-helpers PRIVATE xnnpack-base)
-
-  ADD_LIBRARY(packq-microkernel-tester STATIC test/packq-microkernel-tester.cc)
-  TARGET_LINK_LIBRARIES(packq-microkernel-tester PRIVATE XNNPACK pthreadpool  GTest::gtest)
-  IF(XNNPACK_ENABLE_KLEIDIAI)
-    TARGET_LINK_LIBRARIES(packq-microkernel-tester PRIVATE kleidiai)
-  ENDIF()
-
-  IF(XNNPACK_BUILD_LIBRARY)
-    # ---[ Build size tests
-    ADD_EXECUTABLE(subgraph-size-test test/subgraph/subgraph-size.c)
-    TARGET_LINK_LIBRARIES(subgraph-size-test PRIVATE XNNPACK)
-
-    # ---[ Build operator-level unit tests
-    SET(LIBRARY_OPERATOR_TESTS
-      argmax-pooling-nhwc
-      average-pooling-nhwc
-      batch-matrix-multiply-nc
-      binary-elementwise-nd
-      constant-pad-nd-eager
-      constant-pad-nd
-      convolution-nchw
-      convolution-nhwc
-      copy-nc-eager
-      copy-nc
-      deconvolution-nhwc-qd8-f32-qc8w
-      deconvolution-nhwc
-      depth-to-space-nchw2nhwc
-      depth-to-space-nhwc
-      dynamic-fully-connected-nc
-      fully-connected-nc
-      max-pooling-nhwc
-      reduce-nd
-      resize-bilinear-nchw
-      resize-bilinear-nhwc
-      rope-nthc
-      scaled-dot-product-attention-nhtc
-      slice-nd-eager
-      slice-nd
-      softmax-nc
-      space-to-depth-nhwc
-      transpose-nd-eager
-      transpose-nd
-      unary-elementwise-nc
-      unpooling-nhwc
-    )
-    FOREACH(TEST ${LIBRARY_OPERATOR_TESTS})
-      ADD_EXECUTABLE(${TEST}-test test/operators/${TEST}.cc)
-      TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        GTest::gmock
-        GTest::gtest
-        GTest::gtest_main
-        convolution-test-helpers
-        hardware-config
-        logging
-        microkernels-all
-        microparams-init
-        next-prime
-        pthreadpool
-        unary-ops
-        XNNPACK)
-      ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
-      SET_PROPERTY(TEST ${TEST}-test PROPERTY LABELS "operator")
-    ENDFOREACH()
-    SHARD_TEST(average-pooling-nhwc-test 5)
-    SHARD_TEST(binary-elementwise-nd-test 10)
-    SHARD_TEST(batch-matrix-multiply-nc-test 5)
-    SHARD_TEST(constant-pad-nd-test 5)
-    SHARD_TEST(constant-pad-nd-eager-test 5)
-    SHARD_TEST(convolution-nchw-test 10)
-    SHARD_TEST(convolution-nhwc-test 10)
-    SHARD_TEST(deconvolution-nhwc-test 10)
-    SHARD_TEST(fully-connected-nc-test 10)
-    SHARD_TEST(max-pooling-nhwc-test 10)
-    SHARD_TEST(slice-nd-test 5)
-    SHARD_TEST(transpose-nd-test 10)
-    SHARD_TEST(transpose-nd-eager-test 5)
-
-    # ---[ Build subgraph optimizations unit tests
-    SET(LIBRARY_SUBGRAPH_OPTIMIZATION_TESTS
-        fusion
-        memory-planner
-        subgraph-fp16
-        subgraph
-        runtime
-        subgraph-nchw
-        workspace)
-    FOREACH(TEST ${LIBRARY_SUBGRAPH_OPTIMIZATION_TESTS})
-      ADD_EXECUTABLE(${TEST}-test test/subgraph/${TEST}.cc)
-      TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        GTest::gmock
-        GTest::gtest
-        GTest::gtest_main
-        runtime-flags
-        XNNPACK)
-      ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
-    ENDFOREACH()
-
-    # ---[ Build subgraph-level unit tests
-    SET(LIBRARY_SUBGRAPH_UNIT_TESTS
-        argmax-pooling-2d
-        average-pooling-2d
-        average-pooling-2d-reshape
-        batch-matrix-multiply
-        binary
-        concatenate
-        copy
-        depth-to-space-2d
-        even-split
-        fully-connected
-        max-pooling-2d
-        scaled-dot-product-attention
-        softmax
-        space-to-depth-2d
-        static-constant-pad
-        static-reduce
-        static-reshape
-        static-resize-bilinear-2d
-        static-slice
-        static-transpose
-        unary
-        unpooling-2d)
-    FOREACH(TEST ${LIBRARY_SUBGRAPH_UNIT_TESTS})
-      ADD_EXECUTABLE(${TEST}-test test/subgraph/${TEST}.cc)
-      TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        GTest::gmock
-        GTest::gtest
-        GTest::gtest_main
-        datatype
-        subgraph
-        logging
-        runtime-flags
-        unary-ops
-        XNNPACK)
-      ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
-      SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
-    ENDFOREACH()
-    IF(XNNPACK_TARGET_PROCESSOR MATCHES "^riscv")
-      SHARD_TEST(static-reduce-test 20)
-      SHARD_TEST(static-slice-test 20)
-    ENDIF()
-
-    SET(LIBRARY_SUBGRAPH_CONVOLUTION_UNIT_TESTS
-        convolution-2d
-        deconvolution-2d
-        depthwise-convolution-2d)
-    FOREACH(TEST ${LIBRARY_SUBGRAPH_CONVOLUTION_UNIT_TESTS})
-      ADD_EXECUTABLE(${TEST}-test test/subgraph/${TEST}.cc)
-      TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        convolution-test-helpers
-        GTest::gmock
-        GTest::gtest
-        GTest::gtest_main
-        runtime-flags
-        subgraph
-        XNNPACK)
-      ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
-      SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
-    ENDFOREACH()
-    SHARD_TEST(deconvolution-2d-test 10)
-  ENDIF()
-
-  # ---[ Normalization unit tests
-  SET(NORMALIZATION_UNIT_TESTS
-      slice-normalization
-      reduce-normalization
-      transpose-normalization)
-  FOREACH(TEST ${NORMALIZATION_UNIT_TESTS})
-    ADD_EXECUTABLE(${TEST}-test test/operators/${TEST}.cc)
-    TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE GTest::gtest GTest::gtest_main pthreadpool normalization)
-    ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
-  ENDFOREACH()
-
-  # ---[ Build microkernel-level unit tests
-  SET(MICROKERNEL_UNIT_TESTS
-      avgpool-minmax
-      maxpool-minmax
-      f16-conv-hwc2chw
-      f16-f32acc-rdsum
-      f16-f32acc-rsum
-      f16-ibilinear
-      f16-ibilinear-chw
-      f16-raddstoreexpminusmax
-      f16-rmax
-      f16-rmin
-      f16-rminmax
-      f16-rsum
-      f16-spmm-minmax
-      f16-vcmul
-      f16-vmulcaddc-minmax
-      f32-argmaxpool
-      f32-conv-hwc
-      f32-conv-hwc2chw
-      f32-ibilinear
-      f32-ibilinear-chw
-      f32-raddexpminusmax
-      f32-raddextexp
-      f32-raddstoreexpminusmax
-      f32-rdsum
-      f32-rmax
-      f32-rmin
-      f32-rminmax
-      f32-rsum
-      f32-spmm-minmax
-      f32-vcmul
-      f32-vmulcaddc-minmax
-      f32-vscaleexpminusmax
-      f32-vscaleextexp
-      indirection
-      packing
-      qs8-packw
-      qs8-qc4w-packw
-      qs8-rdsum-minmax-fp32
-      qs8-rsum
-      qu8-rdsum
-      qu8-rsum
-      qu8-vlrelu
-      s8-ibilinear
-      u8-ibilinear
-      u8-lut32norm
-      u8-rmax
-      x16-packw
-      x32-packw
-      x32-packx
-      x32-unpool
-      x8-lut
-      x8-packw
-      xN-transpose
-      xx-fill
-      xx-pad)
-  FOREACH(TEST ${MICROKERNEL_UNIT_TESTS})
-    ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        GTest::gmock
-        GTest::gtest
-        GTest::gtest_main
-        hardware-config
-        indirection
-        logging
-        microkernels-all
-        microkernel-utils
-        microparams-init
-        next-prime
-        packing
-        pthreadpool
-        XNNPACK
-    )
-    ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
-    SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
-  ENDFOREACH()
-  SHARD_TEST(avgpool-minmax-test 10)
-  SHARD_TEST(maxpool-minmax-test 10)
-  IF(XNNPACK_TARGET_PROCESSOR MATCHES "^riscv")
-    SHARD_TEST(f32-argmaxpool-test 20)
-    SHARD_TEST(f32-rdsum-test 10)
-  ENDIF()
-
-  SET(MICROKERNEL_DWCONV_UNIT_TESTS
-      f16-dwconv-minmax
-      f16-dwconv2d-chw
-      f32-dwconv-minmax
-      f32-dwconv
-      f32-dwconv2d-chw
-      qs8-dwconv-minmax-fp32
-      qs8-dwconv-minmax-rndnu
-      qs8-qc8w-dwconv-minmax-fp32
-      qu8-dwconv-minmax-fp32
-      qu8-dwconv-minmax-rndnu)
-  FOREACH(TEST ${MICROKERNEL_DWCONV_UNIT_TESTS})
-    ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        dwconv-microkernel-tester
-        GTest::gmock
-        GTest::gtest
-        GTest::gtest_main
-        hardware-config
-        logging
-        microkernels-all
-        microparams-init
-        pthreadpool
-    )
-    ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
-    SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
-  ENDFOREACH()
-  SHARD_TEST(f32-dwconv-minmax-test 10)
-  SHARD_TEST(f32-dwconv-test 10)
-  SHARD_TEST(qs8-dwconv-minmax-fp32-test 10)
-  SHARD_TEST(qs8-qc8w-dwconv-minmax-fp32-test 10)
-
-  SET(MICROKERNEL_GEMM_UNIT_TESTS
-      bf16-gemm-minmax
-      f16-f32acc-gemm-minmax
-      f16-f32acc-igemm-minmax
-      f16-gemm-minmax
-      f16-igemm-minmax
-      f32-gemm
-      f32-gemm-goi-minmax
-      f32-gemm-minmax
-      f32-gemm-relu
-      f32-gemminc-minmax
-      f32-igemm
-      f32-igemm-minmax
-      f32-igemm-relu
-      f32-ppmm-minmax
-      f32-qc4w-gemm-minmax
-      f32-qc8w-gemm
-      f32-qc8w-gemm-minmax
-      f32-qc8w-gemm-relu
-      pf32-gemm-minmax
-      qd8-f16-qb4w-gemm-minmax
-      qd8-f16-qc4w-gemm-minmax
-      qd8-f16-qc8w-gemm-minmax
-      qd8-f32-qb4w-gemm-minmax
-      qd8-f32-qc4w-gemm-minmax
-      qd8-f32-qc8w-gemm-minmax
-      qd8-f32-qc8w-igemm-minmax
-      qp8-f32-qb4w-gemm-minmax
-      qp8-f32-qc4w-gemm-minmax
-      qp8-f32-qc8w-gemm-minmax
-      qs8-qc8w-gemm-minmax-fp32
-      qs8-qc8w-igemm-minmax-fp32
-      qu8-gemm-minmax-fp32
-      qu8-gemm-minmax-rndnu
-      qu8-igemm-minmax-fp32
-      qu8-igemm-minmax-rndnu)
-  FOREACH(TEST ${MICROKERNEL_GEMM_UNIT_TESTS})
-    FILE(GLOB TEST_SOURCES "test/${TEST}*.cc")
-    IF(TEST_SOURCES)
-        ADD_EXECUTABLE(${TEST}-test ${TEST_SOURCES})
-        TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-            gemm-microkernel-tester
-            GTest::gmock
-            GTest::gtest
-            GTest::gtest_main
-            hardware-config
-            logging
-            microkernels-all
-            microparams-init
-            pthreadpool
-        )
-        ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
-        SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
-    ENDIF()
-  ENDFOREACH()
-  SHARD_TEST(qd8-f16-qc8w-gemm-minmax-test 10)
-  SHARD_TEST(qd8-f32-qc4w-gemm-minmax-test 10)
-  SHARD_TEST(qd8-f32-qc8w-gemm-minmax-test 10)
-  SHARD_TEST(qd8-f32-qc8w-igemm-minmax-test 10)
-  SHARD_TEST(qs8-qc8w-gemm-minmax-fp32-test 10)
-  SHARD_TEST(qs8-qc8w-igemm-minmax-fp32-test 10)
-
-  SET(MICROKERNEL_PACKQ_UNIT_TESTS
-      x8-packq)
-  FOREACH(TEST ${MICROKERNEL_PACKQ_UNIT_TESTS})
-    ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        packq-microkernel-tester
-        GTest::gmock
-        GTest::gtest
-        GTest::gtest_main
-        hardware-config
-        logging
-        microkernels-all
-        microparams-init
-        pthreadpool
-    )
-    ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
-    SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
-  ENDFOREACH()
-
-  SET(MICROKERNEL_VBINARY_UNIT_TESTS
-      f16-vadd
-      f16-vaddc
-      f16-vdiv
-      f16-vdivc
-      f16-vmax
-      f16-vmaxc
-      f16-vmin
-      f16-vminc
-      f16-vmul
-      f16-vmulc
-      f16-vprelu
-      f16-vpreluc
-      f16-vrpreluc
-      f16-vrdivc
-      f16-vrsubc
-      f16-vsqrdiff
-      f16-vsqrdiffc
-      f16-vsub
-      f16-vsubc
-      f32-vadd
-      f32-vaddc
-      f32-vcopysign
-      f32-vcopysignc
-      f32-vdiv
-      f32-vdivc
-      f32-vmax
-      f32-vmaxc
-      f32-vmin
-      f32-vminc
-      f32-vmul
-      f32-vmulc
-      f32-vprelu
-      f32-vpreluc
-      f32-vrpreluc
-      f32-vrcopysignc
-      f32-vrdivc
-      f32-vrsubc
-      f32-vsqrdiff
-      f32-vsqrdiffc
-      f32-vsub
-      f32-vsubc
-      qs8-vadd-minmax
-      qs8-vaddc-minmax
-      qs8-vmul-minmax-fp32
-      qs8-vmulc-minmax-fp32
-      qu8-vadd-minmax
-      qu8-vaddc-minmax
-      qu8-vmul-minmax-fp32
-      qu8-vmul-minmax-rndnu
-      qu8-vmulc-minmax-fp32
-      qu8-vmulc-minmax-rndnu)
-  FOREACH(TEST ${MICROKERNEL_VBINARY_UNIT_TESTS})
-    ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        vbinary-microkernel-tester
-        GTest::gmock
-        GTest::gtest
-        GTest::gtest_main
-        hardware-config
-        logging
-        microkernels-all
-        microparams-init
-        pthreadpool
-    )
-    ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
-    SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
-  ENDFOREACH()
-
-  SET(MICROKERNEL_VCVT_TESTS
-      f16-f32-vcvt
-      f16-qs8-vcvt
-      f16-qu8-vcvt
-      f32-f16-vcvt
-      f32-qs8-vcvt
-      f32-qu8-vcvt
-      qs8-f16-vcvt
-      qs8-f32-vcvt
-      qs8-vcvt
-      qu8-f32-vcvt
-      qu8-vcvt)
-  LIST(REMOVE_ITEM MICROKERNEL_VCVT_TESTS ${SHARDED_TESTS})
-  FOREACH(TEST ${MICROKERNEL_VCVT_TESTS})
-    ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        GTest::gmock
-        GTest::gtest
-        GTest::gtest_main
-        datatype
-        hardware-config
-        logging
-        microkernels-all
-        microparams-init
-        pthreadpool
-    )
-    ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
-    SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
-  ENDFOREACH()
-  IF(XNNPACK_TARGET_PROCESSOR MATCHES "^riscv")
-    SHARD_TEST(f16-qs8-vcvt-test 10)
-    SHARD_TEST(f16-qu8-vcvt-test 10)
-    SHARD_TEST(f32-qs8-vcvt-test 10)
-    SHARD_TEST(f32-qu8-vcvt-test 10)
-    SHARD_TEST(qs8-f32-vcvt-test 10)
-    SHARD_TEST(qu8-f32-vcvt-test 10)
-    SHARD_TEST(qs8-vcvt-test 10)
-    SHARD_TEST(qu8-vcvt-test 10)
-  ENDIF()
-
-  SET(MICROKERNEL_VUNARY_TESTS
-      f16-vabs
-      f16-vapproxgelu
-      f16-vclamp
-      f16-velu
-      f16-vgelu
-      f16-vhswish
-      f16-vlrelu
-      f16-vneg
-      f16-vrndd
-      f16-vrndne
-      f16-vrndu
-      f16-vrndz
-      f16-vrsqrt
-      f16-vsigmoid
-      f16-vsqr
-      f16-vsqrt
-      f16-vtanh
-      f32-vabs
-      f32-vclamp
-      f32-vcos
-      f32-velu
-      f32-vexp
-      f32-vgelu
-      f32-vhswish
-      f32-vlog
-      f32-vlrelu
-      f32-vneg
-      f32-vrelu
-      f32-vrndd
-      f32-vrndne
-      f32-vrndu
-      f32-vrndz
-      f32-vrsqrt
-      f32-vsigmoid
-      f32-vsin
-      f32-vsqr
-      f32-vsqrt
-      f32-vtanh
-      qs8-vlrelu
-      s8-vclamp
-      u8-vclamp)
-  LIST(REMOVE_ITEM MICROKERNEL_VUNARY_TESTS ${SHARDED_TESTS})
-  FOREACH(TEST ${MICROKERNEL_VUNARY_TESTS})
-    ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        GTest::gmock
-        GTest::gtest
-        GTest::gtest_main
-        hardware-config
-        logging
-        microkernels-all
-        microparams-init
-        pthreadpool
-        next-prime
-    )
-    ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
-    SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
-  ENDFOREACH()
-  IF(XNNPACK_TARGET_PROCESSOR MATCHES "^riscv")
-    SHARD_TEST(f32-vclamp-test 10)
-    SHARD_TEST(f32-velu-test 10)
-    SHARD_TEST(f32-vlrelu-test 10)
-    SHARD_TEST(qs8-vlrelu-test 10)
-    SHARD_TEST(qu8-vlrelu-test 10)
-    SHARD_TEST(s8-vclamp-test 10)
-    SHARD_TEST(u8-vclamp-test 10)
-  ENDIF()
-
-  # Special-case
-  IF(XNNPACK_ENABLE_KLEIDIAI)
-    TARGET_LINK_LIBRARIES(x8-packq-test PRIVATE kleidiai)
-  ENDIF()
-
-  ADD_EXECUTABLE(buffer-test test/buffer.cc)
-  TARGET_LINK_LIBRARIES(buffer-test PRIVATE
-    GTest::gmock
-    GTest::gtest
-    GTest::gtest_main
-    datatype
-    XNNPACK)
-  ADD_TEST(NAME buffer-test COMMAND buffer-test)
-  SET_TARGET_PROPERTIES(buffer-test PROPERTIES CXX_EXTENSIONS YES)
-
-  IF(XNNPACK_BUILD_LIBRARY)
-    ADD_EXECUTABLE(weights-cache-test test/weights-cache.cc)
-    TARGET_LINK_LIBRARIES(weights-cache-test PRIVATE XNNPACK pthreadpool GTest::gtest GTest::gtest_main)
-
-    ADD_EXECUTABLE(mutex-test test/mutex.cc)
-    TARGET_LINK_LIBRARIES(mutex-test PRIVATE GTest::gtest GTest::gtest_main pthreadpool)
-    TARGET_LINK_LIBRARIES(mutex-test PRIVATE logging mutex)
-
-    ADD_EXECUTABLE(microkernel-utils-test test/microkernel-utils.cc)
-    TARGET_LINK_LIBRARIES(microkernel-utils-test PRIVATE microkernel-utils hardware-config logging GTest::gtest GTest::gtest_main pthreadpool)
-
-    ADD_EXECUTABLE(operator-utils-test test/operators/operator-utils.cc)
-    TARGET_LINK_LIBRARIES(operator-utils-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main pthreadpool)
-  ENDIF()
+  ADD_SUBDIRECTORY(test)
 ENDIF()
 
 # ---[ XNNPACK microbenchmarks
 IF(XNNPACK_BUILD_BENCHMARKS)
-  # ---[ Build google benchmark
-  IF(NOT TARGET benchmark)
-    IF(XNNPACK_USE_SYSTEM_LIBS)
-      FIND_PACKAGE(benchmark REQUIRED)
-    ELSE()
-      SET(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "")
-      ADD_SUBDIRECTORY(
-        "${GOOGLEBENCHMARK_SOURCE_DIR}"
-        "${CONFU_DEPENDENCIES_BINARY_DIR}/googlebenchmark")
-    ENDIF()
-  ENDIF()
-
-  ADD_LIBRARY(bench-utils STATIC bench/utils.cc)
-  TARGET_LINK_LIBRARIES(bench-utils PRIVATE benchmark::benchmark cpuinfo pthreadpool)
-  TARGET_LINK_LIBRARIES(bench-utils PRIVATE xnnpack-base hardware-config)
-  IF(XNNPACK_BUILD_LIBRARY)
-    TARGET_LINK_LIBRARIES(bench-utils PRIVATE logging memory)
-  ENDIF()
-
-  # Helper libraries
-  ADD_LIBRARY(packq-benchmark STATIC bench/packq-benchmark.cc)
-  TARGET_LINK_LIBRARIES(packq-benchmark PRIVATE XNNPACK benchmark::benchmark bench-utils)
-  IF(XNNPACK_ENABLE_KLEIDIAI)
-    TARGET_LINK_LIBRARIES(packq-benchmark PRIVATE kleidiai)
-  ENDIF()
-
-  ADD_LIBRARY(gemm-benchmark STATIC bench/gemm-benchmark.cc)
-  TARGET_LINK_LIBRARIES(gemm-benchmark PRIVATE XNNPACK benchmark::benchmark bench-utils)
-  IF(XNNPACK_ENABLE_KLEIDIAI)
-    TARGET_LINK_LIBRARIES(gemm-benchmark PUBLIC kleidiai)
-  ENDIF()
-
-  IF(XNNPACK_BUILD_LIBRARY)
-    # ---[ Build end-to-end microbenchmarks
-    ADD_LIBRARY(models STATIC
-      bench/models/fp32-attention.cc
-      bench/models/fp32-depthwise-separable.cc
-      bench/models/fp32-elementwise.cc
-      bench/models/fp32-layer-norm.cc
-      bench/models/fp32-mobilenet-v1.cc
-      bench/models/fp32-mobilenet-v2.cc
-      bench/models/fp32-mobilenet-v3-large.cc
-      bench/models/fp32-mobilenet-v3-small.cc
-      bench/models/qd8-attention.cc
-      bench/models/qs8-mobilenet-v2.cc)
-    SET_TARGET_PROPERTIES(models PROPERTIES CXX_EXTENSIONS YES)
-    TARGET_LINK_LIBRARIES(models PRIVATE XNNPACK)
-
-    ADD_EXECUTABLE(bench-models bench/models/benchmark.cc)
-    TARGET_LINK_LIBRARIES(bench-models PRIVATE
-      bench-utils
-      benchmark::benchmark
-      models
-      XNNPACK)
-
-    # ---[ Build operator-level microbenchmarks
-    SET(LIBRARY_OPERATOR_BENCHMARKS
-        average-pooling
-        batch-matrix-multiply
-        binary
-        convolution
-        deconvolution
-        fully-connected
-        max-pooling
-        prelu
-        resize-bilinear-nhwc
-        scaled-dot-product-attention
-        softmax
-        unary)
-    FOREACH(BENCH ${LIBRARY_OPERATOR_BENCHMARKS})
-      ADD_EXECUTABLE(${BENCH}-bench bench/operators/${BENCH}.cc)
-      TARGET_LINK_LIBRARIES(${BENCH}-bench PRIVATE
-        bench-utils
-        benchmark::benchmark
-        datatype
-        XNNPACK
-      )
-    ENDFOREACH()
-  ENDIF()
-
-  # ---[ Build microkernel-level microbenchmarks
-  SET(MICROKERNEL_BENCHMARKS
-      bf16-gemm
-      f16-conv-hwc2chw
-      f16-dwconv
-      f16-dwconv2d-chw
-      f16-f32acc-gemm
-      f16-f32acc-igemm
-      f16-f32acc-rdsum
-      f16-f32acc-rsum
-      f16-gemm
-      f16-gemm-minmax
-      f16-igemm
-      f16-raddstoreexpminusmax
-      f16-rmax
-      f16-rmin
-      f16-rminmax
-      f16-rsum
-      f16-spmm
-      f32-bgemm
-      f32-conv-hwc
-      f32-conv-hwc2chw
-      f32-dwconv
-      f32-dwconv2d-chw
-      f32-gemm
-      f32-gemm-goi-minmax
-      f32-gemm-minmax
-      f32-igemm
-      f32-qc4w-gemm
-      f32-qc8w-gemm
-      f32-raddexpminusmax
-      f32-raddextexp
-      f32-raddstoreexpminusmax
-      f32-rdsum
-      f32-rmax
-      f32-rmin
-      f32-rminmax
-      f32-rsum
-      f32-softmax
-      f32-spmm
-      f16-vcmul
-      f32-vcmul
-      f32-vscaleexpminusmax
-      f32-vscaleextexp
-      pf32-gemm-minmax
-      qd8-f16-qb4w-gemm
-      qd8-f16-qc4w-gemm
-      qd8-f16-qc8w-gemm
-      qd8-f32-qb4w-gemm
-      qd8-f32-qc4w-gemm
-      qd8-f32-qc8w-gemm
-      qp8-f32-qc4w-gemm
-      qp8-f32-qc8w-gemm
-      qp8-f32-qb4w-gemm
-      qs8-dwconv
-      qs8-gemm
-      qs8-qc8w-gemm-fp32
-      qs8-rdsum
-      qu8-rdsum
-      qs8-rsum
-      qu8-rsum
-      qu8-gemm
-      qu8-gemm-fp32
-      qu8-gemm-rndnu
-      x16-packw
-      x32-packw
-      x8-lut
-      x8-packq
-      x8-packw
-      vunary
-      vbinary
-      xN-transposec
-      xx-transposev)
-  FOREACH(BENCH ${MICROKERNEL_BENCHMARKS})
-    ADD_EXECUTABLE(${BENCH}-bench bench/${BENCH}.cc)
-    IF(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-      # Attempt to work around slow compilation/linking of benchmarks with a lot of functions
-      TARGET_COMPILE_OPTIONS(${BENCH}-bench PRIVATE "-fno-function-sections")
-      TARGET_COMPILE_OPTIONS(${BENCH}-bench PRIVATE "-Os")
-    ENDIF()
-    TARGET_LINK_LIBRARIES(${BENCH}-bench PRIVATE
-      bench-utils
-      benchmark::benchmark
-      gemm-benchmark
-      hardware-config
-      indirection
-      logging
-      microkernels-all
-      microparams-init
-      packing
-      packq-benchmark
-      pthreadpool)
-    SET_TARGET_PROPERTIES(${BENCH}-bench PROPERTIES CXX_EXTENSIONS YES)
-  ENDFOREACH()
-
-  # Special-case
-  IF(XNNPACK_ENABLE_KLEIDIAI)
-    TARGET_LINK_LIBRARIES(x8-packq-bench PRIVATE kleidiai)
-  ENDIF()
+  ADD_SUBDIRECTORY(bench)
 ENDIF()

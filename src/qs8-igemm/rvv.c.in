@@ -42,10 +42,10 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${OUT
     $if DATATYPE in ["QD8"]:
       const int8_t* zero_data,
     $if DATATYPE in ["QD8", "QC4"]:
-      const ${PARAMS_TYPE} params[restrict XNN_MIN_ELEMENTS(1)],
-      const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)])
+      const ${PARAMS_TYPE}* restrict params,
+      const struct xnn_qd8_quantization_params* restrict quantization_params)
     $else:
-      const ${PARAMS_TYPE} params[restrict XNN_MIN_ELEMENTS(1)])
+      const ${PARAMS_TYPE}* restrict params)
 {
   assert(mr != 0);
   assert(mr <= ${MR});
@@ -169,7 +169,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${OUT
       $for M in range(MR):
         vfpacc${M} = __riscv_vfmin_vf_f32${OUT_LMUL}(vfpacc${M}, voutput_max, vl);
 
-      $for M in range(MR):
+      $for M in reversed(range(MR)):
         __riscv_vse32_v_f32${OUT_LMUL}(c${M}, vfpacc${M}, vl);
 
       $for M in reversed(range(MR)):
@@ -212,7 +212,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${OUT
           $for M in range(MR):
             vint8${IN_LMUL}_t vout8${M} = __riscv_vncvt_x_x_w_i8${IN_LMUL}(vout${M}, vl);
 
-          $for M in range(MR):
+          $for M in reversed(range(MR)):
             __riscv_vse8_v_i8${IN_LMUL}(c${M}, vout8${M}, vl);
 
         $for M in reversed(range(MR)):

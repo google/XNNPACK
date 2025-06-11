@@ -28,8 +28,8 @@ static void xnnpack_resize_bilinear(benchmark::State& state) {
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
 
-  xnnpack::Buffer<T> input(in_height * in_width * channels +
-                           XNN_EXTRA_BYTES / sizeof(T));
+  xnnpack::Buffer<T> input(in_height * in_width * channels,
+                           xnnpack::XnnExtraBytes);
   xnnpack::Buffer<T> output(out_height * out_width * channels);
 
   xnnpack::fill_uniform_random_bits(input.data(), input.size(), rng);
@@ -49,10 +49,9 @@ static void xnnpack_resize_bilinear(benchmark::State& state) {
   }
 
   size_t workspace_size = 0;
-  size_t workspace_alignment = 1;
   status = xnn_reshape_resize_bilinear2d_nhwc(
       op, 1, in_height, in_width, channels, channels, channels, &workspace_size,
-      &workspace_alignment, /*threadpool=*/nullptr);
+      /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape ResizeBilinear operator");
     return;

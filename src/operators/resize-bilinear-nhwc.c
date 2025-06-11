@@ -84,9 +84,25 @@ enum xnn_status xnn_create_resize_bilinear2d_nhwc(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nhwc));
     return xnn_status_out_of_memory;
   }
+  const int num_compute_invocations = 2;
+  resize_op->compute = xnn_allocate_zero_memory(num_compute_invocations * sizeof(struct compute_parameters));
+  if (resize_op->compute == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(struct compute_parameters),
+                  xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nhwc));
+    return xnn_status_out_of_memory;
+  }
+  resize_op->num_compute_invocations = num_compute_invocations;
+  resize_op->convolution_op = xnn_allocate_zero_memory(sizeof(struct xnn_convolution_operator));
+  if (resize_op->convolution_op == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(struct xnn_convolution_operator),
+                  xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nhwc));
+    return xnn_status_out_of_memory;
+  }
 
-  resize_op->output_height = output_height;
-  resize_op->output_width = output_width;
+  resize_op->convolution_op->output_height = output_height;
+  resize_op->convolution_op->output_width = output_width;
 
   resize_op->type = xnn_operator_type_resize_bilinear_nhwc;
   resize_op->flags = flags;
@@ -107,7 +123,6 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nhwc(
     size_t input_pixel_stride,
     size_t output_pixel_stride,
     size_t* workspace_size,
-    size_t* workspace_alignment,
     pthreadpool_t threadpool)
 {
   if (resize_op->type != xnn_operator_type_resize_bilinear_nhwc) {
@@ -172,8 +187,8 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nhwc(
 
   const size_t log2_data_element_size = resize_op->ibilinear_config->log2_data_element_size;
   const size_t log2_weight_element_size = resize_op->ibilinear_config->log2_weight_element_size;
-  const size_t output_height = resize_op->output_height;
-  const size_t output_width = resize_op->output_width;
+  const size_t output_height = resize_op->convolution_op->output_height;
+  const size_t output_width = resize_op->convolution_op->output_width;
   const bool enable_transient_indirection = !!(resize_op->flags & XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER);
   const size_t input_pixel_stride_in_bytes = input_pixel_stride << log2_data_element_size;
   const size_t indirection_buffer_size = sizeof(void*) * (output_height * output_width * 4);
@@ -186,7 +201,6 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nhwc(
     // Round up to a multiple of pointer size
     const size_t indirect_input_offset = (packed_weights_size + sizeof(void*) - 1) & ~(sizeof(void*) - 1);
     *workspace_size = indirection_buffer_size + indirect_input_offset;
-    *workspace_alignment = XNN_ALLOCATION_ALIGNMENT;
 
     resize_bilinear_compute_index++;
     resize_op->context.resize_nhwc_indirection_init = (struct resize_bilinear_nhwc_indirection_init_context) {
@@ -211,17 +225,17 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nhwc(
     }
   } else {
     *workspace_size = 0;
-    *workspace_alignment = 1;
 
-    if (output_height * output_width != resize_op->last_output_height * resize_op->last_output_width) {
-      const void** indirection_buffer = (const void**) xnn_reallocate_memory(resize_op->indirection_buffer, indirection_buffer_size);
+    if (output_height * output_width != resize_op->convolution_op->last_output_height * resize_op->convolution_op->last_output_width ||
+        channels != resize_op->convolution_op->last_input_channels) {
+      const void** indirection_buffer = (const void**) xnn_reallocate_memory(resize_op->convolution_op->indirection_buffer, indirection_buffer_size);
       if (indirection_buffer == NULL) {
         xnn_log_error(
             "failed to allocate %zu bytes for %s operator indirection buffer",
             indirection_buffer_size, xnn_operator_type_to_string_v2(resize_op));
         return xnn_status_out_of_memory;
       }
-      resize_op->indirection_buffer = indirection_buffer;
+      resize_op->convolution_op->indirection_buffer = indirection_buffer;
       xnn_log_debug("allocated %zu bytes for indirection buffer in %s operator",
                     indirection_buffer_size,
                     xnn_operator_type_to_string_v2(resize_op));
@@ -237,10 +251,11 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nhwc(
       }
     }
 
-    if (input_height != resize_op->last_input_height ||
-        input_width != resize_op->last_input_width ||
-        output_height != resize_op->last_output_height ||
-        output_width != resize_op->last_output_width)
+    if (input_height != resize_op->convolution_op->last_input_height ||
+        input_width != resize_op->convolution_op->last_input_width ||
+        output_height != resize_op->convolution_op->last_output_height ||
+        output_width != resize_op->convolution_op->last_output_width ||
+        channels != resize_op->convolution_op->last_input_channels)
     {
       const uint32_t flags = resize_op->flags;
       // Set a dummy input first, the actual input offset is calculated in setup when we have the input pointer.
@@ -250,15 +265,16 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nhwc(
         input_pixel_stride_in_bytes,
         input_height, input_width,
         output_height, output_width,
-        dummy_input, resize_op->indirection_buffer, resize_op->packed_weights.pointer,
+        dummy_input, resize_op->convolution_op->indirection_buffer, resize_op->packed_weights.pointer,
         !!(flags & XNN_FLAG_ALIGN_CORNERS),
         !!(flags & XNN_FLAG_TENSORFLOW_LEGACY_MODE));
 
-      resize_op->last_input = dummy_input;
-      resize_op->last_input_height = input_height;
-      resize_op->last_input_width = input_width;
-      resize_op->last_output_height = output_height;
-      resize_op->last_output_width = output_width;
+      resize_op->convolution_op->last_input = dummy_input;
+      resize_op->convolution_op->last_input_height = input_height;
+      resize_op->convolution_op->last_input_width = input_width;
+      resize_op->convolution_op->last_output_height = output_height;
+      resize_op->convolution_op->last_output_width = output_width;
+      resize_op->convolution_op->last_input_channels = channels;
     }
   }
 
@@ -268,7 +284,7 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nhwc(
   assert(resize_op->weights_cache == NULL);
   resize_op->context.resize_bilinear = (struct resize_bilinear_context) {
     .scaled_channels = channels << log2_data_element_size,
-    .indirect_input = resize_op->indirection_buffer,
+    .indirect_input = resize_op->convolution_op->indirection_buffer,
     .input_batch_stride = input_pixel_stride_in_bytes * input_height * input_width,
     .packed_weights = resize_op->packed_weights.pointer,
     .output_pixel_stride = output_pixel_stride_in_bytes,
@@ -343,7 +359,7 @@ enum xnn_status xnn_setup_resize_bilinear2d_nhwc(
     resize_op->context.resize_nhwc_indirection_init.buffer = (const void**) workspace;
     resize_op->context.resize_nhwc_indirection_init.input = input;
   } else {
-    resize_op->context.resize_bilinear.input_offset = (size_t) ((uintptr_t) input - (uintptr_t) resize_op->last_input);
+    resize_op->context.resize_bilinear.input_offset = (size_t) ((uintptr_t) input - (uintptr_t) resize_op->convolution_op->last_input);
   }
   resize_op->context.resize_bilinear.output = output;
 

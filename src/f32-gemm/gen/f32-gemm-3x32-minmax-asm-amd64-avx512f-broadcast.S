@@ -86,19 +86,20 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_3x32__asm_amd64_avx512f_broadcast
       add r11, 4
       cmp rdx, r11
       jne .Linner_loop
+
 .Linner_loop_end:
       # Min/max clamping.
       vminps  zmm11, zmm1, zmm11
-      vminps  zmm12, zmm1, zmm12
       vminps  zmm13, zmm1, zmm13
-      vminps  zmm14, zmm1, zmm14
       vminps  zmm15, zmm1, zmm15
+      vminps  zmm12, zmm1, zmm12
+      vminps  zmm14, zmm1, zmm14
       vminps  zmm16, zmm1, zmm16
       vmaxps  zmm11, zmm0, zmm11
-      vmaxps  zmm12, zmm0, zmm12
       vmaxps  zmm13, zmm0, zmm13
-      vmaxps  zmm14, zmm0, zmm14
       vmaxps  zmm15, zmm0, zmm15
+      vmaxps  zmm12, zmm0, zmm12
+      vmaxps  zmm14, zmm0, zmm14
       vmaxps  zmm16, zmm0, zmm16
 
       # Check whether full or partial store.

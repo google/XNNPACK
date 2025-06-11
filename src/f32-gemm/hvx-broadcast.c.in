@@ -20,7 +20,7 @@ void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_minmax_params* restrict params)
 {
   assert(mr != 0);
   assert(mr <= ${MR});
@@ -54,7 +54,7 @@ void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
 
   do {
     $for N in range(0, NR, 32):
-        HVX_Vector vacc0x${N//32} = xnn_load_f32(w + ${N});
+        HVX_Vector vacc0x${N//32} = Q6_Vqf32_vadd_Vqf32Vsf(Q6_V_vzero(), xnn_load_f32(w + ${N}));
     $for M in range(1, MR):
       $for N in range(0, NR, 32):
         HVX_Vector vacc${M}x${N//32} = vacc0x${N//32};
@@ -66,17 +66,24 @@ void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}__hvx_broadcast(
         const HVX_Vector va${M} = xnn_set1_f32(*a${M});
         a${M} += 1;
 
-      const HVX_Vector vb0 = *((const HVX_Vector *)(w));
-      $for N in range(32, NR, 32):
+      $for N in range(0, NR, 32):
         const HVX_Vector vb${N//32} = *((const HVX_Vector *)(w + ${N}));
       w += ${NR};
 
       $for N in range(0, NR, 32):
         $for M in range(MR):
-            vacc${M}x${N//32} = xnn_fmadd_f32(va${M}, vb${N//32}, vacc${M}x${N//32});
+          const HVX_Vector vtemp${M}x${N//32} = Q6_Vqf32_vmpy_VsfVsf(va${M}, vb${N//32});
+
+      $for N in range(0, NR, 32):
+        $for M in range(MR):
+          vacc${M}x${N//32} = Q6_Vqf32_vadd_Vqf32Vqf32(vacc${M}x${N//32}, vtemp${M}x${N//32});
 
       k -= sizeof(float);
     } while (k != 0);
+
+    $for N in range(0, NR, 32):
+      $for M in range(MR):
+        vacc${M}x${N//32} = Q6_Vsf_equals_Vqf32(vacc${M}x${N//32});
 
     HVX_Vector vmin = xnn_set1_f32(params->scalar.min);
     $for N in range(0, NR, 32):

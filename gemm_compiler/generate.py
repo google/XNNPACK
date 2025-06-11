@@ -14,43 +14,44 @@ def generate_gemm_microkernel(
     isa: base_architecture.BaseArchitecture, output_file: str
 ):
   """Shared logic for assembly gemm microkernel generation."""
-  asm_string = isa.header()
+  isa.header()
 
   # adjust inner loop
-  asm_string += isa.adjust_kc()
+  isa.adjust_kc()
 
   # setup a{1}->a{M-1} & c{1]->c{M-1}registers
-  asm_string += isa.input_output_register_setup()
+  isa.input_output_register_setup()
 
   ## Pre outer loop preparation
-  asm_string += isa.outer_loop_prepare()
+  isa.outer_loop_prepare()
 
   ## the outer loop label
-  asm_string += '\n.Louter_loop:\n'
-  asm_string += '# Initialize k counter.\n'
-  asm_string += isa.initialize_k_register()
+  isa.label('outer_loop')
+  isa.comment('Initialize k counter.')
+  isa.initialize_k_register()
 
   ## Read a registers from the stack if required
-  asm_string += isa.read_a_registers()
+  isa.read_a_registers()
 
   ## Initialize accumulators
-  asm_string += isa.init_accumulators()
+  isa.init_accumulators()
 
   ## inner loop
-  asm_string += isa.inner_loop()
+  isa.inner_loop()
 
-  asm_string += '.Linner_loop_end:\n'
-  asm_string += isa.dequantize()
+  isa.label('inner_loop_end')
+  isa.convert_to_output_type()
 
   ## min/max clamping
-  asm_string += '# Min/max clamping.\n'
-  asm_string += isa.clamp()
+  isa.comment('Min/max clamping.')
+  isa.clamp()
 
   ## store
-  asm_string += isa.store()
+  isa.store()
 
-  asm_string += isa.epilogue()
+  isa.epilogue()
 
+  asm_string = isa.get_string()
   # Correctly indent the generated assembly.
   lines = asm_string.splitlines()
   stripped_lines = [line.lstrip() for line in lines]

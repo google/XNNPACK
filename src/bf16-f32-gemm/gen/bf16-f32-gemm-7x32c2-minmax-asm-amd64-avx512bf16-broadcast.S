@@ -199,96 +199,97 @@ BEGIN_FUNCTION xnn_bf16_f32_gemm_minmax_ukernel_7x32c2__asm_amd64_avx512bf16_bro
       add r9, 128
       vbroadcastss zmm2, DWORD PTR [rcx + r11]
       vpslld zmm2, zmm2, 16
-      vpsrad zmm2, zmm2, 16
+      vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm11, zmm2, zmm7
 
       vpslld zmm2, zmm2, 16
-      vpsrad zmm2, zmm2, 16
+      vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm18, zmm2, zmm8
 
       vbroadcastss zmm2, DWORD PTR [rax + r11]
       vpslld zmm2, zmm2, 16
-      vpsrad zmm2, zmm2, 16
+      vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm12, zmm2, zmm7
 
       vpslld zmm2, zmm2, 16
-      vpsrad zmm2, zmm2, 16
+      vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm19, zmm2, zmm8
 
       vbroadcastss zmm2, DWORD PTR [r15 + r11]
       vpslld zmm2, zmm2, 16
-      vpsrad zmm2, zmm2, 16
+      vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm13, zmm2, zmm7
 
       vpslld zmm2, zmm2, 16
-      vpsrad zmm2, zmm2, 16
+      vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm20, zmm2, zmm8
 
       vbroadcastss zmm2, DWORD PTR [r14 + r11]
       vpslld zmm2, zmm2, 16
-      vpsrad zmm2, zmm2, 16
+      vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm14, zmm2, zmm7
 
       vpslld zmm2, zmm2, 16
-      vpsrad zmm2, zmm2, 16
+      vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm21, zmm2, zmm8
 
       vbroadcastss zmm2, DWORD PTR [r12 + r11]
       vpslld zmm2, zmm2, 16
-      vpsrad zmm2, zmm2, 16
+      vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm15, zmm2, zmm7
 
       vpslld zmm2, zmm2, 16
-      vpsrad zmm2, zmm2, 16
+      vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm22, zmm2, zmm8
 
       vbroadcastss zmm2, DWORD PTR [r10 + r11]
       vpslld zmm2, zmm2, 16
-      vpsrad zmm2, zmm2, 16
+      vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm16, zmm2, zmm7
 
       vpslld zmm2, zmm2, 16
-      vpsrad zmm2, zmm2, 16
+      vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm23, zmm2, zmm8
 
       vbroadcastss zmm2, DWORD PTR [r13 + r11]
       vpslld zmm2, zmm2, 16
-      vpsrad zmm2, zmm2, 16
+      vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm17, zmm2, zmm7
 
       vpslld zmm2, zmm2, 16
-      vpsrad zmm2, zmm2, 16
+      vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm24, zmm2, zmm8
+
 
 .Linner_loop_end:
       # Min/max clamping.
       vminps  zmm11, zmm1, zmm11
-      vminps  zmm12, zmm1, zmm12
       vminps  zmm13, zmm1, zmm13
-      vminps  zmm14, zmm1, zmm14
       vminps  zmm15, zmm1, zmm15
-      vminps  zmm16, zmm1, zmm16
       vminps  zmm17, zmm1, zmm17
-      vminps  zmm18, zmm1, zmm18
       vminps  zmm19, zmm1, zmm19
-      vminps  zmm20, zmm1, zmm20
       vminps  zmm21, zmm1, zmm21
-      vminps  zmm22, zmm1, zmm22
       vminps  zmm23, zmm1, zmm23
+      vminps  zmm12, zmm1, zmm12
+      vminps  zmm14, zmm1, zmm14
+      vminps  zmm16, zmm1, zmm16
+      vminps  zmm18, zmm1, zmm18
+      vminps  zmm20, zmm1, zmm20
+      vminps  zmm22, zmm1, zmm22
       vminps  zmm24, zmm1, zmm24
       vmaxps  zmm11, zmm0, zmm11
-      vmaxps  zmm12, zmm0, zmm12
       vmaxps  zmm13, zmm0, zmm13
-      vmaxps  zmm14, zmm0, zmm14
       vmaxps  zmm15, zmm0, zmm15
-      vmaxps  zmm16, zmm0, zmm16
       vmaxps  zmm17, zmm0, zmm17
-      vmaxps  zmm18, zmm0, zmm18
       vmaxps  zmm19, zmm0, zmm19
-      vmaxps  zmm20, zmm0, zmm20
       vmaxps  zmm21, zmm0, zmm21
-      vmaxps  zmm22, zmm0, zmm22
       vmaxps  zmm23, zmm0, zmm23
+      vmaxps  zmm12, zmm0, zmm12
+      vmaxps  zmm14, zmm0, zmm14
+      vmaxps  zmm16, zmm0, zmm16
+      vmaxps  zmm18, zmm0, zmm18
+      vmaxps  zmm20, zmm0, zmm20
+      vmaxps  zmm22, zmm0, zmm22
       vmaxps  zmm24, zmm0, zmm24
 
       # Pop output pointers from the stack.

@@ -3,6 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+// clang-format off
+
 #pragma once
 
 #include <benchmark/benchmark.h>
@@ -24,7 +26,7 @@
   BENCHMARK_CAPTURE(bgemm_fn, name_prefix##sd1x_text_encoder, "SD1.X Text Encoder", __VA_ARGS__)->Apply(SD1XTextEncoderBgemmArguments)->UseRealTime();
 
 
-static void AlbertBgemmArguments(benchmark::internal::Benchmark* b) {
+inline void AlbertBgemmArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"B", "M", "N", "K"});
 
   /*        B   M    N    K  */
@@ -32,7 +34,7 @@ static void AlbertBgemmArguments(benchmark::internal::Benchmark* b) {
   b->Args({12, 384, 384,  64});
 }
 
-static void MobilebertBgemmArguments(benchmark::internal::Benchmark* b) {
+inline void MobilebertBgemmArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"B", "M", "N", "K"});
 
   /*       B   M    N    K  */
@@ -40,7 +42,7 @@ static void MobilebertBgemmArguments(benchmark::internal::Benchmark* b) {
   b->Args({4, 384, 384,  32});
 }
 
-static void SD1XDiffusionBgemmArguments(benchmark::internal::Benchmark* b) {
+inline void SD1XDiffusionBgemmArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"B", "M", "N", "K"});
 
   /*       B    M     N     K */
@@ -62,7 +64,7 @@ static void SD1XDiffusionBgemmArguments(benchmark::internal::Benchmark* b) {
   b->Args({8,   64,  160,   77});
 }
 
-static void SD1XEncoderDecoderBgemmArguments(benchmark::internal::Benchmark* b) {
+inline void SD1XEncoderDecoderBgemmArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"B", "M", "N", "K"});
 
   /*       B    M     N     K */
@@ -70,7 +72,7 @@ static void SD1XEncoderDecoderBgemmArguments(benchmark::internal::Benchmark* b) 
   b->Args({1,  512, 4096, 4096});
 }
 
-static void SD1XTextEncoderBgemmArguments(benchmark::internal::Benchmark* b) {
+inline void SD1XTextEncoderBgemmArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"B", "M", "N", "K"});
 
   /*       B   M    N   K */
@@ -78,7 +80,7 @@ static void SD1XTextEncoderBgemmArguments(benchmark::internal::Benchmark* b) {
   b->Args({12, 77, 64, 77});
 }
 
-static void QD8AttentionBgemmArguments(benchmark::internal::Benchmark* b) {
+inline void QD8AttentionBgemmArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"B", "M", "N", "K"});
 
   /*       B      M    N   K */

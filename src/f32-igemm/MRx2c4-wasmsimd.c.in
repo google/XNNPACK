@@ -34,7 +34,7 @@ void xnn_f32_igemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}c4__${ISA}${ARCH_SUFFI
     size_t cn_stride,
     size_t a_offset,
     const float* zero,
-    const ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const ${PARAMS}* restrict params) XNN_OOB_READS
 {
   assert(mr != 0);
   assert(mr <= ${MR});

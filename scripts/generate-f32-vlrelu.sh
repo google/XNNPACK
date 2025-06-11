@@ -9,11 +9,6 @@ tools/xngen src/f32-vlrelu/scalar.c.in -D BATCH_TILE=1 -D WASM=0 -o src/f32-vlre
 tools/xngen src/f32-vlrelu/scalar.c.in -D BATCH_TILE=2 -D WASM=0 -o src/f32-vlrelu/gen/f32-vlrelu-scalar-u2.c &
 tools/xngen src/f32-vlrelu/scalar.c.in -D BATCH_TILE=4 -D WASM=0 -o src/f32-vlrelu/gen/f32-vlrelu-scalar-u4.c &
 
-##################################### WAsm ####################################
-tools/xngen src/f32-vlrelu/wasm.c.in -D BATCH_TILE=1 -D WASM=1 -o src/f32-vlrelu/gen/f32-vlrelu-wasm-u1.c &
-tools/xngen src/f32-vlrelu/wasm.c.in -D BATCH_TILE=2 -D WASM=1 -o src/f32-vlrelu/gen/f32-vlrelu-wasm-u2.c &
-tools/xngen src/f32-vlrelu/wasm.c.in -D BATCH_TILE=4 -D WASM=1 -o src/f32-vlrelu/gen/f32-vlrelu-wasm-u4.c &
-
 ################################## WAsm SIMD ##################################
 tools/xngen src/f32-vlrelu/wasmsimd-laneselect.c.in -D BATCH_TILE=4 -D RELAXED=0 -o src/f32-vlrelu/gen/f32-vlrelu-wasmsimd-laneselect-u4.c &
 tools/xngen src/f32-vlrelu/wasmsimd-laneselect.c.in -D BATCH_TILE=8 -D RELAXED=0 -o src/f32-vlrelu/gen/f32-vlrelu-wasmsimd-laneselect-u8.c &

@@ -28,7 +28,7 @@ void xnn_${DATATYPE_SPEC}_gemm${SUFFIX}_ukernel_${MR}x${LMUL}v__rvv(
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)])
+    const ${PARAMS}* restrict params)
 {
   assert(mr != 0);
   assert(mr <= ${MR});

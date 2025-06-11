@@ -65,7 +65,7 @@ void TestImpl(const Param& p) {
       std::vector<size_t> input_shape = expected_shape;
       input_shape[axis] *= p.num_outputs;
 
-      Tensor<T> input(input_shape, PaddingBytes{XNN_EXTRA_BYTES});
+      Tensor<T> input(input_shape, xnnpack::XnnExtraBytes);
       DatatypeGenerator<T> generator(quantization);
       input.generate([&]() { return generator(rng); });
 

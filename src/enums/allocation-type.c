@@ -12,7 +12,7 @@
 const char* xnn_allocation_type_to_string(enum xnn_allocation_type allocation_type) {
   switch(allocation_type) {
   #define XNN_ENUM_ITEM(enum_name, enum_string) case enum_name: return enum_string;
-  #include "src/xnnpack/allocation-type-defs.h"
+  #include "src/xnnpack/allocation-type-defs.inc"
   default:
     XNN_UNREACHABLE;
   #undef XNN_ENUM_ITEM

@@ -32,7 +32,7 @@ static void init_f16_raddstoreexpminusmax_config(void) {
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_raddstoreexpminusmax_config.ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u32;
     }
-  #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
+  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_avx2) {
@@ -48,7 +48,7 @@ static void init_f32_raddstoreexpminusmax_config(void) {
     if (hardware_config->use_arm_neon) {
       f32_raddstoreexpminusmax_config.ukernel =
         (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__neonfma_rr1_lut64_p2_u16_acc2;
-    } else if (!XNN_PLATFORM_MOBILE) {
+    } else {
       f32_raddstoreexpminusmax_config.ukernel =
         (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_u4_acc2;
     }
@@ -59,12 +59,12 @@ static void init_f32_raddstoreexpminusmax_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+      if (hardware_config->use_x86_avx512f) {
         f32_raddstoreexpminusmax_config.ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr2_p5_u64_acc2;
       } else
     #endif
     #if XNN_ENABLE_AVX256SKX
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx256skx) {
+      if (hardware_config->use_x86_avx256skx) {
         f32_raddstoreexpminusmax_config.ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__avx256skx_rr2_p5_u32_acc2;
       } else
     #endif
@@ -82,17 +82,18 @@ static void init_f32_raddstoreexpminusmax_config(void) {
         (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_u16_acc2;
     #endif
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     f32_raddstoreexpminusmax_config.ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__rvv_rr2_p6_u4v;
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    f32_raddstoreexpminusmax_config.ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u128_acc2;
   #else
     f32_raddstoreexpminusmax_config.ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_u4_acc2;
   #endif
 }
 
-static bool is_f16_compatible_config(const struct xnn_hardware_config hardware_config[restrict XNN_MIN_ELEMENTS(1)]) {
+static bool is_f16_compatible_config(const struct xnn_hardware_config* hardware_config) {
   #if (XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR) || (XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR)
     return hardware_config->use_arm_neon_fp16_arith;
-  #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
+  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     return hardware_config->use_x86_avx2;
   #else
     return false;

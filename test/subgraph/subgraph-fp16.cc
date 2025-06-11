@@ -20,6 +20,7 @@
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/node-type.h"
+#include "src/xnnpack/operator.h"
 #include "src/xnnpack/subgraph.h"
 #include "test/replicable_random_device.h"
 #include "test/subgraph/mock-allocator.h"
@@ -579,8 +580,8 @@ TEST(SUBGRAPH_FP16, fully_connected_qd8_f16_qc8w) {
   int8_t static_filter_data[6 + XNN_EXTRA_BYTES / sizeof(int8_t)] = {
       1, 2, 3, -3, -2, -1,
   };
-  float bias[2] = {1, 2};
-  float kernel_scale[2] = {0.5f, 1.5f};
+  float bias[2 + XNN_EXTRA_BYTES / sizeof(float)] = {1, 2};
+  float kernel_scale[2 + XNN_EXTRA_BYTES / sizeof(float)] = {0.5f, 1.5f};
   // external input[0]   bias [2]   static filter [1]
   //        |              /        /
   //  [convert f32->qd8]  /        /
@@ -596,8 +597,9 @@ TEST(SUBGRAPH_FP16, fully_connected_qd8_f16_qc8w) {
   const uint32_t fully_connected_out_id = 4;
   tester.AddInputTensorF32({5, 3}, input_id)
       .AddDynamicallyQuantizedTensor({5, 3}, converted_input_id, /*flags=*/0)
-      .AddStaticTensorQS8({2, 3}, TensorType::kDense, &kernel_scale[0],
-                          filter_id, /*flags=*/0, static_filter_data)
+      .AddStaticTensorQS8({2, 3}, /*channel_dim=*/0, TensorType::kDense,
+                          &kernel_scale[0], filter_id, /*flags=*/0,
+                          static_filter_data)
       .AddStaticTensorF32({2}, TensorType::kDense, bias_id, /*flags=*/0,
                           &bias[0])
       .AddOutputTensorF32({5, 2}, fully_connected_out_id)
@@ -625,8 +627,9 @@ TEST(SUBGRAPH_FP16, fully_connected_qd8_f16_qc8w) {
 
   reference_tester.AddInputTensorF32({5, 3}, input_id)
       .AddDynamicallyQuantizedTensor({5, 3}, converted_input_id, /*flags=*/0)
-      .AddStaticTensorQS8({2, 3}, TensorType::kDense, &kernel_scale[0],
-                          filter_id, /*flags=*/0, static_filter_data)
+      .AddStaticTensorQS8({2, 3}, /*channel_dim=*/0, TensorType::kDense,
+                          &kernel_scale[0], filter_id, /*flags=*/0,
+                          static_filter_data)
       .AddStaticTensorF32({2}, TensorType::kDense, bias_id, /*flags=*/0,
                           &bias[0])
       .AddOutputTensorF32({5, 2}, fully_connected_out_id)
@@ -640,10 +643,29 @@ TEST(SUBGRAPH_FP16, fully_connected_qd8_f16_qc8w) {
   xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.f, 1.f),
                           std::ref(rng));
-  xnnpack::Buffer<float> input(15 + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> input(15, xnnpack::XnnExtraBytes);
   std::generate(input.begin(), input.end(), std::ref(f32rng));
   xnnpack::Buffer<float> reference_output(10), output(10);
-  ASSERT_EQ(tester.NumNodes(), 4);
+
+  switch (tester.NumNodes()) {
+    case 3:
+      // LHS packing was inlined.
+      ASSERT_EQ(tester.Node(0)->type, xnn_node_type_convert);
+      ASSERT_EQ(tester.Node(1)->type, xnn_node_type_fully_connected);
+      ASSERT_EQ(tester.Node(2)->type, xnn_node_type_convert);
+      ASSERT_TRUE(tester.Node(1)->flags & XNN_FLAG_INLINE_LHS_PACKING);
+      break;
+    case 4:
+      ASSERT_EQ(tester.Node(0)->type, xnn_node_type_convert);
+      ASSERT_EQ(tester.Node(1)->type, xnn_node_type_convert);
+      ASSERT_EQ(tester.Node(2)->type, xnn_node_type_fully_connected);
+      ASSERT_EQ(tester.Node(3)->type, xnn_node_type_convert);
+      break;
+    default:
+      GTEST_FAIL() << "Expected either 3 (inlined LHS packing) or 4 (no "
+                      "inlined LHS packing) nodes, but got "
+                   << tester.NumNodes() << ".";
+  }
 
   xnn_runtime_t fp16_runtime_ptr = nullptr;
   xnn_status status =
@@ -1149,8 +1171,7 @@ TEST(SUBGRAPH_FP16_BATCH_MATRIX_MULTIPLY, with_non_static_value) {
   //                  |
   //               external
   //               output[2]
-  tester
-      .AddInputTensorF32({1, 2, 2, 3}, 0)
+  tester.AddInputTensorF32({1, 2, 2, 3}, 0)
       .AddInputTensorF32({1, 1, 1, 3}, 1)
       .AddOutputTensorF32({1, 2, 2, 3}, 2)
       .AddBatchMatrixMultiply(0, 1, 2, 0)

@@ -3,7 +3,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-
 #include <cstddef>
 #include <string>
 
@@ -16,24 +15,24 @@
 namespace {
 
 struct XnnTestParam {
-  const char *name;
+  const char* name;
   xnn_x8_packq_f32qp8_ukernel_fn ukernel;
   uint64_t arch_flags;
   int unroll;
 };
 
-class XnnTest : public testing::TestWithParam<XnnTestParam> {
-};
+class XnnTest : public testing::TestWithParam<XnnTestParam> {};
 
-std::string GetTestName(const testing::TestParamInfo<XnnTest::ParamType>& info) {
+std::string GetTestName(
+    const testing::TestParamInfo<XnnTest::ParamType>& info) {
   return info.param.name;
 }
 
 #define XNN_UKERNEL(arch_flags, ukernel, unroll) \
-  { #ukernel, ukernel, arch_flags, unroll },
+  {#ukernel, ukernel, arch_flags, unroll},
 
 const XnnTestParam xnn_test_params[] = {
-#include "src/x8-packq/x8-packq.h"
+#include "src/x8-packq/x8-packq.inc"
 };
 
 #undef XNN_UKERNEL
@@ -70,10 +69,7 @@ TEST_P(XnnTest, k_div_kr_m_lt_mr) {
   }
 }
 
-INSTANTIATE_TEST_SUITE_P(x8_packq,
-                         XnnTest,
-                         testing::ValuesIn(xnn_test_params),
+INSTANTIATE_TEST_SUITE_P(x8_packq, XnnTest, testing::ValuesIn(xnn_test_params),
                          GetTestName);
 
-} // namespace xnnpack
-
+}  // namespace xnnpack

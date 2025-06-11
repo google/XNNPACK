@@ -69,6 +69,14 @@ static enum xnn_status create_slice_nd(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
     goto error;
   }
+  slice_op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
+  if (slice_op->compute == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(struct compute_parameters),
+                  xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
+  slice_op->num_compute_invocations = 1;
 
   init_slice_nd(flags, operator_type, copy_config, slice_op);
 
@@ -145,11 +153,9 @@ static enum xnn_status reshape_slice_nd(
   }
 
   for (size_t i = 0; i < num_dims; i++) {
-    if (input_shape[i] == 0) {
-      xnn_log_error(
-          "failed to reshape %s operator: input shape dimension #%zu is zero",
-          xnn_operator_type_to_string_v2(slice_op), i);
-      return xnn_status_invalid_parameter;
+    if (sizes[i] == 0) {
+      slice_op->state = xnn_run_state_skip;
+      return xnn_status_success;
     }
     if (offsets[i] >= input_shape[i]) {
       xnn_log_error(
@@ -166,7 +172,7 @@ static enum xnn_status reshape_slice_nd(
           input_shape[i]);
       return xnn_status_unsupported_parameter;
     }
-    if (sizes[i] > 0 && offsets[i] + sizes[i] > input_shape[i]) {
+    if (offsets[i] + sizes[i] > input_shape[i]) {
       xnn_log_error(
           "failed to reshape %s operator with %zu offsets[%zu] and %zu "
           "sizes[%zu]: offset + size <= %zu",
@@ -396,12 +402,21 @@ static enum xnn_status xnn_run_slice_nd(
 {
   struct xnn_operator slice_op;
   memset(&slice_op, 0, sizeof(slice_op));
+  slice_op.compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
+  if (slice_op.compute == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(struct compute_parameters),
+                  xnn_operator_type_to_string(operator_type));
+    return xnn_status_out_of_memory;
+  }
+  slice_op.num_compute_invocations = 1;
 
   const struct xnn_unary_elementwise_config* copy_config = xnn_init_xx_copy_config();
   if (copy_config == NULL) {
     xnn_log_error(
         "failed to run %s operator: unsupported hardware configuration",
         xnn_operator_type_to_string(operator_type));
+    xnn_destroy_operator(&slice_op);
     return xnn_status_unsupported_hardware;
   }
 
@@ -414,6 +429,7 @@ static enum xnn_status xnn_run_slice_nd(
     threadpool);
 
   if (status != xnn_status_success){
+    xnn_destroy_operator(&slice_op);
     return status;
   }
 
@@ -422,10 +438,13 @@ static enum xnn_status xnn_run_slice_nd(
     input, output);
 
   if (status != xnn_status_success){
+    xnn_destroy_operator(&slice_op);
     return status;
   }
 
-  return xnn_run_operator(&slice_op, threadpool);
+  status = xnn_run_operator(&slice_op, threadpool);
+  xnn_destroy_operator(&slice_op);
+  return status;
 }
 
 enum xnn_status xnn_run_slice_nd_x32(

@@ -17,8 +17,8 @@
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
-#include "src/xnnpack/math.h"
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/math.h"
 #include "test/replicable_random_device.h"
 
 class CopyOperatorTester {
@@ -29,9 +29,7 @@ class CopyOperatorTester {
     return *this;
   }
 
-  size_t channels() const {
-    return this->channels_;
-  }
+  size_t channels() const { return this->channels_; }
 
   CopyOperatorTester& input_stride(size_t input_stride) {
     assert(input_stride != 0);
@@ -69,27 +67,26 @@ class CopyOperatorTester {
     return *this;
   }
 
-  size_t batch_size() const {
-    return this->batch_size_;
-  }
+  size_t batch_size() const { return this->batch_size_; }
 
   CopyOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
 
-  size_t iterations() const {
-    return this->iterations_;
-  }
+  size_t iterations() const { return this->iterations_; }
 
   void TestX8() const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<uint32_t> u8dist(
-      std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
+        std::numeric_limits<uint8_t>::min(),
+        std::numeric_limits<uint8_t>::max());
 
-    xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
-      (batch_size() - 1) * input_stride() + channels());
-    xnnpack::Buffer<uint8_t> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<uint8_t> input(
+        (batch_size() - 1) * input_stride() + channels(),
+        xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<uint8_t> output((batch_size() - 1) * output_stride() +
+                                    channels());
     xnnpack::Buffer<uint8_t> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
@@ -105,24 +102,29 @@ class CopyOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t copy_op = nullptr;
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_create_copy_nc_x8(
-          0, &copy_op));
+      ASSERT_EQ(xnn_status_success, xnn_create_copy_nc_x8(0, &copy_op));
       ASSERT_NE(nullptr, copy_op);
 
       // Smart pointer to automatically delete copy_op.
-      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_copy_op(copy_op, xnn_delete_operator);
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+          auto_copy_op(copy_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x8(copy_op, batch_size(),
-          channels(), input_stride(), output_stride(), /*threadpool=*/nullptr));
-      ASSERT_EQ(xnn_status_success, xnn_setup_copy_nc_x8(copy_op, input.data(), output.data()));
-      ASSERT_EQ(xnn_status_success, xnn_run_operator(copy_op, /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success,
+                xnn_reshape_copy_nc_x8(copy_op, batch_size(), channels(),
+                                       input_stride(), output_stride(),
+                                       /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success,
+                xnn_setup_copy_nc_x8(copy_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success,
+                xnn_run_operator(copy_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          EXPECT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
-            << "at batch " << i << " / " << batch_size() << ", channel = " << c << " / " << channels();
+          EXPECT_EQ(output_ref[i * channels() + c],
+                    output[i * output_stride() + c])
+              << "at batch " << i << " / " << batch_size()
+              << ", channel = " << c << " / " << channels();
         }
       }
     }
@@ -132,9 +134,11 @@ class CopyOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<uint16_t> u16dist;
 
-    xnnpack::Buffer<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
-      (batch_size() - 1) * input_stride() + channels());
-    xnnpack::Buffer<uint16_t> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<uint16_t> input(
+        (batch_size() - 1) * input_stride() + channels(),
+        xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<uint16_t> output((batch_size() - 1) * output_stride() +
+                                     channels());
     xnnpack::Buffer<uint16_t> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u16dist(rng); });
@@ -150,24 +154,29 @@ class CopyOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t copy_op = nullptr;
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_create_copy_nc_x16(
-          0, &copy_op));
+      ASSERT_EQ(xnn_status_success, xnn_create_copy_nc_x16(0, &copy_op));
       ASSERT_NE(nullptr, copy_op);
 
       // Smart pointer to automatically delete copy_op.
-      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_copy_op(copy_op, xnn_delete_operator);
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+          auto_copy_op(copy_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x16(copy_op, batch_size(),
-          channels(), input_stride(), output_stride(), /*threadpool=*/nullptr));
-      ASSERT_EQ(xnn_status_success, xnn_setup_copy_nc_x16(copy_op, input.data(), output.data()));
-      ASSERT_EQ(xnn_status_success, xnn_run_operator(copy_op, /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success,
+                xnn_reshape_copy_nc_x16(copy_op, batch_size(), channels(),
+                                        input_stride(), output_stride(),
+                                        /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success,
+                xnn_setup_copy_nc_x16(copy_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success,
+                xnn_run_operator(copy_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          EXPECT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
-            << "at batch " << i << " / " << batch_size() << ", channel = " << c << " / " << channels();
+          EXPECT_EQ(output_ref[i * channels() + c],
+                    output[i * output_stride() + c])
+              << "at batch " << i << " / " << batch_size()
+              << ", channel = " << c << " / " << channels();
         }
       }
     }
@@ -177,9 +186,11 @@ class CopyOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<uint32_t> u32dist;
 
-    xnnpack::Buffer<uint32_t> input(XNN_EXTRA_BYTES / sizeof(uint32_t) +
-      (batch_size() - 1) * input_stride() + channels());
-    xnnpack::Buffer<uint32_t> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<uint32_t> input(
+        (batch_size() - 1) * input_stride() + channels(),
+        xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<uint32_t> output((batch_size() - 1) * output_stride() +
+                                     channels());
     xnnpack::Buffer<uint32_t> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u32dist(rng); });
@@ -195,24 +206,29 @@ class CopyOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t copy_op = nullptr;
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_create_copy_nc_x32(
-          0, &copy_op));
+      ASSERT_EQ(xnn_status_success, xnn_create_copy_nc_x32(0, &copy_op));
       ASSERT_NE(nullptr, copy_op);
 
       // Smart pointer to automatically delete copy_op.
-      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_copy_op(copy_op, xnn_delete_operator);
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+          auto_copy_op(copy_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x32(copy_op, batch_size(),
-          channels(), input_stride(), output_stride(), /*threadpool=*/nullptr));
-      ASSERT_EQ(xnn_status_success, xnn_setup_copy_nc_x32(copy_op, input.data(), output.data()));
-      ASSERT_EQ(xnn_status_success, xnn_run_operator(copy_op, /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success,
+                xnn_reshape_copy_nc_x32(copy_op, batch_size(), channels(),
+                                        input_stride(), output_stride(),
+                                        /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success,
+                xnn_setup_copy_nc_x32(copy_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success,
+                xnn_run_operator(copy_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          EXPECT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
-            << "at batch " << i << " / " << batch_size() << ", channel = " << c << " / " << channels();
+          EXPECT_EQ(output_ref[i * channels() + c],
+                    output[i * output_stride() + c])
+              << "at batch " << i << " / " << batch_size()
+              << ", channel = " << c << " / " << channels();
         }
       }
     }
@@ -222,9 +238,11 @@ class CopyOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<uint32_t> u32dist;
 
-    xnnpack::Buffer<uint32_t> input(XNN_EXTRA_BYTES / sizeof(uint32_t) +
-      (batch_size() - 1) * input_stride() + channels());
-    xnnpack::Buffer<uint32_t> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<uint32_t> input(
+        (batch_size() - 1) * input_stride() + channels(),
+        xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<uint32_t> output((batch_size() - 1) * output_stride() +
+                                     channels());
     xnnpack::Buffer<uint32_t> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u32dist(rng); });
@@ -240,22 +258,17 @@ class CopyOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
       ASSERT_EQ(xnn_status_success,
-      xnn_run_copy_nc_x32(
-        channels(),
-        input_stride(),
-        output_stride(),
-        batch_size(),
-        input.data(),
-        output.data(),
-        0,
-        nullptr  /* thread pool */));
-
+                xnn_run_copy_nc_x32(channels(), input_stride(), output_stride(),
+                                    batch_size(), input.data(), output.data(),
+                                    0, nullptr /* thread pool */));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          EXPECT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
-            << "at batch " << i << " / " << batch_size() << ", channel = " << c << " / " << channels();
+          EXPECT_EQ(output_ref[i * channels() + c],
+                    output[i * output_stride() + c])
+              << "at batch " << i << " / " << batch_size()
+              << ", channel = " << c << " / " << channels();
         }
       }
     }

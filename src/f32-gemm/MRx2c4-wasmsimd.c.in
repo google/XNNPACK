@@ -38,7 +38,7 @@ void xnn_${DATATYPE_SPEC}_gemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}c4__${ISA}
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const ${PARAMS}* restrict params) XNN_OOB_READS
 {
   assert(mr != 0);
   assert(mr <= ${MR});

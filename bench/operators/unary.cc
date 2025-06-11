@@ -152,8 +152,8 @@ static void benchmark_unary_operator(benchmark::State& state,
   xnn_unary_params params;
   xnn_quantization_params input_quantization = {0, 1.0f};
   xnn_quantization_params output_quantization = {0, 1.0f};
-  init_params(op_type, xnn_datatype_of<In>(), xnn_datatype_of<Out>(),
-              params, input_quantization, output_quantization);
+  init_params(op_type, xnn_datatype_of<In>(), xnn_datatype_of<Out>(), params,
+              input_quantization, output_quantization);
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
@@ -161,7 +161,7 @@ static void benchmark_unary_operator(benchmark::State& state,
       std::max<float>(std::numeric_limits<In>::lowest(), -128.0f),
       std::min<float>(std::numeric_limits<In>::max(), 127.0f));
 
-  xnnpack::Buffer<In> input(batch_size + XNN_EXTRA_BYTES / sizeof(In));
+  xnnpack::Buffer<In> input(batch_size, xnnpack::XnnExtraBytes);
   xnnpack::Buffer<Out> output(batch_size);
   std::generate(input.begin(), input.end(),
                 [&]() { return static_cast<In>(f32dist(rng)); });
@@ -174,7 +174,7 @@ static void benchmark_unary_operator(benchmark::State& state,
 
   xnn_operator_t op = nullptr;
   status = xnn_create_unary_elementwise_nc(
-      op_type, xnn_datatype_of<In>(), xnn_datatype_of<Out>(), &params,
+      op_type, xnn_datatype_of<In>(), xnn_datatype_of<Out>(), &params, nullptr,
       &input_quantization, &output_quantization, 0 /* flags */, &op);
   if (status != xnn_status_success || op == nullptr) {
     state.SkipWithError("failed to create operator");
@@ -412,8 +412,8 @@ static void benchmark_tflite_unary_operator(benchmark::State& state,
   xnn_unary_params params;
   xnn_quantization_params input_quantization = {0, 1.0f};
   xnn_quantization_params output_quantization = {0, 1.0f};
-  init_params(op, xnn_datatype_of<In>(), xnn_datatype_of<Out>(),
-              params, input_quantization, output_quantization);
+  init_params(op, xnn_datatype_of<In>(), xnn_datatype_of<Out>(), params,
+              input_quantization, output_quantization);
   auto in_quantization = [=](flatbuffers::FlatBufferBuilder& builder) {
     return CreateTfLiteQuantizationParameters(builder, input_quantization);
   };

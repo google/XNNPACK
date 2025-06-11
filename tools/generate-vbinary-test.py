@@ -74,7 +74,7 @@ OP_TYPES = {
 }
 
 BINOP_TEST_TEMPLATE = """
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, datatype, params_type, init_params)
+#define XNN_UKERNEL(arch_flags, ukernel, batch_tile, vector_tile, datatype, params_type, init_params)
 XNN_TEST_BINARY_BATCH_EQ(ukernel, arch_flags, batch_tile, ${BROADCAST_B}, datatype, ${", ".join(TEST_ARGS)});
 XNN_TEST_BINARY_BATCH_DIV(ukernel, arch_flags, batch_tile, ${BROADCAST_B}, datatype, ${", ".join(TEST_ARGS)});
 XNN_TEST_BINARY_BATCH_LT(ukernel, arch_flags, batch_tile, ${BROADCAST_B}, datatype, ${", ".join(TEST_ARGS)});
@@ -144,8 +144,12 @@ def main(args):
   op_type = OP_TYPES[op]
 
   test_args = ["ukernel"]
-  if tester in ["VBinaryMicrokernelTester"] and not datatype in ["qs8", "qu8"]:
-    test_args.append("%s::OpType::%s" % (tester, op_type))
+  if tester in ["VBinaryMicrokernelTester"]:
+    if datatype in ["qs8", "qu8"] and op in ["vprelu", "vpreluc", "vrpreluc"]:
+      op_type = "Prelu" if op in ["vprelu", "vpreluc"] else "RPrelu"
+      test_args.append("%s::OpType::%s" % (tester, op_type))
+    elif not datatype in ["qs8", "qu8"]:
+      test_args.append("%s::OpType::%s" % (tester, op_type))
   test_args.append("init_params")
   tests += xnncommon.make_multiline_macro(
       xngen.preprocess(
@@ -162,9 +166,11 @@ def main(args):
   )
 
   folder = datatype + "-" + ("vbinary" if datatype.startswith("f") else op)
-  tests += f'#include "src/{folder}/{options.ukernel}.h"\n'
-  tests += "#undef XNN_UKERNEL_WITH_PARAMS\n"
-  tests = tests.replace("s32-vmulc/s32-vmulc.h", "s32-vmul/s32-vmulc.h")
+  tests += (
+      f'#include "src/{folder}/{options.ukernel}.inc"\n'
+  )
+  tests += "#undef XNN_UKERNEL\n"
+  tests = tests.replace("s32-vmulc/s32-vmulc.inc", "s32-vmul/s32-vmulc.inc")
 
   xnncommon.overwrite_if_changed(options.output, tests)
 

@@ -43,10 +43,9 @@ enum xnn_status create_nchw_convolution(
       uint32_t filter_id,
       uint32_t bias_id,
       uint32_t output_id,
-      const struct xnn_value* values,
+      const struct xnn_runtime_value* values,
       const void* filter_data,
       const void* bias_data,
-      struct xnn_code_cache* code_cache,
       xnn_weights_cache_t weights_cache,
       struct xnn_operator_data* opdata) {
   enum xnn_status status;
@@ -59,9 +58,9 @@ enum xnn_status create_nchw_convolution(
     case xnn_datatype_fp16:
       switch (output_datatype) {
         case xnn_datatype_fp32: {
-          flags |= (values[input_id].layout == xnn_layout_type_nhwc
-                                   ? XNN_FLAG_INPUT_NHWC
-                                   : 0);
+          if (!(values[input_id].flags & XNN_VALUE_FLAG_LAYOUT_NCHW)) {
+            flags |= XNN_FLAG_INPUT_NHWC;
+          }
           if (bias_datatype == xnn_datatype_fp32) {
             flags |= XNN_FLAG_FP32_STATIC_BIASES;
           }
@@ -82,7 +81,7 @@ enum xnn_status create_nchw_convolution(
               group_input_channels * groups /* input_pixel_stride */,
               group_output_channels * groups /* output_pixel_stride */,
               filter_data, bias_data, output_min,
-              output_max, flags, code_cache, weights_cache,
+              output_max, flags, weights_cache,
               &opdata->operator_objects[0]);
           break;
         }
@@ -106,11 +105,11 @@ enum xnn_status create_nchw_convolution(
               filter_data, bias_data, output_min,
               output_max,
               flags |
-                  (values[input_id].layout == xnn_layout_type_nhwc
-                   ? XNN_FLAG_INPUT_NHWC
-                   : 0) |
+                  (values[input_id].flags & XNN_VALUE_FLAG_LAYOUT_NCHW
+                   ? 0
+                   : XNN_FLAG_INPUT_NHWC) |
                   XNN_FLAG_FP32_STATIC_WEIGHTS,
-              code_cache, weights_cache, &opdata->operator_objects[0]);
+              weights_cache, &opdata->operator_objects[0]);
           break;
         default:
           XNN_UNREACHABLE;
@@ -138,8 +137,7 @@ enum xnn_status create_nchw_convolution(
           bias_data,
           output_min,
           output_max,
-          flags | (values[input_id].layout == xnn_layout_type_nhwc ? XNN_FLAG_INPUT_NHWC : 0),
-          code_cache,
+          flags | (values[input_id].flags & XNN_VALUE_FLAG_LAYOUT_NCHW ? 0 : XNN_FLAG_INPUT_NHWC),
           weights_cache,
           &opdata->operator_objects[0]);
       break;
@@ -151,10 +149,9 @@ enum xnn_status create_nchw_convolution(
 
 static enum xnn_status create_convolution_operator(
   const struct xnn_node* node,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
-  struct xnn_code_cache* code_cache,
   xnn_weights_cache_t weights_cache)
 {
   assert(node->num_inputs >= 2);
@@ -192,7 +189,7 @@ static enum xnn_status create_convolution_operator(
                                               ? values[filter_id].datatype
                                               : xnn_datatype_invalid;
   const enum xnn_datatype output_datatype = values[output_id].datatype;
-  if (values[output_id].layout == xnn_layout_type_nchw) {
+  if (values[output_id].flags & XNN_VALUE_FLAG_LAYOUT_NCHW) {
     status = create_nchw_convolution(
           node->params.convolution_2d.input_padding_top,
           node->params.convolution_2d.input_padding_right,
@@ -210,10 +207,10 @@ static enum xnn_status create_convolution_operator(
           node->activation.output_min,
           node->activation.output_max,
           node->flags, input_id, filter_id, bias_id, output_id,
-          values, filter_data, bias_data, code_cache, weights_cache, opdata);
+          values, filter_data, bias_data, weights_cache, opdata);
   } else {
-    assert(values[input_id].layout == xnn_layout_type_nhwc);
-    assert(values[output_id].layout == xnn_layout_type_nhwc);
+    assert((values[input_id].flags & XNN_VALUE_FLAG_LAYOUT_NCHW) == 0);
+    assert((values[output_id].flags & XNN_VALUE_FLAG_LAYOUT_NCHW) == 0);
     switch (output_datatype) {
       case xnn_datatype_fp32:
         switch (filter_datatype) {
@@ -245,7 +242,7 @@ static enum xnn_status create_convolution_operator(
                         node->params.convolution_2d
                             .groups /* output_pixel_stride */,
                     filter_data, bias_data, node->activation.output_min,
-                    node->activation.output_max, flags, code_cache,
+                    node->activation.output_max, flags,
                     weights_cache, &opdata->operator_objects[0]);
                 break;
               default:
@@ -277,7 +274,6 @@ static enum xnn_status create_convolution_operator(
                   node->activation.output_min,
                   node->activation.output_max,
                   node->flags,
-                  code_cache,
                   weights_cache,
                   &opdata->operator_objects[0]);
                 break;
@@ -310,7 +306,6 @@ static enum xnn_status create_convolution_operator(
                   node->activation.output_min,
                   node->activation.output_max,
                   node->flags,
-                  code_cache,
                   weights_cache,
                   &opdata->operator_objects[0]);
                 break;
@@ -337,7 +332,6 @@ static enum xnn_status create_convolution_operator(
                   node->activation.output_min,
                   node->activation.output_max,
                   node->flags,
-                  code_cache,
                   weights_cache,
                   &opdata->operator_objects[0]);
                 break;
@@ -381,7 +375,6 @@ static enum xnn_status create_convolution_operator(
               node->activation.output_min,
               node->activation.output_max,
               flags,
-              code_cache,
               weights_cache,
               &opdata->operator_objects[0]);
             break;
@@ -410,7 +403,6 @@ static enum xnn_status create_convolution_operator(
                     node->activation.output_min,
                     node->activation.output_max,
                     node->flags,
-                    code_cache,
                     weights_cache,
                     &opdata->operator_objects[0]);
                 break;
@@ -437,7 +429,6 @@ static enum xnn_status create_convolution_operator(
                     node->activation.output_min,
                     node->activation.output_max,
                     node->flags,
-                    code_cache,
                     weights_cache,
                     &opdata->operator_objects[0]);
                 break;
@@ -481,7 +472,6 @@ static enum xnn_status create_convolution_operator(
               (int8_t) output_zero_point,
               output_scale, output_min, output_max,
               node->flags,
-              code_cache,
               weights_cache,
               &opdata->operator_objects[0]);
             break;
@@ -515,7 +505,6 @@ static enum xnn_status create_convolution_operator(
               (int8_t) output_zero_point,
               output_scale, output_min, output_max,
               node->flags,
-              code_cache,
               weights_cache,
               &opdata->operator_objects[0]);
             break;
@@ -554,7 +543,6 @@ static enum xnn_status create_convolution_operator(
           (uint8_t) output_zero_point,
           output_scale, output_min, output_max,
           node->flags,
-          code_cache,
           weights_cache,
           &opdata->operator_objects[0]);
         break;
@@ -568,7 +556,7 @@ static enum xnn_status create_convolution_operator(
 
 enum xnn_status reshape_convolution_operator(
   struct xnn_operator_data* opdata,
-  struct xnn_value* values,
+  struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -613,7 +601,6 @@ enum xnn_status reshape_convolution_operator(
         input_height,
         input_width,
         &opdata->workspace_size,
-        &opdata->workspace_alignment,
         &output_height,
         &output_width,
         threadpool);
@@ -625,7 +612,6 @@ enum xnn_status reshape_convolution_operator(
         input_height,
         input_width,
         &opdata->workspace_size,
-        &opdata->workspace_alignment,
         &output_height,
         &output_width,
         threadpool);
@@ -637,7 +623,6 @@ enum xnn_status reshape_convolution_operator(
         input_height,
         input_width,
         &opdata->workspace_size,
-        &opdata->workspace_alignment,
         &output_height,
         &output_width,
         threadpool);
@@ -649,7 +634,6 @@ enum xnn_status reshape_convolution_operator(
         input_height,
         input_width,
         &opdata->workspace_size,
-        &opdata->workspace_alignment,
         &output_height,
         &output_width,
         threadpool);
@@ -661,7 +645,6 @@ enum xnn_status reshape_convolution_operator(
         input_height,
         input_width,
         &opdata->workspace_size,
-        &opdata->workspace_alignment,
         &output_height,
         &output_width,
         threadpool);
@@ -673,7 +656,6 @@ enum xnn_status reshape_convolution_operator(
         input_height,
         input_width,
         &opdata->workspace_size,
-        &opdata->workspace_alignment,
         &output_height,
         &output_width,
         threadpool);
@@ -685,7 +667,6 @@ enum xnn_status reshape_convolution_operator(
         input_height,
         input_width,
         &opdata->workspace_size,
-        &opdata->workspace_alignment,
         &output_height,
         &output_width,
         threadpool);
@@ -697,7 +678,6 @@ enum xnn_status reshape_convolution_operator(
         input_height,
         input_width,
         &opdata->workspace_size,
-        &opdata->workspace_alignment,
         &output_height,
         &output_width,
         threadpool);
@@ -709,7 +689,6 @@ enum xnn_status reshape_convolution_operator(
         input_height,
         input_width,
         &opdata->workspace_size,
-        &opdata->workspace_alignment,
         &output_height,
         &output_width,
         threadpool);
@@ -723,14 +702,14 @@ enum xnn_status reshape_convolution_operator(
   }
 
   const size_t output_pixel_stride = opdata->operator_objects[0]->output_pixel_stride;
-  struct xnn_value* output_value = values + output_id;
+  struct xnn_runtime_value* output_value = values + output_id;
   output_value->shape.dim[0] = batch_size;
   output_value->shape.dim[1] = output_height;
   output_value->shape.dim[2] = output_width;
   output_value->shape.dim[3] = output_pixel_stride;
 
   output_value->shape.num_dims = 4;
-  const size_t new_size = xnn_tensor_get_size(output_value);
+  const size_t new_size = xnn_runtime_tensor_get_size(output_value);
   if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
     output_value->size = new_size;
     return xnn_status_reallocation_required;
@@ -740,7 +719,7 @@ enum xnn_status reshape_convolution_operator(
 
 static enum xnn_status reshape_convolution_operator_static(
   struct xnn_operator_data* opdata,
-  struct xnn_value* values,
+  struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -749,7 +728,7 @@ static enum xnn_status reshape_convolution_operator_static(
 
 enum xnn_status setup_convolution_operator(
   const struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -761,11 +740,11 @@ enum xnn_status setup_convolution_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  const struct xnn_value* input_value = values + input_id;
+  const struct xnn_runtime_value* input_value = values + input_id;
   const void* input_data = input_value->data;
   assert(input_data != NULL);
 
-  const struct xnn_value* output_value = values + output_id;
+  const struct xnn_runtime_value* output_value = values + output_id;
   void* output_data = output_value->data;
   assert(output_data != NULL);
 
@@ -872,7 +851,7 @@ enum xnn_status setup_convolution_operator(
 
 static enum xnn_status setup_convolution_operator_static(
   const struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool) {
   return setup_convolution_operator(opdata, values, num_values, threadpool);
@@ -1308,7 +1287,9 @@ enum xnn_status xnn_define_convolution_2d(
         // Dynammically quantized tensors for fully connected ops are quantized
         // per-channel, not per-batch.
         input_value->quantization.num_nonbatch_dims = 1;
-        input_value->quantization.dynamic_params_size =  xnn_tensor_get_dynamic_quant_param_size(input_value);
+        input_value->quantization.dynamic_params_size =
+            xnn_tensor_get_dynamic_quant_param_size(input_value->datatype, &input_value->shape,
+                                                    input_value->quantization.num_nonbatch_dims);
       }
       return xnn_define_fully_connected(subgraph, output_min, output_max,
                                         input_id, filter_id, bias_id, output_id, /*flags=*/0);

@@ -26,7 +26,7 @@ void xnn_bf16_gemm_minmax_ukernel_5x4c8__neonfma_shland(
     xnn_bfloat16* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const struct xnn_bf16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_bf16_minmax_params* restrict params)
 {
   assert(mr != 0);
   assert(mr <= 5);

@@ -20,10 +20,9 @@
 
 static enum xnn_status create_rope_operator(
   const struct xnn_node* node,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
-  struct xnn_code_cache* code_cache,
   xnn_weights_cache_t weights_cache)
 {
   assert(node->num_inputs == 2);
@@ -32,7 +31,7 @@ static enum xnn_status create_rope_operator(
   enum xnn_status status;
   const uint32_t input_id = node->inputs[0];
   assert(input_id < num_values);
-  const struct xnn_value *input_value = &values[input_id];
+  const struct xnn_runtime_value *input_value = &values[input_id];
   switch (input_value->datatype) {
     case xnn_datatype_fp16:
       status = xnn_create_rope_nthc_f16(
@@ -52,13 +51,13 @@ static enum xnn_status create_rope_operator(
 
 static enum xnn_status reshape_rope_operator(
   struct xnn_operator_data* opdata,
-  struct xnn_value* values,
+  struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
-  const struct xnn_value* input_value = values + input_id;
+  const struct xnn_runtime_value* input_value = values + input_id;
 
   const size_t num_input_dims = input_value->shape.num_dims;
   const size_t batch_size = xnn_shape_multiply_batch_dims(&input_value->shape, 3);
@@ -95,11 +94,11 @@ static enum xnn_status reshape_rope_operator(
   }
   const uint32_t output_id = opdata->outputs[0];
   assert(output_id < num_values);
-  struct xnn_value* output_value = values + output_id;
+  struct xnn_runtime_value* output_value = values + output_id;
 
   output_value->shape.num_dims = input_value->shape.num_dims;
   memcpy(output_value->shape.dim, input_value->shape.dim, input_value->shape.num_dims * sizeof(size_t));
-  const size_t new_size = xnn_tensor_get_size(output_value);
+  const size_t new_size = xnn_runtime_tensor_get_size(output_value);
   if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
     output_value->size = new_size;
     return xnn_status_reallocation_required;
@@ -109,7 +108,7 @@ static enum xnn_status reshape_rope_operator(
 
 static enum xnn_status setup_rope_operator(
   const struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -125,15 +124,15 @@ static enum xnn_status setup_rope_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  const struct xnn_value* input_value = values + input_id;
+  const struct xnn_runtime_value* input_value = values + input_id;
   const void* input_data = input_value->data;
   assert(input_data != NULL);
 
-  const struct xnn_value* weights_value = values + weights_id;
+  const struct xnn_runtime_value* weights_value = values + weights_id;
   const void* weights_data = weights_value->data;
   assert(weights_data != NULL);
 
-  const struct xnn_value* output_value = values + output_id;
+  const struct xnn_runtime_value* output_value = values + output_id;
   void* output_data = output_value->data;
   assert(output_data != NULL);
 

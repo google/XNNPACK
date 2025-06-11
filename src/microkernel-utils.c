@@ -9,13 +9,14 @@
 #include <stddef.h>
 
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/config-types.h"
 #include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/math.h"
 
-static bool fits_in_cache(size_t mr, size_t nc, size_t m_stride,
-                          size_t n_stride, size_t cm_stride, size_t cn_stride,
-                          size_t cache_size, size_t cache_line_size) {
+static bool gemm_fits_in_cache(size_t mr, size_t nc, size_t m_stride,
+                               size_t n_stride, size_t cn_stride,
+                               size_t cache_size, size_t cache_line_size) {
   // Check if the bytes fit.
   const size_t lines_mr = divide_round_up(mr * m_stride, cache_line_size);
   const size_t lines_nc = divide_round_up(nc * n_stride, cache_line_size);
@@ -30,10 +31,45 @@ static bool fits_in_cache(size_t mr, size_t nc, size_t m_stride,
   return true;
 }
 
+bool xnn_should_inline_lhs_packing(const struct xnn_gemm_config *gemm_config,
+                                   size_t m_packed_stride, size_t n_stride,
+                                   size_t cn_stride, size_t mc, size_t nc) {
+  const struct xnn_hardware_config *hardware_config =
+      xnn_init_hardware_config();
+
+  // Select which cache we want the tiles to fit in.
+  const size_t cache_bytes = hardware_config->l2_data_cache_bytes;
+  const size_t cache_line_size = hardware_config->l2_data_cache_line_size;
+
+  // If we don't have any information on the cache size, then all bets are off.
+  if (!cache_bytes) {
+    return false;
+  }
+
+  const size_t mr = min(gemm_config->mr, mc);
+
+  // We only want to inline the LHS packing if it's possible to
+  // compute an entire row of the GEMM without flooding the cache.
+  const bool gemm_row_fits_in_cache =
+      gemm_fits_in_cache(mr, nc, m_packed_stride, n_stride, cn_stride,
+                         cache_bytes, cache_line_size);
+
+  xnn_log_debug(
+      "mr=%zu, nr=%hhu, m_packed_stride=%zu, n_stride=%zu, "
+      "mc=%zu, nc=%zu, gemm_row_fits_in_cache=%s.",
+      mr, gemm_config->nr, m_packed_stride, n_stride, mc, nc,
+      gemm_row_fits_in_cache ? "true" : "false");
+
+  return gemm_row_fits_in_cache;
+}
+
 size_t xnn_gemm_best_tile_size(size_t num_groups, size_t m, size_t n,
                                size_t m_stride, size_t n_stride,
-                               size_t cm_stride, size_t cn_stride, size_t mr,
-                               size_t nr, size_t num_threads) {
+                               size_t cn_stride, size_t mr, size_t nr,
+                               size_t num_threads) {
+  const struct xnn_hardware_config *hardware_config =
+      xnn_init_hardware_config();
+
   // Adjust `mr` and `nr` if they are larger than `m` and `n`, respectively.
   mr = min(mr, m);
   nr = min(nr, n);
@@ -50,17 +86,15 @@ size_t xnn_gemm_best_tile_size(size_t num_groups, size_t m, size_t n,
   // Select which cache we want the tiles to fit in. Start with L1, and if the
   // smallest possible tile won't fit, try L2. If the smallest tile still won't
   // fit, then don't try to fit to the cache size.
-  const struct xnn_hardware_config *hardware_config =
-      xnn_init_hardware_config();
   size_t cache_size = hardware_config->l1_data_cache_bytes;
   size_t cache_line_size = hardware_config->l1_data_cache_line_size;
   if (XNN_ARCH_X86 || XNN_ARCH_X86_64 ||
-      (cache_size && !fits_in_cache(mr, nr, m_stride, n_stride, cm_stride,
-                                    cn_stride, cache_size, cache_line_size))) {
+      (cache_size && !gemm_fits_in_cache(mr, nr, m_stride, n_stride, cn_stride,
+                                         cache_size, cache_line_size))) {
     cache_size = hardware_config->l2_data_cache_bytes;
     cache_line_size = hardware_config->l2_data_cache_line_size;
-    if (cache_size && !fits_in_cache(mr, nr, m_stride, n_stride, cm_stride,
-                                     cn_stride, cache_size, cache_line_size)) {
+    if (cache_size && !gemm_fits_in_cache(mr, nr, m_stride, n_stride, cn_stride,
+                                          cache_size, cache_line_size)) {
       // Don't check for cache fit.
       cache_size = 0;
     }
@@ -80,8 +114,8 @@ size_t xnn_gemm_best_tile_size(size_t num_groups, size_t m, size_t n,
     // If, however, we have more than one tile row, then we want the data used
     // to compute a tile of size `mr`x`j*nr` to fit in the cache.
     if (mr < m && cache_size &&
-        !fits_in_cache(mr, j * nr, m_stride, n_stride, cm_stride, cn_stride,
-                       cache_size, cache_line_size)) {
+        !gemm_fits_in_cache(mr, j * nr, m_stride, n_stride, cn_stride,
+                            cache_size, cache_line_size)) {
       break;
     }
 

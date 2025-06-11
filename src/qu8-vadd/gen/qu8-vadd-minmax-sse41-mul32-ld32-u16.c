@@ -23,7 +23,7 @@ void xnn_qu8_vadd_minmax_ukernel__sse41_mul32_ld32_u16(
     const uint8_t* input_a,
     const uint8_t* input_b,
     uint8_t* output,
-    const struct xnn_qu8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_qu8_add_minmax_params* restrict params) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(uint8_t) == 0);

@@ -20,7 +20,7 @@ void xnn_qu8_rsum_ukernel__wasmsimd_u32_acc4(
     size_t batch,
     const uint8_t* input,
     uint32_t* output,
-    const struct xnn_qs8_rsum_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_qs8_rsum_params* restrict params) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(input != NULL);

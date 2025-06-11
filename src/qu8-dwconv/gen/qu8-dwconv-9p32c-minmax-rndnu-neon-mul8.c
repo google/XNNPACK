@@ -24,8 +24,9 @@ void xnn_qu8_dwconv_minmax_rndnu_ukernel_9p32c__neon_mul8(
     intptr_t input_stride,
     size_t output_increment,
     size_t input_offset,
+    size_t input_pixel_stride,
     const uint8_t* zero,
-    const union xnn_qu8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_qu8_conv_minmax_params* restrict params) XNN_OOB_READS
 {
   assert(channels != 0);
   assert(output_width != 0);
@@ -514,6 +515,7 @@ void xnn_qu8_dwconv_minmax_rndnu_ukernel_9p32c__neon_mul8(
       } while (c != 0);
     }
 
+    input_offset += input_pixel_stride;
     output = (uint8_t*) ((uintptr_t) output + output_increment);
   } while (--output_width != 0);
 }

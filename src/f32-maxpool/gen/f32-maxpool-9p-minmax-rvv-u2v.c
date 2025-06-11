@@ -18,10 +18,11 @@ void xnn_f32_maxpool_minmax_ukernel_9p__rvv_u2v(
     size_t channels,
     const float** input,
     size_t input_offset,
+    size_t input_pixel_stride,
     float* output,
     size_t input_increment,
     size_t output_increment,
-    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_minmax_params* restrict params)
 {
   assert(output_pixels != 0);
   assert(kernel_elements != 0);
@@ -131,6 +132,7 @@ void xnn_f32_maxpool_minmax_ukernel_9p__rvv_u2v(
       } while (c != 0);
     }
     input = (const float**) ((uintptr_t) input + input_increment);
+    input_offset += input_pixel_stride;
     output = (float*) ((uintptr_t) output + output_increment);
   } while (--output_pixels != 0);
 }

@@ -3,6 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <random>
@@ -25,7 +26,7 @@ void TestImpl(size_t rank) {
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
-  for (int iters = 0; iters < 100; ++iters) {
+  for (auto _ : FuzzTest(std::chrono::milliseconds(500))) {
     std::vector<size_t> dims = random_shape(rng, rank);
 
     std::vector<int64_t> begins(dims.size());
@@ -38,14 +39,14 @@ void TestImpl(size_t rank) {
       std::uniform_int_distribution<int64_t> end_dist;
       if (begins[i] < 0) {
         // Negative begin, negative end
-        end_dist = std::uniform_int_distribution<int64_t>(begins[i] + 1, 0);
+        end_dist = std::uniform_int_distribution<int64_t>(begins[i], 0);
       } else if (rng() % 2 == 0) {
         // Positive begin, negative end
         end_dist =
-            std::uniform_int_distribution<int64_t>(begins[i] + 1 - range, 0);
+            std::uniform_int_distribution<int64_t>(begins[i] - range, 0);
       } else {
         // Positive begin, positive end
-        end_dist = std::uniform_int_distribution<int64_t>(begins[i] + 1, range);
+        end_dist = std::uniform_int_distribution<int64_t>(begins[i], range);
       }
       ends[i] = end_dist(rng);
     }
@@ -67,7 +68,7 @@ void TestImpl(size_t rank) {
         shape[i] += dims[i];
       }
 
-      xnnpack::Tensor<T> input(shape, xnnpack::PaddingBytes{XNN_EXTRA_BYTES});
+      xnnpack::Tensor<T> input(shape, xnnpack::XnnExtraBytes);
       DatatypeGenerator<T> generator(quantization);
       input.generate([&]() { return generator(rng); });
 

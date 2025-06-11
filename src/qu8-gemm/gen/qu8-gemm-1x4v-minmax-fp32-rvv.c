@@ -26,7 +26,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x4v__rvv(
     uint8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_qu8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_qu8_conv_minmax_params* restrict params)
 {
   assert(mr != 0);
   assert(mr <= 1);
@@ -51,7 +51,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x4v__rvv(
     nc = nc - vl;
 
     vint32m4_t vacc0 = __riscv_vle32_v_i32m4((const int32_t*)w, vl);
- 
+
     w = (const int32_t*) w + nr;
 
     size_t k = kc;
@@ -67,7 +67,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x4v__rvv(
 
       k -= sizeof(uint8_t);
     } while (k != 0);
- 
+
     vfloat32m4_t vfacc0 = __riscv_vfcvt_f_x_v_f32m4(vacc0, vl);
 
     vfacc0 = __riscv_vfmul_vf_f32m4(vfacc0, vscale, vl);

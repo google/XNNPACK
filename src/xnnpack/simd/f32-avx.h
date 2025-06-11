@@ -7,8 +7,8 @@
 #ifndef __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX_H_
 #define __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX_H_
 
-#include "src/xnnpack/simd/f32-avx-base.h"  // IWYU pragma: export
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/simd/f32-avx-base.h"  // IWYU pragma: export
 
 // Whether or not this architecture has native fused multiply-add support.
 #define XNN_SIMD_HAS_NATIVE_FMA 0
@@ -67,6 +67,11 @@ static XNN_INLINE xnn_simd_f32_t xnn_sra_f32(xnn_simd_f32_t a, uint8_t bits) {
 static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
                                                xnn_simd_f32_t b) {
   return _mm256_cmp_ps(a, b, _CMP_EQ_OQ);
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_cmpneq_f32(xnn_simd_f32_t a,
+  xnn_simd_f32_t b) {
+return _mm256_cmp_ps(a, b, _CMP_NEQ_OQ);
 }
 
 #endif  // __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX_H_

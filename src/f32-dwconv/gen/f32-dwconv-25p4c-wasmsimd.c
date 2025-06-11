@@ -24,8 +24,9 @@ void xnn_f32_dwconv_ukernel_25p4c__wasmsimd(
     intptr_t input_stride,
     size_t output_increment,
     size_t input_offset,
+    size_t input_pixel_stride,
     const float* zero,
-    const struct xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f32_default_params* restrict params) XNN_OOB_READS
 {
   assert(channels != 0);
   assert(output_width != 0);
@@ -439,6 +440,7 @@ void xnn_f32_dwconv_ukernel_25p4c__wasmsimd(
       }
     }
 
+    input_offset += input_pixel_stride;
     output = (float*) ((uintptr_t) output + output_increment);
   } while (--output_width != 0);
 }

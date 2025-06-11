@@ -12,7 +12,8 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
 
-// Default: serves to differentiate pointer types for micro-kernels without fused activation.
+// Default: serves to differentiate pointer types for micro-kernels without
+// fused activation.
 
 struct xnn_f16_default_params {
   char _;  // Dummy member variable to comply with the C standard
@@ -30,13 +31,12 @@ struct xnn_s32_default_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
-
-// ReLU: serves to differentiate pointer types for micro-kernels with fused ReLU activation.
+// ReLU: serves to differentiate pointer types for micro-kernels with fused ReLU
+// activation.
 
 struct xnn_f32_relu_params {
   char _;  // Dummy member variable to comply with the C standard
 };
-
 
 // Scale: used by RSUM microkernels
 
@@ -58,7 +58,6 @@ struct xnn_f32_scale_params {
   } scalar;
 };
 
-
 // Scale+Min+Max: used by AVGPOOL microkernels.
 
 struct xnn_f16_scaleminmax_params {
@@ -77,8 +76,8 @@ struct xnn_f32_scaleminmax_params {
   } scalar;
 };
 
-
-// Min+Max: used by VCLAMP and GEMM/IGEMM/DWCONV/MAXPOOL/etc with MINMAX activation.
+// Min+Max: used by VCLAMP and GEMM/IGEMM/DWCONV/MAXPOOL/etc with MINMAX
+// activation.
 
 struct xnn_bf16_minmax_params {
   struct {
@@ -146,6 +145,20 @@ struct xnn_u8_minmax_params {
   } scalar;
 };
 
+// VPReLU: used by VPRELU microkernels.
+
+union xnn_qs8_vprelu_scalar_params {
+  struct {
+    int32_t input_zero_point;
+    int32_t slope_zero_point;
+    int32_t output_zero_point;
+    float positive_multiplier;
+    float rprelu_positive_multiplier;
+    float negative_multiplier;
+    int32_t output_min;
+    int32_t output_max;
+  } scalar;
+};
 
 // Conv w. Min+Max: used by quantized GEMM/IGEMM/DWCONV microkernels with MINMAX activation.
 struct xnn_qd8_quantization_params {
@@ -298,8 +311,8 @@ union xnn_qu8_conv_minmax_params {
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 };
 
-
-// Add w. Min+Max: used by quantized VADD[C] microkernels with MINMAX activation.
+// Add w. Min+Max: used by quantized VADD[C] microkernels with MINMAX
+// activation.
 
 struct xnn_qs8_add_minmax_params {
   struct {
@@ -329,8 +342,8 @@ struct xnn_qu8_add_minmax_params {
   } scalar;
 };
 
-
-// Mul w. Min+Max: used by quantized VMUL[C] microkernels with MINMAX activation.
+// Mul w. Min+Max: used by quantized VMUL[C] microkernels with MINMAX
+// activation.
 
 union xnn_qs8_mul_minmax_params {
   struct {
@@ -393,6 +406,8 @@ union xnn_binary_uparams {
   struct xnn_qu8_add_minmax_params qu8_addsub;
   union xnn_qs8_mul_minmax_params qs8_mul;
   union xnn_qu8_mul_minmax_params qu8_mul;
+  union xnn_qs8_vprelu_scalar_params qs8_vprelu;
+  union xnn_qs8_vprelu_scalar_params qu8_vprelu;
   struct xnn_f16_minmax_params f16;
   struct xnn_f32_minmax_params f32;
   struct xnn_binary_reference_params reference;
@@ -496,7 +511,6 @@ struct xnn_qu8_f32_cvt_params {
   } scalar;
 };
 
-
 // ELU: used by VELU microkernels.
 
 struct xnn_f16_elu_params {
@@ -514,7 +528,6 @@ struct xnn_f32_elu_params {
     float beta;
   } scalar;
 };
-
 
 // LReLU (Leaky ReLU): used by VLRELU microkernels.
 
@@ -608,4 +621,3 @@ struct subconvolution_params {
   // scaled_kernel_size := kernel_size * mr * sizeof(void*).
   size_t scaled_kernel_size;
 };
-

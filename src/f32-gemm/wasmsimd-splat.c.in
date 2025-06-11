@@ -42,7 +42,7 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}${ACTIVATION_SUFFIX}_ukerne
     size_t cn_stride,
     $if INC:
       const float* restrict acc,
-    const ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)])
+    const ${PARAMS}* restrict params)
 {
   assert(mr != 0);
   assert(mr <= ${MR});

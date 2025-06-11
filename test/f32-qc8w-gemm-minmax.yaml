@@ -738,23 +738,6 @@
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_qs8w_gemm_goi_w
   k-block: 4
-# WAsm
-- name: xnn_f32_qc8w_gemm_minmax_ukernel_1x4__wasm
-  init: xnn_init_f32_minmax_scalar_params
-  pack: xnn_pack_f32_qs8w_gemm_goi_w
-  k-block: 1
-- name: xnn_f32_qc8w_gemm_minmax_ukernel_2x4__wasm
-  init: xnn_init_f32_minmax_scalar_params
-  pack: xnn_pack_f32_qs8w_gemm_goi_w
-  k-block: 1
-- name: xnn_f32_qc8w_gemm_minmax_ukernel_4x2__wasm
-  init: xnn_init_f32_minmax_scalar_params
-  pack: xnn_pack_f32_qs8w_gemm_goi_w
-  k-block: 1
-- name: xnn_f32_qc8w_gemm_minmax_ukernel_4x4__wasm
-  init: xnn_init_f32_minmax_scalar_params
-  pack: xnn_pack_f32_qs8w_gemm_goi_w
-  k-block: 1
 # Scalar
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_1x4__scalar
   init: xnn_init_f32_minmax_scalar_params

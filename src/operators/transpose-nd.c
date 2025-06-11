@@ -31,8 +31,8 @@
 /// Changing the loop order can have dramatic performance implications.
 static void reorder_array(
     size_t num_dims,
-    const size_t loop_order[restrict XNN_MIN_ELEMENTS(1) ],
-    size_t array[restrict XNN_MIN_ELEMENTS(1)])
+    const size_t* restrict loop_order,
+    size_t* restrict array)
 {
   size_t tmp[XNN_MAX_TENSOR_DIMS];
   memcpy(tmp, array, sizeof(size_t) * num_dims);
@@ -81,6 +81,14 @@ static enum xnn_status create_transpose_nd(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
     goto error;
   }
+  transpose_op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
+  if (transpose_op->compute == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(struct compute_parameters),
+                  xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
+  transpose_op->num_compute_invocations = 1;
 
   init_transpose_nd(flags, transpose_config, operator_type, transpose_op);
   *transpose_op_out = transpose_op;
@@ -328,8 +336,11 @@ static enum xnn_status reshape_transpose_nd(
   struct univector_contiguous_context* univector_context = &transpose_op->context.univector_contiguous;
   switch (normalized_dims) {
     case 1:
-      transpose_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
-      transpose_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_univector_contiguous;
+      transpose_op->compute[0].type =
+          xnn_parallelization_type_1d_tile_1d_dynamic;
+      transpose_op->compute[0].task_1d_tile_1d_dynamic =
+          (pthreadpool_task_1d_tile_1d_dynamic_t)
+              xnn_compute_univector_contiguous;
       transpose_op->compute[0].range[0] = normalized_element_size;
       transpose_op->compute[0].tile[0] = normalized_element_size;
       univector_context->ukernel = transpose_config->copy;
@@ -337,27 +348,36 @@ static enum xnn_status reshape_transpose_nd(
       univector_context->log2_ysize = 0;
       break;
     case 2:
-      transpose_op->compute[0].type = xnn_parallelization_type_2d_tile_2d;
+      transpose_op->compute[0].type =
+          xnn_parallelization_type_2d_tile_2d_dynamic;
       if (variable_size_ukernel) {
-        transpose_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_transposev_2d;
+        transpose_op->compute[0].task_2d_tile_2d_dynamic =
+            (pthreadpool_task_2d_tile_2d_dynamic_t)xnn_compute_transposev_2d;
       } else {
-        transpose_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_transposec_2d;
+        transpose_op->compute[0].task_2d_tile_2d_dynamic =
+            (pthreadpool_task_2d_tile_2d_dynamic_t)xnn_compute_transposec_2d;
       }
       break;
     case 3:
-      transpose_op->compute[0].type = xnn_parallelization_type_3d_tile_2d;
+      transpose_op->compute[0].type =
+          xnn_parallelization_type_3d_tile_2d_dynamic;
       if (variable_size_ukernel) {
-        transpose_op->compute[0].task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_transposev_3d;
+        transpose_op->compute[0].task_3d_tile_2d_dynamic =
+            (pthreadpool_task_3d_tile_2d_dynamic_t)xnn_compute_transposev_3d;
       } else {
-        transpose_op->compute[0].task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_transposec_3d;
+        transpose_op->compute[0].task_3d_tile_2d_dynamic =
+            (pthreadpool_task_3d_tile_2d_dynamic_t)xnn_compute_transposec_3d;
       }
       break;
     case 4:
-      transpose_op->compute[0].type = xnn_parallelization_type_4d_tile_2d;
+      transpose_op->compute[0].type =
+          xnn_parallelization_type_4d_tile_2d_dynamic;
       if (variable_size_ukernel) {
-        transpose_op->compute[0].task_4d_tile_2d = (pthreadpool_task_4d_tile_2d_t) xnn_compute_transposev_4d;
+        transpose_op->compute[0].task_4d_tile_2d_dynamic =
+            (pthreadpool_task_4d_tile_2d_dynamic_t)xnn_compute_transposev_4d;
       } else {
-        transpose_op->compute[0].task_4d_tile_2d = (pthreadpool_task_4d_tile_2d_t) xnn_compute_transposec_4d;
+        transpose_op->compute[0].task_4d_tile_2d_dynamic =
+            (pthreadpool_task_4d_tile_2d_dynamic_t)xnn_compute_transposec_4d;
       }
       break;
     case 5:
@@ -606,6 +626,10 @@ enum xnn_status run_transpose_nd(
 
   struct xnn_operator transpose_op;
   memset(&transpose_op, 0, sizeof(transpose_op));
+  struct compute_parameters compute;
+  memset(&compute, 0, sizeof(compute));
+  transpose_op.compute = &compute;
+  transpose_op.num_compute_invocations = 1;
 
   const struct xnn_transpose_config* transpose_config = xnn_init_transpose_config();
   if (!transpose_config) {
@@ -730,6 +754,14 @@ enum xnn_status create_depth_to_space_nchw2nhwc(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
     goto error;
   }
+  depth_to_space_op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
+  if (depth_to_space_op->compute == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(struct compute_parameters),
+                  xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
+  depth_to_space_op->num_compute_invocations = 1;
 
   const struct xnn_transpose_config* transpose_config = xnn_init_transpose_config();
   if (!transpose_config) {
@@ -738,7 +770,7 @@ enum xnn_status create_depth_to_space_nchw2nhwc(
     return xnn_status_unsupported_hardware;
   }
 
-  depth_to_space_op->block_size = block_size;
+  depth_to_space_op->depth_to_space.block_size = block_size;
 
   depth_to_space_op->type = operator_type;
   depth_to_space_op->flags = flags;
@@ -798,7 +830,7 @@ enum xnn_status reshape_depth_to_space_nchw2nhwc(
     return xnn_status_invalid_parameter;
   }
 
-  const uint32_t block_size = depth_to_space_op->block_size;
+  const uint32_t block_size = depth_to_space_op->depth_to_space.block_size;
   if (input_channels % (block_size * block_size) != 0) {
     xnn_log_error("failed to reshape %s operator with %zu input_channels and %zu block_sizex: "
                   "input channels must be divisible by block_size * block_size",
@@ -988,6 +1020,14 @@ static enum xnn_status create_depth_to_space_nhwc(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
     goto error;
   }
+  depth_to_space_op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
+  if (depth_to_space_op->compute == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(struct compute_parameters),
+                  xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
+  depth_to_space_op->num_compute_invocations = 1;
 
   const struct xnn_transpose_config* transpose_config = xnn_init_transpose_config();
   if (!transpose_config) {
@@ -996,7 +1036,7 @@ static enum xnn_status create_depth_to_space_nhwc(
     return xnn_status_unsupported_hardware;
   }
 
-  depth_to_space_op->block_size = block_size;
+  depth_to_space_op->depth_to_space.block_size = block_size;
   depth_to_space_op->type = operator_type;
   depth_to_space_op->flags = flags;
   depth_to_space_op->transpose_config = transpose_config;
@@ -1081,7 +1121,7 @@ static enum xnn_status reshape_depth_to_space_nhwc(
     return xnn_status_invalid_parameter;
   }
 
-  const uint32_t block_size = depth_to_space_op->block_size;
+  const uint32_t block_size = depth_to_space_op->depth_to_space.block_size;
   if (input_channels % (block_size * block_size) != 0) {
     xnn_log_error("failed to reshape %s operator with %zu input_channels and %u block_size: "
                   "input channels must be divisible by block_size * block_size",
@@ -1273,6 +1313,14 @@ static enum xnn_status create_space_to_depth_nhwc(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
     goto error;
   }
+  space_to_depth_op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
+  if (space_to_depth_op->compute == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(struct compute_parameters),
+                  xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
+  space_to_depth_op->num_compute_invocations = 1;
 
   const struct xnn_transpose_config* transpose_config = xnn_init_transpose_config();
   if (!transpose_config) {
@@ -1281,7 +1329,7 @@ static enum xnn_status create_space_to_depth_nhwc(
     return xnn_status_unsupported_hardware;
   }
 
-  space_to_depth_op->block_size = block_size;
+  space_to_depth_op->depth_to_space.block_size = block_size;
 
   space_to_depth_op->type = operator_type;
   space_to_depth_op->flags = flags;
@@ -1367,7 +1415,7 @@ static enum xnn_status reshape_space_to_depth_nhwc(
     return xnn_status_invalid_parameter;
   }
 
-  const uint32_t block_size = space_to_depth_op->block_size;
+  const uint32_t block_size = space_to_depth_op->depth_to_space.block_size;
   const size_t output_channels = input_channels * block_size * block_size;
 
   if (input_width % block_size != 0) {

@@ -24,7 +24,7 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c4__sse_2x(
     const float* restrict weights,
     float* restrict output,
     size_t output_stride,
-    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f32_minmax_params* restrict params) XNN_OOB_READS
 {
   assert(rows != 0);
   assert(channels != 0);

@@ -64,9 +64,10 @@ build:macos_arm64 --cpu=darwin_arm64
 common --enable_bzlmod=false
 
 # Disable some warnings to allow a warning-free build
-build --cxxopt='-Wno-sign-compare'
-build --cxxopt='-Wno-comment'
-build --cxxopt='-Wno-psabi'
-build --cxxopt='-Wno-unused-but-set-variable'
-build --cxxopt='-Wno-unused-const-variable'
-build --copt='-Wno-unused-but-set-variable'
+build --copt='-Wall'
+build --copt='-Werror'
+build --copt='-Wno-comment'
+build --copt='-Wno-sign-compare'
+
+# Disable all warnings in external code
+build --per_file_copt=external/.*@-w

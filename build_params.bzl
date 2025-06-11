@@ -7,7 +7,7 @@ load(
     ":build_defs.bzl",
     "xnnpack_cc_library",
     "xnnpack_if_kleidiai_enabled",
-    "xnnpack_slinky_defines",
+    "xnnpack_select_if",
 )
 
 # buildifier: disable=out-of-order-load
@@ -24,130 +24,6 @@ def xnnpack_list_sum(values, initial = 0):
     for value in values:
         result += value
     return result
-
-def xnnpack_select_if(cond = None, val_true = [], val_false = []):
-    if cond != None:
-        return select({
-            cond: val_true,
-            "//conditions:default": val_false,
-        })
-    else:
-        return val_true
-
-def xnnpack_configurable_defines():
-    return xnnpack_select_if(
-        ":cpuinfo_enabled",
-        ["XNN_ENABLE_CPUINFO=1"],
-        ["XNN_ENABLE_CPUINFO=0"],
-    ) + xnnpack_select_if(
-        ":memopt_enabled",
-        ["XNN_ENABLE_MEMOPT=1"],
-        ["XNN_ENABLE_MEMOPT=1"],
-    ) + xnnpack_select_if(
-        ":sparse_enabled",
-        ["XNN_ENABLE_SPARSE=1"],
-        ["XNN_ENABLE_SPARSE=0"],
-    ) + xnnpack_select_if(
-        ":assembly_enabled",
-        ["XNN_ENABLE_ASSEMBLY=1"],
-        ["XNN_ENABLE_ASSEMBLY=0"],
-    ) + xnnpack_select_if(
-        ":arm_fp16_scalar_enabled",
-        ["XNN_ENABLE_ARM_FP16_SCALAR=1"],
-        ["XNN_ENABLE_ARM_FP16_SCALAR=0"],
-    ) + xnnpack_select_if(
-        ":arm_fp16_vector_enabled",
-        ["XNN_ENABLE_ARM_FP16_VECTOR=1"],
-        ["XNN_ENABLE_ARM_FP16_VECTOR=0"],
-    ) + xnnpack_select_if(
-        ":arm_bf16_enabled",
-        ["XNN_ENABLE_ARM_BF16=1"],
-        ["XNN_ENABLE_ARM_BF16=0"],
-    ) + xnnpack_select_if(
-        ":arm_dotprod_enabled",
-        ["XNN_ENABLE_ARM_DOTPROD=1"],
-        ["XNN_ENABLE_ARM_DOTPROD=0"],
-    ) + xnnpack_select_if(
-        ":arm_i8mm_enabled",
-        ["XNN_ENABLE_ARM_I8MM=1"],
-        ["XNN_ENABLE_ARM_I8MM=0"],
-    ) + xnnpack_select_if(
-        ":riscv_fp16_vector_enabled",
-        ["XNN_ENABLE_RISCV_FP16_VECTOR=1"],
-        ["XNN_ENABLE_RISCV_FP16_VECTOR=0"],
-    ) + xnnpack_select_if(
-        ":avx512amx_enabled",
-        ["XNN_ENABLE_AVX512AMX=1"],
-        ["XNN_ENABLE_AVX512AMX=0"],
-    ) + xnnpack_select_if(
-        ":avx512fp16_enabled",
-        ["XNN_ENABLE_AVX512FP16=1"],
-        ["XNN_ENABLE_AVX512FP16=0"],
-    ) + xnnpack_select_if(
-        ":avx512bf16_enabled",
-        ["XNN_ENABLE_AVX512BF16=1"],
-        ["XNN_ENABLE_AVX512BF16=0"],
-    ) + xnnpack_select_if(
-        ":avxvnni_enabled",
-        ["XNN_ENABLE_AVXVNNI=1"],
-        ["XNN_ENABLE_AVXVNNI=0"],
-    ) + xnnpack_select_if(
-        ":avxvnniint8_enabled",
-        ["XNN_ENABLE_AVXVNNIINT8=1"],
-        ["XNN_ENABLE_AVXVNNIINT8=0"],
-    ) + xnnpack_select_if(
-        ":avx512f_enabled",
-        ["XNN_ENABLE_AVX512F=1"],
-        ["XNN_ENABLE_AVX512F=0"],
-    ) + xnnpack_select_if(
-        ":avx256skx_enabled",
-        ["XNN_ENABLE_AVX256SKX=1"],
-        ["XNN_ENABLE_AVX256SKX=0"],
-    ) + xnnpack_select_if(
-        ":avx256vnni_enabled",
-        ["XNN_ENABLE_AVX256VNNI=1"],
-        ["XNN_ENABLE_AVX256VNNI=0"],
-    ) + xnnpack_select_if(
-        ":avx256vnnigfni_enabled",
-        ["XNN_ENABLE_AVX256VNNIGFNI=1"],
-        ["XNN_ENABLE_AVX256VNNIGFNI=0"],
-    ) + xnnpack_select_if(
-        ":avx512skx_enabled",
-        ["XNN_ENABLE_AVX512SKX=1"],
-        ["XNN_ENABLE_AVX512SKX=0"],
-    ) + xnnpack_select_if(
-        ":avx512vbmi_enabled",
-        ["XNN_ENABLE_AVX512VBMI=1"],
-        ["XNN_ENABLE_AVX512VBMI=0"],
-    ) + xnnpack_select_if(
-        ":avx512vnni_enabled",
-        ["XNN_ENABLE_AVX512VNNI=1"],
-        ["XNN_ENABLE_AVX512VNNI=0"],
-    ) + xnnpack_select_if(
-        ":avx512vnnigfni_enabled",
-        ["XNN_ENABLE_AVX512VNNIGFNI=1"],
-        ["XNN_ENABLE_AVX512VNNIGFNI=0"],
-    ) + xnnpack_select_if(
-        ":hvx_enabled",
-        ["XNN_ENABLE_HVX=1"],
-        ["XNN_ENABLE_HVX=0"],
-    ) + xnnpack_select_if(
-        ":kleidiai_enabled",
-        ["XNN_ENABLE_KLEIDIAI=1"],
-        ["XNN_ENABLE_KLEIDIAI=0"],
-    ) + xnnpack_select_if(
-        ":arm_sme_enabled",
-        ["XNN_ENABLE_ARM_SME=1"],
-        ["XNN_ENABLE_SRM_SME=0"],
-    ) + xnnpack_select_if(
-        ":arm_sme2_enabled",
-        ["XNN_ENABLE_ARM_SME2=1"],
-        ["XNN_ENABLE_ARM_SME2=0"],
-    ) + xnnpack_select_if(
-        ":wasm_revectorize_enabled",
-        ["XNN_ENABLE_WASM_REVECTORIZE=1"],
-        ["XNN_ENABLE_WASM_REVECTORIZE=0"],
-    ) + xnnpack_slinky_defines()
 
 def _create_params(
         cond = None,
@@ -253,7 +129,6 @@ _XNNPACK_SIMD_ARCH_COPT_MAPPING = {
         ],
     ),
     "fma3": xnnpack_select_if("//build_config:x86", ["-mfma"]),
-    "hvx": xnnpack_select_if("//build_config:hexagon", ["-mhvx-ieee-fp"]),
     "neon": select({
         "//build_config:aarch32": [
             "-marm",
@@ -273,13 +148,14 @@ _XNNPACK_SIMD_ARCH_COPT_MAPPING = {
     }),
     "sse2": xnnpack_select_if("//build_config:x86", ["-msse2"]),
     "sse41": xnnpack_select_if("//build_config:x86", ["-msse4.1"]),
+    "hvx": xnnpack_select_if("//build_config:hexagon", ["-mhvx-ieee-fp"]),
 }
 
 def xnnpack_simd_copts_for_arch(arch):
     return _XNNPACK_SIMD_ARCH_COPT_MAPPING.get(arch, [])
 
 def xnnpack_simd_f32_archs():
-    return ["avx", "avx2", "avx512f", "fma3", "hvx", "neon", "scalar", "sse2", "wasmsimd"]
+    return ["avx", "avx2", "avx512f", "fma3", "hvx", "neon", "scalar", "sse2", "sse2fma", "wasmsimd", "wasmrelaxedsimd"]
 
 def xnnpack_simd_f16_archs():
     return ["scalar", "neonfp16arith", "avx512fp16"]
@@ -291,10 +167,10 @@ def xnnpack_simd_s32_archs():
     return ["avx2", "avx512f", "neon", "scalar", "sse41", "hvx", "wasmsimd"]
 
 def xnnpack_simd_s8_archs():
-    return ["scalar", "sse41", "neon", "wasmsimd"]
+    return ["scalar", "sse41", "neon", "hvx", "wasmsimd"]
 
 def xnnpack_simd_u8_archs():
-    return ["scalar", "sse2", "neon", "wasmsimd"]
+    return ["scalar", "sse2", "neon", "hvx", "wasmsimd"]
 
 def xnnpack_archs():
     return XNNPACK_PARAMS_FOR_ARCH.keys()
@@ -335,7 +211,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
             "-ffp-contract=off",
         ],
         extra_deps = [
-            "//:config_hdrs",
+            "//src/configs:config_hdrs",
             "@FXdiv",
         ],
     ),
@@ -555,6 +431,16 @@ XNNPACK_PARAMS_FOR_ARCH = {
         msvc_x86_64_copts = ["/arch:SSE"],
     ),
     "sse2": _create_params(
+        cond = "//build_config:x86",
+        copts = _x86_align_stack(16),
+        gcc_x86_copts = [
+            "-msse2",
+            "-mno-sse3",
+        ],
+        msvc_x86_32_copts = ["/arch:SSE2"],
+        msvc_x86_64_copts = ["/arch:SSE2"],
+    ),
+    "sse2fma": _create_params(
         cond = "//build_config:x86",
         copts = _x86_align_stack(16),
         gcc_x86_copts = [

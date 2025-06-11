@@ -27,7 +27,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_7x4v__rvv(
     size_t cn_stride,
     size_t a_offset,
     const int8_t* zero,
-    const union xnn_qs8_qc8w_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_qs8_qc8w_conv_minmax_params* restrict params)
 {
   assert(mr != 0);
   assert(mr <= 7);
@@ -212,13 +212,13 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_7x4v__rvv(
     vint8m1_t vout85 = __riscv_vncvt_x_x_w_i8m1(vout5, vl);
     vint8m1_t vout86 = __riscv_vncvt_x_x_w_i8m1(vout6, vl);
 
-    __riscv_vse8_v_i8m1(c0, vout80, vl);
-    __riscv_vse8_v_i8m1(c1, vout81, vl);
-    __riscv_vse8_v_i8m1(c2, vout82, vl);
-    __riscv_vse8_v_i8m1(c3, vout83, vl);
-    __riscv_vse8_v_i8m1(c4, vout84, vl);
-    __riscv_vse8_v_i8m1(c5, vout85, vl);
     __riscv_vse8_v_i8m1(c6, vout86, vl);
+    __riscv_vse8_v_i8m1(c5, vout85, vl);
+    __riscv_vse8_v_i8m1(c4, vout84, vl);
+    __riscv_vse8_v_i8m1(c3, vout83, vl);
+    __riscv_vse8_v_i8m1(c2, vout82, vl);
+    __riscv_vse8_v_i8m1(c1, vout81, vl);
+    __riscv_vse8_v_i8m1(c0, vout80, vl);
 
     c6 = (int8_t*) ((uintptr_t) c6 + cn_stride);
     c5 = (int8_t*) ((uintptr_t) c5 + cn_stride);

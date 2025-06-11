@@ -23,7 +23,7 @@ void xnn_qs8_vadd_minmax_ukernel__hvx_u128(
     const int8_t* input_a,
     const int8_t* input_b,
     int8_t* output,
-    const struct xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_qs8_add_minmax_params* restrict params) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(int8_t) == 0);
@@ -126,8 +126,7 @@ void xnn_qs8_vadd_minmax_ukernel__hvx_u128(
         Q6_V_vstu_variable(output, 32, vout);
         output += 32;
         batch -=32;
-      }
-      else{
+      } else {
         Q6_V_vstu_variable(output, batch, vout);
         batch = 0;
       }

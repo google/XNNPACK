@@ -14,12 +14,10 @@
 extern "C" {
 #endif
 
-#define XNN_UKERNEL(arch_flags, fn_name, element_tile, datatype) \
-  XNN_INTERNAL void fn_name(                             \
-      size_t n,                                          \
-      const float* input,                                \
-      float* sum);
-#include "src/f32-raddextexp/f32-raddextexp.h"
+#define XNN_UKERNEL(arch_flags, fn_name, element_tile, datatype, params_type, \
+                    init_params)                                              \
+  XNN_INTERNAL void fn_name(size_t n, const float* input, float* sum);
+#include "src/f32-raddextexp/f32-raddextexp.inc"
 #undef XNN_UKERNEL
 
 #ifdef __cplusplus

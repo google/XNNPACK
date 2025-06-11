@@ -25,7 +25,7 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x8__wasmsimd_x86_splat(
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_minmax_params* restrict params)
 {
   assert(mr != 0);
   assert(mr <= 4);

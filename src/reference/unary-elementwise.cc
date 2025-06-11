@@ -21,8 +21,8 @@
 #include "src/xnnpack/reference-utils.h"
 
 using xnnpack::dequantize;
-using xnnpack::round_float_to_int;
 using xnnpack::quantize;
+using xnnpack::round_float_to_int;
 
 namespace {
 
@@ -225,7 +225,6 @@ const xnn_unary_elementwise_config* get_convert_config(xnn_datatype input,
   }
 }
 
-
 template <typename T>
 struct AbsOp {
   explicit AbsOp(const xnn_unary_uparams*) {}
@@ -314,24 +313,6 @@ struct NegateOp {
   }
   xnn_bfloat16 operator()(xnn_bfloat16 x) const {
     return xnn_bfloat16_from_bits(xnn_bfloat16_to_bits(x) ^ sign_mask);
-  }
-};
-
-template <typename T>
-struct ReLUOp {
-  explicit ReLUOp(const xnn_unary_uparams*) {}
-
-  int operator()(int x) const { return std::max(x, 0); }
-  float operator()(float x) const { return std::max(x, 0.0f); }
-  static const uint16_t sign_mask = 0x8000;
-  xnn_float16 operator()(xnn_float16 x) const {
-    return (xnn_float16_to_bits(x) & sign_mask) != 0 ? xnn_float16_from_bits(0)
-                                                     : x;
-  }
-  xnn_bfloat16 operator()(xnn_bfloat16 x) const {
-    return (xnn_bfloat16_to_bits(x) & sign_mask) != 0
-               ? xnn_bfloat16_from_bits(0)
-               : x;
   }
 };
 
@@ -473,7 +454,7 @@ template <typename T>
 struct SignOp {
   explicit SignOp(const xnn_unary_uparams*) {}
 
-  int32_t operator()(int32_t x) const { return x < 0 ? -1 : x > 0 ? 1: 0; }
+  int32_t operator()(int32_t x) const { return x < 0 ? -1 : x > 0 ? 1 : 0; }
   float operator()(float x) const { return x < 0 ? -1 : x > 0 ? 1 : 0; }
 
   static const uint16_t sign_mask = 0x8000;

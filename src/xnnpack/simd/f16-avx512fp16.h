@@ -27,8 +27,21 @@ typedef __m512h xnn_simd_f16_t;
   const xnn_simd_f16_t var = _mm512_castsi512_ph(_mm512_set1_epi16(val));
 
 #if XNN_HAVE_FLOAT16
+
+#if defined(__clang__) && (__clang_major__ < 19)
+static XNN_INLINE __m512h xnn_broadcast_16_512_workaround(uint16_t x) {
+  uint32_t bits = (uint32_t)x | ((uint32_t)x) << 16;
+  __asm__ volatile("" : "=m"(bits) : "m"(bits));
+  return (__m512h)_mm512_castsi512_pd(_mm512_set1_epi32(bits));
+}
+#define XNN_SIMD_CONST_F16_FROM_FLOAT(var, val)               \
+  const xnn_simd_f16_t var = xnn_broadcast_16_512_workaround( \
+      xnn_float16_to_bits(xnn_float16_from_float(val)))
+#else
 #define XNN_SIMD_CONST_F16_FROM_FLOAT(var, val) \
   const xnn_simd_f16_t var = _mm512_set1_ph(xnn_float16_from_float(val))
+#endif  // Old Clang workaround
+
 #else
 #define XNN_SIMD_CONST_F16_FROM_FLOAT(var, val) \
   XNN_SIMD_CONST_F16_FROM_INT16(                \
@@ -37,10 +50,6 @@ typedef __m512h xnn_simd_f16_t;
 
 // Whether or not this architecture has native fused multiply-add support.
 #define XNN_SIMD_HAS_NATIVE_FMA 1
-
-// Include the header for generic functions _after_ declaring the arch-specific
-// types and sizes.
-#include "src/xnnpack/simd/f16-generic-functions.h"
 
 // Arithmetic operations.
 static XNN_INLINE xnn_simd_f16_t xnn_zero_f16() { return _mm512_setzero_ph(); }
@@ -157,10 +166,6 @@ static XNN_INLINE xnn_simd_f16_t xnn_rsqrt_f16(xnn_simd_f16_t a) {
   return _mm512_rsqrt_ph(a);
 }
 
-static XNN_INLINE xnn_simd_f16_t xnn_getexp_f16(xnn_simd_f16_t a) {
-  return _mm512_getexp_ph(a);
-}
-
 // Load/store operations.
 static XNN_INLINE xnn_simd_f16_t xnn_loadu_f16(const xnn_float16* ptr) {
   return _mm512_loadu_ph(ptr);
@@ -183,14 +188,6 @@ static XNN_INLINE xnn_simd_f16_t xnn_set1_f16(xnn_float16 v) {
   return _mm512_set1_ph(v);
 #else
   return _mm512_castsi512_ph(_mm512_set1_epi16(v.value));
-#endif  // XNN_HAVE_FLOAT16
-}
-
-static XNN_INLINE xnn_simd_f16_t xnn_set1_or_load_f16(const xnn_float16* v) {
-#if XNN_HAVE_FLOAT16
-  return _mm512_set1_ph(*v);
-#else
-  return _mm512_castsi512_ph(_mm512_set1_epi16(v->value));
 #endif  // XNN_HAVE_FLOAT16
 }
 

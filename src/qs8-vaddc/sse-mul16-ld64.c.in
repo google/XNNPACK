@@ -30,7 +30,7 @@ void xnn_${DATATYPE.lower()}_vaddc_minmax_ukernel__${ISA}_mul16_ld64_u${BATCH_TI
     const ${XINT8_T}* input_a,
     const ${XINT8_T}* input_b,
     ${XINT8_T}* output,
-    const struct xnn_${DATATYPE.lower()}_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_${DATATYPE.lower()}_add_minmax_params* restrict params) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(${XINT8_T}) == 0);

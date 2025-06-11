@@ -22,10 +22,9 @@
 
 static enum xnn_status create_pack_lh_operator(
   const struct xnn_node* node,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
-  struct xnn_code_cache* code_cache,
   xnn_weights_cache_t weights_cache)
 {
   assert(node->num_inputs == 1);
@@ -34,7 +33,7 @@ static enum xnn_status create_pack_lh_operator(
 
   const uint32_t input_id = node->inputs[0];
   assert(input_id < num_values);
-  const struct xnn_value *input_value = &values[input_id];
+  const struct xnn_runtime_value *input_value = &values[input_id];
   enum xnn_status status;
   switch (input_value->datatype) {
     case xnn_datatype_qint8:
@@ -60,24 +59,26 @@ static enum xnn_status create_pack_lh_operator(
 
 static enum xnn_status reshape_pack_lh_operator(
   struct xnn_operator_data* opdata,
-  struct xnn_value* values,
+  struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
-  const struct xnn_value* input_value = &values[input_id];
+  const struct xnn_runtime_value* input_value = &values[input_id];
   const uint32_t output_id = opdata->outputs[0];
   assert(output_id < num_values);
-  struct xnn_value* output_value = &values[output_id];
+  struct xnn_runtime_value* output_value = &values[output_id];
 
   const size_t num_input_dims = input_value->shape.num_dims;
   const size_t channels =
       num_input_dims < 1 ? 1 : input_value->shape.dim[num_input_dims - 1];
   size_t batch_size =
       num_input_dims < 2 ? 1 : input_value->shape.dim[num_input_dims - 2];
-  size_t num_groups =
-      xnn_shape_multiply_leading_dims(&input_value->shape, num_input_dims - 2);
+  size_t num_groups = (2 <= num_input_dims)
+                          ? xnn_shape_multiply_leading_dims(&input_value->shape,
+                                                            num_input_dims - 2)
+                          : 1;
   const size_t old_workspace_size = opdata->workspace_size;
   enum xnn_status status = xnn_status_invalid_state;
   size_t output_size_bytes = 0;
@@ -137,7 +138,7 @@ static enum xnn_status reshape_pack_lh_operator(
 
 static enum xnn_status setup_pack_lh_operator(
   const struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -149,11 +150,11 @@ static enum xnn_status setup_pack_lh_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  const struct xnn_value* input_value = values + input_id;
+  const struct xnn_runtime_value* input_value = values + input_id;
   const void* input_data = input_value->data;
   assert(input_data != NULL);
 
-  const struct xnn_value* output_value = values + output_id;
+  const struct xnn_runtime_value* output_value = values + output_id;
   void* output_data = output_value->data;
   assert(output_data != NULL);
 

@@ -37,7 +37,8 @@ class TransposeNormalizationTester {
 
   size_t expected_dims() const { return this->expected_dims_; }
 
-  TransposeNormalizationTester& expected_element_size(size_t expected_element_size) {
+  TransposeNormalizationTester& expected_element_size(
+      size_t expected_element_size) {
     this->expected_element_size_ = expected_element_size;
     return *this;
   }
@@ -56,51 +57,66 @@ class TransposeNormalizationTester {
     return *this;
   }
 
-  TransposeNormalizationTester& input_stride(const std::vector<size_t> input_stride) {
+  TransposeNormalizationTester& input_stride(
+      const std::vector<size_t> input_stride) {
     assert(input_stride.size() <= XNN_MAX_TENSOR_DIMS);
     this->input_stride_ = input_stride;
     return *this;
   }
 
-  TransposeNormalizationTester& output_stride(const std::vector<size_t> output_stride) {
+  TransposeNormalizationTester& output_stride(
+      const std::vector<size_t> output_stride) {
     assert(output_stride.size() <= XNN_MAX_TENSOR_DIMS);
     this->output_stride_ = output_stride;
     return *this;
   }
 
-  TransposeNormalizationTester& expected_shape(const std::vector<size_t> expected_shape) {
+  TransposeNormalizationTester& expected_shape(
+      const std::vector<size_t> expected_shape) {
     this->expected_shape_ = expected_shape;
     return *this;
   }
 
-  const std::vector<size_t>& expected_shape() const { return this->expected_shape_; }
+  const std::vector<size_t>& expected_shape() const {
+    return this->expected_shape_;
+  }
 
-  TransposeNormalizationTester& expected_perm(const std::vector<size_t> expected_perm) {
+  TransposeNormalizationTester& expected_perm(
+      const std::vector<size_t> expected_perm) {
     this->expected_perm_ = expected_perm;
     return *this;
   }
 
-  const std::vector<size_t>& expected_perm() const { return this->expected_perm_; }
+  const std::vector<size_t>& expected_perm() const {
+    return this->expected_perm_;
+  }
 
-  TransposeNormalizationTester& expected_input_stride(const std::vector<size_t> expected_input_stride) {
+  TransposeNormalizationTester& expected_input_stride(
+      const std::vector<size_t> expected_input_stride) {
     this->expected_input_stride_ = expected_input_stride;
     return *this;
   }
 
-  TransposeNormalizationTester& expected_output_stride(const std::vector<size_t> expected_output_stride) {
+  TransposeNormalizationTester& expected_output_stride(
+      const std::vector<size_t> expected_output_stride) {
     this->expected_output_stride_ = expected_output_stride;
     return *this;
   }
 
-  const std::vector<size_t>& expected_input_stride() const { return this->expected_input_stride_; }
+  const std::vector<size_t>& expected_input_stride() const {
+    return this->expected_input_stride_;
+  }
 
-  const std::vector<size_t>& expected_output_stride() const { return this->expected_output_stride_; }
+  const std::vector<size_t>& expected_output_stride() const {
+    return this->expected_output_stride_;
+  }
 
   TransposeNormalizationTester& calculate_expected_input_stride() {
     expected_input_stride_.resize(expected_dims());
     expected_input_stride_[expected_dims() - 1] = expected_element_size();
     for (size_t i = expected_dims() - 1; i-- != 0;) {
-      expected_input_stride_[i] = expected_input_stride_[i + 1] * expected_shape_[i + 1];
+      expected_input_stride_[i] =
+          expected_input_stride_[i + 1] * expected_shape_[i + 1];
     }
     return *this;
   }
@@ -109,8 +125,8 @@ class TransposeNormalizationTester {
     expected_output_stride_.resize(expected_dims());
     expected_output_stride_[expected_dims() - 1] = expected_element_size();
     for (size_t i = expected_dims() - 1; i-- != 0;) {
-      expected_output_stride_[i] = expected_output_stride_[i + 1]
-          * expected_shape_[expected_perm_[i + 1]];
+      expected_output_stride_[i] = expected_output_stride_[i + 1] *
+                                   expected_shape_[expected_perm_[i + 1]];
     }
     return *this;
   }
@@ -123,12 +139,14 @@ class TransposeNormalizationTester {
     std::vector<size_t> actual_normalized_input_stride(num_dims());
     std::vector<size_t> actual_normalized_output_stride(num_dims());
 
-    xnn_normalize_transpose_permutation(num_dims(), element_size(), perm_.data(),
-                                        shape_.data(), input_stride_.empty() ? nullptr : input_stride_.data(),
-                                        output_stride_.empty() ? nullptr : output_stride_.data(),
-                                        &actual_normalized_dims, &actual_element_size, actual_normalized_perm.data(),
-                                        actual_normalized_shape.data(), actual_normalized_input_stride.data(),
-                                        actual_normalized_output_stride.data());
+    xnn_normalize_transpose_permutation(
+        num_dims(), element_size(), perm_.data(), shape_.data(),
+        input_stride_.empty() ? nullptr : input_stride_.data(),
+        output_stride_.empty() ? nullptr : output_stride_.data(),
+        &actual_normalized_dims, &actual_element_size,
+        actual_normalized_perm.data(), actual_normalized_shape.data(),
+        actual_normalized_input_stride.data(),
+        actual_normalized_output_stride.data());
     EXPECT_EQ(expected_element_size(), actual_element_size);
     EXPECT_EQ(expected_dims(), actual_normalized_dims);
 
@@ -136,7 +154,8 @@ class TransposeNormalizationTester {
       EXPECT_EQ(expected_shape()[i], actual_normalized_shape[i]);
       EXPECT_EQ(expected_perm()[i], actual_normalized_perm[i]);
       EXPECT_EQ(expected_input_stride()[i], actual_normalized_input_stride[i]);
-      EXPECT_EQ(expected_output_stride()[i], actual_normalized_output_stride[i]);
+      EXPECT_EQ(expected_output_stride()[i],
+                actual_normalized_output_stride[i]);
     }
   }
 

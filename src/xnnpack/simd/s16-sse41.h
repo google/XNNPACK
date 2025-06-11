@@ -63,14 +63,6 @@ static XNN_INLINE xnn_simd_s16_t xnn_set1_s16(int16_t v) {
   return _mm_set1_epi16(v);
 }
 
-static XNN_INLINE xnn_simd_s16_t xnn_set1_or_load_s16(const int16_t* v) {
-#if XNN_ARCH_X86
-  return _mm_load_si128((const __m128i*)v);
-#else
-  return _mm_set1_epi16(*v);
-#endif
-}
-
 // Tail load/store operations.
 
 static XNN_INLINE xnn_simd_s16_t
@@ -80,23 +72,30 @@ xnn_load_tail_s16(const int16_t* input, size_t num_elements) XNN_OOB_READS {
   return _mm_loadu_si128((const __m128i*)input);
 }
 
-static XNN_INLINE xnn_simd_s16_t
-xnn_load_tail_safe_s16(const int16_t* input, size_t num_elements) {
+static XNN_INLINE xnn_simd_s16_t xnn_load_tail_safe_s16(const int16_t* input,
+                                                        size_t num_elements) {
   assert(num_elements > 0);
   assert(num_elements < xnn_simd_size_s16);
 
   XNN_ALIGN(16) int16_t padded[8];
   int16_t* d = &padded[0];
   switch (num_elements) {
-  case 7: *d++ = *input++;
-  case 6: *d++ = *input++;
-  case 5: *d++ = *input++;
-  case 4: *d++ = *input++;
-  case 3: *d++ = *input++;
-  case 2: *d++ = *input++;
-  case 1: *d++ = *input++;
+    case 7:
+      *d++ = *input++;
+    case 6:
+      *d++ = *input++;
+    case 5:
+      *d++ = *input++;
+    case 4:
+      *d++ = *input++;
+    case 3:
+      *d++ = *input++;
+    case 2:
+      *d++ = *input++;
+    case 1:
+      *d++ = *input++;
   }
-  return _mm_loadu_si128((const __m128i*)&padded[0]);
+  return _mm_load_si128((const __m128i*)&padded[0]);
 }
 
 static XNN_INLINE void xnn_store_tail_s16(int16_t* output, xnn_simd_s16_t v,

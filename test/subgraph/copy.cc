@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <cassert>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <vector>
@@ -25,7 +26,7 @@ void TestImpl(size_t rank) {
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
-  for (int rep = 0; rep < 100; ++rep) {
+  for (auto _ : FuzzTest(std::chrono::milliseconds(250))) {
     xnn_quantization_params quantization =
         random_quantization(xnn_datatype_of<T>(), rng);
 
@@ -39,7 +40,7 @@ void TestImpl(size_t rank) {
     for (int reshape = 0; reshape < 2; ++reshape) {
       std::vector<size_t> shape = random_shape(rng, rank);
 
-      Tensor<T> input(shape, PaddingBytes{XNN_EXTRA_BYTES});
+      Tensor<T> input(shape, xnnpack::XnnExtraBytes);
       DatatypeGenerator<T> generator(quantization);
       input.generate([&]() { return generator(rng); });
 

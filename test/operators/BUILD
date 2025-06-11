@@ -11,22 +11,24 @@ load(
 
 OPERATOR_TEST_DEPS = [
     "@pthreadpool",
-    "//:XNNPACK",
-    "//:buffer",
     "//:aligned_allocator",
     "//:allocator",
+    "//:buffer",
     "//:cache",
     "//:common",
     "//:datatype",
     "//:fp16",
     "//:internal",
     "//:math",
-    "//:microkernel_configs",
-    "//:microparams",
+    "//:microparams_h",
     "//:normalization",
     "//:params",
     "//:quantization",
+    "//:XNNPACK",
+    "//src/configs:microkernel_configs",
+    "//src/configs:config_types",
     "//test:replicable_random_device",
+    "//:microkernel_hdrs",
 ]
 
 xnnpack_cxx_library(
@@ -42,7 +44,7 @@ xnnpack_cxx_library(
     visibility = ["//:__subpackages__"],
     deps = [
         "//:buffer",
-        "//:microparams",
+        "//:microparams_h",
         "//:quantization",
     ],
 )
@@ -60,8 +62,8 @@ xnnpack_unit_test(
     name = "operator_utils_test",
     srcs = ["operator-utils.cc"],
     deps = [
-        "//:microkernel_configs",
         "//:operator_utils",
+        "//src/configs:microkernel_configs",
     ],
 )
 
@@ -115,7 +117,7 @@ xnnpack_unit_test(
         "batch-matrix-multiply-operator-tester.h",
     ],
     shard_count = 5,
-    deps = OPERATOR_TEST_DEPS + ["//:microkernels_h"],
+    deps = OPERATOR_TEST_DEPS,
 )
 
 xnnpack_unit_test(
@@ -143,7 +145,7 @@ xnnpack_unit_test(
     srcs = [
         "convert-nc.cc",
     ],
-    deps = OPERATOR_TEST_DEPS + ["//:microkernels_h"],
+    deps = OPERATOR_TEST_DEPS,
 )
 
 xnnpack_unit_test(
@@ -237,9 +239,7 @@ xnnpack_unit_test(
         "fully-connected-nc.cc",
         "fully-connected-operator-tester.h",
     ],
-    deps = OPERATOR_TEST_DEPS + [
-        "//:microkernels_h",
-    ],
+    deps = OPERATOR_TEST_DEPS,
 )
 
 xnnpack_unit_test(
@@ -314,16 +314,6 @@ xnnpack_unit_test(
     srcs = [
         "rope-nthc.cc",
         "rope-operator-tester.h",
-    ],
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "scaled_dot_product_attention_nhtc_test",
-    timeout = "moderate",
-    srcs = [
-        "scaled-dot-product-attention-nhtc.cc",
-        "scaled-dot-product-attention-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,
 )

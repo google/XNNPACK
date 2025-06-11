@@ -164,130 +164,131 @@ BEGIN_FUNCTION xnn_bf16_f32_gemm_minmax_ukernel_5x64c2__asm_amd64_avx512bf16_bro
       add r9, 256
       vbroadcastss zmm2, DWORD PTR [rcx + r11]
       vpslld zmm2, zmm2, 16
-      vpsrad zmm2, zmm2, 16
+      vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm11, zmm2, zmm7
 
       vpslld zmm2, zmm2, 16
-      vpsrad zmm2, zmm2, 16
+      vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm16, zmm2, zmm8
 
       vpslld zmm2, zmm2, 16
-      vpsrad zmm2, zmm2, 16
+      vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm21, zmm2, zmm9
 
       vpslld zmm2, zmm2, 16
-      vpsrad zmm2, zmm2, 16
+      vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm26, zmm2, zmm10
 
       vbroadcastss zmm3, DWORD PTR [rax + r11]
       vpslld zmm3, zmm3, 16
-      vpsrad zmm3, zmm3, 16
+      vpsrld zmm3, zmm3, 16
       vdpbf16ps  zmm12, zmm3, zmm7
 
       vpslld zmm3, zmm3, 16
-      vpsrad zmm3, zmm3, 16
+      vpsrld zmm3, zmm3, 16
       vdpbf16ps  zmm17, zmm3, zmm8
 
       vpslld zmm3, zmm3, 16
-      vpsrad zmm3, zmm3, 16
+      vpsrld zmm3, zmm3, 16
       vdpbf16ps  zmm22, zmm3, zmm9
 
       vpslld zmm3, zmm3, 16
-      vpsrad zmm3, zmm3, 16
+      vpsrld zmm3, zmm3, 16
       vdpbf16ps  zmm27, zmm3, zmm10
 
       vbroadcastss zmm4, DWORD PTR [r15 + r11]
       vpslld zmm4, zmm4, 16
-      vpsrad zmm4, zmm4, 16
+      vpsrld zmm4, zmm4, 16
       vdpbf16ps  zmm13, zmm4, zmm7
 
       vpslld zmm4, zmm4, 16
-      vpsrad zmm4, zmm4, 16
+      vpsrld zmm4, zmm4, 16
       vdpbf16ps  zmm18, zmm4, zmm8
 
       vpslld zmm4, zmm4, 16
-      vpsrad zmm4, zmm4, 16
+      vpsrld zmm4, zmm4, 16
       vdpbf16ps  zmm23, zmm4, zmm9
 
       vpslld zmm4, zmm4, 16
-      vpsrad zmm4, zmm4, 16
+      vpsrld zmm4, zmm4, 16
       vdpbf16ps  zmm28, zmm4, zmm10
 
       vbroadcastss zmm5, DWORD PTR [r14 + r11]
       vpslld zmm5, zmm5, 16
-      vpsrad zmm5, zmm5, 16
+      vpsrld zmm5, zmm5, 16
       vdpbf16ps  zmm14, zmm5, zmm7
 
       vpslld zmm5, zmm5, 16
-      vpsrad zmm5, zmm5, 16
+      vpsrld zmm5, zmm5, 16
       vdpbf16ps  zmm19, zmm5, zmm8
 
       vpslld zmm5, zmm5, 16
-      vpsrad zmm5, zmm5, 16
+      vpsrld zmm5, zmm5, 16
       vdpbf16ps  zmm24, zmm5, zmm9
 
       vpslld zmm5, zmm5, 16
-      vpsrad zmm5, zmm5, 16
+      vpsrld zmm5, zmm5, 16
       vdpbf16ps  zmm29, zmm5, zmm10
 
       vbroadcastss zmm6, DWORD PTR [r12 + r11]
       vpslld zmm6, zmm6, 16
-      vpsrad zmm6, zmm6, 16
+      vpsrld zmm6, zmm6, 16
       vdpbf16ps  zmm15, zmm6, zmm7
 
       vpslld zmm6, zmm6, 16
-      vpsrad zmm6, zmm6, 16
+      vpsrld zmm6, zmm6, 16
       vdpbf16ps  zmm20, zmm6, zmm8
 
       vpslld zmm6, zmm6, 16
-      vpsrad zmm6, zmm6, 16
+      vpsrld zmm6, zmm6, 16
       vdpbf16ps  zmm25, zmm6, zmm9
 
       vpslld zmm6, zmm6, 16
-      vpsrad zmm6, zmm6, 16
+      vpsrld zmm6, zmm6, 16
       vdpbf16ps  zmm30, zmm6, zmm10
+
 
 .Linner_loop_end:
       # Min/max clamping.
       vminps  zmm11, zmm1, zmm11
-      vminps  zmm12, zmm1, zmm12
-      vminps  zmm13, zmm1, zmm13
-      vminps  zmm14, zmm1, zmm14
       vminps  zmm15, zmm1, zmm15
-      vminps  zmm16, zmm1, zmm16
-      vminps  zmm17, zmm1, zmm17
-      vminps  zmm18, zmm1, zmm18
       vminps  zmm19, zmm1, zmm19
-      vminps  zmm20, zmm1, zmm20
-      vminps  zmm21, zmm1, zmm21
-      vminps  zmm22, zmm1, zmm22
       vminps  zmm23, zmm1, zmm23
-      vminps  zmm24, zmm1, zmm24
-      vminps  zmm25, zmm1, zmm25
-      vminps  zmm26, zmm1, zmm26
       vminps  zmm27, zmm1, zmm27
+      vminps  zmm12, zmm1, zmm12
+      vminps  zmm16, zmm1, zmm16
+      vminps  zmm20, zmm1, zmm20
+      vminps  zmm24, zmm1, zmm24
       vminps  zmm28, zmm1, zmm28
+      vminps  zmm13, zmm1, zmm13
+      vminps  zmm17, zmm1, zmm17
+      vminps  zmm21, zmm1, zmm21
+      vminps  zmm25, zmm1, zmm25
       vminps  zmm29, zmm1, zmm29
+      vminps  zmm14, zmm1, zmm14
+      vminps  zmm18, zmm1, zmm18
+      vminps  zmm22, zmm1, zmm22
+      vminps  zmm26, zmm1, zmm26
       vminps  zmm30, zmm1, zmm30
       vmaxps  zmm11, zmm0, zmm11
-      vmaxps  zmm12, zmm0, zmm12
-      vmaxps  zmm13, zmm0, zmm13
-      vmaxps  zmm14, zmm0, zmm14
       vmaxps  zmm15, zmm0, zmm15
-      vmaxps  zmm16, zmm0, zmm16
-      vmaxps  zmm17, zmm0, zmm17
-      vmaxps  zmm18, zmm0, zmm18
       vmaxps  zmm19, zmm0, zmm19
-      vmaxps  zmm20, zmm0, zmm20
-      vmaxps  zmm21, zmm0, zmm21
-      vmaxps  zmm22, zmm0, zmm22
       vmaxps  zmm23, zmm0, zmm23
-      vmaxps  zmm24, zmm0, zmm24
-      vmaxps  zmm25, zmm0, zmm25
-      vmaxps  zmm26, zmm0, zmm26
       vmaxps  zmm27, zmm0, zmm27
+      vmaxps  zmm12, zmm0, zmm12
+      vmaxps  zmm16, zmm0, zmm16
+      vmaxps  zmm20, zmm0, zmm20
+      vmaxps  zmm24, zmm0, zmm24
       vmaxps  zmm28, zmm0, zmm28
+      vmaxps  zmm13, zmm0, zmm13
+      vmaxps  zmm17, zmm0, zmm17
+      vmaxps  zmm21, zmm0, zmm21
+      vmaxps  zmm25, zmm0, zmm25
       vmaxps  zmm29, zmm0, zmm29
+      vmaxps  zmm14, zmm0, zmm14
+      vmaxps  zmm18, zmm0, zmm18
+      vmaxps  zmm22, zmm0, zmm22
+      vmaxps  zmm26, zmm0, zmm26
       vmaxps  zmm30, zmm0, zmm30
 
       # Check whether full or partial store.

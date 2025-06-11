@@ -15,7 +15,7 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__hvx_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     ${XINT8_T}* output,
-    const struct xnn_f32_${DATATYPE.lower()}_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f32_${DATATYPE.lower()}_cvt_params* restrict params)
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -77,9 +77,7 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__hvx_u${BATCH_TILE}(
     output += 32;
   }
   if XNN_UNLIKELY(batch != 0) {
-    assert(batch >= 1 * sizeof(float));
-    assert(batch < 32 * sizeof(float));
-    HVX_Vector vx = xnn_loadu_f32(input);
+    HVX_Vector vx = xnn_load_tail_f32(input, batch >> XNN_LOG2_SIZEOF_FLOAT);
 
     vx = xnn_fmadd_f32(vx, vscale, vmagic_bias);
 

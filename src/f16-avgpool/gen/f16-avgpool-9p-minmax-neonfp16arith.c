@@ -23,12 +23,13 @@ void xnn_f16_avgpool_minmax_ukernel_9p__neonfp16arith_u8(
     size_t channels,
     const xnn_float16** input,
     size_t input_offset,
+    size_t input_pixel_stride,
     const xnn_float16* zero,
     const xnn_float16* multiplier,
     xnn_float16* output,
     size_t input_increment,
     size_t output_increment,
-    const struct xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f16_scaleminmax_params* restrict params)
 {
   assert(output_pixels != 0);
   assert(channels != 0);
@@ -260,6 +261,7 @@ void xnn_f16_avgpool_minmax_ukernel_9p__neonfp16arith_u8(
     }
 
     input = (const xnn_float16**) ((uintptr_t) input + input_increment);
+    input_offset += input_pixel_stride;
     output = (xnn_float16*) ((uintptr_t) output + output_increment);
   } while (--output_pixels != 0);
 }

@@ -26,8 +26,8 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x4v__rvv(
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const struct xnn_f32_qc4w_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
-    const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_qc4w_minmax_params* restrict params,
+    const struct xnn_qd8_quantization_params* restrict quantization_params)
 {
   assert(mr != 0);
   assert(mr <= 1);
@@ -50,7 +50,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x4v__rvv(
     vint32m4_t vksum = __riscv_vle32_v_i32m4((const int32_t*)w, vl);
     const int32_t vinput_zero_point0 = quantization_params[0].zero_point;
     vint32m4_t vacc0 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point0, vl);
- 
+
     w = (const int32_t*) w + nr;
 
     size_t k = kc;
@@ -68,7 +68,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x4v__rvv(
       vint16m2_t va0bc1 = __riscv_vwmul_vx_i16m2(vbc1, va0c1, vl);
       vacc0 = __riscv_vwadd_wv_i32m4(vacc0, va0bc1, vl);
     }
- 
+
     vacc0 = __riscv_vsra_vx_i32m4(vacc0, 4, vl);
     // i32 -> f32
     vfloat32m4_t vout0 = __riscv_vfcvt_f_x_v_f32m4(vacc0, vl);

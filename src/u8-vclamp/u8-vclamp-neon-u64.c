@@ -14,15 +14,15 @@ void xnn_u8_vclamp_ukernel__neon_u64(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,
-    const struct xnn_u8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_u8_minmax_params* restrict params) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(uint8_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const uint8x16_t voutput_max = vld1q_dup_u8(&params->scalar.max);
-  const uint8x16_t voutput_min = vld1q_dup_u8(&params->scalar.min);
+  const uint8x16_t voutput_max = vdupq_n_u8(params->scalar.max);
+  const uint8x16_t voutput_min = vdupq_n_u8(params->scalar.min);
 
   for (; batch >= 64; batch -= 64) {
     uint8x16_t vacc0 = vld1q_u8(input); input += 16;

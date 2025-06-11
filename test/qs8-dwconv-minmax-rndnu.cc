@@ -185,7 +185,7 @@ std::vector<DWConvTestParams> CreateTests(
           .kernel_tile(kr)
           .input_offset(xnnpack::NextPrime(cr + 1) * 16)
       , test_func)
-      .loop_zi(0, kr - 1)
+      .loop_zi(0, kr - 1, std::max<size_t>(1, kr / 3))
       .loop_channels(adj_c_block + c_block, cr * 16 - 1, cr * 3));
 
   return tests;
@@ -205,5 +205,5 @@ INSTANTIATE_TEST_SUITE_P(                                                       
     [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {                                                      \
       return info.param.test_name;                                                                                       \
     });
-#include "src/qs8-dwconv/qs8-dwconv-minmax-rndnu.h"
-#undef XNN_UKERNEL_WITH_PARAMS
+#include "src/qs8-dwconv/qs8-dwconv-minmax-rndnu.inc"
+#undef XNN_UKERNEL

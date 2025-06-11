@@ -29,8 +29,9 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${KERN
     intptr_t input_stride,
     size_t output_increment,
     size_t input_offset,
+    size_t input_pixel_stride,
     const int8_t* zero,
-    const ${PARAMS_TYPE} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const ${PARAMS_TYPE}* restrict params) XNN_OOB_READS
 {
   assert(channels != 0);
   assert(output_width != 0);
@@ -254,6 +255,7 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${KERN
       }${" while (c != 0);" if CHANNEL_TILE > 16 else ""}
     }
 
+    input_offset += input_pixel_stride;
     output = (int8_t*) ((uintptr_t) output + output_increment);
   } while (--output_width != 0);
 }

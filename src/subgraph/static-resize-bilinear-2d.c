@@ -21,10 +21,9 @@
 
 static enum xnn_status create_resize_bilinear_operator(
   const struct xnn_node* node,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
-  struct xnn_code_cache* code_cache,
   xnn_weights_cache_t weights_cache)
 {
   assert(node->num_inputs == 1);
@@ -42,17 +41,17 @@ static enum xnn_status create_resize_bilinear_operator(
   const size_t output_width = node->params.static_resize.new_width;
   enum xnn_status status;
 
-  const struct xnn_value *input_value = &values[input_id];
+  const struct xnn_runtime_value *input_value = &values[input_id];
 
-  if (input_value->layout == xnn_layout_type_nchw) {
+  if (input_value->flags & XNN_VALUE_FLAG_LAYOUT_NCHW) {
     status = xnn_create_resize_bilinear2d_nchw(
       input_value->datatype,
       output_height, output_width,
       node->flags,
       &opdata->operator_objects[0]);
   } else {
-    assert(values[input_id].layout == xnn_layout_type_nhwc);
-    assert(values[output_id].layout == xnn_layout_type_nhwc);
+    assert((values[input_id].flags & XNN_VALUE_FLAG_LAYOUT_NCHW) == 0);
+    assert((values[output_id].flags & XNN_VALUE_FLAG_LAYOUT_NCHW) == 0);
     status = xnn_create_resize_bilinear2d_nhwc(
       input_value->datatype,
       output_height, output_width,
@@ -64,7 +63,7 @@ static enum xnn_status create_resize_bilinear_operator(
 
 static enum xnn_status reshape_resize_bilinear_operator(
   struct xnn_operator_data* opdata,
-  struct xnn_value* values,
+  struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -99,7 +98,6 @@ static enum xnn_status reshape_resize_bilinear_operator(
         channel_dim,
         channel_dim,
         &opdata->workspace_size,
-        &opdata->workspace_alignment,
         threadpool);
       break;
     default:
@@ -109,17 +107,17 @@ static enum xnn_status reshape_resize_bilinear_operator(
     return status;
   }
 
-  const size_t output_height = opdata->operator_objects[0]->output_height;
-  const size_t output_width = opdata->operator_objects[0]->output_width;
+  const size_t output_height = opdata->operator_objects[0]->convolution_op->output_height;
+  const size_t output_width = opdata->operator_objects[0]->convolution_op->output_width;
   const uint32_t output_id = opdata->outputs[0];
   assert(output_id < num_values);
-  struct xnn_value* output_value = values + output_id;
+  struct xnn_runtime_value* output_value = values + output_id;
   output_value->shape.num_dims = 4;
   output_value->shape.dim[0] = batch_size;
   output_value->shape.dim[1] = output_height;
   output_value->shape.dim[2] = output_width;
   output_value->shape.dim[3] = channel_dim;
-  const size_t new_size = xnn_tensor_get_size(output_value);
+  const size_t new_size = xnn_runtime_tensor_get_size(output_value);
   if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
     output_value->size = new_size;
     return xnn_status_reallocation_required;
@@ -130,7 +128,7 @@ static enum xnn_status reshape_resize_bilinear_operator(
 
 static enum xnn_status setup_resize_bilinear_operator(
   const struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -142,11 +140,11 @@ static enum xnn_status setup_resize_bilinear_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  const struct xnn_value* input_value = values + input_id;
+  const struct xnn_runtime_value* input_value = values + input_id;
   const void* input_data = input_value->data;
   assert(input_data != NULL);
 
-  const struct xnn_value* output_value = values + output_id;
+  const struct xnn_runtime_value* output_value = values + output_id;
   void* output_data = output_value->data;
   assert(output_data != NULL);
 

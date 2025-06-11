@@ -31,7 +31,7 @@ void xnn_u8_rmax_ukernel__scalar_u2_acc2(
   xnn_simd_u8_t vmax1 = vmax0;
 
   for (; batch >= 2 * sizeof(uint8_t); batch -= 2 * sizeof(uint8_t)) {
-    xnn_simd_u8_t vt0 = xnn_loadu_u8(input);
+    xnn_simd_u8_t vt0 = xnn_loadu_u8(input + 0 * xnn_simd_size_u8);
     xnn_simd_u8_t vt1 = xnn_loadu_u8(input + 1 * xnn_simd_size_u8);
     input += 2 * xnn_simd_size_u8;
 
@@ -47,7 +47,7 @@ void xnn_u8_rmax_ukernel__scalar_u2_acc2(
     vmax0 = xnn_max_u8(vmax0, vt);
   }
 
-  uint8_t max0 = xnn_horizontal_max_u8(vmax0);
+  uint8_t max0 = xnn_reduce_max_u8(vmax0);
 
   if XNN_UNLIKELY(batch != 0) {
     do {

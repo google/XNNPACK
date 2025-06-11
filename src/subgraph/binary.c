@@ -24,10 +24,9 @@
 
 static enum xnn_status create_binary_operator(
   const struct xnn_node* node,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
-  struct xnn_code_cache* code_cache,
   xnn_weights_cache_t weights_cache)
 {
   const uint32_t input1_id = opdata->inputs[0];
@@ -60,7 +59,7 @@ static enum xnn_status create_binary_operator(
 
 static enum xnn_status reshape_binary_operator(
   struct xnn_operator_data* opdata,
-  struct xnn_value* values,
+  struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -71,27 +70,28 @@ static enum xnn_status reshape_binary_operator(
   const uint32_t output_id = opdata->outputs[0];
   assert(output_id < num_values);
 
+  struct xnn_shape shape2;
   opdata->shape1.num_dims = values[input1_id].shape.num_dims;
-  opdata->shape2.num_dims = values[input2_id].shape.num_dims;
-  if (values[output_id].layout == xnn_layout_type_nchw) {
-    assert(values[input1_id].layout == xnn_layout_type_nchw);
-    assert(values[input2_id].layout == xnn_layout_type_nchw);
+  shape2.num_dims = values[input2_id].shape.num_dims;
+  if (values[output_id].flags & XNN_VALUE_FLAG_LAYOUT_NCHW) {
+    assert(values[input1_id].flags & XNN_VALUE_FLAG_LAYOUT_NCHW);
+    assert(values[input2_id].flags & XNN_VALUE_FLAG_LAYOUT_NCHW);
     opdata->shape1.dim[0] = values[input1_id].shape.dim[0];
     opdata->shape1.dim[1] = values[input1_id].shape.dim[values[input1_id].shape.num_dims - 1];
     if (values[input1_id].shape.num_dims > 2) {
       memcpy(&opdata->shape1.dim[2], &values[input1_id].shape.dim[1], (values[input1_id].shape.num_dims - 2) * sizeof(size_t));
     }
-    opdata->shape2.dim[0] = values[input2_id].shape.dim[0];
-    opdata->shape2.dim[1] = values[input2_id].shape.dim[values[input2_id].shape.num_dims - 1];
+    shape2.dim[0] = values[input2_id].shape.dim[0];
+    shape2.dim[1] = values[input2_id].shape.dim[values[input2_id].shape.num_dims - 1];
     if (values[input1_id].shape.num_dims > 2) {
-      memcpy(&opdata->shape2.dim[2], &values[input2_id].shape.dim[1], (values[input2_id].shape.num_dims - 2) * sizeof(size_t));
+      memcpy(&shape2.dim[2], &values[input2_id].shape.dim[1], (values[input2_id].shape.num_dims - 2) * sizeof(size_t));
     }
   } else {
-    assert(values[output_id].layout == xnn_layout_type_nhwc);
-    assert(values[input1_id].layout == xnn_layout_type_nhwc);
-    assert(values[input2_id].layout == xnn_layout_type_nhwc);
+    assert((values[output_id].flags & XNN_VALUE_FLAG_LAYOUT_NCHW) == 0);
+    assert((values[input1_id].flags & XNN_VALUE_FLAG_LAYOUT_NCHW) == 0);
+    assert((values[input2_id].flags & XNN_VALUE_FLAG_LAYOUT_NCHW) == 0);
     memcpy(opdata->shape1.dim, values[input1_id].shape.dim, values[input1_id].shape.num_dims * sizeof(size_t));
-    memcpy(opdata->shape2.dim, values[input2_id].shape.dim, values[input2_id].shape.num_dims * sizeof(size_t));
+    memcpy(shape2.dim, values[input2_id].shape.dim, values[input2_id].shape.num_dims * sizeof(size_t));
   }
 
   // Handle scalars. Although the output shape is dimensionless, the reshape
@@ -100,17 +100,17 @@ static enum xnn_status reshape_binary_operator(
     opdata->shape1.num_dims = 1;
     opdata->shape1.dim[0] = 1;
   }
-  if (opdata->shape2.num_dims == 0) {
-    opdata->shape2.num_dims = 1;
-    opdata->shape2.dim[0] = 1;
+  if (shape2.num_dims == 0) {
+    shape2.num_dims = 1;
+    shape2.dim[0] = 1;
   }
   const size_t old_workspace_size = opdata->workspace_size;
   enum xnn_status status = xnn_reshape_binary_elementwise_nd(
     opdata->operator_objects[0],
     opdata->shape1.num_dims,
     opdata->shape1.dim,
-    opdata->shape2.num_dims,
-    opdata->shape2.dim,
+    shape2.num_dims,
+    shape2.dim,
     threadpool);
   if (status != xnn_status_success) {
     return status;
@@ -120,7 +120,7 @@ static enum xnn_status reshape_binary_operator(
 
 static enum xnn_status setup_binary_operator(
   const struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -136,15 +136,15 @@ static enum xnn_status setup_binary_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  const struct xnn_value* input1_value = values + input1_id;
+  const struct xnn_runtime_value* input1_value = values + input1_id;
   const void* input1_data = input1_value->data;
   assert(input1_data != NULL);
 
-  const struct xnn_value* input2_value = values + input2_id;
+  const struct xnn_runtime_value* input2_value = values + input2_id;
   const void* input2_data = input2_value->data;
   assert(input2_data != NULL);
 
-  const struct xnn_value* output_value = values + output_id;
+  const struct xnn_runtime_value* output_value = values + output_id;
   void* output_data = output_value->data;
   assert(output_data != NULL);
 

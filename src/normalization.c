@@ -16,12 +16,12 @@
 
 void xnn_normalize_slice(
     const size_t num_dims,
-    const size_t offsets[XNN_MIN_ELEMENTS(1)],
-    const size_t sizes[XNN_MIN_ELEMENTS(1)],
-    const size_t input_shape[XNN_MIN_ELEMENTS(1)],
-    size_t normalized_offsets[XNN_MIN_ELEMENTS(XNN_MAX_TENSOR_DIMS)],
-    size_t normalized_input_shape[XNN_MIN_ELEMENTS(XNN_MAX_TENSOR_DIMS)],
-    size_t normalized_output_shape[XNN_MIN_ELEMENTS(XNN_MAX_TENSOR_DIMS)],
+    const size_t* offsets,
+    const size_t* sizes,
+    const size_t* input_shape,
+    size_t* normalized_offsets,
+    size_t* normalized_input_shape,
+    size_t* normalized_output_shape,
     size_t* num_normalized_dims)
 {
   *num_normalized_dims = num_dims;

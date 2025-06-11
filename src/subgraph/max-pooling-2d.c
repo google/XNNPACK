@@ -21,10 +21,9 @@
 
 static enum xnn_status create_max_pooling_operator(
   const struct xnn_node* node,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
-  struct xnn_code_cache* code_cache,
   xnn_weights_cache_t weights_cache)
 {
   assert(node->num_inputs == 1);
@@ -35,7 +34,7 @@ static enum xnn_status create_max_pooling_operator(
 
   const uint32_t input_id = node->inputs[0];
   assert(input_id < num_values);
-  const struct xnn_value *input_value = &values[input_id];
+  const struct xnn_runtime_value *input_value = &values[input_id];
   const enum xnn_datatype datatype = input_value->datatype;
 
   enum xnn_status status;
@@ -128,7 +127,7 @@ static enum xnn_status create_max_pooling_operator(
 
 static enum xnn_status reshape_max_pooling_operator(
   struct xnn_operator_data* opdata,
-  struct xnn_value* values,
+  struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -138,7 +137,7 @@ static enum xnn_status reshape_max_pooling_operator(
   const uint32_t output_id = opdata->outputs[0];
   assert(output_id < num_values);
 
-  struct xnn_value* output_value = values + output_id;
+  struct xnn_runtime_value* output_value = values + output_id;
 
   const size_t batch_size = values[input_id].shape.dim[0];
   const size_t input_height = values[input_id].shape.dim[1];
@@ -146,7 +145,6 @@ static enum xnn_status reshape_max_pooling_operator(
   const size_t channels = values[input_id].shape.dim[3];
 
   enum xnn_status status = xnn_status_invalid_state;
-  const size_t old_workspace_size = opdata->workspace_size;
   size_t output_height, output_width;
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_max_pooling_nhwc_f16:
@@ -215,8 +213,8 @@ static enum xnn_status reshape_max_pooling_operator(
   output_value->shape.dim[3] = channels;
 
   output_value->shape.num_dims = 4;
-  const size_t new_size = xnn_tensor_get_size(output_value);
-  if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
+  const size_t new_size = xnn_runtime_tensor_get_size(output_value);
+  if (new_size > output_value->size) {
     output_value->size = new_size;
     return xnn_status_reallocation_required;
   }
@@ -225,7 +223,7 @@ static enum xnn_status reshape_max_pooling_operator(
 
 static enum xnn_status setup_max_pooling_operator(
   const struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
+  const struct xnn_runtime_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
@@ -237,11 +235,11 @@ static enum xnn_status setup_max_pooling_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  const struct xnn_value* input_value = values + input_id;
+  const struct xnn_runtime_value* input_value = values + input_id;
   const void* input_data = input_value->data;
   assert(input_data != NULL);
 
-  const struct xnn_value* output_value = values + output_id;
+  const struct xnn_runtime_value* output_value = values + output_id;
   void* output_data = output_value->data;
   assert(output_data != NULL);
 
@@ -303,13 +301,6 @@ enum xnn_status xnn_define_max_pooling_2d(
     return xnn_status_invalid_parameter;
   }
 
-  if (pooling_size == 1) {
-    xnn_log_error(
-      "failed to define %s operator with 1 pooling element: 1x1 pooling is meaningless",
-      xnn_node_type_to_string(xnn_node_type_max_pooling_2d));
-    return xnn_status_invalid_parameter;
-  }
-
   if (stride_height == 0 || stride_width == 0) {
     xnn_log_error(
       "failed to define %s operator with %" PRIu32 "x%" PRIu32 " stride: stride dimensions must be non-zero",
@@ -321,20 +312,6 @@ enum xnn_status xnn_define_max_pooling_2d(
     xnn_log_error(
       "failed to define %s operator with %" PRIu32 "x%" PRIu32 " dilation: dilation dimensions must be non-zero",
       xnn_node_type_to_string(xnn_node_type_max_pooling_2d), dilation_width, dilation_height);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (stride_height > pooling_height) {
-    xnn_log_error(
-      "failed to define %s operator with %" PRIu32 " stride height: must be less than pooling height %" PRIu32,
-      xnn_node_type_to_string(xnn_node_type_max_pooling_2d), stride_height, pooling_height);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (stride_width > pooling_width) {
-    xnn_log_error(
-      "failed to define %s operator with %" PRIu32 " stride width: must be less than pooling width %" PRIu32,
-      xnn_node_type_to_string(xnn_node_type_max_pooling_2d), stride_width, pooling_width);
     return xnn_status_invalid_parameter;
   }
 

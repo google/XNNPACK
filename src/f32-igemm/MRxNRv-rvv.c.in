@@ -28,7 +28,7 @@ void xnn_f32_igemm${SUFFIX}_ukernel_${MR}x${LMUL}v__rvv(
     size_t cn_stride,
     size_t a_offset,
     const float* zero,
-    const ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)])
+    const ${PARAMS}* restrict params)
 {
   assert(mr != 0);
   assert(mr <= ${MR});

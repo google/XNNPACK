@@ -5,7 +5,10 @@
 
 #include "test/subgraph/runtime-flags.h"
 
+#include <cstdint>
+
 #include <gtest/gtest.h>
+
 #if GTEST_HAS_ABSL
 #include <absl/flags/flag.h>
 #endif
@@ -27,4 +30,4 @@ uint32_t xnn_test_runtime_flags() {
 #endif
 }
 
-}
+}  // extern "C"

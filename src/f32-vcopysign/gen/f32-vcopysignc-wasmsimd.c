@@ -24,7 +24,7 @@ void xnn_f32_vcopysignc_ukernel__wasmsimd_u4(
     const float* mag,
     const float* sign,
     float* output,
-    const struct xnn_f32_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_default_params* unused_params)
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -60,7 +60,7 @@ void xnn_f32_vcopysignc_ukernel__wasmsimd_u8(
     const float* mag,
     const float* sign,
     float* output,
-    const struct xnn_f32_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_default_params* unused_params)
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -75,14 +75,14 @@ void xnn_f32_vcopysignc_ukernel__wasmsimd_u8(
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
 
-    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag));
+    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag + 0 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_1 = xnn_abs_f32(xnn_loadu_f32(mag + 1 * xnn_simd_size_f32));
     mag += 8;
 
     xnn_simd_f32_t vy_0 = xnn_or_f32(vsign, vmag_0);
     xnn_simd_f32_t vy_1 = xnn_or_f32(vsign, vmag_1);
 
-    xnn_storeu_f32(output, vy_0);
+    xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
     output += 8;
   }
@@ -109,7 +109,7 @@ void xnn_f32_vcopysignc_ukernel__wasmsimd_u12(
     const float* mag,
     const float* sign,
     float* output,
-    const struct xnn_f32_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_default_params* unused_params)
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -124,7 +124,7 @@ void xnn_f32_vcopysignc_ukernel__wasmsimd_u12(
 
   for (; batch >= 12 * sizeof(float); batch -= 12 * sizeof(float)) {
 
-    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag));
+    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag + 0 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_1 = xnn_abs_f32(xnn_loadu_f32(mag + 1 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_2 = xnn_abs_f32(xnn_loadu_f32(mag + 2 * xnn_simd_size_f32));
     mag += 12;
@@ -133,7 +133,7 @@ void xnn_f32_vcopysignc_ukernel__wasmsimd_u12(
     xnn_simd_f32_t vy_1 = xnn_or_f32(vsign, vmag_1);
     xnn_simd_f32_t vy_2 = xnn_or_f32(vsign, vmag_2);
 
-    xnn_storeu_f32(output, vy_0);
+    xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
     xnn_storeu_f32(output + 2 * xnn_simd_size_f32, vy_2);
     output += 12;
@@ -161,7 +161,7 @@ void xnn_f32_vcopysignc_ukernel__wasmsimd_u16(
     const float* mag,
     const float* sign,
     float* output,
-    const struct xnn_f32_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_default_params* unused_params)
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -176,7 +176,7 @@ void xnn_f32_vcopysignc_ukernel__wasmsimd_u16(
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
 
-    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag));
+    xnn_simd_f32_t vmag_0 = xnn_abs_f32(xnn_loadu_f32(mag + 0 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_1 = xnn_abs_f32(xnn_loadu_f32(mag + 1 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_2 = xnn_abs_f32(xnn_loadu_f32(mag + 2 * xnn_simd_size_f32));
     xnn_simd_f32_t vmag_3 = xnn_abs_f32(xnn_loadu_f32(mag + 3 * xnn_simd_size_f32));
@@ -187,7 +187,7 @@ void xnn_f32_vcopysignc_ukernel__wasmsimd_u16(
     xnn_simd_f32_t vy_2 = xnn_or_f32(vsign, vmag_2);
     xnn_simd_f32_t vy_3 = xnn_or_f32(vsign, vmag_3);
 
-    xnn_storeu_f32(output, vy_0);
+    xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
     xnn_storeu_f32(output + 2 * xnn_simd_size_f32, vy_2);
     xnn_storeu_f32(output + 3 * xnn_simd_size_f32, vy_3);

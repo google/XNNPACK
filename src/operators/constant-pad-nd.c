@@ -30,7 +30,7 @@ static void init_constant_pad_nd(
     const struct xnn_xx_pad_config* pad_config,
     xnn_operator_t constant_pad_op)
 {
-  constant_pad_op->pad_value = padding_value;
+  constant_pad_op->padding.pad_value = padding_value;
 
   constant_pad_op->type = operator_type;
   constant_pad_op->flags = flags;
@@ -63,6 +63,21 @@ static enum xnn_status create_constant_pad_nd(
     xnn_log_error(
       "failed to allocate %zu bytes for %s operator descriptor",
       sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
+  constant_pad_op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
+  if (constant_pad_op->compute == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(struct compute_parameters),
+                  xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
+  constant_pad_op->num_compute_invocations = 1;
+  constant_pad_op->dynamic_context.reduce = xnn_allocate_zero_simd_memory(sizeof(struct pad_context));
+  if (constant_pad_op->dynamic_context.reduce == NULL) {
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator descriptor",
+      sizeof(struct pad_context), xnn_operator_type_to_string(operator_type));
     goto error;
   }
 
@@ -200,29 +215,29 @@ static enum xnn_status reshape_constant_pad_nd(
   const struct xnn_xx_fill_config* xx_fill_config = constant_pad_op->fill_config;
   const struct xnn_xx_pad_config* xx_pad_config = constant_pad_op->pad_config;
 
-  constant_pad_op->context.pad = (struct pad_context) {
-    .padding_value = constant_pad_op->pad_value,
+  *constant_pad_op->dynamic_context.pad = (struct pad_context) {
+    .padding_value = constant_pad_op->padding.pad_value,
     .fill_ukernel = xx_fill_config->ukernel,
     .pad_ukernel = xx_pad_config->ukernel,
   };
 
   for (size_t i = 0; i < XNN_MAX_TENSOR_DIMS; i++) {
-    constant_pad_op->context.pad.pre_paddings[i] = normalized_pre_paddings[XNN_MAX_TENSOR_DIMS - 1 - i];
-    constant_pad_op->context.pad.input_size[i] = normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - i];
+    constant_pad_op->dynamic_context.pad->pre_paddings[i] = normalized_pre_paddings[XNN_MAX_TENSOR_DIMS - 1 - i];
+    constant_pad_op->dynamic_context.pad->input_size[i] = normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - i];
   }
   size_t input_stride = normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1];
   size_t output_stride = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1];
   for (size_t i = 1; i < XNN_MAX_TENSOR_DIMS; i++) {
-    constant_pad_op->context.pad.input_stride[i - 1] = input_stride << log2_element_size;
-    constant_pad_op->context.pad.output_stride[i - 1] = output_stride << log2_element_size;
+    constant_pad_op->dynamic_context.pad->input_stride[i - 1] = input_stride << log2_element_size;
+    constant_pad_op->dynamic_context.pad->output_stride[i - 1] = output_stride << log2_element_size;
     input_stride *= normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - i];
     output_stride *= normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1 - i];
   }
-  constant_pad_op->context.pad.input_size[0] <<= log2_element_size;
-  constant_pad_op->context.pad.output_size[0] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1] << log2_element_size;
-  constant_pad_op->context.pad.pre_paddings[0] <<= log2_element_size;
-  constant_pad_op->context.pad.post_paddings[0] =
-    constant_pad_op->context.pad.output_size[0] - constant_pad_op->context.pad.pre_paddings[0] - constant_pad_op->context.pad.input_size[0];
+  constant_pad_op->dynamic_context.pad->input_size[0] <<= log2_element_size;
+  constant_pad_op->dynamic_context.pad->output_size[0] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1] << log2_element_size;
+  constant_pad_op->dynamic_context.pad->pre_paddings[0] <<= log2_element_size;
+  constant_pad_op->dynamic_context.pad->post_paddings[0] =
+    constant_pad_op->dynamic_context.pad->output_size[0] - constant_pad_op->dynamic_context.pad->pre_paddings[0] - constant_pad_op->dynamic_context.pad->input_size[0];
 
   constant_pad_op->compute[0].type = xnn_parallelization_type_5d;
   constant_pad_op->compute[0].task_5d = (pthreadpool_task_5d_t) xnn_compute_pad_5d;
@@ -311,13 +326,13 @@ static enum xnn_status setup_constant_pad_nd(
       break;
   }
 
-  constant_pad_op->context.pad.input = input;
-  constant_pad_op->context.pad.output = output;
+  constant_pad_op->dynamic_context.pad->input = input;
+  constant_pad_op->dynamic_context.pad->output = output;
 
   for (size_t i = 1; i < XNN_MAX_TENSOR_DIMS; i++) {
-    constant_pad_op->context.pad.input =
-      (const void*) ((uintptr_t) constant_pad_op->context.pad.input -
-                     (constant_pad_op->context.pad.pre_paddings[i] * constant_pad_op->context.pad.input_stride[i - 1]));
+    constant_pad_op->dynamic_context.pad->input =
+      (const void*) ((uintptr_t) constant_pad_op->dynamic_context.pad->input -
+                     (constant_pad_op->dynamic_context.pad->pre_paddings[i] * constant_pad_op->dynamic_context.pad->input_stride[i - 1]));
   }
   constant_pad_op->state = xnn_run_state_ready;
 
@@ -369,6 +384,13 @@ enum xnn_status run_constant_pad_nd(
 {
   struct xnn_operator constant_pad_op;
   memset(&constant_pad_op, 0, sizeof(constant_pad_op));
+  struct compute_parameters compute;
+  memset(&compute, 0, sizeof(compute));
+  constant_pad_op.compute = &compute;
+  constant_pad_op.num_compute_invocations = 1;
+  struct pad_context pad_context;
+  memset(&pad_context, 0, sizeof(pad_context));
+  constant_pad_op.dynamic_context.pad = &pad_context;
 
   const struct xnn_xx_fill_config* fill_config = xnn_init_xx_fill_config();
   if (fill_config == NULL) {

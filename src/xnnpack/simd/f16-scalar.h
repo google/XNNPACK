@@ -54,12 +54,12 @@ static XNN_INLINE xnn_simd_f16_t xnn_mul_f16(xnn_simd_f16_t a,
 // If we're computing the fused ops in `float`, act as if we're going to
 // round like native FMA.
 #if XNN_HAVE_FLOAT16
-#if ((XNN_ARCH_X86 || XNN_ARCH_X86_64) && defined(__FMA3__)) || \
+#if ((XNN_ARCH_X86 || XNN_ARCH_X86_64) && defined(__FMA__)) || \
     (XNN_ARCH_ARM64 && __ARM_FEATURE_FMA && defined(__ARM_FEATURE_FP16_FML))
 #define XNN_SIMD_HAS_NATIVE_FMA 1
 #else
 #define XNN_SIMD_HAS_NATIVE_FMA 0
-#endif  // ((XNN_ARCH_X86 || XNN_ARCH_X86_64) && defined(__FMA3__)) ||
+#endif  // ((XNN_ARCH_X86 || XNN_ARCH_X86_64) && defined(__FMA__)) ||
         // (XNN_ARCH_ARM64 && __ARM_FEATURE_FMA &&
         // defined(__ARM_FEATURE_FP16_FML))
 #else
@@ -203,15 +203,6 @@ static XNN_INLINE xnn_simd_f16_t xnn_cmpeq_f16(xnn_simd_f16_t a,
 #define XNN_SIMD_HAVE_RCP_F16 0
 #define XNN_SIMD_HAVE_RSQRT_F16 0
 
-static XNN_INLINE xnn_simd_f16_t xnn_getexp_f16(xnn_simd_f16_t a) {
-#if XNN_HAVE_FLOAT16
-  return (xnn_float16)(((xnn_float16_to_bits(a) & 0x7c00) >> 10) - 15);
-#else
-  return xnn_float16_from_float(
-      (float)(((xnn_float16_to_bits(a) & 0x7c00) >> 10) - 15));
-#endif  // XNN_HAVE_FLOAT16
-}
-
 // Load/store operations.
 static XNN_INLINE xnn_simd_f16_t xnn_loadu_f16(const xnn_simd_f16_t *ptr) {
   return *ptr;
@@ -231,18 +222,14 @@ static XNN_INLINE void xnn_store_f16(xnn_simd_f16_t *ptr, xnn_simd_f16_t v) {
 
 static XNN_INLINE xnn_simd_f16_t xnn_set1_f16(xnn_simd_f16_t v) { return v; }
 
-static XNN_INLINE xnn_simd_f16_t xnn_set1_or_load_f16(xnn_simd_f16_t *v) {
-  return *v;
-}
-
 // Tail load/store operations.
 static XNN_INLINE xnn_simd_f16_t xnn_load_tail_f16(const xnn_simd_f16_t *input,
                                                    size_t num_elements) {
   return *input;
 }
 
-static XNN_INLINE xnn_simd_f16_t xnn_load_tail_safe_f16(
-    const xnn_simd_f16_t *input, size_t num_elements) {
+static XNN_INLINE xnn_simd_f16_t
+xnn_load_tail_safe_f16(const xnn_simd_f16_t *input, size_t num_elements) {
   return *input;
 }
 

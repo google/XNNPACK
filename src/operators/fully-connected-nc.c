@@ -6,7 +6,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <stdio.h>
 #include <assert.h>
 #include <inttypes.h>
 #include <math.h>
@@ -20,6 +19,7 @@
 #include "src/xnnpack/cache.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/compute.h"
+#include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/math.h"
@@ -32,7 +32,6 @@
 #include "src/xnnpack/operator-utils.h"
 #include "src/xnnpack/operator.h"
 #include "src/xnnpack/pack.h"
-#include "src/xnnpack/packq.h"
 #include "src/xnnpack/params.h"
 #include <pthreadpool.h>
 
@@ -53,7 +52,6 @@ static enum xnn_status create_fully_connected_nc(
     xnn_packw_gemm_gio_ukernel_fn pack_gemm_gio_w,
     xnn_packw_gemm_goi_ukernel_fn pack_gemm_goi_w,
     const void* packing_params,
-    int packed_weights_padding_byte,
     size_t extra_weights_bytes,
     xnn_init_qs8_qc8w_scale_params_fn init_scale_params,
     const float* scale_params,
@@ -117,6 +115,39 @@ static enum xnn_status create_fully_connected_nc(
       sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
     goto error;
   }
+  fully_connected_op->compute =
+      xnn_allocate_zero_memory(2 * sizeof(struct compute_parameters));
+  if (fully_connected_op->compute == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(struct compute_parameters),
+                  xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
+  fully_connected_op->num_compute_invocations = 1;
+  fully_connected_op->convolution_op = xnn_allocate_zero_memory(sizeof(struct xnn_convolution_operator));
+  if (fully_connected_op->convolution_op == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(struct xnn_convolution_operator),
+                  xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
+
+
+  fully_connected_op->ukernel.gemm_ukernels = xnn_allocate_zero_simd_memory(sizeof(struct gemm_types));
+  if (fully_connected_op->ukernel.gemm_ukernels == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(struct gemm_types),
+                  xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
+
+  fully_connected_op->dynamic_context.gemm = xnn_allocate_zero_simd_memory(sizeof(struct gemm_op_context));
+  if (fully_connected_op->dynamic_context.gemm == NULL) {
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator descriptor",
+      sizeof(struct gemm_op_context), xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
 
   fully_connected_op->weights_cache = weights_cache;
 
@@ -177,7 +208,7 @@ static enum xnn_status create_fully_connected_nc(
 
   if (cache_offset == XNN_CACHE_NOT_FOUND) {
     void* weights_ptr = xnn_get_pointer_to_write_weights(
-        fully_connected_op, aligned_total_weights_size, packed_weights_padding_byte);
+        fully_connected_op, aligned_total_weights_size);
     if (weights_ptr == NULL) {
       xnn_log_error(
         "failed to allocate %zu bytes for %s operator packed weights",
@@ -186,13 +217,19 @@ static enum xnn_status create_fully_connected_nc(
     }
     xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
       aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
+    if (extra_weights_bytes > 0) {
+      // TODO(b/402602597): We shouldn't need this initialization.
+      memset(weights_ptr, 0, aligned_total_weights_size);
+    }
 
     if (gemm_config->pack_weights_and_biases) {
       gemm_config->pack_weights_and_biases(
           flags, gemm_config, input_channels, output_channels,
           /*groups=*/1,
           /*block_wise=*/block_size,
-          /*kstride=*/k_stride,
+          /*k_stride=*/
+          (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) ? output_channels
+                                               : input_channels,
           /*accumulator_init=*/bias,
           /*weights=*/kernel,
           /*int_extra_data0_fn=*/(xnn_init_scale_params_fn)init_scale_params,
@@ -200,7 +237,9 @@ static enum xnn_status create_fully_connected_nc(
           /*extra_data0_size=*/init_scale_params != NULL ? sizeof(float) : 0,
           /*init_extra_data1_fn=*/
           (xnn_init_scale_params_fn)init_kernel_scale_params,
-          /*extra_data1=*/block_wise ? (const void *) blockwise_kernel_scale_params : (const void *) kernel_scale_params,
+          /*extra_data1=*/
+          block_wise ? (const void*)blockwise_kernel_scale_params
+                     : (const void*)kernel_scale_params,
           /*extra_data1_size=*/init_kernel_scale_params != NULL ? sizeof(float)
                                                                 : 0,
           /*packed_weights_ptr=*/weights_ptr, packing_params);
@@ -229,8 +268,8 @@ static enum xnn_status create_fully_connected_nc(
         void* weights = (void*) ((uintptr_t) weights_ptr +
           gemm_config->nr * ((k_stride << log2_filter_element_size) + bias_element_size));
         init_kernel_scale_params(
-            output_channels, gemm_config->nr, gemm_config->nr,
-            gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
+            output_channels, gemm_config->nr,
+            gemm_config->nr * weights_stride,
             kernel_scale_params, weights);
       }
 
@@ -242,8 +281,8 @@ static enum xnn_status create_fully_connected_nc(
           weights = (void*) ((uintptr_t) weights + gemm_config->nr * sizeof(float));
         }
         init_scale_params(
-            output_channels, gemm_config->nr, gemm_config->nr,
-            gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
+            output_channels, gemm_config->nr,
+            gemm_config->nr * weights_stride,
             scale_params, weights);
       }
     }
@@ -256,8 +295,8 @@ static enum xnn_status create_fully_connected_nc(
     fully_connected_op->packed_weights.offset = cache_offset;
   }
 
-  fully_connected_op->group_input_channels = input_channels;
-  fully_connected_op->group_output_channels = output_channels;
+  fully_connected_op->convolution_op->group_input_channels = input_channels;
+  fully_connected_op->convolution_op->group_output_channels = output_channels;
   fully_connected_op->input_pixel_stride = input_stride;
   fully_connected_op->output_pixel_stride = output_stride;
 
@@ -266,18 +305,22 @@ static enum xnn_status create_fully_connected_nc(
   fully_connected_op->flags = flags;
 
   const size_t mr = gemm_config->mr;
+  const uint32_t mr_packed =
+      gemm_config->mr_packed ? gemm_config->mr_packed : gemm_config->mr;
   fully_connected_op->ukernel.type = xnn_microkernel_type_gemm;
-  fully_connected_op->ukernel.gemm = (struct xnn_ukernel_gemm){
+  fully_connected_op->ukernel.gemm_ukernels->gemm = (struct xnn_ukernel_gemm){
       .mr = mr,
       .nr = nr,
       .kr = kr,
       .sr = sr,
       .kp = planes,
+      .mr_packed = mr_packed,
   };
   assert(XNN_MAX_MR >= mr);
   for (size_t i = 0; i < mr; i++) {
-    fully_connected_op->ukernel.gemm.gemm_cases[i] = gemm_ukernels->gemm[i];
+    fully_connected_op->ukernel.gemm_ukernels->gemm.gemm_cases[i] = gemm_ukernels->gemm[i];
   }
+  fully_connected_op->gemm_config = gemm_config;
 
   fully_connected_op->state = xnn_run_state_invalid;
 
@@ -299,7 +342,6 @@ enum xnn_status create_fully_connected_nc_f16(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     const struct xnn_gemm_config* gemm_config,
     enum xnn_operator_type expected_operator_type,
@@ -359,7 +401,6 @@ enum xnn_status create_fully_connected_nc_f16(
     pack_gemm_gio_w,
     pack_gemm_goi_w,
     /*packing_params=*/NULL,
-    /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/0,
     /*init_scale_params=*/NULL, /*scale_params=*/NULL,
     /*init_kernel_scale_params=*/NULL, /*kernel_scale_params=*/NULL,
@@ -380,12 +421,11 @@ enum xnn_status xnn_create_fully_connected_nc_f16(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out) {
   const struct xnn_gemm_config* gemm_config = xnn_init_f16_gemm_config();
   return create_fully_connected_nc_f16(input_channels, output_channels, input_stride,
-          output_stride, kernel, bias, output_min, output_max, flags, code_cache,
+          output_stride, kernel, bias, output_min, output_max, flags,
           weights_cache, gemm_config,
           xnn_operator_type_fully_connected_nc_f16,
           fully_connected_op_out);
@@ -401,12 +441,11 @@ enum xnn_status xnn_create_fully_connected_nc_pf16(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out) {
   const struct xnn_gemm_config* gemm_config = xnn_init_pf16_gemm_config();
   return create_fully_connected_nc_f16(input_channels, output_channels, input_stride,
-          output_stride, kernel, bias, output_min, output_max, flags, code_cache,
+          output_stride, kernel, bias, output_min, output_max, flags,
           weights_cache, gemm_config, xnn_operator_type_fully_connected_nc_pf16, fully_connected_op_out);
 }
 
@@ -422,7 +461,6 @@ enum xnn_status create_fully_connected_nc_qx8_f16_qc4w(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     const struct xnn_gemm_config *gemm_config,
     enum xnn_operator_type expected_operator_type,
@@ -494,7 +532,6 @@ enum xnn_status create_fully_connected_nc_qx8_f16_qc4w(
     (xnn_packw_gemm_gio_ukernel_fn) gemm_config->pack_gemm_gio,
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
     &packing_params,
-    /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/sizeof(float) * 2,
     /*init_scale_params=*/xnn_init_qs8_qc8w_scale_fp32_params,
     /*scale_params=*/bias,
@@ -502,7 +539,7 @@ enum xnn_status create_fully_connected_nc_qx8_f16_qc4w(
     /*kernel_scale_params=*/kernel_scale,
     &params, sizeof(params),
     gemm_config, gemm_ukernels,
-    xnn_operator_type_fully_connected_nc_qd8_f16_qc4w,
+    expected_operator_type,
     /*weights_cache=*/weights_cache,
     fully_connected_op_out);
 }
@@ -519,14 +556,13 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qc4w(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out)
 {
   const struct xnn_gemm_config* gemm_config = xnn_init_qd8_f16_qc4w_gemm_config();
   return create_fully_connected_nc_qx8_f16_qc4w(input_channels, output_channels, input_stride, output_stride,
                                                 kernel_zero_point, kernel_scale, kernel, bias, output_min,
-                                                output_max, flags, code_cache, weights_cache,
+                                                output_max, flags, weights_cache,
                                                 gemm_config, xnn_operator_type_fully_connected_nc_qd8_f16_qc4w, fully_connected_op_out);
 }
 
@@ -542,14 +578,13 @@ enum xnn_status xnn_create_fully_connected_nc_qdu8_f16_qc4w(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out)
 {
   const struct xnn_gemm_config* gemm_config = xnn_init_qdu8_f16_qc4w_gemm_config();
   return create_fully_connected_nc_qx8_f16_qc4w(input_channels, output_channels, input_stride, output_stride,
                                                 kernel_zero_point, kernel_scale, kernel, bias, output_min,
-                                                output_max, flags, code_cache, weights_cache,
+                                                output_max, flags, weights_cache,
                                                 gemm_config, xnn_operator_type_fully_connected_nc_qdu8_f16_qc4w, fully_connected_op_out);
 }
 
@@ -566,7 +601,6 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out)
 {
@@ -667,12 +701,11 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w(
     /*pack_gemm_gio_w,=*/ NULL,
     /*pack_gemm_goi_w=*/ NULL,
     /*packing_params=*/&packing_params,
-    /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/sizeof(float),
     /*init_scale_params=*/NULL, /*scale_params=*/NULL,
     /*init_kernel_scale_params=*/NULL, /*kernel_scale_params=*/NULL,
     &params, sizeof(params),
-    gemm_config, &gemm_config->minmax,
+    gemm_config, gemm_ukernels,
     xnn_operator_type_fully_connected_nc_qd8_f16_qb4w,
     /*weights_cache=*/weights_cache,
     fully_connected_op_out);
@@ -690,7 +723,6 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qc4w(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     const struct xnn_gemm_config *gemm_config,
     enum xnn_operator_type expected_operator_type,
@@ -727,7 +759,7 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qc4w(
 
   if (gemm_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
-                  xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_qd8_f32_qc4w));
+                  xnn_operator_type_to_string(expected_operator_type));
     return xnn_status_unsupported_hardware;
   }
 
@@ -758,7 +790,6 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qc4w(
     (xnn_packw_gemm_gio_ukernel_fn) gemm_config->pack_gemm_gio,
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
     &packing_params,
-    /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/sizeof(float) * 2,
     /*init_scale_params=*/xnn_init_qs8_qc8w_scale_fp32_params,
     /*scale_params=*/bias,
@@ -783,7 +814,6 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qc4w(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out)
 {
@@ -791,7 +821,7 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qc4w(
   return create_fully_connected_nc_qx8_f32_qc4w(input_channels, output_channels,
                                                 input_stride, output_stride, kernel_zero_point,
                                                 kernel_scale, kernel, bias, output_min, output_max, flags,
-                                                code_cache, weights_cache, gemm_config, xnn_operator_type_fully_connected_nc_qd8_f32_qc4w,
+                                                weights_cache, gemm_config, xnn_operator_type_fully_connected_nc_qd8_f32_qc4w,
                                                 fully_connected_op_out);
 }
 
@@ -807,7 +837,6 @@ enum xnn_status xnn_create_fully_connected_nc_qdu8_f32_qc4w(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out)
 {
@@ -815,7 +844,7 @@ enum xnn_status xnn_create_fully_connected_nc_qdu8_f32_qc4w(
   return create_fully_connected_nc_qx8_f32_qc4w(input_channels, output_channels,
                                                 input_stride, output_stride, kernel_zero_point,
                                                 kernel_scale, kernel, bias, output_min, output_max, flags,
-                                                code_cache, weights_cache, gemm_config, xnn_operator_type_fully_connected_nc_qdu8_f32_qc4w,
+                                                weights_cache, gemm_config, xnn_operator_type_fully_connected_nc_qdu8_f32_qc4w,
                                                 fully_connected_op_out);
 }
 
@@ -823,7 +852,7 @@ static enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qcxw(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, const float* kernel_scale, const void* kernel,
     const float* bias, float output_min, float output_max, uint32_t flags,
-    xnn_code_cache_t code_cache, xnn_weights_cache_t weights_cache,
+    xnn_weights_cache_t weights_cache,
     enum xnn_operator_type operator_type,
     const struct xnn_gemm_config* gemm_config, bool filter_is_nibble,
     const void* packing_params, xnn_operator_t* fully_connected_op_out) {
@@ -876,7 +905,6 @@ static enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qcxw(
       (xnn_packw_gemm_gio_ukernel_fn)gemm_config->pack_gemm_gio,
       (xnn_packw_gemm_goi_ukernel_fn)gemm_config->pack_gemm_goi,
       packing_params,
-      /*packed_weights_padding_byte=*/0,
       /*extra_weights_bytes=*/0,
       /*init_scale_params=*/NULL,
       /*scale_params=*/bias,
@@ -890,7 +918,7 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qc4w(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, uint8_t kernel_zero_point, const float* kernel_scale,
     const void* kernel, const float* bias, float output_min, float output_max,
-    uint32_t flags, xnn_code_cache_t code_cache,
+    uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
   if (kernel_zero_point != 8 && kernel_zero_point != 0) {
     xnn_log_error("failed to create %s operator with %" PRIu8
@@ -919,7 +947,7 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qc4w(
 
   return xnn_create_fully_connected_nc_qp8_f32_qcxw(
       input_channels, output_channels, input_stride, output_stride,
-      kernel_scale, kernel, bias, output_min, output_max, flags, code_cache,
+      kernel_scale, kernel, bias, output_min, output_max, flags,
       weights_cache,
       /*operator_type=*/xnn_operator_type_fully_connected_nc_qp8_f32_qc4w,
       gemm_config, /*filter_is_nibble=*/true, &packing_params,
@@ -930,7 +958,7 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qc8w(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, const float* kernel_scale, const void* kernel,
     const float* bias, float output_min, float output_max, uint32_t flags,
-    xnn_code_cache_t code_cache, xnn_weights_cache_t weights_cache,
+    xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out) {
   const struct xnn_gemm_config* gemm_config =
       xnn_init_qp8_f32_qc8w_gemm_config();
@@ -942,14 +970,6 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qc8w(
     return xnn_status_unsupported_hardware;
   }
 
-  const struct gemm_fused_ukernels* gemm_ukernels = &gemm_config->minmax;
-  const bool linear_activation =
-      (output_max == INFINITY) && (output_min == -output_max);
-  if (linear_activation && gemm_config->linear.gemm[gemm_config->mr - 1]
-                                   .function[XNN_UARCH_DEFAULT] != NULL) {
-    gemm_ukernels = &gemm_config->linear;
-  }
-
   // We don't know input zero point until runtime, row sum is multiplied by it
   // during packing, so set it to 1.
   const struct xnn_qs8_qc8w_packing_params packing_params = {
@@ -957,7 +977,7 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qc8w(
 
   return xnn_create_fully_connected_nc_qp8_f32_qcxw(
       input_channels, output_channels, input_stride, output_stride,
-      kernel_scale, kernel, bias, output_min, output_max, flags, code_cache,
+      kernel_scale, kernel, bias, output_min, output_max, flags,
       weights_cache,
       /*operator_type=*/xnn_operator_type_fully_connected_nc_qp8_f32_qc8w,
       gemm_config, /*filter_is_nibble=*/false, &packing_params,
@@ -977,7 +997,6 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qb4w(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out)
 {
@@ -1073,7 +1092,6 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qb4w(
     /*pack_gemm_gio_w,=*/ NULL,
     /*pack_gemm_goi_w=*/ NULL,
     &packing_params,
-    /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/0,
     /*init_scale_params=*/NULL,
     /*scale_params=*/NULL,
@@ -1099,7 +1117,6 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qb4w(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     const struct xnn_gemm_config *gemm_config,
     enum xnn_operator_type expected_operator_type,
@@ -1127,8 +1144,9 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qb4w(
   }
 
   if (gemm_config == NULL) {
-    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
-                  xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_qd8_f32_qb4w));
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(expected_operator_type));
     return xnn_status_unsupported_hardware;
   }
 
@@ -1140,19 +1158,23 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qb4w(
 
   if (block_size < XNN_MIN_BLOCKSIZE || block_size % XNN_MIN_BLOCKSIZE != 0) {
     xnn_log_error(
-        "failed to create %s operator with block_size: %zu: expecting block_size to be a multiple of %d.",
-        xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_qd8_f32_qb4w), block_size, XNN_MIN_BLOCKSIZE);
+        "failed to create %s operator with block_size: %zu: expecting "
+        "block_size to be a multiple of %d.",
+        xnn_operator_type_to_string(expected_operator_type), block_size,
+        XNN_MIN_BLOCKSIZE);
     return xnn_status_invalid_parameter;
   }
 
   if (input_channels % block_size != 0) {
     xnn_log_error(
-      "failed to create %s operator with input_channels: %zu, and block_size: %zu: expecting input_channels %% block_size == 0.",
-      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_qd8_f32_qb4w), input_channels, block_size);
+        "failed to create %s operator with input_channels: %zu, and "
+        "block_size: %zu: expecting input_channels %% block_size == 0.",
+        xnn_operator_type_to_string(expected_operator_type), input_channels,
+        block_size);
     return xnn_status_invalid_parameter;
   }
 
-  if (kernel_zero_point != 8) {
+  if (kernel_zero_point != 8 && kernel_zero_point != 0) {
     xnn_log_error(
       "failed to create %s operator with %" PRIu8 " kernel zero point: kernel zero point must be equal to 8 "
       "(unsigned weights) or 0 (signed weights)",
@@ -1167,9 +1189,10 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qb4w(
       float fp32_scale = math_cvt_fp32_bf16(kernel_scale[scale_index]);
       if (fp32_scale <= 0.0f || !isnormal(fp32_scale)) {
         xnn_log_error(
-          "failed to create %s operator with %.7g kernel scale in output channel #%zu, block #%zu: scale must be finite and positive",
-          xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_qd8_f32_qb4w),
-          fp32_scale, output_channel, block_index);
+            "failed to create %s operator with %.7g kernel scale in output "
+            "channel #%zu, block #%zu: scale must be finite and positive",
+            xnn_operator_type_to_string(expected_operator_type), fp32_scale,
+            output_channel, block_index);
         return xnn_status_invalid_parameter;
       }
     }
@@ -1184,27 +1207,21 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qb4w(
   const struct xnn_qs8_qc4w_packing_params packing_params = { /*input_zero_point=*/1, kernel_zero_point };
 
   return create_fully_connected_nc(
-    input_channels, output_channels,
-    input_stride, output_stride,
-    kernel, bias, flags,
-    /*block_size=*/block_size,
-    /*blockwise_kernel_scale_params=*/kernel_scale,
-    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
-    /*filter_is_nibble=*/true,
-    /*bias_element_size=*/sizeof(float),
-    /*pack_gemm_gio_w,=*/ NULL,
-    /*pack_gemm_goi_w=*/ NULL,
-    &packing_params,
-    /*packed_weights_padding_byte=*/0,
-    /*extra_weights_bytes=*/sizeof(float),
-    /*init_scale_params=*/NULL, /*scale_params=*/NULL,
-    /*init_kernel_scale_params=*/NULL, /*kernel_scale_params=*/NULL,
-    &params, sizeof(params),
-    gemm_config, gemm_ukernels,
-    xnn_operator_type_fully_connected_nc_qd8_f32_qb4w,
-    /*weights_cache=*/weights_cache,
-    fully_connected_op_out);
+      input_channels, output_channels, input_stride, output_stride, kernel,
+      bias, flags,
+      /*block_size=*/block_size,
+      /*blockwise_kernel_scale_params=*/kernel_scale,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
+      /*filter_is_nibble=*/true,
+      /*bias_element_size=*/sizeof(float),
+      /*pack_gemm_gio_w,=*/NULL,
+      /*pack_gemm_goi_w=*/NULL, &packing_params,
+      /*extra_weights_bytes=*/sizeof(float),
+      /*init_scale_params=*/NULL, /*scale_params=*/NULL,
+      /*init_kernel_scale_params=*/NULL, /*kernel_scale_params=*/NULL, &params,
+      sizeof(params), gemm_config, gemm_ukernels, expected_operator_type,
+      /*weights_cache=*/weights_cache, fully_connected_op_out);
 }
 
 enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w(
@@ -1220,14 +1237,88 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out)
 {
   const struct xnn_gemm_config* gemm_config = xnn_init_qd8_f32_qb4w_gemm_config();
   return create_fully_connected_nc_qx8_f32_qb4w(input_channels, output_channels, input_stride, output_stride,
                                                 block_size, kernel_zero_point, kernel_scale, kernel, bias,
-                                                output_min, output_max, flags, code_cache, weights_cache,
+                                                output_min, output_max, flags, weights_cache,
+                                                gemm_config, xnn_operator_type_fully_connected_nc_qd8_f32_qb4w, fully_connected_op_out);
+}
+
+enum xnn_status create_fully_connected_nc_qd8_f32_qb4w_f16_scales(
+    size_t input_channels,
+    size_t output_channels,
+    size_t input_stride,
+    size_t output_stride,
+    size_t block_size,
+    uint8_t kernel_zero_point,
+    const xnn_float16* kernel_scale,
+    const void* kernel,
+    const float* bias,
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_weights_cache_t weights_cache,
+    const struct xnn_gemm_config *gemm_config,
+    enum xnn_operator_type expected_operator_type,
+    xnn_operator_t* fully_connected_op_out)
+{
+  const size_t num_blocks = (input_channels + block_size - 1) / block_size * output_channels;
+  xnn_bfloat16* bf16_scale_buffer = (xnn_bfloat16*)xnn_allocate_memory(num_blocks * sizeof(xnn_bfloat16));
+  for (size_t i = 0; i < num_blocks; ++i) {
+    bf16_scale_buffer[i] = xnn_bfloat16_from_float(xnn_float16_to_float(kernel_scale[i]));
+  }
+  enum xnn_status status = create_fully_connected_nc_qx8_f32_qb4w(input_channels, output_channels, input_stride, output_stride,
+                                                block_size, kernel_zero_point, (const uint16_t*) bf16_scale_buffer, kernel, bias,
+                                                output_min, output_max, flags, weights_cache,
+                                                gemm_config, xnn_operator_type_fully_connected_nc_qd8_f32_qb4w, fully_connected_op_out);
+  xnn_release_memory(bf16_scale_buffer);
+  return status;
+}
+
+enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w_f16_scales(
+    size_t input_channels,
+    size_t output_channels,
+    size_t input_stride,
+    size_t output_stride,
+    size_t block_size,
+    uint8_t kernel_zero_point,
+    const xnn_float16* kernel_scale,
+    const void* kernel,
+    const float* bias,
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_weights_cache_t weights_cache,
+    xnn_operator_t* fully_connected_op_out) {
+  const struct xnn_gemm_config* gemm_config = xnn_init_qd8_f32_qb4w_gemm_config();
+  return create_fully_connected_nc_qd8_f32_qb4w_f16_scales(input_channels, output_channels, input_stride, output_stride,
+                                                block_size, kernel_zero_point, kernel_scale, kernel, bias,
+                                                output_min, output_max, flags, weights_cache,
+                                                gemm_config, xnn_operator_type_fully_connected_nc_qd8_f32_qb4w, fully_connected_op_out);
+}
+
+enum xnn_status xnn_create_fully_connected_nc_qdu8_f32_qb4w_f16_scales(
+    size_t input_channels,
+    size_t output_channels,
+    size_t input_stride,
+    size_t output_stride,
+    size_t block_size,
+    uint8_t kernel_zero_point,
+    const xnn_float16* kernel_scale,
+    const void* kernel,
+    const float* bias,
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_weights_cache_t weights_cache,
+    xnn_operator_t* fully_connected_op_out) {
+  const struct xnn_gemm_config* gemm_config = xnn_init_qdu8_f32_qb4w_gemm_config();
+  return create_fully_connected_nc_qd8_f32_qb4w_f16_scales(input_channels, output_channels, input_stride, output_stride,
+                                                block_size, kernel_zero_point, kernel_scale, kernel, bias,
+                                                output_min, output_max, flags, weights_cache,
                                                 gemm_config, xnn_operator_type_fully_connected_nc_qd8_f32_qb4w, fully_connected_op_out);
 }
 
@@ -1244,14 +1335,13 @@ enum xnn_status xnn_create_fully_connected_nc_qdu8_f32_qb4w(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out)
 {
   const struct xnn_gemm_config* gemm_config = xnn_init_qdu8_f32_qb4w_gemm_config();
   return create_fully_connected_nc_qx8_f32_qb4w(input_channels, output_channels, input_stride, output_stride,
                                                 block_size, kernel_zero_point, kernel_scale, kernel, bias,
-                                                output_min, output_max, flags, code_cache, weights_cache,
+                                                output_min, output_max, flags, weights_cache,
                                                 gemm_config, xnn_operator_type_fully_connected_nc_qdu8_f32_qb4w, fully_connected_op_out);
 }
 
@@ -1266,7 +1356,6 @@ enum xnn_status create_fully_connected_nc_qdx8_f32_qc8w(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     const struct xnn_gemm_config* gemm_config,
     enum xnn_operator_type expected_operator_type,
@@ -1325,7 +1414,6 @@ enum xnn_status create_fully_connected_nc_qdx8_f32_qc8w(
     (xnn_packw_gemm_gio_ukernel_fn) gemm_config->pack_gemm_gio,
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
     &packing_params,
-    /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/sizeof(float) * 2,
     xnn_init_qs8_qc8w_scale_fp32_params, bias,
     xnn_init_qs8_qc8w_scale_fp32_params, kernel_scale,
@@ -1347,13 +1435,12 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qc8w(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out)
 {
   const struct xnn_gemm_config* gemm_config = xnn_init_qd8_f32_qc8w_gemm_config();
   return create_fully_connected_nc_qdx8_f32_qc8w(input_channels, output_channels, input_stride, output_stride,
-                                                 kernel_scale, kernel, bias, output_min, output_max, flags, code_cache,
+                                                 kernel_scale, kernel, bias, output_min, output_max, flags,
                                                  weights_cache, gemm_config, xnn_operator_type_fully_connected_nc_qd8_f32_qc8w,
                                                  fully_connected_op_out);
 }
@@ -1369,13 +1456,12 @@ enum xnn_status xnn_create_fully_connected_nc_qdu8_f32_qc8w(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out)
 {
   const struct xnn_gemm_config* gemm_config = xnn_init_qdu8_f32_qc8w_gemm_config();
   return create_fully_connected_nc_qdx8_f32_qc8w(input_channels, output_channels, input_stride, output_stride,
-                                                 kernel_scale, kernel, bias, output_min, output_max, flags, code_cache,
+                                                 kernel_scale, kernel, bias, output_min, output_max, flags,
                                                  weights_cache, gemm_config, xnn_operator_type_fully_connected_nc_qdu8_f32_qc8w,
                                                  fully_connected_op_out);
 }
@@ -1391,7 +1477,6 @@ enum xnn_status create_fully_connected_nc_qx8_f16_qc8w(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     const struct xnn_gemm_config *gemm_config,
     enum xnn_operator_type expected_operator_type,
@@ -1454,13 +1539,12 @@ enum xnn_status create_fully_connected_nc_qx8_f16_qc8w(
     (xnn_packw_gemm_gio_ukernel_fn) gemm_config->pack_gemm_gio,
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
     &packing_params,
-    /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/sizeof(float) * 2,
     xnn_init_qs8_qc8w_scale_fp32_params, bias,
     xnn_init_qs8_qc8w_scale_fp32_params, kernel_scale,
     &params, sizeof(params),
     gemm_config, gemm_ukernels,
-    xnn_operator_type_fully_connected_nc_qd8_f16_qc8w,
+    expected_operator_type,
     /*weights_cache=*/weights_cache,
     fully_connected_op_out);
 }
@@ -1476,13 +1560,12 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qc8w(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out)
 {
   const struct xnn_gemm_config* gemm_config = xnn_init_qd8_f16_qc8w_gemm_config();
   return create_fully_connected_nc_qx8_f16_qc8w(input_channels, output_channels, input_stride, output_stride, kernel_scale, kernel, bias,
-                                                output_min, output_max, flags, code_cache, weights_cache, gemm_config,
+                                                output_min, output_max, flags, weights_cache, gemm_config,
                                                 xnn_operator_type_fully_connected_nc_qd8_f16_qc8w,
                                                 fully_connected_op_out);
 }
@@ -1498,13 +1581,12 @@ enum xnn_status xnn_create_fully_connected_nc_qdu8_f16_qc8w(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out)
 {
   const struct xnn_gemm_config* gemm_config = xnn_init_qdu8_f16_qc8w_gemm_config();
   return create_fully_connected_nc_qx8_f16_qc8w(input_channels, output_channels, input_stride, output_stride, kernel_scale, kernel, bias,
-                                                output_min, output_max, flags, code_cache, weights_cache, gemm_config,
+                                                output_min, output_max, flags, weights_cache, gemm_config,
                                                 xnn_operator_type_fully_connected_nc_qdu8_f16_qc8w,
                                                 fully_connected_op_out);
 }
@@ -1519,7 +1601,6 @@ enum xnn_status xnn_create_fully_connected_nc_f32_f16(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out)
 {
@@ -1541,7 +1622,7 @@ enum xnn_status xnn_create_fully_connected_nc_f32_f16(
   }
   enum xnn_status status = xnn_create_fully_connected_nc_f32(
       input_channels, output_channels, input_stride, output_stride,
-      fp32_kernel_buffer, bias, output_min, output_max, flags, code_cache,
+      fp32_kernel_buffer, bias, output_min, output_max, flags,
       weights_cache, fully_connected_op_out);
   xnn_release_memory(fp32_kernel_buffer);
   xnn_release_memory(fp32_bias_buffer);
@@ -1558,7 +1639,6 @@ enum xnn_status create_fully_connected_nc_f32(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     const struct xnn_gemm_config* gemm_config,
     enum xnn_operator_type expected_operator_type,
@@ -1609,7 +1689,6 @@ enum xnn_status create_fully_connected_nc_f32(
     (xnn_packw_gemm_gio_ukernel_fn) gemm_config->pack_gemm_gio,
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
     /*packing_params=*/NULL,
-    /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/0,
     /*init_scale_params=*/NULL, /*scale_params=*/NULL,
     /*init_kernel_scale_params=*/NULL, /*kernel_scale_params=*/NULL,
@@ -1630,7 +1709,6 @@ enum xnn_status xnn_create_fully_connected_nc_bf16_f32(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out) {
   const struct xnn_gemm_config* gemm_config = xnn_init_bf16_f32_gemm_config();
@@ -1641,7 +1719,7 @@ enum xnn_status xnn_create_fully_connected_nc_bf16_f32(
   }
 
   return create_fully_connected_nc_f32(input_channels, output_channels, input_stride, output_stride, kernel, bias,
-                                       output_min, output_max, flags, code_cache, weights_cache, gemm_config,
+                                       output_min, output_max, flags, weights_cache, gemm_config,
                                        xnn_operator_type_fully_connected_nc_bf16_f32, fully_connected_op_out);
 }
 
@@ -1655,17 +1733,16 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config(flags);
   if (gemm_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f32));
     return xnn_status_unsupported_hardware;
   }
 
-  const struct xnn_gemm_config* gemm_nr2_config = xnn_init_f32_gemm_nr2_config();
+  const struct xnn_gemm_config* gemm_nr2_config = xnn_init_f32_gemm_nr2_config(flags);
 
   // Select microkernel configuration based on output channels
   if (gemm_nr2_config != NULL) {
@@ -1686,7 +1763,7 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
 
   return create_fully_connected_nc_f32(
       input_channels, output_channels, input_stride, output_stride, kernel,
-      bias, output_min, output_max, flags, code_cache, weights_cache,
+      bias, output_min, output_max, flags, weights_cache,
       gemm_config, xnn_operator_type_fully_connected_nc_f32,
       fully_connected_op_out);
 }
@@ -1701,7 +1778,6 @@ enum xnn_status xnn_create_fully_connected_nc_pf32(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out) {
   const struct xnn_gemm_config* gemm_config = xnn_init_pf32_gemm_config();
@@ -1713,7 +1789,7 @@ enum xnn_status xnn_create_fully_connected_nc_pf32(
 
   return create_fully_connected_nc_f32(
       input_channels, output_channels, input_stride, output_stride, kernel,
-      bias, output_min, output_max, flags, code_cache, weights_cache,
+      bias, output_min, output_max, flags, weights_cache,
       gemm_config, xnn_operator_type_fully_connected_nc_pf32,
       fully_connected_op_out);
 }
@@ -1730,7 +1806,6 @@ enum xnn_status xnn_create_fully_connected_nc_f32_qc4w(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out)
 {
@@ -1753,6 +1828,13 @@ enum xnn_status xnn_create_fully_connected_nc_f32_qc4w(
       "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be less than or equal to upper bound",
       xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f32_qc4w), output_min, output_max);
     return xnn_status_invalid_parameter;
+  }
+
+  if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+    xnn_log_error(
+      "failed to create %s operator with XNN_FLAG_TRANSPOSE_WEIGHTS: not supported",
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f32_qc4w));
+    return xnn_status_unsupported_parameter;
   }
 
   for (size_t output_channel = 0; output_channel < output_channels; output_channel++) {
@@ -1797,7 +1879,6 @@ enum xnn_status xnn_create_fully_connected_nc_f32_qc4w(
     (xnn_packw_gemm_gio_ukernel_fn) NULL,
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
     /*packing_params=*/NULL,
-    /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/sizeof(float),
     /*init_scale_params=*/xnn_init_qs8_qc8w_scale_fp32_params,
     /*scale_params=*/kernel_scale,
@@ -1821,7 +1902,6 @@ enum xnn_status xnn_create_fully_connected_nc_f32_qc8w(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out)
 {
@@ -1887,7 +1967,6 @@ enum xnn_status xnn_create_fully_connected_nc_f32_qc8w(
     (xnn_packw_gemm_gio_ukernel_fn) gemm_config->pack_gemm_gio,
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
     /*packing_params=*/NULL,
-    /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/sizeof(float),
     /*init_scale_params=*/xnn_init_qs8_qc8w_scale_fp32_params,
     /*scale_params=*/kernel_scale,
@@ -1914,7 +1993,6 @@ enum xnn_status xnn_create_fully_connected_nc_qs8(
     int8_t output_min,
     int8_t output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out)
 {
@@ -1985,7 +2063,6 @@ enum xnn_status xnn_create_fully_connected_nc_qs8(
     (xnn_packw_gemm_gio_ukernel_fn) gemm_config->pack_gemm_gio,
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
     &packing_params,
-    /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/sizeof(float),
     /*init_scale_params=*/xnn_init_qs8_to_qs8_qc8w_scale_fp32_params,
     /*scale_params=*/&requantization_scale,
@@ -2002,7 +2079,6 @@ enum xnn_status create_fully_connected_nc_qx8_qc8w(
   size_t output_channels,
   size_t input_stride,
   size_t output_stride,
-  int8_t input_zero_point,
   float input_scale,
   const float* kernel_scale,
   const int8_t* kernel,
@@ -2012,10 +2088,11 @@ enum xnn_status create_fully_connected_nc_qx8_qc8w(
   int8_t output_min,
   int8_t output_max,
   uint32_t flags,
-  xnn_code_cache_t code_cache,
   xnn_weights_cache_t weights_cache,
   const struct xnn_gemm_config *gemm_config,
   enum xnn_operator_type expected_operator_type,
+  bool filter_is_nibble,
+  const void *packing_params,
   xnn_operator_t* fully_connected_op_out)
 {
   if (input_scale <= 0.0f || !isnormal(input_scale)) {
@@ -2069,8 +2146,6 @@ enum xnn_status create_fully_connected_nc_qx8_qc8w(
     }
   }
 
-  const struct xnn_qs8_packing_params packing_params = { .input_zero_point = input_zero_point };
-
   assert(gemm_config != NULL);
 
   union xnn_qs8_qc8w_conv_minmax_params params;
@@ -2086,12 +2161,11 @@ enum xnn_status create_fully_connected_nc_qx8_qc8w(
     /*blockwise_kernel_scale_params=*/NULL,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    /*filter_is_nibble=*/false,
+    filter_is_nibble,
     /*bias_element_size=*/sizeof(int32_t),
     (xnn_packw_gemm_gio_ukernel_fn) gemm_config->pack_gemm_gio,
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
-    &packing_params,
-    /*packed_weights_padding_byte=*/0,
+    packing_params,
     /*extra_weights_bytes=*/sizeof(float),
     /*init_scale_params=*/xnn_init_qs8_qc8w_scale_fp32_params,
     /*scale_params=*/requantization_scale,
@@ -2104,6 +2178,35 @@ enum xnn_status create_fully_connected_nc_qx8_qc8w(
 
   xnn_release_simd_memory(requantization_scale);
   return status;
+}
+
+enum xnn_status xnn_create_fully_connected_nc_qs8_qc4w(
+  size_t input_channels,
+  size_t output_channels,
+  size_t input_stride,
+  size_t output_stride,
+  int8_t input_zero_point,
+  float input_scale,
+  uint8_t kernel_zero_point,
+  const float* kernel_scale,
+  const void* kernel,
+  const int32_t* bias,
+  int8_t output_zero_point,
+  float output_scale,
+  int8_t output_min,
+  int8_t output_max,
+  uint32_t flags,
+  xnn_weights_cache_t weights_cache,
+  xnn_operator_t* fully_connected_op_out)
+{
+  const struct xnn_gemm_config* gemm_config = xnn_init_qs8_qc4w_gemm_config();
+  const struct xnn_qs8_qc4w_packing_params packing_params = { .input_zero_point = input_zero_point, .kernel_zero_point = kernel_zero_point };
+  return create_fully_connected_nc_qx8_qc8w(input_channels, output_channels, input_stride, output_stride,
+                                            input_scale, kernel_scale, kernel,
+                                            bias, output_zero_point, output_scale, output_min,
+                                            output_max, flags, weights_cache,
+                                            gemm_config, xnn_operator_type_fully_connected_nc_qs8_qc4w, /*filter_is_nibble=*/true, &packing_params,
+                                            fully_connected_op_out);
 }
 
 enum xnn_status xnn_create_fully_connected_nc_qs8_qc8w(
@@ -2121,17 +2224,17 @@ enum xnn_status xnn_create_fully_connected_nc_qs8_qc8w(
   int8_t output_min,
   int8_t output_max,
   uint32_t flags,
-  xnn_code_cache_t code_cache,
   xnn_weights_cache_t weights_cache,
   xnn_operator_t* fully_connected_op_out)
 {
   const struct xnn_gemm_config* gemm_config = xnn_init_qs8_qc8w_gemm_config();
+  const struct xnn_qs8_packing_params packing_params = { .input_zero_point = input_zero_point};
   return create_fully_connected_nc_qx8_qc8w(input_channels, output_channels, input_stride, output_stride,
-                                            input_zero_point, input_scale, kernel_scale, kernel,
+                                            input_scale, kernel_scale, kernel,
                                             bias, output_zero_point, output_scale, output_min,
-                                            output_max, flags, code_cache, weights_cache,
-                                            gemm_config, xnn_operator_type_fully_connected_nc_qs8_qc8w,
-                                            fully_connected_op_out);
+                                            output_max, flags, weights_cache,
+                                            gemm_config, xnn_operator_type_fully_connected_nc_qs8_qc8w, /*filter_is_nibble=*/false,
+                                            &packing_params, fully_connected_op_out);
 }
 
 enum xnn_status xnn_create_fully_connected_nc_pqs8_qc8w(
@@ -2149,17 +2252,17 @@ enum xnn_status xnn_create_fully_connected_nc_pqs8_qc8w(
   int8_t output_min,
   int8_t output_max,
   uint32_t flags,
-  xnn_code_cache_t code_cache,
   xnn_weights_cache_t weights_cache,
   xnn_operator_t* fully_connected_op_out)
 {
   const struct xnn_gemm_config* gemm_config = xnn_init_pqs8_qc8w_gemm_config();
+  const struct xnn_qs8_packing_params packing_params = { .input_zero_point = input_zero_point};
   return create_fully_connected_nc_qx8_qc8w(input_channels, output_channels, input_stride, output_stride,
-                                            input_zero_point, input_scale, kernel_scale, kernel,
+                                            input_scale, kernel_scale, kernel,
                                             bias, output_zero_point, output_scale, output_min,
-                                            output_max, flags, code_cache, weights_cache,
-                                            gemm_config, xnn_operator_type_fully_connected_nc_pqs8_qc8w,
-                                            fully_connected_op_out);
+                                            output_max, flags, weights_cache,
+                                            gemm_config, xnn_operator_type_fully_connected_nc_pqs8_qc8w, /*filter_is_nibble=*/false,
+                                            &packing_params, fully_connected_op_out);
 }
 
 enum xnn_status xnn_create_fully_connected_nc_qu8(
@@ -2178,7 +2281,6 @@ enum xnn_status xnn_create_fully_connected_nc_qu8(
     uint8_t output_min,
     uint8_t output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out)
 {
@@ -2245,7 +2347,6 @@ enum xnn_status xnn_create_fully_connected_nc_qu8(
     (xnn_packw_gemm_gio_ukernel_fn) gemm_config->pack_gemm_gio,
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
     &packing_params,
-    /*packed_weights_padding_byte=*/kernel_zero_point,
     /*extra_weights_bytes=*/0,
     /*init_scale_params=*/NULL, /*scale_params=*/NULL,
     /*init_kernel_scale_params=*/NULL, /*kernel_scale_params=*/NULL,
@@ -2257,18 +2358,12 @@ enum xnn_status xnn_create_fully_connected_nc_qu8(
 }
 
 static enum xnn_status reshape_fully_connected_nc(
-  xnn_operator_t fully_connected_op,
-  enum xnn_operator_type expected_operator_type,
-  size_t batch_size,
-  uint32_t log2_input_element_size,
-  uint32_t log2_filter_element_size,
-  bool filter_is_nibble,
-  bool dynamic_quantization,
-  uint32_t log2_output_element_size,
-  const void* params,
-  size_t params_size,
-  pthreadpool_t threadpool)
-{
+    xnn_operator_t fully_connected_op,
+    enum xnn_operator_type expected_operator_type, size_t batch_size,
+    uint32_t log2_input_element_size, uint32_t log2_filter_element_size,
+    bool filter_is_nibble, bool dynamic_quantization,
+    uint32_t log2_output_element_size, const void* params, size_t params_size,
+    size_t* workspace_size, pthreadpool_t threadpool) {
   if (fully_connected_op->type != expected_operator_type) {
     xnn_log_error(
         "failed to reshape operator: operator type mismatch (expected %s, got "
@@ -2290,39 +2385,190 @@ static enum xnn_status reshape_fully_connected_nc(
     return xnn_status_success;
   }
 
-  size_t input_channels = fully_connected_op->group_input_channels;
-  const size_t output_channels = fully_connected_op->group_output_channels;
+  size_t input_channels = fully_connected_op->convolution_op->group_input_channels;
+  const size_t output_channels = fully_connected_op->convolution_op->group_output_channels;
 
-  uint32_t mr = fully_connected_op->ukernel.gemm.mr;
-  const uint32_t nr = fully_connected_op->ukernel.gemm.nr;
-  struct xnn_hmp_gemm_ukernel *gemm_cases = fully_connected_op->ukernel.gemm.gemm_cases;
+  uint32_t mr = fully_connected_op->ukernel.gemm_ukernels->gemm.mr;
+  uint32_t mr_packed =
+      fully_connected_op->ukernel.gemm_ukernels->gemm.mr_packed;
+  const uint32_t nr = fully_connected_op->ukernel.gemm_ukernels->gemm.nr;
+  const uint32_t kr = fully_connected_op->ukernel.gemm_ukernels->gemm.kr;
+  const uint32_t sr = fully_connected_op->ukernel.gemm_ukernels->gemm.sr;
+  struct xnn_hmp_gemm_ukernel *gemm_cases = fully_connected_op->ukernel.gemm_ukernels->gemm.gemm_cases;
+  const size_t num_threads = pthreadpool_get_threads_count(threadpool);
 
-  if (batch_size == 1 && fully_connected_op->ukernel.gemm.gemm_cases[0].function[XNN_UARCH_DEFAULT] != NULL) {
+  if (batch_size == 1 && fully_connected_op->ukernel.gemm_ukernels->gemm.gemm_cases[0].function[XNN_UARCH_DEFAULT] != NULL) {
     mr = 1;
+    mr_packed = 1;
   }
 
   assert(mr != 0 && mr <= XNN_MAX_MR);
   struct xnn_hmp_gemm_ukernel gemm_ukernel = gemm_cases[mr - 1];
   if (filter_is_nibble) {
-    const uint32_t planes = fully_connected_op->ukernel.gemm.kp;
+    const uint32_t planes = fully_connected_op->ukernel.gemm_ukernels->gemm.kp;
     input_channels = round_up_po2(input_channels, planes);
   }
 
-  const bool packed_lhs =
-      (fully_connected_op->type ==
-       xnn_operator_type_fully_connected_nc_qp8_f32_qc4w) ||
-      (fully_connected_op->type ==
-       xnn_operator_type_fully_connected_nc_qp8_f32_qc8w) ||
-      (fully_connected_op->type ==
-       xnn_operator_type_fully_connected_nc_qp8_f32_qb4w) ||
-      (fully_connected_op->type ==
-       xnn_operator_type_fully_connected_nc_pf32) ||
-      (fully_connected_op->type ==
-       xnn_operator_type_fully_connected_nc_pf16) ||
-      (fully_connected_op->type ==
-       xnn_operator_type_fully_connected_nc_pqs8_qc8w);
+  const struct xnn_pack_lh_config* packed_lh_config = NULL;
+  bool inline_lhs_packing =
+      fully_connected_op->flags & XNN_FLAG_INLINE_LHS_PACKING;
+  switch (fully_connected_op->type) {
+    case xnn_operator_type_fully_connected_nc_qd8_f16_qb4w:
+    case xnn_operator_type_fully_connected_nc_qd8_f16_qc4w:
+    case xnn_operator_type_fully_connected_nc_qd8_f16_qc8w:
+      if (inline_lhs_packing) {
+        packed_lh_config = xnn_init_f16_qdint8_pack_lh_config();
+      }
+      break;
+    case xnn_operator_type_fully_connected_nc_qdu8_f16_qc4w:
+    case xnn_operator_type_fully_connected_nc_qdu8_f16_qc8w:
+      if (inline_lhs_packing) {
+        packed_lh_config = xnn_init_f16_qduint8_pack_lh_config();
+      }
+      break;
+    case xnn_operator_type_fully_connected_nc_qd8_f32_qb4w:
+    case xnn_operator_type_fully_connected_nc_qd8_f32_qc4w:
+    case xnn_operator_type_fully_connected_nc_qd8_f32_qc8w:
+      if (inline_lhs_packing) {
+        packed_lh_config = xnn_init_f32_qdint8_pack_lh_config();
+      }
+      break;
+    case xnn_operator_type_fully_connected_nc_qdu8_f32_qb4w:
+    case xnn_operator_type_fully_connected_nc_qdu8_f32_qc4w:
+    case xnn_operator_type_fully_connected_nc_qdu8_f32_qc8w:
+      if (inline_lhs_packing) {
+        packed_lh_config = xnn_init_f32_qduint8_pack_lh_config();
+      }
+      break;
+    case xnn_operator_type_fully_connected_nc_qp8_f32_qb4w:
+    case xnn_operator_type_fully_connected_nc_qp8_f32_qc4w:
+    case xnn_operator_type_fully_connected_nc_qp8_f32_qc8w:
+      packed_lh_config = xnn_init_qp8_pack_lh_config();
+      break;
+    case xnn_operator_type_fully_connected_nc_pf16:
+      packed_lh_config = xnn_init_x16_pack_lh_config();
+      break;
+    case xnn_operator_type_fully_connected_nc_pf32:
+      packed_lh_config = xnn_init_x32_pack_lh_config();
+      break;
+    case xnn_operator_type_fully_connected_nc_pqs8_qc8w:
+      packed_lh_config = xnn_init_x8_pack_lh_config();
+      break;
+    default:
+      break;
+  }
 
-  fully_connected_op->context.gemm.gemm.gemm = (struct gemm_context){
+  // Clear the operator's compute data to avoid accidentally reusing values from
+  // a previous reshape (this was an interesting bug to track down).
+  memset(fully_connected_op->compute, 0, 2 * sizeof(struct compute_parameters));
+  struct compute_parameters* gemm_compute = &fully_connected_op->compute[0];
+  fully_connected_op->num_compute_invocations = 1;
+  struct gemm_op_context* gemm_context =
+      fully_connected_op->dynamic_context.gemm;
+
+  // Compute the optimal tile size for this GEMM.
+  const size_t nc = xnn_gemm_best_tile_size(
+      /*num_groups=*/1, /*m=*/batch_size, /*n=*/output_channels,
+      /*m_stride=*/
+      fully_connected_op->input_pixel_stride
+          << (packed_lh_config ? packed_lh_config->log2_packed_element_size
+                               : log2_input_element_size),
+      /*n_stride=*/
+      fully_connected_op->weights_stride,
+      /*cn_stride=*/1 << log2_output_element_size, mr, nr,
+      /*num_threads=*/num_threads);
+
+  // If we are packing the LHS, provide a per-thread workspace to do so inline.
+  if (packed_lh_config) {
+    if (inline_lhs_packing) {
+      assert(workspace_size);
+      const size_t per_thread_workspace_size = packed_lh_config->size_fn(
+          mr, /*k=*/input_channels, mr_packed, kr, sr);
+
+      // If `xnn_gemm_best_tile_size` suggests an `nc` that is smaller than `n`,
+      // i.e. it suggests splitting along `output_channels`, then it's probably
+      // not a good idea to inline the packing, which requires using `nc == n`.
+      //
+      // Similarly, inlining the packing also doesn't make sense if the number
+      // of threads exceeds the number of tiles that we can parallelize over.
+      //
+      // In either case, we pack the entire LHS into the workspace in a separate
+      // `compute`, just as if it were a separate op.
+      const bool should_inline_lhs_packing = xnn_should_inline_lhs_packing(
+          fully_connected_op->gemm_config,
+          /*m_packed_stride=*/divide_round_up(per_thread_workspace_size, mr),
+          /*n_stride=*/fully_connected_op->weights_stride,
+          /*cn_stride=*/1 << log2_output_element_size, /*mc=*/batch_size,
+          /*nc=*/output_channels);
+
+      if (packed_lh_config->gemv_noop && mr == 1) {
+        xnn_log_debug(
+            "Skipping inline packing for %s with m=%zu, n=%zu, and k=%zu since "
+            "it is a no-op for GEMV.",
+            xnn_operator_type_to_string(fully_connected_op->type), batch_size,
+            output_channels, input_channels);
+      } else if (!should_inline_lhs_packing ||
+                 num_threads * mr > round_up(batch_size, mr)) {
+        xnn_log_debug(
+            "Pre-packing LHS of %s despite request to inline because %s.",
+            xnn_operator_type_to_string(fully_connected_op->type), batch_size,
+            output_channels, input_channels,
+            !should_inline_lhs_packing
+                ? "packed lhs will likely not stay in cache"
+                : "batch size does not parallelize well over the number of "
+                  "threads");
+
+        // Allocate a workspace for the entire LHS.
+        *workspace_size = packed_lh_config->size_fn(
+            batch_size, /*k=*/input_channels, mr_packed, kr, sr);
+
+        // Set up the LHS packing as a separate compute.
+        gemm_context->pack_lh = (struct pack_lh_context){
+            .m = batch_size,
+            .k = input_channels,
+            .mr = mr_packed,
+            .kr = kr,
+            .sr = sr,
+            .lhs_stride = input_channels
+                          << packed_lh_config->log2_input_element_size,
+            .packed_offset_fn = packed_lh_config->offset_fn,
+            .pack_lh_ukernel = packed_lh_config->ukernel,
+        };
+        fully_connected_op->compute[0].context_offset =
+            offsetof(struct gemm_op_context, pack_lh);
+        fully_connected_op->compute[0].type =
+            xnn_parallelization_type_2d_tile_1d_dynamic;
+        fully_connected_op->compute[0].task_2d_tile_1d_dynamic =
+            (pthreadpool_task_2d_tile_1d_dynamic_t)xnn_compute_pack_lh;
+        fully_connected_op->compute[0].range[0] = 1;
+        fully_connected_op->compute[0].range[1] = batch_size;
+        fully_connected_op->compute[0].tile[0] = mr_packed;
+
+        fully_connected_op->num_compute_invocations = 2;
+        gemm_compute = &fully_connected_op->compute[1];
+        log2_input_element_size = packed_lh_config->log2_packed_element_size;
+        inline_lhs_packing = false;
+        xnn_log_debug("Requesting workspace of size %zu bytes for LHS packing.",
+                      *workspace_size);
+      } else {
+        xnn_log_debug(
+            "Inlining LHS packing for %s with m=%zu, n=%zu, and k=%zu.",
+            xnn_operator_type_to_string(fully_connected_op->type), batch_size,
+            output_channels, input_channels);
+        // We need a buffer for `mr` packed rows for each thread for inlined
+        // LHS packing.
+        *workspace_size = num_threads * per_thread_workspace_size;
+        log2_input_element_size = packed_lh_config->log2_input_element_size;
+        xnn_log_debug(
+            "Requesting workspace of size %zu x %zu bytes for LHS packing.",
+            num_threads, *workspace_size);
+      }
+    } else {
+      log2_input_element_size = packed_lh_config->log2_packed_element_size;
+    }
+  }
+
+  gemm_context->gemm = (struct gemm_context){
       .k_scaled = input_channels << log2_input_element_size,
       .w_stride = fully_connected_op->weights_stride,
       .a_stride = fully_connected_op->input_pixel_stride
@@ -2334,89 +2580,83 @@ static enum xnn_status reshape_fully_connected_nc(
       .log2_csize = log2_output_element_size,
       .ukernel = gemm_ukernel,
       .mr = mr,
-      .kr = fully_connected_op->ukernel.gemm.kr,
-      .sr = fully_connected_op->ukernel.gemm.sr,
+      .nc = output_channels,
+      .kr = kr,
+      .sr = sr,
       .kc = input_channels,
+      .packed_lh_config = packed_lh_config,
+      .workspace_offset = 0,
+      .mr_packed = mr_packed,
+      .dynamic_quantization = dynamic_quantization,
   };
 
-  if (packed_lhs) {
-    switch (fully_connected_op->type) {
-      case xnn_operator_type_fully_connected_nc_qp8_f32_qb4w:
-      case xnn_operator_type_fully_connected_nc_qp8_f32_qc4w:
-      case xnn_operator_type_fully_connected_nc_qp8_f32_qc8w:
-        fully_connected_op->context.gemm.gemm.gemm.packed_lh_offset_fn = xnn_x8_packq_f32qp8_packed_offset;
-        break;
-      case xnn_operator_type_fully_connected_nc_pf16:
-        fully_connected_op->context.gemm.gemm.gemm.packed_lh_offset_fn = xnn_init_x16_pack_lh_config()->offset_fn;
-        break;
-      case xnn_operator_type_fully_connected_nc_pf32:
-        fully_connected_op->context.gemm.gemm.gemm.packed_lh_offset_fn = xnn_init_x32_pack_lh_config()->offset_fn;
-        break;
-      case xnn_operator_type_fully_connected_nc_pqs8_qc8w:
-        fully_connected_op->context.gemm.gemm.gemm.packed_lh_offset_fn = xnn_init_x8_pack_lh_config()->offset_fn;
-        break;
-      default:
-        XNN_UNREACHABLE;
-    }
-  }
-  memcpy(&fully_connected_op->context.gemm.gemm.gemm.params, params, params_size);
-  fully_connected_op->context.gemm.gemm.gemm.fused_params = &fully_connected_op->context.gemm.gemm.gemm.params;
-
-  // Compute the optimal tile size for this GEMM.
-  const size_t nc = xnn_gemm_best_tile_size(
-      /*num_groups=*/1, /*m=*/batch_size, /*n=*/output_channels,
-      /*m_stride=*/fully_connected_op->context.gemm.gemm.gemm.a_stride,
-      /*n_stride=*/fully_connected_op->context.gemm.gemm.gemm.w_stride,
-      /*cm_stride=*/fully_connected_op->context.gemm.gemm.gemm.cm_stride,
-      /*cn_stride=*/1 << log2_output_element_size, mr, nr,
-      /*num_threads=*/pthreadpool_get_threads_count(threadpool));
+  memcpy(&gemm_context->gemm.params, params, params_size);
+  gemm_context->gemm.fused_params = &gemm_context->gemm.params;
 
 #if XNN_MAX_UARCH_TYPES > 1
   if (xnn_is_hmp_gemm_ukernel(gemm_ukernel)) {
-    fully_connected_op->compute[0].type =
-        xnn_parallelization_type_2d_tile_2d_dynamic_with_uarch;
-    if (dynamic_quantization) {
-      fully_connected_op->compute[0].task_2d_tile_2d_dynamic_with_id =
-          (pthreadpool_task_2d_tile_2d_dynamic_with_id_t)xnn_compute_hmp_dqgemm;
-    } else if (packed_lhs) {
-      fully_connected_op->compute[0].task_2d_tile_2d_dynamic_with_id =
-          (pthreadpool_task_2d_tile_2d_dynamic_with_id_t)xnn_compute_hmp_qp8gemm;
+    if (packed_lh_config) {
+      if (inline_lhs_packing) {
+        gemm_compute->type =
+            xnn_parallelization_type_1d_tile_1d_dynamic_with_uarch_with_thread;
+        fully_connected_op->compute[0]
+            .task_1d_tile_1d_dynamic_with_id_with_thread =
+            (pthreadpool_task_1d_tile_1d_dynamic_with_id_with_thread_t)
+                xnn_compute_hmp_inline_packed_qp8gemm;
+      } else {
+        gemm_compute->type =
+            xnn_parallelization_type_2d_tile_2d_dynamic_with_uarch;
+        gemm_compute->task_2d_tile_2d_dynamic_with_id =
+            (pthreadpool_task_2d_tile_2d_dynamic_with_id_t)
+                xnn_compute_hmp_qp8gemm;
+      }
     } else {
-      fully_connected_op->compute[0].task_2d_tile_2d_dynamic_with_id =
-          (pthreadpool_task_2d_tile_2d_dynamic_with_id_t)xnn_compute_hmp_gemm;
+      gemm_compute->type =
+          xnn_parallelization_type_2d_tile_2d_dynamic_with_uarch;
+      if (dynamic_quantization) {
+        gemm_compute->task_2d_tile_2d_dynamic_with_id =
+            (pthreadpool_task_2d_tile_2d_dynamic_with_id_t)
+                xnn_compute_hmp_dqgemm;
+      } else {
+        gemm_compute->task_2d_tile_2d_dynamic_with_id =
+            (pthreadpool_task_2d_tile_2d_dynamic_with_id_t)xnn_compute_hmp_gemm;
+      }
     }
-  } else {
-    fully_connected_op->compute[0].type =
-        xnn_parallelization_type_2d_tile_2d_dynamic;
-    if (dynamic_quantization) {
-      fully_connected_op->compute[0].task_2d_tile_2d_dynamic =
-          (pthreadpool_task_2d_tile_2d_dynamic_t)xnn_compute_dqgemm;
-    } else if (packed_lhs) {
-      fully_connected_op->compute[0].task_2d_tile_2d_dynamic =
-          (pthreadpool_task_2d_tile_2d_dynamic_t)xnn_compute_qp8gemm;
-    } else {
-      fully_connected_op->compute[0].task_2d_tile_2d_dynamic =
-          (pthreadpool_task_2d_tile_2d_dynamic_t)xnn_compute_gemm;
-    }
-  }
-#else
-  fully_connected_op->compute[0].type =
-      xnn_parallelization_type_2d_tile_2d_dynamic;
-  if (dynamic_quantization) {
-    fully_connected_op->compute[0].task_2d_tile_2d_dynamic =
-        (pthreadpool_task_2d_tile_2d_dynamic_t)xnn_compute_dqgemm;
-  } else if (packed_lhs) {
-    fully_connected_op->compute[0].task_2d_tile_2d_dynamic =
-        (pthreadpool_task_2d_tile_2d_dynamic_t)xnn_compute_qp8gemm;
-  } else {
-    fully_connected_op->compute[0].task_2d_tile_2d_dynamic =
-        (pthreadpool_task_2d_tile_2d_dynamic_t)xnn_compute_gemm;
-  }
+  } else
 #endif  // XNN_MAX_UARCH_TYPES > 1
-  fully_connected_op->compute[0].range[1] = batch_size;
-  fully_connected_op->compute[0].range[0] = output_channels;
-  fully_connected_op->compute[0].tile[1] = mr;
-  fully_connected_op->compute[0].tile[0] = nc;
+    if (packed_lh_config) {
+      if (inline_lhs_packing) {
+        gemm_compute->type =
+            xnn_parallelization_type_1d_tile_1d_dynamic_with_thread;
+        gemm_compute->task_1d_tile_1d_dynamic_with_id =
+            (pthreadpool_task_1d_tile_1d_dynamic_with_id_t)
+                xnn_compute_inline_packed_qp8gemm;
+      } else {
+        gemm_compute->type = xnn_parallelization_type_2d_tile_2d_dynamic;
+        gemm_compute->task_2d_tile_2d_dynamic =
+            (pthreadpool_task_2d_tile_2d_dynamic_t)xnn_compute_qp8gemm;
+      }
+    } else {
+      gemm_compute->type = xnn_parallelization_type_2d_tile_2d_dynamic;
+      if (dynamic_quantization) {
+        gemm_compute->task_2d_tile_2d_dynamic =
+            (pthreadpool_task_2d_tile_2d_dynamic_t)xnn_compute_dqgemm;
+      } else {
+        gemm_compute->type = xnn_parallelization_type_2d_tile_2d_dynamic;
+        gemm_compute->task_2d_tile_2d_dynamic =
+            (pthreadpool_task_2d_tile_2d_dynamic_t)xnn_compute_gemm;
+      }
+    }
+
+  if (packed_lh_config && inline_lhs_packing) {
+    gemm_compute->range[0] = batch_size;
+    gemm_compute->tile[0] = mr;
+  } else {
+    gemm_compute->range[0] = output_channels;
+    gemm_compute->range[1] = batch_size;
+    gemm_compute->tile[0] = nc;
+    gemm_compute->tile[1] = mr;
+  }
   fully_connected_op->state = xnn_run_state_needs_setup;
 
   return xnn_status_success;
@@ -2428,34 +2668,30 @@ enum xnn_status xnn_reshape_fully_connected_nc_f16(
     pthreadpool_t threadpool)
 {
   return reshape_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_f16,
-    batch_size,
-    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_HALF,
-    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_HALF,
-    /*filter_is_nibble=*/false,
-    /*dynamic_quantization=*/false,
-    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
-    &fully_connected_op->params.f16_minmax,
-    sizeof(fully_connected_op->params.f16_minmax),
-    threadpool);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_f16, batch_size,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_HALF,
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_HALF,
+      /*filter_is_nibble=*/false,
+      /*dynamic_quantization=*/false,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
+      &fully_connected_op->params.f16_minmax,
+      sizeof(fully_connected_op->params.f16_minmax),
+      /*workspace_size=*/NULL, threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_pf16(
-    xnn_operator_t fully_connected_op,
-    size_t batch_size,
-    pthreadpool_t threadpool)
-{
+    xnn_operator_t fully_connected_op, size_t batch_size,
+    size_t* workspace_size, pthreadpool_t threadpool) {
   return reshape_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_pf16,
-    batch_size,
-    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_HALF,
-    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_HALF,
-    /*filter_is_nibble=*/false,
-    /*dynamic_quantization=*/false,
-    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
-    &fully_connected_op->params.f16_minmax,
-    sizeof(fully_connected_op->params.f16_minmax),
-    threadpool);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_pf16, batch_size,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_HALF,
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_HALF,
+      /*filter_is_nibble=*/false,
+      /*dynamic_quantization=*/false,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
+      &fully_connected_op->params.f16_minmax,
+      sizeof(fully_connected_op->params.f16_minmax), workspace_size,
+      threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_f32_f16(
@@ -2472,16 +2708,16 @@ enum xnn_status xnn_reshape_fully_connected_nc_bf16_f32(
     pthreadpool_t threadpool)
 {
   return reshape_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_bf16_f32,
-    batch_size,
-    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_HALF,
-    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_HALF,
-    /*filter_is_nibble=*/false,
-    /*dynamic_quantization=*/false,
-    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    &fully_connected_op->params.f32_minmax,
-    sizeof(fully_connected_op->params.f32_minmax),
-    threadpool);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_bf16_f32,
+      batch_size,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_HALF,
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_HALF,
+      /*filter_is_nibble=*/false,
+      /*dynamic_quantization=*/false,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      &fully_connected_op->params.f32_minmax,
+      sizeof(fully_connected_op->params.f32_minmax),
+      /*workspace_size=*/NULL, threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_f32(
@@ -2490,34 +2726,30 @@ enum xnn_status xnn_reshape_fully_connected_nc_f32(
     pthreadpool_t threadpool)
 {
   return reshape_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_f32,
-    batch_size,
-    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    /*filter_is_nibble=*/false,
-    /*dynamic_quantization=*/false,
-    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    &fully_connected_op->params.f32_minmax,
-    sizeof(fully_connected_op->params.f32_minmax),
-    threadpool);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_f32, batch_size,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      /*filter_is_nibble=*/false,
+      /*dynamic_quantization=*/false,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      &fully_connected_op->params.f32_minmax,
+      sizeof(fully_connected_op->params.f32_minmax),
+      /*workspace_size=*/NULL, threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_pf32(
-    xnn_operator_t fully_connected_op,
-    size_t batch_size,
-    pthreadpool_t threadpool)
-{
+    xnn_operator_t fully_connected_op, size_t batch_size,
+    size_t* workspace_size, pthreadpool_t threadpool) {
   return reshape_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_pf32,
-    batch_size,
-    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    /*filter_is_nibble=*/false,
-    /*dynamic_quantization=*/false,
-    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    &fully_connected_op->params.f32_minmax,
-    sizeof(fully_connected_op->params.f32_minmax),
-    threadpool);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_pf32, batch_size,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      /*filter_is_nibble=*/false,
+      /*dynamic_quantization=*/false,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      &fully_connected_op->params.f32_minmax,
+      sizeof(fully_connected_op->params.f32_minmax), workspace_size,
+      threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_f32_qc4w(
@@ -2526,17 +2758,18 @@ enum xnn_status xnn_reshape_fully_connected_nc_f32_qc4w(
     pthreadpool_t threadpool)
 {
   return reshape_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_f32_qc4w,
-    batch_size,
-    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    // Pass 1 byte even though it is half byte, we handle the division via filter_is_nibble == true.
-    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
-    /*filter_is_nibble=*/true,
-    /*dynamic_quantization=*/false,
-    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    &fully_connected_op->params.f32_qc4w_minmax,
-    sizeof(fully_connected_op->params.f32_qc4w_minmax),
-    threadpool);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_f32_qc4w,
+      batch_size,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      // Pass 1 byte even though it is half byte, we handle the division via
+      // filter_is_nibble == true.
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
+      /*filter_is_nibble=*/true,
+      /*dynamic_quantization=*/false,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      &fully_connected_op->params.f32_qc4w_minmax,
+      sizeof(fully_connected_op->params.f32_qc4w_minmax),
+      /*workspace_size=*/NULL, threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_f32_qc8w(
@@ -2545,226 +2778,211 @@ enum xnn_status xnn_reshape_fully_connected_nc_f32_qc8w(
     pthreadpool_t threadpool)
 {
   return reshape_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_f32_qc8w,
-    batch_size,
-    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    /*filter_is_nibble=*/false,
-    /*dynamic_quantization=*/false,
-    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    &fully_connected_op->params.f32_minmax,
-    sizeof(fully_connected_op->params.f32_minmax),
-    threadpool);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_f32_qc8w,
+      batch_size,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      /*filter_is_nibble=*/false,
+      /*dynamic_quantization=*/false,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      &fully_connected_op->params.f32_minmax,
+      sizeof(fully_connected_op->params.f32_minmax),
+      /*workspace_size=*/NULL, threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_qd8_f16_qc4w(
-    xnn_operator_t fully_connected_op,
-    size_t batch_size,
-    pthreadpool_t threadpool)
-{
+    xnn_operator_t fully_connected_op, size_t batch_size,
+    size_t* workspace_size, pthreadpool_t threadpool) {
   return reshape_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f16_qc4w,
-    batch_size,
-    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    // Pass 1 byte even though it is half byte, we handle the division via filter_is_nibble == true.
-    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
-    /*filter_is_nibble=*/true,
-    /*dynamic_quantization=*/true,
-    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
-    &fully_connected_op->params.f32_qc4w_minmax,
-    sizeof(fully_connected_op->params.f32_qc4w_minmax),
-    threadpool);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f16_qc4w,
+      batch_size,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      // Pass 1 byte even though it is half byte, we handle the division via
+      // filter_is_nibble == true.
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
+      /*filter_is_nibble=*/true,
+      /*dynamic_quantization=*/true,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
+      &fully_connected_op->params.f32_qc4w_minmax,
+      sizeof(fully_connected_op->params.f32_qc4w_minmax), workspace_size,
+      threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_qdu8_f16_qc4w(
-    xnn_operator_t fully_connected_op,
-    size_t batch_size,
-    pthreadpool_t threadpool)
-{
+    xnn_operator_t fully_connected_op, size_t batch_size,
+    size_t* workspace_size, pthreadpool_t threadpool) {
   return reshape_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_qdu8_f16_qc4w,
-    batch_size,
-    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    // Pass 1 byte even though it is half byte, we handle the division via filter_is_nibble == true.
-    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
-    /*filter_is_nibble=*/true,
-    /*dynamic_quantization=*/true,
-    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
-    &fully_connected_op->params.f32_qc4w_minmax,
-    sizeof(fully_connected_op->params.f32_qc4w_minmax),
-    threadpool);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qdu8_f16_qc4w,
+      batch_size,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      // Pass 1 byte even though it is half byte, we handle the division via
+      // filter_is_nibble == true.
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
+      /*filter_is_nibble=*/true,
+      /*dynamic_quantization=*/true,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
+      &fully_connected_op->params.f32_qc4w_minmax,
+      sizeof(fully_connected_op->params.f32_qc4w_minmax), workspace_size,
+      threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_qd8_f16_qb4w(
-    xnn_operator_t fully_connected_op,
-    size_t batch_size,
-    pthreadpool_t threadpool)
-{
+    xnn_operator_t fully_connected_op, size_t batch_size,
+    size_t* workspace_size, pthreadpool_t threadpool) {
   return reshape_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f16_qb4w,
-    batch_size,
-    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    // Pass 1 byte even though it is half byte, we handle the division via filter_is_nibble == true.
-    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
-    /*filter_is_nibble=*/true,
-    /*dynamic_quantization=*/true,
-    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
-    &fully_connected_op->params.f32_qb4w_minmax,
-    sizeof(fully_connected_op->params.f32_qb4w_minmax),
-    threadpool);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f16_qb4w,
+      batch_size,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      // Pass 1 byte even though it is half byte, we handle the division via
+      // filter_is_nibble == true.
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
+      /*filter_is_nibble=*/true,
+      /*dynamic_quantization=*/true,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
+      &fully_connected_op->params.f32_qb4w_minmax,
+      sizeof(fully_connected_op->params.f32_qb4w_minmax), workspace_size,
+      threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_qd8_f32_qc4w(
-    xnn_operator_t fully_connected_op,
-    size_t batch_size,
-    pthreadpool_t threadpool)
-{
+    xnn_operator_t fully_connected_op, size_t batch_size,
+    size_t* workspace_size, pthreadpool_t threadpool) {
   return reshape_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f32_qc4w,
-    batch_size,
-    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    // Pass 1 byte even though it is half byte, we handle the division via filter_is_nibble == true.
-    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
-    /*filter_is_nibble=*/true,
-    /*dynamic_quantization=*/true,
-    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    &fully_connected_op->params.f32_qc4w_minmax,
-    sizeof(fully_connected_op->params.f32_qc4w_minmax),
-    threadpool);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f32_qc4w,
+      batch_size,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      // Pass 1 byte even though it is half byte, we handle the division via
+      // filter_is_nibble == true.
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
+      /*filter_is_nibble=*/true,
+      /*dynamic_quantization=*/true,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      &fully_connected_op->params.f32_qc4w_minmax,
+      sizeof(fully_connected_op->params.f32_qc4w_minmax), workspace_size,
+      threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_qdu8_f32_qc4w(
-    xnn_operator_t fully_connected_op,
-    size_t batch_size,
-    pthreadpool_t threadpool)
-{
+    xnn_operator_t fully_connected_op, size_t batch_size,
+    size_t* workspace_size, pthreadpool_t threadpool) {
   return reshape_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_qdu8_f32_qc4w,
-    batch_size,
-    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    // Pass 1 byte even though it is half byte, we handle the division via filter_is_nibble == true.
-    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
-    /*filter_is_nibble=*/true,
-    /*dynamic_quantization=*/true,
-    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    &fully_connected_op->params.f32_qc4w_minmax,
-    sizeof(fully_connected_op->params.f32_qc4w_minmax),
-    threadpool);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qdu8_f32_qc4w,
+      batch_size,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      // Pass 1 byte even though it is half byte, we handle the division via
+      // filter_is_nibble == true.
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
+      /*filter_is_nibble=*/true,
+      /*dynamic_quantization=*/true,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      &fully_connected_op->params.f32_qc4w_minmax,
+      sizeof(fully_connected_op->params.f32_qc4w_minmax), workspace_size,
+      threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_qd8_f32_qb4w(
-    xnn_operator_t fully_connected_op,
-    size_t batch_size,
-    pthreadpool_t threadpool)
-{
+    xnn_operator_t fully_connected_op, size_t batch_size,
+    size_t* workspace_size, pthreadpool_t threadpool) {
   return reshape_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f32_qb4w,
-    batch_size,
-    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    // Pass 1 byte even though it is half byte, we handle the division via filter_is_nibble == true.
-    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
-    /*filter_is_nibble=*/true,
-    /*dynamic_quantization=*/true,
-    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    &fully_connected_op->params.f32_qb4w_minmax,
-    sizeof(fully_connected_op->params.f32_qb4w_minmax),
-    threadpool);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f32_qb4w,
+      batch_size,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      // Pass 1 byte even though it is half byte, we handle the division via
+      // filter_is_nibble == true.
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
+      /*filter_is_nibble=*/true,
+      /*dynamic_quantization=*/true,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      &fully_connected_op->params.f32_qb4w_minmax,
+      sizeof(fully_connected_op->params.f32_qb4w_minmax), workspace_size,
+      threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_qdu8_f32_qb4w(
-    xnn_operator_t fully_connected_op,
-    size_t batch_size,
-    pthreadpool_t threadpool)
-{
+    xnn_operator_t fully_connected_op, size_t batch_size,
+    size_t* workspace_size, pthreadpool_t threadpool) {
   return reshape_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_qdu8_f32_qb4w,
-    batch_size,
-    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    // Pass 1 byte even though it is half byte, we handle the division via filter_is_nibble == true.
-    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
-    /*filter_is_nibble=*/true,
-    /*dynamic_quantization=*/true,
-    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    &fully_connected_op->params.f32_qb4w_minmax,
-    sizeof(fully_connected_op->params.f32_qb4w_minmax),
-    threadpool);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qdu8_f32_qb4w,
+      batch_size,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      // Pass 1 byte even though it is half byte, we handle the division via
+      // filter_is_nibble == true.
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
+      /*filter_is_nibble=*/true,
+      /*dynamic_quantization=*/true,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      &fully_connected_op->params.f32_qb4w_minmax,
+      sizeof(fully_connected_op->params.f32_qb4w_minmax), workspace_size,
+      threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_qd8_f16_qc8w(
-    xnn_operator_t fully_connected_op,
-    size_t batch_size,
-    pthreadpool_t threadpool)
-{
+    xnn_operator_t fully_connected_op, size_t batch_size,
+    size_t* workspace_size, pthreadpool_t threadpool) {
   return reshape_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f16_qc8w,
-    batch_size,
-    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    /*filter_is_nibble=*/false,
-    /*dynamic_quantization=*/true,
-    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
-    &fully_connected_op->params.f16_minmax,
-    sizeof(fully_connected_op->params.f16_minmax),
-    threadpool);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f16_qc8w,
+      batch_size,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      /*filter_is_nibble=*/false,
+      /*dynamic_quantization=*/true,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
+      &fully_connected_op->params.f16_minmax,
+      sizeof(fully_connected_op->params.f16_minmax), workspace_size,
+      threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_qdu8_f16_qc8w(
-    xnn_operator_t fully_connected_op,
-    size_t batch_size,
-    pthreadpool_t threadpool)
-{
+    xnn_operator_t fully_connected_op, size_t batch_size,
+    size_t* workspace_size, pthreadpool_t threadpool) {
   return reshape_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_qdu8_f16_qc8w,
-    batch_size,
-    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    /*filter_is_nibble=*/false,
-    /*dynamic_quantization=*/true,
-    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
-    &fully_connected_op->params.f16_minmax,
-    sizeof(fully_connected_op->params.f16_minmax),
-    threadpool);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qdu8_f16_qc8w,
+      batch_size,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      /*filter_is_nibble=*/false,
+      /*dynamic_quantization=*/true,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
+      &fully_connected_op->params.f16_minmax,
+      sizeof(fully_connected_op->params.f16_minmax), workspace_size,
+      threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_qd8_f32_qc8w(
-    xnn_operator_t fully_connected_op,
-    size_t batch_size,
-    pthreadpool_t threadpool)
-{
+    xnn_operator_t fully_connected_op, size_t batch_size,
+    size_t* workspace_size, pthreadpool_t threadpool) {
   return reshape_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f32_qc8w,
-    batch_size,
-    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    /*filter_is_nibble=*/false,
-    /*dynamic_quantization=*/true,
-    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    &fully_connected_op->params.f32_minmax,
-    sizeof(fully_connected_op->params.f32_minmax),
-    threadpool);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f32_qc8w,
+      batch_size,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      /*filter_is_nibble=*/false,
+      /*dynamic_quantization=*/true,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      &fully_connected_op->params.f32_minmax,
+      sizeof(fully_connected_op->params.f32_minmax), workspace_size,
+      threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_qdu8_f32_qc8w(
-    xnn_operator_t fully_connected_op,
-    size_t batch_size,
-    pthreadpool_t threadpool)
-{
+    xnn_operator_t fully_connected_op, size_t batch_size,
+    size_t* workspace_size, pthreadpool_t threadpool) {
   return reshape_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_qdu8_f32_qc8w,
-    batch_size,
-    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    /*filter_is_nibble=*/false,
-    /*dynamic_quantization=*/true,
-    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    &fully_connected_op->params.f32_minmax,
-    sizeof(fully_connected_op->params.f32_minmax),
-    threadpool);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qdu8_f32_qc8w,
+      batch_size,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      /*filter_is_nibble=*/false,
+      /*dynamic_quantization=*/true,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      &fully_connected_op->params.f32_minmax,
+      sizeof(fully_connected_op->params.f32_minmax), workspace_size,
+      threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_qp8_f32_qc4w(
     xnn_operator_t fully_connected_op, size_t batch_size,
-    pthreadpool_t threadpool) {
+    size_t* workspace_size, pthreadpool_t threadpool) {
   return reshape_fully_connected_nc(
       fully_connected_op, xnn_operator_type_fully_connected_nc_qp8_f32_qc4w,
       batch_size,
@@ -2776,12 +2994,13 @@ enum xnn_status xnn_reshape_fully_connected_nc_qp8_f32_qc4w(
       /*dynamic_quantization=*/false,
       /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
       &fully_connected_op->params.f32_minmax,
-      sizeof(fully_connected_op->params.f32_minmax), threadpool);
+      sizeof(fully_connected_op->params.f32_minmax), workspace_size,
+      threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_qp8_f32_qc8w(
     xnn_operator_t fully_connected_op, size_t batch_size,
-    pthreadpool_t threadpool) {
+    size_t* workspace_size, pthreadpool_t threadpool) {
   return reshape_fully_connected_nc(
       fully_connected_op, xnn_operator_type_fully_connected_nc_qp8_f32_qc8w,
       batch_size,
@@ -2791,12 +3010,13 @@ enum xnn_status xnn_reshape_fully_connected_nc_qp8_f32_qc8w(
       /*dynamic_quantization=*/false,
       /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
       &fully_connected_op->params.f32_minmax,
-      sizeof(fully_connected_op->params.f32_minmax), threadpool);
+      sizeof(fully_connected_op->params.f32_minmax), workspace_size,
+      threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_qp8_f32_qb4w(
     xnn_operator_t fully_connected_op, size_t batch_size,
-    pthreadpool_t threadpool) {
+    size_t* workspace_size, pthreadpool_t threadpool) {
   return reshape_fully_connected_nc(
       fully_connected_op, xnn_operator_type_fully_connected_nc_qp8_f32_qb4w,
       batch_size,
@@ -2808,7 +3028,8 @@ enum xnn_status xnn_reshape_fully_connected_nc_qp8_f32_qb4w(
       /*dynamic_quantization=*/false,
       /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
       &fully_connected_op->params.f32_qb4w_minmax,
-      sizeof(fully_connected_op->params.f32_qb4w_minmax), threadpool);
+      sizeof(fully_connected_op->params.f32_qb4w_minmax), workspace_size,
+      threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_qs8(
@@ -2817,16 +3038,33 @@ enum xnn_status xnn_reshape_fully_connected_nc_qs8(
     pthreadpool_t threadpool)
 {
   return reshape_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_qs8,
-    batch_size,
-    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    /*filter_is_nibble=*/false,
-    /*dynamic_quantization=*/false,
-    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    &fully_connected_op->params.qs8_qc8w_conv_minmax,
-    sizeof(fully_connected_op->params.qs8_qc8w_conv_minmax),
-    threadpool);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qs8, batch_size,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      /*filter_is_nibble=*/false,
+      /*dynamic_quantization=*/false,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      &fully_connected_op->params.qs8_qc8w_conv_minmax,
+      sizeof(fully_connected_op->params.qs8_qc8w_conv_minmax),
+      /*workspace_size=*/NULL, threadpool);
+}
+
+enum xnn_status xnn_reshape_fully_connected_nc_qs8_qc4w(
+    xnn_operator_t fully_connected_op,
+    size_t batch_size,
+    pthreadpool_t threadpool)
+{
+  return reshape_fully_connected_nc(
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qs8_qc4w,
+      batch_size,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      /*filter_is_nibble=*/true,
+      /*dynamic_quantization=*/false,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      &fully_connected_op->params.qs8_qc8w_conv_minmax,
+      sizeof(fully_connected_op->params.qs8_qc8w_conv_minmax),
+      /*workspace_size=*/NULL, threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_qs8_qc8w(
@@ -2835,34 +3073,32 @@ enum xnn_status xnn_reshape_fully_connected_nc_qs8_qc8w(
     pthreadpool_t threadpool)
 {
   return reshape_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_qs8_qc8w,
-    batch_size,
-    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    /*filter_is_nibble=*/false,
-    /*dynamic_quantization=*/false,
-    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    &fully_connected_op->params.qs8_qc8w_conv_minmax,
-    sizeof(fully_connected_op->params.qs8_qc8w_conv_minmax),
-    threadpool);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qs8_qc8w,
+      batch_size,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      /*filter_is_nibble=*/false,
+      /*dynamic_quantization=*/false,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      &fully_connected_op->params.qs8_qc8w_conv_minmax,
+      sizeof(fully_connected_op->params.qs8_qc8w_conv_minmax),
+      /*workspace_size=*/NULL, threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_pqs8_qc8w(
-    xnn_operator_t fully_connected_op,
-    size_t batch_size,
-    pthreadpool_t threadpool)
-{
+    xnn_operator_t fully_connected_op, size_t batch_size,
+    size_t* workspace_size, pthreadpool_t threadpool) {
   return reshape_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_pqs8_qc8w,
-    batch_size,
-    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    /*filter_is_nibble=*/false,
-    /*dynamic_quantization=*/false,
-    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
-    &fully_connected_op->params.qs8_qc8w_conv_minmax,
-    sizeof(fully_connected_op->params.qs8_qc8w_conv_minmax),
-    threadpool);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_pqs8_qc8w,
+      batch_size,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      /*filter_is_nibble=*/false,
+      /*dynamic_quantization=*/false,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+      &fully_connected_op->params.qs8_qc8w_conv_minmax,
+      sizeof(fully_connected_op->params.qs8_qc8w_conv_minmax), workspace_size,
+      threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_qu8(
@@ -2871,25 +3107,21 @@ enum xnn_status xnn_reshape_fully_connected_nc_qu8(
     pthreadpool_t threadpool)
 {
   return reshape_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_qu8,
-    batch_size,
-    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
-    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
-    /*filter_is_nibble=*/false,
-    /*dynamic_quantization=*/false,
-    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
-    &fully_connected_op->params.qu8_conv_minmax,
-    sizeof(fully_connected_op->params.qu8_conv_minmax),
-    threadpool);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qu8, batch_size,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
+      /*filter_is_nibble=*/false,
+      /*dynamic_quantization=*/false,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
+      &fully_connected_op->params.qu8_conv_minmax,
+      sizeof(fully_connected_op->params.qu8_conv_minmax),
+      /*workspace_size=*/NULL, threadpool);
 }
 
 static enum xnn_status setup_fully_connected_nc(
-  xnn_operator_t fully_connected_op,
-  enum xnn_operator_type expected_operator_type,
-  const void* input,
-  void* output,
-  const void* quantization_params)
-{
+    xnn_operator_t fully_connected_op,
+    enum xnn_operator_type expected_operator_type, const void* input,
+    void* output, void* workspace, const void* quantization_params) {
   if (fully_connected_op->type != expected_operator_type) {
     xnn_log_error(
         "failed to setup operator: operator type mismatch (expected %s, got "
@@ -2921,9 +3153,19 @@ static enum xnn_status setup_fully_connected_nc(
       break;
   }
 
-  fully_connected_op->context.gemm.gemm.gemm.a = input;
-  fully_connected_op->context.gemm.gemm.gemm.c = output;
-  fully_connected_op->context.gemm.gemm.gemm.quantization_params = quantization_params;
+  struct gemm_op_context* gemm_context =
+      fully_connected_op->dynamic_context.gemm;
+
+  if (fully_connected_op->num_compute_invocations == 2) {
+    gemm_context->pack_lh.lhs = input;
+    gemm_context->pack_lh.lhs_packed = workspace;
+    gemm_context->gemm.a = workspace;
+  } else {
+    gemm_context->gemm.a = input;
+    gemm_context->gemm.workspace = workspace;
+  }
+  gemm_context->gemm.c = output;
+  gemm_context->gemm.quantization_params = quantization_params;
 
   fully_connected_op->state = xnn_run_state_ready;
 
@@ -2936,18 +3178,16 @@ enum xnn_status xnn_setup_fully_connected_nc_f16(
     void* output)
 {
   return setup_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_f16,
-    input, output, /*quantization_params=*/NULL);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_f16, input,
+      output, /*workspace=*/NULL, /*quantization_params=*/NULL);
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_pf16(
-    xnn_operator_t fully_connected_op,
-    const void* input,
-    void* output)
-{
+    xnn_operator_t fully_connected_op, const void* input, void* output,
+    void* workspace) {
   return setup_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_pf16,
-    input, output, /*quantization_params=*/NULL);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_pf16, input,
+      output, workspace, /*quantization_params=*/NULL);
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_f32_f16(
@@ -2964,8 +3204,8 @@ enum xnn_status xnn_setup_fully_connected_nc_bf16_f32(
     float* output)
 {
   return setup_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_bf16_f32,
-    input, output, /*quantization_params=*/NULL);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_bf16_f32, input,
+      output, /*workspace=*/NULL, /*quantization_params=*/NULL);
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_f32(
@@ -2974,18 +3214,16 @@ enum xnn_status xnn_setup_fully_connected_nc_f32(
     float* output)
 {
   return setup_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_f32,
-    input, output, /*quantization_params=*/NULL);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_f32, input,
+      output, /*workspace=*/NULL, /*quantization_params=*/NULL);
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_pf32(
-    xnn_operator_t fully_connected_op,
-    const float* input,
-    float* output)
-{
+    xnn_operator_t fully_connected_op, const float* input, float* output,
+    void* workspace) {
   return setup_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_pf32,
-    input, output, /*quantization_params=*/NULL);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_pf32, input,
+      output, workspace, /*quantization_params=*/NULL);
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_f32_qc4w(
@@ -2994,8 +3232,8 @@ enum xnn_status xnn_setup_fully_connected_nc_f32_qc4w(
     float* output)
 {
   return setup_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_f32_qc4w,
-    input, output, /*quantization_params=*/NULL);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_f32_qc4w, input,
+      output, /*workspace=*/NULL, /*quantization_params=*/NULL);
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_f32_qc8w(
@@ -3004,150 +3242,131 @@ enum xnn_status xnn_setup_fully_connected_nc_f32_qc8w(
     float* output)
 {
   return setup_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_f32_qc8w,
-    input, output, /*quantization_params=*/NULL);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_f32_qc8w, input,
+      output, /*workspace=*/NULL, /*quantization_params=*/NULL);
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_qd8_f16_qc4w(
-    xnn_operator_t fully_connected_op,
-    const int8_t* input,
-    void* output,
-    const struct xnn_quantization_params* quantization_params)
-{
+    xnn_operator_t fully_connected_op, const int8_t* input, void* output,
+    void* workspace,
+    const struct xnn_quantization_params* quantization_params) {
   return setup_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f16_qc4w,
-    input, output, quantization_params);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f16_qc4w,
+      input, output, workspace, quantization_params);
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_qdu8_f16_qc4w(
-    xnn_operator_t fully_connected_op,
-    const int8_t* input,
-    void* output,
-    const struct xnn_quantization_params* quantization_params)
-{
+    xnn_operator_t fully_connected_op, const int8_t* input, void* output,
+    void* workspace,
+    const struct xnn_quantization_params* quantization_params) {
   return setup_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_qdu8_f16_qc4w,
-    input, output, quantization_params);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qdu8_f16_qc4w,
+      input, output, workspace, quantization_params);
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_qd8_f16_qb4w(
-    xnn_operator_t fully_connected_op,
-    const int8_t* input,
-    void* output,
-    const struct xnn_quantization_params* quantization_params)
-{
+    xnn_operator_t fully_connected_op, const int8_t* input, void* output,
+    void* workspace,
+    const struct xnn_quantization_params* quantization_params) {
   return setup_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f16_qb4w,
-    input, output, quantization_params);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f16_qb4w,
+      input, output, workspace, quantization_params);
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_qd8_f32_qc4w(
-    xnn_operator_t fully_connected_op,
-    const int8_t* input,
-    float* output,
-    const struct xnn_quantization_params* quantization_params)
-{
+    xnn_operator_t fully_connected_op, const int8_t* input, float* output,
+    void* workspace,
+    const struct xnn_quantization_params* quantization_params) {
   return setup_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f32_qc4w,
-    input, output, quantization_params);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f32_qc4w,
+      input, output, workspace, quantization_params);
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_qdu8_f32_qc4w(
-    xnn_operator_t fully_connected_op,
-    const uint8_t* input,
-    float* output,
-    const struct xnn_quantization_params* quantization_params)
-{
+    xnn_operator_t fully_connected_op, const uint8_t* input, float* output,
+    void* workspace,
+    const struct xnn_quantization_params* quantization_params) {
   return setup_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_qdu8_f32_qc4w,
-    input, output, quantization_params);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qdu8_f32_qc4w,
+      input, output, workspace, quantization_params);
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_qd8_f32_qb4w(
-    xnn_operator_t fully_connected_op,
-    const int8_t* input,
-    float* output,
-    const struct xnn_quantization_params* quantization_params)
-{
+    xnn_operator_t fully_connected_op, const int8_t* input, float* output,
+    void* workspace,
+    const struct xnn_quantization_params* quantization_params) {
   return setup_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f32_qb4w,
-    input, output, quantization_params);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f32_qb4w,
+      input, output, workspace, quantization_params);
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_qdu8_f32_qb4w(
-    xnn_operator_t fully_connected_op,
-    const int8_t* input,
-    float* output,
-    const struct xnn_quantization_params* quantization_params)
-{
+    xnn_operator_t fully_connected_op, const int8_t* input, float* output,
+    void* workspace,
+    const struct xnn_quantization_params* quantization_params) {
   return setup_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_qdu8_f32_qb4w,
-    input, output, quantization_params);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qdu8_f32_qb4w,
+      input, output, workspace, quantization_params);
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_qd8_f16_qc8w(
-    xnn_operator_t fully_connected_op,
-    const int8_t* input,
-    void* output,
-    const struct xnn_quantization_params* quantization_params)
-{
+    xnn_operator_t fully_connected_op, const int8_t* input, void* output,
+    void* workspace,
+    const struct xnn_quantization_params* quantization_params) {
   return setup_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f16_qc8w,
-    input, output, quantization_params);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f16_qc8w,
+      input, output, workspace, quantization_params);
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_qdu8_f16_qc8w(
-    xnn_operator_t fully_connected_op,
-    const int8_t* input,
-    void* output,
-    const struct xnn_quantization_params* quantization_params)
-{
+    xnn_operator_t fully_connected_op, const int8_t* input, void* output,
+    void* workspace,
+    const struct xnn_quantization_params* quantization_params) {
   return setup_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_qdu8_f16_qc8w,
-    input, output, quantization_params);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qdu8_f16_qc8w,
+      input, output, workspace, quantization_params);
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_qp8_f32_qc4w(
-    xnn_operator_t fully_connected_op, const int8_t* input, float* output) {
+    xnn_operator_t fully_connected_op, const float* input, float* output,
+    void* workspace) {
   return setup_fully_connected_nc(
       fully_connected_op, xnn_operator_type_fully_connected_nc_qp8_f32_qc4w,
-      input, output, /*quantization_params=*/NULL);
+      input, output, workspace, /*quantization_params=*/NULL);
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_qp8_f32_qc8w(
-    xnn_operator_t fully_connected_op, const int8_t* input, float* output) {
+    xnn_operator_t fully_connected_op, const float* input, float* output,
+    void* workspace) {
   return setup_fully_connected_nc(
       fully_connected_op, xnn_operator_type_fully_connected_nc_qp8_f32_qc8w,
-      input, output, /*quantization_params=*/NULL);
+      input, output, workspace, /*quantization_params=*/NULL);
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_qp8_f32_qb4w(
-    xnn_operator_t fully_connected_op, const int8_t* input, float* output) {
+    xnn_operator_t fully_connected_op, const float* input, float* output,
+    void* workspace) {
   return setup_fully_connected_nc(
       fully_connected_op, xnn_operator_type_fully_connected_nc_qp8_f32_qb4w,
-      input, output, /*quantization_params=*/NULL);
+      input, output, workspace, /*quantization_params=*/NULL);
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_qd8_f32_qc8w(
-    xnn_operator_t fully_connected_op,
-    const int8_t* input,
-    float* output,
-    const struct xnn_quantization_params* quantization_params)
-{
+    xnn_operator_t fully_connected_op, const int8_t* input, float* output,
+    void* workspace,
+    const struct xnn_quantization_params* quantization_params) {
   return setup_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f32_qc8w,
-    input, output, quantization_params);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f32_qc8w,
+      input, output, workspace, quantization_params);
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_qdu8_f32_qc8w(
-    xnn_operator_t fully_connected_op,
-    const int8_t* input,
-    float* output,
-    const struct xnn_quantization_params* quantization_params)
-{
+    xnn_operator_t fully_connected_op, const int8_t* input, float* output,
+    void* workspace,
+    const struct xnn_quantization_params* quantization_params) {
   return setup_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_qdu8_f32_qc8w,
-    input, output, quantization_params);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qdu8_f32_qc8w,
+      input, output, workspace, quantization_params);
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_qs8(
@@ -3156,8 +3375,18 @@ enum xnn_status xnn_setup_fully_connected_nc_qs8(
     int8_t* output)
 {
   return setup_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_qs8,
-    input, output, /*quantization_params=*/NULL);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qs8, input,
+      output, /*workspace=*/NULL, /*quantization_params=*/NULL);
+}
+
+enum xnn_status xnn_setup_fully_connected_nc_qs8_qc4w(
+    xnn_operator_t fully_connected_op,
+    const int8_t* input,
+    int8_t* output)
+{
+  return setup_fully_connected_nc(
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qs8_qc4w, input,
+      output, /*workspace=*/NULL, /*quantization_params=*/NULL);
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_qs8_qc8w(
@@ -3166,18 +3395,16 @@ enum xnn_status xnn_setup_fully_connected_nc_qs8_qc8w(
     int8_t* output)
 {
   return setup_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_qs8_qc8w,
-    input, output, /*quantization_params=*/NULL);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qs8_qc8w, input,
+      output, /*workspace=*/NULL, /*quantization_params=*/NULL);
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_pqs8_qc8w(
-    xnn_operator_t fully_connected_op,
-    const int8_t* input,
-    int8_t* output)
-{
+    xnn_operator_t fully_connected_op, const int8_t* input, int8_t* output,
+    void* workspace) {
   return setup_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_pqs8_qc8w,
-    input, output, /*quantization_params=*/NULL);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_pqs8_qc8w, input,
+      output, workspace, /*quantization_params=*/NULL);
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_qu8(
@@ -3186,6 +3413,6 @@ enum xnn_status xnn_setup_fully_connected_nc_qu8(
     uint8_t* output)
 {
   return setup_fully_connected_nc(
-    fully_connected_op, xnn_operator_type_fully_connected_nc_qu8,
-    input, output, /*quantization_params=*/NULL);
+      fully_connected_op, xnn_operator_type_fully_connected_nc_qu8, input,
+      output, /*workspace=*/NULL, /*quantization_params=*/NULL);
 }

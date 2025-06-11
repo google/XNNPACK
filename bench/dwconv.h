@@ -6,6 +6,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+// clang-format off
+
 #pragma once
 
 #include <benchmark/benchmark.h>
@@ -28,7 +30,7 @@
 
 
 // ShuffleNet v1 with 1 group.
-static void ShuffleNetV1G1DWConvArguments(benchmark::internal::Benchmark* b) {
+inline void ShuffleNetV1G1DWConvArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "G"});
 
   /********* Stage 2: stride-2 unit *********/
@@ -52,7 +54,7 @@ static void ShuffleNetV1G1DWConvArguments(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v1 with 2 groups.
-static void ShuffleNetV1G2DWConvArguments(benchmark::internal::Benchmark* b) {
+inline void ShuffleNetV1G2DWConvArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "G"});
 
   /********* Stage 2: stride-2 unit *********/
@@ -76,7 +78,7 @@ static void ShuffleNetV1G2DWConvArguments(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v1 with 3 groups.
-static void ShuffleNetV1G3DWConvArguments(benchmark::internal::Benchmark* b) {
+inline void ShuffleNetV1G3DWConvArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "G"});
 
   /********* Stage 2: stride-2 unit **********/
@@ -100,7 +102,7 @@ static void ShuffleNetV1G3DWConvArguments(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v1 with 4 groups.
-static void ShuffleNetV1G4DWConvArguments(benchmark::internal::Benchmark* b) {
+inline void ShuffleNetV1G4DWConvArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "G"});
 
   /********* Stage 2: stride-2 unit *********/
@@ -124,7 +126,7 @@ static void ShuffleNetV1G4DWConvArguments(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v1 with 8 groups.
-static void ShuffleNetV1G8DWConvArguments(benchmark::internal::Benchmark* b) {
+inline void ShuffleNetV1G8DWConvArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "G"});
 
   /********* Stage 2: stride-2 unit *********/
@@ -148,7 +150,7 @@ static void ShuffleNetV1G8DWConvArguments(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v2 (0.5X scale)
-static void ShuffleNetV2X05DWConvArguments(benchmark::internal::Benchmark* b) {
+inline void ShuffleNetV2X05DWConvArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "G"});
 
   /**************** Stage 2 *****************/
@@ -166,7 +168,7 @@ static void ShuffleNetV2X05DWConvArguments(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v2 (1.0X scale)
-static void ShuffleNetV2X10DWConvArguments(benchmark::internal::Benchmark* b) {
+inline void ShuffleNetV2X10DWConvArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "G"});
 
   /**************** Stage 2 *****************/
@@ -185,7 +187,7 @@ static void ShuffleNetV2X10DWConvArguments(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v2 (1.5X scale)
-static void ShuffleNetV2X15DWConvArguments(benchmark::internal::Benchmark* b) {
+inline void ShuffleNetV2X15DWConvArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "G"});
 
   /**************** Stage 2 *****************/
@@ -204,7 +206,7 @@ static void ShuffleNetV2X15DWConvArguments(benchmark::internal::Benchmark* b) {
 }
 
 // ShuffleNet v2 (2.0X scale)
-static void ShuffleNetV2X20DWConvArguments(benchmark::internal::Benchmark* b) {
+inline void ShuffleNetV2X20DWConvArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "G"});
 
   /***************** Stage 2 ****************/
@@ -222,7 +224,7 @@ static void ShuffleNetV2X20DWConvArguments(benchmark::internal::Benchmark* b) {
   b->Args({ 7,  7,  3,  3,  2,  2, 1, 1, 488});
 }
 
-static void MobileNetV1DWConvArguments(benchmark::internal::Benchmark* b) {
+inline void MobileNetV1DWConvArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "G"});
 
   /*        H    W   KH  KW  PH  PW  S  D    G */
@@ -237,7 +239,7 @@ static void MobileNetV1DWConvArguments(benchmark::internal::Benchmark* b) {
   b->Args({  7,   7,  3,  3,  2,  2, 1, 1, 1024});
 }
 
-static void MobileNetV2DWConvArguments(benchmark::internal::Benchmark* b) {
+inline void MobileNetV2DWConvArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "G"});
 
   /**************** Bottleneck 1 ***************/
@@ -279,7 +281,7 @@ static void MobileNetV2DWConvArguments(benchmark::internal::Benchmark* b) {
 //b->Args({  7,   7,  3,  3,  2,  2, 1, 1, 960});
 }
 
-static void MobileNetV3SmallDWConvArguments(benchmark::internal::Benchmark* b) {
+inline void MobileNetV3SmallDWConvArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "G"});
 
   /*************** Bottleneck 1 ***************/
@@ -317,7 +319,7 @@ static void MobileNetV3SmallDWConvArguments(benchmark::internal::Benchmark* b) {
 //b->Args({  7,   7,  5,  5,  4,  4, 1, 1, 576});
 }
 
-static void MobileNetV3LargeDWConvArguments(benchmark::internal::Benchmark* b) {
+inline void MobileNetV3LargeDWConvArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"H", "W", "KH", "KW", "PH", "PW", "S", "D", "G"});
 
   /*************** Bottleneck 1 ***************/

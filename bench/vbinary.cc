@@ -15,13 +15,13 @@
 
 #include "bench/utils.h"
 #include "include/xnnpack.h"
+#include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/microparams.h"
-#include "src/xnnpack/buffer.h"
 #include <benchmark/benchmark.h>
 
 template <typename T>
@@ -46,9 +46,8 @@ struct UniformDistribution<xnn_float16> {
 
 template <>
 struct UniformDistribution<int8_t> {
-  std::uniform_int_distribution<int> dist{
-      std::numeric_limits<int8_t>::lowest(),
-      std::numeric_limits<int8_t>::max()};
+  std::uniform_int_distribution<int> dist{std::numeric_limits<int8_t>::lowest(),
+                                          std::numeric_limits<int8_t>::max()};
 
   template <class Generator>
   int8_t operator()(Generator& g) {
@@ -85,25 +84,29 @@ xnn_quantization_params quantization = {0, 1.0f};
 template <>
 struct ParamsWrapper<xnn_qs8_add_minmax_params> {
   xnn_qs8_add_minmax_params params = make_params<xnn_qs8_add_minmax_params>(
-      xnn_init_qs8_add_minmax_scalar_params, &quantization, &quantization, &quantization);
+      xnn_init_qs8_add_minmax_scalar_params, &quantization, &quantization,
+      &quantization);
 };
 
 template <>
 struct ParamsWrapper<xnn_qu8_add_minmax_params> {
   xnn_qu8_add_minmax_params params = make_params<xnn_qu8_add_minmax_params>(
-      xnn_init_qu8_add_minmax_scalar_params, &quantization, &quantization, &quantization);
+      xnn_init_qu8_add_minmax_scalar_params, &quantization, &quantization,
+      &quantization);
 };
 
 template <>
 struct ParamsWrapper<xnn_qs8_mul_minmax_params> {
   xnn_qs8_mul_minmax_params params = make_params<xnn_qs8_mul_minmax_params>(
-      xnn_init_qs8_mul_minmax_scalar_params, &quantization, &quantization, &quantization);
+      xnn_init_qs8_mul_minmax_scalar_params, &quantization, &quantization,
+      &quantization);
 };
 
 template <>
 struct ParamsWrapper<xnn_qu8_mul_minmax_params> {
   xnn_qu8_mul_minmax_params params = make_params<xnn_qu8_mul_minmax_params>(
-      xnn_init_qu8_mul_minmax_scalar_params, &quantization, &quantization, &quantization);
+      xnn_init_qu8_mul_minmax_scalar_params, &quantization, &quantization,
+      &quantization);
 };
 
 // Microkernel function, templated on the `params` type.
@@ -142,74 +145,76 @@ static void vbinary(benchmark::State& state, uint64_t arch_flags,
   }
 
   const size_t num_elements_per_iteration = num_elements;
-  state.counters["num_elements"] =
-    benchmark::Counter(uint64_t(state.iterations()) * num_elements_per_iteration, benchmark::Counter::kIsRate);
+  state.counters["num_elements"] = benchmark::Counter(
+      uint64_t(state.iterations()) * num_elements_per_iteration,
+      benchmark::Counter::kIsRate);
 
   const size_t bytes_per_iteration = 3 * num_elements * sizeof(T);
   state.counters["bytes"] =
-    benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
+      benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
+                         benchmark::Counter::kIsRate);
 }
 
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, \
-                                datatype, params_type, init_params)           \
-  BENCHMARK_CAPTURE(vbinary, ukernel, arch_flags, ukernel)                    \
-      ->Apply(                                                                \
-          benchmark::utils::BinaryElementwiseParameters<datatype, datatype>)  \
+#define XNN_UKERNEL(arch_flags, ukernel, batch_tile, vector_tile, datatype,  \
+                    params_type, init_params)                                \
+  BENCHMARK_CAPTURE(vbinary, ukernel, arch_flags, ukernel)                   \
+      ->Apply(                                                               \
+          benchmark::utils::BinaryElementwiseParameters<datatype, datatype>) \
       ->UseRealTime();
-#include "src/f16-vbinary/f16-vadd.h"
-#include "src/f16-vbinary/f16-vaddc.h"
-#include "src/f16-vbinary/f16-vdiv.h"
-#include "src/f16-vbinary/f16-vdivc.h"
-#include "src/f16-vbinary/f16-vmax.h"
-#include "src/f16-vbinary/f16-vmaxc.h"
-#include "src/f16-vbinary/f16-vmin.h"
-#include "src/f16-vbinary/f16-vminc.h"
-#include "src/f16-vbinary/f16-vmul.h"
-#include "src/f16-vbinary/f16-vmulc.h"
-#include "src/f16-vbinary/f16-vprelu.h"
-#include "src/f16-vbinary/f16-vpreluc.h"
-#include "src/f16-vbinary/f16-vrdivc.h"
-#include "src/f16-vbinary/f16-vrpreluc.h"
-#include "src/f16-vbinary/f16-vrsubc.h"
-#include "src/f16-vbinary/f16-vsqrdiff.h"
-#include "src/f16-vbinary/f16-vsqrdiffc.h"
-#include "src/f16-vbinary/f16-vsub.h"
-#include "src/f16-vbinary/f16-vsubc.h"
-#include "src/f32-vbinary/f32-vadd.h"
-#include "src/f32-vbinary/f32-vaddc.h"
-#include "src/f32-vbinary/f32-vcopysign.h"
-#include "src/f32-vbinary/f32-vcopysignc.h"
-#include "src/f32-vbinary/f32-vdiv.h"
-#include "src/f32-vbinary/f32-vdivc.h"
-#include "src/f32-vbinary/f32-vmax.h"
-#include "src/f32-vbinary/f32-vmaxc.h"
-#include "src/f32-vbinary/f32-vmin.h"
-#include "src/f32-vbinary/f32-vminc.h"
-#include "src/f32-vbinary/f32-vmul.h"
-#include "src/f32-vbinary/f32-vmulc.h"
-#include "src/f32-vbinary/f32-vprelu.h"
-#include "src/f32-vbinary/f32-vpreluc.h"
-#include "src/f32-vbinary/f32-vrcopysignc.h"
-#include "src/f32-vbinary/f32-vrdivc.h"
-#include "src/f32-vbinary/f32-vrpreluc.h"
-#include "src/f32-vbinary/f32-vrsubc.h"
-#include "src/f32-vbinary/f32-vsqrdiff.h"
-#include "src/f32-vbinary/f32-vsqrdiffc.h"
-#include "src/f32-vbinary/f32-vsub.h"
-#include "src/f32-vbinary/f32-vsubc.h"
-#include "src/qs8-vadd/qs8-vadd-minmax.h"
-#include "src/qs8-vaddc/qs8-vaddc-minmax.h"
-#include "src/qs8-vmul/qs8-vmul-minmax-fp32.h"
-#include "src/qs8-vmul/qs8-vmul-minmax-rndnu.h"
-#include "src/qs8-vmulc/qs8-vmulc-minmax-fp32.h"
-#include "src/qs8-vmulc/qs8-vmulc-minmax-rndnu.h"
-#include "src/qu8-vadd/qu8-vadd-minmax.h"
-#include "src/qu8-vaddc/qu8-vaddc-minmax.h"
-#include "src/qu8-vmul/qu8-vmul-minmax-fp32.h"
-#include "src/qu8-vmul/qu8-vmul-minmax-rndnu.h"
-#include "src/qu8-vmulc/qu8-vmulc-minmax-fp32.h"
-#include "src/qu8-vmulc/qu8-vmulc-minmax-rndnu.h"
-#undef XNN_UKERNEL_WITH_PARAMS
+#include "src/f16-vbinary/f16-vadd.inc"
+#include "src/f16-vbinary/f16-vaddc.inc"
+#include "src/f16-vbinary/f16-vdiv.inc"
+#include "src/f16-vbinary/f16-vdivc.inc"
+#include "src/f16-vbinary/f16-vmax.inc"
+#include "src/f16-vbinary/f16-vmaxc.inc"
+#include "src/f16-vbinary/f16-vmin.inc"
+#include "src/f16-vbinary/f16-vminc.inc"
+#include "src/f16-vbinary/f16-vmul.inc"
+#include "src/f16-vbinary/f16-vmulc.inc"
+#include "src/f16-vbinary/f16-vprelu.inc"
+#include "src/f16-vbinary/f16-vpreluc.inc"
+#include "src/f16-vbinary/f16-vrdivc.inc"
+#include "src/f16-vbinary/f16-vrpreluc.inc"
+#include "src/f16-vbinary/f16-vrsubc.inc"
+#include "src/f16-vbinary/f16-vsqrdiff.inc"
+#include "src/f16-vbinary/f16-vsqrdiffc.inc"
+#include "src/f16-vbinary/f16-vsub.inc"
+#include "src/f16-vbinary/f16-vsubc.inc"
+#include "src/f32-vbinary/f32-vadd.inc"
+#include "src/f32-vbinary/f32-vaddc.inc"
+#include "src/f32-vbinary/f32-vcopysign.inc"
+#include "src/f32-vbinary/f32-vcopysignc.inc"
+#include "src/f32-vbinary/f32-vdiv.inc"
+#include "src/f32-vbinary/f32-vdivc.inc"
+#include "src/f32-vbinary/f32-vmax.inc"
+#include "src/f32-vbinary/f32-vmaxc.inc"
+#include "src/f32-vbinary/f32-vmin.inc"
+#include "src/f32-vbinary/f32-vminc.inc"
+#include "src/f32-vbinary/f32-vmul.inc"
+#include "src/f32-vbinary/f32-vmulc.inc"
+#include "src/f32-vbinary/f32-vprelu.inc"
+#include "src/f32-vbinary/f32-vpreluc.inc"
+#include "src/f32-vbinary/f32-vrcopysignc.inc"
+#include "src/f32-vbinary/f32-vrdivc.inc"
+#include "src/f32-vbinary/f32-vrpreluc.inc"
+#include "src/f32-vbinary/f32-vrsubc.inc"
+#include "src/f32-vbinary/f32-vsqrdiff.inc"
+#include "src/f32-vbinary/f32-vsqrdiffc.inc"
+#include "src/f32-vbinary/f32-vsub.inc"
+#include "src/f32-vbinary/f32-vsubc.inc"
+#include "src/qs8-vadd/qs8-vadd-minmax.inc"
+#include "src/qs8-vaddc/qs8-vaddc-minmax.inc"
+#include "src/qs8-vmul/qs8-vmul-minmax-fp32.inc"
+#include "src/qs8-vmul/qs8-vmul-minmax-rndnu.inc"
+#include "src/qs8-vmulc/qs8-vmulc-minmax-fp32.inc"
+#include "src/qs8-vmulc/qs8-vmulc-minmax-rndnu.inc"
+#include "src/qu8-vadd/qu8-vadd-minmax.inc"
+#include "src/qu8-vaddc/qu8-vaddc-minmax.inc"
+#include "src/qu8-vmul/qu8-vmul-minmax-fp32.inc"
+#include "src/qu8-vmul/qu8-vmul-minmax-rndnu.inc"
+#include "src/qu8-vmulc/qu8-vmulc-minmax-fp32.inc"
+#include "src/qu8-vmulc/qu8-vmulc-minmax-rndnu.inc"
+#undef XNN_UKERNEL
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();

@@ -5,16 +5,11 @@
 # LICENSE file in the root directory of this source tree.
 
 import argparse
-import codecs
-import collections
-import math
 import os
 import re
 import sys
-import yaml
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from primes import next_prime
 import xngen
 import xnncommon
 
@@ -233,7 +228,7 @@ std::vector<DWConvTestParams> CreateTests(
           .kernel_tile(kr)
           .input_offset(xnnpack::NextPrime(cr + 1) * 16)
       , test_func)
-      .loop_zi(0, kr - 1)
+      .loop_zi(0, kr - 1, std::max<size_t>(1, kr / 3))
       .loop_channels(adj_c_block + c_block, cr * 16 - 1, cr * 3));
 
   return tests;
@@ -332,8 +327,10 @@ def main(args):
       )
   )
 
-  tests += f'#include "src/{folder}/{options.ukernel}.h"\n'
-  tests += "#undef XNN_UKERNEL_WITH_PARAMS\n"
+  tests += (
+      f'#include "src/{folder}/{options.ukernel}.inc"\n'
+  )
+  tests += "#undef XNN_UKERNEL\n"
 
   xnncommon.overwrite_if_changed(options.output, tests)
 

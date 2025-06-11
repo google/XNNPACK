@@ -27,7 +27,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_2x2__scalar_imagic(
     size_t cn_stride,
     size_t a_offset,
     const int8_t* zero,
-    const union xnn_qs8_qc8w_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_qs8_qc8w_conv_minmax_params* restrict params)
 {
   assert(mr != 0);
   assert(mr <= 2);

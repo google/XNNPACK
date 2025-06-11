@@ -38,7 +38,7 @@ struct XnnTestParam;
 
 class Tester {
  public:
-  Tester(const XnnTestParam& param);
+  explicit Tester(const XnnTestParam& param);
 
   Tester& output_pixels(size_t output_pixels) {
     assert(output_pixels != 0);
@@ -163,11 +163,10 @@ class Tester {
 
     xnnpack::Buffer<const xnn_float16*> indirect_input(
         (output_pixels() - 1) * step() + pooling_elements());
-    xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
-                                       input_offset() +
-                                       indirect_input.size() * channels());
-    xnnpack::Buffer<xnn_float16> zero(
-        channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0);
+    xnnpack::Buffer<xnn_float16> input(
+        input_offset() + indirect_input.size() * channels(),
+        xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<xnn_float16> zero(channels(), 0, xnnpack::XnnExtraBytes);
     xnnpack::Buffer<xnn_float16> multiplier(output_pixels());
     xnnpack::Buffer<xnn_float16> output(
         (output_pixels() - 1) * output_stride() + channels());
@@ -175,8 +174,6 @@ class Tester {
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(input.begin(), input.begin() + input_offset(), std::nanf(""));
-      std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(xnn_float16),
-                input.end(), std::nanf(""));
       std::generate(multiplier.begin(), multiplier.end(),
                     [&]() { return m32dist(rng); });
 
@@ -244,10 +241,10 @@ class Tester {
       pavgpool_minmax(
           output_pixels(), pooling_elements(), channels(),
           reinterpret_cast<const xnn_float16**>(indirect_input.data()),
-          input_offset() * sizeof(xnn_float16), zero.data(),
-          pixelwise_ ? multiplier.data() : nullptr,
-          output.data(), step() * sizeof(void*),
-          (output_stride()) * sizeof(xnn_float16), &params);
+          input_offset() * sizeof(xnn_float16), /*input_pixel_stride=*/0,
+          zero.data(), pixelwise_ ? multiplier.data() : nullptr, output.data(),
+          step() * sizeof(void*), (output_stride()) * sizeof(xnn_float16),
+          &params);
 
       // Verify results.
       for (size_t x = 0; x < output_pixels(); x++) {
@@ -283,11 +280,10 @@ class Tester {
 
     xnnpack::Buffer<const float*> indirect_input(
         (output_pixels() - 1) * step() + pooling_elements());
-    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
-                                 input_offset() +
-                                 indirect_input.size() * channels());
-    xnnpack::Buffer<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float),
-                                0.0f);
+    xnnpack::Buffer<float> input(
+        input_offset() + indirect_input.size() * channels(),
+        xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<float> zero(channels(), 0.0f, xnnpack::XnnExtraBytes);
     xnnpack::Buffer<float> multiplier(output_pixels());
     xnnpack::Buffer<float> output((output_pixels() - 1) * output_stride() +
                                   channels());
@@ -295,8 +291,6 @@ class Tester {
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(input.begin(), input.begin() + input_offset(), std::nanf(""));
-      std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(float), input.end(),
-                std::nanf(""));
       std::generate(multiplier.begin(), multiplier.end(),
                     [&]() { return m32dist(rng); });
 
@@ -356,9 +350,9 @@ class Tester {
       // Call optimized micro-kernel.
       pavgpool_minmax(output_pixels(), pooling_elements(), channels(),
                       indirect_input.data(), input_offset() * sizeof(float),
-                      zero.data(), pixelwise_ ? multiplier.data() : nullptr,
-                      output.data(), step() * sizeof(void*),
-                      (output_stride()) * sizeof(float),
+                      /*input_pixel_stride=*/0, zero.data(),
+                      pixelwise_ ? multiplier.data() : nullptr, output.data(),
+                      step() * sizeof(void*), (output_stride()) * sizeof(float),
                       &params);
 
       // Verify results.
@@ -419,7 +413,7 @@ class Tester {
 };
 
 struct XnnTestParam {
-  const char *name;
+  const char* name;
   Tester::Kernel kernel;
   uint64_t arch_flags;
   size_t channel_tile, primary_tile;
@@ -430,23 +424,29 @@ Tester::Tester(const XnnTestParam& param) : pixelwise_(param.pixelwise) {}
 
 class XnnTest : public testing::TestWithParam<XnnTestParam> {};
 
-std::string GetTestName(const testing::TestParamInfo<XnnTest::ParamType>& info) {
-  return std::string(info.param.name) + (info.param.pixelwise ? "_pixelwise" : "");
+std::string GetTestName(
+    const testing::TestParamInfo<XnnTest::ParamType>& info) {
+  return std::string(info.param.name) +
+         (info.param.pixelwise ? "_pixelwise" : "");
 }
 
 const XnnTestParam xnn_test_params[] = {
 
-#define XNN_UKERNEL(arch_flags, ukernel, channel_tile, primary_tile, datatype, params_type, init_params) \
-  {#ukernel, Tester::Kernel{ukernel, init_params}, arch_flags, channel_tile, primary_tile, true}, \
-  {#ukernel, Tester::Kernel{ukernel, init_params}, arch_flags, channel_tile, primary_tile, false},
+#define XNN_UKERNEL(arch_flags, ukernel, channel_tile, primary_tile, datatype, \
+                    params_type, init_params)                                  \
+  {#ukernel,     Tester::Kernel{ukernel, init_params},                         \
+   arch_flags,   channel_tile,                                                 \
+   primary_tile, true},                                                        \
+      {#ukernel,     Tester::Kernel{ukernel, init_params},                     \
+       arch_flags,   channel_tile,                                             \
+       primary_tile, false},
 
-#include "src/f16-avgpool/f16-avgpool-minmax.h"
-#include "src/f32-avgpool/f32-avgpool-minmax.h"
+#include "src/f16-avgpool/f16-avgpool-minmax.inc"
+#include "src/f32-avgpool/f32-avgpool-minmax.inc"
 
 #undef XNN_UKERNEL
 
 };
-
 
 }  // namespace
 
@@ -504,7 +504,8 @@ TEST_P(XnnTest, channels_eq_channel_tile_unipass_fulltile_with_qmax) {
 TEST_P(XnnTest, channels_eq_channel_tile_unipass_subtile) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   const size_t channel_tile = GetParam().channel_tile;
-  for (size_t pooling_elements = 2; pooling_elements < GetParam().primary_tile; pooling_elements++) {
+  for (size_t pooling_elements = 2; pooling_elements < GetParam().primary_tile;
+       pooling_elements++) {
     Tester(GetParam())
         .pooling_elements(pooling_elements)
         .channels(channel_tile)
@@ -515,7 +516,8 @@ TEST_P(XnnTest, channels_eq_channel_tile_unipass_subtile) {
 TEST_P(XnnTest, channels_eq_channel_tile_unipass_subtile_with_input_offset) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   const size_t channel_tile = GetParam().channel_tile;
-  for (size_t pooling_elements = 2; pooling_elements < GetParam().primary_tile; pooling_elements++) {
+  for (size_t pooling_elements = 2; pooling_elements < GetParam().primary_tile;
+       pooling_elements++) {
     Tester(GetParam())
         .pooling_elements(pooling_elements)
         .channels(channel_tile)
@@ -527,7 +529,8 @@ TEST_P(XnnTest, channels_eq_channel_tile_unipass_subtile_with_input_offset) {
 TEST_P(XnnTest, channels_eq_channel_tile_unipass_subtile_with_zero) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   const size_t channel_tile = GetParam().channel_tile;
-  for (size_t pooling_elements = 2; pooling_elements < GetParam().primary_tile; pooling_elements++) {
+  for (size_t pooling_elements = 2; pooling_elements < GetParam().primary_tile;
+       pooling_elements++) {
     for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
       Tester(GetParam())
           .pooling_elements(pooling_elements)
@@ -541,7 +544,10 @@ TEST_P(XnnTest, channels_eq_channel_tile_unipass_subtile_with_zero) {
 
 TEST_P(XnnTest, channels_gt_channel_tile_unipass_fulltile) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
-  for (size_t channels = GetParam().channel_tile + 1; channels < (GetParam().channel_tile == 1 ? 10 : GetParam().channel_tile * 2); channels++) {
+  for (size_t channels = GetParam().channel_tile + 1;
+       channels <
+       (GetParam().channel_tile == 1 ? 10 : GetParam().channel_tile * 2);
+       channels++) {
     Tester(GetParam())
         .pooling_elements(GetParam().primary_tile)
         .channels(channels)
@@ -552,7 +558,10 @@ TEST_P(XnnTest, channels_gt_channel_tile_unipass_fulltile) {
 TEST_P(XnnTest, channels_gt_channel_tile_unipass_fulltile_with_input_offset) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   if (GetParam().channel_tile == GetParam().channel_tile) {
-    for (size_t channels = GetParam().channel_tile + 1; channels < (GetParam().channel_tile == 1 ? 10 : GetParam().channel_tile * 2); channels++) {
+    for (size_t channels = GetParam().channel_tile + 1;
+         channels <
+         (GetParam().channel_tile == 1 ? 10 : GetParam().channel_tile * 2);
+         channels++) {
       Tester(GetParam())
           .pooling_elements(GetParam().primary_tile)
           .channels(channels)
@@ -561,7 +570,8 @@ TEST_P(XnnTest, channels_gt_channel_tile_unipass_fulltile_with_input_offset) {
     }
   } else {
     const size_t channel_tile = GetParam().channel_tile;
-    for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
+    for (size_t channels = channel_tile + 1; channels < channel_tile * 2;
+         channels = xnnpack::NextPrime(channels)) {
       Tester(GetParam())
           .pooling_elements(GetParam().primary_tile)
           .channels(channels)
@@ -574,7 +584,10 @@ TEST_P(XnnTest, channels_gt_channel_tile_unipass_fulltile_with_input_offset) {
 TEST_P(XnnTest, channels_gt_channel_tile_unipass_fulltile_with_zero) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   if (GetParam().channel_tile == GetParam().channel_tile) {
-    for (size_t channels = GetParam().channel_tile + 1; channels < (GetParam().channel_tile == 1 ? 10 : GetParam().channel_tile * 2); channels++) {
+    for (size_t channels = GetParam().channel_tile + 1;
+         channels <
+         (GetParam().channel_tile == 1 ? 10 : GetParam().channel_tile * 2);
+         channels++) {
       for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
         Tester(GetParam())
             .pooling_elements(GetParam().primary_tile)
@@ -586,7 +599,8 @@ TEST_P(XnnTest, channels_gt_channel_tile_unipass_fulltile_with_zero) {
     }
   } else {
     const size_t channel_tile = GetParam().channel_tile;
-    for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
+    for (size_t channels = channel_tile + 1; channels < channel_tile * 2;
+         channels = xnnpack::NextPrime(channels)) {
       for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
         Tester(GetParam())
             .pooling_elements(GetParam().primary_tile)
@@ -601,7 +615,10 @@ TEST_P(XnnTest, channels_gt_channel_tile_unipass_fulltile_with_zero) {
 
 TEST_P(XnnTest, channels_gt_channel_tile_unipass_fulltile_with_qmin) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
-  for (size_t channels = GetParam().channel_tile + 1; channels < (GetParam().channel_tile == 1 ? 10 : GetParam().channel_tile * 2); channels++) {
+  for (size_t channels = GetParam().channel_tile + 1;
+       channels <
+       (GetParam().channel_tile == 1 ? 10 : GetParam().channel_tile * 2);
+       channels++) {
     Tester(GetParam())
         .pooling_elements(GetParam().primary_tile)
         .channels(channels)
@@ -612,7 +629,10 @@ TEST_P(XnnTest, channels_gt_channel_tile_unipass_fulltile_with_qmin) {
 
 TEST_P(XnnTest, channels_gt_channel_tile_unipass_fulltile_with_qmax) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
-  for (size_t channels = GetParam().channel_tile + 1; channels < (GetParam().channel_tile == 1 ? 10 : GetParam().channel_tile * 2); channels++) {
+  for (size_t channels = GetParam().channel_tile + 1;
+       channels <
+       (GetParam().channel_tile == 1 ? 10 : GetParam().channel_tile * 2);
+       channels++) {
     Tester(GetParam())
         .pooling_elements(GetParam().primary_tile)
         .channels(channels)
@@ -623,8 +643,12 @@ TEST_P(XnnTest, channels_gt_channel_tile_unipass_fulltile_with_qmax) {
 
 TEST_P(XnnTest, channels_gt_channel_tile_unipass_subtile) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
-  for (size_t pooling_elements = 2; pooling_elements < GetParam().primary_tile; pooling_elements++) {
-    for (size_t channels = GetParam().channel_tile + 1; channels < (GetParam().channel_tile == 1 ? 10 : GetParam().channel_tile * 2); channels++) {
+  for (size_t pooling_elements = 2; pooling_elements < GetParam().primary_tile;
+       pooling_elements++) {
+    for (size_t channels = GetParam().channel_tile + 1;
+         channels <
+         (GetParam().channel_tile == 1 ? 10 : GetParam().channel_tile * 2);
+         channels++) {
       Tester(GetParam())
           .pooling_elements(pooling_elements)
           .channels(channels)
@@ -635,8 +659,12 @@ TEST_P(XnnTest, channels_gt_channel_tile_unipass_subtile) {
 
 TEST_P(XnnTest, channels_gt_channel_tile_unipass_subtile_with_input_offset) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
-  for (size_t pooling_elements = 2; pooling_elements < GetParam().primary_tile; pooling_elements++) {
-    for (size_t channels = GetParam().channel_tile + 1; channels < (GetParam().channel_tile == 1 ? 10 : GetParam().channel_tile * 2); channels++) {
+  for (size_t pooling_elements = 2; pooling_elements < GetParam().primary_tile;
+       pooling_elements++) {
+    for (size_t channels = GetParam().channel_tile + 1;
+         channels <
+         (GetParam().channel_tile == 1 ? 10 : GetParam().channel_tile * 2);
+         channels++) {
       Tester(GetParam())
           .pooling_elements(pooling_elements)
           .channels(channels)
@@ -648,8 +676,12 @@ TEST_P(XnnTest, channels_gt_channel_tile_unipass_subtile_with_input_offset) {
 
 TEST_P(XnnTest, channels_gt_channel_tile_unipass_subtile_with_zero) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
-  for (size_t pooling_elements = 2; pooling_elements < GetParam().primary_tile; pooling_elements++) {
-    for (size_t channels = GetParam().channel_tile + 1; channels < (GetParam().channel_tile == 1 ? 10 : GetParam().channel_tile * 2); channels++) {
+  for (size_t pooling_elements = 2; pooling_elements < GetParam().primary_tile;
+       pooling_elements++) {
+    for (size_t channels = GetParam().channel_tile + 1;
+         channels <
+         (GetParam().channel_tile == 1 ? 10 : GetParam().channel_tile * 2);
+         channels++) {
       for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
         Tester(GetParam())
             .pooling_elements(pooling_elements)
@@ -665,8 +697,10 @@ TEST_P(XnnTest, channels_gt_channel_tile_unipass_subtile_with_zero) {
 TEST_P(XnnTest, few_output_pixels_0) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
-    for (size_t pooling_elements : std::vector<size_t>{{2, GetParam().primary_tile - 1, GetParam().primary_tile}}) {
-      for (size_t channels = 1; channels <= GetParam().channel_tile * 5; channels += std::max<size_t>(1, GetParam().channel_tile - 1)) {
+    for (size_t pooling_elements : std::vector<size_t>{
+             {2, GetParam().primary_tile - 1, GetParam().primary_tile}}) {
+      for (size_t channels = 1; channels <= GetParam().channel_tile * 5;
+           channels += std::max<size_t>(1, GetParam().channel_tile - 1)) {
         Tester(GetParam())
             .output_pixels(output_pixels)
             .pooling_elements(pooling_elements)
@@ -680,8 +714,10 @@ TEST_P(XnnTest, few_output_pixels_0) {
 TEST_P(XnnTest, few_output_pixels_with_input_offset_0) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
-    for (size_t pooling_elements : std::vector<size_t>{{2, GetParam().primary_tile - 1, GetParam().primary_tile}}) {
-      for (size_t channels = 1; channels <= GetParam().channel_tile * 5; channels += std::max<size_t>(1, GetParam().channel_tile - 1)) {
+    for (size_t pooling_elements : std::vector<size_t>{
+             {2, GetParam().primary_tile - 1, GetParam().primary_tile}}) {
+      for (size_t channels = 1; channels <= GetParam().channel_tile * 5;
+           channels += std::max<size_t>(1, GetParam().channel_tile - 1)) {
         Tester(GetParam())
             .output_pixels(output_pixels)
             .pooling_elements(pooling_elements)
@@ -696,9 +732,12 @@ TEST_P(XnnTest, few_output_pixels_with_input_offset_0) {
 TEST_P(XnnTest, few_output_pixels_with_zero_0) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
-    for (size_t pooling_elements : std::vector<size_t>{{2, GetParam().primary_tile - 1, GetParam().primary_tile}}) {
-      for (size_t channels = 1; channels <= GetParam().channel_tile * 5; channels += std::max<size_t>(1, GetParam().channel_tile - 1)) {
-        for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+    for (size_t pooling_elements : std::vector<size_t>{
+             {2, GetParam().primary_tile - 1, GetParam().primary_tile}}) {
+      for (size_t channels = 1; channels <= GetParam().channel_tile * 5;
+           channels += std::max<size_t>(1, GetParam().channel_tile - 1)) {
+        for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2;
+             zero_index_mod2++) {
           Tester(GetParam())
               .output_pixels(output_pixels)
               .pooling_elements(pooling_elements)
@@ -715,8 +754,10 @@ TEST_P(XnnTest, few_output_pixels_with_zero_0) {
 TEST_P(XnnTest, few_output_pixels_with_qmin_0) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
-    for (size_t pooling_elements : std::vector<size_t>{{2, GetParam().primary_tile - 1, GetParam().primary_tile}}) {
-      for (size_t channels = 1; channels <= GetParam().channel_tile * 5; channels += std::max<size_t>(1, GetParam().channel_tile - 1)) {
+    for (size_t pooling_elements : std::vector<size_t>{
+             {2, GetParam().primary_tile - 1, GetParam().primary_tile}}) {
+      for (size_t channels = 1; channels <= GetParam().channel_tile * 5;
+           channels += std::max<size_t>(1, GetParam().channel_tile - 1)) {
         Tester(GetParam())
             .output_pixels(output_pixels)
             .pooling_elements(pooling_elements)
@@ -731,8 +772,10 @@ TEST_P(XnnTest, few_output_pixels_with_qmin_0) {
 TEST_P(XnnTest, few_output_pixels_with_qmax_0) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
-    for (size_t pooling_elements : std::vector<size_t>{{2, GetParam().primary_tile - 1, GetParam().primary_tile}}) {
-      for (size_t channels = 1; channels <= GetParam().channel_tile * 5; channels += std::max<size_t>(1, GetParam().channel_tile - 1)) {
+    for (size_t pooling_elements : std::vector<size_t>{
+             {2, GetParam().primary_tile - 1, GetParam().primary_tile}}) {
+      for (size_t channels = 1; channels <= GetParam().channel_tile * 5;
+           channels += std::max<size_t>(1, GetParam().channel_tile - 1)) {
         Tester(GetParam())
             .output_pixels(output_pixels)
             .pooling_elements(pooling_elements)
@@ -747,8 +790,10 @@ TEST_P(XnnTest, few_output_pixels_with_qmax_0) {
 TEST_P(XnnTest, few_output_pixels_with_output_stride_0) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
-    for (size_t pooling_elements : std::vector<size_t>{{2, GetParam().primary_tile - 1, GetParam().primary_tile}}) {
-      for (size_t channels = 1; channels <= GetParam().channel_tile * 5; channels += std::max<size_t>(1, GetParam().channel_tile - 1)) {
+    for (size_t pooling_elements : std::vector<size_t>{
+             {2, GetParam().primary_tile - 1, GetParam().primary_tile}}) {
+      for (size_t channels = 1; channels <= GetParam().channel_tile * 5;
+           channels += std::max<size_t>(1, GetParam().channel_tile - 1)) {
         Tester(GetParam())
             .output_pixels(output_pixels)
             .pooling_elements(pooling_elements)
@@ -763,8 +808,10 @@ TEST_P(XnnTest, few_output_pixels_with_output_stride_0) {
 TEST_P(XnnTest, few_output_pixels_with_step_0) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
-    for (size_t pooling_elements : std::vector<size_t>{{2, GetParam().primary_tile - 1, GetParam().primary_tile}}) {
-      for (size_t channels = 1; channels <= GetParam().channel_tile * 5; channels += std::max<size_t>(1, GetParam().channel_tile - 1)) {
+    for (size_t pooling_elements : std::vector<size_t>{
+             {2, GetParam().primary_tile - 1, GetParam().primary_tile}}) {
+      for (size_t channels = 1; channels <= GetParam().channel_tile * 5;
+           channels += std::max<size_t>(1, GetParam().channel_tile - 1)) {
         for (size_t step = 2; step <= pooling_elements; step++) {
           Tester(GetParam())
               .output_pixels(output_pixels)
@@ -780,7 +827,5 @@ TEST_P(XnnTest, few_output_pixels_with_step_0) {
   }
 }
 
-INSTANTIATE_TEST_SUITE_P(avgpool_minmax,
-                         XnnTest,
-                         testing::ValuesIn(xnn_test_params),
-                         GetTestName);
+INSTANTIATE_TEST_SUITE_P(avgpool_minmax, XnnTest,
+                         testing::ValuesIn(xnn_test_params), GetTestName);

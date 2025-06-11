@@ -21,7 +21,7 @@ void xnn_f32_qs8_vcvt_ukernel__avx512skx_u96(
     size_t batch,
     const float* input,
     int8_t* output,
-    const struct xnn_f32_qs8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_qs8_cvt_params* restrict params)
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -32,13 +32,16 @@ void xnn_f32_qs8_vcvt_ukernel__avx512skx_u96(
 
   XNN_ALIGN(32) static const uint32_t shuffle256_mask[8] = {0, 4, 2, 6, 1, 5, 3, 7};
 
+  // *cvtps_epi32 maps all floats out of bounds of int to INT_MIN, so we need to clamp at the max to avoid overflow.
+  // INT16_MAX is exactly representable as a float, and is plenty large (this clamp is applied after scaling).
+  const __m512 voverflow_max = _mm512_set1_ps((float) INT16_MAX);
+
   const __m512 vscale = _mm512_set1_ps(params->scalar.scale);
-  const __m512 voutput_max_less_zero_point = _mm512_set1_ps((float) ((int32_t) 127 - (int32_t) params->scalar.output_zero_point));
   const __m512i voutput_zero_point = _mm512_set1_epi16(params->scalar.output_zero_point);
   const __m512i vshuffle512_mask = _mm512_load_si512(shuffle512_mask);
   const __m256i vshuffle256_mask = _mm256_load_si256((const __m256i*) shuffle256_mask);
   XNN_FORCE_REALIZATION(vscale);
-  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  XNN_FORCE_REALIZATION(voverflow_max);
   XNN_FORCE_REALIZATION(voutput_zero_point);
   for (; batch >= 96 * sizeof(float); batch -= 96 * sizeof(float)) {
     __m512 vx0123 = _mm512_loadu_ps(input);
@@ -56,12 +59,12 @@ void xnn_f32_qs8_vcvt_ukernel__avx512skx_u96(
     vxGHIJ = _mm512_mul_ps(vxGHIJ, vscale);
     vxKLMN = _mm512_mul_ps(vxKLMN, vscale);
 
-    vx0123 = _mm512_min_ps(vx0123, voutput_max_less_zero_point);
-    vx4567 = _mm512_min_ps(vx4567, voutput_max_less_zero_point);
-    vx89AB = _mm512_min_ps(vx89AB, voutput_max_less_zero_point);
-    vxCDEF = _mm512_min_ps(vxCDEF, voutput_max_less_zero_point);
-    vxGHIJ = _mm512_min_ps(vxGHIJ, voutput_max_less_zero_point);
-    vxKLMN = _mm512_min_ps(vxKLMN, voutput_max_less_zero_point);
+    vx0123 = _mm512_min_ps(vx0123, voverflow_max);
+    vx4567 = _mm512_min_ps(vx4567, voverflow_max);
+    vx89AB = _mm512_min_ps(vx89AB, voverflow_max);
+    vxCDEF = _mm512_min_ps(vxCDEF, voverflow_max);
+    vxGHIJ = _mm512_min_ps(vxGHIJ, voverflow_max);
+    vxKLMN = _mm512_min_ps(vxKLMN, voverflow_max);
 
     const __m512i vacc0123 = _mm512_cvtps_epi32(vx0123);
     const __m512i vacc4567 = _mm512_cvtps_epi32(vx4567);
@@ -91,7 +94,7 @@ void xnn_f32_qs8_vcvt_ukernel__avx512skx_u96(
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     __m512 vx0123 = _mm512_loadu_ps(input);
     vx0123 = _mm512_mul_ps(vx0123, vscale);
-    vx0123 = _mm512_min_ps(vx0123, voutput_max_less_zero_point);
+    vx0123 = _mm512_min_ps(vx0123, voverflow_max);
     input += 16;
 
     const __m512i vacc0123 = _mm512_cvtps_epi32(vx0123);
@@ -114,7 +117,7 @@ void xnn_f32_qs8_vcvt_ukernel__avx512skx_u96(
 
     __m512 vx0123 = _mm512_maskz_loadu_ps(vmask, input);
     vx0123 = _mm512_mul_ps(vx0123, vscale);
-    vx0123 = _mm512_min_ps(vx0123, voutput_max_less_zero_point);
+    vx0123 = _mm512_min_ps(vx0123, voverflow_max);
 
     const __m512i vacc0123 = _mm512_cvtps_epi32(vx0123);
 

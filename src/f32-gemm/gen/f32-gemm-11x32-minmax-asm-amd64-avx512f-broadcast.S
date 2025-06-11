@@ -245,51 +245,52 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_11x32__asm_amd64_avx512f_broadcast
       add r11, 4
       cmp rdx, r11
       jne .Linner_loop
+
 .Linner_loop_end:
       # Min/max clamping.
       vminps  zmm11, zmm1, zmm11
-      vminps  zmm12, zmm1, zmm12
       vminps  zmm13, zmm1, zmm13
-      vminps  zmm14, zmm1, zmm14
       vminps  zmm15, zmm1, zmm15
-      vminps  zmm16, zmm1, zmm16
       vminps  zmm17, zmm1, zmm17
-      vminps  zmm18, zmm1, zmm18
       vminps  zmm19, zmm1, zmm19
-      vminps  zmm20, zmm1, zmm20
       vminps  zmm21, zmm1, zmm21
-      vminps  zmm22, zmm1, zmm22
       vminps  zmm23, zmm1, zmm23
-      vminps  zmm24, zmm1, zmm24
       vminps  zmm25, zmm1, zmm25
-      vminps  zmm26, zmm1, zmm26
       vminps  zmm27, zmm1, zmm27
-      vminps  zmm28, zmm1, zmm28
       vminps  zmm29, zmm1, zmm29
-      vminps  zmm30, zmm1, zmm30
       vminps  zmm9, zmm1, zmm9
+      vminps  zmm12, zmm1, zmm12
+      vminps  zmm14, zmm1, zmm14
+      vminps  zmm16, zmm1, zmm16
+      vminps  zmm18, zmm1, zmm18
+      vminps  zmm20, zmm1, zmm20
+      vminps  zmm22, zmm1, zmm22
+      vminps  zmm24, zmm1, zmm24
+      vminps  zmm26, zmm1, zmm26
+      vminps  zmm28, zmm1, zmm28
+      vminps  zmm30, zmm1, zmm30
       vminps  zmm10, zmm1, zmm10
       vmaxps  zmm11, zmm0, zmm11
-      vmaxps  zmm12, zmm0, zmm12
       vmaxps  zmm13, zmm0, zmm13
-      vmaxps  zmm14, zmm0, zmm14
       vmaxps  zmm15, zmm0, zmm15
-      vmaxps  zmm16, zmm0, zmm16
       vmaxps  zmm17, zmm0, zmm17
-      vmaxps  zmm18, zmm0, zmm18
       vmaxps  zmm19, zmm0, zmm19
-      vmaxps  zmm20, zmm0, zmm20
       vmaxps  zmm21, zmm0, zmm21
-      vmaxps  zmm22, zmm0, zmm22
       vmaxps  zmm23, zmm0, zmm23
-      vmaxps  zmm24, zmm0, zmm24
       vmaxps  zmm25, zmm0, zmm25
-      vmaxps  zmm26, zmm0, zmm26
       vmaxps  zmm27, zmm0, zmm27
-      vmaxps  zmm28, zmm0, zmm28
       vmaxps  zmm29, zmm0, zmm29
-      vmaxps  zmm30, zmm0, zmm30
       vmaxps  zmm9, zmm0, zmm9
+      vmaxps  zmm12, zmm0, zmm12
+      vmaxps  zmm14, zmm0, zmm14
+      vmaxps  zmm16, zmm0, zmm16
+      vmaxps  zmm18, zmm0, zmm18
+      vmaxps  zmm20, zmm0, zmm20
+      vmaxps  zmm22, zmm0, zmm22
+      vmaxps  zmm24, zmm0, zmm24
+      vmaxps  zmm26, zmm0, zmm26
+      vmaxps  zmm28, zmm0, zmm28
+      vmaxps  zmm30, zmm0, zmm30
       vmaxps  zmm10, zmm0, zmm10
 
       # Pop output pointers from the stack.

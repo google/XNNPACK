@@ -38,20 +38,20 @@ static XNN_INLINE xnn_simd_s8_t xnn_min_s8(xnn_simd_s8_t a, xnn_simd_s8_t b) {
   return _mm_min_epi8(a, b);
 }
 
-static XNN_INLINE int8_t xnn_horizontal_max_s8(xnn_simd_s8_t a) {
+static XNN_INLINE int8_t xnn_reduce_max_s8(xnn_simd_s8_t a) {
   xnn_simd_s8_t vmax = _mm_max_epi8(a, _mm_unpackhi_epi64(a, a));
   vmax = _mm_max_epi8(vmax, _mm_srli_epi64(vmax, 32));
   vmax = _mm_max_epi8(vmax, _mm_srli_epi32(vmax, 16));
   vmax = _mm_max_epi8(vmax, _mm_srli_epi16(vmax, 8));
-  return (int8_t) _mm_cvtsi128_si32(vmax);
+  return (int8_t)_mm_cvtsi128_si32(vmax);
 }
 
-static XNN_INLINE int8_t xnn_horizontal_min_s8(xnn_simd_s8_t a) {
+static XNN_INLINE int8_t xnn_reduce_min_s8(xnn_simd_s8_t a) {
   xnn_simd_s8_t vmin = _mm_min_epi8(a, _mm_unpackhi_epi64(a, a));
   vmin = _mm_min_epi8(vmin, _mm_srli_epi64(vmin, 32));
   vmin = _mm_min_epi8(vmin, _mm_srli_epi32(vmin, 16));
   vmin = _mm_min_epi8(vmin, _mm_srli_epi16(vmin, 8));
-  return (int8_t) _mm_cvtsi128_si32(vmin);
+  return (int8_t)_mm_cvtsi128_si32(vmin);
 }
 
 // Load/store operations.
@@ -68,20 +68,12 @@ static XNN_INLINE void xnn_storeu_s8(int8_t* ptr, xnn_simd_s8_t v) {
   _mm_storeu_si128((__m128i*)ptr, v);
 }
 
-static XNN_INLINE void xnn_store_s8(float* ptr, xnn_simd_s8_t v) {
+static XNN_INLINE void xnn_store_s8(int8_t* ptr, xnn_simd_s8_t v) {
   _mm_store_si128((__m128i*)ptr, v);
 }
 
 static XNN_INLINE xnn_simd_s8_t xnn_set1_s8(int8_t v) {
   return _mm_set1_epi8(v);
-}
-
-static XNN_INLINE xnn_simd_s8_t xnn_set1_or_load_s8(const int8_t* v) {
-#if XNN_ARCH_X86
-  return _mm_load_si128((const __m128i*)v);
-#else
-  return _mm_set1_epi8(*v);
-#endif
 }
 
 // Tail load/store operations.
@@ -101,21 +93,50 @@ static XNN_INLINE xnn_simd_s8_t xnn_load_tail_safe_s8(const int8_t* input,
   XNN_ALIGN(16) int8_t padded[16];
   int8_t* d = &padded[0];
   switch (num_elements) {
-  case 15: *d++ = *input++;
-  case 14: *d++ = *input++;
-  case 13: *d++ = *input++;
-  case 12: *d++ = *input++;
-  case 11: *d++ = *input++;
-  case 10: *d++ = *input++;
-  case 9: *d++ = *input++;
-  case 8: *d++ = *input++;
-  case 7: *d++ = *input++;
-  case 6: *d++ = *input++;
-  case 5: *d++ = *input++;
-  case 4: *d++ = *input++;
-  case 3: *d++ = *input++;
-  case 2: *d++ = *input++;
-  case 1: *d++ = *input++;
+    case 15:
+      *d++ = *input++;
+      XNN_FALLTHROUGH
+    case 14:
+      *d++ = *input++;
+      XNN_FALLTHROUGH
+    case 13:
+      *d++ = *input++;
+      XNN_FALLTHROUGH
+    case 12:
+      *d++ = *input++;
+      XNN_FALLTHROUGH
+    case 11:
+      *d++ = *input++;
+      XNN_FALLTHROUGH
+    case 10:
+      *d++ = *input++;
+      XNN_FALLTHROUGH
+    case 9:
+      *d++ = *input++;
+      XNN_FALLTHROUGH
+    case 8:
+      *d++ = *input++;
+      XNN_FALLTHROUGH
+    case 7:
+      *d++ = *input++;
+      XNN_FALLTHROUGH
+    case 6:
+      *d++ = *input++;
+      XNN_FALLTHROUGH
+    case 5:
+      *d++ = *input++;
+      XNN_FALLTHROUGH
+    case 4:
+      *d++ = *input++;
+      XNN_FALLTHROUGH
+    case 3:
+      *d++ = *input++;
+      XNN_FALLTHROUGH
+    case 2:
+      *d++ = *input++;
+      XNN_FALLTHROUGH
+    case 1:
+      *d++ = *input++;
   }
   return _mm_load_si128((const __m128i*)&padded[0]);
 }

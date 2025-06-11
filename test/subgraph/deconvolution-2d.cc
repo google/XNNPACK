@@ -3,1167 +3,437 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>  // For std::generate, std::min.
-#include <array>      // For std::array.
-#include <cmath>      // For std::lrintf.
-#include <cstddef>    // For size_t.
-#include <cstdint>    // For uint32_t.
-#include <limits>     // For std::numeric_limits.
-#include <memory>     // For std::unique_ptr.
-#include <random>     // For std::uniform_real_distribution.
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <chrono>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <limits>
+#include <random>
+#include <vector>
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
-#include "src/xnnpack/node-type.h"
-#include "src/xnnpack/operator-utils.h"
-#include "src/xnnpack/operator.h"
-#include "src/xnnpack/requantization.h"
-#include "src/xnnpack/subgraph.h"
 #include "test/replicable_random_device.h"
-#include "test/subgraph/runtime-flags.h"
+#include "test/subgraph/stencil.h"
+#include "test/subgraph/subgraph-tester.h"
 
-template <class T, class KernelType = T, class BiasType = T> class DeconvolutionTestBase : public ::testing::Test {
- protected:
-  DeconvolutionTestBase() {
-    input_size_dist = std::uniform_int_distribution<uint32_t>(10, 15);
-    kernel_size_dist = std::uniform_int_distribution<uint32_t>(1, 5);
-    stride_dist = std::uniform_int_distribution<uint32_t>(1, 3);
-    f32dist = std::uniform_real_distribution<float>(0.1f, 1.0f);
-    scale_dist = std::uniform_real_distribution<float>(1.0f, 5.0f);
-    i32dist = std::uniform_int_distribution<int32_t>(-10000, 10000);
+namespace xnnpack {
 
-    batch_size = input_size_dist(rng);
-    input_height = input_size_dist(rng);
-    input_width = input_size_dist(rng);
-    kernel_height = kernel_size_dist(rng);
-    kernel_width = kernel_size_dist(rng);
-    upsampling_height = stride_dist(rng);
-    upsampling_width = stride_dist(rng);
-    dilation_height = stride_dist(rng);
-    dilation_width = stride_dist(rng);
-    groups = input_size_dist(rng);
-    group_input_channels = input_size_dist(rng);
-    group_output_channels = input_size_dist(rng);
-    output_min = -std::numeric_limits<float>::infinity();
-    output_max = std::numeric_limits<float>::infinity();
-    adjustment_height = 0;
-    adjustment_width = 0;
-    output_height = xnn_compute_deconvolution_output_dimension(
-      input_height, padding_top + padding_bottom, adjustment_height, kernel_height, dilation_height, upsampling_height);
-    output_width = xnn_compute_deconvolution_output_dimension(
-      input_width, padding_left + padding_right, adjustment_width, kernel_width, dilation_width, upsampling_width);
+template <typename Data, typename Filter, typename Bias>
+Tensor<float> ReferenceImpl(Tensor<Data> input, Tensor<Filter> filter,
+                            Tensor<Bias> bias,
+                            const xnn_quantization_params& input_quantization,
+                            int filter_zero_point, Tensor<float> filter_scale,
+                            const xnn_quantization_params& bias_quantization,
+                            size_t groups, size_t group_input_channels,
+                            size_t group_output_channels,
+                            const StencilParams& kh, const StencilParams& kw,
+                            const Adjustment& adjustment) {
+  Tensor<float> output({input.extent(0), kh.input_extent(input.extent(1), false,
+                                                         adjustment.height),
+                        kw.input_extent(input.extent(2), false,
+                                        adjustment.width),
+                        groups * group_output_channels});
 
-    input_dims = {{batch_size, input_height, input_width, groups * group_input_channels}};
-    kernel_dims = {{groups * group_output_channels, kernel_height, kernel_width, group_input_channels}};
-    bias_dims = {{groups * group_output_channels}};
-    output_dims = {{batch_size, output_height, output_width, groups * group_output_channels}};
-
-    input = xnnpack::Buffer<T>(
-      XNN_EXTRA_BYTES / sizeof(T) + batch_size * input_height * input_width * groups * group_input_channels);
-    kernel = xnnpack::Buffer<KernelType>(groups * group_output_channels * kernel_height * kernel_width * group_input_channels);
-    bias = xnnpack::Buffer<BiasType>(groups * group_output_channels);
-    operator_output = xnnpack::Buffer<T>(batch_size * output_height * output_width * groups * group_output_channels);
-    subgraph_output = xnnpack::Buffer<T>(batch_size * output_height * output_width * groups * group_output_channels);
+  input = input.split(3, {groups, group_input_channels});
+  output = output.split(3, {groups, group_output_channels});
+  if (!bias.empty()) {
+    bias = bias.split(0, {groups, group_output_channels});
+  }
+  filter = filter.split(0, {groups, group_output_channels});
+  if (!filter_scale.empty()) {
+    filter_scale = filter_scale.split(0, {groups, group_output_channels});
   }
 
-  xnnpack::ReplicableRandomDevice rng;
-  std::uniform_int_distribution<uint32_t> input_size_dist;
-  std::uniform_int_distribution<uint32_t> kernel_size_dist;
-  std::uniform_int_distribution<uint32_t> stride_dist;
-  std::uniform_int_distribution<int32_t> i32dist;
-  std::uniform_real_distribution<float> f32dist;
-  std::uniform_real_distribution<float> scale_dist;
-
-  const uint32_t padding_top = 0;
-  const uint32_t padding_right = 0;
-  const uint32_t padding_bottom = 0;
-  const uint32_t padding_left = 0;
-  uint32_t batch_size;
-  uint32_t input_height;
-  uint32_t input_width;
-  uint32_t kernel_height;
-  uint32_t kernel_width;
-  uint32_t upsampling_height;
-  uint32_t upsampling_width;
-  uint32_t adjustment_height;
-  uint32_t adjustment_width;
-  uint32_t dilation_height;
-  uint32_t dilation_width;
-  uint32_t groups;
-  uint32_t group_input_channels;
-  uint32_t group_output_channels;
-  float output_min;
-  float output_max;
-  uint32_t output_height;
-  uint32_t output_width;
-
-  std::array<size_t, 4> input_dims;
-  std::array<size_t, 4> kernel_dims;
-  std::array<size_t, 1> bias_dims;
-  std::array<size_t, 4> output_dims;
-
-  xnnpack::Buffer<T> input;
-  xnnpack::Buffer<KernelType> kernel;
-  xnnpack::Buffer<BiasType> bias;
-  xnnpack::Buffer<T> operator_output;
-  xnnpack::Buffer<T> subgraph_output;
-};
-
-template <class T> class QuantizedDeconvolutionTestBase : public DeconvolutionTestBase<T, T, int32_t> {
-protected:
-  QuantizedDeconvolutionTestBase()
-  {
-    i8dist = std::uniform_int_distribution<int32_t>(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
-    w8dist = std::uniform_int_distribution<int32_t>(-std::numeric_limits<T>::max(), std::numeric_limits<T>::max());
-    std::uniform_int_distribution<int32_t> u8dist(
-      std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
-    accumulators = xnnpack::Buffer<int32_t>(
-      this->batch_size * this->output_height * this->output_width * this->groups * this->group_output_channels);
-  }
-
-  void initialize_accumulators_from_bias()
-  {
-    for (size_t i = 0; i < this->batch_size; i++) {
-      for (size_t oy = 0; oy < this->output_height; oy++) {
-        for (size_t ox = 0; ox < this->output_width; ox++) {
-          for (size_t g = 0; g < this->groups; g++) {
-            for (size_t oc = 0; oc < this->group_output_channels; oc++) {
-              accumulators
-                [(((i * this->output_height + oy) * this->output_width + ox) * this->groups + g) *
-                   this->group_output_channels +
-                 oc] = this->bias[g * this->group_output_channels + oc];
-            }
-          }
-        }
-      }
-    }
-  }
-
-  std::uniform_int_distribution<int32_t> i8dist;
-  std::uniform_int_distribution<int32_t> u8dist;
-  std::uniform_int_distribution<int32_t> w8dist;
-  xnnpack::Buffer<int32_t> accumulators;
-};
-
-using DeconvolutionTestQS8 = QuantizedDeconvolutionTestBase<int8_t>;
-using DeconvolutionTestQU8 = QuantizedDeconvolutionTestBase<uint8_t>;
-using DeconvolutionTestQD8F32QC8W = DeconvolutionTestBase<float, int8_t, float>;
-using DeconvolutionTestF16 = DeconvolutionTestBase<xnn_float16, float, float>;
-using DeconvolutionTestF32 = DeconvolutionTestBase<float>;
-
-TEST_F(DeconvolutionTestQS8, define)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  xnnpack::Buffer<float> kernel_scale(groups * group_output_channels, 1.0f);
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_qint8, 0, 1.0f, input_dims.size(), input_dims.data(), nullptr,
-                          /*external_id=*/0, /*flags=*/0, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t kernel_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_channelwise_quantized_tensor_value(
-                          subgraph, xnn_datatype_qcint8, kernel_scale.data(), kernel_dims.size(), /*channel_dim=*/0, kernel_dims.data(), kernel.data(),
-                          /*external_id=*/1, /*flags=*/0, &kernel_id));
-
-  uint32_t bias_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_channelwise_quantized_tensor_value(
-                          subgraph, xnn_datatype_qcint32, kernel_scale.data(), bias_dims.size(), /*channel_dim=*/0, bias_dims.data(), bias.data(),
-                          /*external_id=*/2, /*flags=*/0, &bias_id));
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_qint8, 0, 1.0f, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/3, /*flags=*/0, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_deconvolution_2d(
-      subgraph, padding_top, padding_right, padding_bottom, padding_left, adjustment_height, adjustment_width,
-      kernel_height, kernel_width, upsampling_height, upsampling_width, dilation_height, dilation_width, groups,
-      group_input_channels, group_output_channels, output_min, output_max, input_id, kernel_id, bias_id, output_id,
-      /*flags=*/0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_deconvolution_2d);
-  ASSERT_EQ(node->params.deconvolution_2d.padding_top, padding_top);
-  ASSERT_EQ(node->params.deconvolution_2d.padding_right, padding_right);
-  ASSERT_EQ(node->params.deconvolution_2d.padding_bottom, padding_bottom);
-  ASSERT_EQ(node->params.deconvolution_2d.padding_left, padding_left);
-  ASSERT_EQ(node->params.deconvolution_2d.kernel_height, kernel_height);
-  ASSERT_EQ(node->params.deconvolution_2d.kernel_width, kernel_width);
-  ASSERT_EQ(node->params.deconvolution_2d.upsampling_height, upsampling_height);
-  ASSERT_EQ(node->params.deconvolution_2d.upsampling_width, upsampling_width);
-  ASSERT_EQ(node->params.deconvolution_2d.dilation_height, dilation_height);
-  ASSERT_EQ(node->params.deconvolution_2d.dilation_width, dilation_width);
-  ASSERT_EQ(node->params.deconvolution_2d.adjustment_height, adjustment_height);
-  ASSERT_EQ(node->params.deconvolution_2d.adjustment_width, adjustment_width);
-  ASSERT_EQ(node->params.deconvolution_2d.groups, groups);
-  ASSERT_EQ(node->params.deconvolution_2d.group_input_channels, group_input_channels);
-  ASSERT_EQ(node->params.deconvolution_2d.group_output_channels, group_output_channels);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
-  ASSERT_EQ(node->num_inputs, 3);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->inputs[1], kernel_id);
-  ASSERT_EQ(node->inputs[2], bias_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-}
-
-TEST_F(DeconvolutionTestQU8, define)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_quint8, 0, 1.0f, input_dims.size(), input_dims.data(), nullptr,
-                          /*external_id=*/0, /*flags=*/0, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t kernel_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_quint8, 0, 1.0f, kernel_dims.size(), kernel_dims.data(), kernel.data(),
-                          /*external_id=*/1, /*flags=*/0, &kernel_id));
-
-  uint32_t bias_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_qint32, 0, 1.0f, bias_dims.size(), bias_dims.data(), bias.data(),
-                          /*external_id=*/2, /*flags=*/0, &bias_id));
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_quint8, 0, 1.0f, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/3, /*flags=*/0, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_deconvolution_2d(
-      subgraph, padding_top, padding_right, padding_bottom, padding_left, adjustment_height, adjustment_width,
-      kernel_height, kernel_width, upsampling_height, upsampling_width, dilation_height, dilation_width, groups,
-      group_input_channels, group_output_channels, output_min, output_max, input_id, kernel_id, bias_id, output_id,
-      /*flags=*/0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_deconvolution_2d);
-  ASSERT_EQ(node->params.deconvolution_2d.padding_top, padding_top);
-  ASSERT_EQ(node->params.deconvolution_2d.padding_right, padding_right);
-  ASSERT_EQ(node->params.deconvolution_2d.padding_bottom, padding_bottom);
-  ASSERT_EQ(node->params.deconvolution_2d.padding_left, padding_left);
-  ASSERT_EQ(node->params.deconvolution_2d.kernel_height, kernel_height);
-  ASSERT_EQ(node->params.deconvolution_2d.kernel_width, kernel_width);
-  ASSERT_EQ(node->params.deconvolution_2d.upsampling_height, upsampling_height);
-  ASSERT_EQ(node->params.deconvolution_2d.upsampling_width, upsampling_width);
-  ASSERT_EQ(node->params.deconvolution_2d.dilation_height, dilation_height);
-  ASSERT_EQ(node->params.deconvolution_2d.dilation_width, dilation_width);
-  ASSERT_EQ(node->params.deconvolution_2d.adjustment_height, adjustment_height);
-  ASSERT_EQ(node->params.deconvolution_2d.adjustment_width, adjustment_width);
-  ASSERT_EQ(node->params.deconvolution_2d.groups, groups);
-  ASSERT_EQ(node->params.deconvolution_2d.group_input_channels, group_input_channels);
-  ASSERT_EQ(node->params.deconvolution_2d.group_output_channels, group_output_channels);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
-  ASSERT_EQ(node->num_inputs, 3);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->inputs[1], kernel_id);
-  ASSERT_EQ(node->inputs[2], bias_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-}
-
-TEST_F(DeconvolutionTestF16, define)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, input_dims.size(), input_dims.data(), nullptr,
-                          /*external_id=*/0, /*flags=*/0, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t kernel_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, kernel_dims.size(), kernel_dims.data(), kernel.data(), /*external_id=*/1,
-      /*flags=*/0, &kernel_id));
-
-  uint32_t bias_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, bias_dims.size(), bias_dims.data(), bias.data(),
-                          /*external_id=*/2, /*flags=*/0, &bias_id));
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/3, /*flags=*/0, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_deconvolution_2d(
-      subgraph, padding_top, padding_right, padding_bottom, padding_left, adjustment_height, adjustment_width,
-      kernel_height, kernel_width, upsampling_height, upsampling_width, dilation_height, dilation_width, groups,
-      group_input_channels, group_output_channels, output_min, output_max, input_id, kernel_id, bias_id, output_id,
-      /*flags=*/0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_deconvolution_2d);
-  ASSERT_EQ(node->params.deconvolution_2d.padding_top, padding_top);
-  ASSERT_EQ(node->params.deconvolution_2d.padding_right, padding_right);
-  ASSERT_EQ(node->params.deconvolution_2d.padding_bottom, padding_bottom);
-  ASSERT_EQ(node->params.deconvolution_2d.padding_left, padding_left);
-  ASSERT_EQ(node->params.deconvolution_2d.kernel_height, kernel_height);
-  ASSERT_EQ(node->params.deconvolution_2d.kernel_width, kernel_width);
-  ASSERT_EQ(node->params.deconvolution_2d.upsampling_height, upsampling_height);
-  ASSERT_EQ(node->params.deconvolution_2d.upsampling_width, upsampling_width);
-  ASSERT_EQ(node->params.deconvolution_2d.dilation_height, dilation_height);
-  ASSERT_EQ(node->params.deconvolution_2d.dilation_width, dilation_width);
-  ASSERT_EQ(node->params.deconvolution_2d.adjustment_height, adjustment_height);
-  ASSERT_EQ(node->params.deconvolution_2d.adjustment_width, adjustment_width);
-  ASSERT_EQ(node->params.deconvolution_2d.groups, groups);
-  ASSERT_EQ(node->params.deconvolution_2d.group_input_channels, group_input_channels);
-  ASSERT_EQ(node->params.deconvolution_2d.group_output_channels, group_output_channels);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
-  ASSERT_EQ(node->num_inputs, 3);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->inputs[1], kernel_id);
-  ASSERT_EQ(node->inputs[2], bias_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-}
-
-TEST_F(DeconvolutionTestQD8F32QC8W, define)
-{
-  xnnpack::Buffer<float> requantization_scales(group_output_channels * groups, 1.0f);
-
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_dynamically_quantized_tensor_value(
-                          subgraph, xnn_datatype_qdint8, input_dims.size(), /*num_nonbatch_dims=*/1, input_dims.data(),
-                          /*external_id=*/0, /*flags=*/0, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t kernel_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_channelwise_quantized_tensor_value(
-      subgraph, xnn_datatype_qcint8, requantization_scales.data(), kernel_dims.size(), /*channel_dim=*/0,
-      kernel_dims.data(), kernel.data(), /*external_id=*/1,
-      /*flags=*/0, &kernel_id));
-
-  uint32_t bias_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, bias_dims.size(), bias_dims.data(), bias.data(),
-                          /*external_id=*/2, /*flags=*/0, &bias_id));
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/3, /*flags=*/0, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_deconvolution_2d(
-      subgraph, padding_top, padding_right, padding_bottom, padding_left, adjustment_height, adjustment_width,
-      kernel_height, kernel_width, upsampling_height, upsampling_width, dilation_height, dilation_width, groups,
-      group_input_channels, group_output_channels, output_min, output_max, input_id, kernel_id, bias_id, output_id,
-      /*flags=*/0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_deconvolution_2d);
-  ASSERT_EQ(node->params.deconvolution_2d.padding_top, padding_top);
-  ASSERT_EQ(node->params.deconvolution_2d.padding_right, padding_right);
-  ASSERT_EQ(node->params.deconvolution_2d.padding_bottom, padding_bottom);
-  ASSERT_EQ(node->params.deconvolution_2d.padding_left, padding_left);
-  ASSERT_EQ(node->params.deconvolution_2d.kernel_height, kernel_height);
-  ASSERT_EQ(node->params.deconvolution_2d.kernel_width, kernel_width);
-  ASSERT_EQ(node->params.deconvolution_2d.upsampling_height, upsampling_height);
-  ASSERT_EQ(node->params.deconvolution_2d.upsampling_width, upsampling_width);
-  ASSERT_EQ(node->params.deconvolution_2d.dilation_height, dilation_height);
-  ASSERT_EQ(node->params.deconvolution_2d.dilation_width, dilation_width);
-  ASSERT_EQ(node->params.deconvolution_2d.adjustment_height, adjustment_height);
-  ASSERT_EQ(node->params.deconvolution_2d.adjustment_width, adjustment_width);
-  ASSERT_EQ(node->params.deconvolution_2d.groups, groups);
-  ASSERT_EQ(node->params.deconvolution_2d.group_input_channels, group_input_channels);
-  ASSERT_EQ(node->params.deconvolution_2d.group_output_channels, group_output_channels);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
-  ASSERT_EQ(node->num_inputs, 3);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->inputs[1], kernel_id);
-  ASSERT_EQ(node->inputs[2], bias_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-}
-
-TEST_F(DeconvolutionTestF32, define)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(), nullptr,
-                          /*external_id=*/0, /*flags=*/0, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t kernel_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, kernel_dims.size(), kernel_dims.data(), kernel.data(), /*external_id=*/1,
-      /*flags=*/0, &kernel_id));
-
-  uint32_t bias_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, bias_dims.size(), bias_dims.data(), bias.data(),
-                          /*external_id=*/2, /*flags=*/0, &bias_id));
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/3, /*flags=*/0, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_deconvolution_2d(
-      subgraph, padding_top, padding_right, padding_bottom, padding_left, adjustment_height, adjustment_width,
-      kernel_height, kernel_width, upsampling_height, upsampling_width, dilation_height, dilation_width, groups,
-      group_input_channels, group_output_channels, output_min, output_max, input_id, kernel_id, bias_id, output_id,
-      /*flags=*/0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_deconvolution_2d);
-  ASSERT_EQ(node->params.deconvolution_2d.padding_top, padding_top);
-  ASSERT_EQ(node->params.deconvolution_2d.padding_right, padding_right);
-  ASSERT_EQ(node->params.deconvolution_2d.padding_bottom, padding_bottom);
-  ASSERT_EQ(node->params.deconvolution_2d.padding_left, padding_left);
-  ASSERT_EQ(node->params.deconvolution_2d.kernel_height, kernel_height);
-  ASSERT_EQ(node->params.deconvolution_2d.kernel_width, kernel_width);
-  ASSERT_EQ(node->params.deconvolution_2d.upsampling_height, upsampling_height);
-  ASSERT_EQ(node->params.deconvolution_2d.upsampling_width, upsampling_width);
-  ASSERT_EQ(node->params.deconvolution_2d.dilation_height, dilation_height);
-  ASSERT_EQ(node->params.deconvolution_2d.dilation_width, dilation_width);
-  ASSERT_EQ(node->params.deconvolution_2d.adjustment_height, adjustment_height);
-  ASSERT_EQ(node->params.deconvolution_2d.adjustment_width, adjustment_width);
-  ASSERT_EQ(node->params.deconvolution_2d.groups, groups);
-  ASSERT_EQ(node->params.deconvolution_2d.group_input_channels, group_input_channels);
-  ASSERT_EQ(node->params.deconvolution_2d.group_output_channels, group_output_channels);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
-  ASSERT_EQ(node->num_inputs, 3);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->inputs[1], kernel_id);
-  ASSERT_EQ(node->inputs[2], bias_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-}
-
-TEST_F(DeconvolutionTestQS8, matches_operator_api)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_operator_t op = nullptr;
-
-  std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-  std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
-  std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-  const int8_t input_zero_point = 1;
-  const float input_scale = scale_dist(rng);
-  xnnpack::Buffer<float> kernel_scale(groups * group_output_channels);
-  std::generate(kernel_scale.begin(), kernel_scale.end(), [&]() { return scale_dist(rng); });
-
-  std::fill(accumulators.begin(), accumulators.end(), 0);
-  for (size_t i = 0; i < batch_size; i++) {
-    for (size_t oy = 0; oy < output_height; oy++) {
-      for (size_t ox = 0; ox < output_width; ox++) {
-        for (size_t ky = 0; ky < kernel_height; ky++) {
-          const size_t y = oy + padding_top - ky * dilation_height;
-          const size_t iy = y / upsampling_height;
-          if (iy * upsampling_height == y && iy < input_height) {
-            for (size_t kx = 0; kx < kernel_width; kx++) {
-              const size_t x = ox + padding_left - kx * dilation_width;
-              const size_t ix = x / upsampling_width;
-              if (ix * upsampling_width == x && ix < input_width) {
-                for (size_t g = 0; g < groups; g++) {
-                  for (size_t oc = 0; oc < group_output_channels; oc++) {
-                    for (size_t ic = 0; ic < group_input_channels; ic++) {
-                      accumulators
-                        [(((i * output_height + oy) * output_width + ox) * groups + g) * group_output_channels + oc] +=
-                        (int32_t(input[((i * input_height + iy) * input_width + ix) * g * group_input_channels + ic]) -
-                         int32_t(input_zero_point)) *
-                        int32_t(kernel
-                                  [(((g * group_output_channels + oc) * kernel_height + ky) * kernel_width + kx) *
-                                     group_input_channels +
-                                   ic]);
-                    }
-                  }
+  for (size_t n = 0; n < output.extent(0); ++n) {
+    for (size_t oy = 0; oy < output.extent(1); ++oy) {
+      for (size_t ox = 0; ox < output.extent(2); ++ox) {
+        for (size_t g = 0; g < groups; ++g) {
+          for (size_t oc = 0; oc < group_output_channels; ++oc) {
+            xnn_quantization_params filter_quantization = {filter_zero_point,
+                                                           filter_scale(g, oc)};
+            double output_nyxc =
+                bias.empty() ? 0.0f
+                             : dequantize(bias(g, oc), bias_quantization);
+            for (size_t dy = 0; dy < kh.size; ++dy) {
+              const size_t y = oy + kh.padding_min - dy * kh.dilation;
+              const size_t iy = y / kh.stride;
+              if (iy * kh.stride != y || iy >= input.extent(1)) continue;
+              for (size_t dx = 0; dx < kw.size; ++dx) {
+                const size_t x = ox + kw.padding_min - dx * kw.dilation;
+                const size_t ix = x / kw.stride;
+                if (ix * kw.stride != x || ix >= input.extent(2)) continue;
+                for (size_t ic = 0; ic < group_input_channels; ++ic) {
+                  float input_nyxc =
+                      dequantize(input(n, iy, ix, g, ic), input_quantization);
+                  float filter_yxc = dequantize(filter(g, oc, dy, dx, ic),
+                                                filter_quantization);
+                  output_nyxc += input_nyxc * filter_yxc;
                 }
               }
             }
+            output(n, oy, ox, g, oc) = output_nyxc;
           }
         }
       }
     }
   }
 
-  // Compute renormalization parameters.
-  const int32_t accumulated_min = *std::min_element(accumulators.cbegin(), accumulators.cend());
-  const int32_t accumulated_max = *std::max_element(accumulators.cbegin(), accumulators.cend());
+  return output.fuse({3, 4});
+}
 
-  float output_scale = double(uint32_t(accumulated_max - accumulated_min)) / 255.0;
-  int8_t output_zero_point = int8_t(std::max(
-    std::min(
-      lrint(-0.5 - 0.5 * double(accumulated_min + accumulated_max) / output_scale),
-      long(std::numeric_limits<int8_t>::max())),
-    long(std::numeric_limits<int8_t>::min())));
-  const int8_t quantized_output_min = xnn_qs8_quantize(output_min, output_scale, output_zero_point);
-  const int8_t quantized_output_max = xnn_qs8_quantize(output_max, output_scale, output_zero_point);
+// For float types, generate data in [-1, 1]
+template <typename T>
+DatatypeGenerator<T> MakeDatatypeGenerator(T) {
+  return DatatypeGenerator<T>(-1.0f, 1.0f);
+}
 
-  // Call operator API.
-  const xnn_status status = xnn_create_deconvolution2d_nhwc_qs8_qc8w(
-    padding_top, padding_right, padding_bottom, padding_left, kernel_height, kernel_width, upsampling_height,
-    upsampling_width, dilation_height, dilation_width, groups, group_input_channels, group_output_channels,
-    groups * group_input_channels, groups * group_output_channels, input_zero_point, input_scale, kernel_scale.data(),
-    kernel.data(), bias.data(), output_zero_point, output_scale, quantized_output_min, quantized_output_max,
-    /*flags=*/0, nullptr, nullptr, &op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
+template <typename T>
+T MaxDatatype(T) {
+  return 1.0f;
+}
 
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
+// For quantized types, generate the full range of the type.
+template <typename T, typename Kind>
+DatatypeGenerator<quantized<T, Kind>> MakeDatatypeGenerator(
+    quantized<T, Kind>) {
+  return DatatypeGenerator<quantized<T, Kind>>();
+}
+
+template <typename T, typename Kind>
+T MaxDatatype(quantized<T, Kind>) {
+  return NumericLimits<quantized<T, Kind>>::max();
+}
+
+template <>
+DatatypeGenerator<quantized<int32_t>> MakeDatatypeGenerator(
+    quantized<int32_t>) {
+  return DatatypeGenerator<quantized<int32_t>>(-10000, 10000, {0, 1.0f});
+}
+
+DeconvolutionParams StencilToDeconvolutionParams(const StencilParams& kh,
+                                                 const StencilParams& kw) {
+  DeconvolutionParams params;
+  params.padding.top = kh.padding_min;
+  params.padding.left = kw.padding_min;
+  params.padding.bottom = kh.padding_max;
+  params.padding.right = kw.padding_max;
+  params.kernel.height = kh.size;
+  params.kernel.width = kw.size;
+  params.upsampling.height = kh.stride;
+  params.upsampling.width = kw.stride;
+  params.dilation.height = kh.dilation;
+  params.dilation.width = kw.dilation;
+  return params;
+}
+
+template <typename T>
+xnn_quantization_params quantization_for_range(float min, float max) {
+  xnn_quantization_params result;
+  result.scale = (max - min) / (static_cast<float>(NumericLimits<T>::max()) -
+                                static_cast<float>(NumericLimits<T>::min()));
+  result.zero_point = NumericLimits<T>::min() - min / result.scale;
+  return result;
+}
+
+template <typename Input, typename Filter, typename Output>
+xnn_quantization_params CalculateDeconvolutionQuantizationParams(
+    size_t reduction_size, xnn_quantization_params input_quantization,
+    xnn_quantization_params filter_quantization) {
+  if (!xnn_datatype_is_quantized(xnn_datatype_of<Output>())) {
+    return {0, 1.0f};
   }
 
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-  ASSERT_EQ(
-    xnn_status_success, xnn_reshape_deconvolution2d_nhwc_qs8_qc8w(
-                          op, batch_size, input_height, input_width, adjustment_height, adjustment_width,
-                          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-                          /*threadpool=*/nullptr));
-  ASSERT_EQ(
-    xnn_status_success, xnn_setup_deconvolution2d_nhwc_qs8_qc8w(
-                          op, input.data(), operator_output.data()));
+  // Get the dequantized input and filter ranges.
+  const float input_min =
+      dequantize(NumericLimits<Input>::min(), input_quantization);
+  const float input_max =
+      dequantize(NumericLimits<Input>::max(), input_quantization);
+  const float filter_min =
+      dequantize(NumericLimits<Filter>::min(), filter_quantization);
+  const float filter_max =
+      dequantize(NumericLimits<Filter>::max(), filter_quantization);
 
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
+  // Find the range of the product of an input and a filter value.
+  std::array<float, 4> corners = {
+      input_min * filter_min,
+      input_max * filter_min,
+      input_min * filter_max,
+      input_max * filter_max,
+  };
+  auto input_filter_minmax =
+      std::minmax_element(corners.begin(), corners.end());
 
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+  const float output_min = *input_filter_minmax.first * reduction_size;
+  const float output_max = *input_filter_minmax.second * reduction_size;
 
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_qint8, input_zero_point, input_scale, input_dims.size(),
-                          input_dims.data(), nullptr, /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
+  // Now we want the output quantization to hold the range of the output.
+  return quantization_for_range<Output>(output_min, output_max);
+}
 
-  uint32_t kernel_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_channelwise_quantized_tensor_value(
-                          subgraph, xnn_datatype_qcint8, kernel_scale.data(), kernel_dims.size(), /*channel_dim=*/0, kernel_dims.data(),
-                          kernel.data(), /*external_id=*/1, /*flags=*/0, &kernel_id));
-
-  uint32_t bias_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_channelwise_quantized_tensor_value(
-                          subgraph, xnn_datatype_qcint32, kernel_scale.data(), bias_dims.size(), /*channel_dim=*/0, bias_dims.data(),
-                          bias.data(), /*external_id=*/2, /*flags=*/0, &bias_id));
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_qint8, output_zero_point, output_scale, output_dims.size(),
-                          output_dims.data(), nullptr, /*external_id=*/3, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_deconvolution_2d(
-      subgraph, padding_top, padding_right, padding_bottom, padding_left, adjustment_height, adjustment_width,
-      kernel_height, kernel_width, upsampling_height, upsampling_width, dilation_height, dilation_width, groups,
-      group_input_channels, group_output_channels, output_min, output_max, input_id, kernel_id, bias_id, output_id,
-      /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  // Check outputs match.
-  for (size_t i = 0; i < operator_output.size(); i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]);
+// Dynamic quantization looks a lot like a float input/output, but the error is
+// hard to quantify and test well. Rather than do that, we can just generate
+// input data that has (close to) zero error when dynamically quantized, which
+// makes it easier to test.
+template <typename Data>
+void FakeDynamicQuantize(Tensor<Data> input, float qmin, float qmax) {
+  auto minmax = std::minmax_element(input.begin(), input.end());
+  const float rmin = *minmax.first;
+  const float rmax = *minmax.second;
+  const float scale = rmin == rmax ? 1.0f : (qmax - qmin) / (rmax - rmin);
+  const float inv_scale = 1.0f / scale;
+  for (auto& i : input) {
+    i = std::round((i - rmin) * scale) * inv_scale;
   }
 }
 
-TEST_F(DeconvolutionTestQU8, matches_operator_api)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+template <typename Data>
+void FakeDynamicQuantize(Tensor<Data> input, xnn_datatype datatype) {
+  if (datatype == xnn_datatype_qdint8) {
+    FakeDynamicQuantize(input, -128.0f, 127.0f);
+  } else if (datatype == xnn_datatype_qduint8) {
+    FakeDynamicQuantize(input, 0.0f, 255.0f);
+  } else {
+    XNN_UNREACHABLE;
+  }
+}
 
-  xnn_operator_t op = nullptr;
+template <typename Data>
+void FakeDynamicQuantize(const Tensor<quantized<Data>>& input, xnn_datatype) {}
 
-  std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-  std::generate(kernel.begin(), kernel.end(), [&]() { return u8dist(rng); });
-  std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-  const uint8_t input_zero_point = u8dist(rng);
-  const uint8_t kernel_zero_point = 0;
-  const float input_scale = scale_dist(rng);
-  const float kernel_scale = scale_dist(rng);
+template <typename Data, typename Filter, typename Bias>
+void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
+  const bool channelwise_quantization =
+      xnn_datatype_is_channelwise_quantized(xnn_datatype_of<Filter>());
+  ReplicableRandomDevice rng;
 
-  // Compute reference results, without renormalization.
-  initialize_accumulators_from_bias();
-  for (size_t i = 0; i < batch_size; i++) {
-    for (size_t oy = 0; oy < output_height; oy++) {
-      for (size_t ox = 0; ox < output_width; ox++) {
-        for (size_t ky = 0; ky < kernel_height; ky++) {
-          const size_t y = oy + padding_top - ky * dilation_height;
-          const size_t iy = y / upsampling_height;
-          if (iy * upsampling_height == y && iy < input_height) {
-            for (size_t kx = 0; kx < kernel_width; kx++) {
-              const size_t x = ox + padding_left - kx * dilation_width;
-              const size_t ix = x / upsampling_width;
-              if (ix * upsampling_width == x && ix < input_width) {
-                for (size_t g = 0; g < groups; g++) {
-                  for (size_t oc = 0; oc < group_output_channels; oc++) {
-                    for (size_t ic = 0; ic < group_input_channels; ic++) {
-                      accumulators
-                        [(((i * output_height + oy) * output_width + ox) * groups + g) * group_output_channels + oc] +=
-                        (int32_t(input[((i * input_height + iy) * input_width + ix) * g * group_input_channels + ic]) -
-                         int32_t(input_zero_point)) *
-                        (int32_t(kernel
-                                   [(((g * group_output_channels + oc) * kernel_height + ky) * kernel_width + kx) *
-                                      group_input_channels +
-                                    ic]) -
-                         int32_t(kernel_zero_point));
-                    }
-                  }
-                }
-              }
-            }
-          }
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  auto data_gen = MakeDatatypeGenerator(Data());
+
+  for (auto _ : FuzzTest(std::chrono::milliseconds(1000))) {
+    // Generate some random kernel and shape parameters.
+    StencilParams kw = random_stencil_params(rng);
+    StencilParams kh = random_stencil_params(rng);
+
+    // TODO: XNNPACK subgraph doesn't support padding for subconv deconvolution.
+    if (kw.dilation == 1 && kh.dilation == 1) {
+      kw.padding_min = 0;
+      kw.padding_max = 0;
+      kh.padding_min = 0;
+      kh.padding_max = 0;
+    }
+
+    DeconvolutionParams params = StencilToDeconvolutionParams(kh, kw);
+    std::uniform_int_distribution<> channels_dist{1, 10};
+    std::uniform_int_distribution<> groups_dist{1, 3};
+    std::uniform_int_distribution<>
+        height_adjustment_dist{0, static_cast<int>(kh.stride) - 1};
+    std::uniform_int_distribution<>
+        width_adjustment_dist{0, static_cast<int>(kw.stride) - 1};
+    params.groups = groups_dist(rng);
+    params.group_input_channels = channels_dist(rng);
+    params.group_output_channels = channels_dist(rng);
+    params.adjustment.height = 0;
+    params.adjustment.width = 0;
+
+    // Padding mode is `Valid`.
+    if (kw.padding_min == 0 && kw.padding_max == 0 &&
+        kh.padding_min == 0 && kh.padding_max == 0) {
+      params.adjustment.height = height_adjustment_dist(rng);
+      params.adjustment.width = width_adjustment_dist(rng);
+    }
+
+    // Make a random filter.
+    std::vector<size_t> filter_shape = {
+        params.groups * params.group_output_channels,
+        params.kernel.height,
+        params.kernel.width,
+        params.group_input_channels,
+    };
+    DatatypeGenerator<Filter> filter_gen = MakeDatatypeGenerator(Filter());
+    Tensor<Filter> filter(filter_shape, XnnExtraBytes);
+    filter.generate([&]() { return filter_gen(rng); });
+    const size_t reduction_size =
+        filter.extent(1) * filter.extent(2) * filter.extent(3);
+
+    // (Maybe) make a random bias.
+    Tensor<Bias> bias;
+    if (rng() & 1) {
+      std::vector<size_t> bias_shape = {params.groups *
+                                        params.group_output_channels};
+      DatatypeGenerator<Bias> bias_gen = MakeDatatypeGenerator(Bias());
+      Tensor<Bias> bias(bias_shape, XnnExtraBytes);
+      bias.generate([&]() { return bias_gen(rng); });
+    }
+
+    xnn_quantization_params input_quantization =
+        random_quantization(xnn_datatype_of<Data>(), rng, 0.001f, 2.0f);
+
+    // The filter quantization might have a per-channel scale. We always store
+    // the scale in a Tensor, but it might be a broadcast of a single value.
+    xnn_quantization_params filter_quantization =
+        random_quantization(xnn_datatype_of<Filter>(), rng, 0.001f, 2.0f);
+    Tensor<float> filter_scale(
+        {channelwise_quantization ? filter.extent(0) : 1});
+    if (filter_scale.size() > 1) {
+      // Generate random per-channel scales, in the range of the original scale.
+      std::uniform_real_distribution<float> filter_scale_dist(
+          0.001f, filter_quantization.scale);
+      filter_scale.generate([&]() { return filter_scale_dist(rng); });
+    } else {
+      filter_scale.fill(filter_quantization.scale);
+    }
+    broadcast_extent_1(filter_scale);
+
+    // The output quantization is computed from the kernel size and input
+    // quantization.
+    xnn_quantization_params output_quantization =
+        CalculateDeconvolutionQuantizationParams<Data, Filter, Data>(
+            reduction_size, input_quantization, filter_quantization);
+    xnn_quantization_params bias_quantization = {
+        0, input_quantization.scale * filter_quantization.scale};
+
+    params.output_min = dequantize(data_gen(rng), output_quantization);
+    params.output_max = dequantize(data_gen(rng), output_quantization);
+    if (params.output_min >= params.output_max) {
+      // ~50% of the time, there is no min/max.
+      params.output_min = -std::numeric_limits<float>::infinity();
+      params.output_max = std::numeric_limits<float>::infinity();
+    }
+
+    SubgraphTester subgraph(4);
+    const uint32_t input_id = 0;
+    const uint32_t filter_id = 1;
+    const uint32_t bias_id = bias.empty() ? XNN_INVALID_VALUE_ID : 2;
+    const uint32_t output_id = 3;
+    subgraph.AddInputTensor(4, xnn_datatype_of<Data>(), input_quantization,
+                            input_id);
+    uint32_t conv_input_id = input_id;
+
+    if (convert_to != xnn_datatype_invalid) {
+      subgraph.AddInternalDynamicallyQuantizedTensor(
+          4, convert_to, /*num_nonbatch_dims=*/3, &conv_input_id);
+      subgraph.AddConvert(input_id, conv_input_id);
+    }
+
+    if (channelwise_quantization) {
+      subgraph.AddStaticTensorQS8(
+          filter.extents(), /*channel_dim=*/0, TensorType::kDense,
+          filter_scale.data(), filter_id,
+          /*flags=*/0, reinterpret_cast<int8_t*>(filter.base()));
+    } else {
+      subgraph.AddStaticTensor(filter.extents(), filter_id, filter.base(),
+                               filter_quantization);
+    }
+    if (bias_id != XNN_INVALID_VALUE_ID) {
+      subgraph.AddStaticTensor(bias.extents(), bias_id, bias.base(),
+                               bias_quantization);
+    }
+    subgraph
+        .AddOutputTensor(4, xnn_datatype_of<Data>(), output_quantization,
+                         output_id)
+        .AddDeconvolution2D(params, conv_input_id, filter_id, bias_id,
+                            output_id);
+    xnn_status status = subgraph.CreateRuntime();
+    if (status == xnn_status_unsupported_hardware) {
+      GTEST_SKIP();
+      return;
+    }
+
+    // Run the subgraph twice, with a different input/output shape each time.
+    for (int reshape = 0; reshape < 2; ++reshape) {
+      std::vector<size_t> input_shape = random_shape(rng, 4);
+      std::vector<size_t> output_shape = {
+          input_shape[0],
+          kh.input_extent(input_shape[1], false, params.adjustment.height),
+          kw.input_extent(input_shape[2], false, params.adjustment.width),
+          params.groups * params.group_output_channels,
+      };
+      input_shape[3] = params.groups * params.group_input_channels;
+
+      Tensor<Data> input(input_shape, XnnExtraBytes);
+      input.generate([&]() { return data_gen(rng); });
+      if (convert_to != xnn_datatype_invalid) {
+        assert(convert_to == xnn_datatype_qdint8);
+        // If we are dynamically quantizing, preprocess the data to have zero
+        // error when it will be quantized, which makes testing the behavior
+        // much easier.
+        for (size_t b = 0; b < input.extent(0); ++b) {
+          FakeDynamicQuantize(input.slice(0, b), convert_to);
+        }
+      }
+
+      subgraph.ReshapeExternalTensor(input_shape, input.base(), input_id)
+          .ReshapeRuntime();
+      ASSERT_EQ(subgraph.GetExternalTensorShape(output_id), output_shape)
+          << ", input_shape=" << index_to_string(input_shape) << ", kh=" << kh
+          << ", kw=" << kw;
+
+      // Run subgraph
+      Tensor<Data> output(output_shape);
+      subgraph.SetupExternalTensor(output.base(), output_id)
+          .SetupRuntime()
+          .InvokeRuntime();
+
+      // Verify results.
+      Tensor<float> expected = ReferenceImpl(
+          input, filter, bias, input_quantization,
+          filter_quantization.zero_point, filter_scale, bias_quantization,
+          params.groups, params.group_input_channels,
+          params.group_output_channels, kh, kw, params.adjustment);
+      for (float& i : expected) {
+        i = std::max(i, params.output_min);
+        i = std::min(i, params.output_max);
+      }
+
+      ASSERT_EQ(expected.extents(), output.extents());
+      if (xnn_datatype_is_quantized(xnn_datatype_of<Data>())) {
+        for (const auto& i : EnumerateIndices(output.extents())) {
+          ASSERT_NEAR(output(i),
+                      quantize<Data>(expected(i), output_quantization), 1)
+              << "input_shape=" << index_to_string(input_shape)
+              << ", output_shape=" << index_to_string(output_shape)
+              << ", filter_shape=" << index_to_string(filter_shape)
+              << ", kh=" << kh << ", kw=" << kw;
+        }
+      } else {
+        const float max_a = MaxDatatype(Data()) * input_quantization.scale;
+        const float max_b = MaxDatatype(Filter()) * filter_quantization.scale;
+        const float tolerance = xnnpack::epsilon(xnn_datatype_of<Data>()) *
+                                reduction_size * max_a * max_b * 4.0f;
+        for (const auto& i : EnumerateIndices(output.extents())) {
+          ASSERT_NEAR(static_cast<float>(output(i)), expected(i), tolerance)
+              << "input_shape=" << index_to_string(input_shape)
+              << ", output_shape=" << index_to_string(output_shape)
+              << ", filter_shape=" << index_to_string(filter_shape)
+              << ", kh=" << kh << ", kw=" << kw;
         }
       }
     }
   }
-
-  // Compute renormalization parameters.
-  const int32_t accumulated_min = *std::min_element(accumulators.cbegin(), accumulators.cend());
-  const int32_t accumulated_max = *std::max_element(accumulators.cbegin(), accumulators.cend());
-
-  const double output_scale = double(uint32_t(accumulated_max - accumulated_min)) / 255.0;
-  const uint8_t output_zero_point = uint8_t(std::max(
-    std::min(
-      lrint(127.5 - 0.5 * double(accumulated_min + accumulated_max) / output_scale),
-      long(std::numeric_limits<uint8_t>::max())),
-    long(std::numeric_limits<uint8_t>::min())));
-  const uint8_t quantized_output_min = xnn_qu8_quantize(output_min, output_scale, output_zero_point);
-  const uint8_t quantized_output_max = xnn_qu8_quantize(output_max, output_scale, output_zero_point);
-
-  // Call operator API.
-  const xnn_status status = xnn_create_deconvolution2d_nhwc_qu8(
-    padding_top, padding_right, padding_bottom, padding_left, kernel_height, kernel_width, upsampling_height,
-    upsampling_width, dilation_height, dilation_width, groups, group_input_channels, group_output_channels,
-    groups * group_input_channels, groups * group_output_channels, input_zero_point, input_scale, kernel_zero_point,
-    kernel_scale, kernel.data(), bias.data(), output_zero_point, output_scale, quantized_output_min,
-    quantized_output_max, /*flags=*/0, nullptr, nullptr, &op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
-
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
-  }
-
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-  ASSERT_EQ(
-    xnn_status_success, xnn_reshape_deconvolution2d_nhwc_qu8(
-                          op, batch_size, input_height, input_width, adjustment_height, adjustment_width,
-                          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-                          /*threadpool=*/nullptr));
-  ASSERT_EQ(
-    xnn_status_success, xnn_setup_deconvolution2d_nhwc_qu8(
-                          op, input.data(), operator_output.data()));
-
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_quint8, input_zero_point, input_scale, input_dims.size(),
-                          input_dims.data(), nullptr, /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t kernel_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_quint8, 0, kernel_scale, kernel_dims.size(), kernel_dims.data(),
-                          kernel.data(), /*external_id=*/1, /*flags=*/0, &kernel_id));
-
-  uint32_t bias_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_qint32, 0, kernel_scale, bias_dims.size(), bias_dims.data(),
-                          bias.data(), /*external_id=*/2, /*flags=*/0, &bias_id));
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_quint8, output_zero_point, output_scale, output_dims.size(),
-                          output_dims.data(), nullptr, /*external_id=*/3, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_deconvolution_2d(
-      subgraph, padding_top, padding_right, padding_bottom, padding_left, adjustment_height, adjustment_width,
-      kernel_height, kernel_width, upsampling_height, upsampling_width, dilation_height, dilation_width, groups,
-      group_input_channels, group_output_channels, output_min, output_max, input_id, kernel_id, bias_id, output_id,
-      /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  // Check outputs match.
-  for (size_t i = 0; i < operator_output.size(); i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]);
-  }
 }
 
-TEST_F(DeconvolutionTestF16, matches_operator_api)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+using quint8 = quantized<uint8_t>;
+using qint8 = quantized<int8_t>;
+using qcint8 = quantized<int8_t, channelwise>;
+using qint32 = quantized<int32_t>;
 
-  xnn_operator_t op = nullptr;
-
-  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
-  std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-
-  // Call operator API.
-  const xnn_status status = xnn_create_deconvolution2d_nhwc_f16(
-    padding_top, padding_right, padding_bottom, padding_left, kernel_height, kernel_width, upsampling_height,
-    upsampling_width, dilation_height, dilation_width, groups, group_input_channels, group_output_channels,
-    groups * group_input_channels, groups * group_output_channels, kernel.data(), bias.data(), output_min, output_max,
-    XNN_FLAG_FP32_STATIC_WEIGHTS, nullptr, nullptr, &op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
-
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
-  }
-
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-  ASSERT_EQ(
-    xnn_status_success, xnn_reshape_deconvolution2d_nhwc_f16(
-                          op, batch_size, input_height, input_width, adjustment_height, adjustment_width,
-                          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-                          /*threadpool=*/nullptr));
-  ASSERT_EQ(
-    xnn_status_success, xnn_setup_deconvolution2d_nhwc_f16(
-                          op, input.data(), operator_output.data()));
-
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, input_dims.size(), input_dims.data(), nullptr,
-                          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t kernel_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, kernel_dims.size(), kernel_dims.data(), kernel.data(),
-                          /*external_id=*/1, /*flags=*/0, &kernel_id));
-
-  uint32_t bias_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, bias_dims.size(), bias_dims.data(), bias.data(),
-                          /*external_id=*/2, /*flags=*/0, &bias_id));
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/3, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_deconvolution_2d(
-      subgraph, padding_top, padding_right, padding_bottom, padding_left, adjustment_height, adjustment_width,
-      kernel_height, kernel_width, upsampling_height, upsampling_width, dilation_height, dilation_width, groups,
-      group_input_channels, group_output_channels, output_min, output_max, input_id, kernel_id, bias_id, output_id,
-      /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  // Check outputs match.
-  for (size_t i = 0; i < operator_output.size(); i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]);
-  }
+TEST(Deconvolution2DQC8, test) { TestImpl<qint8, qcint8, qint32>(); }
+TEST(Deconvolution2DQU8, test) { TestImpl<quint8, quint8, qint32>(); }
+TEST(Deconvolution2DQS8, test) { TestImpl<qint8, qint8, qint32>(); }
+TEST(Deconvolution2DF16, test) { TestImpl<xnn_float16, float, float>(); }
+TEST(Deconvolution2DF32, test) { TestImpl<float, float, float>(); }
+TEST(Deconvolution2DQD8F32QC8W, test) {
+  TestImpl<float, qcint8, float>(/*convert_to=*/xnn_datatype_qdint8);
 }
 
-TEST_F(DeconvolutionTestQD8F32QC8W, internally_allocated_dynamic_quantization_parameters)
-{
-  std::uniform_int_distribution<int32_t> w8dist = std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
-
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnnpack::Buffer<float> convert_input(batch_size * input_height * input_width * groups * group_input_channels + XNN_EXTRA_BYTES / sizeof(float));
-  std::generate(convert_input.begin(), convert_input.end(), [&]() { return f32dist(rng); });
-
-  xnnpack::Buffer<int8_t> operator_dq_data(batch_size * input_height * input_width * groups * group_input_channels + XNN_EXTRA_BYTES);
-  xnnpack::Buffer<xnn_quantization_params> quantization_params(batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
-
-  xnnpack::Buffer<float> kernel_scale(group_output_channels * groups);
-  std::generate(kernel_scale.begin(), kernel_scale.end(), [&]() { return scale_dist(rng); });
-
-  std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
-  std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-
-
-  // Call operator API.
-  xnn_operator_t convert_op = nullptr;
-  const size_t quantized_batch_size = input_height * input_width * group_input_channels * groups;
-  xnn_status status = xnn_create_convert_nc_f32_qd8(
-      /*flags=*/0, &convert_op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convert_op(convert_op, xnn_delete_operator);
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
-  }
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, convert_op);
-  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f32_qd8(convert_op, batch_size, quantized_batch_size,
-                                                               quantized_batch_size, quantized_batch_size, /*threadpool=*/nullptr));
-  ASSERT_EQ(xnn_status_success, xnn_setup_convert_nc_f32_qd8(convert_op, convert_input.data(),
-                                                             operator_dq_data.data(), quantization_params.data()));
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(convert_op, /*threadpool=*/nullptr));
-
-  xnn_operator_t deconvolution_op = nullptr;
-  status = xnn_create_deconvolution2d_nhwc_qd8_f32_qc8w(
-    padding_top, padding_right, padding_bottom, padding_left, kernel_height, kernel_width, upsampling_height,
-    upsampling_width, dilation_height, dilation_width, groups, group_input_channels, group_output_channels,
-    groups * group_input_channels, groups * group_output_channels, kernel_scale.data(), kernel.data(), bias.data(), output_min, output_max,
-    /*flags=*/0, nullptr, nullptr, &deconvolution_op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(deconvolution_op, xnn_delete_operator);
-
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
-  }
-
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, deconvolution_op);
-  ASSERT_EQ(
-    xnn_status_success, xnn_reshape_deconvolution2d_nhwc_qd8_f32_qc8w(
-                          deconvolution_op, batch_size, input_height, input_width, adjustment_height, adjustment_width,
-                          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-                          /*threadpool=*/nullptr));
-  ASSERT_EQ(
-    xnn_status_success, xnn_setup_deconvolution2d_nhwc_qd8_f32_qc8w(
-                          deconvolution_op, operator_dq_data.data(), operator_output.data(), quantization_params.data()));
-
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(deconvolution_op, /*threadpool=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(), nullptr,
-                          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t dq_quantized_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_dynamically_quantized_tensor_value(
-                          subgraph, xnn_datatype_qdint8, input_dims.size(), /*num_nonbatch_dims=*/3, input_dims.data(),
-                          XNN_INVALID_VALUE_ID, /*flags=*/0, &dq_quantized_id));
-  ASSERT_NE(dq_quantized_id, XNN_INVALID_NODE_ID);
-
-  uint32_t kernel_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_channelwise_quantized_tensor_value(
-                          subgraph, xnn_datatype_qcint8, kernel_scale.data(), kernel_dims.size(), /*channel_dim=*/0,
-                          kernel_dims.data(), kernel.data(), /*external_id=*/1, /*flags=*/0, &kernel_id));
-
-  uint32_t bias_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, bias_dims.size(), bias_dims.data(), bias.data(),
-                          /*external_id=*/2, /*flags=*/0, &bias_id));
-  ASSERT_NE(bias_id, XNN_INVALID_NODE_ID);
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/3, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-  ASSERT_EQ(xnn_status_success, xnn_define_unary(subgraph, xnn_unary_convert, /*params=*/nullptr, input_id, dq_quantized_id, /*flags=*/0));
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_deconvolution_2d(
-      subgraph, padding_top, padding_right, padding_bottom, padding_left, adjustment_height, adjustment_width,
-      kernel_height, kernel_width, upsampling_height, upsampling_width, dilation_height, dilation_width, groups,
-      group_input_channels, group_output_channels, output_min, output_max, dq_quantized_id, kernel_id, bias_id, output_id,
-      /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, convert_input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  // Check outputs match.
-  for (size_t i = 0; i < operator_output.size(); i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]);
-  }
-}
-
-TEST_F(DeconvolutionTestF32, matches_operator_api)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_operator_t op = nullptr;
-
-  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
-  std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-
-  // Call operator API.
-  const xnn_status status = xnn_create_deconvolution2d_nhwc_f32(
-    padding_top, padding_right, padding_bottom, padding_left, kernel_height, kernel_width, upsampling_height,
-    upsampling_width, dilation_height, dilation_width, groups, group_input_channels, group_output_channels,
-    groups * group_input_channels, groups * group_output_channels, kernel.data(), bias.data(), output_min, output_max,
-    /*flags=*/0, nullptr, nullptr, &op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
-
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
-  }
-
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-  ASSERT_EQ(
-    xnn_status_success, xnn_reshape_deconvolution2d_nhwc_f32(
-                          op, batch_size, input_height, input_width, adjustment_height, adjustment_width,
-                          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-                          /*threadpool=*/nullptr));
-  ASSERT_EQ(
-    xnn_status_success, xnn_setup_deconvolution2d_nhwc_f32(
-                          op, input.data(), operator_output.data()));
-
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(), nullptr,
-                          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t kernel_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, kernel_dims.size(), kernel_dims.data(), kernel.data(),
-                          /*external_id=*/1, /*flags=*/0, &kernel_id));
-
-  uint32_t bias_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, bias_dims.size(), bias_dims.data(), bias.data(),
-                          /*external_id=*/2, /*flags=*/0, &bias_id));
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/3, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_deconvolution_2d(
-      subgraph, padding_top, padding_right, padding_bottom, padding_left, adjustment_height, adjustment_width,
-      kernel_height, kernel_width, upsampling_height, upsampling_width, dilation_height, dilation_width, groups,
-      group_input_channels, group_output_channels, output_min, output_max, input_id, kernel_id, bias_id, output_id,
-      /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  // Check outputs match.
-  for (size_t i = 0; i < operator_output.size(); i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i]);
-  }
-}
-
-TEST_F(DeconvolutionTestF32, reshape_output)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(), nullptr,
-                          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t kernel_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, kernel_dims.size(), kernel_dims.data(), kernel.data(),
-                          /*external_id=*/1, /*flags=*/0, &kernel_id));
-
-  uint32_t bias_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, bias_dims.size(), bias_dims.data(), bias.data(),
-                          /*external_id=*/2, /*flags=*/0, &bias_id));
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/3, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_deconvolution_2d(
-      subgraph, padding_top, padding_right, padding_bottom, padding_left, adjustment_height, adjustment_width,
-      kernel_height, kernel_width, upsampling_height, upsampling_width, dilation_height, dilation_width, groups,
-      group_input_channels, group_output_channels, output_min, output_max, input_id, kernel_id, bias_id, output_id,
-      /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  input_dims[0] += 2;
-  input_dims[1] += 3;
-  input_dims[2] += 4;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_dims.size(), input_dims.data()));
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
-  const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
-  ASSERT_EQ(output_shape->dim[0], input_dims[0]);
-  ASSERT_EQ(output_shape->dim[1], runtime->opdata[0].operator_objects[0]->output_height);
-  ASSERT_EQ(output_shape->dim[2], runtime->opdata[0].operator_objects[0]->output_width);
-  ASSERT_EQ(output_shape->dim[3], output_dims[3]);
-
-  input_dims[0] -= 1;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_dims.size(), input_dims.data()));
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_success);
-  ASSERT_EQ(output_shape->dim[0], input_dims[0]);
-  ASSERT_EQ(output_shape->dim[1], runtime->opdata[0].operator_objects[0]->output_height);
-  ASSERT_EQ(output_shape->dim[2], runtime->opdata[0].operator_objects[0]->output_width);
-  ASSERT_EQ(output_shape->dim[3], output_dims[3]);
-}
+}  // namespace xnnpack

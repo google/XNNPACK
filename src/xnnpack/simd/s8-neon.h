@@ -37,7 +37,7 @@ static XNN_INLINE xnn_simd_s8_t xnn_min_s8(xnn_simd_s8_t a, xnn_simd_s8_t b) {
   return vminq_s8(a, b);
 }
 
-static XNN_INLINE int8_t xnn_horizontal_max_s8(xnn_simd_s8_t a) {
+static XNN_INLINE int8_t xnn_reduce_max_s8(xnn_simd_s8_t a) {
   int8x8_t max0 = vpmax_s8(vget_low_s8(a), vget_high_s8(a));
   max0 = vpmax_s8(max0, max0);
   max0 = vpmax_s8(max0, max0);
@@ -46,7 +46,7 @@ static XNN_INLINE int8_t xnn_horizontal_max_s8(xnn_simd_s8_t a) {
   return vget_lane_s8(max0, 0);
 }
 
-static XNN_INLINE int8_t xnn_horizontal_min_s8(xnn_simd_s8_t a) {
+static XNN_INLINE int8_t xnn_reduce_min_s8(xnn_simd_s8_t a) {
   int8x8_t min0 = vpmin_s8(vget_low_s8(a), vget_high_s8(a));
   min0 = vpmin_s8(min0, min0);
   min0 = vpmin_s8(min0, min0);
@@ -79,14 +79,6 @@ static XNN_INLINE void xnn_store_s8(int8_t* ptr, xnn_simd_s8_t v) {
 
 static XNN_INLINE xnn_simd_s8_t xnn_set1_s8(int8_t v) { return vdupq_n_s8(v); }
 
-static XNN_INLINE xnn_simd_s8_t xnn_set1_or_load_s8(const int8_t* v) {
-#if XNN_ARCH_X86
-  return vld1q_s8(v);
-#else
-  return vdupq_n_s8(*v);
-#endif
-}
-
 // Tail load/store operations.
 
 static XNN_INLINE xnn_simd_s8_t
@@ -104,21 +96,36 @@ static XNN_INLINE xnn_simd_s8_t xnn_load_tail_safe_s8(const int8_t* input,
   XNN_ALIGN(16) int8_t padded[16];
   int8_t* d = &padded[0];
   switch (num_elements) {
-  case 15: *d++ = *input++;
-  case 14: *d++ = *input++;
-  case 13: *d++ = *input++;
-  case 12: *d++ = *input++;
-  case 11: *d++ = *input++;
-  case 10: *d++ = *input++;
-  case 9: *d++ = *input++;
-  case 8: *d++ = *input++;
-  case 7: *d++ = *input++;
-  case 6: *d++ = *input++;
-  case 5: *d++ = *input++;
-  case 4: *d++ = *input++;
-  case 3: *d++ = *input++;
-  case 2: *d++ = *input++;
-  case 1: *d++ = *input++;
+    case 15:
+      *d++ = *input++;
+    case 14:
+      *d++ = *input++;
+    case 13:
+      *d++ = *input++;
+    case 12:
+      *d++ = *input++;
+    case 11:
+      *d++ = *input++;
+    case 10:
+      *d++ = *input++;
+    case 9:
+      *d++ = *input++;
+    case 8:
+      *d++ = *input++;
+    case 7:
+      *d++ = *input++;
+    case 6:
+      *d++ = *input++;
+    case 5:
+      *d++ = *input++;
+    case 4:
+      *d++ = *input++;
+    case 3:
+      *d++ = *input++;
+    case 2:
+      *d++ = *input++;
+    case 1:
+      *d++ = *input++;
   }
   return vld1q_s8(&padded[0]);
 }

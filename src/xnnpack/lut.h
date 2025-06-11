@@ -17,13 +17,10 @@
 extern "C" {
 #endif
 
-
 #define DECLARE_X8_LUT_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                     \
-      size_t n,                                  \
-      const uint8_t* x,                          \
-      uint8_t* y,                                \
-      const uint8_t table[XNN_RESTRICT XNN_MIN_ELEMENTS(256)]);
+      size_t n, const uint8_t* x, uint8_t* y,    \
+      const uint8_t* table);
 
 DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__scalar_u1)
 DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__scalar_u2)
@@ -69,15 +66,11 @@ DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__wasmsimd_u32)
 DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__wasmsimd_u48)
 DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__wasmsimd_u64)
 
-
-#define DECLARE_U8_LUT32NORM_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                           \
-      size_t n,                                        \
-      const uint8_t* x,                                \
-      const uint32_t* t,                               \
-      uint8_t* y);
-
-DECLARE_U8_LUT32NORM_UKERNEL_FUNCTION(xnn_u8_lut32norm_ukernel__scalar)
+#define XNN_UKERNEL(arch_flags, fn_name, datatype, params_type, init_params) \
+  XNN_INTERNAL void fn_name(size_t n, const uint8_t* x, const uint32_t* t,   \
+                            uint8_t* y);
+#include "src/u8-lut32norm/u8-lut32norm.inc"
+#undef XNN_UKERNEL
 
 
 #ifdef __cplusplus

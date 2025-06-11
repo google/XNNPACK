@@ -84,7 +84,6 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_5x64c4__asm_amd64_avx512vnni
       cmp rdi, 4
       cmovle r12, r14
       cmovle r8, rbp
-
       # Load quantization_params pointer from stack
       mov r11, [rsp + 456]
       mov edi, [r11 + 0]
@@ -177,6 +176,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_5x64c4__asm_amd64_avx512vnni
       add r11, 4
       cmp rdx, r11
       jne .Linner_loop
+
 .Linner_loop_end:
 
       # Convert from int32 to float.
@@ -274,44 +274,44 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_5x64c4__asm_amd64_avx512vnni
       vfmadd213ps zmm4, zmm3, zmm9
       # Min/max clamping.
       vminps  zmm5, zmm1, zmm5
-      vminps  zmm12, zmm1, zmm12
-      vminps  zmm14, zmm1, zmm14
-      vminps  zmm15, zmm1, zmm15
       vminps  zmm16, zmm1, zmm16
-      vminps  zmm17, zmm1, zmm17
-      vminps  zmm18, zmm1, zmm18
-      vminps  zmm19, zmm1, zmm19
       vminps  zmm20, zmm1, zmm20
-      vminps  zmm21, zmm1, zmm21
-      vminps  zmm22, zmm1, zmm22
-      vminps  zmm23, zmm1, zmm23
       vminps  zmm24, zmm1, zmm24
-      vminps  zmm25, zmm1, zmm25
-      vminps  zmm26, zmm1, zmm26
-      vminps  zmm27, zmm1, zmm27
       vminps  zmm28, zmm1, zmm28
+      vminps  zmm12, zmm1, zmm12
+      vminps  zmm17, zmm1, zmm17
+      vminps  zmm21, zmm1, zmm21
+      vminps  zmm25, zmm1, zmm25
       vminps  zmm29, zmm1, zmm29
+      vminps  zmm14, zmm1, zmm14
+      vminps  zmm18, zmm1, zmm18
+      vminps  zmm22, zmm1, zmm22
+      vminps  zmm26, zmm1, zmm26
       vminps  zmm30, zmm1, zmm30
+      vminps  zmm15, zmm1, zmm15
+      vminps  zmm19, zmm1, zmm19
+      vminps  zmm23, zmm1, zmm23
+      vminps  zmm27, zmm1, zmm27
       vminps  zmm4, zmm1, zmm4
       vmaxps  zmm5, zmm0, zmm5
-      vmaxps  zmm12, zmm0, zmm12
-      vmaxps  zmm14, zmm0, zmm14
-      vmaxps  zmm15, zmm0, zmm15
       vmaxps  zmm16, zmm0, zmm16
-      vmaxps  zmm17, zmm0, zmm17
-      vmaxps  zmm18, zmm0, zmm18
-      vmaxps  zmm19, zmm0, zmm19
       vmaxps  zmm20, zmm0, zmm20
-      vmaxps  zmm21, zmm0, zmm21
-      vmaxps  zmm22, zmm0, zmm22
-      vmaxps  zmm23, zmm0, zmm23
       vmaxps  zmm24, zmm0, zmm24
-      vmaxps  zmm25, zmm0, zmm25
-      vmaxps  zmm26, zmm0, zmm26
-      vmaxps  zmm27, zmm0, zmm27
       vmaxps  zmm28, zmm0, zmm28
+      vmaxps  zmm12, zmm0, zmm12
+      vmaxps  zmm17, zmm0, zmm17
+      vmaxps  zmm21, zmm0, zmm21
+      vmaxps  zmm25, zmm0, zmm25
       vmaxps  zmm29, zmm0, zmm29
+      vmaxps  zmm14, zmm0, zmm14
+      vmaxps  zmm18, zmm0, zmm18
+      vmaxps  zmm22, zmm0, zmm22
+      vmaxps  zmm26, zmm0, zmm26
       vmaxps  zmm30, zmm0, zmm30
+      vmaxps  zmm15, zmm0, zmm15
+      vmaxps  zmm19, zmm0, zmm19
+      vmaxps  zmm23, zmm0, zmm23
+      vmaxps  zmm27, zmm0, zmm27
       vmaxps  zmm4, zmm0, zmm4
 
       # Check whether full or partial store.

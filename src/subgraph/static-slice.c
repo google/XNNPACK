@@ -13,6 +13,7 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator-type.h"
 #include "src/xnnpack/operator.h"
@@ -22,10 +23,9 @@
 
 static enum xnn_status create_slice_operator(
     const struct xnn_node* node,
-    const struct xnn_value* values,
+    const struct xnn_runtime_value* values,
     size_t num_values,
     struct xnn_operator_data* opdata,
-    struct xnn_code_cache* code_cache,
   xnn_weights_cache_t weights_cache)
 {
   assert(node->num_inputs == 1);
@@ -35,7 +35,7 @@ static enum xnn_status create_slice_operator(
   const uint32_t input_id = node->inputs[0];
   assert(input_id != XNN_INVALID_VALUE_ID);
   assert(input_id < num_values);
-  const struct xnn_value *input_value = &values[input_id];
+  const struct xnn_runtime_value *input_value = &values[input_id];
   switch (xnn_datatype_size_bits(input_value->datatype)) {
     case 8:
       status = xnn_create_slice_nd_x8(/*flags=*/0, &opdata->operator_objects[0]);
@@ -52,7 +52,6 @@ static enum xnn_status create_slice_operator(
 
   if (status == xnn_status_success) {
     const int num_dims = node->params.slice.num_dims;
-    opdata->shape2.num_dims = num_dims;
     memcpy(opdata->begins, node->params.slice.begins, num_dims * sizeof(int64_t));
     memcpy(opdata->ends, node->params.slice.ends, num_dims * sizeof(int64_t));
   }
@@ -62,7 +61,7 @@ static enum xnn_status create_slice_operator(
 
 static enum xnn_status reshape_slice_operator(
     struct xnn_operator_data* opdata,
-    struct xnn_value* values,
+    struct xnn_runtime_value* values,
     size_t num_values,
     pthreadpool_t threadpool)
 {
@@ -70,24 +69,25 @@ static enum xnn_status reshape_slice_operator(
   const uint32_t output_id = opdata->outputs[0];
   assert(input_id < num_values);
   assert(output_id < num_values);
-  struct xnn_value* output_value = values + output_id;
-  struct xnn_value* input_value = values + input_id;
+  struct xnn_runtime_value* output_value = values + output_id;
+  struct xnn_runtime_value* input_value = values + input_id;
   const size_t num_dims = input_value->shape.num_dims;
-  assert(num_dims == opdata->shape2.num_dims);
   enum xnn_status status = xnn_status_invalid_state;
   const size_t old_workspace_size = opdata->workspace_size;
   size_t offsets[XNN_MAX_TENSOR_DIMS], sizes[XNN_MAX_TENSOR_DIMS];
+  output_value->shape.num_dims = num_dims;
   for (size_t i = 0; i < num_dims; ++i) {
     if (opdata->begins[i] < 0) {
-      offsets[i] = opdata->begins[i] + input_value->shape.dim[i];
+      offsets[i] = doz(input_value->shape.dim[i], -opdata->begins[i]);
     } else {
       offsets[i] = opdata->begins[i];
     }
     if (opdata->ends[i] <= 0) {
-      sizes[i] = opdata->ends[i] + input_value->shape.dim[i] - offsets[i];
+      sizes[i] = doz(doz(input_value->shape.dim[i], -opdata->ends[i]), offsets[i]);
     } else {
-      sizes[i] = opdata->ends[i] - offsets[i];
+      sizes[i] = doz(opdata->ends[i], offsets[i]);
     }
+    output_value->shape.dim[i] = sizes[i];
   }
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_slice_nd_x8:
@@ -114,15 +114,7 @@ static enum xnn_status reshape_slice_operator(
   if (status != xnn_status_success) {
     return status;
   }
-  output_value->shape.num_dims = num_dims;
-  for (size_t i = 0; i < num_dims; ++i) {
-    if (sizes[i] == 0) {
-      output_value->shape.dim[i] = input_value->shape.dim[i];
-    } else {
-      output_value->shape.dim[i] = sizes[i];
-    }
-  }
-  const size_t new_size = xnn_tensor_get_size(output_value);
+  const size_t new_size = xnn_runtime_tensor_get_size(output_value);
   if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
     output_value->size = new_size;
     return xnn_status_reallocation_required;
@@ -132,7 +124,7 @@ static enum xnn_status reshape_slice_operator(
 
 static enum xnn_status setup_slice_operator(
     const struct xnn_operator_data* opdata,
-    const struct xnn_value* values,
+    const struct xnn_runtime_value* values,
     size_t num_values,
     pthreadpool_t threadpool)
 {
@@ -144,11 +136,11 @@ static enum xnn_status setup_slice_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  const struct xnn_value* input_value = values + input_id;
+  const struct xnn_runtime_value* input_value = values + input_id;
   const void* input_data = input_value->data;
   assert(input_data != NULL);
 
-  const struct xnn_value* output_value = values + output_id;
+  const struct xnn_runtime_value* output_value = values + output_id;
   void* output_data = output_value->data;
   assert(output_data != NULL);
 

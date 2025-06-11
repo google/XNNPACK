@@ -197,11 +197,18 @@ def generate_test_cases(
   if requantization_type:
     test_args.append("xnn_qs8_requantize_%s" % requantization_type.lower())
   if vector_tile:
-    ctype = {"qs8": "int8_t", "qu8": "uint8_t", "u8": "uint8_t", "f16": "uint16_t", "f32": "float"}[datatype]
+    ctype = {
+        "qs8": "int8_t",
+        "qu8": "uint8_t",
+        "u8": "uint8_t",
+        "f16": "uint16_t",
+        "f32": "float",
+    }[datatype]
     batch_scale = {
         "rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype,
-        "rvvfp16arith": " * xnn_init_hardware_config()->vlenb / sizeof(%s)"
-        % ctype,
+        "rvvfp16arith": (
+            " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype
+        ),
     }[isa]
   return xngen.preprocess(
       REDUCE_TEST_TEMPLATE,

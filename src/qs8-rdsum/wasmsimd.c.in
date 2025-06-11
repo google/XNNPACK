@@ -29,7 +29,7 @@ void xnn_${DATATYPE.lower()}_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__was
     size_t input_stride,
     const ${XINT8_T}* zero,
     ${XINT32_T}* output,
-    const struct xnn_qs8_rsum_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_qs8_rsum_params* restrict params) XNN_OOB_READS
 {
   assert(rows != 0);
   assert(channels != 0);

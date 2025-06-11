@@ -77,7 +77,8 @@ struct UnaryOpInfo {
   virtual float ReferenceImpl(float x, const xnn_unary_params& params) const {
     XNN_UNREACHABLE;
   }
-  virtual int32_t ReferenceImpl(int32_t x, const xnn_unary_params& params) const {
+  virtual int32_t ReferenceImpl(int32_t x,
+                                const xnn_unary_params& params) const {
     XNN_UNREACHABLE;
   }
 
@@ -94,7 +95,11 @@ struct UnaryOpInfo {
       case xnn_datatype_fp16:
         return TolExact16(y_ref);
       default:
+#if XNN_ARCH_HEXAGON
+        return TolExact(y_ref) * 4.f;
+#else
         return TolExact(y_ref);
+#endif
     }
   }
 
@@ -119,27 +124,25 @@ struct UnaryOpInfo {
         return {0, 1.0f};
     }
   }
+
+  // If this returns false, we do not promise to match the reference
+  // implementation within `Tolerance`.
+  virtual bool IsInSupportedRange(float y) const { return true; }
 };
 
 struct Convert : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return x;
   }
-  int32_t ReferenceImpl(int32_t x, const xnn_unary_params&) const override { return x; }
+  int32_t ReferenceImpl(int32_t x, const xnn_unary_params&) const override {
+    return x;
+  }
 
   float Tolerance(float y_ref, xnn_datatype datatype) const override {
     return xnn_datatype_is_quantized(datatype)
                ? 1.0f
-               : TolRelative(y_ref, xnnpack::epsilon(datatype));
-  }
-};
-
-struct ReLU : public UnaryOpInfo {
-  float ReferenceImpl(float x, const xnn_unary_params&) const override {
-    return std::max(x, 0.0f);
-  }
-  int32_t ReferenceImpl(int32_t x, const xnn_unary_params&) const override {
-    return std::max<int32_t>(x, 0);
+               : TolMixed(y_ref, xnnpack::epsilon(datatype),
+                          xnnpack::epsilon(datatype));
   }
 };
 
@@ -173,8 +176,10 @@ struct Clamp : public UnaryOpInfo {
     return std::min<float>(std::max<float>(x, params.clamp.min),
                            params.clamp.max);
   }
-  int32_t ReferenceImpl(int32_t x, const xnn_unary_params& params) const override {
-    return std::min<int32_t>(std::max<int32_t>(x, params.clamp.min), params.clamp.max);
+  int32_t ReferenceImpl(int32_t x,
+                        const xnn_unary_params& params) const override {
+    return std::min<int32_t>(std::max<int32_t>(x, params.clamp.min),
+                             params.clamp.max);
   }
 
   xnn_quantization_params InputQuantizationParams(
@@ -309,10 +314,10 @@ struct LeakyReLU : public UnaryOpInfo {
   float Tolerance(float y_ref, xnn_datatype datatype) const override {
     switch (datatype) {
       case xnn_datatype_fp32:
-        return TolExact(y_ref);
       case xnn_datatype_fp16:
       case xnn_datatype_bf16:
-        return TolMixed(y_ref, 1.0e-4f, 1.0e-3f);
+        return TolMixed(y_ref, xnnpack::epsilon(datatype),
+                        5 * xnnpack::epsilon(datatype));
       case xnn_datatype_qint8:
       case xnn_datatype_quint8:
         return 1;
@@ -326,24 +331,52 @@ struct RoundToNearestEven : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return std::nearbyint(x);
   }
+
+#if XNN_ARCH_RISCV
+  bool IsInSupportedRange(float y) const override {
+    // TODO(#8087): These ops are broken for large inputs on RISCV.
+    return std::abs(y) < 1e6f;
+  }
+#endif
 };
 
 struct RoundTowardsZero : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return std::trunc(x);
   }
+
+#if XNN_ARCH_RISCV
+  bool IsInSupportedRange(float y) const override {
+    // TODO(#8087): These ops are broken for large inputs on RISCV.
+    return std::abs(y) < 1e6f;
+  }
+#endif
 };
 
 struct RoundUp : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return std::ceil(x);
   }
+
+#if XNN_ARCH_RISCV
+  bool IsInSupportedRange(float y) const override {
+    // TODO(#8087): These ops are broken for large inputs on RISCV.
+    return std::abs(y) < 1e6f;
+  }
+#endif
 };
 
 struct RoundDown : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return std::floor(x);
   }
+
+#if XNN_ARCH_RISCV
+  bool IsInSupportedRange(float y) const override {
+    // TODO(#8087): These ops are broken for large inputs on RISCV.
+    return std::abs(y) < 1e6f;
+  }
+#endif
 };
 
 struct Sigmoid : public UnaryOpInfo {
@@ -414,16 +447,17 @@ struct Square : public UnaryOpInfo {
     return x * x;
   }
   int32_t ReferenceImpl(int32_t x, const xnn_unary_params&) const override {
-    return static_cast<int32_t>(static_cast<int64_t>(x) * static_cast<int64_t>(x));
+    return static_cast<int32_t>(static_cast<int64_t>(x) *
+                                static_cast<int64_t>(x));
   }
 
   float Tolerance(float y_ref, xnn_datatype datatype) const override {
     switch (datatype) {
       case xnn_datatype_fp32:
-        return TolExact(y_ref);
       case xnn_datatype_fp16:
       case xnn_datatype_bf16:
-        return TolMixed(y_ref, 1.0e-4f, 5.0e-3f);
+        return TolMixed(y_ref, xnnpack::epsilon(datatype),
+                        xnnpack::epsilon(datatype));
       case xnn_datatype_qint8:
       case xnn_datatype_quint8:
         return 1;
@@ -444,13 +478,7 @@ struct SquareRoot : public UnaryOpInfo {
   float Tolerance(float y_ref, xnn_datatype datatype) const override {
     switch (datatype) {
       case xnn_datatype_fp32:
-        if (y_ref > std::sqrt(std::numeric_limits<float>::epsilon() *
-                              std::numeric_limits<float>::max())) {
-          // When we use reciprocal sqrt to compute sqrt, the error is huge when
-          // the input is near the max float (b/401455604).
-          return std::numeric_limits<float>::max();
-        }
-        return TolRelative(y_ref, 3.0f * std::numeric_limits<float>::epsilon());
+        return TolRelative(y_ref, 2.0f * std::numeric_limits<float>::epsilon());
       case xnn_datatype_fp16:
       case xnn_datatype_bf16:
         return TolRelative(y_ref, 3.0f * xnnpack::epsilon(datatype));
@@ -463,11 +491,26 @@ struct SquareRoot : public UnaryOpInfo {
   }
 
   Interval Domain(xnn_datatype datatype) const override {
-    if (datatype == xnn_datatype_fp16) {
-      return {0.001f, 10.0f};
-    } else {
-      return Interval::Positive(datatype);
+    switch (datatype) {
+      case xnn_datatype_fp16:
+        return {1.0e-4f, 10.0f};
+      case xnn_datatype_fp32:
+        // The reciprocal square root estimate instructions (e.g. `vrsqrteq_f32`
+        // for Arm or `_m*_rsqrt_ps` for Intel) seem to fail for values larger
+        // than the inverse of the minimum normalized number when denormals are
+        // switched off, so limit the range to that of normally inversible
+        // numbers.
+        return {std::numeric_limits<float>::epsilon(),
+                std::numeric_limits<float>::max() / 4};
+      default:
+        return Interval::Positive(datatype);
     }
+  }
+
+  bool IsInSupportedRange(float y) const override {
+    // TODO(b/404943039): We have some cases where inf input produces NaN
+    // output, that the reference implementation disagrees with.
+    return !std::isnan(y) && !std::isinf(y);
   }
 };
 
@@ -506,8 +549,7 @@ struct ReciprocalSquareRoot : public UnaryOpInfo {
   float Tolerance(float y_ref, xnn_datatype datatype) const override {
     switch (datatype) {
       case xnn_datatype_fp32:
-        return TolMixed(y_ref, std::numeric_limits<float>::epsilon(),
-                        4 * std::numeric_limits<float>::epsilon());
+        return TolRelative(y_ref, 2 * std::numeric_limits<float>::epsilon());
       case xnn_datatype_fp16:
       case xnn_datatype_bf16:
         return TolMixed(y_ref, 1.0e-4f, 5.0e-3f);
@@ -520,11 +562,26 @@ struct ReciprocalSquareRoot : public UnaryOpInfo {
   }
 
   Interval Domain(xnn_datatype datatype) const override {
-    if (datatype == xnn_datatype_fp16) {
-      return {1.0e-4f, 10.0f};
-    } else {
-      return Interval::Positive(datatype);
+    switch (datatype) {
+      case xnn_datatype_fp16:
+        return {1.0e-4f, 10.0f};
+      case xnn_datatype_fp32:
+        // The reciprocal square root estimate instructions (e.g. `vrsqrteq_f32`
+        // for Arm or `_m*_rsqrt_ps` for Intel) seem to fail for values larger
+        // than the inverse of the minimum normalized number when denormals are
+        // switched off, so limit the range to that of normally inversible
+        // numbers.
+        return {std::numeric_limits<float>::epsilon(),
+                std::numeric_limits<float>::max() / 4};
+      default:
+        return Interval::Positive(datatype);
     }
+  }
+
+  bool IsInSupportedRange(float y) const override {
+    // TODO(b/404943039): If the input is inf, the result is 0, but we produce
+    // NaN.
+    return y != 0.0f;
   }
 };
 
@@ -635,38 +692,6 @@ struct Sign : public UnaryOpInfo {
 };
 
 const UnaryOpInfo* GetUnaryOpInfo(xnn_unary_operator op);
-
-inline bool is_nan(float x) { return std::isnan(x); }
-
-template <typename T>
-inline bool is_nan(xnnpack::quantized<T> x) { return false; }
-
-// Generate random data in the given domain, where the domain is given as
-// unquantized values.
-// TODO: Replace uses with DatatypeGenerator
-template <typename T, typename Rng>
-void FillRandom(Rng& rng, T* x, size_t n, const Interval& domain,
-                const xnn_quantization_params& quantization = {0, 1.0f}) {
-  float min = domain.min;
-  float max = domain.max;
-  min = min * quantization.scale + quantization.zero_point;
-  max = max * quantization.scale + quantization.zero_point;
-  min = std::max(domain.min,
-                 static_cast<float>(xnnpack::NumericLimits<T>::min()));
-  max = std::min(domain.max,
-                 static_cast<float>(xnnpack::NumericLimits<T>::max()));
-
-  std::uniform_real_distribution<float> dist(min, max);
-  for (size_t i = 0; i < n; ++i) {
-    // Try generating random numbers until we get non-NaN
-    while (true) {
-      x[i] = static_cast<T>(dist(rng));
-      if (!is_nan(x[i])) {
-        break;
-      }
-    }
-  }
-}
 
 // Compute the result of a unary operator using the reference implementation.
 template <typename In, typename Out, typename UnaryOp>

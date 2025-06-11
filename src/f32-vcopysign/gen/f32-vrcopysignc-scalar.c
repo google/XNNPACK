@@ -24,7 +24,7 @@ void xnn_f32_vrcopysignc_ukernel__scalar_u1(
     const float* sign,
     const float* mag,
     float* output,
-    const struct xnn_f32_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_default_params* unused_params)
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -54,7 +54,7 @@ void xnn_f32_vrcopysignc_ukernel__scalar_u2(
     const float* sign,
     const float* mag,
     float* output,
-    const struct xnn_f32_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_default_params* unused_params)
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -67,7 +67,7 @@ void xnn_f32_vrcopysignc_ukernel__scalar_u2(
   xnn_simd_f32_t vmag = xnn_abs_f32(xnn_set1_f32(*mag));
 
   for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
-    xnn_simd_f32_t vsign_0 = xnn_loadu_f32(sign);
+    xnn_simd_f32_t vsign_0 = xnn_loadu_f32(sign + 0 * xnn_simd_size_f32);
     xnn_simd_f32_t vsign_1 = xnn_loadu_f32(sign + 1 * xnn_simd_size_f32);
     sign += 2;
 
@@ -77,7 +77,7 @@ void xnn_f32_vrcopysignc_ukernel__scalar_u2(
     xnn_simd_f32_t vy_0 = xnn_or_f32(vsign_0, vmag);
     xnn_simd_f32_t vy_1 = xnn_or_f32(vsign_1, vmag);
 
-    xnn_storeu_f32(output, vy_0);
+    xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
     output += 2;
   }
@@ -99,7 +99,7 @@ void xnn_f32_vrcopysignc_ukernel__scalar_u4(
     const float* sign,
     const float* mag,
     float* output,
-    const struct xnn_f32_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_default_params* unused_params)
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -112,7 +112,7 @@ void xnn_f32_vrcopysignc_ukernel__scalar_u4(
   xnn_simd_f32_t vmag = xnn_abs_f32(xnn_set1_f32(*mag));
 
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
-    xnn_simd_f32_t vsign_0 = xnn_loadu_f32(sign);
+    xnn_simd_f32_t vsign_0 = xnn_loadu_f32(sign + 0 * xnn_simd_size_f32);
     xnn_simd_f32_t vsign_1 = xnn_loadu_f32(sign + 1 * xnn_simd_size_f32);
     xnn_simd_f32_t vsign_2 = xnn_loadu_f32(sign + 2 * xnn_simd_size_f32);
     xnn_simd_f32_t vsign_3 = xnn_loadu_f32(sign + 3 * xnn_simd_size_f32);
@@ -128,7 +128,7 @@ void xnn_f32_vrcopysignc_ukernel__scalar_u4(
     xnn_simd_f32_t vy_2 = xnn_or_f32(vsign_2, vmag);
     xnn_simd_f32_t vy_3 = xnn_or_f32(vsign_3, vmag);
 
-    xnn_storeu_f32(output, vy_0);
+    xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
     xnn_storeu_f32(output + 2 * xnn_simd_size_f32, vy_2);
     xnn_storeu_f32(output + 3 * xnn_simd_size_f32, vy_3);
@@ -152,7 +152,7 @@ void xnn_f32_vrcopysignc_ukernel__scalar_u8(
     const float* sign,
     const float* mag,
     float* output,
-    const struct xnn_f32_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_default_params* unused_params)
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -165,7 +165,7 @@ void xnn_f32_vrcopysignc_ukernel__scalar_u8(
   xnn_simd_f32_t vmag = xnn_abs_f32(xnn_set1_f32(*mag));
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    xnn_simd_f32_t vsign_0 = xnn_loadu_f32(sign);
+    xnn_simd_f32_t vsign_0 = xnn_loadu_f32(sign + 0 * xnn_simd_size_f32);
     xnn_simd_f32_t vsign_1 = xnn_loadu_f32(sign + 1 * xnn_simd_size_f32);
     xnn_simd_f32_t vsign_2 = xnn_loadu_f32(sign + 2 * xnn_simd_size_f32);
     xnn_simd_f32_t vsign_3 = xnn_loadu_f32(sign + 3 * xnn_simd_size_f32);
@@ -193,7 +193,7 @@ void xnn_f32_vrcopysignc_ukernel__scalar_u8(
     xnn_simd_f32_t vy_6 = xnn_or_f32(vsign_6, vmag);
     xnn_simd_f32_t vy_7 = xnn_or_f32(vsign_7, vmag);
 
-    xnn_storeu_f32(output, vy_0);
+    xnn_storeu_f32(output + 0 * xnn_simd_size_f32, vy_0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy_1);
     xnn_storeu_f32(output + 2 * xnn_simd_size_f32, vy_2);
     xnn_storeu_f32(output + 3 * xnn_simd_size_f32, vy_3);

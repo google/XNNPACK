@@ -1,0 +1,147 @@
+// Copyright 2019 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert ARCH in ("avx512f", "hvx")
+$SIMD_SIZE = {"scalar": 1, "sse2": 4, "neon": 4, "wasmsimd": 4, "avx": 8, "avx512f": 16, "hvx": 32}[ARCH]
+$assert CHANNEL_TILE % SIMD_SIZE == 0
+$assert KERNEL_TILE >= 2
+$assert ACCUMULATORS >= 1
+#include <assert.h>
+
+#include "src/xnnpack/simd/f32-${ARCH}.h"
+
+#include "src/xnnpack/dwconv.h"
+
+
+void xnn_f32_dwconv_minmax_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__${ARCH}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+    size_t channels,
+    size_t output_width,
+    const float** input,
+    const float* weights,
+    float* output,
+    intptr_t input_stride,
+    size_t output_increment,
+    size_t input_offset,
+    size_t input_pixel_stride,
+    const float* zero,
+    const struct xnn_f32_minmax_params* restrict params)
+{
+  assert(channels != 0);
+  assert(output_width != 0);
+
+  const xnn_simd_f32_t vmin = xnn_set1_f32(params->scalar.min);
+  const xnn_simd_f32_t vmax = xnn_set1_f32(params->scalar.max);
+  do {
+    $for K in range(KERNEL_TILE):
+      const float* i${K} = input[${K}];
+      assert(i${K} != NULL);
+      if XNN_UNPREDICTABLE(i${K} != zero) {
+        i${K} = (const float*) ((uintptr_t) i${K} + input_offset);
+      }
+    input = (const float**) ((uintptr_t) input + input_stride);
+
+    size_t c = channels;
+    const float* w = weights;
+    for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
+      $for C in range(0, CHANNEL_TILE, SIMD_SIZE):
+        xnn_simd_f32_t vacc${C}p0 = xnn_load_f32(w + ${C});
+
+      $for K in range(KERNEL_TILE):
+
+        $for C in range(0, CHANNEL_TILE, SIMD_SIZE):
+          const xnn_simd_f32_t vi${K}x${C} = xnn_loadu_f32(i${K} + ${C});
+        i${K} += ${CHANNEL_TILE};
+
+        $for C in range(0, CHANNEL_TILE, SIMD_SIZE):
+          const xnn_simd_f32_t vk${K}x${C} = xnn_load_f32(w + ${(K + 1) * CHANNEL_TILE + C});
+        $for C in range(0, CHANNEL_TILE, SIMD_SIZE):
+          $if 1 <= K < ACCUMULATORS:
+            xnn_simd_f32_t vacc${C}p${K} = xnn_mul_f32(vi${K}x${C}, vk${K}x${C});
+          $else:
+            vacc${C}p${K % ACCUMULATORS} = xnn_fmadd_f32(vi${K}x${C}, vk${K}x${C}, vacc${C}p${K % ACCUMULATORS});
+
+      w += ${(KERNEL_TILE + 1) * CHANNEL_TILE};
+
+      $if ACCUMULATORS > 1:
+        // Add up all accumulators to vacc0p0
+        $ACC_SLICE = 1
+        $while ACC_SLICE < ACCUMULATORS:
+          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+            $if A + ACC_SLICE < ACCUMULATORS:
+              $for C in range(0, CHANNEL_TILE, SIMD_SIZE):
+                vacc${C}p${A} = xnn_add_f32(vacc${C}p${A}, vacc${C}p${A + ACC_SLICE});
+          $ACC_SLICE *= 2
+
+      $for C in range(0, CHANNEL_TILE, SIMD_SIZE):
+        xnn_simd_f32_t vacc${C} = xnn_max_f32(vmin, vacc${C}p0);
+      $for C in range(0, CHANNEL_TILE, SIMD_SIZE):
+        vacc${C} = xnn_min_f32(vmax, vacc${C});
+
+      $for C in range(0, CHANNEL_TILE, SIMD_SIZE):
+        xnn_storeu_f32(output + ${C}, vacc${C});
+      output += ${CHANNEL_TILE};
+    }
+    $if CHANNEL_TILE > SIMD_SIZE:
+      for (; c >= ${SIMD_SIZE}; c -= ${SIMD_SIZE}) {
+        xnn_simd_f32_t vacc0p0 = xnn_load_f32(w);
+        $for K in range(KERNEL_TILE):
+
+          const xnn_simd_f32_t vi${K}x0 = xnn_loadu_f32(i${K});
+          i${K} += ${SIMD_SIZE};
+
+          const xnn_simd_f32_t vk${K}x0 = xnn_load_f32(w + ${(K + 1) * CHANNEL_TILE});
+          $if 1 <= K < ACCUMULATORS:
+            xnn_simd_f32_t vacc0p${K} = xnn_mul_f32(vi${K}x0, vk${K}x0);
+          $else:
+            vacc0p${K % ACCUMULATORS} = xnn_fmadd_f32(vi${K}x0, vk${K}x0, vacc0p${K % ACCUMULATORS});
+
+        w += ${SIMD_SIZE};
+
+        $if ACCUMULATORS > 1:
+          // Add up all accumulators to vacc0p0
+          $ACC_SLICE = 1
+          $while ACC_SLICE < ACCUMULATORS:
+            $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+              $if A + ACC_SLICE < ACCUMULATORS:
+                vacc0p${A} = xnn_add_f32(vacc0p${A}, vacc0p${A + ACC_SLICE});
+            $ACC_SLICE *= 2
+
+        xnn_simd_f32_t vacc0 = xnn_max_f32(vmin, vacc0p0);
+        vacc0 = xnn_min_f32(vmax, vacc0);
+
+        xnn_storeu_f32(output, vacc0);
+        output += ${SIMD_SIZE};
+      }
+    if XNN_UNLIKELY(c != 0) {
+      xnn_simd_f32_t vacc0p0 = xnn_load_tail_f32(w, c);
+      $for K in range(KERNEL_TILE):
+
+        const xnn_simd_f32_t vi${K}x0 = xnn_load_tail_f32(i${K}, c);
+        const xnn_simd_f32_t vk${K}x0 = xnn_load_tail_f32(w + ${(K + 1) * CHANNEL_TILE}, c);
+        $if 1 <= K < ACCUMULATORS:
+          xnn_simd_f32_t vacc0p${K} = xnn_mul_f32(vi${K}x0, vk${K}x0);
+        $else:
+          vacc0p${K % ACCUMULATORS} = xnn_fmadd_f32(vi${K}x0, vk${K}x0, vacc0p${K % ACCUMULATORS});
+
+      $if ACCUMULATORS > 1:
+        // Add up all accumulators to vacc0p0
+        $ACC_SLICE = 1
+        $while ACC_SLICE < ACCUMULATORS:
+          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+            $if A + ACC_SLICE < ACCUMULATORS:
+              vacc0p${A} = xnn_add_f32(vacc0p${A}, vacc0p${A + ACC_SLICE});
+          $ACC_SLICE *= 2
+
+      xnn_simd_f32_t vacc0 = xnn_max_f32(vmin, vacc0p0);
+      vacc0 = xnn_min_f32(vmax, vacc0);
+
+      xnn_store_tail_f32(output, vacc0, c);
+      output += c;
+    }
+
+    input_offset += input_pixel_stride;
+    output = (float*) ((uintptr_t) output + output_increment);
+  } while (--output_width != 0);
+}

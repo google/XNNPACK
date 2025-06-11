@@ -24,7 +24,7 @@ void xnn_${DATATYPE.lower()}_rsum_ukernel__wasmrelaxedsimd_u${CHANNEL_TILE}${ACC
     size_t batch,
     const ${XINT8_T}* input,
     ${XINT32_T}* output,
-    const struct xnn_qs8_rsum_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_qs8_rsum_params* restrict params) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(input != NULL);

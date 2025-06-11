@@ -88,4 +88,15 @@ static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
 #endif  // __AVX2__
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_cmpneq_f32(xnn_simd_f32_t a,
+                                                xnn_simd_f32_t b) {
+#ifdef __AVX2__
+  return _mm256_castsi256_ps(_mm256_xor_si256(
+      _mm256_cmpeq_epi32(_mm256_castps_si256(a), _mm256_castps_si256(a)),
+      _mm256_cmpeq_epi32(_mm256_castps_si256(a), _mm256_castps_si256(b))));
+#else
+  return _mm256_cmp_ps(a, b, _CMP_NEQ_OQ);
+#endif  // __AVX2__
+}
+
 #endif  // __XNNPACK_SRC_XNNPACK_SIMD_F32_FMA3_H_

@@ -3,12 +3,14 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <algorithm>
 #include <cassert>
+#include <chrono>
 #include <cstddef>
 #include <cstdlib>
+#include <random>
 #include <vector>
 
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
@@ -18,6 +20,13 @@
 #include "test/subgraph/subgraph-tester.h"
 
 namespace xnnpack {
+
+namespace {
+
+static const float kMaxR = 10.0f;
+static const float kMaxI = 1.0;
+
+};  // namespace
 
 template <typename T>
 Tensor<T> ReferenceImpl(Tensor<T> x, Tensor<T> w) {
@@ -61,7 +70,7 @@ void TestImpl() {
     return;
   }
 
-  for (int reshape = 0; reshape < 100; ++reshape) {
+  for (auto _ : FuzzTest(std::chrono::milliseconds(1000))) {
     std::vector<size_t> shape = random_shape(rng, 4);
     const size_t batch_size = shape[0];
     const size_t tokens = shape[1];
@@ -72,11 +81,10 @@ void TestImpl() {
         tokens + std::uniform_int_distribution<>(0, 10)(rng);
 
     // The last dimension is split into 2 dimensions {re, im}, channels
-    Tensor<T> input({batch_size, tokens, heads, 2, channels},
-                    PaddingBytes{XNN_EXTRA_BYTES});
-    Tensor<T> weights({max_tokens, 2, channels}, PaddingBytes{XNN_EXTRA_BYTES});
-    DatatypeGenerator<T> gen_r(1.0f, 10.0f);
-    DatatypeGenerator<T> gen_i(0.01f, 1.0f);
+    Tensor<T> input({batch_size, tokens, heads, 2, channels}, XnnExtraBytes);
+    Tensor<T> weights({max_tokens, 2, channels}, XnnExtraBytes);
+    DatatypeGenerator<T> gen_r(1.0f, kMaxR);
+    DatatypeGenerator<T> gen_i(0.01f, kMaxI);
     input.slice(3, 0).generate([&]() { return gen_r(rng); });
     input.slice(3, 1).generate([&]() { return gen_i(rng); });
     weights.slice(1, 0).generate([&]() { return gen_r(rng); });
@@ -97,10 +105,11 @@ void TestImpl() {
         .InvokeRuntime();
 
     // Verify results.
-    const float tolerance = 2.0f * xnnpack::epsilon(xnn_datatype_of<T>());
+    const float max_input_val = std::max(kMaxR, kMaxR);
+    const float abs_tol =
+        max_input_val * max_input_val * xnnpack::epsilon(xnn_datatype_of<T>());
     for (const auto& i : EnumerateIndices(output.extents())) {
-      ASSERT_NEAR(output(i), expected(i),
-                  tolerance * std::abs(static_cast<float>(expected(i))));
+      ASSERT_NEAR(output(i), expected(i), abs_tol);
     }
   }
 }

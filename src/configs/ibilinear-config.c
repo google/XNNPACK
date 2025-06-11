@@ -38,7 +38,7 @@ static void init_f16_ibilinear_config(void) {
       f16_ibilinear_config.ukernel = (xnn_ibilinear_ukernel_fn) xnn_f16_ibilinear_ukernel__neonfp16arith_c8;
       f16_ibilinear_config.pixel_tile = 1;
     }
-  #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
+  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_avx2) {
@@ -59,7 +59,7 @@ static void init_f32_ibilinear_config(void) {
     if (hardware_config->use_arm_neon) {
       f32_ibilinear_config.ukernel = (xnn_ibilinear_ukernel_fn) xnn_f32_ibilinear_ukernel__neon_c8;
       f32_ibilinear_config.pixel_tile = 1;
-    } else if (!XNN_PLATFORM_MOBILE) {
+    } else {
       f32_ibilinear_config.ukernel = (xnn_ibilinear_ukernel_fn) xnn_f32_ibilinear_ukernel__scalar_c2;
       f32_ibilinear_config.pixel_tile = 1;
     }
@@ -92,7 +92,7 @@ static void init_s8_ibilinear_config(void) {
     if (hardware_config->use_arm_neon) {
       s8_ibilinear_config.ukernel = (xnn_ibilinear_ukernel_fn) xnn_s8_ibilinear_ukernel__neon_c8;
       s8_ibilinear_config.pixel_tile = 1;
-    } else if (!XNN_PLATFORM_MOBILE) {
+    } else {
       s8_ibilinear_config.ukernel = (xnn_ibilinear_ukernel_fn) xnn_s8_ibilinear_ukernel__scalar_c1;
       s8_ibilinear_config.pixel_tile = 1;
     }
@@ -129,7 +129,7 @@ static void init_u8_ibilinear_config(void) {
     if (hardware_config->use_arm_neon) {
       u8_ibilinear_config.ukernel = (xnn_ibilinear_ukernel_fn) xnn_u8_ibilinear_ukernel__neon_c8;
       u8_ibilinear_config.pixel_tile = 1;
-    } else if (!XNN_PLATFORM_MOBILE) {
+    } else {
       u8_ibilinear_config.ukernel = (xnn_ibilinear_ukernel_fn) xnn_u8_ibilinear_ukernel__scalar_c1;
       u8_ibilinear_config.pixel_tile = 1;
     }

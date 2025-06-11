@@ -18,9 +18,9 @@ Usage example:
 bench/vunary_bench | tee /dev/stderr | tools/parse-microkernel-bench.py
 """
 
-from collections import defaultdict
+import collections
 import math
-from pathlib import Path
+import pathlib
 import re
 import sys
 
@@ -66,14 +66,14 @@ def to_seconds(time, units):
 
 
 def seconds_to_string(t):
-  if t < 1e-8:
-    s = "%0.1fns" % (t * 1e9)
-  elif t < 1e-5:
-    s = "%0.1fus" % (t * 1e6)
-  elif t < 1e-2:
-    s = "%0.1fms" % (t * 1e3)
+  if t < 1e-7:
+    s = "%5.1fns" % (t * 1e9)
+  elif t < 1e-4:
+    s = "%5.1fus" % (t * 1e6)
+  elif t < 1e-1:
+    s = "%5.1fms" % (t * 1e3)
   else:
-    s = "%0.1fs" % t
+    s = "%5.1fs" % t
 
   return s.rjust(5)
 
@@ -82,10 +82,10 @@ def ratio_to_string(t, best):
   r = t / best
   if r <= 1.01:
     s = seconds_to_string(t)
-  elif r < 10:
-    s = "%0.2fx" % r
+  elif r < 100:
+    s = "%6.2fx" % r
   else:
-    s = ">10x"
+    s = "  >100x"
 
   return color(r) + s.rjust(5) + RESET
 
@@ -94,7 +94,7 @@ def prod_kernels(ukernels):
   """Returns the set of kernels that are used in production."""
   result = set()
   try:
-    configs = (Path(__file__).parent.parent / "src/configs").glob("*.c")
+    configs = (pathlib.Path(__file__).parent.parent / "src/configs").glob("*.c")
     for path in configs:
       contents = path.read_text()
       for i in ukernels:
@@ -109,7 +109,7 @@ def prod_kernels(ukernels):
 r = re.compile(r"(.*ukernel[^/]*)/([\S]*)\s+(\d\S+) (\S+)\s+(\d\S+)\s+(\S+).*")
 
 # Gather the data into a dictionary {ukernel: {benchmark: time_seconds}}
-all_ukernels = defaultdict(dict)
+all_ukernels = collections.defaultdict(dict)
 for line in sys.stdin:
   m = r.match(line)
   if m:
@@ -141,13 +141,13 @@ while all_ukernels:
 
   # Make the table layout and header.
   ukernel_width = max([len(i) for i in ukernels.keys()]) + 5
-  table_format = "| {} | " + " | ".join(["{:>5}" for i in benchmarks]) + " |"
+  table_format = "| {} | " + " | ".join(["{:>7}" for i in benchmarks]) + " |"
   print(
       table_format.format(
           "ukernel".ljust(ukernel_width), *range(len(benchmarks))
       )
   )
-  print(table_format.format("-" * ukernel_width, *["-" * 5] * len(benchmarks)))
+  print(table_format.format("-" * ukernel_width, *["-" * 7] * len(benchmarks)))
 
   # Find the best time for each benchmark.
   bests = {}

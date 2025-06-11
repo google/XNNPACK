@@ -7,6 +7,5 @@
 ##################################### SIMD #####################################
 tools/xngen src/f16-vapproxgelu/rational-6-4.c.in -D ARCH=scalar -D BATCH_TILES=1,2,4,8 -o src/f16-vapproxgelu/gen/f16-vapproxgelu-scalar-rational-6-4-div.c &
 tools/xngen src/f16-vapproxgelu/rational-6-4.c.in -D ARCH=neonfp16arith -D BATCH_TILES=8,16,32 -o src/f16-vapproxgelu/gen/f16-vapproxgelu-neonfp16arith-rational-6-4-div.c &
-tools/xngen src/f16-vapproxgelu/rational-6-4.c.in -D ARCH=avx512fp16 -D BATCH_TILES=32,64,96 -o src/f16-vapproxgelu/gen/f16-vapproxgelu-avx512fp16-rational-6-4-div.c &
 
 wait

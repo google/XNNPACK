@@ -215,7 +215,6 @@ class BinaryElementwiseOperatorTester {
                            std::multiplies<size_t>());
   }
 
-
   BinaryElementwiseOperatorTester& input2_shape(
       std::vector<size_t> input2_shape) {
     assert(input2_shape.size() <= XNN_MAX_TENSOR_DIMS);
@@ -314,19 +313,21 @@ class BinaryElementwiseOperatorTester {
       output_dims[i] = std::max(input1_dims[i], input2_dims[i]);
     }
 
-    Tensor<T> input1(input1_shape(), {XNN_EXTRA_BYTES});
-    Tensor<T> input2(input2_shape(), {XNN_EXTRA_BYTES});
+    Tensor<T> input1(input1_shape(), XnnExtraBytes);
+    Tensor<T> input2(input2_shape(), XnnExtraBytes);
     broadcast_extent_1(input1);
     broadcast_extent_1(input2);
     Tensor<T> output(output_dims);
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      xnnpack::randomize_buffer(datatype(), rng, limits.min, limits.max, input1);
-      xnnpack::randomize_buffer(datatype(), rng, limits.min, limits.max, input2);
+      xnnpack::randomize_buffer(datatype(), rng, limits.min, limits.max,
+                                input1);
+      xnnpack::randomize_buffer(datatype(), rng, limits.min, limits.max,
+                                input2);
 
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       if (mode == RunMode::kCreateReshapeRun) {
         // Create, setup, run, and destroy a binary elementwise operator.
-        ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
         xnn_operator_t binary_elementwise_op = nullptr;
         xnn_status status = xnn_create_binary_elementwise_nd(
             operation_type(), xnn_datatype_of<T>(), &input1_quantization(),
@@ -549,14 +550,11 @@ TEST_P(BinaryNDTest, op) {
 }
 
 const xnn_datatype all_datatypes[] = {
-    xnn_datatype_quint8,
-    xnn_datatype_qint8,
+    xnn_datatype_quint8, xnn_datatype_qint8,
 #ifndef XNN_EXCLUDE_F16_TESTS
     xnn_datatype_fp16,
 #endif
-    xnn_datatype_bf16,
-    xnn_datatype_fp32,
-    xnn_datatype_int32,
+    xnn_datatype_bf16,   xnn_datatype_fp32,  xnn_datatype_int32,
 };
 
 const xnn_binary_operator all_binary_ops[] = {

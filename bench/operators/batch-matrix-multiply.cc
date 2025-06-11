@@ -49,8 +49,7 @@ void xnnpack_batch_matrix_multiply_f32(benchmark::State& state,
   const size_t input2_elements = batch_size * k * n;
   const size_t output_elements = batch_size * m * n;
 
-  xnnpack::Buffer<float> input1(input1_elements +
-                                XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> input1(input1_elements, xnnpack::XnnExtraBytes);
   std::generate(input1.begin(), input1.end(), std::ref(f32rng));
   xnnpack::Buffer<float> input2(input2_elements);
   std::generate(input2.begin(), input2.end(), std::ref(f32rng));
@@ -75,11 +74,10 @@ void xnnpack_batch_matrix_multiply_f32(benchmark::State& state,
   pthreadpool_t threadpool = pthreadpool_create(num_threads);
 
   size_t workspace_size = 0;
-  size_t workspace_alignment = 0;
   status = xnn_reshape_batch_matrix_multiply_nc_f32(
       op, /*num_batch_dims=*/1, /*batch_dims_a=*/&batch_size,
       /*batch_dims_b=*/&batch_size, m, k, n, &workspace_size,
-      &workspace_alignment, threadpool);
+      threadpool);
 
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape FP32 BatchMatrixMultiply operator");
@@ -145,16 +143,15 @@ void xnnpack_batch_matrix_multiply_qd8_f32_qc8w(benchmark::State& state,
   const size_t input2_elements = batch_size * k * n;
   const size_t output_elements = batch_size * m * n;
 
-  xnnpack::Buffer<int8_t> input1(input1_elements +
-                                 XNN_EXTRA_BYTES / sizeof(int8_t));
+  xnnpack::Buffer<int8_t> input1(input1_elements, xnnpack::XnnExtraBytes);
   xnnpack::fill_uniform_random_bits(input1.data(), input1.size(), rng);
   xnnpack::Buffer<int8_t> input2(input2_elements);
   xnnpack::fill_uniform_random_bits(input2.data(), input2.size(), rng);
   xnnpack::Buffer<float> output(output_elements);
 
   // Allocate and fill the quantization parameters.
-  xnnpack::Buffer<float> channelwise_scales(batch_size * n +
-                                            XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> channelwise_scales(batch_size * n,
+                                            xnnpack::XnnExtraBytes);
   std::generate(channelwise_scales.begin(), channelwise_scales.end(),
                 std::ref(f32rng));
   xnnpack::Buffer<xnn_quantization_params> quantization_params(

@@ -28,8 +28,8 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_5x4v__rvv(
     size_t a_offset,
     const int8_t* zero,
     const int8_t* zero_data,
-    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
-    const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_minmax_params* restrict params,
+    const struct xnn_qd8_quantization_params* restrict quantization_params)
 {
   assert(mr != 0);
   assert(mr <= 5);
@@ -186,11 +186,11 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_5x4v__rvv(
     vfpacc3 = __riscv_vfmin_vf_f32m4(vfpacc3, voutput_max, vl);
     vfpacc4 = __riscv_vfmin_vf_f32m4(vfpacc4, voutput_max, vl);
 
-    __riscv_vse32_v_f32m4(c0, vfpacc0, vl);
-    __riscv_vse32_v_f32m4(c1, vfpacc1, vl);
-    __riscv_vse32_v_f32m4(c2, vfpacc2, vl);
-    __riscv_vse32_v_f32m4(c3, vfpacc3, vl);
     __riscv_vse32_v_f32m4(c4, vfpacc4, vl);
+    __riscv_vse32_v_f32m4(c3, vfpacc3, vl);
+    __riscv_vse32_v_f32m4(c2, vfpacc2, vl);
+    __riscv_vse32_v_f32m4(c1, vfpacc1, vl);
+    __riscv_vse32_v_f32m4(c0, vfpacc0, vl);
 
     c4 = (float*) ((uintptr_t) c4 + cn_stride);
     c3 = (float*) ((uintptr_t) c3 + cn_stride);

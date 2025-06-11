@@ -9,6 +9,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <float.h>
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
@@ -18,7 +19,7 @@ void xnn_f16_qs8_vcvt_ukernel__scalar_imagic_u2(
     size_t batch,
     const xnn_float16* input,
     int8_t* output,
-    const struct xnn_f16_qs8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f16_qs8_cvt_params* restrict params)
 {
   assert(batch != 0);
   assert(batch % sizeof(xnn_float16) == 0);
@@ -26,7 +27,9 @@ void xnn_f16_qs8_vcvt_ukernel__scalar_imagic_u2(
   assert(output != NULL);
 
   const xnn_float16* i = input;
-  const float vscale = xnn_float16_to_float(params->scalar.scale);
+  // Don't let the scale be 0, which can happen for large scales, and should
+  // not happen because this value is a reciprocal.
+  const float vscale = math_max_f32(FLT_MIN, xnn_float16_to_float(params->scalar.scale));
   const float vmagic_bias = 12582912.0f;
   const float output_min_less_zero_point = (float) ((int32_t) -128 - (int32_t) params->scalar.output_zero_point);
   const float output_max_less_zero_point = (float) ((int32_t) 127 - (int32_t) params->scalar.output_zero_point);

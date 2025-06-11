@@ -11,6 +11,7 @@
 
 SET(PROD_AVX_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-avx-int16-u16.c
+  src/f32-avgpool/gen/f32-avgpool-9p-minmax-avx-u8.c
   src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-avx.c
   src/f32-dwconv/gen/f32-dwconv-4p16c-minmax-avx.c
   src/f32-dwconv/gen/f32-dwconv-9p16c-minmax-avx.c
@@ -30,8 +31,11 @@ SET(PROD_AVX_MICROKERNEL_SRCS
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x16-minmax-avx-broadcast.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-avx-u32.c
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-avx-u32.c
+  src/f32-rdminmax/gen/f32-rdmax-2p2x-avx-c32.c
+  src/f32-rdminmax/gen/f32-rdmin-2p2x-avx-c32.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx-c32.c
   src/f32-rminmax/gen/f32-rmax-avx-u32-acc4.c
+  src/f32-rminmax/gen/f32-rmin-avx-u32-acc4.c
   src/f32-rminmax/gen/f32-rminmax-avx-u32-acc4.c
   src/f32-rsum/gen/f32-rsum-avx-u32-acc4.c
   src/f32-vapproxgelu/gen/f32-vapproxgelu-avx-rational-12-10-div.c
@@ -54,23 +58,26 @@ SET(PROD_AVX_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vsqrdiffc-avx-u16.c
   src/f32-vbinary/gen/f32-vsub-avx-u16.c
   src/f32-vbinary/gen/f32-vsubc-avx-u16.c
-  src/f32-vclamp/gen/f32-vclamp-avx-u16.c
+  src/f32-vclamp/gen/f32-vclamp-avx.c
   src/f32-vcopysign/gen/f32-vcopysign-avx.c
   src/f32-vcopysign/gen/f32-vcopysignc-avx.c
   src/f32-vcopysign/gen/f32-vrcopysignc-avx.c
   src/f32-vcos/gen/f32-vcos-avx-rational-5-4-div.c
   src/f32-velu/gen/f32-velu-avx-rr2-lut4-p4-perm-u32.c
+  src/f32-vexp/gen/f32-vexp-avx-rational-3-2-div.c
   src/f32-vgelu/gen/f32-vgelu-avx-rational-12-10-div.c
-  src/f32-vhswish/gen/f32-vhswish-avx-u16.c
+  src/f32-vhswish/gen/f32-vhswish-avx.c
   src/f32-vlrelu/gen/f32-vlrelu-avx-u16.c
   src/f32-vrnd/gen/f32-vrndd-avx-u16.c
   src/f32-vrnd/gen/f32-vrndne-avx-u16.c
   src/f32-vrnd/gen/f32-vrndu-avx-u16.c
   src/f32-vrnd/gen/f32-vrndz-avx-u16.c
-  src/f32-vrsqrt/gen/f32-vrsqrt-avx-rsqrt-u16.c
+  src/f32-vrsqrt/gen/f32-vrsqrt-avx-rsqrt.c
+  src/f32-vrsqrt/gen/f32-vrsqrt-avx-sqrt.c
   src/f32-vsigmoid/gen/f32-vsigmoid-avx-rr2-p5-nr2-u16.c
   src/f32-vsin/gen/f32-vsin-avx-rational-5-4-div.c
-  src/f32-vsqrt/gen/f32-vsqrt-avx-rsqrt-u16.c
+  src/f32-vsqrt/gen/f32-vsqrt-avx-rsqrt.c
+  src/f32-vsqrt/gen/f32-vsqrt-avx-sqrt.c
   src/f32-vtanh/gen/f32-vtanh-avx-rational-9-8-div.c
   src/f32-vunary/gen/f32-vabs-avx.c
   src/f32-vunary/gen/f32-vneg-avx.c
@@ -178,8 +185,6 @@ SET(NON_PROD_AVX_MICROKERNEL_SRCS
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-avx-u8.c
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-avx-u16.c
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-avx-u24.c
-  src/f32-rdminmax/gen/f32-rdmax-2p2x-avx-c32.c
-  src/f32-rdminmax/gen/f32-rdmin-2p2x-avx-c32.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx-c16.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx-c64.c
   src/f32-rminmax/gen/f32-rmax-avx-u8.c
@@ -190,7 +195,6 @@ SET(NON_PROD_AVX_MICROKERNEL_SRCS
   src/f32-rminmax/gen/f32-rmin-avx-u16-acc2.c
   src/f32-rminmax/gen/f32-rmin-avx-u24-acc3.c
   src/f32-rminmax/gen/f32-rmin-avx-u32-acc2.c
-  src/f32-rminmax/gen/f32-rmin-avx-u32-acc4.c
   src/f32-rminmax/gen/f32-rminmax-avx-u8.c
   src/f32-rminmax/gen/f32-rminmax-avx-u16-acc2.c
   src/f32-rminmax/gen/f32-rminmax-avx-u24-acc3.c
@@ -218,7 +222,6 @@ SET(NON_PROD_AVX_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vsqrdiffc-avx-u8.c
   src/f32-vbinary/gen/f32-vsub-avx-u8.c
   src/f32-vbinary/gen/f32-vsubc-avx-u8.c
-  src/f32-vclamp/gen/f32-vclamp-avx-u8.c
   src/f32-velu/gen/f32-velu-avx-rr2-lut4-p4-perm-u8.c
   src/f32-velu/gen/f32-velu-avx-rr2-lut4-p4-perm-u16.c
   src/f32-velu/gen/f32-velu-avx-rr2-lut4-p4-perm-u24.c
@@ -230,16 +233,11 @@ SET(NON_PROD_AVX_MICROKERNEL_SRCS
   src/f32-velu/gen/f32-velu-avx-rr2-p6-u16.c
   src/f32-velu/gen/f32-velu-avx-rr2-p6-u24.c
   src/f32-velu/gen/f32-velu-avx-rr2-p6-u32.c
-  src/f32-vhswish/gen/f32-vhswish-avx-u8.c
   src/f32-vlrelu/gen/f32-vlrelu-avx-u8.c
-  src/f32-vrelu/gen/f32-vrelu-avx-u8.c
-  src/f32-vrelu/gen/f32-vrelu-avx-u16.c
   src/f32-vrnd/gen/f32-vrndd-avx-u8.c
   src/f32-vrnd/gen/f32-vrndne-avx-u8.c
   src/f32-vrnd/gen/f32-vrndu-avx-u8.c
   src/f32-vrnd/gen/f32-vrndz-avx-u8.c
-  src/f32-vrsqrt/gen/f32-vrsqrt-avx-rsqrt-u8.c
-  src/f32-vrsqrt/gen/f32-vrsqrt-avx-rsqrt-u32.c
   src/f32-vsigmoid/gen/f32-vsigmoid-avx-rr2-p5-div-u8.c
   src/f32-vsigmoid/gen/f32-vsigmoid-avx-rr2-p5-div-u16.c
   src/f32-vsigmoid/gen/f32-vsigmoid-avx-rr2-p5-div-u24.c
@@ -247,11 +245,6 @@ SET(NON_PROD_AVX_MICROKERNEL_SRCS
   src/f32-vsigmoid/gen/f32-vsigmoid-avx-rr2-p5-nr2-u8.c
   src/f32-vsigmoid/gen/f32-vsigmoid-avx-rr2-p5-nr2-u24.c
   src/f32-vsigmoid/gen/f32-vsigmoid-avx-rr2-p5-nr2-u32.c
-  src/f32-vsqrt/gen/f32-vsqrt-avx-rsqrt-u8.c
-  src/f32-vsqrt/gen/f32-vsqrt-avx-rsqrt-u32.c
-  src/f32-vsqrt/gen/f32-vsqrt-avx-sqrt-u8.c
-  src/f32-vsqrt/gen/f32-vsqrt-avx-sqrt-u16.c
-  src/f32-vsqrt/gen/f32-vsqrt-avx-sqrt-u32.c
   src/f32-vtanh/gen/f32-vtanh-avx-rational-9-8-nr.c
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-1x4c8-minmax-avx-ld64.c
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-2x4c8-minmax-avx-ld64.c

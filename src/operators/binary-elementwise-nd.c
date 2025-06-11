@@ -119,6 +119,10 @@ static const struct xnn_binary_elementwise_config* init_config(
           return xnn_init_f32_vprelu_config();
         case xnn_datatype_fp16:
           return xnn_init_f16_vprelu_config();
+        case xnn_datatype_qint8:
+          return xnn_init_qs8_vprelu_config();
+        case xnn_datatype_quint8:
+          return xnn_init_qu8_vprelu_config();
         default:
           return NULL;
       }
@@ -203,7 +207,7 @@ static enum xnn_status init_binary_elementwise_nd(
   }
 
   memcpy(&op->params, &uparams, sizeof(uparams));
-  memcpy(&op->params2, &uparams2, sizeof(uparams2));
+  memcpy(op->params2, &uparams2, sizeof(uparams2));
 
   op->binary_elementwise_config = config;
   op->binary_elementwise.log2_element_size =
@@ -235,6 +239,21 @@ enum xnn_status xnn_create_binary_elementwise_nd(
   if (op == NULL) {
     xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
                   sizeof(struct xnn_operator),
+                  xnn_binary_operator_to_string(type));
+    return xnn_status_out_of_memory;
+  }
+  op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
+  if (op->compute == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(struct compute_parameters),
+                  xnn_binary_operator_to_string(type));
+    return xnn_status_out_of_memory;
+  }
+  op->num_compute_invocations = 1;
+  op->params2 = xnn_allocate_zero_memory(sizeof(union xnn_params2));
+  if (op->params2 == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(union xnn_params2),
                   xnn_binary_operator_to_string(type));
     return xnn_status_out_of_memory;
   }
@@ -373,8 +392,8 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
         op->binary_elementwise_config->ropc_ukernel;
     compressed_a_shape = compressed_input2_shape;
     compressed_b_shape = compressed_input1_shape;
-    memcpy(&op->context.elementwise_binary.params, &op->params2.binary,
-           sizeof(op->params.binary));
+    memcpy(&op->context.elementwise_binary.params, op->params2,
+           sizeof(op->params2->binary));
   } else if (compressed_input2_shape[0] == 1) {
     op->context.elementwise_binary.ukernel =
         op->binary_elementwise_config->opc_ukernel;
@@ -401,7 +420,6 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
     y_stride *= compressed_output_shape[i];
   }
 
-  const size_t num_threads = pthreadpool_get_threads_count(threadpool);
   const size_t element_tile = op->binary_elementwise_config->element_tile;
   if (compressed_output_shape[5] == 1) {
     if (compressed_output_shape[4] == 1) {
@@ -415,45 +433,53 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
             op->context.elementwise_binary.y_stride[4] =
                 (1 << log2_element_size);
             op->context.elementwise_binary.elements = (1 << log2_element_size);
-            op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
-            op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t)
-                xnn_compute_elementwise_binary_1d_tile;
-            op->compute[0].range[0] =
-                compressed_output_shape[0] * (1 << log2_element_size);
-            op->compute[0].tile[0] =
-                max(element_tile,
-                    round_up_po2(op->compute[0].range[0] / num_threads,
-                                 (element_tile << log2_element_size)));
+            op->compute[0].type = xnn_parallelization_type_1d_tile_1d_dynamic;
+            op->compute[0].task_1d_tile_1d_dynamic =
+                (pthreadpool_task_1d_tile_1d_dynamic_t)
+                    xnn_compute_elementwise_binary_1d_tile;
+            op->compute[0].range[0] = compressed_output_shape[0]
+                                      << log2_element_size;
+            op->compute[0].tile[0] = element_tile << log2_element_size;
           } else {
-            op->compute[0].type = xnn_parallelization_type_1d;
-            op->compute[0].task_1d =
-                (pthreadpool_task_1d_t)xnn_compute_elementwise_binary_1d;
+            op->compute[0].type = xnn_parallelization_type_1d_tile_1d_dynamic;
+            op->compute[0].task_1d_tile_1d_dynamic =
+                (pthreadpool_task_1d_tile_1d_dynamic_t)
+                    xnn_compute_elementwise_binary_1d;
             op->compute[0].range[0] = compressed_output_shape[1];
+            op->compute[0].tile[0] = 1;
           }
         } else {
-          op->compute[0].type = xnn_parallelization_type_2d;
-          op->compute[0].task_2d =
-              (pthreadpool_task_2d_t)xnn_compute_elementwise_binary_2d;
+          op->compute[0].type = xnn_parallelization_type_2d_tile_1d_dynamic;
+          op->compute[0].task_2d_tile_1d_dynamic =
+              (pthreadpool_task_2d_tile_1d_dynamic_t)
+                  xnn_compute_elementwise_binary_2d;
           op->compute[0].range[0] = compressed_output_shape[2];
           op->compute[0].range[1] = compressed_output_shape[1];
+          op->compute[0].tile[0] = 1;
         }
       } else {
-        op->compute[0].type = xnn_parallelization_type_3d;
-        op->compute[0].task_3d =
-            (pthreadpool_task_3d_t)xnn_compute_elementwise_binary_3d;
+        op->compute[0].type = xnn_parallelization_type_3d_tile_2d_dynamic;
+        op->compute[0].task_3d_tile_2d_dynamic =
+            (pthreadpool_task_3d_tile_2d_dynamic_t)
+                xnn_compute_elementwise_binary_3d;
         op->compute[0].range[0] = compressed_output_shape[3];
         op->compute[0].range[1] = compressed_output_shape[2];
         op->compute[0].range[2] = compressed_output_shape[1];
+        op->compute[0].tile[0] = 1;
+        op->compute[0].tile[1] = 1;
       }
     } else {
-      op->compute[0].type = xnn_parallelization_type_4d;
-      op->compute[0].task_4d =
-          (pthreadpool_task_4d_t)xnn_compute_elementwise_binary_4d;
+      op->compute[0].type = xnn_parallelization_type_4d_tile_2d_dynamic;
+      op->compute[0].task_4d_tile_2d_dynamic =
+          (pthreadpool_task_4d_tile_2d_dynamic_t)
+              xnn_compute_elementwise_binary_4d;
       op->compute[0].range[0] = compressed_output_shape[4];
       op->compute[0].range[1] = compressed_output_shape[3];
       op->compute[0].range[2] = compressed_output_shape[2];
       op->compute[0].range[3] = compressed_output_shape[1];
-    }
+      op->compute[0].tile[0] = 1;
+      op->compute[0].tile[1] = 1;
+  }
   } else {
     op->compute[0].type = xnn_parallelization_type_5d;
     op->compute[0].task_5d =
@@ -512,11 +538,24 @@ enum xnn_status xnn_run_binary_elementwise_nd(
     void* output, pthreadpool_t threadpool) {
   struct xnn_operator op;
   memset(&op, 0, sizeof(op));
+  op.compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
+  if (op.compute == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(struct compute_parameters),
+                  xnn_binary_operator_to_string(type));
+    return xnn_status_out_of_memory;
+  }
+  op.num_compute_invocations = 1;
+  union xnn_params2 params2;
+  memset(&params2, 0, sizeof(params2));
+  op.params2 = &params2;
 
   enum xnn_status status = init_binary_elementwise_nd(
       &op, type, datatype, input1_quantization, input2_quantization,
       output_quantization, flags);
   if (status != xnn_status_success) {
+    op.params2 = NULL;
+    xnn_destroy_operator(&op);
     return status;
   }
 
@@ -524,13 +563,20 @@ enum xnn_status xnn_run_binary_elementwise_nd(
                                              num_input2_dims, input2_shape,
                                              threadpool);
   if (status != xnn_status_success) {
+    op.params2 = NULL;
+    xnn_destroy_operator(&op);
     return status;
   }
 
   status = xnn_setup_binary_elementwise_nd(&op, input1, input2, output);
   if (status != xnn_status_success) {
+    op.params2 = NULL;
+    xnn_destroy_operator(&op);
     return status;
   }
 
-  return xnn_run_operator(&op, threadpool);
+  status = xnn_run_operator(&op, threadpool);
+  op.params2 = NULL;
+  xnn_destroy_operator(&op);
+  return status;
 }
