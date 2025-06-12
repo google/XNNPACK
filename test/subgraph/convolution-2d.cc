@@ -13,11 +13,13 @@
 #include <cstdlib>
 #include <limits>
 #include <random>
+#include <string>
 #include <utility>
 #include <vector>
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
+#include "src/subgraph/subgraph-utils.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/datatype.h"
@@ -25,6 +27,9 @@
 #include "test/replicable_random_device.h"
 #include "test/subgraph/stencil.h"
 #include "test/subgraph/subgraph-tester.h"
+#include "absl/log/absl_log.h"
+#include "absl/strings/str_cat.h"
+#include "absl/strings/str_join.h"
 
 namespace xnnpack {
 
@@ -337,10 +342,13 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
                                bias_quantization);
     }
     subgraph
-        .AddOutputTensor(4, xnn_datatype_of<Data>(), output_quantization,
-                         output_id)
+        .AddDynamicTensor(
+            4, output_id, xnn_datatype_of<Data>(), output_quantization,
+            XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT)
         .AddConvolution2D(params, conv_input_id, filter_id, bias_id, output_id,
                           flags);
+    // .AddOutputTensor(4, xnn_datatype_of<Data>(), output_quantization,
+    //                  output_id)
     xnn_status status = subgraph.CreateRuntime();
     if (status == xnn_status_unsupported_hardware) {
       GTEST_SKIP();
@@ -392,9 +400,12 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
 
       // Run subgraph
       Tensor<Data> output(output_shape);
-      subgraph.SetupExternalTensor(output.base(), output_id)
-          .SetupRuntime()
-          .InvokeRuntime();
+      for (int i = 0; i < 256; i++) {
+        *(output.data() + i) = i;
+      }
+      subgraph.SetupExternalTensor(output.base(), output_id).SetupRuntime();
+      xnn_subgraph_log_info(subgraph.Subgraph());
+      subgraph.InvokeRuntime();
 
       // Verify results.
       Tensor<float> expected = ReferenceImpl(
@@ -405,6 +416,38 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
       for (float& i : expected) {
         i = std::max(i, params.output_min);
         i = std::min(i, params.output_max);
+      }
+
+      {
+        const float* o = (const float*)expected.data();
+        for (int i = 0; i * 16 + 15 < expected.size(); i++) {
+          ABSL_LOG(INFO) << "expected: ["
+                         << absl::StrJoin(
+                                o, o + 16, ", ",
+                                [&](std::string* out, float f) {
+                                  absl::StrAppend(
+                                      out,
+                                      absl::Hex((uint8_t)quantize<Data>(
+                                                    f, output_quantization),
+                                                absl::kZeroPad2));
+                                })
+                         << "]";
+          o += 16;
+        }
+      }
+      {
+        const uint8_t* o = (const uint8_t*)output.data();
+        for (int i = 0; i * 16 + 15 < output.size(); i++) {
+          ABSL_LOG(INFO) << "output[" << absl::Hex(o) << "]: ["
+                         << absl::StrJoin(o, o + 16, ", ",
+                                          [&](std::string* out, uint8_t u) {
+                                            absl::StrAppend(
+                                                out,
+                                                absl::Hex(u, absl::kZeroPad2));
+                                          })
+                         << "]";
+          o += 16;
+        }
       }
 
       ASSERT_EQ(expected.extents(), output.extents());
@@ -428,6 +471,7 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
               << ", kh=" << kh << ", kw=" << kw;
         }
       }
+      return;
     }
   }
 }

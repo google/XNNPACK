@@ -98,9 +98,18 @@ struct xnn_avgpool_config {
 };
 
 struct xnn_pack_lh_config {
-  xnn_pack_lh_ukernel_fn ukernel;
-  xnn_pack_lh_size_fn size_fn;
-  xnn_pack_lh_offset_fn offset_fn;
+  union {
+    struct {
+      xnn_pack_lh_ukernel_fn ukernel;
+      xnn_pack_lh_size_fn size_fn;
+      xnn_pack_lh_offset_fn offset_fn;
+    };
+    struct {
+      xnn_pack_lh_igemm_ukernel_fn igemm_ukernel;
+      xnn_pack_lh_igemm_size_fn igemm_size_fn;
+      xnn_pack_lh_igemm_offset_fn igemm_offset_fn;
+    };
+  };
   uint32_t log2_input_element_size;
   uint32_t log2_packed_element_size;
   bool gemv_noop;
