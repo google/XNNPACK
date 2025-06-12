@@ -13,7 +13,7 @@
 #include "bench/utils.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/gemm.h"
-#include "src/xnnpack/hardware-config.h"
+#include "src/xnnpack/isa-checks.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/pack.h"
@@ -27,7 +27,7 @@
       xnn_init_qu8_conv_minmax_fp32_scalar_params,
       xnn_pack_qu8_gemm_goi_w,
       /*mr=*/1, /*nr=*/4 * xnn_init_hardware_config()->vlenb / sizeof(int32_t), /*kr=*/1, /*sr=*/1,
-      benchmark::utils::CheckRVV);
+      /*arch_flags=*/xnn_arch_riscv_vector);
   }
 
   BENCHMARK_GEMM(qu8_gemm_minmax_fp32_ukernel_1x4v__rvv)
@@ -38,7 +38,7 @@
       xnn_init_qu8_conv_minmax_fp32_scalar_params,
       xnn_pack_qu8_gemm_goi_w,
       /*mr=*/4, /*nr=*/4 * xnn_init_hardware_config()->vlenb / sizeof(int32_t), /*kr=*/1, /*sr=*/1,
-      benchmark::utils::CheckRVV);
+      /*arch_flags=*/xnn_arch_riscv_vector);
   }
 
   BENCHMARK_GEMM(qu8_gemm_minmax_fp32_ukernel_4x4v__rvv)
@@ -49,7 +49,7 @@
       xnn_init_qu8_conv_minmax_fp32_scalar_params,
       xnn_pack_qu8_gemm_goi_w,
       /*mr=*/7, /*nr=*/4 * xnn_init_hardware_config()->vlenb / sizeof(int32_t), /*kr=*/1, /*sr=*/1,
-      benchmark::utils::CheckRVV);
+      /*arch_flags=*/xnn_arch_riscv_vector);
   }
 
   BENCHMARK_GEMM(qu8_gemm_minmax_fp32_ukernel_7x4v__rvv)
