@@ -682,7 +682,7 @@ size_t get_tensor_size(const struct xnn_gemm_config* gemm_config, enum xnn_value
   // Round size up to the nearest byte.
   // TODO: We should not be using this helper for non-byte-addressable types,
   // perhaps we should just assert here.
-  return round_up_po2(size_bits, 8) >> 3;
+  return (size_bits + 7) >> 3;
 }
 
 size_t xnn_runtime_tensor_get_size(const struct xnn_runtime_value* value)
