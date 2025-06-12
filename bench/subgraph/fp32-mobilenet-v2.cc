@@ -13,7 +13,9 @@
 #include <iostream>
 #include <limits>
 #include <random>
+#include <vector>
 
+#include "bench/subgraph/models.h"
 #include "include/xnnpack.h"
 
 // align a size up to XNN_EXTRA_BYTES
@@ -31,7 +33,7 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  std::random_device random_device;
+  std::random_device random_device;  // NOLINT(runtime/random_device)
   auto rng = std::mt19937(random_device());
 
   uint32_t v0 = XNN_INVALID_VALUE_ID;
@@ -704,8 +706,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(864, float)>
-      w67_data;
+  static std::vector<float> w67_data;
+  w67_data.resize(XNN_PAD_EXTRA_BYTES(864, float));
   uint32_t w67 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w67_dims = {{32, 3, 3, 3}};
   status = xnn_define_tensor_value(
@@ -716,7 +718,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(32, float)> w68_data;
+  static std::vector<float> w68_data;
+  w68_data.resize(XNN_PAD_EXTRA_BYTES(32, float));
   uint32_t w68 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w68_dims = {{32}};
   status = xnn_define_tensor_value(
@@ -727,8 +730,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(288, float)>
-      w69_data;
+  static std::vector<float> w69_data;
+  w69_data.resize(XNN_PAD_EXTRA_BYTES(288, float));
   uint32_t w69 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w69_dims = {{1, 3, 3, 32}};
   status = xnn_define_tensor_value(
@@ -739,7 +742,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(32, float)> w70_data;
+  static std::vector<float> w70_data;
+  w70_data.resize(XNN_PAD_EXTRA_BYTES(32, float));
   uint32_t w70 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w70_dims = {{32}};
   status = xnn_define_tensor_value(
@@ -750,8 +754,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(512, float)>
-      w71_data;
+  static std::vector<float> w71_data;
+  w71_data.resize(XNN_PAD_EXTRA_BYTES(512, float));
   uint32_t w71 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w71_dims = {{16, 1, 1, 32}};
   status = xnn_define_tensor_value(
@@ -762,7 +766,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(16, float)> w72_data;
+  static std::vector<float> w72_data;
+  w72_data.resize(XNN_PAD_EXTRA_BYTES(16, float));
   uint32_t w72 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w72_dims = {{16}};
   status = xnn_define_tensor_value(
@@ -773,8 +778,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(1536, float)>
-      w73_data;
+  static std::vector<float> w73_data;
+  w73_data.resize(XNN_PAD_EXTRA_BYTES(1536, float));
   uint32_t w73 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w73_dims = {{96, 1, 1, 16}};
   status = xnn_define_tensor_value(
@@ -785,7 +790,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(96, float)> w74_data;
+  static std::vector<float> w74_data;
+  w74_data.resize(XNN_PAD_EXTRA_BYTES(96, float));
   uint32_t w74 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w74_dims = {{96}};
   status = xnn_define_tensor_value(
@@ -796,8 +802,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(864, float)>
-      w75_data;
+  static std::vector<float> w75_data;
+  w75_data.resize(XNN_PAD_EXTRA_BYTES(864, float));
   uint32_t w75 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w75_dims = {{1, 3, 3, 96}};
   status = xnn_define_tensor_value(
@@ -808,7 +814,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(96, float)> w76_data;
+  static std::vector<float> w76_data;
+  w76_data.resize(XNN_PAD_EXTRA_BYTES(96, float));
   uint32_t w76 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w76_dims = {{96}};
   status = xnn_define_tensor_value(
@@ -819,8 +826,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(2304, float)>
-      w77_data;
+  static std::vector<float> w77_data;
+  w77_data.resize(XNN_PAD_EXTRA_BYTES(2304, float));
   uint32_t w77 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w77_dims = {{24, 1, 1, 96}};
   status = xnn_define_tensor_value(
@@ -831,7 +838,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(24, float)> w78_data;
+  static std::vector<float> w78_data;
+  w78_data.resize(XNN_PAD_EXTRA_BYTES(24, float));
   uint32_t w78 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w78_dims = {{24}};
   status = xnn_define_tensor_value(
@@ -842,8 +850,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(3456, float)>
-      w79_data;
+  static std::vector<float> w79_data;
+  w79_data.resize(XNN_PAD_EXTRA_BYTES(3456, float));
   uint32_t w79 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w79_dims = {{144, 1, 1, 24}};
   status = xnn_define_tensor_value(
@@ -854,8 +862,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(144, float)>
-      w80_data;
+  static std::vector<float> w80_data;
+  w80_data.resize(XNN_PAD_EXTRA_BYTES(144, float));
   uint32_t w80 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w80_dims = {{144}};
   status = xnn_define_tensor_value(
@@ -866,8 +874,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(1296, float)>
-      w81_data;
+  static std::vector<float> w81_data;
+  w81_data.resize(XNN_PAD_EXTRA_BYTES(1296, float));
   uint32_t w81 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w81_dims = {{1, 3, 3, 144}};
   status = xnn_define_tensor_value(
@@ -878,8 +886,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(144, float)>
-      w82_data;
+  static std::vector<float> w82_data;
+  w82_data.resize(XNN_PAD_EXTRA_BYTES(144, float));
   uint32_t w82 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w82_dims = {{144}};
   status = xnn_define_tensor_value(
@@ -890,8 +898,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(3456, float)>
-      w83_data;
+  static std::vector<float> w83_data;
+  w83_data.resize(XNN_PAD_EXTRA_BYTES(3456, float));
   uint32_t w83 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w83_dims = {{24, 1, 1, 144}};
   status = xnn_define_tensor_value(
@@ -902,7 +910,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(24, float)> w84_data;
+  static std::vector<float> w84_data;
+  w84_data.resize(XNN_PAD_EXTRA_BYTES(24, float));
   uint32_t w84 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w84_dims = {{24}};
   status = xnn_define_tensor_value(
@@ -913,8 +922,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(3456, float)>
-      w85_data;
+  static std::vector<float> w85_data;
+  w85_data.resize(XNN_PAD_EXTRA_BYTES(3456, float));
   uint32_t w85 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w85_dims = {{144, 1, 1, 24}};
   status = xnn_define_tensor_value(
@@ -925,8 +934,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(144, float)>
-      w86_data;
+  static std::vector<float> w86_data;
+  w86_data.resize(XNN_PAD_EXTRA_BYTES(144, float));
   uint32_t w86 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w86_dims = {{144}};
   status = xnn_define_tensor_value(
@@ -937,8 +946,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(1296, float)>
-      w87_data;
+  static std::vector<float> w87_data;
+  w87_data.resize(XNN_PAD_EXTRA_BYTES(1296, float));
   uint32_t w87 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w87_dims = {{1, 3, 3, 144}};
   status = xnn_define_tensor_value(
@@ -949,8 +958,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(144, float)>
-      w88_data;
+  static std::vector<float> w88_data;
+  w88_data.resize(XNN_PAD_EXTRA_BYTES(144, float));
   uint32_t w88 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w88_dims = {{144}};
   status = xnn_define_tensor_value(
@@ -961,8 +970,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(4608, float)>
-      w89_data;
+  static std::vector<float> w89_data;
+  w89_data.resize(XNN_PAD_EXTRA_BYTES(4608, float));
   uint32_t w89 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w89_dims = {{32, 1, 1, 144}};
   status = xnn_define_tensor_value(
@@ -973,7 +982,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(32, float)> w90_data;
+  static std::vector<float> w90_data;
+  w90_data.resize(XNN_PAD_EXTRA_BYTES(32, float));
   uint32_t w90 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w90_dims = {{32}};
   status = xnn_define_tensor_value(
@@ -984,8 +994,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(6144, float)>
-      w91_data;
+  static std::vector<float> w91_data;
+  w91_data.resize(XNN_PAD_EXTRA_BYTES(6144, float));
   uint32_t w91 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w91_dims = {{192, 1, 1, 32}};
   status = xnn_define_tensor_value(
@@ -996,8 +1006,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(192, float)>
-      w92_data;
+  static std::vector<float> w92_data;
+  w92_data.resize(XNN_PAD_EXTRA_BYTES(192, float));
   uint32_t w92 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w92_dims = {{192}};
   status = xnn_define_tensor_value(
@@ -1008,8 +1018,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(1728, float)>
-      w93_data;
+  static std::vector<float> w93_data;
+  w93_data.resize(XNN_PAD_EXTRA_BYTES(1728, float));
   uint32_t w93 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w93_dims = {{1, 3, 3, 192}};
   status = xnn_define_tensor_value(
@@ -1020,8 +1030,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(192, float)>
-      w94_data;
+  static std::vector<float> w94_data;
+  w94_data.resize(XNN_PAD_EXTRA_BYTES(192, float));
   uint32_t w94 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w94_dims = {{192}};
   status = xnn_define_tensor_value(
@@ -1032,8 +1042,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(6144, float)>
-      w95_data;
+  static std::vector<float> w95_data;
+  w95_data.resize(XNN_PAD_EXTRA_BYTES(6144, float));
   uint32_t w95 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w95_dims = {{32, 1, 1, 192}};
   status = xnn_define_tensor_value(
@@ -1044,7 +1054,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(32, float)> w96_data;
+  static std::vector<float> w96_data;
+  w96_data.resize(XNN_PAD_EXTRA_BYTES(32, float));
   uint32_t w96 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w96_dims = {{32}};
   status = xnn_define_tensor_value(
@@ -1055,8 +1066,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(6144, float)>
-      w97_data;
+  static std::vector<float> w97_data;
+  w97_data.resize(XNN_PAD_EXTRA_BYTES(6144, float));
   uint32_t w97 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w97_dims = {{192, 1, 1, 32}};
   status = xnn_define_tensor_value(
@@ -1067,8 +1078,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(192, float)>
-      w98_data;
+  static std::vector<float> w98_data;
+  w98_data.resize(XNN_PAD_EXTRA_BYTES(192, float));
   uint32_t w98 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w98_dims = {{192}};
   status = xnn_define_tensor_value(
@@ -1079,8 +1090,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(1728, float)>
-      w99_data;
+  static std::vector<float> w99_data;
+  w99_data.resize(XNN_PAD_EXTRA_BYTES(1728, float));
   uint32_t w99 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w99_dims = {{1, 3, 3, 192}};
   status = xnn_define_tensor_value(
@@ -1091,8 +1102,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(192, float)>
-      w100_data;
+  static std::vector<float> w100_data;
+  w100_data.resize(XNN_PAD_EXTRA_BYTES(192, float));
   uint32_t w100 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w100_dims = {{192}};
   status = xnn_define_tensor_value(
@@ -1103,8 +1114,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(6144, float)>
-      w101_data;
+  static std::vector<float> w101_data;
+  w101_data.resize(XNN_PAD_EXTRA_BYTES(6144, float));
   uint32_t w101 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w101_dims = {{32, 1, 1, 192}};
   status = xnn_define_tensor_value(
@@ -1115,8 +1126,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(32, float)>
-      w102_data;
+  static std::vector<float> w102_data;
+  w102_data.resize(XNN_PAD_EXTRA_BYTES(32, float));
   uint32_t w102 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w102_dims = {{32}};
   status = xnn_define_tensor_value(
@@ -1127,8 +1138,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(6144, float)>
-      w103_data;
+  static std::vector<float> w103_data;
+  w103_data.resize(XNN_PAD_EXTRA_BYTES(6144, float));
   uint32_t w103 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w103_dims = {{192, 1, 1, 32}};
   status = xnn_define_tensor_value(
@@ -1139,8 +1150,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(192, float)>
-      w104_data;
+  static std::vector<float> w104_data;
+  w104_data.resize(XNN_PAD_EXTRA_BYTES(192, float));
   uint32_t w104 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w104_dims = {{192}};
   status = xnn_define_tensor_value(
@@ -1151,8 +1162,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(1728, float)>
-      w105_data;
+  static std::vector<float> w105_data;
+  w105_data.resize(XNN_PAD_EXTRA_BYTES(1728, float));
   uint32_t w105 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w105_dims = {{1, 3, 3, 192}};
   status = xnn_define_tensor_value(
@@ -1163,8 +1174,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(192, float)>
-      w106_data;
+  static std::vector<float> w106_data;
+  w106_data.resize(XNN_PAD_EXTRA_BYTES(192, float));
   uint32_t w106 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w106_dims = {{192}};
   status = xnn_define_tensor_value(
@@ -1175,8 +1186,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(12288, float)>
-      w107_data;
+  static std::vector<float> w107_data;
+  w107_data.resize(XNN_PAD_EXTRA_BYTES(12288, float));
   uint32_t w107 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w107_dims = {{64, 1, 1, 192}};
   status = xnn_define_tensor_value(
@@ -1187,8 +1198,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(64, float)>
-      w108_data;
+  static std::vector<float> w108_data;
+  w108_data.resize(XNN_PAD_EXTRA_BYTES(64, float));
   uint32_t w108 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w108_dims = {{64}};
   status = xnn_define_tensor_value(
@@ -1199,8 +1210,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(24576, float)>
-      w109_data;
+  static std::vector<float> w109_data;
+  w109_data.resize(XNN_PAD_EXTRA_BYTES(24576, float));
   uint32_t w109 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w109_dims = {{384, 1, 1, 64}};
   status = xnn_define_tensor_value(
@@ -1211,8 +1222,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(384, float)>
-      w110_data;
+  static std::vector<float> w110_data;
+  w110_data.resize(XNN_PAD_EXTRA_BYTES(384, float));
   uint32_t w110 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w110_dims = {{384}};
   status = xnn_define_tensor_value(
@@ -1223,8 +1234,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(3456, float)>
-      w111_data;
+  static std::vector<float> w111_data;
+  w111_data.resize(XNN_PAD_EXTRA_BYTES(3456, float));
   uint32_t w111 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w111_dims = {{1, 3, 3, 384}};
   status = xnn_define_tensor_value(
@@ -1235,8 +1246,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(384, float)>
-      w112_data;
+  static std::vector<float> w112_data;
+  w112_data.resize(XNN_PAD_EXTRA_BYTES(384, float));
   uint32_t w112 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w112_dims = {{384}};
   status = xnn_define_tensor_value(
@@ -1247,8 +1258,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(24576, float)>
-      w113_data;
+  static std::vector<float> w113_data;
+  w113_data.resize(XNN_PAD_EXTRA_BYTES(24576, float));
   uint32_t w113 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w113_dims = {{64, 1, 1, 384}};
   status = xnn_define_tensor_value(
@@ -1259,8 +1270,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(64, float)>
-      w114_data;
+  static std::vector<float> w114_data;
+  w114_data.resize(XNN_PAD_EXTRA_BYTES(64, float));
   uint32_t w114 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w114_dims = {{64}};
   status = xnn_define_tensor_value(
@@ -1271,8 +1282,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(24576, float)>
-      w115_data;
+  static std::vector<float> w115_data;
+  w115_data.resize(XNN_PAD_EXTRA_BYTES(24576, float));
   uint32_t w115 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w115_dims = {{384, 1, 1, 64}};
   status = xnn_define_tensor_value(
@@ -1283,8 +1294,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(384, float)>
-      w116_data;
+  static std::vector<float> w116_data;
+  w116_data.resize(XNN_PAD_EXTRA_BYTES(384, float));
   uint32_t w116 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w116_dims = {{384}};
   status = xnn_define_tensor_value(
@@ -1295,8 +1306,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(3456, float)>
-      w117_data;
+  static std::vector<float> w117_data;
+  w117_data.resize(XNN_PAD_EXTRA_BYTES(3456, float));
   uint32_t w117 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w117_dims = {{1, 3, 3, 384}};
   status = xnn_define_tensor_value(
@@ -1307,8 +1318,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(384, float)>
-      w118_data;
+  static std::vector<float> w118_data;
+  w118_data.resize(XNN_PAD_EXTRA_BYTES(384, float));
   uint32_t w118 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w118_dims = {{384}};
   status = xnn_define_tensor_value(
@@ -1319,8 +1330,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(24576, float)>
-      w119_data;
+  static std::vector<float> w119_data;
+  w119_data.resize(XNN_PAD_EXTRA_BYTES(24576, float));
   uint32_t w119 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w119_dims = {{64, 1, 1, 384}};
   status = xnn_define_tensor_value(
@@ -1331,8 +1342,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(64, float)>
-      w120_data;
+  static std::vector<float> w120_data;
+  w120_data.resize(XNN_PAD_EXTRA_BYTES(64, float));
   uint32_t w120 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w120_dims = {{64}};
   status = xnn_define_tensor_value(
@@ -1343,8 +1354,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(24576, float)>
-      w121_data;
+  static std::vector<float> w121_data;
+  w121_data.resize(XNN_PAD_EXTRA_BYTES(24576, float));
   uint32_t w121 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w121_dims = {{384, 1, 1, 64}};
   status = xnn_define_tensor_value(
@@ -1355,8 +1366,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(384, float)>
-      w122_data;
+  static std::vector<float> w122_data;
+  w122_data.resize(XNN_PAD_EXTRA_BYTES(384, float));
   uint32_t w122 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w122_dims = {{384}};
   status = xnn_define_tensor_value(
@@ -1367,8 +1378,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(3456, float)>
-      w123_data;
+  static std::vector<float> w123_data;
+  w123_data.resize(XNN_PAD_EXTRA_BYTES(3456, float));
   uint32_t w123 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w123_dims = {{1, 3, 3, 384}};
   status = xnn_define_tensor_value(
@@ -1379,8 +1390,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(384, float)>
-      w124_data;
+  static std::vector<float> w124_data;
+  w124_data.resize(XNN_PAD_EXTRA_BYTES(384, float));
   uint32_t w124 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w124_dims = {{384}};
   status = xnn_define_tensor_value(
@@ -1391,8 +1402,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(24576, float)>
-      w125_data;
+  static std::vector<float> w125_data;
+  w125_data.resize(XNN_PAD_EXTRA_BYTES(24576, float));
   uint32_t w125 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w125_dims = {{64, 1, 1, 384}};
   status = xnn_define_tensor_value(
@@ -1403,8 +1414,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(64, float)>
-      w126_data;
+  static std::vector<float> w126_data;
+  w126_data.resize(XNN_PAD_EXTRA_BYTES(64, float));
   uint32_t w126 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w126_dims = {{64}};
   status = xnn_define_tensor_value(
@@ -1415,8 +1426,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(24576, float)>
-      w127_data;
+  static std::vector<float> w127_data;
+  w127_data.resize(XNN_PAD_EXTRA_BYTES(24576, float));
   uint32_t w127 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w127_dims = {{384, 1, 1, 64}};
   status = xnn_define_tensor_value(
@@ -1427,8 +1438,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(384, float)>
-      w128_data;
+  static std::vector<float> w128_data;
+  w128_data.resize(XNN_PAD_EXTRA_BYTES(384, float));
   uint32_t w128 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w128_dims = {{384}};
   status = xnn_define_tensor_value(
@@ -1439,8 +1450,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(3456, float)>
-      w129_data;
+  static std::vector<float> w129_data;
+  w129_data.resize(XNN_PAD_EXTRA_BYTES(3456, float));
   uint32_t w129 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w129_dims = {{1, 3, 3, 384}};
   status = xnn_define_tensor_value(
@@ -1451,8 +1462,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(384, float)>
-      w130_data;
+  static std::vector<float> w130_data;
+  w130_data.resize(XNN_PAD_EXTRA_BYTES(384, float));
   uint32_t w130 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w130_dims = {{384}};
   status = xnn_define_tensor_value(
@@ -1463,8 +1474,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(36864, float)>
-      w131_data;
+  static std::vector<float> w131_data;
+  w131_data.resize(XNN_PAD_EXTRA_BYTES(36864, float));
   uint32_t w131 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w131_dims = {{96, 1, 1, 384}};
   status = xnn_define_tensor_value(
@@ -1475,8 +1486,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(96, float)>
-      w132_data;
+  static std::vector<float> w132_data;
+  w132_data.resize(XNN_PAD_EXTRA_BYTES(96, float));
   uint32_t w132 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w132_dims = {{96}};
   status = xnn_define_tensor_value(
@@ -1487,8 +1498,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(55296, float)>
-      w133_data;
+  static std::vector<float> w133_data;
+  w133_data.resize(XNN_PAD_EXTRA_BYTES(55296, float));
   uint32_t w133 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w133_dims = {{576, 1, 1, 96}};
   status = xnn_define_tensor_value(
@@ -1499,8 +1510,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(576, float)>
-      w134_data;
+  static std::vector<float> w134_data;
+  w134_data.resize(XNN_PAD_EXTRA_BYTES(576, float));
   uint32_t w134 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w134_dims = {{576}};
   status = xnn_define_tensor_value(
@@ -1511,8 +1522,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(5184, float)>
-      w135_data;
+  static std::vector<float> w135_data;
+  w135_data.resize(XNN_PAD_EXTRA_BYTES(5184, float));
   uint32_t w135 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w135_dims = {{1, 3, 3, 576}};
   status = xnn_define_tensor_value(
@@ -1523,8 +1534,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(576, float)>
-      w136_data;
+  static std::vector<float> w136_data;
+  w136_data.resize(XNN_PAD_EXTRA_BYTES(576, float));
   uint32_t w136 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w136_dims = {{576}};
   status = xnn_define_tensor_value(
@@ -1535,8 +1546,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(55296, float)>
-      w137_data;
+  static std::vector<float> w137_data;
+  w137_data.resize(XNN_PAD_EXTRA_BYTES(55296, float));
   uint32_t w137 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w137_dims = {{96, 1, 1, 576}};
   status = xnn_define_tensor_value(
@@ -1547,8 +1558,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(96, float)>
-      w138_data;
+  static std::vector<float> w138_data;
+  w138_data.resize(XNN_PAD_EXTRA_BYTES(96, float));
   uint32_t w138 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w138_dims = {{96}};
   status = xnn_define_tensor_value(
@@ -1559,8 +1570,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(55296, float)>
-      w139_data;
+  static std::vector<float> w139_data;
+  w139_data.resize(XNN_PAD_EXTRA_BYTES(55296, float));
   uint32_t w139 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w139_dims = {{576, 1, 1, 96}};
   status = xnn_define_tensor_value(
@@ -1571,8 +1582,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(576, float)>
-      w140_data;
+  static std::vector<float> w140_data;
+  w140_data.resize(XNN_PAD_EXTRA_BYTES(576, float));
   uint32_t w140 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w140_dims = {{576}};
   status = xnn_define_tensor_value(
@@ -1583,8 +1594,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(5184, float)>
-      w141_data;
+  static std::vector<float> w141_data;
+  w141_data.resize(XNN_PAD_EXTRA_BYTES(5184, float));
   uint32_t w141 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w141_dims = {{1, 3, 3, 576}};
   status = xnn_define_tensor_value(
@@ -1595,8 +1606,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(576, float)>
-      w142_data;
+  static std::vector<float> w142_data;
+  w142_data.resize(XNN_PAD_EXTRA_BYTES(576, float));
   uint32_t w142 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w142_dims = {{576}};
   status = xnn_define_tensor_value(
@@ -1607,8 +1618,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(55296, float)>
-      w143_data;
+  static std::vector<float> w143_data;
+  w143_data.resize(XNN_PAD_EXTRA_BYTES(55296, float));
   uint32_t w143 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w143_dims = {{96, 1, 1, 576}};
   status = xnn_define_tensor_value(
@@ -1619,8 +1630,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(96, float)>
-      w144_data;
+  static std::vector<float> w144_data;
+  w144_data.resize(XNN_PAD_EXTRA_BYTES(96, float));
   uint32_t w144 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w144_dims = {{96}};
   status = xnn_define_tensor_value(
@@ -1631,8 +1642,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(55296, float)>
-      w145_data;
+  static std::vector<float> w145_data;
+  w145_data.resize(XNN_PAD_EXTRA_BYTES(55296, float));
   uint32_t w145 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w145_dims = {{576, 1, 1, 96}};
   status = xnn_define_tensor_value(
@@ -1643,8 +1654,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(576, float)>
-      w146_data;
+  static std::vector<float> w146_data;
+  w146_data.resize(XNN_PAD_EXTRA_BYTES(576, float));
   uint32_t w146 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w146_dims = {{576}};
   status = xnn_define_tensor_value(
@@ -1655,8 +1666,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(5184, float)>
-      w147_data;
+  static std::vector<float> w147_data;
+  w147_data.resize(XNN_PAD_EXTRA_BYTES(5184, float));
   uint32_t w147 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w147_dims = {{1, 3, 3, 576}};
   status = xnn_define_tensor_value(
@@ -1667,8 +1678,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(576, float)>
-      w148_data;
+  static std::vector<float> w148_data;
+  w148_data.resize(XNN_PAD_EXTRA_BYTES(576, float));
   uint32_t w148 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w148_dims = {{576}};
   status = xnn_define_tensor_value(
@@ -1679,8 +1690,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(92160, float)>
-      w149_data;
+  static std::vector<float> w149_data;
+  w149_data.resize(XNN_PAD_EXTRA_BYTES(92160, float));
   uint32_t w149 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w149_dims = {{160, 1, 1, 576}};
   status = xnn_define_tensor_value(
@@ -1691,8 +1702,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(160, float)>
-      w150_data;
+  static std::vector<float> w150_data;
+  w150_data.resize(XNN_PAD_EXTRA_BYTES(160, float));
   uint32_t w150 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w150_dims = {{160}};
   status = xnn_define_tensor_value(
@@ -1703,8 +1714,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(153600, float)>
-      w151_data;
+  static std::vector<float> w151_data;
+  w151_data.resize(XNN_PAD_EXTRA_BYTES(153600, float));
   uint32_t w151 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w151_dims = {{960, 1, 1, 160}};
   status = xnn_define_tensor_value(
@@ -1715,8 +1726,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(960, float)>
-      w152_data;
+  static std::vector<float> w152_data;
+  w152_data.resize(XNN_PAD_EXTRA_BYTES(960, float));
   uint32_t w152 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w152_dims = {{960}};
   status = xnn_define_tensor_value(
@@ -1727,8 +1738,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(8640, float)>
-      w153_data;
+  static std::vector<float> w153_data;
+  w153_data.resize(XNN_PAD_EXTRA_BYTES(8640, float));
   uint32_t w153 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w153_dims = {{1, 3, 3, 960}};
   status = xnn_define_tensor_value(
@@ -1739,8 +1750,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(960, float)>
-      w154_data;
+  static std::vector<float> w154_data;
+  w154_data.resize(XNN_PAD_EXTRA_BYTES(960, float));
   uint32_t w154 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w154_dims = {{960}};
   status = xnn_define_tensor_value(
@@ -1751,8 +1762,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(153600, float)>
-      w155_data;
+  static std::vector<float> w155_data;
+  w155_data.resize(XNN_PAD_EXTRA_BYTES(153600, float));
   uint32_t w155 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w155_dims = {{160, 1, 1, 960}};
   status = xnn_define_tensor_value(
@@ -1763,8 +1774,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(160, float)>
-      w156_data;
+  static std::vector<float> w156_data;
+  w156_data.resize(XNN_PAD_EXTRA_BYTES(160, float));
   uint32_t w156 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w156_dims = {{160}};
   status = xnn_define_tensor_value(
@@ -1775,8 +1786,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(153600, float)>
-      w157_data;
+  static std::vector<float> w157_data;
+  w157_data.resize(XNN_PAD_EXTRA_BYTES(153600, float));
   uint32_t w157 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w157_dims = {{960, 1, 1, 160}};
   status = xnn_define_tensor_value(
@@ -1787,8 +1798,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(960, float)>
-      w158_data;
+  static std::vector<float> w158_data;
+  w158_data.resize(XNN_PAD_EXTRA_BYTES(960, float));
   uint32_t w158 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w158_dims = {{960}};
   status = xnn_define_tensor_value(
@@ -1799,8 +1810,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(8640, float)>
-      w159_data;
+  static std::vector<float> w159_data;
+  w159_data.resize(XNN_PAD_EXTRA_BYTES(8640, float));
   uint32_t w159 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w159_dims = {{1, 3, 3, 960}};
   status = xnn_define_tensor_value(
@@ -1811,8 +1822,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(960, float)>
-      w160_data;
+  static std::vector<float> w160_data;
+  w160_data.resize(XNN_PAD_EXTRA_BYTES(960, float));
   uint32_t w160 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w160_dims = {{960}};
   status = xnn_define_tensor_value(
@@ -1823,8 +1834,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(153600, float)>
-      w161_data;
+  static std::vector<float> w161_data;
+  w161_data.resize(XNN_PAD_EXTRA_BYTES(153600, float));
   uint32_t w161 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w161_dims = {{160, 1, 1, 960}};
   status = xnn_define_tensor_value(
@@ -1835,8 +1846,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(160, float)>
-      w162_data;
+  static std::vector<float> w162_data;
+  w162_data.resize(XNN_PAD_EXTRA_BYTES(160, float));
   uint32_t w162 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w162_dims = {{160}};
   status = xnn_define_tensor_value(
@@ -1847,8 +1858,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(153600, float)>
-      w163_data;
+  static std::vector<float> w163_data;
+  w163_data.resize(XNN_PAD_EXTRA_BYTES(153600, float));
   uint32_t w163 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w163_dims = {{960, 1, 1, 160}};
   status = xnn_define_tensor_value(
@@ -1859,8 +1870,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(960, float)>
-      w164_data;
+  static std::vector<float> w164_data;
+  w164_data.resize(XNN_PAD_EXTRA_BYTES(960, float));
   uint32_t w164 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w164_dims = {{960}};
   status = xnn_define_tensor_value(
@@ -1871,8 +1882,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(8640, float)>
-      w165_data;
+  static std::vector<float> w165_data;
+  w165_data.resize(XNN_PAD_EXTRA_BYTES(8640, float));
   uint32_t w165 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w165_dims = {{1, 3, 3, 960}};
   status = xnn_define_tensor_value(
@@ -1883,8 +1894,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(960, float)>
-      w166_data;
+  static std::vector<float> w166_data;
+  w166_data.resize(XNN_PAD_EXTRA_BYTES(960, float));
   uint32_t w166 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w166_dims = {{960}};
   status = xnn_define_tensor_value(
@@ -1895,8 +1906,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(307200, float)>
-      w167_data;
+  static std::vector<float> w167_data;
+  w167_data.resize(XNN_PAD_EXTRA_BYTES(307200, float));
   uint32_t w167 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w167_dims = {{320, 1, 1, 960}};
   status = xnn_define_tensor_value(
@@ -1907,8 +1918,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(320, float)>
-      w168_data;
+  static std::vector<float> w168_data;
+  w168_data.resize(XNN_PAD_EXTRA_BYTES(320, float));
   uint32_t w168 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w168_dims = {{320}};
   status = xnn_define_tensor_value(
@@ -1919,8 +1930,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(409600, float)>
-      w169_data;
+  static std::vector<float> w169_data;
+  w169_data.resize(XNN_PAD_EXTRA_BYTES(409600, float));
   uint32_t w169 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w169_dims = {{1280, 1, 1, 320}};
   status = xnn_define_tensor_value(
@@ -1931,8 +1942,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(1280, float)>
-      w170_data;
+  static std::vector<float> w170_data;
+  w170_data.resize(XNN_PAD_EXTRA_BYTES(1280, float));
   uint32_t w170 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w170_dims = {{1280}};
   status = xnn_define_tensor_value(
@@ -1943,8 +1954,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(1281280, float)>
-      w171_data;
+  static std::vector<float> w171_data;
+  w171_data.resize(XNN_PAD_EXTRA_BYTES(1281280, float));
   uint32_t w171 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w171_dims = {{1001, 1, 1, 1280}};
   status = xnn_define_tensor_value(
@@ -1955,8 +1966,8 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<float, XNN_PAD_EXTRA_BYTES(1001, float)>
-      w172_data;
+  static std::vector<float> w172_data;
+  w172_data.resize(XNN_PAD_EXTRA_BYTES(1001, float));
   uint32_t w172 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w172_dims = {{1001}};
   status = xnn_define_tensor_value(
@@ -1967,7 +1978,21 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
+  static std::vector<int32_t> w173_data;
+  w173_data.resize(XNN_PAD_EXTRA_BYTES(2, int32_t));
+  uint32_t w173 = XNN_INVALID_VALUE_ID;
+  std::array<size_t, 1> w173_dims = {{2}};
+  status = xnn_define_tensor_value(
+      subgraph, xnn_datatype_int32, w173_dims.size(), w173_dims.data(),
+      /*data=*/w173_data.data(), XNN_INVALID_VALUE_ID, /*flags=*/0, &w173);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to create tensor w173" << std::endl;
+    return nullptr;
+  }
+
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, +1.0f),
+                          std::ref(rng));
+  auto i32rng = std::bind(std::uniform_int_distribution<int>(-10000, 10000),
                           std::ref(rng));
   std::generate(w67_data.begin(), w67_data.end(), std::ref(f32rng));
   std::generate(w68_data.begin(), w68_data.end(), std::ref(f32rng));
@@ -2075,6 +2100,7 @@ xnn_subgraph_t FP32MobileNetV2() {
   std::generate(w170_data.begin(), w170_data.end(), std::ref(f32rng));
   std::generate(w171_data.begin(), w171_data.end(), std::ref(f32rng));
   std::generate(w172_data.begin(), w172_data.end(), std::ref(f32rng));
+  std::generate(w173_data.begin(), w173_data.end(), std::ref(i32rng));
 
   status = xnn_define_convolution_2d(
       subgraph,
@@ -2231,7 +2257,10 @@ xnn_subgraph_t FP32MobileNetV2() {
 
   xnn_binary_params v10_params = {-std::numeric_limits<float>::infinity(),
                                   std::numeric_limits<float>::infinity()};
-  status = xnn_define_binary(subgraph, xnn_binary_add, &v10_params, v9, v6, v10,
+  status = xnn_define_binary(subgraph, xnn_binary_add, &v10_params,
+                             /*input1_id=*/v9,
+                             /*input2_id=*/v6,
+                             /*output_id=*/v10,
                              /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #9" << std::endl;
@@ -2342,9 +2371,11 @@ xnn_subgraph_t FP32MobileNetV2() {
 
   xnn_binary_params v17_params = {-std::numeric_limits<float>::infinity(),
                                   std::numeric_limits<float>::infinity()};
-  status =
-      xnn_define_binary(subgraph, xnn_binary_add, &v17_params, v16, v13, v17,
-                        /*flags=*/0);
+  status = xnn_define_binary(subgraph, xnn_binary_add, &v17_params,
+                             /*input1_id=*/v16,
+                             /*input2_id=*/v13,
+                             /*output_id=*/v17,
+                             /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #16" << std::endl;
     return nullptr;
@@ -2404,9 +2435,11 @@ xnn_subgraph_t FP32MobileNetV2() {
 
   xnn_binary_params v21_params = {-std::numeric_limits<float>::infinity(),
                                   std::numeric_limits<float>::infinity()};
-  status =
-      xnn_define_binary(subgraph, xnn_binary_add, &v21_params, v20, v17, v21,
-                        /*flags=*/0);
+  status = xnn_define_binary(subgraph, xnn_binary_add, &v21_params,
+                             /*input1_id=*/v20,
+                             /*input2_id=*/v17,
+                             /*output_id=*/v21,
+                             /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #20" << std::endl;
     return nullptr;
@@ -2518,9 +2551,11 @@ xnn_subgraph_t FP32MobileNetV2() {
 
   xnn_binary_params v28_params = {-std::numeric_limits<float>::infinity(),
                                   std::numeric_limits<float>::infinity()};
-  status =
-      xnn_define_binary(subgraph, xnn_binary_add, &v28_params, v27, v24, v28,
-                        /*flags=*/0);
+  status = xnn_define_binary(subgraph, xnn_binary_add, &v28_params,
+                             /*input1_id=*/v27,
+                             /*input2_id=*/v24,
+                             /*output_id=*/v28,
+                             /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #27" << std::endl;
     return nullptr;
@@ -2580,9 +2615,11 @@ xnn_subgraph_t FP32MobileNetV2() {
 
   xnn_binary_params v32_params = {-std::numeric_limits<float>::infinity(),
                                   std::numeric_limits<float>::infinity()};
-  status =
-      xnn_define_binary(subgraph, xnn_binary_add, &v32_params, v31, v28, v32,
-                        /*flags=*/0);
+  status = xnn_define_binary(subgraph, xnn_binary_add, &v32_params,
+                             /*input1_id=*/v31,
+                             /*input2_id=*/v28,
+                             /*output_id=*/v32,
+                             /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #31" << std::endl;
     return nullptr;
@@ -2642,9 +2679,11 @@ xnn_subgraph_t FP32MobileNetV2() {
 
   xnn_binary_params v36_params = {-std::numeric_limits<float>::infinity(),
                                   std::numeric_limits<float>::infinity()};
-  status =
-      xnn_define_binary(subgraph, xnn_binary_add, &v36_params, v35, v32, v36,
-                        /*flags=*/0);
+  status = xnn_define_binary(subgraph, xnn_binary_add, &v36_params,
+                             /*input1_id=*/v35,
+                             /*input2_id=*/v32,
+                             /*output_id=*/v36,
+                             /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #35" << std::endl;
     return nullptr;
@@ -2756,9 +2795,11 @@ xnn_subgraph_t FP32MobileNetV2() {
 
   xnn_binary_params v43_params = {-std::numeric_limits<float>::infinity(),
                                   std::numeric_limits<float>::infinity()};
-  status =
-      xnn_define_binary(subgraph, xnn_binary_add, &v43_params, v42, v39, v43,
-                        /*flags=*/0);
+  status = xnn_define_binary(subgraph, xnn_binary_add, &v43_params,
+                             /*input1_id=*/v42,
+                             /*input2_id=*/v39,
+                             /*output_id=*/v43,
+                             /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #42" << std::endl;
     return nullptr;
@@ -2818,9 +2859,11 @@ xnn_subgraph_t FP32MobileNetV2() {
 
   xnn_binary_params v47_params = {-std::numeric_limits<float>::infinity(),
                                   std::numeric_limits<float>::infinity()};
-  status =
-      xnn_define_binary(subgraph, xnn_binary_add, &v47_params, v46, v43, v47,
-                        /*flags=*/0);
+  status = xnn_define_binary(subgraph, xnn_binary_add, &v47_params,
+                             /*input1_id=*/v46,
+                             /*input2_id=*/v43,
+                             /*output_id=*/v47,
+                             /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #46" << std::endl;
     return nullptr;
@@ -2932,9 +2975,11 @@ xnn_subgraph_t FP32MobileNetV2() {
 
   xnn_binary_params v54_params = {-std::numeric_limits<float>::infinity(),
                                   std::numeric_limits<float>::infinity()};
-  status =
-      xnn_define_binary(subgraph, xnn_binary_add, &v54_params, v53, v50, v54,
-                        /*flags=*/0);
+  status = xnn_define_binary(subgraph, xnn_binary_add, &v54_params,
+                             /*input1_id=*/v53,
+                             /*input2_id=*/v50,
+                             /*output_id=*/v54,
+                             /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #53" << std::endl;
     return nullptr;
@@ -2994,9 +3039,11 @@ xnn_subgraph_t FP32MobileNetV2() {
 
   xnn_binary_params v58_params = {-std::numeric_limits<float>::infinity(),
                                   std::numeric_limits<float>::infinity()};
-  status =
-      xnn_define_binary(subgraph, xnn_binary_add, &v58_params, v57, v54, v58,
-                        /*flags=*/0);
+  status = xnn_define_binary(subgraph, xnn_binary_add, &v58_params,
+                             /*input1_id=*/v57,
+                             /*input2_id=*/v54,
+                             /*output_id=*/v58,
+                             /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #57" << std::endl;
     return nullptr;
@@ -3104,7 +3151,10 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  status = xnn_define_copy(subgraph, v64, v65, 0);
+  status = xnn_define_copy(subgraph,
+                           /*input_id=*/v64,
+                           /*output_id=*/v65,
+                           /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #64" << std::endl;
     return nullptr;
@@ -3118,6 +3168,6 @@ xnn_subgraph_t FP32MobileNetV2() {
   }
 
   return subgraph;
-}
+}  // NOLINT(readability/fn_size)
 
 }  // namespace models

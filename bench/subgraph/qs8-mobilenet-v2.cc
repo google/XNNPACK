@@ -13,7 +13,9 @@
 #include <iostream>
 #include <limits>
 #include <random>
+#include <vector>
 
+#include "bench/subgraph/models.h"
 #include "include/xnnpack.h"
 
 // align a size up to XNN_EXTRA_BYTES
@@ -31,7 +33,7 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  std::random_device random_device;
+  std::random_device random_device;  // NOLINT(runtime/random_device)
   auto rng = std::mt19937(random_device());
 
   uint32_t v0 = XNN_INVALID_VALUE_ID;
@@ -834,11 +836,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(864, int8_t)>
-      w67_data;
+  static std::vector<int8_t> w67_data;
+  w67_data.resize(XNN_PAD_EXTRA_BYTES(864, int8_t));
   uint32_t w67 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w67_dims = {{32, 3, 3, 3}};
-  static std::array<float, 32> w67_scale;
+  static std::vector<float> w67_scale;
+  w67_scale.resize(32);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -853,11 +856,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(32, int32_t)>
-      w68_data;
+  static std::vector<int32_t> w68_data;
+  w68_data.resize(XNN_PAD_EXTRA_BYTES(32, int32_t));
   uint32_t w68 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w68_dims = {{32}};
-  static std::array<float, 32> w68_scale;
+  static std::vector<float> w68_scale;
+  w68_scale.resize(32);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -872,11 +876,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(288, int8_t)>
-      w69_data;
+  static std::vector<int8_t> w69_data;
+  w69_data.resize(XNN_PAD_EXTRA_BYTES(288, int8_t));
   uint32_t w69 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w69_dims = {{1, 3, 3, 32}};
-  static std::array<float, 32> w69_scale;
+  static std::vector<float> w69_scale;
+  w69_scale.resize(32);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -891,11 +896,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(32, int32_t)>
-      w70_data;
+  static std::vector<int32_t> w70_data;
+  w70_data.resize(XNN_PAD_EXTRA_BYTES(32, int32_t));
   uint32_t w70 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w70_dims = {{32}};
-  static std::array<float, 32> w70_scale;
+  static std::vector<float> w70_scale;
+  w70_scale.resize(32);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -910,11 +916,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(512, int8_t)>
-      w71_data;
+  static std::vector<int8_t> w71_data;
+  w71_data.resize(XNN_PAD_EXTRA_BYTES(512, int8_t));
   uint32_t w71 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w71_dims = {{16, 1, 1, 32}};
-  static std::array<float, 16> w71_scale;
+  static std::vector<float> w71_scale;
+  w71_scale.resize(16);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -929,11 +936,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(16, int32_t)>
-      w72_data;
+  static std::vector<int32_t> w72_data;
+  w72_data.resize(XNN_PAD_EXTRA_BYTES(16, int32_t));
   uint32_t w72 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w72_dims = {{16}};
-  static std::array<float, 16> w72_scale;
+  static std::vector<float> w72_scale;
+  w72_scale.resize(16);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -948,11 +956,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(1536, int8_t)>
-      w73_data;
+  static std::vector<int8_t> w73_data;
+  w73_data.resize(XNN_PAD_EXTRA_BYTES(1536, int8_t));
   uint32_t w73 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w73_dims = {{96, 1, 1, 16}};
-  static std::array<float, 96> w73_scale;
+  static std::vector<float> w73_scale;
+  w73_scale.resize(96);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -967,11 +976,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(96, int32_t)>
-      w74_data;
+  static std::vector<int32_t> w74_data;
+  w74_data.resize(XNN_PAD_EXTRA_BYTES(96, int32_t));
   uint32_t w74 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w74_dims = {{96}};
-  static std::array<float, 96> w74_scale;
+  static std::vector<float> w74_scale;
+  w74_scale.resize(96);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -986,11 +996,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(864, int8_t)>
-      w75_data;
+  static std::vector<int8_t> w75_data;
+  w75_data.resize(XNN_PAD_EXTRA_BYTES(864, int8_t));
   uint32_t w75 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w75_dims = {{1, 3, 3, 96}};
-  static std::array<float, 96> w75_scale;
+  static std::vector<float> w75_scale;
+  w75_scale.resize(96);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1005,11 +1016,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(96, int32_t)>
-      w76_data;
+  static std::vector<int32_t> w76_data;
+  w76_data.resize(XNN_PAD_EXTRA_BYTES(96, int32_t));
   uint32_t w76 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w76_dims = {{96}};
-  static std::array<float, 96> w76_scale;
+  static std::vector<float> w76_scale;
+  w76_scale.resize(96);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1024,11 +1036,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(2304, int8_t)>
-      w77_data;
+  static std::vector<int8_t> w77_data;
+  w77_data.resize(XNN_PAD_EXTRA_BYTES(2304, int8_t));
   uint32_t w77 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w77_dims = {{24, 1, 1, 96}};
-  static std::array<float, 24> w77_scale;
+  static std::vector<float> w77_scale;
+  w77_scale.resize(24);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1043,11 +1056,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(24, int32_t)>
-      w78_data;
+  static std::vector<int32_t> w78_data;
+  w78_data.resize(XNN_PAD_EXTRA_BYTES(24, int32_t));
   uint32_t w78 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w78_dims = {{24}};
-  static std::array<float, 24> w78_scale;
+  static std::vector<float> w78_scale;
+  w78_scale.resize(24);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1062,11 +1076,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(3456, int8_t)>
-      w79_data;
+  static std::vector<int8_t> w79_data;
+  w79_data.resize(XNN_PAD_EXTRA_BYTES(3456, int8_t));
   uint32_t w79 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w79_dims = {{144, 1, 1, 24}};
-  static std::array<float, 144> w79_scale;
+  static std::vector<float> w79_scale;
+  w79_scale.resize(144);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1081,11 +1096,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(144, int32_t)>
-      w80_data;
+  static std::vector<int32_t> w80_data;
+  w80_data.resize(XNN_PAD_EXTRA_BYTES(144, int32_t));
   uint32_t w80 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w80_dims = {{144}};
-  static std::array<float, 144> w80_scale;
+  static std::vector<float> w80_scale;
+  w80_scale.resize(144);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1100,11 +1116,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(1296, int8_t)>
-      w81_data;
+  static std::vector<int8_t> w81_data;
+  w81_data.resize(XNN_PAD_EXTRA_BYTES(1296, int8_t));
   uint32_t w81 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w81_dims = {{1, 3, 3, 144}};
-  static std::array<float, 144> w81_scale;
+  static std::vector<float> w81_scale;
+  w81_scale.resize(144);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1119,11 +1136,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(144, int32_t)>
-      w82_data;
+  static std::vector<int32_t> w82_data;
+  w82_data.resize(XNN_PAD_EXTRA_BYTES(144, int32_t));
   uint32_t w82 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w82_dims = {{144}};
-  static std::array<float, 144> w82_scale;
+  static std::vector<float> w82_scale;
+  w82_scale.resize(144);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1138,11 +1156,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(3456, int8_t)>
-      w83_data;
+  static std::vector<int8_t> w83_data;
+  w83_data.resize(XNN_PAD_EXTRA_BYTES(3456, int8_t));
   uint32_t w83 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w83_dims = {{24, 1, 1, 144}};
-  static std::array<float, 24> w83_scale;
+  static std::vector<float> w83_scale;
+  w83_scale.resize(24);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1157,11 +1176,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(24, int32_t)>
-      w84_data;
+  static std::vector<int32_t> w84_data;
+  w84_data.resize(XNN_PAD_EXTRA_BYTES(24, int32_t));
   uint32_t w84 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w84_dims = {{24}};
-  static std::array<float, 24> w84_scale;
+  static std::vector<float> w84_scale;
+  w84_scale.resize(24);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1176,11 +1196,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(3456, int8_t)>
-      w85_data;
+  static std::vector<int8_t> w85_data;
+  w85_data.resize(XNN_PAD_EXTRA_BYTES(3456, int8_t));
   uint32_t w85 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w85_dims = {{144, 1, 1, 24}};
-  static std::array<float, 144> w85_scale;
+  static std::vector<float> w85_scale;
+  w85_scale.resize(144);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1195,11 +1216,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(144, int32_t)>
-      w86_data;
+  static std::vector<int32_t> w86_data;
+  w86_data.resize(XNN_PAD_EXTRA_BYTES(144, int32_t));
   uint32_t w86 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w86_dims = {{144}};
-  static std::array<float, 144> w86_scale;
+  static std::vector<float> w86_scale;
+  w86_scale.resize(144);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1214,11 +1236,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(1296, int8_t)>
-      w87_data;
+  static std::vector<int8_t> w87_data;
+  w87_data.resize(XNN_PAD_EXTRA_BYTES(1296, int8_t));
   uint32_t w87 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w87_dims = {{1, 3, 3, 144}};
-  static std::array<float, 144> w87_scale;
+  static std::vector<float> w87_scale;
+  w87_scale.resize(144);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1233,11 +1256,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(144, int32_t)>
-      w88_data;
+  static std::vector<int32_t> w88_data;
+  w88_data.resize(XNN_PAD_EXTRA_BYTES(144, int32_t));
   uint32_t w88 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w88_dims = {{144}};
-  static std::array<float, 144> w88_scale;
+  static std::vector<float> w88_scale;
+  w88_scale.resize(144);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1252,11 +1276,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(4608, int8_t)>
-      w89_data;
+  static std::vector<int8_t> w89_data;
+  w89_data.resize(XNN_PAD_EXTRA_BYTES(4608, int8_t));
   uint32_t w89 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w89_dims = {{32, 1, 1, 144}};
-  static std::array<float, 32> w89_scale;
+  static std::vector<float> w89_scale;
+  w89_scale.resize(32);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1271,11 +1296,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(32, int32_t)>
-      w90_data;
+  static std::vector<int32_t> w90_data;
+  w90_data.resize(XNN_PAD_EXTRA_BYTES(32, int32_t));
   uint32_t w90 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w90_dims = {{32}};
-  static std::array<float, 32> w90_scale;
+  static std::vector<float> w90_scale;
+  w90_scale.resize(32);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1290,11 +1316,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(6144, int8_t)>
-      w91_data;
+  static std::vector<int8_t> w91_data;
+  w91_data.resize(XNN_PAD_EXTRA_BYTES(6144, int8_t));
   uint32_t w91 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w91_dims = {{192, 1, 1, 32}};
-  static std::array<float, 192> w91_scale;
+  static std::vector<float> w91_scale;
+  w91_scale.resize(192);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1309,11 +1336,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(192, int32_t)>
-      w92_data;
+  static std::vector<int32_t> w92_data;
+  w92_data.resize(XNN_PAD_EXTRA_BYTES(192, int32_t));
   uint32_t w92 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w92_dims = {{192}};
-  static std::array<float, 192> w92_scale;
+  static std::vector<float> w92_scale;
+  w92_scale.resize(192);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1328,11 +1356,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(1728, int8_t)>
-      w93_data;
+  static std::vector<int8_t> w93_data;
+  w93_data.resize(XNN_PAD_EXTRA_BYTES(1728, int8_t));
   uint32_t w93 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w93_dims = {{1, 3, 3, 192}};
-  static std::array<float, 192> w93_scale;
+  static std::vector<float> w93_scale;
+  w93_scale.resize(192);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1347,11 +1376,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(192, int32_t)>
-      w94_data;
+  static std::vector<int32_t> w94_data;
+  w94_data.resize(XNN_PAD_EXTRA_BYTES(192, int32_t));
   uint32_t w94 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w94_dims = {{192}};
-  static std::array<float, 192> w94_scale;
+  static std::vector<float> w94_scale;
+  w94_scale.resize(192);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1366,11 +1396,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(6144, int8_t)>
-      w95_data;
+  static std::vector<int8_t> w95_data;
+  w95_data.resize(XNN_PAD_EXTRA_BYTES(6144, int8_t));
   uint32_t w95 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w95_dims = {{32, 1, 1, 192}};
-  static std::array<float, 32> w95_scale;
+  static std::vector<float> w95_scale;
+  w95_scale.resize(32);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1385,11 +1416,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(32, int32_t)>
-      w96_data;
+  static std::vector<int32_t> w96_data;
+  w96_data.resize(XNN_PAD_EXTRA_BYTES(32, int32_t));
   uint32_t w96 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w96_dims = {{32}};
-  static std::array<float, 32> w96_scale;
+  static std::vector<float> w96_scale;
+  w96_scale.resize(32);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1404,11 +1436,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(6144, int8_t)>
-      w97_data;
+  static std::vector<int8_t> w97_data;
+  w97_data.resize(XNN_PAD_EXTRA_BYTES(6144, int8_t));
   uint32_t w97 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w97_dims = {{192, 1, 1, 32}};
-  static std::array<float, 192> w97_scale;
+  static std::vector<float> w97_scale;
+  w97_scale.resize(192);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1423,11 +1456,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(192, int32_t)>
-      w98_data;
+  static std::vector<int32_t> w98_data;
+  w98_data.resize(XNN_PAD_EXTRA_BYTES(192, int32_t));
   uint32_t w98 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w98_dims = {{192}};
-  static std::array<float, 192> w98_scale;
+  static std::vector<float> w98_scale;
+  w98_scale.resize(192);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1442,11 +1476,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(1728, int8_t)>
-      w99_data;
+  static std::vector<int8_t> w99_data;
+  w99_data.resize(XNN_PAD_EXTRA_BYTES(1728, int8_t));
   uint32_t w99 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w99_dims = {{1, 3, 3, 192}};
-  static std::array<float, 192> w99_scale;
+  static std::vector<float> w99_scale;
+  w99_scale.resize(192);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1461,11 +1496,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(192, int32_t)>
-      w100_data;
+  static std::vector<int32_t> w100_data;
+  w100_data.resize(XNN_PAD_EXTRA_BYTES(192, int32_t));
   uint32_t w100 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w100_dims = {{192}};
-  static std::array<float, 192> w100_scale;
+  static std::vector<float> w100_scale;
+  w100_scale.resize(192);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1480,11 +1516,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(6144, int8_t)>
-      w101_data;
+  static std::vector<int8_t> w101_data;
+  w101_data.resize(XNN_PAD_EXTRA_BYTES(6144, int8_t));
   uint32_t w101 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w101_dims = {{32, 1, 1, 192}};
-  static std::array<float, 32> w101_scale;
+  static std::vector<float> w101_scale;
+  w101_scale.resize(32);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1499,11 +1536,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(32, int32_t)>
-      w102_data;
+  static std::vector<int32_t> w102_data;
+  w102_data.resize(XNN_PAD_EXTRA_BYTES(32, int32_t));
   uint32_t w102 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w102_dims = {{32}};
-  static std::array<float, 32> w102_scale;
+  static std::vector<float> w102_scale;
+  w102_scale.resize(32);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1518,11 +1556,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(6144, int8_t)>
-      w103_data;
+  static std::vector<int8_t> w103_data;
+  w103_data.resize(XNN_PAD_EXTRA_BYTES(6144, int8_t));
   uint32_t w103 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w103_dims = {{192, 1, 1, 32}};
-  static std::array<float, 192> w103_scale;
+  static std::vector<float> w103_scale;
+  w103_scale.resize(192);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1537,11 +1576,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(192, int32_t)>
-      w104_data;
+  static std::vector<int32_t> w104_data;
+  w104_data.resize(XNN_PAD_EXTRA_BYTES(192, int32_t));
   uint32_t w104 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w104_dims = {{192}};
-  static std::array<float, 192> w104_scale;
+  static std::vector<float> w104_scale;
+  w104_scale.resize(192);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1556,11 +1596,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(1728, int8_t)>
-      w105_data;
+  static std::vector<int8_t> w105_data;
+  w105_data.resize(XNN_PAD_EXTRA_BYTES(1728, int8_t));
   uint32_t w105 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w105_dims = {{1, 3, 3, 192}};
-  static std::array<float, 192> w105_scale;
+  static std::vector<float> w105_scale;
+  w105_scale.resize(192);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1575,11 +1616,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(192, int32_t)>
-      w106_data;
+  static std::vector<int32_t> w106_data;
+  w106_data.resize(XNN_PAD_EXTRA_BYTES(192, int32_t));
   uint32_t w106 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w106_dims = {{192}};
-  static std::array<float, 192> w106_scale;
+  static std::vector<float> w106_scale;
+  w106_scale.resize(192);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1594,11 +1636,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(12288, int8_t)>
-      w107_data;
+  static std::vector<int8_t> w107_data;
+  w107_data.resize(XNN_PAD_EXTRA_BYTES(12288, int8_t));
   uint32_t w107 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w107_dims = {{64, 1, 1, 192}};
-  static std::array<float, 64> w107_scale;
+  static std::vector<float> w107_scale;
+  w107_scale.resize(64);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1613,11 +1656,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(64, int32_t)>
-      w108_data;
+  static std::vector<int32_t> w108_data;
+  w108_data.resize(XNN_PAD_EXTRA_BYTES(64, int32_t));
   uint32_t w108 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w108_dims = {{64}};
-  static std::array<float, 64> w108_scale;
+  static std::vector<float> w108_scale;
+  w108_scale.resize(64);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1632,11 +1676,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(24576, int8_t)>
-      w109_data;
+  static std::vector<int8_t> w109_data;
+  w109_data.resize(XNN_PAD_EXTRA_BYTES(24576, int8_t));
   uint32_t w109 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w109_dims = {{384, 1, 1, 64}};
-  static std::array<float, 384> w109_scale;
+  static std::vector<float> w109_scale;
+  w109_scale.resize(384);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1651,11 +1696,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(384, int32_t)>
-      w110_data;
+  static std::vector<int32_t> w110_data;
+  w110_data.resize(XNN_PAD_EXTRA_BYTES(384, int32_t));
   uint32_t w110 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w110_dims = {{384}};
-  static std::array<float, 384> w110_scale;
+  static std::vector<float> w110_scale;
+  w110_scale.resize(384);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1670,11 +1716,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(3456, int8_t)>
-      w111_data;
+  static std::vector<int8_t> w111_data;
+  w111_data.resize(XNN_PAD_EXTRA_BYTES(3456, int8_t));
   uint32_t w111 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w111_dims = {{1, 3, 3, 384}};
-  static std::array<float, 384> w111_scale;
+  static std::vector<float> w111_scale;
+  w111_scale.resize(384);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1689,11 +1736,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(384, int32_t)>
-      w112_data;
+  static std::vector<int32_t> w112_data;
+  w112_data.resize(XNN_PAD_EXTRA_BYTES(384, int32_t));
   uint32_t w112 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w112_dims = {{384}};
-  static std::array<float, 384> w112_scale;
+  static std::vector<float> w112_scale;
+  w112_scale.resize(384);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1708,11 +1756,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(24576, int8_t)>
-      w113_data;
+  static std::vector<int8_t> w113_data;
+  w113_data.resize(XNN_PAD_EXTRA_BYTES(24576, int8_t));
   uint32_t w113 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w113_dims = {{64, 1, 1, 384}};
-  static std::array<float, 64> w113_scale;
+  static std::vector<float> w113_scale;
+  w113_scale.resize(64);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1727,11 +1776,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(64, int32_t)>
-      w114_data;
+  static std::vector<int32_t> w114_data;
+  w114_data.resize(XNN_PAD_EXTRA_BYTES(64, int32_t));
   uint32_t w114 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w114_dims = {{64}};
-  static std::array<float, 64> w114_scale;
+  static std::vector<float> w114_scale;
+  w114_scale.resize(64);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1746,11 +1796,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(24576, int8_t)>
-      w115_data;
+  static std::vector<int8_t> w115_data;
+  w115_data.resize(XNN_PAD_EXTRA_BYTES(24576, int8_t));
   uint32_t w115 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w115_dims = {{384, 1, 1, 64}};
-  static std::array<float, 384> w115_scale;
+  static std::vector<float> w115_scale;
+  w115_scale.resize(384);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1765,11 +1816,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(384, int32_t)>
-      w116_data;
+  static std::vector<int32_t> w116_data;
+  w116_data.resize(XNN_PAD_EXTRA_BYTES(384, int32_t));
   uint32_t w116 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w116_dims = {{384}};
-  static std::array<float, 384> w116_scale;
+  static std::vector<float> w116_scale;
+  w116_scale.resize(384);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1784,11 +1836,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(3456, int8_t)>
-      w117_data;
+  static std::vector<int8_t> w117_data;
+  w117_data.resize(XNN_PAD_EXTRA_BYTES(3456, int8_t));
   uint32_t w117 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w117_dims = {{1, 3, 3, 384}};
-  static std::array<float, 384> w117_scale;
+  static std::vector<float> w117_scale;
+  w117_scale.resize(384);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1803,11 +1856,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(384, int32_t)>
-      w118_data;
+  static std::vector<int32_t> w118_data;
+  w118_data.resize(XNN_PAD_EXTRA_BYTES(384, int32_t));
   uint32_t w118 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w118_dims = {{384}};
-  static std::array<float, 384> w118_scale;
+  static std::vector<float> w118_scale;
+  w118_scale.resize(384);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1822,11 +1876,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(24576, int8_t)>
-      w119_data;
+  static std::vector<int8_t> w119_data;
+  w119_data.resize(XNN_PAD_EXTRA_BYTES(24576, int8_t));
   uint32_t w119 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w119_dims = {{64, 1, 1, 384}};
-  static std::array<float, 64> w119_scale;
+  static std::vector<float> w119_scale;
+  w119_scale.resize(64);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1841,11 +1896,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(64, int32_t)>
-      w120_data;
+  static std::vector<int32_t> w120_data;
+  w120_data.resize(XNN_PAD_EXTRA_BYTES(64, int32_t));
   uint32_t w120 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w120_dims = {{64}};
-  static std::array<float, 64> w120_scale;
+  static std::vector<float> w120_scale;
+  w120_scale.resize(64);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1860,11 +1916,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(24576, int8_t)>
-      w121_data;
+  static std::vector<int8_t> w121_data;
+  w121_data.resize(XNN_PAD_EXTRA_BYTES(24576, int8_t));
   uint32_t w121 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w121_dims = {{384, 1, 1, 64}};
-  static std::array<float, 384> w121_scale;
+  static std::vector<float> w121_scale;
+  w121_scale.resize(384);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1879,11 +1936,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(384, int32_t)>
-      w122_data;
+  static std::vector<int32_t> w122_data;
+  w122_data.resize(XNN_PAD_EXTRA_BYTES(384, int32_t));
   uint32_t w122 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w122_dims = {{384}};
-  static std::array<float, 384> w122_scale;
+  static std::vector<float> w122_scale;
+  w122_scale.resize(384);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1898,11 +1956,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(3456, int8_t)>
-      w123_data;
+  static std::vector<int8_t> w123_data;
+  w123_data.resize(XNN_PAD_EXTRA_BYTES(3456, int8_t));
   uint32_t w123 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w123_dims = {{1, 3, 3, 384}};
-  static std::array<float, 384> w123_scale;
+  static std::vector<float> w123_scale;
+  w123_scale.resize(384);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1917,11 +1976,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(384, int32_t)>
-      w124_data;
+  static std::vector<int32_t> w124_data;
+  w124_data.resize(XNN_PAD_EXTRA_BYTES(384, int32_t));
   uint32_t w124 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w124_dims = {{384}};
-  static std::array<float, 384> w124_scale;
+  static std::vector<float> w124_scale;
+  w124_scale.resize(384);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1936,11 +1996,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(24576, int8_t)>
-      w125_data;
+  static std::vector<int8_t> w125_data;
+  w125_data.resize(XNN_PAD_EXTRA_BYTES(24576, int8_t));
   uint32_t w125 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w125_dims = {{64, 1, 1, 384}};
-  static std::array<float, 64> w125_scale;
+  static std::vector<float> w125_scale;
+  w125_scale.resize(64);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1955,11 +2016,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(64, int32_t)>
-      w126_data;
+  static std::vector<int32_t> w126_data;
+  w126_data.resize(XNN_PAD_EXTRA_BYTES(64, int32_t));
   uint32_t w126 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w126_dims = {{64}};
-  static std::array<float, 64> w126_scale;
+  static std::vector<float> w126_scale;
+  w126_scale.resize(64);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1974,11 +2036,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(24576, int8_t)>
-      w127_data;
+  static std::vector<int8_t> w127_data;
+  w127_data.resize(XNN_PAD_EXTRA_BYTES(24576, int8_t));
   uint32_t w127 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w127_dims = {{384, 1, 1, 64}};
-  static std::array<float, 384> w127_scale;
+  static std::vector<float> w127_scale;
+  w127_scale.resize(384);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -1993,11 +2056,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(384, int32_t)>
-      w128_data;
+  static std::vector<int32_t> w128_data;
+  w128_data.resize(XNN_PAD_EXTRA_BYTES(384, int32_t));
   uint32_t w128 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w128_dims = {{384}};
-  static std::array<float, 384> w128_scale;
+  static std::vector<float> w128_scale;
+  w128_scale.resize(384);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2012,11 +2076,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(3456, int8_t)>
-      w129_data;
+  static std::vector<int8_t> w129_data;
+  w129_data.resize(XNN_PAD_EXTRA_BYTES(3456, int8_t));
   uint32_t w129 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w129_dims = {{1, 3, 3, 384}};
-  static std::array<float, 384> w129_scale;
+  static std::vector<float> w129_scale;
+  w129_scale.resize(384);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2031,11 +2096,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(384, int32_t)>
-      w130_data;
+  static std::vector<int32_t> w130_data;
+  w130_data.resize(XNN_PAD_EXTRA_BYTES(384, int32_t));
   uint32_t w130 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w130_dims = {{384}};
-  static std::array<float, 384> w130_scale;
+  static std::vector<float> w130_scale;
+  w130_scale.resize(384);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2050,11 +2116,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(36864, int8_t)>
-      w131_data;
+  static std::vector<int8_t> w131_data;
+  w131_data.resize(XNN_PAD_EXTRA_BYTES(36864, int8_t));
   uint32_t w131 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w131_dims = {{96, 1, 1, 384}};
-  static std::array<float, 96> w131_scale;
+  static std::vector<float> w131_scale;
+  w131_scale.resize(96);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2069,11 +2136,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(96, int32_t)>
-      w132_data;
+  static std::vector<int32_t> w132_data;
+  w132_data.resize(XNN_PAD_EXTRA_BYTES(96, int32_t));
   uint32_t w132 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w132_dims = {{96}};
-  static std::array<float, 96> w132_scale;
+  static std::vector<float> w132_scale;
+  w132_scale.resize(96);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2088,11 +2156,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(55296, int8_t)>
-      w133_data;
+  static std::vector<int8_t> w133_data;
+  w133_data.resize(XNN_PAD_EXTRA_BYTES(55296, int8_t));
   uint32_t w133 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w133_dims = {{576, 1, 1, 96}};
-  static std::array<float, 576> w133_scale;
+  static std::vector<float> w133_scale;
+  w133_scale.resize(576);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2107,11 +2176,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(576, int32_t)>
-      w134_data;
+  static std::vector<int32_t> w134_data;
+  w134_data.resize(XNN_PAD_EXTRA_BYTES(576, int32_t));
   uint32_t w134 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w134_dims = {{576}};
-  static std::array<float, 576> w134_scale;
+  static std::vector<float> w134_scale;
+  w134_scale.resize(576);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2126,11 +2196,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(5184, int8_t)>
-      w135_data;
+  static std::vector<int8_t> w135_data;
+  w135_data.resize(XNN_PAD_EXTRA_BYTES(5184, int8_t));
   uint32_t w135 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w135_dims = {{1, 3, 3, 576}};
-  static std::array<float, 576> w135_scale;
+  static std::vector<float> w135_scale;
+  w135_scale.resize(576);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2145,11 +2216,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(576, int32_t)>
-      w136_data;
+  static std::vector<int32_t> w136_data;
+  w136_data.resize(XNN_PAD_EXTRA_BYTES(576, int32_t));
   uint32_t w136 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w136_dims = {{576}};
-  static std::array<float, 576> w136_scale;
+  static std::vector<float> w136_scale;
+  w136_scale.resize(576);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2164,11 +2236,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(55296, int8_t)>
-      w137_data;
+  static std::vector<int8_t> w137_data;
+  w137_data.resize(XNN_PAD_EXTRA_BYTES(55296, int8_t));
   uint32_t w137 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w137_dims = {{96, 1, 1, 576}};
-  static std::array<float, 96> w137_scale;
+  static std::vector<float> w137_scale;
+  w137_scale.resize(96);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2183,11 +2256,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(96, int32_t)>
-      w138_data;
+  static std::vector<int32_t> w138_data;
+  w138_data.resize(XNN_PAD_EXTRA_BYTES(96, int32_t));
   uint32_t w138 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w138_dims = {{96}};
-  static std::array<float, 96> w138_scale;
+  static std::vector<float> w138_scale;
+  w138_scale.resize(96);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2202,11 +2276,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(55296, int8_t)>
-      w139_data;
+  static std::vector<int8_t> w139_data;
+  w139_data.resize(XNN_PAD_EXTRA_BYTES(55296, int8_t));
   uint32_t w139 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w139_dims = {{576, 1, 1, 96}};
-  static std::array<float, 576> w139_scale;
+  static std::vector<float> w139_scale;
+  w139_scale.resize(576);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2221,11 +2296,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(576, int32_t)>
-      w140_data;
+  static std::vector<int32_t> w140_data;
+  w140_data.resize(XNN_PAD_EXTRA_BYTES(576, int32_t));
   uint32_t w140 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w140_dims = {{576}};
-  static std::array<float, 576> w140_scale;
+  static std::vector<float> w140_scale;
+  w140_scale.resize(576);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2240,11 +2316,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(5184, int8_t)>
-      w141_data;
+  static std::vector<int8_t> w141_data;
+  w141_data.resize(XNN_PAD_EXTRA_BYTES(5184, int8_t));
   uint32_t w141 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w141_dims = {{1, 3, 3, 576}};
-  static std::array<float, 576> w141_scale;
+  static std::vector<float> w141_scale;
+  w141_scale.resize(576);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2259,11 +2336,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(576, int32_t)>
-      w142_data;
+  static std::vector<int32_t> w142_data;
+  w142_data.resize(XNN_PAD_EXTRA_BYTES(576, int32_t));
   uint32_t w142 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w142_dims = {{576}};
-  static std::array<float, 576> w142_scale;
+  static std::vector<float> w142_scale;
+  w142_scale.resize(576);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2278,11 +2356,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(55296, int8_t)>
-      w143_data;
+  static std::vector<int8_t> w143_data;
+  w143_data.resize(XNN_PAD_EXTRA_BYTES(55296, int8_t));
   uint32_t w143 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w143_dims = {{96, 1, 1, 576}};
-  static std::array<float, 96> w143_scale;
+  static std::vector<float> w143_scale;
+  w143_scale.resize(96);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2297,11 +2376,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(96, int32_t)>
-      w144_data;
+  static std::vector<int32_t> w144_data;
+  w144_data.resize(XNN_PAD_EXTRA_BYTES(96, int32_t));
   uint32_t w144 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w144_dims = {{96}};
-  static std::array<float, 96> w144_scale;
+  static std::vector<float> w144_scale;
+  w144_scale.resize(96);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2316,11 +2396,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(55296, int8_t)>
-      w145_data;
+  static std::vector<int8_t> w145_data;
+  w145_data.resize(XNN_PAD_EXTRA_BYTES(55296, int8_t));
   uint32_t w145 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w145_dims = {{576, 1, 1, 96}};
-  static std::array<float, 576> w145_scale;
+  static std::vector<float> w145_scale;
+  w145_scale.resize(576);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2335,11 +2416,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(576, int32_t)>
-      w146_data;
+  static std::vector<int32_t> w146_data;
+  w146_data.resize(XNN_PAD_EXTRA_BYTES(576, int32_t));
   uint32_t w146 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w146_dims = {{576}};
-  static std::array<float, 576> w146_scale;
+  static std::vector<float> w146_scale;
+  w146_scale.resize(576);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2354,11 +2436,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(5184, int8_t)>
-      w147_data;
+  static std::vector<int8_t> w147_data;
+  w147_data.resize(XNN_PAD_EXTRA_BYTES(5184, int8_t));
   uint32_t w147 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w147_dims = {{1, 3, 3, 576}};
-  static std::array<float, 576> w147_scale;
+  static std::vector<float> w147_scale;
+  w147_scale.resize(576);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2373,11 +2456,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(576, int32_t)>
-      w148_data;
+  static std::vector<int32_t> w148_data;
+  w148_data.resize(XNN_PAD_EXTRA_BYTES(576, int32_t));
   uint32_t w148 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w148_dims = {{576}};
-  static std::array<float, 576> w148_scale;
+  static std::vector<float> w148_scale;
+  w148_scale.resize(576);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2392,11 +2476,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(92160, int8_t)>
-      w149_data;
+  static std::vector<int8_t> w149_data;
+  w149_data.resize(XNN_PAD_EXTRA_BYTES(92160, int8_t));
   uint32_t w149 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w149_dims = {{160, 1, 1, 576}};
-  static std::array<float, 160> w149_scale;
+  static std::vector<float> w149_scale;
+  w149_scale.resize(160);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2411,11 +2496,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(160, int32_t)>
-      w150_data;
+  static std::vector<int32_t> w150_data;
+  w150_data.resize(XNN_PAD_EXTRA_BYTES(160, int32_t));
   uint32_t w150 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w150_dims = {{160}};
-  static std::array<float, 160> w150_scale;
+  static std::vector<float> w150_scale;
+  w150_scale.resize(160);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2430,11 +2516,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(153600, int8_t)>
-      w151_data;
+  static std::vector<int8_t> w151_data;
+  w151_data.resize(XNN_PAD_EXTRA_BYTES(153600, int8_t));
   uint32_t w151 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w151_dims = {{960, 1, 1, 160}};
-  static std::array<float, 960> w151_scale;
+  static std::vector<float> w151_scale;
+  w151_scale.resize(960);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2449,11 +2536,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(960, int32_t)>
-      w152_data;
+  static std::vector<int32_t> w152_data;
+  w152_data.resize(XNN_PAD_EXTRA_BYTES(960, int32_t));
   uint32_t w152 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w152_dims = {{960}};
-  static std::array<float, 960> w152_scale;
+  static std::vector<float> w152_scale;
+  w152_scale.resize(960);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2468,11 +2556,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(8640, int8_t)>
-      w153_data;
+  static std::vector<int8_t> w153_data;
+  w153_data.resize(XNN_PAD_EXTRA_BYTES(8640, int8_t));
   uint32_t w153 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w153_dims = {{1, 3, 3, 960}};
-  static std::array<float, 960> w153_scale;
+  static std::vector<float> w153_scale;
+  w153_scale.resize(960);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2487,11 +2576,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(960, int32_t)>
-      w154_data;
+  static std::vector<int32_t> w154_data;
+  w154_data.resize(XNN_PAD_EXTRA_BYTES(960, int32_t));
   uint32_t w154 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w154_dims = {{960}};
-  static std::array<float, 960> w154_scale;
+  static std::vector<float> w154_scale;
+  w154_scale.resize(960);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2506,11 +2596,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(153600, int8_t)>
-      w155_data;
+  static std::vector<int8_t> w155_data;
+  w155_data.resize(XNN_PAD_EXTRA_BYTES(153600, int8_t));
   uint32_t w155 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w155_dims = {{160, 1, 1, 960}};
-  static std::array<float, 160> w155_scale;
+  static std::vector<float> w155_scale;
+  w155_scale.resize(160);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2525,11 +2616,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(160, int32_t)>
-      w156_data;
+  static std::vector<int32_t> w156_data;
+  w156_data.resize(XNN_PAD_EXTRA_BYTES(160, int32_t));
   uint32_t w156 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w156_dims = {{160}};
-  static std::array<float, 160> w156_scale;
+  static std::vector<float> w156_scale;
+  w156_scale.resize(160);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2544,11 +2636,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(153600, int8_t)>
-      w157_data;
+  static std::vector<int8_t> w157_data;
+  w157_data.resize(XNN_PAD_EXTRA_BYTES(153600, int8_t));
   uint32_t w157 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w157_dims = {{960, 1, 1, 160}};
-  static std::array<float, 960> w157_scale;
+  static std::vector<float> w157_scale;
+  w157_scale.resize(960);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2563,11 +2656,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(960, int32_t)>
-      w158_data;
+  static std::vector<int32_t> w158_data;
+  w158_data.resize(XNN_PAD_EXTRA_BYTES(960, int32_t));
   uint32_t w158 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w158_dims = {{960}};
-  static std::array<float, 960> w158_scale;
+  static std::vector<float> w158_scale;
+  w158_scale.resize(960);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2582,11 +2676,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(8640, int8_t)>
-      w159_data;
+  static std::vector<int8_t> w159_data;
+  w159_data.resize(XNN_PAD_EXTRA_BYTES(8640, int8_t));
   uint32_t w159 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w159_dims = {{1, 3, 3, 960}};
-  static std::array<float, 960> w159_scale;
+  static std::vector<float> w159_scale;
+  w159_scale.resize(960);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2601,11 +2696,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(960, int32_t)>
-      w160_data;
+  static std::vector<int32_t> w160_data;
+  w160_data.resize(XNN_PAD_EXTRA_BYTES(960, int32_t));
   uint32_t w160 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w160_dims = {{960}};
-  static std::array<float, 960> w160_scale;
+  static std::vector<float> w160_scale;
+  w160_scale.resize(960);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2620,11 +2716,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(153600, int8_t)>
-      w161_data;
+  static std::vector<int8_t> w161_data;
+  w161_data.resize(XNN_PAD_EXTRA_BYTES(153600, int8_t));
   uint32_t w161 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w161_dims = {{160, 1, 1, 960}};
-  static std::array<float, 160> w161_scale;
+  static std::vector<float> w161_scale;
+  w161_scale.resize(160);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2639,11 +2736,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(160, int32_t)>
-      w162_data;
+  static std::vector<int32_t> w162_data;
+  w162_data.resize(XNN_PAD_EXTRA_BYTES(160, int32_t));
   uint32_t w162 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w162_dims = {{160}};
-  static std::array<float, 160> w162_scale;
+  static std::vector<float> w162_scale;
+  w162_scale.resize(160);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2658,11 +2756,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(153600, int8_t)>
-      w163_data;
+  static std::vector<int8_t> w163_data;
+  w163_data.resize(XNN_PAD_EXTRA_BYTES(153600, int8_t));
   uint32_t w163 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w163_dims = {{960, 1, 1, 160}};
-  static std::array<float, 960> w163_scale;
+  static std::vector<float> w163_scale;
+  w163_scale.resize(960);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2677,11 +2776,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(960, int32_t)>
-      w164_data;
+  static std::vector<int32_t> w164_data;
+  w164_data.resize(XNN_PAD_EXTRA_BYTES(960, int32_t));
   uint32_t w164 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w164_dims = {{960}};
-  static std::array<float, 960> w164_scale;
+  static std::vector<float> w164_scale;
+  w164_scale.resize(960);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2696,11 +2796,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(8640, int8_t)>
-      w165_data;
+  static std::vector<int8_t> w165_data;
+  w165_data.resize(XNN_PAD_EXTRA_BYTES(8640, int8_t));
   uint32_t w165 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w165_dims = {{1, 3, 3, 960}};
-  static std::array<float, 960> w165_scale;
+  static std::vector<float> w165_scale;
+  w165_scale.resize(960);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2715,11 +2816,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(960, int32_t)>
-      w166_data;
+  static std::vector<int32_t> w166_data;
+  w166_data.resize(XNN_PAD_EXTRA_BYTES(960, int32_t));
   uint32_t w166 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w166_dims = {{960}};
-  static std::array<float, 960> w166_scale;
+  static std::vector<float> w166_scale;
+  w166_scale.resize(960);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2734,11 +2836,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(307200, int8_t)>
-      w167_data;
+  static std::vector<int8_t> w167_data;
+  w167_data.resize(XNN_PAD_EXTRA_BYTES(307200, int8_t));
   uint32_t w167 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w167_dims = {{320, 1, 1, 960}};
-  static std::array<float, 320> w167_scale;
+  static std::vector<float> w167_scale;
+  w167_scale.resize(320);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2753,11 +2856,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(320, int32_t)>
-      w168_data;
+  static std::vector<int32_t> w168_data;
+  w168_data.resize(XNN_PAD_EXTRA_BYTES(320, int32_t));
   uint32_t w168 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w168_dims = {{320}};
-  static std::array<float, 320> w168_scale;
+  static std::vector<float> w168_scale;
+  w168_scale.resize(320);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2772,11 +2876,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(409600, int8_t)>
-      w169_data;
+  static std::vector<int8_t> w169_data;
+  w169_data.resize(XNN_PAD_EXTRA_BYTES(409600, int8_t));
   uint32_t w169 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> w169_dims = {{1280, 1, 1, 320}};
-  static std::array<float, 1280> w169_scale;
+  static std::vector<float> w169_scale;
+  w169_scale.resize(1280);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2791,11 +2896,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(1280, int32_t)>
-      w170_data;
+  static std::vector<int32_t> w170_data;
+  w170_data.resize(XNN_PAD_EXTRA_BYTES(1280, int32_t));
   uint32_t w170 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 1> w170_dims = {{1280}};
-  static std::array<float, 1280> w170_scale;
+  static std::vector<float> w170_scale;
+  w170_scale.resize(1280);
   {
     auto scalerng = std::bind(
         std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
@@ -2810,31 +2916,46 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  alignas(16) static std::array<int8_t, XNN_PAD_EXTRA_BYTES(1281280, int8_t)>
-      w171_data;
+  static std::array<int32_t, 2> w171_data;
+  w171_data = {
+      0x000001,
+      0x000002,
+  };
   uint32_t w171 = XNN_INVALID_VALUE_ID;
-  std::array<size_t, 2> w171_dims = {{1001, 1280}};
-  status = xnn_define_quantized_tensor_value(
-      subgraph, xnn_datatype_qint8,
-      /*zero_point=*/0,
-      /*scale=*/0.004167426843196154f, w171_dims.size(), w171_dims.data(),
+  std::array<size_t, 1> w171_dims = {{2}};
+  status = xnn_define_tensor_value(
+      subgraph, xnn_datatype_int32, w171_dims.size(), w171_dims.data(),
       /*data=*/w171_data.data(), XNN_INVALID_VALUE_ID, /*flags=*/0, &w171);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor w171" << std::endl;
     return nullptr;
   }
 
-  alignas(16) static std::array<int32_t, XNN_PAD_EXTRA_BYTES(1001, int32_t)>
-      w172_data;
+  static std::vector<int8_t> w172_data;
+  w172_data.resize(XNN_PAD_EXTRA_BYTES(1281280, int8_t));
   uint32_t w172 = XNN_INVALID_VALUE_ID;
-  std::array<size_t, 1> w172_dims = {{1001}};
+  std::array<size_t, 2> w172_dims = {{1001, 1280}};
   status = xnn_define_quantized_tensor_value(
-      subgraph, xnn_datatype_qint32,
+      subgraph, xnn_datatype_qint8,
       /*zero_point=*/0,
-      /*scale=*/7.704259769525379e-05f, w172_dims.size(), w172_dims.data(),
+      /*scale=*/0.004167426843196154f, w172_dims.size(), w172_dims.data(),
       /*data=*/w172_data.data(), XNN_INVALID_VALUE_ID, /*flags=*/0, &w172);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor w172" << std::endl;
+    return nullptr;
+  }
+
+  static std::vector<int32_t> w173_data;
+  w173_data.resize(XNN_PAD_EXTRA_BYTES(1001, int32_t));
+  uint32_t w173 = XNN_INVALID_VALUE_ID;
+  std::array<size_t, 1> w173_dims = {{1001}};
+  status = xnn_define_quantized_tensor_value(
+      subgraph, xnn_datatype_qint32,
+      /*zero_point=*/0,
+      /*scale=*/7.704259769525379e-05f, w173_dims.size(), w173_dims.data(),
+      /*data=*/w173_data.data(), XNN_INVALID_VALUE_ID, /*flags=*/0, &w173);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to create tensor w173" << std::endl;
     return nullptr;
   }
 
@@ -2954,8 +3075,8 @@ xnn_subgraph_t QS8MobileNetV2() {
   std::generate(w168_data.begin(), w168_data.end(), std::ref(qc32rng));
   std::generate(w169_data.begin(), w169_data.end(), std::ref(qc8rng));
   std::generate(w170_data.begin(), w170_data.end(), std::ref(qc32rng));
-  std::generate(w171_data.begin(), w171_data.end(), std::ref(qs8rng));
-  std::generate(w172_data.begin(), w172_data.end(), std::ref(qs32rng));
+  std::generate(w172_data.begin(), w172_data.end(), std::ref(qs8rng));
+  std::generate(w173_data.begin(), w173_data.end(), std::ref(qs32rng));
 
   status = xnn_define_unary(subgraph, xnn_unary_convert,
                             /*params=*/nullptr, v0, v1, 0);
@@ -3119,9 +3240,11 @@ xnn_subgraph_t QS8MobileNetV2() {
 
   xnn_binary_params v11_params = {std::numeric_limits<int8_t>::min(),
                                   std::numeric_limits<int8_t>::max()};
-  status =
-      xnn_define_binary(subgraph, xnn_binary_add, &v11_params, v10, v7, v11,
-                        /*flags=*/0);
+  status = xnn_define_binary(subgraph, xnn_binary_add, &v11_params,
+                             /*input1_id=*/v10,
+                             /*input2_id=*/v7,
+                             /*output_id=*/v11,
+                             /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #10" << std::endl;
     return nullptr;
@@ -3231,9 +3354,11 @@ xnn_subgraph_t QS8MobileNetV2() {
 
   xnn_binary_params v18_params = {std::numeric_limits<int8_t>::min(),
                                   std::numeric_limits<int8_t>::max()};
-  status =
-      xnn_define_binary(subgraph, xnn_binary_add, &v18_params, v17, v14, v18,
-                        /*flags=*/0);
+  status = xnn_define_binary(subgraph, xnn_binary_add, &v18_params,
+                             /*input1_id=*/v17,
+                             /*input2_id=*/v14,
+                             /*output_id=*/v18,
+                             /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #17" << std::endl;
     return nullptr;
@@ -3293,9 +3418,11 @@ xnn_subgraph_t QS8MobileNetV2() {
 
   xnn_binary_params v22_params = {std::numeric_limits<int8_t>::min(),
                                   std::numeric_limits<int8_t>::max()};
-  status =
-      xnn_define_binary(subgraph, xnn_binary_add, &v22_params, v21, v18, v22,
-                        /*flags=*/0);
+  status = xnn_define_binary(subgraph, xnn_binary_add, &v22_params,
+                             /*input1_id=*/v21,
+                             /*input2_id=*/v18,
+                             /*output_id=*/v22,
+                             /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #21" << std::endl;
     return nullptr;
@@ -3407,9 +3534,11 @@ xnn_subgraph_t QS8MobileNetV2() {
 
   xnn_binary_params v29_params = {std::numeric_limits<int8_t>::min(),
                                   std::numeric_limits<int8_t>::max()};
-  status =
-      xnn_define_binary(subgraph, xnn_binary_add, &v29_params, v28, v25, v29,
-                        /*flags=*/0);
+  status = xnn_define_binary(subgraph, xnn_binary_add, &v29_params,
+                             /*input1_id=*/v28,
+                             /*input2_id=*/v25,
+                             /*output_id=*/v29,
+                             /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #28" << std::endl;
     return nullptr;
@@ -3469,9 +3598,11 @@ xnn_subgraph_t QS8MobileNetV2() {
 
   xnn_binary_params v33_params = {std::numeric_limits<int8_t>::min(),
                                   std::numeric_limits<int8_t>::max()};
-  status =
-      xnn_define_binary(subgraph, xnn_binary_add, &v33_params, v32, v29, v33,
-                        /*flags=*/0);
+  status = xnn_define_binary(subgraph, xnn_binary_add, &v33_params,
+                             /*input1_id=*/v32,
+                             /*input2_id=*/v29,
+                             /*output_id=*/v33,
+                             /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #32" << std::endl;
     return nullptr;
@@ -3531,9 +3662,11 @@ xnn_subgraph_t QS8MobileNetV2() {
 
   xnn_binary_params v37_params = {std::numeric_limits<int8_t>::min(),
                                   std::numeric_limits<int8_t>::max()};
-  status =
-      xnn_define_binary(subgraph, xnn_binary_add, &v37_params, v36, v33, v37,
-                        /*flags=*/0);
+  status = xnn_define_binary(subgraph, xnn_binary_add, &v37_params,
+                             /*input1_id=*/v36,
+                             /*input2_id=*/v33,
+                             /*output_id=*/v37,
+                             /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #36" << std::endl;
     return nullptr;
@@ -3645,9 +3778,11 @@ xnn_subgraph_t QS8MobileNetV2() {
 
   xnn_binary_params v44_params = {std::numeric_limits<int8_t>::min(),
                                   std::numeric_limits<int8_t>::max()};
-  status =
-      xnn_define_binary(subgraph, xnn_binary_add, &v44_params, v43, v40, v44,
-                        /*flags=*/0);
+  status = xnn_define_binary(subgraph, xnn_binary_add, &v44_params,
+                             /*input1_id=*/v43,
+                             /*input2_id=*/v40,
+                             /*output_id=*/v44,
+                             /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #43" << std::endl;
     return nullptr;
@@ -3707,9 +3842,11 @@ xnn_subgraph_t QS8MobileNetV2() {
 
   xnn_binary_params v48_params = {std::numeric_limits<int8_t>::min(),
                                   std::numeric_limits<int8_t>::max()};
-  status =
-      xnn_define_binary(subgraph, xnn_binary_add, &v48_params, v47, v44, v48,
-                        /*flags=*/0);
+  status = xnn_define_binary(subgraph, xnn_binary_add, &v48_params,
+                             /*input1_id=*/v47,
+                             /*input2_id=*/v44,
+                             /*output_id=*/v48,
+                             /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #47" << std::endl;
     return nullptr;
@@ -3821,9 +3958,11 @@ xnn_subgraph_t QS8MobileNetV2() {
 
   xnn_binary_params v55_params = {std::numeric_limits<int8_t>::min(),
                                   std::numeric_limits<int8_t>::max()};
-  status =
-      xnn_define_binary(subgraph, xnn_binary_add, &v55_params, v54, v51, v55,
-                        /*flags=*/0);
+  status = xnn_define_binary(subgraph, xnn_binary_add, &v55_params,
+                             /*input1_id=*/v54,
+                             /*input2_id=*/v51,
+                             /*output_id=*/v55,
+                             /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #54" << std::endl;
     return nullptr;
@@ -3883,9 +4022,11 @@ xnn_subgraph_t QS8MobileNetV2() {
 
   xnn_binary_params v59_params = {std::numeric_limits<int8_t>::min(),
                                   std::numeric_limits<int8_t>::max()};
-  status =
-      xnn_define_binary(subgraph, xnn_binary_add, &v59_params, v58, v55, v59,
-                        /*flags=*/0);
+  status = xnn_define_binary(subgraph, xnn_binary_add, &v59_params,
+                             /*input1_id=*/v58,
+                             /*input2_id=*/v55,
+                             /*output_id=*/v59,
+                             /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #58" << std::endl;
     return nullptr;
@@ -3960,10 +4101,16 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  size_t reduction_axes_v64[2] = {1, 2};
-  status = xnn_define_static_reduce(subgraph, xnn_reduce_mean, 2,
-                                    &reduction_axes_v64[0], v63, v64,
-                                    /*flags=*/0);
+  std::array<int64_t, 2> axis_v63_w171_v64 = {(int64_t)w171_data[0],
+                                              (int64_t)w171_data[1]};
+  status = xnn_define_static_reduce_v2(
+      subgraph,
+      /*reduce_operator=*/xnn_reduce_mean,
+      /*num_reduction_axes=*/axis_v63_w171_v64.size(),
+      /*reduction_axes=*/axis_v63_w171_v64.data(),
+      /*input_id=*/v63,
+      /*output_id=*/v64,
+      /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #63" << std::endl;
     return nullptr;
@@ -3972,7 +4119,11 @@ xnn_subgraph_t QS8MobileNetV2() {
   status = xnn_define_fully_connected(
       subgraph,
       /*output_min=*/std::numeric_limits<int8_t>::min(),
-      /*output_max=*/std::numeric_limits<int8_t>::max(), v64, w171, w172, v65,
+      /*output_max=*/std::numeric_limits<int8_t>::max(),
+      /*input_id=*/v64,
+      /*filter_id=*/w172,
+      /*bias_id=*/w173,
+      /*output_id=*/v65,
       /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #64" << std::endl;
@@ -3987,6 +4138,6 @@ xnn_subgraph_t QS8MobileNetV2() {
   }
 
   return subgraph;
-}
+}  // NOLINT(readability/fn_size)
 
 }  // namespace models
