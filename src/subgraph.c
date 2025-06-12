@@ -6,7 +6,7 @@
 #include "src/xnnpack/subgraph.h"
 
 #include <assert.h>
-#include <inttypes.h>  // fixdeps: keep
+#include <inttypes.h>  // IWYU pragma: keep
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -2559,6 +2559,13 @@ void xnn_subgraph_rewrite_ssa(xnn_subgraph_t subgraph) {
 
 enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
                                       uint32_t optimization_flags) {
+  // If the subgraph has no nodes, then there is nothing for us to do here, but
+  // do warn the user as this seems a bit unusual.
+  if (!subgraph->num_nodes) {
+    xnn_log_warning("Trying to optimize subgraph with zero nodes, skipping.");
+    return xnn_status_success;
+  }
+
   // Start with a clean and ordered subgraph.
   xnn_subgraph_clean_up(subgraph);
 
