@@ -55,9 +55,9 @@ http_archive(
 # Google Test framework, used by most unit-tests.
 http_archive(
     name = "com_google_googletest",
-    sha256 = "648b9430fca63acc68c59ee98f624dcbcd9c24ea6b278c306ab6b7f49f62034a",
-    strip_prefix = "googletest-d144031940543e15423a25ae5a8a74141044862f",
-    urls = ["https://github.com/google/googletest/archive/d144031940543e15423a25ae5a8a74141044862f.zip"],
+    sha256 = "06eacab9034a91181eb847bf3b113b836ad926bdf5769459d684326987e8dab1",
+    strip_prefix = "googletest-fd15f51d57f983c5f3f609bb39fd77f6dbdc391a",
+    urls = ["https://github.com/google/googletest/archive/fd15f51d57f983c5f3f609bb39fd77f6dbdc391a.zip"],
 )
 # LINT.ThenChange(cmake/DownloadGoogleTest.cmake,MODULE.bazel:googletest)
 
@@ -95,10 +95,10 @@ http_archive(
 # cpuinfo library, used for detecting processor characteristics
 http_archive(
     name = "cpuinfo",
-    sha256 = "ae356c4c0c841e20711b5e111a1ccdec9c2f3c1dd7bde7cfba1bed18d6d02459",
-    strip_prefix = "cpuinfo-de0ce7c7251372892e53ce9bc891750d2c9a4fd8",
+    sha256 = "5a44173cac3acbc3321663ee8df7dcc9f28a1139e834ebac6831a8c4af35f892",
+    strip_prefix = "cpuinfo-d7427551d6531037da216d20cd36feb19ed4905f",
     urls = [
-        "https://github.com/pytorch/cpuinfo/archive/de0ce7c7251372892e53ce9bc891750d2c9a4fd8.zip",
+        "https://github.com/pytorch/cpuinfo/archive/d7427551d6531037da216d20cd36feb19ed4905f.zip",
     ],
 )
 # LINT.ThenChange(cmake/DownloadCpuinfo.cmake,MODULE.bazel:cpuinfo)
@@ -107,10 +107,10 @@ http_archive(
 # KleidiAI library, used for ARM microkernels.
 http_archive(
     name = "KleidiAI",
-    sha256 = "ca8b8ee0c3dd2284c1eae3ac07f7064ce92317ac7c3cfcd1d511662e0594cdb8",
-    strip_prefix = "kleidiai-fb4caf0937a45002861cc12788b6018bfb89ae58",
+    sha256 = "ad04cc186b12810ecde9d75911c76a0113d3c055773c700377de302eef6c4419",
+    strip_prefix = "kleidiai-247088200c679f30b1b4a680bd12fee18457a100",
     urls = [
-        "https://github.com/ARM-software/kleidiai/archive/fb4caf0937a45002861cc12788b6018bfb89ae58.zip",
+        "https://github.com/ARM-software/kleidiai/archive/247088200c679f30b1b4a680bd12fee18457a100.zip",
     ],
 )
 # LINT.ThenChange(cmake/DownloadKleidiAI.cmake,MODULE.bazel:kleidiai)
