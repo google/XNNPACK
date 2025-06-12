@@ -2560,9 +2560,9 @@ void xnn_subgraph_rewrite_ssa(xnn_subgraph_t subgraph) {
 enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
                                       uint32_t optimization_flags) {
   // If the subgraph has no nodes, then there is nothing for us to do here, but
-  // do warn the user as this seems a bit unusual.
+  // do print a notice to the user as this seems a bit unusual.
   if (!subgraph->num_nodes) {
-    xnn_log_warning("Trying to optimize subgraph with zero nodes, skipping.");
+    xnn_log_info("Trying to optimize subgraph with zero nodes, skipping.");
     return xnn_status_success;
   }
 
