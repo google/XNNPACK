@@ -132,7 +132,7 @@ static void init_x32_pack_lh_config(void) {
 #if XNN_ENABLE_ARM_SME2
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   assert(hardware_config != NULL);
-  if (hardware_config->use_arm_sme2) {
+  if ((hardware_config->arch_flags & xnn_arch_arm_sme2)) {
     x32_pack_lh_config.ukernel = (xnn_pack_lh_ukernel_fn) xnn_x32_pack_lh_ukernel__neonsme2;
     x32_pack_lh_config.size_fn = (xnn_pack_lh_size_fn) xnn_x32_pack_lh_size__neonsme2;
     x32_pack_lh_config.offset_fn = (xnn_pack_lh_offset_fn) xnn_x32_pack_lh_offset__neonsme2;
@@ -158,7 +158,7 @@ static void init_x16_pack_lh_config(void) {
 #if XNN_ENABLE_ARM_SME2
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   assert(hardware_config != NULL);
-  if (hardware_config->use_arm_sme2) {
+  if ((hardware_config->arch_flags & xnn_arch_arm_sme2)) {
     x16_pack_lh_config.ukernel = (xnn_pack_lh_ukernel_fn) xnn_x16_pack_lh_ukernel__neonsme2;
     x16_pack_lh_config.size_fn = (xnn_pack_lh_size_fn) xnn_x16_pack_lh_size__neonsme2;
     x16_pack_lh_config.offset_fn = (xnn_pack_lh_offset_fn) xnn_x16_pack_lh_offset__neonsme2;
@@ -184,7 +184,7 @@ static void init_x8_pack_lh_config(void) {
 #if XNN_ENABLE_ARM_SME2
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   assert(hardware_config != NULL);
-  if (hardware_config->use_arm_sme2) {
+  if ((hardware_config->arch_flags & xnn_arch_arm_sme2)) {
     x8_pack_lh_config.ukernel = (xnn_pack_lh_ukernel_fn) xnn_x8_pack_lh_ukernel__neonsme2;
     x8_pack_lh_config.size_fn = (xnn_pack_lh_size_fn) xnn_x8_pack_lh_size__neonsme2;
     x8_pack_lh_config.offset_fn = (xnn_pack_lh_offset_fn) xnn_x8_pack_lh_offset__neonsme2;

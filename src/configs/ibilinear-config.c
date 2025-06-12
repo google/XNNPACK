@@ -27,21 +27,21 @@ static void init_f16_ibilinear_config(void) {
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (hardware_config->use_arm_neon_fp16_arith) {
+    if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
       f16_ibilinear_config.ukernel = (xnn_ibilinear_ukernel_fn) xnn_f16_ibilinear_ukernel__neonfp16arith_c8;
       f16_ibilinear_config.pixel_tile = 1;
     }
   #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (hardware_config->use_arm_neon_fp16_arith) {
+    if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
       f16_ibilinear_config.ukernel = (xnn_ibilinear_ukernel_fn) xnn_f16_ibilinear_ukernel__neonfp16arith_c8;
       f16_ibilinear_config.pixel_tile = 1;
     }
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (hardware_config->use_x86_avx2) {
+    if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
       f16_ibilinear_config.ukernel = (xnn_ibilinear_ukernel_fn) xnn_f16_ibilinear_ukernel__fma3_c8;
       f16_ibilinear_config.pixel_tile = 1;
     }
@@ -56,7 +56,7 @@ static void init_f32_ibilinear_config(void) {
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (hardware_config->use_arm_neon) {
+    if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       f32_ibilinear_config.ukernel = (xnn_ibilinear_ukernel_fn) xnn_f32_ibilinear_ukernel__neon_c8;
       f32_ibilinear_config.pixel_tile = 1;
     } else {
@@ -89,7 +89,7 @@ static void init_s8_ibilinear_config(void) {
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (hardware_config->use_arm_neon) {
+    if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       s8_ibilinear_config.ukernel = (xnn_ibilinear_ukernel_fn) xnn_s8_ibilinear_ukernel__neon_c8;
       s8_ibilinear_config.pixel_tile = 1;
     } else {
@@ -102,7 +102,7 @@ static void init_s8_ibilinear_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (hardware_config->use_x86_sse4_1) {
+    if ((hardware_config->arch_flags & xnn_arch_x86_sse4_1)) {
       s8_ibilinear_config.ukernel = (xnn_ibilinear_ukernel_fn) xnn_s8_ibilinear_ukernel__sse41_c16;
       s8_ibilinear_config.pixel_tile = 1;
     } else {
@@ -126,7 +126,7 @@ static void init_u8_ibilinear_config(void) {
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (hardware_config->use_arm_neon) {
+    if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       u8_ibilinear_config.ukernel = (xnn_ibilinear_ukernel_fn) xnn_u8_ibilinear_ukernel__neon_c8;
       u8_ibilinear_config.pixel_tile = 1;
     } else {
@@ -139,7 +139,7 @@ static void init_u8_ibilinear_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (hardware_config->use_x86_sse4_1) {
+    if ((hardware_config->arch_flags & xnn_arch_x86_sse4_1)) {
       u8_ibilinear_config.ukernel = (xnn_ibilinear_ukernel_fn) xnn_u8_ibilinear_ukernel__sse41_c16;
       u8_ibilinear_config.pixel_tile = 1;
     } else {

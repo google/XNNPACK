@@ -23,7 +23,7 @@ static void init_f16_vmulcaddc_config(void) {
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (hardware_config->use_arm_neon_fp16_arith) {
+    if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
       f16_vmulcaddc_config.ukernel = (xnn_vmulcaddc_ukernel_fn) xnn_f16_vmulcaddc_minmax_ukernel_c8__neonfp16arith_2x;
       f16_vmulcaddc_config.init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_vmulcaddc_config.channel_tile = 8;
@@ -32,7 +32,7 @@ static void init_f16_vmulcaddc_config(void) {
   #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (hardware_config->use_arm_neon_fp16_arith) {
+    if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
       f16_vmulcaddc_config.ukernel = (xnn_vmulcaddc_ukernel_fn) xnn_f16_vmulcaddc_minmax_ukernel_c8__neonfp16arith_2x;
       f16_vmulcaddc_config.init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_vmulcaddc_config.channel_tile = 8;
@@ -41,7 +41,7 @@ static void init_f16_vmulcaddc_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (hardware_config->use_x86_avx2) {
+    if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
       f16_vmulcaddc_config.ukernel = (xnn_vmulcaddc_ukernel_fn) xnn_f16_vmulcaddc_minmax_ukernel_c8__fma3_2x;
       f16_vmulcaddc_config.init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_vmulcaddc_config.channel_tile = 8;
@@ -54,7 +54,7 @@ static void init_f32_vmulcaddc_config(void) {
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (hardware_config->use_arm_neon) {
+    if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       f32_vmulcaddc_config.ukernel = (xnn_vmulcaddc_ukernel_fn) xnn_f32_vmulcaddc_minmax_ukernel_c4__neon_2x;
       f32_vmulcaddc_config.init.f32 = xnn_init_f32_minmax_scalar_params;
       f32_vmulcaddc_config.channel_tile = 4;

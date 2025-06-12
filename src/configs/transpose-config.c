@@ -23,7 +23,7 @@ static void init_transpose_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
 
-    if (hardware_config->use_arm_neon) {
+    if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       transpose_config.copy = (xnn_vunary_ukernel_fn) xnn_xx_copy_ukernel__scalar_memcpy;
       transpose_config.x8 = (struct xnn_transpose_subconfig) {
         .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x8_transposec_ukernel__16x16_reuse_dec_zip_neon,
@@ -131,13 +131,13 @@ static void init_transpose_config(void) {
       .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x64_transposec_ukernel__2x2_multi_mov_sse2,
       .tile_size = 32,
     };
-    if (hardware_config->use_x86_ssse3) {
+    if ((hardware_config->arch_flags & xnn_arch_x86_ssse3)) {
       transpose_config.x24 = (struct xnn_transpose_subconfig) {
         .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x24_transposec_ukernel__4x4_ssse3,
         .tile_size = 32,
       };
     }
-    if (hardware_config->use_x86_avx) {
+    if ((hardware_config->arch_flags & xnn_arch_x86_avx)) {
       transpose_config.x32 = (struct xnn_transpose_subconfig) {
         .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x32_transposec_ukernel__8x8_reuse_multi_avx,
         .tile_size = 32,
@@ -147,7 +147,7 @@ static void init_transpose_config(void) {
         .tile_size = 32,
       };
     }
-    if (hardware_config->use_x86_avx2) {
+    if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
       transpose_config.x8 = (struct xnn_transpose_subconfig) {
         .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x8_transposec_ukernel__32x32_reuse_switch_avx2,
         .tile_size = 32,
