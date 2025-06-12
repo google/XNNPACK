@@ -22,7 +22,7 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/gemm.h"
 #include "src/xnnpack/igemm.h"
-#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/packw.h"
