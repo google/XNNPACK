@@ -496,8 +496,6 @@ struct xnn_subgraph {
   uint32_t num_reserved_nodes;
   uint32_t num_nodes;
   struct xnn_node* nodes;
-
-  uint32_t flags;
 };
 
 /// Runtime is a combination of an execution plan for subgraph Nodes and a
