@@ -748,8 +748,8 @@ SubgraphTester& SubgraphTester::AddSoftmax(uint32_t input_id,
   return *this;
 }
 
-SubgraphTester& SubgraphTester::Optimize() {
-  const xnn_status status = xnn_subgraph_optimize(subgraph_.get(), /*flags=*/0);
+SubgraphTester& SubgraphTester::Optimize(uint32_t flags) {
+  const xnn_status status = xnn_subgraph_optimize(subgraph_.get(), flags);
   EXPECT_EQ(status, xnn_status_success);
 
   return *this;
