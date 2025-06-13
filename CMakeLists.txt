@@ -14,6 +14,9 @@ CMAKE_POLICY(SET CMP0074 NEW)
 # MSVC runtime library flags are selected by an abstraction.
 CMAKE_POLICY(SET CMP0091 NEW)
 
+# Avoid "ignoring duplicate libraries" warning on macOS.
+CMAKE_POLICY(SET CMP0156 NEW)
+
 # ---[ Project and semantic versioning.
 PROJECT(XNNPACK C CXX ASM)
 
