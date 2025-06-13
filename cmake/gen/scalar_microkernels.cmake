@@ -153,9 +153,9 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-25p1c-minmax-fp32-scalar-fmagic.c
   src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-25p2c-minmax-fp32-scalar-lrintf.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x4-minmax-fp32-scalar-lrintf.c
-  src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x4-minmax-fp32-scalar-lrintf.c
+  src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x4-minmax-fp32-scalar-lrintf.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x4-minmax-fp32-scalar-lrintf.c
-  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-3x4-minmax-fp32-scalar-lrintf.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4-minmax-fp32-scalar-lrintf.c
   src/qs8-qu8-packw/gen/qs8-qu8-packw-x16c8-gemm-goi-scalar.c
   src/qs8-rdsum/gen/qs8-rdsum-minmax-fp32-scalar-u1-acc1.c
   src/qs8-rsum/gen/qs8-rsum-scalar-u4.c
@@ -176,9 +176,9 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/qu8-dwconv/gen/qu8-dwconv-25p2c-minmax-fp32-scalar-lrintf.c
   src/qu8-f32-vcvt/gen/qu8-f32-vcvt-scalar-u4.c
   src/qu8-gemm/gen/qu8-gemm-1x4-minmax-fp32-scalar-lrintf.c
-  src/qu8-gemm/gen/qu8-gemm-3x4-minmax-fp32-scalar-lrintf.c
+  src/qu8-gemm/gen/qu8-gemm-4x4-minmax-fp32-scalar-lrintf.c
   src/qu8-igemm/gen/qu8-igemm-1x4-minmax-fp32-scalar-lrintf.c
-  src/qu8-igemm/gen/qu8-igemm-3x4-minmax-fp32-scalar-lrintf.c
+  src/qu8-igemm/gen/qu8-igemm-4x4-minmax-fp32-scalar-lrintf.c
   src/qu8-rdsum/gen/qu8-rdsum-scalar.c
   src/qu8-rsum/gen/qu8-rsum-scalar-u4.c
   src/qu8-vadd/gen/qu8-vadd-minmax-scalar-u1.c
@@ -598,12 +598,12 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x2-minmax-fp32-scalar-lrintf.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x4-minmax-fp32-scalar-fmagic.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x4-minmax-fp32-scalar-imagic.c
+  src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x4-minmax-fp32-scalar-lrintf.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x2-minmax-fp32-scalar-fmagic.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x2-minmax-fp32-scalar-imagic.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x2-minmax-fp32-scalar-lrintf.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x4-minmax-fp32-scalar-fmagic.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x4-minmax-fp32-scalar-imagic.c
-  src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x4-minmax-fp32-scalar-lrintf.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x2-minmax-fp32-scalar-fmagic.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x2-minmax-fp32-scalar-imagic.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x2-minmax-fp32-scalar-lrintf.c
@@ -620,12 +620,12 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-3x2-minmax-fp32-scalar-lrintf.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-3x4-minmax-fp32-scalar-fmagic.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-3x4-minmax-fp32-scalar-imagic.c
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-3x4-minmax-fp32-scalar-lrintf.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x2-minmax-fp32-scalar-fmagic.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x2-minmax-fp32-scalar-imagic.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x2-minmax-fp32-scalar-lrintf.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4-minmax-fp32-scalar-fmagic.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4-minmax-fp32-scalar-imagic.c
-  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4-minmax-fp32-scalar-lrintf.c
   src/qs8-qu8-packw/gen/qs8-qu8-packw-x8c8-gemm-gio-scalar.c
   src/qs8-qu8-packw/gen/qs8-qu8-packw-x8c8-gemm-goi-scalar.c
   src/qs8-qu8-packw/gen/qs8-qu8-packw-x16c8-gemm-gio-scalar.c
@@ -694,6 +694,7 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/qu8-gemm/gen/qu8-gemm-3x2-minmax-rndnu-scalar.c
   src/qu8-gemm/gen/qu8-gemm-3x4-minmax-fp32-scalar-fmagic.c
   src/qu8-gemm/gen/qu8-gemm-3x4-minmax-fp32-scalar-imagic.c
+  src/qu8-gemm/gen/qu8-gemm-3x4-minmax-fp32-scalar-lrintf.c
   src/qu8-gemm/gen/qu8-gemm-3x4-minmax-rndnu-scalar.c
   src/qu8-gemm/gen/qu8-gemm-4x2-minmax-fp32-scalar-fmagic.c
   src/qu8-gemm/gen/qu8-gemm-4x2-minmax-fp32-scalar-imagic.c
@@ -701,7 +702,6 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/qu8-gemm/gen/qu8-gemm-4x2-minmax-rndnu-scalar.c
   src/qu8-gemm/gen/qu8-gemm-4x4-minmax-fp32-scalar-fmagic.c
   src/qu8-gemm/gen/qu8-gemm-4x4-minmax-fp32-scalar-imagic.c
-  src/qu8-gemm/gen/qu8-gemm-4x4-minmax-fp32-scalar-lrintf.c
   src/qu8-gemm/gen/qu8-gemm-4x4-minmax-rndnu-scalar.c
   src/qu8-igemm/gen/qu8-igemm-1x2-minmax-fp32-scalar-fmagic.c
   src/qu8-igemm/gen/qu8-igemm-1x2-minmax-fp32-scalar-imagic.c
@@ -724,6 +724,7 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/qu8-igemm/gen/qu8-igemm-3x2-minmax-rndnu-scalar.c
   src/qu8-igemm/gen/qu8-igemm-3x4-minmax-fp32-scalar-fmagic.c
   src/qu8-igemm/gen/qu8-igemm-3x4-minmax-fp32-scalar-imagic.c
+  src/qu8-igemm/gen/qu8-igemm-3x4-minmax-fp32-scalar-lrintf.c
   src/qu8-igemm/gen/qu8-igemm-3x4-minmax-rndnu-scalar.c
   src/qu8-igemm/gen/qu8-igemm-4x2-minmax-fp32-scalar-fmagic.c
   src/qu8-igemm/gen/qu8-igemm-4x2-minmax-fp32-scalar-imagic.c
@@ -731,7 +732,6 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/qu8-igemm/gen/qu8-igemm-4x2-minmax-rndnu-scalar.c
   src/qu8-igemm/gen/qu8-igemm-4x4-minmax-fp32-scalar-fmagic.c
   src/qu8-igemm/gen/qu8-igemm-4x4-minmax-fp32-scalar-imagic.c
-  src/qu8-igemm/gen/qu8-igemm-4x4-minmax-fp32-scalar-lrintf.c
   src/qu8-igemm/gen/qu8-igemm-4x4-minmax-rndnu-scalar.c
   src/qu8-rsum/gen/qu8-rsum-scalar-u1.c
   src/qu8-rsum/gen/qu8-rsum-scalar-u2.c
