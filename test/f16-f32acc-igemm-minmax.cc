@@ -260,6 +260,16 @@ std::vector<GemmTestParams> CreateTests1(
         .loop_zi(0, mr - 1));
   }
   gemm_tests.push_back(GemmTestParams(
+      "min",
+      tester.clone()
+          .m(mr).n(nr).k(k_block).min(0.0f)
+      , test_func, arch_flags));
+  gemm_tests.push_back(GemmTestParams(
+      "max",
+      tester.clone()
+          .m(mr).n(nr).k(k_block).max(0.0f)
+      , test_func, arch_flags));
+  gemm_tests.push_back(GemmTestParams(
       "strided_cm",
       tester.clone()
           .m(mr).n(nr).k(k_block)
@@ -279,7 +289,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*k_block=*/1,
           /*adj_k_block=*/1,
           /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-          /*is_igemm=*/false,
+          /*is_igemm=*/true,
           /*unsigned_inputs=*/false,
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
@@ -298,7 +308,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*k_block=*/1,
           /*adj_k_block=*/1,
           /*mr=*/1, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-          /*is_igemm=*/false,
+          /*is_igemm=*/true,
           /*unsigned_inputs=*/false,
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
@@ -317,7 +327,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*k_block=*/1,
           /*adj_k_block=*/1,
           /*mr=*/3, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-          /*is_igemm=*/false,
+          /*is_igemm=*/true,
           /*unsigned_inputs=*/false,
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
@@ -336,7 +346,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*k_block=*/1,
           /*adj_k_block=*/1,
           /*mr=*/4, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-          /*is_igemm=*/false,
+          /*is_igemm=*/true,
           /*unsigned_inputs=*/false,
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
@@ -355,7 +365,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*k_block=*/1,
           /*adj_k_block=*/1,
           /*mr=*/4, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-          /*is_igemm=*/false,
+          /*is_igemm=*/true,
           /*unsigned_inputs=*/false,
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
@@ -374,7 +384,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*k_block=*/1,
           /*adj_k_block=*/1,
           /*mr=*/5, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-          /*is_igemm=*/false,
+          /*is_igemm=*/true,
           /*unsigned_inputs=*/false,
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
@@ -393,7 +403,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*k_block=*/1,
           /*adj_k_block=*/1,
           /*mr=*/5, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-          /*is_igemm=*/false,
+          /*is_igemm=*/true,
           /*unsigned_inputs=*/false,
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
@@ -412,7 +422,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*k_block=*/1,
           /*adj_k_block=*/1,
           /*mr=*/6, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-          /*is_igemm=*/false,
+          /*is_igemm=*/true,
           /*unsigned_inputs=*/false,
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
@@ -431,7 +441,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*k_block=*/1,
           /*adj_k_block=*/1,
           /*mr=*/7, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-          /*is_igemm=*/false,
+          /*is_igemm=*/true,
           /*unsigned_inputs=*/false,
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {

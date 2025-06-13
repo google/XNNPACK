@@ -287,6 +287,18 @@ std::vector<GemmTestParams> CreateTests1(
         .loop_zi(0, mr - 1));
   }
   gemm_tests.push_back(GemmTestParams(
+      "qmin",
+      tester.clone()
+          .m(mr).n(nr).k(k_block).qmin(128)
+          .b_zero_point(8)
+      , test_func, arch_flags));
+  gemm_tests.push_back(GemmTestParams(
+      "qmax",
+      tester.clone()
+          .m(mr).n(nr).k(k_block).qmax(128)
+          .b_zero_point(8)
+      , test_func, arch_flags));
+  gemm_tests.push_back(GemmTestParams(
       "strided_cm",
       tester.clone()
           .m(mr).n(nr).k(k_block)

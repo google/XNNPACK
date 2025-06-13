@@ -260,6 +260,16 @@ std::vector<GemmTestParams> CreateTests1(
         .loop_zi(0, mr - 1));
   }
   gemm_tests.push_back(GemmTestParams(
+      "min",
+      tester.clone()
+          .m(mr).n(nr).k(k_block).min(0.0f)
+      , test_func, arch_flags));
+  gemm_tests.push_back(GemmTestParams(
+      "max",
+      tester.clone()
+          .m(mr).n(nr).k(k_block).max(0.0f)
+      , test_func, arch_flags));
+  gemm_tests.push_back(GemmTestParams(
       "strided_cm",
       tester.clone()
           .m(mr).n(nr).k(k_block)
