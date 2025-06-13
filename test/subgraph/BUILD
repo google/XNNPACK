@@ -14,17 +14,18 @@ load(
 SUBGRAPH_TEST_DEPS = [
     ":runtime_flags",
     ":subgraph_tester",
-    "//:XNNPACK",
     "//:buffer",
     "//:common",
     "//:datatype",
     "//:math",
     "//:node_type",
-    "//:operators",
     "//:operator_utils",
+    "//:operators",
     "//:reference_ukernels",
     "//:requantization",
     "//:subgraph",
+    "//:XNNPACK",
+    "//src/configs:hardware_config",
     "//test:replicable_random_device",
 ]
 
