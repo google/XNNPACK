@@ -174,7 +174,6 @@ xnnpack_cxx_library(
     ] + xnnpack_optional_ruy_deps() + xnnpack_optional_gemmlowp_deps(),
 ) for kernel in [
     "f16_gemm_minmax",
-    "f32_gemm_goi_minmax",
     "f32_gemm_minmax",
     "f32_gemm",
     "pqs8_qc8w_gemm_minmax",
