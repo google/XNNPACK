@@ -1941,16 +1941,11 @@ void xnn_pack_qu8_weights_and_biases(
 #if XNN_ENABLE_KLEIDIAI
 size_t xnn_packed_stride_kai_qs4_weights_and_biases_sme(
     const struct xnn_gemm_config* gemm_config, size_t k, size_t unused_k_stride,
-    size_t unused_block_size,  //
-    size_t extra_bytes) {
-  const uint32_t nr = gemm_config->nr;
-  const uint32_t kr = gemm_config->nr;
-  const uint32_t sr = gemm_config->nr;
-  size_t ret_val =
-      kai_get_rhs_packed_stride_rhs_pack_nxk_qsi4cxps1s0_qsu4cxs1s0_neon(
-          k, nr, kr, sr) /
-      kai_get_n_step_rhs_pack_nxk_qsi4cxps1s0_qsu4cxs1s0_neon(nr);
-  return ret_val;
+    size_t unused_block_size, size_t extra_bytes) {
+  const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
+  const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
+  return kai_get_rhs_packed_stride_rhs_pack_nxk_qsi4cxps1s0_qsu4cxs1s0_neon(
+      k, /*nr=*/1, kr, sr);
 }
 
 void xnn_pack_kai_qs4_weights_and_biases_sme(
