@@ -582,3 +582,18 @@
   init: xnn_init_qu8_conv_minmax_fp32_scalar_params
   pack: xnn_pack_qu8_gemm_goi_w
   k-block: 1
+
+# RVV
+- name: xnn_qu8_gemm_minmax_fp32_ukernel_1x4v__rvv
+  init: xnn_init_qu8_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qu8_gemm_goi_w
+  k-block: 1
+- name: xnn_qu8_gemm_minmax_fp32_ukernel_4x4v__rvv
+  init: xnn_init_qu8_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qu8_gemm_goi_w
+  k-block: 1
+- name: xnn_qu8_gemm_minmax_fp32_ukernel_7x4v__rvv
+  init: xnn_init_qu8_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qu8_gemm_goi_w
+  k-block: 1
+  
