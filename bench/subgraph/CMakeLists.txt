@@ -28,7 +28,7 @@ IF(XNNPACK_BUILD_LIBRARY)
 
   ADD_EXECUTABLE(bench-models benchmark.cc)
   TARGET_LINK_LIBRARIES(bench-models PRIVATE
-    bench-utils
+    xnnpack-bench-utils
     benchmark::benchmark
     models
     XNNPACK)
