@@ -25,6 +25,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_u4(
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t n_stride,
   const uint32_t* weights,
   const uint32_t* bias,
   const void* scale,
@@ -61,7 +62,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_u4(
       }
       packed_w += 2;
 
-      const float* w1 = w0 + kc;
+      const float* w1 = w0 + n_stride;
 
       // KC main loop multiple of 2x4
       size_t k = kc;

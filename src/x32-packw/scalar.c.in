@@ -27,6 +27,7 @@ void xnn_x${BITS}_packw_gemm_goi_ukernel_x${NR}__scalar_${TYPE_SUFFIX}_u${KBLOCK
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t n_stride,
   const ${WTYPE}* weights,
   $if BITS == 8:
     const int32_t* bias,
@@ -78,7 +79,7 @@ void xnn_x${BITS}_packw_gemm_goi_ukernel_x${NR}__scalar_${TYPE_SUFFIX}_u${KBLOCK
         out += ${NR} * sizeof(${BTYPE});
 
       $for N in range(1, NR):
-        const ${TYPE}* w${N} = w${N-1} + kc;
+        const ${TYPE}* w${N} = w${N-1} + n_stride;
       $if BITS == 8:
         $for N in range(NR):
           uint32_t ksum${N} = 0;
@@ -145,7 +146,7 @@ void xnn_x${BITS}_packw_gemm_goi_ukernel_x${NR}__scalar_${TYPE_SUFFIX}_u${KBLOCK
       $if NR > 2:
         // NR remainder has less than ${NR} rows so last row is not loaded
       $for N in range(1, NR-1):
-        const ${TYPE}* w${N} = w${N-1} + kc;
+        const ${TYPE}* w${N} = w${N-1} + n_stride;
         $if N % 2 == 0:
           if XNN_UNPREDICTABLE(n <= ${N}) {
             w${N} = w${N-1};

@@ -26,6 +26,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__avx512f_u4(
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t n_stride,
   const uint32_t* weights,
   const uint32_t* bias,
   const void* scale,
@@ -60,21 +61,21 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__avx512f_u4(
       }
       packed_w += 16;
 
-      const float* w1 = w0 + kc;
-      const float* w2 = w1 + kc;
-      const float* w3 = w2 + kc;
-      const float* w4 = w3 + kc;
-      const float* w5 = w4 + kc;
-      const float* w6 = w5 + kc;
-      const float* w7 = w6 + kc;
-      const float* w8 = w7 + kc;
-      const float* w9 = w8 + kc;
-      const float* w10 = w9 + kc;
-      const float* w11 = w10 + kc;
-      const float* w12 = w11 + kc;
-      const float* w13 = w12 + kc;
-      const float* w14 = w13 + kc;
-      const float* w15 = w14 + kc;
+      const float* w1 = w0 + n_stride;
+      const float* w2 = w1 + n_stride;
+      const float* w3 = w2 + n_stride;
+      const float* w4 = w3 + n_stride;
+      const float* w5 = w4 + n_stride;
+      const float* w6 = w5 + n_stride;
+      const float* w7 = w6 + n_stride;
+      const float* w8 = w7 + n_stride;
+      const float* w9 = w8 + n_stride;
+      const float* w10 = w9 + n_stride;
+      const float* w11 = w10 + n_stride;
+      const float* w12 = w11 + n_stride;
+      const float* w13 = w12 + n_stride;
+      const float* w14 = w13 + n_stride;
+      const float* w15 = w14 + n_stride;
 
       // KC main loop multiple of 4
       size_t k = kc;
@@ -304,59 +305,59 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__avx512f_u4(
 
       // NR remainder has less than 16 rows so last row is not loaded
       // For SR=4 the
-      const float* w1 = w0 + kc;
+      const float* w1 = w0 + n_stride;
       if XNN_UNPREDICTABLE(n < 2) {
         w1 = w0;
       }
-      const float* w2 = w1 + kc;
+      const float* w2 = w1 + n_stride;
       if XNN_UNPREDICTABLE(n <= 2) {
         w2 = w1;
       }
-      const float* w3 = w2 + kc;
+      const float* w3 = w2 + n_stride;
       if XNN_UNPREDICTABLE(n < 4) {
         w3 = w2;
       }
-      const float* w4 = w3 + kc;
+      const float* w4 = w3 + n_stride;
       if XNN_UNPREDICTABLE(n <= 4) {
         w4 = w3;
       }
-      const float* w5 = w4 + kc;
+      const float* w5 = w4 + n_stride;
       if XNN_UNPREDICTABLE(n < 6) {
         w5 = w4;
       }
-      const float* w6 = w5 + kc;
+      const float* w6 = w5 + n_stride;
       if XNN_UNPREDICTABLE(n <= 6) {
         w6 = w5;
       }
-      const float* w7 = w6 + kc;
+      const float* w7 = w6 + n_stride;
       if XNN_UNPREDICTABLE(n < 8) {
         w7 = w6;
       }
-      const float* w8 = w7 + kc;
+      const float* w8 = w7 + n_stride;
       if XNN_UNPREDICTABLE(n <= 8) {
         w8 = w7;
       }
-      const float* w9 = w8 + kc;
+      const float* w9 = w8 + n_stride;
       if XNN_UNPREDICTABLE(n < 10) {
         w9 = w8;
       }
-      const float* w10 = w9 + kc;
+      const float* w10 = w9 + n_stride;
       if XNN_UNPREDICTABLE(n <= 10) {
         w10 = w9;
       }
-      const float* w11 = w10 + kc;
+      const float* w11 = w10 + n_stride;
       if XNN_UNPREDICTABLE(n < 12) {
         w11 = w10;
       }
-      const float* w12 = w11 + kc;
+      const float* w12 = w11 + n_stride;
       if XNN_UNPREDICTABLE(n <= 12) {
         w12 = w11;
       }
-      const float* w13 = w12 + kc;
+      const float* w13 = w12 + n_stride;
       if XNN_UNPREDICTABLE(n < 14) {
         w13 = w12;
       }
-      const float* w14 = w13 + kc;
+      const float* w14 = w13 + n_stride;
       if XNN_UNPREDICTABLE(n <= 14) {
         w14 = w13;
       }

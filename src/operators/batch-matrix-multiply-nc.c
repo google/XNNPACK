@@ -354,7 +354,7 @@ enum xnn_status create_batch_matrix_multiply_nc_fx_const_weights(
     } else {
       if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
         batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.packw_gemm_goi(
-            /*groups=*/batch_size_b, n, k, nr, kr, sr, data_b,
+            /*groups=*/batch_size_b, n, k, nr, kr, sr, k, data_b,
             /*bias=*/NULL, /*scale=*/NULL, packed_data,
             /*extra_bytes=*/0, /*packing_params=*/NULL);
       } else {
@@ -561,7 +561,7 @@ enum xnn_status create_batch_matrix_multiply_nc_qx8_f32_qc8w(
           /*input_zero_point=*/1};
       if (batch_matrix_multiply_op->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
         batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.packw_gemm_goi(
-            /*groups=*/batch_size_b, n, k, nr, kr, sr, data_b, /*b=*/NULL,
+            /*groups=*/batch_size_b, n, k, nr, kr, sr, k, data_b, /*b=*/NULL,
             /*scale=*/NULL, packed_data, nr * extra_bytes, &pack_gemm_params);
       } else {
         batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.packw_gemm_gio(

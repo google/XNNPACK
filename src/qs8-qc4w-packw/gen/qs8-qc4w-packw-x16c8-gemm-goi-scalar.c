@@ -27,6 +27,7 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x16c8__scalar(
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t n_stride,
   const uint8_t* k,
   const int32_t* b,
   const float* scale,
@@ -71,7 +72,7 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x16c8__scalar(
           const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * 8) & (skr - 1));
           for (size_t kr_block_offset = 0; kr_block_offset < 8; kr_block_offset++) {
             const size_t kc_idx = kc_begin + kr_block_offset;
-            const size_t k_offset = (nr_block_start + nr_block_offset) * kc + kc_idx;
+            const size_t k_offset = (nr_block_start + nr_block_offset) * n_stride + kc_idx;
             const size_t kh_offset = k_offset + 8;
             if (kernel_zero_point == 0) {
               int8_t kv_lo = 0;

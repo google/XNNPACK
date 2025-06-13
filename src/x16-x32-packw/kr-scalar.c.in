@@ -25,6 +25,7 @@ void xnn_x${BITS}_x${BIAS_BITS}_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t n_stride,
   const ${WTYPE}* weights,
   const ${BTYPE}* bias,
   const void* scale,
@@ -58,7 +59,7 @@ void xnn_x${BITS}_x${BIAS_BITS}_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
       out += ${NR} * sizeof(${BTYPE}) / sizeof(${TYPE});
 
       $for N in range(1, NR):
-        const ${TYPE}* w${N} = w${N-1} + kc;
+        const ${TYPE}* w${N} = w${N-1} + n_stride;
 
       // KC main loop multiple of ${NR}x${KR}
       size_t k = kc;
@@ -110,7 +111,7 @@ void xnn_x${BITS}_x${BIAS_BITS}_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
      $if NR > 2:
         // NR remainder has less than ${NR} rows so last row is not loaded
       $for N in range(1, NR-1):
-        const ${TYPE}* w${N} = w${N-1} + kc;
+        const ${TYPE}* w${N} = w${N-1} + n_stride;
         $if N % 2 == 0:
           if XNN_UNPREDICTABLE(n <= ${N}) {
             w${N} = w${N-1};
