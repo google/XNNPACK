@@ -72,7 +72,7 @@ XNN_INIT_ONCE_GUARD(hardware);
 
 // TODO(b/409244409): Remove before end of 2025/Q2.
 #if XNN_ARCH_ARM64
-int32_t xnn_enable_arm_sme2_default = 0;
+int32_t xnn_enable_arm_sme2_default = 1;
 #endif  // XNN_ARCH_ARM64
 
 static void set_arch_flag(uint64_t flag, bool value) {

@@ -111,7 +111,10 @@ OPTION(XNNPACK_ENABLE_ARM_BF16 "Build XNNPACK with ARM BF16 (BFLOAT16) micro-ker
 OPTION(XNNPACK_ENABLE_ARM_DOTPROD "Build XNNPACK with ARM DotProd (integer dot product) micro-kernels" ON)
 OPTION(XNNPACK_ENABLE_ARM_I8MM "Build XNNPACK with ARM I8MM (8-bit integer matrix multiply accumulate) micro-kernels" ON)
 OPTION(XNNPACK_ENABLE_ARM_SME "Build XNNPACK with ARM SME micro-kernels" ON)
-OPTION(XNNPACK_ENABLE_ARM_SME2 "Build XNNPACK with ARM SME2 micro-kernels" ON)
+
+# Only enable this by default once we're able to test all SME2 kernels continuously.
+OPTION(XNNPACK_ENABLE_ARM_SME2 "Build XNNPACK with ARM SME2 micro-kernels" OFF)
+
 IF(NOT XNNPACK_TARGET_PROCESSOR MATCHES "arm(64)?")
   SET(XNNPACK_ENABLE_ARM_FP16_SCALAR OFF)
   SET(XNNPACK_ENABLE_ARM_FP16_VECTOR OFF)
