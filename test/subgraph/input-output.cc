@@ -5,8 +5,8 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <numeric>
 #include <vector>
 
@@ -15,12 +15,30 @@
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/datatype.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/subgraph.h"
+#include "test/subgraph/runtime-flags.h"
 #include "test/subgraph/subgraph-tester.h"
 
 namespace xnnpack {
 
-TEST(InputOutput, ConditionalReadWrite) {
+class InputOutput : public testing::TestWithParam<bool> {};
+
+INSTANTIATE_TEST_SUITE_P(
+    InputOutput, InputOutput, testing::Bool(),
+    [](const testing::TestParamInfo<InputOutput::ParamType>& info) {
+      const bool rewrite_for_fp16 = info.param;
+      return rewrite_for_fp16 ? "fp16_rewrite" : "fp32";
+    });
+
+TEST_P(InputOutput, ConditionalReadWrite) {
+  const bool rewrite_for_fp16 = GetParam();
+  if (rewrite_for_fp16 &&
+      !xnn_is_f16_compatible_config(xnn_init_hardware_config())) {
+    GTEST_SKIP() << "No FP16 support detected.";
+  }
+
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
   std::vector<size_t> dims = {5};
@@ -54,7 +72,13 @@ TEST(InputOutput, ConditionalReadWrite) {
       .AddBinary(xnn_binary_add, nullptr, persistent_a_id, input_b_id,
                  persistent_id)
       .AddCopy(persistent_id, output_id);
-  ASSERT_EQ(xnn_status_success, subgraph.CreateRuntime());
+
+  // Rewrite the subgraph for `fp16` if requested.
+  ASSERT_EQ(xnn_status_success,
+            subgraph.CreateRuntime(
+                /*threadpool=*/nullptr,
+                /*flags=*/xnn_test_runtime_flags() |
+                    (rewrite_for_fp16 ? XNN_FLAG_FORCE_FP16_INFERENCE : 0)));
 
   Tensor<float> input(dims, xnnpack::XnnExtraBytes);
   std::iota(input.begin(), input.end(), 0.0f);
@@ -93,7 +117,13 @@ TEST(InputOutput, ConditionalReadWrite) {
   ASSERT_THAT(add, testing::ElementsAre(2.0f, 3.0f, 4.0f, 5.0f, 6.0f));
 }
 
-TEST(InputOutput, SlidingWindow) {
+TEST_P(InputOutput, SlidingWindow) {
+  const bool rewrite_for_fp16 = GetParam();
+  if (rewrite_for_fp16 &&
+      !xnn_is_f16_compatible_config(xnn_init_hardware_config())) {
+    GTEST_SKIP() << "No FP16 support detected.";
+  }
+
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
   const size_t slices = 20;
@@ -119,7 +149,13 @@ TEST(InputOutput, SlidingWindow) {
   subgraph.AddSlice({0, 0}, {-1, 0}, {1, 1}, persistent_id, prev_id)
       .AddConcatenate(0, {input_id, prev_id}, persistent_id)
       .AddCopy(persistent_id, output_id);
-  ASSERT_EQ(xnn_status_success, subgraph.CreateRuntime());
+
+  // Rewrite the subgraph for `fp16` if requested.
+  ASSERT_EQ(xnn_status_success,
+            subgraph.CreateRuntime(
+                /*threadpool=*/nullptr,
+                /*flags=*/xnn_test_runtime_flags() |
+                    (rewrite_for_fp16 ? XNN_FLAG_FORCE_FP16_INFERENCE : 0)));
 
   // If we are using an input-output tensor as the persistent tensor, we need
   // to provide the storage for it.
@@ -149,7 +185,13 @@ TEST(InputOutput, SlidingWindow) {
   }
 }
 
-TEST(InputOutput, MultipleWrites) {
+TEST_P(InputOutput, MultipleWrites) {
+  const bool rewrite_for_fp16 = GetParam();
+  if (rewrite_for_fp16 &&
+      !xnn_is_f16_compatible_config(xnn_init_hardware_config())) {
+    GTEST_SKIP() << "No FP16 support detected.";
+  }
+
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
   std::vector<size_t> dims = {5};
@@ -181,7 +223,13 @@ TEST(InputOutput, MultipleWrites) {
                  persistent_id)
       .AddBinary(xnn_binary_multiply, nullptr, persistent_id, a_id,
                  persistent_id);
-  ASSERT_EQ(xnn_status_success, subgraph.CreateRuntime());
+
+  // Rewrite the subgraph for `fp16` if requested.
+  ASSERT_EQ(xnn_status_success,
+            subgraph.CreateRuntime(
+                /*threadpool=*/nullptr,
+                /*flags=*/xnn_test_runtime_flags() |
+                    (rewrite_for_fp16 ? XNN_FLAG_FORCE_FP16_INFERENCE : 0)));
 
   // If we are using an input-output tensor as the persistent tensor, we need
   // to provide the storage for it.
@@ -191,7 +239,7 @@ TEST(InputOutput, MultipleWrites) {
   subgraph.ReshapeExternalTensor(dims, persistent.base(), persistent_id)
       .ReshapeRuntime();
 
-  float a = 0.9f;
+  float a = 0.75f;
   subgraph.SetupExternalTensor(&a, a_id).SetupRuntime().InvokeRuntime();
 
   ASSERT_THAT(persistent, testing::Each(a * a * a * a * a));
