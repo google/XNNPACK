@@ -639,7 +639,8 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
     size_t n, size_t* workspace_size,
     uint32_t log2_input_a_element_size, uint32_t log2_input_b_element_size,
     uint32_t bias_element_size, uint32_t log2_output_element_size,
-    const void* params, size_t params_size,
+    const void* params, size_t params_size, const void* packing_params,
+    xnn_init_scale_params_fn init_scale_params, const float* scale_params,
     size_t num_threads) {
   if (batch_matrix_multiply_op->type != expected_operator_type) {
     xnn_log_error(
@@ -798,6 +799,7 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
           .gc_stride = input_b_batch_stride,
           .pack_weights_and_biases = gemm_config->pack_weights_and_biases,
           .gemm_config = gemm_config,
+          .params = packing_params,
       };
       batch_matrix_multiply_op->compute[0].task_2d_tile_1d_dynamic =
           (pthreadpool_task_2d_tile_1d_dynamic_t)
@@ -815,6 +817,7 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
           .nr = nr,
           .kr = kr,
           .sr = sr,
+          .k_stride = k << log2_input_b_element_size,
           .bias = NULL,
           .b_stride = bias_element_size,
           .w_stride = weights_stride,
@@ -825,6 +828,7 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
           .gc_stride = input_b_batch_stride,
           .pack_weights_and_biases = gemm_config->pack_weights_and_biases,
           .gemm_config = gemm_config,
+          .params = packing_params,
       };
       batch_matrix_multiply_op->compute[0].task_2d_tile_1d_dynamic =
           (pthreadpool_task_2d_tile_1d_dynamic_t)
@@ -1094,7 +1098,8 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_f16(
       /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
       &batch_matrix_multiply_op->params.f16_minmax,
       sizeof(batch_matrix_multiply_op->params.f16_minmax),
-      pthreadpool_get_threads_count(threadpool));
+      /*packing_params=*/NULL, /*init_scale_params=*/NULL,
+      /*scale_params=*/NULL, pthreadpool_get_threads_count(threadpool));
 }
 
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_pf16(
@@ -1111,7 +1116,8 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_pf16(
       /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
       &batch_matrix_multiply_op->params.f16_minmax,
       sizeof(batch_matrix_multiply_op->params.f16_minmax),
-      pthreadpool_get_threads_count(threadpool));
+      /*packing_params=*/NULL, /*init_scale_params=*/NULL,
+      /*scale_params=*/NULL, pthreadpool_get_threads_count(threadpool));
 }
 
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_bf16_f32(
@@ -1128,7 +1134,8 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_bf16_f32(
       /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
       &batch_matrix_multiply_op->params.f32_minmax,
       sizeof(batch_matrix_multiply_op->params.f32_minmax),
-      pthreadpool_get_threads_count(threadpool));
+      /*packing_params=*/NULL, /*init_scale_params=*/NULL,
+      /*scale_params=*/NULL, pthreadpool_get_threads_count(threadpool));
 }
 
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_f32(
@@ -1145,7 +1152,8 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_f32(
       /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
       &batch_matrix_multiply_op->params.f32_minmax,
       sizeof(batch_matrix_multiply_op->params.f32_minmax),
-      pthreadpool_get_threads_count(threadpool));
+      /*packing_params=*/NULL, /*init_scale_params=*/NULL,
+      /*scale_params=*/NULL, pthreadpool_get_threads_count(threadpool));
 }
 
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_pf32(
@@ -1162,7 +1170,8 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_pf32(
       /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
       &batch_matrix_multiply_op->params.f32_minmax,
       sizeof(batch_matrix_multiply_op->params.f32_minmax),
-      pthreadpool_get_threads_count(threadpool));
+      /*packing_params=*/NULL, /*init_scale_params=*/NULL,
+      /*scale_params=*/NULL, pthreadpool_get_threads_count(threadpool));
 }
 
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_qd8_f32_qc8w(
@@ -1179,7 +1188,8 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_qd8_f32_qc8w(
       /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
       &batch_matrix_multiply_op->params.f32_minmax,
       sizeof(batch_matrix_multiply_op->params.f32_minmax),
-      pthreadpool_get_threads_count(threadpool));
+      /*packing_params=*/NULL, /*init_scale_params=*/NULL,
+      /*scale_params=*/NULL, pthreadpool_get_threads_count(threadpool));
 }
 
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_qp8_f32_qc8w(
@@ -1196,7 +1206,8 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_qp8_f32_qc8w(
       /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
       &batch_matrix_multiply_op->params.f32_minmax,
       sizeof(batch_matrix_multiply_op->params.f32_minmax),
-      pthreadpool_get_threads_count(threadpool));
+      /*packing_params=*/NULL, /*init_scale_params=*/NULL,
+      /*scale_params=*/NULL, pthreadpool_get_threads_count(threadpool));
 }
 
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_qdu8_f32_qc8w(
@@ -1213,7 +1224,8 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_qdu8_f32_qc8w(
       /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
       &batch_matrix_multiply_op->params.f32_minmax,
       sizeof(batch_matrix_multiply_op->params.f32_minmax),
-      pthreadpool_get_threads_count(threadpool));
+      /*packing_params=*/NULL, /*init_scale_params=*/NULL,
+      /*scale_params=*/NULL, pthreadpool_get_threads_count(threadpool));
 }
 
 static enum xnn_status setup_batch_matrix_multiply_nc(

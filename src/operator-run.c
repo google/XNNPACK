@@ -323,16 +323,26 @@ void xnn_compute_batched_packw_gemm_gio(
         n_block_size,
         /*groups=*/1, /*block_size=*/0, /*k_stride=*/context->k_stride_elements,
         /*accumulator_init=*/bias, kernel,
-        /*init_extra_data0_fn=*/NULL,
-        /*extra_data0=*/NULL, /*extra_data0_element_size=*/0,
+        /*init_extra_data0_fn=*/context->init_scale_params,
+        /*extra_data0=*/context->scale_params, /*extra_data0_element_size=*/0,
         /*init_extra_data1_fn=*/NULL, /*extra_data1=*/NULL,
         /*extra_data1_element_size=*/0, packed_weights,
-        /*params=*/NULL);
+        /*params=*/context->params);
   } else {
     context->packw_gemm_gio(
         /*groups=*/1, n_block_size, context->kc, context->nr, context->kr,
         context->sr, context->k_stride_elements, kernel, bias, /*scale=*/NULL,
-        packed_weights, /*extra_bytes=*/0, /*params=*/NULL);
+        packed_weights, /*extra_bytes=*/0, /*params=*/context->params);
+
+    if (context->scale_params != NULL) {
+      assert(context->init_scale_params != NULL);
+      void* weights =
+          (void*) ((uintptr_t) packed_weights +
+                   context->nr * (context->k_stride + context->b_stride));
+      context->init_scale_params(
+        n_block_size, context->nr, context->nr * context->w_stride,
+        context->scale_params, weights);
+    }
   }
 }
 
@@ -365,16 +375,26 @@ void xnn_compute_batched_packw_gemm_goi(
         /*flags=*/0, context->gemm_config, context->kc, n_block_size,
         /*groups=*/1, /*block_size=*/0, /*k_stride=*/context->kc,
         /*accumulator_init=*/bias, kernel,
-        /*init_extra_data0_fn=*/NULL,
-        /*extra_data0=*/NULL, /*extra_data0_element_size=*/0,
+        /*init_extra_data0_fn=*/context->init_scale_params,
+        /*extra_data0=*/context->scale_params, /*extra_data0_element_size=*/0,
         /*init_extra_data1_fn=*/NULL, /*extra_data1=*/NULL,
         /*extra_data1_element_size=*/0, packed_weights,
-        /*params=*/NULL);
+        /*params=*/context->params);
   } else {
     context->packw_gemm_goi(
         /*groups=*/1, n_block_size, context->kc, context->nr, context->kr,
         context->sr, kernel, bias, /*scale=*/NULL, packed_weights,
-        /*extra_bytes=*/0, /*params=*/NULL);
+        /*extra_bytes=*/0, /*params=*/context->params);
+
+    if (context->scale_params != NULL) {
+      assert(context->init_scale_params != NULL);
+      void* weights =
+          (void*) ((uintptr_t) packed_weights +
+                   context->nr * (context->k_stride + context->b_stride));
+      context->init_scale_params(
+        n_block_size, context->nr, context->nr * context->w_stride,
+        context->scale_params, weights);
+    }
   }
 }
 

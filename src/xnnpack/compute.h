@@ -210,6 +210,10 @@ struct packw_gemm_goi_context {
 
   // A pointer to the underlying `xnn_gemm_config`.
   const struct xnn_gemm_config* gemm_config;
+
+  // Scale parameters and initialization function for the packing microkernel.
+  xnn_init_scale_params_fn init_scale_params;
+  const void* scale_params;
 };
 
 XNN_PRIVATE void xnn_compute_packw_gemm_goi(
@@ -231,6 +235,8 @@ struct packw_gemm_gio_context {
   size_t sr;
   // Pointer to kernel.
   const void* kernel;
+  // Stride, in bytes, between each N of the kernel.
+  size_t k_stride;
   // Pointer to bias.
   const void* bias;
   // Stride, in bytes, between each bias.
@@ -252,6 +258,9 @@ struct packw_gemm_gio_context {
   // Stride, in bytes, between each group of of packed weights.
   size_t gc_stride;
 
+  // Packing params passed to the packing microkernel.
+  const void* params;
+
   // Microkernel to preform packing.
   xnn_packw_gemm_gio_ukernel_fn packw_gemm_gio;
 
@@ -260,6 +269,10 @@ struct packw_gemm_gio_context {
 
   // A pointer to the underlying `xnn_gemm_config`.
   const struct xnn_gemm_config* gemm_config;
+
+  // Scale parameters and initialization function for the packing microkernel.
+  xnn_init_scale_params_fn init_scale_params;
+  const void* scale_params;
 };
 
 XNN_PRIVATE void xnn_compute_packw_gemm_gio(
