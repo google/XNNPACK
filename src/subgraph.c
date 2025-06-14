@@ -326,7 +326,6 @@ void xnn_subgraph_analyze_consumers_and_producers(xnn_subgraph_t subgraph) {
     for (uint32_t o = 0; o < node->num_outputs; o++) {
       const uint32_t output_id = node->outputs[o];
       assert(output_id < subgraph->num_values);
-
       assert(subgraph->values[output_id].producer == XNN_INVALID_NODE_ID);
       subgraph->values[output_id].producer = n;
     }
@@ -966,6 +965,9 @@ static bool all_values_fp32_or_pfp32(xnn_subgraph_t subgraph,
 bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
   xnn_log_info("Analyzing subgraph for FP16 compatibility");
 
+  // Count the number of consumers for each value.
+  xnn_subgraph_analyze_consumers_and_producers(subgraph);
+
   // Convert tensors and operators in the subgraph to FP16
   // 1. Check that all operators in the subgraph are supported in FP16.
   // 2. Indicate values that must be converted to FP16.
@@ -1404,6 +1406,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
 
   xnn_log_info("XNNPACK has switched to FP16 inference mode!");
 
+  xnn_subgraph_rewrite_ssa(subgraph);
   return true;
 
 error:
@@ -2475,11 +2478,6 @@ void xnn_subgraph_rewrite_ssa(xnn_subgraph_t subgraph) {
     for (uint32_t j = 0; j < node->num_outputs; j++) {
       const uint32_t output_id = node->outputs[j];
       const struct xnn_value* value = &subgraph->values[output_id];
-      if (!xnn_value_is_external_output(value->flags)) {
-        // We only care to rewrite external outputs. Internal values should
-        // already be SSA.
-        continue;
-      }
       if (!values_written[output_id]) {
         // This is the first time we've seen this output.
       } else {
