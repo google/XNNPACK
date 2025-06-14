@@ -1860,7 +1860,12 @@ void xnn_pack_qb4_weights_and_biases(
         /*extra_bytes_n=*/nr * extra_bytes_n,
         /*params*/ (const struct xnn_qs8_qc4w_packing_params*)params);
   } else {
-    xnn_pack_qs8_qb4w_gemm_goi_w(
+    bool has_fast_packing_ukernel = gemm_config->pack_gemm_goi_bl != NULL;
+    xnn_packw_gemm_goi_bl_ukernel_fn pack_gemm_goi = has_fast_packing_ukernel ? 
+        (xnn_packw_gemm_goi_bl_ukernel_fn) gemm_config->pack_gemm_goi_bl : (xnn_packw_gemm_goi_bl_ukernel_fn) xnn_pack_qs8_qb4w_gemm_goi_w;
+    // Fast Packing Ukernel initalizes scales and bias, so we pass in
+    // bias to packing fn if we use the fast packing ukernel, nullptr otherwise
+    pack_gemm_goi(
         /*g=*/groups,
         /*nc=*/output_channels,
         /*kc=*/input_channels,
@@ -1869,12 +1874,16 @@ void xnn_pack_qb4_weights_and_biases(
         /*sr=*/sr,
         /*bl=*/block_size,
         /*kernel=*/(const uint8_t*)weights,
-        /*bias=*/nullptr,
+        /*bias=*/has_fast_packing_ukernel ? (const int32_t*)accumulator_init : nullptr,
         /*scale=*/(const xnn_bfloat16*)extra_data1,
         /*packed_weights=*/packed_weights_ptr,
         /*extra_bytes_bl=*/nr * extra_bytes_bl,
         /*extra_bytes_n=*/nr * extra_bytes_n,
         /*params*/ (const struct xnn_qs8_qc4w_packing_params*)params);
+    if (has_fast_packing_ukernel) {
+      // Fast Packing UKernel initializes scales and bias, so can early exit
+      return;
+    }
   }
 
   // fill in kernel scales

@@ -274,6 +274,7 @@ MICROKERNEL_DEFS = [
     "src/x32-pack-lh/x32-pack-lh.inc",
     "src/x32-packb/x32-packb.inc",
     "src/x32-packw/x32-packw.inc",
+    "src/qb4-packw/qb4-packw.inc",
     "src/x32-packx/x32-packx.inc",
     "src/x32-transposec/x32-transposec.inc",
     "src/x64-transposec/x64-transposec.inc",
