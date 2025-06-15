@@ -38,6 +38,7 @@ MICROKERNEL_TEST_DEPS = [
     "//:requantization",
     "//:xnnpack_h",
     "//src/configs:hardware_config",
+    "//src/configs:microkernel_configs",
 ]
 
 ############################## Testing utilities ###############################

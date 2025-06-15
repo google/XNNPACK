@@ -59,7 +59,7 @@ typedef void (*xnn_pack_bf16_f32_gio_gemm_fn)(
     const void* scale, void* packed_weights, size_t extra_bytes,
     const void* params);
 
-// Pack bf16 weights and flaot32 biases.
+// Pack bf16 weights and float32 biases.
 XNN_INTERNAL void xnn_pack_bf16_f32_gemm_goi_w(
     size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
     const xnn_bfloat16* kernel, const float* bias, const void* scale,
@@ -489,6 +489,21 @@ XNN_INTERNAL size_t xnn_packed_stride_kai_qb4_weights_and_biases(
     size_t block_size,                          //
     size_t k_stride,                            //
     size_t extra_bytes);
+
+XNN_INTERNAL void xnn_pack_kai_qs8_conv_goki_w_sme2(
+    size_t g,              //
+    size_t nc,             //
+    size_t ks,             //
+    size_t kc,             //
+    size_t nr,             //
+    size_t kr,             //
+    size_t sr,             //
+    const int8_t* k,       //
+    const int32_t* b,      //
+    const float* scale,    //
+    void* packed_weights,  //
+    size_t extra_bytes,    //
+    const struct xnn_qs8_packing_params* params);
 #endif  // XNN_ENABLE_KLEIDIAI
 
 XNN_INTERNAL void xnn_pack_qs8_to_qu8_gemm_gio_w(
