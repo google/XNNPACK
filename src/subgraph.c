@@ -1064,12 +1064,9 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
           subgraph->values[node->outputs[0]].fp16_compatible = true;
         } else if (subgraph->values[node->inputs[0]].datatype ==
                        xnn_datatype_fp32 &&
-                   (node->params.inlined_lhs_packing.packed_input_datatype ==
-                        xnn_datatype_qdint8 ||
-                    node->params.inlined_lhs_packing.packed_input_datatype ==
-                        xnn_datatype_qduint8 ||
-                    node->params.inlined_lhs_packing.packed_input_datatype ==
-                        xnn_datatype_qpint8)) {
+                   (node->packed_input_datatype == xnn_datatype_qdint8 ||
+                    node->packed_input_datatype == xnn_datatype_qduint8 ||
+                    node->packed_input_datatype == xnn_datatype_qpint8)) {
           subgraph->values[node->inputs[0]].fp16_compatible = true;
           subgraph->values[node->outputs[0]].fp16_compatible = true;
         } else if ((subgraph->values[node->inputs[0]].datatype ==
@@ -1326,17 +1323,15 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
       case xnn_node_type_fully_connected: {
         // Patch up any LHS packing of fully-connected nodes, if needed.
         if (node->flags & XNN_FLAG_INLINE_LHS_PACKING) {
-          switch (node->params.inlined_lhs_packing.packed_input_datatype) {
+          switch (node->packed_input_datatype) {
             case xnn_datatype_pfp32:
               // Switch from packed `fp32` to packed `fp16`.
-              node->params.inlined_lhs_packing.packed_input_datatype =
-                  xnn_datatype_pfp16;
+              node->packed_input_datatype = xnn_datatype_pfp16;
               break;
             case xnn_datatype_qpint8:
               // Convert from `qpint8` back to `qdint8` since we don't have a
               // `qpint8` packing function for `f16` inputs.
-              node->params.inlined_lhs_packing.packed_input_datatype =
-                  xnn_datatype_qdint8;
+              node->packed_input_datatype = xnn_datatype_qdint8;
               break;
             default:
               break;
@@ -2275,159 +2270,195 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
     struct xnn_node* node = &subgraph->nodes[node_id];
 
     // Skip anything that is not a fully-connected node.
-    if (!(node->type == xnn_node_type_fully_connected ||
-          node->type == xnn_node_type_batch_matrix_multiply)) {
-      continue;
-    }
+    switch (node->type) {
+      case xnn_node_type_batch_matrix_multiply:
+      case xnn_node_type_fully_connected: {
+        // Get a handle on the inputs/outputs.
+        const uint32_t input_id = node->inputs[0];
+        struct xnn_value* input_value = &subgraph->values[input_id];
+        struct xnn_value* kernel_value = &subgraph->values[node->inputs[1]];
+        struct xnn_value* output_value = &subgraph->values[node->outputs[0]];
+        const enum xnn_datatype input_datatype = input_value->datatype;
+        const enum xnn_datatype kernel_datatype = kernel_value->datatype;
+        const enum xnn_datatype output_datatype = output_value->datatype;
 
-    // Get a handle on the inputs/outputs.
-    const uint32_t input_id = node->inputs[0];
-    struct xnn_value* input_value = &subgraph->values[input_id];
-    struct xnn_value* kernel_value = &subgraph->values[node->inputs[1]];
-    struct xnn_value* output_value = &subgraph->values[node->outputs[0]];
-    const enum xnn_datatype input_datatype = input_value->datatype;
-    const enum xnn_datatype kernel_datatype = kernel_value->datatype;
-    const enum xnn_datatype output_datatype = output_value->datatype;
+        // Check if we have a packed GEMM config for the combination of
+        // input/kernel/output.
+        const struct xnn_gemm_config* gemm_config = NULL;
+        enum xnn_datatype assumed_datatype = xnn_datatype_invalid;
+        switch (input_datatype) {
+          case xnn_datatype_fp16:
+            if (input_datatype == output_datatype &&
+                kernel_datatype == xnn_datatype_fp16) {
+              if ((gemm_config = xnn_init_pf16_gemm_config())) {
+                assumed_datatype = xnn_datatype_pfp16;
+              }
+            }
+            break;
+          case xnn_datatype_fp32:
+            if (input_datatype == output_datatype &&
+                kernel_datatype == xnn_datatype_fp32) {
+              if ((gemm_config = xnn_init_pf32_gemm_config())) {
+                assumed_datatype = xnn_datatype_pfp32;
+              }
+            }
+            break;
+          case xnn_datatype_qint8:
+            if (input_datatype == output_datatype &&
+                kernel_datatype == xnn_datatype_qcint8) {
+              if ((gemm_config = xnn_init_pqs8_qc8w_gemm_config())) {
+                assumed_datatype = xnn_datatype_pqint8;
+              }
+            }
+            break;
+          case xnn_datatype_qdint8:
+            // We may inline the `qdint8` packing regardless of whether we have
+            // a specialized `qpint8` kernel or not.
+            assumed_datatype = xnn_datatype_qdint8;
+            if (output_datatype == xnn_datatype_fp32) {
+              switch (kernel_datatype) {
+                case xnn_datatype_qbint4:
+                  if ((gemm_config = xnn_init_qp8_f32_qb4w_gemm_config())) {
+                    assumed_datatype = xnn_datatype_qpint8;
+                  }
+                  break;
+                case xnn_datatype_qcint4:
+                  if ((gemm_config = xnn_init_qp8_f32_qc4w_gemm_config())) {
+                    assumed_datatype = xnn_datatype_qpint8;
+                  }
+                  break;
+                case xnn_datatype_qcint8:
+                  if ((gemm_config = xnn_init_qp8_f32_qc8w_gemm_config())) {
+                    assumed_datatype = xnn_datatype_qpint8;
+                  }
+                  break;
+                default:
+                  break;
+              }
+            }
+            break;
+          default:
+            // If none of the above happened, do nothing for this node.
+            continue;
+        }
 
-    // Check if we have a packed GEMM config for the combination of
-    // input/kernel/output.
-    const struct xnn_gemm_config* gemm_config = NULL;
-    enum xnn_datatype assumed_datatype = xnn_datatype_invalid;
-    switch (input_datatype) {
-      case xnn_datatype_fp16:
-        if (input_datatype == output_datatype &&
-            kernel_datatype == xnn_datatype_fp16) {
-          if ((gemm_config = xnn_init_pf16_gemm_config())) {
-            assumed_datatype = xnn_datatype_pfp16;
-          }
-        }
-        break;
-      case xnn_datatype_fp32:
-        if (input_datatype == output_datatype &&
-            kernel_datatype == xnn_datatype_fp32) {
-          if ((gemm_config = xnn_init_pf32_gemm_config())) {
-            assumed_datatype = xnn_datatype_pfp32;
-          }
-        }
-        break;
-      case xnn_datatype_qint8:
-        if (input_datatype == output_datatype &&
-            kernel_datatype == xnn_datatype_qcint8) {
-          if ((gemm_config = xnn_init_pqs8_qc8w_gemm_config())) {
-            assumed_datatype = xnn_datatype_pqint8;
-          }
-        }
-        break;
-      case xnn_datatype_qdint8:
-        // We may inline the `qdint8` packing regardless of whether we have a
-        // specialized `qpint8` kernel or not.
-        assumed_datatype = xnn_datatype_qdint8;
-        if (output_datatype == xnn_datatype_fp32) {
-          switch (kernel_datatype) {
-            case xnn_datatype_qbint4:
-              if ((gemm_config = xnn_init_qp8_f32_qb4w_gemm_config())) {
-                assumed_datatype = xnn_datatype_qpint8;
+        if (assumed_datatype != xnn_datatype_invalid) {
+          if (optimization_flags & XNN_FLAG_NO_INLINED_LHS_PACKING) {
+            if (assumed_datatype == xnn_datatype_qdint8) {
+              // If the input is already `qdint8`, don't do anything different.
+              continue;
+            } else if (assumed_datatype == xnn_datatype_qpint8) {
+              xnn_log_debug(
+                  // `qpint8` inputs are generated by modifying the `convert` op
+                  // that generated the `qdint8` input, so we only have to add a
+                  // `pack-lh` op for the other input types.
+                  "Coercing type of input ID #%" PRIu32
+                  " of %s node from `%s` to `%s`.",
+                  input_id, xnn_node_type_to_string(xnn_node_type_convert),
+                  xnn_datatype_to_string(input_datatype),
+                  xnn_datatype_to_string(xnn_datatype_qpint8));
+              subgraph->values[input_id].datatype = assumed_datatype;
+              subgraph->values[input_id].gemm_config = gemm_config;
+            } else {
+              // Insert a node to pack the LHS.
+              xnn_log_debug(
+                  "Adding %s node for input ID #%" PRIu32
+                  " of type `%s` for %s node.",
+                  xnn_node_type_to_string(xnn_node_type_pack_lh), input_id,
+                  xnn_node_type_to_string(xnn_node_type_fully_connected),
+                  xnn_datatype_to_string(xnn_datatype_qpint8));
+              uint32_t new_id = XNN_INVALID_VALUE_ID;
+              enum xnn_status status =
+                  xnn_insert_pack_lh_node(subgraph, input_id, &new_id);
+              if (status != xnn_status_success) {
+                return status;
               }
-              break;
-            case xnn_datatype_qcint4:
-              if ((gemm_config = xnn_init_qp8_f32_qc4w_gemm_config())) {
-                assumed_datatype = xnn_datatype_qpint8;
+              subgraph->nodes[node_id].inputs[0] = new_id;
+              changes++;
+            }
+            // If this is a fully-connected op, we need to coerce the shape of
+            // the inputs from `[B, M, K]` to `[B * M, K]` to avoid batch-wise
+            // packing.
+            if (node->type == xnn_node_type_fully_connected) {
+              subgraph->values[subgraph->nodes[node_id].inputs[0]].flags |=
+                  XNN_FLAG_SQUASH_GROUPS;
+            }
+          } else {
+            if (input_datatype == xnn_datatype_qdint8) {
+              // Short-circuit the inputs of the producer of the `qdint8`
+              // values.
+              struct xnn_node* producer =
+                  &subgraph->nodes[input_value->producer];
+              if (producer->type != xnn_node_type_convert) {
+                xnn_log_error(
+                    "Expected producer node #%u of %s tensor #%u to be of type "
+                    "%s, but found type %s instead.",
+                    input_value->producer,
+                    xnn_datatype_to_string(input_datatype), input_id,
+                    xnn_node_type_to_string(xnn_node_type_convert),
+                    xnn_node_type_to_string(producer->type));
+                return xnn_status_invalid_state;
               }
-              break;
-            case xnn_datatype_qcint8:
-              if ((gemm_config = xnn_init_qp8_f32_qc8w_gemm_config())) {
-                assumed_datatype = xnn_datatype_qpint8;
+              // Maybe use `qduint8` instead of `qdint8`?
+              xnn_log_debug(
+                  "Skipping %s node #%u for input #%" PRIu32
+                  " of node #%u (%s).",
+                  xnn_node_type_to_string(producer->type), producer->id,
+                  input_id, node_id,
+                  xnn_node_type_to_string(xnn_node_type_fully_connected));
+              struct xnn_value* new_input =
+                  &subgraph->values[producer->inputs[0]];
+              node->inputs[0] = producer->inputs[0];
+              if (new_input->first_consumer == input_value->producer) {
+                new_input->first_consumer = node_id;
               }
-              break;
-            default:
-              break;
+              if (--input_value->num_consumers == 0) {
+                xnn_node_clear(producer);
+              }
+              if (convert_gemm_to_qduint8(new_input->datatype, node->type,
+                                          kernel_datatype)) {
+                assumed_datatype = xnn_datatype_qduint8;
+              }
+              changes++;
+            }
+            xnn_log_debug("Setting assumed_datatype=%s for node #%u (%s).",
+                          xnn_datatype_to_string(assumed_datatype), node_id,
+                          xnn_node_type_to_string(node->type));
+            node->packed_input_datatype = assumed_datatype;
+            node->flags |= XNN_FLAG_INLINE_LHS_PACKING;
           }
         }
-        break;
+      } break;
+
+      case xnn_node_type_convolution_2d:
+      case xnn_node_type_deconvolution_2d: {
+        // Get a handle on the inputs/outputs.
+        const uint32_t input_id = node->inputs[0];
+        struct xnn_value* input_value = &subgraph->values[input_id];
+        struct xnn_value* kernel_value = &subgraph->values[node->inputs[1]];
+        struct xnn_value* output_value = &subgraph->values[node->outputs[0]];
+        const enum xnn_datatype input_datatype = input_value->datatype;
+        const enum xnn_datatype kernel_datatype = kernel_value->datatype;
+        const enum xnn_datatype output_datatype = output_value->datatype;
+
+        // Check if we can do anything special with this operation.
+        if (input_datatype == xnn_datatype_qint8 &&
+            (kernel_datatype == xnn_datatype_qcint8 ||
+             kernel_datatype == xnn_datatype_qint8) &&
+            output_datatype == xnn_datatype_qint8 &&
+            xnn_init_pqs8_qc8w_gemm_config() != NULL &&
+            !(optimization_flags & XNN_FLAG_NO_INLINED_LHS_PACKING)) {
+          // Note that there is currently no option to not use inlining for this
+          // iGEMM kernel.
+          xnn_log_debug("Setting assumed_datatype=%s for node #%u (%s).",
+                        xnn_datatype_to_string(xnn_datatype_pqint8), node_id,
+                        xnn_node_type_to_string(node->type));
+          node->packed_input_datatype = xnn_datatype_pqint8;
+          node->flags |= XNN_FLAG_INLINE_LHS_PACKING;
+        }
+      } break;
       default:
-        // If none of the above happened, do nothing for this node.
-        continue;
-    }
-
-    if (assumed_datatype != xnn_datatype_invalid) {
-      if (optimization_flags & XNN_FLAG_NO_INLINED_LHS_PACKING) {
-        if (assumed_datatype == xnn_datatype_qdint8) {
-          // If the input is already `qdint8`, don't do anything different.
-          continue;
-        } else if (assumed_datatype == xnn_datatype_qpint8) {
-          xnn_log_debug(
-              // `qpint8` inputs are generated by modifying the `convert` op
-              // that generated the `qdint8` input, so we only have to add a
-              // `pack-lh` op for the other input types.
-              "Coercing type of input ID #%" PRIu32
-              " of %s node from `%s` to `%s`.",
-              input_id, xnn_node_type_to_string(xnn_node_type_convert),
-              xnn_datatype_to_string(input_datatype),
-              xnn_datatype_to_string(xnn_datatype_qpint8));
-          subgraph->values[input_id].datatype = assumed_datatype;
-          subgraph->values[input_id].gemm_config = gemm_config;
-        } else {
-          // Insert a node to pack the LHS.
-          xnn_log_debug("Adding %s node for input ID #%" PRIu32
-                        " of type `%s` for %s node.",
-                        xnn_node_type_to_string(xnn_node_type_pack_lh),
-                        input_id,
-                        xnn_node_type_to_string(xnn_node_type_fully_connected),
-                        xnn_datatype_to_string(xnn_datatype_qpint8));
-          uint32_t new_id = XNN_INVALID_VALUE_ID;
-          enum xnn_status status =
-              xnn_insert_pack_lh_node(subgraph, input_id, &new_id);
-          if (status != xnn_status_success) {
-            return status;
-          }
-          subgraph->nodes[node_id].inputs[0] = new_id;
-          changes++;
-        }
-        // If this is a fully-connected op, we need to coerce the shape of the
-        // inputs from `[B, M, K]` to `[B * M, K]` to avoid batch-wise packing.
-        if (node->type == xnn_node_type_fully_connected) {
-          subgraph->values[subgraph->nodes[node_id].inputs[0]].flags |=
-              XNN_FLAG_SQUASH_GROUPS;
-        }
-      } else {
-        if (input_datatype == xnn_datatype_qdint8) {
-          // Short-circuit the inputs of the producer of the `qdint8` values.
-          struct xnn_node* producer = &subgraph->nodes[input_value->producer];
-          if (producer->type != xnn_node_type_convert) {
-            xnn_log_error(
-                "Expected producer node #%u of %s tensor #%u to be of type %s, "
-                "but found type %s instead.",
-                input_value->producer, xnn_datatype_to_string(input_datatype),
-                input_id, xnn_node_type_to_string(xnn_node_type_convert),
-                xnn_node_type_to_string(producer->type));
-            return xnn_status_invalid_state;
-          }
-          // Maybe use `qduint8` instead of `qdint8`?
-          xnn_log_debug(
-              "Skipping %s node #%u for input #%" PRIu32 " of node #%u (%s).",
-              xnn_node_type_to_string(producer->type), producer->id, input_id,
-              node_id, xnn_node_type_to_string(xnn_node_type_fully_connected));
-          struct xnn_value* new_input = &subgraph->values[producer->inputs[0]];
-          node->inputs[0] = producer->inputs[0];
-          if (new_input->first_consumer == input_value->producer) {
-            new_input->first_consumer = node_id;
-          }
-          if (--input_value->num_consumers == 0) {
-            xnn_node_clear(producer);
-          }
-          if (convert_gemm_to_qduint8(new_input->datatype, node->type,
-                                      kernel_datatype)) {
-            assumed_datatype = xnn_datatype_qduint8;
-          }
-          changes++;
-        }
-        xnn_log_debug("Setting assumed_datatype=%s for node #%u (%s).",
-                      xnn_datatype_to_string(assumed_datatype), node_id,
-                      xnn_node_type_to_string(node->type));
-        node->params.inlined_lhs_packing.packed_input_datatype =
-            assumed_datatype;
-        node->flags |= XNN_FLAG_INLINE_LHS_PACKING;
-      }
+        break;
     }
   }
 
