@@ -18,7 +18,7 @@ XNN_INIT_ONCE_GUARD(xx_pad);
 
 static void init_xx_pad_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       xx_pad_config.ukernel = (xnn_pad_ukernel_fn) xnn_xx_pad_ukernel_p16__neon_u16;
@@ -36,8 +36,8 @@ static void init_xx_pad_config(void) {
   #endif
 }
 
-const struct xnn_xx_pad_config* xnn_init_xx_pad_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_xx_pad_config* xnn_get_xx_pad_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }

@@ -93,7 +93,7 @@ XNN_INIT_ONCE_GUARD(qu8_gemm);
 
 static void init_f16_gemm_config(void) {
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
@@ -108,7 +108,7 @@ static void init_f16_gemm_config(void) {
       f16_gemm_config.nr = 8;
     }
   #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
@@ -232,7 +232,7 @@ static void init_f16_gemm_config(void) {
       #endif  // XNN_ENABLE_ASSEMBLY
     }
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
@@ -268,7 +268,7 @@ static void init_f16_gemm_config(void) {
 static void init_pf16_gemm_config(void) {
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
   const struct xnn_hardware_config* hardware_config =
-      xnn_init_hardware_config();
+      xnn_get_hardware_config();
   assert(hardware_config != NULL);
   if (XNN_ENABLE_ARM_SME2 && (hardware_config->arch_flags & xnn_arch_arm_sme2)) {
     #if XNN_ENABLE_ARM_SME2
@@ -291,7 +291,7 @@ static void init_pf16_gemm_config(void) {
 
 static void init_bf16_f32_gemm_config(void) {
 #if XNN_ARCH_X86_64
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   assert(hardware_config != NULL);
   (void) hardware_config;  // May be unused.
   if (XNN_ENABLE_AVX512BF16 && (hardware_config->arch_flags & xnn_arch_x86_avx512bf16)) {
@@ -312,7 +312,7 @@ static void init_bf16_f32_gemm_config(void) {
 
 static void init_pf32_gemm_config(void) {
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   assert(hardware_config != NULL);
   (void) hardware_config;  // May be unused.
   if (XNN_ENABLE_ARM_SME2 && (hardware_config->arch_flags & xnn_arch_arm_sme2)) {
@@ -339,7 +339,7 @@ static void init_pf32_gemm_config(void) {
 static void init_pqs8_qc8w_gemm_config(void) {
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
   const struct xnn_hardware_config* hardware_config =
-      xnn_init_hardware_config();
+      xnn_get_hardware_config();
   assert(hardware_config != NULL);
   (void)hardware_config;  // May be unused.
   if (XNN_ENABLE_ARM_SME2 && (hardware_config->arch_flags & xnn_arch_arm_sme2)) {
@@ -375,7 +375,7 @@ static void init_pqs8_qc8w_gemm_config(void) {
 
 static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, bool consistent_arithmetic) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
@@ -704,7 +704,7 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
        #endif  // XNN_ENABLE_ASSEMBLY
     #endif  // XNN_ENABLE_ASSEMBLY && !XNN_PLATFORM_IOS && !XNN_PLATFORM_MAC
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     #if XNN_ENABLE_AVX512F && XNN_ARCH_X86_64 && !XNN_PLATFORM_WINDOWS
@@ -772,7 +772,7 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
       f32_gemm_config->nr = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if (hardware_config->is_x86) {
@@ -834,7 +834,7 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
       #endif
     }
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_riscv_vector)) {
@@ -878,7 +878,7 @@ static void init_f32_gemm_config() {
 
 static void init_f32_igemm_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
@@ -1207,7 +1207,7 @@ static void init_f32_igemm_config(void) {
        #endif  // XNN_ENABLE_ASSEMBLY
     #endif  // XNN_ENABLE_ASSEMBLY && !XNN_PLATFORM_IOS && !XNN_PLATFORM_MAC
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     #if XNN_ENABLE_AVX512F
@@ -1262,7 +1262,7 @@ static void init_f32_igemm_config(void) {
       f32_igemm_config.nr = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if (hardware_config->is_x86) {
@@ -1324,7 +1324,7 @@ static void init_f32_igemm_config(void) {
       #endif
     }
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_riscv_vector)) {
@@ -1363,7 +1363,7 @@ static void init_f32_igemm_config(void) {
 
 static void init_f32_gemm_nr2_config_impl(struct xnn_gemm_config* f32_gemm_nr2_config, bool consistent_arithmetic) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
@@ -1414,7 +1414,7 @@ static void init_f32_gemm_nr2_config_impl(struct xnn_gemm_config* f32_gemm_nr2_c
        #endif  // XNN_ENABLE_ASSEMBLY
     #endif  // XNN_ENABLE_ASSEMBLY && !XNN_PLATFORM_IOS && !XNN_PLATFORM_MAC
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     #if XNN_ENABLE_AVX512F && XNN_ARCH_X86_64 && !XNN_PLATFORM_WINDOWS
@@ -1492,7 +1492,7 @@ static void init_f32_gemm_nr2_config_impl(struct xnn_gemm_config* f32_gemm_nr2_c
       f32_gemm_nr2_config->log2_kr = 2;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if (hardware_config->is_x86) {
@@ -1565,7 +1565,7 @@ static void init_f32_gemm_nr2_config() {
 static void init_f32_qc4w_gemm_config(void) {
     f32_qc4w_gemm_config.planes = 1;
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
@@ -1592,7 +1592,7 @@ static void init_f32_qc4w_gemm_config(void) {
     f32_qc4w_gemm_config.mr = 6;
     f32_qc4w_gemm_config.nr = 8;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     #if XNN_ENABLE_AVX512SKX
@@ -1647,7 +1647,7 @@ static void init_f32_qc4w_gemm_config(void) {
 
 static void init_f32_qc8w_gemm_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
@@ -1744,7 +1744,7 @@ static void init_f32_qc8w_gemm_config(void) {
       #endif  // XNN_ENABLE_ASSEMBLY
     #endif  // XNN_ENABLE_ASSEMBLY && !XNN_PLATFORM_IOS && !XNN_PLATFORM_MAC
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     #if XNN_ENABLE_AVX512SKX
@@ -1792,7 +1792,7 @@ static void init_f32_qc8w_gemm_config(void) {
       f32_qc8w_gemm_config.nr = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if (hardware_config->is_x86) {
@@ -1866,7 +1866,7 @@ static void init_qdu8_f16_qc4w_gemm_config(void) {
   qdu8_f16_qc4w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_qc4w_gemm_gio_w;
   qdu8_f16_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_qc4w_gemm_goi_w;
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     #if XNN_ENABLE_AVX256VNNI
@@ -1938,7 +1938,7 @@ static void init_qd8_f16_qc4w_gemm_config(void) {
   qd8_f16_qc4w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_qc4w_gemm_gio_w;
   qd8_f16_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_qc4w_gemm_goi_w;
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
@@ -1962,7 +1962,7 @@ static void init_qd8_f16_qc4w_gemm_config(void) {
       }
     }
   #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if (XNN_ENABLE_ARM_I8MM && (hardware_config->arch_flags & xnn_arch_arm_neon_i8mm)) {
@@ -2003,7 +2003,7 @@ static void init_qd8_f16_qb4w_gemm_config(void) {
   qd8_f16_qb4w_gemm_config.pack_weights_and_biases = xnn_pack_qb4_weights_and_biases;
 
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
@@ -2027,7 +2027,7 @@ static void init_qd8_f16_qb4w_gemm_config(void) {
       }
     }
   #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if (XNN_ENABLE_ARM_I8MM && (hardware_config->arch_flags & xnn_arch_arm_neon_i8mm)) {
@@ -2059,7 +2059,7 @@ static void init_qd8_f16_qb4w_gemm_config(void) {
         qd8_f16_qb4w_gemm_config.planes = 2;
     }
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
@@ -2083,7 +2083,7 @@ static void init_qd8_f32_qc4w_gemm_config(void) {
   qd8_f32_qc4w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_qc4w_gemm_gio_w;  // Ignored
   qd8_f32_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_qc4w_gemm_goi_w;  // Ignored
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
@@ -2114,7 +2114,7 @@ static void init_qd8_f32_qc4w_gemm_config(void) {
       qd8_f32_qc4w_gemm_config.planes = 2;
     }
   #elif XNN_ARCH_ARM64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if (XNN_ENABLE_ARM_I8MM && (hardware_config->arch_flags & xnn_arch_arm_neon_i8mm)) {
@@ -2147,7 +2147,7 @@ static void init_qd8_f32_qc4w_gemm_config(void) {
     }
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     #if XNN_ENABLE_AVX512AMX
-      const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+      const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
       assert(hardware_config != NULL);
       (void) hardware_config;  // May be unused.
       if ((hardware_config->arch_flags & xnn_arch_x86_avx512amx)) {
@@ -2179,7 +2179,7 @@ static void init_qd8_f32_qc4w_gemm_config(void) {
     qd8_f32_qc4w_gemm_config.log2_kr = 3;
     qd8_f32_qc4w_gemm_config.planes = 2;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     qd8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x4v__rvv);
     qd8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x4v__rvv);
     qd8_f32_qc4w_gemm_config.init.f32_qc4w = xnn_init_f32_qc4w_minmax_scalar_params;
@@ -2201,7 +2201,7 @@ static void init_qd8_f32_qc4w_gemm_config(void) {
 static void init_qp8_f32_qc4w_gemm_config(void) {
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
   const struct xnn_hardware_config* hardware_config =
-      xnn_init_hardware_config();
+      xnn_get_hardware_config();
   assert(hardware_config != NULL);
   if (XNN_ENABLE_ARM_SME2 && (hardware_config->arch_flags & xnn_arch_arm_sme2)) {
     #if XNN_ENABLE_ARM_SME2
@@ -2258,7 +2258,7 @@ static void init_qp8_f32_qc4w_gemm_config(void) {
 static void init_qp8_f32_qc8w_gemm_config(void) {
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
   const struct xnn_hardware_config* hardware_config =
-      xnn_init_hardware_config();
+      xnn_get_hardware_config();
   assert(hardware_config != NULL);
   if (XNN_ENABLE_ARM_I8MM && (hardware_config->arch_flags & xnn_arch_arm_neon_i8mm)) {
 #if XNN_ENABLE_ARM_I8MM
@@ -2292,7 +2292,7 @@ static void init_qp8_f32_qc8w_gemm_config(void) {
 static void init_qp8_f32_qb4w_gemm_config(void) {
   #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
     const struct xnn_hardware_config* hardware_config =
-        xnn_init_hardware_config();
+        xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if (XNN_ENABLE_ARM_I8MM && (hardware_config->arch_flags & xnn_arch_arm_neon_i8mm)) {
       #if XNN_ENABLE_ARM_I8MM
@@ -2330,7 +2330,7 @@ static void init_qdu8_f32_qb4w_gemm_config(void) {
   qdu8_f32_qb4w_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_qb4_weights_and_biases;
   qdu8_f32_qb4w_gemm_config.pack_weights_and_biases = xnn_pack_qb4_weights_and_biases;
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     #if XNN_ENABLE_AVX512VNNIGFNI
@@ -2371,7 +2371,7 @@ static void init_qd8_f32_qb4w_gemm_config(void) {
   qd8_f32_qb4w_gemm_config.pack_weights_and_biases = xnn_pack_qb4_weights_and_biases;
 
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
@@ -2402,7 +2402,7 @@ static void init_qd8_f32_qb4w_gemm_config(void) {
       qd8_f32_qb4w_gemm_config.planes = 2;
     }
   #elif XNN_ARCH_ARM64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if (XNN_ENABLE_ARM_I8MM && (hardware_config->arch_flags & xnn_arch_arm_neon_i8mm)) {
@@ -2434,7 +2434,7 @@ static void init_qd8_f32_qb4w_gemm_config(void) {
       qd8_f32_qb4w_gemm_config.planes = 2;
     }
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
@@ -2492,7 +2492,7 @@ static void init_qd8_f16_qc8w_gemm_config(void) {
   qd8_f16_qc8w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_gemm_gio_w;
   qd8_f16_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_gemm_goi_w;
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
@@ -2577,7 +2577,7 @@ static void init_qd8_f16_qc8w_gemm_config(void) {
       #endif  // XNN_ENABLE_ASSEMBLY
     }
   #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     #if XNN_PLATFORM_IOS || XNN_PLATFORM_MAC || XNN_PLATFORM_WINDOWS
@@ -2737,7 +2737,7 @@ static void init_qd8_f16_qc8w_gemm_config(void) {
       #endif  // XNN_ENABLE_ASSEMBLY
     #endif  // XNN_PLATFORM_IOS || XNN_PLATFORM_MAC || XNN_PLATFORM_WINDOWS
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     #if XNN_ENABLE_AVX512AMX
@@ -2793,7 +2793,7 @@ static void init_qdu8_f16_qc8w_gemm_config(void) {
   qdu8_f16_qc8w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_gemm_gio_w;
   qdu8_f16_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_gemm_goi_w;
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     #if XNN_ENABLE_AVX256VNNI
@@ -2847,7 +2847,7 @@ static void init_qd8_f16_qc8w_igemm_config(void) {
   qd8_f16_qc8w_igemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_gemm_gio_w;
   qd8_f16_qc8w_igemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_gemm_goi_w;
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
@@ -2920,7 +2920,7 @@ static void init_qd8_f16_qc8w_igemm_config(void) {
       #endif  // XNN_ENABLE_ASSEMBLY
     }
   #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     #if XNN_PLATFORM_IOS || XNN_PLATFORM_MAC || XNN_PLATFORM_WINDOWS
@@ -3080,7 +3080,7 @@ static void init_qd8_f16_qc8w_igemm_config(void) {
       #endif  // XNN_ENABLE_ASSEMBLY
     #endif  // XNN_PLATFORM_IOS || XNN_PLATFORM_MAC || XNN_PLATFORM_WINDOWS
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     #if XNN_ENABLE_AVX512AMX
@@ -3136,7 +3136,7 @@ static void init_qdu8_f32_qc8w_gemm_config(void) {
   qdu8_f32_qc8w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_gemm_gio_w;
   qdu8_f32_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_gemm_goi_w;
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     #if XNN_ENABLE_AVX512VNNI && XNN_ARCH_X86_64 && !XNN_PLATFORM_WINDOWS
@@ -3207,7 +3207,7 @@ static void init_qdu8_f32_qc8w_igemm_config(void) {
   qdu8_f32_qc8w_igemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_gemm_gio_w;
   qdu8_f32_qc8w_igemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_gemm_goi_w;
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     #if XNN_ENABLE_AVX512VNNI
@@ -3260,7 +3260,7 @@ static void init_qdu8_f32_qc4w_gemm_config(void) {
   qdu8_f32_qc4w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_qc4w_gemm_gio_w;  // Ignored
   qdu8_f32_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_qc4w_gemm_goi_w;  // Ignored
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     #if XNN_ENABLE_AVX512VNNIGFNI && XNN_ENABLE_AVX256VNNI
@@ -3375,7 +3375,7 @@ static void init_qd8_f32_qc8w_gemm_config(void) {
   qd8_f32_qc8w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_gemm_gio_w;
   qd8_f32_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_gemm_goi_w;
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
@@ -3493,7 +3493,7 @@ static void init_qd8_f32_qc8w_gemm_config(void) {
       qd8_f32_qc8w_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     }
   #elif XNN_ARCH_ARM64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     #if XNN_PLATFORM_IOS || XNN_PLATFORM_MAC || XNN_PLATFORM_WINDOWS
@@ -3682,7 +3682,7 @@ static void init_qd8_f32_qc8w_gemm_config(void) {
       #endif  // XNN_ENABLE_ASSEMBLY
     #endif  // XNN_PLATFORM_IOS || XNN_PLATFORM_MAC || XNN_PLATFORM_WINDOWS
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     #if XNN_ENABLE_AVX512AMX
@@ -3763,7 +3763,7 @@ static void init_qd8_f32_qc8w_gemm_config(void) {
       qd8_f32_qc8w_gemm_config.log2_kr = 3;
     }
   #elif XNN_ARCH_WASMRELAXEDSIMD
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_wasm_sdot)) {
@@ -3817,7 +3817,7 @@ static void init_qd8_f32_qc8w_gemm_config(void) {
     qd8_f32_qc8w_gemm_config.log2_kr = 1;
     qd8_f32_qc8w_gemm_config.log2_sr = 2;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     qd8_f32_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4v__rvv);
     qd8_f32_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x4v__rvv);
     qd8_f32_qc8w_gemm_config.minmax.dqigemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_dqigemm_ukernel((xnn_dqigemm_ukernel_fn) xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x4v__rvv);
@@ -3840,7 +3840,7 @@ static void init_qd8_f32_qc8w_gemm_config(void) {
 
 static void init_qs8_qc4w_gemm_config(void) {
   #if XNN_ARCH_ARM64 && !XNN_PLATFORM_WINDOWS
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if (XNN_ENABLE_ARM_DOTPROD && (hardware_config->arch_flags & xnn_arch_arm_neon_dot)) {
@@ -3876,7 +3876,7 @@ static void init_qs8_qc8w_gemm_config(void) {
   qs8_qc8w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_gemm_gio_w;
   qs8_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_gemm_goi_w;
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
@@ -4128,7 +4128,7 @@ static void init_qs8_qc8w_gemm_config(void) {
       qs8_qc8w_gemm_config.log2_kr = 2;
     }
   #elif XNN_ARCH_ARM64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     #if XNN_PLATFORM_IOS || XNN_PLATFORM_MAC || XNN_PLATFORM_WINDOWS
@@ -4403,7 +4403,7 @@ static void init_qs8_qc8w_gemm_config(void) {
       #endif  // XNN_ENABLE_ASSEMBLY
     #endif  // XNN_PLATFORM_IOS || XNN_PLATFORM_MAC || XNN_PLATFORM_WINDOWS
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     #if XNN_ENABLE_AVX512AMX
@@ -4571,7 +4571,7 @@ static void init_qs8_qc8w_gemm_config(void) {
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     #if XNN_ARCH_WASMRELAXEDSIMD
-      const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+      const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
       assert(hardware_config != NULL);
       (void) hardware_config;  // May be unused.
       if ((hardware_config->arch_flags & xnn_arch_wasm_sdot)) {
@@ -4707,7 +4707,7 @@ static void init_qs8_qc8w_gemm_config(void) {
       #endif
     #endif
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x4v__rvv);
     qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x4v__rvv);
     qs8_qc8w_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x4v__rvv);
@@ -4757,7 +4757,7 @@ static void init_qu8_gemm_config(void) {
   qu8_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qu8_gemm_gio_w;
   qu8_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qu8_gemm_goi_w;
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
@@ -4967,7 +4967,7 @@ static void init_qu8_gemm_config(void) {
       qu8_gemm_config.nr = 16;
     #endif  // XNN_ENABLE_ASSEMBLY
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     #if XNN_ENABLE_AVX512SKX
@@ -5041,8 +5041,8 @@ static void init_qu8_gemm_config(void) {
   assert(qu8_gemm_config.mr <= XNN_MAX_MR);
 }
 
-const struct xnn_gemm_config* xnn_init_f16_gemm_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_gemm_config* xnn_get_f16_gemm_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
@@ -5050,8 +5050,8 @@ const struct xnn_gemm_config* xnn_init_f16_gemm_config() {
   return &f16_gemm_config;
 }
 
-const struct xnn_gemm_config* xnn_init_pf16_gemm_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_gemm_config* xnn_get_pf16_gemm_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -5059,8 +5059,8 @@ const struct xnn_gemm_config* xnn_init_pf16_gemm_config() {
   return pf16_gemm_config.mr ? &pf16_gemm_config : NULL;
 }
 
-const struct xnn_gemm_config* xnn_init_bf16_f32_gemm_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_gemm_config* xnn_get_bf16_f32_gemm_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL || !xnn_is_bf16_compatible_config(hardware_config)) {
     return NULL;
   }
@@ -5068,24 +5068,24 @@ const struct xnn_gemm_config* xnn_init_bf16_f32_gemm_config() {
   return &bf16_f32_gemm_config;
 }
 
-const struct xnn_gemm_config* xnn_init_pf32_gemm_config() {
-  if (xnn_init_hardware_config() == NULL) {
+const struct xnn_gemm_config* xnn_get_pf32_gemm_config() {
+  if (xnn_get_hardware_config() == NULL) {
     return NULL;
   }
   XNN_INIT_ONCE(pf32_gemm);
   return pf32_gemm_config.mr ? &pf32_gemm_config : NULL;
 }
 
-const struct xnn_gemm_config* xnn_init_pqs8_qc8w_gemm_config() {
-  if (xnn_init_hardware_config() == NULL) {
+const struct xnn_gemm_config* xnn_get_pqs8_qc8w_gemm_config() {
+  if (xnn_get_hardware_config() == NULL) {
     return NULL;
   }
   XNN_INIT_ONCE(pqs8_qc8w_gemm);
   return pqs8_qc8w_gemm_config.mr ? &pqs8_qc8w_gemm_config : NULL;
 }
 
-const struct xnn_gemm_config* xnn_init_f32_gemm_config(uint32_t flags) {
-  if (xnn_init_hardware_config() == NULL) {
+const struct xnn_gemm_config* xnn_get_f32_gemm_config(uint32_t flags) {
+  if (xnn_get_hardware_config() == NULL) {
     return NULL;
   }
   XNN_INIT_ONCE(f32_gemm);
@@ -5096,16 +5096,16 @@ const struct xnn_gemm_config* xnn_init_f32_gemm_config(uint32_t flags) {
   }
 }
 
-const struct xnn_gemm_config* xnn_init_f32_igemm_config() {
-  if (xnn_init_hardware_config() == NULL) {
+const struct xnn_gemm_config* xnn_get_f32_igemm_config() {
+  if (xnn_get_hardware_config() == NULL) {
     return NULL;
   }
   XNN_INIT_ONCE(f32_igemm);
   return &f32_igemm_config;
 }
 
-const struct xnn_gemm_config* xnn_init_f32_gemm_nr2_config(uint32_t flags) {
-  if (xnn_init_hardware_config() == NULL) {
+const struct xnn_gemm_config* xnn_get_f32_gemm_nr2_config(uint32_t flags) {
+  if (xnn_get_hardware_config() == NULL) {
     return NULL;
   }
   XNN_INIT_ONCE(f32_gemm_nr2);
@@ -5116,24 +5116,24 @@ const struct xnn_gemm_config* xnn_init_f32_gemm_nr2_config(uint32_t flags) {
   }
 }
 
-const struct xnn_gemm_config* xnn_init_f32_qc4w_gemm_config() {
-  if (xnn_init_hardware_config() == NULL) {
+const struct xnn_gemm_config* xnn_get_f32_qc4w_gemm_config() {
+  if (xnn_get_hardware_config() == NULL) {
     return NULL;
   }
   XNN_INIT_ONCE(f32_qc4w_gemm);
   return &f32_qc4w_gemm_config;
 }
 
-const struct xnn_gemm_config* xnn_init_f32_qc8w_gemm_config() {
-  if (xnn_init_hardware_config() == NULL) {
+const struct xnn_gemm_config* xnn_get_f32_qc8w_gemm_config() {
+  if (xnn_get_hardware_config() == NULL) {
     return NULL;
   }
   XNN_INIT_ONCE(f32_qc8w_gemm);
   return &f32_qc8w_gemm_config;
 }
 
-const struct xnn_gemm_config* xnn_init_qd8_f16_qc8w_gemm_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_gemm_config* xnn_get_qd8_f16_qc8w_gemm_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
@@ -5141,8 +5141,8 @@ const struct xnn_gemm_config* xnn_init_qd8_f16_qc8w_gemm_config() {
   return &qd8_f16_qc8w_gemm_config;
 }
 
-const struct xnn_gemm_config* xnn_init_qd8_f16_qc8w_igemm_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_gemm_config* xnn_get_qd8_f16_qc8w_igemm_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
@@ -5150,8 +5150,8 @@ const struct xnn_gemm_config* xnn_init_qd8_f16_qc8w_igemm_config() {
   return &qd8_f16_qc8w_igemm_config;
 }
 
-const struct xnn_gemm_config* xnn_init_qd8_f16_qc4w_gemm_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_gemm_config* xnn_get_qd8_f16_qc4w_gemm_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
@@ -5164,8 +5164,8 @@ const struct xnn_gemm_config* xnn_init_qd8_f16_qc4w_gemm_config() {
   return &qd8_f16_qc4w_gemm_config;
 }
 
-const struct xnn_gemm_config* xnn_init_qdu8_f16_qc4w_gemm_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_gemm_config* xnn_get_qdu8_f16_qc4w_gemm_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
@@ -5173,8 +5173,8 @@ const struct xnn_gemm_config* xnn_init_qdu8_f16_qc4w_gemm_config() {
   return &qdu8_f16_qc4w_gemm_config;
 }
 
-const struct xnn_gemm_config* xnn_init_qd8_f16_qb4w_gemm_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_gemm_config* xnn_get_qd8_f16_qb4w_gemm_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
@@ -5182,72 +5182,72 @@ const struct xnn_gemm_config* xnn_init_qd8_f16_qb4w_gemm_config() {
   return &qd8_f16_qb4w_gemm_config;
 }
 
-const struct xnn_gemm_config* xnn_init_qd8_f32_qc4w_gemm_config() {
-  if (xnn_init_hardware_config() == NULL) {
+const struct xnn_gemm_config* xnn_get_qd8_f32_qc4w_gemm_config() {
+  if (xnn_get_hardware_config() == NULL) {
     return NULL;
   }
   XNN_INIT_ONCE(qd8_f32_qc4w_gemm);
   return &qd8_f32_qc4w_gemm_config;
 }
 
-const struct xnn_gemm_config* xnn_init_qdu8_f32_qc4w_gemm_config() {
-  if (xnn_init_hardware_config() == NULL) {
+const struct xnn_gemm_config* xnn_get_qdu8_f32_qc4w_gemm_config() {
+  if (xnn_get_hardware_config() == NULL) {
     return NULL;
   }
   XNN_INIT_ONCE(qdu8_f32_qc4w_gemm);
   return &qdu8_f32_qc4w_gemm_config;
 }
 
-const struct xnn_gemm_config* xnn_init_qd8_f32_qb4w_gemm_config() {
-  if (xnn_init_hardware_config() == NULL) {
+const struct xnn_gemm_config* xnn_get_qd8_f32_qb4w_gemm_config() {
+  if (xnn_get_hardware_config() == NULL) {
     return NULL;
   }
   XNN_INIT_ONCE(qd8_f32_qb4w_gemm);
   return &qd8_f32_qb4w_gemm_config;
 }
 
-const struct xnn_gemm_config* xnn_init_qdu8_f32_qb4w_gemm_config() {
-  if (xnn_init_hardware_config() == NULL) {
+const struct xnn_gemm_config* xnn_get_qdu8_f32_qb4w_gemm_config() {
+  if (xnn_get_hardware_config() == NULL) {
     return NULL;
   }
   XNN_INIT_ONCE(qdu8_f32_qb4w_gemm);
   return &qdu8_f32_qb4w_gemm_config;
 }
 
-const struct xnn_gemm_config* xnn_init_qdu8_f16_qc8w_gemm_config() {
-  if (xnn_init_hardware_config() == NULL) {
+const struct xnn_gemm_config* xnn_get_qdu8_f16_qc8w_gemm_config() {
+  if (xnn_get_hardware_config() == NULL) {
     return NULL;
   }
   XNN_INIT_ONCE(qdu8_f16_qc8w_gemm);
   return &qdu8_f16_qc8w_gemm_config;
 }
 
-const struct xnn_gemm_config* xnn_init_qdu8_f32_qc8w_igemm_config() {
-  if (xnn_init_hardware_config() == NULL) {
+const struct xnn_gemm_config* xnn_get_qdu8_f32_qc8w_igemm_config() {
+  if (xnn_get_hardware_config() == NULL) {
     return NULL;
   }
   XNN_INIT_ONCE(qdu8_f32_qc8w_igemm);
   return &qdu8_f32_qc8w_igemm_config;
 }
 
-const struct xnn_gemm_config* xnn_init_qdu8_f32_qc8w_gemm_config() {
-  if (xnn_init_hardware_config() == NULL) {
+const struct xnn_gemm_config* xnn_get_qdu8_f32_qc8w_gemm_config() {
+  if (xnn_get_hardware_config() == NULL) {
     return NULL;
   }
   XNN_INIT_ONCE(qdu8_f32_qc8w_gemm);
   return &qdu8_f32_qc8w_gemm_config;
 }
 
-const struct xnn_gemm_config* xnn_init_qd8_f32_qc8w_gemm_config() {
-  if (xnn_init_hardware_config() == NULL) {
+const struct xnn_gemm_config* xnn_get_qd8_f32_qc8w_gemm_config() {
+  if (xnn_get_hardware_config() == NULL) {
     return NULL;
   }
   XNN_INIT_ONCE(qd8_f32_qc8w_gemm);
   return &qd8_f32_qc8w_gemm_config;
 }
 
-const struct xnn_gemm_config* xnn_init_qp8_f32_qc4w_gemm_config() {
-  if (xnn_init_hardware_config() == NULL) {
+const struct xnn_gemm_config* xnn_get_qp8_f32_qc4w_gemm_config() {
+  if (xnn_get_hardware_config() == NULL) {
     return NULL;
   }
   XNN_INIT_ONCE(qp8_f32_qc4w_gemm);
@@ -5258,8 +5258,8 @@ const struct xnn_gemm_config* xnn_init_qp8_f32_qc4w_gemm_config() {
   return NULL;
 }
 
-const struct xnn_gemm_config* xnn_init_qp8_f32_qc8w_gemm_config() {
-  if (xnn_init_hardware_config() == NULL) {
+const struct xnn_gemm_config* xnn_get_qp8_f32_qc8w_gemm_config() {
+  if (xnn_get_hardware_config() == NULL) {
     return NULL;
   }
   XNN_INIT_ONCE(qp8_f32_qc8w_gemm);
@@ -5270,9 +5270,9 @@ const struct xnn_gemm_config* xnn_init_qp8_f32_qc8w_gemm_config() {
   return NULL;
 }
 
-const struct xnn_gemm_config* xnn_init_qp8_f32_qb4w_gemm_config() {
+const struct xnn_gemm_config* xnn_get_qp8_f32_qb4w_gemm_config() {
   const struct xnn_hardware_config* hardware_config =
-      xnn_init_hardware_config();
+      xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -5284,24 +5284,24 @@ XNN_INIT_ONCE(qp8_f32_qb4w_gemm);
   return NULL;
 }
 
-const struct xnn_gemm_config* xnn_init_qs8_qc4w_gemm_config() {
-  if (xnn_init_hardware_config() == NULL) {
+const struct xnn_gemm_config* xnn_get_qs8_qc4w_gemm_config() {
+  if (xnn_get_hardware_config() == NULL) {
     return NULL;
   }
   XNN_INIT_ONCE(qs8_qc4w_gemm);
   return &qs8_qc4w_gemm_config;
 }
 
-const struct xnn_gemm_config* xnn_init_qs8_qc8w_gemm_config() {
-  if (xnn_init_hardware_config() == NULL) {
+const struct xnn_gemm_config* xnn_get_qs8_qc8w_gemm_config() {
+  if (xnn_get_hardware_config() == NULL) {
     return NULL;
   }
   XNN_INIT_ONCE(qs8_qc8w_gemm);
   return &qs8_qc8w_gemm_config;
 }
 
-const struct xnn_gemm_config* xnn_init_qu8_gemm_config() {
-  if (xnn_init_hardware_config() == NULL) {
+const struct xnn_gemm_config* xnn_get_qu8_gemm_config() {
+  if (xnn_get_hardware_config() == NULL) {
     return NULL;
   }
   XNN_INIT_ONCE(qu8_gemm);

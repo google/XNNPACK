@@ -45,7 +45,7 @@ static void init_allocator_config(void) {
 }
 
 enum xnn_status xnn_initialize(const struct xnn_allocator* allocator) {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     xnn_log_error("XNNPACK initialization failed: hardware not supported");
     return xnn_status_unsupported_hardware;

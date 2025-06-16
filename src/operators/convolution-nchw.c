@@ -400,14 +400,14 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
 
   status = xnn_status_unsupported_hardware;
 
-  const struct xnn_spmm_config* spmm_config = xnn_init_f16_spmm_config();
+  const struct xnn_spmm_config* spmm_config = xnn_get_f16_spmm_config();
   if (spmm_config == NULL) {
     xnn_log_error("failed to create %s operator: operations on data type are not supported",
       xnn_operator_type_to_string(operator_type));
     goto error;
   }
 
-  const struct xnn_dwconv2d_chw_config* dwconv2d_chw_config = xnn_init_f16_dwconv2d_chw_config();
+  const struct xnn_dwconv2d_chw_config* dwconv2d_chw_config = xnn_get_f16_dwconv2d_chw_config();
   if (dwconv2d_chw_config == NULL) {
     xnn_log_error("failed to create %s operator: operations on data type are not supported",
       xnn_operator_type_to_string(operator_type));
@@ -537,7 +537,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
         xnn_pack_dconv_oki_w = (xnn_pack_dconv_oki_w_fn) xnn_pack_f32_to_f16_dconv_oki_w;
       }
 
-      const struct xnn_conv_hwc2chw_config* conv_hwc2chw_config = xnn_init_f16_conv_hwc2chw_3x3c3s2_config();
+      const struct xnn_conv_hwc2chw_config* conv_hwc2chw_config = xnn_get_f16_conv_hwc2chw_3x3c3s2_config();
       if (conv_hwc2chw_config == NULL) {
         status = xnn_status_unsupported_hardware;
         xnn_log_error("failed to create %s operator: operations on data type are not supported",
@@ -751,7 +751,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
 
   status = xnn_status_unsupported_hardware;
 
-  const struct xnn_dwconv2d_chw_config* dwconv2d_chw_config = xnn_init_f32_dwconv2d_chw_config();
+  const struct xnn_dwconv2d_chw_config* dwconv2d_chw_config = xnn_get_f32_dwconv2d_chw_config();
   if (dwconv2d_chw_config == NULL) {
     xnn_log_error("failed to create %s operator: operations on data type are not supported",
       xnn_operator_type_to_string(operator_type));
@@ -846,21 +846,21 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
     convolution_op->weights_cache = weights_cache;
   }
 
-  const struct xnn_spmm_config* spmm_config = xnn_init_f32_spmm_config();
+  const struct xnn_spmm_config* spmm_config = xnn_get_f32_spmm_config();
   if (spmm_config == NULL) {
     xnn_log_error(
       "failed to create %s operator: unsupported hardware configuration",
       xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
     return xnn_status_unsupported_hardware;
   }
-  const struct xnn_spmm_config* spmm2_config = xnn_init_f32_spmm2_config();
+  const struct xnn_spmm_config* spmm2_config = xnn_get_f32_spmm2_config();
   if (spmm2_config == NULL) {
     xnn_log_error(
       "failed to create %s operator: unsupported hardware configuration",
       xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
     return xnn_status_unsupported_hardware;
   }
-  const struct xnn_spmm_config* spmm4_config = xnn_init_f32_spmm4_config();
+  const struct xnn_spmm_config* spmm4_config = xnn_get_f32_spmm4_config();
   if (spmm4_config == NULL) {
     xnn_log_error(
       "failed to create %s operator: unsupported hardware configuration",
@@ -890,7 +890,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
     }
     case xnn_microkernel_type_conv2d_hwc2chw:
     {
-      const struct xnn_conv_hwc2chw_config* conv_hwc2chw_config = xnn_init_f32_conv_hwc2chw_3x3c3s2_config();
+      const struct xnn_conv_hwc2chw_config* conv_hwc2chw_config = xnn_get_f32_conv_hwc2chw_3x3c3s2_config();
       if (conv_hwc2chw_config == NULL) {
         status = xnn_status_unsupported_hardware;
         xnn_log_error("failed to create %s operator: operations on data type are not supported",

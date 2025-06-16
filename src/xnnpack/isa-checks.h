@@ -17,7 +17,7 @@
 inline size_t get_batch_scale(size_t element_size) {
 #if XNN_ARCH_RISCV
   const struct xnn_hardware_config* hardware_config =
-      xnn_init_hardware_config();
+      xnn_get_hardware_config();
   return hardware_config
              ? std::max<size_t>(1, hardware_config->vlenb / element_size)
              : 1;
@@ -34,7 +34,7 @@ size_t get_batch_scale() {
 #define TEST_REQUIRES_ARCH_FLAGS(FLAGS)                       \
   do {                                                        \
     const struct xnn_hardware_config* hardware_config =       \
-        xnn_init_hardware_config();                           \
+        xnn_get_hardware_config();                           \
     if (hardware_config == nullptr ||                         \
         (hardware_config->arch_flags & (FLAGS)) != (FLAGS)) { \
       GTEST_SKIP();                                           \

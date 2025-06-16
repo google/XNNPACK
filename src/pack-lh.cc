@@ -40,7 +40,7 @@ void pack_lh_fx_qd(size_t m, size_t k, size_t mr_packed, size_t kr, size_t sr,
   // Initialize a static pointer to the convert and minmax configs. Not using
   // static initialization since this potentially locks a mutex at each call,
   // and also not worried about it being initialized twice since the
-  // `xnn_init_*_config` calls are synced and should always produce the same
+  // `xnn_get_*_config` calls are synced and should always produce the same
   // result.
   static std::atomic<xnn_vunary_ukernel_fn> convert_ukernel;
   if (!convert_ukernel) {
@@ -130,7 +130,7 @@ void xnn_pack_lh_f32_qdint8(size_t m, size_t k, size_t mr_packed, size_t kr,
                             size_t lhs_stride, void* lhs_packed) {
   pack_lh_fx_qd</*InputT=*/float, /*OutputT=*/int8_t,
                 /*qs8_cvt_params_t=*/struct xnn_f32_qs8_cvt_params,
-                xnn_init_f32_to_qs8_cvt_config, xnn_init_f32_rminmax_config,
+                xnn_get_f32_to_qs8_cvt_config, xnn_get_f32_rminmax_config,
                 xnn_f32_qd8_asymmetric_quantization_params>(
       m, k, mr_packed, kr, sr, m_idx_start, (const float*)lhs, lhs_stride,
       lhs_packed);
@@ -141,7 +141,7 @@ void xnn_pack_lh_f32_qduint8(size_t m, size_t k, size_t mr_packed, size_t kr,
                              size_t lhs_stride, void* lhs_packed) {
   pack_lh_fx_qd</*InputT=*/float, /*OutputT=*/uint8_t,
                 /*qs8_cvt_params_t=*/struct xnn_f32_qs8_cvt_params,
-                xnn_init_f32_to_qu8_cvt_config, xnn_init_f32_rminmax_config,
+                xnn_get_f32_to_qu8_cvt_config, xnn_get_f32_rminmax_config,
                 xnn_f32_qdu8_asymmetric_quantization_params>(
       m, k, mr_packed, kr, sr, m_idx_start, (const float*)lhs, lhs_stride,
       lhs_packed);
@@ -152,7 +152,7 @@ void xnn_pack_lh_f16_qdint8(size_t m, size_t k, size_t mr_packed, size_t kr,
                             size_t lhs_stride, void* lhs_packed) {
   pack_lh_fx_qd</*InputT=*/xnn_float16, /*OutputT=*/int8_t,
                 /*qs8_cvt_params_t=*/struct xnn_f16_qs8_cvt_params,
-                xnn_init_f16_to_qs8_cvt_config, xnn_init_f16_rminmax_config,
+                xnn_get_f16_to_qs8_cvt_config, xnn_get_f16_rminmax_config,
                 xnn_f16_qd8_asymmetric_quantization_params>(
       m, k, mr_packed, kr, sr, m_idx_start, (const xnn_float16*)lhs, lhs_stride,
       lhs_packed);
@@ -163,7 +163,7 @@ void xnn_pack_lh_f16_qduint8(size_t m, size_t k, size_t mr_packed, size_t kr,
                              size_t lhs_stride, void* lhs_packed) {
   pack_lh_fx_qd</*InputT=*/xnn_float16, /*OutputT=*/uint8_t,
                 /*qs8_cvt_params_t=*/struct xnn_f16_qs8_cvt_params,
-                xnn_init_f16_to_qu8_cvt_config, xnn_init_f16_rminmax_config,
+                xnn_get_f16_to_qu8_cvt_config, xnn_get_f16_rminmax_config,
                 xnn_f16_qdu8_asymmetric_quantization_params>(
       m, k, mr_packed, kr, sr, m_idx_start, (const xnn_float16*)lhs, lhs_stride,
       lhs_packed);

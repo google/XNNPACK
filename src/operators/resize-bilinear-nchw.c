@@ -27,9 +27,9 @@ static const struct xnn_ibilinear_chw_config* get_ibilinear_nchw_config(enum xnn
 {
   switch (datatype) {
     case xnn_datatype_fp16:
-      return xnn_init_f16_ibilinear_chw_config();
+      return xnn_get_f16_ibilinear_chw_config();
     case xnn_datatype_fp32:
-      return xnn_init_f32_ibilinear_chw_config();
+      return xnn_get_f32_ibilinear_chw_config();
     default:
       return NULL;
   }

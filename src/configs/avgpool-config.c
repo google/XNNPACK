@@ -21,7 +21,7 @@ XNN_INIT_ONCE_GUARD(f32_avgpool);
 
 static void init_f16_avgpool_config(void) {
   #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_ARM_FP16_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
       f16_avgpool_config.ukernel = (xnn_avgpool_ukernel_fn) xnn_f16_avgpool_minmax_ukernel_9p__neonfp16arith_u8;
@@ -30,7 +30,7 @@ static void init_f16_avgpool_config(void) {
       f16_avgpool_config.channel_tile = 8;
     }
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_x86_f16c)) {
       f16_avgpool_config.ukernel = (xnn_avgpool_ukernel_fn) xnn_f16_avgpool_minmax_ukernel_9p__f16c_u8;
@@ -43,7 +43,7 @@ static void init_f16_avgpool_config(void) {
 
 static void init_f32_avgpool_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       f32_avgpool_config.ukernel = (xnn_avgpool_ukernel_fn) xnn_f32_avgpool_minmax_ukernel_9p__neon_u4;
@@ -62,7 +62,7 @@ static void init_f32_avgpool_config(void) {
     f32_avgpool_config.primary_tile = 9;
     f32_avgpool_config.channel_tile = 4;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
       if ((hardware_config->arch_flags & xnn_arch_x86_avx512f)) {
@@ -101,8 +101,8 @@ static void init_f32_avgpool_config(void) {
   #endif
 }
 
-const struct xnn_avgpool_config* xnn_init_f16_avgpool_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_avgpool_config* xnn_get_f16_avgpool_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
@@ -110,8 +110,8 @@ const struct xnn_avgpool_config* xnn_init_f16_avgpool_config() {
   return &f16_avgpool_config;
 }
 
-const struct xnn_avgpool_config* xnn_init_f32_avgpool_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_avgpool_config* xnn_get_f32_avgpool_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }

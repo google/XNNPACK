@@ -36,7 +36,7 @@ static std::pair<size_t, size_t> LargePoolSize(size_t min_elements) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, small_pool) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f16_avgpool_config();
+      xnn_get_f16_avgpool_config();
   if (avgpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -62,7 +62,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, small_pool) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, small_pool_multithreaded) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f16_avgpool_config();
+      xnn_get_f16_avgpool_config();
   if (avgpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -80,7 +80,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, small_pool_multithreaded) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, small_pool_with_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f16_avgpool_config();
+      xnn_get_f16_avgpool_config();
   if (avgpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -118,7 +118,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, small_pool_with_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, small_pool_with_width_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f16_avgpool_config();
+      xnn_get_f16_avgpool_config();
   if (avgpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -156,7 +156,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, small_pool_with_width_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, small_pool_with_height_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f16_avgpool_config();
+      xnn_get_f16_avgpool_config();
   if (avgpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -194,7 +194,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, small_pool_with_height_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, small_pool_with_tf_same_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f16_avgpool_config();
+      xnn_get_f16_avgpool_config();
   if (avgpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -256,7 +256,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, small_pool_with_tf_same_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, small_pool_with_tf_same_padding_multithreaded) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f16_avgpool_config();
+      xnn_get_f16_avgpool_config();
   if (avgpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -275,7 +275,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, small_pool_with_tf_same_padding_multithreaded) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, small_pool_with_input_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f16_avgpool_config();
+      xnn_get_f16_avgpool_config();
   if (avgpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -303,7 +303,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, small_pool_with_input_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, small_pool_with_output_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f16_avgpool_config();
+      xnn_get_f16_avgpool_config();
   if (avgpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -331,7 +331,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, small_pool_with_output_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, small_pool_with_qmin) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f16_avgpool_config();
+      xnn_get_f16_avgpool_config();
   if (avgpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -359,7 +359,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, small_pool_with_qmin) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, small_pool_with_qmax) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f16_avgpool_config();
+      xnn_get_f16_avgpool_config();
   if (avgpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -390,7 +390,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, small_pool_with_qmax) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_small_pool) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f16_avgpool_config();
+      xnn_get_f16_avgpool_config();
   if (avgpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -418,7 +418,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_small_pool) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_small_pool_with_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f16_avgpool_config();
+      xnn_get_f16_avgpool_config();
   if (avgpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -458,7 +458,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_small_pool_with_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_small_pool_with_width_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f16_avgpool_config();
+      xnn_get_f16_avgpool_config();
   if (avgpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -498,7 +498,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_small_pool_with_width_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_small_pool_with_height_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f16_avgpool_config();
+      xnn_get_f16_avgpool_config();
   if (avgpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -538,7 +538,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_small_pool_with_height_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_small_pool_with_tf_same_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f16_avgpool_config();
+      xnn_get_f16_avgpool_config();
   if (avgpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -604,7 +604,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_small_pool_with_tf_same_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_small_pool_with_input_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f16_avgpool_config();
+      xnn_get_f16_avgpool_config();
   if (avgpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -634,7 +634,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_small_pool_with_input_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_small_pool_with_output_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f16_avgpool_config();
+      xnn_get_f16_avgpool_config();
   if (avgpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -664,7 +664,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_small_pool_with_output_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_small_pool_with_qmin) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f16_avgpool_config();
+      xnn_get_f16_avgpool_config();
   if (avgpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -694,7 +694,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_small_pool_with_qmin) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_small_pool_with_qmax) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f16_avgpool_config();
+      xnn_get_f16_avgpool_config();
   if (avgpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -727,7 +727,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_small_pool_with_qmax) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, large_pool) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f16_avgpool_config();
+      xnn_get_f16_avgpool_config();
   if (avgpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -753,7 +753,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, large_pool) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, large_pool_multithreaded) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f16_avgpool_config();
+      xnn_get_f16_avgpool_config();
   if (avgpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -771,7 +771,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, large_pool_multithreaded) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, large_pool_with_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -807,7 +807,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, large_pool_with_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, large_pool_with_width_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -859,7 +859,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, large_pool_with_width_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, large_pool_with_height_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -895,7 +895,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, large_pool_with_height_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, large_pool_with_tf_same_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -955,7 +955,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, large_pool_with_tf_same_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, large_pool_with_input_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -981,7 +981,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, large_pool_with_input_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, large_pool_with_output_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -1007,7 +1007,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, large_pool_with_output_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, large_pool_with_qmin) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -1033,7 +1033,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, large_pool_with_qmin) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, large_pool_with_qmax) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -1059,7 +1059,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, large_pool_with_qmax) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, large_pool_with_tf_same_padding_multithreaded) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f16_avgpool_config();
+      xnn_get_f16_avgpool_config();
   if (avgpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -1090,7 +1090,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, large_pool_with_tf_same_padding_multithreaded) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_large_pool) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f16_avgpool_config();
+      xnn_get_f16_avgpool_config();
   if (avgpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -1118,7 +1118,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_large_pool) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_large_pool_with_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -1156,7 +1156,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_large_pool_with_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_large_pool_with_width_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -1194,7 +1194,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_large_pool_with_width_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_large_pool_with_height_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -1232,7 +1232,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_large_pool_with_height_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_large_pool_with_tf_same_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -1296,7 +1296,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_large_pool_with_tf_same_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_large_pool_with_input_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -1324,7 +1324,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_large_pool_with_input_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_large_pool_with_output_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -1352,7 +1352,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_large_pool_with_output_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_large_pool_with_qmin) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -1380,7 +1380,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_large_pool_with_qmin) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_large_pool_with_qmax) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -1408,7 +1408,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_large_pool_with_qmax) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_large_pool_multithreaded) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f16_avgpool_config();
+      xnn_get_f16_avgpool_config();
   if (avgpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -1430,7 +1430,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_large_pool_multithreaded) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, small_image) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -1454,7 +1454,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, small_image) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, small_image_with_width_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -1499,7 +1499,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, small_image_with_width_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, small_image_with_height_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -1544,7 +1544,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, small_image_with_height_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, small_image_with_input_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -1570,7 +1570,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, small_image_with_input_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, small_image_with_output_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -1596,7 +1596,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, small_image_with_output_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, small_image_with_qmin) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -1622,7 +1622,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, small_image_with_qmin) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, small_image_with_qmax) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -1651,7 +1651,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, small_image_with_qmax) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_small_image) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -1677,7 +1677,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_small_image) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_small_image_with_width_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -1726,7 +1726,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_small_image_with_width_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_small_image_with_height_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -1775,7 +1775,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_small_image_with_height_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_small_image_with_input_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -1803,7 +1803,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_small_image_with_input_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_small_image_with_output_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -1831,7 +1831,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_small_image_with_output_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_small_image_with_qmin) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -1859,7 +1859,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_small_image_with_qmin) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_small_image_with_qmax) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -1890,7 +1890,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_small_image_with_qmax) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, large_image) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -1914,7 +1914,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, large_image) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, large_image_with_width_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -1960,7 +1960,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, large_image_with_width_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, large_image_with_height_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -2006,7 +2006,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, large_image_with_height_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, large_image_with_input_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -2032,7 +2032,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, large_image_with_input_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, large_image_with_output_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -2058,7 +2058,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, large_image_with_output_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, large_image_with_qmin) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -2084,7 +2084,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, large_image_with_qmin) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, large_image_with_qmax) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -2113,7 +2113,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, large_image_with_qmax) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_large_image) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -2139,7 +2139,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_large_image) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_large_image_with_width_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -2189,7 +2189,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_large_image_with_width_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_large_image_with_height_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -2239,7 +2239,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_large_image_with_height_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_large_image_with_input_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -2267,7 +2267,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_large_image_with_input_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_large_image_with_output_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -2295,7 +2295,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_large_image_with_output_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_large_image_with_qmin) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -2323,7 +2323,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_large_image_with_qmin) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_large_image_with_qmax) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -2351,7 +2351,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, batched_large_image_with_qmax) {
 
 TEST(AVERAGE_POOLING_NHWC_F16, batched_large_image_multithreaded) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -2520,7 +2520,7 @@ TEST(AVERAGE_POOLING_NHWC_F16, setup_global_to_local) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, small_pool) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -2544,7 +2544,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, small_pool) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, small_pool_multithreaded) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -2560,7 +2560,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, small_pool_multithreaded) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, small_pool_with_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -2596,7 +2596,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, small_pool_with_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, small_pool_with_width_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -2632,7 +2632,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, small_pool_with_width_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, small_pool_with_height_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -2668,7 +2668,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, small_pool_with_height_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, small_pool_with_tf_same_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -2728,7 +2728,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, small_pool_with_tf_same_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, small_pool_with_tf_same_padding_multithreaded) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -2745,7 +2745,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, small_pool_with_tf_same_padding_multithreaded) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, small_pool_with_input_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -2771,7 +2771,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, small_pool_with_input_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, small_pool_with_output_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -2797,7 +2797,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, small_pool_with_output_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, small_pool_with_qmin) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -2823,7 +2823,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, small_pool_with_qmin) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, small_pool_with_qmax) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -2852,7 +2852,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, small_pool_with_qmax) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_small_pool) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -2878,7 +2878,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_small_pool) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_small_pool_with_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -2916,7 +2916,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_small_pool_with_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_small_pool_with_width_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -2954,7 +2954,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_small_pool_with_width_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_small_pool_with_height_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -2992,7 +2992,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_small_pool_with_height_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_small_pool_with_tf_same_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -3056,7 +3056,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_small_pool_with_tf_same_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_small_pool_with_input_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -3084,7 +3084,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_small_pool_with_input_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_small_pool_with_output_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -3112,7 +3112,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_small_pool_with_output_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_small_pool_with_qmin) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -3140,7 +3140,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_small_pool_with_qmin) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_small_pool_with_qmax) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -3171,7 +3171,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_small_pool_with_qmax) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, large_pool) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -3195,7 +3195,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, large_pool) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, large_pool_multithreaded) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -3211,7 +3211,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, large_pool_multithreaded) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, large_pool_with_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -3247,7 +3247,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, large_pool_with_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, large_pool_with_width_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -3299,7 +3299,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, large_pool_with_width_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, large_pool_with_height_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -3335,7 +3335,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, large_pool_with_height_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, large_pool_with_tf_same_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -3395,7 +3395,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, large_pool_with_tf_same_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, large_pool_with_input_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -3421,7 +3421,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, large_pool_with_input_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, large_pool_with_output_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -3447,7 +3447,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, large_pool_with_output_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, large_pool_with_qmin) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -3473,7 +3473,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, large_pool_with_qmin) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, large_pool_with_qmax) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -3499,7 +3499,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, large_pool_with_qmax) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, large_pool_with_tf_same_padding_multithreaded) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile + 1);
@@ -3528,7 +3528,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, large_pool_with_tf_same_padding_multithreaded) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_large_pool) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -3554,7 +3554,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_large_pool) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_large_pool_with_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -3592,7 +3592,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_large_pool_with_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_large_pool_with_width_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -3630,7 +3630,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_large_pool_with_width_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_large_pool_with_height_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -3668,7 +3668,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_large_pool_with_height_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_large_pool_with_tf_same_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -3732,7 +3732,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_large_pool_with_tf_same_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_large_pool_with_input_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -3760,7 +3760,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_large_pool_with_input_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_large_pool_with_output_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -3788,7 +3788,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_large_pool_with_output_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_large_pool_with_qmin) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -3816,7 +3816,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_large_pool_with_qmin) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_large_pool_with_qmax) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -3844,7 +3844,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_large_pool_with_qmax) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_large_pool_multithreaded) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -3864,7 +3864,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_large_pool_multithreaded) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, small_image) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -3888,7 +3888,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, small_image) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, small_image_with_width_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -3933,7 +3933,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, small_image_with_width_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, small_image_with_height_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -3978,7 +3978,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, small_image_with_height_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, small_image_with_input_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -4004,7 +4004,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, small_image_with_input_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, small_image_with_output_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -4030,7 +4030,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, small_image_with_output_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, small_image_with_qmin) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -4056,7 +4056,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, small_image_with_qmin) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, small_image_with_qmax) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -4085,7 +4085,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, small_image_with_qmax) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_small_image) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -4111,7 +4111,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_small_image) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_small_image_with_width_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -4160,7 +4160,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_small_image_with_width_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_small_image_with_height_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -4209,7 +4209,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_small_image_with_height_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_small_image_with_input_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -4237,7 +4237,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_small_image_with_input_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_small_image_with_output_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -4265,7 +4265,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_small_image_with_output_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_small_image_with_qmin) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -4293,7 +4293,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_small_image_with_qmin) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_small_image_with_qmax) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       SmallPoolSize(avgpool_config->primary_tile);
@@ -4324,7 +4324,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_small_image_with_qmax) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, large_image) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -4348,7 +4348,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, large_image) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, large_image_with_width_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -4394,7 +4394,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, large_image_with_width_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, large_image_with_height_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -4440,7 +4440,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, large_image_with_height_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, large_image_with_input_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -4466,7 +4466,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, large_image_with_input_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, large_image_with_output_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -4492,7 +4492,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, large_image_with_output_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, large_image_with_qmin) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -4518,7 +4518,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, large_image_with_qmin) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, large_image_with_qmax) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -4547,7 +4547,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, large_image_with_qmax) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_large_image) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -4573,7 +4573,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_large_image) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_large_image_with_width_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -4623,7 +4623,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_large_image_with_width_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_large_image_with_height_padding) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -4673,7 +4673,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_large_image_with_height_padding) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_large_image_with_input_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -4701,7 +4701,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_large_image_with_input_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_large_image_with_output_stride) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -4729,7 +4729,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_large_image_with_output_stride) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_large_image_with_qmin) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -4757,7 +4757,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_large_image_with_qmin) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_large_image_with_qmax) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);
@@ -4785,7 +4785,7 @@ TEST(AVERAGE_POOLING_NHWC_F32, batched_large_image_with_qmax) {
 
 TEST(AVERAGE_POOLING_NHWC_F32, batched_large_image_multithreaded) {
   const struct xnn_avgpool_config* avgpool_config =
-      xnn_init_f32_avgpool_config();
+      xnn_get_f32_avgpool_config();
   ASSERT_NE(avgpool_config, nullptr);
   const std::pair<size_t, size_t> pooling_size =
       LargePoolSize(avgpool_config->primary_tile * 2);

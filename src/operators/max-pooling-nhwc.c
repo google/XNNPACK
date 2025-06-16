@@ -177,7 +177,7 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_s8(
     return xnn_status_invalid_parameter;
   }
 
-  const struct xnn_maxpool_config* maxpool_config = xnn_init_s8_maxpool_config();
+  const struct xnn_maxpool_config* maxpool_config = xnn_get_s8_maxpool_config();
   assert(maxpool_config != NULL);
   struct xnn_s8_minmax_params params;
   maxpool_config->init.s8(&params, output_min, output_max);
@@ -216,7 +216,7 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_u8(
     return xnn_status_invalid_parameter;
   }
 
-  const struct xnn_maxpool_config* maxpool_config = xnn_init_u8_maxpool_config();
+  const struct xnn_maxpool_config* maxpool_config = xnn_get_u8_maxpool_config();
   assert(maxpool_config != NULL);
   struct xnn_u8_minmax_params params;
   maxpool_config->init.u8(&params, output_min, output_max);
@@ -269,7 +269,7 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_f32(
     return xnn_status_invalid_parameter;
   }
 
-  const struct xnn_maxpool_config* maxpool_config = xnn_init_f32_maxpool_config();
+  const struct xnn_maxpool_config* maxpool_config = xnn_get_f32_maxpool_config();
   if (maxpool_config == NULL) {
     xnn_log_error(
       "failed to create %s operator: unsupported hardware configuration",
@@ -331,7 +331,7 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_f16(
     return xnn_status_invalid_parameter;
   }
 
-  const struct xnn_maxpool_config* maxpool_config = xnn_init_f16_maxpool_config();
+  const struct xnn_maxpool_config* maxpool_config = xnn_get_f16_maxpool_config();
   if (maxpool_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_max_pooling_nhwc_f16));

@@ -205,9 +205,9 @@ def generate_test_cases(
         "f32": "float",
     }[datatype]
     batch_scale = {
-        "rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype,
+        "rvv": " * xnn_get_hardware_config()->vlenb / sizeof(%s)" % ctype,
         "rvvfp16arith": (
-            " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype
+            " * xnn_get_hardware_config()->vlenb / sizeof(%s)" % ctype
         ),
     }[isa]
   return xngen.preprocess(

@@ -20,7 +20,7 @@ XNN_INIT_ONCE_GUARD(transpose);
 
 static void init_transpose_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
 
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
@@ -103,7 +103,7 @@ static void init_transpose_config(void) {
       .tile_size = 32,
     };
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
 
     transpose_config.copy = (xnn_vunary_ukernel_fn) xnn_xx_copy_ukernel__scalar_memcpy;
@@ -198,7 +198,7 @@ static void init_transpose_config(void) {
       .tile_size = 32,
     };
     #if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-      const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+      const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
       assert(hardware_config != NULL);
       if (hardware_config->vlenb >= 128) {
         transpose_config.x32 = (struct xnn_transpose_subconfig) {
@@ -248,8 +248,8 @@ static void init_transpose_config(void) {
   #endif
 }
 
-const struct xnn_transpose_config* xnn_init_transpose_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_transpose_config* xnn_get_transpose_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }

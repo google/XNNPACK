@@ -105,10 +105,10 @@ enum xnn_status xnn_create_softmax_nc_qu8(
   }
   softmax_op->softmax.input_scale = input_scale;
 
-  const struct xnn_lut32norm_config* lut32norm_config = xnn_init_u8_lut32norm_config();
+  const struct xnn_lut32norm_config* lut32norm_config = xnn_get_u8_lut32norm_config();
   assert(lut32norm_config != NULL);
 
-  const struct xnn_reduce_config* rmax_config = xnn_init_u8_rmax_config();
+  const struct xnn_reduce_config* rmax_config = xnn_get_u8_rmax_config();
   assert(rmax_config != NULL);
 
   softmax_op->type = xnn_operator_type_softmax_nc_qu8;
@@ -297,21 +297,21 @@ enum xnn_status xnn_create_softmax_nc_f16(
     xnn_operator_t* softmax_op_out)
 {
   const struct xnn_raddstoreexpminusmax_config* raddstoreexpminusmax_config =
-    xnn_init_f16_raddstoreexpminusmax_config();
+    xnn_get_f16_raddstoreexpminusmax_config();
   if (raddstoreexpminusmax_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_softmax_nc_f16));
     return xnn_status_unsupported_hardware;
   }
 
-  const struct xnn_reduce_config* rmax_config = xnn_init_f16_rmax_config();
+  const struct xnn_reduce_config* rmax_config = xnn_get_f16_rmax_config();
   if (rmax_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_softmax_nc_f16));
     return xnn_status_unsupported_hardware;
   }
 
-  const struct xnn_binary_elementwise_config* vmul_config = xnn_init_f16_vmul_config();
+  const struct xnn_binary_elementwise_config* vmul_config = xnn_get_f16_vmul_config();
   if (vmul_config == NULL) {
     xnn_log_error(
       "failed to create %s operator: unsupported hardware configuration",
@@ -333,7 +333,7 @@ enum xnn_status xnn_create_softmax_nc_f32(
     xnn_operator_t* softmax_op_out)
 {
   const struct xnn_raddstoreexpminusmax_config* raddstoreexpminusmax_config =
-    xnn_init_f32_raddstoreexpminusmax_config();
+    xnn_get_f32_raddstoreexpminusmax_config();
   if (raddstoreexpminusmax_config == NULL) {
     xnn_log_error(
       "failed to create %s operator: unsupported hardware configuration",
@@ -341,7 +341,7 @@ enum xnn_status xnn_create_softmax_nc_f32(
     return xnn_status_unsupported_hardware;
   }
 
-  const struct xnn_reduce_config* rmax_config = xnn_init_f32_rmax_config();
+  const struct xnn_reduce_config* rmax_config = xnn_get_f32_rmax_config();
   if (rmax_config == NULL) {
     xnn_log_error(
       "failed to create %s operator: unsupported hardware configuration",
@@ -349,7 +349,7 @@ enum xnn_status xnn_create_softmax_nc_f32(
     return xnn_status_unsupported_hardware;
   }
 
-  const struct xnn_binary_elementwise_config* vmul_config = xnn_init_f32_vmul_config();
+  const struct xnn_binary_elementwise_config* vmul_config = xnn_get_f32_vmul_config();
   if (vmul_config == NULL) {
     xnn_log_error(
       "failed to create %s operator: unsupported hardware configuration",

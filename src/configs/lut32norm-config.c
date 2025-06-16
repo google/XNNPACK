@@ -20,8 +20,8 @@ static void init_u8_lut32norm_config(void) {
   u8_lut32norm_config.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
 }
 
-const struct xnn_lut32norm_config* xnn_init_u8_lut32norm_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_lut32norm_config* xnn_get_u8_lut32norm_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }

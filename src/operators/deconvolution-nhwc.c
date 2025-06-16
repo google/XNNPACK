@@ -502,7 +502,7 @@ enum xnn_status create_deconvolution2d_nhwc_qs8_qc8w(
     return xnn_status_invalid_parameter;
   }
 
-  const struct xnn_gemm_config* gemm_config = xnn_init_qs8_qc8w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qs8_qc8w_gemm_config();
   assert(gemm_config != NULL);
 
   union xnn_qs8_qc8w_conv_minmax_params params;
@@ -780,7 +780,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qu8(
     return xnn_status_unsupported_parameter;
   }
 
-  const struct xnn_gemm_config* gemm_config = xnn_init_qu8_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qu8_gemm_config();
   assert(gemm_config != NULL);
 
   union xnn_qu8_conv_minmax_params params;
@@ -868,7 +868,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f16(
     return xnn_status_invalid_parameter;
   }
 
-  const struct xnn_gemm_config* gemm_config = xnn_init_f16_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_f16_gemm_config();
   if (gemm_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f16));
@@ -1028,7 +1028,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qd8_f32_qc8w(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* deconvolution_op_out)
 {
-  const struct xnn_gemm_config* gemm_config = xnn_init_qd8_f32_qc8w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qd8_f32_qc8w_gemm_config();
   return create_deconvolution2d_nhwc_qx8_f32_qc8w(output_padding_top, output_padding_right,
                                                   output_padding_bottom, output_padding_left,
                                                   kernel_height, kernel_width,
@@ -1067,7 +1067,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qdu8_f32_qc8w(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* deconvolution_op_out)
 {
-  const struct xnn_gemm_config* gemm_config = xnn_init_qdu8_f32_qc8w_igemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qdu8_f32_qc8w_igemm_config();
   return create_deconvolution2d_nhwc_qx8_f32_qc8w(output_padding_top, output_padding_right,
                                                   output_padding_bottom, output_padding_left,
                                                   kernel_height, kernel_width,
@@ -1126,14 +1126,14 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
     return xnn_status_invalid_parameter;
   }
 
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_f32_igemm_config();
   if (gemm_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f32));
     return xnn_status_unsupported_hardware;
   }
 
-  const struct xnn_gemm_config* gemm_nr2_config = xnn_init_f32_gemm_nr2_config(flags);
+  const struct xnn_gemm_config* gemm_nr2_config = xnn_get_f32_gemm_nr2_config(flags);
   if (gemm_nr2_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f32));

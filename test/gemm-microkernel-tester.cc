@@ -2308,7 +2308,7 @@ void GemmMicrokernelTester::Test_PF32(
 
   // Get the LHS packing config.
   const struct xnn_pack_lh_config* pack_lh_config =
-      xnn_init_x32_pack_lh_config();
+      xnn_get_x32_pack_lh_config();
   ASSERT_NE(pack_lh_config, nullptr);
 
   // Loop over the iterations.
@@ -2425,7 +2425,7 @@ void GemmMicrokernelTester::Test_PF16(
 
   // Get the LHS packing config.
   const struct xnn_pack_lh_config* pack_lh_config =
-      xnn_init_x16_pack_lh_config();
+      xnn_get_x16_pack_lh_config();
   ASSERT_NE(pack_lh_config, nullptr);
 
   // Loop over the iterations.
@@ -2545,7 +2545,7 @@ void GemmMicrokernelTester::Test_PQS8(
 
   // Get the LHS packing config.
   const struct xnn_pack_lh_config* pack_lh_config =
-      xnn_init_x8_pack_lh_config();
+      xnn_get_x8_pack_lh_config();
   ASSERT_NE(pack_lh_config, nullptr);
 
   xnnpack::fill_uniform_random_bits(a.data(), a.size(), rng);

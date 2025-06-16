@@ -22,7 +22,7 @@ static void init_x8_lut_config(void) {
   #elif XNN_ARCH_ARM64
     x8_lut_config.microkernel = xnn_x8_lut_ukernel__aarch64_neon_tbx128x4_u64;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
 
     #if XNN_ENABLE_AVX256VBMI
@@ -44,7 +44,7 @@ static void init_x8_lut_config(void) {
       x8_lut_config.microkernel = xnn_x8_lut_ukernel__scalar_u4;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
 
     if (hardware_config->is_x86) {
@@ -65,8 +65,8 @@ static void init_x8_lut_config(void) {
   #endif
 }
 
-const struct xnn_x8_lut_config* xnn_init_x8_lut_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_x8_lut_config* xnn_get_x8_lut_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }

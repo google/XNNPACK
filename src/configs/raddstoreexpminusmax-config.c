@@ -21,19 +21,19 @@ XNN_INIT_ONCE_GUARD(f32_raddstoreexpminusmax);
 
 static void init_f16_raddstoreexpminusmax_config(void) {
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
       f16_raddstoreexpminusmax_config.ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u32;
     }
   #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
       f16_raddstoreexpminusmax_config.ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u32;
     }
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
       f16_raddstoreexpminusmax_config.ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u32;
@@ -43,7 +43,7 @@ static void init_f16_raddstoreexpminusmax_config(void) {
 
 static void init_f32_raddstoreexpminusmax_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       f32_raddstoreexpminusmax_config.ukernel =
@@ -56,7 +56,7 @@ static void init_f32_raddstoreexpminusmax_config(void) {
     f32_raddstoreexpminusmax_config.ukernel =
       (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__neonfma_rr1_lut64_p2_u16_acc2;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
       if ((hardware_config->arch_flags & xnn_arch_x86_avx512f)) {
@@ -100,8 +100,8 @@ static bool is_f16_compatible_config(const struct xnn_hardware_config* hardware_
   #endif
 }
 
-const struct xnn_raddstoreexpminusmax_config* xnn_init_f16_raddstoreexpminusmax_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_raddstoreexpminusmax_config* xnn_get_f16_raddstoreexpminusmax_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL || !is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
@@ -109,8 +109,8 @@ const struct xnn_raddstoreexpminusmax_config* xnn_init_f16_raddstoreexpminusmax_
   return &f16_raddstoreexpminusmax_config;
 }
 
-const struct xnn_raddstoreexpminusmax_config* xnn_init_f32_raddstoreexpminusmax_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_raddstoreexpminusmax_config* xnn_get_f32_raddstoreexpminusmax_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }

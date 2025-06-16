@@ -418,7 +418,7 @@ def generate_test_cases(ukernel, init_fn, mr, nr, k_block, vector_tile, is_pipel
   is_vector = ""
   if vector_tile:
     ctype = {"f16": "uint16_t", "f32": "float"}[datatype]
-    mr_scale = {"rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype}[isa]
+    mr_scale = {"rvv": " * xnn_get_hardware_config()->vlenb / sizeof(%s)" % ctype}[isa]
     is_vector = "v"
     next_prime_for_output_stride = "xnnpack::NextPrime(" + str(mr) + str(mr_scale) + " * 2 + 1)"
   else:

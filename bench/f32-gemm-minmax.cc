@@ -315,7 +315,7 @@
       xnn_f32_gemm_minmax_ukernel_1x4v__rvv,
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_f32_gemm_goi_w,
-      /*mr=*/1, /*nr=*/4 * xnn_init_hardware_config()->vlenb / sizeof(float), /*kr=*/1, /*sr=*/1,
+      /*mr=*/1, /*nr=*/4 * xnn_get_hardware_config()->vlenb / sizeof(float), /*kr=*/1, /*sr=*/1,
       /*arch_flags=*/xnn_arch_riscv_vector);
   }
 
@@ -326,7 +326,7 @@
       xnn_f32_gemm_minmax_ukernel_7x4v__rvv,
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_f32_gemm_goi_w,
-      /*mr=*/7, /*nr=*/4 * xnn_init_hardware_config()->vlenb / sizeof(float), /*kr=*/1, /*sr=*/1,
+      /*mr=*/7, /*nr=*/4 * xnn_get_hardware_config()->vlenb / sizeof(float), /*kr=*/1, /*sr=*/1,
       /*arch_flags=*/xnn_arch_riscv_vector);
   }
 

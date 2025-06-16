@@ -776,7 +776,7 @@ def generate_test_cases(
         }[input_datatype]
     )
     nr_scale = {
-        "rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % accum_type
+        "rvv": " * xnn_get_hardware_config()->vlenb / sizeof(%s)" % accum_type
     }[isa]
   test_fun_name = "".join(ukernel.split("_")[1:4]).upper()
   if test_fun_name in {"QP8F32QC8W"}:

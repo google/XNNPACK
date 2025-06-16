@@ -574,11 +574,11 @@ const xnn_unary_elementwise_config* get_config(xnn_unary_operator op,
 
 extern "C" {
 
-// If we could guarantee that xnn_init_*_config did not return NULL, we could
+// If we could guarantee that xnn_get_*_config did not return NULL, we could
 // only support reference configs for the subset of ops/datatypes that we don't
 // have a microkernel for. But, that is not the case, so we need the full set of
 // reference ops implemented.
-const xnn_unary_elementwise_config* xnn_init_unary_reference_config(
+const xnn_unary_elementwise_config* xnn_get_unary_reference_config(
     xnn_unary_operator op, xnn_datatype input_datatype,
     xnn_datatype output_datatype) {
   if (op == xnn_unary_convert) {

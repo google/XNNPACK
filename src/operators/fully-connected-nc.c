@@ -423,7 +423,7 @@ enum xnn_status xnn_create_fully_connected_nc_f16(
     uint32_t flags,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f16_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_f16_gemm_config();
   return create_fully_connected_nc_f16(input_channels, output_channels, input_stride,
           output_stride, kernel, bias, output_min, output_max, flags,
           weights_cache, gemm_config,
@@ -443,7 +443,7 @@ enum xnn_status xnn_create_fully_connected_nc_pf16(
     uint32_t flags,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_pf16_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_pf16_gemm_config();
   return create_fully_connected_nc_f16(input_channels, output_channels, input_stride,
           output_stride, kernel, bias, output_min, output_max, flags,
           weights_cache, gemm_config, xnn_operator_type_fully_connected_nc_pf16, fully_connected_op_out);
@@ -559,7 +559,7 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qc4w(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out)
 {
-  const struct xnn_gemm_config* gemm_config = xnn_init_qd8_f16_qc4w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qd8_f16_qc4w_gemm_config();
   return create_fully_connected_nc_qx8_f16_qc4w(input_channels, output_channels, input_stride, output_stride,
                                                 kernel_zero_point, kernel_scale, kernel, bias, output_min,
                                                 output_max, flags, weights_cache,
@@ -581,7 +581,7 @@ enum xnn_status xnn_create_fully_connected_nc_qdu8_f16_qc4w(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out)
 {
-  const struct xnn_gemm_config* gemm_config = xnn_init_qdu8_f16_qc4w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qdu8_f16_qc4w_gemm_config();
   return create_fully_connected_nc_qx8_f16_qc4w(input_channels, output_channels, input_stride, output_stride,
                                                 kernel_zero_point, kernel_scale, kernel, bias, output_min,
                                                 output_max, flags, weights_cache,
@@ -667,7 +667,7 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w(
     return xnn_status_invalid_parameter;
   }
 
-  const struct xnn_gemm_config* gemm_config = xnn_init_qd8_f16_qb4w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qd8_f16_qb4w_gemm_config();
   if (gemm_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_qd8_f16_qb4w));
@@ -817,7 +817,7 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qc4w(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out)
 {
-  const struct xnn_gemm_config* gemm_config = xnn_init_qd8_f32_qc4w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qd8_f32_qc4w_gemm_config();
   return create_fully_connected_nc_qx8_f32_qc4w(input_channels, output_channels,
                                                 input_stride, output_stride, kernel_zero_point,
                                                 kernel_scale, kernel, bias, output_min, output_max, flags,
@@ -840,7 +840,7 @@ enum xnn_status xnn_create_fully_connected_nc_qdu8_f32_qc4w(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out)
 {
-  const struct xnn_gemm_config* gemm_config = xnn_init_qdu8_f32_qc4w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qdu8_f32_qc4w_gemm_config();
   return create_fully_connected_nc_qx8_f32_qc4w(input_channels, output_channels,
                                                 input_stride, output_stride, kernel_zero_point,
                                                 kernel_scale, kernel, bias, output_min, output_max, flags,
@@ -931,7 +931,7 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qc4w(
   }
 
   const struct xnn_gemm_config* gemm_config =
-      xnn_init_qp8_f32_qc4w_gemm_config();
+      xnn_get_qp8_f32_qc4w_gemm_config();
   if (gemm_config == NULL) {
     xnn_log_error(
         "failed to create %s operator: unsupported hardware configuration",
@@ -961,7 +961,7 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qc8w(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out) {
   const struct xnn_gemm_config* gemm_config =
-      xnn_init_qp8_f32_qc8w_gemm_config();
+      xnn_get_qp8_f32_qc8w_gemm_config();
   if (gemm_config == NULL) {
     xnn_log_error(
         "failed to create %s operator: unsupported hardware configuration",
@@ -1021,7 +1021,7 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qb4w(
     return xnn_status_invalid_parameter;
   }
 
-  const struct xnn_gemm_config* gemm_config = xnn_init_qp8_f32_qb4w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qp8_f32_qb4w_gemm_config();
   if (gemm_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_qp8_f32_qb4w));
@@ -1240,7 +1240,7 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out)
 {
-  const struct xnn_gemm_config* gemm_config = xnn_init_qd8_f32_qb4w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qd8_f32_qb4w_gemm_config();
   return create_fully_connected_nc_qx8_f32_qb4w(input_channels, output_channels, input_stride, output_stride,
                                                 block_size, kernel_zero_point, kernel_scale, kernel, bias,
                                                 output_min, output_max, flags, weights_cache,
@@ -1293,7 +1293,7 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w_f16_scales(
     uint32_t flags,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_qd8_f32_qb4w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qd8_f32_qb4w_gemm_config();
   return create_fully_connected_nc_qd8_f32_qb4w_f16_scales(input_channels, output_channels, input_stride, output_stride,
                                                 block_size, kernel_zero_point, kernel_scale, kernel, bias,
                                                 output_min, output_max, flags, weights_cache,
@@ -1315,7 +1315,7 @@ enum xnn_status xnn_create_fully_connected_nc_qdu8_f32_qb4w_f16_scales(
     uint32_t flags,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_qdu8_f32_qb4w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qdu8_f32_qb4w_gemm_config();
   return create_fully_connected_nc_qd8_f32_qb4w_f16_scales(input_channels, output_channels, input_stride, output_stride,
                                                 block_size, kernel_zero_point, kernel_scale, kernel, bias,
                                                 output_min, output_max, flags, weights_cache,
@@ -1338,7 +1338,7 @@ enum xnn_status xnn_create_fully_connected_nc_qdu8_f32_qb4w(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out)
 {
-  const struct xnn_gemm_config* gemm_config = xnn_init_qdu8_f32_qb4w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qdu8_f32_qb4w_gemm_config();
   return create_fully_connected_nc_qx8_f32_qb4w(input_channels, output_channels, input_stride, output_stride,
                                                 block_size, kernel_zero_point, kernel_scale, kernel, bias,
                                                 output_min, output_max, flags, weights_cache,
@@ -1438,7 +1438,7 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qc8w(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out)
 {
-  const struct xnn_gemm_config* gemm_config = xnn_init_qd8_f32_qc8w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qd8_f32_qc8w_gemm_config();
   return create_fully_connected_nc_qdx8_f32_qc8w(input_channels, output_channels, input_stride, output_stride,
                                                  kernel_scale, kernel, bias, output_min, output_max, flags,
                                                  weights_cache, gemm_config, xnn_operator_type_fully_connected_nc_qd8_f32_qc8w,
@@ -1459,7 +1459,7 @@ enum xnn_status xnn_create_fully_connected_nc_qdu8_f32_qc8w(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out)
 {
-  const struct xnn_gemm_config* gemm_config = xnn_init_qdu8_f32_qc8w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qdu8_f32_qc8w_gemm_config();
   return create_fully_connected_nc_qdx8_f32_qc8w(input_channels, output_channels, input_stride, output_stride,
                                                  kernel_scale, kernel, bias, output_min, output_max, flags,
                                                  weights_cache, gemm_config, xnn_operator_type_fully_connected_nc_qdu8_f32_qc8w,
@@ -1563,7 +1563,7 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qc8w(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out)
 {
-  const struct xnn_gemm_config* gemm_config = xnn_init_qd8_f16_qc8w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qd8_f16_qc8w_gemm_config();
   return create_fully_connected_nc_qx8_f16_qc8w(input_channels, output_channels, input_stride, output_stride, kernel_scale, kernel, bias,
                                                 output_min, output_max, flags, weights_cache, gemm_config,
                                                 xnn_operator_type_fully_connected_nc_qd8_f16_qc8w,
@@ -1584,7 +1584,7 @@ enum xnn_status xnn_create_fully_connected_nc_qdu8_f16_qc8w(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out)
 {
-  const struct xnn_gemm_config* gemm_config = xnn_init_qdu8_f16_qc8w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qdu8_f16_qc8w_gemm_config();
   return create_fully_connected_nc_qx8_f16_qc8w(input_channels, output_channels, input_stride, output_stride, kernel_scale, kernel, bias,
                                                 output_min, output_max, flags, weights_cache, gemm_config,
                                                 xnn_operator_type_fully_connected_nc_qdu8_f16_qc8w,
@@ -1711,7 +1711,7 @@ enum xnn_status xnn_create_fully_connected_nc_bf16_f32(
     uint32_t flags,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_bf16_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_bf16_f32_gemm_config();
   if (gemm_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_bf16_f32));
@@ -1735,14 +1735,14 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
     uint32_t flags,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config(flags);
+  const struct xnn_gemm_config* gemm_config = xnn_get_f32_gemm_config(flags);
   if (gemm_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f32));
     return xnn_status_unsupported_hardware;
   }
 
-  const struct xnn_gemm_config* gemm_nr2_config = xnn_init_f32_gemm_nr2_config(flags);
+  const struct xnn_gemm_config* gemm_nr2_config = xnn_get_f32_gemm_nr2_config(flags);
 
   // Select microkernel configuration based on output channels
   if (gemm_nr2_config != NULL) {
@@ -1780,7 +1780,7 @@ enum xnn_status xnn_create_fully_connected_nc_pf32(
     uint32_t flags,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_pf32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_pf32_gemm_config();
   if (gemm_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_pf32));
@@ -1847,7 +1847,7 @@ enum xnn_status xnn_create_fully_connected_nc_f32_qc4w(
     }
   }
 
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_qc4w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_f32_qc4w_gemm_config();
   if (gemm_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f32_qc4w));
@@ -1936,7 +1936,7 @@ enum xnn_status xnn_create_fully_connected_nc_f32_qc8w(
     }
   }
 
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_qc8w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_f32_qc8w_gemm_config();
   if (gemm_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f32_qc8w));
@@ -2040,7 +2040,7 @@ enum xnn_status xnn_create_fully_connected_nc_qs8(
     return xnn_status_unsupported_parameter;
   }
 
-  const struct xnn_gemm_config* gemm_config = xnn_init_qs8_qc8w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qs8_qc8w_gemm_config();
   assert(gemm_config != NULL);
 
   union xnn_qs8_qc8w_conv_minmax_params params;
@@ -2199,7 +2199,7 @@ enum xnn_status xnn_create_fully_connected_nc_qs8_qc4w(
   xnn_weights_cache_t weights_cache,
   xnn_operator_t* fully_connected_op_out)
 {
-  const struct xnn_gemm_config* gemm_config = xnn_init_qs8_qc4w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qs8_qc4w_gemm_config();
   const struct xnn_qs8_qc4w_packing_params packing_params = { .input_zero_point = input_zero_point, .kernel_zero_point = kernel_zero_point };
   return create_fully_connected_nc_qx8_qc8w(input_channels, output_channels, input_stride, output_stride,
                                             input_scale, kernel_scale, kernel,
@@ -2227,7 +2227,7 @@ enum xnn_status xnn_create_fully_connected_nc_qs8_qc8w(
   xnn_weights_cache_t weights_cache,
   xnn_operator_t* fully_connected_op_out)
 {
-  const struct xnn_gemm_config* gemm_config = xnn_init_qs8_qc8w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qs8_qc8w_gemm_config();
   const struct xnn_qs8_packing_params packing_params = { .input_zero_point = input_zero_point};
   return create_fully_connected_nc_qx8_qc8w(input_channels, output_channels, input_stride, output_stride,
                                             input_scale, kernel_scale, kernel,
@@ -2255,7 +2255,7 @@ enum xnn_status xnn_create_fully_connected_nc_pqs8_qc8w(
   xnn_weights_cache_t weights_cache,
   xnn_operator_t* fully_connected_op_out)
 {
-  const struct xnn_gemm_config* gemm_config = xnn_init_pqs8_qc8w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_pqs8_qc8w_gemm_config();
   const struct xnn_qs8_packing_params packing_params = { .input_zero_point = input_zero_point};
   return create_fully_connected_nc_qx8_qc8w(input_channels, output_channels, input_stride, output_stride,
                                             input_scale, kernel_scale, kernel,
@@ -2322,7 +2322,7 @@ enum xnn_status xnn_create_fully_connected_nc_qu8(
     return xnn_status_unsupported_parameter;
   }
 
-  const struct xnn_gemm_config* gemm_config = xnn_init_qu8_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qu8_gemm_config();
   assert(gemm_config != NULL);
 
   union xnn_qu8_conv_minmax_params params;
@@ -2417,42 +2417,42 @@ static enum xnn_status reshape_fully_connected_nc(
     case xnn_operator_type_fully_connected_nc_qd8_f16_qc4w:
     case xnn_operator_type_fully_connected_nc_qd8_f16_qc8w:
       if (inline_lhs_packing) {
-        packed_lh_config = xnn_init_f16_qdint8_pack_lh_config();
+        packed_lh_config = xnn_get_f16_qdint8_pack_lh_config();
       }
       break;
     case xnn_operator_type_fully_connected_nc_qdu8_f16_qc4w:
     case xnn_operator_type_fully_connected_nc_qdu8_f16_qc8w:
       if (inline_lhs_packing) {
-        packed_lh_config = xnn_init_f16_qduint8_pack_lh_config();
+        packed_lh_config = xnn_get_f16_qduint8_pack_lh_config();
       }
       break;
     case xnn_operator_type_fully_connected_nc_qd8_f32_qb4w:
     case xnn_operator_type_fully_connected_nc_qd8_f32_qc4w:
     case xnn_operator_type_fully_connected_nc_qd8_f32_qc8w:
       if (inline_lhs_packing) {
-        packed_lh_config = xnn_init_f32_qdint8_pack_lh_config();
+        packed_lh_config = xnn_get_f32_qdint8_pack_lh_config();
       }
       break;
     case xnn_operator_type_fully_connected_nc_qdu8_f32_qb4w:
     case xnn_operator_type_fully_connected_nc_qdu8_f32_qc4w:
     case xnn_operator_type_fully_connected_nc_qdu8_f32_qc8w:
       if (inline_lhs_packing) {
-        packed_lh_config = xnn_init_f32_qduint8_pack_lh_config();
+        packed_lh_config = xnn_get_f32_qduint8_pack_lh_config();
       }
       break;
     case xnn_operator_type_fully_connected_nc_qp8_f32_qb4w:
     case xnn_operator_type_fully_connected_nc_qp8_f32_qc4w:
     case xnn_operator_type_fully_connected_nc_qp8_f32_qc8w:
-      packed_lh_config = xnn_init_qp8_pack_lh_config();
+      packed_lh_config = xnn_get_qp8_pack_lh_config();
       break;
     case xnn_operator_type_fully_connected_nc_pf16:
-      packed_lh_config = xnn_init_x16_pack_lh_config();
+      packed_lh_config = xnn_get_x16_pack_lh_config();
       break;
     case xnn_operator_type_fully_connected_nc_pf32:
-      packed_lh_config = xnn_init_x32_pack_lh_config();
+      packed_lh_config = xnn_get_x32_pack_lh_config();
       break;
     case xnn_operator_type_fully_connected_nc_pqs8_qc8w:
-      packed_lh_config = xnn_init_x8_pack_lh_config();
+      packed_lh_config = xnn_get_x8_pack_lh_config();
       break;
     default:
       break;

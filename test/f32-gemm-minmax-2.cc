@@ -558,7 +558,7 @@ std::vector<GemmTestParams> CreateTests2(
     std::string kbs = std::to_string(k_block);
     std::string kb2s = std::to_string(k_block * 2);
     std::string akbs = std::to_string(adj_k_block);
-    nr = nr * xnn_init_hardware_config()->vlenb / sizeof(float);
+    nr = nr * xnn_get_hardware_config()->vlenb / sizeof(float);
     std::string nrs = std::to_string(nr);
 
     const GemmMicrokernelTester tester = GemmMicrokernelTester()

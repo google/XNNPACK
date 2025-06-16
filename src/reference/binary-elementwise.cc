@@ -352,7 +352,7 @@ struct CopysignOp {
 
 extern "C" {
 
-const struct xnn_binary_elementwise_config* xnn_init_binary_reference_config(
+const struct xnn_binary_elementwise_config* xnn_get_binary_reference_config(
     enum xnn_binary_operator type, enum xnn_datatype datatype) {
   switch (type) {
     case xnn_binary_add:

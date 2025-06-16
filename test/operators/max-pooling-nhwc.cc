@@ -18,7 +18,7 @@ constexpr int max_pool_size = 25;
 
 TEST(MAX_POOLING_NHWC_S8, unit_batch_small_1xM_pool) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_s8_maxpool_config();
+      xnn_get_s8_maxpool_config();
   ASSERT_NE(maxpool_config, nullptr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= max_pool_size; pool_size++) {
@@ -36,7 +36,7 @@ TEST(MAX_POOLING_NHWC_S8, unit_batch_small_1xM_pool) {
 
 TEST(MAX_POOLING_NHWC_S8, unit_batch_small_1xM_pool_with_padding) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_s8_maxpool_config();
+      xnn_get_s8_maxpool_config();
   ASSERT_NE(maxpool_config, nullptr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 3; pool_size <= max_pool_size; pool_size++) {
@@ -60,7 +60,7 @@ TEST(MAX_POOLING_NHWC_S8, unit_batch_small_1xM_pool_with_padding) {
 
 TEST(MAX_POOLING_NHWC_S8, unit_batch_small_1xM_pool_with_tf_same_padding) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_s8_maxpool_config();
+      xnn_get_s8_maxpool_config();
   ASSERT_NE(maxpool_config, nullptr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 3; pool_size <= max_pool_size; pool_size++) {
@@ -82,7 +82,7 @@ TEST(MAX_POOLING_NHWC_S8, unit_batch_small_1xM_pool_with_tf_same_padding) {
 
 TEST(MAX_POOLING_NHWC_S8, unit_batch_small_1xM_pool_with_stride) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_s8_maxpool_config();
+      xnn_get_s8_maxpool_config();
   ASSERT_NE(maxpool_config, nullptr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= max_pool_size; pool_size++) {
@@ -101,7 +101,7 @@ TEST(MAX_POOLING_NHWC_S8, unit_batch_small_1xM_pool_with_stride) {
 
 TEST(MAX_POOLING_NHWC_S8, unit_batch_small_1xM_pool_with_dilation) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_s8_maxpool_config();
+      xnn_get_s8_maxpool_config();
   ASSERT_NE(maxpool_config, nullptr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= max_pool_size; pool_size++) {
@@ -122,7 +122,7 @@ TEST(MAX_POOLING_NHWC_S8, unit_batch_small_1xM_pool_with_dilation) {
 
 TEST(MAX_POOLING_NHWC_S8, unit_batch_small_Mx1_pool) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_s8_maxpool_config();
+      xnn_get_s8_maxpool_config();
   ASSERT_NE(maxpool_config, nullptr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= max_pool_size; pool_size++) {
@@ -140,7 +140,7 @@ TEST(MAX_POOLING_NHWC_S8, unit_batch_small_Mx1_pool) {
 
 TEST(MAX_POOLING_NHWC_S8, unit_batch_small_Mx1_pool_with_padding) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_s8_maxpool_config();
+      xnn_get_s8_maxpool_config();
   ASSERT_NE(maxpool_config, nullptr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= max_pool_size; pool_size++) {
@@ -164,7 +164,7 @@ TEST(MAX_POOLING_NHWC_S8, unit_batch_small_Mx1_pool_with_padding) {
 
 TEST(MAX_POOLING_NHWC_S8, unit_batch_small_Mx1_pool_with_tf_same_padding) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_s8_maxpool_config();
+      xnn_get_s8_maxpool_config();
   ASSERT_NE(maxpool_config, nullptr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= max_pool_size; pool_size++) {
@@ -186,7 +186,7 @@ TEST(MAX_POOLING_NHWC_S8, unit_batch_small_Mx1_pool_with_tf_same_padding) {
 
 TEST(MAX_POOLING_NHWC_S8, unit_batch_small_Mx1_pool_with_stride) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_s8_maxpool_config();
+      xnn_get_s8_maxpool_config();
   ASSERT_NE(maxpool_config, nullptr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= max_pool_size; pool_size++) {
@@ -205,7 +205,7 @@ TEST(MAX_POOLING_NHWC_S8, unit_batch_small_Mx1_pool_with_stride) {
 
 TEST(MAX_POOLING_NHWC_S8, unit_batch_small_Mx1_pool_with_dilation) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_s8_maxpool_config();
+      xnn_get_s8_maxpool_config();
   ASSERT_NE(maxpool_config, nullptr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= max_pool_size; pool_size++) {
@@ -226,7 +226,7 @@ TEST(MAX_POOLING_NHWC_S8, unit_batch_small_Mx1_pool_with_dilation) {
 
 TEST(MAX_POOLING_NHWC_S8, unit_batch_small_pool_with_input_stride) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_s8_maxpool_config();
+      xnn_get_s8_maxpool_config();
   ASSERT_NE(maxpool_config, nullptr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= max_pool_size; pool_size++) {
@@ -254,7 +254,7 @@ TEST(MAX_POOLING_NHWC_S8, unit_batch_small_pool_with_input_stride) {
 
 TEST(MAX_POOLING_NHWC_S8, unit_batch_small_pool_with_output_stride) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_s8_maxpool_config();
+      xnn_get_s8_maxpool_config();
   ASSERT_NE(maxpool_config, nullptr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= max_pool_size; pool_size++) {
@@ -282,7 +282,7 @@ TEST(MAX_POOLING_NHWC_S8, unit_batch_small_pool_with_output_stride) {
 
 TEST(MAX_POOLING_NHWC_S8, unit_batch_small_pool_with_qmin) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_s8_maxpool_config();
+      xnn_get_s8_maxpool_config();
   ASSERT_NE(maxpool_config, nullptr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= max_pool_size; pool_size++) {
@@ -310,7 +310,7 @@ TEST(MAX_POOLING_NHWC_S8, unit_batch_small_pool_with_qmin) {
 
 TEST(MAX_POOLING_NHWC_S8, unit_batch_small_pool_with_qmax) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_s8_maxpool_config();
+      xnn_get_s8_maxpool_config();
   ASSERT_NE(maxpool_config, nullptr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= max_pool_size; pool_size++) {
@@ -338,7 +338,7 @@ TEST(MAX_POOLING_NHWC_S8, unit_batch_small_pool_with_qmax) {
 
 TEST(MAX_POOLING_NHWC_S8, small_batch_small_pool) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_s8_maxpool_config();
+      xnn_get_s8_maxpool_config();
   ASSERT_NE(maxpool_config, nullptr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= max_pool_size; pool_size++) {
@@ -364,7 +364,7 @@ TEST(MAX_POOLING_NHWC_S8, small_batch_small_pool) {
 
 TEST(MAX_POOLING_NHWC_S8, small_batch_small_pool_with_input_stride) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_s8_maxpool_config();
+      xnn_get_s8_maxpool_config();
   ASSERT_NE(maxpool_config, nullptr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= max_pool_size; pool_size++) {
@@ -392,7 +392,7 @@ TEST(MAX_POOLING_NHWC_S8, small_batch_small_pool_with_input_stride) {
 
 TEST(MAX_POOLING_NHWC_S8, small_batch_small_pool_with_output_stride) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_s8_maxpool_config();
+      xnn_get_s8_maxpool_config();
   ASSERT_NE(maxpool_config, nullptr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= max_pool_size; pool_size++) {
@@ -940,7 +940,7 @@ TEST(MAX_POOLING_NHWC_U8, setup_swap_height_and_width) {
 #ifndef XNN_EXCLUDE_F16_TESTS
 TEST(MAX_POOLING_NHWC_F16, unit_batch_small_1xM_pool) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_f16_maxpool_config();
+      xnn_get_f16_maxpool_config();
   if (maxpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -960,7 +960,7 @@ TEST(MAX_POOLING_NHWC_F16, unit_batch_small_1xM_pool) {
 
 TEST(MAX_POOLING_NHWC_F16, unit_batch_small_1xM_pool_with_padding) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_f16_maxpool_config();
+      xnn_get_f16_maxpool_config();
   if (maxpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -986,7 +986,7 @@ TEST(MAX_POOLING_NHWC_F16, unit_batch_small_1xM_pool_with_padding) {
 
 TEST(MAX_POOLING_NHWC_F16, unit_batch_small_1xM_pool_with_tf_same_padding) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_f16_maxpool_config();
+      xnn_get_f16_maxpool_config();
   if (maxpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -1010,7 +1010,7 @@ TEST(MAX_POOLING_NHWC_F16, unit_batch_small_1xM_pool_with_tf_same_padding) {
 
 TEST(MAX_POOLING_NHWC_F16, unit_batch_small_1xM_pool_with_stride) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_f16_maxpool_config();
+      xnn_get_f16_maxpool_config();
   if (maxpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -1031,7 +1031,7 @@ TEST(MAX_POOLING_NHWC_F16, unit_batch_small_1xM_pool_with_stride) {
 
 TEST(MAX_POOLING_NHWC_F16, unit_batch_small_1xM_pool_with_dilation) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_f16_maxpool_config();
+      xnn_get_f16_maxpool_config();
   if (maxpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -1054,7 +1054,7 @@ TEST(MAX_POOLING_NHWC_F16, unit_batch_small_1xM_pool_with_dilation) {
 
 TEST(MAX_POOLING_NHWC_F16, unit_batch_small_Mx1_pool) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_f16_maxpool_config();
+      xnn_get_f16_maxpool_config();
   if (maxpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -1074,7 +1074,7 @@ TEST(MAX_POOLING_NHWC_F16, unit_batch_small_Mx1_pool) {
 
 TEST(MAX_POOLING_NHWC_F16, unit_batch_small_Mx1_pool_with_padding) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_f16_maxpool_config();
+      xnn_get_f16_maxpool_config();
   if (maxpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -1100,7 +1100,7 @@ TEST(MAX_POOLING_NHWC_F16, unit_batch_small_Mx1_pool_with_padding) {
 
 TEST(MAX_POOLING_NHWC_F16, unit_batch_small_Mx1_pool_with_tf_same_padding) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_f16_maxpool_config();
+      xnn_get_f16_maxpool_config();
   if (maxpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -1124,7 +1124,7 @@ TEST(MAX_POOLING_NHWC_F16, unit_batch_small_Mx1_pool_with_tf_same_padding) {
 
 TEST(MAX_POOLING_NHWC_F16, unit_batch_small_Mx1_pool_with_stride) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_f16_maxpool_config();
+      xnn_get_f16_maxpool_config();
   if (maxpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -1145,7 +1145,7 @@ TEST(MAX_POOLING_NHWC_F16, unit_batch_small_Mx1_pool_with_stride) {
 
 TEST(MAX_POOLING_NHWC_F16, unit_batch_small_Mx1_pool_with_dilation) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_f16_maxpool_config();
+      xnn_get_f16_maxpool_config();
   if (maxpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -1168,7 +1168,7 @@ TEST(MAX_POOLING_NHWC_F16, unit_batch_small_Mx1_pool_with_dilation) {
 
 TEST(MAX_POOLING_NHWC_F16, unit_batch_small_pool_with_input_stride) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_f16_maxpool_config();
+      xnn_get_f16_maxpool_config();
   if (maxpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -1198,7 +1198,7 @@ TEST(MAX_POOLING_NHWC_F16, unit_batch_small_pool_with_input_stride) {
 
 TEST(MAX_POOLING_NHWC_F16, unit_batch_small_pool_with_output_stride) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_f16_maxpool_config();
+      xnn_get_f16_maxpool_config();
   if (maxpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -1228,7 +1228,7 @@ TEST(MAX_POOLING_NHWC_F16, unit_batch_small_pool_with_output_stride) {
 
 TEST(MAX_POOLING_NHWC_F16, unit_batch_small_pool_with_qmin) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_f16_maxpool_config();
+      xnn_get_f16_maxpool_config();
   if (maxpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -1258,7 +1258,7 @@ TEST(MAX_POOLING_NHWC_F16, unit_batch_small_pool_with_qmin) {
 
 TEST(MAX_POOLING_NHWC_F16, unit_batch_small_pool_with_qmax) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_f16_maxpool_config();
+      xnn_get_f16_maxpool_config();
   if (maxpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -1288,7 +1288,7 @@ TEST(MAX_POOLING_NHWC_F16, unit_batch_small_pool_with_qmax) {
 
 TEST(MAX_POOLING_NHWC_F16, small_batch_small_pool) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_f16_maxpool_config();
+      xnn_get_f16_maxpool_config();
   if (maxpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -1316,7 +1316,7 @@ TEST(MAX_POOLING_NHWC_F16, small_batch_small_pool) {
 
 TEST(MAX_POOLING_NHWC_F16, small_batch_small_pool_with_input_stride) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_f16_maxpool_config();
+      xnn_get_f16_maxpool_config();
   if (maxpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }
@@ -1346,7 +1346,7 @@ TEST(MAX_POOLING_NHWC_F16, small_batch_small_pool_with_input_stride) {
 
 TEST(MAX_POOLING_NHWC_F16, small_batch_small_pool_with_output_stride) {
   const struct xnn_maxpool_config* maxpool_config =
-      xnn_init_f16_maxpool_config();
+      xnn_get_f16_maxpool_config();
   if (maxpool_config == nullptr) {
     GTEST_SKIP();  // F16 unsupported.
   }

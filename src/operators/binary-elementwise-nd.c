@@ -32,97 +32,97 @@ static const struct xnn_binary_elementwise_config* init_config(
     case xnn_binary_add:
       switch (datatype) {
         case xnn_datatype_fp32:
-          return xnn_init_f32_vadd_config();
+          return xnn_get_f32_vadd_config();
         case xnn_datatype_fp16:
-          return xnn_init_f16_vadd_config();
+          return xnn_get_f16_vadd_config();
         case xnn_datatype_qint8:
-          return xnn_init_qs8_vadd_config();
+          return xnn_get_qs8_vadd_config();
         case xnn_datatype_quint8:
-          return xnn_init_qu8_vadd_config();
+          return xnn_get_qu8_vadd_config();
         default:
           return NULL;
       }
     case xnn_binary_subtract:
       switch (datatype) {
         case xnn_datatype_fp32:
-          return xnn_init_f32_vsub_config();
+          return xnn_get_f32_vsub_config();
         case xnn_datatype_fp16:
-          return xnn_init_f16_vsub_config();
+          return xnn_get_f16_vsub_config();
         case xnn_datatype_qint8:
           *sign_b = -1;
-          return xnn_init_qs8_vadd_config();
+          return xnn_get_qs8_vadd_config();
         case xnn_datatype_quint8:
           *sign_b = -1;
-          return xnn_init_qu8_vadd_config();
+          return xnn_get_qu8_vadd_config();
         default:
           return NULL;
       }
     case xnn_binary_multiply:
       switch (datatype) {
         case xnn_datatype_fp32:
-          return xnn_init_f32_vmul_config();
+          return xnn_get_f32_vmul_config();
         case xnn_datatype_fp16:
-          return xnn_init_f16_vmul_config();
+          return xnn_get_f16_vmul_config();
         case xnn_datatype_qint8:
-          return xnn_init_qs8_vmul_config();
+          return xnn_get_qs8_vmul_config();
         case xnn_datatype_quint8:
-          return xnn_init_qu8_vmul_config();
+          return xnn_get_qu8_vmul_config();
         default:
           return NULL;
       }
     case xnn_binary_divide:
       switch (datatype) {
         case xnn_datatype_fp32:
-          return xnn_init_f32_vdiv_config();
+          return xnn_get_f32_vdiv_config();
         case xnn_datatype_fp16:
-          return xnn_init_f16_vdiv_config();
+          return xnn_get_f16_vdiv_config();
         default:
           return NULL;
       }
     case xnn_binary_maximum:
       switch (datatype) {
         case xnn_datatype_fp32:
-          return xnn_init_f32_vmax_config();
+          return xnn_get_f32_vmax_config();
         case xnn_datatype_fp16:
-          return xnn_init_f16_vmax_config();
+          return xnn_get_f16_vmax_config();
         default:
           return NULL;
       }
     case xnn_binary_minimum:
       switch (datatype) {
         case xnn_datatype_fp32:
-          return xnn_init_f32_vmin_config();
+          return xnn_get_f32_vmin_config();
         case xnn_datatype_fp16:
-          return xnn_init_f16_vmin_config();
+          return xnn_get_f16_vmin_config();
         default:
           return NULL;
       }
     case xnn_binary_copysign:
       switch (datatype) {
         case xnn_datatype_fp32:
-          return xnn_init_f32_vcopysign_config();
+          return xnn_get_f32_vcopysign_config();
         default:
           return NULL;
       }
     case xnn_binary_squared_difference:
       switch (datatype) {
         case xnn_datatype_fp32:
-          return xnn_init_f32_vsqrdiff_config();
+          return xnn_get_f32_vsqrdiff_config();
         case xnn_datatype_fp16:
-          return xnn_init_f16_vsqrdiff_config();
+          return xnn_get_f16_vsqrdiff_config();
         default:
           return NULL;
       }
     case xnn_binary_prelu:
       switch (datatype) {
         case xnn_datatype_fp32:
-          return xnn_init_f32_vprelu_config();
+          return xnn_get_f32_vprelu_config();
         case xnn_datatype_fp16:
-          return xnn_init_f16_vprelu_config();
+          return xnn_get_f16_vprelu_config();
         case xnn_datatype_qint8:
-          return xnn_init_qs8_vprelu_config();
+          return xnn_get_qs8_vprelu_config();
         case xnn_datatype_quint8:
-          return xnn_init_qu8_vprelu_config();
+          return xnn_get_qu8_vprelu_config();
         default:
           return NULL;
       }
@@ -147,7 +147,7 @@ static enum xnn_status init_binary_elementwise_nd(
     xnn_log_debug(
       "unsupported operator %s for datatype %s, falling back to reference kernel",
       xnn_binary_operator_to_string(type), xnn_datatype_to_string(datatype));
-    config = xnn_init_binary_reference_config(type, datatype);
+    config = xnn_get_binary_reference_config(type, datatype);
   }
   if (config == NULL) {
     xnn_log_error(

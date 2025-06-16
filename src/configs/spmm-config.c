@@ -25,7 +25,7 @@ XNN_INIT_ONCE_GUARD(f32_spmm4);
 
 static void init_f16_spmm_config(void) {
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
       f16_spmm_config.ukernel = (xnn_spmm_ukernel_fn) xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_pipelined;
@@ -34,7 +34,7 @@ static void init_f16_spmm_config(void) {
       f16_spmm_config.nr = 1;
     }
   #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
       f16_spmm_config.ukernel = (xnn_spmm_ukernel_fn) xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_pipelined;
@@ -47,7 +47,7 @@ static void init_f16_spmm_config(void) {
 
 static void init_f32_spmm_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       f32_spmm_config.ukernel = (xnn_spmm_ukernel_fn) xnn_f32_spmm_minmax_ukernel_32x1__neon;
@@ -71,13 +71,13 @@ static void init_f32_spmm_config(void) {
     f32_spmm_config.mr = 32;
     f32_spmm_config.nr = 1;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     f32_spmm_config.ukernel = (xnn_spmm_ukernel_fn) xnn_f32_spmm_minmax_ukernel_8vx1__rvv;
     f32_spmm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_spmm_config.mr = 8 * hardware_config->vlenb / sizeof(float);
     f32_spmm_config.nr = 1;
   #elif XNN_ARCH_WASMRELAXEDSIMD
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->is_x86) {
       f32_spmm_config.ukernel = (xnn_spmm_ukernel_fn) xnn_f32_spmm_minmax_ukernel_32x1__wasmrelaxedsimd_x86;
@@ -91,7 +91,7 @@ static void init_f32_spmm_config(void) {
       f32_spmm_config.nr = 1;
     }
   #elif XNN_ARCH_WASMSIMD
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->is_x86) {
       f32_spmm_config.ukernel = (xnn_spmm_ukernel_fn) xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_x86;
@@ -119,7 +119,7 @@ static void init_f32_spmm_config(void) {
 
 static void init_f32_spmm2_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       f32_spmm2_config.ukernel = (xnn_spmm_ukernel_fn) xnn_f32_spmm_minmax_ukernel_8x2__scalar;
@@ -133,7 +133,7 @@ static void init_f32_spmm2_config(void) {
     f32_spmm2_config.mr = 32;
     f32_spmm2_config.nr = 2;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     f32_spmm2_config.ukernel = (xnn_spmm_ukernel_fn) xnn_f32_spmm_minmax_ukernel_8vx2__rvv;
     f32_spmm2_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_spmm2_config.mr = 8 * hardware_config->vlenb / sizeof(float);
@@ -158,7 +158,7 @@ static void init_f32_spmm4_config(void) {
     f32_spmm4_config.mr = 32;
     f32_spmm4_config.nr = 4;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     f32_spmm4_config.ukernel = (xnn_spmm_ukernel_fn) xnn_f32_spmm_minmax_ukernel_4vx4__rvv;
     f32_spmm4_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_spmm4_config.mr = 4 * hardware_config->vlenb / sizeof(float);
@@ -171,8 +171,8 @@ static void init_f32_spmm4_config(void) {
   #endif
 }
 
-const struct xnn_spmm_config* xnn_init_f16_spmm_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_spmm_config* xnn_get_f16_spmm_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_chw_compatible_config(hardware_config)) {
     return NULL;
   }
@@ -180,8 +180,8 @@ const struct xnn_spmm_config* xnn_init_f16_spmm_config() {
   return &f16_spmm_config;
 }
 
-const struct xnn_spmm_config* xnn_init_f32_spmm_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_spmm_config* xnn_get_f32_spmm_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL || !xnn_is_chw_compatible_config(hardware_config)) {
     return NULL;
   }
@@ -189,8 +189,8 @@ const struct xnn_spmm_config* xnn_init_f32_spmm_config() {
   return &f32_spmm_config;
 }
 
-const struct xnn_spmm_config* xnn_init_f32_spmm2_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_spmm_config* xnn_get_f32_spmm2_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL || !xnn_is_chw_compatible_config(hardware_config)) {
     return NULL;
   }
@@ -198,8 +198,8 @@ const struct xnn_spmm_config* xnn_init_f32_spmm2_config() {
   return &f32_spmm2_config;
 }
 
-const struct xnn_spmm_config* xnn_init_f32_spmm4_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_spmm_config* xnn_get_f32_spmm4_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL || !xnn_is_chw_compatible_config(hardware_config)) {
     return NULL;
   }

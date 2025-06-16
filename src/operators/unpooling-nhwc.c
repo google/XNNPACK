@@ -80,7 +80,7 @@ enum xnn_status xnn_create_unpooling2d_nhwc_x32(
     goto error;
   }
 
-  const struct xnn_unpool_config* unpool_config = xnn_init_x32_unpool_config();
+  const struct xnn_unpool_config* unpool_config = xnn_get_x32_unpool_config();
   if (unpool_config == NULL) {
     xnn_log_error(
       "failed to create %s operator: unsupported hardware configuration",

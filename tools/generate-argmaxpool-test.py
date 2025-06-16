@@ -625,7 +625,7 @@ def generate_test_cases(
     ctype = {"f16": "uint16_t", "f32": "float"}[datatype]
     channel_scaled_tile = {
         "rvv": (
-            "(%s * xnn_init_hardware_config()->vlenb / sizeof(%s))"
+            "(%s * xnn_get_hardware_config()->vlenb / sizeof(%s))"
             % (str(channel_tile), ctype)
         )
     }[isa]
