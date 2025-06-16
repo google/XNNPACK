@@ -22,7 +22,7 @@ ADD_LIBRARY(bench-utils STATIC utils.cc)
 TARGET_LINK_LIBRARIES(bench-utils PRIVATE benchmark::benchmark cpuinfo pthreadpool)
 TARGET_LINK_LIBRARIES(bench-utils PRIVATE xnnpack-base hardware-config)
 IF(XNNPACK_BUILD_LIBRARY)
-  TARGET_LINK_LIBRARIES(bench-utils PRIVATE logging memory)
+  TARGET_LINK_LIBRARIES(bench-utils PRIVATE logging memory-utils)
 ENDIF()
 
 # Helper libraries
