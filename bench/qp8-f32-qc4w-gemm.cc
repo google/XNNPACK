@@ -149,18 +149,18 @@
 
   BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_1x64c4__neonsme2)
 
-  static void qp8_f32_qc4w_gemm_minmax_ukernel_32x64c4__neonsme2(benchmark::State& state, const char* net) {
+  static void qp8_f32_qc4w_gemm_minmax_ukernel_16x64c4__neonsme2(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
-      xnn_qp8_f32_qc4w_gemm_minmax_ukernel_32x64c4__neonsme2,
+      xnn_qp8_f32_qc4w_gemm_minmax_ukernel_16x64c4__neonsme2,
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_kai_qs4_weights_and_biases_sme,
       xnn_packed_stride_kai_qs4_weights_and_biases_sme,
-      /*mr=*/32, /*nr=*/64, /*kr=*/4, /*sr=*/1,
-      /*mr_packed=*/32,
+      /*mr=*/16, /*nr=*/64, /*kr=*/4, /*sr=*/1,
+      /*mr_packed=*/16,
       /*arch_flags=*/xnn_arch_arm_sme2);
   }
 
-  BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_32x64c4__neonsme2)
+  BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_16x64c4__neonsme2)
   #endif  // XNN_ENABLE_KLEIDIAI
 #endif  // XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
 
