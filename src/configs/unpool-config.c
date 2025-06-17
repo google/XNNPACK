@@ -18,7 +18,7 @@ XNN_INIT_ONCE_GUARD(x32_unpool);
 
 static void init_x32_unpool_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       x32_unpool_config.unpool = (xnn_unpool_ukernel_fn) xnn_x32_unpool_ukernel__neon;
@@ -37,8 +37,8 @@ static void init_x32_unpool_config(void) {
 
 }
 
-const struct xnn_unpool_config* xnn_init_x32_unpool_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_unpool_config* xnn_get_x32_unpool_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }

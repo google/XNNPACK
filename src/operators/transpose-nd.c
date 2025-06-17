@@ -66,7 +66,7 @@ static enum xnn_status create_transpose_nd(
     goto error;
   }
 
-  const struct xnn_transpose_config* transpose_config = xnn_init_transpose_config();
+  const struct xnn_transpose_config* transpose_config = xnn_get_transpose_config();
   if (!transpose_config) {
     xnn_log_error(
       "failed to create transpose config: unsupported hardware configuration");
@@ -631,7 +631,7 @@ enum xnn_status run_transpose_nd(
   transpose_op.compute = &compute;
   transpose_op.num_compute_invocations = 1;
 
-  const struct xnn_transpose_config* transpose_config = xnn_init_transpose_config();
+  const struct xnn_transpose_config* transpose_config = xnn_get_transpose_config();
   if (!transpose_config) {
     return xnn_status_unsupported_hardware;
   }
@@ -763,7 +763,7 @@ enum xnn_status create_depth_to_space_nchw2nhwc(
   }
   depth_to_space_op->num_compute_invocations = 1;
 
-  const struct xnn_transpose_config* transpose_config = xnn_init_transpose_config();
+  const struct xnn_transpose_config* transpose_config = xnn_get_transpose_config();
   if (!transpose_config) {
     xnn_log_error(
       "failed to create transpose config: unsupported hardware configuration");
@@ -1029,7 +1029,7 @@ static enum xnn_status create_depth_to_space_nhwc(
   }
   depth_to_space_op->num_compute_invocations = 1;
 
-  const struct xnn_transpose_config* transpose_config = xnn_init_transpose_config();
+  const struct xnn_transpose_config* transpose_config = xnn_get_transpose_config();
   if (!transpose_config) {
     xnn_log_error(
       "failed to create transpose config: unsupported hardware configuration");
@@ -1322,7 +1322,7 @@ static enum xnn_status create_space_to_depth_nhwc(
   }
   space_to_depth_op->num_compute_invocations = 1;
 
-  const struct xnn_transpose_config* transpose_config = xnn_init_transpose_config();
+  const struct xnn_transpose_config* transpose_config = xnn_get_transpose_config();
   if (!transpose_config) {
     xnn_log_error(
       "failed to create transpose config: unsupported hardware configuration");

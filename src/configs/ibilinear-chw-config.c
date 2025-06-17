@@ -21,14 +21,14 @@ XNN_INIT_ONCE_GUARD(f32_ibilinear_chw);
 
 static void init_f16_ibilinear_chw_config(void) {
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
       f16_ibilinear_chw_config.ukernel = (xnn_ibilinear_chw_ukernel_fn) xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p8;
       f16_ibilinear_chw_config.channel_tile = 1;
     }
   #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
       f16_ibilinear_chw_config.ukernel = (xnn_ibilinear_chw_ukernel_fn) xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p8;
@@ -43,7 +43,7 @@ static void init_f16_ibilinear_chw_config(void) {
 
 static void init_f32_ibilinear_chw_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       f32_ibilinear_chw_config.ukernel = (xnn_ibilinear_chw_ukernel_fn) xnn_f32_ibilinear_chw_ukernel__neon_p8;
@@ -71,8 +71,8 @@ static void init_f32_ibilinear_chw_config(void) {
       (xnn_indirection_init_resize_bilinear2d_chw_fn) xnn_indirection_init_resize_bilinear2d_chw_f32;
 }
 
-const struct xnn_ibilinear_chw_config* xnn_init_f16_ibilinear_chw_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_ibilinear_chw_config* xnn_get_f16_ibilinear_chw_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_chw_compatible_config(hardware_config)) {
     return NULL;
   }
@@ -80,8 +80,8 @@ const struct xnn_ibilinear_chw_config* xnn_init_f16_ibilinear_chw_config() {
   return &f16_ibilinear_chw_config;
 }
 
-const struct xnn_ibilinear_chw_config* xnn_init_f32_ibilinear_chw_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_ibilinear_chw_config* xnn_get_f32_ibilinear_chw_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL || !xnn_is_chw_compatible_config(hardware_config)) {
     return NULL;
   }

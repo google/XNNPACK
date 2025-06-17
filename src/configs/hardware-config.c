@@ -348,7 +348,7 @@ static void init_hardware_config(void) {
 #endif  // XNN_ENABLE_CPUINFO
 }
 
-const struct xnn_hardware_config* xnn_init_hardware_config() {
+const struct xnn_hardware_config* xnn_get_hardware_config() {
   #if !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV && !XNN_ARCH_PPC64 && XNN_ENABLE_CPUINFO
     if (!cpuinfo_initialize()) {
       xnn_log_error("failed to initialize cpuinfo");

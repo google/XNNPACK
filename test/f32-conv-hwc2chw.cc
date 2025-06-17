@@ -1644,8 +1644,8 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
       .subsampling(2)
       .padding_width(1)
       .input_channels(3)
-      .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
-      .output_channels(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+      .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
+      .output_channels(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
       .input_width(1)
       .input_height(3)
       .Test(xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_1x1, xnn_init_f32_minmax_scalar_params);
@@ -1659,8 +1659,8 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
         .subsampling(2)
         .padding_width(1)
         .input_channels(3)
-        .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
-        .output_channels(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+        .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
+        .output_channels(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
         .input_width(input_width)
         .input_height(3)
         .Test(xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_1x1, xnn_init_f32_minmax_scalar_params);
@@ -1669,7 +1669,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_1X1, output_channels_lt_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t output_channels = 1; output_channels < output_channels_tile; output_channels++) {
       for (size_t input_width = 1; input_width < 8; input_width += 1) {
         ConvHWC2CHWMicrokernelTester()
@@ -1677,7 +1677,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
           .subsampling(2)
           .padding_width(1)
           .input_channels(3)
-          .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
           .output_channels(output_channels)
           .input_width(input_width)
           .input_height(3)
@@ -1688,7 +1688,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_1X1, output_channels_div_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t output_channels = output_channels_tile * 2; output_channels <= output_channels_tile * 4; output_channels += output_channels_tile) {
       for (size_t input_width = 1; input_width < 8; input_width += 1) {
         ConvHWC2CHWMicrokernelTester()
@@ -1696,7 +1696,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
           .subsampling(2)
           .padding_width(1)
           .input_channels(3)
-          .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
           .output_channels(output_channels)
           .input_width(input_width)
           .input_height(3)
@@ -1707,7 +1707,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_1X1, output_channels_gt_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t output_channels = output_channels_tile + 1; output_channels < output_channels_tile * 2; output_channels++) {
       for (size_t input_width = 1; input_width < 8; input_width += 1) {
         ConvHWC2CHWMicrokernelTester()
@@ -1715,7 +1715,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
           .subsampling(2)
           .padding_width(1)
           .input_channels(3)
-          .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
           .output_channels(output_channels)
           .input_width(input_width)
           .input_height(3)
@@ -1726,7 +1726,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_1X1, input_height_lt_3) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 1; input_height < 3; input_height++) {
       for (size_t output_channels = 1; output_channels < output_channels_tile * 2; output_channels += output_channels_tile - 1) {
         for (size_t input_width = 1; input_width < 8; input_width += 1) {
@@ -1735,7 +1735,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
             .subsampling(2)
             .padding(1)  // padded input height of at least 3 required
             .input_channels(3)
-            .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
             .output_channels(output_channels)
             .input_width(input_width)
             .input_height(input_height)
@@ -1747,7 +1747,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_1X1, input_height_gt_3) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 4; input_height <= 9; input_height++) {
       for (size_t output_channels = 1; output_channels < output_channels_tile * 2; output_channels += output_channels_tile - 1) {
         for (size_t input_width = 1; input_width < 8; input_width += 1) {
@@ -1756,7 +1756,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
             .subsampling(2)
             .padding_width(1)
             .input_channels(3)
-            .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
             .output_channels(output_channels)
             .input_width(input_width)
             .input_height(input_height)
@@ -1768,7 +1768,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_1X1, padding_top) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
       for (size_t output_channels = 1; output_channels < output_channels_tile * 4; output_channels += output_channels_tile * 2 - 1) {
         for (size_t input_width = 1; input_width < 8; input_width += 1) {
@@ -1778,7 +1778,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
             .padding_width(1)
             .padding_top(padding_top)
             .input_channels(3)
-            .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
             .output_channels(output_channels)
             .input_width(input_width)
             .input_height(9)
@@ -1790,7 +1790,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_1X1, padding_bottom) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t padding_bottom = 0; padding_bottom <= 1; padding_bottom++) {
       for (size_t output_channels = 1; output_channels < output_channels_tile * 4; output_channels += output_channels_tile * 2 - 1) {
         for (size_t input_width = 1; input_width < 8; input_width += 1) {
@@ -1800,7 +1800,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
             .padding_width(1)
             .padding_bottom(padding_bottom)
             .input_channels(3)
-            .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
             .output_channels(output_channels)
             .input_width(input_width)
             .input_height(9)
@@ -1812,7 +1812,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_1X1, output_y_start) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t output_y_start = 1; output_y_start <= 3; output_y_start++) {
       for (size_t output_channels = 1; output_channels < output_channels_tile * 2; output_channels += output_channels_tile - 1) {
         for (size_t input_width = 1; input_width < 8; input_width += 1) {
@@ -1821,7 +1821,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
             .subsampling(2)
             .padding_width(1)
             .input_channels(3)
-            .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
             .output_channels(output_channels)
             .input_width(input_width)
             .input_height(9)
@@ -1834,7 +1834,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_1X1, output_y_end) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t output_y_end = 2; output_y_end < 5; output_y_end++) {
       for (size_t output_channels = 1; output_channels < output_channels_tile * 2; output_channels += output_channels_tile - 1) {
         for (size_t input_width = 1; input_width < 8; input_width += 1) {
@@ -1843,7 +1843,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
             .subsampling(2)
             .padding_width(1)
             .input_channels(3)
-            .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
             .output_channels(output_channels)
             .input_width(input_width)
             .input_height(9)
@@ -1856,7 +1856,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_1X1, qmin) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t output_channels = 1; output_channels < output_channels_tile * 2; output_channels += output_channels_tile - 1) {
       for (size_t input_width = 1; input_width < 8; input_width += 1) {
         ConvHWC2CHWMicrokernelTester()
@@ -1864,7 +1864,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
           .subsampling(2)
           .padding_width(1)
           .input_channels(3)
-          .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
           .output_channels(output_channels)
           .input_width(input_width)
           .input_height(6)
@@ -1876,7 +1876,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_1X1, qmax) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t output_channels = 1; output_channels < output_channels_tile * 2; output_channels += output_channels_tile - 1) {
       for (size_t input_width = 1; input_width < 8; input_width += 1) {
         ConvHWC2CHWMicrokernelTester()
@@ -1884,7 +1884,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
           .subsampling(2)
           .padding_width(1)
           .input_channels(3)
-          .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
           .output_channels(output_channels)
           .input_width(input_width)
           .input_height(6)
@@ -1904,8 +1904,8 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
       .subsampling(2)
       .padding_width(1)
       .input_channels(3)
-      .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
-      .output_channels(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+      .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
+      .output_channels(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
       .input_width(2)
       .input_height(3)
       .Test(xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_2x1, xnn_init_f32_minmax_scalar_params);
@@ -1919,8 +1919,8 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
         .subsampling(2)
         .padding_width(1)
         .input_channels(3)
-        .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
-        .output_channels(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+        .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
+        .output_channels(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
         .input_width(input_width)
         .input_height(3)
         .Test(xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_2x1, xnn_init_f32_minmax_scalar_params);
@@ -1935,8 +1935,8 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
         .subsampling(2)
         .padding_width(1)
         .input_channels(3)
-        .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
-        .output_channels(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+        .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
+        .output_channels(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
         .input_width(input_width)
         .input_height(3)
         .Test(xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_2x1, xnn_init_f32_minmax_scalar_params);
@@ -1951,8 +1951,8 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
         .subsampling(2)
         .padding_width(1)
         .input_channels(3)
-        .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
-        .output_channels(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+        .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
+        .output_channels(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
         .input_width(input_width)
         .input_height(3)
         .Test(xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_2x1, xnn_init_f32_minmax_scalar_params);
@@ -1961,7 +1961,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_2X1, output_channels_lt_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t output_channels = 1; output_channels < output_channels_tile; output_channels++) {
       for (size_t input_width = 1; input_width < 16; input_width += 3) {
         ConvHWC2CHWMicrokernelTester()
@@ -1969,7 +1969,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
           .subsampling(2)
           .padding_width(1)
           .input_channels(3)
-          .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
           .output_channels(output_channels)
           .input_width(input_width)
           .input_height(3)
@@ -1980,7 +1980,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_2X1, output_channels_div_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t output_channels = output_channels_tile * 2; output_channels <= output_channels_tile * 4; output_channels += output_channels_tile) {
       for (size_t input_width = 1; input_width < 16; input_width += 3) {
         ConvHWC2CHWMicrokernelTester()
@@ -1988,7 +1988,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
           .subsampling(2)
           .padding_width(1)
           .input_channels(3)
-          .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
           .output_channels(output_channels)
           .input_width(input_width)
           .input_height(3)
@@ -1999,7 +1999,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_2X1, output_channels_gt_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t output_channels = output_channels_tile + 1; output_channels < output_channels_tile * 2; output_channels++) {
       for (size_t input_width = 1; input_width < 16; input_width += 3) {
         ConvHWC2CHWMicrokernelTester()
@@ -2007,7 +2007,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
           .subsampling(2)
           .padding_width(1)
           .input_channels(3)
-          .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
           .output_channels(output_channels)
           .input_width(input_width)
           .input_height(3)
@@ -2018,7 +2018,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_2X1, input_height_lt_3) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 1; input_height < 3; input_height++) {
       for (size_t output_channels = 1; output_channels < output_channels_tile * 2; output_channels += output_channels_tile - 1) {
         for (size_t input_width = 1; input_width < 16; input_width += 3) {
@@ -2027,7 +2027,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
             .subsampling(2)
             .padding(1)  // padded input height of at least 3 required
             .input_channels(3)
-            .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
             .output_channels(output_channels)
             .input_width(input_width)
             .input_height(input_height)
@@ -2039,7 +2039,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_2X1, input_height_gt_3) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 4; input_height <= 9; input_height++) {
       for (size_t output_channels = 1; output_channels < output_channels_tile * 2; output_channels += output_channels_tile - 1) {
         for (size_t input_width = 1; input_width < 16; input_width += 3) {
@@ -2048,7 +2048,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
             .subsampling(2)
             .padding_width(1)
             .input_channels(3)
-            .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
             .output_channels(output_channels)
             .input_width(input_width)
             .input_height(input_height)
@@ -2060,7 +2060,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_2X1, padding_top) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
       for (size_t output_channels = 1; output_channels < output_channels_tile * 4; output_channels += output_channels_tile * 2 - 1) {
         for (size_t input_width = 1; input_width < 16; input_width += 3) {
@@ -2070,7 +2070,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
             .padding_width(1)
             .padding_top(padding_top)
             .input_channels(3)
-            .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
             .output_channels(output_channels)
             .input_width(input_width)
             .input_height(9)
@@ -2082,7 +2082,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_2X1, padding_bottom) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t padding_bottom = 0; padding_bottom <= 1; padding_bottom++) {
       for (size_t output_channels = 1; output_channels < output_channels_tile * 4; output_channels += output_channels_tile * 2 - 1) {
         for (size_t input_width = 1; input_width < 16; input_width += 3) {
@@ -2092,7 +2092,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
             .padding_width(1)
             .padding_bottom(padding_bottom)
             .input_channels(3)
-            .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
             .output_channels(output_channels)
             .input_width(input_width)
             .input_height(9)
@@ -2104,7 +2104,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_2X1, output_y_start) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t output_y_start = 1; output_y_start <= 3; output_y_start++) {
       for (size_t output_channels = 1; output_channels < output_channels_tile * 2; output_channels += output_channels_tile - 1) {
         for (size_t input_width = 1; input_width < 16; input_width += 3) {
@@ -2113,7 +2113,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
             .subsampling(2)
             .padding_width(1)
             .input_channels(3)
-            .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
             .output_channels(output_channels)
             .input_width(input_width)
             .input_height(9)
@@ -2126,7 +2126,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_2X1, output_y_end) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t output_y_end = 2; output_y_end < 5; output_y_end++) {
       for (size_t output_channels = 1; output_channels < output_channels_tile * 2; output_channels += output_channels_tile - 1) {
         for (size_t input_width = 1; input_width < 16; input_width += 3) {
@@ -2135,7 +2135,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
             .subsampling(2)
             .padding_width(1)
             .input_channels(3)
-            .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
             .output_channels(output_channels)
             .input_width(input_width)
             .input_height(9)
@@ -2148,7 +2148,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_2X1, qmin) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t output_channels = 1; output_channels < output_channels_tile * 2; output_channels += output_channels_tile - 1) {
       for (size_t input_width = 1; input_width < 16; input_width += 3) {
         ConvHWC2CHWMicrokernelTester()
@@ -2156,7 +2156,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
           .subsampling(2)
           .padding_width(1)
           .input_channels(3)
-          .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
           .output_channels(output_channels)
           .input_width(input_width)
           .input_height(6)
@@ -2168,7 +2168,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_2X1, qmax) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t output_channels = 1; output_channels < output_channels_tile * 2; output_channels += output_channels_tile - 1) {
       for (size_t input_width = 1; input_width < 16; input_width += 3) {
         ConvHWC2CHWMicrokernelTester()
@@ -2176,7 +2176,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
           .subsampling(2)
           .padding_width(1)
           .input_channels(3)
-          .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
           .output_channels(output_channels)
           .input_width(input_width)
           .input_height(6)
@@ -2196,8 +2196,8 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
       .subsampling(2)
       .padding_width(1)
       .input_channels(3)
-      .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
-      .output_channels(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+      .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
+      .output_channels(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
       .input_width(4)
       .input_height(3)
       .Test(xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_2x2, xnn_init_f32_minmax_scalar_params);
@@ -2211,8 +2211,8 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
         .subsampling(2)
         .padding_width(1)
         .input_channels(3)
-        .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
-        .output_channels(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+        .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
+        .output_channels(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
         .input_width(input_width)
         .input_height(3)
         .Test(xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_2x2, xnn_init_f32_minmax_scalar_params);
@@ -2227,8 +2227,8 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
         .subsampling(2)
         .padding_width(1)
         .input_channels(3)
-        .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
-        .output_channels(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+        .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
+        .output_channels(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
         .input_width(input_width)
         .input_height(3)
         .Test(xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_2x2, xnn_init_f32_minmax_scalar_params);
@@ -2243,8 +2243,8 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
         .subsampling(2)
         .padding_width(1)
         .input_channels(3)
-        .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
-        .output_channels(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+        .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
+        .output_channels(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
         .input_width(input_width)
         .input_height(3)
         .Test(xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_2x2, xnn_init_f32_minmax_scalar_params);
@@ -2253,7 +2253,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_2X2, output_channels_lt_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t output_channels = 1; output_channels < output_channels_tile; output_channels++) {
       for (size_t input_width = 1; input_width < 32; input_width += 7) {
         ConvHWC2CHWMicrokernelTester()
@@ -2261,7 +2261,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
           .subsampling(2)
           .padding_width(1)
           .input_channels(3)
-          .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
           .output_channels(output_channels)
           .input_width(input_width)
           .input_height(3)
@@ -2272,7 +2272,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_2X2, output_channels_div_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t output_channels = output_channels_tile * 2; output_channels <= output_channels_tile * 4; output_channels += output_channels_tile) {
       for (size_t input_width = 1; input_width < 32; input_width += 7) {
         ConvHWC2CHWMicrokernelTester()
@@ -2280,7 +2280,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
           .subsampling(2)
           .padding_width(1)
           .input_channels(3)
-          .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
           .output_channels(output_channels)
           .input_width(input_width)
           .input_height(3)
@@ -2291,7 +2291,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_2X2, output_channels_gt_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t output_channels = output_channels_tile + 1; output_channels < output_channels_tile * 2; output_channels++) {
       for (size_t input_width = 1; input_width < 32; input_width += 7) {
         ConvHWC2CHWMicrokernelTester()
@@ -2299,7 +2299,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
           .subsampling(2)
           .padding_width(1)
           .input_channels(3)
-          .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
           .output_channels(output_channels)
           .input_width(input_width)
           .input_height(3)
@@ -2310,7 +2310,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_2X2, input_height_lt_3) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 1; input_height < 3; input_height++) {
       for (size_t output_channels = 1; output_channels < output_channels_tile * 2; output_channels += output_channels_tile - 1) {
         for (size_t input_width = 1; input_width < 32; input_width += 7) {
@@ -2319,7 +2319,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
             .subsampling(2)
             .padding(1)  // padded input height of at least 3 required
             .input_channels(3)
-            .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
             .output_channels(output_channels)
             .input_width(input_width)
             .input_height(input_height)
@@ -2331,7 +2331,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_2X2, input_height_gt_3) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 4; input_height <= 9; input_height++) {
       for (size_t output_channels = 1; output_channels < output_channels_tile * 2; output_channels += output_channels_tile - 1) {
         for (size_t input_width = 1; input_width < 32; input_width += 7) {
@@ -2340,7 +2340,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
             .subsampling(2)
             .padding_width(1)
             .input_channels(3)
-            .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
             .output_channels(output_channels)
             .input_width(input_width)
             .input_height(input_height)
@@ -2352,7 +2352,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_2X2, padding_top) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
       for (size_t output_channels = 1; output_channels < output_channels_tile * 4; output_channels += output_channels_tile * 2 - 1) {
         for (size_t input_width = 1; input_width < 32; input_width += 7) {
@@ -2362,7 +2362,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
             .padding_width(1)
             .padding_top(padding_top)
             .input_channels(3)
-            .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
             .output_channels(output_channels)
             .input_width(input_width)
             .input_height(9)
@@ -2374,7 +2374,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_2X2, padding_bottom) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t padding_bottom = 0; padding_bottom <= 1; padding_bottom++) {
       for (size_t output_channels = 1; output_channels < output_channels_tile * 4; output_channels += output_channels_tile * 2 - 1) {
         for (size_t input_width = 1; input_width < 32; input_width += 7) {
@@ -2384,7 +2384,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
             .padding_width(1)
             .padding_bottom(padding_bottom)
             .input_channels(3)
-            .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
             .output_channels(output_channels)
             .input_width(input_width)
             .input_height(9)
@@ -2396,7 +2396,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_2X2, output_y_start) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t output_y_start = 1; output_y_start <= 3; output_y_start++) {
       for (size_t output_channels = 1; output_channels < output_channels_tile * 2; output_channels += output_channels_tile - 1) {
         for (size_t input_width = 1; input_width < 32; input_width += 7) {
@@ -2405,7 +2405,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
             .subsampling(2)
             .padding_width(1)
             .input_channels(3)
-            .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
             .output_channels(output_channels)
             .input_width(input_width)
             .input_height(9)
@@ -2418,7 +2418,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_2X2, output_y_end) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t output_y_end = 2; output_y_end < 5; output_y_end++) {
       for (size_t output_channels = 1; output_channels < output_channels_tile * 2; output_channels += output_channels_tile - 1) {
         for (size_t input_width = 1; input_width < 32; input_width += 7) {
@@ -2427,7 +2427,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
             .subsampling(2)
             .padding_width(1)
             .input_channels(3)
-            .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+            .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
             .output_channels(output_channels)
             .input_width(input_width)
             .input_height(9)
@@ -2440,7 +2440,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_2X2, qmin) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t output_channels = 1; output_channels < output_channels_tile * 2; output_channels += output_channels_tile - 1) {
       for (size_t input_width = 1; input_width < 32; input_width += 7) {
         ConvHWC2CHWMicrokernelTester()
@@ -2448,7 +2448,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
           .subsampling(2)
           .padding_width(1)
           .input_channels(3)
-          .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
           .output_channels(output_channels)
           .input_width(input_width)
           .input_height(6)
@@ -2460,7 +2460,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X2V__RVV_2X2, qmax) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t output_channels_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t output_channels_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t output_channels = 1; output_channels < output_channels_tile * 2; output_channels += output_channels_tile - 1) {
       for (size_t input_width = 1; input_width < 32; input_width += 7) {
         ConvHWC2CHWMicrokernelTester()
@@ -2468,7 +2468,7 @@ TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SCALAR_1X1, qmax) {
           .subsampling(2)
           .padding_width(1)
           .input_channels(3)
-          .output_channels_tile(2 * xnn_init_hardware_config()->vlenb / sizeof(float))
+          .output_channels_tile(2 * xnn_get_hardware_config()->vlenb / sizeof(float))
           .output_channels(output_channels)
           .input_width(input_width)
           .input_height(6)

@@ -31,7 +31,7 @@ XNN_INIT_ONCE_GUARD(qu8_dwconv);
 
 static void init_f16_dwconv_config(void) {
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
       f16_dwconv_config[0].minmax = (xnn_dwconv_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_3p16c__neonfp16arith;
@@ -55,7 +55,7 @@ static void init_f16_dwconv_config(void) {
       f16_dwconv_config[3].primary_tile = 25;
     }
   #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
       f16_dwconv_config[0].minmax = (xnn_dwconv_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_3p16c__neonfp16arith;
@@ -79,7 +79,7 @@ static void init_f16_dwconv_config(void) {
       f16_dwconv_config[3].primary_tile = 25;
     }
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
       f16_dwconv_config[0].minmax = (xnn_dwconv_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_3p16c__fma3;
@@ -107,7 +107,7 @@ static void init_f16_dwconv_config(void) {
 
 static void init_f32_dwconv_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       f32_dwconv_config[0].minmax = (xnn_dwconv_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_3p8c__neon;
@@ -202,7 +202,7 @@ static void init_f32_dwconv_config(void) {
     f32_dwconv_config[3].channel_tile = 8;
     f32_dwconv_config[3].primary_tile = 25;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
       if ((hardware_config->arch_flags & xnn_arch_x86_avx512f)) {
@@ -308,7 +308,7 @@ static void init_f32_dwconv_config(void) {
       f32_dwconv_config[2].channel_tile = 8;
       f32_dwconv_config[2].primary_tile = 9;
     #else
-      const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+      const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
       assert(hardware_config != NULL);
       if (hardware_config->is_x86) {
         f32_dwconv_config[0].minmax = (xnn_dwconv_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_3p8c__wasmsimd_x86;
@@ -365,7 +365,7 @@ static void init_f32_dwconv_config(void) {
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     size_t lmul = 8;
     const int element_size = 4; // size of float
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
 
     f32_dwconv_config[0].minmax = (xnn_dwconv_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_3p8vc__rvv;
     f32_dwconv_config[0].linear = (xnn_dwconv_ukernel_fn) xnn_f32_dwconv_ukernel_3p8vc__rvv;
@@ -439,7 +439,7 @@ static void init_f32_dwconv_config(void) {
 
 static void init_qs8_qc8w_dwconv_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       if ((hardware_config->arch_flags & xnn_arch_arm_neon_v8)) {
@@ -497,7 +497,7 @@ static void init_qs8_qc8w_dwconv_config(void) {
     qs8_qc8w_dwconv_config[2].channel_tile = 16;
     qs8_qc8w_dwconv_config[2].primary_tile = 25;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512SKX
       if ((hardware_config->arch_flags & xnn_arch_x86_avx512skx)) {
@@ -570,7 +570,7 @@ static void init_qs8_qc8w_dwconv_config(void) {
     qs8_qc8w_dwconv_config[2].channel_tile = 16;
     qs8_qc8w_dwconv_config[2].primary_tile = 25;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-      const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+      const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
       qs8_qc8w_dwconv_config[0].minmax = (xnn_dwconv_ukernel_fn) xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p8vc__rvv;
       qs8_qc8w_dwconv_config[0].init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
       qs8_qc8w_dwconv_config[0].channel_tile = 8 * hardware_config->vlenb / sizeof(int32_t);
@@ -601,7 +601,7 @@ static void init_qs8_qc8w_dwconv_config(void) {
 
 static void init_qs8_dwconv_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       qs8_dwconv_config[0].minmax = (xnn_dwconv_ukernel_fn) xnn_qs8_dwconv_minmax_rndnu_ukernel_9p16c__neon_mla8_ld64;
@@ -632,7 +632,7 @@ static void init_qs8_dwconv_config(void) {
     qs8_dwconv_config[1].channel_tile = 16;
     qs8_dwconv_config[1].primary_tile = 25;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512SKX
       if ((hardware_config->arch_flags & xnn_arch_x86_avx512skx)) {
@@ -685,7 +685,7 @@ static void init_qs8_dwconv_config(void) {
     qs8_dwconv_config[1].channel_tile = 16;
     qs8_dwconv_config[1].primary_tile = 25;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-      const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+      const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
       qs8_dwconv_config[0].minmax = (xnn_dwconv_ukernel_fn) xnn_qs8_dwconv_minmax_fp32_ukernel_9p8vc__rvv;
       qs8_dwconv_config[0].init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
       qs8_dwconv_config[0].channel_tile = 8 * hardware_config->vlenb / sizeof(int32_t);
@@ -708,7 +708,7 @@ static void init_qs8_dwconv_config(void) {
 
 static void init_qu8_dwconv_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       qu8_dwconv_config[0].minmax = (xnn_dwconv_ukernel_fn) xnn_qu8_dwconv_minmax_rndnu_ukernel_9p16c__neon_mul8;
@@ -739,7 +739,7 @@ static void init_qu8_dwconv_config(void) {
     qu8_dwconv_config[1].channel_tile = 8;
     qu8_dwconv_config[1].primary_tile = 25;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512SKX
       if ((hardware_config->arch_flags & xnn_arch_x86_avx512skx)) {
@@ -792,7 +792,7 @@ static void init_qu8_dwconv_config(void) {
     qu8_dwconv_config[1].channel_tile = 8;
     qu8_dwconv_config[1].primary_tile = 25;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-      const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+      const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
       qs8_dwconv_config[0].minmax = (xnn_dwconv_ukernel_fn) xnn_qu8_dwconv_minmax_fp32_ukernel_9p8vc__rvv;
       qs8_dwconv_config[0].init.qu8 = xnn_init_qu8_conv_minmax_fp32_scalar_params;
       qs8_dwconv_config[0].channel_tile = 8 * hardware_config->vlenb / sizeof(int32_t);
@@ -813,8 +813,8 @@ static void init_qu8_dwconv_config(void) {
   #endif
 }
 
-const struct xnn_dwconv_config* xnn_init_f16_dwconv_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_dwconv_config* xnn_get_f16_dwconv_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
@@ -822,8 +822,8 @@ const struct xnn_dwconv_config* xnn_init_f16_dwconv_config() {
   return f16_dwconv_config;
 }
 
-const struct xnn_dwconv_config* xnn_init_f32_dwconv_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_dwconv_config* xnn_get_f32_dwconv_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -831,8 +831,8 @@ const struct xnn_dwconv_config* xnn_init_f32_dwconv_config() {
   return f32_dwconv_config;
 }
 
-const struct xnn_dwconv_config* xnn_init_qs8_qc8w_dwconv_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_dwconv_config* xnn_get_qs8_qc8w_dwconv_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -840,8 +840,8 @@ const struct xnn_dwconv_config* xnn_init_qs8_qc8w_dwconv_config() {
   return qs8_qc8w_dwconv_config;
 }
 
-const struct xnn_dwconv_config* xnn_init_qs8_dwconv_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_dwconv_config* xnn_get_qs8_dwconv_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -849,8 +849,8 @@ const struct xnn_dwconv_config* xnn_init_qs8_dwconv_config() {
   return qs8_dwconv_config;
 }
 
-const struct xnn_dwconv_config* xnn_init_qu8_dwconv_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_dwconv_config* xnn_get_qu8_dwconv_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }

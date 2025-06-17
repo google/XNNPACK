@@ -41,9 +41,9 @@ static void init_f16_qdint8_pack_lh_config(void) {
   f16_qdint8_pack_lh_config.log2_packed_element_size = 0;
 }
 
-const struct xnn_pack_lh_config* xnn_init_f16_qdint8_pack_lh_config() {
+const struct xnn_pack_lh_config* xnn_get_f16_qdint8_pack_lh_config() {
   const struct xnn_hardware_config* hardware_config =
-      xnn_init_hardware_config();
+      xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -59,9 +59,9 @@ static void init_f16_qduint8_pack_lh_config(void) {
   f16_qduint8_pack_lh_config.log2_packed_element_size = 0;
 }
 
-const struct xnn_pack_lh_config* xnn_init_f16_qduint8_pack_lh_config() {
+const struct xnn_pack_lh_config* xnn_get_f16_qduint8_pack_lh_config() {
   const struct xnn_hardware_config* hardware_config =
-      xnn_init_hardware_config();
+      xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -77,9 +77,9 @@ static void init_f32_qdint8_pack_lh_config(void) {
   f32_qdint8_pack_lh_config.log2_packed_element_size = 0;
 }
 
-const struct xnn_pack_lh_config* xnn_init_f32_qdint8_pack_lh_config() {
+const struct xnn_pack_lh_config* xnn_get_f32_qdint8_pack_lh_config() {
   const struct xnn_hardware_config* hardware_config =
-      xnn_init_hardware_config();
+      xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -95,9 +95,9 @@ static void init_f32_qduint8_pack_lh_config(void) {
   f32_qduint8_pack_lh_config.log2_packed_element_size = 0;
 }
 
-const struct xnn_pack_lh_config* xnn_init_f32_qduint8_pack_lh_config() {
+const struct xnn_pack_lh_config* xnn_get_f32_qduint8_pack_lh_config() {
   const struct xnn_hardware_config* hardware_config =
-      xnn_init_hardware_config();
+      xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -117,9 +117,9 @@ static void init_qp8_pack_lh_config(void) {
   qp8_pack_lh_config.log2_packed_element_size = 0;
 }
 
-const struct xnn_pack_lh_config* xnn_init_qp8_pack_lh_config() {
+const struct xnn_pack_lh_config* xnn_get_qp8_pack_lh_config() {
   const struct xnn_hardware_config* hardware_config =
-      xnn_init_hardware_config();
+      xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -130,7 +130,7 @@ const struct xnn_pack_lh_config* xnn_init_qp8_pack_lh_config() {
 static void init_x32_pack_lh_config(void) {
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
 #if XNN_ENABLE_ARM_SME2
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   assert(hardware_config != NULL);
   if ((hardware_config->arch_flags & xnn_arch_arm_sme2)) {
     x32_pack_lh_config.ukernel = (xnn_pack_lh_ukernel_fn) xnn_x32_pack_lh_ukernel__neonsme2;
@@ -144,8 +144,8 @@ static void init_x32_pack_lh_config(void) {
   x32_pack_lh_config.gemv_noop = true;
 }
 
-const struct xnn_pack_lh_config* xnn_init_x32_pack_lh_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_pack_lh_config* xnn_get_x32_pack_lh_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -156,7 +156,7 @@ const struct xnn_pack_lh_config* xnn_init_x32_pack_lh_config() {
 static void init_x16_pack_lh_config(void) {
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
 #if XNN_ENABLE_ARM_SME2
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   assert(hardware_config != NULL);
   if ((hardware_config->arch_flags & xnn_arch_arm_sme2)) {
     x16_pack_lh_config.ukernel = (xnn_pack_lh_ukernel_fn) xnn_x16_pack_lh_ukernel__neonsme2;
@@ -170,8 +170,8 @@ static void init_x16_pack_lh_config(void) {
   x16_pack_lh_config.gemv_noop = true;
 }
 
-const struct xnn_pack_lh_config* xnn_init_x16_pack_lh_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_pack_lh_config* xnn_get_x16_pack_lh_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -182,7 +182,7 @@ const struct xnn_pack_lh_config* xnn_init_x16_pack_lh_config() {
 static void init_x8_pack_lh_config(void) {
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
 #if XNN_ENABLE_ARM_SME2
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   assert(hardware_config != NULL);
   if ((hardware_config->arch_flags & xnn_arch_arm_sme2)) {
     x8_pack_lh_config.ukernel = (xnn_pack_lh_ukernel_fn) xnn_x8_pack_lh_ukernel__neonsme2;
@@ -196,8 +196,8 @@ static void init_x8_pack_lh_config(void) {
   x8_pack_lh_config.gemv_noop = true;
 }
 
-const struct xnn_pack_lh_config* xnn_init_x8_pack_lh_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_pack_lh_config* xnn_get_x8_pack_lh_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }

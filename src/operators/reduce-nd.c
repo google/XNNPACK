@@ -430,33 +430,33 @@ enum xnn_status xnn_create_reduce_nd(
     case xnn_datatype_fp16: {
       if (is_minmax) {
         log2_accumulator_element_size = 1;
-        fill_config = xnn_init_xx_fill_config();
+        fill_config = xnn_get_xx_fill_config();
         cvt_config = cvt_unused;
 
         if (operator_type == xnn_operator_type_reduce_min_nd) {
-          config = xnn_init_f16_rmin_config();
+          config = xnn_get_f16_rmin_config();
         } else {  // max
-          config = xnn_init_f16_rmax_config();
+          config = xnn_get_f16_rmax_config();
         }
       } else {
         log2_accumulator_element_size = 2;
-        config = xnn_init_f16_f32acc_rsum_config();
+        config = xnn_get_f16_f32acc_rsum_config();
         fill_config = fill_unused;
-        cvt_config = xnn_init_f32_to_f16_cvt_config();
+        cvt_config = xnn_get_f32_to_f16_cvt_config();
       }
       break;
     }
     case xnn_datatype_fp32: {
       if (is_minmax) {
-        fill_config = xnn_init_xx_fill_config();
+        fill_config = xnn_get_xx_fill_config();
 
         if (operator_type == xnn_operator_type_reduce_min_nd) {
-          config = xnn_init_f32_rmin_config();
+          config = xnn_get_f32_rmin_config();
         } else {  // max
-          config = xnn_init_f32_rmax_config();
+          config = xnn_get_f32_rmax_config();
         }
       } else {
-        config = xnn_init_f32_rsum_config();
+        config = xnn_get_f32_rsum_config();
         fill_config = fill_unused;
       }
 
@@ -470,19 +470,19 @@ enum xnn_status xnn_create_reduce_nd(
         assert(
           input_quantization->zero_point == output_quantization->zero_point);
         log2_accumulator_element_size = 0;
-        fill_config = xnn_init_xx_fill_config();
+        fill_config = xnn_get_xx_fill_config();
         cvt_config = cvt_unused;
 
         if (operator_type == xnn_operator_type_reduce_min_nd) {
-          config = xnn_init_s8_rmin_config();
+          config = xnn_get_s8_rmin_config();
         } else {  // max
-          config = xnn_init_s8_rmax_config();
+          config = xnn_get_s8_rmax_config();
         }
       } else {
         log2_accumulator_element_size = 2;
-        config = xnn_init_qs8_rsum_config();
+        config = xnn_get_qs8_rsum_config();
         fill_config = fill_unused;
-        cvt_config = xnn_init_unary_reference_config(
+        cvt_config = xnn_get_unary_reference_config(
           xnn_unary_convert, xnn_datatype_int32, xnn_datatype_qint8);
       }
       break;
@@ -493,21 +493,21 @@ enum xnn_status xnn_create_reduce_nd(
         assert(
           input_quantization->zero_point == output_quantization->zero_point);
         log2_accumulator_element_size = 0;
-        fill_config = xnn_init_xx_fill_config();
+        fill_config = xnn_get_xx_fill_config();
         cvt_config = cvt_unused;
 
         if (operator_type == xnn_operator_type_reduce_min_nd) {
-          config = xnn_init_u8_rmin_config();
+          config = xnn_get_u8_rmin_config();
         } else {  // max
-          config = xnn_init_u8_rmax_config();
+          config = xnn_get_u8_rmax_config();
         }
       } else {
         log2_accumulator_element_size = 2;
-        config = xnn_init_qu8_rsum_config();
+        config = xnn_get_qu8_rsum_config();
         // We just use an int32 -> qu8 conversion. This means we effectively
         // only have a 31-bit accumulator instead of 32-bit, but that seems
         // insignificant.
-        cvt_config = xnn_init_unary_reference_config(
+        cvt_config = xnn_get_unary_reference_config(
           xnn_unary_convert, xnn_datatype_int32, xnn_datatype_quint8);
         fill_config = fill_unused;
       }

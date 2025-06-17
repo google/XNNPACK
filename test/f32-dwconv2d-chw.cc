@@ -37543,7 +37543,7 @@
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_5X1V, output_width_eq_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     DWConv2DMicrokernelTester()
-      .input_width((1 * xnn_init_hardware_config()->vlenb / sizeof(float) - 1) * 1 + 1)
+      .input_width((1 * xnn_get_hardware_config()->vlenb / sizeof(float) - 1) * 1 + 1)
       .input_height(5)
       .kernel_height(3)
       .kernel_width(3)
@@ -37557,7 +37557,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_5X1V, output_width_div_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 2 * width_tile * 1 + 0; input_width < 8 * width_tile * 1 + 0; input_width += 1) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -37575,7 +37575,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_5X1V, output_width_lt_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 1; input_width < (width_tile - 1) * 1 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(1)
@@ -37593,7 +37593,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_5X1V, output_width_gt_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = width_tile * 1 + 1; input_width < 2 * width_tile * 1 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -37611,7 +37611,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_5X1V, output_height_div_5) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 10; input_height < 40; input_height += 5) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 1 + 1; input_width += width_tile * 1 - 1) {
         DWConv2DMicrokernelTester()
@@ -37631,7 +37631,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_5X1V, output_height_lt_5) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 1; input_height < 5; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 1 + 1; input_width += width_tile * 1 - 1) {
         DWConv2DMicrokernelTester()
@@ -37651,7 +37651,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_5X1V, output_height_gt_5) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 6; input_height < 26; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 1 + 1; input_width += width_tile * 1 - 1) {
         DWConv2DMicrokernelTester()
@@ -37675,7 +37675,7 @@
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_6X1V, output_width_eq_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     DWConv2DMicrokernelTester()
-      .input_width((1 * xnn_init_hardware_config()->vlenb / sizeof(float) - 1) * 1 + 1)
+      .input_width((1 * xnn_get_hardware_config()->vlenb / sizeof(float) - 1) * 1 + 1)
       .input_height(6)
       .kernel_height(3)
       .kernel_width(3)
@@ -37689,7 +37689,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_6X1V, output_width_div_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 2 * width_tile * 1 + 0; input_width < 8 * width_tile * 1 + 0; input_width += 1) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -37707,7 +37707,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_6X1V, output_width_lt_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 1; input_width < (width_tile - 1) * 1 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(1)
@@ -37725,7 +37725,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_6X1V, output_width_gt_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = width_tile * 1 + 1; input_width < 2 * width_tile * 1 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -37743,7 +37743,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_6X1V, output_height_div_6) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 12; input_height < 48; input_height += 6) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 1 + 1; input_width += width_tile * 1 - 1) {
         DWConv2DMicrokernelTester()
@@ -37763,7 +37763,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_6X1V, output_height_lt_6) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 1; input_height < 6; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 1 + 1; input_width += width_tile * 1 - 1) {
         DWConv2DMicrokernelTester()
@@ -37783,7 +37783,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_6X1V, output_height_gt_6) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 7; input_height < 31; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 1 + 1; input_width += width_tile * 1 - 1) {
         DWConv2DMicrokernelTester()
@@ -37807,7 +37807,7 @@
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_7X1V, output_width_eq_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     DWConv2DMicrokernelTester()
-      .input_width((1 * xnn_init_hardware_config()->vlenb / sizeof(float) - 1) * 1 + 1)
+      .input_width((1 * xnn_get_hardware_config()->vlenb / sizeof(float) - 1) * 1 + 1)
       .input_height(7)
       .kernel_height(3)
       .kernel_width(3)
@@ -37821,7 +37821,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_7X1V, output_width_div_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 2 * width_tile * 1 + 0; input_width < 8 * width_tile * 1 + 0; input_width += 1) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -37839,7 +37839,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_7X1V, output_width_lt_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 1; input_width < (width_tile - 1) * 1 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(1)
@@ -37857,7 +37857,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_7X1V, output_width_gt_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = width_tile * 1 + 1; input_width < 2 * width_tile * 1 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -37875,7 +37875,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_7X1V, output_height_div_7) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 14; input_height < 56; input_height += 7) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 1 + 1; input_width += width_tile * 1 - 1) {
         DWConv2DMicrokernelTester()
@@ -37895,7 +37895,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_7X1V, output_height_lt_7) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 1; input_height < 7; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 1 + 1; input_width += width_tile * 1 - 1) {
         DWConv2DMicrokernelTester()
@@ -37915,7 +37915,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_7X1V, output_height_gt_7) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 8; input_height < 36; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 1 + 1; input_width += width_tile * 1 - 1) {
         DWConv2DMicrokernelTester()
@@ -37939,7 +37939,7 @@
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_8X1V, output_width_eq_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     DWConv2DMicrokernelTester()
-      .input_width((1 * xnn_init_hardware_config()->vlenb / sizeof(float) - 1) * 1 + 1)
+      .input_width((1 * xnn_get_hardware_config()->vlenb / sizeof(float) - 1) * 1 + 1)
       .input_height(8)
       .kernel_height(3)
       .kernel_width(3)
@@ -37953,7 +37953,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_8X1V, output_width_div_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 2 * width_tile * 1 + 0; input_width < 8 * width_tile * 1 + 0; input_width += 1) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -37971,7 +37971,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_8X1V, output_width_lt_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 1; input_width < (width_tile - 1) * 1 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(1)
@@ -37989,7 +37989,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_8X1V, output_width_gt_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = width_tile * 1 + 1; input_width < 2 * width_tile * 1 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -38007,7 +38007,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_8X1V, output_height_div_8) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 16; input_height < 64; input_height += 8) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 1 + 1; input_width += width_tile * 1 - 1) {
         DWConv2DMicrokernelTester()
@@ -38027,7 +38027,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_8X1V, output_height_lt_8) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 1; input_height < 8; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 1 + 1; input_width += width_tile * 1 - 1) {
         DWConv2DMicrokernelTester()
@@ -38047,7 +38047,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_8X1V, output_height_gt_8) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 9; input_height < 41; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 1 + 1; input_width += width_tile * 1 - 1) {
         DWConv2DMicrokernelTester()
@@ -38071,7 +38071,7 @@
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_1X2V, output_width_eq_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     DWConv2DMicrokernelTester()
-      .input_width((2 * xnn_init_hardware_config()->vlenb / sizeof(float) - 1) * 1 + 1)
+      .input_width((2 * xnn_get_hardware_config()->vlenb / sizeof(float) - 1) * 1 + 1)
       .input_height(1)
       .kernel_height(3)
       .kernel_width(3)
@@ -38085,7 +38085,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_1X2V, output_width_div_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 2 * width_tile * 1 + 0; input_width < 8 * width_tile * 1 + 0; input_width += 2) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -38103,7 +38103,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_1X2V, output_width_lt_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 1; input_width < (width_tile - 1) * 1 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(2)
@@ -38121,7 +38121,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_1X2V, output_width_gt_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = width_tile * 1 + 1; input_width < 2 * width_tile * 1 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -38139,7 +38139,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_1X2V, output_height_gt_1) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 2; input_height < 3; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 1 + 1; input_width += width_tile * 1 - 1) {
         DWConv2DMicrokernelTester()
@@ -38163,7 +38163,7 @@
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_2X2V, output_width_eq_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     DWConv2DMicrokernelTester()
-      .input_width((2 * xnn_init_hardware_config()->vlenb / sizeof(float) - 1) * 1 + 1)
+      .input_width((2 * xnn_get_hardware_config()->vlenb / sizeof(float) - 1) * 1 + 1)
       .input_height(2)
       .kernel_height(3)
       .kernel_width(3)
@@ -38177,7 +38177,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_2X2V, output_width_div_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 2 * width_tile * 1 + 0; input_width < 8 * width_tile * 1 + 0; input_width += 2) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -38195,7 +38195,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_2X2V, output_width_lt_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 1; input_width < (width_tile - 1) * 1 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(2)
@@ -38213,7 +38213,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_2X2V, output_width_gt_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = width_tile * 1 + 1; input_width < 2 * width_tile * 1 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -38231,7 +38231,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_2X2V, output_height_div_2) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 4; input_height < 16; input_height += 2) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 1 + 1; input_width += width_tile * 1 - 1) {
         DWConv2DMicrokernelTester()
@@ -38251,7 +38251,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_2X2V, output_height_lt_2) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 1; input_height < 2; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 1 + 1; input_width += width_tile * 1 - 1) {
         DWConv2DMicrokernelTester()
@@ -38271,7 +38271,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_2X2V, output_height_gt_2) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 3; input_height < 5; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 1 + 1; input_width += width_tile * 1 - 1) {
         DWConv2DMicrokernelTester()
@@ -38295,7 +38295,7 @@
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_3X2V, output_width_eq_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     DWConv2DMicrokernelTester()
-      .input_width((2 * xnn_init_hardware_config()->vlenb / sizeof(float) - 1) * 1 + 1)
+      .input_width((2 * xnn_get_hardware_config()->vlenb / sizeof(float) - 1) * 1 + 1)
       .input_height(3)
       .kernel_height(3)
       .kernel_width(3)
@@ -38309,7 +38309,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_3X2V, output_width_div_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 2 * width_tile * 1 + 0; input_width < 8 * width_tile * 1 + 0; input_width += 2) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -38327,7 +38327,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_3X2V, output_width_lt_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 1; input_width < (width_tile - 1) * 1 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(2)
@@ -38345,7 +38345,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_3X2V, output_width_gt_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = width_tile * 1 + 1; input_width < 2 * width_tile * 1 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -38363,7 +38363,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_3X2V, output_height_div_3) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 6; input_height < 24; input_height += 3) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 1 + 1; input_width += width_tile * 1 - 1) {
         DWConv2DMicrokernelTester()
@@ -38383,7 +38383,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_3X2V, output_height_lt_3) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 1; input_height < 3; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 1 + 1; input_width += width_tile * 1 - 1) {
         DWConv2DMicrokernelTester()
@@ -38403,7 +38403,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_3X2V, output_height_gt_3) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 4; input_height < 7; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 1 + 1; input_width += width_tile * 1 - 1) {
         DWConv2DMicrokernelTester()
@@ -38427,7 +38427,7 @@
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_4X2V, output_width_eq_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
     DWConv2DMicrokernelTester()
-      .input_width((2 * xnn_init_hardware_config()->vlenb / sizeof(float) - 1) * 1 + 1)
+      .input_width((2 * xnn_get_hardware_config()->vlenb / sizeof(float) - 1) * 1 + 1)
       .input_height(4)
       .kernel_height(3)
       .kernel_width(3)
@@ -38441,7 +38441,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_4X2V, output_width_div_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 2 * width_tile * 1 + 0; input_width < 8 * width_tile * 1 + 0; input_width += 2) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -38459,7 +38459,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_4X2V, output_width_lt_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 1; input_width < (width_tile - 1) * 1 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(2)
@@ -38477,7 +38477,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_4X2V, output_width_gt_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = width_tile * 1 + 1; input_width < 2 * width_tile * 1 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -38495,7 +38495,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_4X2V, output_height_div_4) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 8; input_height < 32; input_height += 4) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 1 + 1; input_width += width_tile * 1 - 1) {
         DWConv2DMicrokernelTester()
@@ -38515,7 +38515,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_4X2V, output_height_lt_4) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 1; input_height < 4; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 1 + 1; input_width += width_tile * 1 - 1) {
         DWConv2DMicrokernelTester()
@@ -38535,7 +38535,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3P1__RVV_4X2V, output_height_gt_4) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 5; input_height < 9; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 1 + 1; input_width += width_tile * 1 - 1) {
         DWConv2DMicrokernelTester()
@@ -38558,7 +38558,7 @@
 #if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_5X1V, output_width_eq_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = (width_tile - 1) * 2 + 1; input_width < width_tile * 2 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -38576,7 +38576,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_5X1V, output_width_div_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 2 * width_tile * 2 + 0; input_width < 8 * width_tile * 2 + 0; input_width += 2) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -38594,7 +38594,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_5X1V, output_width_lt_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 1; input_width < (width_tile - 1) * 2 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(2)
@@ -38612,7 +38612,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_5X1V, output_width_gt_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = width_tile * 2 + 1; input_width < 2 * width_tile * 2 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -38630,7 +38630,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_5X1V, output_height_eq_5) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 9; input_height < 11; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -38650,7 +38650,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_5X1V, output_height_div_5) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 20; input_height < 80; input_height += 10) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -38670,7 +38670,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_5X1V, output_height_lt_5) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 1; input_height < 9; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -38690,7 +38690,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_5X1V, output_height_gt_5) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 11; input_height < 51; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -38710,7 +38710,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_5X1V, padding_top_eq_1) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 2; input_height < 32; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -38733,7 +38733,7 @@
 #if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_6X1V, output_width_eq_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = (width_tile - 1) * 2 + 1; input_width < width_tile * 2 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -38751,7 +38751,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_6X1V, output_width_div_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 2 * width_tile * 2 + 0; input_width < 8 * width_tile * 2 + 0; input_width += 2) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -38769,7 +38769,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_6X1V, output_width_lt_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 1; input_width < (width_tile - 1) * 2 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(2)
@@ -38787,7 +38787,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_6X1V, output_width_gt_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = width_tile * 2 + 1; input_width < 2 * width_tile * 2 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -38805,7 +38805,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_6X1V, output_height_eq_6) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 11; input_height < 13; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -38825,7 +38825,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_6X1V, output_height_div_6) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 24; input_height < 96; input_height += 12) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -38845,7 +38845,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_6X1V, output_height_lt_6) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 1; input_height < 11; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -38865,7 +38865,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_6X1V, output_height_gt_6) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 13; input_height < 61; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -38885,7 +38885,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_6X1V, padding_top_eq_1) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 2; input_height < 38; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -38908,7 +38908,7 @@
 #if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_7X1V, output_width_eq_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = (width_tile - 1) * 2 + 1; input_width < width_tile * 2 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -38926,7 +38926,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_7X1V, output_width_div_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 2 * width_tile * 2 + 0; input_width < 8 * width_tile * 2 + 0; input_width += 2) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -38944,7 +38944,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_7X1V, output_width_lt_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 1; input_width < (width_tile - 1) * 2 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(2)
@@ -38962,7 +38962,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_7X1V, output_width_gt_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = width_tile * 2 + 1; input_width < 2 * width_tile * 2 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -38980,7 +38980,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_7X1V, output_height_eq_7) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 13; input_height < 15; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -39000,7 +39000,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_7X1V, output_height_div_7) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 28; input_height < 112; input_height += 14) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -39020,7 +39020,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_7X1V, output_height_lt_7) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 1; input_height < 13; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -39040,7 +39040,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_7X1V, output_height_gt_7) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 15; input_height < 71; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -39060,7 +39060,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_7X1V, padding_top_eq_1) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 2; input_height < 44; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -39083,7 +39083,7 @@
 #if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_8X1V, output_width_eq_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = (width_tile - 1) * 2 + 1; input_width < width_tile * 2 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -39101,7 +39101,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_8X1V, output_width_div_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 2 * width_tile * 2 + 0; input_width < 8 * width_tile * 2 + 0; input_width += 2) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -39119,7 +39119,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_8X1V, output_width_lt_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 1; input_width < (width_tile - 1) * 2 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(2)
@@ -39137,7 +39137,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_8X1V, output_width_gt_1v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = width_tile * 2 + 1; input_width < 2 * width_tile * 2 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -39155,7 +39155,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_8X1V, output_height_eq_8) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 15; input_height < 17; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -39175,7 +39175,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_8X1V, output_height_div_8) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 32; input_height < 128; input_height += 16) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -39195,7 +39195,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_8X1V, output_height_lt_8) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 1; input_height < 15; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -39215,7 +39215,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_8X1V, output_height_gt_8) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 17; input_height < 81; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -39235,7 +39235,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_8X1V, padding_top_eq_1) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 1 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 1 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 2; input_height < 50; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -39258,7 +39258,7 @@
 #if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_1X2V, output_width_eq_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = (width_tile - 1) * 2 + 1; input_width < width_tile * 2 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -39276,7 +39276,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_1X2V, output_width_div_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 2 * width_tile * 2 + 0; input_width < 8 * width_tile * 2 + 0; input_width += 4) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -39294,7 +39294,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_1X2V, output_width_lt_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 1; input_width < (width_tile - 1) * 2 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(4)
@@ -39312,7 +39312,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_1X2V, output_width_gt_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = width_tile * 2 + 1; input_width < 2 * width_tile * 2 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -39330,7 +39330,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_1X2V, output_height_eq_1) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 1; input_height < 3; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -39350,7 +39350,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_1X2V, output_height_gt_1) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 3; input_height < 5; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -39370,7 +39370,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_1X2V, padding_top_eq_1) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 2; input_height < 8; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -39393,7 +39393,7 @@
 #if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_2X2V, output_width_eq_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = (width_tile - 1) * 2 + 1; input_width < width_tile * 2 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -39411,7 +39411,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_2X2V, output_width_div_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 2 * width_tile * 2 + 0; input_width < 8 * width_tile * 2 + 0; input_width += 4) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -39429,7 +39429,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_2X2V, output_width_lt_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 1; input_width < (width_tile - 1) * 2 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(4)
@@ -39447,7 +39447,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_2X2V, output_width_gt_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = width_tile * 2 + 1; input_width < 2 * width_tile * 2 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -39465,7 +39465,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_2X2V, output_height_eq_2) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 3; input_height < 5; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -39485,7 +39485,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_2X2V, output_height_div_2) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 8; input_height < 32; input_height += 4) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -39505,7 +39505,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_2X2V, output_height_lt_2) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 1; input_height < 3; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -39525,7 +39525,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_2X2V, output_height_gt_2) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 5; input_height < 9; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -39545,7 +39545,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_2X2V, padding_top_eq_1) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 2; input_height < 14; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -39568,7 +39568,7 @@
 #if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_3X2V, output_width_eq_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = (width_tile - 1) * 2 + 1; input_width < width_tile * 2 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -39586,7 +39586,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_3X2V, output_width_div_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 2 * width_tile * 2 + 0; input_width < 8 * width_tile * 2 + 0; input_width += 4) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -39604,7 +39604,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_3X2V, output_width_lt_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 1; input_width < (width_tile - 1) * 2 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(4)
@@ -39622,7 +39622,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_3X2V, output_width_gt_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = width_tile * 2 + 1; input_width < 2 * width_tile * 2 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -39640,7 +39640,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_3X2V, output_height_eq_3) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 5; input_height < 7; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -39660,7 +39660,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_3X2V, output_height_div_3) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 12; input_height < 48; input_height += 6) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -39680,7 +39680,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_3X2V, output_height_lt_3) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 1; input_height < 5; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -39700,7 +39700,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_3X2V, output_height_gt_3) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 7; input_height < 13; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -39720,7 +39720,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_3X2V, padding_top_eq_1) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 2; input_height < 20; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -39743,7 +39743,7 @@
 #if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_4X2V, output_width_eq_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = (width_tile - 1) * 2 + 1; input_width < width_tile * 2 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -39761,7 +39761,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_4X2V, output_width_div_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 2 * width_tile * 2 + 0; input_width < 8 * width_tile * 2 + 0; input_width += 4) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -39779,7 +39779,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_4X2V, output_width_lt_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = 1; input_width < (width_tile - 1) * 2 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(4)
@@ -39797,7 +39797,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_4X2V, output_width_gt_2v) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_width = width_tile * 2 + 1; input_width < 2 * width_tile * 2 + 1; input_width++) {
       DWConv2DMicrokernelTester()
         .input_width(input_width)
@@ -39815,7 +39815,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_4X2V, output_height_eq_4) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 7; input_height < 9; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -39835,7 +39835,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_4X2V, output_height_div_4) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 16; input_height < 64; input_height += 8) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -39855,7 +39855,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_4X2V, output_height_lt_4) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 1; input_height < 7; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -39875,7 +39875,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_4X2V, output_height_gt_4) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 9; input_height < 17; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()
@@ -39895,7 +39895,7 @@
 
   TEST(F32_DWCONV2D_CHW_3X3S2P1__RVV_4X2V, padding_top_eq_1) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_riscv_vector);
-    size_t width_tile = 2 * xnn_init_hardware_config()->vlenb / sizeof(float);
+    size_t width_tile = 2 * xnn_get_hardware_config()->vlenb / sizeof(float);
     for (size_t input_height = 2; input_height < 26; input_height++) {
       for (size_t input_width = 1; input_width < 5 * width_tile * 2 + 1; input_width += width_tile * 2 - 1) {
         DWConv2DMicrokernelTester()

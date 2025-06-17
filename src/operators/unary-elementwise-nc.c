@@ -57,7 +57,7 @@ static enum xnn_status init_lut_op(
   uint8_t* lookup_table = op->lookup_table;
   memcpy(lookup_table, lut, lookup_table_elements);
 
-  op->lut_config = xnn_init_x8_lut_config();
+  op->lut_config = xnn_get_x8_lut_config();
 
   op->state = xnn_run_state_invalid;
 
@@ -92,23 +92,23 @@ static const struct xnn_unary_elementwise_config* get_config(
   if (input_datatype != output_datatype) {
     if (op_type == xnn_unary_convert) {
       if (input_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_fp16) {
-        return xnn_init_f32_to_f16_cvt_config();
+        return xnn_get_f32_to_f16_cvt_config();
       } else if (input_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_qint8) {
-        return xnn_init_f32_to_qs8_cvt_config();
+        return xnn_get_f32_to_qs8_cvt_config();
       } else if (input_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_quint8) {
-        return xnn_init_f32_to_qu8_cvt_config();
+        return xnn_get_f32_to_qu8_cvt_config();
       } else if (input_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_qpint8) {
-        return xnn_init_f32_to_qp8_cvt_config();
+        return xnn_get_f32_to_qp8_cvt_config();
       } else if (input_datatype == xnn_datatype_fp16 && output_datatype == xnn_datatype_fp32) {
-        return xnn_init_f16_to_f32_cvt_config();
+        return xnn_get_f16_to_f32_cvt_config();
       } else if (input_datatype == xnn_datatype_fp16 && output_datatype == xnn_datatype_qint8) {
-        return xnn_init_f16_to_qs8_cvt_config();
+        return xnn_get_f16_to_qs8_cvt_config();
       } else if (input_datatype == xnn_datatype_qint8 && output_datatype == xnn_datatype_fp16) {
-        return xnn_init_qs8_to_f16_cvt_config();
+        return xnn_get_qs8_to_f16_cvt_config();
       } else if (input_datatype == xnn_datatype_qint8 && output_datatype == xnn_datatype_fp32) {
-        return xnn_init_qs8_to_f32_cvt_config();
+        return xnn_get_qs8_to_f32_cvt_config();
       } else if (input_datatype == xnn_datatype_quint8 && output_datatype == xnn_datatype_fp32) {
-        return xnn_init_qu8_to_f32_cvt_config();
+        return xnn_get_qu8_to_f32_cvt_config();
       }
     }
     return NULL;
@@ -122,11 +122,11 @@ static const struct xnn_unary_elementwise_config* get_config(
           xnn_log_debug("unsupported operator clamp for datatype QINT8: quantization parameters differ");
           return NULL;
         }
-        return xnn_init_s8_clamp_config();
+        return xnn_get_s8_clamp_config();
       case xnn_unary_leaky_relu:
-        return xnn_init_qs8_lrelu_config();
+        return xnn_get_qs8_lrelu_config();
       case xnn_unary_convert:
-        return xnn_init_qs8_cvt_config();
+        return xnn_get_qs8_cvt_config();
       default:
         return NULL;
     }
@@ -138,99 +138,99 @@ static const struct xnn_unary_elementwise_config* get_config(
           xnn_log_debug("unsupported operator clamp for datatype QUINT8: quantization parameters differ");
           return NULL;
         }
-        return xnn_init_u8_clamp_config();
+        return xnn_get_u8_clamp_config();
       case xnn_unary_leaky_relu:
-        return xnn_init_qu8_lrelu_config();
+        return xnn_get_qu8_lrelu_config();
       case xnn_unary_convert:
-        return xnn_init_qu8_cvt_config();
+        return xnn_get_qu8_cvt_config();
       default:
         return NULL;
     }
   } else if (datatype == xnn_datatype_fp16) {
     switch (op_type) {
       case xnn_unary_abs:
-        return xnn_init_f16_abs_config();
+        return xnn_get_f16_abs_config();
       case xnn_unary_approxgelu:
-        return xnn_init_f16_approxgelu_config();
+        return xnn_get_f16_approxgelu_config();
       case xnn_unary_bankers_rounding:
-        return xnn_init_f16_rndne_config();
+        return xnn_get_f16_rndne_config();
       case xnn_unary_ceiling:
-        return xnn_init_f16_rndu_config();
+        return xnn_get_f16_rndu_config();
       case xnn_unary_clamp:
-        return xnn_init_f16_clamp_config();
+        return xnn_get_f16_clamp_config();
       case xnn_unary_cosine:
-        return xnn_init_f16_cosine_config();
+        return xnn_get_f16_cosine_config();
       case xnn_unary_elu:
-        return xnn_init_f16_elu_config();
+        return xnn_get_f16_elu_config();
       case xnn_unary_exp:
-        return xnn_init_f16_exp_config();
+        return xnn_get_f16_exp_config();
       case xnn_unary_gelu:
-        return xnn_init_f16_gelu_config();
+        return xnn_get_f16_gelu_config();
       case xnn_unary_floor:
-        return xnn_init_f16_rndd_config();
+        return xnn_get_f16_rndd_config();
       case xnn_unary_hardswish:
-        return xnn_init_f16_hswish_config();
+        return xnn_get_f16_hswish_config();
       case xnn_unary_leaky_relu:
-        return xnn_init_f16_lrelu_config();
+        return xnn_get_f16_lrelu_config();
       case xnn_unary_negate:
-        return xnn_init_f16_neg_config();
+        return xnn_get_f16_neg_config();
       case xnn_unary_reciprocal_square_root:
-        return xnn_init_f16_rsqrt_config();
+        return xnn_get_f16_rsqrt_config();
       case xnn_unary_sigmoid:
-        return xnn_init_f16_sigmoid_config();
+        return xnn_get_f16_sigmoid_config();
       case xnn_unary_sine:
-        return xnn_init_f16_sine_config();
+        return xnn_get_f16_sine_config();
       case xnn_unary_square_root:
-        return xnn_init_f16_sqrt_config();
+        return xnn_get_f16_sqrt_config();
       case xnn_unary_square:
-        return xnn_init_f16_sqr_config();
+        return xnn_get_f16_sqr_config();
       case xnn_unary_tanh:
-        return xnn_init_f16_tanh_config();
+        return xnn_get_f16_tanh_config();
       default:
         return NULL;
     }
   } else if (datatype == xnn_datatype_fp32) {
     switch (op_type) {
       case xnn_unary_abs:
-        return xnn_init_f32_abs_config();
+        return xnn_get_f32_abs_config();
       case xnn_unary_approxgelu:
-        return xnn_init_f32_approxgelu_config(flags);
+        return xnn_get_f32_approxgelu_config(flags);
       case xnn_unary_bankers_rounding:
-        return xnn_init_f32_rndne_config();
+        return xnn_get_f32_rndne_config();
       case xnn_unary_ceiling:
-        return xnn_init_f32_rndu_config();
+        return xnn_get_f32_rndu_config();
       case xnn_unary_clamp:
-        return xnn_init_f32_clamp_config();
+        return xnn_get_f32_clamp_config();
       case xnn_unary_cosine:
-        return xnn_init_f32_cosine_config(flags);
+        return xnn_get_f32_cosine_config(flags);
       case xnn_unary_elu:
-        return xnn_init_f32_elu_config();
+        return xnn_get_f32_elu_config();
       case xnn_unary_exp:
-        return xnn_init_f32_exp_config(flags);
+        return xnn_get_f32_exp_config(flags);
       case xnn_unary_floor:
-        return xnn_init_f32_rndd_config();
+        return xnn_get_f32_rndd_config();
       case xnn_unary_gelu:
-        return xnn_init_f32_gelu_config(flags);
+        return xnn_get_f32_gelu_config(flags);
       case xnn_unary_hardswish:
-        return xnn_init_f32_hswish_config(flags);
+        return xnn_get_f32_hswish_config(flags);
       case xnn_unary_leaky_relu:
-        return xnn_init_f32_lrelu_config();
+        return xnn_get_f32_lrelu_config();
       case xnn_unary_log:
-        return xnn_init_f32_log_config(flags);
+        return xnn_get_f32_log_config(flags);
       case xnn_unary_negate:
-        return xnn_init_f32_neg_config();
+        return xnn_get_f32_neg_config();
       case xnn_unary_reciprocal_square_root:
-        return xnn_init_f32_rsqrt_config(flags);
+        return xnn_get_f32_rsqrt_config(flags);
       case xnn_unary_sigmoid:
-        return xnn_init_f32_sigmoid_config();
+        return xnn_get_f32_sigmoid_config();
       case xnn_unary_sine:
-        return xnn_init_f32_sine_config(flags);
+        return xnn_get_f32_sine_config(flags);
       case xnn_unary_square_root:
-        return xnn_init_f32_sqrt_config(flags);
+        return xnn_get_f32_sqrt_config(flags);
       case xnn_unary_square:
-        return xnn_init_f32_sqr_config();
+        return xnn_get_f32_sqr_config();
       case xnn_unary_tanh:
-        return xnn_init_f32_tanh_config(flags);
+        return xnn_get_f32_tanh_config(flags);
       default:
         return NULL;
     }
@@ -276,7 +276,7 @@ static enum xnn_status init_op(
   }
 
   // Fall back to reference.
-  config = xnn_init_unary_reference_config(op_type, input_datatype, output_datatype);
+  config = xnn_get_unary_reference_config(op_type, input_datatype, output_datatype);
   if (config) {
     if (xnn_datatype_size_bytes(input_datatype) == 1 && xnn_datatype_size_bytes(output_datatype) == 1) {
       // We can use a LUT for this op.
@@ -797,7 +797,7 @@ enum xnn_status create_convert_nc_f16_qx8(
   enum xnn_operator_type expected_operator_type,
   xnn_operator_t* convert_op_out)
 {
-  const struct xnn_reduce_config* f16_rminmax_config = xnn_init_f16_rminmax_config();
+  const struct xnn_reduce_config* f16_rminmax_config = xnn_get_f16_rminmax_config();
   if (f16_rminmax_config == NULL) {
     xnn_log_error(
         "failed to create %s operator: unsupported hardware configuration",
@@ -821,7 +821,7 @@ enum xnn_status create_convert_nc_f32_qx8(
   enum xnn_operator_type expected_operator_type,
   xnn_operator_t* convert_op_out)
 {
-  const struct xnn_reduce_config* f32_rminmax_config = xnn_init_f32_rminmax_config();
+  const struct xnn_reduce_config* f32_rminmax_config = xnn_get_f32_rminmax_config();
   if (f32_rminmax_config == NULL) {
     xnn_log_error(
         "failed to create %s operator: unsupported hardware configuration",
@@ -842,32 +842,32 @@ enum xnn_status create_convert_nc_f32_qx8(
 enum xnn_status xnn_create_convert_nc_f16_qd8(
   uint32_t flags,
   xnn_operator_t* convert_op_out) {
-  return create_convert_nc_f16_qx8(flags, xnn_init_f16_to_qs8_cvt_config(), xnn_operator_type_convert_nc_f16_qd8, convert_op_out);
+  return create_convert_nc_f16_qx8(flags, xnn_get_f16_to_qs8_cvt_config(), xnn_operator_type_convert_nc_f16_qd8, convert_op_out);
 }
 
 enum xnn_status xnn_create_convert_nc_f16_qdu8(
   uint32_t flags,
   xnn_operator_t* convert_op_out) {
-  return create_convert_nc_f16_qx8(flags, xnn_init_f16_to_qu8_cvt_config(), xnn_operator_type_convert_nc_f16_qdu8, convert_op_out);
+  return create_convert_nc_f16_qx8(flags, xnn_get_f16_to_qu8_cvt_config(), xnn_operator_type_convert_nc_f16_qdu8, convert_op_out);
 }
 
 enum xnn_status xnn_create_convert_nc_f32_qd8(
   uint32_t flags,
   xnn_operator_t* convert_op_out) {
-  return create_convert_nc_f32_qx8(flags, xnn_init_f32_to_qs8_cvt_config(), xnn_operator_type_convert_nc_f32_qd8, convert_op_out);
+  return create_convert_nc_f32_qx8(flags, xnn_get_f32_to_qs8_cvt_config(), xnn_operator_type_convert_nc_f32_qd8, convert_op_out);
 }
 
 enum xnn_status xnn_create_convert_nc_f32_qdu8(
   uint32_t flags,
   xnn_operator_t* convert_op_out) {
-  return create_convert_nc_f32_qx8(flags, xnn_init_f32_to_qu8_cvt_config(), xnn_operator_type_convert_nc_f32_qdu8, convert_op_out);
+  return create_convert_nc_f32_qx8(flags, xnn_get_f32_to_qu8_cvt_config(), xnn_operator_type_convert_nc_f32_qdu8, convert_op_out);
 }
 
 enum xnn_status xnn_create_convert_nc_f32_qp8(
     uint32_t flags, const struct xnn_gemm_config* gemm_config,
     xnn_operator_t* convert_op_out) {
   const struct xnn_reduce_config* f32_rminmax_config =
-      xnn_init_f32_rminmax_config();
+      xnn_get_f32_rminmax_config();
   if (f32_rminmax_config == NULL) {
     xnn_log_error(
         "failed to create %s operator: unsupported hardware configuration",
@@ -876,7 +876,7 @@ enum xnn_status xnn_create_convert_nc_f32_qp8(
   }
 
   enum xnn_status status = create_unary_elementwise_nc(
-    flags, xnn_init_f32_to_qp8_cvt_config(),
+    flags, xnn_get_f32_to_qp8_cvt_config(),
     /*params=*/NULL, /*params_size=*/0,
     xnn_operator_type_convert_nc_f32_qp8, convert_op_out);
   if (status == xnn_status_success) {
@@ -891,7 +891,7 @@ enum xnn_status xnn_create_copy_nc_x8(
     xnn_operator_t* copy_op_out)
 {
   return create_unary_elementwise_nc(
-    flags, xnn_init_xx_copy_config(),
+    flags, xnn_get_xx_copy_config(),
     /*params=*/NULL, /*params_size=*/0,
     xnn_operator_type_copy_nc_x8, copy_op_out);
 }
@@ -901,7 +901,7 @@ enum xnn_status xnn_create_copy_nc_x16(
     xnn_operator_t* copy_op_out)
 {
   return create_unary_elementwise_nc(
-    flags, xnn_init_xx_copy_config(),
+    flags, xnn_get_xx_copy_config(),
     /*params=*/NULL, /*params_size=*/0,
     xnn_operator_type_copy_nc_x16, copy_op_out);
 }
@@ -911,7 +911,7 @@ enum xnn_status xnn_create_copy_nc_x32(
     xnn_operator_t* copy_op_out)
 {
   return create_unary_elementwise_nc(
-    flags, xnn_init_xx_copy_config(),
+    flags, xnn_get_xx_copy_config(),
     /*params=*/NULL, /*params_size=*/0,
     xnn_operator_type_copy_nc_x32, copy_op_out);
 }
@@ -1465,7 +1465,7 @@ enum xnn_status xnn_run_copy_nc_x32(
     xnn_operator_type_copy_nc_x32,
     channels, input_stride, output_stride, batch_size,
     input, output,
-    xnn_init_xx_copy_config(), NULL, 0,
+    xnn_get_xx_copy_config(), NULL, 0,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_UINT32_T,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_UINT32_T,
     flags,

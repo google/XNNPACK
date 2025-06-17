@@ -25,21 +25,21 @@ XNN_INIT_ONCE_GUARD(u8_maxpool);
 
 static void init_f16_maxpool_config(void) {
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
       f16_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_f16_maxpool_minmax_ukernel_9p__neonfp16arith_u8;
       f16_maxpool_config.init.f16 = xnn_init_f16_minmax_scalar_params;
     }
   #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
       f16_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_f16_maxpool_minmax_ukernel_9p__neonfp16arith_u8;
       f16_maxpool_config.init.f16 = xnn_init_f16_minmax_scalar_params;
     }
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
       f16_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_f16_maxpool_minmax_ukernel_9p__avx2_u16;
@@ -53,7 +53,7 @@ static void init_f16_maxpool_config(void) {
 
 static void init_f32_maxpool_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       f32_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p__neon_u4;
@@ -82,7 +82,7 @@ static void init_f32_maxpool_config(void) {
 
 static void init_s8_maxpool_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       s8_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_s8_maxpool_minmax_ukernel_9p__neon_u16;
@@ -95,7 +95,7 @@ static void init_s8_maxpool_config(void) {
     s8_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_s8_maxpool_minmax_ukernel_9p__neon_u16;
     s8_maxpool_config.init.s8 = xnn_init_s8_minmax_scalar_params;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_x86_sse4_1)) {
       s8_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_s8_maxpool_minmax_ukernel_9p__sse41_u16;
@@ -115,7 +115,7 @@ static void init_s8_maxpool_config(void) {
 
 static void init_u8_maxpool_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       u8_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_u8_maxpool_minmax_ukernel_9p__neon_u16;
@@ -139,8 +139,8 @@ static void init_u8_maxpool_config(void) {
   #endif
 }
 
-const struct xnn_maxpool_config* xnn_init_f16_maxpool_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_maxpool_config* xnn_get_f16_maxpool_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
@@ -148,8 +148,8 @@ const struct xnn_maxpool_config* xnn_init_f16_maxpool_config() {
   return &f16_maxpool_config;
 }
 
-const struct xnn_maxpool_config* xnn_init_f32_maxpool_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_maxpool_config* xnn_get_f32_maxpool_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -157,8 +157,8 @@ const struct xnn_maxpool_config* xnn_init_f32_maxpool_config() {
   return &f32_maxpool_config;
 }
 
-const struct xnn_maxpool_config* xnn_init_s8_maxpool_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_maxpool_config* xnn_get_s8_maxpool_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -166,8 +166,8 @@ const struct xnn_maxpool_config* xnn_init_s8_maxpool_config() {
   return &s8_maxpool_config;
 }
 
-const struct xnn_maxpool_config* xnn_init_u8_maxpool_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_maxpool_config* xnn_get_u8_maxpool_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }

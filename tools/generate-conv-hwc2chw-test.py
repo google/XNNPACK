@@ -491,7 +491,7 @@ def generate_test_cases(
   is_vector = ""
   if (vector_tile):
     ctype = {"f16": "uint16_t", "f32": "float"}[datatype]
-    output_channels_scale = {"rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype}[isa]
+    output_channels_scale = {"rvv": " * xnn_get_hardware_config()->vlenb / sizeof(%s)" % ctype}[isa]
     is_vector = "v"
 
   test_args = [ukernel, init_fn]

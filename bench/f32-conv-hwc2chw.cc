@@ -161,21 +161,21 @@ static void f32_conv_hwc2chw_3x3s2p1c3x2v__rvv_1x1(benchmark::State& state,
                                                    const char* net) {
   f32_conv_hwc2chw(state, xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_1x1,
                    xnn_init_f32_minmax_scalar_params,
-                   2 * xnn_init_hardware_config()->vlenb / sizeof(float) /* output channel tile */);
+                   2 * xnn_get_hardware_config()->vlenb / sizeof(float) /* output channel tile */);
 }
 
 static void f32_conv_hwc2chw_3x3s2p1c3x2v__rvv_2x1(benchmark::State& state,
                                                    const char* net) {
   f32_conv_hwc2chw(state, xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_2x1,
                    xnn_init_f32_minmax_scalar_params,
-                   2 * xnn_init_hardware_config()->vlenb / sizeof(float) /* output channel tile */);
+                   2 * xnn_get_hardware_config()->vlenb / sizeof(float) /* output channel tile */);
 }
 
 static void f32_conv_hwc2chw_3x3s2p1c3x2v__rvv_2x2(benchmark::State& state,
                                                    const char* net) {
     f32_conv_hwc2chw(state, xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x2v__rvv_2x2,
                    xnn_init_f32_minmax_scalar_params,
-                   2 * xnn_init_hardware_config()->vlenb / sizeof(float) /* output channel tile */);
+                   2 * xnn_get_hardware_config()->vlenb / sizeof(float) /* output channel tile */);
 }
 
 BENCHMARK_DCONV(f32_conv_hwc2chw_3x3s2p1c3x2v__rvv_1x1);

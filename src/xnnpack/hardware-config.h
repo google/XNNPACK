@@ -102,7 +102,7 @@ struct xnn_hardware_config {
   size_t l2_data_cache_num_sets;
 };
 
-XNN_INTERNAL const struct xnn_hardware_config* xnn_init_hardware_config();
+XNN_INTERNAL const struct xnn_hardware_config* xnn_get_hardware_config();
 
 static inline bool xnn_is_bf16_compatible_config(
     const struct xnn_hardware_config* hardware_config) {

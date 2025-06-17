@@ -53,7 +53,7 @@ enum xnn_status xnn_create_argmax_pooling2d_nhwc_f32(
 
   status = xnn_status_unsupported_hardware;
 
-  const struct xnn_argmaxpool_config* argmaxpool_config = xnn_init_f32_argmaxpool_config();
+  const struct xnn_argmaxpool_config* argmaxpool_config = xnn_get_f32_argmaxpool_config();
   if (argmaxpool_config == NULL) {
     xnn_log_error(
       "failed to create %s operator: unsupported hardware configuration",

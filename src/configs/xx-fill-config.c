@@ -18,7 +18,7 @@ XNN_INIT_ONCE_GUARD(xx_fill);
 
 static void init_xx_fill_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       xx_fill_config.ukernel = (xnn_fill_ukernel_fn) xnn_xx_fill_ukernel__neon_u64;
@@ -38,8 +38,8 @@ static void init_xx_fill_config(void) {
   #endif
 }
 
-const struct xnn_xx_fill_config* xnn_init_xx_fill_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_xx_fill_config* xnn_get_xx_fill_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }

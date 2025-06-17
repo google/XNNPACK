@@ -129,18 +129,18 @@ XNN_UKERNEL(0, xnn_x32_packw_gemm_goi_ukernel_x64__scalar_float_u2, 64, 1, 1, 2,
 XNN_UKERNEL(0, xnn_x32_packw_gemm_goi_ukernel_x64__scalar_int_u2, 64, 1, 1, 2, 1)
 
 #if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-XNN_UKERNEL(xnn_arch_riscv_vector, xnn_x32_packw_gemm_goi_ukernel_x1v__rvv_u2, 1, 1, 1, 2, xnn_init_hardware_config()->vlenb / sizeof(uint32_t))
-XNN_UKERNEL(xnn_arch_riscv_vector, xnn_x32_packw_gemm_goi_ukernel_x1v__rvv_u4, 1, 1, 1, 4, xnn_init_hardware_config()->vlenb / sizeof(uint32_t))
-XNN_UKERNEL(xnn_arch_riscv_vector, xnn_x32_packw_gemm_goi_ukernel_x1v__rvv_u8, 1, 1, 1, 8, xnn_init_hardware_config()->vlenb / sizeof(uint32_t))
-XNN_UKERNEL(xnn_arch_riscv_vector, xnn_x32_packw_gemm_goi_ukernel_x2v__rvv_u2, 2, 1, 1, 2, xnn_init_hardware_config()->vlenb / sizeof(uint32_t))
-XNN_UKERNEL(xnn_arch_riscv_vector, xnn_x32_packw_gemm_goi_ukernel_x2v__rvv_u4, 2, 1, 1, 4, xnn_init_hardware_config()->vlenb / sizeof(uint32_t))
-XNN_UKERNEL(xnn_arch_riscv_vector, xnn_x32_packw_gemm_goi_ukernel_x2v__rvv_u8, 2, 1, 1, 8, xnn_init_hardware_config()->vlenb / sizeof(uint32_t))
-XNN_UKERNEL(xnn_arch_riscv_vector, xnn_x32_packw_gemm_goi_ukernel_x4v__rvv_u2, 4, 1, 1, 2, xnn_init_hardware_config()->vlenb / sizeof(uint32_t))
-XNN_UKERNEL(xnn_arch_riscv_vector, xnn_x32_packw_gemm_goi_ukernel_x4v__rvv_u4, 4, 1, 1, 4, xnn_init_hardware_config()->vlenb / sizeof(uint32_t))
-XNN_UKERNEL(xnn_arch_riscv_vector, xnn_x32_packw_gemm_goi_ukernel_x4v__rvv_u8, 4, 1, 1, 8, xnn_init_hardware_config()->vlenb / sizeof(uint32_t))
-XNN_UKERNEL(xnn_arch_riscv_vector, xnn_x32_packw_gemm_goi_ukernel_x8v__rvv_u2, 8, 1, 1, 2, xnn_init_hardware_config()->vlenb / sizeof(uint32_t))
-XNN_UKERNEL(xnn_arch_riscv_vector, xnn_x32_packw_gemm_goi_ukernel_x8v__rvv_u4, 8, 1, 1, 4, xnn_init_hardware_config()->vlenb / sizeof(uint32_t))
-XNN_UKERNEL(xnn_arch_riscv_vector, xnn_x32_packw_gemm_goi_ukernel_x8v__rvv_u8, 8, 1, 1, 8, xnn_init_hardware_config()->vlenb / sizeof(uint32_t))
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_x32_packw_gemm_goi_ukernel_x1v__rvv_u2, 1, 1, 1, 2, xnn_get_hardware_config()->vlenb / sizeof(uint32_t))
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_x32_packw_gemm_goi_ukernel_x1v__rvv_u4, 1, 1, 1, 4, xnn_get_hardware_config()->vlenb / sizeof(uint32_t))
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_x32_packw_gemm_goi_ukernel_x1v__rvv_u8, 1, 1, 1, 8, xnn_get_hardware_config()->vlenb / sizeof(uint32_t))
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_x32_packw_gemm_goi_ukernel_x2v__rvv_u2, 2, 1, 1, 2, xnn_get_hardware_config()->vlenb / sizeof(uint32_t))
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_x32_packw_gemm_goi_ukernel_x2v__rvv_u4, 2, 1, 1, 4, xnn_get_hardware_config()->vlenb / sizeof(uint32_t))
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_x32_packw_gemm_goi_ukernel_x2v__rvv_u8, 2, 1, 1, 8, xnn_get_hardware_config()->vlenb / sizeof(uint32_t))
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_x32_packw_gemm_goi_ukernel_x4v__rvv_u2, 4, 1, 1, 2, xnn_get_hardware_config()->vlenb / sizeof(uint32_t))
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_x32_packw_gemm_goi_ukernel_x4v__rvv_u4, 4, 1, 1, 4, xnn_get_hardware_config()->vlenb / sizeof(uint32_t))
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_x32_packw_gemm_goi_ukernel_x4v__rvv_u8, 4, 1, 1, 8, xnn_get_hardware_config()->vlenb / sizeof(uint32_t))
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_x32_packw_gemm_goi_ukernel_x8v__rvv_u2, 8, 1, 1, 2, xnn_get_hardware_config()->vlenb / sizeof(uint32_t))
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_x32_packw_gemm_goi_ukernel_x8v__rvv_u4, 8, 1, 1, 4, xnn_get_hardware_config()->vlenb / sizeof(uint32_t))
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_x32_packw_gemm_goi_ukernel_x8v__rvv_u8, 8, 1, 1, 8, xnn_get_hardware_config()->vlenb / sizeof(uint32_t))
 #endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
 #if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX

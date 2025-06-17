@@ -318,7 +318,7 @@ class ConvertOperatorTester {
 
     // The parameters of the GEMM config are used as packing parameters.
     const struct xnn_gemm_config* gemm_config =
-        xnn_init_f32_gemm_nr2_config(/*flags=*/0);
+        xnn_get_f32_gemm_nr2_config(/*flags=*/0);
 
     xnnpack::Buffer<float> input(
         (batch_size() - 1) * input_stride() + channels(),
@@ -340,7 +340,7 @@ class ConvertOperatorTester {
 
       ASSERT_EQ(xnn_status_success,
                 xnn_create_convert_nc_f32_qp8(
-                    0, xnn_init_qp8_f32_qc4w_gemm_config(), &convert_op));
+                    0, xnn_get_qp8_f32_qc4w_gemm_config(), &convert_op));
       ASSERT_NE(nullptr, convert_op);
 
       // Smart pointer to automatically delete convert op.

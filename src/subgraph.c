@@ -1023,7 +1023,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
       case xnn_node_type_rope:
         break;
       case xnn_node_type_pack_lh:
-        if (xnn_init_x16_pack_lh_config() != NULL) {
+        if (xnn_get_x16_pack_lh_config() != NULL) {
           break;
         }
       default:
@@ -2203,41 +2203,41 @@ static bool convert_gemm_to_qduint8(
   const struct xnn_gemm_config* unsigned_config = NULL;
   if (input_datatype == xnn_datatype_fp32) {
     if (consumer_weights_type == xnn_datatype_qcint4) {
-      original_config = xnn_init_qd8_f32_qc4w_gemm_config();
-      unsigned_config = xnn_init_qdu8_f32_qc4w_gemm_config();
+      original_config = xnn_get_qd8_f32_qc4w_gemm_config();
+      unsigned_config = xnn_get_qdu8_f32_qc4w_gemm_config();
     } else if (consumer_weights_type == xnn_datatype_qcint8) {
-      original_config = xnn_init_qd8_f32_qc8w_gemm_config();
+      original_config = xnn_get_qd8_f32_qc8w_gemm_config();
       switch (consumer_type) {
         case xnn_node_type_batch_matrix_multiply:
         case xnn_node_type_fully_connected:
-          unsigned_config = xnn_init_qdu8_f32_qc8w_gemm_config();
+          unsigned_config = xnn_get_qdu8_f32_qc8w_gemm_config();
           break;
         case xnn_node_type_convolution_2d:
         case xnn_node_type_deconvolution_2d:
-          unsigned_config = xnn_init_qdu8_f32_qc8w_igemm_config();
+          unsigned_config = xnn_get_qdu8_f32_qc8w_igemm_config();
           break;
         default:
           XNN_UNREACHABLE;
       }
     } else if (consumer_weights_type == xnn_datatype_qbint4) {
-      original_config = xnn_init_qd8_f32_qb4w_gemm_config();
-      unsigned_config = xnn_init_qdu8_f32_qb4w_gemm_config();
+      original_config = xnn_get_qd8_f32_qb4w_gemm_config();
+      unsigned_config = xnn_get_qdu8_f32_qb4w_gemm_config();
     }
   } else if (input_datatype == xnn_datatype_fp16) {
     if (consumer_weights_type == xnn_datatype_qcint4) {
-      original_config = xnn_init_qd8_f16_qc4w_gemm_config();
-      unsigned_config = xnn_init_qdu8_f16_qc4w_gemm_config();
+      original_config = xnn_get_qd8_f16_qc4w_gemm_config();
+      unsigned_config = xnn_get_qdu8_f16_qc4w_gemm_config();
     } else if (consumer_weights_type == xnn_datatype_qcint8) {
       switch (consumer_type) {
         case xnn_node_type_batch_matrix_multiply:
         case xnn_node_type_fully_connected:
-          original_config = xnn_init_qd8_f16_qc8w_gemm_config();
-          unsigned_config = xnn_init_qdu8_f16_qc8w_gemm_config();
+          original_config = xnn_get_qd8_f16_qc8w_gemm_config();
+          unsigned_config = xnn_get_qdu8_f16_qc8w_gemm_config();
           break;
         case xnn_node_type_convolution_2d:
         case xnn_node_type_deconvolution_2d:
-          original_config = xnn_init_qd8_f16_qc8w_igemm_config();
-          unsigned_config = xnn_init_qdu8_f16_qc8w_gemm_config();
+          original_config = xnn_get_qd8_f16_qc8w_igemm_config();
+          unsigned_config = xnn_get_qdu8_f16_qc8w_gemm_config();
           break;
         default:
           XNN_UNREACHABLE;
@@ -2290,7 +2290,7 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
       case xnn_datatype_fp16:
         if (input_datatype == output_datatype &&
             kernel_datatype == xnn_datatype_fp16) {
-          if ((gemm_config = xnn_init_pf16_gemm_config())) {
+          if ((gemm_config = xnn_get_pf16_gemm_config())) {
             assumed_datatype = xnn_datatype_pfp16;
           }
         }
@@ -2298,7 +2298,7 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
       case xnn_datatype_fp32:
         if (input_datatype == output_datatype &&
             kernel_datatype == xnn_datatype_fp32) {
-          if ((gemm_config = xnn_init_pf32_gemm_config())) {
+          if ((gemm_config = xnn_get_pf32_gemm_config())) {
             assumed_datatype = xnn_datatype_pfp32;
           }
         }
@@ -2306,7 +2306,7 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
       case xnn_datatype_qint8:
         if (input_datatype == output_datatype &&
             kernel_datatype == xnn_datatype_qcint8) {
-          if ((gemm_config = xnn_init_pqs8_qc8w_gemm_config())) {
+          if ((gemm_config = xnn_get_pqs8_qc8w_gemm_config())) {
             assumed_datatype = xnn_datatype_pqint8;
           }
         }
@@ -2318,17 +2318,17 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
         if (output_datatype == xnn_datatype_fp32) {
           switch (kernel_datatype) {
             case xnn_datatype_qbint4:
-              if ((gemm_config = xnn_init_qp8_f32_qb4w_gemm_config())) {
+              if ((gemm_config = xnn_get_qp8_f32_qb4w_gemm_config())) {
                 assumed_datatype = xnn_datatype_qpint8;
               }
               break;
             case xnn_datatype_qcint4:
-              if ((gemm_config = xnn_init_qp8_f32_qc4w_gemm_config())) {
+              if ((gemm_config = xnn_get_qp8_f32_qc4w_gemm_config())) {
                 assumed_datatype = xnn_datatype_qpint8;
               }
               break;
             case xnn_datatype_qcint8:
-              if ((gemm_config = xnn_init_qp8_f32_qc8w_gemm_config())) {
+              if ((gemm_config = xnn_get_qp8_f32_qc8w_gemm_config())) {
                 assumed_datatype = xnn_datatype_qpint8;
               }
               break;
@@ -2587,7 +2587,7 @@ enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
   }
 
   const struct xnn_hardware_config* hardware_config =
-      xnn_init_hardware_config();
+      xnn_get_hardware_config();
   if (hardware_config == NULL) {
     xnn_log_error("failed to get hardware config");
     return xnn_status_unsupported_hardware;

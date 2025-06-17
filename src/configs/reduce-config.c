@@ -76,7 +76,7 @@ static uint32_t pack_float32(float value) {
 
 static void init_s8_rmax_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       s8_rmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_s8_rmax_ukernel__neon_u32_acc2;
@@ -89,7 +89,7 @@ static void init_s8_rmax_config(void) {
     s8_rmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_s8_rmax_ukernel__neon_u32_acc2;
     s8_rmax_config.rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_s8_rdmax_ukernel_2p2x__neon_c32;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_x86_sse4_1)) {
       s8_rmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_s8_rmax_ukernel__sse41_u32_acc2;
@@ -114,7 +114,7 @@ static void init_s8_rmax_config(void) {
 
 static void init_s8_rminmax_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       s8_rminmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_s8_rminmax_ukernel__neon_u32_acc2;
@@ -124,7 +124,7 @@ static void init_s8_rminmax_config(void) {
   #elif XNN_ARCH_ARM64
     s8_rminmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_s8_rminmax_ukernel__neon_u32_acc2;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_x86_sse4_1)) {
       s8_rminmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_s8_rminmax_ukernel__sse41_u32_acc2;
@@ -142,7 +142,7 @@ static void init_s8_rminmax_config(void) {
 
 static void init_s8_rmin_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       s8_rmin_config.ukernel = (xnn_reduce_ukernel_fn) xnn_s8_rmin_ukernel__neon_u32_acc2;
@@ -155,7 +155,7 @@ static void init_s8_rmin_config(void) {
     s8_rmin_config.ukernel = (xnn_reduce_ukernel_fn) xnn_s8_rmin_ukernel__neon_u32_acc2;
     s8_rmin_config.rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_s8_rdmin_ukernel_2p2x__neon_c32;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_x86_sse4_1)) {
       s8_rmin_config.ukernel = (xnn_reduce_ukernel_fn) xnn_s8_rmin_ukernel__sse41_u32_acc2;
@@ -180,7 +180,7 @@ static void init_s8_rmin_config(void) {
 
 static void init_u8_rmax_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       u8_rmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_u8_rmax_ukernel__neon_u32_acc2;
@@ -211,7 +211,7 @@ static void init_u8_rmax_config(void) {
 
 static void init_u8_rminmax_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       u8_rminmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_u8_rminmax_ukernel__neon_u32_acc2;
@@ -233,7 +233,7 @@ static void init_u8_rminmax_config(void) {
 
 static void init_u8_rmin_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       u8_rmin_config.ukernel = (xnn_reduce_ukernel_fn) xnn_u8_rmin_ukernel__neon_u32_acc2;
@@ -264,7 +264,7 @@ static void init_u8_rmin_config(void) {
 
 static void init_qs8_rsum_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
 
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
@@ -282,7 +282,7 @@ static void init_qs8_rsum_config(void) {
       qs8_rsum_config.rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_qs8_rdsum_ukernel_7p7x__scalar_c4;
     }
   #elif XNN_ARCH_ARM64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
 
     if (XNN_ENABLE_ARM_DOTPROD && (hardware_config->arch_flags & xnn_arch_arm_neon_dot)) {
@@ -294,7 +294,7 @@ static void init_qs8_rsum_config(void) {
     }
     qs8_rsum_config.rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_qs8_rdsum_ukernel_7p7x__neon_c32;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
 
     #if XNN_ENABLE_AVX512VNNI
@@ -355,7 +355,7 @@ static void init_qs8_rsum_config(void) {
 
 static void init_qu8_rsum_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
 
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
@@ -369,7 +369,7 @@ static void init_qu8_rsum_config(void) {
     qu8_rsum_config.ukernel = (xnn_reduce_ukernel_fn) xnn_qu8_rsum_ukernel__neon_u32_acc2;
     qu8_rsum_config.rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_qu8_rdsum_ukernel_7p7x__neon_u16;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
 
     if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
@@ -400,14 +400,14 @@ static void init_qu8_rsum_config(void) {
 
 static void init_f16_f32acc_rsum_config(void) {
   #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_ARM_FP16_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
       f16_f32acc_rsum_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f16_f32acc_rsum_ukernel__neonfp16arith_u32_acc4;
       f16_f32acc_rsum_config.rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_f16_f32acc_rdsum_ukernel_7p7x__neonfp16arith_c16;
     }
   #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64)
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512SKX
       if ((hardware_config->arch_flags & xnn_arch_x86_avx512skx)) {
@@ -437,7 +437,7 @@ static void init_f16_f32acc_rsum_config(void) {
 
 static void init_f16_rmax_config(void) {
   #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_ARM_FP16_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
       f16_rmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f16_rmax_ukernel__neonfp16arith_u32_acc4;
@@ -447,7 +447,7 @@ static void init_f16_rmax_config(void) {
       f16_rmax_config.rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_f16_rdmax_ukernel_2p2x__scalar_c2;
     }
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     #if XNN_ENABLE_AVX512FP16
@@ -477,7 +477,7 @@ static void init_f16_rmax_config(void) {
 
 static void init_f16_rminmax_config(void) {
   #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_ARM_FP16_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
       f16_rminmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f16_rminmax_ukernel__neonfp16arith_u32_acc4;
@@ -486,7 +486,7 @@ static void init_f16_rminmax_config(void) {
     }
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     #if XNN_ENABLE_AVX512FP16 || XNN_ENABLE_AVX512SKX
-      const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+      const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
       assert(hardware_config != NULL);
     #endif
     #if XNN_ENABLE_AVX512FP16
@@ -509,7 +509,7 @@ static void init_f16_rminmax_config(void) {
 
 static void init_f16_rmin_config(void) {
   #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_ARM_FP16_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
       f16_rmin_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f16_rmin_ukernel__neonfp16arith_u32_acc4;
@@ -520,7 +520,7 @@ static void init_f16_rmin_config(void) {
     }
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     #if XNN_ENABLE_AVX512FP16 || XNN_ENABLE_AVX512SKX
-      const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+      const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
       assert(hardware_config != NULL);
     #endif
     #if XNN_ENABLE_AVX512FP16
@@ -547,7 +547,7 @@ static void init_f16_rmin_config(void) {
 
 static void init_f32_rmax_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       f32_rmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rmax_ukernel__neon_u16_acc4;
@@ -560,7 +560,7 @@ static void init_f32_rmax_config(void) {
     f32_rmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rmax_ukernel__neon_u16_acc4;
     f32_rmax_config.rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_f32_rdmax_ukernel_2p2x__neon_c32;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
       if ((hardware_config->arch_flags & xnn_arch_x86_avx512f)) {
@@ -601,7 +601,7 @@ static void init_f32_rmax_config(void) {
 
 static void init_f32_rminmax_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       f32_rminmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rminmax_ukernel__neon_u16_acc4;
@@ -611,7 +611,7 @@ static void init_f32_rminmax_config(void) {
   #elif XNN_ARCH_ARM64
     f32_rminmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rminmax_ukernel__neon_u16_acc4;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
       if ((hardware_config->arch_flags & xnn_arch_x86_avx512f)) {
@@ -636,7 +636,7 @@ static void init_f32_rminmax_config(void) {
 
 static void init_f32_rmin_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       f32_rmin_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rmin_ukernel__neon_u16_acc4;
@@ -649,7 +649,7 @@ static void init_f32_rmin_config(void) {
     f32_rmin_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rmin_ukernel__neon_u16_acc4;
     f32_rmin_config.rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_f32_rdmin_ukernel_2p2x__neon_c32;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
       if ((hardware_config->arch_flags & xnn_arch_x86_avx512f)) {
@@ -690,7 +690,7 @@ static void init_f32_rmin_config(void) {
 
 static void init_f32_rsum_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       f32_rsum_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__neon_u16_acc4;
@@ -703,7 +703,7 @@ static void init_f32_rsum_config(void) {
     f32_rsum_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__neon_u16_acc4;
     f32_rsum_config.rd_ukernel = (xnn_reduce_discontiguous_ukernel_fn) xnn_f32_rdsum_ukernel_7p7x__neon_c16;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
       if ((hardware_config->arch_flags & xnn_arch_x86_avx512f)) {
@@ -749,8 +749,8 @@ static void init_f32_rsum_config(void) {
   f32_rsum_config.update = xnn_update_f32_reduce_scalar_params;
 }
 
-const struct xnn_reduce_config* xnn_init_f16_f32acc_rsum_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_reduce_config* xnn_get_f16_f32acc_rsum_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
@@ -758,8 +758,8 @@ const struct xnn_reduce_config* xnn_init_f16_f32acc_rsum_config() {
   return &f16_f32acc_rsum_config;
 }
 
-const struct xnn_reduce_config* xnn_init_f16_rmax_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_reduce_config* xnn_get_f16_rmax_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -767,8 +767,8 @@ const struct xnn_reduce_config* xnn_init_f16_rmax_config() {
   return &f16_rmax_config;
 }
 
-const struct xnn_reduce_config* xnn_init_f16_rminmax_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_reduce_config* xnn_get_f16_rminmax_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -776,8 +776,8 @@ const struct xnn_reduce_config* xnn_init_f16_rminmax_config() {
   return &f16_rminmax_config;
 }
 
-const struct xnn_reduce_config* xnn_init_f16_rmin_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_reduce_config* xnn_get_f16_rmin_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -785,8 +785,8 @@ const struct xnn_reduce_config* xnn_init_f16_rmin_config() {
   return &f16_rmin_config;
 }
 
-const struct xnn_reduce_config* xnn_init_f32_rmax_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_reduce_config* xnn_get_f32_rmax_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -794,8 +794,8 @@ const struct xnn_reduce_config* xnn_init_f32_rmax_config() {
   return &f32_rmax_config;
 }
 
-const struct xnn_reduce_config* xnn_init_f32_rminmax_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_reduce_config* xnn_get_f32_rminmax_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -803,8 +803,8 @@ const struct xnn_reduce_config* xnn_init_f32_rminmax_config() {
   return &f32_rminmax_config;
 }
 
-const struct xnn_reduce_config* xnn_init_f32_rmin_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_reduce_config* xnn_get_f32_rmin_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -812,8 +812,8 @@ const struct xnn_reduce_config* xnn_init_f32_rmin_config() {
   return &f32_rmin_config;
 }
 
-const struct xnn_reduce_config* xnn_init_f32_rsum_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_reduce_config* xnn_get_f32_rsum_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -821,8 +821,8 @@ const struct xnn_reduce_config* xnn_init_f32_rsum_config() {
   return &f32_rsum_config;
 }
 
-const struct xnn_reduce_config* xnn_init_s8_rmax_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_reduce_config* xnn_get_s8_rmax_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -830,8 +830,8 @@ const struct xnn_reduce_config* xnn_init_s8_rmax_config() {
   return &s8_rmax_config;
 }
 
-const struct xnn_reduce_config* xnn_init_s8_rminmax_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_reduce_config* xnn_get_s8_rminmax_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -839,8 +839,8 @@ const struct xnn_reduce_config* xnn_init_s8_rminmax_config() {
   return &s8_rminmax_config;
 }
 
-const struct xnn_reduce_config* xnn_init_s8_rmin_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_reduce_config* xnn_get_s8_rmin_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -848,8 +848,8 @@ const struct xnn_reduce_config* xnn_init_s8_rmin_config() {
   return &s8_rmin_config;
 }
 
-const struct xnn_reduce_config* xnn_init_u8_rmax_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_reduce_config* xnn_get_u8_rmax_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -857,8 +857,8 @@ const struct xnn_reduce_config* xnn_init_u8_rmax_config() {
   return &u8_rmax_config;
 }
 
-const struct xnn_reduce_config* xnn_init_u8_rminmax_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_reduce_config* xnn_get_u8_rminmax_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -866,8 +866,8 @@ const struct xnn_reduce_config* xnn_init_u8_rminmax_config() {
   return &u8_rminmax_config;
 }
 
-const struct xnn_reduce_config* xnn_init_u8_rmin_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_reduce_config* xnn_get_u8_rmin_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -875,8 +875,8 @@ const struct xnn_reduce_config* xnn_init_u8_rmin_config() {
   return &u8_rmin_config;
 }
 
-const struct xnn_reduce_config* xnn_init_qs8_rsum_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_reduce_config* xnn_get_qs8_rsum_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -884,8 +884,8 @@ const struct xnn_reduce_config* xnn_init_qs8_rsum_config() {
   return &qs8_rsum_config;
 }
 
-const struct xnn_reduce_config* xnn_init_qu8_rsum_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_reduce_config* xnn_get_qu8_rsum_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }

@@ -16,7 +16,7 @@ constexpr size_t max_pooling_size = 25;
 
 TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_1xM_pool) {
   const struct xnn_argmaxpool_config* argmaxpool_config =
-      xnn_init_f32_argmaxpool_config();
+      xnn_get_f32_argmaxpool_config();
   ASSERT_NE(argmaxpool_config, nullptr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= max_pooling_size; pool_size++) {
@@ -34,7 +34,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_1xM_pool) {
 
 TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_1xM_pool_with_padding) {
   const struct xnn_argmaxpool_config* argmaxpool_config =
-      xnn_init_f32_argmaxpool_config();
+      xnn_get_f32_argmaxpool_config();
   ASSERT_NE(argmaxpool_config, nullptr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 3; pool_size <= max_pooling_size; pool_size++) {
@@ -58,7 +58,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_1xM_pool_with_padding) {
 
 TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_1xM_pool_with_tf_same_padding) {
   const struct xnn_argmaxpool_config* argmaxpool_config =
-      xnn_init_f32_argmaxpool_config();
+      xnn_get_f32_argmaxpool_config();
   ASSERT_NE(argmaxpool_config, nullptr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 3; pool_size <= max_pooling_size; pool_size++) {
@@ -80,7 +80,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_1xM_pool_with_tf_same_padding) {
 
 TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_Mx1_pool) {
   const struct xnn_argmaxpool_config* argmaxpool_config =
-      xnn_init_f32_argmaxpool_config();
+      xnn_get_f32_argmaxpool_config();
   ASSERT_NE(argmaxpool_config, nullptr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= max_pooling_size; pool_size++) {
@@ -98,7 +98,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_Mx1_pool) {
 
 TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_Mx1_pool_with_padding) {
   const struct xnn_argmaxpool_config* argmaxpool_config =
-      xnn_init_f32_argmaxpool_config();
+      xnn_get_f32_argmaxpool_config();
   ASSERT_NE(argmaxpool_config, nullptr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= max_pooling_size; pool_size++) {
@@ -122,7 +122,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_Mx1_pool_with_padding) {
 
 TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_Mx1_pool_with_tf_same_padding) {
   const struct xnn_argmaxpool_config* argmaxpool_config =
-      xnn_init_f32_argmaxpool_config();
+      xnn_get_f32_argmaxpool_config();
   ASSERT_NE(argmaxpool_config, nullptr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= max_pooling_size; pool_size++) {
@@ -144,7 +144,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_Mx1_pool_with_tf_same_padding) {
 
 TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_pool_with_input_stride) {
   const struct xnn_argmaxpool_config* argmaxpool_config =
-      xnn_init_f32_argmaxpool_config();
+      xnn_get_f32_argmaxpool_config();
   ASSERT_NE(argmaxpool_config, nullptr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= max_pooling_size; pool_size++) {
@@ -172,7 +172,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_pool_with_input_stride) {
 
 TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_pool_with_output_stride) {
   const struct xnn_argmaxpool_config* argmaxpool_config =
-      xnn_init_f32_argmaxpool_config();
+      xnn_get_f32_argmaxpool_config();
   ASSERT_NE(argmaxpool_config, nullptr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= max_pooling_size; pool_size++) {
@@ -200,7 +200,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, unit_batch_small_pool_with_output_stride) {
 
 TEST(ARGMAX_POOLING_NHWC_F32, small_batch_small_pool) {
   const struct xnn_argmaxpool_config* argmaxpool_config =
-      xnn_init_f32_argmaxpool_config();
+      xnn_get_f32_argmaxpool_config();
   ASSERT_NE(argmaxpool_config, nullptr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= max_pooling_size; pool_size++) {
@@ -226,7 +226,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, small_batch_small_pool) {
 
 TEST(ARGMAX_POOLING_NHWC_F32, small_batch_small_pool_with_input_stride) {
   const struct xnn_argmaxpool_config* argmaxpool_config =
-      xnn_init_f32_argmaxpool_config();
+      xnn_get_f32_argmaxpool_config();
   ASSERT_NE(argmaxpool_config, nullptr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= max_pooling_size; pool_size++) {
@@ -254,7 +254,7 @@ TEST(ARGMAX_POOLING_NHWC_F32, small_batch_small_pool_with_input_stride) {
 
 TEST(ARGMAX_POOLING_NHWC_F32, small_batch_small_pool_with_output_stride) {
   const struct xnn_argmaxpool_config* argmaxpool_config =
-      xnn_init_f32_argmaxpool_config();
+      xnn_get_f32_argmaxpool_config();
   ASSERT_NE(argmaxpool_config, nullptr);
   for (size_t channels = 1; channels <= 100; channels += 15) {
     for (size_t pool_size = 2; pool_size <= max_pooling_size; pool_size++) {

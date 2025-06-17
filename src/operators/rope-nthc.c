@@ -75,7 +75,7 @@ enum xnn_status xnn_create_rope_nthc_f16(
   uint32_t flags,
   xnn_operator_t* rope_op_out)
 {
-  const struct xnn_cmul_config* config = xnn_init_f16_cmul_config();
+  const struct xnn_cmul_config* config = xnn_get_f16_cmul_config();
   if (config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_rope_nthc_f16));
@@ -93,7 +93,7 @@ enum xnn_status xnn_create_rope_nthc_f32(
   uint32_t flags,
   xnn_operator_t* rope_op_out)
 {
-  const struct xnn_cmul_config* config = xnn_init_f32_cmul_config();
+  const struct xnn_cmul_config* config = xnn_get_f32_cmul_config();
   if (config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_rope_nthc_f32));

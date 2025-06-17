@@ -21,7 +21,7 @@ XNN_INIT_ONCE_GUARD(f32_dwconv2d_chw);
 
 static void init_f16_dwconv2d_chw_config(void) {
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
       f16_dwconv2d_chw_config.dwconv2d_chw_3x3.ukernel = (xnn_dwconv2d_chw_ukernel_fn) xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8;
@@ -41,7 +41,7 @@ static void init_f16_dwconv2d_chw_config(void) {
       f16_dwconv2d_chw_config.dwconv2d_chw_5x5s2.output_width_tile = 8;
     }
   #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
       f16_dwconv2d_chw_config.dwconv2d_chw_3x3.ukernel = (xnn_dwconv2d_chw_ukernel_fn) xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8;
@@ -65,7 +65,7 @@ static void init_f16_dwconv2d_chw_config(void) {
 
 static void init_f32_dwconv2d_chw_config(void) {
   #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       f32_dwconv2d_chw_config.dwconv2d_chw_3x3.ukernel = (xnn_dwconv2d_chw_ukernel_fn) xnn_f32_dwconv2d_chw_ukernel_3x3p1__neon_2x4;
@@ -117,7 +117,7 @@ static void init_f32_dwconv2d_chw_config(void) {
     f32_dwconv2d_chw_config.dwconv2d_chw_5x5s2.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_dwconv2d_chw_config.dwconv2d_chw_5x5s2.output_width_tile = 4;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_x86_ssse3)) {
       f32_dwconv2d_chw_config.dwconv2d_chw_3x3.ukernel = (xnn_dwconv2d_chw_ukernel_fn) xnn_f32_dwconv2d_chw_ukernel_3x3p1__ssse3_2x4_acc2;
@@ -141,7 +141,7 @@ static void init_f32_dwconv2d_chw_config(void) {
     f32_dwconv2d_chw_config.dwconv2d_chw_5x5s2.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_dwconv2d_chw_config.dwconv2d_chw_5x5s2.output_width_tile = 4;
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->is_x86) {
       f32_dwconv2d_chw_config.dwconv2d_chw_3x3.ukernel = (xnn_dwconv2d_chw_ukernel_fn) xnn_f32_dwconv2d_chw_ukernel_3x3p1__wasmsimd_x86_loadsplat_2x4;
@@ -177,7 +177,7 @@ static void init_f32_dwconv2d_chw_config(void) {
       f32_dwconv2d_chw_config.dwconv2d_chw_5x5s2.output_width_tile = 4;
     }
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
     f32_dwconv2d_chw_config.dwconv2d_chw_3x3.ukernel = (xnn_dwconv2d_chw_ukernel_fn) xnn_f32_dwconv2d_chw_ukernel_3x3p1__rvv_7x1v;
     f32_dwconv2d_chw_config.dwconv2d_chw_3x3.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_dwconv2d_chw_config.dwconv2d_chw_3x3.output_width_tile = 1 * hardware_config->vlenb / sizeof(float);
@@ -212,8 +212,8 @@ static void init_f32_dwconv2d_chw_config(void) {
   #endif
 }
 
-const struct xnn_dwconv2d_chw_config* xnn_init_f16_dwconv2d_chw_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_dwconv2d_chw_config* xnn_get_f16_dwconv2d_chw_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_chw_compatible_config(hardware_config)) {
     return NULL;
   }
@@ -221,8 +221,8 @@ const struct xnn_dwconv2d_chw_config* xnn_init_f16_dwconv2d_chw_config() {
   return &f16_dwconv2d_chw_config;
 }
 
-const struct xnn_dwconv2d_chw_config* xnn_init_f32_dwconv2d_chw_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+const struct xnn_dwconv2d_chw_config* xnn_get_f32_dwconv2d_chw_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == NULL || !xnn_is_chw_compatible_config(hardware_config)) {
     return NULL;
   }

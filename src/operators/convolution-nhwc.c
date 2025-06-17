@@ -842,7 +842,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qd8_f16_qc8w(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
-  const struct xnn_gemm_config* gemm_config = xnn_init_qd8_f16_qc8w_igemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qd8_f16_qc8w_igemm_config();
   return create_convolution2d_nhwc_qx8_f16_qc8w(input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
                                                     kernel_height, kernel_width, subsampling_height, subsampling_width, dilation_height, dilation_width,
                                                     groups, group_input_channels, group_output_channels, input_channel_stride, output_channel_stride,
@@ -875,7 +875,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qdu8_f16_qc8w(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
-  const struct xnn_gemm_config* gemm_config = xnn_init_qdu8_f16_qc8w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qdu8_f16_qc8w_gemm_config();
   return create_convolution2d_nhwc_qx8_f16_qc8w(input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
                                                     kernel_height, kernel_width, subsampling_height, subsampling_width, dilation_height, dilation_width,
                                                     groups, group_input_channels, group_output_channels, input_channel_stride, output_channel_stride,
@@ -1002,7 +1002,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qd8_f32_qc8w(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
-  const struct xnn_gemm_config* gemm_config = xnn_init_qd8_f32_qc8w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qd8_f32_qc8w_gemm_config();
   return create_convolution2d_nhwc_qx8_f32_qc8w(input_padding_top,
                                                 input_padding_right,
                                                 input_padding_bottom,
@@ -1038,7 +1038,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qdu8_f32_qc8w(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
-  const struct xnn_gemm_config* gemm_config = xnn_init_qdu8_f32_qc8w_igemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qdu8_f32_qc8w_igemm_config();
   return create_convolution2d_nhwc_qx8_f32_qc8w(input_padding_top,
                                                 input_padding_right,
                                                 input_padding_bottom,
@@ -1122,7 +1122,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qu8(
     .kernel_zero_point = kernel_zero_point,
   };
 
-  const struct xnn_gemm_config* gemm_config = xnn_init_qu8_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qu8_gemm_config();
   assert(gemm_config != NULL);
 
   union xnn_qu8_conv_minmax_params gemm_params;
@@ -1131,7 +1131,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qu8(
       kernel_zero_point, requantization_scale, output_zero_point, output_min, output_max);
   }
 
-  const struct xnn_dwconv_config* dwconv_config = xnn_init_qu8_dwconv_config();
+  const struct xnn_dwconv_config* dwconv_config = xnn_get_qu8_dwconv_config();
   assert(dwconv_config != NULL);
 
   union xnn_qu8_conv_minmax_params dwconv_params;
@@ -1263,7 +1263,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8(
 
   const struct xnn_qs8_packing_params packing_params = { .input_zero_point = input_zero_point, };
 
-  const struct xnn_gemm_config* gemm_config = xnn_init_qs8_qc8w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qs8_qc8w_gemm_config();
   assert(gemm_config != NULL);
 
   union xnn_qs8_qc8w_conv_minmax_params gemm_params;
@@ -1272,7 +1272,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8(
       output_zero_point, output_min, output_max);
   }
 
-  const struct xnn_dwconv_config* dwconv_config = xnn_init_qs8_qc8w_dwconv_config();
+  const struct xnn_dwconv_config* dwconv_config = xnn_get_qs8_qc8w_dwconv_config();
   assert(dwconv_config != NULL);
 
   union xnn_qs8_qc8w_conv_minmax_params dwconv_params;
@@ -1421,7 +1421,7 @@ enum xnn_status create_convolution2d_nhwc_qx8_qc8w(
       output_zero_point, output_min, output_max);
   }
 
-  const struct xnn_dwconv_config* dwconv_config = xnn_init_qs8_qc8w_dwconv_config();
+  const struct xnn_dwconv_config* dwconv_config = xnn_get_qs8_qc8w_dwconv_config();
   assert(dwconv_config != NULL);
 
   union xnn_qs8_qc8w_conv_minmax_params dwconv_params;
@@ -1503,7 +1503,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8_qc8w(
     uint32_t flags,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_qs8_qc8w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_qs8_qc8w_gemm_config();
   return create_convolution2d_nhwc_qx8_qc8w(input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
                                             kernel_height, kernel_width, subsampling_height, subsampling_width, dilation_height,
                                             dilation_width, groups, group_input_channels, group_output_channels,
@@ -1561,7 +1561,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     return xnn_status_invalid_parameter;
   }
 
-  const struct xnn_gemm_config* gemm_config = xnn_init_f16_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_f16_gemm_config();
   if (gemm_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f16));
@@ -1573,7 +1573,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     gemm_config->init.f16(&gemm_params, fp16_output_min, fp16_output_max);
   }
 
-  const struct xnn_dwconv_config* dwconv_config = xnn_init_f16_dwconv_config();
+  const struct xnn_dwconv_config* dwconv_config = xnn_get_f16_dwconv_config();
   if (dwconv_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f16));
@@ -1587,7 +1587,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     dwconv_ukernel->init.f16(&dwconv_params, fp16_output_min, fp16_output_max);
   }
 
-  const struct xnn_vmulcaddc_config* vmulcaddc_config = xnn_init_f16_vmulcaddc_config();
+  const struct xnn_vmulcaddc_config* vmulcaddc_config = xnn_get_f16_vmulcaddc_config();
   if (vmulcaddc_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f16));
@@ -1706,7 +1706,7 @@ enum xnn_status create_convolution2d_nhwc_f32(
     gemm_config->init.f32(&gemm_params, output_min, output_max);
   }
 
-  const struct xnn_dwconv_config* dwconv_config = xnn_init_f32_dwconv_config();
+  const struct xnn_dwconv_config* dwconv_config = xnn_get_f32_dwconv_config();
   if (dwconv_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32));
@@ -1720,7 +1720,7 @@ enum xnn_status create_convolution2d_nhwc_f32(
     dwconv_ukernel->init.f32(&dwconv_params, output_min, output_max);
   }
 
-  const struct xnn_vmulcaddc_config* vmulcaddc_config = xnn_init_f32_vmulcaddc_config();
+  const struct xnn_vmulcaddc_config* vmulcaddc_config = xnn_get_f32_vmulcaddc_config();
   if (vmulcaddc_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32));
@@ -1795,14 +1795,14 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
     uint32_t flags,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_f32_igemm_config();
   if (gemm_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32));
     return xnn_status_unsupported_hardware;
   }
 
-  const struct xnn_gemm_config* gemm_nr2_config = xnn_init_f32_gemm_nr2_config(flags);
+  const struct xnn_gemm_config* gemm_nr2_config = xnn_get_f32_gemm_nr2_config(flags);
   if (gemm_nr2_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32));
@@ -2373,7 +2373,7 @@ static enum xnn_status reshape_dwconv(
 
   const size_t channel_tile = convolution_op->ukernel.dwconv.channel_tile;
   // Be defensive against bogus hardware_config cache size info, assume the L1 cache is at least 32KB.
-  const size_t cache_size = max(32768, xnn_init_hardware_config()->l1_data_cache_bytes / 2);
+  const size_t cache_size = max(32768, xnn_get_hardware_config()->l1_data_cache_bytes / 2);
   const size_t output_working_set_per_channel =
       (primary_tile << log2_input_element_size) + (primary_tile << log2_filter_element_size) + extra_weights_elements_size + (1 << log2_output_element_size);
   const size_t tile_size = divide_round_up(cache_size / output_working_set_per_channel, channel_tile) * channel_tile;

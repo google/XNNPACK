@@ -1095,7 +1095,7 @@ class FullyConnectedOperatorTester {
   void TestQP8F32QC4W() const {
     // Get the parameters of this GEMM, skip if not available.
     const struct xnn_gemm_config* gemm_config =
-        xnn_init_qp8_f32_qc4w_gemm_config();
+        xnn_get_qp8_f32_qc4w_gemm_config();
     if (gemm_config == nullptr) {
       GTEST_SKIP();
     }
@@ -1325,7 +1325,7 @@ class FullyConnectedOperatorTester {
   void TestQP8F32QC8W() const {
     // Get the parameters of this GEMM, skip if not available.
     const struct xnn_gemm_config* gemm_config =
-        xnn_init_qp8_f32_qc8w_gemm_config();
+        xnn_get_qp8_f32_qc8w_gemm_config();
     if (gemm_config == nullptr) {
       GTEST_SKIP();
     }
@@ -1538,7 +1538,7 @@ class FullyConnectedOperatorTester {
   void TestQP8F32QB4W() const {
     // Get the parameters of this GEMM, skip if not available.
     const struct xnn_gemm_config* gemm_config =
-        xnn_init_qp8_f32_qb4w_gemm_config();
+        xnn_get_qp8_f32_qb4w_gemm_config();
     if (gemm_config == nullptr) {
       GTEST_SKIP();
     }

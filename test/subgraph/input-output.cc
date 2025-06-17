@@ -35,7 +35,7 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_P(InputOutput, ConditionalReadWrite) {
   const bool rewrite_for_fp16 = GetParam();
   if (rewrite_for_fp16 &&
-      !xnn_is_f16_compatible_config(xnn_init_hardware_config())) {
+      !xnn_is_f16_compatible_config(xnn_get_hardware_config())) {
     GTEST_SKIP() << "No FP16 support detected.";
   }
 
@@ -120,7 +120,7 @@ TEST_P(InputOutput, ConditionalReadWrite) {
 TEST_P(InputOutput, SlidingWindow) {
   const bool rewrite_for_fp16 = GetParam();
   if (rewrite_for_fp16 &&
-      !xnn_is_f16_compatible_config(xnn_init_hardware_config())) {
+      !xnn_is_f16_compatible_config(xnn_get_hardware_config())) {
     GTEST_SKIP() << "No FP16 support detected.";
   }
 
@@ -188,7 +188,7 @@ TEST_P(InputOutput, SlidingWindow) {
 TEST_P(InputOutput, MultipleWrites) {
   const bool rewrite_for_fp16 = GetParam();
   if (rewrite_for_fp16 &&
-      !xnn_is_f16_compatible_config(xnn_init_hardware_config())) {
+      !xnn_is_f16_compatible_config(xnn_get_hardware_config())) {
     GTEST_SKIP() << "No FP16 support detected.";
   }
 

@@ -259,7 +259,7 @@ size_t GetMaxCacheSize() {
 }
 
 bool CheckArchFlags(benchmark::State& state, uint64_t arch_flags) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  const xnn_hardware_config* hardware_config = xnn_get_hardware_config();
   if (hardware_config == nullptr) {
     state.SkipWithError("no hardware config");
     return false;

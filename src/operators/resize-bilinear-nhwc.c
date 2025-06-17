@@ -29,13 +29,13 @@ static const struct xnn_ibilinear_config* get_ibilinear_nhwc_config(enum xnn_dat
 {
   switch (datatype) {
     case xnn_datatype_qint8:
-      return xnn_init_s8_ibilinear_config();
+      return xnn_get_s8_ibilinear_config();
     case xnn_datatype_quint8:
-      return xnn_init_u8_ibilinear_config();
+      return xnn_get_u8_ibilinear_config();
     case xnn_datatype_fp16:
-      return xnn_init_f16_ibilinear_config();
+      return xnn_get_f16_ibilinear_config();
     case xnn_datatype_fp32:
-      return xnn_init_f32_ibilinear_config();
+      return xnn_get_f32_ibilinear_config();
     default:
       return NULL;
   }

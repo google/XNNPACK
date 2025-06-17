@@ -638,7 +638,7 @@ class BatchMatMulOperatorTester {
 
   void TestQP8F32QC8W() const {
     const struct xnn_gemm_config* gemm_config =
-        xnn_init_qp8_f32_qc8w_gemm_config();
+        xnn_get_qp8_f32_qc8w_gemm_config();
     if (gemm_config == nullptr) {
       GTEST_SKIP();
     }

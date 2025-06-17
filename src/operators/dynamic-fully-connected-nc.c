@@ -202,7 +202,7 @@ enum xnn_status xnn_create_dynamic_fully_connected_nc_f16(
   uint32_t flags,
   xnn_operator_t* dynamic_fully_connected_op_out)
 {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f16_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_f16_gemm_config();
   if (gemm_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_dynamic_fully_connected_nc_f16));
@@ -221,7 +221,7 @@ enum xnn_status xnn_create_dynamic_fully_connected_nc_pf16(
   uint32_t flags,
   xnn_operator_t* dynamic_fully_connected_op_out)
 {
-  const struct xnn_gemm_config* gemm_config = xnn_init_pf16_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_pf16_gemm_config();
   if (gemm_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_dynamic_fully_connected_nc_pf16));
@@ -299,7 +299,7 @@ enum xnn_status create_dynamic_fully_connected_nc_f32(
 enum xnn_status xnn_create_dynamic_fully_connected_nc_f32(
     float output_min, float output_max, uint32_t flags,
     xnn_operator_t* dynamic_fully_connected_op_out) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config(flags);
+  const struct xnn_gemm_config* gemm_config = xnn_get_f32_gemm_config(flags);
   if (gemm_config == NULL) {
     xnn_log_error(
         "failed to create %s operator: unsupported hardware configuration",
@@ -309,7 +309,7 @@ enum xnn_status xnn_create_dynamic_fully_connected_nc_f32(
   }
 
   const struct xnn_gemm_config* gemm_nr2_config =
-      xnn_init_f32_gemm_nr2_config(flags);
+      xnn_get_f32_gemm_nr2_config(flags);
 
   return create_dynamic_fully_connected_nc_f32(
       output_min, output_max, flags, gemm_config, gemm_nr2_config,
@@ -320,7 +320,7 @@ enum xnn_status xnn_create_dynamic_fully_connected_nc_f32(
 enum xnn_status xnn_create_dynamic_fully_connected_nc_pf32(
     float output_min, float output_max, uint32_t flags,
     xnn_operator_t* dynamic_fully_connected_op_out) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_pf32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_get_pf32_gemm_config();
   if (gemm_config == NULL) {
     xnn_log_error(
         "failed to create %s operator: unsupported hardware configuration",
@@ -515,10 +515,10 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
       dynamic_fully_connected_op->flags & XNN_FLAG_INLINE_LHS_PACKING;
   switch (dynamic_fully_connected_op->type) {
     case xnn_operator_type_dynamic_fully_connected_nc_pf16:
-      packed_lh_config = xnn_init_x16_pack_lh_config();
+      packed_lh_config = xnn_get_x16_pack_lh_config();
       break;
     case xnn_operator_type_dynamic_fully_connected_nc_pf32:
-      packed_lh_config = xnn_init_x32_pack_lh_config();
+      packed_lh_config = xnn_get_x32_pack_lh_config();
       break;
     default:
       break;
