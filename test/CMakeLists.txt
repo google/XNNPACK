@@ -112,6 +112,7 @@ SET(MICROKERNEL_UNIT_TESTS
     f32-vscaleextexp
     indirection
     packing
+    qb4-packw
     qs8-packw
     qs8-qc4w-packw
     qu8-vlrelu
