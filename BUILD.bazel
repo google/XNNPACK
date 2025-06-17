@@ -1318,18 +1318,6 @@ config_setting(
     define_values = {"xnn_enable_hmp": "false"},
 )
 
-# Enable usage of optimized memory allocation
-config_setting(
-    name = "xnn_enable_memopt_explicit_true",
-    define_values = {"xnn_enable_memopt": "true"},
-)
-
-# Disable usage of optimized memory allocation
-config_setting(
-    name = "xnn_enable_memopt_explicit_false",
-    define_values = {"xnn_enable_memopt": "false"},
-)
-
 # Enables usage of slinky locality optimizations
 config_setting(
     name = "slinky_enabled",
@@ -1873,22 +1861,6 @@ alias(
         ":xnn_enable_sparse_explicit_true": ":xnn_enable_sparse_explicit_true",
         ":xnn_enable_sparse_explicit_false": ":xnn_enable_sparse_explicit_true",
         "//conditions:default": ":sparse_enabled_by_default",
-    }),
-)
-
-selects.config_setting_group(
-    name = "memopt_enabled_by_default",
-    match_any = [
-        "//conditions:default",
-    ],
-)
-
-alias(
-    name = "memopt_enabled",
-    actual = select({
-        ":xnn_enable_memopt_explicit_true": ":xnn_enable_memopt_explicit_true",
-        ":xnn_enable_memopt_explicit_false": ":xnn_enable_memopt_explicit_true",
-        "//conditions:default": ":memopt_enabled_by_default",
     }),
 )
 

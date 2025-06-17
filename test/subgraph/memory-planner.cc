@@ -90,21 +90,12 @@ TEST(MemoryPlanner, MemoryBlocksCoalescing) {
   }
   xnn_plan_value_allocation_tracker(&tracker);
 
-#if XNN_ENABLE_MEMOPT
   EXPECT_EQ(192, tracker.mem_arena_size);
   EXPECT_EQ(64, tracker.usage[0].alloc_offset);
   EXPECT_EQ(152, tracker.usage[1].alloc_offset);
   EXPECT_EQ(0, tracker.usage[2].alloc_offset);
   EXPECT_EQ(0, tracker.usage[3].alloc_offset);
   EXPECT_EQ(120, tracker.usage[4].alloc_offset);
-#else
-  EXPECT_EQ(332, tracker.mem_arena_size);
-  EXPECT_EQ(0, tracker.usage[0].alloc_offset);
-  EXPECT_EQ(57, tracker.usage[1].alloc_offset);
-  EXPECT_EQ(96, tracker.usage[2].alloc_offset);
-  EXPECT_EQ(160, tracker.usage[3].alloc_offset);
-  EXPECT_EQ(312, tracker.usage[4].alloc_offset);
-#endif
 
   xnn_release_value_allocation_tracker(&tracker);
 }
@@ -154,7 +145,6 @@ TEST(MemoryPlanner, GeneralPlanning) {
   }
   xnn_plan_value_allocation_tracker(&tracker);
 
-#if XNN_ENABLE_MEMOPT
   EXPECT_EQ(124, tracker.mem_arena_size);
   EXPECT_EQ(0, tracker.usage[0].alloc_offset);
   EXPECT_EQ(32, tracker.usage[1].alloc_offset);
@@ -164,17 +154,6 @@ TEST(MemoryPlanner, GeneralPlanning) {
   EXPECT_EQ(0, tracker.usage[5].alloc_offset);
   EXPECT_EQ(104, tracker.usage[6].alloc_offset);
   EXPECT_EQ(64, tracker.usage[7].alloc_offset);
-#else
-  EXPECT_EQ(234, tracker.mem_arena_size);
-  EXPECT_EQ(0, tracker.usage[0].alloc_offset);
-  EXPECT_EQ(32, tracker.usage[1].alloc_offset);
-  EXPECT_EQ(60, tracker.usage[2].alloc_offset);
-  EXPECT_EQ(96, tracker.usage[3].alloc_offset);
-  EXPECT_EQ(112, tracker.usage[4].alloc_offset);
-  EXPECT_EQ(120, tracker.usage[5].alloc_offset);
-  EXPECT_EQ(184, tracker.usage[6].alloc_offset);
-  EXPECT_EQ(194, tracker.usage[7].alloc_offset);
-#endif
 
   xnn_release_value_allocation_tracker(&tracker);
 }

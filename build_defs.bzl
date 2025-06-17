@@ -17,10 +17,6 @@ def xnnpack_configurable_defines():
         ["XNN_ENABLE_CPUINFO=1"],
         ["XNN_ENABLE_CPUINFO=0"],
     ) + xnnpack_select_if(
-        "//:memopt_enabled",
-        ["XNN_ENABLE_MEMOPT=1"],
-        ["XNN_ENABLE_MEMOPT=1"],
-    ) + xnnpack_select_if(
         "//:sparse_enabled",
         ["XNN_ENABLE_SPARSE=1"],
         ["XNN_ENABLE_SPARSE=0"],

@@ -149,9 +149,7 @@ void xnn_init_value_allocation_tracker(
 {
   tracker->mem_arena_size = 0;
   tracker->usage = xnn_allocate_zero_memory(sizeof(struct xnn_usage_record) * (runtime->num_values + runtime->num_ops));
-#if XNN_ENABLE_MEMOPT
   populate_value_lifecycle(runtime, tracker->usage);
-#endif
   tracker->min_value_id = XNN_INVALID_VALUE_ID;
   tracker->max_value_id = XNN_INVALID_VALUE_ID;
 }
@@ -203,7 +201,6 @@ void xnn_add_operator_workspace_allocation_tracker(
 }
 
 void xnn_plan_value_allocation_tracker(struct xnn_value_allocation_tracker* tracker) {
-#if XNN_ENABLE_MEMOPT
   if (tracker->min_value_id == XNN_INVALID_VALUE_ID) {
     assert(tracker->max_value_id == XNN_INVALID_VALUE_ID);
     return;
@@ -256,13 +253,4 @@ void xnn_plan_value_allocation_tracker(struct xnn_value_allocation_tracker* trac
   tracker->mem_arena_size = mem_arena_size;
   xnn_release_memory(sorted_usage);
   xnn_release_memory(current_live_mem_blocks);
-#else
-  tracker->mem_arena_size = 0;
-  for (uint32_t i = tracker->min_value_id; i <= tracker->max_value_id; ++i) {
-    if (tracker->usage[i].tensor_size > 0) {
-      tracker->usage[i].alloc_offset = tracker->mem_arena_size;
-      tracker->mem_arena_size += tracker->usage[i].tensor_size;
-    }
-  }
-#endif
 }
