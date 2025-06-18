@@ -61,7 +61,7 @@ TARGET_LINK_LIBRARIES(xnnpack-test INTERFACE
 ADD_LIBRARY(next-prime STATIC next_prime.cc)
 
 ADD_LIBRARY(gemm-microkernel-tester STATIC gemm-microkernel-tester.cc)
-TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE xnnpack-test packing)
+TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE xnnpack-test xnnpack-packing)
 TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE pthreadpool)
 TARGET_LINK_LIBRARIES(gemm-microkernel-tester PUBLIC next-prime)
 IF(XNNPACK_ENABLE_KLEIDIAI)
@@ -136,14 +136,14 @@ SET(MICROKERNEL_UNIT_TESTS
 FOREACH(TEST ${MICROKERNEL_UNIT_TESTS})
   ADD_EXECUTABLE(${TEST}-test ${TEST}.cc)
   TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-      hardware-config
-      indirection
-      logging
-      microkernels-all
-      microkernel-utils
-      microparams-init
+      xnnpack-hardware-config
+      xnnpack-indirection
+      xnnpack-logging
+      xnnpack-microkernels-all
+      xnnpack-microkernel-utils
+      xnnpack-microparams-init
       next-prime
-      packing
+      xnnpack-packing
       pthreadpool
       xnnpack-test)
   ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
@@ -171,10 +171,10 @@ FOREACH(TEST ${MICROKERNEL_DWCONV_UNIT_TESTS})
   ADD_EXECUTABLE(${TEST}-test ${TEST}.cc)
   TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
       dwconv-microkernel-tester
-      hardware-config
-      logging
-      microkernels-all
-      microparams-init
+      xnnpack-hardware-config
+      xnnpack-logging
+      xnnpack-microkernels-all
+      xnnpack-microparams-init
       pthreadpool
       xnnpack-test)
   ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
@@ -228,10 +228,10 @@ FOREACH(TEST ${MICROKERNEL_GEMM_UNIT_TESTS})
       ADD_EXECUTABLE(${TEST}-test ${TEST_SOURCES})
       TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
           gemm-microkernel-tester
-          hardware-config
-          logging
-          microkernels-all
-          microparams-init
+          xnnpack-hardware-config
+          xnnpack-logging
+          xnnpack-microkernels-all
+          xnnpack-microparams-init
           pthreadpool
           xnnpack-test)
       ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
@@ -251,10 +251,10 @@ FOREACH(TEST ${MICROKERNEL_PACKQ_UNIT_TESTS})
   ADD_EXECUTABLE(${TEST}-test ${TEST}.cc)
   TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
       packq-microkernel-tester
-      hardware-config
-      logging
-      microkernels-all
-      microparams-init
+      xnnpack-hardware-config
+      xnnpack-logging
+      xnnpack-microkernels-all
+      xnnpack-microparams-init
       pthreadpool
       xnnpack-test)
   ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
@@ -323,10 +323,10 @@ FOREACH(TEST ${MICROKERNEL_VBINARY_UNIT_TESTS})
   ADD_EXECUTABLE(${TEST}-test ${TEST}.cc)
   TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
       vbinary-microkernel-tester
-      hardware-config
-      logging
-      microkernels-all
-      microparams-init
+      xnnpack-hardware-config
+      xnnpack-logging
+      xnnpack-microkernels-all
+      xnnpack-microparams-init
       pthreadpool
       xnnpack-test)
   ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
@@ -349,11 +349,11 @@ LIST(REMOVE_ITEM MICROKERNEL_VCVT_TESTS ${SHARDED_TESTS})
 FOREACH(TEST ${MICROKERNEL_VCVT_TESTS})
   ADD_EXECUTABLE(${TEST}-test ${TEST}.cc)
   TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-      datatype
-      hardware-config
-      logging
-      microkernels-all
-      microparams-init
+      xnnpack-datatype
+      xnnpack-hardware-config
+      xnnpack-logging
+      xnnpack-microkernels-all
+      xnnpack-microparams-init
       pthreadpool
       xnnpack-test)
   ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
@@ -415,10 +415,10 @@ LIST(REMOVE_ITEM MICROKERNEL_VUNARY_TESTS ${SHARDED_TESTS})
 FOREACH(TEST ${MICROKERNEL_VUNARY_TESTS})
   ADD_EXECUTABLE(${TEST}-test ${TEST}.cc)
   TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-      hardware-config
-      logging
-      microkernels-all
-      microparams-init
+      xnnpack-hardware-config
+      xnnpack-logging
+      xnnpack-microkernels-all
+      xnnpack-microparams-init
       pthreadpool
       next-prime
       xnnpack-test)
@@ -443,7 +443,7 @@ ENDIF()
 ADD_EXECUTABLE(buffer-test buffer.cc)
 TARGET_LINK_LIBRARIES(buffer-test PRIVATE
   xnnpack-test
-  datatype)
+  xnnpack-datatype)
 ADD_TEST(NAME buffer-test COMMAND buffer-test)
 SET_TARGET_PROPERTIES(buffer-test PROPERTIES CXX_EXTENSIONS YES)
 
@@ -453,8 +453,8 @@ IF(XNNPACK_BUILD_LIBRARY)
 
   ADD_EXECUTABLE(mutex-test mutex.cc)
   TARGET_LINK_LIBRARIES(mutex-test PRIVATE GTest::gtest GTest::gtest_main pthreadpool)
-  TARGET_LINK_LIBRARIES(mutex-test PRIVATE logging mutex)
+  TARGET_LINK_LIBRARIES(mutex-test PRIVATE xnnpack-logging xnnpack-mutex)
 
   ADD_EXECUTABLE(microkernel-utils-test microkernel-utils.cc)
-  TARGET_LINK_LIBRARIES(microkernel-utils-test PRIVATE microkernel-utils hardware-config logging GTest::gtest GTest::gtest_main pthreadpool)
+  TARGET_LINK_LIBRARIES(microkernel-utils-test PRIVATE xnnpack-microkernel-utils xnnpack-hardware-config xnnpack-logging GTest::gtest GTest::gtest_main pthreadpool)
 ENDIF()
