@@ -6,7 +6,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef THIRD_PARTY_XNNPACK_TEST_GEMM_MICROKERNEL_TESTER_H_
+#define THIRD_PARTY_XNNPACK_TEST_GEMM_MICROKERNEL_TESTER_H_
 
 #include <algorithm>
 #include <cstddef>
@@ -230,7 +231,7 @@ class GemmMicrokernelTester {
 
   void Test(xnn_qs8_qc4w_gemm_minmax_ukernel_fn gemm,
             xnn_init_qs8_qc8w_conv_minmax_params_fn init_params,
-            xnn_pack_qs8_qc4w_gemm_fn pack, xnn_qs8_requantize_fn requantize) ;
+            xnn_pack_qs8_qc4w_gemm_fn pack, xnn_qs8_requantize_fn requantize);
 
   void Test(xnn_qs8_qc8w_gemm_minmax_ukernel_fn gemm,
             xnn_init_qs8_qc8w_conv_minmax_params_fn init_params,
@@ -357,6 +358,13 @@ class GemmMicrokernelTester {
                  xnn_init_qs8_qc8w_conv_minmax_params_fn init_minmax_params,
                  xnn_pack_weights_and_biases_fn pack,
                  xnn_packed_stride_weights_and_biases_fn packed_stride) const;
+
+  void Test_PQS8(xnn_packed_lhs_igemm_ukernel_fn packed_igemm,
+                 xnn_init_qs8_qc8w_conv_minmax_params_fn init_minmax_params,
+                 xnn_pack_lh_igemm_ukernel_fn pack_lh_for_igemm_fn,
+                 xnn_pack_lh_igemm_size_fn size_for_igemm_fn,
+                 xnn_pack_qs8_igemm_fn pack_rhs,
+                 xnn_qs8_requantize_fn requantize) const;
 
  private:
   size_t mr_{1};
@@ -516,3 +524,5 @@ inline std::ostream& operator<<(std::ostream& outs,
 }
 
 using GemmTest = testing::TestWithParam<GemmTestParams>;
+
+#endif  // THIRD_PARTY_XNNPACK_TEST_GEMM_MICROKERNEL_TESTER_H_
