@@ -596,7 +596,7 @@ enum xnn_status xnn_create_runtime_v4(
   }
   if (runtime->profiling) {
     for (size_t i = 0; i < subgraph->num_nodes; i++) {
-      runtime->opdata[i].end_ts = xnn_allocate_zero_memory(sizeof(size_t) * XNN_MAX_OPERATOR_OBJECTS);
+      runtime->opdata[i].end_ts = xnn_allocate_zero_memory(sizeof(xnn_timestamp) * XNN_MAX_OPERATOR_OBJECTS);
     }
   }
 
