@@ -158,6 +158,7 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = OPERATOR_TEST_DEPS + [
         ":convolution_test_helpers",
+        "//:operator_h",
     ],
 )
 
@@ -171,6 +172,7 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = OPERATOR_TEST_DEPS + [
         ":convolution_test_helpers",
+        "//:operator_h",
     ],
 )
 
@@ -203,6 +205,7 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = OPERATOR_TEST_DEPS + [
         ":convolution_test_helpers",
+        "//:operator_h",
     ],
 )
 

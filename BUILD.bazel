@@ -74,6 +74,7 @@ MICROKERNEL_DEPS = [
     ":tables",
     ":unaligned",
     "//src/configs:hardware_config",
+    ":logging",
 ]
 
 SIMD_HEADERS = [
@@ -312,6 +313,7 @@ xnnpack_cc_library(
     name = "internal",
     hdrs = ["src/xnnpack/internal.h"],
     deps = [
+        ":math",
         ":subgraph_h",
         ":xnnpack_h",
         "//src/configs:config_hdrs",
@@ -569,6 +571,7 @@ xnnpack_cxx_library(
     srcs = ["src/reference/packing.cc"],
     hdrs = ["src/xnnpack/pack.h"],
     deps = [
+        ":allocator",
         ":common",
         ":logging",
         ":math",
@@ -818,7 +821,6 @@ xnnpack_cc_library(
     ],
     deps = [
         ":allocation_type",
-        ":cache",
         ":common",
         ":math",
         ":node_type",

@@ -235,6 +235,10 @@ typedef void (*xnn_igemm_ukernel_fn)(size_t mr, size_t nr, size_t kc, size_t ks,
                                      size_t a_offset, const void* zero,
                                      const void* params);
 
+typedef void (*xnn_packed_lhs_igemm_ukernel_fn)(
+    size_t mr, size_t nc, size_t kc, size_t ks, const void* packed_lhs,
+    const void* w, int8_t* c, size_t cm_stride, const void* params);
+
 typedef void (*xnn_f32_igemm_ukernel_fn)(
     size_t mr, size_t nr, size_t kc, size_t ks, const float** a, const float* w,
     float* c, size_t cm_stride, size_t cn_stride, size_t a_offset,
@@ -705,13 +709,26 @@ typedef void (*xnn_pack_lh_ukernel_fn)(size_t m, size_t k, size_t mr, size_t kr,
                                        const void* lhs, size_t lhs_stride,
                                        void* lhs_packed);
 
+typedef void (*xnn_pack_lh_igemm_ukernel_fn)(size_t m, size_t kc, size_t ks,
+                                             size_t mr_packed, size_t kr,
+                                             size_t sr, const void** a,
+                                             size_t a_offset, const void* zero,
+                                             void* lhs_packed);
+
 // PACKLH Size: Size of packed buffer required.
 typedef size_t (*xnn_pack_lh_size_fn)(size_t m, size_t k, size_t mr, size_t kr,
                                       size_t sr);
 
+typedef size_t (*xnn_pack_lh_igemm_size_fn)(size_t m, size_t kc, size_t ks,
+                                            size_t mr_packed, size_t kr,
+                                            size_t sr);
+
 // PACKLH Offset: Offset into the packed buffer.
 typedef size_t (*xnn_pack_lh_offset_fn)(size_t m, size_t k, size_t mr,
                                         size_t kr, size_t sr);
+
+typedef size_t (*xnn_pack_lh_igemm_offset_fn)(size_t m, size_t kc, size_t ks,
+                                              size_t mr, size_t kr, size_t sr);
 
 // FILL: FILL array with value
 
@@ -1274,7 +1291,10 @@ struct xnn_hmp_dqigemm_ukernel {
 };
 
 struct xnn_hmp_igemm_ukernel {
-  xnn_igemm_ukernel_fn function[XNN_MAX_UARCH_TYPES];
+  union {
+    xnn_igemm_ukernel_fn function[XNN_MAX_UARCH_TYPES];
+    xnn_packed_lhs_igemm_ukernel_fn packed_lhs_function[XNN_MAX_UARCH_TYPES];
+  };
 };
 
 struct xnn_hmp_qp8gemm_ukernel {
