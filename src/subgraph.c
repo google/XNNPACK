@@ -1316,31 +1316,38 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
       continue;
     }
 
-    if (node->type == xnn_node_type_static_constant_pad) {
-      node->params.static_pad.padding_value = fp16_ieee_from_fp32_value(
-          uint32_as_float(node->params.static_pad.padding_value));
-    } else if (node->type == xnn_node_type_fully_connected) {
-      // Patch up any LHS packing of fully-connected nodes, if needed.
-      if (node->flags & XNN_FLAG_INLINE_LHS_PACKING) {
-        switch (node->params.inlined_lhs_packing.packed_input_datatype) {
-          case xnn_datatype_pfp32:
-            // Switch from packed `fp32` to packed `fp16`.
-            node->params.inlined_lhs_packing.packed_input_datatype =
-                xnn_datatype_pfp16;
-            break;
-          case xnn_datatype_qpint8:
-            // Convert from `qpint8` back to `qdint8` since we don't have a
-            // `qpint8` packing function for `f16` inputs.
-            node->params.inlined_lhs_packing.packed_input_datatype =
-                xnn_datatype_qdint8;
-            break;
-          default:
-            break;
+    // Fix up anything node-type specific.
+    switch (node->type) {
+      case xnn_node_type_static_constant_pad:
+        node->params.static_pad.padding_value = fp16_ieee_from_fp32_value(
+            uint32_as_float(node->params.static_pad.padding_value));
+        break;
+      case xnn_node_type_batch_matrix_multiply:
+      case xnn_node_type_fully_connected: {
+        // Patch up any LHS packing of fully-connected nodes, if needed.
+        if (node->flags & XNN_FLAG_INLINE_LHS_PACKING) {
+          switch (node->params.inlined_lhs_packing.packed_input_datatype) {
+            case xnn_datatype_pfp32:
+              // Switch from packed `fp32` to packed `fp16`.
+              node->params.inlined_lhs_packing.packed_input_datatype =
+                  xnn_datatype_pfp16;
+              break;
+            case xnn_datatype_qpint8:
+              // Convert from `qpint8` back to `qdint8` since we don't have a
+              // `qpint8` packing function for `f16` inputs.
+              node->params.inlined_lhs_packing.packed_input_datatype =
+                  xnn_datatype_qdint8;
+              break;
+            default:
+              break;
+          }
+        } else if (subgraph->values[node->inputs[0]].datatype ==
+                   xnn_datatype_qpint8) {
+          subgraph->values[node->inputs[0]].datatype = xnn_datatype_qdint8;
         }
-      } else if (subgraph->values[node->inputs[0]].datatype ==
-                 xnn_datatype_qpint8) {
-        subgraph->values[node->inputs[0]].datatype = xnn_datatype_qdint8;
-      }
+      } break;
+      default:
+        break;
     }
 
     for (uint32_t i = 0; i < node->num_inputs; i++) {
