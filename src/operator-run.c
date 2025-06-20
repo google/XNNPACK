@@ -241,11 +241,11 @@ void xnn_compute_batched_packw_gemm_gio(
   if (context->pack_weights_and_biases) {
     context->pack_weights_and_biases(
         /*flags=*/XNN_FLAG_TRANSPOSE_WEIGHTS, context->gemm_config, context->kc,
-        n_block_size,
-        /*groups=*/1, /*block_size=*/0, /*k_stride=*/context->k_stride_elements,
-        /*accumulator_init=*/bias, kernel,
-        /*init_extra_data0_fn=*/context->init_scale_params,
-        /*extra_data0=*/context->scale_params, /*extra_data0_element_size=*/0,
+        n_block_size, /*groups=*/1, /*block_size=*/0,
+        /*k_stride=*/context->k_stride_elements, /*accumulator_init=*/bias,
+        kernel, /*init_extra_data0_fn=*/context->init_scale_params,
+        /*extra_data0=*/context->scale_params,
+        /*extra_data0_element_size=*/context->scale_params_size,
         /*init_extra_data1_fn=*/NULL, /*extra_data1=*/NULL,
         /*extra_data1_element_size=*/0, packed_weights,
         /*params=*/context->params);
@@ -295,7 +295,8 @@ void xnn_compute_batched_packw_gemm_goi(
         /*groups=*/1, /*block_size=*/0, /*k_stride=*/context->kc,
         /*accumulator_init=*/bias, kernel,
         /*init_extra_data0_fn=*/context->init_scale_params,
-        /*extra_data0=*/context->scale_params, /*extra_data0_element_size=*/0,
+        /*extra_data0=*/context->scale_params,
+        /*extra_data0_element_size=*/context->scale_params_size,
         /*init_extra_data1_fn=*/NULL, /*extra_data1=*/NULL,
         /*extra_data1_element_size=*/0, packed_weights,
         /*params=*/context->params);
