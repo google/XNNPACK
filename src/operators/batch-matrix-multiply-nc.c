@@ -27,7 +27,6 @@
 #include "src/xnnpack/operator-utils.h"
 #include "src/xnnpack/operator.h"
 #include "src/xnnpack/pack.h"
-#include "src/xnnpack/packq.h"
 #include "src/xnnpack/params.h"
 #include <pthreadpool.h>
 
@@ -74,7 +73,8 @@ enum xnn_status create_batch_matrix_multiply_nc(
   // `reshape_batch_matrix_multiply_nc`.
   batch_matrix_multiply_op->num_compute_invocations = 0;
 
-  batch_matrix_multiply_op->ukernel.gemm_ukernels = xnn_allocate_zero_simd_memory(sizeof(struct gemm_types));
+  batch_matrix_multiply_op->ukernel.gemm_ukernels =
+      xnn_allocate_zero_simd_memory(sizeof(struct gemm_types));
   if (batch_matrix_multiply_op->ukernel.gemm_ukernels == NULL) {
     xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
                   sizeof(struct gemm_types),
@@ -82,14 +82,14 @@ enum xnn_status create_batch_matrix_multiply_nc(
     goto error;
   }
 
-  batch_matrix_multiply_op->dynamic_context.gemm = xnn_allocate_zero_simd_memory(sizeof(struct gemm_op_context));
+  batch_matrix_multiply_op->dynamic_context.gemm =
+      xnn_allocate_zero_simd_memory(sizeof(struct gemm_op_context));
   if (batch_matrix_multiply_op->dynamic_context.gemm == NULL) {
-    xnn_log_error(
-      "failed to allocate %zu bytes for %s operator descriptor",
-      sizeof(struct gemm_op_context), xnn_operator_type_to_string(operator_type));
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(struct gemm_op_context),
+                  xnn_operator_type_to_string(operator_type));
     goto error;
   }
-
 
   memcpy(&batch_matrix_multiply_op->params, params, params_size);
   batch_matrix_multiply_op->type = operator_type;
@@ -99,13 +99,14 @@ enum xnn_status create_batch_matrix_multiply_nc(
   const size_t mr = gemm_config->mr;
   const size_t mr_packed = gemm_config->mr_packed ? gemm_config->mr_packed : mr;
   batch_matrix_multiply_op->ukernel.type = xnn_microkernel_type_gemm;
-  batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm = (struct xnn_ukernel_gemm){
-      .mr = mr,
-      .mr_packed = mr_packed,
-      .nr = gemm_config->nr,
-      .kr = UINT32_C(1) << gemm_config->log2_kr,
-      .sr = UINT32_C(1) << gemm_config->log2_sr,
-  };
+  batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm =
+      (struct xnn_ukernel_gemm){
+          .mr = mr,
+          .mr_packed = mr_packed,
+          .nr = gemm_config->nr,
+          .kr = UINT32_C(1) << gemm_config->log2_kr,
+          .sr = UINT32_C(1) << gemm_config->log2_sr,
+      };
 
   assert(mr <= XNN_MAX_MR);
   for (size_t i = 0; i < mr; i++) {
@@ -312,7 +313,8 @@ enum xnn_status create_batch_matrix_multiply_nc_fx_const_weights(
 
   // If the packed data has not been cached, pack and cache it.
   if (cache_offset == XNN_CACHE_NOT_FOUND) {
-    const uint32_t nr = batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.nr;
+    const uint32_t nr =
+        batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.nr;
     const size_t n_stride = round_up(n, nr);
     const size_t packed_size = batch_size_b * n_stride * weights_stride;
     const size_t aligned_size =
@@ -330,8 +332,7 @@ enum xnn_status create_batch_matrix_multiply_nc_fx_const_weights(
     }
     xnn_log_debug(
         "allocated %zu bytes for packed weights in %s operator (ptr=%p)",
-        aligned_size,
-        xnn_operator_type_to_string_v2(batch_matrix_multiply_op),
+        aligned_size, xnn_operator_type_to_string_v2(batch_matrix_multiply_op),
         packed_data);
 
     // Pack the weights.
@@ -510,7 +511,8 @@ enum xnn_status create_batch_matrix_multiply_nc_qx8_f32_qc8w(
 
   // If the packed data has not been cached, pack and cache it.
   if (cache_offset == XNN_CACHE_NOT_FOUND) {
-    const uint32_t nr = batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.nr;
+    const uint32_t nr =
+        batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.nr;
     const size_t n_stride = round_up(n, nr);
     const size_t packed_size = batch_size_b * n_stride * weights_stride;
     const size_t aligned_size =
@@ -527,8 +529,7 @@ enum xnn_status create_batch_matrix_multiply_nc_qx8_f32_qc8w(
     }
     xnn_log_debug(
         "allocated %zu bytes for packed weights in %s operator (ptr=%p)",
-        aligned_size,
-        xnn_operator_type_to_string_v2(batch_matrix_multiply_op),
+        aligned_size, xnn_operator_type_to_string_v2(batch_matrix_multiply_op),
         packed_data);
     if (extra_bytes > 0) {
       // TODO(b/402602597): We shouldn't need this initialization.
@@ -636,12 +637,11 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
     xnn_operator_t batch_matrix_multiply_op,
     enum xnn_operator_type expected_operator_type, size_t num_batch_dims,
     const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
-    size_t n, size_t* workspace_size,
-    uint32_t log2_input_a_element_size, uint32_t log2_input_b_element_size,
-    uint32_t bias_element_size, uint32_t log2_output_element_size,
-    const void* params, size_t params_size, const void* packing_params,
-    xnn_init_scale_params_fn init_scale_params, const float* scale_params,
-    size_t num_threads) {
+    size_t n, size_t* workspace_size, uint32_t log2_input_a_element_size,
+    uint32_t log2_input_b_element_size, uint32_t bias_element_size,
+    uint32_t log2_output_element_size, const void* params, size_t params_size,
+    const void* packing_params, xnn_init_scale_params_fn init_scale_params,
+    const float* scale_params, size_t num_threads) {
   if (batch_matrix_multiply_op->type != expected_operator_type) {
     xnn_log_error(
         "failed to setup operator: operator type mismatch (expected %s, got "
@@ -730,13 +730,15 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
   struct xnn_hmp_gemm_ukernel* gemm_cases =
       batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.gemm_cases;
 
-  if (m == 1 && batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.gemm_cases[0]
-                        .function[XNN_UARCH_DEFAULT] != NULL) {
+  if (m == 1 &&
+      batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.gemm_cases[0]
+              .function[XNN_UARCH_DEFAULT] != NULL) {
     mr = 1;
   }
 
   const uint32_t mr_packed =
-      m > 1 ? batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.mr_packed : 1;
+      m > 1 ? batch_matrix_multiply_op->ukernel.gemm_ukernels->gemm.mr_packed
+            : 1;
 
   assert(mr != 0 && mr <= XNN_MAX_MR);
   struct xnn_hmp_gemm_ukernel gemm_ukernel = gemm_cases[mr - 1];
@@ -1087,8 +1089,7 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_f16(
     xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
     const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
-    size_t n, size_t* workspace_size,
-    pthreadpool_t threadpool) {
+    size_t n, size_t* workspace_size, pthreadpool_t threadpool) {
   return reshape_batch_matrix_multiply_nc(
       batch_matrix_multiply_op, xnn_operator_type_batch_matrix_multiply_nc_f16,
       num_batch_dims, batch_dims_a, batch_dims_b, m, k, n, workspace_size,
@@ -1105,8 +1106,7 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_f16(
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_pf16(
     xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
     const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
-    size_t n, size_t* workspace_size,
-    pthreadpool_t threadpool) {
+    size_t n, size_t* workspace_size, pthreadpool_t threadpool) {
   return reshape_batch_matrix_multiply_nc(
       batch_matrix_multiply_op, xnn_operator_type_batch_matrix_multiply_nc_pf16,
       num_batch_dims, batch_dims_a, batch_dims_b, m, k, n, workspace_size,
@@ -1123,11 +1123,11 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_pf16(
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_bf16_f32(
     xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
     const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
-    size_t n, size_t* workspace_size,
-    pthreadpool_t threadpool) {
+    size_t n, size_t* workspace_size, pthreadpool_t threadpool) {
   return reshape_batch_matrix_multiply_nc(
-      batch_matrix_multiply_op, xnn_operator_type_batch_matrix_multiply_nc_bf16_f32,
-      num_batch_dims, batch_dims_a, batch_dims_b, m, k, n, workspace_size,
+      batch_matrix_multiply_op,
+      xnn_operator_type_batch_matrix_multiply_nc_bf16_f32, num_batch_dims,
+      batch_dims_a, batch_dims_b, m, k, n, workspace_size,
       /*log2_input_a_element_size=*/XNN_LOG2_SIZEOF_HALF,
       /*log2_input_b_element_size=*/XNN_LOG2_SIZEOF_HALF,
       /*bias_element_size=*/sizeof(float),
@@ -1141,8 +1141,7 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_bf16_f32(
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_f32(
     xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
     const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
-    size_t n, size_t* workspace_size,
-    pthreadpool_t threadpool) {
+    size_t n, size_t* workspace_size, pthreadpool_t threadpool) {
   return reshape_batch_matrix_multiply_nc(
       batch_matrix_multiply_op, xnn_operator_type_batch_matrix_multiply_nc_f32,
       num_batch_dims, batch_dims_a, batch_dims_b, m, k, n, workspace_size,
@@ -1159,8 +1158,7 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_f32(
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_pf32(
     xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
     const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
-    size_t n, size_t* workspace_size,
-    pthreadpool_t threadpool) {
+    size_t n, size_t* workspace_size, pthreadpool_t threadpool) {
   return reshape_batch_matrix_multiply_nc(
       batch_matrix_multiply_op, xnn_operator_type_batch_matrix_multiply_nc_pf32,
       num_batch_dims, batch_dims_a, batch_dims_b, m, k, n, workspace_size,

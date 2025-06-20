@@ -248,7 +248,7 @@ struct xnn_runtime_value {
 
 XNN_INLINE static bool xnn_value_is_external(uint32_t flags) {
   return (flags & (XNN_VALUE_FLAG_EXTERNAL_INPUT |
-                          XNN_VALUE_FLAG_EXTERNAL_OUTPUT)) != 0;
+                   XNN_VALUE_FLAG_EXTERNAL_OUTPUT)) != 0;
 }
 
 XNN_INLINE static bool xnn_value_is_external_output(uint32_t flags) {
@@ -268,7 +268,8 @@ XNN_INLINE static bool xnn_value_is_valid(enum xnn_value_type value_type) {
   return value_type != xnn_value_type_invalid;
 }
 
-XNN_INLINE static bool xnn_value_is_static(enum xnn_allocation_type allocation_type) {
+XNN_INLINE static bool xnn_value_is_static(
+    enum xnn_allocation_type allocation_type) {
   return allocation_type == xnn_allocation_type_static;
 }
 
@@ -285,8 +286,9 @@ typedef enum xnn_status (*xnn_reshape_operator_fn)(
     size_t num_values, pthreadpool_t threadpool);
 
 typedef enum xnn_status (*xnn_setup_operator_fn)(
-    const struct xnn_operator_data* opdata, const struct xnn_runtime_value* values,
-    size_t num_values, pthreadpool_t threadpool);
+    const struct xnn_operator_data* opdata,
+    const struct xnn_runtime_value* values, size_t num_values,
+    pthreadpool_t threadpool);
 
 struct xnn_node {
   enum xnn_node_type type;
@@ -477,7 +479,7 @@ struct xnn_operator_data {
   uint32_t inputs[XNN_MAX_INPUTS];
   uint32_t num_outputs;
   uint32_t outputs[XNN_MAX_OUTPUTS];
-  xnn_timestamp *end_ts;
+  xnn_timestamp* end_ts;
   void* workspace;
   size_t workspace_size;
   uint32_t flags;
@@ -588,7 +590,7 @@ size_t xnn_shape_multiply_trailing_dims(const struct xnn_shape* shape,
 
 // Get the size in bytes to hold dynamic quant params
 size_t xnn_tensor_get_dynamic_quant_param_size(enum xnn_datatype datatype,
-                                               const struct xnn_shape *shape,
+                                               const struct xnn_shape* shape,
                                                size_t num_nonbatch_dims);
 
 XNN_INLINE static size_t xnn_tensor_get_rounded_dynamic_quant_param_size(
@@ -619,7 +621,7 @@ void xnn_value_copy(struct xnn_value* dst_value,
                     const struct xnn_value* src_value);
 
 void xnn_runtime_value_copy(struct xnn_runtime_value* dst_value,
-                    const struct xnn_value* src_value);
+                            const struct xnn_value* src_value);
 
 void xnn_init_convert_node(struct xnn_node* node, uint32_t input_id,
                            uint32_t output_id, uint32_t flags);

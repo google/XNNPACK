@@ -114,8 +114,8 @@ struct xnn_ukernel {
     struct xnn_ukernel_vunary vunary;
   };
   union {
-    struct gemm_types *gemm_ukernels;
-    struct xnn_ukernel_igemm *igemm;
+    struct gemm_types* gemm_ukernels;
+    struct xnn_ukernel_igemm* igemm;
   };
 };
 
@@ -152,8 +152,7 @@ struct gemm_op_context {
 
 struct igemm_op_context {
   struct igemm_context igemm;
-  struct conv2d_igemm_indirection_init_context
-      conv2d_igemm_indirection_init;
+  struct conv2d_igemm_indirection_init_context conv2d_igemm_indirection_init;
 };
 
 struct xnn_convolution_operator {
@@ -205,7 +204,7 @@ union xnn_params2 {
 struct xnn_operator {
   size_t batch_size;
   size_t channels;
-  struct xnn_convolution_operator *convolution_op;
+  struct xnn_convolution_operator* convolution_op;
 
   size_t input_pixel_stride;
   size_t output_pixel_stride;
@@ -291,7 +290,7 @@ struct xnn_operator {
   // also use this to store parameters to binary operators. For most such
   // operators, this is a copy of params, but params need to be swapped for
   // commutative ops with per-operand params.
-  union xnn_params2 *params2;
+  union xnn_params2* params2;
   enum xnn_operator_type type;
   struct xnn_ukernel ukernel;
 
@@ -333,7 +332,7 @@ struct xnn_operator {
     const struct xnn_pack_lh_config* pack_lh_config;
   };
 
-  struct compute_parameters *compute;
+  struct compute_parameters* compute;
   int num_compute_invocations;
   union {
     struct argmax_pooling_context argmax_pooling;
@@ -368,11 +367,11 @@ struct xnn_operator {
     struct pack_lh_context pack_lh;
   } context;
   union {
-    struct dwconv_op_context *dwconv;
-    struct gemm_op_context *gemm;
-    struct igemm_op_context *igemm;
-    struct reduce_context *reduce;
-    struct pad_context *pad;
+    struct dwconv_op_context* dwconv;
+    struct gemm_op_context* gemm;
+    struct igemm_op_context* igemm;
+    struct reduce_context* reduce;
+    struct pad_context* pad;
   } dynamic_context;
 
   xnn_weights_cache_t weights_cache;

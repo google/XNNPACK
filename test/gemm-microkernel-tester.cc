@@ -17,7 +17,6 @@
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
 #include "src/xnnpack/isa-checks.h"
-#include "src/xnnpack/log.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
@@ -100,7 +99,7 @@ TEST_P(GemmTest, Test) {
 }
 
 static float compute_sum_tolerance(float max_value, int reduction_size,
-                               float epsilon) {
+                                   float epsilon) {
   // Each `reduction_size` add potentially grows the error by `epsilon`.
   float tolerance = reduction_size * epsilon;
   // The error is then scaled by the max value.
@@ -108,8 +107,8 @@ static float compute_sum_tolerance(float max_value, int reduction_size,
   // Also include some absolute error tolerance.
   tolerance += epsilon;
 
-  // TODO: This tolerance is very lax in some cases, but is required to be
-  // able to run the f16_qb4w tests.
+  // TODO(unassigned): This tolerance is very lax in some cases, but is required
+  // to be able to run the f16_qb4w tests.
   EXPECT_LT(tolerance, max_value)
       << "max_value=" << max_value << ", reduction_size=" << reduction_size
       << ", epsilon=" << epsilon;
@@ -710,8 +709,8 @@ void GemmMicrokernelTester::Test(
   ASSERT_LE(m(), mr());
 
   xnnpack::ReplicableRandomDevice rng;
-  auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10, 10),
-                          std::ref(rng));
+  auto i32rng =
+      std::bind(std::uniform_int_distribution<int32_t>(-10, 10), std::ref(rng));
   auto w8rng = std::bind(std::uniform_int_distribution<int32_t>(
                              0, std::numeric_limits<uint8_t>::max()),
                          std::ref(rng));
@@ -738,8 +737,8 @@ void GemmMicrokernelTester::Test(
   std::generate(bias.begin(), bias.end(), std::ref(i32rng));
 
   std::fill(packed_w.begin(), packed_w.end(), 0);
-  const xnn_qs8_qc4w_packing_params packing_params = {static_cast<int8_t>(a_zero_point() - 0x80),
-                                                      b_zero_point()};
+  const xnn_qs8_qc4w_packing_params packing_params = {
+      static_cast<int8_t>(a_zero_point() - 0x80), b_zero_point()};
   void* const packed_data = packed_w.data();
   pack(/*g=*/1, n(), k2, nr(), kr(), sr(), b.data(), bias.data(),
        /*scale=*/nullptr, packed_w.data(), sizeof(float) * nr(),
@@ -752,15 +751,16 @@ void GemmMicrokernelTester::Test(
       for (size_t k_index = 0; k_index < k2; k_index++) {
         const size_t nb_index = (n_index * k2 + k_index) / 2;
         int8_t bv =
-            int8_t((k_index % 2 == 0) ? (b[nb_index] & 15)
-                   : (b[nb_index] >> 4)) -
+            static_cast<int8_t>((k_index % 2 == 0) ? (b[nb_index] & 15)
+                                                   : (b[nb_index] >> 4)) -
             b_zero_point();
         if (b_zero_point() == 0) {
           bv = sign_extend_int4(bv);
         }
         acc[m_index * n() + n_index] +=
             (static_cast<int32_t>(a[m_index * a_stride() + k_index]) -
-             static_cast<int32_t>(a_zero_point() - 0x80)) * static_cast<int32_t>(bv);
+             static_cast<int32_t>(a_zero_point() - 0x80)) *
+            static_cast<int32_t>(bv);
       }
       acc[m_index * n() + n_index] += bias[n_index];
     }
@@ -787,7 +787,6 @@ void GemmMicrokernelTester::Test(
       scale.data(),
       (void*)((uintptr_t)packed_w.data() +
               nr() * (ks() * packed_k_bytes + sizeof(float))));
-
 
   union xnn_qs8_qc8w_conv_minmax_params minmax_params;
   init_params(&minmax_params, c_zero_point, static_cast<int8_t>(qmin() - 0x80),
@@ -1554,8 +1553,7 @@ void GemmMicrokernelTester::Test(xnn_qd8_f16_qb4w_gemm_ukernel_fn gemm,
                                  xnn_pack_qs8_qb4w_gemm_fn pack) const {
   ASSERT_LE(m(), mr());
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.f, 1.f),
                           std::ref(rng));
   auto scalerng = std::bind(std::uniform_real_distribution<float>(0.5f, 2.f),
@@ -1866,8 +1864,7 @@ void GemmMicrokernelTester::Test(xnn_qd8_f32_qb4w_gemm_ukernel_fn gemm,
                                  xnn_pack_qs8_qb4w_gemm_fn pack) const {
   ASSERT_LE(m(), mr());
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.f, 1.f),
                           std::ref(rng));
   auto scalerng = std::bind(std::uniform_real_distribution<float>(0.5f, 2.f),
@@ -3356,7 +3353,7 @@ void GemmMicrokernelTester::Test(xnn_f16_igemm_minmax_ukernel_fn igemm_minmax,
 
   const float tolerance =
       compute_sum_tolerance(max_abs_product, ks() * k(),
-                        xnnpack::NumericLimits<xnn_float16>::epsilon());
+                            xnnpack::NumericLimits<xnn_float16>::epsilon());
 
   for (size_t i = 0; i < m(); i++) {
     for (size_t j = 0; j < n(); j++) {

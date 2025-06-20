@@ -20,17 +20,15 @@
 #include "src/xnnpack/params.h"
 #include <pthreadpool.h>
 
-enum xnn_status create_pack_lh(
-    uint32_t flags,
-    const struct xnn_pack_lh_config *pack_lh_config,
-    enum xnn_operator_type expected_operator_type,
-    xnn_operator_t* pack_lh_op_out)
-{
+enum xnn_status create_pack_lh(uint32_t flags,
+                               const struct xnn_pack_lh_config* pack_lh_config,
+                               enum xnn_operator_type expected_operator_type,
+                               xnn_operator_t* pack_lh_op_out) {
   xnn_operator_t pack_lh_op = NULL;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(expected_operator_type));
+                  xnn_operator_type_to_string(expected_operator_type));
     return xnn_status_uninitialized;
   }
 
@@ -43,12 +41,13 @@ enum xnn_status create_pack_lh(
 
   pack_lh_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (pack_lh_op == NULL) {
-    xnn_log_error(
-      "failed to allocate %zu bytes for %s operator descriptor",
-      sizeof(struct xnn_operator), xnn_operator_type_to_string(expected_operator_type));
+    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
+                  sizeof(struct xnn_operator),
+                  xnn_operator_type_to_string(expected_operator_type));
     return xnn_status_out_of_memory;
   }
-  pack_lh_op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
+  pack_lh_op->compute =
+      xnn_allocate_zero_memory(sizeof(struct compute_parameters));
   if (pack_lh_op->compute == NULL) {
     xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
                   sizeof(struct compute_parameters),
@@ -66,28 +65,28 @@ enum xnn_status create_pack_lh(
   return xnn_status_success;
 }
 
-enum xnn_status xnn_create_pack_lh_x32(
-    uint32_t flags,
-    xnn_operator_t* pack_lh_op_out) {
-  const struct xnn_pack_lh_config *pack_lh_config = xnn_init_x32_pack_lh_config();
-  return create_pack_lh(flags, pack_lh_config,
-          xnn_operator_type_pack_lh_x32, pack_lh_op_out);
+enum xnn_status xnn_create_pack_lh_x32(uint32_t flags,
+                                       xnn_operator_t* pack_lh_op_out) {
+  const struct xnn_pack_lh_config* pack_lh_config =
+      xnn_init_x32_pack_lh_config();
+  return create_pack_lh(flags, pack_lh_config, xnn_operator_type_pack_lh_x32,
+                        pack_lh_op_out);
 }
 
-enum xnn_status xnn_create_pack_lh_x16(
-    uint32_t flags,
-    xnn_operator_t* pack_lh_op_out) {
-  const struct xnn_pack_lh_config *pack_lh_config = xnn_init_x16_pack_lh_config();
-  return create_pack_lh(flags, pack_lh_config,
-          xnn_operator_type_pack_lh_x16, pack_lh_op_out);
+enum xnn_status xnn_create_pack_lh_x16(uint32_t flags,
+                                       xnn_operator_t* pack_lh_op_out) {
+  const struct xnn_pack_lh_config* pack_lh_config =
+      xnn_init_x16_pack_lh_config();
+  return create_pack_lh(flags, pack_lh_config, xnn_operator_type_pack_lh_x16,
+                        pack_lh_op_out);
 }
 
-enum xnn_status xnn_create_pack_lh_x8(
-    uint32_t flags,
-    xnn_operator_t* pack_lh_op_out) {
-  const struct xnn_pack_lh_config *pack_lh_config = xnn_init_x8_pack_lh_config();
-  return create_pack_lh(flags, pack_lh_config,
-          xnn_operator_type_pack_lh_x8, pack_lh_op_out);
+enum xnn_status xnn_create_pack_lh_x8(uint32_t flags,
+                                      xnn_operator_t* pack_lh_op_out) {
+  const struct xnn_pack_lh_config* pack_lh_config =
+      xnn_init_x8_pack_lh_config();
+  return create_pack_lh(flags, pack_lh_config, xnn_operator_type_pack_lh_x8,
+                        pack_lh_op_out);
 }
 
 enum xnn_status reshape_pack_lh(xnn_operator_t pack_lh_op, size_t num_groups,
@@ -138,7 +137,7 @@ enum xnn_status reshape_pack_lh(xnn_operator_t pack_lh_op, size_t num_groups,
   *output_size_bytes = num_groups * group_size;
   pack_lh_op->compute[0].type = xnn_parallelization_type_2d_tile_1d;
   pack_lh_op->compute[0].task_2d_tile_1d =
-      (pthreadpool_task_2d_tile_1d_t) xnn_compute_pack_lh;
+      (pthreadpool_task_2d_tile_1d_t)xnn_compute_pack_lh;
   pack_lh_op->compute[0].range[0] = num_groups;
   pack_lh_op->compute[0].range[1] = batch_size;
   pack_lh_op->compute[0].tile[0] = mr_packed;
@@ -153,9 +152,9 @@ enum xnn_status xnn_reshape_pack_lh_x16(xnn_operator_t pack_lh_op,
                                         size_t channels,
                                         size_t* output_size_bytes,
                                         pthreadpool_t threadpool) {
-  const struct xnn_gemm_config* gemm_config =
-      xnn_init_pf16_gemm_config();
-  const struct xnn_pack_lh_config *pack_lh_config = xnn_init_x16_pack_lh_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_pf16_gemm_config();
+  const struct xnn_pack_lh_config* pack_lh_config =
+      xnn_init_x16_pack_lh_config();
   return reshape_pack_lh(pack_lh_op, num_groups, batch_size, channels,
                          output_size_bytes, xnn_operator_type_pack_lh_x16,
                          /*element_size=*/sizeof(xnn_float16), gemm_config,
@@ -167,9 +166,9 @@ enum xnn_status xnn_reshape_pack_lh_x8(xnn_operator_t pack_lh_op,
                                        size_t channels,
                                        size_t* output_size_bytes,
                                        pthreadpool_t threadpool) {
-  const struct xnn_gemm_config* gemm_config =
-      xnn_init_pqs8_qc8w_gemm_config();
-  const struct xnn_pack_lh_config *pack_lh_config = xnn_init_x8_pack_lh_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_pqs8_qc8w_gemm_config();
+  const struct xnn_pack_lh_config* pack_lh_config =
+      xnn_init_x8_pack_lh_config();
   return reshape_pack_lh(pack_lh_op, num_groups, batch_size, channels,
                          output_size_bytes, xnn_operator_type_pack_lh_x8,
                          /*element_size=*/sizeof(int8_t), gemm_config,
@@ -181,21 +180,18 @@ enum xnn_status xnn_reshape_pack_lh_x32(xnn_operator_t pack_lh_op,
                                         size_t channels,
                                         size_t* output_size_bytes,
                                         pthreadpool_t threadpool) {
-  const struct xnn_gemm_config* gemm_config =
-      xnn_init_pf32_gemm_config();
-  const struct xnn_pack_lh_config *pack_lh_config = xnn_init_x32_pack_lh_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_pf32_gemm_config();
+  const struct xnn_pack_lh_config* pack_lh_config =
+      xnn_init_x32_pack_lh_config();
   return reshape_pack_lh(pack_lh_op, num_groups, batch_size, channels,
                          output_size_bytes, xnn_operator_type_pack_lh_x32,
                          /*element_size=*/sizeof(float), gemm_config,
                          pack_lh_config, threadpool);
 }
 
-enum xnn_status setup_pack_lh(
-  xnn_operator_t pack_lh_op,
-  const void* input,
-  void* output,
-  enum xnn_operator_type expected_operator_type)
-{
+enum xnn_status setup_pack_lh(xnn_operator_t pack_lh_op, const void* input,
+                              void* output,
+                              enum xnn_operator_type expected_operator_type) {
   if (pack_lh_op->type != expected_operator_type) {
     xnn_log_error(
         "failed to setup operator: operator type mismatch (expected %s, got "
@@ -226,28 +222,19 @@ enum xnn_status setup_pack_lh(
   return xnn_status_success;
 }
 
-enum xnn_status xnn_setup_pack_lh_x16(
-  xnn_operator_t pack_lh_op,
-  const void* input,
-  void* output)
-{
+enum xnn_status xnn_setup_pack_lh_x16(xnn_operator_t pack_lh_op,
+                                      const void* input, void* output) {
   return setup_pack_lh(pack_lh_op, input, output,
-          xnn_operator_type_pack_lh_x16);
+                       xnn_operator_type_pack_lh_x16);
 }
 
-enum xnn_status xnn_setup_pack_lh_x8(
-  xnn_operator_t pack_lh_op,
-  const void* input,
-  void* output)
-{
-  return setup_pack_lh(pack_lh_op, input, output,
-          xnn_operator_type_pack_lh_x8);
+enum xnn_status xnn_setup_pack_lh_x8(xnn_operator_t pack_lh_op,
+                                     const void* input, void* output) {
+  return setup_pack_lh(pack_lh_op, input, output, xnn_operator_type_pack_lh_x8);
 }
 
-enum xnn_status xnn_setup_pack_lh_x32(
-  xnn_operator_t pack_lh_op,
-  const void* input,
-  void* output)
-{
-  return setup_pack_lh(pack_lh_op, input, output, xnn_operator_type_pack_lh_x32);
+enum xnn_status xnn_setup_pack_lh_x32(xnn_operator_t pack_lh_op,
+                                      const void* input, void* output) {
+  return setup_pack_lh(pack_lh_op, input, output,
+                       xnn_operator_type_pack_lh_x32);
 }

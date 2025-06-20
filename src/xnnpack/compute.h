@@ -14,7 +14,6 @@
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams.h"
-#include "src/xnnpack/operator-type.h"
 #include <pthreadpool.h>
 
 enum xnn_parallelization_type {
@@ -582,7 +581,7 @@ XNN_PRIVATE void xnn_compute_grouped_batch_igemm(
     size_t mr_block_size);
 
 XNN_PRIVATE void xnn_compute_dq_zero_buffer_igemm(
-    const struct igemm_context* context, size_t size);
+    const struct igemm_context* context, size_t batch_index);
 
 XNN_PRIVATE void xnn_compute_dqigemm(const struct igemm_context* context,
                                      size_t nr_block_start,
@@ -721,29 +720,29 @@ struct subconv_context {
 };
 
 XNN_PRIVATE void xnn_compute_dq_zero_buffer_subconv(
-    const struct subconv_context* context, size_t size);
+    const struct subconv_context* context, size_t batch_index);
 
 XNN_PRIVATE void xnn_compute_grouped_subconv2d(
     const struct subconv_context* context, size_t batch_index,
     size_t group_index, size_t subkernel_index, size_t slice_y,
-    size_t slice_x_start, size_t nr_block_start, size_t slice_x_max,
-    size_t nr_block_size);
+    size_t slice_x_start, size_t nc_block_start, size_t slice_x_max,
+    size_t nc_block_size);
 
 XNN_PRIVATE void xnn_compute_grouped_dqsubconv2d(
     const struct subconv_context* context, size_t batch_index,
     size_t group_index, size_t subkernel_index, size_t slice_y,
-    size_t slice_x_start, size_t nr_block_start, size_t slice_x_max,
-    size_t nr_block_size);
+    size_t slice_x_start, size_t nc_block_start, size_t slice_x_max,
+    size_t nc_block_size);
 
 XNN_PRIVATE void xnn_compute_subconv2d(
     const struct subconv_context* context, size_t batch_index,
     size_t subkernel_index, size_t slice_y, size_t slice_x_start,
-    size_t nr_block_start, size_t slice_x_max, size_t nr_block_size);
+    size_t nc_block_start, size_t slice_x_max, size_t nc_block_size);
 
 XNN_PRIVATE void xnn_compute_dqsubconv2d(
     const struct subconv_context* context, size_t batch_index,
     size_t subkernel_index, size_t slice_y, size_t slice_x_start,
-    size_t nr_block_start, size_t slice_x_max, size_t nr_block_size);
+    size_t nc_block_start, size_t slice_x_max, size_t nc_block_size);
 
 struct conv2d_context {
   size_t input_height;
@@ -1030,7 +1029,7 @@ XNN_PRIVATE void xnn_compute_resize_bilinear(
     size_t pixel_start, size_t pixel_range);
 XNN_PRIVATE void xnn_compute_resize_bilinear_chw(
     const struct resize_bilinear_chw_context* context, size_t batch_index,
-    size_t pixel_start, size_t pixel_range);
+    size_t channel_start, size_t channel_range);
 
 struct elementwise_binary_context {
   const void* a;
@@ -1047,7 +1046,7 @@ struct elementwise_binary_context {
 
 XNN_PRIVATE void xnn_compute_elementwise_binary_1d_tile(
     const struct elementwise_binary_context* context, size_t offset,
-    size_t tile);
+    size_t count);
 XNN_PRIVATE void xnn_compute_elementwise_binary_1d(
     const struct elementwise_binary_context* context, size_t offset,
     size_t count);
