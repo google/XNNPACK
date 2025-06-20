@@ -235,6 +235,10 @@ typedef void (*xnn_igemm_ukernel_fn)(size_t mr, size_t nr, size_t kc, size_t ks,
                                      size_t a_offset, const void* zero,
                                      const void* params);
 
+typedef void (*xnn_packed_lhs_igemm_ukernel_fn)(
+    size_t mr, size_t nc, size_t kc, size_t ks, const void* packed_lhs,
+    const void* w, int8_t* c, size_t cm_stride, const void* params);
+
 typedef void (*xnn_f32_igemm_ukernel_fn)(
     size_t mr, size_t nr, size_t kc, size_t ks, const float** a, const float* w,
     float* c, size_t cm_stride, size_t cn_stride, size_t a_offset,

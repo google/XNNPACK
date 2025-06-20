@@ -24,6 +24,7 @@
 #include "src/xnnpack/unaligned.h"
 
 #if XNN_ENABLE_KLEIDIAI
+#include "kai/ukernels/matmul/pack/kai_rhs_imatmul_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4c32p_qsu4c32s1s0.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4cxp_qs4cxs1s0.h"
@@ -36,6 +37,7 @@
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxps1s0_qsu4cxs1s0_neon.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi8cxp_qsi8cx_neon.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_x16p2vlx2b_x16_x16_sme.h"
+#include "src/xnnpack/allocator.h"
 #endif  // XNN_ENABLE_KLEIDIAI
 
 struct unaligned_int32_t {
@@ -2455,6 +2457,56 @@ void xnn_pack_kai_qb4_weights_and_biases(
     xnn_init_qs8_qc8w_scale_fp32_params(
         output_channels, nr, nr * weights_stride,
         (const float*)accumulator_init, weights_start);
+  }
+}
+
+void xnn_pack_kai_qs8_conv_goki_w_sme2(
+    size_t g, size_t nc, size_t ks, size_t kc, size_t nr, size_t kr, size_t sr,
+    const int8_t* k, const int32_t* b, const float* scale, void* packed_weights,
+    size_t extra_bytes, const struct xnn_qs8_packing_params* params) {
+  assert(g != 0);
+  assert(nr >= sr);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
+
+  kai_rhs_pack_qsi8cx_params kai_params{};
+  kai_params.lhs_zero_point = params->input_zero_point;
+  kai_params.scale_multiplier = 1.0F;
+
+  int32_t* tmp_bias = NULL;
+
+  if (b == NULL) {
+    tmp_bias = (int32_t*)xnn_allocate_zero_memory(g * nc * sizeof(int32_t));
+    b = tmp_bias;
+  }
+
+  int8_t* tmp_data =
+      (int8_t*)xnn_allocate_memory(nc * ks * kc * sizeof(int8_t));
+  const size_t rhs_row_stride = nc * sizeof(int8_t);
+  const size_t packed_rhs_size =
+      kai_get_rhs_packed_size_rhs_imatmul_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme(
+          nc, ks, kc);
+
+  for (size_t g_idx = 0; g_idx < g; ++g_idx) {
+    transpose_weights_x8(k, tmp_data, nc, ks * kc);
+    kai_run_rhs_imatmul_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme(
+        nc, ks, kc, rhs_row_stride, tmp_data, b, scale, packed_weights,
+        &kai_params);
+
+    k += nc * ks * kc;
+    b += nc;
+
+    if (scale != NULL) {
+      scale += nc;
+    }
+
+    packed_weights = (uint8_t*)packed_weights + packed_rhs_size;
+  }
+
+  xnn_release_memory(tmp_data);
+
+  if (tmp_bias != NULL) {
+    xnn_release_memory(tmp_bias);
   }
 }
 #endif  // XNN_ENABLE_KLEIDIAI
