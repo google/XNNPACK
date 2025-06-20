@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_TEST_PACKW_MICROKERNEL_TESTER_H_
+#define XNNPACK_TEST_PACKW_MICROKERNEL_TESTER_H_
 
 #include <gtest/gtest.h>
 
@@ -740,3 +741,5 @@ class PackWMicrokernelTester {
   size_t izp_{0};
   size_t kzp_{8};
 };
+
+#endif  // XNNPACK_TEST_PACKW_MICROKERNEL_TESTER_H_

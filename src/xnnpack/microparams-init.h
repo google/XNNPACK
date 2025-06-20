@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_MICROPARAMS_INIT_H_
+#define XNNPACK_SRC_XNNPACK_MICROPARAMS_INIT_H_
 
 #include <stddef.h>
 #include <stdint.h>
@@ -264,3 +265,5 @@ DECLARE_INIT_QU8_VPRELU_PARAMS_FUNCTION(xnn_init_qu8_vprelu_scalar_params)
 #ifdef __cplusplus
 }  // extern "C"
 #endif
+
+#endif  // XNNPACK_SRC_XNNPACK_MICROPARAMS_INIT_H_

@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 //
 
-#ifndef __XNNPACK_SRC_XNNPACK_SIMD_F32_SSE2_H_
-#define __XNNPACK_SRC_XNNPACK_SIMD_F32_SSE2_H_
+#ifndef XNNPACK_SRC_XNNPACK_SIMD_F32_SSE2_H_
+#define XNNPACK_SRC_XNNPACK_SIMD_F32_SSE2_H_
 
 #include <assert.h>
 #include <stddef.h>
@@ -34,4 +34,4 @@ static XNN_INLINE xnn_simd_f32_t xnn_fmsub_f32(xnn_simd_f32_t a,
   return _mm_sub_ps(_mm_mul_ps(a, b), c);
 }
 
-#endif  // __XNNPACK_SRC_XNNPACK_SIMD_F32_SSE2_H_
+#endif  // XNNPACK_SRC_XNNPACK_SIMD_F32_SSE2_H_

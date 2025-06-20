@@ -3,8 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#ifndef THIRD_PARTY_XNNPACK_SRC_XNNPACK_MICROKERNEL_UTILS_H_
-#define THIRD_PARTY_XNNPACK_SRC_XNNPACK_MICROKERNEL_UTILS_H_
+#ifndef XNNPACK_SRC_XNNPACK_MICROKERNEL_UTILS_H_
+#define XNNPACK_SRC_XNNPACK_MICROKERNEL_UTILS_H_
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -36,4 +36,4 @@ bool xnn_should_inline_lhs_packing(const struct xnn_gemm_config* gemm_config,
 }
 #endif
 
-#endif  // THIRD_PARTY_XNNPACK_SRC_XNNPACK_MICROKERNEL_UTILS_H_
+#endif  // XNNPACK_SRC_XNNPACK_MICROKERNEL_UTILS_H_

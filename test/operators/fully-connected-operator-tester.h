@@ -6,7 +6,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_TEST_OPERATORS_FULLY_CONNECTED_OPERATOR_TESTER_H_
+#define XNNPACK_TEST_OPERATORS_FULLY_CONNECTED_OPERATOR_TESTER_H_
 
 #include <algorithm>
 #include <cassert>
@@ -4097,3 +4098,5 @@ class FullyConnectedOperatorTester {
   WeightsType weights_type_{WeightsType::Default};
   bool use_weights_cache_{false};
 };
+
+#endif  // XNNPACK_TEST_OPERATORS_FULLY_CONNECTED_OPERATOR_TESTER_H_

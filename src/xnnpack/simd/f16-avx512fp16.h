@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 //
 
-#ifndef THIRD_PARTY_XNNPACK_SRC_XNNPACK_SIMD_F16_AVX512F_H_
-#define THIRD_PARTY_XNNPACK_SRC_XNNPACK_SIMD_F16_AVX512F_H_
+#ifndef XNNPACK_SRC_XNNPACK_SIMD_F16_AVX512F_H_
+#define XNNPACK_SRC_XNNPACK_SIMD_F16_AVX512F_H_
 
 #include <assert.h>
 #include <immintrin.h>
@@ -217,4 +217,4 @@ static XNN_INLINE void xnn_store_tail_f16(xnn_float16* output, xnn_simd_f16_t v,
   _mm512_mask_storeu_epi16(output, vmask, _mm512_castph_si512(v));
 }
 
-#endif  // THIRD_PARTY_XNNPACK_SRC_XNNPACK_SIMD_F16_AVX512F_H_
+#endif  // XNNPACK_SRC_XNNPACK_SIMD_F16_AVX512F_H_

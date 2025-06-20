@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_CONFIG_TYPES_H_
+#define XNNPACK_SRC_XNNPACK_CONFIG_TYPES_H_
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -307,3 +308,5 @@ struct xnn_unpool_config {
 #ifdef __cplusplus
 }  // extern "C"
 #endif
+
+#endif  // XNNPACK_SRC_XNNPACK_CONFIG_TYPES_H_

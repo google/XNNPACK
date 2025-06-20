@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 //
 
-#ifndef __XNNPACK_SRC_XNNPACK_SIMD_F32_FMA3_H_
-#define __XNNPACK_SRC_XNNPACK_SIMD_F32_FMA3_H_
+#ifndef XNNPACK_SRC_XNNPACK_SIMD_F32_FMA3_H_
+#define XNNPACK_SRC_XNNPACK_SIMD_F32_FMA3_H_
 
 #include <stdint.h>
 
@@ -99,4 +99,4 @@ static XNN_INLINE xnn_simd_f32_t xnn_cmpneq_f32(xnn_simd_f32_t a,
 #endif  // __AVX2__
 }
 
-#endif  // __XNNPACK_SRC_XNNPACK_SIMD_F32_FMA3_H_
+#endif  // XNNPACK_SRC_XNNPACK_SIMD_F32_FMA3_H_

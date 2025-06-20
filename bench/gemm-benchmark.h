@@ -3,8 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#ifndef THIRD_PARTY_XNNPACK_BENCH_GEMM_BENCHMARK_H_
-#define THIRD_PARTY_XNNPACK_BENCH_GEMM_BENCHMARK_H_
+#ifndef XNNPACK_BENCH_GEMM_BENCHMARK_H_
+#define XNNPACK_BENCH_GEMM_BENCHMARK_H_
 
 #include <cstddef>
 #include <cstdint>
@@ -131,4 +131,4 @@ void GEMMBenchmark(benchmark::State& state,
                    uint64_t arch_flags = 0);
 #endif  // XNN_ENABLE_KLEIDIAI
 
-#endif  // THIRD_PARTY_XNNPACK_BENCH_GEMM_BENCHMARK_H_
+#endif  // XNNPACK_BENCH_GEMM_BENCHMARK_H_

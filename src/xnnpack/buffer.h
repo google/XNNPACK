@@ -3,8 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#ifndef __XNNPACK_TEST_BUFFER_H_
-#define __XNNPACK_TEST_BUFFER_H_
+#ifndef XNNPACK_TEST_BUFFER_H_
+#define XNNPACK_TEST_BUFFER_H_
 
 #include <algorithm>
 #include <array>
@@ -1153,4 +1153,4 @@ inline std::string index_to_string(const std::vector<size_t>& v) {
 
 }  // namespace xnnpack
 
-#endif  // __XNNPACK_TEST_BUFFER_H_
+#endif  // XNNPACK_TEST_BUFFER_H_

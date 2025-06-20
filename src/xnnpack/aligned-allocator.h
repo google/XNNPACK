@@ -4,7 +4,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_ALIGNED_ALLOCATOR_H_
+#define XNNPACK_SRC_XNNPACK_ALIGNED_ALLOCATOR_H_
 
 #include <stdlib.h>
 
@@ -122,3 +123,5 @@ class AlignedAllocator {
     p->~U();
   }
 };
+
+#endif  // XNNPACK_SRC_XNNPACK_ALIGNED_ALLOCATOR_H_

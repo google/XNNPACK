@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_MICROKERNEL_TYPE_H_
+#define XNNPACK_SRC_XNNPACK_MICROKERNEL_TYPE_H_
 
 #include "src/xnnpack/common.h"
 
@@ -25,3 +26,5 @@ XNN_INTERNAL const char* xnn_microkernel_type_to_string(
 #ifdef __cplusplus
 }  // extern "C"
 #endif
+
+#endif  // XNNPACK_SRC_XNNPACK_MICROKERNEL_TYPE_H_

@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_MEMORY_H_
+#define XNNPACK_SRC_XNNPACK_MEMORY_H_
 
 #include <stddef.h>
 #include <string.h>
@@ -48,3 +49,5 @@ enum xnn_status xnn_finalize_weights_memory(struct xnn_weights_buffer* buffer);
 #ifdef __cplusplus
 }  // extern "C"
 #endif
+
+#endif  // XNNPACK_SRC_XNNPACK_MEMORY_H_

@@ -6,7 +6,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_REQUANTIZATION_H_
+#define XNNPACK_SRC_XNNPACK_REQUANTIZATION_H_
 
 #include <assert.h>
 #include <math.h>
@@ -224,3 +225,5 @@ inline static uint8_t xnn_qu8_quantize(float val, float scale,
   return (uint8_t)lrintf(
       fminf(fmaxf(val / scale + (float)zero_point, 0.0f), 255.0f));
 }
+
+#endif  // XNNPACK_SRC_XNNPACK_REQUANTIZATION_H_

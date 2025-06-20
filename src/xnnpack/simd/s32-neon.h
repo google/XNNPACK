@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 //
 
-#ifndef __XNNPACK_SRC_XNNPACK_SIMD_S32_NEON_H_
-#define __XNNPACK_SRC_XNNPACK_SIMD_S32_NEON_H_
+#ifndef XNNPACK_SRC_XNNPACK_SIMD_S32_NEON_H_
+#define XNNPACK_SRC_XNNPACK_SIMD_S32_NEON_H_
 
 #include <arm_neon.h>
 #include <assert.h>
@@ -114,4 +114,4 @@ static XNN_INLINE float32x4_t xnn_cvt_f32_s32(xnn_simd_s32_t a) {
   return vcvtq_f32_s32(a);
 }
 
-#endif  // __XNNPACK_SRC_XNNPACK_SIMD_S32_NEON_H_
+#endif  // XNNPACK_SRC_XNNPACK_SIMD_S32_NEON_H_

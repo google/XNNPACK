@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_NORMALIZATION_H_
+#define XNNPACK_SRC_XNNPACK_NORMALIZATION_H_
 
 #include <stddef.h>
 
@@ -46,3 +47,5 @@ void xnn_normalize_reduction(size_t* num_reduction_axes_ptr,
 #ifdef __cplusplus
 }  // extern "C"
 #endif
+
+#endif  // XNNPACK_SRC_XNNPACK_NORMALIZATION_H_

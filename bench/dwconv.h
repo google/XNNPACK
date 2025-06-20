@@ -8,7 +8,8 @@
 
 // clang-format off
 
-#pragma once
+#ifndef XNNPACK_BENCH_DWCONV_H_
+#define XNNPACK_BENCH_DWCONV_H_
 
 #include <benchmark/benchmark.h>
 
@@ -368,3 +369,5 @@ inline void MobileNetV3LargeDWConvArguments(benchmark::internal::Benchmark* b) {
   /*        H    W   KH  KW  PH  PW  S  D   G */
 //b->Args({  7,   7,  5,  5,  4,  4, 1, 1, 960});
 }
+
+#endif  // XNNPACK_BENCH_DWCONV_H_

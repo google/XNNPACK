@@ -1,4 +1,5 @@
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_ARRAY_HELPERS_H_
+#define XNNPACK_SRC_XNNPACK_ARRAY_HELPERS_H_
 
 #include <algorithm>
 #include <array>
@@ -95,3 +96,5 @@ class ArrayPrefix {
 };
 }  // namespace internal
 }  // namespace xnnpack
+
+#endif  // XNNPACK_SRC_XNNPACK_ARRAY_HELPERS_H_

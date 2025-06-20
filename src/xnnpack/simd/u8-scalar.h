@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 //
 
-#ifndef __XNNPACK_SRC_XNNPACK_SIMD_U8_SCALAR_H_
-#define __XNNPACK_SRC_XNNPACK_SIMD_U8_SCALAR_H_
+#ifndef XNNPACK_SRC_XNNPACK_SIMD_U8_SCALAR_H_
+#define XNNPACK_SRC_XNNPACK_SIMD_U8_SCALAR_H_
 
 #include <math.h>
 #include <stddef.h>
@@ -72,4 +72,4 @@ static XNN_INLINE void xnn_store_tail_u8(uint8_t *output, xnn_simd_u8_t v,
   *output = v;
 }
 
-#endif  // __XNNPACK_SRC_XNNPACK_SIMD_U8_SCALAR_H_
+#endif  // XNNPACK_SRC_XNNPACK_SIMD_U8_SCALAR_H_

@@ -8,7 +8,8 @@
 
 // clang-format off
 
-#pragma once
+#ifndef XNNPACK_BENCH_CONV_H_
+#define XNNPACK_BENCH_CONV_H_
 
 #include <benchmark/benchmark.h>
 
@@ -852,3 +853,5 @@ inline void SRCNN955ConvArguments(benchmark::internal::Benchmark* b) {
   b->Args({376, 376,  5,  5,  0,  0, 1, 1,   64,   32});
   b->Args({372, 372,  5,  5,  0,  0, 1, 1,   32,    1});
 }
+
+#endif  // XNNPACK_BENCH_CONV_H_

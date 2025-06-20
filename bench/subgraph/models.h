@@ -3,8 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#ifndef THIRD_PARTY_XNNPACK_BENCH_MODELS_MODELS_H_
-#define THIRD_PARTY_XNNPACK_BENCH_MODELS_MODELS_H_
+#ifndef XNNPACK_BENCH_MODELS_MODELS_H_
+#define XNNPACK_BENCH_MODELS_MODELS_H_
 
 #include <cstddef>
 #include <cstdint>
@@ -84,4 +84,4 @@ xnn_subgraph_t FP32TransformerBlock(size_t batch_size, size_t sequence_length,
 
 }  // namespace models
 
-#endif  // THIRD_PARTY_XNNPACK_BENCH_MODELS_MODELS_H_
+#endif  // XNNPACK_BENCH_MODELS_MODELS_H_

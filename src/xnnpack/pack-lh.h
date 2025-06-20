@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_PACK_LH_H_
+#define XNNPACK_SRC_XNNPACK_PACK_LH_H_
 
 #include <stddef.h>
 #include <stdint.h>
@@ -99,3 +100,5 @@ void xnn_pack_lh_f16_qduint8(size_t m, size_t k, size_t mr_packed, size_t kr,
 #ifdef __cplusplus
 }  // extern "C"
 #endif
+
+#endif  // XNNPACK_SRC_XNNPACK_PACK_LH_H_

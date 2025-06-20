@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_QUANTIZATION_H_
+#define XNNPACK_SRC_XNNPACK_QUANTIZATION_H_
 
 #include <assert.h>
 #include <math.h>
@@ -88,3 +89,5 @@ xnn_f16_qd8_asymmetric_quantization_params(xnn_float16 min, xnn_float16 max,
   params.inv_scale = 1.f / params.inv_scale;
   return params;
 }
+
+#endif  // XNNPACK_SRC_XNNPACK_QUANTIZATION_H_

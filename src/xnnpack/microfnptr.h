@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_MICROFNPTR_H_
+#define XNNPACK_SRC_XNNPACK_MICROFNPTR_H_
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -1322,3 +1323,5 @@ struct gemm_fused_ukernels {
     struct xnn_hmp_dqigemm_ukernel dqigemm[XNN_MAX_MR];
   };
 };
+
+#endif  // XNNPACK_SRC_XNNPACK_MICROFNPTR_H_

@@ -3,8 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#ifndef THIRD_PARTY_XNNPACK_TEST_SUBGRAPH_STENCIL_H_
-#define THIRD_PARTY_XNNPACK_TEST_SUBGRAPH_STENCIL_H_
+#ifndef XNNPACK_TEST_SUBGRAPH_STENCIL_H_
+#define XNNPACK_TEST_SUBGRAPH_STENCIL_H_
 
 #include <algorithm>
 #include <cassert>
@@ -133,4 +133,4 @@ Tensor<T> make_stencil_dim(Tensor<T> x, size_t dim,
 
 }  // namespace xnnpack
 
-#endif  // THIRD_PARTY_XNNPACK_TEST_SUBGRAPH_STENCIL_H_
+#endif  // XNNPACK_TEST_SUBGRAPH_STENCIL_H_

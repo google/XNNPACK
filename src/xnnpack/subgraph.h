@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_SUBGRAPH_H_
+#define XNNPACK_SRC_XNNPACK_SUBGRAPH_H_
 
 #include <assert.h>
 #include <stddef.h>
@@ -649,3 +650,5 @@ XNN_INTERNAL enum xnn_reduce_operator xnn_node_type_to_reduce_operator(
 #ifdef __cplusplus
 }  // extern "C"
 #endif
+
+#endif  // XNNPACK_SRC_XNNPACK_SUBGRAPH_H_

@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 //
 
-#ifndef __XNNPACK_SRC_XNNPACK_SIMD_S32_WASMSIMD_H_
-#define __XNNPACK_SRC_XNNPACK_SIMD_S32_WASMSIMD_H_
+#ifndef XNNPACK_SRC_XNNPACK_SIMD_S32_WASMSIMD_H_
+#define XNNPACK_SRC_XNNPACK_SIMD_S32_WASMSIMD_H_
 
 #include <assert.h>
 #include <stddef.h>
@@ -116,4 +116,4 @@ static XNN_INLINE v128_t xnn_cvt_f32_s32(xnn_simd_s32_t a) {
   return wasm_f32x4_convert_i32x4(a);
 }
 
-#endif  // __XNNPACK_SRC_XNNPACK_SIMD_S32_WASMSIMD_H_
+#endif  // XNNPACK_SRC_XNNPACK_SIMD_S32_WASMSIMD_H_

@@ -5,7 +5,8 @@
 
 // clang-format off
 
-#pragma once
+#ifndef XNNPACK_BENCH_BGEMM_H_
+#define XNNPACK_BENCH_BGEMM_H_
 
 #include <benchmark/benchmark.h>
 
@@ -111,3 +112,5 @@ static void LLMGemmArguments(benchmark::internal::Benchmark* b) {
   b->Args({1, 128, 128, 1024});
   b->Args({1, 128, 4096, 1024});
 }
+
+#endif  // XNNPACK_BENCH_BGEMM_H_

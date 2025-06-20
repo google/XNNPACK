@@ -6,7 +6,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_BENCH_GEMM_H_
+#define XNNPACK_BENCH_GEMM_H_
 
 #include <cstdint>
 #include <functional>
@@ -818,3 +819,5 @@ inline void LLMGemmArguments(BenchmarkWrapper* b) {
   b->Args({ 128, 32000, 4096, 32 });
   b->Args({ 128, 32000, 4096, 256 });
 }
+
+#endif  // XNNPACK_BENCH_GEMM_H_

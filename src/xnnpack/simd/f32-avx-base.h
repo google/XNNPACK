@@ -17,8 +17,8 @@
 //   - xnn_sll_f32
 //   - xnn_srl_f32
 
-#ifndef __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX_BASE_H_
-#define __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX_BASE_H_
+#ifndef XNNPACK_SRC_XNNPACK_SIMD_F32_AVX_BASE_H_
+#define XNNPACK_SRC_XNNPACK_SIMD_F32_AVX_BASE_H_
 
 #include <assert.h>
 #include <immintrin.h>
@@ -200,4 +200,4 @@ static XNN_INLINE void xnn_store_tail_f32(float* output, xnn_simd_f32_t v,
   }
 }
 
-#endif  // __XNNPACK_SRC_XNNPACK_SIMD_F32_AVX_BASE_H_
+#endif  // XNNPACK_SRC_XNNPACK_SIMD_F32_AVX_BASE_H_

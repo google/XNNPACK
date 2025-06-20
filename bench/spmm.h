@@ -5,7 +5,8 @@
 
 // clang-format off
 
-#pragma once
+#ifndef XNNPACK_BENCH_SPMM_H_
+#define XNNPACK_BENCH_SPMM_H_
 
 #include <benchmark/benchmark.h>
 
@@ -385,3 +386,5 @@ static void MobileNetV3LargeSpmmArguments(benchmark::internal::Benchmark* b) {
   /*           M       N    K */
 //b->Args({  7 *   7, 960, 160});
 }
+
+#endif  // XNNPACK_BENCH_SPMM_H_

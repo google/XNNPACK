@@ -3,8 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#ifndef __XNNPACK_SRC_XNNPACK_PACKQ_H
-#define __XNNPACK_SRC_XNNPACK_PACKQ_H
+#ifndef XNNPACK_SRC_XNNPACK_PACKQ_H_
+#define XNNPACK_SRC_XNNPACK_PACKQ_H_
 
 #include <assert.h>
 #include <stddef.h>
@@ -152,4 +152,4 @@ XNN_INLINE static float xnn_x8_packq_f32qp8_get_dequantized(
 }  // extern "C"
 #endif
 
-#endif  // __XNNPACK_SRC_XNNPACK_PACKQ_H
+#endif  // XNNPACK_SRC_XNNPACK_PACKQ_H_

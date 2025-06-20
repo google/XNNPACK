@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_UNPOOL_H_
+#define XNNPACK_SRC_XNNPACK_UNPOOL_H_
 
 #include <stddef.h>
 #include <stdint.h>
@@ -27,3 +28,5 @@ DECLARE_X32_UNPOOL_UKERNEL_FUNCTION(xnn_x32_unpool_ukernel__wasmsimd)
 #ifdef __cplusplus
 }  // extern "C"
 #endif
+
+#endif  // XNNPACK_SRC_XNNPACK_UNPOOL_H_

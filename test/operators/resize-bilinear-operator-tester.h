@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_TEST_OPERATORS_RESIZE_BILINEAR_OPERATOR_TESTER_H_
+#define XNNPACK_TEST_OPERATORS_RESIZE_BILINEAR_OPERATOR_TESTER_H_
 
 #include <algorithm>
 #include <cassert>
@@ -1111,3 +1112,5 @@ class ResizeBilinearOperatorTester {
   size_t iterations_{1};
   bool transient_indirection_buffer_{false};
 };
+
+#endif  // XNNPACK_TEST_OPERATORS_RESIZE_BILINEAR_OPERATOR_TESTER_H_

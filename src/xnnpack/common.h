@@ -6,7 +6,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_COMMON_H_
+#define XNNPACK_SRC_XNNPACK_COMMON_H_
 
 #if defined(__APPLE__)
 #include <TargetConditionals.h>
@@ -407,3 +408,5 @@
 #define XNN_LOG2_SIZEOF_FLOAT 2     // log2(sizeof(float))
 #define XNN_LOG2_SIZEOF_INT32_T 2   // log2(sizeof(int32_t))
 #define XNN_LOG2_SIZEOF_UINT32_T 2  // log2(sizeof(uint32_t))
+
+#endif  // XNNPACK_SRC_XNNPACK_COMMON_H_

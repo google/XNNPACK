@@ -8,7 +8,8 @@
 
 // clang-format off
 
-#pragma once
+#ifndef XNNPACK_BENCH_DCONV_H_
+#define XNNPACK_BENCH_DCONV_H_
 
 #include <benchmark/benchmark.h>
 
@@ -54,3 +55,5 @@ inline void SqueezeNetV11ConvArguments(benchmark::internal::Benchmark* b) {
   /*        H    W   GCout */
   b->Args({224, 224,   64});
 }
+
+#endif  // XNNPACK_BENCH_DCONV_H_

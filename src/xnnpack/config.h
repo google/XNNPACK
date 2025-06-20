@@ -3,8 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#ifndef THIRD_PARTY_XNNPACK_SRC_XNNPACK_CONFIG_H_
-#define THIRD_PARTY_XNNPACK_SRC_XNNPACK_CONFIG_H_
+#ifndef XNNPACK_SRC_XNNPACK_CONFIG_H_
+#define XNNPACK_SRC_XNNPACK_CONFIG_H_
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -431,4 +431,4 @@ XNN_INTERNAL const struct xnn_unpool_config* xnn_init_x32_unpool_config();
 }  // extern "C"
 #endif
 
-#endif  // THIRD_PARTY_XNNPACK_SRC_XNNPACK_CONFIG_H_
+#endif  // XNNPACK_SRC_XNNPACK_CONFIG_H_

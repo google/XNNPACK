@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_IBILINEAR_H_
+#define XNNPACK_SRC_XNNPACK_IBILINEAR_H_
 
 #include <stddef.h>
 #include <stdint.h>
@@ -167,3 +168,5 @@ DECLARE_F16_IBILINEAR_CHW_UKERNEL_FUNCTION(
 #ifdef __cplusplus
 }  // extern "C"
 #endif
+
+#endif  // XNNPACK_SRC_XNNPACK_IBILINEAR_H_

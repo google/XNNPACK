@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_BENCH_UTILS_H_
+#define XNNPACK_BENCH_UTILS_H_
 
 #include <algorithm>
 #include <cstddef>
@@ -149,3 +150,5 @@ inline T Doz(T a, T b) {
 
 }  // namespace utils
 }  // namespace benchmark
+
+#endif  // XNNPACK_BENCH_UTILS_H_

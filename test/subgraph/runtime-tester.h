@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_TEST_SUBGRAPH_RUNTIME_TESTER_H_
+#define XNNPACK_TEST_SUBGRAPH_RUNTIME_TESTER_H_
 
 #include <algorithm>
 #include <cstddef>
@@ -149,3 +150,5 @@ class RuntimeTester : public SubgraphTester {
 };
 
 }  // namespace xnnpack
+
+#endif  // XNNPACK_TEST_SUBGRAPH_RUNTIME_TESTER_H_

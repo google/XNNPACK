@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_TEST_OPERATORS_CONVOLUTION_TEST_HELPERS_H_
+#define XNNPACK_TEST_OPERATORS_CONVOLUTION_TEST_HELPERS_H_
 
 #include <cstddef>
 #include <cstdint>
@@ -129,3 +130,5 @@ void compute_depthwise_convolution_qu8_reference_results(
     xnnpack::Buffer<int32_t>& accumulators, bool has_bias,
     const xnnpack::Buffer<int32_t>& bias);
 }  // namespace xnnpack
+
+#endif  // XNNPACK_TEST_OPERATORS_CONVOLUTION_TEST_HELPERS_H_

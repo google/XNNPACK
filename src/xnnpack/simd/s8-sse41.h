@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 //
 
-#ifndef __XNNPACK_SRC_XNNPACK_SIMD_S8_SSE41_H_
-#define __XNNPACK_SRC_XNNPACK_SIMD_S8_SSE41_H_
+#ifndef XNNPACK_SRC_XNNPACK_SIMD_S8_SSE41_H_
+#define XNNPACK_SRC_XNNPACK_SIMD_S8_SSE41_H_
 
 #include <assert.h>
 #include <smmintrin.h>
@@ -166,4 +166,4 @@ static XNN_INLINE void xnn_store_tail_s8(int8_t* output, xnn_simd_s8_t v,
   }
 }
 
-#endif  // __XNNPACK_SRC_XNNPACK_SIMD_S8_SSE41_H_
+#endif  // XNNPACK_SRC_XNNPACK_SIMD_S8_SSE41_H_

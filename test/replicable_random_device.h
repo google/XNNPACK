@@ -3,8 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#ifndef __XNNPACK_TEST_REPLICABLE_RANDOM_NUMBER_GENERATOR_H_
-#define __XNNPACK_TEST_REPLICABLE_RANDOM_NUMBER_GENERATOR_H_
+#ifndef XNNPACK_TEST_REPLICABLE_RANDOM_NUMBER_GENERATOR_H_
+#define XNNPACK_TEST_REPLICABLE_RANDOM_NUMBER_GENERATOR_H_
 
 #include <chrono>
 #include <cstddef>
@@ -145,4 +145,4 @@ class FuzzTest {
 
 }  // namespace xnnpack
 
-#endif  // __XNNPACK_TEST_REPLICABLE_RANDOM_NUMBER_GENERATOR_H_
+#endif  // XNNPACK_TEST_REPLICABLE_RANDOM_NUMBER_GENERATOR_H_

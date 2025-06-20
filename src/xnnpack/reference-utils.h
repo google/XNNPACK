@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_REFERENCE_UTILS_H_
+#define XNNPACK_SRC_XNNPACK_REFERENCE_UTILS_H_
 
 #include <algorithm>
 #include <cmath>
@@ -93,3 +94,5 @@ T integer_pow(T a, T b) {
 }
 
 }  // namespace xnnpack
+
+#endif  // XNNPACK_SRC_XNNPACK_REFERENCE_UTILS_H_

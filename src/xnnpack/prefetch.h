@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_SRC_XNNPACK_PREFETCH_H_
+#define XNNPACK_SRC_XNNPACK_PREFETCH_H_
 
 #ifdef _MSC_VER
 #include <intrin.h>
@@ -60,3 +61,5 @@ XNN_INLINE static void xnn_prefetch_to_l1(const void *address) {
 #error "Compiler-specific implementation of xnn_prefetch_to_l1 required"
 #endif
 }
+
+#endif  // XNNPACK_SRC_XNNPACK_PREFETCH_H_

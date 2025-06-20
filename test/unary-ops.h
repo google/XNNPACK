@@ -3,8 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#ifndef THIRD_PARTY_XNNPACK_TEST_UNARY_OPS_H_
-#define THIRD_PARTY_XNNPACK_TEST_UNARY_OPS_H_
+#ifndef XNNPACK_TEST_UNARY_OPS_H_
+#define XNNPACK_TEST_UNARY_OPS_H_
 
 #include <algorithm>
 #include <cassert>
@@ -773,4 +773,4 @@ void UnaryReferenceImpl(
   }
 }
 
-#endif  // THIRD_PARTY_XNNPACK_TEST_UNARY_OPS_H_
+#endif  // XNNPACK_TEST_UNARY_OPS_H_

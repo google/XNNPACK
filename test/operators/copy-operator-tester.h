@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_TEST_OPERATORS_COPY_OPERATOR_TESTER_H_
+#define XNNPACK_TEST_OPERATORS_COPY_OPERATOR_TESTER_H_
 
 #include <algorithm>
 #include <cassert>
@@ -281,3 +282,5 @@ class CopyOperatorTester {
   size_t output_stride_{0};
   size_t iterations_{15};
 };
+
+#endif  // XNNPACK_TEST_OPERATORS_COPY_OPERATOR_TESTER_H_

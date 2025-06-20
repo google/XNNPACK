@@ -8,7 +8,8 @@
 
 // clang-format off
 
-#pragma once
+#ifndef XNNPACK_INCLUDE_XNNPACK_H_
+#define XNNPACK_INCLUDE_XNNPACK_H_
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -4777,3 +4778,5 @@ enum xnn_status xnn_setup_space_to_depth_nhwc_x8(
 #ifdef __cplusplus
 }  // extern "C"
 #endif
+
+#endif  // XNNPACK_INCLUDE_XNNPACK_H_

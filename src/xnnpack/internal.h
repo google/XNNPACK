@@ -5,8 +5,8 @@
 
 // This file contains internal functions that are not part of the public API.
 
-#ifndef THIRD_PARTY_XNNPACK_SRC_XNNPACK_INTERNAL_H_
-#define THIRD_PARTY_XNNPACK_SRC_XNNPACK_INTERNAL_H_
+#ifndef XNNPACK_SRC_XNNPACK_INTERNAL_H_
+#define XNNPACK_SRC_XNNPACK_INTERNAL_H_
 
 #include <stddef.h>
 #include <stdint.h>
@@ -548,4 +548,4 @@ enum xnn_status xnn_create_fully_connected_nc_qdu8_f32_qb4w_f16_scales(
 }  // extern "C"
 #endif
 
-#endif  // THIRD_PARTY_XNNPACK_SRC_XNNPACK_INTERNAL_H_
+#endif  // XNNPACK_SRC_XNNPACK_INTERNAL_H_

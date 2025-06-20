@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 //
 
-#ifndef __XNNPACK_SRC_XNNPACK_SIMD_S32_SSE41_H_
-#define __XNNPACK_SRC_XNNPACK_SIMD_S32_SSE41_H_
+#ifndef XNNPACK_SRC_XNNPACK_SIMD_S32_SSE41_H_
+#define XNNPACK_SRC_XNNPACK_SIMD_S32_SSE41_H_
 
 #include <assert.h>
 #include <smmintrin.h>
@@ -121,4 +121,4 @@ static XNN_INLINE __m128 xnn_cvt_f32_s32(xnn_simd_s32_t a) {
   return _mm_cvtepi32_ps(a);
 }
 
-#endif  // __XNNPACK_SRC_XNNPACK_SIMD_S32_SSE41_H_
+#endif  // XNNPACK_SRC_XNNPACK_SIMD_S32_SSE41_H_

@@ -3,8 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#ifndef THIRD_PARTY_XNNPACK_SRC_XNNPACK_OPERATOR_UTILS_H_
-#define THIRD_PARTY_XNNPACK_SRC_XNNPACK_OPERATOR_UTILS_H_
+#ifndef XNNPACK_SRC_XNNPACK_OPERATOR_UTILS_H_
+#define XNNPACK_SRC_XNNPACK_OPERATOR_UTILS_H_
 
 #include <stddef.h>
 #include <stdint.h>
@@ -68,4 +68,4 @@ XNN_INTERNAL const char* xnn_operator_type_to_string_v2(xnn_operator_t op);
 }
 #endif
 
-#endif  // THIRD_PARTY_XNNPACK_SRC_XNNPACK_OPERATOR_UTILS_H_
+#endif  // XNNPACK_SRC_XNNPACK_OPERATOR_UTILS_H_

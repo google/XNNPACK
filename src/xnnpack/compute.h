@@ -3,8 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#ifndef THIRD_PARTY_XNNPACK_SRC_XNNPACK_COMPUTE_H_
-#define THIRD_PARTY_XNNPACK_SRC_XNNPACK_COMPUTE_H_
+#ifndef XNNPACK_SRC_XNNPACK_COMPUTE_H_
+#define XNNPACK_SRC_XNNPACK_COMPUTE_H_
 
 #include <stddef.h>
 #include <stdint.h>
@@ -1362,4 +1362,4 @@ XNN_PRIVATE void xnn_compute_rope(const struct rope_context* context,
                                   size_t batch_index, size_t head_index,
                                   size_t sequence_index);
 
-#endif  // THIRD_PARTY_XNNPACK_SRC_XNNPACK_COMPUTE_H_
+#endif  // XNNPACK_SRC_XNNPACK_COMPUTE_H_

@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef XNNPACK_TEST_OPERATORS_TRANSPOSE_OPERATOR_TESTER_H_
+#define XNNPACK_TEST_OPERATORS_TRANSPOSE_OPERATOR_TESTER_H_
 
 #include <algorithm>
 #include <cassert>
@@ -359,3 +360,5 @@ class TransposeOperatorTester {
   std::vector<size_t> shape_;
   std::vector<size_t> perm_;
 };
+
+#endif  // XNNPACK_TEST_OPERATORS_TRANSPOSE_OPERATOR_TESTER_H_
