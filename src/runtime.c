@@ -3,10 +3,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#ifndef __MACH__
-#define _POSIX_C_SOURCE 199309L
-#endif
-
 #include <assert.h>
 #include <inttypes.h>
 #include <stddef.h>
