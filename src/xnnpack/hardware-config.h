@@ -10,6 +10,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include <cpuinfo.h>
 #include "src/xnnpack/common.h"
 
 #ifdef __cplusplus
@@ -82,6 +83,7 @@ enum xnn_arch_flags {
 };
 
 struct xnn_hardware_config {
+  enum cpuinfo_uarch primary_uarch;
   uint64_t arch_flags;
 #if XNN_ARCH_RISCV
   // vlenb CSR (VLEN/8). 0 if vector extension is unsupported.

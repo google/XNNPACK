@@ -84,6 +84,7 @@ static void set_arch_flag(uint64_t flag, bool value) {
 }
 
 static void init_hardware_config(void) {
+  hardware_config.primary_uarch = cpuinfo_get_core(0)->uarch;
   hardware_config.arch_flags = 0;
 #if XNN_ARCH_ARM64 || XNN_ARCH_ARM
 #if XNN_PLATFORM_WINDOWS
