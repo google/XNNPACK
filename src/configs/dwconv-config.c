@@ -171,7 +171,9 @@ static void init_f32_dwconv_config(void) {
       f32_dwconv_config[2].channel_tile = 8;
       f32_dwconv_config[2].primary_tile = 9;
     #else  // !XNN_PLATFORM_IOS && !XNN_PLATFORM_MAC
-      switch (cpuinfo_get_core(0)->uarch) {
+      const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+      assert(hardware_config != NULL);
+      switch (hardware_config->primary_uarch) {
         case cpuinfo_uarch_kryo:
           f32_dwconv_config[2].minmax = (xnn_dwconv_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_9p8c__neonfma;
           f32_dwconv_config[2].init.f32 = xnn_init_f32_minmax_scalar_params;
