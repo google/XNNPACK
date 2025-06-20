@@ -705,13 +705,26 @@ typedef void (*xnn_pack_lh_ukernel_fn)(size_t m, size_t k, size_t mr, size_t kr,
                                        const void* lhs, size_t lhs_stride,
                                        void* lhs_packed);
 
+typedef void (*xnn_pack_lh_igemm_ukernel_fn)(size_t m, size_t kc, size_t ks,
+                                             size_t mr_packed, size_t kr,
+                                             size_t sr, const void** a,
+                                             size_t a_offset, const void* zero,
+                                             void* lhs_packed);
+
 // PACKLH Size: Size of packed buffer required.
 typedef size_t (*xnn_pack_lh_size_fn)(size_t m, size_t k, size_t mr, size_t kr,
                                       size_t sr);
 
+typedef size_t (*xnn_pack_lh_igemm_size_fn)(size_t m, size_t kc, size_t ks,
+                                            size_t mr_packed, size_t kr,
+                                            size_t sr);
+
 // PACKLH Offset: Offset into the packed buffer.
 typedef size_t (*xnn_pack_lh_offset_fn)(size_t m, size_t k, size_t mr,
                                         size_t kr, size_t sr);
+
+typedef size_t (*xnn_pack_lh_igemm_offset_fn)(size_t m, size_t kc, size_t ks,
+                                              size_t mr, size_t kr, size_t sr);
 
 // FILL: FILL array with value
 

@@ -603,7 +603,7 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
             .lhs_stride = input_channels
                           << packed_lh_config->log2_input_element_size,
             .packed_offset_fn = packed_lh_config->offset_fn,
-            .pack_lh_ukernel = packed_lh_config->ukernel,
+            .pack_lh_ukernel = packed_lh_config->pack_lh_fn,
             .workspace_offset = workspace_offset,
         };
 

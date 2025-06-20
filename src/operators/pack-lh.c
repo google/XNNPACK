@@ -131,7 +131,7 @@ enum xnn_status reshape_pack_lh(xnn_operator_t pack_lh_op, size_t num_groups,
       .gi_stride = batch_size * channels * element_size,
       .gp_stride = group_size,
       .packed_offset_fn = (xnn_pack_lh_offset_fn)pack_lh_config->offset_fn,
-      .pack_lh_ukernel = (xnn_pack_lh_ukernel_fn)pack_lh_config->ukernel,
+      .pack_lh_ukernel = (xnn_pack_lh_ukernel_fn)pack_lh_config->pack_lh_fn,
   };
 
   *output_size_bytes = num_groups * group_size;

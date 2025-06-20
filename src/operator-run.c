@@ -615,7 +615,7 @@ XNN_INLINE static void compute_inline_packed_qp8gemm(
     size_t mr_block_start, size_t mr_block_size) {
   assert(context->packed_lh_config != NULL);
   assert(context->packed_lh_config->offset_fn != NULL);
-  assert(context->packed_lh_config->ukernel != NULL);
+  assert(context->packed_lh_config->pack_lh_fn != NULL);
 
   const size_t cm_stride = context->cm_stride;
   const size_t cn_stride = context->cn_stride;
@@ -652,7 +652,7 @@ XNN_INLINE static void compute_inline_packed_qp8gemm(
     if (skip_lhs_packing) {
       packed_lhs = (const void*)(a + mr_block_start * a_stride);
     } else {
-      context->packed_lh_config->ukernel(
+      context->packed_lh_config->pack_lh_fn(
           /*m=*/mr_step, kc, mr_packed, kr, sr,
           /*m_idx_start=*/0, (const void*)(a + mr_block_start * a_stride),
           a_stride, workspace);

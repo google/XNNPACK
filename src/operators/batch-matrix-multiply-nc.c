@@ -950,7 +950,7 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
             .gi_stride = m * k << packed_lh_config->log2_input_element_size,
             .gp_stride = ga_stride,
             .packed_offset_fn = packed_lh_config->offset_fn,
-            .pack_lh_ukernel = packed_lh_config->ukernel,
+            .pack_lh_ukernel = packed_lh_config->pack_lh_fn,
             .workspace_offset = workspace_offset,
         };
 

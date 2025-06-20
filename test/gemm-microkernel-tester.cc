@@ -2315,10 +2315,10 @@ void GemmMicrokernelTester::Test_PF32(
   const size_t input_packed_size =
       pack_lh_config->size_fn(m(), k(), mr_packed(), kr(), sr());
   xnnpack::Buffer<int8_t> input_packed(input_packed_size);
-  pack_lh_config->ukernel(m(), k(), mr_packed(), kr(), sr(),
-                          /*m_idx_start=*/0, input_f32.data(),
-                          /*lhs_stride=*/k() * sizeof(float),
-                          input_packed.data());
+  pack_lh_config->pack_lh_fn(m(), k(), mr_packed(), kr(), sr(),
+                             /*m_idx_start=*/0, input_f32.data(),
+                             /*lhs_stride=*/k() * sizeof(float),
+                             input_packed.data());
 
   std::generate(weights.begin(), weights.end(), std::ref(f32rng));
   std::generate(bias.begin(), bias.end(), std::ref(f32rng));
@@ -2433,10 +2433,10 @@ void GemmMicrokernelTester::Test_PF16(
       pack_lh_config->size_fn(m(), k(), mr_packed(), kr(), sr());
   xnnpack::Buffer<int8_t> input_packed(input_packed_size, /*extra_bytes=*/{0},
                                        "input_packed");
-  pack_lh_config->ukernel(m(), k(), mr_packed(), kr(), sr(),
-                          /*m_idx_start=*/0, input_f16.data(),
-                          /*lhs_stride=*/k() * sizeof(xnn_float16),
-                          input_packed.data());
+  pack_lh_config->pack_lh_fn(m(), k(), mr_packed(), kr(), sr(),
+                             /*m_idx_start=*/0, input_f16.data(),
+                             /*lhs_stride=*/k() * sizeof(xnn_float16),
+                             input_packed.data());
 
   std::generate(weights.begin(), weights.end(), std::ref(f32rng));
   std::generate(bias.begin(), bias.end(), std::ref(f32rng));
@@ -2553,10 +2553,10 @@ void GemmMicrokernelTester::Test_PQS8(
   const size_t input_packed_size =
       pack_lh_config->size_fn(m(), k(), mr_packed(), kr(), sr());
   xnnpack::Buffer<int8_t> input_packed(input_packed_size);
-  pack_lh_config->ukernel(m(), k(), mr_packed(), kr(), sr(),
-                          /*m_idx_start=*/0, a.data(),
-                          /*lhs_stride=*/k() * sizeof(int8_t),
-                          input_packed.data());
+  pack_lh_config->pack_lh_fn(m(), k(), mr_packed(), kr(), sr(),
+                             /*m_idx_start=*/0, a.data(),
+                             /*lhs_stride=*/k() * sizeof(int8_t),
+                             input_packed.data());
 
   // Compute 32-bit results and output quantization arguments.
   std::fill(acc.begin(), acc.end(), 0);
