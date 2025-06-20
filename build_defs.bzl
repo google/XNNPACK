@@ -150,12 +150,6 @@ def xnnpack_std_cxxopts():
     """Compiler flags to specify language standard for C++ sources."""
     return ["-std=gnu++14"]
 
-def xnnpack_std_c_defines():
-    """Default defines used throughout the C sources."""
-    # We need this for things like `struct timespec` that are not in c99, but
-    # are in POSIX 1003.1b-1993.
-    return ["_POSIX_C_SOURCE=199309L"]
-
 def xnnpack_test_deps_for_library():
     """Depencies needed for a library to use gunit."""
     return ["@com_google_googletest//:gtest_main"]
@@ -352,7 +346,7 @@ def xnnpack_cc_library(
             "//:optimized_build": optimized_copts,
             "//conditions:default": [],
         }),
-        defines = xnnpack_std_c_defines() + defines,
+        defines = defines,
         deps = deps,
         includes = ["include", "src"] + includes,
         linkstatic = True,

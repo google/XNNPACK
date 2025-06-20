@@ -312,7 +312,6 @@ xnnpack_cc_library(
     name = "internal",
     hdrs = ["src/xnnpack/internal.h"],
     deps = [
-        ":math",
         ":subgraph_h",
         ":xnnpack_h",
         "//src/configs:config_hdrs",
@@ -820,6 +819,7 @@ xnnpack_cc_library(
     ],
     deps = [
         ":allocation_type",
+        ":cache",
         ":common",
         ":math",
         ":node_type",
