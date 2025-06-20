@@ -201,26 +201,20 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${OUT_
       $for M in range(MR):
         vfacc${M} = __riscv_vfmin_vf_f32${OUT_LMUL}(vfacc${M}, output_max_less_zero_point, vl);
 
+      $for M in range(MR):
+        vint16${INTER_LMUL}_t vout${M} = __riscv_vfncvt_x(vfacc${M}, vl);
+
+      $for M in range(MR):
+        vout${M} = __riscv_vadd_vx_i16${INTER_LMUL}(vout${M}, (int16_t) output_zero_point, vl);
+
       $if DATATYPE == "QU8":
         $for M in range(MR):
-          vuint16${INTER_LMUL}_t vout${M} = __riscv_vfncvt_xu(vfacc${M}, vl);
-
-        $for M in range(MR):
-          vout${M} = __riscv_vadd_vx_u16${INTER_LMUL}(vout${M}, (uint16_t) output_zero_point, vl);
-
-        $for M in range(MR):
-          vuint8${IN_LMUL}_t vout8${M} = __riscv_vnclipu_wx_u8${IN_LMUL}(vout${M}, 0, vl);
+          vuint8${IN_LMUL}_t vout8${M} = __riscv_vncvt_x_x_w_u8${IN_LMUL}(__riscv_vreinterpret_u16${INTER_LMUL}(vout${M}), vl);
 
         $for M in range(MR):
           __riscv_vse8_v_u8${IN_LMUL}(c${M}, vout8${M}, vl);
           c${M} = (${XINT8_T}*) ((uintptr_t) c${M} + cn_stride);
       $else:
-        $for M in range(MR):
-          vint16${INTER_LMUL}_t vout${M} = __riscv_vfncvt_x(vfacc${M}, vl);
-
-        $for M in range(MR):
-          vout${M} = __riscv_vadd_vx_i16${INTER_LMUL}(vout${M}, (int16_t) output_zero_point, vl);
-
         $for M in range(MR):
           vint8${IN_LMUL}_t vout8${M} = __riscv_vncvt_x_x_w_i8${IN_LMUL}(vout${M}, vl);
 

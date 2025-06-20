@@ -142,6 +142,10 @@ tools/xngen src/qs8-gemm/rvv.c.in -D MR=1 -D NR=m4 -D REQUANTIZATION=FP32 -D DAT
 tools/xngen src/qs8-gemm/rvv.c.in -D MR=4 -D NR=m4 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x4v-minmax-fp32-rvv.c &
 tools/xngen src/qs8-gemm/rvv.c.in -D MR=7 -D NR=m4 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-7x4v-minmax-fp32-rvv.c &
 
+tools/xngen src/qs8-gemm/rvv.c.in -D MR=1 -D NR=m4 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-gemm/gen/qu8-gemm-1x4v-minmax-fp32-rvv.c &
+tools/xngen src/qs8-gemm/rvv.c.in -D MR=4 -D NR=m4 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-gemm/gen/qu8-gemm-4x4v-minmax-fp32-rvv.c &
+tools/xngen src/qs8-gemm/rvv.c.in -D MR=7 -D NR=m4 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-gemm/gen/qu8-gemm-7x4v-minmax-fp32-rvv.c &
+
 ################################## WAsm SIMD ##################################
 ### C2 micro-kernels
 tools/xngen src/qs8-gemm/MRx4c2-wasmsimd-dot16x2.c.in -D MR=1 -D VARIANT=LD64     -D REQUANTIZATION=         -D DATATYPE=QD8 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x4c2-minmax-wasmsimd-dot16x2-ld64.c &
