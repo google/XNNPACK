@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <type_traits>
 
 #include "include/xnnpack.h"
 #include "src/xnnpack/common.h"
@@ -41,15 +42,28 @@
 #endif  // XNN_ENABLE_KLEIDIAI
 
 struct unaligned_int32_t {
-  char value[sizeof(int32_t)];
+  XNN_INLINE explicit unaligned_int32_t(int32_t v) {
+    memcpy(value_, &v, sizeof(v));
+  }
 
-  XNN_INLINE unaligned_int32_t(int32_t v) { memcpy(value, &v, sizeof(v)); }
+  // Allow assignment from any integer type of at most sizeof(int32_t).
+  template <typename T, std::enable_if_t<sizeof(T) <= sizeof(int32_t) &&
+                                             std::is_integral<T>::value,
+                                         bool> = true>
+  unaligned_int32_t& operator=(T v) {
+    // Clear any trailing bytes.
+    memset(value_ + sizeof(T), 0, sizeof(int32_t) - sizeof(T));
+    memcpy(value_, &v, sizeof(T));
+    return *this;
+  }
 
-  XNN_INLINE operator int32_t() const {
+  XNN_INLINE operator int32_t() const {  // NOLINT(google-explicit-constructor)
     int32_t v;
-    memcpy(&v, value, sizeof(v));
+    memcpy(&v, value_, sizeof(v));
     return v;
   }
+
+  char value_[sizeof(int32_t)];
 };
 
 template <typename Src, typename Dst>
