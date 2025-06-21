@@ -1910,7 +1910,7 @@ enum xnn_status xnn_create_fully_connected_nc_qs8(
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
                   xnn_operator_type_to_string(
-                      xnn_operator_type_fully_connected_nc_qs8_qc8w));
+                      xnn_operator_type_fully_connected_nc_qs8));
     return xnn_status_uninitialized;
   }
 
