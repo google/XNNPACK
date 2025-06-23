@@ -54,7 +54,7 @@ xnnpack_cxx_library(
     testonly = True,
     hdrs = ["operator-test-utils.h"],
     # TODO: This shouldn't be required outside of here.
-    visibility = ["//:__subpackages__"],
+    visibility = ["//visibility:private"],
     deps = ["//test:replicable_random_device"],
 )
 
