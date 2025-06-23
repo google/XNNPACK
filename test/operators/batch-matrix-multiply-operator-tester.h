@@ -26,6 +26,7 @@
 #include "src/xnnpack/config.h"
 #include "src/xnnpack/internal.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/pack.h"
 #include "src/xnnpack/packq.h"
 #include "test/replicable_random_device.h"
 
@@ -130,6 +131,126 @@ class BatchMatMulOperatorTester {
           }
         }
       }
+    }
+  }
+
+  static void ComputeRefQS8(size_t m, size_t k, size_t n, bool transpose_b,
+                            const int8_t* input_a, const int8_t* input_b,
+                            int8_t input_zero_point, int32_t* accumulators) {
+    std::fill(accumulators, accumulators + m * n, static_cast<int32_t>(0));
+
+    if (transpose_b) {
+      // lhs is B*M*K, rhs is B*N*K.
+      for (size_t mi = 0; mi < m; mi++) {
+        for (size_t ni = 0; ni < n; ni++) {
+          for (size_t ki = 0; ki < k; ki++) {
+            accumulators[mi * n + ni] +=
+                (static_cast<int32_t>(input_a[mi * k + ki]) -
+                 static_cast<int32_t>(input_zero_point)) *
+                static_cast<int32_t>(input_b[ni * k + ki]);
+          }
+        }
+      }
+    } else {
+      // lhs is B*M*K, rhs is B*K*N.
+      for (size_t mi = 0; mi < m; mi++) {
+        for (size_t ni = 0; ni < n; ni++) {
+          for (size_t ki = 0; ki < k; ki++) {
+            accumulators[mi * n + ni] +=
+                (static_cast<int32_t>(input_a[mi * k + ki]) -
+                 static_cast<int32_t>(input_zero_point)) *
+                static_cast<int32_t>(input_b[ki * n + ni]);
+          }
+        }
+      }
+    }
+  }
+
+  void ComputeReferenceQS8(const std::vector<size_t>& batch_dims_output,
+                           const int8_t* input_a, const int8_t* input_b,
+                           float scale, int8_t input_zero_point,
+                           int8_t output_zero_point, int32_t* accumulators,
+                           int8_t* output_ref,
+                           void (*ref_fun)(size_t, size_t, size_t, bool,
+                                           const int8_t*, const int8_t*,
+                                           int8_t, int32_t*)) const {
+    const int num_batch_dims = batch_dims_output.size();
+
+    // Compute reference results.
+    if (num_batch_dims == 0) {
+      ref_fun(m(), k(), n(), transpose_b(), input_a, input_b, input_zero_point,
+              accumulators);
+    } else if (num_batch_dims == 1) {
+      for (size_t b = 0; b < batch_dims_output[0]; b++) {
+        const size_t ba = b % batch_dims_a()[0];
+        const size_t bb = b % batch_dims_b()[0];
+        ref_fun(m(), k(), n(), transpose_b(), &input_a[ba * m() * k()],
+                &input_b[bb * n() * k()], input_zero_point,
+                &accumulators[b * m() * n()]);
+      }
+    } else if (num_batch_dims == 2) {
+      for (size_t b0 = 0; b0 < batch_dims_output[0]; b0++) {
+        const size_t b0a = b0 % batch_dims_a()[0];
+        const size_t b0b = b0 % batch_dims_b()[0];
+        for (size_t b1 = 0; b1 < batch_dims_output[1]; b1++) {
+          const size_t ba = b0a * batch_dims_a()[1] + (b1 % batch_dims_a()[1]);
+          const size_t bb = b0b * batch_dims_b()[1] + (b1 % batch_dims_b()[1]);
+          const size_t bc = b0 * batch_dims_output[1] + b1;
+          ref_fun(m(), k(), n(), transpose_b(), &input_a[ba * m() * k()],
+                  &input_b[bb * n() * k()], input_zero_point,
+                  &accumulators[bc * m() * n()]);
+        }
+      }
+    } else if (num_batch_dims == 3) {
+      for (size_t b0 = 0; b0 < batch_dims_output[0]; b0++) {
+        const size_t b0a = b0 % batch_dims_a()[0];
+        const size_t b0b = b0 % batch_dims_b()[0];
+        for (size_t b1 = 0; b1 < batch_dims_output[1]; b1++) {
+          const size_t b1a = b0a * batch_dims_a()[1] + (b1 % batch_dims_a()[1]);
+          const size_t b1b = b0b * batch_dims_b()[1] + (b1 % batch_dims_b()[1]);
+          const size_t b1c = b0 * batch_dims_output[1] + b1;
+          for (size_t b2 = 0; b2 < batch_dims_output[2]; b2++) {
+            const size_t ba =
+                b1a * batch_dims_a()[2] + (b2 % batch_dims_a()[2]);
+            const size_t bb =
+                b1b * batch_dims_b()[2] + (b2 % batch_dims_b()[2]);
+            const size_t bc = b1c * batch_dims_output[2] + b2;
+            ref_fun(m(), k(), n(), transpose_b(), &input_a[ba * m() * k()],
+                    &input_b[bb * n() * k()], input_zero_point,
+                    &accumulators[bc * m() * n()]);
+          }
+        }
+      }
+    } else if (num_batch_dims == 4) {
+      for (size_t b0 = 0; b0 < batch_dims_output[0]; b0++) {
+        const size_t b0a = b0 % batch_dims_a()[0];
+        const size_t b0b = b0 % batch_dims_b()[0];
+        for (size_t b1 = 0; b1 < batch_dims_output[1]; b1++) {
+          const size_t b1a = b0a * batch_dims_a()[1] + (b1 % batch_dims_a()[1]);
+          const size_t b1b = b0b * batch_dims_b()[1] + (b1 % batch_dims_b()[1]);
+          const size_t b1c = b0 * batch_dims_output[1] + b1;
+          for (size_t b2 = 0; b2 < batch_dims_output[2]; b2++) {
+            const size_t b2a =
+                b1a * batch_dims_a()[2] + (b2 % batch_dims_a()[2]);
+            const size_t b2b =
+                b1b * batch_dims_b()[2] + (b2 % batch_dims_b()[2]);
+            const size_t b2c = b1c * batch_dims_output[2] + b2;
+            for (size_t b3 = 0; b3 < batch_dims_output[3]; b3++) {
+              const size_t ba =
+                  b2a * batch_dims_a()[3] + (b3 % batch_dims_a()[3]);
+              const size_t bb =
+                  b2b * batch_dims_b()[3] + (b3 % batch_dims_b()[3]);
+              const size_t bc = b2c * batch_dims_output[3] + b3;
+              ref_fun(m(), k(), n(), transpose_b(), &input_a[ba * m() * k()],
+                      &input_b[bb * n() * k()], input_zero_point,
+                      &accumulators[bc * m() * n()]);
+            }
+          }
+        }
+      }
+    } else {
+      FAIL() << "Number of batch dims must be <= 4 (got " << num_batch_dims
+             << ")";
     }
   }
 
@@ -293,6 +414,113 @@ class BatchMatMulOperatorTester {
                                                      /*threadpool=*/nullptr));
 
       VerifyF16(output, output_ref);
+    }
+  }
+
+  void TestQS8() const {
+    ASSERT_EQ(batch_dims_a().size(), batch_dims_b().size());
+    const size_t num_batch_dims = batch_dims_a().size();
+
+    xnnpack::ReplicableRandomDevice rng;
+    std::uniform_int_distribution<int32_t> s8dist(
+        std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+
+    size_t batch_size_a = 1;
+    for (int k = 0; k < num_batch_dims; k++) {
+      batch_size_a *= batch_dims_a()[k];
+    }
+    size_t batch_size_b = 1;
+    for (int k = 0; k < num_batch_dims; k++) {
+      batch_size_b *= batch_dims_b()[k];
+    }
+    std::vector<size_t> batch_dims_output(num_batch_dims);
+    size_t batch_size_output = 1;
+    for (int k = 0; k < num_batch_dims; k++) {
+      batch_dims_output[k] = std::max(batch_dims_a()[k], batch_dims_b()[k]);
+      batch_size_output *= batch_dims_output[k];
+    }
+
+    xnnpack::Buffer<int8_t> input_a(batch_size_a * m() * k(),
+                                    xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<int8_t> input_b(batch_size_b * k() * n(),
+                                    xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<int8_t> output(batch_size_output * m() * n());
+    xnnpack::Buffer<int32_t> accumulators(batch_size_output * m() * n());
+    xnnpack::Buffer<int8_t> output_ref(batch_size_output * m() * n());
+
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
+      std::generate_n(input_a.begin(), batch_size_a * m() * k(),
+                    [&]() { return s8dist(rng); });
+      std::generate_n(input_b.begin(), batch_size_b * k() * n(),
+                    [&]() { return s8dist(rng); });
+
+      float scale = 1.0f;
+      int8_t input_zero_point = 0;
+      int8_t output_zero_point = 0;
+      int8_t output_min = 0;
+      int8_t output_max = 127;
+
+      // Compute reference results without requantization.
+      ComputeReferenceQS8(batch_dims_output, input_a.data(), input_b.data(),
+                          scale, input_zero_point, output_zero_point,
+                          accumulators.data(), output_ref.data(),
+                          ComputeRefQS8);
+
+      // Renormalize reference results.
+      std::transform(
+          accumulators.cbegin(), accumulators.cend(), output_ref.begin(),
+          [scale, output_zero_point, output_min,
+           output_max](int32_t x) -> double {
+            return std::max<int32_t>(
+                std::min<int32_t>(
+                    (x - static_cast<int32_t>(output_zero_point)) / scale,
+                    output_max),
+                output_min);
+          });
+
+      // Create, setup, run, and destroy Fully Connected operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t batch_matrix_multiply_op = nullptr;
+
+      const xnn_status status = xnn_create_batch_matrix_multiply_nc_qs8(
+          output_zero_point, output_min, output_max, flags(),
+          &batch_matrix_multiply_op);
+      if (status == xnn_status_unsupported_hardware) {
+        GTEST_SKIP();
+      }
+      ASSERT_EQ(xnn_status_success, status);
+      ASSERT_NE(nullptr, batch_matrix_multiply_op);
+
+      // Smart pointer to automatically delete batch_matrix_multiply_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+          auto_batch_matrix_multiply_op(batch_matrix_multiply_op,
+                                        xnn_delete_operator);
+
+      struct xnn_qs8_packing_params packing_params;
+      packing_params.input_zero_point = input_zero_point;
+
+      size_t workspace_size = 0;
+      ASSERT_EQ(expected_status_reshape(),
+                xnn_reshape_batch_matrix_multiply_nc_qs8(
+                    batch_matrix_multiply_op, num_batch_dims,
+                    batch_dims_a().data(), batch_dims_b().data(), m(), k(), n(),
+                    &scale, &packing_params, &workspace_size,
+                    /*threadpool=*/nullptr));
+      if (expected_status_reshape() != xnn_status_success) {
+        return;
+      }
+      ASSERT_NE(workspace_size, 0);
+      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
+
+      ASSERT_EQ(xnn_status_success,
+                xnn_setup_batch_matrix_multiply_nc_qs8(
+                    batch_matrix_multiply_op, workspace.data(), input_a.data(),
+                    input_b.data(), output.data()));
+
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(batch_matrix_multiply_op,
+                                                     /*threadpool=*/nullptr));
+
+      VerifyQS8(output, output_ref);
     }
   }
 
@@ -767,6 +995,23 @@ class BatchMatMulOperatorTester {
               output_ref[bi * m() * n() + mi * n() + ni],
               output[bi * m() * n() + mi * n() + ni],
               1.0e-2f * std::abs(output_ref[bi * m() * n() + mi * n() + ni]))
+              << "batch = " << bi << " / " << batch_size_output
+              << ", m = " << mi << " / " << m() << ", n = " << ni << " / "
+              << n();
+        }
+      }
+    }
+  }
+
+  void VerifyQS8(const xnnpack::Buffer<int8_t>& output,
+                 const xnnpack::Buffer<int8_t>& output_ref) const {
+    const size_t batch_size_output = output.size() / (m() * n());
+    for (size_t bi = 0; bi < batch_size_output; bi++) {
+      for (size_t mi = 0; mi < m(); mi++) {
+        for (size_t ni = 0; ni < n(); ni++) {
+          ASSERT_EQ(
+              output_ref[bi * m() * n() + mi * n() + ni],
+              output[bi * m() * n() + mi * n() + ni])
               << "batch = " << bi << " / " << batch_size_output
               << ", m = " << mi << " / " << m() << ", n = " << ni << " / "
               << n();

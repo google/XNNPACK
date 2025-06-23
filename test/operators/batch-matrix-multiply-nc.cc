@@ -193,6 +193,19 @@ TEST_P(BatchMatMulTest, TestF16) {
       .TestF16();
 }
 
+TEST_P(BatchMatMulTest, TestQS8) {
+  const BatchMatMulTesterParams& params = GetParam();
+  BatchMatMulOperatorTester()
+      .batch_dims_a(params.batch_dims_a)
+      .batch_dims_b(params.batch_dims_b)
+      .m(params.m)
+      .k(params.k)
+      .n(params.n)
+      .transpose_b(params.transpose_b)
+      .expected_status_reshape(params.expected_status_reshape)
+      .TestQS8();
+}
+
 TEST_P(BatchMatMulTest, TestQD8F32QC8W) {
   const BatchMatMulTesterParams& params = GetParam();
   BatchMatMulOperatorTester()

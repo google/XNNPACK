@@ -117,7 +117,7 @@ xnnpack_unit_test(
         "batch-matrix-multiply-operator-tester.h",
     ],
     shard_count = 5,
-    deps = OPERATOR_TEST_DEPS,
+    deps = OPERATOR_TEST_DEPS + ["//:packing"],
 )
 
 xnnpack_unit_test(

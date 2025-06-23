@@ -2771,6 +2771,20 @@ enum xnn_status xnn_setup_batch_matrix_multiply_nc_f32(
     xnn_operator_t batch_matrix_multiply_op, void* workspace,
     const float* input_a, const float* input_b, float* output);
 
+enum xnn_status xnn_create_batch_matrix_multiply_nc_qs8(
+    int8_t output_zero_point, int8_t output_min, int8_t output_max,
+    uint32_t flags, xnn_operator_t* batch_matrix_multiply_op_out);
+
+enum xnn_status xnn_reshape_batch_matrix_multiply_nc_qs8(
+    xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
+    const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
+    size_t n, const float* scale, const void* packing_params,
+    size_t* workspace_size, pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_batch_matrix_multiply_nc_qs8(
+    xnn_operator_t batch_matrix_multiply_op, void* workspace,
+    const int8_t* input_a, const int8_t* input_b, int8_t* output);
+
 enum xnn_status xnn_create_batch_matrix_multiply_nc_qd8_f32_qc8w(
     size_t batch_size_b, size_t k, size_t n, const int8_t* data_b,
     const float* scale_b, uint32_t flags,

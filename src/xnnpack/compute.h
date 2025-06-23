@@ -213,6 +213,7 @@ struct packw_gemm_goi_context {
   // Scale parameters and initialization function for the packing microkernel.
   xnn_init_scale_params_fn init_scale_params;
   const void* scale_params;
+  size_t scale_params_size;
 };
 
 XNN_PRIVATE void xnn_compute_packw_gemm_goi(
@@ -272,6 +273,7 @@ struct packw_gemm_gio_context {
   // Scale parameters and initialization function for the packing microkernel.
   xnn_init_scale_params_fn init_scale_params;
   const void* scale_params;
+  size_t scale_params_size;
 };
 
 XNN_PRIVATE void xnn_compute_packw_gemm_gio(
