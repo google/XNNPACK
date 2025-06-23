@@ -21,6 +21,7 @@
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator-type.h"
+#include "src/xnnpack/pack.h"
 #include <pthreadpool.h>
 
 #ifdef __cplusplus
@@ -200,6 +201,7 @@ union xnn_params2 {
   struct xnn_f32_default_params f32_default;
   struct xnn_s8_minmax_params s8_minmax;
   struct xnn_u8_minmax_params u8_minmax;
+  struct xnn_qs8_packing_params qs8_packing;
 };
 
 struct xnn_operator {
