@@ -373,7 +373,7 @@ class BatchMatMulOperatorTester {
       ComputeReference(batch_dims_output, input_a.data(), input_b.data(),
                        output_ref.data(), ComputeRef<xnn_float16>);
 
-      // Create, setup, run, and destroy Fully Connected operator.
+      // Create, setup, run, and destroy Batch Matrix Multiply operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t batch_matrix_multiply_op = nullptr;
 
@@ -448,79 +448,101 @@ class BatchMatMulOperatorTester {
     xnnpack::Buffer<int32_t> accumulators(batch_size_output * m() * n());
     xnnpack::Buffer<int8_t> output_ref(batch_size_output * m() * n());
 
-    for (size_t iteration = 0; iteration < kIterations; iteration++) {
-      std::generate_n(input_a.begin(), batch_size_a * m() * k(),
-                    [&]() { return s8dist(rng); });
-      std::generate_n(input_b.begin(), batch_size_b * k() * n(),
-                    [&]() { return s8dist(rng); });
+    for (bool const_weights : {true, false}) {
+      for (size_t iteration = 0; iteration < kIterations; iteration++) {
+        std::generate_n(input_a.begin(), batch_size_a * m() * k(),
+                        [&]() { return s8dist(rng); });
+        std::generate_n(input_b.begin(), batch_size_b * k() * n(),
+                        [&]() { return s8dist(rng); });
 
-      float scale = 1.0f;
-      int8_t input_zero_point = 0;
-      int8_t output_zero_point = 0;
-      int8_t output_min = 0;
-      int8_t output_max = 127;
+        float scale = 1.0f;
+        int8_t input_zero_point = 0;
+        int8_t output_zero_point = 0;
+        int8_t output_min = 0;
+        int8_t output_max = 127;
 
-      // Compute reference results without requantization.
-      ComputeReferenceQS8(batch_dims_output, input_a.data(), input_b.data(),
-                          scale, input_zero_point, output_zero_point,
-                          accumulators.data(), output_ref.data(),
-                          ComputeRefQS8);
+        // Compute reference results without requantization.
+        ComputeReferenceQS8(batch_dims_output, input_a.data(), input_b.data(),
+                            scale, input_zero_point, output_zero_point,
+                            accumulators.data(), output_ref.data(),
+                            ComputeRefQS8);
 
-      // Renormalize reference results.
-      std::transform(
-          accumulators.cbegin(), accumulators.cend(), output_ref.begin(),
-          [scale, output_zero_point, output_min,
-           output_max](int32_t x) -> double {
-            return std::max<int32_t>(
-                std::min<int32_t>(
-                    (x - static_cast<int32_t>(output_zero_point)) / scale,
-                    output_max),
-                output_min);
-          });
+        // Renormalize reference results.
+        std::transform(
+            accumulators.cbegin(), accumulators.cend(), output_ref.begin(),
+            [scale, output_zero_point, output_min,
+            output_max](int32_t x) -> double {
+              return std::max<int32_t>(
+                  std::min<int32_t>(
+                      (x - output_zero_point) / scale, output_max),
+                  output_min);
+            });
 
-      // Create, setup, run, and destroy Fully Connected operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-      xnn_operator_t batch_matrix_multiply_op = nullptr;
+        // Create, setup, run, and destroy Batch Matrix Multiply operator.
+        ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+        xnn_operator_t batch_matrix_multiply_op = nullptr;
 
-      const xnn_status status = xnn_create_batch_matrix_multiply_nc_qs8(
-          output_zero_point, output_min, output_max, flags(),
-          &batch_matrix_multiply_op);
-      if (status == xnn_status_unsupported_hardware) {
-        GTEST_SKIP();
+        xnn_status status = xnn_status_success;
+        if (const_weights) {
+          std::vector<float> scales(batch_size_b * n(), scale);
+          status = xnn_create_batch_matrix_multiply_nc_qs8_const_weights(
+            batch_size_b, k(), n(), input_b.data(), output_zero_point,
+            output_min, output_max, input_zero_point, scales.data(), flags(),
+            &batch_matrix_multiply_op);
+        } else {
+          status = xnn_create_batch_matrix_multiply_nc_qs8(
+            output_zero_point, output_min, output_max, flags(),
+            &batch_matrix_multiply_op);
+        }
+        if (status == xnn_status_unsupported_hardware) {
+          GTEST_SKIP();
+        }
+        ASSERT_EQ(xnn_status_success, status);
+        ASSERT_NE(nullptr, batch_matrix_multiply_op);
+
+        // Smart pointer to automatically delete batch_matrix_multiply_op.
+        std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+            auto_batch_matrix_multiply_op(batch_matrix_multiply_op,
+                                          xnn_delete_operator);
+
+        size_t workspace_size = 0;
+        struct xnn_qs8_packing_params packing_params;
+        packing_params.input_zero_point = input_zero_point;
+        if (const_weights) {
+          ASSERT_EQ(expected_status_reshape(),
+                    xnn_reshape_batch_matrix_multiply_nc_qs8_const_weights(
+                        batch_matrix_multiply_op, num_batch_dims,
+                        batch_dims_a().data(), batch_dims_b().data(), m(), k(),
+                        n(), /*threadpool=*/nullptr));
+        } else {
+          ASSERT_EQ(expected_status_reshape(),
+                    xnn_reshape_batch_matrix_multiply_nc_qs8(
+                        batch_matrix_multiply_op, num_batch_dims,
+                        batch_dims_a().data(), batch_dims_b().data(), m(), k(),
+                        n(), &scale, &packing_params, &workspace_size,
+                        /*threadpool=*/nullptr));
+        }
+        if (expected_status_reshape() != xnn_status_success) {
+          return;
+        }
+        if (const_weights) {
+          ASSERT_EQ(workspace_size, 0);
+        } else {
+          ASSERT_NE(workspace_size, 0);
+        }
+        xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(
+            workspace_size);
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_batch_matrix_multiply_nc_qs8(
+                      batch_matrix_multiply_op, workspace.data(),
+                      input_a.data(), input_b.data(), output.data()));
+
+        ASSERT_EQ(xnn_status_success, xnn_run_operator(batch_matrix_multiply_op,
+                                                      /*threadpool=*/nullptr));
+
+        VerifyQS8(output, output_ref);
       }
-      ASSERT_EQ(xnn_status_success, status);
-      ASSERT_NE(nullptr, batch_matrix_multiply_op);
-
-      // Smart pointer to automatically delete batch_matrix_multiply_op.
-      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
-          auto_batch_matrix_multiply_op(batch_matrix_multiply_op,
-                                        xnn_delete_operator);
-
-      struct xnn_qs8_packing_params packing_params;
-      packing_params.input_zero_point = input_zero_point;
-
-      size_t workspace_size = 0;
-      ASSERT_EQ(expected_status_reshape(),
-                xnn_reshape_batch_matrix_multiply_nc_qs8(
-                    batch_matrix_multiply_op, num_batch_dims,
-                    batch_dims_a().data(), batch_dims_b().data(), m(), k(), n(),
-                    &scale, &packing_params, &workspace_size,
-                    /*threadpool=*/nullptr));
-      if (expected_status_reshape() != xnn_status_success) {
-        return;
-      }
-      ASSERT_NE(workspace_size, 0);
-      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
-
-      ASSERT_EQ(xnn_status_success,
-                xnn_setup_batch_matrix_multiply_nc_qs8(
-                    batch_matrix_multiply_op, workspace.data(), input_a.data(),
-                    input_b.data(), output.data()));
-
-      ASSERT_EQ(xnn_status_success, xnn_run_operator(batch_matrix_multiply_op,
-                                                     /*threadpool=*/nullptr));
-
-      VerifyQS8(output, output_ref);
     }
   }
 
@@ -563,7 +585,7 @@ class BatchMatMulOperatorTester {
       ComputeReference(batch_dims_output, input_a.data(), input_b.data(),
                        output_ref.data(), ComputeRef<xnn_bfloat16>);
 
-      // Create, setup, run, and destroy Fully Connected operator.
+      // Create, setup, run, and destroy Batch Matrix Multiply operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t batch_matrix_multiply_op = nullptr;
 
@@ -647,7 +669,7 @@ class BatchMatMulOperatorTester {
         ComputeReference(batch_dims_output, input_a.data(), input_b.data(),
                          output_ref.data(), ComputeRef<float>);
 
-        // Create, setup, run, and destroy Fully Connected operator.
+        // Create, setup, run, and destroy Batch Matrix Multiply operator.
         ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
         xnn_operator_t batch_matrix_multiply_op = nullptr;
 
@@ -681,7 +703,9 @@ class BatchMatMulOperatorTester {
         if (expected_status_reshape() != xnn_status_success) {
           return;
         }
-        if (!const_weights) {
+        if (const_weights) {
+          ASSERT_EQ(workspace_size, 0);
+        } else {
           ASSERT_NE(workspace_size, 0);
         }
         xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(
@@ -823,7 +847,7 @@ class BatchMatMulOperatorTester {
       ComputeReference(batch_dims_output, input_a.data(), input_b.data(),
                        output_ref.data(), ComputeRef<float>);
 
-      // Create, setup, run, and destroy Fully Connected operator.
+      // Create, setup, run, and destroy Batch Matrix Multiply operator.
       xnn_operator_t batch_matrix_multiply_op = nullptr;
 
       status = xnn_create_batch_matrix_multiply_nc_qd8_f32_qc8w(
@@ -944,7 +968,7 @@ class BatchMatMulOperatorTester {
       ComputeReference(batch_dims_output, input_a.data(), input_b.data(),
                        output_ref.data(), ComputeRef<float>);
 
-      // Create, setup, run, and destroy Fully Connected operator.
+      // Create, setup, run, and destroy Batch Matrix Multiply operator.
       xnn_operator_t batch_matrix_multiply_op = nullptr;
 
       status = xnn_create_batch_matrix_multiply_nc_qp8_f32_qc8w(
