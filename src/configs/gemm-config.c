@@ -7,10 +7,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#if XNN_ENABLE_CPUINFO
-  #include <cpuinfo.h>
-#endif  // XNN_ENABLE_CPUINFO
-
 #include "include/xnnpack.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/config.h"
@@ -114,8 +110,8 @@ static void init_f16_gemm_config(void) {
     (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
       #if XNN_ENABLE_ASSEMBLY
-        switch (cpuinfo_get_core(0)->uarch) {
-          case cpuinfo_uarch_cortex_a55:
+        switch (hardware_config->uarch[0]) {
+          case xnn_uarch_cortex_a55:
             f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64);
             f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a55);
             f16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64);
@@ -126,8 +122,8 @@ static void init_f16_gemm_config(void) {
             f16_gemm_config.mr = 6;
             f16_gemm_config.nr = 16;
             break;
-          case cpuinfo_uarch_cortex_a55r0:
-          case cpuinfo_uarch_cortex_a75:
+          case xnn_uarch_cortex_a55r0:
+          case xnn_uarch_cortex_a75:
             f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64);
             f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a55r0);
             f16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64);
@@ -138,7 +134,7 @@ static void init_f16_gemm_config(void) {
             f16_gemm_config.mr = 6;
             f16_gemm_config.nr = 16;
             break;
-          case cpuinfo_uarch_exynos_m5:
+          case xnn_uarch_exynos_m5:
             f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64);
             f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f16_gemm_minmax_ukernel_4x16__asm_aarch64_neonfp16arith_ld64);
             f16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64);
@@ -149,7 +145,7 @@ static void init_f16_gemm_config(void) {
             f16_gemm_config.mr = 4;
             f16_gemm_config.nr = 16;
             break;
-          case cpuinfo_uarch_exynos_m4:
+          case xnn_uarch_exynos_m4:
             f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64);
             f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_ld64);
             f16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64);
@@ -161,21 +157,21 @@ static void init_f16_gemm_config(void) {
             f16_gemm_config.nr = 16;
             break;
           default:
-          case cpuinfo_uarch_cortex_a76:
-          case cpuinfo_uarch_cortex_a77:
-          case cpuinfo_uarch_cortex_a78:
-          case cpuinfo_uarch_cortex_a510:
-          case cpuinfo_uarch_cortex_a710:
-          case cpuinfo_uarch_cortex_a715:
-          case cpuinfo_uarch_cortex_x1:
-          case cpuinfo_uarch_cortex_x2:
-          case cpuinfo_uarch_cortex_x3:
-          case cpuinfo_uarch_cortex_x4:
-          case cpuinfo_uarch_oryon:
-          case cpuinfo_uarch_neoverse_n1:
-          case cpuinfo_uarch_neoverse_n2:
-          case cpuinfo_uarch_neoverse_v1:
-          case cpuinfo_uarch_neoverse_v2:
+          case xnn_uarch_cortex_a76:
+          case xnn_uarch_cortex_a77:
+          case xnn_uarch_cortex_a78:
+          case xnn_uarch_cortex_a510:
+          case xnn_uarch_cortex_a710:
+          case xnn_uarch_cortex_a715:
+          case xnn_uarch_cortex_x1:
+          case xnn_uarch_cortex_x2:
+          case xnn_uarch_cortex_x3:
+          case xnn_uarch_cortex_x4:
+          case xnn_uarch_oryon:
+          case xnn_uarch_neoverse_n1:
+          case xnn_uarch_neoverse_n2:
+          case xnn_uarch_neoverse_v1:
+          case xnn_uarch_neoverse_v2:
             f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64);
             f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a75);
             f16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64);
@@ -194,21 +190,15 @@ static void init_f16_gemm_config(void) {
           const uint32_t mr = f16_gemm_config.mr;
           const uint32_t nr = f16_gemm_config.nr;
           for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-            const struct cpuinfo_uarch_info* uarch_info = cpuinfo_get_uarch(i);
-            if (uarch_info == NULL) {
-              /* No more microarchitectures in the system */
-              break;
-            }
-
-            switch (uarch_info->uarch) {
-              case cpuinfo_uarch_cortex_a55:
+            switch (hardware_config->uarch[i]) {
+              case xnn_uarch_cortex_a55:
                 if (mr == 6 && nr == 16) {
                   f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(6)].function[i] = (xnn_gemm_ukernel_fn) xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a55;
                   f16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(6)].function[i] = (xnn_igemm_ukernel_fn) xnn_f16_igemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a55;
                 }
                 break;
-              case cpuinfo_uarch_cortex_a55r0:
-              case cpuinfo_uarch_cortex_a75:
+              case xnn_uarch_cortex_a55r0:
+              case xnn_uarch_cortex_a75:
                 if (mr == 6 && nr == 16) {
                   f16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(6)].function[i] = (xnn_gemm_ukernel_fn) xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a55r0;
                   f16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(6)].function[i] = (xnn_igemm_ukernel_fn) xnn_f16_igemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a55r0;
@@ -391,11 +381,11 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
     (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       #if XNN_ENABLE_ASSEMBLY
-        switch (cpuinfo_get_uarch(0)->uarch) {
-          case cpuinfo_uarch_cortex_a5:
-          case cpuinfo_uarch_cortex_a7:
-          case cpuinfo_uarch_krait:
-          case cpuinfo_uarch_kryo:
+        switch (hardware_config->uarch[0]) {
+          case xnn_uarch_cortex_a5:
+          case xnn_uarch_cortex_a7:
+          case xnn_uarch_krait:
+          case xnn_uarch_kryo:
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53_prfm);
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a7);
             f32_gemm_config->init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -404,7 +394,7 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
             f32_gemm_config->mr = 4;
             f32_gemm_config->nr = 8;
             break;
-          case cpuinfo_uarch_cortex_a53:
+          case xnn_uarch_cortex_a53:
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53_prfm);
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a53_prfm);
             f32_gemm_config->init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -413,7 +403,7 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
             f32_gemm_config->mr = 4;
             f32_gemm_config->nr = 8;
             break;
-          case cpuinfo_uarch_cortex_a55r0:
+          case xnn_uarch_cortex_a55r0:
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53);
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a53);
             f32_gemm_config->init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -422,9 +412,9 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
             f32_gemm_config->mr = 4;
             f32_gemm_config->nr = 8;
             break;
-          case cpuinfo_uarch_cortex_a32:
-          case cpuinfo_uarch_cortex_a35:
-          case cpuinfo_uarch_cortex_a55:
+          case xnn_uarch_cortex_a32:
+          case xnn_uarch_cortex_a35:
+          case xnn_uarch_cortex_a55:
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53);
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a55);
             f32_gemm_config->init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -434,9 +424,9 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
             f32_gemm_config->nr = 8;
             break;
 
-          case cpuinfo_uarch_cortex_a57:
-          case cpuinfo_uarch_cortex_a72:
-          case cpuinfo_uarch_cortex_a73:
+          case xnn_uarch_cortex_a57:
+          case xnn_uarch_cortex_a72:
+          case xnn_uarch_cortex_a73:
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53_prfm);
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a75_prfm);
             f32_gemm_config->init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -462,26 +452,20 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
           const uint32_t mr = f32_gemm_config->mr;
           const uint32_t nr = f32_gemm_config->nr;
           for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-            const struct cpuinfo_uarch_info* uarch_info = cpuinfo_get_uarch(i);
-            if (uarch_info == NULL) {
-              /* No more microarchitectures in the system */
-              break;
-            }
-
-            switch (uarch_info->uarch) {
-              case cpuinfo_uarch_cortex_a53:
+            switch (hardware_config->uarch[i]) {
+              case xnn_uarch_cortex_a53:
                 if (mr == 4 && nr == 8) {
                   f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53_prfm;
                   f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a53_prfm;
                 }
                 break;
-              case cpuinfo_uarch_cortex_a55r0:
+              case xnn_uarch_cortex_a55r0:
                 if (mr == 4 && nr == 8) {
                   f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53;
                   f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a53;
                 }
                 break;
-              case cpuinfo_uarch_cortex_a55:
+              case xnn_uarch_cortex_a55:
                 if (mr == 4 && nr == 8) {
                   f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53;
                   f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a55;
@@ -517,8 +501,10 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
     }
   #elif XNN_ARCH_ARM64
     #if XNN_ENABLE_ASSEMBLY && !XNN_PLATFORM_IOS && !XNN_PLATFORM_MAC
-        switch (cpuinfo_get_core(0)->uarch) {
-          case cpuinfo_uarch_cortex_a72:
+        const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+        assert(hardware_config);
+        switch (hardware_config->uarch[0]) {
+          case xnn_uarch_cortex_a72:
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a75_prfm);
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a75_prfm);
             f32_gemm_config->init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -527,12 +513,12 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
             f32_gemm_config->mr = 4;
             f32_gemm_config->nr = 8;
             break;
-          case cpuinfo_uarch_cortex_a57:
-          case cpuinfo_uarch_cortex_a75:
-          case cpuinfo_uarch_cortex_a76:
-          case cpuinfo_uarch_exynos_m3:
-          case cpuinfo_uarch_exynos_m4:
-          case cpuinfo_uarch_neoverse_n1:
+          case xnn_uarch_cortex_a57:
+          case xnn_uarch_cortex_a75:
+          case xnn_uarch_cortex_a76:
+          case xnn_uarch_exynos_m3:
+          case xnn_uarch_exynos_m4:
+          case xnn_uarch_neoverse_n1:
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a75_prfm);
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a75_prfm);
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_cortex_a75_prfm);
@@ -542,8 +528,8 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
             f32_gemm_config->mr = 6;
             f32_gemm_config->nr = 8;
             break;
-          case cpuinfo_uarch_exynos_m1:
-          case cpuinfo_uarch_exynos_m2:
+          case xnn_uarch_exynos_m1:
+          case xnn_uarch_exynos_m2:
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x8s4__neonfma);
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x8s4__neonfma);
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_6x8s4__neonfma);
@@ -554,7 +540,7 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
             f32_gemm_config->nr = 8;
             f32_gemm_config->log2_sr = 2;
             break;
-          case cpuinfo_uarch_cortex_a53:
+          case xnn_uarch_cortex_a53:
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53_prfm);
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a53_prfm);
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_cortex_a53_prfm);
@@ -564,7 +550,7 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
             f32_gemm_config->mr = 6;
             f32_gemm_config->nr = 8;
             break;
-          case cpuinfo_uarch_cortex_a55r0:
+          case xnn_uarch_cortex_a55r0:
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53);
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a53);
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_cortex_a53);
@@ -574,9 +560,9 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
             f32_gemm_config->mr = 6;
             f32_gemm_config->nr = 8;
             break;
-          case cpuinfo_uarch_cortex_a35:
-          case cpuinfo_uarch_cortex_a55:
-          case cpuinfo_uarch_kryo:
+          case xnn_uarch_cortex_a35:
+          case xnn_uarch_cortex_a55:
+          case xnn_uarch_kryo:
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53);
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a55);
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_cortex_a55);
@@ -586,7 +572,7 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
             f32_gemm_config->mr = 6;
             f32_gemm_config->nr = 8;
             break;
-          case cpuinfo_uarch_cortex_a73:
+          case xnn_uarch_cortex_a73:
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a75_prfm);
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_cortex_a73);
             f32_gemm_config->init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -595,8 +581,8 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
             f32_gemm_config->mr = 6;
             f32_gemm_config->nr = 8;
             break;
-          case cpuinfo_uarch_cortex_a77:
-          case cpuinfo_uarch_exynos_m5:
+          case xnn_uarch_cortex_a77:
+          case xnn_uarch_exynos_m5:
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a75);
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a75);
             f32_gemm_config->init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -605,8 +591,8 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
             f32_gemm_config->mr = 4;
             f32_gemm_config->nr = 8;
             break;
-          case cpuinfo_uarch_cortex_x3:
-          case cpuinfo_uarch_neoverse_v2:
+          case xnn_uarch_cortex_x3:
+          case xnn_uarch_neoverse_v2:
             // TODO(fbarchard): Implement asm with indexed inputs
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc2);
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_lane_ld128);
@@ -616,8 +602,8 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
             f32_gemm_config->mr = 6;
             f32_gemm_config->nr = 8;
             break;
-          case cpuinfo_uarch_oryon:
-          case cpuinfo_uarch_cortex_x4:
+          case xnn_uarch_oryon:
+          case xnn_uarch_cortex_x4:
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x16__aarch64_neonfma_lane_ld128);
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x16__aarch64_neonfma_lane_ld128);
             f32_gemm_config->init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -626,14 +612,14 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
             f32_gemm_config->mr = 4;
             f32_gemm_config->nr = 16;
             break;
-          case cpuinfo_uarch_cortex_a78:
-          case cpuinfo_uarch_cortex_a510:
-          case cpuinfo_uarch_cortex_a710:
-          case cpuinfo_uarch_cortex_a715:
-          case cpuinfo_uarch_cortex_x1:
-          case cpuinfo_uarch_cortex_x2:
-          case cpuinfo_uarch_neoverse_n2:
-          case cpuinfo_uarch_neoverse_v1:
+          case xnn_uarch_cortex_a78:
+          case xnn_uarch_cortex_a510:
+          case xnn_uarch_cortex_a710:
+          case xnn_uarch_cortex_a715:
+          case xnn_uarch_cortex_x1:
+          case xnn_uarch_cortex_x2:
+          case xnn_uarch_neoverse_n2:
+          case xnn_uarch_neoverse_v1:
           default:
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc4);
             f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128);
@@ -652,14 +638,8 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
           const uint32_t nr = f32_gemm_config->nr;
           const uint32_t log2_sr = f32_gemm_config->log2_sr;
           for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-            const struct cpuinfo_uarch_info* uarch_info = cpuinfo_get_uarch(i);
-            if (uarch_info == NULL) {
-              /* No more microarchitectures in the system */
-              break;
-            }
-
-            switch (uarch_info->uarch) {
-              case cpuinfo_uarch_cortex_a53:
+            switch (hardware_config->uarch[i]) {
+              case xnn_uarch_cortex_a53:
                 if (mr == 6 && nr == 8 && log2_sr == 0) {
                   f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53_prfm;
                   f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a53_prfm;
@@ -669,7 +649,7 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
                   f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a53_prfm;
                 }
                 break;
-              case cpuinfo_uarch_cortex_a55r0:
+              case xnn_uarch_cortex_a55r0:
                 if (mr == 6 && nr == 8 && log2_sr == 0) {
                   f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53;
                   f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a53;
@@ -679,7 +659,7 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
                   f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a53;
                 }
                 break;
-              case cpuinfo_uarch_cortex_a55:
+              case xnn_uarch_cortex_a55:
                 if (mr == 6 && nr == 8 && log2_sr == 0) {
                   f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53;
                   f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a55;
@@ -743,9 +723,9 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
       } else
     #endif
     if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
-      switch (cpuinfo_get_core(0)->uarch) {
-        case cpuinfo_uarch_zen:
-        case cpuinfo_uarch_dhyana:
+      switch (hardware_config->uarch[0]) {
+        case xnn_uarch_zen:
+        case xnn_uarch_dhyana:
           f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x16s4__fma3_broadcast);
           f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x16s4__fma3_broadcast);
           f32_gemm_config->init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -894,11 +874,11 @@ static void init_f32_igemm_config(void) {
     (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       #if XNN_ENABLE_ASSEMBLY
-        switch (cpuinfo_get_uarch(0)->uarch) {
-          case cpuinfo_uarch_cortex_a5:
-          case cpuinfo_uarch_cortex_a7:
-          case cpuinfo_uarch_krait:
-          case cpuinfo_uarch_kryo:
+        switch (hardware_config->uarch[0]) {
+          case xnn_uarch_cortex_a5:
+          case xnn_uarch_cortex_a7:
+          case xnn_uarch_krait:
+          case xnn_uarch_kryo:
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53_prfm);
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a7);
             f32_igemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -907,7 +887,7 @@ static void init_f32_igemm_config(void) {
             f32_igemm_config.mr = 4;
             f32_igemm_config.nr = 8;
             break;
-          case cpuinfo_uarch_cortex_a53:
+          case xnn_uarch_cortex_a53:
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53_prfm);
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a53_prfm);
             f32_igemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -916,7 +896,7 @@ static void init_f32_igemm_config(void) {
             f32_igemm_config.mr = 4;
             f32_igemm_config.nr = 8;
             break;
-          case cpuinfo_uarch_cortex_a55r0:
+          case xnn_uarch_cortex_a55r0:
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53);
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a53);
             f32_igemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -925,9 +905,9 @@ static void init_f32_igemm_config(void) {
             f32_igemm_config.mr = 4;
             f32_igemm_config.nr = 8;
             break;
-          case cpuinfo_uarch_cortex_a32:
-          case cpuinfo_uarch_cortex_a35:
-          case cpuinfo_uarch_cortex_a55:
+          case xnn_uarch_cortex_a32:
+          case xnn_uarch_cortex_a35:
+          case xnn_uarch_cortex_a55:
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53);
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a55);
             f32_igemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -937,9 +917,9 @@ static void init_f32_igemm_config(void) {
             f32_igemm_config.nr = 8;
             break;
 
-          case cpuinfo_uarch_cortex_a57:
-          case cpuinfo_uarch_cortex_a72:
-          case cpuinfo_uarch_cortex_a73:
+          case xnn_uarch_cortex_a57:
+          case xnn_uarch_cortex_a72:
+          case xnn_uarch_cortex_a73:
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53_prfm);
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a75_prfm);
             f32_igemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -965,26 +945,20 @@ static void init_f32_igemm_config(void) {
           const uint32_t mr = f32_igemm_config.mr;
           const uint32_t nr = f32_igemm_config.nr;
           for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-            const struct cpuinfo_uarch_info* uarch_info = cpuinfo_get_uarch(i);
-            if (uarch_info == NULL) {
-              /* No more microarchitectures in the system */
-              break;
-            }
-
-            switch (uarch_info->uarch) {
-              case cpuinfo_uarch_cortex_a53:
+            switch (hardware_config->uarch[i]) {
+              case xnn_uarch_cortex_a53:
                 if (mr == 4 && nr == 8) {
                   f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53_prfm;
                   f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a53_prfm;
                 }
                 break;
-              case cpuinfo_uarch_cortex_a55r0:
+              case xnn_uarch_cortex_a55r0:
                 if (mr == 4 && nr == 8) {
                   f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53;
                   f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a53;
                 }
                 break;
-              case cpuinfo_uarch_cortex_a55:
+              case xnn_uarch_cortex_a55:
                 if (mr == 4 && nr == 8) {
                   f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53;
                   f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a55;
@@ -1020,8 +994,10 @@ static void init_f32_igemm_config(void) {
     }
   #elif XNN_ARCH_ARM64
     #if XNN_ENABLE_ASSEMBLY && !XNN_PLATFORM_IOS && !XNN_PLATFORM_MAC
-        switch (cpuinfo_get_core(0)->uarch) {
-          case cpuinfo_uarch_cortex_a72:
+        const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+        assert(hardware_config);
+        switch (hardware_config->uarch[0]) {
+          case xnn_uarch_cortex_a72:
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a75_prfm);
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a75_prfm);
             f32_igemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -1030,12 +1006,12 @@ static void init_f32_igemm_config(void) {
             f32_igemm_config.mr = 4;
             f32_igemm_config.nr = 8;
             break;
-          case cpuinfo_uarch_cortex_a57:
-          case cpuinfo_uarch_cortex_a75:
-          case cpuinfo_uarch_cortex_a76:
-          case cpuinfo_uarch_exynos_m3:
-          case cpuinfo_uarch_exynos_m4:
-          case cpuinfo_uarch_neoverse_n1:
+          case xnn_uarch_cortex_a57:
+          case xnn_uarch_cortex_a75:
+          case xnn_uarch_cortex_a76:
+          case xnn_uarch_exynos_m3:
+          case xnn_uarch_exynos_m4:
+          case xnn_uarch_neoverse_n1:
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a75_prfm);
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a75_prfm);
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_6x8__asm_aarch64_neonfma_cortex_a75_prfm);
@@ -1045,8 +1021,8 @@ static void init_f32_igemm_config(void) {
             f32_igemm_config.mr = 6;
             f32_igemm_config.nr = 8;
             break;
-          case cpuinfo_uarch_exynos_m1:
-          case cpuinfo_uarch_exynos_m2:
+          case xnn_uarch_exynos_m1:
+          case xnn_uarch_exynos_m2:
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_1x8s4__neonfma);
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_4x8s4__neonfma);
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_6x8s4__neonfma);
@@ -1057,7 +1033,7 @@ static void init_f32_igemm_config(void) {
             f32_igemm_config.nr = 8;
             f32_igemm_config.log2_sr = 2;
             break;
-          case cpuinfo_uarch_cortex_a53:
+          case xnn_uarch_cortex_a53:
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53_prfm);
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a53_prfm);
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_6x8__asm_aarch64_neonfma_cortex_a53_prfm);
@@ -1067,7 +1043,7 @@ static void init_f32_igemm_config(void) {
             f32_igemm_config.mr = 6;
             f32_igemm_config.nr = 8;
             break;
-          case cpuinfo_uarch_cortex_a55r0:
+          case xnn_uarch_cortex_a55r0:
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53);
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a53);
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_6x8__asm_aarch64_neonfma_cortex_a53);
@@ -1077,9 +1053,9 @@ static void init_f32_igemm_config(void) {
             f32_igemm_config.mr = 6;
             f32_igemm_config.nr = 8;
             break;
-          case cpuinfo_uarch_cortex_a35:
-          case cpuinfo_uarch_cortex_a55:
-          case cpuinfo_uarch_kryo:
+          case xnn_uarch_cortex_a35:
+          case xnn_uarch_cortex_a55:
+          case xnn_uarch_kryo:
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53);
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a55);
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_6x8__asm_aarch64_neonfma_cortex_a55);
@@ -1089,7 +1065,7 @@ static void init_f32_igemm_config(void) {
             f32_igemm_config.mr = 6;
             f32_igemm_config.nr = 8;
             break;
-          case cpuinfo_uarch_cortex_a73:
+          case xnn_uarch_cortex_a73:
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a75_prfm);
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_6x8__asm_aarch64_neonfma_cortex_a73);
             f32_igemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -1098,8 +1074,8 @@ static void init_f32_igemm_config(void) {
             f32_igemm_config.mr = 6;
             f32_igemm_config.nr = 8;
             break;
-          case cpuinfo_uarch_cortex_a77:
-          case cpuinfo_uarch_exynos_m5:
+          case xnn_uarch_cortex_a77:
+          case xnn_uarch_exynos_m5:
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a75);
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a75);
             f32_igemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -1108,8 +1084,8 @@ static void init_f32_igemm_config(void) {
             f32_igemm_config.mr = 4;
             f32_igemm_config.nr = 8;
             break;
-          case cpuinfo_uarch_cortex_x3:
-          case cpuinfo_uarch_neoverse_v2:
+          case xnn_uarch_cortex_x3:
+          case xnn_uarch_neoverse_v2:
             // TODO(fbarchard): Implement asm with indexed inputs
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64);
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_lane_ld128);
@@ -1119,8 +1095,8 @@ static void init_f32_igemm_config(void) {
             f32_igemm_config.mr = 6;
             f32_igemm_config.nr = 8;
             break;
-          case cpuinfo_uarch_oryon:
-          case cpuinfo_uarch_cortex_x4:
+          case xnn_uarch_oryon:
+          case xnn_uarch_cortex_x4:
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_1x16__aarch64_neonfma_lane_ld128);
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_4x16__aarch64_neonfma_lane_ld128);
             f32_igemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -1129,14 +1105,14 @@ static void init_f32_igemm_config(void) {
             f32_igemm_config.mr = 4;
             f32_igemm_config.nr = 16;
             break;
-          case cpuinfo_uarch_cortex_a78:
-          case cpuinfo_uarch_cortex_a510:
-          case cpuinfo_uarch_cortex_a710:
-          case cpuinfo_uarch_cortex_a715:
-          case cpuinfo_uarch_cortex_x1:
-          case cpuinfo_uarch_cortex_x2:
-          case cpuinfo_uarch_neoverse_n2:
-          case cpuinfo_uarch_neoverse_v1:
+          case xnn_uarch_cortex_a78:
+          case xnn_uarch_cortex_a510:
+          case xnn_uarch_cortex_a710:
+          case xnn_uarch_cortex_a715:
+          case xnn_uarch_cortex_x1:
+          case xnn_uarch_cortex_x2:
+          case xnn_uarch_neoverse_n2:
+          case xnn_uarch_neoverse_v1:
           default:
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64);
             f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128);
@@ -1155,14 +1131,8 @@ static void init_f32_igemm_config(void) {
           const uint32_t nr = f32_igemm_config.nr;
           const uint32_t log2_sr = f32_igemm_config.log2_sr;
           for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-            const struct cpuinfo_uarch_info* uarch_info = cpuinfo_get_uarch(i);
-            if (uarch_info == NULL) {
-              /* No more microarchitectures in the system */
-              break;
-            }
-
-            switch (uarch_info->uarch) {
-              case cpuinfo_uarch_cortex_a53:
+            switch (hardware_config->uarch[i]) {
+              case xnn_uarch_cortex_a53:
                 if (mr == 6 && nr == 8 && log2_sr == 0) {
                   f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53_prfm;
                   f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a53_prfm;
@@ -1172,7 +1142,7 @@ static void init_f32_igemm_config(void) {
                   f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a53_prfm;
                 }
                 break;
-              case cpuinfo_uarch_cortex_a55r0:
+              case xnn_uarch_cortex_a55r0:
                 if (mr == 6 && nr == 8 && log2_sr == 0) {
                   f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53;
                   f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a53;
@@ -1182,7 +1152,7 @@ static void init_f32_igemm_config(void) {
                   f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a53;
                 }
                 break;
-              case cpuinfo_uarch_cortex_a55:
+              case xnn_uarch_cortex_a55:
                 if (mr == 6 && nr == 8 && log2_sr == 0) {
                   f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53;
                   f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a55;
@@ -1233,9 +1203,9 @@ static void init_f32_igemm_config(void) {
       } else
     #endif
     if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
-      switch (cpuinfo_get_core(0)->uarch) {
-        case cpuinfo_uarch_zen:
-        case cpuinfo_uarch_dhyana:
+      switch (hardware_config->uarch[0]) {
+        case xnn_uarch_zen:
+        case xnn_uarch_dhyana:
           f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_1x16s4__fma3_broadcast);
           f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_4x16s4__fma3_broadcast);
           f32_igemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -1455,9 +1425,9 @@ static void init_f32_gemm_nr2_config_impl(struct xnn_gemm_config* f32_gemm_nr2_c
       } else
     #endif
     if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
-      switch (cpuinfo_get_core(0)->uarch) {
-        case cpuinfo_uarch_zen:
-        case cpuinfo_uarch_dhyana:
+      switch (hardware_config->uarch[0]) {
+        case xnn_uarch_zen:
+        case xnn_uarch_dhyana:
           f32_gemm_nr2_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x8__fma3_broadcast);
           f32_gemm_nr2_config->minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x8__fma3_broadcast);
           f32_gemm_nr2_config->minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_1x8__fma3_broadcast);
@@ -1680,28 +1650,30 @@ static void init_f32_qc8w_gemm_config(void) {
     }
   #elif XNN_ARCH_ARM64
     #if XNN_ENABLE_ASSEMBLY && !XNN_PLATFORM_IOS && !XNN_PLATFORM_MAC
-      switch (cpuinfo_get_core(0)->uarch) {
+      const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+      assert(hardware_config);
+      switch (hardware_config->uarch[0]) {
         // TODO(fbarchard): fill in microkernels.
-        case cpuinfo_uarch_cortex_a72:
-        case cpuinfo_uarch_cortex_a57:
-        case cpuinfo_uarch_cortex_a75:
-        case cpuinfo_uarch_cortex_a76:
-        case cpuinfo_uarch_exynos_m3:
-        case cpuinfo_uarch_exynos_m4:
-        case cpuinfo_uarch_exynos_m1:
-        case cpuinfo_uarch_exynos_m2:
-        case cpuinfo_uarch_cortex_a53:
-        case cpuinfo_uarch_cortex_a55r0:
-        case cpuinfo_uarch_cortex_a35:
-        case cpuinfo_uarch_cortex_a55:
-        case cpuinfo_uarch_kryo:
-        case cpuinfo_uarch_cortex_a73:
-        case cpuinfo_uarch_cortex_a77:
-        case cpuinfo_uarch_exynos_m5:
-        case cpuinfo_uarch_cortex_a78:
-        case cpuinfo_uarch_cortex_x1:
-        case cpuinfo_uarch_neoverse_n1:
-        case cpuinfo_uarch_neoverse_v1:
+        case xnn_uarch_cortex_a72:
+        case xnn_uarch_cortex_a57:
+        case xnn_uarch_cortex_a75:
+        case xnn_uarch_cortex_a76:
+        case xnn_uarch_exynos_m3:
+        case xnn_uarch_exynos_m4:
+        case xnn_uarch_exynos_m1:
+        case xnn_uarch_exynos_m2:
+        case xnn_uarch_cortex_a53:
+        case xnn_uarch_cortex_a55r0:
+        case xnn_uarch_cortex_a35:
+        case xnn_uarch_cortex_a55:
+        case xnn_uarch_kryo:
+        case xnn_uarch_cortex_a73:
+        case xnn_uarch_cortex_a77:
+        case xnn_uarch_exynos_m5:
+        case xnn_uarch_cortex_a78:
+        case xnn_uarch_cortex_x1:
+        case xnn_uarch_neoverse_n1:
+        case xnn_uarch_neoverse_v1:
         default:
           f32_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc4);
           f32_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_qc8w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128);
@@ -1721,15 +1693,10 @@ static void init_f32_qc8w_gemm_config(void) {
         (void) nr;
         (void) log2_sr;
         for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-          const struct cpuinfo_uarch_info* uarch_info = cpuinfo_get_uarch(i);
-          if (uarch_info == NULL) {
-            /* No more microarchitectures in the system */
-            break;
-          }
-          switch (uarch_info->uarch) {
-            case cpuinfo_uarch_cortex_a53:
-            case cpuinfo_uarch_cortex_a55r0:
-            case cpuinfo_uarch_cortex_a55:
+          switch (hardware_config->uarch[i]) {
+            case xnn_uarch_cortex_a53:
+            case xnn_uarch_cortex_a55r0:
+            case xnn_uarch_cortex_a55:
             default:
               break;
           }
@@ -2346,7 +2313,7 @@ static void init_qdu8_f32_qb4w_gemm_config(void) {
     (void) hardware_config;  // May be unused.
     #if XNN_ENABLE_AVX512VNNIGFNI
       // Zen4 has gfni but is slower and 8x16 works better on zen4.  14x16 is faster on Sapphire Rapids
-      if ((hardware_config->arch_flags & xnn_arch_x86_avx512vnnigfni) && cpuinfo_get_core(0)->uarch != cpuinfo_uarch_zen4) {
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx512vnnigfni) && hardware_config->uarch[0] != xnn_uarch_zen4) {
         qdu8_f32_qb4w_gemm_config.arch = xnn_arch_x86_avx512vnnigfni;
         qdu8_f32_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x16c8__avx512vnnigfni_prfm);
         qdu8_f32_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(14)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qb4w_gemm_minmax_ukernel_14x16c8__avx512vnnigfni_prfm);
@@ -2521,9 +2488,9 @@ static void init_qd8_f16_qc8w_gemm_config(void) {
             qd8_f16_qc8w_gemm_config.log2_kr = 2;
           #endif  // XNN_ENABLE_ARM_DOTPROD
         } else if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
-          switch (cpuinfo_get_uarch(0)->uarch) {
-            case cpuinfo_uarch_cortex_a53:
-            case cpuinfo_uarch_cortex_a55:
+          switch (hardware_config->uarch[0]) {
+            case xnn_uarch_cortex_a53:
+            case xnn_uarch_cortex_a55:
               qd8_f16_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x8__asm_aarch32_neonfp16arith_ld64_2);
               qd8_f16_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f16_qc8w_gemm_minmax_ukernel_4x8__asm_aarch32_neonfp16arith_ld64_2);
               qd8_f16_qc8w_gemm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
@@ -2548,14 +2515,8 @@ static void init_qd8_f16_qc8w_gemm_config(void) {
           const uint32_t nr = qd8_f16_qc8w_gemm_config.nr;
           const uint32_t log2_kr = qd8_f16_qc8w_gemm_config.log2_kr;
           for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-            const struct cpuinfo_uarch_info* uarch_info = cpuinfo_get_uarch(i);
-            if (uarch_info == NULL) {
-              /* No more microarchitectures in the system */
-              break;
-            }
-
-            switch (uarch_info->uarch) {
-              case cpuinfo_uarch_cortex_a55:
+            switch (hardware_config->uarch[i]) {
+              case xnn_uarch_cortex_a55:
                 #if XNN_ENABLE_ARM_DOTPROD
                   if (mr == 4 && nr == 8 && log2_kr == 2 && (hardware_config->arch_flags & xnn_arch_arm_neon_dot) && (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
                     qd8_f16_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_dqgemm_ukernel_fn) xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x8c4__neondotfp16arith;
@@ -2665,8 +2626,8 @@ static void init_qd8_f16_qc8w_gemm_config(void) {
           #endif  // XNN_ENABLE_ARM_I8MM
         } else if (XNN_ENABLE_ARM_DOTPROD && (hardware_config->arch_flags & xnn_arch_arm_neon_dot) && (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
           #if XNN_ENABLE_ARM_DOTPROD
-           switch (cpuinfo_get_core(0)->uarch) {
-              case cpuinfo_uarch_cortex_a55:
+           switch (hardware_config->uarch[0]) {
+              case xnn_uarch_cortex_a55:
                 qd8_f16_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f16_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondotfp16arith_cortex_a55);
                 break;
               default:
@@ -2699,14 +2660,8 @@ static void init_qd8_f16_qc8w_gemm_config(void) {
           (void) nr;
           (void) log2_kr;
           for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-            const struct cpuinfo_uarch_info* uarch_info = cpuinfo_get_uarch(i);
-            if (uarch_info == NULL) {
-              /* No more microarchitectures in the system */
-              break;
-            }
-
-            switch (uarch_info->uarch) {
-              case cpuinfo_uarch_cortex_a55:
+            switch (hardware_config->uarch[i]) {
+              case xnn_uarch_cortex_a55:
                 #if XNN_ENABLE_ARM_DOTPROD
                   if (mr == 4 && nr == 16 && log2_kr == 2 && (hardware_config->arch_flags & xnn_arch_arm_neon_dot) && (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
                     qd8_f16_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_dqgemm_ukernel_fn) xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x16c4__neondotfp16arith;
@@ -2891,14 +2846,8 @@ static void init_qd8_f16_qc8w_igemm_config(void) {
           const uint32_t nr = qd8_f16_qc8w_igemm_config.nr;
           const uint32_t log2_kr = qd8_f16_qc8w_igemm_config.log2_kr;
           for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-            const struct cpuinfo_uarch_info* uarch_info = cpuinfo_get_uarch(i);
-            if (uarch_info == NULL) {
-              /* No more microarchitectures in the system */
-              break;
-            }
-
-            switch (uarch_info->uarch) {
-              case cpuinfo_uarch_cortex_a55:
+            switch (hardware_config->uarch[i]) {
+              case xnn_uarch_cortex_a55:
                 #if XNN_ENABLE_ARM_DOTPROD
                   if (mr == 4 && nr == 8 && log2_kr == 2 && (hardware_config->arch_flags & xnn_arch_arm_neon_dot) && (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
                     qd8_f16_qc8w_igemm_config.minmax.dqigemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_dqigemm_ukernel_fn) xnn_qd8_f16_qc8w_igemm_minmax_ukernel_1x8c4__neondotfp16arith;
@@ -3008,8 +2957,8 @@ static void init_qd8_f16_qc8w_igemm_config(void) {
           #endif  // XNN_ENABLE_ARM_I8MM
         } else if (XNN_ENABLE_ARM_DOTPROD && (hardware_config->arch_flags & xnn_arch_arm_neon_dot) && (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
           #if XNN_ENABLE_ARM_DOTPROD
-           switch (cpuinfo_get_core(0)->uarch) {
-              case cpuinfo_uarch_cortex_a55:
+           switch (hardware_config->uarch[0]) {
+              case xnn_uarch_cortex_a55:
                 qd8_f16_qc8w_igemm_config.minmax.dqigemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_dqigemm_ukernel((xnn_dqigemm_ukernel_fn) xnn_qd8_f16_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondotfp16arith_cortex_a55);
                 break;
               default:
@@ -3042,14 +2991,8 @@ static void init_qd8_f16_qc8w_igemm_config(void) {
           (void) nr;
           (void) log2_kr;
           for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-            const struct cpuinfo_uarch_info* uarch_info = cpuinfo_get_uarch(i);
-            if (uarch_info == NULL) {
-              /* No more microarchitectures in the system */
-              break;
-            }
-
-            switch (uarch_info->uarch) {
-              case cpuinfo_uarch_cortex_a55:
+            switch (hardware_config->uarch[i]) {
+              case xnn_uarch_cortex_a55:
                 #if XNN_ENABLE_ARM_DOTPROD
                   if (mr == 4 && nr == 16 && log2_kr == 2 && (hardware_config->arch_flags & xnn_arch_arm_neon_dot) && (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
                     qd8_f16_qc8w_igemm_config.minmax.dqigemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_dqigemm_ukernel_fn) xnn_qd8_f16_qc8w_igemm_minmax_ukernel_1x16c4__neondotfp16arith;
@@ -3280,7 +3223,7 @@ static void init_qdu8_f32_qc4w_gemm_config(void) {
     #if XNN_ENABLE_AVX512VNNIGFNI && XNN_ENABLE_AVX256VNNI
       // Zen4 has gfni but is slower and 8x16 works better on zen4.  14x16 is faster on Sapphire Rapids
       // TODO(b/361288044): Re-enable once fixed.
-      if (false && (hardware_config->arch_flags & xnn_arch_x86_avx512vnnigfni) && cpuinfo_get_core(0)->uarch != cpuinfo_uarch_zen4) {
+      if (false && (hardware_config->arch_flags & xnn_arch_x86_avx512vnnigfni) && hardware_config->uarch[0] != xnn_uarch_zen4) {
         qdu8_f32_qc4w_gemm_config.arch = xnn_arch_x86_avx512vnnigfni;
         qdu8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c8__avx512vnnigfni_prfm);
         qdu8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(14)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc4w_gemm_minmax_ukernel_14x16c8__avx512vnnigfni_prfm);
@@ -3396,8 +3339,8 @@ static void init_qd8_f32_qc8w_gemm_config(void) {
       #if XNN_ENABLE_ASSEMBLY
         #if XNN_ENABLE_ARM_DOTPROD
           if (XNN_ENABLE_ARM_DOTPROD && (hardware_config->arch_flags & xnn_arch_arm_neon_dot)) {
-            switch (cpuinfo_get_uarch(0)->uarch) {
-              case cpuinfo_uarch_cortex_a55:
+            switch (hardware_config->uarch[0]) {
+              case xnn_uarch_cortex_a55:
                 qd8_f32_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x8c4__neondot);
                 qd8_f32_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x8c4__asm_aarch32_neondot_cortex_a55);
                 qd8_f32_qc8w_gemm_config.minmax.dqigemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_dqigemm_ukernel((xnn_dqigemm_ukernel_fn) xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x8c4__neondot);
@@ -3421,9 +3364,9 @@ static void init_qd8_f32_qc8w_gemm_config(void) {
           } else
         #endif  // XNN_ENABLE_ARM_DOTPROD
         {
-          switch (cpuinfo_get_uarch(0)->uarch) {
-            case cpuinfo_uarch_cortex_a53:
-            case cpuinfo_uarch_cortex_a55:
+          switch (hardware_config->uarch[0]) {
+            case xnn_uarch_cortex_a53:
+            case xnn_uarch_cortex_a55:
               qd8_f32_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch32_neonmlal_ld64_2);
               qd8_f32_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x8__asm_aarch32_neonmlal_ld64_2);
               qd8_f32_qc8w_gemm_config.minmax.dqigemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_dqigemm_ukernel((xnn_dqigemm_ukernel_fn) xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x8__neon_mlal_lane);
@@ -3452,14 +3395,8 @@ static void init_qd8_f32_qc8w_gemm_config(void) {
           const uint32_t nr = qd8_f32_qc8w_gemm_config.nr;
           const uint32_t log2_kr = qd8_f32_qc8w_gemm_config.log2_kr;
           for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-            const struct cpuinfo_uarch_info* uarch_info = cpuinfo_get_uarch(i);
-            if (uarch_info == NULL) {
-              /* No more microarchitectures in the system */
-              break;
-            }
-
-            switch (uarch_info->uarch) {
-              case cpuinfo_uarch_cortex_a55:
+            switch (hardware_config->uarch[i]) {
+              case xnn_uarch_cortex_a55:
                 #if XNN_ENABLE_ARM_DOTPROD
                   if (mr == 4 && nr == 8 && log2_kr == 2 && (hardware_config->arch_flags & xnn_arch_arm_neon_dot)) {
                     qd8_f32_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x8c4__neondot;
@@ -3596,8 +3533,8 @@ static void init_qd8_f32_qc8w_gemm_config(void) {
         #endif  // XNN_ENABLE_ARM_I8MM
         #if XNN_ENABLE_ARM_DOTPROD
           if (XNN_ENABLE_ARM_DOTPROD && (hardware_config->arch_flags & xnn_arch_arm_neon_dot)) {
-            switch (cpuinfo_get_core(0)->uarch) {
-              case cpuinfo_uarch_cortex_a55:
+            switch (hardware_config->uarch[0]) {
+              case xnn_uarch_cortex_a55:
                 qd8_f32_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_cortex_a55);
                 qd8_f32_qc8w_gemm_config.minmax.dqigemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_dqigemm_ukernel((xnn_dqigemm_ukernel_fn) xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_cortex_a55);
                 break;
@@ -3636,14 +3573,8 @@ static void init_qd8_f32_qc8w_gemm_config(void) {
           (void) nr;
           (void) log2_kr;
           for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-            const struct cpuinfo_uarch_info* uarch_info = cpuinfo_get_uarch(i);
-            if (uarch_info == NULL) {
-              /* No more microarchitectures in the system */
-              break;
-            }
-
-            switch (uarch_info->uarch) {
-              case cpuinfo_uarch_cortex_a55:
+            switch (hardware_config->uarch[i]) {
+              case xnn_uarch_cortex_a55:
                 #if XNN_ENABLE_ARM_DOTPROD
                   if (mr == 4 && nr == 16 && log2_kr == 2 && (hardware_config->arch_flags & xnn_arch_arm_neon_dot)) {
                     qd8_f32_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c4__neondot;
@@ -3897,8 +3828,8 @@ static void init_qs8_qc8w_gemm_config(void) {
       #if XNN_ENABLE_ASSEMBLY
         if (XNN_ENABLE_ARM_DOTPROD && (hardware_config->arch_flags & xnn_arch_arm_neon_dot)) {
           #if XNN_ENABLE_ARM_DOTPROD
-            switch (cpuinfo_get_uarch(0)->uarch) {
-              case cpuinfo_uarch_cortex_a55:
+            switch (hardware_config->uarch[0]) {
+              case xnn_uarch_cortex_a55:
                 qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c4__neondot);
                 qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x8c4__asm_aarch32_neondot_cortex_a55);
                 qs8_qc8w_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x8c4__neondot);
@@ -3927,11 +3858,11 @@ static void init_qs8_qc8w_gemm_config(void) {
             }
           #endif  // XNN_ENABLE_ARM_DOTPROD
         } else {
-          switch (cpuinfo_get_uarch(0)->uarch) {
-            case cpuinfo_uarch_cortex_a5:
-            case cpuinfo_uarch_cortex_a7:
-            case cpuinfo_uarch_krait:
-            case cpuinfo_uarch_kryo:
+          switch (hardware_config->uarch[0]) {
+            case xnn_uarch_cortex_a5:
+            case xnn_uarch_cortex_a7:
+            case xnn_uarch_krait:
+            case xnn_uarch_kryo:
               qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8__asm_aarch32_neon_mlal_lane_cortex_a7_prfm);
               qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x8__asm_aarch32_neon_mlal_lane_cortex_a7_prfm);
               qs8_qc8w_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x8__asm_aarch32_neon_mlal_lane_cortex_a7_prfm);
@@ -3943,8 +3874,8 @@ static void init_qs8_qc8w_gemm_config(void) {
               qs8_qc8w_gemm_config.mr = 4;
               qs8_qc8w_gemm_config.nr = 8;
               break;
-            case cpuinfo_uarch_cortex_a32:
-            case cpuinfo_uarch_cortex_a35:
+            case xnn_uarch_cortex_a32:
+            case xnn_uarch_cortex_a35:
               qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8__asm_aarch32_neonv8_mlal_lane_cortex_a35);
               qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x8__asm_aarch32_neonv8_mlal_lane_cortex_a35);
               qs8_qc8w_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x8__asm_aarch32_neonv8_mlal_lane_cortex_a35);
@@ -3956,8 +3887,8 @@ static void init_qs8_qc8w_gemm_config(void) {
               qs8_qc8w_gemm_config.mr = 4;
               qs8_qc8w_gemm_config.nr = 8;
               break;
-            case cpuinfo_uarch_cortex_a53:
-            case cpuinfo_uarch_cortex_a57:
+            case xnn_uarch_cortex_a53:
+            case xnn_uarch_cortex_a57:
               qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8__asm_aarch32_neonv8_mlal_lane_cortex_a35_prfm);
               qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x8__asm_aarch32_neonv8_mlal_lane_cortex_a53_prfm);
               qs8_qc8w_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x8__asm_aarch32_neonv8_mlal_lane_cortex_a35_prfm);
@@ -3969,8 +3900,8 @@ static void init_qs8_qc8w_gemm_config(void) {
               qs8_qc8w_gemm_config.mr = 4;
               qs8_qc8w_gemm_config.nr = 8;
               break;
-            case cpuinfo_uarch_cortex_a55r0:
-            case cpuinfo_uarch_cortex_a55:
+            case xnn_uarch_cortex_a55r0:
+            case xnn_uarch_cortex_a55:
               qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8__asm_aarch32_neonv8_mlal_lane_cortex_a35);
               qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x8__asm_aarch32_neonv8_mlal_lane_cortex_a53);
               qs8_qc8w_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x8__asm_aarch32_neonv8_mlal_lane_cortex_a35);
@@ -3982,7 +3913,7 @@ static void init_qs8_qc8w_gemm_config(void) {
               qs8_qc8w_gemm_config.mr = 4;
               qs8_qc8w_gemm_config.nr = 8;
               break;
-            case cpuinfo_uarch_cortex_a72:
+            case xnn_uarch_cortex_a72:
               qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c2s4__neonv8_mlal);
               qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x8c2s4__neonv8_mlal);
               qs8_qc8w_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x8c2s4__neonv8_mlal);
@@ -3996,9 +3927,9 @@ static void init_qs8_qc8w_gemm_config(void) {
               qs8_qc8w_gemm_config.log2_kr = 1;
               qs8_qc8w_gemm_config.log2_sr = 2;
               break;
-            case cpuinfo_uarch_exynos_m1:
-            case cpuinfo_uarch_exynos_m2:
-            case cpuinfo_uarch_exynos_m3:
+            case xnn_uarch_exynos_m1:
+            case xnn_uarch_exynos_m2:
+            case xnn_uarch_exynos_m3:
               qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8__asm_aarch32_neonv8_mlal_lane_cortex_a35_prfm);
               qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x8__asm_aarch32_neonv8_mlal_lane_ld64_prfm);
               qs8_qc8w_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x8__asm_aarch32_neonv8_mlal_lane_cortex_a35_prfm);
@@ -4045,14 +3976,8 @@ static void init_qs8_qc8w_gemm_config(void) {
           const uint32_t nr = qs8_qc8w_gemm_config.nr;
           const uint32_t log2_kr = qs8_qc8w_gemm_config.log2_kr;
           for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-            const struct cpuinfo_uarch_info* uarch_info = cpuinfo_get_uarch(i);
-            if (uarch_info == NULL) {
-              /* No more microarchitectures in the system */
-              break;
-            }
-
-            switch (uarch_info->uarch) {
-              case cpuinfo_uarch_cortex_a53:
+            switch (hardware_config->uarch[i]) {
+              case xnn_uarch_cortex_a53:
                 if (mr == 4 && nr == 8 && log2_kr == 0) {
                   qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8__asm_aarch32_neonv8_mlal_lane_cortex_a35_prfm;
                   qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x8__asm_aarch32_neonv8_mlal_lane_cortex_a53_prfm;
@@ -4060,7 +3985,7 @@ static void init_qs8_qc8w_gemm_config(void) {
                   qs8_qc8w_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_igemm_ukernel_fn) xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x8__asm_aarch32_neonv8_mlal_lane_cortex_a53_prfm;
                 }
                 break;
-              case cpuinfo_uarch_cortex_a55:
+              case xnn_uarch_cortex_a55:
                 #if XNN_ENABLE_ARM_DOTPROD
                   if (mr == 4 && nr == 8 && log2_kr == 2 && (hardware_config->arch_flags & xnn_arch_arm_neon_dot)) {
                     qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c4__neondot;
@@ -4070,7 +3995,7 @@ static void init_qs8_qc8w_gemm_config(void) {
                     break;
                   }
                 #endif  // XNN_ENABLE_ARM_DOTPROD
-              case cpuinfo_uarch_cortex_a55r0:
+              case xnn_uarch_cortex_a55r0:
                 if (mr == 4 && nr == 8 && log2_kr == 0) {
                   qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8__asm_aarch32_neonv8_mlal_lane_cortex_a35;
                   qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x8__asm_aarch32_neonv8_mlal_lane_cortex_a53;
@@ -4250,8 +4175,8 @@ static void init_qs8_qc8w_gemm_config(void) {
           #endif  // XNN_ENABLE_ARM_I8MM
         } else if (XNN_ENABLE_ARM_DOTPROD && (hardware_config->arch_flags & xnn_arch_arm_neon_dot)) {
           #if XNN_ENABLE_ARM_DOTPROD
-            switch (cpuinfo_get_core(0)->uarch) {
-              case cpuinfo_uarch_cortex_a55:
+            switch (hardware_config->uarch[0]) {
+              case xnn_uarch_cortex_a55:
                 qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_cortex_a55);
                 qs8_qc8w_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_cortex_a55);
                 break;
@@ -4271,9 +4196,9 @@ static void init_qs8_qc8w_gemm_config(void) {
             qs8_qc8w_gemm_config.log2_kr = 2;
           #endif  // XNN_ENABLE_ARM_DOTPROD
         } else {
-          switch (cpuinfo_get_core(0)->uarch) {
-            case cpuinfo_uarch_cortex_a35:
-            case cpuinfo_uarch_kryo:
+          switch (hardware_config->uarch[0]) {
+            case xnn_uarch_cortex_a35:
+            case xnn_uarch_kryo:
               qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16__neonv8_mlal_lane);
               qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x16__asm_aarch64_neon_mlal_lane_ld64);
               qs8_qc8w_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x16__neonv8_mlal_lane);
@@ -4286,9 +4211,9 @@ static void init_qs8_qc8w_gemm_config(void) {
               qs8_qc8w_gemm_config.nr = 16;
               break;
 
-            case cpuinfo_uarch_cortex_a53:
-            case cpuinfo_uarch_cortex_a55r0:
-            case cpuinfo_uarch_cortex_a55:
+            case xnn_uarch_cortex_a53:
+            case xnn_uarch_cortex_a55r0:
+            case xnn_uarch_cortex_a55:
               qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16__neonv8_mlal_lane);
               qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a53);
               qs8_qc8w_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x16__neonv8_mlal_lane);
@@ -4301,8 +4226,8 @@ static void init_qs8_qc8w_gemm_config(void) {
               qs8_qc8w_gemm_config.nr = 16;
               break;
 
-            case cpuinfo_uarch_cortex_a72:
-            case cpuinfo_uarch_cortex_a73:
+            case xnn_uarch_cortex_a72:
+            case xnn_uarch_cortex_a73:
               qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c8__asm_aarch64_neon_mlal_prfm);
               qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x8c8__asm_aarch64_neon_mlal_prfm);
               qs8_qc8w_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x8c8__asm_aarch64_neon_mlal_prfm);
@@ -4338,14 +4263,8 @@ static void init_qs8_qc8w_gemm_config(void) {
           const uint32_t nr = qs8_qc8w_gemm_config.nr;
           const uint32_t log2_kr = qs8_qc8w_gemm_config.log2_kr;
           for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-            const struct cpuinfo_uarch_info* uarch_info = cpuinfo_get_uarch(i);
-            if (uarch_info == NULL) {
-              /* No more microarchitectures in the system */
-              break;
-            }
-
-            switch (uarch_info->uarch) {
-              case cpuinfo_uarch_cortex_a55:
+            switch (hardware_config->uarch[i]) {
+              case xnn_uarch_cortex_a55:
                 #if XNN_ENABLE_ARM_DOTPROD
                   if (mr == 4 && nr == 16 && log2_kr == 2 && (hardware_config->arch_flags & xnn_arch_arm_neon_dot)) {
                     qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__neondot;
@@ -4355,8 +4274,8 @@ static void init_qs8_qc8w_gemm_config(void) {
                     break;
                   }
                 #endif  // XNN_ENABLE_ARM_DOTPROD
-              case cpuinfo_uarch_cortex_a53:
-              case cpuinfo_uarch_cortex_a55r0:
+              case xnn_uarch_cortex_a53:
+              case xnn_uarch_cortex_a55r0:
                 if (mr == 2 && nr == 8 && log2_kr == 3) {
                   qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c8__asm_aarch64_neon_mlal_cortex_a53_prfm;
                   qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(2)].function[i] = (xnn_gemm_ukernel_fn) xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x8c8__asm_aarch64_neon_mlal_cortex_a53_prfm;
@@ -4776,11 +4695,11 @@ static void init_qu8_gemm_config(void) {
     (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       #if XNN_ENABLE_ASSEMBLY
-        switch (cpuinfo_get_uarch(0)->uarch) {
-          case cpuinfo_uarch_cortex_a5:
-          case cpuinfo_uarch_cortex_a7:
-          case cpuinfo_uarch_krait:
-          case cpuinfo_uarch_kryo:
+        switch (hardware_config->uarch[0]) {
+          case xnn_uarch_cortex_a5:
+          case xnn_uarch_cortex_a7:
+          case xnn_uarch_krait:
+          case xnn_uarch_kryo:
             qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu_ukernel_1x8__asm_aarch32_neon_mlal_lane_cortex_a7_prfm);
             qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_cortex_a7_prfm);
             qu8_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qu8_igemm_minmax_rndnu_ukernel_1x8__asm_aarch32_neon_mlal_lane_cortex_a7_prfm);
@@ -4789,8 +4708,8 @@ static void init_qu8_gemm_config(void) {
             qu8_gemm_config.mr = 4;
             qu8_gemm_config.nr = 8;
             break;
-          case cpuinfo_uarch_cortex_a32:
-          case cpuinfo_uarch_cortex_a35:
+          case xnn_uarch_cortex_a32:
+          case xnn_uarch_cortex_a35:
             qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu_ukernel_1x8__asm_aarch32_neon_mlal_lane_cortex_a7);
             qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_cortex_a7);
             qu8_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qu8_igemm_minmax_rndnu_ukernel_1x8__asm_aarch32_neon_mlal_lane_cortex_a7);
@@ -4799,9 +4718,9 @@ static void init_qu8_gemm_config(void) {
             qu8_gemm_config.mr = 4;
             qu8_gemm_config.nr = 8;
             break;
-          case cpuinfo_uarch_cortex_a53:
-          case cpuinfo_uarch_cortex_a57:
-          case cpuinfo_uarch_cortex_a72:
+          case xnn_uarch_cortex_a53:
+          case xnn_uarch_cortex_a57:
+          case xnn_uarch_cortex_a72:
             qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu_ukernel_1x8__asm_aarch32_neon_mlal_lane_cortex_a7_prfm);
             qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_cortex_a53_prfm);
             qu8_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qu8_igemm_minmax_rndnu_ukernel_1x8__asm_aarch32_neon_mlal_lane_cortex_a7_prfm);
@@ -4810,8 +4729,8 @@ static void init_qu8_gemm_config(void) {
             qu8_gemm_config.mr = 4;
             qu8_gemm_config.nr = 8;
             break;
-          case cpuinfo_uarch_cortex_a55r0:
-          case cpuinfo_uarch_cortex_a55:
+          case xnn_uarch_cortex_a55r0:
+          case xnn_uarch_cortex_a55:
             qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu_ukernel_1x8__asm_aarch32_neon_mlal_lane_cortex_a7);
             qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_cortex_a53);
             qu8_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qu8_igemm_minmax_rndnu_ukernel_1x8__asm_aarch32_neon_mlal_lane_cortex_a7);
@@ -4820,9 +4739,9 @@ static void init_qu8_gemm_config(void) {
             qu8_gemm_config.mr = 4;
             qu8_gemm_config.nr = 8;
             break;
-          case cpuinfo_uarch_exynos_m1:
-          case cpuinfo_uarch_exynos_m2:
-          case cpuinfo_uarch_exynos_m3:
+          case xnn_uarch_exynos_m1:
+          case xnn_uarch_exynos_m2:
+          case xnn_uarch_exynos_m3:
             qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu_ukernel_1x8__asm_aarch32_neon_mlal_lane_cortex_a7_prfm);
             qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_ld64_prfm);
             qu8_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qu8_igemm_minmax_rndnu_ukernel_1x8__asm_aarch32_neon_mlal_lane_cortex_a7_prfm);
@@ -4849,14 +4768,8 @@ static void init_qu8_gemm_config(void) {
           const uint32_t nr = qu8_gemm_config.nr;
           const uint32_t log2_kr = qu8_gemm_config.log2_kr;
           for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-            const struct cpuinfo_uarch_info* uarch_info = cpuinfo_get_uarch(i);
-            if (uarch_info == NULL) {
-              /* No more microarchitectures in the system */
-              break;
-            }
-
-            switch (uarch_info->uarch) {
-              case cpuinfo_uarch_cortex_a53:
+            switch (hardware_config->uarch[i]) {
+              case xnn_uarch_cortex_a53:
                 if (mr == 4 && nr == 8 && log2_kr == 0) {
                   qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu_ukernel_1x8__asm_aarch32_neon_mlal_lane_cortex_a7_prfm;
                   qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_cortex_a53_prfm;
@@ -4864,8 +4777,8 @@ static void init_qu8_gemm_config(void) {
                   qu8_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_igemm_ukernel_fn) xnn_qu8_igemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_cortex_a53_prfm;
                 }
                 break;
-              case cpuinfo_uarch_cortex_a55r0:
-              case cpuinfo_uarch_cortex_a55:
+              case xnn_uarch_cortex_a55r0:
+              case xnn_uarch_cortex_a55:
                 if (mr == 4 && nr == 8 && log2_kr == 0) {
                   qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu_ukernel_1x8__asm_aarch32_neon_mlal_lane_cortex_a7;
                   qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lane_cortex_a53;
@@ -4900,11 +4813,13 @@ static void init_qu8_gemm_config(void) {
     }
   #elif XNN_ARCH_ARM64
     #if XNN_ENABLE_ASSEMBLY
-      switch (cpuinfo_get_core(0)->uarch) {
-        case cpuinfo_uarch_cortex_a53:
-        case cpuinfo_uarch_cortex_a55r0:
-        case cpuinfo_uarch_cortex_a55:
-        case cpuinfo_uarch_kryo:
+      const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+      assert(hardware_config);
+      switch (hardware_config->uarch[0]) {
+        case xnn_uarch_cortex_a53:
+        case xnn_uarch_cortex_a55r0:
+        case xnn_uarch_cortex_a55:
+        case xnn_uarch_kryo:
           qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu16_ukernel_1x16__neon_mlal_lane);
           qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu16_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a53_prfm);
           qu8_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qu8_igemm_minmax_rndnu16_ukernel_1x16__neon_mlal_lane);
@@ -4914,16 +4829,16 @@ static void init_qu8_gemm_config(void) {
           qu8_gemm_config.nr = 16;
           break;
 
-        case cpuinfo_uarch_cortex_a57:
-        case cpuinfo_uarch_cortex_a72:
-        case cpuinfo_uarch_cortex_a73:
-        case cpuinfo_uarch_cortex_a75:
-        case cpuinfo_uarch_cortex_a76:
-        case cpuinfo_uarch_exynos_m1:
-        case cpuinfo_uarch_exynos_m2:
-        case cpuinfo_uarch_exynos_m3:
-        case cpuinfo_uarch_exynos_m4:
-        case cpuinfo_uarch_neoverse_n1:
+        case xnn_uarch_cortex_a57:
+        case xnn_uarch_cortex_a72:
+        case xnn_uarch_cortex_a73:
+        case xnn_uarch_cortex_a75:
+        case xnn_uarch_cortex_a76:
+        case xnn_uarch_exynos_m1:
+        case xnn_uarch_exynos_m2:
+        case xnn_uarch_exynos_m3:
+        case xnn_uarch_exynos_m4:
+        case xnn_uarch_neoverse_n1:
           qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu_ukernel_1x16__neon_mlal_lane);
           qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a75_prfm);
           qu8_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qu8_igemm_minmax_rndnu_ukernel_1x16__neon_mlal_lane);
@@ -4950,16 +4865,10 @@ static void init_qu8_gemm_config(void) {
         const uint32_t nr = qu8_gemm_config.nr;
         const uint32_t log2_kr = qu8_gemm_config.log2_kr;
         for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-          const struct cpuinfo_uarch_info* uarch_info = cpuinfo_get_uarch(i);
-          if (uarch_info == NULL) {
-            /* No more microarchitectures in the system */
-            break;
-          }
-
-          switch (uarch_info->uarch) {
-            case cpuinfo_uarch_cortex_a53:
-            case cpuinfo_uarch_cortex_a55r0:
-            case cpuinfo_uarch_cortex_a55:
+          switch (hardware_config->uarch[i]) {
+            case xnn_uarch_cortex_a53:
+            case xnn_uarch_cortex_a55r0:
+            case xnn_uarch_cortex_a55:
               if (mr == 4 && nr == 16 && log2_kr == 0) {
                 qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a53_prfm;
                 qu8_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_igemm_ukernel_fn) xnn_qu8_igemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a53_prfm;

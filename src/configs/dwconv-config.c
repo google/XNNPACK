@@ -6,10 +6,6 @@
 #include <assert.h>
 #include <stddef.h>
 
-#if XNN_ENABLE_CPUINFO
-  #include <cpuinfo.h>
-#endif  // XNN_ENABLE_CPUINFO
-
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/config.h"
 #include "src/xnnpack/dwconv.h"
@@ -171,17 +167,19 @@ static void init_f32_dwconv_config(void) {
       f32_dwconv_config[2].channel_tile = 8;
       f32_dwconv_config[2].primary_tile = 9;
     #else  // !XNN_PLATFORM_IOS && !XNN_PLATFORM_MAC
-      switch (cpuinfo_get_core(0)->uarch) {
-        case cpuinfo_uarch_kryo:
+      const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+      assert(hardware_config != NULL);
+      switch (hardware_config->uarch[0]) {
+        case xnn_uarch_kryo:
           f32_dwconv_config[2].minmax = (xnn_dwconv_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_9p8c__neonfma;
           f32_dwconv_config[2].init.f32 = xnn_init_f32_minmax_scalar_params;
           f32_dwconv_config[2].channel_tile = 8;
           f32_dwconv_config[2].primary_tile = 9;
           break;
         #if XNN_ENABLE_ASSEMBLY
-          case cpuinfo_uarch_cortex_a53:
-          case cpuinfo_uarch_cortex_a55r0:
-          case cpuinfo_uarch_cortex_a55:
+          case xnn_uarch_cortex_a53:
+          case xnn_uarch_cortex_a55r0:
+          case xnn_uarch_cortex_a55:
             f32_dwconv_config[2].minmax = (xnn_dwconv_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma_cortex_a55;
             f32_dwconv_config[2].init.f32 = xnn_init_f32_minmax_scalar_params;
             f32_dwconv_config[2].channel_tile = 4;

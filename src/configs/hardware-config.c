@@ -66,6 +66,51 @@ ssize_t xnn_syscall(size_t rax, size_t rdi, size_t rsi, size_t rdx) {
 }
 #endif
 
+#if XNN_ENABLE_CPUINFO
+static enum xnn_uarch cpuinfo_to_xnn_uarch(enum cpuinfo_uarch uarch) {
+  switch (uarch) {
+    case cpuinfo_uarch_dhyana: return xnn_uarch_dhyana;
+    case cpuinfo_uarch_zen: return xnn_uarch_zen;
+    case cpuinfo_uarch_zen4: return xnn_uarch_zen4;
+
+    case cpuinfo_uarch_cortex_a5: return xnn_uarch_cortex_a5;
+    case cpuinfo_uarch_cortex_a7: return xnn_uarch_cortex_a7;
+    case cpuinfo_uarch_cortex_a32: return xnn_uarch_cortex_a32;
+    case cpuinfo_uarch_cortex_a35: return xnn_uarch_cortex_a35;
+    case cpuinfo_uarch_cortex_a53: return xnn_uarch_cortex_a53;
+    case cpuinfo_uarch_cortex_a55r0: return xnn_uarch_cortex_a55r0;
+    case cpuinfo_uarch_cortex_a55: return xnn_uarch_cortex_a55;
+    case cpuinfo_uarch_cortex_a57: return xnn_uarch_cortex_a57;
+    case cpuinfo_uarch_cortex_a72: return xnn_uarch_cortex_a72;
+    case cpuinfo_uarch_cortex_a73: return xnn_uarch_cortex_a73;
+    case cpuinfo_uarch_cortex_a75: return xnn_uarch_cortex_a75;
+    case cpuinfo_uarch_cortex_a76: return xnn_uarch_cortex_a76;
+    case cpuinfo_uarch_cortex_a77: return xnn_uarch_cortex_a77;
+    case cpuinfo_uarch_cortex_a78: return xnn_uarch_cortex_a78;
+    case cpuinfo_uarch_cortex_a510: return xnn_uarch_cortex_a510;
+    case cpuinfo_uarch_cortex_a710: return xnn_uarch_cortex_a710;
+    case cpuinfo_uarch_cortex_a715: return xnn_uarch_cortex_a715;
+    case cpuinfo_uarch_cortex_x1: return xnn_uarch_cortex_x1;
+    case cpuinfo_uarch_cortex_x2: return xnn_uarch_cortex_x2;
+    case cpuinfo_uarch_cortex_x3: return xnn_uarch_cortex_x3;
+    case cpuinfo_uarch_cortex_x4: return xnn_uarch_cortex_x4;
+    case cpuinfo_uarch_exynos_m1: return xnn_uarch_exynos_m1;
+    case cpuinfo_uarch_exynos_m2: return xnn_uarch_exynos_m2;
+    case cpuinfo_uarch_exynos_m3: return xnn_uarch_exynos_m3;
+    case cpuinfo_uarch_exynos_m4: return xnn_uarch_exynos_m4;
+    case cpuinfo_uarch_exynos_m5: return xnn_uarch_exynos_m5;
+    case cpuinfo_uarch_krait: return xnn_uarch_krait;
+    case cpuinfo_uarch_kryo: return xnn_uarch_kryo;
+    case cpuinfo_uarch_neoverse_n1: return xnn_uarch_neoverse_n1;
+    case cpuinfo_uarch_neoverse_n2: return xnn_uarch_neoverse_n2;
+    case cpuinfo_uarch_neoverse_v1: return xnn_uarch_neoverse_v1;
+    case cpuinfo_uarch_neoverse_v2: return xnn_uarch_neoverse_v2;
+    case cpuinfo_uarch_oryon: return xnn_uarch_oryon;
+    default: return xnn_uarch_unknown;
+  }
+}
+#endif  // XNN_ENABLE_CPUINFO
+
 static struct xnn_hardware_config hardware_config = {0};
 
 XNN_INIT_ONCE_GUARD(hardware);
@@ -335,8 +380,15 @@ static void init_hardware_config(void) {
       xnn_log_info("cpu_get_uarch(%i): 0x%x", i, cpuinfo_get_uarch(i)->uarch);
     }
 #endif  // XNN_MAX_UARCH_TYPES > 1
+    for (size_t i = 0; i < XNN_MAX_UARCH_TYPES; ++i) {
+      const struct cpuinfo_uarch_info* uarch = cpuinfo_get_uarch(i);
+      hardware_config.uarch[i] = uarch ? cpuinfo_to_xnn_uarch(uarch->uarch) : xnn_uarch_unknown;
+    }
 #else
   xnn_log_warning("Unable to determine L1/L2 data cache properties.");
+  for (size_t i = 0; i < XNN_MAX_UARCH_TYPES; ++i) {
+    hardware_config.uarch[i] = xnn_uarch_unknown;
+  }
 #endif  // XNN_ENABLE_CPUINFO
 }
 

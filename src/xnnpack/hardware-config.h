@@ -81,7 +81,50 @@ enum xnn_arch_flags {
 #endif  // XNN_ARCH_HEXAGON
 };
 
+enum xnn_uarch {
+  xnn_uarch_unknown = 0,
+
+  xnn_uarch_dhyana,
+  xnn_uarch_zen,
+  xnn_uarch_zen4,
+
+  xnn_uarch_cortex_a5,
+  xnn_uarch_cortex_a7,
+  xnn_uarch_cortex_a32,
+  xnn_uarch_cortex_a35,
+  xnn_uarch_cortex_a53,
+  xnn_uarch_cortex_a55,
+  xnn_uarch_cortex_a55r0,
+  xnn_uarch_cortex_a57,
+  xnn_uarch_cortex_a72,
+  xnn_uarch_cortex_a73,
+  xnn_uarch_cortex_a75,
+  xnn_uarch_cortex_a76,
+  xnn_uarch_cortex_a77,
+  xnn_uarch_cortex_a78,
+  xnn_uarch_cortex_a510,
+  xnn_uarch_cortex_a710,
+  xnn_uarch_cortex_a715,
+  xnn_uarch_cortex_x1,
+  xnn_uarch_cortex_x2,
+  xnn_uarch_cortex_x3,
+  xnn_uarch_cortex_x4,
+  xnn_uarch_exynos_m1,
+  xnn_uarch_exynos_m2,
+  xnn_uarch_exynos_m3,
+  xnn_uarch_exynos_m4,
+  xnn_uarch_exynos_m5,
+  xnn_uarch_krait,
+  xnn_uarch_kryo,
+  xnn_uarch_neoverse_n1,
+  xnn_uarch_neoverse_n2,
+  xnn_uarch_neoverse_v1,
+  xnn_uarch_neoverse_v2,
+  xnn_uarch_oryon,
+};
+
 struct xnn_hardware_config {
+  enum xnn_uarch uarch[XNN_MAX_UARCH_TYPES];
   uint64_t arch_flags;
 #if XNN_ARCH_RISCV
   // vlenb CSR (VLEN/8). 0 if vector extension is unsupported.
