@@ -40,16 +40,21 @@
 #include "src/xnnpack/allocator.h"
 #endif  // XNN_ENABLE_KLEIDIAI
 
-struct unaligned_int32_t {
-  char value[sizeof(int32_t)];
+class unaligned_int32_t {
+ public:
+  XNN_INLINE unaligned_int32_t(  // NOLINT(google-explicit-constructor)
+      int32_t v) {
+    memcpy(value_, &v, sizeof(v));
+  }
 
-  XNN_INLINE unaligned_int32_t(int32_t v) { memcpy(value, &v, sizeof(v)); }
-
-  XNN_INLINE operator int32_t() const {
+  XNN_INLINE operator int32_t() const {  // NOLINT(google-explicit-constructor)
     int32_t v;
-    memcpy(&v, value, sizeof(v));
+    memcpy(&v, value_, sizeof(v));
     return v;
   }
+
+ private:
+  char value_[sizeof(int32_t)];
 };
 
 template <typename Src, typename Dst>

@@ -576,8 +576,6 @@ xnnpack_cxx_library(
         ":microfnptr_h",
         ":microparams_h",
         ":microparams_init",
-        ":params",
-        ":quantization",
         ":unaligned",
         ":xnnpack_h",
         "//src/configs:config_hdrs",
