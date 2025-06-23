@@ -1292,7 +1292,10 @@ struct xnn_hmp_dqigemm_ukernel {
 };
 
 struct xnn_hmp_igemm_ukernel {
-  xnn_igemm_ukernel_fn function[XNN_MAX_UARCH_TYPES];
+  union {
+    xnn_igemm_ukernel_fn function[XNN_MAX_UARCH_TYPES];
+    xnn_packed_lhs_igemm_ukernel_fn packed_lhs_function[XNN_MAX_UARCH_TYPES];
+  };
 };
 
 struct xnn_hmp_qp8gemm_ukernel {

@@ -12,6 +12,7 @@
 #include "include/xnnpack.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/config-types.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams.h"
 #include <pthreadpool.h>
@@ -46,16 +47,17 @@ enum xnn_parallelization_type {
   xnn_parallelization_type_6d_tile_2d,
 #if XNN_MAX_UARCH_TYPES > 1
   xnn_parallelization_type_1d_tile_1d_dynamic_with_uarch_with_thread,
-  xnn_parallelization_type_2d_tile_1d_with_uarch,
   xnn_parallelization_type_2d_tile_1d_dynamic_with_uarch_with_thread,
-  xnn_parallelization_type_2d_tile_2d_with_uarch,
+  xnn_parallelization_type_2d_tile_1d_with_uarch,
   xnn_parallelization_type_2d_tile_2d_dynamic_with_uarch,
-  xnn_parallelization_type_3d_tile_1d_with_uarch,
+  xnn_parallelization_type_2d_tile_2d_with_uarch,
+  xnn_parallelization_type_3d_tile_1d_dynamic_with_uarch_with_thread,
   xnn_parallelization_type_3d_tile_1d_with_uarch_with_thread,
-  xnn_parallelization_type_3d_tile_2d_with_uarch,
+  xnn_parallelization_type_3d_tile_1d_with_uarch,
   xnn_parallelization_type_3d_tile_2d_dynamic_with_uarch,
-  xnn_parallelization_type_4d_tile_2d_with_uarch,
+  xnn_parallelization_type_3d_tile_2d_with_uarch,
   xnn_parallelization_type_4d_tile_2d_dynamic_with_uarch,
+  xnn_parallelization_type_4d_tile_2d_with_uarch,
 #endif  // XNN_MAX_UARCH_TYPES > 1
 };
 
@@ -96,17 +98,19 @@ struct compute_parameters {
 #if XNN_MAX_UARCH_TYPES > 1
     pthreadpool_task_1d_tile_1d_dynamic_with_id_with_thread_t
         task_1d_tile_1d_dynamic_with_id_with_thread;
-    pthreadpool_task_2d_tile_1d_with_id_t task_2d_tile_1d_with_id;
     pthreadpool_task_2d_tile_1d_dynamic_with_id_with_thread_t
         task_2d_tile_1d_dynamic_with_id_with_thread;
+    pthreadpool_task_2d_tile_1d_with_id_t task_2d_tile_1d_with_id;
     pthreadpool_task_2d_tile_2d_with_id_t task_2d_tile_2d_with_id;
+    pthreadpool_task_3d_tile_1d_dynamic_with_id_with_thread_t
+        task_3d_tile_1d_dynamic_with_id_with_thread;
     pthreadpool_task_3d_tile_1d_with_id_t task_3d_tile_1d_with_id;
     pthreadpool_task_3d_tile_1d_with_id_with_thread_t
         task_3d_tile_1d_with_id_with_thread;
     pthreadpool_task_3d_tile_2d_with_id_t task_3d_tile_2d_with_id;
-    pthreadpool_task_4d_tile_2d_with_id_t task_4d_tile_2d_with_id;
     pthreadpool_task_4d_tile_2d_dynamic_with_id_t
         task_4d_tile_2d_dynamic_with_id;
+    pthreadpool_task_4d_tile_2d_with_id_t task_4d_tile_2d_with_id;
 #endif  // XNN_MAX_UARCH_TYPES > 1
   };
   // Offset of the invocation context w.r.t. xnn_operator.context. Typically 0,
@@ -557,7 +561,20 @@ struct igemm_context {
     union xnn_qu8_conv_minmax_params qu8;
     struct xnn_f16_scaleminmax_params f16;
     struct xnn_f32_minmax_params f32;
+    union xnn_qs8_qc8w_conv_minmax_params qs8_qc8w;
   } params;
+  // Config for inline LHS packing.
+  const struct xnn_pack_lh_config* packed_lh_config;
+  // The `mr_packed` size of the current GEMM microkernel.
+  size_t mr_packed;
+  size_t kr;
+  size_t sr;
+  // Pointer to additional workspace, if required.
+  void* workspace;
+  // Offset of the per-thread chunks from the start of the workspace pointer.
+  size_t workspace_offset;
+  // Size, in bytes, of the workspace allocated to each thread.
+  size_t per_thread_workspace_size;
 };
 
 XNN_PRIVATE void xnn_compute_grouped_dqigemm(
@@ -613,6 +630,14 @@ XNN_PRIVATE void xnn_compute_batch_igemm(const struct igemm_context* context,
                                          size_t nr_block_size,
                                          size_t mr_block_size);
 
+XNN_PRIVATE void xnn_compute_batch_inline_packed_igemm(
+    const struct igemm_context* context, uint32_t thread_id, size_t batch_index,
+    size_t mr_block_start, size_t mr_block_size);
+
+XNN_PRIVATE void xnn_compute_grouped_batch_inline_packed_igemm(
+    const struct igemm_context* context, uint32_t thread_id, size_t batch_index,
+    size_t group_index, size_t mr_block_start, size_t mr_block_size);
+
 #if XNN_MAX_UARCH_TYPES > 1
 XNN_PRIVATE void xnn_compute_hmp_grouped_igemm(
     const struct igemm_context* context, uint32_t uarch_index,
@@ -657,6 +682,15 @@ XNN_PRIVATE void xnn_compute_batch_hmp_igemm(
     const struct igemm_context* context, uint32_t uarch_index,
     size_t batch_index, size_t nr_block_start, size_t mr_block_start,
     size_t nr_block_size, size_t mr_block_size);
+
+XNN_PRIVATE void xnn_compute_batch_hmp_inline_packed_igemm(
+    const struct igemm_context* context, uint32_t uarch_index, size_t thread_id,
+    size_t batch_index, size_t mr_block_start, size_t mr_block_size);
+
+XNN_PRIVATE void xnn_compute_grouped_batch_hmp_inline_packed_igemm(
+    const struct igemm_context* context, uint32_t uarch_index, size_t thread_id,
+    size_t batch_index, size_t group_index, size_t mr_block_start,
+    size_t mr_block_size);
 #endif  // XNN_MAX_UARCH_TYPES > 1
 
 struct subgemm_context {

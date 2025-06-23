@@ -56,6 +56,8 @@ XNN_ENUM_ITEM(xnn_operator_type_convolution_nhwc_qdu8_f32_qc8w,
 XNN_ENUM_ITEM(xnn_operator_type_convolution_nhwc_qd8_f32_qc8w,
               "Convolution (NHWC, QD8, F32, QC8W)")
 XNN_ENUM_ITEM(xnn_operator_type_convolution_nhwc_qc8, "Convolution (NHWC, QC8)")
+XNN_ENUM_ITEM(xnn_operator_type_convolution_nhwc_pqs8_qs8_qc8w,
+              "Convolution (NHWC, PQS8, QS8, QC8W)")
 XNN_ENUM_ITEM(xnn_operator_type_convolution_nhwc_qs8, "Convolution (NHWC, QS8)")
 XNN_ENUM_ITEM(xnn_operator_type_convolution_nhwc_qu8, "Convolution (NHWC, QU8)")
 XNN_ENUM_ITEM(xnn_operator_type_copy_nc_x8, "Copy (NC, X8)")
@@ -73,6 +75,8 @@ XNN_ENUM_ITEM(xnn_operator_type_deconvolution_nhwc_qs8,
               "Deconvolution (NHWC, QS8)")
 XNN_ENUM_ITEM(xnn_operator_type_deconvolution_nhwc_qs8_qc8w,
               "Deconvolution (NC, QS8, QC8W)")
+XNN_ENUM_ITEM(xnn_operator_type_deconvolution_nhwc_pqs8_qs8_qc8w,
+              "Deconvolution (NHWC, PQS8, QS8, QC8W)")
 XNN_ENUM_ITEM(xnn_operator_type_deconvolution_nhwc_qu8,
               "Deconvolution (NHWC, QU8)")
 XNN_ENUM_ITEM(xnn_operator_type_depth_to_space_nchw2nhwc_x16,

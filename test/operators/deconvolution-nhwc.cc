@@ -2,11 +2,11 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+
 #include <cstddef>
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "include/xnnpack.h"
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
 #include "test/operators/deconvolution-operator-tester.h"
@@ -3368,6 +3368,11 @@ static const DeconvolutionTestCase kDeconvolutionSetupTests[] = {
 CREATE_DECONVOLUTION_TESTS(DECONVOLUTION_NHWC_QC8,
                            xnn_init_qs8_qc8w_gemm_config(), TestQC8)
 CREATE_DECONVOLUTION_SETUP_TESTS(DECONVOLUTION_NHWC_QC8, TestSetupQS8)
+
+CREATE_DECONVOLUTION_TESTS(DECONVOLUTION_NHWC_PQS8_QS8_QC8W,
+                           xnn_init_pqs8_qc8w_gemm_config(), TestPQC8)
+CREATE_DECONVOLUTION_SETUP_TESTS(DECONVOLUTION_NHWC_PQS8_QS8_QC8W,
+                                 TestSetupPQS8)
 
 CREATE_DECONVOLUTION_TESTS(DECONVOLUTION_NHWC_QU8, xnn_init_qu8_gemm_config(),
                            TestQU8)

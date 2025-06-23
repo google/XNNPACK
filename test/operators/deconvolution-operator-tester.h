@@ -28,8 +28,10 @@
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/cache.h"
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/internal.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
+#include "src/xnnpack/operator.h"
 #include "test/replicable_random_device.h"
 
 constexpr int kIterations = 1;
@@ -458,6 +460,7 @@ class DeconvolutionOperatorTester {
                                                  group_output_channels());
 
     const int8_t input_zero_point = 1;
+    const int8_t output_zero_point = -1;
 
     for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
@@ -465,125 +468,8 @@ class DeconvolutionOperatorTester {
                     [&]() { return w8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
 
-      // Compute reference results, without renormalization.
-      if (has_bias()) {
-        for (size_t i = 0; i < batch_size(); i++) {
-          for (size_t oy = 0; oy < output_height(); oy++) {
-            for (size_t ox = 0; ox < output_width(); ox++) {
-              for (size_t g = 0; g < groups(); g++) {
-                for (size_t oc = 0; oc < group_output_channels(); oc++) {
-                  accumulators[(((i * output_height() + oy) * output_width() +
-                                 ox) *
-                                    groups() +
-                                g) *
-                                   group_output_channels() +
-                               oc] = bias[g * group_output_channels() + oc];
-                }
-              }
-            }
-          }
-        }
-      } else {
-        std::fill(accumulators.begin(), accumulators.end(), 0);
-      }
-      for (size_t i = 0; i < batch_size(); i++) {
-        for (size_t oy = 0; oy < output_height(); oy++) {
-          for (size_t ox = 0; ox < output_width(); ox++) {
-            for (size_t ky = 0; ky < kernel_height(); ky++) {
-              const size_t y = oy + padding_top() - ky * dilation_height();
-              const size_t iy = y / stride_height();
-              if (iy * stride_height() == y && iy < input_height()) {
-                for (size_t kx = 0; kx < kernel_width(); kx++) {
-                  const size_t x = ox + padding_left() - kx * dilation_width();
-                  const size_t ix = x / stride_width();
-                  if (ix * stride_width() == x && ix < input_width()) {
-                    for (size_t g = 0; g < groups(); g++) {
-                      for (size_t oc = 0; oc < group_output_channels(); oc++) {
-                        for (size_t ic = 0; ic < group_input_channels(); ic++) {
-                          accumulators[(((i * output_height() + oy) *
-                                             output_width() +
-                                         ox) *
-                                            groups() +
-                                        g) *
-                                           group_output_channels() +
-                                       oc] +=
-                              (int32_t(input[((i * input_height() + iy) *
-                                                  input_width() +
-                                              ix) *
-                                                 input_pixel_stride() +
-                                             g * group_input_channels() + ic]) -
-                               int32_t(input_zero_point)) *
-                              int32_t(
-                                  kernel[(((g * group_output_channels() + oc) *
-                                               kernel_height() +
-                                           ky) *
-                                              kernel_width() +
-                                          kx) *
-                                             group_input_channels() +
-                                         ic]);
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-
-      // Compute renormalization parameters.
-      const int8_t output_zero_point = -1;
-      for (size_t c = 0; c < groups() * group_output_channels(); c++) {
-        int32_t accumulated_min = accumulators[c];
-        int32_t accumulated_max = accumulators[c];
-        for (size_t px = 0;
-             px < batch_size() * output_height() * output_width(); px++) {
-          accumulated_min = std::min(
-              accumulated_min,
-              accumulators[px * groups() * group_output_channels() + c]);
-          accumulated_max = std::max(
-              accumulated_max,
-              accumulators[px * groups() * group_output_channels() + c]);
-        }
-
-        float requantization_scale = 2.328e-10f;  // 0x1.0p-32f;
-        if (accumulated_max != 0) {
-          requantization_scale =
-              std::max(requantization_scale,
-                       float(int32_t(std::numeric_limits<int8_t>::max()) -
-                             int32_t(output_zero_point)) /
-                           float(accumulated_max));
-        }
-        if (accumulated_min != 0) {
-          requantization_scale =
-              std::max(requantization_scale,
-                       float(int32_t(std::numeric_limits<int8_t>::min()) -
-                             int32_t(output_zero_point)) /
-                           float(accumulated_min));
-        }
-        requantization_scale = std::min(requantization_scale, 1.f);
-
-        requantization_scales[c] = requantization_scale;
-      }
-
-      // Renormalize reference results.
-      for (size_t c = 0; c < groups() * group_output_channels(); c++) {
-        for (size_t px = 0;
-             px < batch_size() * output_height() * output_width(); px++) {
-          output_ref[px * groups() * group_output_channels() + c] =
-              double(int32_t(output_zero_point)) +
-              double(
-                  accumulators[px * groups() * group_output_channels() + c]) *
-                  double(requantization_scales[c]);
-        }
-      }
-      std::transform(output_ref.cbegin(), output_ref.cend(), output_ref.begin(),
-                     [this](double x) -> double {
-                       return std::max<double>(
-                           std::min<double>(x, double(qmax() - 0x80)),
-                           double(qmin() - 0x80));
-                     });
+      ComputeReferenceQS8(input, kernel, bias, input_zero_point,
+                          output_zero_point, output_ref, requantization_scales);
 
       // Create, setup, run, and destroy Deconvolution operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -613,8 +499,8 @@ class DeconvolutionOperatorTester {
               input_pixel_stride(), output_pixel_stride(), input_zero_point,
               /*input_scale=*/1.0f, requantization_scales.data(), kernel.data(),
               has_bias() ? bias.data() : nullptr, output_zero_point,
-              /*output_scale=*/1.f, int8_t(qmin() - 0x80),
-              int8_t(qmax() - 0x80),
+              /*output_scale=*/1.f, static_cast<int8_t>(qmin() - 0x80),
+              static_cast<int8_t>(qmax() - 0x80),
               /*flags=*/0, auto_weights_cache.get(), &deconvolution_op));
 
       if (use_weights_cache()) {
@@ -641,7 +527,8 @@ class DeconvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success,
                 xnn_run_operator(deconvolution_op, /*threadpool=*/nullptr));
 
-      VerifyQC8(output, output_ref);
+      VerifyQC8(batch_size(), output_height(), output_width(),
+                /*output_zero_point=*/0, output, output_ref);
 
       if (use_weights_cache()) {
         xnn_operator_t deconvolution_op2 = nullptr;
@@ -659,8 +546,8 @@ class DeconvolutionOperatorTester {
                 output_pixel_stride(), input_zero_point, 1.0f /* input scale */,
                 requantization_scales.data(), kernel.data(),
                 has_bias() ? bias.data() : nullptr, output_zero_point,
-                /*output_scale=*/1.0f, int8_t(qmin() - 0x80),
-                int8_t(qmax() - 0x80),
+                /*output_scale=*/1.0f, static_cast<int8_t>(qmin() - 0x80),
+                static_cast<int8_t>(qmax() - 0x80),
                 /*flags=*/0, auto_weights_cache.get(), &deconvolution_op2));
 
         // Smart pointer to automatically delete deconvolution_op2.
@@ -684,44 +571,349 @@ class DeconvolutionOperatorTester {
                   xnn_run_operator(deconvolution_op2, /*threadpool=*/nullptr));
 
         VerifyWeightsCache(internal_weights_cache, old_weights_cache_size);
-        VerifyQC8(output2, output_ref);
+        VerifyQC8(batch_size(), output_height(), output_width(),
+                  /*output_zero_point=*/0, output2, output_ref);
       }
     }
   }
 
-  void VerifyQC8(const xnnpack::Buffer<int8_t>& output,
-                 const xnnpack::Buffer<double>& output_ref) const {
+  void TestPQC8() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
+    xnnpack::ReplicableRandomDevice rng;
+    std::uniform_int_distribution<int32_t> i32dist(-10000, 10000);
+    std::uniform_int_distribution<int32_t> i8dist(
+        std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+    std::uniform_int_distribution<int32_t> w8dist(
+        -std::numeric_limits<int8_t>::max(),
+        std::numeric_limits<int8_t>::max());
+    std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
+
+    xnnpack::Buffer<int8_t> input(
+        (batch_size() * input_height() * input_width() - 1) *
+                input_pixel_stride() +
+            groups() * group_input_channels(),
+        xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<int8_t> kernel(groups() * group_output_channels() *
+                                   kernel_height() * kernel_width() *
+                                   group_input_channels());
+    xnnpack::Buffer<int32_t> bias(groups() * group_output_channels());
+    xnnpack::Buffer<int8_t> output(
+        (batch_size() * output_height() * output_width() - 1) *
+            output_pixel_stride() +
+        groups() * group_output_channels());
+    xnnpack::Buffer<int32_t> accumulators(batch_size() * output_height() *
+                                          output_width() * groups() *
+                                          group_output_channels());
+    xnnpack::Buffer<double> output_ref(batch_size() * output_height() *
+                                       output_width() * groups() *
+                                       group_output_channels());
+    xnnpack::Buffer<float> requantization_scales(groups() *
+                                                 group_output_channels());
+
+    const int8_t input_zero_point = 1;
+    const int8_t output_zero_point = -1;
+
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
+      std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
+      std::generate(kernel.begin(), kernel.end(),
+                    [&]() { return w8dist(rng); });
+      std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
+
+      ComputeReferenceQS8(input, kernel, bias, input_zero_point,
+                          output_zero_point, output_ref, requantization_scales);
+
+      // Create, setup, run, and destroy Deconvolution operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t deconvolution_op = nullptr;
+
+      struct xnn_internal_weights_cache* internal_weights_cache = nullptr;
+      std::unique_ptr<xnn_weights_cache_provider,
+                      decltype(&xnn_delete_weights_cache)>
+          auto_weights_cache(nullptr, xnn_delete_weights_cache);
+      if (use_weights_cache()) {
+        xnn_weights_cache_t weights_cache = nullptr;
+        xnn_create_weights_cache(&weights_cache);
+        auto_weights_cache.reset(weights_cache);
+        if (weights_cache) {
+          internal_weights_cache =
+              (struct xnn_internal_weights_cache*)weights_cache->context;
+        }
+      }
+
+      uint32_t flags = XNN_FLAG_INLINE_LHS_PACKING;
+      enum xnn_status status = xnn_create_deconvolution2d_nhwc_pqs8_qs8_qc8w(
+          padding_top(), padding_right(), padding_bottom(), padding_left(),
+          kernel_height(), kernel_width(), stride_height(), stride_width(),
+          dilation_height(), dilation_width(), groups(), group_input_channels(),
+          group_output_channels(), input_pixel_stride(), output_pixel_stride(),
+          input_zero_point,
+          /*input_scale=*/1.0f, requantization_scales.data(), kernel.data(),
+          has_bias() ? bias.data() : nullptr, output_zero_point,
+          /*output_scale=*/1.f, static_cast<int8_t>(qmin() - 0x80),
+          static_cast<int8_t>(qmax() - 0x80), flags, auto_weights_cache.get(),
+          &deconvolution_op);
+      if (status == xnn_status_unsupported_hardware) {
+        GTEST_SKIP();
+      }
+      ASSERT_EQ(xnn_status_success, status);
+
+      if (use_weights_cache()) {
+        ASSERT_EQ(xnn_status_success,
+                  xnn_finalize_weights_cache(
+                      auto_weights_cache.get(),
+                      xnn_weights_cache_finalization_kind_soft));
+      }
+      // Smart pointer to automatically delete deconvolution_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+          auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
+
+      size_t workspace_size = 0;
+      ASSERT_EQ(xnn_status_success,
+                xnn_reshape_deconvolution2d_nhwc_pqs8_qs8_qc8w(
+                    deconvolution_op, batch_size(), input_height(),
+                    input_width(), adjustment_height(), adjustment_width(),
+                    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+                    &workspace_size,
+                    /*threadpool=*/nullptr));
+      xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> workspace(
+          workspace_size);
+
+      ASSERT_EQ(
+          xnn_status_success,
+          xnn_setup_deconvolution2d_nhwc_pqs8_qs8_qc8w(
+              deconvolution_op, input.data(), output.data(), workspace.data()));
+
+      ASSERT_EQ(xnn_status_success,
+                xnn_run_operator(deconvolution_op, /*threadpool=*/nullptr));
+
+      VerifyQC8(batch_size(), output_height(), output_width(),
+                /*output_zero_point=*/0, output, output_ref);
+
+      if (use_weights_cache()) {
+        xnn_operator_t deconvolution_op2 = nullptr;
+        size_t old_weights_cache_size =
+            internal_weights_cache->cache.weights.size;
+
+        status = xnn_create_deconvolution2d_nhwc_pqs8_qs8_qc8w(
+            padding_top(), padding_right(), padding_bottom(), padding_left(),
+            kernel_height(), kernel_width(), stride_height(), stride_width(),
+            dilation_height(), dilation_width(), groups(),
+            group_input_channels(), group_output_channels(),
+            input_pixel_stride(), output_pixel_stride(), input_zero_point,
+            1.0f /* input scale */, requantization_scales.data(), kernel.data(),
+            has_bias() ? bias.data() : nullptr, output_zero_point,
+            /*output_scale=*/1.0f, static_cast<int8_t>(qmin() - 0x80),
+            static_cast<int8_t>(qmax() - 0x80), flags, auto_weights_cache.get(),
+            &deconvolution_op2);
+        if (status == xnn_status_unsupported_hardware) {
+          GTEST_SKIP();
+        }
+        ASSERT_EQ(xnn_status_success, status);
+
+        // Smart pointer to automatically delete deconvolution_op2.
+        std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+            auto_deconvolution_op(deconvolution_op2, xnn_delete_operator);
+        xnnpack::Buffer<int8_t> output2(output.size(), INT8_C(0xA5));
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_reshape_deconvolution2d_nhwc_pqs8_qs8_qc8w(
+                      deconvolution_op2, batch_size(), input_height(),
+                      input_width(), adjustment_height(), adjustment_width(),
+                      /*output_height_out=*/nullptr,
+                      /*output_width_out=*/nullptr, &workspace_size,
+                      /*threadpool=*/nullptr));
+
+        if (workspace_size > workspace.size()) {
+          workspace =
+              xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT>(workspace_size);
+        }
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_deconvolution2d_nhwc_pqs8_qs8_qc8w(
+                      deconvolution_op2, input.data(), output2.data(),
+                      workspace.data()));
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_run_operator(deconvolution_op2, /*threadpool=*/nullptr));
+
+        VerifyWeightsCache(internal_weights_cache, old_weights_cache_size);
+        VerifyQC8(batch_size(), output_height(), output_width(),
+                  /*output_zero_point=*/0, output2, output_ref);
+      }
+    }
+  }
+
+  void ComputeReferenceQS8(
+      const xnnpack::Buffer<int8_t>& input,
+      const xnnpack::Buffer<int8_t>& kernel,
+      const xnnpack::Buffer<int32_t>& bias, int8_t input_zero_point,
+      int8_t output_zero_point, xnnpack::Buffer<double>& output_ref,
+      xnnpack::Buffer<float>& requantization_scales) const {
+    xnnpack::Buffer<int32_t> accumulators(batch_size() * output_height() *
+                                          output_width() * groups() *
+                                          group_output_channels());
+
+    // Compute reference results, without renormalization.
+    if (has_bias()) {
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t oy = 0; oy < output_height(); oy++) {
+          for (size_t ox = 0; ox < output_width(); ox++) {
+            for (size_t g = 0; g < groups(); g++) {
+              for (size_t oc = 0; oc < group_output_channels(); oc++) {
+                accumulators[(((i * output_height() + oy) * output_width() +
+                               ox) *
+                                  groups() +
+                              g) *
+                                 group_output_channels() +
+                             oc] = bias[g * group_output_channels() + oc];
+              }
+            }
+          }
+        }
+      }
+    } else {
+      std::fill(accumulators.begin(), accumulators.end(), 0);
+    }
     for (size_t i = 0; i < batch_size(); i++) {
-      for (size_t y = 0; y < output_height(); y++) {
-        for (size_t x = 0; x < output_width(); x++) {
+      for (size_t oy = 0; oy < output_height(); oy++) {
+        for (size_t ox = 0; ox < output_width(); ox++) {
+          for (size_t ky = 0; ky < kernel_height(); ky++) {
+            const size_t y = oy + padding_top() - ky * dilation_height();
+            const size_t iy = y / stride_height();
+            if (iy * stride_height() == y && iy < input_height()) {
+              for (size_t kx = 0; kx < kernel_width(); kx++) {
+                const size_t x = ox + padding_left() - kx * dilation_width();
+                const size_t ix = x / stride_width();
+                if (ix * stride_width() == x && ix < input_width()) {
+                  for (size_t g = 0; g < groups(); g++) {
+                    for (size_t oc = 0; oc < group_output_channels(); oc++) {
+                      for (size_t ic = 0; ic < group_input_channels(); ic++) {
+                        accumulators[(((i * output_height() + oy) *
+                                           output_width() +
+                                       ox) *
+                                          groups() +
+                                      g) *
+                                         group_output_channels() +
+                                     oc] +=
+                            (static_cast<int32_t>(
+                                 input[((i * input_height() + iy) *
+                                            input_width() +
+                                        ix) *
+                                           input_pixel_stride() +
+                                       g * group_input_channels() + ic]) -
+                             static_cast<int32_t>(input_zero_point)) *
+                            static_cast<int32_t>(
+                                kernel[(((g * group_output_channels() + oc) *
+                                             kernel_height() +
+                                         ky) *
+                                            kernel_width() +
+                                        kx) *
+                                           group_input_channels() +
+                                       ic]);
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Compute renormalization parameters.
+    for (size_t c = 0; c < groups() * group_output_channels(); c++) {
+      int32_t accumulated_min = accumulators[c];
+      int32_t accumulated_max = accumulators[c];
+      for (size_t px = 0; px < batch_size() * output_height() * output_width();
+           px++) {
+        accumulated_min =
+            std::min(accumulated_min,
+                     accumulators[px * groups() * group_output_channels() + c]);
+        accumulated_max =
+            std::max(accumulated_max,
+                     accumulators[px * groups() * group_output_channels() + c]);
+      }
+
+      float requantization_scale = 2.328e-10f;  // 0x1.0p-32f;
+      if (accumulated_max != 0) {
+        requantization_scale = std::max(
+            requantization_scale,
+            static_cast<float>(
+                static_cast<int32_t>(std::numeric_limits<int8_t>::max()) -
+                static_cast<int32_t>(output_zero_point)) /
+                static_cast<float>(accumulated_max));
+      }
+      if (accumulated_min != 0) {
+        requantization_scale = std::max(
+            requantization_scale,
+            static_cast<float>(
+                static_cast<int32_t>(std::numeric_limits<int8_t>::min()) -
+                static_cast<int32_t>(output_zero_point)) /
+                static_cast<float>(accumulated_min));
+      }
+      requantization_scale = std::min(requantization_scale, 1.f);
+
+      requantization_scales[c] = requantization_scale;
+    }
+
+    // Renormalize reference results.
+    for (size_t c = 0; c < groups() * group_output_channels(); c++) {
+      for (size_t px = 0; px < batch_size() * output_height() * output_width();
+           px++) {
+        output_ref[px * groups() * group_output_channels() + c] =
+            static_cast<double>(static_cast<int32_t>(output_zero_point)) +
+            static_cast<double>(
+                accumulators[px * groups() * group_output_channels() + c]) *
+                static_cast<double>(requantization_scales[c]);
+      }
+    }
+    std::transform(
+        output_ref.cbegin(), output_ref.cend(), output_ref.begin(),
+        [this](double x) -> double {
+          return std::max<double>(
+              std::min<double>(x, static_cast<double>(qmax() - 0x80)),
+              static_cast<double>(qmin() - 0x80));
+        });
+  }
+
+  void VerifyQC8(size_t batch_size, size_t output_height, size_t output_width,
+                 int8_t output_zero_point,
+                 const xnnpack::Buffer<int8_t>& output,
+                 const xnnpack::Buffer<double>& output_ref) const {
+    for (size_t i = 0; i < batch_size; i++) {
+      for (size_t y = 0; y < output_height; y++) {
+        for (size_t x = 0; x < output_width; x++) {
           for (size_t g = 0; g < groups(); g++) {
             for (size_t c = 0; c < group_output_channels(); c++) {
               ASSERT_LE(
-                  int32_t(
-                      output[((i * output_height() + y) * output_width() + x) *
+                  static_cast<int32_t>(
+                      output[((i * output_height + y) * output_width + x) *
                                  output_pixel_stride() +
                              g * group_output_channels() + c]),
-                  int32_t(qmax() - 0x80))
+                  static_cast<int32_t>(qmax() - 0x80))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g
                   << ", channel = " << c;
               ASSERT_GE(
-                  int32_t(
-                      output[((i * output_height() + y) * output_width() + x) *
+                  static_cast<int32_t>(
+                      output[((i * output_height + y) * output_width + x) *
                                  output_pixel_stride() +
                              g * group_output_channels() + c]),
-                  int32_t(qmin() - 0x80))
+                  static_cast<int32_t>(qmin() - 0x80))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g
                   << ", channel = " << c;
               ASSERT_NEAR(
-                  output_ref[(((i * output_height() + y) * output_width() + x) *
+                  output_ref[(((i * output_height + y) * output_width + x) *
                                   groups() +
                               g) *
                                  group_output_channels() +
                              c],
-                  double(
-                      output[((i * output_height() + y) * output_width() + x) *
+                  static_cast<double>(
+                      output[((i * output_height + y) * output_width + x) *
                                  output_pixel_stride() +
-                             g * group_output_channels() + c]),
+                             g * group_output_channels() + c]) -
+                      static_cast<double>(output_zero_point),
                   0.9)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g
                   << ", channel = " << c;
@@ -2143,97 +2335,13 @@ class DeconvolutionOperatorTester {
                     [&]() { return w8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
 
-      // Compute reference results, without renormalization.
-      if (has_bias()) {
-        for (size_t i = 0; i < batch_size(); i++) {
-          for (size_t oy = 0; oy < output_height(); oy++) {
-            for (size_t ox = 0; ox < output_width(); ox++) {
-              for (size_t g = 0; g < groups(); g++) {
-                for (size_t oc = 0; oc < group_output_channels(); oc++) {
-                  accumulators[(((i * output_height() + oy) * output_width() +
-                                 ox) *
-                                    groups() +
-                                g) *
-                                   group_output_channels() +
-                               oc] = bias[g * group_output_channels() + oc];
-                }
-              }
-            }
-          }
-        }
-      } else {
-        std::fill(accumulators.begin(), accumulators.end(), 0);
-      }
-      for (size_t i = 0; i < batch_size(); i++) {
-        for (size_t oy = 0; oy < output_height(); oy++) {
-          for (size_t ox = 0; ox < output_width(); ox++) {
-            for (size_t ky = 0; ky < kernel_height(); ky++) {
-              const size_t y = oy + padding_top() - ky * dilation_height();
-              const size_t iy = y / stride_height();
-              if (iy * stride_height() == y && iy < input_height()) {
-                for (size_t kx = 0; kx < kernel_width(); kx++) {
-                  const size_t x = ox + padding_left() - kx * dilation_width();
-                  const size_t ix = x / stride_width();
-                  if (ix * stride_width() == x && ix < input_width()) {
-                    for (size_t g = 0; g < groups(); g++) {
-                      for (size_t oc = 0; oc < group_output_channels(); oc++) {
-                        for (size_t ic = 0; ic < group_input_channels(); ic++) {
-                          accumulators[(((i * output_height() + oy) *
-                                             output_width() +
-                                         ox) *
-                                            groups() +
-                                        g) *
-                                           group_output_channels() +
-                                       oc] +=
-                              (int32_t(input[((i * input_height() + iy) *
-                                                  input_width() +
-                                              ix) *
-                                                 input_pixel_stride() +
-                                             g * group_input_channels() + ic]) -
-                               int32_t(input_zero_point)) *
-                              int32_t(
-                                  kernel[(((g * group_output_channels() + oc) *
-                                               kernel_height() +
-                                           ky) *
-                                              kernel_width() +
-                                          kx) *
-                                             group_input_channels() +
-                                         ic]);
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-
-      // Compute renormalization parameters.
-      const int32_t accumulated_min =
-          *std::min_element(accumulators.cbegin(), accumulators.cend());
-      const int32_t accumulated_max =
-          *std::max_element(accumulators.cbegin(), accumulators.cend());
-
-      const double output_scale =
-          double(uint32_t(accumulated_max - accumulated_min)) / 255.0;
-      const int8_t output_zero_point = int8_t(std::max(
-          std::min(
-              lrint(-0.5 - 0.5 * double(accumulated_min + accumulated_max) /
-                               output_scale),
-              long(std::numeric_limits<int8_t>::max())),
-          long(std::numeric_limits<int8_t>::min())));
-
-      // Renormalize reference results.
-      std::transform(
-          accumulators.cbegin(), accumulators.cend(), output_ref.begin(),
-          [this, output_scale, output_zero_point](int32_t x) -> double {
-            return std::max<double>(
-                std::min<double>(double(x) / output_scale,
-                                 double(qmax() - 0x80) - output_zero_point),
-                double(qmin() - 0x80) - output_zero_point);
-          });
+      int8_t output_zero_point = 0;
+      double output_scale = 0.0;
+      ComputeReferenceQS8(input, kernel, bias, input_zero_point,
+                          output_zero_point, output_scale, batch_size(),
+                          input_height(), input_width(), output_height(),
+                          output_width(), output_ref,
+                          /*compute_renormalization=*/true);
 
       // Create, setup, and run Deconvolution operator once.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -2249,8 +2357,9 @@ class DeconvolutionOperatorTester {
               input_pixel_stride(), output_pixel_stride(), input_zero_point,
               1.0f /* input scale */, 1.0f /* kernel scale */, kernel.data(),
               has_bias() ? bias.data() : nullptr, output_zero_point,
-              output_scale, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80), 0,
-              nullptr, &deconvolution_op));
+              output_scale, static_cast<int8_t>(qmin() - 0x80),
+              static_cast<int8_t>(qmax() - 0x80), 0, nullptr,
+              &deconvolution_op));
 
       // Smart pointer to automatically delete deconvolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
@@ -2271,129 +2380,18 @@ class DeconvolutionOperatorTester {
                 xnn_run_operator(deconvolution_op, /*threadpool=*/nullptr));
 
       // Verify results of the first run.
-      for (size_t i = 0; i < batch_size(); i++) {
-        for (size_t y = 0; y < output_height(); y++) {
-          for (size_t x = 0; x < output_width(); x++) {
-            for (size_t g = 0; g < groups(); g++) {
-              for (size_t c = 0; c < group_output_channels(); c++) {
-                EXPECT_LE(
-                    int32_t(output[((i * output_height() + y) * output_width() +
-                                    x) *
-                                       output_pixel_stride() +
-                                   g * group_output_channels() + c]),
-                    int32_t(qmax() - 0x80))
-                    << "(x, y) = (" << x << ", " << y << "), group = " << g
-                    << ", channel = " << c;
-                EXPECT_GE(
-                    int32_t(output[((i * output_height() + y) * output_width() +
-                                    x) *
-                                       output_pixel_stride() +
-                                   g * group_output_channels() + c]),
-                    int32_t(qmin() - 0x80))
-                    << "(x, y) = (" << x << ", " << y << "), group = " << g
-                    << ", channel = " << c;
-                ASSERT_NEAR(
-                    output_ref[(((i * output_height() + y) * output_width() +
-                                 x) *
-                                    groups() +
-                                g) *
-                                   group_output_channels() +
-                               c],
-                    double(output[((i * output_height() + y) * output_width() +
-                                   x) *
-                                      output_pixel_stride() +
-                                  g * group_output_channels() + c]) -
-                        double(output_zero_point),
-                    0.9)
-                    << "(x, y) = (" << x << ", " << y << "), group = " << g
-                    << ", channel = " << c;
-              }
-            }
-          }
-        }
-      }
+      VerifyQC8(batch_size(), output_height(), output_width(),
+                output_zero_point, output, output_ref);
 
       // Re-generate data for the second run.
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
 
-      // Compute reference results for the second run, including
-      // renormalization.
-      if (has_bias()) {
-        for (size_t i = 0; i < next_batch_size(); i++) {
-          for (size_t oy = 0; oy < next_output_height(); oy++) {
-            for (size_t ox = 0; ox < next_output_width(); ox++) {
-              for (size_t g = 0; g < groups(); g++) {
-                for (size_t oc = 0; oc < group_output_channels(); oc++) {
-                  next_accumulators[(((i * next_output_height() + oy) *
-                                          next_output_width() +
-                                      ox) *
-                                         groups() +
-                                     g) *
-                                        group_output_channels() +
-                                    oc] =
-                      bias[g * group_output_channels() + oc];
-                }
-              }
-            }
-          }
-        }
-      } else {
-        std::fill(next_accumulators.begin(), next_accumulators.end(), 0);
-      }
-      for (size_t i = 0; i < next_batch_size(); i++) {
-        for (size_t oy = 0; oy < next_output_height(); oy++) {
-          for (size_t ox = 0; ox < next_output_width(); ox++) {
-            for (size_t ky = 0; ky < kernel_height(); ky++) {
-              const size_t y = oy + padding_top() - ky * dilation_height();
-              const size_t iy = y / stride_height();
-              if (iy * stride_height() == y && iy < next_input_height()) {
-                for (size_t kx = 0; kx < kernel_width(); kx++) {
-                  const size_t x = ox + padding_left() - kx * dilation_width();
-                  const size_t ix = x / stride_width();
-                  if (ix * stride_width() == x && ix < next_input_width()) {
-                    for (size_t g = 0; g < groups(); g++) {
-                      for (size_t oc = 0; oc < group_output_channels(); oc++) {
-                        for (size_t ic = 0; ic < group_input_channels(); ic++) {
-                          next_accumulators[(((i * next_output_height() + oy) *
-                                                  next_output_width() +
-                                              ox) *
-                                                 groups() +
-                                             g) *
-                                                group_output_channels() +
-                                            oc] +=
-                              (int32_t(input[((i * next_input_height() + iy) *
-                                                  next_input_width() +
-                                              ix) *
-                                                 input_pixel_stride() +
-                                             g * group_input_channels() + ic]) -
-                               int32_t(input_zero_point)) *
-                              int32_t(
-                                  kernel[(((g * group_output_channels() + oc) *
-                                               kernel_height() +
-                                           ky) *
-                                              kernel_width() +
-                                          kx) *
-                                             group_input_channels() +
-                                         ic]);
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-      std::transform(
-          next_accumulators.cbegin(), next_accumulators.cend(),
-          next_output_ref.begin(),
-          [this, output_scale, output_zero_point](int32_t x) -> double {
-            return std::max<double>(
-                std::min<double>(double(x) / output_scale,
-                                 double(qmax() - 0x80) - output_zero_point),
-                double(qmin() - 0x80) - output_zero_point);
-          });
+      ComputeReferenceQS8(input, kernel, bias, input_zero_point,
+                          output_zero_point, output_scale, next_batch_size(),
+                          next_input_height(), next_input_width(),
+                          next_output_height(), next_output_width(),
+                          next_output_ref,
+                          /*compute_renormalization=*/false);
 
       // Setup and run Deconvolution operator the second time, and destroy the
       // operator.
@@ -2412,49 +2410,264 @@ class DeconvolutionOperatorTester {
                 xnn_run_operator(deconvolution_op, /*threadpool=*/nullptr));
 
       // Verify results of the second run.
-      for (size_t i = 0; i < next_batch_size(); i++) {
-        for (size_t y = 0; y < next_output_height(); y++) {
-          for (size_t x = 0; x < next_output_width(); x++) {
+      VerifyQC8(next_batch_size(), next_output_height(), next_output_width(),
+                output_zero_point, output, next_output_ref);
+    }
+  }
+
+  void TestSetupPQS8() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
+    xnnpack::ReplicableRandomDevice rng;
+    std::uniform_int_distribution<int32_t> i32dist(-10000, 10000);
+    std::uniform_int_distribution<int32_t> i8dist(
+        std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+    std::uniform_int_distribution<int32_t> w8dist(
+        -std::numeric_limits<int8_t>::max(),
+        std::numeric_limits<int8_t>::max());
+
+    xnnpack::Buffer<int8_t> input(
+        std::max((batch_size() * input_height() * input_width() - 1) *
+                         input_pixel_stride() +
+                     groups() * group_input_channels(),
+                 (next_batch_size() * next_input_height() * next_input_width() -
+                  1) * input_pixel_stride() +
+                     groups() * group_input_channels()),
+        xnnpack::XnnExtraBytes);
+    xnnpack::Buffer<int8_t> kernel(groups() * group_output_channels() *
+                                   kernel_height() * kernel_width() *
+                                   group_input_channels());
+    xnnpack::Buffer<int32_t> bias(groups() * group_output_channels());
+    xnnpack::Buffer<int8_t> output(std::max(
+        (batch_size() * output_height() * output_width() - 1) *
+                output_pixel_stride() +
+            groups() * group_output_channels(),
+        (next_batch_size() * next_output_height() * next_output_width() - 1) *
+                output_pixel_stride() +
+            groups() * group_output_channels()));
+    xnnpack::Buffer<int32_t> accumulators(batch_size() * output_height() *
+                                          output_width() * groups() *
+                                          group_output_channels());
+    xnnpack::Buffer<double> output_ref(batch_size() * output_height() *
+                                       output_width() * groups() *
+                                       group_output_channels());
+    xnnpack::Buffer<int32_t> next_accumulators(
+        next_batch_size() * next_output_height() * next_output_width() *
+        groups() * group_output_channels());
+    xnnpack::Buffer<double> next_output_ref(
+        next_batch_size() * next_output_height() * next_output_width() *
+        groups() * group_output_channels());
+
+    const int8_t input_zero_point = 127;
+
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
+      std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
+      std::generate(kernel.begin(), kernel.end(),
+                    [&]() { return w8dist(rng); });
+      std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
+
+      int8_t output_zero_point = 0;
+      double output_scale = 0.0;
+      ComputeReferenceQS8(input, kernel, bias, input_zero_point,
+                          output_zero_point, output_scale, batch_size(),
+                          input_height(), input_width(), output_height(),
+                          output_width(), output_ref,
+                          /*compute_renormalization=*/true);
+
+      // Create, setup, and run Deconvolution operator once.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t deconvolution_op = nullptr;
+
+      uint32_t flags = XNN_FLAG_INLINE_LHS_PACKING;
+      enum xnn_status status = xnn_create_deconvolution2d_nhwc_pqs8_qs8_qs8(
+          padding_top(), padding_right(), padding_bottom(), padding_left(),
+          kernel_height(), kernel_width(), stride_height(), stride_width(),
+          dilation_height(), dilation_width(), groups(), group_input_channels(),
+          group_output_channels(), input_pixel_stride(), output_pixel_stride(),
+          input_zero_point,
+          /*input_scale=*/1.0f, /*kernel_scale=*/1.0f, kernel.data(),
+          has_bias() ? bias.data() : nullptr, output_zero_point, output_scale,
+          static_cast<int8_t>(qmin() - 0x80),
+          static_cast<int8_t>(qmax() - 0x80), flags, nullptr,
+          &deconvolution_op);
+      if (status == xnn_status_unsupported_hardware) {
+        GTEST_SKIP();
+      }
+      ASSERT_EQ(xnn_status_success, status);
+
+      // Smart pointer to automatically delete deconvolution_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+          auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
+
+      size_t workspace_size = 0;
+      ASSERT_EQ(xnn_status_success,
+                xnn_reshape_deconvolution2d_nhwc_pqs8_qs8_qc8w(
+                    deconvolution_op, batch_size(), input_height(),
+                    input_width(), adjustment_height(), adjustment_width(),
+                    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+                    &workspace_size,
+                    /*threadpool=*/nullptr));
+      xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> workspace(
+          workspace_size);
+
+      ASSERT_EQ(
+          xnn_status_success,
+          xnn_setup_deconvolution2d_nhwc_pqs8_qs8_qc8w(
+              deconvolution_op, input.data(), output.data(), workspace.data()));
+
+      ASSERT_EQ(xnn_status_success,
+                xnn_run_operator(deconvolution_op, /*threadpool=*/nullptr));
+
+      // Verify results of the first run.
+      VerifyQC8(batch_size(), output_height(), output_width(),
+                output_zero_point, output, output_ref);
+
+      // Re-generate data for the second run.
+      std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
+
+      ComputeReferenceQS8(input, kernel, bias, input_zero_point,
+                          output_zero_point, output_scale, next_batch_size(),
+                          next_input_height(), next_input_width(),
+                          next_output_height(), next_output_width(),
+                          next_output_ref,
+                          /*compute_renormalization=*/false);
+
+      // Setup and run Deconvolution operator the second time, and destroy the
+      // operator.
+      ASSERT_EQ(xnn_status_success,
+                xnn_reshape_deconvolution2d_nhwc_pqs8_qs8_qc8w(
+                    deconvolution_op, next_batch_size(), next_input_height(),
+                    next_input_width(), adjustment_height(), adjustment_width(),
+                    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+                    &workspace_size,
+                    /*threadpool=*/nullptr));
+
+      if (workspace_size > workspace.size()) {
+        workspace =
+            xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT>(workspace_size);
+      }
+
+      ASSERT_EQ(
+          xnn_status_success,
+          xnn_setup_deconvolution2d_nhwc_pqs8_qs8_qc8w(
+              deconvolution_op, input.data(), output.data(), workspace.data()));
+
+      ASSERT_EQ(xnn_status_success,
+                xnn_run_operator(deconvolution_op, /*threadpool=*/nullptr));
+
+      // Verify results of the second run.
+      VerifyQC8(next_batch_size(), next_output_height(), next_output_width(),
+                output_zero_point, output, next_output_ref);
+    }
+  }
+
+  void ComputeReferenceQS8(const xnnpack::Buffer<int8_t>& input,
+                           const xnnpack::Buffer<int8_t>& kernel,
+                           const xnnpack::Buffer<int32_t>& bias,
+                           int8_t input_zero_point, int8_t& output_zero_point,
+                           double& output_scale, size_t batch_size,
+                           size_t input_height, size_t input_width,
+                           size_t output_height, size_t output_width,
+                           xnnpack::Buffer<double>& output_ref,
+                           bool compute_renormalization) const {
+    xnnpack::Buffer<int32_t> accumulators(batch_size * output_height *
+                                          output_width * groups() *
+                                          group_output_channels());
+
+    // Compute reference results, without renormalization.
+    if (has_bias()) {
+      for (size_t i = 0; i < batch_size; i++) {
+        for (size_t oy = 0; oy < output_height; oy++) {
+          for (size_t ox = 0; ox < output_width; ox++) {
             for (size_t g = 0; g < groups(); g++) {
-              for (size_t c = 0; c < group_output_channels(); c++) {
-                EXPECT_LE(int32_t(output[((i * next_output_height() + y) *
-                                              next_output_width() +
-                                          x) *
-                                             output_pixel_stride() +
-                                         g * group_output_channels() + c]),
-                          int32_t(qmax() - 0x80))
-                    << "(x, y) = (" << x << ", " << y << "), group = " << g
-                    << ", channel = " << c;
-                EXPECT_GE(int32_t(output[((i * next_output_height() + y) *
-                                              next_output_width() +
-                                          x) *
-                                             output_pixel_stride() +
-                                         g * group_output_channels() + c]),
-                          int32_t(qmin() - 0x80))
-                    << "(x, y) = (" << x << ", " << y << "), group = " << g
-                    << ", channel = " << c;
-                ASSERT_NEAR(next_output_ref[(((i * next_output_height() + y) *
-                                                  next_output_width() +
-                                              x) *
-                                                 groups() +
-                                             g) *
-                                                group_output_channels() +
-                                            c],
-                            double(output[((i * next_output_height() + y) *
-                                               next_output_width() +
-                                           x) *
-                                              output_pixel_stride() +
-                                          g * group_output_channels() + c]) -
-                                double(output_zero_point),
-                            0.9)
-                    << "(x, y) = (" << x << ", " << y << "), group = " << g
-                    << ", channel = " << c;
+              for (size_t oc = 0; oc < group_output_channels(); oc++) {
+                accumulators[(((i * output_height + oy) * output_width + ox) *
+                                  groups() +
+                              g) *
+                                 group_output_channels() +
+                             oc] = bias[g * group_output_channels() + oc];
+              }
+            }
+          }
+        }
+      }
+    } else {
+      std::fill(accumulators.begin(), accumulators.end(), 0);
+    }
+    for (size_t i = 0; i < batch_size; i++) {
+      for (size_t oy = 0; oy < output_height; oy++) {
+        for (size_t ox = 0; ox < output_width; ox++) {
+          for (size_t ky = 0; ky < kernel_height(); ky++) {
+            const size_t y = oy + padding_top() - ky * dilation_height();
+            const size_t iy = y / stride_height();
+            if (iy * stride_height() == y && iy < input_height) {
+              for (size_t kx = 0; kx < kernel_width(); kx++) {
+                const size_t x = ox + padding_left() - kx * dilation_width();
+                const size_t ix = x / stride_width();
+                if (ix * stride_width() == x && ix < input_width) {
+                  for (size_t g = 0; g < groups(); g++) {
+                    for (size_t oc = 0; oc < group_output_channels(); oc++) {
+                      for (size_t ic = 0; ic < group_input_channels(); ic++) {
+                        accumulators[(((i * output_height + oy) * output_width +
+                                       ox) *
+                                          groups() +
+                                      g) *
+                                         group_output_channels() +
+                                     oc] +=
+                            (static_cast<int32_t>(
+                                 input[((i * input_height + iy) * input_width +
+                                        ix) *
+                                           input_pixel_stride() +
+                                       g * group_input_channels() + ic]) -
+                             static_cast<int32_t>(input_zero_point)) *
+                            static_cast<int32_t>(
+                                kernel[(((g * group_output_channels() + oc) *
+                                             kernel_height() +
+                                         ky) *
+                                            kernel_width() +
+                                        kx) *
+                                           group_input_channels() +
+                                       ic]);
+                      }
+                    }
+                  }
+                }
               }
             }
           }
         }
       }
     }
+
+    // Compute renormalization parameters.
+    if (compute_renormalization) {
+      const int32_t accumulated_min =
+          *std::min_element(accumulators.cbegin(), accumulators.cend());
+      const int32_t accumulated_max =
+          *std::max_element(accumulators.cbegin(), accumulators.cend());
+
+      output_scale = static_cast<double>(static_cast<uint32_t>(
+                         accumulated_max - accumulated_min)) /
+                     255.0;
+      output_zero_point = static_cast<int8_t>(std::max(
+          std::min(lrint(-0.5 - 0.5 *
+                                    static_cast<double>(accumulated_min +
+                                                        accumulated_max) /
+                                    output_scale),
+                   static_cast<long>(std::numeric_limits<int8_t>::max())),
+          static_cast<long>(std::numeric_limits<int8_t>::min())));
+    }
+
+    // Renormalize reference results.
+    std::transform(
+        accumulators.cbegin(), accumulators.cend(), output_ref.begin(),
+        [this, output_scale, output_zero_point](int32_t x) -> double {
+          return std::max<double>(
+              std::min<double>(
+                  static_cast<double>(x) / output_scale,
+                  static_cast<double>(qmax() - 0x80) - output_zero_point),
+              static_cast<double>(qmin() - 0x80) - output_zero_point);
+        });
   }
 
   void TestSetupQU8() const {

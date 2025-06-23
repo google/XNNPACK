@@ -857,10 +857,85 @@ void xnn_compute_grouped_dqigemm(const struct igemm_context* restrict context,
   }
 }
 
-void xnn_compute_batch_igemm(const struct igemm_context* restrict context,
-                             size_t batch_index, size_t nr_block_start,
-                             size_t mr_block_start, size_t nr_block_size,
-                             size_t mr_block_size) {
+static void compute_batch_inline_packed_igemm(
+    const struct igemm_context* restrict context, uint32_t uarch_index,
+    uint32_t thread_id, size_t batch_index, size_t group_index,
+    size_t mr_block_start, size_t mr_block_size) {
+  const size_t mr = context->mr;
+  const size_t mr_packed = context->mr_packed;
+  const size_t kc = context->kc;
+  const size_t ks = context->ks;
+  const size_t cm_stride = context->cm_stride;
+  const size_t a_offset = context->a_offset + batch_index * context->ba_stride +
+                          group_index * context->ga_stride;
+  const void* packed_w = (const void*)((uintptr_t)context->packed_w +
+                                       group_index * context->gw_stride);
+  const uintptr_t c = (uintptr_t)context->c + batch_index * context->bc_stride +
+                      group_index * context->gc_stride;
+  void* workspace =
+      (void*)((uintptr_t)context->workspace + context->workspace_offset +
+              thread_id * context->per_thread_workspace_size);
+
+  while (mr_block_size > 0) {
+    const size_t mr_step = min(mr_block_size, mr);
+
+    // Pack the LHS data into the workspace.
+    context->packed_lh_config->pack_lh_for_igemm_fn(
+        mr_step, kc, ks, mr_packed, context->kr, context->sr,
+        /*a=*/
+        (const void**)((uintptr_t)context->indirect_a +
+                       mr_block_start * ks * sizeof(void*)),
+        a_offset, context->zero, workspace);
+
+    // Compute the iGEMM on the packed LHS data.
+    context->ukernel.packed_lhs_function[uarch_index](
+        mr_step, context->nc, kc, ks, /*packed_lhs=*/workspace, packed_w,
+        (void*)(c + mr_block_start * cm_stride), cm_stride, &context->params);
+
+    mr_block_size -= mr_step;
+    mr_block_start += mr_step;
+  }
+}
+
+void xnn_compute_batch_inline_packed_igemm(
+    const struct igemm_context* restrict context, uint32_t thread_id,
+    size_t batch_index, size_t mr_block_start, size_t mr_block_size) {
+  compute_batch_inline_packed_igemm(context, XNN_UARCH_DEFAULT, thread_id,
+                                    batch_index, /*group_index=*/0,
+                                    mr_block_start, mr_block_size);
+}
+
+void xnn_compute_batch_hmp_inline_packed_igemm(
+    const struct igemm_context* restrict context, uint32_t uarch_index,
+    size_t thread_id, size_t batch_index, size_t mr_block_start,
+    size_t mr_block_size) {
+  compute_batch_inline_packed_igemm(context, uarch_index, thread_id,
+                                    batch_index, /*group_index=*/0,
+                                    mr_block_start, mr_block_size);
+}
+
+void xnn_compute_grouped_batch_inline_packed_igemm(
+    const struct igemm_context* restrict context, uint32_t thread_id,
+    size_t batch_index, size_t group_index, size_t mr_block_start,
+    size_t mr_block_size) {
+  compute_batch_inline_packed_igemm(context, XNN_UARCH_DEFAULT, thread_id,
+                                    batch_index, group_index, mr_block_start,
+                                    mr_block_size);
+}
+
+void xnn_compute_grouped_batch_hmp_inline_packed_igemm(
+    const struct igemm_context* restrict context, uint32_t uarch_index,
+    size_t thread_id, size_t batch_index, size_t group_index,
+    size_t mr_block_start, size_t mr_block_size) {
+  compute_batch_inline_packed_igemm(context, uarch_index, thread_id,
+                                    batch_index, group_index, mr_block_start,
+                                    mr_block_size);
+}
+
+void xnn_compute_batch_igemm(
+    const struct igemm_context* restrict context,
+    size_t batch_index, size_t nr_block_start, size_t mr_block_start,
+    size_t nr_block_size, size_t mr_block_size) {
   const size_t ks = context->ks;
   const size_t cm_stride = context->cm_stride;
 

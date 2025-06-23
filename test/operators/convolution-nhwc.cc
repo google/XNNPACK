@@ -6,13 +6,10 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <cstddef>
 #include <utility>
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "include/xnnpack.h"
-#include "src/xnnpack/common.h"
 #include "test/operators/convolution-operator-tester.h"
 
 namespace {
@@ -1090,6 +1087,10 @@ static const ConvolutionTestCase kConvolutionSetupTests[] = {
 
 CREATE_CONVOLUTION_TESTS(CONVOLUTION_NHWC_QC8, TestNHWCxQC8)
 CREATE_CONVOLUTION_SETUP_TESTS(CONVOLUTION_NHWC_QC8, TestSetupNHWCxQC8)
+
+CREATE_CONVOLUTION_TESTS(CONVOLUTION_NHWC_PQS8_QS8_QC8W, TestNHWCxPQC8)
+CREATE_CONVOLUTION_SETUP_TESTS(CONVOLUTION_NHWC_PQS8_QS8_QC8W,
+                               TestSetupNHWCxPQC8)
 
 CREATE_CONVOLUTION_TESTS(CONVOLUTION_NHWC_QD8_F16_QC8W, TestNHWCxQD8F16QC8W)
 
