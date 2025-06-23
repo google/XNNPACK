@@ -70,11 +70,6 @@ static struct xnn_hardware_config hardware_config = {0};
 
 XNN_INIT_ONCE_GUARD(hardware);
 
-// TODO(b/409244409): Remove before end of 2025/Q2.
-#if XNN_ARCH_ARM64
-int32_t xnn_enable_arm_sme2_default = 1;
-#endif  // XNN_ARCH_ARM64
-
 static void set_arch_flag(uint64_t flag, bool value) {
   if (value) {
     hardware_config.arch_flags |= flag;
@@ -127,10 +122,7 @@ static void init_hardware_config(void) {
   set_arch_flag(xnn_arch_arm_sve, cpuinfo_has_arm_sve());
   set_arch_flag(xnn_arch_arm_sve2, cpuinfo_has_arm_sve2());
   set_arch_flag(xnn_arch_arm_sme, cpuinfo_has_arm_sme());
-  // TODO(b/409244409): Remove before end of 2025/Q2.
-  set_arch_flag(xnn_arch_arm_sme2,
-      xnn_enable_arm_sme2_default && cpuinfo_has_arm_sme2());
-  xnn_enable_arm_sme2_default = -1;
+  set_arch_flag(xnn_arch_arm_sme2, cpuinfo_has_arm_sme2());
 #endif
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
