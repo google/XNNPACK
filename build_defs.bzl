@@ -156,11 +156,7 @@ def xnnpack_std_c_defines():
     We need this for things like `struct timespec` that are not in c99, but
     are part of POSIX 1003.1b-1993."""
 
-    return select({
-        "//build_config:ios": ["_DARWIN_C_SOURCE=1"],
-        "//build_config:macos": ["_DARWIN_C_SOURCE=1"],
-        "//conditions:default": ["_POSIX_C_SOURCE=199309L"],
-    })
+    return ["_DARWIN_C_SOURCE=1", "_POSIX_C_SOURCE=199309L"]
 
 def xnnpack_test_deps_for_library():
     """Depencies needed for a library to use gunit."""
