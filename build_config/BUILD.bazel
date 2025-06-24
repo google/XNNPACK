@@ -212,9 +212,9 @@ config_setting(
 
 config_setting(
     name = "ios",
-    values = {
-        "apple_platform_type": "ios",
-    },
+    constraint_values = [
+        "@platforms//os:ios",
+    ],
 )
 
 config_setting(
@@ -281,6 +281,13 @@ config_setting(
     name = "fuchsia",
     constraint_values = [
         "@platforms//os:fuchsia",
+    ],
+)
+
+config_setting(
+    name = "macos",
+    constraint_values = [
+        "@platforms//os:macos",
     ],
 )
 

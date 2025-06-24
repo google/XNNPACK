@@ -12,7 +12,6 @@
 
 #include "include/xnnpack.h"
 #include "src/xnnpack/allocation-type.h"
-#include "src/xnnpack/cache.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/math.h"
