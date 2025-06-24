@@ -561,6 +561,8 @@ xnnpack_cxx_library(
         ":microparams_h",
         ":quantization",
         "//src/configs:config_hdrs",
+        "//src/configs:reduce_config",
+        "//src/configs:unary_elementwise_config",
     ] + xnnpack_if_kleidiai_enabled([
         "@KleidiAI//kai/ukernels/matmul",
     ]),
