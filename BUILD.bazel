@@ -74,6 +74,7 @@ MICROKERNEL_DEPS = [
     ":tables",
     ":unaligned",
     "//src/configs:hardware_config",
+    ":logging",
 ]
 
 SIMD_HEADERS = [

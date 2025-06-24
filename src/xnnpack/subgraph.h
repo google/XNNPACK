@@ -295,6 +295,8 @@ struct xnn_node {
   union {
     enum xnn_binary_operator binary_operator;
     enum xnn_unary_operator unary_operator;
+    // Used by the `fully-connected` and `batch-matrix-multiply` ops.
+    enum xnn_datatype packed_input_datatype;
   };
   uint32_t id;
   /// Static parameters of the operator node.
@@ -354,10 +356,6 @@ struct xnn_node {
     struct {
       int32_t axis;
     } even_split;
-    // Used by the `fully-connected` and `batch-matrix-multiply` ops.
-    struct {
-      enum xnn_datatype packed_input_datatype;
-    } inlined_lhs_packing;
     struct {
       uint32_t padding_top;
       uint32_t padding_right;

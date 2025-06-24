@@ -313,7 +313,7 @@ static enum xnn_status create_fully_connected_operator(
   enum xnn_status status;
   const enum xnn_datatype input_datatype =
       node->flags & XNN_FLAG_INLINE_LHS_PACKING
-          ? node->params.inlined_lhs_packing.packed_input_datatype
+          ? node->packed_input_datatype
           : input_value->datatype;
   enum fully_connected_op_type op_type = get_fully_connected_op_type(
       input_datatype, filter_value, bias_value, output_value);

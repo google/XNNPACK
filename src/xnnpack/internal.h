@@ -558,6 +558,19 @@ enum xnn_status xnn_create_convolution2d_nhwc_pqs8_qs8_qc8w(
     int8_t output_max, uint32_t flags, xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out);
 
+enum xnn_status xnn_create_convolution2d_nhwc_pqs8_qs8_qs8(
+    uint32_t input_padding_top, uint32_t input_padding_right,
+    uint32_t input_padding_bottom, uint32_t input_padding_left,
+    uint32_t kernel_height, uint32_t kernel_width, uint32_t subsampling_height,
+    uint32_t subsampling_width, uint32_t dilation_height,
+    uint32_t dilation_width, uint32_t groups, size_t group_input_channels,
+    size_t group_output_channels, size_t input_channel_stride,
+    size_t output_channel_stride, int8_t input_zero_point, float input_scale,
+    float kernel_scale, const int8_t* kernel, const int32_t* bias,
+    int8_t output_zero_point, float output_scale, int8_t output_min,
+    int8_t output_max, uint32_t flags, xnn_weights_cache_t weights_cache,
+    xnn_operator_t* convolution_op_out);
+
 enum xnn_status xnn_reshape_convolution2d_nhwc_pqs8_qs8_qc8w(
     xnn_operator_t convolution_op, size_t batch_size, size_t input_height,
     size_t input_width, size_t* workspace_size, size_t* output_height_out,

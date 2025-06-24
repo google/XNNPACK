@@ -1420,6 +1420,54 @@ enum xnn_status xnn_create_convolution2d_nhwc_pqs8_qs8_qc8w(
       xnn_operator_type_convolution_nhwc_pqs8_qs8_qc8w, convolution_op_out);
 }
 
+enum xnn_status xnn_create_convolution2d_nhwc_pqs8_qs8_qs8(
+    uint32_t input_padding_top, uint32_t input_padding_right,
+    uint32_t input_padding_bottom, uint32_t input_padding_left,
+    uint32_t kernel_height, uint32_t kernel_width, uint32_t subsampling_height,
+    uint32_t subsampling_width, uint32_t dilation_height,
+    uint32_t dilation_width, uint32_t groups, size_t group_input_channels,
+    size_t group_output_channels, size_t input_channel_stride,
+    size_t output_channel_stride, int8_t input_zero_point, float input_scale,
+    float kernel_scale, const int8_t* kernel, const int32_t* bias,
+    int8_t output_zero_point, float output_scale, int8_t output_min,
+    int8_t output_max, uint32_t flags, xnn_weights_cache_t weights_cache,
+    xnn_operator_t* convolution_op_out) {
+  const struct xnn_gemm_config* gemm_config = xnn_init_pqs8_qc8w_gemm_config();
+  if (!gemm_config) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(
+            xnn_operator_type_convolution_nhwc_pqs8_qs8_qc8w));
+    return xnn_status_unsupported_hardware;
+  }
+  float* broadcast_kernel_scale =
+      xnn_allocate_simd_memory(groups * group_output_channels * sizeof(float));
+  if (broadcast_kernel_scale == NULL) {
+    xnn_log_error(
+        "failed to allocate %zu bytes for %s operator packed weights",
+        groups * group_output_channels * sizeof(float),
+        xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qc8));
+    return xnn_status_out_of_memory;
+  }
+  for (size_t output_channel = 0;
+       output_channel < groups * group_output_channels; output_channel++) {
+    broadcast_kernel_scale[output_channel] = kernel_scale;
+  }
+
+  enum xnn_status status = create_convolution2d_nhwc_qx8_qc8w(
+      input_padding_top, input_padding_right, input_padding_bottom,
+      input_padding_left, kernel_height, kernel_width, subsampling_height,
+      subsampling_width, dilation_height, dilation_width, groups,
+      group_input_channels, group_output_channels, input_channel_stride,
+      output_channel_stride, input_zero_point, input_scale,
+      broadcast_kernel_scale, kernel, bias, output_zero_point, output_scale,
+      output_min, output_max, flags, weights_cache, gemm_config,
+      xnn_operator_type_convolution_nhwc_pqs8_qs8_qc8w, convolution_op_out);
+  xnn_release_simd_memory(broadcast_kernel_scale);
+
+  return status;
+}
+
 enum xnn_status xnn_create_convolution2d_nhwc_f16(
     uint32_t input_padding_top, uint32_t input_padding_right,
     uint32_t input_padding_bottom, uint32_t input_padding_left,

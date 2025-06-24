@@ -38,9 +38,9 @@ static enum xnn_status create_batch_matrix_multiply_operator(
   assert(input_b_id != XNN_INVALID_VALUE_ID);
   assert(input_b_id < num_values);
   const enum xnn_datatype input_a_datatype =
-      (node->params.inlined_lhs_packing.packed_input_datatype !=
+      (node->packed_input_datatype !=
        xnn_datatype_invalid)
-          ? node->params.inlined_lhs_packing.packed_input_datatype
+          ? node->packed_input_datatype
           : values[input_a_id].datatype;
   const enum xnn_datatype input_b_datatype = values[input_b_id].datatype;
 
