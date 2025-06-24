@@ -9,15 +9,17 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <immintrin.h>
 
 #include "src/xnnpack/common.h"
-#include "src/xnnpack/gemm.h"
 #include "src/xnnpack/intrinsics-polyfill.h"
 #include "src/xnnpack/math.h"
-#include "src/xnnpack/unaligned.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/prefetch.h"
+#include "src/xnnpack/unaligned.h"
 
 
 void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_5x8c8__avx256vnni_prfm(

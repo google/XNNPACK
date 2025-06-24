@@ -23,6 +23,7 @@
 #include "src/xnnpack/simd/s8-scalar.h"
 
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
 
 void xnn_s8_maxpool_minmax_ukernel_9p__scalar_u1(

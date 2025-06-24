@@ -9,13 +9,15 @@
 // LICENSE file in the root directory of this source tree.
 #include <assert.h>
 #include <math.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <immintrin.h>
 
-#include "src/xnnpack/unaligned.h"
 #include "src/xnnpack/common.h"
-#include "src/xnnpack/reduce.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/reduce.h"
 
 
 void xnn_qs8_rdsum_ukernel_7p7x__avx2_c64(

@@ -23,6 +23,7 @@
 #include "src/xnnpack/simd/f16-neonfp16arith.h"
 
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
 
 void xnn_f16_maxpool_minmax_ukernel_9p__neonfp16arith_u8(

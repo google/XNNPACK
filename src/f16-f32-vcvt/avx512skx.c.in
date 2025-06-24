@@ -7,11 +7,16 @@ $assert BATCH_TILE % 16 == 0
 $assert BATCH_TILE >= 16
 $SIMD_TILE = BATCH_TILE // 16
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <immintrin.h>
 
 #include "src/xnnpack/common.h"
-#include "src/xnnpack/intrinsics-polyfill.h"
+$if BATCH_TILE > 16:
+  #include "src/xnnpack/math.h"
+$else:
+  #include "src/xnnpack/intrinsics-polyfill.h"
 #include "src/xnnpack/vcvt.h"
 
 

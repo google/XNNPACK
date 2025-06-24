@@ -13,10 +13,14 @@ $assert CHANNEL_TILE % 8 == 0
 $assert CHANNEL_TILE >= 8
 $assert KERNEL_TILE >= 2
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <${SSE_HEADER}>
 
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/unaligned.h"
 
 

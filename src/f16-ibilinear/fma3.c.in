@@ -8,12 +8,15 @@ $assert CHANNEL_TILE >= 8
 $assert PIXEL_TILE == 1
 $ABC = "456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <immintrin.h>
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/ibilinear.h"
 #include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
 
 
 void xnn_f16_ibilinear_ukernel__fma3_c${CHANNEL_TILE}${"" if PIXEL_TILE == 1 else "x%d" % PIXEL_TILE}(

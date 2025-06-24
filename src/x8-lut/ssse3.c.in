@@ -8,6 +8,8 @@ $assert BATCH_TILE % 16 == 0
 $SIMD_TILE = BATCH_TILE // 16
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 $if AVX:
   #include <immintrin.h>
@@ -15,8 +17,7 @@ $else:
   #include <tmmintrin.h>
 
 #include "src/xnnpack/common.h"
-$if AVX:
-  #include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
 #include "src/xnnpack/lut.h"
 $if not AVX:
   #include "src/xnnpack/unaligned.h"

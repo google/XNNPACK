@@ -7,11 +7,16 @@ $assert NR % 8 == 0
 $assert ACCTYPE in ["F16", "F32"]
 $ACC_SUFFIX = "_f32acc" if ACCTYPE == "F32" else ""
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <immintrin.h>
 
-#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/gemm.h"
 
 
 void xnn_f16${ACC_SUFFIX}_gemm_minmax_ukernel_${MR}x${NR}__avx2_broadcast(

@@ -9,6 +9,8 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 #if defined(__has_feature)
   #if __has_feature(memory_sanitizer)
     #include <sanitizer/msan_interface.h>
@@ -21,7 +23,7 @@
 #include "src/xnnpack/gemm.h"
 #include "src/xnnpack/intrinsics-polyfill.h"
 #include "src/xnnpack/math.h"
-#include "src/xnnpack/unaligned.h"
+#include "src/xnnpack/microparams.h"
 
 
 void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_7x64c4__avx512amx(

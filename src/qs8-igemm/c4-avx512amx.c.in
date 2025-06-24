@@ -10,6 +10,8 @@ $assert 1 <= MR <= 16
 $assert REQUANTIZATION == "FP32" or not REQUANTIZATION
 $assert DATATYPE in ["QD8_F32", "QD8_F16", "QC8"]
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 #if defined(__has_feature)
   #if __has_feature(memory_sanitizer)
     #include <sanitizer/msan_interface.h>
@@ -18,10 +20,10 @@ $assert DATATYPE in ["QD8_F32", "QD8_F16", "QC8"]
 
 #include <immintrin.h>
 
-#include "src/xnnpack/gemm.h"
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/intrinsics-polyfill.h"
 #include "src/xnnpack/math.h"
-#include "src/xnnpack/unaligned.h"
+#include "src/xnnpack/microparams.h"
 $if PREFETCH:
   #include "src/xnnpack/prefetch.h"
 

@@ -9,12 +9,16 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <immintrin.h>
 #include <smmintrin.h>
 
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/gemm.h"
 #include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/microparams.h"
 
 
 void xnn_f32_qc8w_gemm_minmax_ukernel_2x32__avx512skx_broadcast(

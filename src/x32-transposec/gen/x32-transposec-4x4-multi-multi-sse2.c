@@ -11,6 +11,8 @@
 #include <immintrin.h>
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"

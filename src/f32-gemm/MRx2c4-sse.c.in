@@ -7,12 +7,16 @@ $assert DATATYPE in ["F32", "QC4", "QC8"]
 $assert NR == 2
 $assert MR % 2 == 0
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 $if DATATYPE in ["QC8", "QC4"]:
   #include <smmintrin.h>
 $else:
   #include <xmmintrin.h>
 
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/gemm.h"
 $if DATATYPE == "QC8":
   #include "src/xnnpack/unaligned.h"

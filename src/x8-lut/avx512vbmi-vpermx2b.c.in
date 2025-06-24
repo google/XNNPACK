@@ -8,6 +8,8 @@ $assert BATCH_TILE % 64 == 0
 $SIMD_TILE = BATCH_TILE // 64
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <immintrin.h>
 

@@ -12,7 +12,7 @@ $SIMD_TILE = NR // 8
 
 #include <immintrin.h>
 
-#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/packw.h"
 $if PREFETCH:
   #include "src/xnnpack/prefetch.h"

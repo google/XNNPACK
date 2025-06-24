@@ -11,11 +11,12 @@
 #include <immintrin.h>
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/transpose.h"
-#include "src/xnnpack/unaligned.h"
 
 
 void xnn_x64_transposec_ukernel__2x2_reuse_multi_sse2(

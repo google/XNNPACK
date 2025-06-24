@@ -9,13 +9,16 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <immintrin.h>
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/reduce.h"
-#include "src/xnnpack/unaligned.h"
 
 
 void xnn_f16_f32acc_rsum_ukernel__avx512skx_u32_acc2(

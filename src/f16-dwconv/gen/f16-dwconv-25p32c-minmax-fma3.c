@@ -9,11 +9,16 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <immintrin.h>
 
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/dwconv.h"
 #include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
 
 
 void xnn_f16_dwconv_minmax_ukernel_25p32c__fma3(

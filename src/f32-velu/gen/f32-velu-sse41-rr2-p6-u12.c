@@ -9,11 +9,14 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <smmintrin.h>
 
 #include "src/xnnpack/vunary.h"
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
 
 
 void xnn_f32_velu_ukernel__sse41_rr2_p6_u12(

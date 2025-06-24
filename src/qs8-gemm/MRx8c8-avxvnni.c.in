@@ -7,15 +7,19 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert REQUANTIZATION == "FP32" or not REQUANTIZATION
 $assert DATATYPE in ["QC8", "QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <immintrin.h>
 
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/gemm.h"
 #include "src/xnnpack/intrinsics-polyfill.h"
 #include "src/xnnpack/math.h"
-#include "src/xnnpack/unaligned.h"
+#include "src/xnnpack/microparams.h"
 $if PREFETCH:
   #include "src/xnnpack/prefetch.h"
+#include "src/xnnpack/unaligned.h"
 
 
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QU8": "qu8", "QD8_F16" : "qd8_f16_qc8w", "QD8_F32": "qd8_f32_qc8w", "QC4_F16": "qd8_f16_qc4w", "QC4_F32": "qd8_f32_qc4w"}[DATATYPE]

@@ -15,6 +15,7 @@
 #include "src/xnnpack/simd/f32-neon.h"
 
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
 
 void xnn_f32_avgpool_minmax_ukernel_9p__neon_u4(

@@ -13,6 +13,8 @@ $assert not DATATYPE in ["QD8", "QC4", "QB4"] or not REQUANTIZATION
 $assert VARIANT in ["LD64", "LD128", "EXTENDED"]
 $assert MR <= 4
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 $if AVX:
   #ifdef _MSC_VER
@@ -27,7 +29,8 @@ $else:
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/gemm.h"
 #include "src/xnnpack/math.h"
-$if DATATYPE != "QD8":
+#include "src/xnnpack/microparams.h"
+$if DATATYPE not in ["QD8", "QC4", "QB4"]:
   #include "src/xnnpack/unaligned.h"
 
 

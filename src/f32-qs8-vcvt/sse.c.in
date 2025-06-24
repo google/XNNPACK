@@ -10,10 +10,13 @@ $assert BATCH_TILE >= 8
 $SSE_HEADER = {2: "emmintrin.h", 4: "smmintrin.h"}[SSE]
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <${SSE_HEADER}>
 
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/unaligned.h"
 #include "src/xnnpack/vcvt.h"
 

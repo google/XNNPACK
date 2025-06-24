@@ -23,6 +23,7 @@
 #include "src/xnnpack/simd/s8-sse41.h"
 
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
 
 void xnn_s8_maxpool_minmax_ukernel_9p__sse41_u16(
