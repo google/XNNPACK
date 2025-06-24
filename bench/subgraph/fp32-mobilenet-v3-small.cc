@@ -2687,7 +2687,7 @@ xnn_subgraph_t FP32MobileNetV3Small() {
 
   status = xnn_define_convolution_2d(
       subgraph,
-      /*padding_top=*/0, /*padding_right=*/1, /*padding_bottom=*/1,
+      /*padding_top=*/0, /*padding_right=*/0, /*padding_bottom=*/0,
       /*padding_left=*/0,
       /*kernel_height=*/3, /*kernel_width=*/3,
       /*subsampling_height=*/2, /*subsampling_width=*/2,
@@ -2697,7 +2697,7 @@ xnn_subgraph_t FP32MobileNetV3Small() {
       /*group_output_channels=*/16,
       /*output_min=*/-std::numeric_limits<float>::infinity(),
       /*output_max=*/std::numeric_limits<float>::infinity(), v0, w111, w112, v1,
-      /*flags=*/0);
+      /*flags=*/XNN_FLAG_TENSORFLOW_SAME_PADDING);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #0" << std::endl;
     return nullptr;
@@ -2713,7 +2713,7 @@ xnn_subgraph_t FP32MobileNetV3Small() {
 
   status = xnn_define_depthwise_convolution_2d(
       subgraph,
-      /*padding_top=*/0, /*padding_right=*/1, /*padding_bottom=*/1,
+      /*padding_top=*/0, /*padding_right=*/0, /*padding_bottom=*/0,
       /*padding_left=*/0,
       /*kernel_height=*/3, /*kernel_width=*/3,
       /*subsampling_height=*/2, /*subsampling_width=*/2,
@@ -2722,7 +2722,7 @@ xnn_subgraph_t FP32MobileNetV3Small() {
       /*input_channels=*/16,
       /*output_min=*/0.0f,
       /*output_max=*/std::numeric_limits<float>::infinity(), v2, w113, w114, v3,
-      /*flags=*/0);
+      /*flags=*/XNN_FLAG_TENSORFLOW_SAME_PADDING);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #2" << std::endl;
     return nullptr;
@@ -2840,7 +2840,7 @@ xnn_subgraph_t FP32MobileNetV3Small() {
 
   status = xnn_define_depthwise_convolution_2d(
       subgraph,
-      /*padding_top=*/0, /*padding_right=*/1, /*padding_bottom=*/1,
+      /*padding_top=*/0, /*padding_right=*/0, /*padding_bottom=*/0,
       /*padding_left=*/0,
       /*kernel_height=*/3, /*kernel_width=*/3,
       /*subsampling_height=*/2, /*subsampling_width=*/2,
@@ -2850,7 +2850,7 @@ xnn_subgraph_t FP32MobileNetV3Small() {
       /*output_min=*/0.0f,
       /*output_max=*/std::numeric_limits<float>::infinity(), v10, w124, w125,
       v11,
-      /*flags=*/0);
+      /*flags=*/XNN_FLAG_TENSORFLOW_SAME_PADDING);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #10" << std::endl;
     return nullptr;
@@ -2972,8 +2972,8 @@ xnn_subgraph_t FP32MobileNetV3Small() {
 
   status = xnn_define_depthwise_convolution_2d(
       subgraph,
-      /*padding_top=*/1, /*padding_right=*/2, /*padding_bottom=*/2,
-      /*padding_left=*/1,
+      /*padding_top=*/0, /*padding_right=*/0, /*padding_bottom=*/0,
+      /*padding_left=*/0,
       /*kernel_height=*/5, /*kernel_width=*/5,
       /*subsampling_height=*/2, /*subsampling_width=*/2,
       /*dilation_height=*/1, /*dilation_width=*/1,
@@ -2982,7 +2982,7 @@ xnn_subgraph_t FP32MobileNetV3Small() {
       /*output_min=*/-std::numeric_limits<float>::infinity(),
       /*output_max=*/std::numeric_limits<float>::infinity(), v18, w136, w137,
       v19,
-      /*flags=*/0);
+      /*flags=*/XNN_FLAG_TENSORFLOW_SAME_PADDING);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #18" << std::endl;
     return nullptr;
@@ -3738,8 +3738,8 @@ xnn_subgraph_t FP32MobileNetV3Small() {
 
   status = xnn_define_depthwise_convolution_2d(
       subgraph,
-      /*padding_top=*/1, /*padding_right=*/2, /*padding_bottom=*/2,
-      /*padding_left=*/1,
+      /*padding_top=*/0, /*padding_right=*/0, /*padding_bottom=*/0,
+      /*padding_left=*/0,
       /*kernel_height=*/5, /*kernel_width=*/5,
       /*subsampling_height=*/2, /*subsampling_width=*/2,
       /*dilation_height=*/1, /*dilation_width=*/1,
@@ -3748,7 +3748,7 @@ xnn_subgraph_t FP32MobileNetV3Small() {
       /*output_min=*/-std::numeric_limits<float>::infinity(),
       /*output_max=*/std::numeric_limits<float>::infinity(), v71, w191, w192,
       v72,
-      /*flags=*/0);
+      /*flags=*/XNN_FLAG_TENSORFLOW_SAME_PADDING);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #71" << std::endl;
     return nullptr;

@@ -3087,7 +3087,7 @@ xnn_subgraph_t QS8MobileNetV2() {
 
   status = xnn_define_convolution_2d(
       subgraph,
-      /*padding_top=*/0, /*padding_right=*/1, /*padding_bottom=*/1,
+      /*padding_top=*/0, /*padding_right=*/0, /*padding_bottom=*/0,
       /*padding_left=*/0,
       /*kernel_height=*/3, /*kernel_width=*/3,
       /*subsampling_height=*/2, /*subsampling_width=*/2,
@@ -3096,7 +3096,7 @@ xnn_subgraph_t QS8MobileNetV2() {
       /*group_input_channels=*/3,
       /*group_output_channels=*/32,
       /*output_min=*/0.0f, /*output_max=*/6.0f, v1, w67, w68, v2,
-      /*flags=*/0);
+      /*flags=*/XNN_FLAG_TENSORFLOW_SAME_PADDING);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #1" << std::endl;
     return nullptr;
@@ -3155,7 +3155,7 @@ xnn_subgraph_t QS8MobileNetV2() {
 
   status = xnn_define_depthwise_convolution_2d(
       subgraph,
-      /*padding_top=*/0, /*padding_right=*/1, /*padding_bottom=*/1,
+      /*padding_top=*/0, /*padding_right=*/0, /*padding_bottom=*/0,
       /*padding_left=*/0,
       /*kernel_height=*/3, /*kernel_width=*/3,
       /*subsampling_height=*/2, /*subsampling_width=*/2,
@@ -3163,7 +3163,7 @@ xnn_subgraph_t QS8MobileNetV2() {
       /*depth_multiplier=*/1,
       /*input_channels=*/96,
       /*output_min=*/0.0f, /*output_max=*/6.0f, v5, w75, w76, v6,
-      /*flags=*/0);
+      /*flags=*/XNN_FLAG_TENSORFLOW_SAME_PADDING);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #5" << std::endl;
     return nullptr;
@@ -3269,7 +3269,7 @@ xnn_subgraph_t QS8MobileNetV2() {
 
   status = xnn_define_depthwise_convolution_2d(
       subgraph,
-      /*padding_top=*/0, /*padding_right=*/1, /*padding_bottom=*/1,
+      /*padding_top=*/0, /*padding_right=*/0, /*padding_bottom=*/0,
       /*padding_left=*/0,
       /*kernel_height=*/3, /*kernel_width=*/3,
       /*subsampling_height=*/2, /*subsampling_width=*/2,
@@ -3277,7 +3277,7 @@ xnn_subgraph_t QS8MobileNetV2() {
       /*depth_multiplier=*/1,
       /*input_channels=*/144,
       /*output_min=*/0.0f, /*output_max=*/6.0f, v12, w87, w88, v13,
-      /*flags=*/0);
+      /*flags=*/XNN_FLAG_TENSORFLOW_SAME_PADDING);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #12" << std::endl;
     return nullptr;
@@ -3447,7 +3447,7 @@ xnn_subgraph_t QS8MobileNetV2() {
 
   status = xnn_define_depthwise_convolution_2d(
       subgraph,
-      /*padding_top=*/0, /*padding_right=*/1, /*padding_bottom=*/1,
+      /*padding_top=*/0, /*padding_right=*/0, /*padding_bottom=*/0,
       /*padding_left=*/0,
       /*kernel_height=*/3, /*kernel_width=*/3,
       /*subsampling_height=*/2, /*subsampling_width=*/2,
@@ -3455,7 +3455,7 @@ xnn_subgraph_t QS8MobileNetV2() {
       /*depth_multiplier=*/1,
       /*input_channels=*/192,
       /*output_min=*/0.0f, /*output_max=*/6.0f, v23, w105, w106, v24,
-      /*flags=*/0);
+      /*flags=*/XNN_FLAG_TENSORFLOW_SAME_PADDING);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #23" << std::endl;
     return nullptr;
@@ -3871,7 +3871,7 @@ xnn_subgraph_t QS8MobileNetV2() {
 
   status = xnn_define_depthwise_convolution_2d(
       subgraph,
-      /*padding_top=*/0, /*padding_right=*/1, /*padding_bottom=*/1,
+      /*padding_top=*/0, /*padding_right=*/0, /*padding_bottom=*/0,
       /*padding_left=*/0,
       /*kernel_height=*/3, /*kernel_width=*/3,
       /*subsampling_height=*/2, /*subsampling_width=*/2,
@@ -3879,7 +3879,7 @@ xnn_subgraph_t QS8MobileNetV2() {
       /*depth_multiplier=*/1,
       /*input_channels=*/576,
       /*output_min=*/0.0f, /*output_max=*/6.0f, v49, w147, w148, v50,
-      /*flags=*/0);
+      /*flags=*/XNN_FLAG_TENSORFLOW_SAME_PADDING);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #49" << std::endl;
     return nullptr;

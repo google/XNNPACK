@@ -2104,7 +2104,7 @@ xnn_subgraph_t FP32MobileNetV2() {
 
   status = xnn_define_convolution_2d(
       subgraph,
-      /*padding_top=*/0, /*padding_right=*/1, /*padding_bottom=*/1,
+      /*padding_top=*/0, /*padding_right=*/0, /*padding_bottom=*/0,
       /*padding_left=*/0,
       /*kernel_height=*/3, /*kernel_width=*/3,
       /*subsampling_height=*/2, /*subsampling_width=*/2,
@@ -2113,7 +2113,7 @@ xnn_subgraph_t FP32MobileNetV2() {
       /*group_input_channels=*/3,
       /*group_output_channels=*/32,
       /*output_min=*/0.0f, /*output_max=*/6.0f, v0, w67, w68, v1,
-      /*flags=*/0);
+      /*flags=*/XNN_FLAG_TENSORFLOW_SAME_PADDING);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #0" << std::endl;
     return nullptr;
@@ -2172,7 +2172,7 @@ xnn_subgraph_t FP32MobileNetV2() {
 
   status = xnn_define_depthwise_convolution_2d(
       subgraph,
-      /*padding_top=*/0, /*padding_right=*/1, /*padding_bottom=*/1,
+      /*padding_top=*/0, /*padding_right=*/0, /*padding_bottom=*/0,
       /*padding_left=*/0,
       /*kernel_height=*/3, /*kernel_width=*/3,
       /*subsampling_height=*/2, /*subsampling_width=*/2,
@@ -2180,7 +2180,7 @@ xnn_subgraph_t FP32MobileNetV2() {
       /*depth_multiplier=*/1,
       /*input_channels=*/96,
       /*output_min=*/0.0f, /*output_max=*/6.0f, v4, w75, w76, v5,
-      /*flags=*/0);
+      /*flags=*/XNN_FLAG_TENSORFLOW_SAME_PADDING);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #4" << std::endl;
     return nullptr;
@@ -2286,7 +2286,7 @@ xnn_subgraph_t FP32MobileNetV2() {
 
   status = xnn_define_depthwise_convolution_2d(
       subgraph,
-      /*padding_top=*/0, /*padding_right=*/1, /*padding_bottom=*/1,
+      /*padding_top=*/0, /*padding_right=*/0, /*padding_bottom=*/0,
       /*padding_left=*/0,
       /*kernel_height=*/3, /*kernel_width=*/3,
       /*subsampling_height=*/2, /*subsampling_width=*/2,
@@ -2294,7 +2294,7 @@ xnn_subgraph_t FP32MobileNetV2() {
       /*depth_multiplier=*/1,
       /*input_channels=*/144,
       /*output_min=*/0.0f, /*output_max=*/6.0f, v11, w87, w88, v12,
-      /*flags=*/0);
+      /*flags=*/XNN_FLAG_TENSORFLOW_SAME_PADDING);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #11" << std::endl;
     return nullptr;
@@ -2464,7 +2464,7 @@ xnn_subgraph_t FP32MobileNetV2() {
 
   status = xnn_define_depthwise_convolution_2d(
       subgraph,
-      /*padding_top=*/0, /*padding_right=*/1, /*padding_bottom=*/1,
+      /*padding_top=*/0, /*padding_right=*/0, /*padding_bottom=*/0,
       /*padding_left=*/0,
       /*kernel_height=*/3, /*kernel_width=*/3,
       /*subsampling_height=*/2, /*subsampling_width=*/2,
@@ -2472,7 +2472,7 @@ xnn_subgraph_t FP32MobileNetV2() {
       /*depth_multiplier=*/1,
       /*input_channels=*/192,
       /*output_min=*/0.0f, /*output_max=*/6.0f, v22, w105, w106, v23,
-      /*flags=*/0);
+      /*flags=*/XNN_FLAG_TENSORFLOW_SAME_PADDING);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #22" << std::endl;
     return nullptr;
@@ -2888,7 +2888,7 @@ xnn_subgraph_t FP32MobileNetV2() {
 
   status = xnn_define_depthwise_convolution_2d(
       subgraph,
-      /*padding_top=*/0, /*padding_right=*/1, /*padding_bottom=*/1,
+      /*padding_top=*/0, /*padding_right=*/0, /*padding_bottom=*/0,
       /*padding_left=*/0,
       /*kernel_height=*/3, /*kernel_width=*/3,
       /*subsampling_height=*/2, /*subsampling_width=*/2,
@@ -2896,7 +2896,7 @@ xnn_subgraph_t FP32MobileNetV2() {
       /*depth_multiplier=*/1,
       /*input_channels=*/576,
       /*output_min=*/0.0f, /*output_max=*/6.0f, v48, w147, w148, v49,
-      /*flags=*/0);
+      /*flags=*/XNN_FLAG_TENSORFLOW_SAME_PADDING);
   if (status != xnn_status_success) {
     std::cerr << "failed to create node #48" << std::endl;
     return nullptr;
