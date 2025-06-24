@@ -306,6 +306,28 @@
   }
 
   BENCHMARK_GEMM(f32_gemm_minmax_ukernel_6x128__hvx_broadcast)
+
+  static void f32_gemm_minmax_ukernel_7x128__hvx_broadcast(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_f32_gemm_minmax_ukernel_7x128__hvx_broadcast,
+      xnn_init_f32_minmax_scalar_params,
+      xnn_pack_f32_gemm_goi_w,
+      /*mr=*/7, /*nr=*/128, /*kr=*/1, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_hvx);
+  }
+
+  BENCHMARK_GEMM(f32_gemm_minmax_ukernel_7x128__hvx_broadcast)
+
+  static void f32_gemm_minmax_ukernel_8x128__hvx_broadcast(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_f32_gemm_minmax_ukernel_8x128__hvx_broadcast,
+      xnn_init_f32_minmax_scalar_params,
+      xnn_pack_f32_gemm_goi_w,
+      /*mr=*/8, /*nr=*/128, /*kr=*/1, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_hvx);
+  }
+
+  BENCHMARK_GEMM(f32_gemm_minmax_ukernel_8x128__hvx_broadcast)
 #endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
 
 

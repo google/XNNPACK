@@ -668,5 +668,7 @@ tools/xngen src/f32-gemm/hvx-broadcast.c.in -D MR=3  -D NR=128 -o src/f32-gemm/g
 tools/xngen src/f32-gemm/hvx-broadcast.c.in -D MR=4  -D NR=128 -o src/f32-gemm/gen/f32-gemm-4x128-minmax-hvx-broadcast.c &
 tools/xngen src/f32-gemm/hvx-broadcast.c.in -D MR=5  -D NR=128 -o src/f32-gemm/gen/f32-gemm-5x128-minmax-hvx-broadcast.c &
 tools/xngen src/f32-gemm/hvx-broadcast.c.in -D MR=6  -D NR=128 -o src/f32-gemm/gen/f32-gemm-6x128-minmax-hvx-broadcast.c &
+tools/xngen src/f32-gemm/hvx-broadcast.c.in -D MR=7  -D NR=128 -o src/f32-gemm/gen/f32-gemm-7x128-minmax-hvx-broadcast.c &
+tools/xngen src/f32-gemm/hvx-broadcast.c.in -D MR=8  -D NR=128 -o src/f32-gemm/gen/f32-gemm-8x128-minmax-hvx-broadcast.c &
 
 wait

@@ -680,6 +680,8 @@ DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_igemm_minmax_ukernel_3x128__hv
 DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_igemm_minmax_ukernel_4x128__hvx_broadcast)
 DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_igemm_minmax_ukernel_5x128__hvx_broadcast)
 DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_igemm_minmax_ukernel_6x128__hvx_broadcast)
+DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_igemm_minmax_ukernel_7x128__hvx_broadcast)
+DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_igemm_minmax_ukernel_8x128__hvx_broadcast)
 
 #define DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(fn_name)                    \
   XNN_INTERNAL void fn_name(size_t mr, size_t nr, size_t kc, size_t ks,       \
