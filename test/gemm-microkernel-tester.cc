@@ -2650,6 +2650,7 @@ void GemmMicrokernelTester::Test_PQS8(
     xnn_pack_lh_igemm_size_fn size_for_igemm_fn, xnn_pack_qs8_igemm_fn pack_rhs,
     xnn_qs8_requantize_fn requantize) const {
   ASSERT_LE(m(), mr());
+  ASSERT_EQ(xnn_initialize(nullptr), xnn_status_success);
 
   xnnpack::ReplicableRandomDevice rng;
   auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000),
