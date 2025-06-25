@@ -253,13 +253,15 @@ void xnn_compute_batched_packw_gemm_gio(
     context->packw_gemm_gio(
         /*groups=*/1, n_block_size, context->kc, context->nr, context->kr,
         context->sr, context->k_stride_elements, kernel, bias, /*scale=*/NULL,
-        packed_weights, /*extra_bytes=*/0, /*params=*/context->params);
+        packed_weights,
+        /*extra_bytes=*/context->nr * context->scale_params_size,
+        /*params=*/context->params);
 
     if (context->scale_params != NULL) {
       assert(context->init_scale_params != NULL);
       void* weights =
-          (void*)((uintptr_t)packed_weights +
-                  context->nr * (context->k_stride + context->b_stride));
+          (void*)((uintptr_t)packed_weights + context->nr * (
+              context->w_stride - context->scale_params_size));
       context->init_scale_params(n_block_size, context->nr,
                                  context->nr * context->w_stride,
                                  context->scale_params, weights);
@@ -304,13 +306,14 @@ void xnn_compute_batched_packw_gemm_goi(
     context->packw_gemm_goi(
         /*groups=*/1, n_block_size, context->kc, context->nr, context->kr,
         context->sr, kernel, bias, /*scale=*/NULL, packed_weights,
-        /*extra_bytes=*/0, /*params=*/context->params);
+        /*extra_bytes=*/context->nr * context->scale_params_size,
+        /*params=*/context->params);
 
     if (context->scale_params != NULL) {
       assert(context->init_scale_params != NULL);
       void* weights =
-          (void*)((uintptr_t)packed_weights +
-                  context->nr * (context->k_stride + context->b_stride));
+          (void*)((uintptr_t)packed_weights + context->nr *
+                  (context->w_stride - context->scale_params_size));
       context->init_scale_params(n_block_size, context->nr,
                                  context->nr * context->w_stride,
                                  context->scale_params, weights);

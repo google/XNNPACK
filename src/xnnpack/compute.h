@@ -239,8 +239,6 @@ struct packw_gemm_gio_context {
   size_t sr;
   // Pointer to kernel.
   const void* kernel;
-  // Stride, in bytes, between each N of the kernel.
-  size_t k_stride;
   // Pointer to bias.
   const void* bias;
   // Stride, in bytes, between each bias.

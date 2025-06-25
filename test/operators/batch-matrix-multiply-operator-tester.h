@@ -26,6 +26,7 @@
 #include "src/xnnpack/config.h"
 #include "src/xnnpack/internal.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/packq.h"
 #include "test/replicable_random_device.h"
@@ -458,8 +459,8 @@ class BatchMatMulOperatorTester {
         float scale = 1.0f;
         int8_t input_zero_point = 0;
         int8_t output_zero_point = 0;
-        int8_t output_min = 0;
-        int8_t output_max = 127;
+        int8_t output_min = INT8_MIN;
+        int8_t output_max = INT8_MAX;
 
         // Compute reference results without requantization.
         ComputeReferenceQS8(batch_dims_output, input_a.data(), input_b.data(),
@@ -484,7 +485,9 @@ class BatchMatMulOperatorTester {
 
         xnn_status status = xnn_status_success;
         if (const_weights) {
-          std::vector<float> scales(batch_size_b * n(), scale);
+          std::vector<float> scales(
+              round_up_po2(batch_size_b * n(), XNN_MAX_MR),
+              scale);
           status = xnn_create_batch_matrix_multiply_nc_qs8_const_weights(
             batch_size_b, k(), n(), input_b.data(), output_zero_point,
             output_min, output_max, input_zero_point, scales.data(), flags(),
