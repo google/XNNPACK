@@ -145,7 +145,6 @@ SET(NON_PROD_FMA3_MICROKERNEL_SRCS
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x16-minmax-fma3-broadcast.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-7x16-minmax-fma3-broadcast.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-8x16-minmax-fma3-broadcast.c
-  src/f32-vclamp/gen/f32-vclamp-fma3.c
   src/f32-vcmul/gen/f32-vcmul-fma3-u8.c
   src/f32-vcmul/gen/f32-vcmul-fma3-u32.c
   src/f32-vcmul/gen/f32-vcmul-fma3-u64.c
