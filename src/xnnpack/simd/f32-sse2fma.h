@@ -11,7 +11,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "src/xnnpack/simd/f32-sse2-base.h"
+#include "src/xnnpack/simd/f32-sse2-base.h"  // IWYU pragma: export
 
 // Whether or not this architecture has native fused multiply-add support.
 // Here, we do not, but we are emulating it for numerical consistency with FMA
