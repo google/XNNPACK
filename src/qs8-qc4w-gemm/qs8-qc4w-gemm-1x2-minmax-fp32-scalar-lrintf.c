@@ -1,8 +1,3 @@
-// clang-format off
-// Auto-generated file. Do not edit!
-//   Template: src/qs8-gemm/scalar.c.in
-//   Generator: tools/xngen
-//
 // Copyright 2021 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
