@@ -512,6 +512,7 @@ jobs:
           bazel test \
             --test_output=all \
             --test_filter=*QP8* \
+            --local_test_jobs=HOST_CPUS \
             test:qp8_f32_qc4w_gemm_minmax_test \
             test/operators:fully_connected_nc_test \
             test/subgraph:fully_connected_test
@@ -568,6 +569,7 @@ jobs:
           bazel test \
             --test_output=all \
             --test_filter=*QP8* \
+            --local_test_jobs=HOST_CPUS \
             test:qp8_f32_qc4w_gemm_minmax_test \
             test/operators:fully_connected_nc_test \
             test/subgraph:fully_connected_test
