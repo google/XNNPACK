@@ -25,33 +25,14 @@ struct InitQuantizationParams {
   typedef struct xnn_qd8_quantization_params (*fn)(T min, T max, T* scale);
 };
 
-typedef const struct xnn_unary_elementwise_config* (*init_cvt_config_fn)();
-typedef const struct xnn_reduce_config* (*init_rminmax_config_fn)();
-
 template <typename InputT, typename OutputT, typename qs8_cvt_params_t,
-          init_cvt_config_fn init_cvt_config,
-          init_rminmax_config_fn init_rminmax_config,
           typename InitQuantizationParams<InputT>::fn init_quantization_params>
-void pack_lh_fx_qd(size_t m, size_t k, size_t mr_packed, size_t kr, size_t sr,
-                   size_t m_idx_start, const InputT* lhs, size_t lhs_stride,
-                   void* lhs_packed) {
+static void pack_lh_fx_qd(size_t m, size_t k, size_t mr_packed, size_t kr,
+                          size_t sr, size_t m_idx_start, const InputT* lhs,
+                          size_t lhs_stride, void* lhs_packed,
+                          xnn_vunary_ukernel_fn convert_ukernel,
+                          xnn_reduce_ukernel_fn minmax_ukernel) {
   assert(m_idx_start == 0);
-
-  // Initialize a static pointer to the convert and minmax configs. Not using
-  // static initialization since this potentially locks a mutex at each call,
-  // and also not worried about it being initialized twice since the
-  // `xnn_init_*_config` calls are synced and should always produce the same
-  // result.
-  static std::atomic<xnn_vunary_ukernel_fn> convert_ukernel;
-  if (!convert_ukernel) {
-    convert_ukernel = init_cvt_config()->ukernel;
-    assert(convert_ukernel);
-  }
-  static std::atomic<xnn_reduce_ukernel_fn> minmax_ukernel;
-  if (!minmax_ukernel) {
-    minmax_ukernel = init_rminmax_config()->ukernel;
-    assert(minmax_ukernel);
-  }
 
   struct xnn_f32_default_params minmax_params;
   qs8_cvt_params_t convert_params;
@@ -73,7 +54,7 @@ void pack_lh_fx_qd(size_t m, size_t k, size_t mr_packed, size_t kr, size_t sr,
       InputT minmax[2] = {std::numeric_limits<float>::infinity(),
                           -std::numeric_limits<float>::infinity()};
       InputT scale;
-      minmax_ukernel.load()(k_scaled, lhs, minmax, &minmax_params);
+      minmax_ukernel(k_scaled, lhs, minmax, &minmax_params);
       quantization_params[row_id] =
           init_quantization_params(minmax[0], minmax[1], &scale);
 
@@ -81,8 +62,8 @@ void pack_lh_fx_qd(size_t m, size_t k, size_t mr_packed, size_t kr, size_t sr,
       convert_params.scalar.scale = scale;
       convert_params.scalar.output_zero_point =
           quantization_params[row_id].zero_point;
-      convert_ukernel.load()(k_scaled, lhs, packed_weights,
-                             (union xnn_unary_uparams*)&convert_params);
+      convert_ukernel(k_scaled, lhs, packed_weights,
+                      (union xnn_unary_uparams*)&convert_params);
 
       // Advance the input and output pointers.
       lhs = (const InputT*)((uintptr_t)lhs + lhs_stride);
@@ -128,45 +109,57 @@ size_t xnn_pack_lh_fx_qd8_packed_offset(size_t m, size_t k, size_t mr_packed,
 void xnn_pack_lh_f32_qdint8(size_t m, size_t k, size_t mr_packed, size_t kr,
                             size_t sr, size_t m_idx_start, const void* lhs,
                             size_t lhs_stride, void* lhs_packed) {
+  static const xnn_vunary_ukernel_fn convert_ukernel =
+      xnn_init_f32_to_qs8_cvt_config()->ukernel;
+  static const xnn_reduce_ukernel_fn minmax_ukernel =
+      xnn_init_f32_rminmax_config()->ukernel;
   pack_lh_fx_qd</*InputT=*/float, /*OutputT=*/int8_t,
                 /*qs8_cvt_params_t=*/struct xnn_f32_qs8_cvt_params,
-                xnn_init_f32_to_qs8_cvt_config, xnn_init_f32_rminmax_config,
                 xnn_f32_qd8_asymmetric_quantization_params>(
       m, k, mr_packed, kr, sr, m_idx_start, (const float*)lhs, lhs_stride,
-      lhs_packed);
+      lhs_packed, convert_ukernel, minmax_ukernel);
 }
 
 void xnn_pack_lh_f32_qduint8(size_t m, size_t k, size_t mr_packed, size_t kr,
                              size_t sr, size_t m_idx_start, const void* lhs,
                              size_t lhs_stride, void* lhs_packed) {
+  static const xnn_vunary_ukernel_fn convert_ukernel =
+      xnn_init_f32_to_qu8_cvt_config()->ukernel;
+  static const xnn_reduce_ukernel_fn minmax_ukernel =
+      xnn_init_f32_rminmax_config()->ukernel;
   pack_lh_fx_qd</*InputT=*/float, /*OutputT=*/uint8_t,
                 /*qs8_cvt_params_t=*/struct xnn_f32_qs8_cvt_params,
-                xnn_init_f32_to_qu8_cvt_config, xnn_init_f32_rminmax_config,
                 xnn_f32_qdu8_asymmetric_quantization_params>(
       m, k, mr_packed, kr, sr, m_idx_start, (const float*)lhs, lhs_stride,
-      lhs_packed);
+      lhs_packed, convert_ukernel, minmax_ukernel);
 }
 
 void xnn_pack_lh_f16_qdint8(size_t m, size_t k, size_t mr_packed, size_t kr,
                             size_t sr, size_t m_idx_start, const void* lhs,
                             size_t lhs_stride, void* lhs_packed) {
+  static const xnn_vunary_ukernel_fn convert_ukernel =
+      xnn_init_f16_to_qs8_cvt_config()->ukernel;
+  static const xnn_reduce_ukernel_fn minmax_ukernel =
+      xnn_init_f16_rminmax_config()->ukernel;
   pack_lh_fx_qd</*InputT=*/xnn_float16, /*OutputT=*/int8_t,
                 /*qs8_cvt_params_t=*/struct xnn_f16_qs8_cvt_params,
-                xnn_init_f16_to_qs8_cvt_config, xnn_init_f16_rminmax_config,
                 xnn_f16_qd8_asymmetric_quantization_params>(
       m, k, mr_packed, kr, sr, m_idx_start, (const xnn_float16*)lhs, lhs_stride,
-      lhs_packed);
+      lhs_packed, convert_ukernel, minmax_ukernel);
 }
 
 void xnn_pack_lh_f16_qduint8(size_t m, size_t k, size_t mr_packed, size_t kr,
                              size_t sr, size_t m_idx_start, const void* lhs,
                              size_t lhs_stride, void* lhs_packed) {
+  static const xnn_vunary_ukernel_fn convert_ukernel =
+      xnn_init_f16_to_qu8_cvt_config()->ukernel;
+  static const xnn_reduce_ukernel_fn minmax_ukernel =
+      xnn_init_f16_rminmax_config()->ukernel;
   pack_lh_fx_qd</*InputT=*/xnn_float16, /*OutputT=*/uint8_t,
                 /*qs8_cvt_params_t=*/struct xnn_f16_qs8_cvt_params,
-                xnn_init_f16_to_qu8_cvt_config, xnn_init_f16_rminmax_config,
                 xnn_f16_qdu8_asymmetric_quantization_params>(
       m, k, mr_packed, kr, sr, m_idx_start, (const xnn_float16*)lhs, lhs_stride,
-      lhs_packed);
+      lhs_packed, convert_ukernel, minmax_ukernel);
 }
 
 }  // extern "C"
