@@ -91,6 +91,32 @@
   }
 
   BENCHMARK_GEMM_BL(qp8_f32_qb4w_gemm_minmax_ukernel_1x8c16s2__aarch64_neondot)
+
+  static void qp8_f32_qb4w_gemm_minmax_ukernel_1x4c8s2__aarch64_neondot(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qp8_f32_qb4w_gemm_minmax_ukernel_1x4c8s2__aarch64_neondot,
+      xnn_init_f32_qb4w_minmax_scalar_params,
+      xnn_pack_kai_qb4_weights_and_biases,
+      xnn_packed_stride_kai_qb4_weights_and_biases,
+      /*mr=*/1, /*nr=*/4, /*kr=*/8, /*sr=*/2,
+      /*mr_packed=*/1,
+      /*arch_flags=*/xnn_arch_arm_neon_dot);
+  }
+
+  BENCHMARK_GEMM_BL(qp8_f32_qb4w_gemm_minmax_ukernel_1x4c8s2__aarch64_neondot)
+
+  static void qp8_f32_qb4w_gemm_minmax_ukernel_4x4c8s2__aarch64_neondot(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qp8_f32_qb4w_gemm_minmax_ukernel_4x4c8s2__aarch64_neondot,
+      xnn_init_f32_qb4w_minmax_scalar_params,
+      xnn_pack_kai_qb4_weights_and_biases,
+      xnn_packed_stride_kai_qb4_weights_and_biases,
+      /*mr=*/4, /*nr=*/4, /*kr=*/8, /*sr=*/2,
+      /*mr_packed=*/4,
+      /*arch_flags=*/xnn_arch_arm_neon_dot);
+  }
+
+  BENCHMARK_GEMM_BL(qp8_f32_qb4w_gemm_minmax_ukernel_4x4c8s2__aarch64_neondot)
   #endif  // XNN_ENABLE_KLEIDIAI
 #endif  // XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM64
 
