@@ -300,33 +300,6 @@ std::vector<GemmTestParams> CreateTests1(
 #endif  // XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM64
 
 
-#if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
-  #if XNN_ENABLE_KLEIDIAI
-  INSTANTIATE_TEST_SUITE_P(
-      QP8_F32_QC8W_GEMM_MINMAX_16X4C8__NEONI8MM_MSTEP4, GemmTest,
-      testing::ValuesIn(CreateTests1(
-          /*k_block=*/1,
-          /*adj_k_block=*/1,
-          /*mr=*/16, /*nr=*/4, /*kr=*/8, /*sr=*/1,
-          /*mr_packed=*/4,
-          /*is_igemm=*/false,
-          /*unsigned_inputs=*/false,
-          /*planes=*/1,
-          [](GemmMicrokernelTester& tester) {
-            tester.Test_QP8F32QC8W(xnn_qp8_f32_qc8w_gemm_minmax_ukernel_16x4c8__neoni8mm_mstep4,
-                        xnn_init_f32_minmax_scalar_params,
-                        xnn_pack_kai_qs8_weights_and_biases,
-                        xnn_packed_stride_kai_qs8_weights_and_biases);
-          },
-          xnn_arch_arm_neon_i8mm)),
-      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-
-  #endif  // XNN_ENABLE_KLEIDIAI
-#endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
-
-
 #if XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
   #if XNN_ENABLE_KLEIDIAI
   INSTANTIATE_TEST_SUITE_P(
@@ -374,3 +347,4 @@ std::vector<GemmTestParams> CreateTests1(
 
   #endif  // XNN_ENABLE_KLEIDIAI
 #endif  // XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
+

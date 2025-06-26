@@ -2262,6 +2262,8 @@ DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemminc_minmax_ukernel_4x8__sse_load1)
 DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemminc_minmax_ukernel_5x8__sse_load1)
+DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_gemminc_minmax_ukernel_6x8__sse_load1)
 
 DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemminc_minmax_ukernel_1x8__sse_dup)
@@ -2271,6 +2273,8 @@ DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemminc_minmax_ukernel_4x8__sse_dup)
 DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemminc_minmax_ukernel_5x8__sse_dup)
+DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_gemminc_minmax_ukernel_6x8__sse_dup)
 
 DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemminc_minmax_ukernel_1x8s4__sse)
@@ -2280,6 +2284,8 @@ DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemminc_minmax_ukernel_4x8s4__sse)
 DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemminc_minmax_ukernel_5x8s4__sse)
+DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_gemminc_minmax_ukernel_6x8s4__sse)
 
 DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemminc_minmax_ukernel_1x8__avx_broadcast)
@@ -2297,6 +2303,8 @@ DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemminc_minmax_ukernel_5x16__avx_broadcast)
 DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemminc_minmax_ukernel_6x8__avx_broadcast)
+DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_gemminc_minmax_ukernel_6x16__avx_broadcast)
 DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemminc_minmax_ukernel_7x8__avx_broadcast)
 
@@ -2317,6 +2325,8 @@ DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
 DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemminc_minmax_ukernel_6x8__fma3_broadcast)
 DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_gemminc_minmax_ukernel_6x16__fma3_broadcast)
+DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemminc_minmax_ukernel_7x8__fma3_broadcast)
 DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemminc_minmax_ukernel_8x8__fma3_broadcast)
@@ -2329,6 +2339,8 @@ DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemminc_minmax_ukernel_4x16s4__fma3_broadcast)
 DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemminc_minmax_ukernel_5x16s4__fma3_broadcast)
+DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_gemminc_minmax_ukernel_6x16s4__fma3_broadcast)
 
 DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemminc_minmax_ukernel_1x16__avx512f_broadcast)

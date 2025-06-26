@@ -111,6 +111,10 @@ XNN_UKERNEL(xnn_arch_x86_avx2, xnn_f32_vsigmoid_ukernel__avx2_rr1_p5_nr2fma_u32,
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f32_vsigmoid_ukernel__avx512f_rr1_lut16_p3_perm_scalef_nr1fma_u16, 16, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f32_vsigmoid_ukernel__avx512f_rr1_lut16_p3_perm_scalef_nr1fma_u32, 32, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f32_vsigmoid_ukernel__avx512f_rr1_lut16_p3_perm_scalef_nr1fma_u48, 48, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f32_vsigmoid_ukernel__avx512f_rr1_lut16_p3_perm_scalef_nr1fma_u64, 64, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f32_vsigmoid_ukernel__avx512f_rr1_lut16_p3_perm_scalef_div_u16, 16, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f32_vsigmoid_ukernel__avx512f_rr1_lut16_p3_perm_scalef_div_u32, 32, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f32_vsigmoid_ukernel__avx512f_rr1_lut16_p3_perm_scalef_div_u48, 48, false, float, struct xnn_f32_default_params, NULL)

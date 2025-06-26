@@ -20,24 +20,6 @@
 #include "src/xnnpack/packw.h"
 
 
-#if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
-  #if XNN_ENABLE_KLEIDIAI
-  static void qp8_f32_qc8w_gemm_minmax_ukernel_16x4c8__neoni8mm_mstep4(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_qp8_f32_qc8w_gemm_minmax_ukernel_16x4c8__neoni8mm_mstep4,
-      xnn_init_f32_minmax_scalar_params,
-      xnn_pack_kai_qs8_weights_and_biases,
-      xnn_packed_stride_kai_qs8_weights_and_biases,
-      /*mr=*/16, /*nr=*/4, /*kr=*/8, /*sr=*/1,
-      /*mr_packed=*/4,
-      /*arch_flags=*/xnn_arch_arm_neon_i8mm);
-  }
-
-  BENCHMARK_GEMM(qp8_f32_qc8w_gemm_minmax_ukernel_16x4c8__neoni8mm_mstep4)
-  #endif  // XNN_ENABLE_KLEIDIAI
-#endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
-
-
 #if XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM64
   #if XNN_ENABLE_KLEIDIAI
   static void qp8_f32_qc8w_gemm_minmax_ukernel_1x4c4__aarch64_neondot(benchmark::State& state, const char* net) {
