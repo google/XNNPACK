@@ -8,13 +8,15 @@ $assert NR > 1
 $assert KR > 1
 $assert TYPE in ["int8_t"]
 $assert IZP in [0, 128]
-
 $NR_TILE = math.gcd(16, NR)
-
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
+#include "src/xnnpack/common.h"
+$if DATATYPE in ["QS8"]:
+  #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/packw.h"
 
 $BTYPE = {"QS8": "int32_t", "X8": "uint32_t"}[DATATYPE]

@@ -9,9 +9,10 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include "src/xnnpack/lut.h"
-#include "src/xnnpack/common.h"
 
 
 void xnn_x8_lut_ukernel__scalar_u1(

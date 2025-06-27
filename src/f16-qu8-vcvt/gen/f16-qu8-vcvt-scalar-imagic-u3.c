@@ -9,10 +9,14 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+
 #include <float.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/vcvt.h"
 
 void xnn_f16_qu8_vcvt_ukernel__scalar_imagic_u3(

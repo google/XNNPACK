@@ -5,11 +5,9 @@
 
 $assert NR != 0
 $assert KR == 4
-
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
-
 #include <wasm_simd128.h>
 
 #include "src/xnnpack/packw.h"

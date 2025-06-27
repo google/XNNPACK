@@ -6,12 +6,11 @@
 $assert NR > 1
 $assert KBLOCK >= 1
 $assert TYPE in ["int8_t"]
-
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
 
-#include "src/xnnpack/math.h"
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/packw.h"
 #include "src/xnnpack/unaligned.h"
 

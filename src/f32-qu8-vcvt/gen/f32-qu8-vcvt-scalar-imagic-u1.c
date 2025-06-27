@@ -10,8 +10,11 @@
 
 #include <assert.h>
 
-#include "src/xnnpack/common.h"
+#include <stddef.h>
+#include <stdint.h>
+
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/vcvt.h"
 
 void xnn_f32_qu8_vcvt_ukernel__scalar_imagic_u1(

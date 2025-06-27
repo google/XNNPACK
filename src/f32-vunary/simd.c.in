@@ -6,7 +6,6 @@
 $assert OP in ["ABS", "NEG", "SQR"]
 $BATCH_TILES = tuple(int(bt) for bt in BATCH_TILES.split(","))
 $SIMD_SIZE = BATCH_TILES[0]
-
 #include <assert.h>
 #include <stddef.h>
 

@@ -7,8 +7,9 @@ $assert TILE_HEIGHT & (TILE_HEIGHT-1) == 0 and TILE_HEIGHT != 0
 $assert TILE_WIDTH & (TILE_WIDTH-1) == 0 and TILE_WIDTH != 0
 $assert TILE_HEIGHT in [1, 2, 4]
 $assert TILE_WIDTH in [1, 2, 4]
-
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"

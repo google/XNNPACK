@@ -6,18 +6,18 @@
 $assert NR > 1
 $assert KBLOCK >= 1
 $assert TYPE in ["int8_t", "uint16_t", "uint32_t", "float"]
-
-#include <assert.h>
-#include <stddef.h>
-#include <stdint.h>
-
-#include "src/xnnpack/math.h"
-#include "src/xnnpack/packw.h"
-
 $TYPE_SUFFIX = {"int8_t": "int", "uint16_t": "int", "uint32_t": "int", "float": "float"}[TYPE]
 $BITS = {"int8_t": 8, "uint16_t": 16, "uint32_t": 32, "float": 32}[TYPE]
 $BTYPE = {"int8_t": "int32_t", "uint16_t": "uint16_t", "uint32_t": "uint32_t", "float": "float"}[TYPE]
 $WTYPE = {"int8_t": "int8_t", "uint16_t": "uint16_t", "uint32_t": "uint32_t", "float": "uint32_t"}[TYPE]
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+$if BITS == 8:
+  #include "src/xnnpack/microparams.h"
+#include "src/xnnpack/packw.h"
 
 
 void xnn_x${BITS}_packw_gemm_goi_ukernel_x${NR}__scalar_${TYPE_SUFFIX}_u${KBLOCK}(

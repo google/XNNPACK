@@ -4,10 +4,10 @@
 //   Generator: tools/xngen
 //
 // Copyright (C) 2024 Intel Corporation
-//  
+//
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
-//  
+//
 // 1. Redistributions of source code must retain the above copyright notice,
 //    this list of conditions and the following disclaimer.
 // 2. Redistributions in binary form must reproduce the above copyright notice,
@@ -16,7 +16,7 @@
 // 3. Neither the name of the copyright holder nor the names of its contributors
 //    may be used to endorse or promote products derived from this software
 //    without specific prior written permission.
-//  
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 // AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
 // THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,13 +28,17 @@
 // WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 // OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//  
-//  
+//
+//
 // SPDX-License-Identifier: BSD-3-Clause
 
-
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/vbinary.h"
 
 void xnn_qs8_vrpreluc_ukernel__scalar_u4(
@@ -52,7 +56,7 @@ void xnn_qs8_vrpreluc_ukernel__scalar_u4(
 
   const int32_t input_zero_point = params->scalar.input_zero_point;
   const float vpositive_multiplier = params->scalar.rprelu_positive_multiplier;
-  const float vnegative_multiplier = params->scalar.negative_multiplier;                                
+  const float vnegative_multiplier = params->scalar.negative_multiplier;
   const float voutput_min_less_zero_point = (int32_t) params->scalar.output_min - (int32_t) params->scalar.output_zero_point;
   const float voutput_max_less_zero_point = (int32_t) params->scalar.output_max - (int32_t) params->scalar.output_zero_point;
   const float vmagic_bias = 12582912.0f;

@@ -8,9 +8,7 @@ $assert CHANNEL_TILE % 8 == 0
 $assert CHANNEL_TILE >= 8
 $SIMD_TILE = CHANNEL_TILE // 8
 $assert ACCUMULATORS <= SIMD_TILE
-
 #include <assert.h>
-
 #include <wasm_simd128.h>
 
 #include "src/xnnpack/common.h"

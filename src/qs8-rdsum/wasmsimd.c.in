@@ -6,10 +6,8 @@
 $assert DATATYPE in ["QS8", "QU8"]
 $assert CHANNELS % 8 == 0
 $assert CHANNELS >= 8
-
 #include <assert.h>
 #include <math.h>
-
 #include <wasm_simd128.h>
 
 #include "src/xnnpack/common.h"

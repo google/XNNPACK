@@ -7,11 +7,12 @@ $assert NR > 1
 $assert KR > 1
 $assert TYPE in ["int8_t"]
 $assert IZP in [0, 128]
-
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
 
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/packw.h"
 
 $BITS = {"int8_t": 8, "uint16_t": 16, "uint32_t": 32, "float": 32}[TYPE]

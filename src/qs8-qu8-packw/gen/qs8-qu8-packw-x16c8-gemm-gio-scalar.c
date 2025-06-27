@@ -8,12 +8,13 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-
-
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/packw.h"
 
 void xnn_qs8_to_qu8_packw_gemm_gio_ukernel_x16c8__scalar(
