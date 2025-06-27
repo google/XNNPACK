@@ -288,6 +288,16 @@ enum xnn_status xnn_subgraph_add_nodes(xnn_subgraph_t subgraph,
   return xnn_status_success;
 }
 
+static bool is_repeated_input(const struct xnn_node* node, uint32_t idx) {
+  const uint32_t input_id = node->inputs[idx];
+  for (int k = 0; k < idx; ++k) {
+    if (node->inputs[k] == input_id) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void xnn_subgraph_analyze_consumers_and_producers(xnn_subgraph_t subgraph) {
   // Initialize producer/consumer fields to safe defaults.
   for (uint32_t i = 0; i < subgraph->num_values; i++) {
@@ -307,6 +317,9 @@ void xnn_subgraph_analyze_consumers_and_producers(xnn_subgraph_t subgraph) {
     }
 
     for (uint32_t i = 0; i < node->num_inputs; i++) {
+      if (is_repeated_input(node, i)) {
+        continue;
+      }
       const uint32_t input_id = node->inputs[i];
       assert(input_id < subgraph->num_values);
 
@@ -1208,6 +1221,9 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
   for (uint32_t n = 0; n < subgraph->num_nodes; n++) {
     const struct xnn_node* node = &subgraph->nodes[n];
     for (uint32_t i = 0; i < node->num_inputs; i++) {
+      if (is_repeated_input(node, i)) {
+        continue;
+      }
       const struct xnn_value* value = &subgraph->values[node->inputs[i]];
       if (value->fp16_id != XNN_INVALID_VALUE_ID &&
           value->first_consumer == n) {
@@ -1353,8 +1369,10 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
         if (fp16_value->first_consumer == XNN_INVALID_NODE_ID) {
           fp16_value->first_consumer = n;
         }
-        fp16_value->num_consumers++;
         node->inputs[i] = fp16_id;
+        if (!is_repeated_input(node, i)) {
+          fp16_value->num_consumers++;
+        }
       }
     }
     for (uint32_t o = 0; o < node->num_outputs; o++) {
@@ -1410,6 +1428,9 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
     }
     // Insert Convert nodes for inputs
     for (uint32_t i = 0; i < node->num_inputs; i++) {
+      if (is_repeated_input(node, i)) {
+        continue;
+      }
       const struct xnn_value* value = &subgraph->values[node->inputs[i]];
       const uint32_t fp32_id = value->fp32_id;
       if (fp32_id != XNN_INVALID_VALUE_ID &&
