@@ -11,6 +11,7 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
@@ -23,24 +24,28 @@ static XNN_INTRINSIC void xnn_packed2planar(
   int8_t* out,
   int32_t vkernel_zero_point)
 {
-  const uint32_t s_v0 = (((const uint32_t*)weights)[0] ^ vkernel_zero_point);
-  const int8_t v0 = (((const int8_t*)&s_v0))[0] << 4;
-  const int8_t v1 = (((const int8_t*)&s_v0))[0] & 0xF0;
-  const int8_t v2 = (((const int8_t*)&s_v0))[1] << 4;
-  const int8_t v3 = (((const int8_t*)&s_v0))[1] & 0xF0;
-  const int8_t v4 = (((const int8_t*)&s_v0))[2] << 4;
-  const int8_t v5 = (((const int8_t*)&s_v0))[2] & 0xF0;
-  const int8_t v6 = (((const int8_t*)&s_v0))[3] << 4;
-  const int8_t v7 = (((const int8_t*)&s_v0))[3] & 0xF0;
-  const uint32_t s_v1 = (((const uint32_t*)weights)[1] ^ vkernel_zero_point);
-  const int8_t v8 = (((const int8_t*)&s_v1))[0] << 4;
-  const int8_t v9 = (((const int8_t*)&s_v1))[0] & 0xF0;
-  const int8_t v10 = (((const int8_t*)&s_v1))[1] << 4;
-  const int8_t v11 = (((const int8_t*)&s_v1))[1] & 0xF0;
-  const int8_t v12 = (((const int8_t*)&s_v1))[2] << 4;
-  const int8_t v13 = (((const int8_t*)&s_v1))[2] & 0xF0;
-  const int8_t v14 = (((const int8_t*)&s_v1))[3] << 4;
-  const int8_t v15 = (((const int8_t*)&s_v1))[3] & 0xF0;
+  uint8_t s_v0[4];
+  const uint32_t w0 = (((const uint32_t*)weights)[0] ^ vkernel_zero_point);
+  memcpy(s_v0, &w0, sizeof(uint32_t));
+  const int8_t v0 = s_v0[0] << 4;
+  const int8_t v1 = s_v0[0] & 0xF0;
+  const int8_t v2 = s_v0[1] << 4;
+  const int8_t v3 = s_v0[1] & 0xF0;
+  const int8_t v4 = s_v0[2] << 4;
+  const int8_t v5 = s_v0[2] & 0xF0;
+  const int8_t v6 = s_v0[3] << 4;
+  const int8_t v7 = s_v0[3] & 0xF0;
+  uint8_t s_v1[4];
+  const uint32_t w1 = (((const uint32_t*)weights)[1] ^ vkernel_zero_point);
+  memcpy(s_v1, &w1, sizeof(uint32_t));
+  const int8_t v8 = s_v1[0] << 4;
+  const int8_t v9 = s_v1[0] & 0xF0;
+  const int8_t v10 = s_v1[1] << 4;
+  const int8_t v11 = s_v1[1] & 0xF0;
+  const int8_t v12 = s_v1[2] << 4;
+  const int8_t v13 = s_v1[2] & 0xF0;
+  const int8_t v14 = s_v1[3] << 4;
+  const int8_t v15 = s_v1[3] & 0xF0;
 
   (*ksum) += (int32_t) (v0);
   (*ksum) += (int32_t) (v1);
