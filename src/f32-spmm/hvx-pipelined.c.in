@@ -5,14 +5,12 @@
 
 $assert MR % 32 == 0
 #include <assert.h>
-
-#include <hvx_hexagon_protos.h>
 #include <hexagon_protos.h>
 #include <hexagon_types.h>
-
-#include "src/xnnpack/simd/f32-hvx.h"
+#include <hvx_hexagon_protos.h>
 
 #include "src/xnnpack/prefetch.h"
+#include "src/xnnpack/simd/f32-hvx.h"
 #include "src/xnnpack/spmm.h"
 
 void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__hvx_pipelined${"_x" + str(UNROLL) if UNROLL > 1 else ""}(

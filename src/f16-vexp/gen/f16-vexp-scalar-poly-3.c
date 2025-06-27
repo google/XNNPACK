@@ -12,11 +12,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "src/xnnpack/simd/f16-scalar.h"
-
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
+#include "src/xnnpack/simd/f16-scalar.h"
 
 
 static XNN_INLINE xnn_simd_f16_t xnn_setexp_f16(xnn_simd_f16_t vx) {

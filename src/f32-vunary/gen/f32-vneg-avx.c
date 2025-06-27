@@ -12,12 +12,10 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "src/xnnpack/simd/f32-avx.h"
-
 #include "src/xnnpack/common.h"
-#include "src/xnnpack/math.h"
-#include "src/xnnpack/vunary.h"
 #include "src/xnnpack/microparams.h"
+#include "src/xnnpack/simd/f32-avx.h"
+#include "src/xnnpack/vunary.h"
 
 
 void xnn_f32_vneg_ukernel__avx_u8(

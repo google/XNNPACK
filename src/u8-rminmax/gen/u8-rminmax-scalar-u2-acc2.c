@@ -9,11 +9,15 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
+// Architecture-specific headers.
+#include "src/xnnpack/simd/u8-scalar.h"
+
+// XNNPACK headers.
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/reduce.h"
-
-#include "src/xnnpack/simd/u8-scalar.h"
 
 void xnn_u8_rminmax_ukernel__scalar_u2_acc2(
     size_t batch,

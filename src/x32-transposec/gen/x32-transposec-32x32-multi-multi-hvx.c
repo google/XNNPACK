@@ -8,12 +8,11 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "src/xnnpack/simd/f32-hvx.h"
-
 #include <assert.h>
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/simd/f32-hvx.h"
 #include "src/xnnpack/transpose.h"
 
 void xnn_x32_transposec_ukernel__32x32_multi_multi_hvx(

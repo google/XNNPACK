@@ -9,10 +9,12 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/reduce.h"
-
 #include "src/xnnpack/simd/f16-scalar.h"
 
 

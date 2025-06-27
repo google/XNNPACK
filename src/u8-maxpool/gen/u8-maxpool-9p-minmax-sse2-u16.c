@@ -20,11 +20,10 @@
 #define xnn_load_tail_safe_impl(x, c) xnn_load_tail_safe_u8(x, c)
 #define xnn_pre_store_impl(x) x
 
-#include "src/xnnpack/simd/u8-sse2.h"
-
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
+#include "src/xnnpack/simd/u8-sse2.h"
 
 void xnn_u8_maxpool_minmax_ukernel_9p__sse2_u16(
     size_t output_pixels,

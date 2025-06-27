@@ -5,9 +5,8 @@ $SIMD_TILE = BATCH_TILE // 32
 $assert OP in ["ADD", "MAX", "MIN", "MUL", "SUB", "SQRDIFF"]
 #include <assert.h>
 
-#include "src/xnnpack/simd/f32-hvx.h"
-
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/simd/f32-hvx.h"
 #include "src/xnnpack/vbinary.h"
 
 $_HEXAGON_OP_HVX = {

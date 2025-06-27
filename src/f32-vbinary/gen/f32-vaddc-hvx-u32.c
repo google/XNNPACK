@@ -6,9 +6,8 @@
 
 #include <assert.h>
 
-#include "src/xnnpack/simd/f32-hvx.h"
-
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/simd/f32-hvx.h"
 #include "src/xnnpack/vbinary.h"
 
 void xnn_f32_vaddc_ukernel__hvx_u32(

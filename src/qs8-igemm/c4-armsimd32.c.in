@@ -8,9 +8,13 @@ $assert DATATYPE in ["QC8", "QS8", "QU8"]
 $assert 1 <= MR <= 2
 $assert 1 <= NR <= 2
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <arm_acle.h>
 
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/intrinsics-polyfill.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/gemm.h"

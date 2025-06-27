@@ -7,10 +7,12 @@ $assert BATCH_TILE % 32 == 0
 $assert BATCH_TILE >= 32
 $assert OP in ["RNDNE", "RNDZ", "RNDU", "RNDD"]
 #include <assert.h>
-
-#include "src/xnnpack/simd/f32-${ARCH}.h"
+#include <stddef.h>
+#include <stdint.h>
 
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/simd/f32-${ARCH}.h"
 #include "src/xnnpack/vunary.h"
 
 

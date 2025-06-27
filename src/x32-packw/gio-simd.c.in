@@ -10,12 +10,12 @@ $SIMD_SIZE = BATCH_TILES[0]
 #include <stddef.h>
 #include <stdint.h>
 
-#include "src/xnnpack/simd/s32-${ARCH}.h"
-
-#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/packw.h"
 $if PREFETCH:
   #include "src/xnnpack/prefetch.h"
+#include "src/xnnpack/simd/s32-${ARCH}.h"
+
 
 $for NR in BATCH_TILES:
   $SIMD_TILE = NR // SIMD_SIZE

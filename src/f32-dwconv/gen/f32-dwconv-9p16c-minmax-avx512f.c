@@ -9,10 +9,13 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
-#include "src/xnnpack/simd/f32-avx512f.h"
-
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/simd/f32-avx512f.h"
 
 
 void xnn_f32_dwconv_minmax_ukernel_9p16c__avx512f(

@@ -6,10 +6,12 @@
 $BATCH_TILES = tuple(int(bt) for bt in BATCH_TILES.split(","))
 $SIMD_SIZE = BATCH_TILES[0]
 #include <assert.h>
-
-#include "src/xnnpack/simd/f32-${ARCH}.h"
+#include <stddef.h>
+#include <stdint.h>
 
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/simd/f32-${ARCH}.h"
 #include "src/xnnpack/vunary.h"
 
 $for BATCH_TILE in BATCH_TILES:

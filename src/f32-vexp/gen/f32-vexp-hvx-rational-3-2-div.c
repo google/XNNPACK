@@ -12,10 +12,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "src/xnnpack/simd/f32-hvx.h"
-
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/microparams.h"
+#include "src/xnnpack/simd/f32-hvx.h"
 
 
 static XNN_INLINE xnn_simd_f32_t xnn_setexp_f32(xnn_simd_f32_t vx) {

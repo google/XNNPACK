@@ -9,10 +9,9 @@ $SIMD_SIZE = BATCH_TILES[0]
 #include <stddef.h>
 #include <stdint.h>
 
-#include "src/xnnpack/simd/f32-${ARCH}.h"
-
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/microparams.h"
+#include "src/xnnpack/simd/f32-${ARCH}.h"
 #include "src/xnnpack/vunary.h"
 
 $if ARCH == "neon":

@@ -7,14 +7,14 @@ $assert DIV in ("DIV", "NR")
 $BATCH_TILES = tuple(int(bt) for bt in BATCH_TILES.split(","))
 $SIMD_SIZE = BATCH_TILES[0]
 #include <assert.h>
+
 $if ARCH == "scalar":
   #include <math.h>
 #include <stddef.h>
 
-#include "src/xnnpack/simd/f32-${ARCH}.h"
-
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/microparams.h"
+#include "src/xnnpack/simd/f32-${ARCH}.h"
 #include "src/xnnpack/vunary.h"
 
 // Define some mathematical constants in case they are not provided by `math.h`.

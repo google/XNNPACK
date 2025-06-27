@@ -11,8 +11,8 @@
 
 #include <assert.h>
 
-#include "src/xnnpack/simd/f32-hvx.h"
 #include "src/xnnpack/raddstoreexpminusmax.h"
+#include "src/xnnpack/simd/f32-hvx.h"
 
 void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u32(
     size_t batch,

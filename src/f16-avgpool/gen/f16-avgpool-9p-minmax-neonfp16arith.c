@@ -12,11 +12,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "src/xnnpack/simd/f16-neonfp16arith.h"
-
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
+#include "src/xnnpack/simd/f16-neonfp16arith.h"
 
 void xnn_f16_avgpool_minmax_ukernel_9p__neonfp16arith_u8(
     size_t output_pixels,

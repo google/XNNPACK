@@ -9,8 +9,11 @@ $SIMD_TILE = BATCH_TILE // SIMD_SIZE
 $assert ACCUMULATORS <= SIMD_TILE
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/reduce.h"
 #include "src/xnnpack/simd/f32-${ARCH}.h"
 

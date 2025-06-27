@@ -8,11 +8,15 @@ $assert BATCH_TILE % 4 == 0
 $SIMD_TILE = BATCH_TILE // 4
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <arm_acle.h>
 
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/intrinsics-polyfill.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/unaligned.h"
 #include "src/xnnpack/vunary.h"
 

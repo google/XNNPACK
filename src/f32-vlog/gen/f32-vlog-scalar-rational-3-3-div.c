@@ -9,13 +9,13 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+
 #include <math.h>
 #include <stddef.h>
 
-#include "src/xnnpack/simd/f32-scalar.h"
-
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/microparams.h"
+#include "src/xnnpack/simd/f32-scalar.h"
 #include "src/xnnpack/vunary.h"
 
 // Define some mathematical constants in case they are not provided by `math.h`.

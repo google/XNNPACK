@@ -12,11 +12,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "src/xnnpack/simd/f32-avx512f.h"
-
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
+#include "src/xnnpack/simd/f32-avx512f.h"
 
 void xnn_f32_avgpool_minmax_ukernel_9p__avx512f_u16(
     size_t output_pixels,
