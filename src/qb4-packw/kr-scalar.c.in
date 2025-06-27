@@ -8,6 +8,7 @@ $assert KR > 1
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
@@ -21,10 +22,12 @@ static XNN_INTRINSIC void xnn_packed2planar(
   int32_t vkernel_zero_point)
 {
   $for K_I in range(0, KR, 4):
-    const uint32_t s_v${K_I//4} = (((const uint32_t*)weights)[${K_I//4}] ^ vkernel_zero_point);
+    uint8_t s_v${K_I//4}[4];
+    const uint32_t w${K_I//4} = (((const uint32_t*)weights)[${K_I//4}] ^ vkernel_zero_point);
+    memcpy(s_v${K_I//4}, &w${K_I//4}, sizeof(uint32_t));
     $for K in range(0, 4):
-      const int8_t v${2*(K_I+K)} = (((const int8_t*)&s_v${K_I//4}))[${K}] << 4;
-      const int8_t v${2*(K_I+K)+1} = (((const int8_t*)&s_v${K_I//4}))[${K}] & 0xF0;
+      const int8_t v${2*(K_I+K)} = s_v${K_I//4}[${K}] << 4;
+      const int8_t v${2*(K_I+K)+1} = s_v${K_I//4}[${K}] & 0xF0;
 
   $for K in range(0, 2*KR):
     (*ksum) += (int32_t) (v${K});
