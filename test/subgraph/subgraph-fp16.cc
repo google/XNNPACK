@@ -1224,4 +1224,55 @@ TEST(SUBGRAPH_FP16_BATCH_MATRIX_MULTIPLY, with_non_static_value) {
   ASSERT_EQ(convert_out->allocation_type, xnn_allocation_type_workspace);
 }
 
+TEST(SUBGRAPH_FP16_DUPLICATE_INPUTS, converted_only_once) {
+  SubgraphTester tester(2);
+
+  // external input[0]   input[0]
+  //               \     /
+  //                \   /
+  //              [multiply]
+  //                  |
+  //               external
+  //               output[1]
+  tester.AddInputTensorF32({1, 2, 2, 3}, 0)
+      .AddOutputTensorF32({1, 2, 2, 3}, 1)
+      .AddBinary(xnn_binary_multiply, nullptr, 0, 0, 1)
+      .Optimize()
+      .RewriteForFp16();
+
+  // After rewriting for FP16, the graph should look like this, with *
+  // indicating new operators and values created: The static tensor data has
+  // been converted into a new buffer.
+  //
+  // external input[0]
+  //        |
+  //    [convert]*
+  //        |
+  //     input[2]*.    input[2]*
+  //        \.            /
+  //         \           /
+  //           [multiply]
+  //               |
+  //           fp16 value[3]*
+  //               |
+  //           [convert]*
+  //               |
+  //             external
+  //             output[1]
+
+  // We should have 3 nodes, the original Mul node, plus one convert node for
+  // each of the external input and output.
+  ASSERT_EQ(tester.NumNodes(), 3);
+  ASSERT_EQ(tester.Node(0)->type, xnn_node_type_convert);
+  ASSERT_EQ(tester.Node(1)->type, xnn_node_type_binary_elementwise);
+  ASSERT_EQ(tester.Node(2)->type, xnn_node_type_convert);
+
+  // Check that the inputs to the Mul node are the same value.
+  ASSERT_EQ(tester.Node(1)->inputs[0], tester.Node(1)->inputs[1]);
+
+  // Check that the output of convert is allocated in workspace.
+  const xnn_value* convert_out = tester.Value(3);
+  ASSERT_EQ(convert_out->allocation_type, xnn_allocation_type_workspace);
+}
+
 }  // namespace xnnpack
