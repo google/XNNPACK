@@ -479,15 +479,16 @@ class BatchMatMulOperatorTester {
                   output_min);
             });
 
+        std::vector<float> scales(
+              round_up_po2(batch_size_b * n(), XNN_MAX_MR),
+              scale);
+
         // Create, setup, run, and destroy Batch Matrix Multiply operator.
         ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
         xnn_operator_t batch_matrix_multiply_op = nullptr;
 
         xnn_status status = xnn_status_success;
         if (const_weights) {
-          std::vector<float> scales(
-              round_up_po2(batch_size_b * n(), XNN_MAX_MR),
-              scale);
           status = xnn_create_batch_matrix_multiply_nc_qs8_const_weights(
             batch_size_b, k(), n(), input_b.data(), output_zero_point,
             output_min, output_max, input_zero_point, scales.data(), flags(),
@@ -522,7 +523,7 @@ class BatchMatMulOperatorTester {
                     xnn_reshape_batch_matrix_multiply_nc_qs8(
                         batch_matrix_multiply_op, num_batch_dims,
                         batch_dims_a().data(), batch_dims_b().data(), m(), k(),
-                        n(), &scale, &packing_params, &workspace_size,
+                        n(), scales.data(), &packing_params, &workspace_size,
                         /*threadpool=*/nullptr));
         }
         if (expected_status_reshape() != xnn_status_success) {

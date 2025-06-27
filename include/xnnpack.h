@@ -2774,7 +2774,7 @@ enum xnn_status xnn_setup_batch_matrix_multiply_nc_f32(
 enum xnn_status xnn_create_batch_matrix_multiply_nc_qs8_const_weights(
     size_t batch_size_b, size_t k, size_t n, const void* data_b,
     int8_t output_zero_point, int8_t output_min, int8_t output_max,
-    int8_t input_zero_point, const float* scale_params, uint32_t flags,
+    int8_t input_zero_point, const float* scale_b, uint32_t flags,
     xnn_operator_t* batch_matrix_multiply_op_out);
 
 enum xnn_status xnn_create_batch_matrix_multiply_nc_qs8(
