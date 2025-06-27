@@ -19,122 +19,575 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  cmake-linux-x86_64:
-    runs-on: 'ubuntu-24.04-8core'
-    timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@v4
-      - name: Update apt
-        run: |
-          echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
-          sudo dpkg-reconfigure man-db
-          sudo apt update
-      - name: Install ninja
-        run: sudo apt install ninja-build
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: ${{ github.job }}
-          max-size: "500M"
-          save: ${{ inputs.update-caches }}
-      - name: Configure and build
-        run: scripts/build-local.sh
-        working-directory: ${{ github.workspace }}
-      - name: Run tests
-        if: ${{ inputs.run-tests }}
-        run: ctest --output-on-failure --parallel $(nproc)
-        working-directory: ${{ github.workspace }}/build/local
+  # cmake-linux-x86_64:
+  #   runs-on: 'ubuntu-24.04-8core'
+  #   timeout-minutes: 60
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Update apt
+  #       run: |
+  #         echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
+  #         sudo dpkg-reconfigure man-db
+  #         sudo apt update
+  #     - name: Install ninja
+  #       run: sudo apt install ninja-build
+  #     - name: Setup ccache
+  #       uses: hendrikmuhs/ccache-action@v1.2
+  #       with:
+  #         key: ${{ github.job }}
+  #         max-size: "500M"
+  #         save: ${{ inputs.update-caches }}
+  #     - name: Configure and build
+  #       run: scripts/build-local.sh
+  #       working-directory: ${{ github.workspace }}
+  #     - name: Run tests
+  #       if: ${{ inputs.run-tests }}
+  #       run: ctest --output-on-failure --parallel $(nproc)
+  #       working-directory: ${{ github.workspace }}/build/local
 
-  cmake-linux-aarch64:
-    runs-on: arm-ubuntu-arm-22.04-8core
-    timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@v4
-      - name: Update apt
-        run: |
-          echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
-          sudo dpkg-reconfigure man-db
-          sudo apt update
-      - name: Install ninja
-        run: sudo apt install ninja-build
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: ${{ github.job }}
-          max-size: "500M"
-          save: ${{ inputs.update-caches }}
-      - name: Configure and build
-        run: scripts/build-local.sh
-        working-directory: ${{ github.workspace }}
-      - name: Run tests
-        if: ${{ inputs.run-tests }}
-        run: ctest --output-on-failure --parallel $(nproc)
-        working-directory: ${{ github.workspace }}/build/local
+  # cmake-linux-aarch64:
+  #   runs-on: arm-ubuntu-arm-22.04-8core
+  #   timeout-minutes: 60
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Update apt
+  #       run: |
+  #         echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
+  #         sudo dpkg-reconfigure man-db
+  #         sudo apt update
+  #     - name: Install ninja
+  #       run: sudo apt install ninja-build
+  #     - name: Setup ccache
+  #       uses: hendrikmuhs/ccache-action@v1.2
+  #       with:
+  #         key: ${{ github.job }}
+  #         max-size: "500M"
+  #         save: ${{ inputs.update-caches }}
+  #     - name: Configure and build
+  #       run: scripts/build-local.sh
+  #       working-directory: ${{ github.workspace }}
+  #     - name: Run tests
+  #       if: ${{ inputs.run-tests }}
+  #       run: ctest --output-on-failure --parallel $(nproc)
+  #       working-directory: ${{ github.workspace }}/build/local
 
-  cmake-linux-armhf:
-    runs-on: arm-ubuntu-arm-22.04-8core
-    timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@v4
-      - name: Update apt
-        run: |
-          echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
-          sudo dpkg-reconfigure man-db
-          sudo apt update
-      - name: Install ninja
-        run: sudo apt install ninja-build
-      - name: Install armhf cross-toolchain
-        run: sudo apt install crossbuild-essential-armhf
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: ${{ github.job }}
-          max-size: "500M"
-          save: ${{ inputs.update-caches }}
-      - name: Configure and build
-        run: scripts/build-linux-armhf.sh -DCMAKE_BUILD_TYPE=Release
-        working-directory: ${{ github.workspace }}
-      - name: Link the armhf loader to run the test binaries
-        run: sudo ln -s /usr/arm-linux-gnueabihf/lib/ld-linux-armhf.so.3 /usr/lib/ld-linux-armhf.so.3
-      - name: Run tests
-        if: ${{ inputs.run-tests }}
-        env:
-          LD_LIBRARY_PATH: /usr/arm-linux-gnueabihf/lib/:${{ env.LD_LIBRARY_PATH }}
-        run: ctest --output-on-failure --parallel $(nproc)
-        working-directory: ${{ github.workspace }}/build/linux/armhf
+  # cmake-linux-armhf:
+  #   runs-on: arm-ubuntu-arm-22.04-8core
+  #   timeout-minutes: 60
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Update apt
+  #       run: |
+  #         echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
+  #         sudo dpkg-reconfigure man-db
+  #         sudo apt update
+  #     - name: Install ninja
+  #       run: sudo apt install ninja-build
+  #     - name: Install armhf cross-toolchain
+  #       run: sudo apt install crossbuild-essential-armhf
+  #     - name: Setup ccache
+  #       uses: hendrikmuhs/ccache-action@v1.2
+  #       with:
+  #         key: ${{ github.job }}
+  #         max-size: "500M"
+  #         save: ${{ inputs.update-caches }}
+  #     - name: Configure and build
+  #       run: scripts/build-linux-armhf.sh -DCMAKE_BUILD_TYPE=Release
+  #       working-directory: ${{ github.workspace }}
+  #     - name: Link the armhf loader to run the test binaries
+  #       run: sudo ln -s /usr/arm-linux-gnueabihf/lib/ld-linux-armhf.so.3 /usr/lib/ld-linux-armhf.so.3
+  #     - name: Run tests
+  #       if: ${{ inputs.run-tests }}
+  #       env:
+  #         LD_LIBRARY_PATH: /usr/arm-linux-gnueabihf/lib/:${{ env.LD_LIBRARY_PATH }}
+  #       run: ctest --output-on-failure --parallel $(nproc)
+  #       working-directory: ${{ github.workspace }}/build/linux/armhf
 
-  cmake-linux-riscv64:
-    runs-on: 'ubuntu-24.04-16core'
-    timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@v4
-      - name: Update apt
-        run: |
-          echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
-          sudo dpkg-reconfigure man-db
-          sudo apt update
-      - name: Install ninja
-        run: sudo apt install ninja-build
-      - name: Install riscv64 cross-toolchain
-        run: sudo apt install crossbuild-essential-riscv64
-      - name: Install qemu-riscv64
-        run: sudo apt install qemu-user
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: ${{ github.job }}
-          max-size: "500M"
-          save: ${{ inputs.update-caches }}
-      - name: Configure and build
-        run: scripts/build-linux-riscv64.sh -DCMAKE_BUILD_TYPE=Release -DXNNPACK_ENABLE_RISCV_VECTOR=OFF
-        working-directory: ${{ github.workspace }}
-      - name: Run tests
-        if: ${{ inputs.run-tests }}
-        run: ctest --output-on-failure --parallel $(nproc)
-        working-directory: ${{ github.workspace }}/build/linux/riscv64
+  # cmake-linux-riscv64:
+  #   runs-on: 'ubuntu-24.04-16core'
+  #   timeout-minutes: 60
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Update apt
+  #       run: |
+  #         echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
+  #         sudo dpkg-reconfigure man-db
+  #         sudo apt update
+  #     - name: Install ninja
+  #       run: sudo apt install ninja-build
+  #     - name: Install riscv64 cross-toolchain
+  #       run: sudo apt install crossbuild-essential-riscv64
+  #     - name: Install qemu-riscv64
+  #       run: sudo apt install qemu-user
+  #     - name: Setup ccache
+  #       uses: hendrikmuhs/ccache-action@v1.2
+  #       with:
+  #         key: ${{ github.job }}
+  #         max-size: "500M"
+  #         save: ${{ inputs.update-caches }}
+  #     - name: Configure and build
+  #       run: scripts/build-linux-riscv64.sh -DCMAKE_BUILD_TYPE=Release -DXNNPACK_ENABLE_RISCV_VECTOR=OFF
+  #       working-directory: ${{ github.workspace }}
+  #     - name: Run tests
+  #       if: ${{ inputs.run-tests }}
+  #       run: ctest --output-on-failure --parallel $(nproc)
+  #       working-directory: ${{ github.workspace }}/build/linux/riscv64
 
-  cmake-linux-riscv64-rvv:
-    runs-on: 'ubuntu-24.04-16core'
+  # cmake-linux-riscv64-rvv:
+  #   runs-on: 'ubuntu-24.04-16core'
+  #   timeout-minutes: 60
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Update apt
+  #       run: |
+  #         echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
+  #         sudo dpkg-reconfigure man-db
+  #         sudo apt update
+  #     - name: Install ninja
+  #       run: sudo apt install ninja-build
+  #     - name: Download and Install riscv64 cross-toolchain tarball
+  #       run: |
+  #         wget -nv https://github.com/riscv-collab/riscv-gnu-toolchain/releases/download/2025.01.20/riscv64-glibc-ubuntu-24.04-llvm-nightly-2025.01.20-nightly.tar.xz
+  #         tar xJf riscv64-glibc-ubuntu-24.04-llvm-nightly-2025.01.20-nightly.tar.xz
+  #       working-directory: ${{ github.workspace }}
+  #     - name: Setup ccache
+  #       uses: hendrikmuhs/ccache-action@v1.2
+  #       with:
+  #         key: ${{ github.job }}
+  #         max-size: "500M"
+  #         save: ${{ inputs.update-caches }}
+  #     - name: Check for cached qemu build
+  #       id: cached-qemu
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: ${{ github.workspace }}/bin/qemu-riscv64
+  #         key: ${{ runner.os }}-qemu-riscv64
+  #     - name: Download and build qemu-riscv64
+  #       if: steps.cached-qemu.outputs.cache-hit != 'true'
+  #       run: |
+  #         sudo apt install libglib2.0-dev
+  #         mkdir bin
+  #         wget -nv https://download.qemu.org/qemu-9.2.2.tar.xz
+  #         tar xJf qemu-9.2.2.tar.xz
+  #         cd qemu-9.2.2
+  #         ./configure --target-list=riscv64-linux-user --static
+  #         make -j $(nproc)
+  #         cp build/qemu-riscv64 ../bin/
+  #       working-directory: ${{ github.workspace }}
+  #     - name: Configure and build
+  #       run: |
+  #         scripts/build-linux-riscv64.sh \
+  #           -DCMAKE_BUILD_TYPE=Release \
+  #           -DXNNPACK_ENABLE_RISCV_VECTOR=ON \
+  #           -DUSE_GNU_SOURCE=ON \
+  #           -DRISCV_TOOLCHAIN_ROOT=${{ github.workspace }}/riscv/ \
+  #           -DRISCV_QEMU_ROOT=${{ github.workspace }}
+  #       working-directory: ${{ github.workspace }}
+  #     - name: Run tests (no operator tests)
+  #       if: ${{ inputs.run-tests }}
+  #       run: ctest --output-on-failure --label-exclude operator --parallel $(nproc)
+  #       working-directory: ${{ github.workspace }}/build/linux/riscv64
+
+  # cmake-windows-arm64:
+  #   runs-on: windows-2022-32core
+  #   timeout-minutes: 60
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Setup ccache
+  #       uses: hendrikmuhs/ccache-action@v1.2
+  #       with:
+  #         key: ${{ github.job }}
+  #         max-size: "500M"
+  #         save: ${{ inputs.update-caches }}
+  #     - name: Install Ninja
+  #       uses: seanmiddleditch/gha-setup-ninja@master
+  #     - name: Setup build environment
+  #       shell: bash
+  #       run: |
+  #         echo "VCVARSALL=$(vswhere -products \* -latest -property installationPath)\\VC\\Auxiliary\\Build\\vcvarsall.bat" >> $GITHUB_ENV
+  #     - name: Configure and build
+  #       run: scripts/build-windows-arm64.cmd
+  #       shell: cmd
+  #       working-directory: ${{ github.workspace }}
+  #       env:
+  #         CFLAGS: "/UNDEBUG"
+  #         CXXFLAGS: "/UNDEBUG"
+
+  # cmake-windows-x64:
+  #   runs-on: windows-2022-32core
+  #   timeout-minutes: 60
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Setup ccache
+  #       uses: hendrikmuhs/ccache-action@v1.2
+  #       with:
+  #         key: ${{ github.job }}
+  #         max-size: "500M"
+  #         save: ${{ inputs.update-caches }}
+  #     - name: Install Ninja
+  #       uses: seanmiddleditch/gha-setup-ninja@master
+  #     - name: Setup build environment
+  #       shell: bash
+  #       run: |
+  #         echo "VCVARSALL=$(vswhere -products \* -latest -property installationPath)\\VC\\Auxiliary\\Build\\vcvarsall.bat" >> $GITHUB_ENV
+  #     - name: Configure and build
+  #       run: scripts/build-windows-x64.cmd
+  #       shell: cmd
+  #       working-directory: ${{ github.workspace }}
+  #       env:
+  #         CFLAGS: "/UNDEBUG"
+  #         CXXFLAGS: "/UNDEBUG"
+  #     - name: Run tests
+  #       if: ${{ inputs.run-tests }}
+  #       run: ctest -C Release --output-on-failure --parallel $NUMBER_OF_PROCESSORS
+  #       working-directory: ${{ github.workspace }}/build/windows/x64
+
+  # cmake-windows-x86:
+  #   runs-on: windows-2022-32core
+  #   timeout-minutes: 60
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Setup ccache
+  #       uses: hendrikmuhs/ccache-action@v1.2
+  #       with:
+  #         key: ${{ github.job }}
+  #         max-size: "500M"
+  #         save: ${{ inputs.update-caches }}
+  #     - name: Install Ninja
+  #       uses: seanmiddleditch/gha-setup-ninja@master
+  #     - name: Setup build environment
+  #       shell: bash
+  #       run: |
+  #         echo "VCVARSALL=$(vswhere -products \* -latest -property installationPath)\\VC\\Auxiliary\\Build\\vcvarsall.bat" >> $GITHUB_ENV
+  #     - name: Configure and build
+  #       run: scripts/build-windows-x86.cmd
+  #       shell: cmd
+  #       working-directory: ${{ github.workspace }}
+  #       env:
+  #         CFLAGS: "/UNDEBUG"
+  #         CXXFLAGS: "/UNDEBUG"
+  #     - name: Run tests
+  #       if: ${{ inputs.run-tests }}
+  #       run: ctest -C Release --output-on-failure --parallel $NUMBER_OF_PROCESSORS
+  #       working-directory: ${{ github.workspace }}/build/windows/x86
+
+  # cmake-macos-arm64:
+  #   runs-on: macos-latest
+  #   timeout-minutes: 60
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Install ninja
+  #       run: brew install ninja
+  #     - name: Create output directory
+  #       run: mkdir -p build/macos/arm64
+  #       working-directory: ${{ github.workspace }}
+  #     - name: Setup ccache
+  #       uses: hendrikmuhs/ccache-action@v1.2
+  #       with:
+  #         key: ${{ github.job }}
+  #         max-size: "500M"
+  #         save: ${{ inputs.update-caches }}
+  #     - name: Generate CMake project
+  #       run: |
+  #         cmake \
+  #           -G Ninja \
+  #           -DCMAKE_CONFIGURATION_TYPES=Release \
+  #           -DCMAKE_OSX_ARCHITECTURES=arm64 \
+  #           -DHAVE_STD_REGEX=TRUE \
+  #           ../../..
+  #       working-directory: ${{ github.workspace }}/build/macos/arm64
+  #     - name: Build with Xcode
+  #       run: |
+  #         cmake \
+  #           --build \
+  #           build/macos/arm64 \
+  #           -j$((2*$(sysctl -n hw.ncpu)))
+  #       working-directory: ${{ github.workspace }}
+
+  # cmake-android:
+  #   strategy:
+  #     matrix:
+  #       arch: [arm64, armv7, x86]
+  #   runs-on: 'ubuntu-24.04-8core'
+  #   timeout-minutes: 60
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Update apt
+  #       run: |
+  #         echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
+  #         sudo dpkg-reconfigure man-db
+  #         sudo apt update
+  #     - name: Install ninja
+  #       run: sudo apt install ninja-build
+  #     - name: Setup Android NDK
+  #       id: setup-ndk
+  #       uses: nttld/setup-ndk@v1
+  #       with:
+  #         ndk-version: r26d
+  #         add-to-path: false
+  #     - name: Setup ccache
+  #       uses: hendrikmuhs/ccache-action@v1.2
+  #       with:
+  #         key: ${{ github.job }}-${{ matrix.arch }}
+  #         max-size: "500M"
+  #         save: ${{ inputs.update-caches }}
+  #     - name: Force compiler binary mtime
+  #       # The nttld/setup-ndk action downloads the compiler binaries and copies them to the
+  #       # tools-cache, where their mtimes are set to the current time. This is bad since ccache
+  #       # uses the compiler binary mtime to determine whether two compilations match. We solve
+  #       # this problem by coercing the mtime of the compiler binaries to a fixed value. Note that
+  #       # if the compiler does indeed change, this will also cause the path to change as it would
+  #       # imply using a different NDK version.
+  #       run: |
+  #         find ${{ steps.setup-ndk.outputs.ndk-path }} -wholename '*/bin/clang*' -executable -type f,l -exec touch -h -t 202408130000 {} +
+  #     - name: Configure and build
+  #       run: scripts/build-android-${{ matrix.arch }}.sh
+  #       working-directory: ${{ github.workspace }}
+  #       env:
+  #         ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
+
+  # cmake-ios-arm64:
+  #   runs-on: macos-latest
+  #   timeout-minutes: 60
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Create output directory
+  #       run: mkdir -p build/ios/arm64
+  #       working-directory: ${{ github.workspace }}
+  #     - name: Generate CMake project
+  #       run: cmake -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=arm64 -DXNNPACK_BUILD_BENCHMARKS=OFF -DXNNPACK_BUILD_TESTS=OFF ../../..
+  #       working-directory: ${{ github.workspace }}/build/ios/arm64
+  #     - name: Build with Xcode
+  #       run: cmake --build build/ios/arm64 --parallel $(sysctl -n hw.ncpu) -- -quiet
+  #       working-directory: ${{ github.workspace }}
+
+  # cmake-ios-x86_64:
+  #   runs-on: macos-latest
+  #   timeout-minutes: 60
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Create output directory
+  #       run: mkdir -p build/ios/x86_64
+  #       working-directory: ${{ github.workspace }}
+  #     - name: Generate CMake project
+  #       run: cmake -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=x86_64 -DXNNPACK_BUILD_BENCHMARKS=OFF -DXNNPACK_BUILD_TESTS=OFF ../../..
+  #       working-directory: ${{ github.workspace }}/build/ios/x86_64
+  #     - name: Build with Xcode
+  #       run: cmake --build build/ios/x86_64 --parallel $(sysctl -n hw.ncpu) -- -sdk iphonesimulator -quiet
+  #       working-directory: ${{ github.workspace }}
+
+  # bazel-linux-x86_64-clang-18:
+  #   runs-on: 'ubuntu-24.04-8core'
+  #   timeout-minutes: 60
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Update apt
+  #       run: |
+  #         echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
+  #         sudo dpkg-reconfigure man-db
+  #         sudo apt update
+  #     - name: Install clang-18
+  #       working-directory: ${{ github.workspace }}
+  #       run: |
+  #         wget https://apt.llvm.org/llvm.sh
+  #         chmod +x llvm.sh
+  #         sudo ./llvm.sh 18
+  #     - name: Restore bazel cache
+  #       uses: actions/cache/restore@v4
+  #       with:
+  #         path: "/home/runner/.cache/bazel"
+  #         key: ${{ github.job }}
+  #         restore-keys: |
+  #           ${{ github.job }}-
+  #     - name: Build tests
+  #       env:
+  #         CC: clang-18
+  #         CXX: clang++-18
+  #       run: |
+  #           bazel build //test/... //bench/...
+  #       working-directory: ${{ github.workspace }}
+  #     - name: Run tests
+  #       if: ${{ inputs.run-tests }}
+  #       env:
+  #         CC: clang-18
+  #         CXX: clang++-18
+  #       run: |
+  #           bazel test --test_output=errors //test/... //bench/...
+  #       working-directory: ${{ github.workspace }}
+  #     - name: Compress disk cache
+  #       # Bazel's `--disk-cache` currently grows without bounds, so we remove files
+  #       # that haven't been accessed in 7+ days manually.
+  #       if: ${{ inputs.update-caches }}
+  #       run: find $HOME/.cache/bazel -type f -atime +7 -delete
+  #     - name: Save bazel cache
+  #       if: ${{ inputs.update-caches }}
+  #       uses: actions/cache/save@v4
+  #       with:
+  #         path: "/home/runner/.cache/bazel"
+  #         key: ${{ github.job }}-${{ github.sha }}
+
+  # bazel-linux-x86_64-gcc-9:
+  #   runs-on: 'ubuntu-24.04-8core'
+  #   timeout-minutes: 60
+  #   env:
+  #     CC: gcc-9
+  #     CXX: g++-9
+  #     BAZEL_DEFINES: --define=xnn_enable_avxvnni=false --define=xnn_enable_avx256vnni=false --define=xnn_enable_avxvnniint8=false --define=xnn_enable_avx512amx=false --define=xnn_enable_avx512fp16=false --define=xnn_enable_avx512bf16=false
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Update apt
+  #       run: |
+  #         echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
+  #         sudo dpkg-reconfigure man-db
+  #         sudo apt update
+  #     - name: Install gcc-9
+  #       working-directory: ${{ github.workspace }}
+  #       run: |
+  #         sudo apt install gcc-9 g++-9
+  #     - name: Restore bazel cache
+  #       uses: actions/cache/restore@v4
+  #       with:
+  #         path: "/home/runner/.cache/bazel"
+  #         key: ${{ github.job }}
+  #         restore-keys: |
+  #           ${{ github.job }}-
+  #     - name: Build tests
+  #       run: |
+  #           bazel build ${BAZEL_DEFINES} //test/... //bench/...
+  #       working-directory: ${{ github.workspace }}
+  #     - name: Build XNNPack
+  #       if: ${{ inputs.run-tests }}
+  #       run: |
+  #           bazel build ${BAZEL_DEFINES} //test/...
+  #       working-directory: ${{ github.workspace }}
+  #     - name: Compress disk cache
+  #       # Bazel's `--disk-cache` currently grows without bounds, so we remove files
+  #       # that haven't been accessed in 7+ days manually.
+  #       if: ${{ inputs.update-caches }}
+  #       run: find $HOME/.cache/bazel -type f -atime +7 -delete
+  #     - name: Save bazel cache
+  #       if: ${{ inputs.update-caches }}
+  #       uses: actions/cache/save@v4
+  #       with:
+  #         path: "/home/runner/.cache/bazel"
+  #         key: ${{ github.job }}-${{ github.sha }}
+
+  # bazel-linux-aarch64-clang18:
+  #   runs-on: arm-ubuntu-arm-22.04-4core
+  #   timeout-minutes: 60
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Update apt
+  #       run: |
+  #         echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
+  #         sudo dpkg-reconfigure man-db
+  #         sudo apt update
+  #     - name: Install clang-18
+  #       working-directory: ${{ github.workspace }}
+  #       run: |
+  #         wget https://apt.llvm.org/llvm.sh
+  #         chmod +x llvm.sh
+  #         sudo ./llvm.sh 18
+  #     - name: Restore bazel cache
+  #       uses: actions/cache/restore@v4
+  #       with:
+  #         path: "/home/runner/.cache/bazel"
+  #         key: ${{ github.job }}
+  #         restore-keys: |
+  #           ${{ github.job }}-
+  #     - name: Build tests
+  #       env:
+  #         CC: clang-18
+  #         CXX: clang++-18
+  #       run: |
+  #           bazel build //test/... //bench/...
+  #       working-directory: ${{ github.workspace }}
+  #     - name: Run tests
+  #       if: ${{ inputs.run-tests }}
+  #       env:
+  #         CC: clang-18
+  #         CXX: clang++-18
+  #       run: |
+  #         # We only test the KleidiAI integration for now.
+  #         bazel test \
+  #           --test_output=all \
+  #           --test_filter=*QP8* \
+  #           --local_test_jobs=HOST_CPUS \
+  #           test:qp8_f32_qc4w_gemm_minmax_test \
+  #           test/operators:fully_connected_nc_test \
+  #           test/subgraph:fully_connected_test
+  #       working-directory: ${{ github.workspace }}
+  #     - name: Compress disk cache
+  #       # Bazel's `--disk-cache` currently grows without bounds, so we remove files
+  #       # that haven't been accessed in 7+ days manually.
+  #       if: ${{ inputs.update-caches }}
+  #       run: find $HOME/.cache/bazel -type f -atime +7 -delete
+  #     - name: Save bazel cache
+  #       if: ${{ inputs.update-caches }}
+  #       uses: actions/cache/save@v4
+  #       with:
+  #         path: "/home/runner/.cache/bazel"
+  #         key: ${{ github.job }}-${{ github.sha }}
+
+  # bazel-linux-aarch64-gcc13:
+  #   # This ensures we have solid test coverage for _Float16
+  #   runs-on: arm-ubuntu-arm-22.04-4core
+  #   timeout-minutes: 60
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Add repository ppa:ubuntu-toolchain-r/test for gcc-13 and g++-13
+  #       working-directory: ${{ github.workspace }}
+  #       run: |
+  #         sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+  #         sudo apt update
+  #     - name: Install gcc-13 (cached)
+  #       uses: awalsh128/cache-apt-pkgs-action@v1.4.3
+  #       with:
+  #         packages: gcc-13 g++-13
+  #         version: 1.0
+  #     - name: Restore bazel cache
+  #       uses: actions/cache/restore@v4
+  #       with:
+  #         path: "/home/runner/.cache/bazel"
+  #         key: ${{ github.job }}
+  #         restore-keys: |
+  #           ${{ github.job }}-
+  #     - name: Build tests
+  #       env:
+  #         CC: gcc-13
+  #         CXX: g++-13
+  #       run: |
+  #           bazel build //test/... //bench/...
+  #       working-directory: ${{ github.workspace }}
+  #     - name: Run tests
+  #       if: ${{ inputs.run-tests }}
+  #       env:
+  #         CC: gcc-13
+  #         CXX: g++-13
+  #       run: |
+  #         # We only test the KleidiAI integration for now.
+  #         bazel test \
+  #           --test_output=all \
+  #           --test_filter=*QP8* \
+  #           --local_test_jobs=HOST_CPUS \
+  #           test:qp8_f32_qc4w_gemm_minmax_test \
+  #           test/operators:fully_connected_nc_test \
+  #           test/subgraph:fully_connected_test
+  #       working-directory: ${{ github.workspace }}
+  #     - name: Compress disk cache
+  #       # Bazel's `--disk-cache` currently grows without bounds, so we remove files
+  #       # that haven't been accessed in 7+ days manually.
+  #       if: ${{ inputs.update-caches }}
+  #       run: find $HOME/.cache/bazel -type f -atime +7 -delete
+  #     - name: Save bazel cache
+  #       if: ${{ inputs.update-caches }}
+  #       uses: actions/cache/save@v4
+  #       with:
+  #         path: "/home/runner/.cache/bazel"
+  #         key: ${{ github.job }}-${{ github.sha }}
+
+  bazel-linux-aarch64-qemu:
+    runs-on: "arm-ubuntu-arm-22.04-4core"
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -143,379 +596,59 @@ jobs:
           echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
           sudo dpkg-reconfigure man-db
           sudo apt update
-      - name: Install ninja
-        run: sudo apt install ninja-build
-      - name: Download and Install riscv64 cross-toolchain tarball
-        run: |
-          wget -nv https://github.com/riscv-collab/riscv-gnu-toolchain/releases/download/2025.01.20/riscv64-glibc-ubuntu-24.04-llvm-nightly-2025.01.20-nightly.tar.xz
-          tar xJf riscv64-glibc-ubuntu-24.04-llvm-nightly-2025.01.20-nightly.tar.xz
+      - name: Install clang-20
         working-directory: ${{ github.workspace }}
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 20
+      - name: Restore bazel cache
+        uses: actions/cache/restore@v4
         with:
+          path: "/home/runner/.cache/bazel"
           key: ${{ github.job }}
-          max-size: "500M"
-          save: ${{ inputs.update-caches }}
+          restore-keys: |
+            ${{ github.job }}-
       - name: Check for cached qemu build
         id: cached-qemu
         uses: actions/cache@v4
         with:
-          path: ${{ github.workspace }}/bin/qemu-riscv64
-          key: ${{ runner.os }}-qemu-riscv64
-      - name: Download and build qemu-riscv64
-        if: steps.cached-qemu.outputs.cache-hit != 'true'
-        run: |
-          sudo apt install libglib2.0-dev
-          mkdir bin
-          wget -nv https://download.qemu.org/qemu-9.2.2.tar.xz
-          tar xJf qemu-9.2.2.tar.xz
-          cd qemu-9.2.2
-          ./configure --target-list=riscv64-linux-user --static
-          make -j $(nproc)
-          cp build/qemu-riscv64 ../bin/
-        working-directory: ${{ github.workspace }}
-      - name: Configure and build
-        run: |
-          scripts/build-linux-riscv64.sh \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DXNNPACK_ENABLE_RISCV_VECTOR=ON \
-            -DUSE_GNU_SOURCE=ON \
-            -DRISCV_TOOLCHAIN_ROOT=${{ github.workspace }}/riscv/ \
-            -DRISCV_QEMU_ROOT=${{ github.workspace }}
-        working-directory: ${{ github.workspace }}
-      - name: Run tests (no operator tests)
-        if: ${{ inputs.run-tests }}
-        run: ctest --output-on-failure --label-exclude operator --parallel $(nproc)
-        working-directory: ${{ github.workspace }}/build/linux/riscv64
-
-  cmake-windows-arm64:
-    runs-on: windows-2022-32core
-    timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: ${{ github.job }}
-          max-size: "500M"
-          save: ${{ inputs.update-caches }}
-      - name: Install Ninja
-        uses: seanmiddleditch/gha-setup-ninja@master
-      - name: Setup build environment
-        shell: bash
-        run: |
-          echo "VCVARSALL=$(vswhere -products \* -latest -property installationPath)\\VC\\Auxiliary\\Build\\vcvarsall.bat" >> $GITHUB_ENV
-      - name: Configure and build
-        run: scripts/build-windows-arm64.cmd
-        shell: cmd
-        working-directory: ${{ github.workspace }}
+          path: ${{ github.workspace }}/bin/qemu-aarch64
+          key: ${{ runner.os }}-qemu-aarch64
+      - name: Download and build qemu-aarch64 (if newer)
         env:
-          CFLAGS: "/UNDEBUG"
-          CXXFLAGS: "/UNDEBUG"
-
-  cmake-windows-x64:
-    runs-on: windows-2022-32core
-    timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: ${{ github.job }}
-          max-size: "500M"
-          save: ${{ inputs.update-caches }}
-      - name: Install Ninja
-        uses: seanmiddleditch/gha-setup-ninja@master
-      - name: Setup build environment
-        shell: bash
+          CC: clang-20
+          CXX: clang++-20
         run: |
-          echo "VCVARSALL=$(vswhere -products \* -latest -property installationPath)\\VC\\Auxiliary\\Build\\vcvarsall.bat" >> $GITHUB_ENV
-      - name: Configure and build
-        run: scripts/build-windows-x64.cmd
-        shell: cmd
-        working-directory: ${{ github.workspace }}
-        env:
-          CFLAGS: "/UNDEBUG"
-          CXXFLAGS: "/UNDEBUG"
-      - name: Run tests
-        if: ${{ inputs.run-tests }}
-        run: ctest -C Release --output-on-failure --parallel $NUMBER_OF_PROCESSORS
-        working-directory: ${{ github.workspace }}/build/windows/x64
-
-  cmake-windows-x86:
-    runs-on: windows-2022-32core
-    timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: ${{ github.job }}
-          max-size: "500M"
-          save: ${{ inputs.update-caches }}
-      - name: Install Ninja
-        uses: seanmiddleditch/gha-setup-ninja@master
-      - name: Setup build environment
-        shell: bash
-        run: |
-          echo "VCVARSALL=$(vswhere -products \* -latest -property installationPath)\\VC\\Auxiliary\\Build\\vcvarsall.bat" >> $GITHUB_ENV
-      - name: Configure and build
-        run: scripts/build-windows-x86.cmd
-        shell: cmd
-        working-directory: ${{ github.workspace }}
-        env:
-          CFLAGS: "/UNDEBUG"
-          CXXFLAGS: "/UNDEBUG"
-      - name: Run tests
-        if: ${{ inputs.run-tests }}
-        run: ctest -C Release --output-on-failure --parallel $NUMBER_OF_PROCESSORS
-        working-directory: ${{ github.workspace }}/build/windows/x86
-
-  cmake-macos-arm64:
-    runs-on: macos-latest
-    timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install ninja
-        run: brew install ninja
-      - name: Create output directory
-        run: mkdir -p build/macos/arm64
-        working-directory: ${{ github.workspace }}
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: ${{ github.job }}
-          max-size: "500M"
-          save: ${{ inputs.update-caches }}
-      - name: Generate CMake project
-        run: |
-          cmake \
-            -G Ninja \
-            -DCMAKE_CONFIGURATION_TYPES=Release \
-            -DCMAKE_OSX_ARCHITECTURES=arm64 \
-            -DHAVE_STD_REGEX=TRUE \
-            ../../..
-        working-directory: ${{ github.workspace }}/build/macos/arm64
-      - name: Build with Xcode
-        run: |
-          cmake \
-            --build \
-            build/macos/arm64 \
-            -j$((2*$(sysctl -n hw.ncpu)))
-        working-directory: ${{ github.workspace }}
-
-  cmake-android:
-    strategy:
-      matrix:
-        arch: [arm64, armv7, x86]
-    runs-on: 'ubuntu-24.04-8core'
-    timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@v4
-      - name: Update apt
-        run: |
-          echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
-          sudo dpkg-reconfigure man-db
-          sudo apt update
-      - name: Install ninja
-        run: sudo apt install ninja-build
-      - name: Setup Android NDK
-        id: setup-ndk
-        uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: r26d
-          add-to-path: false
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: ${{ github.job }}-${{ matrix.arch }}
-          max-size: "500M"
-          save: ${{ inputs.update-caches }}
-      - name: Force compiler binary mtime
-        # The nttld/setup-ndk action downloads the compiler binaries and copies them to the
-        # tools-cache, where their mtimes are set to the current time. This is bad since ccache
-        # uses the compiler binary mtime to determine whether two compilations match. We solve
-        # this problem by coercing the mtime of the compiler binaries to a fixed value. Note that
-        # if the compiler does indeed change, this will also cause the path to change as it would
-        # imply using a different NDK version.
-        run: |
-          find ${{ steps.setup-ndk.outputs.ndk-path }} -wholename '*/bin/clang*' -executable -type f,l -exec touch -h -t 202408130000 {} +
-      - name: Configure and build
-        run: scripts/build-android-${{ matrix.arch }}.sh
-        working-directory: ${{ github.workspace }}
-        env:
-          ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
-
-  cmake-ios-arm64:
-    runs-on: macos-latest
-    timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@v4
-      - name: Create output directory
-        run: mkdir -p build/ios/arm64
-        working-directory: ${{ github.workspace }}
-      - name: Generate CMake project
-        run: cmake -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=arm64 -DXNNPACK_BUILD_BENCHMARKS=OFF -DXNNPACK_BUILD_TESTS=OFF ../../..
-        working-directory: ${{ github.workspace }}/build/ios/arm64
-      - name: Build with Xcode
-        run: cmake --build build/ios/arm64 --parallel $(sysctl -n hw.ncpu) -- -quiet
-        working-directory: ${{ github.workspace }}
-
-  cmake-ios-x86_64:
-    runs-on: macos-latest
-    timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@v4
-      - name: Create output directory
-        run: mkdir -p build/ios/x86_64
-        working-directory: ${{ github.workspace }}
-      - name: Generate CMake project
-        run: cmake -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=x86_64 -DXNNPACK_BUILD_BENCHMARKS=OFF -DXNNPACK_BUILD_TESTS=OFF ../../..
-        working-directory: ${{ github.workspace }}/build/ios/x86_64
-      - name: Build with Xcode
-        run: cmake --build build/ios/x86_64 --parallel $(sysctl -n hw.ncpu) -- -sdk iphonesimulator -quiet
-        working-directory: ${{ github.workspace }}
-
-  bazel-linux-x86_64-clang-18:
-    runs-on: 'ubuntu-24.04-8core'
-    timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@v4
-      - name: Update apt
-        run: |
-          echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
-          sudo dpkg-reconfigure man-db
-          sudo apt update
-      - name: Install clang-18
-        working-directory: ${{ github.workspace }}
-        run: |
-          wget https://apt.llvm.org/llvm.sh
-          chmod +x llvm.sh
-          sudo ./llvm.sh 18
-      - name: Restore bazel cache
-        uses: actions/cache/restore@v4
-        with:
-          path: "/home/runner/.cache/bazel"
-          key: ${{ github.job }}
-          restore-keys: |
-            ${{ github.job }}-
-      - name: Build tests
-        env:
-          CC: clang-18
-          CXX: clang++-18
-        run: |
-            bazel build //test/... //bench/...
+          mkdir -p bin
+          wget -Snv https://gitlab.com/rth7680/qemu/-/archive/tgt-arm-sme2-afp/qemu-tgt-arm-sme2-afp.tar.bz2
+          if [ ! -f bin/qemu-aarch64 ] || [ qemu-tgt-arm-sme2-afp.tar.bz2 -nt bin/qemu-aarch64 ]; then
+            sudo apt-get install libglib2.0-dev libfdt-dev libpixman-1-dev zlib1g-dev ninja-build
+            tar xjf qemu-tgt-arm-sme2-afp.tar.bz2
+            cd qemu-tgt-arm-sme2-afp
+            ./configure --target-list=aarch64-linux-user
+            make -j $(nproc)
+            cp build/qemu-aarch64 ../bin/
+          fi
         working-directory: ${{ github.workspace }}
       - name: Run tests
         if: ${{ inputs.run-tests }}
         env:
-          CC: clang-18
-          CXX: clang++-18
+          CC: clang-20
+          CXX: clang++-20
         run: |
-            bazel test --test_output=errors //test/... //bench/...
-        working-directory: ${{ github.workspace }}
-      - name: Compress disk cache
-        # Bazel's `--disk-cache` currently grows without bounds, so we remove files
-        # that haven't been accessed in 7+ days manually.
-        if: ${{ inputs.update-caches }}
-        run: find $HOME/.cache/bazel -type f -atime +7 -delete
-      - name: Save bazel cache
-        if: ${{ inputs.update-caches }}
-        uses: actions/cache/save@v4
-        with:
-          path: "/home/runner/.cache/bazel"
-          key: ${{ github.job }}-${{ github.sha }}
-
-  bazel-linux-x86_64-gcc-9:
-    runs-on: 'ubuntu-24.04-8core'
-    timeout-minutes: 60
-    env:
-      CC: gcc-9
-      CXX: g++-9
-      BAZEL_DEFINES: --define=xnn_enable_avxvnni=false --define=xnn_enable_avx256vnni=false --define=xnn_enable_avxvnniint8=false --define=xnn_enable_avx512amx=false --define=xnn_enable_avx512fp16=false --define=xnn_enable_avx512bf16=false
-    steps:
-      - uses: actions/checkout@v4
-      - name: Update apt
-        run: |
-          echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
-          sudo dpkg-reconfigure man-db
-          sudo apt update
-      - name: Install gcc-9
-        working-directory: ${{ github.workspace }}
-        run: |
-          sudo apt install gcc-9 g++-9
-      - name: Restore bazel cache
-        uses: actions/cache/restore@v4
-        with:
-          path: "/home/runner/.cache/bazel"
-          key: ${{ github.job }}
-          restore-keys: |
-            ${{ github.job }}-
-      - name: Build tests
-        run: |
-            bazel build ${BAZEL_DEFINES} //test/... //bench/...
-        working-directory: ${{ github.workspace }}
-      - name: Build XNNPack
-        if: ${{ inputs.run-tests }}
-        run: |
-            bazel build ${BAZEL_DEFINES} //test/...
-        working-directory: ${{ github.workspace }}
-      - name: Compress disk cache
-        # Bazel's `--disk-cache` currently grows without bounds, so we remove files
-        # that haven't been accessed in 7+ days manually.
-        if: ${{ inputs.update-caches }}
-        run: find $HOME/.cache/bazel -type f -atime +7 -delete
-      - name: Save bazel cache
-        if: ${{ inputs.update-caches }}
-        uses: actions/cache/save@v4
-        with:
-          path: "/home/runner/.cache/bazel"
-          key: ${{ github.job }}-${{ github.sha }}
-
-  bazel-linux-aarch64-clang18:
-    runs-on: arm-ubuntu-arm-22.04-4core
-    timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@v4
-      - name: Update apt
-        run: |
-          echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
-          sudo dpkg-reconfigure man-db
-          sudo apt update
-      - name: Install clang-18
-        working-directory: ${{ github.workspace }}
-        run: |
-          wget https://apt.llvm.org/llvm.sh
-          chmod +x llvm.sh
-          sudo ./llvm.sh 18
-      - name: Restore bazel cache
-        uses: actions/cache/restore@v4
-        with:
-          path: "/home/runner/.cache/bazel"
-          key: ${{ github.job }}
-          restore-keys: |
-            ${{ github.job }}-
-      - name: Build tests
-        env:
-          CC: clang-18
-          CXX: clang++-18
-        run: |
-            bazel build //test/... //bench/...
-        working-directory: ${{ github.workspace }}
-      - name: Run tests
-        if: ${{ inputs.run-tests }}
-        env:
-          CC: clang-18
-          CXX: clang++-18
-        run: |
-          # We only test the KleidiAI integration for now.
           bazel test \
-            --test_output=all \
-            --test_filter=*QP8* \
-            --local_test_jobs=HOST_CPUS \
-            test:qp8_f32_qc4w_gemm_minmax_test \
-            test/operators:fully_connected_nc_test \
-            test/subgraph:fully_connected_test
+            --platforms=//build_config:aarch64_linux \
+            --run_under="${PWD}/bin/qemu-aarch64 " \
+            --define xnn_enable_arm_sme2=true \
+            //test:qs8_qc8w_igemm_minmax_fp32_test \
+            //test:qp8_f32_qc4w_gemm_minmax_test \
+            //test:pf32_gemm_minmax_test \
+            //test:pf16_gemm_minmax_test \
+            //test:pqs8_qc8w_gemm_minmax_test \
+            --test_filter="*NEONSME2*" \
+            --test_output=errors \
+            --local_test_jobs=$(nproc) \
         working-directory: ${{ github.workspace }}
       - name: Compress disk cache
         # Bazel's `--disk-cache` currently grows without bounds, so we remove files
@@ -529,59 +662,3 @@ jobs:
           path: "/home/runner/.cache/bazel"
           key: ${{ github.job }}-${{ github.sha }}
 
-  bazel-linux-aarch64-gcc13:
-    # This ensures we have solid test coverage for _Float16
-    runs-on: arm-ubuntu-arm-22.04-4core
-    timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@v4
-      - name: Add repository ppa:ubuntu-toolchain-r/test for gcc-13 and g++-13
-        working-directory: ${{ github.workspace }}
-        run: |
-          sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-          sudo apt update
-      - name: Install gcc-13 (cached)
-        uses: awalsh128/cache-apt-pkgs-action@v1.4.3
-        with:
-          packages: gcc-13 g++-13
-          version: 1.0
-      - name: Restore bazel cache
-        uses: actions/cache/restore@v4
-        with:
-          path: "/home/runner/.cache/bazel"
-          key: ${{ github.job }}
-          restore-keys: |
-            ${{ github.job }}-
-      - name: Build tests
-        env:
-          CC: gcc-13
-          CXX: g++-13
-        run: |
-            bazel build //test/... //bench/...
-        working-directory: ${{ github.workspace }}
-      - name: Run tests
-        if: ${{ inputs.run-tests }}
-        env:
-          CC: gcc-13
-          CXX: g++-13
-        run: |
-          # We only test the KleidiAI integration for now.
-          bazel test \
-            --test_output=all \
-            --test_filter=*QP8* \
-            --local_test_jobs=HOST_CPUS \
-            test:qp8_f32_qc4w_gemm_minmax_test \
-            test/operators:fully_connected_nc_test \
-            test/subgraph:fully_connected_test
-        working-directory: ${{ github.workspace }}
-      - name: Compress disk cache
-        # Bazel's `--disk-cache` currently grows without bounds, so we remove files
-        # that haven't been accessed in 7+ days manually.
-        if: ${{ inputs.update-caches }}
-        run: find $HOME/.cache/bazel -type f -atime +7 -delete
-      - name: Save bazel cache
-        if: ${{ inputs.update-caches }}
-        uses: actions/cache/save@v4
-        with:
-          path: "/home/runner/.cache/bazel"
-          key: ${{ github.job }}-${{ github.sha }}
