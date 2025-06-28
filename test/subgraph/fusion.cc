@@ -375,6 +375,63 @@ TEST(CONSTANT_PAD_THEN_CONVOLUTION, fusion) {
   ASSERT_EQ(unoptimized_output, optimized_output);
 }
 
+TEST(CONSTANT_PAD_THEN_CONVOLUTION, fusion_quantized_int8) {
+  RuntimeTester tester(5);
+  uint32_t input_id = 0;
+  uint32_t intermediate_id = 1;
+  uint32_t filter_id = 2;
+  uint32_t bias_id = 3;
+  uint32_t output_id = 4;
+  size_t pre_paddings[4] = {0, 2, 4, 0};
+  size_t post_paddings[4] = {0, 6, 8, 0};
+  float padding_value = 0.0f;
+  using qint8 = xnnpack::quantized<int8_t>;
+  using qint32 = xnnpack::quantized<int32_t>;
+  xnn_quantization_params input_quantization = {-128, 0.003921568859368563f};
+  xnn_quantization_params output_quantization = {-17, 0.06731567531824112f};
+  const TensorShape filter_dims = {32, 3, 3, 3};
+  xnnpack::Buffer<qint8> filter_data(filter_dims.NumElements(), 54);
+  xnn_quantization_params filter_quantization = {0, 0.005239306949079037f};
+  const TensorShape bias_dims = {32};
+  xnnpack::Buffer<qint32> bias_data(bias_dims.NumElements(), 21);
+  xnn_quantization_params bias_quantization = {0, 0.000020546303858282045};
+  const TensorShape input_dims = {1, 254, 254, 3};
+  xnnpack::Buffer<qint8> input_data(input_dims.NumElements(), 127);
+
+  tester.AddInputTensor<qint8>({1, 254, 254, 3}, input_data.data(), input_quantization, input_id)
+      .AddDynamicTensor<qint8>({1, 262, 266, 3}, intermediate_id, input_quantization)
+      .AddStaticTensor<qint8>(filter_dims, filter_id, filter_data.data(), filter_quantization)
+      .AddStaticTensor<qint32>(bias_dims, bias_id, bias_data.data(), bias_quantization)
+      .AddOutputTensor<qint8>({1, 131, 133, 32}, output_quantization, output_id)
+      .AddConstantPad(pre_paddings, post_paddings, padding_value, input_id,
+                      intermediate_id)
+      .AddConvolution2D(
+          ConvolutionParams{
+              Padding{0, 0, 0, 0},
+              Kernel{3, 3},
+              Subsampling{2, 2},
+              Dilation{1, 1},
+              /*groups=*/1,
+              /*group_input_channels=*/3,
+              /*group_output_channels=*/32,
+          },
+          intermediate_id, filter_id, bias_id, output_id);
+
+  xnnpack::Buffer<float> unoptimized_output = tester.RunWithoutFusion<float>();
+  ASSERT_EQ(tester.NumOperators(), 2);
+
+  xnnpack::Buffer<float> optimized_output = tester.RunWithFusion<float>();
+
+  ASSERT_EQ(tester.NumOperators(), 1);
+  ASSERT_EQ(tester.Node(1)->params.convolution_2d.input_padding_top, 2);
+  ASSERT_EQ(tester.Node(1)->params.convolution_2d.input_padding_left, 4);
+  ASSERT_EQ(tester.Node(1)->params.convolution_2d.input_padding_right, 8);
+  ASSERT_EQ(tester.Node(1)->params.convolution_2d.input_padding_bottom, 6);
+  ASSERT_EQ(tester.Node(1)->outputs[0], output_id);
+
+  ASSERT_EQ(unoptimized_output, optimized_output);
+}
+
 TEST(CONSTANT_PAD_THEN_CONVOLUTION,
      not_fused_due_to_non_zero_padding_in_n_dimension) {
   RuntimeTester tester(5);
