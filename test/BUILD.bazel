@@ -970,7 +970,7 @@ xnnpack_unit_test(
     ],
     deps = MICROKERNEL_TEST_DEPS,
 ) for kernel in [
-    "qb4-packw",
+    "qb4_packw",
     "qs8_packw",
     "qs8_qc4w_packw",
     "x16_packw",
