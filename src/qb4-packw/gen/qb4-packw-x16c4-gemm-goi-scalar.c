@@ -3,7 +3,7 @@
 //   Template: src/qb4-packw/kr-scalar.c.in
 //   Generator: tools/xngen
 //
-// Copyright 2023 Google LLC
+// Copyright 2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -18,15 +18,19 @@
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/packw.h"
 
+// KR is 4 or 8
 static XNN_INTRINSIC void xnn_packed2planar(
   int32_t* ksum,
   const uint8_t* weights,
   int8_t* out,
   int32_t vkernel_zero_point)
 {
+  uint32_t w0;
+  memcpy(&w0, weights + 0, sizeof(uint32_t));
+  w0 ^= vkernel_zero_point;
+
   uint8_t s_v0[4];
-  const uint32_t w0 = (((const uint32_t*)weights)[0] ^ vkernel_zero_point);
-  memcpy(s_v0, &w0, sizeof(uint32_t));
+  memcpy(&s_v0[0], &w0, sizeof(uint32_t));
   const int8_t v0 = s_v0[0] << 4;
   const int8_t v1 = s_v0[0] & 0xF0;
   const int8_t v2 = s_v0[1] << 4;
@@ -36,19 +40,19 @@ static XNN_INTRINSIC void xnn_packed2planar(
   const int8_t v6 = s_v0[3] << 4;
   const int8_t v7 = s_v0[3] & 0xF0;
 
-  (*ksum) += (int32_t) (v0);
-  (*ksum) += (int32_t) (v1);
-  (*ksum) += (int32_t) (v2);
-  (*ksum) += (int32_t) (v3);
-  (*ksum) += (int32_t) (v4);
-  (*ksum) += (int32_t) (v5);
-  (*ksum) += (int32_t) (v6);
-  (*ksum) += (int32_t) (v7);
+  (*ksum) += (int32_t) v0;
+  (*ksum) += (int32_t) v1;
+  (*ksum) += (int32_t) v2;
+  (*ksum) += (int32_t) v3;
+  (*ksum) += (int32_t) v4;
+  (*ksum) += (int32_t) v5;
+  (*ksum) += (int32_t) v6;
+  (*ksum) += (int32_t) v7;
 
-  out[0] = (((uint8_t) v0) >> 4 | (v4));
-  out[1] = (((uint8_t) v1) >> 4 | (v5));
-  out[2] = (((uint8_t) v2) >> 4 | (v6));
-  out[3] = (((uint8_t) v3) >> 4 | (v7));
+  out[0] = (((uint8_t) v0) >> 4 | v4);
+  out[1] = (((uint8_t) v1) >> 4 | v5);
+  out[2] = (((uint8_t) v2) >> 4 | v6);
+  out[3] = (((uint8_t) v3) >> 4 | v7);
 }
 
 void xnn_qb4_packw_gemm_goi_ukernel_x16c4__scalar(

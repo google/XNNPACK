@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -15,25 +15,29 @@ $assert KR > 1
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/packw.h"
 
+// KR is 4 or 8
 static XNN_INTRINSIC void xnn_packed2planar(
   int32_t* ksum,
   const uint8_t* weights,
   int8_t* out,
   int32_t vkernel_zero_point)
 {
-  $for K_I in range(0, KR, 4):
-    uint8_t s_v${K_I//4}[4];
-    const uint32_t w${K_I//4} = (((const uint32_t*)weights)[${K_I//4}] ^ vkernel_zero_point);
-    memcpy(s_v${K_I//4}, &w${K_I//4}, sizeof(uint32_t));
-    $for K in range(0, 4):
-      const int8_t v${2*(K_I+K)} = s_v${K_I//4}[${K}] << 4;
-      const int8_t v${2*(K_I+K)+1} = s_v${K_I//4}[${K}] & 0xF0;
+  $for K in range(0, KR, 4):
+    uint32_t w${K//4};
+    memcpy(&w${K//4}, weights + ${K}, sizeof(uint32_t));
+    w${K//4} ^= vkernel_zero_point;
+
+    uint8_t s_v${K//4}[4];
+    memcpy(&s_v${K//4}[0], &w${K//4}, sizeof(uint32_t));
+    $for B in range(0, 4):
+      const int8_t v${2*(K+B)+0} = s_v${K//4}[${B}] << 4;
+      const int8_t v${2*(K+B)+1} = s_v${K//4}[${B}] & 0xF0;
 
   $for K in range(0, 2*KR):
-    (*ksum) += (int32_t) (v${K});
+    (*ksum) += (int32_t) v${K};
 
   $for K in range(0, KR):
-    out[${K}] = (((uint8_t) v${K}) >> 4 | (v${K+KR}));
+    out[${K}] = (((uint8_t) v${K}) >> 4 | v${K+KR});
 }
 
 void xnn_qb4_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
