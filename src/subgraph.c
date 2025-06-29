@@ -1600,7 +1600,7 @@ enum xnn_status xnn_subgraph_fusion(xnn_subgraph_t subgraph) {
             ((padding_datatype == xnn_datatype_qint8 ||
               padding_datatype == xnn_datatype_quint8) &&
              padding_value ==
-                 (uint32_t)(uint8_t)subgraph->values[producer->outputs[0]]
+                 (uint32_t)subgraph->values[producer->outputs[0]]
                      .quantization.zero_point);
         switch (consumer->type) {
           case xnn_node_type_convolution_2d:
