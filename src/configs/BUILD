@@ -49,12 +49,28 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "hardware_config",
+    srcs = ["hardware-config.c"],
+    hdrs = ["//:src/xnnpack/hardware-config.h"],
+    deps = [
+        "//:common",
+        "//:init_once",
+        "//:logging",
+    ] + xnnpack_select_if(
+        "//:cpuinfo_enabled",
+        ["@cpuinfo"],
+    ),
+)
+
+xnnpack_cc_library(
     name = "dwconv2d_chw_config",
     srcs = ["dwconv2d-chw-config.c"],
     deps = [
         ":config_hdrs",
+        ":hardware_config",
         "//:common",
         "//:init_once",
+        "//:logging",
         "//:microfnptr_h",
         "//:microkernel_hdrs",
         "//:microparams_init",
@@ -69,6 +85,7 @@ xnnpack_cc_library(
         ":hardware_config",
         "//:common",
         "//:init_once",
+        "//:logging",
         "//:microfnptr_h",
         "//:microkernel_hdrs",
         "//:microparams_init",
@@ -81,8 +98,10 @@ xnnpack_cc_library(
     srcs = ["unpool-config.c"],
     deps = [
         ":config_hdrs",
+        ":hardware_config",
         "//:common",
         "//:init_once",
+        "//:logging",
         "//:microfnptr_h",
         "//:microkernel_hdrs",
     ],
@@ -93,8 +112,10 @@ xnnpack_cc_library(
     srcs = ["avgpool-config.c"],
     deps = [
         ":config_hdrs",
+        ":hardware_config",
         "//:common",
         "//:init_once",
+        "//:logging",
         "//:microfnptr_h",
         "//:microkernel_hdrs",
         "//:microparams_init",
@@ -117,8 +138,10 @@ xnnpack_cc_library(
     srcs = ["conv-hwc2chw-config.c"],
     deps = [
         ":config_hdrs",
+        ":hardware_config",
         "//:common",
         "//:init_once",
+        "//:logging",
         "//:microfnptr_h",
         "//:microkernel_hdrs",
         "//:microparams_init",
@@ -130,8 +153,10 @@ xnnpack_cc_library(
     srcs = ["binary-elementwise-config.c"],
     deps = [
         ":config_hdrs",
+        ":hardware_config",
         "//:common",
         "//:init_once",
+        "//:logging",
         "//:microfnptr_h",
         "//:microkernel_hdrs",
         "//:microparams_init",
@@ -143,8 +168,10 @@ xnnpack_cc_library(
     srcs = ["maxpool-config.c"],
     deps = [
         ":config_hdrs",
+        ":hardware_config",
         "//:common",
         "//:init_once",
+        "//:logging",
         "//:microfnptr_h",
         "//:microkernel_hdrs",
         "//:microparams_init",
@@ -156,8 +183,10 @@ xnnpack_cc_library(
     srcs = ["argmaxpool-config.c"],
     deps = [
         ":config_hdrs",
+        ":hardware_config",
         "//:common",
         "//:init_once",
+        "//:logging",
         "//:microfnptr_h",
         "//:microkernel_hdrs",
     ],
@@ -168,8 +197,10 @@ xnnpack_cc_library(
     srcs = ["vmulcaddc-config.c"],
     deps = [
         ":config_hdrs",
+        ":hardware_config",
         "//:common",
         "//:init_once",
+        "//:logging",
         "//:microfnptr_h",
         "//:microkernel_hdrs",
         "//:microparams_init",
@@ -181,11 +212,12 @@ xnnpack_cc_library(
     srcs = ["transpose-config.c"],
     deps = [
         ":config_hdrs",
+        ":hardware_config",
         "//:common",
         "//:init_once",
+        "//:logging",
         "//:microfnptr_h",
         "//:microkernel_hdrs",
-        "//:microparams_init",
     ],
 )
 
@@ -194,8 +226,10 @@ xnnpack_cc_library(
     srcs = ["spmm-config.c"],
     deps = [
         ":config_hdrs",
+        ":hardware_config",
         "//:common",
         "//:init_once",
+        "//:logging",
         "//:microfnptr_h",
         "//:microkernel_hdrs",
         "//:microparams_init",
@@ -207,9 +241,11 @@ xnnpack_cc_library(
     srcs = ["ibilinear-config.c"],
     deps = [
         ":config_hdrs",
+        ":hardware_config",
         "//:common",
         "//:indirection",
         "//:init_once",
+        "//:logging",
         "//:microfnptr_h",
         "//:microkernel_hdrs",
     ],
@@ -220,26 +256,14 @@ xnnpack_cc_library(
     srcs = ["ibilinear-chw-config.c"],
     deps = [
         ":config_hdrs",
+        ":hardware_config",
         "//:common",
         "//:indirection",
         "//:init_once",
+        "//:logging",
         "//:microfnptr_h",
         "//:microkernel_hdrs",
     ],
-)
-
-xnnpack_cc_library(
-    name = "hardware_config",
-    srcs = ["hardware-config.c"],
-    hdrs = ["//:src/xnnpack/hardware-config.h"],
-    deps = [
-        "//:common",
-        "//:init_once",
-        "//:logging",
-    ] + xnnpack_select_if(
-        "//:cpuinfo_enabled",
-        ["@cpuinfo"],
-    ),
 )
 
 xnnpack_cc_library(
@@ -250,6 +274,7 @@ xnnpack_cc_library(
         ":hardware_config",
         "//:common",
         "//:init_once",
+        "//:logging",
         "//:microfnptr_h",
         "//:microkernel_hdrs",
         "//:microparams_init",
@@ -261,8 +286,10 @@ xnnpack_cc_library(
     srcs = ["dwconv-config.c"],
     deps = [
         ":config_hdrs",
+        ":hardware_config",
         "//:common",
         "//:init_once",
+        "//:logging",
         "//:microfnptr_h",
         "//:microkernel_hdrs",
         "//:microparams_init",
@@ -280,6 +307,7 @@ xnnpack_cc_library(
         ":hardware_config",
         "//:common",
         "//:init_once",
+        "//:logging",
         "//:microfnptr_h",
         "//:microkernel_hdrs",
         "//:microparams_init",
@@ -310,8 +338,10 @@ xnnpack_cc_library(
     srcs = ["cmul-config.c"],
     deps = [
         ":config_hdrs",
+        ":hardware_config",
         "//:common",
         "//:init_once",
+        "//:logging",
         "//:microfnptr_h",
         "//:microkernel_hdrs",
     ],
@@ -322,11 +352,12 @@ xnnpack_cc_library(
     srcs = ["raddstoreexpminusmax-config.c"],
     deps = [
         ":config_hdrs",
+        ":hardware_config",
         "//:common",
         "//:init_once",
+        "//:logging",
         "//:microfnptr_h",
         "//:microkernel_hdrs",
-        "//:microparams_init",
     ],
 )
 
