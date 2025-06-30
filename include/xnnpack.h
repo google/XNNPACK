@@ -117,6 +117,11 @@ extern "C" {
 /// The minimum blocksize for blockwise quantized operators.
 #define XNN_MIN_BLOCKSIZE 32
 
+/// If Slinky is enabled, assume shapes are concrete (and rebuild pipeline in
+/// reshape). This makes reshaping more expensive, but may reduce overhead in
+/// some cases.
+#define XNN_FLAG_SLINKY_STATIC_BOUNDS 0x10000000
+
 #ifdef __GNUC__
 #define XNN_DEPRECATED __attribute__((deprecated))
 #else
