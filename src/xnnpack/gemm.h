@@ -312,6 +312,8 @@ DECLARE_PF32_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_pf32_gemm_minmax_ukernel_1x32__neonsme2)
 DECLARE_PF32_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_pf32_gemm_minmax_ukernel_32x32__neonsme2)
+DECLARE_PF32_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_pf32_gemm_minmax_ukernel_32x32__neonsme)
 
 #define DECLARE_PQS8_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(fn_name)            \
                                                                            \
