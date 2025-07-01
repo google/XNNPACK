@@ -16,6 +16,7 @@ $assert NR % 8 == 0
 #include "src/xnnpack/microparams.h"
 
 
+$RANGE_MR = list(reversed(range(MR))) if INC else list(range(MR))
 void xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__neonfp16arith_ld64(
     size_t mr,
     size_t nc,
@@ -122,13 +123,13 @@ void xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__neonfp16ari
         vacc${M}x${N//8} = vminq_f16(vacc${M}x${N//8}, vmax);
 
     if XNN_LIKELY(nc >= ${NR}) {
-      $for M in range(MR):
+      $for M in RANGE_MR:
         vst1q_u16(c${M}, vreinterpretq_u16_f16(vacc${M}x0));
         $for N in range(8, NR, 8):
           vst1q_u16(c${M} + ${N}, vreinterpretq_u16_f16(vacc${M}x${N//8}));
         c${M} = (uint16_t*) ((uintptr_t) c${M} + cn_stride);
 
-      $for M in range(MR):
+      $for M in RANGE_MR:
         a${M} = (const uint16_t*) ((uintptr_t) a${M} - kc);
 
       nc -= ${NR};
@@ -138,30 +139,30 @@ void xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__neonfp16ari
           if (nc & ${1 << LOG2N}) {
             $if LOG2N >= 3:
               $for N in range(0, 1 << LOG2N, 8):
-                $for M in range(MR):
+                $for M in RANGE_MR:
                   vst1q_u16(c${M}, vreinterpretq_u16_f16(vacc${M}x${N//8})); c${M} += 8;
 
-              $for M in range(MR):
+              $for M in RANGE_MR:
                 $for N in range(0, NR - (1 << LOG2N), 8):
                   vacc${M}x${N//8} = vacc${M}x${(N + (1 << LOG2N))//8};
             $elif LOG2N == 2:
-              $for M in range(MR):
+              $for M in RANGE_MR:
                 vst1_u16(c${M}, vreinterpret_u16_f16(vacc${M})); c${M} += 4;
 
-              $for M in range(MR):
+              $for M in RANGE_MR:
                 vacc${M} = vget_high_f16(vacc${M}x0);
             $elif LOG2N == 1:
-              $for M in range(MR):
+              $for M in RANGE_MR:
                 vst1_lane_u32((void*) c${M}, vreinterpret_u32_f16(vacc${M}), 0); c${M} += 2;
 
-              $for M in range(MR):
+              $for M in RANGE_MR:
                 vacc${M} = vext_f16(vacc${M}, vacc${M}, 2);
             $elif LOG2N == 0:
-              $for M in range(MR):
+              $for M in RANGE_MR:
                 vst1_lane_u16(c${M}, vreinterpret_u16_f16(vacc${M}), 0);
           }
         $if LOG2N == 3:
-          $for M in range(MR):
+          $for M in RANGE_MR:
             float16x4_t vacc${M} = vget_low_f16(vacc${M}x0);
 
       nc = 0;

@@ -4191,7 +4191,6 @@ void GemmMicrokernelTester::Test(xnn_f32_gemminc_minmax_ukernel_fn gemminc,
   xnnpack::Buffer<float> a((m() - 1) * a_stride() + k(),
                            xnnpack::XnnExtraBytes);
   xnnpack::Buffer<float> b(n() * k());
-  xnnpack::Buffer<float> bias(n());
   xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> packed_w(
       packed_n() * packed_k());  // no packed_n()
   xnnpack::Buffer<float> c((m() - 1) * cm_stride() + n());
@@ -4257,6 +4256,93 @@ void GemmMicrokernelTester::Test(xnn_f32_gemminc_minmax_ukernel_fn gemminc,
       ASSERT_NEAR(c[i * cm_stride() + j], c_ref[i * n() + j], max_abs_err)
           << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
           << ", optimized = " << c[i * cm_stride() + j]
+          << ", Mr x Nr x Kr = " << mr() << " x " << nr() << " x " << kr()
+          << ", M x N x K = " << m() << " x " << n() << " x " << k();
+    }
+  }
+}
+
+void GemmMicrokernelTester::Test(xnn_f16_gemminc_minmax_ukernel_fn gemminc,
+                                 xnn_init_f16_minmax_params_fn init_params,
+                                 xnn_pack_f16_gemminc_fn pack) const {
+  ASSERT_LE(m(), mr());
+  ASSERT_GE(a_stride(), k());
+  ASSERT_GE(cm_stride(), n());
+
+  xnnpack::ReplicableRandomDevice rng;
+  std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
+
+  xnnpack::Buffer<xnn_float16> a((m() - 1) * a_stride() + k(),
+                                 xnnpack::XnnExtraBytes);
+  xnnpack::Buffer<xnn_float16> b(n() * k());
+  xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> packed_w(
+      packed_n() * packed_k());  // no packed_n()
+  xnnpack::Buffer<xnn_float16> c((m() - 1) * cm_stride() + n());
+  xnnpack::Buffer<float> c_ref(m() * n());
+  xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> acc(mr() * packed_n());
+
+  std::generate(a.begin(), a.end(), [&]() { return f32dist(rng); });
+  std::generate(b.begin(), b.end(), [&]() { return f32dist(rng); });
+  std::fill(c_ref.begin(), c_ref.end(), 0.0f);
+  std::generate(acc.begin(), acc.end(), [&]() { return f32dist(rng); });
+
+  std::fill(packed_w.begin(), packed_w.end(), 0.0f);
+  pack(/*g=*/1, n(), k(), nr(), kr(), sr(), (const uint16_t*)b.data(),
+       (uint16_t*)packed_w.data(),
+       /*params=*/nullptr);
+
+  for (size_t m_index = 0; m_index < m(); m_index++) {
+    for (size_t n_index = 0; n_index < n(); n_index++) {
+      for (size_t k_index = 0; k_index < k(); k_index++) {
+        ASSERT_LE(n(), packed_n());
+        ASSERT_LT(m_index * n() + n_index, c_ref.size());
+        c_ref[m_index * n() + n_index] +=
+            a[m_index * a_stride() + k_index] * b[n_index * k() + k_index];
+      }
+      c_ref[m_index * n() + n_index] +=
+          acc[n_index / nr() * nr() * mr() + m_index % mr() * nr() +
+              n_index % nr()];
+    }
+  }
+
+  // Prepare parameters.
+  xnn_f16_minmax_params params;
+  init_params(&params, min(), max());
+
+  for (size_t m_index = 0; m_index < m(); m_index++) {
+    for (size_t n_index = 0; n_index < n(); n_index++) {
+      c_ref[m_index * n() + n_index] = std::max(
+          std::min(c_ref[m_index * n() + n_index], max()), min());
+    }
+  }
+
+  gemminc(m(), n(), k() * sizeof(xnn_float16), a.data(),
+          a_stride() * sizeof(xnn_float16), packed_w.data(), c.data(),
+          cm_stride() * sizeof(xnn_float16), nr() * sizeof(xnn_float16),
+          acc.data(), &params);
+
+  // Compute an upper bound for the summation error of the inner products.
+  const float nu = k() * xnnpack::NumericLimits<xnn_float16>::epsilon();
+  ASSERT_LT(k() * nu, 1.0f)
+      << "Unreasonable dimensions for `xnn_float16` tolerance.";
+  float max_abs_err = k() * nu / (1.0f - nu);
+
+  // Validate micro-kernel outputs.
+  for (size_t i = 0; i < m(); i++) {
+    for (size_t j = 0; j < n(); j++) {
+      ASSERT_LE(c[i * cm_stride() + j], max())
+          << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
+          << ", optimized = " << xnn_float16_to_float(c[i * cm_stride() + j])
+          << ", Mr x Nr x Kr = " << mr() << " x " << nr() << " x " << kr()
+          << ", M x N x K = " << m() << " x " << n() << " x " << k();
+      ASSERT_GE(c[i * cm_stride() + j], min())
+          << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
+          << ", optimized = " << xnn_float16_to_float(c[i * cm_stride() + j])
+          << ", Mr x Nr x Kr = " << mr() << " x " << nr() << " x " << kr()
+          << ", M x N x K = " << m() << " x " << n() << " x " << k();
+      ASSERT_NEAR(c[i * cm_stride() + j], c_ref[i * n() + j], max_abs_err)
+          << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
+          << ", optimized = " << xnn_float16_to_float(c[i * cm_stride() + j])
           << ", Mr x Nr x Kr = " << mr() << " x " << nr() << " x " << kr()
           << ", M x N x K = " << m() << " x " << n() << " x " << k();
     }

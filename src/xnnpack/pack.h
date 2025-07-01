@@ -750,6 +750,12 @@ typedef void (*xnn_pack_f32_gemminc_fn)(size_t g, size_t nc, size_t kc,
                                         float* packed_weights,
                                         const void* params);
 
+typedef void (*xnn_pack_f16_gemminc_fn)(size_t g, size_t nc, size_t kc,
+                                        size_t nr, size_t kr, size_t sr,
+                                        const uint16_t* kernel,
+                                        uint16_t* packed_weights,
+                                        const void* params);
+
 XNN_INTERNAL void xnn_pack_f32_gemminc_goi_w(size_t g, size_t nc, size_t kc,
                                              size_t nr, size_t kr, size_t sr,
                                              const float* kernel,

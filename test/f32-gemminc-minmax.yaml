@@ -103,11 +103,19 @@
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_gemminc_goi_w
   k-block: 2
+- name: xnn_f32_gemminc_minmax_ukernel_1x8__aarch64_neonfma_lane_ld128
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemminc_goi_w
+  k-block: 2
 - name: xnn_f32_gemminc_minmax_ukernel_1x8__neon_dup_ld64
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_gemminc_goi_w
   k-block: 2
 - name: xnn_f32_gemminc_minmax_ukernel_1x8__neon_lane_ld64
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemminc_goi_w
+  k-block: 2
+- name: xnn_f32_gemminc_minmax_ukernel_1x8__neon_lane_ld128
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_gemminc_goi_w
   k-block: 2

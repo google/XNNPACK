@@ -607,6 +607,16 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f16_gemminc_minmax_test",
+    srcs = [
+        "f16-gemminc-minmax.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
     name = "f32_ppmm_minmax_test",
     srcs = [
         "f32-ppmm-minmax.cc",

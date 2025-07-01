@@ -2148,6 +2148,8 @@ DECLARE_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
 DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemminc_minmax_ukernel_1x8__neon_lane_ld64)
 DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_gemminc_minmax_ukernel_1x8__neon_lane_ld128)
+DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemminc_minmax_ukernel_4x8__neon_lane_ld64)
 DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemminc_minmax_ukernel_4x8__neon_lane_ld128)
@@ -2160,6 +2162,8 @@ DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
 
 DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemminc_minmax_ukernel_1x8__aarch64_neonfma_lane_ld64)
+DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_gemminc_minmax_ukernel_1x8__aarch64_neonfma_lane_ld128)
 DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_lane_ld64)
 DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
@@ -2493,6 +2497,30 @@ DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemminc_minmax_ukernel_2x4__scalar)
 DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemminc_minmax_ukernel_4x4__scalar)
+
+#define DECLARE_F16_GEMMINC_MINMAX_UKERNEL_FUNCTION(fn_name)                  \
+  XNN_INTERNAL void fn_name(                                                  \
+      size_t mr, size_t nc, size_t kc, const xnn_float16* a, size_t a_stride, \
+      const xnn_float16* w, xnn_float16* c, size_t cm_stride,                 \
+      size_t cn_stride, const xnn_float16* acc,                               \
+      const struct xnn_f16_minmax_params* params);
+
+DECLARE_F16_GEMMINC_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_gemminc_minmax_ukernel_1x8__neonfp16arith_ld64)
+DECLARE_F16_GEMMINC_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_gemminc_minmax_ukernel_1x16__neonfp16arith_ld64)
+DECLARE_F16_GEMMINC_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_gemminc_minmax_ukernel_4x8__neonfp16arith_ld64)
+DECLARE_F16_GEMMINC_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_gemminc_minmax_ukernel_4x16__neonfp16arith_ld64)
+DECLARE_F16_GEMMINC_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_gemminc_minmax_ukernel_6x8__neonfp16arith_ld64)
+DECLARE_F16_GEMMINC_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_gemminc_minmax_ukernel_6x16__neonfp16arith_ld64)
+DECLARE_F16_GEMMINC_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_gemminc_minmax_ukernel_8x8__neonfp16arith_ld64)
+DECLARE_F16_GEMMINC_MINMAX_UKERNEL_FUNCTION(
+    xnn_f16_gemminc_minmax_ukernel_8x16__neonfp16arith_ld64)
 
 #define DECLARE_QU8_GEMM_MINMAX_UKERNEL_FUNCTION(fn_name)                      \
   XNN_INTERNAL void fn_name(size_t mr, size_t nc, size_t kc, const uint8_t* a, \

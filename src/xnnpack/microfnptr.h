@@ -222,6 +222,11 @@ typedef void (*xnn_f32_gemminc_minmax_ukernel_fn)(
     const float* w, float* c, size_t cm_stride, size_t cn_stride,
     const float* acc, const struct xnn_f32_minmax_params* params);
 
+typedef void (*xnn_f16_gemminc_minmax_ukernel_fn)(
+    size_t mr, size_t nr, size_t k, const xnn_float16* a, size_t a_stride,
+    const xnn_float16* w, xnn_float16* c, size_t cm_stride, size_t cn_stride,
+    const xnn_float16* acc, const struct xnn_f16_minmax_params* params);
+
 // IGEMM: Indirect GEMM without activation
 
 typedef void (*xnn_dqigemm_ukernel_fn)(
