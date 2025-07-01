@@ -9,13 +9,12 @@ $assert KBLOCK >= 4
 $assert KBLOCK % 4 == 0
 $assert SR == 1 or SR == 4
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
+#include <arm_neon.h>
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
 
-#include <arm_neon.h>
-
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/packw.h"
 $if PREFETCH:
   #include "src/xnnpack/prefetch.h"

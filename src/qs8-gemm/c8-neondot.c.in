@@ -10,14 +10,17 @@ $assert REQUANTIZATION in ["FP32", "RNDNU"] or not REQUANTIZATION
 $assert DATATYPE in ["QC8", "QS8", "QD8", "QC4"]
 $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 $assert not DATATYPE in ["QD8", "QC4"] or not REQUANTIZATION
-#include <assert.h>
-
 #include <arm_neon.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/gemm.h"
 $if REQUANTIZATION == "FP32":
   #include "src/xnnpack/intrinsics-polyfill.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
 
 
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8", "QD8": "qd8_f32_qc8w", "QC4": "qd8_f32_qc4w"}[DATATYPE]

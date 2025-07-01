@@ -5,13 +5,12 @@
 
 $assert NR >= 2
 $assert KBLOCK >= 2
-
+#include <arm_neon.h>
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
 
-#include <arm_neon.h>
-
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/packw.h"
 $if PREFETCH:
   #include "src/xnnpack/prefetch.h"

@@ -8,11 +8,10 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <arm_fp16.h>
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
-
-#include <arm_fp16.h>
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/intrinsics-polyfill.h"
