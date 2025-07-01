@@ -18,6 +18,7 @@ extern "C" {
 
 // These flags should be sorted by preference (a < b ==> a slower than b).
 enum xnn_arch_flags {
+  xnn_arch_none = 0,
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   xnn_arch_arm_v6 = 1 << 0,
   xnn_arch_arm_vfpv2 = 1 << 1,
@@ -35,8 +36,7 @@ enum xnn_arch_flags {
   xnn_arch_arm_sve2 = 1 << 13,
   xnn_arch_arm_sme = 1 << 14,
   xnn_arch_arm_sme2 = 1 << 15,
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#elif XNN_ARCH_X86 || XNN_ARCH_X86_64
   xnn_arch_x86_ssse3 = 1 << 0,
   xnn_arch_x86_sse4_1 = 1 << 1,
   xnn_arch_x86_avx = 1 << 2,
@@ -56,29 +56,25 @@ enum xnn_arch_flags {
   xnn_arch_x86_avx512amx = 1 << 16,
   xnn_arch_x86_avx512fp16 = 1 << 17,
   xnn_arch_x86_avx512bf16 = 1 << 18,
-#endif
-#if XNN_ARCH_RISCV
+#elif XNN_ARCH_RISCV
   xnn_arch_riscv_vector = 1 << 0,
   xnn_arch_riscv_vector_fp16_arith = 1 << 1,
-#endif
-#if XNN_ARCH_PPC64
+#elif XNN_ARCH_PPC64
   xnn_arch_vsx = 1 << 0,
   xnn_arch_vsx3 = 1 << 1,
   xnn_arch_mma = 1 << 2,
-#endif
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+#elif XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   xnn_arch_wasm_is_x86 = 1 << 0,
-#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 #if XNN_ARCH_WASMRELAXEDSIMD
   xnn_arch_wasm_blendvps = 1 << 1,
   xnn_arch_wasm_pshufb = 1 << 2,
   xnn_arch_wasm_sdot = 1 << 3,
   xnn_arch_wasm_usdot = 1 << 4,
   xnn_arch_wasm_fma = 1 << 5,
-#endif  // XNN_ARCH_WASMRELAXEDSIMD
-#if XNN_ARCH_HEXAGON
+#endif // XNN_ARCH_WASMRELAXEDSIMD
+#elif XNN_ARCH_HEXAGON
   xnn_arch_hvx = 1 << 0,
-#endif  // XNN_ARCH_HEXAGON
+#endif
 };
 
 enum xnn_uarch {
