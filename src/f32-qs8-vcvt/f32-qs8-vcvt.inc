@@ -28,10 +28,10 @@ XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_qs8_vcvt_ukernel__rvv_u8v, 8, true, f
 #endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_UKERNEL(0, xnn_f32_qs8_vcvt_ukernel__sse2_u8, 8, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
-XNN_UKERNEL(0, xnn_f32_qs8_vcvt_ukernel__sse2_u16, 16, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
-XNN_UKERNEL(0, xnn_f32_qs8_vcvt_ukernel__sse2_u24, 24, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
-XNN_UKERNEL(0, xnn_f32_qs8_vcvt_ukernel__sse2_u32, 32, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_qs8_vcvt_ukernel__sse2_u8, 8, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_qs8_vcvt_ukernel__sse2_u16, 16, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_qs8_vcvt_ukernel__sse2_u24, 24, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_qs8_vcvt_ukernel__sse2_u32, 32, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_f32_qs8_vcvt_ukernel__sse41_u8, 8, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_f32_qs8_vcvt_ukernel__sse41_u16, 16, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_f32_qs8_vcvt_ukernel__sse41_u24, 24, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
@@ -54,14 +54,14 @@ XNN_UKERNEL(xnn_arch_x86_avx512skx, xnn_f32_qs8_vcvt_ukernel__avx512skx_u128, 12
 #endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-XNN_UKERNEL(0, xnn_f32_qs8_vcvt_ukernel__wasmsimd_cvt_u8, 8, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
-XNN_UKERNEL(0, xnn_f32_qs8_vcvt_ukernel__wasmsimd_cvt_u16, 16, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
-XNN_UKERNEL(0, xnn_f32_qs8_vcvt_ukernel__wasmsimd_cvt_u24, 24, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
-XNN_UKERNEL(0, xnn_f32_qs8_vcvt_ukernel__wasmsimd_cvt_u32, 32, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
-XNN_UKERNEL(0, xnn_f32_qs8_vcvt_ukernel__wasmsimd_magic_u8, 8, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
-XNN_UKERNEL(0, xnn_f32_qs8_vcvt_ukernel__wasmsimd_magic_u16, 16, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
-XNN_UKERNEL(0, xnn_f32_qs8_vcvt_ukernel__wasmsimd_magic_u24, 24, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
-XNN_UKERNEL(0, xnn_f32_qs8_vcvt_ukernel__wasmsimd_magic_u32, 32, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_qs8_vcvt_ukernel__wasmsimd_cvt_u8, 8, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_qs8_vcvt_ukernel__wasmsimd_cvt_u16, 16, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_qs8_vcvt_ukernel__wasmsimd_cvt_u24, 24, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_qs8_vcvt_ukernel__wasmsimd_cvt_u32, 32, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_qs8_vcvt_ukernel__wasmsimd_magic_u8, 8, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_qs8_vcvt_ukernel__wasmsimd_magic_u16, 16, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_qs8_vcvt_ukernel__wasmsimd_magic_u24, 24, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_qs8_vcvt_ukernel__wasmsimd_magic_u32, 32, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
@@ -72,18 +72,18 @@ XNN_UKERNEL(xnn_arch_hvx, xnn_f32_qs8_vcvt_ukernel__hvx_u128, 128, false, float,
 XNN_UKERNEL(xnn_arch_hvx, xnn_f32_qs8_vcvt_ukernel__hvx_u256, 256, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
 #endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 
-XNN_UKERNEL(0, xnn_f32_qs8_vcvt_ukernel__scalar_fmagic_u1, 1, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
-XNN_UKERNEL(0, xnn_f32_qs8_vcvt_ukernel__scalar_fmagic_u2, 2, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
-XNN_UKERNEL(0, xnn_f32_qs8_vcvt_ukernel__scalar_fmagic_u3, 3, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
-XNN_UKERNEL(0, xnn_f32_qs8_vcvt_ukernel__scalar_fmagic_u4, 4, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
-XNN_UKERNEL(0, xnn_f32_qs8_vcvt_ukernel__scalar_imagic_u1, 1, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
-XNN_UKERNEL(0, xnn_f32_qs8_vcvt_ukernel__scalar_imagic_u2, 2, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
-XNN_UKERNEL(0, xnn_f32_qs8_vcvt_ukernel__scalar_imagic_u3, 3, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
-XNN_UKERNEL(0, xnn_f32_qs8_vcvt_ukernel__scalar_imagic_u4, 4, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
-XNN_UKERNEL(0, xnn_f32_qs8_vcvt_ukernel__scalar_lrintf_u1, 1, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
-XNN_UKERNEL(0, xnn_f32_qs8_vcvt_ukernel__scalar_lrintf_u2, 2, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
-XNN_UKERNEL(0, xnn_f32_qs8_vcvt_ukernel__scalar_lrintf_u3, 3, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
-XNN_UKERNEL(0, xnn_f32_qs8_vcvt_ukernel__scalar_lrintf_u4, 4, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_qs8_vcvt_ukernel__scalar_fmagic_u1, 1, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_qs8_vcvt_ukernel__scalar_fmagic_u2, 2, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_qs8_vcvt_ukernel__scalar_fmagic_u3, 3, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_qs8_vcvt_ukernel__scalar_fmagic_u4, 4, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_qs8_vcvt_ukernel__scalar_imagic_u1, 1, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_qs8_vcvt_ukernel__scalar_imagic_u2, 2, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_qs8_vcvt_ukernel__scalar_imagic_u3, 3, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_qs8_vcvt_ukernel__scalar_imagic_u4, 4, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_qs8_vcvt_ukernel__scalar_lrintf_u1, 1, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_qs8_vcvt_ukernel__scalar_lrintf_u2, 2, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_qs8_vcvt_ukernel__scalar_lrintf_u3, 3, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_qs8_vcvt_ukernel__scalar_lrintf_u4, 4, false, float, XNN_QUANTIZED(int8_t), struct xnn_f32_qs8_cvt_params, xnn_init_f32_qs8_cvt_scalar_params)
 
 
 #ifdef XNN_DEFINED_QUANTIZED

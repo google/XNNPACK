@@ -8,11 +8,11 @@ XNN_PAD_UKERNEL(xnn_arch_arm_neon, xnn_xx_pad_ukernel_p16__neon_u16, 16)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_PAD_UKERNEL(0, xnn_xx_pad_ukernel_p16__sse2_u16, 16)
+XNN_PAD_UKERNEL(xnn_arch_none, xnn_xx_pad_ukernel_p16__sse2_u16, 16)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-XNN_PAD_UKERNEL(0, xnn_xx_pad_ukernel_p16__wasmsimd_u16, 16)
+XNN_PAD_UKERNEL(xnn_arch_none, xnn_xx_pad_ukernel_p16__wasmsimd_u16, 16)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-XNN_PAD_UKERNEL(0, xnn_xx_pad_ukernel_p4__scalar_u16, 4)
+XNN_PAD_UKERNEL(xnn_arch_none, xnn_xx_pad_ukernel_p4__scalar_u16, 4)

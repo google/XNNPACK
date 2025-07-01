@@ -32,8 +32,8 @@ XNN_UKERNEL(xnn_arch_x86_avx512skx, xnn_f16_rmax_ukernel__avx512skx_u64_acc4, 64
 XNN_UKERNEL(xnn_arch_x86_f16c, xnn_f16_rmax_ukernel__f16c_u32, 32, false, xnn_float16, xnn_float16, struct xnn_f16_default_params, ((struct xnn_init_f16_default_params_fn) NULL))
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-XNN_UKERNEL(0, xnn_f16_rmax_ukernel__scalar_u1, 1, false, xnn_float16, xnn_float16, struct xnn_f16_default_params, ((struct xnn_init_f16_default_params_fn) NULL))
-XNN_UKERNEL(0, xnn_f16_rmax_ukernel__scalar_u2_acc2, 2, false, xnn_float16, xnn_float16, struct xnn_f16_default_params, ((struct xnn_init_f16_default_params_fn) NULL))
-XNN_UKERNEL(0, xnn_f16_rmax_ukernel__scalar_u3_acc3, 3, false, xnn_float16, xnn_float16, struct xnn_f16_default_params, ((struct xnn_init_f16_default_params_fn) NULL))
-XNN_UKERNEL(0, xnn_f16_rmax_ukernel__scalar_u4_acc2, 4, false, xnn_float16, xnn_float16, struct xnn_f16_default_params, ((struct xnn_init_f16_default_params_fn) NULL))
-XNN_UKERNEL(0, xnn_f16_rmax_ukernel__scalar_u4_acc4, 4, false, xnn_float16, xnn_float16, struct xnn_f16_default_params, ((struct xnn_init_f16_default_params_fn) NULL))
+XNN_UKERNEL(xnn_arch_none, xnn_f16_rmax_ukernel__scalar_u1, 1, false, xnn_float16, xnn_float16, struct xnn_f16_default_params, ((struct xnn_init_f16_default_params_fn) NULL))
+XNN_UKERNEL(xnn_arch_none, xnn_f16_rmax_ukernel__scalar_u2_acc2, 2, false, xnn_float16, xnn_float16, struct xnn_f16_default_params, ((struct xnn_init_f16_default_params_fn) NULL))
+XNN_UKERNEL(xnn_arch_none, xnn_f16_rmax_ukernel__scalar_u3_acc3, 3, false, xnn_float16, xnn_float16, struct xnn_f16_default_params, ((struct xnn_init_f16_default_params_fn) NULL))
+XNN_UKERNEL(xnn_arch_none, xnn_f16_rmax_ukernel__scalar_u4_acc2, 4, false, xnn_float16, xnn_float16, struct xnn_f16_default_params, ((struct xnn_init_f16_default_params_fn) NULL))
+XNN_UKERNEL(xnn_arch_none, xnn_f16_rmax_ukernel__scalar_u4_acc4, 4, false, xnn_float16, xnn_float16, struct xnn_f16_default_params, ((struct xnn_init_f16_default_params_fn) NULL))

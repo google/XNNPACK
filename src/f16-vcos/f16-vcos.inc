@@ -7,10 +7,10 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
 
-XNN_UKERNEL(0, xnn_f16_vcos_ukernel__scalar_rational_3_2_div_u1, 1, false, xnn_float16, struct xnn_f16_default_params, NULL)
-XNN_UKERNEL(0, xnn_f16_vcos_ukernel__scalar_rational_3_2_div_u2, 2, false, xnn_float16, struct xnn_f16_default_params, NULL)
-XNN_UKERNEL(0, xnn_f16_vcos_ukernel__scalar_rational_3_2_div_u4, 4, false, xnn_float16, struct xnn_f16_default_params, NULL)
-XNN_UKERNEL(0, xnn_f16_vcos_ukernel__scalar_rational_3_2_div_u8, 8, false, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_f16_vcos_ukernel__scalar_rational_3_2_div_u1, 1, false, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_f16_vcos_ukernel__scalar_rational_3_2_div_u2, 2, false, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_f16_vcos_ukernel__scalar_rational_3_2_div_u4, 4, false, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_f16_vcos_ukernel__scalar_rational_3_2_div_u8, 8, false, xnn_float16, struct xnn_f16_default_params, NULL)
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 XNN_UKERNEL(xnn_arch_arm_neon_fp16_arith, xnn_f16_vcos_ukernel__neonfp16arith_rational_3_2_div_u8, 8, false, xnn_float16, struct xnn_f16_default_params, NULL)

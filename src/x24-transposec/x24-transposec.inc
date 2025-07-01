@@ -5,14 +5,14 @@
 
 // clang-format off
 
-XNN_TRANSPOSE_UKERNEL(0, xnn_x24_transposec_ukernel__1x2_scalar, 24, void, 1, 2)
-XNN_TRANSPOSE_UKERNEL(0, xnn_x24_transposec_ukernel__1x4_scalar, 24, void, 1, 4)
-XNN_TRANSPOSE_UKERNEL(0, xnn_x24_transposec_ukernel__2x1_scalar, 24, void, 2, 1)
-XNN_TRANSPOSE_UKERNEL(0, xnn_x24_transposec_ukernel__2x2_scalar, 24, void, 2, 2)
-XNN_TRANSPOSE_UKERNEL(0, xnn_x24_transposec_ukernel__2x4_scalar, 24, void, 2, 4)
-XNN_TRANSPOSE_UKERNEL(0, xnn_x24_transposec_ukernel__4x1_scalar, 24, void, 4, 1)
-XNN_TRANSPOSE_UKERNEL(0, xnn_x24_transposec_ukernel__4x2_scalar, 24, void, 4, 2)
-XNN_TRANSPOSE_UKERNEL(0, xnn_x24_transposec_ukernel__4x4_scalar, 24, void, 4, 4)
+XNN_TRANSPOSE_UKERNEL(xnn_arch_none, xnn_x24_transposec_ukernel__1x2_scalar, 24, void, 1, 2)
+XNN_TRANSPOSE_UKERNEL(xnn_arch_none, xnn_x24_transposec_ukernel__1x4_scalar, 24, void, 1, 4)
+XNN_TRANSPOSE_UKERNEL(xnn_arch_none, xnn_x24_transposec_ukernel__2x1_scalar, 24, void, 2, 1)
+XNN_TRANSPOSE_UKERNEL(xnn_arch_none, xnn_x24_transposec_ukernel__2x2_scalar, 24, void, 2, 2)
+XNN_TRANSPOSE_UKERNEL(xnn_arch_none, xnn_x24_transposec_ukernel__2x4_scalar, 24, void, 2, 4)
+XNN_TRANSPOSE_UKERNEL(xnn_arch_none, xnn_x24_transposec_ukernel__4x1_scalar, 24, void, 4, 1)
+XNN_TRANSPOSE_UKERNEL(xnn_arch_none, xnn_x24_transposec_ukernel__4x2_scalar, 24, void, 4, 2)
+XNN_TRANSPOSE_UKERNEL(xnn_arch_none, xnn_x24_transposec_ukernel__4x4_scalar, 24, void, 4, 4)
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 XNN_TRANSPOSE_UKERNEL(xnn_arch_x86_ssse3, xnn_x24_transposec_ukernel__4x4_ssse3, 24, void, 4, 4)

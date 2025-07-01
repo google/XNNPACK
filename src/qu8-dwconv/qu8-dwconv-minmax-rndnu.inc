@@ -23,7 +23,7 @@ XNN_UKERNEL(xnn_arch_arm_neon, xnn_qu8_dwconv_minmax_rndnu_ukernel_25p32c__neon_
 XNN_UKERNEL(xnn_arch_arm_neon, xnn_qu8_dwconv_minmax_rndnu_ukernel_25p32c__neon_mul16, 32, false, 32, 25, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_rndnu_neon_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-XNN_UKERNEL(0, xnn_qu8_dwconv_minmax_rndnu_ukernel_9p1c__scalar, 1, false, 1, 9, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_rndnu_scalar_params)
-XNN_UKERNEL(0, xnn_qu8_dwconv_minmax_rndnu_ukernel_9p2c__scalar, 2, false, 2, 9, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_rndnu_scalar_params)
-XNN_UKERNEL(0, xnn_qu8_dwconv_minmax_rndnu_ukernel_9p4c__scalar, 4, false, 4, 9, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_rndnu_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_qu8_dwconv_minmax_rndnu_ukernel_9p1c__scalar, 1, false, 1, 9, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_rndnu_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_qu8_dwconv_minmax_rndnu_ukernel_9p2c__scalar, 2, false, 2, 9, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_rndnu_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_qu8_dwconv_minmax_rndnu_ukernel_9p4c__scalar, 4, false, 4, 9, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_rndnu_scalar_params)
 

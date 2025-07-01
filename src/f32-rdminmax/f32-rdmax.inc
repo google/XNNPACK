@@ -10,7 +10,7 @@ XNN_UKERNEL(xnn_arch_arm_neon, xnn_f32_rdmax_ukernel_2p2x__neon_c32, 2, 32, fals
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_UKERNEL(0, xnn_f32_rdmax_ukernel_2p2x__sse2_c32, 2, 32, false, float, float, void*, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_rdmax_ukernel_2p2x__sse2_c32, 2, 32, false, float, float, void*, NULL)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_rdmax_ukernel_2p2x__avx_c32, 2, 32, false, float, float, void*, NULL)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -19,11 +19,11 @@ XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f32_rdmax_ukernel_2p2x__avx512f_c32, 2, 32
 #endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-XNN_UKERNEL(0, xnn_f32_rdmax_ukernel_2p2x__wasmsimd_c32, 2, 32, false, float, float, void*, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_rdmax_ukernel_2p2x__wasmsimd_c32, 2, 32, false, float, float, void*, NULL)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 XNN_UKERNEL(xnn_arch_hvx, xnn_f32_rdmax_ukernel_2p2x__hvx_c32, 2, 32, false, float, float, void*, NULL)
 #endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 
-XNN_UKERNEL(0, xnn_f32_rdmax_ukernel_2p2x__scalar_c2, 2, 2, false, float, float, void*, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_rdmax_ukernel_2p2x__scalar_c2, 2, 2, false, float, float, void*, NULL)

@@ -11,13 +11,13 @@ XNN_UKERNEL(xnn_arch_arm_neon, xnn_u8_maxpool_minmax_ukernel_9p__neon_u16, 16, 9
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_UKERNEL(0, xnn_u8_maxpool_minmax_ukernel_9p__sse2_u16, 16, 9, uint8_t, struct xnn_u8_minmax_params, xnn_init_u8_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_u8_maxpool_minmax_ukernel_9p__sse2_u16, 16, 9, uint8_t, struct xnn_u8_minmax_params, xnn_init_u8_minmax_scalar_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-XNN_UKERNEL(0, xnn_u8_maxpool_minmax_ukernel_9p__wasmsimd_u16, 16, 9, uint8_t, struct xnn_u8_minmax_params, xnn_init_u8_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_u8_maxpool_minmax_ukernel_9p__wasmsimd_u16, 16, 9, uint8_t, struct xnn_u8_minmax_params, xnn_init_u8_minmax_scalar_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-XNN_UKERNEL(0, xnn_u8_maxpool_minmax_ukernel_9p__scalar_u1, 1, 9, uint8_t, struct xnn_u8_minmax_params, xnn_init_u8_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_u8_maxpool_minmax_ukernel_9p__scalar_u1, 1, 9, uint8_t, struct xnn_u8_minmax_params, xnn_init_u8_minmax_scalar_params)
 
 

@@ -6,10 +6,10 @@
 
 // arch_flags, ukernel, nr, kr, sr, kblock, nr_scale
 
-XNN_UKERNEL(0, xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_u4, 8, 1, 1, 4, 1)
-XNN_UKERNEL(0, xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_u4, 16, 1, 1, 4, 1)
-XNN_UKERNEL(0, xnn_x16_packw_gemm_goi_ukernel_x32__scalar_int_u4, 32, 1, 1, 4, 1)
-XNN_UKERNEL(0, xnn_x16_packw_gemm_goi_ukernel_x64__scalar_int_u4, 64, 1, 1, 4, 1)
+XNN_UKERNEL(xnn_arch_none, xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_u4, 8, 1, 1, 4, 1)
+XNN_UKERNEL(xnn_arch_none, xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_u4, 16, 1, 1, 4, 1)
+XNN_UKERNEL(xnn_arch_none, xnn_x16_packw_gemm_goi_ukernel_x32__scalar_int_u4, 32, 1, 1, 4, 1)
+XNN_UKERNEL(xnn_arch_none, xnn_x16_packw_gemm_goi_ukernel_x64__scalar_int_u4, 64, 1, 1, 4, 1)
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 XNN_UKERNEL(xnn_arch_arm_neon, xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u4, 8, 1, 1, 4, 1)

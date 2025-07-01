@@ -6,7 +6,7 @@
 
 // arch_flags, ukernel, unroll
 
-XNN_UKERNEL(0, xnn_x8_packq_f32qp8_ukernel__scalar_u1, 1)
+XNN_UKERNEL(xnn_arch_none, xnn_x8_packq_f32qp8_ukernel__scalar_u1, 1)
 
 #if XNN_ENABLE_KLEIDIAI
 XNN_UKERNEL(xnn_arch_arm_neon, xnn_x8_packq_f32qp8_ukernel__aarch64_neon_u2, 2)

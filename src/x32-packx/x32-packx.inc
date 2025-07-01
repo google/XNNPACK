@@ -18,15 +18,15 @@ XNN_UKERNEL(xnn_arch_arm_neon, xnn_x32_packx_ukernel_8x__neon_st4_x8_prfm, 8, 8)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_UKERNEL(0, xnn_x32_packx_ukernel_4x__sse, 4, 4)
+XNN_UKERNEL(xnn_arch_none, xnn_x32_packx_ukernel_4x__sse, 4, 4)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-XNN_UKERNEL(0, xnn_x32_packx_ukernel_4x__wasmsimd, 4, 4)
+XNN_UKERNEL(xnn_arch_none, xnn_x32_packx_ukernel_4x__wasmsimd, 4, 4)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-XNN_UKERNEL(0, xnn_x32_packx_ukernel_2x__scalar, 1, 2)
-XNN_UKERNEL(0, xnn_x32_packx_ukernel_3x__scalar, 1, 3)
-XNN_UKERNEL(0, xnn_x32_packx_ukernel_4x__scalar, 1, 4)
+XNN_UKERNEL(xnn_arch_none, xnn_x32_packx_ukernel_2x__scalar, 1, 2)
+XNN_UKERNEL(xnn_arch_none, xnn_x32_packx_ukernel_3x__scalar, 1, 3)
+XNN_UKERNEL(xnn_arch_none, xnn_x32_packx_ukernel_4x__scalar, 1, 4)
 
 

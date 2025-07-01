@@ -4,7 +4,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-XNN_UKERNEL(0, xnn_qu8_rdsum_ukernel_7p7x__scalar_c4, 7, 4, false, uint8_t, uint32_t, struct xnn_qs8_rsum_params, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_qu8_rdsum_ukernel_7p7x__scalar_c4, 7, 4, false, uint8_t, uint32_t, struct xnn_qs8_rsum_params, NULL)
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 XNN_UKERNEL(xnn_arch_arm_neon, xnn_qu8_rdsum_ukernel_7p7x__neon_u16, 7, 16, false, uint8_t, uint32_t, struct xnn_qs8_rsum_params, NULL)
@@ -19,9 +19,9 @@ XNN_UKERNEL(xnn_arch_x86_ssse3, xnn_qu8_rdsum_ukernel_7p7x__ssse3_c64, 7, 64, fa
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-XNN_UKERNEL(0, xnn_qu8_rdsum_ukernel_7p7x__wasmsimd_c16, 7, 16, false, uint8_t, uint32_t, struct xnn_qs8_rsum_params, NULL)
-XNN_UKERNEL(0, xnn_qu8_rdsum_ukernel_7p7x__wasmsimd_c32, 7, 32, false, uint8_t, uint32_t, struct xnn_qs8_rsum_params, NULL)
-XNN_UKERNEL(0, xnn_qu8_rdsum_ukernel_7p7x__wasmsimd_c64, 7, 64, false, uint8_t, uint32_t, struct xnn_qs8_rsum_params, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_qu8_rdsum_ukernel_7p7x__wasmsimd_c16, 7, 16, false, uint8_t, uint32_t, struct xnn_qs8_rsum_params, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_qu8_rdsum_ukernel_7p7x__wasmsimd_c32, 7, 32, false, uint8_t, uint32_t, struct xnn_qs8_rsum_params, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_qu8_rdsum_ukernel_7p7x__wasmsimd_c64, 7, 64, false, uint8_t, uint32_t, struct xnn_qs8_rsum_params, NULL)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)

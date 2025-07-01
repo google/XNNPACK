@@ -6,9 +6,9 @@
 // clang-format off
 
 // arch_flags, ukernel, nr, kr, sr, kblock, nr_scale
-XNN_UKERNEL(0, xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__scalar, 8, 8, 1, 16, 1)
-XNN_UKERNEL(0, xnn_qs8_qc4w_packw_gemm_goi_ukernel_x16c8__scalar, 16, 8, 1, 16, 1)
-XNN_UKERNEL(0, xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar, 32, 8, 1, 16, 1)
+XNN_UKERNEL(xnn_arch_none, xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__scalar, 8, 8, 1, 16, 1)
+XNN_UKERNEL(xnn_arch_none, xnn_qs8_qc4w_packw_gemm_goi_ukernel_x16c8__scalar, 16, 8, 1, 16, 1)
+XNN_UKERNEL(xnn_arch_none, xnn_qs8_qc4w_packw_gemm_goi_ukernel_x32c8__scalar, 32, 8, 1, 16, 1)
 
 #if XNN_ENABLE_AVXVNNI && (XNN_ARCH_X86_64 || XNN_ARCH_X86)
 XNN_UKERNEL(xnn_arch_x86_avxvnni, xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avxvnni, 8, 8, 1, 16, 1)

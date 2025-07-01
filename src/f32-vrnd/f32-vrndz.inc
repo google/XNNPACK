@@ -20,8 +20,8 @@ XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vrndz_ukernel__rvv_u8v, 8, true, floa
 #endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_UKERNEL(0, xnn_f32_vrndz_ukernel__sse2_u4, 4, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL(0, xnn_f32_vrndz_ukernel__sse2_u8, 8, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_vrndz_ukernel__sse2_u4, 4, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_vrndz_ukernel__sse2_u8, 8, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_f32_vrndz_ukernel__sse41_u4, 4, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_f32_vrndz_ukernel__sse41_u8, 8, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_vrndz_ukernel__avx_u8, 8, false, float, struct xnn_f32_default_params, NULL)
@@ -34,16 +34,16 @@ XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f32_vrndz_ukernel__avx512f_u32, 32, false,
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-XNN_UKERNEL(0, xnn_f32_vrndz_ukernel__wasmsimd_u4, 4, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL(0, xnn_f32_vrndz_ukernel__wasmsimd_u8, 8, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_vrndz_ukernel__wasmsimd_u4, 4, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_vrndz_ukernel__wasmsimd_u8, 8, false, float, struct xnn_f32_default_params, NULL)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
-XNN_UKERNEL(0, xnn_f32_vrndz_ukernel__hvx_u32, 32, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL(0, xnn_f32_vrndz_ukernel__hvx_u64, 64, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL(0, xnn_f32_vrndz_ukernel__hvx_u128, 128, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_vrndz_ukernel__hvx_u32, 32, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_vrndz_ukernel__hvx_u64, 64, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_vrndz_ukernel__hvx_u128, 128, false, float, struct xnn_f32_default_params, NULL)
 #endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
 
-XNN_UKERNEL(0, xnn_f32_vrndz_ukernel__scalar_libm_u1, 1, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL(0, xnn_f32_vrndz_ukernel__scalar_libm_u2, 2, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL(0, xnn_f32_vrndz_ukernel__scalar_libm_u4, 4, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_vrndz_ukernel__scalar_libm_u1, 1, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_vrndz_ukernel__scalar_libm_u2, 2, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_none, xnn_f32_vrndz_ukernel__scalar_libm_u4, 4, false, float, struct xnn_f32_default_params, NULL)
