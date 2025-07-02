@@ -123,3 +123,4 @@ http_archive(
     urls = [
         "https://github.com/google/ruy/archive/9f53ba413e6fc879236dcaa3e008915973d67a4f.zip",
     ],
+)
