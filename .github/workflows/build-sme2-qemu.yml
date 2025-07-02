@@ -1,0 +1,113 @@
+name: Build and Run Tests with `qemu` and `sme2`
+
+on:
+  workflow_dispatch:
+    inputs:
+      run-tests:
+        description: 'Whether to also run unit tests where possible.'
+        default: true
+        required: false
+        type: boolean
+      update-caches:
+        description: 'Whether to update the `ccache` or `bazel` caches, where possible.'
+        default: true
+        required: false
+        type: boolean
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}-${{ inputs.update-caches }}
+  cancel-in-progress: true
+
+jobs:
+  bazel-linux-aarch64-qemu:
+    runs-on: "ubuntu-24.04-arm"
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update apt
+        run: |
+          echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
+          sudo dpkg-reconfigure man-db
+          sudo apt update
+      - name: Install clang-20
+        working-directory: ${{ github.workspace }}
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 20
+      - name: Restore bazel cache
+        uses: actions/cache/restore@v4
+        with:
+          path: "/home/runner/.cache/bazel"
+          key: ${{ github.job }}
+          restore-keys: |
+            ${{ github.job }}-
+      - name: Check for cached qemu build
+        id: cached-qemu
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/bin/qemu-aarch64
+          key: ${{ runner.os }}-qemu-aarch64
+      - name: Download and build qemu-aarch64 (if newer)
+        env:
+          CC: clang-20
+          CXX: clang++-20
+        run: |
+          mkdir -p bin
+          wget -Snv https://gitlab.com/rth7680/qemu/-/archive/tgt-arm-sme2-afp/qemu-tgt-arm-sme2-afp.tar.bz2
+          if [ ! -f bin/qemu-aarch64 ] || [ qemu-tgt-arm-sme2-afp.tar.bz2 -nt bin/qemu-aarch64 ]; then
+            sudo apt-get install libglib2.0-dev libfdt-dev libpixman-1-dev zlib1g-dev ninja-build
+            tar xjf qemu-tgt-arm-sme2-afp.tar.bz2
+            cd qemu-tgt-arm-sme2-afp
+            ./configure --target-list=aarch64-linux-user
+            make -j $(nproc)
+            cp build/qemu-aarch64 ../bin/
+          fi
+        working-directory: ${{ github.workspace }}
+      - name: Run microkernel tests
+        if: ${{ inputs.run-tests }}
+        env:
+          CC: clang-20
+          CXX: clang++-20
+        run: |
+          bazel test \
+            --platforms=//build_config:aarch64_linux \
+            --run_under="${PWD}/bin/qemu-aarch64 " \
+            --define xnn_enable_arm_sme2=true \
+            //test:qs8_qc8w_igemm_minmax_fp32_test \
+            //test:qp8_f32_qc4w_gemm_minmax_test \
+            //test:pf32_gemm_minmax_test \
+            //test:pf16_gemm_minmax_test \
+            //test:pqs8_qc8w_gemm_minmax_test \
+            --test_filter="*NEONSME2*" \
+            --test_output=errors \
+            --test_sharding_strategy=disabled \
+            --local_test_jobs=$(nproc)
+        working-directory: ${{ github.workspace }}
+      - name: Run subgraph tests
+        if: ${{ inputs.run-tests }}
+        env:
+          CC: clang-20
+          CXX: clang++-20
+        run: |
+          bazel test \
+            --platforms=//build_config:aarch64_linux \
+            --run_under="${PWD}/bin/qemu-aarch64 " \
+            --define xnn_enable_arm_sme2=true \
+            //test/subgraph/... \
+            --test_output=errors \
+            --test_sharding_strategy=disabled \
+            --local_test_jobs=$(nproc)
+        working-directory: ${{ github.workspace }}
+      - name: Compress disk cache
+        # Bazel's `--disk-cache` currently grows without bounds, so we remove files
+        # that haven't been accessed in 7+ days manually.
+        if: ${{ inputs.update-caches }}
+        run: find $HOME/.cache/bazel -type f -atime +7 -delete
+      - name: Save bazel cache
+        if: ${{ inputs.update-caches }}
+        uses: actions/cache/save@v4
+        with:
+          path: "/home/runner/.cache/bazel"
+          key: ${{ github.job }}-${{ github.sha }}
+

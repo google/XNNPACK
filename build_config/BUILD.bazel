@@ -13,6 +13,16 @@ package(
     default_visibility = ["//:__subpackages__"],
 )
 
+################################### Platforms ##################################
+
+platform(
+    name = "aarch64_linux",
+    constraint_values = [
+        "@platforms//cpu:aarch64",
+        "@platforms//os:linux",
+    ],
+)
+
 ############################# Build configurations #############################
 
 config_setting(
