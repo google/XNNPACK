@@ -43,27 +43,40 @@ jobs:
           restore-keys: |
             ${{ github.job }}-
       - name: Check for cached qemu build
-        id: cached-qemu
-        uses: actions/cache@v4
+        id: cached-qemu-restore
+        uses: actions/cache/restore@v4
         with:
           path: ${{ github.workspace }}/bin/qemu-aarch64
           key: ${{ runner.os }}-qemu-aarch64
       - name: Download and build qemu-aarch64 (if newer)
+        id: build-qemu
         env:
           CC: clang-20
           CXX: clang++-20
         run: |
           mkdir -p bin
           wget -Snv https://gitlab.com/rth7680/qemu/-/archive/tgt-arm-sme2-afp/qemu-tgt-arm-sme2-afp.tar.bz2
+          ls -lh bin/qemu-aarch64 qemu-tgt-arm-sme2-afp.tar.bz2
           if [ ! -f bin/qemu-aarch64 ] || [ qemu-tgt-arm-sme2-afp.tar.bz2 -nt bin/qemu-aarch64 ]; then
+            echo
+            echo "Rebuilding qemu-arch64 from latest commit!"
+            echo
+            echo "save=true" >> "$GITHUB_OUTPUT"
             sudo apt-get install libglib2.0-dev libfdt-dev libpixman-1-dev zlib1g-dev ninja-build
             tar xjf qemu-tgt-arm-sme2-afp.tar.bz2
             cd qemu-tgt-arm-sme2-afp
             ./configure --target-list=aarch64-linux-user
             make -j $(nproc)
-            cp build/qemu-aarch64 ../bin/
+            cp -f build/qemu-aarch64 ../bin/
           fi
         working-directory: ${{ github.workspace }}
+      - name: Save cached qemu build
+        id: cached-qemu-save
+        if: ${{ steps.build-qemu.outputs.save }}
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ github.workspace }}/bin/qemu-aarch64
+          key: ${{ runner.os }}-qemu-aarch64
       - name: Run microkernel tests
         continue-on-error: true
         if: ${{ inputs.run-tests }}
