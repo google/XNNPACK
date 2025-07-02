@@ -81,8 +81,7 @@ jobs:
             //test:pf16_gemm_minmax_test \
             //test:pqs8_qc8w_gemm_minmax_test \
             --test_filter="*NEONSME2*" \
-            --test_output=errors \
-            --test_sharding_strategy=disabled \
+            --test_summary=detailed \
             --local_test_jobs=$(nproc)
         working-directory: ${{ github.workspace }}
       - name: Run subgraph tests
@@ -97,8 +96,7 @@ jobs:
             --run_under="${PWD}/bin/qemu-aarch64 " \
             --define xnn_enable_arm_sme2=true \
             //test/subgraph/... \
-            --test_output=errors \
-            --test_sharding_strategy=disabled \
+            --test_summary=detailed \
             --local_test_jobs=$(nproc)
         working-directory: ${{ github.workspace }}
       - name: Compress disk cache
