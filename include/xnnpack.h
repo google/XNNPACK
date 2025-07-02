@@ -56,9 +56,6 @@ extern "C" {
 /// Enable timing of each operator's runtime.
 #define XNN_FLAG_BASIC_PROFILING 0x00000008
 
-/// Deprecated
-#define XNN_FLAG_JIT 0x00000010
-
 /// The convolution operator represents a depthwise convolution, and use HWGo layout for filters.
 #define XNN_FLAG_DEPTHWISE_CONVOLUTION 0x00000001
 
@@ -3999,7 +3996,7 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_f16_qc4w(
 enum xnn_status xnn_reshape_fully_connected_nc_qd8_f16_qc4w(
   xnn_operator_t fully_connected_op,
   size_t batch_size,
-  size_t* workspace_size, 
+  size_t* workspace_size,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w(
@@ -4021,7 +4018,7 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w(
 enum xnn_status xnn_reshape_fully_connected_nc_qd8_f16_qb4w(
     xnn_operator_t fully_connected_op,
     size_t batch_size,
-    size_t* workspace_size, 
+    size_t* workspace_size,
     pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_fully_connected_nc_qd8_f16_qb4w(
@@ -4056,7 +4053,7 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_f32_qc4w(
 enum xnn_status xnn_reshape_fully_connected_nc_qd8_f32_qc4w(
   xnn_operator_t fully_connected_op,
   size_t batch_size,
-  size_t* workspace_size, 
+  size_t* workspace_size,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w(
@@ -4078,7 +4075,7 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w(
 enum xnn_status xnn_reshape_fully_connected_nc_qd8_f32_qb4w(
   xnn_operator_t fully_connected_op,
   size_t batch_size,
-  size_t* workspace_size, 
+  size_t* workspace_size,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_fully_connected_nc_qd8_f32_qb4w(
@@ -4112,7 +4109,7 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_f16_qc8w(
 enum xnn_status xnn_reshape_fully_connected_nc_qd8_f16_qc8w(
   xnn_operator_t fully_connected_op,
   size_t batch_size,
-  size_t* workspace_size, 
+  size_t* workspace_size,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qc8w(
@@ -4139,7 +4136,7 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_f32_qc8w(
 enum xnn_status xnn_reshape_fully_connected_nc_qd8_f32_qc8w(
   xnn_operator_t fully_connected_op,
   size_t batch_size,
-  size_t* workspace_size, 
+  size_t* workspace_size,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_create_fully_connected_nc_qs8(
