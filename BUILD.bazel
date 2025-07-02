@@ -451,7 +451,10 @@ filegroup(
     [
         xnnpack_cc_library_for_arch(
             name = arch + "_prod_microkernels",
-            srcs = prod_asm_srcs_for_arch(arch) + prod_c_srcs_for_arch(arch),
+            srcs = prod_c_srcs_for_arch(arch) + xnnpack_select_if(
+                ":assembly_enabled",
+                prod_asm_srcs_for_arch(arch),
+            ),
             arch = arch,
             # Internal build flag.
             tags = ["nobuilder"],
@@ -459,7 +462,10 @@ filegroup(
         ),
         xnnpack_cc_library_for_arch(
             name = arch + "_all_microkernels",
-            srcs = non_prod_asm_srcs_for_arch(arch) + non_prod_c_srcs_for_arch(arch),
+            srcs = non_prod_c_srcs_for_arch(arch) + xnnpack_select_if(
+                ":assembly_enabled",
+                non_prod_asm_srcs_for_arch(arch),
+            ),
             arch = arch,
             tags = ["nobuilder"],
             deps = MICROKERNEL_DEPS + [":" + arch + "_prod_microkernels"],
