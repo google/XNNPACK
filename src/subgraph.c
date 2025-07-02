@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "include/experimental.h"
 #include "include/xnnpack.h"
 #include "src/xnnpack/allocation-type.h"
 #include "src/xnnpack/allocator.h"

@@ -135,7 +135,10 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "xnnpack_h",
-    hdrs = ["include/xnnpack.h"],
+    hdrs = [
+        "include/experimental.h",
+        "include/xnnpack.h",
+    ],
     deps = [
         "@pthreadpool",
     ],
@@ -906,6 +909,7 @@ xnnpack_cc_library(
         "src/init.c",
     ],
     hdrs = [
+        "include/experimental.h",
         "include/xnnpack.h",
     ],
     copts = select({
