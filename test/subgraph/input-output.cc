@@ -17,7 +17,6 @@
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/math.h"
-#include "src/xnnpack/subgraph.h"
 #include "test/subgraph/runtime-flags.h"
 #include "test/subgraph/subgraph-tester.h"
 

@@ -9,10 +9,11 @@
 #ifndef XNNPACK_SRC_XNNPACK_ISA_CHECKS_H_
 #define XNNPACK_SRC_XNNPACK_ISA_CHECKS_H_
 
-#include <stddef.h>
+#include <algorithm>  // IWYU pragma: keep
+#include <cstddef>
 
 #include "src/xnnpack/common.h"
-#include "src/xnnpack/hardware-config.h"
+#include "src/xnnpack/hardware-config.h"  // IWYU pragma: keep
 
 inline size_t get_batch_scale(size_t element_size) {
 #if XNN_ARCH_RISCV

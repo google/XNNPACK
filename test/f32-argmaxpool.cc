@@ -8,6 +8,7 @@
 //   Specification: test/f32-argmaxpool.yaml
 //   Generator: tools/generate-argmaxpool-test.py
 
+#include <cstddef>
 
 #include <gtest/gtest.h>
 #include "src/xnnpack/argmaxpool.h"

@@ -11,9 +11,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
-#include <functional>
 #include <limits>
-#include <numeric>
 #include <random>
 #include <type_traits>
 #include <vector>

@@ -15,12 +15,10 @@
 #include <ios>
 #include <limits>
 #include <random>
-#include <vector>
 
 #include <gtest/gtest.h>
 #include "src/xnnpack/buffer.h"
-#include "src/xnnpack/common.h"
-#include "src/xnnpack/fill.h"
+#include "src/xnnpack/fill.h"  // IWYU pragma: keep
 #include "src/xnnpack/isa-checks.h"
 #include "src/xnnpack/microfnptr.h"
 #include "test/replicable_random_device.h"

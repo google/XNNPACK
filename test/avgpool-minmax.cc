@@ -13,22 +13,18 @@
 #include <cstdint>
 #include <cstdlib>
 #include <functional>
-#include <limits>
 #include <random>
 #include <string>
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "include/xnnpack.h"
-#include "src/xnnpack/avgpool.h"
+#include "src/xnnpack/avgpool.h"  // IWYU pragma: keep
 #include "src/xnnpack/buffer.h"
-#include "src/xnnpack/common.h"
 #include "src/xnnpack/isa-checks.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
-#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/microparams-init.h"  // IWYU pragma: keep
 #include "src/xnnpack/microparams.h"
-#include "src/xnnpack/requantization.h"
 #include "test/next_prime.h"
 #include "test/replicable_random_device.h"
 

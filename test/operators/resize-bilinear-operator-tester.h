@@ -16,7 +16,6 @@
 #include <memory>
 #include <numeric>
 #include <random>
-#include <vector>
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"

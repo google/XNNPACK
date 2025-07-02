@@ -8,9 +8,11 @@
 //   Specification: test/f32-raddexpminusmax.yaml
 //   Generator: tools/generate-raddexpminusmax-test.py
 
+#include <cstddef>
 
 #include <gtest/gtest.h>
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/isa-checks.h"
 #include "src/xnnpack/raddexpminusmax.h"
 #include "test/raddexpminusmax-microkernel-tester.h"

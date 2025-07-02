@@ -9,8 +9,8 @@
 //   Generator: tools/generate-vbinary-test.py
 
 
-#include "src/xnnpack/microparams-init.h"
-#include "src/xnnpack/vbinary.h"
+#include "src/xnnpack/microparams-init.h"  // IWYU pragma: keep
+#include "src/xnnpack/vbinary.h"  // IWYU pragma: keep
 #include "test/vbinary-microkernel-tester.h"
 
 #define XNN_UKERNEL(arch_flags, ukernel, batch_tile, vector_tile, datatype, params_type, init_params)                                           \

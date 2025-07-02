@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <cstddef>
-#include <cstdlib>
 #include <cstdint>
+#include <cstdlib>
 #include <limits>
 #include <numeric>
 #include <vector>
@@ -13,6 +13,7 @@
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/datatype.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/subgraph.h"
 #include "test/subgraph/runtime-tester.h"

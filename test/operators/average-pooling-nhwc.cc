@@ -8,11 +8,11 @@
 
 #include <cmath>
 #include <cstddef>
-#include <cstdint>
 #include <utility>
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
+#include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
 #include "test/operators/average-pooling-operator-tester.h"
 

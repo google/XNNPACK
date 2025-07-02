@@ -20,7 +20,6 @@
 #include <random>
 
 #include <gtest/gtest.h>
-#include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"

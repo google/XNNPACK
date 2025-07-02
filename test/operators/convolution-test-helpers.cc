@@ -8,8 +8,8 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <vector>
 
+#include "src/xnnpack/buffer.h"
 #include "src/xnnpack/microparams.h"
 
 namespace xnnpack {

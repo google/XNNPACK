@@ -4,12 +4,13 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <cstddef>
+#include <cstdint>
 #include <string>
 
 #include <gtest/gtest.h>
-#include "src/xnnpack/common.h"
 #include "src/xnnpack/isa-checks.h"
-#include "src/xnnpack/packq.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/packq.h"  // IWYU pragma: keep
 #include "test/packq-microkernel-tester.h"
 
 namespace {

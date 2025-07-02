@@ -8,18 +8,15 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <memory>
 #include <random>
-#include <vector>
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
-#include "src/xnnpack/common.h"
 #include "test/replicable_random_device.h"
 #include <pthreadpool.h>
 
