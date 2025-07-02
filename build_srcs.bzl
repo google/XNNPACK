@@ -11,32 +11,6 @@
 Lists of target-specific sources used to build XNNPACK.
 """
 
-OPERATOR_SRCS = [
-    "src/operator-delete.c",
-    "src/operator-run.c",
-    "src/operators/argmax-pooling-nhwc.c",
-    "src/operators/average-pooling-nhwc.c",
-    "src/operators/batch-matrix-multiply-nc.c",
-    "src/operators/binary-elementwise-nd.c",
-    "src/operators/constant-pad-nd.c",
-    "src/operators/convolution-nchw.c",
-    "src/operators/convolution-nhwc.c",
-    "src/operators/deconvolution-nhwc.c",
-    "src/operators/dynamic-fully-connected-nc.c",
-    "src/operators/fully-connected-nc.c",
-    "src/operators/max-pooling-nhwc.c",
-    "src/operators/pack-lh.c",
-    "src/operators/reduce-nd.c",
-    "src/operators/resize-bilinear-nchw.c",
-    "src/operators/resize-bilinear-nhwc.c",
-    "src/operators/rope-nthc.c",
-    "src/operators/slice-nd.c",
-    "src/operators/softmax-nc.c",
-    "src/operators/transpose-nd.c",
-    "src/operators/unary-elementwise-nc.c",
-    "src/operators/unpooling-nhwc.c",
-]
-
 SUBGRAPH_SRCS = [
     "src/memory-planner.c",
     "src/runtime.c",

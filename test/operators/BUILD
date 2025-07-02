@@ -20,15 +20,15 @@ OPERATOR_TEST_DEPS = [
     "//:fp16",
     "//:internal",
     "//:math",
+    "//:microkernel_hdrs",
     "//:microparams_h",
     "//:normalization",
     "//:params",
     "//:quantization",
     "//:XNNPACK",
-    "//src/configs:microkernel_configs",
     "//src/configs:config_types",
+    "//src/configs:microkernel_configs",
     "//test:replicable_random_device",
-    "//:microkernel_hdrs",
 ]
 
 xnnpack_cxx_library(
@@ -62,8 +62,8 @@ xnnpack_unit_test(
     name = "operator_utils_test",
     srcs = ["operator-utils.cc"],
     deps = [
-        "//:operator_utils",
         "//src/configs:microkernel_configs",
+        "//src/operators:operator_utils",
     ],
 )
 
@@ -72,8 +72,8 @@ xnnpack_unit_test(
     timeout = "long",
     srcs = ["unary-elementwise-nc.cc"],
     deps = OPERATOR_TEST_DEPS + [
-        "//:operator_h",
-        "//:operator_utils",
+        "//src/operators:operator_h",
+        "//src/operators:operator_utils",
         "//test:unary_ops",
     ],
 )
@@ -85,8 +85,8 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = OPERATOR_TEST_DEPS + [
         ":operator_test_utils",
-        "//:operator_utils",
         "//:reference_ukernels",
+        "//src/operators:operator_utils",
     ],
 )
 
@@ -161,7 +161,7 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = OPERATOR_TEST_DEPS + [
         ":convolution_test_helpers",
-        "//:operator_h",
+        "//src/operators:operator_h",
     ],
 )
 
@@ -175,7 +175,7 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = OPERATOR_TEST_DEPS + [
         ":convolution_test_helpers",
-        "//:operator_h",
+        "//src/operators:operator_h",
     ],
 )
 
@@ -208,7 +208,7 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = OPERATOR_TEST_DEPS + [
         ":convolution_test_helpers",
-        "//:operator_h",
+        "//src/operators:operator_h",
     ],
 )
 
