@@ -5,18 +5,41 @@
 
 #include "src/xnnpack/pack-lh.h"
 
-#include <atomic>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
 
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/quantization.h"
+
+namespace {
+
+size_t xnn_pack_lh_fx_qd8_packed_size(size_t m, size_t k, size_t mr_packed,
+                                      size_t kr, size_t sr) {
+  // Each packed row starts with the `mr` quantization params, followed by the
+  // `mr` rows of quantized data.
+  m = round_up(m, mr_packed);
+  k = round_up(k, kr * sr);
+  return m * sizeof(struct xnn_qd8_quantization_params) +
+          m * k * sizeof(int8_t);
+}
+
+size_t xnn_pack_lh_fx_qd8_packed_offset(size_t m, size_t k, size_t mr_packed,
+                                        size_t kr, size_t sr) {
+  // Each packed row starts with the `mr` quantization params, followed by the
+  // `mr` rows of quantized data.
+  m = round_up(m, mr_packed);
+  k = round_up(k, kr * sr);
+  return m * sizeof(struct xnn_qd8_quantization_params) +
+          m * k * sizeof(int8_t);
+}
 
 // Wraps a templated function that generates `xnn_qd8_quantization_params` from
 // parameters of the templated type.
@@ -84,28 +107,6 @@ static void pack_lh_fx_qd(size_t m, size_t k, size_t mr_packed, size_t kr,
   }
 }
 
-extern "C" {
-
-size_t xnn_pack_lh_fx_qd8_packed_size(size_t m, size_t k, size_t mr_packed,
-                                      size_t kr, size_t sr) {
-  // Each packed row starts with the `mr` quantization params, followed by the
-  // `mr` rows of quantized data.
-  m = round_up(m, mr_packed);
-  k = round_up(k, kr * sr);
-  return m * sizeof(struct xnn_qd8_quantization_params) +
-         m * k * sizeof(int8_t);
-}
-
-size_t xnn_pack_lh_fx_qd8_packed_offset(size_t m, size_t k, size_t mr_packed,
-                                        size_t kr, size_t sr) {
-  // Each packed row starts with the `mr` quantization params, followed by the
-  // `mr` rows of quantized data.
-  m = round_up(m, mr_packed);
-  k = round_up(k, kr * sr);
-  return m * sizeof(struct xnn_qd8_quantization_params) +
-         m * k * sizeof(int8_t);
-}
-
 void xnn_pack_lh_f32_qdint8(size_t m, size_t k, size_t mr_packed, size_t kr,
                             size_t sr, size_t m_idx_start, const void* lhs,
                             size_t lhs_stride, void* lhs_packed) {
@@ -160,6 +161,82 @@ void xnn_pack_lh_f16_qduint8(size_t m, size_t k, size_t mr_packed, size_t kr,
                 xnn_f16_qdu8_asymmetric_quantization_params>(
       m, k, mr_packed, kr, sr, m_idx_start, (const xnn_float16*)lhs, lhs_stride,
       lhs_packed, convert_ukernel, minmax_ukernel);
+}
+
+}  // namespace
+
+extern "C" {
+
+const xnn_pack_lh_config* xnn_init_f16_qdint8_pack_lh_config() {
+  const xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  if (hardware_config == nullptr) {
+    return nullptr;
+  }
+  static const xnn_pack_lh_config config = []() {
+    xnn_pack_lh_config config = {};
+    config.pack_lh_fn = (xnn_pack_lh_ukernel_fn)xnn_pack_lh_f16_qdint8;
+    config.size_fn = (xnn_pack_lh_size_fn)xnn_pack_lh_fx_qd8_packed_size;
+    config.offset_fn = (xnn_pack_lh_offset_fn)xnn_pack_lh_fx_qd8_packed_offset;
+    config.log2_input_element_size = XNN_LOG2_SIZEOF_HALF;
+    config.log2_packed_element_size = 0;
+    return config;
+  }();
+  return &config;
+}
+
+const xnn_pack_lh_config* xnn_init_f16_qduint8_pack_lh_config() {
+  const xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  if (hardware_config == nullptr) {
+    return nullptr;
+  }
+  static const xnn_pack_lh_config config = []() {
+    xnn_pack_lh_config config = {};
+    config.pack_lh_fn = (xnn_pack_lh_ukernel_fn)xnn_pack_lh_f16_qduint8;
+    config.size_fn = (xnn_pack_lh_size_fn)xnn_pack_lh_fx_qd8_packed_size;
+    config.offset_fn = (xnn_pack_lh_offset_fn)xnn_pack_lh_fx_qd8_packed_offset;
+    config.log2_input_element_size = XNN_LOG2_SIZEOF_HALF;
+    config.log2_packed_element_size = 0;
+    return config;
+  }();
+  return &config;
+}
+
+const xnn_pack_lh_config* xnn_init_f32_qdint8_pack_lh_config() {
+  const xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  if (hardware_config == nullptr) {
+    return nullptr;
+  }
+  static const xnn_pack_lh_config config = []() {
+    xnn_pack_lh_config config = {};
+    config.pack_lh_fn = (xnn_pack_lh_ukernel_fn)xnn_pack_lh_f32_qdint8;
+    config.size_fn = (xnn_pack_lh_size_fn)xnn_pack_lh_fx_qd8_packed_size;
+    config.offset_fn = (xnn_pack_lh_offset_fn)xnn_pack_lh_fx_qd8_packed_offset;
+    config.log2_input_element_size = XNN_LOG2_SIZEOF_FLOAT;
+    config.log2_packed_element_size = 0;
+    return config;
+  }();
+  return &config;
+}
+
+const xnn_pack_lh_config* xnn_init_f32_qduint8_pack_lh_config() {
+  const xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  if (hardware_config == nullptr) {
+    return nullptr;
+  }
+  static const xnn_pack_lh_config config = []() {
+    xnn_pack_lh_config config = {};
+    config.pack_lh_fn = (xnn_pack_lh_ukernel_fn)xnn_pack_lh_f32_qduint8;
+    config.size_fn = (xnn_pack_lh_size_fn)xnn_pack_lh_fx_qd8_packed_size;
+    config.offset_fn = (xnn_pack_lh_offset_fn)xnn_pack_lh_fx_qd8_packed_offset;
+    config.log2_input_element_size = XNN_LOG2_SIZEOF_FLOAT;
+    config.log2_packed_element_size = 0;
+    return config;
+  }();
+  return &config;
 }
 
 }  // extern "C"

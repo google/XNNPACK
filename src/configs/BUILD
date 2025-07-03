@@ -63,371 +63,50 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
-    name = "dwconv2d_chw_config",
-    srcs = ["dwconv2d-chw-config.c"],
-    deps = [
-        ":config_hdrs",
-        ":hardware_config",
-        "//:common",
-        "//:init_once",
-        "//:logging",
-        "//:microfnptr_h",
-        "//:microkernel_hdrs",
-        "//:microparams_init",
+    name = "microkernel_configs",
+    srcs = [
+        "argmaxpool-config.c",
+        "avgpool-config.c",
+        "binary-elementwise-config.c",
+        "cmul-config.c",
+        "conv-hwc2chw-config.c",
+        "dwconv-config.c",
+        "dwconv2d-chw-config.c",
+        "gemm-config.c",
+        "ibilinear-chw-config.c",
+        "ibilinear-config.c",
+        "lut32norm-config.c",
+        "maxpool-config.c",
+        "pack-lh-config.c",
+        "raddstoreexpminusmax-config.c",
+        "reduce-config.c",
+        "spmm-config.c",
+        "transpose-config.c",
+        "unary-elementwise-config.c",
+        "unpool-config.c",
+        "vmulcaddc-config.c",
+        "x8-lut-config.c",
+        "xx-fill-config.c",
+        "xx-pad-config.c",
     ],
-)
-
-xnnpack_cc_library(
-    name = "unary_elementwise_config",
-    srcs = ["unary-elementwise-config.c"],
-    deps = [
-        ":config_hdrs",
-        ":hardware_config",
-        "//:common",
-        "//:init_once",
-        "//:logging",
-        "//:microfnptr_h",
-        "//:microkernel_hdrs",
-        "//:microparams_init",
-        "//:xnnpack_h",
+    hdrs = [
+        "//:src/xnnpack/config.h",
     ],
-)
-
-xnnpack_cc_library(
-    name = "unpool_config",
-    srcs = ["unpool-config.c"],
-    deps = [
-        ":config_hdrs",
-        ":hardware_config",
-        "//:common",
-        "//:init_once",
-        "//:logging",
-        "//:microfnptr_h",
-        "//:microkernel_hdrs",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "avgpool_config",
-    srcs = ["avgpool-config.c"],
-    deps = [
-        ":config_hdrs",
-        ":hardware_config",
-        "//:common",
-        "//:init_once",
-        "//:logging",
-        "//:microfnptr_h",
-        "//:microkernel_hdrs",
-        "//:microparams_init",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "x8_lut_config",
-    srcs = ["x8-lut-config.c"],
-    deps = [
-        ":config_hdrs",
-        "//:common",
-        "//:init_once",
-        "//:microkernel_hdrs",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "conv_hwc2chw_config",
-    srcs = ["conv-hwc2chw-config.c"],
-    deps = [
-        ":config_hdrs",
-        ":hardware_config",
-        "//:common",
-        "//:init_once",
-        "//:logging",
-        "//:microfnptr_h",
-        "//:microkernel_hdrs",
-        "//:microparams_init",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "binary_elementwise_config",
-    srcs = ["binary-elementwise-config.c"],
-    deps = [
-        ":config_hdrs",
-        ":hardware_config",
-        "//:common",
-        "//:init_once",
-        "//:logging",
-        "//:microfnptr_h",
-        "//:microkernel_hdrs",
-        "//:microparams_init",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "maxpool_config",
-    srcs = ["maxpool-config.c"],
-    deps = [
-        ":config_hdrs",
-        ":hardware_config",
-        "//:common",
-        "//:init_once",
-        "//:logging",
-        "//:microfnptr_h",
-        "//:microkernel_hdrs",
-        "//:microparams_init",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "argmaxpool_config",
-    srcs = ["argmaxpool-config.c"],
-    deps = [
-        ":config_hdrs",
-        ":hardware_config",
-        "//:common",
-        "//:init_once",
-        "//:logging",
-        "//:microfnptr_h",
-        "//:microkernel_hdrs",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "vmulcaddc_config",
-    srcs = ["vmulcaddc-config.c"],
-    deps = [
-        ":config_hdrs",
-        ":hardware_config",
-        "//:common",
-        "//:init_once",
-        "//:logging",
-        "//:microfnptr_h",
-        "//:microkernel_hdrs",
-        "//:microparams_init",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "transpose_config",
-    srcs = ["transpose-config.c"],
-    deps = [
-        ":config_hdrs",
-        ":hardware_config",
-        "//:common",
-        "//:init_once",
-        "//:logging",
-        "//:microfnptr_h",
-        "//:microkernel_hdrs",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "spmm_config",
-    srcs = ["spmm-config.c"],
-    deps = [
-        ":config_hdrs",
-        ":hardware_config",
-        "//:common",
-        "//:init_once",
-        "//:logging",
-        "//:microfnptr_h",
-        "//:microkernel_hdrs",
-        "//:microparams_init",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "ibilinear_config",
-    srcs = ["ibilinear-config.c"],
     deps = [
         ":config_hdrs",
         ":hardware_config",
         "//:common",
         "//:indirection",
-        "//:init_once",
-        "//:logging",
-        "//:microfnptr_h",
-        "//:microkernel_hdrs",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "ibilinear_chw_config",
-    srcs = ["ibilinear-chw-config.c"],
-    deps = [
-        ":config_hdrs",
-        ":hardware_config",
-        "//:common",
-        "//:indirection",
-        "//:init_once",
-        "//:logging",
-        "//:microfnptr_h",
-        "//:microkernel_hdrs",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "reduce_config",
-    srcs = ["reduce-config.c"],
-    deps = [
-        ":config_hdrs",
-        ":hardware_config",
-        "//:common",
-        "//:init_once",
-        "//:logging",
-        "//:microfnptr_h",
-        "//:microkernel_hdrs",
-        "//:microparams_init",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "dwconv_config",
-    srcs = ["dwconv-config.c"],
-    deps = [
-        ":config_hdrs",
-        ":hardware_config",
-        "//:common",
-        "//:init_once",
-        "//:logging",
-        "//:microfnptr_h",
-        "//:microkernel_hdrs",
-        "//:microparams_init",
-    ] + xnnpack_select_if(
-        "//:cpuinfo_enabled",
-        ["@cpuinfo"],
-    ),
-)
-
-xnnpack_cc_library(
-    name = "gemm_config",
-    srcs = ["gemm-config.c"],
-    deps = [
-        ":config_hdrs",
-        ":hardware_config",
-        "//:common",
         "//:init_once",
         "//:logging",
         "//:microfnptr_h",
         "//:microkernel_hdrs",
         "//:microparams_init",
         "//:packing",
+        "//:prod_microkernels",
         "//:xnnpack_h",
     ] + xnnpack_select_if(
         "//:cpuinfo_enabled",
         ["@cpuinfo"],
     ),
-)
-
-xnnpack_cc_library(
-    name = "pack_lh_config",
-    srcs = ["pack-lh-config.c"],
-    deps = [
-        ":config_hdrs",
-        ":hardware_config",
-        "//:common",
-        "//:init_once",
-        "//:microfnptr_h",
-        "//:microkernel_hdrs",
-        "//:pack_lh",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "cmul_config",
-    srcs = ["cmul-config.c"],
-    deps = [
-        ":config_hdrs",
-        ":hardware_config",
-        "//:common",
-        "//:init_once",
-        "//:logging",
-        "//:microfnptr_h",
-        "//:microkernel_hdrs",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "raddstoreexpminusmax_config",
-    srcs = ["raddstoreexpminusmax-config.c"],
-    deps = [
-        ":config_hdrs",
-        ":hardware_config",
-        "//:common",
-        "//:init_once",
-        "//:logging",
-        "//:microfnptr_h",
-        "//:microkernel_hdrs",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "lut32norm_config",
-    srcs = ["lut32norm-config.c"],
-    deps = [
-        ":config_hdrs",
-        "//:common",
-        "//:init_once",
-        "//:microkernel_hdrs",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "xx_pad_config",
-    srcs = ["xx-pad-config.c"],
-    deps = [
-        ":config_hdrs",
-        "//:common",
-        "//:init_once",
-        "//:microfnptr_h",
-        "//:microkernel_hdrs",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "xx_fill_config",
-    srcs = ["xx-fill-config.c"],
-    deps = [
-        ":config_hdrs",
-        "//:common",
-        "//:init_once",
-        "//:microfnptr_h",
-        "//:microkernel_hdrs",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "microkernel_configs",
-    hdrs = [
-        "//:src/xnnpack/config.h",
-    ],
-    deps = [
-        ":argmaxpool_config",
-        ":avgpool_config",
-        ":binary_elementwise_config",
-        ":cmul_config",
-        ":config_hdrs",
-        ":conv_hwc2chw_config",
-        ":dwconv2d_chw_config",
-        ":dwconv_config",
-        ":gemm_config",
-        ":ibilinear_chw_config",
-        ":ibilinear_config",
-        ":lut32norm_config",
-        ":maxpool_config",
-        ":pack_lh_config",
-        ":raddstoreexpminusmax_config",
-        ":reduce_config",
-        ":spmm_config",
-        ":transpose_config",
-        ":unary_elementwise_config",
-        ":unpool_config",
-        ":vmulcaddc_config",
-        ":x8_lut_config",
-        ":xx_fill_config",
-        ":xx_pad_config",
-        "//:common",
-        "//:microfnptr_h",
-        "//:prod_microkernels",
-    ],
 )

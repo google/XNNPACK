@@ -32,6 +32,7 @@
 #include "src/xnnpack/operator-utils.h"
 #include "src/xnnpack/operator.h"
 #include "src/xnnpack/pack.h"
+#include "src/xnnpack/pack-lh.h"
 #include "src/xnnpack/params.h"
 #include <pthreadpool.h>
 

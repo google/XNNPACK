@@ -77,25 +77,18 @@ extern "C" {
 
 #undef XNN_UKERNEL
 
-// The following are `pack-lh` kernel functions wrapping the `qdint8` and
-// `qduint8` conversion functions.
-size_t xnn_pack_lh_fx_qd8_packed_size(size_t m, size_t k, size_t mr_packed,
-                                      size_t kr, size_t sr);
-size_t xnn_pack_lh_fx_qd8_packed_offset(size_t m, size_t k, size_t mr_packed,
-                                        size_t kr, size_t sr);
-
-void xnn_pack_lh_f32_qdint8(size_t m, size_t k, size_t mr_packed, size_t kr,
-                            size_t sr, size_t m_idx_start, const void* lhs,
-                            size_t lhs_stride, void* lhs_packed);
-void xnn_pack_lh_f32_qduint8(size_t m, size_t k, size_t mr_packed, size_t kr,
-                             size_t sr, size_t m_idx_start, const void* lhs,
-                             size_t lhs_stride, void* lhs_packed);
-void xnn_pack_lh_f16_qdint8(size_t m, size_t k, size_t mr_packed, size_t kr,
-                            size_t sr, size_t m_idx_start, const void* lhs,
-                            size_t lhs_stride, void* lhs_packed);
-void xnn_pack_lh_f16_qduint8(size_t m, size_t k, size_t mr_packed, size_t kr,
-                             size_t sr, size_t m_idx_start, const void* lhs,
-                             size_t lhs_stride, void* lhs_packed);
+// These "configs" are defined here because they do not follow established
+// conventions of configs and microkernels (the "microkernels" depend on other
+// configs and microkernels), which would need to have special treatment to
+// avoid a circular dependency.
+XNN_INTERNAL const struct xnn_pack_lh_config*
+xnn_init_f16_qdint8_pack_lh_config();
+XNN_INTERNAL const struct xnn_pack_lh_config*
+xnn_init_f16_qduint8_pack_lh_config();
+XNN_INTERNAL const struct xnn_pack_lh_config*
+xnn_init_f32_qdint8_pack_lh_config();
+XNN_INTERNAL const struct xnn_pack_lh_config*
+xnn_init_f32_qduint8_pack_lh_config();
 
 #ifdef __cplusplus
 }  // extern "C"
