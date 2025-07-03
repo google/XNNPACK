@@ -276,6 +276,7 @@ static enum xnn_status create_fully_connected_operator(
   const void* kernel_fp32_data =
       filter_value->fp32_data ? filter_value->fp32_data : kernel_data;
   bool has_non_static_weights = (kernel_data == NULL);
+  (void)has_non_static_weights; // Avoid unused variable warning
 
   const void* bias_data = NULL;
   const void* bias_fp32_data = NULL;
