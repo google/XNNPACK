@@ -8,6 +8,7 @@
 //   Specification: test/f16-conv-hwc2chw.yaml
 //   Generator: tools/generate-conv-hwc2chw-test.py
 
+#include <cstddef>
 
 #include <gtest/gtest.h>
 #include "src/xnnpack/common.h"

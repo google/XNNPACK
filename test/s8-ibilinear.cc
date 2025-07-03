@@ -8,9 +8,11 @@
 //   Specification: test/s8-ibilinear.yaml
 //   Generator: tools/generate-ibilinear-test.py
 
+#include <cstddef>
 
 #include <gtest/gtest.h>
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/ibilinear.h"
 #include "src/xnnpack/isa-checks.h"
 #include "test/ibilinear-microkernel-tester.h"

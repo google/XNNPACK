@@ -11,6 +11,7 @@
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
+#include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
 #include "test/operators/max-pooling-operator-tester.h"
 

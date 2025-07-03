@@ -13,7 +13,6 @@
 #include <cstdlib>
 #include <functional>
 #include <random>
-#include <vector>
 
 #include <gtest/gtest.h>
 #include "src/xnnpack/buffer.h"

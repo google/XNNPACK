@@ -5,12 +5,8 @@
 # LICENSE file in the root directory of this source tree.
 
 import argparse
-import codecs
-import math
 import os
-import re
 import sys
-import yaml
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import xngen
@@ -123,8 +119,8 @@ def main(args):
 //   Generator: {generator}
 
 
-#include "src/xnnpack/microparams-init.h"
-#include "src/xnnpack/vbinary.h"
+#include "src/xnnpack/microparams-init.h"  // IWYU pragma: keep
+#include "src/xnnpack/vbinary.h"  // IWYU pragma: keep
 #include "test/{tester_header}"
 
 """.format(

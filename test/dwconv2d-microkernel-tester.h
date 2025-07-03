@@ -16,11 +16,11 @@
 #include <cstdint>
 #include <cstdlib>
 #include <random>
-#include <vector>
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams.h"

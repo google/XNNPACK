@@ -9,22 +9,18 @@
 
 #include <algorithm>
 #include <cassert>
-#include <climits>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
-#include <functional>
 #include <limits>
 #include <random>
-#include <vector>
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
-#include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/requantization.h"
 #include "test/replicable_random_device.h"
