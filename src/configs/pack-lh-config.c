@@ -12,6 +12,7 @@
 #include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/init-once.h"
 #include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/pack-lh.h"
 #include "src/xnnpack/packq.h"
 
 static struct xnn_pack_lh_config qp8_pack_lh_config = {0};
