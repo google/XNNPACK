@@ -81,10 +81,7 @@ void TestImpl(size_t rank) {
       // Check reshaped shape is correct
       subgraph.ReshapeExternalTensor(input_shape, input.base(), 0)
           .ReshapeRuntime();
-      if (subgraph.Status() == xnn_status_unsupported_parameter) {
-        GTEST_SKIP() << "Broadcast operator unsupported by XNNPACK runtime";
-        return;
-      }
+      ASSERT_EQ(subgraph.Status(), xnn_status_success);
       ASSERT_EQ(subgraph.GetExternalTensorShape(1), output_shape);
 
       // Run subgraph
