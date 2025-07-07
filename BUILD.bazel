@@ -459,7 +459,6 @@ filegroup(
                 prod_asm_srcs_for_arch(arch),
             ),
             arch = arch,
-            # Internal build flag.
             tags = ["nobuilder"],
             deps = MICROKERNEL_DEPS,
         ),
