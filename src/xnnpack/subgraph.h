@@ -10,6 +10,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "include/experimental.h"
 #include "include/xnnpack.h"
 #include "src/xnnpack/allocation-type.h"
 #include "src/xnnpack/common.h"
@@ -516,7 +517,7 @@ struct xnn_runtime {
 #ifdef XNN_SLINKY_AVAILABLE
   // Fields used by Slinky -- unused unless XNN_FLAG_SLINKY_ENABLED is set
   slinky_pipeline_t slinky_pipeline;
-  void* slinky_thread_pool;
+  xnn_scheduler_t scheduler;
 #endif  // XNN_SLINKY_AVAILABLE
 };
 

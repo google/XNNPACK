@@ -508,7 +508,7 @@ static enum xnn_status create_runtime_impl(
   xnn_weights_cache_t weights_cache,
   xnn_workspace_t workspace,
   pthreadpool_t threadpool,
-  void* slinky_thread_pool,
+  xnn_scheduler_t scheduler,
   uint32_t flags,
   xnn_runtime_t* runtime_out)
 {
@@ -649,7 +649,7 @@ static enum xnn_status create_runtime_impl(
 
   runtime->threadpool = threadpool;
 #ifdef XNN_SLINKY_AVAILABLE
-  runtime->slinky_thread_pool = slinky_thread_pool;
+  runtime->scheduler = scheduler;
 #endif  // XNN_SLINKY_AVAILABLE
 
   for (uint32_t i = 0; i < runtime->num_values; i++) {
@@ -698,17 +698,16 @@ enum xnn_status xnn_create_runtime_v4(
   uint32_t flags,
   xnn_runtime_t* runtime_out)
 {
-  return create_runtime_impl(subgraph, weights_cache, workspace, threadpool, /*slinky_thread_pool=*/NULL, flags, runtime_out);
+  return create_runtime_impl(subgraph, weights_cache, workspace, threadpool, /*scheduler=*/NULL, flags, runtime_out);
 }
 
-enum xnn_status xnn_create_runtime_slinky(
+enum xnn_status xnn_create_runtime_with_scheduler(
   xnn_subgraph_t subgraph,
   xnn_weights_cache_t weights_cache,
-  void* slinky_thread_pool,
+  xnn_scheduler_t scheduler,
   uint32_t flags,
   xnn_runtime_t* runtime_out) {
-  flags |= XNN_FLAG_SLINKY_ENABLED;
-  return create_runtime_impl(subgraph, weights_cache, /*workspace=*/NULL, /*threadpool=*/NULL, slinky_thread_pool, flags, runtime_out);
+  return create_runtime_impl(subgraph, weights_cache, /*workspace=*/NULL, /*threadpool=*/NULL, scheduler, flags, runtime_out);
 }
 
 enum xnn_status xnn_plan_memory(
