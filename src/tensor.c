@@ -530,7 +530,15 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value_v2(
         xnn_datatype_to_string(scale_type), datatype);
       return xnn_status_unsupported_parameter;
   }
-  const size_t block_count = dims[0] * dims[1] / block_size;
+  size_t block_count = 1;
+  for (size_t i = 0; i < num_dims; i++) {
+    if (i == channel_dim) {
+      block_count *= divide_round_up(dims[i], block_size);
+    } else {
+      block_count *= dims[i];
+    }
+  }
+  xnn_log_error("block_count: %zu", block_count);
   for (size_t block = 0; block < block_count; block++) {
     float float_scale;
     switch (scale_type) {
@@ -545,9 +553,9 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value_v2(
     }
     if (float_scale <= 0.0f || !isnormal(float_scale)) {
       xnn_log_error(
-        "failed to create Blockwise Quantized Dense Tensor value with %.7g scale in block #%zu: "
+        "failed to create Blockwise Quantized Dense Tensor value with %.7g scale: "
         "scale must be finite, normalized, and positive",
-        float_scale, block);
+        float_scale);
       return xnn_status_invalid_parameter;
     }
   }
