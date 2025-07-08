@@ -99,6 +99,7 @@ jobs:
             //test:pqs8_qc8w_gemm_minmax_test \
             --test_filter="*NEONSME2*" \
             --test_summary=detailed \
+            --test_timeout=600 \
             --local_test_jobs=$(nproc)
         working-directory: ${{ github.workspace }}
       - name: Build and run subgraph tests
@@ -114,6 +115,7 @@ jobs:
             --define xnn_enable_arm_sme2=true \
             //test/subgraph/... \
             --test_summary=detailed \
+            --test_timeout=600 \
             --local_test_jobs=$(nproc)
         working-directory: ${{ github.workspace }}
       - name: Compress disk cache
