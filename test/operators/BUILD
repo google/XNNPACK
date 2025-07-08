@@ -119,7 +119,6 @@ xnnpack_unit_test(
     shard_count = 5,
     deps = OPERATOR_TEST_DEPS + [
         "//:microfnptr_h",
-        "//:packing",
     ],
 )
 
