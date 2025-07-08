@@ -417,10 +417,12 @@ def main(args):
 //   Specification: {specification}
 //   Generator: {generator}
 
+#include <cstddef>
 
 #include <gtest/gtest.h>
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/dwconv.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/isa-checks.h"
 #include "src/xnnpack/microparams-init.h"
 #include "test/dwconv2d-microkernel-tester.h"

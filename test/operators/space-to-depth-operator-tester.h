@@ -6,14 +6,12 @@
 #ifndef XNNPACK_TEST_OPERATORS_SPACE_TO_DEPTH_OPERATOR_TESTER_H_
 #define XNNPACK_TEST_OPERATORS_SPACE_TO_DEPTH_OPERATOR_TESTER_H_
 
-#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <memory>
 #include <numeric>
-#include <vector>
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"

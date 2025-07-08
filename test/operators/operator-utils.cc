@@ -8,7 +8,9 @@
 #include <cstddef>
 
 #include <gtest/gtest.h>
+#include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
+#include "src/xnnpack/microfnptr.h"
 
 TEST(COMPUTE_CONVOLUTION_OUTPUT_DIMENSION, compute) {
   ASSERT_EQ(xnn_compute_convolution_output_dimension(5, 3, 1, 1), 3);
