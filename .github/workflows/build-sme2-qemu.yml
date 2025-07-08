@@ -58,10 +58,10 @@ jobs:
         run: |
           mkdir -p bin
           wget -Snv https://gitlab.com/rth7680/qemu/-/archive/tgt-arm-sme2-afp/qemu-tgt-arm-sme2-afp.tar.bz2
-          if [ ! -f qemu-tgt-arm-sme2-afp.tar.bz2.sha256 ] || [ ! sha256sum -c qemu-tgt-arm-sme2-afp.tar.bz2.sha256 ]; then
-            echo ""
+          if [ ! -f qemu-tgt-arm-sme2-afp.tar.bz2.sha256 ] || [[ $(sha256sum -c qemu-tgt-arm-sme2-afp.tar.bz2.sha256) && $? -eq 1 ]]; then
+            echo " "
             echo "Rebuilding qemu-arch64 from latest commit!"
-            echo ""
+            echo " "
             echo "save=true" >> "$GITHUB_OUTPUT"
             sha256sum qemu-tgt-arm-sme2-afp.tar.bz2 > qemu-tgt-arm-sme2-afp.tar.bz2.sha256
             sudo apt-get install libglib2.0-dev libfdt-dev libpixman-1-dev zlib1g-dev ninja-build
@@ -81,7 +81,7 @@ jobs:
             ${{ github.workspace }}/bin/qemu-aarch64
             ${{ github.workspace }}/qemu-tgt-arm-sme2-afp.tar.bz2.sha256
           key: ${{ runner.os }}-qemu-aarch64
-      - name: Run microkernel tests
+      - name: Build and run microkernel tests
         continue-on-error: true
         if: ${{ inputs.run-tests }}
         env:
@@ -101,7 +101,7 @@ jobs:
             --test_summary=detailed \
             --local_test_jobs=$(nproc)
         working-directory: ${{ github.workspace }}
-      - name: Run subgraph tests
+      - name: Build and run subgraph tests
         continue-on-error: true
         if: ${{ inputs.run-tests }}
         env:
