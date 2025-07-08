@@ -6,9 +6,12 @@
 #ifndef XNNPACK_SRC_XNNPACK_PREFETCH_H_
 #define XNNPACK_SRC_XNNPACK_PREFETCH_H_
 
+#include <stdint.h>
 #ifdef _MSC_VER
 #include <intrin.h>
 #endif
+
+#include "src/xnnpack/common.h"
 
 #ifdef __hexagon__
 #include <hexagon_protos.h>
@@ -26,16 +29,14 @@ XNN_INLINE static void xnn_prefetch_to_l2_linear(void *address,
 // width: width of a fetch block in bytes.
 // stride: an unsigned byte offset which is used to increment the pointer
 //         after each width-sized block is fetched.
-// direction: If clear, row major. If set, cloumn major.
+// direction: If clear, row major. If set, column major.
 XNN_INLINE static void xnn_prefetch_to_l2_box(void *address, uint64_t stride,
                                               uint64_t width, uint64_t height,
                                               uint64_t direction) {
   uint64_t info = HEXAGON_V64_CREATE_H(direction, stride, width, height);
   Q6_l2fetch_AP(address, info);
 }
-#endif
-
-#include "src/xnnpack/common.h"
+#endif  // __hexagon__
 
 XNN_INLINE static void xnn_prefetch_to_l1(const void *address) {
 #if defined(__GNUC__)
