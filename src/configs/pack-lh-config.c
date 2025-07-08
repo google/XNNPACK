@@ -24,6 +24,7 @@ static struct xnn_pack_lh_config x8_pack_lh_config = {0};
 static struct xnn_pack_lh_config x16_pack_lh_config = {0};
 static struct xnn_pack_lh_config x32_pack_lh_config = {0};
 static struct xnn_pack_lh_config x8_igemm_pack_lh_config = {0};
+static struct xnn_pack_lh_config x16_igemm_pack_lh_config = {0};
 
 XNN_INIT_ONCE_GUARD(f16_qdint8_pack_lh);
 XNN_INIT_ONCE_GUARD(f16_qduint8_pack_lh);
@@ -34,6 +35,7 @@ XNN_INIT_ONCE_GUARD(x8_pack_lh);
 XNN_INIT_ONCE_GUARD(x16_pack_lh);
 XNN_INIT_ONCE_GUARD(x32_pack_lh);
 XNN_INIT_ONCE_GUARD(x8_igemm_pack_lh);
+XNN_INIT_ONCE_GUARD(x16_igemm_pack_lh);
 
 static void init_f16_qdint8_pack_lh_config(void) {
   f16_qdint8_pack_lh_config.pack_lh_fn = (xnn_pack_lh_ukernel_fn)xnn_pack_lh_f16_qdint8;
@@ -232,4 +234,29 @@ const struct xnn_pack_lh_config* xnn_init_x8_igemm_pack_lh_config() {
   XNN_INIT_ONCE(x8_igemm_pack_lh);
   return &x8_igemm_pack_lh_config;
 }
-  
+
+static void init_x16_igemm_pack_lh_config(void) {
+  #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+  #if XNN_ENABLE_ARM_SME2
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if ((hardware_config->arch_flags & xnn_arch_arm_sme2)) {
+      x16_igemm_pack_lh_config.pack_lh_for_igemm_fn = (xnn_pack_lh_igemm_ukernel_fn) xnn_x16_pack_lh_ukernel__igemm_neonsme2;
+      x16_igemm_pack_lh_config.size_for_igemm_fn = (xnn_pack_lh_igemm_size_fn) xnn_x16_pack_lh_size__igemm_neonsme2;
+      x16_igemm_pack_lh_config.offset_for_igemm_fn = (xnn_pack_lh_igemm_offset_fn) xnn_x16_pack_lh_offset__igemm_neonsme2;
+    }
+  #endif  // XNN_ENABLE_ARM_SME2
+  #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+  x16_igemm_pack_lh_config.log2_input_element_size = 0;
+  x16_igemm_pack_lh_config.log2_packed_element_size = 0;
+}
+
+const struct xnn_pack_lh_config* xnn_init_x16_igemm_pack_lh_config() {
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  if (hardware_config == NULL) {
+    return NULL;
+  }
+  XNN_INIT_ONCE(x16_igemm_pack_lh);
+  return &x16_igemm_pack_lh_config;
+}

@@ -312,9 +312,17 @@ static void init_pf16_gemm_config(void) {
       pf16_gemm_config.arch = xnn_arch_arm_sme2;
       pf16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme2);
       pf16_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(mr)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2);
+      pf16_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(mr)] =
+        xnn_init_hmp_packed_igemm_ukernel(
+            (xnn_packed_lhs_igemm_ukernel_fn)
+                xnn_pf16_f16_igemm_minmax_fp16_ukernel_32x32c2__neonsme2);
       pf16_gemm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
       pf16_gemm_config.pack_weights_and_biases = xnn_pack_kai_f16_weights_and_biases;
       pf16_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_kai_f16_weights_and_biases;
+      pf16_gemm_config.pack_igemm_goki =
+        (xnn_pack_conv_goki_w_fn)xnn_pack_kai_f16_conv_goki_w_sme2;
+      pf16_gemm_config.pack_igemm_kgo =
+        (xnn_pack_conv_kgo_w_fn)xnn_pack_f16_conv_kgo_w;
       pf16_gemm_config.mr = mr;
       pf16_gemm_config.mr_packed = mr;
       pf16_gemm_config.nr = nr;
@@ -5028,6 +5036,7 @@ const struct xnn_gemm_config* xnn_init_pf16_gemm_config() {
     return NULL;
   }
   XNN_INIT_ONCE(pf16_gemm);
+
   return pf16_gemm_config.mr ? &pf16_gemm_config : NULL;
 }
 

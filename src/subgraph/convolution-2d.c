@@ -309,6 +309,31 @@ static enum xnn_status create_convolution_operator(
         switch (filter_datatype) {
           case xnn_datatype_fp16:
           case xnn_datatype_fp32:
+            if(input_datatype == xnn_datatype_pfp16) {
+
+            status = xnn_create_convolution2d_nhwc_pf16(
+                node->params.convolution_2d.input_padding_top,
+                node->params.convolution_2d.input_padding_right,
+                node->params.convolution_2d.input_padding_bottom,
+                node->params.convolution_2d.input_padding_left,
+                node->params.convolution_2d.kernel_height,
+                node->params.convolution_2d.kernel_width,
+                node->params.convolution_2d.subsampling_height,
+                node->params.convolution_2d.subsampling_width,
+                node->params.convolution_2d.dilation_height,
+                node->params.convolution_2d.dilation_width,
+                node->params.convolution_2d.groups,
+                node->params.convolution_2d.group_input_channels,
+                node->params.convolution_2d.group_output_channels,
+                node->params.convolution_2d.group_input_channels *
+                    node->params.convolution_2d.groups /* input_pixel_stride */,
+                node->params.convolution_2d.group_output_channels *
+                    node->params.convolution_2d
+                        .groups /* output_pixel_stride */,
+                filter_data, bias_data, node->activation.output_min,
+                node->activation.output_max, flags, weights_cache,
+                &opdata->operator_objects[0]);
+            } else {
             status = xnn_create_convolution2d_nhwc_f16(
                 node->params.convolution_2d.input_padding_top,
                 node->params.convolution_2d.input_padding_right,
@@ -331,6 +356,7 @@ static enum xnn_status create_convolution_operator(
                 filter_data, bias_data, node->activation.output_min,
                 node->activation.output_max, flags, weights_cache,
                 &opdata->operator_objects[0]);
+            }
             break;
           case xnn_datatype_qcint8:
             switch (input_datatype) {
@@ -659,6 +685,11 @@ enum xnn_status reshape_convolution_operator(struct xnn_operator_data* opdata,
           opdata->operator_objects[0], batch_size, input_height, input_width,
           &opdata->workspace_size, &output_height, &output_width, threadpool);
       break;
+    case xnn_operator_type_convolution_nhwc_pf16:
+      status = xnn_reshape_convolution2d_nhwc_pf16(
+          opdata->operator_objects[0], batch_size, input_height, input_width,
+          &opdata->workspace_size, &output_height, &output_width, threadpool);
+      break;
     default:
       XNN_UNREACHABLE;
   }
@@ -779,6 +810,11 @@ enum xnn_status setup_convolution_operator(
       break;
     case xnn_operator_type_convolution_nhwc_pqs8_qs8_qc8w:
       return xnn_setup_convolution2d_nhwc_pqs8_qs8_qc8w(
+          opdata->operator_objects[0], opdata->workspace, input_data,
+          output_data);
+      break;
+    case xnn_operator_type_convolution_nhwc_pf16:
+      return xnn_setup_convolution2d_nhwc_pf16(
           opdata->operator_objects[0], opdata->workspace, input_data,
           output_data);
       break;

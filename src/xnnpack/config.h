@@ -37,8 +37,8 @@ XNN_INTERNAL const struct xnn_pack_lh_config* xnn_init_qp8_pack_lh_config();
 XNN_INTERNAL const struct xnn_pack_lh_config* xnn_init_x8_pack_lh_config();
 XNN_INTERNAL const struct xnn_pack_lh_config* xnn_init_x16_pack_lh_config();
 XNN_INTERNAL const struct xnn_pack_lh_config* xnn_init_x32_pack_lh_config();
-XNN_INTERNAL const struct xnn_pack_lh_config*
-xnn_init_x8_igemm_pack_lh_config();
+XNN_INTERNAL const struct xnn_pack_lh_config* xnn_init_x8_igemm_pack_lh_config();
+XNN_INTERNAL const struct xnn_pack_lh_config* xnn_init_x16_igemm_pack_lh_config();
 
 XNN_INTERNAL const struct xnn_binary_elementwise_config*
 xnn_init_f16_vadd_config();
