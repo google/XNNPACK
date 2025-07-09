@@ -556,46 +556,6 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "f32_qc8w_gemm_test",
-    srcs = [
-        "f32-qc8w-gemm.cc",
-    ],
-    deps = MICROKERNEL_TEST_DEPS + [
-        ":gemm_microkernel_tester",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "f32_qc8w_gemm_relu_test",
-    srcs = [
-        "f32-qc8w-gemm-relu.cc",
-    ],
-    deps = MICROKERNEL_TEST_DEPS + [
-        ":gemm_microkernel_tester",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "f32_qc4w_gemm_minmax_test",
-    srcs = [
-        "f32-qc4w-gemm-minmax.cc",
-    ],
-    deps = MICROKERNEL_TEST_DEPS + [
-        ":gemm_microkernel_tester",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "f32_qc8w_gemm_minmax_test",
-    srcs = [
-        "f32-qc8w-gemm-minmax.cc",
-    ],
-    deps = MICROKERNEL_TEST_DEPS + [
-        ":gemm_microkernel_tester",
-    ],
-)
-
-xnnpack_unit_test(
     name = "f32_gemminc_minmax_test",
     srcs = [
         "f32-gemminc-minmax.cc",

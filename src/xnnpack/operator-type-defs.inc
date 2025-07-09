@@ -105,10 +105,6 @@ XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_pf16,
               "Fully Connected (NC, PF16)")
 XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_f32,
               "Fully Connected (NC, F32)")
-XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_f32_qc4w,
-              "Fully Connected (NC, F32, QC4W)")
-XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_f32_qc8w,
-              "Fully Connected (NC, F32, QC8W)")
 XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_pf32,
               "Fully Connected (NC, PF32)")
 XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_qd8_f16_qb4w,

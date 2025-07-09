@@ -158,8 +158,6 @@ xnnpack_cxx_library(
     "qu8_gemm_rndnu",
     "f16_f32acc_gemm",
     "f16_gemm",
-    "f32_qc4w_gemm",
-    "f32_qc8w_gemm",
 ]]
 
 [xnnpack_benchmark(

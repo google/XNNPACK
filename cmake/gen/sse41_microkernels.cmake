@@ -13,10 +13,6 @@ SET(PROD_SSE41_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-sse41-int16-u16.c
   src/f16-maxpool/gen/f16-maxpool-9p-minmax-sse41-u8.c
   src/f32-f16-vcvt/gen/f32-f16-vcvt-sse41-u8.c
-  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x8-minmax-sse41-dup.c
-  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x8-minmax-sse41-dup.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-sse41-dup.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-minmax-sse41-dup.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-sse41-u32.c
   src/f32-vlrelu/gen/f32-vlrelu-sse41-u8.c
   src/f32-vrnd/gen/f32-vrndd-sse41-u8.c
@@ -81,24 +77,6 @@ SET(NON_PROD_SSE41_MICROKERNEL_SRCS
   src/f32-f16-vcvt/gen/f32-f16-vcvt-sse41-u16.c
   src/f32-f16-vcvt/gen/f32-f16-vcvt-sse41-u24.c
   src/f32-f16-vcvt/gen/f32-f16-vcvt-sse41-u32.c
-  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-3x8-minmax-sse41-dup.c
-  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-5x8-minmax-sse41-dup.c
-  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-6x8-minmax-sse41-dup.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-sse41-load1.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8s4-minmax-sse41.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-3x8-minmax-sse41-dup.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-3x8-minmax-sse41-load1.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-3x8s4-minmax-sse41.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x2c4-minmax-sse41.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-minmax-sse41-load1.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8s4-minmax-sse41.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x8-minmax-sse41-dup.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x8-minmax-sse41-load1.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x8s4-minmax-sse41.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x2c4-minmax-sse41.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x8-minmax-sse41-dup.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x8-minmax-sse41-load1.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x8s4-minmax-sse41.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-sse41-u8.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-sse41-u16.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-sse41-u24.c

@@ -64,9 +64,6 @@ using qint8 = quantized<int8_t>;
 using qcint8 = quantized<int8_t, channelwise>;
 using qint32 = quantized<int32_t>;
 using qcint4 = quantized<int4x2, channelwise>;
-
-// This is not a "real" XNNPACK datatype, but it is required to match the
-// behavior of F32QC4W (b/407771627).
 using qcuint4 = quantized<uint4x2, channelwise>;
 
 template <>
@@ -553,9 +550,6 @@ TEST(FullyConnectedF16, static_b) {
   TestStaticB<xnn_float16, xnn_float16, xnn_float16>();
 }
 TEST(FullyConnectedF32, static_b) { TestStaticB<float, float, float>(); }
-// TODO(b/407771627): Either add xnn_datatype_qcuint4, or remove F32QC4W.
-TEST(FullyConnectedF32QC4W, static_b) { TestStaticB<float, qcuint4, float>(); }
-TEST(FullyConnectedF32QC8W, static_b) { TestStaticB<float, qcint8, float>(); }
 TEST(FullyConnectedBF16F32, static_b) {
   TestStaticB<xnn_bfloat16, xnn_bfloat16, float, float>();
 }

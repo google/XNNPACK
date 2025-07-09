@@ -200,10 +200,6 @@ SET(MICROKERNEL_GEMM_UNIT_TESTS
     f32-igemm-minmax
     f32-igemm-relu
     f32-ppmm-minmax
-    f32-qc4w-gemm-minmax
-    f32-qc8w-gemm
-    f32-qc8w-gemm-minmax
-    f32-qc8w-gemm-relu
     pf16-gemm-minmax
     pf32-gemm-minmax
     pqs8-qc8w-gemm-minmax
