@@ -21,12 +21,6 @@ tools/generate-gemm-test.py --spec test/f32-gemm-relu.yaml       --output-test t
 tools/generate-gemm-test.py --spec test/f32-gemm-minmax.yaml     --output-test test/f32-gemm-minmax.cc    --output-test test/f32-gemm-minmax-2.cc --output-bench bench/f32-gemm-minmax.cc &
 tools/generate-gemm-test.py --spec test/f32-gemminc-minmax.yaml  --output-test test/f32-gemminc-minmax.cc --output-test test/f32-gemminc-minmax-2.cc &
 
-tools/generate-gemm-test.py --spec test/f32-qc4w-gemm-minmax.yaml --output-test test/f32-qc4w-gemm-minmax.cc &
-
-tools/generate-gemm-test.py --spec test/f32-qc8w-gemm.yaml        --output-test test/f32-qc8w-gemm.cc        &
-tools/generate-gemm-test.py --spec test/f32-qc8w-gemm-relu.yaml   --output-test test/f32-qc8w-gemm-relu.cc   &
-tools/generate-gemm-test.py --spec test/f32-qc8w-gemm-minmax.yaml --output-test test/f32-qc8w-gemm-minmax.cc &
-
 tools/generate-gemm-test.py --spec test/pf32-gemm-minmax.yaml     --output-test test/pf32-gemm-minmax.cc --output-bench bench/pf32-gemm-minmax.cc &
 tools/generate-gemm-test.py --spec test/pf16-gemm-minmax.yaml     --output-test test/pf16-gemm-minmax.cc --output-bench bench/pf16-gemm-minmax.cc &
 

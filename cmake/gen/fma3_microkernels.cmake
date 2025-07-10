@@ -37,10 +37,6 @@ SET(PROD_FMA3_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-5x8-minmax-fma3-broadcast.c
   src/f32-igemm/gen/f32-igemm-5x16-minmax-fma3-broadcast-prfm.c
   src/f32-igemm/gen/f32-igemm-10x8-minmax-fma3-broadcast.c
-  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x16-minmax-fma3-broadcast.c
-  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-3x16-minmax-fma3-broadcast.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x16-minmax-fma3-broadcast.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x16-minmax-fma3-broadcast.c
   src/f32-vapproxgelu/gen/f32-vapproxgelu-fma3-rational-12-10-div.c
   src/f32-vcmul/gen/f32-vcmul-fma3-u16.c
   src/f32-vcos/gen/f32-vcos-fma3-rational-5-4-div.c
@@ -133,18 +129,6 @@ SET(NON_PROD_FMA3_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-6x16s4-minmax-fma3-broadcast.c
   src/f32-igemm/gen/f32-igemm-7x8-minmax-fma3-broadcast.c
   src/f32-igemm/gen/f32-igemm-8x8-minmax-fma3-broadcast.c
-  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-2x16-minmax-fma3-broadcast.c
-  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x16-minmax-fma3-broadcast.c
-  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-5x16-minmax-fma3-broadcast.c
-  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-6x16-minmax-fma3-broadcast.c
-  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-7x16-minmax-fma3-broadcast.c
-  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-8x16-minmax-fma3-broadcast.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-2x16-minmax-fma3-broadcast.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-3x16-minmax-fma3-broadcast.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x16-minmax-fma3-broadcast.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x16-minmax-fma3-broadcast.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-7x16-minmax-fma3-broadcast.c
-  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-8x16-minmax-fma3-broadcast.c
   src/f32-vcmul/gen/f32-vcmul-fma3-u8.c
   src/f32-vcmul/gen/f32-vcmul-fma3-u32.c
   src/f32-vcmul/gen/f32-vcmul-fma3-u64.c
