@@ -7,7 +7,6 @@
 #include <array>
 #include <cassert>
 #include <chrono>
-#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -18,10 +17,10 @@
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
-#include "src/xnnpack/common.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
 #include "test/replicable_random_device.h"
+#include "test/subgraph/fake-dynamic-quantize.h"
 #include "test/subgraph/stencil.h"
 #include "test/subgraph/subgraph-tester.h"
 
@@ -178,36 +177,6 @@ xnn_quantization_params CalculateDeconvolutionQuantizationParams(
   // Now we want the output quantization to hold the range of the output.
   return quantization_for_range<Output>(output_min, output_max);
 }
-
-// Dynamic quantization looks a lot like a float input/output, but the error is
-// hard to quantify and test well. Rather than do that, we can just generate
-// input data that has (close to) zero error when dynamically quantized, which
-// makes it easier to test.
-template <typename Data>
-void FakeDynamicQuantize(Tensor<Data> input, float qmin, float qmax) {
-  auto minmax = std::minmax_element(input.begin(), input.end());
-  const float rmin = *minmax.first;
-  const float rmax = *minmax.second;
-  const float scale = rmin == rmax ? 1.0f : (qmax - qmin) / (rmax - rmin);
-  const float inv_scale = 1.0f / scale;
-  for (auto& i : input) {
-    i = std::round((i - rmin) * scale) * inv_scale;
-  }
-}
-
-template <typename Data>
-void FakeDynamicQuantize(Tensor<Data> input, xnn_datatype datatype) {
-  if (datatype == xnn_datatype_qdint8) {
-    FakeDynamicQuantize(input, -128.0f, 127.0f);
-  } else if (datatype == xnn_datatype_qduint8) {
-    FakeDynamicQuantize(input, 0.0f, 255.0f);
-  } else {
-    XNN_UNREACHABLE;
-  }
-}
-
-template <typename Data>
-void FakeDynamicQuantize(const Tensor<quantized<Data>>& input, xnn_datatype) {}
 
 template <typename Data, typename Filter, typename Bias>
 void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
