@@ -65,6 +65,12 @@ SPECIAL_VALUES_F32 = {
         "{0.0f, -0.0f, 1.0f, NAN}",  # Expected outputs.
         1,  # Error margin in ULP.
     ),
+    "ReciprocalSquareRoot": (
+        3,  # Number of elements.
+        "{INFINITY, -INFINITY, NAN}",  # Inputs.
+        "{0, NAN, NAN}",  # Expected outputs.
+        1,  # Error margin in ULP.
+    ),
     "TanH": (
         7,  # Number of elements.
         "{0.0f, -0.0f, 10.0f, -10.0f, INFINITY, -INFINITY, NAN}",

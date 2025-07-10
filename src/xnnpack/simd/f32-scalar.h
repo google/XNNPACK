@@ -105,6 +105,16 @@ static XNN_INLINE xnn_simd_f32_t xnn_xor_f32(xnn_simd_f32_t a,
   return *(const xnn_simd_f32_t *)&res;
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_not_f32(xnn_simd_f32_t a) {
+  const uint32_t res = ~(*(const uint32_t *)&a);
+  return *(const xnn_simd_f32_t *)&res;
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_andnot_f32(xnn_simd_f32_t a,
+                                                xnn_simd_f32_t b) {
+  return xnn_and_f32(xnn_not_f32(a), b);
+}
+
 static XNN_INLINE xnn_simd_f32_t xnn_sll_f32(xnn_simd_f32_t a, uint8_t bits) {
   const uint32_t res = *(uint32_t *)&a << bits;
   return *(const xnn_simd_f32_t *)&res;
