@@ -9,7 +9,8 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
-    
+#include <math.h>
+
 // Arch-specific SIMD wrapper.
 #include "src/xnnpack/simd/f32-${ARCH}.h"
 
@@ -64,6 +65,8 @@ $for BATCH_TILE in BATCH_TILES:
     const xnn_simd_f32_t kOne = xnn_set1_f32(1.0f);
     const xnn_simd_f32_t kHalf = xnn_set1_f32(0.5f);
 
+    const xnn_simd_f32_t kInf = xnn_set1_f32(INFINITY);
+
     $if BATCH_TILE > SIMD_SIZE:
       for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
         const xnn_simd_f32_t vx${ABC[0]} = xnn_loadu_f32(input);
@@ -91,6 +94,10 @@ $for BATCH_TILE in BATCH_TILES:
             vy${ABC[N]} = xnn_sub_f32(vy${ABC[N]}, vt5_${ABC[N]});
         }
 
+        // Set output to 0 where the input is infinity (and not NaN)
+        $for N in range(SIMD_TILE):
+          vy${ABC[N]} = xnn_andnot_f32(xnn_cmpeq_f32(kInf, vx${ABC[N]}), vy${ABC[N]});
+
         // Store the results.
         xnn_storeu_f32(output, vy${ABC[0]});
         $for N in range(1, SIMD_TILE):
@@ -115,6 +122,9 @@ $for BATCH_TILE in BATCH_TILES:
         vy = xnn_sub_f32(vy, vt5);
       }
 
+      // Set output to 0 where the input is infinity (and not NaN)
+      vy = xnn_andnot_f32(xnn_cmpeq_f32(kInf, vx), vy);
+
       xnn_storeu_f32(output, vy);
       output += xnn_simd_size_f32;
     }
@@ -136,6 +146,9 @@ $for BATCH_TILE in BATCH_TILES:
         const xnn_simd_f32_t vt5 = xnn_mul_f32(vt3, vt4);
         vy = xnn_sub_f32(vy, vt5);
       }
+
+      // Set output to 0 where the input is infinity (and not NaN)
+      vy = xnn_andnot_f32(xnn_cmpeq_f32(kInf, vx), vy);
 
       xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
     }

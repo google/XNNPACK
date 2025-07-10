@@ -243,6 +243,10 @@ static XNN_INLINE xnn_simd_f32_t xnn_xor_f32(xnn_simd_f32_t a,
   return Q6_V_vxor_VV(a, b);
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_andnot_f32(xnn_simd_f32_t a) {
+  return Q6_V_vand_VV(Q6_V_vnot_VV(a), b);
+}
+
 static XNN_INLINE xnn_simd_f32_t xnn_sll_f32(xnn_simd_f32_t a, uint8_t bits) {
   return Q6_Vw_vasl_VwR(a, (uint32_t)bits);
 }

@@ -178,6 +178,11 @@ static XNN_INLINE xnn_simd_f32_t xnn_not_f32(xnn_simd_f32_t a) {
   return vreinterpretq_f32_u32(vmvnq_u32(vreinterpretq_u32_f32(a)));
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_andnot_f32(xnn_simd_f32_t a,
+                                                xnn_simd_f32_t b) {
+  return xnn_and_f32(xnn_not_f32(a), b);
+}
+
 static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
                                                xnn_simd_f32_t b) {
   return vreinterpretq_f32_u32(vceqq_f32(a, b));

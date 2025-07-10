@@ -11,7 +11,8 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
-    
+#include <math.h>
+
 // Arch-specific SIMD wrapper.
 #include "src/xnnpack/simd/f32-neon.h"
 
@@ -62,6 +63,8 @@ void xnn_f32_vrsqrt_ukernel__neon_rsqrt_u4(
   const xnn_simd_f32_t kOne = xnn_set1_f32(1.0f);
   const xnn_simd_f32_t kHalf = xnn_set1_f32(0.5f);
 
+  const xnn_simd_f32_t kInf = xnn_set1_f32(INFINITY);
+
 
   for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
     const xnn_simd_f32_t vx = xnn_loadu_f32(input);
@@ -79,6 +82,9 @@ void xnn_f32_vrsqrt_ukernel__neon_rsqrt_u4(
       const xnn_simd_f32_t vt5 = xnn_mul_f32(vt3, vt4);
       vy = xnn_sub_f32(vy, vt5);
     }
+
+    // Set output to 0 where the input is infinity (and not NaN)
+    vy = xnn_andnot_f32(xnn_cmpeq_f32(kInf, vx), vy);
 
     xnn_storeu_f32(output, vy);
     output += xnn_simd_size_f32;
@@ -102,6 +108,9 @@ void xnn_f32_vrsqrt_ukernel__neon_rsqrt_u4(
       vy = xnn_sub_f32(vy, vt5);
     }
 
+    // Set output to 0 where the input is infinity (and not NaN)
+    vy = xnn_andnot_f32(xnn_cmpeq_f32(kInf, vx), vy);
+
     xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
   }
 }
@@ -117,6 +126,8 @@ void xnn_f32_vrsqrt_ukernel__neon_rsqrt_u8(
   // Constants for the Newton-Raphson iteration.
   const xnn_simd_f32_t kOne = xnn_set1_f32(1.0f);
   const xnn_simd_f32_t kHalf = xnn_set1_f32(0.5f);
+
+  const xnn_simd_f32_t kInf = xnn_set1_f32(INFINITY);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const xnn_simd_f32_t vx0 = xnn_loadu_f32(input);
@@ -143,6 +154,10 @@ void xnn_f32_vrsqrt_ukernel__neon_rsqrt_u8(
       vy1 = xnn_sub_f32(vy1, vt5_1);
     }
 
+    // Set output to 0 where the input is infinity (and not NaN)
+    vy0 = xnn_andnot_f32(xnn_cmpeq_f32(kInf, vx0), vy0);
+    vy1 = xnn_andnot_f32(xnn_cmpeq_f32(kInf, vx1), vy1);
+
     // Store the results.
     xnn_storeu_f32(output, vy0);
     xnn_storeu_f32(output + 4, vy1);
@@ -166,6 +181,9 @@ void xnn_f32_vrsqrt_ukernel__neon_rsqrt_u8(
       vy = xnn_sub_f32(vy, vt5);
     }
 
+    // Set output to 0 where the input is infinity (and not NaN)
+    vy = xnn_andnot_f32(xnn_cmpeq_f32(kInf, vx), vy);
+
     xnn_storeu_f32(output, vy);
     output += xnn_simd_size_f32;
   }
@@ -188,6 +206,9 @@ void xnn_f32_vrsqrt_ukernel__neon_rsqrt_u8(
       vy = xnn_sub_f32(vy, vt5);
     }
 
+    // Set output to 0 where the input is infinity (and not NaN)
+    vy = xnn_andnot_f32(xnn_cmpeq_f32(kInf, vx), vy);
+
     xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
   }
 }
@@ -203,6 +224,8 @@ void xnn_f32_vrsqrt_ukernel__neon_rsqrt_u16(
   // Constants for the Newton-Raphson iteration.
   const xnn_simd_f32_t kOne = xnn_set1_f32(1.0f);
   const xnn_simd_f32_t kHalf = xnn_set1_f32(0.5f);
+
+  const xnn_simd_f32_t kInf = xnn_set1_f32(INFINITY);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const xnn_simd_f32_t vx0 = xnn_loadu_f32(input);
@@ -245,6 +268,12 @@ void xnn_f32_vrsqrt_ukernel__neon_rsqrt_u16(
       vy3 = xnn_sub_f32(vy3, vt5_3);
     }
 
+    // Set output to 0 where the input is infinity (and not NaN)
+    vy0 = xnn_andnot_f32(xnn_cmpeq_f32(kInf, vx0), vy0);
+    vy1 = xnn_andnot_f32(xnn_cmpeq_f32(kInf, vx1), vy1);
+    vy2 = xnn_andnot_f32(xnn_cmpeq_f32(kInf, vx2), vy2);
+    vy3 = xnn_andnot_f32(xnn_cmpeq_f32(kInf, vx3), vy3);
+
     // Store the results.
     xnn_storeu_f32(output, vy0);
     xnn_storeu_f32(output + 4, vy1);
@@ -270,6 +299,9 @@ void xnn_f32_vrsqrt_ukernel__neon_rsqrt_u16(
       vy = xnn_sub_f32(vy, vt5);
     }
 
+    // Set output to 0 where the input is infinity (and not NaN)
+    vy = xnn_andnot_f32(xnn_cmpeq_f32(kInf, vx), vy);
+
     xnn_storeu_f32(output, vy);
     output += xnn_simd_size_f32;
   }
@@ -291,6 +323,9 @@ void xnn_f32_vrsqrt_ukernel__neon_rsqrt_u16(
       const xnn_simd_f32_t vt5 = xnn_mul_f32(vt3, vt4);
       vy = xnn_sub_f32(vy, vt5);
     }
+
+    // Set output to 0 where the input is infinity (and not NaN)
+    vy = xnn_andnot_f32(xnn_cmpeq_f32(kInf, vx), vy);
 
     xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
   }

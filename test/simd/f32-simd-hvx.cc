@@ -279,6 +279,18 @@ TEST_F(F32SimdHVXTest, Xor) {
   }
 }
 
+TEST_F(F32SimdHVXTest, AndNot) {
+  const xnn_simd_f32_t a = xnn_loadu_f32(inputs_.data());
+  const xnn_simd_f32_t b = xnn_loadu_f32(inputs_.data() + xnn_simd_size_f32);
+  const xnn_simd_f32_t res = xnn_andnot_f32(a, b);
+  xnn_storeu_f32(output_.data(), res);
+  for (size_t k = 0; k < xnn_simd_size_f32; k++) {
+    ASSERT_EQ(*(uint32_t *)&output_[k],
+              ~(*(uint32_t *)&inputs_[k]) &
+                  *(uint32_t *)&inputs_[k + xnn_simd_size_f32]);
+  }
+}
+
 TEST_F(F32SimdHVXTest, ShiftLeft) {
   const xnn_simd_f32_t a = xnn_loadu_f32(inputs_.data());
   // Not using a loop since the `bits` parameter needs to be a compile-time

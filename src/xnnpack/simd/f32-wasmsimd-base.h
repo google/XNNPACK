@@ -100,6 +100,11 @@ static XNN_INLINE xnn_simd_f32_t xnn_xor_f32(xnn_simd_f32_t a,
   return wasm_v128_xor(a, b);
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_andnot_f32(xnn_simd_f32_t a,
+                                                xnn_simd_f32_t b) {
+  return wasm_v128_andnot(b, a);
+}
+
 static XNN_INLINE xnn_simd_f32_t xnn_sll_f32(xnn_simd_f32_t a, uint8_t bits) {
   return wasm_i32x4_shl(a, bits);
 }
