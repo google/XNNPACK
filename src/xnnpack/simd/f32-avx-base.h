@@ -125,6 +125,11 @@ static XNN_INLINE xnn_simd_f32_t xnn_xor_f32(xnn_simd_f32_t a,
   return _mm256_xor_ps(a, b);
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_andnot_f32(xnn_simd_f32_t a,
+                                                xnn_simd_f32_t b) {
+  return _mm256_andnot_ps(a, b);
+}
+
 // Special functions.
 #define XNN_SIMD_HAVE_RCP_F32 1
 #define XNN_SIMD_NUM_RCP_ITER_F32 1
