@@ -400,19 +400,27 @@ jobs:
           restore-keys: |
             ${{ github.job }}-
       - name: Build tests
+        if: ${{ !inputs.run-tests }}
         env:
           CC: clang-18
           CXX: clang++-18
         run: |
-            bazel build //test/... //bench/...
+            bazel build \
+              --test_output=errors \
+              //test/... \
+              //bench/...
         working-directory: ${{ github.workspace }}
-      - name: Run tests
+      - name: Build and run tests
         if: ${{ inputs.run-tests }}
         env:
           CC: clang-18
           CXX: clang++-18
         run: |
-            bazel test --test_output=errors //test/... //bench/...
+            bazel test \
+              --test_output=errors \
+              --local_test_jobs=HOST_CPUS \
+              //test/... \
+              //bench/...
         working-directory: ${{ github.workspace }}
       - name: Compress disk cache
         # Bazel's `--disk-cache` currently grows without bounds, so we remove files
@@ -452,13 +460,22 @@ jobs:
           restore-keys: |
             ${{ github.job }}-
       - name: Build tests
+        if: ${{ !inputs.run-tests }}
         run: |
-            bazel build ${BAZEL_DEFINES} //test/... //bench/...
+            bazel build \
+              ${BAZEL_DEFINES} \
+              //test/... \
+              //bench/...
         working-directory: ${{ github.workspace }}
-      - name: Build XNNPack
+      - name: Build and run tests
         if: ${{ inputs.run-tests }}
         run: |
-            bazel build ${BAZEL_DEFINES} //test/...
+            bazel test \
+              --test_output=errors \
+              --local_test_jobs=HOST_CPUS \
+              ${BAZEL_DEFINES} \
+              //test/... \
+              //bench/...
         working-directory: ${{ github.workspace }}
       - name: Compress disk cache
         # Bazel's `--disk-cache` currently grows without bounds, so we remove files
@@ -473,7 +490,7 @@ jobs:
           key: ${{ github.job }}-${{ github.sha }}
 
   bazel-linux-aarch64-clang18:
-    runs-on: arm-ubuntu-arm-22.04-4core
+    runs-on: arm-ubuntu-arm-22.04-8core
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -496,26 +513,26 @@ jobs:
           restore-keys: |
             ${{ github.job }}-
       - name: Build tests
+        if: ${{ !inputs.run-tests }}
         env:
           CC: clang-18
           CXX: clang++-18
         run: |
-            bazel build //test/... //bench/...
+            bazel build \
+              //test/... \
+              //bench/...
         working-directory: ${{ github.workspace }}
-      - name: Run tests
+      - name: Build and run tests
         if: ${{ inputs.run-tests }}
         env:
           CC: clang-18
           CXX: clang++-18
         run: |
-          # We only test the KleidiAI integration for now.
           bazel test \
-            --test_output=all \
-            --test_filter=*QP8* \
+            --test_output=errors \
             --local_test_jobs=HOST_CPUS \
-            test:qp8_f32_qc4w_gemm_minmax_test \
-            test/operators:fully_connected_nc_test \
-            test/subgraph:fully_connected_test
+            //test/... \
+            //bench/...
         working-directory: ${{ github.workspace }}
       - name: Compress disk cache
         # Bazel's `--disk-cache` currently grows without bounds, so we remove files
@@ -531,7 +548,7 @@ jobs:
 
   bazel-linux-aarch64-gcc13:
     # This ensures we have solid test coverage for _Float16
-    runs-on: arm-ubuntu-arm-22.04-4core
+    runs-on: arm-ubuntu-arm-22.04-8core
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -553,26 +570,26 @@ jobs:
           restore-keys: |
             ${{ github.job }}-
       - name: Build tests
+        if: ${{ !inputs.run-tests }}
         env:
           CC: gcc-13
           CXX: g++-13
         run: |
-            bazel build //test/... //bench/...
+            bazel build \
+              //test/... \
+              //bench/...
         working-directory: ${{ github.workspace }}
-      - name: Run tests
+      - name: Build and run tests
         if: ${{ inputs.run-tests }}
         env:
           CC: gcc-13
           CXX: g++-13
         run: |
-          # We only test the KleidiAI integration for now.
           bazel test \
-            --test_output=all \
-            --test_filter=*QP8* \
+            --test_output=errors \
             --local_test_jobs=HOST_CPUS \
-            test:qp8_f32_qc4w_gemm_minmax_test \
-            test/operators:fully_connected_nc_test \
-            test/subgraph:fully_connected_test
+            //test/... \
+            //bench/...
         working-directory: ${{ github.workspace }}
       - name: Compress disk cache
         # Bazel's `--disk-cache` currently grows without bounds, so we remove files
@@ -587,7 +604,7 @@ jobs:
           key: ${{ github.job }}-${{ github.sha }}
 
   bazel-linux-aarch64-sme2:
-    runs-on: arm-ubuntu-arm-22.04-4core
+    runs-on: arm-ubuntu-arm-22.04-8core
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
