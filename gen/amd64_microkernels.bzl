@@ -167,6 +167,17 @@ NON_PROD_AMD64_ASM_MICROKERNEL_SRCS = [
     "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-11x16-minmax-asm-amd64-avx512vnni.S",
     "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-11x16c8-minmax-asm-amd64-avx512vnni.S",
     "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-11x32-minmax-asm-amd64-avx512vnni.S",
+    "src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x16-minmax-fp32-asm-amd64-avx512vnni.S",
+    "src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x16-minmax-fp32-asm-amd64-avx512vnni.S",
+    "src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x16-minmax-fp32-asm-amd64-avx512vnni.S",
+    "src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x16-minmax-fp32-asm-amd64-avx512vnni.S",
+    "src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-5x16-minmax-fp32-asm-amd64-avx512vnni.S",
+    "src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-6x16-minmax-fp32-asm-amd64-avx512vnni.S",
+    "src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-7x16-minmax-fp32-asm-amd64-avx512vnni.S",
+    "src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-8x16-minmax-fp32-asm-amd64-avx512vnni.S",
+    "src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-9x16-minmax-fp32-asm-amd64-avx512vnni.S",
+    "src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-10x16-minmax-fp32-asm-amd64-avx512vnni.S",
+    "src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-11x16-minmax-fp32-asm-amd64-avx512vnni.S",
 ]
 
 AMD64_ASM_MICROKERNEL_SRCS = PROD_AMD64_ASM_MICROKERNEL_SRCS + NON_PROD_AMD64_ASM_MICROKERNEL_SRCS

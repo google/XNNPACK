@@ -166,6 +166,7 @@ class Avx512Vnni(avx512f_template.Avx512F):
         ACC = accumulators[self.m * nr + mr]
         self.asm_string += f'vcvtdq2ps z{ACC}, z{other_reg}\n'
 
+  # TODO: This is a qd8 conversion, move it to a child class?
   def convert_to_output(self):
     W = self.w_ptr_register()
     if self._c == 8:
@@ -239,6 +240,7 @@ class Avx512Vnni(avx512f_template.Avx512F):
 
     return self.asm_string
 
+  # TODO: This is qd8 specific, move it to a child class?
   def outer_loop_prepare(self):
     # outside the outer loop
     zp_scale_load_push = (
@@ -381,3 +383,293 @@ class Avx512VnniQc4w(Avx512Vnni):
 
   def w_register_bytes(self):
     return self.register_bytes() // 2
+
+
+class Avx512VnniQS8QC8W(Avx512Vnni):
+
+  def function_name(self):
+    c = self._c
+    return (
+        f'xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_{self.m}x{self.n * self.n_step()}'
+        + f'c{c}__asm_amd64_{self.isa()}'
+    )
+
+  def pre_header(self):
+    super().pre_header()
+    self.asm_string += """.MASK:
+        .quad   -9187201950435737472  # 0x8080808080808080\n"""
+
+  def load_params(self, reg):
+    return """
+      movsx         eax, WORD PTR [{reg}]
+      vpbroadcastd zmm29, eax
+
+      vpbroadcastb x{min}, BYTE PTR [{reg} + 2]
+
+      movsx         eax, WORD PTR [{reg} + 4]
+      vpbroadcastd  z{max}, eax
+      vpsubd        z{max}, z{max}, zmm29
+      vcvtdq2ps     z{max}, z{max}
+""".format(
+        reg=reg,
+        prefix=self.prefix(),
+        min=self.min_register(),
+        max=self.max_register(),
+    )
+
+  def init_accumulators(self):
+    self.comment('Initialize accumulators with bias')
+    accumulators = self.acc_registers()
+    W = self.w_ptr_register()
+
+    vksum = 'vmovaps z{ACC}, [{W} + {offset}]\n'
+
+    for nr in range(0, self.n):
+      for mr in range(0, self.m):
+        self.asm_string += vksum.format(
+            ACC=accumulators[nr * self.m + mr],
+            W=self.w_ptr_register(),
+            offset=self.register_bytes() * nr,
+        )
+
+    self.increment_ptr(ptr=W, step=self.register_bytes() * self.n)
+    self.interleave_zeros(self.m, self.n)
+
+  def input_asm(self):
+    loop_c4 = (
+        'vpxord {AM}, z{mask}, DWORD PTR [{AM_ptr} + {a_offset}]{{1to16}}\n'
+    )
+    match self._c:
+      case 4:
+        loop = loop_c4
+      case _:
+        raise NotImplementedError
+    in_asm = {
+        'loop': [loop],
+        'compute': ['vpdpbusd  z{ACC}, {A}, {W}\n'],
+    }
+    return in_asm
+
+  def convert_to_output(self):
+    W = self.w_ptr_register()
+    if self._c == 8:
+      shift_add = """vpsrlq {tmp}, z{acc}, 32
+        vpaddd z{acc}, z{acc}, {tmp}\n"""
+      accumulators = self.acc_registers()
+      for nr in range(0, self.n * 2):
+        for mr in range(0, self.m):
+          self.asm_string += shift_add.format(
+              acc=accumulators[self.m * nr + mr], tmp=self.w_registers()[0]
+          )
+      perm_reg = self.w_registers()[0]
+      self.asm_string += (
+          f'vmovups {perm_reg}, zmmword ptr [rip + .PERMUTATION]\n'
+      )
+      perm = 'vpermt2ps z{acc0}, {perm_reg}, z{acc1}\n'
+      for nr in range(0, self.n):
+        for mr in range(0, self.m):
+          self.asm_string += perm.format(
+              perm_reg=perm_reg,
+              acc0=accumulators[2 * self.m * nr + mr],
+              acc1=accumulators[2 * self.m * nr + self.m + mr],
+          )
+
+    self.convert_to_float()
+    accumulators = self.acc_registers()
+
+    output_scale = 'vmovaps {W_SCALE}, [{W} + {offset}]\n'
+    # output scales
+    for nr in range(0, self.n):
+      self.asm_string += output_scale.format(
+          W=W,
+          offset=self.register_bytes() * nr,
+          W_SCALE=self.scale_registers()[nr],
+      )
+    self.increment_ptr(ptr=W, step=self.register_bytes() * self.n)
+    for nr in range(0, self.n):
+      for mr in range(0, self.m):
+        self.asm_string += 'vmulps z{ACC}, z{ACC}, {SCALE}\n'.format(
+            ACC=accumulators[nr * self.m + mr],
+            SCALE=self.scale_registers()[nr],
+        )
+
+    for nr in range(0, self.n):
+      for mr in range(0, self.m):
+        self.asm_string += 'vminps z{ACC}, z{ACC}, z{MAX}\n'.format(
+            ACC=accumulators[nr * self.m + mr],
+            MAX=self.max_register(),
+        )
+
+    for nr in range(0, self.n):
+      for mr in range(0, self.m):
+        self.asm_string += 'vcvtps2dq z{ACC}, z{ACC}\n'.format(
+            ACC=accumulators[nr * self.m + mr],
+        )
+
+    for nr in range(0, self.n):
+      for mr in range(0, self.m):
+        self.asm_string += 'vpaddd z{ACC}, z{ACC}, zmm29\n'.format(
+            ACC=accumulators[nr * self.m + mr],
+        )
+
+    for nr in range(0, self.n):
+      for mr in range(0, self.m):
+        self.asm_string += 'vpmovsdb x{ACC}, z{ACC}\n'.format(
+            ACC=accumulators[nr * self.m + mr],
+        )
+
+    for nr in range(0, self.n):
+      for mr in range(0, self.m):
+        self.asm_string += 'vpmaxsb x{ACC}, x{ACC}, x{MIN}\n'.format(
+            ACC=accumulators[nr * self.m + mr],
+            MIN=self.min_register(),
+        )
+
+    return self.asm_string
+
+  def store(self):
+    tmp_gp_regs = self.tmp_gp_registers()
+    accumulators = self.acc_registers()
+    cm_registers = self.cm_registers()
+    nc_reg = self.nc_register()
+    pop_c = self.m > self.max_m_before_spilling()
+    c_reg_offset = self.max_m_before_spilling()
+    if pop_c:
+      self.asm_string += '\n' + '# Pop output pointers from the stack.\n'
+      c_reg_offset = 0
+      pop_c_str = 'mov {C_REG}, [rsp + {offset}]\n'
+      for mr in range(0, self.m):
+        sp_offset = (mr) * 16 + self.c_ptr_stack_offset()
+        self.asm_string += pop_c_str.format(
+            C_REG=cm_registers[mr], offset=sp_offset
+        )
+    self.asm_string += """
+      # Check whether full or partial store.
+      cmp {nc}, {n_step}
+      jl .Ltail\n""".format(n_step=self.n * self.n_step(), nc=nc_reg)
+    for mr in range(0, self.m):
+      self.asm_string += """
+      vmovups  [{c_reg}], x{ACC}""".format(
+          ACC=accumulators[mr], c_reg=cm_registers[mr + c_reg_offset]
+      )
+      for nr in range(1, self.n):
+        self.asm_string += """
+      vmovups  [{c_reg} + {offset}], x{ACC}""".format(
+            ACC=accumulators[self.m * nr + mr],
+            c_reg=cm_registers[mr + c_reg_offset],
+            offset=self.register_bytes()
+            * nr
+            // 4,  # TODO: Find a better way to compute this stride than dividing by 4.
+        )
+    self.asm_string += '\n'
+    for mr in range(0, self.m):
+      self.asm_string += 'add {cm}, {cn_stride}\n'.format(
+          cn_stride=self.n
+          * self.register_bytes()
+          // 4,  # TODO: Find a better way to compute this stride than dividing by 4.
+          cm=cm_registers[mr + c_reg_offset],
+      )
+    if pop_c:
+      self.asm_string += '\n' + '# Write output pointers to the stack.\n'
+      pop_c_str = 'mov [rsp + {offset}], {C_REG}\n'
+      for mr in range(0, self.m):
+        sp_offset = (mr) * 16 + self.c_ptr_stack_offset()
+        self.asm_string += pop_c_str.format(
+            C_REG=cm_registers[mr], offset=sp_offset
+        )
+    check = """
+      sub {nc}, {n_step}
+      jne .Louter_loop
+      jmp .Lreturn\n""".format(n_step=self.n * self.n_step(), nc=nc_reg)
+    self.asm_string += check
+
+    self.asm_string += '\n.Ltail:'
+    if self.n * self.n_step() == 64:
+      self.asm_string += """
+      mov {tmp1}, -1
+      shlx {tmp1}, {tmp1}, {nc_reg}
+      not {tmp1}
+      kmovw k1, {tmp1_lo}
+      shr {tmp1}, 16
+      kmovw k2, {tmp1_lo}
+      shr {tmp1}, 16
+      kmovw k3, {tmp1_lo}
+      shr {tmp1}, 16
+      kmovw k4, {tmp1_lo}\n
+      """.format(
+          nc_reg=nc_reg,
+          tmp1=tmp_gp_regs[1],
+          tmp1_lo=self.register_map_dword(tmp_gp_regs[1]),
+      )
+      for mr in range(0, self.m):
+        self.asm_string += (
+            'vmovdqu8  XMMWORD PTR [{c_reg}]{{k1}}, z{ACC}\n'.format(
+                ACC=accumulators[mr], c_reg=cm_registers[mr + c_reg_offset]
+            )
+        )
+        self.asm_string += (
+            'vmovdqu8  XMMWORD PTR [{c_reg} + 16]{{k2}}, z{ACC}\n'.format(
+                ACC=accumulators[mr + self.m],
+                c_reg=cm_registers[mr + c_reg_offset],
+            )
+        )
+        self.asm_string += (
+            'vmovdqu8  XMMWORD PTR [{c_reg} + 32]{{k3}}, z{ACC}\n'.format(
+                ACC=accumulators[mr + 2 * self.m],
+                c_reg=cm_registers[mr + c_reg_offset],
+            )
+        )
+        self.asm_string += (
+            'vmovdqu8  XMMWORD PTR [{c_reg} + 64]{{k4}}, z{ACC}\n'.format(
+                ACC=accumulators[mr + 3 * self.m],
+                c_reg=cm_registers[mr + c_reg_offset],
+            )
+        )
+    elif self.n * self.n_step() == 32:
+      self.asm_string += """
+      mov {tmp1}, -1
+      shlx {tmp1}, {tmp1}, {nc_reg}
+      not {tmp1}
+      kmovw k1, {tmp1_lo}
+      shr {tmp1_lo}, 16
+      kmovw k2, {tmp1_lo}\n""".format(
+          nc_reg=nc_reg,
+          tmp1_lo=self.register_map_dword(tmp_gp_regs[1]),
+          tmp1=tmp_gp_regs[1],
+      )
+      for mr in range(0, self.m):
+        self.asm_string += (
+            'vmovdqu8  XMMWORD PTR [{c_reg}]{{k1}}, z{ACC}\n'.format(
+                ACC=accumulators[mr], c_reg=cm_registers[mr + c_reg_offset]
+            )
+        )
+        self.asm_string += (
+            'vmovdqu8  XMMWORD PTR [{c_reg} + 16]{{k2}}, z{ACC}\n'.format(
+                ACC=accumulators[mr + self.m],
+                c_reg=cm_registers[mr + c_reg_offset],
+            )
+        )
+    else:
+      self.asm_string += """
+      mov {tmp1}, -1
+      shlx {tmp1}, {tmp1}, {nc_reg}
+      not {tmp1}
+      kmovw k1, {tmp1_lo}\n""".format(
+          nc_reg=nc_reg,
+          tmp1=tmp_gp_regs[1],
+          tmp1_lo=self.register_map_dword(tmp_gp_regs[1]),
+      )
+      for mr in range(0, self.m):
+        self.asm_string += (
+            'vmovdqu8  XMMWORD PTR [{c_reg}]{{k1}}, x{ACC}\n'.format(
+                ACC=accumulators[mr], c_reg=cm_registers[mr + c_reg_offset]
+            )
+        )
+
+  def outer_loop_prepare(self):
+    self.asm_string += """
+    # Load 0x80 for xoring the weights
+    vbroadcastsd  z{mask}, qword ptr [rip + .MASK]\n
+    """.format(
+        mask=self.mask_register(),
+    )

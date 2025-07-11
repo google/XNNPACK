@@ -171,8 +171,7 @@ BEGIN_FUNCTION {function_name}
 
       # load params to free up a GP registers
       mov r13, [rsp + {params_offset}] # params
-      vbroadcastss {prefix}mm0, DWORD PTR [r13]
-      vbroadcastss {prefix}mm1, DWORD PTR [r13 + 4]
+      {load_params}
 
       # Load c pointer.
       mov r10, [rsp + 72]
@@ -182,6 +181,13 @@ BEGIN_FUNCTION {function_name}
         function_name=self.function_name(),
         prefix=self.prefix(),
         params_offset=self.params_offset(),
+        load_params=self.load_params('r13'),
+    )
+
+  def load_params(self, reg):
+    return """vbroadcastss {prefix}mm0, DWORD PTR [{reg}]
+      vbroadcastss {prefix}mm1, DWORD PTR [{reg} + 4]""".format(
+        reg=reg, prefix=self.prefix()
     )
 
   # Quantization parameters are pushed to the stack at this offset.
@@ -430,6 +436,7 @@ END_FUNCTION {function_name}.dfsan
             AM=self.a_registers(mr),
             a_offset=self.k_register(),
             A=self.a_registers(mr),
+            mask=self.mask_register(),
         )
       for m in self.compute_asm()[loop]:
         for nr in range(0, n):
@@ -483,6 +490,7 @@ END_FUNCTION {function_name}.dfsan
             AM=self.a_registers(0),
             a_offset=self.k_register(),
             A=self.a_registers(0),
+            mask=self.mask_register(),
         )
         loop = 'loop_tail' if tail else 'loop'
         for m in self.compute_asm()[loop]:
