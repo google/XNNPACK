@@ -255,7 +255,7 @@ class Avx512FC(Avx512F):
         + f'__asm_amd64_{self.isa()}_broadcast'
     )
 
-  def convert_to_output_type(self):
+  def convert_to_output(self):
     shift_add = """vpsrlq {tmp}, z{acc}, 32
       vaddps z{acc}, z{acc}, {tmp}\n"""
     accumulators = self.acc_registers()
@@ -274,6 +274,9 @@ class Avx512FC(Avx512F):
             acc0=accumulators[2 * self.m * nr + mr],
             acc1=accumulators[2 * self.m * nr + self.m + mr],
         )
+
+    self.comment('Min/max clamping.')
+    self.clamp()
 
   def k_mask(self):
     return '0xFFFFFFFFFFFFFFFB'

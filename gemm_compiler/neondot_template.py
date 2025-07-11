@@ -108,7 +108,7 @@ class NeonDot(neonfma_template.NeonFma):
       case _:
         raise NotImplementedError
 
-  def convert_to_output_type(self):
+  def convert_to_output(self):
     accumulators = self.acc_registers()
     self.comment('Convert from int32 to float.')
     for nr in range(0, self.n * self.m):
@@ -172,6 +172,9 @@ class NeonDot(neonfma_template.NeonFma):
             b=accumulators[mr * self.n + nr],
             c=self.w_registers()[nr],
         )
+
+    self.comment('Min/max clamping.')
+    self.clamp()
 
   def init_accumulators(self):
     self.comment('Initialize accumulators with k_sum * input zero point.')
@@ -282,7 +285,7 @@ class NeonDotQS8QC8W(NeonDot):
   def dup_s16(self, ptr, q):
     self.asm_string += f'ld1r {{v{q}.8h}}, [{ptr}]\n'
 
-  def convert_to_output_type(self):
+  def convert_to_output(self):
     accumulators = self.acc_registers()
     self.comment('Convert from int32 to float.')
     for nr in range(0, self.n * self.m):
@@ -349,6 +352,9 @@ class NeonDotQS8QC8W(NeonDot):
           b=accumulators[mr * self.n + 2],
           atype='sint16',
       )
+
+    self.comment('Min/max clamping.')
+    self.clamp()
 
   def clamp_min(self, reg, prefix):
     max_reg = self.max_register()

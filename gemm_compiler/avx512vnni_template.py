@@ -166,7 +166,7 @@ class Avx512Vnni(avx512f_template.Avx512F):
         ACC = accumulators[self.m * nr + mr]
         self.asm_string += f'vcvtdq2ps z{ACC}, z{other_reg}\n'
 
-  def convert_to_output_type(self):
+  def convert_to_output(self):
     W = self.w_ptr_register()
     if self._c == 8:
       shift_add = """vpsrlq {tmp}, z{acc}, 32
@@ -233,6 +233,9 @@ class Avx512Vnni(avx512f_template.Avx512F):
             SCALE=self.scale_registers()[nr],
             BIAS=self.w_registers()[nr],
         )
+
+    self.comment('Min/max clamping.')
+    self.clamp()
 
     return self.asm_string
 

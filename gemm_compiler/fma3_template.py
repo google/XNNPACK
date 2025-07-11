@@ -62,8 +62,9 @@ class Fma3(x64_template.X64):
   def max_m_before_spilling(self):
     return 4
 
-  def convert_to_output_type(self):
-    return ''
+  def convert_to_output(self):
+    self.comment('Min/max clamping.')
+    self.clamp()
 
   def prefix(self):
     return 'y'

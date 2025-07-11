@@ -122,7 +122,7 @@ class NeonMlal(aarch32_template.Aarch32):
     self.asm_string += f'vld1.32 {{d{qmax_0}[], d{qmax_1}[]}}, [{minmax_reg}]\n'
     self.asm_string += f'sub {minmax_reg}, {minmax_reg}, #4\n'
 
-  def convert_to_output_type(self):
+  def convert_to_output(self):
     accumulators = self.acc_registers()
     self.asm_string += '\n# Convert from int32 to float.\n'
     for nr in range(0, self.n * self.m):
@@ -168,6 +168,9 @@ class NeonMlal(aarch32_template.Aarch32):
         self.asm_string += 'vadd.f32 q{ACC}, q{ACC}, q{BIAS}\n'.format(
             ACC=accumulators[mr * 2 + nr], BIAS=self.w_registers()[nr]
         )
+
+    self.comment('Min/max clamping.')
+    self.clamp()
 
   # The number of k elements to unroll the inner loop by.
   # 8 is the only value which makes sense for mlal.
