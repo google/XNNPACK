@@ -150,6 +150,20 @@ uint32_t xnn_get_heuristic_mr_igemm(
   return best_mr;
 }
 
+enum xnn_status xnn_allocate_extra_params(
+    xnn_operator_t op, size_t num_extra_params) {
+  op->extra_params = xnn_allocate_zero_memory(
+      num_extra_params * sizeof(union xnn_params));
+  if (op->extra_params == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for operator descriptor",
+                  num_extra_params * sizeof(union xnn_params));
+    return xnn_status_out_of_memory;
+  }
+  op->num_extra_params = num_extra_params;
+
+  return xnn_status_success;
+}
+
 enum xnn_status xnn_destroy_operator(xnn_operator_t op)
 {
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
@@ -181,7 +195,8 @@ enum xnn_status xnn_destroy_operator(xnn_operator_t op)
   xnn_release_simd_memory(op->ukernel.gemm_ukernels);
   xnn_release_simd_memory(op->dynamic_context.gemm);
   xnn_release_memory(op->compute);
-  xnn_release_memory(op->params2);
+  xnn_release_memory(op->extra_params);
+
   return xnn_status_success;
 }
 

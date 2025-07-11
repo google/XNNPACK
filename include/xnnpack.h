@@ -2551,8 +2551,8 @@ enum xnn_status xnn_delete_operator(
 enum xnn_status xnn_create_binary_elementwise_nd(
   enum xnn_binary_operator type,
   enum xnn_datatype datatype,
-  const struct xnn_quantization_params* input1_quantization,
-  const struct xnn_quantization_params* input2_quantization,
+  const struct xnn_quantization_params* a_quantization,
+  const struct xnn_quantization_params* b_quantization,
   const struct xnn_quantization_params* output_quantization,
   uint32_t flags,
   xnn_operator_t* binary_op_out);

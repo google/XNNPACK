@@ -192,14 +192,27 @@ struct xnn_convolution_operator {
   struct subconvolution_params* subconvolution_buffer;
 };
 
-union xnn_params2 {
+union xnn_params {
   union xnn_binary_uparams binary;
-  union xnn_unary_uparams unary;
   struct xnn_f16_default_params f16_default;
-  struct xnn_f32_minmax_params f32_minmax;
   struct xnn_f32_default_params f32_default;
+  struct xnn_f16_minmax_params f16_minmax;
+  struct xnn_f16_scaleminmax_params f16_scaleminmax;
+  struct xnn_f32_minmax_params f32_minmax;
+  struct xnn_f32_scaleminmax_params f32_scaleminmax;
+  struct xnn_f32_scale_params f32_scale;
+  struct xnn_f16_minmax_params f16_chw;
+  struct xnn_f32_minmax_params f32_chw;
+  struct xnn_f32_qb4w_minmax_params f32_qb4w_minmax;
+  struct xnn_f32_qc4w_minmax_params f32_qc4w_minmax;
+  struct xnn_reduce_params reduce;
+  union xnn_qs8_conv_minmax_params qs8_conv_minmax;
+  union xnn_qs8_qc8w_conv_minmax_params qs8_qc8w_conv_minmax;
+  union xnn_qu8_conv_minmax_params qu8_conv_minmax;
   struct xnn_s8_minmax_params s8_minmax;
+  struct xnn_s32_default_params s32_default;
   struct xnn_u8_minmax_params u8_minmax;
+  union xnn_unary_uparams unary;
 };
 
 struct xnn_operator {
@@ -263,35 +276,16 @@ struct xnn_operator {
     } padding;
   };
 
-  union {
-    union xnn_binary_uparams binary;
-    union xnn_unary_uparams unary;
-    struct xnn_f16_default_params f16_default;
-    struct xnn_f32_default_params f32_default;
-    struct xnn_f16_minmax_params f16_minmax;
-    struct xnn_f16_scaleminmax_params f16_scaleminmax;
-    struct xnn_reduce_params reduce;
-    struct xnn_f32_minmax_params f32_minmax;
-    struct xnn_f32_scaleminmax_params f32_scaleminmax;
-    struct xnn_f32_scale_params f32_scale;
-    struct xnn_f16_minmax_params f16_chw;
-    struct xnn_f32_minmax_params f32_chw;
-    struct xnn_f32_qb4w_minmax_params f32_qb4w_minmax;
-    struct xnn_f32_qc4w_minmax_params f32_qc4w_minmax;
-    union xnn_qs8_conv_minmax_params qs8_conv_minmax;
-    union xnn_qs8_qc8w_conv_minmax_params qs8_qc8w_conv_minmax;
-    union xnn_qu8_conv_minmax_params qu8_conv_minmax;
-    struct xnn_s8_minmax_params s8_minmax;
-    struct xnn_s32_default_params s32_default;
-    struct xnn_u8_minmax_params u8_minmax;
-  } params;
+  union xnn_params params;
+
   // Second set of params. Operators like Dynamic Fully Connected only decides
   // on the specific config to use during reshape, so it needs to keep two sets
   // of params around. Configs can have different initialization functions. We
   // also use this to store parameters to binary operators. For most such
   // operators, this is a copy of params, but params need to be swapped for
   // commutative ops with per-operand params.
-  union xnn_params2* params2;
+  union xnn_params* extra_params;
+  size_t num_extra_params;
   enum xnn_operator_type type;
   struct xnn_ukernel ukernel;
 
