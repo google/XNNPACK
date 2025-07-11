@@ -109,6 +109,9 @@ xnn_datatype xnn_datatype_of() {
     return xnn_datatype_qcint8;
   } else if (std::is_same<T, xnnpack::quantized<int32_t>>::value) {
     return xnn_datatype_qint32;
+  } else if (std::is_same<
+                 T, xnnpack::quantized<int32_t, xnnpack::channelwise>>::value) {
+    return xnn_datatype_qcint32;
   } else if (std::is_same<T, xnn_float16>::value) {
     return xnn_datatype_fp16;
   } else if (std::is_same<T, xnn_bfloat16>::value) {

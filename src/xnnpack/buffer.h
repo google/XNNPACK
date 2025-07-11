@@ -1031,7 +1031,7 @@ class DatatypeGenerator<quantized<T>> {
 
  public:
   DatatypeGenerator(float min, float max,
-                    const xnn_quantization_params& params) {
+                    const xnn_quantization_params params = {0, 1.0f}) {
     min = std::ceil(fake_quantize(min, params));
     max = std::floor(fake_quantize(max, params));
     dist_ = std::uniform_int_distribution<int>(round_float_to_int<T>(min),
@@ -1040,7 +1040,8 @@ class DatatypeGenerator<quantized<T>> {
   explicit DatatypeGenerator(const xnn_quantization_params& params)
       : DatatypeGenerator(-1.0f, 1.0f, params) {}
   DatatypeGenerator()
-      : dist_(std::numeric_limits<T>::min(), std::numeric_limits<T>::max()) {}
+      : DatatypeGenerator(std::numeric_limits<T>::min(),
+                          std::numeric_limits<T>::max()) {}
 
   template <typename Rng>
   T operator()(Rng& rng) {

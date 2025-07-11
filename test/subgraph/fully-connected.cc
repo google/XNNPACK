@@ -60,7 +60,11 @@ using quint8 = quantized<uint8_t>;
 using qint8 = quantized<int8_t>;
 using qcint8 = quantized<int8_t, channelwise>;
 using qint32 = quantized<int32_t>;
+using qcint32 = quantized<int32_t, channelwise>;
 using qcint4 = quantized<int4x2, channelwise>;
+
+// Bogus datatype used to indicate an invalid type.
+using invalid_type = quantized<float>;
 
 // This is not a "real" XNNPACK datatype, but it is required to match the
 // behavior of F32QC4W (b/407771627).
@@ -97,6 +101,14 @@ xnn_datatype datatype_of() {
   }
 }
 
+template <typename T>
+static float max_abs_bias() {
+  if (std::is_same<T, qint32>::value) {
+    return 10000;
+  }
+  return 1.0f;
+};
+
 // Compute output(oc) = bias(oc) + sum(input'(ic) * filter'(oc, ic)), where the
 // input, filter, and bias are potentially quantized.
 template <typename Input, typename Filter, typename Bias, typename Scale>
@@ -104,12 +116,12 @@ void MatrixVectorMultiply(const Input* input, const Tensor<Filter>& filter,
                           Tensor<Bias> bias,
                           const xnn_quantization_params& input_quantization,
                           int filter_zero_point, Tensor<Scale> filter_scale,
-                          size_t filter_ic_block_size,
-                          const xnn_quantization_params& bias_quantization,
-                          float* output) {
+                          size_t filter_ic_block_size, int bias_zero_point,
+                          Tensor<Scale> bias_scale, float* output) {
   for (size_t oc = 0; oc < filter.extent(0); ++oc) {
     double output_ic =
-        bias.empty() ? 0.0f : dequantize(bias(oc), bias_quantization);
+        bias.empty() ? 0.0f
+                     : dequantize(bias(oc), {bias_zero_point, bias_scale(oc)});
     for (size_t ic = 0; ic < filter.extent(1); ++ic) {
       xnn_quantization_params filter_quantization = {
           filter_zero_point, filter_scale(oc, ic / filter_ic_block_size)};
@@ -130,12 +142,12 @@ void MatrixVectorMultiplyInt4(const Input* input, const Tensor<Filter>& filter,
                               Tensor<Bias> bias,
                               const xnn_quantization_params& input_quantization,
                               int filter_zero_point, Tensor<Scale> filter_scale,
-                              size_t filter_ic_block_size,
-                              const xnn_quantization_params& bias_quantization,
-                              float* output) {
+                              size_t filter_ic_block_size, int bias_zero_point,
+                              Tensor<Scale> bias_scale, float* output) {
   for (size_t oc = 0; oc < filter.extent(0); ++oc) {
     double output_ic =
-        bias.empty() ? 0.0f : dequantize(bias(oc), bias_quantization);
+        bias.empty() ? 0.0f
+                     : dequantize(bias(oc), {bias_zero_point, bias_scale(oc)});
     for (size_t ic = 0; ic < filter.extent(1); ++ic) {
       for (size_t p = 0; p < 2; ++p) {
         xnn_quantization_params filter_quantization = {
@@ -155,12 +167,11 @@ void MatrixVectorMultiply(const Input* input, const Tensor<qcint4>& filter,
                           Tensor<Bias> bias,
                           const xnn_quantization_params& input_quantization,
                           int filter_zero_point, Tensor<Scale> filter_scale,
-                          size_t filter_ic_block_size,
-                          const xnn_quantization_params& bias_quantization,
-                          float* output) {
+                          size_t filter_ic_block_size, int bias_zero_point,
+                          Tensor<Scale> bias_scale, float* output) {
   return MatrixVectorMultiplyInt4(
       input, filter, bias, input_quantization, filter_zero_point, filter_scale,
-      filter_ic_block_size, bias_quantization, output);
+      filter_ic_block_size, bias_zero_point, bias_scale, output);
 }
 
 template <typename Input, typename Bias, typename Scale>
@@ -168,12 +179,11 @@ void MatrixVectorMultiply(const Input* input, const Tensor<qcuint4>& filter,
                           Tensor<Bias> bias,
                           const xnn_quantization_params& input_quantization,
                           int filter_zero_point, Tensor<Scale> filter_scale,
-                          size_t filter_ic_block_size,
-                          const xnn_quantization_params& bias_quantization,
-                          float* output) {
+                          size_t filter_ic_block_size, int bias_zero_point,
+                          Tensor<Scale> bias_scale, float* output) {
   return MatrixVectorMultiplyInt4(
       input, filter, bias, input_quantization, filter_zero_point, filter_scale,
-      filter_ic_block_size, bias_quantization, output);
+      filter_ic_block_size, bias_zero_point, bias_scale, output);
 }
 
 template <typename Input, typename Filter, typename Bias, typename Scale>
@@ -181,9 +191,8 @@ Tensor<float> ReferenceImpl(Tensor<Input> input, Tensor<Filter> filter,
                             Tensor<Bias> bias,
                             const xnn_quantization_params& input_quantization,
                             int filter_zero_point, Tensor<Scale> filter_scale,
-                            size_t filter_ic_block_size,
-                            const xnn_quantization_params& bias_quantization,
-                            uint32_t flags) {
+                            size_t filter_ic_block_size, int bias_zero_point,
+                            Tensor<Scale> bias_scale, uint32_t flags) {
   if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
     filter = filter.transpose({1, 0});
   }
@@ -198,7 +207,7 @@ Tensor<float> ReferenceImpl(Tensor<Input> input, Tensor<Filter> filter,
   for (const auto& i : EnumerateIndices(output_batches.shape())) {
     MatrixVectorMultiply(&input_batches(i), filter, bias, input_quantization,
                          filter_zero_point, filter_scale, filter_ic_block_size,
-                         bias_quantization, &output_batches(i));
+                         bias_zero_point, bias_scale, &output_batches(i));
   }
 
   return output;
@@ -225,16 +234,18 @@ int32_t MaxOfDatatype(quantized<T, Kind>) {
   return NumericLimits<quantized<T, Kind>>::max();
 }
 
-DatatypeGenerator<qint32> MakeDatatypeGenerator(qint32) {
-  return DatatypeGenerator<qint32>(-10000, 10000, {0, 1.0f});
-}
-
 // Generate 2 values at once with uint8.
 DatatypeGenerator<quint8> MakeDatatypeGenerator(qcint4) {
   return DatatypeGenerator<quint8>();
 }
 DatatypeGenerator<quint8> MakeDatatypeGenerator(qcuint4) {
   return DatatypeGenerator<quint8>();
+}
+
+// Generate values within an explicit range.
+template <typename T>
+DatatypeGenerator<T> MakeDatatypeGenerator(T, float min, float max) {
+  return DatatypeGenerator<T>(min, max);
 }
 
 template <typename T>
@@ -246,10 +257,11 @@ xnn_quantization_params quantization_for_range(float min, float max) {
   return result;
 }
 
-template <typename Input, typename Filter, typename Output>
+template <typename Input, typename Filter, typename Bias, typename Output>
 xnn_quantization_params CalculateFullyConnectedQuantizationParams(
     size_t reduction_size, xnn_quantization_params input_quantization,
-    xnn_quantization_params filter_quantization) {
+    xnn_quantization_params filter_quantization,
+    xnn_quantization_params bias_quantization) {
   if (!xnn_datatype_is_quantized(datatype_of<Output>())) {
     return {0, 1.0f};
   }
@@ -263,6 +275,8 @@ xnn_quantization_params CalculateFullyConnectedQuantizationParams(
       dequantize(NumericLimits<Filter>::min(), filter_quantization);
   const float filter_max =
       dequantize(NumericLimits<Filter>::max(), filter_quantization);
+  const float bias_min = dequantize(-max_abs_bias<Bias>(), bias_quantization);
+  const float bias_max = dequantize(max_abs_bias<Bias>(), bias_quantization);
 
   // Find the range of the product of an input and a filter value.
   std::array<float, 4> corners = {
@@ -274,8 +288,10 @@ xnn_quantization_params CalculateFullyConnectedQuantizationParams(
   auto input_filter_minmax =
       std::minmax_element(corners.begin(), corners.end());
 
-  const float output_min = *input_filter_minmax.first * reduction_size;
-  const float output_max = *input_filter_minmax.second * reduction_size;
+  const float output_min =
+      *input_filter_minmax.first * reduction_size + bias_min;
+  const float output_max =
+      *input_filter_minmax.second * reduction_size + bias_max;
 
   // Now we want the output quantization to hold the range of the output.
   return quantization_for_range<Output>(output_min, output_max);
@@ -340,15 +356,6 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
     Tensor<Filter> filter(filter_shape, XnnExtraBytes);
     filter.generate([&]() { return filter_gen(rng); });
 
-    // (Maybe) make a random bias.
-    Tensor<Bias> bias;
-    if (rng() & 1) {
-      std::vector<size_t> bias_shape = {output_channels};
-      DatatypeGenerator<Bias> bias_gen = MakeDatatypeGenerator(Bias());
-      Tensor<Bias> bias(bias_shape, XnnExtraBytes);
-      bias.generate([&]() { return bias_gen(rng); });
-    }
-
     xnn_quantization_params input_quantization =
         random_quantization(datatype_of<Input>(), rng, 0.001f, 2.0f);
 
@@ -371,13 +378,27 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
     }
     broadcast_extent_1(filter_scale);
 
+    // (Maybe) make a random bias.
+    Tensor<Bias> bias;
+    if (!std::is_same<Bias, invalid_type>::value && flag_dist(rng)) {
+      std::vector<size_t> bias_shape = {output_channels};
+      DatatypeGenerator<Bias> bias_gen = MakeDatatypeGenerator(
+          Bias(), -max_abs_bias<Bias>(), max_abs_bias<Bias>());
+      bias = Tensor<Bias>(bias_shape, XnnExtraBytes);
+      bias.generate([&]() { return bias_gen(rng); });
+    }
+
     // The output quantization is computed from the kernel size and input
     // quantization.
+    xnn_quantization_params bias_quantization =
+        xnn_datatype_is_quantized(datatype_of<Bias>())
+            ? xnn_quantization_params{0, input_quantization.scale *
+                                             filter_quantization.scale}
+            : xnn_quantization_params{0, 1.0f};
     xnn_quantization_params output_quantization =
-        CalculateFullyConnectedQuantizationParams<Input, Filter, Output>(
-            input_channels, input_quantization, filter_quantization);
-    xnn_quantization_params bias_quantization = {
-        0, input_quantization.scale * filter_quantization.scale};
+        CalculateFullyConnectedQuantizationParams<Input, Filter, Bias, Output>(
+            input_channels, input_quantization, filter_quantization,
+            bias_quantization);
 
     float output_min = dequantize(output_gen(rng), output_quantization);
     float output_max = dequantize(output_gen(rng), output_quantization);
@@ -475,10 +496,21 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
           .InvokeRuntime();
 
       // Verify results.
+      int32_t bias_zero_point;
+      Tensor<Scale> bias_scale({bias.size()});
+      if (xnn_datatype_is_channelwise_quantized(datatype_of<Bias>())) {
+        bias_zero_point = filter_quantization.zero_point;
+        for (size_t k = 0; k < bias_scale.extent(0); k++) {
+          bias_scale(k) = input_quantization.scale * filter_scale(k, 0);
+        }
+      } else {
+        bias_zero_point = bias_quantization.zero_point;
+        bias_scale.fill(bias_quantization.scale);
+      }
       Tensor<float> expected =
           ReferenceImpl(input, filter, bias, input_quantization,
                         filter_quantization.zero_point, filter_scale,
-                        block_size, bias_quantization, flags);
+                        block_size, bias_zero_point, bias_scale, flags);
       for (float& i : expected) {
         i = std::max(i, output_min);
         i = std::min(i, output_max);
@@ -489,18 +521,24 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
         for (const auto& i : EnumerateIndices(output.extents())) {
           ASSERT_NEAR(output(i),
                       quantize<Output>(expected(i), output_quantization), 1)
-              << "input_shape=" << index_to_string(input_shape)
+              << "i=" << index_to_string(i)
+              << ", input_shape=" << index_to_string(input_shape)
               << ", output_shape=" << index_to_string(output_shape)
               << ", filter_shape=" << index_to_string(filter_shape);
         }
       } else {
         const float max_a = MaxOfDatatype(Input());
         const float max_b = MaxOfDatatype(Filter()) * filter_quantization.scale;
+        const float max_bias =
+            bias.empty() ? 0.0f
+                         : max_abs_bias<Bias>() * bias_quantization.scale;
         const float tolerance = xnnpack::epsilon(xnn_datatype_of<Output>()) *
-                                input_channels * max_a * max_b * 4.0f;
+                                (input_channels * max_a * max_b + max_bias) *
+                                4.0f;
         for (const auto& i : EnumerateIndices(output.extents())) {
           ASSERT_NEAR(static_cast<float>(output(i)), expected(i), tolerance)
-              << "input_shape=" << index_to_string(input_shape)
+              << "i=" << index_to_string(i)
+              << ", input_shape=" << index_to_string(input_shape)
               << ", output_shape=" << index_to_string(output_shape)
               << ", filter_shape=" << index_to_string(filter_shape);
         }
@@ -509,10 +547,12 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
   }
 }
 
-TEST(FullyConnectedQC8, static_b) { TestStaticB<qint8, qcint8, qint32>(); }
+TEST(FullyConnectedQC8, static_b) { TestStaticB<qint8, qcint8, qcint32>(); }
 TEST(FullyConnectedQU8, static_b) { TestStaticB<quint8, quint8, qint32>(); }
-TEST(FullyConnectedQS8QC8W, static_b) { TestStaticB<qint8, qcint8, qint32>(); }
-TEST(FullyConnectedQS8QC4W, static_b) { TestStaticB<qint8, qcint4, qint32>(); }
+
+TEST(FullyConnectedQS8QC8W, static_b) { TestStaticB<qint8, qcint8, qcint32>(); }
+TEST(FullyConnectedQS8QC4W, static_b) { TestStaticB<qint8, qcint4, qcint32>(); }
+
 TEST(FullyConnectedF16F32F16, static_b) {
   TestStaticB<xnn_float16, float, float>();
 }
@@ -520,18 +560,31 @@ TEST(FullyConnectedF16, static_b) {
   TestStaticB<xnn_float16, xnn_float16, xnn_float16>();
 }
 TEST(FullyConnectedF32, static_b) { TestStaticB<float, float, float>(); }
+
 // TODO(b/407771627): Either add xnn_datatype_qcuint4, or remove F32QC4W.
-TEST(FullyConnectedF32QC4W, static_b) { TestStaticB<float, qcuint4, float>(); }
-TEST(FullyConnectedF32QC8W, static_b) { TestStaticB<float, qcint8, float>(); }
+TEST(FullyConnectedF32QC4W, static_b) {
+  // It looks like these kernels want the bias to be `float` and scaled by the
+  // inverse channelwise weight scale. Setting `Bias` to `invalid_type` to
+  // disable testing with a bias vector until we've figured this out.
+  TestStaticB<float, qcuint4, invalid_type>();
+}
+TEST(FullyConnectedF32QC8W, static_b) {
+  // It looks like these kernels want the bias to be `float` and scaled by the
+  // inverse channelwise weight scale. Setting `Bias` to `invalid_type` to
+  // disable testing with a bias vector until we've figured this out.
+  TestStaticB<float, qcint8, invalid_type>();
+}
+
 TEST(FullyConnectedBF16F32, static_b) {
   TestStaticB<xnn_bfloat16, xnn_bfloat16, float, float>();
 }
+
 TEST(FullyConnectedQD8F16QC4W, static_b) {
-  TestStaticB<xnn_float16, qcint4, xnn_float16>(
+  TestStaticB<xnn_float16, qcint4, float>(
       /*convert_to=*/xnn_datatype_qdint8);
 }
 TEST(FullyConnectedQD8F16QC8W, static_b) {
-  TestStaticB<xnn_float16, qcint8, xnn_float16>(
+  TestStaticB<xnn_float16, qcint8, float>(
       /*convert_to=*/xnn_datatype_qdint8);
 }
 TEST(FullyConnectedQD8F32QC4W, static_b) {
@@ -542,7 +595,7 @@ TEST(FullyConnectedQD8F32QC8W, static_b) {
 }
 
 TEST(FullyConnectedQD8F16QB4W, static_b) {
-  TestStaticB<xnn_float16, qcuint4, xnn_float16, xnn_float16, xnn_bfloat16>(
+  TestStaticB<xnn_float16, qcuint4, float, xnn_float16, xnn_bfloat16>(
       /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
 }
 TEST(FullyConnectedQD8F32QB4W, static_b) {
@@ -551,7 +604,7 @@ TEST(FullyConnectedQD8F32QB4W, static_b) {
 }
 
 TEST(FullyConnectedQC8, dont_inline_pack_static_b) {
-  TestStaticB<qint8, qcint8, qint32>(
+  TestStaticB<qint8, qcint8, qcint32>(
       /*convert_to=*/xnn_datatype_invalid, /*block_size=*/no_blockwise,
       /*runtime_flags=*/xnn_test_runtime_flags() |
           XNN_FLAG_NO_INLINED_LHS_PACKING);
@@ -569,13 +622,13 @@ TEST(FullyConnectedF32, dont_inline_pack_static_b) {
           XNN_FLAG_NO_INLINED_LHS_PACKING);
 }
 TEST(FullyConnectedQD8F16QC4W, dont_inline_pack_static_b) {
-  TestStaticB<xnn_float16, qcint4, xnn_float16>(
+  TestStaticB<xnn_float16, qcint4, float>(
       /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/no_blockwise,
       /*runtime_flags=*/xnn_test_runtime_flags() |
           XNN_FLAG_NO_INLINED_LHS_PACKING);
 }
 TEST(FullyConnectedQD8F16QC8W, dont_inline_pack_static_b) {
-  TestStaticB<xnn_float16, qcint8, xnn_float16>(
+  TestStaticB<xnn_float16, qcint8, float>(
       /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/no_blockwise,
       /*runtime_flags=*/xnn_test_runtime_flags() |
           XNN_FLAG_NO_INLINED_LHS_PACKING);
@@ -684,7 +737,8 @@ void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid,
       if (bias_id != XNN_INVALID_VALUE_ID) {
         std::vector<size_t> bias_shape = {output_channels};
         bias = Tensor<Bias>(bias_shape, XnnExtraBytes);
-        DatatypeGenerator<Bias> bias_gen = MakeDatatypeGenerator(Bias());
+        DatatypeGenerator<Bias> bias_gen = MakeDatatypeGenerator(
+            Bias(), -max_abs_bias<Bias>(), max_abs_bias<Bias>());
         bias.generate([&]() { return bias_gen(rng); });
         subgraph.ReshapeExternalTensor(bias_shape, bias.base(), bias_id);
       }
@@ -699,10 +753,12 @@ void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid,
           .InvokeRuntime();
 
       // Verify results.
-      Tensor<float> expected =
-          ReferenceImpl(input, filter, bias, input_quantization,
-                        filter_quantization.zero_point, filter_scale,
-                        block_size, bias_quantization, flags);
+      Tensor<float> bias_scale({bias.size()});
+      bias_scale.fill(bias_quantization.scale);
+      Tensor<float> expected = ReferenceImpl(
+          input, filter, bias, input_quantization,
+          filter_quantization.zero_point, filter_scale, block_size,
+          bias_quantization.zero_point, bias_scale, flags);
       for (float& i : expected) {
         i = std::max(i, output_min);
         i = std::min(i, output_max);
@@ -720,8 +776,12 @@ void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid,
       } else {
         const float max_a = MaxOfDatatype(Input());
         const float max_b = MaxOfDatatype(Filter()) * filter_quantization.scale;
+        const float max_bias =
+            bias.empty() ? 0.0f
+                         : max_abs_bias<Bias>() * bias_quantization.scale;
         const float tolerance = xnnpack::epsilon(xnn_datatype_of<Output>()) *
-                                input_channels * max_a * max_b * 4.0f;
+                                (input_channels * max_a * max_b + max_bias) *
+                                4.0f;
         for (const auto& i : EnumerateIndices(output.extents())) {
           ASSERT_NEAR(static_cast<float>(output(i)), expected(i), tolerance)
               << "input_shape=" << index_to_string(input_shape)
