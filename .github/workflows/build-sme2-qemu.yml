@@ -1,7 +1,7 @@
 name: Build and Run Tests with `qemu` and `sme2`
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       run-tests:
         description: 'Whether to also run unit tests where possible.'
@@ -31,12 +31,12 @@ jobs:
           echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
           sudo dpkg-reconfigure man-db
           sudo apt update
-      - name: Install clang-20
+      - name: Install clang-18
         working-directory: ${{ github.workspace }}
         run: |
           wget https://apt.llvm.org/llvm.sh
           chmod +x llvm.sh
-          sudo ./llvm.sh 20
+          sudo ./llvm.sh 18
       - name: Restore bazel cache
         uses: actions/cache/restore@v4
         with:
@@ -55,8 +55,8 @@ jobs:
       - name: Download and build qemu-aarch64 (if newer)
         id: build-qemu
         env:
-          CC: clang-20
-          CXX: clang++-20
+          CC: clang-18
+          CXX: clang++-18
         run: |
           mkdir -p bin
           wget -Snv https://gitlab.com/qemu-project/qemu/-/archive/master/qemu-master.tar.bz2
@@ -87,8 +87,8 @@ jobs:
         continue-on-error: true
         if: ${{ inputs.run-tests }}
         env:
-          CC: clang-20
-          CXX: clang++-20
+          CC: clang-18
+          CXX: clang++-18
         run: |
           bazel test \
             --platforms=//build_config:aarch64_linux \
@@ -102,6 +102,7 @@ jobs:
             --cache_test_results=no \
             --test_filter="*NEONSME2*" \
             --test_summary=detailed \
+            --test_output=errors \
             --test_timeout=600 \
             --local_test_jobs=$(nproc)
         working-directory: ${{ github.workspace }}
@@ -109,8 +110,8 @@ jobs:
         continue-on-error: true
         if: ${{ inputs.run-tests }}
         env:
-          CC: clang-20
-          CXX: clang++-20
+          CC: clang-18
+          CXX: clang++-18
         run: |
           bazel test \
             --platforms=//build_config:aarch64_linux \
@@ -119,6 +120,7 @@ jobs:
             //test/subgraph/... \
             --cache_test_results=no \
             --test_summary=detailed \
+            --test_output=errors \
             --test_timeout=600 \
             --local_test_jobs=$(nproc)
         working-directory: ${{ github.workspace }}
