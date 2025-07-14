@@ -107,7 +107,7 @@ http_archive(
 # KleidiAI library, used for ARM microkernels.
 http_archive(
     name = "KleidiAI",
-    sha256 = "ad04cc186b12810ecde9d75911c76a0113d3c055773c700377de302eef6c4419",
+    sha256 = "6dd2af9f248cbf1b40e8089b237bc79fda98badc5043049235e10636bf696fdb",
     strip_prefix = "kleidiai-247088200c679f30b1b4a680bd12fee18457a100",
     urls = [
         "https://github.com/ARM-software/kleidiai/archive/247088200c679f30b1b4a680bd12fee18457a100.zip",
