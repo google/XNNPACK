@@ -394,21 +394,26 @@ class Avx512VnniQS8QC8W(Avx512Vnni):
         + f'c{c}__asm_amd64_{self.isa()}'
     )
 
+  def quantization_params_offset(self):
+    # TODO: Reorganize class hierarchy so that this override is not needed, qd8
+    # should be a child/sibling of this.
+    return 0
+
   def pre_header(self):
     super().pre_header()
-    self.asm_string += """.MASK:
+    self.asm_string += """.SIGN_MASK:
         .quad   -9187201950435737472  # 0x8080808080808080\n"""
 
   def load_params(self, reg):
     return """
       movsx         eax, WORD PTR [{reg}]
-      vpbroadcastd zmm29, eax
+      vpbroadcastd zmm31, eax
 
       vpbroadcastb x{min}, BYTE PTR [{reg} + 2]
 
       movsx         eax, WORD PTR [{reg} + 4]
       vpbroadcastd  z{max}, eax
-      vpsubd        z{max}, z{max}, zmm29
+      vpsubd        z{max}, z{max}, zmm31
       vcvtdq2ps     z{max}, z{max}
 """.format(
         reg=reg,
@@ -439,9 +444,14 @@ class Avx512VnniQS8QC8W(Avx512Vnni):
     loop_c4 = (
         'vpxord {AM}, z{mask}, DWORD PTR [{AM_ptr} + {a_offset}]{{1to16}}\n'
     )
+    loop_c8 = (
+        'vpxorq {AM}, z{mask}, QWORD PTR [{AM_ptr} + {a_offset}]{{1to8}}\n'
+    )
     match self._c:
       case 4:
         loop = loop_c4
+      case 8:
+        loop = loop_c8
       case _:
         raise NotImplementedError
     in_asm = {
@@ -508,7 +518,7 @@ class Avx512VnniQS8QC8W(Avx512Vnni):
 
     for nr in range(0, self.n):
       for mr in range(0, self.m):
-        self.asm_string += 'vpaddd z{ACC}, z{ACC}, zmm29\n'.format(
+        self.asm_string += 'vpaddd z{ACC}, z{ACC}, zmm31\n'.format(
             ACC=accumulators[nr * self.m + mr],
         )
 
@@ -669,7 +679,7 @@ class Avx512VnniQS8QC8W(Avx512Vnni):
   def outer_loop_prepare(self):
     self.asm_string += """
     # Load 0x80 for xoring the weights
-    vbroadcastsd  z{mask}, qword ptr [rip + .MASK]\n
+    vbroadcastsd  z{mask}, qword ptr [rip + .SIGN_MASK]\n
     """.format(
         mask=self.mask_register(),
     )

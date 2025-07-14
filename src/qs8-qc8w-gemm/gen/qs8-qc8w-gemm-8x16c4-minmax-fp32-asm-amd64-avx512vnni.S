@@ -4,10 +4,10 @@
 // LICENSE file in the root directory of this source tree.
 
 #include "src/xnnpack/assembly.h"
-.MASK:
+.SIGN_MASK:
       .quad   -9187201950435737472  # 0x8080808080808080
 
-BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_9x16c4__asm_amd64_avx512vnni
+BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x16c4__asm_amd64_avx512vnni
 
       .intel_syntax noprefix
       # Free up GP registers.
@@ -25,13 +25,13 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_9x16c4__asm_amd64_avx512vnn
       mov r13, [rsp + 96] # params
 
       movsx         eax, WORD PTR [r13]
-      vpbroadcastd zmm29, eax
+      vpbroadcastd zmm31, eax
 
       vpbroadcastb xmm0, BYTE PTR [r13 + 2]
 
       movsx         eax, WORD PTR [r13 + 4]
       vpbroadcastd  zmm1, eax
-      vpsubd        zmm1, zmm1, zmm29
+      vpsubd        zmm1, zmm1, zmm31
       vcvtdq2ps     zmm1, zmm1
 
 
@@ -43,20 +43,15 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_9x16c4__asm_amd64_avx512vnn
       add rdx, 3
       and rdx, -4
 
-      # Move stack parameters which have not yet been loaded
-      mov r12, [rsp + 104]
-
       # Align the stack pointer.
       mov r13, rsp
       sub rsp, 64
       and rsp, 0xFFFFFFFFFFFFFFC0
       # Store the old stack pointer containing the return address
       mov [rsp], r13
-      # Push additional stack parameters to the new stack
-      mov [rsp + 8], r12
 
       # Allocate some space on the stack.
-      sub rsp, 768
+      sub rsp, 704
       # Write rsi (a pointer) to the stack as we need the register.
       mov [rsp + 16], rcx
       # Write r10 (c pointer) to the stack as we need the register.
@@ -146,20 +141,8 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_9x16c4__asm_amd64_avx512vnn
       mov [rsp + 128], rax
       mov [rsp + 136], r13
 
-      # Clamp a & c pointers if mr <= 8
-      mov rcx, rax
-      add rcx, r8
-      mov r10, r13
-      add r10, r11
-      cmp rdi, 8
-      cmovle rcx, rax
-      cmovle r10, r13
-
-      mov [rsp + 144], rcx
-      mov [rsp + 152], r10
-
       # Load 0x80 for xoring the weights
-      vbroadcastsd  zmm13, qword ptr [rip + .MASK]
+      vbroadcastsd  zmm13, qword ptr [rip + .SIGN_MASK]
 
 
 .Louter_loop:
@@ -174,7 +157,6 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_9x16c4__asm_amd64_avx512vnn
       mov r10, [rsp + 96]
       mov r13, [rsp + 112]
       mov rbx, [rsp + 128]
-      mov rbp, [rsp + 144]
 
       # Initialize accumulators with bias
       vmovaps zmm5, [r9 + 0]
@@ -185,7 +167,6 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_9x16c4__asm_amd64_avx512vnn
       vmovaps zmm17, [r9 + 0]
       vmovaps zmm18, [r9 + 0]
       vmovaps zmm19, [r9 + 0]
-      vmovaps zmm20, [r9 + 0]
       add r9, 64
 
 .Linner_loop:
@@ -207,8 +188,6 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_9x16c4__asm_amd64_avx512vnn
       vpdpbusd  zmm18, zmm2, zmm6
       vpxord zmm2, zmm13, DWORD PTR [rbx + r11]{1to16}
       vpdpbusd  zmm19, zmm2, zmm6
-      vpxord zmm2, zmm13, DWORD PTR [rbp + r11]{1to16}
-      vpdpbusd  zmm20, zmm2, zmm6
 
       add r11, 4
       cmp rdx, r11
@@ -225,7 +204,6 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_9x16c4__asm_amd64_avx512vnn
       vcvtdq2ps zmm17, zmm17
       vcvtdq2ps zmm18, zmm18
       vcvtdq2ps zmm19, zmm19
-      vcvtdq2ps zmm20, zmm20
       vmovaps zmm10, [r9 + 0]
       add r9, 64
       vmulps zmm5, zmm5, zmm10
@@ -236,7 +214,6 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_9x16c4__asm_amd64_avx512vnn
       vmulps zmm17, zmm17, zmm10
       vmulps zmm18, zmm18, zmm10
       vmulps zmm19, zmm19, zmm10
-      vmulps zmm20, zmm20, zmm10
       vminps zmm5, zmm5, zmm1
       vminps zmm12, zmm12, zmm1
       vminps zmm14, zmm14, zmm1
@@ -245,7 +222,6 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_9x16c4__asm_amd64_avx512vnn
       vminps zmm17, zmm17, zmm1
       vminps zmm18, zmm18, zmm1
       vminps zmm19, zmm19, zmm1
-      vminps zmm20, zmm20, zmm1
       vcvtps2dq zmm5, zmm5
       vcvtps2dq zmm12, zmm12
       vcvtps2dq zmm14, zmm14
@@ -254,16 +230,14 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_9x16c4__asm_amd64_avx512vnn
       vcvtps2dq zmm17, zmm17
       vcvtps2dq zmm18, zmm18
       vcvtps2dq zmm19, zmm19
-      vcvtps2dq zmm20, zmm20
-      vpaddd zmm5, zmm5, zmm29
-      vpaddd zmm12, zmm12, zmm29
-      vpaddd zmm14, zmm14, zmm29
-      vpaddd zmm15, zmm15, zmm29
-      vpaddd zmm16, zmm16, zmm29
-      vpaddd zmm17, zmm17, zmm29
-      vpaddd zmm18, zmm18, zmm29
-      vpaddd zmm19, zmm19, zmm29
-      vpaddd zmm20, zmm20, zmm29
+      vpaddd zmm5, zmm5, zmm31
+      vpaddd zmm12, zmm12, zmm31
+      vpaddd zmm14, zmm14, zmm31
+      vpaddd zmm15, zmm15, zmm31
+      vpaddd zmm16, zmm16, zmm31
+      vpaddd zmm17, zmm17, zmm31
+      vpaddd zmm18, zmm18, zmm31
+      vpaddd zmm19, zmm19, zmm31
       vpmovsdb xmm5, zmm5
       vpmovsdb xmm12, zmm12
       vpmovsdb xmm14, zmm14
@@ -272,7 +246,6 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_9x16c4__asm_amd64_avx512vnn
       vpmovsdb xmm17, zmm17
       vpmovsdb xmm18, zmm18
       vpmovsdb xmm19, zmm19
-      vpmovsdb xmm20, zmm20
       vpmaxsb xmm5, xmm5, xmm0
       vpmaxsb xmm12, xmm12, xmm0
       vpmaxsb xmm14, xmm14, xmm0
@@ -281,7 +254,6 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_9x16c4__asm_amd64_avx512vnn
       vpmaxsb xmm17, xmm17, xmm0
       vpmaxsb xmm18, xmm18, xmm0
       vpmaxsb xmm19, xmm19, xmm0
-      vpmaxsb xmm20, xmm20, xmm0
 
       # Pop output pointers from the stack.
       mov rcx, [rsp + 24]
@@ -292,7 +264,6 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_9x16c4__asm_amd64_avx512vnn
       mov r10, [rsp + 104]
       mov r13, [rsp + 120]
       mov rbx, [rsp + 136]
-      mov rbp, [rsp + 152]
 
       # Check whether full or partial store.
       cmp rsi, 16
@@ -306,7 +277,6 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_9x16c4__asm_amd64_avx512vnn
       vmovups  [r10], xmm17
       vmovups  [r13], xmm18
       vmovups  [rbx], xmm19
-      vmovups  [rbp], xmm20
       add rcx, 16
       add rax, 16
       add r15, 16
@@ -315,7 +285,6 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_9x16c4__asm_amd64_avx512vnn
       add r10, 16
       add r13, 16
       add rbx, 16
-      add rbp, 16
 
       # Write output pointers to the stack.
       mov [rsp + 24], rcx
@@ -326,7 +295,6 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_9x16c4__asm_amd64_avx512vnn
       mov [rsp + 104], r10
       mov [rsp + 120], r13
       mov [rsp + 136], rbx
-      mov [rsp + 152], rbp
 
       sub rsi, 16
       jne .Louter_loop
@@ -345,10 +313,9 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_9x16c4__asm_amd64_avx512vnn
       vmovdqu8  XMMWORD PTR [r10]{k1}, xmm17
       vmovdqu8  XMMWORD PTR [r13]{k1}, xmm18
       vmovdqu8  XMMWORD PTR [rbx]{k1}, xmm19
-      vmovdqu8  XMMWORD PTR [rbp]{k1}, xmm20
 
 .Lreturn:
-      add rsp, 768
+      add rsp, 704
       mov r13, [rsp]
       mov rsp, r13
       # Restore the callee saved registers.
@@ -365,16 +332,16 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_9x16c4__asm_amd64_avx512vnn
       #else
       ret
       #endif
-END_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_9x16c4__asm_amd64_avx512vnni
+END_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x16c4__asm_amd64_avx512vnni
 
       #if XNN_HAS_FEATURE(dataflow_sanitizer)
-BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_9x16c4__asm_amd64_avx512vnni.dfsan
+BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x16c4__asm_amd64_avx512vnni.dfsan
       .intel_syntax noprefix
       # We could implement this by calling a function that implements the dfsan instrumentation.
       # For now, just break, so if someone tries to use this, they'll know where the problem is.
       int 3
       ret
-END_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_9x16c4__asm_amd64_avx512vnni.dfsan
+END_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x16c4__asm_amd64_avx512vnni.dfsan
       #endif
 
       #ifdef __ELF__

@@ -33,10 +33,11 @@ def generate_qs8_qc8w_gemm_microkernels():
 
   nr = 16
   for mr in range(1, 12):
-    generate.generate_gemm_microkernel(
-        isa=avx512vnni_template.Avx512VnniQS8QC8W(mr, nr, 4),
-        output_file=os.path.join(
-            output_base,
-            f'qs8-qc8w-gemm-{mr}x{nr}-minmax-fp32-asm-amd64-avx512vnni.S',
-        ),
-    )
+    for c in [4, 8]:
+      generate.generate_gemm_microkernel(
+          isa=avx512vnni_template.Avx512VnniQS8QC8W(mr, nr, c),
+          output_file=os.path.join(
+              output_base,
+              f'qs8-qc8w-gemm-{mr}x{nr}c{c}-minmax-fp32-asm-amd64-avx512vnni.S',
+          ),
+      )

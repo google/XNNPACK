@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include "src/xnnpack/assembly.h"
-.MASK:
+.SIGN_MASK:
       .quad   -9187201950435737472  # 0x8080808080808080
 
 BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_7x16c4__asm_amd64_avx512vnni
@@ -25,13 +25,13 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_7x16c4__asm_amd64_avx512vnn
       mov r13, [rsp + 96] # params
 
       movsx         eax, WORD PTR [r13]
-      vpbroadcastd zmm29, eax
+      vpbroadcastd zmm31, eax
 
       vpbroadcastb xmm0, BYTE PTR [r13 + 2]
 
       movsx         eax, WORD PTR [r13 + 4]
       vpbroadcastd  zmm1, eax
-      vpsubd        zmm1, zmm1, zmm29
+      vpsubd        zmm1, zmm1, zmm31
       vcvtdq2ps     zmm1, zmm1
 
 
@@ -43,17 +43,12 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_7x16c4__asm_amd64_avx512vnn
       add rdx, 3
       and rdx, -4
 
-      # Move stack parameters which have not yet been loaded
-      mov r12, [rsp + 104]
-
       # Align the stack pointer.
       mov r13, rsp
       sub rsp, 64
       and rsp, 0xFFFFFFFFFFFFFFC0
       # Store the old stack pointer containing the return address
       mov [rsp], r13
-      # Push additional stack parameters to the new stack
-      mov [rsp + 8], r12
 
       # Allocate some space on the stack.
       sub rsp, 640
@@ -135,7 +130,7 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_7x16c4__asm_amd64_avx512vnn
       mov [rsp + 120], r10
 
       # Load 0x80 for xoring the weights
-      vbroadcastsd  zmm13, qword ptr [rip + .MASK]
+      vbroadcastsd  zmm13, qword ptr [rip + .SIGN_MASK]
 
 
 .Louter_loop:
@@ -215,13 +210,13 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_7x16c4__asm_amd64_avx512vnn
       vcvtps2dq zmm16, zmm16
       vcvtps2dq zmm17, zmm17
       vcvtps2dq zmm18, zmm18
-      vpaddd zmm5, zmm5, zmm29
-      vpaddd zmm12, zmm12, zmm29
-      vpaddd zmm14, zmm14, zmm29
-      vpaddd zmm15, zmm15, zmm29
-      vpaddd zmm16, zmm16, zmm29
-      vpaddd zmm17, zmm17, zmm29
-      vpaddd zmm18, zmm18, zmm29
+      vpaddd zmm5, zmm5, zmm31
+      vpaddd zmm12, zmm12, zmm31
+      vpaddd zmm14, zmm14, zmm31
+      vpaddd zmm15, zmm15, zmm31
+      vpaddd zmm16, zmm16, zmm31
+      vpaddd zmm17, zmm17, zmm31
+      vpaddd zmm18, zmm18, zmm31
       vpmovsdb xmm5, zmm5
       vpmovsdb xmm12, zmm12
       vpmovsdb xmm14, zmm14
