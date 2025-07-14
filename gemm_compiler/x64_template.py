@@ -169,7 +169,7 @@ BEGIN_FUNCTION {function_name}
       push r13
       push r12
 
-      # load params to free up a GP registers
+      # load params to free up GP registers
       mov r13, [rsp + {params_offset}] # params
       {load_params}
 

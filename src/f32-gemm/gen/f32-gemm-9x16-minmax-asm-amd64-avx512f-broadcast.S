@@ -19,7 +19,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x16__asm_amd64_avx512f_broadcast
       push r13
       push r12
 
-      # load params to free up a GP registers
+      # load params to free up GP registers
       mov r13, [rsp + 96] # params
       vbroadcastss zmm0, DWORD PTR [r13]
       vbroadcastss zmm1, DWORD PTR [r13 + 4]

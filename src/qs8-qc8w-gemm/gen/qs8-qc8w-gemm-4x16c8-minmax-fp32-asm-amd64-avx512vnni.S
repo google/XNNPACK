@@ -39,7 +39,7 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c8__asm_amd64_avx512vnn
       push r13
       push r12
 
-      # load params to free up a GP registers
+      # load params to free up GP registers
       mov r13, [rsp + 96] # params
 
       movsx         eax, WORD PTR [r13]
