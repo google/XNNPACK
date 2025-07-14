@@ -37,9 +37,6 @@ XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_vrsqrt_ukernel__avx_rsqrt_u32, 32, false, 
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_vrsqrt_ukernel__avx_sqrt_u8, 8, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_vrsqrt_ukernel__avx_sqrt_u16, 16, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_vrsqrt_ukernel__avx_sqrt_u32, 32, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL(xnn_arch_x86_avx2, xnn_f32_vrsqrt_ukernel__avx2_sqrt_u8, 8, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL(xnn_arch_x86_avx2, xnn_f32_vrsqrt_ukernel__avx2_sqrt_u16, 16, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL(xnn_arch_x86_avx2, xnn_f32_vrsqrt_ukernel__avx2_sqrt_u32, 32, false, float, struct xnn_f32_default_params, NULL)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
