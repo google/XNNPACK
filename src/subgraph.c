@@ -2340,7 +2340,10 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
             if (output_datatype == xnn_datatype_fp32) {
               switch (kernel_datatype) {
                 case xnn_datatype_qbint4:
-                  if ((gemm_config = xnn_init_qp8_f32_qb4w_gemm_config())) {
+                  // The qp8_f32_qb4w kernels only support unsigned 4-bit
+                  // weights.
+                  if (kernel_value->quantization.zero_point == 8 &&
+                      (gemm_config = xnn_init_qp8_f32_qb4w_gemm_config())) {
                     assumed_datatype = xnn_datatype_qpint8;
                   }
                   break;

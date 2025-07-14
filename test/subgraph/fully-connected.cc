@@ -426,7 +426,11 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
     std::vector<size_t> filter_dims = filter.extents();
     filter_dims[1] *= filter_channel_factor;
     if (block_size != no_blockwise) {
-      filter_quantization.zero_point = 8;
+      // TODO(b/431767679): This should always be set to 0, and we should be
+      // specifying signed vs. unsigned in the datatype instead.
+      filter_quantization.zero_point = static_cast<int32_t>(
+          (NumericLimits<Filter>::min() + NumericLimits<Filter>::max() + 1) /
+          2);
       uint32_t id = 0;
       ASSERT_EQ(xnn_status_success,
                 xnn_define_blockwise_quantized_tensor_value(
@@ -594,12 +598,21 @@ TEST(FullyConnectedQD8F32QC8W, static_b) {
   TestStaticB<float, qcint8, float>(/*convert_to=*/xnn_datatype_qdint8);
 }
 
-TEST(FullyConnectedQD8F16QB4W, static_b) {
+TEST(FullyConnectedQD8F16QB4UW, static_b) {
   TestStaticB<xnn_float16, qcuint4, float, xnn_float16, xnn_bfloat16>(
       /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
 }
-TEST(FullyConnectedQD8F32QB4W, static_b) {
+TEST(FullyConnectedQD8F16QB4W, static_b) {
+  TestStaticB<xnn_float16, qcint4, float, xnn_float16, xnn_bfloat16>(
+      /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
+}
+
+TEST(FullyConnectedQD8F32QB4UW, static_b) {
   TestStaticB<float, qcuint4, float, float, xnn_bfloat16>(
+      /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
+}
+TEST(FullyConnectedQD8F32QB4W, static_b) {
+  TestStaticB<float, qcint4, float, float, xnn_bfloat16>(
       /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
 }
 
