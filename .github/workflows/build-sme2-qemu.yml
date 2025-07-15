@@ -13,6 +13,9 @@ on:
         default: true
         required: false
         type: boolean
+  schedule:
+    # Run daily at midnight.
+    - cron: "0 0 * * *"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}-${{ inputs.update-caches }}
@@ -20,7 +23,7 @@ concurrency:
 
 jobs:
   bazel-linux-aarch64-qemu:
-    runs-on: "ubuntu-24.04-arm"
+    runs-on: "arm-ubuntu-arm-22.04-8core"
     timeout-minutes: 60
     env:
       QEMU_ARGS: -cpu max,sme-default-vector-length=64
@@ -69,7 +72,7 @@ jobs:
             sudo apt-get install libglib2.0-dev libfdt-dev libpixman-1-dev zlib1g-dev ninja-build
             tar xjf qemu-master.tar.bz2
             cd $(ls -dt qemu-* | tail -1)
-            ./configure --target-list=aarch64-linux-user
+            ./configure --target-list=aarch64-linux-user --enable-debug-tcg
             make -j $(nproc)
             cp -f build/qemu-aarch64 ../bin/
           fi
@@ -94,6 +97,7 @@ jobs:
             --platforms=//build_config:aarch64_linux \
             --run_under="${PWD}/bin/qemu-aarch64 ${QEMU_ARGS} " \
             --define xnn_enable_arm_sme2=true \
+            --dynamic_mode=off \
             //test:qs8_qc8w_igemm_minmax_fp32_test \
             //test:qp8_f32_qc4w_gemm_minmax_test \
             //test:pf32_gemm_minmax_test \
@@ -101,7 +105,7 @@ jobs:
             //test:pqs8_qc8w_gemm_minmax_test \
             --cache_test_results=no \
             --test_filter="*NEONSME2*" \
-            --test_summary=detailed \
+            --test_output=errors \
             --test_timeout=600 \
             --local_test_jobs=$(nproc)
         working-directory: ${{ github.workspace }}
@@ -116,12 +120,30 @@ jobs:
             --platforms=//build_config:aarch64_linux \
             --run_under="${PWD}/bin/qemu-aarch64 ${QEMU_ARGS} " \
             --define xnn_enable_arm_sme2=true \
+            --dynamic_mode=off \
             //test/subgraph/... \
             --cache_test_results=no \
-            --test_summary=detailed \
+            --test_output=errors \
             --test_timeout=600 \
             --local_test_jobs=$(nproc)
         working-directory: ${{ github.workspace }}
+      - name: Upload binary artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries
+          path: |
+            ${{ github.workspace }}/bin/qemu-aarch64
+            ${{ github.workspace }}/bazel-bin/test/**/*_test
+            !${{ github.workspace }}/bazel-bin/test/**/*.runfiles
+            !${{ github.workspace }}/bazel-bin/test/**/_objs
+          overwrite: true
+      - name: Upload log artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: test_logs
+          path:  ~/.cache/bazel/**/test.log
+          include-hidden-files: true
+          overwrite: true
       - name: Compress disk cache
         # Bazel's `--disk-cache` currently grows without bounds, so we remove files
         # that haven't been accessed in 7+ days manually.
