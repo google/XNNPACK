@@ -38,8 +38,8 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x16c2__asm_amd64_avx512f_broadcast
 
       # load params to free up GP registers
       mov r13, [rsp + 96] # params
-      vbroadcastss zmm0, DWORD PTR [r13]
-      vbroadcastss zmm1, DWORD PTR [r13 + 4]
+      vbroadcastss zmm0, dword ptr [r13]
+      vbroadcastss zmm1, dword ptr [r13 + 4]
 
       # Load c pointer.
       mov r10, [rsp + 72]
@@ -82,7 +82,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x16c2__asm_amd64_avx512f_broadcast
       vmovaps  zmm7, [r9 + 0]
       vmovaps  zmm8, [r9 + 64]
       add r9, 128
-      vbroadcastsd zmm2, QWORD PTR [rcx + r11]
+      vbroadcastsd zmm2, qword ptr [rcx + r11]
       vfmadd231ps  zmm11, zmm2, zmm7
       vfmadd231ps  zmm12, zmm2, zmm8
 
@@ -103,7 +103,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x16c2__asm_amd64_avx512f_broadcast
       vmovaps  zmm7, [r9 + 0]
       vmovaps  zmm8, [r9 + 64]
       add r9, 128
-      vbroadcastsd zmm2, QWORD PTR [rcx + r11]
+      vbroadcastsd zmm2, qword ptr [rcx + r11]
       vfmadd231ps  zmm11{k3}, zmm2, zmm7
       vfmadd231ps  zmm12{k3}, zmm2, zmm8
 
@@ -134,7 +134,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x16c2__asm_amd64_avx512f_broadcast
       shlx r11, r11, rsi
       not r11
       kmovw k1, r11d
-      vmovups  ZMMWORD PTR [r10]{k1}, zmm11
+      vmovups  zmmword ptr [r10]{k1}, zmm11
 
 .Lreturn:
       add rsp, 128

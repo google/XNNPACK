@@ -112,7 +112,7 @@ class Avx512Vnni(avx512f_template.Avx512F):
 
   def input_asm(self):
     loop_c4 = 'vpbroadcastd {AM}, [{AM_ptr} + {a_offset}]\n'
-    loop_c8 = 'vbroadcasti32x2 {AM}, QWORD PTR [{AM_ptr} + {a_offset}]\n'
+    loop_c8 = 'vbroadcasti32x2 {AM}, qword ptr [{AM_ptr} + {a_offset}]\n'
     match self._c:
       case 4:
         loop = loop_c4
@@ -203,7 +203,7 @@ class Avx512Vnni(avx512f_template.Avx512F):
     for nr in range(0, self.n):
       for mr in range(0, self.m):
         self.asm_string += (
-            'vmulps z{ACC}, z{ACC}, DWORD PTR [{quantization_params_reg} +'
+            'vmulps z{ACC}, z{ACC}, dword ptr [{quantization_params_reg} +'
             ' {offset}]{{1to16}}\n'.format(
                 ACC=accumulators[nr * self.m + mr],
                 offset=4 + mr * 8,
@@ -270,7 +270,7 @@ class Avx512Vnni(avx512f_template.Avx512F):
     W = self.w_ptr_register()
 
     ksum_x16 = 'vmovaps  {KSUM}, [{W} + {offset}]\n'
-    vksum = 'vpmulld z{ACC}, {KSUM}, ZMMWORD PTR [rsp + {offset}]\n'
+    vksum = 'vpmulld z{ACC}, {KSUM}, zmmword ptr [rsp + {offset}]\n'
 
     for nr in range(0, self.n):
       self.asm_string += ksum_x16.format(
@@ -410,12 +410,12 @@ class Avx512VnniQS8QC8W(Avx512Vnni):
 
   def load_params(self, reg):
     return """
-      movsx         eax, WORD PTR [{reg}]
+      movsx         eax, word ptr [{reg}]
       vpbroadcastd zmm31, eax
 
-      vpbroadcastb x{min}, BYTE PTR [{reg} + 2]
+      vpbroadcastb x{min}, byte ptr [{reg} + 2]
 
-      movsx         eax, WORD PTR [{reg} + 4]
+      movsx         eax, word ptr [{reg} + 4]
       vpbroadcastd  z{max}, eax
       vpsubd        z{max}, z{max}, zmm31
       vcvtdq2ps     z{max}, z{max}
@@ -446,10 +446,10 @@ class Avx512VnniQS8QC8W(Avx512Vnni):
 
   def input_asm(self):
     loop_c4 = (
-        'vpxord {AM}, z{sign_mask}, DWORD PTR [{AM_ptr} + {a_offset}]{{1to16}}\n'
+        'vpxord {AM}, z{sign_mask}, dword ptr [{AM_ptr} + {a_offset}]{{1to16}}\n'
     )
     loop_c8 = (
-        'vpxorq {AM}, z{sign_mask}, QWORD PTR [{AM_ptr} + {a_offset}]{{1to8}}\n'
+        'vpxorq {AM}, z{sign_mask}, qword ptr [{AM_ptr} + {a_offset}]{{1to8}}\n'
     )
     match self._c:
       case 4:
@@ -617,24 +617,24 @@ class Avx512VnniQS8QC8W(Avx512Vnni):
       )
       for mr in range(0, self.m):
         self.asm_string += (
-            'vmovdqu8  XMMWORD PTR [{c_reg}]{{k1}}, z{ACC}\n'.format(
+            'vmovdqu8  xmmword ptr [{c_reg}]{{k1}}, z{ACC}\n'.format(
                 ACC=accumulators[mr], c_reg=cm_registers[mr + c_reg_offset]
             )
         )
         self.asm_string += (
-            'vmovdqu8  XMMWORD PTR [{c_reg} + 16]{{k2}}, z{ACC}\n'.format(
+            'vmovdqu8  xmmword ptr [{c_reg} + 16]{{k2}}, z{ACC}\n'.format(
                 ACC=accumulators[mr + self.m],
                 c_reg=cm_registers[mr + c_reg_offset],
             )
         )
         self.asm_string += (
-            'vmovdqu8  XMMWORD PTR [{c_reg} + 32]{{k3}}, z{ACC}\n'.format(
+            'vmovdqu8  xmmword ptr [{c_reg} + 32]{{k3}}, z{ACC}\n'.format(
                 ACC=accumulators[mr + 2 * self.m],
                 c_reg=cm_registers[mr + c_reg_offset],
             )
         )
         self.asm_string += (
-            'vmovdqu8  XMMWORD PTR [{c_reg} + 64]{{k4}}, z{ACC}\n'.format(
+            'vmovdqu8  xmmword ptr [{c_reg} + 64]{{k4}}, z{ACC}\n'.format(
                 ACC=accumulators[mr + 3 * self.m],
                 c_reg=cm_registers[mr + c_reg_offset],
             )
@@ -653,12 +653,12 @@ class Avx512VnniQS8QC8W(Avx512Vnni):
       )
       for mr in range(0, self.m):
         self.asm_string += (
-            'vmovdqu8  XMMWORD PTR [{c_reg}]{{k1}}, z{ACC}\n'.format(
+            'vmovdqu8  xmmword ptr [{c_reg}]{{k1}}, z{ACC}\n'.format(
                 ACC=accumulators[mr], c_reg=cm_registers[mr + c_reg_offset]
             )
         )
         self.asm_string += (
-            'vmovdqu8  XMMWORD PTR [{c_reg} + 16]{{k2}}, z{ACC}\n'.format(
+            'vmovdqu8  xmmword ptr [{c_reg} + 16]{{k2}}, z{ACC}\n'.format(
                 ACC=accumulators[mr + self.m],
                 c_reg=cm_registers[mr + c_reg_offset],
             )
@@ -675,7 +675,7 @@ class Avx512VnniQS8QC8W(Avx512Vnni):
       )
       for mr in range(0, self.m):
         self.asm_string += (
-            'vmovdqu8  XMMWORD PTR [{c_reg}]{{k1}}, x{ACC}\n'.format(
+            'vmovdqu8  xmmword ptr [{c_reg}]{{k1}}, x{ACC}\n'.format(
                 ACC=accumulators[mr], c_reg=cm_registers[mr + c_reg_offset]
             )
         )

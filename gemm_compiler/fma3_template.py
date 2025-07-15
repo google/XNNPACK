@@ -83,7 +83,7 @@ class Fma3(x64_template.X64):
   def input_asm(self):
     in_asm = {
         'loop': [
-            'vbroadcastss {AM}, DWORD PTR [{AM_ptr} + {a_offset}]\n',
+            'vbroadcastss {AM}, dword ptr [{AM_ptr} + {a_offset}]\n',
         ]
     }
     return in_asm
@@ -232,7 +232,7 @@ class Fma3(x64_template.X64):
     test {nc_lo}, 2
     jz .Ltail_1\n""".format(nc_lo=nc_lo)
     for mr in range(0, self.m):
-      self.asm_string += 'vmovlps  QWORD PTR [{c_reg}], x{ACC}\n'.format(
+      self.asm_string += 'vmovlps  qword ptr [{c_reg}], x{ACC}\n'.format(
           ACC=accumulators[mr], c_reg=cm_registers[mr + c_reg_offset]
       )
     for mr in range(0, self.m):
@@ -248,7 +248,7 @@ class Fma3(x64_template.X64):
     test {nc_lo}, 1
     jz .Lreturn\n""".format(nc_lo=nc_lo)
     for mr in range(0, self.m):
-      self.asm_string += 'vmovss  DWORD PTR [{c_reg}], x{ACC}\n'.format(
+      self.asm_string += 'vmovss  dword ptr [{c_reg}], x{ACC}\n'.format(
           ACC=accumulators[mr], c_reg=cm_registers[mr + c_reg_offset]
       )
 

@@ -41,8 +41,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x32c8__asm_amd64_avx512vnni
 
       # load params to free up GP registers
       mov r13, [rsp + 96] # params
-      vbroadcastss zmm0, DWORD PTR [r13]
-      vbroadcastss zmm1, DWORD PTR [r13 + 4]
+      vbroadcastss zmm0, dword ptr [r13]
+      vbroadcastss zmm1, dword ptr [r13 + 4]
 
       # Load c pointer.
       mov r10, [rsp + 72]
@@ -83,8 +83,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x32c8__asm_amd64_avx512vnni
       # Initialize accumulators with k_sum * input zero point.
       vmovaps  zmm6, [r9 + 0]
       vmovaps  zmm7, [r9 + 64]
-      vpmulld zmm5, zmm6, ZMMWORD PTR [rsp + 64]
-      vpmulld zmm12, zmm7, ZMMWORD PTR [rsp + 64]
+      vpmulld zmm5, zmm6, zmmword ptr [rsp + 64]
+      vpmulld zmm12, zmm7, zmmword ptr [rsp + 64]
       add r9, 128
       # Interleave with zeros.
       vextracti64x4 ymm15, zmm12, 1
@@ -104,7 +104,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x32c8__asm_amd64_avx512vnni
       vpandd zmm8, zmm8, zmm13
       vpandd zmm9, zmm9, zmm13
       add r9, 128
-      vbroadcasti32x2 zmm2, QWORD PTR [rcx + r11]
+      vbroadcasti32x2 zmm2, qword ptr [rcx + r11]
       vpdpbusd  zmm5, zmm2, zmm6
       vpdpbusd  zmm12, zmm2, zmm7
       vpdpbusd  zmm14, zmm2, zmm8
@@ -134,8 +134,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x32c8__asm_amd64_avx512vnni
       vcvtdq2ps zmm12, zmm14
       # Load quantization_params pointer from stack
       mov r11, [rsp + 136]
-      vmulps zmm5, zmm5, DWORD PTR [r11 + 4]{1to16}
-      vmulps zmm12, zmm12, DWORD PTR [r11 + 4]{1to16}
+      vmulps zmm5, zmm5, dword ptr [r11 + 4]{1to16}
+      vmulps zmm12, zmm12, dword ptr [r11 + 4]{1to16}
       vmovaps zmm10, [r9 + 0]
       vmovaps zmm11, [r9 + 64]
       add r9, 128
@@ -169,8 +169,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x32c8__asm_amd64_avx512vnni
       kmovw k1, r11d
       shr r11d, 16
       kmovw k2, r11d
-      vmovups  ZMMWORD PTR [r10]{k1}, zmm5
-      vmovups  ZMMWORD PTR [r10 + 64]{k2}, zmm12
+      vmovups  zmmword ptr [r10]{k1}, zmm5
+      vmovups  zmmword ptr [r10 + 64]{k2}, zmm12
 
 .Lreturn:
       add rsp, 128

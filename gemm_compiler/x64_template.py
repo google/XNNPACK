@@ -188,8 +188,8 @@ BEGIN_FUNCTION {function_name}
     )
 
   def load_params(self, reg):
-    return """vbroadcastss {prefix}mm0, DWORD PTR [{reg}]
-      vbroadcastss {prefix}mm1, DWORD PTR [{reg} + 4]""".format(
+    return """vbroadcastss {prefix}mm0, dword ptr [{reg}]
+      vbroadcastss {prefix}mm1, dword ptr [{reg} + 4]""".format(
         reg=reg, prefix=self.prefix()
     )
 

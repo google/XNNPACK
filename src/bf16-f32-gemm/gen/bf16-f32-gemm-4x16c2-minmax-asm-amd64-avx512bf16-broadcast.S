@@ -21,8 +21,8 @@ BEGIN_FUNCTION xnn_bf16_f32_gemm_minmax_ukernel_4x16c2__asm_amd64_avx512bf16_bro
 
       # load params to free up GP registers
       mov r13, [rsp + 96] # params
-      vbroadcastss zmm0, DWORD PTR [r13]
-      vbroadcastss zmm1, DWORD PTR [r13 + 4]
+      vbroadcastss zmm0, dword ptr [r13]
+      vbroadcastss zmm1, dword ptr [r13 + 4]
 
       # Load c pointer.
       mov r10, [rsp + 72]
@@ -89,13 +89,13 @@ BEGIN_FUNCTION xnn_bf16_f32_gemm_minmax_ukernel_4x16c2__asm_amd64_avx512bf16_bro
 .Linner_loop:
       vmovaps  zmm7, [r9 + 0]
       add r9, 64
-      vbroadcastss zmm2, DWORD PTR [rcx + r11]
+      vbroadcastss zmm2, dword ptr [rcx + r11]
       vdpbf16ps  zmm11, zmm2, zmm7
-      vbroadcastss zmm3, DWORD PTR [rax + r11]
+      vbroadcastss zmm3, dword ptr [rax + r11]
       vdpbf16ps  zmm12, zmm3, zmm7
-      vbroadcastss zmm4, DWORD PTR [r15 + r11]
+      vbroadcastss zmm4, dword ptr [r15 + r11]
       vdpbf16ps  zmm13, zmm4, zmm7
-      vbroadcastss zmm5, DWORD PTR [r14 + r11]
+      vbroadcastss zmm5, dword ptr [r14 + r11]
       vdpbf16ps  zmm14, zmm5, zmm7
 
       add r11, 4
@@ -114,22 +114,22 @@ BEGIN_FUNCTION xnn_bf16_f32_gemm_minmax_ukernel_4x16c2__asm_amd64_avx512bf16_bro
 .Linner_loop_tail:
       vmovaps  zmm7, [r9 + 0]
       add r9, 64
-      vbroadcastss zmm2, DWORD PTR [rcx + r11]
+      vbroadcastss zmm2, dword ptr [rcx + r11]
       vpslld zmm2, zmm2, 16
       vpsrld zmm2, zmm2, 16
       vdpbf16ps  zmm11, zmm2, zmm7
 
-      vbroadcastss zmm3, DWORD PTR [rax + r11]
+      vbroadcastss zmm3, dword ptr [rax + r11]
       vpslld zmm3, zmm3, 16
       vpsrld zmm3, zmm3, 16
       vdpbf16ps  zmm12, zmm3, zmm7
 
-      vbroadcastss zmm4, DWORD PTR [r15 + r11]
+      vbroadcastss zmm4, dword ptr [r15 + r11]
       vpslld zmm4, zmm4, 16
       vpsrld zmm4, zmm4, 16
       vdpbf16ps  zmm13, zmm4, zmm7
 
-      vbroadcastss zmm5, DWORD PTR [r14 + r11]
+      vbroadcastss zmm5, dword ptr [r14 + r11]
       vpslld zmm5, zmm5, 16
       vpsrld zmm5, zmm5, 16
       vdpbf16ps  zmm14, zmm5, zmm7
@@ -168,10 +168,10 @@ BEGIN_FUNCTION xnn_bf16_f32_gemm_minmax_ukernel_4x16c2__asm_amd64_avx512bf16_bro
       shlx r11, r11, rsi
       not r11
       kmovw k1, r11d
-      vmovups  ZMMWORD PTR [r10]{k1}, zmm11
-      vmovups  ZMMWORD PTR [r13]{k1}, zmm12
-      vmovups  ZMMWORD PTR [rbx]{k1}, zmm13
-      vmovups  ZMMWORD PTR [rbp]{k1}, zmm14
+      vmovups  zmmword ptr [r10]{k1}, zmm11
+      vmovups  zmmword ptr [r13]{k1}, zmm12
+      vmovups  zmmword ptr [rbx]{k1}, zmm13
+      vmovups  zmmword ptr [rbp]{k1}, zmm14
 
 .Lreturn:
       add rsp, 128

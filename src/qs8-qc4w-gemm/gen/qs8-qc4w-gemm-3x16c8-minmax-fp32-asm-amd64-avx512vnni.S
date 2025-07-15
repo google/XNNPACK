@@ -44,12 +44,12 @@ BEGIN_FUNCTION xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_3x16c8__asm_amd64_avx512vnn
       # load params to free up GP registers
       mov r13, [rsp + 96] # params
 
-      movsx         eax, WORD PTR [r13]
+      movsx         eax, word ptr [r13]
       vpbroadcastd zmm31, eax
 
-      vpbroadcastb xmm0, BYTE PTR [r13 + 2]
+      vpbroadcastb xmm0, byte ptr [r13 + 2]
 
-      movsx         eax, WORD PTR [r13 + 4]
+      movsx         eax, word ptr [r13 + 4]
       vpbroadcastd  zmm1, eax
       vpsubd        zmm1, zmm1, zmm31
       vcvtdq2ps     zmm1, zmm1
@@ -125,13 +125,13 @@ BEGIN_FUNCTION xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_3x16c8__asm_amd64_avx512vnn
       vpandd zmm6, zmm6, zmm13
       vpandd zmm7, zmm7, zmm13
       add r9, 64
-      vpxorq zmm2, zmm30, QWORD PTR [rcx + r11]{1to8}
+      vpxorq zmm2, zmm30, qword ptr [rcx + r11]{1to8}
       vpdpbusd  zmm5, zmm2, zmm6
       vpdpbusd  zmm15, zmm2, zmm7
-      vpxorq zmm2, zmm30, QWORD PTR [rax + r11]{1to8}
+      vpxorq zmm2, zmm30, qword ptr [rax + r11]{1to8}
       vpdpbusd  zmm12, zmm2, zmm6
       vpdpbusd  zmm16, zmm2, zmm7
-      vpxorq zmm2, zmm30, QWORD PTR [r15 + r11]{1to8}
+      vpxorq zmm2, zmm30, qword ptr [r15 + r11]{1to8}
       vpdpbusd  zmm14, zmm2, zmm6
       vpdpbusd  zmm17, zmm2, zmm7
 
@@ -205,9 +205,9 @@ BEGIN_FUNCTION xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_3x16c8__asm_amd64_avx512vnn
       shlx r11, r11, rsi
       not r11
       kmovw k1, r11d
-      vmovdqu8  XMMWORD PTR [r10]{k1}, xmm5
-      vmovdqu8  XMMWORD PTR [r13]{k1}, xmm12
-      vmovdqu8  XMMWORD PTR [rbx]{k1}, xmm14
+      vmovdqu8  xmmword ptr [r10]{k1}, xmm5
+      vmovdqu8  xmmword ptr [r13]{k1}, xmm12
+      vmovdqu8  xmmword ptr [rbx]{k1}, xmm14
 
 .Lreturn:
       add rsp, 320
