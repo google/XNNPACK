@@ -312,8 +312,6 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
         $for M in range(MR):
           vout${M}x01234567 = _mm256_fmadd_ps(vout${M}x01234567, vinput_scale${M}, vbias01234567);
 
-        
-
       $if DATATYPE in ["QC4_F16", "QB4_F16", "QD8_F16"]:
         $for M in range(MR):
           vout${M}x01234567 = _mm256_max_ps(vout${M}x01234567, vmin);

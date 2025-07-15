@@ -212,8 +212,6 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x8c8__avx2(
     w = (const float*) w + 8;
     vout0x01234567 = _mm256_fmadd_ps(vout0x01234567, vinput_scale0, vbias01234567);
 
-    
-
     vout0x01234567 = _mm256_max_ps(vout0x01234567, vmin);
 
     vout0x01234567 = _mm256_min_ps(vout0x01234567, vmax);

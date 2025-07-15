@@ -304,8 +304,6 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_3x8c8__avx2(
     vout1x01234567 = _mm256_fmadd_ps(vout1x01234567, vinput_scale1, vbias01234567);
     vout2x01234567 = _mm256_fmadd_ps(vout2x01234567, vinput_scale2, vbias01234567);
 
-    
-
     vout0x01234567 = _mm256_max_ps(vout0x01234567, vmin);
     vout1x01234567 = _mm256_max_ps(vout1x01234567, vmin);
     vout2x01234567 = _mm256_max_ps(vout2x01234567, vmin);
