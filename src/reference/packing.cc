@@ -116,11 +116,14 @@ void xnn_pack_f32_gemm_goi_w(size_t g, size_t nc, size_t kc, size_t nr,
               round_down_po2(kr_block_start, skr) +
               ((kr_block_start + nr_block_offset * kr) & (skr - 1));
           const size_t kc_end = std::min(kc, kc_begin + kr);
+          float* end = packed_weights + kr;
           if (kc_begin < kc_end) {
             std::copy_n(&k[(nr_block_start + nr_block_offset) * kc + kc_begin],
                         kc_end - kc_begin, packed_weights);
+            packed_weights += kc_end - kc_begin;
           }
-          packed_weights += kr;
+          std::fill(packed_weights, end, 0.0f);
+          packed_weights = end;
         }
         packed_weights += (nr - nr_block_size) * kr;
       }
@@ -205,11 +208,14 @@ void xnn_pack_f16_gemm_goi_w(size_t g, size_t nc, size_t kc, size_t nr,
               round_down_po2(kr_block_start, skr) +
               ((kr_block_start + nr_block_offset * kr) & (skr - 1));
           const size_t kc_end = std::min(kc, kc_begin + kr);
+          uint16_t* end = packed_weights + kr;
           if (kc_begin < kc_end) {
             std::copy_n(&k[(nr_block_start + nr_block_offset) * kc + kc_begin],
                         kc_end - kc_begin, packed_weights);
+            packed_weights += kc_end - kc_begin;
           }
-          packed_weights += kr;
+          std::fill(packed_weights, end, 0);
+          packed_weights = end;
         }
         packed_weights += (nr - nr_block_size) * kr;
       }
@@ -247,11 +253,14 @@ void xnn_pack_f32_to_f16_gemm_goi_w(size_t g, size_t nc, size_t kc, size_t nr,
               round_down_po2(kr_block_start, skr) +
               ((kr_block_start + nr_block_offset * kr) & (skr - 1));
           const size_t kc_end = std::min(kc, kc_begin + kr);
+          xnn_float16* end = packed_weights + kr;
           if (kc_begin < kc_end) {
             std::copy_n(&k[(nr_block_start + nr_block_offset) * kc + kc_begin],
                         kc_end - kc_begin, packed_weights);
+            packed_weights += kc_end - kc_begin;
           }
-          packed_weights += kr;
+          std::fill(packed_weights, end, xnn_float16(0.0f));
+          packed_weights = end;
         }
         packed_weights += (nr - nr_block_size) * kr;
       }

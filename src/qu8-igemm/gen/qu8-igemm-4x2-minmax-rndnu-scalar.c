@@ -32,7 +32,7 @@ void xnn_qu8_igemm_minmax_rndnu_ukernel_4x2__scalar(
     size_t cn_stride,
     size_t a_offset,
     const uint8_t* zero,
-    const union xnn_qu8_conv_minmax_params* restrict params)
+    const union xnn_qu8_conv_minmax_params* restrict params) XNN_DISABLE_UBSAN
 {
   assert(mr != 0);
   assert(mr <= 4);

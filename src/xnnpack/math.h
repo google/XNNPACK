@@ -23,6 +23,11 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/fp16.h"
 
+#if XNN_COMPILER_HAS_FEATURE(memory_sanitizer)
+  #include <sanitizer/msan_interface.h>
+  #include <math.h>
+#endif
+
 // stdlib.h from Windows 10 SDK defines min & max macros.
 // Undefine them before defining the corresponding functions.
 #ifdef min
@@ -467,6 +472,25 @@ XNN_INLINE static uint16_t math_cvt_bf16_fp32(float x) {
   // TODO Handle fraction rounding
   return bits.as_uint32 >> 16;
 }
+
+#if XNN_COMPILER_HAS_FEATURE(memory_sanitizer)
+XNN_INLINE static int32_t math_round_f32_to_s32(float x) {
+  // msan flags lrintf(x) as use of uninitialized memory if x is uninitialized,
+  // but we want to use lrintf like we do SIMD instructions, which pass through
+  // uninitialized memory without error (but maintain the uninitialized-ness).
+  // This wrapper implements that behavior for lrintf.
+  int32_t shadow = __msan_test_shadow(&x, sizeof(x));
+  __msan_unpoison(&x, sizeof(x));
+  int32_t result = lrintf(x);
+  if (shadow != -1) {
+    __msan_poison(&result, sizeof(result));
+  }
+  return result;
+}
+#else
+// This is a workaround for the fact that we can't include math.h here.
+#define math_round_f32_to_s32(x) ((int32_t) lrintf(x))
+#endif
 
 #ifdef __cplusplus
 }  // extern "C"
