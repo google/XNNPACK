@@ -158,14 +158,6 @@ SET(NON_PROD_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-gemm/gen/f16-gemm-4x16-minmax-neonfp16arith-ld64.c
   src/f16-gemm/gen/f16-gemm-8x8-minmax-neonfp16arith-ld64.c
   src/f16-gemm/gen/f16-gemm-8x16-minmax-neonfp16arith-ld64.c
-  src/f16-gemm/gen/f16-gemminc-1x8-minmax-neonfp16arith-ld64.c
-  src/f16-gemm/gen/f16-gemminc-1x16-minmax-neonfp16arith-ld64.c
-  src/f16-gemm/gen/f16-gemminc-4x8-minmax-neonfp16arith-ld64.c
-  src/f16-gemm/gen/f16-gemminc-4x16-minmax-neonfp16arith-ld64.c
-  src/f16-gemm/gen/f16-gemminc-6x8-minmax-neonfp16arith-ld64.c
-  src/f16-gemm/gen/f16-gemminc-6x16-minmax-neonfp16arith-ld64.c
-  src/f16-gemm/gen/f16-gemminc-8x8-minmax-neonfp16arith-ld64.c
-  src/f16-gemm/gen/f16-gemminc-8x16-minmax-neonfp16arith-ld64.c
   src/f16-ibilinear-chw/gen/f16-ibilinear-chw-neonfp16arith-p4.c
   src/f16-ibilinear-chw/gen/f16-ibilinear-chw-neonfp16arith-p16.c
   src/f16-ibilinear/gen/f16-ibilinear-neonfp16arith-c16.c

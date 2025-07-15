@@ -326,9 +326,6 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-gemm/gen/f32-gemm-2x4-relu-scalar.c
   src/f32-gemm/gen/f32-gemm-2x4-scalar.c
   src/f32-gemm/gen/f32-gemm-4x2-relu-scalar.c
-  src/f32-gemminc/gen/f32-gemminc-1x4-minmax-scalar.c
-  src/f32-gemminc/gen/f32-gemminc-2x4-minmax-scalar.c
-  src/f32-gemminc/gen/f32-gemminc-4x4-minmax-scalar.c
   src/f32-ibilinear-chw/gen/f32-ibilinear-chw-scalar-p1.c
   src/f32-ibilinear-chw/gen/f32-ibilinear-chw-scalar-p2.c
   src/f32-ibilinear/gen/f32-ibilinear-scalar-c1.c

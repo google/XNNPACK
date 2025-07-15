@@ -151,16 +151,6 @@ SET(NON_PROD_AVX_MICROKERNEL_SRCS
   src/f32-gemm/gen/f32-gemm-6x8-minmax-avx-broadcast.c
   src/f32-gemm/gen/f32-gemm-6x16-minmax-avx-broadcast.c
   src/f32-gemm/gen/f32-gemm-7x8-minmax-avx-broadcast.c
-  src/f32-gemminc/gen/f32-gemminc-1x8-minmax-avx-broadcast.c
-  src/f32-gemminc/gen/f32-gemminc-1x16-minmax-avx-broadcast.c
-  src/f32-gemminc/gen/f32-gemminc-3x16-minmax-avx-broadcast.c
-  src/f32-gemminc/gen/f32-gemminc-4x8-minmax-avx-broadcast.c
-  src/f32-gemminc/gen/f32-gemminc-4x16-minmax-avx-broadcast.c
-  src/f32-gemminc/gen/f32-gemminc-5x8-minmax-avx-broadcast.c
-  src/f32-gemminc/gen/f32-gemminc-5x16-minmax-avx-broadcast.c
-  src/f32-gemminc/gen/f32-gemminc-6x8-minmax-avx-broadcast.c
-  src/f32-gemminc/gen/f32-gemminc-6x16-minmax-avx-broadcast.c
-  src/f32-gemminc/gen/f32-gemminc-7x8-minmax-avx-broadcast.c
   src/f32-igemm/gen/f32-igemm-3x16-minmax-avx-broadcast.c
   src/f32-igemm/gen/f32-igemm-4x8-minmax-avx-broadcast.c
   src/f32-igemm/gen/f32-igemm-4x16-minmax-avx-broadcast.c

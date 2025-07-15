@@ -206,6 +206,8 @@ def main(args):
 
       subdir = os.path.relpath(root, root_dir)
       filepath = os.path.join(subdir, name)
+      if 'pipertmp' in filepath:
+        continue
 
       # Skip files created by repository tools.
       if (

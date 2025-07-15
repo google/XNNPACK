@@ -274,22 +274,6 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/f32-gemm/gen/f32-gemm-6x8s4-minmax-neon.c
   src/f32-gemm/gen/f32-gemm-6x16-minmax-neon-lane-ld128.c
   src/f32-gemm/gen/f32-gemm-8x8s4-minmax-neon.c
-  src/f32-gemminc/gen/f32-gemminc-1x8-minmax-neon-dup-ld64.c
-  src/f32-gemminc/gen/f32-gemminc-1x8-minmax-neon-lane-ld64.c
-  src/f32-gemminc/gen/f32-gemminc-1x8-minmax-neon-lane-ld128.c
-  src/f32-gemminc/gen/f32-gemminc-1x8s4-minmax-neon.c
-  src/f32-gemminc/gen/f32-gemminc-4x8-minmax-neon-dup-ld64.c
-  src/f32-gemminc/gen/f32-gemminc-4x8-minmax-neon-dup-ld128.c
-  src/f32-gemminc/gen/f32-gemminc-4x8-minmax-neon-lane-ld64.c
-  src/f32-gemminc/gen/f32-gemminc-4x8-minmax-neon-lane-ld128.c
-  src/f32-gemminc/gen/f32-gemminc-4x8s4-minmax-neon.c
-  src/f32-gemminc/gen/f32-gemminc-5x8-minmax-neon-lane-ld64.c
-  src/f32-gemminc/gen/f32-gemminc-6x8-minmax-neon-dup-ld64.c
-  src/f32-gemminc/gen/f32-gemminc-6x8-minmax-neon-dup-ld128.c
-  src/f32-gemminc/gen/f32-gemminc-6x8-minmax-neon-lane-ld64.c
-  src/f32-gemminc/gen/f32-gemminc-6x8-minmax-neon-lane-ld128.c
-  src/f32-gemminc/gen/f32-gemminc-6x8s4-minmax-neon.c
-  src/f32-gemminc/gen/f32-gemminc-8x8s4-minmax-neon.c
   src/f32-ibilinear-chw/gen/f32-ibilinear-chw-neon-p4.c
   src/f32-ibilinear-chw/gen/f32-ibilinear-chw-neon-p16.c
   src/f32-ibilinear/gen/f32-ibilinear-neon-c4.c
