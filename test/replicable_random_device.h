@@ -78,7 +78,7 @@ class ReplicableRandomDevice {
         random_generator_(random_seed_),
         scoped_trace_(__FILE__, __LINE__,
                       "To replicate this failure, re-run the test with "
-                      "`--gunit_random_seed=" +
+                      "`--gtest_random_seed=" +
                           std::to_string(random_seed_) + "`.") {}
 
   // Wrapped methods from `BaseRandomDevice`.
