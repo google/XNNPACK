@@ -620,8 +620,8 @@ std::vector<GemmTestParams> CreateTests1(
   INSTANTIATE_TEST_SUITE_P(
       QS8_QC4W_GEMM_MINMAX_FP32_1X16C8__ASM_AMD64_AVX512VNNI, GemmTest,
       testing::ValuesIn(CreateTests1(
-          /*k_block=*/4,
-          /*adj_k_block=*/4,
+          /*k_block=*/8,
+          /*adj_k_block=*/8,
           /*mr=*/1, /*nr=*/16, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
           /*unsigned_inputs=*/false,
@@ -640,8 +640,8 @@ std::vector<GemmTestParams> CreateTests1(
   INSTANTIATE_TEST_SUITE_P(
       QS8_QC4W_GEMM_MINMAX_FP32_2X16C8__ASM_AMD64_AVX512VNNI, GemmTest,
       testing::ValuesIn(CreateTests1(
-          /*k_block=*/4,
-          /*adj_k_block=*/4,
+          /*k_block=*/8,
+          /*adj_k_block=*/8,
           /*mr=*/2, /*nr=*/16, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
           /*unsigned_inputs=*/false,
@@ -660,8 +660,8 @@ std::vector<GemmTestParams> CreateTests1(
   INSTANTIATE_TEST_SUITE_P(
       QS8_QC4W_GEMM_MINMAX_FP32_3X16C8__ASM_AMD64_AVX512VNNI, GemmTest,
       testing::ValuesIn(CreateTests1(
-          /*k_block=*/4,
-          /*adj_k_block=*/4,
+          /*k_block=*/8,
+          /*adj_k_block=*/8,
           /*mr=*/3, /*nr=*/16, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
           /*unsigned_inputs=*/false,
@@ -680,8 +680,8 @@ std::vector<GemmTestParams> CreateTests1(
   INSTANTIATE_TEST_SUITE_P(
       QS8_QC4W_GEMM_MINMAX_FP32_4X16C8__ASM_AMD64_AVX512VNNI, GemmTest,
       testing::ValuesIn(CreateTests1(
-          /*k_block=*/4,
-          /*adj_k_block=*/4,
+          /*k_block=*/8,
+          /*adj_k_block=*/8,
           /*mr=*/4, /*nr=*/16, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
           /*unsigned_inputs=*/false,
@@ -700,8 +700,8 @@ std::vector<GemmTestParams> CreateTests1(
   INSTANTIATE_TEST_SUITE_P(
       QS8_QC4W_GEMM_MINMAX_FP32_5X16C8__ASM_AMD64_AVX512VNNI, GemmTest,
       testing::ValuesIn(CreateTests1(
-          /*k_block=*/4,
-          /*adj_k_block=*/4,
+          /*k_block=*/8,
+          /*adj_k_block=*/8,
           /*mr=*/5, /*nr=*/16, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
           /*unsigned_inputs=*/false,
@@ -720,8 +720,8 @@ std::vector<GemmTestParams> CreateTests1(
   INSTANTIATE_TEST_SUITE_P(
       QS8_QC4W_GEMM_MINMAX_FP32_6X16C8__ASM_AMD64_AVX512VNNI, GemmTest,
       testing::ValuesIn(CreateTests1(
-          /*k_block=*/4,
-          /*adj_k_block=*/4,
+          /*k_block=*/8,
+          /*adj_k_block=*/8,
           /*mr=*/6, /*nr=*/16, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
           /*unsigned_inputs=*/false,
@@ -740,8 +740,8 @@ std::vector<GemmTestParams> CreateTests1(
   INSTANTIATE_TEST_SUITE_P(
       QS8_QC4W_GEMM_MINMAX_FP32_7X16C8__ASM_AMD64_AVX512VNNI, GemmTest,
       testing::ValuesIn(CreateTests1(
-          /*k_block=*/4,
-          /*adj_k_block=*/4,
+          /*k_block=*/8,
+          /*adj_k_block=*/8,
           /*mr=*/7, /*nr=*/16, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
           /*unsigned_inputs=*/false,
@@ -760,8 +760,8 @@ std::vector<GemmTestParams> CreateTests1(
   INSTANTIATE_TEST_SUITE_P(
       QS8_QC4W_GEMM_MINMAX_FP32_8X16C8__ASM_AMD64_AVX512VNNI, GemmTest,
       testing::ValuesIn(CreateTests1(
-          /*k_block=*/4,
-          /*adj_k_block=*/4,
+          /*k_block=*/8,
+          /*adj_k_block=*/8,
           /*mr=*/8, /*nr=*/16, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
           /*unsigned_inputs=*/false,
@@ -780,8 +780,8 @@ std::vector<GemmTestParams> CreateTests1(
   INSTANTIATE_TEST_SUITE_P(
       QS8_QC4W_GEMM_MINMAX_FP32_9X16C8__ASM_AMD64_AVX512VNNI, GemmTest,
       testing::ValuesIn(CreateTests1(
-          /*k_block=*/4,
-          /*adj_k_block=*/4,
+          /*k_block=*/8,
+          /*adj_k_block=*/8,
           /*mr=*/9, /*nr=*/16, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
           /*unsigned_inputs=*/false,

@@ -509,6 +509,8 @@ void xnn_pack_qs8_qc4w_gemm_goi_w(
   } while (--g != 0);
 }
 
+namespace {
+
 // Packs the weights so as to minimize register usage in kernels.
 // For example:
 // 0 1
@@ -530,7 +532,7 @@ void xnn_pack_qs8_qc4w_gemm_goi_w_non_planar(
     size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
     size_t register_bytes, const uint8_t* k, const int32_t* b,
     const float* scale, void* packed_weights, size_t extra_bytes,
-    const struct xnn_qs8_qc4w_packing_params* params) {
+    uint32_t input_zero_point, uint32_t kernel_zero_point) {
   assert(g != 0);
   assert(nc != 0);
   assert(kc != 0);
@@ -539,12 +541,9 @@ void xnn_pack_qs8_qc4w_gemm_goi_w_non_planar(
   assert(sr >= 1 && sr <= 16);
   assert(k != nullptr);
   assert(packed_weights != nullptr);
-  assert(params != nullptr);
-  assert(params->kernel_zero_point == 8 || params->kernel_zero_point == 0);
+  assert(kernel_zero_point == 8 || kernel_zero_point == 0);
 
   const size_t skr = sr * kr;
-  const uint32_t izp = (uint32_t)params->input_zero_point;
-  const uint32_t kernel_zero_point = (uint32_t)params->kernel_zero_point;
   int row_offset = register_bytes / kr;
   do {
     size_t nr_block_start = 0;
@@ -628,10 +627,11 @@ void xnn_pack_qs8_qc4w_gemm_goi_w_non_planar(
               }
             }
             packed_b[actual_nr_block_offset] =
-                packed_b[actual_nr_block_offset] - ksum_lo * izp * 16;
+                packed_b[actual_nr_block_offset] -
+                ksum_lo * input_zero_point * 16;
             packed_b[actual_nr_block_offset + row_offset] =
                 packed_b[actual_nr_block_offset + row_offset] -
-                ksum_hi * izp * 16;
+                ksum_hi * input_zero_point * 16;
             pw = (uint8_t*)pw + kr;  // kr * 2 nibbles
           }
         }
@@ -649,14 +649,18 @@ void xnn_pack_qs8_qc4w_gemm_goi_w_non_planar(
   } while (--g != 0);
 }
 
+}  // namespace
+
 void xnn_pack_qs8_qc4w_gemm_goi_w_non_planar_scalar(
     size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
     const uint8_t* k, const int32_t* b, const float* scale,
     void* packed_weights, size_t extra_bytes,
     const struct xnn_qs8_qc4w_packing_params* params) {
-  xnn_pack_qs8_qc4w_gemm_goi_w_non_planar(g, nc, kc, nr, kr, sr,
-                                          /*register_bytes=*/1, k, b, scale,
-                                          packed_weights, extra_bytes, params);
+  assert(params != nullptr);
+  xnn_pack_qs8_qc4w_gemm_goi_w_non_planar(
+      g, nc, kc, nr, kr, sr,
+      /*register_bytes=*/1, k, b, scale, packed_weights, extra_bytes,
+      params->input_zero_point, params->kernel_zero_point);
 }
 
 void xnn_pack_qs8_qc4w_gemm_goi_w_non_planar_aarch64(
@@ -664,9 +668,11 @@ void xnn_pack_qs8_qc4w_gemm_goi_w_non_planar_aarch64(
     const uint8_t* k, const int32_t* b, const float* scale,
     void* packed_weights, size_t extra_bytes,
     const struct xnn_qs8_qc4w_packing_params* params) {
-  xnn_pack_qs8_qc4w_gemm_goi_w_non_planar(g, nc, kc, nr, kr, sr,
-                                          /*register_bytes=*/16, k, b, scale,
-                                          packed_weights, extra_bytes, params);
+  assert(params != nullptr);
+  xnn_pack_qs8_qc4w_gemm_goi_w_non_planar(
+      g, nc, kc, nr, kr, sr,
+      /*register_bytes=*/16, k, b, scale, packed_weights, extra_bytes,
+      params->input_zero_point, params->kernel_zero_point);
 }
 
 void xnn_pack_qs8_qc4w_gemm_goi_w_non_planar_avx512(
@@ -674,21 +680,24 @@ void xnn_pack_qs8_qc4w_gemm_goi_w_non_planar_avx512(
     const uint8_t* k, const int32_t* b, const float* scale,
     void* packed_weights, size_t extra_bytes,
     const struct xnn_qs8_qc4w_packing_params* params) {
-  xnn_pack_qs8_qc4w_gemm_goi_w_non_planar(g, nc, kc, nr, kr, sr,
-                                          /*register_bytes=*/64, k, b, scale,
-                                          packed_weights, extra_bytes, params);
+  assert(params != nullptr);
+  xnn_pack_qs8_qc4w_gemm_goi_w_non_planar(
+      g, nc, kc, nr, kr, sr,
+      /*register_bytes=*/64, k, b, scale, packed_weights, extra_bytes,
+      params->input_zero_point, params->kernel_zero_point);
 }
 
 void xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w_non_planar_avx512(
-  size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
-  const uint8_t* k, const int32_t* b, const float* scale,
-  void* packed_weights, size_t extra_bytes,
-  const struct xnn_qs8_qc4w_packing_params* params) {
-xnn_qs8_qc4w_packing_params adjusted_params = *params;
-adjusted_params.input_zero_point += 0x80;
-xnn_pack_qs8_qc4w_gemm_goi_w_non_planar(g, nc, kc, nr, kr, sr,
-                                        /*register_bytes=*/64, k, b, scale,
-                                        packed_weights, extra_bytes, &adjusted_params);
+    size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
+    const uint8_t* k, const int32_t* b, const float* scale,
+    void* packed_weights, size_t extra_bytes,
+    const struct xnn_qs8_qc4w_packing_params* params) {
+  assert(params != nullptr);
+  uint32_t input_zero_point = (int32_t)params->input_zero_point + 0x80;
+  xnn_pack_qs8_qc4w_gemm_goi_w_non_planar(
+      g, nc, kc, nr, kr, sr,
+      /*register_bytes=*/64, k, b, scale, packed_weights, extra_bytes,
+      input_zero_point, params->kernel_zero_point);
 }
 // Same as qc4w but unsigned 4 bit output
 // Applies kv ^ 0x88 to convert int4 to uint4

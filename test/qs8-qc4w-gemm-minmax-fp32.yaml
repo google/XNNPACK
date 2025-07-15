@@ -85,47 +85,47 @@
 - name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x16c8__asm_amd64_avx512vnni
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
   pack: xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w_non_planar_avx512
-  k-block: 4
+  k-block: 8
   planes: 1
 - name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_2x16c8__asm_amd64_avx512vnni
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
   pack: xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w_non_planar_avx512
-  k-block: 4
+  k-block: 8
   planes: 1
 - name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_3x16c8__asm_amd64_avx512vnni
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
   pack: xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w_non_planar_avx512
-  k-block: 4
+  k-block: 8
   planes: 1
 - name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_4x16c8__asm_amd64_avx512vnni
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
   pack: xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w_non_planar_avx512
-  k-block: 4
+  k-block: 8
   planes: 1
 - name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_5x16c8__asm_amd64_avx512vnni
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
   pack: xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w_non_planar_avx512
-  k-block: 4
+  k-block: 8
   planes: 1
 - name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_6x16c8__asm_amd64_avx512vnni
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
   pack: xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w_non_planar_avx512
-  k-block: 4
+  k-block: 8
   planes: 1
 - name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_7x16c8__asm_amd64_avx512vnni
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
   pack: xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w_non_planar_avx512
-  k-block: 4
+  k-block: 8
   planes: 1
 - name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_8x16c8__asm_amd64_avx512vnni
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
   pack: xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w_non_planar_avx512
-  k-block: 4
+  k-block: 8
   planes: 1
 - name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_9x16c8__asm_amd64_avx512vnni
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
   pack: xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w_non_planar_avx512
-  k-block: 4
+  k-block: 8
   planes: 1
 
 # Scalar

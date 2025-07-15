@@ -3853,7 +3853,24 @@ static void init_qs8_qc4w_gemm_config(void) {
         qs8_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_qc4w_gemm_goi_w_non_planar_aarch64;
       #endif  // XNN_ENABLE_ARM_DOTPROD
     } else
-  #endif // XNN_ARCH_ARM64 && !XNN_PLATFORM_WINDOWS
+  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    (void) hardware_config;  // May be unused.
+    #if XNN_ENABLE_AVX512VNNI && XNN_ENABLE_ASSEMBLY && XNN_ARCH_X86_64 && !XNN_PLATFORM_WINDOWS
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx512vnni)) {
+        qs8_qc4w_gemm_config.arch = xnn_arch_x86_avx512vnni;
+        qs8_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x16c8__asm_amd64_avx512vnni);
+        qs8_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(8)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_8x16c8__asm_amd64_avx512vnni);
+        qs8_qc4w_gemm_config.init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
+        qs8_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w_non_planar_avx512;
+        qs8_qc4w_gemm_config.planes = 1;
+        qs8_qc4w_gemm_config.mr = 8;
+        qs8_qc4w_gemm_config.nr = 16;
+        qs8_qc4w_gemm_config.log2_kr = 3;
+      } else
+    #endif
+  #endif //XNN_ARCH_X86 || XNN_ARCH_X86_64
   {
     qs8_qc4w_gemm_config.init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
     qs8_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x2__scalar_lrintf);
@@ -3862,6 +3879,8 @@ static void init_qs8_qc4w_gemm_config(void) {
     qs8_qc4w_gemm_config.nr = 2;
     qs8_qc4w_gemm_config.planes = 1;
   }
+  assert(qs8_qc4w_gemm_config.mr <= XNN_MAX_MR);
+  assert(qs8_qc4w_gemm_config.mr <= (XNN_EXTRA_QUANTIZATION_PARAMS + 1));
 }
 
 static void init_qs8_qc8w_gemm_config(void) {
