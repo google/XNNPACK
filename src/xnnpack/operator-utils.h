@@ -55,6 +55,8 @@ XNN_INTERNAL uint32_t
 xnn_get_heuristic_mr_igemm(size_t batch_size, uint32_t max_mr, uint32_t nr,
                            struct xnn_hmp_igemm_ukernel* igemm_cases);
 
+XNN_INTERNAL enum xnn_status xnn_allocate_extra_params(
+    xnn_operator_t op, size_t num_extra_params);
 XNN_INTERNAL enum xnn_status xnn_destroy_operator(xnn_operator_t op);
 
 XNN_INTERNAL const char* xnn_unary_operator_to_string(
