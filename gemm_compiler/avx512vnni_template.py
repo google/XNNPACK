@@ -399,6 +399,10 @@ class Avx512VnniQS8QC8W(Avx512Vnni):
     # should be a child/sibling of this.
     return 0
 
+  def sign_mask_register(self):
+    # mask register is unused here, just use that one.
+    return self.mask_register()
+
   def pre_header(self):
     super().pre_header()
     self.asm_string += """.SIGN_MASK:
@@ -442,10 +446,10 @@ class Avx512VnniQS8QC8W(Avx512Vnni):
 
   def input_asm(self):
     loop_c4 = (
-        'vpxord {AM}, z{mask}, DWORD PTR [{AM_ptr} + {a_offset}]{{1to16}}\n'
+        'vpxord {AM}, z{sign_mask}, DWORD PTR [{AM_ptr} + {a_offset}]{{1to16}}\n'
     )
     loop_c8 = (
-        'vpxorq {AM}, z{mask}, QWORD PTR [{AM_ptr} + {a_offset}]{{1to8}}\n'
+        'vpxorq {AM}, z{sign_mask}, QWORD PTR [{AM_ptr} + {a_offset}]{{1to8}}\n'
     )
     match self._c:
       case 4:
@@ -679,7 +683,19 @@ class Avx512VnniQS8QC8W(Avx512Vnni):
   def outer_loop_prepare(self):
     self.asm_string += """
     # Load 0x80 for xoring the weights
-    vbroadcastsd  z{mask}, qword ptr [rip + .SIGN_MASK]\n
+    vbroadcastsd  z{sign_mask}, qword ptr [rip + .SIGN_MASK]\n
     """.format(
-        mask=self.mask_register(),
+        sign_mask=self.sign_mask_register(),
     )
+
+class Avx512VnniQS8QC4W(Avx512VnniQc4w, Avx512VnniQS8QC8W):
+
+  def function_name(self):
+    c = self._c
+    return (
+        f'xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_{self.m}x{self.n * self.n_step()}'
+        + f'c{c}__asm_amd64_{self.isa()}'
+    )
+
+  def sign_mask_register(self):
+    return "mm30"

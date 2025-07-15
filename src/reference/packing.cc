@@ -679,6 +679,17 @@ void xnn_pack_qs8_qc4w_gemm_goi_w_non_planar_avx512(
                                           packed_weights, extra_bytes, params);
 }
 
+void xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w_non_planar_avx512(
+  size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
+  const uint8_t* k, const int32_t* b, const float* scale,
+  void* packed_weights, size_t extra_bytes,
+  const struct xnn_qs8_qc4w_packing_params* params) {
+xnn_qs8_qc4w_packing_params adjusted_params = *params;
+adjusted_params.input_zero_point += 0x80;
+xnn_pack_qs8_qc4w_gemm_goi_w_non_planar(g, nc, kc, nr, kr, sr,
+                                        /*register_bytes=*/64, k, b, scale,
+                                        packed_weights, extra_bytes, &adjusted_params);
+}
 // Same as qc4w but unsigned 4 bit output
 // Applies kv ^ 0x88 to convert int4 to uint4
 // Does not multiply bias by 16

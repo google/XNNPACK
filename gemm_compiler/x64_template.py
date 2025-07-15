@@ -39,6 +39,9 @@ class X64(base_architecture.BaseArchitecture):
   def mask_register(self):
     return 'mm13'
 
+  def sign_mask_register(self):
+    return 'mm13'
+
   def am_registers(self):
     return [self.a_ptr_register()] + [
         'rax',
@@ -412,6 +415,7 @@ END_FUNCTION {function_name}.dfsan
               offset=self.register_bytes() * nr // 2,
               w_step=self.register_bytes() * self.n,
               mask=self.mask_register(),
+              sign_mask=self.sign_mask_register(),
           )
     for l in self.weights_asm()['loop']:
       for nr in range(0, n):
@@ -421,6 +425,7 @@ END_FUNCTION {function_name}.dfsan
             offset=self.register_bytes() * nr,
             w_step=self.register_bytes() * n,
             mask=self.mask_register(),
+            sign_mask=self.sign_mask_register(),
         )
     if 'after' in self.weights_asm():
       for l in self.weights_asm()['after']:
@@ -437,6 +442,7 @@ END_FUNCTION {function_name}.dfsan
             a_offset=self.k_register(),
             A=self.a_registers(mr),
             mask=self.mask_register(),
+            sign_mask=self.sign_mask_register(),
         )
       for m in self.compute_asm()[loop]:
         for nr in range(0, n):
@@ -461,6 +467,7 @@ END_FUNCTION {function_name}.dfsan
               offset=self.register_bytes() * nr // 2,
               w_step=self.register_bytes() * self.n,
               mask=self.mask_register(),
+              sign_mask=self.sign_mask_register(),
           )
     for l in self.weights_asm()['loop']:
       for nr in range(0, n):
@@ -470,6 +477,7 @@ END_FUNCTION {function_name}.dfsan
             offset=self.register_bytes() * nr,
             w_step=self.register_bytes() * n,
             mask=self.mask_register(),
+            sign_mask=self.sign_mask_register(),
         )
 
     # input
@@ -491,6 +499,7 @@ END_FUNCTION {function_name}.dfsan
             a_offset=self.k_register(),
             A=self.a_registers(0),
             mask=self.mask_register(),
+            sign_mask=self.sign_mask_register(),
         )
         loop = 'loop_tail' if tail else 'loop'
         for m in self.compute_asm()[loop]:
