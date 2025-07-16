@@ -5,6 +5,7 @@
 
 #include "src/xnnpack/assembly.h"
 
+      .p2align 6, 0x0
 .PERMUTATION:
       .long   0
       .long   2
@@ -254,7 +255,7 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_7x16c8__asm_amd64_avx512vnn
       vpaddd zmm24, zmm24, zmm6
       vpsrlq zmm6, zmm25, 32
       vpaddd zmm25, zmm25, zmm6
-      vmovups zmm6, zmmword ptr [rip + .PERMUTATION]
+      vmovaps zmm6, zmmword ptr [rip + .PERMUTATION]
       vpermt2ps zmm5, zmm6, zmm19
       vpermt2ps zmm12, zmm6, zmm20
       vpermt2ps zmm14, zmm6, zmm21

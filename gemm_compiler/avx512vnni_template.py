@@ -82,8 +82,10 @@ class Avx512Vnni(avx512f_template.Avx512F):
     return self.k_register()
 
   def pre_header(self):
+    alignment = int(math.log2(self.register_bytes()))
     header_c4 = ''
-    header_c8 = """
+    header_c8 = f"""
+        .p2align {alignment}, 0x0
         .PERMUTATION:
         .long   0
         .long   2
@@ -180,7 +182,7 @@ class Avx512Vnni(avx512f_template.Avx512F):
           )
       perm_reg = self.w_registers()[0]
       self.asm_string += (
-          f'vmovups {perm_reg}, zmmword ptr [rip + .PERMUTATION]\n'
+          f'vmovaps {perm_reg}, zmmword ptr [rip + .PERMUTATION]\n'
       )
       perm = 'vpermt2ps z{acc0}, {perm_reg}, z{acc1}\n'
       for nr in range(0, self.n):
@@ -477,7 +479,7 @@ class Avx512VnniQS8QC8W(Avx512Vnni):
           )
       perm_reg = self.w_registers()[0]
       self.asm_string += (
-          f'vmovups {perm_reg}, zmmword ptr [rip + .PERMUTATION]\n'
+          f'vmovaps {perm_reg}, zmmword ptr [rip + .PERMUTATION]\n'
       )
       perm = 'vpermt2ps z{acc0}, {perm_reg}, z{acc1}\n'
       for nr in range(0, self.n):
