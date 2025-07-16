@@ -1914,8 +1914,8 @@ std::vector<GemmTestParams> CreateTests1(
   INSTANTIATE_TEST_SUITE_P(
       QD8_F32_QC4W_GEMM_MINMAX_3X16C8__ASM_AMD64_AVX512VNNI, GemmTest,
       testing::ValuesIn(CreateTests1(
-          /*k_block=*/4,
-          /*adj_k_block=*/4,
+          /*k_block=*/8,
+          /*adj_k_block=*/8,
           /*mr=*/3, /*nr=*/16, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
           /*unsigned_inputs=*/true,
@@ -1933,8 +1933,8 @@ std::vector<GemmTestParams> CreateTests1(
   INSTANTIATE_TEST_SUITE_P(
       QD8_F32_QC4W_GEMM_MINMAX_7X16C8__ASM_AMD64_AVX512VNNI, GemmTest,
       testing::ValuesIn(CreateTests1(
-          /*k_block=*/4,
-          /*adj_k_block=*/4,
+          /*k_block=*/8,
+          /*adj_k_block=*/8,
           /*mr=*/7, /*nr=*/16, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
           /*unsigned_inputs=*/true,

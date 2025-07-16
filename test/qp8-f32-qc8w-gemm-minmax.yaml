@@ -8,25 +8,25 @@
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_kai_qs8_weights_and_biases
   packed-stride: xnn_packed_stride_kai_qs8_weights_and_biases
-  k-block: 1
+  k-block: 4
   cpp-check: XNN_ENABLE_KLEIDIAI
 - name: xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x4c8__aarch64_neondot
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_kai_qs8_weights_and_biases
   packed-stride: xnn_packed_stride_kai_qs8_weights_and_biases
-  k-block: 1
+  k-block: 8
   cpp-check: XNN_ENABLE_KLEIDIAI
 - name: xnn_qp8_f32_qc8w_gemm_minmax_ukernel_16x4c4__aarch64_neondot_mstep4
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_kai_qs8_weights_and_biases
   packed-stride: xnn_packed_stride_kai_qs8_weights_and_biases
-  k-block: 1
+  k-block: 4
   cpp-check: XNN_ENABLE_KLEIDIAI
 - name: xnn_qp8_f32_qc8w_gemm_minmax_ukernel_16x4c8__neoni8mm_mstep4
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_kai_qs8_weights_and_biases
   packed-stride: xnn_packed_stride_kai_qs8_weights_and_biases
-  k-block: 1
+  k-block: 8
   cpp-check: XNN_ENABLE_KLEIDIAI
   name: xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x64c4__neonsme2
   init: xnn_init_f32_minmax_scalar_params

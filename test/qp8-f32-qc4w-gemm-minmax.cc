@@ -258,8 +258,8 @@ std::vector<GemmTestParams> CreateTests1(
   INSTANTIATE_TEST_SUITE_P(
       QP8_F32_QC4W_GEMM_MINMAX_1X4C16S2__AARCH64_NEONDOT, GemmTest,
       testing::ValuesIn(CreateTests1(
-          /*k_block=*/2,
-          /*adj_k_block=*/2,
+          /*k_block=*/32,
+          /*adj_k_block=*/32,
           /*mr=*/1, /*nr=*/4, /*kr=*/16, /*sr=*/2,
           /*mr_packed=*/1,
           /*is_igemm=*/false,
@@ -280,8 +280,8 @@ std::vector<GemmTestParams> CreateTests1(
   INSTANTIATE_TEST_SUITE_P(
       QP8_F32_QC4W_GEMM_MINMAX_1X8C16S2__AARCH64_NEONDOT, GemmTest,
       testing::ValuesIn(CreateTests1(
-          /*k_block=*/2,
-          /*adj_k_block=*/2,
+          /*k_block=*/32,
+          /*adj_k_block=*/32,
           /*mr=*/1, /*nr=*/8, /*kr=*/16, /*sr=*/2,
           /*mr_packed=*/1,
           /*is_igemm=*/false,
@@ -302,8 +302,8 @@ std::vector<GemmTestParams> CreateTests1(
   INSTANTIATE_TEST_SUITE_P(
       QP8_F32_QC4W_GEMM_MINMAX_1X4C8S2__AARCH64_NEONDOT, GemmTest,
       testing::ValuesIn(CreateTests1(
-          /*k_block=*/2,
-          /*adj_k_block=*/2,
+          /*k_block=*/16,
+          /*adj_k_block=*/16,
           /*mr=*/1, /*nr=*/4, /*kr=*/8, /*sr=*/2,
           /*mr_packed=*/1,
           /*is_igemm=*/false,
@@ -324,8 +324,8 @@ std::vector<GemmTestParams> CreateTests1(
   INSTANTIATE_TEST_SUITE_P(
       QP8_F32_QC4W_GEMM_MINMAX_16X4C8S2__AARCH64_NEONDOT_MSTEP4, GemmTest,
       testing::ValuesIn(CreateTests1(
-          /*k_block=*/2,
-          /*adj_k_block=*/2,
+          /*k_block=*/16,
+          /*adj_k_block=*/16,
           /*mr=*/16, /*nr=*/4, /*kr=*/8, /*sr=*/2,
           /*mr_packed=*/4,
           /*is_igemm=*/false,
@@ -351,8 +351,8 @@ std::vector<GemmTestParams> CreateTests1(
   INSTANTIATE_TEST_SUITE_P(
       QP8_F32_QC4W_GEMM_MINMAX_4X4C16S2__NEONI8MM, GemmTest,
       testing::ValuesIn(CreateTests1(
-          /*k_block=*/2,
-          /*adj_k_block=*/2,
+          /*k_block=*/32,
+          /*adj_k_block=*/32,
           /*mr=*/4, /*nr=*/4, /*kr=*/16, /*sr=*/2,
           /*mr_packed=*/4,
           /*is_igemm=*/false,
@@ -373,8 +373,8 @@ std::vector<GemmTestParams> CreateTests1(
   INSTANTIATE_TEST_SUITE_P(
       QP8_F32_QC4W_GEMM_MINMAX_4X8C16S2__NEONI8MM, GemmTest,
       testing::ValuesIn(CreateTests1(
-          /*k_block=*/2,
-          /*adj_k_block=*/2,
+          /*k_block=*/32,
+          /*adj_k_block=*/32,
           /*mr=*/4, /*nr=*/8, /*kr=*/16, /*sr=*/2,
           /*mr_packed=*/4,
           /*is_igemm=*/false,
@@ -395,8 +395,8 @@ std::vector<GemmTestParams> CreateTests1(
   INSTANTIATE_TEST_SUITE_P(
       QP8_F32_QC4W_GEMM_MINMAX_8X4C16S2__NEONI8MM_MSTEP2, GemmTest,
       testing::ValuesIn(CreateTests1(
-          /*k_block=*/2,
-          /*adj_k_block=*/2,
+          /*k_block=*/32,
+          /*adj_k_block=*/32,
           /*mr=*/8, /*nr=*/4, /*kr=*/16, /*sr=*/2,
           /*mr_packed=*/4,
           /*is_igemm=*/false,
@@ -417,8 +417,8 @@ std::vector<GemmTestParams> CreateTests1(
   INSTANTIATE_TEST_SUITE_P(
       QP8_F32_QC4W_GEMM_MINMAX_8X8C16S2__NEONI8MM_MSTEP2, GemmTest,
       testing::ValuesIn(CreateTests1(
-          /*k_block=*/2,
-          /*adj_k_block=*/2,
+          /*k_block=*/32,
+          /*adj_k_block=*/32,
           /*mr=*/8, /*nr=*/8, /*kr=*/16, /*sr=*/2,
           /*mr_packed=*/4,
           /*is_igemm=*/false,
