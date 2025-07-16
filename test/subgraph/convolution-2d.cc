@@ -4,7 +4,6 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <algorithm>
-#include <array>
 #include <cassert>
 #include <chrono>
 #include <cstddef>
@@ -21,6 +20,7 @@
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
 #include "test/replicable_random_device.h"
+#include "test/subgraph/calculate_quantization_params.h"
 #include "test/subgraph/fake-dynamic-quantize.h"
 #include "test/subgraph/stencil.h"
 #include "test/subgraph/subgraph-tester.h"
@@ -137,50 +137,6 @@ ConvolutionParams StencilToConvolutionParams(const StencilParams& kh,
   return params;
 }
 
-template <typename T>
-xnn_quantization_params quantization_for_range(float min, float max) {
-  xnn_quantization_params result;
-  result.scale = (max - min) / (static_cast<float>(NumericLimits<T>::max()) -
-                                static_cast<float>(NumericLimits<T>::min()));
-  result.zero_point = NumericLimits<T>::min() - min / result.scale;
-  return result;
-}
-
-template <typename Input, typename Filter, typename Output>
-xnn_quantization_params CalculateConvolutionQuantizationParams(
-    size_t reduction_size, xnn_quantization_params input_quantization,
-    xnn_quantization_params filter_quantization) {
-  if (!xnn_datatype_is_quantized(xnn_datatype_of<Output>())) {
-    return {0, 1.0f};
-  }
-
-  // Get the dequantized input and filter ranges.
-  const float input_min =
-      dequantize(NumericLimits<Input>::min(), input_quantization);
-  const float input_max =
-      dequantize(NumericLimits<Input>::max(), input_quantization);
-  const float filter_min =
-      dequantize(NumericLimits<Filter>::min(), filter_quantization);
-  const float filter_max =
-      dequantize(NumericLimits<Filter>::max(), filter_quantization);
-
-  // Find the range of the product of an input and a filter value.
-  std::array<float, 4> corners = {
-      input_min * filter_min,
-      input_max * filter_min,
-      input_min * filter_max,
-      input_max * filter_max,
-  };
-  auto input_filter_minmax =
-      std::minmax_element(corners.begin(), corners.end());
-
-  const float output_min = *input_filter_minmax.first * reduction_size;
-  const float output_max = *input_filter_minmax.second * reduction_size;
-
-  // Now we want the output quantization to hold the range of the output.
-  return quantization_for_range<Output>(output_min, output_max);
-}
-
 template <typename Data, typename Filter, typename Bias>
 void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
   const bool channelwise_quantization =
@@ -264,8 +220,9 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
     // The output quantization is computed from the kernel size and input
     // quantization.
     xnn_quantization_params output_quantization =
-        CalculateConvolutionQuantizationParams<Data, Filter, Data>(
-            reduction_size, input_quantization, filter_quantization);
+        CalculateGEMMQuantizationParams<Data, Filter, Data>(
+            reduction_size, input_quantization, filter_quantization,
+            /*bias_quantization=*/{0, 1.0f});
     xnn_quantization_params bias_quantization = {
         0, input_quantization.scale * filter_quantization.scale};
 
