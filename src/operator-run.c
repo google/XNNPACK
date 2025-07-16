@@ -33,7 +33,7 @@
 #include "src/xnnpack/microparams-init.h"
 #endif  // XNN_MAX_UARCH_TYPES > 1
 
-void xnn_compute_transposec_2d(const struct transpose_context* restrict context,
+void xnn_compute_transposec_2d(struct transpose_context* restrict context,
                                size_t i, size_t j, size_t tile_i,
                                size_t tile_j) {
   const size_t ld_input = context->input_stride[1];
@@ -46,7 +46,7 @@ void xnn_compute_transposec_2d(const struct transpose_context* restrict context,
       ld_input, ld_output, tile_i, tile_j);
 }
 
-void xnn_compute_transposec_3d(const struct transpose_context* restrict context,
+void xnn_compute_transposec_3d(struct transpose_context* restrict context,
                                size_t i, size_t j, size_t k, size_t tile_j,
                                size_t tile_k) {
   const size_t ld_input = context->input_stride[2];
@@ -62,7 +62,7 @@ void xnn_compute_transposec_3d(const struct transpose_context* restrict context,
   context->const_size_ukernel(x, y, ld_input, ld_output, tile_j, tile_k);
 }
 
-void xnn_compute_transposec_4d(const struct transpose_context* restrict context,
+void xnn_compute_transposec_4d(struct transpose_context* restrict context,
                                size_t i, size_t j, size_t k, size_t l,
                                size_t tile_k, size_t tile_l) {
   const size_t ld_input = context->input_stride[3];
@@ -80,7 +80,7 @@ void xnn_compute_transposec_4d(const struct transpose_context* restrict context,
   context->const_size_ukernel(x, y, ld_input, ld_output, tile_k, tile_l);
 }
 
-void xnn_compute_transposec_5d(const struct transpose_context* restrict context,
+void xnn_compute_transposec_5d(struct transpose_context* restrict context,
                                size_t i, size_t j, size_t k, size_t l, size_t m,
                                size_t tile_l, size_t tile_m) {
   const size_t ld_input = context->input_stride[4];
@@ -99,7 +99,7 @@ void xnn_compute_transposec_5d(const struct transpose_context* restrict context,
   context->const_size_ukernel(x, y, ld_input, ld_output, tile_l, tile_m);
 }
 
-void xnn_compute_transposec_6d(const struct transpose_context* restrict context,
+void xnn_compute_transposec_6d(struct transpose_context* restrict context,
                                size_t i, size_t j, size_t k, size_t l, size_t m,
                                size_t n, size_t tile_m, size_t tile_n) {
   const size_t ld_input = context->input_stride[5];
@@ -120,7 +120,7 @@ void xnn_compute_transposec_6d(const struct transpose_context* restrict context,
   context->const_size_ukernel(x, y, ld_input, ld_output, tile_m, tile_n);
 }
 
-void xnn_compute_transposev_2d(const struct transpose_context* restrict context,
+void xnn_compute_transposev_2d(struct transpose_context* restrict context,
                                size_t i, size_t j, size_t tile_i,
                                size_t tile_j) {
   const size_t element_size = context->output_stride[1];
@@ -137,7 +137,7 @@ void xnn_compute_transposev_2d(const struct transpose_context* restrict context,
       context->output_stride[1], element_size, tile_i, tile_j);
 }
 
-void xnn_compute_transposev_3d(const struct transpose_context* restrict context,
+void xnn_compute_transposev_3d(struct transpose_context* restrict context,
                                size_t i, size_t j, size_t k, size_t tile_j,
                                size_t tile_k) {
   const size_t element_size = context->output_stride[2];
@@ -156,7 +156,7 @@ void xnn_compute_transposev_3d(const struct transpose_context* restrict context,
       context->output_stride[2], element_size, tile_j, tile_k);
 }
 
-void xnn_compute_transposev_4d(const struct transpose_context* restrict context,
+void xnn_compute_transposev_4d(struct transpose_context* restrict context,
                                size_t i, size_t j, size_t k, size_t l,
                                size_t tile_k, size_t tile_l) {
   const size_t element_size = context->output_stride[3];
@@ -177,7 +177,7 @@ void xnn_compute_transposev_4d(const struct transpose_context* restrict context,
       context->output_stride[3], element_size, tile_k, tile_l);
 }
 
-void xnn_compute_transposev_5d(const struct transpose_context* restrict context,
+void xnn_compute_transposev_5d(struct transpose_context* restrict context,
                                size_t i, size_t j, size_t k, size_t l, size_t m,
                                size_t tile_l, size_t tile_m) {
   const size_t element_size = context->output_stride[4];
@@ -199,7 +199,7 @@ void xnn_compute_transposev_5d(const struct transpose_context* restrict context,
       context->output_stride[4], element_size, tile_l, tile_m);
 }
 
-void xnn_compute_transposev_6d(const struct transpose_context* restrict context,
+void xnn_compute_transposev_6d(struct transpose_context* restrict context,
                                size_t i, size_t j, size_t k, size_t l, size_t m,
                                size_t n, size_t tile_m, size_t tile_n) {
   const size_t element_size = context->output_stride[5];
@@ -224,7 +224,7 @@ void xnn_compute_transposev_6d(const struct transpose_context* restrict context,
 }
 
 void xnn_compute_batched_packw_gemm_gio(
-    const struct packw_gemm_gio_context* restrict context, size_t batch_index,
+    struct packw_gemm_gio_context* restrict context, size_t batch_index,
     size_t n_block_start, size_t n_block_size) {
   const void* kernel = (const void*)((uintptr_t)context->kernel +
                                      n_block_start * context->n_stride +
@@ -269,14 +269,14 @@ void xnn_compute_batched_packw_gemm_gio(
 }
 
 void xnn_compute_packw_gemm_gio(
-    const struct packw_gemm_gio_context* restrict context, size_t n_block_start,
+    struct packw_gemm_gio_context* restrict context, size_t n_block_start,
     size_t n_block_size) {
   xnn_compute_batched_packw_gemm_gio(context, /*batch_index=*/0, n_block_start,
                                      n_block_size);
 }
 
 void xnn_compute_batched_packw_gemm_goi(
-    const struct packw_gemm_goi_context* restrict context, size_t batch_index,
+    struct packw_gemm_goi_context* restrict context, size_t batch_index,
     size_t n_block_start, size_t n_block_size) {
   const void* kernel = (const void*)((uintptr_t)context->kernel +
                                      context->k_stride * n_block_start +
@@ -320,14 +320,13 @@ void xnn_compute_batched_packw_gemm_goi(
   }
 }
 
-void xnn_compute_packw_gemm_goi(
-    const struct packw_gemm_goi_context* restrict context, size_t n_block_start,
-    size_t n_block_size) {
+void xnn_compute_packw_gemm_goi(struct packw_gemm_goi_context* restrict context,
+                                size_t n_block_start, size_t n_block_size) {
   xnn_compute_batched_packw_gemm_goi(context, /*batch_index=*/0, n_block_start,
                                      n_block_size);
 }
 
-static void compute_group_indices(const struct gemm_context* context,
+static void compute_group_indices(struct gemm_context* context,
                                   size_t group_index, size_t* group_index_a,
                                   size_t* group_index_b) {
   const size_t num_batch_dims = context->num_batch_dims;
@@ -346,7 +345,7 @@ static void compute_group_indices(const struct gemm_context* context,
   }
 }
 
-void xnn_compute_hmp_grouped_gemm(const struct gemm_context* restrict context,
+void xnn_compute_hmp_grouped_gemm(struct gemm_context* restrict context,
                                   uint32_t uarch_index, size_t group_index,
                                   size_t nr_block_start, size_t mr_block_start,
                                   size_t nr_block_size, size_t mr_block_size) {
@@ -411,7 +410,7 @@ void xnn_compute_hmp_grouped_gemm(const struct gemm_context* restrict context,
   }
 }
 
-void xnn_compute_grouped_gemm(const struct gemm_context* restrict context,
+void xnn_compute_grouped_gemm(struct gemm_context* restrict context,
                               size_t group_index, size_t nr_block_start,
                               size_t mr_block_start, size_t nr_block_size,
                               size_t mr_block_size) {
@@ -420,7 +419,7 @@ void xnn_compute_grouped_gemm(const struct gemm_context* restrict context,
                                mr_block_size);
 }
 
-void xnn_compute_gemm(const struct gemm_context* restrict context,
+void xnn_compute_gemm(struct gemm_context* restrict context,
                       size_t nr_block_start, size_t mr_block_start,
                       size_t nr_block_size, size_t mr_block_size) {
   const size_t a_stride = context->a_stride;
@@ -443,7 +442,7 @@ void xnn_compute_gemm(const struct gemm_context* restrict context,
   }
 }
 
-void xnn_compute_dqgemm(const struct gemm_context* restrict context,
+void xnn_compute_dqgemm(struct gemm_context* restrict context,
                         size_t nr_block_start, size_t mr_block_start,
                         size_t nr_block_size, size_t mr_block_size) {
   const size_t a_stride = context->a_stride;
@@ -467,10 +466,12 @@ void xnn_compute_dqgemm(const struct gemm_context* restrict context,
   }
 }
 
-void xnn_compute_hmp_grouped_qp8gemm(
-    const struct gemm_context* restrict context, uint32_t uarch_index,
-    size_t group_index, size_t nr_block_start, size_t mr_block_start,
-    size_t nr_block_size, size_t mr_block_size) {
+void xnn_compute_hmp_grouped_qp8gemm(struct gemm_context* restrict context,
+                                     uint32_t uarch_index, size_t group_index,
+                                     size_t nr_block_start,
+                                     size_t mr_block_start,
+                                     size_t nr_block_size,
+                                     size_t mr_block_size) {
   const size_t cm_stride = context->cm_stride;
   const size_t cn_stride = context->cn_stride;
 
@@ -524,7 +525,7 @@ void xnn_compute_hmp_grouped_qp8gemm(
   }
 }
 
-void xnn_compute_grouped_qp8gemm(const struct gemm_context* restrict context,
+void xnn_compute_grouped_qp8gemm(struct gemm_context* restrict context,
                                  size_t group_index, size_t nr_block_start,
                                  size_t mr_block_start, size_t nr_block_size,
                                  size_t mr_block_size) {
@@ -534,7 +535,7 @@ void xnn_compute_grouped_qp8gemm(const struct gemm_context* restrict context,
 }
 
 XNN_INLINE static void compute_hmp_qp8gemm(
-    const struct gemm_context* restrict context, uint32_t uarch_index,
+    struct gemm_context* restrict context, uint32_t uarch_index,
     size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
     size_t mr_block_size) {
   const size_t cm_stride = context->cm_stride;
@@ -582,7 +583,7 @@ XNN_INLINE static void compute_hmp_qp8gemm(
   }
 }
 
-void xnn_compute_hmp_qp8gemm(const struct gemm_context* restrict context,
+void xnn_compute_hmp_qp8gemm(struct gemm_context* restrict context,
                              uint32_t uarch_index, size_t nr_block_start,
                              size_t mr_block_start, size_t nr_block_size,
                              size_t mr_block_size) {
@@ -590,16 +591,15 @@ void xnn_compute_hmp_qp8gemm(const struct gemm_context* restrict context,
                       nr_block_size, mr_block_size);
 }
 
-void xnn_compute_qp8gemm(const struct gemm_context* restrict context,
+void xnn_compute_qp8gemm(struct gemm_context* restrict context,
                          size_t nr_block_start, size_t mr_block_start,
                          size_t nr_block_size, size_t mr_block_size) {
   compute_hmp_qp8gemm(context, XNN_UARCH_DEFAULT, nr_block_start,
                       mr_block_start, nr_block_size, mr_block_size);
 }
 
-void xnn_compute_spmm(const struct spmm_context* restrict context,
-                      size_t batch_index, size_t mr_block_start,
-                      size_t mr_block_size) {
+void xnn_compute_spmm(struct spmm_context* restrict context, size_t batch_index,
+                      size_t mr_block_start, size_t mr_block_size) {
   context->ukernel(
       mr_block_size, context->n,
       (const void*)((uintptr_t)context->input +
@@ -613,7 +613,7 @@ void xnn_compute_spmm(const struct spmm_context* restrict context,
 }
 
 XNN_INLINE static void compute_inline_packed_qp8gemm(
-    const struct gemm_context* context, uint32_t uarch_index, size_t thread_id,
+    struct gemm_context* context, uint32_t uarch_index, size_t thread_id,
     size_t group_index_a, size_t group_index_b, size_t group_index_c,
     size_t mr_block_start, size_t mr_block_size) {
   assert(context->packed_lh_config != NULL);
@@ -663,8 +663,7 @@ XNN_INLINE static void compute_inline_packed_qp8gemm(
 
     // Call the appropriate GEMM kernel.
     if (context->dynamic_quantization) {
-      const struct xnn_qd8_quantization_params* quantization_params =
-          packed_lhs;
+      const struct xnn_qd8_quantization_params* quantization_params = packed_lhs;
       const void* packed_inputs =
           (const void*)((uintptr_t)packed_lhs +
                         mr * sizeof(struct xnn_qd8_quantization_params));
@@ -684,7 +683,7 @@ XNN_INLINE static void compute_inline_packed_qp8gemm(
   }
 }
 
-void xnn_compute_hmp_inline_packed_qp8gemm(const struct gemm_context* context,
+void xnn_compute_hmp_inline_packed_qp8gemm(struct gemm_context* context,
                                            uint32_t uarch_index,
                                            size_t thread_id,
                                            size_t mr_block_start,
@@ -695,7 +694,7 @@ void xnn_compute_hmp_inline_packed_qp8gemm(const struct gemm_context* context,
                                 mr_block_size);
 }
 
-void xnn_compute_inline_packed_qp8gemm(const struct gemm_context* context,
+void xnn_compute_inline_packed_qp8gemm(struct gemm_context* context,
                                        uint32_t thread_id,
                                        size_t mr_block_start,
                                        size_t mr_block_size) {
@@ -706,9 +705,8 @@ void xnn_compute_inline_packed_qp8gemm(const struct gemm_context* context,
 }
 
 void xnn_compute_hmp_grouped_inline_packed_qp8gemm(
-    const struct gemm_context* context, uint32_t uarch_index,
-    uint32_t thread_id, size_t group_index, size_t mr_block_start,
-    size_t mr_block_size) {
+    struct gemm_context* context, uint32_t uarch_index, uint32_t thread_id,
+    size_t group_index, size_t mr_block_start, size_t mr_block_size) {
   // Compute the group index offsets into A and B.
   size_t group_index_a = 0;
   size_t group_index_b = 0;
@@ -719,9 +717,11 @@ void xnn_compute_hmp_grouped_inline_packed_qp8gemm(
                                 mr_block_size);
 }
 
-void xnn_compute_grouped_inline_packed_qp8gemm(
-    const struct gemm_context* context, uint32_t thread_id, size_t group_index,
-    size_t mr_block_start, size_t mr_block_size) {
+void xnn_compute_grouped_inline_packed_qp8gemm(struct gemm_context* context,
+                                               uint32_t thread_id,
+                                               size_t group_index,
+                                               size_t mr_block_start,
+                                               size_t mr_block_size) {
   // Compute the group index offsets into A and B.
   size_t group_index_a = 0;
   size_t group_index_b = 0;
@@ -732,10 +732,12 @@ void xnn_compute_grouped_inline_packed_qp8gemm(
                                 mr_block_start, mr_block_size);
 }
 
-void xnn_compute_grouped_batch_igemm(
-    const struct igemm_context* restrict context, size_t batch_index,
-    size_t group_index, size_t nr_block_start, size_t mr_block_start,
-    size_t nr_block_size, size_t mr_block_size) {
+void xnn_compute_grouped_batch_igemm(struct igemm_context* restrict context,
+                                     size_t batch_index, size_t group_index,
+                                     size_t nr_block_start,
+                                     size_t mr_block_start,
+                                     size_t nr_block_size,
+                                     size_t mr_block_size) {
   const size_t ks = context->ks;
   const size_t cm_stride = context->cm_stride;
 
@@ -760,25 +762,26 @@ void xnn_compute_grouped_batch_igemm(
   }
 }
 
-void xnn_compute_dq_zero_buffer_igemm(
-    const struct igemm_context* restrict context, size_t batch_index) {
+void xnn_compute_dq_zero_buffer_igemm(struct igemm_context* restrict context,
+                                      size_t batch_index) {
   memset(context->zero_buffers[batch_index],
          context->quantization_params[batch_index].zero_point,
          context->zero_size);
 }
 
 void xnn_compute_dq_zero_buffer_subconv(
-    const struct subconv_context* restrict context,
-    size_t batch_index) {
+    struct subconv_context* restrict context, size_t batch_index) {
   memset(context->zero_buffers[batch_index],
          context->quantization_params[batch_index].zero_point,
          context->zero_size);
 }
 
-void xnn_compute_grouped_batch_dqigemm(
-    const struct igemm_context* restrict context, size_t batch_index,
-    size_t group_index, size_t nr_block_start, size_t mr_block_start,
-    size_t nr_block_size, size_t mr_block_size) {
+void xnn_compute_grouped_batch_dqigemm(struct igemm_context* restrict context,
+                                       size_t batch_index, size_t group_index,
+                                       size_t nr_block_start,
+                                       size_t mr_block_start,
+                                       size_t nr_block_size,
+                                       size_t mr_block_size) {
   const size_t ks = context->ks;
   const size_t cm_stride = context->cm_stride;
 
@@ -804,7 +807,7 @@ void xnn_compute_grouped_batch_dqigemm(
   }
 }
 
-void xnn_compute_grouped_igemm(const struct igemm_context* restrict context,
+void xnn_compute_grouped_igemm(struct igemm_context* restrict context,
                                size_t group_index, size_t nr_block_start,
                                size_t mr_block_start, size_t nr_block_size,
                                size_t mr_block_size) {
@@ -831,7 +834,7 @@ void xnn_compute_grouped_igemm(const struct igemm_context* restrict context,
   }
 }
 
-void xnn_compute_grouped_dqigemm(const struct igemm_context* restrict context,
+void xnn_compute_grouped_dqigemm(struct igemm_context* restrict context,
                                  size_t group_index, size_t nr_block_start,
                                  size_t mr_block_start, size_t nr_block_size,
                                  size_t mr_block_size) {
@@ -860,7 +863,7 @@ void xnn_compute_grouped_dqigemm(const struct igemm_context* restrict context,
 }
 
 static void compute_batch_inline_packed_igemm(
-    const struct igemm_context* restrict context, uint32_t uarch_index,
+    struct igemm_context* restrict context, uint32_t uarch_index,
     uint32_t thread_id, size_t batch_index, size_t group_index,
     size_t mr_block_start, size_t mr_block_size) {
   const size_t mr = context->mr;
@@ -900,7 +903,7 @@ static void compute_batch_inline_packed_igemm(
 }
 
 void xnn_compute_batch_inline_packed_igemm(
-    const struct igemm_context* restrict context, uint32_t thread_id,
+    struct igemm_context* restrict context, uint32_t thread_id,
     size_t batch_index, size_t mr_block_start, size_t mr_block_size) {
   compute_batch_inline_packed_igemm(context, XNN_UARCH_DEFAULT, thread_id,
                                     batch_index, /*group_index=*/0,
@@ -908,7 +911,7 @@ void xnn_compute_batch_inline_packed_igemm(
 }
 
 void xnn_compute_batch_hmp_inline_packed_igemm(
-    const struct igemm_context* restrict context, uint32_t uarch_index,
+    struct igemm_context* restrict context, uint32_t uarch_index,
     size_t thread_id, size_t batch_index, size_t mr_block_start,
     size_t mr_block_size) {
   compute_batch_inline_packed_igemm(context, uarch_index, thread_id,
@@ -917,7 +920,7 @@ void xnn_compute_batch_hmp_inline_packed_igemm(
 }
 
 void xnn_compute_grouped_batch_inline_packed_igemm(
-    const struct igemm_context* restrict context, uint32_t thread_id,
+    struct igemm_context* restrict context, uint32_t thread_id,
     size_t batch_index, size_t group_index, size_t mr_block_start,
     size_t mr_block_size) {
   compute_batch_inline_packed_igemm(context, XNN_UARCH_DEFAULT, thread_id,
@@ -926,7 +929,7 @@ void xnn_compute_grouped_batch_inline_packed_igemm(
 }
 
 void xnn_compute_grouped_batch_hmp_inline_packed_igemm(
-    const struct igemm_context* restrict context, uint32_t uarch_index,
+    struct igemm_context* restrict context, uint32_t uarch_index,
     size_t thread_id, size_t batch_index, size_t group_index,
     size_t mr_block_start, size_t mr_block_size) {
   compute_batch_inline_packed_igemm(context, uarch_index, thread_id,
@@ -934,10 +937,10 @@ void xnn_compute_grouped_batch_hmp_inline_packed_igemm(
                                     mr_block_size);
 }
 
-void xnn_compute_batch_igemm(
-    const struct igemm_context* restrict context,
-    size_t batch_index, size_t nr_block_start, size_t mr_block_start,
-    size_t nr_block_size, size_t mr_block_size) {
+void xnn_compute_batch_igemm(struct igemm_context* restrict context,
+                             size_t batch_index, size_t nr_block_start,
+                             size_t mr_block_start, size_t nr_block_size,
+                             size_t mr_block_size) {
   const size_t ks = context->ks;
   const size_t cm_stride = context->cm_stride;
 
@@ -960,7 +963,7 @@ void xnn_compute_batch_igemm(
   }
 }
 
-void xnn_compute_batch_dqigemm(const struct igemm_context* restrict context,
+void xnn_compute_batch_dqigemm(struct igemm_context* restrict context,
                                size_t batch_index, size_t nr_block_start,
                                size_t mr_block_start, size_t nr_block_size,
                                size_t mr_block_size) {
@@ -987,7 +990,7 @@ void xnn_compute_batch_dqigemm(const struct igemm_context* restrict context,
   }
 }
 
-void xnn_compute_igemm(const struct igemm_context* restrict context,
+void xnn_compute_igemm(struct igemm_context* restrict context,
                        size_t nr_block_start, size_t mr_block_start,
                        size_t nr_block_size, size_t mr_block_size) {
   const size_t ks = context->ks;
@@ -1010,7 +1013,7 @@ void xnn_compute_igemm(const struct igemm_context* restrict context,
   }
 }
 
-void xnn_compute_dqigemm(const struct igemm_context* restrict context,
+void xnn_compute_dqigemm(struct igemm_context* restrict context,
                          size_t nr_block_start, size_t mr_block_start,
                          size_t nr_block_size, size_t mr_block_size) {
   const size_t ks = context->ks;
@@ -1036,7 +1039,7 @@ void xnn_compute_dqigemm(const struct igemm_context* restrict context,
 
 // `output_tile_start` should be a multiple of igemm.mr (tile size).
 void xnn_compute_conv2d_igemm_indirection(
-    const struct conv2d_igemm_indirection_init_context* restrict context,
+    struct conv2d_igemm_indirection_init_context* restrict context,
     size_t output_tile_start, size_t output_tile_size) {
   xnn_indirection_init_conv2d(
       output_tile_size, output_tile_start, output_tile_start + output_tile_size,
@@ -1048,11 +1051,11 @@ void xnn_compute_conv2d_igemm_indirection(
       context->input_padding_top, context->input_padding_left);
 }
 
-void xnn_compute_grouped_subgemm2d(
-    const struct subgemm_context* restrict context, size_t batch_index,
-    size_t group_index, size_t subkernel_index, size_t slice_y,
-    size_t slice_x_start, size_t nc_block_start, size_t slice_x_max,
-    size_t nc_block_size) {
+void xnn_compute_grouped_subgemm2d(struct subgemm_context* restrict context,
+                                   size_t batch_index, size_t group_index,
+                                   size_t subkernel_index, size_t slice_y,
+                                   size_t slice_x_start, size_t nc_block_start,
+                                   size_t slice_x_max, size_t nc_block_size) {
   const struct subconvolution_params* subconvolution_params =
       &context->subconvolution_params[subkernel_index];
 
@@ -1084,11 +1087,11 @@ void xnn_compute_grouped_subgemm2d(
       cx_stride, context->cn_stride, &context->params);
 }
 
-void xnn_compute_grouped_subconv2d(
-    const struct subconv_context* restrict context, size_t batch_index,
-    size_t group_index, size_t subkernel_index, size_t slice_y,
-    size_t slice_x_start, size_t nc_block_start, size_t slice_x_max,
-    size_t nc_block_size) {
+void xnn_compute_grouped_subconv2d(struct subconv_context* restrict context,
+                                   size_t batch_index, size_t group_index,
+                                   size_t subkernel_index, size_t slice_y,
+                                   size_t slice_x_start, size_t nc_block_start,
+                                   size_t slice_x_max, size_t nc_block_size) {
   const struct subconvolution_params* subconvolution_params =
       &context->subconvolution_params[subkernel_index];
 
@@ -1123,11 +1126,12 @@ void xnn_compute_grouped_subconv2d(
       context->zero, &context->params);
 }
 
-void xnn_compute_grouped_dqsubconv2d(
-    const struct subconv_context* restrict context, size_t batch_index,
-    size_t group_index, size_t subkernel_index, size_t slice_y,
-    size_t slice_x_start, size_t nc_block_start, size_t slice_x_max,
-    size_t nc_block_size) {
+void xnn_compute_grouped_dqsubconv2d(struct subconv_context* restrict context,
+                                     size_t batch_index, size_t group_index,
+                                     size_t subkernel_index, size_t slice_y,
+                                     size_t slice_x_start,
+                                     size_t nc_block_start, size_t slice_x_max,
+                                     size_t nc_block_size) {
   const struct subconvolution_params* subconvolution_params =
       &context->subconvolution_params[subkernel_index];
 
@@ -1163,7 +1167,7 @@ void xnn_compute_grouped_dqsubconv2d(
       &context->quantization_params[batch_index]);
 }
 
-void xnn_compute_subconv2d(const struct subconv_context* restrict context,
+void xnn_compute_subconv2d(struct subconv_context* restrict context,
                            size_t batch_index, size_t subkernel_index,
                            size_t slice_y, size_t slice_x_start,
                            size_t nc_block_start, size_t slice_x_max,
@@ -1200,7 +1204,7 @@ void xnn_compute_subconv2d(const struct subconv_context* restrict context,
       &context->params);
 }
 
-void xnn_compute_dqsubconv2d(const struct subconv_context* restrict context,
+void xnn_compute_dqsubconv2d(struct subconv_context* restrict context,
                              size_t batch_index, size_t subkernel_index,
                              size_t slice_y, size_t slice_x_start,
                              size_t nc_block_start, size_t slice_x_max,
@@ -1238,7 +1242,7 @@ void xnn_compute_dqsubconv2d(const struct subconv_context* restrict context,
       &context->quantization_params[batch_index]);
 }
 
-void xnn_compute_conv2d_hwc2chw(const struct conv2d_context* restrict context,
+void xnn_compute_conv2d_hwc2chw(struct conv2d_context* restrict context,
                                 size_t batch_index, size_t output_y_start,
                                 size_t output_y_slice) {
   context->hwc2chw_ukernel(
@@ -1255,7 +1259,7 @@ void xnn_compute_conv2d_hwc2chw(const struct conv2d_context* restrict context,
 }
 
 void xnn_compute_dwconv_indirection(
-    const struct dwconv_indirection_init_context* restrict context,
+    struct dwconv_indirection_init_context* restrict context,
     size_t output_y_start, size_t output_y_tile) {
   xnn_indirection_init_dwconv2d(
       output_y_start, output_y_start + output_y_tile,
@@ -1268,7 +1272,7 @@ void xnn_compute_dwconv_indirection(
       context->step_height, context->step_width, context->tile_size);
 }
 
-void xnn_compute_dwconv_unipass(const struct dwconv_context* restrict context,
+void xnn_compute_dwconv_unipass(struct dwconv_context* restrict context,
                                 size_t batch_index, size_t output_y,
                                 size_t output_c_start, size_t output_c_tile) {
   const void** indirect_input =
@@ -1293,7 +1297,7 @@ void xnn_compute_dwconv_unipass(const struct dwconv_context* restrict context,
                    context->zero, &context->params);
 }
 
-void xnn_compute_dwconv2d_chw(const struct dwconv2d_context* restrict context,
+void xnn_compute_dwconv2d_chw(struct dwconv2d_context* restrict context,
                               size_t batch_index, size_t channel) {
   context->chw_ukernel(context->input_height, context->input_width,
                        (const void*)((uintptr_t)context->input +
@@ -1308,9 +1312,8 @@ void xnn_compute_dwconv2d_chw(const struct dwconv2d_context* restrict context,
                        context->input_padding_top, &context->params);
 }
 
-void xnn_compute_argmax_pooling(
-    const struct argmax_pooling_context* restrict context, size_t batch_index,
-    size_t output_y) {
+void xnn_compute_argmax_pooling(struct argmax_pooling_context* restrict context,
+                                size_t batch_index, size_t output_y) {
   const void** indirect_input =
       (const void**)((uintptr_t)context->indirect_input +
                      output_y * context->indirect_input_height_stride);
@@ -1330,7 +1333,7 @@ void xnn_compute_argmax_pooling(
                    context->index_increment);
 }
 
-void xnn_compute_max_pooling(const struct max_pooling_context* restrict context,
+void xnn_compute_max_pooling(struct max_pooling_context* restrict context,
                              size_t batch_index, size_t output_y) {
   const void** indirect_input =
       (const void**)((uintptr_t)context->indirect_input +
@@ -1347,7 +1350,7 @@ void xnn_compute_max_pooling(const struct max_pooling_context* restrict context,
                    context->output_increment, &context->params);
 }
 
-void xnn_compute_unpooling(const struct unpooling_context* restrict context,
+void xnn_compute_unpooling(struct unpooling_context* restrict context,
                            size_t input_y, size_t input_x) {
   const void* input = (const void*)((uintptr_t)context->input +
                                     input_y * context->input_height_stride +
@@ -1366,7 +1369,7 @@ void xnn_compute_unpooling(const struct unpooling_context* restrict context,
 }
 
 void xnn_compute_average_pooling(
-    const struct average_pooling_context* restrict context, size_t batch_index,
+    struct average_pooling_context* restrict context, size_t batch_index,
     size_t output_y) {
   // Refer to xnn_compute_average_pooling for documentation on these terms.
   const size_t indirect_y = min(output_y, context->indirect_top_height) +
@@ -1398,8 +1401,7 @@ void xnn_compute_average_pooling(
 }
 
 void xnn_compute_resize_bilinear_indirection(
-    const struct
-    resize_bilinear_nhwc_indirection_init_context* restrict context,
+    struct resize_bilinear_nhwc_indirection_init_context* restrict context,
     size_t output_y_start, size_t output_y_tile) {
   void* buffer = context->buffer;
 
@@ -1414,7 +1416,7 @@ void xnn_compute_resize_bilinear_indirection(
 }
 
 void xnn_compute_resize_bilinear(
-    const struct resize_bilinear_context* restrict context, size_t batch_index,
+    struct resize_bilinear_context* restrict context, size_t batch_index,
     size_t pixel_start, size_t pixel_range) {
   void* output = (void*)((uintptr_t)context->output +
                          pixel_start * context->output_pixel_stride +
@@ -1430,8 +1432,8 @@ void xnn_compute_resize_bilinear(
 }
 
 void xnn_compute_resize_bilinear_chw(
-    const struct resize_bilinear_chw_context* restrict context,
-    size_t batch_index, size_t channel_start, size_t channel_range) {
+    struct resize_bilinear_chw_context* restrict context, size_t batch_index,
+    size_t channel_start, size_t channel_range) {
   void* output = (void*)((uintptr_t)context->output +
                          channel_start * context->output_channel_stride +
                          batch_index * context->output_batch_stride);
@@ -1445,7 +1447,7 @@ void xnn_compute_resize_bilinear_chw(
                    context->input_channel_stride);
 }
 
-void xnn_compute_pad_5d(const struct pad_context* restrict context, size_t i,
+void xnn_compute_pad_5d(struct pad_context* restrict context, size_t i,
                         size_t j, size_t k, size_t l, size_t m) {
   const void* input =
       (const void*)((uintptr_t)context->input + i * context->input_stride[4] +
@@ -1483,8 +1485,7 @@ void xnn_compute_pad_5d(const struct pad_context* restrict context, size_t i,
   }
 }
 
-void xnn_compute_slice_1d(const struct slice_context* restrict context,
-                          size_t i) {
+void xnn_compute_slice_1d(struct slice_context* restrict context, size_t i) {
   const void* input =
       (const void*)((uintptr_t)context->input + i * context->input_stride[0]);
   void* output =
@@ -1493,8 +1494,8 @@ void xnn_compute_slice_1d(const struct slice_context* restrict context,
   context->ukernel(context->contiguous_size, input, output, NULL);
 }
 
-void xnn_compute_slice_2d(const struct slice_context* restrict context,
-                          size_t i, size_t j) {
+void xnn_compute_slice_2d(struct slice_context* restrict context, size_t i,
+                          size_t j) {
   const void* input =
       (const void*)((uintptr_t)context->input + i * context->input_stride[1] +
                     j * context->input_stride[0]);
@@ -1505,8 +1506,8 @@ void xnn_compute_slice_2d(const struct slice_context* restrict context,
   context->ukernel(context->contiguous_size, input, output, NULL);
 }
 
-void xnn_compute_slice_3d(const struct slice_context* restrict context,
-                          size_t i, size_t j, size_t k) {
+void xnn_compute_slice_3d(struct slice_context* restrict context, size_t i,
+                          size_t j, size_t k) {
   const void* input =
       (const void*)((uintptr_t)context->input + i * context->input_stride[2] +
                     j * context->input_stride[1] +
@@ -1518,8 +1519,8 @@ void xnn_compute_slice_3d(const struct slice_context* restrict context,
   context->ukernel(context->contiguous_size, input, output, NULL);
 }
 
-void xnn_compute_slice_4d(const struct slice_context* restrict context,
-                          size_t i, size_t j, size_t k, size_t l) {
+void xnn_compute_slice_4d(struct slice_context* restrict context, size_t i,
+                          size_t j, size_t k, size_t l) {
   const void* input =
       (const void*)((uintptr_t)context->input + i * context->input_stride[3] +
                     j * context->input_stride[2] +
@@ -1533,8 +1534,8 @@ void xnn_compute_slice_4d(const struct slice_context* restrict context,
   context->ukernel(context->contiguous_size, input, output, NULL);
 }
 
-void xnn_compute_slice_5d(const struct slice_context* restrict context,
-                          size_t i, size_t j, size_t k, size_t l, size_t m) {
+void xnn_compute_slice_5d(struct slice_context* restrict context, size_t i,
+                          size_t j, size_t k, size_t l, size_t m) {
   const void* input =
       (const void*)((uintptr_t)context->input + i * context->input_stride[4] +
                     j * context->input_stride[3] +
@@ -1550,7 +1551,7 @@ void xnn_compute_slice_5d(const struct slice_context* restrict context,
 }
 
 void xnn_compute_elementwise_binary_1d_tile(
-    const struct elementwise_binary_context* restrict context, size_t offset,
+    struct elementwise_binary_context* restrict context, size_t offset,
     size_t count) {
   size_t a_offset = ((context->a_stride[4] == 0 ? 0 : offset));
   size_t b_offset = ((context->b_stride[4] == 0 ? 0 : offset));
@@ -1561,8 +1562,7 @@ void xnn_compute_elementwise_binary_1d_tile(
 }
 
 void xnn_compute_elementwise_binary_1d(
-    const struct elementwise_binary_context* context, size_t offset,
-    size_t count) {
+    struct elementwise_binary_context* context, size_t offset, size_t count) {
   for (size_t i = offset; i < offset + count; i++) {
     const void* a =
         (const void*)((uintptr_t)context->a + i * context->a_stride[4]);
@@ -1574,7 +1574,7 @@ void xnn_compute_elementwise_binary_1d(
 }
 
 void xnn_compute_elementwise_binary_2d(
-    const struct elementwise_binary_context* context, size_t i, size_t offset,
+    struct elementwise_binary_context* context, size_t i, size_t offset,
     size_t count) {
   uintptr_t a = (uintptr_t)context->a + i * context->a_stride[3];
   uintptr_t b = (uintptr_t)context->b + i * context->b_stride[3];
@@ -1588,7 +1588,7 @@ void xnn_compute_elementwise_binary_2d(
 }
 
 void xnn_compute_elementwise_binary_3d(
-    const struct elementwise_binary_context* context, size_t i, size_t offset_j,
+    struct elementwise_binary_context* context, size_t i, size_t offset_j,
     size_t offset_k, size_t count_j, size_t count_k) {
   uintptr_t a = (uintptr_t)context->a + i * context->a_stride[2];
   uintptr_t b = (uintptr_t)context->b + i * context->b_stride[2];
@@ -1608,7 +1608,7 @@ void xnn_compute_elementwise_binary_3d(
 }
 
 void xnn_compute_elementwise_binary_4d(
-    const struct elementwise_binary_context* context, size_t i, size_t j,
+    struct elementwise_binary_context* context, size_t i, size_t j,
     size_t offset_k, size_t offset_l, size_t count_k, size_t count_l) {
   uintptr_t a = (uintptr_t)context->a + +i * context->a_stride[1] +
                 j * context->a_stride[2];
@@ -1631,8 +1631,8 @@ void xnn_compute_elementwise_binary_4d(
 }
 
 void xnn_compute_elementwise_binary_5d(
-    const struct elementwise_binary_context* restrict context, size_t i,
-    size_t j, size_t k, size_t l, size_t m) {
+    struct elementwise_binary_context* restrict context, size_t i, size_t j,
+    size_t k, size_t l, size_t m) {
   const void* a =
       (const void*)((uintptr_t)context->a + i * context->a_stride[0] +
                     j * context->a_stride[1] + k * context->a_stride[2] +
@@ -1647,7 +1647,7 @@ void xnn_compute_elementwise_binary_5d(
   context->ukernel(context->elements, a, b, y, &context->params);
 }
 
-void xnn_compute_lut_strided(const struct lut_strided_context* restrict context,
+void xnn_compute_lut_strided(struct lut_strided_context* restrict context,
                              size_t batch_offset, size_t batch_range) {
   for (size_t batch_index = batch_offset;
        batch_index < batch_offset + batch_range; batch_index++) {
@@ -1659,9 +1659,8 @@ void xnn_compute_lut_strided(const struct lut_strided_context* restrict context,
   }
 }
 
-void xnn_compute_lut_contiguous(
-    const struct lut_contiguous_context* restrict context, size_t offset,
-    size_t size) {
+void xnn_compute_lut_contiguous(struct lut_contiguous_context* restrict context,
+                                size_t offset, size_t size) {
   const void* x = (const void*)((uintptr_t)context->x + offset);
   void* y = (void*)((uintptr_t)context->y + offset);
 
@@ -1669,8 +1668,8 @@ void xnn_compute_lut_contiguous(
 }
 
 void xnn_compute_univector_strided(
-    const struct univector_strided_context* restrict context,
-    size_t batch_index, size_t batch_range) {
+    struct univector_strided_context* restrict context, size_t batch_index,
+    size_t batch_range) {
   const size_t x_stride = context->x_stride;
   const size_t y_stride = context->y_stride;
 
@@ -1684,7 +1683,7 @@ void xnn_compute_univector_strided(
 }
 
 void xnn_compute_univector_contiguous(
-    const struct univector_contiguous_context* restrict context, size_t offset,
+    struct univector_contiguous_context* restrict context, size_t offset,
     size_t size) {
   const uint32_t log2_xsize = context->log2_xsize;
   const uint32_t log2_ysize = context->log2_ysize;
@@ -1695,7 +1694,7 @@ void xnn_compute_univector_contiguous(
 }
 
 void xnn_compute_contiguous_reduce(
-    const struct reduce_context* restrict context, size_t output_idx0,
+    struct reduce_context* restrict context, size_t output_idx0,
     size_t output_idx1, size_t output_idx2, size_t output1_block_size,
     size_t output2_block_size) {
   assert(output1_block_size == 1);
@@ -1773,10 +1772,11 @@ void xnn_compute_contiguous_reduce(
   }
 }
 
-void xnn_compute_discontiguous_reduce(
-    const struct reduce_context* restrict context, size_t output_idx0,
-    size_t output_idx1, size_t output_idx2, size_t output1_block_size,
-    size_t output2_block_size) {
+void xnn_compute_discontiguous_reduce(struct reduce_context* restrict context,
+                                      size_t output_idx0, size_t output_idx1,
+                                      size_t output_idx2,
+                                      size_t output1_block_size,
+                                      size_t output2_block_size) {
   assert(output1_block_size == 1);
   const size_t* input_stride = context->input_stride;
   const size_t* output_stride = context->output_stride;
@@ -1848,8 +1848,7 @@ void xnn_compute_discontiguous_reduce(
 }
 
 void xnn_compute_pad_qd8_params(
-    const struct f32_qd8_convert_context* restrict context,
-    size_t batch_index) {
+    struct f32_qd8_convert_context* restrict context, size_t batch_index) {
   const size_t batch_size = context->batch_size;
   for (size_t i = 0; i < XNN_EXTRA_QUANTIZATION_PARAMS; ++i) {
     context->quantization_params[batch_size + i].zero_point =
@@ -1865,7 +1864,7 @@ typedef struct xnn_qd8_quantization_params(f32_quantization_params_fn)(
     float min, float max, float* f32_scale);
 
 void xnn_compute_f16_qx8_convert(
-    const struct f16_qd8_convert_context* restrict context,
+    struct f16_qd8_convert_context* restrict context,
     f16_quantization_params_fn quantization_params_function,
     size_t batch_index) {
   const size_t x_stride = context->x_stride;
@@ -1890,7 +1889,7 @@ void xnn_compute_f16_qx8_convert(
 }
 
 void xnn_compute_f16_qd8_convert(
-    const struct f16_qd8_convert_context* restrict context, size_t batch_offset,
+    struct f16_qd8_convert_context* restrict context, size_t batch_offset,
     size_t batch_range) {
   for (size_t batch_index = batch_offset;
        batch_index < batch_offset + batch_range; batch_index++) {
@@ -1900,7 +1899,7 @@ void xnn_compute_f16_qd8_convert(
 }
 
 void xnn_compute_f16_qdu8_convert(
-    const struct f16_qd8_convert_context* restrict context, size_t batch_offset,
+    struct f16_qd8_convert_context* restrict context, size_t batch_offset,
     size_t batch_range) {
   for (size_t batch_index = batch_offset;
        batch_index < batch_offset + batch_range; batch_index++) {
@@ -1910,7 +1909,7 @@ void xnn_compute_f16_qdu8_convert(
 }
 
 void xnn_compute_f32_qx8_convert(
-    const struct f32_qd8_convert_context* restrict context,
+    struct f32_qd8_convert_context* restrict context,
     f32_quantization_params_fn quantization_params_function,
     size_t batch_index) {
   const size_t x_stride = context->x_stride;
@@ -1934,7 +1933,7 @@ void xnn_compute_f32_qx8_convert(
 }
 
 void xnn_compute_f32_qd8_convert(
-    const struct f32_qd8_convert_context* restrict context, size_t batch_offset,
+    struct f32_qd8_convert_context* restrict context, size_t batch_offset,
     size_t batch_range) {
   for (size_t batch_index = batch_offset;
        batch_index < batch_offset + batch_range; batch_index++) {
@@ -1944,7 +1943,7 @@ void xnn_compute_f32_qd8_convert(
 }
 
 void xnn_compute_f32_qdu8_convert(
-    const struct f32_qd8_convert_context* restrict context, size_t batch_offset,
+    struct f32_qd8_convert_context* restrict context, size_t batch_offset,
     size_t batch_range) {
   for (size_t batch_index = batch_offset;
        batch_index < batch_offset + batch_range; batch_index++) {
@@ -1953,7 +1952,7 @@ void xnn_compute_f32_qdu8_convert(
   }
 }
 
-void xnn_compute_pack_lh(const struct pack_lh_context* restrict context,
+void xnn_compute_pack_lh(struct pack_lh_context* restrict context,
                          size_t group_idx, size_t m_idx_start, size_t tile) {
   const void* lhs =
       (const void*)((uintptr_t)context->lhs + group_idx * context->gi_stride +
@@ -1969,7 +1968,7 @@ void xnn_compute_pack_lh(const struct pack_lh_context* restrict context,
 }
 
 void xnn_compute_f32_qp8_convert(
-    const struct f32_qp8_convert_context* restrict context, size_t group_idx,
+    struct f32_qp8_convert_context* restrict context, size_t group_idx,
     size_t m_idx_start, size_t m_tile) {
   const size_t m_end = m_idx_start + m_tile;
   while (m_idx_start < m_end) {
@@ -1990,7 +1989,7 @@ void xnn_compute_f32_qp8_convert(
   }
 }
 
-void xnn_compute_u8_softmax(const struct u8_softmax_context* restrict context,
+void xnn_compute_u8_softmax(struct u8_softmax_context* restrict context,
                             size_t batch_index) {
   const uint8_t* x =
       (const uint8_t*)((uintptr_t)context->x + context->x_stride * batch_index);
@@ -2006,7 +2005,7 @@ void xnn_compute_u8_softmax(const struct u8_softmax_context* restrict context,
 }
 
 void xnn_compute_floating_point_softmax(
-    const struct floating_point_softmax_context* restrict context,
+    struct floating_point_softmax_context* restrict context,
     size_t batch_index) {
   const void* x =
       (const void*)((uintptr_t)context->x + context->x_stride * batch_index);
@@ -2038,7 +2037,7 @@ void xnn_compute_floating_point_softmax(
   context->vmulc_ukernel(n, y, &y_scale, y, &context->minmax_params);
 }
 
-void xnn_compute_vmulcaddc(const struct vmulcaddc_context* restrict context,
+void xnn_compute_vmulcaddc(struct vmulcaddc_context* restrict context,
                            size_t batch_start, size_t batch_size) {
   const size_t x_stride = context->x_stride;
   const size_t y_stride = context->y_stride;
@@ -2050,9 +2049,8 @@ void xnn_compute_vmulcaddc(const struct vmulcaddc_context* restrict context,
                    &context->params);
 }
 
-void xnn_compute_rope(const struct rope_context* restrict context,
-                      size_t batch_index, size_t head_index,
-                      size_t sequence_index) {
+void xnn_compute_rope(struct rope_context* restrict context, size_t batch_index,
+                      size_t head_index, size_t sequence_index) {
   const size_t scaled_channels = context->scaled_channels;
   const size_t offset = batch_index * context->batch_stride +
                         head_index * context->head_stride +
@@ -2067,7 +2065,7 @@ void xnn_compute_rope(const struct rope_context* restrict context,
 }
 
 #if XNN_MAX_UARCH_TYPES > 1
-void xnn_compute_hmp_gemm(const struct gemm_context* restrict context,
+void xnn_compute_hmp_gemm(struct gemm_context* restrict context,
                           uint32_t uarch_index, size_t nr_block_start,
                           size_t mr_block_start, size_t nr_block_size,
                           size_t mr_block_size) {
@@ -2090,7 +2088,7 @@ void xnn_compute_hmp_gemm(const struct gemm_context* restrict context,
   }
 }
 
-void xnn_compute_hmp_dqgemm(const struct gemm_context* restrict context,
+void xnn_compute_hmp_dqgemm(struct gemm_context* restrict context,
                             uint32_t uarch_index, size_t nr_block_start,
                             size_t mr_block_start, size_t nr_block_size,
                             size_t mr_block_size) {
@@ -2115,7 +2113,7 @@ void xnn_compute_hmp_dqgemm(const struct gemm_context* restrict context,
 }
 
 void xnn_compute_hmp_grouped_batch_igemm(
-    const struct igemm_context* restrict context, uint32_t uarch_index,
+    struct igemm_context* restrict context, uint32_t uarch_index,
     size_t batch_index, size_t group_index, size_t nr_block_start,
     size_t mr_block_start, size_t nr_block_size, size_t mr_block_size) {
   const size_t ks = context->ks;
@@ -2143,7 +2141,7 @@ void xnn_compute_hmp_grouped_batch_igemm(
 }
 
 void xnn_compute_hmp_grouped_batch_dqigemm(
-    const struct igemm_context* restrict context, uint32_t uarch_index,
+    struct igemm_context* restrict context, uint32_t uarch_index,
     size_t batch_index, size_t group_index, size_t nr_block_start,
     size_t mr_block_start, size_t nr_block_size, size_t mr_block_size) {
   const size_t ks = context->ks;
@@ -2171,7 +2169,7 @@ void xnn_compute_hmp_grouped_batch_dqigemm(
   }
 }
 
-void xnn_compute_hmp_grouped_igemm(const struct igemm_context* restrict context,
+void xnn_compute_hmp_grouped_igemm(struct igemm_context* restrict context,
                                    uint32_t uarch_index, size_t group_index,
                                    size_t nr_block_start, size_t mr_block_start,
                                    size_t nr_block_size, size_t mr_block_size) {
@@ -2198,10 +2196,12 @@ void xnn_compute_hmp_grouped_igemm(const struct igemm_context* restrict context,
   }
 }
 
-void xnn_compute_hmp_grouped_dqigemm(
-    const struct igemm_context* restrict context, uint32_t uarch_index,
-    size_t group_index, size_t nr_block_start, size_t mr_block_start,
-    size_t nr_block_size, size_t mr_block_size) {
+void xnn_compute_hmp_grouped_dqigemm(struct igemm_context* restrict context,
+                                     uint32_t uarch_index, size_t group_index,
+                                     size_t nr_block_start,
+                                     size_t mr_block_start,
+                                     size_t nr_block_size,
+                                     size_t mr_block_size) {
   const size_t ks = context->ks;
   const size_t cm_stride = context->cm_stride;
 
@@ -2226,7 +2226,7 @@ void xnn_compute_hmp_grouped_dqigemm(
   }
 }
 
-void xnn_compute_batch_hmp_igemm(const struct igemm_context* restrict context,
+void xnn_compute_batch_hmp_igemm(struct igemm_context* restrict context,
                                  uint32_t uarch_index, size_t batch_index,
                                  size_t nr_block_start, size_t mr_block_start,
                                  size_t nr_block_size, size_t mr_block_size) {
@@ -2252,7 +2252,7 @@ void xnn_compute_batch_hmp_igemm(const struct igemm_context* restrict context,
   }
 }
 
-void xnn_compute_batch_hmp_dqigemm(const struct igemm_context* restrict context,
+void xnn_compute_batch_hmp_dqigemm(struct igemm_context* restrict context,
                                    uint32_t uarch_index, size_t batch_index,
                                    size_t nr_block_start, size_t mr_block_start,
                                    size_t nr_block_size, size_t mr_block_size) {
@@ -2279,7 +2279,7 @@ void xnn_compute_batch_hmp_dqigemm(const struct igemm_context* restrict context,
   }
 }
 
-void xnn_compute_hmp_igemm(const struct igemm_context* restrict context,
+void xnn_compute_hmp_igemm(struct igemm_context* restrict context,
                            uint32_t uarch_index, size_t nr_block_start,
                            size_t mr_block_start, size_t nr_block_size,
                            size_t mr_block_size) {
@@ -2303,7 +2303,7 @@ void xnn_compute_hmp_igemm(const struct igemm_context* restrict context,
   }
 }
 
-void xnn_compute_hmp_dqigemm(const struct igemm_context* restrict context,
+void xnn_compute_hmp_dqigemm(struct igemm_context* restrict context,
                              uint32_t uarch_index, size_t nr_block_start,
                              size_t mr_block_start, size_t nr_block_size,
                              size_t mr_block_size) {
@@ -2367,7 +2367,7 @@ enum xnn_status xnn_run_operator_with_index(xnn_operator_t op,
     flags |= PTHREADPOOL_FLAG_YIELD_WORKERS;
   }
   for (size_t i = 0; i < op->num_compute_invocations; i++) {
-    const struct compute_parameters* compute = &op->compute[i];
+    struct compute_parameters* compute = &op->compute[i];
     if (compute->type == xnn_parallelization_type_invalid) {
       break;
     }
