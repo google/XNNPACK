@@ -921,12 +921,11 @@ xnn_quantization_params random_quantization(xnn_datatype datatype, Rng& rng,
   std::uniform_int_distribution<> u8_dist{std::numeric_limits<uint8_t>::min(),
                                           std::numeric_limits<uint8_t>::max()};
   std::uniform_real_distribution<float> scale_dist{min_scale, max_scale};
-  switch (datatype) {
-    case xnn_datatype_qint8:
-    case xnn_datatype_qcint8:
-    case xnn_datatype_qcint4:
-      // signed integer quantization assumes zero point is 0.
+  if (xnn_datatype_is_channelwise_quantized(datatype)) {
+      // channelwise quantization assumes the zero point is 0.
       return {0, scale_dist(rng)};
+  }
+  switch (datatype) {
     case xnn_datatype_quint8:
       return {u8_dist(rng), scale_dist(rng)};
     default:

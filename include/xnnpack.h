@@ -303,6 +303,12 @@ enum xnn_datatype {
   /// Packed quantized 8-bit unsigned integer with shared per-Value quantization
   /// parameters.
   xnn_datatype_pqint8 = 17,
+  /// Quantized 4-bit unsigned integer with shared per-channel quantization
+  /// parameters.
+  xnn_datatype_qcuint4 = 18,
+  /// Quantized 4-bit unsigned integer with shared per-channel-block quantization
+  /// parameters.
+  xnn_datatype_qbuint4 = 19,
 };
 
 /// Define a tensor-type Value and add it to a Subgraph.
@@ -433,6 +439,19 @@ enum xnn_status xnn_validate_channelwise_quantized_tensor(
 ///                and XNN_VALUE_FLAG_EXTERNAL_OUTPUT.
 /// @param id_out - pointer to the variable that will be initialized with the Value ID upon successful return. If a
 ///                 valid @a external_id was provided, the variable will be initialized with the @a external_id value.
+enum xnn_status xnn_define_channelwise_quantized_tensor_value_v3(
+  xnn_subgraph_t subgraph,
+  enum xnn_datatype datatype,
+  int32_t zero_point,
+  const float* scale,
+  size_t num_dims,
+  size_t channel_dim,
+  const size_t* dims,
+  const void* data,
+  uint32_t external_id,
+  uint32_t flags,
+  uint32_t* id_out);
+
 enum xnn_status xnn_define_channelwise_quantized_tensor_value_v2(
   xnn_subgraph_t subgraph,
   enum xnn_datatype datatype,
@@ -453,6 +472,21 @@ enum xnn_status xnn_define_channelwise_quantized_tensor_value_v2(
 ///                     expecting number of scale values to be = output_channels * (input_channels / block_size).
 /// @param scale_type - datatype of the scale. bf6 & fp16 are supported,
 ///                     however, only 7 mantisaa bits are used for scale calculation.
+enum xnn_status xnn_define_blockwise_quantized_tensor_value_v3(
+  xnn_subgraph_t subgraph,
+  enum xnn_datatype datatype,
+  int32_t zero_point,
+  const void* scale,
+  size_t num_dims,
+  size_t block_dim,
+  size_t block_size,
+  const size_t* dims,
+  const void* data,
+  uint32_t external_id,
+  uint32_t flags,
+  enum xnn_datatype scale_type,
+  uint32_t* id_out);
+
 enum xnn_status xnn_define_blockwise_quantized_tensor_value_v2(
   xnn_subgraph_t subgraph,
   enum xnn_datatype datatype,
