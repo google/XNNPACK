@@ -422,6 +422,7 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
 }
 
 TEST(FullyConnectedQC8, static_b) { TestStaticB<qint8, qcint8, qcint32>(); }
+TEST(FullyConnectedQS8, static_b) { TestStaticB<qint8, qint8, qint32>(); }
 TEST(FullyConnectedQU8, static_b) { TestStaticB<quint8, quint8, qint32>(); }
 
 TEST(FullyConnectedQS8QC8W, static_b) { TestStaticB<qint8, qcint8, qcint32>(); }

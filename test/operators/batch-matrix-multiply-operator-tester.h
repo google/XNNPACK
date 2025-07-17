@@ -26,9 +26,10 @@
 #include "src/xnnpack/config.h"
 #include "src/xnnpack/internal.h"
 #include "src/xnnpack/math.h"
-#include "src/xnnpack/microfnptr.h"
-#include "src/xnnpack/pack.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/packq.h"
+#include "src/xnnpack/requantization.h"
+#include "src/xnnpack/quantization.h"
 #include "test/replicable_random_device.h"
 
 constexpr int kIterations = 1;
@@ -169,9 +170,7 @@ class BatchMatMulOperatorTester {
 
   void ComputeReferenceQS8(const std::vector<size_t>& batch_dims_output,
                            const int8_t* input_a, const int8_t* input_b,
-                           float scale, int8_t input_zero_point,
-                           int8_t output_zero_point, int32_t* accumulators,
-                           int8_t* output_ref,
+                           int8_t input_zero_point, int32_t* accumulators,
                            void (*ref_fun)(size_t, size_t, size_t, bool,
                                            const int8_t*, const int8_t*,
                                            int8_t, int32_t*)) const {
@@ -447,7 +446,7 @@ class BatchMatMulOperatorTester {
                                     xnnpack::XnnExtraBytes);
     xnnpack::Buffer<int8_t> output(batch_size_output * m() * n());
     xnnpack::Buffer<int32_t> accumulators(batch_size_output * m() * n());
-    xnnpack::Buffer<int8_t> output_ref(batch_size_output * m() * n());
+    xnnpack::Buffer<double> output_ref(batch_size_output * m() * n());
 
     for (bool const_weights : {true, false}) {
       for (size_t iteration = 0; iteration < kIterations; iteration++) {
@@ -456,32 +455,35 @@ class BatchMatMulOperatorTester {
         std::generate_n(input_b.begin(), batch_size_b * k() * n(),
                         [&]() { return s8dist(rng); });
 
-        float scale = 1.0f;
-        int8_t input_zero_point = 0;
-        int8_t output_zero_point = 0;
-        int8_t output_min = INT8_MIN;
-        int8_t output_max = INT8_MAX;
+        const int8_t input_zero_point = s8dist(rng);
+        const int8_t output_min = std::numeric_limits<int8_t>::min();
+        const int8_t output_max = std::numeric_limits<int8_t>::max();
 
         // Compute reference results without requantization.
         ComputeReferenceQS8(batch_dims_output, input_a.data(), input_b.data(),
-                            scale, input_zero_point, output_zero_point,
-                            accumulators.data(), output_ref.data(),
+                            input_zero_point, accumulators.data(),
                             ComputeRefQS8);
+
+        // Compute renormalization parameters.
+        const int32_t accumulated_min =
+            *std::min_element(accumulators.cbegin(), accumulators.cend());
+        const int32_t accumulated_max =
+            *std::max_element(accumulators.cbegin(), accumulators.cend());
+
+        const xnn_qd8_quantization_params output_quantization =
+            xnn_qd8_asymmetric_quantization_params(
+                accumulated_min, accumulated_max);
+        const float scale = 1.0f / output_quantization.inv_scale;
 
         // Renormalize reference results.
         std::transform(
-            accumulators.cbegin(), accumulators.cend(), output_ref.begin(),
-            [scale, output_zero_point, output_min,
-            output_max](int32_t x) -> double {
-              return std::max<int32_t>(
-                  std::min<int32_t>(
-                      (x - output_zero_point) / scale, output_max),
-                  output_min);
-            });
-
-        std::vector<float> scales(
-              round_up_po2(batch_size_b * n(), XNN_MAX_MR),
-              scale);
+          accumulators.cbegin(), accumulators.cend(), output_ref.begin(),
+          [scale, output_quantization](int32_t x) -> double {
+            return static_cast<double>(
+                xnn_qs8_quantize(
+                    static_cast<float>(x), scale,
+                    static_cast<int32_t>(output_quantization.zero_point)));
+          });
 
         // Create, setup, run, and destroy Batch Matrix Multiply operator.
         ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -490,13 +492,15 @@ class BatchMatMulOperatorTester {
         xnn_status status = xnn_status_success;
         if (const_weights) {
           status = xnn_create_batch_matrix_multiply_nc_qs8_const_weights(
-            batch_size_b, k(), n(), input_b.data(), output_zero_point,
-            output_min, output_max, input_zero_point, scales.data(), flags(),
-            &batch_matrix_multiply_op);
+              batch_size_b, k(), n(), input_b.data(), input_zero_point,
+              output_quantization.zero_point, output_min, output_max,
+              output_quantization.inv_scale, flags(),
+              &batch_matrix_multiply_op);
         } else {
           status = xnn_create_batch_matrix_multiply_nc_qs8(
-            output_zero_point, output_min, output_max, flags(),
-            &batch_matrix_multiply_op);
+              input_zero_point, output_quantization.zero_point,
+              output_min, output_max, &output_quantization.inv_scale, flags(),
+              &batch_matrix_multiply_op);
         }
         if (status == xnn_status_unsupported_hardware) {
           GTEST_SKIP();
@@ -510,8 +514,6 @@ class BatchMatMulOperatorTester {
                                           xnn_delete_operator);
 
         size_t workspace_size = 0;
-        struct xnn_qs8_packing_params packing_params;
-        packing_params.input_zero_point = input_zero_point;
         if (const_weights) {
           ASSERT_EQ(expected_status_reshape(),
                     xnn_reshape_batch_matrix_multiply_nc_qs8_const_weights(
@@ -523,7 +525,7 @@ class BatchMatMulOperatorTester {
                     xnn_reshape_batch_matrix_multiply_nc_qs8(
                         batch_matrix_multiply_op, num_batch_dims,
                         batch_dims_a().data(), batch_dims_b().data(), m(), k(),
-                        n(), scales.data(), &packing_params, &workspace_size,
+                        n(), &workspace_size,
                         /*threadpool=*/nullptr));
         }
         if (expected_status_reshape() != xnn_status_success) {
@@ -1032,14 +1034,14 @@ class BatchMatMulOperatorTester {
   }
 
   void VerifyQS8(const xnnpack::Buffer<int8_t>& output,
-                 const xnnpack::Buffer<int8_t>& output_ref) const {
+                 const xnnpack::Buffer<double>& output_ref) const {
     const size_t batch_size_output = output.size() / (m() * n());
     for (size_t bi = 0; bi < batch_size_output; bi++) {
       for (size_t mi = 0; mi < m(); mi++) {
         for (size_t ni = 0; ni < n(); ni++) {
-          ASSERT_EQ(
+          ASSERT_NEAR(
               output_ref[bi * m() * n() + mi * n() + ni],
-              output[bi * m() * n() + mi * n() + ni])
+              output[bi * m() * n() + mi * n() + ni], 1)
               << "batch = " << bi << " / " << batch_size_output
               << ", m = " << mi << " / " << m() << ", n = " << ni << " / "
               << n();

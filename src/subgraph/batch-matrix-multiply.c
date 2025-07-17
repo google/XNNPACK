@@ -43,7 +43,12 @@ static enum xnn_status create_batch_matrix_multiply_operator(
           ? node->packed_input_datatype
           : values[input_a_id].datatype;
   const enum xnn_datatype input_b_datatype = values[input_b_id].datatype;
+  const uint32_t output_id = node->outputs[0];
+  assert(output_id != XNN_INVALID_VALUE_ID);
+  assert(output_id < num_values);
+  const struct xnn_runtime_value* output_value = &values[output_id];
 
+  const struct xnn_runtime_value* input_a = values + input_a_id;
   const struct xnn_runtime_value* input_b = values + input_b_id;
   // Get the shape and size of the second input.
   size_t batch_size_b = 1;
@@ -187,6 +192,37 @@ static enum xnn_status create_batch_matrix_multiply_operator(
       }
       break;
     }
+    case xnn_datatype_qint8: {
+      switch (input_b_datatype) {
+        case xnn_datatype_qint8: {
+          const int8_t output_min = INT8_MIN;
+          const int8_t output_max = INT8_MAX;
+
+          const float requantization_scale =
+                input_a->quantization.scale * input_b->quantization.scale /
+                output_value->quantization.scale;
+
+          if (xnn_value_is_static(input_b->allocation_type)) {
+            status = xnn_create_batch_matrix_multiply_nc_qs8_const_weights(
+                batch_size_b, k, n, input_b->data,
+                input_a->quantization.zero_point,
+                output_value->quantization.zero_point, output_min, output_max,
+                requantization_scale, node->flags,
+                &opdata->operator_objects[0]);
+          } else {
+            status = xnn_create_batch_matrix_multiply_nc_qs8(
+                input_a->quantization.zero_point,
+                output_value->quantization.zero_point, output_min, output_max,
+                &requantization_scale, node->flags,
+                &opdata->operator_objects[0]);
+          }
+          break;
+        }
+        default:
+          XNN_UNREACHABLE;
+      }
+      break;
+    }
     default:
       XNN_UNREACHABLE;
   }
@@ -324,6 +360,17 @@ static enum xnn_status reshape_batch_matrix_multiply_operator(
           opdata->operator_objects[0], num_batch_dims, padded_dims_a,
           padded_dims_b, m, k, n, &opdata->workspace_size, threadpool);
       break;
+    case xnn_operator_type_batch_matrix_multiply_nc_qs8:
+      if (xnn_value_is_static(input_b->allocation_type)) {
+        status = xnn_reshape_batch_matrix_multiply_nc_qs8_const_weights(
+            opdata->operator_objects[0], num_batch_dims, padded_dims_a,
+            padded_dims_b, m, k, n, threadpool);
+      } else {
+        status = xnn_reshape_batch_matrix_multiply_nc_qs8(
+            opdata->operator_objects[0], num_batch_dims, padded_dims_a,
+            padded_dims_b, m, k, n, &opdata->workspace_size, threadpool);
+      }
+      break;
     default:
       XNN_UNREACHABLE;
   }
@@ -407,6 +454,10 @@ static enum xnn_status setup_batch_matrix_multiply_operator(
       return xnn_setup_batch_matrix_multiply_nc_qdu8_f32_qc8w(
           opdata->operator_objects[0], opdata->workspace, input_a_data,
           input_b_data, input_a->quantization.dynamic_params, output_data);
+    case xnn_operator_type_batch_matrix_multiply_nc_qs8:
+      return xnn_setup_batch_matrix_multiply_nc_qs8(
+          opdata->operator_objects[0], opdata->workspace, input_a_data,
+          input_b_data, output_data);
     default:
       XNN_UNREACHABLE;
   }
@@ -437,6 +488,12 @@ static inline bool validate_datatypes(enum xnn_datatype input1_datatype,
     case xnn_datatype_qcint8:
       if (input1_datatype == xnn_datatype_qdint8 &&
           output_datatype == xnn_datatype_fp32) {
+        return true;
+      }
+      break;
+    case xnn_datatype_qint8:
+      if (input1_datatype == xnn_datatype_qint8 &&
+          output_datatype == xnn_datatype_qint8) {
         return true;
       }
       break;
@@ -474,6 +531,7 @@ enum xnn_status xnn_define_batch_matrix_multiply(xnn_subgraph_t subgraph,
     case xnn_datatype_bf16:
     case xnn_datatype_fp16:
     case xnn_datatype_fp32:
+    case xnn_datatype_qint8:
       break;
     case xnn_datatype_qdint8:
       if (input1_value->quantization.num_nonbatch_dims >
@@ -515,6 +573,7 @@ enum xnn_status xnn_define_batch_matrix_multiply(xnn_subgraph_t subgraph,
     case xnn_datatype_fp16:
     case xnn_datatype_bf16:
     case xnn_datatype_fp32:
+    case xnn_datatype_qint8:
       break;
     case xnn_datatype_qcint8:
       // Check that `input2` is static, which is required for this variant.
@@ -554,6 +613,7 @@ enum xnn_status xnn_define_batch_matrix_multiply(xnn_subgraph_t subgraph,
   switch (output_value->datatype) {
     case xnn_datatype_fp16:
     case xnn_datatype_fp32:
+    case xnn_datatype_qint8:
       break;
     default:
       xnn_log_error(

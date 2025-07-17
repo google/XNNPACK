@@ -21,6 +21,7 @@
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator-type.h"
+#include "src/xnnpack/pack.h"
 #include <pthreadpool.h>
 
 #ifdef __cplusplus
@@ -207,6 +208,7 @@ union xnn_params {
   struct xnn_f32_qc4w_minmax_params f32_qc4w_minmax;
   struct xnn_reduce_params reduce;
   union xnn_qs8_conv_minmax_params qs8_conv_minmax;
+  struct xnn_qs8_qc8w_packing_params qs8_packing;
   union xnn_qs8_qc8w_conv_minmax_params qs8_qc8w_conv_minmax;
   union xnn_qu8_conv_minmax_params qu8_conv_minmax;
   struct xnn_s8_minmax_params s8_minmax;
@@ -285,7 +287,7 @@ struct xnn_operator {
   // operators, this is a copy of params, but params need to be swapped for
   // commutative ops with per-operand params.
   union xnn_params* extra_params;
-  size_t num_extra_params;
+  uint32_t num_extra_params;
   enum xnn_operator_type type;
   struct xnn_ukernel ukernel;
 
