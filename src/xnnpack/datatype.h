@@ -50,6 +50,7 @@ const char* xnn_datatype_to_string(enum xnn_datatype type);
 namespace xnnpack {
 
 struct channelwise {};
+struct blockwise {};
 
 // We need a type that distinguishes an intX_t from a quantized intX_t. We can't
 // do arithmetic on these, because we don't know the quantization parameters.
