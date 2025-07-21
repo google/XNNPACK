@@ -827,6 +827,8 @@ DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
 DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemm_minmax_ukernel_5x8__fma3_broadcast)
 DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_gemm_minmax_ukernel_2x16__fma3_broadcast)
+DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemm_minmax_ukernel_5x16__fma3_broadcast)
 DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemm_minmax_ukernel_6x8__fma3_broadcast)
