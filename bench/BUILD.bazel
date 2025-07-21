@@ -153,6 +153,7 @@ xnnpack_cxx_library(
     "qd8_f32_qc8w_gemm",
     "qd8_f16_qc4w_gemm",
     "qd8_f32_qc4w_gemm",
+    "qs8_qc4w_gemm_fp32",
     "qs8_qc8w_gemm_fp32",
     "qu8_gemm_fp32",
     "qu8_gemm_rndnu",
