@@ -820,7 +820,7 @@ void GEMMBenchmark(benchmark::State& state,
       benchmark::Counter::kIsRate);
 }
 
-#if XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
+#if XNN_ENABLE_KLEIDIAI && (XNN_ENABLE_ARM_SME2 || XNN_ENABLE_ARM_SME)
 void GEMMBenchmark(benchmark::State& state,
                    xnn_pf32_gemm_minmax_ukernel_fn gemm,
                    xnn_init_f32_minmax_params_fn init_minmax_params,
@@ -870,10 +870,10 @@ void GEMMBenchmark(benchmark::State& state,
 
   // Pack the left-hand operand.
   const size_t input_packed_size =
-      xnn_x32_pack_lh_size__neonsme2(mc, kc, mr_packed, kr, sr);
+      xnn_x32_pack_lh_size__neonsme(mc, kc, mr_packed, kr, sr);
   xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> input_packed(
       input_packed_size / sizeof(float));
-  xnn_x32_pack_lh_ukernel__neonsme2(mc, kc, mr_packed, kr, sr,
+  xnn_x32_pack_lh_ukernel__neonsme(mc, kc, mr_packed, kr, sr,
                                     /*m_idx_start=*/0, a.data(),
                                     /*lhs_stride=*/kc * sizeof(float),
                                     input_packed.data());
@@ -918,7 +918,7 @@ void GEMMBenchmark(benchmark::State& state,
         const uint32_t mb = min(mc - m, mr);
         gemm(mb, nc, kc * sizeof(float),
              input_packed.data() +
-                 xnn_x32_pack_lh_offset__neonsme2(m, kc, mr_packed, kr, sr),
+                 xnn_x32_pack_lh_offset__neonsme(m, kc, mr_packed, kr, sr),
              w.data() + packed_w_size / sizeof(float) * buffer_index,
              c.data() + (buffer_index * mc + m) * nc, nc * sizeof(float),
              sizeof(float), &minmax_params);
@@ -940,7 +940,9 @@ void GEMMBenchmark(benchmark::State& state,
       static_cast<uint64_t>(state.iterations()) * 2 * mc * nc * kc,
       benchmark::Counter::kIsRate);
 }
+#endif //   XNN_ENABLE_KLEIDIAI && (XNN_ENABLE_ARM_SME2 || XNN_ENABLE_ARM_SME)
 
+#if XNN_ENABLE_KLEIDIAI && XNN_ENABLE_ARM_SME2
 void GEMMBenchmark(benchmark::State& state,
                    xnn_pf16_gemm_minmax_ukernel_fn gemm,
                    xnn_init_f16_minmax_params_fn init_minmax_params,

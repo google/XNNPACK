@@ -3,6 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <pthreadpool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -18,7 +19,6 @@
 #include "src/xnnpack/operator-utils.h"
 #include "src/xnnpack/operator.h"
 #include "src/xnnpack/params.h"
-#include <pthreadpool.h>
 
 enum xnn_status create_pack_lh(uint32_t flags,
                                const struct xnn_pack_lh_config* pack_lh_config,
@@ -112,9 +112,11 @@ enum xnn_status reshape_pack_lh(xnn_operator_t pack_lh_op, size_t num_groups,
     return xnn_status_success;
   }
 
-  const uint32_t mr_packed = batch_size == 1          ? 1
-                             : gemm_config->mr_packed ? gemm_config->mr_packed
-                                                      : gemm_config->mr;
+  const uint32_t mr_packed =
+      batch_size == 1
+          ? (gemm_config->arch == xnn_arch_arm_sme ? gemm_config->mr : 1)
+      : gemm_config->mr_packed ? gemm_config->mr_packed
+                               : gemm_config->mr;
   const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
   const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
 
