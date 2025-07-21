@@ -1563,6 +1563,24 @@ tools/xngen src/qs8-gemm/MRx4c8-ssevnni.c.in -D MR=2  -D DATATYPE=QC4_F32 -D SSE
 tools/xngen src/qs8-gemm/MRx4c8-ssevnni.c.in -D MR=3  -D DATATYPE=QC4_F32 -D SSE=4 -D AVX=0 -D VARIANT=MADD -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x4c8-minmax-sse41-madd-prfm.c &
 tools/xngen src/qs8-gemm/MRx4c8-ssevnni.c.in -D MR=4  -D DATATYPE=QC4_F32 -D SSE=4 -D AVX=0 -D VARIANT=MADD -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION= -o src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x4c8-minmax-sse41-madd-prfm.c &
 
+tools/xngen src/qs8-gemm/MRx4c8-ssevnni.c.in -D MR=1  -D DATATYPE=QS8_QC4 -D SSE=3 -D AVX=0 -D VARIANT=MADD -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-1x4c8-minmax-ssse3-madd.c &
+tools/xngen src/qs8-gemm/MRx4c8-ssevnni.c.in -D MR=2  -D DATATYPE=QS8_QC4 -D SSE=3 -D AVX=0 -D VARIANT=MADD -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-2x4c8-minmax-ssse3-madd.c &
+tools/xngen src/qs8-gemm/MRx4c8-ssevnni.c.in -D MR=3  -D DATATYPE=QS8_QC4 -D SSE=3 -D AVX=0 -D VARIANT=MADD -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-3x4c8-minmax-ssse3-madd.c &
+tools/xngen src/qs8-gemm/MRx4c8-ssevnni.c.in -D MR=4  -D DATATYPE=QS8_QC4 -D SSE=3 -D AVX=0 -D VARIANT=MADD -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-4x4c8-minmax-ssse3-madd.c &
+tools/xngen src/qs8-gemm/MRx4c8-ssevnni.c.in -D MR=1  -D DATATYPE=QS8_QC4 -D SSE=4 -D AVX=0 -D VARIANT=MADD -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-1x4c8-minmax-sse41-madd.c &
+tools/xngen src/qs8-gemm/MRx4c8-ssevnni.c.in -D MR=2  -D DATATYPE=QS8_QC4 -D SSE=4 -D AVX=0 -D VARIANT=MADD -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-2x4c8-minmax-sse41-madd.c &
+tools/xngen src/qs8-gemm/MRx4c8-ssevnni.c.in -D MR=3  -D DATATYPE=QS8_QC4 -D SSE=4 -D AVX=0 -D VARIANT=MADD -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-3x4c8-minmax-sse41-madd.c &
+tools/xngen src/qs8-gemm/MRx4c8-ssevnni.c.in -D MR=4  -D DATATYPE=QS8_QC4 -D SSE=4 -D AVX=0 -D VARIANT=MADD -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-4x4c8-minmax-sse41-madd.c &
+
+tools/xngen src/qs8-gemm/MRx4c8-ssevnni.c.in -D MR=1  -D DATATYPE=QS8_QC4 -D SSE=3 -D AVX=0 -D VARIANT=MADD -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-1x4c8-minmax-ssse3-madd-prfm.c &
+tools/xngen src/qs8-gemm/MRx4c8-ssevnni.c.in -D MR=2  -D DATATYPE=QS8_QC4 -D SSE=3 -D AVX=0 -D VARIANT=MADD -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-2x4c8-minmax-ssse3-madd-prfm.c &
+tools/xngen src/qs8-gemm/MRx4c8-ssevnni.c.in -D MR=3  -D DATATYPE=QS8_QC4 -D SSE=3 -D AVX=0 -D VARIANT=MADD -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-3x4c8-minmax-ssse3-madd-prfm.c &
+tools/xngen src/qs8-gemm/MRx4c8-ssevnni.c.in -D MR=4  -D DATATYPE=QS8_QC4 -D SSE=3 -D AVX=0 -D VARIANT=MADD -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-4x4c8-minmax-ssse3-madd-prfm.c &
+tools/xngen src/qs8-gemm/MRx4c8-ssevnni.c.in -D MR=1  -D DATATYPE=QS8_QC4 -D SSE=4 -D AVX=0 -D VARIANT=MADD -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-1x4c8-minmax-sse41-madd-prfm.c &
+tools/xngen src/qs8-gemm/MRx4c8-ssevnni.c.in -D MR=2  -D DATATYPE=QS8_QC4 -D SSE=4 -D AVX=0 -D VARIANT=MADD -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-2x4c8-minmax-sse41-madd-prfm.c &
+tools/xngen src/qs8-gemm/MRx4c8-ssevnni.c.in -D MR=3  -D DATATYPE=QS8_QC4 -D SSE=4 -D AVX=0 -D VARIANT=MADD -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-3x4c8-minmax-sse41-madd-prfm.c &
+tools/xngen src/qs8-gemm/MRx4c8-ssevnni.c.in -D MR=4  -D DATATYPE=QS8_QC4 -D SSE=4 -D AVX=0 -D VARIANT=MADD -D GFNI=0 -D PREFETCH=1 -D REQUANTIZATION=FP32 -o src/qs8-qc4w-gemm/gen/qs8-qc4w-gemm-4x4c8-minmax-sse41-madd-prfm.c &
+
 ################################## x86 AVX256 VNNI EVEX #################################
 ### C8 micro-kernels
 tools/xngen src/qs8-gemm/MRx8c8-avxvnni.c.in -D MR=1  -D DATATYPE=QC8     -D AVX=10 -D VARIANT=     -D GFNI=0 -D PREFETCH=0 -D REQUANTIZATION=FP32 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-avx256vnni.c &
