@@ -1135,11 +1135,15 @@ struct reduce_context {
   union {
     xnn_reduce_ukernel_fn contiguous_reduce;
     xnn_reduce_discontiguous_ukernel_fn discontiguous_reduce;
+    xnn_reduce_discontiguous_ukernel_fn2 discontiguous_reduce2;
   } ukernel;
   xnn_vunary_ukernel_fn cvt_ukernel;
   xnn_fill_ukernel_fn fill_ukernel;
   struct xnn_reduce_params params;
   union xnn_unary_uparams cvt_params;
+  // TODO(b/405244706): remove once all the datatypes and reductions are
+  // supported.
+  bool is_old_reduce;
 };
 
 // Compute contiguous reduction over the 1st, 3rd and 5th dimensions of the
