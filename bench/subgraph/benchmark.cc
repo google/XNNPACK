@@ -216,7 +216,7 @@ static void FP32LayerNorm(benchmark::State& state) {
 static void FP32L2Norm(benchmark::State& state) {
   BenchmarkInvoke(state, [&state]() {
     return models::FP32L2Norm(state.range(0), state.range(1), state.range(2),
-                                 state.range(3));
+                              state.range(3));
   });
 }
 
@@ -341,33 +341,64 @@ static void TransformerBlockArguments(benchmark::internal::Benchmark* b) {
 
 BENCHMARK(FP32Attention)
     ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
     ->UseRealTime()
     ->Apply(AttentionArguments);
 
 BENCHMARK(FP16Attention)
     ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
     ->UseRealTime()
     ->Apply(AttentionArguments);
 
-BENCHMARK(FP32MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-BENCHMARK(FP32MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-BENCHMARK(FP32MobileNetV3Large)->Unit(benchmark::kMicrosecond)->UseRealTime();
-BENCHMARK(FP32MobileNetV3Small)->Unit(benchmark::kMicrosecond)->UseRealTime();
+BENCHMARK(FP32MobileNetV1)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime();
+BENCHMARK(FP32MobileNetV2)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime();
+BENCHMARK(FP32MobileNetV3Large)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime();
+BENCHMARK(FP32MobileNetV3Small)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime();
 
-BENCHMARK(FP16MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
-BENCHMARK(FP16MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
-BENCHMARK(FP16MobileNetV3Large)->Unit(benchmark::kMicrosecond)->UseRealTime();
-BENCHMARK(FP16MobileNetV3Small)->Unit(benchmark::kMicrosecond)->UseRealTime();
+BENCHMARK(FP16MobileNetV1)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime();
+BENCHMARK(FP16MobileNetV2)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime();
+BENCHMARK(FP16MobileNetV3Large)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime();
+BENCHMARK(FP16MobileNetV3Small)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime();
 
 BENCHMARK(QD8Attention)
     ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
     ->UseRealTime()
     ->Apply(AttentionArguments);
 
-BENCHMARK(QS8MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+BENCHMARK(QS8MobileNetV2)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime();
 
 BENCHMARK(FP32Elementwise)
     ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
     ->UseRealTime()
     ->ArgNames({"B", "N", "D"})
     ->Args({1024, 1024, 6})
@@ -377,41 +408,49 @@ BENCHMARK(FP32Elementwise)
 
 BENCHMARK(FP32LayerNorm)
     ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
     ->UseRealTime()
     ->Apply(LayerNormArguments);
 
 BENCHMARK(FP32L2Norm)
     ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
     ->UseRealTime()
     ->Apply(L2NormArguments);
 
 BENCHMARK(FP32SoftmaxDecomp)
     ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
     ->UseRealTime()
     ->Apply(SoftmaxArguments);
 
 BENCHMARK(FP32SoftmaxFused)
     ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
     ->UseRealTime()
     ->Apply(SoftmaxArguments);
 
 BENCHMARK(FP32DepthwiseSeparable)
     ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
     ->UseRealTime()
     ->Apply(DepthwiseSeparableArguments);
 
 BENCHMARK(QD8TransformerBlock)
     ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
     ->UseRealTime()
     ->Apply(TransformerBlockArguments);
 
 BENCHMARK(FP32TransformerBlock)
     ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
     ->UseRealTime()
     ->Apply(TransformerBlockArguments);
 
 BENCHMARK(FP16TransformerBlock)
     ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
     ->UseRealTime()
     ->Apply(TransformerBlockArguments);
 
