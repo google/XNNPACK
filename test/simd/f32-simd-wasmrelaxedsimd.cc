@@ -24,6 +24,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/isa-checks.h"
 #include "src/xnnpack/simd/f32-wasmrelaxedsimd.h"
 #include "test/replicable_random_device.h"
@@ -217,8 +218,8 @@ TEST_F(F32SimdWASMRELAXEDSIMDTest, ReduceAdd) {
     max_abs_input = std::max(max_abs_input, std::abs(inputs_[i]));
   }
   // Don't expect an exact result due to implementation-defined behavior.
-  float tolerance =
-      std::numeric_limits<float>::epsilon() * max_abs_input * xnn_simd_size_f32 * 2.0f;
+  float tolerance = std::numeric_limits<float>::epsilon() * max_abs_input *
+                    xnn_simd_size_f32 * 2.0f;
   ASSERT_NEAR(res, expected, tolerance);
 }
 

@@ -6,7 +6,6 @@
 #ifndef XNNPACK_TEST_OPERATORS_TRANSPOSE_OPERATOR_TESTER_H_
 #define XNNPACK_TEST_OPERATORS_TRANSPOSE_OPERATOR_TESTER_H_
 
-#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>

@@ -8,13 +8,15 @@
 //   Specification: test/f16-raddstoreexpminusmax.yaml
 //   Generator: tools/generate-raddstoreexpminusmax-test.py
 
+#include <cstddef>
 
 #include <gtest/gtest.h>
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/isa-checks.h"
-#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/microparams-init.h"  // IWYU pragma: keep
 #include "src/xnnpack/raddstoreexpminusmax.h"
 #include "test/raddstoreexpminusmax-microkernel-tester.h"
+#include "src/xnnpack/hardware-config.h"
 
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)

@@ -214,6 +214,7 @@ def main(args):
 //   Specification: {specification}
 //   Generator: {generator}
 
+#include <cstddef>
 
 #include <gtest/gtest.h>
 #include "src/xnnpack/common.h"
