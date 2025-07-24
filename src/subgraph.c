@@ -1456,6 +1456,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
 
   xnn_log_info("XNNPACK has switched to FP16 inference mode!");
 
+  xnn_subgraph_rewrite_ssa(subgraph);
   return true;
 
 error:
@@ -2566,11 +2567,6 @@ void xnn_subgraph_rewrite_ssa(xnn_subgraph_t subgraph) {
     for (uint32_t j = 0; j < node->num_outputs; j++) {
       const uint32_t output_id = node->outputs[j];
       const struct xnn_value* value = &subgraph->values[output_id];
-      if (!xnn_value_is_external_output(value->flags)) {
-        // We only care to rewrite external outputs. Internal values should
-        // already be SSA.
-        continue;
-      }
       if (!values_written[output_id]) {
         // This is the first time we've seen this output.
       } else {
