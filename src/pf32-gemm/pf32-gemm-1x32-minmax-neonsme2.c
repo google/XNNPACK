@@ -9,6 +9,14 @@
 
 #if XNN_ENABLE_KLEIDIAI
 #include "kai/ukernels/matmul/matmul_clamp_f32_f32_f32p/kai_matmul_clamp_f32_f32_f32p2vlx1b_1x16vl_sme2_mla.h"
+
+size_t xnn_pf32_gemm_minmax_ukernel_1x32__neonsme2_get_mr() {
+  return 1;
+}
+
+size_t xnn_pf32_gemm_minmax_ukernel_1x32__neonsme2_get_nr() {
+  return kai_get_nr_matmul_clamp_f32_f32_f32p2vlx1b_1x16vl_sme2_mla();
+}
 #endif  // XNN_ENABLE_KLEIDIAI
 
 // Wraps the `kai_run_matmul_clamp_f32_f32_f32p2vlx1b_1x16vl_sme2_mla`

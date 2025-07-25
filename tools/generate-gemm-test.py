@@ -66,6 +66,10 @@ def split_ukernel_name(name):
     mr_packed = mr // int(mr_packed.group(1))
   else:
     mr_packed = mr
+  if "sme2" in target_name:
+    mr = name + "_get_mr()"
+    nr = name + "_get_nr()"
+    mr_packed = mr
 
   requantization = common_parts[-3]
   if requantization not in ["fp32", "rndnu", "rndnu16"]:

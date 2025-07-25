@@ -1796,8 +1796,10 @@ std::vector<GemmTestParams> CreateTests2(
       testing::ValuesIn(CreateTests2(
           /*k_block=*/4,
           /*adj_k_block=*/4,
-          /*mr=*/32, /*nr=*/32, /*kr=*/4, /*sr=*/1,
-          /*mr_packed=*/32,
+          /*mr=*/xnn_pqs8_qc8w_igemm_minmax_fp32_ukernel_32x32c4__neonsme2_get_mr(),
+          /*nr=*/xnn_pqs8_qc8w_igemm_minmax_fp32_ukernel_32x32c4__neonsme2_get_nr(),
+          /*kr=*/4, /*sr=*/1,
+          /*mr_packed=*/xnn_pqs8_qc8w_igemm_minmax_fp32_ukernel_32x32c4__neonsme2_get_mr(),
           /*is_igemm=*/true,
           /*unsigned_inputs=*/false,
           /*planes=*/1,
