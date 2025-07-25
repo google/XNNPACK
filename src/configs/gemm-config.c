@@ -3897,6 +3897,17 @@ static void init_qs8_qc4w_gemm_config(void) {
         qs8_qc4w_gemm_config.log2_kr = 3;
       } else
     #endif
+    if ((hardware_config->arch_flags & xnn_arch_x86_avx)) {
+      qs8_qc4w_gemm_config.arch = xnn_arch_x86_avx;
+      qs8_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x4c8__avx_madd);
+      qs8_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(5)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_5x4c8__avx_madd_prfm);
+      qs8_qc4w_gemm_config.init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
+      qs8_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_to_qu8_qc4uw_gemm_goi_w;
+      qs8_qc4w_gemm_config.planes = 2;
+      qs8_qc4w_gemm_config.mr = 5;
+      qs8_qc4w_gemm_config.nr = 4;
+      qs8_qc4w_gemm_config.log2_kr = 3;
+    } else
     if ((hardware_config->arch_flags & xnn_arch_x86_ssse3)) {
       qs8_qc4w_gemm_config.arch = xnn_arch_x86_ssse3;
       qs8_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x4c8__ssse3_madd);
