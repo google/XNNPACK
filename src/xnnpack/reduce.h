@@ -10,7 +10,7 @@
 #include <stdint.h>
 
 #include "src/xnnpack/common.h"
-#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/microparams.h"  // IWYU pragma: keep
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,6 +45,16 @@ extern "C" {
 #include "src/u8-rminmax/u8-rminmax.inc"
 #undef XNN_UKERNEL
 
+#define XNN_UKERNEL(arch_flags, ukernel, row_tile, batch_tile, vector_tile,   \
+                    datatype_in, datatype_out, params_type, init_params)      \
+  XNN_INTERNAL void ukernel(size_t channels, size_t k1, size_t k2, size_t k3, \
+                            const datatype_in* input, size_t input_stride1,   \
+                            size_t input_stride2, size_t input_stride3,       \
+                            const datatype_in* zero, datatype_out* output,    \
+                            const params_type* params);
+#include "src/f32-rdsum/f32-rdsum.inc"
+#undef XNN_UKERNEL
+
 #define XNN_UKERNEL(arch_flags, ukernel, row_tile, batch_tile, vector_tile, \
                     datatype_in, datatype_out, params_type, init_params)    \
   XNN_INTERNAL void ukernel(size_t rows, size_t channels,                   \
@@ -52,7 +62,6 @@ extern "C" {
                             const datatype_in* zero, datatype_out* output,  \
                             const params_type* params);
 #include "src/f16-f32acc-rdsum/f16-f32acc-rdsum.inc"
-#include "src/f32-rdsum/f32-rdsum.inc"
 #include "src/qs8-rdsum/qs8-rdsum-minmax-fp32.inc"
 #include "src/qu8-rdsum/qu8-rdsum.inc"
 #undef XNN_UKERNEL
