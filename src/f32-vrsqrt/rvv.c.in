@@ -11,9 +11,6 @@ $assert LMUL in [1, 2, 4, 8]
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/vunary.h"
 
-#include <cfloat>
-#include <limits>
-
 // In the following, we do a single Newton-Raphson step on the equation
 // $x^{-2} - a$, which expands to:
 //
