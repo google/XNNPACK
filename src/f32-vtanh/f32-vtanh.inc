@@ -9,6 +9,13 @@ XNN_UKERNEL(xnn_arch_none, xnn_f32_vtanh_ukernel__scalar_rational_9_8_div_u2, 2,
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vtanh_ukernel__scalar_rational_9_8_div_u4, 4, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vtanh_ukernel__scalar_rational_9_8_div_u8, 8, false, float, struct xnn_f32_default_params, NULL)
 
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vtanh_ukernel__rvv_tanh_u1v, 1, true, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vtanh_ukernel__rvv_tanh_u2v, 2, true, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vtanh_ukernel__rvv_tanh_u4v, 4, true, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vtanh_ukernel__rvv_tanh_u8v, 8, true, float, struct xnn_f32_default_params, NULL)
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vtanh_ukernel__sse2_rational_9_8_div_u4, 4, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vtanh_ukernel__sse2_rational_9_8_div_u8, 8, false, float, struct xnn_f32_default_params, NULL)

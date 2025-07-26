@@ -1,0 +1,304 @@
+// clang-format off
+// Auto-generated file. Do not edit!
+//   Template: src/f32-vtanh/rvv.c.in
+//   Generator: tools/xngen
+//
+/* 
+ *========================================================
+ * Copyright (c) RVVPL and Lobachevsky State University of 
+ * Nizhny Novgorod and its affiliates. All rights reserved.
+ * 
+ * Copyright 2025 The RVVMF Authors (Valentin Volokitin)
+ *
+ * Distributed under the BSD 4-Clause License
+ * (See file LICENSE in the root directory of this 
+ * source tree)
+ *========================================================
+ *
+ *********************************************************
+ *                                                       *
+ *   File:  tanh.c                                       *
+ *   Contains: intrinsic function tanh for f64, f32, f16 *
+ *                                                       *
+ * Input vector register V with any floating point value *
+ * Input AVL number of elements in vector register       *
+ *                                                       *
+ * Computes the hyperbolic tangent of input vector V     *
+ *                                                       *
+ * Algorithm:                                            *
+ *    1) Piecewise polynomial approximation on segments: *
+ *       f64 [0, 0x1.30fc1931f09c9p+4] - 94,             *
+ *       f32 [0, 0x1.205966p+3] - 83,                    *
+ *       f16 [0, 0x1.0a4p+2] - 10                        *
+ *    2) For efficiency, some sections are divided into  *
+ *       2 (fp16), 4 (fp64) or 8 (fp32) equal sections   *
+ *    3) Polynomial degrees: f64 - 13, f32 - 5, f16 - 5  *
+ *                                                       *
+ *                                                       *
+ *********************************************************
+*/
+ 
+#include <assert.h>
+#include <math.h>
+
+#include <riscv_vector.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/intrinsics-polyfill.h"
+#include "src/xnnpack/vunary.h"
+
+
+#include <stdint.h>
+#include <float.h>
+#include <math.h>
+
+
+
+static uint32_t RVVMF_tanhsp_LOOK_UP_TABLE [672] = {
+0x00000000, 0x00000000, 0x3f800000, 0x2af254e1, 0xbeaaaaab, 0x34086fc9, 0x3e0884eb,
+0x00000000, 0x3c07ff33, 0x2f983499, 0x3f7ffb7c, 0xbc07fc18, 0xbea2771f, 0x00000000,
+0x00000000, 0xbc080000, 0x3c17fee2, 0x2f5f5cb6, 0x3f7ffa5c, 0xbc17fa8c, 0xbe9de24e,
+0x00000000, 0x00000000, 0xbc180000, 0x3c27fe7e, 0x2f108e25, 0x3f7ff91c, 0xbc27f8a3,
+0xbe979b37, 0x00000000, 0x00000000, 0xbc280000, 0x3c37fe05, 0x2e898bd0, 0x3f7ff7bc,
+0xbc37f654, 0xbe8f41e5, 0x00000000, 0x00000000, 0xbc380000, 0x3c47fd75, 0xac4268c0,
+0x3f7ff63c, 0xbc47f395, 0xbe846cc4, 0x00000000, 0x00000000, 0xbc480000, 0x3c57fccc,
+0xae8b8041, 0x3f7ff49c, 0xbc57f05c, 0xbe6d5159, 0x00000000, 0x00000000, 0xbc580000,
+0x3c67fc08, 0xaf020b3c, 0x3f7ff2dc, 0xbc67ec9f, 0xbe4af1c1, 0x00000000, 0x00000000,
+0xbc680000, 0x3c77fb27, 0xaf360b6b, 0x3f7ff0fd, 0xbc77ef99, 0xbee9ee31, 0x00000000,
+0x00000000, 0xbc780000, 0x3c87fccd, 0x30039804, 0x3f7fedf1, 0xbc87f3af, 0xbeb041cc,
+0x00000000, 0x00000000, 0xbc880000, 0x3c97fb89, 0xad9aaab2, 0x3f7fe971, 0xbc97ed27,
+0xbe9defe4, 0x00000000, 0x00000000, 0xbc980000, 0x3ca7f9f9, 0xaff62740, 0x3f7fe472,
+0xbca7e798, 0xbeab3a8e, 0xbe28b21d, 0x00000000, 0xbca80000, 0x3cb7f815, 0xb059287e,
+0x3f7fdef3, 0xbcb7e0ad, 0xbeb03d7a, 0x00000000, 0x00000000, 0xbcb80000, 0x3cc7f5d4,
+0x30687b40, 0x3f7fd8f4, 0xbcc7d705, 0xbeab52e3, 0xbe2e8399, 0x00000000, 0xbcc80000,
+0x3cd7f330, 0x3052e038, 0x3f7fd275, 0xbcd7cbe5, 0xbe9aae6e, 0x00000000, 0x00000000,
+0xbcd80000, 0x3ce7f020, 0x3070c308, 0x3f7fcb77, 0xbce7c01f, 0xbea2c39e, 0x00000000,
+0x00000000, 0xbce80000, 0x3cf7ec9d, 0xb031ceb6, 0x3f7fc3f9, 0xbcf7b1bb, 0xbe9b1460,
+0x00000000, 0x00000000, 0xbcf80000, 0x3d07f336, 0x2fe20cce, 0x3f7fb7ce, 0xbd07cb29,
+0xbeade548, 0xbefb875f, 0x00000000, 0xbd080000, 0x3d17ee26, 0xb018d56c, 0x3f7fa5d5,
+0xbd17b95b, 0xbea7dc31, 0x3e765517, 0x00000000, 0xbd180000, 0x3d27e7e6, 0x301b6088,
+0x3f7f91e0, 0xbd279e69, 0xbead224f, 0xbeb37072, 0x00000000, 0xbd280000, 0x3d37e057,
+0x3055b7f8, 0x3f7f7bed, 0xbd3782fd, 0xbea48a4c, 0x3ef75980, 0x00000000, 0xbd380000,
+0x3d47d759, 0x308406aa, 0x3f7f63ff, 0xbd475ef4, 0xbea450e3, 0x3ee52c61, 0x00000000,
+0xbd480000, 0x3d57cccd, 0xb0d70373, 0x3f7f4a16, 0xbd573465, 0xbea54e29, 0x3ea28317,
+0x00000000, 0xbd580000, 0x3d67c092, 0xb0fda174, 0x3f7f2e33, 0xbd67026b, 0xbea95d90,
+0xbced721e, 0x00000000, 0xbd680000, 0x3d77b288, 0x30d3971f, 0x3f7f1056, 0xbd76caa5,
+0xbea82aca, 0x3d270b34, 0x00000000, 0xbd780000, 0x3d87ccea, 0xb1079b4f, 0x3f7edfd9,
+0xbd873404, 0xbea7c4f1, 0x3d19dfa2, 0x00000000, 0xbd880000, 0x3d97b8b6, 0xb1691437,
+0x3f7e9852, 0xbd96e3d6, 0xbea629d2, 0x3dbe602c, 0x00000000, 0xbd980000, 0x3da79fca,
+0x3115ba63, 0x3f7e48f9, 0xbda67fef, 0xbea73a6a, 0xbb94e985, 0x00000000, 0xbda80000,
+0x3db781ab, 0x302b6d52, 0x3f7df1d5, 0xbdb608d5, 0xbea42d9b, 0x3ddd9e84, 0x00000000,
+0xbdb80000, 0x3dc75ddc, 0xb12a0d80, 0x3f7d92f4, 0xbdc57a0c, 0xbea4c3cd, 0x3d250844,
+0x00000000, 0xbdc80000, 0x3dd733e0, 0x317e4437, 0x3f7d2c5f, 0xbdd4d3c2, 0xbea28014,
+0x3dc52a88, 0x00000000, 0xbdd80000, 0x3de7033f, 0xb0df4d79, 0x3f7cbe25, 0xbde41285,
+0xbea31691, 0x3d0b7a7b, 0x00000000, 0xbde80000, 0x3df6cb7d, 0xb164bbaa, 0x3f7c4851,
+0xbdf3361f, 0xbea073d6, 0x3dbc66ae, 0x00000000, 0xbdf80000, 0x3e0734ba, 0xb14ce577,
+0x3f7b8976, 0xbe04d92f, 0xbe9f2c6a, 0x3d9b71ee, 0x00000000, 0xbe080000, 0x3e16e4b4,
+0x31e6e00d, 0x3f7a70f3, 0xbe139deb, 0xbe9c102f, 0x3dbe2d4e, 0xbec27e63, 0xbe180000,
+0x3e26823c, 0x30d86425, 0x3f793b2d, 0xbe221b44, 0xbe98addb, 0x3ddf1891, 0x00000000,
+0xbe280000, 0x3e360b81, 0x3133c478, 0x3f77e8ba, 0xbe304aa4, 0xbe9574e9, 0x3de6cb49,
+0x00000000, 0xbe380000, 0x3e457ebe, 0xb15161b0, 0x3f767a3b, 0xbe3e2619, 0xbe91efa7,
+0x3df105dd, 0x00000000, 0xbe480000, 0x3e54da37, 0xb1d223c3, 0x3f74f05e, 0xbe4ba7cb,
+0xbe8e4a23, 0x3df70779, 0x00000000, 0xbe580000, 0x3e641c3b, 0x31ca9894, 0x3f734bdb,
+0xbe58ca6b, 0xbe89eed5, 0x3e07e480, 0x00000000, 0xbe680000, 0x3e734328, 0xb0552cba,
+0x3f718d77, 0xbe6588a7, 0xbe85bf9b, 0x3e0c7182, 0x00000000, 0xbe780000, 0x3e84e3a2,
+0x32753859, 0x3f6ec11d, 0xbe77dfcf, 0xbe7dd63e, 0x3e15abdc, 0x00000000, 0xbe880000,
+0x3e93afbf, 0x30e7c445, 0x3f6ab32c, 0xbe876609, 0xbe6aaa58, 0x3e1f007a, 0x00000000,
+0xbe980000, 0x3ea23833, 0xb27fc7ee, 0x3f664d35, 0xbe91ef6a, 0xbe56a4ec, 0x3e2547e4,
+0x3e3a8368, 0xbea80000, 0x3eb077b9, 0xb25fb1a2, 0x3f6196cb, 0xbe9b8125, 0xbe41b7f8,
+0x3e297dcc, 0x00000000, 0xbeb80000, 0x3ebe6989, 0xb2203e6b, 0x3f5c97cb, 0xbea4139e,
+0xbe2bf624, 0x3e2e1cd2, 0x00000000, 0xbec80000, 0x3ecc095a, 0xb19f88c2, 0x3f575846,
+0xbeaba235, 0xbe163cd0, 0x3e2e416a, 0xbe8961e2, 0xbed80000, 0x3ed95365, 0xb1d88b50,
+0x3f51e061, 0xbeb22b91, 0xbe0096a0, 0x3e2d643f, 0x3c00e022, 0xbee80000, 0x3ee64465,
+0xb1dfaf6f, 0x3f4c3842, 0xbeb7b11a, 0xbdd5e086, 0x3e2a83b9, 0xbec57c6d, 0xbef80000,
+0x3ef90109, 0xb1b96e5b, 0x3f43733f, 0xbebe1be1, 0xbd974a0d, 0x3e23756a, 0xbd873640,
+0xbf080000, 0x3f0857a4, 0xb179dde1, 0x3f3762c4, 0xbec35680, 0xbd11eebf, 0x3e159a5a,
+0xbcbd080b, 0xbf180000, 0x3f136bb8, 0xb28cd16b, 0x3f2b1b1e, 0xbec51123, 0xba9e8b55,
+0x3e040dd9, 0xbc56570e, 0xbf280000, 0x3f1dbafc, 0x32bcbc81, 0x3f1ed11e, 0xbec3b480,
+0x3ceb0bf2, 0x3de0b649, 0xbd3b6b1a, 0xbf380000, 0x3f2746c5, 0xb2a50043, 0x3f12b298,
+0xbebfb61d, 0x3d5ba111, 0x3db7cfd3, 0xbd23710f, 0xbf480000, 0x3f301305, 0xb22a3482,
+0x3f06e5d8, 0xbeb99014, 0x3d96c306, 0x3d8fb87d, 0xbd57680b, 0xbf580000, 0x3f3825d9,
+0xb21009b8, 0x3ef71325, 0xbeb1ba4a, 0x3db60329, 0x3d54422d, 0xbda48676, 0xbf680000,
+0x3f3f870d, 0x3219abbe, 0x3ee16a66, 0xbea8a54d, 0x3dcc30d8, 0x3d10579a, 0xbd8c9783,
+0xbf780000, 0x3f495fda, 0xb28ee0ea, 0x3ec330b0, 0xbe998a55, 0x3ddee122, 0x3c6d2b38,
+0xbd28555b, 0xbf880000, 0x3f546de6, 0xb1f2bbfe, 0x3e9f7398, 0xbe845032, 0x3de294c7,
+0xbbb64892, 0xbcd51ed3, 0xbf980000, 0x3f5d6a85, 0x32153840, 0x3e80fdd4, 0xbe5f219f,
+0x3dd5f756, 0xbc90ad49, 0xbc45f34f, 0xbfa80000, 0x3f64a852, 0xb2cbcd13, 0x3e4f0f00,
+0xbe38f185, 0x3dc056d6, 0xbcc193fe, 0xbbb3ffa7, 0xbfb80000, 0x3f6a737a, 0x32487d71,
+0x3e2522c2, 0xbe173c46, 0x3da6ebfe, 0xbccfeb49, 0xba08a912, 0xbfc80000, 0x3f6f0f5b,
+0xb2590815, 0x3e03094e, 0xbdf4bb1b, 0x3d8d2f62, 0xbcc8e802, 0x3b11b028, 0xbfd80000,
+0x3f72b5b8, 0xb2c10105, 0x3dcf1f7f, 0xbdc45ecd, 0x3d6a43ae, 0xbcb654a9, 0x3b93f58a,
+0xbfe80000, 0x3f7596ff, 0x32dd6015, 0x3da32d10, 0xbd9c8a60, 0x3d3f91ff, 0xbc9ed21c,
+0x3b95bbfa, 0xbff80000, 0x3f78cca7, 0xb0972382, 0x3d632d8e, 0xbd5cc9a9, 0x3d0ada09,
+0xbc759e5f, 0x3b93025e, 0xc0080000, 0x3f7b9bbb, 0x32b1e509, 0x3d0b53fe, 0xbd08f000,
+0x3cb04b05, 0xbc243eaf, 0x3b5fab96, 0xc0180000, 0x3f7d53ca, 0xb2b52d42, 0x3caa2900,
+0xbca86208, 0x3c5bd007, 0xbbd30261, 0x3b19b041, 0xc0280000, 0x3f7e6026, 0x32db56b7,
+0x3c4f43e8, 0xbc4df2f6, 0x3c078e31, 0xbb847046, 0x3ac863c9, 0xc0380000, 0x3f7f0376,
+0xb2f9c763, 0x3bfc0dec, 0xbbfb14ed, 0x3ba61910, 0xbb23fd75, 0x3a7da63c, 0xc0480000,
+0x3f7f66b6, 0xb28190aa, 0x3b991c5c, 0xbb98c074, 0x3b4ab703, 0xbac968e4, 0x3a1e38b0,
+0xc0580000, 0x3f7fa2fb, 0x32d341ea, 0x3b39e760, 0xbb39a38d, 0x3af6d178, 0xba762769,
+0x39c22f26, 0xc0680000, 0x3f7fc791, 0xb1c9a492, 0x3ae1a383, 0xbae1716d, 0x3a960988,
+0xba15fa9b, 0x396e0649, 0xc0780000, 0x3f7fe556, 0x31f317d4, 0x3a5543f0, 0xba552865,
+0x3a0dfda2, 0xb98f891b, 0x38e4c5a0, 0xc0880000, 0x3f7ff631, 0xb2d94593, 0x399cf3c7,
+0xb99ce9cf, 0x39512851, 0xb8d3aad3, 0x38290233, 0xc0980000, 0x3f7ffc64, 0x3160d947,
+0x38e6fada, 0xb8e6f1c2, 0x3899f298, 0xb81bdbcd, 0x377917cc, 0xc0a80000, 0x3f7ffeac,
+0x31bfd85c, 0x3829f391, 0xb829ee62, 0x37e29132, 0xb7656a3b, 0x36b76ca6, 0xc0b80000,
+0x3f7fff83, 0xb139c0dd, 0x377a16f9, 0xb77a102a, 0x3726b54b, 0xb6a8cff4, 0x3606f239,
+0xc0c80000, 0x3f7fffd2, 0xaee1ade0, 0x36b801b2, 0xb6b7fce8, 0x36755150, 0xb5f86b6d,
+0x3546a377, 0xc0d80000, 0x3f7fffef, 0x319d7c82, 0x3607627e, 0xb6075f08, 0x35b47f1c,
+0xb536c780, 0x34921fe8, 0xc0e80000, 0x3f7ffffa, 0xb2671450, 0x3547389f, 0xb547338f,
+0x3504cd4b, 0xb4867b76, 0x33d70ed1, 0xc0f80000, 0x3f7fffff, 0xb2c74487, 0x3431d0d7,
+0xb43185fc, 0x33ecbbf1, 0xb3792e54, 0x32c6e0f4, 0xc1080000, 0x3f7fffff, 0x32fd30e6,
+0x3381678d, 0xb3816709, 0x332b6586, 0xb3420132, 0x36d668b8, 0xc110165a, 0x3f800000,
+0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000};
+
+#if 8 != 8
+
+vfloat32m8_t __riscv_vtanh_f32m8(vfloat32m8_t x, size_t avl)
+{ 
+    size_t vl = __riscv_vsetvl_e32m8(avl);
+    vuint32m8_t ix = __riscv_vand_vx_u32m8(
+                 __riscv_vreinterpret_v_f32m8_u32m8(x), 0x7fffffff, vl);
+    
+    vuint32m8_t index = __riscv_vsrl_vx_u32m8(ix, 20, vl);
+    index = __riscv_vsub_vx_u32m8(index, 959, vl);
+
+    #if 8 == 1
+    vbool32_t mask = __riscv_vmsltu_vx_u32m8_b32(ix, 0x3c000000, vl);
+    #endif
+    #if 8 == 2
+    vbool16_t mask = __riscv_vmsltu_vx_u32m8_b16(ix, 0x3c000000, vl);
+    #endif
+    #if 8 == 4
+    vbool8_t  mask = __riscv_vmsltu_vx_u32m8_b8(ix, 0x3c000000, vl);
+    #endif
+
+    index = __riscv_vmerge_vxm_u32m8(index, 0x00000000, mask, vl);
+     
+    // 0x1.205966p+3f
+    #if 8 == 1
+    mask = __riscv_vmsgtu_vx_u32m8_b32(ix, 0x41102cb3, vl);
+    #endif
+    #if 8 == 2
+    mask = __riscv_vmsgtu_vx_u32m8_b16(ix, 0x41102cb3, vl);
+    #endif
+    #if 8 == 4
+    mask = __riscv_vmsgtu_vx_u32m8_b8(ix, 0x41102cb3, vl);
+    #endif
+    
+    vfloat32m8_t y = __riscv_vreinterpret_v_u32m8_f32m8(
+                        __riscv_vmerge_vxm_u32m8(ix, 0x00000000, mask, vl));
+    index = __riscv_vmerge_vxm_u32m8(index, 83, mask, vl);
+    
+    index = __riscv_vsll_vx_u32m8(index, 5, vl);
+            
+    vfloat32m8_t p0H = __riscv_vloxei32_v_f32m8((float*)RVVMF_tanhsp_LOOK_UP_TABLE + 0, index, vl);
+    vfloat32m8_t p0L = __riscv_vloxei32_v_f32m8((float*)RVVMF_tanhsp_LOOK_UP_TABLE + 1, index, vl);
+    vfloat32m8_t p1 =  __riscv_vloxei32_v_f32m8((float*)RVVMF_tanhsp_LOOK_UP_TABLE + 2, index, vl);
+    vfloat32m8_t p2 =  __riscv_vloxei32_v_f32m8((float*)RVVMF_tanhsp_LOOK_UP_TABLE + 3, index, vl);
+    vfloat32m8_t p3 =  __riscv_vloxei32_v_f32m8((float*)RVVMF_tanhsp_LOOK_UP_TABLE + 4, index, vl);
+    vfloat32m8_t p4 =  __riscv_vloxei32_v_f32m8((float*)RVVMF_tanhsp_LOOK_UP_TABLE + 5, index, vl);
+    vfloat32m8_t p5 =  __riscv_vloxei32_v_f32m8((float*)RVVMF_tanhsp_LOOK_UP_TABLE + 6, index, vl);
+    vfloat32m8_t x_m = __riscv_vloxei32_v_f32m8((float*)RVVMF_tanhsp_LOOK_UP_TABLE + 7, index, vl);
+    
+    y = __riscv_vfadd_vv_f32m8(y, x_m, vl);
+    
+    vfloat32m8_t px = __riscv_vfmadd_vv_f32m8(y, p5, p4, vl);
+    px = __riscv_vfmadd_vv_f32m8(px, y, p3, vl);
+    px = __riscv_vfmadd_vv_f32m8(px, y, p2, vl);
+    px = __riscv_vfmadd_vv_f32m8(px, y, p1, vl);
+    px = __riscv_vfmadd_vv_f32m8(px, y, p0L, vl);
+    px = __riscv_vfadd_vv_f32m8(px, p0H, vl);
+    
+    vuint32m8_t signx = __riscv_vand_vx_u32m8(
+                __riscv_vreinterpret_v_f32m8_u32m8(x), 0x80000000, vl);
+    px = __riscv_vreinterpret_v_u32m8_f32m8(__riscv_vor_vv_u32m8(
+                __riscv_vreinterpret_v_f32m8_u32m8(px), signx, vl));
+
+#ifndef __FAST_MATH__
+
+#if 8 == 1
+    vbool32_t mask_sNaN = __riscv_vmsgtu_vx_u32m1_b32 (ix, 0x7f800000, vl);
+    px = __riscv_vmerge_vvm_f32m1(px, x, mask_sNaN, vl);
+    mask_sNaN = __riscv_vmand_mm_b32(mask_sNaN,
+                  __riscv_vmsltu_vx_u32m1_b32(ix, 0x7fc00000, vl), vl);
+    unsigned int issNaN = __riscv_vcpop_m_b32(mask_sNaN, vl);
+    if (issNaN) {
+        volatile float x1 = 0.0f/0.0f;
+        px = __riscv_vfmerge_vfm_f32m1(px, x1, mask_sNaN, vl);
+    }
+#endif
+
+#if 8 == 2
+    vbool16_t mask_sNaN = __riscv_vmsgtu_vx_u32m2_b16 (ix, 0x7f800000, vl);
+    px = __riscv_vmerge_vvm_f32m2(px, x, mask_sNaN, vl);
+    mask_sNaN = __riscv_vmand_mm_b16(mask_sNaN,
+                  __riscv_vmsltu_vx_u32m2_b16(ix, 0x7fc00000, vl), vl);
+    unsigned int issNaN = __riscv_vcpop_m_b16(mask_sNaN, vl);
+    if (issNaN) {
+        volatile float x1 = 0.0f/0.0f;
+        px = __riscv_vfmerge_vfm_f32m2(px, x1, mask_sNaN, vl);
+    }
+#endif
+
+#if 8 == 4
+    vbool8_t mask_sNaN = __riscv_vmsgtu_vx_u32m4_b8 (ix, 0x7f800000, vl);
+    px = __riscv_vmerge_vvm_f32m4(px, x, mask_sNaN, vl);
+    mask_sNaN = __riscv_vmand_mm_b8(mask_sNaN,
+                  __riscv_vmsltu_vx_u32m4_b8(ix, 0x7fc00000, vl), vl);
+    unsigned int issNaN = __riscv_vcpop_m_b8(mask_sNaN, vl);
+    if (issNaN) {
+        volatile float x1 = 0.0f/0.0f;
+        px = __riscv_vfmerge_vfm_f32m4(px, x1, mask_sNaN, vl);
+    }
+#endif
+
+#endif
+
+    return px;
+}
+#else
+
+vfloat32m4_t __riscv_vtanh_f32m4(vfloat32m4_t x, size_t avl);
+vfloat32m8_t __riscv_vtanh_f32m8(vfloat32m8_t x, size_t avl)
+{  
+    vfloat32m8_t res;
+    size_t vl = __riscv_vsetvl_e32m4(avl);
+    vfloat32m4_t x1 = __riscv_vget_v_f32m8_f32m4(x, 0);
+    x1 = __riscv_vtanh_f32m4(x1, vl);
+    res = __riscv_vset_v_f32m4_f32m8(res, 0, x1);
+    if(avl > vl){
+        vl = __riscv_vsetvl_e32m4(avl-vl);
+        x1 = __riscv_vget_v_f32m8_f32m4(x, 1);
+        x1 = __riscv_vtanh_f32m4(x1, vl);
+        res = __riscv_vset_v_f32m4_f32m8(res, 1, x1);
+    }
+    return res;
+}
+
+#endif
+
+void xnn_f32_vtanh_ukernel__rvv_tanh_u8v(
+    size_t batch,
+    const float* input,
+    float* output,
+    const struct xnn_f32_default_params* params)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  batch >>= XNN_LOG2_SIZEOF_FLOAT;
+  do {
+    const size_t n = __riscv_vsetvl_e32m8(batch);
+    vfloat32m8_t vx = __riscv_vle32_v_f32m8(input, n);
+    input += n;
+    vfloat32m8_t vacc = __riscv_vtanh_f32m8(vx, n);
+    __riscv_vse32_v_f32m8(output, vacc, n);
+    output += n;
+
+    batch -= n;
+  } while (batch != 0);
+}
+

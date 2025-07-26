@@ -220,8 +220,12 @@ static void init_hardware_config(void) {
     const bool use_riscv_vector = (hwcap & COMPAT_HWCAP_ISA_V) != 0;
     set_arch_flag(xnn_arch_riscv_vector, use_riscv_vector);
 
+#if XNN_ENABLE_RISCV_FP16_VECTOR
+    set_arch_flag(xnn_arch_riscv_vector_fp16_arith, true);
+#else
     /* There is no HWCAP for fp16 so disable by default */
     set_arch_flag(xnn_arch_riscv_vector_fp16_arith, false);
+#endif
 
     if (use_riscv_vector) {
       register uint32_t vlenb __asm__ ("t0");
