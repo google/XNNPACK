@@ -263,8 +263,7 @@ bool CheckArchFlags(benchmark::State& state, uint64_t arch_flags) {
   if (hardware_config == nullptr) {
     state.SkipWithError("no hardware config");
     return false;
-  } 
-  else if ((hardware_config->arch_flags & arch_flags) != arch_flags) {
+  } else if ((hardware_config->arch_flags & arch_flags) != arch_flags) {
     state.SkipWithError("architecture unsupported");
     return false;
   }
