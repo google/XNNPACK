@@ -2632,6 +2632,109 @@ void xnn_subgraph_rewrite_ssa(xnn_subgraph_t subgraph) {
   xnn_release_memory(values_written);
 }
 
+static enum xnn_status xnn_subgraph_non_slinky_rewrites(
+    xnn_subgraph_t subgraph, uint32_t optimization_flags) {
+  if (optimization_flags & XNN_FLAG_SLINKY_ENABLED) {
+    return xnn_status_success;
+  }
+
+  // Count the number of consumers for each value.
+  xnn_subgraph_analyze_consumers_and_producers(subgraph);
+
+  // Track the number of changes made.
+  size_t changes = 0;
+
+  for (uint32_t node_id = 0; node_id < subgraph->num_nodes; node_id++) {
+    struct xnn_node* node = &subgraph->nodes[node_id];
+    switch (node->type) {
+      case xnn_node_type_static_broadcast: {
+        // XNNPACK doesn't need explicit braodcasting for binary and
+        // batch_matrix_multiply nodes, so check if it can be elided.
+        const uint32_t input_id = node->inputs[0];
+        const uint32_t output_id = node->outputs[0];
+        const struct xnn_value* input_value = &subgraph->values[input_id];
+        const struct xnn_value* output_value = &subgraph->values[output_id];
+
+        // Find all consumers of the broadcast node's output.
+        uint32_t num_consumers = output_value->num_consumers;
+        for (uint32_t k = output_value->first_consumer;
+             k < subgraph->num_nodes && num_consumers; k++) {
+          struct xnn_node* consumer = &subgraph->nodes[k];
+          for (uint32_t j = 0; j < consumer->num_inputs; j++) {
+            if (consumer->inputs[j] == output_id) {
+              // If the consumer is known to broadcast implicitly, short-circuit
+              // it.
+              if (consumer->type == xnn_node_type_binary_elementwise ||
+                  consumer->type == xnn_node_type_batch_matrix_multiply) {
+                if (!is_repeated_input(consumer, j)) {
+                  num_consumers -= 1;
+                }
+                consumer->inputs[j] = input_id;
+              }
+            }
+          }
+        }
+
+        // If the broadcast can not be elided, then replace it with a binary op
+        // that just adds zero and broadcasts implicitly.
+        if (num_consumers) {
+          // Compute the shape of the right-hand operand to the binary op that,
+          // when added to the input, will result in the correct output shape.
+          size_t shape[XNN_MAX_TENSOR_DIMS];
+          size_t num_dims = node->params.static_reshape.new_shape.num_dims;
+          const size_t* old_shape = input_value->shape.dim;
+          const size_t* new_shape = node->params.static_reshape.new_shape.dim;
+          size_t num_elements = 1;
+          for (uint32_t k = 0; k < num_dims; k++) {
+            shape[k] = (new_shape[k] == 0 || new_shape[k] == old_shape[k])
+                           ? 1
+                           : new_shape[k];
+            num_elements *= shape[k];
+          }
+
+          // Create a static right-hand side value filled with zeros.
+          void* data = xnn_allocate_zero_memory(
+              num_elements * xnn_datatype_size_bytes(input_value->datatype));
+          uint32_t new_value_id;
+          enum xnn_status status =
+              xnn_datatype_is_quantized(input_value->datatype)
+                  ? xnn_define_quantized_tensor_value(
+                        subgraph, input_value->datatype,
+                        /*zero_point=*/0, /*quantization_scale=*/1.0, num_dims,
+                        shape, data, /*external_id=*/XNN_INVALID_VALUE_ID,
+                        /*flags=*/XNN_VALUE_FLAG_NEEDS_CLEANUP, &new_value_id)
+                  : xnn_define_tensor_value(
+                        subgraph, input_value->datatype, num_dims, shape, data,
+                        /*external_id=*/XNN_INVALID_VALUE_ID,
+                        /*flags=*/XNN_VALUE_FLAG_NEEDS_CLEANUP, &new_value_id);
+          if (status != xnn_status_success) {
+            return status;
+          }
+
+          // Replace the broadcast node with a binary add.
+          status =
+              xnn_define_binary(subgraph, xnn_binary_add, /*params=*/NULL,
+                                input_id, new_value_id, output_id, node->flags);
+          node->type = xnn_node_type_invalid;
+        } else {
+          node->type = xnn_node_type_invalid;
+        }
+
+        changes += 1;
+      }
+      default:
+        break;
+    }
+  }
+
+  // Clean up after ourselves.
+  if (changes) {
+    xnn_subgraph_clean_up(subgraph);
+  }
+
+  return xnn_status_success;
+}
+
 enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
                                       uint32_t optimization_flags) {
   // If the subgraph has no nodes, then there is nothing for us to do here, but
@@ -2703,6 +2806,12 @@ enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
         "disabling inlined LHS packing because `XNN_FLAG_SLINKY_ENABLED` is "
         "set.");
     optimization_flags |= XNN_FLAG_NO_INLINED_LHS_PACKING;
+  } else {
+    enum xnn_status status =
+        xnn_subgraph_non_slinky_rewrites(subgraph, optimization_flags);
+    if (status != xnn_status_success) {
+      return status;
+    }
   }
 
   enum xnn_status status =
