@@ -163,29 +163,12 @@ vfloat32m2_t __riscv_vtanh_f32m2(vfloat32m2_t x, size_t avl)
     vuint32m2_t index = __riscv_vsrl_vx_u32m2(ix, 20, vl);
     index = __riscv_vsub_vx_u32m2(index, 959, vl);
 
-    #if 2 == 1
-    vbool32_t mask = __riscv_vmsltu_vx_u32m2_b32(ix, 0x3c000000, vl);
-    #endif
-    #if 2 == 2
     vbool16_t mask = __riscv_vmsltu_vx_u32m2_b16(ix, 0x3c000000, vl);
-    #endif
-    #if 2 == 4
-    vbool8_t  mask = __riscv_vmsltu_vx_u32m2_b8(ix, 0x3c000000, vl);
-    #endif
-
     index = __riscv_vmerge_vxm_u32m2(index, 0x00000000, mask, vl);
-     
+
     // 0x1.205966p+3f
-    #if 2 == 1
-    mask = __riscv_vmsgtu_vx_u32m2_b32(ix, 0x41102cb3, vl);
-    #endif
-    #if 2 == 2
     mask = __riscv_vmsgtu_vx_u32m2_b16(ix, 0x41102cb3, vl);
-    #endif
-    #if 2 == 4
-    mask = __riscv_vmsgtu_vx_u32m2_b8(ix, 0x41102cb3, vl);
-    #endif
-    
+
     vfloat32m2_t y = __riscv_vreinterpret_v_u32m2_f32m2(
                         __riscv_vmerge_vxm_u32m2(ix, 0x00000000, mask, vl));
     index = __riscv_vmerge_vxm_u32m2(index, 83, mask, vl);
@@ -216,20 +199,6 @@ vfloat32m2_t __riscv_vtanh_f32m2(vfloat32m2_t x, size_t avl)
                 __riscv_vreinterpret_v_f32m2_u32m2(px), signx, vl));
 
 #ifndef __FAST_MATH__
-
-#if 2 == 1
-    vbool32_t mask_sNaN = __riscv_vmsgtu_vx_u32m1_b32 (ix, 0x7f800000, vl);
-    px = __riscv_vmerge_vvm_f32m1(px, x, mask_sNaN, vl);
-    mask_sNaN = __riscv_vmand_mm_b32(mask_sNaN,
-                  __riscv_vmsltu_vx_u32m1_b32(ix, 0x7fc00000, vl), vl);
-    unsigned int issNaN = __riscv_vcpop_m_b32(mask_sNaN, vl);
-    if (issNaN) {
-        volatile float x1 = 0.0f/0.0f;
-        px = __riscv_vfmerge_vfm_f32m1(px, x1, mask_sNaN, vl);
-    }
-#endif
-
-#if 2 == 2
     vbool16_t mask_sNaN = __riscv_vmsgtu_vx_u32m2_b16 (ix, 0x7f800000, vl);
     px = __riscv_vmerge_vvm_f32m2(px, x, mask_sNaN, vl);
     mask_sNaN = __riscv_vmand_mm_b16(mask_sNaN,
@@ -239,20 +208,6 @@ vfloat32m2_t __riscv_vtanh_f32m2(vfloat32m2_t x, size_t avl)
         volatile float x1 = 0.0f/0.0f;
         px = __riscv_vfmerge_vfm_f32m2(px, x1, mask_sNaN, vl);
     }
-#endif
-
-#if 2 == 4
-    vbool8_t mask_sNaN = __riscv_vmsgtu_vx_u32m4_b8 (ix, 0x7f800000, vl);
-    px = __riscv_vmerge_vvm_f32m4(px, x, mask_sNaN, vl);
-    mask_sNaN = __riscv_vmand_mm_b8(mask_sNaN,
-                  __riscv_vmsltu_vx_u32m4_b8(ix, 0x7fc00000, vl), vl);
-    unsigned int issNaN = __riscv_vcpop_m_b8(mask_sNaN, vl);
-    if (issNaN) {
-        volatile float x1 = 0.0f/0.0f;
-        px = __riscv_vfmerge_vfm_f32m4(px, x1, mask_sNaN, vl);
-    }
-#endif
-
 #endif
 
     return px;

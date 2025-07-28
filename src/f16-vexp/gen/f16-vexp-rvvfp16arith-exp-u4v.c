@@ -48,23 +48,6 @@
 #include "src/xnnpack/intrinsics-polyfill.h"
 #include "src/xnnpack/vunary.h"
 
-#if 4 == 1
-  #define RVV_BOOL vbool16_t
-#endif
-
-#if 4 == 2
-  #define RVV_BOOL vbool8_t
-#endif
-
-#if 4 == 4
-  #define RVV_BOOL vbool4_t
-#endif
-
-#if 4 == 8
-  #define RVV_BOOL vbool2_t
-#endif
-
-
 
 /* ---------- UTILS ---------- */
 
@@ -179,56 +162,11 @@ extern uint16_t EXP_POL_COEFF_3_F16;  // 0x1.55p-3f16
 
 /* ---------- EXP IMPLEMENTATION ---------- */
 
-#if 4 == 1
-forceinline void check_special_cases_f16m4(vfloat16m4_t* x, vfloat16m4_t* special, RVV_BOOL* specialMask,
+forceinline void check_special_cases_f16m4(vfloat16m4_t* x, vfloat16m4_t* special, vbool4_t* specialMask,
     FLOAT16_T overflowThreshold, size_t vl)
 {
     uint16_t pinf = 0x7c00;    
-    RVV_BOOL mask;
-    // check +inf
-    *specialMask = __riscv_vmfeq_vf_f16m4_b16(*x, RVVMF_EXP_AS_FP16(pinf), vl);
-    *special = __riscv_vfmerge_vfm_f16m4(*x, RVVMF_EXP_AS_FP16(pinf), *specialMask, vl);
-    // check overflow
-    mask = __riscv_vmand_mm_b16(__riscv_vmfgt_vf_f16m4_b16(*x, overflowThreshold, vl),
-        __riscv_vmflt_vf_f16m4_b16(*x, RVVMF_EXP_AS_FP16(pinf), vl), vl);
-    *special = __riscv_vfmerge_vfm_f16m4(*special, RVVMF_EXP_AS_FP16(pinf), mask, vl);
-    *specialMask = __riscv_vmor_mm_b16(*specialMask, mask, vl);  
-    /* if (__riscv_vcpop_m_b16(mask, vl))
-        volatile double exception = DBL_MAX*2.0; */  // FE_OVERFLOW
-    
-    // NaNs, overflow, -inf -- automatically
-    *x = __riscv_vfmerge_vfm_f16m4(*x, RVVMF_EXP_AS_FP16(ZERO_F16), *specialMask, vl);
-}
-#endif
-
-#if 4 == 2
-forceinline void check_special_cases_f16m4(vfloat16m4_t* x, vfloat16m4_t* special, RVV_BOOL* specialMask,
-    FLOAT16_T overflowThreshold, size_t vl)
-{
-    uint16_t pinf = 0x7c00;    
-    RVV_BOOL mask;
-    // check +inf
-    *specialMask = __riscv_vmfeq_vf_f16m4_b8(*x, RVVMF_EXP_AS_FP16(pinf), vl);
-    *special = __riscv_vfmerge_vfm_f16m4(*x, RVVMF_EXP_AS_FP16(pinf), *specialMask, vl);
-    // check overflow
-    mask = __riscv_vmand_mm_b8(__riscv_vmfgt_vf_f16m4_b8(*x, overflowThreshold, vl),
-        __riscv_vmflt_vf_f16m4_b8(*x, RVVMF_EXP_AS_FP16(pinf), vl), vl);
-    *special = __riscv_vfmerge_vfm_f16m4(*special, RVVMF_EXP_AS_FP16(pinf), mask, vl);
-    *specialMask = __riscv_vmor_mm_b8(*specialMask, mask, vl);  
-    /* if (__riscv_vcpop_m_b8(mask, vl))
-        volatile double exception = DBL_MAX*2.0; */  // FE_OVERFLOW
-    
-    // NaNs, overflow, -inf -- automatically
-    *x = __riscv_vfmerge_vfm_f16m4(*x, RVVMF_EXP_AS_FP16(ZERO_F16), *specialMask, vl);
-}
-#endif
-
-#if 4 == 4
-forceinline void check_special_cases_f16m4(vfloat16m4_t* x, vfloat16m4_t* special, RVV_BOOL* specialMask,
-    FLOAT16_T overflowThreshold, size_t vl)
-{
-    uint16_t pinf = 0x7c00;    
-    RVV_BOOL mask;
+    vbool4_t mask;
     // check +inf
     *specialMask = __riscv_vmfeq_vf_f16m4_b4(*x, RVVMF_EXP_AS_FP16(pinf), vl);
     *special = __riscv_vfmerge_vfm_f16m4(*x, RVVMF_EXP_AS_FP16(pinf), *specialMask, vl);
@@ -243,30 +181,6 @@ forceinline void check_special_cases_f16m4(vfloat16m4_t* x, vfloat16m4_t* specia
     // NaNs, overflow, -inf -- automatically
     *x = __riscv_vfmerge_vfm_f16m4(*x, RVVMF_EXP_AS_FP16(ZERO_F16), *specialMask, vl);
 }
-#endif
-
-#if 4 == 8
-forceinline void check_special_cases_f16m4(vfloat16m4_t* x, vfloat16m4_t* special, RVV_BOOL* specialMask,
-    FLOAT16_T overflowThreshold, size_t vl)
-{
-    uint16_t pinf = 0x7c00;    
-    RVV_BOOL mask;
-    // check +inf
-    *specialMask = __riscv_vmfeq_vf_f16m4_b2(*x, RVVMF_EXP_AS_FP16(pinf), vl);
-    *special = __riscv_vfmerge_vfm_f16m4(*x, RVVMF_EXP_AS_FP16(pinf), *specialMask, vl);
-    // check overflow
-    mask = __riscv_vmand_mm_b2(__riscv_vmfgt_vf_f16m4_b2(*x, overflowThreshold, vl),
-        __riscv_vmflt_vf_f16m4_b2(*x, RVVMF_EXP_AS_FP16(pinf), vl), vl);
-    *special = __riscv_vfmerge_vfm_f16m4(*special, RVVMF_EXP_AS_FP16(pinf), mask, vl);
-    *specialMask = __riscv_vmor_mm_b2(*specialMask, mask, vl);  
-    /* if (__riscv_vcpop_m_b2(mask, vl))
-        volatile double exception = DBL_MAX*2.0; */  // FE_OVERFLOW
-    
-    // NaNs, overflow, -inf -- automatically
-    *x = __riscv_vfmerge_vfm_f16m4(*x, RVVMF_EXP_AS_FP16(ZERO_F16), *specialMask, vl);
-}
-#endif
-
 
 forceinline void do_exp_argument_reduction_hl_f16m4(vfloat16m4_t x,
     vfloat16m4_t* yh, vfloat16m4_t* yl, vuint16m4_t* ei, vuint16m4_t* fi, size_t vl)
@@ -311,23 +225,9 @@ forceinline void update_exponent_with_subnormal_f16m4(FLOAT16_T subnormalThresho
 {
 #ifndef __FAST_MATH__
     uint16_t ninf = 0xfc00;
-#if 4 == 1
-    RVV_BOOL subnormalMask = __riscv_vmand_mm_b16(__riscv_vmfgt_vf_f16m1_b16(x, RVVMF_EXP_AS_FP16(ninf), vl),
-        __riscv_vmflt_vf_f16m4_b16(x, subnormalThreshold, vl), vl);
-#endif
-#if 4 == 2
-    RVV_BOOL subnormalMask = __riscv_vmand_mm_b8(__riscv_vmfgt_vf_f16m2_b8(x, RVVMF_EXP_AS_FP16(ninf), vl),
-        __riscv_vmflt_vf_f16m4_b8(x, subnormalThreshold, vl), vl);
-#endif
-#if 4 == 4
-    RVV_BOOL subnormalMask = __riscv_vmand_mm_b4(__riscv_vmfgt_vf_f16m4_b4(x, RVVMF_EXP_AS_FP16(ninf), vl),
+    vbool4_t subnormalMask = __riscv_vmand_mm_b4(__riscv_vmfgt_vf_f16m4_b4(x, RVVMF_EXP_AS_FP16(ninf), vl),
         __riscv_vmflt_vf_f16m4_b4(x, subnormalThreshold, vl), vl);
-#endif
-#if 4 == 8
-    RVV_BOOL subnormalMask = __riscv_vmand_mm_b2(__riscv_vmfgt_vf_f16m8_b2(x, RVVMF_EXP_AS_FP16(ninf), vl),
-        __riscv_vmflt_vf_f16m4_b2(x, subnormalThreshold, vl), vl);
-#endif
-    /* if (__riscv_vcpop_m_b16(subnormalMask, vl))
+    /* if (__riscv_vcpop_m_b4(subnormalMask, vl))
         volatile double exception = nextafter(DBL_MIN/(double((uint16_t)1 << 52)), 0.0) */ // FE_UNDERFLOW
     
     vfloat16m4_t subnormalRes;
@@ -359,18 +259,7 @@ forceinline void reconstruct_exp_hl_hl_f16m4(vfloat16m4_t x, vuint16m4_t ei, vfl
 forceinline void update_underflow_f16m4(vfloat16m4_t x, vfloat16m4_t* res,
     FLOAT16_T underflowThreshold, FLOAT16_T underflowValue, size_t vl)
 {
-#if 4 == 1
-    RVV_BOOL underflowMask = __riscv_vmflt_vf_f16m1_b16(x, underflowThreshold, vl);
-#endif
-#if 4 == 2
-    RVV_BOOL underflowMask = __riscv_vmflt_vf_f16m2_b8(x, underflowThreshold, vl);
-#endif
-#if 4 == 4
-    RVV_BOOL underflowMask = __riscv_vmflt_vf_f16m4_b4(x, underflowThreshold, vl);
-#endif
-#if 4 == 8
-    RVV_BOOL underflowMask = __riscv_vmflt_vf_f16m8_b2(x, underflowThreshold, vl);
-#endif
+    vbool4_t underflowMask = __riscv_vmflt_vf_f16m4_b4(x, underflowThreshold, vl);
     *res = __riscv_vfmerge_vfm_f16m4(*res, underflowValue, underflowMask, vl);
 }
 
@@ -391,12 +280,12 @@ vfloat16m4_t __riscv_vexp_f16m4(vfloat16m4_t x, size_t avl)
 #ifndef __FAST_MATH__
     FLOAT16_T zeroThreshold = RVVMF_EXP_AS_FP16(EXP_ZERO_THRESHOLD_F16);
     vfloat16m4_t special;
-    RVV_BOOL specialMask;
+    vbool4_t specialMask;
     check_special_cases_f16m4(&x, &special, &specialMask, RVVMF_EXP_AS_FP16(EXP_EXPM1_OVERFLOW_THRESHOLD_F16), vl);
 #else
     FLOAT16_T zeroThreshold = RVVMF_EXP_AS_FP16(EXP_SUBNORMAL_THRESHOLD_F16);    
 #endif
-    
+
     do_exp_argument_reduction_hl_f16m4(x, &yh, &yl, &ei, &fi, vl);
     get_table_values_hl_f16m4(&fi, &th, &tl, vl);
     calculate_exp_polynom_hl_f16m4(yh, yl, &pm4h, &pm4l, vl);
