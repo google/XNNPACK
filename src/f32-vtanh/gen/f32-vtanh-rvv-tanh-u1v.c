@@ -3,40 +3,11 @@
 //   Template: src/f32-vtanh/rvv.c.in
 //   Generator: tools/xngen
 //
-/* 
- *========================================================
- * Copyright (c) RVVPL and Lobachevsky State University of 
- * Nizhny Novgorod and its affiliates. All rights reserved.
- * 
- * Copyright 2025 The RVVMF Authors (Valentin Volokitin)
- *
- * Distributed under the BSD 4-Clause License
- * (See file LICENSE in the root directory of this 
- * source tree)
- *========================================================
- *
- *********************************************************
- *                                                       *
- *   File:  tanh.c                                       *
- *   Contains: intrinsic function tanh for f64, f32, f16 *
- *                                                       *
- * Input vector register V with any floating point value *
- * Input AVL number of elements in vector register       *
- *                                                       *
- * Computes the hyperbolic tangent of input vector V     *
- *                                                       *
- * Algorithm:                                            *
- *    1) Piecewise polynomial approximation on segments: *
- *       f64 [0, 0x1.30fc1931f09c9p+4] - 94,             *
- *       f32 [0, 0x1.205966p+3] - 83,                    *
- *       f16 [0, 0x1.0a4p+2] - 10                        *
- *    2) For efficiency, some sections are divided into  *
- *       2 (fp16), 4 (fp64) or 8 (fp32) equal sections   *
- *    3) Polynomial degrees: f64 - 13, f32 - 5, f16 - 5  *
- *                                                       *
- *                                                       *
- *********************************************************
-*/
+// Copyright 2025 RVVPL and Lobachevsky State University of Nizhny Novgorod
+// Code adapted from https://github.com/rvvpl/rvvmf
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
  
 #include <assert.h>
 #include <math.h>
@@ -53,8 +24,8 @@
 #include <math.h>
 
 
-
-static uint32_t RVVMF_tanhsp_LOOK_UP_TABLE [672] = {
+#if 1 == 1
+uint32_t RVVMF_tanhsp_LOOK_UP_TABLE [672] = {
 0x00000000, 0x00000000, 0x3f800000, 0x2af254e1, 0xbeaaaaab, 0x34086fc9, 0x3e0884eb,
 0x00000000, 0x3c07ff33, 0x2f983499, 0x3f7ffb7c, 0xbc07fc18, 0xbea2771f, 0x00000000,
 0x00000000, 0xbc080000, 0x3c17fee2, 0x2f5f5cb6, 0x3f7ffa5c, 0xbc17fa8c, 0xbe9de24e,
@@ -151,6 +122,10 @@ static uint32_t RVVMF_tanhsp_LOOK_UP_TABLE [672] = {
 0xb43185fc, 0x33ecbbf1, 0xb3792e54, 0x32c6e0f4, 0xc1080000, 0x3f7fffff, 0x32fd30e6,
 0x3381678d, 0xb3816709, 0x332b6586, 0xb3420132, 0x36d668b8, 0xc110165a, 0x3f800000,
 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000};
+#else
+extern uint32_t RVVMF_tanhsp_LOOK_UP_TABLE [672];
+#endif
+
 
 #if 1 != 8
 

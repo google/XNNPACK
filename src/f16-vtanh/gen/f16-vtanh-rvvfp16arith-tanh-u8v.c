@@ -3,40 +3,11 @@
 //   Template: src/f16-vtanh/rvvfp16arith.c.in
 //   Generator: tools/xngen
 //
-/* 
- *========================================================
- * Copyright (c) RVVPL and Lobachevsky State University of 
- * Nizhny Novgorod and its affiliates. All rights reserved.
- * 
- * Copyright 2025 The RVVMF Authors (Valentin Volokitin)
- *
- * Distributed under the BSD 4-Clause License
- * (See file LICENSE in the root directory of this 
- * source tree)
- *========================================================
- *
- *********************************************************
- *                                                       *
- *   File:  tanh.c                                       *
- *   Contains: intrinsic function tanh for f64, f32, f16 *
- *                                                       *
- * Input vector register V with any floating point value *
- * Input AVL number of elements in vector register       *
- *                                                       *
- * Computes the hyperbolic tangent of input vector V     *
- *                                                       *
- * Algorithm:                                            *
- *    1) Piecewise polynomial approximation on segments: *
- *       f64 [0, 0x1.30fc1931f09c9p+4] - 94,             *
- *       f32 [0, 0x1.205966p+3] - 83,                    *
- *       f16 [0, 0x1.0a4p+2] - 10                        *
- *    2) For efficiency, some sections are divided into  *
- *       2 (fp16), 4 (fp64) or 8 (fp32) equal sections   *
- *    3) Polynomial degrees: f64 - 13, f32 - 5, f16 - 5  *
- *                                                       *
- *                                                       *
- *********************************************************
-*/
+// Copyright 2025 RVVPL and Lobachevsky State University of Nizhny Novgorod
+// Code adapted from https://github.com/rvvpl/rvvmf
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
 #include <math.h>
@@ -50,7 +21,8 @@
 #define RVVMF_EXP_AS_FP16(x) (*(_Float16*)(&(x)))
 
 
-static uint16_t RVVMF_FP16_tanhsp_LOOK_UP_TABLE [88] = {
+#if 8 == 1
+uint16_t RVVMF_FP16_tanhsp_LOOK_UP_TABLE [88] = {
 0x0000, 0x0000, 0x3c00, 0x009f, 0xb557, 0x1b71, 0x2fb4,
 0x0000, 0x34d8, 0x81a2, 0x3b44, 0xb465, 0xad82, 0x2df6,
 0xce13, 0xb500, 0x3696, 0x8359, 0x3aa5, 0xb578, 0xae6e,
@@ -64,6 +36,9 @@ static uint16_t RVVMF_FP16_tanhsp_LOOK_UP_TABLE [88] = {
 0x1017, 0xc300, 0x3bff, 0x8599, 0x14b3, 0x94bb, 0x1194,
 0x117e, 0x2048, 0xc414, 0x3c00, 0x0000, 0x0000, 0x0000,
 0x0000, 0x0000, 0x0000, 0x0000};
+#else
+extern uint16_t RVVMF_FP16_tanhsp_LOOK_UP_TABLE [88];
+#endif
 
 #if 8 != 8
 vfloat16m8_t __riscv_vtanh_f16m8(vfloat16m8_t x, size_t avl)

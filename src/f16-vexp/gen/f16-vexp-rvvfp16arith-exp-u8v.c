@@ -3,41 +3,11 @@
 //   Template: src/f16-vexp/rvvfp16arith.c.in
 //   Generator: tools/xngen
 //
-/* 
- *========================================================
- * Copyright (c) RVVPL and Lobachevsky State University of 
- * Nizhny Novgorod and its affiliates. All rights reserved.
- * 
- * Copyright 2025 The RVVMF Authors (Elena Panova)
- *
- * Distributed under the BSD 4-Clause License
- * (See file LICENSE in the root directory of this 
- * source tree)
- *========================================================
- *
- *********************************************************
- *                                                       *
- *   File:  exp.c                                        *
- *   Contains: intrinsic rvv 1.0 function exp            *
- *      for float16, accuracy=0.501 ulp                  *
- *      in domain [underflow, overflow]                  *
- *                                                       *
- * Input vector register V with any floating point value *
- * Input AVL number of elements in vector register       *
- *                                                       *
- * Computes the e-base exponent of input vector V        *
- *                                                       *
- * Algorithm:                                            *
- *    1) Argument reduction to a small interval near 0   *
- *    2) Additional reduction using the look-up table    *
- *       of size 2^k (k=3)                               *
- *    3) Polynomial degree: 3                            *
- *    4) Reconstruction of the result                    *
- *                                                       *
- *                                                       *
- *********************************************************
-*/
-
+// Copyright 2025 RVVPL and Lobachevsky State University of Nizhny Novgorod
+// Code adapted from https://github.com/rvvpl/rvvmf
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
 #include <math.h>
@@ -156,7 +126,6 @@ extern uint16_t RVVMF_EXP_LOOK_UP_TABLE_HIGH_F16[8];
 extern uint16_t RVVMF_EXP_LOOK_UP_TABLE_LOW_F16[8];
 extern uint16_t EXP_POL_COEFF_2_F16;  // 0x1p-1f16 
 extern uint16_t EXP_POL_COEFF_3_F16;  // 0x1.55p-3f16 
-
 #endif
 
 

@@ -1,37 +1,8 @@
-/* 
- *========================================================
- * Copyright (c) RVVPL and Lobachevsky State University of 
- * Nizhny Novgorod and its affiliates. All rights reserved.
- * 
- * Copyright 2025 The RVVMF Authors (Elena Panova)
- *
- * Distributed under the BSD 4-Clause License
- * (See file LICENSE in the root directory of this 
- * source tree)
- *========================================================
- *
- *********************************************************
- *                                                       *
- *   File:  exp.c                                        *
- *   Contains: intrinsic rvv 1.0 function exp            *
- *      for float32, accuracy=0.501 ulp                  *
- *      in domain [underflow, overflow]                  *
- *                                                       *
- * Input vector register V with any floating point value *
- * Input AVL number of elements in vector register       *
- *                                                       *
- * Computes the e-base exponent of input vector V        *
- *                                                       *
- * Algorithm:                                            *
- *    1) Argument reduction to a small interval near 0   *
- *    2) Additional reduction using the look-up table    *
- *       of size 2^k (k=4)                               *
- *    3) Polynomial degree: 4                            *
- *    4) Reconstruction of the result                    *
- *                                                       *
- *                                                       *
- *********************************************************
-*/
+// Copyright 2025 RVVPL and Lobachevsky State University of Nizhny Novgorod
+// Code adapted from https://github.com/rvvpl/rvvmf
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
 
 $assert LMUL in [1, 2, 4, 8]
 #include <assert.h>
