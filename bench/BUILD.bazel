@@ -448,6 +448,9 @@ xnnpack_benchmark(
         "f32-softmax.cc",
     ],
     copts = xnnpack_optional_dnnl_copts(),
+    tags = [
+        "nocfi",  # b/431917126
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS + xnnpack_optional_dnnl_deps() + [
         "//:microparams_h",
     ],
