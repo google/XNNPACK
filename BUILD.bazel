@@ -995,9 +995,10 @@ xnnpack_cc_library(
         ":logging",
         ":params",
         "//src/configs:hardware_config",
-        "@KleidiAI//:common",
         "@pthreadpool",
-    ],
+    ] + xnnpack_if_kleidiai_enabled([
+        "@KleidiAI//:common",
+    ]),
 )
 
 ############################# Build configurations #############################
