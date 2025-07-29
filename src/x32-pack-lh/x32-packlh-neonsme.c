@@ -11,7 +11,6 @@
 #include <stdint.h>
 
 #include "src/xnnpack/common.h"
-#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/pack-lh.h"
 
@@ -27,8 +26,6 @@ void xnn_x32_pack_lh_ukernel__neonsme(size_t m, size_t k, size_t mr_packed,
                                       size_t lhs_stride,
                                       void* XNN_RESTRICT lhs_packed) {
 #if XNN_ENABLE_KLEIDIAI
-  const struct xnn_hardware_config* hardware_config =
-      xnn_init_hardware_config();
     if (mr_packed == 1) {
       memcpy(lhs_packed, lhs, sizeof(float) * k);
     } else {
@@ -43,8 +40,6 @@ void xnn_x32_pack_lh_ukernel__neonsme(size_t m, size_t k, size_t mr_packed,
 size_t xnn_x32_pack_lh_size__neonsme(size_t m, size_t k, size_t mr_packed,
                                      size_t kr, size_t sr) {
 #if XNN_ENABLE_KLEIDIAI
-  const struct xnn_hardware_config* hardware_config =
-      xnn_init_hardware_config();
     if (mr_packed == 1) {
       return m * sizeof(float) * k;
     } else {
@@ -60,8 +55,6 @@ size_t xnn_x32_pack_lh_size__neonsme(size_t m, size_t k, size_t mr_packed,
 size_t xnn_x32_pack_lh_offset__neonsme(size_t m, size_t k, size_t mr_packed,
                                        size_t kr, size_t sr) {
 #if XNN_ENABLE_KLEIDIAI
-  const struct xnn_hardware_config* hardware_config =
-      xnn_init_hardware_config();
     if (mr_packed == 1) {
       return m * sizeof(float) * k;
     } else {
