@@ -72,9 +72,7 @@
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_kai_qs8_weights_and_biases,
       xnn_packed_stride_kai_qs8_weights_and_biases,
-      /*mr=*/xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x64c4__neonsme2_get_mr(),
-      /*nr=*/xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x64c4__neonsme2_get_nr(),
-      /*kr=*/4, /*sr=*/1,
+      /*mr=*/xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x64c4__neonsme2_get_mr(), /*nr=*/xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x64c4__neonsme2_get_nr(), /*kr=*/4, /*sr=*/1,
       /*mr_packed=*/xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x64c4__neonsme2_get_mr(),
       /*arch_flags=*/xnn_arch_arm_sme2);
   }
@@ -87,9 +85,7 @@
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_kai_qs8_weights_and_biases,
       xnn_packed_stride_kai_qs8_weights_and_biases,
-      /*mr=*/xnn_qp8_f32_qc8w_gemm_minmax_ukernel_16x64c4__neonsme2_get_mr(),
-      /*nr=*/xnn_qp8_f32_qc8w_gemm_minmax_ukernel_16x64c4__neonsme2_get_nr(),
-      /*kr=*/4, /*sr=*/1,
+      /*mr=*/xnn_qp8_f32_qc8w_gemm_minmax_ukernel_16x64c4__neonsme2_get_mr(), /*nr=*/xnn_qp8_f32_qc8w_gemm_minmax_ukernel_16x64c4__neonsme2_get_nr(), /*kr=*/4, /*sr=*/1,
       /*mr_packed=*/xnn_qp8_f32_qc8w_gemm_minmax_ukernel_16x64c4__neonsme2_get_mr(),
       /*arch_flags=*/xnn_arch_arm_sme2);
   }

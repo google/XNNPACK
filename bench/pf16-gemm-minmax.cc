@@ -28,9 +28,7 @@
       xnn_init_f16_minmax_scalar_params,
       xnn_pack_kai_f16_weights_and_biases,
       xnn_packed_stride_kai_f16_weights_and_biases,
-      /*mr=*/xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme2_get_mr(),
-      /*nr=*/xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme2_get_nr(),
-      /*kr=*/2, /*sr=*/1,
+      /*mr=*/xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme2_get_mr(), /*nr=*/xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme2_get_nr(), /*kr=*/2, /*sr=*/1,
       /*mr_packed=*/xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme2_get_mr(),
       /*arch_flags=*/xnn_arch_arm_sme2);
   }
@@ -43,9 +41,7 @@
       xnn_init_f16_minmax_scalar_params,
       xnn_pack_kai_f16_weights_and_biases,
       xnn_packed_stride_kai_f16_weights_and_biases,
-      /*mr=*/xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2_get_mr(),
-      /*nr=*/xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2_get_nr(),
-      /*kr=*/2, /*sr=*/1,
+      /*mr=*/xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2_get_mr(), /*nr=*/xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2_get_nr(), /*kr=*/2, /*sr=*/1,
       /*mr_packed=*/xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2_get_mr(),
       /*arch_flags=*/xnn_arch_arm_sme2);
   }

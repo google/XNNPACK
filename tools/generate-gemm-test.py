@@ -970,7 +970,6 @@ def main(args):
           isa,
           assembly,
       ) = split_ukernel_name(name)
-      mr_packed = int(ukernel_spec.get("mr-packed", mr_packed))
 
       if k_block < kr * sr:
         print(f"Error: k_block ({k_block}) must be >= kr * sr ({kr} * {sr}) for kernel {name} in {options.spec}")

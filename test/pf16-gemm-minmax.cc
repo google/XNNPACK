@@ -236,9 +236,7 @@ std::vector<GemmTestParams> CreateTests1(
       testing::ValuesIn(CreateTests1(
           /*k_block=*/2,
           /*adj_k_block=*/2,
-          /*mr=*/xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme2_get_mr(),
-          /*nr=*/xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme2_get_nr(),
-          /*kr=*/2, /*sr=*/1,
+          /*mr=*/xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme2_get_mr(), /*nr=*/xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme2_get_nr(), /*kr=*/2, /*sr=*/1,
           /*mr_packed=*/xnn_pf16_gemm_minmax_ukernel_1x32c2__neonsme2_get_mr(),
           /*is_igemm=*/false,
           /*unsigned_inputs=*/false,
@@ -260,9 +258,7 @@ std::vector<GemmTestParams> CreateTests1(
       testing::ValuesIn(CreateTests1(
           /*k_block=*/2,
           /*adj_k_block=*/2,
-          /*mr=*/xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2_get_mr(),
-          /*nr=*/xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2_get_nr(),
-          /*kr=*/2, /*sr=*/1,
+          /*mr=*/xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2_get_mr(), /*nr=*/xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2_get_nr(), /*kr=*/2, /*sr=*/1,
           /*mr_packed=*/xnn_pf16_gemm_minmax_ukernel_32x32c2__neonsme2_get_mr(),
           /*is_igemm=*/false,
           /*unsigned_inputs=*/false,
