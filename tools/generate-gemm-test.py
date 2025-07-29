@@ -67,8 +67,29 @@ def split_ukernel_name(name):
   else:
     mr_packed = mr
   if "sme2" in target_name:
-    mr = name + "_get_mr()"
-    nr = name + "_get_nr()"
+    # SME2 kernels have a non-constant mr, nr that we need to use functions to
+    # learn the value of. However, we cannot call these functions unless SME2
+    # is supported by the hardware.
+    mr = """[]() -> size_t {{
+      const struct xnn_hardware_config* hardware_config =
+            xnn_init_hardware_config();
+      if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {{
+        return {name}_get_mr();
+      }} else {{
+        return 0;
+      }}
+    }}
+""".format(name=name)
+    nr = """[]() -> size_t {{
+      const struct xnn_hardware_config* hardware_config =
+            xnn_init_hardware_config();
+      if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {{
+        return {name}_get_nr();
+      }} else {{
+        return 0;
+      }}
+    }}
+""".format(name=name)
     mr_packed = mr
 
   requantization = common_parts[-3]
@@ -117,9 +138,9 @@ GEMM_CREATE_TESTS_CODE = """\
 // NOLINTNEXTLINE(clang-diagnostic-unused-function)
 std::vector<GemmTestParams> CreateTests(
     size_t k_block, size_t adj_k_block,
-    size_t mr, size_t nr, size_t kr, size_t sr,
+    ConstantOrFunction mr, ConstantOrFunction nr, size_t kr, size_t sr,
     $if PACKED_LHS:
-      size_t mr_packed,
+      ConstantOrFunction mr_packed,
     bool is_igemm,
     bool unsigned_inputs,
     uint8_t planes,
@@ -868,6 +889,23 @@ def main(args):
     if not isinstance(spec_yaml, list):
       raise ValueError("expected a list of micro-kernels in the spec")
 
+    constant_or_function = """\
+namespace {
+
+struct ConstantOrFunction {
+  ConstantOrFunction(size_t x) : fn([x]() { return x; }) {}  //NOLINT
+  ConstantOrFunction(int x) : fn([x]() { return x; }) {}  //NOLINT
+  template <typename Fn>
+  ConstantOrFunction(Fn fn) : fn(std::move(fn)) {}  //NOLINT
+
+  std::function<size_t()> fn;
+
+  operator size_t() const { return fn(); }  //NOLINT
+};
+
+}  // namespace
+"""
+
     tests = """\
 // clang-format off
 // Copyright (c) Facebook, Inc. and its affiliates.
@@ -902,7 +940,9 @@ def main(args):
 #include "src/xnnpack/requantization.h"
 #include "test/gemm-microkernel-tester.h"
 #include "test/next_prime.h"
-""".format(specification=options.spec, generator=sys.argv[0])
+
+{constant_or_function}
+""".format(specification=options.spec, generator=sys.argv[0], constant_or_function=constant_or_function)
 
     benches = """\
 // clang-format off
@@ -915,6 +955,9 @@ def main(args):
 //   Specification: {specification}
 //   Generator: {generator}
 
+#include <cstdint>
+#include <functional>
+
 #include <benchmark/benchmark.h>
 #include "bench/gemm-benchmark.h"
 #include "bench/utils.h"
@@ -925,7 +968,9 @@ def main(args):
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/packw.h"
-""".format(specification=options.spec, generator=sys.argv[0])
+
+{constant_or_function}
+""".format(specification=options.spec, generator=sys.argv[0], constant_or_function=constant_or_function)
 
     test_outputs = collections.defaultdict(str)
     bench_outputs = benches

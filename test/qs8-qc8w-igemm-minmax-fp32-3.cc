@@ -34,10 +34,26 @@
 
 namespace {
 
+struct ConstantOrFunction {
+  ConstantOrFunction(size_t x) : fn([x]() { return x; }) {}  //NOLINT
+  ConstantOrFunction(int x) : fn([x]() { return x; }) {}  //NOLINT
+  template <typename Fn>
+  ConstantOrFunction(Fn fn) : fn(std::move(fn)) {}  //NOLINT
+
+  std::function<size_t()> fn;
+
+  operator size_t() const { return fn(); }  //NOLINT
+};
+
+}  // namespace
+
+
+namespace {
+
 // NOLINTNEXTLINE(clang-diagnostic-unused-function)
 std::vector<GemmTestParams> CreateTests1(
     size_t k_block, size_t adj_k_block,
-    size_t mr, size_t nr, size_t kr, size_t sr,
+    ConstantOrFunction mr, ConstantOrFunction nr, size_t kr, size_t sr,
     bool is_igemm,
     bool unsigned_inputs,
     uint8_t planes,
@@ -283,8 +299,8 @@ std::vector<GemmTestParams> CreateTests1(
 // NOLINTNEXTLINE(clang-diagnostic-unused-function)
 std::vector<GemmTestParams> CreateTests2(
     size_t k_block, size_t adj_k_block,
-    size_t mr, size_t nr, size_t kr, size_t sr,
-    size_t mr_packed,
+    ConstantOrFunction mr, ConstantOrFunction nr, size_t kr, size_t sr,
+    ConstantOrFunction mr_packed,
     bool is_igemm,
     bool unsigned_inputs,
     uint8_t planes,
@@ -476,7 +492,7 @@ std::vector<GemmTestParams> CreateTests2(
   // NOLINTNEXTLINE(clang-diagnostic-unused-function)
   std::vector<GemmTestParams> CreateTests3(
       size_t k_block, size_t adj_k_block,
-      size_t mr, size_t nr, size_t kr, size_t sr,
+      ConstantOrFunction mr, ConstantOrFunction nr, size_t kr, size_t sr,
       bool is_igemm,
       bool unsigned_inputs,
       uint8_t planes,
@@ -1796,8 +1812,35 @@ std::vector<GemmTestParams> CreateTests2(
       testing::ValuesIn(CreateTests2(
           /*k_block=*/4,
           /*adj_k_block=*/4,
-          /*mr=*/xnn_pqs8_qc8w_igemm_minmax_fp32_ukernel_32x32c4__neonsme2_get_mr(), /*nr=*/xnn_pqs8_qc8w_igemm_minmax_fp32_ukernel_32x32c4__neonsme2_get_nr(), /*kr=*/4, /*sr=*/1,
-          /*mr_packed=*/xnn_pqs8_qc8w_igemm_minmax_fp32_ukernel_32x32c4__neonsme2_get_mr(),
+          /*mr=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_pqs8_qc8w_igemm_minmax_fp32_ukernel_32x32c4__neonsme2_get_mr();
+        } else {
+          return 0;
+        }
+      }
+  , /*nr=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_pqs8_qc8w_igemm_minmax_fp32_ukernel_32x32c4__neonsme2_get_nr();
+        } else {
+          return 0;
+        }
+      }
+  , /*kr=*/4, /*sr=*/1,
+          /*mr_packed=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_pqs8_qc8w_igemm_minmax_fp32_ukernel_32x32c4__neonsme2_get_mr();
+        } else {
+          return 0;
+        }
+      }
+  ,
           /*is_igemm=*/true,
           /*unsigned_inputs=*/false,
           /*planes=*/1,
