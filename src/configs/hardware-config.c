@@ -50,6 +50,11 @@
 #include <wasm_simd128.h>
 #endif
 
+#if XNN_ENABLE_RISCV_FP16_VECTOR
+#include <stdio.h>
+#include <string.h>
+#endif
+
 #include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/init-once.h"
 #include "src/xnnpack/log.h"
@@ -221,7 +226,34 @@ static void init_hardware_config(void) {
     set_arch_flag(xnn_arch_riscv_vector, use_riscv_vector);
 
 #if XNN_ENABLE_RISCV_FP16_VECTOR
-    set_arch_flag(xnn_arch_riscv_vector_fp16_arith, true);
+    char cpuinfo_line[512];
+    FILE* f = fopen("/proc/cpuinfo", "re");
+    int flag_isa_fp16 = 0;
+    if(f) {
+      memset(cpuinfo_line, 0, sizeof(cpuinfo_line));
+      while (fgets(cpuinfo_line, sizeof(cpuinfo_line), f)) {
+        if (memcmp(cpuinfo_line, "isa", 3) == 0) {
+          char* isa = strstr(cpuinfo_line, "rv64");
+          if (isa) {
+            size_t extensions_len = 0;
+            char* extensions;
+            extensions = strpbrk(isa, "zxs");
+            if (extensions) {
+              char* ext = strtok(extensions, "_");
+              extensions_len = strlen(extensions);
+              while (ext) {
+                if (!strcmp(ext, "zvfh")) {
+                  flag_isa_fp16 = 1;
+                }
+                ext = strtok(NULL, "_");
+              }
+            }
+          }
+        }
+      }
+      fclose(f);
+    }
+    set_arch_flag(xnn_arch_riscv_vector_fp16_arith, flag_isa_fp16 == 1);
 #else
     /* There is no HWCAP for fp16 so disable by default */
     set_arch_flag(xnn_arch_riscv_vector_fp16_arith, false);
