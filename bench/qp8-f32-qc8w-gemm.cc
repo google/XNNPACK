@@ -8,6 +8,9 @@
 //   Specification: test/qp8-f32-qc8w-gemm-minmax.yaml
 //   Generator: tools/generate-gemm-test.py
 
+#include <cstdint>
+#include <functional>
+
 #include <benchmark/benchmark.h>
 #include "bench/gemm-benchmark.h"
 #include "bench/utils.h"
@@ -18,6 +21,22 @@
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/packw.h"
+
+namespace {
+
+struct ConstantOrFunction {
+  ConstantOrFunction(size_t x) : fn([x]() { return x; }) {}  //NOLINT
+  ConstantOrFunction(int x) : fn([x]() { return x; }) {}  //NOLINT
+  template <typename Fn>
+  ConstantOrFunction(Fn fn) : fn(std::move(fn)) {}  //NOLINT
+
+  std::function<size_t()> fn;
+
+  operator size_t() const { return fn(); }  //NOLINT
+};
+
+}  // namespace
+
 
 
 #if XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM64
@@ -72,8 +91,35 @@
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_kai_qs8_weights_and_biases,
       xnn_packed_stride_kai_qs8_weights_and_biases,
-      /*mr=*/1, /*nr=*/64, /*kr=*/4, /*sr=*/1,
-      /*mr_packed=*/1,
+      /*mr=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x64c4__neonsme2_get_mr();
+        } else {
+          return 0;
+        }
+      }
+  , /*nr=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x64c4__neonsme2_get_nr();
+        } else {
+          return 0;
+        }
+      }
+  , /*kr=*/4, /*sr=*/1,
+      /*mr_packed=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x64c4__neonsme2_get_mr();
+        } else {
+          return 0;
+        }
+      }
+  ,
       /*arch_flags=*/xnn_arch_arm_sme2);
   }
 
@@ -85,8 +131,35 @@
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_kai_qs8_weights_and_biases,
       xnn_packed_stride_kai_qs8_weights_and_biases,
-      /*mr=*/16, /*nr=*/64, /*kr=*/4, /*sr=*/1,
-      /*mr_packed=*/16,
+      /*mr=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_qp8_f32_qc8w_gemm_minmax_ukernel_16x64c4__neonsme2_get_mr();
+        } else {
+          return 0;
+        }
+      }
+  , /*nr=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_qp8_f32_qc8w_gemm_minmax_ukernel_16x64c4__neonsme2_get_nr();
+        } else {
+          return 0;
+        }
+      }
+  , /*kr=*/4, /*sr=*/1,
+      /*mr_packed=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme2) == xnn_arch_arm_sme2) {
+          return xnn_qp8_f32_qc8w_gemm_minmax_ukernel_16x64c4__neonsme2_get_mr();
+        } else {
+          return 0;
+        }
+      }
+  ,
       /*arch_flags=*/xnn_arch_arm_sme2);
   }
 

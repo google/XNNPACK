@@ -699,14 +699,15 @@ void xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w_non_planar_avx512(
       /*register_bytes=*/64, k, b, scale, packed_weights, extra_bytes,
       input_zero_point, params->kernel_zero_point);
 }
+
 // Same as qc4w but unsigned 4 bit output
 // Applies kv ^ 0x88 to convert int4 to uint4
 // Does not multiply bias by 16
-void xnn_pack_qs8_qc4uw_gemm_goi_w(
+static void pack_qs8_qc4uw_gemm_goi_w(
     size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
     const uint8_t* k, const int32_t* b, const float* scale,
     void* packed_weights, size_t extra_bytes,
-    const struct xnn_qs8_qc4w_packing_params* params) {
+    uint32_t izp, uint32_t kernel_zero_point) {
   assert(g != 0);
   assert(nc != 0);
   assert(kc != 0);
@@ -715,12 +716,9 @@ void xnn_pack_qs8_qc4uw_gemm_goi_w(
   assert(sr >= 1 && sr <= 16);
   assert(k != nullptr);
   assert(packed_weights != nullptr);
-  assert(params != nullptr);
-  assert(params->kernel_zero_point == 8 || params->kernel_zero_point == 0);
+  assert(kernel_zero_point == 8 || kernel_zero_point == 0);
 
   const size_t skr = sr * kr;
-  const uint32_t izp = (uint32_t)params->input_zero_point;
-  const uint32_t kernel_zero_point = (uint32_t)params->kernel_zero_point;
   do {
     size_t nr_block_start = 0;
     do {
@@ -794,6 +792,32 @@ void xnn_pack_qs8_qc4uw_gemm_goi_w(
       b += nc;
     }
   } while (--g != 0);
+}
+
+// For qd8_qc4w madd
+void xnn_pack_qs8_qc4uw_gemm_goi_w(
+    size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
+    const uint8_t* k, const int32_t* b, const float* scale,
+    void* packed_weights, size_t extra_bytes,
+    const struct xnn_qs8_qc4w_packing_params* params) {
+  assert(params != nullptr);
+  pack_qs8_qc4uw_gemm_goi_w(
+      g, nc, kc, nr, kr, sr,
+      k, b, scale, packed_weights, extra_bytes,
+      params->input_zero_point, params->kernel_zero_point);
+}
+
+// For qs8_qc4w madd
+void xnn_pack_qs8_to_qu8_qc4uw_gemm_goi_w(
+    size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
+    const uint8_t* k, const int32_t* b, const float* scale,
+    void* packed_weights, size_t extra_bytes,
+    const struct xnn_qs8_qc4w_packing_params* params) {
+  assert(params != nullptr);
+  pack_qs8_qc4uw_gemm_goi_w(
+      g, nc, kc, nr, kr, sr,
+      k, b, scale, packed_weights, extra_bytes,
+      params->input_zero_point + 0x80, params->kernel_zero_point);
 }
 
 void xnn_pack_qs8_qb4w_gemm_goi_w(

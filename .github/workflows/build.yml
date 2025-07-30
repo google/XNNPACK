@@ -607,7 +607,7 @@ jobs:
     runs-on: "arm-ubuntu-arm-22.04-8core"
     timeout-minutes: 60
     env:
-      QEMU_ARGS: -cpu max,sme-default-vector-length=64
+      QEMU_ARGS: -cpu max
     steps:
       - uses: actions/checkout@v4
       - name: Update apt

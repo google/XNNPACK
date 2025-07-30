@@ -995,9 +995,10 @@ xnnpack_cc_library(
         ":logging",
         ":params",
         "//src/configs:hardware_config",
-        "@KleidiAI//:common",
         "@pthreadpool",
-    ],
+    ] + xnnpack_if_kleidiai_enabled([
+        "@KleidiAI//:common",
+    ]),
 )
 
 ############################# Build configurations #############################
@@ -1549,10 +1550,20 @@ alias(
     }),
 )
 
+selects.config_setting_group(
+    name = "arm_sme2_enabled_by_default",
+    match_any = [
+        "//build_config:aarch64",
+    ],
+)
+
 alias(
     name = "arm_sme2_enabled",
-    # Only enable this by default once we're able to test all SME2 kernels continuously.
-    actual = ":xnn_enable_arm_sme2_explicit_true",
+    actual = select({
+        ":xnn_enable_arm_sme2_explicit_true": ":xnn_enable_arm_sme2_explicit_true",
+        ":xnn_enable_arm_sme2_explicit_false": ":xnn_enable_arm_sme2_explicit_true",
+        "//conditions:default": ":arm_sme2_enabled_by_default",
+    }),
 )
 
 selects.config_setting_group(
@@ -1888,6 +1899,7 @@ bzl_library(
     name = "build_defs_bzl",
     srcs = ["build_defs.bzl"],
     visibility = ["//visibility:private"],
+    deps = ["@rules_cc//cc:core_rules"],
 )
 
 bzl_library(

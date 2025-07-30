@@ -8,6 +8,9 @@
 //   Specification: test/qd8-f32-qb4w-gemm-minmax.yaml
 //   Generator: tools/generate-gemm-test.py
 
+#include <cstdint>
+#include <functional>
+
 #include <benchmark/benchmark.h>
 #include "bench/gemm-benchmark.h"
 #include "bench/utils.h"
@@ -18,6 +21,22 @@
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/packw.h"
+
+namespace {
+
+struct ConstantOrFunction {
+  ConstantOrFunction(size_t x) : fn([x]() { return x; }) {}  //NOLINT
+  ConstantOrFunction(int x) : fn([x]() { return x; }) {}  //NOLINT
+  template <typename Fn>
+  ConstantOrFunction(Fn fn) : fn(std::move(fn)) {}  //NOLINT
+
+  std::function<size_t()> fn;
+
+  operator size_t() const { return fn(); }  //NOLINT
+};
+
+}  // namespace
+
 
 
 #if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64

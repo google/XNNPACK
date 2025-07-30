@@ -408,6 +408,7 @@ tools/xngen src/f32-gemm/avx-broadcast.c.in -D MR=7 -D NR=8  -D AVX=1 -D FMA=3 -
 tools/xngen src/f32-gemm/avx-broadcast.c.in -D MR=8 -D NR=8  -D AVX=1 -D FMA=3 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-8x8-minmax-fma3-broadcast.c &
 tools/xngen src/f32-gemm/avx-broadcast.c.in -D MR=10 -D NR=8 -D AVX=1 -D FMA=3 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-10x8-minmax-fma3-broadcast.c &
 tools/xngen src/f32-gemm/avx-broadcast.c.in -D MR=1 -D NR=16 -D AVX=1 -D FMA=3 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x16-minmax-fma3-broadcast.c &
+tools/xngen src/f32-gemm/avx-broadcast.c.in -D MR=2 -D NR=16 -D AVX=1 -D FMA=3 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-2x16-minmax-fma3-broadcast.c &
 tools/xngen src/f32-gemm/avx-broadcast.c.in -D MR=3 -D NR=16 -D AVX=1 -D FMA=3 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-3x16-minmax-fma3-broadcast.c &
 tools/xngen src/f32-gemm/avx-broadcast.c.in -D MR=4 -D NR=16 -D AVX=1 -D FMA=3 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x16-minmax-fma3-broadcast.c &
 tools/xngen src/f32-gemm/avx-broadcast.c.in -D MR=5 -D NR=16 -D AVX=1 -D FMA=3 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-5x16-minmax-fma3-broadcast.c &

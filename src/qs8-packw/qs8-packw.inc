@@ -16,9 +16,11 @@ XNN_QS8_UKERNEL(xnn_arch_none, xnn_qs8_packw_gemm_goi_ukernel_x96c4__scalar, 96,
 XNN_QS8_UKERNEL(xnn_arch_none, xnn_qs8_packw_gemm_goi_ukernel_x128c4__scalar, 128, 4, 1, 4, 1, 0)
 #endif
 
+XNN_QS8_UKERNEL(xnn_arch_none, xnn_qs8_packw_gemm_goi_ukernel_x4c8__scalar, 4, 8, 1, 8, 1, 0)
 XNN_QS8_UKERNEL(xnn_arch_none, xnn_qs8_packw_gemm_goi_ukernel_x8c8__scalar, 8, 8, 1, 8, 1, 0)
 XNN_QS8_UKERNEL(xnn_arch_none, xnn_qs8_packw_gemm_goi_ukernel_x16c8__scalar, 16, 8, 1, 8, 1, 0)
 
+XNN_QS8_UKERNEL(xnn_arch_none, xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x4c8__scalar, 4, 8, 1, 8, 1, 128)
 XNN_QS8_UKERNEL(xnn_arch_none, xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x8c8__scalar, 8, 8, 1, 8, 1, 128)
 XNN_QS8_UKERNEL(xnn_arch_none, xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar, 16, 8, 1, 8, 1, 128)
 
@@ -32,9 +34,11 @@ XNN_QS8_GIO_UKERNEL(xnn_arch_none, xnn_qs8_packw_gemm_gio_ukernel_x96c4__scalar,
 XNN_QS8_GIO_UKERNEL(xnn_arch_none, xnn_qs8_packw_gemm_gio_ukernel_x128c4__scalar, 128, 4, 1, 4, 1, 0)
 #endif
 
+XNN_QS8_GIO_UKERNEL(xnn_arch_none, xnn_qs8_packw_gemm_gio_ukernel_x4c8__scalar, 4, 8, 1, 8, 1, 0)
 XNN_QS8_GIO_UKERNEL(xnn_arch_none, xnn_qs8_packw_gemm_gio_ukernel_x8c8__scalar, 8, 8, 1, 8, 1, 0)
 XNN_QS8_GIO_UKERNEL(xnn_arch_none, xnn_qs8_packw_gemm_gio_ukernel_x16c8__scalar, 16, 8, 1, 8, 1, 0)
 
+XNN_QS8_GIO_UKERNEL(xnn_arch_none, xnn_qs8_to_qu8_packw_gemm_gio_ukernel_x4c8__scalar, 4, 8, 1, 8, 1, 128)
 XNN_QS8_GIO_UKERNEL(xnn_arch_none, xnn_qs8_to_qu8_packw_gemm_gio_ukernel_x8c8__scalar, 8, 8, 1, 8, 1, 128)
 XNN_QS8_GIO_UKERNEL(xnn_arch_none, xnn_qs8_to_qu8_packw_gemm_gio_ukernel_x16c8__scalar, 16, 8, 1, 8, 1, 128)
 

@@ -620,14 +620,6 @@ struct CubeRoot : public UnaryOpInfo {
   float Tolerance(float y_ref, xnn_datatype datatype) const override {
     return TolRelative(y_ref, 2.5f * xnnpack::epsilon(datatype));
   }
-
-  Interval Domain(xnn_datatype datatype) const override {
-    if (datatype == xnn_datatype_fp16 || datatype == xnn_datatype_bf16) {
-      return {0.001f, 10.0f};
-    } else {
-      return Interval::Positive(datatype);
-    }
-  }
 };
 
 struct Cosine : public UnaryOpInfo {
