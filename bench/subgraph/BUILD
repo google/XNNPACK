@@ -44,7 +44,7 @@ xnnpack_benchmark(
     deps = [
         ":models",
         "//:allocator",
-        "//:subgraph",
+        "//:subgraph_h",
         "//:xnnpack_h",
         "//bench:bench_utils",
         "@pthreadpool",

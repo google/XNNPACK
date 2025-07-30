@@ -22,10 +22,9 @@ SUBGRAPH_TEST_DEPS = [
     "//:math",
     "//:node_type",
     "//:operator_utils",
-    "//:operators",
     "//:reference_ukernels",
     "//:requantization",
-    "//:subgraph",
+    "//:subgraph_h",
     "//:XNNPACK",
     "//src/configs:hardware_config",
     "//test:replicable_random_device",
@@ -144,7 +143,11 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "workspace_test",
     srcs = ["workspace.cc"],
-    deps = SUBGRAPH_TEST_DEPS + ["//:allocation_type"],
+    deps = SUBGRAPH_TEST_DEPS + [
+        "//:allocation_type",
+        "//:operators",
+        "//:subgraph",
+    ],
 )
 
 xnnpack_unit_test(

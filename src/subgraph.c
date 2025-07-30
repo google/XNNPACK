@@ -2714,6 +2714,19 @@ enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
   return xnn_status_success;
 }
 
+uint32_t xnn_subgraph_get_value_flags(xnn_subgraph_t subgraph,
+                                      uint32_t value_id) {
+  return subgraph->values[value_id].flags;
+}
+
+size_t xnn_subgraph_get_value_size(xnn_subgraph_t subgraph, uint32_t value_id) {
+  return xnn_tensor_get_size(&subgraph->values[value_id]);
+}
+
+uint32_t xnn_subgraph_get_num_external_values(xnn_subgraph_t subgraph) {
+  return subgraph->external_value_ids;
+}
+
 enum xnn_status xnn_delete_subgraph(xnn_subgraph_t subgraph) {
   if (subgraph != NULL) {
     if (subgraph->nodes != NULL) {

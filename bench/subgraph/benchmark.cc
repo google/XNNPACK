@@ -50,12 +50,14 @@ struct ModelRuntime {
       return false;
     }
     for (uint32_t i = 0; i < model->num_values; ++i) {
-      if ((model->values[i].flags & (XNN_VALUE_FLAG_EXTERNAL_INPUT |
-                                     XNN_VALUE_FLAG_EXTERNAL_OUTPUT)) == 0) {
+      uint32_t flags = xnn_subgraph_get_value_flags(model.get(), i);
+      if ((flags & (XNN_VALUE_FLAG_EXTERNAL_INPUT |
+                    XNN_VALUE_FLAG_EXTERNAL_OUTPUT)) == 0) {
         continue;
       }
       // Make a buffer for this external value.
-      size_t size = xnn_tensor_get_size(&model->values[i]) + XNN_EXTRA_BYTES;
+      size_t size =
+          xnn_subgraph_get_value_size(model.get(), i) + XNN_EXTRA_BYTES;
       external_values.push_back(
           xnn_external_value{i, xnn_allocate_zero_simd_memory(size)});
     }
