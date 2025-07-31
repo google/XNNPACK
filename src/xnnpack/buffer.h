@@ -296,6 +296,7 @@ class Buffer {
 #endif
     }
 #endif
+    assert(reinterpret_cast<std::uintptr_t>(memory) % alignment == 0);
     return reinterpret_cast<T*>(memory);
   }
 
