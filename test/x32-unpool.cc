@@ -7,7 +7,8 @@
 
 #include <gtest/gtest.h>
 #include "src/xnnpack/common.h"
-#include "src/xnnpack/isa-checks.h"
+#include "src/xnnpack/hardware-config.h"  // IWYU pragma: keep
+#include "src/xnnpack/isa-checks.h"  // IWYU pragma: keep
 #include "src/xnnpack/unpool.h"
 #include "test/unpool-microkernel-tester.h"
 

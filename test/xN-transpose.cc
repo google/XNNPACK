@@ -3,7 +3,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
@@ -11,15 +10,12 @@
 #include <functional>
 #include <numeric>
 #include <utility>
-#include <vector>
 
 #include <gtest/gtest.h>
-#include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
-#include "src/xnnpack/common.h"
 #include "src/xnnpack/isa-checks.h"
 #include "src/xnnpack/microfnptr.h"
-#include "src/xnnpack/transpose.h"
+#include "src/xnnpack/transpose.h"  // IWYU pragma: keep
 
 using transpose_ukernel =
     std::function<void(const void* input, void* output, size_t input_row_stride,

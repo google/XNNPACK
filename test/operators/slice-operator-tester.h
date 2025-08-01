@@ -21,7 +21,6 @@
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
-#include "src/xnnpack/math.h"
 
 class SliceOperatorTester {
  public:
