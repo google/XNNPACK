@@ -30,6 +30,10 @@
 #if XNN_ENABLE_CPUINFO
   #include <cpuinfo.h>
 #endif  // XNN_ENABLE_CPUINFO
+#if XNN_ARCH_HEXAGON
+// TODO - use CPUINFO
+#include <qurt.h>
+#endif
 
 #if XNN_ARCH_RISCV
 #include <inttypes.h>
@@ -211,7 +215,29 @@ static void init_hardware_config(void) {
 #endif  // !XNN_ARCH_X86 && !XNN_ARCH_X86_64
 
 #if XNN_ARCH_HEXAGON
-  set_arch_flag(xnn_arch_hvx, XNN_ENABLE_HVX);
+  qurt_arch_version_t vers = {0};
+  int ret = 0;
+  int version = 0;
+
+  ret = qurt_sysenv_get_arch_version(&vers);
+  if (QURT_EOK == ret) {
+    // Lower 8 bits represents the version number in hex form
+    if ((vers.arch_version & 0xff) == 0x73) {
+      version = 73;
+    } else if ((vers.arch_version & 0xff) == 0x75) {
+      version = 75;
+    } else if ((vers.arch_version & 0xff) == 0x79) {
+      version = 79;
+    }
+    // TODO: use xnn_log_info
+    printf("HEXAGON UARCH VERSION %d\n", version);
+    printf("HEXAGON sizeof(max_align_t) %zd\n", sizeof(max_align_t));
+
+    // TODO(b/435522481): Support v69
+    if (version >= 73) {
+      set_arch_flag(xnn_arch_hvx, XNN_ENABLE_HVX);
+    }
+  }
 #endif  // XNN_ARCH_HEXAGON
 
   #if XNN_ARCH_RISCV
