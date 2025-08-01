@@ -765,7 +765,8 @@ typedef void (*xnn_f16_f32acc_rdsum_ukernel_fn)(
     const struct xnn_f16_f32acc_scale_params* params);
 
 typedef void (*xnn_f32_rdsum_ukernel_fn)(
-    size_t rows, size_t channels, const float* input, size_t input_stride,
+    size_t channels, size_t k1, size_t k2, size_t k3, const float* input,
+    size_t input_stride1, size_t input_stride2, size_t input_stride3,
     const float* zero, float* output,
     const struct xnn_f32_scale_params* params);
 
@@ -804,6 +805,13 @@ typedef void (*xnn_qu8_rsum_ukernel_fn)(
 
 typedef void (*xnn_reduce_discontiguous_ukernel_fn)(
     size_t rows, size_t channels, const void* input, size_t input_stride,
+    const void* zero, void* output, const void* params);
+
+// TODO(b/405244706): remove once all the datatypes and reductions are
+// supported.
+typedef void (*xnn_reduce_discontiguous_ukernel_fn2)(
+    size_t channels, size_t k1, size_t k2, size_t k3, const void* input,
+    size_t input_stride1, size_t input_stride2, size_t input_stride3,
     const void* zero, void* output, const void* params);
 
 typedef void (*xnn_f32_rdminmax_ukernel_fn)(size_t rows, size_t channels,

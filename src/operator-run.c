@@ -1813,27 +1813,30 @@ void xnn_compute_discontiguous_reduce(struct reduce_context* restrict context,
         context->accumulation_element_size, context->identity_value);
   }
 
-  // Input dimension 0 is reduced.
-  for (size_t i = 0; i < input_shape0; ++i) {
-    const void* input = (const void*)((uintptr_t)context->input + input_offset);
-    // Input dimension 2 is reduced.
-    for (size_t j = 0; j < input_shape2; ++j) {
-      const void* input_row = input;
-      // The microkernel reduces input dimension 4 and iterates over
-      // output_block_size elements of dimension 5.
-      context->ukernel.discontiguous_reduce(
-          context->channels, output2_block_size, input_row, input_stride[4],
-          context->zero, output, &context->params);
-      // input_stride[4] is the number of bytes of input which have been
-      // processed by the microkernel call.
-      input_row = (const void*)((uintptr_t)input_row + input_stride[4]);
-      // Reset the output pointer.
-      output = (void*)((uintptr_t)output_ptr + workspace_offset);
-      // Iterating over input_shape[2].
-      input = (const void*)((uintptr_t)input + input_stride[2]);
+  if (context->is_old_reduce) {
+    // Input dimension 0 is reduced.
+    for (size_t i = 0; i < input_shape0; ++i) {
+      // Input dimension 2 is reduced.
+      for (size_t j = 0; j < input_shape2; ++j) {
+        // The microkernel reduces input dimension 4 and iterates over
+        // output_block_size elements of dimension 5.
+        context->ukernel.discontiguous_reduce(
+            context->channels, output2_block_size,
+            (const void*)((uintptr_t)context->input + input_offset +
+                          i * input_stride[0] + j * input_stride[2]),
+            input_stride[4], context->zero,
+            (void*)((uintptr_t)output_ptr + workspace_offset),
+            &context->params);
+      }
     }
-    // Iterating over input_shape[0].
-    input_offset += input_stride[0];
+  } else {
+    // The microkernel reduces input dimension 0, 2 & 4 and iterates over
+    // output_block_size elements of dimension 5.
+    context->ukernel.discontiguous_reduce2(
+        output2_block_size, context->channels, input_shape2, input_shape0,
+        (const void*)((uintptr_t)context->input + input_offset),
+        input_stride[4], input_stride[2], input_stride[0], context->zero,
+        output, &context->params);
   }
   // Convert to output datatype if accumulation type != output type.
   if (context->workspace) {
