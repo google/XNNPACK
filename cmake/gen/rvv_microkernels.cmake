@@ -87,6 +87,10 @@ SET(PROD_RVV_MICROKERNEL_SRCS
   src/qu8-dwconv/gen/qu8-dwconv-9p8vc-minmax-fp32-rvv.c
   src/qu8-dwconv/gen/qu8-dwconv-25p8vc-minmax-fp32-rvv.c
   src/qu8-f32-vcvt/gen/qu8-f32-vcvt-rvv-u2v.c
+  src/qu8-gemm/gen/qu8-gemm-1x4v-minmax-fp32-rvv.c
+  src/qu8-gemm/gen/qu8-gemm-4x4v-minmax-fp32-rvv.c
+  src/qu8-igemm/gen/qu8-igemm-1x4v-minmax-fp32-rvv.c
+  src/qu8-igemm/gen/qu8-igemm-4x4v-minmax-fp32-rvv.c
   src/qu8-rdsum/gen/qu8-rdsum-7p7x-rvv-u2v.c
   src/qu8-rsum/gen/qu8-rsum-rvv-u2v.c
   src/qu8-vadd/gen/qu8-vadd-minmax-rvv-u2v.c
@@ -242,6 +246,8 @@ SET(NON_PROD_RVV_MICROKERNEL_SRCS
   src/qs8-vmul/gen/qs8-vmul-minmax-f32-rvv-u1v.c
   src/qs8-vmulc/gen/qs8-vmulc-minmax-f32-rvv-u1v.c
   src/qu8-f32-vcvt/gen/qu8-f32-vcvt-rvv-u1v.c
+  src/qu8-gemm/gen/qu8-gemm-7x4v-minmax-fp32-rvv.c
+  src/qu8-igemm/gen/qu8-igemm-7x4v-minmax-fp32-rvv.c
   src/qu8-rdsum/gen/qu8-rdsum-7p7x-rvv-u1v.c
   src/qu8-rsum/gen/qu8-rsum-rvv-u1v.c
   src/qu8-vadd/gen/qu8-vadd-minmax-rvv-u1v.c
