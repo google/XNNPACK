@@ -216,28 +216,26 @@ static void init_hardware_config(void) {
 
 #if XNN_ARCH_HEXAGON
   qurt_arch_version_t vers = {0};
-  int ret = 0;
-  int version = 0;
-
-  ret = qurt_sysenv_get_arch_version(&vers);
-  if (QURT_EOK == ret) {
+  unsigned int arch_version = 0;
+  if (qurt_sysenv_get_arch_version(&vers) == QURT_EOK) {
     // Lower 8 bits represents the version number in hex form
-    if ((vers.arch_version & 0xff) == 0x73) {
-      version = 73;
-    } else if ((vers.arch_version & 0xff) == 0x75) {
-      version = 75;
-    } else if ((vers.arch_version & 0xff) == 0x79) {
-      version = 79;
-    }
-    // TODO: use xnn_log_info
-    printf("HEXAGON UARCH VERSION %d\n", version);
-    printf("HEXAGON sizeof(max_align_t) %zd\n", sizeof(max_align_t));
-
-    // TODO(b/435522481): Support v69
-    if (version >= 73) {
-      set_arch_flag(xnn_arch_hvx, XNN_ENABLE_HVX);
-    }
+    arch_version = vers.arch_version & 0xff;
   }
+
+  // TODO: use xnn_log_info
+  printf("HEXAGON UARCH VERSION %x\n", arch_version);
+
+  // TODO(b/435522481): Support v69.
+  if (arch_version >= 0x73) {
+    set_arch_flag(xnn_arch_hvx, XNN_ENABLE_HVX);
+  }
+
+  unsigned int max_hthreads = 1;
+  qurt_sysenv_max_hthreads_t hardware_threads = {0};
+  if (qurt_sysenv_get_max_hw_threads(&hardware_threads) == QURT_EOK) {
+    max_hthreads = hardware_threads.max_hthreads;
+  }
+  printf("HEXAGON HTHREADS %d\n", max_hthreads);
 #endif  // XNN_ARCH_HEXAGON
 
   #if XNN_ARCH_RISCV
