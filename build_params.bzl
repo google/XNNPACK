@@ -398,6 +398,9 @@ XNNPACK_PARAMS_FOR_ARCH = {
     "neonsme": _create_params(
         cond = "//:arm_sme_enabled",
         copts = ["-march=armv8.2-a+sve+sve2"],
+        extra_deps = xnnpack_if_kleidiai_enabled([
+            "@KleidiAI//kai/ukernels/matmul:matmul",
+        ]),
     ),
     "neonsme2": _create_params(
         cond = "//:arm_sme2_enabled",
