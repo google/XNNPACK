@@ -10,6 +10,7 @@
 
 #include <assert.h>
 #include <math.h>  // for lrintf
+#include <stdio.h>  // for printf
 
 #include <hexagon_types.h>
 #include <hexagon_protos.h>
@@ -72,29 +73,39 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x32c4__hvx(
   assert(kc != 0);
   assert(kc % sizeof(int8_t) == 0);
   assert(a != NULL);
+  assert(((uintptr_t) (a) % sizeof(int32_t)) == 0);
   assert(w != NULL);
   assert(c != NULL);
 
   kc = round_up_po2(kc, 4 * sizeof(int8_t));
   const int8_t* a0 = a;
   int8_t* c0 = c;
+  assert(((uintptr_t) (a0) & 3) == 0);
+
+  {
+    static int warning_unaligned = 0;
+    if ((a_stride & (sizeof(int32_t) - 1)) == 0 && warning_unaligned == 0) {
+      printf("HEXAGON GEMM a_stride unaligned.");
+      warning_unaligned = 1;
+    }
+  }
 
   const HVX_Vector voutput_zero_point = Q6_Vh_vsplat_R(params->fp32_scalar.output_zero_point);
   const HVX_Vector voutput_min = Q6_Vb_vsplat_R(params->fp32_scalar.output_min);
   const HVX_Vector voutput_max = Q6_Vb_vsplat_R(params->fp32_scalar.output_max);
-
   do {
     HVX_Vector vacc0x0 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
 
     size_t k = kc;
-    for (; k >= 4 * sizeof(int8_t); k -= 4 * sizeof(int8_t)) {
-      const HVX_Vector va0x0123 = Q6_V_vsplat_R(unaligned_load_s32(a0)); a0 += 4;
+    {
+      for (; k >= 4 * sizeof(int8_t); k -= 4 * sizeof(int8_t)) {
+        const HVX_Vector va0x0123 = Q6_V_vsplat_R(*((const int32_t*)a0)); a0 += 4;
 
-      const HVX_Vector vb0x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+        const HVX_Vector vb0x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
 
-      vacc0x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x0, va0x0123, vb0x0123);
+        vacc0x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x0, va0x0123, vb0x0123);
+      }
     }
-
     const HVX_Vector vscale0 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
     vacc0x0 = rescale_fp32(vacc0x0, vscale0);
 
