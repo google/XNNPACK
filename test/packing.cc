@@ -5,7 +5,6 @@
 
 // clang-format off
 
-#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <numeric>
@@ -15,8 +14,8 @@
 #include <gtest/gtest.h>
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/math.h"
-#include "src/xnnpack/microkernel-utils.h"
 #include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/pack.h"
 
 // QD8-F32-QC4W GEMM packing tests.

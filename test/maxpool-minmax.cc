@@ -7,15 +7,15 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <algorithm>
-#include <limits>
+#include <cstddef>
+#include <cstdint>
 #include <string>
+#include <vector>
 
 #include <gtest/gtest.h>
-#include "src/xnnpack/common.h"
 #include "src/xnnpack/isa-checks.h"
-#include "src/xnnpack/math.h"
-#include "src/xnnpack/maxpool.h"
-#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/maxpool.h"  // IWYU pragma: keep
+#include "src/xnnpack/microparams-init.h"  // IWYU pragma: keep
 #include "test/maxpool-microkernel-tester.h"
 #include "test/next_prime.h"
 
