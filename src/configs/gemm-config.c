@@ -334,7 +334,7 @@ static void init_bf16_f32_gemm_config(void) {
   assert(hardware_config != NULL);
   (void) hardware_config;  // May be unused.
   if (XNN_ENABLE_AVX512BF16 && (hardware_config->arch_flags & xnn_arch_x86_avx512bf16)) {
-    #if XNN_ENABLE_AVX512BF16
+    #if XNN_ENABLE_AVX512BF16 && XNN_ENABLE_ASSEMBLY
       bf16_f32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_bf16_f32_gemm_minmax_ukernel_1x32c2__asm_amd64_avx512bf16_broadcast);
       bf16_f32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(11)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_bf16_f32_gemm_minmax_ukernel_11x32c2__asm_amd64_avx512bf16_broadcast);
       bf16_f32_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
