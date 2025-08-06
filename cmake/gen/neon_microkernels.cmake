@@ -40,7 +40,7 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-neon-u32.c
   src/f32-rdminmax/gen/f32-rdmax-2p2x-neon-c32.c
   src/f32-rdminmax/gen/f32-rdmin-2p2x-neon-c32.c
-  src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-neon-c16.c
+  src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-neon-u16.c
   src/f32-rminmax/gen/f32-rmax-neon-u16-acc4.c
   src/f32-rminmax/gen/f32-rmin-neon-u16-acc4.c
   src/f32-rminmax/gen/f32-rminmax-neon-u16-acc4.c
@@ -108,7 +108,7 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c2s4-minmax-fp32-neon-mlal.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x8c2s4-minmax-fp32-neon-mlal.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x8c2s4-minmax-fp32-neon-mlal.c
-  src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-neon-c32.c
+  src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-neon-u32.c
   src/qs8-rsum/gen/qs8-rsum-neon-u32-acc2.c
   src/qs8-vadd/gen/qs8-vadd-minmax-neon-ld64-u16.c
   src/qs8-vadd/gen/qs8-vadd-minmax-neon-ld64-u32.c
@@ -330,8 +330,8 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-p5-u8-acc2.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-p5-u16-acc2.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-p5-u16-acc4.c
-  src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-neon-c32.c
-  src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-neon-c64.c
+  src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-neon-u32.c
+  src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-neon-u64.c
   src/f32-rminmax/gen/f32-rmax-neon-u4.c
   src/f32-rminmax/gen/f32-rmax-neon-u8-acc2.c
   src/f32-rminmax/gen/f32-rmax-neon-u12-acc3.c
@@ -580,8 +580,8 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-6x8-minmax-fp32-neon-mlal-lane.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-6x16-minmax-fp32-neon-mlal-lane-prfm.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-6x16-minmax-fp32-neon-mlal-lane.c
-  src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-neon-c16.c
-  src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-neon-c64.c
+  src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-neon-u16.c
+  src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-neon-u64.c
   src/qs8-rsum/gen/qs8-rsum-neon-u16.c
   src/qs8-rsum/gen/qs8-rsum-neon-u64-acc2.c
   src/qs8-rsum/gen/qs8-rsum-neon-u64-acc4.c

@@ -17,7 +17,7 @@
 #include "src/xnnpack/reduce.h"
 
 
-void xnn_qu8_rdsum_ukernel_7p7x__scalar_c4(
+void xnn_qu8_rdsum_ukernel_7p7x__scalar_u4(
     size_t rows,
     size_t channels,
     const uint8_t* input,

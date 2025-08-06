@@ -11,7 +11,7 @@
 
 SET(PROD_AVX512SKX_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-avx512skx-u16.c
-  src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-avx512skx-c64.c
+  src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-avx512skx-u64.c
   src/f16-f32acc-rsum/gen/f16-f32acc-rsum-avx512skx-u32-acc2.c
   src/f16-rminmax/gen/f16-rmax-avx512skx-u64-acc4.c
   src/f16-rminmax/gen/f16-rmin-avx512skx-u64-acc4.c
@@ -39,7 +39,7 @@ SET(PROD_AVX512SKX_MICROKERNEL_SRCS
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-7x16c8-minmax-fp32-avx512skx-prfm.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x16c8-minmax-fp32-avx512skx-prfm.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-7x16c8-minmax-fp32-avx512skx-prfm.c
-  src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-avx512skx-c64.c
+  src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-avx512skx-u64.c
   src/qs8-rsum/gen/qs8-rsum-avx512skx-u128-acc2.c
   src/qs8-vadd/gen/qs8-vadd-minmax-avx512skx-mul32-ld128-u16.c
   src/qs8-vaddc/gen/qs8-vaddc-minmax-avx512skx-mul32-ld128-u16.c
@@ -58,9 +58,9 @@ SET(PROD_AVX512SKX_MICROKERNEL_SRCS
 
 SET(NON_PROD_AVX512SKX_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-avx512skx-u32.c
-  src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-avx512skx-c16.c
-  src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-avx512skx-c32.c
-  src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-avx512skx-c128.c
+  src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-avx512skx-u16.c
+  src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-avx512skx-u32.c
+  src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-avx512skx-u128.c
   src/f16-f32acc-rsum/gen/f16-f32acc-rsum-avx512skx-u16.c
   src/f16-f32acc-rsum/gen/f16-f32acc-rsum-avx512skx-u48-acc3.c
   src/f16-f32acc-rsum/gen/f16-f32acc-rsum-avx512skx-u64-acc2.c
@@ -179,7 +179,7 @@ SET(NON_PROD_AVX512SKX_MICROKERNEL_SRCS
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-7x16c8-minmax-fp32-avx512skx.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-8x16c8-minmax-fp32-avx512skx-prfm.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-8x16c8-minmax-fp32-avx512skx.c
-  src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-avx512skx-c128.c
+  src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-avx512skx-u128.c
   src/qs8-rsum/gen/qs8-rsum-avx512skx-u64.c
   src/qs8-rsum/gen/qs8-rsum-avx512skx-u256-acc2.c
   src/qs8-rsum/gen/qs8-rsum-avx512skx-u256-acc4.c

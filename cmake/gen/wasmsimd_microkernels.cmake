@@ -93,7 +93,7 @@ SET(PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-wasmsimd-rr2-p5-u16-acc2.c
   src/f32-rdminmax/gen/f32-rdmax-2p2x-wasmsimd-c32.c
   src/f32-rdminmax/gen/f32-rdmin-2p2x-wasmsimd-c32.c
-  src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-wasmsimd-c16.c
+  src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-wasmsimd-u16.c
   src/f32-rminmax/gen/f32-rmax-wasmsimd-pminmax-u16-acc4.c
   src/f32-rminmax/gen/f32-rmin-wasmsimd-minmax-u16-acc4.c
   src/f32-rminmax/gen/f32-rminmax-wasmsimd-minmax-u16-acc4.c
@@ -171,7 +171,7 @@ SET(PROD_WASMSIMD_MICROKERNEL_SRCS
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x16c2s2-minmax-fp32-wasmsimd-dot16x2.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4c2s4-minmax-fp32-wasmsimd-dot16x2-ld128.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x16c2s2-minmax-fp32-wasmsimd-dot16x2.c
-  src/qs8-rdsum/gen/qs8-rdsum-7p7x-wasmsimd-c32.c
+  src/qs8-rdsum/gen/qs8-rdsum-7p7x-wasmsimd-u32.c
   src/qs8-rsum/gen/qs8-rsum-wasmsimd-u32-acc4.c
   src/qs8-vadd/gen/qs8-vadd-minmax-wasmsimd-u32.c
   src/qs8-vaddc/gen/qs8-vaddc-minmax-wasmsimd-u32.c
@@ -187,7 +187,7 @@ SET(PROD_WASMSIMD_MICROKERNEL_SRCS
   src/qu8-gemm/gen/qu8-gemm-4x4c2s4-minmax-fp32-wasmsimd-dot16x2-ld128.c
   src/qu8-igemm/gen/qu8-igemm-1x4c2s4-minmax-fp32-wasmsimd-dot16x2-ld128.c
   src/qu8-igemm/gen/qu8-igemm-4x4c2s4-minmax-fp32-wasmsimd-dot16x2-ld128.c
-  src/qu8-rdsum/gen/qu8-rdsum-7p7x-wasmsimd-c32.c
+  src/qu8-rdsum/gen/qu8-rdsum-7p7x-wasmsimd-u32.c
   src/qu8-rsum/gen/qu8-rsum-wasmsimd-u32-acc4.c
   src/qu8-vadd/gen/qu8-vadd-minmax-wasmsimd-u32.c
   src/qu8-vaddc/gen/qu8-vaddc-minmax-wasmsimd-u32.c
@@ -582,8 +582,8 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-wasmsimd-rr2-p5-u4.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-wasmsimd-rr2-p5-u8-acc2.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-wasmsimd-rr2-p5-u16-acc4.c
-  src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-wasmsimd-c32.c
-  src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-wasmsimd-c64.c
+  src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-wasmsimd-u32.c
+  src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-wasmsimd-u64.c
   src/f32-rminmax/gen/f32-rmax-wasmsimd-minmax-u4.c
   src/f32-rminmax/gen/f32-rmax-wasmsimd-minmax-u8-acc2.c
   src/f32-rminmax/gen/f32-rmax-wasmsimd-minmax-u12-acc3.c
@@ -840,8 +840,8 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4c8-minmax-fp32-wasmsimd-dot16x2-ld64.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4c8-minmax-fp32-wasmsimd-dot16x2-ld128.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x16c2-minmax-fp32-wasmsimd-dot16x2.c
-  src/qs8-rdsum/gen/qs8-rdsum-7p7x-wasmsimd-c16.c
-  src/qs8-rdsum/gen/qs8-rdsum-7p7x-wasmsimd-c64.c
+  src/qs8-rdsum/gen/qs8-rdsum-7p7x-wasmsimd-u16.c
+  src/qs8-rdsum/gen/qs8-rdsum-7p7x-wasmsimd-u64.c
   src/qs8-rsum/gen/qs8-rsum-wasmsimd-u8.c
   src/qs8-rsum/gen/qs8-rsum-wasmsimd-u16-acc2.c
   src/qs8-rsum/gen/qs8-rsum-wasmsimd-u32-acc2.c
@@ -907,8 +907,8 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/qu8-igemm/gen/qu8-igemm-4x4c2s4-minmax-fp32-wasmsimd-dot16x2-ld64.c
   src/qu8-igemm/gen/qu8-igemm-4x4c8-minmax-fp32-wasmsimd-dot16x2-ld64.c
   src/qu8-igemm/gen/qu8-igemm-4x4c8-minmax-fp32-wasmsimd-dot16x2-ld128.c
-  src/qu8-rdsum/gen/qu8-rdsum-7p7x-wasmsimd-c16.c
-  src/qu8-rdsum/gen/qu8-rdsum-7p7x-wasmsimd-c64.c
+  src/qu8-rdsum/gen/qu8-rdsum-7p7x-wasmsimd-u16.c
+  src/qu8-rdsum/gen/qu8-rdsum-7p7x-wasmsimd-u64.c
   src/qu8-rsum/gen/qu8-rsum-wasmsimd-u8.c
   src/qu8-rsum/gen/qu8-rsum-wasmsimd-u16-acc2.c
   src/qu8-rsum/gen/qu8-rsum-wasmsimd-u32-acc2.c

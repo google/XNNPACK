@@ -15,7 +15,7 @@
 #include "src/xnnpack/reduce.h"
 
 
-void xnn_qs8_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__neon_c${CHANNELS}(
+void xnn_qs8_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__neon_u${CHANNELS}(
     size_t rows,
     size_t channels,
     const int8_t* input,

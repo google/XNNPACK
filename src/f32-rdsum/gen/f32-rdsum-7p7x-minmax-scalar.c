@@ -19,7 +19,7 @@
 #include "src/xnnpack/simd/f32-scalar.h"
 
 
-void xnn_f32_rdsum_ukernel_7p7x__scalar_c4(
+void xnn_f32_rdsum_ukernel_7p7x__scalar_u4(
     size_t rows,
     size_t channels,
     const float* input,

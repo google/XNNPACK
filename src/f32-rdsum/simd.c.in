@@ -17,7 +17,7 @@ $import math
 $LOG2_SIMD_SIZE = int(math.log2(SIMD_SIZE))
 
 $UNROLL = CHANNELS >> LOG2_SIMD_SIZE
-void xnn_f32_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__${ARCH}_c${CHANNELS}(
+void xnn_f32_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__${ARCH}_u${CHANNELS}(
     size_t rows,
     size_t channels,
     const float* input,

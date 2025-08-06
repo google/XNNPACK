@@ -3,7 +3,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -18,7 +17,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 $UNROLL = CHANNELS_BATCH >> 4
-void xnn_f16_f32acc_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__avx512skx_c${CHANNELS_BATCH}(
+void xnn_f16_f32acc_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__avx512skx_u${CHANNELS_BATCH}(
     size_t rows,
     size_t channels,
     const xnn_float16* input,
