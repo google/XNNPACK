@@ -748,7 +748,7 @@ static void init_f32_rsum_config(void) {
     f32_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdsum_ukernel_7p7x__rvv_u4v);
   #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
     f32_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum_ukernel__hvx_u64_acc2);
-    f32_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdsum_ukernel_7p7x__scalar_c4);
+    f32_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdsum_ukernel_7p7x__hvx_c128);
   #else
     f32_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum_ukernel__scalar_u4_acc4);
     f32_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdsum_ukernel_7p7x__scalar_c4);
