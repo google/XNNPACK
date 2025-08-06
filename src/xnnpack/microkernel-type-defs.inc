@@ -16,6 +16,9 @@ XNN_ENUM_ITEM(xnn_microkernel_type_dwconv, "DWConv")
 XNN_ENUM_ITEM(xnn_microkernel_type_gemm, "GEMM")
 XNN_ENUM_ITEM(xnn_microkernel_type_igemm, "IGEMM")
 XNN_ENUM_ITEM(xnn_microkernel_type_reduce, "Reduce")
+// TODO(b/405244706): remove once all the datatypes and reductions are
+// supported.
+XNN_ENUM_ITEM(xnn_microkernel_type_reduce2, "Reduce2")
 XNN_ENUM_ITEM(xnn_microkernel_type_pixelwise_average_pooling,
               "Pixelwise Average Pooling")
 XNN_ENUM_ITEM(xnn_microkernel_type_spmm, "SPMM")

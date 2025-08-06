@@ -62,6 +62,12 @@ XNN_INIT_ONCE_GUARD(qu8_rsum);
   (xnn_reduce_discontiguous_ukernel_fn) ukernel;       \
   xnn_log_info("Using reduce_discontiguous microkernel '%s'.", #ukernel);
 
+// TODO(b/405244706): remove once all the datatypes and reductions are
+// supported.
+#define XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(ukernel) \
+  (xnn_reduce_discontiguous_ukernel_fn2) ukernel;       \
+  xnn_log_info("Using reduce_discontiguous microkernel '%s'.", #ukernel);
+
 static uint32_t pack_xint8_x4(uint8_t value) {
   uint32_t result;
   *((uint8_t*) &result) = value;
@@ -704,14 +710,14 @@ static void init_f32_rsum_config(void) {
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       f32_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum_ukernel__neon_u16_acc4);
-      f32_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdsum_ukernel_7p7x__neon_u16);
+      f32_rsum_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum_ukernel_7p7x__neon_u16);
     } else {
       f32_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum_ukernel__scalar_u4_acc4);
-      f32_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdsum_ukernel_7p7x__scalar_u4);
+      f32_rsum_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum_ukernel_7p7x__scalar_u4);
     }
   #elif XNN_ARCH_ARM64
     f32_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum_ukernel__neon_u16_acc4);
-    f32_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdsum_ukernel_7p7x__neon_u16);
+    f32_rsum_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum_ukernel_7p7x__neon_u16);
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -732,26 +738,26 @@ static void init_f32_rsum_config(void) {
     }
     #if XNN_ENABLE_AVX512F
       if ((hardware_config->arch_flags & xnn_arch_x86_avx512f)) {
-        f32_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdsum_ukernel_7p7x__avx512f_u64);
+        f32_rsum_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum_ukernel_7p7x__avx512f_u64);
       } else
     #endif
     if ((hardware_config->arch_flags & xnn_arch_x86_avx)) {
-      f32_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdsum_ukernel_7p7x__avx_u32);
+      f32_rsum_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum_ukernel_7p7x__avx_u32);
     } else {
-      f32_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdsum_ukernel_7p7x__sse2_u16);
+      f32_rsum_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum_ukernel_7p7x__sse2_u16);
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum_ukernel__wasmsimd_u16_acc4);
-    f32_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_u16);
+    f32_rsum_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_u16);
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     f32_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum_ukernel__scalar_u4_acc4);
-    f32_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdsum_ukernel_7p7x__rvv_u4v);
+    f32_rsum_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum_ukernel_7p7x__rvv_u4v);
   #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
     f32_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum_ukernel__hvx_u64_acc2);
     f32_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdsum_ukernel_7p7x__hvx_u128);
   #else
     f32_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum_ukernel__scalar_u4_acc4);
-    f32_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdsum_ukernel_7p7x__scalar_u4);
+    f32_rsum_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum_ukernel_7p7x__scalar_u4);
   #endif
 
   f32_rsum_config.identity_value = 0;

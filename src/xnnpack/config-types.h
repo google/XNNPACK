@@ -66,6 +66,9 @@ struct xnn_unary_elementwise_config {
 struct xnn_reduce_config {
   xnn_reduce_ukernel_fn ukernel;
   xnn_reduce_discontiguous_ukernel_fn rd_ukernel;
+  // TODO(b/405244706): remove once all the datatypes and reductions are
+  // supported.
+  xnn_reduce_discontiguous_ukernel_fn2 rd_ukernel2;
   uint32_t identity_value;
   union {
     xnn_init_reduce_params_fn reduce;

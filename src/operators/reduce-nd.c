@@ -4,7 +4,6 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-#include <math.h>
 #include <inttypes.h>
 #include <limits.h>
 #include <stddef.h>
@@ -14,7 +13,6 @@
 
 #include "include/xnnpack.h"
 #include "src/xnnpack/allocator.h"
-#include "src/xnnpack/common.h"
 #include "src/xnnpack/compute.h"
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
@@ -219,7 +217,11 @@ static enum xnn_status reshape_reduce_nd(
   const uint32_t log2_data_element_size = reduce_op->reduce.log2_data_element_size;
   const uint32_t log2_accumulator_element_size = reduce_op->reduce.log2_accumulator_element_size;
   reduce_op->compute[0].type = xnn_parallelization_type_3d_tile_2d;
-  reduce_op->ukernel.type = xnn_microkernel_type_reduce;
+  const bool is_old_reduce =
+      reduce_op->ukernel.type != xnn_microkernel_type_reduce2;
+  reduce_op->ukernel.type = is_old_reduce
+      ? xnn_microkernel_type_reduce
+      : xnn_microkernel_type_reduce2;
   // Reduction along the innermost dimension.
   const bool is_minmax = (reduce_op->type == xnn_operator_type_reduce_max_nd ||
                           reduce_op->type == xnn_operator_type_reduce_min_nd);
@@ -247,6 +249,7 @@ static enum xnn_status reshape_reduce_nd(
       .output_element_size = UINT32_C(1) << log2_data_element_size,
       .identity_value = reduce_op->reduce.identity_value,
       .ukernel.contiguous_reduce = reduce_op->reduce_config->ukernel,
+      .is_old_reduce = is_old_reduce,
     };
 
     if (is_minmax) {
@@ -294,14 +297,28 @@ static enum xnn_status reshape_reduce_nd(
       reduce_op->channels = channel_like_dim;
     }
 
-    *reduce_op->dynamic_context.reduce = (struct reduce_context) {
-      .zero = reduce_op->zero_buffer,
-      .channels = axis_dim,
-      .ukernel.discontiguous_reduce = reduce_op->reduce_config->rd_ukernel,
-      .accumulation_element_size = UINT32_C(1) << log2_accumulator_element_size,
-      .output_element_size = UINT32_C(1) << log2_data_element_size,
-      .identity_value = reduce_op->reduce.identity_value,
-    };
+    if (is_old_reduce) {
+      *reduce_op->dynamic_context.reduce = (struct reduce_context) {
+        .zero = reduce_op->zero_buffer,
+        .channels = axis_dim,
+        .ukernel.discontiguous_reduce = reduce_op->reduce_config->rd_ukernel,
+        .accumulation_element_size = UINT32_C(1) << log2_accumulator_element_size,
+        .output_element_size = UINT32_C(1) << log2_data_element_size,
+        .identity_value = reduce_op->reduce.identity_value,
+        .is_old_reduce = true,
+      };
+    } else {
+      *reduce_op->dynamic_context.reduce = (struct reduce_context) {
+        .zero = reduce_op->zero_buffer,
+        .channels = axis_dim,
+        .ukernel.discontiguous_reduce2 = reduce_op->reduce_config->rd_ukernel2,
+        .accumulation_element_size = UINT32_C(1) << log2_accumulator_element_size,
+        .output_element_size = UINT32_C(1) << log2_data_element_size,
+        .identity_value = reduce_op->reduce.identity_value,
+        .is_old_reduce = false,
+      };
+    }
+
 
     if (is_minmax) {
       reduce_op->dynamic_context.reduce->fill_ukernel = reduce_op->fill_config->ukernel;
@@ -539,10 +556,23 @@ enum xnn_status xnn_create_reduce_nd(
     cvt_params_size = cvt_config->init(&cvt_params, NULL, input_quantization, output_quantization);
   }
 
-  return create_reduce_nd(
+  // TODO(b/405244706): once all the datatypes and reductions are supported,
+  // turn back to just return `create_reduce_nd` result.
+  enum xnn_status status = xnn_status_invalid_state;
+  status = create_reduce_nd(
     flags, log2_data_element_size, log2_accumulator_element_size, operator_type,
     config, fill_config, cvt_config, &params,
     params_size, &cvt_params, cvt_params_size, reduce_op_out);
+  if (status != xnn_status_success) {
+    return status;
+  }
+
+  if (datatype == xnn_datatype_fp32 &&
+      (reduce_operator_type == xnn_reduce_sum ||
+       reduce_operator_type == xnn_reduce_mean)) {
+    (*reduce_op_out)->ukernel.type = xnn_microkernel_type_reduce2;
+  }
+  return xnn_status_success;
 }
 
 enum xnn_status xnn_reshape_reduce_nd(
