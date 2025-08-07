@@ -33,6 +33,7 @@
 #if XNN_ARCH_HEXAGON
 // TODO - use CPUINFO
 #include <qurt.h>
+#include "HAP_power.h"  // NOLINT - part of the hexagon SDK
 #endif
 
 #if XNN_ARCH_RISCV
@@ -236,6 +237,13 @@ static void init_hardware_config(void) {
     max_hthreads = hardware_threads.max_hthreads;
   }
   printf("HEXAGON HTHREADS %d\n", max_hthreads);
+
+  unsigned int clkFreqHz = 0;
+  HAP_power_response_t response = {.type = HAP_power_get_clk_Freq};
+  if (HAP_power_get(NULL, &response) == AEE_SUCCESS) {
+    clkFreqHz = response.clkFreqHz;
+  }
+  printf("HEXAGON CLKFREQHZ %d\n", clkFreqHz);
 #endif  // XNN_ARCH_HEXAGON
 
   #if XNN_ARCH_RISCV
