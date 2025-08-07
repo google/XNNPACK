@@ -13,7 +13,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include "src/xnnpack/ibilinear.h"
 
 
-void xnn_f32_ibilinear_ukernel__scalar_c${CHANNEL_TILE}${"" if PIXEL_TILE == 1 else "x%d" % PIXEL_TILE}(
+void xnn_f32_ibilinear_ukernel__scalar_u${CHANNEL_TILE}${"" if PIXEL_TILE == 1 else "x%d" % PIXEL_TILE}(
     size_t output_pixels,
     size_t channels,
     const float** restrict input,

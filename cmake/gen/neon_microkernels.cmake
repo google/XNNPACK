@@ -27,7 +27,7 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/f32-gemm/gen/f32-gemm-4x2-minmax-neon-lane-ld64.c
   src/f32-gemm/gen/f32-gemm-4x8-minmax-neon-lane-ld128.c
   src/f32-ibilinear-chw/gen/f32-ibilinear-chw-neon-p8.c
-  src/f32-ibilinear/gen/f32-ibilinear-neon-c8.c
+  src/f32-ibilinear/gen/f32-ibilinear-neon-u8.c
   src/f32-igemm/gen/f32-igemm-1x8-minmax-neon-lane-ld64.c
   src/f32-igemm/gen/f32-igemm-4x2-minmax-neon-lane-ld64.c
   src/f32-igemm/gen/f32-igemm-4x8-minmax-neon-lane-ld128.c
@@ -142,8 +142,8 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/qu8-vlrelu/gen/qu8-vlrelu-neon-u32.c
   src/qu8-vmul/gen/qu8-vmul-minmax-rndnu-neon-ld64-u16.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-rndnu-neon-ld64-u16.c
-  src/s8-ibilinear/gen/s8-ibilinear-neon-c8.c
-  src/s8-ibilinear/gen/s8-ibilinear-neon-c16.c
+  src/s8-ibilinear/gen/s8-ibilinear-neon-u8.c
+  src/s8-ibilinear/gen/s8-ibilinear-neon-u16.c
   src/s8-maxpool/gen/s8-maxpool-9p-minmax-neon-u16.c
   src/s8-rdminmax/gen/s8-rdmax-2p2x-neon-c32.c
   src/s8-rdminmax/gen/s8-rdmin-2p2x-neon-c32.c
@@ -151,8 +151,8 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/s8-rminmax/gen/s8-rmin-neon-u32-acc2.c
   src/s8-rminmax/gen/s8-rminmax-neon-u32-acc2.c
   src/s8-vclamp/s8-vclamp-neon-u64.c
-  src/u8-ibilinear/gen/u8-ibilinear-neon-c8.c
-  src/u8-ibilinear/gen/u8-ibilinear-neon-c16.c
+  src/u8-ibilinear/gen/u8-ibilinear-neon-u8.c
+  src/u8-ibilinear/gen/u8-ibilinear-neon-u16.c
   src/u8-maxpool/gen/u8-maxpool-9p-minmax-neon-u16.c
   src/u8-rdminmax/gen/u8-rdmax-2p2x-neon-c32.c
   src/u8-rdminmax/gen/u8-rdmin-2p2x-neon-c32.c
@@ -276,7 +276,7 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/f32-gemm/gen/f32-gemm-8x8s4-minmax-neon.c
   src/f32-ibilinear-chw/gen/f32-ibilinear-chw-neon-p4.c
   src/f32-ibilinear-chw/gen/f32-ibilinear-chw-neon-p16.c
-  src/f32-ibilinear/gen/f32-ibilinear-neon-c4.c
+  src/f32-ibilinear/gen/f32-ibilinear-neon-u4.c
   src/f32-igemm/gen/f32-igemm-1x8-minmax-neon-dup-ld64.c
   src/f32-igemm/gen/f32-igemm-1x8-minmax-neon-lane-ld128.c
   src/f32-igemm/gen/f32-igemm-1x8s4-minmax-neon.c

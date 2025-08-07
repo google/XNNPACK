@@ -23,7 +23,7 @@ SET(PROD_SSE_MICROKERNEL_SRCS
   src/f32-gemm/gen/f32-gemm-4x2c4-minmax-sse.c
   src/f32-gemm/gen/f32-gemm-4x8-minmax-sse-load1.c
   src/f32-ibilinear-chw/gen/f32-ibilinear-chw-sse-p8.c
-  src/f32-ibilinear/gen/f32-ibilinear-sse-c8.c
+  src/f32-ibilinear/gen/f32-ibilinear-sse-u8.c
   src/f32-igemm/gen/f32-igemm-1x8-minmax-sse-load1.c
   src/f32-igemm/gen/f32-igemm-4x2c4-minmax-sse.c
   src/f32-igemm/gen/f32-igemm-4x8-minmax-sse-load1.c
@@ -118,7 +118,7 @@ SET(NON_PROD_SSE_MICROKERNEL_SRCS
   src/f32-gemm/gen/f32-gemm-6x8-minmax-sse-load1.c
   src/f32-gemm/gen/f32-gemm-6x8s4-minmax-sse.c
   src/f32-ibilinear-chw/gen/f32-ibilinear-chw-sse-p4.c
-  src/f32-ibilinear/gen/f32-ibilinear-sse-c4.c
+  src/f32-ibilinear/gen/f32-ibilinear-sse-u4.c
   src/f32-igemm/gen/f32-igemm-1x8-minmax-sse-dup.c
   src/f32-igemm/gen/f32-igemm-1x8s4-minmax-sse.c
   src/f32-igemm/gen/f32-igemm-3x8-minmax-sse-dup.c

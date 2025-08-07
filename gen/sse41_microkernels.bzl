@@ -56,7 +56,7 @@ PROD_SSE41_MICROKERNEL_SRCS = [
     "src/qu8-vlrelu/gen/qu8-vlrelu-sse41-u32.c",
     "src/qu8-vmul/gen/qu8-vmul-minmax-fp32-sse41-mul16-ld64-u16.c",
     "src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-sse41-mul16-ld64-u16.c",
-    "src/s8-ibilinear/gen/s8-ibilinear-sse41-c16.c",
+    "src/s8-ibilinear/gen/s8-ibilinear-sse41-u16.c",
     "src/s8-maxpool/gen/s8-maxpool-9p-minmax-sse41-u16.c",
     "src/s8-rdminmax/gen/s8-rdmax-2p2x-sse41-c32.c",
     "src/s8-rdminmax/gen/s8-rdmin-2p2x-sse41-c32.c",
@@ -64,7 +64,7 @@ PROD_SSE41_MICROKERNEL_SRCS = [
     "src/s8-rminmax/gen/s8-rmin-sse41-u32-acc2.c",
     "src/s8-rminmax/gen/s8-rminmax-sse41-u32-acc2.c",
     "src/s8-vclamp/s8-vclamp-sse41-u64.c",
-    "src/u8-ibilinear/gen/u8-ibilinear-sse41-c16.c",
+    "src/u8-ibilinear/gen/u8-ibilinear-sse41-u16.c",
 ]
 
 NON_PROD_SSE41_MICROKERNEL_SRCS = [
@@ -297,7 +297,7 @@ NON_PROD_SSE41_MICROKERNEL_SRCS = [
     "src/qu8-vlrelu/gen/qu8-vlrelu-sse41-u16.c",
     "src/qu8-vmul/gen/qu8-vmul-minmax-fp32-sse41-mul16-ld64-u8.c",
     "src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-sse41-mul16-ld64-u8.c",
-    "src/s8-ibilinear/gen/s8-ibilinear-sse41-c8.c",
+    "src/s8-ibilinear/gen/s8-ibilinear-sse41-u8.c",
     "src/s8-rminmax/gen/s8-rmax-sse41-u16.c",
     "src/s8-rminmax/gen/s8-rmax-sse41-u48-acc3.c",
     "src/s8-rminmax/gen/s8-rmax-sse41-u64-acc2.c",
@@ -310,7 +310,7 @@ NON_PROD_SSE41_MICROKERNEL_SRCS = [
     "src/s8-rminmax/gen/s8-rminmax-sse41-u48-acc3.c",
     "src/s8-rminmax/gen/s8-rminmax-sse41-u64-acc2.c",
     "src/s8-rminmax/gen/s8-rminmax-sse41-u64-acc4.c",
-    "src/u8-ibilinear/gen/u8-ibilinear-sse41-c8.c",
+    "src/u8-ibilinear/gen/u8-ibilinear-sse41-u8.c",
     "src/x32-packw/gen/x32-packw-gio-sse41-u2.c",
 ]
 

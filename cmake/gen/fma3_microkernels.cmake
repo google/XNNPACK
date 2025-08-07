@@ -14,7 +14,7 @@ SET(PROD_FMA3_MICROKERNEL_SRCS
   src/f16-dwconv/gen/f16-dwconv-4p16c-minmax-fma3.c
   src/f16-dwconv/gen/f16-dwconv-9p16c-minmax-fma3.c
   src/f16-dwconv/gen/f16-dwconv-25p8c-minmax-fma3-acc2.c
-  src/f16-ibilinear/gen/f16-ibilinear-fma3-c8.c
+  src/f16-ibilinear/gen/f16-ibilinear-fma3-u8.c
   src/f16-vmulcaddc/gen/f16-vmulcaddc-c8-minmax-fma3-2x.c
   src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9t2-u32.c
   src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-fma3.c
@@ -73,7 +73,7 @@ SET(NON_PROD_FMA3_MICROKERNEL_SRCS
   src/f16-dwconv/gen/f16-dwconv-25p16c-minmax-fma3.c
   src/f16-dwconv/gen/f16-dwconv-25p32c-minmax-fma3-acc2.c
   src/f16-dwconv/gen/f16-dwconv-25p32c-minmax-fma3.c
-  src/f16-ibilinear/gen/f16-ibilinear-fma3-c16.c
+  src/f16-ibilinear/gen/f16-ibilinear-fma3-u16.c
   src/f16-vmulcaddc/gen/f16-vmulcaddc-c16-minmax-fma3-2x.c
   src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-div-u8.c
   src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-div-u16.c

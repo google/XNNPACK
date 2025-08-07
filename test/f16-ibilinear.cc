@@ -17,57 +17,57 @@
 
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  TEST(F16_IBILINEAR__NEONFP16ARITH_C8, channels_eq_8) {
+  TEST(F16_IBILINEAR__NEONFP16ARITH_U8, channels_eq_8) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
     IBilinearMicrokernelTester()
       .pixels(1)
       .channels(8)
-      .Test(xnn_f16_ibilinear_ukernel__neonfp16arith_c8);
+      .Test(xnn_f16_ibilinear_ukernel__neonfp16arith_u8);
   }
 
-  TEST(F16_IBILINEAR__NEONFP16ARITH_C8, channels_div_8) {
+  TEST(F16_IBILINEAR__NEONFP16ARITH_U8, channels_div_8) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
     for (size_t channels = 16; channels < 80; channels += 8) {
       IBilinearMicrokernelTester()
         .pixels(1)
         .channels(channels)
-        .Test(xnn_f16_ibilinear_ukernel__neonfp16arith_c8);
+        .Test(xnn_f16_ibilinear_ukernel__neonfp16arith_u8);
     }
   }
 
-  TEST(F16_IBILINEAR__NEONFP16ARITH_C8, channels_lt_8) {
+  TEST(F16_IBILINEAR__NEONFP16ARITH_U8, channels_lt_8) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
     for (size_t channels = 1; channels < 8; channels++) {
       IBilinearMicrokernelTester()
         .pixels(1)
         .channels(channels)
-        .Test(xnn_f16_ibilinear_ukernel__neonfp16arith_c8);
+        .Test(xnn_f16_ibilinear_ukernel__neonfp16arith_u8);
     }
   }
 
-  TEST(F16_IBILINEAR__NEONFP16ARITH_C8, channels_gt_8) {
+  TEST(F16_IBILINEAR__NEONFP16ARITH_U8, channels_gt_8) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
     for (size_t channels = 9; channels < 16; channels++) {
       IBilinearMicrokernelTester()
         .pixels(1)
         .channels(channels)
-        .Test(xnn_f16_ibilinear_ukernel__neonfp16arith_c8);
+        .Test(xnn_f16_ibilinear_ukernel__neonfp16arith_u8);
     }
   }
 
-  TEST(F16_IBILINEAR__NEONFP16ARITH_C8, pixels_gt_1) {
+  TEST(F16_IBILINEAR__NEONFP16ARITH_U8, pixels_gt_1) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
     for (size_t pixels = 2; pixels < 3; pixels++) {
       for (size_t channels = 1; channels <= 40; channels += 7) {
         IBilinearMicrokernelTester()
           .pixels(pixels)
           .channels(channels)
-          .Test(xnn_f16_ibilinear_ukernel__neonfp16arith_c8);
+          .Test(xnn_f16_ibilinear_ukernel__neonfp16arith_u8);
       }
     }
   }
 
-  TEST(F16_IBILINEAR__NEONFP16ARITH_C8, input_offset) {
+  TEST(F16_IBILINEAR__NEONFP16ARITH_U8, input_offset) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
     for (size_t pixels = 1; pixels < 5; pixels += 1) {
       for (size_t channels = 1; channels <= 40; channels += 7) {
@@ -75,12 +75,12 @@
           .pixels(pixels)
           .channels(channels)
           .input_offset(43)
-          .Test(xnn_f16_ibilinear_ukernel__neonfp16arith_c8);
+          .Test(xnn_f16_ibilinear_ukernel__neonfp16arith_u8);
       }
     }
   }
 
-  TEST(F16_IBILINEAR__NEONFP16ARITH_C8, output_stride) {
+  TEST(F16_IBILINEAR__NEONFP16ARITH_U8, output_stride) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
     for (size_t pixels = 1; pixels < 5; pixels += 1) {
       for (size_t channels = 1; channels <= 40; channels += 7) {
@@ -88,7 +88,7 @@
           .pixels(pixels)
           .channels(channels)
           .output_stride(43)
-          .Test(xnn_f16_ibilinear_ukernel__neonfp16arith_c8);
+          .Test(xnn_f16_ibilinear_ukernel__neonfp16arith_u8);
       }
     }
   }
@@ -96,57 +96,57 @@
 
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  TEST(F16_IBILINEAR__NEONFP16ARITH_C16, channels_eq_16) {
+  TEST(F16_IBILINEAR__NEONFP16ARITH_U16, channels_eq_16) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
     IBilinearMicrokernelTester()
       .pixels(1)
       .channels(16)
-      .Test(xnn_f16_ibilinear_ukernel__neonfp16arith_c16);
+      .Test(xnn_f16_ibilinear_ukernel__neonfp16arith_u16);
   }
 
-  TEST(F16_IBILINEAR__NEONFP16ARITH_C16, channels_div_16) {
+  TEST(F16_IBILINEAR__NEONFP16ARITH_U16, channels_div_16) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
     for (size_t channels = 32; channels < 160; channels += 16) {
       IBilinearMicrokernelTester()
         .pixels(1)
         .channels(channels)
-        .Test(xnn_f16_ibilinear_ukernel__neonfp16arith_c16);
+        .Test(xnn_f16_ibilinear_ukernel__neonfp16arith_u16);
     }
   }
 
-  TEST(F16_IBILINEAR__NEONFP16ARITH_C16, channels_lt_16) {
+  TEST(F16_IBILINEAR__NEONFP16ARITH_U16, channels_lt_16) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
     for (size_t channels = 1; channels < 16; channels++) {
       IBilinearMicrokernelTester()
         .pixels(1)
         .channels(channels)
-        .Test(xnn_f16_ibilinear_ukernel__neonfp16arith_c16);
+        .Test(xnn_f16_ibilinear_ukernel__neonfp16arith_u16);
     }
   }
 
-  TEST(F16_IBILINEAR__NEONFP16ARITH_C16, channels_gt_16) {
+  TEST(F16_IBILINEAR__NEONFP16ARITH_U16, channels_gt_16) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
     for (size_t channels = 17; channels < 32; channels++) {
       IBilinearMicrokernelTester()
         .pixels(1)
         .channels(channels)
-        .Test(xnn_f16_ibilinear_ukernel__neonfp16arith_c16);
+        .Test(xnn_f16_ibilinear_ukernel__neonfp16arith_u16);
     }
   }
 
-  TEST(F16_IBILINEAR__NEONFP16ARITH_C16, pixels_gt_1) {
+  TEST(F16_IBILINEAR__NEONFP16ARITH_U16, pixels_gt_1) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
     for (size_t pixels = 2; pixels < 3; pixels++) {
       for (size_t channels = 1; channels <= 80; channels += 15) {
         IBilinearMicrokernelTester()
           .pixels(pixels)
           .channels(channels)
-          .Test(xnn_f16_ibilinear_ukernel__neonfp16arith_c16);
+          .Test(xnn_f16_ibilinear_ukernel__neonfp16arith_u16);
       }
     }
   }
 
-  TEST(F16_IBILINEAR__NEONFP16ARITH_C16, input_offset) {
+  TEST(F16_IBILINEAR__NEONFP16ARITH_U16, input_offset) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
     for (size_t pixels = 1; pixels < 5; pixels += 1) {
       for (size_t channels = 1; channels <= 80; channels += 15) {
@@ -154,12 +154,12 @@
           .pixels(pixels)
           .channels(channels)
           .input_offset(83)
-          .Test(xnn_f16_ibilinear_ukernel__neonfp16arith_c16);
+          .Test(xnn_f16_ibilinear_ukernel__neonfp16arith_u16);
       }
     }
   }
 
-  TEST(F16_IBILINEAR__NEONFP16ARITH_C16, output_stride) {
+  TEST(F16_IBILINEAR__NEONFP16ARITH_U16, output_stride) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_arm_neon_fp16_arith);
     for (size_t pixels = 1; pixels < 5; pixels += 1) {
       for (size_t channels = 1; channels <= 80; channels += 15) {
@@ -167,7 +167,7 @@
           .pixels(pixels)
           .channels(channels)
           .output_stride(83)
-          .Test(xnn_f16_ibilinear_ukernel__neonfp16arith_c16);
+          .Test(xnn_f16_ibilinear_ukernel__neonfp16arith_u16);
       }
     }
   }
@@ -175,57 +175,57 @@
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(F16_IBILINEAR__FMA3_C8, channels_eq_8) {
+  TEST(F16_IBILINEAR__FMA3_U8, channels_eq_8) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     IBilinearMicrokernelTester()
       .pixels(1)
       .channels(8)
-      .Test(xnn_f16_ibilinear_ukernel__fma3_c8);
+      .Test(xnn_f16_ibilinear_ukernel__fma3_u8);
   }
 
-  TEST(F16_IBILINEAR__FMA3_C8, channels_div_8) {
+  TEST(F16_IBILINEAR__FMA3_U8, channels_div_8) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     for (size_t channels = 16; channels < 80; channels += 8) {
       IBilinearMicrokernelTester()
         .pixels(1)
         .channels(channels)
-        .Test(xnn_f16_ibilinear_ukernel__fma3_c8);
+        .Test(xnn_f16_ibilinear_ukernel__fma3_u8);
     }
   }
 
-  TEST(F16_IBILINEAR__FMA3_C8, channels_lt_8) {
+  TEST(F16_IBILINEAR__FMA3_U8, channels_lt_8) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     for (size_t channels = 1; channels < 8; channels++) {
       IBilinearMicrokernelTester()
         .pixels(1)
         .channels(channels)
-        .Test(xnn_f16_ibilinear_ukernel__fma3_c8);
+        .Test(xnn_f16_ibilinear_ukernel__fma3_u8);
     }
   }
 
-  TEST(F16_IBILINEAR__FMA3_C8, channels_gt_8) {
+  TEST(F16_IBILINEAR__FMA3_U8, channels_gt_8) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     for (size_t channels = 9; channels < 16; channels++) {
       IBilinearMicrokernelTester()
         .pixels(1)
         .channels(channels)
-        .Test(xnn_f16_ibilinear_ukernel__fma3_c8);
+        .Test(xnn_f16_ibilinear_ukernel__fma3_u8);
     }
   }
 
-  TEST(F16_IBILINEAR__FMA3_C8, pixels_gt_1) {
+  TEST(F16_IBILINEAR__FMA3_U8, pixels_gt_1) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     for (size_t pixels = 2; pixels < 3; pixels++) {
       for (size_t channels = 1; channels <= 40; channels += 7) {
         IBilinearMicrokernelTester()
           .pixels(pixels)
           .channels(channels)
-          .Test(xnn_f16_ibilinear_ukernel__fma3_c8);
+          .Test(xnn_f16_ibilinear_ukernel__fma3_u8);
       }
     }
   }
 
-  TEST(F16_IBILINEAR__FMA3_C8, input_offset) {
+  TEST(F16_IBILINEAR__FMA3_U8, input_offset) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     for (size_t pixels = 1; pixels < 5; pixels += 1) {
       for (size_t channels = 1; channels <= 40; channels += 7) {
@@ -233,12 +233,12 @@
           .pixels(pixels)
           .channels(channels)
           .input_offset(43)
-          .Test(xnn_f16_ibilinear_ukernel__fma3_c8);
+          .Test(xnn_f16_ibilinear_ukernel__fma3_u8);
       }
     }
   }
 
-  TEST(F16_IBILINEAR__FMA3_C8, output_stride) {
+  TEST(F16_IBILINEAR__FMA3_U8, output_stride) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     for (size_t pixels = 1; pixels < 5; pixels += 1) {
       for (size_t channels = 1; channels <= 40; channels += 7) {
@@ -246,7 +246,7 @@
           .pixels(pixels)
           .channels(channels)
           .output_stride(43)
-          .Test(xnn_f16_ibilinear_ukernel__fma3_c8);
+          .Test(xnn_f16_ibilinear_ukernel__fma3_u8);
       }
     }
   }
@@ -254,57 +254,57 @@
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(F16_IBILINEAR__FMA3_C16, channels_eq_16) {
+  TEST(F16_IBILINEAR__FMA3_U16, channels_eq_16) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     IBilinearMicrokernelTester()
       .pixels(1)
       .channels(16)
-      .Test(xnn_f16_ibilinear_ukernel__fma3_c16);
+      .Test(xnn_f16_ibilinear_ukernel__fma3_u16);
   }
 
-  TEST(F16_IBILINEAR__FMA3_C16, channels_div_16) {
+  TEST(F16_IBILINEAR__FMA3_U16, channels_div_16) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     for (size_t channels = 32; channels < 160; channels += 16) {
       IBilinearMicrokernelTester()
         .pixels(1)
         .channels(channels)
-        .Test(xnn_f16_ibilinear_ukernel__fma3_c16);
+        .Test(xnn_f16_ibilinear_ukernel__fma3_u16);
     }
   }
 
-  TEST(F16_IBILINEAR__FMA3_C16, channels_lt_16) {
+  TEST(F16_IBILINEAR__FMA3_U16, channels_lt_16) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     for (size_t channels = 1; channels < 16; channels++) {
       IBilinearMicrokernelTester()
         .pixels(1)
         .channels(channels)
-        .Test(xnn_f16_ibilinear_ukernel__fma3_c16);
+        .Test(xnn_f16_ibilinear_ukernel__fma3_u16);
     }
   }
 
-  TEST(F16_IBILINEAR__FMA3_C16, channels_gt_16) {
+  TEST(F16_IBILINEAR__FMA3_U16, channels_gt_16) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     for (size_t channels = 17; channels < 32; channels++) {
       IBilinearMicrokernelTester()
         .pixels(1)
         .channels(channels)
-        .Test(xnn_f16_ibilinear_ukernel__fma3_c16);
+        .Test(xnn_f16_ibilinear_ukernel__fma3_u16);
     }
   }
 
-  TEST(F16_IBILINEAR__FMA3_C16, pixels_gt_1) {
+  TEST(F16_IBILINEAR__FMA3_U16, pixels_gt_1) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     for (size_t pixels = 2; pixels < 3; pixels++) {
       for (size_t channels = 1; channels <= 80; channels += 15) {
         IBilinearMicrokernelTester()
           .pixels(pixels)
           .channels(channels)
-          .Test(xnn_f16_ibilinear_ukernel__fma3_c16);
+          .Test(xnn_f16_ibilinear_ukernel__fma3_u16);
       }
     }
   }
 
-  TEST(F16_IBILINEAR__FMA3_C16, input_offset) {
+  TEST(F16_IBILINEAR__FMA3_U16, input_offset) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     for (size_t pixels = 1; pixels < 5; pixels += 1) {
       for (size_t channels = 1; channels <= 80; channels += 15) {
@@ -312,12 +312,12 @@
           .pixels(pixels)
           .channels(channels)
           .input_offset(83)
-          .Test(xnn_f16_ibilinear_ukernel__fma3_c16);
+          .Test(xnn_f16_ibilinear_ukernel__fma3_u16);
       }
     }
   }
 
-  TEST(F16_IBILINEAR__FMA3_C16, output_stride) {
+  TEST(F16_IBILINEAR__FMA3_U16, output_stride) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     for (size_t pixels = 1; pixels < 5; pixels += 1) {
       for (size_t channels = 1; channels <= 80; channels += 15) {
@@ -325,7 +325,7 @@
           .pixels(pixels)
           .channels(channels)
           .output_stride(83)
-          .Test(xnn_f16_ibilinear_ukernel__fma3_c16);
+          .Test(xnn_f16_ibilinear_ukernel__fma3_u16);
       }
     }
   }

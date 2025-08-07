@@ -57,7 +57,7 @@ SET(PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-gemm/gen/f32-gemm-5x8-relu-wasmsimd-splat.c
   src/f32-gemm/gen/f32-gemm-5x8-wasmsimd-splat.c
   src/f32-ibilinear-chw/gen/f32-ibilinear-chw-wasmsimd-p8.c
-  src/f32-ibilinear/gen/f32-ibilinear-wasmsimd-c8.c
+  src/f32-ibilinear/gen/f32-ibilinear-wasmsimd-u8.c
   src/f32-igemm/gen/f32-igemm-1x8-minmax-wasmsimd-arm-splat.c
   src/f32-igemm/gen/f32-igemm-1x8-minmax-wasmsimd-x86-loadsplat.c
   src/f32-igemm/gen/f32-igemm-1x8-minmax-wasmsimd-x86-splat.c
@@ -196,7 +196,7 @@ SET(PROD_WASMSIMD_MICROKERNEL_SRCS
   src/qu8-vlrelu/gen/qu8-vlrelu-wasmsimd-x86-u16.c
   src/qu8-vmul/gen/qu8-vmul-minmax-fp32-wasmsimd-mul32-ld64-u8.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-wasmsimd-mul32-ld64-u8.c
-  src/s8-ibilinear/gen/s8-ibilinear-wasmsimd-dot16x2-c8.c
+  src/s8-ibilinear/gen/s8-ibilinear-wasmsimd-dot16x2-u8.c
   src/s8-maxpool/gen/s8-maxpool-9p-minmax-wasmsimd-u16.c
   src/s8-rdminmax/gen/s8-rdmax-2p2x-wasmsimd-c32.c
   src/s8-rdminmax/gen/s8-rdmin-2p2x-wasmsimd-c32.c
@@ -204,7 +204,7 @@ SET(PROD_WASMSIMD_MICROKERNEL_SRCS
   src/s8-rminmax/gen/s8-rmin-wasmsimd-u32-acc2.c
   src/s8-rminmax/gen/s8-rminmax-wasmsimd-u32-acc2.c
   src/s8-vclamp/s8-vclamp-wasmsimd-u64.c
-  src/u8-ibilinear/gen/u8-ibilinear-wasmsimd-dot16x2-c8.c
+  src/u8-ibilinear/gen/u8-ibilinear-wasmsimd-dot16x2-u8.c
   src/u8-maxpool/gen/u8-maxpool-9p-minmax-wasmsimd-u16.c
   src/u8-rdminmax/gen/u8-rdmax-2p2x-wasmsimd-c32.c
   src/u8-rdminmax/gen/u8-rdmin-2p2x-wasmsimd-c32.c
@@ -463,7 +463,7 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-gemm/gen/f32-gemm-6x8s4-relu-wasmsimd.c
   src/f32-gemm/gen/f32-gemm-6x8s4-wasmsimd.c
   src/f32-ibilinear-chw/gen/f32-ibilinear-chw-wasmsimd-p4.c
-  src/f32-ibilinear/gen/f32-ibilinear-wasmsimd-c4.c
+  src/f32-ibilinear/gen/f32-ibilinear-wasmsimd-u4.c
   src/f32-igemm/gen/f32-igemm-1x8-minmax-wasmsimd-arm-loadsplat.c
   src/f32-igemm/gen/f32-igemm-1x8s4-minmax-wasmsimd-arm.c
   src/f32-igemm/gen/f32-igemm-1x8s4-minmax-wasmsimd-x86.c
@@ -923,9 +923,9 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/qu8-vlrelu/gen/qu8-vlrelu-wasmsimd-x86-u32.c
   src/qu8-vmul/gen/qu8-vmul-minmax-fp32-wasmsimd-mul32-ld64-u16.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-wasmsimd-mul32-ld64-u16.c
-  src/s8-ibilinear/gen/s8-ibilinear-wasmsimd-dot16x2-c16.c
-  src/s8-ibilinear/gen/s8-ibilinear-wasmsimd-mul32-c8.c
-  src/s8-ibilinear/gen/s8-ibilinear-wasmsimd-mul32-c16.c
+  src/s8-ibilinear/gen/s8-ibilinear-wasmsimd-dot16x2-u16.c
+  src/s8-ibilinear/gen/s8-ibilinear-wasmsimd-mul32-u8.c
+  src/s8-ibilinear/gen/s8-ibilinear-wasmsimd-mul32-u16.c
   src/s8-rminmax/gen/s8-rmax-wasmsimd-u16.c
   src/s8-rminmax/gen/s8-rmax-wasmsimd-u48-acc3.c
   src/s8-rminmax/gen/s8-rmax-wasmsimd-u64-acc2.c
@@ -938,9 +938,9 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/s8-rminmax/gen/s8-rminmax-wasmsimd-u48-acc3.c
   src/s8-rminmax/gen/s8-rminmax-wasmsimd-u64-acc2.c
   src/s8-rminmax/gen/s8-rminmax-wasmsimd-u64-acc4.c
-  src/u8-ibilinear/gen/u8-ibilinear-wasmsimd-dot16x2-c16.c
-  src/u8-ibilinear/gen/u8-ibilinear-wasmsimd-mul32-c8.c
-  src/u8-ibilinear/gen/u8-ibilinear-wasmsimd-mul32-c16.c
+  src/u8-ibilinear/gen/u8-ibilinear-wasmsimd-dot16x2-u16.c
+  src/u8-ibilinear/gen/u8-ibilinear-wasmsimd-mul32-u8.c
+  src/u8-ibilinear/gen/u8-ibilinear-wasmsimd-mul32-u16.c
   src/x8-lut/gen/x8-lut-wasmsimd-u16.c
   src/x8-lut/gen/x8-lut-wasmsimd-u48.c
   src/x8-lut/gen/x8-lut-wasmsimd-u64.c

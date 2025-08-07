@@ -19,7 +19,7 @@ $ABC = "456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include "src/xnnpack/math.h"
 
 
-void xnn_f16_ibilinear_ukernel__fma3_c${CHANNEL_TILE}${"" if PIXEL_TILE == 1 else "x%d" % PIXEL_TILE}(
+void xnn_f16_ibilinear_ukernel__fma3_u${CHANNEL_TILE}${"" if PIXEL_TILE == 1 else "x%d" % PIXEL_TILE}(
     size_t output_pixels,
     size_t channels,
     const xnn_float16** restrict input,

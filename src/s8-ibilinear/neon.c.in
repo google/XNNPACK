@@ -25,7 +25,7 @@ $VST1_LANE_X8 = {"S8": "vst1_lane_s8", "U8": "vst1_lane_u8"}[DATATYPE]
 $VEXT_X8 = {"S8": "vext_s8", "U8": "vext_u8"}[DATATYPE]
 $VREINTERPRET_U32_X8 = {"S8": "vreinterpret_u32_s8", "U8": "vreinterpret_u32_u8"}[DATATYPE]
 $VREINTERPRET_U16_X8 = {"S8": "vreinterpret_u16_s8", "U8": "vreinterpret_u16_u8"}[DATATYPE]
-void xnn_${DATATYPE.lower()}_ibilinear_ukernel__neon_c${CHANNEL_TILE}${"" if PIXEL_TILE == 1 else "x%d" % PIXEL_TILE}(
+void xnn_${DATATYPE.lower()}_ibilinear_ukernel__neon_u${CHANNEL_TILE}${"" if PIXEL_TILE == 1 else "x%d" % PIXEL_TILE}(
     size_t output_pixels,
     size_t channels,
     const ${XINT8_T}** restrict input,

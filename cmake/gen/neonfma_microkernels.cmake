@@ -18,7 +18,7 @@ SET(PROD_NEONFMA_MICROKERNEL_SRCS
   src/f32-gemm/gen/f32-gemm-4x8s4-minmax-neonfma.c
   src/f32-gemm/gen/f32-gemm-6x8s4-minmax-neonfma.c
   src/f32-ibilinear-chw/gen/f32-ibilinear-chw-neonfma-p8.c
-  src/f32-ibilinear/gen/f32-ibilinear-neonfma-c8.c
+  src/f32-ibilinear/gen/f32-ibilinear-neonfma-u8.c
   src/f32-igemm/gen/f32-igemm-1x8s4-minmax-neonfma.c
   src/f32-igemm/gen/f32-igemm-4x8s4-minmax-neonfma.c
   src/f32-igemm/gen/f32-igemm-6x8s4-minmax-neonfma.c
@@ -68,7 +68,7 @@ SET(NON_PROD_NEONFMA_MICROKERNEL_SRCS
   src/f32-gemm/gen/f32-gemm-8x8s4-minmax-neonfma.c
   src/f32-ibilinear-chw/gen/f32-ibilinear-chw-neonfma-p4.c
   src/f32-ibilinear-chw/gen/f32-ibilinear-chw-neonfma-p16.c
-  src/f32-ibilinear/gen/f32-ibilinear-neonfma-c4.c
+  src/f32-ibilinear/gen/f32-ibilinear-neonfma-u4.c
   src/f32-igemm/gen/f32-igemm-1x8-minmax-neonfma-dup-ld64.c
   src/f32-igemm/gen/f32-igemm-4x8-minmax-neonfma-dup-ld64.c
   src/f32-igemm/gen/f32-igemm-4x8-minmax-neonfma-dup-ld128.c
