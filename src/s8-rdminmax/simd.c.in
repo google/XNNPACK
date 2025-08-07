@@ -42,7 +42,7 @@ $EMIT_MAX = "MAX" in OP
 $XINT8_T = {"S8": "int8_t", "U8": "uint8_t"}[DATATYPE]
 $SIMD_SIZE = {"scalar": 1, "sse41": 16, "neon": 16, "wasmsimd": 16, "sse2": 16, "hvx": 128}[ARCH]
 
-void xnn_${DATATYPE.lower()}_rd${OP.lower()}_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__${ARCH}_c${CHANNELS}(
+void xnn_${DATATYPE.lower()}_rd${OP.lower()}_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__${ARCH}_u${CHANNELS}(
     size_t rows,
     size_t channels,
     const ${XINT8_T}* input,
