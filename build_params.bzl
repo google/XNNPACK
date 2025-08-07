@@ -750,7 +750,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
     "rvvfp16arith": _create_params(
         cond = "//:riscv_fp16_vector_enabled",
         copts = [
-            "-march=rv64gc_zvfh",
+            "-march=rv64gcv_zvfh",
             "-mabi=lp64d",
         ],
     ),

@@ -20,4 +20,9 @@ tools/xngen src/f32-vexp/rational-3-2.c.in -D ARCH=hvx -D BATCH_TILES=32,64,128 
 
 tools/xngen src/f32-vexp/rational-3-2.c.in -D ARCH=avx512f -D BATCH_TILES=16,32,48,64 -D DIV=NR -o src/f32-vexp/gen/f32-vexp-avx512f-rational-3-2-nr.c &
 
+tools/xngen src/f32-vexp/rvv.c.in -D LMUL=1 -o src/f32-vexp/gen/f32-vexp-rvv-exp-u1v.c &
+tools/xngen src/f32-vexp/rvv.c.in -D LMUL=2 -o src/f32-vexp/gen/f32-vexp-rvv-exp-u2v.c &
+tools/xngen src/f32-vexp/rvv.c.in -D LMUL=4 -o src/f32-vexp/gen/f32-vexp-rvv-exp-u4v.c &
+tools/xngen src/f32-vexp/rvv.c.in -D LMUL=8 -o src/f32-vexp/gen/f32-vexp-rvv-exp-u8v.c &
+
 wait
