@@ -12,7 +12,7 @@
 
 #include <wasm_simd128.h>
 
-#include "xnnpack/gemm.h"
+#include "src/xnnpack/gemm.h"
 
 void xnn_f16_gemm_minmax_ukernel_6x8__wasmrelaxedsimd_splat(
     size_t mr,
