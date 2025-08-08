@@ -207,15 +207,15 @@ SET(NON_PROD_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-rsum/gen/f16-rsum-neonfp16arith-u32-acc2.c
   src/f16-rsum/gen/f16-rsum-neonfp16arith-u32-acc4.c
   src/f16-spmm/gen/f16-spmm-8x1-minmax-neonfp16arith-pipelined.c
-  src/f16-spmm/gen/f16-spmm-8x1-minmax-neonfp16arith-x2.c
+  src/f16-spmm/gen/f16-spmm-8x1-minmax-neonfp16arith-u2.c
   src/f16-spmm/gen/f16-spmm-8x1-minmax-neonfp16arith.c
   src/f16-spmm/gen/f16-spmm-16x1-minmax-neonfp16arith-pipelined.c
-  src/f16-spmm/gen/f16-spmm-16x1-minmax-neonfp16arith-x2.c
+  src/f16-spmm/gen/f16-spmm-16x1-minmax-neonfp16arith-u2.c
   src/f16-spmm/gen/f16-spmm-16x1-minmax-neonfp16arith.c
   src/f16-spmm/gen/f16-spmm-24x1-minmax-neonfp16arith-pipelined.c
-  src/f16-spmm/gen/f16-spmm-24x1-minmax-neonfp16arith-x2.c
+  src/f16-spmm/gen/f16-spmm-24x1-minmax-neonfp16arith-u2.c
   src/f16-spmm/gen/f16-spmm-24x1-minmax-neonfp16arith.c
-  src/f16-spmm/gen/f16-spmm-32x1-minmax-neonfp16arith-x2.c
+  src/f16-spmm/gen/f16-spmm-32x1-minmax-neonfp16arith-u2.c
   src/f16-spmm/gen/f16-spmm-32x1-minmax-neonfp16arith.c
   src/f16-vbinary/gen/f16-vadd-neonfp16arith-u8.c
   src/f16-vbinary/gen/f16-vaddc-neonfp16arith-u8.c

@@ -113,7 +113,7 @@ static void init_f32_spmm_config(void) {
       f32_spmm_config.nr = 1;
     }
   #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
-    f32_spmm_config.ukernel = XNN_INIT_SPMM_UKERNEL(xnn_f32_spmm_minmax_ukernel_128x1__hvx_pipelined_x2);
+    f32_spmm_config.ukernel = XNN_INIT_SPMM_UKERNEL(xnn_f32_spmm_minmax_ukernel_128x1__hvx_pipelined_u2);
     f32_spmm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_spmm_config.mr = 128;
     f32_spmm_config.nr = 1;

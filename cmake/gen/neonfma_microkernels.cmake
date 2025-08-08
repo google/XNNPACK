@@ -92,16 +92,16 @@ SET(NON_PROD_NEONFMA_MICROKERNEL_SRCS
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neonfma-rr1-p5-u16-acc2.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neonfma-rr1-p5-u16-acc4.c
   src/f32-spmm/gen/f32-spmm-4x1-minmax-neonfma-pipelined.c
-  src/f32-spmm/gen/f32-spmm-4x1-minmax-neonfma-x2.c
+  src/f32-spmm/gen/f32-spmm-4x1-minmax-neonfma-u2.c
   src/f32-spmm/gen/f32-spmm-4x1-minmax-neonfma.c
   src/f32-spmm/gen/f32-spmm-8x1-minmax-neonfma-pipelined.c
-  src/f32-spmm/gen/f32-spmm-8x1-minmax-neonfma-x2.c
+  src/f32-spmm/gen/f32-spmm-8x1-minmax-neonfma-u2.c
   src/f32-spmm/gen/f32-spmm-8x1-minmax-neonfma.c
   src/f32-spmm/gen/f32-spmm-12x1-minmax-neonfma.c
   src/f32-spmm/gen/f32-spmm-16x1-minmax-neonfma-pipelined.c
-  src/f32-spmm/gen/f32-spmm-16x1-minmax-neonfma-x2.c
+  src/f32-spmm/gen/f32-spmm-16x1-minmax-neonfma-u2.c
   src/f32-spmm/gen/f32-spmm-16x1-minmax-neonfma.c
-  src/f32-spmm/gen/f32-spmm-32x1-minmax-neonfma-x2.c
+  src/f32-spmm/gen/f32-spmm-32x1-minmax-neonfma-u2.c
   src/f32-spmm/gen/f32-spmm-32x1-minmax-neonfma.c
   src/f32-velu/gen/f32-velu-neonfma-rr1-lut16-p3-u4.c
   src/f32-velu/gen/f32-velu-neonfma-rr1-lut16-p3-u8.c

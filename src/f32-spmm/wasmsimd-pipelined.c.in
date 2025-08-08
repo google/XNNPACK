@@ -17,7 +17,7 @@ $WASM_F32X4_MIN={"MINMAX": "wasm_f32x4_min", "PMINMAX": "wasm_f32x4_pmin"}[MINMA
 $WASM_F32X4_MAX={"MINMAX": "wasm_f32x4_max", "PMINMAX": "wasm_f32x4_pmax"}[MINMAX]
 $ISA = "wasmrelaxedsimd" if ARCH == "RELAXED" else "wasmsimd"
 $ARCH_SUFFIX = "_x86" if MINMAX == "PMINMAX" else "_arm"
-void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${ISA}${ARCH_SUFFIX}_pipelined${"_x" + str(UNROLL) if UNROLL > 1 else ""}(
+void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${ISA}${ARCH_SUFFIX}_pipelined${"_u" + str(UNROLL) if UNROLL > 1 else ""}(
     size_t mc,
     size_t nc,
     const float* input,

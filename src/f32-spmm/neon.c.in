@@ -18,7 +18,7 @@ $VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
 #include "src/xnnpack/spmm.h"
 
 
-void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}${"_x" + str(UNROLL) if UNROLL > 1 else ""}(
+void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}${"_u" + str(UNROLL) if UNROLL > 1 else ""}(
     size_t mc,
     size_t nc,
     const float* input,

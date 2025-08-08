@@ -13,7 +13,7 @@ $assert MR % 32 == 0
 #include "src/xnnpack/simd/f32-hvx.h"
 #include "src/xnnpack/spmm.h"
 
-void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__hvx${"_x" + str(UNROLL) if UNROLL > 1 else ""}(
+void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__hvx${"_u" + str(UNROLL) if UNROLL > 1 else ""}(
     size_t mc,
     size_t nc,
     const float* input,

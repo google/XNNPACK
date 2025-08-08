@@ -349,17 +349,17 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/f32-rsum/gen/f32-rsum-neon-u12-acc3.c
   src/f32-rsum/gen/f32-rsum-neon-u16-acc2.c
   src/f32-spmm/gen/f32-spmm-4x1-minmax-neon-pipelined.c
-  src/f32-spmm/gen/f32-spmm-4x1-minmax-neon-x2.c
+  src/f32-spmm/gen/f32-spmm-4x1-minmax-neon-u2.c
   src/f32-spmm/gen/f32-spmm-4x1-minmax-neon.c
   src/f32-spmm/gen/f32-spmm-8x1-minmax-neon-pipelined.c
-  src/f32-spmm/gen/f32-spmm-8x1-minmax-neon-x2.c
+  src/f32-spmm/gen/f32-spmm-8x1-minmax-neon-u2.c
   src/f32-spmm/gen/f32-spmm-8x1-minmax-neon.c
   src/f32-spmm/gen/f32-spmm-12x1-minmax-neon.c
   src/f32-spmm/gen/f32-spmm-16x1-minmax-neon-pipelined.c
-  src/f32-spmm/gen/f32-spmm-16x1-minmax-neon-x2.c
+  src/f32-spmm/gen/f32-spmm-16x1-minmax-neon-u2.c
   src/f32-spmm/gen/f32-spmm-16x1-minmax-neon.c
   src/f32-spmm/gen/f32-spmm-32x1-minmax-neon-pipelined.c
-  src/f32-spmm/gen/f32-spmm-32x1-minmax-neon-x2.c
+  src/f32-spmm/gen/f32-spmm-32x1-minmax-neon-u2.c
   src/f32-vbinary/gen/f32-vadd-neon-u4.c
   src/f32-vbinary/gen/f32-vaddc-neon-u4.c
   src/f32-vbinary/gen/f32-vmax-neon-u4.c

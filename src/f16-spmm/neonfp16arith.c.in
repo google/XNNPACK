@@ -17,7 +17,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include "src/xnnpack/spmm.h"
 
 
-void xnn_f16_spmm_minmax_ukernel_${MR}x${NR}__neonfp16arith${"_x%d" % UNROLL if UNROLL > 1 else ""}(
+void xnn_f16_spmm_minmax_ukernel_${MR}x${NR}__neonfp16arith${"_u%d" % UNROLL if UNROLL > 1 else ""}(
     size_t mc,
     size_t nc,
     const xnn_float16* input,
