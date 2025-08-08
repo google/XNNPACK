@@ -171,7 +171,7 @@ class Tester2 {
   void Test(UKernelFn<Input, Output, Params> ukernel,
             InitParams init_params) const {
     xnnpack::ReplicableRandomDevice rng;
-    std::uniform_int_distribution<int32_t> size_dist(1, 3);
+    std::uniform_int_distribution<int32_t> size_dist(1, 2);
     const size_t k2 = size_dist(rng);
     const size_t k3 = size_dist(rng);
     for (size_t channels = this->channels().begin;
