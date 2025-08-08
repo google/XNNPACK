@@ -420,7 +420,7 @@ static void init_f16_f32acc_rsum_config(void) {
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
       f16_f32acc_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f16_f32acc_rsum_ukernel__neonfp16arith_u32_acc4);
-      f16_f32acc_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f16_f32acc_rdsum_ukernel_7p7x__neonfp16arith_u16);
+      f16_f32acc_rsum_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f16_f32acc_rdsum_ukernel_7p7x__neonfp16arith_u16);
     }
   #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64)
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -438,11 +438,11 @@ static void init_f16_f32acc_rsum_config(void) {
     }
     #if XNN_ENABLE_AVX512SKX
       if ((hardware_config->arch_flags & xnn_arch_x86_avx512skx)) {
-        f16_f32acc_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_u64);
+        f16_f32acc_rsum_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_u64);
       } else
     #endif
     if ((hardware_config->arch_flags & xnn_arch_x86_f16c)) {
-      f16_f32acc_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f16_f32acc_rdsum_ukernel_7p7x__f16c_u32);
+      f16_f32acc_rsum_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f16_f32acc_rdsum_ukernel_7p7x__f16c_u32);
     }
   #endif
 

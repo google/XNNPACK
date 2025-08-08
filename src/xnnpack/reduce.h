@@ -52,6 +52,7 @@ extern "C" {
                             size_t input_stride2, size_t input_stride3,       \
                             const datatype_in* zero, datatype_out* output,    \
                             const params_type* params);
+#include "src/f16-f32acc-rdsum/f16-f32acc-rdsum.inc"
 #include "src/f32-rdsum/f32-rdsum.inc"
 #undef XNN_UKERNEL
 
@@ -61,7 +62,6 @@ extern "C" {
                             const datatype_in* input, size_t input_stride,  \
                             const datatype_in* zero, datatype_out* output,  \
                             const params_type* params);
-#include "src/f16-f32acc-rdsum/f16-f32acc-rdsum.inc"
 #include "src/qs8-rdsum/qs8-rdsum-minmax-fp32.inc"
 #include "src/qu8-rdsum/qu8-rdsum.inc"
 #undef XNN_UKERNEL

@@ -760,7 +760,8 @@ typedef void (*xnn_u8_reduce_ukernel_fn)(size_t batch, const uint8_t* input,
 // RDSUM: Discontiguous Reduce-Sum
 
 typedef void (*xnn_f16_f32acc_rdsum_ukernel_fn)(
-    size_t rows, size_t channels, const xnn_float16* input, size_t input_stride,
+    size_t channels, size_t k1, size_t k2, size_t k3, const xnn_float16* input,
+    size_t input_stride1, size_t input_stride2, size_t input_stride3,
     const xnn_float16* zero, float* output,
     const struct xnn_f16_f32acc_scale_params* params);
 

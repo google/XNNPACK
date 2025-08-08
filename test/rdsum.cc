@@ -248,10 +248,6 @@ class Tester2 {
 };
 
 struct Kernel {
-  explicit Kernel(xnn_f16_f32acc_rdsum_ukernel_fn fn,
-                  xnn_init_f16_f32acc_scale_params_fn init_params) {
-    dispatch = [=](const Tester& tester) { tester.Test(fn, init_params); };
-  }
   explicit Kernel(xnn_qs8_rdsum_ukernel_fn fn,
                   xnn_init_qs8_rsum_params_fn init_params) {
     dispatch = [=](const Tester& tester) { tester.Test(fn, init_params); };
@@ -264,6 +260,10 @@ struct Kernel {
 };
 
 struct Kernel2 {
+  explicit Kernel2(xnn_f16_f32acc_rdsum_ukernel_fn fn,
+                   xnn_init_f16_f32acc_scale_params_fn init_params) {
+    dispatch = [=](const Tester2& tester) { tester.Test(fn, init_params); };
+  }
   explicit Kernel2(xnn_f32_rdsum_ukernel_fn fn,
                    xnn_init_f32_scale_params_fn init_params) {
     dispatch = [=](const Tester2& tester) { tester.Test(fn, init_params); };
@@ -299,7 +299,6 @@ KernelInfo kernels[] = {
                     datatype_in, datatype_out, params_type, init_params)      \
   {#ukernel,     arch_flags,  Kernel{ukernel, init_params}, row_tile,         \
    channel_tile, vector_tile, sizeof(datatype_in)},
-#include "src/f16-f32acc-rdsum/f16-f32acc-rdsum.inc"
 #include "src/qs8-rdsum/qs8-rdsum-minmax-fp32.inc"
 #include "src/qu8-rdsum/qu8-rdsum.inc"
 #undef XNN_UKERNEL
@@ -310,6 +309,7 @@ KernelInfo2 kernels2[] = {
                     datatype_in, datatype_out, params_type, init_params)      \
   {#ukernel,     arch_flags,  Kernel2{ukernel, init_params}, row_tile,        \
    channel_tile, vector_tile, sizeof(datatype_in)},
+#include "src/f16-f32acc-rdsum/f16-f32acc-rdsum.inc"
 #include "src/f32-rdsum/f32-rdsum.inc"
 #undef XNN_UKERNEL
 };

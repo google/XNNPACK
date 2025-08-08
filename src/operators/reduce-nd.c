@@ -567,7 +567,7 @@ enum xnn_status xnn_create_reduce_nd(
     return status;
   }
 
-  if (datatype == xnn_datatype_fp32 &&
+  if ((datatype == xnn_datatype_fp16 || datatype == xnn_datatype_fp32) &&
       (reduce_operator_type == xnn_reduce_sum ||
        reduce_operator_type == xnn_reduce_mean)) {
     (*reduce_op_out)->ukernel.type = xnn_microkernel_type_reduce2;
