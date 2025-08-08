@@ -14,7 +14,7 @@ class NeonDot(neonfma_template.NeonFma):
     return 'neondot'
 
   def a_registers(self, idx):
-    registers = ['2', '3', '4', '5', '11']
+    registers = ['2', '3', '4', '5', '11', '26', '27']
     assert idx < len(registers)
     return registers[idx]
 
@@ -53,7 +53,7 @@ class NeonDot(neonfma_template.NeonFma):
     )
 
   def zp_scale(self, pos):
-    regs = ['30', '31']
+    regs = ['28', '29', '30', '31']
     return regs[pos]
 
   # kc = round_up_po2(kc, channels)
@@ -190,6 +190,17 @@ class NeonDot(neonfma_template.NeonFma):
     else:
       self.load_simd_register(
           q=self.zp_scale(0), ptr=self.quantization_params_register(), offset=0
+      )
+    if self.m > 6:
+      self.load_simd_register_pair(
+          q0=self.zp_scale(2),
+          q1=self.zp_scale(3),
+          ptr=self.quantization_params_register(),
+          offset=32,
+      )
+    elif self.m > 4:
+      self.load_simd_register(
+          q=self.zp_scale(2), ptr=self.quantization_params_register(), offset=32
       )
     for nr in range(0, self.n - 1, 2):
       self.load_simd_register_pair(

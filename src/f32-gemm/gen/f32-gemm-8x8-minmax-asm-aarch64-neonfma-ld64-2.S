@@ -38,8 +38,8 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld64_2
       add x15, x14, x7
       add x19, x15, x7
       add x23, x19, x7
-      add x24, x23, x7
-      add x26, x24, x7
+      add x27, x23, x7
+      add x26, x27, x7
       add x28, x26, x7
 
       cmp x0, 2
@@ -56,9 +56,9 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld64_2
 
       cmp x0, 6
       csel  x21, x12, x21, LO
-      csel  x24, x23, x24, LO
+      csel  x27, x23, x27, LO
       csel  x22, x21, x22, LS
-      csel  x26, x24, x26, LS
+      csel  x26, x27, x26, LS
 
       cmp x0, 8
       csel  x25, x22, x25, LO
@@ -214,7 +214,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld64_2
       stp q15, q16, [x15], #32
       stp q17, q18, [x19], #32
       stp q19, q20, [x23], #32
-      stp q21, q22, [x24], #32
+      stp q21, q22, [x27], #32
       stp q23, q24, [x26], #32
       stp q25, q26, [x28], #32
       sub x3, x3, x2
@@ -237,7 +237,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld64_2
       str q15, [x15], #16
       str q17, [x19], #16
       str q19, [x23], #16
-      str q21, [x24], #16
+      str q21, [x27], #16
       str q23, [x26], #16
       str q25, [x28], #16
       mov v11.16b, v12.16b
@@ -257,7 +257,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld64_2
       str d15, [x15], #8
       str d17, [x19], #8
       str d19, [x23], #8
-      str d21, [x24], #8
+      str d21, [x27], #8
       str d23, [x26], #8
       str d25, [x28], #8
       dup d11, v11.d[1]
@@ -277,7 +277,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld64_2
       str s15, [x15], #0
       str s17, [x19], #0
       str s19, [x23], #0
-      str s21, [x24], #0
+      str s21, [x27], #0
       str s23, [x26], #0
       str s25, [x28], #0
 
