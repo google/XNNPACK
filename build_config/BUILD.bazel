@@ -110,9 +110,17 @@ config_setting(
 )
 
 config_setting(
-    name = "windows_x86_64_clang",
+    name = "windows_x86_64_clangcl",
     values = {
         "compiler": "clang-cl",
+        "cpu": "x64_windows",
+    },
+)
+
+config_setting(
+    name = "windows_x86_64_clang",
+    values = {
+        "compiler": "clang",
         "cpu": "x64_windows",
     },
 )
@@ -348,6 +356,7 @@ selects.config_setting_group(
         ":tvos_x86_64",
         ":watchos_x86_64",
         ":windows_x86_64",
+        ":windows_x86_64_clangcl",
         ":windows_x86_64_clang",
         ":windows_x86_64_mingw",
         ":windows_x86_64_msys",
@@ -364,6 +373,7 @@ selects.config_setting_group(
         ":macos_x86_64_legacy",
         ":tvos_x86_64",
         ":watchos_x86_64",
+        ":windows_x86_64_clangcl",
         ":windows_x86_64_clang",
         ":windows_x86_64_mingw",
     ],
