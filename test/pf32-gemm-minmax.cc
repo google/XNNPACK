@@ -347,3 +347,106 @@ std::vector<GemmTestParams> CreateTests1(
   #endif  // XNN_ENABLE_KLEIDIAI
 #endif  // XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
 
+
+#if XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
+  #if XNN_ENABLE_KLEIDIAI
+  INSTANTIATE_TEST_SUITE_P(
+      PF32_GEMM_MINMAX_1X32__NEONSME, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/1,
+          /*adj_k_block=*/1,
+          /*mr=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme) == xnn_arch_arm_sme) {
+          return xnn_pf32_gemm_minmax_ukernel_1x32__neonsme_get_mr();
+        } else {
+          return 0;
+        }
+      }
+  , /*nr=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme) == xnn_arch_arm_sme) {
+          return xnn_pf32_gemm_minmax_ukernel_1x32__neonsme_get_nr();
+        } else {
+          return 0;
+        }
+      }
+  , /*kr=*/1, /*sr=*/1,
+          /*mr_packed=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme) == xnn_arch_arm_sme) {
+          return xnn_pf32_gemm_minmax_ukernel_1x32__neonsme_get_mr();
+        } else {
+          return 0;
+        }
+      }
+  ,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test_PF32(xnn_pf32_gemm_minmax_ukernel_1x32__neonsme,
+                        xnn_init_f32_minmax_scalar_params,
+                        xnn_pack_kai_f32_weights_and_biases,
+                        xnn_packed_stride_kai_f32_weights_and_biases);
+          },
+          xnn_arch_arm_sme)),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+
+  INSTANTIATE_TEST_SUITE_P(
+      PF32_GEMM_MINMAX_32X32__NEONSME, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/1,
+          /*adj_k_block=*/1,
+          /*mr=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme) == xnn_arch_arm_sme) {
+          return xnn_pf32_gemm_minmax_ukernel_32x32__neonsme_get_mr();
+        } else {
+          return 0;
+        }
+      }
+  , /*nr=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme) == xnn_arch_arm_sme) {
+          return xnn_pf32_gemm_minmax_ukernel_32x32__neonsme_get_nr();
+        } else {
+          return 0;
+        }
+      }
+  , /*kr=*/1, /*sr=*/1,
+          /*mr_packed=*/[]() -> size_t {
+        const struct xnn_hardware_config* hardware_config =
+              xnn_init_hardware_config();
+        if (hardware_config != nullptr && (hardware_config->arch_flags & xnn_arch_arm_sme) == xnn_arch_arm_sme) {
+          return xnn_pf32_gemm_minmax_ukernel_32x32__neonsme_get_mr();
+        } else {
+          return 0;
+        }
+      }
+  ,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test_PF32(xnn_pf32_gemm_minmax_ukernel_32x32__neonsme,
+                        xnn_init_f32_minmax_scalar_params,
+                        xnn_pack_kai_f32_weights_and_biases,
+                        xnn_packed_stride_kai_f32_weights_and_biases);
+          },
+          xnn_arch_arm_sme)),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  #endif  // XNN_ENABLE_KLEIDIAI
+#endif  // XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
+
