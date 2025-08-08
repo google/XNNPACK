@@ -13,8 +13,8 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-scalar-u4.c
   src/f16-qs8-vcvt/gen/f16-qs8-vcvt-scalar-imagic-u4.c
   src/f16-qu8-vcvt/gen/f16-qu8-vcvt-scalar-imagic-u4.c
-  src/f16-rdminmax/gen/f16-rdmax-2p2x-scalar-c2.c
-  src/f16-rdminmax/gen/f16-rdmin-2p2x-scalar-c2.c
+  src/f16-rdminmax/gen/f16-rdmax-2p2x-scalar-u2.c
+  src/f16-rdminmax/gen/f16-rdmin-2p2x-scalar-u2.c
   src/f16-rminmax/gen/f16-rmax-scalar-u2-acc2.c
   src/f16-rminmax/gen/f16-rmin-scalar-u2-acc2.c
   src/f16-rminmax/gen/f16-rminmax-scalar-u2-acc2.c
@@ -73,8 +73,8 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-scalar-imagic-u4.c
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-scalar-lrintf-u4.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-scalar-rr2-p5-u4-acc2.c
-  src/f32-rdminmax/gen/f32-rdmax-2p2x-scalar-c2.c
-  src/f32-rdminmax/gen/f32-rdmin-2p2x-scalar-c2.c
+  src/f32-rdminmax/gen/f32-rdmax-2p2x-scalar-u2.c
+  src/f32-rdminmax/gen/f32-rdmin-2p2x-scalar-u2.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-scalar.c
   src/f32-rminmax/gen/f32-rmax-scalar-u4-acc4.c
   src/f32-rminmax/gen/f32-rmin-scalar-u4-acc4.c
@@ -197,8 +197,8 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/qu8-vrpreluc/gen/qu8-vrpreluc-scalar-u8.c
   src/s8-ibilinear/gen/s8-ibilinear-scalar-u1.c
   src/s8-maxpool/gen/s8-maxpool-9p-minmax-scalar-u1.c
-  src/s8-rdminmax/gen/s8-rdmax-2p2x-scalar-c2.c
-  src/s8-rdminmax/gen/s8-rdmin-2p2x-scalar-c2.c
+  src/s8-rdminmax/gen/s8-rdmax-2p2x-scalar-u2.c
+  src/s8-rdminmax/gen/s8-rdmin-2p2x-scalar-u2.c
   src/s8-rminmax/gen/s8-rmax-scalar-u2-acc2.c
   src/s8-rminmax/gen/s8-rmin-scalar-u2-acc2.c
   src/s8-rminmax/gen/s8-rminmax-scalar-u2-acc2.c
@@ -206,8 +206,8 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/u8-ibilinear/gen/u8-ibilinear-scalar-u1.c
   src/u8-lut32norm/u8-lut32norm-scalar.c
   src/u8-maxpool/gen/u8-maxpool-9p-minmax-scalar-u1.c
-  src/u8-rdminmax/gen/u8-rdmax-2p2x-scalar-c2.c
-  src/u8-rdminmax/gen/u8-rdmin-2p2x-scalar-c2.c
+  src/u8-rdminmax/gen/u8-rdmax-2p2x-scalar-u2.c
+  src/u8-rdminmax/gen/u8-rdmin-2p2x-scalar-u2.c
   src/u8-rminmax/gen/u8-rmax-scalar-u2-acc2.c
   src/u8-rminmax/gen/u8-rmin-scalar-u2-acc2.c
   src/u8-rminmax/gen/u8-rminmax-scalar-u2-acc2.c

@@ -16,7 +16,7 @@ $EMIT_MIN = "MIN" in OP
 $EMIT_MAX = "MAX" in OP
 $SIMD_SIZE = {"scalar": 1, "sse2": 4, "neon": 4, "wasmsimd": 4, "avx": 8, "avx512f": 16, "hvx": 32}[ARCH]
 
-void xnn_f32_rd${OP.lower()}_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__${ARCH}_c${CHANNELS}(
+void xnn_f32_rd${OP.lower()}_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__${ARCH}_u${CHANNELS}(
     size_t rows,
     size_t channels,
     const float* input,
