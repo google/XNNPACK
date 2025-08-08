@@ -36,7 +36,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld32_2
       add x15, x14, x7
       add x19, x15, x7
       add x23, x19, x7
-      add x24, x23, x7
+      add x27, x23, x7
 
       cmp x0, 2
       csel  x9, x3, x9, LO
@@ -52,7 +52,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld32_2
 
       cmp x0, 6
       csel  x21, x12, x21, LO
-      csel  x24, x23, x24, LO
+      csel  x27, x23, x27, LO
 
 .Louter_loop:
       # Initialize k counter.
@@ -131,7 +131,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld32_2
       stp q15, q16, [x15], #32
       stp q17, q18, [x19], #32
       stp q19, q20, [x23], #32
-      stp q21, q22, [x24], #32
+      stp q21, q22, [x27], #32
       sub x3, x3, x2
       sub x9, x9, x2
       sub x10, x10, x2
@@ -150,7 +150,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld32_2
       str q15, [x15], #16
       str q17, [x19], #16
       str q19, [x23], #16
-      str q21, [x24], #16
+      str q21, [x27], #16
       mov v11.16b, v12.16b
       mov v13.16b, v14.16b
       mov v15.16b, v16.16b
@@ -166,7 +166,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld32_2
       str d15, [x15], #8
       str d17, [x19], #8
       str d19, [x23], #8
-      str d21, [x24], #8
+      str d21, [x27], #8
       dup d11, v11.d[1]
       dup d13, v13.d[1]
       dup d15, v15.d[1]
@@ -182,7 +182,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld32_2
       str s15, [x15], #0
       str s17, [x19], #0
       str s19, [x23], #0
-      str s21, [x24], #0
+      str s21, [x27], #0
 
 .Lreturn:
       # Restore the callee saved GP registers.
