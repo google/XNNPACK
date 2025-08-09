@@ -995,8 +995,7 @@ struct ConstantOrFunction {
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/packw.h"
 
-{constant_or_function}
-""".format(specification=options.spec, generator=sys.argv[0], constant_or_function=constant_or_function)
+""".format(specification=options.spec, generator=sys.argv[0])
 
     test_outputs = collections.defaultdict(str)
     bench_outputs = benches

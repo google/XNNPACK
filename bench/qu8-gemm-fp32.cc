@@ -22,21 +22,6 @@
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/packw.h"
 
-namespace {
-
-struct ConstantOrFunction {
-  ConstantOrFunction(size_t x) : fn([x]() { return x; }) {}  //NOLINT
-  ConstantOrFunction(int x) : fn([x]() { return x; }) {}  //NOLINT
-  template <typename Fn>
-  ConstantOrFunction(Fn fn) : fn(std::move(fn)) {}  //NOLINT
-
-  std::function<size_t()> fn;
-
-  operator size_t() const { return fn(); }  //NOLINT
-};
-
-}  // namespace
-
 
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

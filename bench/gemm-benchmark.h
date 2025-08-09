@@ -20,6 +20,17 @@
 #include "bench/utils.h"
 #include <benchmark/benchmark.h>
 
+struct ConstantOrFunction {
+  ConstantOrFunction(size_t x) : fn([x]() { return x; }) {}  //NOLINT
+  ConstantOrFunction(int x) : fn([x]() { return x; }) {}  //NOLINT
+  template <typename Fn>
+  ConstantOrFunction(Fn fn) : fn(std::move(fn)) {}  //NOLINT
+
+  std::function<size_t()> fn;
+
+  operator size_t() const { return fn(); }  //NOLINT
+};
+
 void GEMMBenchmark(benchmark::State& state, xnn_qs8_gemm_minmax_ukernel_fn gemm,
                    xnn_init_qs8_conv_minmax_params_fn init_params,
                    xnn_pack_qs8_gemm_fn pack, size_t mr, size_t nr, size_t kr,
@@ -127,14 +138,14 @@ void GEMMBenchmark(benchmark::State& state,
                    xnn_init_f32_minmax_params_fn init_minmax_params,
                    xnn_pack_weights_and_biases_fn pack_weights,
                    xnn_packed_stride_weights_and_biases_fn packed_stride,
-                   size_t mr, size_t nr, size_t kr, size_t sr, size_t mr_packed,
+                   ConstantOrFunction mr, ConstantOrFunction nr, size_t kr, size_t sr, ConstantOrFunction mr_packed,
                    uint64_t arch_flags = 0);
 void GEMMBenchmark(benchmark::State& state,
                    xnn_pf16_gemm_minmax_ukernel_fn gemm,
                    xnn_init_f16_minmax_params_fn init_minmax_params,
                    xnn_pack_weights_and_biases_fn pack_weights,
                    xnn_packed_stride_weights_and_biases_fn packed_stride,
-                   size_t mr, size_t nr, size_t kr, size_t sr, size_t mr_packed,
+                   ConstantOrFunction mr, ConstantOrFunction nr, size_t kr, size_t sr, ConstantOrFunction mr_packed,
                    uint64_t arch_flags = 0);
 #endif  // XNN_ENABLE_KLEIDIAI
 
