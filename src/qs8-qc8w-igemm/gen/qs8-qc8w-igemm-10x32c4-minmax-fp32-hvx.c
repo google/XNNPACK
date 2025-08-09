@@ -18,7 +18,6 @@
 #include "src/xnnpack/gemm.h"
 #include "src/xnnpack/intrinsics-polyfill.h"  // for Q6_V_vstu_variable
 #include "src/xnnpack/math.h"
-#include "src/xnnpack/unaligned.h"
 
 
 // multiply vacc by vscale and return result as int
@@ -74,10 +73,11 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_10x32c4__hvx(
   assert(kc != 0);
   assert(ks != 0);
   assert(ks % (10 * sizeof(void*)) == 0);
-  assert(a_offset % sizeof(int8_t) == 0);
   assert(a != NULL);
+  assert(((uintptr_t) (a) % sizeof(int32_t)) == 0);
   assert(w != NULL);
   assert(c != NULL);
+  assert(a_offset % sizeof(int32_t) == 0);
 
   kc = round_up_po2(kc, 4 * sizeof(int8_t));
   int8_t* c0 = c;
