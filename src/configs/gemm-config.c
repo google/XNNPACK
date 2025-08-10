@@ -651,12 +651,12 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
           case xnn_uarch_cortex_x3:
           case xnn_uarch_neoverse_v2:
             // TODO(fbarchard): Implement asm with indexed inputs
-            f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc2);
-            f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(6)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_lane_ld128);
+            f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_2);
+            f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(8)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld128_2);
             f32_gemm_config->init.f32 = xnn_init_f32_minmax_scalar_params;
             f32_gemm_config->pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_x32_packw_gemm_gio_ukernel_x8__neon_u2;
             f32_gemm_config->pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane_u4_prfm;
-            f32_gemm_config->mr = 6;
+            f32_gemm_config->mr = 8;
             f32_gemm_config->nr = 8;
             break;
           case xnn_uarch_oryon:
