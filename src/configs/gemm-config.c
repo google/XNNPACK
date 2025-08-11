@@ -678,13 +678,13 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
           case xnn_uarch_neoverse_n2:
           case xnn_uarch_neoverse_v1:
           default:
-            f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc4);
-            f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128);
-            f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(6)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128);
+            f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_2);
+            f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128_2);
+            f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(7)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_7x8__asm_aarch64_neonfma_ld128_2);
             f32_gemm_config->init.f32 = xnn_init_f32_minmax_scalar_params;
             f32_gemm_config->pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f32_gemm_gio_w;
             f32_gemm_config->pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane_u4_prfm;
-            f32_gemm_config->mr = 6;
+            f32_gemm_config->mr = 7;
             f32_gemm_config->nr = 8;
             break;
         }
