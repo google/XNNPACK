@@ -45,17 +45,17 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x16c4__asm_aarch64_neondot_
       # Initialize k counter.
       mov x20, x2
       # Initialize accumulators with k_sum * input zero point.
-      ldr q30, [x24, 0]
+      ldr q28, [x24, 0]
       ldp q2, q3, [x5, 0]
       ldp q4, q5, [x5, 32]
-      mul v12.4s, v2.4s, v30.s[0]
-      mul v16.4s, v2.4s, v30.s[2]
-      mul v13.4s, v3.4s, v30.s[0]
-      mul v17.4s, v3.4s, v30.s[2]
-      mul v14.4s, v4.4s, v30.s[0]
-      mul v18.4s, v4.4s, v30.s[2]
-      mul v15.4s, v5.4s, v30.s[0]
-      mul v19.4s, v5.4s, v30.s[2]
+      mul v12.4s, v2.4s, v28.s[0]
+      mul v16.4s, v2.4s, v28.s[2]
+      mul v13.4s, v3.4s, v28.s[0]
+      mul v17.4s, v3.4s, v28.s[2]
+      mul v14.4s, v4.4s, v28.s[0]
+      mul v18.4s, v4.4s, v28.s[2]
+      mul v15.4s, v5.4s, v28.s[0]
+      mul v19.4s, v5.4s, v28.s[2]
       add x5, x5, 64
 
       # Are there at least 8 bytes?
@@ -133,14 +133,14 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x16c4__asm_aarch64_neondot_
       scvtf v18.4s, v18.4s, #4
       scvtf v19.4s, v19.4s, #4
       # Multiply by input scale.
-      fmul v12.4s, v12.4s, v30.s[1]
-      fmul v16.4s, v16.4s, v30.s[3]
-      fmul v13.4s, v13.4s, v30.s[1]
-      fmul v17.4s, v17.4s, v30.s[3]
-      fmul v14.4s, v14.4s, v30.s[1]
-      fmul v18.4s, v18.4s, v30.s[3]
-      fmul v15.4s, v15.4s, v30.s[1]
-      fmul v19.4s, v19.4s, v30.s[3]
+      fmul v12.4s, v12.4s, v28.s[1]
+      fmul v16.4s, v16.4s, v28.s[3]
+      fmul v13.4s, v13.4s, v28.s[1]
+      fmul v17.4s, v17.4s, v28.s[3]
+      fmul v14.4s, v14.4s, v28.s[1]
+      fmul v18.4s, v18.4s, v28.s[3]
+      fmul v15.4s, v15.4s, v28.s[1]
+      fmul v19.4s, v19.4s, v28.s[3]
       # Load weights scale.
       ldp q2, q3, [x5, 0]
       ldp q4, q5, [x5, 32]

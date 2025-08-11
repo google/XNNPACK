@@ -55,7 +55,7 @@ class Aarch64(arm_template.Arm):
         'x15',
         'x19',
         'x23',
-        'x24',
+        'x27',
         'x26',
         'x28',
     ]
