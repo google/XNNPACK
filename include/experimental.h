@@ -79,6 +79,16 @@ enum xnn_status xnn_create_threadpool(
   xnn_scheduler_t scheduler,
   xnn_threadpool_t* threadpool_out);
 
+/// Create a Threadpool object from a Scheduler.
+///
+/// @param scheduler - Scheduler to implement parallel task execution.
+/// @param flags - Binary feature flags of the threadpool. No flags are currently supported.
+/// @param threadpool_out - The created Threadpool object.
+enum xnn_status xnn_create_threadpool_v2(
+  xnn_scheduler_t scheduler,
+  uint32_t flags,
+  xnn_threadpool_t* threadpool_out);
+
 /// Destroy a Threadpool object
 ///
 /// @param subgraph - the Threadpool object to destroy.
