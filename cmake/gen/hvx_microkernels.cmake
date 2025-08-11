@@ -23,8 +23,8 @@ SET(PROD_HVX_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-5x64-minmax-hvx-broadcast.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-hvx-u256.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-hvx-rr2-p5-u128-acc2.c
-  src/f32-rdminmax/gen/f32-rdmax-2p2x-hvx-c32.c
-  src/f32-rdminmax/gen/f32-rdmin-2p2x-hvx-c32.c
+  src/f32-rdminmax/gen/f32-rdmax-2p2x-hvx-u32.c
+  src/f32-rdminmax/gen/f32-rdmin-2p2x-hvx-u32.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-hvx-u128.c
   src/f32-rminmax/gen/f32-rmax-hvx-u64-acc2.c
   src/f32-rminmax/gen/f32-rmin-hvx-u64-acc2.c
@@ -71,13 +71,13 @@ SET(PROD_HVX_MICROKERNEL_SRCS
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-3x128c4-minmax-fp32-hvx.c
   src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u128.c
   src/qs8-vaddc/gen/qs8-vaddc-minmax-hvx-u128.c
-  src/s8-rdminmax/gen/s8-rdmax-2p2x-hvx-c128.c
-  src/s8-rdminmax/gen/s8-rdmin-2p2x-hvx-c128.c
+  src/s8-rdminmax/gen/s8-rdmax-2p2x-hvx-u128.c
+  src/s8-rdminmax/gen/s8-rdmin-2p2x-hvx-u128.c
   src/s8-rminmax/gen/s8-rmax-hvx-u256-acc2.c
   src/s8-rminmax/gen/s8-rmin-hvx-u256-acc2.c
   src/s8-rminmax/gen/s8-rminmax-hvx-u256-acc2.c
-  src/u8-rdminmax/gen/u8-rdmax-2p2x-hvx-c128.c
-  src/u8-rdminmax/gen/u8-rdmin-2p2x-hvx-c128.c
+  src/u8-rdminmax/gen/u8-rdmax-2p2x-hvx-u128.c
+  src/u8-rdminmax/gen/u8-rdmin-2p2x-hvx-u128.c
   src/u8-rminmax/gen/u8-rmax-hvx-u256-acc2.c
   src/u8-rminmax/gen/u8-rmin-hvx-u256-acc2.c
   src/u8-rminmax/gen/u8-rminmax-hvx-u256-acc2.c

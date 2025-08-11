@@ -20,8 +20,8 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-sse2-u32.c
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-sse2-u32.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-sse2-rr2-p5-u16-acc2.c
-  src/f32-rdminmax/gen/f32-rdmax-2p2x-sse2-c32.c
-  src/f32-rdminmax/gen/f32-rdmin-2p2x-sse2-c32.c
+  src/f32-rdminmax/gen/f32-rdmax-2p2x-sse2-u32.c
+  src/f32-rdminmax/gen/f32-rdmin-2p2x-sse2-u32.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-sse2-u16.c
   src/f32-rsum/gen/f32-rsum-sse2-u16-acc4.c
   src/f32-vapproxgelu/gen/f32-vapproxgelu-sse2-rational-12-10-div.c
@@ -94,8 +94,8 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/s8-vclamp/s8-vclamp-sse2-u64.c
   src/u8-ibilinear/gen/u8-ibilinear-sse2-u8.c
   src/u8-maxpool/gen/u8-maxpool-9p-minmax-sse2-u16.c
-  src/u8-rdminmax/gen/u8-rdmax-2p2x-sse2-c32.c
-  src/u8-rdminmax/gen/u8-rdmin-2p2x-sse2-c32.c
+  src/u8-rdminmax/gen/u8-rdmax-2p2x-sse2-u32.c
+  src/u8-rdminmax/gen/u8-rdmin-2p2x-sse2-u32.c
   src/u8-rminmax/gen/u8-rmax-sse2-u32-acc2.c
   src/u8-rminmax/gen/u8-rmin-sse2-u32-acc2.c
   src/u8-rminmax/gen/u8-rminmax-sse2-u32-acc2.c
