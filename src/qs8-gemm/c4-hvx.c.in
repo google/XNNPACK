@@ -10,6 +10,7 @@ $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 $assert not DATATYPE in ["QD8", "QC4"] or not REQUANTIZATION
 #include <assert.h>
 #include <math.h>  // for lrintf
+#include <stdio.h>  // for printf
 
 #include <hexagon_types.h>
 #include <hexagon_protos.h>
@@ -102,10 +103,24 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
         c${M} = c${M-1};
       }
 
+  // TODO: Use log when fixed
+  {
+    static int warning_unaligned = 0;
+    if ((a_stride & (sizeof(int32_t) - 1)) != 0 && warning_unaligned == 0) {
+      printf("HEXAGON GEMM a_stride unaligned.");
+      warning_unaligned = 1;
+    }
+    static int warning_a_unaligned = 0;
+    if ((((intptr_t) a) & (sizeof(int32_t) - 1)) != 0 && warning_a_unaligned == 0) {
+      printf("HEXAGON GEMM a unaligned.");
+      warning_a_unaligned = 1;
+    }
+    fflush(stdout);
+  }
+
   const HVX_Vector voutput_zero_point = Q6_Vh_vsplat_R(params->${PARAMS_STRUCT}.output_zero_point);
   const HVX_Vector voutput_min = Q6_Vb_vsplat_R(params->${PARAMS_STRUCT}.output_min);
   const HVX_Vector voutput_max = Q6_Vb_vsplat_R(params->${PARAMS_STRUCT}.output_max);
-
   do {
     $for N in range(0, NR, 32):
       HVX_Vector vacc0x${N//32} = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
@@ -114,18 +129,31 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
         HVX_Vector vacc${M}x${N//32} = vacc0x${N//32};
 
     size_t k = kc;
-    for (; k >= 4 * sizeof(int8_t); k -= 4 * sizeof(int8_t)) {
-      $for M in range(MR):
-        const HVX_Vector va${M}x0123 = Q6_V_vsplat_R(unaligned_load_s32(a${M})); a${M} += 4;
+    if (((((intptr_t) a) | a_stride) & (sizeof(int32_t) - 1)) != 0) {
+      for (; k >= 4 * sizeof(int8_t); k -= 4 * sizeof(int8_t)) {
+        $for M in range(MR):
+          const HVX_Vector va${M}x0123 = Q6_V_vsplat_R(unaligned_load_s32(a${M})); a${M} += 4;
 
-      $for N in range(0, NR, 32):
-        const HVX_Vector vb${N//32}x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
-
-      $for M in range(MR):
         $for N in range(0, NR, 32):
-          vacc${M}x${N//32} = Q6_Vw_vrmpyacc_VwVbVb(vacc${M}x${N//32}, va${M}x0123, vb${N//32}x0123);
-    }
+          const HVX_Vector vb${N//32}x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
 
+        $for M in range(MR):
+          $for N in range(0, NR, 32):
+            vacc${M}x${N//32} = Q6_Vw_vrmpyacc_VwVbVb(vacc${M}x${N//32}, va${M}x0123, vb${N//32}x0123);
+      }
+    } else {
+      for (; k >= 4 * sizeof(int8_t); k -= 4 * sizeof(int8_t)) {
+        $for M in range(MR):
+          const HVX_Vector va${M}x0123 = Q6_V_vsplat_R(*((const int32_t*)a${M})); a${M} += 4;
+
+        $for N in range(0, NR, 32):
+          const HVX_Vector vb${N//32}x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+
+        $for M in range(MR):
+          $for N in range(0, NR, 32):
+            vacc${M}x${N//32} = Q6_Vw_vrmpyacc_VwVbVb(vacc${M}x${N//32}, va${M}x0123, vb${N//32}x0123);
+      }
+    }
     $for N in range(0, NR, 32):
       const HVX_Vector vscale${N//32} = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
       $for M in range(MR):

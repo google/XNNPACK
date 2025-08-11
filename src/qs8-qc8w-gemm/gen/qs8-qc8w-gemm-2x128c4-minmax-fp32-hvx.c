@@ -10,6 +10,7 @@
 
 #include <assert.h>
 #include <math.h>  // for lrintf
+#include <stdio.h>  // for printf
 
 #include <hexagon_types.h>
 #include <hexagon_protos.h>
@@ -85,10 +86,24 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x128c4__hvx(
     c1 = c0;
   }
 
+  // TODO: Use log when fixed
+  {
+    static int warning_unaligned = 0;
+    if ((a_stride & (sizeof(int32_t) - 1)) != 0 && warning_unaligned == 0) {
+      printf("HEXAGON GEMM a_stride unaligned.");
+      warning_unaligned = 1;
+    }
+    static int warning_a_unaligned = 0;
+    if ((((intptr_t) a) & (sizeof(int32_t) - 1)) != 0 && warning_a_unaligned == 0) {
+      printf("HEXAGON GEMM a unaligned.");
+      warning_a_unaligned = 1;
+    }
+    fflush(stdout);
+  }
+
   const HVX_Vector voutput_zero_point = Q6_Vh_vsplat_R(params->fp32_scalar.output_zero_point);
   const HVX_Vector voutput_min = Q6_Vb_vsplat_R(params->fp32_scalar.output_min);
   const HVX_Vector voutput_max = Q6_Vb_vsplat_R(params->fp32_scalar.output_max);
-
   do {
     HVX_Vector vacc0x0 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
     HVX_Vector vacc0x1 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
@@ -100,25 +115,45 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x128c4__hvx(
     HVX_Vector vacc1x3 = vacc0x3;
 
     size_t k = kc;
-    for (; k >= 4 * sizeof(int8_t); k -= 4 * sizeof(int8_t)) {
-      const HVX_Vector va0x0123 = Q6_V_vsplat_R(unaligned_load_s32(a0)); a0 += 4;
-      const HVX_Vector va1x0123 = Q6_V_vsplat_R(unaligned_load_s32(a1)); a1 += 4;
+    if (((((intptr_t) a) | a_stride) & (sizeof(int32_t) - 1)) != 0) {
+      for (; k >= 4 * sizeof(int8_t); k -= 4 * sizeof(int8_t)) {
+        const HVX_Vector va0x0123 = Q6_V_vsplat_R(unaligned_load_s32(a0)); a0 += 4;
+        const HVX_Vector va1x0123 = Q6_V_vsplat_R(unaligned_load_s32(a1)); a1 += 4;
 
-      const HVX_Vector vb0x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
-      const HVX_Vector vb1x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
-      const HVX_Vector vb2x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
-      const HVX_Vector vb3x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+        const HVX_Vector vb0x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+        const HVX_Vector vb1x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+        const HVX_Vector vb2x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+        const HVX_Vector vb3x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
 
-      vacc0x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x0, va0x0123, vb0x0123);
-      vacc0x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x1, va0x0123, vb1x0123);
-      vacc0x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x2, va0x0123, vb2x0123);
-      vacc0x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x3, va0x0123, vb3x0123);
-      vacc1x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc1x0, va1x0123, vb0x0123);
-      vacc1x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc1x1, va1x0123, vb1x0123);
-      vacc1x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc1x2, va1x0123, vb2x0123);
-      vacc1x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc1x3, va1x0123, vb3x0123);
+        vacc0x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x0, va0x0123, vb0x0123);
+        vacc0x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x1, va0x0123, vb1x0123);
+        vacc0x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x2, va0x0123, vb2x0123);
+        vacc0x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x3, va0x0123, vb3x0123);
+        vacc1x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc1x0, va1x0123, vb0x0123);
+        vacc1x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc1x1, va1x0123, vb1x0123);
+        vacc1x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc1x2, va1x0123, vb2x0123);
+        vacc1x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc1x3, va1x0123, vb3x0123);
+      }
+    } else {
+      for (; k >= 4 * sizeof(int8_t); k -= 4 * sizeof(int8_t)) {
+        const HVX_Vector va0x0123 = Q6_V_vsplat_R(*((const int32_t*)a0)); a0 += 4;
+        const HVX_Vector va1x0123 = Q6_V_vsplat_R(*((const int32_t*)a1)); a1 += 4;
+
+        const HVX_Vector vb0x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+        const HVX_Vector vb1x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+        const HVX_Vector vb2x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+        const HVX_Vector vb3x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+
+        vacc0x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x0, va0x0123, vb0x0123);
+        vacc0x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x1, va0x0123, vb1x0123);
+        vacc0x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x2, va0x0123, vb2x0123);
+        vacc0x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x3, va0x0123, vb3x0123);
+        vacc1x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc1x0, va1x0123, vb0x0123);
+        vacc1x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc1x1, va1x0123, vb1x0123);
+        vacc1x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc1x2, va1x0123, vb2x0123);
+        vacc1x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc1x3, va1x0123, vb3x0123);
+      }
     }
-
     const HVX_Vector vscale0 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
     vacc0x0 = rescale_fp32(vacc0x0, vscale0);
     vacc1x0 = rescale_fp32(vacc1x0, vscale0);

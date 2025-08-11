@@ -20,7 +20,6 @@ $assert not DATATYPE == "QD8" or not REQUANTIZATION
 #include "src/xnnpack/gemm.h"
 #include "src/xnnpack/intrinsics-polyfill.h"  // for Q6_V_vstu_variable
 #include "src/xnnpack/math.h"
-#include "src/xnnpack/unaligned.h"
 
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8", "QD8": "qd8_f32_qc8w"}[DATATYPE]
 $REQUANTIZATION_SPEC = "" if DATATYPE in ["QD8", "QC4"] else "_" + REQUANTIZATION.lower()
@@ -75,7 +74,6 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
     const int8_t* zero,
     $if DATATYPE in ["QD8"]:
       const int8_t* zero_data,
-    $if DATATYPE == "QD8":
       const ${PARAMS_TYPE}* restrict params,
       const struct xnn_qd8_quantization_params* restrict quantization_params) XNN_OOB_READS
     $else:
@@ -87,10 +85,11 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
   assert(kc != 0);
   assert(ks != 0);
   assert(ks % (${MR} * sizeof(void*)) == 0);
-  assert(a_offset % sizeof(int8_t) == 0);
   assert(a != NULL);
+  assert(((uintptr_t) (a) % sizeof(int32_t)) == 0);
   assert(w != NULL);
   assert(c != NULL);
+  assert(a_offset % sizeof(int32_t) == 0);
 
   kc = round_up_po2(kc, 4 * sizeof(int8_t));
   ${OUT_T}* c0 = c;
