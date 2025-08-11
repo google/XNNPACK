@@ -49,41 +49,31 @@ static enum xnn_status check_zero_point(
   enum xnn_datatype datatype,
   int32_t zero_point)
 {
+  int32_t min, max;
   switch (datatype) {
     case xnn_datatype_qcint4:
     case xnn_datatype_qbint4:
-      if (zero_point < 0 || zero_point > 15) {
-        xnn_log_error(
-          "failed to create Quantized Dense Tensor value: invalid zero point %" PRId32" outside the [0, 15] range",
-          zero_point);
-        return xnn_status_invalid_parameter;
-      }
+      min = -8;
+      max = 7;
+      break;
+    case xnn_datatype_qcuint4:
+    case xnn_datatype_qbuint4:
+      min = 0;
+      max = 15;
       break;
     case xnn_datatype_qcint8:
     case xnn_datatype_qint8:
-      if ((int32_t) (int8_t) zero_point != zero_point) {
-        xnn_log_error(
-          "failed to create Quantized Dense Tensor value: invalid zero point %" PRId32" outside the [-128, 127] range",
-          zero_point);
-        return xnn_status_invalid_parameter;
-      }
+      min = -128;
+      max = 127;
       break;
     case xnn_datatype_quint8:
-      if ((int32_t) (uint8_t) zero_point != zero_point) {
-        xnn_log_error(
-          "failed to create Quantized Dense Tensor value: invalid zero point %" PRId32" outside the [0, 255] range",
-          zero_point);
-        return xnn_status_invalid_parameter;
-      }
+      min = 0;
+      max = 255;
       break;
     case xnn_datatype_qcint32:
     case xnn_datatype_qint32:
-      if (zero_point != 0) {
-        xnn_log_error(
-          "failed to create Quantized Dense Tensor value: invalid non-zero zero point %" PRId32,
-          zero_point);
-        return xnn_status_invalid_parameter;
-      }
+      min = 0;
+      max = 0;
       break;
     default:
       xnn_log_error("failed to create Quantized Dense Tensor value: unsupported datatype %s (%d)",
@@ -91,6 +81,12 @@ static enum xnn_status check_zero_point(
       return xnn_status_unsupported_parameter;
   }
 
+  if (zero_point < min || zero_point > max) {
+    xnn_log_error(
+      "failed to create Quantized Dense Tensor value: invalid zero point %" PRId32" outside the [%" PRId32" , %" PRId32"] range",
+      zero_point, min, max);
+    return xnn_status_invalid_parameter;
+  }
   return xnn_status_success;
 }
 
@@ -371,6 +367,7 @@ enum xnn_status xnn_validate_channelwise_quantized_tensor(
 
   switch (datatype) {
     case xnn_datatype_qcint4:
+    case xnn_datatype_qcuint4:
     case xnn_datatype_qcint8:
     case xnn_datatype_qcint32:
       break;
@@ -393,7 +390,7 @@ enum xnn_status xnn_validate_channelwise_quantized_tensor(
   return xnn_status_success;
 }
 
-enum xnn_status xnn_define_channelwise_quantized_tensor_value_v2(
+enum xnn_status xnn_define_channelwise_quantized_tensor_value_v3(
     xnn_subgraph_t subgraph,
     enum xnn_datatype datatype,
     int32_t zero_point,
@@ -452,13 +449,32 @@ enum xnn_status xnn_define_channelwise_quantized_tensor_value_v2(
   return xnn_status_success;
 }
 
-enum xnn_status xnn_define_blockwise_quantized_tensor_value_v2(
+enum xnn_status xnn_define_channelwise_quantized_tensor_value_v2(
+    xnn_subgraph_t subgraph,
+    enum xnn_datatype datatype,
+    int32_t zero_point,
+    const float* scale,
+    size_t num_dims,
+    size_t channel_dim,
+    const size_t* dims,
+    const void* data,
+    uint32_t external_id,
+    uint32_t flags,
+    uint32_t* id_out) {
+  if (datatype == xnn_datatype_qcint4 && zero_point == 8) {
+    datatype = xnn_datatype_qcuint4;
+    zero_point = 0;
+  }
+  return xnn_define_channelwise_quantized_tensor_value_v3(subgraph, datatype, zero_point, scale, num_dims, channel_dim, dims, data, external_id, flags, id_out);
+}
+
+enum xnn_status xnn_define_blockwise_quantized_tensor_value_v3(
     xnn_subgraph_t subgraph,
     enum xnn_datatype datatype,
     int32_t zero_point,
     const void* scale,
     size_t num_dims,
-    size_t channel_dim,
+    size_t block_dim,
     size_t block_size,
     const size_t* dims,
     const void* data,
@@ -493,11 +509,11 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value_v2(
     return xnn_status_unsupported_parameter;
   }
 
-  if (channel_dim >= num_dims) {
+  if (block_dim >= num_dims) {
     xnn_log_error(
       "failed to create Blockwise Quantized Dense Tensor value: "
-      "channel dimension index %zu is out of range for %zu-dimensional tensor",
-      channel_dim, num_dims);
+      "blockwise dimension index %zu is out of range for %zu-dimensional tensor",
+      block_dim, num_dims);
     return xnn_status_invalid_parameter;
   }
 
@@ -505,6 +521,12 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value_v2(
     xnn_log_error(
       "failed to create Blockwise Quantized Dense Tensor value: "
       "block size is invalid. Got %zu\n", block_size);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (zero_point != 0) {
+    xnn_log_error("failed to create Blockwise Quantized Dense Tensor value: zero point %d must be 0\n", zero_point);
+    return xnn_status_invalid_parameter;
   }
 
   enum xnn_status status = check_zero_point(datatype, zero_point);
@@ -514,11 +536,18 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value_v2(
 
   switch (datatype) {
     case xnn_datatype_qbint4:
+    case xnn_datatype_qbuint4:
       break;
     default:
       xnn_log_error("failed to create Blockwise Quantized Dense Tensor value: unsupported datatype %s (%d)",
         xnn_datatype_to_string(datatype), datatype);
       return xnn_status_unsupported_parameter;
+  }
+
+  if (datatype == xnn_datatype_qbuint4) {
+    // TODO(b/431767679): Use the datatype instead of the zero point to
+    // determine signedness in XNNPACK.
+    zero_point = 8;
   }
 
   switch (scale_type) {
@@ -530,7 +559,14 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value_v2(
         xnn_datatype_to_string(scale_type), datatype);
       return xnn_status_unsupported_parameter;
   }
-  const size_t block_count = dims[0] * dims[1] / block_size;
+  size_t block_count = 1;
+  for (size_t i = 0; i < num_dims; ++i) {
+    if (i == block_dim) {
+      block_count *= divide_round_up(dims[i], block_size);
+    } else {
+      block_count *= dims[i];
+    }
+  }
   for (size_t block = 0; block < block_count; block++) {
     float float_scale;
     switch (scale_type) {
@@ -574,7 +610,7 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value_v2(
     default:
       XNN_UNREACHABLE;
   }
-  value->quantization.channel_dimension_blockwise = channel_dim;
+  value->quantization.block_dim = block_dim;
   value->quantization.block_size = block_size;
   set_shape(value, num_dims, dims);
   value->size = xnn_tensor_get_size_by_id(subgraph, value->id);
@@ -586,20 +622,42 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value_v2(
   return xnn_status_success;
 }
 
+enum xnn_status xnn_define_blockwise_quantized_tensor_value_v2(
+    xnn_subgraph_t subgraph,
+    enum xnn_datatype datatype,
+    int32_t zero_point,
+    const void* scale,
+    size_t num_dims,
+    size_t block_dim,
+    size_t block_size,
+    const size_t* dims,
+    const void* data,
+    uint32_t external_id,
+    uint32_t flags,
+    enum xnn_datatype scale_type,
+    uint32_t* id_out) {
+  block_dim = 1 - block_dim;
+  if (datatype == xnn_datatype_qbint4 && zero_point == 8) {
+    datatype = xnn_datatype_qbuint4;
+    zero_point = 0;
+  }
+  return xnn_define_blockwise_quantized_tensor_value_v3(subgraph, datatype, zero_point, scale, num_dims, block_dim, block_size, dims, data, external_id, flags, scale_type, id_out);
+}
+
 enum xnn_status xnn_define_blockwise_quantized_tensor_value(
     xnn_subgraph_t subgraph,
     enum xnn_datatype datatype,
     int32_t zero_point,
     const uint16_t* scale,
     size_t num_dims,
-    size_t channel_dim,
+    size_t block_dim,
     size_t block_size,
     const size_t* dims,
     const void* data,
     uint32_t external_id,
     uint32_t flags,
     uint32_t* id_out) {
-  return xnn_define_blockwise_quantized_tensor_value_v2(subgraph, datatype, zero_point, scale, num_dims, channel_dim,
+  return xnn_define_blockwise_quantized_tensor_value_v2(subgraph, datatype, zero_point, scale, num_dims, block_dim,
                                                         block_size, dims, data, external_id, flags, xnn_datatype_bf16, id_out);
 }
 

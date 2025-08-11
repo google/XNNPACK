@@ -54,13 +54,12 @@ using qcint8 = quantized<int8_t, channelwise>;
 using qint32 = quantized<int32_t>;
 using qcint32 = quantized<int32_t, channelwise>;
 using qcint4 = quantized<int4x2, channelwise>;
+using qcuint4 = quantized<uint4x2, channelwise>;
+using qbint4 = quantized<int4x2, blockwise>;
+using qbuint4 = quantized<uint4x2, blockwise>;
 
 // Bogus datatype used to indicate an invalid type.
 using invalid_type = quantized<float>;
-
-// This is not a "real" XNNPACK datatype, but it is required to match the
-// behavior of F32QC4W (b/407771627).
-using qcuint4 = quantized<uint4x2, channelwise>;
 
 template <>
 class NumericLimits<qcint4> {
@@ -82,12 +81,36 @@ class NumericLimits<qcuint4> {
   static int32_t max_identity() { return min(); }
 };
 
+template <>
+class NumericLimits<qbint4> {
+ public:
+  static int32_t min() { return -8; }
+  static int32_t max() { return 7; }
+  static int32_t smallest_normal() { return 0; }
+  static int32_t min_identity() { return max(); }
+  static int32_t max_identity() { return min(); }
+};
+
+template <>
+class NumericLimits<qbuint4> {
+ public:
+  static int32_t min() { return 0; }
+  static int32_t max() { return 15; }
+  static int32_t smallest_normal() { return 0; }
+  static int32_t min_identity() { return max(); }
+  static int32_t max_identity() { return min(); }
+};
+
 template <typename T>
 xnn_datatype datatype_of() {
   if (std::is_same<T, qcint4>::value) {
     return xnn_datatype_qcint4;
   } else if (std::is_same<T, qcuint4>::value) {
-    return xnn_datatype_qcint4;
+    return xnn_datatype_qcuint4;
+  } else if (std::is_same<T, qbint4>::value) {
+    return xnn_datatype_qbint4;
+  } else if (std::is_same<T, qbuint4>::value) {
+    return xnn_datatype_qbuint4;
   } else {
     return xnn_datatype_of<T>();
   }
