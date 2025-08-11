@@ -151,7 +151,7 @@ class SubgraphTester {
   template <typename T>
   SubgraphTester& ReshapeExternalTensor(const TensorShape& shape, T* data,
                                         uint32_t external_id) {
-    assert(external_id < subgraph_->external_value_ids);
+    assert(external_id < xnn_subgraph_get_num_external_values(subgraph_.get()));
     const xnn_status status = xnn_reshape_external_value(
         runtime_.get(), external_id, shape.Rank(), shape.Dims());
     EXPECT_EQ(status, xnn_status_success);
@@ -162,7 +162,7 @@ class SubgraphTester {
 
   template <typename T>
   SubgraphTester& SetupExternalTensor(T* data, uint32_t external_id) {
-    assert(external_id < subgraph_->external_value_ids);
+    assert(external_id < xnn_subgraph_get_num_external_values(subgraph_.get()));
     external_tensors_[external_id] = data;
     return *this;
   }
@@ -549,12 +549,12 @@ class SubgraphTester {
 
   template <typename T>
   float* GetExternalTensorData(uint32_t external_id) {
-    assert(external_id < subgraph_->external_value_ids);
+    assert(external_id < xnn_subgraph_get_num_external_values(subgraph_.get()));
     return reinterpret_cast<T*>(external_tensors_[external_id]);
   }
 
   float* GetExternalTensorDataF32(uint32_t external_id) {
-    assert(external_id < subgraph_->external_value_ids);
+    assert(external_id < xnn_subgraph_get_num_external_values(subgraph_.get()));
     return GetExternalTensorData<float>(external_id);
   }
 
