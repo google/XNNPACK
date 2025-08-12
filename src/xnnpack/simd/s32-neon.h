@@ -71,12 +71,11 @@ xnn_load_tail_s32(const int32_t* input, size_t num_elements) XNN_OOB_READS {
 }
 
 // TODO: Use direct load of 1,2 or 3 int32_t
-// Consider clearing pad values to 0
 static XNN_INLINE xnn_simd_s32_t xnn_load_tail_safe_s32(const int32_t* input,
                                                         size_t num_elements) {
   assert(num_elements <= xnn_simd_size_s32);
 
-  XNN_ALIGN(16) int32_t padded[4];
+  XNN_ALIGN(16) int32_t padded[4] = {0, 0, 0, 0};
   int32_t* dst = padded;
   switch (num_elements) {
     case 4:
