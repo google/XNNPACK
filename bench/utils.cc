@@ -33,6 +33,11 @@
 #include <benchmark/benchmark.h>
 #include <pthreadpool.h>
 
+#if XNN_PLATFORM_QURT
+#include <qurt.h>
+#include <HAP_power.h>
+#endif
+
 // Common flags for all benchmarks.
 int FLAGS_num_threads = 1;
 int FLAGS_batch_size = 1;
@@ -223,7 +228,7 @@ void DisableDenormals() {
 
 // Return clock rate in Hz.
 uint64_t GetCurrentCpuFrequency() {
-#ifdef __linux__
+#if defined(__linux__)
   int freq = 0;
   char cpuinfo_name[512];
   int cpu = sched_getcpu();
@@ -238,7 +243,12 @@ uint64_t GetCurrentCpuFrequency() {
     }
     fclose(f);
   }
-#endif  // __linux__
+#elif XNN_PLATFORM_QURT
+  HAP_power_response_t response = {.type = HAP_power_get_clk_Freq};
+  if (HAP_power_get(NULL, &response) == AEE_SUCCESS) {
+    return static_cast<uint64_t>(response.clkFreqHz);
+  }
+#endif
   return 0;
 }
 
