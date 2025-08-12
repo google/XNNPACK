@@ -651,7 +651,7 @@ static enum xnn_status create_runtime_impl(
   runtime->threadpool = threadpool;
 #ifdef XNN_SLINKY_AVAILABLE
   if (scheduler != NULL) {
-    status = xnn_create_threadpool_v2(scheduler, /*flags=*/0, &runtime->owned_xnn_threadpool);
+    status = xnn_create_threadpool(scheduler, &runtime->owned_xnn_threadpool);
     if (status != xnn_status_success) {
       xnn_log_error("failed to create threadpool");
       goto error;
@@ -720,16 +720,31 @@ enum xnn_status xnn_create_runtime_with_scheduler(
   return create_runtime_impl(subgraph, weights_cache, /*workspace=*/NULL, /*threadpool=*/NULL, scheduler, /*xnn_threadpool=*/NULL, flags, runtime_out);
 }
 
+static int num_threads_v2(void* v1) {
+  xnn_scheduler_t scheduler = (xnn_scheduler_t)v1;
+  return scheduler->num_threads(scheduler);
+}
+
+static void schedule_v2(void* v1, void* context, void (*task)(void*)) {
+  xnn_scheduler_t scheduler = (xnn_scheduler_t)v1;
+  return scheduler->schedule(scheduler, context, task);
+}
+
 enum xnn_status xnn_create_threadpool(
   xnn_scheduler_t scheduler,
   xnn_threadpool_t* threadpool_out)
 {
-  return xnn_create_threadpool_v2(scheduler, /*flags=*/0, threadpool_out);
+  struct xnn_scheduler_v2 scheduler_v2 = {
+    .num_threads = num_threads_v2,
+    .schedule = schedule_v2,
+  };
+  return xnn_create_threadpool_v2(scheduler_v2, scheduler, /*flags=*/0, threadpool_out);
 }
 
 #ifndef XNN_SLINKY_AVAILABLE
 enum xnn_status xnn_create_threadpool_v2(
-  xnn_scheduler_t scheduler,
+  struct xnn_scheduler_v2 scheduler,
+  void* scheduler_context,
   uint32_t flags,
   xnn_threadpool_t* threadpool_out)
 {

@@ -79,13 +79,24 @@ enum xnn_status xnn_create_threadpool(
   xnn_scheduler_t scheduler,
   xnn_threadpool_t* threadpool_out);
 
-/// Create a Threadpool object from a Scheduler.
+/// An abstract interface of a parallel task scheduler.
+struct xnn_scheduler_v2 {
+  /// Get the number of tasks that can be executed concurrently.
+  int (*num_threads)(void* scheduler_context);
+
+  /// Schedule `task` to be called, with `context` as its argument.
+  void (*schedule)(void* scheduler_context, void* context, void (*task)(void* context));
+};
+
+/// Create a Threadpool object from a Scheduler v2.
 ///
 /// @param scheduler - Scheduler to implement parallel task execution.
+/// @param scheduler_context - Context to pass to scheduler methods.
 /// @param flags - Binary feature flags of the threadpool. No flags are currently supported.
 /// @param threadpool_out - The created Threadpool object.
 enum xnn_status xnn_create_threadpool_v2(
-  xnn_scheduler_t scheduler,
+  struct xnn_scheduler_v2 scheduler,
+  void* scheduler_context,
   uint32_t flags,
   xnn_threadpool_t* threadpool_out);
 
