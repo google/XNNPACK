@@ -517,7 +517,6 @@ struct xnn_runtime {
 #ifdef XNN_SLINKY_AVAILABLE
   // Fields used by Slinky -- unused unless XNN_FLAG_SLINKY_ENABLED is set
   slinky_pipeline_t slinky_pipeline;
-  xnn_scheduler_t scheduler;
   xnn_threadpool_t xnn_threadpool;
   xnn_threadpool_t owned_xnn_threadpool;
 #endif  // XNN_SLINKY_AVAILABLE
