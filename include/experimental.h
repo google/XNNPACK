@@ -86,6 +86,16 @@ enum xnn_status xnn_create_runtime_with_threadpool(
   uint32_t flags,
   xnn_runtime_t* runtime_out);
 
+/// Replace the threadpool used by a Runtime with a new Threadpool object.
+///
+/// The new thread pool should have the same number of threads as the current threadpool.
+///
+/// @param runtime - A Runtime object to update the threadpool of.
+/// @param threadpool - Threadpool object to to implement parallel operations.
+enum xnn_status xnn_update_runtime_with_threadpool(
+  xnn_runtime_t runtime,
+  xnn_threadpool_t threadpool);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

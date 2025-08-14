@@ -728,6 +728,15 @@ enum xnn_status xnn_create_runtime_with_threadpool(
   return create_runtime_impl(subgraph, weights_cache, /*workspace=*/NULL, /*threadpool*/NULL, threadpool, flags, runtime_out);
 }
 
+#ifndef XNN_SLINKY_AVAILABLE
+enum xnn_status xnn_update_runtime_with_threadpool(
+  xnn_runtime_t runtime,
+  xnn_threadpool_t threadpool) {
+  // This operation is not supported.
+  return xnn_status_deprecated;
+}
+#endif
+
 enum xnn_status xnn_plan_memory(
     xnn_runtime_t runtime) {
   enum xnn_status status = xnn_status_invalid_state;
