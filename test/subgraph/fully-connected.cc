@@ -573,7 +573,7 @@ void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid,
       output_max = std::numeric_limits<float>::infinity();
     }
 
-    SubgraphTester subgraph(4, runtime_flags);
+    SubgraphTester subgraph(4);
     const uint32_t input_id = 0;
     const uint32_t filter_id = 1;
     const uint32_t bias_id = rng() & 1 ? XNN_INVALID_VALUE_ID : 2;
@@ -587,7 +587,8 @@ void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid,
     subgraph.AddOutputTensor(rank, datatype_of<Output>(), output_id)
         .AddFullyConnected(output_min, output_max, input_id, filter_id, bias_id,
                            output_id, flags);
-    xnn_status status = subgraph.CreateRuntime();
+    xnn_status status =
+        subgraph.CreateRuntime(/*threadpool=*/nullptr, runtime_flags);
     if (status == xnn_status_unsupported_hardware) {
       GTEST_SKIP();
       return;
