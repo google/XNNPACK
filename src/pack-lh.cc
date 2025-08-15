@@ -23,24 +23,26 @@ namespace {
 
 size_t xnn_pack_lh_fx_qd8_packed_size(size_t m, size_t k, size_t mr_packed,
                                       size_t kr, size_t sr) {
-  // Each packed row starts with the `mr` quantization params, followed by the
-  // `mr` rows of quantized data.
+  // Each packed row starts with the `mr_packed` quantization params, followed
+  // by the `mr_packed` rows of quantized data.
   m = round_up(m, mr_packed);
   k = round_up(k, kr * sr);
   const size_t alignment = alignof(struct xnn_qd8_quantization_params);
-  return m * sizeof(struct xnn_qd8_quantization_params) +
-         round_up(m * k, alignment) * sizeof(int8_t);
+  return m * round_up(sizeof(struct xnn_qd8_quantization_params) +
+                          k * sizeof(int8_t),
+                      alignment);
 }
 
 size_t xnn_pack_lh_fx_qd8_packed_offset(size_t m, size_t k, size_t mr_packed,
                                         size_t kr, size_t sr) {
-  // Each packed row starts with the `mr` quantization params, followed by the
-  // `mr` rows of quantized data.
-  m = round_up(m, mr_packed);
+  // Each packed row starts with the `mr_packed` quantization params, followed
+  // by the `mr_packed` rows of quantized data.
+  assert(m % mr_packed == 0);
   k = round_up(k, kr * sr);
   const size_t alignment = alignof(struct xnn_qd8_quantization_params);
-  return m * sizeof(struct xnn_qd8_quantization_params) +
-         round_up(m * k, alignment) * sizeof(int8_t);
+  return m * round_up(sizeof(struct xnn_qd8_quantization_params) +
+                          k * sizeof(int8_t),
+                      alignment);
 }
 
 // Wraps a templated function that generates `xnn_qd8_quantization_params` from
