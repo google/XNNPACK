@@ -2,7 +2,7 @@
 $assert BATCH_TILE % 32 == 0
 $assert BATCH_TILE >= 32
 $SIMD_TILE = BATCH_TILE // 32
-$assert OP in ["ADD", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF"]
+$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF"]
 #include <assert.h>
 
 #include "src/xnnpack/math.h"
@@ -11,6 +11,8 @@ $assert OP in ["ADD", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF"]
 
 $_HEXAGON_OP_HVX = {
 $  "ADD": lambda x: "xnn_add_f32(%s, vb)" % x,
+$  "DIV": lambda x: "xnn_div_f32(%s, vb)" % x,
+$  "RDIV": lambda x: "xnn_div_f32(vb, %s)" % x,
 $  "MAX": lambda x: "xnn_max_f32(%s, vb)" % x,
 $  "MIN": lambda x: "xnn_min_f32(%s, vb)" % x,
 $  "MUL": lambda x: "xnn_mul_f32(%s, vb)" % x,
