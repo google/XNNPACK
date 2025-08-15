@@ -19,6 +19,14 @@ SET(NON_PROD_RVVFP16ARITH_MICROKERNEL_SRCS
   src/f16-vclamp/gen/f16-vclamp-rvvfp16arith-u2v.c
   src/f16-vclamp/gen/f16-vclamp-rvvfp16arith-u4v.c
   src/f16-vclamp/gen/f16-vclamp-rvvfp16arith-u8v.c
+  src/f16-vexp/gen/f16-vexp-rvvfp16arith-exp-u1v.c
+  src/f16-vexp/gen/f16-vexp-rvvfp16arith-exp-u2v.c
+  src/f16-vexp/gen/f16-vexp-rvvfp16arith-exp-u4v.c
+  src/f16-vexp/gen/f16-vexp-rvvfp16arith-exp-u8v.c
+  src/f16-vtanh/gen/f16-vtanh-rvvfp16arith-tanh-u1v.c
+  src/f16-vtanh/gen/f16-vtanh-rvvfp16arith-tanh-u2v.c
+  src/f16-vtanh/gen/f16-vtanh-rvvfp16arith-tanh-u4v.c
+  src/f16-vtanh/gen/f16-vtanh-rvvfp16arith-tanh-u8v.c
   src/f32-f16-vcvt/gen/f32-f16-vcvt-rvvfp16arith-u1v.c
   src/f32-f16-vcvt/gen/f32-f16-vcvt-rvvfp16arith-u2v.c
   src/f32-f16-vcvt/gen/f32-f16-vcvt-rvvfp16arith-u4v.c
