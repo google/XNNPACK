@@ -414,13 +414,17 @@ void xnn_pack_qs8_to_qu8_gemm_goi_w(
   } while (--g != 0);
 }
 
+
+namespace {
+
+// Packs the weights so as to maximize performance in kernels.
 static int8_t sign_extend_int4(int8_t value) { return (value ^ 0x8) - 8; }
 
-void xnn_pack_qs8_qc4w_gemm_goi_w(
+void pack_qs8_qc4w_gemm_goi_w(
     size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
     const uint8_t* k, const int32_t* b, const float* scale,
     void* packed_weights, size_t extra_bytes,
-    const struct xnn_qs8_qc4w_packing_params* params) {
+    uint32_t izp, uint32_t kernel_zero_point) {
   assert(g != 0);
   assert(nc != 0);
   assert(kc != 0);
@@ -429,12 +433,9 @@ void xnn_pack_qs8_qc4w_gemm_goi_w(
   assert(sr >= 1 && sr <= 16);
   assert(k != nullptr);
   assert(packed_weights != nullptr);
-  assert(params != nullptr);
-  assert(params->kernel_zero_point == 8 || params->kernel_zero_point == 0);
+  assert(kernel_zero_point == 8 || kernel_zero_point == 0);
 
   const size_t skr = sr * kr;
-  const uint32_t izp = (uint32_t)params->input_zero_point;
-  const uint32_t kernel_zero_point = (uint32_t)params->kernel_zero_point;
   do {
     size_t nr_block_start = 0;
     do {
@@ -507,6 +508,33 @@ void xnn_pack_qs8_qc4w_gemm_goi_w(
       b += nc;
     }
   } while (--g != 0);
+}
+
+}  // namespace
+
+void xnn_pack_qs8_qc4w_gemm_goi_w(
+    size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
+    const uint8_t* k, const int32_t* b, const float* scale,
+    void* packed_weights, size_t extra_bytes,
+    const struct xnn_qs8_qc4w_packing_params* params) {
+  assert(params != nullptr);
+  pack_qs8_qc4w_gemm_goi_w(
+      g, nc, kc, nr, kr, sr,
+      k, b, scale, packed_weights, extra_bytes,
+      params->input_zero_point, params->kernel_zero_point);
+}
+
+void xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w(
+    size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
+    const uint8_t* k, const int32_t* b, const float* scale,
+    void* packed_weights, size_t extra_bytes,
+    const struct xnn_qs8_qc4w_packing_params* params) {
+  assert(params != nullptr);
+  uint32_t input_zero_point = (int32_t)params->input_zero_point + 0x80;
+  pack_qs8_qc4w_gemm_goi_w(
+      g, nc, kc, nr, kr, sr,
+      k, b, scale, packed_weights, extra_bytes,
+      input_zero_point, params->kernel_zero_point);
 }
 
 namespace {
