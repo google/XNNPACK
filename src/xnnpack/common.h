@@ -293,6 +293,8 @@
 
 #if defined(__GNUC__)
 #define XNN_FALLTHROUGH __attribute__((fallthrough));
+#elif defined(__cplusplus) && __cplusplus >= 201703L
+#define XNN_FALLTHROUGH [[fallthrough]];
 #else
 #define XNN_FALLTHROUGH /* fall through */
 #endif
