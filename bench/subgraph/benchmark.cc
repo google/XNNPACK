@@ -17,7 +17,6 @@
 #include "bench/subgraph/models.h"
 #include "bench/utils.h"
 #include "include/xnnpack.h"
-#include "src/xnnpack/allocator.h"
 #include "src/xnnpack/subgraph.h"
 #include <pthreadpool.h>
 
@@ -40,7 +39,7 @@ struct ModelRuntime {
       pthreadpool_destroy(threadpool);
     }
     for (xnn_external_value& i : external_values) {
-      xnn_release_simd_memory(i.data);
+      free(i.data);
     }
   }
 
@@ -49,7 +48,8 @@ struct ModelRuntime {
     if (!model) {
       return false;
     }
-    for (uint32_t i = 0; i < model->num_values; ++i) {
+    for (uint32_t i = 0; i < xnn_subgraph_get_num_external_values(model.get());
+         ++i) {
       uint32_t flags = xnn_subgraph_get_value_flags(model.get(), i);
       if ((flags & (XNN_VALUE_FLAG_EXTERNAL_INPUT |
                     XNN_VALUE_FLAG_EXTERNAL_OUTPUT)) == 0) {
@@ -58,8 +58,7 @@ struct ModelRuntime {
       // Make a buffer for this external value.
       size_t size =
           xnn_subgraph_get_value_size(model.get(), i) + XNN_EXTRA_BYTES;
-      external_values.push_back(
-          xnn_external_value{i, xnn_allocate_zero_simd_memory(size)});
+      external_values.push_back(xnn_external_value{i, malloc(size)});
     }
     return model != nullptr;
   }
