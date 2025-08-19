@@ -3,12 +3,14 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <cstddef>
+#include <cstdint>
 #include <string>
 
 #include <gtest/gtest.h>
-#include "src/xnnpack/common.h"
 #include "src/xnnpack/isa-checks.h"
-#include "src/xnnpack/packx.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/packx.h"  // IWYU pragma: keep
 #include "test/next_prime.h"
 #include "test/pack-microkernel-tester.h"
 

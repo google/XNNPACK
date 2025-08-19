@@ -10,15 +10,12 @@
 #include <cstdlib>
 #include <functional>
 #include <random>
-#include <vector>
 
 #include <gtest/gtest.h>
-#include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
-#include "src/xnnpack/common.h"
 #include "src/xnnpack/isa-checks.h"
 #include "src/xnnpack/microfnptr.h"
-#include "src/xnnpack/raddextexp.h"
+#include "src/xnnpack/raddextexp.h"  // IWYU pragma: keep
 #include "test/replicable_random_device.h"
 
 class RAddExtExpMicrokernelTester {
@@ -116,4 +113,5 @@ class RAddExtExpMicrokernelTester {
   XNN_TEST_RADDEXTEXP_ELEMENT_GT(ukernel, arch_flags, element_tile,           \
                                  init_params);
 #include "src/f32-raddextexp/f32-raddextexp.inc"
+
 #undef XNN_UKERNEL

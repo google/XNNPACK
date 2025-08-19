@@ -6,7 +6,6 @@
 
 import argparse
 import codecs
-import math
 import os
 import re
 import sys
@@ -142,9 +141,11 @@ def main(args):
 //   Specification: {specification}
 //   Generator: {generator}
 
+#include <cstddef>
 
 #include <gtest/gtest.h>
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/isa-checks.h"
 #include "src/xnnpack/lut.h"
 #include "test/lut-microkernel-tester.h"

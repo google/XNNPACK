@@ -62,7 +62,9 @@ xnnpack_unit_test(
     name = "operator_utils_test",
     srcs = ["operator-utils.cc"],
     deps = [
+        "//:microfnptr_h",
         "//:operator_utils",
+        "//src/configs:config_types",
         "//src/configs:microkernel_configs",
     ],
 )
