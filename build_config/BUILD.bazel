@@ -142,6 +142,13 @@ config_setting(
 )
 
 config_setting(
+    name = "windows_aarch64",
+    values = {
+         "cpu": "aarch64_windows",
+    },
+)
+
+config_setting(
     name = "macos_x86_64",
     values = {
         "apple_platform_type": "macos",

@@ -1768,6 +1768,8 @@ alias(
     actual = select({
         ":xnn_enable_kleidiai_explicit_true": ":xnn_enable_kleidiai_explicit_true",
         ":xnn_enable_kleidiai_explicit_false": ":xnn_enable_kleidiai_explicit_true",
+        # Disable for Windows ARM64 unless explicitly enabled
+        "//build_config:windows_aarch64": ":xnn_enable_kleidiai_explicit_true",
         "//conditions:default": ":kleidiai_enabled_by_default",
     }),
 )
