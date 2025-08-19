@@ -23,6 +23,10 @@ XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_maxpool_minmax_ukernel_9p__rvv_u1v, (
 XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_maxpool_minmax_ukernel_9p__rvv_u2v, (2*xnn_init_hardware_config()->vlenb/sizeof(float)), 9, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 #endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
+#if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+XNN_UKERNEL(xnn_arch_none, xnn_f32_maxpool_minmax_ukernel_9p__hvx_u32, 32, 9, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
+#endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
 XNN_UKERNEL(xnn_arch_none, xnn_f32_maxpool_minmax_ukernel_9p__scalar_u1, 1, 9, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 
 

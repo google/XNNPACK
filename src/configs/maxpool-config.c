@@ -82,6 +82,9 @@ static void init_f32_maxpool_config(void) {
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     f32_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_f32_maxpool_minmax_ukernel_9p__rvv_u2v);
     f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    f32_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_f32_maxpool_minmax_ukernel_9p__hvx_u32);
+    f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
   #else
     f32_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_f32_maxpool_minmax_ukernel_9p__scalar_u1);
     f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;

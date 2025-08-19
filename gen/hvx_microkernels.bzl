@@ -17,6 +17,7 @@ PROD_HVX_MICROKERNEL_SRCS = [
     "src/f32-gemm/gen/f32-gemm-8x32-minmax-hvx-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-1x64-minmax-hvx-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-5x64-minmax-hvx-broadcast.c",
+    "src/f32-maxpool/gen/f32-maxpool-9p-minmax-hvx-u32.c",
     "src/f32-qs8-vcvt/gen/f32-qs8-vcvt-hvx-u256.c",
     "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-hvx-rr2-p5-u128-acc2.c",
     "src/f32-rdminmax/gen/f32-rdmax-2p2x-hvx-u32.c",

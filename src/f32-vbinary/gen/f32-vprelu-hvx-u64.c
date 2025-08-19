@@ -22,6 +22,7 @@ void xnn_f32_vprelu_ukernel__hvx_u64(
   assert(input_a != NULL);
   assert(input_b != NULL);
   assert(output != NULL);
+
   const HVX_Vector vzero = xnn_zero_f32();
   for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
     HVX_Vector va0 = xnn_loadu_f32(input_a + 0);
@@ -34,11 +35,11 @@ void xnn_f32_vprelu_ukernel__hvx_u64(
     HVX_Vector vacc0 = xnn_mul_f32(va0, vb0);
     HVX_Vector vacc1 = xnn_mul_f32(va1, vb1);
 
-    const HVX_VectorPred vm0 = Q6_Q_vcmp_gt_VsfVsf(vzero, va0);
-    const HVX_VectorPred vm1 = Q6_Q_vcmp_gt_VsfVsf(vzero, va1);
+    const HVX_VectorPred vm0 = Q6_Q_vcmp_gt_VsfVsf(va0, vzero);
+    const HVX_VectorPred vm1 = Q6_Q_vcmp_gt_VsfVsf(va1, vzero);
 
-    vacc0 = Q6_V_vmux_QVV(vm0, vacc0, va0);
-    vacc1 = Q6_V_vmux_QVV(vm1, vacc1, va1);
+    vacc0 = Q6_V_vmux_QVV(vm0, va0, vacc0);
+    vacc1 = Q6_V_vmux_QVV(vm1, va1, vacc1);
 
     xnn_storeu_f32(output + 0, vacc0);
     xnn_storeu_f32(output + 32, vacc1);
@@ -51,8 +52,8 @@ void xnn_f32_vprelu_ukernel__hvx_u64(
     input_b += 32;
 
     HVX_Vector vacc = xnn_mul_f32(va, vb);
-    const HVX_VectorPred vm = Q6_Q_vcmp_gt_VsfVsf(vzero, va);
-    vacc = Q6_V_vmux_QVV(vm, vacc, va);
+    const HVX_VectorPred vm = Q6_Q_vcmp_gt_VsfVsf(va, vzero);
+    vacc = Q6_V_vmux_QVV(vm, va, vacc);
 
     xnn_storeu_f32(output, vacc);
     output += 32;
@@ -62,8 +63,8 @@ void xnn_f32_vprelu_ukernel__hvx_u64(
     HVX_Vector vb = xnn_load_tail_f32(input_b, batch >> XNN_LOG2_SIZEOF_FLOAT);
 
     HVX_Vector vacc = xnn_mul_f32(va, vb);
-    const HVX_VectorPred vm = Q6_Q_vcmp_gt_VsfVsf(vzero, va);
-    vacc = Q6_V_vmux_QVV(vm, vacc, va);
+    const HVX_VectorPred vm = Q6_Q_vcmp_gt_VsfVsf(va, vzero);
+    vacc = Q6_V_vmux_QVV(vm, va, vacc);
 
     Q6_V_vstu_variable(output, batch, vacc);
   }
