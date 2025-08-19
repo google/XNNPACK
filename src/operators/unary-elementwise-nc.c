@@ -16,8 +16,10 @@
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
 #include "src/xnnpack/datatype.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/internal.h"
 #include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/operator-type.h"
@@ -697,9 +699,8 @@ static enum xnn_status reshape_unary_elementwise_nc(
 
   const xnn_vunary_ukernel_fn ukernel =
       unary_elementwise_op->unary_elementwise_config->ukernel;
-  if ((((input_stride ^ channels) | (output_stride ^ channels)) == 0) || batch_size == 1) {
-    const size_t block_size = 4096;
-
+  if ((((input_stride ^ channels) | (output_stride ^ channels)) == 0) ||
+      batch_size == 1) {
     unary_elementwise_op->context.univector_contiguous = (struct univector_contiguous_context) {
       .log2_xsize = log2_input_size,
       .log2_ysize = log2_output_size,
@@ -715,8 +716,13 @@ static enum xnn_status reshape_unary_elementwise_nc(
     unary_elementwise_op->compute[0].task_1d_tile_1d_dynamic =
         (pthreadpool_task_1d_tile_1d_dynamic_t)xnn_compute_univector_contiguous;
     unary_elementwise_op->compute[0].range[0] = range;
-    unary_elementwise_op->compute[0].tile[0] = block_size;
-    ;
+    size_t bytes_per_tile = xnn_init_hardware_config()->l1_data_cache_bytes;
+    if (!bytes_per_tile) {
+      bytes_per_tile = 1 << 15;  // Default to 32k if cache size is unknown.
+    }
+    const size_t num_tiles = divide_round_up(range, bytes_per_tile);
+    const size_t tile_size = round_up(range / num_tiles, 1 << log2_input_size);
+    unary_elementwise_op->compute[0].tile[0] = tile_size;
   } else {
     unary_elementwise_op->context.univector_strided = (struct univector_strided_context) {
       .n = channels << log2_input_size,

@@ -16,6 +16,7 @@
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
 #include "src/xnnpack/datatype.h"
+#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
@@ -433,7 +434,18 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
                     xnn_compute_elementwise_binary_1d_tile;
             op->compute[0].range[0] = compressed_output_shape[0]
                                       << log2_element_size;
-            op->compute[0].tile[0] = element_tile << log2_element_size;
+            size_t bytes_per_tile =
+                xnn_init_hardware_config()->l1_data_cache_bytes;
+            if (!bytes_per_tile) {
+              bytes_per_tile = 1 << 15;  // Default to 32k if cachesize unknown.
+            }
+            const size_t num_tiles =
+                divide_round_up(compressed_output_shape[0] << log2_element_size,
+                                bytes_per_tile);
+            const size_t tile_size = round_up(
+                (compressed_output_shape[0] << log2_element_size) / num_tiles,
+                element_tile << log2_element_size);
+            op->compute[0].tile[0] = tile_size;
           } else {
             op->compute[0].type = xnn_parallelization_type_1d_tile_1d_dynamic;
             op->compute[0].task_1d_tile_1d_dynamic =
