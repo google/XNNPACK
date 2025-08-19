@@ -20,6 +20,7 @@
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
 #include "test/replicable_random_device.h"
+#include "test/subgraph/quantization-helpers.h"
 #include "test/subgraph/stencil.h"
 #include "test/subgraph/subgraph-tester.h"
 
@@ -75,24 +76,6 @@ Tensor<float> ReferenceImpl(Tensor<Data> input, Tensor<Filter> filter,
   return output;
 }
 
-// For float types, generate data in [-1, 1]
-template <typename T>
-DatatypeGenerator<T> MakeDatatypeGenerator(T) {
-  return DatatypeGenerator<T>(-1.0f, 1.0f);
-}
-
-// For quantized types, generate the full range of the type.
-template <typename T>
-DatatypeGenerator<quantized<T>> MakeDatatypeGenerator(quantized<T>) {
-  return DatatypeGenerator<quantized<T>>();
-}
-
-template <>
-DatatypeGenerator<quantized<int32_t>> MakeDatatypeGenerator(
-    quantized<int32_t>) {
-  return DatatypeGenerator<quantized<int32_t>>(-10000, 10000, {0, 1.0f});
-}
-
 DepthwiseConvolutionParams StencilToDepthwiseConvolutionParams(
     const StencilParams& kh, const StencilParams& kw) {
   DepthwiseConvolutionParams params;
@@ -107,15 +90,6 @@ DepthwiseConvolutionParams StencilToDepthwiseConvolutionParams(
   params.dilation.height = kh.dilation;
   params.dilation.width = kw.dilation;
   return params;
-}
-
-template <typename T>
-xnn_quantization_params quantization_for_range(float min, float max) {
-  xnn_quantization_params result;
-  result.scale = (max - min) / (static_cast<float>(NumericLimits<T>::max()) -
-                                static_cast<float>(NumericLimits<T>::min()));
-  result.zero_point = NumericLimits<T>::min() - min / result.scale;
-  return result;
 }
 
 template <typename Input, typename Filter, typename Output>
@@ -189,7 +163,8 @@ void TestImpl(bool channelwise_quantization = false) {
         params.kernel.width,
         params.input_channels * params.depth_multiplier,
     };
-    DatatypeGenerator<Filter> filter_gen = MakeDatatypeGenerator(Filter());
+    DatatypeGenerator<Filter> filter_gen =
+        MakeDatatypeGenerator(Filter(), /*symmetric_range=*/true);
     Tensor<Filter> filter(filter_shape, XnnExtraBytes);
     filter.generate([&]() { return filter_gen(rng); });
 

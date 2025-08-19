@@ -20,8 +20,7 @@
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
 #include "test/replicable_random_device.h"
-#include "test/subgraph/calculate_quantization_params.h"
-#include "test/subgraph/fake-dynamic-quantize.h"
+#include "test/subgraph/quantization-helpers.h"
 #include "test/subgraph/stencil.h"
 #include "test/subgraph/subgraph-tester.h"
 
@@ -92,35 +91,6 @@ Tensor<float> ReferenceImpl(Tensor<Data> input, Tensor<Filter> filter,
   return output.fuse({3, 4});
 }
 
-// For float types, generate data in [-1, 1]
-template <typename T>
-DatatypeGenerator<T> MakeDatatypeGenerator(T) {
-  return DatatypeGenerator<T>(-1.0f, 1.0f);
-}
-
-template <typename T>
-T MaxDatatype(T) {
-  return 1.0f;
-}
-
-// For quantized types, generate the full range of the type.
-template <typename T, typename Kind>
-DatatypeGenerator<quantized<T, Kind>> MakeDatatypeGenerator(
-    quantized<T, Kind>) {
-  return DatatypeGenerator<quantized<T, Kind>>();
-}
-
-template <typename T, typename Kind>
-T MaxDatatype(quantized<T, Kind>) {
-  return NumericLimits<quantized<T, Kind>>::max();
-}
-
-template <>
-DatatypeGenerator<quantized<int32_t>> MakeDatatypeGenerator(
-    quantized<int32_t>) {
-  return DatatypeGenerator<quantized<int32_t>>(-10000, 10000, {0, 1.0f});
-}
-
 ConvolutionParams StencilToConvolutionParams(const StencilParams& kh,
                                              const StencilParams& kw) {
   ConvolutionParams params;
@@ -182,7 +152,8 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
         params.kernel.width,
         params.group_input_channels,
     };
-    DatatypeGenerator<Filter> filter_gen = MakeDatatypeGenerator(Filter());
+    DatatypeGenerator<Filter> filter_gen =
+        MakeDatatypeGenerator(Filter(), /*symmetric_range=*/true);
     Tensor<Filter> filter(filter_shape, XnnExtraBytes);
     filter.generate([&]() { return filter_gen(rng); });
     const size_t reduction_size =

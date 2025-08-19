@@ -21,8 +21,7 @@
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/subgraph.h"
 #include "test/replicable_random_device.h"
-#include "test/subgraph/calculate_quantization_params.h"
-#include "test/subgraph/fake-dynamic-quantize.h"
+#include "test/subgraph/quantization-helpers.h"
 #include "test/subgraph/runtime-flags.h"
 #include "test/subgraph/subgraph-tester.h"
 
@@ -130,27 +129,6 @@ Tensor<float> ReferenceImpl(Tensor<Input> input, Tensor<Filter> filter,
   }
 
   return output;
-}
-
-// For float types, generate data in [-1, 1]
-template <typename T>
-DatatypeGenerator<T> MakeDatatypeGenerator(T) {
-  return DatatypeGenerator<T>(-1.0f, 1.0f);
-}
-template <typename T>
-T MaxOfDatatype(T) {
-  return 1.0f;
-}
-
-// For quantized types, generate the full range of the type.
-template <typename T, typename Kind>
-DatatypeGenerator<quantized<T, Kind>> MakeDatatypeGenerator(
-    quantized<T, Kind>) {
-  return DatatypeGenerator<quantized<T, Kind>>();
-}
-template <typename T, typename Kind>
-int32_t MaxOfDatatype(quantized<T, Kind>) {
-  return NumericLimits<quantized<T, Kind>>::max();
 }
 
 // Generate 2 values at once with uint8.
@@ -401,8 +379,8 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
               << ", filter_shape=" << index_to_string(filter_shape);
         }
       } else {
-        const float max_a = MaxOfDatatype(Input());
-        const float max_b = MaxOfDatatype(Filter()) * filter_quantization.scale;
+        const float max_a = MaxDatatype(Input());
+        const float max_b = MaxDatatype(Filter()) * filter_quantization.scale;
         const float max_bias =
             bias.empty() ? 0.0f
                          : max_abs_bias<Bias>() * bias_quantization.scale;
@@ -659,8 +637,8 @@ void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid,
               << ", filter_shape=" << index_to_string(filter_shape);
         }
       } else {
-        const float max_a = MaxOfDatatype(Input());
-        const float max_b = MaxOfDatatype(Filter()) * filter_quantization.scale;
+        const float max_a = MaxDatatype(Input());
+        const float max_b = MaxDatatype(Filter()) * filter_quantization.scale;
         const float max_bias =
             bias.empty() ? 0.0f
                          : max_abs_bias<Bias>() * bias_quantization.scale;

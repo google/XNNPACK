@@ -12,8 +12,7 @@ load(
 )
 
 SUBGRAPH_TEST_DEPS = [
-    ":calculate_quantization_params",
-    ":fake_dynamic_quantize",
+    ":quantization_helpers",
     ":runtime_flags",
     ":subgraph_tester",
     "//:buffer",
@@ -50,26 +49,15 @@ xnnpack_cxx_library(
 )
 
 xnnpack_cxx_library(
-    name = "fake_dynamic_quantize",
+    name = "quantization_helpers",
     testonly = True,
-    hdrs = ["fake-dynamic-quantize.h"],
+    hdrs = ["quantization-helpers.h"],
     deps = xnnpack_test_deps_for_library() + [
         "//:buffer",
         "//:common",
         "//:datatype",
         "//:microparams_h",
         "//:quantization",
-        "//:xnnpack_h",
-    ],
-)
-
-xnnpack_cxx_library(
-    name = "calculate_quantization_params",
-    testonly = True,
-    hdrs = ["calculate_quantization_params.h"],
-    deps = xnnpack_test_deps_for_library() + [
-        "//:buffer",
-        "//:datatype",
         "//:xnnpack_h",
     ],
 )

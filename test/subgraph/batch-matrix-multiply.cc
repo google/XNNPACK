@@ -22,8 +22,7 @@
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/subgraph.h"
 #include "test/replicable_random_device.h"
-#include "test/subgraph/calculate_quantization_params.h"
-#include "test/subgraph/fake-dynamic-quantize.h"
+#include "test/subgraph/quantization-helpers.h"
 #include "test/subgraph/runtime-flags.h"
 #include "test/subgraph/subgraph-tester.h"
 
@@ -142,27 +141,6 @@ Tensor<float> ReferenceImpl(Tensor<InputA> input_a, Tensor<InputB> input_b,
   return output;
 }
 
-// For float types, generate data in [-1, 1]
-template <typename T>
-DatatypeGenerator<T> MakeDatatypeGenerator(T) {
-  return DatatypeGenerator<T>(-1.0f, 1.0f);
-}
-template <typename T>
-T MaxDatatype(T) {
-  return 1.0f;
-}
-
-// For quantized types, generate the full range of the type.
-template <typename T, typename Kind>
-DatatypeGenerator<quantized<T, Kind>> MakeDatatypeGenerator(
-    quantized<T, Kind>) {
-  return DatatypeGenerator<quantized<T, Kind>>();
-}
-template <typename T, typename Kind>
-T MaxDatatype(quantized<T, Kind>) {
-  return NumericLimits<quantized<T, Kind>>::max();
-}
-
 template <typename Input, typename Output = Input>
 void TestDynamicB(uint64_t runtime_flags = xnn_test_runtime_flags()) {
   ReplicableRandomDevice rng;
@@ -257,9 +235,11 @@ void TestDynamicB(uint64_t runtime_flags = xnn_test_runtime_flags()) {
 
       Tensor<Input> input_a(a_shape, XnnExtraBytes);
       Tensor<Input> input_b(b_shape, XnnExtraBytes);
-      auto input_gen = MakeDatatypeGenerator(Input());
-      input_a.generate([&]() { return input_gen(rng); });
-      input_b.generate([&]() { return input_gen(rng); });
+      auto input_a_gen = MakeDatatypeGenerator(Input());
+      auto input_b_gen =
+          MakeDatatypeGenerator(Input(), /*symmetric_range=*/true);
+      input_a.generate([&]() { return input_a_gen(rng); });
+      input_b.generate([&]() { return input_b_gen(rng); });
       broadcast_extent_1(input_a);
       broadcast_extent_1(input_b);
 
@@ -370,7 +350,8 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
     b_shape[input_b_rank - 2] = dim_dist(rng);
     b_shape[input_b_rank - 1] = dim_dist(rng);
     Tensor<InputB> input_b(b_shape, XnnExtraBytes);
-    auto input_b_gen = MakeDatatypeGenerator(InputB());
+    auto input_b_gen =
+        MakeDatatypeGenerator(InputB(), /*symmetric_range=*/true);
     input_b.generate([&]() { return input_b_gen(rng); });
     broadcast_extent_1(input_b);
     size_t k = input_b.extent(input_b_rank - 2);
