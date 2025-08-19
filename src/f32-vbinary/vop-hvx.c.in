@@ -34,9 +34,9 @@ void xnn_f32_v${OP.lower()}_ukernel__hvx_u${BATCH_TILE}(
   $if BATCH_TILE > 32:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
       $for N in range(0, BATCH_TILE, 32):
-        HVX_Vector va${int(N/32)} = xnn_loadu_f32(input_a + ${N});
+        HVX_Vector va${N//32} = xnn_loadu_f32(input_a + ${N});
       $for N in range(0, BATCH_TILE, 32):
-        HVX_Vector vb${int(N/32)} = xnn_loadu_f32(input_b + ${N});
+        HVX_Vector vb${N//32} = xnn_loadu_f32(input_b + ${N});
       input_a += ${BATCH_TILE};
       input_b += ${BATCH_TILE};
 
@@ -48,7 +48,7 @@ void xnn_f32_v${OP.lower()}_ukernel__hvx_u${BATCH_TILE}(
           vacc${N} = xnn_mul_f32(vacc${N}, vacc${N});
 
       $for N in range(0, BATCH_TILE, 32):
-        xnn_storeu_f32(output + ${N}, vacc${int(N/32)});
+        xnn_storeu_f32(output + ${N}, vacc${N//32});
       output += ${BATCH_TILE};
     }
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {

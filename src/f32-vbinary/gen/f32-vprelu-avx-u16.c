@@ -35,18 +35,18 @@ void xnn_f32_vprelu_ukernel__avx_u16(
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const __m256 va0 = _mm256_loadu_ps(input_a);
+    const __m256 va0 = _mm256_loadu_ps(input_a + 0);
     const __m256 va1 = _mm256_loadu_ps(input_a + 8);
     input_a += 16;
 
-    __m256 vacc0 = _mm256_mul_ps(va0, _mm256_loadu_ps(input_b));
+    __m256 vacc0 = _mm256_mul_ps(va0, _mm256_loadu_ps(input_b + 0));
     __m256 vacc1 = _mm256_mul_ps(va1, _mm256_loadu_ps(input_b + 8));
     input_b += 16;
 
     vacc0 = _mm256_blendv_ps(va0, vacc0, va0);
     vacc1 = _mm256_blendv_ps(va1, vacc1, va1);
 
-    _mm256_storeu_ps(output, vacc0);
+    _mm256_storeu_ps(output + 0, vacc0);
     _mm256_storeu_ps(output + 8, vacc1);
     output += 16;
   }

@@ -38,15 +38,15 @@ void xnn_f16_vrsubc_ukernel__neonfp16arith_u16(
 
   const float16x8_t vb = vreinterpretq_f16_u16(vld1q_dup_u16(b));
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
-    const float16x8_t va01234567 = vreinterpretq_f16_u16(vld1q_u16(a)); a += 8;
-    const float16x8_t va456789AB = vreinterpretq_f16_u16(vld1q_u16(a)); a += 8;
+    const float16x8_t va0 = vreinterpretq_f16_u16(vld1q_u16(a)); a += 8;
+    const float16x8_t va1 = vreinterpretq_f16_u16(vld1q_u16(a)); a += 8;
 
-    float16x8_t vy01234567 = vsubq_f16(vb, va01234567);
-    float16x8_t vy456789AB = vsubq_f16(vb, va456789AB);
+    float16x8_t vy0 = vsubq_f16(vb, va0);
+    float16x8_t vy1 = vsubq_f16(vb, va1);
 
 
-    vst1q_u16(o, vreinterpretq_u16_f16(vy01234567)); o += 8;
-    vst1q_u16(o, vreinterpretq_u16_f16(vy456789AB)); o += 8;
+    vst1q_u16(o, vreinterpretq_u16_f16(vy0)); o += 8;
+    vst1q_u16(o, vreinterpretq_u16_f16(vy1)); o += 8;
   }
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     const float16x8_t va01234567 = vreinterpretq_f16_u16(vld1q_u16(a)); a += 8;

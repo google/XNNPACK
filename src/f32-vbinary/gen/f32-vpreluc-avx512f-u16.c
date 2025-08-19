@@ -38,13 +38,13 @@ void xnn_f32_vpreluc_ukernel__avx512f_u16(
   const __m512 vzero = _mm512_setzero_ps();
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const __m512 va0 = _mm512_loadu_ps(input_a);
+    __m512 va0 = _mm512_loadu_ps(input_a + 0);
     input_a += 16;
 
     const __mmask16 vsign0 = _mm512_cmp_ps_mask(va0, vzero, _CMP_LT_OQ);
     __m512 vacc0 = _mm512_mask_mul_ps(va0, vsign0, va0, vb);
 
-    _mm512_storeu_ps(output, vacc0);
+    _mm512_storeu_ps(output + 0, vacc0);
     output += 16;
   }
   if XNN_UNLIKELY(batch != 0) {

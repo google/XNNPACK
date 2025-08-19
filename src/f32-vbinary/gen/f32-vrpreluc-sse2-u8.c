@@ -36,7 +36,7 @@ void xnn_f32_vrpreluc_ukernel__sse2_u8(
 
   const __m128 vmask = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vb)));
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const __m128 va0 = _mm_loadu_ps(input_a);
+    const __m128 va0 = _mm_loadu_ps(input_a + 0);
     const __m128 va1 = _mm_loadu_ps(input_a + 4);
     input_a += 8;
 
@@ -46,7 +46,7 @@ void xnn_f32_vrpreluc_ukernel__sse2_u8(
     vacc0 = _mm_or_ps(_mm_and_ps(vacc0, vmask), _mm_andnot_ps(vmask, vb));
     vacc1 = _mm_or_ps(_mm_and_ps(vacc1, vmask), _mm_andnot_ps(vmask, vb));
 
-    _mm_storeu_ps(output, vacc0);
+    _mm_storeu_ps(output + 0, vacc0);
     _mm_storeu_ps(output + 4, vacc1);
     output += 8;
   }

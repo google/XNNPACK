@@ -37,7 +37,7 @@ void xnn_f32_vsqrdiffc_ukernel__avx_u16(
   const __m256 vb = _mm256_broadcast_ss(input_b);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const __m256 va0 = _mm256_loadu_ps(input_a);
+    const __m256 va0 = _mm256_loadu_ps(input_a + 0);
     const __m256 va1 = _mm256_loadu_ps(input_a + 8);
     input_a += 16;
 
@@ -47,7 +47,7 @@ void xnn_f32_vsqrdiffc_ukernel__avx_u16(
     vacc0 = _mm256_mul_ps(vacc0, vacc0);
     vacc1 = _mm256_mul_ps(vacc1, vacc1);
 
-    _mm256_storeu_ps(output, vacc0);
+    _mm256_storeu_ps(output + 0, vacc0);
     _mm256_storeu_ps(output + 8, vacc1);
     output += 16;
   }

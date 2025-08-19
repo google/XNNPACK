@@ -36,7 +36,7 @@ void xnn_f32_vprelu_ukernel__avx512f_u32(
   const __m512 vzero = _mm512_setzero_ps();
 
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
-    const __m512 va0 = _mm512_loadu_ps(input_a);
+    const __m512 va0 = _mm512_loadu_ps(input_a + 0);
     const __m512 va1 = _mm512_loadu_ps(input_a + 16);
     input_a += 32;
 
@@ -46,7 +46,7 @@ void xnn_f32_vprelu_ukernel__avx512f_u32(
     __m512 vacc1 = _mm512_mask_mul_ps(va1, vsign1, va1, _mm512_loadu_ps(input_b + 16));
     input_b += 32;
 
-    _mm512_storeu_ps(output, vacc0);
+    _mm512_storeu_ps(output + 0, vacc0);
     _mm512_storeu_ps(output + 16, vacc1);
     output += 32;
   }

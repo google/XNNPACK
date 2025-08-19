@@ -42,13 +42,13 @@ void xnn_f16_vrsubc_ukernel__avx512fp16_u32(
 
 
   for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {
-    __m512h va0 = _mm512_loadu_ph(a);
+    __m512h va0 = _mm512_loadu_ph(a + 0);
     a += 32;
 
     __m512h vacc0 = _mm512_sub_ph(vb, va0);
 
 
-    _mm512_storeu_ph(o, vacc0);
+    _mm512_storeu_ph(o + 0, vacc0);
     o += 32;
   }
   if XNN_UNLIKELY(batch != 0) {

@@ -6,7 +6,6 @@
 $assert BATCH_TILE % 32 == 0
 $assert BATCH_TILE >= 32
 $SIMD_TILE = BATCH_TILE // 32
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert OP in ["ADD", "DIV", "MAX", "MIN", "MUL", "SUB", "SQRDIFF", "PRELU"]
 #include <assert.h>
 #include <stddef.h>
@@ -63,29 +62,26 @@ void xnn_f16_v${OP.lower()}_ukernel__avx512fp16_u${BATCH_TILE}(
 
   $if BATCH_TILE > 32:
     for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {
-      const __m512h va${ABC[0]} = _mm512_loadu_ph(a);
-      $for N in range(1, SIMD_TILE):
-        const __m512h va${ABC[N]} = _mm512_loadu_ph(a + ${N * 32});
+      $for N in range(SIMD_TILE):
+        const __m512h va${N} = _mm512_loadu_ph(a + ${N * 32});
       a += ${BATCH_TILE};
 
       $if OP == "PRELU":
         $for N in range(SIMD_TILE):
-          const __mmask32 vsign${ABC[N]} = _mm512_cmp_ph_mask(va${ABC[N]}, vzero, _CMP_LT_OQ);
-          __m512h vacc${ABC[N]} = _mm512_mask_mul_ph(va${ABC[N]}, vsign${ABC[N]}, va${ABC[N]}, _mm512_loadu_ph(b + ${N * 32}));
+          const __mmask32 vsign${N} = _mm512_cmp_ph_mask(va${N}, vzero, _CMP_LT_OQ);
+          __m512h vacc${N} = _mm512_mask_mul_ph(va${N}, vsign${N}, va${N}, _mm512_loadu_ph(b + ${N * 32}));
         b += ${BATCH_TILE};
       $else:
-        __m512h vacc${ABC[0]} = ${_MM512_OP_ph}(va${ABC[0]}, _mm512_loadu_ph(b));
-        $for N in range(1, SIMD_TILE):
-          __m512h vacc${ABC[N]} = ${_MM512_OP_ph}(va${ABC[N]}, _mm512_loadu_ph(b + ${N * 32}));
+        $for N in range(SIMD_TILE):
+          __m512h vacc${N} = ${_MM512_OP_ph}(va${N}, _mm512_loadu_ph(b + ${N * 32}));
         b += ${BATCH_TILE};
 
         $if OP == "SQRDIFF":
           $for N in range(SIMD_TILE):
-            vacc${ABC[N]} = _mm512_mul_ph(vacc${ABC[N]}, vacc${ABC[N]});
+            vacc${N} = _mm512_mul_ph(vacc${N}, vacc${N});
 
-      _mm512_storeu_ph(o, vacc${ABC[0]});
-      $for N in range(1, SIMD_TILE):
-        _mm512_storeu_ph(o + ${N * 32}, vacc${ABC[N]});
+      $for N in range(SIMD_TILE):
+        _mm512_storeu_ph(o + ${N * 32}, vacc${N});
       o += ${BATCH_TILE};
     }
   for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {

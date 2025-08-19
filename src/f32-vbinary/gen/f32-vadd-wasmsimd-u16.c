@@ -30,13 +30,13 @@ void xnn_f32_vadd_ukernel__wasmsimd_u16(
   assert(output != NULL);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const v128_t va0 = wasm_v128_load(input_a);
+    const v128_t va0 = wasm_v128_load(input_a + 0);
     const v128_t va1 = wasm_v128_load(input_a + 4);
     const v128_t va2 = wasm_v128_load(input_a + 8);
     const v128_t va3 = wasm_v128_load(input_a + 12);
     input_a += 16;
 
-    const v128_t vb0 = wasm_v128_load(input_b);
+    const v128_t vb0 = wasm_v128_load(input_b + 0);
     const v128_t vb1 = wasm_v128_load(input_b + 4);
     const v128_t vb2 = wasm_v128_load(input_b + 8);
     const v128_t vb3 = wasm_v128_load(input_b + 12);
@@ -48,7 +48,7 @@ void xnn_f32_vadd_ukernel__wasmsimd_u16(
     v128_t vacc3 = wasm_f32x4_add(va3, vb3);
 
 
-    wasm_v128_store(output, vacc0);
+    wasm_v128_store(output + 0, vacc0);
     wasm_v128_store(output + 4, vacc1);
     wasm_v128_store(output + 8, vacc2);
     wasm_v128_store(output + 12, vacc3);

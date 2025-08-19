@@ -5,7 +5,6 @@
 
 $assert BATCH_TILE % 8 == 0
 $assert BATCH_TILE >= 8
-$ABC = "01234567456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF", "PRELU", "RPRELU"]
 #include <arm_neon.h>
 #include <assert.h>
@@ -55,26 +54,26 @@ void xnn_f16_v${OP.lower()}c_ukernel__${ISA}_u${BATCH_TILE}(
   $if BATCH_TILE > 8:
     for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {
       $for N in range(0, BATCH_TILE, 8):
-        const float16x8_t va${ABC[N:N+8]} = vreinterpretq_f16_u16(vld1q_u16(a)); a += 8;
+        const float16x8_t va${N//8} = vreinterpretq_f16_u16(vld1q_u16(a)); a += 8;
 
       $for N in range(0, BATCH_TILE, 8):
-        float16x8_t vy${ABC[N:N+8]} = ${VOPQ_f16("va" + ABC[N:N+8])};
+        float16x8_t vy${N//8} = ${VOPQ_f16("va" + str(N//8))};
 
       $if OP == "SQRDIFF":
         $for N in range(0, BATCH_TILE, 8):
-          vy${ABC[N:N+8]} = vmulq_f16(vy${ABC[N:N+8]}, vy${ABC[N:N+8]});
+          vy${N//8} = vmulq_f16(vy${N//8}, vy${N//8});
       $elif OP == "PRELU":
         $for N in range(0, BATCH_TILE, 8):
-          const uint16x8_t vm${ABC[N:N+8]} = vcltq_s16(vreinterpretq_s16_f16(va${ABC[N:N+8]}), vmovq_n_s16(0));
+          const uint16x8_t vm${N//8} = vcltq_s16(vreinterpretq_s16_f16(va${N//8}), vmovq_n_s16(0));
 
         $for N in range(0, BATCH_TILE, 8):
-          vy${ABC[N:N+8]} = vbslq_f16(vm${ABC[N:N+8]}, vy${ABC[N:N+8]}, va${ABC[N:N+8]});
+          vy${N//8} = vbslq_f16(vm${N//8}, vy${N//8}, va${N//8});
       $elif OP == "RPRELU":
         $for N in range(0, BATCH_TILE, 8):
-          vy${ABC[N:N+8]} = vbslq_f16(vm, vy${ABC[N:N+8]}, vb);
+          vy${N//8} = vbslq_f16(vm, vy${N//8}, vb);
 
       $for N in range(0, BATCH_TILE, 8):
-        vst1q_u16(o, vreinterpretq_u16_f16(vy${ABC[N:N+8]})); o += 8;
+        vst1q_u16(o, vreinterpretq_u16_f16(vy${N//8})); o += 8;
     }
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     const float16x8_t va01234567 = vreinterpretq_f16_u16(vld1q_u16(a)); a += 8;

@@ -6,7 +6,6 @@
 $assert BATCH_TILE % 4 == 0
 $assert BATCH_TILE >= 4
 $SIMD_TILE = BATCH_TILE // 4
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF", "PRELU", "RPRELU"]
 #include <arm_neon.h>
 #include <assert.h>
@@ -52,26 +51,26 @@ void xnn_f32_v${OP.lower()}c_ukernel__${ISA}_u${BATCH_TILE}(
   $if BATCH_TILE > 4:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
       $for N in range(SIMD_TILE):
-        const float32x4_t va${ABC[N]} = vld1q_f32(input_a); input_a += 4;
+        const float32x4_t va${N} = vld1q_f32(input_a); input_a += 4;
 
       $for N in range(SIMD_TILE):
-        float32x4_t vacc${ABC[N]} = ${VOPQ_F32("va" + ABC[N])};
+        float32x4_t vacc${N} = ${VOPQ_F32("va" + str(N))};
 
       $if OP == "SQRDIFF":
         $for N in range(SIMD_TILE):
-          vacc${ABC[N]} = vmulq_f32(vacc${ABC[N]}, vacc${ABC[N]});
+          vacc${N} = vmulq_f32(vacc${N}, vacc${N});
       $elif OP == "PRELU":
         $for N in range(SIMD_TILE):
-          const uint32x4_t vm${ABC[N]} = vcltq_s32(vreinterpretq_s32_f32(va${ABC[N]}), vmovq_n_s32(0));
+          const uint32x4_t vm${N} = vcltq_s32(vreinterpretq_s32_f32(va${N}), vmovq_n_s32(0));
 
         $for N in range(SIMD_TILE):
-          vacc${ABC[N]} = vbslq_f32(vm${ABC[N]}, vacc${ABC[N]}, va${ABC[N]});
+          vacc${N} = vbslq_f32(vm${N}, vacc${N}, va${N});
       $elif OP == "RPRELU":
         $for N in range(SIMD_TILE):
-          vacc${ABC[N]} = vbslq_f32(vm, vacc${ABC[N]}, vb);
+          vacc${N} = vbslq_f32(vm, vacc${N}, vb);
 
       $for N in range(SIMD_TILE):
-        vst1q_f32(output, vacc${ABC[N]}); output += 4;
+        vst1q_f32(output, vacc${N}); output += 4;
     }
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const float32x4_t va = vld1q_f32(input_a); input_a += 4;

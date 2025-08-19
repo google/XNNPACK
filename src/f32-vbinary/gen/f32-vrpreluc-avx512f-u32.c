@@ -39,14 +39,14 @@ void xnn_f32_vrpreluc_ukernel__avx512f_u32(
   const __mmask16 vsign = _mm512_cmp_ps_mask(vb, vzero, _CMP_LT_OQ);
 
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
-    const __m512 va0 = _mm512_loadu_ps(input_a);
+    __m512 va0 = _mm512_loadu_ps(input_a + 0);
     __m512 va1 = _mm512_loadu_ps(input_a + 16);
     input_a += 32;
 
     __m512 vacc0 = _mm512_mask_mul_ps(vb, vsign, va0, vb);
     __m512 vacc1 = _mm512_mask_mul_ps(vb, vsign, va1, vb);
 
-    _mm512_storeu_ps(output, vacc0);
+    _mm512_storeu_ps(output + 0, vacc0);
     _mm512_storeu_ps(output + 16, vacc1);
     output += 32;
   }

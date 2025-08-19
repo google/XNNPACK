@@ -35,16 +35,16 @@ void xnn_f32_vmul_ukernel__avx512f_u32(
 
 
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
-    const __m512 va0 = _mm512_loadu_ps(input_a);
+    const __m512 va0 = _mm512_loadu_ps(input_a + 0);
     const __m512 va1 = _mm512_loadu_ps(input_a + 16);
     input_a += 32;
 
-    __m512 vacc0 = _mm512_mul_ps(va0, _mm512_loadu_ps(input_b));
+    __m512 vacc0 = _mm512_mul_ps(va0, _mm512_loadu_ps(input_b + 0));
     __m512 vacc1 = _mm512_mul_ps(va1, _mm512_loadu_ps(input_b + 16));
     input_b += 32;
 
 
-    _mm512_storeu_ps(output, vacc0);
+    _mm512_storeu_ps(output + 0, vacc0);
     _mm512_storeu_ps(output + 16, vacc1);
     output += 32;
   }

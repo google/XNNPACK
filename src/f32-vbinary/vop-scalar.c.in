@@ -4,7 +4,6 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert BATCH_TILE >= 1
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert OP in ["ADD", "DIV", "MAX", "MIN", "MUL", "SUB", "SQRDIFF", "PRELU"]
 #include <assert.h>
 #include <stddef.h>
@@ -57,25 +56,25 @@ void xnn_f32_v${OP.lower()}_ukernel__${"wasm" if WASM else "scalar"}_u${BATCH_TI
   $else:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
       $for N in range(BATCH_TILE):
-        const float va${ABC[N]} = input_a[${N}];
+        const float va${N} = input_a[${N}];
       input_a += ${BATCH_TILE};
 
       $for N in range(BATCH_TILE):
-        const float vb${ABC[N]} = input_b[${N}];
+        const float vb${N} = input_b[${N}];
       input_b += ${BATCH_TILE};
 
       $for N in range(BATCH_TILE):
-        float vacc${ABC[N]} = ${OP_FUNC("va" + ABC[N], "vb" + ABC[N])};
+        float vacc${N} = ${OP_FUNC("va" + str(N), "vb" + str(N))};
 
       $if OP == "SQRDIFF":
         $for N in range(BATCH_TILE):
-          vacc${ABC[N]} = vacc${ABC[N]} * vacc${ABC[N]};
+          vacc${N} = vacc${N} * vacc${N};
       $elif OP == "PRELU":
         $for N in range(BATCH_TILE):
-          vacc${ABC[N]} = XNN_UNPREDICTABLE(va${ABC[N]} < 0.0f) ? va${ABC[N]} * vb${ABC[N]} : va${ABC[N]};
+          vacc${N} = XNN_UNPREDICTABLE(va${N} < 0.0f) ? va${N} * vb${N} : va${N};
 
       $for N in range(BATCH_TILE):
-        output[${N}] = vacc${ABC[N]};
+        output[${N}] = vacc${N};
       output += ${BATCH_TILE};
     }
     if XNN_UNLIKELY(batch != 0) {

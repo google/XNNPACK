@@ -39,19 +39,19 @@ void xnn_f16_vdiv_ukernel__f16c_u16(
   uint16_t* o = (uint16_t*) output;
 
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
-    const __m256 va01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) a));
-    const __m256 vb01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) b));
-    const __m256 va456789AB = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (a + 8)));
-    const __m256 vb456789AB = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (b + 8)));
+    const __m256 va0 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (a + 0)));
+    const __m256 vb0 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (b + 0)));
+    const __m256 va1 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (a + 8)));
+    const __m256 vb1 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (b + 8)));
     a += 16;
     b += 16;
 
-    __m256 vy01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_div_ps(va01234567, vb01234567), _MM_FROUND_TO_NEAREST_INT));
-    __m256 vy456789AB = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_div_ps(va456789AB, vb456789AB), _MM_FROUND_TO_NEAREST_INT));
+    __m256 vy0 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_div_ps(va0, vb0), _MM_FROUND_TO_NEAREST_INT));
+    __m256 vy1 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_div_ps(va1, vb1), _MM_FROUND_TO_NEAREST_INT));
 
 
-    _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vy01234567, _MM_FROUND_TO_NEAREST_INT));
-    _mm_storeu_si128((__m128i*) (o + 8), _mm256_cvtps_ph(vy456789AB, _MM_FROUND_TO_NEAREST_INT));
+    _mm_storeu_si128((__m128i*) (o + 0), _mm256_cvtps_ph(vy0, _MM_FROUND_TO_NEAREST_INT));
+    _mm_storeu_si128((__m128i*) (o + 8), _mm256_cvtps_ph(vy1, _MM_FROUND_TO_NEAREST_INT));
     o += 16;
   }
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {

@@ -40,18 +40,18 @@ void xnn_f16_vrpreluc_ukernel__f16c_u16(
 
   const __m256 vb = _mm256_cvtph_ps(_mm_set1_epi16((short) *b));
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
-    const __m256 va01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) a));
-    const __m256 va456789AB = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (a + 8)));
+    const __m256 va0 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (a + 0)));
+    const __m256 va1 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (a + 8)));
     a += 16;
 
-    __m256 vy01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(va01234567, vb), _MM_FROUND_TO_NEAREST_INT));
-    __m256 vy456789AB = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(va456789AB, vb), _MM_FROUND_TO_NEAREST_INT));
+    __m256 vy0 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(va0, vb), _MM_FROUND_TO_NEAREST_INT));
+    __m256 vy1 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(va1, vb), _MM_FROUND_TO_NEAREST_INT));
 
-    vy01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_blendv_ps(vb, vy01234567, vb), _MM_FROUND_TO_NEAREST_INT));
-    vy456789AB = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_blendv_ps(vb, vy456789AB, vb), _MM_FROUND_TO_NEAREST_INT));
+    vy0 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_blendv_ps(vb, vy0, vb), _MM_FROUND_TO_NEAREST_INT));
+    vy1 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_blendv_ps(vb, vy1, vb), _MM_FROUND_TO_NEAREST_INT));
 
-    _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vy01234567, _MM_FROUND_TO_NEAREST_INT));
-    _mm_storeu_si128((__m128i*) (o + 8), _mm256_cvtps_ph(vy456789AB, _MM_FROUND_TO_NEAREST_INT));
+    _mm_storeu_si128((__m128i*) (o + 0), _mm256_cvtps_ph(vy0, _MM_FROUND_TO_NEAREST_INT));
+    _mm_storeu_si128((__m128i*) (o + 8), _mm256_cvtps_ph(vy1, _MM_FROUND_TO_NEAREST_INT));
     o += 16;
   }
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {

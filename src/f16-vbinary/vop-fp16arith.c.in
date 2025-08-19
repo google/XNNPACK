@@ -4,7 +4,6 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert BATCH_TILE >= 1
-$ABC = "01234567456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert OP in ["ADD", "DIV", "MAX", "MIN", "MUL", "SUB", "SQRDIFF"]
 #include <arm_fp16.h>
 #include <assert.h>
@@ -48,20 +47,20 @@ void xnn_f16_v${OP.lower()}_ukernel__fp16arith_u${BATCH_TILE}(
   $if BATCH_TILE > 1:
     for (; batch >= ${BATCH_TILE} * sizeof(float16_t); batch -= ${BATCH_TILE} * sizeof(float16_t)) {
       $for N in range(BATCH_TILE):
-        const float16_t va${ABC[N]} = *a++;
+        const float16_t va${N} = *a++;
 
       $for N in range(BATCH_TILE):
-        const float16_t vb${ABC[N]} = *b++;
+        const float16_t vb${N} = *b++;
 
       $for N in range(BATCH_TILE):
-        float16_t vacc${ABC[N]} = ${VOPH_F16("va" + ABC[N], "vb" + ABC[N])};
+        float16_t vacc${N} = ${VOPH_F16("va" + str(N), "vb" + str(N))};
 
       $if OP == "SQRDIFF":
         $for N in range(BATCH_TILE):
-          vacc${ABC[N]} = vmulh_f16(vacc${ABC[N]}, vacc${ABC[N]});
+          vacc${N} = vmulh_f16(vacc${N}, vacc${N});
 
       $for N in range(BATCH_TILE):
-        *o++ = vacc${ABC[N]};
+        *o++ = vacc${N};
     }
     if XNN_UNLIKELY(batch != 0) {
       $if BATCH_TILE > 2:

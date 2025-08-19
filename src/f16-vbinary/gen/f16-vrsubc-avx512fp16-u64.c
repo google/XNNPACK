@@ -42,7 +42,7 @@ void xnn_f16_vrsubc_ukernel__avx512fp16_u64(
 
 
   for (; batch >= 64 * sizeof(uint16_t); batch -= 64 * sizeof(uint16_t)) {
-    __m512h va0 = _mm512_loadu_ph(a);
+    __m512h va0 = _mm512_loadu_ph(a + 0);
     __m512h va1 = _mm512_loadu_ph(a + 32);
     a += 64;
 
@@ -50,7 +50,7 @@ void xnn_f16_vrsubc_ukernel__avx512fp16_u64(
     __m512h vacc1 = _mm512_sub_ph(vb, va1);
 
 
-    _mm512_storeu_ph(o, vacc0);
+    _mm512_storeu_ph(o + 0, vacc0);
     _mm512_storeu_ph(o + 32, vacc1);
     o += 64;
   }

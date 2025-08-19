@@ -35,7 +35,7 @@ void xnn_f32_vpreluc_ukernel__sse41_u8(
   const __m128 vb = _mm_load1_ps(input_b);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const __m128 va0 = _mm_loadu_ps(input_a);
+    const __m128 va0 = _mm_loadu_ps(input_a + 0);
     const __m128 va1 = _mm_loadu_ps(input_a + 4);
     input_a += 8;
 
@@ -46,7 +46,7 @@ void xnn_f32_vpreluc_ukernel__sse41_u8(
     vacc0 = _mm_blendv_ps(va0, vacc0, va0);
     vacc1 = _mm_blendv_ps(va1, vacc1, va1);
 
-    _mm_storeu_ps(output, vacc0);
+    _mm_storeu_ps(output + 0, vacc0);
     _mm_storeu_ps(output + 4, vacc1);
     output += 8;
   }
