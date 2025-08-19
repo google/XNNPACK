@@ -24,7 +24,6 @@ void xnn_f32_vaddc_ukernel__hvx_u64(
   assert(output != NULL);
 
   HVX_Vector vb = xnn_set1_f32(*input_b);
-
   for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
     HVX_Vector va0 = xnn_loadu_f32(input_a + 0);
     HVX_Vector va1 = xnn_loadu_f32(input_a + 32);

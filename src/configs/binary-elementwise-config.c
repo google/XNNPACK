@@ -841,6 +841,11 @@ static void init_f32_vprelu_config(void) {
     f32_vprelu_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vpreluc_ukernel__wasmsimd_u16);
     f32_vprelu_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vrpreluc_ukernel__wasmsimd_u16);
     f32_vprelu_config.element_tile = 16;
+  #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+    f32_vprelu_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vprelu_ukernel__hvx_u128);
+    f32_vprelu_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vpreluc_ukernel__hvx_u128);
+    f32_vprelu_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vrpreluc_ukernel__hvx_u128);
+    f32_vprelu_config.element_tile = 128;
   #else
     f32_vprelu_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vprelu_ukernel__scalar_u8);
     f32_vprelu_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vpreluc_ukernel__scalar_u8);

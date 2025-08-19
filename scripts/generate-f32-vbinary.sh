@@ -357,6 +357,9 @@ tools/xngen src/f32-vbinary/vop-hvx.c.in -D OP=SQRDIFF     -D BATCH_TILE=128 -D 
 tools/xngen src/f32-vbinary/vop-hvx.c.in -D OP=SUB         -D BATCH_TILE=32  -D -o src/f32-vbinary/gen/f32-vsub-hvx-u32.c &
 tools/xngen src/f32-vbinary/vop-hvx.c.in -D OP=SUB         -D BATCH_TILE=64  -D -o src/f32-vbinary/gen/f32-vsub-hvx-u64.c &
 tools/xngen src/f32-vbinary/vop-hvx.c.in -D OP=SUB         -D BATCH_TILE=128 -D -o src/f32-vbinary/gen/f32-vsub-hvx-u128.c &
+tools/xngen src/f32-vbinary/vop-hvx.c.in -D OP=PRELU       -D BATCH_TILE=32  -D -o src/f32-vbinary/gen/f32-vprelu-hvx-u32.c &
+tools/xngen src/f32-vbinary/vop-hvx.c.in -D OP=PRELU       -D BATCH_TILE=64  -D -o src/f32-vbinary/gen/f32-vprelu-hvx-u64.c &
+tools/xngen src/f32-vbinary/vop-hvx.c.in -D OP=PRELU       -D BATCH_TILE=128 -D -o src/f32-vbinary/gen/f32-vprelu-hvx-u128.c &
 
 tools/xngen src/f32-vbinary/vopc-hvx.c.in -D OP=ADD        -D BATCH_TILE=32  -D -o src/f32-vbinary/gen/f32-vaddc-hvx-u32.c &
 tools/xngen src/f32-vbinary/vopc-hvx.c.in -D OP=ADD        -D BATCH_TILE=64  -D -o src/f32-vbinary/gen/f32-vaddc-hvx-u64.c &
@@ -385,6 +388,12 @@ tools/xngen src/f32-vbinary/vopc-hvx.c.in -D OP=SQRDIFF    -D BATCH_TILE=128 -D 
 tools/xngen src/f32-vbinary/vopc-hvx.c.in -D OP=SUB        -D BATCH_TILE=32  -D -o src/f32-vbinary/gen/f32-vsubc-hvx-u32.c &
 tools/xngen src/f32-vbinary/vopc-hvx.c.in -D OP=SUB        -D BATCH_TILE=64  -D -o src/f32-vbinary/gen/f32-vsubc-hvx-u64.c &
 tools/xngen src/f32-vbinary/vopc-hvx.c.in -D OP=SUB        -D BATCH_TILE=128 -D -o src/f32-vbinary/gen/f32-vsubc-hvx-u128.c &
+tools/xngen src/f32-vbinary/vopc-hvx.c.in -D OP=PRELU      -D BATCH_TILE=32  -D -o src/f32-vbinary/gen/f32-vpreluc-hvx-u32.c &
+tools/xngen src/f32-vbinary/vopc-hvx.c.in -D OP=PRELU      -D BATCH_TILE=64  -D -o src/f32-vbinary/gen/f32-vpreluc-hvx-u64.c &
+tools/xngen src/f32-vbinary/vopc-hvx.c.in -D OP=PRELU      -D BATCH_TILE=128 -D -o src/f32-vbinary/gen/f32-vpreluc-hvx-u128.c &
+tools/xngen src/f32-vbinary/vopc-hvx.c.in -D OP=RPRELU     -D BATCH_TILE=32  -D -o src/f32-vbinary/gen/f32-vrpreluc-hvx-u32.c &
+tools/xngen src/f32-vbinary/vopc-hvx.c.in -D OP=RPRELU     -D BATCH_TILE=64  -D -o src/f32-vbinary/gen/f32-vrpreluc-hvx-u64.c &
+tools/xngen src/f32-vbinary/vopc-hvx.c.in -D OP=RPRELU     -D BATCH_TILE=128 -D -o src/f32-vbinary/gen/f32-vrpreluc-hvx-u128.c &
 
 ################################ RISC-V Vector ################################
 tools/xngen src/f32-vbinary/vop-rvv.c.in -D OP=ADD       -D LMUL=4 -D -o src/f32-vbinary/gen/f32-vadd-rvv-u4v.c &

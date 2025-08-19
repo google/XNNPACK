@@ -10,7 +10,7 @@
 #include "src/xnnpack/simd/f32-hvx.h"
 #include "src/xnnpack/vbinary.h"
 
-void xnn_f32_vrdivc_ukernel__hvx_u64(
+void xnn_f32_vpreluc_ukernel__hvx_u64(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -24,14 +24,20 @@ void xnn_f32_vrdivc_ukernel__hvx_u64(
   assert(output != NULL);
 
   HVX_Vector vb = xnn_set1_f32(*input_b);
+  const HVX_Vector vzero = xnn_zero_f32();
   for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
     HVX_Vector va0 = xnn_loadu_f32(input_a + 0);
     HVX_Vector va1 = xnn_loadu_f32(input_a + 32);
     input_a += 64;
 
-    HVX_Vector vacc0 = xnn_div_f32(vb, va0);
-    HVX_Vector vacc1 = xnn_div_f32(vb, va1);
+    HVX_Vector vacc0 = xnn_mul_f32(va0, vb);
+    HVX_Vector vacc1 = xnn_mul_f32(va1, vb);
 
+    const HVX_VectorPred vm0 = Q6_Q_vcmp_gt_VsfVsf(vzero, va0);
+    const HVX_VectorPred vm1 = Q6_Q_vcmp_gt_VsfVsf(vzero, va1);
+
+    vacc0 = Q6_V_vmux_QVV(vm0, vacc0, va0);
+    vacc1 = Q6_V_vmux_QVV(vm1, vacc1, va1);
 
     xnn_storeu_f32(output + 0, vacc0);
     xnn_storeu_f32(output + 32, vacc1);
@@ -41,7 +47,9 @@ void xnn_f32_vrdivc_ukernel__hvx_u64(
     HVX_Vector va = xnn_loadu_f32(input_a);
     input_a += 32;
 
-    HVX_Vector vacc = xnn_div_f32(vb, va);
+    HVX_Vector vacc = xnn_mul_f32(va, vb);
+    const HVX_VectorPred vm = Q6_Q_vcmp_gt_VsfVsf(vzero, va);
+    vacc = Q6_V_vmux_QVV(vm, vacc, va);
 
     xnn_storeu_f32(output, vacc);
     output+= 32;
@@ -49,7 +57,9 @@ void xnn_f32_vrdivc_ukernel__hvx_u64(
   if XNN_UNLIKELY(batch != 0) {
     HVX_Vector va = xnn_load_tail_f32(input_a, batch >> XNN_LOG2_SIZEOF_FLOAT);
 
-    HVX_Vector vacc = xnn_div_f32(vb, va);
+    HVX_Vector vacc = xnn_mul_f32(va, vb);
+    const HVX_VectorPred vm = Q6_Q_vcmp_gt_VsfVsf(vzero, va);
+    vacc = Q6_V_vmux_QVV(vm, vacc, va);
 
     Q6_V_vstu_variable(output, batch, vacc);
   }

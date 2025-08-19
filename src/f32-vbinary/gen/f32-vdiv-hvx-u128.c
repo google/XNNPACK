@@ -22,7 +22,6 @@ void xnn_f32_vdiv_ukernel__hvx_u128(
   assert(input_a != NULL);
   assert(input_b != NULL);
   assert(output != NULL);
-
   for (; batch >= 128 * sizeof(float); batch -= 128 * sizeof(float)) {
     HVX_Vector va0 = xnn_loadu_f32(input_a + 0);
     HVX_Vector va1 = xnn_loadu_f32(input_a + 32);
