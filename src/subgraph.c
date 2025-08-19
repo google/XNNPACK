@@ -2226,7 +2226,8 @@ static bool convert_gemm_to_qduint8(
   const struct xnn_gemm_config* original_config = NULL;
   const struct xnn_gemm_config* unsigned_config = NULL;
   if (input_datatype == xnn_datatype_fp32) {
-    if (consumer_weights_type == xnn_datatype_qcint4) {
+    if (consumer_weights_type == xnn_datatype_qcint4 ||
+        consumer_weights_type == xnn_datatype_qcuint4) {
       original_config = xnn_init_qd8_f32_qc4w_gemm_config();
       unsigned_config = xnn_init_qdu8_f32_qc4w_gemm_config();
     } else if (consumer_weights_type == xnn_datatype_qcint8) {
@@ -2243,12 +2244,14 @@ static bool convert_gemm_to_qduint8(
         default:
           XNN_UNREACHABLE;
       }
-    } else if (consumer_weights_type == xnn_datatype_qbint4) {
+    } else if (consumer_weights_type == xnn_datatype_qbint4 ||
+               consumer_weights_type == xnn_datatype_qbuint4) {
       original_config = xnn_init_qd8_f32_qb4w_gemm_config();
       unsigned_config = xnn_init_qdu8_f32_qb4w_gemm_config();
     }
   } else if (input_datatype == xnn_datatype_fp16) {
-    if (consumer_weights_type == xnn_datatype_qcint4) {
+    if (consumer_weights_type == xnn_datatype_qcint4 ||
+        consumer_weights_type == xnn_datatype_qcuint4) {
       original_config = xnn_init_qd8_f16_qc4w_gemm_config();
       unsigned_config = xnn_init_qdu8_f16_qc4w_gemm_config();
     } else if (consumer_weights_type == xnn_datatype_qcint8) {
@@ -2339,15 +2342,13 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
             assumed_datatype = xnn_datatype_qdint8;
             if (output_datatype == xnn_datatype_fp32) {
               switch (kernel_datatype) {
-                case xnn_datatype_qbint4:
-                  // The qp8_f32_qb4w kernels only support unsigned 4-bit
-                  // weights.
-                  if (kernel_value->quantization.zero_point == 8 &&
-                      (gemm_config = xnn_init_qp8_f32_qb4w_gemm_config())) {
+                case xnn_datatype_qbuint4:
+                  if ((gemm_config = xnn_init_qp8_f32_qb4w_gemm_config())) {
                     assumed_datatype = xnn_datatype_qpint8;
                   }
                   break;
                 case xnn_datatype_qcint4:
+                case xnn_datatype_qcuint4:
                   if ((gemm_config = xnn_init_qp8_f32_qc4w_gemm_config())) {
                     assumed_datatype = xnn_datatype_qpint8;
                   }
