@@ -267,12 +267,13 @@ xnnpack_cxx_library(
 [xnnpack_unit_test(
     name = "%s_test" % test,
     srcs = ["%s.cc" % test.replace("_", "-")],
+    shard_count = shard_count,
     deps = MICROKERNEL_TEST_DEPS,
-) for test in [
-    "rminmax",
-    "rsum",
-    "rdminmax",
-    "rdsum",
+) for (test, shard_count) in [
+    ("rminmax", 1),
+    ("rsum", 1),
+    ("rdminmax", 1),
+    ("rdsum", 5),
 ]]
 
 [xnnpack_unit_test(
