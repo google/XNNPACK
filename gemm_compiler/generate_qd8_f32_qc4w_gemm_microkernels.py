@@ -35,7 +35,6 @@ def generate_qd8_f32_qc4w_gemm_microkernels():
     decrement = 32 * unroll
     for nr in range(8, 16, 8):
       for mr in range(1, 8):
-        print("MR ", mr)
         generate.generate_gemm_microkernel(
             isa=neondot_template.NeonDotQC4W(mr, nr, unroll),
             output_file=os.path.join(
