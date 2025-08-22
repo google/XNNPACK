@@ -62,4 +62,9 @@ tools/xngen src/f16-vtanh/neonfp16arith-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D
 tools/xngen src/f16-vtanh/neonfp16arith-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=24 -D SAT=MINMAX -D DIV=RECPEADJ -o src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-recpeadj-u24.c &
 tools/xngen src/f16-vtanh/neonfp16arith-expm1minus.c.in -D P=3 -D H=2 -D PS=0 -D BATCH_TILE=32 -D SAT=MINMAX -D DIV=RECPEADJ -o src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2ts-recpeadj-u32.c &
 
+tools/xngen src/f16-vtanh/rvvfp16arith.c.in -D LMUL=1 -o src/f16-vtanh/gen/f16-vtanh-rvvfp16arith-tanh-u1v.c &
+tools/xngen src/f16-vtanh/rvvfp16arith.c.in -D LMUL=2 -o src/f16-vtanh/gen/f16-vtanh-rvvfp16arith-tanh-u2v.c &
+tools/xngen src/f16-vtanh/rvvfp16arith.c.in -D LMUL=4 -o src/f16-vtanh/gen/f16-vtanh-rvvfp16arith-tanh-u4v.c &
+tools/xngen src/f16-vtanh/rvvfp16arith.c.in -D LMUL=8 -o src/f16-vtanh/gen/f16-vtanh-rvvfp16arith-tanh-u8v.c &
+
 wait
