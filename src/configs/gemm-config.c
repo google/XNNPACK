@@ -2281,7 +2281,7 @@ static void init_qp8_f32_qc4w_gemm_config(void) {
     qp8_f32_qc4w_gemm_config.mr_packed = mr;
     #endif  // XNN_ENABLE_ARM_SME2
   } else if (XNN_ENABLE_ARM_I8MM && (hardware_config->arch_flags & xnn_arch_arm_neon_i8mm)) {
-#if XNN_ENABLE_ARM_I8MM
+#if XNN_ENABLE_ARM_I8MM && XNN_ENABLE_ARM_DOTPROD
     qp8_f32_qc4w_gemm_config.minmax.qp8gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_QP8GEMM_UKERNEL(xnn_qp8_f32_qc4w_gemm_minmax_ukernel_1x8c16s2__aarch64_neondot);
     qp8_f32_qc4w_gemm_config.minmax.qp8gemm[XNN_MR_TO_INDEX(8)] = XNN_INIT_HMP_QP8GEMM_UKERNEL(xnn_qp8_f32_qc4w_gemm_minmax_ukernel_8x8c16s2__neoni8mm_mstep2);
     qp8_f32_qc4w_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -2335,7 +2335,7 @@ static void init_qp8_f32_qc8w_gemm_config(void) {
     qp8_f32_qc8w_gemm_config.mr_packed = mr;
     #endif  // XNN_ENABLE_ARM_SME2
   } else if (XNN_ENABLE_ARM_I8MM && (hardware_config->arch_flags & xnn_arch_arm_neon_i8mm)) {
-#if XNN_ENABLE_ARM_I8MM
+#if XNN_ENABLE_ARM_I8MM && XNN_ENABLE_ARM_DOTPROD
     qp8_f32_qc8w_gemm_config.minmax.qp8gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_QP8GEMM_UKERNEL(xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x4c8__aarch64_neondot);
     qp8_f32_qc8w_gemm_config.minmax.qp8gemm[XNN_MR_TO_INDEX(16)] = XNN_INIT_HMP_QP8GEMM_UKERNEL(xnn_qp8_f32_qc8w_gemm_minmax_ukernel_16x4c8__neoni8mm_mstep4);
     qp8_f32_qc8w_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -2369,7 +2369,7 @@ static void init_qp8_f32_qb4w_gemm_config(void) {
         xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (XNN_ENABLE_ARM_I8MM && (hardware_config->arch_flags & xnn_arch_arm_neon_i8mm)) {
-      #if XNN_ENABLE_ARM_I8MM
+      #if XNN_ENABLE_ARM_I8MM && XNN_ENABLE_ARM_DOTPROD
         qp8_f32_qb4w_gemm_config.minmax.qp8gemm_bl[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_QP8GEMM_BL_UKERNEL(xnn_qp8_f32_qb4w_gemm_minmax_ukernel_1x4c16s2__aarch64_neondot);
         qp8_f32_qb4w_gemm_config.minmax.qp8gemm_bl[XNN_MR_TO_INDEX(16)] = XNN_INIT_HMP_QP8GEMM_BL_UKERNEL(xnn_qp8_f32_qb4w_gemm_minmax_ukernel_16x4c16s2__neoni8mm_mstep4);
         qp8_f32_qb4w_gemm_config.init.f32_qb4w = xnn_init_f32_qb4w_minmax_scalar_params;
@@ -2482,7 +2482,7 @@ static void init_qd8_f32_qb4w_gemm_config(void) {
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if (XNN_ENABLE_ARM_I8MM && (hardware_config->arch_flags & xnn_arch_arm_neon_i8mm)) {
-      #if XNN_ENABLE_ARM_I8MM
+      #if XNN_ENABLE_ARM_I8MM && XNN_ENABLE_ARM_DOTPROD
         qd8_f32_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x16c8__neoni8mm);
         qd8_f32_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qb4w_gemm_minmax_ukernel_4x16c8__neoni8mm);
         qd8_f32_qb4w_gemm_config.init.f32_qb4w = xnn_init_f32_qb4w_minmax_scalar_params;
@@ -2605,7 +2605,7 @@ static void init_qd8_f16_qc8w_gemm_config(void) {
               break;
           }
         }
-        #if XNN_MAX_UARCH_TYPES > 1
+        #if XNN_MAX_UARCH_TYPES > 1 && XNN_ENABLE_ARM_DOTPROD
         {
           /* Choose micro-kernels for little cores according to micro-kernel specification for the big core */
           const uint32_t mr = qd8_f16_qc8w_gemm_config.mr;
@@ -2936,7 +2936,7 @@ static void init_qd8_f16_qc8w_igemm_config(void) {
           qd8_f16_qc8w_igemm_config.log2_kr = 1;
           qd8_f16_qc8w_igemm_config.log2_sr = 2;
         }
-        #if XNN_MAX_UARCH_TYPES > 1
+        #if XNN_MAX_UARCH_TYPES > 1 && XNN_ENABLE_ARM_DOTPROD
         {
           /* Choose micro-kernels for little cores according to micro-kernel specification for the big core */
           const uint32_t mr = qd8_f16_qc8w_igemm_config.mr;
@@ -3485,7 +3485,7 @@ static void init_qd8_f32_qc8w_gemm_config(void) {
               break;
           }
         }
-        #if XNN_MAX_UARCH_TYPES > 1
+        #if XNN_MAX_UARCH_TYPES > 1 && XNN_ENABLE_ARM_DOTPROD
         {
           /* Choose micro-kernels for little cores according to micro-kernel specification for the big core */
           const uint32_t mr = qd8_f32_qc8w_gemm_config.mr;
