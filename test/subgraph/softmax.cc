@@ -21,7 +21,7 @@
 namespace xnnpack {
 
 template <typename T>
-Tensor<T> softmax(Tensor<T> x) {
+Tensor<T> rms_norm(Tensor<T> x) {
   Tensor<T> y(x.extents());
   std::vector<size_t> batch_dims = x.extents();
   size_t channels = x.extents().back();
@@ -68,7 +68,7 @@ void TestImpl(size_t rank) {
     DatatypeGenerator<T> generator(-20.0f, 20.0f);
     input.generate([&]() { return generator(rng); });
 
-    Tensor<T> expected = softmax(input);
+    Tensor<T> expected = rms_norm(input);
 
     // Check reshaped shape is correct
     subgraph.ReshapeExternalTensor(shape, input.base(), 0).ReshapeRuntime();

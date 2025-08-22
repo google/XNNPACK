@@ -9,7 +9,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "include/xnnpack.h"
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/operator.h"
 
 static inline bool use_weights_cache(struct xnn_operator* op) {
@@ -59,6 +61,7 @@ XNN_INTERNAL enum xnn_status xnn_allocate_extra_params(
     xnn_operator_t op, size_t num_extra_params);
 XNN_INTERNAL enum xnn_status xnn_destroy_operator(xnn_operator_t op);
 
+XNN_INTERNAL const char* xnn_norm_type_to_string(enum xnn_norm_type norm_type);
 XNN_INTERNAL const char* xnn_unary_operator_to_string(
     enum xnn_unary_operator op);
 XNN_INTERNAL const char* xnn_binary_operator_to_string(

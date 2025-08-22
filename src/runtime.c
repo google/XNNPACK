@@ -454,6 +454,7 @@ void propagate_rank(
       case xnn_node_type_static_reduce_max:
       case xnn_node_type_static_reduce_min:
       case xnn_node_type_static_sum:
+      case xnn_node_type_static_sum_squared:
         if (flags & XNN_FLAG_KEEP_DIMS) {
           output_value->shape.num_dims = input_value->shape.num_dims;
         } else {
@@ -470,6 +471,7 @@ void propagate_rank(
       case xnn_node_type_unary_elementwise:
       case xnn_node_type_convert:
       case xnn_node_type_pack_lh:
+      case xnn_node_type_normalize:
       case xnn_node_type_softmax:
       case xnn_node_type_static_transpose:
       case xnn_node_type_static_constant_pad:
@@ -526,7 +528,8 @@ static enum xnn_status create_runtime_impl(
   const uint32_t optimization_flags =
       XNN_FLAG_HINT_SPARSE_INFERENCE | XNN_FLAG_HINT_FP16_INFERENCE |
       XNN_FLAG_FORCE_FP16_INFERENCE | XNN_FLAG_NO_OPERATOR_FUSION |
-      XNN_FLAG_NO_INLINED_LHS_PACKING | XNN_FLAG_SLINKY_ENABLED;
+      XNN_FLAG_NO_INLINED_LHS_PACKING | XNN_FLAG_SLINKY_ENABLED |
+      XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC;
   status = xnn_subgraph_optimize(subgraph, flags & optimization_flags);
   if (status != xnn_status_success) {
     xnn_log_error("failed to optimize subgraph");

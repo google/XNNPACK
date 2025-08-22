@@ -9,7 +9,6 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <string>
 
 #include "src/xnnpack/common.h"

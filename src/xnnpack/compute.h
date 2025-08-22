@@ -1348,6 +1348,34 @@ struct floating_point_softmax_context {
 XNN_PRIVATE void xnn_compute_floating_point_softmax(
     struct floating_point_softmax_context* context, size_t batch_index);
 
+typedef void (*xnn_convert_scale_fn)(float input, void* output);
+
+struct normalize_context {
+  size_t n;
+  const void* x;
+  size_t x_stride;
+  void* y;
+  size_t y_stride;
+  float epsilon;
+  size_t num_channels;
+  xnn_rsum2_ukernel_fn rsum2_ukernel;
+  xnn_vbinary_ukernel_fn vmulc_ukernel;
+  xnn_vbinary_ukernel_fn vmul_ukernel;
+  xnn_convert_scale_fn convert_scale;
+  union {
+    struct xnn_f16_minmax_params f16;
+    struct xnn_f32_minmax_params f32;
+  } minmax_params;
+  union {
+    struct xnn_f32_scale_params f32;
+  } rsum2_params;
+  const void* scale;
+  enum xnn_norm_type norm_type;
+};
+
+XNN_PRIVATE void xnn_compute_normalize(struct normalize_context* context,
+                                      size_t batch_index);
+
 struct rope_context {
   size_t scaled_channels;
   size_t batch_stride;

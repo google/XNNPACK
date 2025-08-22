@@ -128,6 +128,7 @@ template <typename T>
 T get_reduce_identity(xnn_reduce_operator op) {
   switch (op) {
     case xnn_reduce_sum:
+    case xnn_reduce_sum_squared:
     case xnn_reduce_mean:
       return 0;
     case xnn_reduce_max:
@@ -758,6 +759,15 @@ class Tensor {
   // std::fill).
   void fill(T value) {
     generate([=]() { return value; });
+  }
+
+  template <typename G>
+  Tensor<G> cast() const {
+    Tensor<G> res(shape());
+    for (size_t k = 0; k < res.size(); k++) {
+      res[k] = static_cast<G>((*this)[k]);
+    }
+    return res;
   }
 
  private:

@@ -163,6 +163,7 @@ SET(NON_PROD_HVX_MICROKERNEL_SRCS
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-hvx-rr2-p5-u128-acc4.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-hvx-u32.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-hvx-u64.c
+  src/f32-rdsum2/gen/f32-rdsum2-7p7x-minmax-hvx.c
   src/f32-rminmax/gen/f32-rmax-hvx-u32.c
   src/f32-rminmax/gen/f32-rmax-hvx-u96-acc3.c
   src/f32-rminmax/gen/f32-rmax-hvx-u128-acc2.c

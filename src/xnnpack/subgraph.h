@@ -356,6 +356,10 @@ struct xnn_node {
       uint32_t dilation_width;
     } pooling_2d;
     struct {
+      float epsilon;
+      enum xnn_norm_type norm_type;
+    } normalize;
+    struct {
       size_t pre_paddings[XNN_MAX_TENSOR_DIMS];
       size_t post_paddings[XNN_MAX_TENSOR_DIMS];
       uint32_t padding_value;
@@ -579,6 +583,9 @@ size_t xnn_shape_multiply_leading_dims(const struct xnn_shape* shape,
 // Product of trailing dimensions starting from start_dim.
 size_t xnn_shape_multiply_trailing_dims(const struct xnn_shape* shape,
                                         size_t start_dim);
+
+// Returns the innermost dimension.
+size_t xnn_shape_get_last_dim(const struct xnn_shape* shape);
 
 // Get the size in bytes to hold dynamic quant params
 size_t xnn_tensor_get_dynamic_quant_param_size(enum xnn_datatype datatype,

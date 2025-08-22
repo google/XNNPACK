@@ -36,10 +36,22 @@ SubgraphTester::SubgraphTester(uint32_t external_value_ids, uint32_t flags) {
   subgraph_.reset(subgraph_ptr);
 }
 
-SubgraphTester& SubgraphTester::AddInternalDynamicTensorF32(
-    const TensorShape& shape, uint32_t* id_out, uint32_t flags) {
+SubgraphTester& SubgraphTester::AddInternalDynamicTensor(
+    const TensorShape& shape, enum xnn_datatype datatype, uint32_t* id_out,
+    uint32_t flags) {
   const xnn_status status = xnn_define_tensor_value(
-      subgraph_.get(), xnn_datatype_fp32, shape.Rank(), shape.Dims(), nullptr,
+      subgraph_.get(), datatype, shape.Rank(), shape.Dims(), nullptr,
+      XNN_INVALID_VALUE_ID, flags, id_out);
+  EXPECT_EQ(status, xnn_status_success);
+
+  return *this;
+}
+
+SubgraphTester& SubgraphTester::AddInternalStaticTensor(
+    const TensorShape& shape, enum xnn_datatype datatype, uint32_t* id_out,
+    const void* data, uint32_t flags) {
+  const xnn_status status = xnn_define_tensor_value(
+      subgraph_.get(), datatype, shape.Rank(), shape.Dims(), data,
       XNN_INVALID_VALUE_ID, flags, id_out);
   EXPECT_EQ(status, xnn_status_success);
 
@@ -736,6 +748,17 @@ SubgraphTester& SubgraphTester::AddReduce(
   const xnn_status status = xnn_define_static_reduce_v2(
       subgraph_.get(), reduce_operator, reduction_axes.size(),
       reduction_axes.data(), input_id, output_id, flags);
+  EXPECT_EQ(status, xnn_status_success);
+  return *this;
+}
+
+SubgraphTester& SubgraphTester::AddRMSNorm(uint32_t input_id, uint32_t scale_id,
+                                           uint32_t output_id,
+                                           enum xnn_norm_type norm_type,
+                                           float epsilon, uint32_t flags) {
+  const xnn_status status =
+      xnn_define_normalize(subgraph_.get(), norm_type, input_id, scale_id,
+                           output_id, epsilon, flags);
   EXPECT_EQ(status, xnn_status_success);
   return *this;
 }

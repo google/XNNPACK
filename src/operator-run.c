@@ -11,6 +11,7 @@
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "include/xnnpack.h"
@@ -2038,6 +2039,48 @@ void xnn_compute_floating_point_softmax(
   } y_scale;
   context->compute_reciprocal(&y_sum, &y_scale);
   context->vmulc_ukernel(n, y, &y_scale, y, &context->minmax_params);
+}
+
+void xnn_compute_normalize(struct normalize_context* restrict context,
+                           size_t batch_index) {
+  const void* x =
+      (const void*)((uintptr_t)context->x + context->x_stride * batch_index);
+  void* y = (void*)((uintptr_t)context->y + context->y_stride * batch_index);
+  const size_t n = context->n;
+
+  // First pass: reduce sum squared.
+  float sum_of_squares = 0.0f;
+  context->rsum2_ukernel(n, x, &sum_of_squares, &context->rsum2_params);
+
+  // Avoid any negativity due to rounding error.
+  if (sum_of_squares < 0.0f) {
+    sum_of_squares = 0.0f;
+  }
+
+  // Second pass: scale.
+  float scale_fp32 = 0;
+  switch (context->norm_type) {
+    case xnn_norm_l2:
+      scale_fp32 = 1.0f / sqrtf(context->epsilon + sum_of_squares);
+      break;
+    case xnn_norm_rms:
+      scale_fp32 = 1.0f / sqrtf(context->epsilon +
+                                sum_of_squares / context->num_channels);
+      break;
+    default:
+      XNN_UNREACHABLE;
+  }
+  union {
+    float fp32;
+    xnn_float16 fp16;
+  } scale;
+  context->convert_scale(scale_fp32, &scale);
+  context->vmulc_ukernel(n, x, &scale, y, &context->minmax_params);
+
+  // Optional third pass: scale with vector.
+  if (context->scale != NULL) {
+    context->vmul_ukernel(n, y, context->scale, y, /*params=*/NULL);
+  }
 }
 
 void xnn_compute_vmulcaddc(struct vmulcaddc_context* restrict context,
