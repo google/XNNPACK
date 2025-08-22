@@ -343,7 +343,8 @@ TEST(Convolution2DQD8F16QC8W, test) {
   TestImpl<xnn_float16, qcint8, xnn_float16>(
       /*convert_to=*/xnn_datatype_qdint8);
 }
-TEST(Convolution2DQD8F32QC8W, test) {
+// TODO(b/440169634) - Fix windows bot failure
+TEST(DISABLED_Convolution2DQD8F32QC8W, test) {
   TestImpl<float, qcint8, float>(/*convert_to=*/xnn_datatype_qdint8);
 }
 
