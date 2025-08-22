@@ -60,7 +60,7 @@ static HVX_Vector rescale_fp32(HVX_Vector vacc, HVX_Vector vscale)
 }
 #endif  // __HVX_ARCH__ >= 73
 
-void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c4__hvx(
+void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c4__hvx${"_prfm" if PREFETCH else ""}(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -121,7 +121,11 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
   const HVX_Vector voutput_zero_point = Q6_Vh_vsplat_R(params->${PARAMS_STRUCT}.output_zero_point);
   const HVX_Vector voutput_min = Q6_Vb_vsplat_R(params->${PARAMS_STRUCT}.output_min);
   const HVX_Vector voutput_max = Q6_Vb_vsplat_R(params->${PARAMS_STRUCT}.output_max);
+  $if PREFETCH:
+    const uint32_t prefetch_size = HEXAGON_V64_CREATE_H(0, 0, kc * ${NR}, 1);
   do {
+    $if PREFETCH:
+      Q6_l2fetch_AR((void*) w, prefetch_size);
     $for N in range(0, NR, 32):
       HVX_Vector vacc0x${N//32} = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
     $for M in range(1, MR):

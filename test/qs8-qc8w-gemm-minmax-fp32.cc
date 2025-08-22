@@ -4269,5 +4269,105 @@ INSTANTIATE_TEST_SUITE_P(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
+
+  INSTANTIATE_TEST_SUITE_P(
+      QS8_QC8W_GEMM_MINMAX_FP32_3X128C4__HVX_PRFM, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/4,
+          /*adj_k_block=*/4,
+          /*mr=*/3, /*nr=*/128, /*kr=*/4, /*sr=*/1,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_3x128c4__hvx_prfm,
+                        xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+                        xnn_pack_qs8_gemm_goi_w,
+                        xnn_qs8_requantize_fp32);
+          },
+          xnn_arch_hvx)),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      QS8_QC8W_GEMM_MINMAX_FP32_6X128C4__HVX_PRFM, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/4,
+          /*adj_k_block=*/4,
+          /*mr=*/6, /*nr=*/128, /*kr=*/4, /*sr=*/1,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_6x128c4__hvx_prfm,
+                        xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+                        xnn_pack_qs8_gemm_goi_w,
+                        xnn_qs8_requantize_fp32);
+          },
+          xnn_arch_hvx)),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      QS8_QC8W_GEMM_MINMAX_FP32_7X128C4__HVX_PRFM, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/4,
+          /*adj_k_block=*/4,
+          /*mr=*/7, /*nr=*/128, /*kr=*/4, /*sr=*/1,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_7x128c4__hvx_prfm,
+                        xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+                        xnn_pack_qs8_gemm_goi_w,
+                        xnn_qs8_requantize_fp32);
+          },
+          xnn_arch_hvx)),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      QS8_QC8W_GEMM_MINMAX_FP32_8X128C4__HVX_PRFM, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/4,
+          /*adj_k_block=*/4,
+          /*mr=*/8, /*nr=*/128, /*kr=*/4, /*sr=*/1,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x128c4__hvx_prfm,
+                        xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+                        xnn_pack_qs8_gemm_goi_w,
+                        xnn_qs8_requantize_fp32);
+          },
+          xnn_arch_hvx)),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
+      QS8_QC8W_GEMM_MINMAX_FP32_10X128C4__HVX_PRFM, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/4,
+          /*adj_k_block=*/4,
+          /*mr=*/10, /*nr=*/128, /*kr=*/4, /*sr=*/1,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_10x128c4__hvx_prfm,
+                        xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+                        xnn_pack_qs8_gemm_goi_w,
+                        xnn_qs8_requantize_fp32);
+          },
+          xnn_arch_hvx)),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
 #endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
 
