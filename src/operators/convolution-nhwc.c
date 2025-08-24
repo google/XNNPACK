@@ -1946,6 +1946,53 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
                                           convolution_op_out);
 }
 
+enum xnn_status xnn_create_convolution2d_nhwc_pf32(
+    uint32_t input_padding_top, uint32_t input_padding_right,
+    uint32_t input_padding_bottom, uint32_t input_padding_left,
+    uint32_t kernel_height, uint32_t kernel_width, uint32_t subsampling_height,
+    uint32_t subsampling_width, uint32_t dilation_height,
+    uint32_t dilation_width, uint32_t groups, size_t group_input_channels,
+    size_t group_output_channels, size_t input_channel_stride,
+    size_t output_channel_stride, const float* kernel, const float* bias,
+    float output_min, float output_max, uint32_t flags,
+    xnn_weights_cache_t weights_cache, xnn_operator_t* convolution_op_out) {
+  const struct xnn_gemm_config* gemm_config = xnn_init_pf32_gemm_config();
+  if (gemm_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32));
+    return xnn_status_unsupported_hardware;
+  }
+  
+  struct convolution2d_nhwc_context context = {
+      .input_padding_top = input_padding_top,
+      .input_padding_right = input_padding_right,
+      .input_padding_bottom = input_padding_bottom,
+      .input_padding_left = input_padding_left,
+      .kernel_height = kernel_height,
+      .kernel_width = kernel_width,
+      .subsampling_height = subsampling_height,
+      .subsampling_width = subsampling_width,
+      .dilation_height = dilation_height,
+      .dilation_width = dilation_width,
+      .groups = groups,
+      .group_input_channels = group_input_channels,
+      .group_output_channels = group_output_channels,
+      .input_channel_stride = input_channel_stride,
+      .output_channel_stride = output_channel_stride,
+      .kernel = kernel,
+      .bias = bias,
+      .output_min = output_min,
+      .output_max = output_max,
+      .flags = flags,
+      .weights_cache = weights_cache,
+      .gemm_config = gemm_config,
+      .operator_type = xnn_operator_type_convolution_nhwc_pf32,
+  };
+  return create_convolution2d_nhwc_helper(&f32_variant, &context,
+                                          convolution_op_out);
+}
+
 enum xnn_status xnn_create_convolution2d_nhwc_f32_f16(
     uint32_t input_padding_top, uint32_t input_padding_right,
     uint32_t input_padding_bottom, uint32_t input_padding_left,
@@ -2153,6 +2200,11 @@ static enum xnn_status reshape_igemm(
         packed_lh_config = xnn_init_x8_igemm_pack_lh_config();
       }
       break;
+    case xnn_operator_type_convolution_nhwc_pf32:
+      if (inline_lhs_packing) {
+        packed_lh_config = xnn_init_x32_igemm_pack_lh_config();
+      }
+      break;      
     default:
       break;
   }
@@ -2977,6 +3029,22 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_f32(
       output_width_out, threadpool);
 }
 
+enum xnn_status xnn_reshape_convolution2d_nhwc_pf32(
+    xnn_operator_t convolution_op, size_t batch_size, size_t input_height,
+    size_t input_width, size_t* workspace_size, size_t* output_height_out,
+    size_t* output_width_out, pthreadpool_t threadpool) {
+  return reshape_convolution2d_nhwc(
+      convolution_op, xnn_operator_type_convolution_nhwc_pf32, batch_size,
+      input_height, input_width,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      /*extra_weights_elements_size=*/sizeof(float),
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      /*dynamic_quantization=*/false, workspace_size, output_height_out,
+      output_width_out, threadpool);
+}
+
 static enum xnn_status setup_igemm(xnn_operator_t convolution_op,
                                    void* workspace,
                                    uint32_t log2_input_element_size) {
@@ -3181,6 +3249,16 @@ enum xnn_status xnn_setup_convolution2d_nhwc_f32(xnn_operator_t convolution_op,
                                                  float* output) {
   return setup_convolution2d_nhwc(
       convolution_op, xnn_operator_type_convolution_nhwc_f32, workspace, input,
+      output, /*quantization_params=*/NULL,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT);
+}
+
+enum xnn_status xnn_setup_convolution2d_nhwc_pf32(xnn_operator_t convolution_op,
+                                                 void* workspace,
+                                                 const float* input,
+                                                 float* output) {
+  return setup_convolution2d_nhwc(
+      convolution_op, xnn_operator_type_convolution_nhwc_pf32, workspace, input,
       output, /*quantization_params=*/NULL,
       /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT);
 }
