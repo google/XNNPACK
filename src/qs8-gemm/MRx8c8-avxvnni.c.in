@@ -155,12 +155,12 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
           const __m256i vb01234567x4567 = _mm256_and_si256(vbb01234567x01234567, vmask);
           const __m256i vb89ABCDEFx4567 = _mm256_and_si256(vbb89ABCDEFx01234567, vmask);
         $elif VARIANT == "MADD":
-          const __m256i vbs01234567x0123 = _mm256_srli_epi32(vbb01234567x01234567, 4);
-          const __m256i vbs89ABCDEFx0123 = _mm256_srli_epi32(vbb89ABCDEFx01234567, 4);
+          const __m256i vbs01234567x4567 = _mm256_srli_epi32(vbb01234567x01234567, 4);
+          const __m256i vbs89ABCDEFx4567 = _mm256_srli_epi32(vbb89ABCDEFx01234567, 4);
           const __m256i vb01234567x0123 = _mm256_and_si256(vbb01234567x01234567, vmask);
           const __m256i vb89ABCDEFx0123 = _mm256_and_si256(vbb89ABCDEFx01234567, vmask);
-          const __m256i vb01234567x4567 = _mm256_and_si256(vbs01234567x0123, vmask);
-          const __m256i vb89ABCDEFx4567 = _mm256_and_si256(vbs89ABCDEFx0123, vmask);
+          const __m256i vb01234567x4567 = _mm256_and_si256(vbs01234567x4567, vmask);
+          const __m256i vb89ABCDEFx4567 = _mm256_and_si256(vbs89ABCDEFx4567, vmask);
         $else:
           const __m256i vbs01234567x0123 = _mm256_slli_epi32(vbb01234567x01234567, 4);
           const __m256i vbs89ABCDEFx0123 = _mm256_slli_epi32(vbb89ABCDEFx01234567, 4);

@@ -84,12 +84,12 @@ void xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_2x4c8__avx_madd_prfm(
 
       const __m128i vbb01234567x0123 = _mm_load_si128(w);
       const __m128i vbb89ABCDEFx0123 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 16));
-      const __m128i vbs01234567x01 = _mm_srli_epi32(vbb01234567x0123, 4);
-      const __m128i vbs89ABCDEFx01 = _mm_srli_epi32(vbb89ABCDEFx0123, 4);
+      const __m128i vbs01234567x23 = _mm_srli_epi32(vbb01234567x0123, 4);
+      const __m128i vbs89ABCDEFx23 = _mm_srli_epi32(vbb89ABCDEFx0123, 4);
       const __m128i vb01234567x01 = _mm_and_si128(vbb01234567x0123, vmask);
       const __m128i vb89ABCDEFx01 = _mm_and_si128(vbb89ABCDEFx0123, vmask);
-      const __m128i vb01234567x23 = _mm_and_si128(vbs01234567x01, vmask);
-      const __m128i vb89ABCDEFx23 = _mm_and_si128(vbs89ABCDEFx01, vmask);
+      const __m128i vb01234567x23 = _mm_and_si128(vbs01234567x23, vmask);
+      const __m128i vb89ABCDEFx23 = _mm_and_si128(vbs89ABCDEFx23, vmask);
 
       vacc0x01 = _mm_dpbusd_epi32_madd(vacc0x01, va0x01234567, vb01234567x01);
       vacc0x23 = _mm_dpbusd_epi32_madd(vacc0x23, va0x01234567, vb89ABCDEFx01);
