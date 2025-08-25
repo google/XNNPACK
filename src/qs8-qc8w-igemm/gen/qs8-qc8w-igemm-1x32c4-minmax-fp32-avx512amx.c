@@ -102,8 +102,8 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x32c4__avx512amx(
   // XNN_FORCE_REALIZATION(voutput_min);
 
   do {
-    const __m512i vksum0123456789ABCDEF = _mm512_loadu_epi32((const int32_t*) w + 0);
-    const __m512i vksumGHIJKLMNOPQRSTUV = _mm512_loadu_epi32((const int32_t*) w + 16);
+    const __m512i vksum0 = _mm512_loadu_epi32((const int32_t*) w + 0);
+    const __m512i vksum1 = _mm512_loadu_epi32((const int32_t*) w + 16);
     w = (const int32_t*) w + 32;
 
     // Zero tile accumulator
@@ -165,37 +165,37 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x32c4__avx512amx(
     // TODO: Instead of processing up to 4 tiles (16x64) consider
     // quantizing 1 row at a time.
     // Add tile to bias
-    __m512i vacc0x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 0));
-    __m512i vacc0xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(&res[1][0] + 0));
+    __m512i vacc0x0 = _mm512_add_epi32(vksum0, _mm512_load_epi32(&res[0][0] + 0));
+    __m512i vacc0x1 = _mm512_add_epi32(vksum1, _mm512_load_epi32(&res[1][0] + 0));
 
-    __m512 vscaled0x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc0x0123456789ABCDEF);
-    __m512 vscaled0xGHIJKLMNOPQRSTUV = _mm512_cvtepi32_ps(vacc0xGHIJKLMNOPQRSTUV);
+    __m512 vscaled0x0 = _mm512_cvtepi32_ps(vacc0x0);
+    __m512 vscaled0x1 = _mm512_cvtepi32_ps(vacc0x1);
 
-    const __m512 vscale0123456789ABCDEF = _mm512_loadu_ps((const float*) w + 0);
-    const __m512 vscaleGHIJKLMNOPQRSTUV = _mm512_loadu_ps((const float*) w + 16);
+    const __m512 vscale0 = _mm512_loadu_ps((const float*) w + 0);
+    const __m512 vscale1 = _mm512_loadu_ps((const float*) w + 16);
     w = (const int32_t*) w + 32;
 
-    vscaled0x0123456789ABCDEF = _mm512_mul_ps(vscaled0x0123456789ABCDEF, vscale0123456789ABCDEF);
-    vscaled0xGHIJKLMNOPQRSTUV = _mm512_mul_ps(vscaled0xGHIJKLMNOPQRSTUV, vscaleGHIJKLMNOPQRSTUV);
+    vscaled0x0 = _mm512_mul_ps(vscaled0x0, vscale0);
+    vscaled0x1 = _mm512_mul_ps(vscaled0x1, vscale1);
 
-    vscaled0x0123456789ABCDEF = _mm512_min_ps(vscaled0x0123456789ABCDEF, voutput_max_less_zero_point);
-    vscaled0xGHIJKLMNOPQRSTUV = _mm512_min_ps(vscaled0xGHIJKLMNOPQRSTUV, voutput_max_less_zero_point);
+    vscaled0x0 = _mm512_min_ps(vscaled0x0, voutput_max_less_zero_point);
+    vscaled0x1 = _mm512_min_ps(vscaled0x1, voutput_max_less_zero_point);
 
-    vacc0x0123456789ABCDEF = _mm512_cvtps_epi32(vscaled0x0123456789ABCDEF);
-    vacc0xGHIJKLMNOPQRSTUV = _mm512_cvtps_epi32(vscaled0xGHIJKLMNOPQRSTUV);
+    vacc0x0 = _mm512_cvtps_epi32(vscaled0x0);
+    vacc0x1 = _mm512_cvtps_epi32(vscaled0x1);
 
-    vacc0x0123456789ABCDEF = _mm512_add_epi32(vacc0x0123456789ABCDEF, voutput_zero_point);
-    vacc0xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vacc0xGHIJKLMNOPQRSTUV, voutput_zero_point);
+    vacc0x0 = _mm512_add_epi32(vacc0x0, voutput_zero_point);
+    vacc0x1 = _mm512_add_epi32(vacc0x1, voutput_zero_point);
 
-    __m128i vout0x0123456789ABCDEF = _mm512_cvtsepi32_epi8(vacc0x0123456789ABCDEF);
-    __m128i vout0xGHIJKLMNOPQRSTUV = _mm512_cvtsepi32_epi8(vacc0xGHIJKLMNOPQRSTUV);
+    __m128i vout0x0 = _mm512_cvtsepi32_epi8(vacc0x0);
+    __m128i vout0x1 = _mm512_cvtsepi32_epi8(vacc0x1);
 
-    vout0x0123456789ABCDEF = _mm_max_epi8(vout0x0123456789ABCDEF, voutput_min);
-    vout0xGHIJKLMNOPQRSTUV = _mm_max_epi8(vout0xGHIJKLMNOPQRSTUV, voutput_min);
+    vout0x0 = _mm_max_epi8(vout0x0, voutput_min);
+    vout0x1 = _mm_max_epi8(vout0x1, voutput_min);
 
     if XNN_LIKELY(nc >= 32) {
-      _mm_storeu_si128((__m128i*) (c0 + 0), vout0x0123456789ABCDEF);
-      _mm_storeu_si128((__m128i*) (c0 + 16), vout0xGHIJKLMNOPQRSTUV);
+      _mm_storeu_si128((__m128i*) (c0 + 0), vout0x0);
+      _mm_storeu_si128((__m128i*) (c0 + 16), vout0x1);
       c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
       a = (const int8_t**restrict) ((uintptr_t) a - ks);
       nc -= 32;
@@ -204,8 +204,8 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x32c4__avx512amx(
       const __mmask16 vmask0 = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> 0) & 0xFFFF));
       const __mmask16 vmask1 = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> 16) & 0xFFFF));
 
-      _mm_mask_storeu_epi8(c0 + 0, vmask0, vout0x0123456789ABCDEF);
-      _mm_mask_storeu_epi8(c0 + 16, vmask1, vout0xGHIJKLMNOPQRSTUV);
+      _mm_mask_storeu_epi8(c0 + 0, vmask0, vout0x0);
+      _mm_mask_storeu_epi8(c0 + 16, vmask1, vout0x1);
       nc = 0;
     }
   } while (nc != 0);

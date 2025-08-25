@@ -78,12 +78,12 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_4x4c8__sse2_ld128(
 
   do {
     const __m128 vksum = _mm_loadu_ps((const float*) w);
-    const __m128i vinput_zero_point01 = _mm_loadu_si128((const __m128i*) &quantization_params[0]);
-    const __m128i vinput_zero_point0 = _mm_shuffle_epi32(vinput_zero_point01, _MM_SHUFFLE(0, 0, 0, 0));
-    const __m128i vinput_zero_point1 = _mm_shuffle_epi32(vinput_zero_point01, _MM_SHUFFLE(2, 2, 2, 2));
-    const __m128i vinput_zero_point23 = _mm_loadu_si128((const __m128i*) &quantization_params[2]);
-    const __m128i vinput_zero_point2 = _mm_shuffle_epi32(vinput_zero_point23, _MM_SHUFFLE(0, 0, 0, 0));
-    const __m128i vinput_zero_point3 = _mm_shuffle_epi32(vinput_zero_point23, _MM_SHUFFLE(2, 2, 2, 2));
+    const __m128i vinput_zero_point0_1 = _mm_loadu_si128((const __m128i*) &quantization_params[0]);
+    const __m128i vinput_zero_point0 = _mm_shuffle_epi32(vinput_zero_point0_1, _MM_SHUFFLE(0, 0, 0, 0));
+    const __m128i vinput_zero_point1 = _mm_shuffle_epi32(vinput_zero_point0_1, _MM_SHUFFLE(2, 2, 2, 2));
+    const __m128i vinput_zero_point2_3 = _mm_loadu_si128((const __m128i*) &quantization_params[2]);
+    const __m128i vinput_zero_point2 = _mm_shuffle_epi32(vinput_zero_point2_3, _MM_SHUFFLE(0, 0, 0, 0));
+    const __m128i vinput_zero_point3 = _mm_shuffle_epi32(vinput_zero_point2_3, _MM_SHUFFLE(2, 2, 2, 2));
 
     __m128 vinput_zero_point0_float = _mm_cvtepi32_ps(vinput_zero_point0);
     __m128 vout0x0123 = _mm_mul_ps(vksum, vinput_zero_point0_float);
@@ -278,12 +278,12 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_4x4c8__sse2_ld128(
       vout3x0123 = _mm_add_ps(vout3x0123, _mm_mul_ps(_mm_cvtepi32_ps(vacc3x0123), vfilter_output_scale0123));
     }
 
-    const __m128i vinput_scale01 = _mm_loadu_si128((const __m128i*) &quantization_params[0]);
-    const __m128 vinput_scale0 = _mm_castsi128_ps(_mm_shuffle_epi32(vinput_scale01, _MM_SHUFFLE(1, 1, 1, 1)));
-    const __m128 vinput_scale1 = _mm_castsi128_ps(_mm_shuffle_epi32(vinput_scale01, _MM_SHUFFLE(3, 3, 3, 3)));
-    const __m128i vinput_scale23 = _mm_loadu_si128((const __m128i*) &quantization_params[2]);
-    const __m128 vinput_scale2 = _mm_castsi128_ps(_mm_shuffle_epi32(vinput_scale23, _MM_SHUFFLE(1, 1, 1, 1)));
-    const __m128 vinput_scale3 = _mm_castsi128_ps(_mm_shuffle_epi32(vinput_scale23, _MM_SHUFFLE(3, 3, 3, 3)));
+    const __m128i vinput_scale0_1 = _mm_loadu_si128((const __m128i*) &quantization_params[0]);
+    const __m128 vinput_scale0 = _mm_castsi128_ps(_mm_shuffle_epi32(vinput_scale0_1, _MM_SHUFFLE(1, 1, 1, 1)));
+    const __m128 vinput_scale1 = _mm_castsi128_ps(_mm_shuffle_epi32(vinput_scale0_1, _MM_SHUFFLE(3, 3, 3, 3)));
+    const __m128i vinput_scale2_3 = _mm_loadu_si128((const __m128i*) &quantization_params[2]);
+    const __m128 vinput_scale2 = _mm_castsi128_ps(_mm_shuffle_epi32(vinput_scale2_3, _MM_SHUFFLE(1, 1, 1, 1)));
+    const __m128 vinput_scale3 = _mm_castsi128_ps(_mm_shuffle_epi32(vinput_scale2_3, _MM_SHUFFLE(3, 3, 3, 3)));
 
     vout0x0123 = _mm_mul_ps(vout0x0123, vinput_scale0);
     vout1x0123 = _mm_mul_ps(vout1x0123, vinput_scale1);
