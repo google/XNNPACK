@@ -209,7 +209,8 @@ static void init_hardware_config(void) {
   const bool use_x86_avx512vnnigfni = XNN_ENABLE_AVX512VNNIGFNI && use_x86_avx512vnni && cpuinfo_has_x86_gfni();
   const bool use_x86_avx512amx = XNN_ENABLE_AVX512AMX && XNN_ARCH_X86_64 && use_x86_avx512vnnigfni && cpuinfo_has_x86_amx_int8();
   const bool use_x86_avx2 = cpuinfo_has_x86_avx2();
-  const bool use_x86_avx256vnni = XNN_ENABLE_AVX256VNNI && use_x86_avx512skx && cpuinfo_has_x86_avx512vnni();
+  const bool use_x86_avx256skx = XNN_ENABLE_AVX256SKX && cpuinfo_has_x86_avx512f() && cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl();
+  const bool use_x86_avx256vnni = XNN_ENABLE_AVX256VNNI && use_x86_avx256skx && cpuinfo_has_x86_avx512vnni();
 
   set_arch_flag(xnn_arch_x86_ssse3, cpuinfo_has_x86_ssse3());
   set_arch_flag(xnn_arch_x86_sse4_1, cpuinfo_has_x86_sse4_1());
@@ -225,6 +226,11 @@ static void init_hardware_config(void) {
   set_arch_flag(xnn_arch_x86_avx512fp16, XNN_ENABLE_AVX512FP16 && cpuinfo_has_x86_avx512fp16());
   set_arch_flag(xnn_arch_x86_avx512bf16, XNN_ENABLE_AVX512BF16 && cpuinfo_has_x86_avx512bf16());
   set_arch_flag(xnn_arch_x86_avx512amx, use_x86_avx512amx);
+  set_arch_flag(xnn_arch_x86_avxvnni, XNN_ENABLE_AVXVNNI && use_x86_avx2 && cpuinfo_has_x86_avxvnni());
+  set_arch_flag(xnn_arch_x86_avxvnniint8, XNN_ENABLE_AVXVNNIINT8 && use_x86_avx2 && cpuinfo_has_x86_avx_vnni_int8());
+  set_arch_flag(xnn_arch_x86_avx256skx, use_x86_avx256skx);
+  set_arch_flag(xnn_arch_x86_avx256vnni, use_x86_avx256vnni);
+  set_arch_flag(xnn_arch_x86_avx256vnnigfni, XNN_ENABLE_AVX256VNNIGFNI && use_x86_avx256vnni && cpuinfo_has_x86_gfni());
 #if XNN_ARCH_X86_64 && defined(__linux__) && !defined(CHROMIUM)
   if (use_x86_avx512amx) {
     size_t status = xnn_syscall(SYS_arch_prctl, ARCH_REQ_XCOMP_PERM, XFEATURE_XTILEDATA, 0);
@@ -234,11 +240,6 @@ static void init_hardware_config(void) {
     }
   }
 #endif
-  set_arch_flag(xnn_arch_x86_avxvnni, XNN_ENABLE_AVXVNNI && use_x86_avx2 && cpuinfo_has_x86_avxvnni());
-  set_arch_flag(xnn_arch_x86_avxvnniint8, XNN_ENABLE_AVXVNNIINT8 && use_x86_avx2 && cpuinfo_has_x86_avx_vnni_int8());
-  set_arch_flag(xnn_arch_x86_avx256skx, XNN_ENABLE_AVX256SKX && use_x86_avx512skx);
-  set_arch_flag(xnn_arch_x86_avx256vnni, use_x86_avx256vnni);
-  set_arch_flag(xnn_arch_x86_avx256vnnigfni, XNN_ENABLE_AVX256VNNIGFNI && use_x86_avx256vnni && cpuinfo_has_x86_gfni());
 #endif  // !XNN_ARCH_X86 && !XNN_ARCH_X86_64
 
 #if XNN_ARCH_HEXAGON
