@@ -102,7 +102,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c4__avx512amx(
   // XNN_FORCE_REALIZATION(voutput_max);
 
   do {
-    const __m512i vksum0123456789ABCDEF = _mm512_loadu_epi32((const int32_t*) w + 0);
+    const __m512i vksum0 = _mm512_loadu_epi32((const int32_t*) w + 0);
     w = (const int32_t*) w + 16;
 
     // Zero tile accumulator
@@ -160,26 +160,26 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c4__avx512amx(
     // TODO: Instead of processing up to 4 tiles (16x64) consider
     // quantizing 1 row at a time.
     // Add tile to bias
-    __m512i vacc0x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, _mm512_set1_epi32((int) quantization_params->zero_point));
-    vacc0x0123456789ABCDEF = _mm512_add_epi32(vacc0x0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 0));
+    __m512i vacc0x0 = _mm512_mullo_epi32(vksum0, _mm512_set1_epi32((int) quantization_params->zero_point));
+    vacc0x0 = _mm512_add_epi32(vacc0x0, _mm512_load_epi32(&res[0][0] + 0));
 
-    __m512 vscaled0x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc0x0123456789ABCDEF);
+    __m512 vscaled0x0 = _mm512_cvtepi32_ps(vacc0x0);
 
-    vscaled0x0123456789ABCDEF = _mm512_mul_ps(vscaled0x0123456789ABCDEF, _mm512_set1_ps(quantization_params->inv_scale));
+    vscaled0x0 = _mm512_mul_ps(vscaled0x0, _mm512_set1_ps(quantization_params->inv_scale));
 
-    const __m512 vfilter_output_scale0123456789ABCDEF = _mm512_loadu_ps((const float*) w + 0);
+    const __m512 vfilter_output_scale0 = _mm512_loadu_ps((const float*) w + 0);
     w = (const int32_t*) w + 16;
-    const __m512 vbias0123456789ABCDEF = _mm512_loadu_ps((const float*) w + 0);
+    const __m512 vbias0 = _mm512_loadu_ps((const float*) w + 0);
     w = (const int32_t*) w + 16;
 
-    vscaled0x0123456789ABCDEF = _mm512_fmadd_ps(vscaled0x0123456789ABCDEF, vfilter_output_scale0123456789ABCDEF, vbias0123456789ABCDEF);
+    vscaled0x0 = _mm512_fmadd_ps(vscaled0x0, vfilter_output_scale0, vbias0);
 
-    vscaled0x0123456789ABCDEF = _mm512_max_ps(vscaled0x0123456789ABCDEF, voutput_min);
+    vscaled0x0 = _mm512_max_ps(vscaled0x0, voutput_min);
 
-    vscaled0x0123456789ABCDEF = _mm512_min_ps(vscaled0x0123456789ABCDEF, voutput_max);
+    vscaled0x0 = _mm512_min_ps(vscaled0x0, voutput_max);
 
     if XNN_LIKELY(nc >= 16) {
-      _mm512_storeu_ps(c0 + 0, vscaled0x0123456789ABCDEF);
+      _mm512_storeu_ps(c0 + 0, vscaled0x0);
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
 
       a = (const int8_t**restrict) ((uintptr_t) a - ks);
@@ -187,7 +187,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c4__avx512amx(
     } else {
       // Prepare mask for valid 32-bit elements (depends on nc).
       const __mmask16 vmask0 = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> 0) & 0xFFFF));
-      _mm512_mask_storeu_ps(c0 + 0, vmask0, vscaled0x0123456789ABCDEF);
+      _mm512_mask_storeu_ps(c0 + 0, vmask0, vscaled0x0);
       nc = 0;
     }
   } while (nc != 0);
