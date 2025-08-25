@@ -783,6 +783,8 @@ DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
 DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast)
 DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_gemm_minmax_ukernel_10x8__asm_amd64_fma3_broadcast)
+DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemm_minmax_ukernel_1x16__asm_amd64_fma3_broadcast)
 DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemm_minmax_ukernel_2x16__asm_amd64_fma3_broadcast)
@@ -790,6 +792,10 @@ DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemm_minmax_ukernel_3x16__asm_amd64_fma3_broadcast)
 DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemm_minmax_ukernel_4x16__asm_amd64_fma3_broadcast)
+DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_gemm_minmax_ukernel_5x16__asm_amd64_fma3_broadcast)
+DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_gemm_minmax_ukernel_6x16__asm_amd64_fma3_broadcast)
 
 DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_gemm_minmax_ukernel_1x16__asm_amd64_avx512f_broadcast)

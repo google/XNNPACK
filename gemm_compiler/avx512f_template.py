@@ -16,6 +16,9 @@ class Avx512F(fma3_template.Fma3):
   def register_bytes(self):
     return 64
 
+  def num_simd_registers(self):
+    return 32
+
   def prefix(self):
     return 'z'
 
