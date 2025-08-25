@@ -31,7 +31,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x2__scalar(
     size_t cm_stride,
     size_t cn_stride,
     const struct xnn_f32_qc4w_minmax_params* restrict params,
-    const struct xnn_qd8_quantization_params* restrict quantization_params)
+    const struct xnn_qd8_quantization_params* restrict quantization_params) XNN_DISABLE_UBSAN
 {
   assert(mr != 0);
   assert(mr <= 2);

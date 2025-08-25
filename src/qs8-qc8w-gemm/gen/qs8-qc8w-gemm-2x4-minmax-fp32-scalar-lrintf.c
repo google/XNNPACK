@@ -30,7 +30,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x4__scalar_lrintf(
     int8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_qs8_qc8w_conv_minmax_params* restrict params)
+    const union xnn_qs8_qc8w_conv_minmax_params* restrict params) XNN_DISABLE_UBSAN
 {
   assert(mr != 0);
   assert(mr <= 2);
@@ -127,14 +127,14 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x4__scalar_lrintf(
     vfpacc1x2 = math_min_f32(vfpacc1x2, voutput_max_less_zero_point);
     vfpacc1x3 = math_min_f32(vfpacc1x3, voutput_max_less_zero_point);
 
-    const int32_t vrndacc0x0 = (int32_t) lrintf(vfpacc0x0);
-    const int32_t vrndacc0x1 = (int32_t) lrintf(vfpacc0x1);
-    const int32_t vrndacc0x2 = (int32_t) lrintf(vfpacc0x2);
-    const int32_t vrndacc0x3 = (int32_t) lrintf(vfpacc0x3);
-    const int32_t vrndacc1x0 = (int32_t) lrintf(vfpacc1x0);
-    const int32_t vrndacc1x1 = (int32_t) lrintf(vfpacc1x1);
-    const int32_t vrndacc1x2 = (int32_t) lrintf(vfpacc1x2);
-    const int32_t vrndacc1x3 = (int32_t) lrintf(vfpacc1x3);
+    const int32_t vrndacc0x0 = math_round_f32_to_s32(vfpacc0x0);
+    const int32_t vrndacc0x1 = math_round_f32_to_s32(vfpacc0x1);
+    const int32_t vrndacc0x2 = math_round_f32_to_s32(vfpacc0x2);
+    const int32_t vrndacc0x3 = math_round_f32_to_s32(vfpacc0x3);
+    const int32_t vrndacc1x0 = math_round_f32_to_s32(vfpacc1x0);
+    const int32_t vrndacc1x1 = math_round_f32_to_s32(vfpacc1x1);
+    const int32_t vrndacc1x2 = math_round_f32_to_s32(vfpacc1x2);
+    const int32_t vrndacc1x3 = math_round_f32_to_s32(vfpacc1x3);
 
     int32_t vout0x0 = vrndacc0x0 + voutput_zero_point;
     int32_t vout0x1 = vrndacc0x1 + voutput_zero_point;

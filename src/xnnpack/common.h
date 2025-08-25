@@ -288,6 +288,12 @@
 #define XNN_DISABLE_ASAN
 #endif
 
+#if XNN_COMPILER_HAS_FEATURE(undefined_behavior_sanitizer)
+#define XNN_DISABLE_UBSAN __attribute__((__no_sanitize__("undefined")))
+#else
+#define XNN_DISABLE_UBSAN
+#endif
+
 #define XNN_OOB_READS \
   XNN_DISABLE_TSAN XNN_DISABLE_MSAN XNN_DISABLE_HWASAN XNN_DISABLE_ASAN
 

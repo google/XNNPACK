@@ -46,9 +46,9 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
       const int8_t* zero_data,
     $if DATATYPE in ["QD8", "QC4"]:
       const ${PARAMS_TYPE}* restrict params,
-      const struct ${SCALING_PARAMS}* restrict quantization_params)
+      const struct ${SCALING_PARAMS}* restrict quantization_params) ${"XNN_DISABLE_UBSAN" if NR > 1 else ""}
     $else:
-      const ${PARAMS_TYPE}* restrict params)
+      const ${PARAMS_TYPE}* restrict params) ${"XNN_DISABLE_UBSAN" if NR > 1 else ""}
 {
   assert(mr != 0);
   assert(mr <= ${MR});
@@ -299,7 +299,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
 
           $for M in range(MR):
             $for N in range(NR):
-              const int32_t vrndacc${M}x${N} = (int32_t) lrintf(vfpacc${M}x${N});
+              const int32_t vrndacc${M}x${N} = math_round_f32_to_s32(vfpacc${M}x${N});
 
           $for M in range(MR):
             $for N in range(NR):
