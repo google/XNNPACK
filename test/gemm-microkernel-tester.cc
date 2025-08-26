@@ -722,7 +722,7 @@ void GemmMicrokernelTester::Test(
   xnnpack::Buffer<int32_t> bias(n());
   xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> packed_w(
       packed_n() * packed_k_bytes +
-      packed_n() * (sizeof(int32_t) + sizeof(float) * 2));
+      packed_n() * (sizeof(int32_t) + sizeof(float)));
   xnnpack::Buffer<int8_t> c((m() - 1) * cm_stride() + n());
   xnnpack::Buffer<int32_t> acc(m() * n());
   xnnpack::Buffer<float> scale(n());
@@ -847,7 +847,7 @@ void GemmMicrokernelTester::Test(
   xnnpack::Buffer<int32_t> bias(n());
   xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_w(
       packed_n() * packed_k() +
-      packed_n() * (sizeof(int32_t) + sizeof(float)) / sizeof(int8_t));
+      packed_n() * (sizeof(int32_t) + sizeof(float)));
   xnnpack::Buffer<int8_t> c((m() - 1) * cm_stride() + n());
   xnnpack::Buffer<int32_t> acc(m() * n());
   xnnpack::Buffer<float> scale(n());
