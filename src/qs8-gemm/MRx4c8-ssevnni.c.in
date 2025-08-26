@@ -125,9 +125,13 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x4c8__$
           __m128i vacc${M}x01 = _mm_unpacklo_epi32(vsum${M}x01, _mm_setzero_si128());
           __m128i vacc${M}x23 = _mm_unpacklo_epi32(vsum${M}x23, _mm_setzero_si128());
     $else:
-      const __m128i vksum0123 = _mm_load_si128(w);
-      __m128i vacc0x01 = _mm_unpacklo_epi32(vksum0123, _mm_setzero_si128());
-      __m128i vacc0x23 = _mm_unpackhi_epi32(vksum0123, _mm_setzero_si128());
+      $if SSE == 4:
+        __m128i vacc0x01 = _mm_cvtepu32_epi64(_mm_loadu_si64(w));
+        __m128i vacc0x23 = _mm_cvtepu32_epi64(_mm_loadu_si64(((const int32_t*) w + 2)));
+      $else:
+        const __m128i vksum0123 = _mm_load_si128(w);
+        __m128i vacc0x01 = _mm_unpacklo_epi32(vksum0123, _mm_setzero_si128());
+        __m128i vacc0x23 = _mm_unpackhi_epi32(vksum0123, _mm_setzero_si128());
       $for M in range(1, MR):
         __m128i vacc${M}x01 = vacc0x01;
         __m128i vacc${M}x23 = vacc0x23;

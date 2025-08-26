@@ -12,7 +12,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <tmmintrin.h>
+#include <smmintrin.h>
 
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/gemm.h"
@@ -74,9 +74,8 @@ void xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_4x4c8__avx_madd_prfm(
   const __m128i vmask = _mm_set1_epi8(0x0F);
   XNN_FORCE_REALIZATION(vmask);
   do {
-    const __m128i vksum0123 = _mm_load_si128(w);
-    __m128i vacc0x01 = _mm_unpacklo_epi32(vksum0123, _mm_setzero_si128());
-    __m128i vacc0x23 = _mm_unpackhi_epi32(vksum0123, _mm_setzero_si128());
+    __m128i vacc0x01 = _mm_cvtepu32_epi64(_mm_loadu_si64(w));
+    __m128i vacc0x23 = _mm_cvtepu32_epi64(_mm_loadu_si64(((const int32_t*) w + 2)));
     __m128i vacc1x01 = vacc0x01;
     __m128i vacc1x23 = vacc0x23;
     __m128i vacc2x01 = vacc0x01;
