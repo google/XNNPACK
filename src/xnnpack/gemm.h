@@ -5006,8 +5006,10 @@ DECLARE_QD8_F32_QC8W_GEMM_MINMAX_UKERNEL_FUNCTION(
       const void* w, int8_t* c, size_t cm_stride, size_t cn_stride,      \
       const union xnn_qs8_qc8w_conv_minmax_params* params);
 
-DECLARE_QS8_QC4W_GEMM_MINMAX_UKERNEL_FUNCTION(
-    xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x2__scalar_lrintf)
+DECLARE_QS8_QC4W_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x2__scalar_lrintf)
+DECLARE_QS8_QC4W_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x2__scalar_fmagic)
+DECLARE_QS8_QC4W_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x2__scalar_imagic)
+
 DECLARE_QS8_QC4W_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x16c4__asm_aarch64_neondot_ld32_2)
 DECLARE_QS8_QC4W_GEMM_MINMAX_UKERNEL_FUNCTION(

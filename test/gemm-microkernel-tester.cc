@@ -761,7 +761,7 @@ void GemmMicrokernelTester::Test(
     }
   }
 
-  const int8_t c_zero_point = -1;
+  const int8_t c_zero_point = 0;///-1;
   for (size_t n_index = 0; n_index < n(); n_index++) {
     int32_t accumulated_min = acc[n_index];
     int32_t accumulated_max = acc[n_index];

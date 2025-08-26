@@ -422,6 +422,16 @@
 # Scalar
 - name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x2__scalar_lrintf
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
-  pack: xnn_pack_qs8_qc4w_gemm_goi_w_non_planar_scalar
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
   k-block: 2
-  planes: 1
+  planes: 2
+- name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x2__scalar_fmagic
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 2
+  planes: 2
+- name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x2__scalar_imagic
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_qc4w_gemm_goi_w
+  k-block: 2
+  planes: 2
