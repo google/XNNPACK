@@ -23,22 +23,18 @@ $if PREFETCH:
 #include "src/xnnpack/unaligned.h"
 
 
-$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8_QC4": "qs8_qc4w", "QU8": "qu8", "QD8_F16" : "qd8_f16_qc8w", "QD8_F32": "qd8_f32_qc8w", "QC4_F16": "qd8_f16_qc4w", "QC4_F32": "qd8_f32_qc4w"}[DATATYPE]
+$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8_QC4": "qs8_qc4w", "QD8_F16" : "qd8_f16_qc8w", "QD8_F32": "qd8_f32_qc8w", "QC4_F16": "qd8_f16_qc4w", "QC4_F32": "qd8_f32_qc4w"}[DATATYPE]
 $REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar" if REQUANTIZATION else "scalar"
-$PARAMS_TYPE = {"QC8": "union xnn_qs8_qc8w_conv_minmax_params", "QS8_QC4": "union xnn_qs8_qc8w_conv_minmax_params", "QU8": "union xnn_qu8_conv_minmax_params", "QD8_F16": "struct xnn_f16_minmax_params", "QD8_F32": "struct xnn_f32_minmax_params", "QC4_F16": "struct xnn_f16_qc4w_minmax_params", "QC4_F32": "struct xnn_f32_qc4w_minmax_params"}[DATATYPE]
-$XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
-$OUT_T = {"QC8": "int8_t", "QS8_QC4": "int8_t", "QD8_F16": "xnn_float16", "QD8_F32": "float", "QC4_F16": "xnn_float16", "QC4_F32": "float", "QU8": "uint8_t"}[DATATYPE]
-$_MM_PACKXS_EPI16 = "_mm_packus_epi16" if DATATYPE == "QU8" else "_mm_packs_epi16"
-$_MM_MAX_EPX16 = "_mm_max_epu16" if DATATYPE == "QU8" else "_mm_max_epi16"
-$_MM_CVTXEPI32_EPI8 = "_mm_cvtusepi32_epi8" if DATATYPE == "QU8" else "_mm_cvtsepi32_epi8"
+$PARAMS_TYPE = {"QC8": "union xnn_qs8_qc8w_conv_minmax_params", "QS8_QC4": "union xnn_qs8_qc8w_conv_minmax_params", "QD8_F16": "struct xnn_f16_minmax_params", "QD8_F32": "struct xnn_f32_minmax_params", "QC4_F16": "struct xnn_f16_qc4w_minmax_params", "QC4_F32": "struct xnn_f32_qc4w_minmax_params"}[DATATYPE]
+$OUT_T = {"QC8": "int8_t", "QS8_QC4": "int8_t", "QD8_F16": "xnn_float16", "QD8_F32": "float", "QC4_F16": "xnn_float16", "QC4_F32": "float"}[DATATYPE]
 $_MM_DPBUSD_EPI32 = "_mm_dpbusd_epi32_madd" if VARIANT == "MADD" else   "_mm_dpbusd_avx_epi32" if AVX == 2 else "_mm_dpbusd_epi32"
 $ISA = "avx" if AVX else {3: "ssse3", 4: "sse41"}[SSE]
 void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x4c8__${ISA}${"_madd" if VARIANT == "MADD" else ""}${"_prfm" if PREFETCH else ""}(
     size_t mr,
     size_t nc,
     size_t kc,
-    const ${XINT8_T}* restrict a,
+    const int8_t* restrict a,
     size_t a_stride,
     const void* restrict w,
     ${OUT_T}* restrict c,
@@ -54,19 +50,19 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x4c8__$
   assert(mr <= ${MR});
   assert(nc != 0);
   assert(kc != 0);
-  assert(kc % sizeof(${XINT8_T}) == 0);
+  assert(kc % sizeof(int8_t) == 0);
   assert(a != NULL);
   assert(w != NULL);
   assert(c != NULL);
 
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
-  const ${XINT8_T}* a0 = a;
+  const int8_t* a0 = a;
   $if DATATYPE in ["QD8_F16", "QC4_F16"]:
     uint16_t* c0 = (uint16_t*) c;
   $else:
     ${OUT_T}* c0 = c;
   $for M in range(1, MR):
-    const ${XINT8_T}* a${M} = (const ${XINT8_T}*) ((uintptr_t) a${M-1} + a_stride);
+    const int8_t* a${M} = (const int8_t*) ((uintptr_t) a${M-1} + a_stride);
     $if DATATYPE in ["QD8_F16", "QC4_F16"]:
       uint16_t* c${M} = (uint16_t*) ((uintptr_t) c${M-1} + cm_stride);
     $else:
@@ -154,7 +150,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x4c8__$
 
       $if DATATYPE in ["QC4_F16", "QC4_F32", "QS8_QC4"]:
         const __m128i vbb01234567x0123 = _mm_load_si128(w);
-        const __m128i vbb89ABCDEFx0123 = _mm_load_si128((const __m128i*) ((const ${XINT8_T}*) w + 16));
+        const __m128i vbb89ABCDEFx0123 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 16));
         $if GFNI:
           const __m128i vb01234567x01 = _mm_gf2p8affine_epi64_epi8(vbb01234567x0123, vshl4, 0);
           const __m128i vb89ABCDEFx01 = _mm_gf2p8affine_epi64_epi8(vbb89ABCDEFx0123, vshl4, 0);
@@ -176,17 +172,17 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x4c8__$
           const __m128i vb89ABCDEFx01 = _mm_and_si128(vbs89ABCDEFx01, vmask);
       $else:
         const __m128i vb01234567x01 = _mm_load_si128(w);
-        const __m128i vb89ABCDEFx01 = _mm_load_si128((const __m128i*) ((const ${XINT8_T}*) w + 16));
-        const __m128i vb01234567x23 = _mm_load_si128((const __m128i*) ((const ${XINT8_T}*) w + 32));
-        const __m128i vb89ABCDEFx23 = _mm_load_si128((const __m128i*) ((const ${XINT8_T}*) w + 48));
+        const __m128i vb89ABCDEFx01 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 16));
+        const __m128i vb01234567x23 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 32));
+        const __m128i vb89ABCDEFx23 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 48));
         $if PREFETCH:
-          xnn_prefetch_to_l1((const ${XINT8_T}*) w + 896);
+          xnn_prefetch_to_l1((const int8_t*) w + 896);
 
       $for M in range(MR):
         vacc${M}x01 = ${_MM_DPBUSD_EPI32}(vacc${M}x01, va${M}x01234567, vb01234567x01);
         vacc${M}x23 = ${_MM_DPBUSD_EPI32}(vacc${M}x23, va${M}x01234567, vb89ABCDEFx01);
       $if PREFETCH:
-        xnn_prefetch_to_l1((const ${XINT8_T}*) w + 960);
+        xnn_prefetch_to_l1((const int8_t*) w + 960);
       $for M in range(MR):
         $if MR < 3:
           vacc1x${M}x01 = ${_MM_DPBUSD_EPI32}(vacc1x${M}x01, va${M}x89ABCDEF, vb01234567x23);
@@ -196,10 +192,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x4c8__$
           vacc${M}x23 = ${_MM_DPBUSD_EPI32}(vacc${M}x23, va${M}x89ABCDEF, vb89ABCDEFx23);
 
       $if DATATYPE in ["QC4_F16", "QC4_F32", "QS8_QC4"]:
-        w = (const ${XINT8_T}*) w + 32;
+        w = (const int8_t*) w + 32;
       $else:
-        w = (const ${XINT8_T}*) w + 64;
-      k -= 16 * sizeof(${XINT8_T});
+        w = (const int8_t*) w + 64;
+      k -= 16 * sizeof(int8_t);
     }
 
     if (k != 0) {
@@ -212,7 +208,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x4c8__$
 
       $if DATATYPE in ["QC4_F16", "QC4_F32", "QS8_QC4"]:
         const __m128i vbb01234567x0123 = _mm_load_si128(w);
-        const __m128i vbb89ABCDEFx0123 = _mm_load_si128((const __m128i*) ((const ${XINT8_T}*) w + 16));
+        const __m128i vbb89ABCDEFx0123 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 16));
         $if GFNI:
           const __m128i vb01234567x01 = _mm_gf2p8affine_epi64_epi8(vbb01234567x0123, vshl4, 0);
           const __m128i vb89ABCDEFx01 = _mm_gf2p8affine_epi64_epi8(vbb89ABCDEFx0123, vshl4, 0);
@@ -224,16 +220,16 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x4c8__$
           const __m128i vb89ABCDEFx01 = _mm_slli_epi32(vbb89ABCDEFx0123, 4);
       $else:
         const __m128i vb01234567x01 = _mm_load_si128(w);
-        const __m128i vb89ABCDEFx01 = _mm_load_si128((const __m128i*) ((const ${XINT8_T}*) w + 16));
+        const __m128i vb89ABCDEFx01 = _mm_load_si128((const __m128i*) ((const int8_t*) w + 16));
 
       $for M in range(MR):
         vacc${M}x01 = ${_MM_DPBUSD_EPI32}(vacc${M}x01, va${M}x01234567, vb01234567x01);
         vacc${M}x23 = ${_MM_DPBUSD_EPI32}(vacc${M}x23, va${M}x01234567, vb89ABCDEFx01);
       $if PREFETCH:
-        xnn_prefetch_to_l1((const ${XINT8_T}*) w + 960);
+        xnn_prefetch_to_l1((const int8_t*) w + 960);
 
-      w = (const ${XINT8_T}*) w + 32;
-      k -= 8 * sizeof(${XINT8_T});
+      w = (const int8_t*) w + 32;
+      k -= 8 * sizeof(int8_t);
     }
     $if MR < 3:
       $for M in range(MR):
@@ -273,7 +269,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x4c8__$
         if XNN_LIKELY(nc >= 4) {
           $for M in range(MR):
             _mm_storeu_si128((__m128i*) c${M}, vfp16out${M}x0123);
-            a${M} = (const ${XINT8_T}*) ((uintptr_t) a${M} - kc);
+            a${M} = (const int8_t*) ((uintptr_t) a${M} - kc);
             c${M} = (uint16_t*) ((uintptr_t) c${M} + cn_stride);
           nc -= 4;
         } else {
@@ -339,7 +335,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x4c8__$
       $for M in range(MR):
         vacc${M}x0123 = _mm_packs_epi32(vacc${M}x0123, vacc${M}x0123);
       $for M in range(MR):
-        vacc${M}x0123 = ${_MM_MAX_EPX16}(vacc${M}x0123, voutput_min);
+        vacc${M}x0123 = _mm_max_epi16(vacc${M}x0123, voutput_min);
       $for M in range(MR):
         __m128i voutb${M}x0123 = _mm_packs_epi16(vacc${M}x0123, vacc${M}x0123);
 
@@ -347,7 +343,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x4c8__$
         $for M in range(MR):
           _mm_storeu_si32(c${M}, voutb${M}x0123);
           c${M} = (${OUT_T}*) ((uintptr_t) c${M} + cn_stride);
-          a${M} = (const ${XINT8_T}*) ((uintptr_t) a${M} - kc);
+          a${M} = (const int8_t*) ((uintptr_t) a${M} - kc);
 
         nc -= 4;
       } else {
