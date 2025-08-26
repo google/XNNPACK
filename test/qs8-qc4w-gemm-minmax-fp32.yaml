@@ -298,7 +298,6 @@
 # AArch64 assembly
 - name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x16c4__asm_aarch64_neondot_ld32_2
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params
-  pack: xnn_pack_qs8_qc4w_gemm_goi_w_non_planar_aarch64_non_planar_aarch64
   pack: xnn_pack_qs8_qc4w_gemm_goi_w_non_planar_aarch64
   k-block: 4
   planes: 1
