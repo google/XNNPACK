@@ -103,7 +103,7 @@ enum xnn_status xnn_setup_batch_matrix_multiply_nc_qp8_f32_qc8w(
     xnn_operator_t batch_matrix_multiply_op,  //
     void* workspace,                          //
     const int8_t* input_a,                    //
-    const float* input_b,                     //
+    const int8_t* input_b,                    //
     float* output);
 
 enum xnn_status xnn_create_convert_nc_f32_qp8(
