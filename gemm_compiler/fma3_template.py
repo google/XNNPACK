@@ -26,6 +26,9 @@ class Fma3(x64_template.X64):
   def adjust_kc(self):
     return ''
 
+  def num_simd_registers(self):
+    return 16
+
   def init_accumulators(self):
     self.comment('Initialize accumulators with the biases.')
     w_reg = self.w_ptr_register()
@@ -62,8 +65,22 @@ class Fma3(x64_template.X64):
   def max_m_before_spilling(self):
     return 4
 
+  def push_min_max_to_stack(self):
+    # Do we have enough registers to hold accumulators, A, weights and min/max?
+    # A = 1, acc = m * n, weights = n, min/max = 2
+    return self.m * self.n + self.n + 1 + 2 > self.num_simd_registers()
+
   def convert_to_output(self):
     self.comment('Min/max clamping.')
+    if self.push_min_max_to_stack():
+      sp_offset = int((((self.m * 16 + self.c_ptr_stack_offset()) // 32) + 1) * 32)
+      min_reg = self.min_register()
+      max_reg = self.max_register()
+      prefix = self.prefix()
+      self.comment("Pop min & max from the stack")
+      self.asm_string += f'vmovaps {prefix}{min_reg}, [rsp + {sp_offset}]\n'
+      self.asm_string += f'vmovaps {prefix}{max_reg}, [rsp + {sp_offset + 32}]\n'
+
     self.clamp()
 
   def prefix(self):
@@ -131,7 +148,10 @@ class Fma3(x64_template.X64):
         'mm11',
         'mm12',
         'mm13',
-        'mm15',
+        'mm3',
+        'mm4',
+        'mm5',
+        'mm0',
     ]
 
   def store(self):

@@ -72,10 +72,16 @@ class X64(base_architecture.BaseArchitecture):
     return 'r9'
 
   def min_register(self):
-    return 'mm0'
+    if self.push_min_max_to_stack():
+      return self.w_registers()[0][1:]
+    else:
+      return 'mm0'
 
   def max_register(self):
-    return 'mm1'
+    if self.push_min_max_to_stack():
+      return self.w_registers()[1][1:]
+    else:
+      return 'mm1'
 
   def nc_register(self):
     return 'rsi'
@@ -243,6 +249,13 @@ BEGIN_FUNCTION {function_name}
       self.asm_string += """sub rsp, {stack_size}\n""".format(
           stack_size=self.stack_size()
       )
+    # Do we need to push the min/max to the stack?
+    if self.push_min_max_to_stack():
+      sp_offset = int((((self.m * 16 + self.c_ptr_stack_offset()) // 32) + 1) * 32)
+      self.comment("Push min & max to stack to free up registers.")
+      self.asm_string += f'vmovaps [rsp + {sp_offset}], ymm0\n'
+      self.asm_string += f'vmovaps [rsp + {sp_offset+32}], ymm1\n'
+
     # Write rsi & r10 if required to the stack.
     if self.m > self.max_m_before_spilling():
       offset = self.a_ptr_stack_offset()

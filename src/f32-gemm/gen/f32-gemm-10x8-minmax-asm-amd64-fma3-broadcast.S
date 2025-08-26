@@ -5,7 +5,7 @@
 
 #include "src/xnnpack/assembly.h"
 
-BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast
+BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_10x8__asm_amd64_fma3_broadcast
 
       .intel_syntax noprefix
       # Free up GP registers.
@@ -139,6 +139,18 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast
       mov [rsp + 144], rcx
       mov [rsp + 152], r10
 
+      # Clamp a & c pointers if mr <= 9
+      mov rax, rcx
+      add rax, r8
+      mov r12, r10
+      add r12, r11
+      cmp rdi, 9
+      cmovle rax, rcx
+      cmovle r12, r10
+
+      mov [rsp + 160], rax
+      mov [rsp + 168], r12
+
 .Louter_loop:
       # Initialize k counter.
       mov r11, 0
@@ -152,6 +164,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast
       mov r13, [rsp + 112]
       mov rbx, [rsp + 128]
       mov rbp, [rsp + 144]
+      mov r8, [rsp + 160]
 
       # Initialize accumulators with the biases.
       vmovaps  ymm6, [r9 + 0]
@@ -163,6 +176,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast
       vmovaps ymm12, ymm6
       vmovaps ymm13, ymm6
       vmovaps ymm3, ymm6
+      vmovaps ymm4, ymm6
       add r9, 32
 
 .Linner_loop:
@@ -186,6 +200,8 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast
       vfmadd231ps  ymm13, ymm2, ymm14
       vbroadcastss ymm2, dword ptr [rbp + r11]
       vfmadd231ps  ymm3, ymm2, ymm14
+      vbroadcastss ymm2, dword ptr [r8 + r11]
+      vfmadd231ps  ymm4, ymm2, ymm14
 
       add r11, 4
       cmp rdx, r11
@@ -202,6 +218,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast
       vminps  ymm12, ymm1, ymm12
       vminps  ymm13, ymm1, ymm13
       vminps  ymm3, ymm1, ymm3
+      vminps  ymm4, ymm1, ymm4
       vmaxps  ymm6, ymm0, ymm6
       vmaxps  ymm7, ymm0, ymm7
       vmaxps  ymm8, ymm0, ymm8
@@ -211,6 +228,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast
       vmaxps  ymm12, ymm0, ymm12
       vmaxps  ymm13, ymm0, ymm13
       vmaxps  ymm3, ymm0, ymm3
+      vmaxps  ymm4, ymm0, ymm4
 
       # Pop output pointers from the stack.
       mov rcx, [rsp + 24]
@@ -222,6 +240,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast
       mov r13, [rsp + 120]
       mov rbx, [rsp + 136]
       mov rbp, [rsp + 152]
+      mov r8, [rsp + 168]
 
       # Check whether full or partial store.
       cmp rsi, 8
@@ -235,6 +254,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast
       vmovups  [r13], ymm12
       vmovups  [rbx], ymm13
       vmovups  [rbp], ymm3
+      vmovups  [r8], ymm4
       add rcx, 32
       add rax, 32
       add r15, 32
@@ -244,6 +264,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast
       add r13, 32
       add rbx, 32
       add rbp, 32
+      add r8, 32
 
       # Write output pointers to the stack.
       mov [rsp + 24], rcx
@@ -255,6 +276,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast
       mov [rsp + 120], r13
       mov [rsp + 136], rbx
       mov [rsp + 152], rbp
+      mov [rsp + 168], r8
 
       sub rsi, 8
       jne .Louter_loop
@@ -272,6 +294,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast
       vmovups  [r13], xmm12
       vmovups  [rbx], xmm13
       vmovups  [rbp], xmm3
+      vmovups  [r8], xmm4
       add  rcx, 16
       add  rax, 16
       add  r15, 16
@@ -281,6 +304,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast
       add  r13, 16
       add  rbx, 16
       add  rbp, 16
+      add  r8, 16
       vextractf128 xmm6, ymm6, 1
       vextractf128 xmm7, ymm7, 1
       vextractf128 xmm8, ymm8, 1
@@ -290,6 +314,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast
       vextractf128 xmm12, ymm12, 1
       vextractf128 xmm13, ymm13, 1
       vextractf128 xmm3, ymm3, 1
+      vextractf128 xmm4, ymm4, 1
 
 
 .Ltail_2:
@@ -304,6 +329,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast
       vmovlps  qword ptr [r13], xmm12
       vmovlps  qword ptr [rbx], xmm13
       vmovlps  qword ptr [rbp], xmm3
+      vmovlps  qword ptr [r8], xmm4
       add rcx, 8
       add rax, 8
       add r15, 8
@@ -313,6 +339,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast
       add r13, 8
       add rbx, 8
       add rbp, 8
+      add r8, 8
       vmovhlps xmm6, xmm6, xmm6
       vmovhlps xmm7, xmm7, xmm7
       vmovhlps xmm8, xmm8, xmm8
@@ -322,6 +349,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast
       vmovhlps xmm12, xmm12, xmm12
       vmovhlps xmm13, xmm13, xmm13
       vmovhlps xmm3, xmm3, xmm3
+      vmovhlps xmm4, xmm4, xmm4
 
 
 .Ltail_1:
@@ -336,6 +364,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast
       vmovss  dword ptr [r13], xmm12
       vmovss  dword ptr [rbx], xmm13
       vmovss  dword ptr [rbp], xmm3
+      vmovss  dword ptr [r8], xmm4
 
 .Lreturn:
       add rsp, 256
@@ -355,16 +384,16 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast
       #else
       ret
       #endif
-END_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast
+END_FUNCTION xnn_f32_gemm_minmax_ukernel_10x8__asm_amd64_fma3_broadcast
 
       #if XNN_HAS_FEATURE(dataflow_sanitizer)
-BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast.dfsan
+BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_10x8__asm_amd64_fma3_broadcast.dfsan
       .intel_syntax noprefix
       # We could implement this by calling a function that implements the dfsan instrumentation.
       # For now, just break, so if someone tries to use this, they'll know where the problem is.
       int 3
       ret
-END_FUNCTION xnn_f32_gemm_minmax_ukernel_9x8__asm_amd64_fma3_broadcast.dfsan
+END_FUNCTION xnn_f32_gemm_minmax_ukernel_10x8__asm_amd64_fma3_broadcast.dfsan
       #endif
 
       #ifdef __ELF__
