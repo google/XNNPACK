@@ -1944,8 +1944,8 @@ std::vector<GemmTestParams> CreateTests1(
 INSTANTIATE_TEST_SUITE_P(
     QS8_QC4W_GEMM_MINMAX_FP32_1X2__SCALAR_LRINTF, GemmTest,
     testing::ValuesIn(CreateTests1(
-        /*k_block=*/1,
-        /*adj_k_block=*/1,
+        /*k_block=*/2,
+        /*adj_k_block=*/2,
         /*mr=*/1, /*nr=*/2, /*kr=*/1, /*sr=*/1,
         /*is_igemm=*/false,
         /*unsigned_inputs=*/false,
