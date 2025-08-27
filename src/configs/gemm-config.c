@@ -368,7 +368,7 @@ static void init_pf32_gemm_config(void) {
       pf32_gemm_config.mr_packed = mr;
       pf32_gemm_config.nr = nr;
     #endif  // XNN_ENABLE_ARM_SME2
-	} else if (XNN_ENABLE_ARM_SME &&
+  } else if (XNN_ENABLE_ARM_SME &&
              (hardware_config->arch_flags & xnn_arch_arm_sme)) {
 #if XNN_ENABLE_ARM_SME
     const size_t mr = xnn_pf32_gemm_minmax_ukernel_32x32__neonsme_get_mr();
@@ -3317,10 +3317,9 @@ static void init_qdu8_f32_qc4w_gemm_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
-    #if XNN_ENABLE_AVX512VNNIGFNI && XNN_ENABLE_AVX256VNNI
+    #if XNN_ENABLE_AVX512VNNIGFNI
       // Zen4 has gfni but is slower and 8x16 works better on zen4.  14x16 is faster on Sapphire Rapids
-      // TODO(b/361288044): Re-enable once fixed.
-      if (false && (hardware_config->arch_flags & xnn_arch_x86_avx512vnnigfni) && hardware_config->uarch[XNN_UARCH_INDEX] != xnn_uarch_zen4) {
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx512vnnigfni) && hardware_config->uarch[XNN_UARCH_INDEX] != xnn_uarch_zen4) {
         qdu8_f32_qc4w_gemm_config.arch = xnn_arch_x86_avx512vnnigfni;
         qdu8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c8__avx512vnnigfni_prfm);
         qdu8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(14)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qc4w_gemm_minmax_ukernel_14x16c8__avx512vnnigfni_prfm);
