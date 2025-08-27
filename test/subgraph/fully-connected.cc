@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <limits>
 #include <random>
+#include <string>
 #include <type_traits>
 #include <vector>
 
@@ -147,11 +148,18 @@ DatatypeGenerator<T> MakeDatatypeGenerator(T, float min, float max) {
 
 const size_t no_blockwise = std::numeric_limits<size_t>::max();
 
+std::string runtime_flags_to_string(uint32_t runtime_flags) {
+  std::string result;
+  if (runtime_flags & XNN_FLAG_NO_INLINED_LHS_PACKING) {
+    result += "XNN_FLAG_NO_INLINED_LHS_PACKING";
+  }
+  return result;
+}
+
 template <typename Input, typename Filter, typename Bias,
           typename Output = Input, typename Scale = float>
 void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
-                 size_t block_size = no_blockwise,
-                 uint32_t runtime_flags = xnn_test_runtime_flags()) {
+                 size_t block_size = no_blockwise) {
   const bool channelwise_quantization =
       xnn_datatype_is_channelwise_quantized(datatype_of<Filter>());
   // If the filter datatype is sub-byte, we have more than one filter element
@@ -192,6 +200,11 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
     }
     if (flag_dist(rng)) {
       flags |= XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC;
+    }
+
+    uint32_t runtime_flags = xnn_test_runtime_flags();
+    if (flag_dist(rng)) {
+      runtime_flags |= XNN_FLAG_NO_INLINED_LHS_PACKING;
     }
 
     // Make a random filter.
@@ -339,7 +352,8 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
       subgraph.ReshapeExternalTensor(input_shape, input.base(), input_id)
           .ReshapeRuntime();
       ASSERT_EQ(subgraph.GetExternalTensorShape(output_id), output_shape)
-          << ", input_shape=" << index_to_string(input_shape);
+          << ", input_shape=" << index_to_string(input_shape)
+          << ", runtime_flags=" << runtime_flags_to_string(runtime_flags);
 
       // Run subgraph
       Tensor<Output> output(output_shape);
@@ -376,7 +390,8 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
               << "i=" << index_to_string(i)
               << ", input_shape=" << index_to_string(input_shape)
               << ", output_shape=" << index_to_string(output_shape)
-              << ", filter_shape=" << index_to_string(filter_shape);
+              << ", filter_shape=" << index_to_string(filter_shape)
+              << ", runtime_flags=" << runtime_flags_to_string(runtime_flags);
         }
       } else {
         const float max_a = MaxDatatype(Input());
@@ -392,7 +407,8 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
               << "i=" << index_to_string(i)
               << ", input_shape=" << index_to_string(input_shape)
               << ", output_shape=" << index_to_string(output_shape)
-              << ", filter_shape=" << index_to_string(filter_shape);
+              << ", filter_shape=" << index_to_string(filter_shape)
+              << ", runtime_flags=" << runtime_flags_to_string(runtime_flags);
         }
       }
     }
@@ -465,54 +481,10 @@ TEST(FullyConnectedQD8F32QB4W, static_b) {
       /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
 }
 
-TEST(FullyConnectedQC8, dont_inline_pack_static_b) {
-  TestStaticB<qint8, qcint8, qcint32>(
-      /*convert_to=*/xnn_datatype_invalid, /*block_size=*/no_blockwise,
-      /*runtime_flags=*/xnn_test_runtime_flags() |
-          XNN_FLAG_NO_INLINED_LHS_PACKING);
-}
-TEST(FullyConnectedF16, dont_inline_pack_static_b) {
-  TestStaticB<xnn_float16, float, float>(
-      /*convert_to=*/xnn_datatype_invalid, /*block_size=*/no_blockwise,
-      /*runtime_flags=*/xnn_test_runtime_flags() |
-          XNN_FLAG_NO_INLINED_LHS_PACKING);
-}
-TEST(FullyConnectedF32, dont_inline_pack_static_b) {
-  TestStaticB<float, float, float>(
-      /*convert_to=*/xnn_datatype_invalid, /*block_size=*/no_blockwise,
-      /*runtime_flags=*/xnn_test_runtime_flags() |
-          XNN_FLAG_NO_INLINED_LHS_PACKING);
-}
-TEST(FullyConnectedQD8F16QC4W, dont_inline_pack_static_b) {
-  TestStaticB<xnn_float16, qcint4, float>(
-      /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/no_blockwise,
-      /*runtime_flags=*/xnn_test_runtime_flags() |
-          XNN_FLAG_NO_INLINED_LHS_PACKING);
-}
-TEST(FullyConnectedQD8F16QC8W, dont_inline_pack_static_b) {
-  TestStaticB<xnn_float16, qcint8, float>(
-      /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/no_blockwise,
-      /*runtime_flags=*/xnn_test_runtime_flags() |
-          XNN_FLAG_NO_INLINED_LHS_PACKING);
-}
-TEST(FullyConnectedQD8F32QC4W, dont_inline_pack_static_b) {
-  TestStaticB<float, qcint4, float>(
-      /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/no_blockwise,
-      /*runtime_flags=*/xnn_test_runtime_flags() |
-          XNN_FLAG_NO_INLINED_LHS_PACKING);
-}
-TEST(FullyConnectedQD8F32QC8W, dont_inline_pack_static_b) {
-  TestStaticB<float, qcint8, float>(
-      /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/no_blockwise,
-      /*runtime_flags=*/xnn_test_runtime_flags() |
-          XNN_FLAG_NO_INLINED_LHS_PACKING);
-}
-
 template <typename Input, typename Filter, typename Bias,
           typename Output = Input>
 void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid,
-                  size_t block_size = no_blockwise,
-                  uint32_t runtime_flags = xnn_test_runtime_flags()) {
+                  size_t block_size = no_blockwise) {
   ReplicableRandomDevice rng;
   std::bernoulli_distribution flag_dist(0.5);
 
@@ -541,6 +513,11 @@ void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid,
     }
     if (flag_dist(rng)) {
       flags |= XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC;
+    }
+
+    uint32_t runtime_flags = xnn_test_runtime_flags();
+    if (flag_dist(rng)) {
+      runtime_flags |= XNN_FLAG_NO_INLINED_LHS_PACKING;
     }
 
     float output_min = output_gen(rng);
@@ -607,7 +584,8 @@ void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid,
       }
       subgraph.ReshapeRuntime();
       ASSERT_EQ(subgraph.GetExternalTensorShape(output_id), output_shape)
-          << ", input_shape=" << index_to_string(input_shape);
+          << ", input_shape=" << index_to_string(input_shape)
+          << ", runtime_flags=" << runtime_flags_to_string(runtime_flags);
 
       // Run subgraph
       Tensor<Output> output(output_shape);
@@ -634,7 +612,8 @@ void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid,
                       quantize<Output>(expected(i), output_quantization), 1)
               << "input_shape=" << index_to_string(input_shape)
               << ", output_shape=" << index_to_string(output_shape)
-              << ", filter_shape=" << index_to_string(filter_shape);
+              << ", filter_shape=" << index_to_string(filter_shape)
+              << ", runtime_flags=" << runtime_flags_to_string(runtime_flags);
         }
       } else {
         const float max_a = MaxDatatype(Input());
@@ -649,7 +628,8 @@ void TestDynamicB(xnn_datatype convert_to = xnn_datatype_invalid,
           ASSERT_NEAR(static_cast<float>(output(i)), expected(i), tolerance)
               << "input_shape=" << index_to_string(input_shape)
               << ", output_shape=" << index_to_string(output_shape)
-              << ", filter_shape=" << index_to_string(filter_shape);
+              << ", filter_shape=" << index_to_string(filter_shape)
+              << ", runtime_flags=" << runtime_flags_to_string(runtime_flags);
         }
       }
     }
@@ -661,19 +641,6 @@ TEST(FullyConnectedF16, dynamic_b) {
 }
 TEST(FullyConnectedF32, dynamic_b) {
   TestDynamicB<float, float, float, float>();
-}
-
-TEST(FullyConnectedF16, dont_inline_pack_dynamic_b) {
-  TestDynamicB<xnn_float16, xnn_float16, xnn_float16, xnn_float16>(
-      /*convert_to=*/xnn_datatype_invalid, /*block_size=*/no_blockwise,
-      /*runtime_flags=*/xnn_test_runtime_flags() |
-          XNN_FLAG_NO_INLINED_LHS_PACKING);
-}
-TEST(FullyConnectedF32, dont_inline_pack_dynamic_b) {
-  TestDynamicB<float, float, float, float>(
-      /*convert_to=*/xnn_datatype_invalid, /*block_size=*/no_blockwise,
-      /*runtime_flags=*/xnn_test_runtime_flags() |
-          XNN_FLAG_NO_INLINED_LHS_PACKING);
 }
 
 }  // namespace xnnpack
