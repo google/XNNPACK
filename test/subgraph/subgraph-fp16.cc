@@ -18,6 +18,7 @@
 #include "include/xnnpack.h"
 #include "src/xnnpack/allocation-type.h"
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator.h"
@@ -1260,15 +1261,27 @@ TEST(SUBGRAPH_FP16_DUPLICATE_INPUTS, converted_only_once) {
   //             external
   //             output[1]
 
-  // We should have 3 nodes, the original Mul node, plus one convert node for
-  // each of the external input and output.
+  // We should have 3 nodes, the original Mul node (which is converted to
+  // `sqr`), plus one convert node for each of the external input and output.
   ASSERT_EQ(tester.NumNodes(), 3);
   ASSERT_EQ(tester.Node(0)->type, xnn_node_type_convert);
-  ASSERT_EQ(tester.Node(1)->type, xnn_node_type_binary_elementwise);
+  ASSERT_THAT(tester.Node(1)->type,
+              testing::AnyOf(xnn_node_type_unary_elementwise,
+                             xnn_node_type_binary_elementwise));
   ASSERT_EQ(tester.Node(2)->type, xnn_node_type_convert);
 
-  // Check that the inputs to the Mul node are the same value.
-  ASSERT_EQ(tester.Node(1)->inputs[0], tester.Node(1)->inputs[1]);
+  switch (tester.Node(1)->type) {
+    case xnn_node_type_binary_elementwise:
+      // Check that the inputs to the Mul node are the same value.
+      ASSERT_EQ(tester.Node(1)->binary_operator, xnn_binary_multiply);
+      ASSERT_EQ(tester.Node(1)->inputs[0], tester.Node(1)->inputs[1]);
+      break;
+    case xnn_node_type_unary_elementwise:
+      ASSERT_EQ(tester.Node(1)->unary_operator, xnn_unary_square);
+      break;
+    default:
+      XNN_UNREACHABLE;
+  }
 
   // Check that the output of convert is allocated in workspace.
   const xnn_value* convert_out = tester.Value(3);

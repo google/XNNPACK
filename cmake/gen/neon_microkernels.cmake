@@ -41,10 +41,12 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/f32-rdminmax/gen/f32-rdmax-2p2x-neon-u32.c
   src/f32-rdminmax/gen/f32-rdmin-2p2x-neon-u32.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-neon-u16.c
+  src/f32-rdsum2/gen/f32-rdsum2-7p7x-minmax-neon.c
   src/f32-rminmax/gen/f32-rmax-neon-u16-acc4.c
   src/f32-rminmax/gen/f32-rmin-neon-u16-acc4.c
   src/f32-rminmax/gen/f32-rminmax-neon-u16-acc4.c
   src/f32-rsum/gen/f32-rsum-neon-u16-acc4.c
+  src/f32-rsum2/gen/f32-rsum2-neon.c
   src/f32-spmm/gen/f32-spmm-32x1-minmax-neon.c
   src/f32-vapproxgelu/gen/f32-vapproxgelu-neon-rational-12-10-div.c
   src/f32-vbinary/gen/f32-vadd-neon-u8.c

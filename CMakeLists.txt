@@ -501,6 +501,7 @@ SET(OPERATOR_SRCS
   src/operators/dynamic-fully-connected-nc.c
   src/operators/fully-connected-nc.c
   src/operators/max-pooling-nhwc.c
+  src/operators/normalize-nc.c
   src/operators/pack-lh.c
   src/operators/reduce-nd.c
   src/operators/resize-bilinear-nchw.c
@@ -535,6 +536,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/fully-connected-sparse.c
   src/subgraph/fully-connected.c
   src/subgraph/max-pooling-2d.c
+  src/subgraph/normalize.c
   src/subgraph/pack-lh.c
   src/subgraph/reshape-helpers.c
   src/subgraph/rope.c

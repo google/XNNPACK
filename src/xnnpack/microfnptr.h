@@ -780,6 +780,21 @@ typedef void (*xnn_qu8_rdsum_ukernel_fn)(
     size_t rows, size_t channels, const uint8_t* input, size_t input_stride,
     const uint8_t* zero, uint32_t* output,
     const struct xnn_qs8_rsum_params* params);
+
+// RDSUM2: Discontiguous Reduce-Sum squared
+
+typedef void (*xnn_f16_f32acc_rdsum2_ukernel_fn)(
+    size_t channels, size_t k1, size_t k2, size_t k3, const xnn_float16* input,
+    size_t input_stride1, size_t input_stride2, size_t input_stride3,
+    const xnn_float16* zero, float* output,
+    const struct xnn_f16_f32acc_scale_params* params);
+
+typedef void (*xnn_f32_rdsum2_ukernel_fn)(
+    size_t channels, size_t k1, size_t k2, size_t k3, const float* input,
+    size_t input_stride1, size_t input_stride2, size_t input_stride3,
+    const float* zero, float* output,
+    const struct xnn_f32_scale_params* params);
+
 // RSUM: Reduce-Sum
 
 typedef void (*xnn_f16_rsum_ukernel_fn)(
@@ -801,6 +816,19 @@ typedef void (*xnn_qs8_rsum_ukernel_fn)(
 typedef void (*xnn_qu8_rsum_ukernel_fn)(
     size_t batch, const uint8_t* input, uint32_t* output,
     const struct xnn_qs8_rsum_params* params);
+
+// RSUM2: Reduce-Sum Squared
+
+typedef void (*xnn_rsum2_ukernel_fn)(size_t batch, const void* input,
+                                     void* output, const void* params);
+
+typedef void (*xnn_f16_f32acc_rsum2_ukernel_fn)(
+    size_t batch, const xnn_float16* input, float* output,
+    const struct xnn_f16_f32acc_scale_params* params);
+
+typedef void (*xnn_f32_rsum2_ukernel_fn)(
+    size_t batch, const float* input, float* output,
+    const struct xnn_f32_scale_params* params);
 
 // RDMINMAX: Discontiguous Reduce-MINMAX
 

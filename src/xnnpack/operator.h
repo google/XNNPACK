@@ -21,7 +21,6 @@
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator-type.h"
-#include "src/xnnpack/pack.h"
 #include <pthreadpool.h>
 
 #ifdef __cplusplus
@@ -302,8 +301,14 @@ struct xnn_operator {
         const struct xnn_lut32norm_config* lut32norm_config;
         // For F16 and F32.
         struct {
-          const struct xnn_raddstoreexpminusmax_config*
-              raddstoreexpminusmax_config;
+          union {
+            const struct xnn_raddstoreexpminusmax_config*
+                raddstoreexpminusmax_config;
+            struct {
+              float normalize_epsilon;
+              enum xnn_norm_type norm_type;
+            };
+          };
           const struct xnn_binary_elementwise_config* vmul_config;
         };
       };
@@ -352,6 +357,7 @@ struct xnn_operator {
     struct subgemm_context subgemm;
     struct transpose_context transpose;
     struct floating_point_softmax_context floating_point_softmax;
+    struct normalize_context normalize;
     struct u8_softmax_context u8_softmax;
     struct f16_qd8_convert_context f16_qd8_convert;
     struct f32_qd8_convert_context f32_qd8_convert;

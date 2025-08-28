@@ -1468,6 +1468,7 @@ XNN_DEPRECATED enum xnn_status xnn_define_static_mean(
 enum xnn_reduce_operator {
   xnn_reduce_invalid = -1,
   xnn_reduce_sum,
+  xnn_reduce_sum_squared,
   xnn_reduce_mean,
   xnn_reduce_max,
   xnn_reduce_min,
@@ -2118,6 +2119,38 @@ enum xnn_status xnn_define_softmax(
   xnn_subgraph_t subgraph,
   uint32_t input_id,
   uint32_t output_id,
+  uint32_t flags);
+
+/// Type of normalize operation
+enum xnn_norm_type {
+  xnn_norm_invalid = -1,
+  xnn_norm_l2 = 0,
+  xnn_norm_rms = 1,
+};
+
+/// Define a Normalization Node and add it to a Subgraph.
+///
+/// @param subgraph  - a Subgraph object that will own the created Node.
+/// @param input_id  - Value ID for the input tensor. The input tensor must be
+///                    defined in the @a subgraph, and have at least one
+///                    dimension.
+/// @param scale_id  - Optional value ID for the scale tensor. The 1D scale
+///                    tensor must be defined in the @a subgraph, and have the
+///                    same length as the input tensor's last dimension.
+/// @param output_id - Value ID for the output tensor. The output tensor must be
+///                    defined in the @a subgraph, and its shape must match the
+///                    shape of the input tensor.
+/// @param epsilon   - The value by which to offset the mean of the squares
+///                    before inversion (usually ~1e-6).
+/// @param flags     - binary features of the RMSNorm Node. No supported flags
+///                    are currently defined.
+enum xnn_status xnn_define_normalize(
+  xnn_subgraph_t subgraph,
+  enum xnn_norm_type norm_type,
+  uint32_t input_id,
+  uint32_t scale_id,
+  uint32_t output_id,
+  float epsilon,
   uint32_t flags);
 
 /// Define a Space To Depth 2D Node and add it to a Subgraph.
@@ -4453,6 +4486,46 @@ enum xnn_status xnn_setup_resize_bilinear2d_nhwc(
   xnn_operator_t resize_op,
   void* workspace,
   const void* input,
+  void* output);
+
+enum xnn_status xnn_create_normalize_nc_f32(
+  enum xnn_norm_type norm_type,
+  float epsilon,
+  uint32_t flags,
+  xnn_operator_t* normalize_op_out);
+
+enum xnn_status xnn_reshape_normalize_nc_f32(
+  xnn_operator_t normalize_op,
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  size_t batch_size,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_normalize_nc_f32(
+  xnn_operator_t normalize_op,
+  const float* input,
+  const float* scale,
+  float* output);
+
+enum xnn_status xnn_create_normalize_nc_f16(
+  enum xnn_norm_type norm_type,
+  float epsilon,
+  uint32_t flags,
+  xnn_operator_t* normalize_op_out);
+
+enum xnn_status xnn_reshape_normalize_nc_f16(
+  xnn_operator_t normalize_op,
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  size_t batch_size,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_normalize_nc_f16(
+  xnn_operator_t normalize_op,
+  const void* input,
+  const void* scale,
   void* output);
 
 enum xnn_status xnn_create_rope_nthc_f16(

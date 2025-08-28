@@ -201,6 +201,20 @@ enum xnn_status xnn_destroy_operator(xnn_operator_t op)
 }
 
 
+const char* xnn_norm_type_to_string(enum xnn_norm_type norm_type)
+{
+  switch (norm_type) {
+    case xnn_norm_l2:
+      return "L2";
+    case xnn_norm_rms:
+      return "RMS";
+    case xnn_norm_invalid:
+      return "invalid";
+  }
+  XNN_UNREACHABLE;
+  return "unknown";
+}
+
 const char* xnn_unary_operator_to_string(enum xnn_unary_operator op)
 {
   switch (op) {
@@ -316,6 +330,8 @@ enum xnn_operator_type xnn_reduce_operator_to_operator_type(enum xnn_reduce_oper
       return xnn_operator_type_mean_nd;
     case xnn_reduce_sum:
       return xnn_operator_type_sum_nd;
+    case xnn_reduce_sum_squared:
+      return xnn_operator_type_sum_squared_nd;
     case xnn_reduce_max:
       return xnn_operator_type_reduce_max_nd;
     case xnn_reduce_min:

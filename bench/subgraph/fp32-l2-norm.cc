@@ -93,7 +93,7 @@ xnn_subgraph_t FP32L2Norm(size_t m, size_t n, size_t k, uint32_t norm_mask) {
 
   uint32_t inv_sqrt_sum_sq = XNN_INVALID_VALUE_ID;
   status = xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, dims.size(), dims.data(),
+      subgraph, xnn_datatype_fp32, reduction_dims.size(), reduction_dims.data(),
       /*data=*/nullptr, XNN_INVALID_VALUE_ID, /*flags=*/0, &inv_sqrt_sum_sq);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor inv_sqrt_sum_sq" << std::endl;
