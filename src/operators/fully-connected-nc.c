@@ -21,6 +21,7 @@
 #include "src/xnnpack/compute.h"
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
+#include "src/xnnpack/internal.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
@@ -31,8 +32,8 @@
 #include "src/xnnpack/operator-type.h"
 #include "src/xnnpack/operator-utils.h"
 #include "src/xnnpack/operator.h"
-#include "src/xnnpack/pack.h"
 #include "src/xnnpack/pack-lh.h"
+#include "src/xnnpack/pack.h"
 #include "src/xnnpack/params.h"
 #include <pthreadpool.h>
 
@@ -692,6 +693,28 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w(
       /*weights_cache=*/weights_cache, fully_connected_op_out);
 }
 
+enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w_f16_scales(
+    size_t input_channels, size_t output_channels, size_t input_stride,
+    size_t output_stride, size_t block_size, uint8_t kernel_zero_point,
+    const uint16_t* kernel_scale, const void* kernel, const float* bias,
+    float output_min, float output_max, uint32_t flags,
+    xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
+  const size_t num_blocks =
+      (input_channels + block_size - 1) / block_size * output_channels;
+  xnn_bfloat16* bf16_scale_buffer =
+      (xnn_bfloat16*)xnn_allocate_memory(num_blocks * sizeof(xnn_bfloat16));
+  for (size_t i = 0; i < num_blocks; ++i) {
+    bf16_scale_buffer[i] = xnn_bfloat16_from_float(
+        xnn_float16_to_float(((const xnn_float16*)kernel_scale)[i]));
+  }
+  enum xnn_status status = xnn_create_fully_connected_nc_qd8_f16_qb4w(
+      input_channels, output_channels, input_stride, output_stride, block_size,
+      kernel_zero_point, (const uint16_t*)bf16_scale_buffer, kernel, bias,
+      output_min, output_max, flags, weights_cache, fully_connected_op_out);
+  xnn_release_memory(bf16_scale_buffer);
+  return status;
+}
+
 enum xnn_status create_fully_connected_nc_qx8_f32_qc4w(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, uint8_t kernel_zero_point, const float* kernel_scale,
@@ -1075,6 +1098,28 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qb4w(
       /*weights_cache=*/weights_cache, fully_connected_op_out);
 }
 
+enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qb4w_f16_scales(
+    size_t input_channels, size_t output_channels, size_t input_stride,
+    size_t output_stride, size_t block_size, uint8_t kernel_zero_point,
+    const uint16_t* kernel_scale, const void* kernel, const float* bias,
+    float output_min, float output_max, uint32_t flags,
+    xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
+  const size_t num_blocks =
+      (input_channels + block_size - 1) / block_size * output_channels;
+  xnn_bfloat16* bf16_scale_buffer =
+      (xnn_bfloat16*)xnn_allocate_memory(num_blocks * sizeof(xnn_bfloat16));
+  for (size_t i = 0; i < num_blocks; ++i) {
+    bf16_scale_buffer[i] = xnn_bfloat16_from_float(
+        xnn_float16_to_float(((const xnn_float16*)kernel_scale)[i]));
+  }
+  enum xnn_status status = xnn_create_fully_connected_nc_qp8_f32_qb4w(
+      input_channels, output_channels, input_stride, output_stride, block_size,
+      kernel_zero_point, (const uint16_t*)bf16_scale_buffer, kernel, bias,
+      output_min, output_max, flags, weights_cache, fully_connected_op_out);
+  xnn_release_memory(bf16_scale_buffer);
+  return status;
+}
+
 enum xnn_status create_fully_connected_nc_qx8_f32_qb4w(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, size_t block_size, uint8_t kernel_zero_point,
@@ -1213,7 +1258,7 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w(
       fully_connected_op_out);
 }
 
-enum xnn_status create_fully_connected_nc_qd8_f32_qb4w_f16_scales(
+static enum xnn_status create_fully_connected_nc_qd8_f32_qb4w_f16_scales(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, size_t block_size, uint8_t kernel_zero_point,
     const xnn_float16* kernel_scale, const void* kernel, const float* bias,
@@ -1234,7 +1279,7 @@ enum xnn_status create_fully_connected_nc_qd8_f32_qb4w_f16_scales(
       input_channels, output_channels, input_stride, output_stride, block_size,
       kernel_zero_point, (const uint16_t*)bf16_scale_buffer, kernel, bias,
       output_min, output_max, flags, weights_cache, gemm_config,
-      xnn_operator_type_fully_connected_nc_qd8_f32_qb4w,
+      expected_operator_type,
       fully_connected_op_out);
   xnn_release_memory(bf16_scale_buffer);
   return status;
@@ -3127,7 +3172,7 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_f16_qc8w(
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_qdu8_f16_qc8w(
-    xnn_operator_t fully_connected_op, const int8_t* input, void* output,
+    xnn_operator_t fully_connected_op, const int8_t* input, float* output,
     void* workspace,
     const struct xnn_quantization_params* quantization_params) {
   return setup_fully_connected_nc(
@@ -3136,7 +3181,7 @@ enum xnn_status xnn_setup_fully_connected_nc_qdu8_f16_qc8w(
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_qp8_f32_qc4w(
-    xnn_operator_t fully_connected_op, const float* input, float* output,
+    xnn_operator_t fully_connected_op, const int8_t* input, float* output,
     void* workspace) {
   return setup_fully_connected_nc(
       fully_connected_op, xnn_operator_type_fully_connected_nc_qp8_f32_qc4w,
@@ -3144,7 +3189,7 @@ enum xnn_status xnn_setup_fully_connected_nc_qp8_f32_qc4w(
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_qp8_f32_qc8w(
-    xnn_operator_t fully_connected_op, const float* input, float* output,
+    xnn_operator_t fully_connected_op, const int8_t* input, float* output,
     void* workspace) {
   return setup_fully_connected_nc(
       fully_connected_op, xnn_operator_type_fully_connected_nc_qp8_f32_qc8w,
@@ -3152,7 +3197,7 @@ enum xnn_status xnn_setup_fully_connected_nc_qp8_f32_qc8w(
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_qp8_f32_qb4w(
-    xnn_operator_t fully_connected_op, const float* input, float* output,
+    xnn_operator_t fully_connected_op, const int8_t* input, float* output,
     void* workspace) {
   return setup_fully_connected_nc(
       fully_connected_op, xnn_operator_type_fully_connected_nc_qp8_f32_qb4w,

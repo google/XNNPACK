@@ -237,6 +237,12 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
     } else {
       filter_scale.fill(filter_quantization.scale);
     }
+    if (block_size != no_blockwise) {
+      // blockwise scales must be representable as bfloat16.
+      for (Scale& i : filter_scale) {
+        i = static_cast<Scale>(static_cast<xnn_bfloat16>(i));
+      }
+    }
     broadcast_extent_1(filter_scale);
 
     // (Maybe) make a random bias.
@@ -293,14 +299,15 @@ void TestStaticB(xnn_datatype convert_to = xnn_datatype_invalid,
           (NumericLimits<Filter>::min() + NumericLimits<Filter>::max() + 1) /
           2);
       uint32_t id = 0;
-      ASSERT_EQ(xnn_status_success,
-                xnn_define_blockwise_quantized_tensor_value(
-                    subgraph.Subgraph(), xnn_datatype_qbint4,
-                    filter_quantization.zero_point,
-                    reinterpret_cast<const uint16_t*>(filter_scale.data()),
-                    filter_dims.size(),
-                    /*channel_dim=*/0, block_size, filter_dims.data(),
-                    filter.data(), filter_id, /*flags=*/0, &id));
+      ASSERT_EQ(
+          xnn_status_success,
+          xnn_define_blockwise_quantized_tensor_value_v2(
+              subgraph.Subgraph(), xnn_datatype_qbint4,
+              filter_quantization.zero_point,
+              reinterpret_cast<const uint16_t*>(filter_scale.data()),
+              filter_dims.size(),
+              /*channel_dim=*/0, block_size, filter_dims.data(), filter.data(),
+              filter_id, /*flags=*/0, datatype_of<Scale>(), &id));
       ASSERT_EQ(id, filter_id);
     } else if (channelwise_quantization) {
       const size_t channel_dim = flags & XNN_FLAG_TRANSPOSE_WEIGHTS ? 1 : 0;
@@ -469,21 +476,38 @@ TEST(FullyConnectedQD8F32QC8W, static_b) {
   TestStaticB<float, qcint8, float>(/*convert_to=*/xnn_datatype_qdint8);
 }
 
-TEST(FullyConnectedQD8F16QB4UW, static_b) {
+TEST(FullyConnectedQD8F16QB4UW_BF16, static_b) {
   TestStaticB<xnn_float16, qcuint4, float, xnn_float16, xnn_bfloat16>(
       /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
 }
-TEST(FullyConnectedQD8F16QB4W, static_b) {
+TEST(FullyConnectedQD8F16QB4UW_F16, static_b) {
+  TestStaticB<xnn_float16, qcuint4, float, xnn_float16, xnn_float16>(
+      /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
+}
+TEST(FullyConnectedQD8F16QB4W_BF16, static_b) {
   TestStaticB<xnn_float16, qcint4, float, xnn_float16, xnn_bfloat16>(
       /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
 }
 
-TEST(FullyConnectedQD8F32QB4UW, static_b) {
+TEST(FullyConnectedQD8F16QB4W_F16, static_b) {
+  TestStaticB<xnn_float16, qcint4, float, xnn_float16, xnn_float16>(
+      /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
+}
+
+TEST(FullyConnectedQD8F32QB4UW_BF16, static_b) {
   TestStaticB<float, qcuint4, float, float, xnn_bfloat16>(
       /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
 }
-TEST(FullyConnectedQD8F32QB4W, static_b) {
+TEST(FullyConnectedQD8F32QB4UW_F16, static_b) {
+  TestStaticB<float, qcuint4, float, float, xnn_float16>(
+      /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
+}
+TEST(FullyConnectedQD8F32QB4W_BF16, static_b) {
   TestStaticB<float, qcint4, float, float, xnn_bfloat16>(
+      /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
+}
+TEST(FullyConnectedQD8F32QB4W_F16, static_b) {
+  TestStaticB<float, qcint4, float, float, xnn_float16>(
       /*convert_to=*/xnn_datatype_qdint8, /*block_size=*/32);
 }
 
