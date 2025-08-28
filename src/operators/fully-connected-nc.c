@@ -1268,7 +1268,7 @@ enum xnn_status xnn_create_fully_connected_nc_qdu8_f32_qb4w_f16_scales(
       input_channels, output_channels, input_stride, output_stride, block_size,
       kernel_zero_point, kernel_scale, kernel, bias, output_min, output_max,
       flags, weights_cache, gemm_config,
-      xnn_operator_type_fully_connected_nc_qd8_f32_qb4w,
+      xnn_operator_type_fully_connected_nc_qdu8_f32_qb4w,
       fully_connected_op_out);
 }
 
