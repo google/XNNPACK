@@ -429,6 +429,12 @@ TEST(FullyConnectedF16, static_b) {
   TestStaticB<xnn_float16, xnn_float16, xnn_float16>();
 }
 TEST(FullyConnectedF32, static_b) { TestStaticB<float, float, float>(); }
+TEST(FullyConnectedF32F16F16, static_b) {
+  TestStaticB<float, xnn_float16, xnn_float16>();
+}
+TEST(FullyConnectedF32F16F32, static_b) {
+  TestStaticB<float, xnn_float16, float>();
+}
 
 // TODO(b/407771627): Either add xnn_datatype_qcuint4, or remove F32QC4W.
 TEST(FullyConnectedF32QC4W, static_b) {
