@@ -36,10 +36,11 @@ SubgraphTester::SubgraphTester(uint32_t external_value_ids, uint32_t flags) {
   subgraph_.reset(subgraph_ptr);
 }
 
-SubgraphTester& SubgraphTester::AddInternalDynamicTensorF32(
-    const TensorShape& shape, uint32_t* id_out, uint32_t flags) {
+SubgraphTester& SubgraphTester::AddInternalDynamicTensor(
+    const TensorShape& shape, enum xnn_datatype datatype, uint32_t* id_out,
+    uint32_t flags) {
   const xnn_status status = xnn_define_tensor_value(
-      subgraph_.get(), xnn_datatype_fp32, shape.Rank(), shape.Dims(), nullptr,
+      subgraph_.get(), datatype, shape.Rank(), shape.Dims(), nullptr,
       XNN_INVALID_VALUE_ID, flags, id_out);
   EXPECT_EQ(status, xnn_status_success);
 
