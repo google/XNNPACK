@@ -42,6 +42,9 @@ struct Param {
       case xnn_reduce_sum:
         sstr << "sum";
         break;
+      case xnn_reduce_sum_squared:
+        sstr << "sum_squared";
+        break;
       case xnn_reduce_max:
         sstr << "max";
         break;
@@ -103,6 +106,8 @@ std::function<void(float&, float)> get_reference_op(xnn_reduce_operator op) {
     case xnn_reduce_sum:
     case xnn_reduce_mean:
       return [](float& output, float input) { output += input; };
+    case xnn_reduce_sum_squared:
+      return [](float& output, float input) { output += input * input; };
     case xnn_reduce_min:
       return
           [](float& output, float input) { output = std::min(output, input); };
@@ -254,6 +259,14 @@ INSTANTIATE_TEST_SUITE_P(Reduce, ReduceQU8, params,
 INSTANTIATE_TEST_SUITE_P(Reduce, ReduceF16, params,
                          [](auto p) { return p.param.Name(); });
 INSTANTIATE_TEST_SUITE_P(Reduce, ReduceF32, params,
+                         [](auto p) { return p.param.Name(); });
+
+auto params2 = testing::ConvertGenerator<Param::TupleT>(Combine(
+    Values(xnn_reduce_sum_squared),
+    Bool(), Bool(), Range(0, XNN_MAX_TENSOR_DIMS)));
+INSTANTIATE_TEST_SUITE_P(Reduce2, ReduceF16, params2,
+                         [](auto p) { return p.param.Name(); });
+INSTANTIATE_TEST_SUITE_P(Reduce2, ReduceF32, params2,
                          [](auto p) { return p.param.Name(); });
 
 }  // namespace xnnpack

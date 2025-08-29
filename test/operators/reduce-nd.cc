@@ -317,6 +317,10 @@ class ReduceOperatorTester {
                           static_cast<typename Config::AccumulatorType>(
                               input[input_idx]);
                       break;
+                    case xnn_reduce_sum_squared: {
+                      typename Config::AccumulatorType x = input[input_idx];
+                      accumulator[output_idx] += x * x;
+                    } break;
                     case xnn_reduce_max:
                       accumulator[output_idx] = std::max(
                           accumulator[output_idx],
@@ -492,6 +496,9 @@ struct TestParam {
       case xnn_reduce_sum:
         sstr << "sum";
         break;
+      case xnn_reduce_sum_squared:
+        sstr << "sum_squared";
+        break;
       case xnn_reduce_invalid:
         sstr << "invalid";
         break;
@@ -589,7 +596,8 @@ TEST_P(ReduceNDTest, reduce) {
 std::vector<TestParam> GenerateTests() {
   std::vector<TestParam> params;
   for (enum xnn_reduce_operator operation :
-       {xnn_reduce_sum, xnn_reduce_mean, xnn_reduce_max, xnn_reduce_min}) {
+       {xnn_reduce_sum, xnn_reduce_sum_squared, xnn_reduce_mean, xnn_reduce_max,
+        xnn_reduce_min}) {
     for (enum xnn_datatype datatype :
          {xnn_datatype_fp16, xnn_datatype_fp32, xnn_datatype_qint8,
           xnn_datatype_quint8}) {

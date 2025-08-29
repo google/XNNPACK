@@ -20,6 +20,7 @@
 #include "src/xnnpack/reduce.h"
 
 static struct xnn_reduce_config f16_f32acc_rsum_config = {0};
+static struct xnn_reduce_config f16_f32acc_rsum2_config = {0};
 static struct xnn_reduce_config f16_rmax_config = {0};
 static struct xnn_reduce_config f16_rminmax_config = {0};
 static struct xnn_reduce_config f16_rmin_config = {0};
@@ -27,6 +28,7 @@ static struct xnn_reduce_config f32_rmax_config = {0};
 static struct xnn_reduce_config f32_rminmax_config = {0};
 static struct xnn_reduce_config f32_rmin_config = {0};
 static struct xnn_reduce_config f32_rsum_config = {0};
+static struct xnn_reduce_config f32_rsum2_config = {0};
 static struct xnn_reduce_config s8_rmax_config = {0};
 static struct xnn_reduce_config s8_rminmax_config = {0};
 static struct xnn_reduce_config s8_rmin_config = {0};
@@ -37,6 +39,7 @@ static struct xnn_reduce_config u8_rmin_config = {0};
 static struct xnn_reduce_config qu8_rsum_config = {0};
 
 XNN_INIT_ONCE_GUARD(f16_f32acc_rsum);
+XNN_INIT_ONCE_GUARD(f16_f32acc_rsum2);
 XNN_INIT_ONCE_GUARD(f16_rmax);
 XNN_INIT_ONCE_GUARD(f16_rminmax);
 XNN_INIT_ONCE_GUARD(f16_rmin);
@@ -44,6 +47,7 @@ XNN_INIT_ONCE_GUARD(f32_rmax);
 XNN_INIT_ONCE_GUARD(f32_rminmax);
 XNN_INIT_ONCE_GUARD(f32_rmin);
 XNN_INIT_ONCE_GUARD(f32_rsum);
+XNN_INIT_ONCE_GUARD(f32_rsum2);
 XNN_INIT_ONCE_GUARD(s8_rmax);
 XNN_INIT_ONCE_GUARD(s8_rminmax);
 XNN_INIT_ONCE_GUARD(s8_rmin);
@@ -451,6 +455,43 @@ static void init_f16_f32acc_rsum_config(void) {
   f16_f32acc_rsum_config.update = xnn_update_f32_reduce_scalar_params;
 }
 
+static void init_f16_f32acc_rsum2_config(void) {
+  #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_ARM_FP16_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
+      f16_f32acc_rsum2_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f16_f32acc_rsum2_ukernel__neonfp16arith_u32_acc4);
+      f16_f32acc_rsum2_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f16_f32acc_rdsum2_ukernel_7p7x__neonfp16arith_u16);
+    }
+  #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    #if XNN_ENABLE_AVX512SKX
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx512skx)) {
+        // We use a kernel with the same unroll factor as avx, because that
+        // produces numerically consistent results at negligible performance
+        // cost.
+        f16_f32acc_rsum2_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f16_f32acc_rsum2_ukernel__avx512skx_u32_acc2);
+      } else
+    #endif
+    if ((hardware_config->arch_flags & xnn_arch_x86_f16c)) {
+      f16_f32acc_rsum2_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f16_f32acc_rsum2_ukernel__f16c_u24_acc3);
+    }
+    #if XNN_ENABLE_AVX512SKX
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx512skx)) {
+        f16_f32acc_rsum2_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f16_f32acc_rdsum2_ukernel_7p7x__avx512skx_u64);
+      } else
+    #endif
+    if ((hardware_config->arch_flags & xnn_arch_x86_f16c)) {
+      f16_f32acc_rsum2_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f16_f32acc_rdsum2_ukernel_7p7x__f16c_u32);
+    }
+  #endif
+
+  f16_f32acc_rsum2_config.identity_value = 0;
+  f16_f32acc_rsum2_config.init.reduce = NULL;
+  f16_f32acc_rsum2_config.update = xnn_update_f32_reduce_scalar_params;
+}
+
 static void init_f16_rmax_config(void) {
   #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_ARM_FP16_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -765,6 +806,61 @@ static void init_f32_rsum_config(void) {
   f32_rsum_config.update = xnn_update_f32_reduce_scalar_params;
 }
 
+static void init_f32_rsum2_config(void) {
+  #if XNN_ARCH_ARM
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
+      f32_rsum2_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum2_ukernel__neon_u16_acc4);
+      f32_rsum2_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum2_ukernel_7p7x__neon_u16);
+    } else {
+      f32_rsum2_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum2_ukernel__scalar_u4_acc4);
+      f32_rsum2_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum2_ukernel_7p7x__scalar_u4);
+    }
+  #elif XNN_ARCH_ARM64
+    f32_rsum2_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum2_ukernel__neon_u16_acc4);
+    f32_rsum2_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum2_ukernel_7p7x__neon_u16);
+  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    #if XNN_ENABLE_AVX512F
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx512f)) {
+        // We use a kernel with the same unroll factor as avx, because that
+        // produces numerically consistent results at negligible performance
+        // cost.
+        f32_rsum2_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum2_ukernel__avx512f_u64_acc4);
+      } else
+    #endif
+    if ((hardware_config->arch_flags & xnn_arch_x86_avx)) {
+      f32_rsum2_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum2_ukernel__avx_u32_acc4);
+    } else {
+      // A hypothetical u32_acc8 kernel would produce results numerically
+      // consistent with avx and avx512f.
+      f32_rsum2_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum2_ukernel__sse2_u16_acc4);
+    }
+    #if XNN_ENABLE_AVX512F
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx512f)) {
+        f32_rsum2_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum2_ukernel_7p7x__avx512f_u64);
+      } else
+    #endif
+    if ((hardware_config->arch_flags & xnn_arch_x86_avx)) {
+      f32_rsum2_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum2_ukernel_7p7x__avx_u32);
+    } else {
+      f32_rsum2_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum2_ukernel_7p7x__sse2_u16);
+    }
+  #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+    f32_rsum2_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum2_ukernel__wasmsimd_u16_acc4);
+    f32_rsum2_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum2_ukernel_7p7x__wasmsimd_u16);
+  #else
+    f32_rsum2_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum2_ukernel__scalar_u4_acc4);
+    f32_rsum2_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum2_ukernel_7p7x__scalar_u4);
+  #endif
+
+  f32_rsum2_config.identity_value = 0;
+  f32_rsum2_config.init.reduce = NULL;
+  f32_rsum2_config.update = xnn_update_f32_reduce_scalar_params;
+}
+
 const struct xnn_reduce_config* xnn_init_f16_f32acc_rsum_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
@@ -772,6 +868,15 @@ const struct xnn_reduce_config* xnn_init_f16_f32acc_rsum_config() {
   }
   XNN_INIT_ONCE(f16_f32acc_rsum);
   return &f16_f32acc_rsum_config;
+}
+
+const struct xnn_reduce_config* xnn_init_f16_f32acc_rsum2_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
+    return NULL;
+  }
+  XNN_INIT_ONCE(f16_f32acc_rsum2);
+  return &f16_f32acc_rsum2_config;
 }
 
 const struct xnn_reduce_config* xnn_init_f16_rmax_config() {
@@ -835,6 +940,15 @@ const struct xnn_reduce_config* xnn_init_f32_rsum_config() {
   }
   XNN_INIT_ONCE(f32_rsum);
   return &f32_rsum_config;
+}
+
+const struct xnn_reduce_config* xnn_init_f32_rsum2_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == NULL) {
+    return NULL;
+  }
+  XNN_INIT_ONCE(f32_rsum2);
+  return &f32_rsum2_config;
 }
 
 const struct xnn_reduce_config* xnn_init_s8_rmax_config() {

@@ -205,6 +205,7 @@ XNN_INTERNAL const struct xnn_unary_elementwise_config*
 xnn_init_xx_copy_config();
 
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f16_f32acc_rsum_config();
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f16_f32acc_rsum2_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f16_rmax_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f16_rminmax_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f16_rmin_config();
@@ -212,6 +213,7 @@ XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f32_rmax_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f32_rminmax_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f32_rmin_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f32_rsum_config();
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f32_rsum2_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_s8_rmax_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_s8_rminmax_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_s8_rmin_config();

@@ -316,6 +316,8 @@ enum xnn_operator_type xnn_reduce_operator_to_operator_type(enum xnn_reduce_oper
       return xnn_operator_type_mean_nd;
     case xnn_reduce_sum:
       return xnn_operator_type_sum_nd;
+    case xnn_reduce_sum_squared:
+      return xnn_operator_type_sum_squared_nd;
     case xnn_reduce_max:
       return xnn_operator_type_reduce_max_nd;
     case xnn_reduce_min:

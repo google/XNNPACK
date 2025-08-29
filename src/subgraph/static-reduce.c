@@ -292,8 +292,18 @@ enum xnn_status xnn_define_static_reduce_v2(
   switch (input_value->datatype) {
     case xnn_datatype_fp16:
     case xnn_datatype_fp32:
+      break;
     case xnn_datatype_qint8:
     case xnn_datatype_quint8:
+      if (reduce_operator == xnn_reduce_sum_squared) {
+        xnn_log_error(
+            "failed to define %s operator with the first input ID #%" PRIu32
+            ": unsupported Value datatype %s (%d)",
+            xnn_node_type_to_string(node_type), input_id,
+            xnn_datatype_to_string(input_value->datatype),
+            input_value->datatype);
+        return xnn_status_invalid_parameter;
+      }
       break;
     default:
       xnn_log_error(
