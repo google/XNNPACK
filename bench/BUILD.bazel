@@ -97,6 +97,7 @@ xnnpack_cc_library(
 
 xnnpack_cxx_library(
     name = "gemm_benchmark",
+    testonly = True,
     srcs = [
         "gemm-benchmark.cc",
     ],
@@ -115,6 +116,7 @@ xnnpack_cxx_library(
 
 xnnpack_cxx_library(
     name = "packw_benchmark",
+    testonly = True,
     hdrs = [
         "packw-benchmark.h",
     ],
@@ -126,10 +128,24 @@ xnnpack_cxx_library(
 
 xnnpack_cxx_library(
     name = "bgemm",
+    testonly = True,
     hdrs = [
         "bgemm.h",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "@com_google_benchmark//:benchmark",
+    ],
+)
+
+xnnpack_cxx_library(
+    name = "packq_benchmark",
+    testonly = True,
+    srcs = [
+        "packq-benchmark.cc",
+    ],
+    hdrs = ["packq-benchmark.h"],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":bgemm",
         "@com_google_benchmark//:benchmark",
     ],
 )
@@ -275,8 +291,10 @@ xnnpack_benchmark(
     "f32_vcmul",
     "rdminmax",
     "rdsum",
+    "rdsum2",
     "rminmax",
     "rsum",
+    "rsum2",
     "x8_lut",
 ]]
 
@@ -450,18 +468,6 @@ xnnpack_benchmark(
     copts = xnnpack_optional_dnnl_copts(),
     deps = MICROKERNEL_BENCHMARK_DEPS + xnnpack_optional_dnnl_deps() + [
         "//:microparams_h",
-    ],
-)
-
-xnnpack_cxx_library(
-    name = "packq_benchmark",
-    srcs = [
-        "packq-benchmark.cc",
-    ],
-    hdrs = ["packq-benchmark.h"],
-    deps = MICROKERNEL_BENCHMARK_DEPS + [
-        ":bgemm",
-        "@com_google_benchmark//:benchmark",
     ],
 )
 
