@@ -118,8 +118,10 @@ SET(MICROKERNEL_UNIT_TESTS
     qu8-vlrelu
     rdminmax
     rdsum
+    rdsum2
     rminmax
     rsum
+    rsum2
     spmm-minmax
     s8-ibilinear
     u8-ibilinear
@@ -154,6 +156,7 @@ SHARD_TEST(maxpool-minmax-test 10)
 IF(XNNPACK_TARGET_PROCESSOR MATCHES "^riscv")
   SHARD_TEST(f32-argmaxpool-test 20)
   SHARD_TEST(rdsum-test 10)
+  SHARD_TEST(rdsum2-test 10)
 ENDIF()
 
 SET(MICROKERNEL_DWCONV_UNIT_TESTS

@@ -27,10 +27,12 @@ SET(PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-rdminmax/gen/f32-rdmax-2p2x-avx512f-u32.c
   src/f32-rdminmax/gen/f32-rdmin-2p2x-avx512f-u32.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx512f-u64.c
+  src/f32-rdsum2/gen/f32-rdsum2-7p7x-minmax-avx512f.c
   src/f32-rminmax/gen/f32-rmax-avx512f-u64-acc4.c
   src/f32-rminmax/gen/f32-rmin-avx512f-u64-acc4.c
   src/f32-rminmax/gen/f32-rminmax-avx512f-u64-acc4.c
   src/f32-rsum/gen/f32-rsum-avx512f-u32-acc2.c
+  src/f32-rsum2/gen/f32-rsum2-avx512f-u16.c
   src/f32-vapproxgelu/gen/f32-vapproxgelu-avx512f-rational-12-10-div.c
   src/f32-vbinary/gen/f32-vadd-avx512f-u32.c
   src/f32-vbinary/gen/f32-vaddc-avx512f-u32.c
