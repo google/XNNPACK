@@ -21,6 +21,7 @@ extern "C" {
   XNN_INTERNAL void ukernel(size_t batch, const datatype_in* input,            \
                             datatype_out* output, const params_type* params);
 #include "src/f16-f32acc-rsum/f16-f32acc-rsum.inc"
+#include "src/f16-f32acc-rsum2/f16-f32acc-rsum2.inc"
 #include "src/f16-rminmax/f16-rmax.inc"
 #include "src/f16-rminmax/f16-rmin.inc"
 #include "src/f16-rminmax/f16-rminmax.inc"
@@ -29,6 +30,7 @@ extern "C" {
 #include "src/f32-rminmax/f32-rmin.inc"
 #include "src/f32-rminmax/f32-rminmax.inc"
 #include "src/f32-rsum/f32-rsum.inc"
+#include "src/f32-rsum2/f32-rsum2.inc"
 #include "src/qs8-rsum/qs8-rsum.inc"
 #include "src/qu8-rsum/qu8-rsum.inc"
 #undef XNN_UKERNEL
@@ -53,7 +55,9 @@ extern "C" {
                             const datatype_in* zero, datatype_out* output,    \
                             const params_type* params);
 #include "src/f16-f32acc-rdsum/f16-f32acc-rdsum.inc"
+#include "src/f16-f32acc-rdsum2/f16-f32acc-rdsum2.inc"
 #include "src/f32-rdsum/f32-rdsum.inc"
+#include "src/f32-rdsum2/f32-rdsum2.inc"
 #undef XNN_UKERNEL
 
 #define XNN_UKERNEL(arch_flags, ukernel, row_tile, batch_tile, vector_tile, \

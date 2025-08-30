@@ -76,10 +76,12 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-rdminmax/gen/f32-rdmax-2p2x-scalar-u2.c
   src/f32-rdminmax/gen/f32-rdmin-2p2x-scalar-u2.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-scalar.c
+  src/f32-rdsum2/gen/f32-rdsum2-7p7x-minmax-scalar.c
   src/f32-rminmax/gen/f32-rmax-scalar-u4-acc4.c
   src/f32-rminmax/gen/f32-rmin-scalar-u4-acc4.c
   src/f32-rminmax/gen/f32-rminmax-scalar-u4-acc4.c
   src/f32-rsum/gen/f32-rsum-scalar-u4-acc4.c
+  src/f32-rsum2/gen/f32-rsum2-scalar-u1.c
   src/f32-spmm/gen/f32-spmm-8x1-minmax-scalar.c
   src/f32-spmm/gen/f32-spmm-8x2-minmax-scalar.c
   src/f32-spmm/gen/f32-spmm-8x4-minmax-scalar.c

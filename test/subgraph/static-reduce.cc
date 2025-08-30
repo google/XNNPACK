@@ -14,12 +14,14 @@
 #include <type_traits>
 #include <vector>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/node-type.h"
 #include "test/replicable_random_device.h"
 #include "test/subgraph/subgraph-tester.h"
 
@@ -41,6 +43,9 @@ struct Param {
         break;
       case xnn_reduce_sum:
         sstr << "sum";
+        break;
+      case xnn_reduce_sum_squared:
+        sstr << "sum_squared";
         break;
       case xnn_reduce_max:
         sstr << "max";
@@ -103,6 +108,8 @@ std::function<void(float&, float)> get_reference_op(xnn_reduce_operator op) {
     case xnn_reduce_sum:
     case xnn_reduce_mean:
       return [](float& output, float input) { output += input; };
+    case xnn_reduce_sum_squared:
+      return [](float& output, float input) { output += input * input; };
     case xnn_reduce_min:
       return
           [](float& output, float input) { output = std::min(output, input); };
@@ -226,6 +233,105 @@ void TestImpl(const Param& p) {
   }
 }
 
+template <typename T, typename Accum = T>
+void TestSubgraphRewrite(const Param& p) {
+  const size_t rank = p.rank;
+  const bool use_neg_axes = p.use_neg_axes;
+  const bool keep_dims = p.keep_dims;
+
+  ReplicableRandomDevice rng;
+
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  for (uint32_t mask = 1; mask < (1 << rank); ++mask) {
+    std::vector<int64_t> reduction_axes = mask_to_axes(mask);
+    if (use_neg_axes) {
+      negate_axes(rank, reduction_axes);
+    }
+
+    // Define subgraph
+    SubgraphTester subgraph(2);
+    const uint32_t input_id = 0;
+    const uint32_t output_id = 1;
+    std::vector<size_t> input_shape = random_shape(rng, rank);
+    std::vector<size_t> output_shape = input_shape;
+    size_t reduced_elements = 1;
+    for (size_t i = 0; i < rank; ++i) {
+      if (mask & (1 << i)) {
+        reduced_elements *= input_shape[i];
+        output_shape[i] = 1;
+      }
+    }
+
+    // Generate the input.
+    Tensor<T> input(input_shape, xnnpack::XnnExtraBytes);
+    DatatypeGenerator<T> generator(-1.0, 1.0);
+    input.generate([&]() { return generator(rng); });
+
+    subgraph.AddInputTensor(input_shape, xnn_datatype_of<T>(), input_id);
+    subgraph.AddOutputTensor(output_shape, xnn_datatype_of<T>(), output_id);
+
+    // Generate the reduce_sum(sqr(x)) or reduce_sum(mul(x, x))  nodes.
+
+    // b = mul(a, a) or b = sqr(a).
+    uint32_t squared_id = XNN_INVALID_VALUE_ID;
+    subgraph.AddInternalDynamicTensor(input_shape, xnn_datatype_of<T>(),
+                                      &squared_id,
+                                      /*flags=*/0);
+    if (rng() % 2) {
+      subgraph.AddMultiply(input_id, input_id, squared_id);
+    } else {
+      subgraph.AddUnary(xnn_unary_square, /*params=*/nullptr, input_id,
+                        squared_id);
+    }
+
+    // c = reduce_sum(b, axis=-1).
+    subgraph.AddReduce(xnn_reduce_sum, reduction_axes, squared_id, output_id,
+                       /*flags=*/keep_dims ? XNN_FLAG_KEEP_DIMS : 0);
+
+    // Set up the input/output tensors.
+    Tensor<Accum> expected(output_shape, xnnpack::XnnExtraBytes);
+    subgraph.SetupExternalTensor(input.base(), input_id);
+    subgraph.SetupExternalTensor(expected.base(), output_id);
+
+    // Evaluate once with `XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC` enabled to
+    // prevent the subgraph replacement.
+    xnn_status status = subgraph.CreateRuntime(
+        /*threadpool=*/nullptr, XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC);
+    if (status == xnn_status_unsupported_hardware) {
+      GTEST_SKIP();
+      return;
+    }
+    ASSERT_GT(subgraph.NumNodes(), 1);
+
+    // Run the subgraph.
+    subgraph.ReshapeRuntime();
+    subgraph.SetupRuntime();
+    subgraph.InvokeRuntime();
+
+    // Create the runtime and evaluate again and check that the subgraph was
+    // replaced.
+    subgraph.Optimize();
+    ASSERT_EQ(subgraph.NumNodes(), 1);
+    ASSERT_EQ(subgraph.Node(0)->type, xnn_node_type_static_sum_squared);
+
+    // Run the subgraph.
+    Tensor<Accum> output(output_shape, xnnpack::XnnExtraBytes);
+    subgraph.SetupExternalTensor(output.base(), output_id);
+
+    // Run the subgraph.
+    subgraph.ReshapeRuntime();
+    subgraph.SetupRuntime();
+    subgraph.InvokeRuntime();
+
+    // Verify results.
+    const float tolerance = NumericLimits<Accum>::epsilon() * reduced_elements;
+    ASSERT_THAT(output,
+                testing::Pointwise(testing::NanSensitiveFloatNear(tolerance),
+                                   expected));
+  }
+}
+
 template <typename T>
 class Reduce : public ::testing::TestWithParam<Param> {};
 
@@ -238,6 +344,12 @@ TEST_P(ReduceQS8, test) { TestImpl<quantized<int8_t>, int32_t>(GetParam()); }
 TEST_P(ReduceQU8, test) { TestImpl<quantized<uint8_t>, int32_t>(GetParam()); }
 TEST_P(ReduceF16, test) { TestImpl<xnn_float16, float>(GetParam()); }
 TEST_P(ReduceF32, test) { TestImpl<float, float>(GetParam()); }
+TEST_P(ReduceF16, subgraph_rewrite) {
+  TestSubgraphRewrite<xnn_float16, float>(GetParam());
+}
+TEST_P(ReduceF32, subgraph_rewrite) {
+  TestSubgraphRewrite<float, float>(GetParam());
+}
 
 using ::testing::Bool;
 using ::testing::Combine;
@@ -254,6 +366,14 @@ INSTANTIATE_TEST_SUITE_P(Reduce, ReduceQU8, params,
 INSTANTIATE_TEST_SUITE_P(Reduce, ReduceF16, params,
                          [](auto p) { return p.param.Name(); });
 INSTANTIATE_TEST_SUITE_P(Reduce, ReduceF32, params,
+                         [](auto p) { return p.param.Name(); });
+
+auto params2 = testing::ConvertGenerator<Param::TupleT>(Combine(
+    Values(xnn_reduce_sum_squared),
+    Bool(), Bool(), Range(0, XNN_MAX_TENSOR_DIMS)));
+INSTANTIATE_TEST_SUITE_P(Reduce2, ReduceF16, params2,
+                         [](auto p) { return p.param.Name(); });
+INSTANTIATE_TEST_SUITE_P(Reduce2, ReduceF32, params2,
                          [](auto p) { return p.param.Name(); });
 
 }  // namespace xnnpack
