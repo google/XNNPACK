@@ -2123,26 +2123,57 @@ void xnn_subgraph_fuse_unary_quantized_into_lut(xnn_subgraph_t subgraph) {
   }
 }
 
-void xnn_subgraph_clean_up(xnn_subgraph_t subgraph) {
-  // Count the number of consumers for each value.
-  xnn_subgraph_analyze_consumers_and_producers(subgraph);
+static void recursive_remove_node(xnn_subgraph_t subgraph, uint32_t node_id) {
+  struct xnn_node* node = &subgraph->nodes[node_id];
 
-  // Clear unreferenced values.
-  for (uint32_t i = 0; i < subgraph->num_values; i++) {
-    struct xnn_value* value = &subgraph->values[i];
-    if (value->type == xnn_value_type_invalid) {
+  // Decrease the number of consumers on the inputs.
+  for (uint32_t input_id = 0; input_id < node->num_inputs; input_id++) {
+    if (is_repeated_input(node, input_id)) {
       continue;
     }
-
-    if (!xnn_value_is_external_input(value->flags) &&
-        value->num_consumers == 0) {
-      if (value->producer != XNN_INVALID_NODE_ID) {
-        struct xnn_node* producer = &subgraph->nodes[value->producer];
+    struct xnn_value* input_value = &subgraph->values[node->inputs[input_id]];
+    if (!xnn_value_is_external_input(input_value->flags) &&
+        --input_value->num_consumers == 0) {
+      if (input_value->producer != XNN_INVALID_NODE_ID) {
+        struct xnn_node* producer = &subgraph->nodes[input_value->producer];
         if (producer->num_outputs == 1) {
-          xnn_node_clear(&subgraph->nodes[value->producer]);
+          recursive_remove_node(subgraph, producer->id);
         }
       }
-      xnn_value_clear(value);
+      xnn_value_clear(input_value);
+    }
+  }
+
+  xnn_node_clear(node);
+}
+
+void xnn_subgraph_clean_up(xnn_subgraph_t subgraph) {
+  while (true) {
+    // Count the number of consumers for each value.
+    xnn_subgraph_analyze_consumers_and_producers(subgraph);
+
+    // Clear unreferenced values.
+    bool changes = false;
+    for (uint32_t i = 0; i < subgraph->num_values; i++) {
+      struct xnn_value* value = &subgraph->values[i];
+      if (value->type == xnn_value_type_invalid) {
+        continue;
+      }
+
+      if (!xnn_value_is_external_input(value->flags) &&
+          value->num_consumers == 0) {
+        if (value->producer != XNN_INVALID_NODE_ID) {
+          struct xnn_node* producer = &subgraph->nodes[value->producer];
+          if (producer->num_outputs == 1) {
+            changes = true;
+            recursive_remove_node(subgraph, producer->id);
+          }
+        }
+        xnn_value_clear(value);
+      }
+    }
+    if (!changes) {
+      break;
     }
   }
 
@@ -2162,6 +2193,7 @@ void xnn_subgraph_clean_up(xnn_subgraph_t subgraph) {
   uint32_t num_invalid_nodes = 0;
   bool changes = false;
   while (left + num_invalid_nodes < subgraph->num_nodes) {
+    num_invalid_nodes = 0;
     for (uint32_t i = left; i < subgraph->num_nodes; i++) {
       struct xnn_node* node = &subgraph->nodes[i];
 
@@ -2190,8 +2222,8 @@ void xnn_subgraph_clean_up(xnn_subgraph_t subgraph) {
           if (subgraph->nodes[left].type == xnn_node_type_invalid) {
             node->type = xnn_node_type_invalid;
           } else {
-            memcpy(&subgraph->nodes[left + 1], &subgraph->nodes[left],
-                   (i - left) * sizeof(struct xnn_node));
+            memmove(&subgraph->nodes[left + 1], &subgraph->nodes[left],
+                    (i - left) * sizeof(struct xnn_node));
           }
           subgraph->nodes[left] = tmp_node;
         }
