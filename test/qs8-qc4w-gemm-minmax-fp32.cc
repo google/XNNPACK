@@ -2595,11 +2595,11 @@ INSTANTIATE_TEST_SUITE_P(
         /*mr=*/1, /*nr=*/2, /*kr=*/1, /*sr=*/1,
         /*is_igemm=*/false,
         /*unsigned_inputs=*/false,
-        /*planes=*/1,
+        /*planes=*/2,
         [](GemmMicrokernelTester& tester) {
           tester.Test(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x2__scalar_lrintf,
                       xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
-                      xnn_pack_qs8_qc4w_gemm_goi_w_non_planar_scalar,
+                      xnn_pack_qs8_qc4w_gemm_goi_w,
                       xnn_qs8_requantize_fp32);
         },
         0)),
@@ -2616,11 +2616,11 @@ INSTANTIATE_TEST_SUITE_P(
         /*mr=*/1, /*nr=*/2, /*kr=*/1, /*sr=*/1,
         /*is_igemm=*/false,
         /*unsigned_inputs=*/false,
-        /*planes=*/1,
+        /*planes=*/2,
         [](GemmMicrokernelTester& tester) {
           tester.Test(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x2__scalar_fmagic,
                       xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
-                      xnn_pack_qs8_qc4w_gemm_goi_w_non_planar_scalar,
+                      xnn_pack_qs8_qc4w_gemm_goi_w,
                       xnn_qs8_requantize_fp32);
         },
         0)),

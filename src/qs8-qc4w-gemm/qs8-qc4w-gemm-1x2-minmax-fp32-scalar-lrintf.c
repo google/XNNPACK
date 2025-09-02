@@ -53,8 +53,8 @@ void xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x2__scalar_lrintf(
       const uint8_t vbi1 = ((const uint8_t*) w)[1];
       w = (const uint8_t*) w + 2;
       const int32_t vb0c0 = (int32_t) (int8_t) (vbi0 << 4);
-      const int32_t vb1c0 = (int32_t) (int8_t) (vbi0 & 0xF0);
-      const int32_t vb0c1 = (int32_t) (int8_t) (vbi1 << 4);
+      const int32_t vb0c1 = (int32_t) (int8_t) (vbi0 & 0xF0);
+      const int32_t vb1c0 = (int32_t) (int8_t) (vbi1 << 4);
       const int32_t vb1c1 = (int32_t) (int8_t) (vbi1 & 0xF0);
 
       vacc0x0 += va0c0 * vb0c0;
