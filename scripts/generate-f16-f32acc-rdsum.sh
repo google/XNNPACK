@@ -20,9 +20,5 @@ tools/xngen src/f16-f32acc-rdsum/avx512skx.c.in -D CHANNELS_BATCH=16 -D ACCUMULA
 tools/xngen src/f16-f32acc-rdsum/avx512skx.c.in -D CHANNELS_BATCH=32 -D ACCUMULATORS=7 -o src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-avx512skx-u32.c &
 tools/xngen src/f16-f32acc-rdsum/avx512skx.c.in -D CHANNELS_BATCH=64 -D ACCUMULATORS=7 -o src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-avx512skx-u64.c &
 tools/xngen src/f16-f32acc-rdsum/avx512skx.c.in -D CHANNELS_BATCH=128 -D ACCUMULATORS=7 -o src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-avx512skx-u128.c &
-tools/xngen src/f16-f32acc-rdsum/avx512skx.c.in -D CHANNELS_BATCH=16 -D ACCUMULATORS=7 -o src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-avx512skx-u16.c &
-tools/xngen src/f16-f32acc-rdsum/avx512skx.c.in -D CHANNELS_BATCH=32 -D ACCUMULATORS=7 -o src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-avx512skx-u32.c &
-tools/xngen src/f16-f32acc-rdsum/avx512skx.c.in -D CHANNELS_BATCH=64 -D ACCUMULATORS=7 -o src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-avx512skx-u64.c &
-tools/xngen src/f16-f32acc-rdsum/avx512skx.c.in -D CHANNELS_BATCH=128 -D ACCUMULATORS=7 -o src/f16-f32acc-rdsum/gen/f16-f32acc-rdsum-7p7x-avx512skx-u128.c &
 
 wait

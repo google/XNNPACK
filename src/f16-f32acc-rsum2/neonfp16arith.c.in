@@ -1,0 +1,109 @@
+// Copyright 2025 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <arm_neon.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microparams.h"
+#include "src/xnnpack/reduce.h"
+
+$BATCH_TILES = tuple(int(bt) for bt in BATCH_TILES.split(","))
+$SIMD_SIZE = BATCH_TILES[0] // 2
+$for BATCH_TILE in BATCH_TILES:
+  $assert BATCH_TILE % SIMD_SIZE == 0
+  $assert BATCH_TILE >= SIMD_SIZE
+  $SIMD_TILE = BATCH_TILE // SIMD_SIZE
+  $ACCUMULATORS = SIMD_TILE
+  $while ACCUMULATORS:
+    $ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
+
+    void xnn_f16_f32acc_rsum2_ukernel__neonfp16arith_u${BATCH_TILE}${ACC_SUFFIX}(
+        size_t batch, const xnn_float16* input, float* output,
+        const struct xnn_f16_f32acc_scale_params* restrict params) {
+      assert(batch != 0);
+      assert(batch % sizeof(uint16_t) == 0);
+      assert(input != NULL);
+      assert(output != NULL);
+
+      const uint16_t* i = (const uint16_t*) input;
+      $for A in range(ACCUMULATORS):
+        float32x4_t vacc${A} = vmovq_n_f32(0.0f);
+      for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {
+        $for N in range(0, SIMD_TILE, 2):
+          const float16x8_t vh${ABC[N:N+2]} = vreinterpretq_f16_u16(vld1q_u16(i));
+          i += 8;
+
+        $for N in range(0, SIMD_TILE, 2):
+          float32x4_t vt${N} = vcvt_f32_f16(vget_low_f16(vh${ABC[N:N+2]}));
+          float32x4_t vt${N+1} = vcvt_f32_f16(vget_high_f16(vh${ABC[N:N+2]}));
+
+        #if __ARM_FEATURE_FMA
+        $for N in range(((SIMD_TILE + 1)//2)*2):
+          vacc${N % ACCUMULATORS} = vfmaq_f32(vacc${N % ACCUMULATORS}, vt${N}, vt${N});
+        #else
+        $for N in range(((SIMD_TILE + 1)//2)*2):
+          vacc${N % ACCUMULATORS} = vaddq_f32(vacc${N % ACCUMULATORS}, vmulq_f32(vt${N}, vt${N}));
+        #endif  // __ARM_FEATURE_FMA
+      }
+      $for N in range(0, SIMD_TILE - 2, 2):
+        if (batch >= 8 * sizeof(uint16_t)) {
+          const float16x8_t vh = vreinterpretq_f16_u16(vld1q_u16(i));
+          i += 8;
+
+          float32x4_t vt0 = vcvt_f32_f16(vget_low_f16(vh));
+          float32x4_t vt1 = vcvt_f32_f16(vget_high_f16(vh));
+
+          batch -= 8 * sizeof(uint16_t);
+          #if __ARM_FEATURE_FMA
+          vacc${N % ACCUMULATORS} = vfmaq_f32(vacc${N % ACCUMULATORS}, vt0, vt0);
+          vacc${(N + 1) % ACCUMULATORS} = vfmaq_f32(vacc${(N + 1) % ACCUMULATORS}, vt1, vt1);
+          #else
+          vacc${N % ACCUMULATORS} = vaddq_f32(vacc${N % ACCUMULATORS}, vmulq_f32(vt0, vt0));
+          vacc${(N + 1) % ACCUMULATORS} = vaddq_f32(vacc${(N + 1) % ACCUMULATORS}, vmulq_f32(vt1, vt1));
+          #endif  // __ARM_FEATURE_FMA
+        }
+      $REDUCE_ACC = ACCUMULATORS
+      $while REDUCE_ACC > 1:
+        $for A in range(REDUCE_ACC % 2, (REDUCE_ACC + 1) // 2):
+          $if A + REDUCE_ACC // 2 <= REDUCE_ACC:
+            vacc${A} = vaddq_f32(vacc${A}, vacc${A + REDUCE_ACC // 2});
+        $REDUCE_ACC = (REDUCE_ACC + 1) // 2
+      const float32x2_t vscale = vdup_n_f32(params->scalar.scale);
+      if XNN_UNLIKELY(batch & (4 * sizeof(uint16_t))) {
+        const float16x4_t vh = vreinterpret_f16_u16(vld1_u16((const void*) i));
+        i += 4;
+        float32x4_t vt = vcvt_f32_f16(vh);
+        #if __ARM_FEATURE_FMA
+        vacc0 = vfmaq_f32(vacc0, vt, vt);
+        #else
+        vacc0 = vaddq_f32(vacc0, vmulq_f32(vt, vt));
+        #endif  // __ARM_FEATURE_FMA
+      }
+      float32x2_t vacc = vadd_f32(vget_low_f32(vacc0), vget_high_f32(vacc0));
+      if XNN_UNLIKELY(batch & (2 * sizeof(uint16_t))) {
+        const float16x4_t vh = vreinterpret_f16_u32(vld1_dup_u32((const void*) i));
+        i += 2;
+        float32x4_t vt = vcvt_f32_f16(vh);
+        vt = vmulq_f32(vt, vt);
+        vacc = vadd_f32(vacc, vget_low_f32(vt));
+      }
+      vacc = vpadd_f32(vacc, vacc);
+      if XNN_UNLIKELY(batch & (1 * sizeof(uint16_t))) {
+        const float16x4_t vh = vreinterpret_f16_u16(vld1_dup_u16(i));
+        float32x4_t vt = vcvt_f32_f16(vh);
+        vt = vmulq_f32(vt, vt);
+        vacc = vadd_f32(vacc, vget_low_f32(vt));
+      }
+      vacc = vmul_f32(vacc, vscale);
+
+      float vout = vget_lane_f32(vacc, 0);
+      *output += vout;
+    }
+    $ACCUMULATORS //= 2

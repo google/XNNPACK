@@ -272,8 +272,10 @@ xnnpack_cxx_library(
 ) for (test, shard_count) in [
     ("rminmax", 1),
     ("rsum", 1),
+    ("rsum2", 1),
     ("rdminmax", 1),
     ("rdsum", 5),
+    ("rdsum2", 5),
 ]]
 
 [xnnpack_unit_test(
