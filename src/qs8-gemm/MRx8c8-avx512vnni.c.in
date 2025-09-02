@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert REQUANTIZATION == "FP32" or not REQUANTIZATION
-$assert DATATYPE in ["QD8", "QS8", "QC4", "QC8"]
+$assert DATATYPE in ["QD8", "QS8", "QC4", "QC8", "QS8_QC4"]
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -21,10 +21,10 @@ $if PREFETCH:
   #include "src/xnnpack/prefetch.h"
 
 
-$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8": "qd8_f32_qc8w", "QS8": "qs8", "QC4": "qd8_f32_qc4w"}[DATATYPE]
+$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8_QC4": "qs8_qc4w", "QD8": "qd8_f32_qc8w", "QS8": "qs8", "QC4": "qd8_f32_qc4w"}[DATATYPE]
 $REQUANTIZATION_SPEC = "" if DATATYPE in ["QD8", "QC4"] else "_" + REQUANTIZATION.lower()
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar" if REQUANTIZATION else "scalar"
-$PARAMS_TYPE = {"QC8": "union xnn_qs8_qc8w_conv_minmax_params", "QD8": "struct xnn_f32_minmax_params", "QS8": "union xnn_qs8_conv_minmax_params", "QC4": "struct xnn_f32_qc4w_minmax_params"}[DATATYPE]
+$PARAMS_TYPE = {"QC8": "union xnn_qs8_qc8w_conv_minmax_params", "QS8_QC4": "union xnn_qs8_qc8w_conv_minmax_params", "QD8": "struct xnn_f32_minmax_params", "QS8": "union xnn_qs8_conv_minmax_params", "QC4": "struct xnn_f32_qc4w_minmax_params"}[DATATYPE]
 $OUT_T = "float" if DATATYPE in ["QD8", "QC4"] else "int8_t"
 void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8__avx512vnni${"gfni" if GFNI else ""}${"_prfm" if PREFETCH else ""}(
     size_t mr,
@@ -80,24 +80,21 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8__
     const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
     // XNN_FORCE_REALIZATION(voutput_min);
     // XNN_FORCE_REALIZATION(voutput_max);
-    $if DATATYPE == "QC4":
-      const __m512i vvalue_mask = _mm512_set1_epi8(0xF0);
-      XNN_FORCE_REALIZATION(vvalue_mask);
-      $if GFNI:
-        const __m512i vshl4 = _mm512_set1_epi64(0x01020408);
-        XNN_FORCE_REALIZATION(vshl4);
   $else:
     const __m128i vsign_mask = _mm_set1_epi8(0x80);
     XNN_FORCE_REALIZATION(vsign_mask);
-    $if DATATYPE != "QC8":
-      const __m512 vscale = _mm512_set1_ps(params->${PARAMS_STRUCT}.scale);
-      // XNN_FORCE_REALIZATION(vscale);
     const __m512 voutput_max_less_zero_point = _mm512_set1_ps((int32_t) params->${PARAMS_STRUCT}.output_max - (int32_t) params->${PARAMS_STRUCT}.output_zero_point);
     const __m512i voutput_zero_point = _mm512_set1_epi32(params->${PARAMS_STRUCT}.output_zero_point);
     const __m128i voutput_min = _mm_set1_epi8(params->${PARAMS_STRUCT}.output_min);
     // XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
     // XNN_FORCE_REALIZATION(voutput_zero_point);
     // XNN_FORCE_REALIZATION(voutput_min);
+  $if DATATYPE in ["QC4", "QS8_QC4"]:
+    const __m512i vmask = _mm512_set1_epi8(0xF0);
+    XNN_FORCE_REALIZATION(vmask);
+    $if GFNI:
+      const __m512i vshl4 = _mm512_set1_epi64(0x01020408);
+      XNN_FORCE_REALIZATION(vshl4);
   do {
     $if DATATYPE in ["QD8", "QC4"]:
       const __m512i vksum0123456789ABCDEF = _mm512_load_epi32(w);
@@ -135,15 +132,15 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8__
         $if GFNI:
           const __m512i vb01234567x01234567 = _mm512_gf2p8affine_epi64_epi8(vbb01234567x01234567, vshl4, 0);
           const __m512i vb89ABCDEFx01234567 = _mm512_gf2p8affine_epi64_epi8(vbb89ABCDEFx01234567, vshl4, 0);
-          const __m512i vb01234567x89ABCDEF = _mm512_and_si512(vbb01234567x01234567, vvalue_mask);
-          const __m512i vb89ABCDEFx89ABCDEF = _mm512_and_si512(vbb89ABCDEFx01234567, vvalue_mask);
+          const __m512i vb01234567x89ABCDEF = _mm512_and_si512(vbb01234567x01234567, vmask);
+          const __m512i vb89ABCDEFx89ABCDEF = _mm512_and_si512(vbb89ABCDEFx01234567, vmask);
         $else:
           const __m512i vbs01234567x01234567 = _mm512_slli_epi32(vbb01234567x01234567, 4);
           const __m512i vbs89ABCDEFx01234567 = _mm512_slli_epi32(vbb89ABCDEFx01234567, 4);
-          const __m512i vb01234567x89ABCDEF = _mm512_and_si512(vbb01234567x01234567, vvalue_mask);
-          const __m512i vb89ABCDEFx89ABCDEF = _mm512_and_si512(vbb89ABCDEFx01234567, vvalue_mask);
-          const __m512i vb01234567x01234567 = _mm512_and_si512(vbs01234567x01234567, vvalue_mask);
-          const __m512i vb89ABCDEFx01234567 = _mm512_and_si512(vbs89ABCDEFx01234567, vvalue_mask);
+          const __m512i vb01234567x89ABCDEF = _mm512_and_si512(vbb01234567x01234567, vmask);
+          const __m512i vb89ABCDEFx89ABCDEF = _mm512_and_si512(vbb89ABCDEFx01234567, vmask);
+          const __m512i vb01234567x01234567 = _mm512_and_si512(vbs01234567x01234567, vmask);
+          const __m512i vb89ABCDEFx01234567 = _mm512_and_si512(vbs89ABCDEFx01234567, vmask);
       $else:
         const __m512i vb01234567x01234567 = _mm512_load_si512(w);
         const __m512i vb89ABCDEFx01234567 = _mm512_load_si512((const int8_t*) w + 64);
@@ -217,7 +214,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8__
       const __m512i vsum${M}x89ABCDEF = _mm512_add_epi32(vacc${M}x89ABCDEF, _mm512_srli_epi64(vacc${M}x89ABCDEF, 32));
       __m512i vacc${M}x0123456789ABCDEF = _mm512_permutex2var_epi32(vsum${M}x01234567, vidx, vsum${M}x89ABCDEF);
 
-    $if DATATYPE == "QC4":
+    $if DATATYPE in ["QC4", "QS8_QC4"] and VARIANT != "MADD":
       $for M in range(MR):
         vacc${M}x0123456789ABCDEF = _mm512_srai_epi32(vacc${M}x0123456789ABCDEF, 4);
     $for M in range(MR):
@@ -259,14 +256,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8__
         nc = 0;
       }
     $else:
-      $if DATATYPE == "QC8":
-        const __m512 vscale012345678ABCDEF = _mm512_load_ps(w);
-        w = (const float*) w + 16;
-        $for M in range(MR):
-          vscaled${M}x0123456789ABCDEF = _mm512_mul_ps(vscaled${M}x0123456789ABCDEF, vscale012345678ABCDEF);
-      $else:
-        $for M in range(MR):
-          vscaled${M}x0123456789ABCDEF = _mm512_mul_ps(vscaled${M}x0123456789ABCDEF, vscale);
+      const __m512 vscale012345678ABCDEF = _mm512_load_ps(w);
+      w = (const float*) w + 16;
+      $for M in range(MR):
+        vscaled${M}x0123456789ABCDEF = _mm512_mul_ps(vscaled${M}x0123456789ABCDEF, vscale012345678ABCDEF);
 
       $for M in range(MR):
         vscaled${M}x0123456789ABCDEF = _mm512_min_ps(vscaled${M}x0123456789ABCDEF, voutput_max_less_zero_point);
