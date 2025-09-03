@@ -359,16 +359,13 @@ static inline bool xnn_is_hmp_igemm_ukernel(
 
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_bf16_f32_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f16_gemm_config();
-XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_gemm_config(
-    uint32_t flags);
-XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_gemm_nr2_config(
-    uint32_t flags);
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_gemm_config(uint32_t flags);
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_gemm_nr2_config(uint32_t flags);
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_igemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_qc8w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_qc4w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_pf16_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_pf32_gemm_config();
-XNN_INTERNAL const struct xnn_gemm_config* xnn_init_pqs8_qc8w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_pqs8_qc8w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qd8_f16_qb4w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qd8_f16_qc4w_gemm_config();
@@ -385,8 +382,7 @@ XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qdu8_f16_qc8w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qdu8_f32_qc8w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qdu8_f32_qb4w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qdu8_f16_qc4w_gemm_config();
-XNN_INTERNAL const struct xnn_gemm_config*
-xnn_init_qdu8_f32_qc8w_igemm_config();
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qdu8_f32_qc8w_igemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qs8_qc4w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qs8_qc8w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qu8_gemm_config();
@@ -430,6 +426,46 @@ xnn_init_f32_argmaxpool_config();
 XNN_INTERNAL const struct xnn_lut32norm_config* xnn_init_u8_lut32norm_config();
 
 XNN_INTERNAL const struct xnn_unpool_config* xnn_init_x32_unpool_config();
+
+typedef enum xnn_config_name {
+  xnn_config_name_unknown,
+  xnn_config_name_bf16_f32_gemm,
+  xnn_config_name_f16_gemm,
+  xnn_config_name_f32_gemm,
+  xnn_config_name_f32_gemm_nr2,
+  xnn_config_name_f32_igemm,
+  xnn_config_name_f32_qc8w_gemm,
+  xnn_config_name_f32_qc4w_gemm,
+  xnn_config_name_pf16_gemm,
+  xnn_config_name_pf32_gemm,
+  xnn_config_name_pqs8_qc8w_gemm,
+  xnn_config_name_qd8_f16_qb4w_gemm,
+  xnn_config_name_qd8_f16_qc4w_gemm,
+  xnn_config_name_qd8_f16_qc8w_gemm,
+  xnn_config_name_qd8_f16_qc8w_igemm,
+  xnn_config_name_qd8_f32_qb4w_gemm,
+  xnn_config_name_qd8_f32_qc4w_gemm,
+  xnn_config_name_qd8_f32_qc8w_gemm,
+  xnn_config_name_qp8_f32_qc4w_gemm,
+  xnn_config_name_qp8_f32_qc8w_gemm,
+  xnn_config_name_qp8_f32_qb4w_gemm,
+  xnn_config_name_qdu8_f32_qc4w_gemm,
+  xnn_config_name_qdu8_f16_qc8w_gemm,
+  xnn_config_name_qdu8_f32_qc8w_gemm,
+  xnn_config_name_qdu8_f32_qb4w_gemm,
+  xnn_config_name_qdu8_f16_qc4w_gemm,
+  xnn_config_name_qdu8_f32_qc8w_igemm,
+  xnn_config_name_qs8_qc4w_gemm,
+  xnn_config_name_qs8_qc8w_gemm,
+  xnn_config_name_qu8_gemm,
+} xnn_config_name;
+
+xnn_config_identifier xnn_create_config_identifier(xnn_config_name name,
+                                                   uint32_t version);
+
+xnn_config_name xnn_get_config_name(xnn_config_identifier identifier);
+
+xnn_config_name xnn_get_config_version(xnn_config_identifier identifier);
 
 #ifdef __cplusplus
 }  // extern "C"

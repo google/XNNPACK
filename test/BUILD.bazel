@@ -1021,6 +1021,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "config_test",
+    srcs = ["config.cc"],
+    deps = [
+        "//src/configs:config_types",
+        "//src/configs:microkernel_configs",
+    ],
+)
+
+xnnpack_unit_test(
     name = "weights_cache_test",
     srcs = ["weights-cache.cc"],
     deps = [
