@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <condition_variable>  // NOLINT(build/c++11)
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -51,7 +52,7 @@ namespace {
 static void* wipe_buffer = nullptr;
 static size_t wipe_buffer_size = 0;
 
-static std::once_flag wipe_buffer_guard;
+static std::once_flag wipe_buffer_guard;  // NOLINT(build/c++11)
 
 static void InitWipeBuffer() {
 #if XNN_ENABLE_CPUINFO
@@ -98,11 +99,17 @@ void PthreadpoolClearL2Cache(std::atomic<size_t>* counter, size_t id) {
 #else
   WipeCache();
 #endif  // XNN_ENABLE_CPUINFO
-  // Spin until all threads are done. This ensures that each thread calls this
+  // Wait until all threads are done. This ensures that each thread calls this
   // function exactly once.
-  counter->fetch_sub(1, std::memory_order_acquire);
-  while (counter->load(std::memory_order_acquire) > 0) {
-    std::atomic_thread_fence(std::memory_order_acquire);
+  static std::mutex mutex;  // NOLINT(build/c++11)
+  static std::condition_variable cond_var;
+  std::unique_lock<std::mutex> lock(mutex);  // NOLINT(build/c++11)
+  if (counter->fetch_sub(1) == 1) {
+    cond_var.notify_all();
+  } else {
+    while (counter->load() > 0) {
+      cond_var.wait(lock);
+    }
   }
 }
 
