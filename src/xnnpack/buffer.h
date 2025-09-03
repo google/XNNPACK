@@ -128,6 +128,7 @@ template <typename T>
 T get_reduce_identity(xnn_reduce_operator op) {
   switch (op) {
     case xnn_reduce_sum:
+    case xnn_reduce_sum_squared:
     case xnn_reduce_mean:
       return 0;
     case xnn_reduce_max:

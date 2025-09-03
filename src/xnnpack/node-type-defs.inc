@@ -48,6 +48,7 @@ XNN_ENUM_ITEM(xnn_node_type_static_reshape, "Static Reshape")
 XNN_ENUM_ITEM(xnn_node_type_static_resize_bilinear_2d,
               "Static Resize Bilinear 2D")
 XNN_ENUM_ITEM(xnn_node_type_static_slice, "Static Slice")
+XNN_ENUM_ITEM(xnn_node_type_static_sum_squared, "Static Sum Squared")
 XNN_ENUM_ITEM(xnn_node_type_static_sum, "Static Sum")
 XNN_ENUM_ITEM(xnn_node_type_static_transpose, "Static Transpose")
 XNN_ENUM_ITEM(xnn_node_type_unary_elementwise, "Unary Elementwise")

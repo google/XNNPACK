@@ -2800,6 +2800,8 @@ enum xnn_node_type xnn_reduce_operator_to_node_type(
       return xnn_node_type_static_reduce_min;
     case xnn_reduce_sum:
       return xnn_node_type_static_sum;
+    case xnn_reduce_sum_squared:
+      return xnn_node_type_static_sum_squared;
     default:
       return xnn_node_type_invalid;
   }
@@ -2816,6 +2818,8 @@ enum xnn_reduce_operator xnn_node_type_to_reduce_operator(
       return xnn_reduce_min;
     case xnn_node_type_static_sum:
       return xnn_reduce_sum;
+    case xnn_node_type_static_sum_squared:
+      return xnn_reduce_sum_squared;
     default:
       return xnn_reduce_invalid;
   }

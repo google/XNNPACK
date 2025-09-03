@@ -178,6 +178,7 @@ XNN_ENUM_ITEM(xnn_operator_type_space_to_depth_nhwc_x16,
 XNN_ENUM_ITEM(xnn_operator_type_space_to_depth_nhwc_x32,
               "Space To Depth (NHWC, X32)")
 XNN_ENUM_ITEM(xnn_operator_type_sum_nd, "Sum (ND)")
+XNN_ENUM_ITEM(xnn_operator_type_sum_squared_nd, "Normalize (ND)")
 XNN_ENUM_ITEM(xnn_operator_type_transpose_nd_x8, "Transpose (ND, X8)")
 XNN_ENUM_ITEM(xnn_operator_type_transpose_nd_x16, "Transpose (ND, X16)")
 XNN_ENUM_ITEM(xnn_operator_type_transpose_nd_x32, "Transpose (ND, X32)")
