@@ -1007,35 +1007,34 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
       return false;
     }
     switch (node->type) {
-      case xnn_node_type_average_pooling_2d:
-      case xnn_node_type_batch_matrix_multiply:
       case xnn_node_type_binary_elementwise:
+      case xnn_node_type_unary_elementwise:
+      case xnn_node_type_batch_matrix_multiply:
       case xnn_node_type_concatenate:
       case xnn_node_type_convert:
-      case xnn_node_type_convolution_2d:
+      case xnn_node_type_average_pooling_2d:
       case xnn_node_type_copy:
+      case xnn_node_type_convolution_2d:
       case xnn_node_type_deconvolution_2d:
-      case xnn_node_type_depth_to_space_2d:
       case xnn_node_type_depthwise_convolution_2d:
+      case xnn_node_type_depth_to_space_2d:
       case xnn_node_type_even_split:
       case xnn_node_type_fully_connected:
       case xnn_node_type_global_average_pooling_2d:
       case xnn_node_type_global_sum_pooling_2d:
       case xnn_node_type_max_pooling_2d:
-      case xnn_node_type_rope:
       case xnn_node_type_softmax:
       case xnn_node_type_space_to_depth_2d:
       case xnn_node_type_static_constant_pad:
       case xnn_node_type_static_mean:
-      case xnn_node_type_static_reduce_max:
-      case xnn_node_type_static_reduce_min:
-      case xnn_node_type_static_reshape:
-      case xnn_node_type_static_resize_bilinear_2d:
       case xnn_node_type_static_slice:
       case xnn_node_type_static_sum:
-      case xnn_node_type_static_sum_squared:
+      case xnn_node_type_static_reduce_min:
+      case xnn_node_type_static_reduce_max:
+      case xnn_node_type_static_reshape:
+      case xnn_node_type_static_resize_bilinear_2d:
       case xnn_node_type_static_transpose:
-      case xnn_node_type_unary_elementwise:
+      case xnn_node_type_rope:
         break;
       case xnn_node_type_pack_lh:
         if (xnn_init_x16_pack_lh_config() != NULL) {
@@ -2314,99 +2313,6 @@ static bool convert_gemm_to_qduint8(
   return convert_to_qu8;
 }
 
-enum xnn_status xnn_subgraph_optimize_common_subgraphs(
-    xnn_subgraph_t subgraph, uint32_t optimization_flags) {
-  // If we shouldn't change the numerics, then don't do anything.
-  if (optimization_flags & XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC ||
-      optimization_flags & XNN_FLAG_NO_OPERATOR_FUSION) {
-    return xnn_status_success;
-  }
-
-  // Count the number of changes made.
-  size_t changes = 0;
-
-  // Loop over the nodes in this subgraph.
-  for (uint32_t node_id = 0; node_id < subgraph->num_nodes; node_id++) {
-    struct xnn_node* node = &subgraph->nodes[node_id];
-
-    // Skip anything that is not a fully-connected node.
-    switch (node->type) {
-      case xnn_node_type_binary_elementwise:
-        // Replace `mul(x, x)` with `sqr(x)` for consistency.
-        if (node->binary_operator == xnn_binary_multiply &&
-            node->num_inputs == 2 && node->inputs[0] == node->inputs[1]) {
-          const uint32_t input_id = node->inputs[0];
-          const uint32_t output_id = node->outputs[0];
-          xnn_log_info(
-              "Converting node mul[#%u](v%03u, v%03u) to sqr[#%u](v%03u).",
-              node_id, input_id, input_id, node_id, input_id);
-          node->type = xnn_node_type_invalid;
-          enum xnn_status status = xnn_define_unary(subgraph, xnn_unary_square,
-                                                    /*params=*/NULL, input_id,
-                                                    output_id, node->flags);
-          if (status != xnn_status_success) {
-            xnn_log_error("Failed to create new unary-elementwise node.");
-            return status;
-          }
-          subgraph->nodes[node_id] = subgraph->nodes[--subgraph->num_nodes];
-          subgraph->nodes[node_id].id = node_id;
-          subgraph->values[output_id].producer = node_id;
-          changes++;
-        }
-
-      case xnn_node_type_static_sum:
-        // Convert `reduce_sum(sqr(a))` to `reduce_sum2(a)`.
-        while (true) {
-          struct xnn_value* value_arg = &subgraph->values[node->inputs[0]];
-          if (!(value_arg->datatype == xnn_datatype_fp16 ||
-                value_arg->datatype == xnn_datatype_fp32) ||
-              value_arg->producer == XNN_INVALID_NODE_ID) {
-            break;
-          }
-          struct xnn_node* node_arg = &subgraph->nodes[value_arg->producer];
-          if (node_arg->type != xnn_node_type_unary_elementwise ||
-              node_arg->unary_operator != xnn_unary_square) {
-            break;
-          }
-          const uint32_t output_id = node->outputs[0];
-          int64_t reduction_axes[XNN_MAX_TENSOR_DIMS];
-          memcpy(reduction_axes, node->params.reduce.reduction_axes,
-                 node->params.reduce.num_reduction_axes * sizeof(int64_t));
-          enum xnn_status status = xnn_define_static_reduce_v2(
-              subgraph, xnn_reduce_sum_squared,
-              node->params.reduce.num_reduction_axes,
-              node->params.reduce.reduction_axes, node_arg->inputs[0],
-              output_id, node->flags);
-          if (status != xnn_status_success) {
-            xnn_log_error("Failed to create new `normalize` node.");
-            return status;
-          }
-          subgraph->nodes[node_id] = subgraph->nodes[--subgraph->num_nodes];
-          subgraph->nodes[node_id].id = node_id;
-          subgraph->values[output_id].producer = node_id;
-
-          xnn_log_info(
-              "Converted reduce_sum[#%u](sqr[#%u](v%03u)) to "
-              "reduce_sum2[#%u](v%03u).",
-              node_id, value_arg->producer, node->inputs[0], node_id,
-              node->inputs[0]);
-          changes++;
-          break;
-        }
-        break;
-      default:
-        break;
-    }
-  }
-
-  // Clean up after ourselves.
-  if (changes) {
-    xnn_subgraph_clean_up(subgraph);
-  }
-
-  return xnn_status_success;
-}
-
 enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
                                                  uint32_t optimization_flags) {
   // Count the number of changes made.
@@ -2781,13 +2687,6 @@ enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
     return xnn_status_unsupported_hardware;
   }
 
-  // Apply some common subgraph optimizations.
-  enum xnn_status status =
-      xnn_subgraph_optimize_common_subgraphs(subgraph, optimization_flags);
-  if (status != xnn_status_success) {
-    return status;
-  }
-
   if ((optimization_flags & XNN_FLAG_FORCE_FP16_INFERENCE) &&
       (!xnn_is_f16_compatible_config(hardware_config))) {
     xnn_log_error(
@@ -2837,7 +2736,8 @@ enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
     optimization_flags |= XNN_FLAG_NO_INLINED_LHS_PACKING;
   }
 
-  status = xnn_subgraph_optimize_packed_lhs(subgraph, optimization_flags);
+  enum xnn_status status =
+      xnn_subgraph_optimize_packed_lhs(subgraph, optimization_flags);
   if (status != xnn_status_success) {
     return status;
   }

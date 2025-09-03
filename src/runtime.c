@@ -527,8 +527,7 @@ static enum xnn_status create_runtime_impl(
   const uint32_t optimization_flags =
       XNN_FLAG_HINT_SPARSE_INFERENCE | XNN_FLAG_HINT_FP16_INFERENCE |
       XNN_FLAG_FORCE_FP16_INFERENCE | XNN_FLAG_NO_OPERATOR_FUSION |
-      XNN_FLAG_NO_INLINED_LHS_PACKING | XNN_FLAG_SLINKY_ENABLED |
-      XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC;
+      XNN_FLAG_NO_INLINED_LHS_PACKING | XNN_FLAG_SLINKY_ENABLED;
   status = xnn_subgraph_optimize(subgraph, flags & optimization_flags);
   if (status != xnn_status_success) {
     xnn_log_error("failed to optimize subgraph");
