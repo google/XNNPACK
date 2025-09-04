@@ -96,7 +96,7 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avx256vnni(
 
       int32_t* packed_b = (int32_t*) out;
       if XNN_LIKELY(b != NULL) {
-        const __m256i vb0 = _mm256_loadu_si256((const __m256i*) (b + 0));
+        const __m256i vb0 = _mm256_slli_epi32(_mm256_loadu_si256((const __m256i*) (b + 0)), 4);
         _mm256_storeu_si256((__m256i*) (out + 0), vb0);
         b += 8;
       } else {
@@ -279,7 +279,7 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avx256vnni(
       if XNN_LIKELY(b != NULL) {
         size_t nb = n;
         for (nb = 0; nb < n; ++nb) {
-          ((int32_t*) out)[nb] = b[nb];
+          ((int32_t*) out)[nb] = b[nb] << 4;
         }
         b += n;
       } else {

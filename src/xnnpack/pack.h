@@ -109,7 +109,15 @@ typedef void (*xnn_pack_qs8_qc4w_gemm_fn)(
     void* packed_weights, size_t extra_bytes,
     const struct xnn_qs8_qc4w_packing_params* params);
 
+// 4 bit signed for qd8
 XNN_INTERNAL void xnn_pack_qs8_qc4w_gemm_goi_w(
+    size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
+    const uint8_t* kernel, const int32_t* bias, const float* scale,
+    void* packed_weights, size_t extra_bytes,
+    const struct xnn_qs8_qc4w_packing_params* params);
+
+// 4 bit signed for qs8 vnni
+XNN_INTERNAL void xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w(
     size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
     const uint8_t* kernel, const int32_t* bias, const float* scale,
     void* packed_weights, size_t extra_bytes,

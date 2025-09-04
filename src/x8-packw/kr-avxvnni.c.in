@@ -123,7 +123,10 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" i
         ${BTYPE}* packed_b = (${BTYPE}*) out;
       if XNN_LIKELY(b != NULL) {
         $for N in range(0, NR, 8):
-          const __m256i vb${N} = _mm256_loadu_si256((const __m256i*) (b + ${N}));
+          $if DATATYPE in ["QS4"]:
+            const __m256i vb${N} = _mm256_slli_epi32(_mm256_loadu_si256((const __m256i*) (b + ${N})), 4);
+          $else:
+            const __m256i vb${N} = _mm256_loadu_si256((const __m256i*) (b + ${N}));
         $for N in range(0, NR, 8):
           _mm256_storeu_si256((__m256i*) (out + ${N*4}), vb${N});
         b += ${NR};
@@ -272,7 +275,10 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" i
       if XNN_LIKELY(b != NULL) {
         size_t nb = n;
         for (nb = 0; nb < n; ++nb) {
-          ((${BTYPE}*) out)[nb] = b[nb];
+          $if DATATYPE in ["QS4"]:
+            ((${BTYPE}*) out)[nb] = b[nb] << 4;
+          $else:
+            ((${BTYPE}*) out)[nb] = b[nb];
         }
         b += n;
       } else {

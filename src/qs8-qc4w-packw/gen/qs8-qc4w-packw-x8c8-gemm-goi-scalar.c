@@ -58,7 +58,7 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__scalar(
       size_t n = 0;
       if XNN_LIKELY(b != NULL) {
         while (n < nr_block_size) {
-          packed_b[n] = b[n + nr_block_start];
+          packed_b[n] = b[n + nr_block_start] * 16;
           ++n;
         }
       }
