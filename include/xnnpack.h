@@ -226,6 +226,23 @@ size_t xnn_experimental_get_build_identifier_size();
 /// @returns The size in bytes of the identifier's data.
 bool xnn_experimental_check_build_identifier(const void* data, size_t size);
 
+typedef uint64_t xnn_config_identifier;
+
+struct xnn_config_common_initial_sequence {
+  xnn_config_identifier identifier;
+};
+
+/// Check whether the given configuration matches one that is currently in use.
+///
+/// @returns True if the configuration matches.
+bool xnn_experimental_check_config_version(const struct xnn_config_common_initial_sequence* config);
+
+/// Returns a valid microkernel configuration.
+///
+/// This is useful for consumers of this API that want to test their checks
+/// against kernel configurations.
+const struct xnn_config_common_initial_sequence* xnn_experimental_get_test_config();
+
 /// Subgraph is an abstract representation of a neural network model.
 /// Subgraph objects are used to define Values (tensors) and Nodes (operators) comprising the model.
 typedef struct xnn_subgraph* xnn_subgraph_t;
@@ -2293,6 +2310,11 @@ struct xnn_weights_cache_look_up_key {
   const void* kernel;
   /// Pointer to the original bias, could be NULL.
   const void* bias;
+  /// Pointer to the operation configuration, can be NULL.
+  ///
+  /// If this is set, then the cache is allowed to compare the configuration to
+  /// previous runs and maybe reuse those run results.
+  const struct xnn_config_common_initial_sequence* config;
 };
 
 /// A group of function pointers to manage weights cache. All functions may be

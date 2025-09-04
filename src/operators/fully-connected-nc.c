@@ -202,6 +202,7 @@ static enum xnn_status create_fully_connected_nc(
   cache_key.seed = cache_seed;
   cache_key.kernel = kernel;
   cache_key.bias = bias;
+  cache_key.config = (const struct xnn_config_common_initial_sequence*)gemm_config;
   if (use_weights_cache(fully_connected_op)) {
     cache_offset = xnn_weights_cache_look_up(fully_connected_op->weights_cache,
                                              &cache_key);
