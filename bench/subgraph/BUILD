@@ -10,6 +10,17 @@ load(
     "xnnpack_slow_benchmark_tags",
 )
 
+BENCHMARKS_SLOW = {
+    "attention": True,
+    "depthwise_separable": False,
+    "elementwise": False,
+    "l2_norm": False,
+    "layer_norm": False,
+    "mobilenet": False,
+    "softmax": False,
+    "transformer": True,
+}
+
 xnnpack_cxx_library(
     name = "benchmark",
     srcs = [
@@ -47,98 +58,38 @@ xnnpack_cxx_library(
     ],
 )
 
-xnnpack_benchmark(
-    name = "attention",
-    srcs = ["attention.cc"],
-    tags = xnnpack_slow_benchmark_tags(),
-    deps = [
-        ":benchmark",
-        "//:xnnpack_h",
-        "//bench:bench_utils",
-    ],
-)
-
-xnnpack_benchmark(
-    name = "depthwise_separable",
-    srcs = ["depthwise-separable.cc"],
-    deps = [
-        ":benchmark",
-        "//:xnnpack_h",
-    ],
-)
-
-xnnpack_benchmark(
-    name = "elementwise",
-    srcs = ["elementwise.cc"],
-    deps = [
-        ":benchmark",
-        "//:xnnpack_h",
-    ],
-)
-
-xnnpack_benchmark(
-    name = "l2_norm",
-    srcs = ["l2-norm.cc"],
-    deps = [
-        ":benchmark",
-        "//:xnnpack_h",
-    ],
-)
-
-xnnpack_benchmark(
-    name = "layer_norm",
-    srcs = ["layer-norm.cc"],
-    deps = [
-        ":benchmark",
-        "//:xnnpack_h",
-    ],
-)
-
-xnnpack_benchmark(
-    name = "mobilenet",
-    srcs = ["mobilenet.cc"],
-    deps = [
-        ":benchmark",
-        ":models",
-        "//:xnnpack_h",
-    ],
-)
-
-xnnpack_benchmark(
-    name = "softmax",
-    srcs = ["softmax.cc"],
-    deps = [
-        ":benchmark",
-        "//:xnnpack_h",
-    ],
-)
-
-xnnpack_benchmark(
-    name = "transformer",
-    srcs = ["transformer.cc"],
-    tags = xnnpack_slow_benchmark_tags(),
-    deps = [
-        ":benchmark",
-        ":models",
-        "//:xnnpack_h",
-        "//bench:bench_utils",
-    ],
-)
+[[
+    xnnpack_cxx_library(
+        name = name + "_lib",
+        testonly = 1,
+        srcs = [name.replace("_", "-") + ".cc"],
+        deps = [
+            ":benchmark",
+            ":models",
+            "//:xnnpack_h",
+            "//bench:bench_utils",
+            "@com_google_benchmark//:benchmark",
+        ],
+        alwayslink = True,
+    ),
+    xnnpack_benchmark(
+        name = name,
+        srcs = [],
+        tags = xnnpack_slow_benchmark_tags() if is_slow else None,
+        deps = [
+            ":" + name + "_lib",
+            ":models",
+            "//:xnnpack_h",
+            "//bench:bench_utils",
+        ],
+    ),
+] for name, is_slow in BENCHMARKS_SLOW.items()]
 
 xnnpack_benchmark(
     name = "all_benchmarks",
-    srcs = [
-        "attention.cc",
-        "depthwise-separable.cc",
-        "elementwise.cc",
-        "l2-norm.cc",
-        "layer-norm.cc",
-        "mobilenet.cc",
-        "softmax.cc",
-        "transformer.cc",
-    ],
+    srcs = [],
     tags = xnnpack_slow_benchmark_tags(),
-    deps = [
+    deps = [":" + name + "_lib" for name in BENCHMARKS_SLOW] + [
         ":benchmark",
         ":models",
         "//:xnnpack_h",
