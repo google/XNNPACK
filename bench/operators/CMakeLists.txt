@@ -21,8 +21,8 @@ IF(XNNPACK_BUILD_LIBRARY)
       softmax
       unary)
   FOREACH(BENCH ${LIBRARY_OPERATOR_BENCHMARKS})
-    ADD_EXECUTABLE(${BENCH}-bench ${BENCH}.cc)
-    TARGET_LINK_LIBRARIES(${BENCH}-bench PRIVATE
+    ADD_EXECUTABLE(operator-${BENCH}-bench ${BENCH}.cc)
+    TARGET_LINK_LIBRARIES(operator-${BENCH}-bench PRIVATE
       xnnpack-bench-utils
       benchmark::benchmark
       xnnpack-datatype

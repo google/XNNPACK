@@ -11,8 +11,9 @@
 #include <iostream>
 #include <vector>
 
-#include "bench/subgraph/models.h"
+#include "bench/subgraph/benchmark.h"
 #include "include/xnnpack.h"
+#include <benchmark/benchmark.h>
 
 namespace models {
 
@@ -288,3 +289,36 @@ xnn_subgraph_t FP32Softmax(size_t m, size_t n, size_t k, uint32_t norm_mask,
 }
 
 }  // namespace models
+
+static void FP32SoftmaxDecomp(benchmark::State& state) {
+  xnnpack::RunBenchmark(state, [&state]() {
+    return models::FP32Softmax(state.range(0), state.range(1), state.range(2),
+                       state.range(3), /*use_softmax=*/false);
+  });
+}
+
+static void FP32SoftmaxFused(benchmark::State& state) {
+  xnnpack::RunBenchmark(state, [&state]() {
+    return models::FP32Softmax(state.range(0), state.range(1), state.range(2),
+                       state.range(3), /*use_softmax=*/true);
+  });
+}
+
+static void SoftmaxArguments(benchmark::internal::Benchmark* b) {
+  b->ArgNames({"M", "N", "K", "NormMask"});
+  for (int norm_mask = 1; norm_mask < 8; norm_mask++) {
+    b->Args({128, 256, 512, norm_mask});
+  }
+}
+
+BENCHMARK(FP32SoftmaxDecomp)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime()
+    ->Apply(SoftmaxArguments);
+
+BENCHMARK(FP32SoftmaxFused)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime()
+    ->Apply(SoftmaxArguments);

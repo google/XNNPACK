@@ -13,8 +13,9 @@
 #include <random>
 #include <vector>
 
-#include "bench/subgraph/models.h"
+#include "bench/subgraph/benchmark.h"
 #include "include/xnnpack.h"
+#include <benchmark/benchmark.h>
 
 // align a size up to XNN_EXTRA_BYTES
 #define XNN_PAD_EXTRA_BYTES(s, t) \
@@ -22,6 +23,15 @@
 
 namespace models {
 
+struct FP32DepthwiseSeparableWeights {
+  std::vector<float> w0;
+  std::vector<float> w1;
+  std::vector<float> w2;
+  std::vector<float> w3;
+};
+
+// Depthwise convolution with kernel size kw x kw, followed by a 1x1 conv with
+// ci -> co channels. This is a common pattern in imaging models.
 xnn_subgraph_t FP32DepthwiseSeparable(size_t w, size_t h, size_t kw, size_t ci,
                                       size_t co,
                                       FP32DepthwiseSeparableWeights& weights) {
@@ -157,3 +167,34 @@ xnn_subgraph_t FP32DepthwiseSeparable(size_t w, size_t h, size_t kw, size_t ci,
 }
 
 }  // namespace models
+
+static void FP32DepthwiseSeparable(benchmark::State& state) {
+  models::FP32DepthwiseSeparableWeights weights;
+  xnnpack::RunBenchmark(state, [&state, &weights]() {
+    return models::FP32DepthwiseSeparable(state.range(0), state.range(1),
+                                  state.range(2), state.range(3),
+                                  state.range(4), weights);
+  });
+}
+
+static void DepthwiseSeparableArguments(benchmark::internal::Benchmark* b) {
+  b->ArgNames({"W", "H", "KW", "CI", "CO"});
+
+  // Mobilenet v2-ish
+  b->Args({112, 112, 3, 32, 16});
+  b->Args({56, 56, 3, 96, 24});
+  b->Args({28, 28, 3, 144, 32});
+  b->Args({14, 14, 3, 192, 64});
+  b->Args({14, 14, 3, 384, 96});
+  b->Args({14, 14, 3, 576, 160});
+  b->Args({7, 7, 3, 960, 320});
+
+  // Bigger
+  b->Args({512, 512, 3, 128, 128});
+}
+
+BENCHMARK(FP32DepthwiseSeparable)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime()
+    ->Apply(DepthwiseSeparableArguments);

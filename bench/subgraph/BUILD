@@ -11,21 +11,31 @@ load(
 )
 
 xnnpack_cxx_library(
+    name = "benchmark",
+    srcs = [
+        "benchmark.cc",
+    ],
+    hdrs = [
+        "benchmark.h",
+    ],
+    deps = [
+        "//:XNNPACK",
+        "//:subgraph_h",
+        "//bench:bench_utils",
+        "@com_google_benchmark//:benchmark",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cxx_library(
     name = "models",
     testonly = 1,
     srcs = [
-        "fp32-attention.cc",
-        "fp32-depthwise-separable.cc",
-        "fp32-elementwise.cc",
-        "fp32-l2-norm.cc",
-        "fp32-layer-norm.cc",
         "fp32-mobilenet-v1.cc",
         "fp32-mobilenet-v2.cc",
         "fp32-mobilenet-v3-large.cc",
         "fp32-mobilenet-v3-small.cc",
-        "fp32-softmax.cc",
         "fp32-transformer.cc",
-        "qd8-attention.cc",
         "qd8-transformer.cc",
         "qs8-mobilenet-v2.cc",
     ],
@@ -38,15 +48,79 @@ xnnpack_cxx_library(
 )
 
 xnnpack_benchmark(
-    name = "benchmark",
-    srcs = ["benchmark.cc"],
+    name = "attention",
+    srcs = ["attention.cc"],
     tags = xnnpack_slow_benchmark_tags(),
     deps = [
-        ":models",
-        "//:allocator",
-        "//:subgraph_h",
+        ":benchmark",
         "//:xnnpack_h",
         "//bench:bench_utils",
-        "@pthreadpool",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "depthwise_separable",
+    srcs = ["depthwise-separable.cc"],
+    deps = [
+        ":benchmark",
+        "//:xnnpack_h",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "elementwise",
+    srcs = ["elementwise.cc"],
+    deps = [
+        ":benchmark",
+        "//:xnnpack_h",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "l2_norm",
+    srcs = ["l2-norm.cc"],
+    deps = [
+        ":benchmark",
+        "//:xnnpack_h",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "layer-norm",
+    srcs = ["layer-norm.cc"],
+    deps = [
+        ":benchmark",
+        "//:xnnpack_h",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "mobilenet",
+    srcs = ["mobilenet.cc"],
+    deps = [
+        ":benchmark",
+        ":models",
+        "//:xnnpack_h",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "softmax",
+    srcs = ["softmax.cc"],
+    deps = [
+        ":benchmark",
+        "//:xnnpack_h",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "transformer",
+    srcs = ["transformer.cc"],
+    tags = xnnpack_slow_benchmark_tags(),
+    deps = [
+        ":benchmark",
+        ":models",
+        "//:xnnpack_h",
+        "//bench:bench_utils",
     ],
 )

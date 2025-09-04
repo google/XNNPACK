@@ -10,10 +10,20 @@
 #include <limits>
 #include <vector>
 
+#include "bench/subgraph/benchmark.h"
 #include "include/xnnpack.h"
+#include <benchmark/benchmark.h>
 
 namespace models {
 
+// Compute the L2 norm of [m x n x k] tensors, where the mean
+// is computed over the dimensions in `norm_mask`. This computation is
+// equivalent to: input_mean = mean(input, norm_mask) (input - input_mean) /
+// sqrt(mean(squared_difference(input, input_mean), norm_mask) + epsilon) *
+// weight + bias
+//
+// Where `mean(x, norm_mask)` means computing the mean of the dimensions in the
+// `norm_mask`.
 xnn_subgraph_t FP32L2Norm(size_t m, size_t n, size_t k, uint32_t norm_mask) {
   xnn_status status;
   xnn_subgraph_t subgraph = nullptr;
@@ -121,3 +131,23 @@ xnn_subgraph_t FP32L2Norm(size_t m, size_t n, size_t k, uint32_t norm_mask) {
 }
 
 }  // namespace models
+
+static void FP32L2Norm(benchmark::State& state) {
+  xnnpack::RunBenchmark(state, [&state]() {
+    return models::FP32L2Norm(state.range(0), state.range(1), state.range(2),
+                      state.range(3));
+  });
+}
+
+static void L2NormArguments(benchmark::internal::Benchmark* b) {
+  b->ArgNames({"M", "N", "K", "NormMask"});
+  for (int norm_mask = 1; norm_mask < 8; norm_mask++) {
+    b->Args({128, 256, 512, norm_mask});
+  }
+}
+
+BENCHMARK(FP32L2Norm)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime()
+    ->Apply(L2NormArguments);

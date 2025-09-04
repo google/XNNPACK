@@ -7,9 +7,10 @@
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
-#include <limits>
 
+#include "bench/subgraph/benchmark.h"
 #include "include/xnnpack.h"
+#include <benchmark/benchmark.h>
 
 namespace models {
 
@@ -105,3 +106,21 @@ xnn_subgraph_t FP32Elementwise(size_t batch_size, size_t num_elements,
 }
 
 }  // namespace models
+
+static void FP32Elementwise(benchmark::State& state) {
+  xnnpack::RunBenchmark(state, [&state]() {
+    return models::FP32Elementwise(/*batch_size=*/state.range(0),
+                           /*num_elements=*/state.range(1),
+                           /*depth=*/state.range(2));
+  });
+}
+
+BENCHMARK(FP32Elementwise)
+    ->Unit(benchmark::kMicrosecond)
+    ->MeasureProcessCPUTime()
+    ->UseRealTime()
+    ->ArgNames({"B", "N", "D"})
+    ->Args({1024, 1024, 6})
+    ->Args({1024, 1024, 10})
+    ->Args({1024, 1024, 18})
+    ->Args({1024, 1024, 34});
