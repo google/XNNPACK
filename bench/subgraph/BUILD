@@ -86,7 +86,7 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
-    name = "layer-norm",
+    name = "layer_norm",
     srcs = ["layer-norm.cc"],
     deps = [
         ":benchmark",
@@ -116,6 +116,27 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "transformer",
     srcs = ["transformer.cc"],
+    tags = xnnpack_slow_benchmark_tags(),
+    deps = [
+        ":benchmark",
+        ":models",
+        "//:xnnpack_h",
+        "//bench:bench_utils",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "all_benchmarks",
+    srcs = [
+        "attention.cc",
+        "depthwise-separable.cc",
+        "elementwise.cc",
+        "l2-norm.cc",
+        "layer-norm.cc",
+        "mobilenet.cc",
+        "softmax.cc",
+        "transformer.cc",
+    ],
     tags = xnnpack_slow_benchmark_tags(),
     deps = [
         ":benchmark",
