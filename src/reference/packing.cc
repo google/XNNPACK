@@ -293,29 +293,30 @@ void xnn_pack_qu8_gemm_goi_w(size_t g, size_t nc, size_t kc, size_t nr,
       copy_bias(b, nr_block_start, nr_block_size, packed_b, bzp);
       packed_weights = (int32_t*)packed_weights + nr;
 
-      for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr);
-           kr_block_start += kr) {
-        for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size;
-             nr_block_offset++) {
+      for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size;
+           nr_block_offset++) {
+        for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr);
+             kr_block_start += kr) {
+          uint8_t* w = (uint8_t*)packed_weights + nr_block_offset * kr +
+                       kr_block_start * nr;
           const size_t kc_begin =
               round_down_po2(kr_block_start, skr) +
               ((kr_block_start + nr_block_offset * kr) & (skr - 1));
           const size_t kc_end = std::min(kc, kc_begin + kr);
-          uint8_t* end = (uint8_t*)packed_weights + kr;
+          uint8_t* end = w + kr;
           if (kc_begin < kc_end) {
             int32_t ksum = copy_n_and_sum(
                 &k[(nr_block_start + nr_block_offset) * kc + kc_begin],
-                kc_end - kc_begin, (uint8_t*)packed_weights);
-            packed_weights = (int8_t*)packed_weights + kc_end - kc_begin;
+                kc_end - kc_begin, w);
+            w += kc_end - kc_begin;
             packed_b[nr_block_offset] = packed_b[nr_block_offset] - ksum * izp;
           }
-          std::fill((uint8_t*)packed_weights, end, params->kernel_zero_point);
-          packed_weights = end;
+          std::fill(w, end, params->kernel_zero_point);
         }
-        packed_weights = (uint8_t*)packed_weights + (nr - nr_block_size) * kr;
       }
-      packed_weights =
-          reinterpret_cast<void*>((uintptr_t)packed_weights + extra_bytes);
+      packed_weights = reinterpret_cast<void*>(
+          (uintptr_t)packed_weights + nr_block_size * round_up_po2(kc, skr) +
+          extra_bytes);
     }
     k += nc * kc;
     if XNN_UNPREDICTABLE (b != nullptr) {
@@ -343,29 +344,30 @@ void xnn_pack_qs8_gemm_goi_w(size_t g, size_t nc, size_t kc, size_t nr,
       copy_bias(b, nr_block_start, nr_block_size, packed_b);
       packed_weights = (int32_t*)packed_weights + nr;
 
-      for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr);
-           kr_block_start += kr) {
-        for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size;
-             nr_block_offset++) {
+      for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size;
+           nr_block_offset++) {
+        for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr);
+             kr_block_start += kr) {
+          int8_t* w = (int8_t*)packed_weights + nr_block_offset * kr +
+                      kr_block_start * nr;
           const size_t kc_begin =
               round_down_po2(kr_block_start, skr) +
               ((kr_block_start + nr_block_offset * kr) & (skr - 1));
           const size_t kc_end = std::min(kc, kc_begin + kr);
-          int8_t* end = (int8_t*)packed_weights + kr;
+          int8_t* end = w + kr;
           if (kc_begin < kc_end) {
             uint32_t ksum = copy_n_and_sum(
                 &k[(nr_block_start + nr_block_offset) * kc + kc_begin],
-                kc_end - kc_begin, (int8_t*)packed_weights);
-            packed_weights = (int8_t*)packed_weights + kc_end - kc_begin;
+                kc_end - kc_begin, w);
+            w += kc_end - kc_begin;
             packed_b[nr_block_offset] = packed_b[nr_block_offset] - ksum * izp;
           }
-          std::fill((int8_t*)packed_weights, end, INT8_C(0));
-          packed_weights = end;
+          std::fill(w, end, INT8_C(0));
         }
-        packed_weights = (int8_t*)packed_weights + (nr - nr_block_size) * kr;
       }
-      packed_weights =
-          reinterpret_cast<void*>((uintptr_t)packed_weights + extra_bytes);
+      packed_weights = reinterpret_cast<void*>(
+          (uintptr_t)packed_weights + nr_block_size * round_up_po2(kc, skr) +
+          extra_bytes);
     }
     k += nc * kc;
     if XNN_UNPREDICTABLE (b != nullptr) {
@@ -392,29 +394,30 @@ void xnn_pack_qs8_to_qu8_gemm_goi_w(
       copy_bias(b, nr_block_start, nr_block_size, packed_b);
       packed_weights = (int32_t*)packed_weights + nr;
 
-      for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr);
-           kr_block_start += kr) {
-        for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size;
-             nr_block_offset++) {
+      for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size;
+           nr_block_offset++) {
+        for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr);
+             kr_block_start += kr) {
+          int8_t* w = (int8_t*)packed_weights + nr_block_offset * kr +
+                      kr_block_start * nr;
           const size_t kc_begin =
               round_down_po2(kr_block_start, skr) +
               ((kr_block_start + nr_block_offset * kr) & (skr - 1));
           const size_t kc_end = std::min(kc, kc_begin + kr);
-          int8_t* end = (int8_t*)packed_weights + kr;
+          int8_t* end = w + kr;
           if (kc_begin < kc_end) {
             uint32_t ksum = copy_n_and_sum(
                 &k[(nr_block_start + nr_block_offset) * kc + kc_begin],
-                kc_end - kc_begin, (int8_t*)packed_weights);
-            packed_weights = (int8_t*)packed_weights + kc_end - kc_begin;
+                kc_end - kc_begin, w);
+            w += kc_end - kc_begin;
             packed_b[nr_block_offset] = packed_b[nr_block_offset] - ksum * izp;
           }
-          std::fill((int8_t*)packed_weights, end, INT8_C(0));
-          packed_weights = end;
+          std::fill(w, end, INT8_C(0));
         }
-        packed_weights = (int8_t*)packed_weights + (nr - nr_block_size) * kr;
       }
-      packed_weights =
-          reinterpret_cast<void*>((uintptr_t)packed_weights + extra_bytes);
+      packed_weights = reinterpret_cast<void*>(
+          (uintptr_t)packed_weights + nr_block_size * round_up_po2(kc, skr) +
+          extra_bytes);
     }
     k += nc * kc;
     if XNN_UNPREDICTABLE (b != nullptr) {
