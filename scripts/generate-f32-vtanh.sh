@@ -22,4 +22,9 @@ tools/xngen src/f32-vtanh/rational-9-8.c.in -D ARCH=fma3     -D BATCH_TILES=8,16
 tools/xngen src/f32-vtanh/rational-9-8.c.in -D ARCH=avx512f  -D BATCH_TILES=16,32,48,64  -D DIV=NR  -o src/f32-vtanh/gen/f32-vtanh-avx512f-rational-9-8-nr.c &
 tools/xngen src/f32-vtanh/rational-9-8.c.in -D ARCH=hvx      -D BATCH_TILES=32,64,96,128 -D DIV=NR  -o src/f32-vtanh/gen/f32-vtanh-hvx-rational-9-8-nr.c &
 
+tools/xngen src/f32-vtanh/rvv.c.in -D LMUL=1 -o src/f32-vtanh/gen/f32-vtanh-rvv-tanh-u1v.c &
+tools/xngen src/f32-vtanh/rvv.c.in -D LMUL=2 -o src/f32-vtanh/gen/f32-vtanh-rvv-tanh-u2v.c &
+tools/xngen src/f32-vtanh/rvv.c.in -D LMUL=4 -o src/f32-vtanh/gen/f32-vtanh-rvv-tanh-u4v.c &
+tools/xngen src/f32-vtanh/rvv.c.in -D LMUL=8 -o src/f32-vtanh/gen/f32-vtanh-rvv-tanh-u8v.c &
+
 wait
