@@ -2859,6 +2859,14 @@ uint32_t xnn_subgraph_get_num_external_values(xnn_subgraph_t subgraph) {
   return subgraph->external_value_ids;
 }
 
+uint32_t xnn_subgraph_get_num_nodes(xnn_subgraph_t subgraph) {
+  return subgraph->num_nodes;
+}
+
+uint32_t xnn_subgraph_get_num_values(xnn_subgraph_t subgraph) {
+  return subgraph->num_values;
+}
+
 enum xnn_status xnn_delete_subgraph(xnn_subgraph_t subgraph) {
   if (subgraph != NULL) {
     if (subgraph->nodes != NULL) {

@@ -548,9 +548,13 @@ class SubgraphTester {
     return &subgraph_->nodes[node_id];
   }
 
-  size_t NumNodes() const { return subgraph_->num_nodes; }
+  size_t NumNodes() const {
+    return xnn_subgraph_get_num_nodes(subgraph_.get());
+  }
 
-  size_t NumValues() const { return subgraph_->num_values; }
+  size_t NumValues() const {
+    return xnn_subgraph_get_num_values(subgraph_.get());
+  }
 
   xnn_subgraph* Subgraph() const { return subgraph_.get(); }
 
