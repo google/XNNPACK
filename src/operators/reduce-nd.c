@@ -237,7 +237,8 @@ static enum xnn_status reshape_reduce_nd(
 
     if (reduce_op->reduce_config->update != NULL) {
       float scale = 1.0f;
-      if (reduce_op->type == xnn_operator_type_mean_nd) {
+      if (reduce_op->type == xnn_operator_type_mean_nd ||
+          reduce_op->type == xnn_operator_type_mean_squared_nd) {
         scale = 1.0f / num_reduction_elements;
       }
       reduce_op->reduce_config->update(&reduce_op->params.reduce, scale);
@@ -278,7 +279,8 @@ static enum xnn_status reshape_reduce_nd(
 
     if (reduce_op->reduce_config->update != NULL) {
       float scale = 1.0f;
-      if (reduce_op->type == xnn_operator_type_mean_nd) {
+      if (reduce_op->type == xnn_operator_type_mean_nd ||
+          reduce_op->type == xnn_operator_type_mean_squared_nd) {
         scale = 1.0f / num_reduction_elements;
       }
       reduce_op->reduce_config->update(&reduce_op->params.reduce, scale);
@@ -447,6 +449,7 @@ enum xnn_status xnn_create_reduce_nd(
           reduce_config = xnn_init_f16_f32acc_rsum_config();
           break;
         case xnn_operator_type_sum_squared_nd:
+        case xnn_operator_type_mean_squared_nd:
           reduce_config = xnn_init_f16_f32acc_rsum2_config();
           break;
         case xnn_operator_type_reduce_min_nd:
@@ -476,6 +479,7 @@ enum xnn_status xnn_create_reduce_nd(
           reduce_config = xnn_init_f32_rsum_config();
           break;
         case xnn_operator_type_sum_squared_nd:
+        case xnn_operator_type_mean_squared_nd:
           reduce_config = xnn_init_f32_rsum2_config();
           break;
         case xnn_operator_type_reduce_min_nd:
@@ -604,7 +608,8 @@ enum xnn_status xnn_create_reduce_nd(
   if ((datatype == xnn_datatype_fp16 || datatype == xnn_datatype_fp32) &&
       (reduce_operator_type == xnn_reduce_sum ||
        reduce_operator_type == xnn_reduce_sum_squared ||
-       reduce_operator_type == xnn_reduce_mean)) {
+       reduce_operator_type == xnn_reduce_mean ||
+       reduce_operator_type == xnn_reduce_mean_squared)) {
     (*reduce_op_out)->ukernel.type = xnn_microkernel_type_reduce2;
   }
   return xnn_status_success;

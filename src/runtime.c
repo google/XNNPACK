@@ -451,6 +451,7 @@ void propagate_rank(
       case xnn_node_type_global_sum_pooling_1d:
       case xnn_node_type_global_sum_pooling_2d:
       case xnn_node_type_static_mean:
+      case xnn_node_type_static_mean_squared:
       case xnn_node_type_static_reduce_max:
       case xnn_node_type_static_reduce_min:
       case xnn_node_type_static_sum:

@@ -130,6 +130,7 @@ T get_reduce_identity(xnn_reduce_operator op) {
     case xnn_reduce_sum:
     case xnn_reduce_sum_squared:
     case xnn_reduce_mean:
+    case xnn_reduce_mean_squared:
       return 0;
     case xnn_reduce_max:
       return NumericLimits<T>::max_identity();

@@ -582,6 +582,9 @@ size_t xnn_shape_multiply_leading_dims(const struct xnn_shape* shape,
 size_t xnn_shape_multiply_trailing_dims(const struct xnn_shape* shape,
                                         size_t start_dim);
 
+// The size of the given dimension, which can also be a negative index.
+size_t xnn_shape_get_dim(const struct xnn_shape* shape, int64_t dim);
+
 // Get the size in bytes to hold dynamic quant params
 size_t xnn_tensor_get_dynamic_quant_param_size(enum xnn_datatype datatype,
                                                const struct xnn_shape* shape,

@@ -1470,6 +1470,7 @@ enum xnn_reduce_operator {
   xnn_reduce_sum,
   xnn_reduce_sum_squared,
   xnn_reduce_mean,
+  xnn_reduce_mean_squared,
   xnn_reduce_max,
   xnn_reduce_min,
 };

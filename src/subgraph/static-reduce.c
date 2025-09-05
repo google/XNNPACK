@@ -295,7 +295,8 @@ enum xnn_status xnn_define_static_reduce_v2(
       break;
     case xnn_datatype_qint8:
     case xnn_datatype_quint8:
-      if (reduce_operator == xnn_reduce_sum_squared) {
+      if (reduce_operator == xnn_reduce_sum_squared ||
+          reduce_operator == xnn_reduce_mean_squared) {
         xnn_log_error(
             "failed to define %s operator with the first input ID #%" PRIu32
             ": unsupported Value datatype %s (%d)",

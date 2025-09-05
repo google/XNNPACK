@@ -15,6 +15,7 @@
 #include "include/xnnpack.h"
 #include "src/xnnpack/allocation-type.h"
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/config-types.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/math.h"
@@ -654,6 +655,10 @@ size_t xnn_shape_multiply_trailing_dims(
     product *= shape->dim[i];
   }
   return product;
+}
+
+size_t xnn_shape_get_dim(const struct xnn_shape* shape, int64_t dim) {
+  return dim < 0 ? shape->dim[shape->num_dims + dim] : shape->dim[dim];
 }
 
 size_t get_tensor_size(const struct xnn_gemm_config* gemm_config, enum xnn_value_type type,

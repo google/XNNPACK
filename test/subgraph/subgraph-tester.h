@@ -131,6 +131,11 @@ class SubgraphTester {
     return AddInternalDynamicTensor(shape, xnn_datatype_fp32, id_out, flags);
   }
 
+  SubgraphTester& AddInternalStaticTensor(const TensorShape& shape,
+                                          enum xnn_datatype datatype,
+                                          uint32_t* id_out, const void* data,
+                                          uint32_t flags = 0);
+
   SubgraphTester& AddInternalDynamicallyQuantizedTensor(
       const TensorShape& shape, xnn_datatype datatype, size_t num_nonbatch_dims,
       uint32_t* id_out, uint32_t flags = 0);
