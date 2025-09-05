@@ -358,6 +358,12 @@ void TestSubgraphRewrite(const Param& p) {
         GTEST_SKIP();
         return;
       }
+      if (subgraph.NumNodes() == 0) {
+        // If there are zero nodes, we aren't using XNNPACK's internal
+        // implementation, don't try to use it.
+        GTEST_SKIP();
+        return;
+      }
       ASSERT_GT(subgraph.NumNodes(), 1);
 
       // Reshape the subgraph.
