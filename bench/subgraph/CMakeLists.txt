@@ -31,6 +31,7 @@ IF(XNNPACK_BUILD_LIBRARY)
       attention
       depthwise-separable
       elementwise
+      fully-connected
       layer-norm
       mobilenet
       softmax
