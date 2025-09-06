@@ -15,6 +15,7 @@ BENCHMARKS_SLOW = {
     "depthwise_separable": False,
     "convolution": True,
     "elementwise": False,
+    "fully_connected": True,
     "l2_norm": False,
     "layer_norm": False,
     "mobilenet": False,
@@ -67,6 +68,8 @@ xnnpack_cxx_library(
         deps = [
             ":benchmark",
             ":models",
+            "//:datatype",
+            "//:math",
             "//:xnnpack_h",
             "//bench:bench_utils",
             "@com_google_benchmark//:benchmark",
