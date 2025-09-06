@@ -1,9 +1,15 @@
-// Copyright 2025 Google LLC
+// clang-format off
+// Auto-generated file. Do not edit!
+//   Template: src/qs8-gemm/scalar.c.in
+//   Generator: tools/xngen
+//
+// Copyright 2021 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -15,7 +21,7 @@
 #include "src/xnnpack/unaligned.h"
 
 
-void xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x2__scalar_fmagic(
+void xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x2__scalar_lrintf(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -39,8 +45,7 @@ void xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x2__scalar_fmagic(
   const int32_t output_max_less_zero_point = (int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point;
   const float voutput_min_less_zero_point = output_min_less_zero_point;
   const float voutput_max_less_zero_point = output_max_less_zero_point;
-  const float vmagic_bias = 12582912.0f;
-  const int32_t vmagic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) params->fp32_scalar.output_zero_point;
+  const int32_t voutput_zero_point = params->fp32_scalar.output_zero_point;
 
   kc = round_up_po2(kc, 2);
   do {
@@ -58,8 +63,8 @@ void xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x2__scalar_fmagic(
       const uint8_t vbi1 = ((const uint8_t*) w)[1];
       w = (const uint8_t*) w + 2;
       const int32_t vb0c0 = (int32_t) (int8_t) (vbi0 << 4);
-      const int32_t vb1c0 = (int32_t) (int8_t) (vbi0 & 0xF0);
-      const int32_t vb0c1 = (int32_t) (int8_t) (vbi1 << 4);
+      const int32_t vb0c1 = (int32_t) (int8_t) (vbi0 & 0xF0);
+      const int32_t vb1c0 = (int32_t) (int8_t) (vbi1 << 4);
       const int32_t vb1c1 = (int32_t) (int8_t) (vbi1 & 0xF0);
 
       vacc0x0 += va0c0 * vb0c0;
@@ -83,11 +88,11 @@ void xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x2__scalar_fmagic(
     vfpacc0x0 = math_min_f32(vfpacc0x0, voutput_max_less_zero_point);
     vfpacc0x1 = math_min_f32(vfpacc0x1, voutput_max_less_zero_point);
 
-    vfpacc0x0 += vmagic_bias;
-    vfpacc0x1 += vmagic_bias;
+    const int32_t vrndacc0x0 = math_round_f32_to_s32(vfpacc0x0);
+    const int32_t vrndacc0x1 = math_round_f32_to_s32(vfpacc0x1);
 
-    int32_t vout0x0 = (int32_t) float_as_uint32(vfpacc0x0) - vmagic_bias_less_output_zero_point;
-    int32_t vout0x1 = (int32_t) float_as_uint32(vfpacc0x1) - vmagic_bias_less_output_zero_point;
+    int32_t vout0x0 = vrndacc0x0 + voutput_zero_point;
+    int32_t vout0x1 = vrndacc0x1 + voutput_zero_point;
 
     if XNN_LIKELY(nc >= 2) {
       c0[0] = (int8_t) vout0x0;
