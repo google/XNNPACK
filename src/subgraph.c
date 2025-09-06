@@ -2370,8 +2370,9 @@ enum xnn_status xnn_subgraph_optimize_common_subgraphs(
             xnn_log_error("Failed to create new unary-elementwise node.");
             return status;
           }
-          subgraph->nodes[node_id] = subgraph->nodes[--subgraph->num_nodes];
-          subgraph->nodes[node_id].id = node_id;
+          node = &subgraph->nodes[node_id];
+          *node = subgraph->nodes[--subgraph->num_nodes];
+          node->id = node_id;
           subgraph->values[output_id].producer = node_id;
           changes++;
         }
@@ -2446,9 +2447,9 @@ enum xnn_status xnn_subgraph_optimize_common_subgraphs(
                 "Failed to create new `Sum Squared` or `Mean Squared` node.");
             return status;
           }
-          subgraph->nodes[node_id] = subgraph->nodes[--subgraph->num_nodes];
-          subgraph->nodes[node_id].id = node_id;
-          subgraph->values[output_id].producer = node_id;
+          node = &subgraph->nodes[node_id];
+          *node = subgraph->nodes[--subgraph->num_nodes];
+          node->id = node_id;
 
           xnn_log_info(
               "Converted mul[#%u](reduce_sum%s[#%u](v%03u), v%03u) to "
@@ -2498,9 +2499,9 @@ enum xnn_status xnn_subgraph_optimize_common_subgraphs(
             xnn_log_error("Failed to create new `Sum Squared` node.");
             return status;
           }
-          subgraph->nodes[node_id] = subgraph->nodes[--subgraph->num_nodes];
-          subgraph->nodes[node_id].id = node_id;
-          subgraph->values[output_id].producer = node_id;
+          node = &subgraph->nodes[node_id];
+          *node = subgraph->nodes[--subgraph->num_nodes];
+          node->id = node_id;
 
           xnn_log_info(
               "Converted reduce_%s[#%u](sqr[#%u](v%03u)) to "
