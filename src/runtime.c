@@ -728,7 +728,9 @@ enum xnn_status xnn_create_runtime_with_threadpool(
   xnn_threadpool_t threadpool,
   uint32_t flags,
   xnn_runtime_t* runtime_out) {
-  return create_runtime_impl(subgraph, weights_cache, /*workspace=*/NULL, /*threadpool*/NULL, threadpool, flags, runtime_out);
+  return create_runtime_impl(subgraph, weights_cache, /*workspace=*/NULL,
+                             /*threadpool*/ NULL, threadpool, flags,
+                             runtime_out);
 }
 
 #ifndef XNN_SLINKY_AVAILABLE
