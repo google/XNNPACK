@@ -37,6 +37,7 @@ xnnpack_cxx_library(
         "@com_google_benchmark//:benchmark",
         "@pthreadpool",
     ],
+    alwayslink = True,
 )
 
 xnnpack_cxx_library(
