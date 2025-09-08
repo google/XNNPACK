@@ -1,4 +1,10 @@
+// Copyright 2025 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
 #include <stddef.h>
+#include <stdio.h>
 
 #include "src/xnnpack/microparams.h"
 
@@ -33,17 +39,15 @@ size_t xnn_pf16_f16_igemm_minmax_fp16_ukernel_32x32c2__neonsme2_get_nr(void) {
 
 void xnn_pf16_f16_igemm_minmax_fp16_ukernel_32x32c2__neonsme2(
     size_t mr, size_t nc, size_t kc, size_t ks, const void* packed_lhs,
-    const void* restrict w, float* restrict c, size_t cm_stride,
+    const void* restrict w, xnn_float16* restrict c, size_t cm_stride,
     const struct xnn_f16_minmax_params* params) {
-
 #if XNN_ENABLE_KLEIDIAI
   const size_t kai_kr = 2;
   const size_t k = ks * round_up(kc, kai_kr);
 
   kai_run_matmul_clamp_f16_f16p2vlx2_f16p2vlx2_2vlx2vl_sme2_mopa(
-      mr, nc, k, packed_lhs, w, c,
-      cm_stride, sizeof(xnn_float16),
-      xnn_float16_to_float(params->scalar.min),
+      mr, nc, k, packed_lhs, w, c, cm_stride * sizeof(xnn_float16),
+      sizeof(xnn_float16), xnn_float16_to_float(params->scalar.min),
       xnn_float16_to_float(params->scalar.max));
 #else
   assert(

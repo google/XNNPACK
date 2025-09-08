@@ -8,6 +8,7 @@
 #ifndef XNNPACK_SRC_XNNPACK_INTERNAL_H_
 #define XNNPACK_SRC_XNNPACK_INTERNAL_H_
 
+#include <pthreadpool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -15,7 +16,6 @@
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/subgraph.h"
-#include <pthreadpool.h>
 
 // Runtime values marked with this flag should be cleaned up (i.e. deallocated)
 // by the runtime.
@@ -577,9 +577,10 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_pf16(
     size_t input_width, size_t* workspace_size, size_t* output_height_out,
     size_t* output_width_out, pthreadpool_t threadpool);
 
-enum xnn_status xnn_setup_convolution2d_nhwc_pf16(
-    xnn_operator_t convolution_op, void* workspace, const void* input,
-    void* output);
+enum xnn_status xnn_setup_convolution2d_nhwc_pf16(xnn_operator_t convolution_op,
+                                                  void* workspace,
+                                                  const void* input,
+                                                  void* output);
 
 enum xnn_status xnn_create_convolution2d_nhwc_pqs8_qs8_qc8w(
     uint32_t input_padding_top, uint32_t input_padding_right,
