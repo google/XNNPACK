@@ -10,16 +10,17 @@ load(
     "xnnpack_slow_benchmark_tags",
 )
 
-BENCHMARKS_SLOW = {
-    "attention": True,
-    "depthwise_separable": False,
-    "convolution": True,
-    "elementwise": False,
-    "l2_norm": False,
-    "layer_norm": False,
-    "mobilenet": False,
-    "softmax": False,
-    "transformer": True,
+BENCHMARKS_SLOW_LARGE = {
+    "attention": (True, False),
+    "depthwise_separable": (False, False),
+    "convolution": (True, False),
+    "elementwise": (False, False),
+    "fully_connected": (True, True),
+    "l2_norm": (False, False),
+    "layer_norm": (False, False),
+    "mobilenet": (False, False),
+    "softmax": (False, False),
+    "transformer": (True, False),
 }
 
 xnnpack_cxx_library(
@@ -68,6 +69,8 @@ xnnpack_cxx_library(
         deps = [
             ":benchmark",
             ":models",
+            "//:datatype",
+            "//:math",
             "//:xnnpack_h",
             "//bench:bench_utils",
             "@com_google_benchmark//:benchmark",
@@ -85,13 +88,17 @@ xnnpack_cxx_library(
             "//bench:bench_utils",
         ],
     ),
-] for name, is_slow in BENCHMARKS_SLOW.items()]
+] for name, (is_slow, is_large) in BENCHMARKS_SLOW_LARGE.items()]
 
 xnnpack_benchmark(
     name = "all_benchmarks",
     srcs = [],
     tags = xnnpack_slow_benchmark_tags(),
-    deps = [":" + name + "_lib" for name in BENCHMARKS_SLOW] + [
+    deps = [
+        ":" + name + "_lib"
+        for name, (is_slow, is_large) in BENCHMARKS_SLOW_LARGE.items()
+        if not is_large
+    ] + [
         ":benchmark",
         ":models",
         "//:xnnpack_h",
