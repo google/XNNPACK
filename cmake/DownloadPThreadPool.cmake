@@ -18,8 +18,8 @@ ENDIF()
 # LINT.IfChange
 INCLUDE(ExternalProject)
 ExternalProject_Add(pthreadpool
-  URL https://github.com/google/pthreadpool/archive/995229919303dd98c0f1b3b585b54527067ef893.zip
-  URL_HASH SHA256=d5a78b017839ee0474e6aef6e21742b03f641b260f29faf9538a0a6b8fae0704
+  URL https://github.com/google/pthreadpool/archive/3c39478e76e25e450c0a78dd140ade23ea8e24df.zip
+  URL_HASH SHA256=acfb0828682b29c6258f91133906671f593a296a26d888fc76f154989d962c6f
   SOURCE_DIR "${CMAKE_BINARY_DIR}/pthreadpool-source"
   BINARY_DIR "${CMAKE_BINARY_DIR}/pthreadpool"
   CONFIGURE_COMMAND ""
