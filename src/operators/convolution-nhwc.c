@@ -1882,13 +1882,14 @@ static enum xnn_status reshape_igemm(
             .dilation_width = convolution_op->convolution_op->dilation_width,
             .input_padding_top = convolution_op->convolution_op->padding_top,
             .input_padding_left = convolution_op->convolution_op->padding_left,
+            .mr = mr,
         };
 
-    indirection_compute->type = xnn_parallelization_type_1d_tile_1d;
+    indirection_compute->type = xnn_parallelization_type_1d_tile_1d_dynamic;
     indirection_compute->context_offset =
         offsetof(struct igemm_op_context, conv2d_igemm_indirection_init);
-    indirection_compute->task_1d_tile_1d =
-        (pthreadpool_task_1d_tile_1d_t)xnn_compute_conv2d_igemm_indirection;
+    indirection_compute->task_1d_tile_1d_dynamic =
+        (pthreadpool_task_1d_tile_1d_dynamic_t)xnn_compute_conv2d_igemm_indirection;
     indirection_compute->range[0] = tiled_output_size;
     indirection_compute->tile[0] = mr;
   } else {
@@ -2279,20 +2280,14 @@ static enum xnn_status reshape_dwconv(
             .tile_size = primary_tile,
         };
 
-    convolution_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
+    convolution_op->compute[0].type = xnn_parallelization_type_1d_tile_1d_dynamic;
     convolution_op->compute[0].context_offset =
         offsetof(struct dwconv_op_context, dwconv_indirection_init);
-    convolution_op->compute[0].task_1d_tile_1d =
-        (pthreadpool_task_1d_tile_1d_t)xnn_compute_dwconv_indirection;
+    convolution_op->compute[0].task_1d_tile_1d_dynamic =
+        (pthreadpool_task_1d_tile_1d_dynamic_t)xnn_compute_dwconv_indirection;
     convolution_op->compute[0].range[0] = output_height;
+    convolution_op->compute[0].tile[0] = 1;
 
-    if (num_threads > 1) {
-      const size_t target_tiles_per_thread = 5;
-      convolution_op->compute[0].tile[0] =
-          divide_round_up(output_height, num_threads * target_tiles_per_thread);
-    } else {
-      convolution_op->compute[0].tile[0] = output_height;
-    }
   } else {
     dwconv_compute_index = 0;
 
@@ -2403,9 +2398,9 @@ static enum xnn_status reshape_dwconv(
   convolution_op->compute[dwconv_compute_index].tile[0] =
       max(tile_size, channel_tile);
   convolution_op->compute[dwconv_compute_index].type =
-      xnn_parallelization_type_3d_tile_1d;
-  convolution_op->compute[dwconv_compute_index].task_3d_tile_1d =
-      (pthreadpool_task_3d_tile_1d_t)xnn_compute_dwconv_unipass;
+      xnn_parallelization_type_3d_tile_1d_dynamic;
+  convolution_op->compute[dwconv_compute_index].task_3d_tile_1d_dynamic =
+      (pthreadpool_task_3d_tile_1d_dynamic_t)xnn_compute_dwconv_unipass;
   convolution_op->dynamic_context.dwconv->dwconv.ukernel =
       convolution_op->ukernel.dwconv.ukernel;
 
@@ -2446,9 +2441,9 @@ static enum xnn_status reshape_vmulcaddc(xnn_operator_t convolution_op,
     }
   }
 
-  convolution_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
-  convolution_op->compute[0].task_1d_tile_1d =
-      (pthreadpool_task_1d_tile_1d_t)xnn_compute_vmulcaddc;
+  convolution_op->compute[0].type = xnn_parallelization_type_1d_tile_1d_dynamic;
+  convolution_op->compute[0].task_1d_tile_1d_dynamic =
+      (pthreadpool_task_1d_tile_1d_dynamic_t)xnn_compute_vmulcaddc;
   convolution_op->compute[0].range[0] = batch_output_size;
   convolution_op->compute[0].tile[0] = mc;
   convolution_op->state = xnn_run_state_needs_setup;
