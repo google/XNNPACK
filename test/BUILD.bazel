@@ -381,6 +381,17 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "pf16_f16_igemm_minmax_test",
+    srcs = [
+        "pf16-f16-igemm-minmax.cc",
+    ],
+    defines = xnnpack_kleidiai_defines(),
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
     name = "f16_f32acc_igemm_minmax_test",
     srcs = [
         "f16-f32acc-igemm-minmax.cc",

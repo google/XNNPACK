@@ -73,8 +73,8 @@ extern "C" {
   XNN_INTERNAL size_t igemm_packed_offset_fn(                                 \
       size_t m, size_t kc, size_t ks, size_t mr_packed, size_t kr, size_t sr);
 
-#include "src/x8-pack-lh/x8-pack-lh-igemm.inc"
 #include "src/x16-pack-lh/x16-pack-lh-igemm.inc"
+#include "src/x8-pack-lh/x8-pack-lh-igemm.inc"
 
 #undef XNN_UKERNEL
 

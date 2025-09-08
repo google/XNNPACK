@@ -1,3 +1,9 @@
+// clang-format off
+// Copyright 2025 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
 // arch_flags, igemm_ukernel, igemm_size_fn, igemm_packed_offset_fn
 
 #if XNN_ENABLE_KLEIDIAI
