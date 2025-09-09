@@ -1704,9 +1704,8 @@ void xnn_compute_univector_contiguous(
 
 void xnn_compute_contiguous_reduce(
     struct reduce_context* restrict context, size_t output_idx0,
-    size_t output_idx1, size_t output_idx2, size_t output1_block_size,
+    size_t output_idx1, size_t output_idx2, 
     size_t output2_block_size) {
-  assert(output1_block_size == 1);
   const size_t* input_stride = context->input_stride;
   const size_t* output_stride = context->output_stride;
 
@@ -1784,9 +1783,7 @@ void xnn_compute_contiguous_reduce(
 void xnn_compute_discontiguous_reduce(struct reduce_context* restrict context,
                                       size_t output_idx0, size_t output_idx1,
                                       size_t output_idx2,
-                                      size_t output1_block_size,
                                       size_t output2_block_size) {
-  assert(output1_block_size == 1);
   const size_t* input_stride = context->input_stride;
   const size_t* output_stride = context->output_stride;
 

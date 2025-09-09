@@ -1153,13 +1153,13 @@ struct reduce_context {
 // input tensor.
 XNN_PRIVATE void xnn_compute_contiguous_reduce(
     struct reduce_context* context, size_t output_idx0, size_t output_idx1,
-    size_t output_idx2, size_t output1_block_size, size_t output2_block_size);
+    size_t output_idx2, size_t output2_block_size);
 
 // Compute discontiguous reduction over the 0st, 2rd and 4th dimensions of the
 // input tensor.
 XNN_PRIVATE void xnn_compute_discontiguous_reduce(
     struct reduce_context* context, size_t output_idx0, size_t output_idx1,
-    size_t output_idx2, size_t output1_block_size, size_t output2_block_size);
+    size_t output_idx2, size_t output2_block_size);
 
 struct vmulcaddc_context {
   size_t n;

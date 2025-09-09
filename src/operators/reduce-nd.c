@@ -215,8 +215,8 @@ static enum xnn_status reshape_reduce_nd(
     normalized_input_shape[i] = 1;
   }
   const uint32_t log2_data_element_size = reduce_op->reduce.log2_data_element_size;
-  const uint32_t log2_accumulator_element_size = reduce_op->reduce.log2_accumulator_element_size;
-  reduce_op->compute[0].type = xnn_parallelization_type_3d_tile_2d;
+  const uint32_t log2_accumulator_element_size =
+      reduce_op->reduce.log2_accumulator_element_size;
   const bool is_old_reduce =
       reduce_op->ukernel.type != xnn_microkernel_type_reduce2;
   reduce_op->ukernel.type = is_old_reduce
@@ -257,12 +257,13 @@ static enum xnn_status reshape_reduce_nd(
       reduce_op->dynamic_context.reduce->fill_ukernel = reduce_op->fill_config->ukernel;
     }
 
-    reduce_op->compute[0].task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_contiguous_reduce;
+    reduce_op->compute[0].type = xnn_parallelization_type_3d_tile_1d_dynamic;
+    reduce_op->compute[0].task_3d_tile_1d_dynamic =
+        (pthreadpool_task_3d_tile_1d_dynamic_t)xnn_compute_contiguous_reduce;
     reduce_op->compute[0].range[0] = normalized_input_shape[0];
     reduce_op->compute[0].range[1] = normalized_input_shape[2];
     reduce_op->compute[0].range[2] = normalized_input_shape[4];
-    reduce_op->compute[0].tile[0] = 1;
-    reduce_op->compute[0].tile[1] = 2;
+    reduce_op->compute[0].tile[0] = 2;
     reduce_op->dynamic_context.reduce->output_stride[XNN_MAX_TENSOR_DIMS / 2 - 1] = 1;
     for (int i = XNN_MAX_TENSOR_DIMS / 2 -  2; i >= 0; --i) {
       reduce_op->dynamic_context.reduce->output_stride[i] = (reduce_op->dynamic_context.reduce->output_stride[i + 1] * normalized_input_shape[(i + 1) * 2]);
@@ -326,12 +327,13 @@ static enum xnn_status reshape_reduce_nd(
       reduce_op->dynamic_context.reduce->fill_ukernel = reduce_op->fill_config->ukernel;
     }
 
-    reduce_op->compute[0].task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_discontiguous_reduce;
+    reduce_op->compute[0].type = xnn_parallelization_type_3d_tile_1d_dynamic;
+    reduce_op->compute[0].task_3d_tile_1d_dynamic =
+        (pthreadpool_task_3d_tile_1d_dynamic_t)xnn_compute_discontiguous_reduce;
     reduce_op->compute[0].range[0] = normalized_input_shape[1];
     reduce_op->compute[0].range[1] = normalized_input_shape[3];
     reduce_op->compute[0].range[2] = normalized_input_shape[5];
     reduce_op->compute[0].tile[0] = 1;
-    reduce_op->compute[0].tile[1] = normalized_input_shape[5];
     reduce_op->dynamic_context.reduce->output_stride[XNN_MAX_TENSOR_DIMS / 2 - 1] = 1;
     for (int i = XNN_MAX_TENSOR_DIMS / 2 -  2; i >= 0; --i) {
       reduce_op->dynamic_context.reduce->output_stride[i] = (reduce_op->dynamic_context.reduce->output_stride[i + 1] * normalized_input_shape[(i * 2+3)]);
