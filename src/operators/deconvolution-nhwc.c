@@ -1694,10 +1694,11 @@ static enum xnn_status reshape_subconv2d_path(
   size_t igemm_compute_index = 0;
   if (dynamic_quantization) {
     deconvolution_op->compute[igemm_compute_index].type =
-        xnn_parallelization_type_1d;
-    deconvolution_op->compute[igemm_compute_index].task_1d =
-        (pthreadpool_task_1d_t)xnn_compute_dq_zero_buffer_subconv;
+        xnn_parallelization_type_1d_tile_1d_dynamic;
+    deconvolution_op->compute[igemm_compute_index].task_1d_tile_1d_dynamic =
+        (pthreadpool_task_1d_tile_1d_dynamic_t)xnn_compute_dq_zero_buffer_subconv;
     deconvolution_op->compute[igemm_compute_index].range[0] = batch_size;
+    deconvolution_op->compute[igemm_compute_index].tile[0] = 1;
     ++igemm_compute_index;
   }
   if (groups == 1) {

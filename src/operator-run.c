@@ -770,10 +770,13 @@ void xnn_compute_dq_zero_buffer_igemm(struct igemm_context* restrict context,
 }
 
 void xnn_compute_dq_zero_buffer_subconv(
-    struct subconv_context* restrict context, size_t batch_index) {
-  memset(context->zero_buffers[batch_index],
-         context->quantization_params[batch_index].zero_point,
-         context->zero_size);
+    struct subconv_context* restrict context, size_t batch_index,
+    size_t batch_size) {
+  for (size_t k = 0; k < batch_size; k++) {
+    memset(context->zero_buffers[batch_index + k],
+           context->quantization_params[batch_index + k].zero_point,
+           context->zero_size);
+  }
 }
 
 void xnn_compute_grouped_batch_dqigemm(struct igemm_context* restrict context,
@@ -1041,14 +1044,20 @@ void xnn_compute_dqigemm(struct igemm_context* restrict context,
 void xnn_compute_conv2d_igemm_indirection(
     struct conv2d_igemm_indirection_init_context* restrict context,
     size_t output_tile_start, size_t output_tile_size) {
-  xnn_indirection_init_conv2d(
-      output_tile_size, output_tile_start, output_tile_start + output_tile_size,
-      context->indirection_buffer, context->input, context->zero_buffer,
-      context->input_pixel_stride, context->input_height, context->input_width,
-      context->output_height, context->output_width, context->kernel_height,
-      context->kernel_width, context->stride_height, context->stride_width,
-      context->dilation_height, context->dilation_width,
-      context->input_padding_top, context->input_padding_left);
+  while (output_tile_size > 0) {
+    const size_t mr_step = min(output_tile_size, context->mr);
+    xnn_indirection_init_conv2d(
+        mr_step, output_tile_start, output_tile_start + mr_step,
+        context->indirection_buffer, context->input, context->zero_buffer,
+        context->input_pixel_stride, context->input_height,
+        context->input_width, context->output_height, context->output_width,
+        context->kernel_height, context->kernel_width, context->stride_height,
+        context->stride_width, context->dilation_height,
+        context->dilation_width, context->input_padding_top,
+        context->input_padding_left);
+    output_tile_size -= mr_step;
+    output_tile_start += mr_step;
+  }
 }
 
 void xnn_compute_grouped_subgemm2d(struct subgemm_context* restrict context,
@@ -2493,6 +2502,16 @@ enum xnn_status xnn_run_operator_with_index(xnn_operator_t op,
         pthreadpool_parallelize_3d_tile_1d(
             threadpool, compute->task_3d_tile_1d, context, compute->range[0],
             compute->range[1], compute->range[2], compute->tile[0], flags);
+        break;
+      case xnn_parallelization_type_3d_tile_1d_dynamic:
+        assert(compute->range[0] != 0);
+        assert(compute->range[1] != 0);
+        assert(compute->range[2] != 0);
+        assert(compute->tile[0] != 0);
+        pthreadpool_parallelize_3d_tile_1d_dynamic(
+            threadpool, compute->task_3d_tile_1d_dynamic, context,
+            compute->range[0], compute->range[1], compute->range[2],
+            compute->tile[0], flags);
         break;
       case xnn_parallelization_type_3d_tile_1d_with_thread:
         assert(compute->range[0] != 0);
