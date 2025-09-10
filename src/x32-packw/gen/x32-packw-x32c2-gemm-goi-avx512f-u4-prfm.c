@@ -43,6 +43,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x32c2__avx512f_u4_prfm(
   assert(sr == 1);
   assert(weights != NULL);
   assert(packed_weights != NULL);
+  assert((intptr_t)packed_weights % 64 == 0);  // Alignment requirement for `_mm512_stream_ps`.
 
   const float* b = (const float*) bias;
   float* packed_w = (float*) packed_weights;
@@ -55,13 +56,13 @@ void xnn_x32_packw_gemm_goi_ukernel_x32c2__avx512f_u4_prfm(
       if XNN_LIKELY(b != NULL) {
         const __m512 vb0 = _mm512_loadu_ps(b);
         const __m512 vb16 = _mm512_loadu_ps(b + 16);
-        _mm512_store_ps(packed_w, vb0);
-        _mm512_store_ps(packed_w + 16, vb16);
+        _mm512_stream_ps(packed_w, vb0);
+        _mm512_stream_ps(packed_w + 16, vb16);
         b += 32;
       } else {
         const __m512 vzero = _mm512_setzero_ps();
-        _mm512_store_ps(packed_w, vzero);
-        _mm512_store_ps(packed_w + 16, vzero);
+        _mm512_stream_ps(packed_w, vzero);
+        _mm512_stream_ps(packed_w + 16, vzero);
       }
       packed_w += 32;
 
@@ -274,14 +275,14 @@ void xnn_x32_packw_gemm_goi_ukernel_x32c2__avx512f_u4_prfm(
         xnn_prefetch_to_l1((const int8_t*) w30 + 128);
         xnn_prefetch_to_l1((const int8_t*) w31 + 128);
 
-        _mm512_store_ps(packed_w, vres0x0123);
-        _mm512_store_ps(packed_w + 16, vres16x0123);
-        _mm512_store_ps(packed_w + 32, vres32x0123);
-        _mm512_store_ps(packed_w + 48, vres48x0123);
-        _mm512_store_ps(packed_w + 64, vres64x0123);
-        _mm512_store_ps(packed_w + 80, vres80x0123);
-        _mm512_store_ps(packed_w + 96, vres96x0123);
-        _mm512_store_ps(packed_w + 112, vres112x0123);
+        _mm512_stream_ps(packed_w, vres0x0123);
+        _mm512_stream_ps(packed_w + 16, vres16x0123);
+        _mm512_stream_ps(packed_w + 32, vres32x0123);
+        _mm512_stream_ps(packed_w + 48, vres48x0123);
+        _mm512_stream_ps(packed_w + 64, vres64x0123);
+        _mm512_stream_ps(packed_w + 80, vres80x0123);
+        _mm512_stream_ps(packed_w + 96, vres96x0123);
+        _mm512_stream_ps(packed_w + 112, vres112x0123);
         packed_w += 128;
       }
 
@@ -381,22 +382,22 @@ void xnn_x32_packw_gemm_goi_ukernel_x32c2__avx512f_u4_prfm(
           const __m128 vres14 = _mm_castpd_ps(_mm_unpacklo_pd(_mm_castps_pd(v28), _mm_castps_pd(v29)));
           const __m128 vres15 = _mm_castpd_ps(_mm_unpacklo_pd(_mm_castps_pd(v30), _mm_castps_pd(v31)));
 
-          _mm_store_ps(packed_w, vres0);
-          _mm_store_ps(packed_w + 4, vres1);
-          _mm_store_ps(packed_w + 8, vres2);
-          _mm_store_ps(packed_w + 12, vres3);
-          _mm_store_ps(packed_w + 16, vres4);
-          _mm_store_ps(packed_w + 20, vres5);
-          _mm_store_ps(packed_w + 24, vres6);
-          _mm_store_ps(packed_w + 28, vres7);
-          _mm_store_ps(packed_w + 32, vres8);
-          _mm_store_ps(packed_w + 36, vres9);
-          _mm_store_ps(packed_w + 40, vres10);
-          _mm_store_ps(packed_w + 44, vres11);
-          _mm_store_ps(packed_w + 48, vres12);
-          _mm_store_ps(packed_w + 52, vres13);
-          _mm_store_ps(packed_w + 56, vres14);
-          _mm_store_ps(packed_w + 60, vres15);
+          _mm_stream_ps(packed_w, vres0);
+          _mm_stream_ps(packed_w + 4, vres1);
+          _mm_stream_ps(packed_w + 8, vres2);
+          _mm_stream_ps(packed_w + 12, vres3);
+          _mm_stream_ps(packed_w + 16, vres4);
+          _mm_stream_ps(packed_w + 20, vres5);
+          _mm_stream_ps(packed_w + 24, vres6);
+          _mm_stream_ps(packed_w + 28, vres7);
+          _mm_stream_ps(packed_w + 32, vres8);
+          _mm_stream_ps(packed_w + 36, vres9);
+          _mm_stream_ps(packed_w + 40, vres10);
+          _mm_stream_ps(packed_w + 44, vres11);
+          _mm_stream_ps(packed_w + 48, vres12);
+          _mm_stream_ps(packed_w + 52, vres13);
+          _mm_stream_ps(packed_w + 56, vres14);
+          _mm_stream_ps(packed_w + 60, vres15);
           packed_w += 64;
         }
         if (k & 1) {
@@ -499,22 +500,22 @@ void xnn_x32_packw_gemm_goi_ukernel_x32c2__avx512f_u4_prfm(
           // Transpose 2x2
           const __m128 vres15 = _mm_castpd_ps(_mm_unpacklo_pd(_mm_castps_pd(v30), _mm_castps_pd(v31)));  // a b  from row 0, 1
 
-          _mm_store_ps(packed_w, vres0);
-          _mm_store_ps(packed_w + 4, vres1);
-          _mm_store_ps(packed_w + 8, vres2);
-          _mm_store_ps(packed_w + 12, vres3);
-          _mm_store_ps(packed_w + 16, vres4);
-          _mm_store_ps(packed_w + 20, vres5);
-          _mm_store_ps(packed_w + 24, vres6);
-          _mm_store_ps(packed_w + 28, vres7);
-          _mm_store_ps(packed_w + 32, vres8);
-          _mm_store_ps(packed_w + 36, vres9);
-          _mm_store_ps(packed_w + 40, vres10);
-          _mm_store_ps(packed_w + 44, vres11);
-          _mm_store_ps(packed_w + 48, vres12);
-          _mm_store_ps(packed_w + 52, vres13);
-          _mm_store_ps(packed_w + 56, vres14);
-          _mm_store_ps(packed_w + 60, vres15);
+          _mm_stream_ps(packed_w, vres0);
+          _mm_stream_ps(packed_w + 4, vres1);
+          _mm_stream_ps(packed_w + 8, vres2);
+          _mm_stream_ps(packed_w + 12, vres3);
+          _mm_stream_ps(packed_w + 16, vres4);
+          _mm_stream_ps(packed_w + 20, vres5);
+          _mm_stream_ps(packed_w + 24, vres6);
+          _mm_stream_ps(packed_w + 28, vres7);
+          _mm_stream_ps(packed_w + 32, vres8);
+          _mm_stream_ps(packed_w + 36, vres9);
+          _mm_stream_ps(packed_w + 40, vres10);
+          _mm_stream_ps(packed_w + 44, vres11);
+          _mm_stream_ps(packed_w + 48, vres12);
+          _mm_stream_ps(packed_w + 52, vres13);
+          _mm_stream_ps(packed_w + 56, vres14);
+          _mm_stream_ps(packed_w + 60, vres15);
           packed_w += 32 * 2;
         }
       }
@@ -534,8 +535,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x32c2__avx512f_u4_prfm(
         packed_w += (32 - n);
       } else {
         const __m512 vzero = _mm512_setzero_ps();
-        _mm512_store_ps(packed_w, vzero);
-        _mm512_store_ps(packed_w + 16, vzero);
+        _mm512_stream_ps(packed_w, vzero);
+        _mm512_stream_ps(packed_w + 16, vzero);
         packed_w += 32;
       }
 
@@ -772,14 +773,14 @@ void xnn_x32_packw_gemm_goi_ukernel_x32c2__avx512f_u4_prfm(
         xnn_prefetch_to_l1((const int8_t*) w29 + 128);
         xnn_prefetch_to_l1((const int8_t*) w30 + 128);
 
-        _mm512_store_ps(packed_w, vres0x0123);
-        _mm512_store_ps(packed_w + 16, vres16x0123);
-        _mm512_store_ps(packed_w + 32, vres32x0123);
-        _mm512_store_ps(packed_w + 48, vres48x0123);
-        _mm512_store_ps(packed_w + 64, vres64x0123);
-        _mm512_store_ps(packed_w + 80, vres80x0123);
-        _mm512_store_ps(packed_w + 96, vres96x0123);
-        _mm512_store_ps(packed_w + 112, vres112x0123);
+        _mm512_stream_ps(packed_w, vres0x0123);
+        _mm512_stream_ps(packed_w + 16, vres16x0123);
+        _mm512_stream_ps(packed_w + 32, vres32x0123);
+        _mm512_stream_ps(packed_w + 48, vres48x0123);
+        _mm512_stream_ps(packed_w + 64, vres64x0123);
+        _mm512_stream_ps(packed_w + 80, vres80x0123);
+        _mm512_stream_ps(packed_w + 96, vres96x0123);
+        _mm512_stream_ps(packed_w + 112, vres112x0123);
         packed_w += 128;
       }
 
@@ -878,22 +879,22 @@ void xnn_x32_packw_gemm_goi_ukernel_x32c2__avx512f_u4_prfm(
           const __m128 vres14 = _mm_castpd_ps(_mm_unpacklo_pd(_mm_castps_pd(v28), _mm_castps_pd(v29)));
           const __m128 vres15 = _mm_castpd_ps(_mm_unpacklo_pd(_mm_castps_pd(v30), _mm_castps_pd(v31)));
 
-          _mm_store_ps(packed_w, vres0);
-          _mm_store_ps(packed_w + 4, vres1);
-          _mm_store_ps(packed_w + 8, vres2);
-          _mm_store_ps(packed_w + 12, vres3);
-          _mm_store_ps(packed_w + 16, vres4);
-          _mm_store_ps(packed_w + 20, vres5);
-          _mm_store_ps(packed_w + 24, vres6);
-          _mm_store_ps(packed_w + 28, vres7);
-          _mm_store_ps(packed_w + 32, vres8);
-          _mm_store_ps(packed_w + 36, vres9);
-          _mm_store_ps(packed_w + 40, vres10);
-          _mm_store_ps(packed_w + 44, vres11);
-          _mm_store_ps(packed_w + 48, vres12);
-          _mm_store_ps(packed_w + 52, vres13);
-          _mm_store_ps(packed_w + 56, vres14);
-          _mm_store_ps(packed_w + 60, vres15);
+          _mm_stream_ps(packed_w, vres0);
+          _mm_stream_ps(packed_w + 4, vres1);
+          _mm_stream_ps(packed_w + 8, vres2);
+          _mm_stream_ps(packed_w + 12, vres3);
+          _mm_stream_ps(packed_w + 16, vres4);
+          _mm_stream_ps(packed_w + 20, vres5);
+          _mm_stream_ps(packed_w + 24, vres6);
+          _mm_stream_ps(packed_w + 28, vres7);
+          _mm_stream_ps(packed_w + 32, vres8);
+          _mm_stream_ps(packed_w + 36, vres9);
+          _mm_stream_ps(packed_w + 40, vres10);
+          _mm_stream_ps(packed_w + 44, vres11);
+          _mm_stream_ps(packed_w + 48, vres12);
+          _mm_stream_ps(packed_w + 52, vres13);
+          _mm_stream_ps(packed_w + 56, vres14);
+          _mm_stream_ps(packed_w + 60, vres15);
           packed_w += 64;
         }
         if (k & 1) {
@@ -995,22 +996,22 @@ void xnn_x32_packw_gemm_goi_ukernel_x32c2__avx512f_u4_prfm(
           // Transpose 2x2
           const __m128 vres15 = _mm_castpd_ps(_mm_unpacklo_pd(_mm_castps_pd(v30), _mm_castps_pd(v31)));
 
-          _mm_store_ps(packed_w, vres0);
-          _mm_store_ps(packed_w + 4, vres1);
-          _mm_store_ps(packed_w + 8, vres2);
-          _mm_store_ps(packed_w + 12, vres3);
-          _mm_store_ps(packed_w + 16, vres4);
-          _mm_store_ps(packed_w + 20, vres5);
-          _mm_store_ps(packed_w + 24, vres6);
-          _mm_store_ps(packed_w + 28, vres7);
-          _mm_store_ps(packed_w + 32, vres8);
-          _mm_store_ps(packed_w + 36, vres9);
-          _mm_store_ps(packed_w + 40, vres10);
-          _mm_store_ps(packed_w + 44, vres11);
-          _mm_store_ps(packed_w + 48, vres12);
-          _mm_store_ps(packed_w + 52, vres13);
-          _mm_store_ps(packed_w + 56, vres14);
-          _mm_store_ps(packed_w + 60, vres15);
+          _mm_stream_ps(packed_w, vres0);
+          _mm_stream_ps(packed_w + 4, vres1);
+          _mm_stream_ps(packed_w + 8, vres2);
+          _mm_stream_ps(packed_w + 12, vres3);
+          _mm_stream_ps(packed_w + 16, vres4);
+          _mm_stream_ps(packed_w + 20, vres5);
+          _mm_stream_ps(packed_w + 24, vres6);
+          _mm_stream_ps(packed_w + 28, vres7);
+          _mm_stream_ps(packed_w + 32, vres8);
+          _mm_stream_ps(packed_w + 36, vres9);
+          _mm_stream_ps(packed_w + 40, vres10);
+          _mm_stream_ps(packed_w + 44, vres11);
+          _mm_stream_ps(packed_w + 48, vres12);
+          _mm_stream_ps(packed_w + 52, vres13);
+          _mm_stream_ps(packed_w + 56, vres14);
+          _mm_stream_ps(packed_w + 60, vres15);
           packed_w += 32 * 2;
         }
       }
