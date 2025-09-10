@@ -10,6 +10,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "include/xnnpack.h"
 #include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/microfnptr.h"
 
@@ -162,6 +163,7 @@ struct xnn_ibilinear_chw_config {
 };
 
 struct xnn_gemm_config {
+  xnn_config_identifier identifier;
   struct gemm_fused_ukernels minmax;
   struct gemm_fused_ukernels relu;
   struct gemm_fused_ukernels linear;
