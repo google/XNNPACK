@@ -3999,8 +3999,8 @@ static void init_qs8_qc4w_gemm_config(void) {
       } else
     #endif
     #if XNN_ENABLE_AVX256VNNI
-      if ((hardware_config->arch_flags & xnn_arch_x86_avxvnni)) {
-        qs8_qc4w_gemm_config.arch = xnn_arch_x86_avxvnni;
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx256vnni)) {
+        qs8_qc4w_gemm_config.arch = xnn_arch_x86_avx256vnni;
         qs8_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x8c8__avx256vnni_prfm);
         qs8_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(7)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_7x8c8__avx256vnni_prfm);
         qs8_qc4w_gemm_config.init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
