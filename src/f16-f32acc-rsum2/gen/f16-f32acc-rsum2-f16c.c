@@ -3,7 +3,7 @@
 //   Template: src/f16-f32acc-rsum2/f16c.c.in
 //   Generator: tools/xngen
 //
-// Copyright 2025 Google LLC
+// Copyright 2023-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.

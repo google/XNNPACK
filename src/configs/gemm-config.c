@@ -3971,6 +3971,20 @@ static void init_qs8_qc4w_gemm_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
+    #if XNN_ENABLE_AVX512VNNIGFNI
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx512vnnigfni)) {
+        qs8_qc4w_gemm_config.arch = xnn_arch_x86_avx512vnnigfni;
+        qs8_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x16c8__avx512vnnigfni_prfm);
+        qs8_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(7)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_7x16c8__avx512vnnigfni_prfm);
+        qs8_qc4w_gemm_config.init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
+        qs8_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w;
+        qs8_qc4w_gemm_config.planes = 2;
+        qs8_qc4w_gemm_config.mr = 7;
+        qs8_qc4w_gemm_config.nr = 16;
+        qs8_qc4w_gemm_config.log2_kr = 3;
+      } else
+    #endif
+
     #if XNN_ENABLE_AVX512VNNI && XNN_ARCH_X86_64 && !XNN_PLATFORM_WINDOWS && XNN_ENABLE_ASSEMBLY
       if ((hardware_config->arch_flags & xnn_arch_x86_avx512vnni)) {
         qs8_qc4w_gemm_config.arch = xnn_arch_x86_avx512vnni;

@@ -3,6 +3,89 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+# AVX512VNNIGFNI
+- name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x16c8__avx512vnnigfni
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w
+  k-block: 16
+  planes: 2
+- name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_5x16c8__avx512vnnigfni
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w
+  k-block: 16
+  planes: 2
+- name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_7x16c8__avx512vnnigfni
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w
+  k-block: 16
+  planes: 2
+- name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_8x16c8__avx512vnnigfni
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w
+  k-block: 16
+  planes: 2
+- name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_9x16c8__avx512vnnigfni
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w
+  k-block: 16
+  planes: 2
+- name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_10x16c8__avx512vnnigfni
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w
+  k-block: 16
+  planes: 2
+- name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_12x16c8__avx512vnnigfni
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w
+  k-block: 16
+  planes: 2
+- name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_14x16c8__avx512vnnigfni
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w
+  k-block: 16
+  planes: 2
+
+- name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x16c8__avx512vnnigfni_prfm
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w
+  k-block: 16
+  planes: 2
+- name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_5x16c8__avx512vnnigfni_prfm
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w
+  k-block: 16
+  planes: 2
+- name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_7x16c8__avx512vnnigfni_prfm
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w
+  k-block: 16
+  planes: 2
+- name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_8x16c8__avx512vnnigfni_prfm
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w
+  k-block: 16
+  planes: 2
+- name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_9x16c8__avx512vnnigfni_prfm
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w
+  k-block: 16
+  planes: 2
+- name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_10x16c8__avx512vnnigfni_prfm
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w
+  k-block: 16
+  planes: 2
+- name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_12x16c8__avx512vnnigfni_prfm
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w
+  k-block: 16
+  planes: 2
+- name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_14x16c8__avx512vnnigfni_prfm
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_to_qu8_qc4w_gemm_goi_w
+  k-block: 16
+  planes: 2
+
 # AVX256VNNI
 - name: xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x8c8__avx256vnni
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
