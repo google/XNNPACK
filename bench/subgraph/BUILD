@@ -21,6 +21,7 @@ BENCHMARKS_SLOW_LARGE = {
     "mobilenet": (False, False),
     "softmax": (False, False),
     "transformer": (True, False),
+    "unary": (False, False),
 }
 
 xnnpack_cxx_library(
@@ -71,6 +72,7 @@ xnnpack_cxx_library(
             ":models",
             "//:datatype",
             "//:math",
+            "//:operator_utils",
             "//:xnnpack_h",
             "//bench:bench_utils",
             "@com_google_benchmark//:benchmark",
