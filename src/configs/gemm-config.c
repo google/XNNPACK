@@ -137,6 +137,10 @@ XNN_INIT_ONCE_GUARD(qu8_gemm);
   xnn_log_info("Using qp8gemm_bl microkernel '%s'.", #ukernel);
 
 static void init_f16_gemm_config(void) {
+  // LINT.IfChange(init_f16_gemm_config_identifier)
+  f16_gemm_config.identifier = xnn_create_config_identifier(xnn_config_name_f16_gemm, /*version=*/0);
+  // LINT.ThenChange(:init_f16_gemm_config_config)
+  // LINT.IfChange(init_f16_gemm_config_config)
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -287,6 +291,7 @@ static void init_f16_gemm_config(void) {
     }
   #endif
   assert(f16_gemm_config.mr <= XNN_MAX_MR);
+  // LINT.ThenChange(:init_f16_gemm_config_identifier)
 }
 
 #if XNN_ARCH_WASMSIMD
@@ -305,6 +310,10 @@ static void init_f16_gemm_config(void) {
 #endif
 
 static void init_pf16_gemm_config(void) {
+  // LINT.IfChange(init_pf16_gemm_config_identifier)
+  pf16_gemm_config.identifier = xnn_create_config_identifier(xnn_config_name_pf16_gemm, /*version=*/0);
+  // LINT.ThenChange(:init_pf16_gemm_config_config)
+  // LINT.IfChange(init_pf16_gemm_config_config)
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
   const struct xnn_hardware_config* hardware_config =
       xnn_init_hardware_config();
@@ -326,9 +335,14 @@ static void init_pf16_gemm_config(void) {
     #endif  // XNN_ENABLE_ARM_SME2
   }
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+  // LINT.ThenChange(:init_pf16_gemm_config_identifier)
 }
 
 static void init_bf16_f32_gemm_config(void) {
+  // LINT.IfChange(init_bf16_f32_gemm_config_identifier)
+  bf16_f32_gemm_config.identifier = xnn_create_config_identifier(xnn_config_name_bf16_f32_gemm, /*version=*/0);
+  // LINT.ThenChange(:init_bf16_f32_gemm_config_config)
+  // LINT.IfChange(init_bf16_f32_gemm_config_config)
 #if XNN_ARCH_X86_64
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   assert(hardware_config != NULL);
@@ -347,9 +361,14 @@ static void init_bf16_f32_gemm_config(void) {
   }
   assert(bf16_f32_gemm_config.mr <= XNN_MAX_MR);
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+  // LINT.ThenChange(:init_bf16_f32_gemm_config_identifier)
 }
 
 static void init_pf32_gemm_config(void) {
+  // LINT.IfChange(init_pf32_gemm_config_identifier)
+  pf32_gemm_config.identifier = xnn_create_config_identifier(xnn_config_name_pf32_gemm, /*version=*/0);
+  // LINT.ThenChange(:init_pf32_gemm_config_config)
+  // LINT.IfChange(init_pf32_gemm_config_config)
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   assert(hardware_config != NULL);
@@ -388,9 +407,14 @@ static void init_pf32_gemm_config(void) {
   }
   assert(pf32_gemm_config.mr <= XNN_MAX_MR);
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+  // LINT.ThenChange(:init_pf32_gemm_config_identifier)
 }
 
 static void init_pqs8_qc8w_gemm_config(void) {
+  // LINT.IfChange(init_pqs8_qc8w_gemm_config_identifier)
+  pqs8_qc8w_gemm_config.identifier = xnn_create_config_identifier(xnn_config_name_pqs8_qc8w_gemm, /*version=*/0);
+  // LINT.ThenChange(:init_pqs8_qc8w_gemm_config_config)
+  // LINT.IfChange(init_pqs8_qc8w_gemm_config_config)
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
   const struct xnn_hardware_config* hardware_config =
       xnn_init_hardware_config();
@@ -429,9 +453,14 @@ static void init_pqs8_qc8w_gemm_config(void) {
   }
   assert(pqs8_qc8w_gemm_config.mr <= XNN_MAX_MR);
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+  // LINT.ThenChange(:init_pqs8_qc8w_gemm_config_identifier)
 }
 
 static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, bool consistent_arithmetic) {
+  // LINT.IfChange(init_f32_gemm_config_identifier)
+  f32_gemm_config->identifier = xnn_create_config_identifier(xnn_config_name_f32_gemm, /*version=*/0);
+  // LINT.ThenChange(:init_f32_gemm_config_config)
+  // LINT.IfChange(init_f32_gemm_config_config)
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -929,6 +958,7 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
     f32_gemm_config->nr = 4;
   #endif
   assert(f32_gemm_config->mr <= XNN_MAX_MR);
+  // LINT.ThenChange(:init_f32_gemm_config_identifier)
 }
 
 static void init_f32_gemm_config() {
@@ -937,6 +967,10 @@ static void init_f32_gemm_config() {
 }
 
 static void init_f32_igemm_config(void) {
+  // LINT.IfChange(init_f32_igemm_config_identifier)
+  f32_igemm_config.identifier = xnn_create_config_identifier(xnn_config_name_f32_igemm, /*version=*/0);
+  // LINT.ThenChange(:init_f32_igemm_config_config)
+  // LINT.IfChange(init_f32_igemm_config_config)
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -1409,9 +1443,14 @@ static void init_f32_igemm_config(void) {
     f32_igemm_config.nr = 4;
   #endif
   assert(f32_igemm_config.mr <= XNN_MAX_MR);
+  // LINT.ThenChange(:init_f32_igemm_config_identifier)
 }
 
 static void init_f32_gemm_nr2_config_impl(struct xnn_gemm_config* f32_gemm_nr2_config, bool consistent_arithmetic) {
+  // LINT.IfChange(init_f32_gemm_nr2_config_identifier)
+  f32_gemm_nr2_config->identifier = xnn_create_config_identifier(xnn_config_name_f32_gemm_nr2, /*version=*/0);
+  // LINT.ThenChange(:init_f32_gemm_nr2_config_config)
+  // LINT.IfChange(init_f32_gemm_nr2_config_config)
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -1605,6 +1644,7 @@ static void init_f32_gemm_nr2_config_impl(struct xnn_gemm_config* f32_gemm_nr2_c
     f32_gemm_nr2_config->nr = 2;
   #endif
   assert(f32_gemm_nr2_config->mr <= XNN_MAX_MR);
+  // LINT.ThenChange(:init_f32_gemm_nr2_config_identifier)
 }
 
 static void init_f32_gemm_nr2_config() {
@@ -1613,6 +1653,10 @@ static void init_f32_gemm_nr2_config() {
 }
 
 static void init_f32_qc4w_gemm_config(void) {
+  // LINT.IfChange(init_f32_qc4w_gemm_config_identifier)
+  f32_qc4w_gemm_config.identifier = xnn_create_config_identifier(xnn_config_name_f32_qc4w_gemm, /*version=*/0);
+  // LINT.ThenChange(:init_f32_qc4w_gemm_config_config)
+  // LINT.IfChange(init_f32_qc4w_gemm_config_config)
     f32_qc4w_gemm_config.planes = 1;
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -1693,9 +1737,14 @@ static void init_f32_qc4w_gemm_config(void) {
     f32_qc4w_gemm_config.nr = 4;
   #endif
   assert(f32_qc4w_gemm_config.mr <= XNN_MAX_MR);
+  // LINT.ThenChange(:init_f32_qc4w_gemm_config_identifier)
 }
 
 static void init_f32_qc8w_gemm_config(void) {
+  // LINT.IfChange(init_f32_qc8w_gemm_config_identifier)
+  f32_qc8w_gemm_config.identifier = xnn_create_config_identifier(xnn_config_name_f32_qc8w_gemm, /*version=*/0);
+  // LINT.ThenChange(:init_f32_qc8w_gemm_config_config)
+  // LINT.IfChange(init_f32_qc8w_gemm_config_config)
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -1901,9 +1950,14 @@ static void init_f32_qc8w_gemm_config(void) {
     f32_qc8w_gemm_config.nr = 4;
   #endif
   assert(f32_qc8w_gemm_config.mr <= XNN_MAX_MR);
+  // LINT.ThenChange(:init_f32_qc8w_gemm_config_identifier)
 }
 
 static void init_qdu8_f16_qc4w_gemm_config(void) {
+  // LINT.IfChange(init_qdu8_f16_qc4w_gemm_config_identifier)
+  qdu8_f16_qc4w_gemm_config.identifier = xnn_create_config_identifier(xnn_config_name_qdu8_f16_qc4w_gemm, /*version=*/0);
+  // LINT.ThenChange(:init_qdu8_f16_qc4w_gemm_config_config)
+  // LINT.IfChange(init_qdu8_f16_qc4w_gemm_config_config)
   // Use the same packing function throughout.
   qdu8_f16_qc4w_gemm_config.pack_weights_and_biases =
       (xnn_pack_weights_and_biases_fn)xnn_pack_qs4_weights_and_biases;
@@ -1973,9 +2027,14 @@ static void init_qdu8_f16_qc4w_gemm_config(void) {
   #endif
   assert(qdu8_f16_qc4w_gemm_config.mr <= XNN_MAX_MR);
   assert(qdu8_f16_qc4w_gemm_config.mr <= (XNN_EXTRA_QUANTIZATION_PARAMS + 1));
+  // LINT.ThenChange(:init_qdu8_f16_qc4w_gemm_config_identifier)
 }
 
 static void init_qd8_f16_qc4w_gemm_config(void) {
+  // LINT.IfChange(init_qd8_f16_qc4w_gemm_config_identifier)
+  qd8_f16_qc4w_gemm_config.identifier = xnn_create_config_identifier(xnn_config_name_qd8_f16_qc4w_gemm, /*version=*/0);
+  // LINT.ThenChange(:init_qd8_f16_qc4w_gemm_config_config)
+  // LINT.IfChange(init_qd8_f16_qc4w_gemm_config_config)
   // Use the same packing function throughout.
   qd8_f16_qc4w_gemm_config.pack_weights_and_biases =
       (xnn_pack_weights_and_biases_fn)xnn_pack_qs4_weights_and_biases;
@@ -2043,9 +2102,14 @@ static void init_qd8_f16_qc4w_gemm_config(void) {
   #endif
   assert(qd8_f16_qc4w_gemm_config.mr <= XNN_MAX_MR);
   assert(qd8_f16_qc4w_gemm_config.mr <= (XNN_EXTRA_QUANTIZATION_PARAMS + 1));
+  // LINT.ThenChange(:init_qd8_f16_qc4w_gemm_config_identifier)
 }
 
 static void init_qd8_f16_qb4w_gemm_config(void) {
+  // LINT.IfChange(init_qd8_f16_qb4w_gemm_config_identifier)
+  qd8_f16_qb4w_gemm_config.identifier = xnn_create_config_identifier(xnn_config_name_qd8_f16_qb4w_gemm, /*version=*/0);
+  // LINT.ThenChange(:init_qd8_f16_qb4w_gemm_config_config)
+  // LINT.IfChange(init_qd8_f16_qb4w_gemm_config_config)
   qd8_f16_qb4w_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_qb4_weights_and_biases;
   qd8_f16_qb4w_gemm_config.pack_weights_and_biases = xnn_pack_qb4_weights_and_biases;
 
@@ -2121,9 +2185,14 @@ static void init_qd8_f16_qb4w_gemm_config(void) {
   #endif
   assert(qd8_f16_qb4w_gemm_config.mr <= XNN_MAX_MR);
   assert(qd8_f16_qb4w_gemm_config.mr <= (XNN_EXTRA_QUANTIZATION_PARAMS + 1));
+  // LINT.ThenChange(:init_qd8_f16_qb4w_gemm_config_identifier)
 }
 
 static void init_qd8_f32_qc4w_gemm_config(void) {
+  // LINT.IfChange(init_qd8_f32_qc4w_gemm_config_identifier)
+  qd8_f32_qc4w_gemm_config.identifier = xnn_create_config_identifier(xnn_config_name_qd8_f32_qc4w_gemm, /*version=*/0);
+  // LINT.ThenChange(:init_qd8_f32_qc4w_gemm_config_config)
+  // LINT.IfChange(init_qd8_f32_qc4w_gemm_config_config)
   // Use the same packing function throughout.
   qd8_f32_qc4w_gemm_config.pack_weights_and_biases = (xnn_pack_weights_and_biases_fn) xnn_pack_qs4_weights_and_biases;
   qd8_f32_qc4w_gemm_config.packed_stride_weights_and_biases = (xnn_packed_stride_weights_and_biases_fn) xnn_packed_stride_qs4_weights_and_biases;
@@ -2269,9 +2338,14 @@ static void init_qd8_f32_qc4w_gemm_config(void) {
   #endif
   assert(qd8_f32_qc4w_gemm_config.mr <= XNN_MAX_MR);
   assert(qd8_f32_qc4w_gemm_config.mr <= (XNN_EXTRA_QUANTIZATION_PARAMS + 1));
+  // LINT.ThenChange(:init_qd8_f32_qc4w_gemm_config_identifier)
 }
 
 static void init_qp8_f32_qc4w_gemm_config(void) {
+  // LINT.IfChange(init_qp8_f32_qc4w_gemm_config_identifier)
+  qp8_f32_qc4w_gemm_config.identifier = xnn_create_config_identifier(xnn_config_name_qp8_f32_qc4w_gemm, /*version=*/0);
+  // LINT.ThenChange(:init_qp8_f32_qc4w_gemm_config_config)
+  // LINT.IfChange(init_qp8_f32_qc4w_gemm_config_config)
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
   const struct xnn_hardware_config* hardware_config =
       xnn_init_hardware_config();
@@ -2324,9 +2398,14 @@ static void init_qp8_f32_qc4w_gemm_config(void) {
   }
   assert(qp8_f32_qc4w_gemm_config.mr <= XNN_MAX_MR);
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+  // LINT.ThenChange(:init_qp8_f32_qc4w_gemm_config_identifier)
 }
 
 static void init_qp8_f32_qc8w_gemm_config(void) {
+  // LINT.IfChange(init_qp8_f32_qc8w_gemm_config_identifier)
+  qp8_f32_qc8w_gemm_config.identifier = xnn_create_config_identifier(xnn_config_name_qp8_f32_qc8w_gemm, /*version=*/0);
+  // LINT.ThenChange(:init_qp8_f32_qc8w_gemm_config_config)
+  // LINT.IfChange(init_qp8_f32_qc8w_gemm_config_config)
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
   const struct xnn_hardware_config* hardware_config =
       xnn_init_hardware_config();
@@ -2372,9 +2451,14 @@ static void init_qp8_f32_qc8w_gemm_config(void) {
   }
   assert(qp8_f32_qc8w_gemm_config.mr <= XNN_MAX_MR);
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+  // LINT.ThenChange(:init_qp8_f32_qc8w_gemm_config_identifier)
 }
 
 static void init_qp8_f32_qb4w_gemm_config(void) {
+  // LINT.IfChange(init_qp8_f32_qb4w_gemm_config_identifier)
+  qp8_f32_qb4w_gemm_config.identifier = xnn_create_config_identifier(xnn_config_name_qp8_f32_qb4w_gemm, /*version=*/0);
+  // LINT.ThenChange(:init_qp8_f32_qb4w_gemm_config_config)
+  // LINT.IfChange(init_qp8_f32_qb4w_gemm_config_config)
   #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
     const struct xnn_hardware_config* hardware_config =
         xnn_init_hardware_config();
@@ -2410,9 +2494,14 @@ static void init_qp8_f32_qb4w_gemm_config(void) {
     }
     assert(qp8_f32_qb4w_gemm_config.mr <= XNN_MAX_MR);
   #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+    // LINT.ThenChange(:init_qp8_f32_qb4w_gemm_config_identifier)
 }
 
 static void init_qdu8_f32_qb4w_gemm_config(void) {
+  // LINT.IfChange(init_qdu8_f32_qb4w_gemm_config_identifier)
+  qdu8_f32_qb4w_gemm_config.identifier = xnn_create_config_identifier(xnn_config_name_qdu8_f32_qb4w_gemm, /*version=*/0);
+  // LINT.ThenChange(:init_qdu8_f32_qb4w_gemm_config_config)
+  // LINT.IfChange(init_qdu8_f32_qb4w_gemm_config_config)
   qdu8_f32_qb4w_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_qb4_weights_and_biases;
   qdu8_f32_qb4w_gemm_config.pack_weights_and_biases = xnn_pack_qb4_weights_and_biases;
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -2450,9 +2539,14 @@ static void init_qdu8_f32_qb4w_gemm_config(void) {
     #endif
     assert(qdu8_f32_qb4w_gemm_config.mr <= XNN_MAX_MR);
   #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+    // LINT.ThenChange(:init_qdu8_f32_qb4w_gemm_config_identifier)
 }
 
 static void init_qd8_f32_qb4w_gemm_config(void) {
+  // LINT.IfChange(init_qd8_f32_qb4w_gemm_config_identifier)
+  qd8_f32_qb4w_gemm_config.identifier = xnn_create_config_identifier(xnn_config_name_qd8_f32_qb4w_gemm, /*version=*/0);
+  // LINT.ThenChange(:init_qd8_f32_qb4w_gemm_config_config)
+  // LINT.IfChange(init_qd8_f32_qb4w_gemm_config_config)
   qd8_f32_qb4w_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_qb4_weights_and_biases;
   qd8_f32_qb4w_gemm_config.pack_weights_and_biases = xnn_pack_qb4_weights_and_biases;
   qd8_f32_qb4w_gemm_config.pack_gemm_goi_bl = NULL;
@@ -2572,9 +2666,14 @@ static void init_qd8_f32_qb4w_gemm_config(void) {
   #endif
   assert(qd8_f32_qb4w_gemm_config.mr <= XNN_MAX_MR);
   assert(qd8_f32_qb4w_gemm_config.mr <= (XNN_EXTRA_QUANTIZATION_PARAMS + 1));
+  // LINT.ThenChange(:init_qd8_f32_qb4w_gemm_config_identifier)
 }
 
 static void init_qd8_f16_qc8w_gemm_config(void) {
+  // LINT.IfChange(init_qd8_f16_qc8w_gemm_config_identifier)
+  qd8_f16_qc8w_gemm_config.identifier = xnn_create_config_identifier(xnn_config_name_qd8_f16_qc8w_gemm, /*version=*/0);
+  // LINT.ThenChange(:init_qd8_f16_qc8w_gemm_config_config)
+  // LINT.IfChange(init_qd8_f16_qc8w_gemm_config_config)
   // Use the same packing function throughout.
   qd8_f16_qc8w_gemm_config.pack_weights_and_biases = (xnn_pack_weights_and_biases_fn)xnn_pack_qs8_weights_and_biases;
   qd8_f16_qc8w_gemm_config.packed_stride_weights_and_biases = (xnn_packed_stride_weights_and_biases_fn) xnn_packed_stride_qs8_weights_and_biases;
@@ -2858,9 +2957,14 @@ static void init_qd8_f16_qc8w_gemm_config(void) {
   #endif
   assert(qd8_f16_qc8w_gemm_config.mr <= XNN_MAX_MR);
   assert(qd8_f16_qc8w_gemm_config.mr <= (XNN_EXTRA_QUANTIZATION_PARAMS + 1));
+  // LINT.ThenChange(:init_qd8_f16_qc8w_gemm_config_identifier)
 }
 
 static void init_qdu8_f16_qc8w_gemm_config(void) {
+  // LINT.IfChange(init_qdu8_f16_qc8w_gemm_config_identifier)
+  qdu8_f16_qc8w_gemm_config.identifier = xnn_create_config_identifier(xnn_config_name_qdu8_f16_qc8w_gemm, /*version=*/0);
+  // LINT.ThenChange(:init_qdu8_f16_qc8w_gemm_config_config)
+  // LINT.IfChange(init_qdu8_f16_qc8w_gemm_config_config)
   // Use the same packing function throughout.
   qdu8_f16_qc8w_gemm_config.pack_weights_and_biases =
       (xnn_pack_weights_and_biases_fn)xnn_pack_qs8_weights_and_biases;
@@ -2915,9 +3019,14 @@ static void init_qdu8_f16_qc8w_gemm_config(void) {
     assert(qdu8_f16_qc8w_gemm_config.mr <= XNN_MAX_MR);
     assert(qdu8_f16_qc8w_gemm_config.mr <= (XNN_EXTRA_QUANTIZATION_PARAMS + 1));
   #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+    // LINT.ThenChange(:init_qdu8_f16_qc8w_gemm_config_identifier)
 }
 
 static void init_qd8_f16_qc8w_igemm_config(void) {
+  // LINT.IfChange(init_qd8_f16_qc8w_igemm_config_identifier)
+  qd8_f16_qc8w_igemm_config.identifier = xnn_create_config_identifier(xnn_config_name_qd8_f16_qc8w_igemm, /*version=*/0);
+  // LINT.ThenChange(:init_qd8_f16_qc8w_igemm_config_config)
+  // LINT.IfChange(init_qd8_f16_qc8w_igemm_config_config)
   // Use the same packing function throughout.
   qd8_f16_qc8w_igemm_config.pack_weights_and_biases = (xnn_pack_weights_and_biases_fn)xnn_pack_qs8_weights_and_biases;
   qd8_f16_qc8w_igemm_config.packed_stride_weights_and_biases = (xnn_packed_stride_weights_and_biases_fn) xnn_packed_stride_qs8_weights_and_biases;
@@ -3189,9 +3298,14 @@ static void init_qd8_f16_qc8w_igemm_config(void) {
   #endif
   assert(qd8_f16_qc8w_igemm_config.mr <= XNN_MAX_MR);
   assert(qd8_f16_qc8w_igemm_config.mr <= (XNN_EXTRA_QUANTIZATION_PARAMS + 1));
+  // LINT.ThenChange(:init_qd8_f16_qc8w_igemm_config_identifier)
 }
 
 static void init_qdu8_f32_qc8w_gemm_config(void) {
+  // LINT.IfChange(init_qdu8_f32_qc8w_gemm_config_identifier)
+  qdu8_f32_qc8w_gemm_config.identifier = xnn_create_config_identifier(xnn_config_name_qdu8_f32_qc8w_gemm, /*version=*/0);
+  // LINT.ThenChange(:init_qdu8_f32_qc8w_gemm_config_config)
+  // LINT.IfChange(init_qdu8_f32_qc8w_gemm_config_config)
   // Use the same packing function throughout.
   qdu8_f32_qc8w_gemm_config.pack_weights_and_biases =
       (xnn_pack_weights_and_biases_fn)xnn_pack_qs8_weights_and_biases;
@@ -3260,9 +3374,14 @@ static void init_qdu8_f32_qc8w_gemm_config(void) {
     assert(qdu8_f32_qc8w_gemm_config.mr <= XNN_MAX_MR);
     assert(qdu8_f32_qc8w_gemm_config.mr <= (XNN_EXTRA_QUANTIZATION_PARAMS + 1));
   #endif //XNN_ARCH_X86 || XNN_ARCH_X86_64
+    // LINT.ThenChange(:init_qdu8_f32_qc8w_gemm_config_identifier)
 }
 
 static void init_qdu8_f32_qc8w_igemm_config(void) {
+  // LINT.IfChange(init_qdu8_f32_qc8w_igemm_config_identifier)
+  qdu8_f32_qc8w_igemm_config.identifier = xnn_create_config_identifier(xnn_config_name_qdu8_f32_qc8w_igemm, /*version=*/0);
+  // LINT.ThenChange(:init_qdu8_f32_qc8w_igemm_config_config)
+  // LINT.IfChange(init_qdu8_f32_qc8w_igemm_config_config)
   // Use the same packing function throughout.
   qdu8_f32_qc8w_igemm_config.pack_weights_and_biases =
       (xnn_pack_weights_and_biases_fn)xnn_pack_qs8_weights_and_biases;
@@ -3316,9 +3435,14 @@ static void init_qdu8_f32_qc8w_igemm_config(void) {
     assert(qdu8_f32_qc8w_igemm_config.mr <= XNN_MAX_MR);
     assert(qdu8_f32_qc8w_igemm_config.mr <= (XNN_EXTRA_QUANTIZATION_PARAMS + 1));
   #endif //XNN_ARCH_X86 || XNN_ARCH_X86_64
+    // LINT.ThenChange(:init_qdu8_f32_qc8w_igemm_config_identifier)
 }
 
 static void init_qdu8_f32_qc4w_gemm_config(void) {
+  // LINT.IfChange(init_qdu8_f32_qc4w_gemm_config_identifier)
+  qdu8_f32_qc4w_gemm_config.identifier = xnn_create_config_identifier(xnn_config_name_qdu8_f32_qc4w_gemm, /*version=*/0);
+  // LINT.ThenChange(:init_qdu8_f32_qc4w_gemm_config_config)
+  // LINT.IfChange(init_qdu8_f32_qc4w_gemm_config_config)
   // Use the same packing function throughout.
   qdu8_f32_qc4w_gemm_config.pack_weights_and_biases = (xnn_pack_weights_and_biases_fn) xnn_pack_qs4_weights_and_biases;
   qdu8_f32_qc4w_gemm_config.packed_stride_weights_and_biases = (xnn_packed_stride_weights_and_biases_fn) xnn_packed_stride_qs4_weights_and_biases;
@@ -3427,9 +3551,14 @@ static void init_qdu8_f32_qc4w_gemm_config(void) {
     assert(qdu8_f32_qc4w_gemm_config.mr <= XNN_MAX_MR);
     assert(qdu8_f32_qc4w_gemm_config.mr <= (XNN_EXTRA_QUANTIZATION_PARAMS + 1));
   #endif //XNN_ARCH_X86 || XNN_ARCH_X86_64
+    // LINT.ThenChange(:init_qdu8_f32_qc4w_gemm_config_identifier)
 }
 
 static void init_qd8_f32_qc8w_gemm_config(void) {
+  // LINT.IfChange(init_qd8_f32_qc8w_gemm_config_identifier)
+  qd8_f32_qc8w_gemm_config.identifier = xnn_create_config_identifier(xnn_config_name_qd8_f32_qc8w_gemm, /*version=*/0);
+  // LINT.ThenChange(:init_qd8_f32_qc8w_gemm_config_config)
+  // LINT.IfChange(init_qd8_f32_qc8w_gemm_config_config)
   // Use the same packing function throughout.
   qd8_f32_qc8w_gemm_config.pack_weights_and_biases =
       (xnn_pack_weights_and_biases_fn)xnn_pack_qs8_weights_and_biases;
@@ -3948,9 +4077,14 @@ static void init_qd8_f32_qc8w_gemm_config(void) {
   #endif
   assert(qd8_f32_qc8w_gemm_config.mr <= XNN_MAX_MR);
   assert(qd8_f32_qc8w_gemm_config.mr <= (XNN_EXTRA_QUANTIZATION_PARAMS + 1));
+  // LINT.ThenChange(:init_qd8_f32_qc8w_gemm_config_identifier)
 }
 
 static void init_qs8_qc4w_gemm_config(void) {
+  // LINT.IfChange(init_qs8_qc4w_gemm_config_identifier)
+  qs8_qc4w_gemm_config.identifier = xnn_create_config_identifier(xnn_config_name_qs8_qc4w_gemm, /*version=*/0);
+  // LINT.ThenChange(:init_qs8_qc4w_gemm_config_config)
+  // LINT.IfChange(init_qs8_qc4w_gemm_config_config)
   #if XNN_ARCH_ARM64 && !XNN_PLATFORM_WINDOWS && XNN_ENABLE_ASSEMBLY
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -4082,9 +4216,14 @@ static void init_qs8_qc4w_gemm_config(void) {
   }
   assert(qs8_qc4w_gemm_config.mr <= XNN_MAX_MR);
   assert(qs8_qc4w_gemm_config.mr <= (XNN_EXTRA_QUANTIZATION_PARAMS + 1));
+  // LINT.ThenChange(:init_qs8_qc4w_gemm_config_identifier)
 }
 
 static void init_qs8_qc8w_gemm_config(void) {
+  // LINT.IfChange(init_qs8_qc8w_gemm_config_identifier)
+  qs8_qc8w_gemm_config.identifier = xnn_create_config_identifier(xnn_config_name_qs8_qc8w_gemm, /*version=*/0);
+  // LINT.ThenChange(:init_qs8_qc8w_gemm_config_config)
+  // LINT.IfChange(init_qs8_qc8w_gemm_config_config)
   // Use the same packing function throughout.
   qs8_qc8w_gemm_config.pack_weights_and_biases =
       (xnn_pack_weights_and_biases_fn)xnn_pack_qs8_weights_and_biases;
@@ -4971,9 +5110,14 @@ static void init_qs8_qc8w_gemm_config(void) {
     qs8_qc8w_gemm_config.nr = 4;
   #endif
   assert(qs8_qc8w_gemm_config.mr <= XNN_MAX_MR);
+  // LINT.ThenChange(:init_qs8_qc8w_gemm_config_identifier)
 }
 
 static void init_qu8_gemm_config(void) {
+  // LINT.IfChange(init_qu8_gemm_config_identifier)
+  qu8_gemm_config.identifier = xnn_create_config_identifier(xnn_config_name_qu8_gemm, /*version=*/0);
+  // LINT.ThenChange(:init_qu8_gemm_config_config)
+  // LINT.IfChange(init_qu8_gemm_config_config)
   // Use the same packing function throughout.
   qu8_gemm_config.pack_weights_and_biases =
       (xnn_pack_weights_and_biases_fn)xnn_pack_qu8_weights_and_biases;
@@ -5255,6 +5399,7 @@ static void init_qu8_gemm_config(void) {
     qu8_gemm_config.nr = 4;
   #endif
   assert(qu8_gemm_config.mr <= XNN_MAX_MR);
+  // LINT.ThenChange(:init_qu8_gemm_config_identifier)
 }
 
 const struct xnn_gemm_config* xnn_init_f16_gemm_config() {
