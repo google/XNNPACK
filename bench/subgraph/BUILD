@@ -12,6 +12,7 @@ load(
 
 BENCHMARKS_SLOW_LARGE = {
     "attention": (True, False),
+    "binary": (False, False),
     "depthwise_separable": (False, False),
     "convolution": (True, False),
     "elementwise": (False, False),
