@@ -16,6 +16,7 @@
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
 #include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/normalization.h"
 #include "src/xnnpack/operator-type.h"
 #include "src/xnnpack/operator-utils.h"
@@ -221,15 +222,21 @@ static enum xnn_status reshape_slice_nd(
   switch (num_normalized_dims) {
     case 1:
     case 2:
-      slice_op->compute[0].type = xnn_parallelization_type_1d;
-      slice_op->compute[0].task_1d = (pthreadpool_task_1d_t)xnn_compute_slice_1d;
+      slice_op->compute[0].type = xnn_parallelization_type_1d_tile_1d_dynamic;
+      slice_op->compute[0].task_1d_tile_1d_dynamic =
+          (pthreadpool_task_1d_tile_1d_dynamic_t)xnn_compute_slice_1d;
       slice_op->compute[0].range[0] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 2];
+      slice_op->compute[0].tile[0] =
+          divide_round_up(slice_op->context.slice.contiguous_size, 32 * 1024);
       break;
     case 3:
-      slice_op->compute[0].type = xnn_parallelization_type_2d;
-      slice_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_slice_2d;
+      slice_op->compute[0].type = xnn_parallelization_type_2d_tile_1d_dynamic;
+      slice_op->compute[0].task_2d_tile_1d_dynamic =
+          (pthreadpool_task_2d_tile_1d_dynamic_t)xnn_compute_slice_2d;
       slice_op->compute[0].range[0] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 3];
       slice_op->compute[0].range[1] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 2];
+      slice_op->compute[0].tile[0] =
+          divide_round_up(slice_op->context.slice.contiguous_size, 32 * 1024);
       break;
     case 4:
       slice_op->compute[0].type = xnn_parallelization_type_3d;

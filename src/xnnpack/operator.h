@@ -246,36 +246,40 @@ struct xnn_operator {
       enum xnn_binary_operator op_type;
     } binary_elementwise;
     struct {
-      uint32_t block_size;
-    } depth_to_space;
-    struct {
-      uint8_t num_nonbatch_dims;
-      uint8_t log2_input_size;
-      uint8_t log2_output_size;
-      enum xnn_unary_operator op_type;
-    } unary_elementwise;
-    struct {
-      uint32_t log2_data_element_size;
-      uint32_t log2_accumulator_element_size;
-      uint32_t identity_value;
-    } reduce;
-    struct {
-      enum xnn_node_type subtype;
-    } copy;
-    struct {
       size_t num_nonzero_blocks;
       // Total number of output channel blocks when weights use sparse
       // representation.
       size_t num_output_channel_blocks;
       size_t first_input_channel;
     } conv;
+    struct {
+      enum xnn_node_type subtype;
+    } copy;
+    struct {
+      uint32_t block_size;
+    } depth_to_space;
+    struct {
+      uintptr_t input_element_offset;
+      uintptr_t input_element_stride;
+    } fully_connected;
+    struct {
+      uint32_t pad_value;
+    } padding;
+    struct {
+      uint32_t log2_data_element_size;
+      uint32_t log2_accumulator_element_size;
+      uint32_t identity_value;
+    } reduce;
     // Input channel corresponding to the first non-zero kernel element.
     struct {
       float input_scale;
     } softmax;
     struct {
-      uint32_t pad_value;
-    } padding;
+      uint8_t num_nonbatch_dims;
+      uint8_t log2_input_size;
+      uint8_t log2_output_size;
+      enum xnn_unary_operator op_type;
+    } unary_elementwise;
   };
 
   union xnn_params params;

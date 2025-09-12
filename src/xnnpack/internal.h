@@ -656,6 +656,51 @@ enum xnn_status xnn_setup_deconvolution2d_nhwc_pqs8_qs8_qc8w(
     xnn_operator_t deconvolution_op, const int8_t* input, int8_t* output,
     void* workspace);
 
+// Format is input_type, weights type, output type, (dynamic)?
+enum fully_connected_op_type {
+  fc_type_invalid = 0,
+  fc_type_f16_f16_f16 = 1,
+  fc_type_f16_f16_f16_dynamic = 2,
+  fc_type_f16_f32_f16 = 3,
+  fc_type_qd8_f16_qc4w = 5,
+  fc_type_qd8_f16_qb4w = 6,
+  fc_type_qd8_f16_qc8w = 7,
+  fc_type_f32_f32_f32 = 8,
+  fc_type_f32_f32_f32_dynamic = 9,
+  fc_type_qd8_f32_qb4w = 10,
+  fc_type_f32_f32_qc4w = 11,
+  fc_type_qd8_f32_qc4w = 12,
+  fc_type_qp8_f32_qc4w = 13,
+  fc_type_f32_f32_qc8w = 14,
+  fc_type_qd8_f32_qc8w = 15,
+  fc_type_qs8_qs8_qc8w = 16,
+  fc_type_qs8_qs8_qs8 = 17,
+  fc_type_qu8_qu8_qu8 = 18,
+  fc_type_qp8_f32_qb4w = 19,
+  fc_type_pf32_f32_f32 = 20,
+  fc_type_f32_f16_f32 = 21,
+  fc_type_qdu8_f16_qc8w = 22,
+  fc_type_qdu8_f32_qc8w = 23,
+  fc_type_qdu8_f32_qc4w = 24,
+  fc_type_qdu8_f32_qb4w = 26,
+  fc_type_qdu8_f16_qc4w = 27,
+  fc_type_qp8_f32_qc8w = 28,
+  fc_type_pf16_f16_f16 = 29,
+  fc_type_pqs8_qs8_qc8w = 30,
+  fc_type_bf16_bf16_f32 = 31,
+  fc_type_pf16_f16_f16_dynamic = 32,
+  fc_type_pf32_f32_f32_dynamic = 33,
+  fc_type_qs8_qs8_qc4w = 34,
+};
+
+enum fully_connected_op_type xnn_get_fully_connected_op_type(
+    enum xnn_datatype input_datatype, enum xnn_datatype filter_datatype,
+    enum xnn_datatype output_datatype, bool has_non_static_weights);
+
+const struct xnn_gemm_config* xnn_get_gemm_config_for_fc_op_type(
+    enum fully_connected_op_type op_type, size_t output_channels,
+    uint32_t flags);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

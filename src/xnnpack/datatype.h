@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2019-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -11,11 +11,12 @@
 #include <stdint.h>
 
 #include "include/xnnpack.h"
-#include "src/xnnpack/common.h"
-#include "src/xnnpack/math.h"
 
 #ifdef __cplusplus
 #include <type_traits>
+
+#include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
 
 extern "C" {
 #endif
@@ -29,6 +30,7 @@ bool xnn_datatype_is_integral(enum xnn_datatype t);
 
 // Returns true if the datatype is a quantized real datatype.
 bool xnn_datatype_is_quantized(enum xnn_datatype t);
+bool xnn_datatype_is_dynamically_quantized(enum xnn_datatype t);
 bool xnn_datatype_is_channelwise_quantized(enum xnn_datatype t);
 bool xnn_datatype_is_blockwise_quantized(enum xnn_datatype t);
 

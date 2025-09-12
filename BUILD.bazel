@@ -839,6 +839,7 @@ xnnpack_cc_library(
         ":memory",
         ":microkernel_hdrs",
         ":microkernel_type",
+        ":microkernel_utils",
         ":mutex",
         ":node_type",
         ":operator_type",

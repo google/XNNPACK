@@ -2302,9 +2302,9 @@ static enum xnn_status reshape_fully_connected_nc(
   const size_t nc = xnn_gemm_best_tile_size(
       /*num_groups=*/1, /*m=*/batch_size, /*n=*/output_channels,
       /*m_stride=*/
-      fully_connected_op->input_pixel_stride
-          << (packed_lh_config ? packed_lh_config->log2_packed_element_size
-                               : log2_input_element_size),
+      input_channels << (packed_lh_config
+                             ? packed_lh_config->log2_packed_element_size
+                             : log2_input_element_size),
       /*n_stride=*/
       fully_connected_op->weights_stride,
       /*cn_stride=*/1 << log2_output_element_size, mr, nr,
@@ -2362,7 +2362,7 @@ static enum xnn_status reshape_fully_connected_nc(
             .mr = mr_packed,
             .kr = kr,
             .sr = sr,
-            .lhs_stride = input_channels
+            .lhs_stride = fully_connected_op->input_pixel_stride
                           << packed_lh_config->log2_input_element_size,
             .packed_offset_fn = packed_lh_config->offset_fn,
             .pack_lh_ukernel = packed_lh_config->pack_lh_fn,
@@ -2411,6 +2411,7 @@ static enum xnn_status reshape_fully_connected_nc(
                    << log2_output_element_size,
       .cn_stride = nr << log2_output_element_size,
       .log2_csize = log2_output_element_size,
+      .log2_asize = log2_input_element_size,
       .ukernel = gemm_ukernel,
       .mr = mr,
       .nc = output_channels,
@@ -2872,6 +2873,11 @@ static enum xnn_status setup_fully_connected_nc(
 
   struct gemm_op_context* gemm_context =
       fully_connected_op->dynamic_context.gemm;
+
+  input =
+      (const void*)((uintptr_t)input +
+                    (fully_connected_op->fully_connected.input_element_offset
+                     << gemm_context->gemm.log2_asize));
 
   if (fully_connected_op->num_compute_invocations == 2) {
     gemm_context->pack_lh.lhs = input;

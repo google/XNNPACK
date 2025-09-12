@@ -1494,25 +1494,30 @@ void xnn_compute_pad_5d(struct pad_context* restrict context, size_t i,
   }
 }
 
-void xnn_compute_slice_1d(struct slice_context* restrict context, size_t i) {
-  const void* input =
-      (const void*)((uintptr_t)context->input + i * context->input_stride[0]);
-  void* output =
-      (void*)((uintptr_t)context->output + i * context->output_stride[0]);
+void xnn_compute_slice_1d(struct slice_context* restrict context, size_t offset,
+                          size_t count) {
+  for (size_t i = offset; i < offset + count; i++) {
+    const void* input =
+        (const void*)((uintptr_t)context->input + i * context->input_stride[0]);
+    void* output =
+        (void*)((uintptr_t)context->output + i * context->output_stride[0]);
 
-  context->ukernel(context->contiguous_size, input, output, NULL);
+    context->ukernel(context->contiguous_size, input, output, NULL);
+  }
 }
 
 void xnn_compute_slice_2d(struct slice_context* restrict context, size_t i,
-                          size_t j) {
-  const void* input =
-      (const void*)((uintptr_t)context->input + i * context->input_stride[1] +
-                    j * context->input_stride[0]);
-  void* output =
-      (void*)((uintptr_t)context->output + i * context->output_stride[1] +
-              j * context->output_stride[0]);
+                          size_t offset, size_t count) {
+  for (size_t j = offset; j < offset + count; j++) {
+    const void* input =
+        (const void*)((uintptr_t)context->input + i * context->input_stride[1] +
+                      j * context->input_stride[0]);
+    void* output =
+        (void*)((uintptr_t)context->output + i * context->output_stride[1] +
+                j * context->output_stride[0]);
 
-  context->ukernel(context->contiguous_size, input, output, NULL);
+    context->ukernel(context->contiguous_size, input, output, NULL);
+  }
 }
 
 void xnn_compute_slice_3d(struct slice_context* restrict context, size_t i,

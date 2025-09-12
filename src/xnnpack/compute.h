@@ -326,6 +326,8 @@ struct gemm_context {
   size_t workspace_offset;
   // Size, in bytes, of each element of C.
   uint32_t log2_csize;
+  // Size, in bytes, of each element of A.
+  uint32_t log2_asize;
   // Number of batch dimensions in A, B, and C.
   uint32_t num_batch_dims;
   // Batch dimensions of the input A.
@@ -1206,9 +1208,10 @@ struct slice_context {
   size_t num_normalized_dims;
 };
 
-XNN_PRIVATE void xnn_compute_slice_1d(struct slice_context* context, size_t i);
+XNN_PRIVATE void xnn_compute_slice_1d(struct slice_context* context,
+                                      size_t offset, size_t count);
 XNN_PRIVATE void xnn_compute_slice_2d(struct slice_context* context, size_t i,
-                                      size_t j);
+                                      size_t offset, size_t count);
 XNN_PRIVATE void xnn_compute_slice_3d(struct slice_context* context, size_t i,
                                       size_t j, size_t k);
 XNN_PRIVATE void xnn_compute_slice_4d(struct slice_context* context, size_t i,
