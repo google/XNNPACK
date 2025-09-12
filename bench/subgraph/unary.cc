@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <iostream>
 #include <limits>
+#include <string>
 #include <vector>
 
 #include "bench/subgraph/benchmark.h"
@@ -59,6 +60,7 @@ xnn_subgraph_t Unary(int64_t op, size_t d0, size_t d1, size_t d2) {
   }
 
   xnn_unary_params params;
+  memset(&params, 0, sizeof(params));
   status =
       xnn_define_unary(subgraph, static_cast<xnn_unary_operator>(op),
                        /*params=*/&params, input_id, /*output_id=*/output_id,
@@ -81,7 +83,9 @@ static void FP32Unary(benchmark::State& state) {
   });
 }
 
-static void RegisterBenchmarks() {
+// Initialize a static global variable to trigger the registration.
+// The lambda will be executed only once during static initialization.
+static bool benchmarks_registered = [] {
   static const xnn_unary_operator real_ops[] = {
       xnn_unary_abs,
       xnn_unary_approxgelu,
@@ -118,10 +122,6 @@ static void RegisterBenchmarks() {
     b->Args({op, 1, 4096});
     b->Args({op, 256, 4096});
   }
-}
+  return true;
+}();
 
-// Call the registration function
-struct BenchmarkRegisterer {
-  BenchmarkRegisterer() { RegisterBenchmarks(); }
-};
-static BenchmarkRegisterer br;
