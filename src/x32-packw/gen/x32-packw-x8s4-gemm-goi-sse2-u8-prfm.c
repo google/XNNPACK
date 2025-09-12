@@ -42,6 +42,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__sse2_u8_prfm(
   assert(sr == 4);
   assert(weights != NULL);
   assert(packed_weights != NULL);
+  assert((intptr_t)packed_weights % 16 == 0);  // Alignment requirement for `_mm_stream_ps`.
 
   const float* b = (const float*) bias;
   float* packed_w = (float*) packed_weights;
@@ -54,13 +55,13 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__sse2_u8_prfm(
       if XNN_LIKELY(b != NULL) {
         const __m128 vb0 = _mm_loadu_ps(b);
         const __m128 vb4 = _mm_loadu_ps(b + 4);
-        _mm_store_ps(packed_w, vb0);
-        _mm_store_ps(packed_w + 4, vb4);
+        _mm_stream_ps(packed_w, vb0);
+        _mm_stream_ps(packed_w + 4, vb4);
         b += 8;
       } else {
         const __m128 vzero = _mm_setzero_ps();
-        _mm_store_ps(packed_w, vzero);
-        _mm_store_ps(packed_w + 4, vzero);
+        _mm_stream_ps(packed_w, vzero);
+        _mm_stream_ps(packed_w + 4, vzero);
       }
       packed_w += 8;
 
@@ -177,22 +178,22 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__sse2_u8_prfm(
         v6x4567 = _mm_movelh_ps(vtmp6x4567, vtmp7x4567);  // c g k o   from row 2, 3
         v7x4567 = _mm_movehl_ps(vtmp7x4567, vtmp6x4567);  // d h l p   from row 2, 3
 
-        _mm_store_ps(packed_w, v0x0123);
-        _mm_store_ps(packed_w + 4, v4x0123);
-        _mm_store_ps(packed_w + 8, v1x0123);
-        _mm_store_ps(packed_w + 12, v5x0123);
-        _mm_store_ps(packed_w + 16, v2x0123);
-        _mm_store_ps(packed_w + 20, v6x0123);
-        _mm_store_ps(packed_w + 24, v3x0123);
-        _mm_store_ps(packed_w + 28, v7x0123);
-        _mm_store_ps(packed_w + 32, v0x4567);
-        _mm_store_ps(packed_w + 36, v4x4567);
-        _mm_store_ps(packed_w + 40, v1x4567);
-        _mm_store_ps(packed_w + 44, v5x4567);
-        _mm_store_ps(packed_w + 48, v2x4567);
-        _mm_store_ps(packed_w + 52, v6x4567);
-        _mm_store_ps(packed_w + 56, v3x4567);
-        _mm_store_ps(packed_w + 60, v7x4567);
+        _mm_stream_ps(packed_w, v0x0123);
+        _mm_stream_ps(packed_w + 4, v4x0123);
+        _mm_stream_ps(packed_w + 8, v1x0123);
+        _mm_stream_ps(packed_w + 12, v5x0123);
+        _mm_stream_ps(packed_w + 16, v2x0123);
+        _mm_stream_ps(packed_w + 20, v6x0123);
+        _mm_stream_ps(packed_w + 24, v3x0123);
+        _mm_stream_ps(packed_w + 28, v7x0123);
+        _mm_stream_ps(packed_w + 32, v0x4567);
+        _mm_stream_ps(packed_w + 36, v4x4567);
+        _mm_stream_ps(packed_w + 40, v1x4567);
+        _mm_stream_ps(packed_w + 44, v5x4567);
+        _mm_stream_ps(packed_w + 48, v2x4567);
+        _mm_stream_ps(packed_w + 52, v6x4567);
+        _mm_stream_ps(packed_w + 56, v3x4567);
+        _mm_stream_ps(packed_w + 60, v7x4567);
         packed_w += 64;
       }
 
@@ -255,14 +256,14 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__sse2_u8_prfm(
         v6x0123 = _mm_movelh_ps(vtmp6x0123, vtmp7x0123);  // c g k o   from row 2, 3
         v7x0123 = _mm_movehl_ps(vtmp7x0123, vtmp6x0123);  // d h l p   from row 2, 3
 
-        _mm_store_ps(packed_w, v0x0123);
-        _mm_store_ps(packed_w + 4, v4x0123);
-        _mm_store_ps(packed_w + 8, v1x0123);
-        _mm_store_ps(packed_w + 12, v5x0123);
-        _mm_store_ps(packed_w + 16, v2x0123);
-        _mm_store_ps(packed_w + 20, v6x0123);
-        _mm_store_ps(packed_w + 24, v3x0123);
-        _mm_store_ps(packed_w + 28, v7x0123);
+        _mm_stream_ps(packed_w, v0x0123);
+        _mm_stream_ps(packed_w + 4, v4x0123);
+        _mm_stream_ps(packed_w + 8, v1x0123);
+        _mm_stream_ps(packed_w + 12, v5x0123);
+        _mm_stream_ps(packed_w + 16, v2x0123);
+        _mm_stream_ps(packed_w + 20, v6x0123);
+        _mm_stream_ps(packed_w + 24, v3x0123);
+        _mm_stream_ps(packed_w + 28, v7x0123);
         packed_w += 32;
       }
 
@@ -396,14 +397,14 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__sse2_u8_prfm(
         v5 = _mm_movehl_ps(vtmp5, vtmp4);  // b f j n   from row 0, 1
         v6 = _mm_movelh_ps(vtmp6, vtmp7);  // c g k o   from row 2, 3
         v7 = _mm_movehl_ps(vtmp7, vtmp6);  // d h l p   from row 2, 3
-        _mm_store_ps(packed_w, v0);
-        _mm_store_ps(packed_w + 4, v4);
-        _mm_store_ps(packed_w + 8, v1);
-        _mm_store_ps(packed_w + 12, v5);
-        _mm_store_ps(packed_w + 16, v2);
-        _mm_store_ps(packed_w + 20, v6);
-        _mm_store_ps(packed_w + 24, v3);
-        _mm_store_ps(packed_w + 28, v7);
+        _mm_stream_ps(packed_w, v0);
+        _mm_stream_ps(packed_w + 4, v4);
+        _mm_stream_ps(packed_w + 8, v1);
+        _mm_stream_ps(packed_w + 12, v5);
+        _mm_stream_ps(packed_w + 16, v2);
+        _mm_stream_ps(packed_w + 20, v6);
+        _mm_stream_ps(packed_w + 24, v3);
+        _mm_stream_ps(packed_w + 28, v7);
         packed_w += 32;
       }
       packed_w = (float*) ((uintptr_t) packed_w + extra_bytes);
@@ -422,8 +423,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__sse2_u8_prfm(
         packed_w += (8 - n);
       } else {
         const __m128 vzero = _mm_setzero_ps();
-        _mm_store_ps(packed_w, vzero);
-        _mm_store_ps(packed_w + 4, vzero);
+        _mm_stream_ps(packed_w, vzero);
+        _mm_stream_ps(packed_w + 4, vzero);
         packed_w += 8;
       }
 
@@ -540,22 +541,22 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__sse2_u8_prfm(
         v6x4567 = _mm_movelh_ps(vtmp6x4567, vtmp7x4567);  // c g k o   from row 2, 3
         v7x4567 = _mm_movehl_ps(vtmp7x4567, vtmp6x4567);  // d h l p   from row 2, 3
 
-        _mm_store_ps(packed_w, v0x0123);
-        _mm_store_ps(packed_w + 4, v4x0123);
-        _mm_store_ps(packed_w + 8, v1x0123);
-        _mm_store_ps(packed_w + 12, v5x0123);
-        _mm_store_ps(packed_w + 16, v2x0123);
-        _mm_store_ps(packed_w + 20, v6x0123);
-        _mm_store_ps(packed_w + 24, v3x0123);
-        _mm_store_ps(packed_w + 28, v7x0123);
-        _mm_store_ps(packed_w + 32, v0x4567);
-        _mm_store_ps(packed_w + 36, v4x4567);
-        _mm_store_ps(packed_w + 40, v1x4567);
-        _mm_store_ps(packed_w + 44, v5x4567);
-        _mm_store_ps(packed_w + 48, v2x4567);
-        _mm_store_ps(packed_w + 52, v6x4567);
-        _mm_store_ps(packed_w + 56, v3x4567);
-        _mm_store_ps(packed_w + 60, v7x4567);
+        _mm_stream_ps(packed_w, v0x0123);
+        _mm_stream_ps(packed_w + 4, v4x0123);
+        _mm_stream_ps(packed_w + 8, v1x0123);
+        _mm_stream_ps(packed_w + 12, v5x0123);
+        _mm_stream_ps(packed_w + 16, v2x0123);
+        _mm_stream_ps(packed_w + 20, v6x0123);
+        _mm_stream_ps(packed_w + 24, v3x0123);
+        _mm_stream_ps(packed_w + 28, v7x0123);
+        _mm_stream_ps(packed_w + 32, v0x4567);
+        _mm_stream_ps(packed_w + 36, v4x4567);
+        _mm_stream_ps(packed_w + 40, v1x4567);
+        _mm_stream_ps(packed_w + 44, v5x4567);
+        _mm_stream_ps(packed_w + 48, v2x4567);
+        _mm_stream_ps(packed_w + 52, v6x4567);
+        _mm_stream_ps(packed_w + 56, v3x4567);
+        _mm_stream_ps(packed_w + 60, v7x4567);
         packed_w += 64;
       }
 
@@ -615,14 +616,14 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__sse2_u8_prfm(
         v6x0123 = _mm_movelh_ps(vtmp6x0123, vtmp7x0123);  // c g k o   from row 2, 3
         v7x0123 = _mm_movehl_ps(vtmp7x0123, vtmp6x0123);  // d h l p   from row 2, 3
 
-        _mm_store_ps(packed_w, v0x0123);
-        _mm_store_ps(packed_w + 4, v4x0123);
-        _mm_store_ps(packed_w + 8, v1x0123);
-        _mm_store_ps(packed_w + 12, v5x0123);
-        _mm_store_ps(packed_w + 16, v2x0123);
-        _mm_store_ps(packed_w + 20, v6x0123);
-        _mm_store_ps(packed_w + 24, v3x0123);
-        _mm_store_ps(packed_w + 28, v7x0123);
+        _mm_stream_ps(packed_w, v0x0123);
+        _mm_stream_ps(packed_w + 4, v4x0123);
+        _mm_stream_ps(packed_w + 8, v1x0123);
+        _mm_stream_ps(packed_w + 12, v5x0123);
+        _mm_stream_ps(packed_w + 16, v2x0123);
+        _mm_stream_ps(packed_w + 20, v6x0123);
+        _mm_stream_ps(packed_w + 24, v3x0123);
+        _mm_stream_ps(packed_w + 28, v7x0123);
         packed_w += 32;
       }
 
@@ -747,14 +748,14 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__sse2_u8_prfm(
         v5 = _mm_movehl_ps(vtmp5, vtmp4);  // b f j n   from row 0, 1
         v6 = _mm_movelh_ps(vtmp6, vtmp7);  // c g k o   from row 2, 3
         v7 = _mm_movehl_ps(vtmp7, vtmp6);  // d h l p   from row 2, 3
-        _mm_store_ps(packed_w, v0);
-        _mm_store_ps(packed_w + 4, v4);
-        _mm_store_ps(packed_w + 8, v1);
-        _mm_store_ps(packed_w + 12, v5);
-        _mm_store_ps(packed_w + 16, v2);
-        _mm_store_ps(packed_w + 20, v6);
-        _mm_store_ps(packed_w + 24, v3);
-        _mm_store_ps(packed_w + 28, v7);
+        _mm_stream_ps(packed_w, v0);
+        _mm_stream_ps(packed_w + 4, v4);
+        _mm_stream_ps(packed_w + 8, v1);
+        _mm_stream_ps(packed_w + 12, v5);
+        _mm_stream_ps(packed_w + 16, v2);
+        _mm_stream_ps(packed_w + 20, v6);
+        _mm_stream_ps(packed_w + 24, v3);
+        _mm_stream_ps(packed_w + 28, v7);
         packed_w += 32;
       }
       packed_w = (float*) ((uintptr_t) packed_w + extra_bytes);
