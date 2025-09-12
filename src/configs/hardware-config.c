@@ -226,8 +226,8 @@ static void init_hardware_config(void) {
   set_arch_flag(xnn_arch_x86_avx512fp16, XNN_ENABLE_AVX512FP16 && cpuinfo_has_x86_avx512fp16());
   set_arch_flag(xnn_arch_x86_avx512bf16, XNN_ENABLE_AVX512BF16 && cpuinfo_has_x86_avx512bf16());
   set_arch_flag(xnn_arch_x86_avx512amx, use_x86_avx512amx);
-  set_arch_flag(xnn_arch_x86_avxvnni, XNN_ENABLE_AVXVNNI && use_x86_avx2 && cpuinfo_has_x86_avxvnni());
-  set_arch_flag(xnn_arch_x86_avxvnniint8, XNN_ENABLE_AVXVNNIINT8 && use_x86_avx2 && cpuinfo_has_x86_avx_vnni_int8());
+  set_arch_flag(xnn_arch_x86_avxvnni, XNN_ENABLE_AVXVNNI && use_x86_avx2 && cpuinfo_has_x86_avxvnni() && cpuinfo_has_x86_gfni());
+  set_arch_flag(xnn_arch_x86_avxvnniint8, XNN_ENABLE_AVXVNNIINT8 && use_x86_avx2 && cpuinfo_has_x86_avx_vnni_int8() && cpuinfo_has_x86_gfni());
   set_arch_flag(xnn_arch_x86_avx256skx, use_x86_avx256skx);
   set_arch_flag(xnn_arch_x86_avx256vnni, use_x86_avx256vnni);
   set_arch_flag(xnn_arch_x86_avx256vnnigfni, XNN_ENABLE_AVX256VNNIGFNI && use_x86_avx256vnni && cpuinfo_has_x86_gfni());

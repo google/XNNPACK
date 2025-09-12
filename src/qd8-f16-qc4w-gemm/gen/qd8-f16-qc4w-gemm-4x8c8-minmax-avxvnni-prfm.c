@@ -77,6 +77,8 @@ void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_4x8c8__avxvnni_prfm(
   // XNN_FORCE_REALIZATION(voutput_max);
   const __m256i vmask = _mm256_set1_epi8(0xF0);
   XNN_FORCE_REALIZATION(vmask);
+  const __m256i vshl4 = _mm256_set1_epi64x(0x01020408);
+  XNN_FORCE_REALIZATION(vshl4);
   do {
     const __m256i vksum01234567 = _mm256_load_si256(w);
     __m256i vsum0x01234567 = _mm256_mullo_epi32(vksum01234567, vinput_zero_point0);
@@ -110,12 +112,10 @@ void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_4x8c8__avxvnni_prfm(
 
       const __m256i vbb01234567x01234567 = _mm256_load_si256(w);
       const __m256i vbb89ABCDEFx01234567 = _mm256_load_si256((const __m256i*) ((const int8_t*) w + 32));
-      const __m256i vbs01234567x0123 = _mm256_slli_epi32(vbb01234567x01234567, 4);
-      const __m256i vbs89ABCDEFx0123 = _mm256_slli_epi32(vbb89ABCDEFx01234567, 4);
+      const __m256i vb01234567x0123 = _mm256_gf2p8affine_epi64_epi8(vbb01234567x01234567, vshl4, 0);
+      const __m256i vb89ABCDEFx0123 = _mm256_gf2p8affine_epi64_epi8(vbb89ABCDEFx01234567, vshl4, 0);
       const __m256i vb01234567x4567 = _mm256_and_si256(vbb01234567x01234567, vmask);
       const __m256i vb89ABCDEFx4567 = _mm256_and_si256(vbb89ABCDEFx01234567, vmask);
-      const __m256i vb01234567x0123 = _mm256_and_si256(vbs01234567x0123, vmask);
-      const __m256i vb89ABCDEFx0123 = _mm256_and_si256(vbs89ABCDEFx0123, vmask);
 
       vacc0x0123 = _mm256_dpbusd_avx_epi32(vacc0x0123, va0x01234567, vb01234567x0123);
       vacc0x4567 = _mm256_dpbusd_avx_epi32(vacc0x4567, va0x01234567, vb89ABCDEFx0123);
@@ -151,8 +151,8 @@ void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_4x8c8__avxvnni_prfm(
 
       const __m256i vbb01234567x01234567 = _mm256_load_si256(w);
       const __m256i vbb89ABCDEFx01234567 = _mm256_load_si256((const __m256i*) ((const int8_t*) w + 32));
-      const __m256i vb01234567x0123 = _mm256_slli_epi32(vbb01234567x01234567, 4);
-      const __m256i vb89ABCDEFx0123 = _mm256_slli_epi32(vbb89ABCDEFx01234567, 4);
+      const __m256i vb01234567x0123 = _mm256_gf2p8affine_epi64_epi8(vbb01234567x01234567, vshl4, 0);
+      const __m256i vb89ABCDEFx0123 = _mm256_gf2p8affine_epi64_epi8(vbb89ABCDEFx01234567, vshl4, 0);
 
       vacc0x0123 = _mm256_dpbusd_avx_epi32(vacc0x0123, va0x01234567, vb01234567x0123);
       vacc0x4567 = _mm256_dpbusd_avx_epi32(vacc0x4567, va0x01234567, vb89ABCDEFx0123);
