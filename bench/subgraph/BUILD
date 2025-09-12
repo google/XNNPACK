@@ -12,7 +12,7 @@ load(
 
 BENCHMARKS_SLOW_LARGE = {
     "attention": (True, False),
-    "binary": (False, False),
+    "binary": (False, True),
     "depthwise_separable": (False, False),
     "convolution": (True, False),
     "elementwise": (False, False),
@@ -22,7 +22,7 @@ BENCHMARKS_SLOW_LARGE = {
     "mobilenet": (False, False),
     "softmax": (False, False),
     "transformer": (True, False),
-    "unary": (False, False),
+    "unary": (False, True),
 }
 
 xnnpack_cxx_library(
