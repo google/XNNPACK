@@ -220,13 +220,13 @@ void xnn_f32_rdsum_ukernel_7p7x__neon_u16(
           }
 
           if (remainder) {
-            vacc[num_full_chunks] = xnn_add_f32(xnn_load_tail_f32(&i0[num_full_chunks*4], remainder), vacc[num_full_chunks]);
-            vacc[num_full_chunks] = xnn_add_f32(xnn_load_tail_f32(&i1[num_full_chunks*4], remainder), vacc[num_full_chunks]);
-            vacc[num_full_chunks] = xnn_add_f32(xnn_load_tail_f32(&i2[num_full_chunks*4], remainder), vacc[num_full_chunks]);
-            vacc[num_full_chunks] = xnn_add_f32(xnn_load_tail_f32(&i3[num_full_chunks*4], remainder), vacc[num_full_chunks]);
-            vacc[num_full_chunks] = xnn_add_f32(xnn_load_tail_f32(&i4[num_full_chunks*4], remainder), vacc[num_full_chunks]);
-            vacc[num_full_chunks] = xnn_add_f32(xnn_load_tail_f32(&i5[num_full_chunks*4], remainder), vacc[num_full_chunks]);
-            vacc[num_full_chunks] = xnn_add_f32(xnn_load_tail_f32(&i6[num_full_chunks*4], remainder), vacc[num_full_chunks]);
+            vacc[num_full_chunks] = xnn_add_f32(xnn_load_tail_safe_f32(&i0[num_full_chunks*4], remainder), vacc[num_full_chunks]);
+            vacc[num_full_chunks] = xnn_add_f32(xnn_load_tail_safe_f32(&i1[num_full_chunks*4], remainder), vacc[num_full_chunks]);
+            vacc[num_full_chunks] = xnn_add_f32(xnn_load_tail_safe_f32(&i2[num_full_chunks*4], remainder), vacc[num_full_chunks]);
+            vacc[num_full_chunks] = xnn_add_f32(xnn_load_tail_safe_f32(&i3[num_full_chunks*4], remainder), vacc[num_full_chunks]);
+            vacc[num_full_chunks] = xnn_add_f32(xnn_load_tail_safe_f32(&i4[num_full_chunks*4], remainder), vacc[num_full_chunks]);
+            vacc[num_full_chunks] = xnn_add_f32(xnn_load_tail_safe_f32(&i5[num_full_chunks*4], remainder), vacc[num_full_chunks]);
+            vacc[num_full_chunks] = xnn_add_f32(xnn_load_tail_safe_f32(&i6[num_full_chunks*4], remainder), vacc[num_full_chunks]);
           }
           i0 = (const float*) ((uintptr_t) i0 + input_increment);
           i1 = (const float*) ((uintptr_t) i1 + input_increment);
