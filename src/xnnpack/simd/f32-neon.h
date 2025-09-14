@@ -254,11 +254,15 @@ static XNN_INLINE xnn_simd_f32_t xnn_set1_f32(float v) {
 }
 
 // Tail load/store operations.
-static XNN_INLINE xnn_simd_f32_t
-xnn_load_tail_f32(const float* input, size_t num_elements) XNN_OOB_READS {
+static XNN_INLINE xnn_simd_f32_t xnn_load_tail_f32(const float* input,
+                                                   size_t num_elements) {
   assert(num_elements > 0);
   assert(num_elements < xnn_simd_size_f32);
-  return vld1q_f32(input);
+  XNN_ALIGN(16) float buffer[4] = {0};
+  for (size_t i = 0; i < num_elements; i++) {
+    buffer[i] = input[i];
+  }
+  return vld1q_f32(buffer);
 }
 
 // TODO: Use direct load of 1,2 or 3 floats
