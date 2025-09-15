@@ -25,6 +25,20 @@ BENCHMARKS_SLOW_LARGE = {
     "unary": (False, True),
 }
 
+# Enables usage of WASM SIMD AVX-256 revectorization kernels.
+config_setting(
+    name = "xnn_benchmark_use_xnn_threadpool",
+    define_values = {"xnn_benchmark_use_xnn_threadpool": "true"},
+)
+
+# Disables usage of WASM SIMD AVX-256 revectorization kernels.
+xnnpack_cxx_library(
+    name = "simple_scheduler",
+    testonly = 1,
+    hdrs = ["simple_scheduler.h"],
+    deps = ["//:xnnpack_h"],
+)
+
 xnnpack_cxx_library(
     name = "benchmark",
     testonly = True,
@@ -34,7 +48,12 @@ xnnpack_cxx_library(
     hdrs = [
         "benchmark.h",
     ],
+    local_defines = select({
+        ":xnn_benchmark_use_xnn_threadpool": ["XNN_BENCHMARK_USE_THREADPOOL=1"],
+        "//conditions:default": [],
+    }),
     deps = [
+        ":simple_scheduler",
         "//:XNNPACK",
         "//:datatype",
         "//:math",

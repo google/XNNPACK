@@ -1,7 +1,7 @@
 # Copyright (c) Facebook, Inc. and its affiliates.
 # All rights reserved.
 #
-# Copyright 2019 Google LLC
+# Copyright 2019-2025 Google LLC
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
@@ -18,8 +18,8 @@ ENDIF()
 # LINT.IfChange
 INCLUDE(ExternalProject)
 ExternalProject_Add(pthreadpool
-  URL https://github.com/google/pthreadpool/archive/d561aae9dfeab38ff595a0ae3e6bbd90b862c5f8.zip
-  URL_HASH SHA256=8b1d13195842c9b7e8ef5aa7d9b44ca4168a41b8ae97b4e50db4fcc562211f5b
+  URL https://github.com/google/pthreadpool/archive/bad85d364ff2be7a7fcf780f1fbaa7835d781c18.zip
+  URL_HASH SHA256=03524bb51d44e3f6c8cf3316de88cd8f4cec8ab5dde605451209a0051a5dd8c9
   SOURCE_DIR "${CMAKE_BINARY_DIR}/pthreadpool-source"
   BINARY_DIR "${CMAKE_BINARY_DIR}/pthreadpool"
   CONFIGURE_COMMAND ""
