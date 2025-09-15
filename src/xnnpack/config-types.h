@@ -10,6 +10,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "include/experimental.h"
 #include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/microfnptr.h"
 
@@ -120,6 +121,7 @@ struct xnn_pack_lh_config {
 };
 
 struct xnn_dwconv_config {
+  xnn_config_identifier identifier;
   xnn_dwconv_ukernel_fn minmax;
   xnn_dwconv_ukernel_fn linear;
   union {
@@ -162,6 +164,7 @@ struct xnn_ibilinear_chw_config {
 };
 
 struct xnn_gemm_config {
+  xnn_config_identifier identifier;
   struct gemm_fused_ukernels minmax;
   struct gemm_fused_ukernels relu;
   struct gemm_fused_ukernels linear;
@@ -241,6 +244,7 @@ struct xnn_dwconv2d_chw_parameters {
 };
 
 struct xnn_dwconv2d_chw_config {
+  struct xnn_config_identifier identifier;
   // Direct 3x3 stride-1 Convolution with padding 1 on left and right in CHW
   // layout.
   struct xnn_dwconv2d_chw_parameters dwconv2d_chw_3x3;
@@ -256,6 +260,7 @@ struct xnn_dwconv2d_chw_config {
 };
 
 struct xnn_conv_hwc2chw_config {
+  xnn_config_identifier identifier;
   xnn_conv_hwc2chw_ukernel_fn ukernel_with_symm_padding;
   union {
     xnn_init_f16_minmax_params_fn f16;
@@ -271,6 +276,7 @@ struct xnn_conv_hwc2chw_config {
 };
 
 struct xnn_vmulcaddc_config {
+  xnn_config_identifier identifier;
   xnn_vmulcaddc_ukernel_fn ukernel;
   union {
     xnn_init_f16_minmax_params_fn f16;

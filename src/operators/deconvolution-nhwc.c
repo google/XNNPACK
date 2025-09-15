@@ -407,6 +407,7 @@ static enum xnn_status create_deconvolution2d_nhwc(
                      kernel_size ^ nr ^ kr ^ sr ^ ukernel_type;
     cache_key.kernel = kernel;
     cache_key.bias = bias;
+    cache_key.config = &(gemm_config->identifier);
     deconvolution_op->packed_weights.offset =
         xnn_look_up_or_insert_weights_cache(deconvolution_op->weights_cache,
                                             &cache_key, weights_ptr,

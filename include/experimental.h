@@ -96,6 +96,23 @@ enum xnn_status xnn_update_runtime_with_threadpool(
   xnn_runtime_t runtime,
   xnn_threadpool_t threadpool);
 
+
+typedef struct xnn_config_identifier {
+  uint64_t identifier;
+} xnn_config_identifier;
+
+/// Check whether the given configuration matches one that is currently in use.
+///
+/// @returns True if the configuration matches.
+bool xnn_check_config_version(const struct xnn_config_identifier* identifier);
+
+/// Returns a valid microkernel configuration.
+///
+/// This is useful for consumers of this API that want to test their checks
+/// against kernel configurations.
+const struct xnn_config_identifier* xnn_get_test_config();
+
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
