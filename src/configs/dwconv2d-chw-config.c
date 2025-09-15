@@ -28,6 +28,10 @@ XNN_INIT_ONCE_GUARD(f32_dwconv2d_chw);
   xnn_log_info("Using dwconv2d_chw microkernel '%s'.", #ukernel);
 
 static void init_f16_dwconv2d_chw_config(void) {
+  // LINT.IfChange(f16_dwconv2d_chw_config_identifier)
+  f16_dwconv2d_chw_config.identifier = xnn_create_config_identifier(xnn_config_name_f16_dwconv2d_chw, /*version=*/0);
+  // LINT.ThenChange(:f16_dwconv2d_chw_config_config)
+  // LINT.IfChange(:f16_dwconv2d_chw_config_config)
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -69,9 +73,14 @@ static void init_f16_dwconv2d_chw_config(void) {
       f16_dwconv2d_chw_config.dwconv2d_chw_5x5s2.output_width_tile = 8;
     }
   #endif
+  // LINT.ThenChange(f16_dwconv2d_chw_config_identifier)
 }
 
 static void init_f32_dwconv2d_chw_config(void) {
+  // LINT.IfChange(f32_dwconv2d_chw_config_identifier)
+  f32_dwconv2d_chw_config.identifier = xnn_create_config_identifier(xnn_config_name_f32_dwconv2d_chw, /*version=*/0);
+  // LINT.ThenChange(:f32_dwconv2d_chw_config_config)
+  // LINT.IfChange(:f32_dwconv2d_chw_config_config)
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -218,6 +227,7 @@ static void init_f32_dwconv2d_chw_config(void) {
     f32_dwconv2d_chw_config.dwconv2d_chw_5x5s2.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_dwconv2d_chw_config.dwconv2d_chw_5x5s2.output_width_tile = 1;
   #endif
+  // LINT.ThenChange(f32_dwconv2d_chw_config_identifier)
 }
 
 const struct xnn_dwconv2d_chw_config* xnn_init_f16_dwconv2d_chw_config() {
