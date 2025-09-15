@@ -69,6 +69,7 @@ xnnpack_cc_library(
         "avgpool-config.c",
         "binary-elementwise-config.c",
         "cmul-config.c",
+        "config-identifier.c",
         "conv-hwc2chw-config.c",
         "dwconv-config.c",
         "dwconv2d-chw-config.c",
