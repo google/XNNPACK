@@ -2294,6 +2294,11 @@ struct xnn_weights_cache_look_up_key {
   const void* kernel;
   /// Pointer to the original bias, could be NULL.
   const void* bias;
+  /// Pointer to the operation configuration, can be NULL.
+  ///
+  /// If this is set, then the cache is allowed to compare the configuration to
+  /// previous runs and maybe reuse those run results.
+  const struct xnn_config_identifier* config;
 };
 
 /// A group of function pointers to manage weights cache. All functions may be
