@@ -15,8 +15,12 @@
 #include <iostream>
 #include <mutex>
 
+#include "include/experimental.h"
+
 #ifdef __linux__
 #include <sched.h>
+#else
+#include <thread>  // NOLINT(build/c++11)
 #endif
 #if defined(__ANDROID__) || defined(_WIN32) || defined(__CYGWIN__)
 #include <malloc.h>
@@ -84,7 +88,7 @@ static void InitWipeBuffer() {
 }
 
 // Pthreadpool-compatible function to wipe the cache in each thread.
-void PthreadpoolClearL2Cache(std::atomic<size_t>* counter, size_t id) {
+void PthreadpoolClearL2Cache(std::atomic<int64_t>* counter, size_t id) {
 #if XNN_ENABLE_CPUINFO
   static const size_t wipe_buffer_size = []() {
     const auto* l2_cache = cpuinfo_get_l2_cache(0);
@@ -116,6 +120,7 @@ void PthreadpoolClearL2Cache(std::atomic<size_t>* counter, size_t id) {
       cond_var.wait(lock);
     }
   }
+  counter->fetch_sub(1);
 }
 
 };  // namespace
@@ -196,6 +201,28 @@ void WipePthreadpoolL2Caches(benchmark::State& state,
   pthreadpool_parallelize_1d(
       threadpool, (pthreadpool_task_1d_t)PthreadpoolClearL2Cache, &counter,
       pthreadpool_get_threads_count(threadpool), 0);
+  state.ResumeTiming();
+}
+
+void WipeSchedulerL2Caches(benchmark::State& state, xnn_scheduler_v2 scheduler,
+                           void* scheduler_context) {
+  std::atomic<int64_t> counter;
+  state.PauseTiming();
+  const size_t num_threads = scheduler.num_threads(scheduler_context);
+  counter.store(num_threads + 1);
+  for (int k = 0; k < num_threads; k++) {
+    scheduler.schedule(scheduler_context, &counter, [](void* arg) -> void {
+      PthreadpoolClearL2Cache((std::atomic<int64_t>*)arg, 1);
+    });
+  }
+  PthreadpoolClearL2Cache(&counter, 0);
+  while (counter.load() != -(num_threads + 1)) {
+#ifdef __linux__
+    sched_yield();
+#else
+    std::this_thread::yield();
+#endif
+  }
   state.ResumeTiming();
 }
 

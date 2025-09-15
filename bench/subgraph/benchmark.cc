@@ -1,9 +1,9 @@
-// Copyright 2019 Google LLC
+// Copyright 2019-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <benchmark/benchmark.h>
+#include "bench/subgraph/benchmark.h"
 
 #include <cassert>
 #include <cstddef>
@@ -14,11 +14,12 @@
 #include <memory>
 #include <vector>
 
-#include "bench/subgraph/benchmark.h"
+#include "bench/subgraph/simple_scheduler.h"
 #include "bench/utils.h"
+#include "include/experimental.h"
 #include "include/xnnpack.h"
 #include "src/xnnpack/subgraph.h"
-#include <pthreadpool.h>
+#include <benchmark/benchmark.h>
 
 namespace xnnpack {
 
@@ -26,21 +27,19 @@ namespace {
 
 struct ModelRuntime {
   std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> model;
-  pthreadpool_t threadpool = nullptr;
+  std::unique_ptr<xnnpack::SimpleScheduler> scheduler;
   xnn_runtime_t runtime = nullptr;
   std::vector<xnn_external_value> external_values;
 
-  explicit ModelRuntime(int num_threads) : model(nullptr, xnn_delete_subgraph) {
+  explicit ModelRuntime(int num_threads)
+      : model(nullptr, xnn_delete_subgraph),
+        scheduler(std::make_unique<xnnpack::SimpleScheduler>(num_threads - 1)) {
     xnn_delete_runtime(runtime);
-    threadpool = pthreadpool_create(num_threads);
   }
 
   ~ModelRuntime() {
     if (runtime) {
       xnn_delete_runtime(runtime);
-    }
-    if (threadpool) {
-      pthreadpool_destroy(threadpool);
     }
     for (xnn_external_value& i : external_values) {
       free(i.data);
@@ -69,9 +68,11 @@ struct ModelRuntime {
 
   bool CreateRuntime(uint32_t flags) {
     assert(!runtime);
-    return xnn_status_success == xnn_create_runtime_v4(model.get(), nullptr,
-                                                       nullptr, threadpool,
-                                                       flags, &runtime);
+    return (xnn_status_success == xnn_create_runtime_with_scheduler(
+                                      model.get(), /*weights_cache=*/nullptr,
+                                      scheduler->GetXnnSchedulerV2(),
+                                      scheduler->GetContext(), flags,
+                                      &runtime));
   }
   bool ReshapeRuntime() {
     return xnn_status_success == xnn_reshape_runtime(runtime);
@@ -121,8 +122,14 @@ void RunBenchmark(benchmark::State& state,
   int num_iters = FLAGS_benchmark_min_iters;
   while (state.KeepRunningBatch(num_iters)) {
     for (int iter = 0; iter < num_iters; iter++) {
-      benchmark::utils::WipePthreadpoolL2Caches(state,
-                                                model_runtime.threadpool);
+      // if (model_runtime.runtime->threadpool) {
+      //   benchmark::utils::WipePthreadpoolL2Caches(
+      //       state, model_runtime.runtime->threadpool);
+      // } else {
+        benchmark::utils::WipeSchedulerL2Caches(
+            state, model_runtime.scheduler->GetXnnSchedulerV2(),
+            model_runtime.scheduler->GetContext());
+      // }
       if (!model_runtime.Invoke()) {
         state.SkipWithError("failed to invoke runtime");
         return;
