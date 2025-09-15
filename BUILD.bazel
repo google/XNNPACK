@@ -1261,8 +1261,13 @@ config_setting(
 
 # Enables usage of slinky locality optimizations
 config_setting(
-    name = "slinky_enabled",
+    name = "xnn_use_slinky_explicit_true",
     define_values = {"xnn_use_slinky": "true"},
+)
+
+config_setting(
+    name = "xnn_use_slinky_explicit_false",
+    define_values = {"xnn_use_slinky": "false"},
 )
 
 # Enables usage of WASM SIMD AVX-256 revectorization kernels.
@@ -1752,6 +1757,32 @@ alias(
         ":xnn_enable_cpuinfo_explicit_true": ":xnn_enable_cpuinfo_explicit_true",
         ":xnn_enable_cpuinfo_explicit_false": ":xnn_enable_cpuinfo_explicit_true",
         "//conditions:default": ":cpuinfo_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "slinky_enabled_by_default",
+    match_any = [
+        "//build_config:linux_x86",
+        "//build_config:linux_arm64",
+    ],
+)
+
+alias(
+    name = "slinky_enabled",
+    actual = select({
+        ":xnn_use_slinky_explicit_true": ":xnn_use_slinky_explicit_true",
+        ":xnn_use_slinky_explicit_false": ":xnn_use_slinky_explicit_true",
+        "//conditions:default": ":slinky_enabled_by_default",
+    }),
+)
+
+alias(
+    name = "use_slinky",
+    actual = select({
+        ":xnn_use_slinky_explicit_true": ":xnn_use_slinky_explicit_true",
+        ":xnn_use_slinky_explicit_false": ":xnn_use_slinky_explicit_true",
+        "//conditions:default": ":xnn_use_slinky_explicit_true",
     }),
 )
 
