@@ -35,6 +35,8 @@ extern "C" {
 /// Deprecated.
 #define XNN_FLAG_SLINKY_NO_CHECKS 0x00040000
 
+#define XNN_FLAG_RUNTIME_OWNS_THREADPOOL 0x00080000
+
 typedef struct xnn_threadpool* xnn_threadpool_t;
 
 /// An abstract interface of a parallel task scheduler.
@@ -60,7 +62,7 @@ enum xnn_status xnn_create_threadpool_v2(
 
 /// Destroy a Threadpool object
 ///
-/// @param subgraph - the Threadpool object to destroy.
+/// @param threadpool - the Threadpool object to destroy.
 enum xnn_status xnn_delete_threadpool(xnn_threadpool_t threadpool);
 
 /// Create a Runtime object from a subgraph with Slinky enabled.
