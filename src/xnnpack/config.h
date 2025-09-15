@@ -10,6 +10,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "include/experimental.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/microfnptr.h"
@@ -359,16 +360,13 @@ static inline bool xnn_is_hmp_igemm_ukernel(
 
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_bf16_f32_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f16_gemm_config();
-XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_gemm_config(
-    uint32_t flags);
-XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_gemm_nr2_config(
-    uint32_t flags);
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_gemm_config(uint32_t flags);
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_gemm_nr2_config(uint32_t flags);
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_igemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_qc8w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_qc4w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_pf16_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_pf32_gemm_config();
-XNN_INTERNAL const struct xnn_gemm_config* xnn_init_pqs8_qc8w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_pqs8_qc8w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qd8_f16_qb4w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qd8_f16_qc4w_gemm_config();
@@ -385,8 +383,7 @@ XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qdu8_f16_qc8w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qdu8_f32_qc8w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qdu8_f32_qb4w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qdu8_f16_qc4w_gemm_config();
-XNN_INTERNAL const struct xnn_gemm_config*
-xnn_init_qdu8_f32_qc8w_igemm_config();
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qdu8_f32_qc8w_igemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qs8_qc4w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qs8_qc8w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qu8_gemm_config();
@@ -430,6 +427,58 @@ xnn_init_f32_argmaxpool_config();
 XNN_INTERNAL const struct xnn_lut32norm_config* xnn_init_u8_lut32norm_config();
 
 XNN_INTERNAL const struct xnn_unpool_config* xnn_init_x32_unpool_config();
+
+// Used to create configuration identifiers for microkernel configuration
+// fingerprinting.
+//
+// Even though these values should not be used outside of XNNPack, the
+// fingerprints can be accessed and serialized. This means that the values
+// should not be changed as they will be compared to later XNNPack versions.
+//
+// They may be deprecated and new values can be added.
+typedef enum xnn_config_name {
+  xnn_config_name_unknown = 0,
+  // gemm
+  xnn_config_name_bf16_f32_gemm = 1,
+  xnn_config_name_f16_gemm = 2,
+  xnn_config_name_f32_gemm = 3,
+  xnn_config_name_f32_gemm_nr2 = 4,
+  xnn_config_name_f32_igemm = 5,
+  xnn_config_name_f32_qc8w_gemm = 6,
+  xnn_config_name_f32_qc4w_gemm = 7,
+  xnn_config_name_pf16_gemm = 8,
+  xnn_config_name_pf32_gemm = 9,
+  xnn_config_name_pqs8_qc8w_gemm = 10,
+  xnn_config_name_qd8_f16_qb4w_gemm = 11,
+  xnn_config_name_qd8_f16_qc4w_gemm = 12,
+  xnn_config_name_qd8_f16_qc8w_gemm = 13,
+  xnn_config_name_qd8_f16_qc8w_igemm = 14,
+  xnn_config_name_qd8_f32_qb4w_gemm = 15,
+  xnn_config_name_qd8_f32_qc4w_gemm = 16,
+  xnn_config_name_qd8_f32_qc8w_gemm = 17,
+  xnn_config_name_qp8_f32_qc4w_gemm = 18,
+  xnn_config_name_qp8_f32_qc8w_gemm = 19,
+  xnn_config_name_qp8_f32_qb4w_gemm = 20,
+  xnn_config_name_qdu8_f32_qc4w_gemm = 21,
+  xnn_config_name_qdu8_f16_qc8w_gemm = 22,
+  xnn_config_name_qdu8_f32_qc8w_gemm = 23,
+  xnn_config_name_qdu8_f32_qb4w_gemm = 24,
+  xnn_config_name_qdu8_f16_qc4w_gemm = 25,
+  xnn_config_name_qdu8_f32_qc8w_igemm = 26,
+  xnn_config_name_qs8_qc4w_gemm = 27,
+  xnn_config_name_qs8_qc8w_gemm = 28,
+  xnn_config_name_qu8_gemm = 29,
+  // dwconv
+  xnn_config_name_f16_dwconv2d_chw = 101,
+  xnn_config_name_f32_dwconv2d_chw = 102,
+} xnn_config_name;
+
+struct xnn_config_identifier xnn_create_config_identifier(xnn_config_name name,
+                                                   uint32_t version);
+
+xnn_config_name xnn_get_config_name(const struct xnn_config_identifier* identifier);
+
+xnn_config_name xnn_get_config_version(const struct xnn_config_identifier* identifier);
 
 #ifdef __cplusplus
 }  // extern "C"

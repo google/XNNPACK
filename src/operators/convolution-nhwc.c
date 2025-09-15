@@ -102,6 +102,7 @@ static enum xnn_status create_vmulcaddc_path(
     cache_key.seed = groups ^ vmulcaddc_config->channel_tile;
     cache_key.kernel = kernel;
     cache_key.bias = bias;
+    cache_key.config = &vmulcaddc_config->identifier;
     convolution_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
         convolution_op->weights_cache, &cache_key, weights_ptr,
         aligned_total_weights_size);
@@ -204,6 +205,7 @@ static enum xnn_status create_dwconv_path(
     cache_key.seed = cache_seed;
     cache_key.kernel = kernel;
     cache_key.bias = bias;
+    cache_key.config = &dwconv_ukernel->identifier;
     convolution_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
         convolution_op->weights_cache, &cache_key, weights_ptr,
         aligned_total_weights_size);
@@ -253,11 +255,13 @@ static enum xnn_status create_igemm(
                               group_output_channels ^ nr ^ kr ^ sr ^
                               ukernel_type ^ flags;
 
+  const struct xnn_weights_cache_look_up_key cache_key = {
+    .seed = cache_seed,
+    .kernel = kernel,
+    .bias = bias,
+    .config = &gemm_config->identifier,
+  };
   if (use_weights_cache(convolution_op)) {
-    struct xnn_weights_cache_look_up_key cache_key;
-    cache_key.seed = cache_seed;
-    cache_key.kernel = kernel;
-    cache_key.bias = bias;
     convolution_op->packed_weights.offset =
         xnn_weights_cache_look_up(convolution_op->weights_cache, &cache_key);
   }
@@ -389,10 +393,6 @@ static enum xnn_status create_igemm(
   }
 
   if (use_weights_cache(convolution_op)) {
-    struct xnn_weights_cache_look_up_key cache_key;
-    cache_key.seed = cache_seed;
-    cache_key.kernel = kernel;
-    cache_key.bias = bias;
     convolution_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
         convolution_op->weights_cache, &cache_key, weights_ptr,
         aligned_total_weights_size);
