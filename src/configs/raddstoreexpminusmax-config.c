@@ -101,7 +101,7 @@ static bool is_f16_compatible_config(const struct xnn_hardware_config* hardware_
   #if (XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR) || (XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR)
     return (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith);
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    return (hardware_config->arch_flags & xnn_arch_x86_avx2);
+    return (hardware_config->arch_flags & xnn_arch_x86_f16c);
   #else
     return false;
   #endif
