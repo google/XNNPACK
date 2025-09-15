@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "include/experimental.h"
 #include "include/xnnpack.h"
 #include "src/xnnpack/allocator.h"
 #include "src/xnnpack/cache.h"
@@ -165,7 +166,8 @@ static enum xnn_status create_conv2d_hwc2chw_path(
     const xnn_pack_dconv_oki_w_fn xnn_pack_dconv_oki_w,
     const xnn_conv_hwc2chw_ukernel_fn conv_hwc2chw_ukernel,
     const enum xnn_operator_type operator_type,
-    const xnn_operator_t convolution_op)
+    const xnn_operator_t convolution_op,
+    const struct xnn_config_identifier* config_identifier)
 {
   assert(conv_hwc2chw_ukernel != NULL);
 
@@ -195,6 +197,7 @@ static enum xnn_status create_conv2d_hwc2chw_path(
     cache_key.seed = group_input_channels ^ group_output_channels ^ output_channel_tile;
     cache_key.kernel = kernel;
     cache_key.bias = bias;
+    cache_key.config = config_identifier;
     convolution_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
         convolution_op->weights_cache, &cache_key, weights_ptr, aligned_total_weights_size);
   }
@@ -220,7 +223,8 @@ static enum xnn_status create_dwconv_path(
     const size_t output_width_tile,
     const xnn_dwconv2d_chw_ukernel_fn dwconv_ukernel,
     const enum xnn_operator_type operator_type,
-    const xnn_operator_t convolution_op)
+    const xnn_operator_t convolution_op,
+    const struct xnn_config_identifier* config_identifier)
 {
   assert(dwconv_ukernel != NULL);
 
@@ -253,6 +257,7 @@ static enum xnn_status create_dwconv_path(
     cache_key.seed = cache_seed;
     cache_key.kernel = kernel;
     cache_key.bias = bias;
+    cache_key.config = config_identifier;
     convolution_op->packed_weights.offset = xnn_look_up_or_insert_weights_cache(
         convolution_op->weights_cache, &cache_key, weights_ptr, aligned_total_weights_size);
   }
@@ -556,7 +561,8 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
           kernel, bias, log2_filter_element_size,
           xnn_pack_dconv_oki_w,
           conv_hwc2chw_config->ukernel_with_symm_padding,
-          operator_type, convolution_op);
+          operator_type, convolution_op,
+          &conv_hwc2chw_config->identifier);
       if (status != xnn_status_success) {
         goto error;
       }
@@ -580,7 +586,8 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
           pack_chw_dwconv_ghw_w,
           dwconv2d_parameters->output_width_tile,
           dwconv2d_parameters->ukernel,
-          operator_type, convolution_op);
+          operator_type, convolution_op,
+          &dwconv2d_chw_config->identifier);
       if (status != xnn_status_success) {
         goto error;
       }
@@ -909,7 +916,8 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
           kernel, bias, log2_filter_element_size,
           (xnn_pack_dconv_oki_w_fn) xnn_pack_f32_dconv_oki_w,
           conv_hwc2chw_config->ukernel_with_symm_padding,
-          operator_type, convolution_op);
+          operator_type, convolution_op,
+          &conv_hwc2chw_config->identifier);
       if (status != xnn_status_success) {
         goto error;
       }
@@ -926,7 +934,8 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
           (xnn_pack_chw_dwconv_ghw_w_fn) xnn_pack_f32_chw_dwconv_ghw_w,
           dwconv2d_parameters->output_width_tile,
           dwconv2d_parameters->ukernel,
-          operator_type, convolution_op);
+          operator_type, convolution_op,
+          &dwconv2d_chw_config->identifier);
       if (status != xnn_status_success) {
         goto error;
       }

@@ -28,6 +28,10 @@ XNN_INIT_ONCE_GUARD(f32_vmulcaddc);
   xnn_log_info("Using vmulcaddc microkernel '%s'.", #ukernel);
 
 static void init_f16_vmulcaddc_config(void) {
+  // LINT.IfChange(f16_vmulcaddc_identifier)
+  f16_vmulcaddc_config.identifier = xnn_create_config_identifier(xnn_config_name_f16_vmulcaddc, /*version=*/0);
+  // LINT.ThenChange(:f16_vmulcaddc_config)
+  // LINT.IfChange(f16_vmulcaddc_config)
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -56,9 +60,14 @@ static void init_f16_vmulcaddc_config(void) {
       f16_vmulcaddc_config.row_tile = 2;
     }
   #endif
+  // LINT.ThenChange(:f16_vmulcaddc_identifier)
 }
 
 static void init_f32_vmulcaddc_config(void) {
+  // LINT.IfChange(f32_vmulcaddc_identifier)
+  f32_vmulcaddc_config.identifier = xnn_create_config_identifier(xnn_config_name_f32_vmulcaddc, /*version=*/0);
+  // LINT.ThenChange(:f32_vmulcaddc_config)
+  // LINT.IfChange(f32_vmulcaddc_config)
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -110,6 +119,7 @@ static void init_f32_vmulcaddc_config(void) {
     f32_vmulcaddc_config.channel_tile = 1;
     f32_vmulcaddc_config.row_tile = 2;
   #endif
+  // LINT.ThenChange(:f32_vmulcaddc_identifier)
 }
 
 const struct xnn_vmulcaddc_config* xnn_init_f16_vmulcaddc_config() {
