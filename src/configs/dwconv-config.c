@@ -85,7 +85,7 @@ static void init_f16_dwconv_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
+    if ((hardware_config->arch_flags & xnn_arch_x86_fma3) && (hardware_config->arch_flags & xnn_arch_x86_f16c)) {
       f16_dwconv_config[0].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f16_dwconv_minmax_ukernel_3p16c__fma3);
       f16_dwconv_config[0].init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_dwconv_config[0].channel_tile = 16;
