@@ -297,6 +297,7 @@ enum xnn_status create_batch_matrix_multiply_nc_const_weights(
   cache_key.seed = cache_seed;
   cache_key.kernel = data_b;
   cache_key.bias = NULL;
+  cache_key.config = &(batch_matrix_multiply_op->gemm_config->identifier);
   if (use_weights_cache(batch_matrix_multiply_op)) {
     cache_offset = xnn_weights_cache_look_up(
         batch_matrix_multiply_op->weights_cache, &cache_key);

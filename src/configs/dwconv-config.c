@@ -34,6 +34,10 @@ XNN_INIT_ONCE_GUARD(qu8_dwconv);
   xnn_log_info("Using dwconv microkernel '%s'.", #ukernel);
 
 static void init_f16_dwconv_config(void) {
+  // LINT.IfChange(f16_dwconv_identifier)
+  f16_dwconv_config.identifier = xnn_create_config_identifier(xnn_config_name_f16_dwconv, /*version=*/0);
+  // LINT.ThenChange(:f16_dwconv_config)
+  // LINT.IfChange(f16_dwconv_config)
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -107,9 +111,14 @@ static void init_f16_dwconv_config(void) {
       f16_dwconv_config[3].primary_tile = 25;
     }
   #endif
+  // LINT.ThenChange(:f16_dwconv_identifier)
 }
 
 static void init_f32_dwconv_config(void) {
+  // LINT.IfChange(f32_dwconv_identifier)
+  f32_dwconv_config.identifier = xnn_create_config_identifier(xnn_config_name_f32_dwconv, /*version=*/0);
+  // LINT.ThenChange(:f32_dwconv_config)
+  // LINT.IfChange(f32_dwconv_config)
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -441,9 +450,14 @@ static void init_f32_dwconv_config(void) {
     f32_dwconv_config[3].channel_tile = 1;
     f32_dwconv_config[3].primary_tile = 25;
   #endif
+  // LINT.ThenChange(:f32_dwconv_identifier)
 }
 
 static void init_qs8_qc8w_dwconv_config(void) {
+  // LINT.IfChange(qs8_qc8w_dwconv_identifier)
+  qs8_qc8w_dwconv_config.identifier = xnn_create_config_identifier(xnn_config_name_qs8_qc8w_dwconv, /*version=*/0);
+  // LINT.ThenChange(:qs8_qc8w_dwconv_config)
+  // LINT.IfChange(qs8_qc8w_dwconv_config)
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -603,9 +617,14 @@ static void init_qs8_qc8w_dwconv_config(void) {
     qs8_qc8w_dwconv_config[2].channel_tile = 2;
     qs8_qc8w_dwconv_config[2].primary_tile = 25;
   #endif
+  // LINT.ThenChange(:qs8_qc8w_dwconv_identifier)
 }
 
 static void init_qs8_dwconv_config(void) {
+  // LINT.IfChange(qs8_dwconv_identifier)
+  qs8_dwconv_config.identifier = xnn_create_config_identifier(xnn_config_name_qs8_dwconv, /*version=*/0);
+  // LINT.ThenChange(:qs8_dwconv_config)
+  // LINT.IfChange(qs8_dwconv_config)
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -710,9 +729,14 @@ static void init_qs8_dwconv_config(void) {
     qs8_dwconv_config[1].channel_tile = 2;
     qs8_dwconv_config[1].primary_tile = 25;
   #endif
+  // LINT.ThenChange(:qs8_dwconv_identifier)
 }
 
 static void init_qu8_dwconv_config(void) {
+  // LINT.IfChange(qu8_dwconv_identifier)
+  qu8_dwconv_config.identifier = xnn_create_config_identifier(xnn_config_name_qu8_dwconv, /*version=*/0);
+  // LINT.ThenChange(:qu8_dwconv_config)
+  // LINT.IfChange(qu8_dwconv_config)
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -817,6 +841,7 @@ static void init_qu8_dwconv_config(void) {
     qu8_dwconv_config[1].channel_tile = 2;
     qu8_dwconv_config[1].primary_tile = 25;
   #endif
+  // LINT.ThenChange(:qu8_dwconv_identifier)
 }
 
 const struct xnn_dwconv_config* xnn_init_f16_dwconv_config() {
