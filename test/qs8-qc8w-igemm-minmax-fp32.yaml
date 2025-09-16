@@ -1684,14 +1684,6 @@
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 4
-- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_9x32c4__hvx
-  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
-  pack: xnn_pack_qs8_conv_goki_w
-  k-block: 4
-- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_10x32c4__hvx
-  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
-  pack: xnn_pack_qs8_conv_goki_w
-  k-block: 4
 
 - name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x64c4__hvx
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
@@ -1725,55 +1717,6 @@
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 4
-- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_9x64c4__hvx
-  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
-  pack: xnn_pack_qs8_conv_goki_w
-  k-block: 4
-- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_10x64c4__hvx
-  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
-  pack: xnn_pack_qs8_conv_goki_w
-  k-block: 4
-
-- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x96c4__hvx
-  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
-  pack: xnn_pack_qs8_conv_goki_w
-  k-block: 4
-- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_2x96c4__hvx
-  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
-  pack: xnn_pack_qs8_conv_goki_w
-  k-block: 4
-- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_3x96c4__hvx
-  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
-  pack: xnn_pack_qs8_conv_goki_w
-  k-block: 4
-- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x96c4__hvx
-  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
-  pack: xnn_pack_qs8_conv_goki_w
-  k-block: 4
-- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_5x96c4__hvx
-  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
-  pack: xnn_pack_qs8_conv_goki_w
-  k-block: 4
-- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_6x96c4__hvx
-  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
-  pack: xnn_pack_qs8_conv_goki_w
-  k-block: 4
-- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_7x96c4__hvx
-  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
-  pack: xnn_pack_qs8_conv_goki_w
-  k-block: 4
-- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_8x96c4__hvx
-  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
-  pack: xnn_pack_qs8_conv_goki_w
-  k-block: 4
-- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_9x96c4__hvx
-  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
-  pack: xnn_pack_qs8_conv_goki_w
-  k-block: 4
-- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_10x96c4__hvx
-  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
-  pack: xnn_pack_qs8_conv_goki_w
-  k-block: 4
 
 - name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x128c4__hvx
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
@@ -1804,14 +1747,6 @@
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 4
 - name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_8x128c4__hvx
-  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
-  pack: xnn_pack_qs8_conv_goki_w
-  k-block: 4
-- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_9x128c4__hvx
-  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
-  pack: xnn_pack_qs8_conv_goki_w
-  k-block: 4
-- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_10x128c4__hvx
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 4

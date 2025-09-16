@@ -5,7 +5,7 @@
 
 $assert REQUANTIZATION == "FP32" or not REQUANTIZATION
 $assert REQUANTIZATION in ["FP32", "RNDNU"] or not REQUANTIZATION
-$assert DATATYPE in ["QC8", "QS8", "QD8", "QC4"]
+$assert DATATYPE in ["QC8", "QS8_QC4"]
 $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 $assert not DATATYPE in ["QD8", "QC4"] or not REQUANTIZATION
 #include <assert.h>
@@ -21,11 +21,11 @@ $assert not DATATYPE in ["QD8", "QC4"] or not REQUANTIZATION
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/unaligned.h"
 
-$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8": "qd8_f32_qc8w", "QS8": "qs8", "QU8": "qu8", "QC4": "qd8_f32_qc4w"}[DATATYPE]
-$REQUANTIZATION_SPEC = "" if DATATYPE in ["QD8", "QC4"] else "_" + REQUANTIZATION.lower()
+$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8_QC4": "qs8_qc4w", "QD8_F16" : "qd8_f16_qc8w", "QD8_F32": "qd8_f32_qc8w", "QC4_F16": "qd8_f16_qc4w", "QC4_F32": "qd8_f32_qc4w"}[DATATYPE]
+$REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar" if REQUANTIZATION else "scalar"
-$PARAMS_TYPE = {"QC8": "union xnn_qs8_qc8w_conv_minmax_params", "QS8": "union xnn_qs8_conv_minmax_params", "QD8": "struct xnn_f32_minmax_params"}[DATATYPE]
-$OUT_T = "float" if DATATYPE in ["QD8", "QC4"] else "int8_t"
+$PARAMS_TYPE = {"QC8": "union xnn_qs8_qc8w_conv_minmax_params", "QS8_QC4": "union xnn_qs8_qc8w_conv_minmax_params", "QD8_F16": "struct xnn_f16_minmax_params", "QD8_F32": "struct xnn_f32_minmax_params", "QC4_F16": "struct xnn_f16_qc4w_minmax_params", "QC4_F32": "struct xnn_f32_qc4w_minmax_params"}[DATATYPE]
+$OUT_T = {"QC8": "int8_t", "QS8_QC4": "int8_t", "QD8_F16": "xnn_float16", "QD8_F32": "float", "QC4_F16": "xnn_float16", "QC4_F32": "float"}[DATATYPE]
 
 // multiply vacc by vscale and return result as int
 // vacc is vector of int32
@@ -70,7 +70,11 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
     ${OUT_T}* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const ${PARAMS_TYPE}* restrict params) XNN_OOB_READS
+    $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
+      const ${PARAMS_TYPE}* restrict params,
+      const struct xnn_qd8_quantization_params* restrict quantization_params) XNN_OOB_READS
+    $else:
+      const ${PARAMS_TYPE}* restrict params) XNN_OOB_READS
 {
   assert(mr != 0);
   assert(mr <= ${MR});
@@ -83,10 +87,16 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
 
   kc = round_up_po2(kc, 4 * sizeof(int8_t));
   const int8_t* a0 = a;
-  ${OUT_T}* c0 = c;
+  $if DATATYPE in ["QD8_F16", "QC4_F16"]:
+    uint16_t* c0 = (uint16_t*) c;
+  $else:
+    ${OUT_T}* c0 = c;
   $for M in range(1, MR):
     const int8_t* a${M} = (const int8_t*) ((uintptr_t) a${M-1} + a_stride);
-    ${OUT_T}* c${M} = (${OUT_T}*) ((uintptr_t) c${M-1} + cm_stride);
+    $if DATATYPE in ["QD8_F16", "QC4_F16"]:
+      uint16_t* c${M} = (uint16_t*) ((uintptr_t) c${M-1} + cm_stride);
+    $else:
+      ${OUT_T}* c${M} = (${OUT_T}*) ((uintptr_t) c${M-1} + cm_stride);
     $if M % 2 == 0:
       if XNN_UNPREDICTABLE(mr <= ${M}) {
         a${M} = a${M-1};
@@ -121,6 +131,8 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
   const HVX_Vector voutput_zero_point = Q6_Vh_vsplat_R(params->${PARAMS_STRUCT}.output_zero_point);
   const HVX_Vector voutput_min = Q6_Vb_vsplat_R(params->${PARAMS_STRUCT}.output_min);
   const HVX_Vector voutput_max = Q6_Vb_vsplat_R(params->${PARAMS_STRUCT}.output_max);
+  $if DATATYPE in ["QC4_F16", "QC4_F32", "QS8_QC4"]:
+    const HVX_Vector vmask = Q6_Vb_vsplat_R(0xF0);
   $if PREFETCH:
     const uint32_t prefetch_size = HEXAGON_V64_CREATE_H(0, 0, kc * ${NR}, 1);
   do {
@@ -134,30 +146,79 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
 
     size_t k = kc;
     if (((((intptr_t) a) | a_stride) & (sizeof(int32_t) - 1)) != 0) {
-      for (; k >= 4 * sizeof(int8_t); k -= 4 * sizeof(int8_t)) {
+      for (; k >= 8 * sizeof(int8_t); k -= 8 * sizeof(int8_t)) {
         $for M in range(MR):
-          const HVX_Vector va${M}x0123 = Q6_V_vsplat_R(unaligned_load_s32(a${M})); a${M} += 4;
+          const HVX_Vector va${M}x0123 = Q6_V_vsplat_R(unaligned_load_s32(a${M}));
+          const HVX_Vector va${M}x4567 = Q6_V_vsplat_R(unaligned_load_s32(a${M}+4)); a${M} += 8;
 
-        $for N in range(0, NR, 32):
-          const HVX_Vector vb${N//32}x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+        $if DATATYPE in ["QC4_F16", "QC4_F32", "QS8_QC4"]:
+          $for N in range(0, NR, 32):
+            const HVX_Vector vb${N//32}x01234567 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+            const HVX_Vector vbs${N//32}x0123 = Q6_Vw_vasl_VwR(vb${N//32}x01234567, 4);
+            const HVX_Vector vb${N//32}x4567 = Q6_V_vand_VV(vb${N//32}x01234567, vmask);
+            const HVX_Vector vb${N//32}x0123 = Q6_V_vand_VV(vbs${N//32}x0123, vmask);
+        $else:
+          $for N in range(0, NR, 32):
+            const HVX_Vector vb${N//32}x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+          $for N in range(0, NR, 32):
+            const HVX_Vector vb${N//32}x4567 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
 
         $for M in range(MR):
           $for N in range(0, NR, 32):
             vacc${M}x${N//32} = Q6_Vw_vrmpyacc_VwVbVb(vacc${M}x${N//32}, va${M}x0123, vb${N//32}x0123);
+        $for M in range(MR):
+          $for N in range(0, NR, 32):
+            vacc${M}x${N//32} = Q6_Vw_vrmpyacc_VwVbVb(vacc${M}x${N//32}, va${M}x4567, vb${N//32}x4567);
       }
     } else {
-      for (; k >= 4 * sizeof(int8_t); k -= 4 * sizeof(int8_t)) {
+      for (; k >= 8 * sizeof(int8_t); k -= 8 * sizeof(int8_t)) {
         $for M in range(MR):
-          const HVX_Vector va${M}x0123 = Q6_V_vsplat_R(*((const int32_t*)a${M})); a${M} += 4;
+          const HVX_Vector va${M}x0123 = Q6_V_vsplat_R(*((const int32_t*)a${M}));
+          const HVX_Vector va${M}x4567 = Q6_V_vsplat_R(*((const int32_t*)a${M}+4)); a${M} += 8;
 
-        $for N in range(0, NR, 32):
-          const HVX_Vector vb${N//32}x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+        $if DATATYPE in ["QC4_F16", "QC4_F32", "QS8_QC4"]:
+          $for N in range(0, NR, 32):
+            const HVX_Vector vb${N//32}x01234567 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+            const HVX_Vector vbs${N//32}x0123 = Q6_Vw_vasl_VwR(vb${N//32}x01234567, 4);
+            const HVX_Vector vb${N//32}x4567 = Q6_V_vand_VV(vb${N//32}x01234567, vmask);
+            const HVX_Vector vb${N//32}x0123 = Q6_V_vand_VV(vbs${N//32}x0123, vmask);
+        $else:
+          $for N in range(0, NR, 32):
+            const HVX_Vector vb${N//32}x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+          $for N in range(0, NR, 32):
+            const HVX_Vector vb${N//32}x4567 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
 
         $for M in range(MR):
           $for N in range(0, NR, 32):
             vacc${M}x${N//32} = Q6_Vw_vrmpyacc_VwVbVb(vacc${M}x${N//32}, va${M}x0123, vb${N//32}x0123);
+        $for M in range(MR):
+          $for N in range(0, NR, 32):
+            vacc${M}x${N//32} = Q6_Vw_vrmpyacc_VwVbVb(vacc${M}x${N//32}, va${M}x4567, vb${N//32}x4567);
       }
     }
+    if (k != 0) {
+      $for M in range(MR):
+        const HVX_Vector va${M}x0123 = Q6_V_vsplat_R(unaligned_load_s32(a${M})); a${M} += 4;
+
+      $if DATATYPE in ["QC4_F16", "QC4_F32", "QS8_QC4"]:
+        $for N in range(0, NR, 32):
+          const HVX_Vector vb${N//32}x01234567 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+          const HVX_Vector vbs${N//32}x0123 = Q6_Vw_vasl_VwR(vb${N//32}x01234567, 4);
+          const HVX_Vector vb${N//32}x0123 = Q6_V_vand_VV(vbs${N//32}x0123, vmask);
+      $else:
+        $for N in range(0, NR, 32):
+          const HVX_Vector vb${N//32}x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+
+      $for M in range(MR):
+        $for N in range(0, NR, 32):
+          vacc${M}x${N//32} = Q6_Vw_vrmpyacc_VwVbVb(vacc${M}x${N//32}, va${M}x0123, vb${N//32}x0123);
+    }
+
+    $if DATATYPE in ["QC4_F16", "QC4_F32", "QS8_QC4"]:
+      $for M in range(MR):
+        $for N in range(0, NR, 32):
+          vacc${M}x${N//32} = Q6_Vw_vasr_VwR(vacc${M}x${N//32}, 4);
+
     $for N in range(0, NR, 32):
       const HVX_Vector vscale${N//32} = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
       $for M in range(MR):

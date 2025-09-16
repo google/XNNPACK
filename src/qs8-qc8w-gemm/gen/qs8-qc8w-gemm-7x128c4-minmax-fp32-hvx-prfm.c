@@ -168,19 +168,30 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_7x128c4__hvx_prfm(
 
     size_t k = kc;
     if (((((intptr_t) a) | a_stride) & (sizeof(int32_t) - 1)) != 0) {
-      for (; k >= 4 * sizeof(int8_t); k -= 4 * sizeof(int8_t)) {
-        const HVX_Vector va0x0123 = Q6_V_vsplat_R(unaligned_load_s32(a0)); a0 += 4;
-        const HVX_Vector va1x0123 = Q6_V_vsplat_R(unaligned_load_s32(a1)); a1 += 4;
-        const HVX_Vector va2x0123 = Q6_V_vsplat_R(unaligned_load_s32(a2)); a2 += 4;
-        const HVX_Vector va3x0123 = Q6_V_vsplat_R(unaligned_load_s32(a3)); a3 += 4;
-        const HVX_Vector va4x0123 = Q6_V_vsplat_R(unaligned_load_s32(a4)); a4 += 4;
-        const HVX_Vector va5x0123 = Q6_V_vsplat_R(unaligned_load_s32(a5)); a5 += 4;
-        const HVX_Vector va6x0123 = Q6_V_vsplat_R(unaligned_load_s32(a6)); a6 += 4;
+      for (; k >= 8 * sizeof(int8_t); k -= 8 * sizeof(int8_t)) {
+        const HVX_Vector va0x0123 = Q6_V_vsplat_R(unaligned_load_s32(a0));
+        const HVX_Vector va0x4567 = Q6_V_vsplat_R(unaligned_load_s32(a0+4)); a0 += 8;
+        const HVX_Vector va1x0123 = Q6_V_vsplat_R(unaligned_load_s32(a1));
+        const HVX_Vector va1x4567 = Q6_V_vsplat_R(unaligned_load_s32(a1+4)); a1 += 8;
+        const HVX_Vector va2x0123 = Q6_V_vsplat_R(unaligned_load_s32(a2));
+        const HVX_Vector va2x4567 = Q6_V_vsplat_R(unaligned_load_s32(a2+4)); a2 += 8;
+        const HVX_Vector va3x0123 = Q6_V_vsplat_R(unaligned_load_s32(a3));
+        const HVX_Vector va3x4567 = Q6_V_vsplat_R(unaligned_load_s32(a3+4)); a3 += 8;
+        const HVX_Vector va4x0123 = Q6_V_vsplat_R(unaligned_load_s32(a4));
+        const HVX_Vector va4x4567 = Q6_V_vsplat_R(unaligned_load_s32(a4+4)); a4 += 8;
+        const HVX_Vector va5x0123 = Q6_V_vsplat_R(unaligned_load_s32(a5));
+        const HVX_Vector va5x4567 = Q6_V_vsplat_R(unaligned_load_s32(a5+4)); a5 += 8;
+        const HVX_Vector va6x0123 = Q6_V_vsplat_R(unaligned_load_s32(a6));
+        const HVX_Vector va6x4567 = Q6_V_vsplat_R(unaligned_load_s32(a6+4)); a6 += 8;
 
         const HVX_Vector vb0x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
         const HVX_Vector vb1x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
         const HVX_Vector vb2x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
         const HVX_Vector vb3x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+        const HVX_Vector vb0x4567 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+        const HVX_Vector vb1x4567 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+        const HVX_Vector vb2x4567 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+        const HVX_Vector vb3x4567 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
 
         vacc0x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x0, va0x0123, vb0x0123);
         vacc0x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x1, va0x0123, vb1x0123);
@@ -210,21 +221,60 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_7x128c4__hvx_prfm(
         vacc6x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc6x1, va6x0123, vb1x0123);
         vacc6x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc6x2, va6x0123, vb2x0123);
         vacc6x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc6x3, va6x0123, vb3x0123);
+        vacc0x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x0, va0x4567, vb0x4567);
+        vacc0x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x1, va0x4567, vb1x4567);
+        vacc0x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x2, va0x4567, vb2x4567);
+        vacc0x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x3, va0x4567, vb3x4567);
+        vacc1x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc1x0, va1x4567, vb0x4567);
+        vacc1x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc1x1, va1x4567, vb1x4567);
+        vacc1x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc1x2, va1x4567, vb2x4567);
+        vacc1x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc1x3, va1x4567, vb3x4567);
+        vacc2x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc2x0, va2x4567, vb0x4567);
+        vacc2x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc2x1, va2x4567, vb1x4567);
+        vacc2x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc2x2, va2x4567, vb2x4567);
+        vacc2x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc2x3, va2x4567, vb3x4567);
+        vacc3x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc3x0, va3x4567, vb0x4567);
+        vacc3x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc3x1, va3x4567, vb1x4567);
+        vacc3x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc3x2, va3x4567, vb2x4567);
+        vacc3x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc3x3, va3x4567, vb3x4567);
+        vacc4x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc4x0, va4x4567, vb0x4567);
+        vacc4x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc4x1, va4x4567, vb1x4567);
+        vacc4x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc4x2, va4x4567, vb2x4567);
+        vacc4x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc4x3, va4x4567, vb3x4567);
+        vacc5x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc5x0, va5x4567, vb0x4567);
+        vacc5x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc5x1, va5x4567, vb1x4567);
+        vacc5x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc5x2, va5x4567, vb2x4567);
+        vacc5x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc5x3, va5x4567, vb3x4567);
+        vacc6x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc6x0, va6x4567, vb0x4567);
+        vacc6x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc6x1, va6x4567, vb1x4567);
+        vacc6x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc6x2, va6x4567, vb2x4567);
+        vacc6x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc6x3, va6x4567, vb3x4567);
       }
     } else {
-      for (; k >= 4 * sizeof(int8_t); k -= 4 * sizeof(int8_t)) {
-        const HVX_Vector va0x0123 = Q6_V_vsplat_R(*((const int32_t*)a0)); a0 += 4;
-        const HVX_Vector va1x0123 = Q6_V_vsplat_R(*((const int32_t*)a1)); a1 += 4;
-        const HVX_Vector va2x0123 = Q6_V_vsplat_R(*((const int32_t*)a2)); a2 += 4;
-        const HVX_Vector va3x0123 = Q6_V_vsplat_R(*((const int32_t*)a3)); a3 += 4;
-        const HVX_Vector va4x0123 = Q6_V_vsplat_R(*((const int32_t*)a4)); a4 += 4;
-        const HVX_Vector va5x0123 = Q6_V_vsplat_R(*((const int32_t*)a5)); a5 += 4;
-        const HVX_Vector va6x0123 = Q6_V_vsplat_R(*((const int32_t*)a6)); a6 += 4;
+      for (; k >= 8 * sizeof(int8_t); k -= 8 * sizeof(int8_t)) {
+        const HVX_Vector va0x0123 = Q6_V_vsplat_R(*((const int32_t*)a0));
+        const HVX_Vector va0x4567 = Q6_V_vsplat_R(*((const int32_t*)a0+4)); a0 += 8;
+        const HVX_Vector va1x0123 = Q6_V_vsplat_R(*((const int32_t*)a1));
+        const HVX_Vector va1x4567 = Q6_V_vsplat_R(*((const int32_t*)a1+4)); a1 += 8;
+        const HVX_Vector va2x0123 = Q6_V_vsplat_R(*((const int32_t*)a2));
+        const HVX_Vector va2x4567 = Q6_V_vsplat_R(*((const int32_t*)a2+4)); a2 += 8;
+        const HVX_Vector va3x0123 = Q6_V_vsplat_R(*((const int32_t*)a3));
+        const HVX_Vector va3x4567 = Q6_V_vsplat_R(*((const int32_t*)a3+4)); a3 += 8;
+        const HVX_Vector va4x0123 = Q6_V_vsplat_R(*((const int32_t*)a4));
+        const HVX_Vector va4x4567 = Q6_V_vsplat_R(*((const int32_t*)a4+4)); a4 += 8;
+        const HVX_Vector va5x0123 = Q6_V_vsplat_R(*((const int32_t*)a5));
+        const HVX_Vector va5x4567 = Q6_V_vsplat_R(*((const int32_t*)a5+4)); a5 += 8;
+        const HVX_Vector va6x0123 = Q6_V_vsplat_R(*((const int32_t*)a6));
+        const HVX_Vector va6x4567 = Q6_V_vsplat_R(*((const int32_t*)a6+4)); a6 += 8;
 
         const HVX_Vector vb0x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
         const HVX_Vector vb1x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
         const HVX_Vector vb2x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
         const HVX_Vector vb3x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+        const HVX_Vector vb0x4567 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+        const HVX_Vector vb1x4567 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+        const HVX_Vector vb2x4567 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+        const HVX_Vector vb3x4567 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
 
         vacc0x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x0, va0x0123, vb0x0123);
         vacc0x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x1, va0x0123, vb1x0123);
@@ -254,8 +304,81 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_7x128c4__hvx_prfm(
         vacc6x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc6x1, va6x0123, vb1x0123);
         vacc6x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc6x2, va6x0123, vb2x0123);
         vacc6x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc6x3, va6x0123, vb3x0123);
+        vacc0x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x0, va0x4567, vb0x4567);
+        vacc0x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x1, va0x4567, vb1x4567);
+        vacc0x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x2, va0x4567, vb2x4567);
+        vacc0x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x3, va0x4567, vb3x4567);
+        vacc1x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc1x0, va1x4567, vb0x4567);
+        vacc1x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc1x1, va1x4567, vb1x4567);
+        vacc1x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc1x2, va1x4567, vb2x4567);
+        vacc1x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc1x3, va1x4567, vb3x4567);
+        vacc2x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc2x0, va2x4567, vb0x4567);
+        vacc2x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc2x1, va2x4567, vb1x4567);
+        vacc2x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc2x2, va2x4567, vb2x4567);
+        vacc2x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc2x3, va2x4567, vb3x4567);
+        vacc3x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc3x0, va3x4567, vb0x4567);
+        vacc3x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc3x1, va3x4567, vb1x4567);
+        vacc3x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc3x2, va3x4567, vb2x4567);
+        vacc3x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc3x3, va3x4567, vb3x4567);
+        vacc4x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc4x0, va4x4567, vb0x4567);
+        vacc4x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc4x1, va4x4567, vb1x4567);
+        vacc4x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc4x2, va4x4567, vb2x4567);
+        vacc4x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc4x3, va4x4567, vb3x4567);
+        vacc5x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc5x0, va5x4567, vb0x4567);
+        vacc5x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc5x1, va5x4567, vb1x4567);
+        vacc5x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc5x2, va5x4567, vb2x4567);
+        vacc5x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc5x3, va5x4567, vb3x4567);
+        vacc6x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc6x0, va6x4567, vb0x4567);
+        vacc6x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc6x1, va6x4567, vb1x4567);
+        vacc6x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc6x2, va6x4567, vb2x4567);
+        vacc6x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc6x3, va6x4567, vb3x4567);
       }
     }
+    if (k != 0) {
+      const HVX_Vector va0x0123 = Q6_V_vsplat_R(unaligned_load_s32(a0)); a0 += 4;
+      const HVX_Vector va1x0123 = Q6_V_vsplat_R(unaligned_load_s32(a1)); a1 += 4;
+      const HVX_Vector va2x0123 = Q6_V_vsplat_R(unaligned_load_s32(a2)); a2 += 4;
+      const HVX_Vector va3x0123 = Q6_V_vsplat_R(unaligned_load_s32(a3)); a3 += 4;
+      const HVX_Vector va4x0123 = Q6_V_vsplat_R(unaligned_load_s32(a4)); a4 += 4;
+      const HVX_Vector va5x0123 = Q6_V_vsplat_R(unaligned_load_s32(a5)); a5 += 4;
+      const HVX_Vector va6x0123 = Q6_V_vsplat_R(unaligned_load_s32(a6)); a6 += 4;
+
+      const HVX_Vector vb0x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+      const HVX_Vector vb1x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+      const HVX_Vector vb2x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+      const HVX_Vector vb3x0123 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
+
+      vacc0x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x0, va0x0123, vb0x0123);
+      vacc0x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x1, va0x0123, vb1x0123);
+      vacc0x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x2, va0x0123, vb2x0123);
+      vacc0x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc0x3, va0x0123, vb3x0123);
+      vacc1x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc1x0, va1x0123, vb0x0123);
+      vacc1x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc1x1, va1x0123, vb1x0123);
+      vacc1x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc1x2, va1x0123, vb2x0123);
+      vacc1x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc1x3, va1x0123, vb3x0123);
+      vacc2x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc2x0, va2x0123, vb0x0123);
+      vacc2x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc2x1, va2x0123, vb1x0123);
+      vacc2x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc2x2, va2x0123, vb2x0123);
+      vacc2x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc2x3, va2x0123, vb3x0123);
+      vacc3x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc3x0, va3x0123, vb0x0123);
+      vacc3x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc3x1, va3x0123, vb1x0123);
+      vacc3x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc3x2, va3x0123, vb2x0123);
+      vacc3x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc3x3, va3x0123, vb3x0123);
+      vacc4x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc4x0, va4x0123, vb0x0123);
+      vacc4x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc4x1, va4x0123, vb1x0123);
+      vacc4x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc4x2, va4x0123, vb2x0123);
+      vacc4x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc4x3, va4x0123, vb3x0123);
+      vacc5x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc5x0, va5x0123, vb0x0123);
+      vacc5x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc5x1, va5x0123, vb1x0123);
+      vacc5x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc5x2, va5x0123, vb2x0123);
+      vacc5x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc5x3, va5x0123, vb3x0123);
+      vacc6x0 = Q6_Vw_vrmpyacc_VwVbVb(vacc6x0, va6x0123, vb0x0123);
+      vacc6x1 = Q6_Vw_vrmpyacc_VwVbVb(vacc6x1, va6x0123, vb1x0123);
+      vacc6x2 = Q6_Vw_vrmpyacc_VwVbVb(vacc6x2, va6x0123, vb2x0123);
+      vacc6x3 = Q6_Vw_vrmpyacc_VwVbVb(vacc6x3, va6x0123, vb3x0123);
+    }
+
+
     const HVX_Vector vscale0 = *((HVX_Vector *) w); w = (const int8_t*) w + 128;
     vacc0x0 = rescale_fp32(vacc0x0, vscale0);
     vacc1x0 = rescale_fp32(vacc1x0, vscale0);
