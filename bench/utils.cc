@@ -38,6 +38,11 @@
 #include <qurt.h>
 #include <HAP_power.h>
 #endif
+#if XNN_PLATFORM_WINDOWS
+#include <windows.h>
+#include <shlwapi.h>
+#endif
+
 
 // Common flags for all benchmarks.
 int FLAGS_num_threads = 1;
@@ -249,6 +254,15 @@ uint64_t GetCurrentCpuFrequency() {
       return static_cast<uint64_t>(freq) * 1000;
     }
     fclose(f);
+  }
+#elif XNN_PLATFORM_WINDOWS
+  // Read MHz from the registry
+  DWORD data, data_size = sizeof(data);
+  LSTATUS r = SHGetValueA(HKEY_LOCAL_MACHINE,
+                      "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0",
+                      "~MHz", nullptr, &data, &data_size);
+  if (r == ERROR_SUCCESS) {
+    return static_cast<uint64_t>(data) * static_cast<uint64_t>(1000 * 1000);
   }
 #elif XNN_PLATFORM_QURT
   HAP_power_response_t response = {.type = HAP_power_get_clk_Freq};
