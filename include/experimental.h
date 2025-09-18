@@ -32,7 +32,7 @@ extern "C" {
 /// some cases.
 #define XNN_FLAG_SLINKY_STATIC_BOUNDS 0x00020000
 
-/// If Slinky is enabled, disable asserts in Slinky pipelines.
+/// Deprecated.
 #define XNN_FLAG_SLINKY_NO_CHECKS 0x00040000
 
 typedef struct xnn_threadpool* xnn_threadpool_t;
@@ -75,7 +75,7 @@ enum xnn_status xnn_delete_threadpool(xnn_threadpool_t threadpool);
 /// @param threadpool - Threadpool object to to implement parallel operations.
 /// @param flags - binary features of the runtime. The only currently supported values are
 ///                XNN_FLAG_HINT_SPARSE_INFERENCE, XNN_FLAG_HINT_FP16_INFERENCE, XNN_FLAG_FORCE_FP16_INFERENCE,
-///                XNN_FLAG_SLINKY_STATIC_BOUNDS, XNN_FLAG_SLINKY_NO_CHECKS, and XNN_FLAG_SLINKY_NO_SCHEDULE.
+///                XNN_FLAG_SLINKY_STATIC_BOUNDS, and XNN_FLAG_SLINKY_NO_SCHEDULE.
 /// @param runtime_out - pointer to the variable that will be initialized with a handle to the Runtime object upon
 ///                      successful return. Once constructed, the Runtime object is independent of the Subgraph object
 ///                      used to create it.
