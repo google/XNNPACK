@@ -2942,8 +2942,8 @@ enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
   }
 #endif
 
-#ifdef XNN_SLINKY_ENABLED
-  // If compiling with XNN_SLINKY_ENABLED defined, assume we always
+#ifdef XNN_USE_SLINKY
+  // If compiling with XNN_USE_SLINKY defined, assume we always
   // want Slinky enabled, regardless of the runtime flag
   const bool use_slinky = true;
 #else
