@@ -2515,6 +2515,65 @@ enum xnn_status xnn_subgraph_optimize_common_subgraphs(
         }
         break;
 
+      case xnn_node_type_fully_connected: {
+        // Get the inputs/outputs.
+        const uint32_t input_id = node->inputs[0];
+        uint32_t weights_id = node->inputs[1];
+        const uint32_t bias_id = node->inputs[2];
+        const uint32_t output_id = node->outputs[0];
+        struct xnn_value* weights_value = &subgraph->values[weights_id];
+
+        do {
+          // Weights should be non-static and have a producer.
+          if (xnn_value_is_static(weights_value->allocation_type) ||
+              weights_value->producer == XNN_INVALID_VALUE_ID) {
+            break;
+          }
+
+          // Weights producer should be a transpose.
+          struct xnn_node* transpose_node =
+              &subgraph->nodes[weights_value->producer];
+          if (transpose_node->type != xnn_node_type_static_transpose) {
+            break;
+          }
+
+          // The transpose should only flip the last two dimensions.
+          const int32_t num_dims = weights_value->shape.num_dims;
+          bool match = true;
+          for (int k = 0; k < num_dims - 2; k++) {
+            match &= (transpose_node->params.transpose.perm[k] == k);
+          }
+          match &= (transpose_node->params.transpose.perm[num_dims - 2] ==
+                    num_dims - 1);
+          match &= (transpose_node->params.transpose.perm[num_dims - 1] ==
+                    num_dims - 2);
+          if (!match) {
+            break;
+          }
+
+          // If we got this far, skip the transpose and flip the transpose flag
+          // on the weights.
+          weights_id = transpose_node->inputs[0];
+          enum xnn_status status = xnn_define_fully_connected(
+              subgraph, node->activation.output_min, node->activation.output_max, input_id,
+              weights_id, bias_id,
+              output_id, node->flags ^ XNN_FLAG_TRANSPOSE_WEIGHTS);
+          if (status != xnn_status_success) {
+            xnn_log_error("Failed to create new `Fully-Connected` node.");
+            return status;
+          }
+          node = &subgraph->nodes[node_id];
+          *node = subgraph->nodes[--subgraph->num_nodes];
+          node->id = node_id;
+          xnn_log_info(
+              "Converted fully_connected[#%u](v%03u, transpose[#%u](v%03u)) to "
+              "fully_connected[#%u](v%03u, v%03u).",
+              node_id, input_id, weights_value->producer, weights_id, node_id,
+              input_id, weights_id);
+          changes++;
+        } while (false);
+      } break;
+
       default:
         break;
     }
