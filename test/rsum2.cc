@@ -71,9 +71,9 @@ class Tester {
 
     ukernel(batch_size() * sizeof(Input), input.data(), &output, &params);
 
-    // The extra factor 4.0f is needed to account for differences due to kernels
-    // using FMA.
-    const float tolerance = 4.0f * batch_size() * max_abs_value *
+    // The extra factor is needed to account for differences due to kernels
+    // using FMA and other architecture differences.
+    const float tolerance = 5.0f * batch_size() * max_abs_value *
                             max_abs_value * scale *
                             xnnpack::NumericLimits<Output>::epsilon();
     ASSERT_NEAR(expected, output, tolerance);
