@@ -87,17 +87,21 @@ _YNN_PARAMS_FOR_ARCH = {
     },
     "arm64_sme": {
         "cond": "//ynnpack:ynn_enable_arm64_sme",
-        "copts": ynn_select_if(
-            "//ynnpack/base/build_config:arm64",
-            ["-march=armv8.2-a+sve+sve2+sme"],
-        ),
+        "copts": select({
+            # Apple's Clang generates code that crashes with -msve (and works without it), while
+            # other compilers can't compile this code without it.
+            "//ynnpack/base/build_config:apple_clang": ["-march=armv8.2-a+sme"],
+            "//ynnpack/base/build_config:arm64": ["-march=armv8.2-a+sve+sme"],
+            "//conditions:default": [],
+        }),
     },
     "arm64_sme2": {
         "cond": "//ynnpack:ynn_enable_arm64_sme2",
-        "copts": ynn_select_if(
-            "//ynnpack/base/build_config:arm64",
-            ["-march=armv8.2-a+sve+sve2+sme2"],
-        ),
+        "copts": select({
+            "//ynnpack/base/build_config:apple_clang": ["-march=armv8.2-a+sme2"],
+            "//ynnpack/base/build_config:arm64": ["-march=armv8.2-a+sve+sme2"],
+            "//conditions:default": [],
+        }),
     },
     "x86_sse2": {
         "cond": "//ynnpack:ynn_enable_x86_sse2",
