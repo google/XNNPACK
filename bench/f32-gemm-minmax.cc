@@ -2763,7 +2763,10 @@
   }
 
   BENCHMARK_GEMM(f32_gemm_minmax_ukernel_8x8__fma3_broadcast)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+
+#if XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   static void f32_gemm_minmax_ukernel_1x8__avx_broadcast(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_f32_gemm_minmax_ukernel_1x8__avx_broadcast,
@@ -2873,7 +2876,7 @@
   }
 
   BENCHMARK_GEMM(f32_gemm_minmax_ukernel_7x8__avx_broadcast)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
 #if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY

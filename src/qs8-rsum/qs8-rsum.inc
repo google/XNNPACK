@@ -26,11 +26,14 @@ XNN_UKERNEL(xnn_arch_x86_ssse3, xnn_qs8_rsum_ukernel__ssse3_u16, 16, false, int8
 XNN_UKERNEL(xnn_arch_x86_ssse3, xnn_qs8_rsum_ukernel__ssse3_u32_acc2, 32, false, int8_t, int32_t, struct xnn_qs8_rsum_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_ssse3, xnn_qs8_rsum_ukernel__ssse3_u64_acc2, 64, false, int8_t, int32_t, struct xnn_qs8_rsum_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_ssse3, xnn_qs8_rsum_ukernel__ssse3_u64_acc4, 64, false, int8_t, int32_t, struct xnn_qs8_rsum_params, NULL)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_avx2, xnn_qs8_rsum_ukernel__avx2_u32, 32, false, int8_t, int32_t, struct xnn_qs8_rsum_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_avx2, xnn_qs8_rsum_ukernel__avx2_u64_acc2, 64, false, int8_t, int32_t, struct xnn_qs8_rsum_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_avx2, xnn_qs8_rsum_ukernel__avx2_u128_acc2, 128, false, int8_t, int32_t, struct xnn_qs8_rsum_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_avx2, xnn_qs8_rsum_ukernel__avx2_u128_acc4, 128, false, int8_t, int32_t, struct xnn_qs8_rsum_params, NULL)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ENABLE_AVXVNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_avxvnni, xnn_qs8_rsum_ukernel__avxvnni_u32, 32, false, int8_t, int32_t, struct xnn_qs8_rsum_params, NULL)
