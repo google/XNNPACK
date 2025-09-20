@@ -35,6 +35,8 @@ extern "C" {
 /// Deprecated.
 #define XNN_FLAG_SLINKY_NO_CHECKS 0x00040000
 
+#define XNN_FLAG_RUNTIME_OWNS_THREADPOOL 0x00080000
+
 typedef struct xnn_threadpool* xnn_threadpool_t;
 
 /// An abstract interface of a parallel task scheduler.
@@ -95,6 +97,11 @@ enum xnn_status xnn_create_runtime_with_threadpool(
 enum xnn_status xnn_update_runtime_with_threadpool(
   xnn_runtime_t runtime,
   xnn_threadpool_t threadpool);
+
+enum xnn_status xnn_create_runtime_with_scheduler(
+    xnn_subgraph_t subgraph, xnn_weights_cache_t weights_cache,
+    struct xnn_scheduler_v2 scheduler, void* scheduler_context, uint32_t flags,
+    xnn_runtime_t* runtime_out);
 
 #ifdef __cplusplus
 }  // extern "C"

@@ -26,7 +26,15 @@ BENCHMARKS_SLOW_LARGE = {
 }
 
 xnnpack_cxx_library(
+    name = "simple_scheduler",
+    testonly = 1,
+    hdrs = ["simple_scheduler.h"],
+    deps = ["//:xnnpack_h"],
+)
+
+xnnpack_cxx_library(
     name = "benchmark",
+    testonly = 1,
     srcs = [
         "benchmark.cc",
     ],
@@ -34,11 +42,11 @@ xnnpack_cxx_library(
         "benchmark.h",
     ],
     deps = [
+        ":simple_scheduler",
         "//:XNNPACK",
         "//:subgraph_h",
         "//bench:bench_utils",
         "@com_google_benchmark//:benchmark",
-        "@pthreadpool",
     ],
     alwayslink = True,
 )

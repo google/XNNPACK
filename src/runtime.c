@@ -717,6 +717,38 @@ static bool use_slinky(uint32_t flags) {
 }
 #endif  // XNN_SLINKY_ENABLED
 
+enum xnn_status xnn_create_runtime_with_scheduler(
+    xnn_subgraph_t subgraph, xnn_weights_cache_t weights_cache,
+    struct xnn_scheduler_v2 scheduler, void* scheduler_context, uint32_t flags,
+    xnn_runtime_t* runtime_out) {
+#ifdef XNN_SLINKY_ENABLED
+  if (use_slinky(flags)) {
+    xnn_threadpool_t xnn_threadpool = NULL;
+    enum xnn_status status = xnn_create_threadpool_v2(
+        scheduler, scheduler_context, flags, &xnn_threadpool);
+    if (status != xnn_status_success) {
+      return status;
+    }
+    return create_runtime_impl(
+        subgraph, weights_cache, /*workspace=*/NULL, /*threadpool=*/NULL,
+        xnn_threadpool, flags |= XNN_FLAG_RUNTIME_OWNS_THREADPOOL, runtime_out);
+  }
+#endif  // XNN_SLINKY_ENABLED
+
+  pthreadpool_t pthreadpool = pthreadpool_create_v2(
+      (struct pthreadpool_executor*)&scheduler, scheduler_context, 0);
+  xnn_log_info(
+      "Created pthreadpool with %zu threads from an external executor (%i "
+      "threads).",
+      pthreadpool_get_threads_count(pthreadpool),
+      scheduler.num_threads(scheduler_context));
+
+  return create_runtime_impl(subgraph, weights_cache, /*workspace=*/NULL,
+                             pthreadpool, /*xnn_threadpool=*/NULL,
+                             flags |= XNN_FLAG_RUNTIME_OWNS_THREADPOOL,
+                             runtime_out);
+}
+
 #ifndef XNN_SLINKY_ENABLED
 enum xnn_status xnn_create_threadpool_v2(
   struct xnn_scheduler_v2 scheduler,
@@ -1172,10 +1204,18 @@ enum xnn_status xnn_delete_runtime(
     }
 
 #ifdef XNN_SLINKY_ENABLED
-    if (runtime->owned_xnn_threadpool != NULL) {
-      xnn_delete_threadpool(runtime->owned_xnn_threadpool);
+    if (runtime->xnn_threadpool &&
+        runtime->flags & XNN_FLAG_RUNTIME_OWNS_THREADPOOL) {
+      xnn_delete_threadpool(runtime->xnn_threadpool);
     }
 #endif  // XNN_SLINKY_ENABLED
+
+    if (runtime->threadpool &&
+        runtime->flags & XNN_FLAG_RUNTIME_OWNS_THREADPOOL) {
+      if (runtime->threadpool) {
+        pthreadpool_destroy(runtime->threadpool);
+      }
+    }
 
     xnn_release_memory(runtime);
   }
