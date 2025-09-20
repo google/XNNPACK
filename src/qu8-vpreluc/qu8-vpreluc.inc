@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright (C) 2024 Intel Corporation
 //  
 // Redistribution and use in source and binary forms, with or without modification,
@@ -27,21 +28,11 @@
 //  
 // SPDX-License-Identifier: BSD-3-Clause
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_UKERNEL(xnn_arch_x86_avx2, xnn_qu8_vpreluc_ukernel__avx2_u16, 16, false,
-            uint8_t, union xnn_qs8_vprelu_scalar_params,
-            xnn_init_qu8_vprelu_scalar_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_avx2, xnn_qu8_vpreluc_ukernel__avx2_u16, 16, false, uint8_t, union xnn_qs8_vprelu_scalar_params, xnn_init_qu8_vprelu_scalar_params)
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
-XNN_UKERNEL(xnn_arch_none, xnn_qu8_vpreluc_ukernel__scalar_u1, 1, false, uint8_t,
-            union xnn_qs8_vprelu_scalar_params,
-            xnn_init_qu8_vprelu_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_qu8_vpreluc_ukernel__scalar_u2, 2, false, uint8_t,
-            union xnn_qs8_vprelu_scalar_params,
-            xnn_init_qu8_vprelu_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_qu8_vpreluc_ukernel__scalar_u4, 4, false, uint8_t,
-            union xnn_qs8_vprelu_scalar_params,
-            xnn_init_qu8_vprelu_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_qu8_vpreluc_ukernel__scalar_u8, 8, false, uint8_t,
-            union xnn_qs8_vprelu_scalar_params,
-            xnn_init_qu8_vprelu_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_qu8_vpreluc_ukernel__scalar_u1, 1, false, uint8_t, union xnn_qs8_vprelu_scalar_params, xnn_init_qu8_vprelu_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_qu8_vpreluc_ukernel__scalar_u2, 2, false, uint8_t, union xnn_qs8_vprelu_scalar_params, xnn_init_qu8_vprelu_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_qu8_vpreluc_ukernel__scalar_u4, 4, false, uint8_t, union xnn_qs8_vprelu_scalar_params, xnn_init_qu8_vprelu_scalar_params)
+XNN_UKERNEL(xnn_arch_none, xnn_qu8_vpreluc_ukernel__scalar_u8, 8, false, uint8_t, union xnn_qs8_vprelu_scalar_params, xnn_init_qu8_vprelu_scalar_params)

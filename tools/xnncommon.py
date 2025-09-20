@@ -52,6 +52,7 @@ _ISA_TO_MACRO_MAP = {
     "neonsme2": "XNN_ENABLE_ARM_SME2",
     "rvv": "XNN_ENABLE_RISCV_VECTOR",
     "rvvfp16arith": "XNN_ENABLE_RISCV_FP16_VECTOR",
+    "avx": "XNN_ENABLE_AVX",
     "avx2": "XNN_ENABLE_AVX2",
     "avxvnni": "XNN_ENABLE_AVXVNNI",
     "avxvnniint8": "XNN_ENABLE_AVXVNNIINT8",
