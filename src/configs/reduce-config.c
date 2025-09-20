@@ -337,9 +337,12 @@ static void init_qs8_rsum_config(void) {
           qs8_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_qs8_rsum_ukernel__avx256skx_u64_acc2);
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
-      qs8_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_qs8_rsum_ukernel__avx2_u64_acc2);
-    } else if ((hardware_config->arch_flags & xnn_arch_x86_ssse3)) {
+    #if XNN_ENABLE_AVX2
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
+        qs8_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_qs8_rsum_ukernel__avx2_u64_acc2);
+      } else
+    #endif
+    if ((hardware_config->arch_flags & xnn_arch_x86_ssse3)) {
       qs8_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_qs8_rsum_ukernel__ssse3_u32_acc2);
     }
     #if XNN_ENABLE_AVX512SKX
@@ -347,9 +350,12 @@ static void init_qs8_rsum_config(void) {
         qs8_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_qs8_rdsum_ukernel_7p7x__avx512skx_u64);
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
-      qs8_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_qs8_rdsum_ukernel_7p7x__avx2_u64);
-    } else if ((hardware_config->arch_flags & xnn_arch_x86_sse4_1)) {
+    #if XNN_ENABLE_AVX2
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
+        qs8_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_qs8_rdsum_ukernel_7p7x__avx2_u64);
+      } else
+    #endif
+    if ((hardware_config->arch_flags & xnn_arch_x86_sse4_1)) {
       qs8_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_qs8_rdsum_ukernel_7p7x__sse41_u64);
     } else {
       qs8_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_qs8_rdsum_ukernel_7p7x__scalar_u4);
@@ -391,10 +397,12 @@ static void init_qu8_rsum_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-
-    if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
-      qu8_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_qu8_rsum_ukernel__avx2_u64_acc2);
-    } else {
+    #if XNN_ENABLE_AVX2
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
+        qu8_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_qu8_rsum_ukernel__avx2_u64_acc2);
+      } else
+    #endif
+    {
       qu8_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_qu8_rsum_ukernel__sse2_u32_acc2);
     }
     if ((hardware_config->arch_flags & xnn_arch_x86_ssse3)) {

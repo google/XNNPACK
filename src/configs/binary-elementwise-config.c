@@ -1021,13 +1021,16 @@ static void init_qs8_vadd_config(void) {
         qs8_vadd_config.element_tile = 16;
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
-      qs8_vadd_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vadd_minmax_ukernel__avx2_mul32_ld64_u16);
-      qs8_vadd_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vaddc_minmax_ukernel__avx2_mul32_ld64_u16);
-      qs8_vadd_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vaddc_minmax_ukernel__avx2_mul32_ld64_u16);
-      qs8_vadd_config.init = (xnn_init_binary_params_fn) xnn_init_qs8_add_minmax_scalar_params;
-      qs8_vadd_config.element_tile = 16;
-    } else if ((hardware_config->arch_flags & xnn_arch_x86_avx)) {
+    #if XNN_ENABLE_AVX2
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
+        qs8_vadd_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vadd_minmax_ukernel__avx2_mul32_ld64_u16);
+        qs8_vadd_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vaddc_minmax_ukernel__avx2_mul32_ld64_u16);
+        qs8_vadd_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vaddc_minmax_ukernel__avx2_mul32_ld64_u16);
+        qs8_vadd_config.init = (xnn_init_binary_params_fn) xnn_init_qs8_add_minmax_scalar_params;
+        qs8_vadd_config.element_tile = 16;
+      } else
+    #endif
+    if ((hardware_config->arch_flags & xnn_arch_x86_avx)) {
       qs8_vadd_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vadd_minmax_ukernel__avx_mul32_ld32_u8);
       qs8_vadd_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vaddc_minmax_ukernel__avx_mul32_ld32_u8);
       qs8_vadd_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vaddc_minmax_ukernel__avx_mul32_ld32_u8);
@@ -1145,13 +1148,17 @@ static void init_qs8_vprelu_config(void) {
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
-      qs8_vprelu_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vprelu_ukernel__avx2_u16);
-      qs8_vprelu_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vpreluc_ukernel__avx2_u16);
-      qs8_vprelu_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vrpreluc_ukernel__avx2_u16);
-      qs8_vprelu_config.init = (xnn_init_binary_params_fn) xnn_init_qs8_vprelu_scalar_params;
-      qs8_vprelu_config.element_tile = 16;
-    } else {
+    (void) hardware_config;  // May be unused.
+    #if XNN_ENABLE_AVX2
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
+        qs8_vprelu_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vprelu_ukernel__avx2_u16);
+        qs8_vprelu_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vpreluc_ukernel__avx2_u16);
+        qs8_vprelu_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vrpreluc_ukernel__avx2_u16);
+        qs8_vprelu_config.init = (xnn_init_binary_params_fn) xnn_init_qs8_vprelu_scalar_params;
+        qs8_vprelu_config.element_tile = 16;
+      } else
+    #endif
+    {
       qs8_vprelu_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vprelu_ukernel__scalar_u8);
       qs8_vprelu_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vpreluc_ukernel__scalar_u8);
       qs8_vprelu_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vrpreluc_ukernel__scalar_u8);
@@ -1202,13 +1209,16 @@ static void init_qu8_vadd_config(void) {
         qu8_vadd_config.element_tile = 16;
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
-      qu8_vadd_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vadd_minmax_ukernel__avx2_mul32_ld64_u16);
-      qu8_vadd_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vaddc_minmax_ukernel__avx2_mul32_ld64_u16);
-      qu8_vadd_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vaddc_minmax_ukernel__avx2_mul32_ld64_u16);
-      qu8_vadd_config.init = (xnn_init_binary_params_fn) xnn_init_qu8_add_minmax_scalar_params;
-      qu8_vadd_config.element_tile = 16;
-    } else if ((hardware_config->arch_flags & xnn_arch_x86_avx)) {
+    #if XNN_ENABLE_AVX2
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
+        qu8_vadd_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vadd_minmax_ukernel__avx2_mul32_ld64_u16);
+        qu8_vadd_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vaddc_minmax_ukernel__avx2_mul32_ld64_u16);
+        qu8_vadd_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vaddc_minmax_ukernel__avx2_mul32_ld64_u16);
+        qu8_vadd_config.init = (xnn_init_binary_params_fn) xnn_init_qu8_add_minmax_scalar_params;
+        qu8_vadd_config.element_tile = 16;
+      } else
+    #endif
+    if ((hardware_config->arch_flags & xnn_arch_x86_avx)) {
       qu8_vadd_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vadd_minmax_ukernel__avx_mul32_ld32_u8);
       qu8_vadd_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vaddc_minmax_ukernel__avx_mul32_ld32_u8);
       qu8_vadd_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vaddc_minmax_ukernel__avx_mul32_ld32_u8);
@@ -1320,13 +1330,17 @@ static void init_qu8_vprelu_config(void) {
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
-      qu8_vprelu_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vprelu_ukernel__avx2_u16);
-      qu8_vprelu_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vpreluc_ukernel__avx2_u16);
-      qu8_vprelu_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vrpreluc_ukernel__avx2_u16);
-      qu8_vprelu_config.init = (xnn_init_binary_params_fn) xnn_init_qu8_vprelu_scalar_params;
-      qu8_vprelu_config.element_tile = 16;
-    } else {
+    (void) hardware_config;  // May be unused.
+    #if XNN_ENABLE_AVX2
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
+        qu8_vprelu_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vprelu_ukernel__avx2_u16);
+        qu8_vprelu_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vpreluc_ukernel__avx2_u16);
+        qu8_vprelu_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vrpreluc_ukernel__avx2_u16);
+        qu8_vprelu_config.init = (xnn_init_binary_params_fn) xnn_init_qu8_vprelu_scalar_params;
+        qu8_vprelu_config.element_tile = 16;
+    } else
+    #endif
+    {
       qu8_vprelu_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vprelu_ukernel__scalar_u8);
       qu8_vprelu_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vpreluc_ukernel__scalar_u8);
       qu8_vprelu_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vrpreluc_ukernel__scalar_u8);

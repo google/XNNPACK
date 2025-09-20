@@ -688,7 +688,7 @@ TEST(X8_LUT__SCALAR_U16, inplace) {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(X8_LUT__AVX2_U32, batch_eq_32) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx2);
     LUTMicrokernelTester()
@@ -732,10 +732,10 @@ TEST(X8_LUT__SCALAR_U16, inplace) {
         .Test(xnn_x8_lut_ukernel__avx2_u32);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(X8_LUT__AVX2_U64, batch_eq_64) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx2);
     LUTMicrokernelTester()
@@ -779,10 +779,10 @@ TEST(X8_LUT__SCALAR_U16, inplace) {
         .Test(xnn_x8_lut_ukernel__avx2_u64);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(X8_LUT__AVX2_U96, batch_eq_96) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx2);
     LUTMicrokernelTester()
@@ -826,10 +826,10 @@ TEST(X8_LUT__SCALAR_U16, inplace) {
         .Test(xnn_x8_lut_ukernel__avx2_u96);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(X8_LUT__AVX2_U128, batch_eq_128) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx2);
     LUTMicrokernelTester()
@@ -873,7 +873,7 @@ TEST(X8_LUT__SCALAR_U16, inplace) {
         .Test(xnn_x8_lut_ukernel__avx2_u128);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
 #if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)

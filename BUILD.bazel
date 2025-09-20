@@ -1109,6 +1109,18 @@ config_setting(
     define_values = {"xnn_enable_avx512bf16": "false"},
 )
 
+# Enables usage of Intel AVX2 kernels.
+config_setting(
+    name = "xnn_enable_avx2_explicit_true",
+    define_values = {"xnn_enable_avx2": "true"},
+)
+
+# Disables usage of Intel AVX2 kernels.
+config_setting(
+    name = "xnn_enable_avx2_explicit_false",
+    define_values = {"xnn_enable_avx2": "false"},
+)
+
 # Enables usage of Intel AVX-VNNI (integer dot product) kernels.
 config_setting(
     name = "xnn_enable_avxvnni_explicit_true",
@@ -1607,6 +1619,22 @@ alias(
         ":xnn_enable_avx512fp16_explicit_true": ":xnn_enable_avx512fp16_explicit_true",
         ":xnn_enable_avx512fp16_explicit_false": ":xnn_enable_avx512fp16_explicit_true",
         "//conditions:default": ":avx512fp16_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "avx2_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "avx2_enabled",
+    actual = select({
+        ":xnn_enable_avx2_explicit_true": ":xnn_enable_avx2_explicit_true",
+        ":xnn_enable_avx2_explicit_false": ":xnn_enable_avx2_explicit_true",
+        "//conditions:default": ":avx2_enabled_by_default",
     }),
 )
 

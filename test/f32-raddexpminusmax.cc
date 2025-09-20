@@ -16,7 +16,7 @@
 #include "test/raddexpminusmax-microkernel-tester.h"
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_RADDEXPMINUSMAX__AVX2_P5_U32, elements_eq_32) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx2);
     RAddExpMinusMaxMicrokernelTester()
@@ -50,10 +50,10 @@
         .Test(xnn_f32_raddexpminusmax_ukernel__avx2_p5_u32);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_RADDEXPMINUSMAX__AVX2_P5_U32_ACC2, elements_eq_32) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx2);
     RAddExpMinusMaxMicrokernelTester()
@@ -87,10 +87,10 @@
         .Test(xnn_f32_raddexpminusmax_ukernel__avx2_p5_u32_acc2);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_RADDEXPMINUSMAX__AVX2_P5_U32_ACC4, elements_eq_32) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx2);
     RAddExpMinusMaxMicrokernelTester()
@@ -124,10 +124,10 @@
         .Test(xnn_f32_raddexpminusmax_ukernel__avx2_p5_u32_acc4);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_RADDEXPMINUSMAX__AVX2_P5_U64, elements_eq_64) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx2);
     RAddExpMinusMaxMicrokernelTester()
@@ -161,10 +161,10 @@
         .Test(xnn_f32_raddexpminusmax_ukernel__avx2_p5_u64);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_RADDEXPMINUSMAX__AVX2_P5_U64_ACC2, elements_eq_64) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx2);
     RAddExpMinusMaxMicrokernelTester()
@@ -198,10 +198,10 @@
         .Test(xnn_f32_raddexpminusmax_ukernel__avx2_p5_u64_acc2);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_RADDEXPMINUSMAX__AVX2_P5_U64_ACC4, elements_eq_64) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx2);
     RAddExpMinusMaxMicrokernelTester()
@@ -235,10 +235,10 @@
         .Test(xnn_f32_raddexpminusmax_ukernel__avx2_p5_u64_acc4);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_RADDEXPMINUSMAX__AVX2_P5_U72, elements_eq_72) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx2);
     RAddExpMinusMaxMicrokernelTester()
@@ -272,10 +272,10 @@
         .Test(xnn_f32_raddexpminusmax_ukernel__avx2_p5_u72);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_RADDEXPMINUSMAX__AVX2_P5_U72_ACC3, elements_eq_72) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx2);
     RAddExpMinusMaxMicrokernelTester()
@@ -309,10 +309,10 @@
         .Test(xnn_f32_raddexpminusmax_ukernel__avx2_p5_u72_acc3);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_RADDEXPMINUSMAX__AVX2_P5_U80, elements_eq_80) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx2);
     RAddExpMinusMaxMicrokernelTester()
@@ -346,10 +346,10 @@
         .Test(xnn_f32_raddexpminusmax_ukernel__avx2_p5_u80);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_RADDEXPMINUSMAX__AVX2_P5_U80_ACC2, elements_eq_80) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx2);
     RAddExpMinusMaxMicrokernelTester()
@@ -383,10 +383,10 @@
         .Test(xnn_f32_raddexpminusmax_ukernel__avx2_p5_u80_acc2);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_RADDEXPMINUSMAX__AVX2_P5_U80_ACC5, elements_eq_80) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx2);
     RAddExpMinusMaxMicrokernelTester()
@@ -420,10 +420,10 @@
         .Test(xnn_f32_raddexpminusmax_ukernel__avx2_p5_u80_acc5);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_RADDEXPMINUSMAX__AVX2_P5_U96, elements_eq_96) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx2);
     RAddExpMinusMaxMicrokernelTester()
@@ -457,10 +457,10 @@
         .Test(xnn_f32_raddexpminusmax_ukernel__avx2_p5_u96);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_RADDEXPMINUSMAX__AVX2_P5_U96_ACC2, elements_eq_96) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx2);
     RAddExpMinusMaxMicrokernelTester()
@@ -494,10 +494,10 @@
         .Test(xnn_f32_raddexpminusmax_ukernel__avx2_p5_u96_acc2);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_RADDEXPMINUSMAX__AVX2_P5_U96_ACC3, elements_eq_96) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx2);
     RAddExpMinusMaxMicrokernelTester()
@@ -531,10 +531,10 @@
         .Test(xnn_f32_raddexpminusmax_ukernel__avx2_p5_u96_acc3);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_RADDEXPMINUSMAX__AVX2_P5_U96_ACC6, elements_eq_96) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_avx2);
     RAddExpMinusMaxMicrokernelTester()
@@ -568,7 +568,7 @@
         .Test(xnn_f32_raddexpminusmax_ukernel__avx2_p5_u96_acc6);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
 #if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)

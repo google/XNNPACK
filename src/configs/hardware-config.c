@@ -208,7 +208,7 @@ static void init_hardware_config(void) {
   const bool use_x86_avx512vnni = XNN_ENABLE_AVX512VNNI && use_x86_avx512skx && cpuinfo_has_x86_avx512vnni();
   const bool use_x86_avx512vnnigfni = XNN_ENABLE_AVX512VNNIGFNI && use_x86_avx512vnni && cpuinfo_has_x86_gfni();
   const bool use_x86_avx512amx = XNN_ENABLE_AVX512AMX && XNN_ARCH_X86_64 && use_x86_avx512vnnigfni && cpuinfo_has_x86_amx_int8();
-  const bool use_x86_avx2 = cpuinfo_has_x86_avx2();
+  const bool use_x86_avx2 = XNN_ENABLE_AVX2 && cpuinfo_has_x86_avx2();
   const bool use_x86_avx256skx = XNN_ENABLE_AVX256SKX && cpuinfo_has_x86_avx512f() && cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl();
   const bool use_x86_avx256vnni = XNN_ENABLE_AVX256VNNI && use_x86_avx256skx && cpuinfo_has_x86_avx512vnni();
 
