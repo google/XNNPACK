@@ -81,7 +81,6 @@ size_t xnn_gemm_best_tile_size(size_t num_groups, size_t m, size_t n,
   // Start with a `mr`x`nr` tile.
   size_t nc = nr;
   const size_t num_tiles_m = divide_round_up(m, mr);
-  size_t best_num_tiles = num_tiles_m * divide_round_up(n, nc) * num_groups;
 
   // Select which cache we want the tiles to fit in. Start with L1, and if the
   // smallest possible tile won't fit, try L2. If the smallest tile still won't
@@ -100,47 +99,56 @@ size_t xnn_gemm_best_tile_size(size_t num_groups, size_t m, size_t n,
     }
   }
 
-  // Loop over all multiples of `nr`.
-  for (int j = 1; (j - 1) * nr < n; j++) {
-    // Skip this `j` if it results in the same number of tiles as `j - 1`.
-    if (1 < j &&
-        divide_round_up(n, j * nr) == divide_round_up(n, (j - 1) * nr)) {
-      continue;
-    }
+  int max_j = divide_round_up(n, nr) + 1;
 
-    // If we have at most `mr` rows per group, then there will be no cache
-    // re-use across tile rows and we don't care about whether the data fits
-    // in cache or not.
-    // If, however, we have more than one tile row, then we want the data used
-    // to compute a tile of size `mr`x`j*nr` to fit in the cache.
-    if (mr < m && cache_size &&
-        !gemm_fits_in_cache(mr, j * nr, m_stride, n_stride, cn_stride,
+  // Find maximum nc such that a tile still fits into cache.
+  if (mr < m && cache_size) {
+    int l = 1, r = max_j;
+
+    if (!gemm_fits_in_cache(mr, r * nr, m_stride, n_stride, cn_stride,
                             cache_size, cache_line_size)) {
-      break;
-    }
-
-    // Make sure this pair of `i` and `j` generates enough tiles.
-    const size_t num_tiles_n = divide_round_up(n, j * nr);
-    const size_t num_tiles = num_tiles_n * num_tiles_m * num_groups;
-    if (num_tiles < min_num_tiles) {
-      break;
-    }
-
-    // New best tile size? We define the "best" tiling as the smallest total
-    // number of tiles, and for tilings with the same number of tiles, we take
-    // the tiling with the largest `nc`.
-    if (num_tiles < best_num_tiles ||
-        (num_tiles == best_num_tiles && nc < j * nr)) {
-      nc = j * nr;
-      best_num_tiles = num_tiles;
+      while (r - l > 1) {
+        int mid = (l + r) / 2;
+        if (!gemm_fits_in_cache(mr, mid * nr, m_stride, n_stride, cn_stride,
+                                cache_size, cache_line_size)) {
+          r = mid;
+        } else {
+          l = mid;
+        }
+      }
+      max_j = r;
     }
   }
 
+  size_t j_estimate = 1;
+  // Find j so it satisfies num_tiles >= min_num_tiles
+  {
+    int l = 1, r = max_j;
+    while (r - l > 1) {
+      int mid = (l + r) / 2;
+      const size_t num_tiles_n = divide_round_up(n, mid * nr);
+      const size_t num_tiles = num_tiles_n * num_tiles_m * num_groups;
+      if (num_tiles < min_num_tiles) {
+        r = mid;
+      } else {
+        l = mid;
+      }
+    }
+
+    // Find smallest j_estimate such that the number of tiles is the same as j.
+    const size_t num_tiles_n_estimate = divide_round_up(n, l * nr);
+    j_estimate = divide_round_up(n, num_tiles_n_estimate * nr);
+  }
+
+  nc = j_estimate * nr;
+
   // Restrict the resulting `nc` to `n`.
   nc = min(nc, n);
+
   xnn_log_debug(
       "Tile size for GEMM with num_groups=%zi, m=%zu, n=%zu and mr=%zu, nr=%zu "
       "set to [%zu, %zu] (%zu tiles)",
-      num_groups, m, n, mr, nr, mr, nc, best_num_tiles);
+      num_groups, m, n, mr, nr, mr, nc, 
+      num_tiles_m * divide_round_up(n, nc) * num_groups);
   return nc;
 }
