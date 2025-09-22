@@ -27,14 +27,14 @@ XNN_INIT_ONCE_GUARD(f32_raddstoreexpminusmax);
   xnn_log_info("Using raddstoreexpminusmax microkernel '%s'.", #ukernel);
 
 static void init_f16_raddstoreexpminusmax_config(void) {
-  #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
+  #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
       f16_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u32);
     }
-  #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
+  #elif XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
@@ -108,7 +108,7 @@ static void init_f32_raddstoreexpminusmax_config(void) {
 }
 
 static bool is_f16_compatible_config(const struct xnn_hardware_config* hardware_config) {
-  #if (XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR) || (XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR)
+  #if (XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR) || (XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64)
     return (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith);
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     return (hardware_config->arch_flags & xnn_arch_x86_avx2);

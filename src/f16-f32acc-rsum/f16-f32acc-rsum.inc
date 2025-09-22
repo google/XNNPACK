@@ -12,13 +12,13 @@ XNN_UKERNEL(xnn_arch_arm_neon_fp16_arith, xnn_f16_f32acc_rsum_ukernel__neonfp16a
 XNN_UKERNEL(xnn_arch_arm_neon_fp16_arith, xnn_f16_f32acc_rsum_ukernel__neonfp16arith_u32_acc4, 32, false, xnn_float16, float, struct xnn_f16_f32acc_scale_params, xnn_init_f16_f32acc_scale_scalar_params)
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_F16C && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_f16c, xnn_f16_f32acc_rsum_ukernel__f16c_u8, 8, false, xnn_float16, float, struct xnn_f16_f32acc_scale_params, xnn_init_f16_f32acc_scale_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_f16c, xnn_f16_f32acc_rsum_ukernel__f16c_u16_acc2, 16, false, xnn_float16, float, struct xnn_f16_f32acc_scale_params, xnn_init_f16_f32acc_scale_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_f16c, xnn_f16_f32acc_rsum_ukernel__f16c_u24_acc3, 24, false, xnn_float16, float, struct xnn_f16_f32acc_scale_params, xnn_init_f16_f32acc_scale_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_f16c, xnn_f16_f32acc_rsum_ukernel__f16c_u32_acc2, 32, false, xnn_float16, float, struct xnn_f16_f32acc_scale_params, xnn_init_f16_f32acc_scale_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_f16c, xnn_f16_f32acc_rsum_ukernel__f16c_u32_acc4, 32, false, xnn_float16, float, struct xnn_f16_f32acc_scale_params, xnn_init_f16_f32acc_scale_scalar_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_F16C && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_avx512skx, xnn_f16_f32acc_rsum_ukernel__avx512skx_u16, 16, false, xnn_float16, float, struct xnn_f16_f32acc_scale_params, xnn_init_f16_f32acc_scale_scalar_params)

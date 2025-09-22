@@ -73,7 +73,7 @@ XNN_INIT_ONCE_GUARD(qu8_vprelu);
   xnn_log_info("Using binary microkernel '%s'.", #ukernel);
 
 static void init_f16_vadd_config(void) {
-  #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
+  #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
@@ -83,7 +83,7 @@ static void init_f16_vadd_config(void) {
       f16_vadd_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vaddc_ukernel__neonfp16arith_u16);
       f16_vadd_config.element_tile = 16;
     }
-  #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
+  #elif XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
@@ -105,17 +105,19 @@ static void init_f16_vadd_config(void) {
         f16_vadd_config.element_tile = 64;
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_f16c)) {
-      f16_vadd_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vadd_ukernel__f16c_u16);
-      f16_vadd_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vaddc_ukernel__f16c_u16);
-      f16_vadd_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vaddc_ukernel__f16c_u16);
-      f16_vadd_config.element_tile = 16;
-    }
+    #if XNN_ENABLE_F16C
+      if ((hardware_config->arch_flags & xnn_arch_x86_f16c)) {
+        f16_vadd_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vadd_ukernel__f16c_u16);
+        f16_vadd_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vaddc_ukernel__f16c_u16);
+        f16_vadd_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vaddc_ukernel__f16c_u16);
+        f16_vadd_config.element_tile = 16;
+      }
+    #endif
   #endif
 }
 
 static void init_f16_vdiv_config(void) {
-  #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
+  #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
@@ -125,7 +127,7 @@ static void init_f16_vdiv_config(void) {
       f16_vdiv_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vrdivc_ukernel__fp16arith_u2);
       f16_vdiv_config.element_tile = 2;
     }
-  #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
+  #elif XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
@@ -147,17 +149,19 @@ static void init_f16_vdiv_config(void) {
         f16_vdiv_config.element_tile = 64;
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_f16c)) {
-      f16_vdiv_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vdiv_ukernel__f16c_u8);
-      f16_vdiv_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vdivc_ukernel__f16c_u8);
-      f16_vdiv_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vrdivc_ukernel__f16c_u8);
-      f16_vdiv_config.element_tile = 8;
-    }
+    #if XNN_ENABLE_F16C
+      if ((hardware_config->arch_flags & xnn_arch_x86_f16c)) {
+        f16_vdiv_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vdiv_ukernel__f16c_u8);
+        f16_vdiv_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vdivc_ukernel__f16c_u8);
+        f16_vdiv_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vrdivc_ukernel__f16c_u8);
+        f16_vdiv_config.element_tile = 8;
+      }
+    #endif
   #endif
 }
 
 static void init_f16_vmax_config(void) {
-  #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
+  #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
@@ -167,7 +171,7 @@ static void init_f16_vmax_config(void) {
       f16_vmax_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmaxc_ukernel__neonfp16arith_u16);
       f16_vmax_config.element_tile = 16;
     }
-  #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
+  #elif XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
@@ -189,17 +193,19 @@ static void init_f16_vmax_config(void) {
         f16_vmax_config.element_tile = 64;
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_f16c)) {
-      f16_vmax_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmax_ukernel__f16c_u16);
-      f16_vmax_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmaxc_ukernel__f16c_u16);
-      f16_vmax_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmaxc_ukernel__f16c_u16);
-      f16_vmax_config.element_tile = 16;
-    }
+    #if XNN_ENABLE_F16C
+      if ((hardware_config->arch_flags & xnn_arch_x86_f16c)) {
+        f16_vmax_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmax_ukernel__f16c_u16);
+        f16_vmax_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmaxc_ukernel__f16c_u16);
+        f16_vmax_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmaxc_ukernel__f16c_u16);
+        f16_vmax_config.element_tile = 16;
+      }
+    #endif
   #endif
 }
 
 static void init_f16_vmin_config(void) {
-  #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
+  #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
@@ -209,7 +215,7 @@ static void init_f16_vmin_config(void) {
       f16_vmin_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vminc_ukernel__neonfp16arith_u16);
       f16_vmin_config.element_tile = 16;
     }
-  #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
+  #elif XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
@@ -231,17 +237,19 @@ static void init_f16_vmin_config(void) {
         f16_vmin_config.element_tile = 64;
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_f16c)) {
-      f16_vmin_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmin_ukernel__f16c_u16);
-      f16_vmin_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vminc_ukernel__f16c_u16);
-      f16_vmin_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vminc_ukernel__f16c_u16);
-      f16_vmin_config.element_tile = 16;
-    }
+    #if XNN_ENABLE_F16C
+      if ((hardware_config->arch_flags & xnn_arch_x86_f16c)) {
+        f16_vmin_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmin_ukernel__f16c_u16);
+        f16_vmin_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vminc_ukernel__f16c_u16);
+        f16_vmin_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vminc_ukernel__f16c_u16);
+        f16_vmin_config.element_tile = 16;
+      }
+    #endif
   #endif
 }
 
 static void init_f16_vmul_config(void) {
-  #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
+  #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
@@ -251,7 +259,7 @@ static void init_f16_vmul_config(void) {
       f16_vmul_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__neonfp16arith_u16);
       f16_vmul_config.element_tile = 16;
     }
-  #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
+  #elif XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
@@ -273,17 +281,19 @@ static void init_f16_vmul_config(void) {
         f16_vmul_config.element_tile = 64;
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_f16c)) {
-      f16_vmul_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmul_ukernel__f16c_u16);
-      f16_vmul_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__f16c_u16);
-      f16_vmul_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__f16c_u16);
-      f16_vmul_config.element_tile = 16;
-    }
+    #if XNN_ENABLE_F16C
+      if ((hardware_config->arch_flags & xnn_arch_x86_f16c)) {
+        f16_vmul_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmul_ukernel__f16c_u16);
+        f16_vmul_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__f16c_u16);
+        f16_vmul_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__f16c_u16);
+        f16_vmul_config.element_tile = 16;
+      }
+    #endif
   #endif
 }
 
 static void init_f16_vprelu_config(void) {
-  #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
+  #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
@@ -293,7 +303,7 @@ static void init_f16_vprelu_config(void) {
       f16_vprelu_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vrpreluc_ukernel__neonfp16arith_u16);
       f16_vprelu_config.element_tile = 16;
     }
-  #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
+  #elif XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
@@ -315,17 +325,19 @@ static void init_f16_vprelu_config(void) {
         f16_vprelu_config.element_tile = 64;
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_f16c)) {
-      f16_vprelu_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vprelu_ukernel__f16c_u16);
-      f16_vprelu_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vpreluc_ukernel__f16c_u16);
-      f16_vprelu_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vrpreluc_ukernel__f16c_u16);
-      f16_vprelu_config.element_tile = 16;
-    }
+    #if XNN_ENABLE_F16C
+      if ((hardware_config->arch_flags & xnn_arch_x86_f16c)) {
+        f16_vprelu_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vprelu_ukernel__f16c_u16);
+        f16_vprelu_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vpreluc_ukernel__f16c_u16);
+        f16_vprelu_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vrpreluc_ukernel__f16c_u16);
+        f16_vprelu_config.element_tile = 16;
+      }
+    #endif
   #endif
 }
 
 static void init_f16_vsub_config(void) {
-  #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
+  #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
@@ -335,7 +347,7 @@ static void init_f16_vsub_config(void) {
       f16_vsub_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vrsubc_ukernel__neonfp16arith_u16);
       f16_vsub_config.element_tile = 16;
     }
-  #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
+  #elif XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
@@ -357,17 +369,19 @@ static void init_f16_vsub_config(void) {
         f16_vsub_config.element_tile = 64;
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_f16c)) {
-      f16_vsub_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vsub_ukernel__f16c_u16);
-      f16_vsub_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vsubc_ukernel__f16c_u16);
-      f16_vsub_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vrsubc_ukernel__f16c_u16);
-      f16_vsub_config.element_tile = 16;
-    }
+    #if XNN_ENABLE_F16C
+      if ((hardware_config->arch_flags & xnn_arch_x86_f16c)) {
+        f16_vsub_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vsub_ukernel__f16c_u16);
+        f16_vsub_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vsubc_ukernel__f16c_u16);
+        f16_vsub_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vrsubc_ukernel__f16c_u16);
+        f16_vsub_config.element_tile = 16;
+      }
+    #endif
   #endif
 }
 
 static void init_f16_vsqrdiff_config(void) {
-  #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
+  #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
@@ -377,7 +391,7 @@ static void init_f16_vsqrdiff_config(void) {
       f16_vsqrdiff_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vsqrdiffc_ukernel__neonfp16arith_u16);
       f16_vsqrdiff_config.element_tile = 16;
     }
-  #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
+  #elif XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
@@ -399,12 +413,14 @@ static void init_f16_vsqrdiff_config(void) {
         f16_vsqrdiff_config.element_tile = 64;
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_f16c)) {
-      f16_vsqrdiff_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vsqrdiff_ukernel__f16c_u16);
-      f16_vsqrdiff_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vsqrdiffc_ukernel__f16c_u16);
-      f16_vsqrdiff_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vsqrdiffc_ukernel__f16c_u16);
-      f16_vsqrdiff_config.element_tile = 16;
-    }
+    #if XNN_ENABLE_F16C
+      if ((hardware_config->arch_flags & xnn_arch_x86_f16c)) {
+        f16_vsqrdiff_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vsqrdiff_ukernel__f16c_u16);
+        f16_vsqrdiff_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vsqrdiffc_ukernel__f16c_u16);
+        f16_vsqrdiff_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vsqrdiffc_ukernel__f16c_u16);
+        f16_vsqrdiff_config.element_tile = 16;
+      }
+    #endif
   #endif
 }
 

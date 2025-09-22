@@ -1121,6 +1121,18 @@ config_setting(
     define_values = {"xnn_enable_avx": "false"},
 )
 
+# Enables usage of Intel F16C (f16 convert) kernels.
+config_setting(
+    name = "xnn_enable_f16c_explicit_true",
+    define_values = {"xnn_enable_f16c": "true"},
+)
+
+# Disables usage of Intel F16C (f16 convert) kernels.
+config_setting(
+    name = "xnn_enable_f16c_explicit_false",
+    define_values = {"xnn_enable_f16c": "false"},
+)
+
 # Enables usage of Intel AVX2 kernels.
 config_setting(
     name = "xnn_enable_avx2_explicit_true",
@@ -1647,6 +1659,22 @@ alias(
         ":xnn_enable_avx_explicit_true": ":xnn_enable_avx_explicit_true",
         ":xnn_enable_avx_explicit_false": ":xnn_enable_avx_explicit_true",
         "//conditions:default": ":avx_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "f16c_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "f16c_enabled",
+    actual = select({
+        ":xnn_enable_f16c_explicit_true": ":xnn_enable_f16c_explicit_true",
+        ":xnn_enable_f16c_explicit_false": ":xnn_enable_f16c_explicit_true",
+        "//conditions:default": ":f16c_enabled_by_default",
     }),
 )
 

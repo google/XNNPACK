@@ -23,9 +23,12 @@ XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_f32_f16_vcvt_ukernel__sse41_u8, 8, false, f
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_f32_f16_vcvt_ukernel__sse41_u16, 16, false, float, xnn_float16, void, NULL)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_f32_f16_vcvt_ukernel__sse41_u24, 24, false, float, xnn_float16, void, NULL)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_f32_f16_vcvt_ukernel__sse41_u32, 32, false, float, xnn_float16, void, NULL)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_F16C && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_f16c, xnn_f32_f16_vcvt_ukernel__f16c_u8, 8, false, float, xnn_float16, void, NULL)
 XNN_UKERNEL(xnn_arch_x86_f16c, xnn_f32_f16_vcvt_ukernel__f16c_u16, 16, false, float, xnn_float16, void, NULL)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_F16C && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_f16_vcvt_ukernel__avx_u8, 8, false, float, xnn_float16, void, NULL)

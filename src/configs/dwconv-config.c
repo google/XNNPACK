@@ -34,7 +34,7 @@ XNN_INIT_ONCE_GUARD(qu8_dwconv);
   xnn_log_info("Using dwconv microkernel '%s'.", #ukernel);
 
 static void init_f16_dwconv_config(void) {
-  #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
+  #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
@@ -59,7 +59,7 @@ static void init_f16_dwconv_config(void) {
       f16_dwconv_config[3].channel_tile = 8;
       f16_dwconv_config[3].primary_tile = 25;
     }
-  #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
+  #elif XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.

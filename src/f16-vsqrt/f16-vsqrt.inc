@@ -29,14 +29,14 @@ XNN_UKERNEL(xnn_arch_x86_avx512fp16, xnn_f16_vsqrt_ukernel__avx512fp16_sqrt_u64,
 XNN_UKERNEL(xnn_arch_x86_avx512fp16, xnn_f16_vsqrt_ukernel__avx512fp16_sqrt_u128, 128, false, xnn_float16, struct xnn_f16_default_params, NULL)
 #endif  // XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_F16C && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_f16c, xnn_f16_vsqrt_ukernel__f16c_rsqrt_u8, 8, false, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_f16c, xnn_f16_vsqrt_ukernel__f16c_rsqrt_u16, 16, false, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_f16c, xnn_f16_vsqrt_ukernel__f16c_rsqrt_u32, 32, false, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_f16c, xnn_f16_vsqrt_ukernel__f16c_sqrt_u8, 8, false, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_f16c, xnn_f16_vsqrt_ukernel__f16c_sqrt_u16, 16, false, xnn_float16, struct xnn_f16_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_f16c, xnn_f16_vsqrt_ukernel__f16c_sqrt_u32, 32, false, xnn_float16, struct xnn_f16_default_params, NULL)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_F16C && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_avx512skx, xnn_f16_vsqrt_ukernel__avx512skx_sqrt_u16, 16, false, xnn_float16, struct xnn_f16_default_params, NULL)

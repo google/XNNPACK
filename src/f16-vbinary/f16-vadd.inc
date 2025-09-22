@@ -21,8 +21,8 @@ XNN_UKERNEL(xnn_arch_x86_avx512fp16, xnn_f16_vadd_ukernel__avx512fp16_u32, 32, f
 XNN_UKERNEL(xnn_arch_x86_avx512fp16, xnn_f16_vadd_ukernel__avx512fp16_u64, 64, false, xnn_float16, struct xnn_f16_default_params, ((xnn_init_f16_default_params_fn) NULL))
 #endif  // XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_F16C && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_f16c, xnn_f16_vadd_ukernel__f16c_u8, 8, false, xnn_float16, struct xnn_f16_default_params, ((xnn_init_f16_default_params_fn) NULL))
 XNN_UKERNEL(xnn_arch_x86_f16c, xnn_f16_vadd_ukernel__f16c_u16, 16, false, xnn_float16, struct xnn_f16_default_params, ((xnn_init_f16_default_params_fn) NULL))
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_F16C && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 

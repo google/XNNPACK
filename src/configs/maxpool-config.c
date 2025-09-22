@@ -32,7 +32,7 @@ XNN_INIT_ONCE_GUARD(u8_maxpool);
   xnn_log_info("Using maxpool microkernel '%s'.", #ukernel);
 
 static void init_f16_maxpool_config(void) {
-  #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
+  #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
@@ -40,7 +40,7 @@ static void init_f16_maxpool_config(void) {
       f16_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_f16_maxpool_minmax_ukernel_9p__neonfp16arith_u8);
       f16_maxpool_config.init.f16 = xnn_init_f16_minmax_scalar_params;
     }
-  #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
+  #elif XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.

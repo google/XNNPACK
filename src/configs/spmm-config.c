@@ -32,7 +32,7 @@ XNN_INIT_ONCE_GUARD(f32_spmm4);
   xnn_log_info("Using spmm microkernel '%s'.", #ukernel);
 
 static void init_f16_spmm_config(void) {
-  #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
+  #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
@@ -41,7 +41,7 @@ static void init_f16_spmm_config(void) {
       f16_spmm_config.mr = 32;
       f16_spmm_config.nr = 1;
     }
-  #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
+  #elif XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
