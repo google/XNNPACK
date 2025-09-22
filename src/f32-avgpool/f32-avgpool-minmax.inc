@@ -12,8 +12,11 @@ XNN_UKERNEL(xnn_arch_none, xnn_f32_avgpool_minmax_ukernel_9p__neon_u4, 4, 9, flo
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 XNN_UKERNEL(xnn_arch_none, xnn_f32_avgpool_minmax_ukernel_9p__sse2_u4, 4, 9, float, struct xnn_f32_scaleminmax_params, xnn_init_f32_scaleminmax_scalar_params)
-XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_avgpool_minmax_ukernel_9p__avx_u8, 8, 9, float, struct xnn_f32_scaleminmax_params, xnn_init_f32_scaleminmax_scalar_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_avgpool_minmax_ukernel_9p__avx_u8, 8, 9, float, struct xnn_f32_scaleminmax_params, xnn_init_f32_scaleminmax_scalar_params)
+#endif  // XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f32_avgpool_minmax_ukernel_9p__avx512f_u16, 16, 9, float, struct xnn_f32_scaleminmax_params, xnn_init_f32_scaleminmax_scalar_params)

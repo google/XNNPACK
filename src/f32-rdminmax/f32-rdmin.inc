@@ -11,8 +11,11 @@ XNN_UKERNEL(xnn_arch_arm_neon, xnn_f32_rdmin_ukernel_2p2x__neon_u32, 2, 32, fals
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 XNN_UKERNEL(xnn_arch_none, xnn_f32_rdmin_ukernel_2p2x__sse2_u32, 2, 32, false, float, float, void*, NULL)
-XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_rdmin_ukernel_2p2x__avx_u32, 2, 32, false, float, float, void*, NULL)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_rdmin_ukernel_2p2x__avx_u32, 2, 32, false, float, float, void*, NULL)
+#endif  // XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f32_rdmin_ukernel_2p2x__avx512f_u32, 2, 32, false, float, float, void*, NULL)

@@ -22,16 +22,22 @@ XNN_UKERNEL(xnn_arch_none, xnn_qs8_vcvt_ukernel__sse2_u16, 16, false, XNN_QUANTI
 XNN_UKERNEL(xnn_arch_none, xnn_qs8_vcvt_ukernel__sse2_u32, 32, false, XNN_QUANTIZED(int8_t), XNN_QUANTIZED(int8_t), struct xnn_qs8_cvt_params, xnn_init_qs8_cvt_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_ssse3, xnn_qs8_vcvt_ukernel__ssse3_u16, 16, false, XNN_QUANTIZED(int8_t), XNN_QUANTIZED(int8_t), struct xnn_qs8_cvt_params, xnn_init_qs8_cvt_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_ssse3, xnn_qs8_vcvt_ukernel__ssse3_u32, 32, false, XNN_QUANTIZED(int8_t), XNN_QUANTIZED(int8_t), struct xnn_qs8_cvt_params, xnn_init_qs8_cvt_scalar_params)
-XNN_UKERNEL(xnn_arch_x86_avx, xnn_qs8_vcvt_ukernel__avx_u8, 8, false, XNN_QUANTIZED(int8_t), XNN_QUANTIZED(int8_t), struct xnn_qs8_cvt_params, xnn_init_qs8_cvt_scalar_params)
-XNN_UKERNEL(xnn_arch_x86_avx, xnn_qs8_vcvt_ukernel__avx_u16, 16, false, XNN_QUANTIZED(int8_t), XNN_QUANTIZED(int8_t), struct xnn_qs8_cvt_params, xnn_init_qs8_cvt_scalar_params)
-XNN_UKERNEL(xnn_arch_x86_avx, xnn_qs8_vcvt_ukernel__avx_u32, 32, false, XNN_QUANTIZED(int8_t), XNN_QUANTIZED(int8_t), struct xnn_qs8_cvt_params, xnn_init_qs8_cvt_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qs8_vcvt_ukernel__sse41_u8, 8, false, XNN_QUANTIZED(int8_t), XNN_QUANTIZED(int8_t), struct xnn_qs8_cvt_params, xnn_init_qs8_cvt_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qs8_vcvt_ukernel__sse41_u16, 16, false, XNN_QUANTIZED(int8_t), XNN_QUANTIZED(int8_t), struct xnn_qs8_cvt_params, xnn_init_qs8_cvt_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qs8_vcvt_ukernel__sse41_u32, 32, false, XNN_QUANTIZED(int8_t), XNN_QUANTIZED(int8_t), struct xnn_qs8_cvt_params, xnn_init_qs8_cvt_scalar_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_avx, xnn_qs8_vcvt_ukernel__avx_u8, 8, false, XNN_QUANTIZED(int8_t), XNN_QUANTIZED(int8_t), struct xnn_qs8_cvt_params, xnn_init_qs8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_x86_avx, xnn_qs8_vcvt_ukernel__avx_u16, 16, false, XNN_QUANTIZED(int8_t), XNN_QUANTIZED(int8_t), struct xnn_qs8_cvt_params, xnn_init_qs8_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_x86_avx, xnn_qs8_vcvt_ukernel__avx_u32, 32, false, XNN_QUANTIZED(int8_t), XNN_QUANTIZED(int8_t), struct xnn_qs8_cvt_params, xnn_init_qs8_cvt_scalar_params)
+#endif  // XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86_64 || XNN_ARCH_X86)
 XNN_UKERNEL(xnn_arch_x86_avx2, xnn_qs8_vcvt_ukernel__avx2_u16, 16, false, XNN_QUANTIZED(int8_t), XNN_QUANTIZED(int8_t), struct xnn_qs8_cvt_params, xnn_init_qs8_cvt_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_avx2, xnn_qs8_vcvt_ukernel__avx2_u32, 32, false, XNN_QUANTIZED(int8_t), XNN_QUANTIZED(int8_t), struct xnn_qs8_cvt_params, xnn_init_qs8_cvt_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_avx2, xnn_qs8_vcvt_ukernel__avx2_u64, 64, false, XNN_QUANTIZED(int8_t), XNN_QUANTIZED(int8_t), struct xnn_qs8_cvt_params, xnn_init_qs8_cvt_scalar_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 XNN_UKERNEL(xnn_arch_none, xnn_qs8_vcvt_ukernel__wasmsimd_u8, 8, false, XNN_QUANTIZED(int8_t), XNN_QUANTIZED(int8_t), struct xnn_qs8_cvt_params, xnn_init_qs8_cvt_scalar_params)

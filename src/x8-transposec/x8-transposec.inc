@@ -16,9 +16,12 @@ XNN_TRANSPOSE_UKERNEL(xnn_arch_none, xnn_x8_transposec_ukernel__4x4_scalar_int, 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 XNN_TRANSPOSE_UKERNEL(xnn_arch_none, xnn_x8_transposec_ukernel__16x16_reuse_mov_sse2, 8, uint8_t, 16, 16)
 XNN_TRANSPOSE_UKERNEL(xnn_arch_none, xnn_x8_transposec_ukernel__16x16_reuse_switch_sse2, 8, uint8_t, 16, 16)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86_64 || XNN_ARCH_X86)
 XNN_TRANSPOSE_UKERNEL(xnn_arch_x86_avx2, xnn_x8_transposec_ukernel__32x32_reuse_mov_avx2, 8, uint8_t, 32, 32)
 XNN_TRANSPOSE_UKERNEL(xnn_arch_x86_avx2, xnn_x8_transposec_ukernel__32x32_reuse_switch_avx2, 8, uint8_t, 32, 32)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 XNN_TRANSPOSE_UKERNEL(xnn_arch_none, xnn_x8_transposec_ukernel__16x16_reuse_mov_wasmsimd, 8, uint8_t, 16, 16)

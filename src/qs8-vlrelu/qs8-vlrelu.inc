@@ -30,13 +30,19 @@ XNN_UKERNEL(xnn_arch_x86_ssse3, xnn_qs8_vlrelu_ukernel__ssse3_u32, 32, false, XN
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qs8_vlrelu_ukernel__sse41_u8, 8, false, XNN_QUANTIZED(int8_t), struct xnn_qs8_lrelu_params, xnn_init_qs8_lrelu_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qs8_vlrelu_ukernel__sse41_u16, 16, false, XNN_QUANTIZED(int8_t), struct xnn_qs8_lrelu_params, xnn_init_qs8_lrelu_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qs8_vlrelu_ukernel__sse41_u32, 32, false, XNN_QUANTIZED(int8_t), struct xnn_qs8_lrelu_params, xnn_init_qs8_lrelu_scalar_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_qs8_vlrelu_ukernel__avx_u8, 8, false, XNN_QUANTIZED(int8_t), struct xnn_qs8_lrelu_params, xnn_init_qs8_lrelu_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_qs8_vlrelu_ukernel__avx_u16, 16, false, XNN_QUANTIZED(int8_t), struct xnn_qs8_lrelu_params, xnn_init_qs8_lrelu_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_qs8_vlrelu_ukernel__avx_u32, 32, false, XNN_QUANTIZED(int8_t), struct xnn_qs8_lrelu_params, xnn_init_qs8_lrelu_scalar_params)
+#endif  // XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86_64 || XNN_ARCH_X86)
 XNN_UKERNEL(xnn_arch_x86_avx2, xnn_qs8_vlrelu_ukernel__avx2_u16, 16, false, XNN_QUANTIZED(int8_t), struct xnn_qs8_lrelu_params, xnn_init_qs8_lrelu_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_avx2, xnn_qs8_vlrelu_ukernel__avx2_u32, 32, false, XNN_QUANTIZED(int8_t), struct xnn_qs8_lrelu_params, xnn_init_qs8_lrelu_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_avx2, xnn_qs8_vlrelu_ukernel__avx2_u64, 64, false, XNN_QUANTIZED(int8_t), struct xnn_qs8_lrelu_params, xnn_init_qs8_lrelu_scalar_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 XNN_UKERNEL(xnn_arch_none, xnn_qs8_vlrelu_ukernel__wasmsimd_arm_u16, 16, false, XNN_QUANTIZED(int8_t), struct xnn_qs8_lrelu_params, xnn_init_qs8_lrelu_scalar_params)

@@ -20,9 +20,12 @@ XNN_UKERNEL(xnn_arch_none, xnn_qs8_vmulc_minmax_fp32_ukernel__sse2_mul16_ld64_u8
 XNN_UKERNEL(xnn_arch_none, xnn_qs8_vmulc_minmax_fp32_ukernel__sse2_mul16_ld64_u16, 16, false, int8_t, union xnn_qs8_mul_minmax_params, xnn_init_qs8_mul_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qs8_vmulc_minmax_fp32_ukernel__sse41_mul16_ld64_u8, 8, false, int8_t, union xnn_qs8_mul_minmax_params, xnn_init_qs8_mul_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qs8_vmulc_minmax_fp32_ukernel__sse41_mul16_ld64_u16, 16, false, int8_t, union xnn_qs8_mul_minmax_params, xnn_init_qs8_mul_minmax_scalar_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_qs8_vmulc_minmax_fp32_ukernel__avx_mul16_ld64_u8, 8, false, int8_t, union xnn_qs8_mul_minmax_params, xnn_init_qs8_mul_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_qs8_vmulc_minmax_fp32_ukernel__avx_mul16_ld64_u16, 16, false, int8_t, union xnn_qs8_mul_minmax_params, xnn_init_qs8_mul_minmax_scalar_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 XNN_UKERNEL(xnn_arch_none, xnn_qs8_vmulc_minmax_fp32_ukernel__wasmsimd_mul32_ld64_u8, 8, false, int8_t, union xnn_qs8_mul_minmax_params, xnn_init_qs8_mul_minmax_scalar_params)

@@ -27,15 +27,21 @@ XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qs8_f32_vcvt_ukernel__sse41_u8, 8, false, X
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qs8_f32_vcvt_ukernel__sse41_u16, 16, false, XNN_QUANTIZED(int8_t), float, struct xnn_qs8_f32_cvt_params, xnn_init_qs8_f32_cvt_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qs8_f32_vcvt_ukernel__sse41_u24, 24, false, XNN_QUANTIZED(int8_t), float, struct xnn_qs8_f32_cvt_params, xnn_init_qs8_f32_cvt_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qs8_f32_vcvt_ukernel__sse41_u32, 32, false, XNN_QUANTIZED(int8_t), float, struct xnn_qs8_f32_cvt_params, xnn_init_qs8_f32_cvt_scalar_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_qs8_f32_vcvt_ukernel__avx_u8, 8, false, XNN_QUANTIZED(int8_t), float, struct xnn_qs8_f32_cvt_params, xnn_init_qs8_f32_cvt_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_qs8_f32_vcvt_ukernel__avx_u16, 16, false, XNN_QUANTIZED(int8_t), float, struct xnn_qs8_f32_cvt_params, xnn_init_qs8_f32_cvt_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_qs8_f32_vcvt_ukernel__avx_u24, 24, false, XNN_QUANTIZED(int8_t), float, struct xnn_qs8_f32_cvt_params, xnn_init_qs8_f32_cvt_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_qs8_f32_vcvt_ukernel__avx_u32, 32, false, XNN_QUANTIZED(int8_t), float, struct xnn_qs8_f32_cvt_params, xnn_init_qs8_f32_cvt_scalar_params)
+#endif  // XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86_64 || XNN_ARCH_X86)
 XNN_UKERNEL(xnn_arch_x86_avx2, xnn_qs8_f32_vcvt_ukernel__avx2_u8, 8, false, XNN_QUANTIZED(int8_t), float, struct xnn_qs8_f32_cvt_params, xnn_init_qs8_f32_cvt_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_avx2, xnn_qs8_f32_vcvt_ukernel__avx2_u16, 16, false, XNN_QUANTIZED(int8_t), float, struct xnn_qs8_f32_cvt_params, xnn_init_qs8_f32_cvt_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_avx2, xnn_qs8_f32_vcvt_ukernel__avx2_u24, 24, false, XNN_QUANTIZED(int8_t), float, struct xnn_qs8_f32_cvt_params, xnn_init_qs8_f32_cvt_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_avx2, xnn_qs8_f32_vcvt_ukernel__avx2_u32, 32, false, XNN_QUANTIZED(int8_t), float, struct xnn_qs8_f32_cvt_params, xnn_init_qs8_f32_cvt_scalar_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_avx512skx, xnn_qs8_f32_vcvt_ukernel__avx512skx_u16, 16, false, XNN_QUANTIZED(int8_t), float, struct xnn_qs8_f32_cvt_params, xnn_init_qs8_f32_cvt_scalar_params)

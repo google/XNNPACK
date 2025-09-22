@@ -27,11 +27,13 @@ XNN_UKERNEL(xnn_arch_none, xnn_f32_vcmul_ukernel__sse_u4, 4, false, float, struc
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vcmul_ukernel__sse_u8, 8, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vcmul_ukernel__sse_u12, 12, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vcmul_ukernel__sse_u16, 16, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-XNN_UKERNEL(xnn_arch_x86_avx2, xnn_f32_vcmul_ukernel__fma3_u8, 8, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
-XNN_UKERNEL(xnn_arch_x86_avx2, xnn_f32_vcmul_ukernel__fma3_u16, 16, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
-XNN_UKERNEL(xnn_arch_x86_avx2, xnn_f32_vcmul_ukernel__fma3_u32, 32, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
-XNN_UKERNEL(xnn_arch_x86_avx2, xnn_f32_vcmul_ukernel__fma3_u64, 64, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+XNN_UKERNEL(xnn_arch_x86_fma3, xnn_f32_vcmul_ukernel__fma3_u8, 8, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL(xnn_arch_x86_fma3, xnn_f32_vcmul_ukernel__fma3_u16, 16, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL(xnn_arch_x86_fma3, xnn_f32_vcmul_ukernel__fma3_u32, 32, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL(xnn_arch_x86_fma3, xnn_f32_vcmul_ukernel__fma3_u64, 64, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)

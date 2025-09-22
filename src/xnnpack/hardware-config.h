@@ -159,8 +159,8 @@ static inline bool xnn_is_f16_compatible_config(
      XNN_ENABLE_ARM_FP16_SCALAR) ||                \
     (XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR)
   return (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith);
-#elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-  return (hardware_config->arch_flags & xnn_arch_x86_f16c);
+#elif XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  return (hardware_config->arch_flags & xnn_arch_x86_f16c) && (hardware_config->arch_flags & xnn_arch_x86_avx);
 #else
   return false;
 #endif

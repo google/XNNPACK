@@ -51,6 +51,14 @@ XNN_UKERNEL(xnn_arch_none, xnn_x32_packw_gemm_goi_ukernel_x16s4__sse2_u4, 16, 1,
 XNN_UKERNEL(xnn_arch_none, xnn_x32_packw_gemm_goi_ukernel_x16s4__sse2_u4_prfm, 16, 1, 4, 4, 1)
 XNN_UKERNEL(xnn_arch_none, xnn_x32_packw_gemm_goi_ukernel_x16s4__sse2_u8, 16, 1, 4, 8, 1)
 XNN_UKERNEL(xnn_arch_none, xnn_x32_packw_gemm_goi_ukernel_x16s4__sse2_u8_prfm, 16, 1, 4, 8, 1)
+
+XNN_GIO_UKERNEL(xnn_arch_x86_sse4_1, xnn_x32_packw_gemm_gio_ukernel_x4__sse41_u2, 4, 1, 1, 1, 1)
+XNN_GIO_UKERNEL(xnn_arch_x86_sse4_1, xnn_x32_packw_gemm_gio_ukernel_x8__sse41_u2, 8, 1, 1, 1, 1)
+XNN_GIO_UKERNEL(xnn_arch_x86_sse4_1, xnn_x32_packw_gemm_gio_ukernel_x12__sse41_u2, 12, 1, 1, 1, 1)
+XNN_GIO_UKERNEL(xnn_arch_x86_sse4_1, xnn_x32_packw_gemm_gio_ukernel_x16__sse41_u2, 16, 1, 1, 1, 1)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_x32_packw_gemm_goi_ukernel_x8__avx_u4, 8, 1, 1, 4, 1)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_x32_packw_gemm_goi_ukernel_x8__avx_u4_prfm, 8, 1, 1, 4, 1)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_x32_packw_gemm_goi_ukernel_x8s4__avx_u4, 8, 1, 4, 4, 1)
@@ -59,7 +67,6 @@ XNN_UKERNEL(xnn_arch_x86_avx, xnn_x32_packw_gemm_goi_ukernel_x16__avx_u4, 16, 1,
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_x32_packw_gemm_goi_ukernel_x16__avx_u4_prfm, 16, 1, 1, 4, 1)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_x32_packw_gemm_goi_ukernel_x16s4__avx_u4, 16, 1, 4, 4, 1)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_x32_packw_gemm_goi_ukernel_x16s4__avx_u4_prfm, 16, 1, 4, 4, 1)
-
 XNN_GIO_UKERNEL(xnn_arch_x86_avx, xnn_x32_packw_gemm_gio_ukernel_x8__avx_u1, 8, 1, 1, 1, 1)
 XNN_GIO_UKERNEL(xnn_arch_x86_avx, xnn_x32_packw_gemm_gio_ukernel_x8__avx_u1_prfm, 8, 1, 1, 1, 1)
 XNN_GIO_UKERNEL(xnn_arch_x86_avx, xnn_x32_packw_gemm_gio_ukernel_x16__avx_u1, 16, 1, 1, 1, 1)
@@ -72,12 +79,7 @@ XNN_GIO_UKERNEL(xnn_arch_x86_avx, xnn_x32_packw_gemm_gio_ukernel_x16__avx_u8, 16
 XNN_GIO_UKERNEL(xnn_arch_x86_avx, xnn_x32_packw_gemm_gio_ukernel_x16__avx_u8_prfm, 16, 1, 1, 8, 1)
 XNN_GIO_UKERNEL(xnn_arch_x86_avx, xnn_x32_packw_gemm_gio_ukernel_x32__avx_u8, 32, 1, 1, 8, 1)
 XNN_GIO_UKERNEL(xnn_arch_x86_avx, xnn_x32_packw_gemm_gio_ukernel_x32__avx_u8_prfm, 32, 1, 1, 8, 1)
-
-XNN_GIO_UKERNEL(xnn_arch_x86_sse4_1, xnn_x32_packw_gemm_gio_ukernel_x4__sse41_u2, 4, 1, 1, 1, 1)
-XNN_GIO_UKERNEL(xnn_arch_x86_sse4_1, xnn_x32_packw_gemm_gio_ukernel_x8__sse41_u2, 8, 1, 1, 1, 1)
-XNN_GIO_UKERNEL(xnn_arch_x86_sse4_1, xnn_x32_packw_gemm_gio_ukernel_x12__sse41_u2, 12, 1, 1, 1, 1)
-XNN_GIO_UKERNEL(xnn_arch_x86_sse4_1, xnn_x32_packw_gemm_gio_ukernel_x16__sse41_u2, 16, 1, 1, 1, 1)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 XNN_GIO_UKERNEL(xnn_arch_none, xnn_x32_packw_gemm_gio_ukernel_x2__scalar, 2, 1, 1, 1, 1)
 XNN_GIO_UKERNEL(xnn_arch_none, xnn_x32_packw_gemm_gio_ukernel_x4__scalar, 4, 1, 1, 1, 1)

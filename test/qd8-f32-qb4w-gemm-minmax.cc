@@ -267,7 +267,7 @@ INSTANTIATE_TEST_SUITE_P(
     });
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   INSTANTIATE_TEST_SUITE_P(
       QD8_F32_QB4W_GEMM_MINMAX_1X4C8__AVX_LD128, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -419,7 +419,10 @@ INSTANTIATE_TEST_SUITE_P(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
+#endif  // XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   INSTANTIATE_TEST_SUITE_P(
       QD8_F32_QB4W_GEMM_MINMAX_1X4C8__SSE2_LD128, GemmTest,
       testing::ValuesIn(CreateTests1(

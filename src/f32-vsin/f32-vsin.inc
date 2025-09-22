@@ -16,15 +16,18 @@ XNN_UKERNEL(xnn_arch_none, xnn_f32_vsin_ukernel__sse2_rational_5_4_div_u12, 12, 
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vsin_ukernel__sse2_rational_5_4_div_u16, 16, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vsin_ukernel__sse2fma_rational_5_4_div_u4, 4, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vsin_ukernel__sse2fma_rational_5_4_div_u8, 8, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_vsin_ukernel__avx_rational_5_4_div_u8, 8, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_vsin_ukernel__avx_rational_5_4_div_u16, 16, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_vsin_ukernel__avx_rational_5_4_div_u24, 24, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_vsin_ukernel__avx_rational_5_4_div_u32, 32, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_fma3, xnn_f32_vsin_ukernel__fma3_rational_5_4_div_u8, 8, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_fma3, xnn_f32_vsin_ukernel__fma3_rational_5_4_div_u16, 16, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_fma3, xnn_f32_vsin_ukernel__fma3_rational_5_4_div_u24, 24, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_fma3, xnn_f32_vsin_ukernel__fma3_rational_5_4_div_u32, 32, false, float, struct xnn_f32_default_params, NULL)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_vsin_ukernel__avx_rational_5_4_div_u8, 8, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_vsin_ukernel__avx_rational_5_4_div_u16, 16, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_vsin_ukernel__avx_rational_5_4_div_u24, 24, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_vsin_ukernel__avx_rational_5_4_div_u32, 32, false, float, struct xnn_f32_default_params, NULL)
+#endif  // XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f32_vsin_ukernel__avx512f_rational_5_4_div_u16, 16, false, float, struct xnn_f32_default_params, NULL)

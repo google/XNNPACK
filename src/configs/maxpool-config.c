@@ -35,6 +35,7 @@ static void init_f16_maxpool_config(void) {
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
+    (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
       f16_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_f16_maxpool_minmax_ukernel_9p__neonfp16arith_u8);
       f16_maxpool_config.init.f16 = xnn_init_f16_minmax_scalar_params;
@@ -42,6 +43,7 @@ static void init_f16_maxpool_config(void) {
   #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
+    (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
       f16_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_f16_maxpool_minmax_ukernel_9p__neonfp16arith_u8);
       f16_maxpool_config.init.f16 = xnn_init_f16_minmax_scalar_params;
@@ -49,10 +51,14 @@ static void init_f16_maxpool_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
-      f16_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_f16_maxpool_minmax_ukernel_9p__avx2_u16);
-      f16_maxpool_config.init.f16 = xnn_init_f16_minmax_scalar_params;
-    } else {
+    (void) hardware_config;  // May be unused.
+    #if XNN_ENABLE_AVX2
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
+        f16_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_f16_maxpool_minmax_ukernel_9p__avx2_u16);
+        f16_maxpool_config.init.f16 = xnn_init_f16_minmax_scalar_params;
+      } else
+    #endif
+    {
       f16_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_f16_maxpool_minmax_ukernel_9p__sse41_u8);
       f16_maxpool_config.init.f16 = xnn_init_f16_minmax_scalar_params;
     }
@@ -63,6 +69,7 @@ static void init_f32_maxpool_config(void) {
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
+    (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       f32_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_f32_maxpool_minmax_ukernel_9p__neon_u4);
       f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -95,6 +102,7 @@ static void init_s8_maxpool_config(void) {
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
+    (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       s8_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_s8_maxpool_minmax_ukernel_9p__neon_u16);
       s8_maxpool_config.init.s8 = xnn_init_s8_minmax_scalar_params;
@@ -108,6 +116,7 @@ static void init_s8_maxpool_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
+    (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_x86_sse4_1)) {
       s8_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_s8_maxpool_minmax_ukernel_9p__sse41_u16);
       s8_maxpool_config.init.s8 = xnn_init_s8_minmax_scalar_params;
@@ -128,6 +137,7 @@ static void init_u8_maxpool_config(void) {
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
+    (void) hardware_config;  // May be unused.
     if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
       u8_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_u8_maxpool_minmax_ukernel_9p__neon_u16);
       u8_maxpool_config.init.u8 = xnn_init_u8_minmax_scalar_params;
