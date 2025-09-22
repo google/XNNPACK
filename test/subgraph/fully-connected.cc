@@ -140,12 +140,6 @@ DatatypeGenerator<quint8> MakeDatatypeGenerator(qcuint4) {
   return DatatypeGenerator<quint8>();
 }
 
-// Generate values within an explicit range.
-template <typename T>
-DatatypeGenerator<T> MakeDatatypeGenerator(T, float min, float max) {
-  return DatatypeGenerator<T>(min, max);
-}
-
 const size_t no_blockwise = std::numeric_limits<size_t>::max();
 
 std::string runtime_flags_to_string(uint32_t runtime_flags) {

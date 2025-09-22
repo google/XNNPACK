@@ -25,12 +25,12 @@
 
 namespace xnnpack {
 
-template <typename Data, typename Filter, typename Bias>
+template <typename Data, typename Filter, typename Bias, typename Scale>
 Tensor<float> ReferenceImpl(Tensor<Data> input, Tensor<Filter> filter,
                             Tensor<Bias> bias,
                             const xnn_quantization_params& input_quantization,
                             int filter_zero_point, Tensor<float> filter_scale,
-                            const xnn_quantization_params& bias_quantization,
+                            int bias_zero_point, Tensor<Scale> bias_scale,
                             size_t groups, size_t group_input_channels,
                             size_t group_output_channels,
                             const StencilParams& kh, const StencilParams& kw,
@@ -60,7 +60,8 @@ Tensor<float> ReferenceImpl(Tensor<Data> input, Tensor<Filter> filter,
                                                            filter_scale(g, oc)};
             double output_nyxc =
                 bias.empty() ? 0.0f
-                             : dequantize(bias(g, oc), bias_quantization);
+                             : dequantize(bias(g, oc),
+                                          {bias_zero_point, bias_scale(g, oc)});
             for (size_t dy = 0; dy < kh.size; ++dy) {
               const size_t y = oy + kh.padding_min - dy * kh.dilation;
               const size_t iy = y / kh.stride;
@@ -104,7 +105,7 @@ DeconvolutionParams StencilToDeconvolutionParams(const StencilParams& kh,
   return params;
 }
 
-template <typename Data, typename Filter, typename Bias>
+template <typename Data, typename Filter, typename Bias, typename Scale = float>
 void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
   const bool channelwise_quantization =
       xnn_datatype_is_channelwise_quantized(xnn_datatype_of<Filter>());
@@ -166,8 +167,9 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
     if (rng() & 1) {
       std::vector<size_t> bias_shape = {params.groups *
                                         params.group_output_channels};
-      DatatypeGenerator<Bias> bias_gen = MakeDatatypeGenerator(Bias());
-      Tensor<Bias> bias(bias_shape, XnnExtraBytes);
+      DatatypeGenerator<Bias> bias_gen = MakeDatatypeGenerator(
+          Bias(), -max_abs_bias<Bias>(), max_abs_bias<Bias>());
+      bias = Tensor<Bias>(bias_shape, XnnExtraBytes);
       bias.generate([&]() { return bias_gen(rng); });
     }
 
@@ -192,12 +194,15 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
 
     // The output quantization is computed from the kernel size and input
     // quantization.
+    xnn_quantization_params bias_quantization =
+        xnn_datatype_is_quantized(datatype_of<Bias>())
+            ? xnn_quantization_params{0, input_quantization.scale *
+                                             filter_quantization.scale}
+            : xnn_quantization_params{0, 1.0f};
     xnn_quantization_params output_quantization =
         CalculateGEMMQuantizationParams<Data, Filter, Data>(
             reduction_size, input_quantization, filter_quantization,
-            /*bias_quantization=*/{0, 1.0f});
-    xnn_quantization_params bias_quantization = {
-        0, input_quantization.scale * filter_quantization.scale};
+            bias_quantization);
 
     params.output_min = dequantize(data_gen(rng), output_quantization);
     params.output_max = dequantize(data_gen(rng), output_quantization);
@@ -282,10 +287,21 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
           .InvokeRuntime();
 
       // Verify results.
+      int32_t bias_zero_point;
+      Tensor<Scale> bias_scale({bias.size()});
+      if (xnn_datatype_is_channelwise_quantized(datatype_of<Bias>())) {
+        bias_zero_point = filter_quantization.zero_point;
+        for (size_t k = 0; k < bias_scale.extent(0); k++) {
+          bias_scale(k) = input_quantization.scale * filter_scale(k, 0);
+        }
+      } else {
+        bias_zero_point = bias_quantization.zero_point;
+        bias_scale.fill(bias_quantization.scale);
+      }
       Tensor<float> expected = ReferenceImpl(
           input, filter, bias, input_quantization,
-          filter_quantization.zero_point, filter_scale, bias_quantization,
-          params.groups, params.group_input_channels,
+          filter_quantization.zero_point, filter_scale, bias_zero_point,
+          bias_scale, params.groups, params.group_input_channels,
           params.group_output_channels, kh, kw, params.adjustment);
       for (float& i : expected) {
         i = std::max(i, params.output_min);
@@ -324,7 +340,7 @@ using qint8 = quantized<int8_t>;
 using qcint8 = quantized<int8_t, channelwise>;
 using qint32 = quantized<int32_t>;
 
-TEST(Deconvolution2DQC8, test) { TestImpl<qint8, qcint8, qint32>(); }
+TEST(Deconvolution2DQC8, test) { TestImpl<qint8, qcint8, qcint32>(); }
 TEST(Deconvolution2DQU8, test) { TestImpl<quint8, quint8, qint32>(); }
 TEST(Deconvolution2DQS8, test) { TestImpl<qint8, qint8, qint32>(); }
 TEST(Deconvolution2DF16, test) { TestImpl<xnn_float16, float, float>(); }

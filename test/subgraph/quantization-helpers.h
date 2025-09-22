@@ -245,6 +245,12 @@ inline DatatypeGenerator<quantized<int32_t>> MakeDatatypeGenerator(
   return DatatypeGenerator<quantized<int32_t>>(-10000, 10000, {0, 1.0f});
 }
 
+// Generate values within an explicit range.
+template <typename T>
+DatatypeGenerator<T> MakeDatatypeGenerator(T, float min, float max) {
+  return DatatypeGenerator<T>(min, max);
+}
+
 }  // namespace xnnpack
 
 #endif  // XNNPACK_TEST_SUBGRAPH_CALCULATE_QUANTIZATION_PARAMS_H_
