@@ -7,8 +7,10 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <iostream>
 #include <limits>
+#include <random>
 #include <vector>
 
 #include "bench/subgraph/benchmark.h"
@@ -31,6 +33,9 @@ xnn_subgraph_t FullyConnected(size_t batch_size, size_t m, size_t k, size_t n,
   const xnn_datatype datatype_in = xnn_datatype_of<T>();
   const xnn_datatype datatype_w = xnn_datatype_of<W>();
   const xnn_datatype datatype_out = xnn_datatype_of<O>();
+
+  std::random_device random_device;  // NOLINT(runtime/random_device)
+  auto rng = std::mt19937(random_device());
 
   xnn_status status;
   xnn_subgraph_t subgraph = nullptr;
@@ -70,6 +75,9 @@ xnn_subgraph_t FullyConnected(size_t batch_size, size_t m, size_t k, size_t n,
     using Wunpacked = typename xnnpack::unwrap_quantized<W>::type;
     static std::vector<Wunpacked> w1_data;
     w1_data.resize(XNN_PAD_EXTRA_BYTES(k * n, Wunpacked));
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, +1.0f),
+                            std::ref(rng));
+    std::generate(w1_data.begin(), w1_data.end(), std::ref(f32rng));
     if (xnn_datatype_is_channelwise_quantized(datatype_w)) {
       static std::vector<float> w1_scale;
       w1_scale.resize(n);

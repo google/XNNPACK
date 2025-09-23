@@ -5,6 +5,7 @@
 
 #include <benchmark/benchmark.h>
 
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -12,11 +13,13 @@
 #include <cstring>
 #include <functional>
 #include <memory>
+#include <random>
 #include <vector>
 
 #include "bench/subgraph/benchmark.h"
 #include "bench/utils.h"
 #include "include/xnnpack.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/subgraph.h"
 #include <pthreadpool.h>
 
@@ -52,6 +55,8 @@ struct ModelRuntime {
     if (!model) {
       return false;
     }
+    std::random_device random_device;  // NOLINT(runtime/random_device)
+    auto rng = std::mt19937(random_device());
     for (uint32_t i = 0; i < xnn_subgraph_get_num_external_values(model.get());
          ++i) {
       uint32_t flags = xnn_subgraph_get_value_flags(model.get(), i);
@@ -60,9 +65,27 @@ struct ModelRuntime {
         continue;
       }
       // Make a buffer for this external value.
-      size_t size =
-          xnn_subgraph_get_value_size(model.get(), i) + XNN_EXTRA_BYTES;
-      external_values.push_back(xnn_external_value{i, malloc(size)});
+      size_t size = xnn_subgraph_get_value_size(model.get(), i);
+      void* data = malloc(size + XNN_EXTRA_BYTES);
+      switch (xnn_subgraph_get_value_datatype(model.get(), i)) {
+        case xnn_datatype_fp32: {
+          auto f32rng = std::uniform_real_distribution<float>(-1.0f, +1.0f);
+          std::generate((float*)data, (float*)((uintptr_t)data + size),
+                        [&] { return f32rng(rng); });
+        } break;
+        case xnn_datatype_fp16: {
+          auto f32rng = std::uniform_real_distribution<float>(-1.0f, +1.0f);
+          std::generate((xnn_float16*)data,
+                        (xnn_float16*)((uintptr_t)data + size),
+                        [&] { return f32rng(rng); });
+        } break;
+        default: {
+          auto int8rng = std::uniform_int_distribution<int>(0, 255);
+          std::generate((uint8_t*)data, (uint8_t*)((uintptr_t)data + size),
+                        [&] { return int8rng(rng); });
+        } break;
+      }
+      external_values.push_back(xnn_external_value{i, data});
     }
     return model != nullptr;
   }

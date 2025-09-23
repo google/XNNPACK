@@ -538,6 +538,8 @@ enum xnn_status xnn_subgraph_add_nodes(xnn_subgraph_t subgraph,
 uint32_t xnn_subgraph_get_value_flags(xnn_subgraph_t subgraph,
                                       uint32_t value_id);
 size_t xnn_subgraph_get_value_size(xnn_subgraph_t subgraph, uint32_t value_id);
+enum xnn_datatype xnn_subgraph_get_value_datatype(xnn_subgraph_t subgraph,
+                                                  uint32_t value_id);
 uint32_t xnn_subgraph_get_num_external_values(xnn_subgraph_t subgraph);
 uint32_t xnn_subgraph_get_num_nodes(xnn_subgraph_t subgraph);
 uint32_t xnn_subgraph_get_num_values(xnn_subgraph_t subgraph);

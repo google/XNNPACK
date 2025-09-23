@@ -2975,6 +2975,11 @@ size_t xnn_subgraph_get_value_size(xnn_subgraph_t subgraph, uint32_t value_id) {
   return xnn_tensor_get_size(&subgraph->values[value_id]);
 }
 
+enum xnn_datatype xnn_subgraph_get_value_datatype(xnn_subgraph_t subgraph,
+                                                  uint32_t value_id) {
+  return subgraph->values[value_id].datatype;
+}
+
 uint32_t xnn_subgraph_get_num_external_values(xnn_subgraph_t subgraph) {
   return subgraph->external_value_ids;
 }

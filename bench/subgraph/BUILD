@@ -35,6 +35,7 @@ xnnpack_cxx_library(
     ],
     deps = [
         "//:XNNPACK",
+        "//:math",
         "//:subgraph_h",
         "//bench:bench_utils",
         "@com_google_benchmark//:benchmark",
