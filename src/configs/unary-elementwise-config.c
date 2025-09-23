@@ -1037,8 +1037,6 @@ static void init_f32_hswish_config_impl(struct xnn_unary_elementwise_config* con
     } else {
       config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vhswish_ukernel__sse2fma_u8);
     }
-  #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
   #elif XNN_ARCH_WASMRELAXEDSIMD
     config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vhswish_ukernel__wasmrelaxedsimd_u4);
   #elif XNN_ARCH_WASMSIMD
@@ -1487,12 +1485,10 @@ static void init_f32_sigmoid_config(void) {
     } else {
       f32_sigmoid_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsigmoid_ukernel__sse2_rr2_lut64_p2_div_u8);
     }
-  #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-    #if XNN_ARCH_WASMRELAXEDSIMD
-      f32_sigmoid_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_fma_rr2_p5_div_u16);
-    #else
-      f32_sigmoid_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_p5_div_u16);
-    #endif
+  #elif XNN_ARCH_WASMRELAXEDSIMD
+    f32_sigmoid_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_fma_rr2_p5_div_u16);
+  #elif XNN_ARCH_WASMSIMD
+    f32_sigmoid_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_p5_div_u16);
   #else
     f32_sigmoid_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_u2);
   #endif
@@ -1782,12 +1778,10 @@ static void init_f32_to_f16_cvt_config(void) {
     } else {
       f32_to_f16_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_f16_vcvt_ukernel__sse2_u16);
     }
-  #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-    #if XNN_ARCH_WASMRELAXEDSIMD
-      f32_to_f16_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_f16_vcvt_ukernel__wasmrelaxedsimd_u24);
-    #else
-      f32_to_f16_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_f16_vcvt_ukernel__wasmsimd_u24);
-    #endif
+  #elif XNN_ARCH_WASMRELAXEDSIMD
+    f32_to_f16_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_f16_vcvt_ukernel__wasmrelaxedsimd_u24);
+  #elif XNN_ARCH_WASMSIMD
+    f32_to_f16_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_f16_vcvt_ukernel__wasmsimd_u24);
   #else
     f32_to_f16_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_f16_vcvt_ukernel__scalar_fabsf_u2);
   #endif
@@ -2179,14 +2173,12 @@ static void init_qu8_cvt_config(void) {
       qu8_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_qu8_vcvt_ukernel__sse2_u32);
       qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_cvt_scalar_params;
     }
-  #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-    #if XNN_ARCH_WASMRELAXEDSIMD
-      qu8_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_u32);
-      qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_cvt_scalar_params;
-    #else
-      qu8_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_qu8_vcvt_ukernel__wasmsimd_u16);
-      qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_cvt_scalar_params;
-    #endif
+  #elif XNN_ARCH_WASMRELAXEDSIMD
+    qu8_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_u32);
+    qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_cvt_scalar_params;
+  #elif XNN_ARCH_WASMSIMD
+    qu8_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_qu8_vcvt_ukernel__wasmsimd_u16);
+    qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_cvt_scalar_params;
   #elif XNN_ARCH_RISCV
     qu8_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_qu8_vcvt_ukernel__scalar_u4);
     qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_cvt_scalar_params;
