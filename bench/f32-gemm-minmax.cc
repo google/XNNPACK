@@ -2405,7 +2405,7 @@
 #endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_FMA3 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   static void f32_gemm_minmax_ukernel_1x8__fma3_broadcast(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_f32_gemm_minmax_ukernel_1x8__fma3_broadcast,
@@ -2460,10 +2460,10 @@
   }
 
   BENCHMARK_GEMM(f32_gemm_minmax_ukernel_3x16s4__fma3_broadcast)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_FMA3 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+#if XNN_ENABLE_FMA3 && XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
   static void f32_gemm_minmax_ukernel_1x8__asm_amd64_fma3_broadcast(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_f32_gemm_minmax_ukernel_1x8__asm_amd64_fma3_broadcast,
@@ -2639,10 +2639,10 @@
   }
 
   BENCHMARK_GEMM(f32_gemm_minmax_ukernel_6x16__asm_amd64_fma3_broadcast)
-#endif  // XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+#endif  // XNN_ENABLE_FMA3 && XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_FMA3 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   static void f32_gemm_minmax_ukernel_4x8__fma3_broadcast(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_f32_gemm_minmax_ukernel_4x8__fma3_broadcast,
@@ -2763,7 +2763,7 @@
   }
 
   BENCHMARK_GEMM(f32_gemm_minmax_ukernel_8x8__fma3_broadcast)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_FMA3 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
 #if XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)

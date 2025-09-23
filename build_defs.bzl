@@ -69,6 +69,10 @@ def xnnpack_configurable_defines():
         ["XNN_ENABLE_F16C=1"],
         ["XNN_ENABLE_F16C=0"],
     ) + xnnpack_select_if(
+        "//:fma3_enabled",
+        ["XNN_ENABLE_FMA3=1"],
+        ["XNN_ENABLE_FMA3=0"],
+    ) + xnnpack_select_if(
         "//:avx2_enabled",
         ["XNN_ENABLE_AVX2=1"],
         ["XNN_ENABLE_AVX2=0"],

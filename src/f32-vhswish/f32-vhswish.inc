@@ -24,11 +24,13 @@ XNN_UKERNEL(xnn_arch_none, xnn_f32_vhswish_ukernel__sse2_u8, 8, false, float, st
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vhswish_ukernel__sse2_u16, 16, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vhswish_ukernel__sse2fma_u4, 4, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vhswish_ukernel__sse2fma_u8, 8, false, float, struct xnn_f32_default_params, NULL)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+#if XNN_ENABLE_FMA3 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_fma3, xnn_f32_vhswish_ukernel__fma3_u8, 8, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_fma3, xnn_f32_vhswish_ukernel__fma3_u16, 16, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_fma3, xnn_f32_vhswish_ukernel__fma3_u32, 32, false, float, struct xnn_f32_default_params, NULL)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_FMA3 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_vhswish_ukernel__avx_u8, 8, false, float, struct xnn_f32_default_params, NULL)

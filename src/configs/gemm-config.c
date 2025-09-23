@@ -783,44 +783,46 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
         f32_gemm_config->nr = 32;
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
-      switch (hardware_config->uarch[XNN_UARCH_INDEX]) {
-        #if XNN_ENABLE_AVX
-          case xnn_uarch_zen:
-          case xnn_uarch_dhyana:
-            f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_1x16s4__fma3_broadcast);
-            f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_4x16s4__fma3_broadcast);
-            f32_gemm_config->init.f32 = xnn_init_f32_minmax_scalar_params;
-            f32_gemm_config->pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f32_gemm_gio_w;
-            f32_gemm_config->pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x16s4__avx_u4;
-            f32_gemm_config->mr = 4;
-            f32_gemm_config->nr = 16;
-            f32_gemm_config->log2_sr = 2;
-            break;
-        #endif
-        default:
-          #if XNN_ARCH_X86_64 && !XNN_PLATFORM_WINDOWS && XNN_ENABLE_ASSEMBLY && XNN_ENABLE_AVX
-            f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_1x16__asm_amd64_fma3_broadcast);
-            f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(2)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_2x16__asm_amd64_fma3_broadcast);
-            f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(6)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_6x16__asm_amd64_fma3_broadcast);
-            f32_gemm_config->init.f32 = xnn_init_f32_minmax_scalar_params;
-            f32_gemm_config->pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_x32_packw_gemm_gio_ukernel_x16__avx_u8;
-            f32_gemm_config->pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x16__avx_u4;
-            f32_gemm_config->mr = 6;
-            f32_gemm_config->nr = 16;
-          #elif XNN_ENABLE_AVX
-            f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_1x16__fma3_broadcast);
-            f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(2)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_2x16__fma3_broadcast);
-            f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(5)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_5x16__fma3_broadcast);
-            f32_gemm_config->init.f32 = xnn_init_f32_minmax_scalar_params;
-            f32_gemm_config->pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_x32_packw_gemm_gio_ukernel_x16__avx_u8;
-            f32_gemm_config->pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x16__avx_u4;
-            f32_gemm_config->mr = 5;
-            f32_gemm_config->nr = 16;
+    #if XNN_ENABLE_FMA3
+      if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
+        switch (hardware_config->uarch[XNN_UARCH_INDEX]) {
+          #if XNN_ENABLE_FMA3 && XNN_ENABLE_AVX
+            case xnn_uarch_zen:
+            case xnn_uarch_dhyana:
+              f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_1x16s4__fma3_broadcast);
+              f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_4x16s4__fma3_broadcast);
+              f32_gemm_config->init.f32 = xnn_init_f32_minmax_scalar_params;
+              f32_gemm_config->pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f32_gemm_gio_w;
+              f32_gemm_config->pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x16s4__avx_u4;
+              f32_gemm_config->mr = 4;
+              f32_gemm_config->nr = 16;
+              f32_gemm_config->log2_sr = 2;
+              break;
           #endif
-          break;
-      }
-    } else
+          default:
+            #if XNN_ARCH_X86_64 && !XNN_PLATFORM_WINDOWS && XNN_ENABLE_ASSEMBLY && XNN_ENABLE_FMA3 && XNN_ENABLE_AVX
+              f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_1x16__asm_amd64_fma3_broadcast);
+              f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(2)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_2x16__asm_amd64_fma3_broadcast);
+              f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(6)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_6x16__asm_amd64_fma3_broadcast);
+              f32_gemm_config->init.f32 = xnn_init_f32_minmax_scalar_params;
+              f32_gemm_config->pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_x32_packw_gemm_gio_ukernel_x16__avx_u8;
+              f32_gemm_config->pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x16__avx_u4;
+              f32_gemm_config->mr = 6;
+              f32_gemm_config->nr = 16;
+            #elif XNN_ENABLE_FMA3 && XNN_ENABLE_AVX
+              f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_1x16__fma3_broadcast);
+              f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(2)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_2x16__fma3_broadcast);
+              f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(5)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_5x16__fma3_broadcast);
+              f32_gemm_config->init.f32 = xnn_init_f32_minmax_scalar_params;
+              f32_gemm_config->pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_x32_packw_gemm_gio_ukernel_x16__avx_u8;
+              f32_gemm_config->pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x16__avx_u4;
+              f32_gemm_config->mr = 5;
+              f32_gemm_config->nr = 16;
+            #endif
+            break;
+        }
+      } else
+    #endif
     #if XNN_ENABLE_AVX
       if ((hardware_config->arch_flags & xnn_arch_x86_avx)) {
         f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_1x16__avx_broadcast);
@@ -1281,34 +1283,36 @@ static void init_f32_igemm_config(void) {
         f32_igemm_config.nr = 32;
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
-      switch (hardware_config->uarch[XNN_UARCH_INDEX]) {
-        #if XNN_ENABLE_AVX
-          case xnn_uarch_zen:
-          case xnn_uarch_dhyana:
-            f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f32_igemm_minmax_ukernel_1x16s4__fma3_broadcast);
-            f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f32_igemm_minmax_ukernel_4x16s4__fma3_broadcast);
-            f32_igemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
-            f32_igemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f32_gemm_gio_w;
-            f32_igemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x16s4__avx_u4;
-            f32_igemm_config.mr = 4;
-            f32_igemm_config.nr = 16;
-            f32_igemm_config.log2_sr = 2;
-            break;
-        #endif
-        default:
-          #if XNN_ENABLE_AVX
-            f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f32_igemm_minmax_ukernel_1x16__fma3_broadcast);
-            f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(5)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f32_igemm_minmax_ukernel_5x16__fma3_broadcast_prfm);
-            f32_igemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
-            f32_igemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_x32_packw_gemm_gio_ukernel_x16__avx_u8;
-            f32_igemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x16__avx_u4;
-            f32_igemm_config.mr = 5;
-            f32_igemm_config.nr = 16;
+    #if XNN_ENABLE_FMA3 && XNN_ENABLE_AVX
+      if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
+        switch (hardware_config->uarch[XNN_UARCH_INDEX]) {
+          #if XNN_ENABLE_FMA3 && XNN_ENABLE_AVX
+            case xnn_uarch_zen:
+            case xnn_uarch_dhyana:
+              f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f32_igemm_minmax_ukernel_1x16s4__fma3_broadcast);
+              f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f32_igemm_minmax_ukernel_4x16s4__fma3_broadcast);
+              f32_igemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+              f32_igemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f32_gemm_gio_w;
+              f32_igemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x16s4__avx_u4;
+              f32_igemm_config.mr = 4;
+              f32_igemm_config.nr = 16;
+              f32_igemm_config.log2_sr = 2;
+              break;
           #endif
-          break;
-      }
-    } else
+          default:
+            #if XNN_ENABLE_FMA3 && XNN_ENABLE_AVX
+              f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f32_igemm_minmax_ukernel_1x16__fma3_broadcast);
+              f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(5)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f32_igemm_minmax_ukernel_5x16__fma3_broadcast_prfm);
+              f32_igemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+              f32_igemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_x32_packw_gemm_gio_ukernel_x16__avx_u8;
+              f32_igemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x16__avx_u4;
+              f32_igemm_config.mr = 5;
+              f32_igemm_config.nr = 16;
+            #endif
+            break;
+        }
+      } else
+    #endif
     #if XNN_ENABLE_AVX
       if ((hardware_config->arch_flags & xnn_arch_x86_avx)) {
         f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f32_igemm_minmax_ukernel_1x16__avx_broadcast);
@@ -1511,39 +1515,41 @@ static void init_f32_gemm_nr2_config_impl(struct xnn_gemm_config* f32_gemm_nr2_c
         f32_gemm_nr2_config->nr = 16;
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
-      switch (hardware_config->uarch[XNN_UARCH_INDEX]) {
-        #if XNN_ENABLE_AVX
-          case xnn_uarch_zen:
-          case xnn_uarch_dhyana:
-            f32_gemm_nr2_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_1x8__fma3_broadcast);
-            f32_gemm_nr2_config->minmax.gemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_4x8__fma3_broadcast);
-            f32_gemm_nr2_config->minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f32_igemm_minmax_ukernel_1x8__fma3_broadcast);
-            f32_gemm_nr2_config->minmax.igemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f32_igemm_minmax_ukernel_4x8__fma3_broadcast);
-            f32_gemm_nr2_config->init.f32 = xnn_init_f32_minmax_scalar_params;
-            f32_gemm_nr2_config->pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f32_gemm_gio_w;
-            f32_gemm_nr2_config->pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x8__avx_u4;
-            f32_gemm_nr2_config->mr = 4;
-            f32_gemm_nr2_config->nr = 8;
-            break;
-        #endif
-          default:
-          #if XNN_ENABLE_AVX
-            f32_gemm_nr2_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_1x8__fma3_broadcast);
-            f32_gemm_nr2_config->minmax.gemm[XNN_MR_TO_INDEX(5)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_5x8__fma3_broadcast);
-            f32_gemm_nr2_config->minmax.gemm[XNN_MR_TO_INDEX(10)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_10x8__fma3_broadcast);
-            f32_gemm_nr2_config->minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f32_igemm_minmax_ukernel_1x8__fma3_broadcast);
-            f32_gemm_nr2_config->minmax.igemm[XNN_MR_TO_INDEX(5)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f32_igemm_minmax_ukernel_5x8__fma3_broadcast);
-            f32_gemm_nr2_config->minmax.igemm[XNN_MR_TO_INDEX(10)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f32_igemm_minmax_ukernel_10x8__fma3_broadcast);
-            f32_gemm_nr2_config->init.f32 = xnn_init_f32_minmax_scalar_params;
-            f32_gemm_nr2_config->pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_x32_packw_gemm_gio_ukernel_x8__avx_u8;
-            f32_gemm_nr2_config->pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x8__avx_u4;
-            f32_gemm_nr2_config->mr = 10;
-            f32_gemm_nr2_config->nr = 8;
+    #if XNN_ENABLE_FMA3 && XNN_ENABLE_AVX
+      if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
+        switch (hardware_config->uarch[XNN_UARCH_INDEX]) {
+          #if XNN_ENABLE_FMA3 && XNN_ENABLE_AVX
+            case xnn_uarch_zen:
+            case xnn_uarch_dhyana:
+              f32_gemm_nr2_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_1x8__fma3_broadcast);
+              f32_gemm_nr2_config->minmax.gemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_4x8__fma3_broadcast);
+              f32_gemm_nr2_config->minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f32_igemm_minmax_ukernel_1x8__fma3_broadcast);
+              f32_gemm_nr2_config->minmax.igemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f32_igemm_minmax_ukernel_4x8__fma3_broadcast);
+              f32_gemm_nr2_config->init.f32 = xnn_init_f32_minmax_scalar_params;
+              f32_gemm_nr2_config->pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f32_gemm_gio_w;
+              f32_gemm_nr2_config->pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x8__avx_u4;
+              f32_gemm_nr2_config->mr = 4;
+              f32_gemm_nr2_config->nr = 8;
+              break;
           #endif
-            break;
-      }
-    } else
+            default:
+            #if XNN_ENABLE_FMA3 && XNN_ENABLE_AVX
+              f32_gemm_nr2_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_1x8__fma3_broadcast);
+              f32_gemm_nr2_config->minmax.gemm[XNN_MR_TO_INDEX(5)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_5x8__fma3_broadcast);
+              f32_gemm_nr2_config->minmax.gemm[XNN_MR_TO_INDEX(10)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_10x8__fma3_broadcast);
+              f32_gemm_nr2_config->minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f32_igemm_minmax_ukernel_1x8__fma3_broadcast);
+              f32_gemm_nr2_config->minmax.igemm[XNN_MR_TO_INDEX(5)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f32_igemm_minmax_ukernel_5x8__fma3_broadcast);
+              f32_gemm_nr2_config->minmax.igemm[XNN_MR_TO_INDEX(10)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f32_igemm_minmax_ukernel_10x8__fma3_broadcast);
+              f32_gemm_nr2_config->init.f32 = xnn_init_f32_minmax_scalar_params;
+              f32_gemm_nr2_config->pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_x32_packw_gemm_gio_ukernel_x8__avx_u8;
+              f32_gemm_nr2_config->pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x8__avx_u4;
+              f32_gemm_nr2_config->mr = 10;
+              f32_gemm_nr2_config->nr = 8;
+            #endif
+              break;
+        }
+      } else
+    #endif
     #if XNN_ENABLE_AVX
       if ((hardware_config->arch_flags & xnn_arch_x86_avx)) {
         f32_gemm_nr2_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_1x8__avx_broadcast);
@@ -1681,28 +1687,37 @@ static void init_f32_qc4w_gemm_config(void) {
         f32_qc4w_gemm_config.nr = 32;
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
-      f32_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_qc4w_gemm_minmax_ukernel_1x16__avx2_broadcast);
-      f32_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(3)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_qc4w_gemm_minmax_ukernel_3x16__avx2_broadcast);
-      f32_qc4w_gemm_config.init.f32_qc4w = xnn_init_f32_qc4w_minmax_scalar_params;
-      f32_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_f32_qc4w_gemm_goi_w;
-      f32_qc4w_gemm_config.mr = 3;
-      f32_qc4w_gemm_config.nr = 16;
-    } else if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
-      f32_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_qc4w_gemm_minmax_ukernel_1x16__fma3_broadcast);
-      f32_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(3)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_qc4w_gemm_minmax_ukernel_3x16__fma3_broadcast);
-      f32_qc4w_gemm_config.init.f32_qc4w = xnn_init_f32_qc4w_minmax_scalar_params;
-      f32_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_f32_qc4w_gemm_goi_w;
-      f32_qc4w_gemm_config.mr = 3;
-      f32_qc4w_gemm_config.nr = 16;
-    } else if ((hardware_config->arch_flags & xnn_arch_x86_avx)) {
-      f32_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_qc4w_gemm_minmax_ukernel_1x16__avx_broadcast);
-      f32_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(3)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_qc4w_gemm_minmax_ukernel_3x16__avx_broadcast);
-      f32_qc4w_gemm_config.init.f32_qc4w = xnn_init_f32_qc4w_minmax_scalar_params;
-      f32_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_f32_qc4w_gemm_goi_w;
-      f32_qc4w_gemm_config.mr = 3;
-      f32_qc4w_gemm_config.nr = 16;
-    } else {
+    #if XNN_ENABLE_AVX2
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
+        f32_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_qc4w_gemm_minmax_ukernel_1x16__avx2_broadcast);
+        f32_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(3)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_qc4w_gemm_minmax_ukernel_3x16__avx2_broadcast);
+        f32_qc4w_gemm_config.init.f32_qc4w = xnn_init_f32_qc4w_minmax_scalar_params;
+        f32_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_f32_qc4w_gemm_goi_w;
+        f32_qc4w_gemm_config.mr = 3;
+        f32_qc4w_gemm_config.nr = 16;
+    } else
+    #endif
+    #if XNN_ENABLE_FMA3
+      if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
+        f32_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_qc4w_gemm_minmax_ukernel_1x16__fma3_broadcast);
+        f32_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(3)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_qc4w_gemm_minmax_ukernel_3x16__fma3_broadcast);
+        f32_qc4w_gemm_config.init.f32_qc4w = xnn_init_f32_qc4w_minmax_scalar_params;
+        f32_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_f32_qc4w_gemm_goi_w;
+        f32_qc4w_gemm_config.mr = 3;
+        f32_qc4w_gemm_config.nr = 16;
+    } else
+    #endif
+    #if XNN_ENABLE_AVX
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx)) {
+        f32_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_qc4w_gemm_minmax_ukernel_1x16__avx_broadcast);
+        f32_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(3)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_qc4w_gemm_minmax_ukernel_3x16__avx_broadcast);
+        f32_qc4w_gemm_config.init.f32_qc4w = xnn_init_f32_qc4w_minmax_scalar_params;
+        f32_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_f32_qc4w_gemm_goi_w;
+        f32_qc4w_gemm_config.mr = 3;
+        f32_qc4w_gemm_config.nr = 16;
+    } else
+    #endif
+    {
       f32_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_qc4w_gemm_minmax_ukernel_1x8__sse41_dup);
       f32_qc4w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_qc4w_gemm_minmax_ukernel_4x8__sse41_dup);
       f32_qc4w_gemm_config.init.f32_qc4w = xnn_init_f32_qc4w_minmax_scalar_params;
@@ -1831,31 +1846,40 @@ static void init_f32_qc8w_gemm_config(void) {
         f32_qc8w_gemm_config.nr = 32;
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
-      f32_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_qc8w_gemm_minmax_ukernel_1x16__avx2_broadcast);
-      f32_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(5)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_qc8w_gemm_minmax_ukernel_5x16__avx2_broadcast);
-      f32_qc8w_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
-      f32_qc8w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f32_qs8w_gemm_gio_w;
-      f32_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x8_packw_gemm_goi_ukernel_x16__scalar_u2;
-      f32_qc8w_gemm_config.mr = 5;
-      f32_qc8w_gemm_config.nr = 16;
-    } else if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
-      f32_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_qc8w_gemm_minmax_ukernel_1x16__fma3_broadcast);
-      f32_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(5)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_qc8w_gemm_minmax_ukernel_5x16__fma3_broadcast);
-      f32_qc8w_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
-      f32_qc8w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f32_qs8w_gemm_gio_w;
-      f32_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x8_packw_gemm_goi_ukernel_x16__scalar_u2;
-      f32_qc8w_gemm_config.mr = 5;
-      f32_qc8w_gemm_config.nr = 16;
-    } else if ((hardware_config->arch_flags & xnn_arch_x86_avx)) {
-      f32_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_qc8w_gemm_minmax_ukernel_1x16__avx_broadcast);
-      f32_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(5)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_qc8w_gemm_minmax_ukernel_5x16__avx_broadcast);
-      f32_qc8w_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
-      f32_qc8w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f32_qs8w_gemm_gio_w;
-      f32_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x8_packw_gemm_goi_ukernel_x16__scalar_u2;
-      f32_qc8w_gemm_config.mr = 5;
-      f32_qc8w_gemm_config.nr = 16;
-    } else {
+    #if XNN_ENABLE_AVX2
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
+        f32_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_qc8w_gemm_minmax_ukernel_1x16__avx2_broadcast);
+        f32_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(5)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_qc8w_gemm_minmax_ukernel_5x16__avx2_broadcast);
+        f32_qc8w_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+        f32_qc8w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f32_qs8w_gemm_gio_w;
+        f32_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x8_packw_gemm_goi_ukernel_x16__scalar_u2;
+        f32_qc8w_gemm_config.mr = 5;
+        f32_qc8w_gemm_config.nr = 16;
+    } else
+    #endif
+    #if XNN_ENABLE_FMA3
+      if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
+        f32_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_qc8w_gemm_minmax_ukernel_1x16__fma3_broadcast);
+        f32_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(5)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_qc8w_gemm_minmax_ukernel_5x16__fma3_broadcast);
+        f32_qc8w_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+        f32_qc8w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f32_qs8w_gemm_gio_w;
+        f32_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x8_packw_gemm_goi_ukernel_x16__scalar_u2;
+        f32_qc8w_gemm_config.mr = 5;
+        f32_qc8w_gemm_config.nr = 16;
+    } else
+    #endif
+    #if XNN_ENABLE_AVX
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx)) {
+        f32_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_qc8w_gemm_minmax_ukernel_1x16__avx_broadcast);
+        f32_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(5)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_qc8w_gemm_minmax_ukernel_5x16__avx_broadcast);
+        f32_qc8w_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+        f32_qc8w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f32_qs8w_gemm_gio_w;
+        f32_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x8_packw_gemm_goi_ukernel_x16__scalar_u2;
+        f32_qc8w_gemm_config.mr = 5;
+        f32_qc8w_gemm_config.nr = 16;
+    } else
+    #endif
+     {
       f32_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_qc8w_gemm_minmax_ukernel_1x8__sse41_dup);
       f32_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_qc8w_gemm_minmax_ukernel_4x8__sse41_dup);
       f32_qc8w_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
@@ -2135,15 +2159,17 @@ static void init_qd8_f16_qb4w_gemm_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
-    if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
-      qd8_f16_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x8c8__avx2);
-      qd8_f16_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(3)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f16_qb4w_gemm_minmax_ukernel_3x8c8__avx2);
-      qd8_f16_qb4w_gemm_config.init.f16_qb4w = xnn_init_f16_qb4w_minmax_scalar_params;
-      qd8_f16_qb4w_gemm_config.mr = 3;
-      qd8_f16_qb4w_gemm_config.nr = 8;
-      qd8_f16_qb4w_gemm_config.log2_kr = 3;
-      qd8_f16_qb4w_gemm_config.planes = 2;
-    }
+    #if XNN_ENABLE_AVX2
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
+        qd8_f16_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x8c8__avx2);
+        qd8_f16_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(3)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f16_qb4w_gemm_minmax_ukernel_3x8c8__avx2);
+        qd8_f16_qb4w_gemm_config.init.f16_qb4w = xnn_init_f16_qb4w_minmax_scalar_params;
+        qd8_f16_qb4w_gemm_config.mr = 3;
+        qd8_f16_qb4w_gemm_config.nr = 8;
+        qd8_f16_qb4w_gemm_config.log2_kr = 3;
+        qd8_f16_qb4w_gemm_config.planes = 2;
+      }
+    #endif
   #endif
   assert(qd8_f16_qb4w_gemm_config.mr <= XNN_MAX_MR);
   assert(qd8_f16_qb4w_gemm_config.mr <= (XNN_EXTRA_QUANTIZATION_PARAMS + 1));
@@ -2403,8 +2429,7 @@ static void init_qp8_f32_qc8w_gemm_config(void) {
 
 static void init_qp8_f32_qb4w_gemm_config(void) {
   #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
-    const struct xnn_hardware_config* hardware_config =
-        xnn_init_hardware_config();
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if (XNN_ENABLE_ARM_I8MM && (hardware_config->arch_flags & xnn_arch_arm_neon_i8mm)) {
@@ -2554,25 +2579,31 @@ static void init_qd8_f32_qb4w_gemm_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
-    if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
-      qd8_f32_qb4w_gemm_config.arch = xnn_arch_x86_avx2;
-      qd8_f32_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x8c8__avx2);
-      qd8_f32_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(3)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qb4w_gemm_minmax_ukernel_3x8c8__avx2);
-      qd8_f32_qb4w_gemm_config.init.f32_qb4w = xnn_init_f32_qb4w_minmax_scalar_params;
-      qd8_f32_qb4w_gemm_config.mr = 3;
-      qd8_f32_qb4w_gemm_config.nr = 8;
-      qd8_f32_qb4w_gemm_config.log2_kr = 3;
-      qd8_f32_qb4w_gemm_config.planes = 2;
-    } else if ((hardware_config->arch_flags & xnn_arch_x86_avx)) {
-      qd8_f32_qb4w_gemm_config.arch = xnn_arch_x86_avx;
-      qd8_f32_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x4c8__avx_ld128);
-      qd8_f32_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qb4w_gemm_minmax_ukernel_4x4c8__avx_ld128);
-      qd8_f32_qb4w_gemm_config.init.f32_qb4w = xnn_init_f32_qb4w_minmax_scalar_params;
-      qd8_f32_qb4w_gemm_config.mr = 4;
-      qd8_f32_qb4w_gemm_config.nr = 4;
-      qd8_f32_qb4w_gemm_config.log2_kr = 3;
-      qd8_f32_qb4w_gemm_config.planes = 1;
-    } else if ((hardware_config->arch_flags & xnn_arch_x86_sse4_1)) {
+    #if XNN_ENABLE_AVX2
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
+        qd8_f32_qb4w_gemm_config.arch = xnn_arch_x86_avx2;
+        qd8_f32_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x8c8__avx2);
+        qd8_f32_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(3)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qb4w_gemm_minmax_ukernel_3x8c8__avx2);
+        qd8_f32_qb4w_gemm_config.init.f32_qb4w = xnn_init_f32_qb4w_minmax_scalar_params;
+        qd8_f32_qb4w_gemm_config.mr = 3;
+        qd8_f32_qb4w_gemm_config.nr = 8;
+        qd8_f32_qb4w_gemm_config.log2_kr = 3;
+        qd8_f32_qb4w_gemm_config.planes = 2;
+    } else
+    #endif
+    #if XNN_ENABLE_AVX2
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx)) {
+        qd8_f32_qb4w_gemm_config.arch = xnn_arch_x86_avx;
+        qd8_f32_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x4c8__avx_ld128);
+        qd8_f32_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qb4w_gemm_minmax_ukernel_4x4c8__avx_ld128);
+        qd8_f32_qb4w_gemm_config.init.f32_qb4w = xnn_init_f32_qb4w_minmax_scalar_params;
+        qd8_f32_qb4w_gemm_config.mr = 4;
+        qd8_f32_qb4w_gemm_config.nr = 4;
+        qd8_f32_qb4w_gemm_config.log2_kr = 3;
+        qd8_f32_qb4w_gemm_config.planes = 1;
+      } else
+    #endif
+    if ((hardware_config->arch_flags & xnn_arch_x86_sse4_1)) {
       qd8_f32_qb4w_gemm_config.arch = xnn_arch_x86_sse4_1;
       qd8_f32_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x4c8__sse41_ld128);
       qd8_f32_qb4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(3)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qb4w_gemm_minmax_ukernel_3x4c8__sse41_ld128);
@@ -2874,15 +2905,17 @@ static void init_qd8_f16_qc8w_gemm_config(void) {
         qd8_f16_qc8w_gemm_config.log2_kr = 3;
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
-      qd8_f16_qc8w_gemm_config.arch = xnn_arch_x86_avx2;
-      qd8_f16_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x8c8__avx2);
-      qd8_f16_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(3)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f16_qc8w_gemm_minmax_ukernel_3x8c8__avx2);
-      qd8_f16_qc8w_gemm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
-      qd8_f16_qc8w_gemm_config.mr = 3;
-      qd8_f16_qc8w_gemm_config.nr = 8;
-      qd8_f16_qc8w_gemm_config.log2_kr = 3;
-    }
+    #if XNN_ENABLE_AVX2
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
+        qd8_f16_qc8w_gemm_config.arch = xnn_arch_x86_avx2;
+        qd8_f16_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x8c8__avx2);
+        qd8_f16_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(3)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f16_qc8w_gemm_minmax_ukernel_3x8c8__avx2);
+        qd8_f16_qc8w_gemm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
+        qd8_f16_qc8w_gemm_config.mr = 3;
+        qd8_f16_qc8w_gemm_config.nr = 8;
+        qd8_f16_qc8w_gemm_config.log2_kr = 3;
+      }
+    #endif
   #endif
   assert(qd8_f16_qc8w_gemm_config.mr <= XNN_MAX_MR);
   assert(qd8_f16_qc8w_gemm_config.mr <= (XNN_EXTRA_QUANTIZATION_PARAMS + 1));
@@ -3205,15 +3238,17 @@ static void init_qd8_f16_qc8w_igemm_config(void) {
         qd8_f16_qc8w_igemm_config.log2_kr = 3;
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
-      qd8_f16_qc8w_igemm_config.arch = xnn_arch_x86_avx2;
-      qd8_f16_qc8w_igemm_config.minmax.dqigemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQIGEMM_UKERNEL(xnn_qd8_f16_qc8w_igemm_minmax_ukernel_1x8c8__avx2);
-      qd8_f16_qc8w_igemm_config.minmax.dqigemm[XNN_MR_TO_INDEX(3)] = XNN_INIT_HMP_DQIGEMM_UKERNEL(xnn_qd8_f16_qc8w_igemm_minmax_ukernel_3x8c8__avx2);
-      qd8_f16_qc8w_igemm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
-      qd8_f16_qc8w_igemm_config.mr = 3;
-      qd8_f16_qc8w_igemm_config.nr = 8;
-      qd8_f16_qc8w_igemm_config.log2_kr = 3;
-    }
+    #if XNN_ENABLE_AVX2
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
+        qd8_f16_qc8w_igemm_config.arch = xnn_arch_x86_avx2;
+        qd8_f16_qc8w_igemm_config.minmax.dqigemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQIGEMM_UKERNEL(xnn_qd8_f16_qc8w_igemm_minmax_ukernel_1x8c8__avx2);
+        qd8_f16_qc8w_igemm_config.minmax.dqigemm[XNN_MR_TO_INDEX(3)] = XNN_INIT_HMP_DQIGEMM_UKERNEL(xnn_qd8_f16_qc8w_igemm_minmax_ukernel_3x8c8__avx2);
+        qd8_f16_qc8w_igemm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
+        qd8_f16_qc8w_igemm_config.mr = 3;
+        qd8_f16_qc8w_igemm_config.nr = 8;
+        qd8_f16_qc8w_igemm_config.log2_kr = 3;
+      }
+    #endif
   #endif
   assert(qd8_f16_qc8w_igemm_config.mr <= XNN_MAX_MR);
   assert(qd8_f16_qc8w_igemm_config.mr <= (XNN_EXTRA_QUANTIZATION_PARAMS + 1));
@@ -3425,20 +3460,23 @@ static void init_qdu8_f32_qc4w_gemm_config(void) {
         qdu8_f32_qc4w_gemm_config.planes = 2;
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
-      qdu8_f32_qc4w_gemm_config.arch = xnn_arch_x86_avx2;
-      qdu8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avx2_madd_prfm);
-      qdu8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x8c8__avx2_madd_prfm);
-      qdu8_f32_qc4w_gemm_config.pack_weights_and_biases = NULL;  // Override the default packing function.
-      qdu8_f32_qc4w_gemm_config.packed_stride_weights_and_biases = NULL;  // Override the default packing function.
-      qdu8_f32_qc4w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_qc4uw_gemm_gio_w;
-      qdu8_f32_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_qc4uw_gemm_goi_w;
-      qdu8_f32_qc4w_gemm_config.init.f32_qc4w = xnn_init_f32_qc4w_minmax_scalar_params;
-      qdu8_f32_qc4w_gemm_config.mr = 4;
-      qdu8_f32_qc4w_gemm_config.nr = 8;
-      qdu8_f32_qc4w_gemm_config.log2_kr = 3;
-      qdu8_f32_qc4w_gemm_config.planes = 2;
-    } else if ((hardware_config->arch_flags & xnn_arch_x86_ssse3)) {
+    #if XNN_ENABLE_AVX2
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
+        qdu8_f32_qc4w_gemm_config.arch = xnn_arch_x86_avx2;
+        qdu8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avx2_madd_prfm);
+        qdu8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x8c8__avx2_madd_prfm);
+        qdu8_f32_qc4w_gemm_config.pack_weights_and_biases = NULL;  // Override the default packing function.
+        qdu8_f32_qc4w_gemm_config.packed_stride_weights_and_biases = NULL;  // Override the default packing function.
+        qdu8_f32_qc4w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_qc4uw_gemm_gio_w;
+        qdu8_f32_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_qc4uw_gemm_goi_w;
+        qdu8_f32_qc4w_gemm_config.init.f32_qc4w = xnn_init_f32_qc4w_minmax_scalar_params;
+        qdu8_f32_qc4w_gemm_config.mr = 4;
+        qdu8_f32_qc4w_gemm_config.nr = 8;
+        qdu8_f32_qc4w_gemm_config.log2_kr = 3;
+        qdu8_f32_qc4w_gemm_config.planes = 2;
+      } else
+    #endif
+    if ((hardware_config->arch_flags & xnn_arch_x86_ssse3)) {
       qdu8_f32_qc4w_gemm_config.arch = xnn_arch_x86_ssse3;
       qdu8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x4c8__ssse3_madd_prfm);
       qdu8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(5)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qc4w_gemm_minmax_ukernel_5x4c8__ssse3_madd_prfm);
@@ -3872,17 +3910,20 @@ static void init_qd8_f32_qc8w_gemm_config(void) {
         qd8_f32_qc8w_gemm_config.log2_kr = 3;
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
-      qd8_f32_qc8w_gemm_config.arch = xnn_arch_x86_avx2;
-      qd8_f32_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x8c8__avx2);
-      qd8_f32_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x8c8__avx2);
-      qd8_f32_qc8w_gemm_config.minmax.dqigemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQIGEMM_UKERNEL(xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x8c8__avx2);
-      qd8_f32_qc8w_gemm_config.minmax.dqigemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_DQIGEMM_UKERNEL(xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x8c8__avx2);
-      qd8_f32_qc8w_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
-      qd8_f32_qc8w_gemm_config.mr = 4;
-      qd8_f32_qc8w_gemm_config.nr = 8;
-      qd8_f32_qc8w_gemm_config.log2_kr = 3;
-    } else if ((hardware_config->arch_flags & xnn_arch_x86_sse4_1)) {
+    #if XNN_ENABLE_AVX2
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
+        qd8_f32_qc8w_gemm_config.arch = xnn_arch_x86_avx2;
+        qd8_f32_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x8c8__avx2);
+        qd8_f32_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x8c8__avx2);
+        qd8_f32_qc8w_gemm_config.minmax.dqigemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQIGEMM_UKERNEL(xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x8c8__avx2);
+        qd8_f32_qc8w_gemm_config.minmax.dqigemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_DQIGEMM_UKERNEL(xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x8c8__avx2);
+        qd8_f32_qc8w_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+        qd8_f32_qc8w_gemm_config.mr = 4;
+        qd8_f32_qc8w_gemm_config.nr = 8;
+        qd8_f32_qc8w_gemm_config.log2_kr = 3;
+      } else
+    #endif
+    if ((hardware_config->arch_flags & xnn_arch_x86_sse4_1)) {
       qd8_f32_qc8w_gemm_config.arch = xnn_arch_x86_sse4_1;
       qd8_f32_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4c8__sse41_ld64);
       qd8_f32_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x4c8__sse41_ld64);
@@ -4079,28 +4120,32 @@ static void init_qs8_qc4w_gemm_config(void) {
         qs8_qc4w_gemm_config.log2_kr = 3;
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
-      qs8_qc4w_gemm_config.arch = xnn_arch_x86_avx2;
-      qs8_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x8c8__avx2_madd_prfm);
-      qs8_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(7)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_7x8c8__avx2_madd_prfm);
-      qs8_qc4w_gemm_config.init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
-      qs8_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_to_qu8_qc4uw_gemm_goi_w;
-      qs8_qc4w_gemm_config.planes = 2;
-      qs8_qc4w_gemm_config.mr = 7;
-      qs8_qc4w_gemm_config.nr = 8;
-      qs8_qc4w_gemm_config.log2_kr = 3;
-    } else
-    if ((hardware_config->arch_flags & xnn_arch_x86_avx)) {
-      qs8_qc4w_gemm_config.arch = xnn_arch_x86_avx;
-      qs8_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x4c8__avx_madd_prfm);
-      qs8_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(5)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_5x4c8__avx_madd_prfm);
-      qs8_qc4w_gemm_config.init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
-      qs8_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_to_qu8_qc4uw_gemm_goi_w;
-      qs8_qc4w_gemm_config.planes = 2;
-      qs8_qc4w_gemm_config.mr = 5;
-      qs8_qc4w_gemm_config.nr = 4;
-      qs8_qc4w_gemm_config.log2_kr = 3;
-    } else
+    #if XNN_ENABLE_AVX2
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
+        qs8_qc4w_gemm_config.arch = xnn_arch_x86_avx2;
+        qs8_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x8c8__avx2_madd_prfm);
+        qs8_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(7)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_7x8c8__avx2_madd_prfm);
+        qs8_qc4w_gemm_config.init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
+        qs8_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_to_qu8_qc4uw_gemm_goi_w;
+        qs8_qc4w_gemm_config.planes = 2;
+        qs8_qc4w_gemm_config.mr = 7;
+        qs8_qc4w_gemm_config.nr = 8;
+        qs8_qc4w_gemm_config.log2_kr = 3;
+      } else
+    #endif
+    #if XNN_ENABLE_AVX
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx)) {
+        qs8_qc4w_gemm_config.arch = xnn_arch_x86_avx;
+        qs8_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x4c8__avx_madd_prfm);
+        qs8_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(5)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_5x4c8__avx_madd_prfm);
+        qs8_qc4w_gemm_config.init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
+        qs8_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_to_qu8_qc4uw_gemm_goi_w;
+        qs8_qc4w_gemm_config.planes = 2;
+        qs8_qc4w_gemm_config.mr = 5;
+        qs8_qc4w_gemm_config.nr = 4;
+        qs8_qc4w_gemm_config.log2_kr = 3;
+      } else
+    #endif
     if ((hardware_config->arch_flags & xnn_arch_x86_ssse3)) {
       qs8_qc4w_gemm_config.arch = xnn_arch_x86_ssse3;
       qs8_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_DQGEMM_UKERNEL(xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x4c8__ssse3_madd_prfm);
@@ -5247,25 +5292,31 @@ static void init_qu8_gemm_config(void) {
         qu8_gemm_config.log2_kr = 3;
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
-      qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_qu8_gemm_minmax_fp32_ukernel_1x8c8__avx2);
-      qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(3)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_qu8_gemm_minmax_fp32_ukernel_3x8c8__avx2);
-      qu8_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_qu8_igemm_minmax_fp32_ukernel_1x8c8__avx2);
-      qu8_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(3)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_qu8_igemm_minmax_fp32_ukernel_3x8c8__avx2);
-      qu8_gemm_config.init.qu8 = xnn_init_qu8_conv_minmax_fp32_scalar_params;
-      qu8_gemm_config.mr = 3;
-      qu8_gemm_config.nr = 8;
-      qu8_gemm_config.log2_kr = 3;
-    } else if ((hardware_config->arch_flags & xnn_arch_x86_avx)) {
-      qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_qu8_gemm_minmax_fp32_ukernel_1x4c8__avx_ld128);
-      qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(2)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_qu8_gemm_minmax_fp32_ukernel_2x4c8__avx_ld128);
-      qu8_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__avx_ld128);
-      qu8_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(2)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__avx_ld128);
-      qu8_gemm_config.init.qu8 = xnn_init_qu8_conv_minmax_fp32_scalar_params;
-      qu8_gemm_config.mr = 2;
-      qu8_gemm_config.nr = 4;
-      qu8_gemm_config.log2_kr = 3;
-    } else if ((hardware_config->arch_flags & xnn_arch_x86_sse4_1)) {
+    #if XNN_ENABLE_AVX2
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
+        qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_qu8_gemm_minmax_fp32_ukernel_1x8c8__avx2);
+        qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(3)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_qu8_gemm_minmax_fp32_ukernel_3x8c8__avx2);
+        qu8_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_qu8_igemm_minmax_fp32_ukernel_1x8c8__avx2);
+        qu8_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(3)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_qu8_igemm_minmax_fp32_ukernel_3x8c8__avx2);
+        qu8_gemm_config.init.qu8 = xnn_init_qu8_conv_minmax_fp32_scalar_params;
+        qu8_gemm_config.mr = 3;
+        qu8_gemm_config.nr = 8;
+        qu8_gemm_config.log2_kr = 3;
+      } else
+    #endif
+    #if XNN_ENABLE_AVX
+      if ((hardware_config->arch_flags & xnn_arch_x86_avx)) {
+        qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_qu8_gemm_minmax_fp32_ukernel_1x4c8__avx_ld128);
+        qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(2)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_qu8_gemm_minmax_fp32_ukernel_2x4c8__avx_ld128);
+        qu8_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__avx_ld128);
+        qu8_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(2)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__avx_ld128);
+        qu8_gemm_config.init.qu8 = xnn_init_qu8_conv_minmax_fp32_scalar_params;
+        qu8_gemm_config.mr = 2;
+        qu8_gemm_config.nr = 4;
+        qu8_gemm_config.log2_kr = 3;
+      } else
+    #endif
+    if ((hardware_config->arch_flags & xnn_arch_x86_sse4_1)) {
       qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_qu8_gemm_minmax_fp32_ukernel_1x4c8__sse41_ld64);
       qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(3)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_qu8_gemm_minmax_fp32_ukernel_3x4c8__sse41_ld64);
       qu8_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__sse41_ld64);

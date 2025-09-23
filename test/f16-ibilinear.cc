@@ -174,7 +174,7 @@
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_FMA3 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F16_IBILINEAR__FMA3_U8, channels_eq_8) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     IBilinearMicrokernelTester()
@@ -250,10 +250,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_FMA3 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_FMA3 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F16_IBILINEAR__FMA3_U16, channels_eq_16) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_fma3);
     IBilinearMicrokernelTester()
@@ -329,4 +329,4 @@
       }
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_FMA3 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)

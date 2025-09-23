@@ -604,9 +604,11 @@ static void init_f16_tanh_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
-    if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
-      f16_tanh_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_u32);
-    } else
+    #if XNN_ENABLE_FMA3
+      if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
+        f16_tanh_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_u32);
+      } else
+    #endif
     #if XNN_ENABLE_F16C
       if ((hardware_config->arch_flags & xnn_arch_x86_f16c)) {
         f16_tanh_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_vtanh_ukernel__f16c_expm1minus_rr1_p3h2ts_rcp_u24);
@@ -640,11 +642,13 @@ static void init_f16_to_f32_cvt_config(void) {
       if ((hardware_config->arch_flags & xnn_arch_x86_avx512skx)) {
         f16_to_f32_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_f32_vcvt_ukernel__avx512skx_u16);
       } else
-    #elif XNN_ENABLE_F16C
+    #endif
+    #if XNN_ENABLE_F16C
       if ((hardware_config->arch_flags & xnn_arch_x86_f16c)) {
         f16_to_f32_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_f32_vcvt_ukernel__f16c_u16);
       } else
-    #elif XNN_ENABLE_AVX
+    #endif
+    #if XNN_ENABLE_AVX
       if ((hardware_config->arch_flags & xnn_arch_x86_avx)) {
         f16_to_f32_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f16_f32_vcvt_ukernel__avx_int16_u16);
       } else
@@ -748,9 +752,11 @@ static void init_f32_approxgelu_config_impl(struct xnn_unary_elementwise_config*
         config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vapproxgelu_ukernel__avx512f_rational_12_10_div_u32);
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
-      config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vapproxgelu_ukernel__fma3_rational_12_10_div_u16);
-    } else
+    #if XNN_ENABLE_FMA3
+      if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
+        config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vapproxgelu_ukernel__fma3_rational_12_10_div_u16);
+      } else
+    #endif
     #if XNN_ENABLE_AVX
       if ((!consistent_arithmetic && hardware_config->arch_flags & xnn_arch_x86_avx)) {
         config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vapproxgelu_ukernel__avx_rational_12_10_div_u16);
@@ -846,9 +852,11 @@ static void init_f32_cosine_config_impl(struct xnn_unary_elementwise_config* con
         config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vcos_ukernel__avx512f_rational_5_4_div_u32);
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
-      config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vcos_ukernel__fma3_rational_5_4_div_u16);
-    } else
+    #if XNN_ENABLE_FMA3
+      if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
+        config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vcos_ukernel__fma3_rational_5_4_div_u16);
+      } else
+    #endif
     #if XNN_ENABLE_AVX
       if ((!consistent_arithmetic && hardware_config->arch_flags & xnn_arch_x86_avx)) {
         config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vcos_ukernel__avx_rational_5_4_div_u16);
@@ -976,9 +984,11 @@ static void init_f32_gelu_config_impl(struct xnn_unary_elementwise_config* confi
         config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vgelu_ukernel__avx512f_rational_12_10_div_u32);
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
-      config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vgelu_ukernel__fma3_rational_12_10_div_u16);
-    } else
+    #if XNN_ENABLE_FMA3
+      if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
+        config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vgelu_ukernel__fma3_rational_12_10_div_u16);
+      } else
+    #endif
     #if XNN_ENABLE_AVX
       if ((!consistent_arithmetic && hardware_config->arch_flags & xnn_arch_x86_avx)) {
         config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vgelu_ukernel__avx_rational_12_10_div_u16);
@@ -1024,9 +1034,11 @@ static void init_f32_hswish_config_impl(struct xnn_unary_elementwise_config* con
         config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vhswish_ukernel__avx512f_u32);
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
-      config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vhswish_ukernel__fma3_u16);
-    } else
+    #if XNN_ENABLE_FMA3
+      if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
+        config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vhswish_ukernel__fma3_u16);
+      } else
+    #endif
     #if XNN_ENABLE_AVX
       if ((!consistent_arithmetic && hardware_config->arch_flags & xnn_arch_x86_avx)) {
         config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vhswish_ukernel__avx_u16);
@@ -1075,9 +1087,11 @@ static void init_f32_exp_config_impl(struct xnn_unary_elementwise_config* config
         config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vexp_ukernel__avx512f_rational_3_2_div_u16);
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
-      config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vexp_ukernel__fma3_rational_3_2_div_u32);
-    } else
+    #if XNN_ENABLE_FMA3
+      if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
+        config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vexp_ukernel__fma3_rational_3_2_div_u32);
+      } else
+    #endif
     #if XNN_ENABLE_AVX
       if ((!consistent_arithmetic && hardware_config->arch_flags & xnn_arch_x86_avx)) {
         config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vexp_ukernel__avx_rational_3_2_div_u24);
@@ -1123,9 +1137,11 @@ static void init_f32_log_config_impl(struct xnn_unary_elementwise_config* config
         config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vlog_ukernel__avx512f_rational_3_3_div_u16);
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
-      config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vlog_ukernel__fma3_rational_3_3_div_u16);
-    } else
+    #if XNN_ENABLE_FMA3
+      if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
+        config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vlog_ukernel__fma3_rational_3_3_div_u16);
+      } else
+    #endif
     #if XNN_ENABLE_AVX2
       if ((!consistent_arithmetic && hardware_config->arch_flags & xnn_arch_x86_avx2)) {
         config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vlog_ukernel__avx2_rational_3_3_div_u16);
@@ -1651,9 +1667,11 @@ static void init_f32_sine_config_impl(struct xnn_unary_elementwise_config* confi
         config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsin_ukernel__avx512f_rational_5_4_div_u32);
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
-      config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsin_ukernel__fma3_rational_5_4_div_u16);
-    } else
+    #if XNN_ENABLE_FMA3
+      if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
+        config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsin_ukernel__fma3_rational_5_4_div_u16);
+      } else
+    #endif
     #if XNN_ENABLE_AVX
       if ((!consistent_arithmetic && (hardware_config->arch_flags & xnn_arch_x86_avx))) {
         config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsin_ukernel__avx_rational_5_4_div_u16);
@@ -1706,9 +1724,11 @@ static void init_f32_tanh_config_impl(struct xnn_unary_elementwise_config* confi
         config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vtanh_ukernel__avx512f_rational_9_8_div_u32);
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
-      config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vtanh_ukernel__fma3_rational_9_8_div_u16);
-    } else
+    #if XNN_ENABLE_FMA3
+      if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
+        config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vtanh_ukernel__fma3_rational_9_8_div_u16);
+      } else
+    #endif
     #if XNN_ENABLE_AVX
       if ((!consistent_arithmetic && (hardware_config->arch_flags & xnn_arch_x86_avx))) {
         config->ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vtanh_ukernel__avx_rational_9_8_div_u16);
@@ -1764,11 +1784,13 @@ static void init_f32_to_f16_cvt_config(void) {
       if ((hardware_config->arch_flags & xnn_arch_x86_avx512skx)) {
         f32_to_f16_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_f16_vcvt_ukernel__avx512skx_u16);
       } else
-    #elif XNN_ENABLE_F16C
+    #endif
+    #if XNN_ENABLE_F16C
       if ((hardware_config->arch_flags & xnn_arch_x86_f16c)) {
         f32_to_f16_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_f16_vcvt_ukernel__f16c_u16);
       } else
-    #elif XNN_ENABLE_AVX
+    #endif
+    #if XNN_ENABLE_AVX
       if ((hardware_config->arch_flags & xnn_arch_x86_avx)) {
         f32_to_f16_cvt_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_f16_vcvt_ukernel__avx_u24);
       } else

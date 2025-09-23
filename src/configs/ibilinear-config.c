@@ -52,15 +52,16 @@ static void init_f16_ibilinear_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
-    if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
-      f16_ibilinear_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_f16_ibilinear_ukernel__fma3_u8);
-      f16_ibilinear_config.pixel_tile = 1;
-    }
+    #if XNN_ENABLE_FMA3
+      if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
+        f16_ibilinear_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_f16_ibilinear_ukernel__fma3_u8);
+        f16_ibilinear_config.pixel_tile = 1;
+      }
+    #endif
   #endif
   f16_ibilinear_config.log2_data_element_size = XNN_LOG2_SIZEOF_HALF;
   f16_ibilinear_config.log2_weight_element_size = XNN_LOG2_SIZEOF_HALF;
-  f16_ibilinear_config.indirection_init =
-      (xnn_indirection_init_resize_bilinear2d_hwc_fn) xnn_indirection_init_resize_bilinear2d_hwc_f16;
+  f16_ibilinear_config.indirection_init = (xnn_indirection_init_resize_bilinear2d_hwc_fn) xnn_indirection_init_resize_bilinear2d_hwc_f16;
 }
 
 static void init_f32_ibilinear_config(void) {
