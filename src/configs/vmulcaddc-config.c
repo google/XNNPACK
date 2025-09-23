@@ -52,7 +52,7 @@ static void init_f16_vmulcaddc_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
-    if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
+    if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
       f16_vmulcaddc_config.ukernel = XNN_INIT_VMULCADDC_UKERNEL(xnn_f16_vmulcaddc_minmax_ukernel_c8__fma3_2x);
       f16_vmulcaddc_config.init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_vmulcaddc_config.channel_tile = 8;
