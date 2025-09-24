@@ -19,6 +19,7 @@
 #include "bench/subgraph/benchmark.h"
 #include "bench/utils.h"
 #include "include/xnnpack.h"
+#include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/subgraph.h"
 #include <pthreadpool.h>
@@ -55,6 +56,20 @@ struct ModelRuntime {
     if (!model) {
       return false;
     }
+    return model != nullptr;
+  }
+
+  bool CreateRuntime(uint32_t flags) {
+    assert(!runtime);
+    return xnn_status_success == xnn_create_runtime_v4(model.get(), nullptr,
+                                                       nullptr, threadpool,
+                                                       flags, &runtime);
+  }
+  bool ReshapeRuntime() {
+    return xnn_status_success == xnn_reshape_runtime(runtime);
+  }
+
+  bool SetupRuntime() {
     std::random_device random_device;  // NOLINT(runtime/random_device)
     auto rng = std::mt19937(random_device());
     for (uint32_t i = 0; i < xnn_subgraph_get_num_external_values(model.get());
@@ -65,9 +80,16 @@ struct ModelRuntime {
         continue;
       }
       // Make a buffer for this external value.
-      size_t size = xnn_subgraph_get_value_size(model.get(), i);
+      size_t num_dims = 0;
+      size_t dims[XNN_MAX_TENSOR_DIMS];
+      xnn_get_external_value_shape(runtime, i, &num_dims, &dims[0]);
+      xnn_datatype type = xnn_subgraph_get_value_datatype(model.get(), i);
+      size_t size = xnn_datatype_size_bytes(type);
+      for (size_t i = 0; i < num_dims; ++i) {
+        size *= dims[i];
+      }
       void* data = malloc(size + XNN_EXTRA_BYTES);
-      switch (xnn_subgraph_get_value_datatype(model.get(), i)) {
+      switch (type) {
         case xnn_datatype_fp32: {
           auto f32rng = std::uniform_real_distribution<float>(-1.0f, +1.0f);
           std::generate((float*)data, (float*)((uintptr_t)data + size),
@@ -87,20 +109,6 @@ struct ModelRuntime {
       }
       external_values.push_back(xnn_external_value{i, data});
     }
-    return model != nullptr;
-  }
-
-  bool CreateRuntime(uint32_t flags) {
-    assert(!runtime);
-    return xnn_status_success == xnn_create_runtime_v4(model.get(), nullptr,
-                                                       nullptr, threadpool,
-                                                       flags, &runtime);
-  }
-  bool ReshapeRuntime() {
-    return xnn_status_success == xnn_reshape_runtime(runtime);
-  }
-
-  bool SetupRuntime() {
     return xnn_status_success == xnn_setup_runtime_v2(runtime,
                                                       external_values.size(),
                                                       external_values.data());
