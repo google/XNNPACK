@@ -2971,10 +2971,6 @@ uint32_t xnn_subgraph_get_value_flags(xnn_subgraph_t subgraph,
   return subgraph->values[value_id].flags;
 }
 
-size_t xnn_subgraph_get_value_size(xnn_subgraph_t subgraph, uint32_t value_id) {
-  return xnn_tensor_get_size(&subgraph->values[value_id]);
-}
-
 enum xnn_datatype xnn_subgraph_get_value_datatype(xnn_subgraph_t subgraph,
                                                   uint32_t value_id) {
   return subgraph->values[value_id].datatype;
