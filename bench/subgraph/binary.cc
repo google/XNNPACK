@@ -69,7 +69,8 @@ xnn_subgraph_t Binary(int64_t op, size_t d0, size_t d1, size_t d2,
   }
 
   xnn_binary_params params;
-  memset(&params, 0, sizeof(params));
+  params.output_min = -std::numeric_limits<T>::infinity();
+  params.output_max = std::numeric_limits<T>::infinity();
   status = xnn_define_binary(subgraph, static_cast<xnn_binary_operator>(op),
                              /*params=*/&params, input1_id, input2_id,
                              /*output_id=*/output_id,
