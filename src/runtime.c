@@ -559,7 +559,7 @@ static enum xnn_status create_runtime_impl(
 
   runtime->num_ops = subgraph->num_nodes;
 
-  if (flags & XNN_FLAG_YIELD_WORKERS) {
+  if (flags & XNN_FLAG_DONT_SPIN_WORKERS) {
     struct xnn_node* last_valid_node = NULL;
     for (size_t i = 0; i < subgraph->num_nodes; i++) {
       struct xnn_node* node = subgraph->nodes + i;
@@ -568,7 +568,7 @@ static enum xnn_status create_runtime_impl(
       }
     }
     if (last_valid_node != NULL) {
-      last_valid_node->flags |= XNN_FLAG_YIELD_WORKERS;
+      last_valid_node->flags |= XNN_FLAG_DONT_SPIN_WORKERS;
     }
   }
 

@@ -2372,7 +2372,7 @@ enum xnn_status xnn_run_operator_with_index(xnn_operator_t op,
   }
 
   uint32_t flags = PTHREADPOOL_FLAG_DISABLE_DENORMALS;
-  if (op->flags & XNN_FLAG_YIELD_WORKERS) {
+  if (op->flags & XNN_FLAG_DONT_SPIN_WORKERS) {
     flags |= PTHREADPOOL_FLAG_YIELD_WORKERS;
   }
   for (size_t i = 0; i < op->num_compute_invocations; i++) {
