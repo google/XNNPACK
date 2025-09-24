@@ -192,6 +192,141 @@
 #endif  // XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
 
+#if XNN_ENABLE_AVX512AMX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  static void qs8_qc4w_gemm_minmax_fp32_ukernel_1x16c4__avx512amx(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x16c4__avx512amx,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+      xnn_pack_qs8_qc4w_gemm_goi_w,
+      /*mr=*/1, /*nr=*/16, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512amx);
+  }
+
+  BENCHMARK_GEMM(qs8_qc4w_gemm_minmax_fp32_ukernel_1x16c4__avx512amx)
+
+  static void qs8_qc4w_gemm_minmax_fp32_ukernel_7x16c4__avx512amx(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_7x16c4__avx512amx,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+      xnn_pack_qs8_qc4w_gemm_goi_w,
+      /*mr=*/7, /*nr=*/16, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512amx);
+  }
+
+  BENCHMARK_GEMM(qs8_qc4w_gemm_minmax_fp32_ukernel_7x16c4__avx512amx)
+
+  static void qs8_qc4w_gemm_minmax_fp32_ukernel_16x16c4__avx512amx(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_16x16c4__avx512amx,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+      xnn_pack_qs8_qc4w_gemm_goi_w,
+      /*mr=*/16, /*nr=*/16, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512amx);
+  }
+
+  BENCHMARK_GEMM(qs8_qc4w_gemm_minmax_fp32_ukernel_16x16c4__avx512amx)
+
+  static void qs8_qc4w_gemm_minmax_fp32_ukernel_16x16c4__avx512amx_prfm(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_16x16c4__avx512amx_prfm,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+      xnn_pack_qs8_qc4w_gemm_goi_w,
+      /*mr=*/16, /*nr=*/16, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512amx);
+  }
+
+  BENCHMARK_GEMM(qs8_qc4w_gemm_minmax_fp32_ukernel_16x16c4__avx512amx_prfm)
+
+  static void qs8_qc4w_gemm_minmax_fp32_ukernel_1x32c4__avx512amx(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x32c4__avx512amx,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+      xnn_pack_qs8_qc4w_gemm_goi_w,
+      /*mr=*/1, /*nr=*/32, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512amx);
+  }
+
+  BENCHMARK_GEMM(qs8_qc4w_gemm_minmax_fp32_ukernel_1x32c4__avx512amx)
+
+  static void qs8_qc4w_gemm_minmax_fp32_ukernel_7x32c4__avx512amx(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_7x32c4__avx512amx,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+      xnn_pack_qs8_qc4w_gemm_goi_w,
+      /*mr=*/7, /*nr=*/32, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512amx);
+  }
+
+  BENCHMARK_GEMM(qs8_qc4w_gemm_minmax_fp32_ukernel_7x32c4__avx512amx)
+
+  static void qs8_qc4w_gemm_minmax_fp32_ukernel_16x32c4__avx512amx(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_16x32c4__avx512amx,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+      xnn_pack_qs8_qc4w_gemm_goi_w,
+      /*mr=*/16, /*nr=*/32, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512amx);
+  }
+
+  BENCHMARK_GEMM(qs8_qc4w_gemm_minmax_fp32_ukernel_16x32c4__avx512amx)
+
+  static void qs8_qc4w_gemm_minmax_fp32_ukernel_16x32c4__avx512amx_prfm(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_16x32c4__avx512amx_prfm,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+      xnn_pack_qs8_qc4w_gemm_goi_w,
+      /*mr=*/16, /*nr=*/32, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512amx);
+  }
+
+  BENCHMARK_GEMM(qs8_qc4w_gemm_minmax_fp32_ukernel_16x32c4__avx512amx_prfm)
+
+  static void qs8_qc4w_gemm_minmax_fp32_ukernel_1x64c4__avx512amx(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_1x64c4__avx512amx,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+      xnn_pack_qs8_qc4w_gemm_goi_w,
+      /*mr=*/1, /*nr=*/64, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512amx);
+  }
+
+  BENCHMARK_GEMM(qs8_qc4w_gemm_minmax_fp32_ukernel_1x64c4__avx512amx)
+
+  static void qs8_qc4w_gemm_minmax_fp32_ukernel_7x64c4__avx512amx(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_7x64c4__avx512amx,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+      xnn_pack_qs8_qc4w_gemm_goi_w,
+      /*mr=*/7, /*nr=*/64, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512amx);
+  }
+
+  BENCHMARK_GEMM(qs8_qc4w_gemm_minmax_fp32_ukernel_7x64c4__avx512amx)
+
+  static void qs8_qc4w_gemm_minmax_fp32_ukernel_16x64c4__avx512amx(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_16x64c4__avx512amx,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+      xnn_pack_qs8_qc4w_gemm_goi_w,
+      /*mr=*/16, /*nr=*/64, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512amx);
+  }
+
+  BENCHMARK_GEMM(qs8_qc4w_gemm_minmax_fp32_ukernel_16x64c4__avx512amx)
+
+  static void qs8_qc4w_gemm_minmax_fp32_ukernel_16x64c4__avx512amx_prfm(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_qc4w_gemm_minmax_fp32_ukernel_16x64c4__avx512amx_prfm,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+      xnn_pack_qs8_qc4w_gemm_goi_w,
+      /*mr=*/16, /*nr=*/64, /*kr=*/4, /*sr=*/1,
+      /*arch_flags=*/xnn_arch_x86_avx512amx);
+  }
+
+  BENCHMARK_GEMM(qs8_qc4w_gemm_minmax_fp32_ukernel_16x64c4__avx512amx_prfm)
+#endif  // XNN_ENABLE_AVX512AMX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
 #if XNN_ENABLE_AVX512VNNIGFNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   static void qs8_qc4w_gemm_minmax_fp32_ukernel_1x16c8__avx512vnnigfni(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
