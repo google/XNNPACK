@@ -127,7 +127,7 @@ def xnnpack_configurable_defines():
     ) + xnnpack_select_if(
         "//:arm_sme_enabled",
         ["XNN_ENABLE_ARM_SME=1"],
-        ["XNN_ENABLE_SRM_SME=0"],
+        ["XNN_ENABLE_ARM_SME=0"],
     ) + xnnpack_select_if(
         "//:arm_sme2_enabled",
         ["XNN_ENABLE_ARM_SME2=1"],
