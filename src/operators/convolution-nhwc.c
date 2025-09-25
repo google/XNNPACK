@@ -1714,6 +1714,117 @@ enum xnn_status create_convolution2d_nhwc_f32(
       /*weights_cache=*/weights_cache, convolution_op_out);
 }
 
+enum xnn_status create_convolution2d_nhwc_pf32(
+    uint32_t input_padding_top, uint32_t input_padding_right,
+    uint32_t input_padding_bottom, uint32_t input_padding_left,
+    uint32_t kernel_height, uint32_t kernel_width, uint32_t subsampling_height,
+    uint32_t subsampling_width, uint32_t dilation_height,
+    uint32_t dilation_width, uint32_t groups, size_t group_input_channels,
+    size_t group_output_channels, size_t input_channel_stride,
+    size_t output_channel_stride, const float* kernel, const float* bias,
+    float output_min, float output_max, uint32_t flags,
+    const struct xnn_gemm_config* gemm_config,
+    xnn_weights_cache_t weights_cache, xnn_operator_t* convolution_op_out) {
+  if (isnan(output_min)) {
+    xnn_log_error(
+        "failed to create %s operator with NaN output lower bound: lower bound "
+        "must be non-NaN",
+        xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_pf32));
+    return xnn_status_invalid_parameter;
+  }
+
+  if (isnan(output_max)) {
+    xnn_log_error(
+        "failed to create %s operator with NaN output upper bound: upper bound "
+        "must be non-NaN",
+        xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_pf32));
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_min > output_max) {
+    xnn_log_error(
+        "failed to create %s operator with [%.7g, %.7g] output range: lower "
+        "bound must be less than or equal to upper bound",
+        xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32),
+        output_min, output_max);
+    return xnn_status_invalid_parameter;
+  }
+
+  const bool linear_activation =
+      (output_max == INFINITY) && (output_min == -output_max);
+  const bool relu_activation = (output_max == INFINITY) && (output_min == 0.0f);
+
+  struct xnn_f32_minmax_params gemm_params;
+  if XNN_LIKELY (gemm_config->init.f32 != NULL) {
+    gemm_config->init.f32(&gemm_params, output_min, output_max);
+  }
+
+  const struct xnn_dwconv_config* dwconv_config = xnn_init_f32_dwconv_config();
+  if (dwconv_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32));
+    return xnn_status_unsupported_hardware;
+  }
+
+  struct xnn_f32_minmax_params dwconv_params;
+  const struct xnn_dwconv_config* dwconv_ukernel = find_dwconv_ukernel(
+      kernel_height * kernel_width, dwconv_config, XNN_MAX_F32_DWCONV_UKERNELS);
+  if XNN_LIKELY (dwconv_ukernel != NULL) {
+    dwconv_ukernel->init.f32(&dwconv_params, output_min, output_max);
+  }
+
+  const struct xnn_vmulcaddc_config* vmulcaddc_config =
+      xnn_init_f32_vmulcaddc_config();
+  if (vmulcaddc_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32));
+    return xnn_status_unsupported_hardware;
+  }
+
+  struct xnn_f32_minmax_params vmulcaddc_params;
+  if XNN_LIKELY (vmulcaddc_config->init.f32 != NULL) {
+    vmulcaddc_config->init.f32(&vmulcaddc_params, output_min, output_max);
+  }
+
+  return create_convolution2d_nhwc(
+      input_padding_top, input_padding_right, input_padding_bottom,
+      input_padding_left, kernel_height, kernel_width, subsampling_height,
+      subsampling_width, dilation_height, dilation_width, groups,
+      group_input_channels, group_output_channels, input_channel_stride,
+      output_channel_stride, kernel, bias, flags,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      /*bias_element_size=*/sizeof(float),
+      (xnn_pack_vmulcaddc_w_fn)xnn_pack_f32_vmulcaddc_w,
+      (xnn_pack_dwconv_hwg_w_fn)xnn_pack_f32_dwconv_hwg_w,
+      (xnn_pack_dwconv_ghw_w_fn)xnn_pack_f32_dwconv_ghw_w,
+      (xnn_pack_conv_kgo_w_fn)xnn_pack_f32_conv_kgo_w,
+      (xnn_pack_conv_goki_w_fn)gemm_config->pack_igemm_goki,
+      /*packing_params=*/NULL,
+      /*input_padding_byte=*/0,
+      /*extra_weights_bytes=*/0,
+      /*init_scale_params=*/NULL,
+      /*scale_params=*/NULL,
+      /*init_kernel_scale_params=*/NULL,
+      /*kernel_scale_params=*/NULL,
+      /*gemm_params=*/&gemm_params,
+      /*gemm_params_size=*/sizeof(gemm_params),
+      /*dwconv_params=*/&dwconv_params,
+      /*dwconv_params_size=*/sizeof(dwconv_params),
+      /*vmulcaddc_params=*/&vmulcaddc_params,
+      /*vmulcaddc_params_size=*/sizeof(vmulcaddc_params),
+      /*gemm_config=*/gemm_config,
+      /*dwconv_ukernel=*/dwconv_ukernel,
+      /*vmulcaddc_config=*/vmulcaddc_config,
+      /*linear_activation=*/linear_activation,
+      /*relu_activation=*/relu_activation,
+      /*operator_type=*/xnn_operator_type_convolution_nhwc_pf32,
+      /*dynamic_quantization=*/false,
+      /*weights_cache=*/weights_cache, convolution_op_out);
+}
+
 enum xnn_status xnn_create_convolution2d_nhwc_f32(
     uint32_t input_padding_top, uint32_t input_padding_right,
     uint32_t input_padding_bottom, uint32_t input_padding_left,
@@ -1750,6 +1861,33 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
     }
   }
   return create_convolution2d_nhwc_f32(
+      input_padding_top, input_padding_right, input_padding_bottom,
+      input_padding_left, kernel_height, kernel_width, subsampling_height,
+      subsampling_width, dilation_height, dilation_width, groups,
+      group_input_channels, group_output_channels, input_channel_stride,
+      output_channel_stride, kernel, bias, output_min, output_max, flags,
+      gemm_config, weights_cache, convolution_op_out);
+}
+
+enum xnn_status xnn_create_convolution2d_nhwc_pf32(
+    uint32_t input_padding_top, uint32_t input_padding_right,
+    uint32_t input_padding_bottom, uint32_t input_padding_left,
+    uint32_t kernel_height, uint32_t kernel_width, uint32_t subsampling_height,
+    uint32_t subsampling_width, uint32_t dilation_height,
+    uint32_t dilation_width, uint32_t groups, size_t group_input_channels,
+    size_t group_output_channels, size_t input_channel_stride,
+    size_t output_channel_stride, const float* kernel, const float* bias,
+    float output_min, float output_max, uint32_t flags,
+    xnn_weights_cache_t weights_cache, xnn_operator_t* convolution_op_out) {
+  const struct xnn_gemm_config* gemm_config = xnn_init_pf32_gemm_config();
+  if (gemm_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32));
+    return xnn_status_unsupported_hardware;
+  }
+
+  return create_convolution2d_nhwc_pf32(
       input_padding_top, input_padding_right, input_padding_bottom,
       input_padding_left, kernel_height, kernel_width, subsampling_height,
       subsampling_width, dilation_height, dilation_width, groups,
@@ -1965,6 +2103,11 @@ static enum xnn_status reshape_igemm(
         packed_lh_config = xnn_init_x8_igemm_pack_lh_config();
       }
       break;
+    case xnn_operator_type_convolution_nhwc_pf32:
+      if (inline_lhs_packing) {
+        packed_lh_config = xnn_init_x32_igemm_pack_lh_config();
+      }
+      break;      
     default:
       break;
   }
@@ -2791,6 +2934,22 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_f32(
       output_width_out, threadpool);
 }
 
+enum xnn_status xnn_reshape_convolution2d_nhwc_pf32(
+    xnn_operator_t convolution_op, size_t batch_size, size_t input_height,
+    size_t input_width, size_t* workspace_size, size_t* output_height_out,
+    size_t* output_width_out, pthreadpool_t threadpool) {
+  return reshape_convolution2d_nhwc(
+      convolution_op, xnn_operator_type_convolution_nhwc_pf32, batch_size,
+      input_height, input_width,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      /*extra_weights_elements_size=*/sizeof(float),
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+      /*dynamic_quantization=*/false, workspace_size, output_height_out,
+      output_width_out, threadpool);
+}
+
 static enum xnn_status setup_igemm(xnn_operator_t convolution_op,
                                    void* workspace,
                                    uint32_t log2_input_element_size) {
@@ -2995,6 +3154,16 @@ enum xnn_status xnn_setup_convolution2d_nhwc_f32(xnn_operator_t convolution_op,
                                                  float* output) {
   return setup_convolution2d_nhwc(
       convolution_op, xnn_operator_type_convolution_nhwc_f32, workspace, input,
+      output, /*quantization_params=*/NULL,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT);
+}
+
+enum xnn_status xnn_setup_convolution2d_nhwc_pf32(xnn_operator_t convolution_op,
+                                                 void* workspace,
+                                                 const float* input,
+                                                 float* output) {
+  return setup_convolution2d_nhwc(
+      convolution_op, xnn_operator_type_convolution_nhwc_pf32, workspace, input,
       output, /*quantization_params=*/NULL,
       /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT);
 }
