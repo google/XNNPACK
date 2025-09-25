@@ -999,3 +999,12 @@
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_conv_goki_w
   k-block: 1
+
+# ARM SME2
+- name: xnn_pf32_igemm_minmax_ukernel_32x32__neonsme
+  init: xnn_init_f32_minmax_scalar_params
+  pack-lh-fn: xnn_x32_pack_lh_ukernel__igemm_neonsme
+  pack-lh-size-fn: xnn_x32_pack_lh_size__igemm_neonsme
+  pack: xnn_pack_kai_pf32_conv_goki_w_sme
+  k-block: 4
+  cpp-check: XNN_ENABLE_KLEIDIAI
