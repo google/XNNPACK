@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2019-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -17,6 +17,7 @@
 #include "bench/utils.h"
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 #include <pthreadpool.h>
 
@@ -46,8 +47,7 @@ void xnnpack_deconvolution_qu8(benchmark::State& state, const char* net) {
   const size_t input_channels = state.range(11);
   const size_t output_channels = state.range(12);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000),
                           std::ref(rng));
 
@@ -167,8 +167,7 @@ void xnnpack_deconvolution_f32(benchmark::State& state, const char* net) {
   const size_t input_channels = state.range(11);
   const size_t output_channels = state.range(12);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f),
                           std::ref(rng));
 
@@ -295,8 +294,7 @@ void tflite_deconvolution_f32(benchmark::State& state, const char* net) {
     return;
   }
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f),
                           std::ref(rng));
 
@@ -451,11 +449,11 @@ void tflite_deconvolution_f32(benchmark::State& state, const char* net) {
     state.counters["cpufreq"] = cpu_frequency;
   }
 
-  state.counters["FLOPS"] =
-      benchmark::Counter(uint64_t(state.iterations()) * 2 * batch_size *
-                             input_width * input_width * input_channels *
-                             output_channels * kernel_height * kernel_width,
-                         benchmark::Counter::kIsRate);
+  state.counters["FLOPS"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * 2 * batch_size * input_width *
+          input_width * input_channels * output_channels * kernel_height *
+          kernel_width,
+      benchmark::Counter::kIsRate);
 
   interpreter.reset();
 }

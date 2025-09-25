@@ -18,6 +18,7 @@
 #include "include/xnnpack.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
 // align a size up to XNN_EXTRA_BYTES
@@ -34,8 +35,7 @@ xnn_subgraph_t FullyConnected(size_t batch_size, size_t m, size_t k, size_t n,
   const xnn_datatype datatype_w = xnn_datatype_of<W>();
   const xnn_datatype datatype_out = xnn_datatype_of<O>();
 
-  std::random_device random_device;  // NOLINT(runtime/random_device)
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
 
   xnn_status status;
   xnn_subgraph_t subgraph = nullptr;

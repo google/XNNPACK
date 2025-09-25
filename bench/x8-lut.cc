@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2021-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -17,6 +17,7 @@
 #include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/lut.h"
 #include "src/xnnpack/microfnptr.h"
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
 static void x8_lut(benchmark::State& state, xnn_x8_lut_ukernel_fn lut,
@@ -30,8 +31,7 @@ static void x8_lut(benchmark::State& state, xnn_x8_lut_ukernel_fn lut,
   xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> output(num_elements);
   xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> table(256);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   xnnpack::fill_uniform_random_bits(input.data(), input.size(), rng);
   xnnpack::fill_uniform_random_bits(table.data(), table.size(), rng);
 

@@ -15,6 +15,7 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
 template <typename T>
@@ -25,8 +26,7 @@ static void xnnpack_resize_bilinear(benchmark::State& state) {
   const size_t out_height = static_cast<size_t>(state.range(3));
   const size_t channels = static_cast<size_t>(state.range(4));
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
 
   xnnpack::Buffer<T> input(in_height * in_width * channels,
                            xnnpack::XnnExtraBytes);

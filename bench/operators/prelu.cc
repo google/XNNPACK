@@ -1,13 +1,12 @@
-// Copyright 2019 Google LLC
+// Copyright 2019-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
 #include <algorithm>
-#include <cfloat>
-#include <cmath>
+#include <cstddef>
+#include <cstdint>
 #include <functional>
-#include <limits>
 #include <memory>
 #include <random>
 #include <vector>
@@ -15,12 +14,16 @@
 #include "bench/utils.h"
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
+
 #ifdef BENCHMARK_TENSORFLOW_LITE
-#include <flatbuffers/include/flatbuffers/flatbuffers.h>
+#include <flatbuffers/include/flatbuffers/buffer.h>
+#include <flatbuffers/include/flatbuffers/flatbuffer_builder.h>
+#include <flatbuffers/include/flatbuffers/string.h>
+#include <tensorflow/lite/core/interpreter_builder.h>
 #include <tensorflow/lite/interpreter.h>
 #include <tensorflow/lite/kernels/register.h>
-#include <tensorflow/lite/model.h>
 #include <tensorflow/lite/schema/schema_generated.h>
 #include <tensorflow/lite/version.h>
 #endif  // BENCHMARK_TENSORFLOW_LITE
@@ -31,8 +34,7 @@ void xnnpack_prelu_f32(benchmark::State& state, const char* net) {
   const size_t width = state.range(2);
   const size_t channels = state.range(3);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32irng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f),
                            std::ref(rng));
   auto f32wrng = std::bind(std::uniform_real_distribution<float>(0.25f, 0.75f),
@@ -99,15 +101,15 @@ void xnnpack_prelu_f32(benchmark::State& state, const char* net) {
   }
 
   const size_t elements_per_iteration = batch_size * height * width * channels;
-  state.counters["elements"] =
-      benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["elements"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * elements_per_iteration,
+      benchmark::Counter::kIsRate);
 
   const size_t bytes_per_iteration =
       (2 * elements_per_iteration + channels) * sizeof(float);
-  state.counters["bytes"] =
-      benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["bytes"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * bytes_per_iteration,
+      benchmark::Counter::kIsRate);
 }
 
 #ifdef BENCHMARK_TENSORFLOW_LITE
@@ -117,8 +119,7 @@ void tflite_prelu_f32(benchmark::State& state, const char* net) {
   const size_t width = state.range(2);
   const size_t channels = state.range(3);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32irng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f),
                            std::ref(rng));
   auto f32wrng = std::bind(std::uniform_real_distribution<float>(0.25f, 0.75f),
@@ -221,15 +222,15 @@ void tflite_prelu_f32(benchmark::State& state, const char* net) {
   }
 
   const size_t elements_per_iteration = batch_size * height * width * channels;
-  state.counters["elements"] =
-      benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["elements"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * elements_per_iteration,
+      benchmark::Counter::kIsRate);
 
   const size_t bytes_per_iteration =
       (2 * elements_per_iteration + channels) * sizeof(float);
-  state.counters["bytes"] =
-      benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["bytes"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * bytes_per_iteration,
+      benchmark::Counter::kIsRate);
 
   interpreter.reset();
 }

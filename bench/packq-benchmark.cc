@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2023-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -15,6 +15,7 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/packq.h"
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
 void x8_packq(benchmark::State& state, xnn_x8_packq_f32qp8_ukernel_fn packq,
@@ -30,8 +31,7 @@ void x8_packq(benchmark::State& state, xnn_x8_packq_f32qp8_ukernel_fn packq,
   const size_t rounded_n = benchmark::utils::RoundUp(dim_m, mr);
   const size_t rounded_k = benchmark::utils::RoundUp(dim_k, kr);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng = [&]() {
     return std::uniform_real_distribution<float>(-10, 10)(rng);
   };

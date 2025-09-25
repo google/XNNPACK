@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2023-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -17,6 +17,7 @@
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 #include <pthreadpool.h>
 
@@ -40,8 +41,7 @@ void xnnpack_batch_matrix_multiply_f32(benchmark::State& state,
   const bool transpose_b = state.range(4);
   const size_t num_threads = state.range(5);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f),
                           std::ref(rng));
 
@@ -134,8 +134,7 @@ void xnnpack_batch_matrix_multiply_qd8_f32_qc8w(benchmark::State& state,
   const bool transpose_b = state.range(4);
   const size_t num_threads = state.range(5);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f),
                           std::ref(rng));
 
@@ -246,8 +245,7 @@ void tflite_batch_matrix_multiply_f32(benchmark::State& state,
   const size_t k = state.range(1);
   const size_t n = state.range(1);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f),
                           std::ref(rng));
 

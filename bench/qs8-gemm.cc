@@ -1,34 +1,34 @@
-// Copyright 2020 Google LLC
+// Copyright 2020-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
 #include <algorithm>
-#include <cfloat>
 #include <chrono>
-#include <cmath>
+#include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <mutex>
 #include <random>
 
 #include "bench/gemm-benchmark.h"
 #include "bench/utils.h"
-#include <benchmark/benchmark.h>
-#ifdef BENCHMARK_RUY
-#include <ruy/ruy.h>
-#endif  // BENCHMARK_RUY
-
 #include "src/xnnpack/buffer.h"
-#include "src/xnnpack/gemm.h"
+#include "test/replicable_random_device.h"
+#include <benchmark/benchmark.h>
 
 #ifdef BENCHMARK_RUY
+#include <ruy/context.h>
+#include <ruy/matrix.h>
+#include <ruy/mul_params.h>
+#include <ruy/ruy.h>
+
 static void RuyBenchmark(benchmark::State& state, size_t threads) {
   const size_t mc = state.range(0);
   const size_t nc = state.range(1);
   const size_t kc = state.range(2);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000),
                           std::ref(rng));
 
@@ -65,14 +65,14 @@ static void RuyBenchmark(benchmark::State& state, size_t threads) {
   ruy::MulParams<int32_t, int8_t> mul_params;
   mul_params.set_multiplier_fixedpoint(0x40000000);
 
-  // ruy::Context uses deferred initialization, which affects percieved GEMM
+  // ruy::Context uses deferred initialization, which affects perceived GEMM
   // performance. Initialization happens during the first GEMM calls, and per
   // Benoit Jacob it takes up to ~250 milliseconds for performance to stabilize.
   // Thus, on the first benchmark, we compute GEMM for 500 milliseconds (to be
   // safe) without recording performance, and keep the ruy::Context object
   // initialized (by being static) between subsequent benchmarks.
-  static std::once_flag warmup;
-  std::call_once(warmup, [&]() {
+  static std::once_flag warmup;   // NOLINT(build/c++11)
+  std::call_once(warmup, [&]() {  // NOLINT(build/c++11)
     auto start = std::chrono::steady_clock::now();
     do {
       ruy_a.set_data(k.data());
@@ -110,9 +110,9 @@ static void RuyBenchmark(benchmark::State& state, size_t threads) {
     state.counters["cpufreq"] = cpu_frequency;
   }
 
-  state.counters["OPS"] =
-      benchmark::Counter(uint64_t(state.iterations()) * 2 * mc * nc * kc,
-                         benchmark::Counter::kIsRate);
+  state.counters["OPS"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * 2 * mc * nc * kc,
+      benchmark::Counter::kIsRate);
 }
 
 static void ruy_st(benchmark::State& state, const char* net) {

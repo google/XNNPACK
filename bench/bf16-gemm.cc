@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2022-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -21,6 +21,7 @@
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/pack.h"
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
 static void bf16_gemm(benchmark::State& state,
@@ -39,8 +40,7 @@ static void bf16_gemm(benchmark::State& state,
   const size_t nc_stride = benchmark::utils::RoundUp(nc, nr);
   const size_t kc_stride = benchmark::utils::RoundUp(kc, kr * sr);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng =
       std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 

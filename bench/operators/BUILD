@@ -1,4 +1,4 @@
-# Copyright 2023 Google LLC
+# Copyright 2023-2025 Google LLC
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
@@ -13,14 +13,16 @@ load(
 )
 
 OPERATOR_BENCHMARK_DEPS = [
-    "//bench:bench_utils",
-    "//:XNNPACK",
+    "@pthreadpool",
     "//:aligned_allocator",
     "//:buffer",
     "//:cache",
     "//:common",
     "//:datatype",
     "//:math",
+    "//:XNNPACK",
+    "//bench:bench_utils",
+    "//test:replicable_random_device",
 ]
 
 xnnpack_benchmark(
@@ -54,7 +56,6 @@ xnnpack_benchmark(
     tags = xnnpack_slow_benchmark_tags() + ["nowin32"],
     deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps() + [
         "//test:next_prime",
-        "@pthreadpool",
     ] + xnnpack_select_if(
         "//:cpuinfo_enabled",
         ["@cpuinfo"],
@@ -66,7 +67,7 @@ xnnpack_benchmark(
     srcs = ["convolution.cc"],
     copts = xnnpack_optional_tflite_copts(),
     tags = xnnpack_slow_benchmark_tags() + ["nowin32"],
-    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps() + ["@pthreadpool"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
 )
 
 xnnpack_benchmark(
@@ -74,7 +75,7 @@ xnnpack_benchmark(
     srcs = ["deconvolution.cc"],
     copts = xnnpack_optional_tflite_copts(),
     tags = xnnpack_slow_benchmark_tags() + ["nowin32"],
-    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps() + ["@pthreadpool"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
 )
 
 xnnpack_benchmark(

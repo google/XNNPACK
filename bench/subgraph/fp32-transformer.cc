@@ -15,6 +15,7 @@
 
 #include "bench/subgraph/models.h"
 #include "include/xnnpack.h"
+#include "test/replicable_random_device.h"
 
 // align a size up to XNN_EXTRA_BYTES
 #define XNN_PAD_EXTRA_BYTES(s, t) \
@@ -33,8 +34,7 @@ xnn_subgraph_t FP32TransformerBlock(size_t batch_size, size_t sequence_length,
     return nullptr;
   }
 
-  std::random_device random_device;  // NOLINT(runtime/random_device)
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
 
   uint32_t v0 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 3> v0_dims = {
@@ -860,8 +860,10 @@ xnn_subgraph_t FP32TransformerBlock(size_t batch_size, size_t sequence_length,
   }
 
   std::array<size_t, 4> shape_v7_w43_v8 = {
-      (size_t)std::max<int32_t>(w43_data[0], 0), (size_t)std::max<int32_t>(w43_data[1], 0),
-      (size_t)std::max<int32_t>(w43_data[2], 0), (size_t)std::max<int32_t>(w43_data[3], 0)};
+      (size_t)std::max<int32_t>(w43_data[0], 0),
+      (size_t)std::max<int32_t>(w43_data[1], 0),
+      (size_t)std::max<int32_t>(w43_data[2], 0),
+      (size_t)std::max<int32_t>(w43_data[3], 0)};
   status = xnn_define_static_reshape(subgraph,
                                      /*num_dims=*/shape_v7_w43_v8.size(),
                                      /*new_shape=*/shape_v7_w43_v8.data(),
@@ -902,8 +904,10 @@ xnn_subgraph_t FP32TransformerBlock(size_t batch_size, size_t sequence_length,
   }
 
   std::array<size_t, 5> shape_v10_w46_v11 = {
-      (size_t)std::max<int32_t>(w46_data[0], 0), (size_t)std::max<int32_t>(w46_data[1], 0),
-      (size_t)std::max<int32_t>(w46_data[2], 0), (size_t)std::max<int32_t>(w46_data[3], 0),
+      (size_t)std::max<int32_t>(w46_data[0], 0),
+      (size_t)std::max<int32_t>(w46_data[1], 0),
+      (size_t)std::max<int32_t>(w46_data[2], 0),
+      (size_t)std::max<int32_t>(w46_data[3], 0),
       (size_t)std::max<int32_t>(w46_data[4], 0)};
   status = xnn_define_static_reshape(subgraph,
                                      /*num_dims=*/shape_v10_w46_v11.size(),
@@ -931,8 +935,10 @@ xnn_subgraph_t FP32TransformerBlock(size_t batch_size, size_t sequence_length,
   }
 
   std::array<size_t, 4> shape_v12_w48_v13 = {
-      (size_t)std::max<int32_t>(w48_data[0], 0), (size_t)std::max<int32_t>(w48_data[1], 0),
-      (size_t)std::max<int32_t>(w48_data[2], 0), (size_t)std::max<int32_t>(w48_data[3], 0)};
+      (size_t)std::max<int32_t>(w48_data[0], 0),
+      (size_t)std::max<int32_t>(w48_data[1], 0),
+      (size_t)std::max<int32_t>(w48_data[2], 0),
+      (size_t)std::max<int32_t>(w48_data[3], 0)};
   status = xnn_define_static_reshape(subgraph,
                                      /*num_dims=*/shape_v12_w48_v13.size(),
                                      /*new_shape=*/shape_v12_w48_v13.data(),
@@ -955,8 +961,10 @@ xnn_subgraph_t FP32TransformerBlock(size_t batch_size, size_t sequence_length,
   }
 
   std::array<size_t, 5> shape_v14_w49_v15 = {
-      (size_t)std::max<int32_t>(w49_data[0], 0), (size_t)std::max<int32_t>(w49_data[1], 0),
-      (size_t)std::max<int32_t>(w49_data[2], 0), (size_t)std::max<int32_t>(w49_data[3], 0),
+      (size_t)std::max<int32_t>(w49_data[0], 0),
+      (size_t)std::max<int32_t>(w49_data[1], 0),
+      (size_t)std::max<int32_t>(w49_data[2], 0),
+      (size_t)std::max<int32_t>(w49_data[3], 0),
       (size_t)std::max<int32_t>(w49_data[4], 0)};
   status = xnn_define_static_reshape(subgraph,
                                      /*num_dims=*/shape_v14_w49_v15.size(),
@@ -1001,8 +1009,10 @@ xnn_subgraph_t FP32TransformerBlock(size_t batch_size, size_t sequence_length,
   }
 
   std::array<size_t, 4> shape_v18_w52_v19 = {
-      (size_t)std::max<int32_t>(w52_data[0], 0), (size_t)std::max<int32_t>(w52_data[1], 0),
-      (size_t)std::max<int32_t>(w52_data[2], 0), (size_t)std::max<int32_t>(w52_data[3], 0)};
+      (size_t)std::max<int32_t>(w52_data[0], 0),
+      (size_t)std::max<int32_t>(w52_data[1], 0),
+      (size_t)std::max<int32_t>(w52_data[2], 0),
+      (size_t)std::max<int32_t>(w52_data[3], 0)};
   status = xnn_define_static_reshape(subgraph,
                                      /*num_dims=*/shape_v18_w52_v19.size(),
                                      /*new_shape=*/shape_v18_w52_v19.data(),
@@ -1015,8 +1025,10 @@ xnn_subgraph_t FP32TransformerBlock(size_t batch_size, size_t sequence_length,
   }
 
   std::array<size_t, 4> shape_v7_w53_v20 = {
-      (size_t)std::max<int32_t>(w53_data[0], 0), (size_t)std::max<int32_t>(w53_data[1], 0),
-      (size_t)std::max<int32_t>(w53_data[2], 0), (size_t)std::max<int32_t>(w53_data[3], 0)};
+      (size_t)std::max<int32_t>(w53_data[0], 0),
+      (size_t)std::max<int32_t>(w53_data[1], 0),
+      (size_t)std::max<int32_t>(w53_data[2], 0),
+      (size_t)std::max<int32_t>(w53_data[3], 0)};
   status = xnn_define_static_reshape(subgraph,
                                      /*num_dims=*/shape_v7_w53_v20.size(),
                                      /*new_shape=*/shape_v7_w53_v20.data(),
@@ -1039,8 +1051,10 @@ xnn_subgraph_t FP32TransformerBlock(size_t batch_size, size_t sequence_length,
   }
 
   std::array<size_t, 5> shape_v21_w54_v22 = {
-      (size_t)std::max<int32_t>(w54_data[0], 0), (size_t)std::max<int32_t>(w54_data[1], 0),
-      (size_t)std::max<int32_t>(w54_data[2], 0), (size_t)std::max<int32_t>(w54_data[3], 0),
+      (size_t)std::max<int32_t>(w54_data[0], 0),
+      (size_t)std::max<int32_t>(w54_data[1], 0),
+      (size_t)std::max<int32_t>(w54_data[2], 0),
+      (size_t)std::max<int32_t>(w54_data[3], 0),
       (size_t)std::max<int32_t>(w54_data[4], 0)};
   status = xnn_define_static_reshape(subgraph,
                                      /*num_dims=*/shape_v21_w54_v22.size(),
@@ -1067,9 +1081,10 @@ xnn_subgraph_t FP32TransformerBlock(size_t batch_size, size_t sequence_length,
     return nullptr;
   }
 
-  std::array<size_t, 3> shape_v23_w56_v24 = {(size_t)std::max<int32_t>(w56_data[0], 0),
-                                             (size_t)std::max<int32_t>(w56_data[1], 0),
-                                             (size_t)std::max<int32_t>(w56_data[2], 0)};
+  std::array<size_t, 3> shape_v23_w56_v24 = {
+      (size_t)std::max<int32_t>(w56_data[0], 0),
+      (size_t)std::max<int32_t>(w56_data[1], 0),
+      (size_t)std::max<int32_t>(w56_data[2], 0)};
   status = xnn_define_static_reshape(subgraph,
                                      /*num_dims=*/shape_v23_w56_v24.size(),
                                      /*new_shape=*/shape_v23_w56_v24.data(),

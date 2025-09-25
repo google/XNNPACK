@@ -1,7 +1,7 @@
 # Copyright (c) Facebook, Inc. and its affiliates.
 # All rights reserved.
 #
-# Copyright 2019 Google LLC
+# Copyright 2019-2025 Google LLC
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
@@ -17,7 +17,7 @@ IF(XNNPACK_BUILD_LIBRARY)
     qd8-transformer.cc
     qs8-mobilenet-v2.cc)
   SET_TARGET_PROPERTIES(models PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_LINK_LIBRARIES(models PRIVATE XNNPACK)
+  TARGET_LINK_LIBRARIES(models PRIVATE XNNPACK xnnpack-test)
 
   ADD_LIBRARY(subgraph-benchmark STATIC
     benchmark.cc)
@@ -25,6 +25,7 @@ IF(XNNPACK_BUILD_LIBRARY)
   TARGET_LINK_LIBRARIES(subgraph-benchmark PRIVATE
     benchmark::benchmark
     xnnpack-bench-utils
+    xnnpack-test
     XNNPACK)
 
   SET(SUBGRAPH_BENCHMARKS
@@ -39,6 +40,7 @@ IF(XNNPACK_BUILD_LIBRARY)
   FOREACH(BENCH ${SUBGRAPH_BENCHMARKS})
     ADD_EXECUTABLE(subgraph-${BENCH}-bench ${BENCH}.cc)
     TARGET_LINK_LIBRARIES(subgraph-${BENCH}-bench PRIVATE
+      xnnpack-test
       xnnpack-bench-utils
       benchmark::benchmark
       subgraph-benchmark

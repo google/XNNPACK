@@ -1,21 +1,17 @@
-// Copyright 2023 Google LLC
+// Copyright 2023-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
 #include <algorithm>
-#include <cfloat>
-#include <chrono>
-#include <cmath>
+#include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <limits>
-#include <mutex>
 #include <random>
-#include <vector>
 
 #include "bench/gemm.h"
 #include "bench/utils.h"
-#include "src/xnnpack/allocator.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/gemm.h"
@@ -23,9 +19,9 @@
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/pack.h"
-#include "src/xnnpack/packx.h"
-#include "src/xnnpack/ppmm.h"
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
 static void GEMMBenchmark(
@@ -44,8 +40,7 @@ static void GEMMBenchmark(
   const size_t nc_stride = benchmark::utils::RoundUp(nc, nr);
   const size_t kc_stride = benchmark::utils::RoundUp(kc, kr * sr);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng =
       std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
@@ -100,9 +95,9 @@ static void GEMMBenchmark(
     state.counters["cpufreq"] = cpu_frequency;
   }
 
-  state.counters["FLOPS"] =
-      benchmark::Counter(uint64_t(state.iterations()) * 2 * mc * nc * kc,
-                         benchmark::Counter::kIsRate);
+  state.counters["FLOPS"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * 2 * mc * nc * kc,
+      benchmark::Counter::kIsRate);
 }
 
 #if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY

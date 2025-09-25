@@ -9,6 +9,7 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <limits>
 #include <string>
 
@@ -26,7 +27,16 @@ class Xoshiro128Plus {
  public:
   using result_type = uint64_t;
 
-  explicit Xoshiro128Plus(uint64_t s1) : state_{s1, 0} {
+  explicit Xoshiro128Plus(uint64_t s1 = 0) : state_{s1, 0} {
+    // If no seed was provided (e.g. not running tests), use the current
+    // time in milliseconds from epoch.
+    if (state_[0] == 0) {
+      state_[0] = std::chrono::duration_cast<std::chrono::milliseconds>(
+                      std::chrono::system_clock::now() -
+                      std::chrono::system_clock::from_time_t(0))
+                      .count();
+    }
+
     // The seed might not have 64 bits of entropy, which some <random> functions
     // require to give good random data.
     for (int i = 0; i < 10; ++i) {
@@ -86,6 +96,40 @@ class ReplicableRandomDevice {
   void discard(size_t count) { random_generator_.discard(count); }
   static constexpr result_type min() { return BaseRandomDevice::min(); }
   static constexpr result_type max() { return BaseRandomDevice::max(); }
+
+  // Fast convenience function that generates a floating point value in the
+  // range [0, 1).
+  XNN_INLINE float NextFloat() {
+    static uint32_t leftovers = 0;
+    uint32_t float_as_bits;
+    if (leftovers != 0) {
+      float_as_bits = leftovers;
+      leftovers = 0;
+    } else {
+      uint64_t bits = random_generator_();
+      float_as_bits = bits & 0xFFFFFFFF;
+      leftovers = bits >> 32;
+    }
+    float_as_bits = (float_as_bits >> 9) | 0x3F800000;
+    float res;
+    memcpy(&res, &float_as_bits, sizeof(float));
+    return res - 1.0;
+  }
+
+  // Fast convenience function that generates a `uint32_t` value.
+  XNN_INLINE uint32_t NextUInt32() {
+    static uint32_t leftovers = 0;
+    uint32_t res;
+    if (leftovers != 0) {
+      res = leftovers;
+      leftovers = 0;
+    } else {
+      uint64_t bits = random_generator_();
+      res = bits & 0xFFFFFFFF;
+      leftovers = bits >> 32;
+    }
+    return res;
+  }
 
  private:
   const int random_seed_;

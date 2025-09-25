@@ -19,6 +19,7 @@
 #include "src/xnnpack/vbinary.h"
 #include "src/xnnpack/vscaleexpminusmax.h"
 #include "src/xnnpack/vscaleextexp.h"
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
 #ifdef BENCHMARK_INTEL_DNNL
@@ -44,8 +45,7 @@ static void DNNLSoftArgMax(benchmark::State& state) {
   const size_t packed_elements =
       benchmark::utils::RoundUp(elements, cache_line_size_max / sizeof(float));
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(
       std::uniform_real_distribution<float>(-1000.0f, 1000.0f), std::ref(rng));
 
@@ -220,8 +220,7 @@ static void ThreePassSoftMaxWithRecomputing(
   const size_t packed_elements =
       benchmark::utils::RoundUp(elements, cache_line_size_max / sizeof(float));
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(
       std::uniform_real_distribution<float>(-1000.0f, 1000.0f), std::ref(rng));
 
@@ -294,8 +293,7 @@ static void ThreePassSoftMaxWithReloading(
   const size_t packed_elements =
       benchmark::utils::RoundUp(elements, cache_line_size_max / sizeof(float));
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(
       std::uniform_real_distribution<float>(-1000.0f, 1000.0f), std::ref(rng));
 
@@ -371,8 +369,7 @@ static void TwoPassSoftMax(
   const size_t packed_elements =
       benchmark::utils::RoundUp(elements, cache_line_size_max / sizeof(float));
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(
       std::uniform_real_distribution<float>(-1000.0f, 1000.0f), std::ref(rng));
 

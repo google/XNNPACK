@@ -1,26 +1,29 @@
-// Copyright 2023 Google LLC
+// Copyright 2023-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <benchmark/benchmark.h>
-
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <random>
-#include <vector>
 
 #include "bench/bgemm.h"
 #include "bench/utils.h"
+#include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/pack.h"
-#include "src/xnnpack/packw.h"
+#include "test/replicable_random_device.h"
+#include <benchmark/benchmark.h>
 
 static void x8_packw(benchmark::State& state,
                      xnn_x8_packw_gemm_goi_ukernel_fn packw, size_t nr,
-                     size_t kr, size_t sr,
-                     uint64_t arch_flags = 0) {
+                     size_t kr, size_t sr, uint64_t arch_flags = 0) {
   if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
@@ -34,8 +37,7 @@ static void x8_packw(benchmark::State& state,
   const size_t rounded_size =
       rounded_n * rounded_k + rounded_n * sizeof(uint32_t);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
 
   // Computer num_buffers that fit cache with source weights + packed_weights.
   const size_t num_buffers =
@@ -70,21 +72,20 @@ static void x8_packw(benchmark::State& state,
   }
 
   const size_t elements_per_iteration = batch * dim_n * dim_k;
-  state.counters["elements"] =
-      benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["elements"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * elements_per_iteration,
+      benchmark::Counter::kIsRate);
 
   const size_t bytes_per_iteration =
       (elements_per_iteration + batch * rounded_size);
-  state.counters["bytes"] =
-      benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["bytes"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * bytes_per_iteration,
+      benchmark::Counter::kIsRate);
 }
 
-static void x8_gio_packw(
-    benchmark::State& state, xnn_x8_packw_gemm_gio_ukernel_fn packw, size_t nr,
-    size_t kr, size_t sr,
-    uint64_t arch_flags = 0) {
+static void x8_gio_packw(benchmark::State& state,
+                         xnn_x8_packw_gemm_gio_ukernel_fn packw, size_t nr,
+                         size_t kr, size_t sr, uint64_t arch_flags = 0) {
   if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
@@ -98,8 +99,7 @@ static void x8_gio_packw(
   const size_t rounded_size =
       rounded_n * rounded_k + rounded_n * sizeof(uint32_t);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
 
   // Computer num_buffers that fit cache with source weights + packed_weights.
   const size_t num_buffers =
@@ -135,15 +135,15 @@ static void x8_gio_packw(
   }
 
   const size_t elements_per_iteration = batch * dim_n * dim_k;
-  state.counters["elements"] =
-      benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["elements"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * elements_per_iteration,
+      benchmark::Counter::kIsRate);
 
   const size_t bytes_per_iteration =
       elements_per_iteration + batch * rounded_size;
-  state.counters["bytes"] =
-      benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["bytes"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * bytes_per_iteration,
+      benchmark::Counter::kIsRate);
 }
 
 static void qb4_packw(benchmark::State& state,
@@ -162,24 +162,23 @@ static void qb4_packw(benchmark::State& state,
   size_t rounded_k2 = round_up_po2(k2, kr * sr * 2);
   const size_t rounded_n = round_up_po2(dim_n, nr);
 
-  const size_t num_blocks = (rounded_k2 / bl); 
+  const size_t num_blocks = (rounded_k2 / bl);
   const size_t rounded_k_bytes = (rounded_k2 + 1);
-  const size_t rounded_size = rounded_n * (
-    rounded_k_bytes + sizeof(float) + num_blocks * sizeof(uint16_t) + sizeof(float)
-  );
+  const size_t rounded_size =
+      rounded_n * (rounded_k_bytes + sizeof(float) +
+                   num_blocks * sizeof(uint16_t) + sizeof(float));
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
 
   // Computer num_buffers that fit cache with source weights + packed_weights.
   const size_t num_buffers =
-      1 +
-      benchmark::utils::DivideRoundUp<size_t>(
-          benchmark::utils::GetMaxCacheSize(),
-          sizeof(int8_t) * batch * ((dim_n * dim_k + 1) / 2 + batch * rounded_size));
+      1 + benchmark::utils::DivideRoundUp<size_t>(
+              benchmark::utils::GetMaxCacheSize(),
+              sizeof(int8_t) * batch *
+                  ((dim_n * dim_k + 1) / 2 + batch * rounded_size));
 
   xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> weights(
-      num_buffers * ((batch * (dim_n * dim_k+1)/2) + XNN_EXTRA_BYTES));
+      num_buffers * ((batch * (dim_n * dim_k + 1) / 2) + XNN_EXTRA_BYTES));
   xnnpack::fill_uniform_random_bits(weights.data(), weights.size(), rng);
   xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_weights(
       num_buffers * batch * rounded_size);
@@ -197,14 +196,13 @@ static void qb4_packw(benchmark::State& state,
   for (auto _ : state) {
     buffer_index = (buffer_index + 1) % num_buffers;
     int32_t* bias_ptr =
-        null_bias
-            ? nullptr
-            : bias.data() + (buffer_index * batch * dim_n);
+        null_bias ? nullptr : bias.data() + (buffer_index * batch * dim_n);
 
     packw(batch, dim_n, dim_k, nr, kr, sr, bl,
           weights.data() + buffer_index * (batch * (dim_n * dim_k + 1) / 2),
           /*bias=*/bias_ptr,
-          /*scale=*/bf16_scales.data() + (buffer_index * batch * dim_n * num_blocks),
+          /*scale=*/bf16_scales.data() +
+              (buffer_index * batch * dim_n * num_blocks),
           packed_weights.data() + buffer_index * batch * rounded_size,
           /*extra_bytes_bl=*/sizeof(uint16_t) * nr, sizeof(float) * nr,
           &packing_params);
@@ -216,21 +214,20 @@ static void qb4_packw(benchmark::State& state,
   }
 
   const size_t elements_per_iteration = batch * dim_n * dim_k;
-  state.counters["elements"] =
-      benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["elements"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * elements_per_iteration,
+      benchmark::Counter::kIsRate);
 
   const size_t bytes_per_iteration =
       (elements_per_iteration + batch * rounded_size);
-  state.counters["bytes"] =
-      benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["bytes"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * bytes_per_iteration,
+      benchmark::Counter::kIsRate);
 }
 
 static void qs8_packw(benchmark::State& state,
                       xnn_qs8_packw_gemm_goi_ukernel_fn packw, size_t nr,
-                      size_t kr, size_t sr,
-                      uint64_t arch_flags = 0) {
+                      size_t kr, size_t sr, uint64_t arch_flags = 0) {
   if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
@@ -244,8 +241,7 @@ static void qs8_packw(benchmark::State& state,
   const size_t rounded_size =
       rounded_n * rounded_k + rounded_n * sizeof(uint32_t);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
 
   // Computer num_buffers that fit cache with source weights + packed_weights.
   const size_t num_buffers =
@@ -280,21 +276,20 @@ static void qs8_packw(benchmark::State& state,
   }
 
   const size_t elements_per_iteration = batch * dim_n * dim_k;
-  state.counters["elements"] =
-      benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["elements"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * elements_per_iteration,
+      benchmark::Counter::kIsRate);
 
   const size_t bytes_per_iteration =
       (elements_per_iteration + batch * rounded_size);
-  state.counters["bytes"] =
-      benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["bytes"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * bytes_per_iteration,
+      benchmark::Counter::kIsRate);
 }
 
-static void qs8_gio_packw(
-    benchmark::State& state, xnn_qs8_packw_gemm_gio_ukernel_fn packw, size_t nr,
-    size_t kr, size_t sr,
-    uint64_t arch_flags = 0) {
+static void qs8_gio_packw(benchmark::State& state,
+                          xnn_qs8_packw_gemm_gio_ukernel_fn packw, size_t nr,
+                          size_t kr, size_t sr, uint64_t arch_flags = 0) {
   if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
@@ -308,8 +303,7 @@ static void qs8_gio_packw(
   const size_t rounded_size =
       rounded_n * rounded_k + rounded_n * sizeof(uint32_t);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
 
   // Computer num_buffers that fit cache with source weights + packed_weights.
   const size_t num_buffers =
@@ -345,21 +339,21 @@ static void qs8_gio_packw(
   }
 
   const size_t elements_per_iteration = batch * dim_n * dim_k;
-  state.counters["elements"] =
-      benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["elements"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * elements_per_iteration,
+      benchmark::Counter::kIsRate);
 
   const size_t bytes_per_iteration =
       (elements_per_iteration + batch * rounded_size);
-  state.counters["bytes"] =
-      benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["bytes"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * bytes_per_iteration,
+      benchmark::Counter::kIsRate);
 }
 
-static void qs8_qc4w_packw(
-    benchmark::State& state, xnn_qs8_qc4w_packw_gemm_goi_ukernel_fn packw,
-    size_t nr, size_t kr, size_t sr,
-    uint64_t arch_flags = 0) {
+static void qs8_qc4w_packw(benchmark::State& state,
+                           xnn_qs8_qc4w_packw_gemm_goi_ukernel_fn packw,
+                           size_t nr, size_t kr, size_t sr,
+                           uint64_t arch_flags = 0) {
   if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
@@ -373,8 +367,7 @@ static void qs8_qc4w_packw(
   const size_t rounded_size =
       rounded_n * rounded_k / 2 + rounded_n * sizeof(uint32_t);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
 
   // Computer num_buffers that fit cache with source weights + packed_weights.
   const size_t num_buffers =
@@ -409,21 +402,20 @@ static void qs8_qc4w_packw(
   }
 
   const size_t elements_per_iteration = batch * dim_n * dim_k;
-  state.counters["elements"] =
-      benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["elements"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * elements_per_iteration,
+      benchmark::Counter::kIsRate);
 
   const size_t bytes_per_iteration =
       (elements_per_iteration + batch * rounded_size);
-  state.counters["bytes"] =
-      benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["bytes"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * bytes_per_iteration,
+      benchmark::Counter::kIsRate);
 }
 
 static void x16_packw(benchmark::State& state,
                       xnn_x16_packw_gemm_goi_ukernel_fn packw, size_t nr,
-                      size_t kr, size_t sr,
-                      uint64_t arch_flags = 0) {
+                      size_t kr, size_t sr, uint64_t arch_flags = 0) {
   if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
@@ -435,8 +427,7 @@ static void x16_packw(benchmark::State& state,
   const size_t rounded_n = benchmark::utils::RoundUp(dim_n, nr);
   const size_t rounded_k = benchmark::utils::RoundUp(dim_k, kr * sr);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
 
   // Computer num_buffers that fit cache with source weights + packed_weights.
   const size_t num_buffers =
@@ -473,22 +464,22 @@ static void x16_packw(benchmark::State& state,
   }
 
   const size_t elements_per_iteration = batch * dim_n * dim_k;
-  state.counters["elements"] =
-      benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["elements"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * elements_per_iteration,
+      benchmark::Counter::kIsRate);
 
   const size_t bytes_per_iteration =
       (elements_per_iteration + batch * (rounded_n * rounded_k + rounded_n)) *
       sizeof(uint16_t);
-  state.counters["bytes"] =
-      benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["bytes"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * bytes_per_iteration,
+      benchmark::Counter::kIsRate);
 }
 
-static void x16_x32_packw(
-    benchmark::State& state, xnn_x16_x32_packw_gemm_goi_ukernel_fn packw,
-    size_t nr, size_t kr, size_t sr,
-    uint64_t arch_flags = 0) {
+static void x16_x32_packw(benchmark::State& state,
+                          xnn_x16_x32_packw_gemm_goi_ukernel_fn packw,
+                          size_t nr, size_t kr, size_t sr,
+                          uint64_t arch_flags = 0) {
   if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
@@ -500,8 +491,7 @@ static void x16_x32_packw(
   const size_t rounded_n = benchmark::utils::RoundUp(dim_n, nr);
   const size_t rounded_k = benchmark::utils::RoundUp(dim_k, kr * sr);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
 
   // Computer num_buffers that fit cache with source weights + packed_weights.
   const size_t num_buffers =
@@ -538,22 +528,21 @@ static void x16_x32_packw(
   }
 
   const size_t elements_per_iteration = batch * dim_n * dim_k;
-  state.counters["elements"] =
-      benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["elements"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * elements_per_iteration,
+      benchmark::Counter::kIsRate);
 
   const size_t bytes_per_iteration =
       (elements_per_iteration + batch * (rounded_n * rounded_k + rounded_n)) *
       sizeof(uint16_t);
-  state.counters["bytes"] =
-      benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["bytes"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * bytes_per_iteration,
+      benchmark::Counter::kIsRate);
 }
 
 static void x32_packw(benchmark::State& state,
                       xnn_x32_packw_gemm_goi_ukernel_fn packw, size_t nr,
-                      size_t kr, size_t sr,
-                      uint64_t arch_flags = 0) {
+                      size_t kr, size_t sr, uint64_t arch_flags = 0) {
   if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
@@ -565,8 +554,7 @@ static void x32_packw(benchmark::State& state,
   const size_t rounded_n = benchmark::utils::RoundUp(dim_n, nr);
   const size_t rounded_k = benchmark::utils::RoundUp(dim_k, kr * sr);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng =
       std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
@@ -606,22 +594,21 @@ static void x32_packw(benchmark::State& state,
   }
 
   const size_t elements_per_iteration = batch * dim_n * dim_k;
-  state.counters["elements"] =
-      benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["elements"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * elements_per_iteration,
+      benchmark::Counter::kIsRate);
 
   const size_t bytes_per_iteration =
       (elements_per_iteration + batch * (rounded_n * rounded_k + rounded_n)) *
       sizeof(float);
-  state.counters["bytes"] =
-      benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["bytes"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * bytes_per_iteration,
+      benchmark::Counter::kIsRate);
 }
 
-static void x32_gio_packw(
-    benchmark::State& state, xnn_x32_packw_gemm_gio_ukernel_fn packw, size_t nr,
-    size_t kr, size_t sr,
-    uint64_t arch_flags = 0) {
+static void x32_gio_packw(benchmark::State& state,
+                          xnn_x32_packw_gemm_gio_ukernel_fn packw, size_t nr,
+                          size_t kr, size_t sr, uint64_t arch_flags = 0) {
   if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
@@ -633,8 +620,7 @@ static void x32_gio_packw(
   const size_t rounded_n = benchmark::utils::RoundUp(dim_n, nr);
   const size_t rounded_k = benchmark::utils::RoundUp(dim_k, kr * sr);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng =
       std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
@@ -674,16 +660,16 @@ static void x32_gio_packw(
   }
 
   const size_t elements_per_iteration = batch * dim_n * dim_k;
-  state.counters["elements"] =
-      benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["elements"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * elements_per_iteration,
+      benchmark::Counter::kIsRate);
 
   const size_t bytes_per_iteration =
       (elements_per_iteration + batch * (rounded_n * rounded_k + rounded_n)) *
       sizeof(float);
-  state.counters["bytes"] =
-      benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["bytes"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * bytes_per_iteration,
+      benchmark::Counter::kIsRate);
 }
 
 static void x8_packw__reference(size_t batch, size_t dim_n, size_t dim_k,

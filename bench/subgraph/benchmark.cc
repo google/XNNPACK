@@ -1,9 +1,9 @@
-// Copyright 2019 Google LLC
+// Copyright 2019-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <benchmark/benchmark.h>
+#include "bench/subgraph/benchmark.h"
 
 #include <algorithm>
 #include <cassert>
@@ -16,12 +16,13 @@
 #include <random>
 #include <vector>
 
-#include "bench/subgraph/benchmark.h"
 #include "bench/utils.h"
 #include "include/xnnpack.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/subgraph.h"
+#include "test/replicable_random_device.h"
+#include <benchmark/benchmark.h>
 #include <pthreadpool.h>
 
 namespace xnnpack {
@@ -70,8 +71,7 @@ struct ModelRuntime {
   }
 
   bool SetupRuntime() {
-    std::random_device random_device;  // NOLINT(runtime/random_device)
-    auto rng = std::mt19937(random_device());
+    ReplicableRandomDevice rng;
     for (uint32_t i = 0; i < xnn_subgraph_get_num_external_values(model.get());
          ++i) {
       uint32_t flags = xnn_subgraph_get_value_flags(model.get(), i);
@@ -91,20 +91,17 @@ struct ModelRuntime {
       void* data = malloc(size + XNN_EXTRA_BYTES);
       switch (type) {
         case xnn_datatype_fp32: {
-          auto f32rng = std::uniform_real_distribution<float>(-1.0f, +1.0f);
           std::generate((float*)data, (float*)((uintptr_t)data + size),
-                        [&] { return f32rng(rng); });
+                        [&] { return rng.NextFloat(); });
         } break;
         case xnn_datatype_fp16: {
-          auto f32rng = std::uniform_real_distribution<float>(-1.0f, +1.0f);
           std::generate((xnn_float16*)data,
                         (xnn_float16*)((uintptr_t)data + size),
-                        [&] { return f32rng(rng); });
+                        [&] { return rng.NextFloat(); });
         } break;
         default: {
-          auto int8rng = std::uniform_int_distribution<int>(0, 255);
           std::generate((uint8_t*)data, (uint8_t*)((uintptr_t)data + size),
-                        [&] { return int8rng(rng); });
+                        [&] { return rng.NextUInt32() & 0xFF; });
         } break;
       }
       external_values.push_back(xnn_external_value{i, data});

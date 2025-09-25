@@ -1,4 +1,4 @@
-# Copyright 2023 Google LLC
+# Copyright 2023-2025 Google LLC
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
@@ -27,6 +27,7 @@ BENCHMARKS_SLOW_LARGE = {
 
 xnnpack_cxx_library(
     name = "benchmark",
+    testonly = True,
     srcs = [
         "benchmark.cc",
     ],
@@ -39,6 +40,7 @@ xnnpack_cxx_library(
         "//:math",
         "//:subgraph_h",
         "//bench:bench_utils",
+        "//test:replicable_random_device",
         "@com_google_benchmark//:benchmark",
         "@pthreadpool",
     ],
@@ -62,6 +64,7 @@ xnnpack_cxx_library(
     ],
     deps = [
         "//:XNNPACK",
+        "//test:replicable_random_device",
     ],
 )
 
@@ -78,6 +81,7 @@ xnnpack_cxx_library(
             "//:operator_utils",
             "//:xnnpack_h",
             "//bench:bench_utils",
+            "//test:replicable_random_device",
             "@com_google_benchmark//:benchmark",
         ],
         alwayslink = True,

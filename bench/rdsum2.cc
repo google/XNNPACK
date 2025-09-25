@@ -5,13 +5,13 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <random>
 
 #include "bench/utils.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/hardware-config.h"  // IWYU pragma: keep
 #include "src/xnnpack/reduce.h"  // IWYU pragma: keep
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
 // Microkernel function, templated on the `params` type.
@@ -30,8 +30,7 @@ static void reduce(benchmark::State& state, uint64_t arch_flags,
   const size_t channels = state.range(0);
   const size_t rows = state.range(1);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
 
   xnnpack::Buffer<Input, XNN_ALLOCATION_ALIGNMENT> input(
       channels * rows, xnnpack::XnnExtraBytes);

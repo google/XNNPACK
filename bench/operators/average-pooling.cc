@@ -1,33 +1,35 @@
 // Copyright (c) Facebook, Inc. and its affiliates.
 // All rights reserved.
 //
-// Copyright 2019 Google LLC
+// Copyright 2019-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
 #include <algorithm>
-#include <cfloat>
-#include <cmath>
+#include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <limits>
 #include <memory>
 #include <random>
 #include <vector>
 
+#include "bench/utils.h"
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
-#include "src/xnnpack/common.h"
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
+
 #ifdef BENCHMARK_TENSORFLOW_LITE
-#include <flatbuffers/include/flatbuffers/flatbuffers.h>
+#include <flatbuffers/include/flatbuffers/buffer.h>
+#include <flatbuffers/include/flatbuffers/flatbuffer_builder.h>
+#include <tensorflow/lite/core/interpreter_builder.h>
 #include <tensorflow/lite/interpreter.h>
 #include <tensorflow/lite/kernels/register.h>
-#include <tensorflow/lite/model.h>
 #include <tensorflow/lite/schema/schema_generated.h>
 #include <tensorflow/lite/version.h>
 #endif  // BENCHMARK_TENSORFLOW_LITE
-#include "bench/utils.h"
 
 static void xnnpack_average_pooling_f32(benchmark::State& state,
                                         const char* net) {
@@ -39,8 +41,7 @@ static void xnnpack_average_pooling_f32(benchmark::State& state,
   const size_t stride = state.range(5);
   const size_t channels = state.range(6);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng =
       std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
@@ -110,7 +111,7 @@ static void xnnpack_average_pooling_f32(benchmark::State& state,
   }
 
   state.counters["bytes"] = benchmark::Counter(
-      uint64_t(state.iterations()) * batch_size *
+      static_cast<uint64_t>(state.iterations()) * batch_size *
           (input_height * input_width + output_height * output_width) *
           channels * sizeof(float),
       benchmark::Counter::kIsRate);
@@ -126,8 +127,7 @@ void tflite_average_pooling_f32(benchmark::State& state, const char* net) {
   const size_t stride = state.range(5);
   const size_t channels = state.range(6);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng =
       std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
@@ -244,7 +244,7 @@ void tflite_average_pooling_f32(benchmark::State& state, const char* net) {
   }
 
   state.counters["bytes"] = benchmark::Counter(
-      uint64_t(state.iterations()) * batch_size *
+      static_cast<uint64_t>(state.iterations()) * batch_size *
           (input_height * input_width + output_height * output_width) *
           channels * sizeof(float),
       benchmark::Counter::kIsRate);

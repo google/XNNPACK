@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2023-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -20,7 +20,9 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/math.h"
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
+
 #ifdef BENCHMARK_TENSORFLOW_LITE
 #include <flatbuffers/include/flatbuffers/buffer.h>
 #include <flatbuffers/include/flatbuffers/flatbuffer_builder.h>
@@ -155,8 +157,7 @@ static void benchmark_unary_operator(benchmark::State& state,
   init_params(op_type, xnn_datatype_of<In>(), xnn_datatype_of<Out>(), params,
               input_quantization, output_quantization);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32dist = std::uniform_real_distribution<float>(
       std::max<float>(std::numeric_limits<In>::lowest(), -128.0f),
       std::min<float>(std::numeric_limits<In>::max(), 127.0f));
@@ -359,8 +360,7 @@ static void benchmark_tflite_unary_operator(
     return;
   }
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32dist = std::uniform_real_distribution<float>(
       std::max<float>(std::numeric_limits<In>::lowest(), -128.0f),
       std::min<float>(std::numeric_limits<In>::max(), 127.0f));

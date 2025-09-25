@@ -15,6 +15,7 @@
 
 #include "bench/subgraph/benchmark.h"
 #include "include/xnnpack.h"
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
 // align a size up to XNN_EXTRA_BYTES
@@ -43,8 +44,7 @@ xnn_subgraph_t FP32DepthwiseSeparable(size_t w, size_t h, size_t kw, size_t ci,
     return nullptr;
   }
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
 
   uint32_t v0 = 0;
   std::array<size_t, 4> v0_dims = {{1, h, w, ci}};

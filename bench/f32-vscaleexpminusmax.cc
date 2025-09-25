@@ -16,6 +16,7 @@
 #include "src/xnnpack/raddexpminusmax.h"
 #include "src/xnnpack/reduce.h"
 #include "src/xnnpack/vscaleexpminusmax.h"
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
 static void f32_vscaleexpminusmax(
@@ -32,8 +33,7 @@ static void f32_vscaleexpminusmax(
   const size_t packed_elements =
       benchmark::utils::RoundUp(elements, cache_line_size_max / sizeof(float));
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(
       std::uniform_real_distribution<float>(-1000.0f, 1000.0f), std::ref(rng));
 

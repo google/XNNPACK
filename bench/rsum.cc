@@ -4,13 +4,14 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <cstddef>
-#include <random>
+#include <cstdint>
 
 #include "bench/utils.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/hardware-config.h"  // IWYU pragma: keep
 #include "src/xnnpack/reduce.h"  // IWYU pragma: keep
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
 // Microkernel function, templated on the `params` type.
@@ -27,8 +28,7 @@ static void reduce(benchmark::State& state, uint64_t arch_flags,
   const size_t channels = state.range(0);
   const size_t rows = state.range(1);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
 
   xnnpack::Buffer<Input, XNN_ALLOCATION_ALIGNMENT> input(
       channels * rows, xnnpack::XnnExtraBytes);
@@ -51,18 +51,18 @@ static void reduce(benchmark::State& state, uint64_t arch_flags,
   }
 
   const size_t elements_per_iteration = rows * channels;
-  state.counters["elements"] =
-      benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["elements"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * elements_per_iteration,
+      benchmark::Counter::kIsRate);
 
   const size_t bytes_per_iteration = rows * channels * sizeof(Input);
-  state.counters["bytes"] =
-      benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["bytes"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * bytes_per_iteration,
+      benchmark::Counter::kIsRate);
 }
 
 #define XNN_UKERNEL(arch_flags, ukernel, batch_tile, vector_tile, datatype_in, \
-                    datatype_out, params_type, init_params)                                              \
+                    datatype_out, params_type, init_params)                    \
   BENCHMARK_CAPTURE(reduce, ukernel, arch_flags, ukernel)                      \
       ->Apply(benchmark::utils::ReduceParameters<datatype_in>)                 \
       ->UseRealTime();

@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2020-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -17,6 +17,7 @@
 
 #include "bench/subgraph/models.h"
 #include "include/xnnpack.h"
+#include "test/replicable_random_device.h"
 
 // align a size up to XNN_EXTRA_BYTES
 #define XNN_PAD_EXTRA_BYTES(s, t) \
@@ -33,8 +34,7 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  std::random_device random_device;  // NOLINT(runtime/random_device)
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
 
   uint32_t v0 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> v0_dims = {{1, 224, 224, 3}};

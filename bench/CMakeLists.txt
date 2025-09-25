@@ -1,7 +1,7 @@
 # Copyright (c) Facebook, Inc. and its affiliates.
 # All rights reserved.
 #
-# Copyright 2019 Google LLC
+# Copyright 2019-2025 Google LLC
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
@@ -22,18 +22,18 @@ ADD_LIBRARY(xnnpack-bench-utils STATIC utils.cc)
 TARGET_LINK_LIBRARIES(xnnpack-bench-utils PRIVATE benchmark::benchmark cpuinfo pthreadpool)
 TARGET_LINK_LIBRARIES(xnnpack-bench-utils PRIVATE xnnpack-base xnnpack-hardware-config)
 IF(XNNPACK_BUILD_LIBRARY)
-  TARGET_LINK_LIBRARIES(xnnpack-bench-utils PRIVATE xnnpack-logging xnnpack-memory)
+  TARGET_LINK_LIBRARIES(xnnpack-bench-utils PRIVATE xnnpack-logging xnnpack-memory xnnpack-test)
 ENDIF()
 
 # Helper libraries
 ADD_LIBRARY(packq-benchmark STATIC packq-benchmark.cc)
-TARGET_LINK_LIBRARIES(packq-benchmark PRIVATE XNNPACK benchmark::benchmark xnnpack-bench-utils)
+TARGET_LINK_LIBRARIES(packq-benchmark PRIVATE XNNPACK benchmark::benchmark xnnpack-bench-utils xnnpack-test)
 IF(XNNPACK_ENABLE_KLEIDIAI)
   TARGET_LINK_LIBRARIES(packq-benchmark PRIVATE kleidiai)
 ENDIF()
 
 ADD_LIBRARY(gemm-benchmark STATIC gemm-benchmark.cc)
-TARGET_LINK_LIBRARIES(gemm-benchmark PRIVATE XNNPACK benchmark::benchmark xnnpack-bench-utils)
+TARGET_LINK_LIBRARIES(gemm-benchmark PRIVATE XNNPACK benchmark::benchmark xnnpack-bench-utils xnnpack-test)
 IF(XNNPACK_ENABLE_KLEIDIAI)
   TARGET_LINK_LIBRARIES(gemm-benchmark PUBLIC kleidiai)
 ENDIF()
@@ -121,6 +121,7 @@ FOREACH(BENCH ${MICROKERNEL_BENCHMARKS})
     xnnpack-microkernels-all
     xnnpack-microparams-init
     xnnpack-packing
+    xnnpack-test
     packq-benchmark
     pthreadpool)
   SET_TARGET_PROPERTIES(${BENCH}-bench PROPERTIES CXX_EXTENSIONS YES)

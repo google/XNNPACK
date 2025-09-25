@@ -1,35 +1,39 @@
-// Copyright 2023 Google LLC
+// Copyright 2023-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
 #include <algorithm>
-#include <cfloat>
 #include <chrono>
-#include <cmath>
+#include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <limits>
 #include <mutex>
 #include <random>
 
-#include <benchmark/benchmark.h>
-#ifdef BENCHMARK_RUY
-#include <ruy/ruy.h>
-#endif  // BENCHMARK_RUY
 #include "bench/bgemm.h"
 #include "bench/utils.h"
-#include "src/xnnpack/allocator.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/gemm.h"
-#include "src/xnnpack/hardware-config.h"
+#include "src/xnnpack/hardware-config.h"  // IWYU pragma: keep
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
-#include "src/xnnpack/pack.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/packw.h"
 #include "src/xnnpack/packx.h"
 #include "src/xnnpack/ppmm.h"
+#include "test/replicable_random_device.h"
+#include <benchmark/benchmark.h>
+
+#ifdef BENCHMARK_RUY
+#include <ruy/context.h>
+#include <ruy/matrix.h>
+#include <ruy/mul_params.h>
+#include <ruy/ruy.h>
+#endif  // BENCHMARK_RUY
 
 static void f32_gemm(benchmark::State& state,
                      xnn_x32_packw_gemm_goi_ukernel_fn packw,
@@ -49,8 +53,7 @@ static void f32_gemm(benchmark::State& state,
   const size_t stride_n = benchmark::utils::RoundUp(dim_n, nr);
   const size_t stride_k = benchmark::utils::RoundUp(dim_k, kr * sr);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng =
       std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
@@ -90,9 +93,10 @@ static void f32_gemm(benchmark::State& state,
     state.counters["cpufreq"] = cpu_frequency;
   }
 
-  state.counters["FLOPS"] = benchmark::Counter(
-      uint64_t(state.iterations()) * 2 * batch * dim_m * dim_n * dim_k,
-      benchmark::Counter::kIsRate);
+  state.counters["FLOPS"] =
+      benchmark::Counter(static_cast<uint64_t>(state.iterations()) * 2 * batch *
+                             dim_m * dim_n * dim_k,
+                         benchmark::Counter::kIsRate);
 }
 
 // PPMM 1 pass does packx+ppmm a tile row at a time
@@ -115,8 +119,7 @@ static void f32_ppmm1p(benchmark::State& state,
   const size_t stride_n = benchmark::utils::RoundUp(dim_n, nr);
   const size_t stride_k = benchmark::utils::RoundUp(dim_k, kr * sr);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng =
       std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
@@ -162,9 +165,10 @@ static void f32_ppmm1p(benchmark::State& state,
     state.counters["cpufreq"] = cpu_frequency;
   }
 
-  state.counters["FLOPS"] = benchmark::Counter(
-      uint64_t(state.iterations()) * 2 * batch * dim_m * dim_n * dim_k,
-      benchmark::Counter::kIsRate);
+  state.counters["FLOPS"] =
+      benchmark::Counter(static_cast<uint64_t>(state.iterations()) * 2 * batch *
+                             dim_m * dim_n * dim_k,
+                         benchmark::Counter::kIsRate);
 }
 
 // PPMM 2 pass does a full packx of inputs and them full ppmm
@@ -188,8 +192,7 @@ static void f32_ppmm2p(benchmark::State& state,
   const size_t stride_n = benchmark::utils::RoundUp(dim_n, nr);
   const size_t stride_k = benchmark::utils::RoundUp(dim_k, kr * sr);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng =
       std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
@@ -245,15 +248,15 @@ static void f32_ppmm2p(benchmark::State& state,
     state.counters["cpufreq"] = cpu_frequency;
   }
 
-  state.counters["FLOPS"] = benchmark::Counter(
-      uint64_t(state.iterations()) * 2 * batch * dim_m * dim_n * dim_k,
-      benchmark::Counter::kIsRate);
+  state.counters["FLOPS"] =
+      benchmark::Counter(static_cast<uint64_t>(state.iterations()) * 2 * batch *
+                             dim_m * dim_n * dim_k,
+                         benchmark::Counter::kIsRate);
 }
 
 #ifdef BENCHMARK_RUY
 static void RuyBenchmark(benchmark::State& state, uint32_t threads) {
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng =
       std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
@@ -285,14 +288,14 @@ static void RuyBenchmark(benchmark::State& state, uint32_t threads) {
 
   ruy::MulParams<float, float> mul_params;
 
-  // ruy::Context uses deferred initialization, which affects percieved GEMM
+  // ruy::Context uses deferred initialization, which affects perceived GEMM
   // performance. Initialization happens during the first GEMM calls, and per
   // Benoit Jacob it takes up to ~250 milliseconds for performance to stabilize.
   // Thus, on the first benchmark, we compute GEMM for 500 milliseconds (to be
   // safe) without recording performance, and keep the ruy::Context object
   // initialized (by being static) between subsequent benchmarks.
-  static std::once_flag warmup;
-  std::call_once(warmup, [&]() {
+  static std::once_flag warmup;   // NOLINT(build/c++11)
+  std::call_once(warmup, [&]() {  // NOLINT(build/c++11)
     auto start = std::chrono::steady_clock::now();
     do {
       for (size_t i = 0; i < batch; i++) {
@@ -322,9 +325,10 @@ static void RuyBenchmark(benchmark::State& state, uint32_t threads) {
     state.counters["cpufreq"] = cpu_frequency;
   }
 
-  state.counters["FLOPS"] = benchmark::Counter(
-      uint64_t(state.iterations()) * 2 * batch * dim_m * dim_n * dim_k,
-      benchmark::Counter::kIsRate);
+  state.counters["FLOPS"] =
+      benchmark::Counter(static_cast<uint64_t>(state.iterations()) * 2 * batch *
+                             dim_m * dim_n * dim_k,
+                         benchmark::Counter::kIsRate);
 }
 
 static void ruy_st(benchmark::State& state, const char* net) {

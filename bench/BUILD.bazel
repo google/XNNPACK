@@ -1,4 +1,4 @@
-# Copyright 2023 Google LLC
+# Copyright 2023-2025 Google LLC
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
@@ -39,6 +39,7 @@ MICROKERNEL_BENCHMARK_DEPS = [
     "//:params",
     "//:xnnpack_h",
     "//src/configs:hardware_config",
+    "//test:replicable_random_device",
 ]
 
 ############################### Helper libraries ###############################

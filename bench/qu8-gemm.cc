@@ -1,30 +1,22 @@
 // Copyright (c) Facebook, Inc. and its affiliates.
 // All rights reserved.
 //
-// Copyright 2019 Google LLC
+// Copyright 2019-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
 #include <algorithm>
-#include <cfloat>
 #include <chrono>
-#include <cmath>
+#include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <mutex>
 #include <random>
 #include <tuple>
 
-#include <benchmark/benchmark.h>
-#ifdef BENCHMARK_GEMMLOWP
-#include <gemmlowp/public/gemmlowp.h>
-#endif  // BENCHMARK_GEMMLOWP
-#ifdef BENCHMARK_RUY
-#include <ruy/ruy.h>
-#endif  // BENCHMARK_RUY
 #include "bench/gemm.h"
 #include "bench/utils.h"
-#include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/gemm.h"
@@ -32,13 +24,31 @@
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/pack.h"
+#include "test/replicable_random_device.h"
+#include <benchmark/benchmark.h>
 
-static void GEMMBenchmark(
-    benchmark::State& state, xnn_qu8_gemm_minmax_ukernel_fn gemm,
-    xnn_init_qu8_conv_minmax_params_fn init_params, size_t mr, size_t nr,
-    size_t kr, size_t sr,
-    uint64_t arch_flags = 0) {
+#ifdef BENCHMARK_GEMMLOWP
+#include <gemmlowp/internal/multi_thread_gemm.h>
+#include <gemmlowp/public/bit_depth.h>
+#include <gemmlowp/public/gemmlowp.h>
+#include <gemmlowp/public/map.h>
+#include <gemmlowp/public/output_stages.h>
+#endif  // BENCHMARK_GEMMLOWP
+
+#ifdef BENCHMARK_RUY
+#include <ruy/context.h>
+#include <ruy/matrix.h>
+#include <ruy/mul_params.h>
+#include <ruy/ruy.h>
+#endif  // BENCHMARK_RUY
+
+static void GEMMBenchmark(benchmark::State& state,
+                          xnn_qu8_gemm_minmax_ukernel_fn gemm,
+                          xnn_init_qu8_conv_minmax_params_fn init_params,
+                          size_t mr, size_t nr, size_t kr, size_t sr,
+                          uint64_t arch_flags = 0) {
   if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
@@ -50,8 +60,7 @@ static void GEMMBenchmark(
   const size_t nc_stride = benchmark::utils::RoundUp(nc, nr);
   const size_t kc_stride = benchmark::utils::RoundUp(kc, kr * sr);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000),
                           std::ref(rng));
 
@@ -113,9 +122,9 @@ static void GEMMBenchmark(
     state.counters["cpufreq"] = cpu_frequency;
   }
 
-  state.counters["OPS"] =
-      benchmark::Counter(uint64_t(state.iterations()) * 2 * mc * nc * kc,
-                         benchmark::Counter::kIsRate);
+  state.counters["OPS"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * 2 * mc * nc * kc,
+      benchmark::Counter::kIsRate);
 }
 
 #ifdef BENCHMARK_GEMMLOWP
@@ -154,8 +163,7 @@ static void GemmlowpBenchmark(benchmark::State& state, uint32_t threads) {
   const size_t nc = state.range(1);
   const size_t kc = state.range(2);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000),
                           std::ref(rng));
 
@@ -205,9 +213,9 @@ static void GemmlowpBenchmark(benchmark::State& state, uint32_t threads) {
     state.counters["cpufreq"] = cpu_frequency;
   }
 
-  state.counters["OPS"] =
-      benchmark::Counter(uint64_t(state.iterations()) * 2 * mc * nc * kc,
-                         benchmark::Counter::kIsRate);
+  state.counters["OPS"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * 2 * mc * nc * kc,
+      benchmark::Counter::kIsRate);
 }
 
 static void gemmlowp_st(benchmark::State& state, const char* net) {
@@ -221,8 +229,7 @@ static void RuyBenchmark(benchmark::State& state, size_t threads) {
   const size_t nc = state.range(1);
   const size_t kc = state.range(2);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000),
                           std::ref(rng));
 
@@ -259,14 +266,14 @@ static void RuyBenchmark(benchmark::State& state, size_t threads) {
   ruy::MulParams<int32_t, uint8_t> mul_params;
   mul_params.set_multiplier_fixedpoint(0x40000000);
 
-  // ruy::Context uses deferred initialization, which affects percieved GEMM
+  // ruy::Context uses deferred initialization, which affects perceived GEMM
   // performance. Initialization happens during the first GEMM calls, and per
   // Benoit Jacob it takes up to ~250 milliseconds for performance to stabilize.
   // Thus, on the first benchmark, we compute GEMM for 500 milliseconds (to be
   // safe) without recording performance, and keep the ruy::Context object
   // initialized (by being static) between subsequent benchmarks.
-  static std::once_flag warmup;
-  std::call_once(warmup, [&]() {
+  static std::once_flag warmup;   // NOLINT(build/c++11)
+  std::call_once(warmup, [&]() {  // NOLINT(build/c++11)
     auto start = std::chrono::steady_clock::now();
     do {
       ruy_a.set_data(k.data());
@@ -304,9 +311,9 @@ static void RuyBenchmark(benchmark::State& state, size_t threads) {
     state.counters["cpufreq"] = cpu_frequency;
   }
 
-  state.counters["OPS"] =
-      benchmark::Counter(uint64_t(state.iterations()) * 2 * mc * nc * kc,
-                         benchmark::Counter::kIsRate);
+  state.counters["OPS"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * 2 * mc * nc * kc,
+      benchmark::Counter::kIsRate);
 }
 
 static void ruy_st(benchmark::State& state, const char* net) {
@@ -452,71 +459,61 @@ static void qu8_gemm_1x8__neon_mlal_lane(benchmark::State& state,
                                          const char* net) {
   GEMMBenchmark(state, xnn_qu8_gemm_minmax_rndnu_ukernel_1x8__neon_mlal_lane,
                 xnn_init_qu8_conv_minmax_rndnu_scalar_params,
-                /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-                xnn_arch_arm_neon);
+                /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1, xnn_arch_arm_neon);
 }
 static void qu8_gemm_2x8__neon_mlal_lane(benchmark::State& state,
                                          const char* net) {
   GEMMBenchmark(state, xnn_qu8_gemm_minmax_rndnu_ukernel_2x8__neon_mlal_lane,
                 xnn_init_qu8_conv_minmax_rndnu_scalar_params,
-                /*mr=*/2, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-                xnn_arch_arm_neon);
+                /*mr=*/2, /*nr=*/8, /*kr=*/1, /*sr=*/1, xnn_arch_arm_neon);
 }
 static void qu8_gemm_3x8__neon_mlal_lane(benchmark::State& state,
                                          const char* net) {
   GEMMBenchmark(state, xnn_qu8_gemm_minmax_rndnu_ukernel_3x8__neon_mlal_lane,
                 xnn_init_qu8_conv_minmax_rndnu_scalar_params,
-                /*mr=*/3, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-                xnn_arch_arm_neon);
+                /*mr=*/3, /*nr=*/8, /*kr=*/1, /*sr=*/1, xnn_arch_arm_neon);
 }
 static void qu8_gemm_4x8__neon_mlal_lane(benchmark::State& state,
                                          const char* net) {
   GEMMBenchmark(state, xnn_qu8_gemm_minmax_rndnu_ukernel_4x8__neon_mlal_lane,
                 xnn_init_qu8_conv_minmax_rndnu_scalar_params,
-                /*mr=*/4, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-                xnn_arch_arm_neon);
+                /*mr=*/4, /*nr=*/8, /*kr=*/1, /*sr=*/1, xnn_arch_arm_neon);
 }
 static void qu8_gemm_6x8__neon_mlal_lane(benchmark::State& state,
                                          const char* net) {
   GEMMBenchmark(state, xnn_qu8_gemm_minmax_rndnu_ukernel_6x8__neon_mlal_lane,
                 xnn_init_qu8_conv_minmax_rndnu_scalar_params,
-                /*mr=*/6, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-                xnn_arch_arm_neon);
+                /*mr=*/6, /*nr=*/8, /*kr=*/1, /*sr=*/1, xnn_arch_arm_neon);
 }
 static void qu8_gemm_1x16__neon_mlal_lane(benchmark::State& state,
                                           const char* net) {
   GEMMBenchmark(state, xnn_qu8_gemm_minmax_rndnu_ukernel_1x16__neon_mlal_lane,
                 xnn_init_qu8_conv_minmax_rndnu_scalar_params,
-                /*mr=*/1, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-                xnn_arch_arm_neon);
+                /*mr=*/1, /*nr=*/16, /*kr=*/1, /*sr=*/1, xnn_arch_arm_neon);
 }
 static void qu8_gemm_2x16__neon_mlal_lane(benchmark::State& state,
                                           const char* net) {
   GEMMBenchmark(state, xnn_qu8_gemm_minmax_rndnu_ukernel_2x16__neon_mlal_lane,
                 xnn_init_qu8_conv_minmax_rndnu_scalar_params,
-                /*mr=*/2, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-                xnn_arch_arm_neon);
+                /*mr=*/2, /*nr=*/16, /*kr=*/1, /*sr=*/1, xnn_arch_arm_neon);
 }
 static void qu8_gemm_3x16__neon_mlal_lane(benchmark::State& state,
                                           const char* net) {
   GEMMBenchmark(state, xnn_qu8_gemm_minmax_rndnu_ukernel_3x16__neon_mlal_lane,
                 xnn_init_qu8_conv_minmax_rndnu_scalar_params,
-                /*mr=*/3, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-                xnn_arch_arm_neon);
+                /*mr=*/3, /*nr=*/16, /*kr=*/1, /*sr=*/1, xnn_arch_arm_neon);
 }
 static void qu8_gemm_4x16__neon_mlal_lane(benchmark::State& state,
                                           const char* net) {
   GEMMBenchmark(state, xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__neon_mlal_lane,
                 xnn_init_qu8_conv_minmax_rndnu_scalar_params,
-                /*mr=*/4, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-                xnn_arch_arm_neon);
+                /*mr=*/4, /*nr=*/16, /*kr=*/1, /*sr=*/1, xnn_arch_arm_neon);
 }
 static void qu8_gemm_6x16__neon_mlal_lane(benchmark::State& state,
                                           const char* net) {
   GEMMBenchmark(state, xnn_qu8_gemm_minmax_rndnu_ukernel_6x16__neon_mlal_lane,
                 xnn_init_qu8_conv_minmax_rndnu_scalar_params,
-                /*mr=*/6, /*nr=*/16, /*kr=*/1, /*sr=*/1,
-                xnn_arch_arm_neon);
+                /*mr=*/6, /*nr=*/16, /*kr=*/1, /*sr=*/1, xnn_arch_arm_neon);
 }
 
 BENCHMARK_GEMM(qu8_gemm_1x8__neon_mlal_lane)
@@ -536,29 +533,25 @@ static void qu8_gemm_1x1c4__armsimd32(benchmark::State& state,
                                       const char* net) {
   GEMMBenchmark(state, xnn_qu8_gemm_minmax_fp32_ukernel_1x1c4__armsimd32,
                 xnn_init_qu8_conv_minmax_fp32_scalar_params,
-                /*mr=*/1, /*nr=*/1, /*kr=*/4, /*sr=*/1,
-                xnn_arch_arm_v6);
+                /*mr=*/1, /*nr=*/1, /*kr=*/4, /*sr=*/1, xnn_arch_arm_v6);
 }
 static void qu8_gemm_2x1c4__armsimd32(benchmark::State& state,
                                       const char* net) {
   GEMMBenchmark(state, xnn_qu8_gemm_minmax_fp32_ukernel_1x1c4__armsimd32,
                 xnn_init_qu8_conv_minmax_fp32_scalar_params,
-                /*mr=*/2, /*nr=*/1, /*kr=*/4, /*sr=*/1,
-                xnn_arch_arm_v6);
+                /*mr=*/2, /*nr=*/1, /*kr=*/4, /*sr=*/1, xnn_arch_arm_v6);
 }
 static void qu8_gemm_1x2c4__armsimd32(benchmark::State& state,
                                       const char* net) {
   GEMMBenchmark(state, xnn_qu8_gemm_minmax_fp32_ukernel_1x2c4__armsimd32,
                 xnn_init_qu8_conv_minmax_fp32_scalar_params,
-                /*mr=*/1, /*nr=*/2, /*kr=*/4, /*sr=*/1,
-                xnn_arch_arm_v6);
+                /*mr=*/1, /*nr=*/2, /*kr=*/4, /*sr=*/1, xnn_arch_arm_v6);
 }
 static void qu8_gemm_2x2c4__armsimd32(benchmark::State& state,
                                       const char* net) {
   GEMMBenchmark(state, xnn_qu8_gemm_minmax_fp32_ukernel_1x2c4__armsimd32,
                 xnn_init_qu8_conv_minmax_fp32_scalar_params,
-                /*mr=*/2, /*nr=*/2, /*kr=*/4, /*sr=*/1,
-                xnn_arch_arm_v6);
+                /*mr=*/2, /*nr=*/2, /*kr=*/4, /*sr=*/1, xnn_arch_arm_v6);
 }
 
 BENCHMARK_GEMM(qu8_gemm_1x1c4__armsimd32)

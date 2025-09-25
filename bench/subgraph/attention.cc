@@ -9,12 +9,14 @@
 #include <cstdint>
 #include <functional>
 #include <iostream>
+#include <limits>
 #include <random>
 #include <vector>
 
 #include "bench/subgraph/benchmark.h"
 #include "bench/utils.h"
 #include "include/xnnpack.h"
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
 // align a size up to XNN_EXTRA_BYTES
@@ -43,8 +45,7 @@ xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
     return nullptr;
   }
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
 
   uint32_t v0 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> v0_dims = {{b, s, n, t}};
@@ -345,8 +346,7 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
     return nullptr;
   }
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   // Scales must be positive.
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.01f, +1.0f),
                           std::ref(rng));
@@ -676,8 +676,9 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
 
 static void FP32Attention(benchmark::State& state) {
   xnnpack::RunBenchmark(state, [&state]() {
-    return models::FP32Attention(FLAGS_batch_size, state.range(0), state.range(1),
-                         state.range(2), state.range(3));
+    return models::FP32Attention(FLAGS_batch_size, state.range(0),
+                                 state.range(1), state.range(2),
+                                 state.range(3));
   });
 }
 
@@ -685,8 +686,9 @@ static void FP16Attention(benchmark::State& state) {
   xnnpack::RunBenchmark(
       state,
       [&state]() {
-        return models::FP32Attention(FLAGS_batch_size, state.range(0), state.range(1),
-                             state.range(2), state.range(3));
+        return models::FP32Attention(FLAGS_batch_size, state.range(0),
+                                     state.range(1), state.range(2),
+                                     state.range(3));
       },
       XNN_FLAG_FORCE_FP16_INFERENCE);
 }
@@ -694,8 +696,9 @@ static void FP16Attention(benchmark::State& state) {
 static void QD8Attention(benchmark::State& state) {
   models::QD8AttentionWeights weights;
   xnnpack::RunBenchmark(state, [&state, &weights]() {
-    return models::QD8Attention(FLAGS_batch_size, state.range(0), state.range(1),
-                        state.range(2), state.range(3), weights);
+    return models::QD8Attention(FLAGS_batch_size, state.range(0),
+                                state.range(1), state.range(2), state.range(3),
+                                weights);
   });
 }
 

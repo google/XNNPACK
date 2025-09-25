@@ -5,11 +5,9 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <algorithm>
-#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
-#include <limits>
 #include <memory>
 #include <random>
 #include <vector>
@@ -18,6 +16,7 @@
 #include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
 #include "src/xnnpack/math.h"
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
 #ifdef BENCHMARK_TENSORFLOW_LITE
@@ -35,8 +34,7 @@ static void xnnpack_softmax_qu8(benchmark::State& state) {
   const size_t batch_size = static_cast<size_t>(state.range(0));
   const size_t channels = static_cast<size_t>(state.range(1));
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
 
   xnnpack::Buffer<uint8_t> input(batch_size * channels);
   xnnpack::Buffer<uint8_t> output(batch_size * channels);
@@ -92,23 +90,22 @@ static void xnnpack_softmax_qu8(benchmark::State& state) {
   }
 
   const size_t elements_per_iteration = batch_size * channels;
-  state.counters["elements"] =
-      benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["elements"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * elements_per_iteration,
+      benchmark::Counter::kIsRate);
 
   const size_t bytes_per_iteration =
       2 * elements_per_iteration * sizeof(uint8_t);
-  state.counters["bytes"] =
-      benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["bytes"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * bytes_per_iteration,
+      benchmark::Counter::kIsRate);
 }
 
 static void xnnpack_softmax_f32(benchmark::State& state) {
   const size_t batch_size = static_cast<size_t>(state.range(0));
   const size_t channels = static_cast<size_t>(state.range(1));
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(
       std::uniform_real_distribution<float>(-100.0f, 100.0f), std::ref(rng));
 
@@ -167,22 +164,21 @@ static void xnnpack_softmax_f32(benchmark::State& state) {
   }
 
   const size_t elements_per_iteration = batch_size * channels;
-  state.counters["elements"] =
-      benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["elements"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * elements_per_iteration,
+      benchmark::Counter::kIsRate);
 
   const size_t bytes_per_iteration = 2 * elements_per_iteration * sizeof(float);
-  state.counters["bytes"] =
-      benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["bytes"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * bytes_per_iteration,
+      benchmark::Counter::kIsRate);
 }
 
 static void xnnpack_softmax_f16(benchmark::State& state) {
   const size_t batch_size = static_cast<size_t>(state.range(0));
   const size_t channels = static_cast<size_t>(state.range(1));
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(
       std::uniform_real_distribution<float>(-100.0f, 100.0f), std::ref(rng));
   xnnpack::Buffer<xnn_float16> input(batch_size * channels,
@@ -242,15 +238,15 @@ static void xnnpack_softmax_f16(benchmark::State& state) {
   }
 
   const size_t elements_per_iteration = batch_size * channels;
-  state.counters["elements"] =
-      benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["elements"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * elements_per_iteration,
+      benchmark::Counter::kIsRate);
 
   const size_t bytes_per_iteration =
       2 * elements_per_iteration * sizeof(xnn_float16);
-  state.counters["bytes"] =
-      benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["bytes"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * bytes_per_iteration,
+      benchmark::Counter::kIsRate);
 }
 
 #ifdef BENCHMARK_TENSORFLOW_LITE
@@ -258,8 +254,7 @@ static void tflite_softmax_f32(benchmark::State& state) {
   const size_t batch_size = state.range(0);
   const size_t channels = state.range(1);
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(
       std::uniform_real_distribution<float>(-100.0f, 100.0f), std::ref(rng));
 
@@ -352,14 +347,14 @@ static void tflite_softmax_f32(benchmark::State& state) {
   }
 
   const size_t elements_per_iteration = batch_size * channels;
-  state.counters["elements"] =
-      benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["elements"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * elements_per_iteration,
+      benchmark::Counter::kIsRate);
 
   const size_t bytes_per_iteration = 2 * elements_per_iteration * sizeof(float);
-  state.counters["bytes"] =
-      benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["bytes"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * bytes_per_iteration,
+      benchmark::Counter::kIsRate);
 
   interpreter.reset();
 }

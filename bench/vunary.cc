@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC
+// Copyright 2024-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -21,6 +21,7 @@
 #include "src/xnnpack/microparams-init.h"  // IWYU pragma: keep
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/vcvt.h"  // IWYU pragma: keep
+#include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 
 template <typename T>
@@ -141,8 +142,7 @@ void vunary(benchmark::State& state, uint64_t arch_flags,
     init_params(&uparams, params, &input_quantization, &output_quantization);
   }
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
+  xnnpack::ReplicableRandomDevice rng;
   UniformDistribution<TIn> dist;
 
   xnnpack::Buffer<TIn, XNN_ALLOCATION_ALIGNMENT> x(num_elements,
