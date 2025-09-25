@@ -57,8 +57,13 @@ void TestImpl(size_t rank) {
     SubgraphTester subgraph(2);
     subgraph.AddInputTensor(input_rank, xnn_datatype_of<T>(), quantization, 0)
         .AddOutputTensor(rank, xnn_datatype_of<T>(), quantization, 1)
-        .AddBroadcast(broadcast_shape, 0, 1)
-        .CreateRuntime();
+        .AddBroadcast(broadcast_shape, 0, 1);
+    enum xnn_status status = subgraph.CreateRuntime();
+    if (subgraph.CreateRuntime() == xnn_status_unsupported_parameter) {
+      GTEST_SKIP() << "Broadcast operator unsupported by XNNPACK runtime";
+      return;
+    }
+    ASSERT_EQ(status, xnn_status_success);
 
     for (int reshape = 0; reshape < 2; ++reshape) {
       std::vector<size_t> input_shape = broadcast_shape;
@@ -81,10 +86,7 @@ void TestImpl(size_t rank) {
       // Check reshaped shape is correct
       subgraph.ReshapeExternalTensor(input_shape, input.base(), 0)
           .ReshapeRuntime();
-      if (subgraph.Status() == xnn_status_unsupported_parameter) {
-        GTEST_SKIP() << "Broadcast operator unsupported by XNNPACK runtime";
-        return;
-      }
+      ASSERT_EQ(subgraph.Status(), xnn_status_success);
       ASSERT_EQ(subgraph.GetExternalTensorShape(1), output_shape);
 
       // Run subgraph

@@ -2515,6 +2515,44 @@ enum xnn_status xnn_subgraph_optimize_common_subgraphs(
         }
         break;
 
+      case xnn_node_type_static_broadcast:
+        if (!(optimization_flags & XNN_FLAG_SLINKY_ENABLED)) {
+          // XNNPACK doesn't need explicit braodcasting for binary and
+          // batch_matrix_multiply nodes, so check if it can be elided.
+          const uint32_t input_id = node->inputs[0];
+          const uint32_t output_id = node->outputs[0];
+          const struct xnn_value* output_value = &subgraph->values[output_id];
+
+          // Find all consumers of the broadcast node's output.
+          uint32_t num_consumers = output_value->num_consumers;
+          for (uint32_t k = output_value->first_consumer;
+               k < subgraph->num_nodes && num_consumers; k++) {
+            struct xnn_node* consumer = &subgraph->nodes[k];
+            for (uint32_t j = 0; j < consumer->num_inputs; j++) {
+              if (consumer->inputs[j] == output_id) {
+                // If the consumer is known to broadcast implicitly,
+                // short-circuit it.
+                if (consumer->type == xnn_node_type_binary_elementwise ||
+                    consumer->type == xnn_node_type_batch_matrix_multiply) {
+                  if (!is_repeated_input(consumer, j)) {
+                    num_consumers -= 1;
+                  }
+                  consumer->inputs[j] = input_id;
+                  changes += 1;
+                }
+              }
+            }
+          }
+
+          // If the broadcast could not be completely elided, then fail.
+          if (num_consumers) {
+            xnn_log_error("Could not completely elide %s node (%u).",
+                          xnn_node_type_to_string(node->type), node->id);
+            return xnn_status_unsupported_parameter;
+          }
+        }
+        break;
+
       default:
         break;
     }
