@@ -84,6 +84,13 @@ void xnn_subgraph_log_impl(const char* filename, size_t line_number,
             xnn_datatype_to_string(subgraph->values[node->outputs[0]].datatype),
             xnn_datatype_to_string(subgraph->values[node->inputs[1]].datatype));
         break;
+      case xnn_node_type_static_transpose:
+        fprintf(out, " (perm=[%zu", node->params.transpose.perm[0]);
+        for (int i = 1; i < node->params.transpose.num_dims; i++) {
+          fprintf(out, ", %zu", node->params.transpose.perm[i]);
+        }
+        fprintf(out, "])");
+        break;
       default:
         break;
     }
