@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2019-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -15,8 +15,12 @@
 #include <iostream>
 #include <mutex>
 
+#include "include/experimental.h"
+
 #ifdef __linux__
 #include <sched.h>
+#else
+#include <thread>  // NOLINT(build/c++11)
 #endif
 #if defined(__ANDROID__) || defined(_WIN32) || defined(__CYGWIN__)
 #include <malloc.h>
@@ -83,8 +87,16 @@ static void InitWipeBuffer() {
   }
 }
 
+struct ClearL2CacheContext {
+  std::atomic<int64_t> counter;
+  int64_t num_threads = 0;  // Set to zero if we don't need to wait for all
+                            // threads to finish.
+  std::mutex mutex;         // NOLINT(build/c++11)
+  std::condition_variable cond_var;
+};
+
 // Pthreadpool-compatible function to wipe the cache in each thread.
-void PthreadpoolClearL2Cache(std::atomic<size_t>* counter, size_t id) {
+void ClearL2CacheWorkerFun(ClearL2CacheContext* context, size_t id) {
 #if XNN_ENABLE_CPUINFO
   static const size_t wipe_buffer_size = []() {
     const auto* l2_cache = cpuinfo_get_l2_cache(0);
@@ -106,14 +118,27 @@ void PthreadpoolClearL2Cache(std::atomic<size_t>* counter, size_t id) {
 #endif  // XNN_ENABLE_CPUINFO
   // Wait until all threads are done. This ensures that each thread calls this
   // function exactly once.
-  static std::mutex mutex;  // NOLINT(build/c++11)
-  static std::condition_variable cond_var;
-  std::unique_lock<std::mutex> lock(mutex);  // NOLINT(build/c++11)
-  if (counter->fetch_sub(1) == 1) {
-    cond_var.notify_all();
+  std::unique_lock<std::mutex> lock(context->mutex);  // NOLINT(build/c++11)
+  if (context->counter.fetch_sub(1) == 1) {
+    context->cond_var.notify_all();
   } else {
-    while (counter->load() > 0) {
-      cond_var.wait(lock);
+    while (context->counter.load() > 0) {
+      context->cond_var.wait(lock);
+    }
+  }
+
+  // Last thread waits for all the others to finish.
+  if (context->num_threads) {
+    if (id == 0) {
+      if (context->counter.fetch_sub(1) - 1 != -context->num_threads) {
+        do {
+          context->cond_var.wait(lock);
+        } while (context->counter.load() != -context->num_threads);
+      }
+    } else {
+      if (context->counter.fetch_sub(1) - 1 == -context->num_threads) {
+        context->cond_var.notify_all();
+      }
     }
   }
 }
@@ -123,7 +148,7 @@ void PthreadpoolClearL2Cache(std::atomic<size_t>* counter, size_t id) {
 int ProcessArgs(int& argc, char**& argv) {
   for (int i = 1; i < argc;) {
     if (strncmp(argv[i], "--num_threads=", 14) == 0) {
-      FLAGS_num_threads = atoi(argv[i] + 14);
+      FLAGS_num_threads = atoi(argv[i] + 14);  // NOLINT(runtime/deprecated_fn)
       if (FLAGS_num_threads <= 0) {
         std::cerr << "Invalid --num_threads: " << FLAGS_num_threads << "\n";
         return 1;
@@ -131,7 +156,7 @@ int ProcessArgs(int& argc, char**& argv) {
       std::copy(argv + i + 1, argv + argc, argv + i);
       argc -= 1;
     } else if (strncmp(argv[i], "--batch_size=", 13) == 0) {
-      FLAGS_batch_size = atoi(argv[i] + 13);
+      FLAGS_batch_size = atoi(argv[i] + 13);  // NOLINT(runtime/deprecated_fn)
       if (FLAGS_batch_size <= 0) {
         std::cerr << "Invalid --batch_size: " << FLAGS_batch_size << "\n";
         return 1;
@@ -141,14 +166,17 @@ int ProcessArgs(int& argc, char**& argv) {
     } else if (strncmp(argv[i], "--xnn_runtime_flags=", 20) == 0) {
       const char* v = argv[i] + 20;
       if (strlen(v) > 2 && strncmp(v, "0x", 2) == 0) {
-        FLAGS_xnn_runtime_flags = strtoul(v + 2, nullptr, 16);
+        FLAGS_xnn_runtime_flags =
+            strtoul(v + 2, nullptr, 16);  // NOLINT(runtime/deprecated_fn)
       } else {
-        FLAGS_xnn_runtime_flags = strtoul(v, nullptr, 10);
+        FLAGS_xnn_runtime_flags =
+            strtoul(v, nullptr, 10);  // NOLINT(runtime/deprecated_fn)
       }
       std::copy(argv + i + 1, argv + argc, argv + i);
       argc -= 1;
     } else if (strncmp(argv[i], "--benchmark_min_iters=", 22) == 0) {
-      FLAGS_benchmark_min_iters = atoi(argv[i] + 22);
+      FLAGS_benchmark_min_iters =
+          atoi(argv[i] + 22);  // NOLINT(runtime/deprecated_fn)
       if (FLAGS_benchmark_min_iters <= 0) {
         std::cerr << "Invalid --benchmark_min_iters: "
                   << FLAGS_benchmark_min_iters << "\n";
@@ -182,7 +210,7 @@ uint32_t PrefetchToL1(const void* ptr, size_t size) {
   // reads.
   uint32_t sum = 0;
   while (size >= step) {
-    sum += uint32_t(*u8_ptr);
+    sum += static_cast<uint32_t>(*u8_ptr);
     u8_ptr += step;
     size -= step;
   }
@@ -191,16 +219,34 @@ uint32_t PrefetchToL1(const void* ptr, size_t size) {
 
 void WipePthreadpoolL2Caches(benchmark::State& state,
                              pthreadpool_t threadpool) {
+  static struct ClearL2CacheContext context;
   state.PauseTiming();
-  std::atomic<size_t> counter(pthreadpool_get_threads_count(threadpool));
+  const int64_t num_threads = pthreadpool_get_threads_count(threadpool);
+  context.counter = num_threads;
   pthreadpool_parallelize_1d(
-      threadpool, (pthreadpool_task_1d_t)PthreadpoolClearL2Cache, &counter,
+      threadpool, (pthreadpool_task_1d_t)ClearL2CacheWorkerFun, &context,
       pthreadpool_get_threads_count(threadpool), 0);
   state.ResumeTiming();
 }
 
+void WipeSchedulerL2Caches(benchmark::State& state, xnn_scheduler_v2 scheduler,
+                           void* scheduler_context) {
+  static struct ClearL2CacheContext context;
+  state.PauseTiming();
+  const int64_t num_threads = scheduler.num_threads(scheduler_context) + 1;
+  context.num_threads = num_threads;
+  context.counter = num_threads;
+  for (int k = 1; k < num_threads; k++) {
+    scheduler.schedule(scheduler_context, &context, [](void* arg) -> void {
+      ClearL2CacheWorkerFun((struct ClearL2CacheContext*)arg, 1);
+    });
+  }
+  ClearL2CacheWorkerFun(&context, 0);
+  state.ResumeTiming();
+}
+
 uint32_t WipeCache() {
-  std::call_once(wipe_buffer_guard, InitWipeBuffer);
+  std::call_once(wipe_buffer_guard, InitWipeBuffer);  // NOLINT(build/c++11)
   if (!wipe_buffer) {
     return 0;
   }
