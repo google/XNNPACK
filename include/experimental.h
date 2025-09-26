@@ -22,6 +22,9 @@ extern "C" {
 #endif
 
 /// Enable Slinky (if available).
+#define XNN_FLAG_USE_SLINKY 0x00008000
+
+/// Deprecated, use `XNN_FLAG_USE_SLINKY instead.
 #define XNN_FLAG_SLINKY_ENABLED 0x00008000
 
 /// If Slinky is enabled, disable any scheduling.
