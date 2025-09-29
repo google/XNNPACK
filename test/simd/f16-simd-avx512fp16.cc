@@ -250,7 +250,7 @@ TEST_F(F16SimdAVX512FP16Test, Round) {
   std::vector<float> output_f32 = ToFloat32(output_);
   std::vector<float> inputs_f32 = ToFloat32(inputs_);
   for (size_t k = 0; k < xnn_simd_size_f16; k++) {
-    ASSERT_EQ(output_f32[k], std::round(inputs_f32[k]));
+    ASSERT_EQ(output_f32[k], std::rint(inputs_f32[k]));
   }
 }
 
