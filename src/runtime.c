@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2020-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -702,14 +702,15 @@ enum xnn_status xnn_create_runtime_v4(
   uint32_t flags,
   xnn_runtime_t* runtime_out)
 {
-  return create_runtime_impl(subgraph, weights_cache, workspace, threadpool, /*xnn_threadpool=*/NULL, flags, runtime_out);
+  return create_runtime_impl(subgraph, weights_cache, workspace, threadpool,
+                             /*xnn_threadpool=*/NULL, flags, runtime_out);
 }
 
 #ifdef XNN_SLINKY_ENABLED
 static bool use_slinky(uint32_t flags) {
 #ifdef XNN_USE_SLINKY
   // If compiling with XNN_USE_SLINKY defined, assume we always
-  // want Slinky enabled, regardless of the runtime flag
+  // want Slinky enabled, regardless of the runtime flag.
   return true;
 #else
   return (flags & XNN_FLAG_SLINKY_ENABLED) != 0;
@@ -718,40 +719,75 @@ static bool use_slinky(uint32_t flags) {
 #endif  // XNN_SLINKY_ENABLED
 
 #ifndef XNN_SLINKY_ENABLED
-enum xnn_status xnn_create_threadpool_v2(
-  struct xnn_scheduler_v2 scheduler,
-  void* scheduler_context,
-  uint32_t flags,
-  xnn_threadpool_t* threadpool_out)
-{
-  // Return non-null value, will never be used.
-  *threadpool_out = (void*)1;
+// The xnn_threadpool consists of an `xnn_scheduler_v2` and its context.
+struct xnn_threadpool {
+  struct xnn_scheduler_v2 scheduler;
+  void* scheduler_context;
+};
+
+enum xnn_status xnn_create_threadpool_v2(struct xnn_scheduler_v2 scheduler,
+                                         void* scheduler_context,
+                                         uint32_t flags,
+                                         xnn_threadpool_t* threadpool_out) {
+  *threadpool_out = xnn_allocate_memory(sizeof(struct xnn_threadpool));
+  (*threadpool_out)->scheduler = scheduler;
+  (*threadpool_out)->scheduler_context = scheduler_context;
   return xnn_status_success;
 }
 
-enum xnn_status xnn_delete_threadpool(xnn_threadpool_t threadpool)
-{
+enum xnn_status xnn_delete_threadpool(xnn_threadpool_t threadpool) {
+  xnn_release_memory(threadpool);
+  return xnn_status_success;
+}
+
+int xnn_threadpool_num_threads(xnn_threadpool_t threadpool) {
+  return threadpool->scheduler.num_threads(threadpool->scheduler_context);
+}
+
+enum xnn_status xnn_threadpool_schedule(xnn_threadpool_t threadpool,
+                                        void* context,
+                                        void (*task)(void* context)) {
+  threadpool->scheduler.schedule(threadpool->scheduler_context, context, task);
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_update_runtime_with_threadpool(
+    xnn_runtime_t runtime, xnn_threadpool_t xnn_threadpool) {
+  struct pthreadpool_executor executor;
+  executor.num_threads = xnn_threadpool->scheduler.num_threads;
+  executor.schedule = xnn_threadpool->scheduler.schedule;
+  pthreadpool_update_executor(runtime->threadpool, &executor,
+                              xnn_threadpool->scheduler_context);
   return xnn_status_success;
 }
 #endif  // XNN_SLINKY_ENABLED
 
 enum xnn_status xnn_create_runtime_with_threadpool(
-  xnn_subgraph_t subgraph,
-  xnn_weights_cache_t weights_cache,
-  xnn_threadpool_t threadpool,
-  uint32_t flags,
-  xnn_runtime_t* runtime_out) {
-  return create_runtime_impl(subgraph, weights_cache, /*workspace=*/NULL, /*threadpool*/NULL, threadpool, flags, runtime_out);
-}
-
-#ifndef XNN_SLINKY_ENABLED
-enum xnn_status xnn_update_runtime_with_threadpool(
-  xnn_runtime_t runtime,
-  xnn_threadpool_t threadpool) {
-  // This operation is not supported.
-  return xnn_status_deprecated;
-}
+    xnn_subgraph_t subgraph, xnn_weights_cache_t weights_cache,
+    xnn_threadpool_t xnn_threadpool, uint32_t flags,
+    xnn_runtime_t* runtime_out) {
+  pthreadpool_t threadpool = NULL;
+#ifdef XNN_SLINKY_ENABLED
+  if (!use_slinky(flags)) {
+    struct pthreadpool_executor executor;
+    executor.num_threads = (int (*)(void*))xnn_threadpool_num_threads;
+    executor.schedule =
+        (void (*)(void*, void*, void (*)(void*)))xnn_threadpool_schedule;
+    threadpool = pthreadpool_create_v2(&executor, xnn_threadpool, 0);
+    flags |= XNN_FLAG_RUNTIME_OWNS_THREADPOOL;
+  }
+#else
+  struct pthreadpool_executor executor;
+  executor.num_threads = xnn_threadpool->scheduler.num_threads;
+  executor.schedule = xnn_threadpool->scheduler.schedule;
+  threadpool =
+      pthreadpool_create_v2(&executor, xnn_threadpool->scheduler_context, 0);
+  flags |= XNN_FLAG_RUNTIME_OWNS_THREADPOOL;
 #endif  // XNN_SLINKY_ENABLED
+
+  return create_runtime_impl(subgraph, weights_cache, /*workspace=*/NULL,
+                             threadpool, xnn_threadpool, flags, runtime_out);
+}
 
 enum xnn_status xnn_plan_memory(
     xnn_runtime_t runtime) {
@@ -1120,6 +1156,13 @@ enum xnn_status xnn_invoke_runtime(
       }
     }
   }
+
+  // If the `pthreadpool` is using an external `pthreadpool_executor`, release
+  // the executor threads.
+  if (runtime->flags & XNN_FLAG_DONT_SPIN_WORKERS) {
+    pthreadpool_release_executor_threads(runtime->threadpool);
+  }
+
   return xnn_status_success;
 }
 
@@ -1171,11 +1214,12 @@ enum xnn_status xnn_delete_runtime(
       }
     }
 
-#ifdef XNN_SLINKY_ENABLED
-    if (runtime->owned_xnn_threadpool != NULL) {
-      xnn_delete_threadpool(runtime->owned_xnn_threadpool);
+    if (runtime->threadpool &&
+        runtime->flags & XNN_FLAG_RUNTIME_OWNS_THREADPOOL) {
+      if (runtime->threadpool) {
+        pthreadpool_destroy(runtime->threadpool);
+      }
     }
-#endif  // XNN_SLINKY_ENABLED
 
     xnn_release_memory(runtime);
   }

@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2019-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -12,6 +12,7 @@
 #include <functional>
 #include <string>
 
+#include "include/experimental.h"
 #include "src/xnnpack/common.h"
 #include <benchmark/benchmark.h>
 #include <pthreadpool.h>
@@ -52,6 +53,8 @@ uint32_t PrefetchToL1(const void* ptr, size_t size);
 // Clear the L2 cache in each thread of the given `threadpool`, calls
 // `state.PauseTiming()` while doing so.
 void WipePthreadpoolL2Caches(benchmark::State& state, pthreadpool_t threadpool);
+void WipeSchedulerL2Caches(benchmark::State& state, xnn_scheduler_v2 scheduler,
+                           void* scheduler_context);
 
 // Disable support for denormalized numbers in floating-point units.
 void DisableDenormals();
