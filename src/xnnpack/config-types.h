@@ -76,6 +76,7 @@ struct xnn_reduce_config {
     xnn_init_f16_default_params_fn f16;
   } init;
   xnn_update_reduce_params_fn update;
+  uint32_t rd_width;
 };
 
 struct xnn_xx_fill_config {

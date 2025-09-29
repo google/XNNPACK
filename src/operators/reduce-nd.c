@@ -18,6 +18,7 @@
 #include "src/xnnpack/config.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/microkernel-type.h"
 #include "src/xnnpack/microparams.h"
 #include "src/xnnpack/normalization.h"
@@ -263,7 +264,7 @@ static enum xnn_status reshape_reduce_nd(
     reduce_op->compute[0].range[0] = normalized_input_shape[0];
     reduce_op->compute[0].range[1] = normalized_input_shape[2];
     reduce_op->compute[0].range[2] = normalized_input_shape[4];
-    reduce_op->compute[0].tile[0] = 2;
+    reduce_op->compute[0].tile[0] = 1;
     reduce_op->dynamic_context.reduce->output_stride[XNN_MAX_TENSOR_DIMS / 2 - 1] = 1;
     for (int i = XNN_MAX_TENSOR_DIMS / 2 -  2; i >= 0; --i) {
       reduce_op->dynamic_context.reduce->output_stride[i] = (reduce_op->dynamic_context.reduce->output_stride[i + 1] * normalized_input_shape[(i + 1) * 2]);
@@ -333,7 +334,7 @@ static enum xnn_status reshape_reduce_nd(
     reduce_op->compute[0].range[0] = normalized_input_shape[1];
     reduce_op->compute[0].range[1] = normalized_input_shape[3];
     reduce_op->compute[0].range[2] = normalized_input_shape[5];
-    reduce_op->compute[0].tile[0] = 1;
+    reduce_op->compute[0].tile[0] = max(reduce_op->reduce_config->rd_width, 1);
     reduce_op->dynamic_context.reduce->output_stride[XNN_MAX_TENSOR_DIMS / 2 - 1] = 1;
     for (int i = XNN_MAX_TENSOR_DIMS / 2 -  2; i >= 0; --i) {
       reduce_op->dynamic_context.reduce->output_stride[i] = (reduce_op->dynamic_context.reduce->output_stride[i + 1] * normalized_input_shape[(i * 2+3)]);
