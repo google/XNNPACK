@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2020-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -518,7 +518,6 @@ struct xnn_runtime {
   // Fields used by Slinky -- unused unless XNN_FLAG_SLINKY_ENABLED is set
   slinky_pipeline_t slinky_pipeline;
   xnn_threadpool_t xnn_threadpool;
-  xnn_threadpool_t owned_xnn_threadpool;
 #endif  // XNN_SLINKY_ENABLED
 };
 
@@ -643,6 +642,14 @@ XNN_INTERNAL enum xnn_node_type xnn_reduce_operator_to_node_type(
     enum xnn_reduce_operator type);
 XNN_INTERNAL enum xnn_reduce_operator xnn_node_type_to_reduce_operator(
     enum xnn_node_type type);
+
+// Returns the number of threads in a Threadpool.
+int xnn_threadpool_num_threads(xnn_threadpool_t threadpool);
+
+// Schedules a task on a Threadpool.
+enum xnn_status xnn_threadpool_schedule(xnn_threadpool_t threadpool,
+                                        void* context,
+                                        void (*task)(void* context));
 
 #ifdef __cplusplus
 }  // extern "C"
