@@ -78,7 +78,7 @@ void xnn_f16_igemm_minmax_ukernel_8x64__avx512fp16_broadcast(
   }
 
   do {
-    __m512h vacc0x0 = _mm512_load_ph(w);
+    __m512h vacc0x0 = _mm512_load_ph((const uint16_t*) w + 0);
     __m512h vacc0x1 = _mm512_load_ph((const uint16_t*) w + 32);
     __m512h vacc1x0 = vacc0x0;
     __m512h vacc1x1 = vacc0x1;
@@ -142,7 +142,7 @@ void xnn_f16_igemm_minmax_ukernel_8x64__avx512fp16_broadcast(
 
       size_t k = kc;
       do {
-        const __m512h vb0 = _mm512_load_ph(w);
+        const __m512h vb0 = _mm512_load_ph((const uint16_t*) w + 0);
         const __m512h vb1 = _mm512_load_ph((const uint16_t*) w + 32);
         w = (const xnn_float16*) w + 64;
 
@@ -222,28 +222,28 @@ void xnn_f16_igemm_minmax_ukernel_8x64__avx512fp16_broadcast(
     vacc7x1 = _mm512_min_ph(vmax, vacc7x1);
 
     if XNN_LIKELY(nc >= 64) {
-      _mm512_storeu_ph(c7, vacc7x0);
+      _mm512_storeu_ph((uint16_t*) c7 + 0, vacc7x0);
       _mm512_storeu_ph((uint16_t*) c7 + 32, vacc7x1);
       c7 = (uint16_t*) ((uintptr_t) c7 + cn_stride);
-      _mm512_storeu_ph(c6, vacc6x0);
+      _mm512_storeu_ph((uint16_t*) c6 + 0, vacc6x0);
       _mm512_storeu_ph((uint16_t*) c6 + 32, vacc6x1);
       c6 = (uint16_t*) ((uintptr_t) c6 + cn_stride);
-      _mm512_storeu_ph(c5, vacc5x0);
+      _mm512_storeu_ph((uint16_t*) c5 + 0, vacc5x0);
       _mm512_storeu_ph((uint16_t*) c5 + 32, vacc5x1);
       c5 = (uint16_t*) ((uintptr_t) c5 + cn_stride);
-      _mm512_storeu_ph(c4, vacc4x0);
+      _mm512_storeu_ph((uint16_t*) c4 + 0, vacc4x0);
       _mm512_storeu_ph((uint16_t*) c4 + 32, vacc4x1);
       c4 = (uint16_t*) ((uintptr_t) c4 + cn_stride);
-      _mm512_storeu_ph(c3, vacc3x0);
+      _mm512_storeu_ph((uint16_t*) c3 + 0, vacc3x0);
       _mm512_storeu_ph((uint16_t*) c3 + 32, vacc3x1);
       c3 = (uint16_t*) ((uintptr_t) c3 + cn_stride);
-      _mm512_storeu_ph(c2, vacc2x0);
+      _mm512_storeu_ph((uint16_t*) c2 + 0, vacc2x0);
       _mm512_storeu_ph((uint16_t*) c2 + 32, vacc2x1);
       c2 = (uint16_t*) ((uintptr_t) c2 + cn_stride);
-      _mm512_storeu_ph(c1, vacc1x0);
+      _mm512_storeu_ph((uint16_t*) c1 + 0, vacc1x0);
       _mm512_storeu_ph((uint16_t*) c1 + 32, vacc1x1);
       c1 = (uint16_t*) ((uintptr_t) c1 + cn_stride);
-      _mm512_storeu_ph(c0, vacc0x0);
+      _mm512_storeu_ph((uint16_t*) c0 + 0, vacc0x0);
       _mm512_storeu_ph((uint16_t*) c0 + 32, vacc0x1);
       c0 = (uint16_t*) ((uintptr_t) c0 + cn_stride);
 

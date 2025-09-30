@@ -46,12 +46,12 @@ void xnn_f16_gemm_minmax_ukernel_1x32__avx512fp16_broadcast(
   uint16_t* c0 = (uint16_t*) c;
 
   do {
-    __m512h vacc0x0 = _mm512_load_ph(w);
+    __m512h vacc0x0 = _mm512_load_ph((const uint16_t*) w + 0);
     w = (const xnn_float16*) w + 32;
 
     size_t k = kc;
     do {
-      const __m512h vb0 = _mm512_load_ph(w);
+      const __m512h vb0 = _mm512_load_ph((const uint16_t*) w + 0);
       w = (const xnn_float16*) w + 32;
 
       const __m512h va0 = _mm512_castsi512_ph(_mm512_set1_epi16(*a0));
@@ -68,7 +68,7 @@ void xnn_f16_gemm_minmax_ukernel_1x32__avx512fp16_broadcast(
     vacc0x0 = _mm512_min_ph(vmax, vacc0x0);
 
     if XNN_LIKELY(nc >= 32) {
-      _mm512_storeu_ph(c0, vacc0x0);
+      _mm512_storeu_ph((uint16_t*) c0 + 0, vacc0x0);
       a0 = (const uint16_t*) ((uintptr_t) a0 - kc);
       c0 = (uint16_t*) ((uintptr_t) c0 + cn_stride);
 

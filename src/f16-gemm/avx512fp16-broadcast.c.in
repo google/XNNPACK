@@ -66,8 +66,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${NR}__avx512fp16_broadcast(
       }
 
   do {
-    __m512h vacc0x0 = _mm512_load_ph(w);
-    $for N in range(32, NR, 32):
+    $for N in range(0, NR, 32):
       __m512h vacc0x${N//32} = _mm512_load_ph((const uint16_t*) w + ${N});
     $for M in range(1, MR):
       $for N in range(0, NR, 32):
@@ -76,8 +75,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${NR}__avx512fp16_broadcast(
 
     size_t k = kc;
     do {
-      const __m512h vb0 = _mm512_load_ph(w);
-      $for N in range(32, NR, 32):
+      $for N in range(0, NR, 32):
         const __m512h vb${N//32} = _mm512_load_ph((const uint16_t*) w + ${N});
       w = (const xnn_float16*) w + ${NR};
 
@@ -102,8 +100,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${NR}__avx512fp16_broadcast(
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in RANGE_MR:
-        _mm512_storeu_ph(c${M}, vacc${M}x0);
-        $for N in range(32, NR, 32):
+        $for N in range(0, NR, 32):
           _mm512_storeu_ph((uint16_t*) c${M} + ${N}, vacc${M}x${N//32});
         a${M} = (const uint16_t*) ((uintptr_t) a${M} - kc);
         c${M} = (uint16_t*) ((uintptr_t) c${M} + cn_stride);
