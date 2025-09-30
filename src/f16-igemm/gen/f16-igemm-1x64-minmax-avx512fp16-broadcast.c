@@ -90,7 +90,7 @@ void xnn_f16_igemm_minmax_ukernel_1x64__avx512fp16_broadcast(
 
     if XNN_LIKELY(nc >= 64) {
       _mm512_storeu_ph(c0, vacc0x0);
-      _mm512_storeu_ph((uint16_t*) c0 + 1, vacc0x1);
+      _mm512_storeu_ph((uint16_t*) c0 + 32, vacc0x1);
       c0 = (uint16_t*) ((uintptr_t) c0 + cn_stride);
 
       a = (const xnn_float16**restrict) ((uintptr_t) a - ks);

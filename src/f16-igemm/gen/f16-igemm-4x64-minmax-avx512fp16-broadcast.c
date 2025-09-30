@@ -147,16 +147,16 @@ void xnn_f16_igemm_minmax_ukernel_4x64__avx512fp16_broadcast(
 
     if XNN_LIKELY(nc >= 64) {
       _mm512_storeu_ph(c3, vacc3x0);
-      _mm512_storeu_ph((uint16_t*) c3 + 1, vacc3x1);
+      _mm512_storeu_ph((uint16_t*) c3 + 32, vacc3x1);
       c3 = (uint16_t*) ((uintptr_t) c3 + cn_stride);
       _mm512_storeu_ph(c2, vacc2x0);
-      _mm512_storeu_ph((uint16_t*) c2 + 1, vacc2x1);
+      _mm512_storeu_ph((uint16_t*) c2 + 32, vacc2x1);
       c2 = (uint16_t*) ((uintptr_t) c2 + cn_stride);
       _mm512_storeu_ph(c1, vacc1x0);
-      _mm512_storeu_ph((uint16_t*) c1 + 1, vacc1x1);
+      _mm512_storeu_ph((uint16_t*) c1 + 32, vacc1x1);
       c1 = (uint16_t*) ((uintptr_t) c1 + cn_stride);
       _mm512_storeu_ph(c0, vacc0x0);
-      _mm512_storeu_ph((uint16_t*) c0 + 1, vacc0x1);
+      _mm512_storeu_ph((uint16_t*) c0 + 32, vacc0x1);
       c0 = (uint16_t*) ((uintptr_t) c0 + cn_stride);
 
       a = (const xnn_float16**restrict) ((uintptr_t) a - ks);
