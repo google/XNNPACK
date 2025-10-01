@@ -23,6 +23,7 @@ extern "C" {
 #if XNN_LOG_LEVEL >= XNN_LOG_DEBUG
 #define xnn_subgraph_log_debug(s) \
   xnn_subgraph_log_impl(__FILE__, __LINE__, s, stderr)
+#define xnn_subgraph_log_dot_debug(s) xnn_subgraph_log_dot_impl(s, stderr)
 #else
 #define xnn_subgraph_log_debug(s)
 #endif
@@ -30,6 +31,7 @@ extern "C" {
 #if XNN_LOG_LEVEL >= XNN_LOG_INFO
 #define xnn_subgraph_log_info(s) \
   xnn_subgraph_log_impl(__FILE__, __LINE__, s, stderr)
+#define xnn_subgraph_log_dot_info(s) xnn_subgraph_log_dot_impl(s, stderr)
 #else
 #define xnn_subgraph_log_info(s)
 #endif
@@ -37,6 +39,7 @@ extern "C" {
 #if XNN_LOG_LEVEL >= XNN_LOG_WARNING
 #define xnn_subgraph_log_warning(s) \
   xnn_subgraph_log_impl(__FILE__, __LINE__, s, stderr)
+#define xnn_subgraph_log_dot_warning(s) xnn_subgraph_log_dot_impl(s, stderr)
 #else
 #define xnn_subgraph_log_warning(s)
 #endif
@@ -44,6 +47,7 @@ extern "C" {
 #if XNN_LOG_LEVEL >= XNN_LOG_ERROR
 #define xnn_subgraph_log_error(s) \
   xnn_subgraph_log_impl(__FILE__, __LINE__, s, stderr)
+#define xnn_subgraph_log_dot_error(s) xnn_subgraph_log_dot_impl(s, stderr)
 #else
 #define xnn_subgraph_log_error(s)
 #endif
@@ -52,6 +56,10 @@ extern "C" {
 // called directly.
 void xnn_subgraph_log_impl(const char* filename, size_t line_number,
                            xnn_subgraph_t subgraph, FILE* out);
+
+// The actual implementation of the subgraph dot-format logging function, should
+// not be called directly.
+void xnn_subgraph_log_dot_impl(xnn_subgraph_t subgraph, FILE* out);
 
 #ifdef __cplusplus
 }  // extern "C"

@@ -10,6 +10,7 @@
 
 #include "include/xnnpack.h"
 #include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator-utils.h"
 #include "src/xnnpack/operator.h"
@@ -84,6 +85,22 @@ void xnn_subgraph_log_impl(const char* filename, size_t line_number,
             xnn_datatype_to_string(subgraph->values[node->outputs[0]].datatype),
             xnn_datatype_to_string(subgraph->values[node->inputs[1]].datatype));
         break;
+      case xnn_node_type_static_transpose:
+        fprintf(out, " (perm=[%zu", node->params.transpose.perm[0]);
+        for (int i = 1; i < node->params.transpose.num_dims; i++) {
+          fprintf(out, ", %zu", node->params.transpose.perm[i]);
+        }
+        fprintf(out, "])");
+        break;
+      case xnn_node_type_static_reshape:
+        fprintf(out, " (shape=[%zu",
+                node->params.static_reshape.new_shape.dim[0]);
+        for (int i = 1; i < node->params.static_reshape.new_shape.num_dims;
+             i++) {
+          fprintf(out, ", %zu", node->params.static_reshape.new_shape.dim[i]);
+        }
+        fprintf(out, "])");
+        break;
       default:
         break;
     }
@@ -135,6 +152,9 @@ void xnn_subgraph_log_impl(const char* filename, size_t line_number,
               xnn_value_is_external_input(value->flags) ? "input" : "",
               xnn_value_is_external_output(value->flags) ? "output" : "");
     }
+    if (xnn_value_is_static(value->allocation_type)) {
+      fprintf(out, ", static");
+    }
     if (value->producer != XNN_INVALID_NODE_ID) {
       fprintf(out, ", producer=%u", value->producer);
     }
@@ -159,4 +179,133 @@ void xnn_subgraph_log_impl(const char* filename, size_t line_number,
     }
     fprintf(out, ".\n");
   }
+}
+
+void xnn_subgraph_log_dot_impl(xnn_subgraph_t subgraph, FILE* out) {
+  // Header.
+  fprintf(out,
+          "digraph {\n"
+          "  labelloc=\"t\"\n"
+          "  label=\"Subgraph %p with %u nodes and %u values\"\n",
+          subgraph, subgraph->num_nodes, subgraph->num_values);
+
+  // Nodes.
+  for (int node_id = 0; node_id < subgraph->num_nodes; node_id++) {
+    const struct xnn_node* node = &subgraph->nodes[node_id];
+    fprintf(out, "  n%03u [shape=box, label=\"#%03u: %s", node->id, node->id,
+            xnn_node_type_to_string(node->type));
+    switch (node->type) {
+      case xnn_node_type_unary_elementwise:
+        fprintf(
+            out, "\\n(%s, %s)",
+            xnn_unary_operator_to_string(node->unary_operator),
+            xnn_datatype_to_string(subgraph->values[node->inputs[0]].datatype));
+        break;
+      case xnn_node_type_binary_elementwise:
+        fprintf(
+            out, "\\n(%s, %s)",
+            xnn_binary_operator_to_string(node->binary_operator),
+            xnn_datatype_to_string(subgraph->values[node->inputs[0]].datatype));
+        break;
+      case xnn_node_type_convert:
+        fprintf(
+            out, "\\n(%s -> %s)",
+            xnn_datatype_to_string(subgraph->values[node->inputs[0]].datatype),
+            xnn_datatype_to_string(
+                subgraph->values[node->outputs[0]].datatype));
+        break;
+      case xnn_node_type_fully_connected:
+      case xnn_node_type_batch_matrix_multiply:
+        fprintf(
+            out, "\\n(%s, %s, %s)",
+            xnn_datatype_to_string(
+                node->packed_input_datatype != xnn_datatype_invalid
+                    ? node->packed_input_datatype
+                    : subgraph->values[node->inputs[0]].datatype),
+            xnn_datatype_to_string(subgraph->values[node->outputs[0]].datatype),
+            xnn_datatype_to_string(subgraph->values[node->inputs[1]].datatype));
+        break;
+      case xnn_node_type_static_transpose:
+        fprintf(out, "\\n(perm=[%zu", node->params.transpose.perm[0]);
+        for (int i = 1; i < node->params.transpose.num_dims; i++) {
+          fprintf(out, ", %zu", node->params.transpose.perm[i]);
+        }
+        fprintf(out, "])");
+        break;
+      case xnn_node_type_static_reshape:
+        fprintf(out, "\\n(shape=[%zu",
+                node->params.static_reshape.new_shape.dim[0]);
+        for (int i = 1; i < node->params.static_reshape.new_shape.num_dims;
+             i++) {
+          fprintf(out, ", %zu", node->params.static_reshape.new_shape.dim[i]);
+        }
+        fprintf(out, "])");
+        break;
+      default:
+        break;
+    }
+    fprintf(out, "\"]\n");
+  }
+
+  // Values.
+  for (int value_id = 0; value_id < subgraph->num_values; value_id++) {
+    const struct xnn_value* value = &subgraph->values[value_id];
+    if (value->datatype != xnn_datatype_invalid &&
+        (xnn_value_is_external(value->flags) ||
+         xnn_value_is_static(value->allocation_type))) {
+      fprintf(out, "  v%03u [%slabel=\"%03u: %s", value->id,
+              xnn_value_is_static(value->allocation_type)
+                  ? "shape=\"hexagon\", "
+                  : "",
+              value->id, xnn_datatype_to_string(value->datatype));
+      if (value->shape.num_dims) {
+        fprintf(out, "[%zu", value->shape.dim[0]);
+        for (int i = 1; i < value->shape.num_dims; i++) {
+          fprintf(out, ", %zu", value->shape.dim[i]);
+        }
+        fprintf(out, "]");
+      } else if (value->data != NULL) {
+        switch (value->datatype) {
+          case xnn_datatype_fp32:
+            fprintf(out, ": %f", *(const float*)value->data);
+            break;
+          case xnn_datatype_fp16:
+            fprintf(out, ": %f",
+                    xnn_float16_to_float(*(const xnn_float16*)value->data));
+            break;
+          case xnn_datatype_int32:
+            fprintf(out, ": %i", *(const int*)value->data);
+            break;
+          default:
+            fprintf(out, ": ???");
+            break;
+        }
+      } else {
+        fprintf(out, ": ???");
+      }
+      fprintf(out, "\"]\n");
+    }
+  }
+
+  // Edges.
+  for (int node_id = 0; node_id < subgraph->num_nodes; node_id++) {
+    const struct xnn_node* node = &subgraph->nodes[node_id];
+    for (int k = 0; k < node->num_inputs; k++) {
+      const struct xnn_value* value = &subgraph->values[node->inputs[k]];
+      if (value->producer != XNN_INVALID_NODE_ID) {
+        fprintf(out, "  n%03u -> n%03u [label=\"v%03u: %s[", value->producer,
+                node->id, value->id, xnn_datatype_to_string(value->datatype));
+        if (value->shape.num_dims) {
+          fprintf(out, "%zu", value->shape.dim[0]);
+          for (int i = 1; i < value->shape.num_dims; i++) {
+            fprintf(out, ", %zu", value->shape.dim[i]);
+          }
+        }
+        fprintf(out, "]\"]\n");
+      } else {
+        fprintf(out, "  v%03u -> n%03u\n", value->id, node->id);
+      }
+    }
+  }
+  fprintf(out, "}\n\n");
 }
