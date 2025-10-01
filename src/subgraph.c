@@ -2535,20 +2535,77 @@ enum xnn_status xnn_subgraph_optimize_common_subgraphs(
                 if (consumer->type == xnn_node_type_binary_elementwise ||
                     consumer->type == xnn_node_type_batch_matrix_multiply) {
                   if (!is_repeated_input(consumer, j)) {
-                    num_consumers -= 1;
+                    num_consumers--;
                   }
                   consumer->inputs[j] = input_id;
-                  changes += 1;
+                  changes++;
                 }
               }
             }
           }
 
-          // If the broadcast could not be completely elided, then fail.
+          // If the broadcast could not be completely elided, then replace it
+          // with a broadcasting `add` of zero.
+          // TODO(b/421935339) Replace this with a more principled solution if
+          // needed since both the "zero" and output values could be quite
+          // large.
           if (num_consumers) {
-            xnn_log_error("Could not completely elide %s node (%u).",
-                          xnn_node_type_to_string(node->type), node->id);
-            return xnn_status_unsupported_parameter;
+            // Compute the shape of the right-hand operand to the binary op
+            // that, when added to the input, will result in the correct output
+            // shape.
+            size_t shape[XNN_MAX_TENSOR_DIMS];
+            size_t num_dims = node->params.static_reshape.new_shape.num_dims;
+            const struct xnn_value* input_value = &subgraph->values[input_id];
+            const size_t* old_shape = input_value->shape.dim;
+            const size_t* new_shape = node->params.static_reshape.new_shape.dim;
+            size_t num_elements = 1;
+            for (uint32_t k = 0; k < num_dims; k++) {
+              shape[k] = (new_shape[k] == 0 || new_shape[k] == old_shape[k])
+                             ? 1
+                             : new_shape[k];
+              num_elements *= shape[k];
+            }
+
+            // Create a static right-hand side value filled with zeros.
+            void* data = xnn_allocate_zero_memory(
+                num_elements * xnn_datatype_size_bytes(input_value->datatype));
+            uint32_t new_value_id;
+            enum xnn_status status =
+                xnn_datatype_is_quantized(input_value->datatype)
+                    ? xnn_define_quantized_tensor_value(
+                          subgraph, input_value->datatype,
+                          /*zero_point=*/0, /*quantization_scale=*/1.0,
+                          num_dims, shape, data,
+                          /*external_id=*/XNN_INVALID_VALUE_ID,
+                          /*flags=*/XNN_VALUE_FLAG_NEEDS_CLEANUP, &new_value_id)
+                    : xnn_define_tensor_value(
+                          subgraph, input_value->datatype, num_dims, shape,
+                          data,
+                          /*external_id=*/XNN_INVALID_VALUE_ID,
+                          /*flags=*/XNN_VALUE_FLAG_NEEDS_CLEANUP,
+                          &new_value_id);
+            if (status != xnn_status_success) {
+              return status;
+            }
+
+            // Replace the broadcast node with a binary add.
+            status = xnn_define_binary(subgraph, xnn_binary_add,
+                                       /*params=*/NULL, input_id, new_value_id,
+                                       output_id, node->flags);
+            node = &subgraph->nodes[node_id];
+            *node = subgraph->nodes[--subgraph->num_nodes];
+            node->id = node_id;
+
+            xnn_log_warning(
+                "Converted static_broadcast[#%u](v%03u) to a broadcasting "
+                "add[#%u](v%03u, 0).",
+                node_id, input_id, node_id, input_id);
+            changes++;
+          } else {
+            xnn_log_info(
+                "Removed static_broadcast[#%u](v%03u) since it is handled "
+                "implicitly by all its consumers.",
+                node_id, input_id);
           }
         }
         break;
