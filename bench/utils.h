@@ -32,8 +32,7 @@
     if (status != 0) return status;                                     \
     if (::benchmark::ReportUnrecognizedArguments(argc, argv)) return 1; \
     ::benchmark::RunSpecifiedBenchmarks();                              \
-  }                                                                     \
-  int main(int, char**)
+  }                                                                     
 #endif  // BENCHMARK_ARGS_BOTTLENECK
 
 // Common flags for all benchmarks.
