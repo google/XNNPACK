@@ -540,7 +540,7 @@ TEST(U8_IBILINEAR__SCALAR_U4, output_stride) {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_SSE41 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(U8_IBILINEAR__SSE41_U8, channels_eq_8) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse4_1);
     IBilinearMicrokernelTester()
@@ -616,10 +616,10 @@ TEST(U8_IBILINEAR__SCALAR_U4, output_stride) {
       }
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_SSE41 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_SSE41 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(U8_IBILINEAR__SSE41_U16, channels_eq_16) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse4_1);
     IBilinearMicrokernelTester()
@@ -695,7 +695,7 @@ TEST(U8_IBILINEAR__SCALAR_U4, output_stride) {
       }
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_SSE41 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

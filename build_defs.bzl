@@ -49,17 +49,9 @@ def xnnpack_configurable_defines():
         ["XNN_ENABLE_RISCV_FP16_VECTOR=1"],
         ["XNN_ENABLE_RISCV_FP16_VECTOR=0"],
     ) + xnnpack_select_if(
-        "//:avx512amx_enabled",
-        ["XNN_ENABLE_AVX512AMX=1"],
-        ["XNN_ENABLE_AVX512AMX=0"],
-    ) + xnnpack_select_if(
-        "//:avx512fp16_enabled",
-        ["XNN_ENABLE_AVX512FP16=1"],
-        ["XNN_ENABLE_AVX512FP16=0"],
-    ) + xnnpack_select_if(
-        "//:avx512bf16_enabled",
-        ["XNN_ENABLE_AVX512BF16=1"],
-        ["XNN_ENABLE_AVX512BF16=0"],
+        "//:sse41_enabled",
+        ["XNN_ENABLE_SSE41=1"],
+        ["XNN_ENABLE_SSE41=0"],
     ) + xnnpack_select_if(
         "//:avx_enabled",
         ["XNN_ENABLE_AVX=1"],
@@ -116,6 +108,18 @@ def xnnpack_configurable_defines():
         "//:avx512vnnigfni_enabled",
         ["XNN_ENABLE_AVX512VNNIGFNI=1"],
         ["XNN_ENABLE_AVX512VNNIGFNI=0"],
+    ) + xnnpack_select_if(
+        "//:avx512amx_enabled",
+        ["XNN_ENABLE_AVX512AMX=1"],
+        ["XNN_ENABLE_AVX512AMX=0"],
+    ) + xnnpack_select_if(
+        "//:avx512fp16_enabled",
+        ["XNN_ENABLE_AVX512FP16=1"],
+        ["XNN_ENABLE_AVX512FP16=0"],
+    ) + xnnpack_select_if(
+        "//:avx512bf16_enabled",
+        ["XNN_ENABLE_AVX512BF16=1"],
+        ["XNN_ENABLE_AVX512BF16=0"],
     ) + xnnpack_select_if(
         "//:hvx_enabled",
         ["XNN_ENABLE_HVX=1"],

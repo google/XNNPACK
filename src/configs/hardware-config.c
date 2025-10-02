@@ -210,7 +210,7 @@ static void init_hardware_config(void) {
   const bool use_x86_avx256vnni = XNN_ENABLE_AVX256VNNI && use_x86_avx256skx && cpuinfo_has_x86_avx512vnni();
 
   set_arch_flag(xnn_arch_x86_ssse3, cpuinfo_has_x86_ssse3());
-  set_arch_flag(xnn_arch_x86_sse4_1, cpuinfo_has_x86_sse4_1());
+  set_arch_flag(xnn_arch_x86_sse4_1, XNN_ENABLE_SSE41 && cpuinfo_has_x86_sse4_1());
   set_arch_flag(xnn_arch_x86_avx, XNN_ENABLE_AVX2 && cpuinfo_has_x86_avx());
   set_arch_flag(xnn_arch_x86_f16c, XNN_ENABLE_F16C && cpuinfo_has_x86_f16c());
   set_arch_flag(xnn_arch_x86_fma3, XNN_ENABLE_FMA3 && cpuinfo_has_x86_fma3());

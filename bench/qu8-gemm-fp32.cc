@@ -804,7 +804,7 @@
 #endif  // XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_SSE41 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   static void qu8_gemm_minmax_fp32_ukernel_1x4c2__sse41_ld64(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_fp32_ukernel_1x4c2__sse41_ld64,
@@ -1046,7 +1046,10 @@
   }
 
   BENCHMARK_GEMM(qu8_gemm_minmax_fp32_ukernel_3x4c8__sse41_ld128)
+#endif  // XNN_ENABLE_SSE41 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   static void qu8_gemm_minmax_fp32_ukernel_1x4c2__sse2_ld64(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_fp32_ukernel_1x4c2__sse2_ld64,
