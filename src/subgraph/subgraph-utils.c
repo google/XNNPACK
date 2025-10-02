@@ -11,10 +11,15 @@
 #include "include/xnnpack.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/math.h"
+#include "src/xnnpack/mutex.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator-utils.h"
 #include "src/xnnpack/operator.h"
 #include "src/xnnpack/subgraph.h"
+
+// Use a mutex to avoid the concurrent logging of subgraphs, which messes things
+// up badly.
+static struct xnn_mutex mutex;
 
 void xnn_print_flags(const int flags, const int count, const int values[],
                      const char* names) {
@@ -43,6 +48,8 @@ void xnn_print_flags(const int flags, const int count, const int values[],
 
 void xnn_subgraph_log_impl(const char* filename, size_t line_number,
                            xnn_subgraph_t subgraph, FILE* out) {
+  xnn_mutex_lock(&mutex);
+
   // Header.
   fprintf(out, "%s:%zu: Subgraph %p with %u nodes and %u values:\n", filename,
           line_number, subgraph, subgraph->num_nodes, subgraph->num_values);
@@ -179,9 +186,13 @@ void xnn_subgraph_log_impl(const char* filename, size_t line_number,
     }
     fprintf(out, ".\n");
   }
+
+  xnn_mutex_unlock(&mutex);
 }
 
 void xnn_subgraph_log_dot_impl(xnn_subgraph_t subgraph, FILE* out) {
+  xnn_mutex_lock(&mutex);
+
   // Header.
   fprintf(out,
           "digraph {\n"
@@ -308,4 +319,6 @@ void xnn_subgraph_log_dot_impl(xnn_subgraph_t subgraph, FILE* out) {
     }
   }
   fprintf(out, "}\n\n");
+
+  xnn_mutex_unlock(&mutex);
 }
