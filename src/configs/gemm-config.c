@@ -137,7 +137,14 @@ XNN_INIT_ONCE_GUARD(qu8_gemm);
   xnn_log_info("Using qp8gemm_bl microkernel '%s'.", #ukernel);
 
 static void init_f16_gemm_config(void) {
-  #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM
+  // Common parameters.
+  f16_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_HALF;
+  f16_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_HALF;
+  f16_gemm_config.log2_filter_element_bit_size = XNN_LOG2_SIZEOF_HALF + 3;
+  f16_gemm_config.bias_element_size = sizeof(uint16_t);
+
+  // Arch-specific parameters.
+  #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
@@ -333,6 +340,13 @@ static void init_pf16_gemm_config(void) {
 }
 
 static void init_bf16_f32_gemm_config(void) {
+  // Common parameters.
+  bf16_f32_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_FLOAT;
+  bf16_f32_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_FLOAT;
+  bf16_f32_gemm_config.log2_filter_element_bit_size = XNN_LOG2_SIZEOF_FLOAT + 3;
+  bf16_f32_gemm_config.bias_element_size = sizeof(float);
+
+  // Arch-specific parameters.
 #if XNN_ARCH_X86_64
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   assert(hardware_config != NULL);
@@ -354,6 +368,13 @@ static void init_bf16_f32_gemm_config(void) {
 }
 
 static void init_pf32_gemm_config(void) {
+  // Common parameters.
+  pf32_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_FLOAT;
+  pf32_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_FLOAT;
+  pf32_gemm_config.log2_filter_element_bit_size = XNN_LOG2_SIZEOF_FLOAT + 3;
+  pf32_gemm_config.bias_element_size = sizeof(float);
+
+  // Arch-specific parameters.
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   assert(hardware_config != NULL);
@@ -395,6 +416,13 @@ static void init_pf32_gemm_config(void) {
 }
 
 static void init_pqs8_qc8w_gemm_config(void) {
+  // Common parameters.
+  pqs8_qc8w_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  pqs8_qc8w_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  pqs8_qc8w_gemm_config.log2_filter_element_bit_size = XNN_LOG2_SIZEOF_INT8_T + 3;
+  pqs8_qc8w_gemm_config.bias_element_size = sizeof(int32_t);
+
+  // Arch-specific parameters.
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
   const struct xnn_hardware_config* hardware_config =
       xnn_init_hardware_config();
@@ -436,6 +464,13 @@ static void init_pqs8_qc8w_gemm_config(void) {
 }
 
 static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, bool consistent_arithmetic) {
+  // Common parameters.
+  f32_gemm_config->log2_input_element_size = XNN_LOG2_SIZEOF_FLOAT;
+  f32_gemm_config->log2_filter_element_size = XNN_LOG2_SIZEOF_FLOAT;
+  f32_gemm_config->log2_filter_element_bit_size = XNN_LOG2_SIZEOF_FLOAT + 3;
+  f32_gemm_config->bias_element_size = sizeof(float);
+
+  // Arch-specific parameters.
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -949,6 +984,13 @@ static void init_f32_gemm_config() {
 }
 
 static void init_f32_igemm_config(void) {
+  // Common parameters.
+  f32_igemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_FLOAT;
+  f32_igemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_FLOAT;
+  f32_igemm_config.log2_filter_element_bit_size = XNN_LOG2_SIZEOF_FLOAT + 3;
+  f32_igemm_config.bias_element_size = sizeof(float);
+
+  // Arch-specific parameters.
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -1434,6 +1476,13 @@ static void init_f32_igemm_config(void) {
 }
 
 static void init_f32_gemm_nr2_config_impl(struct xnn_gemm_config* f32_gemm_nr2_config, bool consistent_arithmetic) {
+  // Common parameters.
+  f32_gemm_nr2_config->log2_input_element_size = XNN_LOG2_SIZEOF_FLOAT;
+  f32_gemm_nr2_config->log2_filter_element_size = XNN_LOG2_SIZEOF_FLOAT;
+  f32_gemm_nr2_config->log2_filter_element_bit_size = XNN_LOG2_SIZEOF_FLOAT + 3;
+  f32_gemm_nr2_config->bias_element_size = sizeof(float);
+
+  // Arch-specific parameters.
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -1645,7 +1694,15 @@ static void init_f32_gemm_nr2_config() {
 }
 
 static void init_f32_qc4w_gemm_config(void) {
-    f32_qc4w_gemm_config.planes = 1;
+  // Common parameters.
+  f32_qc4w_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_FLOAT;
+  // Pass 1 byte even though it is half byte, we handle the division via filter_is_nibble == true.
+  f32_qc4w_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_UINT8_T;
+  f32_qc4w_gemm_config.log2_filter_element_bit_size = XNN_LOG2_BIT_SIZEOF_INT4;
+  f32_qc4w_gemm_config.bias_element_size = sizeof(float);
+  f32_qc4w_gemm_config.planes = 1;
+
+  // Arch-specific parameters.
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -1737,6 +1794,13 @@ static void init_f32_qc4w_gemm_config(void) {
 }
 
 static void init_f32_qc8w_gemm_config(void) {
+  // Common parameters.
+  f32_qc8w_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_FLOAT;
+  f32_qc8w_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  f32_qc8w_gemm_config.log2_filter_element_bit_size = XNN_LOG2_SIZEOF_INT8_T + 3;
+  f32_qc8w_gemm_config.bias_element_size = sizeof(float);
+
+  // Arch-specific parameters.
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -1954,6 +2018,11 @@ static void init_f32_qc8w_gemm_config(void) {
 }
 
 static void init_qdu8_f16_qc4w_gemm_config(void) {
+  // Common parameters.
+  qdu8_f16_qc4w_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_UINT8_T;
+  qdu8_f16_qc4w_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_UINT8_T;
+  qdu8_f16_qc4w_gemm_config.log2_filter_element_bit_size = XNN_LOG2_BIT_SIZEOF_INT4;
+  qdu8_f16_qc4w_gemm_config.bias_element_size = sizeof(float);
   // Use the same packing function throughout.
   qdu8_f16_qc4w_gemm_config.pack_weights_and_biases =
       (xnn_pack_weights_and_biases_fn)xnn_pack_qs4_weights_and_biases;
@@ -1962,6 +2031,8 @@ static void init_qdu8_f16_qc4w_gemm_config(void) {
           xnn_packed_stride_qs4_weights_and_biases;
   qdu8_f16_qc4w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_qc4w_gemm_gio_w;
   qdu8_f16_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_qc4w_gemm_goi_w;
+
+  // Arch-specific parameters.
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -2026,6 +2097,11 @@ static void init_qdu8_f16_qc4w_gemm_config(void) {
 }
 
 static void init_qd8_f16_qc4w_gemm_config(void) {
+  // Common parameters.
+  qd8_f16_qc4w_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  qd8_f16_qc4w_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_UINT8_T;
+  qd8_f16_qc4w_gemm_config.log2_filter_element_bit_size = XNN_LOG2_BIT_SIZEOF_INT4;
+  qd8_f16_qc4w_gemm_config.bias_element_size = sizeof(float);
   // Use the same packing function throughout.
   qd8_f16_qc4w_gemm_config.pack_weights_and_biases =
       (xnn_pack_weights_and_biases_fn)xnn_pack_qs4_weights_and_biases;
@@ -2034,6 +2110,8 @@ static void init_qd8_f16_qc4w_gemm_config(void) {
           xnn_packed_stride_qs4_weights_and_biases;
   qd8_f16_qc4w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_qc4w_gemm_gio_w;
   qd8_f16_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_qc4w_gemm_goi_w;
+
+  // Arch-specific parameters.
   #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -2096,9 +2174,15 @@ static void init_qd8_f16_qc4w_gemm_config(void) {
 }
 
 static void init_qd8_f16_qb4w_gemm_config(void) {
+  // Common parameters.
+  qd8_f16_qb4w_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  qd8_f16_qb4w_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_UINT8_T;
+  qd8_f16_qb4w_gemm_config.log2_filter_element_bit_size = XNN_LOG2_BIT_SIZEOF_INT4;
+  qd8_f16_qb4w_gemm_config.bias_element_size = sizeof(float);
   qd8_f16_qb4w_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_qb4_weights_and_biases;
   qd8_f16_qb4w_gemm_config.pack_weights_and_biases = xnn_pack_qb4_weights_and_biases;
 
+  // Arch-specific parameters.
   #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -2176,11 +2260,18 @@ static void init_qd8_f16_qb4w_gemm_config(void) {
 }
 
 static void init_qd8_f32_qc4w_gemm_config(void) {
+  // Common parameters.
+  qd8_f32_qc4w_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  qd8_f32_qc4w_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_UINT8_T;
+  qd8_f32_qc4w_gemm_config.log2_filter_element_bit_size = XNN_LOG2_BIT_SIZEOF_INT4;
+  qd8_f32_qc4w_gemm_config.bias_element_size = sizeof(float);
   // Use the same packing function throughout.
   qd8_f32_qc4w_gemm_config.pack_weights_and_biases = (xnn_pack_weights_and_biases_fn) xnn_pack_qs4_weights_and_biases;
   qd8_f32_qc4w_gemm_config.packed_stride_weights_and_biases = (xnn_packed_stride_weights_and_biases_fn) xnn_packed_stride_qs4_weights_and_biases;
   qd8_f32_qc4w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_qc4w_gemm_gio_w;  // Ignored
   qd8_f32_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_qc4w_gemm_goi_w;  // Ignored
+
+  // Arch-specific parameters.
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -2325,6 +2416,13 @@ static void init_qd8_f32_qc4w_gemm_config(void) {
 }
 
 static void init_qp8_f32_qc4w_gemm_config(void) {
+  // Common parameters.
+  qp8_f32_qc4w_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  qp8_f32_qc4w_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_UINT8_T;
+  qp8_f32_qc4w_gemm_config.log2_filter_element_bit_size = XNN_LOG2_BIT_SIZEOF_INT4;
+  qp8_f32_qc4w_gemm_config.bias_element_size = sizeof(float);
+
+  // Arch-specific parameters.
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
   const struct xnn_hardware_config* hardware_config =
       xnn_init_hardware_config();
@@ -2380,6 +2478,13 @@ static void init_qp8_f32_qc4w_gemm_config(void) {
 }
 
 static void init_qp8_f32_qc8w_gemm_config(void) {
+  // Common parameters.
+  qp8_f32_qc8w_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  qp8_f32_qc8w_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_UINT8_T;
+  qp8_f32_qc8w_gemm_config.log2_filter_element_bit_size = XNN_LOG2_SIZEOF_UINT8_T + 3;
+  qp8_f32_qc8w_gemm_config.bias_element_size = sizeof(float);
+
+  // Arch-specific parameters.
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
   const struct xnn_hardware_config* hardware_config =
       xnn_init_hardware_config();
@@ -2428,6 +2533,13 @@ static void init_qp8_f32_qc8w_gemm_config(void) {
 }
 
 static void init_qp8_f32_qb4w_gemm_config(void) {
+  // Common parameters.
+  qp8_f32_qb4w_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  qp8_f32_qb4w_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_UINT8_T;
+  qp8_f32_qb4w_gemm_config.log2_filter_element_bit_size = XNN_LOG2_BIT_SIZEOF_INT4;
+  qp8_f32_qb4w_gemm_config.bias_element_size = sizeof(float);
+
+  // Arch-specific parameters.
   #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -2466,8 +2578,15 @@ static void init_qp8_f32_qb4w_gemm_config(void) {
 }
 
 static void init_qdu8_f32_qb4w_gemm_config(void) {
+  // Common parameters.
+  qdu8_f32_qb4w_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  qdu8_f32_qb4w_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_UINT8_T;
+  qdu8_f32_qb4w_gemm_config.log2_filter_element_bit_size = XNN_LOG2_BIT_SIZEOF_INT4;
+  qdu8_f32_qb4w_gemm_config.bias_element_size = sizeof(float);
   qdu8_f32_qb4w_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_qb4_weights_and_biases;
   qdu8_f32_qb4w_gemm_config.pack_weights_and_biases = xnn_pack_qb4_weights_and_biases;
+
+  // Arch-specific parameters.
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -2506,10 +2625,16 @@ static void init_qdu8_f32_qb4w_gemm_config(void) {
 }
 
 static void init_qd8_f32_qb4w_gemm_config(void) {
+  // Common parameters.
+  qd8_f32_qb4w_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  qd8_f32_qb4w_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_UINT8_T;
+  qd8_f32_qb4w_gemm_config.log2_filter_element_bit_size = XNN_LOG2_BIT_SIZEOF_INT4;
+  qd8_f32_qb4w_gemm_config.bias_element_size = sizeof(float);
   qd8_f32_qb4w_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_qb4_weights_and_biases;
   qd8_f32_qb4w_gemm_config.pack_weights_and_biases = xnn_pack_qb4_weights_and_biases;
   qd8_f32_qb4w_gemm_config.pack_gemm_goi_bl = NULL;
 
+  // Arch-specific parameters.
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -2634,11 +2759,18 @@ static void init_qd8_f32_qb4w_gemm_config(void) {
 }
 
 static void init_qd8_f16_qc8w_gemm_config(void) {
+  // Common parameters.
+  qd8_f16_qc8w_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  qd8_f16_qc8w_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  qd8_f16_qc8w_gemm_config.log2_filter_element_bit_size = XNN_LOG2_SIZEOF_INT8_T + 3;
+  qd8_f16_qc8w_gemm_config.bias_element_size = sizeof(float);
   // Use the same packing function throughout.
   qd8_f16_qc8w_gemm_config.pack_weights_and_biases = (xnn_pack_weights_and_biases_fn)xnn_pack_qs8_weights_and_biases;
   qd8_f16_qc8w_gemm_config.packed_stride_weights_and_biases = (xnn_packed_stride_weights_and_biases_fn) xnn_packed_stride_qs8_weights_and_biases;
   qd8_f16_qc8w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_gemm_gio_w;
   qd8_f16_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_gemm_goi_w;
+
+  // Arch-specific parameters.
   #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -2922,6 +3054,11 @@ static void init_qd8_f16_qc8w_gemm_config(void) {
 }
 
 static void init_qdu8_f16_qc8w_gemm_config(void) {
+  // Common parameters.
+  qdu8_f16_qc8w_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  qdu8_f16_qc8w_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  qdu8_f16_qc8w_gemm_config.log2_filter_element_bit_size = XNN_LOG2_SIZEOF_INT8_T + 3;
+  qdu8_f16_qc8w_gemm_config.bias_element_size = sizeof(float);
   // Use the same packing function throughout.
   qdu8_f16_qc8w_gemm_config.pack_weights_and_biases =
       (xnn_pack_weights_and_biases_fn)xnn_pack_qs8_weights_and_biases;
@@ -2930,6 +3067,8 @@ static void init_qdu8_f16_qc8w_gemm_config(void) {
           xnn_packed_stride_qs8_weights_and_biases;
   qdu8_f16_qc8w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_gemm_gio_w;
   qdu8_f16_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_gemm_goi_w;
+
+  // Arch-specific parameters.
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -3255,6 +3394,11 @@ static void init_qd8_f16_qc8w_igemm_config(void) {
 }
 
 static void init_qdu8_f32_qc8w_gemm_config(void) {
+  // Common parameters.
+  qdu8_f32_qc8w_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  qdu8_f32_qc8w_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  qdu8_f32_qc8w_gemm_config.log2_filter_element_bit_size = XNN_LOG2_SIZEOF_INT8_T + 3;
+  qdu8_f32_qc8w_gemm_config.bias_element_size = sizeof(float);
   // Use the same packing function throughout.
   qdu8_f32_qc8w_gemm_config.pack_weights_and_biases =
       (xnn_pack_weights_and_biases_fn)xnn_pack_qs8_weights_and_biases;
@@ -3263,6 +3407,8 @@ static void init_qdu8_f32_qc8w_gemm_config(void) {
           xnn_packed_stride_qs8_weights_and_biases;
   qdu8_f32_qc8w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_gemm_gio_w;
   qdu8_f32_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_gemm_goi_w;
+
+  // Arch-specific parameters.
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -3382,11 +3528,18 @@ static void init_qdu8_f32_qc8w_igemm_config(void) {
 }
 
 static void init_qdu8_f32_qc4w_gemm_config(void) {
+  // Common parameters.
+  qdu8_f32_qc4w_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  qdu8_f32_qc4w_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_UINT8_T;
+  qdu8_f32_qc4w_gemm_config.log2_filter_element_bit_size = XNN_LOG2_BIT_SIZEOF_INT4;
+  qdu8_f32_qc4w_gemm_config.bias_element_size = sizeof(float);
   // Use the same packing function throughout.
   qdu8_f32_qc4w_gemm_config.pack_weights_and_biases = (xnn_pack_weights_and_biases_fn) xnn_pack_qs4_weights_and_biases;
   qdu8_f32_qc4w_gemm_config.packed_stride_weights_and_biases = (xnn_packed_stride_weights_and_biases_fn) xnn_packed_stride_qs4_weights_and_biases;
   qdu8_f32_qc4w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_qc4w_gemm_gio_w;  // Ignored
   qdu8_f32_qc4w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_qc4w_gemm_goi_w;  // Ignored
+
+  // Arch-specific parameters.
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -3496,6 +3649,11 @@ static void init_qdu8_f32_qc4w_gemm_config(void) {
 }
 
 static void init_qd8_f32_qc8w_gemm_config(void) {
+  // Common parameters.
+  qd8_f32_qc8w_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  qd8_f32_qc8w_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  qd8_f32_qc8w_gemm_config.log2_filter_element_bit_size = XNN_LOG2_SIZEOF_INT8_T + 3;
+  qd8_f32_qc8w_gemm_config.bias_element_size = sizeof(float);
   // Use the same packing function throughout.
   qd8_f32_qc8w_gemm_config.pack_weights_and_biases =
       (xnn_pack_weights_and_biases_fn)xnn_pack_qs8_weights_and_biases;
@@ -3504,6 +3662,8 @@ static void init_qd8_f32_qc8w_gemm_config(void) {
           xnn_packed_stride_qs8_weights_and_biases;
   qd8_f32_qc8w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_gemm_gio_w;
   qd8_f32_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_gemm_goi_w;
+
+  // Arch-specific parameters.
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -4020,6 +4180,13 @@ static void init_qd8_f32_qc8w_gemm_config(void) {
 }
 
 static void init_qs8_qc4w_gemm_config(void) {
+  // Common parameters.
+  qs8_qc4w_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  qs8_qc4w_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  qs8_qc4w_gemm_config.log2_filter_element_bit_size = XNN_LOG2_BIT_SIZEOF_INT4;
+  qs8_qc4w_gemm_config.bias_element_size = sizeof(int32_t);
+
+  // Arch-specific parameters.
   #if XNN_ARCH_ARM64 && !XNN_PLATFORM_WINDOWS && XNN_ENABLE_ASSEMBLY
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -4172,6 +4339,11 @@ static void init_qs8_qc4w_gemm_config(void) {
 }
 
 static void init_qs8_qc8w_gemm_config(void) {
+  // Common parameters.
+  qs8_qc8w_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  qs8_qc8w_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  qs8_qc8w_gemm_config.log2_filter_element_bit_size = XNN_LOG2_SIZEOF_INT8_T + 3;
+  qs8_qc8w_gemm_config.bias_element_size = sizeof(int32_t);
   // Use the same packing function throughout.
   qs8_qc8w_gemm_config.pack_weights_and_biases =
       (xnn_pack_weights_and_biases_fn)xnn_pack_qs8_weights_and_biases;
@@ -4180,6 +4352,8 @@ static void init_qs8_qc8w_gemm_config(void) {
           xnn_packed_stride_qs8_weights_and_biases;
   qs8_qc8w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_gemm_gio_w;
   qs8_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_gemm_goi_w;
+
+  // Arch-specific parameters.
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -5068,6 +5242,11 @@ static void init_qs8_qc8w_gemm_config(void) {
 }
 
 static void init_qu8_gemm_config(void) {
+  // Common parameters.
+  qu8_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_UINT8_T;
+  qu8_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_UINT8_T;
+  qu8_gemm_config.log2_filter_element_bit_size = XNN_LOG2_SIZEOF_UINT8_T + 3;
+  qu8_gemm_config.bias_element_size = sizeof(int32_t);
   // Use the same packing function throughout.
   qu8_gemm_config.pack_weights_and_biases =
       (xnn_pack_weights_and_biases_fn)xnn_pack_qu8_weights_and_biases;
@@ -5076,6 +5255,8 @@ static void init_qu8_gemm_config(void) {
           xnn_packed_stride_qu8_weights_and_biases;
   qu8_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qu8_gemm_gio_w;
   qu8_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qu8_gemm_goi_w;
+
+  // Arch-specific parameters.
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);

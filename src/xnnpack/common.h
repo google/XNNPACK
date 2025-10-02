@@ -417,4 +417,7 @@
 #define XNN_LOG2_SIZEOF_INT32_T 2   // log2(sizeof(int32_t))
 #define XNN_LOG2_SIZEOF_UINT32_T 2  // log2(sizeof(uint32_t))
 
+#define XNN_LOG2_BIT_SIZEOF_INT4 2  // log2(4)
+#define XNN_LOG2_BIT_SIZEOF_UINT4 2  // log2(4)
+
 #endif  // XNNPACK_SRC_XNNPACK_COMMON_H_

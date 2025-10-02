@@ -196,6 +196,10 @@ struct xnn_gemm_config {
   uint8_t planes;     // number of 4 bit planes (1 for legacy, 2 for unzip)
   uint8_t mr_packed;  // `mr` value used for packed left-hand operands.
   enum xnn_arch_flags arch;
+  uint8_t log2_input_element_size;
+  uint8_t log2_filter_element_size;
+  uint8_t log2_filter_element_bit_size;
+  uint8_t bias_element_size;
 };
 
 struct xnn_maxpool_config {
