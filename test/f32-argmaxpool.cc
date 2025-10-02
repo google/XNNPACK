@@ -685,9 +685,9 @@
 #endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_ARGMAXPOOL_9P8X__SSE2_C4, channels_eq_4_onetile) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse2);
     const size_t channel_tile = 4;
     ArgMaxPoolMicrokernelTester()
       .pooling_elements(9)
@@ -696,7 +696,7 @@
   }
 
   TEST(F32_ARGMAXPOOL_9P8X__SSE2_C4, channels_eq_4_onetile_with_input_offset) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse2);
     const size_t channel_tile = 4;
     ArgMaxPoolMicrokernelTester()
       .pooling_elements(9)
@@ -706,7 +706,7 @@
   }
 
   TEST(F32_ARGMAXPOOL_9P8X__SSE2_C4, channels_eq_4_subtile) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse2);
     const size_t channel_tile = 4;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
       ArgMaxPoolMicrokernelTester()
@@ -717,7 +717,7 @@
   }
 
   TEST(F32_ARGMAXPOOL_9P8X__SSE2_C4, channels_eq_4_subtile_with_input_offset) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse2);
     const size_t channel_tile = 4;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
       ArgMaxPoolMicrokernelTester()
@@ -729,7 +729,7 @@
   }
 
   TEST(F32_ARGMAXPOOL_9P8X__SSE2_C4, channels_eq_4_multitile) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse2);
     const size_t channel_tile = 4;
     for (size_t pooling_elements = 2; pooling_elements <= 3 * 9; pooling_elements++) {
       ArgMaxPoolMicrokernelTester()
@@ -740,7 +740,7 @@
   }
 
   TEST(F32_ARGMAXPOOL_9P8X__SSE2_C4, channels_eq_4_multitile_with_input_offset) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse2);
     const size_t channel_tile = 4;
     for (size_t pooling_elements = 2; pooling_elements <= 3 * 9; pooling_elements++) {
       ArgMaxPoolMicrokernelTester()
@@ -752,7 +752,7 @@
   }
 
   TEST(F32_ARGMAXPOOL_9P8X__SSE2_C4, channels_div_4_onetile) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse2);
     for (size_t channels = 8; channels < 32; channels += 4) {
       ArgMaxPoolMicrokernelTester()
         .pooling_elements(9)
@@ -762,7 +762,7 @@
   }
 
   TEST(F32_ARGMAXPOOL_9P8X__SSE2_C4, channels_div_4_onetile_with_input_offset) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse2);
     for (size_t channels = 8; channels < 32; channels += 4) {
       ArgMaxPoolMicrokernelTester()
         .pooling_elements(9)
@@ -773,7 +773,7 @@
   }
 
   TEST(F32_ARGMAXPOOL_9P8X__SSE2_C4, channels_div_4_subtile) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse2);
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
       for (size_t channels = 8; channels < 32; channels += 4) {
         ArgMaxPoolMicrokernelTester()
@@ -785,7 +785,7 @@
   }
 
   TEST(F32_ARGMAXPOOL_9P8X__SSE2_C4, channels_div_4_subtile_with_input_offset) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse2);
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
       for (size_t channels = 8; channels < 32; channels += 4) {
         ArgMaxPoolMicrokernelTester()
@@ -798,7 +798,7 @@
   }
 
   TEST(F32_ARGMAXPOOL_9P8X__SSE2_C4, channels_div_4_multitile) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse2);
     for (size_t pooling_elements = 2; pooling_elements <= 3 * 9; pooling_elements++) {
       for (size_t channels = 8; channels < 32; channels += 4) {
         ArgMaxPoolMicrokernelTester()
@@ -810,7 +810,7 @@
   }
 
   TEST(F32_ARGMAXPOOL_9P8X__SSE2_C4, channels_div_4_multitile_with_input_offset) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse2);
     for (size_t pooling_elements = 2; pooling_elements <= 3 * 9; pooling_elements++) {
       for (size_t channels = 8; channels < 32; channels += 4) {
         ArgMaxPoolMicrokernelTester()
@@ -823,7 +823,7 @@
   }
 
   TEST(F32_ARGMAXPOOL_9P8X__SSE2_C4, channels_lt_4_onetile) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse2);
     const size_t channel_tile = 4;
     for (size_t channels = 1; channels < channel_tile; channels++) {
       ArgMaxPoolMicrokernelTester()
@@ -834,7 +834,7 @@
   }
 
   TEST(F32_ARGMAXPOOL_9P8X__SSE2_C4, channels_lt_4_onetile_with_input_offset) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse2);
     const size_t channel_tile = 4;
     for (size_t channels = 1; channels < channel_tile; channels++) {
       ArgMaxPoolMicrokernelTester()
@@ -846,7 +846,7 @@
   }
 
   TEST(F32_ARGMAXPOOL_9P8X__SSE2_C4, channels_lt_4_subtile) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse2);
     const size_t channel_tile = 4;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
       for (size_t channels = 1; channels < channel_tile; channels++) {
@@ -859,7 +859,7 @@
   }
 
   TEST(F32_ARGMAXPOOL_9P8X__SSE2_C4, channels_lt_4_subtile_with_input_offset) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse2);
     const size_t channel_tile = 4;
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
       for (size_t channels = 1; channels < channel_tile; channels++) {
@@ -873,7 +873,7 @@
   }
 
   TEST(F32_ARGMAXPOOL_9P8X__SSE2_C4, channels_gt_4_onetile) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse2);
     for (size_t channels = 5; channels < 8; channels++) {
       ArgMaxPoolMicrokernelTester()
         .pooling_elements(9)
@@ -883,7 +883,7 @@
   }
 
   TEST(F32_ARGMAXPOOL_9P8X__SSE2_C4, channels_gt_4_onetile_with_input_offset) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse2);
     for (size_t channels = 5; channels < 8; channels++) {
       ArgMaxPoolMicrokernelTester()
         .pooling_elements(9)
@@ -894,7 +894,7 @@
   }
 
   TEST(F32_ARGMAXPOOL_9P8X__SSE2_C4, channels_gt_4_subtile) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse2);
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
       for (size_t channels = 5; channels < 8; channels++) {
         ArgMaxPoolMicrokernelTester()
@@ -906,7 +906,7 @@
   }
 
   TEST(F32_ARGMAXPOOL_9P8X__SSE2_C4, channels_gt_4_subtile_with_input_offset) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse2);
     for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
       for (size_t channels = 5; channels < 8; channels++) {
         ArgMaxPoolMicrokernelTester()
@@ -919,7 +919,7 @@
   }
 
   TEST(F32_ARGMAXPOOL_9P8X__SSE2_C4, channels_gt_4_multitile) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse2);
     for (size_t pooling_elements = 2; pooling_elements <= 3 * 9; pooling_elements++) {
       for (size_t channels = 5; channels < 8; channels++) {
         ArgMaxPoolMicrokernelTester()
@@ -931,7 +931,7 @@
   }
 
   TEST(F32_ARGMAXPOOL_9P8X__SSE2_C4, channels_gt_4_multitile_with_input_offset) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse2);
     for (size_t pooling_elements = 2; pooling_elements <= 3 * 9; pooling_elements++) {
       for (size_t channels = 5; channels < 8; channels++) {
         ArgMaxPoolMicrokernelTester()
@@ -944,7 +944,7 @@
   }
 
   TEST(F32_ARGMAXPOOL_9P8X__SSE2_C4, few_output_pixels) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse2);
     for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
       for (size_t pooling_elements = 2; pooling_elements <= 25; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
         for (size_t channels = 1; channels <= 20; channels += 3) {
@@ -959,7 +959,7 @@
   }
 
   TEST(F32_ARGMAXPOOL_9P8X__SSE2_C4, few_output_pixels_with_input_offset) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse2);
     for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
       for (size_t pooling_elements = 2; pooling_elements <= 25; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
         for (size_t channels = 1; channels <= 20; channels += 3) {
@@ -975,7 +975,7 @@
   }
 
   TEST(F32_ARGMAXPOOL_9P8X__SSE2_C4, few_output_pixels_with_output_stride) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse2);
     for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
       for (size_t pooling_elements = 2; pooling_elements <= 25; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
         for (size_t channels = 1; channels <= 20; channels += 3) {
@@ -991,7 +991,7 @@
   }
 
   TEST(F32_ARGMAXPOOL_9P8X__SSE2_C4, few_output_pixels_with_step) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse2);
     for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
       for (size_t pooling_elements = 2; pooling_elements <= 25; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
         for (size_t channels = 1; channels <= 20; channels += 3) {
@@ -1008,7 +1008,7 @@
       }
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

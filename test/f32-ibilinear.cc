@@ -540,9 +540,9 @@ TEST(F32_IBILINEAR__SCALAR_U4, output_stride) {
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_SSE && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_IBILINEAR__SSE_U4, channels_eq_4) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     IBilinearMicrokernelTester()
       .pixels(1)
       .channels(4)
@@ -550,7 +550,7 @@ TEST(F32_IBILINEAR__SCALAR_U4, output_stride) {
   }
 
   TEST(F32_IBILINEAR__SSE_U4, channels_div_4) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t channels = 8; channels < 40; channels += 4) {
       IBilinearMicrokernelTester()
         .pixels(1)
@@ -560,7 +560,7 @@ TEST(F32_IBILINEAR__SCALAR_U4, output_stride) {
   }
 
   TEST(F32_IBILINEAR__SSE_U4, channels_lt_4) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t channels = 1; channels < 4; channels++) {
       IBilinearMicrokernelTester()
         .pixels(1)
@@ -570,7 +570,7 @@ TEST(F32_IBILINEAR__SCALAR_U4, output_stride) {
   }
 
   TEST(F32_IBILINEAR__SSE_U4, channels_gt_4) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t channels = 5; channels < 8; channels++) {
       IBilinearMicrokernelTester()
         .pixels(1)
@@ -580,7 +580,7 @@ TEST(F32_IBILINEAR__SCALAR_U4, output_stride) {
   }
 
   TEST(F32_IBILINEAR__SSE_U4, pixels_gt_1) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t pixels = 2; pixels < 3; pixels++) {
       for (size_t channels = 1; channels <= 20; channels += 3) {
         IBilinearMicrokernelTester()
@@ -592,7 +592,7 @@ TEST(F32_IBILINEAR__SCALAR_U4, output_stride) {
   }
 
   TEST(F32_IBILINEAR__SSE_U4, input_offset) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t pixels = 1; pixels < 5; pixels += 1) {
       for (size_t channels = 1; channels <= 20; channels += 3) {
         IBilinearMicrokernelTester()
@@ -605,7 +605,7 @@ TEST(F32_IBILINEAR__SCALAR_U4, output_stride) {
   }
 
   TEST(F32_IBILINEAR__SSE_U4, output_stride) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t pixels = 1; pixels < 5; pixels += 1) {
       for (size_t channels = 1; channels <= 20; channels += 3) {
         IBilinearMicrokernelTester()
@@ -616,12 +616,12 @@ TEST(F32_IBILINEAR__SCALAR_U4, output_stride) {
       }
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_SSE && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_SSE && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_IBILINEAR__SSE_U8, channels_eq_8) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     IBilinearMicrokernelTester()
       .pixels(1)
       .channels(8)
@@ -629,7 +629,7 @@ TEST(F32_IBILINEAR__SCALAR_U4, output_stride) {
   }
 
   TEST(F32_IBILINEAR__SSE_U8, channels_div_8) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t channels = 16; channels < 80; channels += 8) {
       IBilinearMicrokernelTester()
         .pixels(1)
@@ -639,7 +639,7 @@ TEST(F32_IBILINEAR__SCALAR_U4, output_stride) {
   }
 
   TEST(F32_IBILINEAR__SSE_U8, channels_lt_8) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t channels = 1; channels < 8; channels++) {
       IBilinearMicrokernelTester()
         .pixels(1)
@@ -649,7 +649,7 @@ TEST(F32_IBILINEAR__SCALAR_U4, output_stride) {
   }
 
   TEST(F32_IBILINEAR__SSE_U8, channels_gt_8) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t channels = 9; channels < 16; channels++) {
       IBilinearMicrokernelTester()
         .pixels(1)
@@ -659,7 +659,7 @@ TEST(F32_IBILINEAR__SCALAR_U4, output_stride) {
   }
 
   TEST(F32_IBILINEAR__SSE_U8, pixels_gt_1) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t pixels = 2; pixels < 3; pixels++) {
       for (size_t channels = 1; channels <= 40; channels += 7) {
         IBilinearMicrokernelTester()
@@ -671,7 +671,7 @@ TEST(F32_IBILINEAR__SCALAR_U4, output_stride) {
   }
 
   TEST(F32_IBILINEAR__SSE_U8, input_offset) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t pixels = 1; pixels < 5; pixels += 1) {
       for (size_t channels = 1; channels <= 40; channels += 7) {
         IBilinearMicrokernelTester()
@@ -684,7 +684,7 @@ TEST(F32_IBILINEAR__SCALAR_U4, output_stride) {
   }
 
   TEST(F32_IBILINEAR__SSE_U8, output_stride) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t pixels = 1; pixels < 5; pixels += 1) {
       for (size_t channels = 1; channels <= 40; channels += 7) {
         IBilinearMicrokernelTester()
@@ -695,7 +695,7 @@ TEST(F32_IBILINEAR__SCALAR_U4, output_stride) {
       }
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_SSE && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

@@ -406,7 +406,7 @@ TEST(X8_LUT__SCALAR_U16, inplace) {
 #endif  // XNN_ARCH_ARM64
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_SSSE3 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(X8_LUT__SSSE3_U16, batch_eq_16) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_ssse3);
     LUTMicrokernelTester()
@@ -450,10 +450,10 @@ TEST(X8_LUT__SCALAR_U16, inplace) {
         .Test(xnn_x8_lut_ukernel__ssse3_u16);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_SSSE3 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_SSSE3 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(X8_LUT__SSSE3_U32, batch_eq_32) {
     TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_ssse3);
     LUTMicrokernelTester()
@@ -497,7 +497,7 @@ TEST(X8_LUT__SCALAR_U16, inplace) {
         .Test(xnn_x8_lut_ukernel__ssse3_u32);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_SSSE3 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
 #if XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)

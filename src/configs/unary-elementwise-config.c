@@ -2376,13 +2376,18 @@ static void init_s8_clamp_config(void) {
         s8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_clamp_scalar_params;
       } else
     #endif
-    if ((hardware_config->arch_flags & xnn_arch_x86_sse4_1)) {
-      s8_clamp_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_s8_vclamp_ukernel__sse41_u64);
-      s8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_clamp_scalar_params;
-    } else {
-      s8_clamp_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_s8_vclamp_ukernel__sse2_u64);
-      s8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_clamp_scalar_params;
-    }
+    #if XNN_ENABLE_SSE4_1
+      if ((hardware_config->arch_flags & xnn_arch_x86_sse4_1)) {
+        s8_clamp_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_s8_vclamp_ukernel__sse41_u64);
+        s8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_clamp_scalar_params;
+      } else
+    #endif
+    #if XNN_ENABLE_SSE2
+      {
+        s8_clamp_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_s8_vclamp_ukernel__sse2_u64);
+        s8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_clamp_scalar_params;
+      }
+    #endif
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     s8_clamp_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_s8_vclamp_ukernel__wasmsimd_u64);
     s8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_clamp_scalar_params;

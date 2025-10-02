@@ -579,9 +579,9 @@
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_SSE && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SSE_1X1, input_width_eq_1) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     ConvHWC2CHWMicrokernelTester()
       .kernel_size(3)
       .subsampling(2)
@@ -595,7 +595,7 @@
   }
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SSE_1X1, input_width_gt_1) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t input_width = 2; input_width < 33; input_width++) {
       ConvHWC2CHWMicrokernelTester()
         .kernel_size(3)
@@ -611,7 +611,7 @@
   }
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SSE_1X1, output_channels_lt_4) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t output_channels = 1; output_channels < 4; output_channels++) {
       for (size_t input_width = 1; input_width < 8; input_width += 1) {
         ConvHWC2CHWMicrokernelTester()
@@ -629,7 +629,7 @@
   }
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SSE_1X1, output_channels_div_4) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t output_channels = 8; output_channels <= 16; output_channels += 4) {
       for (size_t input_width = 1; input_width < 8; input_width += 1) {
         ConvHWC2CHWMicrokernelTester()
@@ -647,7 +647,7 @@
   }
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SSE_1X1, output_channels_gt_4) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t output_channels = 5; output_channels < 8; output_channels++) {
       for (size_t input_width = 1; input_width < 8; input_width += 1) {
         ConvHWC2CHWMicrokernelTester()
@@ -665,7 +665,7 @@
   }
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SSE_1X1, input_height_lt_3) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t input_height = 1; input_height < 3; input_height++) {
       for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
         for (size_t input_width = 1; input_width < 8; input_width += 1) {
@@ -685,7 +685,7 @@
   }
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SSE_1X1, input_height_gt_3) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t input_height = 4; input_height <= 9; input_height++) {
       for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
         for (size_t input_width = 1; input_width < 8; input_width += 1) {
@@ -705,7 +705,7 @@
   }
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SSE_1X1, padding_top) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
       for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
         for (size_t input_width = 1; input_width < 8; input_width += 1) {
@@ -726,7 +726,7 @@
   }
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SSE_1X1, padding_bottom) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t padding_bottom = 0; padding_bottom <= 1; padding_bottom++) {
       for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
         for (size_t input_width = 1; input_width < 8; input_width += 1) {
@@ -747,7 +747,7 @@
   }
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SSE_1X1, output_y_start) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t output_y_start = 1; output_y_start <= 3; output_y_start++) {
       for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
         for (size_t input_width = 1; input_width < 8; input_width += 1) {
@@ -768,7 +768,7 @@
   }
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SSE_1X1, output_y_end) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t output_y_end = 2; output_y_end < 5; output_y_end++) {
       for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
         for (size_t input_width = 1; input_width < 8; input_width += 1) {
@@ -789,7 +789,7 @@
   }
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SSE_1X1, qmin) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
       for (size_t input_width = 1; input_width < 8; input_width += 1) {
         ConvHWC2CHWMicrokernelTester()
@@ -808,7 +808,7 @@
   }
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SSE_1X1, qmax) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
       for (size_t input_width = 1; input_width < 8; input_width += 1) {
         ConvHWC2CHWMicrokernelTester()
@@ -825,12 +825,12 @@
       }
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_SSE && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_SSE && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SSE_2X2, input_width_eq_4) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     ConvHWC2CHWMicrokernelTester()
       .kernel_size(3)
       .subsampling(2)
@@ -844,7 +844,7 @@
   }
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SSE_2X2, input_width_div_4) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t input_width = 8; input_width <= 32; input_width += 12) {
       ConvHWC2CHWMicrokernelTester()
         .kernel_size(3)
@@ -860,7 +860,7 @@
   }
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SSE_2X2, input_width_lt_4) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t input_width = 1; input_width < 4; input_width++) {
       ConvHWC2CHWMicrokernelTester()
         .kernel_size(3)
@@ -876,7 +876,7 @@
   }
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SSE_2X2, input_width_gt_4) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t input_width = 5; input_width < 8; input_width++) {
       ConvHWC2CHWMicrokernelTester()
         .kernel_size(3)
@@ -892,7 +892,7 @@
   }
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SSE_2X2, output_channels_lt_4) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t output_channels = 1; output_channels < 4; output_channels++) {
       for (size_t input_width = 1; input_width < 32; input_width += 7) {
         ConvHWC2CHWMicrokernelTester()
@@ -910,7 +910,7 @@
   }
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SSE_2X2, output_channels_div_4) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t output_channels = 8; output_channels <= 16; output_channels += 4) {
       for (size_t input_width = 1; input_width < 32; input_width += 7) {
         ConvHWC2CHWMicrokernelTester()
@@ -928,7 +928,7 @@
   }
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SSE_2X2, output_channels_gt_4) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t output_channels = 5; output_channels < 8; output_channels++) {
       for (size_t input_width = 1; input_width < 32; input_width += 7) {
         ConvHWC2CHWMicrokernelTester()
@@ -946,7 +946,7 @@
   }
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SSE_2X2, input_height_lt_3) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t input_height = 1; input_height < 3; input_height++) {
       for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
         for (size_t input_width = 1; input_width < 32; input_width += 7) {
@@ -966,7 +966,7 @@
   }
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SSE_2X2, input_height_gt_3) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t input_height = 4; input_height <= 9; input_height++) {
       for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
         for (size_t input_width = 1; input_width < 32; input_width += 7) {
@@ -986,7 +986,7 @@
   }
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SSE_2X2, padding_top) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
       for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
         for (size_t input_width = 1; input_width < 32; input_width += 7) {
@@ -1007,7 +1007,7 @@
   }
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SSE_2X2, padding_bottom) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t padding_bottom = 0; padding_bottom <= 1; padding_bottom++) {
       for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
         for (size_t input_width = 1; input_width < 32; input_width += 7) {
@@ -1028,7 +1028,7 @@
   }
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SSE_2X2, output_y_start) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t output_y_start = 1; output_y_start <= 3; output_y_start++) {
       for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
         for (size_t input_width = 1; input_width < 32; input_width += 7) {
@@ -1049,7 +1049,7 @@
   }
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SSE_2X2, output_y_end) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t output_y_end = 2; output_y_end < 5; output_y_end++) {
       for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
         for (size_t input_width = 1; input_width < 32; input_width += 7) {
@@ -1070,7 +1070,7 @@
   }
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SSE_2X2, qmin) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
       for (size_t input_width = 1; input_width < 32; input_width += 7) {
         ConvHWC2CHWMicrokernelTester()
@@ -1089,7 +1089,7 @@
   }
 
   TEST(F32_CONV_HWC2CHW_3X3S2P1C3X4__SSE_2X2, qmax) {
-    TEST_REQUIRES_ARCH_FLAGS(0);
+    TEST_REQUIRES_ARCH_FLAGS(xnn_arch_x86_sse);
     for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
       for (size_t input_width = 1; input_width < 32; input_width += 7) {
         ConvHWC2CHWMicrokernelTester()
@@ -1106,7 +1106,7 @@
       }
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_SSE && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

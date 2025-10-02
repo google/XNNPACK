@@ -1109,6 +1109,42 @@ config_setting(
     define_values = {"xnn_enable_avx512bf16": "false"},
 )
 
+# Enables usage of Intel SSE kernels.
+config_setting(
+    name = "xnn_enable_sse_explicit_true",
+    define_values = {"xnn_enable_sse": "true"},
+)
+
+# Disables usage of Intel SSE kernels.
+config_setting(
+    name = "xnn_enable_sse_explicit_false",
+    define_values = {"xnn_enable_sse": "false"},
+)
+
+# Enables usage of Intel SSE2 kernels.
+config_setting(
+    name = "xnn_enable_sse2_explicit_true",
+    define_values = {"xnn_enable_sse2": "true"},
+)
+
+# Disables usage of Intel SSE2 kernels.
+config_setting(
+    name = "xnn_enable_sse2_explicit_false",
+    define_values = {"xnn_enable_sse2": "false"},
+)
+
+# Enables usage of Intel SSSE3 kernels.
+config_setting(
+    name = "xnn_enable_ssse3_explicit_true",
+    define_values = {"xnn_enable_ssse3": "true"},
+)
+
+# Disables usage of Intel SSSE3 kernels.
+config_setting(
+    name = "xnn_enable_ssse3_explicit_false",
+    define_values = {"xnn_enable_ssse3": "false"},
+)
+
 # Enables usage of Intel SSE41 kernels.
 config_setting(
     name = "xnn_enable_sse41_explicit_true",
@@ -1667,6 +1703,54 @@ alias(
         ":xnn_enable_avx512fp16_explicit_true": ":xnn_enable_avx512fp16_explicit_true",
         ":xnn_enable_avx512fp16_explicit_false": ":xnn_enable_avx512fp16_explicit_true",
         "//conditions:default": ":avx512fp16_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "sse_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "sse_enabled",
+    actual = select({
+        ":xnn_enable_sse_explicit_true": ":xnn_enable_sse_explicit_true",
+        ":xnn_enable_sse_explicit_false": ":xnn_enable_sse_explicit_true",
+        "//conditions:default": ":sse_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "sse2_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "sse2_enabled",
+    actual = select({
+        ":xnn_enable_sse2_explicit_true": ":xnn_enable_sse2_explicit_true",
+        ":xnn_enable_sse2_explicit_false": ":xnn_enable_sse2_explicit_true",
+        "//conditions:default": ":sse2_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "ssse3_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "ssse3_enabled",
+    actual = select({
+        ":xnn_enable_ssse3_explicit_true": ":xnn_enable_ssse3_explicit_true",
+        ":xnn_enable_ssse3_explicit_false": ":xnn_enable_ssse3_explicit_true",
+        "//conditions:default": ":ssse3_enabled_by_default",
     }),
 )
 

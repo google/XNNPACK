@@ -49,6 +49,18 @@ def xnnpack_configurable_defines():
         ["XNN_ENABLE_RISCV_FP16_VECTOR=1"],
         ["XNN_ENABLE_RISCV_FP16_VECTOR=0"],
     ) + xnnpack_select_if(
+        "//:sse_enabled",
+        ["XNN_ENABLE_SSE=1"],
+        ["XNN_ENABLE_SSE=0"],
+    ) + xnnpack_select_if(
+        "//:sse2_enabled",
+        ["XNN_ENABLE_SSE2=1"],
+        ["XNN_ENABLE_SSE2=0"],
+    ) + xnnpack_select_if(
+        "//:ssse3_enabled",
+        ["XNN_ENABLE_SSSE3=1"],
+        ["XNN_ENABLE_SSSE3=0"],
+    ) + xnnpack_select_if(
         "//:sse41_enabled",
         ["XNN_ENABLE_SSE41=1"],
         ["XNN_ENABLE_SSE41=0"],

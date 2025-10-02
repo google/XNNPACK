@@ -4058,14 +4058,14 @@
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_SSE && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   static void f32_gemm_minmax_ukernel_1x8__sse_dup(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_f32_gemm_minmax_ukernel_1x8__sse_dup,
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_f32_gemm_goi_w,
       /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-      /*arch_flags=*/0);
+      /*arch_flags=*/xnn_arch_x86_sse);
   }
 
   BENCHMARK_GEMM(f32_gemm_minmax_ukernel_1x8__sse_dup)
@@ -4076,7 +4076,7 @@
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_f32_gemm_goi_w,
       /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-      /*arch_flags=*/0);
+      /*arch_flags=*/xnn_arch_x86_sse);
   }
 
   BENCHMARK_GEMM(f32_gemm_minmax_ukernel_1x8__sse_load1)
@@ -4087,7 +4087,7 @@
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_f32_gemm_goi_w,
       /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/4,
-      /*arch_flags=*/0);
+      /*arch_flags=*/xnn_arch_x86_sse);
   }
 
   BENCHMARK_GEMM(f32_gemm_minmax_ukernel_1x8s4__sse)
@@ -4098,7 +4098,7 @@
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_f32_gemm_goi_w,
       /*mr=*/3, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-      /*arch_flags=*/0);
+      /*arch_flags=*/xnn_arch_x86_sse);
   }
 
   BENCHMARK_GEMM(f32_gemm_minmax_ukernel_3x8__sse_dup)
@@ -4109,7 +4109,7 @@
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_f32_gemm_goi_w,
       /*mr=*/3, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-      /*arch_flags=*/0);
+      /*arch_flags=*/xnn_arch_x86_sse);
   }
 
   BENCHMARK_GEMM(f32_gemm_minmax_ukernel_3x8__sse_load1)
@@ -4120,7 +4120,7 @@
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_f32_gemm_goi_w,
       /*mr=*/3, /*nr=*/8, /*kr=*/1, /*sr=*/4,
-      /*arch_flags=*/0);
+      /*arch_flags=*/xnn_arch_x86_sse);
   }
 
   BENCHMARK_GEMM(f32_gemm_minmax_ukernel_3x8s4__sse)
@@ -4131,7 +4131,7 @@
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_f32_gemm_goi_w,
       /*mr=*/4, /*nr=*/2, /*kr=*/4, /*sr=*/1,
-      /*arch_flags=*/0);
+      /*arch_flags=*/xnn_arch_x86_sse);
   }
 
   BENCHMARK_GEMM(f32_gemm_minmax_ukernel_4x2c4__sse)
@@ -4142,7 +4142,7 @@
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_f32_gemm_goi_w,
       /*mr=*/4, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-      /*arch_flags=*/0);
+      /*arch_flags=*/xnn_arch_x86_sse);
   }
 
   BENCHMARK_GEMM(f32_gemm_minmax_ukernel_4x8__sse_dup)
@@ -4153,7 +4153,7 @@
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_f32_gemm_goi_w,
       /*mr=*/4, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-      /*arch_flags=*/0);
+      /*arch_flags=*/xnn_arch_x86_sse);
   }
 
   BENCHMARK_GEMM(f32_gemm_minmax_ukernel_4x8__sse_load1)
@@ -4164,7 +4164,7 @@
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_f32_gemm_goi_w,
       /*mr=*/4, /*nr=*/8, /*kr=*/1, /*sr=*/4,
-      /*arch_flags=*/0);
+      /*arch_flags=*/xnn_arch_x86_sse);
   }
 
   BENCHMARK_GEMM(f32_gemm_minmax_ukernel_4x8s4__sse)
@@ -4175,7 +4175,7 @@
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_f32_gemm_goi_w,
       /*mr=*/5, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-      /*arch_flags=*/0);
+      /*arch_flags=*/xnn_arch_x86_sse);
   }
 
   BENCHMARK_GEMM(f32_gemm_minmax_ukernel_5x8__sse_dup)
@@ -4186,7 +4186,7 @@
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_f32_gemm_goi_w,
       /*mr=*/5, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-      /*arch_flags=*/0);
+      /*arch_flags=*/xnn_arch_x86_sse);
   }
 
   BENCHMARK_GEMM(f32_gemm_minmax_ukernel_5x8__sse_load1)
@@ -4197,7 +4197,7 @@
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_f32_gemm_goi_w,
       /*mr=*/5, /*nr=*/8, /*kr=*/1, /*sr=*/4,
-      /*arch_flags=*/0);
+      /*arch_flags=*/xnn_arch_x86_sse);
   }
 
   BENCHMARK_GEMM(f32_gemm_minmax_ukernel_5x8s4__sse)
@@ -4208,7 +4208,7 @@
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_f32_gemm_goi_w,
       /*mr=*/6, /*nr=*/2, /*kr=*/4, /*sr=*/1,
-      /*arch_flags=*/0);
+      /*arch_flags=*/xnn_arch_x86_sse);
   }
 
   BENCHMARK_GEMM(f32_gemm_minmax_ukernel_6x2c4__sse)
@@ -4219,7 +4219,7 @@
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_f32_gemm_goi_w,
       /*mr=*/6, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-      /*arch_flags=*/0);
+      /*arch_flags=*/xnn_arch_x86_sse);
   }
 
   BENCHMARK_GEMM(f32_gemm_minmax_ukernel_6x8__sse_dup)
@@ -4230,7 +4230,7 @@
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_f32_gemm_goi_w,
       /*mr=*/6, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-      /*arch_flags=*/0);
+      /*arch_flags=*/xnn_arch_x86_sse);
   }
 
   BENCHMARK_GEMM(f32_gemm_minmax_ukernel_6x8__sse_load1)
@@ -4241,11 +4241,11 @@
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_f32_gemm_goi_w,
       /*mr=*/6, /*nr=*/8, /*kr=*/1, /*sr=*/4,
-      /*arch_flags=*/0);
+      /*arch_flags=*/xnn_arch_x86_sse);
   }
 
   BENCHMARK_GEMM(f32_gemm_minmax_ukernel_6x8s4__sse)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_SSE && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
 static void f32_gemm_minmax_ukernel_1x4__scalar(benchmark::State& state, const char* net) {
