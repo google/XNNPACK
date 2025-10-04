@@ -19,5 +19,5 @@ XNN_UKERNEL(xnn_arch_none, xnn_s8_rdmax_ukernel_2p2x__wasmsimd_u32, 2, 32, false
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
-XNN_UKERNEL(xnn_arch_none, xnn_s8_rdmax_ukernel_2p2x__hvx_u128, 2, 128, false, int8_t, int8_t, void*, NULL)
+XNN_UKERNEL(xnn_arch_hvx, xnn_s8_rdmax_ukernel_2p2x__hvx_u128, 2, 128, false, int8_t, int8_t, void*, NULL)
 #endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX

@@ -27,7 +27,7 @@ XNN_UKERNEL(xnn_arch_none, xnn_f32_avgpool_minmax_ukernel_9p__wasmsimd_u4, 4, 9,
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
-XNN_UKERNEL(xnn_arch_none, xnn_f32_avgpool_minmax_ukernel_9p__hvx_u32, 32, 9, float, struct xnn_f32_scaleminmax_params, xnn_init_f32_scaleminmax_scalar_params)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_avgpool_minmax_ukernel_9p__hvx_u32, 32, 9, float, struct xnn_f32_scaleminmax_params, xnn_init_f32_scaleminmax_scalar_params)
 #endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
 
 XNN_UKERNEL(xnn_arch_none, xnn_f32_avgpool_minmax_ukernel_9p__scalar_u1, 1, 9, float, struct xnn_f32_scaleminmax_params, xnn_init_f32_scaleminmax_scalar_params)

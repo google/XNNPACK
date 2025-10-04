@@ -38,10 +38,10 @@ XNN_UKERNEL(xnn_arch_none, xnn_f32_vcopysign_ukernel__wasmsimd_u16, 16, false, f
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
-XNN_UKERNEL(xnn_arch_none, xnn_f32_vcopysign_ukernel__hvx_u32, 32, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
-XNN_UKERNEL(xnn_arch_none, xnn_f32_vcopysign_ukernel__hvx_u64, 64, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
-XNN_UKERNEL(xnn_arch_none, xnn_f32_vcopysign_ukernel__hvx_u96, 96, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
-XNN_UKERNEL(xnn_arch_none, xnn_f32_vcopysign_ukernel__hvx_u128, 128, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_vcopysign_ukernel__hvx_u32, 32, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_vcopysign_ukernel__hvx_u64, 64, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_vcopysign_ukernel__hvx_u96, 96, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_vcopysign_ukernel__hvx_u128, 128, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
 #endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

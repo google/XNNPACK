@@ -56,9 +56,9 @@ XNN_UKERNEL(xnn_arch_none, xnn_f32_vhswish_ukernel__wasmrelaxedsimd_u16, 16, fal
 #endif  // XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
-XNN_UKERNEL(xnn_arch_none, xnn_f32_vhswish_ukernel__hvx_u32, 32, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL(xnn_arch_none, xnn_f32_vhswish_ukernel__hvx_u64, 64, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL(xnn_arch_none, xnn_f32_vhswish_ukernel__hvx_u128, 128, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_vhswish_ukernel__hvx_u32, 32, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_vhswish_ukernel__hvx_u64, 64, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_vhswish_ukernel__hvx_u128, 128, false, float, struct xnn_f32_default_params, NULL)
 #endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
 
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vhswish_ukernel__scalar_u1, 1, false, float, struct xnn_f32_default_params, NULL)

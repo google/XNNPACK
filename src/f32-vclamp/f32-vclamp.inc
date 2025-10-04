@@ -48,9 +48,9 @@ XNN_UKERNEL(xnn_arch_none, xnn_f32_vclamp_ukernel__wasmrelaxedsimd_u16, 16, fals
 #endif  // XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
-XNN_UKERNEL(xnn_arch_none, xnn_f32_vclamp_ukernel__hvx_u32, 32, false, float, struct xnn_f32_minmax_params, xnn_init_f32_clamp_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_f32_vclamp_ukernel__hvx_u64, 64, false, float, struct xnn_f32_minmax_params, xnn_init_f32_clamp_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_f32_vclamp_ukernel__hvx_u128, 128, false, float, struct xnn_f32_minmax_params, xnn_init_f32_clamp_scalar_params)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_vclamp_ukernel__hvx_u32, 32, false, float, struct xnn_f32_minmax_params, xnn_init_f32_clamp_scalar_params)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_vclamp_ukernel__hvx_u64, 64, false, float, struct xnn_f32_minmax_params, xnn_init_f32_clamp_scalar_params)
+XNN_UKERNEL(xnn_arch_hvx, xnn_f32_vclamp_ukernel__hvx_u128, 128, false, float, struct xnn_f32_minmax_params, xnn_init_f32_clamp_scalar_params)
 #endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
 
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vclamp_ukernel__scalar_u1, 1, false, float, struct xnn_f32_minmax_params, xnn_init_f32_clamp_scalar_params)
