@@ -136,7 +136,7 @@ BENCHMARK_CAPTURE(f32_raddextexp, avx512f_p5_scalef_u192_acc6,
     ->UseRealTime();
 #endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 BENCHMARK_CAPTURE(f32_raddextexp, avx2_p5_u64,
                   xnn_f32_raddextexp_ukernel__avx2_p5_u64,
                   xnn_arch_x86_avx2)
@@ -200,7 +200,7 @@ BENCHMARK_CAPTURE(f32_raddextexp, avx2_p5_u96_acc6,
                   xnn_arch_x86_avx2)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();
