@@ -41,6 +41,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__sse2_u8_prfm(
   assert(sr == 1);
   assert(weights != NULL);
   assert(packed_weights != NULL);
+  assert((intptr_t)packed_weights % 16 == 0);  // Alignment requirement for `_mm_stream_ps`.
 
   const float* b = (const float*) bias;
   float* packed_w = (float*) packed_weights;
@@ -57,16 +58,16 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__sse2_u8_prfm(
         const __m128 vbCDEF = _mm_loadu_ps(b + 12);
         b += 16;
 
-        _mm_store_ps(packed_w, vb0123);
-        _mm_store_ps(packed_w + 4, vb4567);
-        _mm_store_ps(packed_w + 8, vb89AB);
-        _mm_store_ps(packed_w + 12, vbCDEF);
+        _mm_stream_ps(packed_w, vb0123);
+        _mm_stream_ps(packed_w + 4, vb4567);
+        _mm_stream_ps(packed_w + 8, vb89AB);
+        _mm_stream_ps(packed_w + 12, vbCDEF);
       } else {
         const __m128 vzero = _mm_setzero_ps();
-        _mm_store_ps(packed_w, vzero);
-        _mm_store_ps(packed_w + 4, vzero);
-        _mm_store_ps(packed_w + 8, vzero);
-        _mm_store_ps(packed_w + 12, vzero);
+        _mm_stream_ps(packed_w, vzero);
+        _mm_stream_ps(packed_w + 4, vzero);
+        _mm_stream_ps(packed_w + 8, vzero);
+        _mm_stream_ps(packed_w + 12, vzero);
       }
       packed_w += 16;
 
@@ -251,38 +252,38 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__sse2_u8_prfm(
         const __m128 vCDEFx6 = _mm_movelh_ps(vCDx6_CDx7, vEFx6_EFx7);
         const __m128 vCDEFx7 = _mm_movehl_ps(vEFx6_EFx7, vCDx6_CDx7);
 
-        _mm_store_ps(packed_w, v0123x0);
-        _mm_store_ps(packed_w + 4, v4567x0);
-        _mm_store_ps(packed_w + 8, v89ABx0);
-        _mm_store_ps(packed_w + 12, vCDEFx0);
-        _mm_store_ps(packed_w + 16, v0123x1);
-        _mm_store_ps(packed_w + 20, v4567x1);
-        _mm_store_ps(packed_w + 24, v89ABx1);
-        _mm_store_ps(packed_w + 28, vCDEFx1);
-        _mm_store_ps(packed_w + 32, v0123x2);
-        _mm_store_ps(packed_w + 36, v4567x2);
-        _mm_store_ps(packed_w + 40, v89ABx2);
-        _mm_store_ps(packed_w + 44, vCDEFx2);
-        _mm_store_ps(packed_w + 48, v0123x3);
-        _mm_store_ps(packed_w + 52, v4567x3);
-        _mm_store_ps(packed_w + 56, v89ABx3);
-        _mm_store_ps(packed_w + 60, vCDEFx3);
-        _mm_store_ps(packed_w + 64, v0123x4);
-        _mm_store_ps(packed_w + 68, v4567x4);
-        _mm_store_ps(packed_w + 72, v89ABx4);
-        _mm_store_ps(packed_w + 76, vCDEFx4);
-        _mm_store_ps(packed_w + 80, v0123x5);
-        _mm_store_ps(packed_w + 84, v4567x5);
-        _mm_store_ps(packed_w + 88, v89ABx5);
-        _mm_store_ps(packed_w + 92, vCDEFx5);
-        _mm_store_ps(packed_w + 96, v0123x6);
-        _mm_store_ps(packed_w + 100, v4567x6);
-        _mm_store_ps(packed_w + 104, v89ABx6);
-        _mm_store_ps(packed_w + 108, vCDEFx6);
-        _mm_store_ps(packed_w + 112, v0123x7);
-        _mm_store_ps(packed_w + 116, v4567x7);
-        _mm_store_ps(packed_w + 120, v89ABx7);
-        _mm_store_ps(packed_w + 124, vCDEFx7);
+        _mm_stream_ps(packed_w, v0123x0);
+        _mm_stream_ps(packed_w + 4, v4567x0);
+        _mm_stream_ps(packed_w + 8, v89ABx0);
+        _mm_stream_ps(packed_w + 12, vCDEFx0);
+        _mm_stream_ps(packed_w + 16, v0123x1);
+        _mm_stream_ps(packed_w + 20, v4567x1);
+        _mm_stream_ps(packed_w + 24, v89ABx1);
+        _mm_stream_ps(packed_w + 28, vCDEFx1);
+        _mm_stream_ps(packed_w + 32, v0123x2);
+        _mm_stream_ps(packed_w + 36, v4567x2);
+        _mm_stream_ps(packed_w + 40, v89ABx2);
+        _mm_stream_ps(packed_w + 44, vCDEFx2);
+        _mm_stream_ps(packed_w + 48, v0123x3);
+        _mm_stream_ps(packed_w + 52, v4567x3);
+        _mm_stream_ps(packed_w + 56, v89ABx3);
+        _mm_stream_ps(packed_w + 60, vCDEFx3);
+        _mm_stream_ps(packed_w + 64, v0123x4);
+        _mm_stream_ps(packed_w + 68, v4567x4);
+        _mm_stream_ps(packed_w + 72, v89ABx4);
+        _mm_stream_ps(packed_w + 76, vCDEFx4);
+        _mm_stream_ps(packed_w + 80, v0123x5);
+        _mm_stream_ps(packed_w + 84, v4567x5);
+        _mm_stream_ps(packed_w + 88, v89ABx5);
+        _mm_stream_ps(packed_w + 92, vCDEFx5);
+        _mm_stream_ps(packed_w + 96, v0123x6);
+        _mm_stream_ps(packed_w + 100, v4567x6);
+        _mm_stream_ps(packed_w + 104, v89ABx6);
+        _mm_stream_ps(packed_w + 108, vCDEFx6);
+        _mm_stream_ps(packed_w + 112, v0123x7);
+        _mm_stream_ps(packed_w + 116, v4567x7);
+        _mm_stream_ps(packed_w + 120, v89ABx7);
+        _mm_stream_ps(packed_w + 124, vCDEFx7);
         packed_w += 128;
       }
 
@@ -370,22 +371,22 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__sse2_u8_prfm(
         const __m128 vCDEFx2 = _mm_movelh_ps(vCDx2_CDx3, vEFx2_EFx3);
         const __m128 vCDEFx3 = _mm_movehl_ps(vEFx2_EFx3, vCDx2_CDx3);
 
-        _mm_store_ps(packed_w, v0123x0);
-        _mm_store_ps(packed_w + 4, v4567x0);
-        _mm_store_ps(packed_w + 8, v89ABx0);
-        _mm_store_ps(packed_w + 12, vCDEFx0);
-        _mm_store_ps(packed_w + 16, v0123x1);
-        _mm_store_ps(packed_w + 20, v4567x1);
-        _mm_store_ps(packed_w + 24, v89ABx1);
-        _mm_store_ps(packed_w + 28, vCDEFx1);
-        _mm_store_ps(packed_w + 32, v0123x2);
-        _mm_store_ps(packed_w + 36, v4567x2);
-        _mm_store_ps(packed_w + 40, v89ABx2);
-        _mm_store_ps(packed_w + 44, vCDEFx2);
-        _mm_store_ps(packed_w + 48, v0123x3);
-        _mm_store_ps(packed_w + 52, v4567x3);
-        _mm_store_ps(packed_w + 56, v89ABx3);
-        _mm_store_ps(packed_w + 60, vCDEFx3);
+        _mm_stream_ps(packed_w, v0123x0);
+        _mm_stream_ps(packed_w + 4, v4567x0);
+        _mm_stream_ps(packed_w + 8, v89ABx0);
+        _mm_stream_ps(packed_w + 12, vCDEFx0);
+        _mm_stream_ps(packed_w + 16, v0123x1);
+        _mm_stream_ps(packed_w + 20, v4567x1);
+        _mm_stream_ps(packed_w + 24, v89ABx1);
+        _mm_stream_ps(packed_w + 28, vCDEFx1);
+        _mm_stream_ps(packed_w + 32, v0123x2);
+        _mm_stream_ps(packed_w + 36, v4567x2);
+        _mm_stream_ps(packed_w + 40, v89ABx2);
+        _mm_stream_ps(packed_w + 44, vCDEFx2);
+        _mm_stream_ps(packed_w + 48, v0123x3);
+        _mm_stream_ps(packed_w + 52, v4567x3);
+        _mm_stream_ps(packed_w + 56, v89ABx3);
+        _mm_stream_ps(packed_w + 60, vCDEFx3);
         packed_w += 64;
       }
 
@@ -443,10 +444,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__sse2_u8_prfm(
             const __m128 v89ABx0 = _mm_movelh_ps(v89x0, vABx0);
             const __m128 vCDEFx0 = _mm_movelh_ps(vCDx0, vEFx0);
 
-            _mm_store_ps(packed_w, v0123x0);
-            _mm_store_ps(packed_w + 4, v4567x0);
-            _mm_store_ps(packed_w + 8, v89ABx0);
-            _mm_store_ps(packed_w + 12, vCDEFx0);
+            _mm_stream_ps(packed_w, v0123x0);
+            _mm_stream_ps(packed_w + 4, v4567x0);
+            _mm_stream_ps(packed_w + 8, v89ABx0);
+            _mm_stream_ps(packed_w + 12, vCDEFx0);
             packed_w += 16;
             break;
           }
@@ -503,14 +504,14 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__sse2_u8_prfm(
             const __m128 vCDEFx0 = _mm_movelh_ps(vCDx0_CDx1, vEFx0_EFx1);
             const __m128 vCDEFx1 = _mm_movehl_ps(vEFx0_EFx1, vCDx0_CDx1);
 
-            _mm_store_ps(packed_w, v0123x0);
-            _mm_store_ps(packed_w + 4, v4567x0);
-            _mm_store_ps(packed_w + 8, v89ABx0);
-            _mm_store_ps(packed_w + 12, vCDEFx0);
-            _mm_store_ps(packed_w + 16, v0123x1);
-            _mm_store_ps(packed_w + 20, v4567x1);
-            _mm_store_ps(packed_w + 24, v89ABx1);
-            _mm_store_ps(packed_w + 28, vCDEFx1);
+            _mm_stream_ps(packed_w, v0123x0);
+            _mm_stream_ps(packed_w + 4, v4567x0);
+            _mm_stream_ps(packed_w + 8, v89ABx0);
+            _mm_stream_ps(packed_w + 12, vCDEFx0);
+            _mm_stream_ps(packed_w + 16, v0123x1);
+            _mm_stream_ps(packed_w + 20, v4567x1);
+            _mm_stream_ps(packed_w + 24, v89ABx1);
+            _mm_stream_ps(packed_w + 28, vCDEFx1);
             packed_w += 32;
             break;
           }
@@ -613,18 +614,18 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__sse2_u8_prfm(
             const __m128 vCDEFx1 = _mm_movehl_ps(vEFx0_EFx1, vCDx0_CDx1);
             const __m128 vCDEFx2 = _mm_movelh_ps(vCDx2, vEFx2);
 
-            _mm_store_ps(packed_w, v0123x0);
-            _mm_store_ps(packed_w + 4, v4567x0);
-            _mm_store_ps(packed_w + 8, v89ABx0);
-            _mm_store_ps(packed_w + 12, vCDEFx0);
-            _mm_store_ps(packed_w + 16, v0123x1);
-            _mm_store_ps(packed_w + 20, v4567x1);
-            _mm_store_ps(packed_w + 24, v89ABx1);
-            _mm_store_ps(packed_w + 28, vCDEFx1);
-            _mm_store_ps(packed_w + 32, v0123x2);
-            _mm_store_ps(packed_w + 36, v4567x2);
-            _mm_store_ps(packed_w + 40, v89ABx2);
-            _mm_store_ps(packed_w + 44, vCDEFx2);
+            _mm_stream_ps(packed_w, v0123x0);
+            _mm_stream_ps(packed_w + 4, v4567x0);
+            _mm_stream_ps(packed_w + 8, v89ABx0);
+            _mm_stream_ps(packed_w + 12, vCDEFx0);
+            _mm_stream_ps(packed_w + 16, v0123x1);
+            _mm_stream_ps(packed_w + 20, v4567x1);
+            _mm_stream_ps(packed_w + 24, v89ABx1);
+            _mm_stream_ps(packed_w + 28, vCDEFx1);
+            _mm_stream_ps(packed_w + 32, v0123x2);
+            _mm_stream_ps(packed_w + 36, v4567x2);
+            _mm_stream_ps(packed_w + 40, v89ABx2);
+            _mm_stream_ps(packed_w + 44, vCDEFx2);
             packed_w += 48;
             break;
           }
@@ -648,10 +649,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__sse2_u8_prfm(
         packed_w += (16 - n);
       } else {
         const __m128 vzero = _mm_setzero_ps();
-        _mm_store_ps(packed_w, vzero);
-        _mm_store_ps(packed_w + 4, vzero);
-        _mm_store_ps(packed_w + 8, vzero);
-        _mm_store_ps(packed_w + 12, vzero);
+        _mm_stream_ps(packed_w, vzero);
+        _mm_stream_ps(packed_w + 4, vzero);
+        _mm_stream_ps(packed_w + 8, vzero);
+        _mm_stream_ps(packed_w + 12, vzero);
         packed_w += 16;
       }
 
@@ -841,38 +842,38 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__sse2_u8_prfm(
         const __m128 vCDEFx6 = _mm_movelh_ps(vCDx6_CDx7, vEFx6_EFx7);
         const __m128 vCDEFx7 = _mm_movehl_ps(vEFx6_EFx7, vCDx6_CDx7);
 
-        _mm_store_ps(packed_w, v0123x0);
-        _mm_store_ps(packed_w + 4, v4567x0);
-        _mm_store_ps(packed_w + 8, v89ABx0);
-        _mm_store_ps(packed_w + 12, vCDEFx0);
-        _mm_store_ps(packed_w + 16, v0123x1);
-        _mm_store_ps(packed_w + 20, v4567x1);
-        _mm_store_ps(packed_w + 24, v89ABx1);
-        _mm_store_ps(packed_w + 28, vCDEFx1);
-        _mm_store_ps(packed_w + 32, v0123x2);
-        _mm_store_ps(packed_w + 36, v4567x2);
-        _mm_store_ps(packed_w + 40, v89ABx2);
-        _mm_store_ps(packed_w + 44, vCDEFx2);
-        _mm_store_ps(packed_w + 48, v0123x3);
-        _mm_store_ps(packed_w + 52, v4567x3);
-        _mm_store_ps(packed_w + 56, v89ABx3);
-        _mm_store_ps(packed_w + 60, vCDEFx3);
-        _mm_store_ps(packed_w + 64, v0123x4);
-        _mm_store_ps(packed_w + 68, v4567x4);
-        _mm_store_ps(packed_w + 72, v89ABx4);
-        _mm_store_ps(packed_w + 76, vCDEFx4);
-        _mm_store_ps(packed_w + 80, v0123x5);
-        _mm_store_ps(packed_w + 84, v4567x5);
-        _mm_store_ps(packed_w + 88, v89ABx5);
-        _mm_store_ps(packed_w + 92, vCDEFx5);
-        _mm_store_ps(packed_w + 96, v0123x6);
-        _mm_store_ps(packed_w + 100, v4567x6);
-        _mm_store_ps(packed_w + 104, v89ABx6);
-        _mm_store_ps(packed_w + 108, vCDEFx6);
-        _mm_store_ps(packed_w + 112, v0123x7);
-        _mm_store_ps(packed_w + 116, v4567x7);
-        _mm_store_ps(packed_w + 120, v89ABx7);
-        _mm_store_ps(packed_w + 124, vCDEFx7);
+        _mm_stream_ps(packed_w, v0123x0);
+        _mm_stream_ps(packed_w + 4, v4567x0);
+        _mm_stream_ps(packed_w + 8, v89ABx0);
+        _mm_stream_ps(packed_w + 12, vCDEFx0);
+        _mm_stream_ps(packed_w + 16, v0123x1);
+        _mm_stream_ps(packed_w + 20, v4567x1);
+        _mm_stream_ps(packed_w + 24, v89ABx1);
+        _mm_stream_ps(packed_w + 28, vCDEFx1);
+        _mm_stream_ps(packed_w + 32, v0123x2);
+        _mm_stream_ps(packed_w + 36, v4567x2);
+        _mm_stream_ps(packed_w + 40, v89ABx2);
+        _mm_stream_ps(packed_w + 44, vCDEFx2);
+        _mm_stream_ps(packed_w + 48, v0123x3);
+        _mm_stream_ps(packed_w + 52, v4567x3);
+        _mm_stream_ps(packed_w + 56, v89ABx3);
+        _mm_stream_ps(packed_w + 60, vCDEFx3);
+        _mm_stream_ps(packed_w + 64, v0123x4);
+        _mm_stream_ps(packed_w + 68, v4567x4);
+        _mm_stream_ps(packed_w + 72, v89ABx4);
+        _mm_stream_ps(packed_w + 76, vCDEFx4);
+        _mm_stream_ps(packed_w + 80, v0123x5);
+        _mm_stream_ps(packed_w + 84, v4567x5);
+        _mm_stream_ps(packed_w + 88, v89ABx5);
+        _mm_stream_ps(packed_w + 92, vCDEFx5);
+        _mm_stream_ps(packed_w + 96, v0123x6);
+        _mm_stream_ps(packed_w + 100, v4567x6);
+        _mm_stream_ps(packed_w + 104, v89ABx6);
+        _mm_stream_ps(packed_w + 108, vCDEFx6);
+        _mm_stream_ps(packed_w + 112, v0123x7);
+        _mm_stream_ps(packed_w + 116, v4567x7);
+        _mm_stream_ps(packed_w + 120, v89ABx7);
+        _mm_stream_ps(packed_w + 124, vCDEFx7);
         packed_w += 128;
       }
 
@@ -957,22 +958,22 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__sse2_u8_prfm(
         const __m128 vCDEFx2 = _mm_movelh_ps(vCDx2_CDx3, vEFx2_EFx3);
         const __m128 vCDEFx3 = _mm_movehl_ps(vEFx2_EFx3, vCDx2_CDx3);
 
-        _mm_store_ps(packed_w, v0123x0);
-        _mm_store_ps(packed_w + 4, v4567x0);
-        _mm_store_ps(packed_w + 8, v89ABx0);
-        _mm_store_ps(packed_w + 12, vCDEFx0);
-        _mm_store_ps(packed_w + 16, v0123x1);
-        _mm_store_ps(packed_w + 20, v4567x1);
-        _mm_store_ps(packed_w + 24, v89ABx1);
-        _mm_store_ps(packed_w + 28, vCDEFx1);
-        _mm_store_ps(packed_w + 32, v0123x2);
-        _mm_store_ps(packed_w + 36, v4567x2);
-        _mm_store_ps(packed_w + 40, v89ABx2);
-        _mm_store_ps(packed_w + 44, vCDEFx2);
-        _mm_store_ps(packed_w + 48, v0123x3);
-        _mm_store_ps(packed_w + 52, v4567x3);
-        _mm_store_ps(packed_w + 56, v89ABx3);
-        _mm_store_ps(packed_w + 60, vCDEFx3);
+        _mm_stream_ps(packed_w, v0123x0);
+        _mm_stream_ps(packed_w + 4, v4567x0);
+        _mm_stream_ps(packed_w + 8, v89ABx0);
+        _mm_stream_ps(packed_w + 12, vCDEFx0);
+        _mm_stream_ps(packed_w + 16, v0123x1);
+        _mm_stream_ps(packed_w + 20, v4567x1);
+        _mm_stream_ps(packed_w + 24, v89ABx1);
+        _mm_stream_ps(packed_w + 28, vCDEFx1);
+        _mm_stream_ps(packed_w + 32, v0123x2);
+        _mm_stream_ps(packed_w + 36, v4567x2);
+        _mm_stream_ps(packed_w + 40, v89ABx2);
+        _mm_stream_ps(packed_w + 44, vCDEFx2);
+        _mm_stream_ps(packed_w + 48, v0123x3);
+        _mm_stream_ps(packed_w + 52, v4567x3);
+        _mm_stream_ps(packed_w + 56, v89ABx3);
+        _mm_stream_ps(packed_w + 60, vCDEFx3);
         packed_w += 64;
       }
 
@@ -1013,10 +1014,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__sse2_u8_prfm(
             const __m128 v89ABx0 = _mm_movelh_ps(v89x0, vABx0);
             const __m128 vCDEFx0 = _mm_movelh_ps(vCDx0, vEFx0);
 
-            _mm_store_ps(packed_w, v0123x0);
-            _mm_store_ps(packed_w + 4, v4567x0);
-            _mm_store_ps(packed_w + 8, v89ABx0);
-            _mm_store_ps(packed_w + 12, vCDEFx0);
+            _mm_stream_ps(packed_w, v0123x0);
+            _mm_stream_ps(packed_w + 4, v4567x0);
+            _mm_stream_ps(packed_w + 8, v89ABx0);
+            _mm_stream_ps(packed_w + 12, vCDEFx0);
             packed_w += 16;
             break;
           }
@@ -1056,14 +1057,14 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__sse2_u8_prfm(
             const __m128 vCDEFx0 = _mm_movelh_ps(vCDx0_CDx1, vEFx0_EFx1);
             const __m128 vCDEFx1 = _mm_movehl_ps(vEFx0_EFx1, vCDx0_CDx1);
 
-            _mm_store_ps(packed_w, v0123x0);
-            _mm_store_ps(packed_w + 4, v4567x0);
-            _mm_store_ps(packed_w + 8, v89ABx0);
-            _mm_store_ps(packed_w + 12, vCDEFx0);
-            _mm_store_ps(packed_w + 16, v0123x1);
-            _mm_store_ps(packed_w + 20, v4567x1);
-            _mm_store_ps(packed_w + 24, v89ABx1);
-            _mm_store_ps(packed_w + 28, vCDEFx1);
+            _mm_stream_ps(packed_w, v0123x0);
+            _mm_stream_ps(packed_w + 4, v4567x0);
+            _mm_stream_ps(packed_w + 8, v89ABx0);
+            _mm_stream_ps(packed_w + 12, vCDEFx0);
+            _mm_stream_ps(packed_w + 16, v0123x1);
+            _mm_stream_ps(packed_w + 20, v4567x1);
+            _mm_stream_ps(packed_w + 24, v89ABx1);
+            _mm_stream_ps(packed_w + 28, vCDEFx1);
             packed_w += 32;
             break;
           }
@@ -1147,18 +1148,18 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__sse2_u8_prfm(
             const __m128 vCDEFx1 = _mm_movehl_ps(vEFx0_EFx1, vCDx0_CDx1);
             const __m128 vCDEFx2 = _mm_movelh_ps(vCDx2, vEFx2);
 
-            _mm_store_ps(packed_w, v0123x0);
-            _mm_store_ps(packed_w + 4, v4567x0);
-            _mm_store_ps(packed_w + 8, v89ABx0);
-            _mm_store_ps(packed_w + 12, vCDEFx0);
-            _mm_store_ps(packed_w + 16, v0123x1);
-            _mm_store_ps(packed_w + 20, v4567x1);
-            _mm_store_ps(packed_w + 24, v89ABx1);
-            _mm_store_ps(packed_w + 28, vCDEFx1);
-            _mm_store_ps(packed_w + 32, v0123x2);
-            _mm_store_ps(packed_w + 36, v4567x2);
-            _mm_store_ps(packed_w + 40, v89ABx2);
-            _mm_store_ps(packed_w + 44, vCDEFx2);
+            _mm_stream_ps(packed_w, v0123x0);
+            _mm_stream_ps(packed_w + 4, v4567x0);
+            _mm_stream_ps(packed_w + 8, v89ABx0);
+            _mm_stream_ps(packed_w + 12, vCDEFx0);
+            _mm_stream_ps(packed_w + 16, v0123x1);
+            _mm_stream_ps(packed_w + 20, v4567x1);
+            _mm_stream_ps(packed_w + 24, v89ABx1);
+            _mm_stream_ps(packed_w + 28, vCDEFx1);
+            _mm_stream_ps(packed_w + 32, v0123x2);
+            _mm_stream_ps(packed_w + 36, v4567x2);
+            _mm_stream_ps(packed_w + 40, v89ABx2);
+            _mm_stream_ps(packed_w + 44, vCDEFx2);
             packed_w += 48;
             break;
           }

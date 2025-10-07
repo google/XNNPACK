@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC
+// Copyright 2024-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -42,6 +42,8 @@ void xnn_x32_packw_gemm_gio_ukernel_x${NR}__avx_u${KBLOCK}${"_prfm" if PREFETCH 
   assert(k_stride != 0);
   assert(weights != NULL);
   assert(packed_weights != NULL);
+  assert((intptr_t)packed_weights % 32 == 0);  // Alignment requirement for `_mm256_stream_ps`.
+
   static const int32_t mask_table[${NR*2}] = {
     $for N in range(SIMD_TILE):
       -1, -1, -1, -1, -1, -1, -1, -1,
@@ -62,11 +64,11 @@ void xnn_x32_packw_gemm_gio_ukernel_x${NR}__avx_u${KBLOCK}${"_prfm" if PREFETCH 
         $for N in range(SIMD_TILE):
           const __m256 vb${N} = _mm256_loadu_ps(b + ${N*SIMD_SIZE});
         $for N in range(SIMD_TILE):
-          _mm256_store_ps(packed_w + ${N*SIMD_SIZE}, vb${N});
+          _mm256_stream_ps(packed_w + ${N*SIMD_SIZE}, vb${N});
         b += ${NR};
       } else {
         $for N in range(SIMD_TILE):
-          _mm256_store_ps(packed_w + ${N*SIMD_SIZE}, vzero);
+          _mm256_stream_ps(packed_w + ${N*SIMD_SIZE}, vzero);
       }
       packed_w += ${NR};
 
@@ -83,7 +85,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x${NR}__avx_u${KBLOCK}${"_prfm" if PREFETCH 
                 xnn_prefetch_to_l1((const int8_t*) w + ${N+960} + ${K} * k_stride);
           $for K in range(KBLOCK):
             $for N in range(SIMD_TILE):
-              _mm256_store_ps(packed_w + ${N*SIMD_SIZE+K*NR}, v${N}_${K});
+              _mm256_stream_ps(packed_w + ${N*SIMD_SIZE+K*NR}, v${N}_${K});
           w += k_stride * ${KBLOCK};
           packed_w += ${NR*KBLOCK};
         }
@@ -96,7 +98,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x${NR}__avx_u${KBLOCK}${"_prfm" if PREFETCH 
           $for N in range(0,SIMD_TILE*SIMD_SIZE,64):
             xnn_prefetch_to_l1((const int8_t*) w + ${N+960});
         $for N in range(SIMD_TILE):
-          _mm256_store_ps(packed_w + ${N*SIMD_SIZE}, v${N});
+          _mm256_stream_ps(packed_w + ${N*SIMD_SIZE}, v${N});
         w += k_stride;
         packed_w += ${NR};
       }
@@ -114,11 +116,11 @@ void xnn_x32_packw_gemm_gio_ukernel_x${NR}__avx_u${KBLOCK}${"_prfm" if PREFETCH 
         $for N in range(SIMD_TILE):
           const __m256 vb${N} = _mm256_maskload_ps(b + ${N*SIMD_SIZE}, vmask${N});
         $for N in range(SIMD_TILE):
-          _mm256_store_ps(packed_w + ${N*SIMD_SIZE}, vb${N});
+          _mm256_stream_ps(packed_w + ${N*SIMD_SIZE}, vb${N});
         b += n;
       } else {
         $for N in range(SIMD_TILE):
-          _mm256_store_ps(packed_w + ${N*SIMD_SIZE}, vzero);
+          _mm256_stream_ps(packed_w + ${N*SIMD_SIZE}, vzero);
       }
       packed_w += ${NR};
 
@@ -127,7 +129,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x${NR}__avx_u${KBLOCK}${"_prfm" if PREFETCH 
         $for N in range(SIMD_TILE):
           const __m256 v${N} = _mm256_maskload_ps(w + ${N*SIMD_SIZE}, vmask${N});
         $for N in range(SIMD_TILE):
-          _mm256_store_ps(packed_w + ${N*SIMD_SIZE}, v${N});
+          _mm256_stream_ps(packed_w + ${N*SIMD_SIZE}, v${N});
         w += k_stride;
         packed_w += ${NR};
       }
