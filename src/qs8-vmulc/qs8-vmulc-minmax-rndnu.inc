@@ -1,9 +1,8 @@
+// clang-format off
 // Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
-
-// clang-format off
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

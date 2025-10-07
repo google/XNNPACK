@@ -5,17 +5,17 @@
 // LICENSE file in the root directory of this source tree.
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_UKERNEL(xnn_arch_none, xnn_f32_vmulcaddc_minmax_ukernel_c4__sse_2x, 2, 4, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_f32_vmulcaddc_minmax_ukernel_c8__sse_2x, 2, 8, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 XNN_UKERNEL(xnn_arch_arm_neon, xnn_f32_vmulcaddc_minmax_ukernel_c4__neon_2x, 2, 4, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_arm_neon_fma, xnn_f32_vmulcaddc_minmax_ukernel_c4__neonfma_2x, 2, 4, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_arm_neon, xnn_f32_vmulcaddc_minmax_ukernel_c8__neon_2x, 2, 8, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_arm_neon_fma, xnn_f32_vmulcaddc_minmax_ukernel_c8__neonfma_2x, 2, 8, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ENABLE_SSE && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_sse, xnn_f32_vmulcaddc_minmax_ukernel_c4__sse_2x, 2, 4, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_x86_sse, xnn_f32_vmulcaddc_minmax_ukernel_c8__sse_2x, 2, 8, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
+#endif  // XNN_ENABLE_SSE && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vmulcaddc_minmax_ukernel_c4__wasmsimd_arm_2x, 2, 4, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)

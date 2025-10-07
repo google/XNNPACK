@@ -62,12 +62,12 @@ XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_spmm_minmax_ukernel_8vx2__rvv, 8, 2, 
 XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_spmm_minmax_ukernel_8vx4__rvv, 8, 4, 1, true, false, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 #endif  // XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_UKERNEL(xnn_arch_none, xnn_f32_spmm_minmax_ukernel_4x1__sse, 4, 1, 1, false, false, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_f32_spmm_minmax_ukernel_8x1__sse, 8, 1, 1, false, false, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_f32_spmm_minmax_ukernel_16x1__sse, 16, 1, 1, false, false, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_f32_spmm_minmax_ukernel_32x1__sse, 32, 1, 1, false, false, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_SSE && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_sse, xnn_f32_spmm_minmax_ukernel_4x1__sse, 4, 1, 1, false, false, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_x86_sse, xnn_f32_spmm_minmax_ukernel_8x1__sse, 8, 1, 1, false, false, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_x86_sse, xnn_f32_spmm_minmax_ukernel_16x1__sse, 16, 1, 1, false, false, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_x86_sse, xnn_f32_spmm_minmax_ukernel_32x1__sse, 32, 1, 1, false, false, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
+#endif  // XNN_ENABLE_SSE && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 XNN_UKERNEL(xnn_arch_none, xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm, 4, 1, 1, false, false, float, struct xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)

@@ -59,11 +59,9 @@ static void init_f32_raddstoreexpminusmax_config(void) {
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     if (hardware_config->arch_flags & xnn_arch_arm_neon) {
-      f32_raddstoreexpminusmax_config.ukernel =
-        XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f32_raddstoreexpminusmax_ukernel__neonfma_rr1_lut64_p2_u16_acc2);
+      f32_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f32_raddstoreexpminusmax_ukernel__neonfma_rr1_lut64_p2_u16_acc2);
     } else {
-      f32_raddstoreexpminusmax_config.ukernel =
-        XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_u4_acc2);
+      f32_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_u4_acc2);
     }
   #elif XNN_ARCH_ARM64
     f32_raddstoreexpminusmax_config.ukernel =
@@ -87,16 +85,19 @@ static void init_f32_raddstoreexpminusmax_config(void) {
         f32_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr2_p5_u32_acc2);
       } else
     #endif
+    #if XNN_ENABLE_SSE2
+      if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
+        f32_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_u16_acc2);
+      } else
+    #endif
     {
-      f32_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_u16_acc2);
+      f32_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_u4_acc2);
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     #if XNN_ARCH_WASMRELAXEDSIMD
-      f32_raddstoreexpminusmax_config.ukernel =
-        XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f32_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr2_p5_u16_acc2);
+      f32_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f32_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr2_p5_u16_acc2);
     #else
-      f32_raddstoreexpminusmax_config.ukernel =
-        XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_u16_acc2);
+      f32_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_u16_acc2);
     #endif
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     f32_raddstoreexpminusmax_config.ukernel = XNN_INIT_RADDSTOREEXPMINUSMAX_UKERNEL(xnn_f32_raddstoreexpminusmax_ukernel__rvv_rr2_p6_u4v);

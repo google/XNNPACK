@@ -1,9 +1,8 @@
+// clang-format off
 // Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
-
-// clang-format off
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
@@ -15,11 +14,14 @@ XNN_UKERNEL(xnn_arch_arm_neon, xnn_qs8_vadd_minmax_ukernel__neon_ld128_u16, 16, 
 XNN_UKERNEL(xnn_arch_arm_neon, xnn_qs8_vadd_minmax_ukernel__neon_ld128_u32, 32, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_UKERNEL(xnn_arch_none, xnn_qs8_vadd_minmax_ukernel__sse2_mul16_ld64_u8, 8, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_qs8_vadd_minmax_ukernel__sse2_mul16_ld64_u16, 16, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_qs8_vadd_minmax_ukernel__sse2_mul16_ld64_u24, 24, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_qs8_vadd_minmax_ukernel__sse2_mul16_ld64_u32, 32, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)
+#if XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_qs8_vadd_minmax_ukernel__sse2_mul16_ld64_u8, 8, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_qs8_vadd_minmax_ukernel__sse2_mul16_ld64_u16, 16, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_qs8_vadd_minmax_ukernel__sse2_mul16_ld64_u24, 24, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_qs8_vadd_minmax_ukernel__sse2_mul16_ld64_u32, 32, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)
+#endif  // XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ENABLE_SSE41 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qs8_vadd_minmax_ukernel__sse41_mul16_ld64_u8, 8, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qs8_vadd_minmax_ukernel__sse41_mul16_ld64_u16, 16, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qs8_vadd_minmax_ukernel__sse41_mul16_ld64_u24, 24, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)
@@ -28,7 +30,7 @@ XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qs8_vadd_minmax_ukernel__sse41_mul32_ld32_u
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qs8_vadd_minmax_ukernel__sse41_mul32_ld32_u16, 16, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qs8_vadd_minmax_ukernel__sse41_mul32_ld32_u24, 24, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qs8_vadd_minmax_ukernel__sse41_mul32_ld32_u32, 32, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_SSE41 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_qs8_vadd_minmax_ukernel__avx_mul16_ld64_u8, 8, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)

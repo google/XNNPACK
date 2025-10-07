@@ -24,15 +24,18 @@ XNN_UKERNEL(xnn_arch_arm_neon_fma, xnn_f32_velu_ukernel__neonfma_rr1_p6_u12, 12,
 XNN_UKERNEL(xnn_arch_arm_neon_fma, xnn_f32_velu_ukernel__neonfma_rr1_p6_u16, 16, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_UKERNEL(xnn_arch_none, xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_u4, 4, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_u8, 8, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_u12, 12, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_u16, 16, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_f32_velu_ukernel__sse2_rr2_p6_u4, 4, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_f32_velu_ukernel__sse2_rr2_p6_u8, 8, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_f32_velu_ukernel__sse2_rr2_p6_u12, 12, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_f32_velu_ukernel__sse2_rr2_p6_u16, 16, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
+#if XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_u4, 4, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_u8, 8, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_u12, 12, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_u16, 16, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_velu_ukernel__sse2_rr2_p6_u4, 4, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_velu_ukernel__sse2_rr2_p6_u8, 8, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_velu_ukernel__sse2_rr2_p6_u12, 12, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_velu_ukernel__sse2_rr2_p6_u16, 16, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
+#endif  // XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ENABLE_SSE41 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_f32_velu_ukernel__sse41_rr2_lut16_p3_u4, 4, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_f32_velu_ukernel__sse41_rr2_lut16_p3_u8, 8, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_f32_velu_ukernel__sse41_rr2_lut16_p3_u12, 12, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
@@ -41,7 +44,7 @@ XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_f32_velu_ukernel__sse41_rr2_p6_u4, 4, false
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_f32_velu_ukernel__sse41_rr2_p6_u8, 8, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_f32_velu_ukernel__sse41_rr2_p6_u12, 12, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_f32_velu_ukernel__sse41_rr2_p6_u16, 16, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_SSE41 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_velu_ukernel__avx_rr2_lut4_p4_perm_u8, 8, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
@@ -86,8 +89,7 @@ XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f32_velu_ukernel__avx512f_rr1_p6_u16, 16, 
 XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f32_velu_ukernel__avx512f_rr1_p6_u32, 32, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f32_velu_ukernel__avx512f_rr1_p6_u48, 48, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_f32_velu_ukernel__avx512f_rr1_p6_u64, 64, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 XNN_UKERNEL(xnn_arch_none, xnn_f32_velu_ukernel__wasmsimd_arm_rr2_lut16_p3_u4, 4, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_velu_ukernel__wasmsimd_arm_rr2_lut16_p3_u8, 8, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)

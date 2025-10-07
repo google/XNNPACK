@@ -3,6 +3,8 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+
+
 XNN_UKERNEL(xnn_arch_none, xnn_u8_rmin_ukernel__scalar_u1, 1, false, uint8_t, uint8_t, void*, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_u8_rmin_ukernel__scalar_u2_acc2, 2, false, uint8_t, uint8_t, void*, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_u8_rmin_ukernel__scalar_u3_acc3, 3, false, uint8_t, uint8_t, void*, NULL)
@@ -17,13 +19,13 @@ XNN_UKERNEL(xnn_arch_arm_neon, xnn_u8_rmin_ukernel__neon_u64_acc2, 64, false, ui
 XNN_UKERNEL(xnn_arch_arm_neon, xnn_u8_rmin_ukernel__neon_u64_acc4, 64, false, uint8_t, uint8_t, void*, NULL)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_UKERNEL(xnn_arch_none, xnn_u8_rmin_ukernel__sse2_u16, 16, false, uint8_t, uint8_t, void*, NULL)
-XNN_UKERNEL(xnn_arch_none, xnn_u8_rmin_ukernel__sse2_u32_acc2, 32, false, uint8_t, uint8_t, void*, NULL)
-XNN_UKERNEL(xnn_arch_none, xnn_u8_rmin_ukernel__sse2_u48_acc3, 48, false, uint8_t, uint8_t, void*, NULL)
-XNN_UKERNEL(xnn_arch_none, xnn_u8_rmin_ukernel__sse2_u64_acc2, 64, false, uint8_t, uint8_t, void*, NULL)
-XNN_UKERNEL(xnn_arch_none, xnn_u8_rmin_ukernel__sse2_u64_acc4, 64, false, uint8_t, uint8_t, void*, NULL)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_u8_rmin_ukernel__sse2_u16, 16, false, uint8_t, uint8_t, void*, NULL)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_u8_rmin_ukernel__sse2_u32_acc2, 32, false, uint8_t, uint8_t, void*, NULL)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_u8_rmin_ukernel__sse2_u48_acc3, 48, false, uint8_t, uint8_t, void*, NULL)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_u8_rmin_ukernel__sse2_u64_acc2, 64, false, uint8_t, uint8_t, void*, NULL)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_u8_rmin_ukernel__sse2_u64_acc4, 64, false, uint8_t, uint8_t, void*, NULL)
+#endif  // XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 XNN_UKERNEL(xnn_arch_none, xnn_u8_rmin_ukernel__wasmsimd_u32_acc2, 32, false, uint8_t, uint8_t, void*, NULL)

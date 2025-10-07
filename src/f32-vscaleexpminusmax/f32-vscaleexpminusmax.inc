@@ -4,6 +4,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+
 #if XNN_ENABLE_AVX2 && (XNN_ARCH_X86_64 || XNN_ARCH_X86)
 XNN_UKERNEL(xnn_arch_x86_avx2, xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_u8, 8, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_x86_avx2, xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_u16, 16, float, struct xnn_f32_default_params, NULL)

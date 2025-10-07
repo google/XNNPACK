@@ -5,7 +5,8 @@
 // LICENSE file in the root directory of this source tree.
 
 
-// arch_flags, ukernel, size_fn, packed_offset_fn
+// Arguments are:
+// XNN_UKERNEL(arch, ukernel, size_fn, packed_offset_fn)
 
 #if XNN_ENABLE_KLEIDIAI
 XNN_UKERNEL(xnn_arch_arm_sme, xnn_x16_pack_lh_ukernel__neonsme2,

@@ -1,9 +1,9 @@
+// clang-format off
 // Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-// clang-format off
 
 #ifndef XNN_QUANTIZED
 #define XNN_QUANTIZED(T) T
@@ -18,16 +18,19 @@ XNN_UKERNEL(xnn_arch_arm_neon, xnn_qu8_f32_vcvt_ukernel__neon_u24, 24, false, XN
 XNN_UKERNEL(xnn_arch_arm_neon, xnn_qu8_f32_vcvt_ukernel__neon_u32, 32, false, XNN_QUANTIZED(uint8_t), float, struct xnn_qu8_f32_cvt_params, xnn_init_qu8_f32_cvt_scalar_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_UKERNEL(xnn_arch_none, xnn_qu8_f32_vcvt_ukernel__sse2_u8, 8, false, XNN_QUANTIZED(uint8_t), float, struct xnn_qu8_f32_cvt_params, xnn_init_qu8_f32_cvt_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_qu8_f32_vcvt_ukernel__sse2_u16, 16, false, XNN_QUANTIZED(uint8_t), float, struct xnn_qu8_f32_cvt_params, xnn_init_qu8_f32_cvt_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_qu8_f32_vcvt_ukernel__sse2_u24, 24, false, XNN_QUANTIZED(uint8_t), float, struct xnn_qu8_f32_cvt_params, xnn_init_qu8_f32_cvt_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_qu8_f32_vcvt_ukernel__sse2_u32, 32, false, XNN_QUANTIZED(uint8_t), float, struct xnn_qu8_f32_cvt_params, xnn_init_qu8_f32_cvt_scalar_params)
+#if XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_qu8_f32_vcvt_ukernel__sse2_u8, 8, false, XNN_QUANTIZED(uint8_t), float, struct xnn_qu8_f32_cvt_params, xnn_init_qu8_f32_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_qu8_f32_vcvt_ukernel__sse2_u16, 16, false, XNN_QUANTIZED(uint8_t), float, struct xnn_qu8_f32_cvt_params, xnn_init_qu8_f32_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_qu8_f32_vcvt_ukernel__sse2_u24, 24, false, XNN_QUANTIZED(uint8_t), float, struct xnn_qu8_f32_cvt_params, xnn_init_qu8_f32_cvt_scalar_params)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_qu8_f32_vcvt_ukernel__sse2_u32, 32, false, XNN_QUANTIZED(uint8_t), float, struct xnn_qu8_f32_cvt_params, xnn_init_qu8_f32_cvt_scalar_params)
+#endif  // XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ENABLE_SSE41 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qu8_f32_vcvt_ukernel__sse41_u8, 8, false, XNN_QUANTIZED(uint8_t), float, struct xnn_qu8_f32_cvt_params, xnn_init_qu8_f32_cvt_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qu8_f32_vcvt_ukernel__sse41_u16, 16, false, XNN_QUANTIZED(uint8_t), float, struct xnn_qu8_f32_cvt_params, xnn_init_qu8_f32_cvt_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qu8_f32_vcvt_ukernel__sse41_u24, 24, false, XNN_QUANTIZED(uint8_t), float, struct xnn_qu8_f32_cvt_params, xnn_init_qu8_f32_cvt_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qu8_f32_vcvt_ukernel__sse41_u32, 32, false, XNN_QUANTIZED(uint8_t), float, struct xnn_qu8_f32_cvt_params, xnn_init_qu8_f32_cvt_scalar_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_SSE41 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_qu8_f32_vcvt_ukernel__avx_u8, 8, false, XNN_QUANTIZED(uint8_t), float, struct xnn_qu8_f32_cvt_params, xnn_init_qu8_f32_cvt_scalar_params)

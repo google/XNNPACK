@@ -4,9 +4,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+
 // Arguments are:
 // XNN_UKERNEL(arch, name, c_block, pipelined, cr, kr, datatype, weights_type,params_type, init_fn)
-
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 XNN_UKERNEL(xnn_arch_none, xnn_f32_dwconv_ukernel_3p4c__wasmsimd, 4, false, 4, 3, float, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_dwconv_ukernel_3p8c__wasmsimd, 8, false, 8, 3, float, float, struct xnn_f32_default_params, NULL)

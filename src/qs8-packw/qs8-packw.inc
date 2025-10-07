@@ -5,7 +5,8 @@
 
 // clang-format off
 
-// arch_flags, ukernel, nr, kr, sr, kblock, nr_scale, izp
+// Arguments are:
+// XNN_UKERNEL(arch, ukernel, nr, kr, sr, kblock, nr_scale, izp)
 XNN_QS8_UKERNEL(xnn_arch_none, xnn_qs8_packw_gemm_goi_ukernel_x8c4__scalar, 8, 4, 1, 4, 1, 0)
 XNN_QS8_UKERNEL(xnn_arch_none, xnn_qs8_packw_gemm_goi_ukernel_x16c4__scalar, 16, 4, 1, 4, 1, 0)
 XNN_QS8_UKERNEL(xnn_arch_none, xnn_qs8_packw_gemm_goi_ukernel_x32c4__scalar, 32, 4, 1, 4, 1, 0)

@@ -13,14 +13,14 @@ XNN_UKERNEL(xnn_arch_none, xnn_f32_vlog_ukernel__scalar_rational_3_3_div_u2, 2, 
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vlog_ukernel__scalar_rational_3_3_div_u4, 4, false, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL(xnn_arch_none, xnn_f32_vlog_ukernel__scalar_rational_3_3_div_u8, 8, false, float, struct xnn_f32_default_params, NULL)
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_UKERNEL(xnn_arch_none, xnn_f32_vlog_ukernel__sse2_rational_3_3_div_u4, 4, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL(xnn_arch_none, xnn_f32_vlog_ukernel__sse2_rational_3_3_div_u8, 8, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL(xnn_arch_none, xnn_f32_vlog_ukernel__sse2_rational_3_3_div_u12, 12, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL(xnn_arch_none, xnn_f32_vlog_ukernel__sse2_rational_3_3_div_u16, 16, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL(xnn_arch_none, xnn_f32_vlog_ukernel__sse2fma_rational_3_3_div_u4, 4, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL(xnn_arch_none, xnn_f32_vlog_ukernel__sse2fma_rational_3_3_div_u8, 8, false, float, struct xnn_f32_default_params, NULL)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_vlog_ukernel__sse2_rational_3_3_div_u4, 4, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_vlog_ukernel__sse2_rational_3_3_div_u8, 8, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_vlog_ukernel__sse2_rational_3_3_div_u12, 12, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_vlog_ukernel__sse2_rational_3_3_div_u16, 16, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_vlog_ukernel__sse2fma_rational_3_3_div_u4, 4, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_vlog_ukernel__sse2fma_rational_3_3_div_u8, 8, false, float, struct xnn_f32_default_params, NULL)
+#endif  // XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ENABLE_FMA3 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_fma3, xnn_f32_vlog_ukernel__fma3_rational_3_3_div_u8, 8, false, float, struct xnn_f32_default_params, NULL)

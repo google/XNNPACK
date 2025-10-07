@@ -62,9 +62,11 @@ static void init_f32_cmul_config(void) {
         f32_cmul_config.ukernel = XNN_INIT_CMUL_UKERNEL(xnn_f32_vcmul_ukernel__fma3_u16);
       } else
     #endif
-    {
-      f32_cmul_config.ukernel = XNN_INIT_CMUL_UKERNEL(xnn_f32_vcmul_ukernel__sse_u8);
-    }
+    #if XNN_ENABLE_SSE
+      if (hardware_config->arch_flags & xnn_arch_x86_sse) {
+        f32_cmul_config.ukernel = XNN_INIT_CMUL_UKERNEL(xnn_f32_vcmul_ukernel__sse_u8);
+      }
+    #endif
 
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_cmul_config.ukernel = XNN_INIT_CMUL_UKERNEL(xnn_f32_vcmul_ukernel__wasmsimd_u8);

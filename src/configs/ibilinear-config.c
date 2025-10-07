@@ -117,12 +117,19 @@ static void init_s8_ibilinear_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
-    if (hardware_config->arch_flags & xnn_arch_x86_sse4_1) {
-      s8_ibilinear_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_s8_ibilinear_ukernel__sse41_u16);
-      s8_ibilinear_config.pixel_tile = 1;
-    } else {
-      s8_ibilinear_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_s8_ibilinear_ukernel__sse2_u8);
-      s8_ibilinear_config.pixel_tile = 1;
+    #if XNN_ENABLE_SSE41
+      if (hardware_config->arch_flags & xnn_arch_x86_sse4_1) {
+        s8_ibilinear_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_s8_ibilinear_ukernel__sse41_u16);
+        s8_ibilinear_config.pixel_tile = 1;
+      } else
+    #endif
+    #if XNN_ENABLE_SSE2
+      if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
+        s8_ibilinear_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_s8_ibilinear_ukernel__sse2_u8);
+        s8_ibilinear_config.pixel_tile = 1;
+      } else
+    #endif
+    {
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     s8_ibilinear_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_s8_ibilinear_ukernel__wasmsimd_dot16x2_u8);
@@ -156,12 +163,19 @@ static void init_u8_ibilinear_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
-    if (hardware_config->arch_flags & xnn_arch_x86_sse4_1) {
-      u8_ibilinear_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_u8_ibilinear_ukernel__sse41_u16);
-      u8_ibilinear_config.pixel_tile = 1;
-    } else {
-      u8_ibilinear_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_u8_ibilinear_ukernel__sse2_u8);
-      u8_ibilinear_config.pixel_tile = 1;
+    #if XNN_ENABLE_SSE41
+      if (hardware_config->arch_flags & xnn_arch_x86_sse4_1) {
+        u8_ibilinear_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_u8_ibilinear_ukernel__sse41_u16);
+        u8_ibilinear_config.pixel_tile = 1;
+      } else
+    #endif
+    #if XNN_ENABLE_SSE2
+      if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
+        u8_ibilinear_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_u8_ibilinear_ukernel__sse2_u8);
+        u8_ibilinear_config.pixel_tile = 1;
+      } else
+    #endif
+    {
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     u8_ibilinear_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_u8_ibilinear_ukernel__wasmsimd_dot16x2_u8);

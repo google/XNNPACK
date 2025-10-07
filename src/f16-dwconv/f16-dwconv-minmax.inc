@@ -4,10 +4,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+
 // Arguments are:
 // XNN_UKERNEL(arch, name, c_block, pipelined, cr, kr, datatype, weights_type,params_type, init_fn)
-
-
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 XNN_UKERNEL(xnn_arch_arm_neon_fp16_arith, xnn_f16_dwconv_minmax_ukernel_3p8c__neonfp16arith, 8, false, 8, 3, xnn_float16, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_arm_neon_fp16_arith, xnn_f16_dwconv_minmax_ukernel_3p8c__neonfp16arith_acc2, 8, false, 8, 3, xnn_float16, xnn_float16, struct xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)

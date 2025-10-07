@@ -1,9 +1,9 @@
+// clang-format off
 // Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-// clang-format off
 
 #ifndef XNN_QUANTIZED
 #define XNN_QUANTIZED(T) T
@@ -22,15 +22,21 @@ XNN_UKERNEL(xnn_arch_riscv_vector, xnn_qs8_vlrelu_ukernel__rvv_u1v, 1, true, XNN
 XNN_UKERNEL(xnn_arch_riscv_vector, xnn_qs8_vlrelu_ukernel__rvv_u2v, 2, true, XNN_QUANTIZED(int8_t), struct xnn_qs8_lrelu_params, xnn_init_qs8_lrelu_scalar_params)
 #endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_UKERNEL(xnn_arch_none, xnn_qs8_vlrelu_ukernel__sse2_u16, 16, false, XNN_QUANTIZED(int8_t), struct xnn_qs8_lrelu_params, xnn_init_qs8_lrelu_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_qs8_vlrelu_ukernel__sse2_u32, 32, false, XNN_QUANTIZED(int8_t), struct xnn_qs8_lrelu_params, xnn_init_qs8_lrelu_scalar_params)
+#if XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_qs8_vlrelu_ukernel__sse2_u16, 16, false, XNN_QUANTIZED(int8_t), struct xnn_qs8_lrelu_params, xnn_init_qs8_lrelu_scalar_params)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_qs8_vlrelu_ukernel__sse2_u32, 32, false, XNN_QUANTIZED(int8_t), struct xnn_qs8_lrelu_params, xnn_init_qs8_lrelu_scalar_params)
+#endif  // XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ENABLE_SSSE3 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_ssse3, xnn_qs8_vlrelu_ukernel__ssse3_u16, 16, false, XNN_QUANTIZED(int8_t), struct xnn_qs8_lrelu_params, xnn_init_qs8_lrelu_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_ssse3, xnn_qs8_vlrelu_ukernel__ssse3_u32, 32, false, XNN_QUANTIZED(int8_t), struct xnn_qs8_lrelu_params, xnn_init_qs8_lrelu_scalar_params)
+#endif  // XNN_ENABLE_SSSE3 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ENABLE_SSE41 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qs8_vlrelu_ukernel__sse41_u8, 8, false, XNN_QUANTIZED(int8_t), struct xnn_qs8_lrelu_params, xnn_init_qs8_lrelu_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qs8_vlrelu_ukernel__sse41_u16, 16, false, XNN_QUANTIZED(int8_t), struct xnn_qs8_lrelu_params, xnn_init_qs8_lrelu_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qs8_vlrelu_ukernel__sse41_u32, 32, false, XNN_QUANTIZED(int8_t), struct xnn_qs8_lrelu_params, xnn_init_qs8_lrelu_scalar_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_SSE41 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_qs8_vlrelu_ukernel__avx_u8, 8, false, XNN_QUANTIZED(int8_t), struct xnn_qs8_lrelu_params, xnn_init_qs8_lrelu_scalar_params)

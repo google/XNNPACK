@@ -46,9 +46,13 @@ static void init_x8_lut_config(void) {
         x8_lut_config.microkernel = xnn_x8_lut_ukernel__avx_u64;
       } else
     #endif
+    #if XNN_ENABLE_SSSE3
+      if (hardware_config->arch_flags & xnn_arch_x86_ssse3) {
+        // Note: SSSE3 version is usually slower than scalar
+        x8_lut_config.microkernel = xnn_x8_lut_ukernel__scalar_u4;
+      } else
+    #endif
     {
-      // Note: SSSE3 version is usually slower than scalar
-      x8_lut_config.microkernel = xnn_x8_lut_ukernel__scalar_u4;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();

@@ -4,6 +4,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+
 #ifndef XNN_QUANTIZED
 #define XNN_QUANTIZED(T) T
 #define XNN_DEFINED_QUANTIZED
@@ -14,10 +15,13 @@
 XNN_UKERNEL(xnn_arch_arm_neon, xnn_s8_vclamp_ukernel__neon_u64, 64, false, XNN_QUANTIZED(int8_t), struct xnn_s8_minmax_params, xnn_init_qs8_clamp_scalar_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_UKERNEL(xnn_arch_none, xnn_s8_vclamp_ukernel__sse2_u64, 64, false, XNN_QUANTIZED(int8_t), struct xnn_s8_minmax_params, xnn_init_qs8_clamp_scalar_params)
+#if XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_s8_vclamp_ukernel__sse2_u64, 64, false, XNN_QUANTIZED(int8_t), struct xnn_s8_minmax_params, xnn_init_qs8_clamp_scalar_params)
+#endif  // XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ENABLE_SSE41 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_s8_vclamp_ukernel__sse41_u64, 64, false, XNN_QUANTIZED(int8_t), struct xnn_s8_minmax_params, xnn_init_qs8_clamp_scalar_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_SSE41 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ENABLE_AVX2 && (XNN_ARCH_X86_64 || XNN_ARCH_X86)
 XNN_UKERNEL(xnn_arch_x86_avx2, xnn_s8_vclamp_ukernel__avx2_u128, 128, false, XNN_QUANTIZED(int8_t), struct xnn_s8_minmax_params, xnn_init_qs8_clamp_scalar_params)

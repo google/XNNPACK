@@ -116,11 +116,14 @@ static void init_s8_rmax_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
-    if (hardware_config->arch_flags & xnn_arch_x86_sse4_1) {
-      s8_rmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_s8_rmax_ukernel__sse41_u32_acc2);
-      s8_rmax_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_s8_rdmax_ukernel_2p2x__sse41_u32);
-      s8_rmax_config.rd_width = 32;
-    } else {
+    #if XNN_ENABLE_SSE41
+      if (hardware_config->arch_flags & xnn_arch_x86_sse4_1) {
+        s8_rmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_s8_rmax_ukernel__sse41_u32_acc2);
+        s8_rmax_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_s8_rdmax_ukernel_2p2x__sse41_u32);
+        s8_rmax_config.rd_width = 32;
+      } else
+    #endif
+    {
       s8_rmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_s8_rmax_ukernel__scalar_u2_acc2);
       s8_rmax_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_s8_rdmax_ukernel_2p2x__scalar_u2);
       s8_rmax_config.rd_width = 2;
@@ -162,9 +165,12 @@ static void init_s8_rminmax_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
-    if (hardware_config->arch_flags & xnn_arch_x86_sse4_1) {
-      s8_rminmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_s8_rminmax_ukernel__sse41_u32_acc2);
-    } else {
+    #if XNN_ENABLE_SSE41
+      if (hardware_config->arch_flags & xnn_arch_x86_sse4_1) {
+        s8_rminmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_s8_rminmax_ukernel__sse41_u32_acc2);
+      } else
+    #endif
+    {
       s8_rminmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_s8_rminmax_ukernel__scalar_u2_acc2);
     }
   #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
@@ -202,11 +208,14 @@ static void init_s8_rmin_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
-    if (hardware_config->arch_flags & xnn_arch_x86_sse4_1) {
-      s8_rmin_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_s8_rmin_ukernel__sse41_u32_acc2);
-      s8_rmin_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_s8_rdmin_ukernel_2p2x__sse41_u32);
-      s8_rmin_config.rd_width = 32;
-    } else {
+    #if XNN_ENABLE_SSE41
+      if (hardware_config->arch_flags & xnn_arch_x86_sse4_1) {
+        s8_rmin_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_s8_rmin_ukernel__sse41_u32_acc2);
+        s8_rmin_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_s8_rdmin_ukernel_2p2x__sse41_u32);
+        s8_rmin_config.rd_width = 32;
+      } else
+    #endif
+    {
       s8_rmin_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_s8_rmin_ukernel__scalar_u2_acc2);
       s8_rmin_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_s8_rdmin_ukernel_2p2x__scalar_u2);
       s8_rmin_config.rd_width = 2;
@@ -251,9 +260,16 @@ static void init_u8_rmax_config(void) {
     u8_rmax_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_u8_rdmax_ukernel_2p2x__neon_u32);
     u8_rmax_config.rd_width = 32;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    u8_rmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_u8_rmax_ukernel__sse2_u32_acc2);
-    u8_rmax_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_u8_rdmax_ukernel_2p2x__sse2_u32);
-    u8_rmax_config.rd_width = 32;
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    (void) hardware_config;  // May be unused.
+    #if XNN_ENABLE_SSE2
+      if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
+        u8_rmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_u8_rmax_ukernel__sse2_u32_acc2);
+        u8_rmax_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_u8_rdmax_ukernel_2p2x__sse2_u32);
+        u8_rmax_config.rd_width = 32;
+      }
+    #endif
   #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -288,7 +304,14 @@ static void init_u8_rminmax_config(void) {
   #elif XNN_ARCH_ARM64
     u8_rminmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_u8_rminmax_ukernel__neon_u32_acc2);
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    u8_rminmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_u8_rminmax_ukernel__sse2_u32_acc2);
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    (void) hardware_config;  // May be unused.
+    #if XNN_ENABLE_SSE2
+      if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
+        u8_rminmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_u8_rminmax_ukernel__sse2_u32_acc2);
+      }
+    #endif
   #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -321,9 +344,16 @@ static void init_u8_rmin_config(void) {
     u8_rmin_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_u8_rdmin_ukernel_2p2x__neon_u32);
     u8_rmin_config.rd_width = 32;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    u8_rmin_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_u8_rmin_ukernel__sse2_u32_acc2);
-    u8_rmin_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_u8_rdmin_ukernel_2p2x__sse2_u32);
-    u8_rmin_config.rd_width = 32;
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    (void) hardware_config;  // May be unused.
+    #if XNN_ENABLE_SSE2
+      if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
+        u8_rmin_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_u8_rmin_ukernel__sse2_u32_acc2);
+        u8_rmin_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_u8_rdmin_ukernel_2p2x__sse2_u32);
+        u8_rmin_config.rd_width = 32;
+      }
+    #endif
   #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -411,9 +441,11 @@ static void init_qs8_rsum_config(void) {
         qs8_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_qs8_rsum_ukernel__avx2_u64_acc2);
       } else
     #endif
-    if (hardware_config->arch_flags & xnn_arch_x86_ssse3) {
-      qs8_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_qs8_rsum_ukernel__ssse3_u32_acc2);
-    }
+    #if XNN_ENABLE_SSSE3
+      if (hardware_config->arch_flags & xnn_arch_x86_ssse3) {
+        qs8_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_qs8_rsum_ukernel__ssse3_u32_acc2);
+      }
+    #endif
     #if XNN_ENABLE_AVX512SKX
       if (hardware_config->arch_flags & xnn_arch_x86_avx512skx) {
         qs8_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_qs8_rdsum_ukernel_7p7x__avx512skx_u64);
@@ -426,10 +458,13 @@ static void init_qs8_rsum_config(void) {
         qs8_rsum_config.rd_width = 64;
       } else
     #endif
-    if (hardware_config->arch_flags & xnn_arch_x86_sse4_1) {
-      qs8_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_qs8_rdsum_ukernel_7p7x__sse41_u64);
-      qs8_rsum_config.rd_width = 64;
-    } else {
+    #if XNN_ENABLE_SSE41
+      if (hardware_config->arch_flags & xnn_arch_x86_sse4_1) {
+        qs8_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_qs8_rdsum_ukernel_7p7x__sse41_u64);
+        qs8_rsum_config.rd_width = 64;
+      } else
+    #endif
+    {
       qs8_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_qs8_rdsum_ukernel_7p7x__scalar_u4);
       qs8_rsum_config.rd_width = 4;
     }
@@ -483,13 +518,21 @@ static void init_qu8_rsum_config(void) {
         qu8_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_qu8_rsum_ukernel__avx2_u64_acc2);
       } else
     #endif
+    #if XNN_ENABLE_SSE2
+      if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
+        qu8_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_qu8_rsum_ukernel__sse2_u32_acc2);
+      } else
+    #endif
     {
-      qu8_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_qu8_rsum_ukernel__sse2_u32_acc2);
+      qu8_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_qu8_rsum_ukernel__scalar_u4);
     }
-    if (hardware_config->arch_flags & xnn_arch_x86_ssse3) {
-      qu8_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_qu8_rdsum_ukernel_7p7x__ssse3_u64);
-      qu8_rsum_config.rd_width = 64;
-    } else {
+    #if XNN_ENABLE_SSSE3
+      if (hardware_config->arch_flags & xnn_arch_x86_ssse3) {
+        qu8_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_qu8_rdsum_ukernel_7p7x__ssse3_u64);
+        qu8_rsum_config.rd_width = 64;
+    } else
+    #endif
+    {
       qu8_rsum_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_qu8_rdsum_ukernel_7p7x__scalar_u4);
       qu8_rsum_config.rd_width = 4;
     }
@@ -760,9 +803,11 @@ static void init_f32_rmax_config(void) {
         f32_rmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rmax_ukernel__avx_u32_acc4);
       } else
     #endif
-    {
-      f32_rmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rmax_ukernel__sse_u16_acc4);
-    }
+    #if XNN_ENABLE_SSE
+      if (hardware_config->arch_flags & xnn_arch_x86_sse) {
+        f32_rmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rmax_ukernel__sse_u16_acc4);
+      }
+    #endif
     #if XNN_ENABLE_AVX512F
       if (hardware_config->arch_flags & xnn_arch_x86_avx512f) {
         f32_rmax_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdmax_ukernel_2p2x__avx512f_u32);
@@ -775,10 +820,12 @@ static void init_f32_rmax_config(void) {
         f32_rmax_config.rd_width = 32;
       } else
     #endif
-    {
-      f32_rmax_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdmax_ukernel_2p2x__sse2_u32);
-      f32_rmax_config.rd_width = 32;
-    }
+    #if XNN_ENABLE_SSE2
+      if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
+        f32_rmax_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdmax_ukernel_2p2x__sse2_u32);
+        f32_rmax_config.rd_width = 32;
+      }
+    #endif
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_rmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rmax_ukernel__wasmsimd_pminmax_u16_acc4);
     f32_rmax_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdmax_ukernel_2p2x__wasmsimd_u32);
@@ -830,9 +877,11 @@ static void init_f32_rminmax_config(void) {
         f32_rminmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rminmax_ukernel__avx_u32_acc4);
       } else
     #endif
-    {
-      f32_rminmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rminmax_ukernel__sse_u16_acc4);
-    }
+    #if XNN_ENABLE_SSE
+      if (hardware_config->arch_flags & xnn_arch_x86_sse) {
+        f32_rminmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rminmax_ukernel__sse_u16_acc4);
+      }
+    #endif
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_rminmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rminmax_ukernel__wasmsimd_minmax_u16_acc4);
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
@@ -880,9 +929,11 @@ static void init_f32_rmin_config(void) {
         f32_rmin_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rmin_ukernel__avx_u32_acc4);
       } else
     #endif
-    {
-      f32_rmin_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rmin_ukernel__sse_u16_acc4);
-    }
+    #if XNN_ENABLE_SSE
+      if (hardware_config->arch_flags & xnn_arch_x86_sse) {
+        f32_rmin_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rmin_ukernel__sse_u16_acc4);
+      }
+    #endif
     #if XNN_ENABLE_AVX512F
       if (hardware_config->arch_flags & xnn_arch_x86_avx512f) {
         f32_rmin_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdmin_ukernel_2p2x__avx512f_u32);
@@ -895,10 +946,12 @@ static void init_f32_rmin_config(void) {
         f32_rmin_config.rd_width = 32;
       } else
     #endif
-    {
-      f32_rmin_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdmin_ukernel_2p2x__sse2_u32);
-      f32_rmin_config.rd_width = 32;
-    }
+    #if XNN_ENABLE_SSE2
+      if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
+        f32_rmin_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdmin_ukernel_2p2x__sse2_u32);
+        f32_rmin_config.rd_width = 32;
+      }
+    #endif
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_rmin_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rmin_ukernel__wasmsimd_minmax_u16_acc4);
     f32_rmin_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdmin_ukernel_2p2x__wasmsimd_u32);
@@ -959,11 +1012,13 @@ static void init_f32_rsum_config(void) {
         f32_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum_ukernel__avx_u32_acc4);
       } else
     #endif
-    {
-      // A hypothetical u32_acc8 kernel would produce results numerically
-      // consistent with avx and avx512f.
-      f32_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum_ukernel__sse2_u16_acc4);
-    }
+    #if XNN_ENABLE_SSE2
+      if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
+        // A hypothetical u32_acc8 kernel would produce results numerically
+        // consistent with avx and avx512f.
+        f32_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum_ukernel__sse2_u16_acc4);
+      }
+    #endif
     #if XNN_ENABLE_AVX512F
       if (hardware_config->arch_flags & xnn_arch_x86_avx512f) {
         f32_rsum_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum_ukernel_7p7x__avx512f_u64);
@@ -976,10 +1031,12 @@ static void init_f32_rsum_config(void) {
         f32_rsum_config.rd_width = 32;
       } else
     #endif
-    {
-      f32_rsum_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum_ukernel_7p7x__sse2_u16);
-      f32_rsum_config.rd_width = 16;
-    }
+    #if XNN_ENABLE_SSE2
+      if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
+        f32_rsum_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum_ukernel_7p7x__sse2_u16);
+        f32_rsum_config.rd_width = 16;
+      }
+    #endif
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_rsum_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum_ukernel__wasmsimd_u16_acc4);
     f32_rsum_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_u16);
@@ -1034,33 +1091,27 @@ static void init_f32_rsum2_config(void) {
         // produces numerically consistent results at negligible performance
         // cost.
         f32_rsum2_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum2_ukernel__avx512f_u64_acc4);
-      } else
-    #endif
-    #if XNN_ENABLE_AVX
-      if (hardware_config->arch_flags & xnn_arch_x86_avx) {
-        f32_rsum2_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum2_ukernel__avx_u32_acc4);
-      } else
-    #endif
-    {
-      // A hypothetical u32_acc8 kernel would produce results numerically
-      // consistent with avx and avx512f.
-      f32_rsum2_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum2_ukernel__sse2_u16_acc4);
-    }
-    #if XNN_ENABLE_AVX512F
-      if (hardware_config->arch_flags & xnn_arch_x86_avx512f) {
         f32_rsum2_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum2_ukernel_7p7x__avx512f_u64);
         f32_rsum2_config.rd_width = 64;
       } else
     #endif
     #if XNN_ENABLE_AVX
       if (hardware_config->arch_flags & xnn_arch_x86_avx) {
+        f32_rsum2_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum2_ukernel__avx_u32_acc4);
         f32_rsum2_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum2_ukernel_7p7x__avx_u32);
         f32_rsum2_config.rd_width = 32;
       } else
     #endif
+    #if XNN_ENABLE_SSE2
+      if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
+        // A hypothetical u32_acc8 kernel would produce results numerically
+        // consistent with avx and avx512f.
+        f32_rsum2_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum2_ukernel__sse2_u16_acc4);
+        f32_rsum2_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum2_ukernel_7p7x__sse2_u16);
+        f32_rsum2_config.rd_width = 16;
+      } else
+    #endif
     {
-      f32_rsum2_config.rd_ukernel2 = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL2(xnn_f32_rdsum2_ukernel_7p7x__sse2_u16);
-      f32_rsum2_config.rd_width = 16;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_rsum2_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rsum2_ukernel__wasmsimd_u16_acc4);

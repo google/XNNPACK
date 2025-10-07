@@ -5,7 +5,8 @@
 // LICENSE file in the root directory of this source tree.
 
 
-// arch_flags, ukernel, channel_tile, channel_subtile, channel_round
+// Arguments are:
+// XNN_UKERNEL(arch, ukernel, channel_tile, channel_subtile, channel_round)
 
 XNN_UKERNEL(xnn_arch_none, xnn_x32_packb_gemm_ukernel_2c1s1r__scalar_float, 2, 1, 1)
 XNN_UKERNEL(xnn_arch_none, xnn_x32_packb_gemm_ukernel_2c1s1r__scalar_int, 2, 1, 1)

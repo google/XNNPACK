@@ -10,8 +10,8 @@ XNN_UKERNEL(xnn_arch_arm_neon_fp16_arith, xnn_f16_vneg_ukernel__neonfp16arith_u8
 XNN_UKERNEL(xnn_arch_arm_neon_fp16_arith, xnn_f16_vneg_ukernel__neonfp16arith_u16, 16, false, xnn_float16, struct xnn_f16_default_params, NULL)
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_UKERNEL(xnn_arch_none, xnn_f16_vneg_ukernel__sse2_u8, 8, false, xnn_float16, struct xnn_f16_default_params, NULL)
-XNN_UKERNEL(xnn_arch_none, xnn_f16_vneg_ukernel__sse2_u16, 16, false, xnn_float16, struct xnn_f16_default_params, NULL)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f16_vneg_ukernel__sse2_u8, 8, false, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f16_vneg_ukernel__sse2_u16, 16, false, xnn_float16, struct xnn_f16_default_params, NULL)
+#endif  // XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 

@@ -18,11 +18,11 @@ XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vabs_ukernel__rvv_u4v, 4, true, float
 XNN_UKERNEL(xnn_arch_riscv_vector, xnn_f32_vabs_ukernel__rvv_u8v, 8, true, float, struct xnn_f32_default_params, NULL)
 #endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_UKERNEL(xnn_arch_none, xnn_f32_vabs_ukernel__sse2_u4, 4, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL(xnn_arch_none, xnn_f32_vabs_ukernel__sse2_u8, 8, false, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL(xnn_arch_none, xnn_f32_vabs_ukernel__sse2_u12, 12, false, float, struct xnn_f32_default_params, NULL)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_vabs_ukernel__sse2_u4, 4, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_vabs_ukernel__sse2_u8, 8, false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_vabs_ukernel__sse2_u12, 12, false, float, struct xnn_f32_default_params, NULL)
+#endif  // XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_vabs_ukernel__avx_u8, 8, false, float, struct xnn_f32_default_params, NULL)

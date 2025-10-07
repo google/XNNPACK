@@ -5,8 +5,8 @@
 // LICENSE file in the root directory of this source tree.
 
 
-// arch_flags, ukernel, nr, kr, sr, kblock, nr_scale
-
+// Arguments are:
+// XNN_UKERNEL(arch, ukernel, nr, kr, sr, kblock, nr_scale)
 XNN_UKERNEL(xnn_arch_none, xnn_x8_packw_gemm_goi_ukernel_x2__scalar_u2, 2, 1, 1, 2, 1)
 XNN_UKERNEL(xnn_arch_none, xnn_x8_packw_gemm_goi_ukernel_x4__scalar_u2, 4, 1, 1, 2, 1)
 XNN_UKERNEL(xnn_arch_none, xnn_x8_packw_gemm_goi_ukernel_x8__scalar_u2, 8, 1, 1, 2, 1)

@@ -465,12 +465,14 @@ static void init_f32_vadd_config(void) {
         f32_vadd_config.element_tile = 16;
       } else
     #endif
-    {
-      f32_vadd_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vadd_ukernel__sse_u8);
-      f32_vadd_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vaddc_ukernel__sse_u8);
-      f32_vadd_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vaddc_ukernel__sse_u8);
-      f32_vadd_config.element_tile = 8;
-    }
+    #if XNN_ENABLE_SSE
+      if (hardware_config->arch_flags & xnn_arch_x86_sse) {
+        f32_vadd_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vadd_ukernel__sse_u8);
+        f32_vadd_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vaddc_ukernel__sse_u8);
+        f32_vadd_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vaddc_ukernel__sse_u8);
+        f32_vadd_config.element_tile = 8;
+      }
+    #endif
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_vadd_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vadd_ukernel__wasmsimd_u16);
     f32_vadd_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vaddc_ukernel__wasmsimd_u16);
@@ -540,12 +542,14 @@ static void init_f32_vcopysign_config(void) {
         f32_vcopysign_config.element_tile = 16;
       } else
     #endif
-    {
-      f32_vcopysign_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vcopysign_ukernel__sse2_u8);
-      f32_vcopysign_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vcopysignc_ukernel__sse2_u8);
-      f32_vcopysign_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vrcopysignc_ukernel__sse2_u8);
-      f32_vcopysign_config.element_tile = 8;
-    }
+    #if XNN_ENABLE_SSE2
+      if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
+        f32_vcopysign_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vcopysign_ukernel__sse2_u8);
+        f32_vcopysign_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vcopysignc_ukernel__sse2_u8);
+        f32_vcopysign_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vrcopysignc_ukernel__sse2_u8);
+        f32_vcopysign_config.element_tile = 8;
+      }
+    #endif
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_vcopysign_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vcopysign_ukernel__wasmsimd_u16);
     f32_vcopysign_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vcopysignc_ukernel__wasmsimd_u16);
@@ -609,12 +613,14 @@ static void init_f32_vdiv_config(void) {
         f32_vdiv_config.element_tile = 16;
       } else
     #endif
-    {
-      f32_vdiv_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vdiv_ukernel__sse_u8);
-      f32_vdiv_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vdivc_ukernel__sse_u8);
-      f32_vdiv_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vrdivc_ukernel__sse_u8);
-      f32_vdiv_config.element_tile = 8;
-    }
+    #if XNN_ENABLE_SSE
+      if (hardware_config->arch_flags & xnn_arch_x86_sse) {
+        f32_vdiv_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vdiv_ukernel__sse_u8);
+        f32_vdiv_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vdivc_ukernel__sse_u8);
+        f32_vdiv_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vrdivc_ukernel__sse_u8);
+        f32_vdiv_config.element_tile = 8;
+      }
+    #endif
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_vdiv_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vdiv_ukernel__wasmsimd_u16);
     f32_vdiv_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vdivc_ukernel__wasmsimd_u16);
@@ -684,12 +690,14 @@ static void init_f32_vmax_config(void) {
         f32_vmax_config.element_tile = 16;
       } else
     #endif
-    {
-      f32_vmax_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vmax_ukernel__sse_u8);
-      f32_vmax_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vmaxc_ukernel__sse_u8);
-      f32_vmax_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vmaxc_ukernel__sse_u8);
-      f32_vmax_config.element_tile = 8;
-    }
+    #if XNN_ENABLE_SSE
+      if (hardware_config->arch_flags & xnn_arch_x86_sse) {
+        f32_vmax_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vmax_ukernel__sse_u8);
+        f32_vmax_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vmaxc_ukernel__sse_u8);
+        f32_vmax_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vmaxc_ukernel__sse_u8);
+        f32_vmax_config.element_tile = 8;
+      }
+    #endif
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -769,12 +777,14 @@ static void init_f32_vmin_config(void) {
         f32_vmin_config.element_tile = 16;
       } else
     #endif
-    {
-      f32_vmin_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vmin_ukernel__sse_u8);
-      f32_vmin_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vminc_ukernel__sse_u8);
-      f32_vmin_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vminc_ukernel__sse_u8);
-      f32_vmin_config.element_tile = 8;
-    }
+    #if XNN_ENABLE_SSE
+      if (hardware_config->arch_flags & xnn_arch_x86_sse) {
+        f32_vmin_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vmin_ukernel__sse_u8);
+        f32_vmin_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vminc_ukernel__sse_u8);
+        f32_vmin_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vminc_ukernel__sse_u8);
+        f32_vmin_config.element_tile = 8;
+      }
+    #endif
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -854,12 +864,14 @@ static void init_f32_vmul_config(void) {
         f32_vmul_config.element_tile = 16;
       } else
     #endif
-    {
-      f32_vmul_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vmul_ukernel__sse_u8);
-      f32_vmul_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vmulc_ukernel__sse_u8);
-      f32_vmul_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vmulc_ukernel__sse_u8);
-      f32_vmul_config.element_tile = 8;
-    }
+    #if XNN_ENABLE_SSE
+      if (hardware_config->arch_flags & xnn_arch_x86_sse) {
+        f32_vmul_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vmul_ukernel__sse_u8);
+        f32_vmul_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vmulc_ukernel__sse_u8);
+        f32_vmul_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vmulc_ukernel__sse_u8);
+        f32_vmul_config.element_tile = 8;
+      }
+    #endif
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_vmul_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vmul_ukernel__wasmsimd_u16);
     f32_vmul_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vmulc_ukernel__wasmsimd_u16);
@@ -929,12 +941,14 @@ static void init_f32_vprelu_config(void) {
         f32_vprelu_config.element_tile = 16;
       } else
     #endif
-    {
-      f32_vprelu_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vprelu_ukernel__sse2_u8);
-      f32_vprelu_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vpreluc_ukernel__sse2_u8);
-      f32_vprelu_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vrpreluc_ukernel__sse2_u8);
-      f32_vprelu_config.element_tile = 8;
-    }
+    #if XNN_ENABLE_SSE2
+      if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
+        f32_vprelu_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vprelu_ukernel__sse2_u8);
+        f32_vprelu_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vpreluc_ukernel__sse2_u8);
+        f32_vprelu_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vrpreluc_ukernel__sse2_u8);
+        f32_vprelu_config.element_tile = 8;
+      }
+    #endif
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_vprelu_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vprelu_ukernel__wasmsimd_u16);
     f32_vprelu_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vpreluc_ukernel__wasmsimd_u16);
@@ -998,12 +1012,14 @@ static void init_f32_vsub_config(void) {
         f32_vsub_config.element_tile = 16;
       } else
     #endif
-    {
-      f32_vsub_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vsub_ukernel__sse_u8);
-      f32_vsub_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vsubc_ukernel__sse_u8);
-      f32_vsub_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vrsubc_ukernel__sse_u8);
-      f32_vsub_config.element_tile = 8;
-    }
+    #if XNN_ENABLE_SSE
+      if (hardware_config->arch_flags & xnn_arch_x86_sse) {
+        f32_vsub_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vsub_ukernel__sse_u8);
+        f32_vsub_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vsubc_ukernel__sse_u8);
+        f32_vsub_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vrsubc_ukernel__sse_u8);
+        f32_vsub_config.element_tile = 8;
+      }
+    #endif
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_vsub_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vsub_ukernel__wasmsimd_u16);
     f32_vsub_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vsubc_ukernel__wasmsimd_u16);
@@ -1073,12 +1089,14 @@ static void init_f32_vsqrdiff_config(void) {
         f32_vsqrdiff_config.element_tile = 16;
       } else
     #endif
-    {
-      f32_vsqrdiff_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vsqrdiff_ukernel__sse_u8);
-      f32_vsqrdiff_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vsqrdiffc_ukernel__sse_u8);
-      f32_vsqrdiff_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vsqrdiffc_ukernel__sse_u8);
-      f32_vsqrdiff_config.element_tile = 8;
-    }
+    #if XNN_ENABLE_SSE
+      if (hardware_config->arch_flags & xnn_arch_x86_sse) {
+        f32_vsqrdiff_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vsqrdiff_ukernel__sse_u8);
+        f32_vsqrdiff_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vsqrdiffc_ukernel__sse_u8);
+        f32_vsqrdiff_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vsqrdiffc_ukernel__sse_u8);
+        f32_vsqrdiff_config.element_tile = 8;
+      }
+    #endif
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_vsqrdiff_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vsqrdiff_ukernel__wasmsimd_u16);
     f32_vsqrdiff_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vsqrdiffc_ukernel__wasmsimd_u16);
@@ -1162,18 +1180,25 @@ static void init_qs8_vadd_config(void) {
         qs8_vadd_config.element_tile = 8;
       } else
     #endif
-    if (hardware_config->arch_flags & xnn_arch_x86_sse4_1) {
-      qs8_vadd_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vadd_minmax_ukernel__sse41_mul16_ld64_u8);
-      qs8_vadd_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vaddc_minmax_ukernel__sse41_mul16_ld64_u8);
-      qs8_vadd_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vaddc_minmax_ukernel__sse41_mul16_ld64_u8);
-      qs8_vadd_config.init = (xnn_init_binary_params_fn) xnn_init_qs8_add_minmax_scalar_params;
-      qs8_vadd_config.element_tile = 8;
-    } else {
-      qs8_vadd_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vadd_minmax_ukernel__sse2_mul16_ld64_u8);
-      qs8_vadd_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vaddc_minmax_ukernel__sse2_mul16_ld64_u8);
-      qs8_vadd_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vaddc_minmax_ukernel__sse2_mul16_ld64_u8);
-      qs8_vadd_config.init = (xnn_init_binary_params_fn) xnn_init_qs8_add_minmax_scalar_params;
-      qs8_vadd_config.element_tile = 8;
+    #if XNN_ENABLE_SSE41
+      if (hardware_config->arch_flags & xnn_arch_x86_sse4_1) {
+        qs8_vadd_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vadd_minmax_ukernel__sse41_mul16_ld64_u8);
+        qs8_vadd_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vaddc_minmax_ukernel__sse41_mul16_ld64_u8);
+        qs8_vadd_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vaddc_minmax_ukernel__sse41_mul16_ld64_u8);
+        qs8_vadd_config.init = (xnn_init_binary_params_fn) xnn_init_qs8_add_minmax_scalar_params;
+        qs8_vadd_config.element_tile = 8;
+      } else
+    #endif
+    #if XNN_ENABLE_SSE2
+      if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
+        qs8_vadd_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vadd_minmax_ukernel__sse2_mul16_ld64_u8);
+        qs8_vadd_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vaddc_minmax_ukernel__sse2_mul16_ld64_u8);
+        qs8_vadd_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vaddc_minmax_ukernel__sse2_mul16_ld64_u8);
+        qs8_vadd_config.init = (xnn_init_binary_params_fn) xnn_init_qs8_add_minmax_scalar_params;
+        qs8_vadd_config.element_tile = 8;
+      } else
+    #endif
+    {
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     qs8_vadd_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vadd_minmax_ukernel__wasmsimd_u32);
@@ -1244,18 +1269,25 @@ static void init_qs8_vmul_config(void) {
         qs8_vmul_config.element_tile = 16;
       } else
     #endif
-    if (hardware_config->arch_flags & xnn_arch_x86_sse4_1) {
-      qs8_vmul_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vmul_minmax_fp32_ukernel__sse41_mul16_ld64_u16);
-      qs8_vmul_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vmulc_minmax_fp32_ukernel__sse41_mul16_ld64_u16);
-      qs8_vmul_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vmulc_minmax_fp32_ukernel__sse41_mul16_ld64_u16);
-      qs8_vmul_config.init = (xnn_init_binary_params_fn) xnn_init_qs8_mul_minmax_scalar_params;
-      qs8_vmul_config.element_tile = 16;
-    } else {
-      qs8_vmul_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vmul_minmax_fp32_ukernel__sse2_mul16_ld64_u8);
-      qs8_vmul_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vmulc_minmax_fp32_ukernel__sse2_mul16_ld64_u8);
-      qs8_vmul_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vmulc_minmax_fp32_ukernel__sse2_mul16_ld64_u8);
-      qs8_vmul_config.init = (xnn_init_binary_params_fn) xnn_init_qs8_mul_minmax_scalar_params;
-      qs8_vmul_config.element_tile = 8;
+    #if XNN_ENABLE_SSE41
+      if (hardware_config->arch_flags & xnn_arch_x86_sse4_1) {
+        qs8_vmul_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vmul_minmax_fp32_ukernel__sse41_mul16_ld64_u16);
+        qs8_vmul_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vmulc_minmax_fp32_ukernel__sse41_mul16_ld64_u16);
+        qs8_vmul_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vmulc_minmax_fp32_ukernel__sse41_mul16_ld64_u16);
+        qs8_vmul_config.init = (xnn_init_binary_params_fn) xnn_init_qs8_mul_minmax_scalar_params;
+        qs8_vmul_config.element_tile = 16;
+      } else
+    #endif
+    #if XNN_ENABLE_SSE2
+      if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
+        qs8_vmul_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vmul_minmax_fp32_ukernel__sse2_mul16_ld64_u8);
+        qs8_vmul_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vmulc_minmax_fp32_ukernel__sse2_mul16_ld64_u8);
+        qs8_vmul_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vmulc_minmax_fp32_ukernel__sse2_mul16_ld64_u8);
+        qs8_vmul_config.init = (xnn_init_binary_params_fn) xnn_init_qs8_mul_minmax_scalar_params;
+        qs8_vmul_config.element_tile = 8;
+      } else
+    #endif
+    {
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     qs8_vmul_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qs8_vmul_minmax_fp32_ukernel__wasmsimd_mul32_ld64_u8);
@@ -1364,18 +1396,25 @@ static void init_qu8_vadd_config(void) {
         qu8_vadd_config.element_tile = 8;
       } else
     #endif
-    if (hardware_config->arch_flags & xnn_arch_x86_sse4_1) {
-      qu8_vadd_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vadd_minmax_ukernel__sse41_mul16_ld64_u8);
-      qu8_vadd_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vaddc_minmax_ukernel__sse41_mul16_ld64_u8);
-      qu8_vadd_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vaddc_minmax_ukernel__sse41_mul16_ld64_u8);
-      qu8_vadd_config.init = (xnn_init_binary_params_fn) xnn_init_qu8_add_minmax_scalar_params;
-      qu8_vadd_config.element_tile = 8;
-    } else {
-      qu8_vadd_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vadd_minmax_ukernel__sse2_mul16_ld64_u8);
-      qu8_vadd_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vaddc_minmax_ukernel__sse2_mul16_ld64_u8);
-      qu8_vadd_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vaddc_minmax_ukernel__sse2_mul16_ld64_u8);
-      qu8_vadd_config.init = (xnn_init_binary_params_fn) xnn_init_qu8_add_minmax_scalar_params;
-      qu8_vadd_config.element_tile = 8;
+    #if XNN_ENABLE_SSE41
+      if (hardware_config->arch_flags & xnn_arch_x86_sse4_1) {
+        qu8_vadd_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vadd_minmax_ukernel__sse41_mul16_ld64_u8);
+        qu8_vadd_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vaddc_minmax_ukernel__sse41_mul16_ld64_u8);
+        qu8_vadd_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vaddc_minmax_ukernel__sse41_mul16_ld64_u8);
+        qu8_vadd_config.init = (xnn_init_binary_params_fn) xnn_init_qu8_add_minmax_scalar_params;
+        qu8_vadd_config.element_tile = 8;
+      } else
+    #endif
+    #if XNN_ENABLE_SSE2
+      if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
+        qu8_vadd_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vadd_minmax_ukernel__sse2_mul16_ld64_u8);
+        qu8_vadd_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vaddc_minmax_ukernel__sse2_mul16_ld64_u8);
+        qu8_vadd_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vaddc_minmax_ukernel__sse2_mul16_ld64_u8);
+        qu8_vadd_config.init = (xnn_init_binary_params_fn) xnn_init_qu8_add_minmax_scalar_params;
+        qu8_vadd_config.element_tile = 8;
+      } else
+    #endif
+    {
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     qu8_vadd_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vadd_minmax_ukernel__wasmsimd_u32);
@@ -1436,18 +1475,25 @@ static void init_qu8_vmul_config(void) {
         qu8_vmul_config.element_tile = 16;
       } else
     #endif
-    if (hardware_config->arch_flags & xnn_arch_x86_sse4_1) {
-      qu8_vmul_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vmul_minmax_fp32_ukernel__sse41_mul16_ld64_u16);
-      qu8_vmul_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vmulc_minmax_fp32_ukernel__sse41_mul16_ld64_u16);
-      qu8_vmul_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vmulc_minmax_fp32_ukernel__sse41_mul16_ld64_u16);
-      qu8_vmul_config.init = (xnn_init_binary_params_fn) xnn_init_qu8_mul_minmax_scalar_params;
-      qu8_vmul_config.element_tile = 16;
-    } else {
-      qu8_vmul_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vmul_minmax_fp32_ukernel__sse2_mul16_ld64_u8);
-      qu8_vmul_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vmulc_minmax_fp32_ukernel__sse2_mul16_ld64_u8);
-      qu8_vmul_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vmulc_minmax_fp32_ukernel__sse2_mul16_ld64_u8);
-      qu8_vmul_config.init = (xnn_init_binary_params_fn) xnn_init_qu8_mul_minmax_scalar_params;
-      qu8_vmul_config.element_tile = 8;
+    #if XNN_ENABLE_SSE41
+      if (hardware_config->arch_flags & xnn_arch_x86_sse4_1) {
+        qu8_vmul_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vmul_minmax_fp32_ukernel__sse41_mul16_ld64_u16);
+        qu8_vmul_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vmulc_minmax_fp32_ukernel__sse41_mul16_ld64_u16);
+        qu8_vmul_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vmulc_minmax_fp32_ukernel__sse41_mul16_ld64_u16);
+        qu8_vmul_config.init = (xnn_init_binary_params_fn) xnn_init_qu8_mul_minmax_scalar_params;
+        qu8_vmul_config.element_tile = 16;
+      } else
+    #endif
+    #if XNN_ENABLE_SSE2
+      if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
+        qu8_vmul_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vmul_minmax_fp32_ukernel__sse2_mul16_ld64_u8);
+        qu8_vmul_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vmulc_minmax_fp32_ukernel__sse2_mul16_ld64_u8);
+        qu8_vmul_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vmulc_minmax_fp32_ukernel__sse2_mul16_ld64_u8);
+        qu8_vmul_config.init = (xnn_init_binary_params_fn) xnn_init_qu8_mul_minmax_scalar_params;
+        qu8_vmul_config.element_tile = 8;
+      } else
+    #endif
+    {
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     qu8_vmul_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_qu8_vmul_minmax_fp32_ukernel__wasmsimd_mul32_ld64_u8);

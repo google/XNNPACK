@@ -4,6 +4,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+
 XNN_TRANSPOSE_UKERNEL(xnn_arch_none, xnn_x8_transposec_ukernel__1x2_scalar_int, 8, uint8_t, 1, 2)
 XNN_TRANSPOSE_UKERNEL(xnn_arch_none, xnn_x8_transposec_ukernel__1x4_scalar_int, 8, uint8_t, 1, 4)
 XNN_TRANSPOSE_UKERNEL(xnn_arch_none, xnn_x8_transposec_ukernel__2x1_scalar_int, 8, uint8_t, 2, 1)
@@ -13,10 +14,10 @@ XNN_TRANSPOSE_UKERNEL(xnn_arch_none, xnn_x8_transposec_ukernel__4x1_scalar_int, 
 XNN_TRANSPOSE_UKERNEL(xnn_arch_none, xnn_x8_transposec_ukernel__4x2_scalar_int, 8, uint8_t, 4, 2)
 XNN_TRANSPOSE_UKERNEL(xnn_arch_none, xnn_x8_transposec_ukernel__4x4_scalar_int, 8, uint8_t, 4, 4)
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_TRANSPOSE_UKERNEL(xnn_arch_none, xnn_x8_transposec_ukernel__16x16_reuse_mov_sse2, 8, uint8_t, 16, 16)
-XNN_TRANSPOSE_UKERNEL(xnn_arch_none, xnn_x8_transposec_ukernel__16x16_reuse_switch_sse2, 8, uint8_t, 16, 16)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_TRANSPOSE_UKERNEL(xnn_arch_x86_sse2, xnn_x8_transposec_ukernel__16x16_reuse_mov_sse2, 8, uint8_t, 16, 16)
+XNN_TRANSPOSE_UKERNEL(xnn_arch_x86_sse2, xnn_x8_transposec_ukernel__16x16_reuse_switch_sse2, 8, uint8_t, 16, 16)
+#endif  // XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ENABLE_AVX2 && (XNN_ARCH_X86_64 || XNN_ARCH_X86)
 XNN_TRANSPOSE_UKERNEL(xnn_arch_x86_avx2, xnn_x8_transposec_ukernel__32x32_reuse_mov_avx2, 8, uint8_t, 32, 32)

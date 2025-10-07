@@ -4,7 +4,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-// arch_flags, ukernel, nr, kr, sr, kblock, nr_scale
+// Arguments are:
+// XNN_UKERNEL(arch, ukernel, nr, kr, sr, kblock, nr_scale)
 
 XNN_UKERNEL(xnn_arch_none, xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_u4, 8, 1, 1, 4, 1)
 XNN_UKERNEL(xnn_arch_none, xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_u4, 16, 1, 1, 4, 1)

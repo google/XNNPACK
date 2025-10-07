@@ -1,9 +1,9 @@
+// clang-format off
 // Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-// clang-format off
 
 // Arguments are:
 // XNN_UKERNEL(arch, name, c_block, pipelined, cr, kr, datatype, weights_type,params_type, init_fn)
@@ -23,20 +23,38 @@ XNN_UKERNEL(xnn_arch_arm_neon, xnn_qu8_dwconv_minmax_fp32_ukernel_25p32c__neon_m
 XNN_UKERNEL(xnn_arch_arm_neon_v8, xnn_qu8_dwconv_minmax_fp32_ukernel_25p32c__neonv8_mul16, 32, false, 32, 25, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_neonv8_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_UKERNEL(xnn_arch_none, xnn_qu8_dwconv_minmax_fp32_ukernel_9p8c__sse2_mul16, 8, false, 8, 9, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
+#if XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_qu8_dwconv_minmax_fp32_ukernel_9p8c__sse2_mul16, 8, false, 8, 9, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
+#endif  // XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ENABLE_SSE41 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qu8_dwconv_minmax_fp32_ukernel_9p8c__sse41_mul16, 8, false, 8, 9, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qu8_dwconv_minmax_fp32_ukernel_9p8c__sse41_mul32, 8, false, 8, 9, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_qu8_dwconv_minmax_fp32_ukernel_9p16c__sse2_mul16, 16, false, 16, 9, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
+#endif  // XNN_ENABLE_SSE41 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+#if XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_qu8_dwconv_minmax_fp32_ukernel_9p16c__sse2_mul16, 16, false, 16, 9, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
+#endif  // XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ENABLE_SSE41 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qu8_dwconv_minmax_fp32_ukernel_9p16c__sse41_mul16, 16, false, 16, 9, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qu8_dwconv_minmax_fp32_ukernel_9p16c__sse41_mul32, 16, false, 16, 9, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_qu8_dwconv_minmax_fp32_ukernel_25p8c__sse2_mul16, 8, false, 8, 25, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
+#endif  // XNN_ENABLE_SSE41 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+#if XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_qu8_dwconv_minmax_fp32_ukernel_25p8c__sse2_mul16, 8, false, 8, 25, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
+#endif  // XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ENABLE_SSE41 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qu8_dwconv_minmax_fp32_ukernel_25p8c__sse41_mul16, 8, false, 8, 25, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qu8_dwconv_minmax_fp32_ukernel_25p8c__sse41_mul32, 8, false, 8, 25, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_qu8_dwconv_minmax_fp32_ukernel_25p16c__sse2_mul16, 16, false, 16, 25, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
+#endif  // XNN_ENABLE_SSE41 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+#if XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_qu8_dwconv_minmax_fp32_ukernel_25p16c__sse2_mul16, 16, false, 16, 25, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
+#endif  // XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ENABLE_SSE41 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qu8_dwconv_minmax_fp32_ukernel_25p16c__sse41_mul16, 16, false, 16, 25, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_sse4_1, xnn_qu8_dwconv_minmax_fp32_ukernel_25p16c__sse41_mul32, 16, false, 16, 25, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
-#endif  //XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_SSE41 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_qu8_dwconv_minmax_fp32_ukernel_9p8c__avx_mul16, 8, false, 8, 9, uint8_t, void, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)

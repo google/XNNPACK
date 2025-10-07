@@ -4,6 +4,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 XNN_UKERNEL(xnn_arch_arm_neon, xnn_f32_rsum_ukernel__neon_u4, 4, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
 XNN_UKERNEL(xnn_arch_arm_neon, xnn_f32_rsum_ukernel__neon_u8_acc2, 8, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
@@ -12,13 +13,13 @@ XNN_UKERNEL(xnn_arch_arm_neon, xnn_f32_rsum_ukernel__neon_u16_acc2, 16, false, f
 XNN_UKERNEL(xnn_arch_arm_neon, xnn_f32_rsum_ukernel__neon_u16_acc4, 16, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_UKERNEL(xnn_arch_none, xnn_f32_rsum_ukernel__sse2_u4, 4, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_f32_rsum_ukernel__sse2_u8_acc2, 8, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_f32_rsum_ukernel__sse2_u12_acc3, 12, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_f32_rsum_ukernel__sse2_u16_acc2, 16, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
-XNN_UKERNEL(xnn_arch_none, xnn_f32_rsum_ukernel__sse2_u16_acc4, 16, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_rsum_ukernel__sse2_u4, 4, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_rsum_ukernel__sse2_u8_acc2, 8, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_rsum_ukernel__sse2_u12_acc3, 12, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_rsum_ukernel__sse2_u16_acc2, 16, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
+XNN_UKERNEL(xnn_arch_x86_sse2, xnn_f32_rsum_ukernel__sse2_u16_acc4, 16, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)
+#endif  // XNN_ENABLE_SSE2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_rsum_ukernel__avx_u8, 8, false, float, float, struct xnn_f32_scale_params, xnn_init_f32_scale_scalar_params)

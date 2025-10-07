@@ -869,15 +869,17 @@ static void init_f32_gemm_config_impl(struct xnn_gemm_config* f32_gemm_config, b
         f32_gemm_config->nr = 16;
       } else
     #endif
-    {
-      f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_1x8__sse_load1);
-      f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_4x8__sse_load1);
-      f32_gemm_config->init.f32 = xnn_init_f32_minmax_scalar_params;
-      f32_gemm_config->pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f32_gemm_gio_w;
-      f32_gemm_config->pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x8__sse2_u4;
-      f32_gemm_config->mr = 4;
-      f32_gemm_config->nr = 8;
-    }
+    #if XNN_ENABLE_SSE2
+      if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
+        f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_1x8__sse_load1);
+        f32_gemm_config->minmax.gemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_4x8__sse_load1);
+        f32_gemm_config->init.f32 = xnn_init_f32_minmax_scalar_params;
+        f32_gemm_config->pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f32_gemm_gio_w;
+        f32_gemm_config->pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x8__sse2_u4;
+        f32_gemm_config->mr = 4;
+        f32_gemm_config->nr = 8;
+      }
+    #endif
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -1370,15 +1372,17 @@ static void init_f32_igemm_config(void) {
         f32_igemm_config.nr = 16;
       } else
     #endif
-    {
-      f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f32_igemm_minmax_ukernel_1x8__sse_load1);
-      f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f32_igemm_minmax_ukernel_4x8__sse_load1);
-      f32_igemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
-      f32_igemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f32_gemm_gio_w;
-      f32_igemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x8__sse2_u4;
-      f32_igemm_config.mr = 4;
-      f32_igemm_config.nr = 8;
-    }
+    #if XNN_ENABLE_SSE2
+      if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
+        f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f32_igemm_minmax_ukernel_1x8__sse_load1);
+        f32_igemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f32_igemm_minmax_ukernel_4x8__sse_load1);
+        f32_igemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+        f32_igemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f32_gemm_gio_w;
+        f32_igemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x8__sse2_u4;
+        f32_igemm_config.mr = 4;
+        f32_igemm_config.nr = 8;
+      }
+    #endif
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -1620,16 +1624,18 @@ static void init_f32_gemm_nr2_config_impl(struct xnn_gemm_config* f32_gemm_nr2_c
         f32_gemm_nr2_config->nr = 8;
       } else
     #endif
-    {
-      f32_gemm_nr2_config->minmax.gemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_4x2c4__sse);
-      f32_gemm_nr2_config->minmax.igemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f32_igemm_minmax_ukernel_4x2c4__sse);
-      f32_gemm_nr2_config->init.f32 = xnn_init_f32_minmax_scalar_params;
-      f32_gemm_nr2_config->pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f32_gemm_gio_w;
-      f32_gemm_nr2_config->pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_u4;
-      f32_gemm_nr2_config->mr = 4;
-      f32_gemm_nr2_config->nr = 2;
-      f32_gemm_nr2_config->log2_kr = 2;
-    }
+    #if XNN_ENABLE_SSE2
+      if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
+        f32_gemm_nr2_config->minmax.gemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_f32_gemm_minmax_ukernel_4x2c4__sse);
+        f32_gemm_nr2_config->minmax.igemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_IGEMM_UKERNEL(xnn_f32_igemm_minmax_ukernel_4x2c4__sse);
+        f32_gemm_nr2_config->init.f32 = xnn_init_f32_minmax_scalar_params;
+        f32_gemm_nr2_config->pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f32_gemm_gio_w;
+        f32_gemm_nr2_config->pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_u4;
+        f32_gemm_nr2_config->mr = 4;
+        f32_gemm_nr2_config->nr = 2;
+        f32_gemm_nr2_config->log2_kr = 2;
+      }
+    #endif
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -2628,7 +2634,6 @@ static void init_qdu8_f32_qb4w_gemm_config(void) {
       }
     #else
       {
-        ;
       }
     #endif
     assert(qdu8_f32_qb4w_gemm_config.mr <= XNN_MAX_MR);
@@ -3120,7 +3125,6 @@ static void init_qdu8_f16_qc8w_gemm_config(void) {
       }
     #else
     {
-      ;
     }
     #endif
     assert(qdu8_f16_qc8w_gemm_config.mr <= XNN_MAX_MR);
@@ -3474,7 +3478,6 @@ static void init_qdu8_f32_qc8w_gemm_config(void) {
       }
     #else
     {
-      ;
     }
     #endif
     assert(qdu8_f32_qc8w_gemm_config.mr <= XNN_MAX_MR);
@@ -3530,7 +3533,6 @@ static void init_qdu8_f32_qc8w_igemm_config(void) {
       }
     #else
     {
-      ;
     }
     #endif
     assert(qdu8_f32_qc8w_igemm_config.mr <= XNN_MAX_MR);

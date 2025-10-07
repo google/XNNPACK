@@ -28,7 +28,14 @@ static void init_xx_fill_config(void) {
   #elif XNN_ARCH_ARM64
     xx_fill_config.ukernel = (xnn_fill_ukernel_fn) xnn_xx_fill_ukernel__neon_u64;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    xx_fill_config.ukernel = (xnn_fill_ukernel_fn) xnn_xx_fill_ukernel__sse2_u64;
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    (void) hardware_config;  // May be unused.
+    #if XNN_ENABLE_SSE2
+      if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
+        xx_fill_config.ukernel = (xnn_fill_ukernel_fn) xnn_xx_fill_ukernel__sse2_u64;
+      }
+    #endif
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     xx_fill_config.ukernel = (xnn_fill_ukernel_fn) xnn_xx_fill_ukernel__wasmsimd_u64;
   #elif XNN_ARCH_RISCV
