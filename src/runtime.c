@@ -528,7 +528,7 @@ static enum xnn_status create_runtime_impl(
 
   const uint32_t optimization_flags =
 #ifdef XNN_SLINKY_ENABLED
-      XNN_FLAG_SLINKY_ENABLED |
+      XNN_FLAG_USE_SLINKY |
 #endif
       XNN_FLAG_HINT_SPARSE_INFERENCE | XNN_FLAG_HINT_FP16_INFERENCE |
       XNN_FLAG_FORCE_FP16_INFERENCE | XNN_FLAG_NO_OPERATOR_FUSION |
@@ -716,7 +716,7 @@ static bool use_slinky(uint32_t flags) {
   // want Slinky enabled, regardless of the runtime flag.
   return true;
 #else
-  return (flags & XNN_FLAG_SLINKY_ENABLED) != 0;
+  return (flags & XNN_FLAG_USE_SLINKY) != 0;
 #endif  // XNN_USE_SLINKY
 }
 #endif  // XNN_SLINKY_ENABLED

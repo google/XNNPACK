@@ -3042,14 +3042,13 @@ enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
   // want Slinky enabled, regardless of the runtime flag
   const bool use_slinky = true;
 #else
-  const bool use_slinky = optimization_flags & XNN_FLAG_SLINKY_ENABLED;
+  const bool use_slinky = optimization_flags & XNN_FLAG_USE_SLINKY;
 #endif
   // If we're using Slinky, don't inline packing functions as Slinky does that
   // automatically.
   if (use_slinky) {
     xnn_log_info(
-        "disabling inlined LHS packing because `XNN_FLAG_SLINKY_ENABLED` is "
-        "set.");
+        "disabling inlined LHS packing because `XNN_FLAG_USE_SLINKY` is set.");
     optimization_flags |= XNN_FLAG_NO_INLINED_LHS_PACKING;
   }
 

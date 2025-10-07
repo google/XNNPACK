@@ -55,7 +55,7 @@ extern "C" {
 #endif
 
 #ifdef XNN_SLINKY_ENABLED
-/// Slinky interface -- unused unless XNN_FLAG_SLINKY_ENABLED is set
+/// Slinky interface -- unused unless XNN_FLAG_USE_SLINKY is set
 struct slinky_pipeline;
 typedef struct slinky_pipeline* slinky_pipeline_t;
 
@@ -515,7 +515,7 @@ struct xnn_runtime {
   bool memory_planned;
 
 #ifdef XNN_SLINKY_ENABLED
-  // Fields used by Slinky -- unused unless XNN_FLAG_SLINKY_ENABLED is set
+  // Fields used by Slinky -- unused unless XNN_FLAG_USE_SLINKY is set
   slinky_pipeline_t slinky_pipeline;
   xnn_threadpool_t xnn_threadpool;
 #endif  // XNN_SLINKY_ENABLED
