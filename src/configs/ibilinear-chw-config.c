@@ -31,14 +31,14 @@ static void init_f16_ibilinear_chw_config(void) {
   #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
+    if (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith) {
       f16_ibilinear_chw_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p8);
       f16_ibilinear_chw_config.channel_tile = 1;
     }
   #elif XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
+    if (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith) {
       f16_ibilinear_chw_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p8);
       f16_ibilinear_chw_config.channel_tile = 1;
     }
@@ -53,7 +53,7 @@ static void init_f32_ibilinear_chw_config(void) {
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
+    if (hardware_config->arch_flags & xnn_arch_arm_neon) {
       f32_ibilinear_chw_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_f32_ibilinear_chw_ukernel__neon_p8);
       f32_ibilinear_chw_config.channel_tile = 1;
     } else {

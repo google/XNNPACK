@@ -32,7 +32,7 @@ static void init_f16_avgpool_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
-    if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
+    if (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith) {
       f16_avgpool_config.ukernel = XNN_INIT_AVGPOOL_UKERNEL(xnn_f16_avgpool_minmax_ukernel_9p__neonfp16arith_u8);
       f16_avgpool_config.init.f16 = xnn_init_f16_scaleminmax_scalar_params;
       f16_avgpool_config.primary_tile = 9;
@@ -43,7 +43,7 @@ static void init_f16_avgpool_config(void) {
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     #if XNN_ENABLE_F16C
-      if ((hardware_config->arch_flags & xnn_arch_x86_f16c)) {
+      if (hardware_config->arch_flags & xnn_arch_x86_f16c) {
         f16_avgpool_config.ukernel = XNN_INIT_AVGPOOL_UKERNEL(xnn_f16_avgpool_minmax_ukernel_9p__f16c_u8);
         f16_avgpool_config.init.f16 = xnn_init_f16_scaleminmax_scalar_params;
         f16_avgpool_config.primary_tile = 9;
@@ -58,7 +58,7 @@ static void init_f32_avgpool_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
-    if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
+    if (hardware_config->arch_flags & xnn_arch_arm_neon) {
       f32_avgpool_config.ukernel = XNN_INIT_AVGPOOL_UKERNEL(xnn_f32_avgpool_minmax_ukernel_9p__neon_u4);
       f32_avgpool_config.init.f32 = xnn_init_f32_scaleminmax_scalar_params;
       f32_avgpool_config.primary_tile = 9;
@@ -79,7 +79,7 @@ static void init_f32_avgpool_config(void) {
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     #if XNN_ENABLE_AVX512F
-      if ((hardware_config->arch_flags & xnn_arch_x86_avx512f)) {
+      if (hardware_config->arch_flags & xnn_arch_x86_avx512f) {
         f32_avgpool_config.ukernel = XNN_INIT_AVGPOOL_UKERNEL(xnn_f32_avgpool_minmax_ukernel_9p__avx512f_u16);
         f32_avgpool_config.init.f32 = xnn_init_f32_scaleminmax_scalar_params;
         f32_avgpool_config.primary_tile = 9;
@@ -87,7 +87,7 @@ static void init_f32_avgpool_config(void) {
       } else
     #endif
     #if XNN_ENABLE_AVX
-      if ((hardware_config->arch_flags & xnn_arch_x86_avx)) {
+      if (hardware_config->arch_flags & xnn_arch_x86_avx) {
         f32_avgpool_config.ukernel = XNN_INIT_AVGPOOL_UKERNEL(xnn_f32_avgpool_minmax_ukernel_9p__avx_u8);
         f32_avgpool_config.init.f32 = xnn_init_f32_scaleminmax_scalar_params;
         f32_avgpool_config.primary_tile = 9;
@@ -108,7 +108,7 @@ static void init_f32_avgpool_config(void) {
   #elif XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if ((hardware_config->arch_flags & xnn_arch_hvx)) {
+    if (hardware_config->arch_flags & xnn_arch_hvx) {
       f32_avgpool_config.ukernel = XNN_INIT_AVGPOOL_UKERNEL(xnn_f32_avgpool_minmax_ukernel_9p__hvx_u32);
       f32_avgpool_config.init.f32 = xnn_init_f32_scaleminmax_scalar_params;
       f32_avgpool_config.primary_tile = 9;

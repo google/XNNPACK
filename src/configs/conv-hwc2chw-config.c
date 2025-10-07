@@ -31,7 +31,7 @@ static void init_f16_conv_hwc2chw_3x3c3s2_config(void) {
   #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
+    if (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith) {
       f16_conv_hwc2chw_3x3c3s2_config.ukernel_with_symm_padding =
         XNN_INIT_CONV_UKERNEL(xnn_f16_conv_hwc2chw_ukernel_3x3s2p1c3x4__neonfp16arith_2x2);
       f16_conv_hwc2chw_3x3c3s2_config.init.f16 = xnn_init_f16_minmax_scalar_params;
@@ -41,7 +41,7 @@ static void init_f16_conv_hwc2chw_3x3c3s2_config(void) {
   #elif XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
+    if (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith) {
       f16_conv_hwc2chw_3x3c3s2_config.ukernel_with_symm_padding =
         XNN_INIT_CONV_UKERNEL(xnn_f16_conv_hwc2chw_ukernel_3x3s2p1c3x4__neonfp16arith_2x2);
       f16_conv_hwc2chw_3x3c3s2_config.init.f16 = xnn_init_f16_minmax_scalar_params;
@@ -55,7 +55,7 @@ static void init_f32_conv_hwc2chw_3x3c3s2_config(void) {
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
+    if (hardware_config->arch_flags & xnn_arch_arm_neon) {
       f32_conv_hwc2chw_3x3c3s2_config.ukernel_with_symm_padding =
         XNN_INIT_CONV_UKERNEL(xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__neon_2x2);
       f32_conv_hwc2chw_3x3c3s2_config.init.f32 = xnn_init_f32_minmax_scalar_params;

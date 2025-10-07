@@ -39,7 +39,7 @@ static void init_transpose_config(void) {
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
 
-    if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
+    if (hardware_config->arch_flags & xnn_arch_arm_neon) {
       transpose_config.copy = XNN_INIT_COPY_UKERNEL(xnn_xx_copy_ukernel__scalar_memcpy);
       transpose_config.x8.const_size_ukernel = XNN_INIT_TRANSPOSEC_UKERNEL(xnn_x8_transposec_ukernel__16x16_reuse_dec_zip_neon);
       transpose_config.x8.tile_size = 32;
@@ -100,12 +100,12 @@ static void init_transpose_config(void) {
     transpose_config.x32.tile_size = 32;
     transpose_config.x64.const_size_ukernel = XNN_INIT_TRANSPOSEC_UKERNEL(xnn_x64_transposec_ukernel__2x2_multi_mov_sse2);
     transpose_config.x64.tile_size = 32;
-    if ((hardware_config->arch_flags & xnn_arch_x86_ssse3)) {
+    if (hardware_config->arch_flags & xnn_arch_x86_ssse3) {
       transpose_config.x24.const_size_ukernel = XNN_INIT_TRANSPOSEC_UKERNEL(xnn_x24_transposec_ukernel__4x4_ssse3);
       transpose_config.x24.tile_size = 32;
     }
     #if XNN_ENABLE_AVX
-      if ((hardware_config->arch_flags & xnn_arch_x86_avx)) {
+      if (hardware_config->arch_flags & xnn_arch_x86_avx) {
         transpose_config.x32.const_size_ukernel = XNN_INIT_TRANSPOSEC_UKERNEL(xnn_x32_transposec_ukernel__8x8_reuse_multi_avx);
         transpose_config.x32.tile_size = 32;
         transpose_config.x64.const_size_ukernel = XNN_INIT_TRANSPOSEC_UKERNEL(xnn_x64_transposec_ukernel__4x4_reuse_multi_avx);
@@ -113,7 +113,7 @@ static void init_transpose_config(void) {
       }
     #endif
     #if XNN_ENABLE_AVX2
-      if ((hardware_config->arch_flags & xnn_arch_x86_avx2)) {
+      if (hardware_config->arch_flags & xnn_arch_x86_avx2) {
         transpose_config.x8.const_size_ukernel = XNN_INIT_TRANSPOSEC_UKERNEL(xnn_x8_transposec_ukernel__32x32_reuse_switch_avx2);
         transpose_config.x8.tile_size = 32;
         transpose_config.x16.const_size_ukernel = XNN_INIT_TRANSPOSEC_UKERNEL(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2);
@@ -174,7 +174,7 @@ static void init_transpose_config(void) {
     transpose_config.x16.tile_size = 32;
     transpose_config.x24.const_size_ukernel = XNN_INIT_TRANSPOSEC_UKERNEL(xnn_x24_transposec_ukernel__1x2_scalar);
     transpose_config.x24.tile_size = 32;
-    if ((hardware_config->arch_flags & xnn_arch_hvx)) {
+    if (hardware_config->arch_flags & xnn_arch_hvx) {
       transpose_config.x32.const_size_ukernel = XNN_INIT_TRANSPOSEC_UKERNEL(xnn_x32_transposec_ukernel__32x32_multi_multi_hvx);
       transpose_config.x32.tile_size = 32;
     } else {

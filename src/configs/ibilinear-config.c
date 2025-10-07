@@ -36,7 +36,7 @@ static void init_f16_ibilinear_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
-    if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
+    if (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith) {
       f16_ibilinear_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_f16_ibilinear_ukernel__neonfp16arith_u8);
       f16_ibilinear_config.pixel_tile = 1;
     }
@@ -44,7 +44,7 @@ static void init_f16_ibilinear_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
-    if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
+    if (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith) {
       f16_ibilinear_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_f16_ibilinear_ukernel__neonfp16arith_u8);
       f16_ibilinear_config.pixel_tile = 1;
     }
@@ -53,7 +53,7 @@ static void init_f16_ibilinear_config(void) {
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     #if XNN_ENABLE_FMA3
-      if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
+      if (hardware_config->arch_flags & xnn_arch_x86_fma3) {
         f16_ibilinear_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_f16_ibilinear_ukernel__fma3_u8);
         f16_ibilinear_config.pixel_tile = 1;
       }
@@ -69,7 +69,7 @@ static void init_f32_ibilinear_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
-    if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
+    if (hardware_config->arch_flags & xnn_arch_arm_neon) {
       f32_ibilinear_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_f32_ibilinear_ukernel__neon_u8);
       f32_ibilinear_config.pixel_tile = 1;
     } else {
@@ -103,7 +103,7 @@ static void init_s8_ibilinear_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
-    if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
+    if (hardware_config->arch_flags & xnn_arch_arm_neon) {
       s8_ibilinear_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_s8_ibilinear_ukernel__neon_u8);
       s8_ibilinear_config.pixel_tile = 1;
     } else {
@@ -117,7 +117,7 @@ static void init_s8_ibilinear_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
-    if ((hardware_config->arch_flags & xnn_arch_x86_sse4_1)) {
+    if (hardware_config->arch_flags & xnn_arch_x86_sse4_1) {
       s8_ibilinear_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_s8_ibilinear_ukernel__sse41_u16);
       s8_ibilinear_config.pixel_tile = 1;
     } else {
@@ -142,7 +142,7 @@ static void init_u8_ibilinear_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
-    if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
+    if (hardware_config->arch_flags & xnn_arch_arm_neon) {
       u8_ibilinear_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_u8_ibilinear_ukernel__neon_u8);
       u8_ibilinear_config.pixel_tile = 1;
     } else {
@@ -156,7 +156,7 @@ static void init_u8_ibilinear_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
-    if ((hardware_config->arch_flags & xnn_arch_x86_sse4_1)) {
+    if (hardware_config->arch_flags & xnn_arch_x86_sse4_1) {
       u8_ibilinear_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_u8_ibilinear_ukernel__sse41_u16);
       u8_ibilinear_config.pixel_tile = 1;
     } else {

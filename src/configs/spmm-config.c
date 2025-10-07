@@ -35,7 +35,7 @@ static void init_f16_spmm_config(void) {
   #if XNN_ENABLE_ARM_FP16_SCALAR && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
+    if (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith) {
       f16_spmm_config.ukernel = XNN_INIT_SPMM_UKERNEL(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_pipelined);
       f16_spmm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_spmm_config.mr = 32;
@@ -44,7 +44,7 @@ static void init_f16_spmm_config(void) {
   #elif XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if ((hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith)) {
+    if (hardware_config->arch_flags & xnn_arch_arm_neon_fp16_arith) {
       f16_spmm_config.ukernel = XNN_INIT_SPMM_UKERNEL(xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_pipelined);
       f16_spmm_config.init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_spmm_config.mr = 32;
@@ -57,7 +57,7 @@ static void init_f32_spmm_config(void) {
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
+    if (hardware_config->arch_flags & xnn_arch_arm_neon) {
       f32_spmm_config.ukernel = XNN_INIT_SPMM_UKERNEL(xnn_f32_spmm_minmax_ukernel_32x1__neon);
       f32_spmm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
       f32_spmm_config.mr = 32;
@@ -129,7 +129,7 @@ static void init_f32_spmm2_config(void) {
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
+    if (hardware_config->arch_flags & xnn_arch_arm_neon) {
       f32_spmm2_config.ukernel = XNN_INIT_SPMM_UKERNEL(xnn_f32_spmm_minmax_ukernel_8x2__scalar);
       f32_spmm2_config.init.f32 = xnn_init_f32_minmax_scalar_params;
       f32_spmm2_config.mr = 8;

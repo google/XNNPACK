@@ -41,7 +41,7 @@ static void init_f32_cmul_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
-    if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
+    if (hardware_config->arch_flags & xnn_arch_arm_neon) {
       f32_cmul_config.ukernel = XNN_INIT_CMUL_UKERNEL(xnn_f32_vcmul_ukernel__neon_u8);
     } else {
       f32_cmul_config.ukernel = XNN_INIT_CMUL_UKERNEL(xnn_f32_vcmul_ukernel__scalar_u4);
@@ -53,12 +53,12 @@ static void init_f32_cmul_config(void) {
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
     #if XNN_ENABLE_AVX512F
-      if ((hardware_config->arch_flags & xnn_arch_x86_avx512f)) {
+      if (hardware_config->arch_flags & xnn_arch_x86_avx512f) {
         f32_cmul_config.ukernel = XNN_INIT_CMUL_UKERNEL(xnn_f32_vcmul_ukernel__avx512f_u32);
       } else
     #endif
     #if XNN_ENABLE_FMA3
-      if ((hardware_config->arch_flags & xnn_arch_x86_fma3)) {
+      if (hardware_config->arch_flags & xnn_arch_x86_fma3) {
         f32_cmul_config.ukernel = XNN_INIT_CMUL_UKERNEL(xnn_f32_vcmul_ukernel__fma3_u16);
       } else
     #endif

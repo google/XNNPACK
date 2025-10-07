@@ -28,7 +28,7 @@ static void init_f32_argmaxpool_config(void) {
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if ((hardware_config->arch_flags & xnn_arch_arm_neon)) {
+    if (hardware_config->arch_flags & xnn_arch_arm_neon) {
       f32_argmaxpool_config.ukernel =
           XNN_INIT_ARGMAXPOOL_UKERNEL(xnn_f32_argmaxpool_ukernel_9p8x__neon_c4);
       f32_argmaxpool_config.primary_tile = 9;

@@ -54,7 +54,7 @@ static void init_x32_pack_lh_config(void) {
 #if XNN_ENABLE_ARM_SME2 || XNN_ENABLE_ARM_SME
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   assert(hardware_config != NULL);
-  if ((hardware_config->arch_flags & xnn_arch_arm_sme)) {
+  if (hardware_config->arch_flags & xnn_arch_arm_sme) {
     x32_pack_lh_config.pack_lh_fn = (xnn_pack_lh_ukernel_fn) xnn_x32_pack_lh_ukernel__neonsme;
     x32_pack_lh_config.size_fn = (xnn_pack_lh_size_fn) xnn_x32_pack_lh_size__neonsme;
     x32_pack_lh_config.offset_fn = (xnn_pack_lh_offset_fn) xnn_x32_pack_lh_offset__neonsme;
@@ -80,7 +80,7 @@ static void init_x16_pack_lh_config(void) {
 #if XNN_ENABLE_ARM_SME2
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   assert(hardware_config != NULL);
-  if ((hardware_config->arch_flags & xnn_arch_arm_sme2)) {
+  if (hardware_config->arch_flags & xnn_arch_arm_sme2) {
     x16_pack_lh_config.pack_lh_fn = (xnn_pack_lh_ukernel_fn) xnn_x16_pack_lh_ukernel__neonsme2;
     x16_pack_lh_config.size_fn = (xnn_pack_lh_size_fn) xnn_x16_pack_lh_size__neonsme2;
     x16_pack_lh_config.offset_fn = (xnn_pack_lh_offset_fn) xnn_x16_pack_lh_offset__neonsme2;
@@ -106,7 +106,7 @@ static void init_x8_pack_lh_config(void) {
 #if XNN_ENABLE_ARM_SME2
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   assert(hardware_config != NULL);
-  if ((hardware_config->arch_flags & xnn_arch_arm_sme2)) {
+  if (hardware_config->arch_flags & xnn_arch_arm_sme2) {
     x8_pack_lh_config.pack_lh_fn = (xnn_pack_lh_ukernel_fn) xnn_x8_pack_lh_ukernel__neonsme2;
     x8_pack_lh_config.size_fn = (xnn_pack_lh_size_fn) xnn_x8_pack_lh_size__neonsme2;
     x8_pack_lh_config.offset_fn = (xnn_pack_lh_offset_fn) xnn_x8_pack_lh_offset__neonsme2;
@@ -132,7 +132,7 @@ static void init_x8_igemm_pack_lh_config(void) {
   #if XNN_ENABLE_ARM_SME2
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if ((hardware_config->arch_flags & xnn_arch_arm_sme2)) {
+    if (hardware_config->arch_flags & xnn_arch_arm_sme2) {
       x8_igemm_pack_lh_config.pack_lh_for_igemm_fn = (xnn_pack_lh_igemm_ukernel_fn) xnn_x8_pack_lh_ukernel__igemm_neonsme2;
       x8_igemm_pack_lh_config.size_for_igemm_fn = (xnn_pack_lh_igemm_size_fn) xnn_x8_pack_lh_size__igemm_neonsme2;
       x8_igemm_pack_lh_config.offset_for_igemm_fn = (xnn_pack_lh_igemm_offset_fn) xnn_x8_pack_lh_offset__igemm_neonsme2;
