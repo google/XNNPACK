@@ -85,6 +85,7 @@ enum xnn_uarch {
   xnn_uarch_dhyana,
   xnn_uarch_zen,
   xnn_uarch_zen4,
+  xnn_uarch_zen5,
 
   xnn_uarch_cortex_a5,
   xnn_uarch_cortex_a7,
