@@ -21,7 +21,6 @@
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
-#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/packw.h"
 #include "src/xnnpack/packx.h"
 #include "src/xnnpack/ppmm.h"

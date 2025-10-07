@@ -21,7 +21,6 @@
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
-#include "src/xnnpack/microparams.h"
 #include "test/replicable_random_device.h"
 #include <benchmark/benchmark.h>
 

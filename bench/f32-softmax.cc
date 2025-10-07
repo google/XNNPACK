@@ -11,7 +11,6 @@
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/microfnptr.h"
-#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/raddexpminusmax.h"
 #include "src/xnnpack/raddextexp.h"
 #include "src/xnnpack/raddstoreexpminusmax.h"
