@@ -27,8 +27,9 @@ XNN_UKERNEL(xnn_arch_x86_avx, xnn_qu8_vadd_minmax_ukernel__avx_mul16_ld64_u8, 8,
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_qu8_vadd_minmax_ukernel__avx_mul16_ld64_u16, 16, false, uint8_t, struct xnn_qu8_add_minmax_params, xnn_init_qu8_add_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_qu8_vadd_minmax_ukernel__avx_mul32_ld32_u8, 8, false, uint8_t, struct xnn_qu8_add_minmax_params, xnn_init_qu8_add_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_qu8_vadd_minmax_ukernel__avx_mul32_ld32_u16, 16, false, uint8_t, struct xnn_qu8_add_minmax_params, xnn_init_qu8_add_minmax_scalar_params)
-#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 #endif  // XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_avx2, xnn_qu8_vadd_minmax_ukernel__avx2_mul32_ld64_u8, 8, false, uint8_t, struct xnn_qu8_add_minmax_params, xnn_init_qu8_add_minmax_scalar_params)
 XNN_UKERNEL(xnn_arch_x86_avx2, xnn_qu8_vadd_minmax_ukernel__avx2_mul32_ld64_u16, 16, false, uint8_t, struct xnn_qu8_add_minmax_params, xnn_init_qu8_add_minmax_scalar_params)
 #endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
