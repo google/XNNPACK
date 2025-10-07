@@ -2313,7 +2313,7 @@ static void init_qu8_lrelu_config(void) {
       qu8_lrelu_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_qu8_vlrelu_ukernel__sse41_u32);
       qu8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_lrelu_scalar_params;
     } else
-    if ((hardware_config->arch_flags & xnn_arch_x86_sse4_1)) {
+    if ((hardware_config->arch_flags & xnn_arch_x86_ssse3)) {
       qu8_lrelu_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_qu8_vlrelu_ukernel__ssse3_u32);
       qu8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_lrelu_scalar_params;
     } else {
