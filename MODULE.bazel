@@ -13,6 +13,7 @@ module(
 
 # Bazel rule definitions
 bazel_dep(name = "rules_cc", version = "0.0.15")
+bazel_dep(name = "rules_license", version = "1.0.0")
 bazel_dep(name = "rules_python", version = "1.0.0")
 
 pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
@@ -108,5 +109,14 @@ http_archive(
     strip_prefix = "ruy-9f53ba413e6fc879236dcaa3e008915973d67a4f",
     urls = [
         "https://github.com/google/ruy/archive/9f53ba413e6fc879236dcaa3e008915973d67a4f.zip",
+    ],
+)
+
+http_archive(
+    name = "slinky",
+    sha256 = "d72196a2feda99ad3fa8f724ee8ab6b1fe2883ad4cb12d2a7169b90b833e0301",
+    strip_prefix = "slinky-cb1f285b76c53b6e8b4075d25127140e5b985f8e",
+    urls = [
+        "https://github.com/dsharlet/slinky/archive/cb1f285b76c53b6e8b4075d25127140e5b985f8e.zip",
     ],
 )
