@@ -14,8 +14,6 @@ load(
     "xnnpack_cc_library",
     "xnnpack_cxx_library",
     "xnnpack_if_kleidiai_enabled",
-    "xnnpack_lib_deps",
-    "xnnpack_lib_srcs",
     "xnnpack_min_size_copts",
     "xnnpack_select_if",
     "xnnpack_slinky_deps",
@@ -912,7 +910,10 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "XNNPACK",
-    srcs = xnnpack_lib_srcs(),
+    srcs = select({
+        "//ynnpack/xnnpack:use_ynnpack": [],
+        "//conditions:default": ["src/init.c"],
+    }),
     hdrs = [
         "include/experimental.h",
         "include/xnnpack.h",
@@ -925,7 +926,28 @@ xnnpack_cc_library(
         "//conditions:default": [],
     }),
     visibility = xnnpack_visibility(),
-    deps = xnnpack_lib_deps(),
+    deps = select({
+        "//ynnpack/xnnpack:use_ynnpack": ["//ynnpack/xnnpack"],
+        "//conditions:default": [
+            "//:allocator",
+            "//:build_identifier",  # build_cleaner: keep
+            "//:common",  # build_cleaner: keep
+            "//:init_once",
+            "//:logging",
+            "//:math",  # build_cleaner: keep
+            "//:microkernel_hdrs",  # build_cleaner: keep
+            "//:microparams_h",  # build_cleaner: keep
+            "//:microparams_init",  # build_cleaner: keep
+            "//:operators",  # build_cleaner: keep
+            "//:params",
+            "//:subgraph",  # build_cleaner: keep
+            "//src/configs:hardware_config",
+            "//src/configs:microkernel_configs",  # build_cleaner: keep
+            "@pthreadpool",
+        ],
+    }) + xnnpack_if_kleidiai_enabled([
+        "@KleidiAI//:common",
+    ]),
 )
 
 ############################# Build configurations #############################
