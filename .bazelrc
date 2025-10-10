@@ -5,6 +5,8 @@ build --enable_bzlmod
 # Basic build settings
 build --jobs 128
 build --cxxopt='-std=gnu++14'
+build --per_file_copt=ynnpack/.*@-std=c++17
+build --per_file_copt=external/.*slinky.*@-std=c++17
 
 # Sets the default Apple platform to macOS.
 build --apple_platform_type=macos
@@ -68,6 +70,7 @@ build --copt='-Wall'
 build --copt='-Werror'
 build --copt='-Wno-comment'
 build --copt='-Wno-sign-compare'
+build --copt='-Wno-ignored-attributes'
 
 # Disable all warnings in external code
 build --per_file_copt=external/.*@-w
