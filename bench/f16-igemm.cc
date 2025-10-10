@@ -109,7 +109,7 @@ static void f16_igemm(benchmark::State& state,
       /*output_start=*/0,
       /*output_end=*/tiled_output_size,
       reinterpret_cast<const void**>(i.data()), a.data(), z.data(),
-      input_pixel_stride << XNN_LOG2_SIZEOF_HALF, input_height, input_width,
+      input_pixel_stride << XNN_LOG2_SIZEOF_FLOAT16, input_height, input_width,
       output_height, output_width, kernel_height, kernel_width, subsampling,
       subsampling, dilation, dilation, padding_top, padding_left);
   for (size_t n = 1; n < num_buffers; n++) {

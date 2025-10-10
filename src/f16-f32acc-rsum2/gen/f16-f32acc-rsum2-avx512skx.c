@@ -44,7 +44,7 @@ void xnn_f16_f32acc_rsum2_ukernel__avx512skx_u16(
     assert(batch <= 15 * sizeof(uint16_t));
 
     // Prepare mask for valid elements (depends on batch).
-    batch >>= XNN_LOG2_SIZEOF_HALF;
+    batch >>= XNN_LOG2_SIZEOF_FLOAT16;
     const __mmask16 vmask =
         _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
@@ -102,7 +102,7 @@ void xnn_f16_f32acc_rsum2_ukernel__avx512skx_u32_acc2(
     assert(batch <= 15 * sizeof(uint16_t));
 
     // Prepare mask for valid elements (depends on batch).
-    batch >>= XNN_LOG2_SIZEOF_HALF;
+    batch >>= XNN_LOG2_SIZEOF_FLOAT16;
     const __mmask16 vmask =
         _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
@@ -158,7 +158,7 @@ void xnn_f16_f32acc_rsum2_ukernel__avx512skx_u32(
     assert(batch <= 15 * sizeof(uint16_t));
 
     // Prepare mask for valid elements (depends on batch).
-    batch >>= XNN_LOG2_SIZEOF_HALF;
+    batch >>= XNN_LOG2_SIZEOF_FLOAT16;
     const __mmask16 vmask =
         _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
@@ -228,7 +228,7 @@ void xnn_f16_f32acc_rsum2_ukernel__avx512skx_u48_acc3(
     assert(batch <= 15 * sizeof(uint16_t));
 
     // Prepare mask for valid elements (depends on batch).
-    batch >>= XNN_LOG2_SIZEOF_HALF;
+    batch >>= XNN_LOG2_SIZEOF_FLOAT16;
     const __mmask16 vmask =
         _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
@@ -294,7 +294,7 @@ void xnn_f16_f32acc_rsum2_ukernel__avx512skx_u48(
     assert(batch <= 15 * sizeof(uint16_t));
 
     // Prepare mask for valid elements (depends on batch).
-    batch >>= XNN_LOG2_SIZEOF_HALF;
+    batch >>= XNN_LOG2_SIZEOF_FLOAT16;
     const __mmask16 vmask =
         _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
@@ -376,7 +376,7 @@ void xnn_f16_f32acc_rsum2_ukernel__avx512skx_u64_acc4(
     assert(batch <= 15 * sizeof(uint16_t));
 
     // Prepare mask for valid elements (depends on batch).
-    batch >>= XNN_LOG2_SIZEOF_HALF;
+    batch >>= XNN_LOG2_SIZEOF_FLOAT16;
     const __mmask16 vmask =
         _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
@@ -454,7 +454,7 @@ void xnn_f16_f32acc_rsum2_ukernel__avx512skx_u64_acc2(
     assert(batch <= 15 * sizeof(uint16_t));
 
     // Prepare mask for valid elements (depends on batch).
-    batch >>= XNN_LOG2_SIZEOF_HALF;
+    batch >>= XNN_LOG2_SIZEOF_FLOAT16;
     const __mmask16 vmask =
         _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
@@ -530,7 +530,7 @@ void xnn_f16_f32acc_rsum2_ukernel__avx512skx_u64(
     assert(batch <= 15 * sizeof(uint16_t));
 
     // Prepare mask for valid elements (depends on batch).
-    batch >>= XNN_LOG2_SIZEOF_HALF;
+    batch >>= XNN_LOG2_SIZEOF_FLOAT16;
     const __mmask16 vmask =
         _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
@@ -660,7 +660,7 @@ void xnn_f16_f32acc_rsum2_ukernel__avx512skx_u128_acc8(
     assert(batch <= 15 * sizeof(uint16_t));
 
     // Prepare mask for valid elements (depends on batch).
-    batch >>= XNN_LOG2_SIZEOF_HALF;
+    batch >>= XNN_LOG2_SIZEOF_FLOAT16;
     const __mmask16 vmask =
         _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
@@ -782,7 +782,7 @@ void xnn_f16_f32acc_rsum2_ukernel__avx512skx_u128_acc4(
     assert(batch <= 15 * sizeof(uint16_t));
 
     // Prepare mask for valid elements (depends on batch).
-    batch >>= XNN_LOG2_SIZEOF_HALF;
+    batch >>= XNN_LOG2_SIZEOF_FLOAT16;
     const __mmask16 vmask =
         _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
@@ -900,7 +900,7 @@ void xnn_f16_f32acc_rsum2_ukernel__avx512skx_u128_acc2(
     assert(batch <= 15 * sizeof(uint16_t));
 
     // Prepare mask for valid elements (depends on batch).
-    batch >>= XNN_LOG2_SIZEOF_HALF;
+    batch >>= XNN_LOG2_SIZEOF_FLOAT16;
     const __mmask16 vmask =
         _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
@@ -1016,7 +1016,7 @@ void xnn_f16_f32acc_rsum2_ukernel__avx512skx_u128(
     assert(batch <= 15 * sizeof(uint16_t));
 
     // Prepare mask for valid elements (depends on batch).
-    batch >>= XNN_LOG2_SIZEOF_HALF;
+    batch >>= XNN_LOG2_SIZEOF_FLOAT16;
     const __mmask16 vmask =
         _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 

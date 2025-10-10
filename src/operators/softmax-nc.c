@@ -560,7 +560,7 @@ enum xnn_status xnn_reshape_softmax_nc_f16(
     softmax_op, xnn_operator_type_softmax_nc_f16,
     channels, input_stride, output_stride,
     batch_size,
-    /*log2_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
     softmax_op->reduce_config->ukernel,
     softmax_op->raddstoreexpminusmax_config, f16_vmul_config,
     (xnn_compute_reciprocal_fn) compute_reciprocal_f16,

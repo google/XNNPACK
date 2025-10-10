@@ -185,7 +185,7 @@ const xnn_pack_lh_config* xnn_init_f16_qdint8_pack_lh_config() {
     config.pack_lh_fn = (xnn_pack_lh_ukernel_fn)xnn_pack_lh_f16_qdint8;
     config.size_fn = (xnn_pack_lh_size_fn)xnn_pack_lh_fx_qd8_packed_size;
     config.offset_fn = (xnn_pack_lh_offset_fn)xnn_pack_lh_fx_qd8_packed_offset;
-    config.log2_input_element_size = XNN_LOG2_SIZEOF_HALF;
+    config.log2_input_element_size = XNN_LOG2_SIZEOF_FLOAT16;
     config.log2_packed_element_size = 0;
     return config;
   }();
@@ -203,7 +203,7 @@ const xnn_pack_lh_config* xnn_init_f16_qduint8_pack_lh_config() {
     config.pack_lh_fn = (xnn_pack_lh_ukernel_fn)xnn_pack_lh_f16_qduint8;
     config.size_fn = (xnn_pack_lh_size_fn)xnn_pack_lh_fx_qd8_packed_size;
     config.offset_fn = (xnn_pack_lh_offset_fn)xnn_pack_lh_fx_qd8_packed_offset;
-    config.log2_input_element_size = XNN_LOG2_SIZEOF_HALF;
+    config.log2_input_element_size = XNN_LOG2_SIZEOF_FLOAT16;
     config.log2_packed_element_size = 0;
     return config;
   }();

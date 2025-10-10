@@ -196,8 +196,8 @@ enum xnn_status xnn_reshape_rope_nthc_f16(
   return reshape_rope_nthc(
     rope_op, xnn_operator_type_rope_nthc_f16,
     batch_size, tokens, heads, channels,
-    /*log2_data_element_size=*/XNN_LOG2_SIZEOF_HALF,
-    /*log2_weight_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    /*log2_data_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
+    /*log2_weight_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
     pthreadpool_get_threads_count(threadpool));
 }
 

@@ -69,7 +69,7 @@ void xnn_f16_rminmax_ukernel__avx512fp16_u96_acc3(
     assert(batch <= 31 * sizeof(uint16_t));
 
     // Prepare mask for valid elements (depends on batch).
-    batch >>= XNN_LOG2_SIZEOF_HALF;
+    batch >>= XNN_LOG2_SIZEOF_FLOAT16;
     const __mmask32 vmask = _cvtu32_mask32((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
     const __m512h vt = _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, i));

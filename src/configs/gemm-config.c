@@ -138,9 +138,9 @@ XNN_INIT_ONCE_GUARD(qu8_gemm);
 
 static void init_f16_gemm_config(void) {
   // Common parameters.
-  f16_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_HALF;
-  f16_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_HALF;
-  f16_gemm_config.log2_filter_element_bit_size = XNN_LOG2_SIZEOF_HALF + 3;
+  f16_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_FLOAT16;
+  f16_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_FLOAT16;
+  f16_gemm_config.log2_filter_element_bit_size = XNN_LOG2_SIZEOF_FLOAT16 + 3;
   f16_gemm_config.bias_element_size = sizeof(uint16_t);
 
   // Arch-specific parameters.

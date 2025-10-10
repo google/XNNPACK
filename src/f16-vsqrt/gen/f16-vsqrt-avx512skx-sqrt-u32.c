@@ -58,7 +58,7 @@ void xnn_f16_vsqrt_ukernel__avx512skx_sqrt_u32(
     assert(batch <= 15 * sizeof(uint16_t));
 
     // Prepare mask for valid elements (depends on batch).
-    batch >>= XNN_LOG2_SIZEOF_HALF;
+    batch >>= XNN_LOG2_SIZEOF_FLOAT16;
     const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
     __m512 vacc = _mm512_cvtph_ps(_mm256_maskz_loadu_epi16(vmask, i));

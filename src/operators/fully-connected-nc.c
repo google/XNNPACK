@@ -2533,7 +2533,7 @@ enum xnn_status xnn_reshape_fully_connected_nc_f16(
   return reshape_fully_connected_nc(
       fully_connected_op, xnn_operator_type_fully_connected_nc_f16, batch_size,
       /*dynamic_quantization=*/false,
-      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
       &fully_connected_op->params.f16_minmax,
       sizeof(fully_connected_op->params.f16_minmax),
       /*workspace_size=*/NULL, threadpool);
@@ -2545,7 +2545,7 @@ enum xnn_status xnn_reshape_fully_connected_nc_pf16(
   return reshape_fully_connected_nc(
       fully_connected_op, xnn_operator_type_fully_connected_nc_pf16, batch_size,
       /*dynamic_quantization=*/false,
-      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
       &fully_connected_op->params.f16_minmax,
       sizeof(fully_connected_op->params.f16_minmax), workspace_size,
       threadpool);
@@ -2628,7 +2628,7 @@ enum xnn_status xnn_reshape_fully_connected_nc_qd8_f16_qc4w(
       fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f16_qc4w,
       batch_size,
       /*dynamic_quantization=*/true,
-      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
       &fully_connected_op->params.f32_qc4w_minmax,
       sizeof(fully_connected_op->params.f32_qc4w_minmax), workspace_size,
       threadpool);
@@ -2641,7 +2641,7 @@ enum xnn_status xnn_reshape_fully_connected_nc_qdu8_f16_qc4w(
       fully_connected_op, xnn_operator_type_fully_connected_nc_qdu8_f16_qc4w,
       batch_size,
       /*dynamic_quantization=*/true,
-      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
       &fully_connected_op->params.f32_qc4w_minmax,
       sizeof(fully_connected_op->params.f32_qc4w_minmax), workspace_size,
       threadpool);
@@ -2654,7 +2654,7 @@ enum xnn_status xnn_reshape_fully_connected_nc_qd8_f16_qb4w(
       fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f16_qb4w,
       batch_size,
       /*dynamic_quantization=*/true,
-      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
       &fully_connected_op->params.f32_qb4w_minmax,
       sizeof(fully_connected_op->params.f32_qb4w_minmax), workspace_size,
       threadpool);
@@ -2719,7 +2719,7 @@ enum xnn_status xnn_reshape_fully_connected_nc_qd8_f16_qc8w(
       fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f16_qc8w,
       batch_size,
       /*dynamic_quantization=*/true,
-      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
       &fully_connected_op->params.f16_minmax,
       sizeof(fully_connected_op->params.f16_minmax), workspace_size,
       threadpool);
@@ -2732,7 +2732,7 @@ enum xnn_status xnn_reshape_fully_connected_nc_qdu8_f16_qc8w(
       fully_connected_op, xnn_operator_type_fully_connected_nc_qdu8_f16_qc8w,
       batch_size,
       /*dynamic_quantization=*/true,
-      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
       &fully_connected_op->params.f16_minmax,
       sizeof(fully_connected_op->params.f16_minmax), workspace_size,
       threadpool);

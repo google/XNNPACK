@@ -43,8 +43,8 @@ static void init_f16_ibilinear_chw_config(void) {
       f16_ibilinear_chw_config.channel_tile = 1;
     }
   #endif
-  f16_ibilinear_chw_config.log2_data_element_size = XNN_LOG2_SIZEOF_HALF;
-  f16_ibilinear_chw_config.log2_weight_element_size = XNN_LOG2_SIZEOF_HALF;
+  f16_ibilinear_chw_config.log2_data_element_size = XNN_LOG2_SIZEOF_FLOAT16;
+  f16_ibilinear_chw_config.log2_weight_element_size = XNN_LOG2_SIZEOF_FLOAT16;
   f16_ibilinear_chw_config.indirection_init =
       (xnn_indirection_init_resize_bilinear2d_chw_fn) xnn_indirection_init_resize_bilinear2d_chw_f16;
 }

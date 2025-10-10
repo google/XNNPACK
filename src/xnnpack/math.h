@@ -498,10 +498,11 @@ XNN_INLINE static int32_t math_round_f32_to_s32(float x) {
 
 // We want to use _Float16 if the compiler supports it fully, but it's
 // tricky to do this detection; there are compiler versions that define the
-// type in broken ways. We're only going to bother using it if the support is
+// type in broken ways. XNNPack only supports FP16 if the compiler and cpu are
 // known to be at least a robust f16<->f32 conversion, which generally means a
-// recent version of Clang or GCC, x86 or ARM or RISC-V architectures, and
-// (in some cases) the right architecture flags specified on the command line.
+// recent version of Clang or GCC or Visual C, x86 or ARM or RISC-V or
+// Web Assembly or Hexagon architectures, and the right architecture flags
+// specified on the command line.
 
 #ifndef XNN_HAVE_FLOAT16
 

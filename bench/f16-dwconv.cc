@@ -112,7 +112,7 @@ static void bench_impl(uint64_t arch_flags, benchmark::State& state,
   xnn_indirection_init_dwconv2d(
       /*output_y_start=*/0, /*output_y_end=*/output_height,
       reinterpret_cast<const void**>(i.data()), a.data(),
-      channels << XNN_LOG2_SIZEOF_HALF, z.data(), input_height, input_width,
+      channels << XNN_LOG2_SIZEOF_FLOAT16, z.data(), input_height, input_width,
       output_height, output_width, kernel_height, kernel_width, subsampling,
       subsampling, dilation, dilation, padding_top, padding_left, step_height,
       step_width, primary_tile);

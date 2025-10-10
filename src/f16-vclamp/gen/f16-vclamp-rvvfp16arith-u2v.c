@@ -33,7 +33,7 @@ void xnn_f16_vclamp_ukernel__rvvfp16arith_u2v(
   const _Float16 vmin = *(const _Float16*) &params->scalar.min;
   const _Float16 vmax = *(const _Float16*) &params->scalar.max;
 
-  batch >>= XNN_LOG2_SIZEOF_HALF;
+  batch >>= XNN_LOG2_SIZEOF_FLOAT16;
   do {
     const size_t n = __riscv_vsetvl_e16m2(batch);
     vfloat16m2_t vacc = __riscv_vle16_v_f16m2((const void*) i, n);

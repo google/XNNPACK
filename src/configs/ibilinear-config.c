@@ -59,8 +59,8 @@ static void init_f16_ibilinear_config(void) {
       }
     #endif
   #endif
-  f16_ibilinear_config.log2_data_element_size = XNN_LOG2_SIZEOF_HALF;
-  f16_ibilinear_config.log2_weight_element_size = XNN_LOG2_SIZEOF_HALF;
+  f16_ibilinear_config.log2_data_element_size = XNN_LOG2_SIZEOF_FLOAT16;
+  f16_ibilinear_config.log2_weight_element_size = XNN_LOG2_SIZEOF_FLOAT16;
   f16_ibilinear_config.indirection_init = (xnn_indirection_init_resize_bilinear2d_hwc_fn) xnn_indirection_init_resize_bilinear2d_hwc_f16;
 }
 

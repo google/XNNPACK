@@ -292,7 +292,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
   xnn_operator_t convolution_op = NULL;
   enum xnn_status status = xnn_status_uninitialized;
 
-  const size_t log2_filter_element_size = XNN_LOG2_SIZEOF_HALF;
+  const size_t log2_filter_element_size = XNN_LOG2_SIZEOF_FLOAT16;
   const enum xnn_operator_type operator_type = xnn_operator_type_convolution_nchw_f16;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
@@ -1249,10 +1249,10 @@ enum xnn_status xnn_reshape_convolution2d_nchw_f16(
     convolution_op,
     xnn_operator_type_convolution_nchw_f16,
     batch_size, input_height, input_width,
-    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_HALF,
-    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
+    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
     /*bias_element_size=*/sizeof(uint16_t),
-    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
     &convolution_op->params.f16_minmax,
     &convolution_op->params.f16_chw,
     output_height_out, output_width_out,

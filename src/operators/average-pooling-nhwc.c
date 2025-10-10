@@ -570,9 +570,9 @@ enum xnn_status xnn_reshape_average_pooling2d_nhwc_f16(
   return reshape_average_pooling2d(
     average_pooling_op,
     batch_size, input_height, input_width, channels, input_pixel_stride, output_pixel_stride,
-    /*log2_data_element_size=*/XNN_LOG2_SIZEOF_HALF,
-    /*log2_weight_element_size=*/XNN_LOG2_SIZEOF_HALF,
-    /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    /*log2_data_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
+    /*log2_weight_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
+    /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
     (xnn_indirection_init_pavgpool2d_fn) xnn_indirection_init_pavgpool2d_f16,
     average_pooling_op->avgpool_config,
     pooling_params, pooling_params_size,
