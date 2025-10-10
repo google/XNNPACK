@@ -1069,13 +1069,11 @@ xnnpack_unit_test(
     srcs = [
         "indirection.cc",
     ],
-    deps = [
-        "//:buffer",
+    deps = MICROKERNEL_TEST_DEPS + [
         "//:indirection",
-        "//:math",
+        "//:microkernel_utils",
         "//:operator_utils",
         "//:operators",
-        "//:xnnpack_h",
     ],
 )
 
