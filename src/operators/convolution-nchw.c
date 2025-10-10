@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <float.h>
 #include <inttypes.h>
 #include <math.h>
 #include <stddef.h>
@@ -12,6 +13,8 @@
 #include <string.h>
 
 #include "include/xnnpack.h"
+#include "src/operators/fingerprint_cache.h"
+#include "src/operators/fingerprint_id.h"
 #include "src/xnnpack/allocator.h"
 #include "src/xnnpack/cache.h"
 #include "src/xnnpack/common.h"
@@ -265,7 +268,256 @@ static enum xnn_status create_dwconv_path(
   return xnn_status_success;
 }
 
-enum xnn_status xnn_create_convolution2d_nchw_f16(
+struct conv2d_variant {
+  size_t log2_filter_element_size;
+  enum xnn_operator_type operator_type;
+  float (*round_float_value)(float);
+  const struct xnn_spmm_config* (*init_spmm_config)();
+  const struct xnn_spmm_config* (*init_spmm2_config)();
+  const struct xnn_spmm_config* (*init_spmm4_config)();
+  const struct xnn_dwconv2d_chw_config* (*init_dwconv2d_chw_config)();
+  void (*init_spmm)(xnn_analyze_spmm_w_fn* xnn_analyze_spmm,
+                    xnn_pack_spmm_w_fn* xnn_pack_spmm,
+                    xnn_operator_t convolution_op, float output_min,
+                    float output_max, int flags,
+                    const struct xnn_spmm_config* spmm_config);
+  const struct xnn_conv_hwc2chw_config* (*init_conv_hwc2chw_config)();
+  enum xnn_status (*init_conv_hwc2chw)(
+      xnn_pack_dconv_oki_w_fn* xnn_pack_dconv_oki_w,
+      const struct xnn_conv_hwc2chw_config** conv_hwc2chw_config,
+      xnn_operator_t convolution_op, int flags, float output_min,
+      float output_max, enum xnn_operator_type operator_type);
+  void (*init_dwconv)(
+      xnn_pack_chw_dwconv_hwg_w_fn* pack_chw_dwconv_hwg_w,
+      xnn_pack_chw_dwconv_ghw_w_fn* pack_chw_dwconv_ghw_w,
+      const struct xnn_dwconv2d_chw_parameters* dwconv2d_parameters,
+      xnn_operator_t convolution_op, int flags, float output_min,
+      float output_max);
+};
+
+static float round_float_value_f32(float value) { return value; }
+
+static float round_float_value_f16(float value) {
+  const xnn_float16 fp16_value = xnn_float16_from_float(value);
+  return xnn_float16_to_float(fp16_value);
+}
+
+static void init_spmm_f32(xnn_analyze_spmm_w_fn* xnn_analyze_spmm,
+                          xnn_pack_spmm_w_fn* xnn_pack_spmm,
+                          xnn_operator_t convolution_op, float output_min,
+                          float output_max, int flags,
+                          const struct xnn_spmm_config* spmm_config) {
+  *xnn_analyze_spmm = (xnn_analyze_spmm_w_fn)xnn_analyze_f32_spmm_w;
+  *xnn_pack_spmm = (xnn_pack_spmm_w_fn)xnn_pack_f32_spmm_w;
+  spmm_config->init.f32(&convolution_op->params.f32_minmax, output_min,
+                        output_max);
+}
+
+static void init_spmm_f16(xnn_analyze_spmm_w_fn* xnn_analyze_spmm,
+                          xnn_pack_spmm_w_fn* xnn_pack_spmm,
+                          xnn_operator_t convolution_op, float output_min,
+                          float output_max, int flags,
+                          const struct xnn_spmm_config* spmm_config) {
+  if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
+    *xnn_analyze_spmm = (xnn_analyze_spmm_w_fn)xnn_analyze_f32_spmm_w;
+    *xnn_pack_spmm = (xnn_pack_spmm_w_fn)xnn_pack_f32_to_f16_spmm_w;
+  } else {
+    *xnn_analyze_spmm = (xnn_analyze_spmm_w_fn)xnn_analyze_f16_spmm_w;
+    *xnn_pack_spmm = (xnn_pack_spmm_w_fn)xnn_pack_f16_spmm_w;
+  }
+  spmm_config->init.f16(&convolution_op->params.f16_minmax,
+                        xnn_float16_from_float(output_min),
+                        xnn_float16_from_float(output_max));
+}
+
+static enum xnn_status init_conv_hwc2chw_f32(
+    xnn_pack_dconv_oki_w_fn* xnn_pack_dconv_oki_w,
+    const struct xnn_conv_hwc2chw_config** conv_hwc2chw_config,
+    xnn_operator_t convolution_op, const int flags, const float output_min,
+    const float output_max, enum xnn_operator_type operator_type) {
+  *xnn_pack_dconv_oki_w = (xnn_pack_dconv_oki_w_fn)xnn_pack_f32_dconv_oki_w;
+  *conv_hwc2chw_config = xnn_init_f32_conv_hwc2chw_3x3c3s2_config();
+  if (*conv_hwc2chw_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: operations on data type are not "
+        "supported",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_unsupported_hardware;
+  }
+
+  (*conv_hwc2chw_config)->init.f32(&convolution_op->params.f32_minmax, output_min,
+                                output_max);
+  return xnn_status_success;
+}
+
+static enum xnn_status init_conv_hwc2chw_f16(
+    xnn_pack_dconv_oki_w_fn* xnn_pack_dconv_oki_w,
+    const struct xnn_conv_hwc2chw_config** conv_hwc2chw_config,
+    xnn_operator_t convolution_op, const int flags, const float output_min,
+    const float output_max, enum xnn_operator_type operator_type) {
+  if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
+    *xnn_pack_dconv_oki_w =
+        (xnn_pack_dconv_oki_w_fn)xnn_pack_f32_to_f16_dconv_oki_w;
+  } else {
+    *xnn_pack_dconv_oki_w = (xnn_pack_dconv_oki_w_fn)xnn_pack_f16_dconv_oki_w;
+  }
+
+  *conv_hwc2chw_config = xnn_init_f16_conv_hwc2chw_3x3c3s2_config();
+  if (*conv_hwc2chw_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: operations on data type are not "
+        "supported",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_unsupported_hardware;
+  }
+
+  (*conv_hwc2chw_config)->init.f16(&convolution_op->params.f16_minmax,
+                                xnn_float16_from_float(output_min),
+                                xnn_float16_from_float(output_max));
+  return xnn_status_success;
+}
+
+static void init_dwconv_f32(
+    xnn_pack_chw_dwconv_hwg_w_fn* pack_chw_dwconv_hwg_w,
+    xnn_pack_chw_dwconv_ghw_w_fn* pack_chw_dwconv_ghw_w,
+    const struct xnn_dwconv2d_chw_parameters* dwconv2d_parameters,
+    xnn_operator_t convolution_op, int flags, float output_min,
+    float output_max) {
+  *pack_chw_dwconv_hwg_w =
+      (xnn_pack_chw_dwconv_hwg_w_fn)xnn_pack_f32_chw_dwconv_hwg_w;
+  *pack_chw_dwconv_ghw_w =
+      (xnn_pack_chw_dwconv_ghw_w_fn)xnn_pack_f32_chw_dwconv_ghw_w;
+  dwconv2d_parameters->init.f32(&convolution_op->params.f32_chw, output_min,
+                                output_max);
+}
+
+static void init_dwconv_f16(
+    xnn_pack_chw_dwconv_hwg_w_fn* pack_chw_dwconv_hwg_w,
+    xnn_pack_chw_dwconv_ghw_w_fn* pack_chw_dwconv_ghw_w,
+    const struct xnn_dwconv2d_chw_parameters* dwconv2d_parameters,
+    xnn_operator_t convolution_op, int flags, float output_min,
+    float output_max) {
+  if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
+    *pack_chw_dwconv_hwg_w =
+        (xnn_pack_chw_dwconv_hwg_w_fn)xnn_pack_f32_to_f16_chw_dwconv_hwg_w;
+    *pack_chw_dwconv_ghw_w =
+        (xnn_pack_chw_dwconv_ghw_w_fn)xnn_pack_f32_to_f16_chw_dwconv_ghw_w;
+  } else {
+    *pack_chw_dwconv_hwg_w =
+        (xnn_pack_chw_dwconv_hwg_w_fn)xnn_pack_f16_chw_dwconv_hwg_w;
+    *pack_chw_dwconv_ghw_w =
+        (xnn_pack_chw_dwconv_ghw_w_fn)xnn_pack_f16_chw_dwconv_ghw_w;
+  }
+  dwconv2d_parameters->init.f16(&convolution_op->params.f16_chw,
+                                xnn_float16_from_float(output_min),
+                                xnn_float16_from_float(output_max));
+}
+
+static const struct conv2d_variant f16_conv = {
+  .log2_filter_element_size = XNN_LOG2_SIZEOF_FLOAT16,
+  .operator_type = xnn_operator_type_convolution_nchw_f16,
+  .round_float_value = round_float_value_f16,
+  .init_spmm_config = xnn_init_f16_spmm_config,
+  .init_spmm2_config = NULL,
+  .init_spmm4_config = NULL,
+  .init_dwconv2d_chw_config = xnn_init_f16_dwconv2d_chw_config,
+  .init_spmm = init_spmm_f16,
+  .init_conv_hwc2chw = init_conv_hwc2chw_f16,
+  .init_dwconv = init_dwconv_f16,
+};
+
+static const struct conv2d_variant f32_conv = {
+  .log2_filter_element_size = XNN_LOG2_SIZEOF_FLOAT,
+  .operator_type = xnn_operator_type_convolution_nchw_f32,
+  .round_float_value = round_float_value_f32,
+  .init_spmm_config = xnn_init_f32_spmm_config,
+  .init_spmm2_config = xnn_init_f32_spmm2_config,
+  .init_spmm4_config = xnn_init_f32_spmm4_config,
+  .init_dwconv2d_chw_config = xnn_init_f32_dwconv2d_chw_config,
+  .init_spmm = init_spmm_f32,
+  .init_conv_hwc2chw = init_conv_hwc2chw_f32,
+  .init_dwconv = init_dwconv_f32,
+};
+
+static enum xnn_status select_convolution2d_ukernel(
+  enum xnn_microkernel_type* ukernel_type,
+  const struct xnn_dwconv2d_chw_parameters** dwconv2d_parameters,
+    uint32_t input_padding_top,
+    uint32_t input_padding_right,
+    uint32_t input_padding_bottom,
+    uint32_t input_padding_left,
+    uint32_t kernel_height,
+    uint32_t kernel_width,
+    uint32_t subsampling_height,
+    uint32_t subsampling_width,
+    uint32_t dilation_height,
+    uint32_t dilation_width,
+    uint32_t groups,
+    size_t group_input_channels,
+    size_t group_output_channels,
+    uint32_t flags,
+    const struct xnn_dwconv2d_chw_config* dwconv2d_chw_config,
+    const enum xnn_operator_type operator_type
+  ) {
+  // Supported cases:
+  // + 1x1 convolution (no groups)
+  // + 3x3 stride-2 with 3 input channels and NHWC input layout
+  // + 3x3 stride-2 depthwise convolution with horizontal padding 1 & no vertical padding
+  // + 3x3 stride-1 depthwise convolution with horizontal padding 1 & no vertical padding
+  // + 5x5 stride-2 depthwise convolution with horizontal padding 2 & no vertical padding
+  // + 5x5 stride-1 depthwise convolution with horizontal padding 2 & no vertical padding
+  const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
+  const bool is_1x1 = kernel_width == 1 && kernel_height == 1 && subsampling_height == 1 && subsampling_width == 1;
+  const bool is_3x3 = kernel_width == 3 && kernel_height == 3 && dilation_height == 1 && dilation_width == 1;
+  const bool is_5x5 = kernel_width == 5 && kernel_height == 5 && dilation_height == 1 && dilation_width == 1;
+  const bool nhwc_input = (flags & XNN_FLAG_INPUT_NHWC) != 0;
+  if (is_1x1 && !any_padding && !nhwc_input && groups == 1) {
+    *ukernel_type = xnn_microkernel_type_spmm;
+  } else if (is_3x3 && subsampling_height == 2 && subsampling_width == 2 &&
+    input_padding_top == 1 && input_padding_left == 1 && input_padding_bottom == 1 && input_padding_right == 1 &&
+    nhwc_input && groups == 1)
+  {
+    *ukernel_type = xnn_microkernel_type_conv2d_hwc2chw;
+  } else if (is_3x3 && subsampling_height == 1 && subsampling_width == 1 &&
+    input_padding_top == 1 && input_padding_left == 1 && input_padding_bottom == 1 && input_padding_right == 1 &&
+    !nhwc_input && group_input_channels == 1 && group_output_channels == 1)
+  {
+    *ukernel_type = xnn_microkernel_type_dwconv;
+    *dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_3x3;
+  } else if (is_3x3 && subsampling_height == 2 && subsampling_width == 2 &&
+    (input_padding_top == 0 || input_padding_top == 1) && input_padding_left == 1 && input_padding_bottom == 1 && input_padding_right == 1 &&
+    !nhwc_input && group_input_channels == 1 && group_output_channels == 1)
+  {
+    *ukernel_type = xnn_microkernel_type_dwconv;
+    *dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_3x3s2;
+  } else if (is_5x5 && subsampling_height == 1 && subsampling_width == 1 &&
+    input_padding_top == 2 && input_padding_left == 2 && input_padding_bottom == 2 && input_padding_right == 2 &&
+    !nhwc_input && group_input_channels == 1 && group_output_channels == 1)
+  {
+    *ukernel_type = xnn_microkernel_type_dwconv;
+    *dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_5x5;
+  } else if (is_5x5 && subsampling_height == 2 && subsampling_width == 2 &&
+    (input_padding_top == 1 || input_padding_top == 2) && input_padding_left == 2 && input_padding_bottom == 2 && input_padding_right == 2 &&
+    !nhwc_input && group_input_channels == 1 && group_output_channels == 1)
+  {
+    *ukernel_type = xnn_microkernel_type_dwconv;
+    *dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_5x5s2;
+  } else {
+    xnn_log_error(
+      "failed to create %s operator with %" PRIu32 "x%" PRIu32 " kernel, %"PRIu32 "x%" PRIu32 " subsampling, %"PRIu32 "x%" PRIu32 " dilation"
+      ", %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding, %" PRIu32 "x%zu input channels, and %" PRIu32 "x%zu output channels: "
+      "only selected convolution parameters are supported",
+      xnn_operator_type_to_string(operator_type),
+      kernel_width, kernel_height, subsampling_width, subsampling_height, dilation_width, dilation_height,
+      input_padding_top, input_padding_left, input_padding_bottom, input_padding_right,
+      groups, group_input_channels, groups, group_output_channels);
+    return xnn_status_unsupported_parameter;
+  }
+  return xnn_status_success;
+}
+
+static enum xnn_status create_convolution2d_nchw(
+    const struct conv2d_variant* variant,
     uint32_t input_padding_top,
     uint32_t input_padding_right,
     uint32_t input_padding_bottom,
@@ -292,8 +544,8 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
   xnn_operator_t convolution_op = NULL;
   enum xnn_status status = xnn_status_uninitialized;
 
-  const size_t log2_filter_element_size = XNN_LOG2_SIZEOF_FLOAT16;
-  const enum xnn_operator_type operator_type = xnn_operator_type_convolution_nchw_f16;
+  const size_t log2_filter_element_size = variant->log2_filter_element_size;
+  const enum xnn_operator_type operator_type = variant->operator_type;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
@@ -379,13 +631,11 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
     goto error;
   }
 
-  const xnn_float16 fp16_output_min = xnn_float16_from_float(output_min);
-  const xnn_float16 fp16_output_max = xnn_float16_from_float(output_max);
-  const float rounded_output_min = xnn_float16_to_float(fp16_output_min);
-  const float rounded_output_max = xnn_float16_to_float(fp16_output_max);
-  if (rounded_output_min >= rounded_output_max) {
+  const float rounded_output_min = variant->round_float_value(output_min);
+  const float rounded_output_max = variant->round_float_value(output_max);
+  if (rounded_output_min > rounded_output_max) {
     xnn_log_error(
-      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be less than or equal to upper bound",
       xnn_operator_type_to_string(operator_type), rounded_output_min, rounded_output_max);
     goto error;
   }
@@ -400,76 +650,48 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
 
   status = xnn_status_unsupported_hardware;
 
-  const struct xnn_spmm_config* spmm_config = xnn_init_f16_spmm_config();
+  const struct xnn_spmm_config* spmm_config = variant->init_spmm_config();
   if (spmm_config == NULL) {
-    xnn_log_error("failed to create %s operator: operations on data type are not supported",
-      xnn_operator_type_to_string(operator_type));
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(operator_type));
     goto error;
   }
+  const struct xnn_spmm_config* spmm2_config = NULL;
+  if (variant->init_spmm2_config) {
+    if ((spmm2_config = variant->init_spmm2_config()) == NULL) {
+      xnn_log_error(
+          "failed to create %s operator: unsupported hardware configuration",
+          xnn_operator_type_to_string(operator_type));
+      goto error;
+    }
+  }
+  const struct xnn_spmm_config* spmm4_config = NULL;
+  if (variant->init_spmm4_config) {
+    if ((spmm4_config = variant->init_spmm4_config()) == NULL) {
+      xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(operator_type));
+      goto error;
+    }
+  }
 
-  const struct xnn_dwconv2d_chw_config* dwconv2d_chw_config = xnn_init_f16_dwconv2d_chw_config();
+  const struct xnn_dwconv2d_chw_config* dwconv2d_chw_config = variant->init_dwconv2d_chw_config();
   if (dwconv2d_chw_config == NULL) {
     xnn_log_error("failed to create %s operator: operations on data type are not supported",
       xnn_operator_type_to_string(operator_type));
     goto error;
   }
 
-  status = xnn_status_unsupported_parameter;
-
   enum xnn_microkernel_type ukernel_type;
   const struct xnn_dwconv2d_chw_parameters* dwconv2d_parameters = NULL;
-  // Supported cases:
-  // + 1x1 convolution (no groups)
-  // + 3x3 stride-2 with 3 input channels and NHWC input layout
-  // + 3x3 stride-2 depthwise convolution with horizontal padding 1 & no vertical padding
-  // + 3x3 stride-1 depthwise convolution with horizontal padding 1 & no vertical padding
-  // + 5x5 stride-2 depthwise convolution with horizontal padding 2 & no vertical padding
-  // + 5x5 stride-1 depthwise convolution with horizontal padding 2 & no vertical padding
-  const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
-  const bool is_1x1 = kernel_width == 1 && kernel_height == 1 && subsampling_height == 1 && subsampling_width == 1;
-  const bool is_3x3 = kernel_width == 3 && kernel_height == 3 && dilation_height == 1 && dilation_width == 1;
-  const bool is_5x5 = kernel_width == 5 && kernel_height == 5 && dilation_height == 1 && dilation_width == 1;
-  const bool nhwc_input = (flags & XNN_FLAG_INPUT_NHWC) != 0;
-  if (is_1x1 && !any_padding && !nhwc_input && groups == 1) {
-    ukernel_type = xnn_microkernel_type_spmm;
-  } else if (is_3x3 && subsampling_height == 2 && subsampling_width == 2 &&
-    input_padding_top == 1 && input_padding_left == 1 && input_padding_bottom == 1 && input_padding_right == 1 &&
-    nhwc_input && groups == 1)
-  {
-    ukernel_type = xnn_microkernel_type_conv2d_hwc2chw;
-  } else if (is_3x3 && subsampling_height == 1 && subsampling_width == 1 &&
-    input_padding_top == 1 && input_padding_left == 1 && input_padding_bottom == 1 && input_padding_right == 1 &&
-    !nhwc_input && group_input_channels == 1 && group_output_channels == 1)
-  {
-    ukernel_type = xnn_microkernel_type_dwconv;
-    dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_3x3;
-  } else if (is_3x3 && subsampling_height == 2 && subsampling_width == 2 &&
-    (input_padding_top == 0 || input_padding_top == 1) && input_padding_left == 1 && input_padding_bottom == 1 && input_padding_right == 1 &&
-    !nhwc_input && group_input_channels == 1 && group_output_channels == 1)
-  {
-    ukernel_type = xnn_microkernel_type_dwconv;
-    dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_3x3s2;
-  } else if (is_5x5 && subsampling_height == 1 && subsampling_width == 1 &&
-    input_padding_top == 2 && input_padding_left == 2 && input_padding_bottom == 2 && input_padding_right == 2 &&
-    !nhwc_input && group_input_channels == 1 && group_output_channels == 1)
-  {
-    ukernel_type = xnn_microkernel_type_dwconv;
-    dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_5x5;
-  } else if (is_5x5 && subsampling_height == 2 && subsampling_width == 2 &&
-    (input_padding_top == 1 || input_padding_top == 2) && input_padding_left == 2 && input_padding_bottom == 2 && input_padding_right == 2 &&
-    !nhwc_input && group_input_channels == 1 && group_output_channels == 1)
-  {
-    ukernel_type = xnn_microkernel_type_dwconv;
-    dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_5x5s2;
-  } else {
-    xnn_log_error(
-      "failed to create %s operator with %" PRIu32 "x%" PRIu32 " kernel, %"PRIu32 "x%" PRIu32 " subsampling, %"PRIu32 "x%" PRIu32 " dilation"
-      ", %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding, %" PRIu32 "x%zu input channels, and %" PRIu32 "x%zu output channels: "
-      "only selected convolution parameters are supported",
-      xnn_operator_type_to_string(operator_type),
-      kernel_width, kernel_height, subsampling_width, subsampling_height, dilation_width, dilation_height,
-      input_padding_top, input_padding_left, input_padding_bottom, input_padding_right,
-      groups, group_input_channels, groups, group_output_channels);
+  status = select_convolution2d_ukernel(
+      &ukernel_type, &dwconv2d_parameters, input_padding_top,
+      input_padding_right, input_padding_bottom, input_padding_left,
+      kernel_height, kernel_width, subsampling_height, subsampling_width,
+      dilation_height, dilation_width, groups, group_input_channels,
+      group_output_channels, flags, dwconv2d_chw_config, operator_type);
+  if (status != xnn_status_success) {
     goto error;
   }
 
@@ -503,84 +725,54 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
   }
 
   switch (ukernel_type) {
-    case xnn_microkernel_type_spmm:
-    {
+    case xnn_microkernel_type_spmm: {
       xnn_analyze_spmm_w_fn xnn_analyze_spmm;
       xnn_pack_spmm_w_fn xnn_pack_spmm;
-      if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
-        xnn_analyze_spmm = (xnn_analyze_spmm_w_fn) xnn_analyze_f32_spmm_w;
-        xnn_pack_spmm = (xnn_pack_spmm_w_fn) xnn_pack_f32_to_f16_spmm_w;
-      } else {
-        xnn_analyze_spmm = (xnn_analyze_spmm_w_fn) xnn_analyze_f16_spmm_w;
-        xnn_pack_spmm = (xnn_pack_spmm_w_fn) xnn_pack_f16_spmm_w;
-      }
-
-      spmm_config->init.f16(&convolution_op->params.f16_minmax, fp16_output_min, fp16_output_max);
+      variant->init_spmm(&xnn_analyze_spmm, &xnn_pack_spmm, convolution_op,
+                        output_min, output_max, flags, spmm_config);
 
       status = create_spmm_path(
-          kernel_height, kernel_width, groups,
-          group_input_channels, group_output_channels,
-          kernel, bias, log2_filter_element_size,
-          xnn_analyze_spmm, xnn_pack_spmm,
-          spmm_config, NULL, NULL,
-          operator_type, convolution_op);
+          kernel_height, kernel_width, groups, group_input_channels,
+          group_output_channels, kernel, bias, log2_filter_element_size,
+          xnn_analyze_spmm, xnn_pack_spmm, spmm_config, spmm2_config,
+          spmm4_config, operator_type, convolution_op);
       if (status != xnn_status_success) {
         goto error;
       }
       break;
     }
-    case xnn_microkernel_type_conv2d_hwc2chw:
-    {
-      assert(groups == 1);
-      xnn_pack_dconv_oki_w_fn xnn_pack_dconv_oki_w = (xnn_pack_dconv_oki_w_fn) xnn_pack_f16_dconv_oki_w;
-      if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
-        xnn_pack_dconv_oki_w = (xnn_pack_dconv_oki_w_fn) xnn_pack_f32_to_f16_dconv_oki_w;
-      }
-
-      const struct xnn_conv_hwc2chw_config* conv_hwc2chw_config = xnn_init_f16_conv_hwc2chw_3x3c3s2_config();
-      if (conv_hwc2chw_config == NULL) {
-        status = xnn_status_unsupported_hardware;
-        xnn_log_error("failed to create %s operator: operations on data type are not supported",
-                      xnn_operator_type_to_string(operator_type));
+    case xnn_microkernel_type_conv2d_hwc2chw: {
+      xnn_pack_dconv_oki_w_fn xnn_pack_dconv_oki_w;
+      const struct xnn_conv_hwc2chw_config* conv_hwc2chw_config;
+      status = variant->init_conv_hwc2chw(
+          &xnn_pack_dconv_oki_w, &conv_hwc2chw_config, convolution_op, flags,
+          output_min, output_max, operator_type);
+      if (status != xnn_status_success) {
         goto error;
       }
-
-      conv_hwc2chw_config->init.f16(&convolution_op->params.f16_minmax, fp16_output_min, fp16_output_max);
-
       status = create_conv2d_hwc2chw_path(
-          kernel_height, kernel_width, groups,
-          group_input_channels,
-          group_output_channels,
-          conv_hwc2chw_config->output_height_tile,
-          conv_hwc2chw_config->output_channel_tile,
-          kernel, bias, log2_filter_element_size,
-          xnn_pack_dconv_oki_w,
-          conv_hwc2chw_config->ukernel_with_symm_padding,
-          operator_type, convolution_op);
+          kernel_height, kernel_width, groups, group_input_channels,
+          group_output_channels, conv_hwc2chw_config->output_height_tile,
+          conv_hwc2chw_config->output_channel_tile, kernel, bias,
+          log2_filter_element_size, xnn_pack_dconv_oki_w,
+          conv_hwc2chw_config->ukernel_with_symm_padding, operator_type,
+          convolution_op);
       if (status != xnn_status_success) {
         goto error;
       }
       break;
     }
-    case xnn_microkernel_type_dwconv:
-    {
-      xnn_pack_chw_dwconv_hwg_w_fn pack_chw_dwconv_hwg_w = (xnn_pack_chw_dwconv_hwg_w_fn) xnn_pack_f16_chw_dwconv_hwg_w;
-      xnn_pack_chw_dwconv_ghw_w_fn pack_chw_dwconv_ghw_w = (xnn_pack_chw_dwconv_ghw_w_fn) xnn_pack_f16_chw_dwconv_ghw_w;
-      if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
-        pack_chw_dwconv_hwg_w = (xnn_pack_chw_dwconv_hwg_w_fn) xnn_pack_f32_to_f16_chw_dwconv_hwg_w;
-        pack_chw_dwconv_ghw_w = (xnn_pack_chw_dwconv_ghw_w_fn) xnn_pack_f32_to_f16_chw_dwconv_ghw_w;
-      }
-
-      dwconv2d_parameters->init.f16(&convolution_op->params.f16_chw, fp16_output_min, fp16_output_max);
-
+    case xnn_microkernel_type_dwconv: {
+      xnn_pack_chw_dwconv_hwg_w_fn pack_chw_dwconv_hwg_w;
+      xnn_pack_chw_dwconv_ghw_w_fn pack_chw_dwconv_ghw_w;
+      variant->init_dwconv(&pack_chw_dwconv_hwg_w, &pack_chw_dwconv_ghw_w,
+                          dwconv2d_parameters, convolution_op, flags,
+                          output_min, output_max);
       status = create_dwconv_path(
-          kernel_height, kernel_width, groups,
-          kernel, bias, flags, log2_filter_element_size,
-          pack_chw_dwconv_hwg_w,
-          pack_chw_dwconv_ghw_w,
-          dwconv2d_parameters->output_width_tile,
-          dwconv2d_parameters->ukernel,
-          operator_type, convolution_op);
+          kernel_height, kernel_width, groups, kernel, bias, flags,
+          log2_filter_element_size, pack_chw_dwconv_hwg_w,
+          pack_chw_dwconv_ghw_w, dwconv2d_parameters->output_width_tile,
+          dwconv2d_parameters->ukernel, operator_type, convolution_op);
       if (status != xnn_status_success) {
         goto error;
       }
@@ -620,6 +812,307 @@ error:
   return status;
 }
 
+struct fingerprint_parameters {
+  uint32_t kernel_width;
+  uint32_t kernel_height;
+  uint32_t dilation_height;
+  uint32_t dilation_width;
+  uint32_t subsampling_height;
+  uint32_t subsampling_width;
+  uint32_t input_padding_top;
+  uint32_t input_padding_left;
+  uint32_t input_padding_bottom;
+  uint32_t input_padding_right;
+  uint32_t groups;
+  uint32_t group_input_channels;
+  uint32_t group_output_channels;
+  uint32_t input_channel_stride;
+  uint32_t output_channel_stride;
+  uint32_t flags;
+};
+
+static const struct fingerprint_parameters
+    fingerprint_parameters_conv2d_hwc2chw = {
+        .kernel_width = 3,
+        .kernel_height = 3,
+        .dilation_height = 1,
+        .dilation_width = 1,
+        .subsampling_height = 2,
+        .subsampling_width = 2,
+        .input_padding_top = 1,
+        .input_padding_left = 1,
+        .input_padding_bottom = 1,
+        .input_padding_right = 1,
+        .groups = 1,
+        .group_input_channels = 3,
+        .group_output_channels = 1,
+        .input_channel_stride = 3,
+        .output_channel_stride = 1,
+        .flags = XNN_FLAG_INPUT_NHWC,
+};
+
+static const struct fingerprint_parameters
+    fingerprint_parameters_conv2d_hwc2chw_fp32_static_weights = {
+        .kernel_width = 3,
+        .kernel_height = 3,
+        .dilation_height = 1,
+        .dilation_width = 1,
+        .subsampling_height = 2,
+        .subsampling_width = 2,
+        .input_padding_top = 1,
+        .input_padding_left = 1,
+        .input_padding_bottom = 1,
+        .input_padding_right = 1,
+        .groups = 1,
+        .group_input_channels = 3,
+        .group_output_channels = 1,
+        .input_channel_stride = 3,
+        .output_channel_stride = 1,
+        .flags = XNN_FLAG_INPUT_NHWC | XNN_FLAG_FP32_STATIC_WEIGHTS,
+};
+
+static const struct fingerprint_parameters fingerprint_parameters_dwconv = {
+    .kernel_width = 3,
+    .kernel_height = 3,
+    .dilation_height = 1,
+    .dilation_width = 1,
+    .subsampling_height = 1,
+    .subsampling_width = 1,
+    .input_padding_top = 1,
+    .input_padding_left = 1,
+    .input_padding_bottom = 1,
+    .input_padding_right = 1,
+    .groups = 1,
+    .group_input_channels = 1,
+    .group_output_channels = 1,
+    .input_channel_stride = 1,
+    .output_channel_stride = 1,
+    .flags = 0,
+};
+
+static const struct fingerprint_parameters
+    fingerprint_parameters_dwconv_fp32_static_weights = {
+        .kernel_width = 3,
+        .kernel_height = 3,
+        .dilation_height = 1,
+        .dilation_width = 1,
+        .subsampling_height = 1,
+        .subsampling_width = 1,
+        .input_padding_top = 1,
+        .input_padding_left = 1,
+        .input_padding_bottom = 1,
+        .input_padding_right = 1,
+        .groups = 1,
+        .group_input_channels = 1,
+        .group_output_channels = 1,
+        .input_channel_stride = 1,
+        .output_channel_stride = 1,
+        .flags = XNN_FLAG_FP32_STATIC_WEIGHTS,
+};
+
+struct fingerprint_buffers {
+  void* data;
+  void* kernel;
+  void* bias;
+};
+
+static struct fingerprint_buffers generate_fingerprint_data(
+    const struct fingerprint_parameters* params, const size_t element_size) {
+  const size_t kernel_size = params->kernel_width * params->kernel_height *
+                             params->group_input_channels *
+                             params->group_output_channels * params->groups;
+  const size_t bias_size = params->group_output_channels * params->groups;
+  const size_t bytes = (kernel_size + bias_size) * element_size;
+  uint8_t* buffer = xnn_allocate_memory(bytes);
+  fill_fingerprint_buffer(buffer, bytes);
+  return (struct fingerprint_buffers){
+      .data = buffer,
+      .kernel = buffer,
+      .bias = buffer + kernel_size,
+  };
+}
+
+enum xnn_status xnn_fingerprint_convolution2d_nchw(
+    const enum xnn_fingerprint_id fingerprint_id) {
+  struct fingerprint_parameters params;
+  const struct conv2d_variant* variant = NULL;
+  switch (fingerprint_id) {
+    case xnn_fingerprint_id_no_fingerprint:
+      return xnn_status_success;
+    case xnn_fingerprint_id_convolution2d_nchw_f16_conv2d_hwc2chw:
+      params = fingerprint_parameters_conv2d_hwc2chw;
+      variant = &f16_conv;
+      break;
+    case xnn_fingerprint_id_convolution2d_nchw_f32_conv2d_hwc2chw:
+      params = fingerprint_parameters_conv2d_hwc2chw;
+      variant = &f32_conv;
+      break;
+    case xnn_fingerprint_id_convolution2d_nchw_f16_conv2d_hwc2chw_fp32_static_weights:
+      params = fingerprint_parameters_conv2d_hwc2chw_fp32_static_weights;
+      variant = &f16_conv;
+      break;
+    case xnn_fingerprint_id_convolution2d_nchw_f16_dwconv:
+      params = fingerprint_parameters_dwconv;
+      variant = &f16_conv;
+      break;
+    case xnn_fingerprint_id_convolution2d_nchw_f32_dwconv:
+      params = fingerprint_parameters_dwconv;
+      variant = &f32_conv;
+      break;
+    case xnn_fingerprint_id_convolution2d_nchw_f16_dwconv_fp32_static_weights:
+      params = fingerprint_parameters_dwconv_fp32_static_weights;
+      variant = &f16_conv;
+      break;
+    default:
+      xnn_log_error("Unknown fingerprint ID for convolution 2D NHWC: %d.", fingerprint_id);
+      return xnn_status_invalid_parameter;
+  }
+  struct fingerprint_context context =
+      create_fingerprint_context(fingerprint_id);
+  if (context.status != xnn_status_uninitialized) {
+    if (context.status != xnn_status_success) {
+      xnn_log_error("Error creating fingerprint context for convolution 2D NHWC: %d.", fingerprint_id);
+    }
+    return context.status;
+  }
+  const struct fingerprint_buffers data = generate_fingerprint_data(
+      &params, 1 << variant->log2_filter_element_size);
+  enum xnn_status status = create_convolution2d_nchw(
+      variant, params.input_padding_top, params.input_padding_right,
+      params.input_padding_bottom, params.input_padding_left,
+      params.kernel_height, params.kernel_width, params.subsampling_height,
+      params.subsampling_width, params.dilation_height, params.dilation_width,
+      params.groups, params.group_input_channels, params.group_output_channels,
+      params.input_channel_stride, params.output_channel_stride, data.kernel,
+      data.bias, /*output_min=*/FLT_MIN, /*output_max=*/FLT_MAX, params.flags,
+      &context.cache, &context.op);
+  finalize_fingerprint_context(&context);
+  return status;
+}
+
+static enum xnn_fingerprint_id get_fingerprint_for(
+    const struct conv2d_variant* variant,
+    uint32_t input_padding_top,
+    uint32_t input_padding_right,
+    uint32_t input_padding_bottom,
+    uint32_t input_padding_left,
+    uint32_t kernel_height,
+    uint32_t kernel_width,
+    uint32_t subsampling_height,
+    uint32_t subsampling_width,
+    uint32_t dilation_height,
+    uint32_t dilation_width,
+    uint32_t groups,
+    size_t group_input_channels,
+    size_t group_output_channels,
+    uint32_t flags)
+{
+  // Get the microkernel type.
+  //
+  // We can use a dummy config here. We're only interested in the microkernel
+  // type populated by `select_convolution2d_ukernel()`.
+  enum xnn_microkernel_type microkernel_type;
+  {
+    struct xnn_dwconv2d_chw_config dummy_config = {};
+    const struct xnn_dwconv2d_chw_parameters* dummy_parameters = NULL;
+    select_convolution2d_ukernel(
+        &microkernel_type, &dummy_parameters, input_padding_top,
+        input_padding_right, input_padding_bottom, input_padding_left,
+        kernel_height, kernel_width, subsampling_height, subsampling_width,
+        dilation_height, dilation_width, groups, group_input_channels,
+        group_output_channels, flags, &dummy_config, variant->operator_type);
+  }
+
+  // Compute the index in a static map of cases.
+  uint32_t index = 0;
+  // Bit 2: operator type.
+  switch (variant->operator_type) {
+    case xnn_operator_type_convolution_nchw_f16:
+      index |= 0 << 2;
+      break;
+    case xnn_operator_type_convolution_nchw_f32:
+      index |= 1 << 2;
+      break;
+    default:
+      xnn_log_error("Unknown operator type for convolution 2D NHWC: %d.", variant->operator_type);
+      return xnn_fingerprint_id_unknown;
+  }
+  // Bit 1: microkernel type.
+  switch (microkernel_type) {
+    case xnn_microkernel_type_conv2d_hwc2chw:
+      index |= 0 << 1;
+      break;
+    case xnn_microkernel_type_dwconv:
+      index |= 1 << 1;
+      break;
+    case xnn_microkernel_type_spmm:
+      return xnn_fingerprint_id_no_fingerprint;
+    default:
+      xnn_log_error("Unknown microkernel type for convolution 2D NHWC: %d.", microkernel_type);
+      return xnn_fingerprint_id_unknown;
+  }
+  // Bit 0: are the weights provided as f32 for an f16 operator?
+  if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
+    index |= 1 << 0;
+  }
+
+  const enum xnn_fingerprint_id id_map[] = {
+    xnn_fingerprint_id_convolution2d_nchw_f16_conv2d_hwc2chw,
+    xnn_fingerprint_id_convolution2d_nchw_f16_conv2d_hwc2chw_fp32_static_weights,
+    xnn_fingerprint_id_convolution2d_nchw_f16_dwconv,
+    xnn_fingerprint_id_convolution2d_nchw_f16_dwconv_fp32_static_weights,
+    xnn_fingerprint_id_convolution2d_nchw_f32_conv2d_hwc2chw,
+    xnn_fingerprint_id_unknown,
+    xnn_fingerprint_id_convolution2d_nchw_f32_dwconv,
+    xnn_fingerprint_id_unknown,
+  };
+  assert(index < sizeof(id_map) / sizeof(id_map[0]));
+  return id_map[index];
+}
+
+enum xnn_status xnn_create_convolution2d_nchw_f16(
+    uint32_t input_padding_top,
+    uint32_t input_padding_right,
+    uint32_t input_padding_bottom,
+    uint32_t input_padding_left,
+    uint32_t kernel_height,
+    uint32_t kernel_width,
+    uint32_t subsampling_height,
+    uint32_t subsampling_width,
+    uint32_t dilation_height,
+    uint32_t dilation_width,
+    uint32_t groups,
+    size_t group_input_channels,
+    size_t group_output_channels,
+    size_t input_channel_stride,
+    size_t output_channel_stride,
+    const void* kernel,
+    const void* bias,
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_weights_cache_t weights_cache,
+    xnn_operator_t* convolution_op_out)
+{
+  const enum xnn_fingerprint_id fingerprint_id = get_fingerprint_for(
+      &f16_conv, input_padding_top, input_padding_right, input_padding_bottom,
+      input_padding_left, kernel_height, kernel_width, subsampling_height,
+      subsampling_width, dilation_height, dilation_width, groups,
+      group_input_channels, group_output_channels, flags);
+  enum xnn_status status = xnn_fingerprint_convolution2d_nchw(fingerprint_id);
+  if (status != xnn_status_success) {
+    xnn_log_error("Failed fingerprinting %s.", xnn_operator_type_to_string(f16_conv.operator_type));
+    return status;
+  }
+
+  return create_convolution2d_nchw(
+      &f16_conv, input_padding_top, input_padding_right, input_padding_bottom,
+      input_padding_left, kernel_height, kernel_width, subsampling_height,
+      subsampling_width, dilation_height, dilation_width, groups,
+      group_input_channels, group_output_channels, input_channel_stride,
+      output_channel_stride, kernel, bias, output_min, output_max, flags,
+      weights_cache, convolution_op_out);
+}
 
 enum xnn_status xnn_create_convolution2d_nchw_f32(
     uint32_t input_padding_top,
@@ -645,326 +1138,23 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
-  xnn_operator_t convolution_op = NULL;
-  enum xnn_status status = xnn_status_uninitialized;
-  const size_t log2_filter_element_size = XNN_LOG2_SIZEOF_FLOAT;
-  const enum xnn_operator_type operator_type = xnn_operator_type_convolution_nchw_f32;
-
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(operator_type));
-    goto error;
+  const enum xnn_fingerprint_id fingerprint_id = get_fingerprint_for(
+      &f16_conv, input_padding_top, input_padding_right, input_padding_bottom,
+      input_padding_left, kernel_height, kernel_width, subsampling_height,
+      subsampling_width, dilation_height, dilation_width, groups,
+      group_input_channels, group_output_channels, flags);
+  enum xnn_status status = xnn_fingerprint_convolution2d_nchw(fingerprint_id);
+  if (status != xnn_status_success) {
+    xnn_log_error("Failed fingerprinting %s.", xnn_operator_type_to_string(f32_conv.operator_type));
+    return status;
   }
-
-  status = xnn_status_invalid_parameter;
-
-  if (kernel_width == 0 || kernel_height == 0) {
-    xnn_log_error(
-      "failed to create %s operator with %" PRIu32 "x%" PRIu32 " kernel: kernel dimensions must be non-zero",
-      xnn_operator_type_to_string(operator_type), kernel_width, kernel_height);
-    goto error;
-  }
-
-  if (subsampling_width == 0 || subsampling_height == 0) {
-    xnn_log_error(
-      "failed to create %s operator with %" PRIu32 "x%" PRIu32 " subsampling: subsampling dimensions must be non-zero",
-      xnn_operator_type_to_string(operator_type), subsampling_width, subsampling_height);
-    goto error;
-  }
-
-  if (dilation_width == 0 || dilation_height == 0) {
-    xnn_log_error(
-      "failed to create %s operator with %" PRIu32 "x%" PRIu32 " dilation: dilation dimensions must be non-zero",
-      xnn_operator_type_to_string(operator_type), dilation_width, dilation_height);
-    goto error;
-  }
-
-  if (groups == 0) {
-    xnn_log_error(
-      "failed to create %s operator with %" PRIu32 " groups: number of groups must be non-zero",
-      xnn_operator_type_to_string(operator_type), groups);
-    goto error;
-  }
-
-  if (group_input_channels == 0) {
-    xnn_log_error(
-      "failed to create %s operator with %zu input channels per group: number of channels must be non-zero",
-      xnn_operator_type_to_string(operator_type), group_input_channels);
-    goto error;
-  }
-
-  if (group_output_channels == 0) {
-    xnn_log_error(
-      "failed to create %s operator with %zu output channels per group: number of channels must be non-zero",
-      xnn_operator_type_to_string(operator_type), group_output_channels);
-    goto error;
-  }
-
-  const size_t input_channels = groups * group_input_channels;
-  if (input_channel_stride < input_channels) {
-    xnn_log_error(
-      "failed to create %s operator with input channel stride of %zu: "
-      "stride must be at least as large as the number of input channels (%" PRIu32 "x%zu)",
-      xnn_operator_type_to_string(operator_type),
-      input_channel_stride, groups, group_input_channels);
-    goto error;
-  }
-
-  const size_t output_channels = groups * group_output_channels;
-  if (output_channel_stride < output_channels) {
-    xnn_log_error(
-      "failed to create %s operator with output channel stride of %zu: "
-      "stride must be at least as large as the number of output channels (%" PRIu32 "x%zu)",
-      xnn_operator_type_to_string(operator_type),
-      output_channel_stride, groups, group_output_channels);
-    goto error;
-  }
-
-  if (isnan(output_min)) {
-    xnn_log_error(
-      "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
-      xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-
-  if (isnan(output_max)) {
-    xnn_log_error(
-      "failed to create %s operator with NaN output upper bound: upper bound must be non-NaN",
-      xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-
-  if (output_min > output_max) {
-    xnn_log_error(
-      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be less than or equal to upper bound",
-      xnn_operator_type_to_string(operator_type), output_min, output_max);
-    goto error;
-  }
-
-  if ((flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) != 0 && group_input_channels != 1) {
-    xnn_log_error(
-      "failed to create depthwise %s operator with %zu input channels per group: "
-      "depthwise convolution must have exactly 1 input channel per group",
-      xnn_operator_type_to_string(operator_type), group_input_channels);
-    goto error;
-  }
-
-  status = xnn_status_unsupported_hardware;
-
-  const struct xnn_dwconv2d_chw_config* dwconv2d_chw_config = xnn_init_f32_dwconv2d_chw_config();
-  if (dwconv2d_chw_config == NULL) {
-    xnn_log_error("failed to create %s operator: operations on data type are not supported",
-      xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-
-  status = xnn_status_unsupported_parameter;
-
-  enum xnn_microkernel_type ukernel_type;
-  const struct xnn_dwconv2d_chw_parameters* dwconv2d_parameters = NULL;
-  // Supported cases:
-  // + 1x1 convolution (no groups)
-  // + 3x3 stride-2 with 3 input channels and NHWC input layout
-  // + 3x3 stride-2 depthwise convolution with horizontal padding 1 & no vertical padding
-  // + 3x3 stride-1 depthwise convolution with horizontal padding 1 & no vertical padding
-  // + 5x5 stride-2 depthwise convolution with horizontal padding 2 & no vertical padding
-  // + 5x5 stride-1 depthwise convolution with horizontal padding 2 & no vertical padding
-  const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
-  const bool is_1x1 = kernel_width == 1 && kernel_height == 1 && subsampling_height == 1 && subsampling_width == 1;
-  const bool is_3x3 = kernel_width == 3 && kernel_height == 3 && dilation_height == 1 && dilation_width == 1;
-  const bool is_5x5 = kernel_width == 5 && kernel_height == 5 && dilation_height == 1 && dilation_width == 1;
-  const bool nhwc_input = (flags & XNN_FLAG_INPUT_NHWC) != 0;
-  if (is_1x1 && !any_padding && !nhwc_input && groups == 1) {
-    ukernel_type = xnn_microkernel_type_spmm;
-  } else if (is_3x3 && subsampling_height == 2 && subsampling_width == 2 &&
-    input_padding_top == 1 && input_padding_left == 1 && input_padding_bottom == 1 && input_padding_right == 1 &&
-    nhwc_input && groups == 1)
-  {
-    ukernel_type = xnn_microkernel_type_conv2d_hwc2chw;
-  } else if (is_3x3 && subsampling_height == 1 && subsampling_width == 1 &&
-    input_padding_top == 1 && input_padding_left == 1 && input_padding_bottom == 1 && input_padding_right == 1 &&
-    !nhwc_input && group_input_channels == 1 && group_output_channels == 1)
-  {
-    ukernel_type = xnn_microkernel_type_dwconv;
-    dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_3x3;
-  } else if (is_3x3 && subsampling_height == 2 && subsampling_width == 2 &&
-    (input_padding_top == 0 || input_padding_top == 1) && input_padding_left == 1 && input_padding_bottom == 1 && input_padding_right == 1 &&
-    !nhwc_input && group_input_channels == 1 && group_output_channels == 1)
-  {
-    ukernel_type = xnn_microkernel_type_dwconv;
-    dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_3x3s2;
-  } else if (is_5x5 && subsampling_height == 1 && subsampling_width == 1 &&
-    input_padding_top == 2 && input_padding_left == 2 && input_padding_bottom == 2 && input_padding_right == 2 &&
-    !nhwc_input && group_input_channels == 1 && group_output_channels == 1)
-  {
-    ukernel_type = xnn_microkernel_type_dwconv;
-    dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_5x5;
-  } else if (is_5x5 && subsampling_height == 2 && subsampling_width == 2 &&
-    (input_padding_top == 1 || input_padding_top == 2) && input_padding_left == 2 && input_padding_bottom == 2 && input_padding_right == 2 &&
-    !nhwc_input && group_input_channels == 1 && group_output_channels == 1)
-  {
-    ukernel_type = xnn_microkernel_type_dwconv;
-    dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_5x5s2;
-  } else {
-    xnn_log_error(
-      "failed to create %s operator with %" PRIu32 "x%" PRIu32 " kernel, %"PRIu32 "x%" PRIu32 " subsampling, %"PRIu32 "x%" PRIu32 " dilation"
-      ", %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding, %" PRIu32 "x%zu input channels, and %" PRIu32 "x%zu output channels: "
-      "only selected convolution parameters are supported",
-      xnn_operator_type_to_string(operator_type),
-      kernel_width, kernel_height, subsampling_width, subsampling_height, dilation_width, dilation_height,
-      input_padding_top, input_padding_left, input_padding_bottom, input_padding_right,
-      groups, group_input_channels, groups, group_output_channels);
-    goto error;
-  }
-
-  status = xnn_status_out_of_memory;
-
-  convolution_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
-  if (convolution_op == NULL) {
-    xnn_log_error(
-      "failed to allocate %zu bytes for %s operator descriptor",
-      sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-  convolution_op->compute = xnn_allocate_zero_memory(sizeof(struct compute_parameters));
-  if (convolution_op->compute == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
-                  sizeof(struct compute_parameters),
-                  xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-  convolution_op->num_compute_invocations = 1;
-  convolution_op->convolution_op = xnn_allocate_zero_memory(sizeof(struct xnn_convolution_operator));
-  if (convolution_op->convolution_op == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
-                  sizeof(struct xnn_convolution_operator),
-                  xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-
-  if (ukernel_type != xnn_microkernel_type_spmm) {
-    convolution_op->weights_cache = weights_cache;
-  }
-
-  const struct xnn_spmm_config* spmm_config = xnn_init_f32_spmm_config();
-  if (spmm_config == NULL) {
-    xnn_log_error(
-      "failed to create %s operator: unsupported hardware configuration",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
-    return xnn_status_unsupported_hardware;
-  }
-  const struct xnn_spmm_config* spmm2_config = xnn_init_f32_spmm2_config();
-  if (spmm2_config == NULL) {
-    xnn_log_error(
-      "failed to create %s operator: unsupported hardware configuration",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
-    return xnn_status_unsupported_hardware;
-  }
-  const struct xnn_spmm_config* spmm4_config = xnn_init_f32_spmm4_config();
-  if (spmm4_config == NULL) {
-    xnn_log_error(
-      "failed to create %s operator: unsupported hardware configuration",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
-    return xnn_status_unsupported_hardware;
-  }
-
-  switch (ukernel_type) {
-    case xnn_microkernel_type_spmm:
-    {
-      const xnn_analyze_spmm_w_fn xnn_analyze_spmm = (xnn_analyze_spmm_w_fn) xnn_analyze_f32_spmm_w;
-      const xnn_pack_spmm_w_fn xnn_pack_spmm = (xnn_pack_spmm_w_fn) xnn_pack_f32_spmm_w;
-
-      spmm_config->init.f32(&convolution_op->params.f32_minmax, output_min, output_max);
-
-      status = create_spmm_path(
-          kernel_height, kernel_width, groups,
-          group_input_channels, group_output_channels,
-          kernel, bias, log2_filter_element_size,
-          xnn_analyze_spmm, xnn_pack_spmm,
-          spmm_config, spmm2_config, spmm4_config,
-          operator_type, convolution_op);
-      if (status != xnn_status_success) {
-        goto error;
-      }
-      break;
-    }
-    case xnn_microkernel_type_conv2d_hwc2chw:
-    {
-      const struct xnn_conv_hwc2chw_config* conv_hwc2chw_config = xnn_init_f32_conv_hwc2chw_3x3c3s2_config();
-      if (conv_hwc2chw_config == NULL) {
-        status = xnn_status_unsupported_hardware;
-        xnn_log_error("failed to create %s operator: operations on data type are not supported",
-                      xnn_operator_type_to_string(operator_type));
-        goto error;
-      }
-
-      conv_hwc2chw_config->init.f32(&convolution_op->params.f32_minmax, output_min, output_max);
-
-      status = create_conv2d_hwc2chw_path(
-          kernel_height, kernel_width, groups,
-          group_input_channels,
-          group_output_channels,
-          conv_hwc2chw_config->output_height_tile,
-          conv_hwc2chw_config->output_channel_tile,
-          kernel, bias, log2_filter_element_size,
-          (xnn_pack_dconv_oki_w_fn) xnn_pack_f32_dconv_oki_w,
-          conv_hwc2chw_config->ukernel_with_symm_padding,
-          operator_type, convolution_op);
-      if (status != xnn_status_success) {
-        goto error;
-      }
-      break;
-    }
-    case xnn_microkernel_type_dwconv:
-    {
-      dwconv2d_parameters->init.f32(&convolution_op->params.f32_chw, output_min, output_max);
-
-      status = create_dwconv_path(
-          kernel_height, kernel_width, groups,
-          kernel, bias, flags, log2_filter_element_size,
-          (xnn_pack_chw_dwconv_hwg_w_fn) xnn_pack_f32_chw_dwconv_hwg_w,
-          (xnn_pack_chw_dwconv_ghw_w_fn) xnn_pack_f32_chw_dwconv_ghw_w,
-          dwconv2d_parameters->output_width_tile,
-          dwconv2d_parameters->ukernel,
-          operator_type, convolution_op);
-      if (status != xnn_status_success) {
-        goto error;
-      }
-      break;
-    }
-    default:
-      XNN_UNREACHABLE;
-  }
-
-  convolution_op->convolution_op->padding_top = input_padding_top;
-  convolution_op->convolution_op->padding_right = input_padding_right;
-  convolution_op->convolution_op->padding_bottom = input_padding_bottom;
-  convolution_op->convolution_op->padding_left = input_padding_left;
-
-  convolution_op->convolution_op->kernel_height = kernel_height;
-  convolution_op->convolution_op->kernel_width = kernel_width;
-  convolution_op->convolution_op->stride_height = subsampling_height;
-  convolution_op->convolution_op->stride_width = subsampling_width;
-  convolution_op->convolution_op->dilation_height = dilation_height;
-  convolution_op->convolution_op->dilation_width = dilation_width;
-  convolution_op->convolution_op->groups = groups;
-  convolution_op->convolution_op->group_input_channels = group_input_channels;
-  convolution_op->convolution_op->group_output_channels = group_output_channels;
-  convolution_op->input_pixel_stride = input_channel_stride;
-  convolution_op->output_pixel_stride = output_channel_stride;
-
-  convolution_op->type = operator_type;
-  convolution_op->ukernel.type = ukernel_type;
-  convolution_op->flags = flags;
-
-  convolution_op->state = xnn_run_state_invalid;
-
-  *convolution_op_out = convolution_op;
-  return xnn_status_success;
-
-error:
-  xnn_delete_operator(convolution_op);
-  return status;
+  return create_convolution2d_nchw(
+      &f32_conv, input_padding_top, input_padding_right, input_padding_bottom,
+      input_padding_left, kernel_height, kernel_width, subsampling_height,
+      subsampling_width, dilation_height, dilation_width, groups,
+      group_input_channels, group_output_channels, input_channel_stride,
+      output_channel_stride, kernel, bias, output_min, output_max, flags,
+      weights_cache, convolution_op_out);
 }
 
 enum xnn_status xnn_create_convolution2d_nchw_f32_f16(
