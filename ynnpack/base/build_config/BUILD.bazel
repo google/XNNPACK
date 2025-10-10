@@ -1,0 +1,79 @@
+# Copyright 2025 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+#
+# Description:
+#   Build configurations for target platforms.
+
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@bazel_skylib//rules:common_settings.bzl", "string_setting")
+
+package(
+    default_visibility = ["//:__subpackages__"],
+)
+
+config_setting(
+    name = "cpu_armv7",
+    values = {"cpu": "armv7a"},
+)
+
+config_setting(
+    name = "cpu_aarch64",
+    values = {"cpu": "aarch64"},
+)
+
+config_setting(
+    name = "cpu_x86",
+    values = {"cpu": "x86"},
+)
+
+config_setting(
+    name = "cpu_x86_64",
+    values = {"cpu": "x86_64"},
+)
+
+config_setting(
+    name = "cpu_k8",
+    values = {"cpu": "k8"},
+)
+
+# TODO: It's weird that this is combined with the OS. We only want to know if we
+# are targeting arm64. Is there a better way to do this?
+config_setting(
+    name = "cpu_darwin_arm64",
+    values = {"cpu": "darwin_arm64"},
+)
+
+selects.config_setting_group(
+    name = "arm64",
+    match_any = [
+        ":cpu_aarch64",
+        ":cpu_darwin_arm64",
+    ],
+)
+
+selects.config_setting_group(
+    name = "arm32",
+    match_any = [
+        ":cpu_armv7",
+    ],
+)
+
+selects.config_setting_group(
+    name = "arm",
+    match_any = [
+        ":arm32",
+        ":arm64",
+    ],
+)
+
+selects.config_setting_group(
+    name = "x86",
+    match_any = [
+        ":cpu_k8",
+        ":cpu_x86",
+        ":cpu_x86_64",
+    ],
+)
+
