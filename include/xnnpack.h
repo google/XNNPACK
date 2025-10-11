@@ -1,7 +1,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates.
 // All rights reserved.
 //
-// Copyright 2019 Google LLC
+// Copyright 2019-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -15,6 +15,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "src/operators/fingerprint_id.h"
 #include <pthreadpool.h>
 
 #ifdef __cplusplus
@@ -2297,6 +2298,8 @@ struct xnn_weights_cache_look_up_key {
   const void* kernel;
   /// Pointer to the original bias, could be NULL.
   const void* bias;
+
+  enum xnn_fingerprint_id fingerprint_id;
 };
 
 /// A group of function pointers to manage weights cache. All functions may be
