@@ -7,7 +7,9 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <float.h>
 #include <inttypes.h>
+#include <limits.h>
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -15,6 +17,8 @@
 #include <string.h>
 
 #include "include/xnnpack.h"
+#include "src/operators/fingerprint_cache.h"
+#include "src/operators/fingerprint_id.h"
 #include "src/xnnpack/allocator.h"
 #include "src/xnnpack/cache.h"
 #include "src/xnnpack/common.h"
@@ -36,6 +40,46 @@
 #include "src/xnnpack/pack.h"
 #include "src/xnnpack/params.h"
 #include <pthreadpool.h>
+
+#define XNNPACK_OP_TYPE_TO_FINGERPRINT(name) \
+  case xnn_operator_type_##name:             \
+    return xnn_fingerprint_id_##name;
+
+static enum xnn_fingerprint_id get_fingerprint_id(
+    const enum xnn_operator_type operator_type) {
+  switch (operator_type) {
+    XNNPACK_OP_TYPE_TO_FINGERPRINT(fully_connected_nc_f16);
+    XNNPACK_OP_TYPE_TO_FINGERPRINT(fully_connected_nc_pf16);
+    XNNPACK_OP_TYPE_TO_FINGERPRINT(fully_connected_nc_qd8_f16_qc4w);
+    XNNPACK_OP_TYPE_TO_FINGERPRINT(fully_connected_nc_qdu8_f16_qc4w);
+    XNNPACK_OP_TYPE_TO_FINGERPRINT(fully_connected_nc_qd8_f16_qb4w);
+    XNNPACK_OP_TYPE_TO_FINGERPRINT(fully_connected_nc_qd8_f32_qc4w);
+    XNNPACK_OP_TYPE_TO_FINGERPRINT(fully_connected_nc_qdu8_f32_qc4w);
+    XNNPACK_OP_TYPE_TO_FINGERPRINT(fully_connected_nc_qp8_f32_qc4w);
+    XNNPACK_OP_TYPE_TO_FINGERPRINT(fully_connected_nc_qp8_f32_qc8w);
+    XNNPACK_OP_TYPE_TO_FINGERPRINT(fully_connected_nc_qp8_f32_qb4w);
+    XNNPACK_OP_TYPE_TO_FINGERPRINT(fully_connected_nc_qd8_f32_qb4w);
+    XNNPACK_OP_TYPE_TO_FINGERPRINT(fully_connected_nc_qdu8_f32_qb4w);
+    XNNPACK_OP_TYPE_TO_FINGERPRINT(fully_connected_nc_qd8_f32_qc8w);
+    XNNPACK_OP_TYPE_TO_FINGERPRINT(fully_connected_nc_qdu8_f32_qc8w);
+    XNNPACK_OP_TYPE_TO_FINGERPRINT(fully_connected_nc_qd8_f16_qc8w);
+    XNNPACK_OP_TYPE_TO_FINGERPRINT(fully_connected_nc_qdu8_f16_qc8w);
+    XNNPACK_OP_TYPE_TO_FINGERPRINT(fully_connected_nc_bf16_f32);
+    XNNPACK_OP_TYPE_TO_FINGERPRINT(fully_connected_nc_f32);
+    XNNPACK_OP_TYPE_TO_FINGERPRINT(fully_connected_nc_pf32);
+    XNNPACK_OP_TYPE_TO_FINGERPRINT(fully_connected_nc_f32_qc4w);
+    XNNPACK_OP_TYPE_TO_FINGERPRINT(fully_connected_nc_f32_qc8w);
+    XNNPACK_OP_TYPE_TO_FINGERPRINT(fully_connected_nc_qs8);
+    XNNPACK_OP_TYPE_TO_FINGERPRINT(fully_connected_nc_qs8_qc4w);
+    XNNPACK_OP_TYPE_TO_FINGERPRINT(fully_connected_nc_qs8_qc8w);
+    XNNPACK_OP_TYPE_TO_FINGERPRINT(fully_connected_nc_pqs8_qc8w);
+    XNNPACK_OP_TYPE_TO_FINGERPRINT(fully_connected_nc_qu8);
+    default:
+      return xnn_fingerprint_id_unknown;
+  }
+}
+
+#undef XNNPACK_OP_TYPE_TO_FINGERPRINT
 
 static enum xnn_status create_fully_connected_nc(
     size_t input_channels, size_t output_channels, size_t input_stride,
@@ -204,6 +248,7 @@ static enum xnn_status create_fully_connected_nc(
   cache_key.seed = cache_seed;
   cache_key.kernel = kernel;
   cache_key.bias = bias;
+  cache_key.fingerprint_id = get_fingerprint_id(operator_type);
   if (use_weights_cache(fully_connected_op)) {
     cache_offset = xnn_weights_cache_look_up(fully_connected_op->weights_cache,
                                              &cache_key);
@@ -335,6 +380,47 @@ error:
   return status;
 }
 
+struct fake_fingerprint_data {
+  int32_t input_channels;
+  int32_t output_channels;
+  void* kernel;
+  void* bias;
+  void* kernel_scales;
+  void* raw_buffer;
+};
+
+// Generates a buffer that holds fak weights and bias.
+//
+// - The fake weights have input_channels * output_channels elements.
+// - The bias has output_channels elements.
+// - The kernel scale has output_channels elements.
+struct fake_fingerprint_data generate_fingerprint_data(
+    const struct xnn_gemm_config* gemm_config, size_t kernel_scale_element_size) {
+  const int32_t input_channels = max(1 << (gemm_config->log2_kr + gemm_config->log2_sr), XNN_MIN_BLOCKSIZE);
+  const int32_t output_channels = gemm_config->nr;
+  const uint32_t bias_element_size = gemm_config->bias_element_size;
+  const uint32_t kernel_element_size = 1 << gemm_config->log2_filter_element_size;
+  const size_t weights_bytes = input_channels * output_channels * kernel_element_size;
+  const size_t bias_bytes = output_channels * bias_element_size;
+  const size_t kernel_scale_bytes = output_channels * kernel_scale_element_size;
+  const size_t bytes = weights_bytes + bias_bytes + kernel_scale_bytes;
+  uint8_t* buffer = xnn_allocate_memory(bytes);
+  fill_fingerprint_buffer(buffer, bytes);
+  return (struct fake_fingerprint_data){
+      .input_channels = input_channels,
+      .output_channels = output_channels,
+      .kernel = buffer,
+      .bias = buffer + weights_bytes,
+      .kernel_scales = buffer + weights_bytes + bias_bytes,
+      .raw_buffer = buffer,
+  };
+}
+
+void release_fingerprint_data(struct fake_fingerprint_data* const data) {
+  assert(data);
+  xnn_release_memory(data->raw_buffer);
+}
+
 enum xnn_status create_fully_connected_nc_f16(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, const void* kernel, const void* bias,
@@ -407,11 +493,47 @@ enum xnn_status create_fully_connected_nc_f16(
       /*weights_cache=*/weights_cache, fully_connected_op_out);
 }
 
+static enum xnn_status fingerprint_fully_connected_nc_f16(
+    const struct xnn_gemm_config* gemm_config,
+    const enum xnn_operator_type operator_type) {
+  if (gemm_config == NULL) {
+    xnn_log_error(
+        "failed to fingerprint %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_unsupported_hardware;
+  }
+
+  enum xnn_status status = xnn_status_success;
+  struct fingerprint_context context = create_fingerprint_context(get_fingerprint_id(operator_type));
+  if(context.status == xnn_status_uninitialized) {
+    struct fake_fingerprint_data data = generate_fingerprint_data(
+        gemm_config, /*kernel_scale_element_size=*/0);
+    status = create_fully_connected_nc_f16(
+        data.input_channels, data.output_channels, /*input_stride=*/data.input_channels,
+        /*output_stride=*/data.output_channels, data.kernel, data.bias,
+        /*output_min=*/FLT_MIN, /*output_max=*/FLT_MAX, /*flags=*/0,
+        &context.cache, gemm_config,
+        operator_type, &context.op);
+    release_fingerprint_data(&data);
+  }
+  finalize_fingerprint_context(&context);
+  return status;
+}
+
+enum xnn_status xnn_fingerprint_fully_connected_nc_f16() {
+  return fingerprint_fully_connected_nc_f16(
+      xnn_init_f16_gemm_config(), xnn_operator_type_fully_connected_nc_f16);
+}
+
 enum xnn_status xnn_create_fully_connected_nc_f16(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, const void* kernel, const void* bias,
     float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
+  enum xnn_status status = xnn_fingerprint_fully_connected_nc_f16();
+  if (status != xnn_status_success) {
+    return status;
+  }
   return create_fully_connected_nc_f16(
       input_channels, output_channels, input_stride, output_stride, kernel,
       bias, output_min, output_max, flags, weights_cache,
@@ -419,11 +541,20 @@ enum xnn_status xnn_create_fully_connected_nc_f16(
       fully_connected_op_out);
 }
 
+enum xnn_status xnn_fingerprint_fully_connected_nc_pf16() {
+  return fingerprint_fully_connected_nc_f16(
+      xnn_init_pf16_gemm_config(), xnn_operator_type_fully_connected_nc_pf16);
+}
+
 enum xnn_status xnn_create_fully_connected_nc_pf16(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, const void* kernel, const void* bias,
     float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
+  enum xnn_status status = xnn_fingerprint_fully_connected_nc_pf16();
+  if (status != xnn_status_success) {
+    return status;
+  }
   return create_fully_connected_nc_f16(
       input_channels, output_channels, input_stride, output_stride, kernel,
       bias, output_min, output_max, flags, weights_cache,
@@ -520,12 +651,47 @@ enum xnn_status create_fully_connected_nc_qx8_f16_qc4w(
       /*weights_cache=*/weights_cache, fully_connected_op_out);
 }
 
+static enum xnn_status fingerprint_fully_connected_nc_qx8_f16_qc4w(
+    uint8_t kernel_zero_point, const struct xnn_gemm_config* gemm_config,
+    const enum xnn_operator_type operator_type) {
+  if (gemm_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_unsupported_hardware;
+  }
+  enum xnn_status status = xnn_status_success;
+  struct fingerprint_context context = create_fingerprint_context(get_fingerprint_id(operator_type));
+  if(context.status == xnn_status_uninitialized) {
+    struct fake_fingerprint_data data = generate_fingerprint_data(
+        gemm_config, /*kernel_scale_element_size=*/sizeof(float));
+    status = create_fully_connected_nc_qx8_f16_qc4w(
+        data.input_channels, data.output_channels, /*input_stride=*/data.input_channels,
+        /*output_stride=*/data.output_channels, kernel_zero_point, data.kernel_scales, data.kernel,
+        data.bias, /*output_min=*/FLT_MIN, /*output_max=*/FLT_MAX, /*flags=*/0, &context.cache,
+        gemm_config, operator_type, &context.op);
+    release_fingerprint_data(&data);
+  }
+  finalize_fingerprint_context(&context);
+  return status;
+}
+
+enum xnn_status xnn_fingerprint_fully_connected_nc_qd8_f16_qc4w() {
+  return fingerprint_fully_connected_nc_qx8_f16_qc4w(
+      /*kernel_zero_point=*/0, xnn_init_qd8_f16_qc4w_gemm_config(),
+      xnn_operator_type_fully_connected_nc_qd8_f16_qc4w);
+}
+
 enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qc4w(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, uint8_t kernel_zero_point, const float* kernel_scale,
     const void* kernel, const float* bias, float output_min, float output_max,
     uint32_t flags, xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out) {
+  enum xnn_status status = xnn_fingerprint_fully_connected_nc_qd8_f16_qc4w();
+  if (status != xnn_status_success) {
+    return status;
+  }
   return create_fully_connected_nc_qx8_f16_qc4w(
       input_channels, output_channels, input_stride, output_stride,
       kernel_zero_point, kernel_scale, kernel, bias, output_min, output_max,
@@ -534,12 +700,22 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qc4w(
       fully_connected_op_out);
 }
 
+enum xnn_status xnn_fingerprint_fully_connected_nc_qdu8_f16_qc4w() {
+  return fingerprint_fully_connected_nc_qx8_f16_qc4w(
+      /*kernel_zero_point=*/0, xnn_init_qdu8_f16_qc4w_gemm_config(),
+      xnn_operator_type_fully_connected_nc_qdu8_f16_qc4w);
+}
+
 enum xnn_status xnn_create_fully_connected_nc_qdu8_f16_qc4w(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, uint8_t kernel_zero_point, const float* kernel_scale,
     const void* kernel, const float* bias, float output_min, float output_max,
     uint32_t flags, xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out) {
+  enum xnn_status status = xnn_fingerprint_fully_connected_nc_qdu8_f16_qc4w();
+  if (status != xnn_status_success) {
+    return status;
+  }
   return create_fully_connected_nc_qx8_f16_qc4w(
       input_channels, output_channels, input_stride, output_stride,
       kernel_zero_point, kernel_scale, kernel, bias, output_min, output_max,
@@ -673,12 +849,47 @@ enum xnn_status create_fully_connected_nc_qd8_f16_qb4w(
       /*weights_cache=*/weights_cache, fully_connected_op_out);
 }
 
+enum xnn_status xnn_fingerprint_fully_connected_nc_qd8_f16_qb4w() {
+  const enum xnn_operator_type operator_type = xnn_operator_type_fully_connected_nc_qd8_f16_qb4w;
+  const struct xnn_gemm_config* gemm_config = xnn_init_qd8_f16_qb4w_gemm_config();
+  if (gemm_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_unsupported_hardware;
+  }
+  enum xnn_status status = xnn_status_success;
+  struct fingerprint_context context = create_fingerprint_context(get_fingerprint_id(operator_type));
+  if(context.status == xnn_status_uninitialized) {
+    struct fake_fingerprint_data data = generate_fingerprint_data(
+        gemm_config, /*kernel_scale_element_size=*/sizeof(uint16_t));
+    // Force coherent values that are checked by the create function.
+    uint16_t* kernel_scales = data.kernel_scales;
+    for (size_t i = 0; i < data.output_channels; ++i) {
+      kernel_scales[i] = math_cvt_bf16_fp32(0.5 + ((float)i) / data.output_channels / 2);
+    }
+    status = create_fully_connected_nc_qd8_f16_qb4w(
+        data.input_channels, data.output_channels, /*input_stride=*/data.input_channels,
+        /*output_stride=*/data.output_channels, /*block_size=*/XNN_MIN_BLOCKSIZE,
+        /*kernel_zero_point=*/0, (const uint16_t*)data.kernel_scales, data.kernel, data.bias,
+        /*output_min=*/FLT_MIN, /*output_max=*/FLT_MAX, /*flags=*/0,
+        &context.cache, gemm_config, operator_type, &context.op);
+    release_fingerprint_data(&data);
+  }
+  finalize_fingerprint_context(&context);
+  return status;
+}
+
 enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, size_t block_size, uint8_t kernel_zero_point,
     const uint16_t* kernel_scale, const void* kernel, const float* bias,
     float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
+  enum xnn_status status = xnn_fingerprint_fully_connected_nc_qd8_f16_qb4w();
+  if (status != xnn_status_success) {
+    return status;
+  }
   return create_fully_connected_nc_qd8_f16_qb4w(
       input_channels, output_channels, input_stride, output_stride, block_size,
       kernel_zero_point, kernel_scale, kernel, bias, output_min, output_max,
@@ -693,6 +904,10 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w_f16_scales(
     const uint16_t* kernel_scale, const void* kernel, const float* bias,
     float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
+  enum xnn_status status = xnn_fingerprint_fully_connected_nc_qd8_f16_qb4w();
+  if (status != xnn_status_success) {
+    return status;
+  }
   const size_t num_blocks =
       (input_channels + block_size - 1) / block_size * output_channels;
   xnn_bfloat16* bf16_scale_buffer =
@@ -701,7 +916,7 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w_f16_scales(
     bf16_scale_buffer[i] = xnn_bfloat16_from_float(
         xnn_float16_to_float(((const xnn_float16*)kernel_scale)[i]));
   }
-  enum xnn_status status = create_fully_connected_nc_qd8_f16_qb4w(
+  status = create_fully_connected_nc_qd8_f16_qb4w(
       input_channels, output_channels, input_stride, output_stride, block_size,
       kernel_zero_point, (const uint16_t*)bf16_scale_buffer, kernel, bias,
       output_min, output_max, flags, weights_cache,
@@ -797,12 +1012,47 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qc4w(
       /*weights_cache=*/weights_cache, fully_connected_op_out);
 }
 
+enum xnn_status fingerprint_fully_connected_nc_qx8_f32_qc4w(
+    const uint8_t kernel_zero_point, const struct xnn_gemm_config* gemm_config,
+    const enum xnn_operator_type operator_type) {
+  if (gemm_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_unsupported_hardware;
+  }
+  enum xnn_status status = xnn_status_success;
+  struct fingerprint_context context = create_fingerprint_context(get_fingerprint_id(operator_type));
+  if(context.status == xnn_status_uninitialized) {
+    struct fake_fingerprint_data data = generate_fingerprint_data(
+        gemm_config, /*kernel_scale_element_size=*/sizeof(float));
+    status = create_fully_connected_nc_qx8_f32_qc4w(
+        data.input_channels, data.output_channels, /*input_stride=*/data.input_channels,
+        /*output_stride=*/data.output_channels, kernel_zero_point, data.kernel_scales, data.kernel,
+        data.bias, /*output_min=*/FLT_MIN, /*output_max=*/FLT_MAX, /*flags=*/0,
+        &context.cache, gemm_config, operator_type, &context.op);
+    release_fingerprint_data(&data);
+  }
+  finalize_fingerprint_context(&context);
+  return status;
+}
+
+enum xnn_status xnn_fingerprint_fully_connected_nc_qd8_f32_qc4w() {
+  return fingerprint_fully_connected_nc_qx8_f32_qc4w(
+      /*kernel_zero_point=*/0, xnn_init_qd8_f32_qc4w_gemm_config(),
+      xnn_operator_type_fully_connected_nc_qd8_f32_qc4w);
+}
+
 enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qc4w(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, uint8_t kernel_zero_point, const float* kernel_scale,
     const void* kernel, const float* bias, float output_min, float output_max,
     uint32_t flags, xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out) {
+  enum xnn_status status = xnn_fingerprint_fully_connected_nc_qd8_f32_qc4w();
+  if (status != xnn_status_success) {
+    return status;
+  }
   return create_fully_connected_nc_qx8_f32_qc4w(
       input_channels, output_channels, input_stride, output_stride,
       kernel_zero_point, kernel_scale, kernel, bias, output_min, output_max,
@@ -811,12 +1061,22 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qc4w(
       fully_connected_op_out);
 }
 
+enum xnn_status xnn_fingerprint_fully_connected_nc_qdu8_f32_qc4w() {
+  return fingerprint_fully_connected_nc_qx8_f32_qc4w(
+      /*kernel_zero_point=*/0, xnn_init_qdu8_f32_qc4w_gemm_config(),
+      xnn_operator_type_fully_connected_nc_qdu8_f32_qc4w);
+}
+
 enum xnn_status xnn_create_fully_connected_nc_qdu8_f32_qc4w(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, uint8_t kernel_zero_point, const float* kernel_scale,
     const void* kernel, const float* bias, float output_min, float output_max,
     uint32_t flags, xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out) {
+  enum xnn_status status = xnn_fingerprint_fully_connected_nc_qdu8_f32_qc4w();
+  if (status != xnn_status_success) {
+    return status;
+  }
   return create_fully_connected_nc_qx8_f32_qc4w(
       input_channels, output_channels, input_stride, output_stride,
       kernel_zero_point, kernel_scale, kernel, bias, output_min, output_max,
@@ -892,6 +1152,44 @@ static enum xnn_status create_fully_connected_nc_qp8_f32_qcxw(
       /*weights_cache=*/weights_cache, fully_connected_op_out);
 }
 
+static enum xnn_status fingerprint_fully_connected_nc_qp8_f32_qcxw(
+    enum xnn_operator_type operator_type, const struct xnn_gemm_config* gemm_config,
+    const void* packing_params) {
+  if (gemm_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_unsupported_hardware;
+  }
+
+  enum xnn_status status = xnn_status_success;
+  struct fingerprint_context context = create_fingerprint_context(get_fingerprint_id(operator_type));
+  if(context.status == xnn_status_uninitialized) {
+    struct fake_fingerprint_data data = generate_fingerprint_data(
+        gemm_config, /*kernel_scale_element_size=*/sizeof(float));
+    status = create_fully_connected_nc_qp8_f32_qcxw(
+        data.input_channels, data.output_channels, /*input_stride=*/data.input_channels,
+        /*output_stride=*/data.output_channels, data.kernel_scales, data.kernel, data.bias,
+        /*output_min=*/FLT_MIN, /*output_max=*/FLT_MAX, /*flags=*/0, &context.cache,
+        operator_type, gemm_config, packing_params,
+        &context.op);
+    release_fingerprint_data(&data);
+  }
+  finalize_fingerprint_context(&context);
+  return status;
+}
+
+enum xnn_status xnn_fingerprint_fully_connected_nc_qp8_f32_qc4w() {
+  // We don't know input zero point until runtime, row sum is multiplied by it
+  // during packing, so set it to 1.
+  const struct xnn_qs8_qc4w_packing_params packing_params = {
+      /*input_zero_point=*/1, /*kernel_zero_point=*/0};
+  return fingerprint_fully_connected_nc_qp8_f32_qcxw(
+      xnn_operator_type_fully_connected_nc_qp8_f32_qc4w,
+      xnn_init_qp8_f32_qc4w_gemm_config(),
+      &packing_params);
+}
+
 enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qc4w(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, uint8_t kernel_zero_point, const float* kernel_scale,
@@ -913,6 +1211,11 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qc4w(
   const struct xnn_qs8_qc4w_packing_params packing_params = {
       /*input_zero_point=*/1, kernel_zero_point};
 
+  enum xnn_status status = xnn_fingerprint_fully_connected_nc_qp8_f32_qc4w();
+  if (status != xnn_status_success) {
+    return status;
+  }
+
   return create_fully_connected_nc_qp8_f32_qcxw(
       input_channels, output_channels, input_stride, output_stride,
       kernel_scale, kernel, bias, output_min, output_max, flags, weights_cache,
@@ -921,11 +1224,26 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qc4w(
       fully_connected_op_out);
 }
 
+enum xnn_status xnn_fingerprint_fully_connected_nc_qp8_f32_qc8w() {
+  // We don't know input zero point until runtime, row sum is multiplied by it
+  // during packing, so set it to 1.
+  const struct xnn_qs8_qc8w_packing_params packing_params = {
+      /*input_zero_point=*/1, /*scale_multiplier=*/1.0f};
+  return fingerprint_fully_connected_nc_qp8_f32_qcxw(
+      xnn_operator_type_fully_connected_nc_qp8_f32_qc8w,
+      xnn_init_qp8_f32_qc8w_gemm_config(),
+      &packing_params);
+}
+
 enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qc8w(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, const float* kernel_scale, const void* kernel,
     const float* bias, float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
+  enum xnn_status status = xnn_fingerprint_fully_connected_nc_qp8_f32_qc8w();
+  if (status != xnn_status_success) {
+    return status;
+  }
 
   // We don't know input zero point until runtime, row sum is multiplied by it
   // during packing, so set it to 1.
@@ -1062,12 +1380,47 @@ static enum xnn_status create_fully_connected_nc_qp8_f32_qb4w(
       /*weights_cache=*/weights_cache, fully_connected_op_out);
 }
 
+enum xnn_status xnn_fingerprint_fully_connected_nc_qp8_f32_qb4w() {
+  const enum xnn_operator_type operator_type = xnn_operator_type_fully_connected_nc_qp8_f32_qb4w;
+  const struct xnn_gemm_config* gemm_config = xnn_init_qp8_f32_qb4w_gemm_config();
+  if (gemm_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_unsupported_hardware;
+  }
+  enum xnn_status status = xnn_status_success;
+  struct fingerprint_context context = create_fingerprint_context(get_fingerprint_id(operator_type));
+  if(context.status == xnn_status_uninitialized) {
+    struct fake_fingerprint_data data = generate_fingerprint_data(
+        gemm_config, /*kernel_scale_element_size=*/sizeof(uint16_t));
+    // Force coherent values that are checked by the create function.
+    uint16_t* kernel_scales = data.kernel_scales;
+    for (size_t i = 0; i < data.output_channels; ++i) {
+      kernel_scales[i] = math_cvt_bf16_fp32(0.5 + ((float)i) / data.output_channels / 2);
+    }
+    status = create_fully_connected_nc_qp8_f32_qb4w(
+        data.input_channels, data.output_channels, /*input_stride=*/data.input_channels,
+        /*output_stride=*/data.output_channels, /*block_size=*/XNN_MIN_BLOCKSIZE,
+        /*kernel_zero_point=*/8, data.kernel_scales, data.kernel, data.bias,
+        /*output_min=*/FLT_MIN, /*output_max=*/FLT_MAX, /*flags=*/0,
+        &context.cache, &context.op);
+    release_fingerprint_data(&data);
+  }
+  finalize_fingerprint_context(&context);
+  return status;
+}
+
 enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qb4w(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, size_t block_size, uint8_t kernel_zero_point,
     const uint16_t* kernel_scale, const void* kernel, const float* bias,
     float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
+  enum xnn_status status = xnn_fingerprint_fully_connected_nc_qp8_f32_qb4w();
+  if (status != xnn_status_success) {
+    return status;
+  }
   return create_fully_connected_nc_qp8_f32_qb4w(
       input_channels, output_channels, input_stride, output_stride, block_size,
       kernel_zero_point, kernel_scale, kernel, bias, output_min, output_max,
@@ -1080,6 +1433,10 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qb4w_f16_scales(
     const uint16_t* kernel_scale, const void* kernel, const float* bias,
     float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
+  enum xnn_status status = xnn_fingerprint_fully_connected_nc_qp8_f32_qb4w();
+  if (status != xnn_status_success) {
+    return status;
+  }
   const size_t num_blocks =
       (input_channels + block_size - 1) / block_size * output_channels;
   xnn_bfloat16* bf16_scale_buffer =
@@ -1089,7 +1446,7 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qb4w_f16_scales(
         xnn_float16_to_float(((const xnn_float16*)kernel_scale)[i]));
   }
   // Fingerprinting is done by xnn_create_fully_connected_nc_qp8_f32_qb4w.
-  enum xnn_status status = xnn_create_fully_connected_nc_qp8_f32_qb4w(
+  status = xnn_create_fully_connected_nc_qp8_f32_qb4w(
       input_channels, output_channels, input_stride, output_stride, block_size,
       kernel_zero_point, (const uint16_t*)bf16_scale_buffer, kernel, bias,
       output_min, output_max, flags, weights_cache, fully_connected_op_out);
@@ -1215,12 +1572,52 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qb4w(
       /*weights_cache=*/weights_cache, fully_connected_op_out);
 }
 
+static enum xnn_status fingerprint_fully_connected_nc_qx8_f32_qb4w(
+    uint8_t kernel_zero_point, const struct xnn_gemm_config* gemm_config,
+    enum xnn_operator_type operator_type) {
+  if (gemm_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_unsupported_hardware;
+  }
+  enum xnn_status status = xnn_status_success;
+  struct fingerprint_context context = create_fingerprint_context(get_fingerprint_id(operator_type));
+  if(context.status == xnn_status_uninitialized) {
+    struct fake_fingerprint_data data = generate_fingerprint_data(
+        gemm_config, /*kernel_scale_element_size=*/sizeof(uint16_t));
+    // Force coherent values that are checked by the create function.
+    uint16_t* kernel_scales = data.kernel_scales;
+    for (size_t i = 0; i < data.output_channels; ++i) {
+      kernel_scales[i] = math_cvt_bf16_fp32(0.5 + ((float)i) / data.output_channels / 2);
+    }
+    status = create_fully_connected_nc_qx8_f32_qb4w(
+        data.input_channels, data.output_channels, /*input_stride=*/data.input_channels,
+        /*output_stride=*/data.output_channels, /*block_size=*/XNN_MIN_BLOCKSIZE, kernel_zero_point,
+        data.kernel_scales, data.kernel, data.bias, /*output_min=*/FLT_MIN, /*output_max=*/FLT_MAX,
+        /*flags=*/0, &context.cache, gemm_config, operator_type, &context.op);
+    release_fingerprint_data(&data);
+  }
+  finalize_fingerprint_context(&context);
+  return status;
+}
+
+enum xnn_status xnn_fingerprint_fully_connected_nc_qd8_f32_qb4w() {
+  return fingerprint_fully_connected_nc_qx8_f32_qb4w(
+      /*kernel_zero_point=*/0, xnn_init_qd8_f32_qb4w_gemm_config(),
+      xnn_operator_type_fully_connected_nc_qd8_f32_qb4w);
+}
+
 enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, size_t block_size, uint8_t kernel_zero_point,
     const uint16_t* kernel_scale, const void* kernel, const float* bias,
     float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
+  enum xnn_status status = xnn_fingerprint_fully_connected_nc_qd8_f32_qb4w();
+  if (status != xnn_status_success) {
+    return status;
+  }
   return create_fully_connected_nc_qx8_f32_qb4w(
       input_channels, output_channels, input_stride, output_stride, block_size,
       kernel_zero_point, kernel_scale, kernel, bias, output_min, output_max,
@@ -1261,6 +1658,10 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w_f16_scales(
     const xnn_float16* kernel_scale, const void* kernel, const float* bias,
     float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
+  enum xnn_status status = xnn_fingerprint_fully_connected_nc_qd8_f32_qb4w();
+  if (status != xnn_status_success) {
+    return status;
+  }
   return create_fully_connected_nc_qdx8_f32_qb4w_f16_scales(
       input_channels, output_channels, input_stride, output_stride, block_size,
       kernel_zero_point, kernel_scale, kernel, bias, output_min, output_max,
@@ -1269,12 +1670,22 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w_f16_scales(
       fully_connected_op_out);
 }
 
+enum xnn_status xnn_fingerprint_fully_connected_nc_qdu8_f32_qb4w() {
+  return fingerprint_fully_connected_nc_qx8_f32_qb4w(
+      /*kernel_zero_point=*/0, xnn_init_qdu8_f32_qb4w_gemm_config(),
+      xnn_operator_type_fully_connected_nc_qdu8_f32_qb4w);
+}
+
 enum xnn_status xnn_create_fully_connected_nc_qdu8_f32_qb4w(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, size_t block_size, uint8_t kernel_zero_point,
     const uint16_t* kernel_scale, const void* kernel, const float* bias,
     float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
+  enum xnn_status status = xnn_fingerprint_fully_connected_nc_qdu8_f32_qb4w();
+  if (status != xnn_status_success) {
+    return status;
+  }
   return create_fully_connected_nc_qx8_f32_qb4w(
       input_channels, output_channels, input_stride, output_stride, block_size,
       kernel_zero_point, kernel_scale, kernel, bias, output_min, output_max,
@@ -1289,6 +1700,10 @@ enum xnn_status xnn_create_fully_connected_nc_qdu8_f32_qb4w_f16_scales(
     const xnn_float16* kernel_scale, const void* kernel, const float* bias,
     float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
+  enum xnn_status status = xnn_fingerprint_fully_connected_nc_qdu8_f32_qb4w();
+  if (status != xnn_status_success) {
+    return status;
+  }
   return create_fully_connected_nc_qdx8_f32_qb4w_f16_scales(
       input_channels, output_channels, input_stride, output_stride, block_size,
       kernel_zero_point, kernel_scale, kernel, bias, output_min, output_max,
@@ -1367,11 +1782,46 @@ enum xnn_status create_fully_connected_nc_qdx8_f32_qc8w(
       /*weights_cache=*/weights_cache, fully_connected_op_out);
 }
 
+static enum xnn_status fingerprint_fully_connected_nc_qdx8_f32_qc8w(
+    const struct xnn_gemm_config* gemm_config,
+    enum xnn_operator_type operator_type) {
+  if (gemm_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_unsupported_hardware;
+  }
+  enum xnn_status status = xnn_status_success;
+  struct fingerprint_context context = create_fingerprint_context(get_fingerprint_id(operator_type));
+  if(context.status == xnn_status_uninitialized) {
+    struct fake_fingerprint_data data = generate_fingerprint_data(
+        gemm_config, /*kernel_scale_element_size=*/sizeof(float));
+    status = create_fully_connected_nc_qdx8_f32_qc8w(
+        data.input_channels, data.output_channels, /*input_stride=*/data.input_channels,
+        /*output_stride=*/data.output_channels, data.kernel_scales, data.kernel, data.bias,
+        /*output_min=*/FLT_MIN, /*output_max=*/FLT_MAX, /*flags=*/0, &context.cache, gemm_config,
+        operator_type, &context.op);
+    release_fingerprint_data(&data);
+  }
+  finalize_fingerprint_context(&context);
+  return status;
+}
+
+enum xnn_status xnn_fingerprint_fully_connected_nc_qd8_f32_qc8w() {
+  return fingerprint_fully_connected_nc_qdx8_f32_qc8w(
+      xnn_init_qd8_f32_qc8w_gemm_config(),
+      /*operator_type=*/xnn_operator_type_fully_connected_nc_qd8_f32_qc8w);
+}
+
 enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qc8w(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, const float* kernel_scale, const int8_t* kernel,
     const float* bias, float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
+  const enum xnn_status status = xnn_fingerprint_fully_connected_nc_qd8_f32_qc8w();
+  if (status != xnn_status_success) {
+    return status;
+  }
   return create_fully_connected_nc_qdx8_f32_qc8w(
       input_channels, output_channels, input_stride, output_stride,
       kernel_scale, kernel, bias, output_min, output_max, flags, weights_cache,
@@ -1380,11 +1830,21 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qc8w(
       fully_connected_op_out);
 }
 
+enum xnn_status xnn_fingerprint_fully_connected_nc_qdu8_f32_qc8w() {
+  return fingerprint_fully_connected_nc_qdx8_f32_qc8w(
+      xnn_init_qdu8_f32_qc8w_gemm_config(),
+      /*operator_type=*/xnn_operator_type_fully_connected_nc_qdu8_f32_qc8w);
+}
+
 enum xnn_status xnn_create_fully_connected_nc_qdu8_f32_qc8w(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, const float* kernel_scale, const int8_t* kernel,
     const float* bias, float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
+  enum xnn_status status = xnn_fingerprint_fully_connected_nc_qdu8_f32_qc8w();
+  if (status != xnn_status_success) {
+    return status;
+  }
   return create_fully_connected_nc_qdx8_f32_qc8w(
       input_channels, output_channels, input_stride, output_stride,
       kernel_scale, kernel, bias, output_min, output_max, flags, weights_cache,
@@ -1466,11 +1926,47 @@ enum xnn_status create_fully_connected_nc_qx8_f16_qc8w(
       /*weights_cache=*/weights_cache, fully_connected_op_out);
 }
 
+static enum xnn_status fingerprint_fully_connected_nc_qx8_f16_qc8w(
+    const struct xnn_gemm_config* gemm_config,
+    const enum xnn_operator_type operator_type) {
+  if (gemm_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_unsupported_hardware;
+  }
+  enum xnn_status status = xnn_status_success;
+  struct fingerprint_context context = create_fingerprint_context(get_fingerprint_id(operator_type));
+  if(context.status == xnn_status_uninitialized) {
+    struct fake_fingerprint_data data = generate_fingerprint_data(
+        gemm_config, /*kernel_scale_element_size=*/sizeof(float));
+    status = create_fully_connected_nc_qx8_f16_qc8w(
+        data.input_channels, data.output_channels, /*input_stride=*/data.input_channels,
+        /*output_stride=*/data.output_channels,
+        data.kernel_scales, data.kernel, data.bias, /*output_min=*/FLT_MIN,
+        /*output_max=*/FLT_MAX, /*flags=*/0, &context.cache, gemm_config,
+        operator_type, &context.op);
+    release_fingerprint_data(&data);
+  }
+  finalize_fingerprint_context(&context);
+  return status;
+}
+
+enum xnn_status xnn_fingerprint_fully_connected_nc_qd8_f16_qc8w() {
+  return fingerprint_fully_connected_nc_qx8_f16_qc8w(
+      xnn_init_qd8_f16_qc8w_gemm_config(),
+      /*operator_type=*/xnn_operator_type_fully_connected_nc_qd8_f16_qc8w);
+}
+
 enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qc8w(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, const float* kernel_scale, const int8_t* kernel,
     const float* bias, float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
+  enum xnn_status status = xnn_fingerprint_fully_connected_nc_qd8_f16_qc8w();
+  if (status != xnn_status_success) {
+    return status;
+  }
   return create_fully_connected_nc_qx8_f16_qc8w(
       input_channels, output_channels, input_stride, output_stride,
       kernel_scale, kernel, bias, output_min, output_max, flags, weights_cache,
@@ -1479,11 +1975,21 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qc8w(
       fully_connected_op_out);
 }
 
+enum xnn_status xnn_fingerprint_fully_connected_nc_qdu8_f16_qc8w() {
+  return fingerprint_fully_connected_nc_qx8_f16_qc8w(
+      xnn_init_qdu8_f16_qc8w_gemm_config(),
+      /*operator_type=*/xnn_operator_type_fully_connected_nc_qdu8_f16_qc8w);
+}
+
 enum xnn_status xnn_create_fully_connected_nc_qdu8_f16_qc8w(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, const float* kernel_scale, const int8_t* kernel,
     const float* bias, float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
+  enum xnn_status status = xnn_fingerprint_fully_connected_nc_qdu8_f16_qc8w();
+  if (status != xnn_status_success) {
+    return status;
+  }
   return create_fully_connected_nc_qx8_f16_qc8w(
       input_channels, output_channels, input_stride, output_stride,
       kernel_scale, kernel, bias, output_min, output_max, flags, weights_cache,
@@ -1513,6 +2019,7 @@ enum xnn_status xnn_create_fully_connected_nc_f32_f16(
     }
     bias = fp32_bias_buffer;
   }
+  // Fingerprinting is done by xnn_create_fully_connected_nc_f32.
   enum xnn_status status = xnn_create_fully_connected_nc_f32(
       input_channels, output_channels, input_stride, output_stride,
       fp32_kernel_buffer, bias, output_min, output_max, flags, weights_cache,
@@ -1590,17 +2097,68 @@ enum xnn_status create_fully_connected_nc_f32(
       /*weights_cache=*/weights_cache, fully_connected_op_out);
 }
 
+static enum xnn_status fingerprint_fully_connected_nc_f32(
+    const struct xnn_gemm_config* gemm_config,
+    const enum xnn_operator_type operator_type,
+    const enum xnn_fingerprint_id fingerprint_id) {
+  if (gemm_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_unsupported_hardware;
+  }
+  enum xnn_status status = xnn_status_success;
+  struct fingerprint_context context = create_fingerprint_context(get_fingerprint_id(operator_type));
+  context.fingerprint_id = fingerprint_id;
+  if(context.status == xnn_status_uninitialized) {
+    struct fake_fingerprint_data data = generate_fingerprint_data(
+        gemm_config, /*kernel_scale_element_size=*/0);
+    status = create_fully_connected_nc_f32(
+        data.input_channels, data.output_channels, /*input_stride=*/data.input_channels,
+        /*output_stride=*/data.output_channels, data.kernel,
+        data.bias, /*output_min=*/FLT_MIN, /*output_max=*/FLT_MAX, /*flags=*/0,
+        &context.cache, gemm_config, operator_type, &context.op);
+    release_fingerprint_data(&data);
+  }
+  finalize_fingerprint_context(&context);
+  return status;
+}
+
+enum xnn_status xnn_fingerprint_fully_connected_nc_bf16_f32() {
+  return fingerprint_fully_connected_nc_f32(
+      xnn_init_bf16_f32_gemm_config(),
+      /*operator_type=*/xnn_operator_type_fully_connected_nc_bf16_f32,
+      /*fingerprint_id=*/xnn_fingerprint_id_fully_connected_nc_bf16_f32);
+}
+
 enum xnn_status xnn_create_fully_connected_nc_bf16_f32(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, const void* kernel, const float* bias,
     float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
-
+  const enum xnn_status status = xnn_fingerprint_fully_connected_nc_bf16_f32();
+  if (status != xnn_status_success) {
+    return status;
+  }
   return create_fully_connected_nc_f32(
       input_channels, output_channels, input_stride, output_stride, kernel,
       bias, output_min, output_max, flags, weights_cache,
       xnn_init_bf16_f32_gemm_config(),
       xnn_operator_type_fully_connected_nc_bf16_f32, fully_connected_op_out);
+}
+
+enum xnn_status xnn_fingerprint_fully_connected_nc_f32() {
+  const enum xnn_status status = fingerprint_fully_connected_nc_f32(
+      xnn_init_f32_gemm_config(/*flags=*/0),
+      /*operator_type=*/xnn_operator_type_fully_connected_nc_f32,
+      /*fingerprint_id=*/xnn_fingerprint_id_fully_connected_nc_f32);
+  if (status != xnn_status_success) {
+    return status;
+  }
+  return fingerprint_fully_connected_nc_f32(
+      xnn_init_f32_gemm_nr2_config(/*flags=*/0),
+      /*operator_type=*/xnn_operator_type_fully_connected_nc_f32,
+      /*fingerprint_id=*/xnn_fingerprint_id_fully_connected_nc_f32_nr2);
 }
 
 enum xnn_status xnn_create_fully_connected_nc_f32(
@@ -1639,10 +2197,22 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
     }
   }
 
+  enum xnn_status status = xnn_fingerprint_fully_connected_nc_f32();
+  if (status != xnn_status_success) {
+    return status;
+  }
+
   return create_fully_connected_nc_f32(
       input_channels, output_channels, input_stride, output_stride, kernel,
       bias, output_min, output_max, flags, weights_cache, gemm_config,
       xnn_operator_type_fully_connected_nc_f32, fully_connected_op_out);
+}
+
+enum xnn_status xnn_fingerprint_fully_connected_nc_pf32() {
+  return fingerprint_fully_connected_nc_f32(
+      xnn_init_pf32_gemm_config(),
+      /*operator_type=*/xnn_operator_type_fully_connected_nc_pf32,
+      /*fingerprint_id=*/xnn_fingerprint_id_fully_connected_nc_pf32);
 }
 
 enum xnn_status xnn_create_fully_connected_nc_pf32(
@@ -1656,6 +2226,11 @@ enum xnn_status xnn_create_fully_connected_nc_pf32(
         "failed to create %s operator: unsupported hardware configuration",
         xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_pf32));
     return xnn_status_unsupported_hardware;
+  }
+
+  enum xnn_status status = xnn_fingerprint_fully_connected_nc_pf32();
+  if (status != xnn_status_success) {
+    return status;
   }
 
   return create_fully_connected_nc_f32(
@@ -1756,12 +2331,47 @@ enum xnn_status create_fully_connected_nc_f32_qc4w(
       /*weights_cache=*/weights_cache, fully_connected_op_out);
 }
 
+static enum xnn_status fingerprint_fully_connected_nc_f32_qc4w() {
+  const enum xnn_operator_type operator_type = xnn_operator_type_fully_connected_nc_f32_qc4w;
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_qc4w_gemm_config();
+  if (gemm_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_unsupported_hardware;
+  }
+  enum xnn_status status = xnn_status_success;
+  struct fingerprint_context context = create_fingerprint_context(get_fingerprint_id(operator_type));
+  if(context.status == xnn_status_uninitialized) {
+    struct fake_fingerprint_data data = generate_fingerprint_data(
+        gemm_config, /*kernel_scale_element_size=*/sizeof(float));
+    // Force coherent values that are checked by the create function.
+    float* kernel_scales = data.kernel_scales;
+    for (size_t i = 0; i < data.output_channels; ++i) {
+      kernel_scales[i] = 0.5 + ((float)i) / data.output_channels / 2;
+    }
+    status = create_fully_connected_nc_f32_qc4w(
+        data.input_channels, data.output_channels, /*input_stride=*/data.input_channels,
+        /*output_stride=*/data.output_channels,
+        /*kernel_zero_point=*/0, data.kernel_scales, data.kernel, data.bias,
+        /*output_min=*/FLT_MIN,
+        /*output_max=*/FLT_MAX, /*flags=*/0, &context.cache, &context.op);
+    release_fingerprint_data(&data);
+  }
+  finalize_fingerprint_context(&context);
+  return status;
+}
+
 enum xnn_status xnn_create_fully_connected_nc_f32_qc4w(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, uint8_t kernel_zero_point, const float* kernel_scale,
     const uint8_t* kernel, const float* bias, float output_min,
     float output_max, uint32_t flags, xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out) {
+  enum xnn_status status = fingerprint_fully_connected_nc_f32_qc4w();
+  if (status != xnn_status_success) {
+    return status;
+  }
   return create_fully_connected_nc_f32_qc4w(
       input_channels, output_channels, input_stride, output_stride,
       kernel_zero_point, kernel_scale, kernel, bias, output_min, output_max,
@@ -1849,12 +2459,46 @@ enum xnn_status create_fully_connected_nc_f32_qc8w(
       /*weights_cache=*/weights_cache, fully_connected_op_out);
 }
 
+static enum xnn_status fingerprint_fully_connected_nc_f32_qc8w() {
+  const enum xnn_operator_type operator_type = xnn_operator_type_fully_connected_nc_f32_qc8w;
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_qc8w_gemm_config();
+  if (gemm_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_unsupported_hardware;
+  }
+
+  enum xnn_status status = xnn_status_success;
+  struct fingerprint_context context = create_fingerprint_context(get_fingerprint_id(operator_type));
+  if(context.status == xnn_status_uninitialized) {
+    struct fake_fingerprint_data data = generate_fingerprint_data(
+        gemm_config, /*kernel_scale_element_size=*/sizeof(float));
+    // Force coherent values that are checked by the create function.
+    float* kernel_scales = data.kernel_scales;
+    for (size_t i = 0; i < data.output_channels; ++i) {
+      kernel_scales[i] = 0.5 + ((float)i) / data.output_channels / 2;
+    }
+    status = create_fully_connected_nc_f32_qc8w(
+        data.input_channels, data.output_channels, /*input_stride=*/data.input_channels,
+        /*output_stride=*/data.output_channels,
+        data.kernel_scales, data.kernel, data.bias, /*output_min=*/FLT_MIN,
+        /*output_max=*/FLT_MAX, /*flags=*/0, &context.cache, &context.op);
+    release_fingerprint_data(&data);
+  }
+  finalize_fingerprint_context(&context);
+  return status;
+}
 
 enum xnn_status xnn_create_fully_connected_nc_f32_qc8w(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, const float* kernel_scale, const int8_t* kernel,
     const float* bias, float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
+  enum xnn_status status = fingerprint_fully_connected_nc_f32_qc8w();
+  if (status != xnn_status_success) {
+    return status;
+  }
   return create_fully_connected_nc_f32_qc8w(
       input_channels, output_channels, input_stride, output_stride,
       kernel_scale, kernel, bias, output_min, output_max, flags, weights_cache,
@@ -1955,6 +2599,32 @@ enum xnn_status create_fully_connected_nc_qs8(
       /*weights_cache=*/weights_cache, fully_connected_op_out);
 }
 
+enum xnn_status xnn_fingerprint_fully_connected_nc_qs8() {
+  const enum xnn_operator_type operator_type = xnn_operator_type_fully_connected_nc_qs8;
+  const struct xnn_gemm_config* gemm_config = xnn_init_qs8_qc8w_gemm_config();
+  if (gemm_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_unsupported_hardware;
+  }
+  enum xnn_status status = xnn_status_success;
+  struct fingerprint_context context = create_fingerprint_context(get_fingerprint_id(operator_type));
+    if(context.status == xnn_status_uninitialized) {
+    struct fake_fingerprint_data data = generate_fingerprint_data(
+        gemm_config, /*kernel_scale_element_size=*/0);
+    status = create_fully_connected_nc_qs8(
+        data.input_channels, data.output_channels, /*input_stride=*/data.input_channels,
+        /*output_stride=*/data.output_channels,
+        /*input_zero_point=*/0, /*input_scale=*/1, /*kernel_scale=*/1, data.kernel,
+        data.bias, /*output_zero_point=*/0, /*output_scale=*/1,
+        /*output_min=*/SCHAR_MIN, /*output_max=*/SCHAR_MAX, /*flags=*/0,
+        &context.cache, &context.op);
+    release_fingerprint_data(&data);
+  }
+  finalize_fingerprint_context(&context);
+  return status;
+}
 
 enum xnn_status xnn_create_fully_connected_nc_qs8(
     size_t input_channels, size_t output_channels, size_t input_stride,
@@ -1963,6 +2633,10 @@ enum xnn_status xnn_create_fully_connected_nc_qs8(
     int8_t output_zero_point, float output_scale, int8_t output_min,
     int8_t output_max, uint32_t flags, xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out) {
+  enum xnn_status status = xnn_fingerprint_fully_connected_nc_qs8();
+  if (status != xnn_status_success) {
+    return status;
+  }
   return create_fully_connected_nc_qs8(
       input_channels, output_channels, input_stride, output_stride,
       input_zero_point, input_scale, kernel_scale, kernel, bias,
@@ -2063,6 +2737,47 @@ enum xnn_status create_fully_connected_nc_qx8_qcyw(
   return status;
 }
 
+static enum xnn_status fingerprint_fully_connected_nc_qx8_qcyw(
+    const void* packing_params, const struct xnn_gemm_config* gemm_config,
+    const enum xnn_operator_type operator_type) {
+  if (gemm_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_unsupported_hardware;
+  }
+  enum xnn_status status = xnn_status_success;
+  struct fingerprint_context context = create_fingerprint_context(get_fingerprint_id(operator_type));
+  if(context.status == xnn_status_uninitialized) {
+    struct fake_fingerprint_data data = generate_fingerprint_data(
+        gemm_config, /*kernel_scale_element_size=*/sizeof(float));
+    // Force coherent values that are checked by the create function.
+    float* kernel_scales = data.kernel_scales;
+    for (size_t i = 0; i < data.output_channels; ++i) {
+      kernel_scales[i] = 0.5 + ((float)i) / data.output_channels / 2;
+    }
+    status = create_fully_connected_nc_qx8_qcyw(
+        data.input_channels, data.output_channels, /*input_stride=*/data.input_channels,
+        /*output_stride=*/data.output_channels,
+        /*input_scale=*/1, data.kernel_scales, data.kernel, data.bias, /*output_zero_point=*/0,
+        /*output_scale=*/1,
+        /*output_min=*/SCHAR_MIN, /*output_max=*/SCHAR_MAX, /*flags=*/0,
+        &context.cache, gemm_config, operator_type,
+        packing_params, &context.op);
+    release_fingerprint_data(&data);
+  }
+  finalize_fingerprint_context(&context);
+  return status;
+}
+
+enum xnn_status xnn_fingerprint_fully_connected_nc_qs8_qc4w() {
+  const struct xnn_gemm_config* gemm_config = xnn_init_qs8_qc4w_gemm_config();
+  const struct xnn_qs8_qc4w_packing_params packing_params = {
+      .input_zero_point = 0, .kernel_zero_point = 0};
+  return fingerprint_fully_connected_nc_qx8_qcyw(
+      &packing_params, gemm_config, xnn_operator_type_fully_connected_nc_qs8_qc4w);
+}
+
 enum xnn_status xnn_create_fully_connected_nc_qs8_qc4w(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, int8_t input_zero_point, float input_scale,
@@ -2070,6 +2785,10 @@ enum xnn_status xnn_create_fully_connected_nc_qs8_qc4w(
     const int32_t* bias, int8_t output_zero_point, float output_scale,
     int8_t output_min, int8_t output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
+  enum xnn_status status = xnn_fingerprint_fully_connected_nc_qs8_qc4w();
+  if (status != xnn_status_success) {
+    return status;
+  }
   const struct xnn_gemm_config* gemm_config = xnn_init_qs8_qc4w_gemm_config();
   const struct xnn_qs8_qc4w_packing_params packing_params = {
       .input_zero_point = input_zero_point,
@@ -2082,6 +2801,13 @@ enum xnn_status xnn_create_fully_connected_nc_qs8_qc4w(
       &packing_params, fully_connected_op_out);
 }
 
+enum xnn_status xnn_fingerprint_fully_connected_nc_qs8_qc8w() {
+  const struct xnn_gemm_config* gemm_config = xnn_init_qs8_qc8w_gemm_config();
+  const struct xnn_qs8_packing_params packing_params = {.input_zero_point = 0};
+  return fingerprint_fully_connected_nc_qx8_qcyw(
+      &packing_params, gemm_config, xnn_operator_type_fully_connected_nc_qs8_qc8w);
+}
+
 enum xnn_status xnn_create_fully_connected_nc_qs8_qc8w(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, int8_t input_zero_point, float input_scale,
@@ -2089,6 +2815,10 @@ enum xnn_status xnn_create_fully_connected_nc_qs8_qc8w(
     int8_t output_zero_point, float output_scale, int8_t output_min,
     int8_t output_max, uint32_t flags, xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out) {
+  enum xnn_status status = xnn_fingerprint_fully_connected_nc_qs8_qc8w();
+  if (status != xnn_status_success) {
+    return status;
+  }
   const struct xnn_gemm_config* gemm_config = xnn_init_qs8_qc8w_gemm_config();
   const struct xnn_qs8_packing_params packing_params = {.input_zero_point =
                                                             input_zero_point};
@@ -2100,6 +2830,13 @@ enum xnn_status xnn_create_fully_connected_nc_qs8_qc8w(
       &packing_params, fully_connected_op_out);
 }
 
+enum xnn_status xnn_fingerprint_fully_connected_nc_pqs8_qc8w() {
+  const struct xnn_gemm_config* gemm_config = xnn_init_pqs8_qc8w_gemm_config();
+  const struct xnn_qs8_packing_params packing_params = {.input_zero_point = 0};
+  return fingerprint_fully_connected_nc_qx8_qcyw(
+      &packing_params, gemm_config, xnn_operator_type_fully_connected_nc_pqs8_qc8w);
+}
+
 enum xnn_status xnn_create_fully_connected_nc_pqs8_qc8w(
     size_t input_channels, size_t output_channels, size_t input_stride,
     size_t output_stride, int8_t input_zero_point, float input_scale,
@@ -2107,6 +2844,10 @@ enum xnn_status xnn_create_fully_connected_nc_pqs8_qc8w(
     int8_t output_zero_point, float output_scale, int8_t output_min,
     int8_t output_max, uint32_t flags, xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out) {
+  enum xnn_status status = xnn_fingerprint_fully_connected_nc_pqs8_qc8w();
+  if (status != xnn_status_success) {
+    return status;
+  }
   const struct xnn_gemm_config* gemm_config = xnn_init_pqs8_qc8w_gemm_config();
   const struct xnn_qs8_packing_params packing_params = {.input_zero_point =
                                                             input_zero_point};
@@ -2200,6 +2941,32 @@ enum xnn_status create_fully_connected_nc_qu8(
       /*weights_cache=*/weights_cache, fully_connected_op_out);
 }
 
+enum xnn_status xnn_fingerprint_fully_connected_nc_qu8() {
+  const enum xnn_operator_type operator_type = xnn_operator_type_fully_connected_nc_qu8;
+  const struct xnn_gemm_config* gemm_config = xnn_init_qu8_gemm_config();
+  if (gemm_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_unsupported_hardware;
+  }
+  enum xnn_status status = xnn_status_success;
+  struct fingerprint_context context = create_fingerprint_context(get_fingerprint_id(operator_type));
+  if(context.status == xnn_status_uninitialized) {
+    struct fake_fingerprint_data data = generate_fingerprint_data(
+        gemm_config, /*kernel_scale_element_size=*/0);
+    status = create_fully_connected_nc_qu8(
+        data.input_channels, data.output_channels, /*input_stride=*/data.input_channels,
+        /*output_stride=*/data.output_channels,
+        /*input_zero_point=*/0, /*input_scale=*/1, /*kernel_zero_point=*/8,
+        /*kernel_scale=*/1, data.kernel, data.bias, /*output_zero_point=*/0,
+        /*output_scale=*/1, /*output_min=*/0, /*output_max=*/UCHAR_MAX,
+        /*flags=*/0, &context.cache, &context.op);
+    release_fingerprint_data(&data);
+  }
+  finalize_fingerprint_context(&context);
+  return status;
+}
 
 enum xnn_status xnn_create_fully_connected_nc_qu8(
     size_t input_channels, size_t output_channels, size_t input_stride,
@@ -2208,6 +2975,10 @@ enum xnn_status xnn_create_fully_connected_nc_qu8(
     const int32_t* bias, uint8_t output_zero_point, float output_scale,
     uint8_t output_min, uint8_t output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out) {
+  enum xnn_status status = xnn_fingerprint_fully_connected_nc_qu8();
+  if (status != xnn_status_success) {
+    return status;
+  }
   return create_fully_connected_nc_qu8(
       input_channels, output_channels, input_stride, output_stride,
       input_zero_point, input_scale, kernel_zero_point, kernel_scale, kernel,
