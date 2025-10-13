@@ -13,6 +13,7 @@
 
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
+#include "ynnpack/subgraph/test/scheduler.h"
 
 namespace ynn {
 
@@ -272,11 +273,24 @@ SubgraphBuilder& SubgraphBuilder::AddGetTensorShape(
   return *this;
 }
 
-Runtime::Runtime(ynn_subgraph_t subgraph, ynn_threadpool_t threadpool,
+Runtime::Runtime(ynn_subgraph_t subgraph, TestScheduler* scheduler,
                  uint32_t flags)
-    : runtime_(nullptr, ynn_delete_runtime) {
+    : runtime_(nullptr, ynn_delete_runtime),
+      threadpool_(nullptr, ynn_delete_threadpool) {
   ynn_runtime_t runtime;
-  status_ = ynn_create_runtime(subgraph, threadpool, flags, &runtime);
+
+  if (scheduler) {
+    ynn_threadpool_t threadpool;
+    status_ = ynn_create_threadpool(scheduler->scheduler(), scheduler,
+                                    /*flags=*/0, &threadpool);
+    if (status_ != ynn_status_success) {
+      return;
+    }
+    threadpool_ =
+        std::unique_ptr<ynn_threadpool, decltype(&ynn_delete_threadpool)>(
+            threadpool, ynn_delete_threadpool);
+  }
+  status_ = ynn_create_runtime(subgraph, threadpool_.get(), flags, &runtime);
   runtime_ = std::unique_ptr<ynn_runtime, decltype(&ynn_delete_runtime)>(
       runtime, ynn_delete_runtime);
 }

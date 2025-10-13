@@ -23,6 +23,7 @@
 #include "ynnpack/base/test/util.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
+#include "ynnpack/subgraph/test/scheduler.h"
 #include "ynnpack/subgraph/test/subgraph_builder.h"
 
 namespace ynn {
@@ -124,6 +125,8 @@ void TestStaticB(A, B, C) {
   TypeGenerator<B> b_gen(-max_abs_value, max_abs_value, quantization_params{});
   TypeGenerator<C> c_gen(-max_abs_value, max_abs_value, quantization_params{});
 
+  TestScheduler scheduler(3);
+
   for (auto _ : FuzzTest(std::chrono::seconds(5))) {
     const size_t input_rank = rank_dist(rng);
     const size_t max_k_dims = std::min<size_t>(2, input_rank - 2) + 1;
@@ -176,7 +179,8 @@ void TestStaticB(A, B, C) {
 
     subgraph.AddDot(num_k_dims, a_id, b_id, c_id, output_id);
 
-    Runtime runtime(subgraph.GetSubgraph());
+    Runtime runtime(subgraph.GetSubgraph(),
+                    random_bool(rng) ? &scheduler : nullptr);
     ASSERT_EQ(runtime.Status(), ynn_status_success);
 
     for (int reshape = 0; reshape < 2; ++reshape) {
@@ -263,6 +267,8 @@ void TestDynamicB(A, B, C) {
   TypeGenerator<B> b_gen(-max_abs_value, max_abs_value, quantization_params{});
   TypeGenerator<C> c_gen(-max_abs_value, max_abs_value, quantization_params{});
 
+  TestScheduler scheduler(3);
+
   for (auto _ : FuzzTest(std::chrono::seconds(5))) {
     const size_t a_rank = rank_dist(rng);
     const size_t b_rank = rank_dist(rng);
@@ -321,7 +327,8 @@ void TestDynamicB(A, B, C) {
 
     subgraph.AddDot(num_k_dims, a_id, b_tr_id, c_id, output_id);
 
-    Runtime runtime(subgraph.GetSubgraph());
+    Runtime runtime(subgraph.GetSubgraph(),
+                    random_bool(rng) ? &scheduler : nullptr);
     ASSERT_EQ(runtime.Status(), ynn_status_success);
 
     for (int reshape = 0; reshape < 2; ++reshape) {

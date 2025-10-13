@@ -10,10 +10,8 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <initializer_list>
 #include <memory>
-#include <numeric>
 #include <utility>
 #include <vector>
 
@@ -22,6 +20,8 @@
 #include "ynnpack/include/ynnpack.h"
 
 namespace ynn {
+
+class TestScheduler;
 
 // This type allows describing tensors as just a rank (with no dimensions), or
 // a fully specified shape.
@@ -226,8 +226,8 @@ class SubgraphBuilder {
 
 class Runtime {
  public:
-  explicit Runtime(ynn_subgraph_t subgraph,
-                   ynn_threadpool_t threadpool = nullptr, uint32_t flags = 0);
+  Runtime(ynn_subgraph_t subgraph, TestScheduler* scheduler = nullptr,
+          uint32_t flags = 0);
 
   Runtime& ReshapeExternalTensor(const TensorShape& shape, void* data,
                                  uint32_t id);
@@ -243,6 +243,7 @@ class Runtime {
  private:
   ynn_status status_;
   std::unique_ptr<ynn_runtime, decltype(&ynn_delete_runtime)> runtime_;
+  std::unique_ptr<ynn_threadpool, decltype(&ynn_delete_threadpool)> threadpool_;
 };
 
 }  // namespace ynn

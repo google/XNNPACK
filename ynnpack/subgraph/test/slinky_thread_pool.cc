@@ -13,39 +13,9 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "ynnpack/include/ynnpack.h"
-#include "external/+_repo_rules+slinky/base/thread_pool.h"
-#include "external/+_repo_rules+slinky/base/thread_pool_impl.h"
+#include "ynnpack/subgraph/test/scheduler.h"
 
 namespace ynn {
-
-// This code looks silly: we make a slinky thread pool, wrap it in
-// xnn_scheduler, just to make it look like slinky::thread_pool. We
-// just need any old thread pool with a `schedule(std::function<void()>)`
-// function, and we want to avoid new dependencies.
-class TestThreadPool {
- public:
-  explicit TestThreadPool(int n) : impl_(n) {}
-
-  static int num_threads_impl(void* self) {
-    return reinterpret_cast<TestThreadPool*>(self)->impl_.thread_count();
-  }
-
-  static void schedule_impl(void* self, void* context,
-                            void (*task)(void* context)) {
-    reinterpret_cast<TestThreadPool*>(self)->impl_.thread_pool::enqueue(
-        [task, context]() { (*task)(context); });
-  }
-
-  static const ynn_scheduler* scheduler() {
-    static const ynn_scheduler scheduler = {
-        TestThreadPool::num_threads_impl, TestThreadPool::schedule_impl};
-    return &scheduler;
-  }
-
- private:
-  slinky::thread_pool_impl impl_;
-};
 
 TEST(thread_pool, inline_scheduling) {
   slinky_thread_pool thread_pool(nullptr, nullptr);
@@ -61,7 +31,7 @@ TEST(thread_pool, inline_scheduling) {
 }
 
 TEST(thread_pool, single_loop) {
-  std::unique_ptr<TestThreadPool> threads = std::make_unique<TestThreadPool>(3);
+  auto threads = std::make_unique<TestScheduler>(3);
   slinky_thread_pool thread_pool(threads->scheduler(), threads.get());
 
   static constexpr size_t size = 10000;
@@ -76,7 +46,7 @@ TEST(thread_pool, single_loop) {
 }
 
 TEST(thread_pool, loop_chain) {
-  std::unique_ptr<TestThreadPool> threads = std::make_unique<TestThreadPool>(3);
+  auto threads = std::make_unique<TestScheduler>(3);
   slinky_thread_pool thread_pool(threads->scheduler(), threads.get());
 
   static constexpr size_t size = 10000;
@@ -95,7 +65,7 @@ TEST(thread_pool, loop_chain) {
 }
 
 TEST(thread_pool, nested_loops) {
-  std::unique_ptr<TestThreadPool> threads = std::make_unique<TestThreadPool>(3);
+  auto threads = std::make_unique<TestScheduler>(3);
   slinky_thread_pool thread_pool(threads->scheduler(), threads.get());
 
   static constexpr size_t size = 100;

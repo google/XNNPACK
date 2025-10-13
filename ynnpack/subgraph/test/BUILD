@@ -7,12 +7,25 @@ load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
 
 cc_library(
+    name = "scheduler",
+    testonly = True,
+    srcs = ["scheduler.cc"],
+    hdrs = ["scheduler.h"],
+    visibility = ["//ynnpack/subgraph:__subpackages__"],
+    deps = [
+        "//ynnpack:ynnpack_h",
+        "@slinky//base:thread_pool_impl",
+    ],
+)
+
+cc_library(
     name = "subgraph_builder",
     testonly = True,
     srcs = ["subgraph_builder.cc"],
     hdrs = ["subgraph_builder.h"],
     visibility = ["//ynnpack:__subpackages__"],
     deps = [
+        ":scheduler",
         "//ynnpack",
         "//ynnpack/base",
         "//ynnpack/base/test:tensor",
@@ -23,11 +36,9 @@ cc_test(
     name = "slinky_thread_pool",
     srcs = ["slinky_thread_pool.cc"],
     deps = [
-        "//ynnpack:ynnpack_h",
+        ":scheduler",
         "//ynnpack/subgraph:slinky_thread_pool",
         "@com_google_googletest//:gtest_main",
-        "@slinky//base:thread_pool",
-        "@slinky//base:thread_pool_impl",
     ],
 )
 
@@ -57,6 +68,7 @@ cc_test(
 
 TEST_DEPS = [
     ":subgraph_builder",
+    ":scheduler",
     "//ynnpack",
     "//ynnpack/base",
     "//ynnpack/base/test:buffer",
