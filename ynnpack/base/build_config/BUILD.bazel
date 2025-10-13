@@ -83,3 +83,11 @@ selects.config_setting_group(
         ":cpu_darwin_arm64",
     ],
 )
+
+selects.config_setting_group(
+    name = "apple_clang_arm64",
+    match_all = [
+        ":apple_clang",
+        ":arm64",
+    ],
+)
