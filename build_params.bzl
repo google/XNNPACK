@@ -11,8 +11,7 @@ load(
 )
 
 # buildifier: disable=out-of-order-load
-def register_extension_info(**kwargs):
-    pass
+load("//:register_extension_info.bzl", "register_extension_info")
 
 def xnnpack_src_to_target_name(src):
     src = src.split("/")[-1]
