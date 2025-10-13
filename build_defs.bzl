@@ -234,6 +234,7 @@ def xnnpack_slinky_defines():
 
 def xnnpack_if_kleidiai_enabled(enabled = [], not_enabled = []):
     return select({
+        "//ynnpack/xnnpack:use_ynnpack": not_enabled,
         "//:kleidiai_enabled": enabled,
         "//conditions:default": not_enabled,
     })
@@ -246,32 +247,6 @@ def xnnpack_kleidiai_defines():
 
 def xnnpack_slow_benchmark_tags():
     return ["manual"]
-
-def xnnpack_lib_srcs():
-    return [
-        "src/init.c",
-    ]
-
-def xnnpack_lib_deps():
-    return [
-        ":allocator",
-        ":build_identifier",  # build_cleaner: keep
-        ":common",  # build_cleaner: keep
-        ":init_once",
-        ":logging",
-        ":math",  # build_cleaner: keep
-        ":microkernel_hdrs",  # build_cleaner: keep
-        ":microparams_h",  # build_cleaner: keep
-        ":microparams_init",  # build_cleaner: keep
-        ":operators",  # build_cleaner: keep
-        ":params",
-        ":subgraph",  # build_cleaner: keep
-        "//src/configs:hardware_config",
-        "//src/configs:microkernel_configs",  # build_cleaner: keep
-        "@pthreadpool",
-    ] + xnnpack_if_kleidiai_enabled([
-        "@KleidiAI//:common",
-    ])
 
 def xnnpack_cc_library(
         name,
@@ -357,6 +332,7 @@ def xnnpack_cc_library(
       testonly: If True only testonly targets (such as tests) can depend on this.
       **kwargs: Other arguments to pass to the cc_library rule.
     """
+
     # Set the default defines.
     defines = defines or xnnpack_configurable_defines()
 
@@ -431,7 +407,7 @@ def xnnpack_cc_library(
         hdrs = hdrs,
         visibility = visibility,
         testonly = testonly,
-        **kwargs,
+        **kwargs
     )
 
 def xnnpack_cxx_library(name, copts = xnnpack_std_cxxopts(), gcc_copts = [], msvc_copts = [], **kwargs):
@@ -496,7 +472,7 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
         tags = tags,
         timeout = timeout,
         shard_count = shard_count,
-        **kwargs,
+        **kwargs
     )
 
 def xnnpack_binary(name, srcs, copts = [], deps = [], linkopts = []):
@@ -534,6 +510,7 @@ def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = [], defines = []
       tags: The list of arbitrary text tags.
       defines: The list of arbitrary defines tags.
     """
+
     # Set the default defines.
     defines = defines or xnnpack_configurable_defines()
 
