@@ -341,9 +341,9 @@ static void init_pf16_gemm_config(void) {
 
 static void init_bf16_f32_gemm_config(void) {
   // Common parameters.
-  bf16_f32_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_BFLOAT16_T;
-  bf16_f32_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_BFLOAT16_T;
-  bf16_f32_gemm_config.log2_filter_element_bit_size = XNN_LOG2_SIZEOF_BFLOAT16_T + 3;
+  bf16_f32_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_BFLOAT16;
+  bf16_f32_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_BFLOAT16;
+  bf16_f32_gemm_config.log2_filter_element_bit_size = XNN_LOG2_SIZEOF_BFLOAT16 + 3;
   bf16_f32_gemm_config.bias_element_size = sizeof(float);
 
   // Arch-specific parameters.
