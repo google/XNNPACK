@@ -227,6 +227,7 @@ void ynn_runtime::schedule() {
     // In order to find a common subnest, we iterate over loop nests of the
     // customers and find a common prefix. This also can be viewed as finding
     // a least common ancestor.
+    bool loop_nest_initialized = false;
     for (const auto& output : f.outputs()) {
       // Find common subnest of the consumers.
       for (int consumer_index = 0;
@@ -235,8 +236,9 @@ void ynn_runtime::schedule() {
         int consumer = consumers[output.buffer->sym()][consumer_index];
         const std::vector<int>& consumer_loop_nest =
             func_scheduling_data[consumer].loop_nest;
-        if (consumer_index == 0) {
+        if (!loop_nest_initialized) {
           sched_data.loop_nest = consumer_loop_nest;
+          loop_nest_initialized = true;
           continue;
         }
         if (consumer_loop_nest.size() < sched_data.loop_nest.size()) {
