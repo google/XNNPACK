@@ -987,21 +987,14 @@ void GEMMBenchmark(benchmark::State& state,
     buffer_index = (buffer_index + 1) % num_buffers;
     state.ResumeTiming();
 
-    if (mr > 1) {
-      for (uint32_t m = 0; m < mc; m += mr) {
-        const uint32_t mb = min(mc - m, mr);
-        gemm(mb, nc, kc * sizeof(float),
-             input_packed.data() +
-                 xnn_x32_pack_lh_offset__neonsme(m, kc, mr_packed, kr, sr),
-             w.data() + packed_w_size / sizeof(float) * buffer_index,
-             c.data() + (buffer_index * mc + m) * nc, nc * sizeof(float),
-             sizeof(float), &minmax_params);
-      }
-    } else {
-      gemm(mr, nc, kc * sizeof(float), input_packed.data(),
-           w.data() + packed_w_size / sizeof(float) * buffer_index,
-           c.data() + (buffer_index * mc) * nc, nc * sizeof(float),
-           sizeof(float), &minmax_params);
+    for (uint32_t m = 0; m < mc; m += mr) {
+      const uint32_t mb = min(mc - m, mr);
+      gemm(mb, nc, kc * sizeof(float),
+            input_packed.data() +
+                xnn_x32_pack_lh_offset__neonsme(m, kc, mr_packed, kr, sr),
+            w.data() + packed_w_size / sizeof(float) * buffer_index,
+            c.data() + (buffer_index * mc + m) * nc, nc * sizeof(float),
+            sizeof(float), &minmax_params);
     }
   }
 
@@ -1106,21 +1099,14 @@ void GEMMBenchmark(benchmark::State& state,
     buffer_index = (buffer_index + 1) % num_buffers;
     state.ResumeTiming();
 
-    if (mr > 1) {
-      for (uint32_t m = 0; m < mc; m += mr) {
-        const uint32_t mb = min(mc - m, mr);
-        gemm(mb, nc, kc * sizeof(xnn_float16),
-             input_packed.data() +
-                 xnn_x16_pack_lh_offset__neonsme2(m, kc, mr_packed, kr, sr),
-             w.data() + packed_w_size * buffer_index,
-             &c[c_elements * buffer_index], nc * sizeof(xnn_float16),
-             sizeof(xnn_float16), &minmax_params);
-      }
-    } else {
-      gemm(mr, nc, kc * sizeof(xnn_float16), input_packed.data(),
-           w.data() + packed_w_size * buffer_index,
-           &c[c_elements * buffer_index], nc * sizeof(xnn_float16),
-           sizeof(xnn_float16), &minmax_params);
+    for (uint32_t m = 0; m < mc; m += mr) {
+      const uint32_t mb = min(mc - m, mr);
+      gemm(mb, nc, kc * sizeof(xnn_float16),
+            input_packed.data() +
+                xnn_x16_pack_lh_offset__neonsme2(m, kc, mr_packed, kr, sr),
+            w.data() + packed_w_size * buffer_index,
+            &c[c_elements * buffer_index], nc * sizeof(xnn_float16),
+            sizeof(xnn_float16), &minmax_params);
     }
   }
 
