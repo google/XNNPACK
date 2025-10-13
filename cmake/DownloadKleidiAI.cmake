@@ -19,7 +19,7 @@ ENDIF()
 INCLUDE(ExternalProject)
 ExternalProject_Add(kleidiai
   URL https://github.com/ARM-software/kleidiai/archive/8ca226712975f24f13f71d04cda039a0ee9f9e2f.zip
-  URL_HASH SHA256=42155cfc084bf1f80e9ef486470f949502ea8d1b845b2f1bebd58978a1b540aa
+  URL_HASH SHA256=800e347850a6b16d65025ccfab545036e8da67a00acf12ba0352dc2303e35d83
   SOURCE_DIR "${CMAKE_BINARY_DIR}/kleidiai-source"
   BINARY_DIR "${CMAKE_BINARY_DIR}/kleidiai"
   CONFIGURE_COMMAND ""
