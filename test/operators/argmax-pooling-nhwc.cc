@@ -3,12 +3,11 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>
 #include <cstddef>
-#include <cstdint>
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"
+#include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
 #include "test/operators/argmax-pooling-operator-tester.h"
 

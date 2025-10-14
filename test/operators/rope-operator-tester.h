@@ -10,11 +10,9 @@
 #include <cassert>
 #include <cmath>
 #include <cstddef>
-#include <cstdint>
 #include <cstdlib>
 #include <memory>
 #include <random>
-#include <vector>
 
 #include <gtest/gtest.h>
 #include "include/xnnpack.h"

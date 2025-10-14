@@ -265,6 +265,7 @@ xnnpack_unit_test(
         ":runtime_tester",
         ":subgraph_tester",
         "//:buffer",
+        "//:datatype",
         "//:node_type",
         "//:subgraph_h",
         "//:xnnpack_h",
@@ -280,6 +281,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":runtime_tester",
+        "//:buffer",
     ],
 )
 
@@ -291,6 +293,7 @@ xnnpack_unit_test(
     deps = [
         ":runtime_tester",
         ":subgraph_tester",
+        "//:buffer",
         "//:subgraph_h",
     ],
 )
