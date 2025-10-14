@@ -171,6 +171,18 @@ class ExpressionCachingTest(unittest.TestCase):
     # same number of objects.
     self.assertEqual(mc_object_count, c_object_count)
 
+  # lift_constants doesn't need and doesn't have caching, because it's only
+  # supposed to modify leaf nodes, but it's still good to have the test to make
+  # sure that nothing is broken.
+  def test_lift_constants(self):
+    c = sample_func()
+    c_object_count = self.count_objects(c)
+
+    mc = self.target.lift_constants(c, {})
+    mc_object_count = self.count_objects(mc)
+
+    self.assertEqual(mc_object_count, c_object_count)
+
 
 if __name__ == "__main__":
   unittest.main()
