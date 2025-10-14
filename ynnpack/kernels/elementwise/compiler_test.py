@@ -1,3 +1,5 @@
+import unittest
+
 # pylint: disable=undefined-variable
 from ynnpack.kernels.elementwise.compiler import *  # pylint: disable=wildcard-import
 
@@ -29,37 +31,137 @@ def compare_ops(a, b):
       return False
   return True
 
+
 x = Var("x", Float(32))
 y = Var("y", Float(32))
 z = Var("z", Float(32))
 
 r = rewrite(f32_a + f32_b, Op(Float(32), "test_add", [f32_a, f32_b]), x + y)
-assert(compare_ops(r, Op(Float(32), "test_add", [x, y])))
+assert compare_ops(r, Op(Float(32), "test_add", [x, y]))
 
-r = rewrite(
-    f32_a * f32_b + f32_c, multiply_add(f32_a, f32_b, f32_c), x * y + z
-)
-assert(compare_ops(r, multiply_add(x, y, z)))
+r = rewrite(f32_a * f32_b + f32_c, multiply_add(f32_a, f32_b, f32_c), x * y + z)
+assert compare_ops(r, multiply_add(x, y, z))
 
-r = rewrite(
-    f32_a * f32_b - f32_c, multiply_sub(f32_a, f32_b, f32_c), x * y - z
-)
-assert(compare_ops(r, multiply_sub(x, y, z)))
+r = rewrite(f32_a * f32_b - f32_c, multiply_sub(f32_a, f32_b, f32_c), x * y - z)
+assert compare_ops(r, multiply_sub(x, y, z))
 
-r = rewrite(
-    f32_a * f32_b - f32_c, multiply_sub(f32_a, f32_b, f32_c), x * y + z
-)
-assert(r is None)
+r = rewrite(f32_a * f32_b - f32_c, multiply_sub(f32_a, f32_b, f32_c), x * y + z)
+assert r is None
 
 r = find_intrinsics(f32_a * f32_b + f32_c)
-assert(compare_ops(r, multiply_add(f32_a, f32_b, f32_c)))
+assert compare_ops(r, multiply_add(f32_a, f32_b, f32_c))
 
 r = find_intrinsics(i32_a * i32_b + i32_c)
-assert(compare_ops(r, multiply_add(i32_a, i32_b, i32_c)))
+assert compare_ops(r, multiply_add(i32_a, i32_b, i32_c))
 
 r = find_intrinsics((i32_a + i32_b) / i32(2))
-assert(compare_ops(r, halving_add(i32_a, i32_b)))
+assert compare_ops(r, halving_add(i32_a, i32_b))
 
 r = find_intrinsics((i32_a + i32_b) / i32(3))
-assert(r is None)
+assert r is None
 
+
+class TestTarget(Target):
+  """Test target for elementwise kernels compiler."""
+
+  def __init__(self):
+    Target.__init__(self)
+    self.features = []
+    self.load_intrinsics = {}
+    self.store_intrinsics = {}
+
+    self.tail_strategy = None
+    self.vector_bits = 128
+
+
+def sample_func():
+  """Just a test function (it's an incomplete implementation of tanh)."""
+  vmax_x = 7.9807181358e00
+  vmin_x = -7.9807181358e00
+
+  valpha_3 = 1.3412411511e-01
+  valpha_5 = 3.5330520477e-03
+  valpha_7 = 2.1235626264e-05
+  valpha_9 = 1.4248920266e-08
+
+  va = load(f32_a)
+
+  vx = min(vmax_x, va)
+  vx = max(vmin_x, vx)
+
+  vx2 = vx * vx
+
+  vp = vx2 * valpha_9 + valpha_7
+  vp = vx2 * vp + valpha_5
+  vp = vx2 * vp + valpha_3
+  vp = vx2 * vp + 1.0
+  return vx * vp
+
+
+class ExpressionCachingTest(unittest.TestCase):
+  """Check that passes don't introduce multiple objects for the same expression."""
+
+  def setUp(self):
+    super().setUp()
+    self.target = TestTarget()
+
+  def count_objects(self, expr):
+    objects = set()
+
+    def count_objects_impl(e):
+      if isinstance(e, Op):
+        for arg in e.args:
+          count_objects_impl(arg)
+
+      objects.add(e)
+
+    count_objects_impl(expr)
+    return len(objects)
+
+  def test_vectorize(self):
+    natural_lanes = 16
+
+    c = sample_func()
+    c_object_count = self.count_objects(c)
+
+    mc = self.target.vectorize(c, natural_lanes, {})
+    mc_object_count = self.count_objects(mc)
+
+    # We need to add a number of constants in the program, because they'll be
+    # broadcasted in the vectorize.
+    constant_count = 7
+    self.assertEqual(mc_object_count, c_object_count + constant_count)
+
+  def test_slice_wide_types(self):
+    natural_lanes = 4
+
+    c = sample_func()
+    c_object_count = self.count_objects(c)
+
+    # At the moment slice_wide_type expects types to have number of lanes
+    # divisible by the natural lanes count.
+    mc = self.target.vectorize(c, natural_lanes, {})
+    mc = self.target.slice_wide_types(mc, {})
+    mc_object_count = self.count_objects(mc)
+
+    # We need to add a number of constants in the program, because they'll be
+    # broadcasted in the vectorize.
+    constant_count = 7
+    self.assertEqual(mc_object_count, c_object_count + constant_count)
+
+  def test_pattern_match(self):
+    natural_lanes = 16
+
+    c = sample_func()
+    c_object_count = self.count_objects(c)
+
+    mc = self.target.pattern_match(c, natural_lanes, {})
+    mc_object_count = self.count_objects(mc)
+
+    # There are no patterns defined in the test target, so we should get the
+    # same number of objects.
+    self.assertEqual(mc_object_count, c_object_count)
+
+
+if __name__ == "__main__":
+  unittest.main()
