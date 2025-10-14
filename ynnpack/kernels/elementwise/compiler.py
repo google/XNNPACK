@@ -118,29 +118,29 @@ def wrap(y):
 def promote_types(x, y):
   """Makes x and y to have compatible types."""
   if x.ty is None and y.ty is None:
-    return (x, y)
+    return [x, y]
 
   if x.ty.type_class == y.ty.type_class and x.ty.size == y.ty.size:
-    return (x, y)
+    return [x, y]
 
   if isinstance(x, Constant) or isinstance(y, Constant):
     if not isinstance(x, Constant):
-      return (x, cast(x.ty, y))
+      return [x, cast(x.ty, y)]
     elif not isinstance(y, Constant):
-      return (cast(y.ty, x), y)
+      return [cast(y.ty, x), y]
     else:
       assert False
 
   if x.ty.type_class == "float" or y.ty.type_class == "float":
     max_size = max(x.ty.size, y.ty.size)
-    return (cast(Float(max_size), x), cast(Float(max_size), y))
+    return [cast(Float(max_size), x), cast(Float(max_size), y)]
   else:
     assert x.ty.type_class == y.ty.type_class
     promoted_ty = x.ty.withsize(max(x.ty.size, y.ty.size))
-    return (
+    return [
         cast(promoted_ty, x),
         cast(promoted_ty, y),
-    )
+    ]
 
 
 class Value:
@@ -243,7 +243,7 @@ class WildConstant(Value):
 class Op(Value):
 
   def __init__(self, ty, name, args):
-    assert isinstance(args, list) or isinstance(args, tuple)
+    assert isinstance(args, list)
     Value.__init__(self, ty)
     self.name = name
     self.args = args
@@ -338,7 +338,7 @@ def intrinsic(func):
 
 @intrinsic
 def abs(value):
-  return Op(value.ty, "abs", (value,))
+  return Op(value.ty, "abs", [value])
 
 
 def lower_abs(x):
@@ -348,27 +348,27 @@ def lower_abs(x):
 
 @intrinsic
 def logical_shift_left(x, shift):
-  return Op(x.ty, "logical_shift_left", (x, shift))
+  return Op(x.ty, "logical_shift_left", [x, shift])
 
 
 @intrinsic
 def round(value):
-  return Op(value.ty, "round", (value,))
+  return Op(value.ty, "round", [value])
 
 
 @intrinsic
 def ceil(value):
-  return Op(value.ty, "ceil", (value,))
+  return Op(value.ty, "ceil", [value])
 
 
 @intrinsic
 def floor(value):
-  return Op(value.ty, "floor", (value,))
+  return Op(value.ty, "floor", [value])
 
 
 @intrinsic
 def sqrt(value):
-  return Op(value.ty, "sqrt", (value,))
+  return Op(value.ty, "sqrt", [value])
 
 
 @intrinsic
@@ -379,17 +379,17 @@ def cast(ty, value):
   # We can just change the type of the constant.
   if isinstance(value, Constant):
     return Constant(ty, value.value)
-  return Op(ty, "cast", (value,))
+  return Op(ty, "cast", [value])
 
 
 @intrinsic
 def saturating_cast(ty, value):
-  return Op(ty, "saturating_cast", (value,))
+  return Op(ty, "saturating_cast", [value])
 
 
 @intrinsic
 def reinterpret_cast(ty, value):
-  return Op(ty, "reinterpret_cast", (value,))
+  return Op(ty, "reinterpret_cast", [value])
 
 
 def widen(x):
@@ -404,27 +404,27 @@ def signed_widen(x):
 @intrinsic
 def widening_sub(x, y):
   assert x.ty == y.ty
-  return Op(x.ty.signed_widen(), "widening_sub", (x, y))
+  return Op(x.ty.signed_widen(), "widening_sub", [x, y])
 
 
 # Computes widen(x) * widen(y)
 @intrinsic
 def widening_mul(x, y):
   assert x.ty == y.ty
-  return Op(x.ty.widen(), "widening_mul", (x, y))
+  return Op(x.ty.widen(), "widening_mul", [x, y])
 
 
 # Computes saturating_narrow(widen(x) + widen(y))
 @intrinsic
 def saturating_add(x, y):
   assert x.ty == y.ty
-  return Op(x.ty, "saturating_add", (x, y))
+  return Op(x.ty, "saturating_add", [x, y])
 
 
 @intrinsic
 def saturating_sub(x, y):
   assert x.ty == y.ty
-  return Op(x.ty, "saturating_sub", (x, y))
+  return Op(x.ty, "saturating_sub", [x, y])
 
 
 # Computes x * y + z
@@ -432,7 +432,7 @@ def saturating_sub(x, y):
 def multiply_add(x, y, z):
   assert x.ty == y.ty
   assert x.ty == z.ty
-  return Op(x.ty, "multiply_add", (x, y, z))
+  return Op(x.ty, "multiply_add", [x, y, z])
 
 
 # Computes x * y - z
@@ -440,45 +440,45 @@ def multiply_add(x, y, z):
 def multiply_sub(x, y, z):
   assert x.ty == y.ty
   assert x.ty == z.ty
-  return Op(x.ty, "multiply_sub", (x, y, z))
+  return Op(x.ty, "multiply_sub", [x, y, z])
 
 
 def halving_add(x, y):
   assert x.ty == y.ty
-  return Op(x.ty, "halving_add", (x, y))
+  return Op(x.ty, "halving_add", [x, y])
 
 
 def rounding_halving_add(x, y):
   assert x.ty == y.ty
-  return Op(x.ty, "rounding_halving_add", (x, y))
+  return Op(x.ty, "rounding_halving_add", [x, y])
 
 
 # Computes saturating_narrow((widen(x) + (1 << (shift - 1))) >> shift)
 @intrinsic
 def rounding_narrowing_shift_right(x, shift):
-  return Op(x.ty.narrow(), "rounding_narrowing_shift_right", (x, shift))
+  return Op(x.ty.narrow(), "rounding_narrowing_shift_right", [x, shift])
 
 
 @intrinsic
 def saturating_narrow(x):
-  return Op(x.ty.narrow(), "saturating_narrow", (x,))
+  return Op(x.ty.narrow(), "saturating_narrow", [x])
 
 
 @intrinsic
 def min(x, y):
   assert x.ty == y.ty
-  return Op(wrap(x).ty, "min", (x, y))
+  return Op(wrap(x).ty, "min", [x, y])
 
 
 @intrinsic
 def max(x, y):
   assert x.ty == y.ty
-  return Op(x.ty, "max", (x, y))
+  return Op(x.ty, "max", [x, y])
 
 
 @intrinsic
 def select_bits(mask, x, y):
-  return Op(x.ty, "select_bits", (mask, x, y))
+  return Op(x.ty, "select_bits", [mask, x, y])
 
 
 def lower_select_bits(mask, x, y):
@@ -508,7 +508,7 @@ def lower_saturating_add(x, y):
 def broadcast(x, lanes):
   assert x.ty.lanes == 1
   x = wrap(x)
-  return Op(x.ty.with_lanes(lanes), "broadcast", (x,))
+  return Op(x.ty.with_lanes(lanes), "broadcast", [x])
 
 
 def combine_vectors(args):
