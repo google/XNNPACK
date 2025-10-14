@@ -2815,7 +2815,7 @@ void GemmMicrokernelTester::Test(
   xnnpack::Buffer<uint16_t> kernel_scale2d(n() * packed_k2 / bl());
   xnnpack::Buffer<float> c((m() - 1) * cm_stride() + n());
   xnnpack::Buffer<int32_t> acc(m() * n());
-  xnnpack::Buffer<float> c_ref(m() * n(), 0);
+  xnnpack::Buffer<float> c_ref(m() * n());
 
   // Create a fake `gemm_config` for the packing functions.
   struct xnn_gemm_config gemm_config;
@@ -2874,7 +2874,7 @@ void GemmMicrokernelTester::Test(
                                       (void*)start);
 
   // Compute 32-bit results and output quantization arguments.
-  std::fill(c_ref.begin(), c_ref.end(), 0);
+  std::fill(c_ref.begin(), c_ref.end(), 0.f);
   for (size_t m_index = 0; m_index < m(); m_index++) {
     for (size_t n_index = 0; n_index < n(); n_index++) {
       float kfsum = 0.0;
