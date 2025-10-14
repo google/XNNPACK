@@ -149,6 +149,15 @@ class ExpressionCachingTest(unittest.TestCase):
     constant_count = 7
     self.assertEqual(mc_object_count, c_object_count + constant_count)
 
+  def test_optimize_slices(self):
+    c = sample_func()
+    c_object_count = self.count_objects(c)
+
+    mc = self.target.optimize_slices(c, {})
+    mc_object_count = self.count_objects(mc)
+
+    self.assertEqual(mc_object_count, c_object_count)
+
   def test_pattern_match(self):
     natural_lanes = 16
 
