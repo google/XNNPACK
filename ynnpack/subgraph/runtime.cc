@@ -185,6 +185,7 @@ void ynn_runtime::schedule() {
     slinky::loop_id loop_id;
     slinky::expr extent;
     slinky::expr step;
+    bool step_is_required = false;
   };
 
   struct scheduling_data {
@@ -261,6 +262,7 @@ void ynn_runtime::schedule() {
     int compute_at = sched_data.loop_nest.size();
     // The total number of elements shared between the producer and consumer
     // at the proposed compute_at level.
+    sched_data.splits_match = 0;
     sched_data.match_volume = 1;
     ynn::scheduling_info* sched =
         static_cast<ynn::scheduling_info*>(f.user_data());
@@ -282,12 +284,27 @@ void ynn_runtime::schedule() {
            compute_at < sched_data.loop_nest.size() &&
            splits_match < loop_splits.size();
            splits_match++) {
-        slinky::expr loop_extent =
-            global_loop_nest[sched_data.loop_nest[compute_at]].extent;
+        int loop_nest_id = sched_data.loop_nest[compute_at];
+        slinky::expr loop_extent = global_loop_nest[loop_nest_id].extent;
+        // Loops can't be shared if the existing loop step and this loop
+        // step are not equal and both are required.
+        if (loop_splits[splits_match].step_is_required &&
+            global_loop_nest[loop_nest_id].step_is_required &&
+            !prove_true(loop_splits[splits_match].step ==
+                        global_loop_nest[loop_nest_id].step)) {
+          break;
+        }
         if (!prove_true(loop_splits[splits_match].extent == loop_extent)) {
         } else {
-          // NOTE(vksnk): Example of can we use scheduling_info from all
-          // functions assigned to a loop to compute a loop step.
+          // We can overwrite the current loop step if it's not required, but
+          // this one is.
+          if (loop_splits[splits_match].step_is_required) {
+            global_loop_nest[loop_nest_id].step =
+                loop_splits[splits_match].step;
+            global_loop_nest[loop_nest_id].step_is_required = true;
+          }
+          // NOTE(vksnk): Another example of how can we use scheduling_info from
+          // all functions assigned to a loop to compute a loop step.
           // global_loop_nest[loop_nest[compute_at]].step = slinky::simplify(
           //     slinky::min(global_loop_nest[loop_nest[compute_at]].step,
           //                 loop_splits[splits_match].step));
@@ -320,7 +337,8 @@ void ynn_runtime::schedule() {
       int splits_match = sched_data.splits_match;
       for (int j = splits_match; j < sched->loop_splits.size(); j++) {
         const ynn::scheduling_split& dim = sched->loop_splits[j];
-        global_loop_nest.push_back({{&f, dim.var}, dim.extent, dim.step});
+        global_loop_nest.push_back(
+            {{&f, dim.var}, dim.extent, dim.step, dim.step_is_required});
         sched_data.loop_nest.push_back(global_loop_nest.size() - 1);
       }
     }

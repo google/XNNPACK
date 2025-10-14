@@ -85,6 +85,11 @@ struct scheduling_split {
   slinky::expr step;
   slinky::expr extent;
   slinky::expr workers = slinky::loop::parallel;
+  // If this is true the corresponding loop is required to have this specific
+  // step, i.e. it can not get scheduled in the loop of the other function
+  // unless the step matches or the other loop doesn't have required step yet.
+  // In the latter case this step will override the existing step of that loop.
+  bool step_is_required = false;
 };
 
 // A scheduling information for a buffer -- it's expected to be attached to the

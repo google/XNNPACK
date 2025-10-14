@@ -196,9 +196,7 @@ auto make_dot_impl(dot_type type, size_t num_k_dims) {
              c_stride_m, c);
     };
 
-    const size_t cache_sizes[] = {
-        cache_size_l2
-    };
+    const size_t cache_sizes[] = {cache_size_l2};
 
     // We need up to 3 loops per cache level.
     dot_loop loops_storage[std::size(cache_sizes) * 3];
@@ -809,6 +807,12 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
     slinky::expr splits[] = {split_n, split_m};
     auto sched =
         runtime.make_schedule(dims, output.buffer, output.extents, splits);
+
+    // We want to use exactly these loop splits for two innermost dot loops.
+    for (size_t i = 0;
+         i < std::min<std::size_t>(2, sched->loop_splits.size()); i++) {
+      sched->loop_splits[i].step_is_required = true;
+    }
 
     // Schedule the output buffer to be stored at the same level as it's
     // computed at.
