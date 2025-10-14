@@ -17,12 +17,21 @@
 #include <benchmark/benchmark.h>
 #include <pthreadpool.h>
 
-#ifdef BENCHMARK_ARGS_BOTTLENECK
+#if defined(BENCHMARK_ARGS_BOTTLENECK)
 #define XNN_BENCHMARK_MAIN()                            \
   extern "C" {                                          \
   int BenchmarkArgBottleneck(int& argc, char**& argv) { \
     return benchmark::utils::ProcessArgs(argc, argv);   \
   }                                                     \
+  }
+#elif defined(__hexagon__)
+#define XNN_BENCHMARK_MAIN()                                            \
+  int __attribute__((weak)) main(int argc, char** argv) {               \
+    ::benchmark::Initialize(&argc, argv);                               \
+    int status = benchmark::utils::ProcessArgs(argc, argv);             \
+    if (status != 0) return status;                                     \
+    if (::benchmark::ReportUnrecognizedArguments(argc, argv)) return 1; \
+    ::benchmark::RunSpecifiedBenchmarks();                              \
   }
 #else
 #define XNN_BENCHMARK_MAIN()                                            \
@@ -32,7 +41,7 @@
     if (status != 0) return status;                                     \
     if (::benchmark::ReportUnrecognizedArguments(argc, argv)) return 1; \
     ::benchmark::RunSpecifiedBenchmarks();                              \
-  }                                                                     
+  }
 #endif  // BENCHMARK_ARGS_BOTTLENECK
 
 // Common flags for all benchmarks.
