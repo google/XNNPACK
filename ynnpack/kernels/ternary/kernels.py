@@ -45,5 +45,5 @@ def multiply_add_fp32_fp32_fp32(a, b, c, x):
 @const_buffer("c", Float(32))
 @buffer("x", Float(32))
 @operator_name("clamp")
-def clamp_fp32_fp32_fp32(a, mn, mx, x):
-  return store(min(max(load(a), load(mn)), load(mx)), x)
+def clamp_fp32_fp32_fp32(a, b, c, x):
+  return store(min(max(load(a), load(b)), load(c)), x)
