@@ -936,27 +936,38 @@ class Target:
     cache[expr] = v
     return v
 
-  def optimize_slices(self, expr):
+  def optimize_slices(self, expr, cache):
     """Recursively iterate over the expression and optimize slices/combines."""
+    if expr in cache:
+      return cache[expr]
+
     if isinstance(expr, Op):
-      args = [self.optimize_slices(arg) for arg in expr.args]
+      args = [self.optimize_slices(arg, cache) for arg in expr.args]
       if expr.name == "slice":
         if args[0].name == "combine":
           comb = args[0]
           slice_index = args[1].value
           total_slices = args[2].value
           if len(comb.args) == total_slices:
-            return comb.args[slice_index]
+            mutated = comb.args[slice_index]
+            cache[expr] = mutated
+            return mutated
           elif len(comb.args) % total_slices == 0:
             num = len(comb.args) // total_slices
-            return combine_vectors(
+            mutated = combine_vectors(
                 comb.args[slice_index * num : (slice_index + 1) * num]
             )
+            cache[expr] = mutated
+            return mutated
 
         elif args[0].name == "broadcast":
           bc = args[0]
-          return broadcast(bc.args[0], expr.ty.lanes)
-      return Op(expr.ty, expr.name, args)
+          mutated = broadcast(bc.args[0], expr.ty.lanes)
+          cache[expr] = mutated
+          return mutated
+      mutated = Op(expr.ty, expr.name, args)
+      cache[expr] = mutated
+      return mutated
     else:
       return expr
 
@@ -1519,7 +1530,7 @@ class Target:
     natural_lanes = self.vector_bits // output_type_size
     ast = self.vectorize(ast, natural_lanes, {})
     ast = self.slice_wide_types(ast, {})
-    ast = self.optimize_slices(ast)
+    ast = self.optimize_slices(ast, {})
     ast = self.pattern_match(ast, natural_lanes, {})
 
     constants = {}
