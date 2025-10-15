@@ -14,12 +14,12 @@ cc_library(
     hdrs = [
         "vec.h",
     ] + select({
-        "//ynnpack/base/build_config:x86": [
+        "//ynnpack:x86": [
             "x86_avx.h",
             "x86_avx512.h",
             "x86_sse.h",
         ],
-        "//ynnpack/base/build_config:arm": ["arm.h"],
+        "//ynnpack:arm": ["arm.h"],
         "//conditions:default": [],
     }),
     compatible_with = _COMPATIBLE_WITH,

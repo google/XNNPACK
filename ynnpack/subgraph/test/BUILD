@@ -167,7 +167,7 @@ cc_test(
     srcs = select({
         # This test assumes we can pattern match and use ternary kernels, which are only guaranteed
         # to exist on x86, and the logic being tested is architecture independent.
-        "//ynnpack/base/build_config:x86": ["fusion.cc"],
+        "//ynnpack:x86": ["fusion.cc"],
         "//conditions:default": [],
     }),
     deps = TEST_DEPS + ["//ynnpack/subgraph"],
