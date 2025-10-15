@@ -18,6 +18,7 @@
 #include "ynnpack/base/half.h"
 #include "ynnpack/base/simd/x86_avx.h"
 #include "ynnpack/base/simd/x86_sse.h"
+#include "ynnpack/base/simd/vec.h"
 #include "ynnpack/kernels/reduce/generic.h"
 #include "ynnpack/kernels/reduce/min_max_accumulator.h"
 #include "ynnpack/kernels/reduce/reduce.h"
@@ -25,18 +26,100 @@
 
 namespace ynn {
 
+namespace simd {
+
+template<>
+struct vec<int32_t, 16> {
+  s32x8 v[2];
+
+  using value_type = int32_t;
+  static constexpr std::integral_constant<size_t, 16> N = {};
+
+  vec() = default;
+  explicit vec(int32_t x) : v{x, x} {};
+
+  YNN_ALWAYS_INLINE vec operator+(vec a) const {
+    vec res;
+    res.v[0] = this->v[0] + a.v[0];
+    res.v[1] = this->v[1] + a.v[1];
+    return res;
+  }
+};
+
+using s32x16 = vec<int32_t, 16>;
+
+s32x16& operator+=(s32x16& a, s8x16 b) {
+  s32x8 a_0(_mm256_cvtepi8_epi32(b.v));
+  s32x8 a_1(_mm256_cvtepi8_epi32(_mm_srli_si128(b.v, 8)));
+
+  a.v[0] += a_0;
+  a.v[1] += a_1;
+  return a;
+}
+
+s32x16& operator+=(s32x16& a, u8x16 b) {
+  s32x8 a_0(_mm256_cvtepu8_epi32(b.v));
+  s32x8 a_1(_mm256_cvtepu8_epi32(_mm_srli_si128(b.v, 8)));
+
+  a.v[0] += a_0;
+  a.v[1] += a_1;
+  return a;
+}
+
+YNN_ALWAYS_INLINE s32x16 load(const int32_t* ptr, s32x16, decltype(s32x16::N)) {
+  s32x16 x;
+
+  x.v[0] = load(ptr, s32x8{}, s32x8::N);
+  x.v[1] = load(ptr + s32x8::N, s32x8{});
+
+  return x;
+}
+
+YNN_ALWAYS_INLINE s32x16 load(const int32_t* ptr, s32x16, size_t n) {
+  s32x16 x;
+
+  if (n < s32x8::N) {
+    x.v[0] = load(ptr, s32x8{}, n);
+    x.v[1] = 0;
+  } else {
+    x.v[0] = load(ptr, s32x8{}, s32x8::N);
+    x.v[1] = load(ptr + s32x8::N, s32x8{}, n - s32x8::N);
+  }
+
+  return x;
+}
+
+YNN_ALWAYS_INLINE void store(int32_t* ptr, s32x16 b, decltype(s32x16::N)) {
+  store(ptr, b.v[0]);
+  store(ptr + s32x8::N, b.v[1]);
+}
+
+YNN_ALWAYS_INLINE void store(int32_t* ptr, s32x16 b, size_t n) {
+  if (n < s32x8::N) {
+    store(ptr, b.v[0], n);
+  } else {
+    store(ptr, b.v[0]);
+    store(ptr + s32x8::N, b.v[1], n - s32x8::N);
+  }
+}
+
+}  // namespace simd
+
 namespace {
 
-using simd::bf16x16;
-using simd::extract;
-using simd::f16x16;
 using simd::f32x4;
 using simd::f32x8;
-using simd::s16x16;
 using simd::s32x4;
 using simd::s32x8;
+using simd::s32x16;
+using simd::bf16x16;
+using simd::f16x16;
+using simd::s16x16;
 using simd::s8x32;
 using simd::u8x32;
+using simd::s8x16;
+using simd::u8x16;
+using simd::extract;
 
 using f16x16_rvar = float16_wrapper<f16x16, s16x16>;
 using bf16x16_rvar = float16_wrapper<bf16x16, s16x16>;
@@ -169,24 +252,38 @@ MIN_MAX_KERNEL(max_fp16_4x16_avx2, dummy_t, f16x16_rvar, half, 16);
 MIN_MAX_KERNEL(max_uint8_4x32_avx2, dummy_t, u8x32, uint8_t, 32);
 MIN_MAX_KERNEL(max_int8_4x32_avx2, dummy_t, s8x32, int8_t, 32);
 
-void sum_int8_int32_4x32_avx2(size_t n, size_t k3, size_t k2, size_t k1,
+void sum_int8_int32_4x16_avx2(size_t n, size_t k3, size_t k2, size_t k1,
                               size_t a_stride_n, size_t a_stride_k3,
                               size_t a_stride_k2, const void* a, size_t,
                               void* c) {
-  tiled_reduce<accumulator_int32, int8_t, int32_t>(
-      n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-      reinterpret_cast<const int8_t*>(a), /*C_stride_m=*/0,
-      reinterpret_cast<int32_t*>(c));
+  if (k1 == 1 && a_stride_n == sizeof(int8_t)) {
+    tiled_reduce<sum_accumulator_k1_1<s32x16>, int8_t, int32_t>(
+        n, k3, k2, a_stride_k3, a_stride_k2,
+        reinterpret_cast<const int8_t*>(a),
+        /*C_stride_m=*/0, reinterpret_cast<int32_t*>(c));
+  } else {
+    tiled_reduce<accumulator_int32, int8_t, int32_t>(
+        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
+        reinterpret_cast<const int8_t*>(a), /*C_stride_m=*/0,
+        reinterpret_cast<int32_t*>(c));
+  }
 }
 
-void sum_uint8_int32_4x32_avx2(size_t n, size_t k3, size_t k2, size_t k1,
+void sum_uint8_int32_4x16_avx2(size_t n, size_t k3, size_t k2, size_t k1,
                                size_t a_stride_n, size_t a_stride_k3,
                                size_t a_stride_k2, const void* a, size_t,
                                void* c) {
-  tiled_reduce<accumulator_int32, uint8_t, int32_t>(
-      n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-      reinterpret_cast<const uint8_t*>(a), /*C_stride_m=*/0,
-      reinterpret_cast<int32_t*>(c));
+  if (k1 == 1 && a_stride_n == sizeof(uint8_t)) {
+    tiled_reduce<sum_accumulator_k1_1<s32x16>, uint8_t, int32_t>(
+        n, k3, k2, a_stride_k3, a_stride_k2,
+        reinterpret_cast<const uint8_t*>(a),
+        /*C_stride_m=*/0, reinterpret_cast<int32_t*>(c));
+  } else {
+    tiled_reduce<accumulator_int32, uint8_t, int32_t>(
+        n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
+        reinterpret_cast<const uint8_t*>(a), /*C_stride_m=*/0,
+        reinterpret_cast<int32_t*>(c));
+  }
 }
 
 void sum_fp32_4x8_avx2(size_t n, size_t k3, size_t k2, size_t k1,

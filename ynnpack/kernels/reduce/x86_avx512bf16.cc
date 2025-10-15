@@ -22,66 +22,19 @@
 
 namespace ynn {
 
-namespace {
-
+using simd::f32x16;
 using simd::bf16x16;
 using simd::bf16x32;
 using simd::extract;
-using simd::f32x16;
-using simd::f32x4;
 
 YNN_ALWAYS_INLINE f32x16& operator+=(f32x16& a, bf16x16 b) {
   a.v = _mm512_add_ps(a.v, _mm512_cvtpbh_ps(reinterpret_cast<__m256bh>(b.v)));
   return a;
 }
 
-struct f32x32 {
-  f32x16 v[2];
+namespace {
 
-  using value_type = float;
-  static constexpr std::integral_constant<size_t, 32> N = {};  // NOLINT
-
-  f32x32() = default;
-  explicit f32x32(float x) : v{x, x} {};
-
-  YNN_ALWAYS_INLINE f32x32 operator+(f32x32 a) const {
-    f32x32 res;
-    res.v[0] = this->v[0] + a.v[0];
-    res.v[1] = this->v[1] + a.v[1];
-    return res;
-  }
-
-  f32x32& operator+=(bf16x32 x) {
-    v[0] += extract<0>(x, bf16x16{});
-    v[1] += extract<1>(x, bf16x16{});
-    return *this;
-  }
-};
-
-template <typename NT>
-YNN_ALWAYS_INLINE f32x32 load(const float* ptr, f32x32, NT n) {
-  f32x32 x;
-
-  if (n < f32x16::N) {
-    x.v[0] = load(ptr, f32x16{}, n);
-    x.v[1] = f32x16(0.0f);
-  } else {
-    x.v[0] = load(ptr, f32x16{}, f32x16::N);
-    x.v[1] = load(ptr + f32x16::N, f32x16(0.0f), n - f32x16::N);
-  }
-
-  return x;
-}
-
-template <typename NT>
-YNN_ALWAYS_INLINE void store(float* ptr, f32x32 b, NT n) {
-  if (n < f32x16::N) {
-    store(ptr, b.v[0], n);
-  } else {
-    store(ptr, b.v[0]);
-    store(ptr + f32x16::N, b.v[1], n - f32x16::N);
-  }
-}
+using simd::f32x4;
 
 f32x16 horizontal_add_2x(bf16x32 a) {
   return f32x16{_mm512_dpbf16_ps(
@@ -111,10 +64,10 @@ struct accumulator_fp32 {
     auto a_1 = 1 < n ? load(offset_bytes(A, 1 * a_stride_n), zero, k) : zero;
     auto a_2 = 2 < n ? load(offset_bytes(A, 2 * a_stride_n), zero, k) : zero;
     auto a_3 = 3 < n ? load(offset_bytes(A, 3 * a_stride_n), zero, k) : zero;
-    acc[0] = acc[0] + horizontal_add_2x(a_0);
-    acc[1] = acc[1] + horizontal_add_2x(a_1);
-    acc[2] = acc[2] + horizontal_add_2x(a_2);
-    acc[3] = acc[3] + horizontal_add_2x(a_3);
+    acc[0] += horizontal_add_2x(a_0);
+    acc[1] += horizontal_add_2x(a_1);
+    acc[2] += horizontal_add_2x(a_2);
+    acc[3] += horizontal_add_2x(a_3);
   }
 
   template <typename NT>
@@ -142,7 +95,7 @@ void sum_bf16_fp32_4x32_avx512bf16(size_t n, size_t k3, size_t k2, size_t k1,
                                    size_t a_stride_k2, const void* a, size_t,
                                    void* c) {
   if (k1 == 1 && a_stride_n == sizeof(bfloat16)) {
-    tiled_reduce<sum_accumulator_k1_1<f32x32>, bfloat16, float>(
+    tiled_reduce<sum_accumulator_k1_1<f32x16>, bfloat16, float>(
         n, k3, k2, a_stride_k3, a_stride_k2,
         reinterpret_cast<const bfloat16*>(a),
         /*C_stride_m=*/0, reinterpret_cast<float*>(c));

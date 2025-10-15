@@ -25,7 +25,7 @@ struct sum_accumulator_k1_1 {
 
   sum_accumulator_k1_1() = default;
 
-  YNN_ALWAYS_INLINE explicit sum_accumulator_k1_1(size_t k) {
+  YNN_ALWAYS_INLINE explicit sum_accumulator_k1_1(size_t) {
     AccT zero(0);
     for (size_t i = 0; i < K2; ++i) {
       acc[i] = zero;
@@ -33,12 +33,12 @@ struct sum_accumulator_k1_1 {
   }
 
   template <typename AT, typename NT, typename K2T>
-  YNN_ALWAYS_INLINE void reduce(const AT* A, NT n, size_t A_stride_k2,
-                                K2T k2) {
+  YNN_ALWAYS_INLINE void reduce(const AT* A, NT n, size_t A_stride_k2, K2T k2) {
     assert(k2 <= K2);
     assert(n <= N);
     assert(n > 0);
-    const simd::vec<AT, N> zero(0);
+
+    const simd::vec<AT, AccT::N> zero(0);
     auto a_0 = load(offset_bytes(A, 0 * A_stride_k2), zero, n);
     auto a_1 = 1 < k2 ? load(offset_bytes(A, 1 * A_stride_k2), zero, n) : zero;
     auto a_2 = 2 < k2 ? load(offset_bytes(A, 2 * A_stride_k2), zero, n) : zero;
@@ -55,6 +55,7 @@ struct sum_accumulator_k1_1 {
                                     NT n) {
     assert(n <= N);
     assert(n > 0);
+
     acc[0] = (acc[0] + acc[1]) + (acc[2] + acc[3]);
     store(C, load(C, AccT{}, n) + acc[0], n);
   }

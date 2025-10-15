@@ -14,6 +14,7 @@
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 #include "ynnpack/base/half.h"
+#include "ynnpack/base/simd/vec.h"
 #include "ynnpack/base/simd/x86_avx.h"
 #include "ynnpack/base/simd/x86_sse.h"
 #include "ynnpack/kernels/reduce/generic.h"
@@ -21,53 +22,49 @@
 
 namespace ynn {
 
-namespace {
+namespace simd {
 
-using simd::extract;
-using simd::f16x16;
-using simd::f16x8;
-using simd::f32x4;
-using simd::f32x8;
+template <>
+struct vec<float, 16> {
+  using value_type = float;
+  static constexpr std::integral_constant<size_t, 16> N = {};  // NOLINT
+
+  vec() = default;
+  explicit vec(float x) : v{x, x} {}
+
+  YNN_ALWAYS_INLINE vec operator+(vec a) const {
+    vec res;
+    res.v[0] = this->v[0] + a.v[0];
+    res.v[1] = this->v[1] + a.v[1];
+    return res;
+  }
+
+  f32x8 v[2];
+};
+
+using f32x16 = vec<float, 16>;
 
 YNN_ALWAYS_INLINE f32x8& operator+=(f32x8& a, f16x8 b) {
   a.v = _mm256_add_ps(a.v, _mm256_cvtph_ps(b.v));
   return a;
 }
 
-struct f32x16 {
-  f32x8 v[2];
-
-  using value_type = float;
-  static constexpr std::integral_constant<size_t, 16> N = {};  // NOLINT
-
-  f32x16() = default;
-  explicit f32x16(float x) : v{x, x} {};
-
-  YNN_ALWAYS_INLINE f32x16 operator+(f32x16 a) const {
-    f32x16 res;
-    res.v[0] = this->v[0] + a.v[0];
-    res.v[1] = this->v[1] + a.v[1];
-    return res;
-  }
-
-  f32x16& operator+=(f16x16 x) {
-    v[0] += extract<0>(x, f16x8{});
-    v[1] += extract<1>(x, f16x8{});
-    return *this;
-  }
-};
-
-template <int Index>
-YNN_ALWAYS_INLINE f32x4 extract(f32x16 x, f32x4) {
-  if (Index < 2) {
-    return extract<Index>(x.v[0], f32x4{});
-  } else {
-    return extract<Index % 2>(x.v[1], f32x4{});
-  }
+YNN_ALWAYS_INLINE f32x16& operator+=(f32x16& a, f16x16 b) {
+    a.v[0] += extract<0>(b, f16x8{});
+    a.v[1] += extract<1>(b, f16x8{});
+    return a;
 }
 
-template <typename NT>
-YNN_ALWAYS_INLINE f32x16 load(const float* ptr, f32x16, NT n) {
+YNN_ALWAYS_INLINE f32x16 load(const float* ptr, f32x16, decltype(f32x16::N)) {
+  f32x16 x;
+
+  x.v[0] = load(ptr, f32x8{}, f32x8::N);
+  x.v[1] = load(ptr + f32x8::N, f32x8(0.0f), f32x8::N);
+
+  return x;
+}
+
+YNN_ALWAYS_INLINE f32x16 load(const float* ptr, f32x16, size_t n) {
   f32x16 x;
 
   if (n < f32x8::N) {
@@ -81,8 +78,12 @@ YNN_ALWAYS_INLINE f32x16 load(const float* ptr, f32x16, NT n) {
   return x;
 }
 
-template <typename NT>
-YNN_ALWAYS_INLINE void store(float* ptr, f32x16 b, NT n) {
+YNN_ALWAYS_INLINE void store(float* ptr, f32x16 b, decltype(f32x16::N)) {
+  store(ptr, b.v[0]);
+  store(ptr + f32x8::N, b.v[1]);
+}
+
+YNN_ALWAYS_INLINE void store(float* ptr, f32x16 b, size_t n) {
   if (n < f32x8::N) {
     store(ptr, b.v[0], n);
   } else {
@@ -90,6 +91,22 @@ YNN_ALWAYS_INLINE void store(float* ptr, f32x16 b, NT n) {
     store(ptr + f32x8::N, b.v[1], n - f32x8::N);
   }
 }
+
+template <int Index>
+YNN_ALWAYS_INLINE f32x4 extract(f32x16 x, f32x4) {
+  return extract<Index % 2>(x.v[Index / 2], f32x4{});
+}
+
+}  // namespace simd
+
+namespace {
+
+using simd::f32x4;
+using simd::f32x8;
+using simd::f32x16;
+using simd::f16x8;
+using simd::f16x16;
+using simd::extract;
 
 struct accumulator_fp32 {
   static constexpr std::integral_constant<size_t, 4> N = {};

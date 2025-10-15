@@ -381,6 +381,10 @@ YNN_ALWAYS_INLINE s32x4& operator+=(s32x4& a, s32x4 b) {
   a.v = _mm_add_epi32(a.v, b.v);
   return a;
 }
+YNN_ALWAYS_INLINE s16x8& operator+=(s16x8& a, s16x8 b) {
+  a.v = _mm_add_epi16(a.v, b.v);
+  return a;
+}
 YNN_ALWAYS_INLINE s8x16& operator+=(s8x16& a, s8x16 b) {
   a.v = _mm_add_epi8(a.v, b.v);
   return a;
@@ -396,6 +400,10 @@ YNN_ALWAYS_INLINE f32x4& operator-=(f32x4& a, f32x4 b) {
 }
 YNN_ALWAYS_INLINE s32x4& operator-=(s32x4& a, s32x4 b) {
   a.v = _mm_sub_epi32(a.v, b.v);
+  return a;
+}
+YNN_ALWAYS_INLINE s16x8& operator-=(s16x8& a, s16x8 b) {
+  a.v = _mm_sub_epi16(a.v, b.v);
   return a;
 }
 YNN_ALWAYS_INLINE s8x16& operator-=(s8x16& a, s8x16 b) {
@@ -418,11 +426,13 @@ YNN_ALWAYS_INLINE s32x4& operator*=(s32x4& a, s32x4 b) {
 
 YNN_ALWAYS_INLINE f32x4 operator+(f32x4 a, f32x4 b) { return a += b; }
 YNN_ALWAYS_INLINE s32x4 operator+(s32x4 a, s32x4 b) { return a += b; }
+YNN_ALWAYS_INLINE s16x8 operator+(s16x8 a, s16x8 b) { return a += b; }
 YNN_ALWAYS_INLINE s8x16 operator+(s8x16 a, s8x16 b) { return a += b; }
 YNN_ALWAYS_INLINE u8x16 operator+(u8x16 a, u8x16 b) { return a += b; }
 
 YNN_ALWAYS_INLINE f32x4 operator-(f32x4 a, f32x4 b) { return a -= b; }
 YNN_ALWAYS_INLINE s32x4 operator-(s32x4 a, s32x4 b) { return a -= b; }
+YNN_ALWAYS_INLINE s16x8 operator-(s16x8 a, s16x8 b) { return a -= b; }
 YNN_ALWAYS_INLINE s8x16 operator-(s8x16 a, s8x16 b) { return a -= b; }
 YNN_ALWAYS_INLINE u8x16 operator-(u8x16 a, u8x16 b) { return a -= b; }
 

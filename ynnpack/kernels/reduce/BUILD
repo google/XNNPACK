@@ -45,9 +45,18 @@ ynn_cc_library(
     per_arch_srcs = {
         "arm_neondot": ["arm_neondot.cc"],
         "arm_neon": ["arm_neon.cc"],
-        "x86_ssse3": ["x86_ssse3.cc"],
-        "x86_sse2": ["x86_sse2.cc"],
-        "x86_sse41": ["x86_sse41.cc"],
+        "x86_ssse3": [
+            "x86_ssse3.cc",
+            "x86_sse.h",
+        ],
+        "x86_sse2": [
+            "x86_sse2.cc",
+            "x86_sse.h",
+        ],
+        "x86_sse41": [
+            "x86_sse41.cc",
+            "x86_sse.h",
+        ],
         "x86_avx512bf16": ["x86_avx512bf16.cc"],
         "x86_avx512bw": ["x86_avx512bw.cc"],
         "x86_avx512f": ["x86_avx512f.cc"],

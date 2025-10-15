@@ -57,7 +57,15 @@ _YNN_PARAMS_FOR_ARCH = {
     },
     "arm_neondot": {
         "cond": "//ynnpack:ynn_enable_arm_neondot",
-        "copts": ["-march=armv8.2-a+dotprod"],
+        "copts": select({
+            "//ynnpack:arm32": [
+                "-marm",
+                "-march=armv8.2-a+dotprod",
+                "-mfpu=neon-fp-armv8",
+            ],
+            "//ynnpack:arm64": ["-march=armv8.2-a+dotprod"],
+            "//conditions:default": [],
+        }),
     },
     "arm64_neoni8mm": {
         "cond": "//ynnpack:ynn_enable_arm64_neoni8mm",
