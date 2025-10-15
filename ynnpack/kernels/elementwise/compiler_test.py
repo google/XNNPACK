@@ -184,5 +184,41 @@ class ExpressionCachingTest(unittest.TestCase):
     self.assertEqual(mc_object_count, c_object_count)
 
 
+class LiftConstantsTest(unittest.TestCase):
+  """Check that lift constant pass does the right thing."""
+
+  def setUp(self):
+    super().setUp()
+    self.target = TestTarget()
+
+  def test_no_constants(self):
+    c = (f32_a + f32_b) * f32_c
+    constants = {}
+    mc = self.target.vectorize(c, lanes=4, cache={})
+    mc = self.target.lift_constants(mc, constants)
+    self.assertEqual(len(constants), 0)
+
+  def test_few_constants(self):
+    c = (f32_a + f32_b * 2.0) * f32_c + 1.0
+    constants = {}
+    mc = self.target.vectorize(c, lanes=4, cache={})
+    mc = self.target.lift_constants(mc, constants)
+    self.assertEqual(len(constants), 2)
+
+  def test_many_constants(self):
+    c = sample_func()
+    constants = {}
+    mc = self.target.vectorize(c, lanes=4, cache={})
+    mc = self.target.lift_constants(mc, constants)
+    self.assertEqual(len(constants), 7)
+
+  def test_repeating_constants(self):
+    c = (f32_a * 1.0 + (f32_b - 1.0) * 2.0) * f32_c + 1.0
+    constants = {}
+    mc = self.target.vectorize(c, lanes=4, cache={})
+    mc = self.target.lift_constants(mc, constants)
+    self.assertEqual(len(constants), 2)
+
+
 if __name__ == "__main__":
   unittest.main()
