@@ -225,6 +225,83 @@ def make_x86_integer_min_max_patterns(vector_bits, prefix):
   ]
 
 
+# TODO(vksnk): These are only correct for SSE2
+def make_x86_float_comparison_patterns(vector_bits, prefix):
+  return [
+      i.vectorize(vector_bits)
+      for i in [
+          Rule(
+              equal(f32_a, f32_b),
+              Op(Float(32), prefix + "cmpeq_ps", [f32_a, f32_b]),
+          ),
+          Rule(
+              not_equal(f32_a, f32_b),
+              Op(Float(32), prefix + "cmpneq_ps", [f32_a, f32_b]),
+          ),
+          Rule(
+              f32_a > f32_b,
+              Op(Float(32), prefix + "cmpgt_ps", [f32_a, f32_b]),
+          ),
+          Rule(
+              f32_a < f32_b,
+              Op(Float(32), prefix + "cmplt_ps", [f32_a, f32_b]),
+          ),
+          Rule(
+              f32_a >= f32_b,
+              Op(Float(32), prefix + "cmpge_ps", [f32_a, f32_b]),
+          ),
+          Rule(
+              f32_a <= f32_b,
+              Op(Float(32), prefix + "cmple_ps", [f32_a, f32_b]),
+          ),
+      ]
+  ]
+
+
+# TODO(vksnk): These are only correct for SSE2
+def make_x86_integer_comparison_patterns(vector_bits, prefix):
+  return [
+      i.vectorize(vector_bits)
+      for i in [
+          Rule(
+              equal(i8_a, i8_b), Op(Int(8), prefix + "cmpeq_epi8", [i8_a, i8_b])
+          ),
+          Rule(
+              equal(i16_a, i16_b),
+              Op(Int(16), prefix + "cmpeq_epi16", [i16_a, i16_b]),
+          ),
+          Rule(
+              equal(i32_a, i32_b),
+              Op(Int(32), prefix + "cmpeq_epi32", [i32_a, i32_b]),
+          ),
+          Rule(
+              i8_a > i8_b,
+              Op(Int(8), prefix + "cmpgt_epi8", [i8_a, i8_b]),
+          ),
+          Rule(
+              i16_a > i16_b,
+              Op(Int(16), prefix + "cmpgt_epi16", [i16_a, i16_b]),
+          ),
+          Rule(
+              i32_a > i32_b,
+              Op(Int(32), prefix + "cmpgt_epi32", [i32_a, i32_b]),
+          ),
+          Rule(
+              i8_a < i8_b,
+              Op(Int(8), prefix + "cmpgt_epi8", [i8_b, i8_a]),
+          ),
+          Rule(
+              i16_a < i16_b,
+              Op(Int(16), prefix + "cmpgt_epi16", [i16_b, i16_a]),
+          ),
+          Rule(
+              i32_a < i32_b,
+              Op(Int(32), prefix + "cmpgt_epi32", [i32_b, i32_a]),
+          ),
+      ]
+  ]
+
+
 def make_x86_broadcast_patterns(vector_bits, prefix):
   return [
       Rule(
@@ -377,6 +454,8 @@ class X86(Target):
     self.patterns += make_x86_cast_patterns(128, "_mm_")
     self.patterns += make_x86_reinterpret_cast_patterns(128, "_mm_")
     self.patterns += make_x86_broadcast_patterns(128, "_mm_")
+    self.patterns += make_x86_float_comparison_patterns(128, "_mm_")
+    self.patterns += make_x86_integer_comparison_patterns(128, "_mm_")
 
     self.header += """
 namespace {
@@ -438,6 +517,11 @@ static inline __m128i saturating_cast_f32_to_uint8(__m128 f0, __m128 f1, __m128 
   const __m128i i01_16 = _mm_packus_epi32(i0, i1);
   const __m128i i23_16 = _mm_packus_epi32(i2, i3);
   return _mm_packus_epi16(i01_16, i23_16);
+}
+
+static inline __m128 bitwise_not(__m128 val) {
+  __m128 all_ones = _mm_castsi128_ps(_mm_set1_epi32(-1));
+  return _mm_xor_ps(val, all_ones);
 }
 
 } // namespace
@@ -562,6 +646,14 @@ static inline __m256i saturating_cast_f32_to_uint8(__m256 f0, __m256 f1, __m256 
   return _mm256_permutevar8x32_epi32(r, _mm256_setr_epi32(0, 4, 1, 5, 2, 6, 3, 7));
 }
 
+static inline __m256 bitwise_not(__m256 val) {
+  __m256 all_ones = _mm256_castsi256_ps(_mm256_set1_epi32(-1));
+  return _mm256_xor_ps(val, all_ones);
+}
+
+static inline __m256 greater_than(__m256 a, __m256 b) {
+  return _mm256_cmp_ps(a, b, _CMP_GT_OS);
+}
 
 } // namespace
 
@@ -628,6 +720,11 @@ static inline void wrapper_mm512_storeu_si512(T* ptr, __m512i v) {
 
 static inline __m512 round(__m512 x) {
   return _mm512_roundscale_ps(x, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
+}
+
+static inline __m512i bitwise_not(__m512i val) {
+  __m512i all_ones = _mm512_set1_epi32(-1);
+  return _mm512_xor_si512(val, all_ones);
 }
 
 } // namespace

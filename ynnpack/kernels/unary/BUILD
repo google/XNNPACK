@@ -16,6 +16,7 @@ py_binary(
         "exp.py",
         "generator.py",
         "kernels.py",
+        "sigmoid.py",
         "sine_cosine.py",
         "tanh.py",
     ],
@@ -34,6 +35,7 @@ ynn_generate_src_hdr(
         "negate_fp32,8x1",
         "reciprocal_square_root_fp32,8x1",
         "square_root_fp32,8x1",
+        "sigmoid_fp32,8x1",
         "tanh_fp32,8x1",
     ],
     output_hdr = "x86_sse2.inc",
@@ -85,6 +87,7 @@ ynn_generate_src_hdr(
     generator_args = [
         "x86_avx2",
         "exp_fp32,16x1",
+        "sigmoid_fp32,16x1",
     ],
     output_hdr = "x86_avx2.inc",
     output_src = "x86_avx2.cc",
@@ -123,6 +126,9 @@ ynn_generate_src_hdr(
         "round_fp32,32x1",
         "sine_fp32,32x1",
         "square_root_fp32,32x1",
+        # Comparison masks are very different in pre-AVX512 vs AVX512,
+        # so we need to have a more general approach to support both.
+        # "sigmoid_fp32,32x1",
         "tanh_fp32,32x1",
     ],
     output_hdr = "x86_avx512f.inc",

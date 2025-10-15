@@ -4,6 +4,7 @@ Enables specification of kernels as pure python functions, and generating C++
 implementations using SIMD intrinsics.
 """
 
+import builtins
 import copy
 import enum
 import functools
@@ -132,15 +133,19 @@ def promote_types(x, y):
       assert False
 
   if x.ty.type_class == "float" or y.ty.type_class == "float":
-    max_size = max(x.ty.size, y.ty.size)
+    max_size = builtins.max(x.ty.size, y.ty.size)
     return [cast(Float(max_size), x), cast(Float(max_size), y)]
   else:
     assert x.ty.type_class == y.ty.type_class
-    promoted_ty = x.ty.withsize(max(x.ty.size, y.ty.size))
+    promoted_ty = x.ty.withsize(builtins.max(x.ty.size, y.ty.size))
     return [
         cast(promoted_ty, x),
         cast(promoted_ty, y),
     ]
+
+
+def get_cmp_type(x):
+  return x.ty
 
 
 class Value:
@@ -221,10 +226,27 @@ class Value:
     return Op(self.ty, "bitwise_xor", promote_types(self, wrap(y)))
 
   def __invert__(self):
-    return Op(self.ty, "bitwise_not", (self,))
+    return Op(self.ty, "bitwise_not", [self])
 
   def __neg__(self):
     return Constant(self.ty, 0) - self
+
+  def __lt__(self, y):
+    x_pr, y_pr = promote_types(self, wrap(y))
+    return Op(get_cmp_type(x_pr), "less_than", [x_pr, y_pr])
+
+  def __le__(self, y):
+    x_pr, y_pr = promote_types(self, wrap(y))
+    return Op(get_cmp_type(x_pr), "less_equal", [x_pr, y_pr])
+
+  def __gt__(self, y):
+    x_pr, y_pr = promote_types(self, wrap(y))
+    opp = Op(get_cmp_type(x_pr), "greater_than", [x_pr, y_pr])
+    return opp
+
+  def __ge__(self, y):
+    x_pr, y_pr = promote_types(self, wrap(y))
+    return Op(get_cmp_type(x_pr), "greater_equal", [x_pr, y_pr])
 
 
 class WildCard(Value):
@@ -334,6 +356,18 @@ def intrinsic(func):
     return func(*args, **kwargs)
 
   return wrapper
+
+
+@intrinsic
+def equal(self, y):
+  x_pr, y_pr = promote_types(self, wrap(y))
+  return Op(get_cmp_type(x_pr), "equal", [x_pr, y_pr])
+
+
+@intrinsic
+def not_equal(self, y):
+  x_pr, y_pr = promote_types(self, wrap(y))
+  return Op(get_cmp_type(x_pr), "not_equal", [x_pr, y_pr])
 
 
 @intrinsic
@@ -485,6 +519,17 @@ def lower_select_bits(mask, x, y):
   return y ^ ((x ^ y) & mask)
 
 
+@intrinsic
+def select(cond, x, y):
+  assert x.ty == y.ty
+  return Op(x.ty, "select", [cond, x, y])
+
+
+# We assume that cond produces a mask.
+def lower_select(cond, x, y):
+  return (x & cond) | (y & ~cond)
+
+
 def load(x, offset_index=0):
   return Load(x.ty, x, offset_index)
 
@@ -533,6 +578,7 @@ lowering_funcs = {
     "widening_mul": lower_widening_mul,
     "saturating_add": lower_saturating_add,
     "select_bits": lower_select_bits,
+    "select": lower_select,
 }
 
 
