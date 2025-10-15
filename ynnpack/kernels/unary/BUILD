@@ -174,7 +174,6 @@ ynn_cc_library(
     ],
     compatible_with = _COMPATIBLE_WITH,
     per_arch_srcs = {
-        "arm64_neon": ["arm_neon.cc"],
         "arm_neon": ["arm_neon.cc"],
         "x86_avx": ["x86_avx.cc"],
         "x86_avx2": ["x86_avx2.cc"],

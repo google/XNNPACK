@@ -457,7 +457,10 @@ ynn_cc_library(
     name = "dot",
     srcs = [
         "dot.cc",
-    ],
+    ] + select({
+        "//ynnpack:arm64": ["arm64_sme_stubs.cc"],
+        "//conditions:default": [],
+    }),
     hdrs = [
         "arm64_neon_fp32.inc",
         "arm64_neoni8mm_int8_int8_int32.inc",
@@ -534,12 +537,10 @@ ynn_cc_library(
         "arm64_neoni8mm": ["arm64_neoni8mm_int8_int8_int32.cc"],
         "arm64_sme": [
             "arm64_sme.cc",
-            "arm64_sme_stubs.cc",
             "arm64_sme_internal.h",
         ],
         "arm64_sme2": [
             "arm64_sme2.cc",
-            "arm64_sme_stubs.cc",
             "arm64_sme_internal.h",
         ],
     },
