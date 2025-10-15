@@ -62,11 +62,11 @@ TEST(get_dot_kernel, small_m) {
   ASSERT_EQ(fp32_1x(arch_flag::sse2), "dot_fp32_1x16x1_1x4x1_sse2");
   ASSERT_EQ(fp32_1x(arch_flag::avx), "dot_fp32_1x32x1_1x8x1_avx");
   ASSERT_EQ(fp32_1x(arch_flag::fma3), "dot_fp32_1x32x1_1x8x1_fma3");
-  ASSERT_EQ(fp32_1x(arch_flag::avx512f), "dot_fp32_1x64x1_1x16x1_avx512f");
+  ASSERT_EQ(fp32_1x(arch_flag::avx512f), "dot_fp32_1x32x4_1x4x4_avx512f");
   ASSERT_EQ(fp32_2x(arch_flag::sse2), "dot_fp32_2x16x1_1x4x1_sse2");
   ASSERT_EQ(fp32_2x(arch_flag::avx), "dot_fp32_2x32x1_1x8x1_avx");
   ASSERT_EQ(fp32_2x(arch_flag::fma3), "dot_fp32_2x32x1_1x8x1_fma3");
-  ASSERT_EQ(fp32_2x(arch_flag::avx512f), "dot_fp32_2x64x1_1x16x1_avx512f");
+  ASSERT_EQ(fp32_2x(arch_flag::avx512f), "dot_fp32_2x32x4_1x4x4_avx512f");
   ASSERT_EQ(fp32_3x(arch_flag::sse2), "dot_fp32_3x16x1_1x4x1_sse2");
   ASSERT_EQ(fp32_3x(arch_flag::avx), "dot_fp32_3x16x1_1x8x1_avx");
   ASSERT_EQ(fp32_3x(arch_flag::fma3), "dot_fp32_3x16x1_1x8x1_fma3");
@@ -78,7 +78,7 @@ TEST(get_dot_kernel, small_m) {
   ASSERT_EQ(fp32_6x(arch_flag::sse2), "dot_fp32_3x16x1_1x4x1_sse2");
   ASSERT_EQ(fp32_6x(arch_flag::avx), "dot_fp32_3x16x1_1x8x1_avx");
   ASSERT_EQ(fp32_6x(arch_flag::fma3), "dot_fp32_6x16x1_1x8x1_fma3");
-  ASSERT_EQ(fp32_6x(arch_flag::avx512f), "dot_fp32_3x64x1_1x16x1_avx512f");
+  ASSERT_EQ(fp32_6x(arch_flag::avx512f), "dot_fp32_6x8x4_1x4x4_avx512f");
   ASSERT_EQ(fp32_8x(arch_flag::sse2), "dot_fp32_3x16x1_1x4x1_sse2");
   ASSERT_EQ(fp32_8x(arch_flag::avx), "dot_fp32_4x16x1_1x8x1_avx");
   ASSERT_EQ(fp32_8x(arch_flag::fma3), "dot_fp32_4x16x1_1x8x1_fma3");
@@ -126,11 +126,11 @@ TEST(get_dot_kernel, small_n) {
   ASSERT_EQ(fp32_x6(arch_flag::sse2), "dot_fp32_4x8x1_1x4x1_sse2");
   ASSERT_EQ(fp32_x6(arch_flag::avx), "dot_fp32_8x8x1_1x8x1_avx");
   ASSERT_EQ(fp32_x6(arch_flag::fma3), "dot_fp32_8x8x1_1x8x1_fma3");
-  ASSERT_EQ(fp32_x6(arch_flag::avx512f), "dot_fp32_12x4x4_1x4x4_avx512f");
+  ASSERT_EQ(fp32_x6(arch_flag::avx512f), "dot_fp32_6x8x4_1x4x4_avx512f");
   ASSERT_EQ(fp32_x8(arch_flag::sse2), "dot_fp32_4x8x1_1x4x1_sse2");
   ASSERT_EQ(fp32_x8(arch_flag::avx), "dot_fp32_8x8x1_1x8x1_avx");
   ASSERT_EQ(fp32_x8(arch_flag::fma3), "dot_fp32_8x8x1_1x8x1_fma3");
-  ASSERT_EQ(fp32_x8(arch_flag::avx512f), "dot_fp32_12x4x4_1x4x4_avx512f");
+  ASSERT_EQ(fp32_x8(arch_flag::avx512f), "dot_fp32_6x8x4_1x4x4_avx512f");
 }
 
 TEST(get_dot_kernel, large) {
