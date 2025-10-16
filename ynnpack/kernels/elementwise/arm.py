@@ -193,25 +193,26 @@ class ARM(Target):
 
     self.header += "#include <arm_neon.h>\n"
     self.header += """
+
 namespace {
 
-static inline float32x4_t and_f32(float32x4_t a, float32x4_t b) {
+YNN_INTRINSIC float32x4_t and_f32(float32x4_t a, float32x4_t b) {
   return vreinterpretq_f32_u32(vandq_u32(vreinterpretq_u32_f32(a), vreinterpretq_u32_f32(b)));
 }
 
-static inline float32x4_t or_f32(float32x4_t a, float32x4_t b) {
+YNN_INTRINSIC float32x4_t or_f32(float32x4_t a, float32x4_t b) {
   return vreinterpretq_f32_u32(vorrq_u32(vreinterpretq_u32_f32(a), vreinterpretq_u32_f32(b)));
 }
 
-static inline float32x4_t xor_f32(float32x4_t a, float32x4_t b) {
+YNN_INTRINSIC float32x4_t xor_f32(float32x4_t a, float32x4_t b) {
   return vreinterpretq_f32_u32(veorq_u32(vreinterpretq_u32_f32(a), vreinterpretq_u32_f32(b)));
 }
 
-static inline float32x4_t not_f32(float32x4_t a) {
+YNN_INTRINSIC float32x4_t not_f32(float32x4_t a) {
   return vreinterpretq_f32_u32(vmvnq_u32(vreinterpretq_u32_f32(a)));
 }
 
-static inline float32x4_t round_f32(float32x4_t a) {
+YNN_INTRINSIC float32x4_t round_f32(float32x4_t a) {
 #if defined(__ARM_ARCH) && __ARM_ARCH < 8
   float32x4_t vmax_non_int_val = vdupq_n_f32(8388608.0f);
   float32x4_t vfilter = vreinterpretq_f32_u32(vcaltq_f32(a, vmax_non_int_val));
@@ -239,7 +240,7 @@ static inline float32x4_t round_f32(float32x4_t a) {
 #endif
 }
 
-static inline int32x4_t cast_f32_to_int32(float32x4_t f) {
+YNN_INTRINSIC int32x4_t cast_f32_to_int32(float32x4_t f) {
 #if defined(__ARM_ARCH) && __ARM_ARCH < 8
   return vcvtq_s32_f32(round_f32(f));
 #else
@@ -247,7 +248,7 @@ static inline int32x4_t cast_f32_to_int32(float32x4_t f) {
 #endif
 }
 
-static inline uint32x4_t cast_f32_to_uint32(float32x4_t f) {
+YNN_INTRINSIC uint32x4_t cast_f32_to_uint32(float32x4_t f) {
 #if defined(__ARM_ARCH) && __ARM_ARCH < 8
   return vcvtq_u32_f32(round_f32(f));
 #else
@@ -255,35 +256,35 @@ static inline uint32x4_t cast_f32_to_uint32(float32x4_t f) {
 #endif
 }
 
-static inline int16x8_t saturating_cast_f32_to_int16(float32x4_t f0, float32x4_t f1) {
+YNN_INTRINSIC int16x8_t saturating_cast_f32_to_int16(float32x4_t f0, float32x4_t f1) {
   return vcombine_s16(vqmovn_s32(cast_f32_to_int32(f0)), vqmovn_s32(cast_f32_to_int32(f1)));
 }
 
-static inline int8x16_t saturating_cast_f32_to_int8(float32x4_t f0, float32x4_t f1, float32x4_t f2, float32x4_t f3) {
+YNN_INTRINSIC int8x16_t saturating_cast_f32_to_int8(float32x4_t f0, float32x4_t f1, float32x4_t f2, float32x4_t f3) {
   const int16x8_t i01_16 = vcombine_s16(vqmovn_s32(cast_f32_to_int32(f0)), vqmovn_s32(cast_f32_to_int32(f1)));
   const int16x8_t i23_16 = vcombine_s16(vqmovn_s32(cast_f32_to_int32(f2)), vqmovn_s32(cast_f32_to_int32(f3)));
   return vcombine_s8(vqmovn_s16(i01_16), vqmovn_s16(i23_16));
 }
 
-static inline uint8x16_t saturating_cast_f32_to_uint8(float32x4_t f0, float32x4_t f1, float32x4_t f2, float32x4_t f3) {
+YNN_INTRINSIC uint8x16_t saturating_cast_f32_to_uint8(float32x4_t f0, float32x4_t f1, float32x4_t f2, float32x4_t f3) {
   const uint16x8_t i01_16 = vcombine_u16(vqmovn_u32(cast_f32_to_uint32(f0)), vqmovn_u32(cast_f32_to_uint32(f1)));
   const uint16x8_t i23_16 = vcombine_u16(vqmovn_u32(cast_f32_to_uint32(f2)), vqmovn_u32(cast_f32_to_uint32(f3)));
   return vcombine_u8(vqmovn_u16(i01_16), vqmovn_u16(i23_16));
 }
 
-static inline int16x8_t saturating_cast_int32_to_int16(int32x4_t a, int32x4_t b) {
+YNN_INTRINSIC int16x8_t saturating_cast_int32_to_int16(int32x4_t a, int32x4_t b) {
   return vcombine_s16(vqmovn_s32(a), vqmovn_s32(b));
 }
 
-static inline int8x16_t saturating_cast_int16_to_int8(int16x8_t a, int16x8_t b) {
+YNN_INTRINSIC int8x16_t saturating_cast_int16_to_int8(int16x8_t a, int16x8_t b) {
   return vcombine_s8(vqmovn_s16(a), vqmovn_s16(b));
 }
 
-static inline uint8x16_t saturating_cast_int16_to_uint8(int16x8_t a, int16x8_t b) {
+YNN_INTRINSIC uint8x16_t saturating_cast_int16_to_uint8(int16x8_t a, int16x8_t b) {
   return vcombine_u8(vqmovun_s16(a), vqmovun_s16(b));
 }
 
-static inline float32x4_t ceil_f32(float32x4_t a) {
+YNN_INTRINSIC float32x4_t ceil_f32(float32x4_t a) {
 #if defined(__ARM_ARCH) && __ARM_ARCH < 8
   float32x4_t vmax_non_int_val = vdupq_n_f32(8388608.0f);
   uint32x4_t vuse_rounding = vcaltq_f32(a, vmax_non_int_val);
@@ -298,7 +299,7 @@ static inline float32x4_t ceil_f32(float32x4_t a) {
 #endif
 }
 
-static inline float32x4_t floor_f32(float32x4_t a) {
+YNN_INTRINSIC float32x4_t floor_f32(float32x4_t a) {
 #if defined(__ARM_ARCH) && __ARM_ARCH < 8
   float32x4_t vmax_non_int_val = vdupq_n_f32(8388608.0f);
   uint32x4_t vuse_rounding = vcaltq_f32(a, vmax_non_int_val);
@@ -313,7 +314,7 @@ static inline float32x4_t floor_f32(float32x4_t a) {
 #endif
 }
 
-static inline float32x4_t sqrt_f32(float32x4_t a) {
+YNN_INTRINSIC float32x4_t sqrt_f32(float32x4_t a) {
 #if defined(__ARM_ARCH) && __ARM_ARCH < 8
     // Get the initial low-precision estimate of 1/sqrt(a).
     float32x4_t rsqrt_estimate = vrsqrteq_f32(a);

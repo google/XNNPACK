@@ -14,7 +14,7 @@ class x86_fp32(x86):
 
 namespace {{
 
-__m{self.bits} unaligned_load_broadcast(const float* ptr) {{
+YNN_INTRINSIC __m{self.bits} unaligned_load_broadcast(const float* ptr) {{
     float value;
     memcpy(&value, ptr, sizeof(float));
     return {self._mm()}_set1_ps(value);

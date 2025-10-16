@@ -22,7 +22,7 @@ class x86_avx512vnni_uint8_int8_int32_k16(x86_avx):  # pylint: disable=invalid-n
 
 namespace {
 
-__m512i _mm512_hadd_epi32(__m512i a, __m512i b) {
+YNN_INTRINSIC __m512i _mm512_hadd_epi32(__m512i a, __m512i b) {
     __m512i even = _mm512_permutex2var_epi32(a, _mm512_set_epi32(30, 28, 26, 24, 22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0), b);
     __m512i odd = _mm512_permutex2var_epi32(a, _mm512_set_epi32(31, 29, 27, 25, 23, 21, 19, 17, 15, 13, 11, 9, 7, 5, 3, 1), b);
     return _mm512_add_epi32(even, odd);

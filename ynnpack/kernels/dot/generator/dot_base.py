@@ -55,22 +55,44 @@ class dot_base:
 #include <cstddef>
 #include <cstring>
 
+#if !defined(__has_attribute)
+#define YNN_COMPILER_HAS_ATTRIBUTE(x) 0
+#else
+#define YNN_COMPILER_HAS_ATTRIBUTE(x) __has_attribute(x)
+#endif
+
+#if defined(__GNUC__)
+#define YNN_ALWAYS_INLINE inline __attribute__((__always_inline__))
+#elif defined(_MSC_VER)
+#define YNN_ALWAYS_INLINE __forceinline
+#else
+#define YNN_ALWAYS_INLINE inline
+#endif
+
+#if YNN_COMPILER_HAS_ATTRIBUTE(unused)
+#define YNN_UNUSED __attribute__((unused))
+#else
+#define YNN_UNUSED
+#endif
+
+#define YNN_INTRINSIC YNN_UNUSED YNN_ALWAYS_INLINE
+
 namespace ynn {
 
 namespace {
 
 template <typename T>
-T* offset_bytes(T* ptr, std::ptrdiff_t offset) {
+YNN_INTRINSIC T* offset_bytes(T* ptr, std::ptrdiff_t offset) {
   return reinterpret_cast<T*>(reinterpret_cast<uint8_t*>(ptr) + offset);
 }
 
 template <typename T>
-const T* offset_bytes(const T* ptr, std::ptrdiff_t offset) {
+YNN_INTRINSIC const T* offset_bytes(const T* ptr, std::ptrdiff_t offset) {
   return reinterpret_cast<const T*>(reinterpret_cast<const uint8_t*>(ptr) +
                                     offset);
 }
 
-std::size_t min(std::size_t a, std::size_t b) {
+YNN_INTRINSIC std::size_t min(std::size_t a, std::size_t b) {
   return a < b ? a : b;
 }
 

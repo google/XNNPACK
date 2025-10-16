@@ -18,7 +18,7 @@ class x86_avx2_fp32_k2(x86_avx):  # pylint: disable=invalid-name
     return super().header() + """
 namespace {
 
-__m256 unaligned_load_broadcast_x2(const float* ptr) {
+YNN_INTRINSIC __m256 unaligned_load_broadcast_x2(const float* ptr) {
     double value;
     memcpy(&value, ptr, sizeof(value));
     return _mm256_castpd_ps(_mm256_set1_pd(value));
@@ -87,13 +87,13 @@ class x86_avx512f_fp32_k2(x86_avx512f):  # pylint: disable=invalid-name
     return super().header() + """
 namespace {
 
-__m512 unaligned_load_broadcast_x2(const float* ptr) {
+YNN_INTRINSIC __m512 unaligned_load_broadcast_x2(const float* ptr) {
     double value;
     memcpy(&value, ptr, sizeof(value));
     return _mm512_castpd_ps(_mm512_set1_pd(value));
 }
 
-__m512 odd_to_even(__m512 x) {
+YNN_INTRINSIC __m512 odd_to_even(__m512 x) {
   return _mm512_castsi512_ps(_mm512_srli_epi64(_mm512_castps_si512(x), 32));
 }
 

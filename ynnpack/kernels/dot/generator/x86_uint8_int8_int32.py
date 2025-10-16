@@ -14,7 +14,7 @@ class x86_avx512vnni_uint8_int8_int32(x86_avx512f):
 
 namespace {{
 
-__m{self.bits}i unaligned_load_broadcast_4xuint8(const uint8_t* ptr) {{
+YNN_INTRINSIC __m{self.bits}i unaligned_load_broadcast_4xuint8(const uint8_t* ptr) {{
     uint32_t value;
     memcpy(&value, ptr, sizeof(uint32_t));
     return _mm{self.bits}_set1_epi32(value);

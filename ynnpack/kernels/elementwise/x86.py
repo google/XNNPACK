@@ -461,16 +461,16 @@ class X86(Target):
 namespace {
 
 template <typename T>
-static inline __m128i wrapper_mm_loadu_si128(const T* ptr) {
+YNN_INTRINSIC __m128i wrapper_mm_loadu_si128(const T* ptr) {
   return _mm_loadu_si128((const __m128i*)ptr);
 }
 
 template <typename T>
-static inline void wrapper_mm_storeu_si128(T* ptr, __m128i v) {
+YNN_INTRINSIC void wrapper_mm_storeu_si128(T* ptr, __m128i v) {
   _mm_storeu_si128((__m128i*)ptr, v);
 }
 
-static inline __m128i saturating_cast_f32_to_int8(__m128 f0, __m128 f1, __m128 f2, __m128 f3) {
+YNN_INTRINSIC __m128i saturating_cast_f32_to_int8(__m128 f0, __m128 f1, __m128 f2, __m128 f3) {
   const __m128 max_int16 = _mm_set1_ps((1 << 15) - 1);
   f0 = _mm_min_ps(f0, max_int16);
   f1 = _mm_min_ps(f1, max_int16);
@@ -485,7 +485,7 @@ static inline __m128i saturating_cast_f32_to_int8(__m128 f0, __m128 f1, __m128 f
   return _mm_packs_epi16(i01_16, i23_16);
 }
 
-static inline __m128i saturating_cast_f32_to_int16(__m128 f0, __m128 f1) {
+YNN_INTRINSIC __m128i saturating_cast_f32_to_int16(__m128 f0, __m128 f1) {
   const __m128 max_int16 = _mm_set1_ps((1 << 15) - 1);
   f0 = _mm_min_ps(f0, max_int16);
   f1 = _mm_min_ps(f1, max_int16);
@@ -494,19 +494,19 @@ static inline __m128i saturating_cast_f32_to_int16(__m128 f0, __m128 f1) {
   return _mm_packs_epi32(i0, i1);
 }
 
-static inline __m128i saturating_cast_int32_to_int16(__m128i a, __m128i b) {
+YNN_INTRINSIC __m128i saturating_cast_int32_to_int16(__m128i a, __m128i b) {
   return _mm_packs_epi32(a, b);
 }
 
-static inline __m128i saturating_cast_int16_to_int8(__m128i a, __m128i b) {
+YNN_INTRINSIC __m128i saturating_cast_int16_to_int8(__m128i a, __m128i b) {
   return _mm_packs_epi16(a, b);
 }
 
-static inline __m128i saturating_cast_int16_to_uint8(__m128i a, __m128i b) {
+YNN_INTRINSIC __m128i saturating_cast_int16_to_uint8(__m128i a, __m128i b) {
   return _mm_packus_epi16(a, b);
 }
 
-static inline __m128i saturating_cast_f32_to_uint8(__m128 f0, __m128 f1, __m128 f2, __m128 f3) {
+YNN_INTRINSIC __m128i saturating_cast_f32_to_uint8(__m128 f0, __m128 f1, __m128 f2, __m128 f3) {
   const __m128 max_uint16 = _mm_set1_ps((1 << 16) - 1);
   f0 = _mm_min_ps(f0, max_uint16);
   f1 = _mm_min_ps(f1, max_uint16);
@@ -519,7 +519,7 @@ static inline __m128i saturating_cast_f32_to_uint8(__m128 f0, __m128 f1, __m128 
   return _mm_packus_epi16(i01_16, i23_16);
 }
 
-static inline __m128 bitwise_not(__m128 val) {
+YNN_INTRINSIC __m128 bitwise_not(__m128 val) {
   __m128 all_ones = _mm_castsi128_ps(_mm_set1_epi32(-1));
   return _mm_xor_ps(val, all_ones);
 }
@@ -532,7 +532,7 @@ static inline __m128 bitwise_not(__m128 val) {
     self.header += """
 namespace {
 
-static inline __m128 round(__m128 x) {
+YNN_INTRINSIC __m128 round(__m128 x) {
   return _mm_round_ps(x, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
 }
 
@@ -548,48 +548,48 @@ static inline __m128 round(__m128 x) {
 namespace {
 
 // Mask table used for partial load/store operations.
-static const int32_t mask_table_avx_f32[16] = {-1, -1, -1, -1, -1, -1, -1, -1,
-                                               0,  0,  0,  0,  0,  0,  0, 0};
+const int32_t mask_table_avx_f32[16] = {-1, -1, -1, -1, -1, -1, -1, -1,
+                                        0,  0,  0,  0,  0,  0,  0, 0};
 
-static inline __m256 partial_load_8x(const float* ptr, size_t num_elements) {
+YNN_INTRINSIC __m256 partial_load_8x(const float* ptr, size_t num_elements) {
   __m256i mask = _mm256_loadu_si256(
             (const __m256i*)(&mask_table_avx_f32[8] - num_elements));
   return _mm256_maskload_ps(ptr, mask);
 }
 
-static inline void partial_store_8x(float* output, size_t num_elements, __m256 v) {
+YNN_INTRINSIC void partial_store_8x(float* output, size_t num_elements, __m256 v) {
   __m256i mask = _mm256_loadu_si256(
             (const __m256i*)(&mask_table_avx_f32[8] - num_elements));
   _mm256_maskstore_ps(output, mask, v);
 }
 
-static inline __m256i partial_load_8x(const int32_t* ptr, size_t num_elements) {
+YNN_INTRINSIC __m256i partial_load_8x(const int32_t* ptr, size_t num_elements) {
   __m256i mask = _mm256_loadu_si256(
             (const __m256i*)(&mask_table_avx_f32[8] - num_elements));
   return _mm256_maskload_epi32(ptr, mask);
 }
 
-static inline void partial_store_8x(int32_t* output, size_t num_elements, __m256i v) {
+YNN_INTRINSIC void partial_store_8x(int32_t* output, size_t num_elements, __m256i v) {
   __m256i mask = _mm256_loadu_si256(
             (const __m256i*)(&mask_table_avx_f32[8] - num_elements));
   _mm256_maskstore_epi32(output, mask, v);
 }
 
 template <typename T>
-static inline __m256i wrapper_mm256_loadu_si256(const T* ptr) {
+YNN_INTRINSIC __m256i wrapper_mm256_loadu_si256(const T* ptr) {
   return _mm256_loadu_si256((const __m256i*)ptr);
 }
 
 template <typename T>
-static inline void wrapper_mm256_storeu_si256(T* ptr, __m256i v) {
+YNN_INTRINSIC void wrapper_mm256_storeu_si256(T* ptr, __m256i v) {
   _mm256_storeu_si256((__m256i*)ptr, v);
 }
 
-static inline __m256 round(__m256 x) {
+YNN_INTRINSIC __m256 round(__m256 x) {
   return _mm256_round_ps(x, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
 }
 
-static inline __m256i saturating_cast_f32_to_int8(__m256 f0, __m256 f1, __m256 f2, __m256 f3) {
+YNN_INTRINSIC __m256i saturating_cast_f32_to_int8(__m256 f0, __m256 f1, __m256 f2, __m256 f3) {
   const __m256 max_int16 = _mm256_set1_ps((1 << 15) - 1);
   f0 = _mm256_min_ps(f0, max_int16);
   f1 = _mm256_min_ps(f1, max_int16);
@@ -605,7 +605,7 @@ static inline __m256i saturating_cast_f32_to_int8(__m256 f0, __m256 f1, __m256 f
   return _mm256_permutevar8x32_epi32(r, _mm256_setr_epi32(0, 4, 1, 5, 2, 6, 3, 7));
 }
 
-static inline __m256i saturating_cast_f32_to_int16(__m256 f0, __m256 f1) {
+YNN_INTRINSIC __m256i saturating_cast_f32_to_int16(__m256 f0, __m256 f1) {
   const __m256 max_int16 = _mm256_set1_ps((1 << 15) - 1);
   f0 = _mm256_min_ps(f0, max_int16);
   f1 = _mm256_min_ps(f1, max_int16);
@@ -615,22 +615,22 @@ static inline __m256i saturating_cast_f32_to_int16(__m256 f0, __m256 f1) {
   return _mm256_permute4x64_epi64(i01_16, (0 << 0) + (2 << 2) + (1 << 4) + (3 << 6));
 }
 
-static inline __m256i saturating_cast_int32_to_int16(__m256i a, __m256i b) {
+YNN_INTRINSIC __m256i saturating_cast_int32_to_int16(__m256i a, __m256i b) {
   const __m256i r = _mm256_packs_epi32(a, b);
   return _mm256_permute4x64_epi64(r, (0 << 0) + (2 << 2) + (1 << 4) + (3 << 6));
 }
 
-static inline __m256i saturating_cast_int16_to_int8(__m256i a, __m256i b) {
+YNN_INTRINSIC __m256i saturating_cast_int16_to_int8(__m256i a, __m256i b) {
   const __m256i r = _mm256_packs_epi16(a, b);
   return _mm256_permute4x64_epi64(r, (0 << 0) + (2 << 2) + (1 << 4) + (3 << 6));
 }
 
-static inline __m256i saturating_cast_int16_to_uint8(__m256i a, __m256i b) {
+YNN_INTRINSIC __m256i saturating_cast_int16_to_uint8(__m256i a, __m256i b) {
   const __m256i r = _mm256_packus_epi16(a, b);
   return _mm256_permute4x64_epi64(r, (0 << 0) + (2 << 2) + (1 << 4) + (3 << 6));
 }
 
-static inline __m256i saturating_cast_f32_to_uint8(__m256 f0, __m256 f1, __m256 f2, __m256 f3) {
+YNN_INTRINSIC __m256i saturating_cast_f32_to_uint8(__m256 f0, __m256 f1, __m256 f2, __m256 f3) {
   const __m256 max_uint16 = _mm256_set1_ps((1 << 16) - 1);
   f0 = _mm256_min_ps(f0, max_uint16);
   f1 = _mm256_min_ps(f1, max_uint16);
@@ -646,12 +646,12 @@ static inline __m256i saturating_cast_f32_to_uint8(__m256 f0, __m256 f1, __m256 
   return _mm256_permutevar8x32_epi32(r, _mm256_setr_epi32(0, 4, 1, 5, 2, 6, 3, 7));
 }
 
-static inline __m256 bitwise_not(__m256 val) {
+YNN_INTRINSIC __m256 bitwise_not(__m256 val) {
   __m256 all_ones = _mm256_castsi256_ps(_mm256_set1_epi32(-1));
   return _mm256_xor_ps(val, all_ones);
 }
 
-static inline __m256 greater_than(__m256 a, __m256 b) {
+YNN_INTRINSIC __m256 greater_than(__m256 a, __m256 b) {
   return _mm256_cmp_ps(a, b, _CMP_GT_OS);
 }
 
@@ -688,41 +688,41 @@ static inline __m256 greater_than(__m256 a, __m256 b) {
     self.header += """
 namespace {
 
-static inline __m512 partial_load_16x(const float* ptr, size_t num_elements) {
+YNN_INTRINSIC __m512 partial_load_16x(const float* ptr, size_t num_elements) {
   __mmask16 mask = _cvtu32_mask16((uint32_t)((1U << num_elements) - 1U));
   return _mm512_maskz_loadu_ps(mask, ptr);
 }
 
-static inline void partial_store_16x(float* output, size_t num_elements, __m512 v) {
+YNN_INTRINSIC void partial_store_16x(float* output, size_t num_elements, __m512 v) {
   __mmask16 mask = _cvtu32_mask16((uint32_t)((1U << num_elements) - 1U));
   _mm512_mask_storeu_ps(output, mask, v);
 }
 
-static inline __m512i partial_load_16x(const int32_t* ptr, size_t num_elements) {
+YNN_INTRINSIC __m512i partial_load_16x(const int32_t* ptr, size_t num_elements) {
   __mmask16 mask = _cvtu32_mask16((uint32_t)((1U << num_elements) - 1U));
   return _mm512_maskz_loadu_epi32(mask, ptr);
 }
 
-static inline void partial_store_16x(int32_t* output, size_t num_elements, __m512i v) {
+YNN_INTRINSIC void partial_store_16x(int32_t* output, size_t num_elements, __m512i v) {
   __mmask16 mask = _cvtu32_mask16((uint32_t)((1U << num_elements) - 1U));
   _mm512_mask_storeu_epi32(output, mask, v);
 }
 
 template <typename T>
-static inline __m512i wrapper_mm512_loadu_si512(const T* ptr) {
+YNN_INTRINSIC __m512i wrapper_mm512_loadu_si512(const T* ptr) {
   return _mm512_loadu_si512((const __m512i*)ptr);
 }
 
 template <typename T>
-static inline void wrapper_mm512_storeu_si512(T* ptr, __m512i v) {
+YNN_INTRINSIC void wrapper_mm512_storeu_si512(T* ptr, __m512i v) {
   _mm512_storeu_si512((__m512i*)ptr, v);
 }
 
-static inline __m512 round(__m512 x) {
+YNN_INTRINSIC __m512 round(__m512 x) {
   return _mm512_roundscale_ps(x, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
 }
 
-static inline __m512i bitwise_not(__m512i val) {
+YNN_INTRINSIC __m512i bitwise_not(__m512i val) {
   __m512i all_ones = _mm512_set1_epi32(-1);
   return _mm512_xor_si512(val, all_ones);
 }
@@ -754,27 +754,27 @@ static inline __m512i bitwise_not(__m512i val) {
     self.header += """
 namespace {
 
-static inline __m512i partial_load_32x(const int16_t* ptr, size_t num_elements) {
+YNN_INTRINSIC __m512i partial_load_32x(const int16_t* ptr, size_t num_elements) {
   __mmask32 mask = _cvtu32_mask32((uint32_t)((1ULL << num_elements) - 1U));
   return _mm512_maskz_loadu_epi16(mask, ptr);
 }
 
-static inline void partial_store_32x(int16_t* output, size_t num_elements, __m512i v) {
+YNN_INTRINSIC void partial_store_32x(int16_t* output, size_t num_elements, __m512i v) {
   __mmask32 mask = _cvtu32_mask32((uint32_t)((1ULL << num_elements) - 1U));
   _mm512_mask_storeu_epi16(output, mask, v);
 }
 
-static inline void partial_store_64x(int8_t* output, size_t num_elements, __m512i v) {
+YNN_INTRINSIC void partial_store_64x(int8_t* output, size_t num_elements, __m512i v) {
   __mmask64 mask = _cvtu64_mask64((1ULL << num_elements) - 1ULL);
   _mm512_mask_storeu_epi8(output, mask, v);
 }
 
-static inline void partial_store_64x(uint8_t* output, size_t num_elements, __m512i v) {
+YNN_INTRINSIC void partial_store_64x(uint8_t* output, size_t num_elements, __m512i v) {
   __mmask64 mask = _cvtu64_mask64((1ULL << num_elements) - 1ULL);
   _mm512_mask_storeu_epi8(output, mask, v);
 }
 
-static inline __m512i saturating_cast_f32_to_int8(__m512 f0, __m512 f1, __m512 f2, __m512 f3) {
+YNN_INTRINSIC __m512i saturating_cast_f32_to_int8(__m512 f0, __m512 f1, __m512 f2, __m512 f3) {
   const __m512 max_int16 = _mm512_set1_ps((1 << 15) - 1);
   f0 = _mm512_min_ps(f0, max_int16);
   f1 = _mm512_min_ps(f1, max_int16);
@@ -790,7 +790,7 @@ static inline __m512i saturating_cast_f32_to_int8(__m512 f0, __m512 f1, __m512 f
   return _mm512_permutexvar_epi32(_mm512_setr_epi32(0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15), r);
 }
 
-static inline __m512i saturating_cast_f32_to_uint8(__m512 f0, __m512 f1, __m512 f2, __m512 f3) {
+YNN_INTRINSIC __m512i saturating_cast_f32_to_uint8(__m512 f0, __m512 f1, __m512 f2, __m512 f3) {
   const __m512 max_uint16 = _mm512_set1_ps((1 << 16) - 1);
   f0 = _mm512_min_ps(f0, max_uint16);
   f1 = _mm512_min_ps(f1, max_uint16);
@@ -804,7 +804,7 @@ static inline __m512i saturating_cast_f32_to_uint8(__m512 f0, __m512 f1, __m512 
   return _mm512_permutexvar_epi32(_mm512_setr_epi32(0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15), r);
 }
 
-static inline __m512i saturating_cast_f32_to_int16(__m512 f0, __m512 f1) {
+YNN_INTRINSIC __m512i saturating_cast_f32_to_int16(__m512 f0, __m512 f1) {
   const __m512 max_int16 = _mm512_set1_ps((1 << 15) - 1);
   f0 = _mm512_min_ps(f0, max_int16);
   f1 = _mm512_min_ps(f1, max_int16);
@@ -814,17 +814,17 @@ static inline __m512i saturating_cast_f32_to_int16(__m512 f0, __m512 f1) {
   return _mm512_permutexvar_epi64(_mm512_setr_epi64(0, 2, 4, 6, 1, 3, 5, 7), r);
 }
 
-static inline __m512i saturating_cast_int32_to_int16(__m512i a, __m512i b) {
+YNN_INTRINSIC __m512i saturating_cast_int32_to_int16(__m512i a, __m512i b) {
   const __m512i r = _mm512_packs_epi32(a, b);
   return _mm512_permutexvar_epi64(_mm512_setr_epi64(0, 2, 4, 6, 1, 3, 5, 7), r);
 }
 
-static inline __m512i saturating_cast_int16_to_int8(__m512i a, __m512i b) {
+YNN_INTRINSIC __m512i saturating_cast_int16_to_int8(__m512i a, __m512i b) {
   const __m512i r = _mm512_packs_epi16(a, b);
   return _mm512_permutexvar_epi64(_mm512_setr_epi64(0, 2, 4, 6, 1, 3, 5, 7), r);
 }
 
-static inline __m512i saturating_cast_int16_to_uint8(__m512i a, __m512i b) {
+YNN_INTRINSIC __m512i saturating_cast_int16_to_uint8(__m512i a, __m512i b) {
   const __m512i r = _mm512_packus_epi16(a, b);
   return _mm512_permutexvar_epi64(_mm512_setr_epi64(0, 2, 4, 6, 1, 3, 5, 7), r);
 }

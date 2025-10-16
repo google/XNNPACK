@@ -14,7 +14,7 @@ class arm_neon_fp32(arm_neon):
 
 namespace {
 
-float32x4_t unaligned_load_broadcast(const void* ptr) {
+YNN_INTRINSIC float32x4_t unaligned_load_broadcast(const void* ptr) {
     float value;
     memcpy(&value, ptr, sizeof(float));
     return vdupq_n_f32(value);

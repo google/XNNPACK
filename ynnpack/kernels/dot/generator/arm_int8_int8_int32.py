@@ -54,7 +54,7 @@ class arm_neondot_int8_int8_int32(arm_int8_int8_int32):
 
 namespace {
 
-int32_t unaligned_load_int8x4(const void* ptr) {
+YNN_INTRINSIC int32_t unaligned_load_int8x4(const void* ptr) {
     int32_t value;
     memcpy(&value, ptr, sizeof(int32_t));
     return value;
@@ -91,7 +91,7 @@ class arm_neoni8mm_int8_int8_int32(arm_int8_int8_int32):
 
 namespace {
 
-std::tuple<int32x4_t, int32x4_t> transpose2x2_x64(int32x4_t x0, int32x4_t x1) {
+YNN_INTRINSIC std::tuple<int32x4_t, int32x4_t> transpose2x2_x64(int32x4_t x0, int32x4_t x1) {
   return {vcombine_s32(vget_low_s32(x0), vget_low_s32(x1)),
           vcombine_s32(vget_high_s32(x0), vget_high_s32(x1))};
 }

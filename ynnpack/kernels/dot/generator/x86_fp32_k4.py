@@ -15,16 +15,16 @@ class x86_avx512f_fp32_k4(x86_avx512f):  # pylint: disable=invalid-name
     return super().header() + """
 namespace {
 
-__m512 unaligned_load_broadcast_x4(const float* ptr) {
+YNN_INTRINSIC __m512 unaligned_load_broadcast_x4(const float* ptr) {
     __m128 value = _mm_loadu_ps(ptr);
     return _mm512_broadcast_f32x4(value);
 }
 
-__m512 odd_to_even(__m512 x) {
+YNN_INTRINSIC __m512 odd_to_even(__m512 x) {
   return _mm512_castsi512_ps(_mm512_srli_epi64(_mm512_castps_si512(x), 32));
 }
 
-__m512 high_to_low(__m512 x) {
+YNN_INTRINSIC __m512 high_to_low(__m512 x) {
   return _mm512_castps256_ps512(_mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(x), 1)));
 }
 

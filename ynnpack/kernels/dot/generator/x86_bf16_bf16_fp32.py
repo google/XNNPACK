@@ -23,7 +23,7 @@ struct bfloat16 {{
   std::uint16_t value;
 }};
 
-__m{self.bits}i unaligned_load_broadcast_bf32x2(const bfloat16* ptr) {{
+YNN_INTRINSIC __m{self.bits}i unaligned_load_broadcast_bf32x2(const bfloat16* ptr) {{
     int32_t value;
     memcpy(&value, ptr, sizeof(int32_t));
     return {self._mm()}_set1_epi32(value);
@@ -104,7 +104,7 @@ class x86_avx512bf16_bf16_bf16_fp32(x86_bf16_bf16_fp32, x86_avx512f):
 
 namespace {{
 
-__m{self.bits} unaligned_load_broadcast_2xbf16(const bfloat16* ptr) {{
+YNN_INTRINSIC __m{self.bits} unaligned_load_broadcast_2xbf16(const bfloat16* ptr) {{
     float value;
     memcpy(&value, ptr, sizeof(float));
     return {self._mm()}_set1_ps(value);
