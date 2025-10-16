@@ -6,7 +6,6 @@
 #include "ynnpack/subgraph/subgraph.h"
 
 #include <algorithm>
-#include <bit>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
