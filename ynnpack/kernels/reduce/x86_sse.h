@@ -159,8 +159,8 @@ YNN_ALWAYS_INLINE s32x4 horizontal_add_8x(s8x16 a) {
 
 template <bool IsSigned>
 struct accumulator_int32 {
-  static constexpr std::integral_constant<size_t, 4> N;
-  static constexpr std::integral_constant<size_t, 16> K;
+  static constexpr std::integral_constant<size_t, 4> N = {};
+  static constexpr std::integral_constant<size_t, 16> K = {};
 
   s32x4 acc[N];
 
