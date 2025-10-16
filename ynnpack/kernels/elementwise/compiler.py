@@ -116,31 +116,42 @@ def wrap(y):
   return result
 
 
-def promote_types(x, y):
+def promote_types(a, b):
   """Makes x and y to have compatible types."""
-  if x.ty is None and y.ty is None:
-    return [x, y]
+  if a.ty is None and b.ty is None:
+    return [a, b]
 
-  if x.ty.type_class == y.ty.type_class and x.ty.size == y.ty.size:
-    return [x, y]
+  assert a.ty.lanes == b.ty.lanes or a.ty.lanes == 1 or b.ty.lanes == 1
 
-  if isinstance(x, Constant) or isinstance(y, Constant):
-    if not isinstance(x, Constant):
-      return [x, cast(x.ty, y)]
-    elif not isinstance(y, Constant):
-      return [cast(y.ty, x), y]
+  if a.ty == b.ty:
+    return [a, b]
+
+  if isinstance(a, Constant) or isinstance(b, Constant):
+    if not isinstance(a, Constant):
+      return [a, cast(a.ty, b)]
+    elif not isinstance(b, Constant):
+      return [cast(b.ty, a), b]
     else:
       assert False
 
-  if x.ty.type_class == "float" or y.ty.type_class == "float":
-    max_size = builtins.max(x.ty.size, y.ty.size)
-    return [cast(Float(max_size), x), cast(Float(max_size), y)]
-  else:
-    assert x.ty.type_class == y.ty.type_class
-    promoted_ty = x.ty.withsize(builtins.max(x.ty.size, y.ty.size))
+  if a.ty.type_class == "float" or b.ty.type_class == "float":
+    max_size = builtins.max(a.ty.size, b.ty.size)
+    max_lanes = builtins.max(a.ty.lanes, b.ty.lanes)
+
     return [
-        cast(promoted_ty, x),
-        cast(promoted_ty, y),
+        cast(Float(max_size, max_lanes), a),
+        cast(Float(max_size, max_lanes), b),
+    ]
+  else:
+    assert a.ty.type_class == b.ty.type_class
+    promoted_ty = Type(
+        a.ty.type_class,
+        builtins.max(a.ty.size, b.ty.size),
+        builtins.max(a.ty.lanes, b.ty.lanes),
+    )
+    return [
+        cast(promoted_ty, a),
+        cast(promoted_ty, b),
     ]
 
 
@@ -407,12 +418,26 @@ def sqrt(value):
 
 @intrinsic
 def cast(ty, value):
+  """Casts value to a given type."""
   # This is no-op.
   if value.ty == ty:
     return value
   # We can just change the type of the constant.
   if isinstance(value, Constant):
-    return Constant(ty, value.value)
+    const = Constant(ty.with_lanes(1), value.value)
+    # This is just so broadcast is inserted.
+    if ty.lanes > 1:
+      const = const.with_lanes(ty.lanes)
+    return const
+  if (
+      value.ty.type_class == ty.type_class
+      and ty.size == value.ty.size
+      and ty.lanes > 1
+      and value.ty.lanes == 1
+  ):
+    # If the types only differ by number of lanes we can insert a broadcast
+    # instead of the full cast.
+    return broadcast(value, ty.lanes)
   return Op(ty, "cast", [value])
 
 
@@ -423,6 +448,7 @@ def saturating_cast(ty, value):
 
 @intrinsic
 def reinterpret_cast(ty, value):
+  assert ty.size == value.ty.size and ty.lanes == value.ty.lanes
   return Op(ty, "reinterpret_cast", [value])
 
 
@@ -551,8 +577,18 @@ def lower_saturating_add(x, y):
 
 
 def broadcast(x, lanes):
+  """Broadcasts a scalar to a vector."""
   assert x.ty.lanes == 1
   x = wrap(x)
+  # TODO(vksnk): here we push broadcast into the op. Usually, you would want to
+  # the opposite, but this simplifies a lot of things. Probably, would make
+  # sense to reconsider in the future.
+  if isinstance(x, Op):
+    return Op(
+        x.ty.with_lanes(lanes),
+        x.name,
+        [broadcast(arg, lanes) for arg in x.args],
+    )
   return Op(x.ty.with_lanes(lanes), "broadcast", [x])
 
 
@@ -1053,8 +1089,9 @@ class Target:
 
       if expr.name in lowering_funcs:
         lowered = lowering_funcs[expr.name](*expr.args)
-        lowered = self.vectorize(lowered, natural_lanes, {})
-        return self.pattern_match(lowered, natural_lanes, cache)
+        mutated = self.pattern_match(lowered, natural_lanes, cache)
+        cache[expr] = mutated
+        return mutated
 
       args = []
       for arg in expr.args:
