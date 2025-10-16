@@ -99,6 +99,7 @@ xnnpack_cc_library(
         "//:indirection",
         "//:init_once",
         "//:logging",
+        "//:math",
         "//:microfnptr_h",
         "//:microkernel_hdrs",
         "//:microparams_init",
