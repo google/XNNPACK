@@ -11,10 +11,10 @@
 #include <cstdint>
 
 #include "ynnpack/include/ynnpack.h"
-#include "external/+_repo_rules+slinky/base/function_ref.h"
-#include "external/+_repo_rules+slinky/base/ref_count.h"
-#include "external/+_repo_rules+slinky/base/thread_pool.h"
-#include "external/+_repo_rules+slinky/base/thread_pool_impl.h"
+#include "slinky/base/function_ref.h"
+#include "slinky/base/ref_count.h"
+#include "slinky/base/thread_pool.h"
+#include "slinky/base/thread_pool_impl.h"
 
 namespace ynn {
 

@@ -449,7 +449,7 @@ cc_library(
     visibility = ["//ynnpack:__subpackages__"],
     deps = [
         "//ynnpack/base",
-        "@slinky//base",
+        "@slinky//slinky/base",
     ],
 )
 

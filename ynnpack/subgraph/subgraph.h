@@ -20,9 +20,9 @@
 
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
-#include "external/+_repo_rules+slinky/runtime/buffer.h"
-#include "external/+_repo_rules+slinky/runtime/evaluate.h"
-#include "external/+_repo_rules+slinky/runtime/expr.h"
+#include "slinky/runtime/buffer.h"
+#include "slinky/runtime/evaluate.h"
+#include "slinky/runtime/expr.h"
 
 #define YNN_THREADPOOL_FLAG_USE_XLA_THREADPOOL (1 << 0)
 

@@ -12,7 +12,7 @@
 #include "ynnpack/subgraph/google/absl_thread_pool.h"
 #endif
 #include "ynnpack/subgraph/slinky_thread_pool.h"
-#include "external/+_repo_rules+slinky/base/thread_pool.h"
+#include "slinky/base/thread_pool.h"
 
 extern "C" {
 

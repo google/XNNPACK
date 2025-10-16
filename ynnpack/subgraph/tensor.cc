@@ -14,8 +14,8 @@
 #include "ynnpack/base/type.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/subgraph.h"
-#include "external/+_repo_rules+slinky/runtime/buffer.h"
-#include "external/+_repo_rules+slinky/runtime/expr.h"
+#include "slinky/runtime/buffer.h"
+#include "slinky/runtime/expr.h"
 
 namespace ynn {
 

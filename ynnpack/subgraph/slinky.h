@@ -15,10 +15,10 @@
 #include <string>
 #include <vector>
 
-#include "external/+_repo_rules+slinky/builder/pipeline.h"
-#include "external/+_repo_rules+slinky/runtime/buffer.h"
-#include "external/+_repo_rules+slinky/runtime/expr.h"
-#include "external/+_repo_rules+slinky/runtime/stmt.h"
+#include "slinky/builder/pipeline.h"
+#include "slinky/runtime/buffer.h"
+#include "slinky/runtime/expr.h"
+#include "slinky/runtime/stmt.h"
 
 #define XNN_ALLOCA(T, N) reinterpret_cast<T*>(alloca((N) * sizeof(T)))
 

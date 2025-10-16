@@ -34,12 +34,12 @@
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/tensor.h"
-#include "external/+_repo_rules+slinky/base/thread_pool.h"
-#include "external/+_repo_rules+slinky/builder/simplify.h"
-#include "external/+_repo_rules+slinky/builder/substitute.h"
-#include "external/+_repo_rules+slinky/runtime/buffer.h"
-#include "external/+_repo_rules+slinky/runtime/evaluate.h"
-#include "external/+_repo_rules+slinky/runtime/expr.h"
+#include "slinky/base/thread_pool.h"
+#include "slinky/builder/simplify.h"
+#include "slinky/builder/substitute.h"
+#include "slinky/runtime/buffer.h"
+#include "slinky/runtime/evaluate.h"
+#include "slinky/runtime/expr.h"
 
 std::string ynn_value::name() const {
   return name_prefix() + std::to_string(id);

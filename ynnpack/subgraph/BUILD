@@ -15,9 +15,9 @@ cc_library(
     visibility = ["//ynnpack:__subpackages__"],
     deps = [
         "//ynnpack:ynnpack_h",
-        "@slinky//base",
-        "@slinky//base:thread_pool",
-        "@slinky//base:thread_pool_impl",
+        "@slinky//slinky/base",
+        "@slinky//slinky/base:thread_pool",
+        "@slinky//slinky/base:thread_pool_impl",
     ],
 )
 
@@ -30,7 +30,7 @@ cc_library(
         ":slinky_thread_pool",
         "//ynnpack:ynnpack_h",
         "//ynnpack/base:log",
-        "@slinky//base:thread_pool",
+        "@slinky//slinky/base:thread_pool",
     ],
 )
 
@@ -80,9 +80,9 @@ cc_library(
         "//ynnpack/kernels/ternary",
         "//ynnpack/kernels/transpose",
         "//ynnpack/kernels/unary",
-        "@slinky//base",
-        "@slinky//base:thread_pool",
-        "@slinky//builder",
-        "@slinky//runtime",
+        "@slinky//slinky/base",
+        "@slinky//slinky/base:thread_pool",
+        "@slinky//slinky/builder",
+        "@slinky//slinky/runtime",
     ],
 )

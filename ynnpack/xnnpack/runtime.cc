@@ -15,8 +15,8 @@
 #include "ynnpack/xnnpack/utils.h"
 #include "ynnpack/xnnpack/xnnpack.h"
 #include <pthreadpool.h>
-#include "external/+_repo_rules+slinky/base/ref_count.h"
-#include "external/+_repo_rules+slinky/base/thread_pool.h"
+#include "slinky/base/ref_count.h"
+#include "slinky/base/thread_pool.h"
 
 namespace {
 

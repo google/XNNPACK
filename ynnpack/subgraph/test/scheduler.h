@@ -2,7 +2,7 @@
 #define XNNPACK_YNNPACK_SUBGRAPH_TEST_SCHEDULER_H_
 
 #include "ynnpack/include/ynnpack.h"
-#include "external/+_repo_rules+slinky/base/thread_pool_impl.h"
+#include "slinky/base/thread_pool_impl.h"
 
 namespace ynn {
 

@@ -9,7 +9,7 @@
 #include <cstddef>
 
 #include "ynnpack/base/arithmetic.h"
-#include "external/+_repo_rules+slinky/base/span.h"
+#include "slinky/base/span.h"
 
 namespace ynn {
 

@@ -14,7 +14,7 @@ cc_library(
     visibility = ["//ynnpack/subgraph:__subpackages__"],
     deps = [
         "//ynnpack:ynnpack_h",
-        "@slinky//base:thread_pool_impl",
+        "@slinky//slinky/base:thread_pool_impl",
     ],
 )
 

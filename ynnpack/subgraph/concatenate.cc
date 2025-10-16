@@ -15,8 +15,8 @@
 #include "ynnpack/subgraph/runtime.h"
 #include "ynnpack/subgraph/slinky.h"
 #include "ynnpack/subgraph/subgraph.h"
-#include "external/+_repo_rules+slinky/builder/pipeline.h"
-#include "external/+_repo_rules+slinky/runtime/expr.h"
+#include "slinky/builder/pipeline.h"
+#include "slinky/runtime/expr.h"
 
 namespace ynn {
 

@@ -24,10 +24,10 @@
 #include "ynnpack/subgraph/slinky.h"
 #include "ynnpack/subgraph/subgraph.h"
 #include "ynnpack/subgraph/utils.h"
-#include "external/+_repo_rules+slinky/builder/pipeline.h"
-#include "external/+_repo_rules+slinky/runtime/buffer.h"
-#include "external/+_repo_rules+slinky/runtime/expr.h"
-#include "external/+_repo_rules+slinky/runtime/stmt.h"
+#include "slinky/builder/pipeline.h"
+#include "slinky/runtime/buffer.h"
+#include "slinky/runtime/expr.h"
+#include "slinky/runtime/stmt.h"
 
 using ynn::operator<<;  // NOLINT(misc-unused-using-decls)
 

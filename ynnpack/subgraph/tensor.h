@@ -10,7 +10,7 @@
 #include <cstddef>
 
 #include "ynnpack/include/ynnpack.h"
-#include "external/+_repo_rules+slinky/runtime/buffer.h"
+#include "slinky/runtime/buffer.h"
 
 #define YNN_THREADPOOL_FLAG_USE_XLA_THREADPOOL (1 << 0)
 

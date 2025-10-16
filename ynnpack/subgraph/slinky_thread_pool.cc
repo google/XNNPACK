@@ -12,9 +12,9 @@
 #include <thread>  // NOLINT(build/c++11)
 
 #include "ynnpack/include/ynnpack.h"
-#include "external/+_repo_rules+slinky/base/function_ref.h"
-#include "external/+_repo_rules+slinky/base/ref_count.h"
-#include "external/+_repo_rules+slinky/base/thread_pool.h"
+#include "slinky/base/function_ref.h"
+#include "slinky/base/ref_count.h"
+#include "slinky/base/thread_pool.h"
 
 namespace ynn {
 

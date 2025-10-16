@@ -30,12 +30,12 @@
 #include "ynnpack/subgraph/slinky.h"
 #include "ynnpack/subgraph/subgraph.h"
 #include "ynnpack/subgraph/utils.h"
-#include "external/+_repo_rules+slinky/base/arithmetic.h"
-#include "external/+_repo_rules+slinky/builder/pipeline.h"
-#include "external/+_repo_rules+slinky/runtime/buffer.h"
-#include "external/+_repo_rules+slinky/runtime/evaluate.h"
-#include "external/+_repo_rules+slinky/runtime/expr.h"
-#include "external/+_repo_rules+slinky/runtime/stmt.h"
+#include "slinky/base/arithmetic.h"
+#include "slinky/builder/pipeline.h"
+#include "slinky/runtime/buffer.h"
+#include "slinky/runtime/evaluate.h"
+#include "slinky/runtime/expr.h"
+#include "slinky/runtime/stmt.h"
 
 using slinky::index_t;
 

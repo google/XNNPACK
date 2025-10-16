@@ -1,7 +1,7 @@
 #include "ynnpack/subgraph/test/scheduler.h"
 
 #include "ynnpack/include/ynnpack.h"
-#include "external/+_repo_rules+slinky/base/thread_pool_impl.h"
+#include "slinky/base/thread_pool_impl.h"
 
 namespace ynn {
 

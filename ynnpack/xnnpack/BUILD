@@ -35,8 +35,8 @@ cc_library(
         "//ynnpack/base:log",
         "//ynnpack/kernels/dot",
         "//ynnpack/subgraph",
-        "@slinky//builder",
-        "@slinky//runtime",
+        "@slinky//slinky/builder",
+        "@slinky//slinky/runtime",
     ],
 )
 
@@ -66,7 +66,7 @@ cc_library(
         "//ynnpack/base:log",
         "//ynnpack/subgraph",
         "@pthreadpool",
-        "@slinky//base:thread_pool",
+        "@slinky//slinky/base:thread_pool",
     ],
 )
 
