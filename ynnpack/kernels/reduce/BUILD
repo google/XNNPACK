@@ -43,6 +43,14 @@ ynn_cc_library(
     compatible_with = _COMPATIBLE_WITH,
     copts = ["-fno-unroll-loops"],
     per_arch_srcs = {
+        "arm_neonfp16arith": [
+            "arm_neonfp16arith.cc",
+            "arm_neon_xf16.h",
+        ],
+        "arm_neonbf16": [
+            "arm_neonbf16.cc",
+            "arm_neon_xf16.h",
+        ],
         "arm_neondot": ["arm_neondot.cc"],
         "arm_neon": ["arm_neon.cc"],
         "x86_ssse3": [
@@ -57,11 +65,17 @@ ynn_cc_library(
             "x86_sse41.cc",
             "x86_sse.h",
         ],
-        "x86_avx512bf16": ["x86_avx512bf16.cc"],
+        "x86_avx512bf16": [
+            "x86_avx512bf16.cc",
+            "x86_avx512_xf16.h",
+        ],
         "x86_avx512bw": ["x86_avx512bw.cc"],
         "x86_avx512f": ["x86_avx512f.cc"],
-        "x86_avx512fp16": ["x86_avx512fp16.cc"],
         "x86_f16c": ["x86_f16c.cc"],
+        "x86_avx512fp16": [
+            "x86_avx512fp16.cc",
+            "x86_avx512_xf16.h",
+        ],
         "x86_avx2": ["x86_avx2.cc"],
     },
     visibility = ["//ynnpack:__subpackages__"],

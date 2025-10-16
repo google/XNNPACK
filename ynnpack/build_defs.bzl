@@ -67,6 +67,22 @@ _YNN_PARAMS_FOR_ARCH = {
             "//conditions:default": [],
         }),
     },
+    "arm_neonfp16arith": {
+        "cond": "//ynnpack:ynn_enable_arm_neonfp16arith",
+        "copts": select({
+            "//ynnpack:arm32": ["-march=armv8.2-a+fp16"],
+            "//ynnpack:arm64": ["-march=armv8.2-a+fp16"],
+            "//conditions:default": [],
+        }),
+    },
+    "arm_neonbf16": {
+        "cond": "//ynnpack:ynn_enable_arm_neonbf16",
+        "copts": select({
+            "//ynnpack:arm32": ["-march=armv8.2-a+bf16"],
+            "//ynnpack:arm64": ["-march=armv8.2-a+bf16"],
+            "//conditions:default": [],
+        }),
+    },
     "arm64_neoni8mm": {
         "cond": "//ynnpack:ynn_enable_arm64_neoni8mm",
         "copts": ["-march=armv8.2-a+i8mm"],

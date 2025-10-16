@@ -67,6 +67,8 @@ uint64_t get_supported_arch_flags() {
 #ifdef YNN_ARCH_ARM
     if (cpuinfo_has_arm_neon()) result |= arch_flag::neon;
     if (cpuinfo_has_arm_neon_dot()) result |= arch_flag::neondot;
+    if (cpuinfo_has_arm_neon_fp16_arith()) result |= arch_flag::neonfp16arith;
+    if (cpuinfo_has_arm_neon_bf16()) result |= arch_flag::neonbf16;
     if (cpuinfo_has_arm_i8mm()) result |= arch_flag::neoni8mm;
     if (cpuinfo_has_arm_sme()) result |= arch_flag::sme;
     if (cpuinfo_has_arm_sme2()) result |= arch_flag::sme2;

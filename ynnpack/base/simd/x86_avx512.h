@@ -607,6 +607,10 @@ YNN_ALWAYS_INLINE s32x8 extract(s32x16 x, s32x8) {
   return s32x8{_mm512_castsi512_si256(x.v)};
 }
 template <int Index>
+YNN_ALWAYS_INLINE s32x4 extract(s32x16 x, s32x4) {
+  return s32x4{_mm512_extracti32x4_epi32(x.v, Index)};
+}
+template <int Index>
 YNN_ALWAYS_INLINE f32x4 extract(f32x16 x, f32x4) {
   return f32x4{_mm512_extractf32x4_ps(x.v, Index)};
 }
@@ -614,6 +618,19 @@ template <int Index>
 YNN_ALWAYS_INLINE bf16x16 extract(bf16x32 x, bf16x16) {
   return bf16x16{_mm256_castps_si256(
       _mm512_extractf32x8_ps(_mm512_castsi512_ps(x.v), Index))};
+}
+template <int Index>
+YNN_ALWAYS_INLINE f16x16 extract(f16x32 x, f16x16) {
+  return f16x16{_mm256_castpd_si256(
+      _mm512_extractf64x4_pd(_mm512_castsi512_pd(x.v), Index))};
+}
+template <int Index>
+YNN_ALWAYS_INLINE s8x32 extract(s8x64 x, s8x32) {
+  return s8x32{_mm512_extracti64x4_epi64(x.v, Index)};
+}
+template <int Index>
+YNN_ALWAYS_INLINE u8x32 extract(u8x64 x, u8x32) {
+  return u8x32{_mm512_extracti64x4_epi64(x.v, Index)};
 }
 
 }  // namespace simd

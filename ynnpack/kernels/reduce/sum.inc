@@ -5,28 +5,33 @@ YNN_UNARY_REDUCE_KERNEL(arch_flag::neon, sum_fp32_4x4_neon, float, float)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::neondot, sum_int8_int32_4x16_neondot, int8_t, int32_t)
 YNN_UNARY_REDUCE_KERNEL(arch_flag::neondot, sum_uint8_int32_4x16_neondot, uint8_t, int32_t)
 #endif  // YNN_ARCH_ARM_NEON
+#ifdef YNN_ARCH_ARM_NEONBF16
+YNN_UNARY_REDUCE_KERNEL(arch_flag::neonbf16, sum_bf16_fp32_4x8_neonbf16, bfloat16, float)
+#endif // YNN_ARCH_ARM_NEONBF16
+#ifdef YNN_ARCH_ARM_NEONFP16ARITH
+YNN_UNARY_REDUCE_KERNEL(arch_flag::neonfp16arith, sum_fp16_fp32_4x8_neonfp16arith, half, float)
+#endif  // YNN_ARCH_ARM_NEONFP16ARITH
 
 #ifdef YNN_ARCH_X86_AVX512BF16
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512bf16, sum_bf16_fp32_4x32_avx512bf16, bfloat16, float)
 #endif  // YNN_ARCH_X86_AVX512BF16
 #ifdef YNN_ARCH_X86_AVX512FP16
-YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512fp16, sum_fp16_fp32_4x16_avx512fp16, half, float)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512fp16, sum_fp16_fp32_4x32_avx512fp16, half, float)
 #endif  // YNN_ARCH_X86_AVX512FP16
 #ifdef YNN_ARCH_X86_AVX512BW
-YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512bw, sum_uint8_int32_4x32_avx512bw, uint8_t, int32_t)
-YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512bw, sum_int8_int32_4x32_avx512bw, int8_t, int32_t)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512bw, sum_uint8_int32_4x64_avx512bw, uint8_t, int32_t)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512bw, sum_int8_int32_4x64_avx512bw, int8_t, int32_t)
 #endif  // YNN_ARCH_X86_AVX512BW
 #ifdef YNN_ARCH_X86_AVX512F
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx512f, sum_fp32_4x16_avx512f, float, float)
 #endif  // YNN_ARCH_X86_AVX512F
 #ifdef YNN_ARCH_X86_AVX2
 YNN_UNARY_REDUCE_KERNEL(arch_flag::avx2, sum_fp32_4x8_avx2, float, float)
-YNN_UNARY_REDUCE_KERNEL(arch_flag::avx2, sum_uint8_int32_4x16_avx2, uint8_t, int32_t)
-YNN_UNARY_REDUCE_KERNEL(arch_flag::avx2, sum_int8_int32_4x16_avx2, int8_t, int32_t)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::avx2, sum_uint8_int32_4x32_avx2, uint8_t, int32_t)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::avx2, sum_int8_int32_4x32_avx2, int8_t, int32_t)
 #endif  // YNN_ARCH_X86_AVX2
 #ifdef YNN_ARCH_X86_F16C
-// TODO(b/450705737): Re-enable this kernel once the GCC 14.2 issue is understood.
-// YNN_UNARY_REDUCE_KERNEL(arch_flag::f16c, sum_fp16_fp32_4x16_f16c, half, float)
+YNN_UNARY_REDUCE_KERNEL(arch_flag::f16c, sum_fp16_fp32_4x16_f16c, half, float)
 #endif  // YNN_ARCH_X86_F16C
 #ifdef YNN_ARCH_X86_SSE41
 YNN_UNARY_REDUCE_KERNEL(arch_flag::sse41, sum_uint8_int32_4x16_sse41, uint8_t, int32_t)

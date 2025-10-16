@@ -550,6 +550,14 @@ YNN_ALWAYS_INLINE f16x8 extract(f16x16 x, f16x8) {
   return f16x8{
       _mm_castps_si128(_mm256_extractf128_ps(_mm256_castsi256_ps(x.v), Index))};
 }
+template <int Index>
+YNN_ALWAYS_INLINE s8x16 extract(s8x32 x, s8x16) {
+  return s8x16{_mm256_extracti128_si256(x.v, Index)};
+}
+template <int Index>
+YNN_ALWAYS_INLINE u8x16 extract(u8x32 x, u8x16) {
+  return u8x16{_mm256_extracti128_si256(x.v, Index)};
+}
 
 }  // namespace simd
 

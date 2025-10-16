@@ -6,6 +6,7 @@
 #ifndef XNNPACK_YNNPACK_BASE_SIMD_VEC_H_
 #define XNNPACK_YNNPACK_BASE_SIMD_VEC_H_
 
+#include <array>
 #include <cassert>
 #include <cstddef>
 #include <cstring>
@@ -77,6 +78,11 @@ template <typename T, size_t N>
 vec<T, N> min(vec<T, N> a, vec<T, N> b);
 template <typename T, size_t N>
 vec<T, N> max(vec<T, N> a, vec<T, N> b);
+
+template <typename T>
+std::array<vec<T, 4>, 4> transpose(std::array<vec<T, 4>, 4> x);
+template <int Index, typename T, typename SliceT>
+SliceT extract(T, SliceT);
 
 namespace internal {
 
