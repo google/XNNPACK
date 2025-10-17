@@ -11,14 +11,16 @@
 #include <cstring>
 #include <type_traits>
 
+#include "ynnpack/base/simd/multiple_of.h"
 #include "ynnpack/base/simd/x86_sse.h"
 #include "ynnpack/kernels/reduce/generic.h"
 #include "ynnpack/kernels/reduce/sum_accumulator.h"
-#include "ynnpack/kernels/reduce/x86_sse.h"
 
 namespace ynn {
 
 namespace simd {
+
+using s32x4x4 = multiple_of<s32x4, 4>;
 
 static s32x4x4& operator+=(s32x4x4& a, s8x16 b) {
   __m128i i8_lo = _mm_unpacklo_epi8(b.v, b.v);
@@ -29,10 +31,10 @@ static s32x4x4& operator+=(s32x4x4& a, s8x16 b) {
   s32x4 b_2(_mm_srai_epi32(_mm_unpacklo_epi16(i8_hi, i8_hi), 24));
   s32x4 b_3(_mm_srai_epi32(_mm_unpackhi_epi16(i8_hi, i8_hi), 24));
 
-  a.v[0].v[0] += b_0;
-  a.v[0].v[1] += b_1;
-  a.v[1].v[0] += b_2;
-  a.v[1].v[1] += b_3;
+  a.v[0] += b_0;
+  a.v[1] += b_1;
+  a.v[2] += b_2;
+  a.v[3] += b_3;
   return a;
 }
 
@@ -46,10 +48,10 @@ static s32x4x4& operator+=(s32x4x4& a, u8x16 b) {
   s32x4 b_2(_mm_unpacklo_epi16(i16_hi, zero));
   s32x4 b_3(_mm_unpackhi_epi16(i16_hi, zero));
 
-  a.v[0].v[0] += b_0;
-  a.v[0].v[1] += b_1;
-  a.v[1].v[0] += b_2;
-  a.v[1].v[1] += b_3;
+  a.v[0] += b_0;
+  a.v[1] += b_1;
+  a.v[2] += b_2;
+  a.v[3] += b_3;
   return a;
 }
 
@@ -76,10 +78,9 @@ using simd::s32x4x4;
 using simd::s8x16;
 using simd::u8x16;
 
-void sum_int8_int32_4x16_ssse3(size_t n, size_t k3, size_t k2, size_t k1,
-                               size_t a_stride_n, size_t a_stride_k3,
-                               size_t a_stride_k2, const void* a, size_t,
-                               void* c) {
+void sum_int8_int32_ssse3(size_t n, size_t k3, size_t k2, size_t k1,
+                          size_t a_stride_n, size_t a_stride_k3,
+                          size_t a_stride_k2, const void* a, size_t, void* c) {
   if (k1 == 1 && a_stride_n == sizeof(int8_t)) {
     tiled_reduce<sum_accumulator_k1_1<s8x16, s32x4x4>, int8_t, int32_t>(
         n, k3, k2, a_stride_k3, a_stride_k2,
@@ -93,10 +94,9 @@ void sum_int8_int32_4x16_ssse3(size_t n, size_t k3, size_t k2, size_t k1,
   }
 }
 
-void sum_uint8_int32_4x16_ssse3(size_t n, size_t k3, size_t k2, size_t k1,
-                                size_t a_stride_n, size_t a_stride_k3,
-                                size_t a_stride_k2, const void* a, size_t,
-                                void* c) {
+void sum_uint8_int32_ssse3(size_t n, size_t k3, size_t k2, size_t k1,
+                           size_t a_stride_n, size_t a_stride_k3,
+                           size_t a_stride_k2, const void* a, size_t, void* c) {
   if (k1 == 1 && a_stride_n == sizeof(uint8_t)) {
     tiled_reduce<sum_accumulator_k1_1<u8x16, s32x4x4>, uint8_t, int32_t>(
         n, k3, k2, a_stride_k3, a_stride_k2,

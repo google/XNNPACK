@@ -208,10 +208,10 @@ MIN_MAX_KERNEL(max_fp16_4x32_avx512bw, dummy_t, f16x32_rvar, half, 32);
 MIN_MAX_KERNEL(max_uint8_4x64_avx512bw, dummy_t, u8x64, uint8_t, 64);
 MIN_MAX_KERNEL(max_int8_4x64_avx512bw, dummy_t, s8x64, int8_t, 64);
 
-void sum_int8_int32_4x64_avx512bw(size_t n, size_t k3, size_t k2, size_t k1,
-                                  size_t a_stride_n, size_t a_stride_k3,
-                                  size_t a_stride_k2, const void* a, size_t,
-                                  void* c) {
+void sum_int8_int32_avx512bw(size_t n, size_t k3, size_t k2, size_t k1,
+                             size_t a_stride_n, size_t a_stride_k3,
+                             size_t a_stride_k2, const void* a, size_t,
+                             void* c) {
   if (k1 == 1 && a_stride_n == sizeof(int8_t)) {
     tiled_reduce<sum_accumulator_k1_1<s8x64, s32x16x4>, int8_t, int32_t>(
         n, k3, k2, a_stride_k3, a_stride_k2,
@@ -225,10 +225,10 @@ void sum_int8_int32_4x64_avx512bw(size_t n, size_t k3, size_t k2, size_t k1,
   }
 }
 
-void sum_uint8_int32_4x64_avx512bw(size_t n, size_t k3, size_t k2, size_t k1,
-                                   size_t a_stride_n, size_t a_stride_k3,
-                                   size_t a_stride_k2, const void* a, size_t,
-                                   void* c) {
+void sum_uint8_int32_avx512bw(size_t n, size_t k3, size_t k2, size_t k1,
+                              size_t a_stride_n, size_t a_stride_k3,
+                              size_t a_stride_k2, const void* a, size_t,
+                              void* c) {
   if (k1 == 1 && a_stride_n == sizeof(uint8_t)) {
     tiled_reduce<sum_accumulator_k1_1<u8x64, s32x16x4>, uint8_t, int32_t>(
         n, k3, k2, a_stride_k3, a_stride_k2,
