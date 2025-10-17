@@ -293,8 +293,11 @@ vec<T, 4> partial_load_switch_x4(const T* ptr, vec<T, 4> src, size_t n) {
     case 2:
       lanes[1] = ptr[1];
       [[fallthrough]];
-    default:
+    case 1:
       lanes[0] = ptr[0];
+      break;
+    default:
+      break;
   }
   return load_aligned(lanes, vec<T, 4>{});
 }
