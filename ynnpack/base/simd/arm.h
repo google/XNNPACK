@@ -285,8 +285,11 @@ inline vec<T, 4> partial_load_lanes_x4(const T* ptr, vec<T, 4> src, size_t n) {
     case 2:
       lanes[1] = ptr[1];
       [[fallthrough]];
-    default:
+    case 1:
       lanes[0] = ptr[0];
+      break;
+    default:
+      break;
   }
   return load_aligned(lanes, vec<T, 4>{});
 }
@@ -300,8 +303,11 @@ inline void partial_store_x32x4(T* ptr, vec<T, 4> b, size_t n) {
     case 2:
       vst1_lane<1>(&ptr[1], vget_low(b.v));
       [[fallthrough]];
-    default:
+    case 1:
       vst1_lane<0>(&ptr[0], vget_low(b.v));
+      break;
+    default:
+      break;
   }
 }
 
