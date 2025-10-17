@@ -22,8 +22,6 @@
 #include "slinky/runtime/pipeline.h"
 #include "slinky/runtime/stmt.h"
 
-#define YNN_THREADPOOL_FLAG_USE_XLA_THREADPOOL (1 << 0)
-
 struct ynn_runtime_value : public ynn_value {
   explicit ynn_runtime_value(const ynn_value& value) : ynn_value(value) {}
   ynn_runtime_value() = default;

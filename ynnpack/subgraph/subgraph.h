@@ -24,8 +24,6 @@
 #include "slinky/runtime/evaluate.h"
 #include "slinky/runtime/expr.h"
 
-#define YNN_THREADPOOL_FLAG_USE_XLA_THREADPOOL (1 << 0)
-
 namespace ynn {
 
 using axes_set = std::bitset<YNN_MAX_TENSOR_RANK>;

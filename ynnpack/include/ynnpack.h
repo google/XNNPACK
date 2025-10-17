@@ -399,15 +399,13 @@ struct ynn_scheduler {
 
 typedef const struct ynn_scheduler* ynn_scheduler_t;
 
+// This type is an alias for `slinky::thread_pool`. A `slinky::thread_pool`
+// instance may be casted to `ynn_threadpool` and passed to YNNPACK APIs.
 typedef struct ynn_threadpool* ynn_threadpool_t;
-
-#define YNN_THREADPOOL_FLAG_USE_ABSL (1 << 0)
 
 // Create a threadpool that uses `scheduler` to start work on other threads.
 // `scheduler` is not copied, since it is stateless we expect it to be stored
 // globally.
-// If the `YNN_THREADPOOL_FLAG_USE_ABSL` flag is set, the thread pool will use
-// only ABSL synchronization primitives.
 enum ynn_status ynn_create_threadpool(ynn_scheduler_t scheduler,
                                       void* scheduler_context, uint32_t flags,
                                       ynn_threadpool_t* threadpool_out);

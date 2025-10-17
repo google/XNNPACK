@@ -12,8 +12,6 @@
 #include "ynnpack/include/ynnpack.h"
 #include "slinky/runtime/buffer.h"
 
-#define YNN_THREADPOOL_FLAG_USE_XLA_THREADPOOL (1 << 0)
-
 namespace ynn {
 
 // Storing sub-byte datatypes is tricky. To deal with it, we store all types in

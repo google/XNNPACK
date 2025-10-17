@@ -151,9 +151,6 @@ xnn_status xnn_create_threadpool_v2(xnn_scheduler_v2 scheduler,
                                     void* scheduler_context, uint32_t flags,
                                     xnn_threadpool_t* threadpool_out) {
   uint32_t ynn_flags = 0;
-  if (flags & XNN_FLAG_SLINKY_USE_XLA_THREAD_POOL) {
-    ynn_flags |= YNN_THREADPOOL_FLAG_USE_XLA_THREADPOOL;
-  }
 
   // This is a little bit confusing, there are two layers of schedulers here:
   // - The inner layer is a wrapper around the xnn_scheduler_v2 we got from the
