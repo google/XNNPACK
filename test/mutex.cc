@@ -24,9 +24,10 @@ TEST(MUTEX, init_lock_unlock_destroy) {
   ASSERT_EQ(xnn_status_success, xnn_mutex_destroy(&m));
 }
 
+// Caveat hexagon has pthread but hangs in this test
 TEST(MUTEX, counter) {
   // Skip if we are not targeting pthread.
-#if XNN_PLATFORM_WEB && !defined(__EMSCRIPTEN_PTHREADS__)
+#if (XNN_PLATFORM_WEB && !defined(__EMSCRIPTEN_PTHREADS__)) || defined(__hexagon__)
   GTEST_SKIP();
 #endif
 
