@@ -953,8 +953,7 @@ class Target:
             implied_features[feature], implied_features, all_features
         )
 
-  def legalize_type(self, ty, lanes):
-    ty = ty.with_lanes(lanes)
+  def legalize_type(self, ty):
     return self.types.get(ty, ty.to_c_decl(True))
 
   def vectorize(self, expr, lanes, cache):
@@ -1257,7 +1256,7 @@ class Target:
             {},
         )
         self.result += (
-            f"{self.indent()}{self.legalize_type(broadcast_op.ty, broadcast_op.ty.lanes)} {b.name}_broadcasted[{increment}];\n"
+            f"{self.indent()}{self.legalize_type(broadcast_op.ty)} {b.name}_broadcasted[{increment}];\n"
         )
 
         if b.broadcast_mode == BroadcastMode.LOCAL_VAR:
@@ -1311,7 +1310,7 @@ class Target:
   def emit_constants(self, constants):
     for k, v in constants.items():
       self.result += (
-          f"{self.indent()}const {self.legalize_type(v.ty, v.ty.lanes)} {k} ="
+          f"{self.indent()}const {self.legalize_type(v.ty)} {k} ="
           f" {v.name}({v.args[0]});\n"
       )
 
@@ -1331,7 +1330,7 @@ class Target:
     self.result += self.indent()
     if i[0] is not None:
       self.result += (
-          f"{self.legalize_type(op.ty, op_natural_vector_size)} {i[0]}_{j}_{k}"
+          f"{self.legalize_type(op.ty.with_lanes(op_natural_vector_size))} {i[0]}_{j}_{k}"
       )
 
     is_load = isinstance(op, Load)
