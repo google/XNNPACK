@@ -36,29 +36,45 @@ x = Var("x", Float(32))
 y = Var("y", Float(32))
 z = Var("z", Float(32))
 
-r = rewrite(f32_a + f32_b, Op(Float(32), "test_add", [f32_a, f32_b]), x + y)
-assert compare_ops(r, Op(Float(32), "test_add", [x, y]))
 
-r = rewrite(f32_a * f32_b + f32_c, multiply_add(f32_a, f32_b, f32_c), x * y + z)
-assert compare_ops(r, multiply_add(x, y, z))
+class RewriteTest(unittest.TestCase):
+  """Check that that rewrite produces expressions we're expecting."""
 
-r = rewrite(f32_a * f32_b - f32_c, multiply_sub(f32_a, f32_b, f32_c), x * y - z)
-assert compare_ops(r, multiply_sub(x, y, z))
+  def test_simple(self):
+    r = rewrite(f32_a + f32_b, Op(Float(32), "test_add", [f32_a, f32_b]), x + y)
+    self.assertTrue(compare_ops(r, Op(Float(32), "test_add", [x, y])))
 
-r = rewrite(f32_a * f32_b - f32_c, multiply_sub(f32_a, f32_b, f32_c), x * y + z)
-assert r is None
+    r = rewrite(
+        f32_a * f32_b + f32_c, multiply_add(f32_a, f32_b, f32_c), x * y + z
+    )
+    self.assertTrue(compare_ops(r, multiply_add(x, y, z)))
 
-r = find_intrinsics(f32_a * f32_b + f32_c)
-assert compare_ops(r, multiply_add(f32_a, f32_b, f32_c))
+    r = rewrite(
+        f32_a * f32_b - f32_c, multiply_sub(f32_a, f32_b, f32_c), x * y - z
+    )
+    self.assertTrue(compare_ops(r, multiply_sub(x, y, z)))
 
-r = find_intrinsics(i32_a * i32_b + i32_c)
-assert compare_ops(r, multiply_add(i32_a, i32_b, i32_c))
+    r = rewrite(
+        f32_a * f32_b - f32_c, multiply_sub(f32_a, f32_b, f32_c), x * y + z
+    )
+    self.assertIsNone(r)
 
-r = find_intrinsics((i32_a + i32_b) / i32(2))
-assert compare_ops(r, halving_add(i32_a, i32_b))
 
-r = find_intrinsics((i32_a + i32_b) / i32(3))
-assert r is None
+class FindIntrinsicsTest(unittest.TestCase):
+  """Check that that find_intrinsics produces expressions we're expecting."""
+
+  def test_simple(self):
+    r = find_intrinsics(f32_a * f32_b + f32_c)
+    self.assertTrue(compare_ops(r, multiply_add(f32_a, f32_b, f32_c)))
+
+    r = find_intrinsics(i32_a * i32_b + i32_c)
+    self.assertTrue(compare_ops(r, multiply_add(i32_a, i32_b, i32_c)))
+
+    r = find_intrinsics((i32_a + i32_b) / i32(2))
+    self.assertTrue(compare_ops(r, halving_add(i32_a, i32_b)))
+
+    r = find_intrinsics((i32_a + i32_b) / i32(3))
+    self.assertIsNone(r)
 
 
 class TestTarget(Target):
