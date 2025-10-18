@@ -39,10 +39,10 @@ YNN_ALWAYS_INLINE f32x4x2& operator+=(f32x4x2& a, f16x8 x) {
 using simd::f32x4x2;
 using simd::f16x8;
 
-void sum_fp16_fp32_4x8_neonfp16arith(size_t n, size_t k3, size_t k2, size_t k1,
-                                     size_t a_stride_n, size_t a_stride_k3,
-                                     size_t a_stride_k2, const void* a, size_t,
-                                     void* c) {
+void sum_fp16_fp32_neonfp16arith(size_t n, size_t k3, size_t k2, size_t k1,
+                                 size_t a_stride_n, size_t a_stride_k3,
+                                 size_t a_stride_k2, const void* a, size_t,
+                                 void* c) {
   if (k1 == 1 && a_stride_n == sizeof(half)) {
     tiled_reduce<sum_accumulator_k1_1<f16x8, f32x4x2>, half, float>(
         n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const half*>(a),

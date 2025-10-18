@@ -111,18 +111,15 @@ struct sum_accumulator_x32 {
 
 template <typename InVT, typename AccT>
 struct sum_accumulator_k1_1 {
-  static constexpr std::integral_constant<size_t, 4> K2 = {};
+  static constexpr std::integral_constant<size_t, 1> K2 = {};
   static constexpr std::integral_constant<size_t, AccT::N> N = {};
 
-  AccT acc[K2];
+  AccT acc;
 
   sum_accumulator_k1_1() = default;
 
   YNN_ALWAYS_INLINE explicit sum_accumulator_k1_1(size_t) {
-    AccT zero(0);
-    for (size_t i = 0; i < K2; ++i) {
-      acc[i] = zero;
-    }
+    acc = AccT(0);
   }
 
   template <typename NT, typename K2T>
@@ -132,16 +129,7 @@ struct sum_accumulator_k1_1 {
     assert(n <= N);
     assert(n > 0);
 
-    const InVT zero(0);
-    auto a_0 = load(offset_bytes(A, 0 * A_stride_k2), zero, n);
-    auto a_1 = 1 < k2 ? load(offset_bytes(A, 1 * A_stride_k2), zero, n) : zero;
-    auto a_2 = 2 < k2 ? load(offset_bytes(A, 2 * A_stride_k2), zero, n) : zero;
-    auto a_3 = 3 < k2 ? load(offset_bytes(A, 3 * A_stride_k2), zero, n) : zero;
-
-    acc[0] += a_0;
-    acc[1] += a_1;
-    acc[2] += a_2;
-    acc[3] += a_3;
+    acc += load(offset_bytes(A, 0 * A_stride_k2), InVT(0), n);
   }
 
   template <typename T, typename NT>
@@ -150,8 +138,7 @@ struct sum_accumulator_k1_1 {
     assert(n <= N);
     assert(n > 0);
 
-    acc[0] = (acc[0] + acc[1]) + (acc[2] + acc[3]);
-    store(C, load(C, AccT{}, n) + acc[0], n);
+    store(C, load(C, AccT{}, n) + acc, n);
   }
 };
 
