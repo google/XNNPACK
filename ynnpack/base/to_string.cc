@@ -75,8 +75,6 @@ const char* to_string(enum ynn_binary_operator op) {
       return "copysign";
     case ynn_binary_squared_difference:
       return "squared_difference";
-    case ynn_binary_prelu:
-      return "prelu";
     case ynn_binary_min:
       return "minimum";
     case ynn_binary_max:

@@ -215,12 +215,6 @@ struct SquaredDifferenceOp {
 };
 
 template <typename T>
-struct PReLUOp {
-  T operator()(T a, T b) const { return (a < 0) ? static_cast<T>(a * b) : a; }
-  using commutative = std::false_type;
-};
-
-template <typename T>
 struct PowOp {
   float operator()(float a, float b) const { return std::pow(a, b); }
   using commutative = std::false_type;
@@ -293,8 +287,6 @@ const binary_kernel* get_binary_reference_kernel(ynn_binary_operator op,
       DISPATCH_OPERATOR_FOR_TYPE(type, is_quantized, MinOp);
     case ynn_binary_copysign:
       DISPATCH_OPERATOR_FOR_TYPE(type, is_quantized, CopysignOp);
-    case ynn_binary_prelu:
-      DISPATCH_OPERATOR_FOR_TYPE(type, is_quantized, PReLUOp);
     case ynn_binary_squared_difference:
       DISPATCH_OPERATOR_FOR_TYPE(type, is_quantized, SquaredDifferenceOp);
     case ynn_binary_pow:
