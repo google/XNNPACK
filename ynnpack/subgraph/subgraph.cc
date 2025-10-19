@@ -200,8 +200,8 @@ uint32_t ynn_subgraph::get_static_value_id(ynn_type type, size_t rank,
                                            uint32_t zero_point_id,
                                            uint32_t scale_id,
                                            float* value_f32) {
-  const size_t size =
-      std::accumulate(dims, dims + rank, 1, std::multiplies<size_t>());
+  const size_t size = std::accumulate(dims, dims + rank, static_cast<size_t>(1),
+                                      std::multiplies<size_t>());
   assert(size > 0);
 
   float scale = 1.0f;

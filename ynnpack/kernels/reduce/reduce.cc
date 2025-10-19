@@ -98,7 +98,7 @@ struct accumulator {
       }
     }
     for (size_t i = 0; i < n; ++i) {
-      C[i] = static_cast<T>(op(static_cast<AccT>(C[i]), acc[i][0]));
+      C[i] = op(static_cast<AccT>(C[i]), acc[i][0]);
     }
   }
 };
@@ -131,7 +131,7 @@ struct accumulator_k1_1 {
                                     NT n) {
     ReduceOp op;
     for (size_t i = 0; i < n; ++i) {
-      C[i] = static_cast<T>(op(static_cast<AccT>(C[i]), acc[i]));
+      C[i] = op(static_cast<AccT>(C[i]), acc[i]);
     }
   }
 };
@@ -208,10 +208,8 @@ struct min_max_accumulator {
     T* __restrict C_min = offset_bytes(C, 0 * C_stride_m);
     T* __restrict C_max = offset_bytes(C, 1 * C_stride_m);
     for (size_t i = 0; i < n; ++i) {
-      C_min[i] =
-          static_cast<T>(min(static_cast<AccT>(C_min[i]), acc_min[i][0]));
-      C_max[i] =
-          static_cast<T>(max(static_cast<AccT>(C_max[i]), acc_max[i][0]));
+      C_min[i] = min(static_cast<AccT>(C_min[i]), acc_min[i][0]);
+      C_max[i] = max(static_cast<AccT>(C_max[i]), acc_max[i][0]);
     }
   }
 };
@@ -249,8 +247,8 @@ struct min_max_accumulator_k1_1 {
     T* __restrict C_min = offset_bytes(C, 0 * C_stride_m);
     T* __restrict C_max = offset_bytes(C, 1 * C_stride_m);
     for (size_t i = 0; i < n; ++i) {
-      C_min[i] = static_cast<T>(min(static_cast<AccT>(C_min[i]), acc_min[i]));
-      C_max[i] = static_cast<T>(max(static_cast<AccT>(C_max[i]), acc_max[i]));
+      C_min[i] = min(static_cast<AccT>(C_min[i]), acc_min[i]);
+      C_max[i] = max(static_cast<AccT>(C_max[i]), acc_max[i]);
     }
   }
 };
