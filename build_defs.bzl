@@ -234,7 +234,6 @@ def xnnpack_slinky_defines():
 
 def xnnpack_if_kleidiai_enabled(enabled = [], not_enabled = []):
     return select({
-        "//ynnpack/xnnpack:use_ynnpack": not_enabled,
         "//:kleidiai_enabled": enabled,
         "//conditions:default": not_enabled,
     })
