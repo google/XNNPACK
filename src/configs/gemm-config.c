@@ -317,8 +317,7 @@ static void init_f16_gemm_config(void) {
 
 static void init_pf16_gemm_config(void) {
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
-  const struct xnn_hardware_config* hardware_config =
-      xnn_init_hardware_config();
+  const struct xnn_hardware_config* hardware_config = XNN_INIT_hardware_config();
   assert(hardware_config != NULL);
   if (XNN_ENABLE_ARM_SME2 && (hardware_config->arch_flags & xnn_arch_arm_sme2)) {
     #if XNN_ENABLE_ARM_SME2
@@ -424,8 +423,7 @@ static void init_pqs8_qc8w_gemm_config(void) {
 
   // Arch-specific parameters.
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
-  const struct xnn_hardware_config* hardware_config =
-      xnn_init_hardware_config();
+  const struct xnn_hardware_config* hardware_config = XNN_INIT_hardware_config();
   assert(hardware_config != NULL);
   (void)hardware_config;  // May be unused.
   if (XNN_ENABLE_ARM_SME2 && (hardware_config->arch_flags & xnn_arch_arm_sme2)) {
@@ -2441,8 +2439,7 @@ static void init_qp8_f32_qc4w_gemm_config(void) {
 
   // Arch-specific parameters.
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
-  const struct xnn_hardware_config* hardware_config =
-      xnn_init_hardware_config();
+  const struct xnn_hardware_config* hardware_config = XNN_INIT_hardware_config();
   assert(hardware_config != NULL);
   if (XNN_ENABLE_ARM_SME2 && (hardware_config->arch_flags & xnn_arch_arm_sme2)) {
     #if XNN_ENABLE_ARM_SME2
@@ -2503,8 +2500,7 @@ static void init_qp8_f32_qc8w_gemm_config(void) {
 
   // Arch-specific parameters.
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
-  const struct xnn_hardware_config* hardware_config =
-      xnn_init_hardware_config();
+  const struct xnn_hardware_config* hardware_config = XNN_INIT_hardware_config();
   assert(hardware_config != NULL);
   if (XNN_ENABLE_ARM_SME2 && (hardware_config->arch_flags & xnn_arch_arm_sme2)) {
     #if XNN_ENABLE_ARM_SME2
@@ -5785,8 +5781,7 @@ const struct xnn_gemm_config* xnn_init_qp8_f32_qc8w_gemm_config() {
 }
 
 const struct xnn_gemm_config* xnn_init_qp8_f32_qb4w_gemm_config() {
-  const struct xnn_hardware_config* hardware_config =
-      xnn_init_hardware_config();
+  const struct xnn_hardware_config* hardware_config = XNN_INIT_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
