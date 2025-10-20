@@ -1103,7 +1103,7 @@ void GEMMBenchmark(benchmark::State& state,
       const uint32_t mb = min(mc - m, mr);
       gemm(mb, nc, kc * sizeof(xnn_float16),
             input_packed.data() +
-                xnn_x16_pack_lh_offset__neonsme2(m, kc, mr_packed, kr, sr),
+                xnn_x16_pack_lh_offset__neonsme(m, kc, mr_packed, kr, sr),
             w.data() + packed_w_size * buffer_index,
             &c[c_elements * buffer_index], nc * sizeof(xnn_float16),
             sizeof(xnn_float16), &minmax_params);

@@ -6,6 +6,7 @@ Auto-generated file. Do not edit!
 """
 
 PROD_NEONSME2_MICROKERNEL_SRCS = [
+    "src/pf16-f16-f16-igemm/pf16-f16-f16-igemm-32x32c2-minmax-neonsme2.c",
     "src/pf16-gemm/pf16-gemm-1x32c2-minmax-neonsme2.c",
     "src/pf16-gemm/pf16-gemm-32x32c2-minmax-neonsme2.c",
     "src/pf32-gemm/pf32-gemm-1x32-minmax-neonsme2.c",
@@ -19,7 +20,9 @@ PROD_NEONSME2_MICROKERNEL_SRCS = [
     "src/qp8-f32-qc8w-gemm/qp8-f32-qc8w-gemm-minmax-16x64c4-neonsme2.c",
     "src/x8-pack-lh/x8-packlh-igemm-neonsme2.c",
     "src/x8-pack-lh/x8-packlh-neonsme2.c",
+    "src/x16-pack-lh/x16-packlh-igemm-neonsme2.c",
     "src/x16-pack-lh/x16-packlh-neonsme2.c",
+    "src/x32-pack-lh/x32-packlh-neonsme2.c",
 ]
 
 NON_PROD_NEONSME2_MICROKERNEL_SRCS = [
