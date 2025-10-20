@@ -40,8 +40,7 @@ static void init_qp8_pack_lh_config(void) {
 }
 
 const struct xnn_pack_lh_config* xnn_init_qp8_pack_lh_config() {
-  const struct xnn_hardware_config* hardware_config =
-      xnn_init_hardware_config();
+  const struct xnn_hardware_config* hardware_config = XNN_INIT_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
@@ -144,8 +143,7 @@ static void init_x8_igemm_pack_lh_config(void) {
 }
 
 const struct xnn_pack_lh_config* xnn_init_x8_igemm_pack_lh_config() {
-  const struct xnn_hardware_config* hardware_config =
-      xnn_init_hardware_config();
+  const struct xnn_hardware_config* hardware_config = XNN_INIT_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
