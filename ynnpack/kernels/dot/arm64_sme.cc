@@ -17,6 +17,8 @@
 #include "ynnpack/kernels/dot/arm64_sme_internal.h"
 #include "ynnpack/kernels/dot/dot.h"
 
+#ifndef MEMORY_SANITIZER  // b/453644115
+
 namespace ynn {
 
 size_t sme_vl(float) {
@@ -271,3 +273,5 @@ void dot_int8_int8_int32_sme(size_t M, size_t N, size_t K3, size_t K2,
 }
 
 }  // namespace ynn
+
+#endif  // MEMORY_SANITIZER
