@@ -7,15 +7,17 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "ynnpack/base/simd/multi_vec.h"
 #include "ynnpack/base/simd/x86_sse.h"
 #include "ynnpack/kernels/reduce/generic.h"
 #include "ynnpack/kernels/reduce/min_max_accumulator.h"
 #include "ynnpack/kernels/reduce/sum_accumulator.h"
-#include "ynnpack/kernels/reduce/x86_sse.h"
 
 namespace ynn {
 
 namespace simd {
+
+using s32x4x4 = multi_vec<s32x4, 4>;
 
 s32x4x4& operator+=(s32x4x4& a, s8x16 b) {
   s32x4 b_0(_mm_cvtepi8_epi32(b.v));
@@ -23,10 +25,10 @@ s32x4x4& operator+=(s32x4x4& a, s8x16 b) {
   s32x4 b_2(_mm_cvtepi8_epi32(_mm_srli_si128(b.v, 8)));
   s32x4 b_3(_mm_cvtepi8_epi32(_mm_srli_si128(b.v, 12)));
 
-  a.v[0].v[0] += b_0;
-  a.v[0].v[1] += b_1;
-  a.v[1].v[0] += b_2;
-  a.v[1].v[1] += b_3;
+  a.v[0] += b_0;
+  a.v[1] += b_1;
+  a.v[2] += b_2;
+  a.v[3] += b_3;
   return a;
 }
 
@@ -36,10 +38,10 @@ s32x4x4& operator+=(s32x4x4& a, u8x16 b) {
   s32x4 b_2(_mm_cvtepu8_epi32(_mm_srli_si128(b.v, 8)));
   s32x4 b_3(_mm_cvtepu8_epi32(_mm_srli_si128(b.v, 12)));
 
-  a.v[0].v[0] += b_0;
-  a.v[0].v[1] += b_1;
-  a.v[1].v[0] += b_2;
-  a.v[1].v[1] += b_3;
+  a.v[0] += b_0;
+  a.v[1] += b_1;
+  a.v[2] += b_2;
+  a.v[3] += b_3;
   return a;
 }
 

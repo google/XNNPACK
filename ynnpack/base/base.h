@@ -72,4 +72,12 @@
 
 #define YNN_ALLOCA(T, N) reinterpret_cast<T*>(__builtin_alloca((N) * sizeof(T)))
 
+#if defined(__clang__)
+#define YNN_UNROLL _Pragma("clang loop unroll(full)")
+#elif defined(__GNUC__)
+#define YNN_UNROLL _Pragma("GCC unroll 999")
+#else
+#define YNN_UNROLL
+#endif
+
 #endif  // XNNPACK_YNNPACK_BASE_BASE_H_
