@@ -11,15 +11,17 @@
 #include <type_traits>
 
 #include "ynnpack/base/bfloat16.h"
+#include "ynnpack/base/simd/multi_vec.h"
 #include "ynnpack/base/simd/x86_avx.h"
 #include "ynnpack/base/simd/x86_avx512.h"
 #include "ynnpack/kernels/reduce/generic.h"
 #include "ynnpack/kernels/reduce/sum_accumulator.h"
-#include "ynnpack/kernels/reduce/x86_avx512_xf16.h"
 
 namespace ynn {
 
 namespace simd {
+
+using f32x16x2 = multi_vec<f32x16, 2>;
 
 static f32x16& operator+=(f32x16& a, bf16x16 b) {
   a.v = _mm512_add_ps(a.v, _mm512_cvtpbh_ps(reinterpret_cast<__m256bh>(b.v)));

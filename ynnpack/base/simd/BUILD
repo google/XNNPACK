@@ -12,6 +12,7 @@ _COMPATIBLE_WITH = []
 cc_library(
     name = "simd",
     hdrs = [
+        "multi_vec.h",
         "vec.h",
     ] + select({
         "//ynnpack:x86": [

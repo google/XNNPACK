@@ -13,6 +13,7 @@
 
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
+#include "ynnpack/base/simd/multi_vec.h"
 #include "ynnpack/base/simd/x86_avx.h"
 #include "ynnpack/base/simd/x86_sse.h"
 #include "ynnpack/kernels/reduce/generic.h"
@@ -24,141 +25,35 @@ namespace ynn {
 
 namespace simd {
 
-struct s32x8x2 {
-  s32x8 v[2];
-
-  using value_type = int32_t;
-  static constexpr std::integral_constant<size_t, 16> N = {};
-
-  s32x8x2() = default;
-  explicit s32x8x2(int32_t x) : v{x, x} {};
-
-  s32x8x2 operator+(s32x8x2 a) const {
-    s32x8x2 res;
-    res.v[0] = this->v[0] + a.v[0];
-    res.v[1] = this->v[1] + a.v[1];
-    return res;
-  }
-};
-
-struct s32x8x4 {
-  s32x8x2 v[2];
-
-  using value_type = int32_t;
-  static constexpr std::integral_constant<size_t, 32> N = {};
-
-  s32x8x4() = default;
-  explicit s32x8x4(int32_t x) : v{s32x8x2(x), s32x8x2(x)} {};
-
-  s32x8x4 operator+(s32x8x4 a) const {
-    s32x8x4 res;
-    res.v[0] = this->v[0] + a.v[0];
-    res.v[1] = this->v[1] + a.v[1];
-    return res;
-  }
-};
-
-static s32x8x2 load(const int32_t* ptr, s32x8x2, decltype(s32x8x2::N)) {
-  s32x8x2 x;
-
-  x.v[0] = load(ptr, s32x8{}, s32x8::N);
-  x.v[1] = load(ptr + s32x8::N, s32x8{});
-
-  return x;
-}
-
-static s32x8x2 load(const int32_t* ptr, s32x8x2, size_t n) {
-  s32x8x2 x;
-
-  if (n < s32x8::N) {
-    x.v[0] = load(ptr, s32x8{}, n);
-    x.v[1] = 0;
-  } else {
-    x.v[0] = load(ptr, s32x8{}, s32x8::N);
-    x.v[1] = load(ptr + s32x8::N, s32x8{}, n - s32x8::N);
-  }
-
-  return x;
-}
-
-static s32x8x4 load(const int32_t* ptr, s32x8x4, decltype(s32x8x4::N)) {
-  s32x8x4 x;
-
-  x.v[0] = load(ptr, s32x8x2{}, s32x8x2::N);
-  x.v[1] = load(ptr + s32x8x2::N, s32x8x2{}, s32x8x2::N);
-
-  return x;
-}
-
-static s32x8x4 load(const int32_t* ptr, s32x8x4, size_t n) {
-  s32x8x4 x;
-
-  if (n <= s32x8x2::N) {
-    x.v[0] = load(ptr, s32x8x2{}, n);
-    x.v[1] = s32x8x2(0);
-  } else {
-    x.v[0] = load(ptr, s32x8x2{}, s32x8x2::N);
-    x.v[1] = load(ptr + s32x8x2::N, s32x8x2{}, n - s32x8x2::N);
-  }
-
-  return x;
-}
-
-static void store(int32_t* ptr, s32x8x2 b, decltype(s32x8x2::N)) {
-  store(ptr, b.v[0]);
-  store(ptr + s32x8::N, b.v[1]);
-}
-
-static void store(int32_t* ptr, s32x8x2 b, size_t n) {
-  if (n < s32x8::N) {
-    store(ptr, b.v[0], n);
-  } else {
-    store(ptr, b.v[0]);
-    store(ptr + s32x8::N, b.v[1], n - s32x8::N);
-  }
-}
-
-static void store(int32_t* ptr, s32x8x4 b, decltype(s32x8x4::N)) {
-  store(ptr, b.v[0], s32x8x2::N);
-  store(ptr + s32x8x2::N, b.v[1], s32x8x2::N);
-}
-
-static void store(int32_t* ptr, s32x8x4 b, size_t n) {
-  if (n <= s32x8x2::N) {
-    store(ptr, b.v[0], n);
-  } else {
-    store(ptr, b.v[0], s32x8x2::N);
-    store(ptr + s32x8x2::N, b.v[1], n - s32x8x2::N);
-  }
-}
-
-static s32x8x2& operator+=(s32x8x2& a, s8x16 b) {
-  s32x8 a_0(_mm256_cvtepi8_epi32(b.v));
-  s32x8 a_1(_mm256_cvtepi8_epi32(_mm_srli_si128(b.v, 8)));
-
-  a.v[0] += a_0;
-  a.v[1] += a_1;
-  return a;
-}
-
-static s32x8x2& operator+=(s32x8x2& a, u8x16 b) {
-  s32x8 a_0(_mm256_cvtepu8_epi32(b.v));
-  s32x8 a_1(_mm256_cvtepu8_epi32(_mm_srli_si128(b.v, 8)));
-
-  a.v[0] += a_0;
-  a.v[1] += a_1;
-  return a;
-}
+using s32x8x4 = multi_vec<s32x8, 4>;
 
 static s32x8x4& operator+=(s32x8x4& a, s8x32 b) {
-  a.v[0] += extract<0>(b, s8x16{});
-  a.v[1] += extract<1>(b, s8x16{});
+  s8x16 b_lo = extract<0>(b, s8x16{});
+  s8x16 b_hi = extract<1>(b, s8x16{});
+  s32x8 b_0(_mm256_cvtepi8_epi32(b_lo.v));
+  s32x8 b_1(_mm256_cvtepi8_epi32(_mm_srli_si128(b_lo.v, 8)));
+  s32x8 b_2(_mm256_cvtepi8_epi32(b_hi.v));
+  s32x8 b_3(_mm256_cvtepi8_epi32(_mm_srli_si128(b_hi.v, 8)));
+
+  a.v[0] += b_0;
+  a.v[1] += b_1;
+  a.v[2] += b_2;
+  a.v[3] += b_3;
   return a;
 }
 
 static s32x8x4& operator+=(s32x8x4& a, u8x32 b) {
-  a.v[0] += extract<0>(b, u8x16{});
-  a.v[1] += extract<1>(b, u8x16{});
+  u8x16 b_lo = extract<0>(b, u8x16{});
+  u8x16 b_hi = extract<1>(b, u8x16{});
+  s32x8 b_0(_mm256_cvtepu8_epi32(b_lo.v));
+  s32x8 b_1(_mm256_cvtepu8_epi32(_mm_srli_si128(b_lo.v, 8)));
+  s32x8 b_2(_mm256_cvtepu8_epi32(b_hi.v));
+  s32x8 b_3(_mm256_cvtepu8_epi32(_mm_srli_si128(b_hi.v, 8)));
+
+  a.v[0] += b_0;
+  a.v[1] += b_1;
+  a.v[2] += b_2;
+  a.v[3] += b_3;
   return a;
 }
 

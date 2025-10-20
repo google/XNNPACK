@@ -14,17 +14,19 @@
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
+#include "ynnpack/base/simd/multi_vec.h"
 #include "ynnpack/base/simd/x86_sse.h"
 #include "ynnpack/base/simd/vec.h"
 #include "ynnpack/kernels/reduce/generic.h"
 #include "ynnpack/kernels/reduce/min_max_accumulator.h"
 #include "ynnpack/kernels/reduce/reduce.h"
 #include "ynnpack/kernels/reduce/sum_accumulator.h"
-#include "ynnpack/kernels/reduce/x86_sse.h"
 
 namespace ynn {
 
 namespace simd {
+
+using s32x4x4 = multi_vec<s32x4, 4>;
 
 static s32x4x4& operator+=(s32x4x4& a, s8x16 b) {
   __m128i i8_lo = _mm_unpacklo_epi8(b.v, b.v);
@@ -35,10 +37,10 @@ static s32x4x4& operator+=(s32x4x4& a, s8x16 b) {
   s32x4 b_2(_mm_srai_epi32(_mm_unpacklo_epi16(i8_hi, i8_hi), 24));
   s32x4 b_3(_mm_srai_epi32(_mm_unpackhi_epi16(i8_hi, i8_hi), 24));
 
-  a.v[0].v[0] += b_0;
-  a.v[0].v[1] += b_1;
-  a.v[1].v[0] += b_2;
-  a.v[1].v[1] += b_3;
+  a.v[0] += b_0;
+  a.v[1] += b_1;
+  a.v[2] += b_2;
+  a.v[3] += b_3;
   return a;
 }
 
@@ -52,10 +54,10 @@ static s32x4x4& operator+=(s32x4x4& a, u8x16 b) {
   s32x4 b_2(_mm_unpacklo_epi16(i16_hi, zero));
   s32x4 b_3(_mm_unpackhi_epi16(i16_hi, zero));
 
-  a.v[0].v[0] += b_0;
-  a.v[0].v[1] += b_1;
-  a.v[1].v[0] += b_2;
-  a.v[1].v[1] += b_3;
+  a.v[0] += b_0;
+  a.v[1] += b_1;
+  a.v[2] += b_2;
+  a.v[3] += b_3;
   return a;
 }
 

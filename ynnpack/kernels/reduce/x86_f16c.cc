@@ -8,9 +8,9 @@
 #include <cassert>
 #include <cstddef>
 #include <cstring>
-#include <type_traits>
 
 #include "ynnpack/base/half.h"
+#include "ynnpack/base/simd/multi_vec.h"
 #include "ynnpack/base/simd/x86_avx.h"
 #include "ynnpack/base/simd/x86_sse.h"
 #include "ynnpack/kernels/reduce/generic.h"
@@ -20,59 +20,7 @@ namespace ynn {
 
 namespace simd {
 
-struct f32x8x2 {
-  f32x8 v[2];
-
-  using value_type = float;
-  static constexpr std::integral_constant<size_t, 16> N = {};  // NOLINT
-
-  f32x8x2() = default;
-  explicit f32x8x2(float x) : v{x, x} {}
-
-  f32x8x2 operator+(f32x8x2 a) const {
-    f32x8x2 res;
-    res.v[0] = this->v[0] + a.v[0];
-    res.v[1] = this->v[1] + a.v[1];
-    return res;
-  }
-};
-
-static f32x8x2 load(const float* ptr, f32x8x2, decltype(f32x8x2::N)) {
-  f32x8x2 x;
-
-  x.v[0] = load(ptr, f32x8{}, f32x8::N);
-  x.v[1] = load(ptr + f32x8::N, f32x8(0.0f), f32x8::N);
-
-  return x;
-}
-
-static f32x8x2 load(const float* ptr, f32x8x2, size_t n) {
-  f32x8x2 x;
-
-  if (n < f32x8::N) {
-    x.v[0] = load(ptr, f32x8{}, n);
-    x.v[1] = f32x8(0.0f);
-  } else {
-    x.v[0] = load(ptr, f32x8{}, f32x8::N);
-    x.v[1] = load(ptr + f32x8::N, f32x8(0.0f), n - f32x8::N);
-  }
-
-  return x;
-}
-
-static void store(float* ptr, f32x8x2 b, decltype(f32x8x2::N)) {
-  store(ptr, b.v[0]);
-  store(ptr + f32x8::N, b.v[1]);
-}
-
-static void store(float* ptr, f32x8x2 b, size_t n) {
-  if (n < f32x8::N) {
-    store(ptr, b.v[0], n);
-  } else {
-    store(ptr, b.v[0]);
-    store(ptr + f32x8::N, b.v[1], n - f32x8::N);
-  }
-}
+using f32x8x2 = multi_vec<f32x8, 2>;
 
 static f32x8& operator+=(f32x8& a, f16x8 b) {
   a.v = _mm256_add_ps(a.v, _mm256_cvtph_ps(b.v));
