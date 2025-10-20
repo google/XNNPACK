@@ -14,7 +14,7 @@
 #include "ynnpack/kernels/dot/arm64_sme_internal.h"
 #include "ynnpack/kernels/dot/dot.h"
 
-#ifndef MEMORY_SANITIZER  // b/453644115
+#ifndef YNN_DISABLE_SME  // b/453644115
 
 namespace ynn {
 

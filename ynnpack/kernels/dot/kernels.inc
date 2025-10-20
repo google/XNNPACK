@@ -48,7 +48,7 @@ YNN_DOT_KERNEL(arch_flag::amxint8, dot_uint8_int8_int32_16x64x64_16x16x4_amxint8
 #include "ynnpack/kernels/dot/x86_sse2_fp32.inc"
 #endif  // YNN_ARCH_X86_SSE2
 
-#ifndef MEMORY_SANITIZER  // b/453644115
+#ifndef YNN_DISABLE_SME
 #ifdef YNN_ARCH_ARM64_SME2
 YNN_DOT_KERNEL(arch_flag::sme2, dot_fp32_sme2, sme_vl(float{}),
                4 * sme_vl(float{}), 1, sme_vl(float{}), 1,
@@ -78,7 +78,7 @@ YNN_DOT_KERNEL(arch_flag::sme, dot_int8_int8_int32_sme, sme_vl(int32_t{}),
                4 * sme_vl(int32_t{}), 4, sme_vl(int32_t{}), 4,
                dot_flag::transpose_a, int8_t, int8_t, int32_t)
 #endif  // YNN_ARCH_ARM64_SME
-#endif  // !YNN_COMPILER_HAS_FEATURE(memory_sanitizer)
+#endif  // YNN_DISABLE_SME
 
 #ifdef YNN_ARCH_ARM64_NEONI8MM
 #include "ynnpack/kernels/dot/arm64_neoni8mm_int8_int8_int32.inc"
