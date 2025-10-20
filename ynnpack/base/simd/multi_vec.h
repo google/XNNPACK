@@ -37,6 +37,15 @@ struct multi_vec {
 
     return res;
   }
+
+  YNN_ALWAYS_INLINE multi_vec operator+=(multi_vec a) {
+    YNN_UNROLL
+    for (size_t i = 0; i < M; ++i) {
+      this->v[i] = this->v[i] + a.v[i];
+    }
+
+    return *this;
+  }
 };
 
 template <typename Vec, size_t M>

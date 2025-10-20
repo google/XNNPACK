@@ -20,31 +20,35 @@ namespace ynn {
 
 namespace simd {
 
-using f32x16x2 = multi_vec<f32x16, 2>;
+using f32x16x16 = multi_vec<f32x16, 16>;
+using f16x32x8 = multi_vec<f16x32, 8>;
 
 static f32x16& operator+=(f32x16& a, f16x16 b) {
   a.v = _mm512_add_ps(a.v, _mm512_cvtph_ps(b.v));
   return a;
 }
 
-static f32x16x2& operator+=(f32x16x2& a, f16x32 b) {
-  a.v[0] += extract<0>(b, f16x16{});
-  a.v[1] += extract<1>(b, f16x16{});
+static f32x16x16& operator+=(f32x16x16& a, f16x32x8 b) {
+  YNN_UNROLL
+  for (size_t i = 0; i < 8; ++i) {
+    a.v[2 * i] += extract<0>(b.v[i], f16x16{});
+    a.v[2 * i + 1] += extract<1>(b.v[i], f16x16{});
+  }
   return a;
 }
 
 }  // namespace simd
 
-using simd::f16x32;
 using simd::f32x16;
-using simd::f32x16x2;
+using simd::f32x16x16;
+using simd::f16x32x8;
 
-void sum_fp16_fp32_4x32_avx512fp16(size_t n, size_t k3, size_t k2, size_t k1,
-                                   size_t a_stride_n, size_t a_stride_k3,
-                                   size_t a_stride_k2, const void* a, size_t,
-                                   void* c) {
+void sum_fp16_fp32_avx512fp16(size_t n, size_t k3, size_t k2, size_t k1,
+                              size_t a_stride_n, size_t a_stride_k3,
+                              size_t a_stride_k2, const void* a, size_t,
+                              void* c) {
   if (k1 == 1 && a_stride_n == sizeof(half)) {
-    tiled_reduce<sum_accumulator_k1_1<f16x32, f32x16x2>, half, float>(
+    tiled_reduce<sum_accumulator_k1_1<f16x32x8, f32x16x16>, half, float>(
         n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const half*>(a),
         /*C_stride_m=*/0, reinterpret_cast<float*>(c));
   } else {

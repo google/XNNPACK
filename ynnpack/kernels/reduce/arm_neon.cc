@@ -49,9 +49,9 @@ MIN_MAX_KERNEL(max_fp16_4x8_neon, dummy_t, f16x8_rvar, half, 8);
 MIN_MAX_KERNEL(max_uint8_4x16_neon, dummy_t, u8x16, uint8_t, 16);
 MIN_MAX_KERNEL(max_int8_4x16_neon, dummy_t, s8x16, int8_t, 16);
 
-void sum_fp32_4x4_neon(size_t n, size_t k3, size_t k2, size_t k1,
-                       size_t a_stride_n, size_t a_stride_k3,
-                       size_t a_stride_k2, const void* a, size_t, void* c) {
+void sum_fp32_neon(size_t n, size_t k3, size_t k2, size_t k1,
+                   size_t a_stride_n, size_t a_stride_k3, size_t a_stride_k2,
+                   const void* a, size_t, void* c) {
   if (k1 == 1 && a_stride_n == sizeof(float)) {
     tiled_reduce<sum_accumulator_k1_1<f32x4, f32x4>, float, float>(
         n, k3, k2, a_stride_k3, a_stride_k2, reinterpret_cast<const float*>(a),
