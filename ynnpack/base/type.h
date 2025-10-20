@@ -39,7 +39,15 @@ size_t type_size_bytes(ynn_type t);
 // represented by a struct that contains multiple elements. `type_size_bytes`
 // returns the size in bytes of one instance of that struct, and this function
 // returns the number of elements stored in that struct.
-size_t type_element_count(ynn_type t);
+inline size_t type_element_count(ynn_type t) {
+  switch (t) {
+    case ynn_type_int4:
+    case ynn_type_uint4:
+      return 2;
+    default:
+      return 1;
+  }
+}
 
 const char* to_string(ynn_type type);
 

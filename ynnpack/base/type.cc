@@ -55,26 +55,6 @@ size_t type_size_bytes(ynn_type t) {
   return 0;
 }
 
-size_t type_element_count(ynn_type t) {
-  switch (t) {
-    case ynn_type_int4:
-    case ynn_type_uint4:
-      return 2;
-    case ynn_type_int8:
-    case ynn_type_uint8:
-    case ynn_type_int32:
-    case ynn_type_fp32:
-    case ynn_type_fp16:
-    case ynn_type_bf16:
-      return 1;
-    case ynn_type_opaque:
-    case ynn_type_invalid:
-      break;
-  }
-  YNN_UNREACHABLE;
-  return -1;
-}
-
 const char* to_string(ynn_type type) {
   switch (type) {
     case ynn_type_invalid:
