@@ -22,19 +22,6 @@ cc_library(
 )
 
 cc_library(
-    name = "threadpool",
-    srcs = ["threadpool.cc"],
-    compatible_with = _COMPATIBLE_WITH,
-    visibility = ["//ynnpack:__subpackages__"],
-    deps = [
-        ":slinky_thread_pool",
-        "//ynnpack:ynnpack_h",
-        "//ynnpack/base:log",
-        "@slinky//slinky/base:thread_pool",
-    ],
-)
-
-cc_library(
     name = "subgraph",
     srcs = [
         "broadcast.cc",
@@ -57,6 +44,7 @@ cc_library(
         "stencil_copy.cc",
         "subgraph.cc",
         "tensor.cc",
+        "threadpool.cc",
         "utils.cc",
         "utils.h",
     ],
@@ -69,7 +57,7 @@ cc_library(
     compatible_with = _COMPATIBLE_WITH,
     visibility = ["//ynnpack:__subpackages__"],
     deps = [
-        ":threadpool",
+        ":slinky_thread_pool",
         "//ynnpack:ynnpack_h",
         "//ynnpack/base",
         "//ynnpack/base:log",
