@@ -8,6 +8,7 @@
 #ifndef XNNPACK_SRC_XNNPACK_INTERNAL_H_
 #define XNNPACK_SRC_XNNPACK_INTERNAL_H_
 
+#include <pthreadpool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -15,7 +16,6 @@
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/subgraph.h"
-#include <pthreadpool.h>
 
 // Runtime values marked with this flag should be cleaned up (i.e. deallocated)
 // by the runtime.
@@ -560,6 +560,27 @@ enum xnn_status xnn_create_fully_connected_nc_qdu8_f32_qb4w_f16_scales(
     const xnn_float16* kernel_scale, const void* kernel, const float* bias,
     float output_min, float output_max, uint32_t flags,
     xnn_weights_cache_t weights_cache, xnn_operator_t* fully_connected_op_out);
+
+enum xnn_status xnn_create_convolution2d_nhwc_pf16(
+    uint32_t input_padding_top, uint32_t input_padding_right,
+    uint32_t input_padding_bottom, uint32_t input_padding_left,
+    uint32_t kernel_height, uint32_t kernel_width, uint32_t subsampling_height,
+    uint32_t subsampling_width, uint32_t dilation_height,
+    uint32_t dilation_width, uint32_t groups, size_t group_input_channels,
+    size_t group_output_channels, size_t input_channel_stride,
+    size_t output_channel_stride, const void* kernel, const void* bias,
+    float output_min, float output_max, uint32_t flags,
+    xnn_weights_cache_t weights_cache, xnn_operator_t* convolution_op_out);
+
+enum xnn_status xnn_reshape_convolution2d_nhwc_pf16(
+    xnn_operator_t convolution_op, size_t batch_size, size_t input_height,
+    size_t input_width, size_t* workspace_size, size_t* output_height_out,
+    size_t* output_width_out, pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_convolution2d_nhwc_pf16(xnn_operator_t convolution_op,
+                                                  void* workspace,
+                                                  const void* input,
+                                                  void* output);
 
 enum xnn_status xnn_create_convolution2d_nhwc_pqs8_qs8_qc8w(
     uint32_t input_padding_top, uint32_t input_padding_right,
