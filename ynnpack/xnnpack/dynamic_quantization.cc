@@ -64,8 +64,8 @@ bool should_use_uint8() {
 // This is a near-duplicate of that found in src/xnnpack/quantization.h
 template <typename T>
 std::pair<float, int32_t> compute_qd8_params(T min, T max) {
-  constexpr float qmin = std::numeric_limits<int8_t>::min();
-  constexpr float qmax = std::numeric_limits<int8_t>::max();
+  constexpr float qmin = std::numeric_limits<uint8_t>::min();
+  constexpr float qmax = std::numeric_limits<uint8_t>::max();
   const float rmin = std::min<float>(0.0f, min);
   const float rmax = std::max<float>(0.0f, max);
   const float scale = rmin == rmax ? 1.f : (qmax - qmin) / (rmax - rmin);
@@ -78,9 +78,12 @@ std::pair<float, int32_t> compute_qd8_params(T min, T max) {
                          : qmax - descaled_max;
   zero_point = std::max<float>(zero_point, qmin);
   zero_point = std::min<float>(zero_point, qmax);
-  assert(zero_point >= std::numeric_limits<int8_t>::min());
-  assert(zero_point <= std::numeric_limits<int8_t>::max());
-  const int32_t nudged_zero_point = std::lrintf(zero_point);
+  assert(zero_point >= std::numeric_limits<uint8_t>::min());
+  assert(zero_point <= std::numeric_limits<uint8_t>::max());
+  // We compute the zero point for uint8, but we want the result to be for int8.
+  // This means we can assume the (float) zero point is positive.
+  const int32_t nudged_zero_point =
+      static_cast<int32_t>(zero_point + 0.5f) - 128;
   return {1.0f / scale, nudged_zero_point};
 }
 
