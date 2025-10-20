@@ -89,7 +89,8 @@ void dot(benchmark::State& state, uint64_t arch_flags, dot_kernel_fn kernel,
   for (auto _ : state) {
     for (size_t i = 0; i < m; i += block_m) {
       size_t m_i = std::min(block_m, m - i);
-      kernel(m_i, n, 1, 1, k, a.stride(0) * sizeof(TA), 0, 0, &a(i, 0), 0, 0,
+      const void* a_i = transpose_a ? &a(0, i * tile_k) : &a(i, 0);
+      kernel(m_i, n, 1, 1, k, a.stride(0) * sizeof(TA), 0, 0, a_i, 0, 0,
              b.stride(0) * sizeof(TB), b.base(), /*init_c_stride_m=*/0, nullptr,
              c.stride(0) * sizeof(TC), &c(i, 0));
     }
