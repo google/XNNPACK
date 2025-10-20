@@ -2814,11 +2814,11 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_pf16(
   return reshape_convolution2d_nhwc(
       convolution_op, xnn_operator_type_convolution_nhwc_pf16, batch_size,
       input_height, input_width,
-      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_HALF,
-      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_HALF,
-      /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_HALF,
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
+      /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
+      /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
       /*extra_weights_elements_size=*/sizeof(uint16_t),
-      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
+      /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT16,
       /*dynamic_quantization=*/false, workspace_size, output_height_out,
       output_width_out, threadpool);
 }
@@ -3050,7 +3050,7 @@ enum xnn_status xnn_setup_convolution2d_nhwc_pf16(xnn_operator_t convolution_op,
   return setup_convolution2d_nhwc(
       convolution_op, xnn_operator_type_convolution_nhwc_pf16, workspace, input,
       output, /*quantization_params=*/NULL,
-      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_HALF);
+      /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT16);
 }
 
 enum xnn_status xnn_setup_convolution2d_nhwc_f16(xnn_operator_t convolution_op,
