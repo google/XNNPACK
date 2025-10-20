@@ -10,9 +10,15 @@ namespace ynn {
 namespace simd {
 
 using f32x4x2 = multi_vec<f32x4, 2>;
+using f32x4x16 = multi_vec<f32x4, 16>;
 
 template <int Index>
 YNN_ALWAYS_INLINE f32x4 extract(f32x4x2 x, f32x4) {
+  return f32x4{x.v[Index]};
+}
+
+template <int Index>
+YNN_ALWAYS_INLINE f32x4 extract(f32x4x16 x, f32x4) {
   return f32x4{x.v[Index]};
 }
 
