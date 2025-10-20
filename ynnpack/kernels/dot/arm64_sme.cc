@@ -77,10 +77,14 @@ __arm_new("za") __arm_locally_streaming void dot_impl(
       for (size_t m = 0; m < M; ++m) {
         svbool_t p = svpsel_lane_b32(n_mask, m_mask, m);
         const void* C_in_m = offset_bytes(C_in, m * C_in_stride_m);
-        svld1_hor_vnum_za32(/*tile=*/0, /*slice=*/m, p, C_in_m, 0);
-        svld1_hor_vnum_za32(/*tile=*/1, /*slice=*/m, p, C_in_m, 1);
-        svld1_hor_vnum_za32(/*tile=*/2, /*slice=*/m, p, C_in_m, 2);
-        svld1_hor_vnum_za32(/*tile=*/3, /*slice=*/m, p, C_in_m, 3);
+        svld1_hor_za32(/*tile=*/0, /*slice=*/m, p,
+                       offset_bytes(C_in_m, 0 * svl * sizeof(TC)));
+        svld1_hor_za32(/*tile=*/1, /*slice=*/m, p,
+                       offset_bytes(C_in_m, 1 * svl * sizeof(TC)));
+        svld1_hor_za32(/*tile=*/2, /*slice=*/m, p,
+                       offset_bytes(C_in_m, 2 * svl * sizeof(TC)));
+        svld1_hor_za32(/*tile=*/3, /*slice=*/m, p,
+                       offset_bytes(C_in_m, 3 * svl * sizeof(TC)));
       }
     } else {
       svzero_za();
@@ -128,10 +132,14 @@ __arm_new("za") __arm_locally_streaming void dot_impl(
     for (size_t m = 0; m < M; ++m) {
       svbool_t p = svpsel_lane_b32(n_mask, m_mask, m);
       void* C_out_m = offset_bytes(C_out, m * C_out_stride_m);
-      svst1_hor_vnum_za32(/*tile=*/0, /*slice=*/m, p, C_out_m, 0);
-      svst1_hor_vnum_za32(/*tile=*/1, /*slice=*/m, p, C_out_m, 1);
-      svst1_hor_vnum_za32(/*tile=*/2, /*slice=*/m, p, C_out_m, 2);
-      svst1_hor_vnum_za32(/*tile=*/3, /*slice=*/m, p, C_out_m, 3);
+      svst1_hor_za32(/*tile=*/0, /*slice=*/m, p,
+                     offset_bytes(C_out_m, 0 * svl * sizeof(TC)));
+      svst1_hor_za32(/*tile=*/1, /*slice=*/m, p,
+                     offset_bytes(C_out_m, 1 * svl * sizeof(TC)));
+      svst1_hor_za32(/*tile=*/2, /*slice=*/m, p,
+                     offset_bytes(C_out_m, 2 * svl * sizeof(TC)));
+      svst1_hor_za32(/*tile=*/3, /*slice=*/m, p,
+                     offset_bytes(C_out_m, 3 * svl * sizeof(TC)));
     }
     C_in = C_in ? offset_bytes(C_in, svl * sizeof(TC) * 4) : nullptr;
     C_out = offset_bytes(C_out, svl * sizeof(TC) * 4);
