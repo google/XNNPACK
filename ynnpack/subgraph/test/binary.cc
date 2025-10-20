@@ -181,7 +181,6 @@ const ynn_binary_operator all_real_ops[] = {
     ynn_binary_min,
     ynn_binary_multiply,
     ynn_binary_pow,
-    ynn_binary_prelu,
     ynn_binary_squared_difference,
     ynn_binary_subtract,
     ynn_binary_leaky_relu,

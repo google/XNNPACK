@@ -153,7 +153,6 @@ enum ynn_binary_operator {
   ynn_binary_min,
   ynn_binary_multiply,
   ynn_binary_pow,
-  ynn_binary_prelu,  // TODO: It's the same as leaky relu? (when not training)
   ynn_binary_squared_difference,
   ynn_binary_subtract,
 };

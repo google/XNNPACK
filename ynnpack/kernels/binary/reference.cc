@@ -17,7 +17,6 @@ const binary_op_info* get_binary_op_info(ynn_binary_operator op) {
   static min min;
   static multiply mul;
   static pow pow;
-  static prelu prelu;
   static squared_difference squared_difference;
   static subtract sub;
   static leaky_relu leaky_relu;
@@ -37,8 +36,6 @@ const binary_op_info* get_binary_op_info(ynn_binary_operator op) {
       return &mul;
     case ynn_binary_pow:
       return &pow;
-    case ynn_binary_prelu:
-      return &prelu;
     case ynn_binary_squared_difference:
       return &squared_difference;
     case ynn_binary_subtract:

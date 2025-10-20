@@ -1000,7 +1000,7 @@ ynn_binary_operator binary_operator_from_xnn(xnn_binary_operator op) {
     case xnn_binary_squared_difference:
       return ynn_binary_squared_difference;
     case xnn_binary_prelu:
-      return ynn_binary_prelu;
+      return ynn_binary_leaky_relu;
     case xnn_binary_pow:
       return ynn_binary_pow;
     case xnn_binary_invalid:

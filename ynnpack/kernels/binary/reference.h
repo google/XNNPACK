@@ -103,12 +103,6 @@ struct squared_difference : public binary_op_info {
   }
 };
 
-struct prelu : public binary_op_info {
-  float operator()(float a, float b) const override {
-    return a < 0 ? a * b : a;
-  }
-};
-
 struct leaky_relu : public binary_op_info {
   float operator()(float a, float b) const override {
     return a < 0 ? a * b : a;
