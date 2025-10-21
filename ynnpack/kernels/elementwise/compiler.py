@@ -1083,7 +1083,8 @@ class Target:
     else:
       return expr
 
-  def pattern_match(self, expr, natural_lanes, cache):
+  def pattern_match(self, expr, cache):
+    """Recursively iterate over the expression and try to find patterns to replace."""
     if expr in cache:
       return cache[expr]
 
@@ -1091,19 +1092,19 @@ class Target:
       for rule in self.patterns:
         replacement = rewrite(rule.pattern, rule.result, expr)
         if replacement is not None:
-          mutated_expr = self.pattern_match(replacement, natural_lanes, cache)
+          mutated_expr = self.pattern_match(replacement, cache)
           cache[expr] = mutated_expr
           return mutated_expr
 
       if expr.name in lowering_funcs:
         lowered = lowering_funcs[expr.name](*expr.args)
-        mutated = self.pattern_match(lowered, natural_lanes, cache)
+        mutated = self.pattern_match(lowered, cache)
         cache[expr] = mutated
         return mutated
 
       args = []
       for arg in expr.args:
-        args.append(self.pattern_match(arg, natural_lanes, cache))
+        args.append(self.pattern_match(arg, cache))
 
       mutated_expr = Op(expr.ty, expr.name, args)
       cache[expr] = mutated_expr
@@ -1261,7 +1262,6 @@ class Target:
         broadcast_lanes = self.vector_bits // b.ty.size
         broadcast_op = self.pattern_match(
             broadcast(Var(b.name, b.ty.with_lanes(1)), broadcast_lanes),
-            broadcast_lanes,
             {},
         )
         self.result += (
@@ -1644,7 +1644,7 @@ class Target:
     ast = self.vectorize(ast, natural_lanes, {})
     ast = self.slice_wide_types(ast, {})
     ast = self.optimize_slices(ast, {})
-    ast = self.pattern_match(ast, natural_lanes, {})
+    ast = self.pattern_match(ast, {})
 
     constants = {}
     ast = self.lift_constants(ast, constants)

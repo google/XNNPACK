@@ -175,12 +175,10 @@ class ExpressionCachingTest(unittest.TestCase):
     self.assertEqual(mc_object_count, c_object_count)
 
   def test_pattern_match(self):
-    natural_lanes = 16
-
     c = sample_func()
     c_object_count = self.count_objects(c)
 
-    mc = self.target.pattern_match(c, natural_lanes, {})
+    mc = self.target.pattern_match(c, {})
     mc_object_count = self.count_objects(mc)
 
     # There are no patterns defined in the test target, so we should get the
