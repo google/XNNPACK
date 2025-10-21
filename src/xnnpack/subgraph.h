@@ -44,12 +44,17 @@
 #define XNN_VALUE_FLAG_FP16_COMPATIBLE 0x00000400
 #define XNN_VALUE_FLAG_LAYOUT_NCHW 0x00000800
 #define XNN_VALUE_FLAG_SHAPE_IS_STATIC 0x00001000
+#define XNN_VALUE_FLAG_IS_ZERO 0x00002000
+#define XNN_VALUE_FLAG_IS_ONE 0x00004000
 
 /// Create explicit `pack-lh` nodes, instead of pack the data on the fly
 /// in a temporary buffer in the consuming op. Inline packing reduces memory
 /// consumption and improves memory locality but may lead to slower GEMMs
 /// because of tiling.
 #define XNN_FLAG_NO_INLINED_LHS_PACKING 0x00004000
+
+/// Do not attempt to elide subgraph nodes with this flag set.
+#define XNN_NODE_FLAG_DONT_ELIDE 0x00800000
 
 #ifdef __cplusplus
 extern "C" {
@@ -259,6 +264,10 @@ XNN_INLINE static bool xnn_value_is_valid(enum xnn_value_type value_type) {
 XNN_INLINE static bool xnn_value_is_static(
     enum xnn_allocation_type allocation_type) {
   return allocation_type == xnn_allocation_type_static;
+}
+
+XNN_INLINE static bool xnn_value_is_const(uint32_t flags) {
+  return (flags & (XNN_VALUE_FLAG_IS_ZERO | XNN_VALUE_FLAG_IS_ONE)) != 0;
 }
 
 struct xnn_node;
@@ -585,6 +594,20 @@ size_t xnn_shape_multiply_trailing_dims(const struct xnn_shape* shape,
 
 // The size of the given dimension, which can also be a negative index.
 size_t xnn_shape_get_dim(const struct xnn_shape* shape, int64_t dim);
+
+// Returns `true` if the two shapes match.
+bool xnn_shape_match(const struct xnn_shape* shape_a,
+                     const struct xnn_shape* shape_b);
+
+// Computes the broadcasted shape of a binary operation.
+enum xnn_status xnn_shape_binary_broadcast(const struct xnn_shape* shape_a,
+                                           const struct xnn_shape* shape_b,
+                                           struct xnn_shape* shape_out);
+
+// Fills any zeros in the dimensions of `shape_b` using the known number of
+// elements in `shape_a`.
+enum xnn_status xnn_shape_fill_gaps(const struct xnn_shape* shape_a,
+                                    struct xnn_shape* shape_b);
 
 // Get the size in bytes to hold dynamic quant params
 size_t xnn_tensor_get_dynamic_quant_param_size(enum xnn_datatype datatype,
