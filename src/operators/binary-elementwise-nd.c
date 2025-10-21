@@ -16,7 +16,6 @@
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
 #include "src/xnnpack/datatype.h"
-#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microparams.h"
@@ -265,6 +264,15 @@ enum xnn_status xnn_create_binary_elementwise_nd(
   return xnn_status_success;
 }
 
+static size_t get_tile_size(xnn_operator_t op) {
+  // Assume a default width (unrolling factor) of 32.
+  const size_t element_tile = op->binary_elementwise_config->element_tile
+                                  ? op->binary_elementwise_config->element_tile
+                                  : 32;
+  return round_up(16 * 1024,
+                  element_tile << op->binary_elementwise.log2_element_size);
+}
+
 enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
                                                   size_t num_input1_dims,
                                                   const size_t* input1_shape,
@@ -415,7 +423,6 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
     y_stride *= compressed_output_shape[i];
   }
 
-  const size_t element_tile = op->binary_elementwise_config->element_tile;
   if (compressed_output_shape[5] == 1) {
     if (compressed_output_shape[4] == 1) {
       if (compressed_output_shape[3] == 1) {
@@ -434,25 +441,15 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
                     xnn_compute_elementwise_binary_1d_tile;
             op->compute[0].range[0] = compressed_output_shape[0]
                                       << log2_element_size;
-            size_t bytes_per_tile =
-                xnn_init_hardware_config()->l1_data_cache_bytes;
-            if (!bytes_per_tile) {
-              bytes_per_tile = 1 << 15;  // Default to 32k if cachesize unknown.
-            }
-            const size_t num_tiles =
-                divide_round_up(compressed_output_shape[0] << log2_element_size,
-                                bytes_per_tile);
-            const size_t tile_size = round_up(
-                (compressed_output_shape[0] << log2_element_size) / num_tiles,
-                element_tile << log2_element_size);
-            op->compute[0].tile[0] = tile_size;
+            op->compute[0].tile[0] = get_tile_size(op);
           } else {
             op->compute[0].type = xnn_parallelization_type_1d_tile_1d_dynamic;
             op->compute[0].task_1d_tile_1d_dynamic =
                 (pthreadpool_task_1d_tile_1d_dynamic_t)
                     xnn_compute_elementwise_binary_1d;
             op->compute[0].range[0] = compressed_output_shape[1];
-            op->compute[0].tile[0] = 1;
+            op->compute[0].tile[0] = divide_round_up(
+                get_tile_size(op), op->context.elementwise_binary.elements);
           }
         } else {
           op->compute[0].type = xnn_parallelization_type_2d_tile_1d_dynamic;
@@ -461,7 +458,8 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
                   xnn_compute_elementwise_binary_2d;
           op->compute[0].range[0] = compressed_output_shape[2];
           op->compute[0].range[1] = compressed_output_shape[1];
-          op->compute[0].tile[0] = 1;
+          op->compute[0].tile[0] = divide_round_up(
+              get_tile_size(op), op->context.elementwise_binary.elements);
         }
       } else {
         op->compute[0].type = xnn_parallelization_type_3d_tile_2d_dynamic;

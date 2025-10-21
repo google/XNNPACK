@@ -61,6 +61,7 @@ struct xnn_binary_elementwise_config {
 struct xnn_unary_elementwise_config {
   xnn_vunary_ukernel_fn ukernel;
   xnn_init_unary_uparams_fn init;
+  uint32_t element_tile;
 };
 
 struct xnn_reduce_config {
