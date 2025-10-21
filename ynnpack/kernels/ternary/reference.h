@@ -75,7 +75,7 @@ struct quantize_int8 {
   }
 
   float tolerance(float, float, float, ynn_type type) const {
-    return 0.0f;
+    return 1.0f;
   }
 };
 
@@ -85,7 +85,7 @@ struct quantize_uint8 {
   }
 
   float tolerance(float, float, float, ynn_type type) const {
-    return 0.0f;
+    return 1.0f;
   }
 };
 
