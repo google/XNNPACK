@@ -15,6 +15,7 @@
 #include "src/xnnpack/igemm.h"
 #include "src/xnnpack/init-once.h"
 #include "src/xnnpack/log.h"
+#include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
 #include "src/xnnpack/pack.h"
@@ -141,7 +142,7 @@ static void init_f16_gemm_config(void) {
   f16_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_FLOAT16;
   f16_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_FLOAT16;
   f16_gemm_config.log2_filter_element_bit_size = XNN_LOG2_SIZEOF_FLOAT16 + 3;
-  f16_gemm_config.bias_element_size = sizeof(uint16_t);
+  f16_gemm_config.bias_element_size = sizeof(xnn_float16);
 
   // Arch-specific parameters.
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
@@ -316,6 +317,11 @@ static void init_f16_gemm_config(void) {
 #endif
 
 static void init_pf16_gemm_config(void) {
+  // Common parameters.
+  pf16_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_FLOAT16;
+  pf16_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_FLOAT16;
+  pf16_gemm_config.log2_filter_element_bit_size = XNN_LOG2_SIZEOF_FLOAT16 + 3;
+  pf16_gemm_config.bias_element_size = sizeof(xnn_float16);
 #if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
   const struct xnn_hardware_config* hardware_config =
       xnn_init_hardware_config();
@@ -3133,6 +3139,11 @@ static void init_qdu8_f16_qc8w_gemm_config(void) {
 }
 
 static void init_qd8_f16_qc8w_igemm_config(void) {
+  // Common parameters.
+  qd8_f16_qc8w_igemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  qd8_f16_qc8w_igemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  qd8_f16_qc8w_igemm_config.log2_filter_element_bit_size = XNN_LOG2_SIZEOF_INT8_T + 3;
+  qd8_f16_qc8w_igemm_config.bias_element_size = sizeof(float);
   // Use the same packing function throughout.
   qd8_f16_qc8w_igemm_config.pack_weights_and_biases = (xnn_pack_weights_and_biases_fn)xnn_pack_qs8_weights_and_biases;
   qd8_f16_qc8w_igemm_config.packed_stride_weights_and_biases = (xnn_packed_stride_weights_and_biases_fn) xnn_packed_stride_qs8_weights_and_biases;
@@ -3486,6 +3497,11 @@ static void init_qdu8_f32_qc8w_gemm_config(void) {
 }
 
 static void init_qdu8_f32_qc8w_igemm_config(void) {
+  // Common parameters.
+  qdu8_f32_qc8w_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  qdu8_f32_qc8w_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_UINT8_T;
+  qdu8_f32_qc8w_gemm_config.log2_filter_element_bit_size = XNN_LOG2_SIZEOF_UINT8_T + 3;
+  qdu8_f32_qc8w_gemm_config.bias_element_size = sizeof(float);
   // Use the same packing function throughout.
   qdu8_f32_qc8w_igemm_config.pack_weights_and_biases =
       (xnn_pack_weights_and_biases_fn)xnn_pack_qs8_weights_and_biases;
