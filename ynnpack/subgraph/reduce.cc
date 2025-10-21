@@ -391,7 +391,7 @@ ynn_status ynn_define_reduce(ynn_subgraph_t subgraph,
       }
       reduction_cost =
           slinky::ceil_div(reduction_cost, slinky::expr(cost_scaling_factor));
-      sched = runtime.make_schedule(dims, output.buffer, output.extents, {},
+      sched = runtime.make_schedule(dims, output.buffer, node.outputs[0], {},
                                     reduction_cost);
     } else {
       // This is a total reduction, so can't have any loops and we don't want

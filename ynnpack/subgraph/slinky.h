@@ -83,8 +83,9 @@ slinky::box_expr make_broadcast_bounds(
 struct scheduling_split {
   slinky::var var;
   slinky::expr step;
-  slinky::expr extent;
   slinky::expr workers = slinky::loop::parallel;
+  // The axis of the extent which was used to compute this split.
+  slinky::index_t axis;
   // If this is true the corresponding loop is required to have this specific
   // step, i.e. it can not get scheduled in the loop of the other function
   // unless the step matches or the other loop doesn't have required step yet.
@@ -115,6 +116,10 @@ struct scheduling_info {
   // A set of loop splits for a given function.
   std::vector<scheduling_split> loop_splits;
   std::vector<scheduled_buffer> scheduled_buffers;
+
+  // This is an ID of the buffer whose extents were used to compute this
+  // scheduling info.
+  uint32_t base_buffer_id = 0;
 
   bool force_root = false;
 };

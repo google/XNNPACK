@@ -70,13 +70,12 @@ slinky::var ynn_runtime::make_global_variable(slinky::expr value,
 
 std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
     const std::vector<slinky::var>& dims, const slinky::buffer_expr_ptr output,
-    const std::vector<slinky::expr>& output_extents,
-    slinky::span<const slinky::expr> given_splits,
+    uint32_t output_value, slinky::span<const slinky::expr> given_splits,
     const slinky::expr& element_cost) {
   auto sched = std::make_unique<ynn::scheduling_info>();
 
   int max_threads = threadpool() ? threadpool()->thread_count() : 1;
-
+  const std::vector<slinky::expr>& output_extents = value(output_value).extents;
   // Enough tasks to have good load balancing.
   slinky::index_t target_task_count = max_threads > 1 ? max_threads * 2 : 1;
 
@@ -135,10 +134,11 @@ std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
 
   for (int d = 0; d < rank; ++d) {
     if (output_extents[d].defined() && splits[d].defined()) {
-      sched->loop_splits.push_back(
-          {dims[d], splits[d], output_extents[d], workers[d]});
+      sched->loop_splits.push_back({dims[d], splits[d], workers[d], d});
     }
   }
+
+  sched->base_buffer_id = output_value;
 
   // Schedule the output buffer to be stored at the same level as it's
   // computed at.
@@ -278,8 +278,10 @@ void ynn_runtime::schedule() {
       const std::vector<ynn::scheduling_split>& loop_splits =
           sched->loop_splits;
 
+      const ynn_runtime_value& v = value(sched->base_buffer_id);
+      assert(v.is_valid());
+      const std::vector<slinky::expr> extents = v.extents;
       int splits_match;
-
       for (compute_at = 0, splits_match = 0;
            compute_at < sched_data.loop_nest.size() &&
            splits_match < loop_splits.size();
@@ -294,7 +296,8 @@ void ynn_runtime::schedule() {
                         global_loop_nest[loop_nest_id].step)) {
           break;
         }
-        if (!prove_true(loop_splits[splits_match].extent == loop_extent)) {
+        if (!prove_true(extents[loop_splits[splits_match].axis] ==
+                        loop_extent)) {
         } else {
           // We can overwrite the current loop step if it's not required, but
           // this one is.
@@ -334,11 +337,14 @@ void ynn_runtime::schedule() {
     if (sched && !sched->loop_splits.empty() &&
         prove_true(sched_data.match_volume == 1)) {
       // Update the global loop nest by adding loops of this function.
+      const ynn_runtime_value& v = value(sched->base_buffer_id);
+      assert(v.is_valid());
+      const std::vector<slinky::expr> extents = v.extents;
       int splits_match = sched_data.splits_match;
       for (int j = splits_match; j < sched->loop_splits.size(); j++) {
         const ynn::scheduling_split& dim = sched->loop_splits[j];
         global_loop_nest.push_back(
-            {{&f, dim.var}, dim.extent, dim.step, dim.step_is_required});
+            {{&f, dim.var}, extents[dim.axis], dim.step, dim.step_is_required});
         sched_data.loop_nest.push_back(global_loop_nest.size() - 1);
       }
     }
