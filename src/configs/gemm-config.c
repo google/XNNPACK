@@ -392,12 +392,16 @@ static void init_pf32_gemm_config(void) {
       pf32_gemm_config.arch = xnn_arch_arm_sme2;
       pf32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_pf32_gemm_minmax_ukernel_1x32__neonsme2);
       pf32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(mr)] =XNN_INIT_HMP_GEMM_UKERNEL(xnn_pf32_gemm_minmax_ukernel_32x32__neonsme2);
+      pf32_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(mr)] = xnn_init_hmp_packed_igemm_ukernel( (xnn_packed_lhs_igemm_ukernel_fn)xnn_pf32_igemm_minmax_ukernel_32x32__neonsme);
       pf32_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
       pf32_gemm_config.pack_weights_and_biases = xnn_pack_kai_f32_weights_and_biases;
       pf32_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_kai_f32_weights_and_biases;
+      pf32_gemm_config.pack_igemm_goki = (xnn_pack_conv_goki_w_fn) xnn_pack_kai_pf32_conv_goki_w_sme;
+      pf32_gemm_config.pack_igemm_kgo = (xnn_pack_conv_kgo_w_fn) xnn_pack_f32_conv_kgo_w;
       pf32_gemm_config.mr = mr;
       pf32_gemm_config.mr_packed = mr;
       pf32_gemm_config.nr = nr;
+      pf32_gemm_config.log2_kr = 0;
     #endif  // XNN_ENABLE_ARM_SME2
   } else if (XNN_ENABLE_ARM_SME &&
              (hardware_config->arch_flags & xnn_arch_arm_sme)) {
@@ -406,13 +410,17 @@ static void init_pf32_gemm_config(void) {
     const size_t nr = xnn_pf32_gemm_minmax_ukernel_32x32__neonsme_get_nr();
     pf32_gemm_config.arch = xnn_arch_arm_sme;
     pf32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_pf32_gemm_minmax_ukernel_1x32__neonsme);
-    pf32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(mr)] =XNN_INIT_HMP_GEMM_UKERNEL(xnn_pf32_gemm_minmax_ukernel_32x32__neonsme);
+    pf32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(mr)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_pf32_gemm_minmax_ukernel_32x32__neonsme);
+    pf32_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(mr)] = xnn_init_hmp_packed_igemm_ukernel( (xnn_packed_lhs_igemm_ukernel_fn)xnn_pf32_igemm_minmax_ukernel_32x32__neonsme);
     pf32_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     pf32_gemm_config.pack_weights_and_biases = xnn_pack_kai_f32_weights_and_biases;
     pf32_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_kai_f32_weights_and_biases;
+    pf32_gemm_config.pack_igemm_goki = (xnn_pack_conv_goki_w_fn) xnn_pack_kai_pf32_conv_goki_w_sme;
+    pf32_gemm_config.pack_igemm_kgo = (xnn_pack_conv_kgo_w_fn) xnn_pack_f32_conv_kgo_w;
     pf32_gemm_config.mr = mr;
     pf32_gemm_config.mr_packed = mr;
     pf32_gemm_config.nr = nr;
+    pf32_gemm_config.log2_kr = 0;
 #endif  // XNN_ENABLE_ARM_SME
   } else {
     /* No Action */
