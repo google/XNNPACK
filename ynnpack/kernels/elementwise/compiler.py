@@ -29,6 +29,15 @@ class Type:
         other.lanes,
     )
 
+  def is_int(self):
+    return self.type_class == "int"
+
+  def is_uint(self):
+    return self.type_class == "uint"
+
+  def is_float(self):
+    return self.type_class == "float"
+
   def __str__(self):
     return f"{self.type_class}{self.size}x{self.lanes}_t"
 
@@ -42,7 +51,7 @@ class Type:
     return Type(self.type_class, self.size // 2, self.lanes)
 
   def signed_widen(self):
-    type_class = "int" if self.type_class == "uint" else self.type_class
+    type_class = "int" if self.is_uint() else self.type_class
     return Type(type_class, self.size * 2, self.lanes)
 
   def with_lanes(self, lanes):
@@ -56,7 +65,7 @@ class Type:
     if const:
       result += "const "
     if self.size == 0:
-      result += "ssize_t" if self.type_class == "int" else "size_t"
+      result += "ssize_t" if self.is_int() else "size_t"
     else:
       result += self.type_class + str(self.size)
       if self.lanes > 1:
@@ -68,21 +77,21 @@ class Type:
     return result
 
   def min(self):
-    if self.type_class == "int":
+    if self.is_int():
       return -(2 ** (self.size - 1))
-    elif self.type_class == "uint":
+    elif self.is_uint():
       return 0
-    elif self.type_class == "float":
+    elif self.is_float():
       return -float("inf")
     else:
       assert False
 
   def max(self):
-    if self.type_class == "int":
+    if self.is_int():
       return 2 ** (self.size - 1) - 1
-    elif self.type_class == "uint":
+    elif self.is_uint():
       return 2**self.size - 1
-    elif self.type_class == "float":
+    elif self.is_float():
       return float("inf")
     else:
       assert False
@@ -134,7 +143,7 @@ def promote_types(a, b):
     else:
       assert False
 
-  if a.ty.type_class == "float" or b.ty.type_class == "float":
+  if a.ty.is_float() or b.ty.is_float():
     max_size = builtins.max(a.ty.size, b.ty.size)
     max_lanes = builtins.max(a.ty.lanes, b.ty.lanes)
 
@@ -387,7 +396,7 @@ def abs(value):
 
 
 def lower_abs(x):
-  assert x.ty.type_class == "float"
+  assert x.ty.is_float()
   return x & reinterpret_cast(Float(32), i32(0x7FFFFFFF))
 
 
