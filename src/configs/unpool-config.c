@@ -36,13 +36,22 @@ static void init_x32_unpool_config(void) {
   #elif XNN_ARCH_ARM64
     x32_unpool_config.unpool = XNN_INIT_UNPOOL_UKERNEL(xnn_x32_unpool_ukernel__neon);
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    x32_unpool_config.unpool = XNN_INIT_UNPOOL_UKERNEL(xnn_x32_unpool_ukernel__sse2);
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    (void) hardware_config;  // May be unused.
+    #if XNN_ENABLE_SSE2
+      if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
+        x32_unpool_config.unpool = XNN_INIT_UNPOOL_UKERNEL(xnn_x32_unpool_ukernel__sse2);
+      } else
+    #endif
+    {
+      x32_unpool_config.unpool = XNN_INIT_UNPOOL_UKERNEL(xnn_x32_unpool_ukernel__scalar);
+    }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     x32_unpool_config.unpool = XNN_INIT_UNPOOL_UKERNEL(xnn_x32_unpool_ukernel__wasmsimd);
   #else
     x32_unpool_config.unpool = XNN_INIT_UNPOOL_UKERNEL(xnn_x32_unpool_ukernel__scalar);
   #endif
-
 }
 
 const struct xnn_unpool_config* xnn_init_x32_unpool_config() {

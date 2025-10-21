@@ -111,8 +111,9 @@ static void init_f16_vadd_config(void) {
         f16_vadd_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vaddc_ukernel__f16c_u16);
         f16_vadd_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vaddc_ukernel__f16c_u16);
         f16_vadd_config.element_tile = 16;
-      }
+      } else
     #endif
+    ;  // no f16 support
   #endif
 }
 
@@ -155,8 +156,9 @@ static void init_f16_vdiv_config(void) {
         f16_vdiv_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vdivc_ukernel__f16c_u8);
         f16_vdiv_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vrdivc_ukernel__f16c_u8);
         f16_vdiv_config.element_tile = 8;
-      }
+      } else
     #endif
+    ;  // no f16 support
   #endif
 }
 
@@ -199,8 +201,9 @@ static void init_f16_vmax_config(void) {
         f16_vmax_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmaxc_ukernel__f16c_u16);
         f16_vmax_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmaxc_ukernel__f16c_u16);
         f16_vmax_config.element_tile = 16;
-      }
+      } else
     #endif
+    ;  // no f16 support
   #endif
 }
 
@@ -243,8 +246,9 @@ static void init_f16_vmin_config(void) {
         f16_vmin_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vminc_ukernel__f16c_u16);
         f16_vmin_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vminc_ukernel__f16c_u16);
         f16_vmin_config.element_tile = 16;
-      }
+      } else
     #endif
+    ;  // no f16 support
   #endif
 }
 
@@ -287,8 +291,9 @@ static void init_f16_vmul_config(void) {
         f16_vmul_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__f16c_u16);
         f16_vmul_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vmulc_ukernel__f16c_u16);
         f16_vmul_config.element_tile = 16;
-      }
+      } else
     #endif
+    ;  // no f16 support
   #endif
 }
 
@@ -331,8 +336,9 @@ static void init_f16_vprelu_config(void) {
         f16_vprelu_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vpreluc_ukernel__f16c_u16);
         f16_vprelu_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vrpreluc_ukernel__f16c_u16);
         f16_vprelu_config.element_tile = 16;
-      }
+      } else
     #endif
+    ;  // no f16 support
   #endif
 }
 
@@ -375,8 +381,9 @@ static void init_f16_vsub_config(void) {
         f16_vsub_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vsubc_ukernel__f16c_u16);
         f16_vsub_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vrsubc_ukernel__f16c_u16);
         f16_vsub_config.element_tile = 16;
-      }
+      } else
     #endif
+    ;  // no f16 support
   #endif
 }
 
@@ -419,8 +426,9 @@ static void init_f16_vsqrdiff_config(void) {
         f16_vsqrdiff_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vsqrdiffc_ukernel__f16c_u16);
         f16_vsqrdiff_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f16_vsqrdiffc_ukernel__f16c_u16);
         f16_vsqrdiff_config.element_tile = 16;
-      }
+      } else
     #endif
+    ;  // no f16 support
   #endif
 }
 
@@ -870,8 +878,14 @@ static void init_f32_vmul_config(void) {
         f32_vmul_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vmulc_ukernel__sse_u8);
         f32_vmul_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vmulc_ukernel__sse_u8);
         f32_vmul_config.element_tile = 8;
-      }
+      } else
     #endif
+    {
+      f32_vmul_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vmul_ukernel__scalar_u8);
+      f32_vmul_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vmulc_ukernel__scalar_u8);
+      f32_vmul_config.ropc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vmulc_ukernel__scalar_u8);
+      f32_vmul_config.element_tile = 8;
+    }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_vmul_config.op_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vmul_ukernel__wasmsimd_u16);
     f32_vmul_config.opc_ukernel = XNN_INIT_BINARY_UKERNEL(xnn_f32_vmulc_ukernel__wasmsimd_u16);

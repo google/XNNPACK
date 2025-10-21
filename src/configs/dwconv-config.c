@@ -109,8 +109,9 @@ static void init_f16_dwconv_config(void) {
         f16_dwconv_config[3].init.f16 = xnn_init_f16_minmax_scalar_params;
         f16_dwconv_config[3].channel_tile = 8;
         f16_dwconv_config[3].primary_tile = 25;
-      }
+      } else
     #endif
+    ;  // no f16 support
   #endif
 }
 
@@ -308,8 +309,34 @@ static void init_f32_dwconv_config(void) {
         f32_dwconv_config[3].init.f32 = xnn_init_f32_minmax_scalar_params;
         f32_dwconv_config[3].channel_tile = 8;
         f32_dwconv_config[3].primary_tile = 25;
-      }
+      } else
     #endif
+    {
+      f32_dwconv_config[0].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_minmax_ukernel_3p1c__scalar_acc2);
+      f32_dwconv_config[0].linear = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_ukernel_3p1c__scalar_acc2);
+      f32_dwconv_config[0].init.f32 = xnn_init_f32_minmax_scalar_params;
+      f32_dwconv_config[0].channel_tile = 1;
+      f32_dwconv_config[0].primary_tile = 3;
+
+      f32_dwconv_config[1].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_minmax_ukernel_4p1c__scalar_acc2);
+      f32_dwconv_config[1].linear = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_ukernel_4p1c__scalar_acc2);
+      f32_dwconv_config[1].init.f32 = xnn_init_f32_minmax_scalar_params;
+      f32_dwconv_config[1].channel_tile = 1;
+      f32_dwconv_config[1].primary_tile = 4;
+
+      f32_dwconv_config[2].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_minmax_ukernel_9p1c__scalar_acc2);
+      f32_dwconv_config[2].linear = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_ukernel_9p1c__scalar_acc2);
+      f32_dwconv_config[2].init.f32 = xnn_init_f32_minmax_scalar_params;
+      f32_dwconv_config[2].channel_tile = 1;
+      f32_dwconv_config[2].primary_tile = 9;
+
+      f32_dwconv_config[3].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_minmax_ukernel_25p2c__scalar_acc2);
+      f32_dwconv_config[3].linear = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_ukernel_25p2c__scalar_acc2);
+      f32_dwconv_config[3].init.f32 = xnn_init_f32_minmax_scalar_params;
+      f32_dwconv_config[3].channel_tile = 1;
+      f32_dwconv_config[3].primary_tile = 25;
+    }
+
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     #if XNN_ARCH_WASMRELAXEDSIMD
       f32_dwconv_config[0].minmax = XNN_INIT_DWCONV_UKERNEL(xnn_f32_dwconv_minmax_ukernel_3p8c__wasmrelaxedsimd_fma);
