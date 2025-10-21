@@ -2450,15 +2450,17 @@ void GemmMicrokernelTester::Test_PF16(
   // Compute 32-bit results and output quantization arguments.
   std::fill(c_ref.begin(), c_ref.end(), 0.0f);
   for (size_t m_index = 0; m_index < m(); m_index++) {
-    for (size_t n_index = 0; n_index < n(); n_index++) {
-      for (size_t k_index = 0; k_index < k(); k_index++) {
-        c_ref[m_index * n() + n_index] +=
-            xnn_float16_to_float(input_f16[m_index * k() + k_index]) *
-            xnn_float16_to_float(weights[n_index * k() + k_index]);
+      for (size_t n_index = 0; n_index < n(); n_index++) {
+        for (size_t k_index = 0; k_index < k(); k_index++) {
+          c_ref[m_index * n() + n_index] =
+              c_ref[m_index * n() + n_index] +
+              xnn_float16(input_f16[m_index * k() + k_index] *
+                          weights[n_index * k() + k_index]);
+        }
+        c_ref[m_index * n() + n_index] =
+            c_ref[m_index * n() + n_index] + bias[n_index];
       }
-      c_ref[m_index * n() + n_index] += xnn_float16_to_float(bias[n_index]);
     }
-  }
 
   // Prepare parameters.
   xnn_f16_minmax_params minmax_params;
@@ -2791,6 +2793,7 @@ void GemmMicrokernelTester::Test_PQS8(
   }
 }
 
+#if XNN_ENABLE_ARM_SME2
 void GemmMicrokernelTester::Test_PF16(
     xnn_pf16_f16_packed_igemm_minmax_ukernel_fn packed_igemm,
     xnn_init_f16_minmax_params_fn init_minmax_params,
@@ -2954,6 +2957,7 @@ void GemmMicrokernelTester::Test_PF16(
     }
   }
 }
+#endif
 
 void GemmMicrokernelTester::Test(
     xnn_qp8_f32_qb4w_gemm_minmax_ukernel_fn gemm,
