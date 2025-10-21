@@ -22,6 +22,7 @@
 
 #include "include/experimental.h"
 #include "include/xnnpack.h"
+#include "src/subgraph/subgraph-utils.h"
 #include "src/xnnpack/allocation-type.h"
 #include "src/xnnpack/allocator.h"
 #include "src/xnnpack/cache.h"
@@ -32,6 +33,7 @@
 #include "src/xnnpack/memory-planner.h"
 #include "src/xnnpack/memory.h"
 #include "src/xnnpack/microkernel-type.h"
+#include "src/xnnpack/mutex.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/operator-utils.h"
 #include "src/xnnpack/operator.h"
@@ -459,13 +461,21 @@ void propagate_rank(
       case xnn_node_type_static_sum_squared:
         if (flags & XNN_FLAG_KEEP_DIMS) {
           output_value->shape.num_dims = input_value->shape.num_dims;
+        } else if (input_value->shape.num_dims >=
+                   node->params.reduce.num_reduction_axes) {
+          output_value->shape.num_dims = input_value->shape.num_dims -
+                                         node->params.reduce.num_reduction_axes;
         } else {
-          output_value->shape.num_dims = input_value->shape.num_dims - node->params.reduce.num_reduction_axes;
+          xnn_log_warning("Unable to determine output rank of Node #%" PRIu32
+                          " %s, assuming %zu.",
+                          node->id, xnn_node_type_to_string(node->type),
+                          output_value->shape.num_dims);
         }
         break;
       case xnn_node_type_batch_matrix_multiply:
       case xnn_node_type_binary_elementwise:
-        output_value->shape.num_dims = max(input_value->shape.num_dims, input_value_b->shape.num_dims);
+        output_value->shape.num_dims =
+            max(input_value->shape.num_dims, input_value_b->shape.num_dims);
         break;
       case xnn_node_type_concatenate:
       case xnn_node_type_copy:
@@ -480,7 +490,9 @@ void propagate_rank(
         output_value->shape.num_dims = input_value->shape.num_dims;
         break;
       case xnn_node_type_static_expand_dims:
-        output_value->shape.num_dims = input_value->shape.num_dims + node->params.static_reshape.new_shape.num_dims;
+        output_value->shape.num_dims =
+            input_value->shape.num_dims +
+            node->params.static_reshape.new_shape.num_dims;
         break;
       case xnn_node_type_fully_connected:
       case xnn_node_type_fully_connected_sparse:
@@ -488,21 +500,41 @@ void propagate_rank(
         break;
       case xnn_node_type_static_reshape:
       case xnn_node_type_static_broadcast:
-        output_value->shape.num_dims = node->params.static_reshape.new_shape.num_dims;
+        output_value->shape.num_dims =
+            node->params.static_reshape.new_shape.num_dims;
         break;
       case xnn_node_type_fuse_dims:
-        output_value->shape.num_dims =
-            input_value->shape.num_dims -
-            node->params.static_reshape.new_shape.num_dims + 1;
+        if (input_value->shape.num_dims >=
+            node->params.static_reshape.new_shape.num_dims + 1) {
+          output_value->shape.num_dims =
+              input_value->shape.num_dims -
+              (node->params.static_reshape.new_shape.num_dims + 1);
+        } else {
+          xnn_log_warning("Unable to determine output rank of Node #%" PRIu32
+                          " %s, assuming %zu.",
+                          node->id, xnn_node_type_to_string(node->type),
+                          output_value->shape.num_dims);
+        }
         break;
       case xnn_node_type_split_dims:
-        output_value->shape.num_dims =
-            input_value->shape.num_dims +
-            node->params.static_reshape.new_shape.num_dims - 1;
+        if (input_value->shape.num_dims +
+                node->params.static_reshape.new_shape.num_dims >=
+            1) {
+          output_value->shape.num_dims =
+              (input_value->shape.num_dims +
+               node->params.static_reshape.new_shape.num_dims) -
+              1;
+        } else {
+          xnn_log_warning("Unable to determine output rank of Node #%" PRIu32
+                          " %s, assuming %zu.",
+                          node->id, xnn_node_type_to_string(node->type),
+                          output_value->shape.num_dims);
+        }
         break;
       default:
         XNN_UNREACHABLE;
     }
+    assert(output_value->shape.num_dims <= XNN_MAX_TENSOR_DIMS);
   }
 }
 
@@ -534,6 +566,9 @@ static enum xnn_status create_runtime_impl(
       XNN_FLAG_FORCE_FP16_INFERENCE | XNN_FLAG_NO_OPERATOR_FUSION |
       XNN_FLAG_NO_INLINED_LHS_PACKING | XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC;
 
+  // static struct xnn_mutex mutex;
+  // xnn_mutex_lock(&mutex);
+
   status = xnn_subgraph_optimize(subgraph, flags & optimization_flags);
   if (status != xnn_status_success) {
     xnn_log_error("failed to optimize subgraph");
@@ -547,6 +582,10 @@ static enum xnn_status create_runtime_impl(
     xnn_log_error("failed to allocate %zu bytes for runtime descriptor", sizeof(struct xnn_runtime));
     goto error;
   }
+
+  // xnn_subgraph_log_info(subgraph);
+  // xnn_subgraph_log_dot_info(subgraph);
+  // xnn_mutex_unlock(&mutex);
 
   runtime->flags = flags;
 
@@ -786,8 +825,9 @@ enum xnn_status xnn_create_runtime_with_threadpool(
     struct pthreadpool_executor executor;
     executor.num_threads = xnn_threadpool->scheduler.num_threads;
     executor.schedule = xnn_threadpool->scheduler.schedule;
-    threadpool =
-        pthreadpool_create_v2(&executor, xnn_threadpool->scheduler_context, 0);
+    threadpool = pthreadpool_create_v2(
+        &executor, xnn_threadpool->scheduler_context,
+        (executor.num_threads(xnn_threadpool->scheduler_context) + 1) / 2);
     flags |= XNN_FLAG_RUNTIME_OWNS_THREADPOOL;
 #endif  // XNN_SLINKY_ENABLED
   }
