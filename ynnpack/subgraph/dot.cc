@@ -296,7 +296,7 @@ auto make_dot_impl(dot_type type, size_t num_k_dims) {
 
 // Make a kernel wrapper for packing the input of a dot kernel, i.e.
 // interleaving `tile_k` rows at a time.
-auto make_pack_impl(dot_type type) {
+auto make_pack_impl() {
   return [](slinky::raw_buffer input, slinky::raw_buffer output) -> index_t {
     const slinky::dim& input_n = input.dim(0);
     const slinky::dim& input_k = input.dim(1);
@@ -389,24 +389,13 @@ auto make_pack_impl(dot_type type) {
   };
 }
 
-std::optional<size_t> get_extent(const ynn_value& x, int dim) {
-  return dim < x.extents.size() ? as_constant(x.extents[dim]) : 1;
-}
-
-void learn_shape_from_b(dot_shape& shape, size_t num_k_dims,
-                        const ynn_value& b) {
-  shape.n = get_extent(b, 0);
-  shape.k1 = get_extent(b, 1);
-  shape.k2 = num_k_dims >= 2 ? get_extent(b, 2) : 1;
-  shape.k3 = num_k_dims >= 3 ? get_extent(b, 3) : 1;
-}
-
 // Packing means transposing
 // b(n, k, ...) => b(k%tile_k, n%nr, k/tile_k, n/tile_n, ...)
 // where tile_n is a multiple of the kernel's tile_n, but not greater than the
 // kernel's block_n.
 uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
-                       size_t num_k_dims, uint32_t input_b_id) {
+                       const dot_kernel& kernel, size_t num_k_dims,
+                       uint32_t input_b_id) {
   const ynn_value& b = subgraph->value(input_b_id);
 
   ynn_value& packed_b = subgraph->new_internal_value();
@@ -419,10 +408,6 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
       2 < b.extents.size() && b.extents[2].defined() ? b.extents[2] : 1;
   slinky::expr k3 =
       3 < b.extents.size() && b.extents[3].defined() ? b.extents[3] : 1;
-
-  dot_shape shape;
-  learn_shape_from_b(shape, num_k_dims, b);
-  dot_kernel kernel = get_dot_kernel(type, shape);
 
   const index_t cache_elements = cache_size_l2 / type_size_bytes(b.type);
 
@@ -448,7 +433,7 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
   node.inputs = {input_b_id};
   node.outputs = {packed_b_id};
   node.op = ynn_node::pack_b{};
-  node.create = [type](const ynn_node& node, ynn_runtime& runtime) {
+  node.create = [](const ynn_node& node, ynn_runtime& runtime) {
     const ynn_runtime_value& input = runtime.value(node.inputs[0]);
     ynn_runtime_value& output = runtime.value(node.outputs[0]);
 
@@ -482,9 +467,8 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
 
     slinky::call_stmt::attributes attrs;
     attrs.name = "pack_b";
-    auto func =
-        slinky::func::make(make_pack_impl(type), {std::move(func_input)},
-                           {{output.buffer, dims}}, std::move(attrs));
+    auto func = slinky::func::make(make_pack_impl(), {std::move(func_input)},
+                                   {{output.buffer, dims}}, std::move(attrs));
 
     auto sched = std::make_unique<scheduling_info>();
 
@@ -570,15 +554,20 @@ std::tuple<slinky::expr, slinky::expr> choose_split_factors(
   return {split_n, split_m};
 }
 
-}  // namespace
+std::optional<size_t> get_extent(const ynn_value& x, int dim) {
+  return dim < x.extents.size() ? as_constant(x.extents[dim]) : 1;
+}
 
-extern "C" {
+void learn_shape_from_b(dot_shape& shape, size_t num_k_dims,
+                        const ynn_value& b) {
+  shape.n = get_extent(b, 0);
+  shape.k1 = get_extent(b, 1);
+  shape.k2 = num_k_dims >= 2 ? get_extent(b, 2) : 1;
+  shape.k3 = num_k_dims >= 3 ? get_extent(b, 3) : 1;
+}
 
-ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
-                          uint32_t input_a_id, uint32_t input_b_id,
-                          uint32_t input_c_id, uint32_t* output_id,
-                          uint32_t flags) {
-  const ynn_node* b_producer = subgraph->get_producer(input_b_id);
+ynn_status always_alias_transpose(ynn_subgraph& subgraph, uint32_t& id) {
+  const ynn_node* b_producer = subgraph.get_producer(id);
   if (b_producer && std::get_if<ynn_node::static_transpose>(&b_producer->op)) {
     // The producer of this pack is a transpose. If it is transposing the rows
     // and columns of B, we can handle it with packing.
@@ -592,16 +581,26 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
       // We don't rewrite the existing transpose op in the (unlikely) event that
       // it is used elsewhere. The existing transpose op will likely be
       // invalidated as a dead operation.
-      input_b_id = YNN_INVALID_VALUE_ID;
-      ynn_status status = define_static_transpose(
-          subgraph, op.permutation, b_producer->inputs[0], &input_b_id,
-          /*alias=*/true);
+      id = YNN_INVALID_VALUE_ID;
+      ynn_status status = define_static_transpose(&subgraph, op.permutation,
+                                                  b_producer->inputs[0], &id,
+                                                  /*alias=*/true);
       if (status != ynn_status_success) {
         return status;
       }
     }
   }
+  return ynn_status_success;
+}
 
+}  // namespace
+
+extern "C" {
+
+ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
+                          uint32_t input_a_id, uint32_t input_b_id,
+                          uint32_t input_c_id, uint32_t* output_id,
+                          uint32_t flags) {
   // Validate arguments.
   assert(subgraph);
   assert(subgraph->is_valid_value(input_a_id));
@@ -610,9 +609,13 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
   assert(num_k_dims <= 3);
   assert(num_k_dims > 0);
 
+  ynn_status status = always_alias_transpose(*subgraph, input_b_id);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
   const ynn_value& a = subgraph->value(input_a_id);
   const ynn_value& b = subgraph->value(input_b_id);
-
   // If any input is a float, the output should be a float.
   const ynn_type c_type = !type_is_integral(a.type) || !type_is_integral(b.type)
                               ? ynn_type_fp32
@@ -627,7 +630,12 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
 
   // Insert a packing node (if necessary).
   dot_type type = {a.type, b.type, c.type};
-  uint32_t packed_b_id = define_pack_b(subgraph, type, num_k_dims, input_b_id);
+  dot_shape shape;
+  learn_shape_from_b(shape, num_k_dims, b);
+  dot_kernel kernel = get_dot_kernel(type, shape, nullptr);
+
+  uint32_t packed_b_id =
+      define_pack_b(subgraph, type, kernel, num_k_dims, input_b_id);
 
   ynn_node node;
   // We need both the original input b (for shape inference only) and packed b.
