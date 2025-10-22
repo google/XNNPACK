@@ -6,6 +6,7 @@
 #include <cassert>
 #include <cstdint>
 #include <map>
+#include <optional>
 #include <string>
 
 #include <gtest/gtest.h>
@@ -28,7 +29,8 @@ std::map<dot_kernel_fn, std::string> kernels = {
 const std::string& get_dot_kernel_name(const dot_type& type,
                                        const dot_shape& shape,
                                        uint64_t arch_flags) {
-  return kernels[get_dot_kernel(type, shape, nullptr, arch_flags).kernel];
+  return kernels[get_dot_kernel(type, shape, nullptr, std::nullopt, arch_flags)
+                     .kernel];
 }
 
 // We use a large highly composite value when we want to test large shapes, so

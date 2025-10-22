@@ -212,6 +212,7 @@ struct ynn_node {
     size_t num_k_dims;
   };
   struct pack_b {};
+  struct transpose_a {};
   struct get_tensor_shape {
     std::vector<int32_t> axes;
     bool reshape_1d;
@@ -230,7 +231,7 @@ struct ynn_node {
                even_split, copy, split_dim, fuse_dim, fuse_dims, split_dims,
                stack, static_reshape, static_broadcast, static_expand_dims,
                static_pad, static_slice, static_transpose, stencil_copy,
-               unary_elementwise, binary_elementwise, dot, pack_b,
+               unary_elementwise, binary_elementwise, dot, pack_b, transpose_a,
                get_tensor_shape, reduce>
       op;
 
