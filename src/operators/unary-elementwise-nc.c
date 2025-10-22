@@ -16,7 +16,6 @@
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
 #include "src/xnnpack/datatype.h"
-#include "src/xnnpack/hardware-config.h"
 #include "src/xnnpack/internal.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/math.h"
@@ -304,6 +303,15 @@ static enum xnn_status init_op(
   }
 }
 
+static size_t get_tile_size(xnn_operator_t op) {
+  // Assume a default width (unrolling factor) of 32.
+  const size_t element_tile = op->unary_elementwise_config->element_tile
+                                  ? op->unary_elementwise_config->element_tile
+                                  : 32;
+  return round_up(16 * 1024,
+                  element_tile << op->unary_elementwise.log2_input_size);
+}
+
 enum xnn_status xnn_create_unary_elementwise_nc(
     enum xnn_unary_operator op_type,
     enum xnn_datatype input_datatype,
@@ -430,8 +438,6 @@ enum xnn_status xnn_reshape_unary_elementwise_nc(
   } else {
     const xnn_vunary_ukernel_fn ukernel = op->unary_elementwise_config->ukernel;
     if (is_contiguous(op)) {
-      const size_t block_size = 4096;
-
       op->context.univector_contiguous = (struct univector_contiguous_context) {
         .log2_xsize = op->unary_elementwise.log2_input_size,
         .log2_ysize = op->unary_elementwise.log2_output_size,
@@ -445,7 +451,7 @@ enum xnn_status xnn_reshape_unary_elementwise_nc(
           (pthreadpool_task_1d_tile_1d_dynamic_t)
               xnn_compute_univector_contiguous;
       op->compute[0].range[0] = range;
-      op->compute[0].tile[0] = block_size;
+      op->compute[0].tile[0] = get_tile_size(op);
     } else {
       op->context.univector_strided = (struct univector_strided_context) {
         .n = channels << op->unary_elementwise.log2_input_size,
@@ -459,7 +465,8 @@ enum xnn_status xnn_reshape_unary_elementwise_nc(
       op->compute[0].task_1d_tile_1d_dynamic =
           (pthreadpool_task_1d_tile_1d_dynamic_t)xnn_compute_univector_strided;
       op->compute[0].range[0] = batch_size;
-      op->compute[0].tile[0] = 1;
+      op->compute[0].tile[0] =
+          divide_round_up(get_tile_size(op), op->context.univector_strided.n);
     }
   }
   op->state = xnn_run_state_needs_setup;
@@ -716,13 +723,8 @@ static enum xnn_status reshape_unary_elementwise_nc(
     unary_elementwise_op->compute[0].task_1d_tile_1d_dynamic =
         (pthreadpool_task_1d_tile_1d_dynamic_t)xnn_compute_univector_contiguous;
     unary_elementwise_op->compute[0].range[0] = range;
-    size_t bytes_per_tile = xnn_init_hardware_config()->l1_data_cache_bytes;
-    if (!bytes_per_tile) {
-      bytes_per_tile = 1 << 15;  // Default to 32k if cache size is unknown.
-    }
-    const size_t num_tiles = divide_round_up(range, bytes_per_tile);
-    const size_t tile_size = round_up(range / num_tiles, 1 << log2_input_size);
-    unary_elementwise_op->compute[0].tile[0] = tile_size;
+    unary_elementwise_op->compute[0].tile[0] =
+        get_tile_size(unary_elementwise_op);
   } else {
     unary_elementwise_op->context.univector_strided = (struct univector_strided_context) {
       .n = channels << log2_input_size,
@@ -739,7 +741,9 @@ static enum xnn_status reshape_unary_elementwise_nc(
     unary_elementwise_op->compute[0].task_1d_tile_1d_dynamic =
         (pthreadpool_task_1d_tile_1d_dynamic_t)xnn_compute_univector_strided;
     unary_elementwise_op->compute[0].range[0] = batch_size;
-    unary_elementwise_op->compute[0].tile[0] = 1;
+    unary_elementwise_op->compute[0].tile[0] =
+        divide_round_up(get_tile_size(unary_elementwise_op),
+                        unary_elementwise_op->context.univector_strided.n);
   }
   unary_elementwise_op->state = xnn_run_state_needs_setup;
 
@@ -973,7 +977,8 @@ enum xnn_status reshape_convert_nc_f16_qx8(
       XNN_UNREACHABLE;
   }
   convert_op->compute[0].range[0] = batch_size;
-  convert_op->compute[0].tile[0] = 1;
+  convert_op->compute[0].tile[0] = divide_round_up(
+      get_tile_size(convert_op), convert_op->context.f16_qd8_convert.n);
 
   convert_op->compute[1].type = xnn_parallelization_type_1d;
   convert_op->compute[1].task_1d = (pthreadpool_task_1d_t) xnn_compute_pad_qd8_params;
@@ -1035,7 +1040,8 @@ enum xnn_status reshape_convert_nc_f32_qx8(
       XNN_UNREACHABLE;
   }
   convert_op->compute[0].range[0] = batch_size;
-  convert_op->compute[0].tile[0] = 1;
+  convert_op->compute[0].tile[0] = divide_round_up(
+      get_tile_size(convert_op), convert_op->context.f32_qd8_convert.n);
 
   convert_op->compute[1].type = xnn_parallelization_type_1d;
   convert_op->compute[1].task_1d = (pthreadpool_task_1d_t) xnn_compute_pad_qd8_params;

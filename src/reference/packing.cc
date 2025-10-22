@@ -2576,10 +2576,6 @@ void xnn_pack_kai_f16_conv_goki_w_sme2(size_t g, size_t nc, size_t ks,
                                        const uint16_t* b, const void* scale,
                                        void* packed_weights, size_t extra_bytes,
                                        const void* params) {
-  fprintf(stderr,
-          "[PF16-IGEMM][PACK] conv_goki pack called: g=%zu nc=%zu ks=%zu "
-          "kc=%zu nr=%zu kr=%zu sr=%zu extra_bytes=%zu\n",
-          g, nc, ks, kc, nr, kr, sr, extra_bytes);
 
   assert(g != 0);
   assert(nr >= sr);
@@ -2601,10 +2597,7 @@ void xnn_pack_kai_f16_conv_goki_w_sme2(size_t g, size_t nc, size_t ks,
           nc, ks, kc);
 
   for (size_t g_idx = 0; g_idx < g; ++g_idx) {
-    fprintf(stderr,
-            "[PF16-IGEMM][PACK] group=%zu transpose & pack: rhs_row_stride=%zu "
-            "packed_rhs_size(bytes)=%zu\n",
-            g_idx, rhs_row_stride, packed_rhs_size);
+
     // TODO: Remove transpose_weights_x16 if KleidiAI release imatmul_pack_nxk packing variant
     transpose_weights_x16(k, tmp_data, nc, ks * kc);
     // Pass FP16 bias directly to the rhs_imatmul packer which expects FP16 bias
