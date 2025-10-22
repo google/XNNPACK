@@ -262,11 +262,11 @@ std::pair<float, int32_t> GetScalarQuantization(
   std::pair<float, int32_t> result;
   result.first =
       value.scale_id != YNN_INVALID_VALUE_ID
-          ? runtime.value(value.scale_id).GetStaticScalarValue<float>()
+          ? runtime.value(value.scale_id).static_scalar_value<float>()
           : 1.0f;
   result.second =
       value.zero_point_id != YNN_INVALID_VALUE_ID
-          ? runtime.value(value.zero_point_id).GetStaticScalarValue<int32_t>()
+          ? runtime.value(value.zero_point_id).static_scalar_value<int32_t>()
           : 0;
   return result;
 }

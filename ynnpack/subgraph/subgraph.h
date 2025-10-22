@@ -13,8 +13,10 @@
 #include <deque>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <ostream>
 #include <string>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -101,8 +103,10 @@ struct ynn_value {
 
   std::string name() const;
 
+  // Asserting that the value is a static scalar value of type T, returns that
+  // value.
   template <typename T>
-  T GetStaticScalarValue() const {
+  T static_scalar_value() const {
     assert(is_static());
     assert(sizeof(T) == data->elem_size);
     assert(data->rank == 0);
@@ -110,6 +114,10 @@ struct ynn_value {
     memcpy(&result, data->base, sizeof(T));
     return result;
   }
+
+  // If the value is reshape-able to a scalar, returns the value converted to
+  // a float, otherwise returns nullopt.
+  std::optional<float> as_scalar_float() const;
 };
 
 struct ynn_node {

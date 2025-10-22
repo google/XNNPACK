@@ -14,6 +14,7 @@
 #include <iomanip>
 #include <memory>
 #include <numeric>
+#include <optional>
 #include <ostream>
 #include <set>
 #include <sstream>
@@ -94,6 +95,32 @@ ynn_status ynn_value::get_external_shape(size_t* rank, size_t* dims) const {
     dims[*rank - 1] *= ynn::type_element_count(type);
   }
   return ynn_status_success;
+}
+
+std::optional<float> ynn_value::as_scalar_float() const {
+  if (!is_static()) return std::nullopt;
+  if (data->elem_size != data->size_bytes()) return std::nullopt;
+  switch (type) {
+    case ynn_type_fp32:
+      return static_scalar_value<float>();
+    case ynn_type_fp16:
+      return static_scalar_value<ynn::half>();
+    case ynn_type_bf16:
+      return static_scalar_value<ynn::bfloat16>();
+    case ynn_type_int32:
+      return static_cast<float>(static_scalar_value<int32_t>());
+    case ynn_type_int8:
+      return static_cast<float>(static_scalar_value<int8_t>());
+    case ynn_type_uint8:
+      return static_cast<float>(static_scalar_value<uint8_t>());
+    case ynn_type_int4:
+    case ynn_type_uint4:
+      // int4 values can't be scalars.
+    case ynn_type_opaque:
+    case ynn_type_invalid:
+      break;
+  }
+  return std::nullopt;
 }
 
 ynn_subgraph::ynn_subgraph(uint32_t external_value_ids)
@@ -197,12 +224,12 @@ uint32_t ynn_subgraph::get_static_value_id(ynn_type type, size_t rank,
       // scalar.
     }
   } else if (scale_id != YNN_INVALID_VALUE_ID) {
-    scale = value(scale_id).GetStaticScalarValue<float>();
+    scale = value(scale_id).static_scalar_value<float>();
   }
 
   int32_t zero_point = 0;
   if (zero_point_id != YNN_INVALID_VALUE_ID) {
-    zero_point = value(zero_point_id).GetStaticScalarValue<int32_t>();
+    zero_point = value(zero_point_id).static_scalar_value<int32_t>();
   }
 
   std::vector<char> value(size * ynn::type_size_bytes(type));
@@ -742,6 +769,9 @@ void ynn_subgraph::dump(std::ostream& os) const {
     }
     if (value.is_static()) {
       os << "static ";
+      if (std::optional<float> v = value.as_scalar_float()) {
+        os << "value=" << *v;
+      }
     }
     os << std::endl;
     ++values_count;
