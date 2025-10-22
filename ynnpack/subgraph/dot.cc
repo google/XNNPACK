@@ -49,8 +49,8 @@ constexpr index_t cache_size_l2 = 128 * 1024;
 
 // The wrapper for the kernel we use when we actually want to run a dot kernel
 // on some buffers.
-auto make_dot_impl(dot_type type, bool transpose_a, size_t num_k_dims) {
-  return [type, transpose_a, num_k_dims](
+auto make_dot_impl(dot_type type, size_t num_k_dims) {
+  return [type, num_k_dims](
              slinky::raw_buffer a, slinky::raw_buffer b,
              slinky::buffer<const void, YNN_MAX_TENSOR_RANK> init_c,
              slinky::raw_buffer c) -> index_t {
@@ -81,18 +81,18 @@ auto make_dot_impl(dot_type type, bool transpose_a, size_t num_k_dims) {
 
     const int b_type_element_count = type_element_count(type.b);
     const index_t tile_k = b_k1i.extent();
+    const index_t a_stride_m = a_m.stride();
+    const index_t a_stride_k3 = a_k3.stride();
+    const index_t a_stride_k2 = a_k2.stride();
+    const index_t a_stride_k1 = a_k1.stride();
     // If a is transposed, then the k dimension has been reshaped to have tile_k
     // values in each element.
-    const index_t a_tile_k = transpose_a ? tile_k : 1;
+    const index_t a_tile_k = a_stride_m <= a_stride_k1 ? tile_k : 1;
     const index_t k1 = (a_k1.extent() * a_tile_k) & ~(tile_k - 1);
     const index_t k1_tail = (a_k1.extent() * a_tile_k) & (tile_k - 1);
     const index_t k2 = a_k2.extent();
     const index_t k3 = a_k3.extent();
     const index_t block_n = b_ni.extent() * b_type_element_count;
-    const index_t a_stride_m = a_m.stride();
-    const index_t a_stride_k3 = a_k3.stride();
-    const index_t a_stride_k2 = a_k2.stride();
-    const index_t a_stride_k1 = a_k1.stride();
     const index_t b_stride_k3 = b_k3.stride();
     const index_t b_stride_k2 = b_k2.stride();
     // TODO: The kernels should probably expect this stride to be multiplied
@@ -106,6 +106,13 @@ auto make_dot_impl(dot_type type, bool transpose_a, size_t num_k_dims) {
 
     // Find a kernel that is compatible with the packed data we have, and
     // matches whether A is transposed or not.
+    std::optional<bool> transpose_a;
+    if (a_stride_k1 == a_stride_m) {
+      // It doesn't matter if we transposed or not, so we can use a kernel with
+      // any transposed-ness.
+    } else {
+      transpose_a = a_stride_m <= a_stride_k1;
+    }
     dot_shape shape;
     shape.m = c_m.extent();
     shape.n = c_n.extent();
@@ -188,6 +195,11 @@ auto make_dot_impl(dot_type type, bool transpose_a, size_t num_k_dims) {
     // hopes of making i bigger, which should improve performance in cases where
     // block_m does not divide c_m.extent()
 
+    // One of these strides is one tile_k, the other is the distance between
+    // rows, depending on whether it is transposed. In either case, the stride
+    // the kernel wants is the bigger stride.
+    const index_t a_stride = std::max(a_stride_k1, a_stride_m);
+
     auto call_kernel = [=, kernel = kernel.kernel](
                            index_t m, index_t n, index_t k1, const void* a,
                            const void* b, index_t init_c_stride_m,
@@ -195,9 +207,9 @@ auto make_dot_impl(dot_type type, bool transpose_a, size_t num_k_dims) {
                            void* c) {
       assert(n <= block_n);
       assert(m <= block_m);
-      kernel(m, n, k3, k2, k1, transpose_a ? a_stride_k1 : a_stride_m,
-             a_stride_k3, a_stride_k2, a, b_stride_k3, b_stride_k2, b_stride_k1,
-             b, init_c_stride_m, init_c, c_stride_m, c);
+      kernel(m, n, k3, k2, k1, a_stride, a_stride_k3, a_stride_k2, a,
+             b_stride_k3, b_stride_k2, b_stride_k1, b, init_c_stride_m, init_c,
+             c_stride_m, c);
     };
 
     const size_t cache_sizes[] = {cache_size_l2};
@@ -225,7 +237,6 @@ auto make_dot_impl(dot_type type, bool transpose_a, size_t num_k_dims) {
           c, a, b, init_c);
     }
     if (k1_tail) {
-      assert(!transpose_a);
       auto loops = schedule_dot(cache_sizes, c_m.extent(), c_n.extent(),
                                 k1_tail, k2, k3, block_m, block_n, block_k,
                                 a.elem_size, b.elem_size, loops_storage);
@@ -841,7 +852,7 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
     node.inputs[0] = define_transpose_a(*subgraph, kernel.tile_k, input_a_id);
   }
 
-  node.create = [transpose_a](const ynn_node& node, ynn_runtime& runtime) {
+  node.create = [](const ynn_node& node, ynn_runtime& runtime) {
     const ynn_node::dot& op = std::get<ynn_node::dot>(node.op);
     const size_t num_k_dims = op.num_k_dims;
     const ynn_runtime_value& input_a = runtime.value(node.inputs[0]);
@@ -913,12 +924,11 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
       attrs.allow_in_place = (1 << 2);
     }
     dot_type dot_type = {input_a.type, packed_b.type, output.type};
-    auto func =
-        slinky::func::make(make_dot_impl(dot_type, transpose_a, num_k_dims),
-                           {{input_a.buffer, std::move(a_bounds)},
-                            {packed_b.buffer, std::move(b_bounds)},
-                            {input_c.buffer, std::move(c_bounds)}},
-                           {{output.buffer, dims}}, std::move(attrs));
+    auto func = slinky::func::make(make_dot_impl(dot_type, num_k_dims),
+                                   {{input_a.buffer, std::move(a_bounds)},
+                                    {packed_b.buffer, std::move(b_bounds)},
+                                    {input_c.buffer, std::move(c_bounds)}},
+                                   {{output.buffer, dims}}, std::move(attrs));
 
     assert(packed_b.extents[0].defined());
     assert(packed_b.extents[1].defined());
