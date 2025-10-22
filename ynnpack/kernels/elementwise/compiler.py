@@ -1471,7 +1471,7 @@ class Target:
         op_natural_vector_size = (
             1
             if is_rem_width and self.tail_strategy == TailStrategy.SCALAR
-            else self.vector_bits // op[1].ty.size
+            else op[1].ty.lanes
         )
         for k in range(output_vector_num):
           self.emit_op(
