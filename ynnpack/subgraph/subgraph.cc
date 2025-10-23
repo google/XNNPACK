@@ -806,6 +806,28 @@ ynn_status ynn_create_subgraph(uint32_t external_value_ids, uint32_t flags,
   return ynn_status_success;
 }
 
+ynn_status ynn_optimize_subgraph(ynn_subgraph_t subgraph,
+                                 ynn_threadpool_t threadpool, uint32_t flags) {
+#if YNN_LOG_LEVEL >= YNN_LOG_LEVEL_DEBUG
+  YNN_LOG_DEBUG() << "subgraph before optimization:\n";
+  subgraph->dump(std::cout);
+#endif
+
+  slinky::thread_pool* slinky_threadpool =
+      reinterpret_cast<slinky::thread_pool*>(threadpool);
+  ynn_status status = subgraph->optimize(slinky_threadpool);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+#if YNN_LOG_LEVEL >= YNN_LOG_LEVEL_DEBUG
+  YNN_LOG_DEBUG() << "subgraph after optimization:\n";
+  subgraph->dump(std::cout);
+#endif
+
+  return ynn_status_success;
+}
+
 void ynn_delete_subgraph(ynn_subgraph_t subgraph) { delete subgraph; }
 
 }  // extern "C"

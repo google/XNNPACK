@@ -640,23 +640,14 @@ ynn_status ynn_runtime::setup() {
 ynn_status ynn_create_runtime(ynn_subgraph_t subgraph,
                               ynn_threadpool_t threadpool, uint32_t flags,
                               ynn_runtime_t* runtime_out) {
-#if YNN_LOG_LEVEL >= YNN_LOG_LEVEL_DEBUG
-  YNN_LOG_DEBUG() << "subgraph before optimization:\n";
-  subgraph->dump(std::cout);
-#endif
-
-  slinky::thread_pool* slinky_threadpool =
-      reinterpret_cast<slinky::thread_pool*>(threadpool);
-  ynn_status status = subgraph->optimize(slinky_threadpool);
+  // TODO(b/454450773): Don't call this here.
+  ynn_status status = ynn_optimize_subgraph(subgraph, threadpool, 0);
   if (status != ynn_status_success) {
     return status;
   }
 
-#if YNN_LOG_LEVEL >= YNN_LOG_LEVEL_DEBUG
-  YNN_LOG_DEBUG() << "subgraph after optimization:\n";
-  subgraph->dump(std::cout);
-#endif
-
+  slinky::thread_pool* slinky_threadpool =
+      reinterpret_cast<slinky::thread_pool*>(threadpool);
   std::unique_ptr<ynn_runtime> runtime(
       new ynn_runtime(*subgraph, slinky_threadpool, flags));
   status = runtime->build();

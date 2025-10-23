@@ -290,6 +290,12 @@ Runtime::Runtime(ynn_subgraph_t subgraph, TestScheduler* scheduler,
         std::unique_ptr<ynn_threadpool, decltype(&ynn_delete_threadpool)>(
             threadpool, ynn_delete_threadpool);
   }
+
+  status_ = ynn_optimize_subgraph(subgraph, threadpool_.get(), 0);
+  if (status_ != ynn_status_success) {
+    return;
+  }
+
   status_ = ynn_create_runtime(subgraph, threadpool_.get(), flags, &runtime);
   runtime_ = std::unique_ptr<ynn_runtime, decltype(&ynn_delete_runtime)>(
       runtime, ynn_delete_runtime);

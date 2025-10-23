@@ -35,6 +35,10 @@ enum ynn_status {
 
 typedef struct ynn_subgraph* ynn_subgraph_t;
 
+// This type is an alias for `slinky::thread_pool`. A `slinky::thread_pool`
+// instance may be casted to `ynn_threadpool` and passed to YNNPACK APIs.
+typedef struct ynn_threadpool* ynn_threadpool_t;
+
 // Create a new subgraph, with `external_value_ids` reserved ids for external
 // values.
 enum ynn_status ynn_create_subgraph(uint32_t external_value_ids, uint32_t flags,
@@ -42,6 +46,10 @@ enum ynn_status ynn_create_subgraph(uint32_t external_value_ids, uint32_t flags,
 
 // Delete a subgraph previously created with `ynn_create_subgraph`.
 void ynn_delete_subgraph(ynn_subgraph_t subgraph);
+
+// Apply subgraph rewrites and other optimizations to the subgraph.
+ynn_status ynn_optimize_subgraph(ynn_subgraph_t subgraph,
+                                 ynn_threadpool_t threadpool, uint32_t flags);
 
 // Describes a type for a value.
 enum ynn_type {
@@ -397,10 +405,6 @@ struct ynn_scheduler {
 };
 
 typedef const struct ynn_scheduler* ynn_scheduler_t;
-
-// This type is an alias for `slinky::thread_pool`. A `slinky::thread_pool`
-// instance may be casted to `ynn_threadpool` and passed to YNNPACK APIs.
-typedef struct ynn_threadpool* ynn_threadpool_t;
 
 // Create a threadpool that uses `scheduler` to start work on other threads.
 // `scheduler` is not copied, since it is stateless we expect it to be stored

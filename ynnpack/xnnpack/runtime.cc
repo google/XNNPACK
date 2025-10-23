@@ -122,9 +122,17 @@ static xnn_status create_runtime_impl(xnn_subgraph_t subgraph,
     ynn_flags |= YNN_RUNTIME_FLAG_NO_SCHEDULE;
   }
 
+  ynn_threadpool_t ynn_threadpool =
+      xnn_threadpool ? xnn_threadpool->ynn : nullptr;
+
+  ynn_status status =
+      ynn_optimize_subgraph(subgraph->ynn, ynn_threadpool, ynn_flags);
+  if (status != ynn_status_success) {
+    return ynn::xnn_status_from_ynn(status);
+  }
+
   return ynn::xnn_status_from_ynn(ynn_create_runtime(
-      subgraph->ynn, xnn_threadpool ? xnn_threadpool->ynn : nullptr, ynn_flags,
-      (ynn_runtime_t*)runtime_out));
+      subgraph->ynn, ynn_threadpool, ynn_flags, (ynn_runtime_t*)runtime_out));
 }
 
 xnn_status xnn_create_runtime_with_threadpool(xnn_subgraph_t subgraph,
