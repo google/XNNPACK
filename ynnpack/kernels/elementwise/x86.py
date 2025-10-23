@@ -404,12 +404,12 @@ def make_x86_fma_patterns(vector_bits, prefix):
       i.vectorize(vector_bits)
       for i in [
           Rule(
-              f32_a * f32_b + f32_c,
+              multiply_add(f32_a, f32_b, f32_c),
               Op(Float(32), prefix + "fmadd_ps", [f32_a, f32_b, f32_c]),
               ["FMA3", "AVX512F"],
           ),
           Rule(
-              f32_a * f32_b - f32_c,
+              multiply_sub(f32_a, f32_b, f32_c),
               Op(Float(32), prefix + "fmsub_ps", [f32_a, f32_b, f32_c]),
               ["FMA3", "AVX512F"],
           ),

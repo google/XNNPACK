@@ -585,6 +585,14 @@ def lower_saturating_add(x, y):
   return saturating_narrow(widen(x) + widen(y))
 
 
+def lower_multiply_add(x, y, z):
+  return x * y + z
+
+
+def lower_multiply_sub(x, y, z):
+  return x * y - z
+
+
 def broadcast(x, lanes):
   """Broadcasts a scalar to a vector."""
   assert x.ty.lanes == 1
@@ -624,6 +632,8 @@ lowering_funcs = {
     "saturating_add": lower_saturating_add,
     "select_bits": lower_select_bits,
     "select": lower_select,
+    "multiply_add": lower_multiply_add,
+    "multiply_sub": lower_multiply_sub,
 }
 
 

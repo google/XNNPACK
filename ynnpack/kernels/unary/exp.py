@@ -53,10 +53,13 @@ def exp_fp32(a, x):
   v2z = setexp_f32(vz)
 
   # Evaluate the numerator polynomial p(f).
-  vp = vr * (vr * (vr * valpha_3 + valpha_2) + valpha_1) + 1.0
+  vp = multiply_add(vr, valpha_3, valpha_2)
+  vp = multiply_add(vr, vp, valpha_1)
+  vp = multiply_add(vr, vp, 1.0)
 
   # Evaluate the denominator polynomial q(r).
-  vq = vr * (vr * vbeta_2 + vbeta_1) + 1.0
+  vq = multiply_add(vr, vbeta_2, vbeta_1)
+  vq = multiply_add(vr, vq, 1.0)
 
   # Divide the numerator by the denominator, obtaining 2^r.
   v2r = vp / vq
@@ -100,19 +103,19 @@ def erf_fp32(a, x):
   vx2 = vx * vx
 
   # Evaluate the numerator polynomial p.
-  vp = vx2 * valpha_11 + valpha_9
-  vp = vx2 * vp + valpha_7
-  vp = vx2 * vp + valpha_5
-  vp = vx2 * vp + valpha_3
-  vp = vx2 * vp + valpha_1
+  vp = multiply_add(vx2, valpha_11, valpha_9)
+  vp = multiply_add(vx2, vp, valpha_7)
+  vp = multiply_add(vx2, vp, valpha_5)
+  vp = multiply_add(vx2, vp, valpha_3)
+  vp = multiply_add(vx2, vp, valpha_1)
   vp = vx * vp
 
   # Evaluate the denominator polynomial q.
-  vq = vx2 * vbeta_10 + vbeta_8
-  vq = vx2 * vq + vbeta_6
-  vq = vx2 * vq + vbeta_4
-  vq = vx2 * vq + vbeta_2
-  vq = vx2 * vq + 1.0
+  vq = multiply_add(vx2, vbeta_10, vbeta_8)
+  vq = multiply_add(vx2, vq, vbeta_6)
+  vq = multiply_add(vx2, vq, vbeta_4)
+  vq = multiply_add(vx2, vq, vbeta_2)
+  vq = multiply_add(vx2, vq, 1.0)
 
   # Divide the numerator by the denominator.
   return store(vp / vq, x)
