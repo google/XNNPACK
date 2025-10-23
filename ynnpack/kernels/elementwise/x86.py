@@ -382,6 +382,15 @@ def make_x86_float32_patterns(vector_bits, prefix):
 
 
 def make_x86_f16c_patterns(vector_bits, prefix):
+  # TODO(vksnk): this is just a workaround, because the fp16 vector is shorter
+  # than target bit width. This needs a clean-up.
+  f32_to_f16_rule = Rule(
+      cast(Float(16), f32_a).with_lanes(vector_bits // 32),
+      Op(Float(16), "wrapper" + prefix + "cvtps_ph", [f32_a]).with_lanes(
+          vector_bits // 32
+      ),
+      ["F16C"],
+  )
   return [
       i.vectorize(vector_bits)
       for i in [
@@ -396,7 +405,7 @@ def make_x86_f16c_patterns(vector_bits, prefix):
               ["F16C"],
           ),
       ]
-  ]
+  ] + [f32_to_f16_rule]
 
 
 def make_x86_fma_patterns(vector_bits, prefix):
@@ -454,6 +463,9 @@ class X86(Target):
     self.store_intrinsics[Int(32, vector_bits // 32)] = (
         "wrapper" + prefix + "storeu_si" + str(vector_bits)
     )
+    self.store_intrinsics[Float(16, vector_bits // 16)] = (
+        "wrapper" + prefix + "storeu_si" + str(vector_bits)
+    )
     self.store_intrinsics[Float(32, vector_bits // 32)] = prefix + "storeu_ps"
 
   def update_for_sse2(self):
@@ -466,7 +478,6 @@ class X86(Target):
         UInt(16, 8): "__m128i",
         UInt(32, 4): "__m128i",
         Float(32, 4): "__m128",
-        Float(16, 8): "__m128i",
     })
 
     self.add_load_intrinsics(128, "_mm_")
@@ -682,7 +693,7 @@ YNN_INTRINSIC __m256 greater_than(__m256 a, __m256 b) {
 """
     self.types.update({
         Float(32, 8): "__m256",
-        Float(16, 16): "__m256i",
+        Float(16, 8): "__m128i",
         Int(8, 32): "__m256i",
         Int(16, 16): "__m256i",
         Int(32, 8): "__m256i",
@@ -708,6 +719,16 @@ YNN_INTRINSIC __m256 greater_than(__m256 a, __m256 b) {
 
   def update_for_f16c(self):
     """Updates the target for F16C support."""
+    self.header += """
+namespace {
+
+YNN_INTRINSIC __m128i wrapper_mm256_cvtps_ph(__m256 x) {
+  return _mm256_cvtps_ph(x, _MM_FROUND_TO_NEAREST_INT);
+}
+
+} // namespace
+
+"""
     self.patterns += make_x86_f16c_patterns(256, "_mm256_")
 
   def update_for_avx512f(self):
@@ -765,7 +786,7 @@ YNN_INTRINSIC __m512i bitwise_not(__m512i val) {
         UInt(16, 32): "__m512i",
         UInt(32, 16): "__m512i",
         Float(32, 16): "__m512",
-        Float(16, 32): "__m512i",
+        Float(16, 16): "__m256i",
     })
     self.add_load_intrinsics(512, "_mm512_")
     self.add_store_intrinsics(512, "_mm512_")

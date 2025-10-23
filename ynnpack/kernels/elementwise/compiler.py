@@ -956,6 +956,15 @@ class Target:
   def indent(self):
     return "  " * self.indent_level
 
+  def get_natural_lanes_num(self, ty):
+    """Returns a number of lanes of the widest type registered in target's types list which also matches class and size of the type."""
+    lanes = 1
+    for t in self.types:
+      if t.type_class == ty.type_class and t.size == ty.size:
+        lanes = builtins.max(lanes, t.lanes)
+
+    return lanes
+
   def as_buffer(self, arg, buffers):
     b = None
     if isinstance(arg, Var):
@@ -1009,7 +1018,7 @@ class Target:
     if isinstance(expr, Var) or isinstance(expr, Constant):
       v = expr
     else:
-      natural_lanes = self.vector_bits // expr.ty.size
+      natural_lanes = self.get_natural_lanes_num(expr.ty)
       # If the number of lanes is less than what hardware vector has there is
       # nothing to slice.
       slices_num = builtins.max(expr.ty.lanes // natural_lanes, 1)
@@ -1502,7 +1511,6 @@ class Target:
 
   def emit_body(
       self,
-      output_type_size,
       ops,
       constants,
       buffers,
@@ -1547,7 +1555,7 @@ class Target:
         output_vector_num = (
             1
             if is_rem_width and self.tail_strategy == TailStrategy.SCALAR
-            else tile_width * output_type_size // self.vector_bits
+            else tile_width // natural_lanes
         )
 
         self.emit_inner_loop_body(
@@ -1584,7 +1592,6 @@ class Target:
 
   def handle_specialize(
       self,
-      output_type_size,
       ops,
       constants,
       buffers,
@@ -1603,7 +1610,6 @@ class Target:
         new_buffers[i].broadcast_mode = BroadcastMode.ALWAYS
 
         self.handle_specialize(
-            output_type_size,
             ops,
             constants,
             new_buffers,
@@ -1618,7 +1624,6 @@ class Target:
         new_buffers[i].broadcast_mode = BroadcastMode.NONE
 
         self.handle_specialize(
-            output_type_size,
             ops,
             constants,
             new_buffers,
@@ -1634,7 +1639,6 @@ class Target:
 
     # Just produce body for every other type of broadcasting.
     self.emit_body(
-        output_type_size,
         ops,
         constants,
         buffers,
@@ -1649,10 +1653,9 @@ class Target:
         func.value.ty == func.to.ty
     ), "Mismatching types of the output value and buffer."
 
-    output_type_size = func.value.ty.size
     ast = copy.deepcopy(func.value)
 
-    natural_lanes = self.vector_bits // output_type_size
+    natural_lanes = self.get_natural_lanes_num(func.value.ty)
     ast = self.vectorize(ast, natural_lanes, {})
     ast = self.slice_wide_types(ast, {})
     ast = self.optimize_slices(ast, {})
@@ -1689,7 +1692,6 @@ class Target:
       self.emit_constants(constants)
 
       self.handle_specialize(
-          output_type_size,
           ops,
           constants,
           buffer_args,

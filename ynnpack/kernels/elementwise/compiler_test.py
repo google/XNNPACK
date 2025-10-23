@@ -89,6 +89,9 @@ class TestTarget(Target):
     self.tail_strategy = None
     self.vector_bits = 128
 
+  def get_natural_lanes_num(self, ty):
+    return self.vector_bits // ty.size
+
 
 def sample_func():
   """Just a test function (it's an incomplete implementation of tanh)."""

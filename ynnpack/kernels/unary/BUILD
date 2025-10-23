@@ -115,7 +115,8 @@ ynn_generate_src_hdr(
     generator = ":generator",
     generator_args = [
         "x86_f16c",
-        "convert,16x1",
+        "convert_fp16_to_fp32,16x1",
+        "convert_fp32_to_fp16,16x1",
     ],
     output_hdr = "x86_f16c.inc",
     output_src = "x86_f16c.cc",
