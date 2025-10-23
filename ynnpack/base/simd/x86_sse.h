@@ -422,10 +422,6 @@ YNN_ALWAYS_INLINE f32x4& operator*=(f32x4& a, f32x4 b) {
   a.v = _mm_mul_ps(a.v, b.v);
   return a;
 }
-YNN_ALWAYS_INLINE s32x4& operator*=(s32x4& a, s32x4 b) {
-  a.v = _mm_mul_epi32(a.v, b.v);
-  return a;
-}
 
 YNN_ALWAYS_INLINE f32x4 operator+(f32x4 a, f32x4 b) { return a += b; }
 YNN_ALWAYS_INLINE s32x4 operator+(s32x4 a, s32x4 b) { return a += b; }
@@ -440,10 +436,9 @@ YNN_ALWAYS_INLINE s8x16 operator-(s8x16 a, s8x16 b) { return a -= b; }
 YNN_ALWAYS_INLINE u8x16 operator-(u8x16 a, u8x16 b) { return a -= b; }
 
 YNN_ALWAYS_INLINE f32x4 operator*(f32x4 a, f32x4 b) { return a *= b; }
-YNN_ALWAYS_INLINE s32x4 operator*(s32x4 a, s32x4 b) { return a *= b; }
 
-YNN_ALWAYS_INLINE s16x8 operator&(s16x8 a, int b) {
-  return s16x8{_mm_and_si128(a.v, _mm_set1_epi16(b))};
+YNN_ALWAYS_INLINE s16x8 operator&(s16x8 a, s16x8 b) {
+  return s16x8{_mm_and_si128(a.v, b.v)};
 }
 YNN_ALWAYS_INLINE s16x8 operator>>(s16x8 a, int b) {
   return s16x8{_mm_srai_epi16(a.v, b)};
@@ -461,9 +456,6 @@ YNN_ALWAYS_INLINE s32x4 min(s32x4 a, s32x4 b) {
 YNN_ALWAYS_INLINE s16x8 min(s16x8 a, s16x8 b) {
   return s16x8{_mm_min_epi16(a.v, b.v)};
 }
-YNN_ALWAYS_INLINE s8x16 min(s8x16 a, s8x16 b) {
-  return s8x16{_mm_min_epi8(a.v, b.v)};
-}
 YNN_ALWAYS_INLINE u8x16 min(u8x16 a, u8x16 b) {
   return u8x16{_mm_min_epu8(a.v, b.v)};
 }
@@ -476,9 +468,6 @@ YNN_ALWAYS_INLINE s32x4 max(s32x4 a, s32x4 b) {
 }
 YNN_ALWAYS_INLINE s16x8 max(s16x8 a, s16x8 b) {
   return s16x8{_mm_max_epi16(a.v, b.v)};
-}
-YNN_ALWAYS_INLINE s8x16 max(s8x16 a, s8x16 b) {
-  return s8x16{_mm_max_epi8(a.v, b.v)};
 }
 YNN_ALWAYS_INLINE u8x16 max(u8x16 a, u8x16 b) {
   return u8x16{_mm_max_epu8(a.v, b.v)};
@@ -530,21 +519,6 @@ YNN_ALWAYS_INLINE uint8_t horizontal_min(u8x16 a) {
   const __m128i min2 = _mm_min_epu8(min4, _mm_srli_si128(min4, 2));
   const __m128i min1 = _mm_min_epu8(min2, _mm_srli_si128(min2, 1));
   return (uint8_t)_mm_cvtsi128_si32(min1);
-}
-
-YNN_ALWAYS_INLINE int8_t horizontal_max(s8x16 a) {
-  const __m128i max8 = _mm_max_epi8(a.v, _mm_srli_si128(a.v, 8));
-  const __m128i max4 = _mm_max_epi8(max8, _mm_srli_si128(max8, 4));
-  const __m128i max2 = _mm_max_epi8(max4, _mm_srli_si128(max4, 2));
-  const __m128i max1 = _mm_max_epi8(max2, _mm_srli_si128(max2, 1));
-  return static_cast<int8_t>(_mm_cvtsi128_si32(max1));
-}
-YNN_ALWAYS_INLINE int8_t horizontal_min(s8x16 a) {
-  const __m128i min8 = _mm_min_epi8(a.v, _mm_srli_si128(a.v, 8));
-  const __m128i min4 = _mm_min_epi8(min8, _mm_srli_si128(min8, 4));
-  const __m128i min2 = _mm_min_epi8(min4, _mm_srli_si128(min4, 2));
-  const __m128i min1 = _mm_min_epi8(min2, _mm_srli_si128(min2, 1));
-  return static_cast<int8_t>(_mm_cvtsi128_si32(min1));
 }
 
 template <typename T>

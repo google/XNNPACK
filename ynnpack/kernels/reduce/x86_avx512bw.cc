@@ -13,7 +13,6 @@
 
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/half.h"
-#include "ynnpack/base/simd/x86_avx.h"
 #include "ynnpack/base/simd/x86_avx512.h"
 #include "ynnpack/kernels/reduce/generic.h"
 #include "ynnpack/kernels/reduce/min_max_accumulator.h"

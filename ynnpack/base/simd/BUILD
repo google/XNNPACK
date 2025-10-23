@@ -17,8 +17,10 @@ cc_library(
     ] + select({
         "//ynnpack:x86": [
             "x86_avx.h",
+            "x86_avx2.h",
             "x86_avx512.h",
             "x86_sse.h",
+            "x86_sse41.h",
         ],
         "//ynnpack:arm": ["arm.h"],
         "//conditions:default": [],
