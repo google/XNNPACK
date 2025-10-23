@@ -36,6 +36,8 @@ const char* xnn_fingerprint_id_to_string(
     return XNN_STRINGIFY(                                       \
         XNN_FINGERPRINT_ID_NAME(operator, in, out, __VA_ARGS__));
 #include "fingerprint_id.h.inc"
+    case xnn_fingerprint_id_test_f16_f32_qc8w_nr2:
+      return "xnn_fingerprint_id_test_f16_f32_qc8w_nr2";
     case xnn_fingerprint_id_unknown:
       return "xnn_fingerprint_id_unknown";
     case xnn_fingerprint_id_no_fingerprint:

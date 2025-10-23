@@ -818,6 +818,8 @@ xnnpack_cc_library(
         ":cache",
         ":common",
         ":datatype",
+        ":fingerprint_cache",
+        ":fingerprint_id",
         ":indirection",
         ":internal",
         ":logging",

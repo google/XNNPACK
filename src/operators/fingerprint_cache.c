@@ -177,3 +177,49 @@ uint32_t fingerprint_cache_get_fingerprint(
   assert(provider->context);
   return ((struct fingerprint_cache_context*)provider->context)->hash;
 }
+
+// A simple C implementation of a pseudo-random number generator to generate
+// random looking deterministic data to initialize fingerprint buffers.
+//
+// See https://en.wikipedia.org/wiki/Xorshift#xorshift+.
+//
+// Note: we do not need anything that is cryptographically secure. We only want
+// random looking data.
+struct Xorshift128PlusState {
+  uint64_t s0;
+  uint64_t s1;
+};
+
+// Advances the pseudo-random number generator by one step and returns data.
+static uint64_t xorshift128plus_next(struct Xorshift128PlusState* state) {
+  uint64_t s1 = state->s0;
+  uint64_t s0 = state->s1;
+  const uint64_t result = s0 + s1;
+  s1 ^= s1 << 23;
+  state->s0 = s0;
+  state->s1 = s1 ^ s0 ^ (s1 >> 18) ^ (s0 >> 5);
+  return result;
+}
+
+// Initializes the state of the pseudo-random number generator and advances it
+// by a few steps to avoid low quality initial values.
+static struct Xorshift128PlusState xorshift128plus_init(uint64_t seed) {
+  struct Xorshift128PlusState state = {seed, 0};
+  for (int i = 0; i < 10; ++i) {
+    xorshift128plus_next(&state);
+  }
+  return state;
+}
+
+void fill_fingerprint_buffer(uint8_t* data, size_t bytes) {
+  struct Xorshift128PlusState prng_state = xorshift128plus_init(0xafb69024c);
+  while (bytes >= sizeof(uint64_t)) {
+    *((uint64_t*)(data)) = xorshift128plus_next(&prng_state);
+    bytes -= sizeof(uint64_t);
+    data += sizeof(uint64_t);
+  }
+  const uint64_t tail = xorshift128plus_next(&prng_state);
+  for (int i = 0; i < bytes; ++i) {
+    data[i] = tail >> (i * 8);
+  }
+}
