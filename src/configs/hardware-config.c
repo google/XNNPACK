@@ -47,6 +47,10 @@
   #include <sys/auxv.h>
 #endif
 
+#if XNN_ARCH_LOONGARCH
+  #include <sys/auxv.h>
+#endif
+
 #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 #include <math.h>
 #endif
@@ -288,6 +292,15 @@ static void init_hardware_config(void) {
       hardware_config.vlenb = vlenb;
       xnn_log_info("RISC-V VLENB: %" PRIu32, vlenb);
     }
+  #endif
+
+  #if XNN_ARCH_LOONGARCH
+    const long loong_hwcap = getauxval(AT_HWCAP);
+    xnn_log_debug("getauxval(AT_HWCAP) = %08lX", loong_hwcap);
+    const bool use_loongarch_sx = (loong_hwcap & HWCAP_LOONGARCH_LSX) != 0;
+    const bool use_loongarch_asx = (loong_hwcap & HWCAP_LOONGARCH_LASX) != 0;
+    set_arch_flag(xnn_arch_loongarch_sx, use_loongarch_sx);
+    set_arch_flag(xnn_arch_loongarch_asx, use_loongarch_asx);
   #endif
 
   #if XNN_ARCH_PPC64
