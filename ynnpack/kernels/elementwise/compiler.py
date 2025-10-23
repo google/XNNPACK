@@ -345,7 +345,7 @@ class Load(Value):
     self.offset_elements = offset_elements
 
   def __repr__(self):
-    return f"load({self.index}, {self.offset_elements})"
+    return f"load<{self.ty}>({self.index}, {self.offset_elements})"
 
   def with_lanes(self, lanes):
     return Load(self.ty.with_lanes(lanes), self.index, self.offset_elements)
@@ -786,6 +786,7 @@ using int16x1_t = int16_t;
 using uint16x1_t = uint16_t;
 using int32x1_t = int32_t;
 using uint32x1_t = uint32_t;
+using float16x1_t = uint16_t;
 using float32x1_t = float;
 using float32_t = float;
 
@@ -999,8 +1000,9 @@ class Target:
       v = expr
     else:
       natural_lanes = self.vector_bits // expr.ty.size
-      assert expr.ty.lanes % natural_lanes == 0
-      slices_num = expr.ty.lanes // natural_lanes
+      # If the number of lanes is less than what hardware vector has there is
+      # nothing to slice.
+      slices_num = builtins.max(expr.ty.lanes // natural_lanes, 1)
 
       args = []
       if not isinstance(expr, Load):
@@ -1759,6 +1761,8 @@ i32_a = Var("a", Int(32))
 i32_b = Var("b", Int(32))
 u32_a = Var("a", UInt(32))
 u32_b = Var("b", UInt(32))
+f16_a = Var("a", Float(16))
+f16_b = Var("b", Float(16))
 f32_a = Var("a", Float(32))
 f32_b = Var("b", Float(32))
 f32_c = Var("c", Float(32))
