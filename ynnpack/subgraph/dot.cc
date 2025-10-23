@@ -778,7 +778,16 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
   dot_type type = {a.type, b.type, c.type};
   dot_shape shape;
   learn_shape_from_b(shape, num_k_dims, b);
-  dot_kernel kernel = get_dot_kernel(type, shape, nullptr, require_transpose_a);
+  static constexpr dot_packed_shape no_tile_k = {0, 1};
+  const dot_packed_shape* packed_shape = nullptr;
+  if ((!type_is_integral(a.type) || !type_is_integral(b.type)) &&
+      (subgraph->flags & YNN_FLAG_CONSISTENT_ARITHMETIC) != 0) {
+    // If we want consistent arithmetic and the inputs are floats, we can't use
+    // a kernel with tile_k > 1.
+    packed_shape = &no_tile_k;
+  }
+  dot_kernel kernel =
+      get_dot_kernel(type, shape, packed_shape, require_transpose_a);
 
   // Insert a packing node (if necessary).
   uint32_t packed_b_id =

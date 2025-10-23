@@ -19,6 +19,12 @@ extern "C" {
 // The most dimensions that can appear in a value.
 #define YNN_MAX_TENSOR_RANK 8
 
+// This flag indicates that YNNPACK should attempt to produce numerically
+// consistent results from a specific build of YNNPACK. This causes YNNPACK to
+// avoid using faster codepaths that are numerically inconsistent with any
+// other codepath that could be used in the same compiled YNNPACK library.
+#define YNN_FLAG_CONSISTENT_ARITHMETIC (1 << 1)
+
 #ifdef __GNUC__
 #define YNN_DEPRECATED __attribute__((deprecated))
 #else
@@ -41,6 +47,7 @@ typedef struct ynn_threadpool* ynn_threadpool_t;
 
 // Create a new subgraph, with `external_value_ids` reserved ids for external
 // values.
+// Supported flags: `YNN_FLAG_CONSISTENT_ARITHMETIC`
 enum ynn_status ynn_create_subgraph(uint32_t external_value_ids, uint32_t flags,
                                     ynn_subgraph_t* subgraph_out);
 

@@ -275,12 +275,14 @@ struct ynn_node {
 };
 
 struct ynn_subgraph {
-  explicit ynn_subgraph(uint32_t external_value_ids);
+  explicit ynn_subgraph(uint32_t external_value_ids, uint32_t flags);
 
   // Number of Value IDs reserved for communication with external graph
   // representation. Values created during subgraph transformation avoid using
   // IDs in [0, reserved_value_ids-1] range.
   uint32_t external_value_ids;
+
+  uint32_t flags;
 
   // We use std::deque, so we can push_back without invalidating pointers to
   // these objects.

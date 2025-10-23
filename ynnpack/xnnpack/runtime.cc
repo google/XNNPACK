@@ -11,6 +11,7 @@
 
 #include "include/experimental.h"
 #include "include/xnnpack.h"
+#include "ynnpack/base/log.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/xnnpack/utils.h"
 #include "ynnpack/xnnpack/xnnpack.h"
@@ -120,6 +121,12 @@ static xnn_status create_runtime_impl(xnn_subgraph_t subgraph,
   uint32_t ynn_flags = 0;
   if (flags & XNN_FLAG_SLINKY_NO_SCHEDULE) {
     ynn_flags |= YNN_RUNTIME_FLAG_NO_SCHEDULE;
+  }
+  if (flags & XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC) {
+    YNN_LOG_WARNING()
+        << "XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC flag is not supported by the "
+           "YNNPACK compatibility shim. Pass YNN_FLAG_CONSISTENT_ARITHMETIC to "
+           "`ynn_create_subgraph` instead.";
   }
 
   ynn_threadpool_t ynn_threadpool =

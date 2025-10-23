@@ -123,8 +123,8 @@ std::optional<float> ynn_value::as_scalar_float() const {
   return std::nullopt;
 }
 
-ynn_subgraph::ynn_subgraph(uint32_t external_value_ids)
-    : external_value_ids(external_value_ids) {
+ynn_subgraph::ynn_subgraph(uint32_t external_value_ids, uint32_t flags)
+    : external_value_ids(external_value_ids), flags(flags) {
   for (size_t i = 0; i < external_value_ids; ++i) {
     values.push_back(ynn_value(i));
   }
@@ -802,7 +802,7 @@ extern "C" {
 
 ynn_status ynn_create_subgraph(uint32_t external_value_ids, uint32_t flags,
                                ynn_subgraph_t* subgraph) {
-  *subgraph = new ynn_subgraph(external_value_ids);
+  *subgraph = new ynn_subgraph(external_value_ids, flags);
   return ynn_status_success;
 }
 
