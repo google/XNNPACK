@@ -407,12 +407,17 @@ ynn_status ynn_subgraph::fold_constants(slinky::thread_pool* threadpool) {
 
   // Use the results of reshape to allocate static buffers for the constants.
   for (uint32_t i : to_fold) {
-    ynn_runtime_value& value = runtime.value(i);
+    ynn_runtime_value& folded = runtime.value(i);
+    assert(values[i].extents.size() == folded.data->rank);
+    for (size_t d = 0; d < folded.data->rank; ++d) {
+      values[i].extents[d] = folded.data->dim(d).extent();
+    }
+    // Make a new value to put the constant in.
     values[i].data =
-        slinky::raw_buffer::make(value.data->rank, value.data->elem_size,
-                                 value.data->dims, YNN_ALLOCATION_ALIGNMENT);
-    value.data = values[i].data;
-    values[i].extents = value.extents;
+        slinky::raw_buffer::make(folded.data->rank, folded.data->elem_size,
+                                 folded.data->dims, YNN_ALLOCATION_ALIGNMENT);
+    // Use the new value as the output of the constant folding runtime.
+    folded.data = values[i].data;
   }
 
   status = runtime.setup();
