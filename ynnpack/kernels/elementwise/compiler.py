@@ -292,7 +292,7 @@ class Op(Value):
     fn_ops.append(self)
 
   def __repr__(self):
-    return f"{self.name}<{self.ty}>({', '.join(map(str, self.args))})"
+    return f"{self.name}<{self.ty}>({', '.join(map(repr, self.args))})"
 
   def compare(self, other):
     return self.name == other.name and self.ty == other.ty
@@ -316,7 +316,7 @@ class Var(Value):
     return self.name
 
   def __repr__(self):
-    return str(self)
+    return f"{self.name}:{self.ty}"
 
   def __hash__(self):
     return hash((self.name, self.ty))
