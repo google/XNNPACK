@@ -937,12 +937,13 @@ class Target:
     self.indent_level = 0
     self.patterns = []
     self.types = {
-        Int(8, 1): "char",
-        Int(16, 1): "short",
-        Int(32, 1): "int",
-        UInt(8, 1): "unsigned char",
-        UInt(16, 1): "unsigned short",
-        UInt(32, 1): "unsigned int",
+        Int(8, 1): "int8_t",
+        Int(16, 1): "int16_t",
+        Int(32, 1): "int32_t",
+        UInt(8, 1): "uint8_t",
+        UInt(16, 1): "uint16_t",
+        UInt(32, 1): "uint32_t",
+        Float(16, 1): "half",
         Float(32, 1): "float",
     }
     self.features = []
@@ -982,8 +983,8 @@ class Target:
             implied_features[feature], implied_features, all_features
         )
 
-  def legalize_type(self, ty):
-    return self.types.get(ty, ty.to_c_decl(True))
+  def legalize_type(self, ty, is_const=True):
+    return self.types.get(ty, ty.to_c_decl(is_const))
 
   def vectorize(self, expr, lanes, cache):
     if expr in cache:
@@ -1386,7 +1387,7 @@ class Target:
     for arg in args:
       b = self.as_buffer(arg, buffers)
       if b is not None:
-        t = str(b.ty)
+        t = self.legalize_type(b.ty, False)
         if is_load:
           t = "const " + t
         row_offset = ""
