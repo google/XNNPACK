@@ -459,13 +459,21 @@ void propagate_rank(
       case xnn_node_type_static_sum_squared:
         if (flags & XNN_FLAG_KEEP_DIMS) {
           output_value->shape.num_dims = input_value->shape.num_dims;
+        } else if (input_value->shape.num_dims >=
+                   node->params.reduce.num_reduction_axes) {
+          output_value->shape.num_dims = input_value->shape.num_dims -
+                                         node->params.reduce.num_reduction_axes;
         } else {
-          output_value->shape.num_dims = input_value->shape.num_dims - node->params.reduce.num_reduction_axes;
+          xnn_log_warning("Unable to determine output rank of Node #%" PRIu32
+                          " %s, assuming %zu.",
+                          node->id, xnn_node_type_to_string(node->type),
+                          output_value->shape.num_dims);
         }
         break;
       case xnn_node_type_batch_matrix_multiply:
       case xnn_node_type_binary_elementwise:
-        output_value->shape.num_dims = max(input_value->shape.num_dims, input_value_b->shape.num_dims);
+        output_value->shape.num_dims =
+            max(input_value->shape.num_dims, input_value_b->shape.num_dims);
         break;
       case xnn_node_type_concatenate:
       case xnn_node_type_copy:
@@ -480,7 +488,9 @@ void propagate_rank(
         output_value->shape.num_dims = input_value->shape.num_dims;
         break;
       case xnn_node_type_static_expand_dims:
-        output_value->shape.num_dims = input_value->shape.num_dims + node->params.static_reshape.new_shape.num_dims;
+        output_value->shape.num_dims =
+            input_value->shape.num_dims +
+            node->params.static_reshape.new_shape.num_dims;
         break;
       case xnn_node_type_fully_connected:
       case xnn_node_type_fully_connected_sparse:
@@ -488,21 +498,41 @@ void propagate_rank(
         break;
       case xnn_node_type_static_reshape:
       case xnn_node_type_static_broadcast:
-        output_value->shape.num_dims = node->params.static_reshape.new_shape.num_dims;
+        output_value->shape.num_dims =
+            node->params.static_reshape.new_shape.num_dims;
         break;
       case xnn_node_type_fuse_dims:
-        output_value->shape.num_dims =
-            input_value->shape.num_dims -
-            node->params.static_reshape.new_shape.num_dims + 1;
+        if (input_value->shape.num_dims >=
+            node->params.static_reshape.new_shape.num_dims + 1) {
+          output_value->shape.num_dims =
+              input_value->shape.num_dims -
+              (node->params.static_reshape.new_shape.num_dims + 1);
+        } else {
+          xnn_log_warning("Unable to determine output rank of Node #%" PRIu32
+                          " %s, assuming %zu.",
+                          node->id, xnn_node_type_to_string(node->type),
+                          output_value->shape.num_dims);
+        }
         break;
       case xnn_node_type_split_dims:
-        output_value->shape.num_dims =
-            input_value->shape.num_dims +
-            node->params.static_reshape.new_shape.num_dims - 1;
+        if (input_value->shape.num_dims +
+                node->params.static_reshape.new_shape.num_dims >=
+            1) {
+          output_value->shape.num_dims =
+              (input_value->shape.num_dims +
+               node->params.static_reshape.new_shape.num_dims) -
+              1;
+        } else {
+          xnn_log_warning("Unable to determine output rank of Node #%" PRIu32
+                          " %s, assuming %zu.",
+                          node->id, xnn_node_type_to_string(node->type),
+                          output_value->shape.num_dims);
+        }
         break;
       default:
         XNN_UNREACHABLE;
     }
+    assert(output_value->shape.num_dims <= XNN_MAX_TENSOR_DIMS);
   }
 }
 

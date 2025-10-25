@@ -36,6 +36,7 @@ static void set_allocation_type(struct xnn_value* value)
 
 static void set_shape(struct xnn_value* value, size_t num_dims, const size_t* dims)
 {
+  assert(num_dims <= XNN_MAX_TENSOR_DIMS);
   value->shape.num_dims = num_dims;
   if (num_dims != 0) {
     if (dims != NULL) {
