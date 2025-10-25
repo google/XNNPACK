@@ -12,7 +12,10 @@
 
 namespace ynn {
 
-enum arch_flag {
+// This should be an enum class, but bitfields are messy.
+namespace arch_flag {
+
+enum {
   none = 0,
 #ifdef YNN_ARCH_X86
   sse2 = 1 << 0,
@@ -44,6 +47,8 @@ enum arch_flag {
   sme2 = 1 << 7,
 #endif
 };
+
+}  // namespace arch_flag
 
 uint64_t get_supported_arch_flags();
 
