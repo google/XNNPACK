@@ -2859,17 +2859,7 @@ void GemmMicrokernelTester::Test_PF16(
     }
   }
 
-  // Create a fake `gemm_config` for the packing functions.
-  struct xnn_gemm_config gemm_config;
-  gemm_config.mr = static_cast<uint8_t>(mr());
-  gemm_config.mr_packed = static_cast<uint8_t>(mr_packed());
-  gemm_config.nr = static_cast<uint8_t>(nr());
-  gemm_config.log2_kr = static_cast<uint8_t>(31 - math_clz_nonzero_u32(kr()));
-  gemm_config.log2_sr = static_cast<uint8_t>(31 - math_clz_nonzero_u32(sr()));
-  gemm_config.planes = planes();
-
-  // Compute packed weights buffer size using the packed_stride function.
-  // Use rhs_imatmul conv_goki packer directly; size helper returns bytes.
+  // Compute packed weights buffer size using conv_goki packer directly; size helper returns bytes.
   const size_t packed_rhs_size =
       xnn_packed_size_kai_f16_conv_goki_w(n(), ks(), k());
   xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> packed_w(
