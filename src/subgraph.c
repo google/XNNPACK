@@ -15,6 +15,7 @@
 
 #include "include/experimental.h"
 #include "include/xnnpack.h"
+#include "src/subgraph/subgraph-utils.h"
 #include "src/xnnpack/allocation-type.h"
 #include "src/xnnpack/allocator.h"
 #include "src/xnnpack/common.h"
@@ -2323,17 +2324,82 @@ static void swap_value_pointers(struct xnn_value** a, struct xnn_value** b) {
   *b = temp;
 }
 
-static float get_value_as_float(const void* data, enum xnn_datatype datatype) {
-  switch (datatype) {
+static float get_scalar_value_as_float(struct xnn_value* val) {
+  switch (val->datatype) {
     case xnn_datatype_fp32:
-      return *(const float*)data;
+      return *(const float*)val->data;
     case xnn_datatype_fp16:
-      return xnn_float16_to_float(*(const xnn_float16*)data);
+      return xnn_float16_to_float(*(const xnn_float16*)val->data);
+    case xnn_datatype_bf16:
+      return xnn_bfloat16_to_float(*(const xnn_bfloat16*)val->data);
     case xnn_datatype_int32:
-      return *(const int32_t*)data;
+      return *(const int32_t*)val->data;
+    case xnn_datatype_qint8:
+      return ((float)*(const int8_t*)val->data - val->quantization.zero_point) *
+             val->quantization.scale;
+    case xnn_datatype_quint8:
+      return ((float)*(const uint8_t*)val->data -
+              val->quantization.zero_point) *
+             val->quantization.scale;
     default:
-      XNN_UNREACHABLE;
+      return NAN;
   }
+}
+
+static size_t swap_input_values(xnn_subgraph_t subgraph, uint32_t old_id,
+                                uint32_t new_id) {
+  size_t changes = 0;
+  struct xnn_value* old_value = &subgraph->values[old_id];
+  struct xnn_value* new_value = &subgraph->values[new_id];
+
+  // If the old value is an external value, point its producer in the right
+  // direction.
+  if (xnn_value_is_external_output(old_value->flags)) {
+    // If the new node does not have a producer, or it's also an output, then
+    // there's nothing we can do, so don't change anything.
+    const uint32_t producer_id = new_value->producer;
+    if (xnn_value_is_external_output(new_value->flags) ||
+        producer_id == XNN_INVALID_NODE_ID) {
+      return 0;
+    }
+
+    // Change the producer's output.
+    struct xnn_node* producer_node = &subgraph->nodes[producer_id];
+    for (int k = 0; k < producer_node->num_outputs; k++) {
+      if (producer_node->outputs[k] == new_id) {
+        producer_node->outputs[k] = old_id;
+        changes++;
+      }
+    }
+    old_value->producer = producer_id;
+
+    // Swap the old/new values so that consumers of `new_id` point to `old_id`
+    // instead.
+    swap_value_pointers(&old_value, &new_value);
+    old_id = old_value->id;
+    new_id = new_value->id;
+  }
+
+  new_value->num_consumers--;
+  new_value->first_consumer = XNN_INVALID_VALUE_ID;
+  for (int k = 0; k < subgraph->num_nodes; k++) {
+    for (int j = 0; j < subgraph->nodes[k].num_inputs; j++) {
+      if (subgraph->nodes[k].inputs[j] == old_id) {
+        subgraph->nodes[k].inputs[j] = new_id;
+        if (!is_repeated_input(&subgraph->nodes[k], j)) {
+          new_value->num_consumers++;
+        }
+        if (new_value->first_consumer == XNN_INVALID_VALUE_ID) {
+          new_value->first_consumer = k;
+        }
+        changes++;
+      } else if (subgraph->nodes[k].inputs[j] == new_id &&
+                 new_value->first_consumer == XNN_INVALID_VALUE_ID) {
+        new_value->first_consumer = k;
+      }
+    }
+  }
+  return changes;
 }
 
 enum xnn_status xnn_subgraph_optimize_common_subgraphs(
@@ -2344,280 +2410,982 @@ enum xnn_status xnn_subgraph_optimize_common_subgraphs(
     return xnn_status_success;
   }
 
-  // Count the number of changes made.
-  size_t changes = 0;
+  // Mark scalar static values as `XNN_VALUE_FLAG_IS_ZERO` or
+  // `XNN_VALUE_FLAG_IS_ONE`, where appropriate.
+  for (uint32_t value_id = 0; value_id < subgraph->num_values; value_id++) {
+    struct xnn_value* value = &subgraph->values[value_id];
+    // We are looking for valid, static, scalar values.
+    if (value->datatype == xnn_datatype_invalid ||
+        !xnn_value_is_static(value->allocation_type) ||
+        xnn_shape_multiply_all_dims(&value->shape) != 1) {
+      continue;
+    }
 
-  // Loop over the nodes in this subgraph.
-  for (uint32_t node_id = 0; node_id < subgraph->num_nodes; node_id++) {
-    struct xnn_node* node = &subgraph->nodes[node_id];
+    // Get the value as a float.
+    const float value_as_float = get_scalar_value_as_float(value);
+    xnn_log_info("v%03u is a constant: %e.", value->id, value_as_float);
 
-    // Skip anything that is not a fully-connected node.
-    switch (node->type) {
-      case xnn_node_type_binary_elementwise:
-        // Replace `mul(x, x)` with `sqr(x)` for consistency.
-        if (node->binary_operator == xnn_binary_multiply &&
-            node->num_inputs == 2 && node->inputs[0] == node->inputs[1]) {
-          const uint32_t input_id = node->inputs[0];
-          const uint32_t output_id = node->outputs[0];
-          xnn_log_info(
-              "Converting node mul[#%u](v%03u, v%03u) to sqr[#%u](v%03u).",
-              node_id, input_id, input_id, node_id, input_id);
-          node->type = xnn_node_type_invalid;
-          enum xnn_status status = xnn_define_unary(subgraph, xnn_unary_square,
-                                                    /*params=*/NULL, input_id,
-                                                    output_id, node->flags);
-          if (status != xnn_status_success) {
-            xnn_log_error("Failed to create new unary-elementwise node.");
-            return status;
+    // Mark the value accordingly.
+    value->flags |= (value_as_float == 0.0f)   ? XNN_VALUE_FLAG_IS_ZERO
+                    : (value_as_float == 1.0f) ? XNN_VALUE_FLAG_IS_ONE
+                                               : 0;
+  }
+
+  // xnn_subgraph_log_dot_info(subgraph);
+
+  while (true) {
+    // Count the number of changes made.
+    size_t changes = 0;
+
+    // Loop over the nodes in this subgraph.
+    for (uint32_t node_id = 0; node_id < subgraph->num_nodes; node_id++) {
+      struct xnn_node* node = &subgraph->nodes[node_id];
+
+      // Propagate constants through constant-preserving ops.
+      switch (node->type) {
+        // Shape and size changes don't affect the constants.
+        case xnn_node_type_copy:
+        case xnn_node_type_even_split:
+        case xnn_node_type_fuse_dims:
+        case xnn_node_type_split_dims:
+        case xnn_node_type_static_broadcast:
+        case xnn_node_type_static_expand_dims:
+        case xnn_node_type_static_reshape:
+        case xnn_node_type_static_slice:
+        case xnn_node_type_static_transpose:
+
+        // Operations that propagate constants.
+        case xnn_node_type_convert:
+        case xnn_node_type_static_mean_squared:
+        case xnn_node_type_static_mean:
+        case xnn_node_type_static_reduce_max:
+        case xnn_node_type_static_reduce_min:
+        case xnn_node_type_static_resize_bilinear_2d: {
+          const struct xnn_value* input_value =
+              &subgraph->values[node->inputs[0]];
+          if (!xnn_value_is_const(input_value->flags)) {
+            break;
           }
-          node = &subgraph->nodes[node_id];
-          *node = subgraph->nodes[--subgraph->num_nodes];
-          node->id = node_id;
-          subgraph->values[output_id].producer = node_id;
-          changes++;
-        }
+          struct xnn_value* output_value = &subgraph->values[node->outputs[0]];
+          output_value->flags |= (input_value->flags & (XNN_VALUE_FLAG_IS_ZERO |
+                                                        XNN_VALUE_FLAG_IS_ONE));
+        } break;
 
-        // Replace `mul(reduce_sum(x), 1/n)` or `mul(reduce_sum_squared(x),
-        // 1/n)` with `reduce_mean(x)` or `reduce_mean_squared(x)`,
-        // respectively.
-        while (node->binary_operator == xnn_binary_multiply) {
-          struct xnn_value* arg_value = &subgraph->values[node->inputs[0]];
-          struct xnn_value* inv_n_value = &subgraph->values[node->inputs[1]];
-          if (xnn_shape_multiply_all_dims(&inv_n_value->shape) != 1 ||
-              !xnn_value_is_static(inv_n_value->allocation_type)) {
-            if (xnn_shape_multiply_all_dims(&arg_value->shape) == 1 &&
-                xnn_value_is_static(arg_value->allocation_type)) {
-              swap_value_pointers(&arg_value, &inv_n_value);
-            } else {
+        // Different unary ops propagate constants in different ways.
+        case xnn_node_type_unary_elementwise: {
+          const struct xnn_value* input_value =
+              &subgraph->values[node->inputs[0]];
+          if (!xnn_value_is_const(input_value->flags)) {
+            break;
+          }
+          struct xnn_value* output_value = &subgraph->values[node->outputs[0]];
+          switch (node->unary_operator) {
+            // The following ops preserve both zeros and ones.
+            case xnn_unary_bankers_rounding:
+            case xnn_unary_ceiling:
+            case xnn_unary_convert:
+            case xnn_unary_elu:
+            case xnn_unary_floor:
+            case xnn_unary_leaky_relu:
+            case xnn_unary_square_root:
+            case xnn_unary_square:
+              output_value->flags |=
+                  (input_value->flags &
+                   (XNN_VALUE_FLAG_IS_ZERO | XNN_VALUE_FLAG_IS_ONE));
               break;
+
+            // The following ops preserve only zeros.
+            case xnn_unary_exp:
+            case xnn_unary_hardswish:
+            case xnn_unary_negate:
+            case xnn_unary_sine:
+            case xnn_unary_tanh:
+              output_value->flags |=
+                  (input_value->flags & XNN_VALUE_FLAG_IS_ZERO);
+              break;
+
+            // The following ops preserve only ones.
+            case xnn_unary_reciprocal_square_root:
+              output_value->flags |=
+                  (input_value->flags & XNN_VALUE_FLAG_IS_ZERO);
+              break;
+
+            // The following ops flip zeros to ones.
+            case xnn_unary_cosine:
+              if (input_value->flags & XNN_VALUE_FLAG_IS_ZERO) {
+                output_value->flags |= XNN_VALUE_FLAG_IS_ONE;
+              }
+              break;
+
+            // The following ops flip ones to zero.
+            case xnn_unary_log:
+              if (input_value->flags & XNN_VALUE_FLAG_IS_ONE) {
+                output_value->flags |= XNN_VALUE_FLAG_IS_ZERO;
+              }
+
+            // Clamps preserve zeros and/or ones if they are in the valid range.
+            case xnn_unary_clamp:
+              if (node->params.unary.clamp.min <= 0.0f &&
+                  node->params.unary.clamp.max >= 0.0f) {
+                output_value->flags |=
+                    (input_value->flags & XNN_VALUE_FLAG_IS_ZERO);
+              }
+              if (node->params.unary.clamp.min <= 1.0f &&
+                  node->params.unary.clamp.max >= 1.0f) {
+                output_value->flags |=
+                    (input_value->flags & XNN_VALUE_FLAG_IS_ONE);
+              }
+              break;
+
+            default:
+              break;
+          }
+        } break;
+        default:
+          break;
+      }
+
+      switch (node->type) {
+        case xnn_node_type_binary_elementwise:
+          // Replace `mul(x, x)` with `sqr(x)` for consistency.
+          if (node->binary_operator == xnn_binary_multiply &&
+              node->num_inputs == 2 && node->inputs[0] == node->inputs[1]) {
+            const uint32_t input_id = node->inputs[0];
+            const uint32_t output_id = node->outputs[0];
+            xnn_log_info(
+                "Converting node mul[#%u](v%03u, v%03u) to sqr[#%u](v%03u).",
+                node_id, input_id, input_id, node_id, input_id);
+            node->type = xnn_node_type_invalid;
+            enum xnn_status status = xnn_define_unary(
+                subgraph, xnn_unary_square,
+                /*params=*/NULL, input_id, output_id, node->flags);
+            if (status != xnn_status_success) {
+              xnn_log_error("Failed to create new unary-elementwise node.");
+              return status;
             }
+            node = &subgraph->nodes[node_id];
+            *node = subgraph->nodes[--subgraph->num_nodes];
+            node->id = node_id;
+            subgraph->values[output_id].producer = node_id;
+            changes++;
           }
 
-          // Check that one of the args is a sum or sum2 reduction.
-          if (!(arg_value->datatype == xnn_datatype_fp16 ||
-                arg_value->datatype == xnn_datatype_fp32) ||
-              arg_value->producer == XNN_INVALID_NODE_ID) {
-            break;
-          }
-          struct xnn_node* arg_node = &subgraph->nodes[arg_value->producer];
-          const enum xnn_node_type arg_node_type = arg_node->type;
-          if (!(arg_node_type == xnn_node_type_static_sum ||
-                arg_node_type == xnn_node_type_static_sum_squared)) {
-            break;
+          // Replace `mul(reduce_sum(x), 1/n)`, `div(reduce_sum(x), n)`  or
+          // `mul(reduce_sum_squared(x), 1/n)`, `div(reduce_sum_squared(x), n)`
+          // with `reduce_mean(x)` or `reduce_mean_squared(x)`, respectively.
+          if ((node->binary_operator == xnn_binary_multiply ||
+               node->binary_operator == xnn_binary_divide)) {
+            do {
+              struct xnn_value* reduce_value =
+                  &subgraph->values[node->inputs[0]];
+              struct xnn_value* arg_value = &subgraph->values[node->inputs[1]];
+              if (xnn_shape_multiply_all_dims(&arg_value->shape) != 1 ||
+                  !xnn_value_is_static(arg_value->allocation_type)) {
+                if (xnn_shape_multiply_all_dims(&reduce_value->shape) == 1 &&
+                    xnn_value_is_static(reduce_value->allocation_type)) {
+                  swap_value_pointers(&reduce_value, &arg_value);
+                } else {
+                  break;
+                }
+              }
+
+              // Check that one of the args is a sum or sum2 reduction.
+              if (!(reduce_value->datatype == xnn_datatype_fp16 ||
+                    reduce_value->datatype == xnn_datatype_fp32) ||
+                  reduce_value->producer == XNN_INVALID_NODE_ID) {
+                break;
+              }
+              struct xnn_node* reduce_node =
+                  &subgraph->nodes[reduce_value->producer];
+              const enum xnn_node_type reduce_node_type = reduce_node->type;
+              if (!(reduce_node_type == xnn_node_type_static_sum ||
+                    reduce_node_type == xnn_node_type_static_sum_squared)) {
+                break;
+              }
+
+              // Check that the other arg is the product of the dimensions of
+              // the reduction axes, or its inverse.
+              struct xnn_value* input_value =
+                  &subgraph->values[reduce_node->inputs[0]];
+              const float arg_as_float = get_scalar_value_as_float(arg_value);
+              size_t num_reduced_dims = 1;
+              for (size_t k = 0;
+                   k < reduce_node->params.reduce.num_reduction_axes; k++) {
+                num_reduced_dims *= xnn_shape_get_dim(
+                    &input_value->shape,
+                    reduce_node->params.reduce.reduction_axes[k]);
+              }
+              if (!num_reduced_dims) {
+                break;
+              }
+              const enum xnn_binary_operator binary_operator =
+                  node->binary_operator;
+              float expected_arg = (binary_operator == xnn_binary_multiply)
+                                       ? 1.0f / num_reduced_dims
+                                       : (float)num_reduced_dims;
+              if (arg_value->datatype == xnn_datatype_fp16) {
+                expected_arg =
+                    xnn_float16_to_float(xnn_float16_from_float(expected_arg));
+              }
+              if (arg_as_float != expected_arg) {
+                break;
+              }
+
+              const uint32_t output_id = node->outputs[0];
+              const size_t num_reduction_axes =
+                  reduce_node->params.reduce.num_reduction_axes;
+              int64_t reduction_axes[XNN_MAX_TENSOR_DIMS];
+              memcpy(reduction_axes, reduce_node->params.reduce.reduction_axes,
+                     num_reduction_axes * sizeof(int64_t));
+              enum xnn_status status = xnn_define_static_reduce_v2(
+                  subgraph,
+                  reduce_node_type == xnn_node_type_static_sum
+                      ? xnn_reduce_mean
+                      : xnn_reduce_mean_squared,
+                  num_reduction_axes, reduction_axes, input_value->id,
+                  output_id, reduce_node->flags);
+              if (status != xnn_status_success) {
+                xnn_log_error(
+                    "Failed to create new `Mean` or `Mean Squared` node.");
+                return status;
+              }
+              node = &subgraph->nodes[node_id];
+              *node = subgraph->nodes[--subgraph->num_nodes];
+              node->id = node_id;
+
+              xnn_log_info(
+                  "Converted %s[#%u](reduce_sum%s[#%u](v%03u), v%03u) to "
+                  "reduce_mean%s[#%u](v%03u).",
+                  (binary_operator == xnn_binary_multiply) ? "mul" : "div",
+                  node_id,
+                  reduce_node_type == xnn_node_type_static_sum_squared
+                      ? "_squared"
+                      : "",
+                  reduce_value->producer, input_value->id, arg_value->id,
+                  reduce_node_type == xnn_node_type_static_sum_squared
+                      ? "_squared"
+                      : "",
+                  node_id, input_value->id);
+              changes++;
+            } while (false);
           }
 
-          // Check that the other arg is the inverse of the innermost dimension.
-          struct xnn_value* input_value =
-              &subgraph->values[arg_node->inputs[0]];
-          const float inv_n =
-              get_value_as_float(inv_n_value->data, inv_n_value->datatype);
-          size_t expected_n = 1;
-          for (size_t k = 0; k < arg_node->params.reduce.num_reduction_axes;
-               k++) {
-            expected_n *= xnn_shape_get_dim(
-                &input_value->shape, arg_node->params.reduce.reduction_axes[k]);
-          }
-          if (!expected_n) {
-            break;
-          }
-          float expected_inv_n = 1.0f / expected_n;
-          if (inv_n_value->datatype == xnn_datatype_fp16) {
-            expected_inv_n =
-                xnn_float16_to_float(xnn_float16_from_float(expected_inv_n));
-          }
-          if (inv_n != expected_inv_n) {
-            break;
-          }
+          // Replace `add(a, neg(b))`, `add(neg(a), b)`, or `sub(a, neg(b))`
+          // with `sub(a, b)`, `sub(b, a)`, or `add(a, b)`, respectively.
+          if ((node->binary_operator == xnn_binary_add ||
+               node->binary_operator == xnn_binary_subtract) &&
+              !(node->flags & XNN_NODE_FLAG_DONT_ELIDE)) {
+            do {
+              struct xnn_value* input_a_value =
+                  &subgraph->values[node->inputs[0]];
+              struct xnn_value* input_b_value =
+                  &subgraph->values[node->inputs[1]];
+              const uint32_t producer_a_id = input_a_value->producer;
+              const uint32_t producer_b_id = input_b_value->producer;
 
-          const uint32_t output_id = node->outputs[0];
-          const size_t num_reduction_axes =
-              arg_node->params.reduce.num_reduction_axes;
-          int64_t reduction_axes[XNN_MAX_TENSOR_DIMS];
-          memcpy(reduction_axes, arg_node->params.reduce.reduction_axes,
-                 num_reduction_axes * sizeof(int64_t));
-          enum xnn_status status = xnn_define_static_reduce_v2(
-              subgraph,
-              arg_node_type == xnn_node_type_static_sum
-                  ? xnn_reduce_mean
-                  : xnn_reduce_mean_squared,
-              num_reduction_axes, reduction_axes, input_value->id, output_id,
-              arg_node->flags);
-          if (status != xnn_status_success) {
-            xnn_log_error(
-                "Failed to create new `Sum Squared` or `Mean Squared` node.");
-            return status;
-          }
-          node = &subgraph->nodes[node_id];
-          *node = subgraph->nodes[--subgraph->num_nodes];
-          node->id = node_id;
+              // Check for `sub(a, neg(b))`.
+              if (node->binary_operator == xnn_binary_subtract &&
+                  producer_b_id != XNN_INVALID_NODE_ID) {
+                struct xnn_node* producer_b_node =
+                    &subgraph->nodes[producer_b_id];
+                if (producer_b_node->type != xnn_node_type_unary_elementwise ||
+                    producer_b_node->unary_operator != xnn_unary_negate) {
+                  break;
+                }
+                enum xnn_status status = xnn_define_binary(
+                    subgraph, xnn_binary_add, /*params=*/NULL, node->inputs[0],
+                    subgraph->nodes[producer_b_id].inputs[0], node->outputs[0],
+                    node->flags);
+                if (status != xnn_status_success) {
+                  xnn_log_error("Failed to create new `Add` node.");
+                  return status;
+                }
+                node = &subgraph->nodes[node_id];
+                *node = subgraph->nodes[--subgraph->num_nodes];
+                node->id = node_id;
 
-          xnn_log_info(
-              "Converted mul[#%u](reduce_sum%s[#%u](v%03u), v%03u) to "
-              "reduce_mean%s[#%u](v%03u).",
-              node_id,
-              arg_node_type == xnn_node_type_static_sum_squared ? "_squared"
-                                                                : "",
-              arg_value->producer, input_value->id, inv_n_value->id,
-              arg_node_type == xnn_node_type_static_sum_squared ? "_squared"
-                                                                : "",
-              node_id, input_value->id);
-          changes++;
-          break;
-        }
-        break;
+                xnn_log_info(
+                    "Converted sub[#%u](v%03u, neg[#%u](v%03u)) to "
+                    "add[#%u](v%03u, v%03u).",
+                    node->id, node->inputs[0], producer_b_id, node->inputs[1],
+                    node->id, node->inputs[0], node->inputs[1]);
+                changes++;
+              }
 
-      case xnn_node_type_static_sum:
-      case xnn_node_type_static_mean:
-        // Convert `reduce_sum(sqr(a))` or `reduce_mean(sqr(a))` to
-        // `reduce_sum_squared(a)` or `reduce_mean_squared(a)`, respectively.
-        while (true) {
-          struct xnn_value* arg_value = &subgraph->values[node->inputs[0]];
-          if (!(arg_value->datatype == xnn_datatype_fp16 ||
-                arg_value->datatype == xnn_datatype_fp32) ||
-              arg_value->producer == XNN_INVALID_NODE_ID) {
-            break;
-          }
-          struct xnn_node* arg_node = &subgraph->nodes[arg_value->producer];
-          if (arg_node->type != xnn_node_type_unary_elementwise ||
-              arg_node->unary_operator != xnn_unary_square) {
-            break;
-          }
-          const uint32_t output_id = node->outputs[0];
-          const size_t num_reduction_axes =
-              node->params.reduce.num_reduction_axes;
-          int64_t reduction_axes[XNN_MAX_TENSOR_DIMS];
-          memcpy(reduction_axes, node->params.reduce.reduction_axes,
-                 num_reduction_axes * sizeof(int64_t));
-          const enum xnn_node_type node_type = node->type;
-          enum xnn_status status = xnn_define_static_reduce_v2(
-              subgraph,
-              node_type == xnn_node_type_static_sum ? xnn_reduce_sum_squared
-                                                    : xnn_reduce_mean_squared,
-              num_reduction_axes, reduction_axes, arg_node->inputs[0],
-              output_id, node->flags);
-          if (status != xnn_status_success) {
-            xnn_log_error("Failed to create new `Sum Squared` node.");
-            return status;
-          }
-          node = &subgraph->nodes[node_id];
-          *node = subgraph->nodes[--subgraph->num_nodes];
-          node->id = node_id;
-
-          xnn_log_info(
-              "Converted reduce_%s[#%u](sqr[#%u](v%03u)) to "
-              "reduce_%s_squared[#%u](v%03u).",
-              node_type == xnn_node_type_static_sum ? "sum" : "mean", node_id,
-              arg_value->producer, node->inputs[0],
-              node_type == xnn_node_type_static_sum ? "sum" : "mean", node_id,
-              node->inputs[0]);
-          changes++;
-          break;
-        }
-        break;
-
-      case xnn_node_type_static_broadcast:
-        if (!(optimization_flags & XNN_FLAG_SLINKY_ENABLED)) {
-          // XNNPACK doesn't need explicit braodcasting for binary and
-          // batch_matrix_multiply nodes, so check if it can be elided.
-          const uint32_t input_id = node->inputs[0];
-          const uint32_t output_id = node->outputs[0];
-          const struct xnn_value* output_value = &subgraph->values[output_id];
-
-          // Find all consumers of the broadcast node's output.
-          uint32_t num_consumers = output_value->num_consumers;
-          for (uint32_t k = output_value->first_consumer;
-               k < subgraph->num_nodes && num_consumers; k++) {
-            struct xnn_node* consumer = &subgraph->nodes[k];
-            for (uint32_t j = 0; j < consumer->num_inputs; j++) {
-              if (consumer->inputs[j] == output_id) {
-                // If the consumer is known to broadcast implicitly,
-                // short-circuit it.
-                if (consumer->type == xnn_node_type_binary_elementwise ||
-                    consumer->type == xnn_node_type_batch_matrix_multiply) {
-                  if (!is_repeated_input(consumer, j)) {
-                    num_consumers--;
+              // Check for `add(a, neg(b))` or `add(neg(a), b)`.
+              else if (node->binary_operator == xnn_binary_add) {
+                // Check for `add(neg(a), b)`.
+                if (producer_a_id != XNN_INVALID_NODE_ID &&
+                    subgraph->nodes[producer_a_id].type ==
+                        xnn_node_type_unary_elementwise &&
+                    subgraph->nodes[producer_a_id].unary_operator ==
+                        xnn_unary_negate) {
+                  enum xnn_status status = xnn_define_binary(
+                      subgraph, xnn_binary_subtract, /*params=*/NULL,
+                      node->inputs[1], subgraph->nodes[producer_a_id].inputs[0],
+                      node->outputs[0], node->flags);
+                  if (status != xnn_status_success) {
+                    xnn_log_error("Failed to create new `Subtract` node.");
+                    return status;
                   }
-                  consumer->inputs[j] = input_id;
+                  node = &subgraph->nodes[node_id];
+                  *node = subgraph->nodes[--subgraph->num_nodes];
+                  node->id = node_id;
+
+                  xnn_log_info(
+                      "Converted add[#%u](neg[#%u](v%03u), v%03u) to "
+                      "sub[#%u](v%03u, v%03u).",
+                      node->id, producer_a_id, node->inputs[0], node->inputs[1],
+                      node->id, node->inputs[0], node->inputs[1]);
+                  changes++;
+                }
+
+                // Check for `add(a, neg(b))`.
+                else if (producer_b_id != XNN_INVALID_NODE_ID &&
+                         subgraph->nodes[producer_b_id].type ==
+                             xnn_node_type_unary_elementwise &&
+                         subgraph->nodes[producer_b_id].unary_operator ==
+                             xnn_unary_negate) {
+                  enum xnn_status status = xnn_define_binary(
+                      subgraph, xnn_binary_subtract, /*params=*/NULL,
+                      node->inputs[0], subgraph->nodes[producer_b_id].inputs[0],
+                      node->outputs[0], node->flags);
+                  if (status != xnn_status_success) {
+                    xnn_log_error("Failed to create new `Subtract` node.");
+                    return status;
+                  }
+                  node = &subgraph->nodes[node_id];
+                  *node = subgraph->nodes[--subgraph->num_nodes];
+                  node->id = node_id;
+
+                  xnn_log_info(
+                      "Converted add[#%u](v%03u, neg[#%u](v%03u)) to "
+                      "sub[#%u](v%03u, v%03u).",
+                      node->id, node->inputs[0], producer_b_id, node->inputs[1],
+                      node->id, node->inputs[0], node->inputs[1]);
                   changes++;
                 }
               }
-            }
+            } while (false);
           }
 
-          // If the broadcast could not be completely elided, then replace it
-          // with a broadcasting `add` of zero.
-          // TODO(b/421935339) Replace this with a more principled solution if
-          // needed since both the "zero" and output values could be quite
-          // large.
-          if (num_consumers) {
-            // Compute the shape of the right-hand operand to the binary op
-            // that, when added to the input, will result in the correct output
-            // shape.
-            size_t shape[XNN_MAX_TENSOR_DIMS];
-            size_t num_dims = node->params.static_reshape.new_shape.num_dims;
-            const struct xnn_value* input_value = &subgraph->values[input_id];
-            const size_t* old_shape = input_value->shape.dim;
-            const size_t* new_shape = node->params.static_reshape.new_shape.dim;
-            size_t num_elements = 1;
-            for (uint32_t k = 0; k < num_dims; k++) {
-              shape[k] = (new_shape[k] == 0 || new_shape[k] == old_shape[k])
-                             ? 1
-                             : new_shape[k];
-              num_elements *= shape[k];
-            }
+          // Replace `mul(x, 0.0f)`, `div(0.0f, x)`, or `mul(x, 1.0)`, `add(x,
+          // 0.0)`, or `sub(x, 0.0)` with a static zero or `x`, respectively.
+          if ((node->binary_operator == xnn_binary_multiply ||
+               node->binary_operator == xnn_binary_divide ||
+               node->binary_operator == xnn_binary_add ||
+               node->binary_operator == xnn_binary_subtract) &&
+              !(node->flags & XNN_NODE_FLAG_DONT_ELIDE)) {
+            do {
+              struct xnn_value* input_value =
+                  &subgraph->values[node->inputs[0]];
+              struct xnn_value* const_value =
+                  &subgraph->values[node->inputs[1]];
 
-            // Create a static right-hand side value filled with zeros.
-            void* data = xnn_allocate_zero_memory(
-                num_elements * xnn_datatype_size_bytes(input_value->datatype));
-            uint32_t new_value_id;
-            enum xnn_status status =
-                xnn_datatype_is_quantized(input_value->datatype)
-                    ? xnn_define_quantized_tensor_value(
-                          subgraph, input_value->datatype,
-                          /*zero_point=*/0, /*quantization_scale=*/1.0,
-                          num_dims, shape, data,
-                          /*external_id=*/XNN_INVALID_VALUE_ID,
-                          /*flags=*/XNN_VALUE_FLAG_NEEDS_CLEANUP, &new_value_id)
-                    : xnn_define_tensor_value(
-                          subgraph, input_value->datatype, num_dims, shape,
-                          data,
-                          /*external_id=*/XNN_INVALID_VALUE_ID,
-                          /*flags=*/XNN_VALUE_FLAG_NEEDS_CLEANUP,
-                          &new_value_id);
+              // If the output value is already a constant, do nothing.
+              struct xnn_value* output_value =
+                  &subgraph->values[node->outputs[0]];
+              if (xnn_value_is_const(output_value->flags)) {
+                break;
+              }
+              const bool is_zero =
+                  (const_value->flags & XNN_VALUE_FLAG_IS_ZERO) != 0;
+              const bool is_one =
+                  (const_value->flags & XNN_VALUE_FLAG_IS_ONE) != 0;
+
+              // One of the two inputs should be a constant.
+              if (!xnn_value_is_const(const_value->flags)) {
+                if (xnn_value_is_const(input_value->flags)) {
+                  swap_value_pointers(&input_value, &const_value);
+                } else {
+                  break;
+                }
+              }
+
+              // If this is a `mul(x, 0.0)` or `div(0.0, x)`, then set the
+              // output to zero.
+              const enum xnn_binary_operator binary_operator =
+                  node->binary_operator;
+              if (is_zero && (binary_operator == xnn_binary_multiply ||
+                              (binary_operator == xnn_binary_divide &&
+                               node->inputs[0] == const_value->id))) {
+                output_value->flags |= XNN_VALUE_FLAG_IS_ZERO;
+
+                xnn_log_info(
+                    "Converted output of %s[#%u](0.0, v%03u) to just 0.0.",
+                    binary_operator == xnn_binary_multiply ? "mul" : "div",
+                    node_id, input_value->id);
+                changes++;
+              }
+
+              // Otherwise, if this is a `mul(x, 1.0)`, `div(div, 1.0)`, `add(x,
+              // 0.0)`, or `sub(x, 0.0)`. then skip this op.
+              else if ((is_one && (binary_operator == xnn_binary_multiply ||
+                                   (binary_operator == xnn_binary_divide &&
+                                    node->inputs[1] == const_value->id))) ||
+                       (is_zero && (binary_operator == xnn_binary_add ||
+                                    (binary_operator == xnn_binary_subtract &&
+                                     node->inputs[1] == const_value->id)))) {
+                if (swap_input_values(subgraph, node->outputs[0],
+                                      input_value->id)) {
+                  xnn_log_info("Elided spurious %s[#%u](v%03u, %s).",
+                               binary_operator == xnn_binary_multiply ? "mul"
+                               : binary_operator == xnn_binary_divide ? "div"
+                               : binary_operator == xnn_binary_add    ? "add"
+                                                                      : "sub",
+                               node->id, input_value->id,
+                               is_zero ? "0.0" : "1.0");
+                  xnn_node_clear(node);
+                } else {
+                  // If this node cannot be elided, then replace it with a
+                  // `copy`.
+                  enum xnn_status status = xnn_define_copy(
+                      subgraph, input_value->id, node->outputs[0], node->flags);
+                  if (status != xnn_status_success) {
+                    xnn_log_error("Failed to create new `Copy` node.");
+                    return status;
+                  }
+                  node = &subgraph->nodes[node_id];
+                  *node = subgraph->nodes[--subgraph->num_nodes];
+                  node->id = node_id;
+                  xnn_log_info(
+                      "Replaced spurious %s[#%u](v%03u, %s) with "
+                      "copy[#%u](v%03u).",
+                      binary_operator == xnn_binary_multiply ? "mul"
+                      : binary_operator == xnn_binary_divide ? "div"
+                      : binary_operator == xnn_binary_add    ? "add"
+                                                             : "sub",
+                      node->id, input_value->id, is_zero ? "0.0" : "1.0",
+                      node_id, input_value->id);
+                }
+                changes++;
+              }
+            } while (false);
+          }
+
+          // Fold min/max operations with a single static value into the
+          // previous operator's activation or a unary `clamp` node.
+          if (node->binary_operator == xnn_binary_maximum ||
+              node->binary_operator == xnn_binary_minimum) {
+            do {
+              // Check that `arg_value` is a static scalar value.
+              struct xnn_value* input_value =
+                  &subgraph->values[node->inputs[0]];
+              struct xnn_value* arg_value = &subgraph->values[node->inputs[1]];
+              if (!xnn_value_is_const(arg_value->flags) &&
+                  !(xnn_shape_multiply_all_dims(&arg_value->shape) == 1 &&
+                    xnn_value_is_static(arg_value->allocation_type))) {
+                if (xnn_value_is_const(input_value->flags) ||
+                    (xnn_shape_multiply_all_dims(&input_value->shape) == 1 &&
+                     xnn_value_is_static(input_value->allocation_type))) {
+                  swap_value_pointers(&input_value, &arg_value);
+                } else {
+                  break;
+                }
+              }
+
+              // Extract the min/max argument.
+              const float arg_as_float =
+                  (arg_value->flags & XNN_VALUE_FLAG_IS_ZERO) ? 0.0f
+                  : (arg_value->flags & XNN_VALUE_FLAG_IS_ONE)
+                      ? 1.0f
+                      : get_scalar_value_as_float(arg_value);
+              const bool is_min = (node->binary_operator == xnn_binary_minimum);
+              const bool is_max = (node->binary_operator == xnn_binary_maximum);
+
+              // Does `input` have a producer that does clamping?
+              bool needs_clamp = true;
+              if (input_value->producer != XNN_INVALID_NODE_ID &&
+                  input_value->num_consumers == 1) {
+                struct xnn_node* input_producer_node =
+                    &subgraph->nodes[input_value->producer];
+                if (has_clamp(input_producer_node)) {
+                  if (is_max) {
+                    input_producer_node->activation.output_min =
+                        math_max_f32(input_producer_node->activation.output_min,
+                                     arg_as_float);
+                    input_producer_node->params.unary.clamp.min = math_max_f32(
+                        input_producer_node->params.unary.clamp.min,
+                        arg_as_float);
+                  } else {
+                    input_producer_node->activation.output_max =
+                        math_min_f32(input_producer_node->activation.output_max,
+                                     arg_as_float);
+                    input_producer_node->params.unary.clamp.max = math_min_f32(
+                        input_producer_node->params.unary.clamp.max,
+                        arg_as_float);
+                  }
+                  input_producer_node->outputs[0] = node->outputs[0];
+                  subgraph->values[node->outputs[0]].producer =
+                      input_producer_node->id;
+                  node->type = xnn_node_type_invalid;
+                  xnn_log_info(
+                      "Merged %s[#%u](%s[#%u](...), %f) into clamping "
+                      "%s[#%u](...).",
+                      is_max ? "maximum" : "minimum", node_id,
+                      xnn_node_type_to_string(input_producer_node->type),
+                      input_producer_node->id, arg_as_float,
+                      xnn_node_type_to_string(input_producer_node->type),
+                      input_producer_node->id);
+                  changes++;
+                  needs_clamp = false;
+                }
+              }
+
+              // Do we need to replace the binary `min`/`max` node with a unary
+              // `clamp` node?
+              if (needs_clamp) {
+                union xnn_unary_params params;
+                params.clamp.max = is_min ? arg_as_float : INFINITY;
+                params.clamp.min = is_max ? arg_as_float : -INFINITY;
+                enum xnn_status status = xnn_define_unary(
+                    subgraph, xnn_unary_clamp, &params, input_value->id,
+                    node->outputs[0], node->flags);
+                if (status != xnn_status_success) {
+                  xnn_log_error("Failed to create new `Clamp` node.");
+                  return status;
+                }
+                node = &subgraph->nodes[node_id];
+                *node = subgraph->nodes[--subgraph->num_nodes];
+                node->id = node_id;
+
+                xnn_log_info(
+                    "Converted %s[#%u](v%03u, %f) to clamp[#%u](v%03u, [%f, "
+                    "%f]).",
+                    is_max ? "maximum" : "minimum", node_id, input_value->id,
+                    arg_as_float, node_id, input_value->id,
+                    node->params.unary.clamp.min, node->params.unary.clamp.max);
+                changes++;
+              }
+            } while (false);
+          }
+          break;
+
+        case xnn_node_type_unary_elementwise:
+          // Fold unary clamp operations into the previous operator's
+          // activation, if possible.
+          if (node->unary_operator == xnn_unary_clamp) {
+            do {
+              struct xnn_value* input_value =
+                  &subgraph->values[node->inputs[0]];
+              if (input_value->num_consumers > 1 ||
+                  input_value->producer == XNN_INVALID_NODE_ID) {
+                break;
+              }
+              struct xnn_node* input_producer_node =
+                  &subgraph->nodes[input_value->producer];
+              if (!has_clamp(input_producer_node)) {
+                break;
+              }
+              input_producer_node->activation.output_min =
+                  math_max_f32(input_producer_node->activation.output_min,
+                               node->params.unary.clamp.min);
+              input_producer_node->params.unary.clamp.min =
+                  math_max_f32(input_producer_node->params.unary.clamp.min,
+                               node->params.unary.clamp.min);
+              input_producer_node->activation.output_max =
+                  math_min_f32(input_producer_node->activation.output_max,
+                               node->params.unary.clamp.max);
+              input_producer_node->params.unary.clamp.max =
+                  math_min_f32(input_producer_node->params.unary.clamp.max,
+                               node->params.unary.clamp.max);
+              input_producer_node->outputs[0] = node->outputs[0];
+              xnn_node_clear(node);
+              xnn_log_info(
+                  "Merged clamp[#%u](%s[#%u](...)) into clamping "
+                  "%s[#%u](...).",
+                  node_id, xnn_node_type_to_string(input_producer_node->type),
+                  input_producer_node->id,
+                  xnn_node_type_to_string(input_producer_node->type),
+                  input_producer_node->id);
+              changes++;
+            } while (false);
+          }
+
+          // Remove spurious unary clamp operations.
+          if (node->unary_operator == xnn_unary_clamp &&
+              node->params.unary.clamp.min == -INFINITY &&
+              node->params.unary.clamp.max == INFINITY) {
+            const uint32_t output_id = node->outputs[0];
+            struct xnn_value* input_value = &subgraph->values[node->inputs[0]];
+            if (swap_input_values(subgraph, output_id, input_value->id)) {
+              xnn_node_clear(node);
+              xnn_log_info("Elided spurious clamp[#%u](v%03u).", node_id,
+                           input_value->id);
+            } else {
+              // If this node cannot be elided, then replace it with a
+              // `copy`.
+              enum xnn_status status = xnn_define_copy(
+                  subgraph, input_value->id, output_id, node->flags);
+              if (status != xnn_status_success) {
+                xnn_log_error("Failed to create new `Copy` node.");
+                return status;
+              }
+              node = &subgraph->nodes[node_id];
+              *node = subgraph->nodes[--subgraph->num_nodes];
+              node->id = node_id;
+              xnn_log_info(
+                  "Replaced spurious clamp[#%u](v%03u) with "
+                  "copy[#%u](v%03u).",
+                  node->id, input_value->id, node_id, input_value->id);
+            }
+              changes++;
+          }
+          break;
+
+        case xnn_node_type_static_sum:
+        case xnn_node_type_static_mean:
+          // Convert `reduce_sum(sqr(a))` or `reduce_mean(sqr(a))` to
+          // `reduce_sum_squared(a)` or `reduce_mean_squared(a)`, respectively.
+          while (true) {
+            struct xnn_value* arg_value = &subgraph->values[node->inputs[0]];
+            if (!(arg_value->datatype == xnn_datatype_fp16 ||
+                  arg_value->datatype == xnn_datatype_fp32) ||
+                arg_value->producer == XNN_INVALID_NODE_ID) {
+              break;
+            }
+            struct xnn_node* arg_node = &subgraph->nodes[arg_value->producer];
+            if (arg_node->type != xnn_node_type_unary_elementwise ||
+                arg_node->unary_operator != xnn_unary_square) {
+              break;
+            }
+            const uint32_t output_id = node->outputs[0];
+            const size_t num_reduction_axes =
+                node->params.reduce.num_reduction_axes;
+            int64_t reduction_axes[XNN_MAX_TENSOR_DIMS];
+            memcpy(reduction_axes, node->params.reduce.reduction_axes,
+                   num_reduction_axes * sizeof(int64_t));
+            const enum xnn_node_type node_type = node->type;
+            enum xnn_status status = xnn_define_static_reduce_v2(
+                subgraph,
+                node_type == xnn_node_type_static_sum ? xnn_reduce_sum_squared
+                                                      : xnn_reduce_mean_squared,
+                num_reduction_axes, reduction_axes, arg_node->inputs[0],
+                output_id, node->flags);
             if (status != xnn_status_success) {
+              xnn_log_error("Failed to create new `Sum Squared` node.");
               return status;
             }
-
-            // Replace the broadcast node with a binary add.
-            status = xnn_define_binary(subgraph, xnn_binary_add,
-                                       /*params=*/NULL, input_id, new_value_id,
-                                       output_id, node->flags);
             node = &subgraph->nodes[node_id];
             *node = subgraph->nodes[--subgraph->num_nodes];
             node->id = node_id;
 
-            xnn_log_warning(
-                "Converted static_broadcast[#%u](v%03u) to a broadcasting "
-                "add[#%u](v%03u, 0).",
-                node_id, input_id, node_id, input_id);
-            changes++;
-          } else {
             xnn_log_info(
-                "Removed static_broadcast[#%u](v%03u) since it is handled "
-                "implicitly by all its consumers.",
-                node_id, input_id);
+                "Converted reduce_%s[#%u](sqr[#%u](v%03u)) to "
+                "reduce_%s_squared[#%u](v%03u).",
+                node_type == xnn_node_type_static_sum ? "sum" : "mean", node_id,
+                arg_value->producer, node->inputs[0],
+                node_type == xnn_node_type_static_sum ? "sum" : "mean", node_id,
+                node->inputs[0]);
+            changes++;
+            break;
           }
-        }
-        break;
+          break;
 
-      default:
-        break;
+        case xnn_node_type_static_broadcast:
+          if (!(optimization_flags & XNN_FLAG_SLINKY_ENABLED)) {
+            // XNNPACK doesn't need explicit braodcasting for binary and
+            // batch_matrix_multiply nodes, so check if it can be elided.
+            const uint32_t input_id = node->inputs[0];
+            const uint32_t output_id = node->outputs[0];
+            const struct xnn_value* output_value = &subgraph->values[output_id];
+
+            // Find all consumers of the broadcast node's output.
+            uint32_t num_consumers = output_value->num_consumers;
+            for (uint32_t k = node_id + 1;
+                 k < subgraph->num_nodes && num_consumers; k++) {
+              struct xnn_node* consumer = &subgraph->nodes[k];
+              for (uint32_t j = 0; j < consumer->num_inputs; j++) {
+                if (consumer->inputs[j] == output_id) {
+                  // If the consumer is known to broadcast implicitly,
+                  // short-circuit it.
+                  if (consumer->type == xnn_node_type_binary_elementwise ||
+                      consumer->type == xnn_node_type_batch_matrix_multiply) {
+                    if (!is_repeated_input(consumer, j)) {
+                      num_consumers--;
+                    }
+                    consumer->inputs[j] = input_id;
+                    changes++;
+                  }
+                }
+              }
+            }
+
+            // If the broadcast could not be completely elided, then replace it
+            // with a broadcasting `add` of zero.
+            // TODO(b/421935339) Replace this with a more principled solution if
+            // needed since both the "zero" and output values could be quite
+            // large.
+            if (num_consumers) {
+              // Compute the shape of the right-hand operand to the binary op
+              // that, when added to the input, will result in the correct
+              // output shape.
+              size_t shape[XNN_MAX_TENSOR_DIMS];
+              size_t num_dims = node->params.static_reshape.new_shape.num_dims;
+              const struct xnn_value* input_value = &subgraph->values[input_id];
+              const size_t* old_shape = input_value->shape.dim;
+              const size_t* new_shape =
+                  node->params.static_reshape.new_shape.dim;
+              size_t num_elements = 1;
+              for (uint32_t k = 0; k < num_dims; k++) {
+                shape[k] = (new_shape[k] == 0 || new_shape[k] == old_shape[k])
+                               ? 1
+                               : new_shape[k];
+                num_elements *= shape[k];
+              }
+
+              // Create a static right-hand side value filled with zeros.
+              void* data = xnn_allocate_zero_memory(
+                  num_elements *
+                  xnn_datatype_size_bytes(input_value->datatype));
+              uint32_t new_value_id;
+              enum xnn_status status =
+                  xnn_datatype_is_quantized(input_value->datatype)
+                      ? xnn_define_quantized_tensor_value(
+                            subgraph, input_value->datatype,
+                            /*zero_point=*/0, /*quantization_scale=*/1.0,
+                            num_dims, shape, data,
+                            /*external_id=*/XNN_INVALID_VALUE_ID,
+                            /*flags=*/XNN_VALUE_FLAG_NEEDS_CLEANUP,
+                            &new_value_id)
+                      : xnn_define_tensor_value(
+                            subgraph, input_value->datatype, num_dims, shape,
+                            data,
+                            /*external_id=*/XNN_INVALID_VALUE_ID,
+                            /*flags=*/XNN_VALUE_FLAG_NEEDS_CLEANUP,
+                            &new_value_id);
+              if (status != xnn_status_success) {
+                return status;
+              }
+
+              // Replace the broadcast node with a binary add.
+              status = xnn_define_binary(
+                  subgraph, xnn_binary_add,
+                  /*params=*/NULL, input_id, new_value_id, output_id,
+                  node->flags | XNN_NODE_FLAG_DONT_ELIDE);
+              node = &subgraph->nodes[node_id];
+              *node = subgraph->nodes[--subgraph->num_nodes];
+              node->id = node_id;
+
+              xnn_log_warning(
+                  "Converted static_broadcast[#%u](v%03u) to a broadcasting "
+                  "add[#%u](v%03u, 0).",
+                  node_id, input_id, node_id, input_id);
+              changes++;
+            } else {
+              xnn_log_info(
+                  "Removed static_broadcast[#%u](v%03u) since it is handled "
+                  "implicitly by all its consumers.",
+                  node_id, input_id);
+            }
+          }
+          break;
+
+        case xnn_node_type_static_reshape:
+          // Remove fully-defined static reshapes that match the shape of the
+          // input.
+          do {
+            // New shape must be completely defined.
+            if (xnn_shape_multiply_all_dims(
+                    &node->params.static_reshape.new_shape) == 0) {
+              break;
+            }
+
+            // Check whether the shapes match.
+            const struct xnn_shape* old_shape =
+                &subgraph->values[node->inputs[0]].shape;
+            const struct xnn_shape* new_shape =
+                &node->params.static_reshape.new_shape;
+            bool match = (old_shape->num_dims == new_shape->num_dims);
+            for (int k = 0; match && k < old_shape->num_dims; k++) {
+              match &= (old_shape->dim[k] == new_shape->dim[k]);
+            }
+            if (!match) {
+              break;
+            }
+
+            if (swap_input_values(subgraph, node->outputs[0],
+                                  node->inputs[0])) {
+              xnn_log_info("Elided spurious static_reshape[#%u](v%03u).",
+                           node_id, node->inputs[0]);
+              xnn_node_clear(node);
+              changes++;
+            }
+          } while (false);
+
+          XNN_FALLTHROUGH
+
+        case xnn_node_type_static_expand_dims:
+          // Merge `reshape(expand_dims(...))` and `expand_dims(reshape(...))`
+          // into a single `reshape`.
+          do {
+            const uint32_t input_id = node->inputs[0];
+            struct xnn_value* input_value = &subgraph->values[input_id];
+            if (input_value->producer == XNN_INVALID_NODE_ID ||
+                input_value->num_consumers != 1) {
+              break;
+            }
+            struct xnn_node* input_producer =
+                &subgraph->nodes[input_value->producer];
+
+            // Check all the interesting combinations.
+
+            // reshape(reshape(x)).
+            if (input_producer->type == xnn_node_type_static_reshape &&
+                node->type == xnn_node_type_static_reshape) {
+              node->inputs[0] = input_producer->inputs[0];
+              input_value = &subgraph->values[node->inputs[0]];
+              if (input_value->first_consumer == input_producer->id) {
+                input_value->first_consumer = node->id;
+              }
+              xnn_log_info(
+                  "Replaced "
+                  "static_reshape[#%u](static_reshape[#%u](v%03u)) with "
+                  "static_reshape[#%u](v%03u).",
+                  input_producer->id, node_id, input_id, input_producer->id,
+                  input_id);
+              xnn_node_clear(input_producer);
+              changes++;
+            }
+
+            // reshape(expand_dims(x)).
+            else if (input_producer->type == xnn_node_type_static_expand_dims &&
+                     node->type == xnn_node_type_static_reshape) {
+              node->inputs[0] = input_producer->inputs[0];
+              input_value = &subgraph->values[node->inputs[0]];
+              if (input_value->first_consumer == input_producer->id) {
+                input_value->first_consumer = node->id;
+              }
+              xnn_log_info(
+                  "Replaced "
+                  "static_reshape[#%u](static_expand_dims[#%u](v%03u)) with "
+                  "static_reshape[#%u](v%03u).",
+                  input_producer->id, node_id, input_id, input_producer->id,
+                  input_id);
+              xnn_node_clear(input_producer);
+              changes++;
+            }
+
+            // expand_dims(reshape(x)).
+            else if (input_producer->type == xnn_node_type_static_reshape &&
+                     node->type == xnn_node_type_static_expand_dims) {
+              const struct xnn_shape* reshape =
+                  &input_producer->params.static_reshape.new_shape;
+              const struct xnn_shape* expanded_dims =
+                  &node->params.static_reshape.new_shape;
+              struct xnn_shape new_shape = {
+                  .num_dims = reshape->num_dims + expanded_dims->num_dims,
+                  .dim = {0}};
+              for (uint32_t idx_expanded = 0, idx_reshape = 0, k = 0;
+                   k < new_shape.num_dims; k++) {
+                if (idx_expanded < expanded_dims->num_dims &&
+                    expanded_dims->dim[idx_expanded] == k) {
+                  new_shape.dim[k] = 1;
+                  idx_expanded++;
+                } else {
+                  new_shape.dim[k] = reshape->dim[idx_reshape++];
+                }
+              }
+              input_producer->params.static_reshape.new_shape = new_shape;
+              input_producer->outputs[0] = node->outputs[0];
+              struct xnn_value* output_value =
+                  &subgraph->values[input_producer->outputs[0]];
+              output_value->producer = input_producer->id;
+              xnn_log_info(
+                  "Replaced "
+                  "static_expand_dims[#%u](static_reshape[#%u](v%03u)) with "
+                  "static_reshape[#%u](v%03u).",
+                  input_producer->id, node_id, input_producer->inputs[0],
+                  input_producer->id, input_producer->inputs[0]);
+              xnn_node_clear(node);
+              changes++;
+            }
+          } while (false);
+
+          // Statically apply static reshapes.
+          do {
+            const uint32_t input_id = node->inputs[0];
+            const uint32_t output_id = node->outputs[0];
+            struct xnn_value* input_value = &subgraph->values[input_id];
+            struct xnn_value* output_value = &subgraph->values[output_id];
+
+            // Is the input static?
+            // Is the reshape the only consumer of the static input value?
+            // If the output is external, don't do anything.
+            if (!xnn_value_is_static(input_value->allocation_type) ||
+                input_value->num_consumers > 1 ||
+                xnn_value_is_external_output(output_value->flags)) {
+              break;
+            }
+
+            // Set the shape of the static value.
+            if (node->type == xnn_node_type_static_reshape) {
+              // Replace the old shape with the new shape.
+              const size_t num_elements =
+                  xnn_shape_multiply_all_dims(&input_value->shape);
+              input_value->shape = node->params.static_reshape.new_shape;
+
+              // Populate any non-zero dimension, or fail if there is more than
+              // one.
+              size_t non_zero_dims = 1;
+              size_t num_zero_dims = 0;
+              for (int k = 0; k < input_value->shape.num_dims; k++) {
+                if (input_value->shape.dim[k]) {
+                  non_zero_dims *= input_value->shape.dim[k];
+                } else {
+                  num_zero_dims++;
+                }
+              }
+              if (num_zero_dims > 1) {
+                break;
+              }
+              for (int k = 0; k < input_value->shape.num_dims; k++) {
+                if (input_value->shape.dim[k] == 0) {
+                  input_value->shape.dim[k] = num_elements / non_zero_dims;
+                  break;
+                }
+              }
+            } else if (node->type == xnn_node_type_static_expand_dims) {
+              const struct xnn_shape* new_dims =
+                  &node->params.static_reshape.new_shape;
+              struct xnn_shape new_shape;
+              new_shape.num_dims =
+                  input_value->shape.num_dims + new_dims->num_dims;
+              for (uint32_t idx_new = 0, idx_old = 0, k = 0;
+                   k < new_shape.num_dims; k++) {
+                if (idx_new < new_dims->num_dims &&
+                    new_dims->dim[idx_new] == k) {
+                  new_shape.dim[k] = 1;
+                  idx_new++;
+                } else {
+                  new_shape.dim[k] = input_value->shape.dim[idx_old++];
+                }
+              }
+              input_value->shape = new_shape;
+            }
+
+            // All nodes should consume the reshaped static value directly.
+            changes += swap_input_values(subgraph, output_id, input_id);
+            xnn_log_info("Inlined %s[#%u](v%03u) of static value v%03u.",
+                         node->type == xnn_node_type_static_reshape
+                             ? "static_reshape"
+                             : "static_expand_dims",
+                         node_id, input_id, input_id);
+            xnn_node_clear(node);
+          } while (false);
+          break;
+
+        default:
+          break;
+      }
     }
-  }
 
-  // Clean up after ourselves.
-  if (changes) {
-    xnn_subgraph_clean_up(subgraph);
+    // Clean up after ourselves.
+    if (changes) {
+      xnn_subgraph_clean_up(subgraph);
+    } else {
+      break;
+    }
   }
 
   return xnn_status_success;
@@ -2985,6 +3753,9 @@ enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
   // Start with a clean and ordered subgraph.
   xnn_subgraph_clean_up(subgraph);
 
+  // xnn_subgraph_log_info(subgraph);
+  // xnn_subgraph_log_dot_info(subgraph);
+
   if (!(optimization_flags & XNN_FLAG_NO_OPERATOR_FUSION)) {
     xnn_subgraph_fusion(subgraph);
     xnn_subgraph_fuse_unary_quantized_into_lut(subgraph);
@@ -3057,6 +3828,8 @@ enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
   if (status != xnn_status_success) {
     return status;
   }
+
+  // xnn_subgraph_log_dot_info(subgraph);
 
   return xnn_status_success;
 }

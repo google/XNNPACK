@@ -43,12 +43,17 @@
 #define XNN_VALUE_FLAG_ONE_CONSUMER 0x00000200
 #define XNN_VALUE_FLAG_FP16_COMPATIBLE 0x00000400
 #define XNN_VALUE_FLAG_LAYOUT_NCHW 0x00000800
+#define XNN_VALUE_FLAG_IS_ZERO 0x00001000
+#define XNN_VALUE_FLAG_IS_ONE 0x00002000
 
 /// Create explicit `pack-lh` nodes, instead of pack the data on the fly
 /// in a temporary buffer in the consuming op. Inline packing reduces memory
 /// consumption and improves memory locality but may lead to slower GEMMs
 /// because of tiling.
 #define XNN_FLAG_NO_INLINED_LHS_PACKING 0x00004000
+
+/// Do not attempt to elide subgraph nodes with this flag set.
+#define XNN_NODE_FLAG_DONT_ELIDE 0x00100000
 
 #ifdef __cplusplus
 extern "C" {
@@ -258,6 +263,11 @@ XNN_INLINE static bool xnn_value_is_valid(enum xnn_value_type value_type) {
 XNN_INLINE static bool xnn_value_is_static(
     enum xnn_allocation_type allocation_type) {
   return allocation_type == xnn_allocation_type_static;
+}
+
+XNN_INLINE static bool xnn_value_is_const(
+    uint32_t flags) {
+  return (flags & (XNN_VALUE_FLAG_IS_ZERO | XNN_VALUE_FLAG_IS_ONE)) != 0;
 }
 
 struct xnn_node;
