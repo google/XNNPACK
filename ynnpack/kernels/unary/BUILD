@@ -172,11 +172,25 @@ ynn_generate_src_hdr(
     output_src = "arm_neon.cc",
 )
 
+ynn_generate_src_hdr(
+    name = "arm_neonfp16",
+    compatible_with = _COMPATIBLE_WITH,
+    generator = ":generator",
+    generator_args = [
+        "arm_neonfp16",
+        "convert_fp16_to_fp32,8x1",
+        "convert_fp32_to_fp16,8x1",
+    ],
+    output_hdr = "arm_neonfp16.inc",
+    output_src = "arm_neonfp16.cc",
+)
+
 ynn_cc_library(
     name = "unary",
     srcs = ["unary.cc"],
     hdrs = [
         "arm_neon.inc",
+        "arm_neonfp16.inc",
         "kernels.inc",
         "unary.h",
         "x86_avx.inc",
@@ -189,6 +203,7 @@ ynn_cc_library(
     compatible_with = _COMPATIBLE_WITH,
     per_arch_srcs = {
         "arm_neon": ["arm_neon.cc"],
+        "arm_neonfp16": ["arm_neonfp16.cc"],
         "x86_avx": ["x86_avx.cc"],
         "x86_avx2": ["x86_avx2.cc"],
         "x86_avx512f": ["x86_avx512f.cc"],

@@ -19,6 +19,7 @@ arch_to_target = {
     "x86_avx512f": X86(["AVX512F"]),
     "x86_avx512bw": X86(["AVX512BW"]),
     "arm_neon": ARM(["NEON"]),
+    "arm_neonfp16": ARM(["NEONFP16"]),
     "arm_neon_fma": ARM(["NEON", "FMA"]),
 }
 

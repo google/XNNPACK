@@ -790,16 +790,6 @@ YNN_INTRINSIC T truediv(T a, T b) {
 } // namespace
 } // namespace ynn
 
-using int8x1_t = int8_t;
-using uint8x1_t = uint8_t;
-using int16x1_t = int16_t;
-using uint16x1_t = uint16_t;
-using int32x1_t = int32_t;
-using uint32x1_t = uint32_t;
-using float16x1_t = uint16_t;
-using float32x1_t = float;
-using float32_t = float;
-
 """
 
 
@@ -1430,8 +1420,8 @@ class Target:
         and is_rem_width
         and self.tail_strategy == TailStrategy.MEMCPY
     ):
-      dst = str_args[0] if is_store else f"&{i[0]}_{j}_{k}"
-      src = f"&{str_args[1]}" if is_store else str_args[0]
+      dst = str_args[0] if is_store else f"(void*)&{i[0]}_{j}_{k}"
+      src = f"(void*)&{str_args[1]}" if is_store else str_args[0]
 
       if is_load:
         self.result += f";\n{self.indent()}"
