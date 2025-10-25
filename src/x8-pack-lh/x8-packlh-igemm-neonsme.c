@@ -20,7 +20,7 @@
 
 // This function just wraps KleidiAI's `kai_run_lhs_pack_x8p2vlx4_x8_sme`, but
 // with a name that is recognized by our tooling.
-void xnn_x8_pack_lh_ukernel__igemm_neonsme2(size_t m, size_t kc, size_t ks,
+void xnn_x8_pack_lh_ukernel__igemm_neonsme(size_t m, size_t kc, size_t ks,
                                             size_t mr_packed, size_t kr,
                                             size_t sr, const void** restrict a,
                                             size_t a_offset, const void* zero,
@@ -34,7 +34,7 @@ void xnn_x8_pack_lh_ukernel__igemm_neonsme2(size_t m, size_t kc, size_t ks,
 #endif  // XNN_ENABLE_KLEIDIAI
 }
 
-size_t xnn_x8_pack_lh_size__igemm_neonsme2(size_t m, size_t kc, size_t ks,
+size_t xnn_x8_pack_lh_size__igemm_neonsme(size_t m, size_t kc, size_t ks,
                                            size_t mr_packed, size_t kr,
                                            size_t sr) {
 #if XNN_ENABLE_KLEIDIAI
@@ -47,7 +47,7 @@ size_t xnn_x8_pack_lh_size__igemm_neonsme2(size_t m, size_t kc, size_t ks,
 #endif  // XNN_ENABLE_KLEIDIAI
 }
 
-size_t xnn_x8_pack_lh_offset__igemm_neonsme2(size_t m, size_t kc, size_t ks,
+size_t xnn_x8_pack_lh_offset__igemm_neonsme(size_t m, size_t kc, size_t ks,
                                              size_t mr_packed, size_t kr,
                                              size_t sr) {
 #if XNN_ENABLE_KLEIDIAI
