@@ -168,11 +168,13 @@ T integer_pow(T a, T b) {
 
 template <typename T>
 T* offset_bytes(T* ptr, ptrdiff_t offset) {
+  assert(ptr || offset == 0);
   return reinterpret_cast<T*>(reinterpret_cast<uint8_t*>(ptr) + offset);
 }
 
 template <typename T>
 const T* offset_bytes(const T* ptr, ptrdiff_t offset) {
+  assert(ptr || offset == 0);
   return reinterpret_cast<const T*>(reinterpret_cast<const uint8_t*>(ptr) +
                                     offset);
 }

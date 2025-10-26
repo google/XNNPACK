@@ -49,8 +49,8 @@ constexpr index_t cache_size_l2 = 128 * 1024;
 
 // The wrapper for the kernel we use when we actually want to run a dot kernel
 // on some buffers.
-auto make_dot_impl(dot_type type, size_t num_k_dims) {
-  return [type, num_k_dims](
+auto make_dot_impl(dot_type type, bool transposed_a, size_t num_k_dims) {
+  return [type, transposed_a, num_k_dims](
              slinky::raw_buffer a, slinky::raw_buffer b,
              slinky::buffer<const void, YNN_MAX_TENSOR_RANK> init_c,
              slinky::raw_buffer c) -> index_t {
@@ -87,7 +87,7 @@ auto make_dot_impl(dot_type type, size_t num_k_dims) {
     const index_t a_stride_k1 = a_k1.stride();
     // If a is transposed, then the k dimension has been reshaped to have tile_k
     // values in each element.
-    const index_t a_tile_k = a_stride_m <= a_stride_k1 ? tile_k : 1;
+    const index_t a_tile_k = transposed_a ? tile_k : 1;
     const index_t k1 = (a_k1.extent() * a_tile_k) & ~(tile_k - 1);
     const index_t k1_tail = (a_k1.extent() * a_tile_k) & (tile_k - 1);
     const index_t k2 = a_k2.extent();
@@ -99,20 +99,12 @@ auto make_dot_impl(dot_type type, size_t num_k_dims) {
     // already.
     assert(b_k1o.stride() % tile_k == 0);
     const index_t b_stride_k1 = b_k1o.stride() / tile_k;
-    const index_t init_c_stride_m = init_c_m.stride();
-    const index_t init_c_stride_n = init_c_n.stride();
     const index_t c_stride_m = c_m.stride();
     const index_t c_stride_n = c_n.stride();
+    index_t init_c_stride_m = init_c_m.stride();
 
     // Find a kernel that is compatible with the packed data we have, and
     // matches whether A is transposed or not.
-    std::optional<bool> transpose_a;
-    if (a_stride_k1 == a_stride_m) {
-      // It doesn't matter if we transposed or not, so we can use a kernel with
-      // any transposed-ness.
-    } else {
-      transpose_a = a_stride_m <= a_stride_k1;
-    }
     dot_shape shape;
     shape.m = c_m.extent();
     shape.n = c_n.extent();
@@ -122,7 +114,10 @@ auto make_dot_impl(dot_type type, size_t num_k_dims) {
     dot_packed_shape packed_shape;
     packed_shape.block_n = block_n;
     packed_shape.tile_k = tile_k;
-    dot_kernel kernel = get_dot_kernel(type, shape, &packed_shape, transpose_a);
+    dot_kernel kernel = get_dot_kernel(type, shape, &packed_shape,
+                                       a_stride_m == a_stride_k1
+                                           ? std::nullopt
+                                           : std::make_optional(transposed_a));
     assert(kernel.kernel);
     assert(tile_k == kernel.tile_k);
     const index_t block_m = kernel.block_m;
@@ -154,16 +149,17 @@ auto make_dot_impl(dot_type type, size_t num_k_dims) {
     assert(!b_k3.is_folded());
     assert(block_n % kernel.tile_n == 0);
 
-    int32_t* init_c_buffer = nullptr;
-    if (init_c.base() && init_c_stride_n == 0 && c_n.extent() > 1) {
-      // The initializer is broadcasted. We need to make a local buffer we can
-      // broadcast into, so the kernels don't need to deal with this. The kernel
-      // will read `block_n` values at a time, so that's how big our broadcast
-      // buffer needs to be.
-      // TODO: Handle non-broadcasted m when n is broadcasted.
-      assert(init_c_stride_m == 0 || c_m.extent() <= 1);
-      assert(init_c.elem_size == sizeof(int32_t));
-      init_c_buffer = YNN_ALLOCA(int32_t, block_n);
+    if (init_c.base() && init_c.base() != c.base && c_n.extent() > 1) {
+      if (init_c_n.stride() == 0) {
+        // The initializer is broadcasted in the n dimension, which the kernel
+        // cannot handle. We need to copy it to the output, and update the
+        // initializer to point to the output.
+        slinky::copy(init_c, c);
+        init_c_stride_m = c_stride_m;
+        init_c = c;
+      } else {
+        assert(init_c_n.stride() == c_stride_n);
+      }
     }
 
     // `for_each_element` below handles the batch dimensions, we handle the loop
@@ -203,8 +199,7 @@ auto make_dot_impl(dot_type type, size_t num_k_dims) {
     auto call_kernel = [=, kernel = kernel.kernel](
                            index_t m, index_t n, index_t k1, const void* a,
                            const void* b, index_t init_c_stride_m,
-                           index_t init_c_stride_n, const void* init_c,
-                           void* c) {
+                           const void* init_c, void* c) {
       assert(n <= block_n);
       assert(m <= block_m);
       kernel(m, n, k3, k2, k1, a_stride, a_stride_k3, a_stride_k2, a,
@@ -224,15 +219,10 @@ auto make_dot_impl(dot_type type, size_t num_k_dims) {
 
       slinky::for_each_element(
           [&](void* c, const void* a, const void* b, const void* init_c) {
-            if (init_c_buffer) {
-              std::fill_n(init_c_buffer, block_n,
-                          *reinterpret_cast<const int32_t*>(init_c));
-              init_c = init_c_buffer;
-            }
             run_dot(loops, c_m.extent(), c_n.extent(), k1, block_m, block_n,
                     block_k, a_stride_m, a_stride_k1 / a_tile_k, a, b_stride_k1,
-                    b_no.stride(), b, init_c_stride_m, init_c_stride_n, init_c,
-                    c_stride_m, c_stride_n, c, call_kernel);
+                    b_no.stride(), b, init_c_stride_m, init_c, c_stride_m,
+                    c_stride_n, c, call_kernel);
           },
           c, a, b, init_c);
     }
@@ -255,8 +245,7 @@ auto make_dot_impl(dot_type type, size_t num_k_dims) {
       memset(a_padded, 0, a_padded_stride_m * block_m);
       auto call_kernel_tail = [&](index_t m, index_t n, index_t k1,
                                   const void* a, const void* b,
-                                  index_t init_c_stride_m,
-                                  index_t init_c_stride_n, const void* init_c,
+                                  index_t init_c_stride_m, const void* init_c,
                                   void* c) {
         assert(m <= block_m);
         assert(n <= block_n);
@@ -283,25 +272,16 @@ auto make_dot_impl(dot_type type, size_t num_k_dims) {
       slinky::for_each_element(
           [&](void* c, const void* a, const void* b, const void* init_c) {
             index_t tail_init_c_stride_m = init_c_stride_m;
-            index_t tail_init_c_stride_n = init_c_stride_n;
-            if (k1 == 0) {
-              if (init_c_buffer) {
-                std::fill_n(init_c_buffer, block_n,
-                            *reinterpret_cast<const int32_t*>(init_c));
-                init_c = init_c_buffer;
-              }
-            } else {
+            if (k1 != 0) {
               init_c = c;
               tail_init_c_stride_m = c_stride_m;
-              tail_init_c_stride_n = c_stride_n;
             }
             a = offset_bytes(a, a_stride_k1 * k1);
             b = offset_bytes(b, b_stride_k1 * k1);
             run_dot(loops, c_m.extent(), c_n.extent(), k1_tail, block_m,
                     block_n, block_k, a_stride_m, a_stride_k1, a, b_stride_k1,
-                    b_no.stride(), b, tail_init_c_stride_m,
-                    tail_init_c_stride_n, init_c, c_stride_m, c_stride_n, c,
-                    call_kernel_tail);
+                    b_no.stride(), b, tail_init_c_stride_m, init_c, c_stride_m,
+                    c_stride_n, c, call_kernel_tail);
           },
           c, a, b, init_c);
     }
@@ -861,7 +841,7 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
     node.inputs[0] = define_transpose_a(*subgraph, kernel.tile_k, input_a_id);
   }
 
-  node.create = [](const ynn_node& node, ynn_runtime& runtime) {
+  node.create = [transpose_a](const ynn_node& node, ynn_runtime& runtime) {
     const ynn_node::dot& op = std::get<ynn_node::dot>(node.op);
     const size_t num_k_dims = op.num_k_dims;
     const ynn_runtime_value& input_a = runtime.value(node.inputs[0]);
@@ -933,11 +913,12 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
       attrs.allow_in_place = (1 << 2);
     }
     dot_type dot_type = {input_a.type, packed_b.type, output.type};
-    auto func = slinky::func::make(make_dot_impl(dot_type, num_k_dims),
-                                   {{input_a.buffer, std::move(a_bounds)},
-                                    {packed_b.buffer, std::move(b_bounds)},
-                                    {input_c.buffer, std::move(c_bounds)}},
-                                   {{output.buffer, dims}}, std::move(attrs));
+    auto func =
+        slinky::func::make(make_dot_impl(dot_type, transpose_a, num_k_dims),
+                           {{input_a.buffer, std::move(a_bounds)},
+                            {packed_b.buffer, std::move(b_bounds)},
+                            {input_c.buffer, std::move(c_bounds)}},
+                           {{output.buffer, dims}}, std::move(attrs));
 
     assert(packed_b.extents[0].defined());
     assert(packed_b.extents[1].defined());

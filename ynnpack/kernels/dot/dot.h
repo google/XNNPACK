@@ -16,13 +16,18 @@
 
 namespace ynn {
 
-enum dot_flag {
+// `enum class` doesn't work well for bitfield values.
+namespace dot_flag {
+
+enum {
   // The `a` parameter of the dot must be transposed from [i, k3, k2, k1]
   // to [k1 / tile_k, k3, k2, {i, tile_k}], where:
   // - The {i, tile_k} dimension is dense (stride of 1 element).
   // - `a_stride_m` indicates the stride of the k1 / tile_k dimension.
   transpose_a = 1 << 0,
 };
+
+}  // namespace dot_flag
 
 // Dot kernels compute the following:
 //

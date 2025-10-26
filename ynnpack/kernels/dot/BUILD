@@ -578,7 +578,6 @@ cc_test(
     srcs = ["schedule_test.cc"],
     deps = [
         ":schedule",
-        "//ynnpack/base/test:fuzz_test",
         "@com_google_googletest//:gtest_main",
     ],
 )
