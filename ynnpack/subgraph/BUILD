@@ -27,11 +27,6 @@ define_build_option(
     default_all = [],
 )
 
-# The capability to capture perfetto traces is disabled by default. To enable and use it, add:
-#
-# git_repository(name = "perfetto", branch = "main", remote = "https://github.com/google/perfetto")
-#
-# To MODULE.bazel, and then add `--define ynn_enable_perfetto=true` to the bazel command line.
 cc_library(
     name = "perfetto",
     srcs = ["perfetto.cc"],
@@ -39,7 +34,15 @@ cc_library(
     compatible_with = _COMPATIBLE_WITH,
     defines = ["YNN_ENABLE_PERFETTO"],
     tags = ["manual"],
-    deps = ["@perfetto//:libperfetto_client_experimental"],
+    deps = [
+        # The capability to capture perfetto traces is disabled by default. To enable and use it:add:
+        #
+        # git_repository(name = "perfetto", branch = "main", remote = "https://github.com/google/perfetto")
+        #
+        # To MODULE.bazel, add `--define ynn_enable_perfetto=true` to the bazel command line, and
+        # uncomment this dependency.
+        # "@perfetto//:libperfetto_client_experimental"
+    ],
 )
 
 cc_library(
