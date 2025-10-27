@@ -196,6 +196,35 @@ _YNN_PARAMS_FOR_ARCH = {
     },
 }
 
+def _map_copts_to_msvc(copts):
+    """Maps GNU-style compiler options to Microsoft Visual Studio compiler options."""
+
+    to_msvc = {
+        "-msse2": "/arch:SSE2",
+        "-mssse3": "/arch:SSE2",
+        "-msse4.1": "/arch:SSE2",
+        "-mavx": "/arch:AVX",
+        "-mavx2": "/arch:AVX2",
+        "-mavx512f": "/arch:AVX512",
+        "-mavx512bw": "/arch:AVX512",
+        "-mavx512bf16": "/arch:AVX512",
+        "-mavx512fp16": "/arch:AVX512",
+        "-mavx512vl": "/arch:AVX512",
+        "-mavx512vnni": "/arch:AVX512",
+        "-mfma": "/arch:AVX",
+        "-mf16c": "/arch:AVX",
+        "-mamx": "/arch:AVX512",
+    }
+
+    # Here we use a dictionary to implement a set. We don't care about the values.
+    msvc_copts = {}
+    for c in copts:
+        to = to_msvc.get(c, "")
+        if to:
+            msvc_copts[to] = ""
+
+    return list(msvc_copts.keys())
+
 def ynn_cc_library(
         name,
         srcs = [],
@@ -225,6 +254,15 @@ def ynn_cc_library(
         arch_params = _YNN_PARAMS_FOR_ARCH[arch]
         arch_cond = arch_params["cond"]
         copts_arch = arch_params.get("copts", [])
+        if type(copts_arch) == "list":
+            copts_arch = select({
+                "//ynnpack:windows_x86_clangcl": ["/clang:" + i for i in copts_arch],
+                "//ynnpack:windows_x86_msvc": _map_copts_to_msvc(copts_arch),
+                "//conditions:default": copts_arch,
+            })
+        else:
+            # The arch_params should have handled this.
+            pass
 
         cc_library(
             name = name + "_" + arch,

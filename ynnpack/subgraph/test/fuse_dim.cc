@@ -57,7 +57,7 @@ void TestImpl(T, size_t rank) {
                            output_shape.begin() + axis + axes_count);
         size_t fused_size = std::accumulate(
             input_shape.begin() + axis, input_shape.begin() + axis + axes_count,
-            1, std::multiplies<>());
+            static_cast<size_t>(1), std::multiplies<>());
         output_shape.insert(output_shape.begin() + axis, fused_size);
         ASSERT_EQ(runtime.GetExternalTensorShape(1), output_shape);
 

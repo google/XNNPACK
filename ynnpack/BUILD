@@ -76,6 +76,24 @@ selects.config_setting_group(
     ],
 )
 
+config_setting(
+    name = "windows_x86_msvc",
+    constraint_values = [
+        "@platforms//os:windows",
+    ],
+    flag_values = {"@bazel_tools//tools/cpp:compiler": "msvc"},
+    visibility = ["//:__subpackages__"],
+)
+
+config_setting(
+    name = "windows_x86_clangcl",
+    constraint_values = [
+        "@platforms//os:windows",
+    ],
+    flag_values = {"@bazel_tools//tools/cpp:compiler": "clangcl"},
+    visibility = ["//:__subpackages__"],
+)
+
 define_build_option(
     name = "ynn_enable_arm_neon",
     default_all = [":arm"],
@@ -191,7 +209,12 @@ define_build_option(
 
 define_build_option(
     name = "ynn_enable_x86_avx512bf16",
-    default_all = [":ynn_enable_x86_avx512"],
+    default_all = [
+        ":ynn_enable_x86_avx512",
+        # This hits internal compiler errors on MSVC on windows. "not_windows" is hard to express in
+        # the build system, and I think linux is the only place we need this to work for now.
+        "@platforms//os:linux",
+    ],
 )
 
 define_build_option(

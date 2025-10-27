@@ -76,7 +76,7 @@ TYPED_TEST(ARCH, load_store) {
   static constexpr size_t N = TypeParam::N;
 
   scalar src[N];
-  std::iota(src, src + N, 0);
+  std::iota(src, src + N, static_cast<scalar>(0));
   vector v = load(src, vector{});
 
   scalar dst[N];
@@ -95,7 +95,7 @@ TYPED_TEST(ARCH, aligned_load_store) {
   static constexpr size_t N = TypeParam::N;
 
   alignas(vector) scalar src[N];
-  std::iota(src, src + N, 0);
+  std::iota(src, src + N, static_cast<scalar>(0));
   vector v = load_aligned(src, vector{});
 
   alignas(vector) scalar dst[N];

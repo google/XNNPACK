@@ -34,7 +34,7 @@ void dot(size_t M, size_t N, size_t K3, size_t K2, size_t K1, size_t A_stride_m,
   using B_info = type_info<BT>;
   assert(M == 1);
   CT* acc = YNN_ALLOCA(CT, N);
-  std::fill_n(acc, N, 0);
+  std::fill_n(acc, N, static_cast<CT>(0));
   for (size_t k3 = 0; k3 < K3; ++k3) {
     const BT* B_k3 = offset_bytes(B, k3 * B_stride_k3);
     const AT* A_k3 = offset_bytes(A, k3 * A_stride_k3);
