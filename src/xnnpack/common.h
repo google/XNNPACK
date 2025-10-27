@@ -297,7 +297,7 @@
 #define XNN_OOB_READS \
   XNN_DISABLE_TSAN XNN_DISABLE_MSAN XNN_DISABLE_HWASAN XNN_DISABLE_ASAN
 
-#if defined(__GNUC__)
+#if defined(__GNUC__) || XNN_COMPILER_HAS_ATTRIBUTE(fallthrough)
 #define XNN_FALLTHROUGH __attribute__((fallthrough));
 #elif defined(__cplusplus) && __cplusplus >= 201703L
 #define XNN_FALLTHROUGH [[fallthrough]];

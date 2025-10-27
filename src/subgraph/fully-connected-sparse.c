@@ -140,6 +140,7 @@ static enum xnn_status create_fully_connected_operator(
         default:
           XNN_UNREACHABLE;
       }
+      break;
     default:
       XNN_UNREACHABLE;
   }

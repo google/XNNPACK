@@ -83,21 +83,22 @@ static XNN_INLINE xnn_simd_s16_t xnn_load_tail_safe_s16(const int16_t* input,
   int16_t* d = &padded[0];
   // clang-format off
   switch (num_elements) {
-    case 15: *d++ = *input++;
-    case 14: *d++ = *input++;
-    case 13: *d++ = *input++;
-    case 12: *d++ = *input++;
-    case 11: *d++ = *input++;
-    case 10: *d++ = *input++;
-    case 9: *d++ = *input++;
-    case 8: *d++ = *input++;
-    case 7: *d++ = *input++;
-    case 6: *d++ = *input++;
-    case 5: *d++ = *input++;
-    case 4: *d++ = *input++;
-    case 3: *d++ = *input++;
-    case 2: *d++ = *input++;
-    case 1: *d++ = *input++;
+    case 15: *d++ = *input++; XNN_FALLTHROUGH
+    case 14: *d++ = *input++; XNN_FALLTHROUGH
+    case 13: *d++ = *input++; XNN_FALLTHROUGH
+    case 12: *d++ = *input++; XNN_FALLTHROUGH
+    case 11: *d++ = *input++; XNN_FALLTHROUGH
+    case 10: *d++ = *input++; XNN_FALLTHROUGH
+    case 9: *d++ = *input++; XNN_FALLTHROUGH
+    case 8: *d++ = *input++; XNN_FALLTHROUGH
+    case 7: *d++ = *input++; XNN_FALLTHROUGH
+    case 6: *d++ = *input++; XNN_FALLTHROUGH
+    case 5: *d++ = *input++; XNN_FALLTHROUGH
+    case 4: *d++ = *input++; XNN_FALLTHROUGH
+    case 3: *d++ = *input++; XNN_FALLTHROUGH
+    case 2: *d++ = *input++; XNN_FALLTHROUGH
+    case 1: *d++ = *input++; XNN_FALLTHROUGH
+    default: break;
   }
   // clang-format on
   return _mm256_load_si256((const __m256i*)&padded[0]);

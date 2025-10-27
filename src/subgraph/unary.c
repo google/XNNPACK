@@ -9,6 +9,7 @@
 #include <stdint.h>
 
 #include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/internal.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/node-type.h"
@@ -398,6 +399,7 @@ enum xnn_status xnn_define_unary(
           xnn_unary_operator_to_string(type), input_id, output_id);
         return xnn_status_invalid_parameter;
       }
+      XNN_FALLTHROUGH
     default:
       break;
   }

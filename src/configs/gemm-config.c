@@ -4558,6 +4558,7 @@ static void init_qs8_qc8w_gemm_config(void) {
                     break;
                   }
                 #endif  // XNN_ENABLE_ARM_DOTPROD
+                XNN_FALLTHROUGH
               case xnn_uarch_cortex_a55r0:
                 if (mr == 4 && nr == 8 && log2_kr == 0) {
                   qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)].function[i] = XNN_INIT_GEMM_UKERNEL(xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8__asm_aarch32_neonv8_mlal_lane_cortex_a35);
@@ -4837,6 +4838,7 @@ static void init_qs8_qc8w_gemm_config(void) {
                     break;
                   }
                 #endif  // XNN_ENABLE_ARM_DOTPROD
+                XNN_FALLTHROUGH
               case xnn_uarch_cortex_a53:
               case xnn_uarch_cortex_a55r0:
                 if (mr == 2 && nr == 8 && log2_kr == 3) {

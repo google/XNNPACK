@@ -1044,6 +1044,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph) {
         if (xnn_init_x16_pack_lh_config() != NULL) {
           break;
         }
+        XNN_FALLTHROUGH
       default:
         xnn_log_warning("FP16 rewrite aborted: node #%" PRIu32
                         " (%s) is not supported for FP16 inference",
