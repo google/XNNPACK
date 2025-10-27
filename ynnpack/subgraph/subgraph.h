@@ -103,13 +103,13 @@ struct ynn_value {
 
   std::string name() const;
 
-  // Asserting that the value is a static scalar value of type T, returns that
-  // value.
+  // Asserting that the value is reshapable to a static scalar value of type T,
+  // returns that value.
   template <typename T>
   T static_scalar_value() const {
     assert(is_static());
     assert(sizeof(T) == data->elem_size);
-    assert(data->rank == 0);
+    assert(data->size_bytes() == data->elem_size);
     T result;
     memcpy(&result, data->base, sizeof(T));
     return result;
