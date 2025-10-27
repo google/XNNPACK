@@ -19,6 +19,9 @@
 #include <variant>
 #include <vector>
 
+#ifdef YNN_ENABLE_PERFETTO
+#include "ynnpack/subgraph/perfetto.h"
+#endif
 #include "ynnpack/base/build_config.h"
 #include "ynnpack/base/log.h"
 #include "ynnpack/base/type.h"
@@ -484,6 +487,11 @@ slinky::expr type_elem_size(ynn_type type) {
   return size > 0 ? slinky::expr(size) : slinky::expr{};
 }
 
+#ifdef YNN_ENABLE_PERFETTO
+// TODO(dsharlet): We need a better way to control tracing output.
+const char* get_trace_filename() { return getenv("YNN_TRACE"); }
+#endif
+
 }  // namespace
 
 extern "C" {
@@ -510,6 +518,16 @@ ynn_runtime::ynn_runtime(const ynn_subgraph& subgraph,
     YNN_LOG_ERROR() << c->attrs.name << " failed";
   };
   eval_config.base_alignment = YNN_ALLOCATION_ALIGNMENT;
+
+#ifdef YNN_ENABLE_PERFETTO
+  eval_config.trace_begin = [](const char* name) {
+    ynn::perfetto_session::global()->begin(name);
+    return reinterpret_cast<slinky::index_t>(name);
+  };
+  eval_config.trace_end = [](slinky::index_t token) {
+    ynn::perfetto_session::global()->end();
+  };
+#endif
   eval_context.config = &eval_config;
 
   values.reserve(subgraph.values.size());
@@ -597,6 +615,9 @@ ynn_status ynn_runtime::build() {
   }
 
   slinky::build_options options;
+#ifdef YNN_ENABLE_PERFETTO
+  options.trace = get_trace_filename() != nullptr;
+#endif
 #ifdef NDEBUG
   options.no_checks = true;
 #endif

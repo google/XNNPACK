@@ -14,32 +14,33 @@ def define_build_option(name, default_all = [], default_any = []):
       default_all: A list of conditions that must all be true for the flag to be enabled by default.
       default_any: A list of conditions for the flag to be enabled by default if any are true.
     """
-    selects.config_setting_group(
-        name = name + "_enabled_by_default",
-        match_all = default_all,
-        match_any = default_any,
-    )
+    explicit_true = name + "_explicit_true"
+    explicit_false = name + "_explicit_false"
+    default = explicit_true
+    if default_all or default_any:
+        default = name + "_enabled_by_default"
+        selects.config_setting_group(
+            name = default,
+            match_all = default_all,
+            match_any = default_any,
+        )
 
     native.config_setting(
-        name = name + "_explicit_true",
+        name = explicit_true,
         define_values = {name: "true"},
     )
 
     native.config_setting(
-        name = name + "_explicit_false",
+        name = explicit_false,
         define_values = {name: "false"},
     )
-
-    explicit_true = ":" + name + "_explicit_true"
-    explicit_false = ":" + name + "_explicit_false"
-    default = ":" + name + "_enabled_by_default"
 
     native.alias(
         name = name,
         actual = select({
-            explicit_true: explicit_true,
-            explicit_false: explicit_true,
-            "//conditions:default": default,
+            explicit_true: ":" + explicit_true,
+            explicit_false: ":" + explicit_true,
+            "//conditions:default": ":" + default,
         }),
     )
 
