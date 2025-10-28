@@ -81,6 +81,9 @@ The following table presents **multi-threaded** (using as many threads as there 
 
 Benchmarked on March 27, 2020 with `end2end_bench --benchmark_min_time=5` on an Android/ARM64 build with Android NDK r21 (`bazel build -c opt --config android_arm64 :end2end_bench`) and neural network models with randomized weights and inputs.
 
+> [!NOTE]
+> The above Bazel configs no longer work. See [BUILD.md](BUILD.md) for an overview of how to build XNNPACK with Bazel.
+
 ### Raspberry Pi
 
 The table below presents **multi-threaded** performance of XNNPACK library on three generations of MobileNet models and three generations of Raspberry Pi boards.
