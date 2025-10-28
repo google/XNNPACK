@@ -17,6 +17,25 @@
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 
+#if defined(__GNUC__) && !defined(__clang__)
+// Workaround for GCC bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=122446
+#define YNN_TILE_DP_IMPL(name, dst, src1, src2)                             \
+  __asm__ volatile(                                                         \
+      "{t" #name "\t%%tmm%c[_src2], %%tmm%c[_src1], %%tmm%c[_dst]|t" #name    \
+      "\t%%tmm%c[_dst], %%tmm%c[_src1], %%tmm%c[_src1]}" ::[_dst] "i"(dst), \
+      [_src1] "i"(src1), [_src2] "i"(src2))
+
+#define YNN_TILE_DPBF16PS(a, b, c) YNN_TILE_DP_IMPL(dpbf16ps, a, b, c)
+#define YNN_TILE_DPFP16PS(a, b, c) YNN_TILE_DP_IMPL(dpfp16ps, a, b, c)
+#define YNN_TILE_DPBSSD(a, b, c) YNN_TILE_DP_IMPL(dpbssd, a, b, c)
+#define YNN_TILE_DPBUSD(a, b, c) YNN_TILE_DP_IMPL(dpbusd, a, b, c)
+#else
+#define YNN_TILE_DPBF16PS(a, b, c) _tile_dpbf16ps(a, b, c)
+#define YNN_TILE_DPFP16PS(a, b, c) _tile_dpfp16ps(a, b, c)
+#define YNN_TILE_DPBSSD(a, b, c) _tile_dpbssd(a, b, c)
+#define YNN_TILE_DPBUSD(a, b, c) _tile_dpbusd(a, b, c)
+#endif
+
 namespace ynn {
 
 template <typename TA, typename TB, typename TC>

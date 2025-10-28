@@ -3,12 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <immintrin.h>
-
 #include <cstddef>
 #include <cstdint>
 
-#include "ynnpack/base/base.h"
 #include "ynnpack/kernels/dot/x86_amx.h"
 
 namespace ynn {
@@ -16,54 +13,14 @@ namespace ynn {
 template <int c, int a, int b>
 struct dpbssd {
   void operator()() {
-    // This should be _tile_dpbssd(c, a, b), but GCC has a ridiculous bug:
-    // https://github.com/google/XNNPACK/issues/9000#issuecomment-3449425946
-    if (c == 0 && a == 4 && b == 5) {
-      _tile_dpbssd(0, 4, 5);
-    } else if (c == 1 && a == 4 && b == 5) {
-      _tile_dpbssd(1, 4, 5);
-    } else if (c == 2 && a == 4 && b == 5) {
-      _tile_dpbssd(2, 4, 5);
-    } else if (c == 3 && a == 4 && b == 5) {
-      _tile_dpbssd(3, 4, 5);
-    } else if (c == 0 && a == 6 && b == 7) {
-      _tile_dpbssd(0, 6, 7);
-    } else if (c == 1 && a == 6 && b == 7) {
-      _tile_dpbssd(1, 6, 7);
-    } else if (c == 2 && a == 6 && b == 7) {
-      _tile_dpbssd(2, 6, 7);
-    } else if (c == 3 && a == 6 && b == 7) {
-      _tile_dpbssd(3, 6, 7);
-    } else {
-      YNN_UNREACHABLE;
-    }
+    YNN_TILE_DPBSSD(c, a, b);
   }
 };
 
 template <int c, int a, int b>
 struct dpbusd {
   void operator()() {
-    // This should be _tile_dpbusd(c, a, b), but GCC has a ridiculous bug:
-    // https://github.com/google/XNNPACK/issues/9000#issuecomment-3449425946
-    if (c == 0 && a == 4 && b == 5) {
-      _tile_dpbusd(0, 4, 5);
-    } else if (c == 1 && a == 4 && b == 5) {
-      _tile_dpbusd(1, 4, 5);
-    } else if (c == 2 && a == 4 && b == 5) {
-      _tile_dpbusd(2, 4, 5);
-    } else if (c == 3 && a == 4 && b == 5) {
-      _tile_dpbusd(3, 4, 5);
-    } else if (c == 0 && a == 6 && b == 7) {
-      _tile_dpbusd(0, 6, 7);
-    } else if (c == 1 && a == 6 && b == 7) {
-      _tile_dpbusd(1, 6, 7);
-    } else if (c == 2 && a == 6 && b == 7) {
-      _tile_dpbusd(2, 6, 7);
-    } else if (c == 3 && a == 6 && b == 7) {
-      _tile_dpbusd(3, 6, 7);
-    } else {
-      YNN_UNREACHABLE;
-    }
+    YNN_TILE_DPBUSD(c, a, b);
   }
 };
 
