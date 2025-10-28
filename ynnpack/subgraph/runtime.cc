@@ -661,17 +661,11 @@ ynn_status ynn_runtime::setup() {
 ynn_status ynn_create_runtime(ynn_subgraph_t subgraph,
                               ynn_threadpool_t threadpool, uint32_t flags,
                               ynn_runtime_t* runtime_out) {
-  // TODO(b/454450773): Don't call this here.
-  ynn_status status = ynn_optimize_subgraph(subgraph, threadpool, 0);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
   slinky::thread_pool* slinky_threadpool =
       reinterpret_cast<slinky::thread_pool*>(threadpool);
-  std::unique_ptr<ynn_runtime> runtime(
-      new ynn_runtime(*subgraph, slinky_threadpool, flags));
-  status = runtime->build();
+  auto runtime =
+      std::make_unique<ynn_runtime>(*subgraph, slinky_threadpool, flags);
+  ynn_status status = runtime->build();
   if (status != ynn_status_success) {
     return status;
   }
