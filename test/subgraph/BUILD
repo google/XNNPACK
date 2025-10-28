@@ -117,14 +117,21 @@ xnnpack_unit_test(
     ],
     deps = SUBGRAPH_TEST_DEPS,
 ) for operator in [
-    "copy",
+    "binary",
     "broadcast",
+    "concatenate",
+    "copy",
+    "depth_to_space_2d",
+    "even_split",
+    "input_output",
+    "rewrites",
     "softmax",
     "space_to_depth_2d",
-    "depth_to_space_2d",
+    "split_fuse",
     "static_constant_pad",
     "static_expand_dims",
     "static_reshape",
+    "static_resize_bilinear_2d",
     "static_slice",
 ]]
 
@@ -136,19 +143,6 @@ xnnpack_unit_test(
         "//:operators",
         "//:subgraph",
     ],
-)
-
-xnnpack_unit_test(
-    name = "input_output_test",
-    srcs = ["input-output.cc"],
-    deps = SUBGRAPH_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "binary_test",
-    timeout = "moderate",
-    srcs = ["binary.cc"],
-    deps = SUBGRAPH_TEST_DEPS,
 )
 
 xnnpack_unit_test(
@@ -173,12 +167,6 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "concatenate_test",
-    srcs = ["concatenate.cc"],
-    deps = SUBGRAPH_TEST_DEPS,
-)
-
-xnnpack_unit_test(
     name = "convolution_2d_test",
     srcs = ["convolution-2d.cc"],
     deps = SUBGRAPH_TEST_DEPS + [":stencil"],
@@ -194,12 +182,6 @@ xnnpack_unit_test(
     name = "depthwise_convolution_2d_test",
     srcs = ["depthwise-convolution-2d.cc"],
     deps = SUBGRAPH_TEST_DEPS + [":stencil"],
-)
-
-xnnpack_unit_test(
-    name = "even_split_test",
-    srcs = ["even-split.cc"],
-    deps = SUBGRAPH_TEST_DEPS,
 )
 
 xnnpack_unit_test(
@@ -235,18 +217,6 @@ xnnpack_unit_test(
     timeout = "moderate",
     srcs = ["static-transpose.cc"],
     shard_count = 5,
-    deps = SUBGRAPH_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "split_fuse_test",
-    srcs = ["split-fuse.cc"],
-    deps = SUBGRAPH_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "static_resize_bilinear_2d_test",
-    srcs = ["static-resize-bilinear-2d.cc"],
     deps = SUBGRAPH_TEST_DEPS,
 )
 

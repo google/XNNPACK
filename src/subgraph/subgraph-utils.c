@@ -210,7 +210,8 @@ void xnn_subgraph_log_impl(const char* filename, size_t line_number,
       fprintf(out, ", flags=");
       XNN_PRINT_FLAGS(
           value->flags, XNN_FLAG_SQUASH_GROUPS, XNN_VALUE_FLAG_ONE_CONSUMER,
-          XNN_VALUE_FLAG_FP16_COMPATIBLE, XNN_VALUE_FLAG_LAYOUT_NCHW);
+          XNN_VALUE_FLAG_FP16_COMPATIBLE, XNN_VALUE_FLAG_LAYOUT_NCHW,
+          XNN_VALUE_FLAG_SHAPE_IS_STATIC);
     }
     fprintf(out, ".\n");
   }
