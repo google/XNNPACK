@@ -32,7 +32,6 @@ enum class ReduceOp {
   kMin,
   kMax,
   kMinMax,
-  kProduct,
 };
 
 size_t OutputRows(ReduceOp op) {
@@ -41,7 +40,6 @@ size_t OutputRows(ReduceOp op) {
     case ReduceOp::kMin:
     case ReduceOp::kMax:
     case ReduceOp::kSumSquared:
-    case ReduceOp::kProduct:
       return 1;
     case ReduceOp::kMinMax:
       return 2;
@@ -57,8 +55,6 @@ float Tolerance(ReduceOp op, size_t k, float max_abs_value) {
       return epsilon(type_of<T>()) * k * max_abs_value * 3;
     case ReduceOp::kSumSquared:
       return epsilon(type_of<T>()) * k * max_abs_value * max_abs_value * 6;
-    case ReduceOp::kProduct:
-      return epsilon(type_of<T>()) * std::pow(max_abs_value, k) * 2;
     case ReduceOp::kMin:
     case ReduceOp::kMax:
     case ReduceOp::kMinMax:
@@ -97,9 +93,6 @@ void Reference(Tensor<AT> a, Tensor<CT> c, ReduceOp op) {
               break;
             case ReduceOp::kSumSquared:
               c(0, j) = c(0, j) + a_j * a_j;
-              break;
-            case ReduceOp::kProduct:
-              c(0, j) = c(0, j) * a_j;
               break;
             case ReduceOp::kMin:
               c(0, j) = min(c(0, j), a_j);
@@ -264,11 +257,6 @@ TEST_P(UnaryReduce, k3) {
 #define YNN_UNARY_REDUCE_KERNEL(arch_flags, name, a_type, c_type) \
   TEST_REDUCE_KERNEL(ReduceOp::kMinMax, arch_flags, name, a_type, c_type);
 #include "ynnpack/kernels/reduce/min_max.inc"
-#undef YNN_UNARY_REDUCE_KERNEL
-
-#define YNN_UNARY_REDUCE_KERNEL(arch_flags, name, a_type, c_type) \
-  TEST_REDUCE_KERNEL(ReduceOp::kProduct, arch_flags, name, a_type, c_type);
-#include "ynnpack/kernels/reduce/product.inc"
 #undef YNN_UNARY_REDUCE_KERNEL
 
 }  // namespace ynn

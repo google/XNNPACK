@@ -45,8 +45,6 @@ unary_reduce_kernel_fn get_reduce_kernel(ynn_reduce_operator op,
       return get_min_kernel(a_type, c_type);
     case ynn_reduce_min_max:
       return get_min_max_kernel(a_type, c_type);
-    case ynn_reduce_product:
-      return get_product_kernel(a_type, c_type);
     default:
       return nullptr;
   }
@@ -181,7 +179,6 @@ ynn_type get_accumulator_type(ynn_reduce_operator op, ynn_type a_type) {
   switch (op) {
     case ynn_reduce_sum:
     case ynn_reduce_sum_squared:
-    case ynn_reduce_product:
       return ynn::type_is_integral(a_type) ? ynn_type_int32 : ynn_type_fp32;
     case ynn_reduce_max:
     case ynn_reduce_min:
@@ -204,9 +201,6 @@ uint32_t get_reduce_identity_value(ynn_subgraph_t subgraph,
     case ynn_reduce_sum_squared:
       value_f32[0] = 0.0f;
       break;
-    case ynn_reduce_product:
-      value_f32[0] = 1.0f;
-      break;
     case ynn_reduce_max:
       value_f32[0] = -std::numeric_limits<float>::infinity();
       break;
@@ -228,7 +222,6 @@ uint32_t get_reduce_identity_value(ynn_subgraph_t subgraph,
   switch (op) {
     case ynn_reduce_sum:
     case ynn_reduce_sum_squared:
-    case ynn_reduce_product:
       // Here, we want the unquantized identity value.
       // TODO(dsharlet): Why? I think it's because we are ignoring these
       // quantization parameters when implementing the sum reduction. This is a
@@ -295,11 +288,6 @@ ynn_status ynn_define_reduce(ynn_subgraph_t subgraph,
                             /*flags=*/0);
         }
         output.scale_id = a.scale_id;
-        break;
-      case ynn_reduce_product:
-        // Maybe we can handle this?
-        assert(a.zero_point_id == YNN_INVALID_VALUE_ID);
-        assert(a.scale_id == YNN_INVALID_VALUE_ID);
         break;
       case ynn_reduce_max:
       case ynn_reduce_min:

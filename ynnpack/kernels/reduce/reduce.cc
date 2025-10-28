@@ -270,14 +270,6 @@ struct max_op {
 };
 
 template <typename T>
-struct product_op {
-  T operator()(T a, T b) { return a * b; }
-
-  static constexpr T identity = 1;
-  static constexpr bool is_associative = true;
-};
-
-template <typename T>
 struct sum_op {
   T operator()(T a, T b) { return a + b; }
 
@@ -533,14 +525,6 @@ void min_max_uint8(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
                    max_op<uint8_t>());
 }
 
-void product_fp32(size_t n, size_t k3, size_t k2, size_t k1, size_t a_stride_n,
-                  size_t a_stride_k3, size_t a_stride_k2, const void* a, size_t,
-                  void* c) {
-  reduce<float>(n, k3, k2, k1, a_stride_n, a_stride_k3, a_stride_k2,
-                static_cast<const float*>(a), static_cast<float*>(c),
-                product_op<float>());
-}
-
 unary_reduce_kernel_fn get_sum_kernel(ynn_type a_type, ynn_type c_type,
                                       size_t n, size_t k3, size_t k2,
                                       size_t k1) {
@@ -610,21 +594,6 @@ unary_reduce_kernel_fn get_min_max_kernel(ynn_type type, size_t n, size_t k3,
 #include "ynnpack/kernels/reduce/min_max.inc"
 #undef YNN_UNARY_REDUCE_KERNEL
   YNN_LOG_ERROR() << "Unsupported min_max type " << type;
-  return nullptr;
-}
-
-unary_reduce_kernel_fn get_product_kernel(ynn_type a_type, ynn_type c_type,
-                                          size_t n, size_t k3, size_t k2,
-                                          size_t k1) {
-#define YNN_UNARY_REDUCE_KERNEL(arch, name, A, C)           \
-  if (is_arch_supported(arch)) {                            \
-    if (type_of<A>() == a_type && type_of<C>() == c_type) { \
-      return name;                                          \
-    }                                                       \
-  }
-#include "ynnpack/kernels/reduce/product.inc"
-#undef YNN_UNARY_REDUCE_KERNEL
-  YNN_LOG_ERROR() << "Unsupported product type " << a_type << "_" << c_type;
   return nullptr;
 }
 

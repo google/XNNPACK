@@ -356,7 +356,6 @@ enum ynn_reduce_operator {
   ynn_reduce_min_max,
   ynn_reduce_sum,
   ynn_reduce_sum_squared,
-  ynn_reduce_product,
 };
 
 // Performs the operation:
@@ -367,8 +366,8 @@ enum ynn_reduce_operator {
 // `XNN_NODE_FLAG_KEEP_DIMS` indicates that a reduction should keep the reduced
 // dimensions in the result (with extent 1).
 //
-// If `output_id` is `YNN_INVALID_VALUE_ID` and `op` is `ynn_reduce_sum` or
-// `ynn_reduce_product`, the output type will be:
+// If `output_id` is `YNN_INVALID_VALUE_ID` and `op` is `ynn_reduce_sum` or the
+// output type will be:
 // - ynn_type_int32 if the input is an integer type
 // - ynn_type_fp32 if the input is a floating point type
 // If `output_id` is `YNN_INVALID_VALUE_ID` and `op` is `ynn_reduce_min` or
@@ -377,7 +376,6 @@ enum ynn_reduce_operator {
 // If `input_b_id` is `YNN_INVALID_VALUE_ID`, `b` is defined to be the
 // "identity" value for the reduction operator:
 // - 0 if `op` is `ynn_reduce_sum`,
-// - 1 if `op` is `ynn_reduce_product`,
 // - The min or max value of the type for `ynn_reduce_max` or `ynn_reduce_min`.
 //
 // If `op` produces multiple outputs, the outputs are stored in a new dimension
