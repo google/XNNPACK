@@ -40,7 +40,10 @@ ynn_cc_library(
         "sum_squared.inc",
     ],
     compatible_with = _COMPATIBLE_WITH,
-    copts = ["-fno-unroll-loops"],
+    copts = [
+        "-fno-unroll-loops",
+        "-O2",
+    ],
     per_arch_srcs = {
         "arm_neonfp16arith": [
             "arm_neonfp16arith.cc",

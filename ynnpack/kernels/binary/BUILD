@@ -120,6 +120,7 @@ ynn_cc_library(
         "x86_sse2.inc",
     ],
     compatible_with = _COMPATIBLE_WITH,
+    copts = ["-O2"],
     per_arch_srcs = {
         "arm_neon": ["arm_neon.cc"],
         "x86_sse2": ["x86_sse2.cc"],

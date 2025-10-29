@@ -489,7 +489,10 @@ ynn_cc_library(
         "x86_sse2_fp32.inc",
     ],
     compatible_with = _COMPATIBLE_WITH,
-    copts = ["-fno-unroll-loops"],
+    copts = [
+        "-fno-unroll-loops",
+        "-O2",
+    ],
     per_arch_srcs = {
         "x86_sse2": ["x86_sse2_fp32.cc"],
         "x86_avx": [
