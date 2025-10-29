@@ -42,7 +42,6 @@ typedef void (*binary_reduce_kernel_fn)(size_t n, size_t k3, size_t k2,
 #include "ynnpack/kernels/reduce/max.inc"
 #include "ynnpack/kernels/reduce/min.inc"
 #include "ynnpack/kernels/reduce/min_max.inc"
-#include "ynnpack/kernels/reduce/product.inc"
 #include "ynnpack/kernels/reduce/sum.inc"
 #include "ynnpack/kernels/reduce/sum_squared.inc"
 #undef YNN_UNARY_REDUCE_KERNEL
@@ -73,12 +72,6 @@ unary_reduce_kernel_fn get_max_kernel(ynn_type type,
                                       size_t k1 = unknown_reduce_extent);
 
 unary_reduce_kernel_fn get_min_max_kernel(ynn_type type,
-                                          size_t n = unknown_reduce_extent,
-                                          size_t k3 = unknown_reduce_extent,
-                                          size_t k2 = unknown_reduce_extent,
-                                          size_t k1 = unknown_reduce_extent);
-
-unary_reduce_kernel_fn get_product_kernel(ynn_type a_type, ynn_type c_type,
                                           size_t n = unknown_reduce_extent,
                                           size_t k3 = unknown_reduce_extent,
                                           size_t k2 = unknown_reduce_extent,

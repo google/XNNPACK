@@ -832,9 +832,11 @@ enum xnn_status reshape_depth_to_space_nchw2nhwc(
 
   const uint32_t block_size = depth_to_space_op->depth_to_space.block_size;
   if (input_channels % (block_size * block_size) != 0) {
-    xnn_log_error("failed to reshape %s operator with %zu input_channels and %zu block_sizex: "
-                  "input channels must be divisible by block_size * block_size",
-      xnn_operator_type_to_string(operator_type), input_width, input_height);
+    xnn_log_error(
+        "failed to reshape %s operator with %zu input_channels and %zu "
+        "block_sizex: input channels must be divisible by block_size * "
+        "block_size",
+        xnn_operator_type_to_string(operator_type), input_width, input_height);
     return xnn_status_invalid_parameter;
   }
 
@@ -1123,9 +1125,12 @@ static enum xnn_status reshape_depth_to_space_nhwc(
 
   const uint32_t block_size = depth_to_space_op->depth_to_space.block_size;
   if (input_channels % (block_size * block_size) != 0) {
-    xnn_log_error("failed to reshape %s operator with %zu input_channels and %u block_size: "
-                  "input channels must be divisible by block_size * block_size",
-      xnn_operator_type_to_string(expected_operator_type), input_channels, block_size);
+    xnn_log_error(
+        "failed to reshape %s operator with %zu input_channels and %u "
+        "block_size: input channels must be divisible by block_size * "
+        "block_size",
+        xnn_operator_type_to_string(expected_operator_type), input_channels,
+        block_size);
     return xnn_status_invalid_parameter;
   }
 
@@ -1420,17 +1425,19 @@ static enum xnn_status reshape_space_to_depth_nhwc(
 
   if (input_width % block_size != 0) {
     xnn_log_error(
-        "failed to reshape %s operator with %zu input width and %u block size: input width must be divisible by block "
-        "size",
-      xnn_operator_type_to_string(expected_operator_type), input_width, block_size);
+        "failed to reshape %s operator with %zu input width and %u block size: "
+        "input width must be divisible by block size",
+        xnn_operator_type_to_string(expected_operator_type), input_width,
+        block_size);
     return xnn_status_invalid_parameter;
   }
 
   if (input_height % block_size != 0) {
     xnn_log_error(
-        "failed to reshape %s operator with %zu input height and %u block size: input height must be divisible by block "
-        "size",
-      xnn_operator_type_to_string(expected_operator_type), input_height, block_size);
+        "failed to reshape %s operator with %zu input height and %u block "
+        "size: input height must be divisible by block size",
+        xnn_operator_type_to_string(expected_operator_type), input_height,
+        block_size);
     return xnn_status_invalid_parameter;
   }
 

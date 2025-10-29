@@ -46,18 +46,18 @@ def tanh_fp32(a, x):
 
   # Evaluate the numerator polynomial p.
   # p = x * (1 + x^2 * (alpha_3 + x^2 * (alpha_5 + x^2 * (alpha_7 + x^2 * alpha_9))))
-  vp = vx2 * valpha_9 + valpha_7
-  vp = vx2 * vp + valpha_5
-  vp = vx2 * vp + valpha_3
-  vp = vx2 * vp + 1.0
+  vp = multiply_add(vx2, valpha_9, valpha_7)
+  vp = multiply_add(vx2, vp, valpha_5)
+  vp = multiply_add(vx2, vp, valpha_3)
+  vp = multiply_add(vx2, vp, 1.0)
   vp = vx * vp
 
   # Evaluate the denominator polynomial q.
   # q = 1 + x^2 * (beta_2 + x^2 * (beta_4 + x^2 * (beta_6 + x^2 * beta_8)))
-  vq = vx2 * vbeta_8 + vbeta_6
-  vq = vx2 * vq + vbeta_4
-  vq = vx2 * vq + vbeta_2
-  vq = vx2 * vq + 1.0
+  vq = multiply_add(vx2, vbeta_8, vbeta_6)
+  vq = multiply_add(vx2, vq, vbeta_4)
+  vq = multiply_add(vx2, vq, vbeta_2)
+  vq = multiply_add(vx2, vq, 1.0)
 
   # Divide the numerator by the denominator.
   vy = vp / vq

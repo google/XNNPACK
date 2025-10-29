@@ -14,6 +14,7 @@
 #include <iomanip>
 #include <memory>
 #include <numeric>
+#include <optional>
 #include <ostream>
 #include <set>
 #include <sstream>
@@ -96,8 +97,34 @@ ynn_status ynn_value::get_external_shape(size_t* rank, size_t* dims) const {
   return ynn_status_success;
 }
 
-ynn_subgraph::ynn_subgraph(uint32_t external_value_ids)
-    : external_value_ids(external_value_ids) {
+std::optional<float> ynn_value::as_scalar_float() const {
+  if (!is_static()) return std::nullopt;
+  if (data->elem_size != data->size_bytes()) return std::nullopt;
+  switch (type) {
+    case ynn_type_fp32:
+      return static_scalar_value<float>();
+    case ynn_type_fp16:
+      return static_scalar_value<ynn::half>();
+    case ynn_type_bf16:
+      return static_scalar_value<ynn::bfloat16>();
+    case ynn_type_int32:
+      return static_cast<float>(static_scalar_value<int32_t>());
+    case ynn_type_int8:
+      return static_cast<float>(static_scalar_value<int8_t>());
+    case ynn_type_uint8:
+      return static_cast<float>(static_scalar_value<uint8_t>());
+    case ynn_type_int4:
+    case ynn_type_uint4:
+      // int4 values can't be scalars.
+    case ynn_type_opaque:
+    case ynn_type_invalid:
+      break;
+  }
+  return std::nullopt;
+}
+
+ynn_subgraph::ynn_subgraph(uint32_t external_value_ids, uint32_t flags)
+    : external_value_ids(external_value_ids), flags(flags) {
   for (size_t i = 0; i < external_value_ids; ++i) {
     values.push_back(ynn_value(i));
   }
@@ -173,8 +200,8 @@ uint32_t ynn_subgraph::get_static_value_id(ynn_type type, size_t rank,
                                            uint32_t zero_point_id,
                                            uint32_t scale_id,
                                            float* value_f32) {
-  const size_t size =
-      std::accumulate(dims, dims + rank, 1, std::multiplies<size_t>());
+  const size_t size = std::accumulate(dims, dims + rank, static_cast<size_t>(1),
+                                      std::multiplies<size_t>());
   assert(size > 0);
 
   float scale = 1.0f;
@@ -197,12 +224,12 @@ uint32_t ynn_subgraph::get_static_value_id(ynn_type type, size_t rank,
       // scalar.
     }
   } else if (scale_id != YNN_INVALID_VALUE_ID) {
-    scale = value(scale_id).GetStaticScalarValue<float>();
+    scale = value(scale_id).static_scalar_value<float>();
   }
 
   int32_t zero_point = 0;
   if (zero_point_id != YNN_INVALID_VALUE_ID) {
-    zero_point = value(zero_point_id).GetStaticScalarValue<int32_t>();
+    zero_point = value(zero_point_id).static_scalar_value<int32_t>();
   }
 
   std::vector<char> value(size * ynn::type_size_bytes(type));
@@ -380,12 +407,17 @@ ynn_status ynn_subgraph::fold_constants(slinky::thread_pool* threadpool) {
 
   // Use the results of reshape to allocate static buffers for the constants.
   for (uint32_t i : to_fold) {
-    ynn_runtime_value& value = runtime.value(i);
+    ynn_runtime_value& folded = runtime.value(i);
+    assert(values[i].extents.size() == folded.data->rank);
+    for (size_t d = 0; d < folded.data->rank; ++d) {
+      values[i].extents[d] = folded.data->dim(d).extent();
+    }
+    // Make a new value to put the constant in.
     values[i].data =
-        slinky::raw_buffer::make(value.data->rank, value.data->elem_size,
-                                 value.data->dims, YNN_ALLOCATION_ALIGNMENT);
-    value.data = values[i].data;
-    values[i].extents = value.extents;
+        slinky::raw_buffer::make(folded.data->rank, folded.data->elem_size,
+                                 folded.data->dims, YNN_ALLOCATION_ALIGNMENT);
+    // Use the new value as the output of the constant folding runtime.
+    folded.data = values[i].data;
   }
 
   status = runtime.setup();
@@ -498,6 +530,7 @@ const char* name_of(const ynn_node::static_transpose&) {
 const char* name_of(const ynn_node::stencil_copy&) { return "stencil_copy"; }
 const char* name_of(const ynn_node::dot&) { return "dot"; }
 const char* name_of(const ynn_node::pack_b&) { return "pack_b"; }
+const char* name_of(const ynn_node::transpose_a&) { return "transpose_a"; }
 const char* name_of(const ynn_node::get_tensor_shape&) {
   return "get_tensor_shape";
 }
@@ -660,6 +693,7 @@ void print(std::ostream& os, const ynn_node::dot& op) {
 }
 
 void print(std::ostream& os, const ynn_node::pack_b& op) {}
+void print(std::ostream& os, const ynn_node::transpose_a& op) {}
 
 void print(std::ostream& os, const ynn_node::get_tensor_shape& op) {
   os << "axes=" << op.axes;
@@ -740,6 +774,9 @@ void ynn_subgraph::dump(std::ostream& os) const {
     }
     if (value.is_static()) {
       os << "static ";
+      if (std::optional<float> v = value.as_scalar_float()) {
+        os << "value=" << *v;
+      }
     }
     os << std::endl;
     ++values_count;
@@ -770,7 +807,29 @@ extern "C" {
 
 ynn_status ynn_create_subgraph(uint32_t external_value_ids, uint32_t flags,
                                ynn_subgraph_t* subgraph) {
-  *subgraph = new ynn_subgraph(external_value_ids);
+  *subgraph = new ynn_subgraph(external_value_ids, flags);
+  return ynn_status_success;
+}
+
+ynn_status ynn_optimize_subgraph(ynn_subgraph_t subgraph,
+                                 ynn_threadpool_t threadpool, uint32_t flags) {
+#if YNN_LOG_LEVEL >= YNN_LOG_LEVEL_DEBUG
+  YNN_LOG_DEBUG() << "subgraph before optimization:\n";
+  subgraph->dump(std::cout);
+#endif
+
+  slinky::thread_pool* slinky_threadpool =
+      reinterpret_cast<slinky::thread_pool*>(threadpool);
+  ynn_status status = subgraph->optimize(slinky_threadpool);
+  if (status != ynn_status_success) {
+    return status;
+  }
+
+#if YNN_LOG_LEVEL >= YNN_LOG_LEVEL_DEBUG
+  YNN_LOG_DEBUG() << "subgraph after optimization:\n";
+  subgraph->dump(std::cout);
+#endif
+
   return ynn_status_success;
 }
 

@@ -215,18 +215,25 @@ xnn_load_tail_safe_f16(const xnn_float16 *input, size_t num_elements) {
   switch (num_elements) {
     case 7:
       *dst++ = *input++;
+      XNN_FALLTHROUGH
     case 6:
       *dst++ = *input++;
+      XNN_FALLTHROUGH
     case 5:
       *dst++ = *input++;
+      XNN_FALLTHROUGH
     case 4:
       *dst++ = *input++;
+      XNN_FALLTHROUGH
     case 3:
       *dst++ = *input++;
+      XNN_FALLTHROUGH
     case 2:
       *dst++ = *input++;
+      XNN_FALLTHROUGH
     default:
       *dst++ = *input++;
+      break;
   }
   return vreinterpretq_f16_u16(vld1q_u16((const uint16_t *)&padded[0]));
 }

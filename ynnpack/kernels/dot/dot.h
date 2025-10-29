@@ -12,17 +12,22 @@
 
 #include "ynnpack/base/arch.h"  // IWYU pragma: keep
 #include "ynnpack/include/ynnpack.h"
-#include "ynnpack/kernels/dot/arm64_sme.h"
+#include "ynnpack/kernels/dot/arm64_sme.h"  // IWYU pragma: keep
 
 namespace ynn {
 
-enum dot_flag {
+// `enum class` doesn't work well for bitfield values.
+namespace dot_flag {
+
+enum {
   // The `a` parameter of the dot must be transposed from [i, k3, k2, k1]
   // to [k1 / tile_k, k3, k2, {i, tile_k}], where:
   // - The {i, tile_k} dimension is dense (stride of 1 element).
   // - `a_stride_m` indicates the stride of the k1 / tile_k dimension.
   transpose_a = 1 << 0,
 };
+
+}  // namespace dot_flag
 
 // Dot kernels compute the following:
 //
@@ -106,9 +111,12 @@ struct dot_packed_shape {
 
 // Find a dot kernel to use for the given `shape`. If not null, the chosen
 // kernel will have the same `tile_n` and `tile_k` as `compatible_with` (i.e.
-// both kernels can use the same packed data.)
+// both kernels can use the same packed data.). Similarly, if `transpose_a` is
+// not `nullopt`, the chosen kernel will have the flag `dot_flag::transpose_a`
+// if *transpose_a is true.
 dot_kernel get_dot_kernel(const dot_type& type, const dot_shape& shape = {},
                           const dot_packed_shape* dot_packed_shape = nullptr,
+                          std::optional<bool> transpose_a = std::nullopt,
                           uint64_t arch_flags = get_supported_arch_flags());
 
 }  // namespace ynn

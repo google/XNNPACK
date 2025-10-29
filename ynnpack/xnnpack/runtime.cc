@@ -11,6 +11,7 @@
 
 #include "include/experimental.h"
 #include "include/xnnpack.h"
+#include "ynnpack/base/log.h"
 #include "ynnpack/include/ynnpack.h"
 #include "ynnpack/xnnpack/utils.h"
 #include "ynnpack/xnnpack/xnnpack.h"
@@ -121,10 +122,24 @@ static xnn_status create_runtime_impl(xnn_subgraph_t subgraph,
   if (flags & XNN_FLAG_SLINKY_NO_SCHEDULE) {
     ynn_flags |= YNN_RUNTIME_FLAG_NO_SCHEDULE;
   }
+  if (flags & XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC) {
+    YNN_LOG_WARNING()
+        << "XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC flag is not supported by the "
+           "YNNPACK compatibility shim. Pass YNN_FLAG_CONSISTENT_ARITHMETIC to "
+           "`ynn_create_subgraph` instead.";
+  }
+
+  ynn_threadpool_t ynn_threadpool =
+      xnn_threadpool ? xnn_threadpool->ynn : nullptr;
+
+  ynn_status status =
+      ynn_optimize_subgraph(subgraph->ynn, ynn_threadpool, ynn_flags);
+  if (status != ynn_status_success) {
+    return ynn::xnn_status_from_ynn(status);
+  }
 
   return ynn::xnn_status_from_ynn(ynn_create_runtime(
-      subgraph->ynn, xnn_threadpool ? xnn_threadpool->ynn : nullptr, ynn_flags,
-      (ynn_runtime_t*)runtime_out));
+      subgraph->ynn, ynn_threadpool, ynn_flags, (ynn_runtime_t*)runtime_out));
 }
 
 xnn_status xnn_create_runtime_with_threadpool(xnn_subgraph_t subgraph,

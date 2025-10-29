@@ -101,8 +101,9 @@ void TestImpl(T, size_t rank) {
       input_shape.back() = align_up(input_shape.back(), elem_count);
       input_shape[perm.back()] = align_up(input_shape[perm.back()], elem_count);
 
-      size_t flat_size = std::accumulate(input_shape.begin(), input_shape.end(),
-                                         1, std::multiplies<size_t>());
+      size_t flat_size =
+          std::accumulate(input_shape.begin(), input_shape.end(),
+                          static_cast<size_t>(1), std::multiplies<size_t>());
 
       Buffer<T> input(flat_size / elem_count);
       std::vector<size_t> input_strides = compute_strides(input_shape);

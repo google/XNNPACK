@@ -520,20 +520,22 @@ static enum xnn_status create_convolution2d_nchw(
   const size_t input_channels = groups * group_input_channels;
   if (input_channel_stride < input_channels) {
     xnn_log_error(
-      "failed to create %s operator with input channel stride of %zu: "
-      "stride must be at least as large as the number of input channels (%" PRIu32 "x%zu)",
-      xnn_operator_type_to_string(operator_type),
-      input_channel_stride, groups, group_input_channels);
+        "failed to create %s operator with input channel stride of %zu: stride "
+        "must be at least as large as the number of input channels (%" PRIu32
+        "x%zu)",
+        xnn_operator_type_to_string(operator_type), input_channel_stride,
+        groups, group_input_channels);
     goto error;
   }
 
   const size_t output_channels = groups * group_output_channels;
   if (output_channel_stride < output_channels) {
     xnn_log_error(
-      "failed to create %s operator with output channel stride of %zu: "
-      "stride must be at least as large as the number of output channels (%" PRIu32 "x%zu)",
-      xnn_operator_type_to_string(operator_type),
-      output_channel_stride, groups, group_output_channels);
+        "failed to create %s operator with output channel stride of %zu: "
+        "stride must be at least as large as the number of output channels "
+        "(%" PRIu32 "x%zu)",
+        xnn_operator_type_to_string(operator_type), output_channel_stride,
+        groups, group_output_channels);
     goto error;
   }
 
@@ -562,9 +564,10 @@ static enum xnn_status create_convolution2d_nchw(
 
   if ((flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) != 0 && group_input_channels != 1) {
     xnn_log_error(
-      "failed to create depthwise %s operator with %zu input channels per group: "
-      "depthwise convolution must have exactly 1 input channel per group",
-      xnn_operator_type_to_string(operator_type), group_input_channels);
+        "failed to create depthwise %s operator with %zu input channels per "
+        "group: depthwise convolution must have exactly 1 input channel per "
+        "group",
+        xnn_operator_type_to_string(operator_type), group_input_channels);
     goto error;
   }
 
@@ -651,14 +654,18 @@ static enum xnn_status create_convolution2d_nchw(
     ukernel_type = xnn_microkernel_type_dwconv;
     dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_5x5s2;
   } else {
-    xnn_log_error(
-      "failed to create %s operator with %" PRIu32 "x%" PRIu32 " kernel, %"PRIu32 "x%" PRIu32 " subsampling, %"PRIu32 "x%" PRIu32 " dilation"
-      ", %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding, %" PRIu32 "x%zu input channels, and %" PRIu32 "x%zu output channels: "
-      "only selected convolution parameters are supported",
-      xnn_operator_type_to_string(operator_type),
-      kernel_width, kernel_height, subsampling_width, subsampling_height, dilation_width, dilation_height,
-      input_padding_top, input_padding_left, input_padding_bottom, input_padding_right,
-      groups, group_input_channels, groups, group_output_channels);
+    xnn_log_error("failed to create %s operator with %" PRIu32 "x%" PRIu32
+                  " kernel, %" PRIu32 "x%" PRIu32 " subsampling, %" PRIu32
+                  "x%" PRIu32 " dilation, %" PRIu32 "+%" PRIu32 "x%" PRIu32
+                  "+%" PRIu32 " padding, %" PRIu32
+                  "x%zu input channels, and %" PRIu32
+                  "x%zu output channels: only selected convolution parameters "
+                  "are supported",
+                  xnn_operator_type_to_string(operator_type), kernel_width,
+                  kernel_height, subsampling_width, subsampling_height,
+                  dilation_width, dilation_height, input_padding_top,
+                  input_padding_left, input_padding_bottom, input_padding_right,
+                  groups, group_input_channels, groups, group_output_channels);
     goto error;
   }
 

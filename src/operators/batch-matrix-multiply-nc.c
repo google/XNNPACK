@@ -582,11 +582,11 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_qs8(
 
   if (output_min > output_max) {
     xnn_log_error(
-      "failed to create %s operator with [%d, %d] output range:"
-      " lower bound must be less than or equal to upper bound",
-      xnn_operator_type_to_string(
-          xnn_operator_type_batch_matrix_multiply_nc_qs8), output_min,
-          output_max);
+        "failed to create %s operator with [%d, %d] output range: lower bound "
+        "must be less than or equal to upper bound",
+        xnn_operator_type_to_string(
+            xnn_operator_type_batch_matrix_multiply_nc_qs8),
+        output_min, output_max);
     return xnn_status_invalid_parameter;
   }
 
@@ -640,8 +640,8 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_qs8_const_weights(
 
   if (requantization_scale <= 0) {
     xnn_log_error(
-        "failed to create %s operator: "
-        "requantization scale %.7g is less or equal to 0.0",
+        "failed to create %s operator: requantization scale %.7g is less or "
+        "equal to 0.0",
         xnn_operator_type_to_string(
             xnn_operator_type_batch_matrix_multiply_nc_qs8),
         requantization_scale);
@@ -650,8 +650,8 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_qs8_const_weights(
 
   if (requantization_scale > 255.0) {
     xnn_log_error(
-        "failed to create %s operator: "
-        "requantization scale %.7g is greater than 255.0",
+        "failed to create %s operator: requantization scale %.7g is greater "
+        "than 255.0",
         xnn_operator_type_to_string(
             xnn_operator_type_batch_matrix_multiply_nc_qs8),
         requantization_scale);

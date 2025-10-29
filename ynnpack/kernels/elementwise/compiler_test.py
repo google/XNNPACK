@@ -89,6 +89,9 @@ class TestTarget(Target):
     self.tail_strategy = None
     self.vector_bits = 128
 
+  def get_natural_lanes_num(self, ty):
+    return self.vector_bits // ty.size
+
 
 def sample_func():
   """Just a test function (it's an incomplete implementation of tanh)."""
@@ -175,12 +178,10 @@ class ExpressionCachingTest(unittest.TestCase):
     self.assertEqual(mc_object_count, c_object_count)
 
   def test_pattern_match(self):
-    natural_lanes = 16
-
     c = sample_func()
     c_object_count = self.count_objects(c)
 
-    mc = self.target.pattern_match(c, natural_lanes, {})
+    mc = self.target.pattern_match(c, {})
     mc_object_count = self.count_objects(mc)
 
     # There are no patterns defined in the test target, so we should get the

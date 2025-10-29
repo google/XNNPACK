@@ -17,6 +17,7 @@
 #include <numeric>
 #include <random>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -105,6 +106,9 @@ struct TensorShape {
   TensorShape(std::vector<size_t> dims) : dims(std::move(dims)) {}  // NOLINT
   TensorShape(const std::initializer_list<size_t>& dims)
       : dims(dims) {}  // NOLINT
+
+  TensorShape(const struct xnn_shape* shape)  // NOLINT
+      : dims(shape->dim, shape->dim + shape->num_dims) {};
 
   size_t Rank() const { return dims.size(); }
   const size_t* Dims() const { return dims.data(); }

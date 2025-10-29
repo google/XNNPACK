@@ -56,8 +56,9 @@ void TestImpl(T, size_t rank) {
         if (deduced_split < splits.size()) {
           splits[deduced_split] = input_shape[axis];
         }
-        input_shape[axis] = std::accumulate(splits.begin(), splits.end(), 1,
-                                            std::multiplies<>());
+        input_shape[axis] =
+            std::accumulate(splits.begin(), splits.end(),
+                            static_cast<size_t>(1), std::multiplies<>());
 
         Tensor<T> input(input_shape);
         TypeGenerator<T> generator(quantization);

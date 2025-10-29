@@ -81,18 +81,27 @@ static XNN_INLINE xnn_simd_s16_t xnn_load_tail_safe_s16(const int16_t* input,
   switch (num_elements) {
     case 7:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 6:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 5:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 4:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 3:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 2:
       *d++ = *input++;
+      XNN_FALLTHROUGH
     case 1:
       *d++ = *input++;
+      XNN_FALLTHROUGH
+    default:
+      break;
   }
   return wasm_v128_load(&padded[0]);
 }

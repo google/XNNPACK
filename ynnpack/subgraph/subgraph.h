@@ -13,8 +13,10 @@
 #include <deque>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <ostream>
 #include <string>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -101,15 +103,21 @@ struct ynn_value {
 
   std::string name() const;
 
+  // Asserting that the value is reshapable to a static scalar value of type T,
+  // returns that value.
   template <typename T>
-  T GetStaticScalarValue() const {
+  T static_scalar_value() const {
     assert(is_static());
     assert(sizeof(T) == data->elem_size);
-    assert(data->rank == 0);
+    assert(data->size_bytes() == data->elem_size);
     T result;
     memcpy(&result, data->base, sizeof(T));
     return result;
   }
+
+  // If the value is reshape-able to a scalar, returns the value converted to
+  // a float, otherwise returns nullopt.
+  std::optional<float> as_scalar_float() const;
 };
 
 struct ynn_node {
@@ -212,6 +220,7 @@ struct ynn_node {
     size_t num_k_dims;
   };
   struct pack_b {};
+  struct transpose_a {};
   struct get_tensor_shape {
     std::vector<int32_t> axes;
     bool reshape_1d;
@@ -230,7 +239,7 @@ struct ynn_node {
                even_split, copy, split_dim, fuse_dim, fuse_dims, split_dims,
                stack, static_reshape, static_broadcast, static_expand_dims,
                static_pad, static_slice, static_transpose, stencil_copy,
-               unary_elementwise, binary_elementwise, dot, pack_b,
+               unary_elementwise, binary_elementwise, dot, pack_b, transpose_a,
                get_tensor_shape, reduce>
       op;
 
@@ -266,12 +275,14 @@ struct ynn_node {
 };
 
 struct ynn_subgraph {
-  explicit ynn_subgraph(uint32_t external_value_ids);
+  explicit ynn_subgraph(uint32_t external_value_ids, uint32_t flags);
 
   // Number of Value IDs reserved for communication with external graph
   // representation. Values created during subgraph transformation avoid using
   // IDs in [0, reserved_value_ids-1] range.
   uint32_t external_value_ids;
+
+  uint32_t flags;
 
   // We use std::deque, so we can push_back without invalidating pointers to
   // these objects.

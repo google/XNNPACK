@@ -577,8 +577,8 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
             batch_size, output_channels, input_channels,
             !should_inline_lhs_packing
                 ? "packed lhs will likely not stay in cache"
-                : "batch size does not parallelize "
-                  "well over the number of threads");
+                : "batch size does not parallelize well over the number of "
+                  "threads");
 
         // Allocate a workspace for the entire LHS.
         *workspace_size =

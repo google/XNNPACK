@@ -146,7 +146,7 @@ constexpr decltype(auto) SwitchElementType(size_t element_size_bits, F&& f) {
 struct TransposeParam {
   uint64_t arch_flags;
   transpose_kernel_fn kernel;
-  int element_size_bits;
+  size_t element_size_bits;
 };
 
 const char* to_string(const TransposeParam& param) { return ""; }
@@ -214,7 +214,7 @@ TEST_P(Transpose, unaligned) {
 struct InterleaveParam {
   uint64_t arch_flags;
   interleave_kernel_fn kernel;
-  int element_size_bits;
+  size_t element_size_bits;
 };
 
 std::string to_string(const InterleaveParam& param) {

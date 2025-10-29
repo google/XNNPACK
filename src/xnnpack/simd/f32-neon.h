@@ -265,14 +265,18 @@ static XNN_INLINE xnn_simd_f32_t xnn_load_tail_safe_f32(const float* input,
   switch (num_elements) {
     case 4:
       *dst++ = *input++;
+      XNN_FALLTHROUGH
     case 3:
       *dst++ = *input++;
+      XNN_FALLTHROUGH
     case 2:
       *dst++ = *input++;
+      XNN_FALLTHROUGH
     case 1:
       *dst++ = *input++;
-    default: {
-    }
+      XNN_FALLTHROUGH
+    default:
+      break;
   }
   return vld1q_f32(padded);
 }

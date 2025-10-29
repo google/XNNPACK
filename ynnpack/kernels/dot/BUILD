@@ -453,14 +453,16 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "arm64_sme_stubs",
+    srcs = ["arm64_sme_stubs.cc"],
+    compatible_with = _COMPATIBLE_WITH,
+    deps = ["//ynnpack/base"],
+)
+
 ynn_cc_library(
     name = "dot",
-    srcs = [
-        "dot.cc",
-    ] + select({
-        "//ynnpack:arm64": ["arm64_sme_stubs.cc"],
-        "//conditions:default": [],
-    }),
+    srcs = ["dot.cc"],
     hdrs = [
         "arm64_neon_fp32.inc",
         "arm64_neoni8mm_int8_int8_int32.inc",
@@ -549,7 +551,10 @@ ynn_cc_library(
         "//ynnpack:ynnpack_h",
         "//ynnpack/base",
         "//ynnpack/base:log",
-    ],
+    ] + select({
+        "//ynnpack:arm64": [":arm64_sme_stubs"],
+        "//conditions:default": [],
+    }),
 )
 
 cc_test(
@@ -573,7 +578,6 @@ cc_test(
     srcs = ["schedule_test.cc"],
     deps = [
         ":schedule",
-        "//ynnpack/base/test:fuzz_test",
         "@com_google_googletest//:gtest_main",
     ],
 )

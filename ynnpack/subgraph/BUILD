@@ -4,6 +4,7 @@
 # LICENSE file in the root directory of this source tree.
 
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("//ynnpack:build_defs.bzl", "define_build_option")
 
 _COMPATIBLE_WITH = []
 
@@ -18,6 +19,29 @@ cc_library(
         "@slinky//slinky/base",
         "@slinky//slinky/base:thread_pool",
         "@slinky//slinky/base:thread_pool_impl",
+    ],
+)
+
+define_build_option(
+    name = "ynn_enable_perfetto",
+    default_all = [],
+)
+
+cc_library(
+    name = "perfetto",
+    srcs = ["perfetto.cc"],
+    hdrs = ["perfetto.h"],
+    compatible_with = _COMPATIBLE_WITH,
+    defines = ["YNN_ENABLE_PERFETTO"],
+    tags = ["manual"],
+    deps = [
+        # The capability to capture perfetto traces is disabled by default. To enable and use it:add:
+        #
+        # git_repository(name = "perfetto", branch = "main", remote = "https://github.com/google/perfetto")
+        #
+        # To MODULE.bazel, add `--define ynn_enable_perfetto=true` to the bazel command line, and
+        # uncomment this dependency.
+        # "@perfetto//:libperfetto_client_experimental"
     ],
 )
 
@@ -72,5 +96,8 @@ cc_library(
         "@slinky//slinky/base:thread_pool",
         "@slinky//slinky/builder",
         "@slinky//slinky/runtime",
-    ],
+    ] + select({
+        ":ynn_enable_perfetto": [":perfetto"],
+        "//conditions:default": [],
+    }),
 )

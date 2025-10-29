@@ -754,8 +754,7 @@ enum xnn_status xnn_define_deconvolution_2d(
       if (input_value->quantization.num_nonbatch_dims >=
           input_value->shape.num_dims) {
         xnn_log_error("failed to define %s operator with input ID #%" PRIu32
-                      ": num_nonbatch_dims (%zu) must be "
-                      "< num_dims (%zu)",
+                      ": num_nonbatch_dims (%zu) must be < num_dims (%zu)",
                       xnn_node_type_to_string(xnn_node_type_convolution_2d),
                       input_id, input_value->quantization.num_nonbatch_dims,
                       input_value->shape.num_dims);

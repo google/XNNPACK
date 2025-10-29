@@ -140,9 +140,9 @@ static enum xnn_status reshape_concatenate_operator(
   output_value->shape.num_dims = input0_value->shape.num_dims;
   if (axis >= output_value->shape.num_dims) {
     xnn_log_error(
-      "failed to reshape reshape operator operator with the output ID #%" PRIu32
-      ": axis (%d) exceeds the number of dimensions (%zu)",
-      output_id, axis, input0_value->shape.num_dims);
+        "failed to reshape reshape operator operator with the output ID "
+        "#%" PRIu32 ": axis (%d) exceeds the number of dimensions (%zu)",
+        output_id, axis, input0_value->shape.num_dims);
     return xnn_status_invalid_parameter;
   }
 

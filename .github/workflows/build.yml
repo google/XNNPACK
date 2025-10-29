@@ -668,8 +668,29 @@ jobs:
             ${{ github.workspace }}/bin/qemu-aarch64
             ${{ github.workspace }}/qemu-master.tar.bz2.sha256
           key: ${{ runner.os }}-qemu-aarch64
+      - name: Build microkernel and subgraph tests
+        if: ${{ !inputs.run-tests }}
+        env:
+          CC: clang-20
+          CXX: clang++-20
+        run: |
+          bazel build \
+            -c opt \
+            --copt=-g \
+            --copt=-DGOOGLE_COMMANDLINEFLAGS_FULL_API=1 \
+            --platforms=//build_config:aarch64_linux \
+            --run_under="${PWD}/bin/qemu-aarch64 ${QEMU_ARGS} " \
+            --define xnn_enable_arm_sme2=true \
+            --dynamic_mode=off \
+            --features=fully_static_link \
+            //test:qs8_qc8w_igemm_minmax_fp32_test \
+            //test:qp8_f32_qc4w_gemm_minmax_test \
+            //test:pf32_gemm_minmax_test \
+            //test:pf16_gemm_minmax_test \
+            //test:pqs8_qc8w_gemm_minmax_test \
+            //test/subgraph/...
+        working-directory: ${{ github.workspace }}
       - name: Build and run microkernel tests
-        continue-on-error: true
         if: ${{ inputs.run-tests }}
         env:
           CC: clang-20
@@ -696,7 +717,6 @@ jobs:
             --local_test_jobs=$(nproc)
         working-directory: ${{ github.workspace }}
       - name: Build and run subgraph tests
-        continue-on-error: true
         if: ${{ inputs.run-tests }}
         env:
           CC: clang-20

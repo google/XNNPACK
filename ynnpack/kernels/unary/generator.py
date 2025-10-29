@@ -2,6 +2,7 @@ from collections.abc import Sequence
 import sys
 
 from ynnpack.kernels.elementwise.generator import generate
+from ynnpack.kernels.unary.convert import *  # pylint: disable=wildcard-import
 from ynnpack.kernels.unary.exp import *  # pylint: disable=wildcard-import
 from ynnpack.kernels.unary.kernels import *  # pylint: disable=wildcard-import
 from ynnpack.kernels.unary.sigmoid import *  # pylint: disable=wildcard-import

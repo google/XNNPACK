@@ -752,11 +752,13 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
 
   const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
   if ((flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0 && any_padding) {
-    xnn_log_error(
-      "failed to define %s operator with %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding: "
-      "TensorFlow SAME padding can't be combined with explicit padding specification",
-      xnn_node_type_to_string(xnn_node_type_convolution_2d),
-      input_padding_top, input_padding_left, input_padding_bottom, input_padding_right);
+    xnn_log_error("failed to define %s operator with %" PRIu32 "+%" PRIu32
+                  "x%" PRIu32 "+%" PRIu32
+                  " padding: TensorFlow SAME padding can't be combined with "
+                  "explicit padding specification",
+                  xnn_node_type_to_string(xnn_node_type_convolution_2d),
+                  input_padding_top, input_padding_left, input_padding_bottom,
+                  input_padding_right);
     return xnn_status_invalid_parameter;
   }
 
@@ -911,24 +913,31 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
     if (!validate_datatypes_with_bias(
         input_value->datatype, filter_value->datatype, bias_value->datatype, output_value->datatype)) {
       xnn_log_error(
-        "failed to define %s operator with input ID #%" PRIu32 ", filter ID #%" PRIu32 ", bias ID #%" PRIu32 ", and output ID #%" PRIu32
-        ": mismatching datatypes across input (%s), filter (%s), bias (%s), and output (%s)",
-        xnn_node_type_to_string(xnn_node_type_depthwise_convolution_2d), input_id, filter_id, bias_id, output_id,
-        xnn_datatype_to_string(input_value->datatype),
-        xnn_datatype_to_string(filter_value->datatype),
-        xnn_datatype_to_string(bias_value->datatype),
-        xnn_datatype_to_string(output_value->datatype));
+          "failed to define %s operator with input ID #%" PRIu32
+          ", filter ID #%" PRIu32 ", bias ID #%" PRIu32
+          ", and output ID #%" PRIu32
+          ": mismatching datatypes across input (%s), filter (%s), bias (%s), "
+          "and output (%s)",
+          xnn_node_type_to_string(xnn_node_type_depthwise_convolution_2d),
+          input_id, filter_id, bias_id, output_id,
+          xnn_datatype_to_string(input_value->datatype),
+          xnn_datatype_to_string(filter_value->datatype),
+          xnn_datatype_to_string(bias_value->datatype),
+          xnn_datatype_to_string(output_value->datatype));
       return xnn_status_invalid_parameter;
     }
   } else {
     if (!validate_datatypes_without_bias(input_value->datatype, filter_value->datatype, output_value->datatype)) {
       xnn_log_error(
-        "failed to define %s operator with input ID #%" PRIu32 ", filter ID #%" PRIu32 ", and output ID #%" PRIu32
-        ": mismatching datatypes across input (%s), filter (%s), and output (%s)",
-        xnn_node_type_to_string(xnn_node_type_depthwise_convolution_2d), input_id, filter_id, output_id,
-        xnn_datatype_to_string(input_value->datatype),
-        xnn_datatype_to_string(filter_value->datatype),
-        xnn_datatype_to_string(output_value->datatype));
+          "failed to define %s operator with input ID #%" PRIu32
+          ", filter ID #%" PRIu32 ", and output ID #%" PRIu32
+          ": mismatching datatypes across input (%s), filter (%s), and output "
+          "(%s)",
+          xnn_node_type_to_string(xnn_node_type_depthwise_convolution_2d),
+          input_id, filter_id, output_id,
+          xnn_datatype_to_string(input_value->datatype),
+          xnn_datatype_to_string(filter_value->datatype),
+          xnn_datatype_to_string(output_value->datatype));
       return xnn_status_invalid_parameter;
     }
   }

@@ -262,11 +262,11 @@ std::pair<float, int32_t> GetScalarQuantization(
   std::pair<float, int32_t> result;
   result.first =
       value.scale_id != YNN_INVALID_VALUE_ID
-          ? runtime.value(value.scale_id).GetStaticScalarValue<float>()
+          ? runtime.value(value.scale_id).static_scalar_value<float>()
           : 1.0f;
   result.second =
       value.zero_point_id != YNN_INVALID_VALUE_ID
-          ? runtime.value(value.zero_point_id).GetStaticScalarValue<int32_t>()
+          ? runtime.value(value.zero_point_id).static_scalar_value<int32_t>()
           : 0;
   return result;
 }
@@ -303,7 +303,7 @@ ynn_status create_unary(const ynn_node& node, ynn_runtime& runtime,
                               {{x.buffer, dims}}, std::move(attrs));
   }
 
-  auto sched = runtime.make_schedule(dims, x.buffer, x.extents);
+  auto sched = runtime.make_schedule(dims, x.buffer, node.outputs[0]);
   func.user_data() = sched.get();
   runtime.scheduling_info_storage.push_back(std::move(sched));
 
@@ -354,7 +354,7 @@ ynn_status create_binary(const ynn_node& node, ynn_runtime& runtime,
       {{a.buffer, std::move(a_bounds)}, {b.buffer, std::move(b_bounds)}},
       {{x.buffer, dims}}, std::move(attrs));
 
-  auto sched = runtime.make_schedule(dims, x.buffer, x.extents);
+  auto sched = runtime.make_schedule(dims, x.buffer, node.outputs[0]);
   func.user_data() = sched.get();
   runtime.scheduling_info_storage.push_back(std::move(sched));
   runtime.funcs.push_back(std::move(func));
@@ -393,7 +393,7 @@ ynn_status create_ternary(const ynn_node& node, ynn_runtime& runtime,
                                   {c.buffer, std::move(c_bounds)}},
                                  {{x.buffer, dims}}, attrs);
 
-  auto sched = runtime.make_schedule(dims, x.buffer, x.extents);
+  auto sched = runtime.make_schedule(dims, x.buffer, node.outputs[0]);
   func.user_data() = sched.get();
   runtime.scheduling_info_storage.push_back(std::move(sched));
   runtime.funcs.push_back(std::move(func));
@@ -511,7 +511,7 @@ ynn_status define_make_unary_params(ynn_subgraph_t subgraph,
         },
         {{params.buffer, dims}}, std::move(attrs));
 
-    auto sched = runtime.make_schedule(dims, params.buffer, params.extents);
+    auto sched = runtime.make_schedule(dims, params.buffer, node.outputs[0]);
     func.user_data() = sched.get();
     runtime.scheduling_info_storage.push_back(std::move(sched));
 

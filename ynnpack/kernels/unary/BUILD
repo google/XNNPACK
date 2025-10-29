@@ -13,6 +13,7 @@ _COMPATIBLE_WITH = []
 py_binary(
     name = "generator",
     srcs = [
+        "convert.py",
         "exp.py",
         "generator.py",
         "kernels.py",
@@ -109,6 +110,19 @@ ynn_generate_src_hdr(
 )
 
 ynn_generate_src_hdr(
+    name = "x86_f16c",
+    compatible_with = _COMPATIBLE_WITH,
+    generator = ":generator",
+    generator_args = [
+        "x86_f16c",
+        "convert_fp16_to_fp32,16x1",
+        "convert_fp32_to_fp16,16x1",
+    ],
+    output_hdr = "x86_f16c.inc",
+    output_src = "x86_f16c.cc",
+)
+
+ynn_generate_src_hdr(
     name = "x86_avx512f",
     compatible_with = _COMPATIBLE_WITH,
     generator = ":generator",
@@ -158,11 +172,25 @@ ynn_generate_src_hdr(
     output_src = "arm_neon.cc",
 )
 
+ynn_generate_src_hdr(
+    name = "arm_neonfp16",
+    compatible_with = _COMPATIBLE_WITH,
+    generator = ":generator",
+    generator_args = [
+        "arm_neonfp16",
+        "convert_fp16_to_fp32,8x1",
+        "convert_fp32_to_fp16,8x1",
+    ],
+    output_hdr = "arm_neonfp16.inc",
+    output_src = "arm_neonfp16.cc",
+)
+
 ynn_cc_library(
     name = "unary",
     srcs = ["unary.cc"],
     hdrs = [
         "arm_neon.inc",
+        "arm_neonfp16.inc",
         "kernels.inc",
         "unary.h",
         "x86_avx.inc",
@@ -175,9 +203,11 @@ ynn_cc_library(
     compatible_with = _COMPATIBLE_WITH,
     per_arch_srcs = {
         "arm_neon": ["arm_neon.cc"],
+        "arm_neonfp16": ["arm_neonfp16.cc"],
         "x86_avx": ["x86_avx.cc"],
         "x86_avx2": ["x86_avx2.cc"],
         "x86_avx512f": ["x86_avx512f.cc"],
+        "x86_f16c": ["x86_f16c"],
         "x86_fma3": ["x86_fma3.cc"],
         "x86_sse2": ["x86_sse2.cc"],
         "x86_sse41": ["x86_sse41.cc"],

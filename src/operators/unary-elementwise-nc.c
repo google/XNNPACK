@@ -380,8 +380,8 @@ enum xnn_status xnn_reshape_unary_elementwise_nc(
 
   if (input_stride < channels) {
     xnn_log_error(
-        "failed to create %s operator with input element stride of %zu: "
-        "stride must be at least as large as the number of channels (%zu)",
+        "failed to create %s operator with input element stride of %zu: stride "
+        "must be at least as large as the number of channels (%zu)",
         xnn_operator_type_to_string_v2(op), input_stride, channels);
     return xnn_status_invalid_parameter;
   }
@@ -683,8 +683,8 @@ static enum xnn_status reshape_unary_elementwise_nc(
 
   if (input_stride < channels) {
     xnn_log_error(
-        "failed to create %s operator with input element stride of %zu: "
-        "stride must be at least as large as the number of channels (%zu)",
+        "failed to create %s operator with input element stride of %zu: stride "
+        "must be at least as large as the number of channels (%zu)",
         xnn_operator_type_to_string_v2(unary_elementwise_op), input_stride,
         channels);
     return xnn_status_invalid_parameter;
@@ -1419,17 +1419,17 @@ static enum xnn_status run_unary_elementwise_nc(
 
   if (input_stride < channels) {
     xnn_log_error(
-      "failed to run %s operator with input element stride of %zu: "
-      "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(operator_type), input_stride, channels);
+        "failed to run %s operator with input element stride of %zu: stride "
+        "must be at least as large as the number of channels (%zu)",
+        xnn_operator_type_to_string(operator_type), input_stride, channels);
     return xnn_status_invalid_parameter;
   }
 
   if (output_stride < channels) {
     xnn_log_error(
-      "failed to run %s operator with output element stride of %zu: "
-      "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(operator_type), output_stride, channels);
+        "failed to run %s operator with output element stride of %zu: stride "
+        "must be at least as large as the number of channels (%zu)",
+        xnn_operator_type_to_string(operator_type), output_stride, channels);
     return xnn_status_invalid_parameter;
   }
 

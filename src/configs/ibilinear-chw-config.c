@@ -55,24 +55,29 @@ static void init_f32_ibilinear_chw_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->arch_flags & xnn_arch_arm_neon) {
       f32_ibilinear_chw_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_f32_ibilinear_chw_ukernel__neon_p8);
-      f32_ibilinear_chw_config.channel_tile = 1;
     } else {
       f32_ibilinear_chw_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_f32_ibilinear_chw_ukernel__scalar_p4);
-      f32_ibilinear_chw_config.channel_tile = 1;
     }
   #elif XNN_ARCH_ARM64
     f32_ibilinear_chw_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_f32_ibilinear_chw_ukernel__neonfma_p8);
-    f32_ibilinear_chw_config.channel_tile = 1;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    f32_ibilinear_chw_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_f32_ibilinear_chw_ukernel__sse_p8);
-    f32_ibilinear_chw_config.channel_tile = 1;
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    (void) hardware_config;  // May be unused.
+    #if XNN_ENABLE_SSE
+      if (hardware_config->arch_flags & xnn_arch_x86_sse) {
+        f32_ibilinear_chw_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_f32_ibilinear_chw_ukernel__sse_p8);
+      } else
+    #endif
+    {
+      f32_ibilinear_chw_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_f32_ibilinear_chw_ukernel__scalar_p4);
+    }
   #elif XNN_ARCH_WASMRELAXEDSIMD || XNN_ARCH_WASMSIMD
     f32_ibilinear_chw_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_f32_ibilinear_chw_ukernel__wasmsimd_p8);
-    f32_ibilinear_chw_config.channel_tile = 1;
   #else
     f32_ibilinear_chw_config.ukernel = XNN_INIT_IBILINEAR_UKERNEL(xnn_f32_ibilinear_chw_ukernel__scalar_p4);
-    f32_ibilinear_chw_config.channel_tile = 1;
   #endif
+  f32_ibilinear_chw_config.channel_tile = 1;
   f32_ibilinear_chw_config.log2_data_element_size = XNN_LOG2_SIZEOF_FLOAT;
   f32_ibilinear_chw_config.log2_weight_element_size = XNN_LOG2_SIZEOF_FLOAT;
   f32_ibilinear_chw_config.indirection_init =

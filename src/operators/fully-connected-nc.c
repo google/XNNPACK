@@ -85,9 +85,8 @@ static enum xnn_status create_fully_connected_nc(
 
   if (input_stride < input_channels) {
     xnn_log_error(
-        "failed to create %s operator with input element stride of %zu: "
-        "stride must be at least as large as the number of input channels "
-        "(%zu)",
+        "failed to create %s operator with input element stride of %zu: stride "
+        "must be at least as large as the number of input channels (%zu)",
         xnn_operator_type_to_string(operator_type), input_stride,
         input_channels);
     goto error;
@@ -599,8 +598,7 @@ enum xnn_status create_fully_connected_nc_qd8_f16_qb4w(
     xnn_log_error(
         "failed to create %s operator with input_channels: %zu, and "
         "block_size: %zu: expecting input_channels %% block_size == 0.",
-        xnn_operator_type_to_string(operator_type), input_channels,
-        block_size);
+        xnn_operator_type_to_string(operator_type), input_channels, block_size);
     return xnn_status_invalid_parameter;
   }
 
@@ -740,8 +738,7 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qc4w(
     xnn_log_error(
         "failed to create %s operator with [%.7g, %.7g] output range: lower "
         "bound must be less than or equal to upper bound",
-        xnn_operator_type_to_string(operator_type), output_min,
-        output_max);
+        xnn_operator_type_to_string(operator_type), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
 
@@ -968,8 +965,7 @@ static enum xnn_status create_fully_connected_nc_qp8_f32_qb4w(
     xnn_log_error(
         "failed to create %s operator with [%.7g, %.7g] output range: lower "
         "bound must be less than or equal to upper bound",
-        xnn_operator_type_to_string(operator_type), output_min,
-        output_max);
+        xnn_operator_type_to_string(operator_type), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
 
@@ -1003,8 +999,7 @@ static enum xnn_status create_fully_connected_nc_qp8_f32_qb4w(
     xnn_log_error(
         "failed to create %s operator with input_channels: %zu, and "
         "block_size: %zu: expecting input_channels %% block_size == 0.",
-        xnn_operator_type_to_string(operator_type), input_channels,
-        block_size);
+        xnn_operator_type_to_string(operator_type), input_channels, block_size);
     return xnn_status_invalid_parameter;
   }
 
@@ -1126,8 +1121,7 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qb4w(
     xnn_log_error(
         "failed to create %s operator with [%.7g, %.7g] output range: lower "
         "bound must be less than or equal to upper bound",
-        xnn_operator_type_to_string(operator_type), output_min,
-        output_max);
+        xnn_operator_type_to_string(operator_type), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
 
@@ -1159,8 +1153,7 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qb4w(
     xnn_log_error(
         "failed to create %s operator with input_channels: %zu, and "
         "block_size: %zu: expecting input_channels %% block_size == 0.",
-        xnn_operator_type_to_string(operator_type), input_channels,
-        block_size);
+        xnn_operator_type_to_string(operator_type), input_channels, block_size);
     return xnn_status_invalid_parameter;
   }
 
@@ -1325,8 +1318,7 @@ enum xnn_status create_fully_connected_nc_qdx8_f32_qc8w(
     xnn_log_error(
         "failed to create %s operator with [%.7g, %.7g] output range: lower "
         "bound must be less than or equal to upper bound",
-        xnn_operator_type_to_string(operator_type), output_min,
-        output_max);
+        xnn_operator_type_to_string(operator_type), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
 
@@ -1550,8 +1542,7 @@ enum xnn_status create_fully_connected_nc_f32(
     xnn_log_error(
         "failed to create %s operator with [%.7g, %.7g] output range: lower "
         "bound must be less than or equal to upper bound",
-        xnn_operator_type_to_string(operator_type), output_min,
-        output_max);
+        xnn_operator_type_to_string(operator_type), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
 
@@ -1691,8 +1682,7 @@ enum xnn_status create_fully_connected_nc_f32_qc4w(
     xnn_log_error(
         "failed to create %s operator with [%.7g, %.7g] output range: lower "
         "bound must be less than or equal to upper bound",
-        xnn_operator_type_to_string(operator_type),
-        output_min, output_max);
+        xnn_operator_type_to_string(operator_type), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
 
@@ -1794,8 +1784,7 @@ enum xnn_status create_fully_connected_nc_f32_qc8w(
     xnn_log_error(
         "failed to create %s operator with [%.7g, %.7g] output range: lower "
         "bound must be less than or equal to upper bound",
-        xnn_operator_type_to_string(operator_type),
-        output_min, output_max);
+        xnn_operator_type_to_string(operator_type), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
 
@@ -1873,8 +1862,7 @@ enum xnn_status create_fully_connected_nc_qs8(
     xnn_log_error(
         "failed to create %s operator with %.7g input scale: scale must be "
         "finite, normalized, and positive",
-        xnn_operator_type_to_string(operator_type),
-        input_scale);
+        xnn_operator_type_to_string(operator_type), input_scale);
     return xnn_status_invalid_parameter;
   }
 
@@ -1882,8 +1870,7 @@ enum xnn_status create_fully_connected_nc_qs8(
     xnn_log_error(
         "failed to create %s operator with %.7g kernel scale: scale must be "
         "finite, normalized, and positive",
-        xnn_operator_type_to_string(operator_type),
-        kernel_scale);
+        xnn_operator_type_to_string(operator_type), kernel_scale);
     return xnn_status_invalid_parameter;
   }
 
@@ -1891,8 +1878,7 @@ enum xnn_status create_fully_connected_nc_qs8(
     xnn_log_error(
         "failed to create %s operator with %.7g output scale: scale must be "
         "finite, normalized, and positive",
-        xnn_operator_type_to_string(operator_type),
-        output_scale);
+        xnn_operator_type_to_string(operator_type), output_scale);
     return xnn_status_invalid_parameter;
   }
 
@@ -1900,8 +1886,7 @@ enum xnn_status create_fully_connected_nc_qs8(
     xnn_log_error(
         "failed to create %s operator with [%" PRId8 ", %" PRId8
         "] output range: lower bound must be less than or equal to upper bound",
-        xnn_operator_type_to_string(operator_type),
-        output_min, output_max);
+        xnn_operator_type_to_string(operator_type), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
 
@@ -1916,8 +1901,8 @@ enum xnn_status create_fully_connected_nc_qs8(
   if (requantization_scale >= 256.0f) {
     xnn_log_error(
         "failed to create %s operator with %.7g input scale, %.7g kernel "
-        "scale, and %.7g output scale: "
-        "requantization scale %.7g is greater or equal to 256.0",
+        "scale, and %.7g output scale: requantization scale %.7g is greater or "
+        "equal to 256.0",
         xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_qs8),
         input_scale, kernel_scale, output_scale, requantization_scale);
     return xnn_status_unsupported_parameter;
@@ -1999,8 +1984,7 @@ enum xnn_status create_fully_connected_nc_qx8_qcyw(
     xnn_log_error(
         "failed to create %s operator with [%" PRId8 ", %" PRId8
         "] output range: lower bound must be less than or equal to upper bound",
-        xnn_operator_type_to_string(operator_type), output_min,
-        output_max);
+        xnn_operator_type_to_string(operator_type), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
 
@@ -2026,8 +2010,8 @@ enum xnn_status create_fully_connected_nc_qx8_qcyw(
     if (requantization_scale[output_channel] >= 256.0f) {
       xnn_log_error(
           "failed to create %s operator with %.7g input scale, %.7g kernel "
-          "scale, and %.7g output scale in output channel #%zu: "
-          "requantization scale %.7g is greater or equal to 256.0",
+          "scale, and %.7g output scale in output channel #%zu: requantization "
+          "scale %.7g is greater or equal to 256.0",
           xnn_operator_type_to_string(operator_type), input_scale,
           kernel_scale[output_channel], output_scale, output_channel,
           requantization_scale[output_channel]);
@@ -2130,8 +2114,7 @@ enum xnn_status create_fully_connected_nc_qu8(
     xnn_log_error(
         "failed to create %s operator with %.7g input scale: scale must be "
         "finite, normalized, and positive",
-        xnn_operator_type_to_string(operator_type),
-        input_scale);
+        xnn_operator_type_to_string(operator_type), input_scale);
     return xnn_status_invalid_parameter;
   }
 
@@ -2139,8 +2122,7 @@ enum xnn_status create_fully_connected_nc_qu8(
     xnn_log_error(
         "failed to create %s operator with %.7g kernel scale: scale must be "
         "finite, normalized, and positive",
-        xnn_operator_type_to_string(operator_type),
-        kernel_scale);
+        xnn_operator_type_to_string(operator_type), kernel_scale);
     return xnn_status_invalid_parameter;
   }
 
@@ -2148,8 +2130,7 @@ enum xnn_status create_fully_connected_nc_qu8(
     xnn_log_error(
         "failed to create %s operator with %.7g output scale: scale must be "
         "finite, normalized, and positive",
-        xnn_operator_type_to_string(operator_type),
-        output_scale);
+        xnn_operator_type_to_string(operator_type), output_scale);
     return xnn_status_invalid_parameter;
   }
 
@@ -2157,8 +2138,7 @@ enum xnn_status create_fully_connected_nc_qu8(
     xnn_log_error(
         "failed to create %s operator with [%" PRIu8 ", %" PRIu8
         "] output range: lower bound must be less than or equal to upper bound",
-        xnn_operator_type_to_string(operator_type),
-        output_min, output_max);
+        xnn_operator_type_to_string(operator_type), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
 
@@ -2166,10 +2146,10 @@ enum xnn_status create_fully_connected_nc_qu8(
   if (requantization_scale >= 256.0f) {
     xnn_log_error(
         "failed to create %s operator with %.7g input scale, %.7g kernel "
-        "scale, and %.7g output scale: "
-        "requantization scale %.7g is greater or equal to 256.0",
-        xnn_operator_type_to_string(operator_type),
-        input_scale, kernel_scale, output_scale, requantization_scale);
+        "scale, and %.7g output scale: requantization scale %.7g is greater or "
+        "equal to 256.0",
+        xnn_operator_type_to_string(operator_type), input_scale, kernel_scale,
+        output_scale, requantization_scale);
     return xnn_status_unsupported_parameter;
   }
 

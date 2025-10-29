@@ -339,8 +339,8 @@ class Tensor {
         result.extents_[i] = 0;
       }
     }
-    if (std::accumulate(result.extents_.begin(), result.extents_.end(), 1,
-                        std::multiplies<>()) == 0) {
+    if (std::accumulate(result.extents_.begin(), result.extents_.end(),
+                        static_cast<size_t>(1), std::multiplies<>()) == 0) {
       // The result is empty.
       result.end_ = result.begin_;
     } else {

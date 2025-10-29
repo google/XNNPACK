@@ -29,6 +29,15 @@ class Type:
         other.lanes,
     )
 
+  def is_int(self):
+    return self.type_class == "int"
+
+  def is_uint(self):
+    return self.type_class == "uint"
+
+  def is_float(self):
+    return self.type_class == "float"
+
   def __str__(self):
     return f"{self.type_class}{self.size}x{self.lanes}_t"
 
@@ -42,7 +51,7 @@ class Type:
     return Type(self.type_class, self.size // 2, self.lanes)
 
   def signed_widen(self):
-    type_class = "int" if self.type_class == "uint" else self.type_class
+    type_class = "int" if self.is_uint() else self.type_class
     return Type(type_class, self.size * 2, self.lanes)
 
   def with_lanes(self, lanes):
@@ -56,7 +65,7 @@ class Type:
     if const:
       result += "const "
     if self.size == 0:
-      result += "ssize_t" if self.type_class == "int" else "size_t"
+      result += "ssize_t" if self.is_int() else "size_t"
     else:
       result += self.type_class + str(self.size)
       if self.lanes > 1:
@@ -68,21 +77,21 @@ class Type:
     return result
 
   def min(self):
-    if self.type_class == "int":
+    if self.is_int():
       return -(2 ** (self.size - 1))
-    elif self.type_class == "uint":
+    elif self.is_uint():
       return 0
-    elif self.type_class == "float":
+    elif self.is_float():
       return -float("inf")
     else:
       assert False
 
   def max(self):
-    if self.type_class == "int":
+    if self.is_int():
       return 2 ** (self.size - 1) - 1
-    elif self.type_class == "uint":
+    elif self.is_uint():
       return 2**self.size - 1
-    elif self.type_class == "float":
+    elif self.is_float():
       return float("inf")
     else:
       assert False
@@ -134,7 +143,7 @@ def promote_types(a, b):
     else:
       assert False
 
-  if a.ty.type_class == "float" or b.ty.type_class == "float":
+  if a.ty.is_float() or b.ty.is_float():
     max_size = builtins.max(a.ty.size, b.ty.size)
     max_lanes = builtins.max(a.ty.lanes, b.ty.lanes)
 
@@ -283,7 +292,7 @@ class Op(Value):
     fn_ops.append(self)
 
   def __repr__(self):
-    return f"{self.name}<{self.ty}>({', '.join(map(str, self.args))})"
+    return f"{self.name}<{self.ty}>({', '.join(map(repr, self.args))})"
 
   def compare(self, other):
     return self.name == other.name and self.ty == other.ty
@@ -307,7 +316,7 @@ class Var(Value):
     return self.name
 
   def __repr__(self):
-    return str(self)
+    return f"{self.name}:{self.ty}"
 
   def __hash__(self):
     return hash((self.name, self.ty))
@@ -336,7 +345,7 @@ class Load(Value):
     self.offset_elements = offset_elements
 
   def __repr__(self):
-    return f"load({self.index}, {self.offset_elements})"
+    return f"load<{self.ty}>({self.index}, {self.offset_elements})"
 
   def with_lanes(self, lanes):
     return Load(self.ty.with_lanes(lanes), self.index, self.offset_elements)
@@ -387,7 +396,7 @@ def abs(value):
 
 
 def lower_abs(x):
-  assert x.ty.type_class == "float"
+  assert x.ty.is_float()
   return x & reinterpret_cast(Float(32), i32(0x7FFFFFFF))
 
 
@@ -576,6 +585,14 @@ def lower_saturating_add(x, y):
   return saturating_narrow(widen(x) + widen(y))
 
 
+def lower_multiply_add(x, y, z):
+  return x * y + z
+
+
+def lower_multiply_sub(x, y, z):
+  return x * y - z
+
+
 def broadcast(x, lanes):
   """Broadcasts a scalar to a vector."""
   assert x.ty.lanes == 1
@@ -615,6 +632,8 @@ lowering_funcs = {
     "saturating_add": lower_saturating_add,
     "select_bits": lower_select_bits,
     "select": lower_select,
+    "multiply_add": lower_multiply_add,
+    "multiply_sub": lower_multiply_sub,
 }
 
 
@@ -771,15 +790,6 @@ YNN_INTRINSIC T truediv(T a, T b) {
 } // namespace
 } // namespace ynn
 
-using int8x1_t = int8_t;
-using uint8x1_t = uint8_t;
-using int16x1_t = int16_t;
-using uint16x1_t = uint16_t;
-using int32x1_t = int32_t;
-using uint32x1_t = uint32_t;
-using float32x1_t = float;
-using float32_t = float;
-
 """
 
 
@@ -917,12 +927,13 @@ class Target:
     self.indent_level = 0
     self.patterns = []
     self.types = {
-        Int(8, 1): "char",
-        Int(16, 1): "short",
-        Int(32, 1): "int",
-        UInt(8, 1): "unsigned char",
-        UInt(16, 1): "unsigned short",
-        UInt(32, 1): "unsigned int",
+        Int(8, 1): "int8_t",
+        Int(16, 1): "int16_t",
+        Int(32, 1): "int32_t",
+        UInt(8, 1): "uint8_t",
+        UInt(16, 1): "uint16_t",
+        UInt(32, 1): "uint32_t",
+        Float(16, 1): "half",
         Float(32, 1): "float",
     }
     self.features = []
@@ -935,6 +946,15 @@ class Target:
 
   def indent(self):
     return "  " * self.indent_level
+
+  def get_natural_lanes_num(self, ty):
+    """Returns a number of lanes of the widest type registered in target's types list which also matches class and size of the type."""
+    lanes = 1
+    for t in self.types:
+      if t.type_class == ty.type_class and t.size == ty.size:
+        lanes = builtins.max(lanes, t.lanes)
+
+    return lanes
 
   def as_buffer(self, arg, buffers):
     b = None
@@ -953,8 +973,8 @@ class Target:
             implied_features[feature], implied_features, all_features
         )
 
-  def legalize_type(self, ty):
-    return self.types.get(ty, ty.to_c_decl(True))
+  def legalize_type(self, ty, is_const=True):
+    return self.types.get(ty, ty.to_c_decl(is_const))
 
   def vectorize(self, expr, lanes, cache):
     if expr in cache:
@@ -989,9 +1009,10 @@ class Target:
     if isinstance(expr, Var) or isinstance(expr, Constant):
       v = expr
     else:
-      natural_lanes = self.vector_bits // expr.ty.size
-      assert expr.ty.lanes % natural_lanes == 0
-      slices_num = expr.ty.lanes // natural_lanes
+      natural_lanes = self.get_natural_lanes_num(expr.ty)
+      # If the number of lanes is less than what hardware vector has there is
+      # nothing to slice.
+      slices_num = builtins.max(expr.ty.lanes // natural_lanes, 1)
 
       args = []
       if not isinstance(expr, Load):
@@ -1074,7 +1095,8 @@ class Target:
     else:
       return expr
 
-  def pattern_match(self, expr, natural_lanes, cache):
+  def pattern_match(self, expr, cache):
+    """Recursively iterate over the expression and try to find patterns to replace."""
     if expr in cache:
       return cache[expr]
 
@@ -1082,19 +1104,19 @@ class Target:
       for rule in self.patterns:
         replacement = rewrite(rule.pattern, rule.result, expr)
         if replacement is not None:
-          mutated_expr = self.pattern_match(replacement, natural_lanes, cache)
+          mutated_expr = self.pattern_match(replacement, cache)
           cache[expr] = mutated_expr
           return mutated_expr
 
       if expr.name in lowering_funcs:
         lowered = lowering_funcs[expr.name](*expr.args)
-        mutated = self.pattern_match(lowered, natural_lanes, cache)
+        mutated = self.pattern_match(lowered, cache)
         cache[expr] = mutated
         return mutated
 
       args = []
       for arg in expr.args:
-        args.append(self.pattern_match(arg, natural_lanes, cache))
+        args.append(self.pattern_match(arg, cache))
 
       mutated_expr = Op(expr.ty, expr.name, args)
       cache[expr] = mutated_expr
@@ -1252,7 +1274,6 @@ class Target:
         broadcast_lanes = self.vector_bits // b.ty.size
         broadcast_op = self.pattern_match(
             broadcast(Var(b.name, b.ty.with_lanes(1)), broadcast_lanes),
-            broadcast_lanes,
             {},
         )
         self.result += (
@@ -1356,7 +1377,7 @@ class Target:
     for arg in args:
       b = self.as_buffer(arg, buffers)
       if b is not None:
-        t = str(b.ty)
+        t = self.legalize_type(b.ty, False)
         if is_load:
           t = "const " + t
         row_offset = ""
@@ -1399,8 +1420,8 @@ class Target:
         and is_rem_width
         and self.tail_strategy == TailStrategy.MEMCPY
     ):
-      dst = str_args[0] if is_store else f"&{i[0]}_{j}_{k}"
-      src = f"&{str_args[1]}" if is_store else str_args[0]
+      dst = str_args[0] if is_store else f"(void*)&{i[0]}_{j}_{k}"
+      src = f"(void*)&{str_args[1]}" if is_store else str_args[0]
 
       if is_load:
         self.result += f";\n{self.indent()}"
@@ -1462,7 +1483,7 @@ class Target:
         op_natural_vector_size = (
             1
             if is_rem_width and self.tail_strategy == TailStrategy.SCALAR
-            else self.vector_bits // op[1].ty.size
+            else op[1].ty.lanes
         )
         for k in range(output_vector_num):
           self.emit_op(
@@ -1481,7 +1502,6 @@ class Target:
 
   def emit_body(
       self,
-      output_type_size,
       ops,
       constants,
       buffers,
@@ -1526,7 +1546,7 @@ class Target:
         output_vector_num = (
             1
             if is_rem_width and self.tail_strategy == TailStrategy.SCALAR
-            else tile_width * output_type_size // self.vector_bits
+            else tile_width // natural_lanes
         )
 
         self.emit_inner_loop_body(
@@ -1563,7 +1583,6 @@ class Target:
 
   def handle_specialize(
       self,
-      output_type_size,
       ops,
       constants,
       buffers,
@@ -1582,7 +1601,6 @@ class Target:
         new_buffers[i].broadcast_mode = BroadcastMode.ALWAYS
 
         self.handle_specialize(
-            output_type_size,
             ops,
             constants,
             new_buffers,
@@ -1597,7 +1615,6 @@ class Target:
         new_buffers[i].broadcast_mode = BroadcastMode.NONE
 
         self.handle_specialize(
-            output_type_size,
             ops,
             constants,
             new_buffers,
@@ -1613,7 +1630,6 @@ class Target:
 
     # Just produce body for every other type of broadcasting.
     self.emit_body(
-        output_type_size,
         ops,
         constants,
         buffers,
@@ -1628,14 +1644,13 @@ class Target:
         func.value.ty == func.to.ty
     ), "Mismatching types of the output value and buffer."
 
-    output_type_size = func.value.ty.size
     ast = copy.deepcopy(func.value)
 
-    natural_lanes = self.vector_bits // output_type_size
+    natural_lanes = self.get_natural_lanes_num(func.value.ty)
     ast = self.vectorize(ast, natural_lanes, {})
     ast = self.slice_wide_types(ast, {})
     ast = self.optimize_slices(ast, {})
-    ast = self.pattern_match(ast, natural_lanes, {})
+    ast = self.pattern_match(ast, {})
 
     constants = {}
     ast = self.lift_constants(ast, constants)
@@ -1668,7 +1683,6 @@ class Target:
       self.emit_constants(constants)
 
       self.handle_specialize(
-          output_type_size,
           ops,
           constants,
           buffer_args,
@@ -1750,6 +1764,8 @@ i32_a = Var("a", Int(32))
 i32_b = Var("b", Int(32))
 u32_a = Var("a", UInt(32))
 u32_b = Var("b", UInt(32))
+f16_a = Var("a", Float(16))
+f16_b = Var("b", Float(16))
 f32_a = Var("a", Float(32))
 f32_b = Var("b", Float(32))
 f32_c = Var("c", Float(32))

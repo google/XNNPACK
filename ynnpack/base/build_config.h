@@ -8,7 +8,8 @@
 
 #define YNN_ALLOCATION_ALIGNMENT 64
 
-#if defined(__x86_64__) || defined(__x86_64)
+#if defined(__x86_64__) || defined(__x86_64) || \
+    defined(_M_X64) && !defined(_M_ARM64EC)
 #define YNN_ARCH_X86_64
 #endif
 

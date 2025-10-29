@@ -12,7 +12,6 @@
 
 #include "ynnpack/base/bfloat16.h"
 #include "ynnpack/base/simd/multi_vec.h"
-#include "ynnpack/base/simd/x86_avx.h"
 #include "ynnpack/base/simd/x86_avx512.h"
 #include "ynnpack/kernels/reduce/generic.h"
 #include "ynnpack/kernels/reduce/sum_accumulator.h"

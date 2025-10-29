@@ -38,8 +38,9 @@ XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_f16_vcvt_ukernel__avx_u8, 8, false, float,
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_f16_vcvt_ukernel__avx_u16, 16, false, float, xnn_float16, void, NULL)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_f16_vcvt_ukernel__avx_u24, 24, false, float, xnn_float16, void, NULL)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_f32_f16_vcvt_ukernel__avx_u32, 32, false, float, xnn_float16, void, NULL)
-#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 #endif  // XNN_ENABLE_AVX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_avx512skx, xnn_f32_f16_vcvt_ukernel__avx512skx_u16, 16, false, float, xnn_float16, void, NULL)
 XNN_UKERNEL(xnn_arch_x86_avx512skx, xnn_f32_f16_vcvt_ukernel__avx512skx_u32, 32, false, float, xnn_float16, void, NULL)
 #endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)

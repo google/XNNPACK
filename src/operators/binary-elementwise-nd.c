@@ -173,22 +173,22 @@ static enum xnn_status init_binary_elementwise_nd(
           output_quantization ? output_quantization->scale : 1.0f;
       if (a_scale <= 0.0f || !isnormal(a_scale)) {
         xnn_log_error(
-            "failed to create %s operator with %.7g input 1 scale: scale must be "
-            "finite and positive",
+            "failed to create %s operator with %.7g input 1 scale: scale must "
+            "be finite and positive",
             xnn_binary_operator_to_string(type), a_scale);
         return xnn_status_invalid_parameter;
       }
       if (b_scale <= 0.0f || !isnormal(b_scale)) {
         xnn_log_error(
-            "failed to create %s operator with %.7g input 2 scale: scale must be "
-            "finite and positive",
+            "failed to create %s operator with %.7g input 2 scale: scale must "
+            "be finite and positive",
             xnn_binary_operator_to_string(type), b_scale);
         return xnn_status_invalid_parameter;
       }
       if (output_scale <= 0.0f || !isnormal(output_scale)) {
         xnn_log_error(
-            "failed to create %s operator with %.7g output scale: scale must be "
-            "finite and positive",
+            "failed to create %s operator with %.7g output scale: scale must "
+            "be finite and positive",
             xnn_binary_operator_to_string(type), output_scale);
         return xnn_status_invalid_parameter;
       }
@@ -284,8 +284,7 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
   if (max(num_input1_dims, num_input2_dims) > XNN_MAX_TENSOR_DIMS) {
     xnn_log_error(
         "failed to reshape %s operator with %zu and %zu dimensions in input "
-        "shapes: "
-        "the number of input dimensions must not exceed %d",
+        "shapes: the number of input dimensions must not exceed %d",
         xnn_operator_type_to_string_v2(op), num_input1_dims, num_input2_dims,
         XNN_MAX_TENSOR_DIMS);
     return xnn_status_unsupported_parameter;
@@ -342,9 +341,8 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
       compressed_output_shape[num_compressed_dims - 1] *= input1_dim;
     } else {
       xnn_log_error(
-          "failed to reshape %s operator: "
-          "shape dimension #%zu of input1 (%zu) does not match shape dimension "
-          "#%zu of input2 (%zu)",
+          "failed to reshape %s operator: shape dimension #%zu of input1 (%zu) "
+          "does not match shape dimension #%zu of input2 (%zu)",
           xnn_operator_type_to_string_v2(op), num_input1_dims - i, input1_dim,
           num_input2_dims - i, input2_dim);
       return xnn_status_invalid_parameter;
