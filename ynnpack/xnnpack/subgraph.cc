@@ -205,6 +205,25 @@ xnn_status xnn_define_convolution_2d(
     }
     filter_id = split_id;
 
+    uint32_t filter_scale_id = subgraph->ynn->value(filter_id).scale_id;
+    if (filter_scale_id != YNN_INVALID_VALUE_ID &&
+        ynn::rank_of_value(subgraph->ynn, filter_scale_id) >= 1) {
+      split_id = YNN_INVALID_VALUE_ID;
+      // There is a bit of gotcha moment here, because it would seem logical
+      // to have splits the same as filter has. However, quantized dots are
+      // factored into multiple parts and the scale is applied in the end, so
+      // it has to match the dims of the output (that being said they are pretty
+      // close: first two dims are the same between filter and output, except
+      // that output has extra dimension of extent 1).
+      const size_t filter_scale_split[] = {groups, 1, group_output_channels};
+      status = ynn_define_split_dim(subgraph->ynn, 0, 3, filter_scale_split,
+                                    filter_scale_id, &split_id, /*flags=*/0);
+      if (status != ynn_status_success) {
+        return ynn::xnn_status_from_ynn(status);
+      }
+      subgraph->ynn->value(filter_id).scale_id = split_id;
+    }
+
     split_id = YNN_INVALID_VALUE_ID;
     if (bias_id != XNN_INVALID_VALUE_ID) {
       const size_t bias_split[] = {groups, 1, group_output_channels};
