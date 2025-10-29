@@ -375,6 +375,9 @@ DECLARE_PQS8_QC8W_PACKED_IGEMM_MINMAX_UKERNEL_FUNCTION(
 DECLARE_PF16_F16_PACKED_IGEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_pf16_f16_igemm_minmax_fp16_ukernel_32x32c2__neonsme2)
 
+DECLARE_PF16_F16_PACKED_IGEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_pf16_f16_igemm_minmax_fp16_ukernel_32x32c2__neonsme)
+
 #define DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(fn_name)                    \
   XNN_INTERNAL void fn_name(size_t mr, size_t nc, size_t kc, const float* a, \
                             size_t a_stride, const float* w, float* c,       \

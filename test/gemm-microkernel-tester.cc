@@ -2793,7 +2793,7 @@ void GemmMicrokernelTester::Test_PQS8(
   }
 }
 
-#if XNN_ENABLE_ARM_SME2
+#if XNN_ENABLE_ARM_SME2 || XNN_ENABLE_ARM_SME
 void GemmMicrokernelTester::Test_PF16(
     xnn_pf16_f16_packed_igemm_minmax_ukernel_fn packed_igemm,
     xnn_init_f16_minmax_params_fn init_minmax_params,
@@ -2867,7 +2867,7 @@ void GemmMicrokernelTester::Test_PF16(
   std::fill(packed_w.begin(), packed_w.end(), 0);
 
   // Pack RHS (weights + FP16 bias) for IGEMM using conv_goki path.
-  xnn_pack_kai_f16_conv_goki_w_sme2(
+  xnn_pack_kai_f16_conv_goki_w_sme(
       /*g=*/1,
       /*nc=*/n(),
       /*ks=*/ks(),

@@ -2570,7 +2570,7 @@ void xnn_pack_kai_qb4_weights_and_biases(
   }
 }
 
-void xnn_pack_kai_f16_conv_goki_w_sme2(size_t g, size_t nc, size_t ks,
+void xnn_pack_kai_f16_conv_goki_w_sme(size_t g, size_t nc, size_t ks,
                                        size_t kc, size_t nr, size_t kr,
                                        size_t sr, const uint16_t* k,
                                        const uint16_t* b, const void* scale,

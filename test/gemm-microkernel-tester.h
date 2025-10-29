@@ -351,7 +351,7 @@ class GemmMicrokernelTester {
                  xnn_pack_weights_and_biases_fn pack,
                  xnn_packed_stride_weights_and_biases_fn packed_stride);
 
-#if XNN_ENABLE_ARM_SME2 
+#if XNN_ENABLE_ARM_SME2 || XNN_ENABLE_ARM_SME
   // PF16 packed-LHS IGEMM (weights_and_biases API + packed_stride)
   void Test_PF16(xnn_pf16_f16_packed_igemm_minmax_ukernel_fn packed_igemm,
                  xnn_init_f16_minmax_params_fn init_minmax_params,

@@ -513,19 +513,19 @@ XNN_INTERNAL size_t xnn_packed_stride_kai_qb4_weights_and_biases(
     size_t k_stride,                            //
     size_t extra_bytes);
 
-XNN_INTERNAL void xnn_pack_kai_f16_conv_goki_w_sme2(size_t g,              //
-                                                    size_t nc,             //
-                                                    size_t ks,             //
-                                                    size_t kc,             //
-                                                    size_t nr,             //
-                                                    size_t kr,             //
-                                                    size_t sr,             //
-                                                    const uint16_t* k,     //
-                                                    const uint16_t* b,     //
-                                                    const void* scale,     //
-                                                    void* packed_weights,  //
-                                                    size_t extra_bytes,    //
-                                                    const void* params);
+XNN_INTERNAL void xnn_pack_kai_f16_conv_goki_w_sme(size_t g,              //
+                                                   size_t nc,             //
+                                                   size_t ks,             //
+                                                   size_t kc,             //
+                                                   size_t nr,             //
+                                                   size_t kr,             //
+                                                   size_t sr,             //
+                                                   const uint16_t* k,     //
+                                                   const uint16_t* b,     //
+                                                   const void* scale,     //
+                                                   void* packed_weights,  //
+                                                   size_t extra_bytes,    //
+                                                   const void* params);
 
 XNN_INTERNAL void xnn_pack_kai_qs8_conv_goki_w_sme2(
     size_t g,              //
@@ -600,7 +600,7 @@ typedef void (*xnn_pack_f16_igemm_fn)(size_t g, size_t nc, size_t ks, size_t kc,
 
 /*
  * KleidiAI variant: same signature except the destination pointer type is
- * void*. Some KleidiAI packers (e.g. xnn_pack_kai_f16_conv_goki_w_sme2) use
+ * void*. Some KleidiAI packers (e.g. xnn_pack_kai_f16_conv_goki_w_sme) use
  * void* for the packed_weights parameter. Provide a typedef to allow tests to
  * pass these packers while still keeping type safety at the call site.
  */
