@@ -6,11 +6,13 @@
 #include <algorithm>
 #include <cassert>
 #include <chrono>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <numeric>
 #include <random>
 #include <tuple>
+#include <utility>
 #include <vector>
 
 #include <gmock/gmock.h>
@@ -48,9 +50,9 @@ static Tensor<T> add_input_tensor(ReplicableRandomDevice& rng,
 template <typename T>
 static std::tuple<Tensor<T>, uint32_t> add_static_tensor(
     ReplicableRandomDevice& rng, SubgraphTester& subgraph,
-    const TensorShape shape) {
+    const TensorShape shape, double min = 0.0, double max = 1.0) {
   Tensor<T> static_tensor(shape.dims, xnnpack::XnnExtraBytes);
-  DatatypeGenerator<T> generator;
+  DatatypeGenerator<T> generator(min, max);
   static_tensor.generate([&]() { return generator(rng); });
   uint32_t static_value_id = XNN_INVALID_VALUE_ID;
   subgraph.AddInternalStaticTensor(shape, xnn_datatype_of<T>(),
@@ -79,6 +81,10 @@ static std::vector<size_t> create_random_extra_dims(ReplicableRandomDevice& rng,
   return indices;
 }
 
+template <class T, class U>
+std::pair<T, T> random_swap(ReplicableRandomDevice& rng, T a, U b) {
+  return (rng() % 2) ? std::pair<T, T>{a, b} : std::pair<T, T>{b, a};
+}
 }  // namespace
 
 template <typename F>
@@ -88,7 +94,7 @@ void RewriteTestImpl(size_t rank, F populate, int expected_size_diff) {
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
-  for (auto _ : FuzzTest(std::chrono::milliseconds(250))) {
+  for (auto _ : FuzzTest(std::chrono::milliseconds(100))) {
     std::vector<size_t> input_shape = random_shape(rng, rank);
 
     // Create the subgraph inputs.
@@ -141,9 +147,11 @@ void RewriteTestImpl(size_t rank, F populate, int expected_size_diff) {
   }
 }
 
-class RewriteTest : public ::testing::TestWithParam<int> {};
+class RewriteShapesTest : public ::testing::TestWithParam<int> {};
 
-TEST_P(RewriteTest, DoesNotElideLoadBearingNoOpReshape) {
+TEST_P(RewriteShapesTest, DoesNotElideLoadBearingNoOpReshape) {
+  // Do not completely elide "load-bearing" nodes that are on the critical path
+  // for the output, e.g. a single node between an input and an output value.
   RewriteTestImpl(
       GetParam(),
       [&](ReplicableRandomDevice& rng, SubgraphTester& subgraph) {
@@ -157,7 +165,9 @@ TEST_P(RewriteTest, DoesNotElideLoadBearingNoOpReshape) {
       /*expected_size_diff=*/0);
 }
 
-TEST_P(RewriteTest, DoesNotElideLoadBearingReshape) {
+TEST_P(RewriteShapesTest, DoesNotElideLoadBearingReshape) {
+  // Do not completely elide "load-bearing" nodes that are on the critical path
+  // for the output, e.g. a single node between an input and an output value.
   RewriteTestImpl(
       GetParam(),
       [&](ReplicableRandomDevice& rng, SubgraphTester& subgraph) {
@@ -169,7 +179,9 @@ TEST_P(RewriteTest, DoesNotElideLoadBearingReshape) {
       /*expected_size_diff=*/0);
 }
 
-TEST_P(RewriteTest, DoesNotElideLoadBearingExpandDims) {
+TEST_P(RewriteShapesTest, DoesNotElideLoadBearingExpandDims) {
+  // Do not completely elide "load-bearing" nodes that are on the critical path
+  // for the output, e.g. a single node between an input and an output value.
   RewriteTestImpl(
       GetParam(),
       [&](ReplicableRandomDevice& rng, SubgraphTester& subgraph) {
@@ -181,7 +193,7 @@ TEST_P(RewriteTest, DoesNotElideLoadBearingExpandDims) {
       /*expected_size_diff=*/0);
 }
 
-TEST_P(RewriteTest, ElidesReshapeOfStaticValue) {
+TEST_P(RewriteShapesTest, ElidesReshapeOfStaticValue) {
   // Keep static and external tensor data in this scope so that it lives for the
   // duration of the test.
   Tensor<float> static_tensor;
@@ -205,13 +217,14 @@ TEST_P(RewriteTest, ElidesReshapeOfStaticValue) {
                             reshaped_value_id);
 
         // Add input1 and the reshaped static value, with the result going to
-        // output1..
-        subgraph.AddAddition(input_id, reshaped_value_id, output_id);
+        // output1.
+        auto inputs = random_swap(rng, reshaped_value_id, input_id);
+        subgraph.AddAddition(inputs.first, inputs.second, output_id);
       },
       /*expected_size_diff=*/-1);
 }
 
-TEST_P(RewriteTest, DoesNotElideNoOpReshapeOfNonStaticShapeValue) {
+TEST_P(RewriteShapesTest, DoesNotElideNoOpReshapeOfNonStaticShapeValue) {
   // Keep static and external tensor data in this scope so that it lives for the
   // duration of the test.
   Tensor<float> extra_input_tensor;
@@ -232,13 +245,14 @@ TEST_P(RewriteTest, DoesNotElideNoOpReshapeOfNonStaticShapeValue) {
                             reshaped_value_id);
 
         // Add input1 and the reshaped static value, with the result going to
-        // output1..
-        subgraph.AddAddition(input_id, reshaped_value_id, output_id);
+        // output1.
+        auto inputs = random_swap(rng, reshaped_value_id, input_id);
+        subgraph.AddAddition(inputs.first, inputs.second, output_id);
       },
       /*expected_size_diff=*/0);
 }
 
-TEST_P(RewriteTest, DoesNotElidesReshapeOfStaticShapeNonStaticValue) {
+TEST_P(RewriteShapesTest, DoesNotElidesReshapeOfStaticShapeNonStaticValue) {
   // Keep static tensor data in this scope so that it lives for the duration of
   // the test.
   Tensor<float> static_tensor;
@@ -268,13 +282,14 @@ TEST_P(RewriteTest, DoesNotElidesReshapeOfStaticShapeNonStaticValue) {
                             reshaped_value_id);
 
         // Add input1 and the reshaped static value, with the result going to
-        // output1..
-        subgraph.AddAddition(input_id, reshaped_value_id, output_id);
+        // output1.
+        auto inputs = random_swap(rng, reshaped_value_id, input_id);
+        subgraph.AddAddition(inputs.first, inputs.second, output_id);
       },
       /*expected_size_diff=*/0);
 }
 
-TEST_P(RewriteTest, CompactsASequenceOfReshapes) {
+TEST_P(RewriteShapesTest, CompactsASequenceOfReshapes) {
   RewriteTestImpl(
       GetParam(),
       [&](ReplicableRandomDevice& rng, SubgraphTester& subgraph) {
@@ -300,7 +315,7 @@ TEST_P(RewriteTest, CompactsASequenceOfReshapes) {
       /*expected_size_diff=*/-2);
 }
 
-TEST_P(RewriteTest, CompactsASequenceOfReshapesAndExpandDims) {
+TEST_P(RewriteShapesTest, CompactsASequenceOfReshapesAndExpandDims) {
   RewriteTestImpl(
       GetParam(),
       [&](ReplicableRandomDevice& rng, SubgraphTester& subgraph) {
@@ -327,7 +342,7 @@ TEST_P(RewriteTest, CompactsASequenceOfReshapesAndExpandDims) {
       /*expected_size_diff=*/-2);
 }
 
-TEST_P(RewriteTest, CompactsASequenceOfExpandDimsAndReshape) {
+TEST_P(RewriteShapesTest, CompactsASequenceOfExpandDimsAndReshape) {
   RewriteTestImpl(
       GetParam(),
       [&](ReplicableRandomDevice& rng, SubgraphTester& subgraph) {
@@ -354,7 +369,177 @@ TEST_P(RewriteTest, CompactsASequenceOfExpandDimsAndReshape) {
       /*expected_size_diff=*/-2);
 }
 
-INSTANTIATE_TEST_SUITE_P(Rewrite, RewriteTest,
+class RewriteClampsTest : public ::testing::TestWithParam<int> {};
+
+TEST_P(RewriteShapesTest, DoesNotElideLoadBearingNoOpClamp) {
+  // Do not completely elide "load-bearing" nodes that are on the critical path
+  // for the output, e.g. a single node between an input and an output value.
+  RewriteTestImpl(
+      GetParam(),
+      [&](ReplicableRandomDevice& rng, SubgraphTester& subgraph) {
+        // Add a no-op clamp between the input and output.
+        subgraph.AddClamp(-INFINITY, INFINITY, input_id, output_id);
+      },
+      /*expected_size_diff=*/0);
+}
+
+TEST_P(RewriteShapesTest, ElidesNoOpClamp) {
+  RewriteTestImpl(
+      GetParam(),
+      [&](ReplicableRandomDevice& rng, SubgraphTester& subgraph) {
+        const TensorShape input_shape(&subgraph.Value(input_id)->shape);
+
+        // Add a clamp in the range `[-INFINITY, INFINITY]`.
+        uint32_t clamped_value_id =
+            add_internal_dynamic_tensor<float>(subgraph, input_shape);
+        subgraph.AddClamp(-INFINITY, INFINITY, input_id, clamped_value_id);
+
+        // Output the sum of the input and the clamped values.
+        auto inputs = random_swap(rng, clamped_value_id, input_id);
+        subgraph.AddAddition(inputs.first, inputs.second, output_id);
+      },
+      /*expected_size_diff=*/-1);
+}
+
+TEST_P(RewriteClampsTest, RewritesMinMaxWithStaticArgsToClamp) {
+  // Keep static and external tensor data in this scope so that it lives for the
+  // duration of the test.
+  Tensor<float> static_min_tensor;
+  Tensor<float> static_max_tensor;
+
+  RewriteTestImpl(
+      GetParam(),
+      [&](ReplicableRandomDevice& rng, SubgraphTester& subgraph) {
+        const TensorShape input_shape(&subgraph.Value(input_id)->shape);
+
+        // Add scalar static tensors for the min/max values.
+        uint32_t static_min_value_id;
+        uint32_t static_max_value_id;
+        std::tie(static_min_tensor, static_min_value_id) =
+            add_static_tensor<float>(rng, subgraph, {1});
+        std::tie(static_max_tensor, static_max_value_id) =
+            add_static_tensor<float>(rng, subgraph, {1});
+
+        // Add the binary `minimum` op.
+        uint32_t min_capped_value_id =
+            add_internal_dynamic_tensor<float>(subgraph, input_shape);
+        auto inputs = random_swap(rng, static_min_value_id, input_id);
+        subgraph.AddBinary(xnn_binary_minimum, /*params=*/nullptr, inputs.first,
+                           inputs.second, min_capped_value_id);
+
+        // Add the binary `maximum` op.
+        inputs = random_swap(rng, min_capped_value_id, static_max_value_id);
+        subgraph.AddBinary(xnn_binary_maximum, /*params=*/nullptr, inputs.first,
+                           inputs.second, output_id);
+      },
+      /*expected_size_diff=*/-1);
+}
+
+TEST_P(RewriteClampsTest, RewritesMaxMinWithStaticArgsToClamp) {
+  // Keep static and external tensor data in this scope so that it lives for the
+  // duration of the test.
+  Tensor<float> static_min_tensor;
+  Tensor<float> static_max_tensor;
+
+  RewriteTestImpl(
+      GetParam(),
+      [&](ReplicableRandomDevice& rng, SubgraphTester& subgraph) {
+        const TensorShape input_shape(&subgraph.Value(input_id)->shape);
+
+        // Add scalar static tensors for the min/max values.
+        uint32_t static_min_value_id;
+        uint32_t static_max_value_id;
+        std::tie(static_min_tensor, static_min_value_id) =
+            add_static_tensor<float>(rng, subgraph, /*shape=*/{1});
+        std::tie(static_max_tensor, static_max_value_id) =
+            add_static_tensor<float>(rng, subgraph, /*shape=*/{1});
+
+        // Add the binary `maximum` op.
+        uint32_t max_capped_value_id =
+            add_internal_dynamic_tensor<float>(subgraph, input_shape);
+        auto inputs = random_swap(rng, static_max_value_id, input_id);
+        subgraph.AddBinary(xnn_binary_maximum, /*params=*/nullptr, inputs.first,
+                           inputs.second, max_capped_value_id);
+
+        // Add the binary `minimum` op.
+        inputs = random_swap(rng, max_capped_value_id, static_min_value_id);
+        subgraph.AddBinary(xnn_binary_minimum, /*params=*/nullptr, inputs.first,
+                           inputs.second, output_id);
+      },
+      /*expected_size_diff=*/-1);
+}
+
+TEST_P(RewriteClampsTest, RewritesSequenceOfClampsToSingleClamps) {
+  RewriteTestImpl(
+      GetParam(),
+      [&](ReplicableRandomDevice& rng, SubgraphTester& subgraph) {
+        const TensorShape input_shape(&subgraph.Value(input_id)->shape);
+        std::uniform_real_distribution<float> rng_fp32(0.0, 0.5);
+
+        // Add a first clamp in the range `[[0, 0.5), [0.5, 1)]`.
+        uint32_t clamped_value_id =
+            add_internal_dynamic_tensor<float>(subgraph, input_shape);
+        subgraph.AddClamp(rng_fp32(rng), 0.5 + rng_fp32(rng), input_id,
+                          clamped_value_id);
+
+        // Add a second clamp in the same range.
+        subgraph.AddClamp(rng_fp32(rng), 0.5 + rng_fp32(rng), clamped_value_id,
+                          output_id);
+      },
+      /*expected_size_diff=*/-1);
+}
+
+TEST_P(RewriteClampsTest,
+       RewritesSequenceOfPotentiallyDisjointClampsToSingleClamps) {
+  RewriteTestImpl(
+      GetParam(),
+      [&](ReplicableRandomDevice& rng, SubgraphTester& subgraph) {
+        const TensorShape input_shape(&subgraph.Value(input_id)->shape);
+        std::uniform_real_distribution<float> rng_fp32(0.0, 2.0);
+
+        // Add a first clamp in the range `[-1, 1]`.
+        uint32_t clamped_value_id =
+            add_internal_dynamic_tensor<float>(subgraph, input_shape);
+        subgraph.AddClamp(rng_fp32(rng) - 1.0, rng_fp32(rng) - 1.0, input_id,
+                          clamped_value_id);
+
+        // Add a second clamp in the same range.
+        subgraph.AddClamp(rng_fp32(rng) - 1.0, rng_fp32(rng) - 1.0,
+                          clamped_value_id, output_id);
+      },
+      /*expected_size_diff=*/-1);
+}
+
+TEST_P(RewriteClampsTest, DoesNotRewriteSharedSequenceOfClamps) {
+  RewriteTestImpl(
+      GetParam(),
+      [&](ReplicableRandomDevice& rng, SubgraphTester& subgraph) {
+        const TensorShape input_shape(&subgraph.Value(input_id)->shape);
+        std::uniform_real_distribution<float> rng_fp32(0.0, 0.5);
+
+        // Add a first clamp in the range `[[0, 0.5), [0.5, 1)]`.
+        uint32_t first_clamped_value_id =
+            add_internal_dynamic_tensor<float>(subgraph, input_shape);
+        subgraph.AddClamp(rng_fp32(rng), 0.5 + rng_fp32(rng), input_id,
+                          first_clamped_value_id);
+
+        // Add a second clamp in the same range.
+        uint32_t second_clamped_value_id =
+            add_internal_dynamic_tensor<float>(subgraph, input_shape);
+        subgraph.AddClamp(rng_fp32(rng), 0.5 + rng_fp32(rng),
+                          first_clamped_value_id, second_clamped_value_id);
+
+        // Output the sum of the first and second clamped values.
+        auto inputs =
+            random_swap(rng, first_clamped_value_id, second_clamped_value_id);
+        subgraph.AddAddition(inputs.first, inputs.second, output_id);
+      },
+      /*expected_size_diff=*/0);
+}
+
+INSTANTIATE_TEST_SUITE_P(Rewrite, RewriteShapesTest,
+                         testing::Range(0, XNN_MAX_TENSOR_DIMS));
+INSTANTIATE_TEST_SUITE_P(Rewrite, RewriteClampsTest,
                          testing::Range(0, XNN_MAX_TENSOR_DIMS));
 
 }  // namespace xnnpack

@@ -1546,32 +1546,6 @@ enum xnn_status xnn_subgraph_fusion(xnn_subgraph_t subgraph) {
         return xnn_status_invalid_state;
       }
 
-      // Try to fuse Clamp Node upstream into producer Node
-      if (is_clamp(consumer) && has_clamp(producer)) {
-        xnn_log_info("fuse Clamp Node #%" PRIu32
-                     " into upstream Node #%" PRIu32,
-                     consumer_id, producer_id);
-        assert(producer->num_outputs == 1);
-        assert(consumer->num_inputs == 1);
-        assert(consumer->num_outputs == 1);
-
-        const uint32_t fused_output_id = consumer->outputs[0];
-        assert(fused_output_id < subgraph->num_values);
-        subgraph->values[fused_output_id].producer = producer_id;
-        producer->outputs[0] = fused_output_id;
-
-        producer->activation.output_min = math_max_f32(
-            producer->activation.output_min, consumer->activation.output_min);
-        producer->activation.output_max = math_min_f32(
-            producer->activation.output_max, consumer->activation.output_max);
-        producer->params.unary.clamp.min = math_max_f32(
-            producer->params.unary.clamp.min, consumer->params.unary.clamp.min);
-        producer->params.unary.clamp.max = math_min_f32(
-            producer->params.unary.clamp.max, consumer->params.unary.clamp.max);
-
-        xnn_node_clear(consumer);
-        xnn_value_clear(value);
-      }
       // Try to fuse Constant Pad node downstream into [Depthwise] Convolution
       // 2D Node
       if (producer->type == xnn_node_type_static_constant_pad) {
@@ -2231,8 +2205,11 @@ void xnn_subgraph_clean_up(xnn_subgraph_t subgraph) {
         value->first_consumer = nodes_map[value->first_consumer];
       }
     }
-    subgraph->num_nodes = left;
   }
+
+  // Always update the number of nodes just in case any trailing invalid nodes
+  // were clipped.
+  subgraph->num_nodes = left;
 
   // Release temporarily allocated memory.
   xnn_release_memory(nodes_map);
@@ -2838,6 +2815,151 @@ static enum xnn_status optimize_common_subgraphs_static_reshapes(
   return xnn_status_success;
 }
 
+// Convert min/max operations with a single static value to a unary `clamp`
+// node.
+static enum xnn_status optimize_common_subgraphs_min_max_to_clamp(
+    xnn_subgraph_t subgraph, uint32_t node_id, size_t* changes) {
+  struct xnn_node* node = &subgraph->nodes[node_id];
+  if (node->type != xnn_node_type_binary_elementwise ||
+      (node->binary_operator != xnn_binary_maximum &&
+       node->binary_operator != xnn_binary_minimum)) {
+    return xnn_status_success;
+  }
+
+  // Check that `arg_value` is a static scalar value.
+  struct xnn_value* input_value = &subgraph->values[node->inputs[0]];
+  struct xnn_value* arg_value = &subgraph->values[node->inputs[1]];
+  if (xnn_shape_multiply_all_dims(&arg_value->shape) != 1 ||
+      !xnn_value_is_static(arg_value->allocation_type)) {
+    if (xnn_shape_multiply_all_dims(&input_value->shape) == 1 &&
+        xnn_value_is_static(input_value->allocation_type)) {
+      swap_value_pointers(&input_value, &arg_value);
+    } else {
+      return xnn_status_success;
+    }
+  }
+
+  // Extract the min/max argument.
+  const float arg_as_float = get_scalar_value_as_float(arg_value);
+  const bool is_min = (node->binary_operator == xnn_binary_minimum);
+  const bool is_max = (node->binary_operator == xnn_binary_maximum);
+
+  // Replace the binary `min`/`max` node with a unary
+  // `clamp` node.
+  union xnn_unary_params params;
+  params.clamp.max = is_min ? arg_as_float : INFINITY;
+  params.clamp.min = is_max ? arg_as_float : -INFINITY;
+  XNN_RETURN_IF_ERROR(
+      xnn_define_unary(subgraph, xnn_unary_clamp, &params, input_value->id,
+                       node->outputs[0], node->flags),
+      "Failed to create new `Clamp` node.");
+  node = &subgraph->nodes[node_id];
+  *node = subgraph->nodes[--subgraph->num_nodes];
+  node->id = node_id;
+
+  xnn_log_info("Converted %s[#%u](v%03u, %f) to clamp[#%u](v%03u, [%f, %f]).",
+               is_max ? "maximum" : "minimum", node_id, input_value->id,
+               arg_as_float, node_id, input_value->id,
+               node->params.unary.clamp.min, node->params.unary.clamp.max);
+  (*changes)++;
+
+  return xnn_status_success;
+}
+
+// Folds unary clamp operations into the previous operator's activation, if
+// possible.
+static enum xnn_status optimize_common_subgraphs_merge_clamps(
+    xnn_subgraph_t subgraph, uint32_t node_id, size_t* changes) {
+  struct xnn_node* node = &subgraph->nodes[node_id];
+  if (node->type != xnn_node_type_unary_elementwise ||
+      node->unary_operator != xnn_unary_clamp) {
+    return xnn_status_success;
+  }
+
+  // Verify that we are the input's only consumer and that it has a producer,
+  // and that its producer is a (or can) clamp.
+  struct xnn_value* input_value = &subgraph->values[node->inputs[0]];
+  if (input_value->num_consumers > 1 ||
+      input_value->producer == XNN_INVALID_NODE_ID) {
+    return xnn_status_success;
+  }
+  struct xnn_node* input_producer_node =
+      &subgraph->nodes[input_value->producer];
+  if (!has_clamp(input_producer_node)) {
+    return xnn_status_success;
+  }
+
+  // Update the input producer's clamping values based on the current clamp.
+  // Note that the order of the min/max matches that of the `clamp` ops
+  // themsevels and is required to ensure correctness when merging
+  // non-overlapping clamps.
+  input_producer_node->activation.output_min =
+      math_min_f32(math_max_f32(input_producer_node->activation.output_min,
+                                node->params.unary.clamp.min),
+                   node->params.unary.clamp.max);
+  input_producer_node->activation.output_max =
+      math_min_f32(math_max_f32(input_producer_node->activation.output_max,
+                                node->params.unary.clamp.min),
+                   node->params.unary.clamp.max);
+  input_producer_node->params.unary.clamp.min =
+      math_min_f32(math_max_f32(input_producer_node->params.unary.clamp.min,
+                                node->params.unary.clamp.min),
+                   node->params.unary.clamp.max);
+  input_producer_node->params.unary.clamp.max =
+      math_min_f32(math_max_f32(input_producer_node->params.unary.clamp.max,
+                                node->params.unary.clamp.min),
+                   node->params.unary.clamp.max);
+
+  // Elide the `clamp` node by just skipping it.
+  input_producer_node->outputs[0] = node->outputs[0];
+  xnn_node_clear(node);
+  xnn_log_info("Merged clamp[#%u](%s[#%u](...)) into clamping %s[#%u](...).",
+               node_id, xnn_node_type_to_string(input_producer_node->type),
+               input_producer_node->id,
+               xnn_node_type_to_string(input_producer_node->type),
+               input_producer_node->id);
+  (*changes)++;
+
+  return xnn_status_success;
+}
+
+// Remove spurious unary clamp operations.
+static enum xnn_status optimize_common_subgraphs_spurious_clamps(
+    xnn_subgraph_t subgraph, uint32_t node_id, size_t* changes) {
+  struct xnn_node* node = &subgraph->nodes[node_id];
+  if (node->type != xnn_node_type_unary_elementwise ||
+      node->unary_operator != xnn_unary_clamp) {
+    return xnn_status_success;
+  }
+
+  // TODO: b/455537016 - We can use different bounds for different datatypes.
+  if (node->params.unary.clamp.min != -INFINITY ||
+      node->params.unary.clamp.max != INFINITY) {
+    return xnn_status_success;
+  }
+
+  const uint32_t output_id = node->outputs[0];
+  struct xnn_value* input_value = &subgraph->values[node->inputs[0]];
+  if (short_circuit(subgraph, input_value->id, output_id)) {
+    xnn_node_clear(node);
+    xnn_log_info("Elided spurious clamp[#%u](v%03u).", node_id,
+                 input_value->id);
+  } else {
+    // If this node cannot be elided, then replace it with a `copy`.
+    XNN_RETURN_IF_ERROR(
+        xnn_define_copy(subgraph, input_value->id, output_id, node->flags),
+        "Failed to create new `Copy` node.");
+    node = &subgraph->nodes[node_id];
+    *node = subgraph->nodes[--subgraph->num_nodes];
+    node->id = node_id;
+    xnn_log_info("Replaced spurious clamp[#%u](v%03u) with copy[#%u](v%03u).",
+                 node->id, input_value->id, node_id, input_value->id);
+  }
+  (*changes)++;
+
+  return xnn_status_success;
+}
+
 static enum xnn_status optimize_common_subgraphs_iter(
     xnn_subgraph_t subgraph, uint32_t optimization_flags, size_t* changes) {
   // Loop over the nodes in this subgraph.
@@ -2870,6 +2992,22 @@ static enum xnn_status optimize_common_subgraphs_iter(
         // `mul(reduce_sum_squared(x), 1/n)`, `div(reduce_sum_squared(x), n)`
         // with `reduce_mean(x)` or `reduce_mean_squared(x)`, respectively.
         XNN_RETURN_IF_ERROR(optimize_common_subgraphs_scaled_sum_to_mean(
+            subgraph, node_id, changes));
+
+        // Convert min/max operations with a single static value to a unary
+        // `clamp` node.
+        XNN_RETURN_IF_ERROR(optimize_common_subgraphs_min_max_to_clamp(
+            subgraph, node_id, changes));
+        break;
+
+      case xnn_node_type_unary_elementwise:
+        // Fold unary clamp operations into the previous operator's
+        // activation, if possible.
+        XNN_RETURN_IF_ERROR(
+            optimize_common_subgraphs_merge_clamps(subgraph, node_id, changes));
+
+        // Remove spurious unary clamp operations.
+        XNN_RETURN_IF_ERROR(optimize_common_subgraphs_spurious_clamps(
             subgraph, node_id, changes));
         break;
 

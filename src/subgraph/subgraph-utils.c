@@ -53,10 +53,18 @@ static void print_node_type(FILE* out, const xnn_subgraph_t subgraph,
   fprintf(out, "%s", xnn_node_type_to_string(node->type));
   switch (node->type) {
     case xnn_node_type_unary_elementwise:
-      fprintf(
-          out, "%s(%s, %s)", separator,
-          xnn_unary_operator_to_string(node->unary_operator),
-          xnn_datatype_to_string(subgraph->values[node->inputs[0]].datatype));
+      if (node->unary_operator == xnn_unary_clamp) {
+        fprintf(
+            out, "%s(%s [%f, %f], %s)", separator,
+            xnn_unary_operator_to_string(node->unary_operator),
+            node->params.unary.clamp.min, node->params.unary.clamp.max,
+            xnn_datatype_to_string(subgraph->values[node->inputs[0]].datatype));
+      } else {
+        fprintf(
+            out, "%s(%s, %s)", separator,
+            xnn_unary_operator_to_string(node->unary_operator),
+            xnn_datatype_to_string(subgraph->values[node->inputs[0]].datatype));
+      }
       break;
     case xnn_node_type_binary_elementwise:
       fprintf(

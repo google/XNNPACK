@@ -115,7 +115,7 @@ xnnpack_unit_test(
     srcs = [
         "%s.cc" % operator.replace("_", "-"),
     ],
-    deps = SUBGRAPH_TEST_DEPS,
+    deps = SUBGRAPH_TEST_DEPS + ["//:subgraph"],
 ) for operator in [
     "binary",
     "broadcast",
