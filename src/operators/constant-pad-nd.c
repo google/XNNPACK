@@ -158,8 +158,8 @@ static enum xnn_status reshape_constant_pad_nd(
 
   if (num_dims > XNN_MAX_TENSOR_DIMS) {
     xnn_log_error(
-        "failed to setup %s operator with %zu dimensions in input shape: "
-        "the number of input dimensions must not exceed %d",
+        "failed to setup %s operator with %zu dimensions in input shape: the "
+        "number of input dimensions must not exceed %d",
         xnn_operator_type_to_string_v2(constant_pad_op), num_dims,
         XNN_MAX_TENSOR_DIMS);
     return xnn_status_unsupported_parameter;

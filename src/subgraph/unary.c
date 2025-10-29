@@ -393,10 +393,9 @@ enum xnn_status xnn_define_unary(
     case xnn_unary_leaky_relu:
     case xnn_unary_elu:
       if (!params) {
-        xnn_log_error(
-          "failed to define %s node with input ID #%" PRIu32 " and output ID #%" PRIu32
-          ": missing clamp params",
-          xnn_unary_operator_to_string(type), input_id, output_id);
+        xnn_log_error("failed to define %s node with input ID #%" PRIu32
+                      " and output ID #%" PRIu32 ": missing clamp params",
+                      xnn_unary_operator_to_string(type), input_id, output_id);
         return xnn_status_invalid_parameter;
       }
       XNN_FALLTHROUGH

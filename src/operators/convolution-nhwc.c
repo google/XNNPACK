@@ -558,31 +558,32 @@ static enum xnn_status create_convolution2d_nhwc(
   if (context->kernel_width == 0 || context->kernel_height == 0) {
     xnn_log_error("failed to create %s operator with %" PRIu32 "x%" PRIu32
                   " kernel: kernel dimensions must be non-zero",
-                  xnn_operator_type_to_string(context->operator_type), context->kernel_width,
-                  context->kernel_height);
+                  xnn_operator_type_to_string(context->operator_type),
+                  context->kernel_width, context->kernel_height);
     goto error;
   }
 
   if (context->subsampling_width == 0 || context->subsampling_height == 0) {
     xnn_log_error("failed to create %s operator with %" PRIu32 "x%" PRIu32
                   " subsampling: subsampling dimensions must be non-zero",
-                  xnn_operator_type_to_string(context->operator_type), context->subsampling_width,
-                  context->subsampling_height);
+                  xnn_operator_type_to_string(context->operator_type),
+                  context->subsampling_width, context->subsampling_height);
     goto error;
   }
 
   if (context->dilation_width == 0 || context->dilation_height == 0) {
     xnn_log_error("failed to create %s operator with %" PRIu32 "x%" PRIu32
                   " dilation: dilation dimensions must be non-zero",
-                  xnn_operator_type_to_string(context->operator_type), context->dilation_width,
-                  context->dilation_height);
+                  xnn_operator_type_to_string(context->operator_type),
+                  context->dilation_width, context->dilation_height);
     goto error;
   }
 
   if (context->groups == 0) {
     xnn_log_error("failed to create %s operator with %" PRIu32
                   " groups: number of groups must be non-zero",
-                  xnn_operator_type_to_string(context->operator_type), context->groups);
+                  xnn_operator_type_to_string(context->operator_type),
+                  context->groups);
     goto error;
   }
 
@@ -590,7 +591,8 @@ static enum xnn_status create_convolution2d_nhwc(
     xnn_log_error(
         "failed to create %s operator with %zu input channels per group: "
         "number of channels must be non-zero",
-        xnn_operator_type_to_string(context->operator_type), context->group_input_channels);
+        xnn_operator_type_to_string(context->operator_type),
+        context->group_input_channels);
     goto error;
   }
 
@@ -598,18 +600,20 @@ static enum xnn_status create_convolution2d_nhwc(
     xnn_log_error(
         "failed to create %s operator with %zu output channels per group: "
         "number of channels must be non-zero",
-        xnn_operator_type_to_string(context->operator_type), context->group_output_channels);
+        xnn_operator_type_to_string(context->operator_type),
+        context->group_output_channels);
     goto error;
   }
 
   const size_t input_channels = context->groups * context->group_input_channels;
   if (context->input_channel_stride < input_channels) {
     xnn_log_error(
-        "failed to create %s operator with input channel stride of %zu: "
-        "stride must be at least as large as the number of input channels "
-        "(%" PRIu32 "x%zu)",
-        xnn_operator_type_to_string(context->operator_type), context->input_channel_stride,
-        context->groups, context->group_input_channels);
+        "failed to create %s operator with input channel stride of %zu: stride "
+        "must be at least as large as the number of input channels (%" PRIu32
+        "x%zu)",
+        xnn_operator_type_to_string(context->operator_type),
+        context->input_channel_stride, context->groups,
+        context->group_input_channels);
     goto error;
   }
 
@@ -619,8 +623,9 @@ static enum xnn_status create_convolution2d_nhwc(
         "failed to create %s operator with output channel stride of %zu: "
         "stride must be at least as large as the number of output channels "
         "(%" PRIu32 "x%zu)",
-        xnn_operator_type_to_string(context->operator_type), context->output_channel_stride,
-        context->groups, context->group_output_channels);
+        xnn_operator_type_to_string(context->operator_type),
+        context->output_channel_stride, context->groups,
+        context->group_output_channels);
     goto error;
   }
 
@@ -628,9 +633,10 @@ static enum xnn_status create_convolution2d_nhwc(
       context->group_input_channels != 1) {
     xnn_log_error(
         "failed to create depthwise %s operator with %zu input channels per "
-        "group: "
-        "depthwise convolution must have exactly 1 input channel per group",
-        xnn_operator_type_to_string(context->operator_type), context->group_input_channels);
+        "group: depthwise convolution must have exactly 1 input channel per "
+        "group",
+        xnn_operator_type_to_string(context->operator_type),
+        context->group_input_channels);
     goto error;
   }
 
@@ -640,11 +646,11 @@ static enum xnn_status create_convolution2d_nhwc(
     if (any_padding) {
       xnn_log_error("failed to create %s operator with %" PRIu32 "+%" PRIu32
                     "x%" PRIu32 "+%" PRIu32
-                    " padding: "
-                    "TensorFlow SAME padding can't be combined with explicit "
-                    "padding specification",
+                    " padding: TensorFlow SAME padding can't be combined with "
+                    "explicit padding specification",
                     xnn_operator_type_to_string(context->operator_type),
-                    context->input_padding_top, context->input_padding_left, context->input_padding_bottom,
+                    context->input_padding_top, context->input_padding_left,
+                    context->input_padding_bottom,
                     context->input_padding_right);
       goto error;
     }
@@ -853,8 +859,7 @@ static enum xnn_status check_kernel_scale_qc8w(
         !isnormal(kernel_scale[output_channel])) {
       xnn_log_error(
           "failed to create %s operator with %.7g kernel scale in output "
-          "channel #%zu: "
-          "scale must be finite, normalized, and positive",
+          "channel #%zu: scale must be finite, normalized, and positive",
           xnn_operator_type_to_string(context->operator_type),
           kernel_scale[output_channel], output_channel);
       return xnn_status_invalid_parameter;
@@ -1003,8 +1008,8 @@ static enum xnn_status init_requantization_scale_qx8_qc8w(
     if (requantization_scale[output_channel] >= 256.0f) {
       xnn_log_error(
           "failed to create %s operator with %.7g input scale, %.7g kernel "
-          "scale, and %.7g output scale in output channel #%zu: "
-          "requantization scale %.7g is greater or equal to 256.0",
+          "scale, and %.7g output scale in output channel #%zu: requantization "
+          "scale %.7g is greater or equal to 256.0",
           xnn_operator_type_to_string(context->operator_type),
           context->input_scale, kernel_scale[output_channel],
           context->output_scale, output_channel,

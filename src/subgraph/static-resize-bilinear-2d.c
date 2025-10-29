@@ -208,9 +208,10 @@ enum xnn_status xnn_define_static_resize_bilinear_2d(
   const uint32_t exclusive_flags = XNN_FLAG_TENSORFLOW_LEGACY_MODE | XNN_FLAG_ALIGN_CORNERS;
   if ((flags & exclusive_flags) == exclusive_flags) {
     xnn_log_error(
-      "failed to define %s operator with both XNN_FLAG_TENSORFLOW_LEGACY_MODE and XNN_FLAG_ALIGN_CORNERS flags: "
-      "the two flags are mutually exclusive",
-      xnn_node_type_to_string(xnn_node_type_static_resize_bilinear_2d));
+        "failed to define %s operator with both "
+        "XNN_FLAG_TENSORFLOW_LEGACY_MODE and XNN_FLAG_ALIGN_CORNERS flags: the "
+        "two flags are mutually exclusive",
+        xnn_node_type_to_string(xnn_node_type_static_resize_bilinear_2d));
     return xnn_status_invalid_parameter;
   }
 

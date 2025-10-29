@@ -113,9 +113,10 @@ enum xnn_status xnn_define_tensor_value(
 
   if (external_id != XNN_INVALID_VALUE_ID && external_id >= subgraph->external_value_ids) {
     xnn_log_error(
-      "failed to create Dense Tensor value: "
-      "external ID %" PRIu32 " exceeds the number of reserved external IDs in subgraph (%" PRIu32 ")",
-      external_id, subgraph->external_value_ids);
+        "failed to create Dense Tensor value: external ID %" PRIu32
+        " exceeds the number of reserved external IDs in subgraph (%" PRIu32
+        ")",
+        external_id, subgraph->external_value_ids);
     return xnn_status_invalid_parameter;
   }
 
@@ -177,9 +178,10 @@ enum xnn_status xnn_define_quantized_tensor_value(
 
   if (external_id != XNN_INVALID_VALUE_ID && external_id >= subgraph->external_value_ids) {
     xnn_log_error(
-      "failed to create Quantized Dense Tensor value: "
-      "external ID %" PRIu32 " exceeds the number of reserved external IDs in subgraph (%" PRIu32 ")",
-      external_id, subgraph->external_value_ids);
+        "failed to create Quantized Dense Tensor value: external ID %" PRIu32
+        " exceeds the number of reserved external IDs in subgraph (%" PRIu32
+        ")",
+        external_id, subgraph->external_value_ids);
     return xnn_status_invalid_parameter;
   }
 
@@ -230,9 +232,11 @@ enum xnn_status xnn_define_dynamically_quantized_tensor_value(
 
   if (external_id != XNN_INVALID_VALUE_ID && external_id >= subgraph->external_value_ids) {
     xnn_log_error(
-      "failed to create Dynamically Quantized Dense Tensor value: "
-      "external ID %" PRIu32 " exceeds the number of reserved external IDs in subgraph (%" PRIu32 ")",
-      external_id, subgraph->external_value_ids);
+        "failed to create Dynamically Quantized Dense Tensor value: external "
+        "ID %" PRIu32
+        " exceeds the number of reserved external IDs in subgraph (%" PRIu32
+        ")",
+        external_id, subgraph->external_value_ids);
     return xnn_status_invalid_parameter;
   }
 
@@ -245,9 +249,9 @@ enum xnn_status xnn_define_dynamically_quantized_tensor_value(
 
   if (num_nonbatch_dims > num_dims) {
     xnn_log_error(
-      "failed to create Dynamically Quantized Dense Tensor value: "
-      "non batch dimensions %zu is greater than number of dimensions %zu",
-      num_nonbatch_dims, num_dims);
+        "failed to create Dynamically Quantized Dense Tensor value: non batch "
+        "dimensions %zu is greater than number of dimensions %zu",
+        num_nonbatch_dims, num_dims);
     return xnn_status_invalid_parameter;
   }
 
@@ -263,8 +267,8 @@ enum xnn_status xnn_define_dynamically_quantized_tensor_value(
 
   if ((flags & (XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT)) != 0) {
     xnn_log_error(
-        "failed to create Dynamically Quantized Dense Tensor value: "
-        "external dynamically quantized tensors are not supported.");
+        "failed to create Dynamically Quantized Dense Tensor value: external "
+        "dynamically quantized tensors are not supported.");
     return xnn_status_unsupported_parameter;
   }
 
@@ -360,9 +364,9 @@ enum xnn_status xnn_validate_channelwise_quantized_tensor(
 
   if (channel_dim >= num_dims) {
     xnn_log_error(
-      "failed to create Channelwise Quantized Dense Tensor value: "
-      "channel dimension index %zu is out of range for %zu-dimensional tensor",
-      channel_dim, num_dims);
+        "failed to create Channelwise Quantized Dense Tensor value: channel "
+        "dimension index %zu is out of range for %zu-dimensional tensor",
+        channel_dim, num_dims);
     return xnn_status_invalid_parameter;
   }
 
@@ -386,9 +390,10 @@ enum xnn_status xnn_validate_channelwise_quantized_tensor(
   for (size_t channel = 0; channel < channels; channel++) {
     if (scale[channel] <= 0.0f || !isnormal(scale[channel])) {
       xnn_log_error(
-        "failed to create Channelwise Quantized Dense Tensor value with %.7g scale in channel #%zu: "
-        "scale must be finite, normalized, and positive",
-        scale[channel], channel);
+          "failed to create Channelwise Quantized Dense Tensor value with %.7g "
+          "scale in channel #%zu: scale must be finite, normalized, and "
+          "positive",
+          scale[channel], channel);
       return xnn_status_invalid_parameter;
     }
   }
@@ -415,9 +420,11 @@ enum xnn_status xnn_define_channelwise_quantized_tensor_value_v2(
 
   if (external_id != XNN_INVALID_VALUE_ID && external_id >= subgraph->external_value_ids) {
     xnn_log_error(
-      "failed to create Channelwise Quantized Dense Tensor value: "
-      "external ID %" PRIu32 " exceeds the number of reserved external IDs in subgraph (%" PRIu32 ")",
-      external_id, subgraph->external_value_ids);
+        "failed to create Channelwise Quantized Dense Tensor value: external "
+        "ID %" PRIu32
+        " exceeds the number of reserved external IDs in subgraph (%" PRIu32
+        ")",
+        external_id, subgraph->external_value_ids);
     return xnn_status_invalid_parameter;
   }
 
@@ -476,9 +483,11 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value_v2(
 
   if (external_id != XNN_INVALID_VALUE_ID && external_id >= subgraph->external_value_ids) {
     xnn_log_error(
-      "failed to create Blockwise Quantized Dense Tensor value: "
-      "external ID %" PRIu32 " exceeds the number of reserved external IDs in subgraph (%" PRIu32 ")",
-      external_id, subgraph->external_value_ids);
+        "failed to create Blockwise Quantized Dense Tensor value: external ID "
+        "%" PRIu32
+        " exceeds the number of reserved external IDs in subgraph (%" PRIu32
+        ")",
+        external_id, subgraph->external_value_ids);
     return xnn_status_invalid_parameter;
   }
 
@@ -497,16 +506,17 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value_v2(
 
   if (channel_dim >= num_dims) {
     xnn_log_error(
-      "failed to create Blockwise Quantized Dense Tensor value: "
-      "channel dimension index %zu is out of range for %zu-dimensional tensor",
-      channel_dim, num_dims);
+        "failed to create Blockwise Quantized Dense Tensor value: channel "
+        "dimension index %zu is out of range for %zu-dimensional tensor",
+        channel_dim, num_dims);
     return xnn_status_invalid_parameter;
   }
 
   if (block_size <= 0) {
     xnn_log_error(
-      "failed to create Blockwise Quantized Dense Tensor value: "
-      "block size is invalid. Got %zu\n", block_size);
+        "failed to create Blockwise Quantized Dense Tensor value: block size "
+        "is invalid. Got %zu\n",
+        block_size);
   }
 
   enum xnn_status status = check_zero_point(datatype, zero_point);
@@ -547,9 +557,9 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value_v2(
     }
     if (float_scale <= 0.0f || !isnormal(float_scale)) {
       xnn_log_error(
-        "failed to create Blockwise Quantized Dense Tensor value with %.7g scale in block #%zu: "
-        "scale must be finite, normalized, and positive",
-        float_scale, block);
+          "failed to create Blockwise Quantized Dense Tensor value with %.7g "
+          "scale in block #%zu: scale must be finite, normalized, and positive",
+          float_scale, block);
       return xnn_status_invalid_parameter;
     }
   }

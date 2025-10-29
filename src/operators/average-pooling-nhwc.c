@@ -60,10 +60,10 @@ enum xnn_status create_average_pooling2d_nhwc(
 
   const uint32_t pooling_size = pooling_height * pooling_width;
   if (pooling_size == 0) {
-    xnn_log_error(
-      "failed to create %s operator with %" PRIu32 "x%" PRIu32 " pooling size: "
-      "pooling size dimensions must be non-zero",
-      xnn_operator_type_to_string(operator_type), pooling_width, pooling_height);
+    xnn_log_error("failed to create %s operator with %" PRIu32 "x%" PRIu32
+                  " pooling size: pooling size dimensions must be non-zero",
+                  xnn_operator_type_to_string(operator_type), pooling_width,
+                  pooling_height);
     return xnn_status_invalid_parameter;
   }
 
@@ -91,11 +91,13 @@ enum xnn_status create_average_pooling2d_nhwc(
   const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
   if ((flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0) {
     if (any_padding) {
-      xnn_log_error(
-        "failed to create %s operator with %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding: "
-        "TensorFlow SAME padding can't be combined with explicit padding specification",
-        xnn_operator_type_to_string(operator_type),
-        input_padding_top, input_padding_left, input_padding_bottom, input_padding_right);
+      xnn_log_error("failed to create %s operator with %" PRIu32 "+%" PRIu32
+                    "x%" PRIu32 "+%" PRIu32
+                    " padding: TensorFlow SAME padding can't be combined with "
+                    "explicit padding specification",
+                    xnn_operator_type_to_string(operator_type),
+                    input_padding_top, input_padding_left, input_padding_bottom,
+                    input_padding_right);
       return xnn_status_invalid_parameter;
     }
   }
@@ -319,17 +321,19 @@ static enum xnn_status reshape_average_pooling2d(
   }
   if (input_pixel_stride < channels) {
     xnn_log_error(
-      "failed to create %s operator with input pixel stride of %zu: "
-      "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(operator_type), input_pixel_stride, channels);
+        "failed to create %s operator with input pixel stride of %zu: stride "
+        "must be at least as large as the number of channels (%zu)",
+        xnn_operator_type_to_string(operator_type), input_pixel_stride,
+        channels);
     return xnn_status_invalid_parameter;
   }
 
   if (output_pixel_stride < channels) {
     xnn_log_error(
-      "failed to create %s operator with output pixel stride of %zu: "
-      "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(operator_type), output_pixel_stride, channels);
+        "failed to create %s operator with output pixel stride of %zu: stride "
+        "must be at least as large as the number of channels (%zu)",
+        xnn_operator_type_to_string(operator_type), output_pixel_stride,
+        channels);
     return xnn_status_invalid_parameter;
   }
 

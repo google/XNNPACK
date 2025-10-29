@@ -608,7 +608,8 @@ static enum xnn_status create_runtime_impl(
   if (flags & XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC) {
     xnn_log_warning(
         "XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC is enabled: performance will be "
-        "degraded! %d", flags);
+        "degraded! %d",
+        flags);
     for (size_t i = 0; i < subgraph->num_nodes; i++) {
       struct xnn_node* node = subgraph->nodes + i;
       node->flags |= XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC;

@@ -34,6 +34,7 @@ void xnn_pf32_gemm_minmax_ukernel_1x32__neonsme(
 #else
   assert(
       "Calling KleidiAI microkernel wrapper, but XNNPACK was compiled without "
-      "`XNN_ENABLE_KLEIDIAI`." && 0);
+      "`XNN_ENABLE_KLEIDIAI`." &&
+      0);
 #endif  // XNN_ENABLE_KLEIDIAI
 }

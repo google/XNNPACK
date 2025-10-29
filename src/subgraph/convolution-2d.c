@@ -994,9 +994,8 @@ enum xnn_status xnn_define_convolution_2d(
   if ((flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0 && any_padding) {
     xnn_log_error("failed to define %s operator with %" PRIu32 "+%" PRIu32
                   "x%" PRIu32 "+%" PRIu32
-                  " padding: "
-                  "TensorFlow SAME padding can't be combined with explicit "
-                  "padding specification",
+                  " padding: TensorFlow SAME padding can't be combined with "
+                  "explicit padding specification",
                   xnn_node_type_to_string(xnn_node_type_convolution_2d),
                   input_padding_top, input_padding_left, input_padding_bottom,
                   input_padding_right);
@@ -1039,8 +1038,7 @@ enum xnn_status xnn_define_convolution_2d(
       if (input_value->quantization.num_nonbatch_dims >=
           input_value->shape.num_dims) {
         xnn_log_error("failed to define %s operator with input ID #%" PRIu32
-                      ": num_nonbatch_dims (%zu) must be "
-                      "< num_dims (%zu)",
+                      ": num_nonbatch_dims (%zu) must be < num_dims (%zu)",
                       xnn_node_type_to_string(xnn_node_type_convolution_2d),
                       input_id, input_value->quantization.num_nonbatch_dims,
                       input_value->shape.num_dims);
@@ -1169,9 +1167,8 @@ enum xnn_status xnn_define_convolution_2d(
     xnn_log_error(
         "failed to define %s operator with filter output channels %zu, groups "
         "#%" PRIu32
-        " and group_output_channels %zu:"
-        "mismatching shapes, filter output channels must be equal to groups * "
-        "group_output_channels.",
+        " and group_output_channels %zu:mismatching shapes, filter output "
+        "channels must be equal to groups * group_output_channels.",
         xnn_node_type_to_string(xnn_node_type_convolution_2d),
         filter_value->shape.dim[0], groups, group_output_channels);
     return xnn_status_invalid_parameter;

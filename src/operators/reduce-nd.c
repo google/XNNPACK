@@ -144,9 +144,8 @@ static enum xnn_status reshape_reduce_nd(
 
   if (num_reduction_axes > num_input_dims) {
     xnn_log_error(
-        "failed to reshape %s operator with %zu reduction axes: "
-        "the number of reduction axes must not exceed the number of input "
-        "dimensions %zu",
+        "failed to reshape %s operator with %zu reduction axes: the number of "
+        "reduction axes must not exceed the number of input dimensions %zu",
         xnn_operator_type_to_string_v2(reduce_op), num_reduction_axes,
         num_input_dims);
     return xnn_status_invalid_parameter;
