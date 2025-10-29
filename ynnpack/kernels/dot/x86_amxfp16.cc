@@ -3,8 +3,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <immintrin.h>
-
 #include <cstddef>
 
 #include "ynnpack/base/half.h"
@@ -14,7 +12,9 @@ namespace ynn {
 
 template <int c, int a, int b>
 struct dpfp16ps {
-  void operator()() { _tile_dpfp16ps(c, a, b); }
+  void operator()() {
+    YNN_TILE_DPFP16PS(c, a, b);
+  }
 };
 
 void dot_fp16_fp16_fp32_16x64x32_16x16x2_amxfp16(

@@ -57,14 +57,14 @@ def sine_cosine_impl(a, x, is_cosine):
 
   # Evaluate the numerator polynomial p.
   # p = x * (1 + x^2 * (alpha_3 + x^2 * alpha_5))
-  vp = vx2 * valpha_5 + valpha_3
-  vp = vx2 * vp + 1.0
+  vp = multiply_add(vx2, valpha_5, valpha_3)
+  vp = multiply_add(vx2, vp, 1.0)
   vp = vx * vp
 
   # Evaluate the denominator polynomial q.
   # q = 1 + x^2 * (beta_2 + x^2 * beta_4)
-  vq = vx2 * vbeta_4 + vbeta_2
-  vq = vx2 * vq + 1.0
+  vq = multiply_add(vx2, vbeta_4, vbeta_2)
+  vq = multiply_add(vx2, vq, 1.0)
 
   # Divide the numerator by the denominator.
   vy = vp / vq

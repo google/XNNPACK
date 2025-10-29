@@ -49,9 +49,10 @@ enum xnn_status xnn_create_unpooling2d_nhwc_x32(
   const uint32_t pooling_size = pooling_height * pooling_width;
   if (pooling_size == 0) {
     xnn_log_error(
-      "failed to create %s operator with %" PRIu32 "x%" PRIu32 " pooling size: "
-      "pooling size dimensions must be non-zero",
-      xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32), pooling_width, pooling_height);
+        "failed to create %s operator with %" PRIu32 "x%" PRIu32
+        " pooling size: pooling size dimensions must be non-zero",
+        xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32),
+        pooling_width, pooling_height);
     goto error;
   }
 
@@ -159,17 +160,19 @@ enum xnn_status xnn_reshape_unpooling2d_nhwc_x32(
 
   if (input_pixel_stride < channels) {
     xnn_log_error(
-      "failed to reshape %s operator with input pixel stride of %zu: "
-      "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32), input_pixel_stride, channels);
+        "failed to reshape %s operator with input pixel stride of %zu: stride "
+        "must be at least as large as the number of channels (%zu)",
+        xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32),
+        input_pixel_stride, channels);
     return xnn_status_invalid_parameter;
   }
 
   if (output_pixel_stride < channels) {
     xnn_log_error(
-      "failed to reshape %s operator with output pixel stride of %zu: "
-      "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32), output_pixel_stride, channels);
+        "failed to reshape %s operator with output pixel stride of %zu: stride "
+        "must be at least as large as the number of channels (%zu)",
+        xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32),
+        output_pixel_stride, channels);
     return xnn_status_invalid_parameter;
   }
 

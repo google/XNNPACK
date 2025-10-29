@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2021-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -322,8 +322,10 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
                 case ${N}:
                   wasm_v128_store16_lane(oN, v0_${N}, 0);
                   oN = (uint${SIZE}_t*) ((uintptr_t) oN + minus_output_stride);
+                  XNN_FALLTHROUGH
               case 1:
                 wasm_v128_store16_lane(oN, v0_1, 0);
+                XNN_FALLTHROUGH
               case 0:
                 wasm_v128_store16_lane(o, v0_0, 0);
                 $if SIZE != 16:
@@ -383,8 +385,10 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
                 case ${N}:
                   wasm_v128_store8_lane(oN, v0_${N}, 0);
                   oN = (uint${SIZE}_t*) ((uintptr_t) oN + minus_output_stride);
+                  XNN_FALLTHROUGH
               case 1:
                 wasm_v128_store8_lane(oN, v0_1, 0);
+                XNN_FALLTHROUGH
               case 0:
                 wasm_v128_store8_lane(o, v0_0, 0);
                 break;

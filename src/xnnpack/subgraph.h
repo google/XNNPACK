@@ -43,6 +43,7 @@
 #define XNN_VALUE_FLAG_ONE_CONSUMER 0x00000200
 #define XNN_VALUE_FLAG_FP16_COMPATIBLE 0x00000400
 #define XNN_VALUE_FLAG_LAYOUT_NCHW 0x00000800
+#define XNN_VALUE_FLAG_SHAPE_IS_STATIC 0x00001000
 
 /// Create explicit `pack-lh` nodes, instead of pack the data on the fly
 /// in a temporary buffer in the consuming op. Inline packing reduces memory

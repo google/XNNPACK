@@ -19,6 +19,9 @@
 #include <variant>
 #include <vector>
 
+#ifdef YNN_ENABLE_PERFETTO
+#include "ynnpack/subgraph/perfetto.h"
+#endif
 #include "ynnpack/base/build_config.h"
 #include "ynnpack/base/log.h"
 #include "ynnpack/base/type.h"
@@ -70,13 +73,12 @@ slinky::var ynn_runtime::make_global_variable(slinky::expr value,
 
 std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
     const std::vector<slinky::var>& dims, const slinky::buffer_expr_ptr output,
-    const std::vector<slinky::expr>& output_extents,
-    slinky::span<const slinky::expr> given_splits,
+    uint32_t output_value, slinky::span<const slinky::expr> given_splits,
     const slinky::expr& element_cost) {
   auto sched = std::make_unique<ynn::scheduling_info>();
 
   int max_threads = threadpool() ? threadpool()->thread_count() : 1;
-
+  const std::vector<slinky::expr>& output_extents = value(output_value).extents;
   // Enough tasks to have good load balancing.
   slinky::index_t target_task_count = max_threads > 1 ? max_threads * 2 : 1;
 
@@ -135,10 +137,11 @@ std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
 
   for (int d = 0; d < rank; ++d) {
     if (output_extents[d].defined() && splits[d].defined()) {
-      sched->loop_splits.push_back(
-          {dims[d], splits[d], output_extents[d], workers[d]});
+      sched->loop_splits.push_back({dims[d], splits[d], workers[d], d});
     }
   }
+
+  sched->base_buffer_id = output_value;
 
   // Schedule the output buffer to be stored at the same level as it's
   // computed at.
@@ -278,8 +281,10 @@ void ynn_runtime::schedule() {
       const std::vector<ynn::scheduling_split>& loop_splits =
           sched->loop_splits;
 
+      const ynn_runtime_value& v = value(sched->base_buffer_id);
+      assert(v.is_valid());
+      const std::vector<slinky::expr> extents = v.extents;
       int splits_match;
-
       for (compute_at = 0, splits_match = 0;
            compute_at < sched_data.loop_nest.size() &&
            splits_match < loop_splits.size();
@@ -294,7 +299,8 @@ void ynn_runtime::schedule() {
                         global_loop_nest[loop_nest_id].step)) {
           break;
         }
-        if (!prove_true(loop_splits[splits_match].extent == loop_extent)) {
+        if (!prove_true(extents[loop_splits[splits_match].axis] ==
+                        loop_extent)) {
         } else {
           // We can overwrite the current loop step if it's not required, but
           // this one is.
@@ -334,11 +340,14 @@ void ynn_runtime::schedule() {
     if (sched && !sched->loop_splits.empty() &&
         prove_true(sched_data.match_volume == 1)) {
       // Update the global loop nest by adding loops of this function.
+      const ynn_runtime_value& v = value(sched->base_buffer_id);
+      assert(v.is_valid());
+      const std::vector<slinky::expr> extents = v.extents;
       int splits_match = sched_data.splits_match;
       for (int j = splits_match; j < sched->loop_splits.size(); j++) {
         const ynn::scheduling_split& dim = sched->loop_splits[j];
         global_loop_nest.push_back(
-            {{&f, dim.var}, dim.extent, dim.step, dim.step_is_required});
+            {{&f, dim.var}, extents[dim.axis], dim.step, dim.step_is_required});
         sched_data.loop_nest.push_back(global_loop_nest.size() - 1);
       }
     }
@@ -478,6 +487,11 @@ slinky::expr type_elem_size(ynn_type type) {
   return size > 0 ? slinky::expr(size) : slinky::expr{};
 }
 
+#ifdef YNN_ENABLE_PERFETTO
+// TODO(dsharlet): We need a better way to control tracing output.
+const char* get_trace_filename() { return getenv("YNN_TRACE"); }
+#endif
+
 }  // namespace
 
 extern "C" {
@@ -504,6 +518,16 @@ ynn_runtime::ynn_runtime(const ynn_subgraph& subgraph,
     YNN_LOG_ERROR() << c->attrs.name << " failed";
   };
   eval_config.base_alignment = YNN_ALLOCATION_ALIGNMENT;
+
+#ifdef YNN_ENABLE_PERFETTO
+  eval_config.trace_begin = [](const char* name) {
+    ynn::perfetto_session::global()->begin(name);
+    return reinterpret_cast<slinky::index_t>(name);
+  };
+  eval_config.trace_end = [](slinky::index_t token) {
+    ynn::perfetto_session::global()->end();
+  };
+#endif
   eval_context.config = &eval_config;
 
   values.reserve(subgraph.values.size());
@@ -591,6 +615,9 @@ ynn_status ynn_runtime::build() {
   }
 
   slinky::build_options options;
+#ifdef YNN_ENABLE_PERFETTO
+  options.trace = get_trace_filename() != nullptr;
+#endif
 #ifdef NDEBUG
   options.no_checks = true;
 #endif
@@ -634,26 +661,11 @@ ynn_status ynn_runtime::setup() {
 ynn_status ynn_create_runtime(ynn_subgraph_t subgraph,
                               ynn_threadpool_t threadpool, uint32_t flags,
                               ynn_runtime_t* runtime_out) {
-#if YNN_LOG_LEVEL >= YNN_LOG_LEVEL_DEBUG
-  YNN_LOG_DEBUG() << "subgraph before optimization:\n";
-  subgraph->dump(std::cout);
-#endif
-
   slinky::thread_pool* slinky_threadpool =
       reinterpret_cast<slinky::thread_pool*>(threadpool);
-  ynn_status status = subgraph->optimize(slinky_threadpool);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-#if YNN_LOG_LEVEL >= YNN_LOG_LEVEL_DEBUG
-  YNN_LOG_DEBUG() << "subgraph after optimization:\n";
-  subgraph->dump(std::cout);
-#endif
-
-  std::unique_ptr<ynn_runtime> runtime(
-      new ynn_runtime(*subgraph, slinky_threadpool, flags));
-  status = runtime->build();
+  auto runtime =
+      std::make_unique<ynn_runtime>(*subgraph, slinky_threadpool, flags);
+  ynn_status status = runtime->build();
   if (status != ynn_status_success) {
     return status;
   }

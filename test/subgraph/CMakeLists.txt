@@ -51,6 +51,8 @@ IF(XNNPACK_BUILD_LIBRARY)
       even-split
       fully-connected
       max-pooling-2d
+      rewrites
+      rope
       softmax
       space-to-depth-2d
       split-fuse

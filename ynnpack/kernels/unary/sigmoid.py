@@ -18,33 +18,32 @@ def sigmoid_fp32(a, x):
   vc3 = float.fromhex('-0x1.555A80p-3')
   vc2 = float.fromhex('0x1.FFFDC6p-2')
   vc1 = float.fromhex('-0x1.FFFFF6p-1')
-  vone = 1.0
   vdenorm_cutoff = float.fromhex('0x1.5D589Ep+6')
 
   vx = load(a)
   vz = abs(vx)
 
-  vn = vz * vminus_log2e + vmagic_bias
+  vn = multiply_add(vz, vminus_log2e, vmagic_bias)
 
   vs = reinterpret_cast(
       Float(32), logical_shift_left(reinterpret_cast(Int(32), vn), i32(23))
   )
   vn = vn - vmagic_bias
 
-  vt = vn * vln2_hi + vz
-  vt = vn * vln2_lo + vt
+  vt = multiply_add(vn, vln2_hi, vz)
+  vt = multiply_add(vn, vln2_lo, vt)
 
-  vp = vt * vc5 + vc4
-  vp = vt * vp + vc3
-  vp = vt * vp + vc2
-  vp = vt * vp + vc1
+  vp = multiply_add(vt, vc5, vc4)
+  vp = multiply_add(vt, vp, vc3)
+  vp = multiply_add(vt, vp, vc2)
+  vp = multiply_add(vt, vp, vc1)
 
   vt = vt * vs
-  ve = vt * vp + vs
-  vd = ve + vone
+  ve = multiply_add(vt, vp, vs)
+  vd = ve + 1.0
 
   vf = ve / vd
   vf = select(vz > vdenorm_cutoff, f32(0.0), vf)
-  vf = select(vx > f32(0.0), vone - vf, vf)
+  vf = select(vx > f32(0.0), 1.0 - vf, vf)
 
   return store(vf, x)

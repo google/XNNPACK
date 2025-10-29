@@ -194,13 +194,13 @@ static enum xnn_status resize_fuse_dims_output_tensor(
   struct xnn_shape* output_shape = &output->shape;
 
   if (input_shape->num_dims < first_dim + num_dims) {
-    xnn_log_error(
-        "failed to fuse dims in %s operator with input ID #%" PRIu32
-        " and output ID #%" PRIu32
-        ": number of input dimensions, "
-        "%zu, is smaller than the fused dimensions, %zu-%zu",
-        xnn_node_type_to_string(xnn_node_type_static_reshape), input_id,
-        output_id, input_shape->num_dims, first_dim, first_dim + num_dims);
+    xnn_log_error("failed to fuse dims in %s operator with input ID #%" PRIu32
+                  " and output ID #%" PRIu32
+                  ": number of input dimensions, %zu, is smaller than the "
+                  "fused dimensions, %zu-%zu",
+                  xnn_node_type_to_string(xnn_node_type_static_reshape),
+                  input_id, output_id, input_shape->num_dims, first_dim,
+                  first_dim + num_dims);
     return xnn_status_invalid_parameter;
   }
 
@@ -244,8 +244,8 @@ static enum xnn_status resize_split_dims_output_tensor(
   if (input_shape->num_dims - 1 + num_dims > XNN_MAX_TENSOR_DIMS) {
     xnn_log_error("failed to split dims in %s operator with input ID #%" PRIu32
                   " and output ID #%" PRIu32
-                  ": number of output dimensions, "
-                  "%zu, is larger than the maximum number of dimensions, %zu",
+                  ": number of output dimensions, %zu, is larger than the "
+                  "maximum number of dimensions, %zu",
                   xnn_node_type_to_string(xnn_node_type_static_reshape),
                   input_id, output_id, input_shape->num_dims - 1 + num_dims,
                   (size_t)XNN_MAX_TENSOR_DIMS);
@@ -536,8 +536,8 @@ enum xnn_status xnn_define_fuse_dims(
     xnn_log_error(
         "failed to define %s operator with %zu-dimensional input shape: at "
         "most %zu dimensions are supported",
-        xnn_node_type_to_string(xnn_node_type_fuse_dims),
-        axis + axes_count, (size_t)XNN_MAX_TENSOR_DIMS);
+        xnn_node_type_to_string(xnn_node_type_fuse_dims), axis + axes_count,
+        (size_t)XNN_MAX_TENSOR_DIMS);
     return xnn_status_unsupported_parameter;
   }
   size_t dims[XNN_MAX_TENSOR_DIMS];
@@ -559,8 +559,8 @@ enum xnn_status xnn_define_split_dim(xnn_subgraph_t subgraph,
     xnn_log_error(
         "failed to define %s operator with %zu-dimensional output shape: at "
         "most %zu dimensions are supported",
-        xnn_node_type_to_string(xnn_node_type_fuse_dims),
-        axis + num_splits, (size_t)XNN_MAX_TENSOR_DIMS);
+        xnn_node_type_to_string(xnn_node_type_fuse_dims), axis + num_splits,
+        (size_t)XNN_MAX_TENSOR_DIMS);
     return xnn_status_unsupported_parameter;
   }
   return define_copy_node(subgraph, /*num_dims=*/num_splits,

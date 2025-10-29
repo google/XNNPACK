@@ -1890,8 +1890,11 @@ static void init_f32_sigmoid_config(void) {
       if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
         f32_sigmoid_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsigmoid_ukernel__sse2_rr2_lut64_p2_div_u8);
         f32_sigmoid_config.element_tile = 8;
-      }
+      } else
     #endif
+    {
+      f32_sigmoid_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_u2);
+    }
   #elif XNN_ARCH_WASMRELAXEDSIMD
     f32_sigmoid_config.ukernel = XNN_INIT_UNARY_UKERNEL(xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_fma_rr2_p5_div_u16);
     f32_sigmoid_config.element_tile = 16;

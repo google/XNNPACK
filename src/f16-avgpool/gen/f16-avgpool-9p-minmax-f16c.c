@@ -43,12 +43,12 @@ static XNN_INLINE __m128i xnn_load_tail_safe_f16(const uint16_t* i, size_t c) {
   XNN_ALIGN(16) uint16_t padded[8];
   uint16_t* dst = padded;
   switch (c) {
-  case 7: *dst++ = *i++;
-  case 6: *dst++ = *i++;
-  case 5: *dst++ = *i++;
-  case 4: *dst++ = *i++;
-  case 3: *dst++ = *i++;
-  case 2: *dst++ = *i++;
+  case 7: *dst++ = *i++; XNN_FALLTHROUGH
+  case 6: *dst++ = *i++; XNN_FALLTHROUGH
+  case 5: *dst++ = *i++; XNN_FALLTHROUGH
+  case 4: *dst++ = *i++; XNN_FALLTHROUGH
+  case 3: *dst++ = *i++; XNN_FALLTHROUGH
+  case 2: *dst++ = *i++; XNN_FALLTHROUGH
   default: *dst++ = *i++;
   }
   return _mm_load_si128((const __m128i*) padded);

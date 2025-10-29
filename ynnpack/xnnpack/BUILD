@@ -13,7 +13,6 @@ cc_library(
     srcs = ["utils.cc"],
     hdrs = ["utils.h"],
     compatible_with = _COMPATIBLE_WITH,
-    visibility = ["//visibility:public"],
     deps = [
         "//:xnnpack_h",
         "//ynnpack",
@@ -27,7 +26,6 @@ cc_library(
     srcs = ["dynamic_quantization.cc"],
     hdrs = ["dynamic_quantization.h"],
     compatible_with = _COMPATIBLE_WITH,
-    visibility = ["//visibility:public"],
     deps = [
         ":utils",
         "//ynnpack",
@@ -49,8 +47,6 @@ cc_library(
         "runtime.cc",
         "subgraph.cc",
         "tensor.cc",
-        "utils.cc",
-        "utils.h",
         "weights_cache.cc",
         "workspace.cc",
         "xnnpack.h",

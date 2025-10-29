@@ -218,7 +218,9 @@ static XNN_INLINE xnn_simd_f32_t xnn_load_tail_safe_f32(const float* input,
       XNN_FALLTHROUGH
     case 1:
       *dst++ = *input++;
-    default: ;
+      XNN_FALLTHROUGH
+    default:
+      break;
   }
   return _mm_load_ps(padded);
 }

@@ -70,7 +70,11 @@
 // not defined on ARM?
 #define YNN_CACHE_LINE_SIZE 64
 
+#ifdef _MSC_VER
+#define YNN_ALLOCA(T, N) reinterpret_cast<T*>(_alloca((N) * sizeof(T)))
+#else
 #define YNN_ALLOCA(T, N) reinterpret_cast<T*>(__builtin_alloca((N) * sizeof(T)))
+#endif
 
 #if defined(__clang__)
 #define YNN_UNROLL _Pragma("clang loop unroll(full)")

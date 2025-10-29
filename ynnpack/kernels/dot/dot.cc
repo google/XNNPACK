@@ -34,7 +34,7 @@ void dot(size_t M, size_t N, size_t K3, size_t K2, size_t K1, size_t A_stride_m,
   using B_info = type_info<BT>;
   assert(M == 1);
   CT* acc = YNN_ALLOCA(CT, N);
-  std::fill_n(acc, N, 0);
+  std::fill_n(acc, N, static_cast<CT>(0));
   for (size_t k3 = 0; k3 < K3; ++k3) {
     const BT* B_k3 = offset_bytes(B, k3 * B_stride_k3);
     const AT* A_k3 = offset_bytes(A, k3 * A_stride_k3);
@@ -226,6 +226,7 @@ struct optimizer {
   size_t k;
   int required_tile_k;
   int required_block_n;
+  std::optional<bool> transpose_a;
   uint64_t supported_arch_flags;
 
   // Outputs
@@ -236,8 +237,9 @@ struct optimizer {
   void operator()(uint64_t arch, int block_m, int block_n, int block_k,
                   int tile_m, int tile_n, int tile_k, uint32_t flags,
                   dot_kernel_fn kernel, const char* name) {
-    if ((flags & dot_flag::transpose_a)) {
-      // TODO: Implement transposing A in subgraphs.
+    if (transpose_a && *transpose_a != ((flags & dot_flag::transpose_a) != 0)) {
+      // The caller wants a transposed (or not), and this kernel is not
+      // transposed (or is).
       return;
     }
     if (!is_arch_supported(arch, supported_arch_flags)) {
@@ -276,6 +278,7 @@ YNN_UNUSED null_logger& operator<<(null_logger& os, std::optional<size_t> v) {
 template <typename A, typename B, typename C>
 dot_kernel get_dot_kernel(const dot_shape& shape,
                           const dot_packed_shape* packed_shape,
+                          std::optional<bool> transpose_a,
                           uint64_t arch_flags) {
   if (!packed_shape) {
     YNN_LOG_DEBUG() << "Selecting kernel for dot " << shape.m << "x" << shape.n
@@ -288,6 +291,7 @@ dot_kernel get_dot_kernel(const dot_shape& shape,
           shape.k3.value_or(1),
       packed_shape ? packed_shape->tile_k : 0,
       packed_shape ? packed_shape->block_n : 0,
+      transpose_a,
       arch_flags,
   };
   // TODO(dsharlet): If we ever have any tile_m != 1 kernels, we need to plumb
@@ -315,29 +319,32 @@ dot_kernel get_dot_kernel(const dot_shape& shape,
 
 dot_kernel get_dot_kernel(const dot_type& type, const dot_shape& shape,
                           const dot_packed_shape* packed_shape,
+                          std::optional<bool> transpose_a,
                           uint64_t arch_flags) {
   if (type.a == ynn_type_fp32 && type.b == ynn_type_fp32 &&
       type.c == ynn_type_fp32) {
-    return get_dot_kernel<float, float, float>(shape, packed_shape, arch_flags);
+    return get_dot_kernel<float, float, float>(shape, packed_shape, transpose_a,
+                                               arch_flags);
   } else if (type.a == ynn_type_fp16 && type.b == ynn_type_fp16 &&
              type.c == ynn_type_fp32) {
-    return get_dot_kernel<half, half, float>(shape, packed_shape, arch_flags);
+    return get_dot_kernel<half, half, float>(shape, packed_shape, transpose_a,
+                                             arch_flags);
   } else if (type.a == ynn_type_bf16 && type.b == ynn_type_bf16 &&
              type.c == ynn_type_fp32) {
     return get_dot_kernel<bfloat16, bfloat16, float>(shape, packed_shape,
-                                                     arch_flags);
+                                                     transpose_a, arch_flags);
   } else if (type.a == ynn_type_int8 && type.b == ynn_type_int8 &&
              type.c == ynn_type_int32) {
     return get_dot_kernel<int8_t, int8_t, int32_t>(shape, packed_shape,
-                                                   arch_flags);
+                                                   transpose_a, arch_flags);
   } else if (type.a == ynn_type_int8 && type.b == ynn_type_int4 &&
              type.c == ynn_type_int32) {
     return get_dot_kernel<uint8_t, int4x2, int32_t>(shape, packed_shape,
-                                                    arch_flags);
+                                                    transpose_a, arch_flags);
   } else if (type.a == ynn_type_uint8 && type.b == ynn_type_int8 &&
              type.c == ynn_type_int32) {
     return get_dot_kernel<uint8_t, int8_t, int32_t>(shape, packed_shape,
-                                                    arch_flags);
+                                                    transpose_a, arch_flags);
   } else {
     YNN_LOG_ERROR() << "Unsupported dot type " << type.a << "_" << type.b << "_"
                     << type.c;

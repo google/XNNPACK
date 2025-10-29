@@ -116,9 +116,9 @@ static enum xnn_status create_deconvolution2d_nhwc(
   const size_t input_channels = groups * group_input_channels;
   if (input_pixel_stride < input_channels) {
     xnn_log_error(
-        "failed to create %s operator with input pixel stride of %zu: "
-        "stride must be at least as large as the number of output channels "
-        "(%" PRIu32 "x%zu)",
+        "failed to create %s operator with input pixel stride of %zu: stride "
+        "must be at least as large as the number of output channels (%" PRIu32
+        "x%zu)",
         xnn_operator_type_to_string(operator_type), input_pixel_stride, groups,
         group_input_channels);
     goto error;
@@ -127,9 +127,9 @@ static enum xnn_status create_deconvolution2d_nhwc(
   const size_t output_channels = groups * group_output_channels;
   if (output_pixel_stride < output_channels) {
     xnn_log_error(
-        "failed to create %s operator with output pixel stride of %zu: "
-        "stride must be at least as large as the number of output channels "
-        "(%" PRIu32 "x%zu)",
+        "failed to create %s operator with output pixel stride of %zu: stride "
+        "must be at least as large as the number of output channels (%" PRIu32
+        "x%zu)",
         xnn_operator_type_to_string(operator_type), output_pixel_stride, groups,
         group_output_channels);
     goto error;
@@ -504,8 +504,8 @@ enum xnn_status create_deconvolution2d_nhwc_qs8_qc8w(
     if (requantization_scale[output_channel] >= 256.0f) {
       xnn_log_error(
           "failed to create %s operator with %.7g input scale, %.7g kernel "
-          "scale, and %.7g output scale in output channel #%zu: "
-          "requantization scale %.7g is greater or equal to 256.0",
+          "scale, and %.7g output scale in output channel #%zu: requantization "
+          "scale %.7g is greater or equal to 256.0",
           xnn_operator_type_to_string(operator_type), input_scale,
           kernel_scale[output_channel], output_scale, output_channel,
           requantization_scale[output_channel]);
@@ -762,8 +762,8 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qu8(
   if (requantization_scale >= 256.0f) {
     xnn_log_error(
         "failed to create %s operator with %.7g input scale, %.7g kernel "
-        "scale, and %.7g output scale: "
-        "requantization scale %.7g is greater or equal to 256.0",
+        "scale, and %.7g output scale: requantization scale %.7g is greater or "
+        "equal to 256.0",
         xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_qu8),
         input_scale, kernel_scale, output_scale, requantization_scale);
     return xnn_status_unsupported_parameter;
@@ -1776,22 +1776,22 @@ static enum xnn_status reshape_deconvolution2d_nhwc(
   }
 
   if (adjustment_height >= deconvolution_op->convolution_op->stride_height) {
-    xnn_log_error(
-        "failed to reshape %s operator with %" PRIu32
-        " height adjustment: "
-        "height adjustment must be smaller than height stride (%" PRIu32 ")",
-        xnn_operator_type_to_string_v2(deconvolution_op), adjustment_height,
-        deconvolution_op->convolution_op->stride_height);
+    xnn_log_error("failed to reshape %s operator with %" PRIu32
+                  " height adjustment: height adjustment must be smaller than "
+                  "height stride (%" PRIu32 ")",
+                  xnn_operator_type_to_string_v2(deconvolution_op),
+                  adjustment_height,
+                  deconvolution_op->convolution_op->stride_height);
     return xnn_status_invalid_parameter;
   }
 
   if (adjustment_width >= deconvolution_op->convolution_op->stride_width) {
-    xnn_log_error(
-        "failed to reshape %s operator with %" PRIu32
-        " width adjustment: "
-        "width adjustment must be smaller than width stride (%" PRIu32 ")",
-        xnn_operator_type_to_string_v2(deconvolution_op), adjustment_width,
-        deconvolution_op->convolution_op->stride_width);
+    xnn_log_error("failed to reshape %s operator with %" PRIu32
+                  " width adjustment: width adjustment must be smaller than "
+                  "width stride (%" PRIu32 ")",
+                  xnn_operator_type_to_string_v2(deconvolution_op),
+                  adjustment_width,
+                  deconvolution_op->convolution_op->stride_width);
     return xnn_status_invalid_parameter;
   }
 

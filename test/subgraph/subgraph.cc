@@ -38,8 +38,8 @@ TEST(SUBGRAPH, hanging_nodes) {
       .AddGlobalAveragePooling(3, 5)
       .Optimize();
 
-  // The hanging node is still there.
-  ASSERT_EQ(tester.NumNodes(), 3);
+  // The hanging node is no longer there.
+  ASSERT_EQ(tester.NumNodes(), 2);
 }
 
 TEST(SUBGRAPH, multiple_outputs_with_hanging_nodes) {

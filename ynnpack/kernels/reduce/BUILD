@@ -35,7 +35,6 @@ ynn_cc_library(
         "max.inc",
         "min.inc",
         "min_max.inc",
-        "product.inc",
         "reduce.h",
         "sum.inc",
         "sum_squared.inc",

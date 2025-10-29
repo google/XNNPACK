@@ -372,6 +372,7 @@ const char* xnn_operator_type_to_string_v2(xnn_operator_t op) {
         case xnn_binary_invalid:
           return "Invalid Binary Op";
       }
+      break;
     case xnn_operator_type_unary_elementwise:
       switch (op->unary_elementwise.op_type) {
         case xnn_unary_abs:
@@ -429,6 +430,7 @@ const char* xnn_operator_type_to_string_v2(xnn_operator_t op) {
         case xnn_unary_invalid:
           return "Invalid Unary Op";
       }
+      break;
     case xnn_operator_type_copy_nc_x16:
     case xnn_operator_type_copy_nc_x32:
     case xnn_operator_type_copy_nc_x8:
@@ -445,6 +447,7 @@ const char* xnn_operator_type_to_string_v2(xnn_operator_t op) {
           return xnn_operator_type_to_string(op->type);
       }
     default:
-      return xnn_operator_type_to_string(op->type);
+      break;
   }
+  return xnn_operator_type_to_string(op->type);
 }

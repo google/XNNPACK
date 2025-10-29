@@ -79,18 +79,6 @@ ynn_generate_src_hdr(
 )
 
 ynn_generate_src_hdr(
-    name = "x86_fma3",
-    compatible_with = _COMPATIBLE_WITH,
-    generator = ":generator",
-    generator_args = [
-        "x86_fma3",
-        "multiply_add_fp32_fp32_fp32,16x1",
-    ],
-    output_hdr = "x86_fma3.inc",
-    output_src = "x86_fma3.cc",
-)
-
-ynn_generate_src_hdr(
     name = "x86_avx512f",
     compatible_with = _COMPATIBLE_WITH,
     generator = ":generator",
@@ -148,7 +136,6 @@ ynn_cc_library(
         "x86_avx2.inc",
         "x86_avx512bw.inc",
         "x86_avx512f.inc",
-        "x86_fma3.inc",
         "x86_sse2.inc",
         "x86_sse41.inc",
     ],
@@ -158,7 +145,6 @@ ynn_cc_library(
         "x86_avx": ["x86_avx.cc"],
         "x86_avx512bw": ["x86_avx512bw.cc"],
         "x86_avx512f": ["x86_avx512f.cc"],
-        "x86_fma3": ["x86_fma3.cc"],
         "x86_avx2": ["x86_avx2.cc"],
         "x86_sse2": ["x86_sse2.cc"],
         "x86_sse41": ["x86_sse41.cc"],

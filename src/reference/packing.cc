@@ -4566,8 +4566,8 @@ enum xnn_status xnn_pack_f32_spmm_w(
                                (int64_t)sizeof(float);
           if (diff != (int64_t)(int32_t)diff) {
             xnn_log_error(
-                "failed to convert kernel to sparse representation: "
-                "scaled difference in input channels exceeds int32_t range");
+                "failed to convert kernel to sparse representation: scaled "
+                "difference in input channels exceeds int32_t range");
             return xnn_status_unsupported_parameter;
           }
           *input_channel_diffs++ = (int32_t)diff;
@@ -4598,8 +4598,8 @@ enum xnn_status xnn_pack_f32_spmm_w(
                                (int64_t)sizeof(float);
           if (diff != (int64_t)(int32_t)diff) {
             xnn_log_error(
-                "failed to convert kernel to sparse representation: "
-                "scaled difference in input channels exceeds int32_t range");
+                "failed to convert kernel to sparse representation: scaled "
+                "difference in input channels exceeds int32_t range");
             return xnn_status_unsupported_parameter;
           }
           *input_channel_diffs++ = (int32_t)diff;
@@ -4618,8 +4618,8 @@ enum xnn_status xnn_pack_f32_spmm_w(
                          (int64_t)sizeof(float);
     if (diff != (int64_t)(int32_t)diff) {
       xnn_log_error(
-          "failed to convert kernel to sparse representation: "
-          "scaled difference in input channels exceeds int32_t range");
+          "failed to convert kernel to sparse representation: scaled "
+          "difference in input channels exceeds int32_t range");
       return xnn_status_unsupported_parameter;
     }
     *input_channel_diffs++ = (int32_t)diff;
@@ -4666,8 +4666,8 @@ enum xnn_status xnn_pack_f32_to_f16_spmm_w(
                                (int64_t)sizeof(uint16_t);
           if (diff != (int64_t)(int32_t)diff) {
             xnn_log_error(
-                "failed to convert kernel to sparse representation: "
-                "scaled difference in input channels exceeds int32_t range");
+                "failed to convert kernel to sparse representation: scaled "
+                "difference in input channels exceeds int32_t range");
             return xnn_status_unsupported_parameter;
           }
           *input_channel_diffs++ = (int32_t)diff;
@@ -4698,8 +4698,8 @@ enum xnn_status xnn_pack_f32_to_f16_spmm_w(
                                (int64_t)sizeof(uint16_t);
           if (diff != (int64_t)(int32_t)diff) {
             xnn_log_error(
-                "failed to convert kernel to sparse representation: "
-                "scaled difference in input channels exceeds int32_t range");
+                "failed to convert kernel to sparse representation: scaled "
+                "difference in input channels exceeds int32_t range");
             return xnn_status_unsupported_parameter;
           }
           *input_channel_diffs++ = (int32_t)diff;
@@ -4718,8 +4718,8 @@ enum xnn_status xnn_pack_f32_to_f16_spmm_w(
                          (int64_t)sizeof(uint16_t);
     if (diff != (int64_t)(int32_t)diff) {
       xnn_log_error(
-          "failed to convert kernel to sparse representation: "
-          "scaled difference in input channels exceeds int32_t range");
+          "failed to convert kernel to sparse representation: scaled "
+          "difference in input channels exceeds int32_t range");
       return xnn_status_unsupported_parameter;
     }
     *input_channel_diffs++ = (int32_t)diff;
@@ -4768,8 +4768,8 @@ enum xnn_status xnn_pack_f16_spmm_w(size_t group_output_channels,
                                (int64_t)sizeof(uint16_t);
           if (diff != (int64_t)(int32_t)diff) {
             xnn_log_error(
-                "failed to convert kernel to sparse representation: "
-                "scaled difference in input channels exceeds int32_t range");
+                "failed to convert kernel to sparse representation: scaled "
+                "difference in input channels exceeds int32_t range");
             return xnn_status_unsupported_parameter;
           }
           *input_channel_diffs++ = (int32_t)diff;
@@ -4800,8 +4800,8 @@ enum xnn_status xnn_pack_f16_spmm_w(size_t group_output_channels,
                                (int64_t)sizeof(uint16_t);
           if (diff != (int64_t)(int32_t)diff) {
             xnn_log_error(
-                "failed to convert kernel to sparse representation: "
-                "scaled difference in input channels exceeds int32_t range");
+                "failed to convert kernel to sparse representation: scaled "
+                "difference in input channels exceeds int32_t range");
             return xnn_status_unsupported_parameter;
           }
           *input_channel_diffs++ = (int32_t)diff;
@@ -4820,8 +4820,8 @@ enum xnn_status xnn_pack_f16_spmm_w(size_t group_output_channels,
                          (int64_t)sizeof(uint16_t);
     if (diff != (int64_t)(int32_t)diff) {
       xnn_log_error(
-          "failed to convert kernel to sparse representation: "
-          "scaled difference in input channels exceeds int32_t range");
+          "failed to convert kernel to sparse representation: scaled "
+          "difference in input channels exceeds int32_t range");
       return xnn_status_unsupported_parameter;
     }
     *input_channel_diffs++ = (int32_t)diff;

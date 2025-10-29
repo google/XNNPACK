@@ -170,7 +170,7 @@ ynn_status define_qd8_params(ynn_subgraph_t subgraph, size_t num_nonbatch_axes,
         YNN_UNREACHABLE;
     }
 
-    auto sched = runtime.make_schedule(dims, scale.buffer, scale.extents);
+    auto sched = runtime.make_schedule(dims, scale.buffer, node.outputs[0]);
 
     // `make_schedule` schedules the scale output buffer, but we
     // also need to schedule the zero point buffer too.

@@ -55,8 +55,8 @@ bool xnn_should_inline_lhs_packing(const struct xnn_gemm_config *gemm_config,
                          cache_bytes, cache_line_size);
 
   xnn_log_debug(
-      "mr=%zu, nr=%hhu, m_packed_stride=%zu, n_stride=%zu, "
-      "mc=%zu, nc=%zu, gemm_row_fits_in_cache=%s.",
+      "mr=%zu, nr=%hhu, m_packed_stride=%zu, n_stride=%zu, mc=%zu, nc=%zu, "
+      "gemm_row_fits_in_cache=%s.",
       mr, gemm_config->nr, m_packed_stride, n_stride, mc, nc,
       gemm_row_fits_in_cache ? "true" : "false");
 
@@ -148,7 +148,7 @@ size_t xnn_gemm_best_tile_size(size_t num_groups, size_t m, size_t n,
   xnn_log_debug(
       "Tile size for GEMM with num_groups=%zi, m=%zu, n=%zu and mr=%zu, nr=%zu "
       "set to [%zu, %zu] (%zu tiles)",
-      num_groups, m, n, mr, nr, mr, nc, 
+      num_groups, m, n, mr, nr, mr, nc,
       num_tiles_m * divide_round_up(n, nc) * num_groups);
   return nc;
 }

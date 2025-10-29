@@ -6,9 +6,6 @@
 #ifdef YNN_ARCH_X86_AVX512F
 #include "ynnpack/kernels/ternary/x86_avx512f.inc"
 #endif  // YNN_ARCH_X86_AVX512F
-#ifdef YNN_ARCH_X86_FMA3
-#include "ynnpack/kernels/ternary/x86_fma3.inc"
-#endif  // YNN_ARCH_X86_FMA3
 #ifdef YNN_ARCH_X86_AVX2
 #include "ynnpack/kernels/ternary/x86_avx2.inc"
 #endif  // YNN_ARCH_X86_AVX2

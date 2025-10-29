@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC
+// Copyright 2024-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -20,6 +20,21 @@
 // Runtime values marked with this flag should be cleaned up (i.e. deallocated)
 // by the runtime.
 #define XNN_VALUE_FLAG_NEEDS_CLEANUP 0x00000008
+
+// Macro to check the `enum xnn_status` result of an expression and return it
+// if it is not `xnn_status_success`, followed by an optional string literal and
+// parameters for `xnn_log_error`.
+#define XNN_VAR_ARG_HEAD(FIRST, ...) FIRST
+#define XNN_RETURN_IF_ERROR(expr, ...)                             \
+  do {                                                             \
+    const enum xnn_status status_ = (expr);                        \
+    if (status_ != xnn_status_success) {                           \
+      if (sizeof(XNN_VAR_ARG_HEAD("" __VA_ARGS__)) > sizeof("")) { \
+        xnn_log_error("" __VA_ARGS__);                             \
+      }                                                            \
+      return status_;                                              \
+    }                                                              \
+  } while (false)
 
 #ifdef __cplusplus
 extern "C" {

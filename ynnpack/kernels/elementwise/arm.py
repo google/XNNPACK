@@ -8,19 +8,43 @@ from ynnpack.kernels.elementwise.compiler import *  # pylint: disable=wildcard-i
 def make_neon_cast_patterns(vector_bits):
   """Adds NEON cast patterns."""
   assert vector_bits == 128
-  return [
-      i.vectorize(vector_bits)
-      for i in [
+  vf32_a = f32_a.with_lanes(vector_bits // 32)
+  vf32_b = f32_b.with_lanes(vector_bits // 32)
+  vf16_a = f16_a.with_lanes(vector_bits // 32)
+
+  return (
+      [
+          i.vectorize(vector_bits)
+          for i in [
+              Rule(
+                  cast(Float(32), i32_a),
+                  Op(Float(32), "vcvtq_f32_s32", [i32_a]),
+              ),
+              Rule(
+                  cast(Int(32), round(f32_a)),
+                  Op(Int(32), "cast_f32_to_int32", [f32_a]),
+              ),
+          ]
+      ]
+      + [
           Rule(
-              cast(Float(32), i32_a),
-              Op(Float(32), "vcvtq_f32_s32", [i32_a]),
+              cast(Float(32, vector_bits // 32), vf16_a),
+              Op(Float(32, vector_bits // 32), "vcvt_f32_f16", [vf16_a]),
           ),
           Rule(
-              cast(Int(32), round(f32_a)),
-              Op(Int(32), "cast_f32_to_int32", [f32_a]),
+              cast(
+                  Float(16, vector_bits // 16),
+                  combine_vectors([vf32_a, vf32_b]),
+              ),
+              Op(
+                  Float(16, vector_bits // 16),
+                  "cast_f32_to_f16",
+                  [vf32_a, vf32_b],
+              ),
           ),
       ]
-  ] + add_saturating_cast_rules(vector_bits)
+      + add_saturating_cast_rules(vector_bits)
+  )
 
 
 def make_neon_reinterpret_cast_patterns(vector_bits):
@@ -175,6 +199,8 @@ class ARM(Target):
     self.load_intrinsics[Int(32, 4)] = "vld1q_s32"
     self.load_intrinsics[UInt(32, 4)] = "vld1q_u32"
     self.load_intrinsics[Float(32, 4)] = "vld1q_f32"
+    self.load_intrinsics[Float(16, 8)] = "vld1q_f16"
+    self.load_intrinsics[Float(16, 4)] = "vld1_f16"
 
   def add_store_intrinsics(self):
     self.store_intrinsics[Int(8, 16)] = "vst1q_s8"
@@ -184,14 +210,16 @@ class ARM(Target):
     self.store_intrinsics[Int(32, 4)] = "vst1q_s32"
     self.store_intrinsics[UInt(32, 4)] = "vst1q_u32"
     self.store_intrinsics[Float(32, 4)] = "vst1q_f32"
+    self.store_intrinsics[Float(16, 8)] = "vst1q_f16"
+    self.store_intrinsics[Float(16, 4)] = "vst1_f16"
 
-  def __init__(self, features):
-    Target.__init__(self)
-    self.features = features
-    self.vector_bits = 128
-    self.tail_strategy = TailStrategy.MEMCPY
+  def legalize_type(self, ty, is_const=True):
+    # This is the type which ARM intrinsics expect as argument for pointers.
+    if ty.is_float() and ty.size == 16 and ty.lanes == 1:
+      return "__fp16"
+    return super().legalize_type(ty, is_const)
 
-    self.header += "#include <arm_neon.h>\n"
+  def update_for_neon(self):
     self.header += """
 
 namespace {
@@ -347,13 +375,55 @@ YNN_INTRINSIC float32x4_t sqrt_f32(float32x4_t a) {
         Float(32, 4): "float32x4_t",
     })
 
-    self.add_load_intrinsics()
-    self.add_store_intrinsics()
     self.patterns += make_neon_float32_patterns(128)
     self.patterns += make_neon_integer_patterns(128)
     self.patterns += make_neon_cast_patterns(128)
     self.patterns += make_neon_reinterpret_cast_patterns(128)
     self.patterns += make_neon_broadcast_patterns(128)
+
+  def update_for_fp16(self):
+    self.header += """
+namespace {
+
+YNN_INTRINSIC float16x8_t cast_f32_to_f16(float32x4_t f0, float32x4_t f1) {
+  return vcombine_f16(vcvt_f16_f32(f0), vcvt_f16_f32(f1));
+}
+} // namespace
+"""
+
+    self.types.update({
+        Float(16, 4): "float16x4_t",
+        Float(16, 8): "float16x8_t",
+    })
+
+  def __init__(self, features):
+    Target.__init__(self)
+    self.features = features
+    self.vector_bits = 128
+    self.tail_strategy = TailStrategy.MEMCPY
+
+    self.header += "#include <arm_neon.h>\n"
+
+    # These are transitive.
+    implied_features = {
+        "NEONFP16": ["NEON"],
+        "FMA": ["NEON"],
+    }
+    all_features = []
+    self.compute_all_features(features, implied_features, all_features)
+
+    known_features = ["NEON", "NEONFP16", "FMA"]
+    for feature in all_features:
+      if feature not in known_features:
+        raise ValueError(f"Unknown feature: {feature}")
+
+    self.add_load_intrinsics()
+    self.add_store_intrinsics()
+
+    if "NEON" in all_features:
+      self.update_for_neon()
+    if "NEONFP16" in all_features:
+      self.update_for_fp16()
 
   def arch_flags(self):
     return "|".join(["arch_flag::" + i.lower() for i in self.features])

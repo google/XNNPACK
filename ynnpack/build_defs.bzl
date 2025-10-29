@@ -14,32 +14,33 @@ def define_build_option(name, default_all = [], default_any = []):
       default_all: A list of conditions that must all be true for the flag to be enabled by default.
       default_any: A list of conditions for the flag to be enabled by default if any are true.
     """
-    selects.config_setting_group(
-        name = name + "_enabled_by_default",
-        match_all = default_all,
-        match_any = default_any,
-    )
+    explicit_true = name + "_explicit_true"
+    explicit_false = name + "_explicit_false"
+    default = explicit_true
+    if default_all or default_any:
+        default = name + "_enabled_by_default"
+        selects.config_setting_group(
+            name = default,
+            match_all = default_all,
+            match_any = default_any,
+        )
 
     native.config_setting(
-        name = name + "_explicit_true",
+        name = explicit_true,
         define_values = {name: "true"},
     )
 
     native.config_setting(
-        name = name + "_explicit_false",
+        name = explicit_false,
         define_values = {name: "false"},
     )
-
-    explicit_true = ":" + name + "_explicit_true"
-    explicit_false = ":" + name + "_explicit_false"
-    default = ":" + name + "_enabled_by_default"
 
     native.alias(
         name = name,
         actual = select({
-            explicit_true: explicit_true,
-            explicit_false: explicit_true,
-            "//conditions:default": default,
+            explicit_true: ":" + explicit_true,
+            explicit_false: ":" + explicit_true,
+            "//conditions:default": ":" + default,
         }),
     )
 
@@ -64,6 +65,17 @@ _YNN_PARAMS_FOR_ARCH = {
                 "-mfpu=neon-fp-armv8",
             ],
             "//ynnpack:arm64": ["-march=armv8.2-a+dotprod"],
+            "//conditions:default": [],
+        }),
+    },
+    "arm_neonfp16": {
+        "cond": "//ynnpack:ynn_enable_arm_neonfp16",
+        "copts": select({
+            "//ynnpack:arm32": [
+                "-marm",
+                "-march=armv7-a",
+                "-mfpu=neon-fp16",
+            ],
             "//conditions:default": [],
         }),
     },
@@ -184,6 +196,35 @@ _YNN_PARAMS_FOR_ARCH = {
     },
 }
 
+def _map_copts_to_msvc(copts):
+    """Maps GNU-style compiler options to Microsoft Visual Studio compiler options."""
+
+    to_msvc = {
+        "-msse2": "/arch:SSE2",
+        "-mssse3": "/arch:SSE2",
+        "-msse4.1": "/arch:SSE2",
+        "-mavx": "/arch:AVX",
+        "-mavx2": "/arch:AVX2",
+        "-mavx512f": "/arch:AVX512",
+        "-mavx512bw": "/arch:AVX512",
+        "-mavx512bf16": "/arch:AVX512",
+        "-mavx512fp16": "/arch:AVX512",
+        "-mavx512vl": "/arch:AVX512",
+        "-mavx512vnni": "/arch:AVX512",
+        "-mfma": "/arch:AVX",
+        "-mf16c": "/arch:AVX",
+        "-mamx": "/arch:AVX512",
+    }
+
+    # Here we use a dictionary to implement a set. We don't care about the values.
+    msvc_copts = {}
+    for c in copts:
+        to = to_msvc.get(c, "")
+        if to:
+            msvc_copts[to] = ""
+
+    return list(msvc_copts.keys())
+
 def ynn_cc_library(
         name,
         srcs = [],
@@ -213,6 +254,15 @@ def ynn_cc_library(
         arch_params = _YNN_PARAMS_FOR_ARCH[arch]
         arch_cond = arch_params["cond"]
         copts_arch = arch_params.get("copts", [])
+        if type(copts_arch) == "list":
+            copts_arch = select({
+                "//ynnpack:windows_x86_clangcl": ["/clang:" + i for i in copts_arch],
+                "//ynnpack:windows_x86_msvc": _map_copts_to_msvc(copts_arch),
+                "//conditions:default": copts_arch,
+            })
+        else:
+            # The arch_params should have handled this.
+            pass
 
         cc_library(
             name = name + "_" + arch,

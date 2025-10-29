@@ -141,6 +141,9 @@ static XNN_INLINE xnn_simd_u8_t xnn_load_tail_safe_u8(const uint8_t* input,
       XNN_FALLTHROUGH
     case 1:
       *d++ = *input++;
+      XNN_FALLTHROUGH
+    default:
+      break;
   }
   return _mm_load_si128((const __m128i*)&padded[0]);
 }

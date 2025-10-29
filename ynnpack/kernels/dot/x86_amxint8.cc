@@ -3,8 +3,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <immintrin.h>
-
 #include <cstddef>
 #include <cstdint>
 
@@ -14,12 +12,16 @@ namespace ynn {
 
 template <int c, int a, int b>
 struct dpbssd {
-  void operator()() { _tile_dpbssd(c, a, b); }
+  void operator()() {
+    YNN_TILE_DPBSSD(c, a, b);
+  }
 };
 
 template <int c, int a, int b>
 struct dpbusd {
-  void operator()() { _tile_dpbusd(c, a, b); }
+  void operator()() {
+    YNN_TILE_DPBUSD(c, a, b);
+  }
 };
 
 void dot_int8_int8_int32_16x64x64_16x16x4_amxint8(

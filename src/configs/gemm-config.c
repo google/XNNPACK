@@ -3511,10 +3511,10 @@ static void init_qdu8_f32_qc8w_gemm_config(void) {
 
 static void init_qdu8_f32_qc8w_igemm_config(void) {
   // Common parameters.
-  qdu8_f32_qc8w_gemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_INT8_T;
-  qdu8_f32_qc8w_gemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_UINT8_T;
-  qdu8_f32_qc8w_gemm_config.log2_filter_element_bit_size = XNN_LOG2_SIZEOF_UINT8_T + 3;
-  qdu8_f32_qc8w_gemm_config.bias_element_size = sizeof(float);
+  qdu8_f32_qc8w_igemm_config.log2_input_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  qdu8_f32_qc8w_igemm_config.log2_filter_element_size = XNN_LOG2_SIZEOF_UINT8_T;
+  qdu8_f32_qc8w_igemm_config.log2_filter_element_bit_size = XNN_LOG2_SIZEOF_UINT8_T + 3;
+  qdu8_f32_qc8w_igemm_config.bias_element_size = sizeof(float);
   // Use the same packing function throughout.
   qdu8_f32_qc8w_igemm_config.pack_weights_and_biases =
       (xnn_pack_weights_and_biases_fn)xnn_pack_qs8_weights_and_biases;
@@ -4571,6 +4571,7 @@ static void init_qs8_qc8w_gemm_config(void) {
                     break;
                   }
                 #endif  // XNN_ENABLE_ARM_DOTPROD
+                XNN_FALLTHROUGH
               case xnn_uarch_cortex_a55r0:
                 if (mr == 4 && nr == 8 && log2_kr == 0) {
                   qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)].function[i] = XNN_INIT_GEMM_UKERNEL(xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8__asm_aarch32_neonv8_mlal_lane_cortex_a35);
@@ -4850,6 +4851,7 @@ static void init_qs8_qc8w_gemm_config(void) {
                     break;
                   }
                 #endif  // XNN_ENABLE_ARM_DOTPROD
+                XNN_FALLTHROUGH
               case xnn_uarch_cortex_a53:
               case xnn_uarch_cortex_a55r0:
                 if (mr == 2 && nr == 8 && log2_kr == 3) {

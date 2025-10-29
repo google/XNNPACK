@@ -14,14 +14,14 @@
 #include "ynnpack/base/build_config.h"
 #if defined(YNN_ARCH_X86_AVX512F) || defined(YNN_ARCH_X86_AVX512BW) || \
     defined(YNN_ARCH_X86_AVX512BF16) || defined(YNN_ARCH_X86_AVX512FP16)
-#include "ynnpack/base/simd/x86_avx.h"
 #include "ynnpack/base/simd/x86_avx512.h"
-#include "ynnpack/base/simd/x86_sse.h"
-#elif defined(YNN_ARCH_X86_AVX) || defined(YNN_ARCH_X86_AVX2) || \
-    defined(YNN_ARCH_X86_F16C)
+#elif defined(YNN_ARCH_X86_AVX2)
+#include "ynnpack/base/simd/x86_avx2.h"
+#elif defined(YNN_ARCH_X86_AVX) || defined(YNN_ARCH_X86_F16C)
 #include "ynnpack/base/simd/x86_avx.h"
-#include "ynnpack/base/simd/x86_sse.h"
-#elif defined(YNN_ARCH_X86_SSE2) || defined(YNN_ARCH_X86_SSE41)
+#elif defined(YNN_ARCH_X86_SSE41)
+#include "ynnpack/base/simd/x86_sse41.h"
+#elif defined(YNN_ARCH_X86_SSE2)
 #include "ynnpack/base/simd/x86_sse.h"
 #endif
 #if defined(YNN_ARCH_ARM_NEON)
@@ -76,7 +76,7 @@ TYPED_TEST(ARCH, load_store) {
   static constexpr size_t N = TypeParam::N;
 
   scalar src[N];
-  std::iota(src, src + N, 0);
+  std::iota(src, src + N, static_cast<scalar>(0));
   vector v = load(src, vector{});
 
   scalar dst[N];
@@ -95,7 +95,7 @@ TYPED_TEST(ARCH, aligned_load_store) {
   static constexpr size_t N = TypeParam::N;
 
   alignas(vector) scalar src[N];
-  std::iota(src, src + N, 0);
+  std::iota(src, src + N, static_cast<scalar>(0));
   vector v = load_aligned(src, vector{});
 
   alignas(vector) scalar dst[N];

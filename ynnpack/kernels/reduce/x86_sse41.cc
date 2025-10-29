@@ -3,12 +3,13 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include "ynnpack/base/simd/x86_sse41.h"
+
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
 
 #include "ynnpack/base/simd/multi_vec.h"
-#include "ynnpack/base/simd/x86_sse.h"
 #include "ynnpack/kernels/reduce/generic.h"
 #include "ynnpack/kernels/reduce/min_max_accumulator.h"
 #include "ynnpack/kernels/reduce/sum_accumulator.h"
