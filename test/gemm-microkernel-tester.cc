@@ -2792,7 +2792,7 @@ void GemmMicrokernelTester::Test_PQS8(
     }
   }
 }
-
+#if XNN_ENABLE_KLEIDIAI
 #if XNN_ENABLE_ARM_SME2 || XNN_ENABLE_ARM_SME
 void GemmMicrokernelTester::Test_PF16(
     xnn_pf16_f16_packed_igemm_minmax_ukernel_fn packed_igemm,
@@ -2947,6 +2947,7 @@ void GemmMicrokernelTester::Test_PF16(
     }
   }
 }
+#endif
 #endif
 
 void GemmMicrokernelTester::Test(
