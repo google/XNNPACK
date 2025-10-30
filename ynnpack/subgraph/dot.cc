@@ -468,7 +468,10 @@ uint32_t define_pack_b(ynn_subgraph_t subgraph, const dot_type& type,
 
     auto sched = std::make_unique<scheduling_info>();
 
-    ynn::scheduled_buffer sched_output_buffer = {output.buffer, 0};
+    // Here we assume that if the packing is static, this scheduling doesn't
+    // matter, and if it is dynamic, that the loop over n is one loop out from
+    // the innermost loop.
+    ynn::scheduled_buffer sched_output_buffer = {output.buffer, 1};
     sched->scheduled_buffers.push_back(std::move(sched_output_buffer));
 
     func.user_data() = sched.get();
@@ -948,13 +951,6 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
       split_n = {};
     }
 
-    if (!packed_b.is_static()) {
-      // If we split m in this case, we'll have to schedule packing to occur
-      // outside the loop over m.
-      // TODO(b/438841352): We should probably do that in some cases.
-      split_m = {};
-    }
-
     slinky::expr splits[] = {split_n, split_m};
     auto sched =
         runtime.make_schedule(dims, output.buffer, node.outputs[0], splits);
@@ -963,6 +959,12 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
     for (size_t i = 0;
          i < std::min<std::size_t>(2, sched->loop_splits.size()); i++) {
       sched->loop_splits[i].step_is_required = true;
+    }
+
+    if (!packed_b.is_static()) {
+      // Loop over n first so we don't redundantly compute the packing for each
+      // split of m.
+      std::swap(sched->loop_splits[0], sched->loop_splits[1]);
     }
 
     // Schedule the output buffer to be stored at the same level as it's
