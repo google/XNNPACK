@@ -62,8 +62,9 @@ static void init_f16_maxpool_config(void) {
       if (hardware_config->arch_flags & xnn_arch_x86_sse4_1) {
         f16_maxpool_config.ukernel = XNN_INIT_MAXPOOL_UKERNEL(xnn_f16_maxpool_minmax_ukernel_9p__sse41_u8);
         f16_maxpool_config.init.f16 = xnn_init_f16_minmax_scalar_params;
-      }
+      } else
     #endif
+    ;  // no f16 support
   #endif
 }
 
