@@ -78,11 +78,39 @@ void interleave2_x8_neon(size_t factor, size_t m, size_t n, size_t stride_a,
   interleave<std::array<uint8x16_t, 2>>(
       m, n, stride_a, static_cast<const uint8_t*>(a), static_cast<uint8_t*>(x));
 }
+void interleave2_x16_neon(size_t factor, size_t m, size_t n, size_t stride_a,
+                          const void* a, void* x) {
+  assert(factor == 2);
+  interleave<std::array<uint8x16_t, 2>>(m, n, stride_a,
+                                        static_cast<const uint16_t*>(a),
+                                        static_cast<uint16_t*>(x));
+}
+void interleave2_x32_neon(size_t factor, size_t m, size_t n, size_t stride_a,
+                          const void* a, void* x) {
+  assert(factor == 2);
+  interleave<std::array<uint8x16_t, 2>>(m, n, stride_a,
+                                        static_cast<const uint32_t*>(a),
+                                        static_cast<uint32_t*>(x));
+}
 void interleave4_x8_neon(size_t factor, size_t m, size_t n, size_t stride_a,
                          const void* a, void* x) {
   assert(factor == 4);
   interleave<std::array<uint8x16_t, 4>>(
       m, n, stride_a, static_cast<const uint8_t*>(a), static_cast<uint8_t*>(x));
+}
+void interleave4_x16_neon(size_t factor, size_t m, size_t n, size_t stride_a,
+                          const void* a, void* x) {
+  assert(factor == 4);
+  interleave<std::array<uint8x16_t, 4>>(m, n, stride_a,
+                                        static_cast<const uint16_t*>(a),
+                                        static_cast<uint16_t*>(x));
+}
+void interleave4_x32_neon(size_t factor, size_t m, size_t n, size_t stride_a,
+                          const void* a, void* x) {
+  assert(factor == 4);
+  interleave<std::array<uint8x16_t, 4>>(m, n, stride_a,
+                                        static_cast<const uint32_t*>(a),
+                                        static_cast<uint32_t*>(x));
 }
 
 }  // namespace ynn
