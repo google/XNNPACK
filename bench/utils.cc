@@ -80,7 +80,12 @@ static void InitWipeBuffer() {
   // level 17.
   wipe_buffer = memalign(128, wipe_buffer_size);
 #else
-  (void)posix_memalign((void**)&wipe_buffer, 128, wipe_buffer_size);
+  // The posix_memalign function returns 0 on success, and an error number on
+  // failure. We should check the return value.
+  if (posix_memalign((void**)&wipe_buffer, 128, wipe_buffer_size) != 0) {
+    // Allocation failed, set wipe_buffer to nullptr to indicate failure
+    wipe_buffer = nullptr;
+  }
 #endif
   if (wipe_buffer != nullptr) {
     memset(wipe_buffer, 0xA5, wipe_buffer_size);
