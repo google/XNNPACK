@@ -287,6 +287,28 @@ ynn_generate_src_hdr(
 )
 
 ynn_generate_src_hdr(
+    name = "arm64_neon_bf16_bf16_fp32",
+    compatible_with = _COMPATIBLE_WITH,
+    generator = "//ynnpack/kernels/dot/generator",
+    generator_args = [
+        "arm64_neon_bf16_bf16_fp32",
+        "dot,1x32x4",
+        "dot,2x32x4",
+        "dot,3x32x4",
+        "dot,2x16x4",
+        "dot,3x16x4",
+        "dot,4x16x4",
+        "dot,5x16x4",
+        "dot,4x8x4",
+        "dot,6x8x4",
+        "dot,8x8x4",
+        "dot,8x4x4",
+    ],
+    output_hdr = "arm64_neon_bf16_bf16_fp32.inc",
+    output_src = "arm64_neon_bf16_bf16_fp32.cc",
+)
+
+ynn_generate_src_hdr(
     name = "arm_neon_int8_int8_int32",
     compatible_with = _COMPATIBLE_WITH,
     generator = "//ynnpack/kernels/dot/generator",
@@ -464,6 +486,7 @@ ynn_cc_library(
     name = "dot",
     srcs = ["dot.cc"],
     hdrs = [
+        "arm64_neon_bf16_bf16_fp32.inc",
         "arm64_neon_fp32.inc",
         "arm64_neoni8mm_int8_int8_int32.inc",
         "arm64_sme.h",
@@ -536,7 +559,10 @@ ynn_cc_library(
             "x86_avx512vnni_uint8_int8_int32.cc",
             "x86_avx512vnni_uint8_int8_int32_k16.cc",
         ],
-        "arm64_neon": ["arm64_neon_fp32.cc"],
+        "arm64_neon": [
+            "arm64_neon_fp32.cc",
+            "arm64_neon_bf16_bf16_fp32.cc",
+        ],
         "arm_neon": ["arm_neon_int8_int8_int32.cc"],
         "arm_neondot": ["arm_neondot_int8_int8_int32.cc"],
         "arm64_neoni8mm": ["arm64_neoni8mm_int8_int8_int32.cc"],
