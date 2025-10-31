@@ -138,6 +138,8 @@ constexpr decltype(auto) SwitchElementType(size_t element_size_bits, F&& f) {
       return std::forward<F>(f)(x512_t());
     case 1024:
       return std::forward<F>(f)(x1024_t());
+    case 2048:
+      return std::forward<F>(f)(x2048_t());
     default:
       YNN_UNREACHABLE;
   }

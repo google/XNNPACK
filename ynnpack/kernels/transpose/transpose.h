@@ -19,6 +19,7 @@ using x128_t = std::array<uint8_t, 16>;
 using x256_t = std::array<uint8_t, 32>;
 using x512_t = std::array<uint8_t, 64>;
 using x1024_t = std::array<uint8_t, 128>;
+using x2048_t = std::array<uint8_t, 256>;
 
 // Pointer to a function that implements transposing data. The size of the
 // elements to transpose is fixed by the function.

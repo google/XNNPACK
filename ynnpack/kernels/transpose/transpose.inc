@@ -6,6 +6,7 @@ YNN_TRANSPOSE_KERNEL(arch_flag::avx2, transpose_x64_avx2, uint64_t)
 YNN_TRANSPOSE_KERNEL(arch_flag::avx, transpose_x256_avx, x256_t)
 YNN_TRANSPOSE_KERNEL(arch_flag::avx, transpose_x512_avx, x512_t)
 YNN_TRANSPOSE_KERNEL(arch_flag::avx, transpose_x1024_avx, x1024_t)
+YNN_TRANSPOSE_KERNEL(arch_flag::avx, transpose_x2048_avx, x2048_t)
 #endif  // YNN_ARCH_X86_AVX
 #ifdef YNN_ARCH_X86_SSE2
 YNN_TRANSPOSE_KERNEL(arch_flag::sse2, transpose_x4_sse2, uint4x2)
