@@ -77,7 +77,7 @@ selects.config_setting_group(
 )
 
 config_setting(
-    name = "windows_x86_msvc",
+    name = "windows_msvc",
     constraint_values = [
         "@platforms//os:windows",
     ],
@@ -86,7 +86,7 @@ config_setting(
 )
 
 config_setting(
-    name = "windows_x86_clangcl",
+    name = "windows_clangcl",
     constraint_values = [
         "@platforms//os:windows",
     ],

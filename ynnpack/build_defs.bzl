@@ -256,8 +256,8 @@ def ynn_cc_library(
         copts_arch = arch_params.get("copts", [])
         if type(copts_arch) == "list":
             copts_arch = select({
-                "//ynnpack:windows_x86_clangcl": ["/clang:" + i for i in copts_arch],
-                "//ynnpack:windows_x86_msvc": _map_copts_to_msvc(copts_arch),
+                "//ynnpack:windows_clangcl": _map_copts_to_msvc(copts_arch),
+                "//ynnpack:windows_msvc": _map_copts_to_msvc(copts_arch),
                 "//conditions:default": copts_arch,
             })
         else:
