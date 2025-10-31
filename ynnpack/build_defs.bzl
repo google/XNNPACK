@@ -293,6 +293,7 @@ def ynn_cc_library(
         name = name,
         srcs = srcs,
         defines = defines,
+        copts = copts,
         local_defines = local_defines,
         hdrs_check = "strict",
         deps = deps_plus_arch_deps,
