@@ -273,12 +273,16 @@ void TestImpl(xnn_datatype convert_to = xnn_datatype_invalid) {
         // error when it will be quantized, which makes testing the behavior
         // much easier.
         std::vector<size_t> input_batches = input.extents();
+        // YNNPACK doesn't have this rewrite.
+        #ifndef XNNPACK_USING_YNNPACK
         if (kw.size == 1 && kh.size == 1 && kw.stride == 1 && kh.stride == 1 &&
             kw.padding() == 0 && kh.padding() == 0 && params.groups == 1) {
           // 1x1 conv gets rewritten to fully connected, which
           // dynamically quantizes at a finer granularity.
           input_batches.resize(3);
-        } else {
+        } else 
+        #endif
+        {
           input_batches.resize(1);
         }
         for (const auto& i : EnumerateIndices(input_batches)) {
