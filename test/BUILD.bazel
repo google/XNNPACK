@@ -108,24 +108,6 @@ xnnpack_cxx_library(
     deps = MICROKERNEL_TEST_DEPS + xnnpack_test_deps_for_library(),
 )
 
-####################### Unit tests for microkernel lists #######################
-# TODO: b/381390736 - Reenable once fixed.
-#sh_test(
-#    name = "microkernel_lists_test",
-#    size = "small",
-#    srcs = ["microkernel_lists_test.sh"],
-#    data = [
-#        "//:cmake_microkernel_lists",
-#        "//:generated_microkernel_lists",
-#        "//gen:bzl_microkernel_lists",
-#    ],
-#    target_compatible_with = xnnpack_select_if(
-#        "//build_config:linux",
-#        [],
-#        ["@platforms//:incompatible"],
-#    ),
-#)
-
 ######################### Unit tests for micro-kernels #########################
 
 [xnnpack_unit_test(

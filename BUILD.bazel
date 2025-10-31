@@ -424,31 +424,6 @@ xnnpack_cc_library(
     textual_hdrs = ["src/xnnpack/assembly.h"],
 )
 
-genrule(
-    name = "generated_microkernel_lists",
-    srcs = glob([
-        "**/*.c",
-        "**/*.cc",
-        "**/*.S",
-    ]),
-    outs = ([
-                "testdata/gen/microkernels.bzl",
-                "testdata/cmake/gen/microkernels.cmake",
-            ] + ["testdata/gen/" + arch + "_microkernels.bzl" for arch in xnnpack_archs()] +
-            ["testdata/cmake/gen/" + arch + "_microkernels.cmake" for arch in xnnpack_archs()]),
-    cmd = ("$(location //tools:update_microkernels) " +
-           "--output $(RULEDIR)/testdata " +
-           "--root_dir %s" % (package_name() if package_name() else ".")),
-    tools = ["//tools:update_microkernels"],
-)
-
-filegroup(
-    name = "cmake_microkernel_lists",
-    srcs = glob([
-        "cmake/gen/*.cmake",
-    ]),
-)
-
 # Generate the prod/all microkernel libraries for each architecture.
 [
     [
