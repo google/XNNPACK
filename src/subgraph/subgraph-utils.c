@@ -169,7 +169,8 @@ void xnn_subgraph_log_impl(const char* filename, size_t line_number,
           XNN_FLAG_FP32_STATIC_WEIGHTS, XNN_FLAG_FP32_STATIC_BIASES,
           XNN_FLAG_ALIGN_CORNERS, XNN_FLAG_DONT_SPIN_WORKERS,
           XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER, XNN_FLAG_KEEP_DIMS,
-          XNN_FLAG_NO_BROADCAST, XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC);
+          XNN_FLAG_NO_BROADCAST, XNN_FLAG_SLOW_CONSISTENT_ARITHMETIC,
+          XNN_NODE_FLAG_DONT_ELIDE);
     }
     fprintf(out, ".\n");
   }
@@ -219,7 +220,8 @@ void xnn_subgraph_log_impl(const char* filename, size_t line_number,
       XNN_PRINT_FLAGS(
           value->flags, XNN_FLAG_SQUASH_GROUPS, XNN_VALUE_FLAG_ONE_CONSUMER,
           XNN_VALUE_FLAG_FP16_COMPATIBLE, XNN_VALUE_FLAG_LAYOUT_NCHW,
-          XNN_VALUE_FLAG_SHAPE_IS_STATIC);
+          XNN_VALUE_FLAG_SHAPE_IS_STATIC, XNN_VALUE_FLAG_IS_ZERO,
+          XNN_VALUE_FLAG_IS_ONE);
     }
     fprintf(out, ".\n");
   }
@@ -291,7 +293,14 @@ void xnn_subgraph_log_dot_impl(xnn_subgraph_t subgraph, FILE* out) {
         }
         fprintf(out, "%s", value->shape.num_dims ? "]" : "");
       }
-      fprintf(out, "\"]\n");
+      fprintf(out, "%s%s\"]\n",
+              value->flags & XNN_VALUE_FLAG_IS_ZERO  ? ", const 0.0"
+              : value->flags & XNN_VALUE_FLAG_IS_ONE ? ", const 1.0"
+                                                     : "",
+              !xnn_value_is_static(value->allocation_type) &&
+                      value->flags & XNN_VALUE_FLAG_SHAPE_IS_STATIC
+                  ? ", static shape"
+                  : "");
       if (value->producer != XNN_INVALID_NODE_ID &&
           xnn_value_is_external(value->flags)) {
         fprintf(out, "  n%03u -> v%03u\n", value->producer, value->id);
@@ -316,7 +325,12 @@ void xnn_subgraph_log_dot_impl(xnn_subgraph_t subgraph, FILE* out) {
             fprintf(out, ", %zu", value->shape.dim[i]);
           }
         }
-        fprintf(out, "]\"]\n");
+        fprintf(out, "]%s%s\"]\n",
+                value->flags & XNN_VALUE_FLAG_IS_ZERO  ? ", const 0.0"
+                : value->flags & XNN_VALUE_FLAG_IS_ONE ? ", const 1.0"
+                                                       : "",
+                value->flags & XNN_VALUE_FLAG_SHAPE_IS_STATIC ? ", static shape"
+                                                              : "");
       } else {
         fprintf(out, "  v%03u -> n%03u\n", value->id, node->id);
       }
