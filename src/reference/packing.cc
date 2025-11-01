@@ -25,6 +25,7 @@
 
 #if XNN_ENABLE_KLEIDIAI
 #include "kai/ukernels/matmul/pack/kai_rhs_imatmul_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme.h"
+#include "kai/ukernels/matmul/pack/kai_rhs_imatmul_pack_kxn_x16p2vlx2b_x16_x16_sme.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4c32p_qsu4c32s1s0.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4cxp_qs4cxs1s0.h"
@@ -2175,6 +2176,15 @@ void transpose_weights_x8(const int8_t* in, int8_t* out, size_t height,
   }
 }
 
+static void transpose_weights_x16(const uint16_t* in, uint16_t* out,
+                                  size_t height, size_t width) {
+  for (size_t j = 0; j < width; ++j) {
+    for (size_t i = 0; i < height; ++i) {
+      out[j * height + i] = in[i * width + j];
+    }
+  }
+}
+
 void xnn_pack_kai_qs8_qc8w_weights_and_biases_sme2(
     uint32_t flags, const struct xnn_gemm_config* gemm_config,
     size_t input_channels, size_t output_channels, size_t groups,
@@ -2340,7 +2350,7 @@ void xnn_pack_kai_f16_weights_and_biases(
   // initialized array as a workaround if bias is null.
   bool free_accumulator_init = false;
   if (accumulator_init == NULL) {
-    accumulator_init = calloc(output_channels, sizeof(xnn_float16));
+    accumulator_init = calloc(output_channels, sizeof(float));
     free_accumulator_init = true;
   }
 
@@ -2362,7 +2372,7 @@ void xnn_pack_kai_f16_weights_and_biases(
           (const void*)((uintptr_t)weights + group * weights_group_stride),
           /*bias=*/
           free_accumulator_init
-              ? accumulator_init
+              ? (const float*)accumulator_init
               : (const float*)(accumulator_init) + group * output_channels,
           /*scale=*/NULL,
           /*rhs_packed=*/
@@ -2378,7 +2388,7 @@ void xnn_pack_kai_f16_weights_and_biases(
           (const void*)((uintptr_t)weights + group * weights_group_stride),
           /*bias=*/
           free_accumulator_init
-              ? accumulator_init
+              ? (const float*)accumulator_init
               : (const float*)(accumulator_init) + group * output_channels,
           /*scale=*/NULL,
           /*rhs_packed=*/
@@ -2558,6 +2568,59 @@ void xnn_pack_kai_qb4_weights_and_biases(
         output_channels, nr, nr * weights_stride,
         (const float*)accumulator_init, weights_start);
   }
+}
+
+void xnn_pack_kai_f16_conv_goki_w_sme(size_t g, size_t nc, size_t ks,
+                                       size_t kc, size_t nr, size_t kr,
+                                       size_t sr, const uint16_t* k,
+                                       const uint16_t* b, const void* scale,
+                                       void* packed_weights, size_t extra_bytes,
+                                       const void* params) {
+
+  assert(g != 0);
+  assert(nr >= sr);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
+
+  uint16_t* tmp_bias = NULL;
+
+  if (b == NULL) {
+    tmp_bias = (uint16_t*)xnn_allocate_zero_memory(g * nc * sizeof(uint16_t));
+    b = tmp_bias;
+  }
+
+  uint16_t* tmp_data =
+      (uint16_t*)xnn_allocate_memory(nc * ks * kc * sizeof(uint16_t));
+  const size_t rhs_row_stride = nc * sizeof(uint16_t);
+  const size_t packed_rhs_size =
+      kai_get_rhs_packed_size_rhs_imatmul_pack_kxn_x16p2vlx2b_x16_x16_sme(
+          nc, ks, kc);
+
+  for (size_t g_idx = 0; g_idx < g; ++g_idx) {
+
+    // TODO: Remove transpose_weights_x16 if KleidiAI release imatmul_pack_nxk packing variant
+    transpose_weights_x16(k, tmp_data, nc, ks * kc);
+    // Pass FP16 bias directly to the rhs_imatmul packer which expects FP16 bias
+    // for this kernel.
+    kai_run_rhs_imatmul_pack_kxn_x16p2vlx2b_x16_x16_sme(
+        nc, ks, kc, rhs_row_stride, tmp_data, b, packed_weights);
+
+    k += nc * ks * kc;
+    b += nc;
+
+    packed_weights = (void*)((uintptr_t)packed_weights + packed_rhs_size);
+  }
+
+  xnn_release_memory(tmp_data);
+
+  if (tmp_bias != NULL) {
+    xnn_release_memory(tmp_bias);
+  }
+}
+
+size_t xnn_packed_size_kai_f16_conv_goki_w(size_t nc, size_t ks, size_t kc) {
+  return kai_get_rhs_packed_size_rhs_imatmul_pack_kxn_x16p2vlx2b_x16_x16_sme(
+      nc, ks, kc);
 }
 
 void xnn_pack_kai_qs8_conv_goki_w_sme2(
