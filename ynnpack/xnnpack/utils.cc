@@ -266,7 +266,16 @@ ynn_status define_xnn_accumulator_for_dot(
   uint32_t b_zero_point_id = b.zero_point_id;
   uint32_t b_scale_id = b.scale_id;
 
-  // We need a list of the k dims for slicing and to compute reductions.
+  // We need a list of the k dims for computing reductions.
+  // We would also need to slice k-dims of zero points and scales of a and b,
+  // but define_xnn_stencil doesn't insert dims corresponding to stencil into
+  // them.
+  assert(a_zero_point_id == YNN_INVALID_VALUE_ID ||
+         (rank_of_value(subgraph, a_zero_point_id) <=
+          (rank_of_value(subgraph, a_id) - num_k_dims + 1)));
+  assert(a_scale_id == YNN_INVALID_VALUE_ID ||
+         (rank_of_value(subgraph, a_scale_id) <=
+          (rank_of_value(subgraph, a_id) - num_k_dims + 1)));
   int32_t a_k_dims[YNN_MAX_TENSOR_RANK];
   int32_t b_k_dims[YNN_MAX_TENSOR_RANK];
   std::iota(a_k_dims, a_k_dims + num_k_dims, -static_cast<int>(num_k_dims));
@@ -275,32 +284,6 @@ ynn_status define_xnn_accumulator_for_dot(
   std::reverse(b_k_dims, b_k_dims + num_k_dims);
 
   ynn_status status = ynn_status_success;
-
-  // Here, we assume that the zero point is a broadcast (this would not be true
-  // for asymmetric blockwise quantization!), and slice those dims from the
-  // quantization data. We leave one dimension behind to be sliced below,
-  // because we need it to represent output row/column dimension.
-  status = slice_dims(subgraph, num_k_dims - 1, &a_k_dims[1], &a_scale_id,
-                      &a_zero_point_id, YNN_NODE_FLAG_SLICE_DIMS);
-  if (status != ynn_status_success) {
-    return status;
-  }
-  status = slice_dims(subgraph, num_k_dims - 1, &b_k_dims[1], &b_scale_id,
-                      &b_zero_point_id, YNN_NODE_FLAG_SLICE_DIMS);
-  if (status != ynn_status_success) {
-    return status;
-  }
-
-  status = slice_dims(subgraph, 1, &a_k_dims[0], &a_scale_id, &a_zero_point_id,
-                      /*flags=*/0);
-  if (status != ynn_status_success) {
-    return status;
-  }
-  status = slice_dims(subgraph, 1, &b_k_dims[0], &b_scale_id, &b_zero_point_id,
-                      /*flags=*/0);
-  if (status != ynn_status_success) {
-    return status;
-  }
 
   if (a_zero_point_id != YNN_INVALID_VALUE_ID &&
       b_zero_point_id != YNN_INVALID_VALUE_ID) {
@@ -388,18 +371,6 @@ ynn_status define_xnn_accumulator_for_dot(
     scale_id = a_scale_id;
   } else if (b_scale_id != YNN_INVALID_VALUE_ID) {
     scale_id = b_scale_id;
-  }
-
-  if (scale_id != YNN_INVALID_VALUE_ID && num_k_dims > 1) {
-    // We need to put the k-dims we removed back.
-    uint32_t scale_expanded_id = YNN_INVALID_VALUE_ID;
-    status = ynn_define_static_expand_dims(
-        subgraph, num_k_dims - 1, &a_k_dims[1], scale_id, &scale_expanded_id,
-        /*flags=*/0);
-    if (status != ynn_status_success) {
-      return status;
-    }
-    scale_id = scale_expanded_id;
   }
 
   if (type == output_value.type && allow_reuse) {
