@@ -235,6 +235,35 @@ xnn_status xnn_define_convolution_2d(
       }
       bias_id = split_id;
     }
+
+    uint32_t input_zero_point_id = subgraph->ynn->value(input_id).zero_point_id;
+    uint32_t input_scale_id = subgraph->ynn->value(input_id).scale_id;
+    if (input_zero_point_id != YNN_INVALID_VALUE_ID &&
+        input_scale_id != YNN_INVALID_VALUE_ID) {
+      // We assume this is a dynamically quantized input.
+      assert(ynn::rank_of_value(subgraph->ynn, input_zero_point_id) == 4);
+      assert(ynn::rank_of_value(subgraph->ynn, input_scale_id) == 4);
+      uint32_t zero_point_id = YNN_INVALID_VALUE_ID;
+      // We assume that non-batch dims have extent 1, so just insert another two
+      // dimensions to match the shape of the input after the group split.
+      const int32_t dims[2] = {1, 2};
+      status = ynn_define_static_expand_dims(subgraph->ynn, 2, dims,
+                                             input_zero_point_id,
+                                             &zero_point_id, /*flags=*/0);
+      if (status != ynn_status_success) {
+        return ynn::xnn_status_from_ynn(status);
+      }
+
+      uint32_t scale_id = YNN_INVALID_VALUE_ID;
+      status = ynn_define_static_expand_dims(
+          subgraph->ynn, 2, dims, input_scale_id, &scale_id, /*flags=*/0);
+      if (status != ynn_status_success) {
+        return ynn::xnn_status_from_ynn(status);
+      }
+
+      subgraph->ynn->value(input_id).zero_point_id = zero_point_id;
+      subgraph->ynn->value(input_id).scale_id = scale_id;
+    }
   }
 
   // Make a stenciled view of the input.
