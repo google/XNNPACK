@@ -672,6 +672,67 @@ size_t xnn_shape_get_dim(const struct xnn_shape* shape, int64_t dim) {
   return dim < 0 ? shape->dim[shape->num_dims + dim] : shape->dim[dim];
 }
 
+bool xnn_shape_match(const struct xnn_shape* shape_a,
+                     const struct xnn_shape* shape_b) {
+  bool res = shape_a->num_dims == shape_b->num_dims;
+  for (int k = 0; res && k < shape_a->num_dims; k++) {
+    res &= shape_a->dim[k] == shape_b->dim[k];
+  }
+  return res;
+}
+
+enum xnn_status xnn_shape_binary_broadcast(const struct xnn_shape* shape_a,
+                                           const struct xnn_shape* shape_b,
+                                           struct xnn_shape* shape_out) {
+  shape_out->num_dims = max(shape_a->num_dims, shape_b->num_dims);
+  for (int idx_a = shape_a->num_dims - 1, idx_b = shape_b->num_dims - 1,
+           idx_c = shape_out->num_dims;
+       idx_c >= 0; idx_a--, idx_b--, idx_c--) {
+    if (idx_a >= 0 && idx_b >= 0) {
+      if (shape_a->dim[idx_a] == 1) {
+        shape_out->dim[idx_c] = shape_a->dim[idx_a];
+      } else if (shape_b->dim[idx_b] == 1 ||
+                 shape_a->dim[idx_a] == shape_b->dim[idx_b]) {
+        shape_out->dim[idx_c] = shape_b->dim[idx_b];
+      } else {
+        return xnn_status_invalid_parameter;
+      }
+    } else if (idx_a >= 0) {
+      shape_out->dim[idx_c] = shape_a->dim[idx_a];
+    } else {
+      shape_out->dim[idx_c] = shape_b->dim[idx_b];
+    }
+  }
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_shape_fill_gaps(const struct xnn_shape* shape_a,
+                                    struct xnn_shape* shape_b) {
+  const size_t num_elements_a = xnn_shape_multiply_all_dims(shape_a);
+  size_t num_elements_b = 1;
+  int zero_dim = -1;
+  for (int k = 0; k < shape_b->num_dims; k++) {
+    if (shape_b->dim[k]) {
+      num_elements_b *= shape_b->dim[k];
+    } else if (zero_dim < 0) {
+      zero_dim = k;
+    } else {
+      xnn_log_error("Invalid shape, has more than one zero dimension.");
+      return xnn_status_invalid_parameter;
+    }
+  }
+  if (zero_dim >= 0) {
+    shape_b->dim[zero_dim] = num_elements_a / num_elements_b;
+    if (shape_b->dim[zero_dim] * num_elements_b != num_elements_a) {
+      xnn_log_error(
+          "Invalid shape dimensions, num_elements_a=%zu, num_elements_b=%zu.",
+          num_elements_a, num_elements_b);
+      return xnn_status_invalid_parameter;
+    }
+  }
+  return xnn_status_success;
+}
+
 size_t get_tensor_size(const struct xnn_gemm_config* gemm_config, enum xnn_value_type type,
                  enum xnn_datatype datatype, const struct xnn_shape *shape, uint32_t flags) {
   assert(type == xnn_value_type_dense_tensor);
