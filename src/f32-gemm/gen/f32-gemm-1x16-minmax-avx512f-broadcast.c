@@ -49,10 +49,11 @@ void xnn_f32_gemm_minmax_ukernel_1x16__avx512f_broadcast(
 
     size_t k = kc;
     do {
+      const __m512 va0 = _mm512_set1_ps(*a0);
+
       const __m512 vb0 = _mm512_load_ps(w);
       w += 16;
 
-      const __m512 va0 = _mm512_set1_ps(*a0);
       vacc0x0 = _mm512_fmadd_ps(va0, vb0, vacc0x0);
 
       a0 += 1;
@@ -60,10 +61,12 @@ void xnn_f32_gemm_minmax_ukernel_1x16__avx512f_broadcast(
       k -= sizeof(float);
     } while (k != 0);
 
+
     const __m512 vmin = _mm512_set1_ps(params->scalar.min);
+    const __m512 vmax = _mm512_set1_ps(params->scalar.max);
+
     vacc0x0 = _mm512_max_ps(vmin, vacc0x0);
 
-    const __m512 vmax = _mm512_set1_ps(params->scalar.max);
     vacc0x0 = _mm512_min_ps(vmax, vacc0x0);
 
     if XNN_LIKELY(nc >= 16) {

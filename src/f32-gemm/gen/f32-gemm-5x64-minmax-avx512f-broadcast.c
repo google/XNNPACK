@@ -92,33 +92,34 @@ void xnn_f32_gemm_minmax_ukernel_5x64__avx512f_broadcast(
 
     size_t k = kc;
     do {
+      const __m512 va0 = _mm512_set1_ps(*a0);
+      const __m512 va1 = _mm512_set1_ps(*a1);
+      const __m512 va2 = _mm512_set1_ps(*a2);
+      const __m512 va3 = _mm512_set1_ps(*a3);
+      const __m512 va4 = _mm512_set1_ps(*a4);
+
       const __m512 vb0 = _mm512_load_ps(w);
-      const __m512 vb1 = _mm512_loadu_ps(w + 16);
-      const __m512 vb2 = _mm512_loadu_ps(w + 32);
-      const __m512 vb3 = _mm512_loadu_ps(w + 48);
+      const __m512 vb1 = _mm512_load_ps(w + 16);
+      const __m512 vb2 = _mm512_load_ps(w + 32);
+      const __m512 vb3 = _mm512_load_ps(w + 48);
       w += 64;
 
-      const __m512 va0 = _mm512_set1_ps(*a0);
       vacc0x0 = _mm512_fmadd_ps(va0, vb0, vacc0x0);
       vacc0x1 = _mm512_fmadd_ps(va0, vb1, vacc0x1);
       vacc0x2 = _mm512_fmadd_ps(va0, vb2, vacc0x2);
       vacc0x3 = _mm512_fmadd_ps(va0, vb3, vacc0x3);
-      const __m512 va1 = _mm512_set1_ps(*a1);
       vacc1x0 = _mm512_fmadd_ps(va1, vb0, vacc1x0);
       vacc1x1 = _mm512_fmadd_ps(va1, vb1, vacc1x1);
       vacc1x2 = _mm512_fmadd_ps(va1, vb2, vacc1x2);
       vacc1x3 = _mm512_fmadd_ps(va1, vb3, vacc1x3);
-      const __m512 va2 = _mm512_set1_ps(*a2);
       vacc2x0 = _mm512_fmadd_ps(va2, vb0, vacc2x0);
       vacc2x1 = _mm512_fmadd_ps(va2, vb1, vacc2x1);
       vacc2x2 = _mm512_fmadd_ps(va2, vb2, vacc2x2);
       vacc2x3 = _mm512_fmadd_ps(va2, vb3, vacc2x3);
-      const __m512 va3 = _mm512_set1_ps(*a3);
       vacc3x0 = _mm512_fmadd_ps(va3, vb0, vacc3x0);
       vacc3x1 = _mm512_fmadd_ps(va3, vb1, vacc3x1);
       vacc3x2 = _mm512_fmadd_ps(va3, vb2, vacc3x2);
       vacc3x3 = _mm512_fmadd_ps(va3, vb3, vacc3x3);
-      const __m512 va4 = _mm512_set1_ps(*a4);
       vacc4x0 = _mm512_fmadd_ps(va4, vb0, vacc4x0);
       vacc4x1 = _mm512_fmadd_ps(va4, vb1, vacc4x1);
       vacc4x2 = _mm512_fmadd_ps(va4, vb2, vacc4x2);
@@ -133,7 +134,10 @@ void xnn_f32_gemm_minmax_ukernel_5x64__avx512f_broadcast(
       k -= sizeof(float);
     } while (k != 0);
 
+
     const __m512 vmin = _mm512_set1_ps(params->scalar.min);
+    const __m512 vmax = _mm512_set1_ps(params->scalar.max);
+
     vacc0x0 = _mm512_max_ps(vmin, vacc0x0);
     vacc1x0 = _mm512_max_ps(vmin, vacc1x0);
     vacc2x0 = _mm512_max_ps(vmin, vacc2x0);
@@ -155,7 +159,6 @@ void xnn_f32_gemm_minmax_ukernel_5x64__avx512f_broadcast(
     vacc3x3 = _mm512_max_ps(vmin, vacc3x3);
     vacc4x3 = _mm512_max_ps(vmin, vacc4x3);
 
-    const __m512 vmax = _mm512_set1_ps(params->scalar.max);
     vacc0x0 = _mm512_min_ps(vmax, vacc0x0);
     vacc1x0 = _mm512_min_ps(vmax, vacc1x0);
     vacc2x0 = _mm512_min_ps(vmax, vacc2x0);
