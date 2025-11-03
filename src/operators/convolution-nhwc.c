@@ -2401,8 +2401,6 @@ static enum xnn_status reshape_igemm(
       igemm_compute->tile[0] = nc;
       igemm_compute->tile[1] = mr;
     }
-    igemm_compute->tile[0] = nc;
-    igemm_compute->tile[1] = mr;
   }
   convolution_op->state = xnn_run_state_needs_setup;
 
