@@ -251,22 +251,21 @@ static enum xnn_status create_fully_connected_nc(
         pack_gemm_gio_w(
             /*groups=*/1, output_channels, input_channels, nr, kr, sr,
             output_channels, kernel, bias, /*scale=*/NULL, weights_ptr,
-            gemm_config->nr * extra_weights_bytes, packing_params);
+            nr * extra_weights_bytes, packing_params);
       } else {
         pack_gemm_goi_w(
             /*groups=*/1, output_channels, input_channels, nr, kr, sr, kernel,
-            bias, /*scale=*/NULL, weights_ptr,
-            gemm_config->nr * extra_weights_bytes, packing_params);
+            bias, /*scale=*/NULL, weights_ptr, nr * extra_weights_bytes,
+            packing_params);
       }
       if (kernel_scale_params != NULL) {
         assert(init_kernel_scale_params != NULL);
 
         void* weights =
             (void*)((uintptr_t)weights_ptr +
-                    gemm_config->nr * ((k_stride << log2_filter_element_size) +
-                                       bias_element_size));
-        init_kernel_scale_params(output_channels, gemm_config->nr,
-                                 gemm_config->nr * weights_stride,
+                    nr * ((k_stride << log2_filter_element_size) +
+                        bias_element_size));
+        init_kernel_scale_params(output_channels, nr, nr * weights_stride,
                                  kernel_scale_params, weights);
       }
 
@@ -274,15 +273,14 @@ static enum xnn_status create_fully_connected_nc(
         assert(init_scale_params != NULL);
         void* weights =
             (void*)((uintptr_t)weights_ptr +
-                    gemm_config->nr * ((k_stride << log2_filter_element_size) +
-                                       bias_element_size));
+                    nr * ((k_stride << log2_filter_element_size) +
+                        bias_element_size));
         if (kernel_scale_params != NULL) {
           weights =
-              (void*)((uintptr_t)weights + gemm_config->nr * sizeof(float));
+              (void*)((uintptr_t)weights + nr * sizeof(float));
         }
-        init_scale_params(output_channels, gemm_config->nr,
-                          gemm_config->nr * weights_stride, scale_params,
-                          weights);
+        init_scale_params(output_channels, nr, nr * weights_stride,
+                          scale_params, weights);
       }
     }
 
