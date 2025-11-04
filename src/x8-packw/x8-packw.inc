@@ -27,7 +27,7 @@ XNN_UKERNEL(xnn_arch_x86_avx2, xnn_x8_packw_gemm_goi_ukernel_x16c8__avx2, 16, 8,
 XNN_UKERNEL(xnn_arch_x86_avx2, xnn_x8_packw_gemm_goi_ukernel_x16c8__avx2_prfm, 16, 8, 1, 8, 1)
 #endif  // XNN_ENABLE_AVX2 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
-#if XNN_ENABLE_AVX256VNNI && (XNN_ARCH_X86_64 || XNN_ARCH_X86)
+#if XNN_ENABLE_AVX256SKX && (XNN_ARCH_X86_64 || XNN_ARCH_X86)
 XNN_UKERNEL(xnn_arch_x86_avx256skx, xnn_x8_packw_gemm_goi_ukernel_x8c8__avx256skx, 8, 8, 1, 8, 1)
 XNN_UKERNEL(xnn_arch_x86_avx256skx, xnn_x8_packw_gemm_goi_ukernel_x8c8__avx256skx_prfm, 8, 8, 1, 8, 1)
 XNN_UKERNEL(xnn_arch_x86_avx256skx, xnn_x8_packw_gemm_goi_ukernel_x16c8__avx256skx, 16, 8, 1, 8, 1)
