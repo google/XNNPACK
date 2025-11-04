@@ -147,7 +147,7 @@ void xnn_f32_gemm_minmax_ukernel_13x16__avx512f_broadcast(
       const __m512 va11 = _mm512_set1_ps(*a11);
       const __m512 va12 = _mm512_set1_ps(*a12);
 
-      const __m512 vb0 = _mm512_load_ps(w);
+      const __m512 vb0 = _mm512_load_ps(w + 0);
       w += 16;
 
       vacc0x0 = _mm512_fmadd_ps(va0, vb0, vacc0x0);
