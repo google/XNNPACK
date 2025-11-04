@@ -1228,4 +1228,8 @@ xnn_status xnn_define_static_transpose(xnn_subgraph_t subgraph, size_t num_dims,
       subgraph->ynn, num_dims, ynn_perm, input_id, &output_id, /*flags=*/0));
 }
 
+xnn_status xnn_define_all_input_shapes_static(xnn_subgraph_t subgraph) {
+  return xnn_status_success;
+}
+
 }  // extern "C"
