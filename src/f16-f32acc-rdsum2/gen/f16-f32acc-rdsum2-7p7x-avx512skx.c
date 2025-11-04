@@ -131,7 +131,7 @@ void xnn_f16_f32acc_rdsum2_ukernel_7p7x__avx512skx_u16(
         // 0xF masks the remainder.
         const size_t remainder = channels & 0xF;
         const size_t batch = channels & 0xF;
-        __mmask16 vmask;
+        __mmask16 vmask = 0xFFFF;
         if (remainder) {
           assert(batch >= 1);
           assert(batch <= 15);
@@ -352,7 +352,7 @@ void xnn_f16_f32acc_rdsum2_ukernel_7p7x__avx512skx_u32(
         // 0xF masks the remainder.
         const size_t remainder = channels & 0xF;
         const size_t batch = channels & 0xF;
-        __mmask16 vmask;
+        __mmask16 vmask = 0xFFFF;
         if (remainder) {
           assert(batch >= 1);
           assert(batch <= 15);
@@ -615,7 +615,7 @@ void xnn_f16_f32acc_rdsum2_ukernel_7p7x__avx512skx_u64(
         // 0xF masks the remainder.
         const size_t remainder = channels & 0xF;
         const size_t batch = channels & 0xF;
-        __mmask16 vmask;
+        __mmask16 vmask = 0xFFFF;
         if (remainder) {
           assert(batch >= 1);
           assert(batch <= 15);
@@ -962,7 +962,7 @@ void xnn_f16_f32acc_rdsum2_ukernel_7p7x__avx512skx_u128(
         // 0xF masks the remainder.
         const size_t remainder = channels & 0xF;
         const size_t batch = channels & 0xF;
-        __mmask16 vmask;
+        __mmask16 vmask = 0xFFFF;
         if (remainder) {
           assert(batch >= 1);
           assert(batch <= 15);
