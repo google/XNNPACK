@@ -1720,7 +1720,8 @@ static enum xnn_status reshape_subconv2d_path(
         output_width_positions;
     deconvolution_op->compute[igemm_compute_index].range[4] =
         group_output_channels;
-    deconvolution_op->compute[igemm_compute_index].tile[0] = mr;
+    deconvolution_op->compute[igemm_compute_index].tile[0] =
+        output_width_positions;
     deconvolution_op->compute[igemm_compute_index].tile[1] = nc;
   } else {
     deconvolution_op->compute[igemm_compute_index].type =
@@ -1742,7 +1743,8 @@ static enum xnn_status reshape_subconv2d_path(
         output_width_positions;
     deconvolution_op->compute[igemm_compute_index].range[5] =
         group_output_channels;
-    deconvolution_op->compute[igemm_compute_index].tile[0] = mr;
+    deconvolution_op->compute[igemm_compute_index].tile[0] =
+        output_width_positions;
     deconvolution_op->compute[igemm_compute_index].tile[1] = nc;
   }
 
