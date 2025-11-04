@@ -36,6 +36,17 @@
     }                                                              \
   } while (false)
 
+#define XNN_IF_ERROR_GOTO(label, expr, ...)                        \
+  do {                                                             \
+    status = (expr);                                               \
+    if (status != xnn_status_success) {                            \
+      if (sizeof(XNN_VAR_ARG_HEAD("" __VA_ARGS__)) > sizeof("")) { \
+        xnn_log_error("" __VA_ARGS__);                             \
+      }                                                            \
+      goto label;                                                  \
+    }                                                              \
+  }while (false)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -289,8 +300,8 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_pf16(
     uint32_t flags, xnn_operator_t* batch_matrix_multiply_op_out);
 
 enum xnn_status xnn_create_batch_matrix_multiply_nc_pf16_const_weights(
-    size_t batch_size_b, size_t k, size_t n, const void* data_b, uint32_t flags,
-    xnn_operator_t* batch_matrix_multiply_op_out);
+    size_t batch_size_b, size_t k, size_t n, const xnn_float16* data_b,
+    uint32_t flags, xnn_operator_t* batch_matrix_multiply_op_out);
 
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_pf16(
     xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
