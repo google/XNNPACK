@@ -102,13 +102,7 @@ $for CHANNELS_BATCH in CHANNELS_BATCHES:
           const size_t num_chunks = round_up_po2(channels, 16) >> 4;
           // 0xF masks the remainder.
           const size_t remainder = channels & 0xF;
-          const size_t batch = channels & 0xF;
-          __mmask16 vmask = 0xFFFF;
-          if (remainder) {
-            assert(batch >= 1);
-            assert(batch <= 15);
-            vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
-          }
+          const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << remainder) - UINT32_C(1)));
           for (int r = k1; r > 0; r -= ${ACCUMULATORS}) {
             $for ACC in range(1, ACCUMULATORS, 2):
               if XNN_UNPREDICTABLE(r < ${ACC+1}) {
@@ -149,7 +143,7 @@ $for CHANNELS_BATCH in CHANNELS_BATCHES:
           }
           if (remainder) {
             __m512 vout = vacc[num_full_chunks];
-            vout = _mm512_maskz_add_ps(vmask, vout,  _mm512_maskz_loadu_ps(vmask, output));
+            vout = _mm512_maskz_add_ps(vmask, vout, _mm512_maskz_loadu_ps(vmask, output));
             _mm512_mask_storeu_ps(output, vmask, vout);
           }
         }
