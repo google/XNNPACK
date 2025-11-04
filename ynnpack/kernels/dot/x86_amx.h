@@ -17,6 +17,10 @@
 #include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/base.h"
 
+#if YNN_COMPILER_HAS_FEATURE(memory_sanitizer)
+#include <sanitizer/msan_interface.h>
+#endif
+
 #if defined(__GNUC__) && !defined(__clang__)
 // Workaround for GCC bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=122446
 #define YNN_TILE_DP_IMPL(name, dst, src1, src2)                             \
@@ -174,6 +178,12 @@ static void x86_amx_dot(size_t M, size_t N, size_t K3, size_t K2, size_t K1,
     _tile_stored(1, offset_bytes(C_out, 1 * row_bytes), C_out_stride_m);
     _tile_stored(2, offset_bytes(C_out, 2 * row_bytes), C_out_stride_m);
     _tile_stored(3, offset_bytes(C_out, 3 * row_bytes), C_out_stride_m);
+    #if YNN_COMPILER_HAS_FEATURE(memory_sanitizer)
+    // msan doesn't support amx, avoid false positives.
+    for (size_t i = 0; i < M; ++i) {
+      __msan_unpoison(offset_bytes(C_out, i * C_out_stride_m), 4 * row_bytes);
+    }
+    #endif
     C_in = C_in ? offset_bytes(C_in, 4 * row_bytes) : nullptr;
     C_out = offset_bytes(C_out, 4 * row_bytes);
     B = offset_bytes(B, 4 * row_bytes);
@@ -221,6 +231,12 @@ static void x86_amx_dot(size_t M, size_t N, size_t K3, size_t K2, size_t K1,
       A_k3 = offset_bytes(A_k3, A_stride_k3);
     } while (k3 > 0);
     _tile_stored(0, C_out, C_out_stride_m);
+    #if YNN_COMPILER_HAS_FEATURE(memory_sanitizer)
+    // msan doesn't support amx, avoid false positives.
+    for (size_t i = 0; i < M; ++i) {
+      __msan_unpoison(offset_bytes(C_out, i * C_out_stride_m), N * sizeof(TC));
+    }
+    #endif
     C_in = C_in ? offset_bytes(C_in, row_bytes) : nullptr;
     C_out = offset_bytes(C_out, row_bytes);
     B = offset_bytes(B, row_bytes);
