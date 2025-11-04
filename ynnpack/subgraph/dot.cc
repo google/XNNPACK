@@ -362,7 +362,7 @@ auto make_pack_impl() {
                 // (including the padded rows), and then the size of the padding
                 // in each row, which we set to 0.
                 const index_t row_size = n * tile_k * elem_size;
-                const index_t padding_size = (block_n - n) * tile_k;
+                const index_t padding_size = (block_n - n) * tile_k * elem_size;
                 for (index_t ko = output_ko.begin(); ko < output_ko.end();
                      ++ko) {
                   const index_t k =
