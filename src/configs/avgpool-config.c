@@ -122,14 +122,12 @@ static void init_f32_avgpool_config(void) {
       f32_avgpool_config.init.f32 = xnn_init_f32_scaleminmax_scalar_params;
       f32_avgpool_config.primary_tile = 9;
       f32_avgpool_config.channel_tile = 32;
-    } else
-  #else
-    {
-      f32_avgpool_config.ukernel = XNN_INIT_AVGPOOL_UKERNEL(xnn_f32_avgpool_minmax_ukernel_9p__scalar_u1);
-      f32_avgpool_config.init.f32 = xnn_init_f32_scaleminmax_scalar_params;
-      f32_avgpool_config.primary_tile = 9;
-      f32_avgpool_config.channel_tile = 1;
     }
+  #else
+    f32_avgpool_config.ukernel = XNN_INIT_AVGPOOL_UKERNEL(xnn_f32_avgpool_minmax_ukernel_9p__scalar_u1);
+    f32_avgpool_config.init.f32 = xnn_init_f32_scaleminmax_scalar_params;
+    f32_avgpool_config.primary_tile = 9;
+    f32_avgpool_config.channel_tile = 1;
   #endif
 }
 
