@@ -404,7 +404,7 @@ class FullyConnectedOperatorTester {
               workspace_size);
         }
 
-        xnnpack::Buffer<float> output2(output.size());
+        xnnpack::Buffer<xnn_float16> output2(output.size());
         ASSERT_EQ(xnn_status_success,
                   xnn_setup_fully_connected_nc_qd8_f16_qc4w(
                       fully_connected_op2, input.data(), output2.data(),
@@ -417,7 +417,7 @@ class FullyConnectedOperatorTester {
 
         VerifyWeightsCache(*internal_weights_cache, old_weights_cache_size);
 
-        VerifyF16(output, output_ref, output_max, output_min);
+        VerifyF16(output2, output_ref, output_max, output_min);
       }
     }
   }
@@ -639,7 +639,7 @@ class FullyConnectedOperatorTester {
 
         VerifyWeightsCache(*internal_weights_cache, old_weights_cache_size);
 
-        VerifyF16(output, output_ref, output_max, output_min);
+        VerifyF16(output2, output_ref, output_max, output_min);
       }
     }
   }
@@ -866,7 +866,7 @@ class FullyConnectedOperatorTester {
 
         VerifyWeightsCache(*internal_weights_cache, old_weights_cache_size);
 
-        VerifyF32(output, output_ref, output_max, output_min);
+        VerifyF32(output2, output_ref, output_max, output_min);
       }
     }
   }
@@ -1085,8 +1085,8 @@ class FullyConnectedOperatorTester {
 
         VerifyWeightsCache(*internal_weights_cache, old_weights_cache_size);
 
-        VerifyF32(output, output_ref, output_max,
-                  output_min);  //, /*rtol=*/2e-3, /*atol=*/2e-3);
+        VerifyF32(output2, output_ref, output_max,
+                  output_min);
       }
     }
   }
@@ -1316,7 +1316,7 @@ class FullyConnectedOperatorTester {
 
         VerifyWeightsCache(*internal_weights_cache, old_weights_cache_size);
 
-        VerifyF32(output, output_ref, output_max, output_min);
+        VerifyF32(output2, output_ref, output_max, output_min);
       }
     }
   }
@@ -1529,7 +1529,7 @@ class FullyConnectedOperatorTester {
 
         VerifyWeightsCache(*internal_weights_cache, old_weights_cache_size);
 
-        VerifyF32(output, output_ref, output_max, output_min);
+        VerifyF32(output2, output_ref, output_max, output_min);
       }
     }
   }
@@ -1753,7 +1753,7 @@ class FullyConnectedOperatorTester {
 
         VerifyWeightsCache(*internal_weights_cache, old_weights_cache_size);
 
-        VerifyF32(output, output_ref, output_max, output_min);
+        VerifyF32(output2, output_ref, output_max, output_min);
       }
     }
   }
@@ -1969,7 +1969,7 @@ class FullyConnectedOperatorTester {
 
         VerifyWeightsCache(*internal_weights_cache, old_weights_cache_size);
 
-        VerifyF16(output, output_ref, output_max, output_min);
+        VerifyF16(output2, output_ref, output_max, output_min);
       }
     }
   }
@@ -2177,7 +2177,7 @@ class FullyConnectedOperatorTester {
 
         VerifyWeightsCache(*internal_weights_cache, old_weights_cache_size);
 
-        VerifyF32(output, output_ref, output_max, output_min);
+        VerifyF32(output2, output_ref, output_max, output_min);
       }
     }
   }
@@ -2361,7 +2361,7 @@ class FullyConnectedOperatorTester {
 
         VerifyWeightsCache(*internal_weights_cache, old_weights_cache_size);
 
-        VerifyQS8(output, output_ref, double(output_zero_point));
+        VerifyQS8(output2, output_ref, static_cast<double>(output_zero_point));
       }
     }
   }
@@ -2586,7 +2586,7 @@ class FullyConnectedOperatorTester {
 
         VerifyWeightsCache(*internal_weights_cache, old_weights_cache_size);
 
-        VerifyQC8(output, output_ref);
+        VerifyQC8(output2, output_ref);
       }
     }
   }
@@ -2813,7 +2813,7 @@ class FullyConnectedOperatorTester {
 
         VerifyWeightsCache(*internal_weights_cache, old_weights_cache_size);
 
-        VerifyQC8(output, output_ref);
+        VerifyQC8(output2, output_ref);
       }
     }
   }
@@ -3010,7 +3010,7 @@ class FullyConnectedOperatorTester {
 
         VerifyWeightsCache(*internal_weights_cache, old_weights_cache_size);
 
-        VerifyQU8(output2, output_ref, double(output_zero_point));
+        VerifyQU8(output2, output_ref, static_cast<double>(output_zero_point));
       }
     }
   }
@@ -3286,7 +3286,7 @@ class FullyConnectedOperatorTester {
                                                        /*threadpool=*/nullptr));
         VerifyWeightsCache(*internal_weights_cache, old_weights_cache_size);
 
-        VerifyF32(output, output_ref, output_max, output_min);
+        VerifyF32(output2, output_ref, output_max, output_min);
       }
     }
   }
@@ -3487,7 +3487,7 @@ class FullyConnectedOperatorTester {
                                                        /*threadpool=*/nullptr));
         VerifyWeightsCache(*internal_weights_cache, old_weights_cache_size);
 
-        VerifyF32(output, output_ref, output_max, output_min);
+        VerifyF32(output2, output_ref, output_max, output_min);
       }
     }
   }
@@ -3680,7 +3680,7 @@ class FullyConnectedOperatorTester {
                                                        /*threadpool=*/nullptr));
         VerifyWeightsCache(*internal_weights_cache, old_weights_cache_size);
 
-        VerifyF32(output, output_ref, output_max, output_min);
+        VerifyF32(output2, output_ref, output_max, output_min);
       }
     }
   }
