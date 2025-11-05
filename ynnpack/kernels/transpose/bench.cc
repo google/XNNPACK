@@ -6,20 +6,20 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <numeric>
 
 #include "ynnpack/base/arch.h"  // IWYU pragma: keep
 #include "ynnpack/base/test/tensor.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/kernels/transpose/interleave.h"
+#include "ynnpack/kernels/transpose/switch_element_size.h"
 #include "ynnpack/kernels/transpose/transpose.h"
 #include <benchmark/benchmark.h>
 
 namespace ynn {
 
 template <typename T>
-void bench(benchmark::State& state, uint64_t arch_flags,
-           transpose_kernel_fn kernel, T) {
+void bench_impl(benchmark::State& state, uint64_t arch_flags,
+                transpose_kernel_fn kernel, T) {
   if (!is_arch_supported(arch_flags)) {
     state.SkipWithMessage("Unsupported hardware");
     return;
@@ -41,9 +41,16 @@ void bench(benchmark::State& state, uint64_t arch_flags,
   }
 }
 
-template <typename T>
 void bench(benchmark::State& state, uint64_t arch_flags,
-           interleave_kernel_fn kernel, T) {
+           transpose_kernel_fn kernel, size_t elem_size_bits) {
+  switch_element_size(elem_size_bits, [&](auto type) {
+    bench_impl(state, arch_flags, kernel, type);
+  });
+}
+
+template <typename T>
+void bench_impl(benchmark::State& state, uint64_t arch_flags,
+                interleave_kernel_fn kernel, T) {
   if (!is_arch_supported(arch_flags)) {
     state.SkipWithMessage("Unsupported hardware");
     return;
@@ -56,7 +63,7 @@ void bench(benchmark::State& state, uint64_t arch_flags,
 
   Tensor<T> a({m, n / element_count});
   Tensor<T> x({factor * n / element_count});
-  std::iota(a.begin(), a.end(), 0);
+  memset(a.data(), 0, a.size() * sizeof(T));
 
   const size_t a_stride = a.stride(0);
 
@@ -65,7 +72,13 @@ void bench(benchmark::State& state, uint64_t arch_flags,
   }
 }
 
-template <typename T>
+void bench(benchmark::State& state, uint64_t arch_flags,
+           interleave_kernel_fn kernel, size_t elem_size_bits) {
+  switch_element_size(elem_size_bits, [&](auto type) {
+    bench_impl(state, arch_flags, kernel, type);
+  });
+}
+
 void TransposeParams(benchmark::internal::Benchmark* b) {
   b->ArgNames({"m", "n"});
   b->Args({30, 30});
@@ -74,18 +87,16 @@ void TransposeParams(benchmark::internal::Benchmark* b) {
   b->Args({128, 128});
 }
 
-#define YNN_TRANSPOSE_KERNEL(arch_flags, kernel, type)         \
-  BENCHMARK_CAPTURE(bench, kernel, arch_flags, kernel, type()) \
-      ->Apply(TransposeParams<type>)                           \
+#define YNN_TRANSPOSE_KERNEL(arch_flags, kernel, elem_size_bits)       \
+  BENCHMARK_CAPTURE(bench, kernel, arch_flags, kernel, elem_size_bits) \
+      ->Apply(TransposeParams)                                         \
       ->UseRealTime();
 #include "ynnpack/kernels/transpose/transpose.inc"
 #undef YNN_TRANSPOSE_KERNEL
 
-template <typename T>
 void InterleaveParams(benchmark::internal::Benchmark* b, int factor) {
-  constexpr int element_count = type_info<T>::element_count();
   b->ArgNames({"factor", "m", "n"});
-  int size = 65536 * element_count;
+  int size = 65536;
   if (factor == 0) {
     for (int f = 2; f <= 16; f *= 2) {
       b->Args({f, f / 2, size / f});
@@ -97,11 +108,11 @@ void InterleaveParams(benchmark::internal::Benchmark* b, int factor) {
   }
 }
 
-#define YNN_INTERLEAVE_KERNEL(arch_flags, kernel, factor, type) \
-  BENCHMARK_CAPTURE(bench, kernel, arch_flags, kernel, type())  \
-      ->Apply([](benchmark::internal::Benchmark* b) {           \
-        InterleaveParams<type>(b, factor);                      \
-      })                                                        \
+#define YNN_INTERLEAVE_KERNEL(arch_flags, kernel, factor, elem_size_bits) \
+  BENCHMARK_CAPTURE(bench, kernel, arch_flags, kernel, elem_size_bits)    \
+      ->Apply([](benchmark::internal::Benchmark* b) {                     \
+        InterleaveParams(b, factor);                                      \
+      })                                                                  \
       ->UseRealTime();
 #include "ynnpack/kernels/transpose/interleave.inc"
 #undef YNN_INTERLEAVE_KERNEL

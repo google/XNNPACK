@@ -19,6 +19,7 @@
 #include "ynnpack/base/test/util.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/kernels/transpose/interleave.h"
+#include "ynnpack/kernels/transpose/switch_element_size.h"
 #include "ynnpack/kernels/transpose/transpose.h"
 
 namespace ynn {
@@ -117,34 +118,6 @@ void TestInterleave(T type, size_t factor, interleave_kernel_fn kernel) {
   }
 }
 
-template <typename F>
-constexpr decltype(auto) SwitchElementType(size_t element_size_bits, F&& f) {
-  switch (element_size_bits) {
-    case 4:
-      return std::forward<F>(f)(uint4x2());
-    case 8:
-      return std::forward<F>(f)(uint8_t());
-    case 16:
-      return std::forward<F>(f)(uint16_t());
-    case 32:
-      return std::forward<F>(f)(uint32_t());
-    case 64:
-      return std::forward<F>(f)(uint64_t());
-    case 128:
-      return std::forward<F>(f)(x128_t());
-    case 256:
-      return std::forward<F>(f)(x256_t());
-    case 512:
-      return std::forward<F>(f)(x512_t());
-    case 1024:
-      return std::forward<F>(f)(x1024_t());
-    case 2048:
-      return std::forward<F>(f)(x2048_t());
-    default:
-      YNN_UNREACHABLE;
-  }
-}
-
 struct TransposeParam {
   uint64_t arch_flags;
   transpose_kernel_fn kernel;
@@ -161,7 +134,7 @@ std::vector<size_t> unaligned_sizes = simd_sizes_up_to(64);
 TEST_P(Transpose, aligned) {
   TransposeParam kernel = GetParam();
   if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
-  SwitchElementType(kernel.element_size_bits, [&](auto type) {
+  switch_element_size(kernel.element_size_bits, [&](auto type) {
     TestTranspose(type, kernel.kernel, aligned_sizes, aligned_sizes);
   });
 }
@@ -169,7 +142,7 @@ TEST_P(Transpose, aligned) {
 TEST_P(Transpose, mx1) {
   TransposeParam kernel = GetParam();
   if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
-  SwitchElementType(kernel.element_size_bits, [&](auto type) {
+  switch_element_size(kernel.element_size_bits, [&](auto type) {
     TestTranspose(type, kernel.kernel, unaligned_sizes, {1});
   });
 }
@@ -177,7 +150,7 @@ TEST_P(Transpose, mx1) {
 TEST_P(Transpose, 1xn) {
   TransposeParam kernel = GetParam();
   if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
-  SwitchElementType(kernel.element_size_bits, [&](auto type) {
+  switch_element_size(kernel.element_size_bits, [&](auto type) {
     TestTranspose(type, kernel.kernel, {1}, unaligned_sizes);
   });
 }
@@ -185,7 +158,7 @@ TEST_P(Transpose, 1xn) {
 TEST_P(Transpose, aligned_m) {
   TransposeParam kernel = GetParam();
   if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
-  SwitchElementType(kernel.element_size_bits, [&](auto type) {
+  switch_element_size(kernel.element_size_bits, [&](auto type) {
     TestTranspose(type, kernel.kernel, aligned_sizes, unaligned_sizes);
   });
 }
@@ -193,7 +166,7 @@ TEST_P(Transpose, aligned_m) {
 TEST_P(Transpose, aligned_n) {
   TransposeParam kernel = GetParam();
   if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
-  SwitchElementType(kernel.element_size_bits, [&](auto type) {
+  switch_element_size(kernel.element_size_bits, [&](auto type) {
     TestTranspose(type, kernel.kernel, unaligned_sizes, aligned_sizes);
   });
 }
@@ -201,15 +174,15 @@ TEST_P(Transpose, aligned_n) {
 TEST_P(Transpose, unaligned) {
   TransposeParam kernel = GetParam();
   if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
-  SwitchElementType(kernel.element_size_bits, [&](auto type) {
+  switch_element_size(kernel.element_size_bits, [&](auto type) {
     TestTranspose(type, kernel.kernel, unaligned_sizes, unaligned_sizes);
   });
 }
 
-#define YNN_TRANSPOSE_KERNEL(arch_flags, name, type)       \
-  INSTANTIATE_TEST_SUITE_P(name, Transpose,                \
-                           testing::Values(TransposeParam{ \
-                               arch_flags, name, elem_size_of(type{})}));
+#define YNN_TRANSPOSE_KERNEL(arch_flags, name, elem_size_bits) \
+  INSTANTIATE_TEST_SUITE_P(                                    \
+      name, Transpose,                                         \
+      testing::Values(TransposeParam{arch_flags, name, elem_size_bits}));
 #include "ynnpack/kernels/transpose/transpose.inc"
 #undef YNN_TRANSPOSE_KERNEL
 
@@ -230,25 +203,24 @@ TEST_P(Interleave, test) {
   InterleaveParam kernel = std::get<0>(GetParam());
   if (!is_arch_supported(kernel.arch_flags)) GTEST_SKIP();
   int factor = std::get<1>(GetParam());
-  SwitchElementType(kernel.element_size_bits, [&](auto type) {
+  switch_element_size(kernel.element_size_bits, [&](auto type) {
     TestInterleave(type, factor, kernel.kernel);
   });
 }
 
-template <typename T>
-auto AllFactors(int factor) {
+auto AllFactors(int factor, int elem_size_bits) {
   std::vector<int> result;
-  constexpr int element_count = type_info<T>::element_count();
+  const int element_count = std::max(elem_size_bits, 8) / elem_size_bits;
   return factor == 0 ? testing::Range(element_count, 17, element_count)
                      : testing::Values(factor);
 }
 
-#define YNN_INTERLEAVE_KERNEL(arch_flags, name, factor, type)                  \
-  INSTANTIATE_TEST_SUITE_P(                                                    \
-      name, Interleave,                                                        \
-      testing::Combine(testing::Values(InterleaveParam{arch_flags, name,       \
-                                                       elem_size_of(type{})}), \
-                       AllFactors<type>(factor)),                              \
+#define YNN_INTERLEAVE_KERNEL(arch_flags, name, factor, elem_size_bits)       \
+  INSTANTIATE_TEST_SUITE_P(                                                   \
+      name, Interleave,                                                       \
+      testing::Combine(                                                       \
+          testing::Values(InterleaveParam{arch_flags, name, elem_size_bits}), \
+          AllFactors(factor, elem_size_bits)),                                \
       test_param_to_string<Interleave::ParamType>);
 #include "ynnpack/kernels/transpose/interleave.inc"
 #undef YNN_INTERLEAVE_KERNEL

@@ -47,7 +47,10 @@ ynn_cc_library(
 
 cc_test(
     name = "test",
-    srcs = ["test.cc"],
+    srcs = [
+        "switch_element_size.h",
+        "test.cc",
+    ],
     deps = [
         ":transpose",
         "//ynnpack/base",
@@ -59,7 +62,10 @@ cc_test(
 
 cc_test(
     name = "bench",
-    srcs = ["bench.cc"],
+    srcs = [
+        "bench.cc",
+        "switch_element_size.h",
+    ],
     args = ["--benchmark_min_time=1x"],
     deps = [
         ":transpose",

@@ -14,13 +14,6 @@
 
 namespace ynn {
 
-// We identify transposes of large fixed size elments using these types.
-using x128_t = std::array<uint8_t, 16>;
-using x256_t = std::array<uint8_t, 32>;
-using x512_t = std::array<uint8_t, 64>;
-using x1024_t = std::array<uint8_t, 128>;
-using x2048_t = std::array<uint8_t, 256>;
-
 // Pointer to a function that implements transposing data. The size of the
 // elements to transpose is fixed by the function.
 // - `a`, `x`: pointers to the input and output, respectively.
@@ -32,7 +25,7 @@ typedef void (*transpose_kernel_fn)(size_t m, size_t n, size_t n_bytes_a,
                                     size_t stride_a, const void* a,
                                     size_t stride_x, void* x);
 
-#define YNN_TRANSPOSE_KERNEL(arch, name, type)                     \
+#define YNN_TRANSPOSE_KERNEL(arch, name, elem_size_bits)           \
   void name(size_t m, size_t n, size_t n_bytes_a, size_t stride_a, \
             const void* a, size_t stride_x, void* x);
 #include "ynnpack/kernels/transpose/transpose.inc"

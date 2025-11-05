@@ -8,11 +8,10 @@
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
-#include <cstdint>
 #include <cstring>
+#include <type_traits>
 
 #include "ynnpack/base/arch.h"
-#include "ynnpack/base/arithmetic.h"
 #include "ynnpack/base/log.h"
 #include "ynnpack/base/type.h"
 #include "ynnpack/kernels/transpose/generic.h"
@@ -50,35 +49,34 @@ void transpose_x4(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
 }
 void transpose_x8(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
                   const void* a, size_t stride_x, void* x) {
-  transpose(m, n, n_bytes_a, stride_a, static_cast<const uint8_t*>(a), stride_x,
-            static_cast<uint8_t*>(x));
+  transpose(m, n, n_bytes_a, stride_a, a, stride_x, x,
+            std::integral_constant<size_t, 8>{});
 }
 void transpose_x16(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
                    const void* a, size_t stride_x, void* x) {
-  transpose(m, n, n_bytes_a, stride_a, static_cast<const uint16_t*>(a),
-            stride_x, static_cast<uint16_t*>(x));
+  transpose(m, n, n_bytes_a, stride_a, a, stride_x, x,
+            std::integral_constant<size_t, 16>{});
 }
 void transpose_x32(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
                    const void* a, size_t stride_x, void* x) {
-  transpose(m, n, n_bytes_a, stride_a, static_cast<const uint32_t*>(a),
-            stride_x, static_cast<uint32_t*>(x));
+  transpose(m, n, n_bytes_a, stride_a, a, stride_x, x,
+            std::integral_constant<size_t, 32>{});
 }
 void transpose_x64(size_t m, size_t n, size_t n_bytes_a, size_t stride_a,
                    const void* a, size_t stride_x, void* x) {
-  transpose(m, n, n_bytes_a, stride_a, static_cast<const uint64_t*>(a),
-            stride_x, static_cast<uint64_t*>(x));
+  transpose(m, n, n_bytes_a, stride_a, a, stride_x, x,
+            std::integral_constant<size_t, 64>{});
 }
 
 transpose_kernel_fn get_transpose_kernel(size_t element_size_bits) {
-#define YNN_TRANSPOSE_KERNEL(arch_flags, name, type)         \
-  if (sizeof(type) * 8 / type_info<type>::element_count() == \
-      element_size_bits) {                                   \
-    if (is_arch_supported(arch_flags)) {                     \
-      return name;                                           \
-    }                                                        \
+#define YNN_TRANSPOSE_KERNEL(arch_flags, name, kernel_element_size_bits) \
+  if (kernel_element_size_bits == element_size_bits) {                   \
+    if (is_arch_supported(arch_flags)) {                                 \
+      return name;                                                       \
+    }                                                                    \
   }
 #include "ynnpack/kernels/transpose/transpose.inc"
-#undef YNN_INTERLEAVE_KERNEL
+#undef YNN_TRANSPOSE_KERNEL
   YNN_LOG_DEBUG() << "Unsupported transpose of " << element_size_bits
                   << "-bit elements.";
   return nullptr;
