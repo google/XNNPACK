@@ -55,10 +55,18 @@ enum xnn_status xnn_reshape_external_value(
                   external_id, value->allocation_type);
     return xnn_status_invalid_parameter;
   }
-  struct xnn_shape* shape = &value->shape;
-  shape->num_dims = num_dims;
-  for (size_t i = 0; i < num_dims; ++i) {
-    shape->dim[i] = dims[i];
+  struct xnn_shape new_shape = {.num_dims = num_dims};
+  for (int k = 0; k < num_dims; k++) {
+    new_shape.dim[k] = dims[k];
+  }
+  if (!xnn_shape_match(&value->shape, &new_shape)) {
+    if (value->flags & XNN_VALUE_FLAG_SHAPE_IS_STATIC) {
+      xnn_log_error("failed to reshape runtime: Value %" PRIu32
+                    " is flagged as having a static shape",
+                    external_id);
+      return xnn_status_invalid_parameter;
+    }
+    value->shape = new_shape;
   }
   value->size = xnn_runtime_tensor_get_size(value);
   return xnn_status_success;
@@ -558,7 +566,7 @@ static enum xnn_status create_runtime_impl(
 
   const uint32_t optimization_flags =
 #ifdef XNN_SLINKY_ENABLED
-      XNN_FLAG_SLINKY_ENABLED |
+      XNN_FLAG_SLINKY_ENABLED | XNN_FLAG_SLINKY_STATIC_BOUNDS |
 #endif
       XNN_FLAG_HINT_SPARSE_INFERENCE | XNN_FLAG_HINT_FP16_INFERENCE |
       XNN_FLAG_FORCE_FP16_INFERENCE | XNN_FLAG_NO_OPERATOR_FUSION |
