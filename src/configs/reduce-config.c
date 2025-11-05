@@ -811,8 +811,11 @@ static void init_f32_rmax_config(void) {
     #if XNN_ENABLE_SSE
       if (hardware_config->arch_flags & xnn_arch_x86_sse) {
         f32_rmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rmax_ukernel__sse_u16_acc4);
-      }
+      } else
     #endif
+    {
+      f32_rmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rmax_ukernel__scalar_u4_acc4);
+    }
     #if XNN_ENABLE_AVX512F
       if (hardware_config->arch_flags & xnn_arch_x86_avx512f) {
         f32_rmax_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdmax_ukernel_2p2x__avx512f_u32);
@@ -829,8 +832,12 @@ static void init_f32_rmax_config(void) {
       if (hardware_config->arch_flags & xnn_arch_x86_sse2) {
         f32_rmax_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdmax_ukernel_2p2x__sse2_u32);
         f32_rmax_config.rd_width = 32;
-      }
+      } else
     #endif
+    {
+      f32_rmax_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdmax_ukernel_2p2x__scalar_u2);
+      f32_rmax_config.rd_width = 2;
+    }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_rmax_config.ukernel = XNN_INIT_REDUCE_UKERNEL(xnn_f32_rmax_ukernel__wasmsimd_pminmax_u16_acc4);
     f32_rmax_config.rd_ukernel = XNN_INIT_REDUCE_DISCONTIGUOUS_UKERNEL(xnn_f32_rdmax_ukernel_2p2x__wasmsimd_u32);

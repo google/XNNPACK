@@ -5003,7 +5003,7 @@ static void init_qs8_qc8w_gemm_config(void) {
         qs8_qc8w_gemm_config.log2_kr = 3;
       } else
     #endif
-    #if XNN_ENABLE_AVX256SKX
+    #if XNN_ENABLE_AVX256SKX && XNN_ENABLE_AVX2
       if (hardware_config->arch_flags & xnn_arch_x86_avx256skx) {
         qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c8__avx256skx);
         qs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = XNN_INIT_HMP_GEMM_UKERNEL(xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x8c8__avx256skx);
