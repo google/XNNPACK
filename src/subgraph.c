@@ -3519,6 +3519,104 @@ static enum xnn_status optimize_common_subgraphs_binary_const_noop(
   return xnn_status_success;
 }
 
+// Merge or remove transposes of the RHS of a batch-matrix-multiply or
+// fully-connected op.
+static enum xnn_status optimize_common_subgraphs_gemm_rhs_transpose(
+    xnn_subgraph_t subgraph, uint32_t node_id, size_t* changes) {
+  struct xnn_node* node = &subgraph->nodes[node_id];
+  if (node->type != xnn_node_type_fully_connected &&
+      node->type != xnn_node_type_batch_matrix_multiply) {
+    return xnn_status_success;
+  }
+
+  // Chech whether the RHS is produced by a `transpose` node.
+  uint32_t weights_id = node->inputs[1];
+  struct xnn_value* weights_value = &subgraph->values[weights_id];
+  if (weights_value->producer == XNN_INVALID_NODE_ID ||
+      subgraph->nodes[weights_value->producer].type !=
+          xnn_node_type_static_transpose ||
+      weights_value->num_consumers != 1) {
+    return xnn_status_success;
+  }
+
+  // Is this the bad packing (unoptimized packing kernels)?
+  const bool is_gio = (node->type == xnn_node_type_fully_connected &&
+                       (node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) != 0) ||
+                      (node->type == xnn_node_type_batch_matrix_multiply &&
+                       (node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) == 0);
+
+  // Check whether the transpose only affects the last two dimensions.
+  const uint32_t transpose_node_id = weights_value->producer;
+  struct xnn_node* transpose_node = &subgraph->nodes[transpose_node_id];
+  const size_t num_dims = transpose_node->params.transpose.num_dims;
+  size_t* perm = transpose_node->params.transpose.perm;
+  bool is_last_dims = true;
+  for (int k = 0; is_last_dims && k < num_dims - 2; k++) {
+    is_last_dims &= perm[k] == k;
+  }
+  is_last_dims &= (perm[num_dims - 2] == num_dims - 1) &&
+                  (perm[num_dims - 1] == num_dims - 2);
+
+  // If the input is `gio` or the transpose only affects the last two dims, flip
+  // the last two dimensions of the transpose.
+  if (!is_gio && !is_last_dims) {
+    return xnn_status_success;
+  }
+
+  // If the transpose consists of only the last two dimensions, we can skip it.
+  if (is_last_dims) {
+    weights_id = transpose_node->inputs[0];
+    xnn_log_info("Skipping elided static_transpose[#%u](v%03u).",
+                 transpose_node_id, weights_id);
+  } else {
+    size_t temp = perm[num_dims - 2];
+    perm[num_dims - 2] = perm[num_dims - 1];
+    perm[num_dims - 1] = temp;
+    const struct xnn_shape* transpose_input_shape =
+        &subgraph->values[transpose_node->inputs[0]].shape;
+    weights_value->shape.num_dims = num_dims;
+    for (int k = 0; k < num_dims; k++) {
+      weights_value->shape.dim[k] = transpose_input_shape->dim[perm[k]];
+    }
+    XNN_RETURN_IF_ERROR(xnn_define_static_transpose(
+        subgraph, num_dims, perm, transpose_node->inputs[0],
+        transpose_node->outputs[0], transpose_node->flags));
+    transpose_node = move_last_node_to(subgraph, transpose_node_id);
+  }
+
+  // Flip the "transpose" flag of the node. Note that this flag has opposite
+  // meanings for fully-connected and batch-matrix-multiply nodes, so instead of
+  // setting the value explicitly, we just flip whatever value was previously
+  // set.
+  const uint32_t node_flags = node->flags ^ XNN_FLAG_TRANSPOSE_WEIGHTS;
+
+  XNN_RETURN_IF_ERROR(
+      node->type == xnn_node_type_fully_connected
+          ? xnn_define_fully_connected(subgraph, node->activation.output_min,
+                                       node->activation.output_max,
+                                       node->inputs[0], weights_id,
+                                       node->inputs[2], node->outputs[0],
+                                       node_flags)
+          : xnn_define_batch_matrix_multiply(
+                subgraph, node->inputs[0], weights_id, node->outputs[0],
+                node_flags));
+  node = move_last_node_to(subgraph, node_id);
+  xnn_log_info(
+      "Converted %s[#%u](v%03u, static_transpose[#%u](v%03u), %s) to "
+      "%s[#%u](v%03u, v%03u, %s).",
+      node->type == xnn_node_type_fully_connected ? "fully_connected"
+                                                  : "batch_matrix_multiply",
+      node_id, node->inputs[0], transpose_node_id, weights_id,
+      is_gio ? "gio" : "goi",
+      node->type == xnn_node_type_fully_connected ? "fully_connected"
+                                                  : "batch_matrix_multiply",
+      node_id, node->inputs[0], node->inputs[1],
+      is_gio ^ !is_last_dims ? "gio" : "goi");
+  (*changes)++;
+
+  return xnn_status_success;
+}
+
 static enum xnn_status optimize_common_subgraphs_iter(
     xnn_subgraph_t subgraph, uint32_t optimization_flags, size_t* changes) {
   // Loop over the nodes in this subgraph.
@@ -3635,6 +3733,14 @@ static enum xnn_status optimize_common_subgraphs_iter(
         // TODO: b/455537016 - Eventually we should also deal with cases such as
         // `static_value` -> `unary` -> `static_reshape` where the reshape can
         // be pushed back to the static value.
+        break;
+
+      case xnn_node_type_fully_connected:
+      case xnn_node_type_batch_matrix_multiply:
+        // Merge or remove transposes of the RHS of a batch-matrix-multiply or
+        // fully-connected op.
+        XNN_RETURN_IF_ERROR(optimize_common_subgraphs_gemm_rhs_transpose(
+            subgraph, node_id, changes));
         break;
 
       default:

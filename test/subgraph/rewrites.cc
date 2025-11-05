@@ -9,6 +9,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <map>
 #include <numeric>
 #include <random>
@@ -94,11 +95,11 @@ std::pair<T, T> random_swap(ReplicableRandomDevice& rng, T a, U b) {
   return (rng() % 2) ? std::pair<T, T>{a, b} : std::pair<T, T>{b, a};
 }
 }  // namespace
-
 template <typename F>
 void RewriteTestImpl(
     size_t rank, F populate, int expected_size_diff,
-    const std::map<enum xnn_node_type, int> expected_node_type_counts = {}) {
+    const std::map<enum xnn_node_type, int> expected_node_type_counts = {},
+    std::function<void(const xnn_subgraph_t)> test_fn = nullptr) {
   ReplicableRandomDevice rng;
   std::uniform_int_distribution<size_t> dim_dist(1, 9);
 
@@ -162,6 +163,9 @@ void RewriteTestImpl(
       ASSERT_EQ(count, expected_count)
           << "Unexpected number of " << xnn_node_type_to_string(node_type)
           << " nodes (expected " << expected_count << ", got " << count << ").";
+    }
+    if (test_fn) {
+      test_fn(subgraph.Subgraph());
     }
 
     // Run subgraph without rewrites.
@@ -1747,9 +1751,270 @@ TEST_P(RewriteArithmeticTest, RewritesDivOfNegValues) {
        {xnn_node_type_unary_elementwise, 1}});
 }
 
+class RewriteGemmTest : public ::testing::TestWithParam<int> {};
+
+TEST_P(RewriteGemmTest, RewritesGioToGoiAndElidesSpuriousTranspose) {
+  // clang-format off
+  // Before:
+  // ┌──────────────────────┐     ┌─────────────────────────┐     ┌─────────────────┐
+  // │ v0: FP32[4, 2, 6, 8] │     │   n1: Fully Connected   │     │ v1: FP32: [???] │
+  // │                      │ ──▶ │ (FP32, FP32, FP32, gio) │ ──▶ │                 │
+  // └──────────────────────┘     └─────────────────────────┘     └─────────────────┘
+  //                                ▲
+  //                                │ v4: FP32[8, 12]
+  //                                │
+  // ┌──────────────────────┐     ┌─────────────────────────┐
+  // │   v3: FP32[12, 8]    │     │  n0: Static Transpose   │
+  // │                      │ ──▶ │      (perm=[1, 0])      │
+  // └──────────────────────┘     └─────────────────────────┘
+  //
+  // After:
+  // ┌──────────────────────┐     ┌─────────────────────────┐     ┌─────────────────┐
+  // │ v0: FP32[4, 2, 6, 8] │     │   n0: Fully Connected   │     │ v1: FP32: [???] │
+  // │                      │ ──▶ │ (FP32, FP32, FP32, goi) │ ──▶ │                 │
+  // └──────────────────────┘     └─────────────────────────┘     └─────────────────┘
+  //                                ▲
+  //                                │
+  //                                │
+  //                              ┌─────────────────────────┐
+  //                              │     v3: FP32[12, 8]     │
+  //                              └─────────────────────────┘
+  // clang-format on
+
+  // Keep static and external tensor data in this scope so that it lives for the
+  // duration of the test.
+  Tensor<float> static_weights_tensor;
+
+  RewriteTestImpl(
+      GetParam(),
+      [&](ReplicableRandomDevice& rng, SubgraphTester& subgraph) {
+        const TensorShape input_shape(&subgraph.Value(input_id)->shape);
+
+        // Create static `goi` weights
+        std::vector<size_t> weights_shape(input_shape.dims.end() - 2,
+                                          input_shape.dims.end());
+        weights_shape[0] *= 2;
+        uint32_t static_weights_value_id;
+        std::tie(static_weights_tensor, static_weights_value_id) =
+            add_static_tensor<float>(rng, subgraph, weights_shape);
+
+        // Transpose the weights to `gio`.
+        std::vector<size_t> transposed_weights_shape = {weights_shape[1],
+                                                        weights_shape[0]};
+        uint32_t transposed_weights_value_id =
+            add_internal_dynamic_tensor<float>(subgraph,
+                                               transposed_weights_shape);
+        subgraph.AddTranspose({1, 0}, static_weights_value_id,
+                              transposed_weights_value_id);
+
+        // Add a `fully-connected` op with the transposed static weights.
+        subgraph.AddFullyConnected(input_id, transposed_weights_value_id,
+                                   /*bias_id=*/XNN_INVALID_VALUE_ID, output_id,
+                                   /*flags=*/XNN_FLAG_TRANSPOSE_WEIGHTS);
+      },
+      /*expected_size_diff=*/-1,
+      /*expected_node_type_counts=*/{{xnn_node_type_static_transpose, 0}});
+}
+
+TEST_P(RewriteGemmTest, RewritesGoiToGioAndElidesSpuriousTranspose) {
+  // clang-format off
+  // Before:
+  // ┌──────────────────────┐     ┌───────────────────────────┐     ┌─────────────────┐
+  // │ v0: FP32[4, 2, 6, 8] │     │ n1: Batch Matrix Multiply │     │ v1: FP32: [???] │
+  // │                      │ ──▶ │  (FP32, FP32, FP32, goi)  │ ──▶ │                 │
+  // └──────────────────────┘     └───────────────────────────┘     └─────────────────┘
+  //                                ▲
+  //                                │ v4: FP32[1, 9, 8]
+  //                                │
+  // ┌──────────────────────┐     ┌───────────────────────────┐
+  // │  v3: FP32[1, 8, 9]   │     │   n0: Static Transpose    │
+  // │                      │ ──▶ │     (perm=[0, 2, 1])      │
+  // └──────────────────────┘     └───────────────────────────┘
+  //
+  // After:
+  // ┌──────────────────────┐     ┌───────────────────────────┐     ┌─────────────────┐
+  // │ v0: FP32[4, 2, 6, 8] │     │ n0: Batch Matrix Multiply │     │ v1: FP32: [???] │
+  // │                      │ ──▶ │  (FP32, FP32, FP32, gio)  │ ──▶ │                 │
+  // └──────────────────────┘     └───────────────────────────┘     └─────────────────┘
+  //                                ▲
+  //                                │
+  //                                │
+  //                              ┌───────────────────────────┐
+  //                              │     v3: FP32[1, 8, 9]     │
+  //                              └───────────────────────────┘
+  // clang-format on
+
+  // Keep static and external tensor data in this scope so that it lives for the
+  // duration of the test.
+  Tensor<float> static_weights_tensor;
+
+  RewriteTestImpl(
+      GetParam(),
+      [&](ReplicableRandomDevice& rng, SubgraphTester& subgraph) {
+        const TensorShape input_shape(&subgraph.Value(input_id)->shape);
+
+        // Create static `gio` weights
+        std::vector<size_t> weights_shape = {1, input_shape.dims.back(), 9};
+        uint32_t static_weights_value_id;
+        std::tie(static_weights_tensor, static_weights_value_id) =
+            add_static_tensor<float>(rng, subgraph, weights_shape);
+
+        // Transpose the weights to `goi`.
+        std::vector<size_t> transposed_weights_shape = {
+            weights_shape[0], weights_shape[2], weights_shape[1]};
+        uint32_t transposed_weights_value_id =
+            add_internal_dynamic_tensor<float>(subgraph,
+                                               transposed_weights_shape);
+        subgraph.AddTranspose({0, 2, 1}, static_weights_value_id,
+                              transposed_weights_value_id);
+
+        // Add a `batch-matrix-multiply` op with the transposed static weights.
+        subgraph.AddBatchMatrixMultiply(input_id, transposed_weights_value_id,
+                                        output_id,
+                                        /*flags=*/XNN_FLAG_TRANSPOSE_WEIGHTS);
+      },
+      /*expected_size_diff=*/-1,
+      /*expected_node_type_counts=*/{{xnn_node_type_static_transpose, 0}},
+      /*test_fn=*/
+      [](xnn_subgraph_t subgraph) {
+        const xnn_node* bmm_node = &subgraph->nodes[subgraph->num_nodes - 1];
+        ASSERT_EQ(bmm_node->type, xnn_node_type_batch_matrix_multiply);
+        ASSERT_EQ(bmm_node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS, 0);
+      });
+}
+
+TEST_P(RewriteGemmTest, RewritesGioToGoiAndKeepsNonSpuriousTranspose) {
+  // clang-format off
+  // Before:
+  // ┌──────────────────────┐     ┌───────────────────────────┐     ┌─────────────────┐
+  // │ v0: FP32[4, 2, 6, 8] │     │ n1: Batch Matrix Multiply │     │ v1: FP32: [???] │
+  // │                      │ ──▶ │  (FP32, FP32, FP32, gio)  │ ──▶ │                 │
+  // └──────────────────────┘     └───────────────────────────┘     └─────────────────┘
+  //                                ▲
+  //                                │ v4: FP32[1, 8, 12]
+  //                                │
+  // ┌──────────────────────┐     ┌───────────────────────────┐
+  // │  v3: FP32[12, 1, 8]  │     │   n0: Static Transpose    │
+  // │                      │ ──▶ │     (perm=[1, 2, 0])      │
+  // └──────────────────────┘     └───────────────────────────┘
+  //
+  // After:
+  // ┌──────────────────────┐     ┌───────────────────────────┐     ┌─────────────────┐
+  // │ v0: FP32[4, 2, 6, 8] │     │ n1: Batch Matrix Multiply │     │ v1: FP32: [???] │
+  // │                      │ ──▶ │  (FP32, FP32, FP32, goi)  │ ──▶ │                 │
+  // └──────────────────────┘     └───────────────────────────┘     └─────────────────┘
+  //                                ▲
+  //                                │ v4: FP32[1, 12, 8],
+  //                                │ static shape
+  //                                │
+  // ┌──────────────────────┐     ┌───────────────────────────┐
+  // │  v3: FP32[12, 1, 8]  │     │   n0: Static Transpose    │
+  // │                      │ ──▶ │     (perm=[1, 0, 2])      │
+  // └──────────────────────┘     └───────────────────────────┘
+  // clang-format on
+
+  // Keep static and external tensor data in this scope so that it lives for the
+  // duration of the test.
+  Tensor<float> static_weights_tensor;
+
+  RewriteTestImpl(
+      GetParam(),
+      [&](ReplicableRandomDevice& rng, SubgraphTester& subgraph) {
+        const TensorShape input_shape(&subgraph.Value(input_id)->shape);
+
+        // Create static scrambled weights
+        std::vector<size_t> weights_shape(input_shape.dims.end() - 3,
+                                          input_shape.dims.end());
+        weights_shape[0] = 2 * weights_shape[1];
+        weights_shape[1] = 1;
+        uint32_t static_weights_value_id;
+        std::tie(static_weights_tensor, static_weights_value_id) =
+            add_static_tensor<float>(rng, subgraph, weights_shape);
+
+        // Transpose the weights to `gio`.
+        std::vector<size_t> transposed_weights_shape = {
+            weights_shape[1], weights_shape[2], weights_shape[0]};
+        uint32_t transposed_weights_value_id =
+            add_internal_dynamic_tensor<float>(subgraph,
+                                               transposed_weights_shape);
+        subgraph.AddTranspose({1, 2, 0}, static_weights_value_id,
+                              transposed_weights_value_id);
+
+        // Add a `batch-matrix-multiply` op with the transposed static weights.
+        subgraph.AddBatchMatrixMultiply(input_id, transposed_weights_value_id,
+                                        output_id);
+      },
+      /*expected_size_diff=*/0,
+      /*expected_node_type_counts=*/{{xnn_node_type_static_transpose, 1}},
+      /*test_fn=*/
+      [](xnn_subgraph_t subgraph) {
+        const xnn_node* bmm_node = &subgraph->nodes[subgraph->num_nodes - 1];
+        ASSERT_EQ(bmm_node->type, xnn_node_type_batch_matrix_multiply);
+        ASSERT_NE(bmm_node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS, 0);
+      });
+}
+
+TEST_P(RewriteGemmTest, DoesNotRewritesGoiToGioWithNonSpuriousTranspose) {
+  // clang-format off
+  // Before:
+  // ┌──────────────────────┐     ┌───────────────────────────┐     ┌─────────────────┐
+  // │ v0: FP32[4, 2, 6, 8] │     │ n1: Batch Matrix Multiply │     │ v1: FP32: [???] │
+  // │                      │ ──▶ │  (FP32, FP32, FP32, goi)  │ ──▶ │                 │
+  // └──────────────────────┘     └───────────────────────────┘     └─────────────────┘
+  //                                ▲
+  //                                │ v4: FP32[1, 9, 8]
+  //                                │
+  // ┌──────────────────────┐     ┌───────────────────────────┐
+  // │  v3: FP32[8, 1, 9]   │     │   n0: Static Transpose    │
+  // │                      │ ──▶ │     (perm=[1, 2, 0])      │
+  // └──────────────────────┘     └───────────────────────────┘
+  //
+  // After: same
+  // clang-format on
+
+  // Keep static and external tensor data in this scope so that it lives for the
+  // duration of the test.
+  Tensor<float> static_weights_tensor;
+
+  RewriteTestImpl(
+      GetParam(),
+      [&](ReplicableRandomDevice& rng, SubgraphTester& subgraph) {
+        const TensorShape input_shape(&subgraph.Value(input_id)->shape);
+
+        // Create shuffled static `gio` weights
+        std::vector<size_t> weights_shape = {input_shape.dims.back(), 1, 9};
+        uint32_t static_weights_value_id;
+        std::tie(static_weights_tensor, static_weights_value_id) =
+            add_static_tensor<float>(rng, subgraph, weights_shape);
+
+        // Transpose the weights to `goi`.
+        std::vector<size_t> transposed_weights_shape = {
+            weights_shape[1], weights_shape[2], weights_shape[0]};
+        uint32_t transposed_weights_value_id =
+            add_internal_dynamic_tensor<float>(subgraph,
+                                               transposed_weights_shape);
+        subgraph.AddTranspose({1, 2, 0}, static_weights_value_id,
+                              transposed_weights_value_id);
+
+        // Add a `batch-matrix-multiply` op with the transposed static weights.
+        subgraph.AddBatchMatrixMultiply(input_id, transposed_weights_value_id,
+                                        output_id,
+                                        /*flags=*/XNN_FLAG_TRANSPOSE_WEIGHTS);
+      },
+      /*expected_size_diff=*/0,
+      /*expected_node_type_counts=*/{{xnn_node_type_static_transpose, 1}},
+      /*test_fn=*/
+      [](xnn_subgraph_t subgraph) {
+        const xnn_node* bmm_node = &subgraph->nodes[subgraph->num_nodes - 1];
+        ASSERT_EQ(bmm_node->type, xnn_node_type_batch_matrix_multiply);
+        ASSERT_NE(bmm_node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS, 0);
+      });
+}
+
 INSTANTIATE_TEST_SUITE_P(Rewrite, RewriteShapesTest, testing::Range(0, 3));
 INSTANTIATE_TEST_SUITE_P(Rewrite, RewriteClampsTest, testing::Values(0, 1, 3));
 INSTANTIATE_TEST_SUITE_P(Rewrite, RewriteArithmeticTest,
                          testing::Values(0, 1, 3));
+INSTANTIATE_TEST_SUITE_P(Rewrite, RewriteGemmTest, testing::Values(3, 4));
 
 }  // namespace xnnpack

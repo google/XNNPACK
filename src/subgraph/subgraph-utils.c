@@ -81,14 +81,17 @@ static void print_node_type(FILE* out, const xnn_subgraph_t subgraph,
     case xnn_node_type_fully_connected:
     case xnn_node_type_batch_matrix_multiply:
       fprintf(
-          out, "%s(%s, %s, %s%s)", separator,
+          out, "%s(%s, %s, %s, %s)", separator,
           xnn_datatype_to_string(
               node->packed_input_datatype != xnn_datatype_invalid
                   ? node->packed_input_datatype
                   : subgraph->values[node->inputs[0]].datatype),
           xnn_datatype_to_string(subgraph->values[node->outputs[0]].datatype),
           xnn_datatype_to_string(subgraph->values[node->inputs[1]].datatype),
-          node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS ? ", transposed" : "");
+          (node->type == xnn_node_type_fully_connected) ^
+                  !(node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS)
+              ? "gio"
+              : "goi");
       break;
     case xnn_node_type_static_transpose:
       fprintf(out, "%s(perm=[%zu", separator, node->params.transpose.perm[0]);
