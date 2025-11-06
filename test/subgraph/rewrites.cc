@@ -19,7 +19,6 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "include/experimental.h"
 #include "include/xnnpack.h"
 #include "src/subgraph/subgraph-utils.h"
 #include "src/xnnpack/buffer.h"
@@ -379,7 +378,6 @@ TEST_P(RewriteShapesTest, DoesNotElidesReshapeOfStaticShapeNonStaticValue) {
         // Create a static value with a different shape from input1.
         uint32_t static_value_id = XNN_INVALID_VALUE_ID;
         std::vector<size_t> static_value_shape = input_shape.dims;
-        static_value_shape.push_back(1);
         std::shuffle(static_value_shape.begin(), static_value_shape.end(), rng);
         std::tie(static_tensor, static_value_id) =
             add_static_tensor<float>(rng, subgraph, static_value_shape);
@@ -1394,103 +1392,6 @@ TEST_P(RewriteArithmeticTest, ElidesNoOpChainOfStaticShapeDivOneMul) {
        {xnn_node_type_unary_elementwise, 0}});
 }
 
-TEST_P(RewriteArithmeticTest, ElidesNoOpChainOfMarkedStaticShapeDivOneMul) {
-  // clang-format off
-  // Before:
-  //                                ┌────────────────────────┐
-  //                                │   v0: FP32[1, 6, 8],   │
-  // ┌───────────────────────────── │      static shape      │
-  // │                              └────────────────────────┘
-  // │                                │
-  // │                                │
-  // │                                ▼
-  // │                              ┌────────────────────────┐
-  // │                              │ n0: Unary Elementwise  │
-  // │                              │      (abs, FP32)       │
-  // │                              └────────────────────────┘
-  // │                                │
-  // │                                │ v4: FP32[1, 6, 8]
-  // │                                ▼
-  // │  ┌─────────────────────┐     ┌────────────────────────┐
-  // │  │ v3: FP32: 1.000000, │     │ n1: Binary Elementwise │
-  // │  │      const 1.0      │ ──▶ │      (add, FP32)       │ ─┐
-  // │  └─────────────────────┘     └────────────────────────┘  │
-  // │                                │                         │
-  // │                                │ v5: FP32[1, 6, 8]       │ v5: FP32[1, 6, 8]
-  // │                                ▼                         │
-  // │                              ┌────────────────────────┐  │
-  // │                              │ n2: Binary Elementwise │  │
-  // │                              │     (divide, FP32)     │ ◀┘
-  // │                              └────────────────────────┘
-  // │                                │
-  // │                                │ v6: FP32[1, 6, 8]
-  // │                                ▼
-  // │                              ┌────────────────────────┐
-  // │                              │ n3: Binary Elementwise │
-  // └────────────────────────────▶ │    (multiply, FP32)    │
-  //                                └────────────────────────┘
-  //                                  │
-  //                                  │
-  //                                  ▼
-  //                                ┌────────────────────────┐
-  //                                │    v1: FP32: [???],    │
-  //                                │      static shape      │
-  //                                └────────────────────────┘
-  //
-  // After:
-  // ┌────────────────────┐     ┌──────────┐     ┌────────────────────┐
-  // │ v0: FP32[1, 6, 8], │     │ n0: Copy │     │ v1: FP32[1, 6, 8], │
-  // │    static shape    │ ──▶ │          │ ──▶ │    static shape    │
-  // └────────────────────┘     └──────────┘     └────────────────────┘
-  // clang-format on
-
-  // Keep static and external tensor data in this scope so that it lives for the
-  // duration of the test.
-  Tensor<float> static_one_tensor;
-
-  RewriteTestImpl(
-      GetParam(),
-      [&](ReplicableRandomDevice& rng, SubgraphTester& subgraph) {
-        const TensorShape input_shape(&subgraph.Value(input_id)->shape);
-
-        // Add a scalar static tensor with the value `1.0`.
-        uint32_t static_one_value_id;
-        std::tie(static_one_tensor, static_one_value_id) =
-            add_static_tensor<float>(rng, subgraph, /*shape=*/{}, 1.0, 1.0);
-
-        // Add the static `1.0` to the absolute value of the inputs to make sure
-        // they are non-negative
-        uint32_t abs_value_id =
-            add_internal_dynamic_tensor<float>(subgraph, input_shape);
-        uint32_t shifted_value_id =
-            add_internal_dynamic_tensor<float>(subgraph, input_shape);
-        subgraph.AddUnary(xnn_unary_abs, /*params=*/nullptr, input_id,
-                          abs_value_id);
-        auto inputs = random_swap(rng, abs_value_id, static_one_value_id);
-        subgraph.AddAddition(inputs.first, inputs.second, shifted_value_id);
-
-        // Add the binary `div(x, x)` op.
-        uint32_t dynamic_one_value_id =
-            add_internal_dynamic_tensor<float>(subgraph, input_shape);
-        subgraph.AddBinary(xnn_binary_divide, /*params=*/nullptr,
-                           shifted_value_id, shifted_value_id,
-                           dynamic_one_value_id);
-
-        // Add the binary `mul` op with the input and the dynamic one value.
-        inputs = random_swap(rng, dynamic_one_value_id, input_id);
-        subgraph.AddBinary(xnn_binary_multiply, /*params=*/nullptr,
-                           inputs.first, inputs.second, output_id);
-
-        // Mark all inputs/outputs as statically shaped.
-        ASSERT_EQ(xnn_define_all_input_shapes_static(subgraph.Subgraph()),
-                  xnn_status_success);
-      },
-      /*expected_size_diff=*/-3,
-      /*expected_node_type_counts=*/
-      {{xnn_node_type_binary_elementwise, 0},
-       {xnn_node_type_unary_elementwise, 0}});
-}
-
 TEST_P(RewriteArithmeticTest, DoesNotElidesNoOpChainOfDynamicShapeDivOneMul) {
   // clang-format off
   // Before:
@@ -2011,7 +1912,8 @@ TEST_P(RewriteGemmTest, DoesNotRewritesGoiToGioWithNonSpuriousTranspose) {
       });
 }
 
-INSTANTIATE_TEST_SUITE_P(Rewrite, RewriteShapesTest, testing::Range(0, 3));
+INSTANTIATE_TEST_SUITE_P(Rewrite, RewriteShapesTest,
+                         testing::Range(0, XNN_MAX_TENSOR_DIMS));
 INSTANTIATE_TEST_SUITE_P(Rewrite, RewriteClampsTest, testing::Values(0, 1, 3));
 INSTANTIATE_TEST_SUITE_P(Rewrite, RewriteArithmeticTest,
                          testing::Values(0, 1, 3));
