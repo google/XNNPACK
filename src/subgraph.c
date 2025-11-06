@@ -3548,14 +3548,14 @@ static enum xnn_status optimize_common_subgraphs_gemm_rhs_transpose(
   // Check whether the transpose only affects the last two dimensions.
   const uint32_t transpose_node_id = weights_value->producer;
   struct xnn_node* transpose_node = &subgraph->nodes[transpose_node_id];
-  const size_t num_dims = transpose_node->params.transpose.num_dims;
+  const size_t num_perm_dims = transpose_node->params.transpose.num_dims;
   size_t* perm = transpose_node->params.transpose.perm;
   bool is_last_dims = true;
-  for (int k = 0; is_last_dims && k < num_dims - 2; k++) {
+  for (int k = 0; is_last_dims && k < num_perm_dims - 2; k++) {
     is_last_dims &= perm[k] == k;
   }
-  is_last_dims &= (perm[num_dims - 2] == num_dims - 1) &&
-                  (perm[num_dims - 1] == num_dims - 2);
+  is_last_dims &= (perm[num_perm_dims - 2] == num_perm_dims - 1) &&
+                  (perm[num_perm_dims - 1] == num_perm_dims - 2);
 
   // If the input is `gio` or the transpose only affects the last two dims, flip
   // the last two dimensions of the transpose.
@@ -3569,19 +3569,23 @@ static enum xnn_status optimize_common_subgraphs_gemm_rhs_transpose(
     xnn_log_info("Skipping elided static_transpose[#%u](v%03u).",
                  transpose_node_id, weights_id);
   } else {
-    size_t temp = perm[num_dims - 2];
-    perm[num_dims - 2] = perm[num_dims - 1];
-    perm[num_dims - 1] = temp;
+    size_t new_perm[XNN_MAX_TENSOR_DIMS] = {0};
+    for (int k = 0; k + 2 < num_perm_dims; k++) {
+      new_perm[k] = perm[k];
+    }
+    new_perm[num_perm_dims - 2] = perm[num_perm_dims - 1];
+    new_perm[num_perm_dims - 1] = perm[num_perm_dims - 2];
     const struct xnn_shape* transpose_input_shape =
         &subgraph->values[transpose_node->inputs[0]].shape;
-    weights_value->shape.num_dims = num_dims;
-    for (int k = 0; k < num_dims; k++) {
+    weights_value->shape.num_dims = num_perm_dims;
+    for (int k = 0; k < num_perm_dims; k++) {
       weights_value->shape.dim[k] = transpose_input_shape->dim[perm[k]];
     }
     XNN_RETURN_IF_ERROR(xnn_define_static_transpose(
-        subgraph, num_dims, perm, transpose_node->inputs[0],
+        subgraph, num_perm_dims, new_perm, transpose_node->inputs[0],
         transpose_node->outputs[0], transpose_node->flags));
     transpose_node = move_last_node_to(subgraph, transpose_node_id);
+    node = &subgraph->nodes[node_id];
   }
 
   // Flip the "transpose" flag of the node. Note that this flag has opposite
