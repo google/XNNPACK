@@ -63,6 +63,8 @@ XNN_INTERNAL const char* xnn_unary_operator_to_string(
     enum xnn_unary_operator op);
 XNN_INTERNAL const char* xnn_binary_operator_to_string(
     enum xnn_binary_operator op);
+XNN_INTERNAL const char* xnn_reduce_operator_to_string(
+    enum xnn_reduce_operator op);
 
 XNN_INTERNAL const char* xnn_operator_type_to_string_v2(xnn_operator_t op);
 
