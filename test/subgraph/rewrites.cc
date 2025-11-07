@@ -1452,6 +1452,8 @@ TEST_P(RewriteArithmeticTest, ElidesNoOpChainOfMarkedStaticShapeDivOneMul) {
       GetParam(),
       [&](ReplicableRandomDevice& rng, SubgraphTester& subgraph) {
         const TensorShape input_shape(&subgraph.Value(input_id)->shape);
+        subgraph.MutableValue(input_id)->flags |=
+            XNN_VALUE_FLAG_SHAPE_IS_STATIC;
 
         // Add a scalar static tensor with the value `1.0`.
         uint32_t static_one_value_id;
@@ -1480,10 +1482,6 @@ TEST_P(RewriteArithmeticTest, ElidesNoOpChainOfMarkedStaticShapeDivOneMul) {
         inputs = random_swap(rng, dynamic_one_value_id, input_id);
         subgraph.AddBinary(xnn_binary_multiply, /*params=*/nullptr,
                            inputs.first, inputs.second, output_id);
-
-        // Mark all inputs/outputs as statically shaped.
-        ASSERT_EQ(xnn_define_all_input_shapes_static(subgraph.Subgraph()),
-                  xnn_status_success);
       },
       /*expected_size_diff=*/-3,
       /*expected_node_type_counts=*/

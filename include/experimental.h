@@ -98,15 +98,6 @@ enum xnn_status xnn_update_runtime_with_threadpool(
   xnn_runtime_t runtime,
   xnn_threadpool_t threadpool);
 
-/// Mark all the inputs to the given subgraph as having static shapes.
-///
-/// If this function is called on a @a subgraph, then @a xnn_reshape_external_
-/// value should not be called on the runtime created by @a xnn_create_runtime.
-///
-/// @param subgraph - A Subgraph object in which all input values will be
-///                   marked as having static shapes.
-enum xnn_status xnn_define_all_input_shapes_static(xnn_subgraph_t subgraph);
-
 #ifdef __cplusplus
 }  // extern "C"
 #endif

@@ -3755,17 +3755,6 @@ static enum xnn_status optimize_common_subgraphs_iter(
   return xnn_status_success;
 }
 
-enum xnn_status xnn_define_all_input_shapes_static(xnn_subgraph_t subgraph) {
-  for (uint32_t value_id = 0; value_id < subgraph->num_values; value_id++) {
-    struct xnn_value* value = &subgraph->values[value_id];
-    if (value->datatype != xnn_datatype_invalid &&
-        xnn_value_is_external_input(value->flags)) {
-      value->flags |= XNN_VALUE_FLAG_SHAPE_IS_STATIC;
-    }
-  }
-  return xnn_status_success;
-}
-
 enum xnn_status xnn_subgraph_optimize_common_subgraphs(
     xnn_subgraph_t subgraph, uint32_t optimization_flags) {
   // If we shouldn't change the numerics, then don't do anything.
