@@ -23,6 +23,7 @@
 #include "include/xnnpack.h"
 #include "src/subgraph/subgraph-utils.h"
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/datatype.h"
 #include "src/xnnpack/node-type.h"
 #include "src/xnnpack/subgraph.h"
@@ -1875,9 +1876,17 @@ TEST_P(RewriteGemmTest, RewritesGoiToGioAndElidesSpuriousTranspose) {
       /*expected_node_type_counts=*/{{xnn_node_type_static_transpose, 0}},
       /*test_fn=*/
       [](xnn_subgraph_t subgraph) {
-        const xnn_node* bmm_node = &subgraph->nodes[subgraph->num_nodes - 1];
-        ASSERT_EQ(bmm_node->type, xnn_node_type_batch_matrix_multiply);
-        ASSERT_EQ(bmm_node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS, 0);
+        const xnn_node* node = &subgraph->nodes[subgraph->num_nodes - 1];
+        switch (node->type) {
+          case xnn_node_type_batch_matrix_multiply:
+            ASSERT_EQ(node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS, 0);
+            break;
+          case xnn_node_type_fully_connected:
+            ASSERT_NE(node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS, 0);
+            break;
+          default:
+            XNN_UNREACHABLE;
+        }
       });
 }
 
@@ -1946,9 +1955,17 @@ TEST_P(RewriteGemmTest, RewritesGioToGoiAndKeepsNonSpuriousTranspose) {
       /*expected_node_type_counts=*/{{xnn_node_type_static_transpose, 1}},
       /*test_fn=*/
       [](xnn_subgraph_t subgraph) {
-        const xnn_node* bmm_node = &subgraph->nodes[subgraph->num_nodes - 1];
-        ASSERT_EQ(bmm_node->type, xnn_node_type_batch_matrix_multiply);
-        ASSERT_NE(bmm_node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS, 0);
+        const xnn_node* node = &subgraph->nodes[subgraph->num_nodes - 1];
+        switch (node->type) {
+          case xnn_node_type_batch_matrix_multiply:
+            ASSERT_NE(node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS, 0);
+            break;
+          case xnn_node_type_fully_connected:
+            ASSERT_EQ(node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS, 0);
+            break;
+          default:
+            XNN_UNREACHABLE;
+        }
       });
 }
 
@@ -2003,9 +2020,17 @@ TEST_P(RewriteGemmTest, DoesNotRewritesGoiToGioWithNonSpuriousTranspose) {
       /*expected_node_type_counts=*/{{xnn_node_type_static_transpose, 1}},
       /*test_fn=*/
       [](xnn_subgraph_t subgraph) {
-        const xnn_node* bmm_node = &subgraph->nodes[subgraph->num_nodes - 1];
-        ASSERT_EQ(bmm_node->type, xnn_node_type_batch_matrix_multiply);
-        ASSERT_NE(bmm_node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS, 0);
+        const xnn_node* node = &subgraph->nodes[subgraph->num_nodes - 1];
+        switch (node->type) {
+          case xnn_node_type_batch_matrix_multiply:
+            ASSERT_NE(node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS, 0);
+            break;
+          case xnn_node_type_fully_connected:
+            ASSERT_EQ(node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS, 0);
+            break;
+          default:
+            XNN_UNREACHABLE;
+        }
       });
 }
 

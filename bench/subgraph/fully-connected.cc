@@ -202,16 +202,20 @@ BENCHMARK(QD8FullyConnected)
 static void FullyConnectedArgs(benchmark::internal::Benchmark* b) {
   b->ArgNames({"M", "K", "N"});
 
-  static const std::array<int64_t, 17> kDims = {
-      1,   2,   4,    8,    16,   32,   64,    128,
-      256, 512, 1024, 2048, 4096, 8192, 16384, 65536};
-  const int64_t kMinK = 8;
+  static const std::array<int64_t, 18> kDims = {
+      1,   2,    4,    8,    16,   32,    64,    128,  256,
+      512, 1024, 2048, 4096, 8192, 16384, 32768, 65536};
+  const int64_t kMinK = 1024;
+  const int64_t kMinM = 32;
   const int64_t kMaxSmall = 16;
   const int64_t kMinHuge = 1024;
   const int64_t kMinFLOPs = (int64_t)1 << 16;
   const int64_t kMaxFLOPs = (int64_t)1 << 30;
 
   for (int64_t m : kDims) {
+    if (m < kMinM) {
+      continue;
+    }
     for (int64_t k : kDims) {
       if (k < kMinK) {
         continue;

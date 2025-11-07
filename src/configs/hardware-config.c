@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "src/configs/hardware_utils.h"
 
 #if XNN_ENABLE_CPUINFO
 #include <cpuinfo.h>
@@ -462,6 +463,7 @@ static void init_hardware_config(void) {
     hardware_config.uarch[i] = xnn_uarch_unknown;
   }
 #endif  // XNN_ENABLE_CPUINFO
+  xnn_set_cache_data(&hardware_config);
 }
 
 const struct xnn_hardware_config* xnn_init_hardware_config() {

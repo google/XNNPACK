@@ -6,6 +6,7 @@
 load(
     "//:build_defs.bzl",
     "xnnpack_cc_library",
+    "xnnpack_cxx_library",
     "xnnpack_select_if",
 )
 
@@ -48,11 +49,24 @@ xnnpack_cc_library(
     ],
 )
 
+xnnpack_cxx_library(
+    name = "hardware_utils",
+    srcs = ["hardware_utils.cc"],
+    hdrs = ["hardware_utils.h"],
+    textual_hdrs = ["//:src/xnnpack/hardware-config.h"],
+    deps = [
+        "//:common",
+        "//:logging",
+        "@com_google_benchmark//:benchmark",
+    ],
+)
+
 xnnpack_cc_library(
     name = "hardware_config",
     srcs = ["hardware-config.c"],
     hdrs = ["//:src/xnnpack/hardware-config.h"],
     deps = [
+        ":hardware_utils",
         "//:common",
         "//:init_once",
         "//:logging",
