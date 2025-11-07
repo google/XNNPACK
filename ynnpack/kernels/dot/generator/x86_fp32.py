@@ -51,6 +51,7 @@ class x86_avx_fp32(x86_fp32, x86_avx):
 class x86_fma3_fp32(x86_fp32, x86_avx):
   def __init__(self):
     super().__init__("fma3", 256, (1, 8, 1))
+    self.flags += ["dot_flag::consistent_arithmetic"]
 
   def product(self, i, j, k):
     return f"c_{i}_{j} = {self._mm()}_fmadd_ps(a_{i}_{k}, b_{k}_{j}, c_{i}_{j});\n"
@@ -59,6 +60,7 @@ class x86_fma3_fp32(x86_fp32, x86_avx):
 class x86_avx512f_fp32(x86_fp32, x86_avx512f):
   def __init__(self):
     super().__init__("avx512f", 512, (1, 16, 1))
+    self.flags += ["dot_flag::consistent_arithmetic"]
 
   def product(self, i, j, k):
     return f"c_{i}_{j} = {self._mm()}_fmadd_ps(a_{i}_{k}, b_{k}_{j}, c_{i}_{j});\n"

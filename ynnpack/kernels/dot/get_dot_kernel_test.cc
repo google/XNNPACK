@@ -29,8 +29,9 @@ std::map<dot_kernel_fn, std::string> kernels = {
 const std::string& get_dot_kernel_name(
     const dot_type& type, const dot_shape& shape, uint64_t arch_flags,
     const dot_packed_shape* packed_shape = nullptr) {
-  return kernels[get_dot_kernel(type, shape, packed_shape, std::nullopt,
-                                arch_flags)
+  return kernels[get_dot_kernel(type, shape, packed_shape,
+                                /*consistent_arithmetic=*/false,
+                                /*transpose_a=*/std::nullopt, arch_flags)
                      .kernel];
 }
 

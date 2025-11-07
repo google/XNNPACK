@@ -603,6 +603,21 @@ cc_test(
 )
 
 cc_test(
+    name = "consistent_arithmetic_test",
+    srcs = ["consistent_arithmetic_test.cc"],
+    deps = [
+        ":dot",
+        "//ynnpack/base",
+        "//ynnpack/base/test:buffer",
+        "//ynnpack/base/test:fuzz_test",
+        "//ynnpack/base/test:random",
+        "//ynnpack/base/test:tensor",
+        "//ynnpack/base/test:util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "schedule_test",
     srcs = ["schedule_test.cc"],
     deps = [

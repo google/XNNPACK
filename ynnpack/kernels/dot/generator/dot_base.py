@@ -47,6 +47,7 @@ class dot_base:
     self.c_type = ""
     self.b_chunk_n = 1
     self.min_tiles = 4
+    self.flags = []
 
   def header(self):
     return """
@@ -482,10 +483,15 @@ do {
         f"dot_{self.kind}_{m}x{n}x{k}_{'x'.join(str(s) for s in self.tile_shape)}_{self.arch}"
     )
 
+    if self.flags:
+      flags = " | ".join(self.flags)
+    else:
+      flags = "0"
+
     inc = ""
     inc += (
-        f"YNN_DOT_KERNEL(arch_flag::{self.arch}, {func_name}, {m},"
-        f" {n}, {k}, {self.tile_shape[1]}, {self.tile_shape[2]}, /*flags=*/0,"
+        f"YNN_DOT_KERNEL(arch_flag::{self.arch}, {func_name}, {m}, {n}, {k},"
+        f" {self.tile_shape[1]}, {self.tile_shape[2]}, /*flags=*/{flags},"
         f" {self.a_type}, {self.b_type}, {self.c_type})\n"
     )
 

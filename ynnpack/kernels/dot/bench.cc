@@ -13,6 +13,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <optional>
 #include <sstream>
 #include <string>
 
@@ -129,7 +130,9 @@ void get_dot_kernel(benchmark::State& state, A, B, C) {
 
   dot_type type = {type_of<A>(), type_of<B>(), type_of<C>()};
   for (auto _ : state) {
-    get_dot_kernel(type, {m, n, k}, &packed_shape, all_archs);
+    get_dot_kernel(type, {m, n, k}, &packed_shape,
+                   /*consistent_arithmetic=*/false,
+                   /*transpose_a=*/std::nullopt, all_archs);
   }
 }
 

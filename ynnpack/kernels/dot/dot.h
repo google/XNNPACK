@@ -25,6 +25,12 @@ enum {
   // - The {i, tile_k} dimension is dense (stride of 1 element).
   // - `a_stride_m` indicates the stride of the k1 / tile_k dimension.
   transpose_a = 1 << 0,
+
+  // This kernel produces results that are numerically consistent with all other
+  // kernels of the same type with this flag. For the most part,
+  // fp32 `tile_k = 1` kernels to be numerically consistent, and bf16/fp16
+  // `tile_k = 2` kernels to be numerically consistent for bf16 and fp16.
+  consistent_arithmetic = 1 << 1,
 };
 
 }  // namespace dot_flag
@@ -116,6 +122,7 @@ struct dot_packed_shape {
 // if *transpose_a is true.
 dot_kernel get_dot_kernel(const dot_type& type, const dot_shape& shape = {},
                           const dot_packed_shape* dot_packed_shape = nullptr,
+                          bool consistent_arithmetic = false,
                           std::optional<bool> transpose_a = std::nullopt,
                           uint64_t arch_flags = get_supported_arch_flags());
 
