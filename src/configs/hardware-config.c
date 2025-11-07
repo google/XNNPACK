@@ -33,6 +33,7 @@
 #if XNN_ARCH_HEXAGON
 // TODO - use CPUINFO
 #include <qurt.h>
+#include "HAP_farf.h"
 #include "HAP_power.h"  // NOLINT - part of the hexagon SDK
 #endif
 
@@ -263,10 +264,10 @@ static void init_hardware_config(void) {
   }
 
   // TODO: use xnn_log_info
-  printf("HEXAGON UARCH VERSION %x\n", arch_version);
+  FARF(ALWAYS, "HEXAGON UARCH VERSION %x\n", arch_version);
 
-  // TODO(b/435522481): Support v69.
-  if (arch_version >= 0x73) {
+  // v69 is in Samsung S22
+  if (arch_version >= 0x69) {
     set_arch_flag(xnn_arch_hvx, XNN_ENABLE_HVX);
   }
 
@@ -275,14 +276,14 @@ static void init_hardware_config(void) {
   if (qurt_sysenv_get_max_hw_threads(&hardware_threads) == QURT_EOK) {
     max_hthreads = hardware_threads.max_hthreads;
   }
-  printf("HEXAGON HTHREADS %d\n", max_hthreads);
+  FARF(ALWAYS, "HEXAGON HTHREADS %d\n", max_hthreads);
 
   unsigned int clkFreqHz = 0;
   HAP_power_response_t response = {.type = HAP_power_get_clk_Freq};
   if (HAP_power_get(NULL, &response) == AEE_SUCCESS) {
     clkFreqHz = response.clkFreqHz;
   }
-  printf("HEXAGON CLKFREQHZ %d\n", clkFreqHz);
+  FARF(ALWAYS, "HEXAGON CLKFREQHZ %d\n", clkFreqHz);
 #endif  // XNN_ARCH_HEXAGON
 
   #if XNN_ARCH_RISCV
