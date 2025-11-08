@@ -251,6 +251,11 @@ struct optimizer {
     if (!is_arch_supported(arch, supported_arch_flags)) {
       return;
     }
+    assert(block_m > 0);
+    assert(block_n > 0);
+    assert(block_k > 0);
+    assert(tile_n > 0);
+    assert(tile_k > 0);
     if ((required_tile_k && tile_k != required_tile_k) ||
         (required_block_n % tile_n != 0)) {
       // We wanted a kernel compatible with `packed_shape`, but this kernel is

@@ -119,7 +119,6 @@ void dot(benchmark::State& state, uint64_t arch_flags, dot_kernel_fn kernel,
 
 template <typename A, typename B, typename C>
 void get_dot_kernel(benchmark::State& state, A, B, C) {
-  constexpr uint64_t all_archs = -1;
   const size_t m = state.range(0);
   const size_t n = state.range(1);
   const size_t k = state.range(2);
@@ -132,7 +131,7 @@ void get_dot_kernel(benchmark::State& state, A, B, C) {
   for (auto _ : state) {
     get_dot_kernel(type, {m, n, k}, &packed_shape,
                    /*consistent_arithmetic=*/false,
-                   /*transpose_a=*/std::nullopt, all_archs);
+                   /*transpose_a=*/std::nullopt);
   }
 }
 
