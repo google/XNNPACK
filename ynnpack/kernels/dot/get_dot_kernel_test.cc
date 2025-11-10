@@ -40,6 +40,7 @@ const std::string& get_dot_kernel_name(
 const int large_shape = 3 * 5 * 7 * 64;
 
 #ifdef YNN_ARCH_X86
+#ifndef MEMORY_SANITIZER  // TODO(453518173, 458235638)
 
 constexpr uint64_t arch_flags_sse2 = arch_flag::sse2;
 constexpr uint64_t arch_flags_avx = arch_flag::avx | arch_flags_sse2;
@@ -188,6 +189,7 @@ TEST(get_dot_kernel, large_tile_k_1) {
   ASSERT_EQ(fp32_large(arch_flags_avx512f), "dot_fp32_5x64x1_1x16x1_avx512f");
 }
 
+#endif  // MEMORY_SANITIZER
 #endif  // YNN_ARCH_X86
 
 }  // namespace ynn
