@@ -31,6 +31,9 @@ enum {
   // fp32 `tile_k = 1` kernels to be numerically consistent, and bf16/fp16
   // `tile_k = 2` kernels to be numerically consistent for bf16 and fp16.
   consistent_arithmetic = 1 << 1,
+
+  // This kernel supports an unaligned B
+  unaligned_b = 1 << 2,
 };
 
 }  // namespace dot_flag

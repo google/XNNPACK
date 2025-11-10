@@ -97,6 +97,10 @@ YNN_INTRINSIC std::size_t min(std::size_t a, std::size_t b) {
   return a < b ? a : b;
 }
 
+YNN_INTRINSIC std::size_t sub_sat(std::size_t a, std::size_t b) {
+  return a > b ? a - b : 0;
+}
+
 }  // namespace
 """
 
@@ -454,6 +458,7 @@ do {
     n = min(self.block_shape[1], n * max(1, self.min_tiles // tiles))
 
     # If we're unrolling the tail, we need to avoid reading B out of bounds.
+    self.n = "N" if handle_tail else self.block_shape[1]
     self.b_chunk_n = self.tile_shape[1] if handle_tail else self.block_shape[1]
 
     self.block_shape = (self.block_shape[0], n, k)
@@ -496,7 +501,9 @@ do {
     )
 
     src = self.begin_func(func_name)
-    if (n != self.tile_shape[1]):
+    # If we claim b is unaligned, we might use slow masked loads in the tail
+    # case.
+    if (n != self.tile_shape[1] or "dot_flag::unaligned_b" in self.flags):
       # The main loop (n = block_shape.n)
       body = self.loop_j(n, k, False)
       src += indent(body, "  ") + "\n"
