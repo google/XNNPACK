@@ -472,8 +472,8 @@ void TestStaticShapeDynamicB(A, B, C) {
   TestScheduler scheduler(3);
 
   for (auto _ : FuzzTest(std::chrono::seconds(5))) {
-    const size_t a_rank = 2;  // rank_dist(rng);
-    const size_t b_rank = 2;  // rank_dist(rng);
+    const size_t a_rank = rank_dist(rng);
+    const size_t b_rank = rank_dist(rng);
     const size_t max_k_dims =
         std::min<size_t>(2, std::min(a_rank, b_rank) - 2) + 1;
     const size_t num_k_dims =
@@ -489,12 +489,35 @@ void TestStaticShapeDynamicB(A, B, C) {
     shapes.a.erase(shapes.a.begin(), shapes.a.begin() + a_broadcast_dims);
     shapes.b.erase(shapes.b.begin(), shapes.b.begin() + b_broadcast_dims);
 
+    ASSERT_EQ(shapes.b.size(), b_rank);
+
+    std::vector<int> b_perm = iota(0, b_rank);
+    // `Tensor::transpose` doesn't support type_element_count != 1, so it's
+    // tricky to test that codepath.
+    if (type_element_count(type_of<B>()) == 1) {
+      // Make a random transpose.
+      std::shuffle(b_perm.begin(), b_perm.end(), rng);
+      if (b_perm[b_perm.size() - 1] == b_perm.size() - 1 ||
+          b_perm[b_perm.size() - 2] == b_perm.size() - 1) {
+        // This transpose affects the innermost dimension.
+      } else if (!random_bool(rng)) {
+        // We can only optimize transposes where the stride 1 dimension is the n
+        // or k dimension, so filter out the rest (50% of the time).
+        b_perm = iota(0, b_rank);
+      }
+    }
+    std::vector<int> inv_b_perm = b_perm;
+    // Apply the inverse of the permutation, so the shape arrives as
+    // expected.
+    std::sort(inv_b_perm.begin(), inv_b_perm.end(),
+              [&](int i, int j) { return b_perm[i] < b_perm[j]; });
+
     SubgraphBuilder subgraph(4);
     const uint32_t a_id = 0;
     const uint32_t b_id = 1;
     const uint32_t output_id = 3;
     subgraph.AddInput(type_of<A>(), shapes.a, a_id)
-        .AddInput(type_of<B>(), shapes.b, b_id)
+        .AddInput(type_of<B>(), permute(inv_b_perm, shapes.b), b_id)
         .AddOutput(type_of<C>(), shapes.c, output_id);
 
     uint32_t c_id = 2;
@@ -510,7 +533,14 @@ void TestStaticShapeDynamicB(A, B, C) {
       subgraph.AddInput(type_of<C>(), shapes.c, c_id);
     }
 
-    subgraph.AddDot(num_k_dims, a_id, b_id, c_id, output_id);
+    uint32_t b_tr_id = b_id;
+    if (b_perm != iota(0, b_rank)) {
+      b_tr_id = YNN_INVALID_VALUE_ID;
+      subgraph.AddTensor(type_of<B>(), b_rank, b_tr_id);
+      subgraph.AddTranspose(b_perm, b_id, b_tr_id);
+    }
+
+    subgraph.AddDot(num_k_dims, a_id, b_tr_id, c_id, output_id);
 
     Runtime runtime(subgraph.GetSubgraph(),
                     random_bool(rng) ? &scheduler : nullptr);
@@ -518,7 +548,7 @@ void TestStaticShapeDynamicB(A, B, C) {
 
     for (int revalue = 0; revalue < 2; ++revalue) {
       Tensor<A> a(shapes.a);
-      Tensor<B> b(to_physical_shape<B>(shapes.b));
+      Tensor<B> b(to_physical_shape<B>(permute(inv_b_perm, shapes.b)));
       a.generate([&]() { return a_gen(rng); });
       b.generate([&]() { return b_gen(rng); });
 
@@ -544,6 +574,11 @@ void TestStaticShapeDynamicB(A, B, C) {
           .ReshapeRuntime()
           .InvokeRuntime();
       ASSERT_EQ(runtime.Status(), ynn_status_success);
+
+      // Apply the transpose so we can compute the reference result.
+      if (b_perm != iota(0, b_rank)) {
+        b = b.transpose(b_perm).deep_copy();
+      }
 
       // Put broadcast dimensions back for the reference computation.
       a = a.expand_dims(iota(0, a_broadcast_dims));

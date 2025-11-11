@@ -690,15 +690,12 @@ ynn_status always_alias_transpose(ynn_subgraph& subgraph, uint32_t& id) {
       // it is used elsewhere. The existing transpose op will likely be
       // invalidated as a dead operation.
       id = YNN_INVALID_VALUE_ID;
-      ynn_status status = define_static_transpose(&subgraph, op.permutation,
-                                                  b_producer->inputs[0], &id,
-                                                  /*alias=*/true);
-      if (status != ynn_status_success) {
-        return status;
-      }
+      return define_static_transpose(&subgraph, op.permutation,
+                                     b_producer->inputs[0], &id,
+                                     /*alias=*/true);
     }
   }
-  return ynn_status_success;
+  return ynn_status_unsupported_parameter;
 }
 
 bool is_constant(const ynn_subgraph& subgraph, uint32_t id, int depth = 5) {
@@ -782,10 +779,8 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
   assert(num_k_dims <= 3);
   assert(num_k_dims > 0);
 
-  ynn_status status = always_alias_transpose(*subgraph, input_b_id);
-  if (status != ynn_status_success) {
-    return status;
-  }
+  const bool b_transposed =
+      always_alias_transpose(*subgraph, input_b_id) == ynn_status_success;
 
   const ynn_value& a = subgraph->value(input_a_id);
   const ynn_value& b = subgraph->value(input_b_id);
@@ -840,10 +835,21 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
       (subgraph->flags & YNN_FLAG_CONSISTENT_ARITHMETIC) != 0;
   dot_kernel kernel = get_dot_kernel(
       type, shape, packed_shape, consistent_arithmetic, require_transpose_a);
-  dot_kernel unpacked_kernel = kernel;
-  if (kernel.tile_k != 1) {
-    unpacked_kernel = get_dot_kernel(
-        type, shape, &no_tile_k, consistent_arithmetic, require_transpose_a);
+  dot_kernel unpacked_kernel;
+  if (b_transposed) {
+    // If b is transposed, we might as well use the packing to do it.
+    // TODO(dsharlet): If the input is transposed, and used elsewhere, it might
+    // be better to let the input be transposed, and attempt to use an unpacked
+    // kernel instead. This is a tricky global optimization to make. Two
+    // transposes is not ideal, but packing should make the dot faster. It would
+    // be nice if we could simply describe all the ways in which something could
+    // be implemented, and let a global cost optimization decide what to do...
+  } else {
+    unpacked_kernel = kernel;
+    if (kernel.tile_k != 1) {
+      unpacked_kernel = get_dot_kernel(
+          type, shape, &no_tile_k, consistent_arithmetic, require_transpose_a);
+    }
   }
 
   // Insert a packing node (if necessary).
@@ -1027,8 +1033,7 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
     std::tie(split_n, split_m) =
         choose_split_factors(runtime, m, n, k, block_n);
 
-    if (as_constant(n) && as_constant(block_n) &&
-        *as_constant(n) <= *as_constant(block_n)) {
+    if (slinky::prove_true(n <= block_n)) {
       // We know n is smaller than the side of the area we want to compute,
       // don't split it.
       split_n = {};

@@ -256,7 +256,8 @@ struct optimizer {
     assert(tile_n > 0);
     assert(tile_k > 0);
     if ((required_tile_k && tile_k != required_tile_k) ||
-        (required_block_n % tile_n != 0)) {
+        ((flags & dot_flag::unaligned_b) == 0 &&
+         (required_block_n % tile_n != 0))) {
       // We wanted a kernel compatible with `packed_shape`, but this kernel is
       // not.
       return;
