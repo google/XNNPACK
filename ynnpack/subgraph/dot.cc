@@ -51,8 +51,8 @@ constexpr index_t cache_size_l2 = 128 * 1024;
 // The wrapper for the kernel we use when we actually want to run a dot kernel
 // on some buffers.
 auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
-                   size_t num_k_dims) {
-  return [type, consistent_arithmetic, transposed_a, num_k_dims](
+                   bool pack_b, size_t num_k_dims) {
+  return [type, consistent_arithmetic, transposed_a, pack_b, num_k_dims](
              slinky::raw_buffer a, slinky::raw_buffer b,
              slinky::buffer<const void, YNN_MAX_TENSOR_RANK> init_c,
              slinky::raw_buffer c) -> index_t {
@@ -94,7 +94,8 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
     const index_t k1_tail = (a_k1.extent() * a_tile_k) & (tile_k - 1);
     const index_t k2 = a_k2.extent();
     const index_t k3 = a_k3.extent();
-    const index_t block_n = b_ni.extent() * b_type_element_count;
+    const index_t block_n =
+        (pack_b ? b_ni.extent() : c_n.extent()) * b_type_element_count;
     const index_t b_stride_k3 = b_k3.stride();
     const index_t b_stride_k2 = b_k2.stride();
     // TODO: The kernels should probably expect this stride to be multiplied
@@ -172,8 +173,16 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
     if (a.rank > 0) {
       a.slice(0, c_m.min());
     }
-    b.slice({0, 1, 2});
-    b.slice(0, c_n.min() / block_n);
+    if (pack_b) {
+      // If b is packed, we must slice b at blocks of n.
+      b.slice({0, 1, 2});
+      b.slice(0, c_n.min() / block_n);
+    } else {
+      // If b is not packed, we need to just slice it at n.
+      b.slice(0);
+      b.slice(0, c_n.min());
+      b.slice({0, 1});
+    }
     for (size_t i = 1; i < num_k_dims; ++i) {
       b.slice(0);
     }
@@ -844,7 +853,7 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
   if (!pack_b) {
     // We don't want or need to pack B, but we still need to reshape it as if it
     // were packed.
-    static constexpr int32_t tile_k_blocks_n[2] = {0, 3};
+    static constexpr int32_t tile_k_blocks_n[2] = {-1, -4};
     ynn_status status = ynn_define_static_expand_dims(
         subgraph, 2, tile_k_blocks_n, input_b_id, &packed_b_id, /*flags=*/0);
     if (status != ynn_status_success) {
@@ -995,12 +1004,13 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
       attrs.allow_in_place = (1 << 2);
     }
     dot_type dot_type = {input_a.type, packed_b.type, output.type};
-    auto func = slinky::func::make(
-        make_dot_impl(dot_type, consistent_arithmetic, transpose_a, num_k_dims),
-        {{input_a.buffer, std::move(a_bounds)},
-         {packed_b.buffer, std::move(b_bounds)},
-         {input_c.buffer, std::move(c_bounds)}},
-        {{output.buffer, dims}}, std::move(attrs));
+    auto func =
+        slinky::func::make(make_dot_impl(dot_type, consistent_arithmetic,
+                                         transpose_a, pack_b, num_k_dims),
+                           {{input_a.buffer, std::move(a_bounds)},
+                            {packed_b.buffer, std::move(b_bounds)},
+                            {input_c.buffer, std::move(c_bounds)}},
+                           {{output.buffer, dims}}, std::move(attrs));
 
     slinky::expr block_n =
         pack_b ? packed_b.extent(1) * b_element_count : block_n_unpacked;
@@ -1034,7 +1044,8 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
       sched->loop_splits[i].step_is_required = true;
     }
 
-    if (pack_b && !packed_b.is_static()) {
+    if (pack_b && !packed_b.is_static() && sched->loop_splits.size() >= 2 &&
+        sched->loop_splits[1].axis == 1) {
       // Loop over n first so we don't redundantly compute the packing for each
       // split of m.
       std::swap(sched->loop_splits[0], sched->loop_splits[1]);

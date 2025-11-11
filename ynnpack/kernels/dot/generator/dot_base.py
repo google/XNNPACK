@@ -2,7 +2,10 @@
 
 Provides the basic structure and shared logic for generating dot kernels."""
 
+# pylint: disable=missing-function-docstring
+
 from collections.abc import Sequence
+
 
 def indent(text, prefix):
   return "\n".join(prefix + line if line else "" for line in text.splitlines())
@@ -111,25 +114,30 @@ YNN_INTRINSIC std::size_t sub_sat(std::size_t a, std::size_t b) {
     return self.tile_shape[1] * self.tile_shape[2]
 
   def begin_func(self, func_name):
-    return f"""
+    result = f"""
 void {func_name}(
     std::size_t M, std::size_t N, std::size_t K3, std::size_t K2, std::size_t K1,
     std::size_t A_stride_m, std::size_t A_stride_k3, std::size_t A_stride_k2, const void* A,
     std::size_t B_stride_k3, std::size_t B_stride_k2, std::size_t B_stride_k1, const void* B,
     std::size_t C_in_stride_m, const void* C_in, std::size_t C_out_stride_m, void* C_out) {{
-  assert(reinterpret_cast<uintptr_t>(B) % ({self.b_alignment_required()} * sizeof({self.b_type})) == 0);
   assert(M > 0);
   assert(N > 0);
   assert(K3 > 0);
   assert(K2 > 0);
   assert(K1 > 0);
   assert(M <= {self.block_shape[0]});
+"""
+
+    if "dot_flag::unaligned_b" not in self.flags:
+      result += f"""\
+  assert(reinterpret_cast<uintptr_t>(B) % ({self.b_alignment_required()} * sizeof({self.b_type})) == 0);
   assert(B_stride_k1 % ({self.tile_shape[1]} * sizeof({self.b_type})) == 0 || K1 == 1);
-""" + (
-        f"""\
-  assert(K1 % {self.tile_shape[2]} == 0);
-""" if self.tile_shape[2] > 1 else ""
-    )
+"""
+
+    if self.tile_shape[2] > 1:
+      result += f"  assert(K1 % {self.tile_shape[2]} == 0);\n"
+
+    return result
 
   def end_func(self):
     return "\n}\n"
