@@ -19,7 +19,6 @@
 #include <random>
 #include <vector>
 
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "src/xnnpack/isa-checks.h"
 #include "src/xnnpack/math.h"
@@ -67,7 +66,9 @@ TEST_F(F16SimdAVX512FP16Test, ConstF16FromFloat) {
 
 TEST_F(F16SimdAVX512FP16Test, SetZero) {
   xnn_storeu_f16(output_.data(), xnn_zero_f16());
-  EXPECT_THAT(ToFloat32(output_), testing::Each(testing::Eq(0.0f)));
+  for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+    ASSERT_EQ(output_[k], xnn_float16_from_float(0.0f));
+  }
 }
 
 TEST_F(F16SimdAVX512FP16Test, Add) {
