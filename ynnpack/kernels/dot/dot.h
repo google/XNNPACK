@@ -8,6 +8,7 @@
 
 #include <cstddef>
 #include <cstdint>  // IWYU pragma: keep
+#include <limits>
 #include <optional>
 
 #include "ynnpack/base/arch.h"  // IWYU pragma: keep
@@ -96,6 +97,7 @@ struct dot_kernel {
   int tile_n = 0;
   int tile_k = 0;
   uint32_t flags = 0;
+  float cost = std::numeric_limits<float>::infinity();
 };
 
 struct dot_shape {

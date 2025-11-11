@@ -103,6 +103,11 @@ struct ynn_value {
 
   std::string name() const;
 
+  // Get the extent of a dimension, or 1 if it is implicitly broadcasted.
+  slinky::expr extent(size_t i) const {
+    return i < extents.size() && extents[i].defined() ? extents[i] : 1;
+  }
+
   // Asserting that the value is reshapable to a static scalar value of type T,
   // returns that value.
   template <typename T>

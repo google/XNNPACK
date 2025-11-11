@@ -232,7 +232,6 @@ struct optimizer {
 
   // Outputs
   dot_kernel result;
-  float dot_cost = std::numeric_limits<float>::infinity();
   const char* kernel_used = nullptr;
 
   void operator()(uint64_t arch, int block_m, int block_n, int block_k,
@@ -267,15 +266,15 @@ struct optimizer {
                           tile_k) *
         dot_arch_cost_factor(arch);
     if (!required_tile_k && !required_block_n) {
-      char selected = dot_cost_k < dot_cost ? '*' : ' ';
+      char selected = dot_cost_k < result.cost ? '*' : ' ';
       YNN_LOG_DEBUG() << " " << selected << name << " cost=" << dot_cost_k;
     }
-    if (dot_cost_k >= dot_cost) {
+    if (dot_cost_k >= result.cost) {
       return;
     }
-    result = {kernel, block_m, block_n, block_k, tile_n, tile_k, flags};
+    result = {kernel, block_m, block_n, block_k,
+              tile_n, tile_k,  flags,   dot_cost_k};
     kernel_used = name;
-    dot_cost = dot_cost_k;
   }
 };
 
