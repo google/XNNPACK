@@ -56,10 +56,6 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
              slinky::raw_buffer a, slinky::raw_buffer b,
              slinky::buffer<const void, YNN_MAX_TENSOR_RANK> init_c,
              slinky::raw_buffer c) -> index_t {
-    // This modifies the dimensions of `init_c`, so we need to (shallow) copy it
-    // (above).
-    allow_broadcasting(init_c);
-
     // If the dot has fewer than 3 reduction dimensions, we use this dummy
     // dimension instead.
     slinky::dim dummy_dim = slinky::dim(0, 0, 0, 0);
@@ -134,7 +130,7 @@ auto make_dot_impl(dot_type type, bool consistent_arithmetic, bool transposed_a,
     assert(b_ni.min() == 0);
     assert(b_ni.extent() == 1 || b_ni.stride() == b.elem_size * tile_k);
     assert(b_k1o.min() == 0);
-    assert(b_k1o.extent() == 1 ||
+    assert(b_k1o.extent() == 1 || b_ni.extent() == 1 ||
            b_k1o.stride() == b_ni.stride() * b_ni.extent());
     assert(b_k2.min() == 0);
     assert(b_k3.min() == 0);
@@ -317,8 +313,9 @@ auto make_pack_impl() {
     assert(output_ki.min() == 0);
     assert(output_ni.min() == 0);
     assert(output_ko.min() == 0);
-    assert(output_ki.stride() == output.elem_size);
-    assert(output_ni.stride() == output_ki.stride() * tile_k);
+    assert(output_ki.extent() == 1 || output_ki.stride() == output.elem_size);
+    assert(output_ni.extent() == 1 || output_ki.extent() == 1 ||
+           output_ni.stride() == output_ki.stride() * tile_k);
     (void)output_ki;
 
     // Slice off the dimensions we will handle. We compute the offsets into the
@@ -1044,8 +1041,8 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
         runtime.make_schedule(dims, output.buffer, node.outputs[0], splits);
 
     // We want to use exactly these loop splits for two innermost dot loops.
-    for (size_t i = 0;
-         i < std::min<std::size_t>(2, sched->loop_splits.size()); i++) {
+    for (size_t i = 0; i < std::min<std::size_t>(2, sched->loop_splits.size());
+         i++) {
       sched->loop_splits[i].step_is_required = true;
     }
 

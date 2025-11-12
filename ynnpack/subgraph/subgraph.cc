@@ -76,6 +76,13 @@ ynn_status ynn_value::set_external_shape(size_t rank, const size_t* dims) {
 
   ynn::init_buffer(*data, ynn::type_size_bytes(type), rank, physical_dims,
                    data->base);
+
+  for (size_t d = 0; d < rank; ++d) {
+    if (!extents[d].defined() || slinky::is_constant(extents[d], 1)) {
+      data->dim(d) = slinky::dim::broadcast();
+    }
+  }
+
   return ynn_status_success;
 }
 

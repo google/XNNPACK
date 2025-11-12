@@ -19,14 +19,6 @@
 
 namespace ynn {
 
-void allow_broadcasting(slinky::raw_buffer& buf) {
-  for (size_t d = 0; d < buf.rank; ++d) {
-    if (buf.dim(d).min() != 0 || buf.dim(d).max() != 0) continue;
-    buf.dim(d).set_stride(0);
-    buf.dim(d).set_unbounded();
-  }
-}
-
 slinky::buffer_expr_ptr make_buffer_expr(slinky::var sym, int rank,
                                          slinky::expr elem_size) {
   slinky::buffer_expr_ptr buf = slinky::buffer_expr::make(sym, rank, elem_size);

@@ -41,14 +41,12 @@ auto make_unary_elementwise_params_impl(unary_kernel_fn kernel) {
              slinky::buffer<const void, YNN_MAX_TENSOR_RANK> a,
              slinky::buffer<const unary_params, YNN_MAX_TENSOR_RANK> params,
              slinky::buffer<void, YNN_MAX_TENSOR_RANK> x) -> slinky::index_t {
-    allow_broadcasting(params);
-
     // Try to fuse dimensions where possible.
     slinky::optimize_dims(x, a, params);
 
     // We're going to handle the two innermost dimensions with the kernel, or
     // treat them as broadcasts if there aren't two dimensions.
-    const slinky::dim broadcast(0, 0, 0);
+    const slinky::dim broadcast(0, 0, 0, 0);
 
     // Here, we can *only* support broadcasting of params in the kernel, so we
     // can only slice broadcasts. If we don't slice a dimension, use the
@@ -107,7 +105,7 @@ auto make_unary_elementwise_impl(unary_kernel_fn kernel) {
 
         // We're going to handle the two innermost dimensions with the kernel,
         // or treat them as broadcasts if there aren't two dimensions.
-        const slinky::dim broadcast(0, 0, 0);
+        const slinky::dim broadcast(0, 0, 0, 0);
 
         const slinky::dim& a_n = a.rank > 0 ? a.dim(0) : broadcast;
         const slinky::dim& x_n = x.rank > 0 ? x.dim(0) : broadcast;
@@ -150,15 +148,12 @@ auto make_binary_elementwise_impl(binary_kernel_fn kernel,
              slinky::buffer<const void, YNN_MAX_TENSOR_RANK> a,
              slinky::buffer<const void, YNN_MAX_TENSOR_RANK> b,
              slinky::buffer<void, YNN_MAX_TENSOR_RANK> x) -> slinky::index_t {
-    allow_broadcasting(a);
-    allow_broadcasting(b);
-
     // Try to fuse dimensions where possible.
     slinky::optimize_dims(x, a, b);
 
     // We're going to handle the two innermost dimensions with the kernel, or
     // treat them as broadcasts if there aren't two dimensions.
-    const slinky::dim broadcast(0, 0, 0);
+    const slinky::dim broadcast(0, 0, 0, 0);
 
     const slinky::dim& a_n = a.rank > 0 ? a.dim(0) : broadcast;
     const slinky::dim& b_n = b.rank > 0 ? b.dim(0) : broadcast;
@@ -208,16 +203,12 @@ auto make_ternary_elementwise_impl(ternary_kernel_fn kernel) {
                slinky::buffer<const void, YNN_MAX_TENSOR_RANK> b,
                slinky::buffer<const void, YNN_MAX_TENSOR_RANK> c,
                slinky::buffer<void, YNN_MAX_TENSOR_RANK> x) -> slinky::index_t {
-        allow_broadcasting(a);
-        allow_broadcasting(b);
-        allow_broadcasting(c);
-
         // Try to fuse dimensions where possible.
         slinky::optimize_dims(x, a, b, c);
 
         // We're going to handle the two innermost dimensions with the kernel,
         // or treat them as broadcasts if there aren't two dimensions.
-        const slinky::dim broadcast(0, 0, 0);
+        const slinky::dim broadcast(0, 0, 0, 0);
 
         const slinky::dim& a_n = a.rank > 0 ? a.dim(0) : broadcast;
         const slinky::dim& b_n = b.rank > 0 ? b.dim(0) : broadcast;
@@ -426,10 +417,6 @@ auto make_params_impl(init_unary_params_fn init_params) {
              slinky::buffer<const float, YNN_MAX_TENSOR_RANK> x_scale,
              slinky::buffer<const int32_t, YNN_MAX_TENSOR_RANK> x_zero_point,
              const slinky::buffer<unary_params>& params) -> slinky::index_t {
-    allow_broadcasting(a_scale);
-    allow_broadcasting(a_zero_point);
-    allow_broadcasting(x_scale);
-    allow_broadcasting(x_zero_point);
     slinky::for_each_element(
         [&](unary_params* params, const float* a_scale,
             const int32_t* a_zero_point, const float* x_scale,

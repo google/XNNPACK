@@ -89,7 +89,6 @@ auto make_unary_reduce_impl(ynn_reduce_operator op,
       // TODO: Do we need to slice init_c first? Or maybe just fall through to
       // slinky::copy and make it optimize this case?
     } else {
-      allow_broadcasting(init_c);
       slinky::copy(init_c, c);
     }
 

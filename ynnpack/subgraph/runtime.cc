@@ -48,6 +48,11 @@ void ynn_runtime_value::make_buffer(ynn_runtime& runtime,
     }
   }
   buffer = ynn::make_buffer_expr(symbol, rank(), std::move(elem_size));
+  for (size_t i = 0; i < rank(); ++i) {
+    if (!extents[i].defined() || slinky::is_constant(extents[i], 1)) {
+      buffer->dim(i) = slinky::dim::broadcast();
+    }
+  }
   assert(buffer->sym() == symbol);
 }
 
@@ -542,14 +547,17 @@ ynn_runtime::ynn_runtime(const ynn_subgraph& subgraph,
       value.symbol = symbols.insert_unique(value.name());
     }
     if (value.is_static()) {
+      for (size_t d = 0; d < value.extents.size(); ++d) {
+        if (!value.extents[d].defined() ||
+            slinky::is_constant(value.extents[d], 1)) {
+          value.data->dim(d) = slinky::dim::broadcast();
+        }
+      }
+
       value.buffer =
           slinky::buffer_expr::make_constant(value.symbol, value.data);
     } else if (value.is_external_input()) {
-      value.buffer = ynn::make_buffer_expr(value.symbol, value.rank(),
-                                           type_elem_size(value.type));
-      for (int d = 0; d < i.rank(); ++d) {
-        value.buffer->dim(d).fold_factor = slinky::dim::unfolded;
-      }
+      value.make_buffer(*this);
 
       if (!value.data) {
         value.data =
@@ -607,6 +615,15 @@ ynn_status ynn_runtime::build() {
     if (value.is_external_output()) {
       assert(value.buffer);
       outputs.push_back(value.buffer);
+    }
+
+    if (value.data) {
+      for (size_t d = 0; d < value.extents.size(); ++d) {
+        if (!value.extents[d].defined() ||
+            slinky::is_constant(value.extents[d], 1)) {
+          value.data->dim(d) = slinky::dim::broadcast();
+        }
+      }
     }
   }
 
