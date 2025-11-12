@@ -19,7 +19,6 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "include/experimental.h"
 #include "include/xnnpack.h"
 #include "src/subgraph/subgraph-utils.h"
 #include "src/xnnpack/buffer.h"
@@ -844,7 +843,7 @@ TEST_P(RewriteArithmeticTest, ElidesNoOpStaticShapeMul) {
         // Add a scalar static tensor with the value `1.0`.
         uint32_t static_one_value_id;
         std::tie(static_one_tensor, static_one_value_id) =
-            add_static_tensor<float>(rng, subgraph, /*shape=*/{1}, 1.0, 1.0);
+            add_static_tensor<float>(rng, subgraph, /*shape=*/{}, 1.0, 1.0);
 
         // Add the binary `multiply` op with the constant 1.0.
         auto inputs =
@@ -934,7 +933,7 @@ TEST_P(RewriteArithmeticTest, ElidesNoOpStaticShapeDiv) {
         // Add a scalar static tensor with the value `1.0`.
         uint32_t static_one_value_id;
         std::tie(static_one_tensor, static_one_value_id) =
-            add_static_tensor<float>(rng, subgraph, /*shape=*/{1}, 1.0, 1.0);
+            add_static_tensor<float>(rng, subgraph, /*shape=*/{}, 1.0, 1.0);
 
         // Add the binary `divide` op by the constant 1.0.
         subgraph.AddBinary(xnn_binary_divide, /*params=*/nullptr,
@@ -1022,7 +1021,7 @@ TEST_P(RewriteArithmeticTest, ElidesNoOpStaticShapeAdd) {
         // Add a scalar static tensor with the value `0.0`.
         uint32_t static_zero_value_id;
         std::tie(static_zero_tensor, static_zero_value_id) =
-            add_static_tensor<float>(rng, subgraph, /*shape=*/{1}, 0.0, 0.0);
+            add_static_tensor<float>(rng, subgraph, /*shape=*/{}, 0.0, 0.0);
 
         // Add the binary `add` op with the constant 0.0.
         auto inputs =
@@ -1112,7 +1111,7 @@ TEST_P(RewriteArithmeticTest, ElidesNoOpStaticShapeSub) {
         // Add a scalar static tensor with the value `0.0`.
         uint32_t static_zero_value_id;
         std::tie(static_zero_tensor, static_zero_value_id) =
-            add_static_tensor<float>(rng, subgraph, /*shape=*/{1}, 0.0, 0.0);
+            add_static_tensor<float>(rng, subgraph, /*shape=*/{}, 0.0, 0.0);
 
         // Add the binary `subtract` op with the constant 0.0.
         subgraph.AddBinary(xnn_binary_subtract, /*params=*/nullptr,
@@ -1247,7 +1246,7 @@ TEST_P(RewriteArithmeticTest, ElidesNoOpChainOfStaticShapeMulZeroAdd) {
         // Add a scalar static tensor with the value `0.0`.
         uint32_t static_zero_value_id;
         std::tie(static_zero_tensor, static_zero_value_id) =
-            add_static_tensor<float>(rng, subgraph, /*shape=*/{1}, 0.0, 0.0);
+            add_static_tensor<float>(rng, subgraph, /*shape=*/{}, 0.0, 0.0);
 
         // Add the binary `multiply` op with the constant 0.0.
         uint32_t dynamic_zero_value_id =
@@ -1361,7 +1360,7 @@ TEST_P(RewriteArithmeticTest, ElidesNoOpChainOfStaticShapeDivOneMul) {
         // Add a scalar static tensor with the value `1.0`.
         uint32_t static_one_value_id;
         std::tie(static_one_tensor, static_one_value_id) =
-            add_static_tensor<float>(rng, subgraph, /*shape=*/{1}, 1.0, 1.0);
+            add_static_tensor<float>(rng, subgraph, /*shape=*/{}, 1.0, 1.0);
 
         // Add the static `1.0` to the absolute value of the inputs to make sure
         // they are non-negative
