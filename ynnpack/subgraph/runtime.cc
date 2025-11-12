@@ -87,9 +87,6 @@ std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
   // Enough tasks to have good load balancing.
   slinky::index_t target_task_count = max_threads > 1 ? max_threads * 2 : 1;
 
-  // Area is selected such that tiles fit better into cache, this is a
-  // constant for now, but we could add a more advanced logic based on
-  // hardware info.
   assert(dims.size() == output->rank() || dims.size() + 1 == output->rank());
   // For min_max reductions dims.size() + 1 == output.rank().
   // Otherwise, dims.size() == output->rank().
@@ -100,6 +97,9 @@ std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
   }
   assert(output->rank() == output_extents.size());
 
+  // Area is selected such that tiles fit better into cache, this is a
+  // constant for now, but we could add a more advanced logic based on
+  // hardware info.
   slinky::expr tile_area = slinky::ceil_div(slinky::expr(32768 * 4),
                                             output->elem_size() * element_cost);
   std::vector<slinky::expr> splits(rank);
