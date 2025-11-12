@@ -56,12 +56,14 @@ YNN_INTRINSIC __m{self.bits} unaligned_load_broadcast(const half* ptr) {{
 class x86_f16c_fp16_fp16_fp32(x86_fp16_fp16_fp32, x86_avx):
   def __init__(self):
     super().__init__(arch="f16c", bits=256, tile_shape=(1, 8, 1))
+    self.flags += ["dot_flag::consistent_arithmetic"]
 
 
 class x86_f16c_fma3_fp16_fp16_fp32(x86_fp16_fp16_fp32, x86_avx):
 
   def __init__(self):
     super().__init__(arch="fma3", bits=256, tile_shape=(1, 8, 1))
+    self.flags += ["dot_flag::consistent_arithmetic"]
 
   def product(self, i, j, k):
     return (
@@ -73,6 +75,7 @@ class x86_avx512f_fp16_fp16_fp32(x86_fp16_fp16_fp32, x86_avx512f):
 
   def __init__(self):
     super().__init__(arch="avx512f", bits=512, tile_shape=(1, 16, 1))
+    self.flags += ["dot_flag::consistent_arithmetic"]
 
   def product(self, i, j, k):
     return (
