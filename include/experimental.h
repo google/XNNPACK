@@ -156,6 +156,8 @@ enum xnn_status xnn_fingerprint_fully_connected_nc_pqs8_qc8w();
 enum xnn_status xnn_fingerprint_fully_connected_nc_qd8_f32_qb4w_f16_scales();
 enum xnn_status xnn_fingerprint_fully_connected_nc_qdu8_f32_qb4w_f16_scales();
 enum xnn_status xnn_fingerprint_convolution2d_nchw(enum xnn_fingerprint_id fingerprint_id);
+enum xnn_status xnn_fingerprint_convolution2d_nhwc(enum xnn_fingerprint_id fingerprint_id);
+enum xnn_status xnn_fingerprint_deconvolution2d_nhwc(enum xnn_fingerprint_id fingerprint_id);
 
 #ifdef __cplusplus
 }  // extern "C"
