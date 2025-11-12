@@ -265,6 +265,25 @@ ynn_generate_src_hdr(
 )
 
 ynn_generate_src_hdr(
+    name = "x86_f16c_fp16_fp16_fp32",
+    compatible_with = _COMPATIBLE_WITH,
+    generator = "//ynnpack/kernels/dot/generator",
+    generator_args = [
+        "x86_f16c_fp16_fp16_fp32",
+        "dot,1x32x1",
+        "dot,2x32x1",
+        "dot,2x16x1",
+        "dot,3x16x1",
+        "dot,4x16x1",
+        "dot,4x8x1",
+        "dot,6x8x1",
+        "dot,8x8x1",
+    ],
+    output_hdr = "x86_f16c_fp16_fp16_fp32.inc",
+    output_src = "x86_f16c_fp16_fp16_fp32.cc",
+)
+
+ynn_generate_src_hdr(
     name = "arm64_neon_fp32",
     compatible_with = _COMPATIBLE_WITH,
     generator = "//ynnpack/kernels/dot/generator",
@@ -508,6 +527,7 @@ ynn_cc_library(
         "x86_avx512vnni_uint8_int8_int32.inc",
         "x86_avx512vnni_uint8_int8_int32_k16.inc",
         "x86_avx_fp32.inc",
+        "x86_f16c_fp16_fp16_fp32.inc",
         "x86_fma3_fp32.inc",
         "x86_sse2_fp32.inc",
     ],
@@ -518,12 +538,9 @@ ynn_cc_library(
     ],
     per_arch_srcs = {
         "x86_sse2": ["x86_sse2_fp32.cc"],
-        "x86_avx": [
-            "x86_avx_fp32.cc",
-        ],
-        "x86_fma3": [
-            "x86_fma3_fp32.cc",
-        ],
+        "x86_avx": ["x86_avx_fp32.cc"],
+        "x86_f16c": ["x86_f16c_fp16_fp16_fp32.cc"],
+        "x86_fma3": ["x86_fma3_fp32.cc"],
         "x86_avx2": [
             "x86_avx2_int8_int8_int32.cc",
             "x86_avx2_fp32_k2.cc",

@@ -49,6 +49,9 @@ YNN_DOT_KERNEL(arch_flag::amxint8, dot_uint8_int8_int32_16x64x64_16x16x4_amxint8
 #ifdef YNN_ARCH_X86_AVX
 #include "ynnpack/kernels/dot/x86_avx_fp32.inc"
 #endif  // YNN_ARCH_X86_AVX
+#ifdef YNN_ARCH_X86_F16C
+#include "ynnpack/kernels/dot/x86_f16c_fp16_fp16_fp32.inc"
+#endif  // YNN_ARCH_X86_F16C
 #ifdef YNN_ARCH_X86_AVX2
 #ifndef MEMORY_SANITIZER  // TODO(b/458235638)
 #include "ynnpack/kernels/dot/x86_avx2_fp32_k2.inc"
