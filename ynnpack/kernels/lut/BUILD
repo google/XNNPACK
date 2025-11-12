@@ -16,7 +16,7 @@ cc_library(
         "lut.h",
     ],
     compatible_with = _COMPATIBLE_WITH,
-    visibility = ["//ynnpack:__subpackages__"],
+    visibility = ["//visibility:private"],
     deps = [
         "//ynnpack:ynnpack_h",
         "//ynnpack/base",
