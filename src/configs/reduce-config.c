@@ -73,25 +73,26 @@ XNN_INIT_ONCE_GUARD(qu8_rsum);
   xnn_log_info("Using reduce_discontiguous microkernel '%s'.", #ukernel);
 
 static uint32_t pack_xint8_x4(uint8_t value) {
-  uint32_t result;
-  *((uint8_t*) &result) = value;
-  *((uint8_t*) &result + 1) = value;
-  *((uint8_t*) &result + 2) = value;
-  *((uint8_t*) &result + 3) = value;
+  uint32_t v32 = (uint32_t)value;
+  uint32_t result = v32 | (v32 << 8) | (v32 << 16) | (v32 << 24);
   return result;
 }
 
 static uint32_t pack_uint16_x2(uint16_t value) {
-  uint32_t result;
-  *((uint16_t*) &result) = value;
-  *((uint16_t*) &result + 1) = value;
+  uint32_t v32 = (uint32_t)value;
+  uint32_t result = v32 | (v32 << 16);
   return result;
 }
 
+typedef union {
+    float f;
+    uint32_t u;
+} FloatUInt32;
+
 static uint32_t pack_float32(float value) {
-  uint32_t result;
-  *((float*) &result) = value;
-  return result;
+  FloatUInt32 data;
+  data.f = value;
+  return data.u;
 }
 
 static void init_s8_rmax_config(void) {
