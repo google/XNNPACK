@@ -55,3 +55,14 @@ YNN_INTRINSIC __m{self.bits} unaligned_load_broadcast(const half* ptr) {{
 class x86_f16c_fp16_fp16_fp32(x86_fp16_fp16_fp32, x86_avx):
   def __init__(self):
     super().__init__(arch="f16c", bits=256, tile_shape=(1, 8, 1))
+
+
+class x86_f16c_fma3_fp16_fp16_fp32(x86_fp16_fp16_fp32, x86_avx):
+
+  def __init__(self):
+    super().__init__(arch="fma3", bits=256, tile_shape=(1, 8, 1))
+
+  def product(self, i, j, k):
+    return (
+        f"c_{i}_{j} = {self._mm()}_fmadd_ps(a_{i}_{k}, b_{k}_{j}, c_{i}_{j});\n"
+    )

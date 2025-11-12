@@ -175,6 +175,14 @@ define_build_option(
 )
 
 define_build_option(
+    name = "ynn_enable_x86_f16c_fma3",
+    default_all = [
+        ":ynn_enable_x86_f16c",
+        ":ynn_enable_x86_fma3",
+    ],
+)
+
+define_build_option(
     name = "ynn_enable_x86_avx2",
     default_all = [":ynn_enable_x86_avx"],
 )

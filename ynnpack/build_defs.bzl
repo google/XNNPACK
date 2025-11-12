@@ -150,6 +150,10 @@ _YNN_PARAMS_FOR_ARCH = {
         "cond": "//ynnpack:ynn_enable_x86_f16c",
         "copts": ["-mf16c"],
     },
+    "x86_f16c_fma3": {
+        "cond": "//ynnpack:ynn_enable_x86_f16c_fma3",
+        "copts": ["-mf16c", "-mavx", "-mfma", "-mno-avx2"],
+    },
     "x86_avx2": {
         "cond": "//ynnpack:ynn_enable_x86_avx2",
         "copts": ["-mavx2"],
