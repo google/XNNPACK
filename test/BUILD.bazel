@@ -1024,6 +1024,29 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "fingerprint_cache_test",
+    srcs = ["fingerprint_cache.cc"],
+    deps = [
+        "//:XNNPACK",
+        "//:cache",
+        "//:fingerprint_cache",
+        "//:fingerprint_id",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "fingerprint_test",
+    srcs = ["fingerprint.cc"],
+    deps = [
+        "//:XNNPACK",
+        "//:cache",
+        "//:fingerprint_check",
+        "//:fingerprint_id",
+        "//:operators",
+    ],
+)
+
+xnnpack_unit_test(
     name = "weights_cache_test",
     srcs = ["weights-cache.cc"],
     deps = [
