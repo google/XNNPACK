@@ -5,6 +5,7 @@
 
 from ynnpack.kernels.dot.generator.x86 import x86
 from ynnpack.kernels.dot.generator.x86 import x86_avx
+from ynnpack.kernels.dot.generator.x86 import x86_avx512f
 
 
 class x86_fp16_fp16_fp32(x86):
@@ -61,6 +62,17 @@ class x86_f16c_fma3_fp16_fp16_fp32(x86_fp16_fp16_fp32, x86_avx):
 
   def __init__(self):
     super().__init__(arch="fma3", bits=256, tile_shape=(1, 8, 1))
+
+  def product(self, i, j, k):
+    return (
+        f"c_{i}_{j} = {self._mm()}_fmadd_ps(a_{i}_{k}, b_{k}_{j}, c_{i}_{j});\n"
+    )
+
+
+class x86_avx512f_fp16_fp16_fp32(x86_fp16_fp16_fp32, x86_avx512f):
+
+  def __init__(self):
+    super().__init__(arch="avx512f", bits=512, tile_shape=(1, 16, 1))
 
   def product(self, i, j, k):
     return (

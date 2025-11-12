@@ -303,6 +303,35 @@ ynn_generate_src_hdr(
 )
 
 ynn_generate_src_hdr(
+    name = "x86_avx512f_fp16_fp16_fp32",
+    compatible_with = _COMPATIBLE_WITH,
+    generator = "//ynnpack/kernels/dot/generator",
+    generator_args = [
+        "x86_avx512f_fp16_fp16_fp32",
+        "dot,1x64x1",
+        "dot,2x64x1",
+        "dot,3x64x1",
+        "dot,4x64x1",
+        "dot,5x64x1",
+        "dot,2x32x1",
+        "dot,3x32x1",
+        "dot,4x32x1",
+        "dot,5x32x1",
+        # The kernels which are commented out should be good, but for some
+        # reason they don't perform well. They don't seem to spill, so keeping them
+        # until we understand why are they slower.
+        # "dot,6x32x1",
+        # "dot,8x32x1",
+        # "dot,10x32x1",
+        # "dot,12x32x1",
+        "dot,5x16x1",
+        # "dot,16x16x1",
+    ],
+    output_hdr = "x86_avx512f_fp16_fp16_fp32.inc",
+    output_src = "x86_avx512f_fp16_fp16_fp32.cc",
+)
+
+ynn_generate_src_hdr(
     name = "arm64_neon_fp32",
     compatible_with = _COMPATIBLE_WITH,
     generator = "//ynnpack/kernels/dot/generator",
@@ -540,6 +569,7 @@ ynn_cc_library(
         "x86_avx512bw_int8_int8_int32.inc",
         "x86_avx512bw_int8_int8_int32_k16.inc",
         "x86_avx512f_bf16_bf16_fp32.inc",
+        "x86_avx512f_fp16_fp16_fp32.inc",
         "x86_avx512f_fp32.inc",
         "x86_avx512f_fp32_k2.inc",
         "x86_avx512f_fp32_k4.inc",
@@ -575,6 +605,7 @@ ynn_cc_library(
             "x86_avx512f_fp32_k2.cc",
             "x86_avx512f_fp32_k4.cc",
             "x86_avx512f_bf16_bf16_fp32.cc",
+            "x86_avx512f_fp16_fp16_fp32.cc",
         ],
         "x86_avx512bw": [
             "x86_avx512bw_int8_int8_int32.cc",
