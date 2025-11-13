@@ -76,22 +76,12 @@ selects.config_setting_group(
     ],
 )
 
-config_setting(
-    name = "windows_msvc",
-    constraint_values = [
-        "@platforms//os:windows",
+selects.config_setting_group(
+    name = "msvc",
+    match_any = [
+        "@rules_cc//cc/compiler:msvc-cl",
+        "@rules_cc//cc/compiler:clang-cl",
     ],
-    flag_values = {"@bazel_tools//tools/cpp:compiler": "msvc"},
-    visibility = ["//:__subpackages__"],
-)
-
-config_setting(
-    name = "windows_clangcl",
-    constraint_values = [
-        "@platforms//os:windows",
-    ],
-    flag_values = {"@bazel_tools//tools/cpp:compiler": "clangcl"},
-    visibility = ["//:__subpackages__"],
 )
 
 define_build_option(

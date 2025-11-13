@@ -211,13 +211,14 @@ def _map_copts_to_msvc(copts):
         "-mavx2": "/arch:AVX2",
         "-mavx512f": "/arch:AVX512",
         "-mavx512bw": "/arch:AVX512",
+        "-mavx512dq": "/arch:AVX512",
         "-mavx512bf16": "/arch:AVX512",
         "-mavx512fp16": "/arch:AVX512",
         "-mavx512vl": "/arch:AVX512",
         "-mavx512vnni": "/arch:AVX512",
         "-mfma": "/arch:AVX",
         "-mf16c": "/arch:AVX",
-        "-mamx": "/arch:AVX512",
+        "-mamx-tile": "/arch:AVX512",
     }
 
     # Here we use a dictionary to implement a set. We don't care about the values.
@@ -228,6 +229,12 @@ def _map_copts_to_msvc(copts):
             msvc_copts[to] = ""
 
     return list(msvc_copts.keys())
+
+def ynn_kernel_copts(unroll_loops = True):
+    return select({
+        "//ynnpack:msvc": ["/O2"],
+        "//conditions:default": ["-O2"] + ([] if unroll_loops else ["-fno-unroll-loops"]),
+    })
 
 def ynn_cc_library(
         name,
@@ -260,8 +267,7 @@ def ynn_cc_library(
         copts_arch = arch_params.get("copts", [])
         if type(copts_arch) == "list":
             copts_arch = select({
-                "//ynnpack:windows_clangcl": _map_copts_to_msvc(copts_arch),
-                "//ynnpack:windows_msvc": _map_copts_to_msvc(copts_arch),
+                "//ynnpack:msvc": _map_copts_to_msvc(copts_arch),
                 "//conditions:default": copts_arch,
             })
         else:

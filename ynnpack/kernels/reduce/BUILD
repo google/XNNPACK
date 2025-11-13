@@ -5,7 +5,7 @@
 
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
-load("//ynnpack:build_defs.bzl", "ynn_cc_library")
+load("//ynnpack:build_defs.bzl", "ynn_cc_library", "ynn_kernel_copts")
 
 _COMPATIBLE_WITH = []
 
@@ -40,10 +40,7 @@ ynn_cc_library(
         "sum_squared.inc",
     ],
     compatible_with = _COMPATIBLE_WITH,
-    copts = [
-        "-fno-unroll-loops",
-        "-O2",
-    ],
+    copts = ynn_kernel_copts(unroll_loops = False),
     per_arch_srcs = {
         "arm_neonfp16arith": [
             "arm_neonfp16arith.cc",

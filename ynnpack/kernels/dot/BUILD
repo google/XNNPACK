@@ -5,7 +5,7 @@
 
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
-load("//ynnpack:build_defs.bzl", "ynn_cc_library", "ynn_generate_src_hdr")
+load("//ynnpack:build_defs.bzl", "ynn_cc_library", "ynn_generate_src_hdr", "ynn_kernel_copts")
 
 _COMPATIBLE_WITH = []
 
@@ -582,10 +582,7 @@ ynn_cc_library(
         "x86_sse2_fp32.inc",
     ],
     compatible_with = _COMPATIBLE_WITH,
-    copts = [
-        "-fno-unroll-loops",
-        "-O2",
-    ],
+    copts = ynn_kernel_copts(unroll_loops = False),
     per_arch_srcs = {
         "x86_sse2": ["x86_sse2_fp32.cc"],
         "x86_avx": ["x86_avx_fp32.cc"],
