@@ -24,8 +24,10 @@
 #include "ynnpack/subgraph/utils.h"
 #include "slinky/base/arithmetic.h"
 #include "slinky/builder/pipeline.h"
+#include "slinky/builder/simplify.h"
 #include "slinky/runtime/buffer.h"
 #include "slinky/runtime/expr.h"
+#include "slinky/runtime/print.h"
 #include "slinky/runtime/stmt.h"
 
 namespace ynn {
@@ -363,7 +365,17 @@ ynn_status ynn_define_reduce(ynn_subgraph_t subgraph,
       attrs.allow_in_place = (1 << 1);
     }
     auto sched = std::make_unique<scheduling_info>();
-    if (!dims.empty()) {
+    slinky::expr output_count = 1;
+    for (const slinky::expr& e : output.extents) {
+      if (e.defined()) {
+        output_count *= e;
+      }
+    }
+    if (dims.empty() || slinky::prove_true(output_count == 1)) {
+      // This is a total reduction, so can't have any loops and we don't want
+      // to schedule it inside of any other loops.
+      sched->force_root = true;
+    } else {
       // The elementwise schedule is based on the output shape.
       // The cost of computation of a single output element is modeled
       // as the product of the reduction dimensions multiplied by the element
@@ -380,10 +392,6 @@ ynn_status ynn_define_reduce(ynn_subgraph_t subgraph,
           slinky::ceil_div(reduction_cost, slinky::expr(cost_scaling_factor));
       sched = runtime.make_schedule(dims, output.buffer, node.outputs[0], {},
                                     reduction_cost);
-    } else {
-      // This is a total reduction, so can't have any loops and we don't want
-      // to schedule it inside of any other loops.
-      sched->force_root = true;
     }
     auto func = slinky::func::make(
         make_unary_reduce_impl(op.op, kernel, op.k_dims),
