@@ -456,7 +456,7 @@ do {
     result += "\n} while (k3 > 0);\n"
     return result
 
-  def loop_j(self, n, k, handle_tail):
+  def loop_j(self, n, k, handle_tail=True):
     """Generate the loop over N."""
     tiles_m = self.block_shape[0] // self.tile_shape[0]
     tiles_n = n // self.tile_shape[1]
@@ -485,6 +485,23 @@ do {
 
     return loop
 
+  def define_func(self):
+    result = ""
+
+    # If we claim b is unaligned, we might use slow masked loads in the tail
+    # case.
+    if (
+        self.block_shape[1] != self.tile_shape[1]
+        or "dot_flag::unaligned_b" in self.flags
+    ):
+      # The main loop (n = block_shape.n)
+      result += (
+          self.loop_j(self.block_shape[1], self.block_shape[2], False) + "\n"
+      )
+    # The tail case (n = tile_shape.n))
+    result += self.loop_j(self.tile_shape[1], self.block_shape[2], True) + "\n"
+    return result
+
   def generate_dot(self, m, n, k):
     """Return the code and declaration for a dot kernel with block shape (m, n, k)."""
     self.block_shape = (m, n, k)
@@ -509,15 +526,7 @@ do {
     )
 
     src = self.begin_func(func_name)
-    # If we claim b is unaligned, we might use slow masked loads in the tail
-    # case.
-    if (n != self.tile_shape[1] or "dot_flag::unaligned_b" in self.flags):
-      # The main loop (n = block_shape.n)
-      body = self.loop_j(n, k, False)
-      src += indent(body, "  ") + "\n"
-    # The tail case (n = tile_shape.n))
-    body = self.loop_j(self.tile_shape[1], k, True)
-    src += indent(body, "  ") + "\n"
+    src += indent(self.define_func(), "  ")
     src += self.end_func()
 
     return src, inc

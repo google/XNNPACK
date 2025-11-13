@@ -85,13 +85,13 @@ class x86_avx512f_fp32(x86_fp32, x86_avx512f):
   def load_b_tile(self, k, j):
     mm = self._mm()
     ptr = self.b_ptr(k, j)
-    if self.n != "N":
-      return f"__m512 b_{k}_{j} = _mm512_loadu_ps({ptr});\n"
-    else:
-      zero = "_mm512_setzero_ps()"
-      mask = f"(uint32_t)((1 << min(16, sub_sat({self.n}, {j}))) - 1)"
-      mask = f"_cvtu32_mask16({mask})"
-      return f"__m512 b_{k}_{j} = {mm}_mask_loadu_ps({zero}, {mask}, {ptr});\n"
+    zero = "_mm512_setzero_ps()"
+    mask = f"(uint32_t)((1 << min(16, sub_sat({self.n}, {j}))) - 1)"
+    mask = f"_cvtu32_mask16({mask})"
+    return f"__m512 b_{k}_{j} = {mm}_mask_loadu_ps({zero}, {mask}, {ptr});\n"
+
+  def define_func(self):
+    return self.loop_j(self.block_shape[1], self.block_shape[2]) + "\n"
 
   def product(self, i, j, k):
     return f"c_{i}_{j} = {self._mm()}_fmadd_ps(a_{i}_{k}, b_{k}_{j}, c_{i}_{j});\n"
