@@ -277,13 +277,7 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_u128(
         const size_t num_chunks = round_up_po2(channels, 16) >> 4;
         // 0xF masks the remainder.
         const size_t remainder = channels & 0xF;
-        const size_t batch = channels & 0xF;
-        __mmask16 vmask;
-        if (remainder) {
-          assert(batch >= 1);
-          assert(batch <= 15);
-          vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
-        }
+        const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << remainder) - UINT32_C(1)));
         for (int r = k1; r > 0; r -= 7) {
           if XNN_UNPREDICTABLE(r < 2) {
             i1 = (const uint16_t*) zero;
