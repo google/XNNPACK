@@ -13,6 +13,7 @@
 #include <cstdint>
 #include <cstring>
 #include <memory>
+#include <numeric>
 #include <optional>
 #include <tuple>
 #include <utility>
@@ -1036,21 +1037,21 @@ ynn_status ynn_define_dot(ynn_subgraph_t subgraph, size_t num_k_dims,
       split_n = {};
     }
 
+    std::vector<slinky::index_t> loop_order = {0, 1};
+    if (pack_b && !packed_b.is_static()) {
+      // Loop over n first so we don't redundantly compute the packing for each
+      // split of m.
+      std::swap(loop_order[0], loop_order[1]);
+    }
+
     slinky::expr splits[] = {split_n, split_m};
-    auto sched =
-        runtime.make_schedule(dims, output.buffer, node.outputs[0], splits);
+    auto sched = runtime.make_schedule(dims, output.buffer, node.outputs[0],
+                                       splits, 1, loop_order);
 
     // We want to use exactly these loop splits for two innermost dot loops.
     for (size_t i = 0; i < std::min<std::size_t>(2, sched->loop_splits.size());
          i++) {
       sched->loop_splits[i].step_is_required = true;
-    }
-
-    if (pack_b && !packed_b.is_static() && sched->loop_splits.size() >= 2 &&
-        sched->loop_splits[1].axis == 1) {
-      // Loop over n first so we don't redundantly compute the packing for each
-      // split of m.
-      std::swap(sched->loop_splits[0], sched->loop_splits[1]);
     }
 
     // Schedule the output buffer to be stored at the same level as it's

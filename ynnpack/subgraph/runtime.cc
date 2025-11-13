@@ -79,7 +79,8 @@ slinky::var ynn_runtime::make_global_variable(slinky::expr value,
 std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
     const std::vector<slinky::var>& dims, const slinky::buffer_expr_ptr output,
     uint32_t output_value, slinky::span<const slinky::expr> given_splits,
-    const slinky::expr& element_cost) {
+    const slinky::expr& element_cost,
+    const std::vector<slinky::index_t>& loop_order) {
   auto sched = std::make_unique<ynn::scheduling_info>();
 
   int max_threads = threadpool() ? threadpool()->thread_count() : 1;
@@ -104,7 +105,13 @@ std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
                                             output->elem_size() * element_cost);
   std::vector<slinky::expr> splits(rank);
   slinky::expr tile_area_so_far = 1;
-  for (int d = 0; d < rank; ++d) {
+
+  auto get_loop_dim = [&](int index_d) {
+    return index_d < loop_order.size() ? loop_order[index_d] : index_d;
+  };
+
+  for (int index_d = 0; index_d < rank; ++index_d) {
+    int d = get_loop_dim(index_d);
     if (!output_extents[d].defined()) continue;
     if (d < given_splits.size()) {
       splits[d] = given_splits[d];
@@ -124,7 +131,8 @@ std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
   std::vector<slinky::expr> workers(rank);
   slinky::expr threads_so_far = 1;
 
-  for (int d = rank - 1; d >= 0; --d) {
+  for (int index_d = rank - 1; index_d >= 0; --index_d) {
+    int d = get_loop_dim(index_d);
     if (max_threads == 1) {
       workers[d] = slinky::loop::serial;
     } else if (output_extents[d].defined() && splits[d].defined()) {
@@ -140,7 +148,8 @@ std::unique_ptr<ynn::scheduling_info> ynn_runtime::make_schedule(
     }
   }
 
-  for (int d = 0; d < rank; ++d) {
+  for (int index_d = 0; index_d < rank; ++index_d) {
+    int d = get_loop_dim(index_d);
     if (output_extents[d].defined() && splits[d].defined()) {
       sched->loop_splits.push_back({dims[d], splits[d], workers[d], d});
     }
