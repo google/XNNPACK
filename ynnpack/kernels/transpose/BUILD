@@ -37,6 +37,10 @@ ynn_cc_library(
             "x86_avx2.h",
             "x86_avx2.cc",
         ],
+        "hvx": [
+            "hvx.h",
+            "hvx.cc",
+        ],
     },
     visibility = ["//ynnpack:__subpackages__"],
     deps = [
