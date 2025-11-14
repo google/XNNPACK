@@ -1318,7 +1318,11 @@ static inline bool validate_datatypes_with_bias(
       }
       break;
     case xnn_datatype_qcint4:
-      if (input_datatype == xnn_datatype_qdint8 &&
+      if (input_datatype == xnn_datatype_fp32 &&
+          bias_datatype == xnn_datatype_fp32 &&
+          output_datatype == xnn_datatype_fp32) {
+        return true;
+      } else if (input_datatype == xnn_datatype_qdint8 &&
           bias_datatype == xnn_datatype_fp32 &&
           output_datatype == xnn_datatype_fp32) {
         return true;

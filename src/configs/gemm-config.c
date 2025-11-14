@@ -2307,6 +2307,7 @@ static void init_qd8_f32_qc2w_gemm_config(void) {
   assert(hardware_config != NULL);
   if (XNN_ENABLE_ARM_DOTPROD && (hardware_config->arch_flags & xnn_arch_arm_neon_dot)) {
 #if XNN_ENABLE_ARM_DOTPROD
+    qd8_f32_qc2w_gemm_config.arch = xnn_arch_arm_neon_dot;
     qd8_f32_qc2w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] =
         xnn_init_hmp_dqgemm_ukernel(
             (xnn_dqgemm_ukernel_fn)
