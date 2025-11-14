@@ -349,7 +349,6 @@ struct xnn_operator {
     struct slice_context slice;
     struct spmm_context spmm;
     struct subconv_context subconv;
-    struct subgemm_context subgemm;
     struct transpose_context transpose;
     struct floating_point_softmax_context floating_point_softmax;
     struct u8_softmax_context u8_softmax;

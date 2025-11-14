@@ -402,7 +402,6 @@ XNN_PRIVATE void xnn_compute_grouped_inline_packed_qp8gemm(
     struct gemm_context* context, uint32_t thread_id, size_t group_index,
     size_t mr_block_start, size_t mr_block_size);
 
-#if XNN_MAX_UARCH_TYPES > 1
 XNN_PRIVATE void xnn_compute_hmp_grouped_gemm(
     struct gemm_context* context, uint32_t uarch_index, size_t group_index,
     size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
@@ -432,7 +431,6 @@ XNN_PRIVATE void xnn_compute_hmp_qp8gemm(
 XNN_PRIVATE void xnn_compute_hmp_inline_packed_qp8gemm(
     struct gemm_context* context, uint32_t uarch_index, size_t thread_id,
     size_t mr_block_start, size_t mr_block_size);
-#endif  // XNN_MAX_UARCH_TYPES > 1
 
 // Context for Sparse Matrix-Dense Matrix Multiplication.
 // C [MxN] := A [MxK] * B [KxN] + bias [N]
@@ -569,134 +567,43 @@ struct igemm_context {
   size_t per_thread_workspace_size;
 };
 
-XNN_PRIVATE void xnn_compute_grouped_dqigemm(
-    struct igemm_context* context, size_t group_index, size_t nr_block_start,
-    size_t mr_block_start, size_t nr_block_size, size_t mr_block_size);
-
-XNN_PRIVATE void xnn_compute_grouped_igemm(
-    struct igemm_context* context, size_t group_index, size_t nr_block_start,
-    size_t mr_block_start, size_t nr_block_size, size_t mr_block_size);
-
-XNN_PRIVATE void xnn_compute_grouped_batch_dqigemm(
-    struct igemm_context* context, size_t batch_index, size_t group_index,
-    size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
-    size_t mr_block_size);
-
-XNN_PRIVATE void xnn_compute_grouped_batch_igemm(
-    struct igemm_context* context, size_t batch_index, size_t group_index,
-    size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
-    size_t mr_block_size);
-
-XNN_PRIVATE void xnn_compute_dq_zero_buffer_igemm(struct igemm_context* context,
-                                                  size_t batch_index);
-
 XNN_PRIVATE void xnn_compute_dqigemm(struct igemm_context* context,
+                                     size_t batch_index, size_t group_index,
                                      size_t nr_block_start,
                                      size_t mr_block_start,
                                      size_t nr_block_size,
                                      size_t mr_block_size);
 
 XNN_PRIVATE void xnn_compute_igemm(struct igemm_context* context,
+                                   size_t batch_index, size_t group_index,
                                    size_t nr_block_start, size_t mr_block_start,
                                    size_t nr_block_size, size_t mr_block_size);
+
+XNN_PRIVATE void xnn_compute_dq_zero_buffer_igemm(struct igemm_context* context,
+                                                  size_t batch_index);
 
 XNN_PRIVATE void xnn_compute_conv2d_igemm_indirection(
     struct conv2d_igemm_indirection_init_context* context,
     size_t output_tile_start, size_t output_tile_size);
 
-XNN_PRIVATE void xnn_compute_batch_dqigemm(
-    struct igemm_context* context, size_t batch_index, size_t nr_block_start,
-    size_t mr_block_start, size_t nr_block_size, size_t mr_block_size);
-
-XNN_PRIVATE void xnn_compute_batch_igemm(
-    struct igemm_context* context, size_t batch_index, size_t nr_block_start,
-    size_t mr_block_start, size_t nr_block_size, size_t mr_block_size);
-
-XNN_PRIVATE void xnn_compute_batch_inline_packed_igemm(
-    struct igemm_context* context, uint32_t thread_id, size_t batch_index,
-    size_t mr_block_start, size_t mr_block_size);
-
-XNN_PRIVATE void xnn_compute_grouped_batch_inline_packed_igemm(
+XNN_PRIVATE void xnn_compute_inline_packed_igemm(
     struct igemm_context* context, uint32_t thread_id, size_t batch_index,
     size_t group_index, size_t mr_block_start, size_t mr_block_size);
 
-#if XNN_MAX_UARCH_TYPES > 1
-XNN_PRIVATE void xnn_compute_hmp_grouped_igemm(
-    struct igemm_context* context, uint32_t uarch_index, size_t group_index,
-    size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
-    size_t mr_block_size);
-
-XNN_PRIVATE void xnn_compute_hmp_grouped_dqigemm(
-    struct igemm_context* context, uint32_t uarch_index, size_t group_index,
-    size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
-    size_t mr_block_size);
-
-XNN_PRIVATE void xnn_compute_hmp_grouped_batch_dqigemm(
-    struct igemm_context* context, uint32_t uarch_index, size_t batch_index,
-    size_t group_index, size_t nr_block_start, size_t mr_block_start,
-    size_t nr_block_size, size_t mr_block_size);
-
-XNN_PRIVATE void xnn_compute_hmp_grouped_batch_igemm(
-    struct igemm_context* context, uint32_t uarch_index, size_t batch_index,
-    size_t group_index, size_t nr_block_start, size_t mr_block_start,
-    size_t nr_block_size, size_t mr_block_size);
-
 XNN_PRIVATE void xnn_compute_hmp_dqigemm(
-    struct igemm_context* context, uint32_t uarch_index, size_t nr_block_start,
-    size_t mr_block_start, size_t nr_block_size, size_t mr_block_size);
+    struct igemm_context* context, uint32_t uarch_index, size_t batch_index,
+    size_t group_index, size_t nr_block_start, size_t mr_block_start,
+    size_t nr_block_size, size_t mr_block_size);
 
 XNN_PRIVATE void xnn_compute_hmp_igemm(
-    struct igemm_context* context, uint32_t uarch_index, size_t nr_block_start,
-    size_t mr_block_start, size_t nr_block_size, size_t mr_block_size);
-
-XNN_PRIVATE void xnn_compute_batch_hmp_dqigemm(
     struct igemm_context* context, uint32_t uarch_index, size_t batch_index,
-    size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
-    size_t mr_block_size);
+    size_t group_index, size_t nr_block_start, size_t mr_block_start,
+    size_t nr_block_size, size_t mr_block_size);
 
-XNN_PRIVATE void xnn_compute_batch_hmp_igemm(
-    struct igemm_context* context, uint32_t uarch_index, size_t batch_index,
-    size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
-    size_t mr_block_size);
-
-XNN_PRIVATE void xnn_compute_batch_hmp_inline_packed_igemm(
-    struct igemm_context* context, uint32_t uarch_index, size_t thread_id,
-    size_t batch_index, size_t mr_block_start, size_t mr_block_size);
-
-XNN_PRIVATE void xnn_compute_grouped_batch_hmp_inline_packed_igemm(
+XNN_PRIVATE void xnn_compute_hmp_inline_packed_igemm(
     struct igemm_context* context, uint32_t uarch_index, size_t thread_id,
     size_t batch_index, size_t group_index, size_t mr_block_start,
     size_t mr_block_size);
-#endif  // XNN_MAX_UARCH_TYPES > 1
-
-struct subgemm_context {
-  const struct subconvolution_params* subconvolution_params;
-  size_t kc;
-  const void* a;
-  size_t ax_stride;
-  size_t ay_stride;
-  size_t cx_stride;
-  size_t cy_stride;
-  size_t cn_stride;
-  size_t ga_stride;
-  size_t gw_stride;
-  size_t gc_stride;
-  size_t ba_stride;
-  size_t bc_stride;
-  uint32_t log2_csize;
-  struct xnn_hmp_gemm_ukernel ukernel;
-  union {
-    union xnn_qs8_conv_minmax_params qs8;
-    union xnn_qu8_conv_minmax_params qu8;
-    struct xnn_f16_scaleminmax_params f16;
-    struct xnn_f32_minmax_params f32;
-  } params;
-};
-
-XNN_PRIVATE void xnn_compute_grouped_subgemm2d(
-    struct subgemm_context* context, size_t batch_index, size_t group_index,
-    size_t subkernel_index, size_t slice_y, size_t slice_x_start,
-    size_t nc_block_start, size_t slice_x_max, size_t nc_block_size);
 
 struct subconv_context {
   const struct subconvolution_params* subconvolution_params;
@@ -733,25 +640,15 @@ struct subconv_context {
 XNN_PRIVATE void xnn_compute_dq_zero_buffer_subconv(
     struct subconv_context* context, size_t batch_index, size_t batch_size);
 
-XNN_PRIVATE void xnn_compute_grouped_subconv2d(
-    struct subconv_context* context, size_t batch_index, size_t group_index,
-    size_t subkernel_index, size_t slice_y, size_t slice_x_start,
-    size_t nc_block_start, size_t slice_x_max, size_t nc_block_size);
-
-XNN_PRIVATE void xnn_compute_grouped_dqsubconv2d(
-    struct subconv_context* context, size_t batch_index, size_t group_index,
-    size_t subkernel_index, size_t slice_y, size_t slice_x_start,
-    size_t nc_block_start, size_t slice_x_max, size_t nc_block_size);
-
 XNN_PRIVATE void xnn_compute_subconv2d(
-    struct subconv_context* context, size_t batch_index, size_t subkernel_index,
-    size_t slice_y, size_t slice_x_start, size_t nc_block_start,
-    size_t slice_x_max, size_t nc_block_size);
+    struct subconv_context* context, size_t batch_index, size_t group_index,
+    size_t subkernel_index, size_t slice_y, size_t slice_x_start,
+    size_t nc_block_start, size_t slice_x_max, size_t nc_block_size);
 
 XNN_PRIVATE void xnn_compute_dqsubconv2d(
-    struct subconv_context* context, size_t batch_index, size_t subkernel_index,
-    size_t slice_y, size_t slice_x_start, size_t nc_block_start,
-    size_t slice_x_max, size_t nc_block_size);
+    struct subconv_context* context, size_t batch_index, size_t group_index,
+    size_t subkernel_index, size_t slice_y, size_t slice_x_start,
+    size_t nc_block_start, size_t slice_x_max, size_t nc_block_size);
 
 struct conv2d_context {
   size_t input_height;
