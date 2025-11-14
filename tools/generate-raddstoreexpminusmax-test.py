@@ -6,7 +6,6 @@
 
 import argparse
 import codecs
-import math
 import os
 import re
 import sys
@@ -182,13 +181,15 @@ def main(args):
 //   Specification: {specification}
 //   Generator: {generator}
 
+#include <cstddef>
 
 #include <gtest/gtest.h>
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/isa-checks.h"
-#include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/microparams-init.h"  // IWYU pragma: keep
 #include "src/xnnpack/raddstoreexpminusmax.h"
 #include "test/raddstoreexpminusmax-microkernel-tester.h"
+#include "src/xnnpack/hardware-config.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
     for ukernel_spec in spec_yaml:

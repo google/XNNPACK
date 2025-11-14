@@ -3,9 +3,10 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "src/xnnpack/microparams-init.h"
-#include "src/xnnpack/vcvt.h"
-#include "test/vunary-microkernel-tester.h"
+#include <gtest/gtest.h>
+#include "src/xnnpack/microparams-init.h"  // IWYU pragma: keep
+#include "src/xnnpack/vcvt.h"  // IWYU pragma: keep
+#include "test/vunary-microkernel-tester.h"  // IWYU pragma: keep
 
 #define XNN_QUANTIZED(T) xnnpack::quantized<T>
 #define XNN_UKERNEL(arch_flags, ukernel, batch_tile,         \

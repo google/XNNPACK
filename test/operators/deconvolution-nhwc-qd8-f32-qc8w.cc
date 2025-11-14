@@ -6,8 +6,7 @@
 #include <cstddef>
 
 #include <gtest/gtest.h>
-#include "include/xnnpack.h"
-#include "src/xnnpack/common.h"
+#include "src/xnnpack/config-types.h"
 #include "src/xnnpack/config.h"
 #include "test/operators/deconvolution-operator-tester.h"
 

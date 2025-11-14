@@ -6,22 +6,23 @@
 #ifndef XNNPACK_TEST_PACKW_MICROKERNEL_TESTER_H_
 #define XNNPACK_TEST_PACKW_MICROKERNEL_TESTER_H_
 
-#include <gtest/gtest.h>
-
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
-#include <limits>
+#include <functional>
 #include <numeric>
 #include <random>
-#include <vector>
 
+#include <gtest/gtest.h>
+#include "include/xnnpack.h"
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/common.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/microparams-init.h"
+#include "src/xnnpack/microparams.h"
 #include "src/xnnpack/pack.h"
 #include "test/replicable_random_device.h"
 

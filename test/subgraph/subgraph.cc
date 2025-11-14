@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <gtest/gtest.h>
+#include "src/xnnpack/buffer.h"
 #include "test/subgraph/runtime-tester.h"
 #include "test/subgraph/subgraph-tester.h"
 

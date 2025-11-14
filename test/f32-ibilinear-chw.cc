@@ -8,6 +8,7 @@
 //   Specification: test/f32-ibilinear-chw.yaml
 //   Generator: tools/generate-ibilinear-chw-test.py
 
+#include <cstddef>
 
 #include <gtest/gtest.h>
 #include "src/xnnpack/common.h"

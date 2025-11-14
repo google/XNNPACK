@@ -7,7 +7,7 @@
 
 #include <cstdint>
 
-#include <gtest/gtest.h>
+#include <gtest/gtest.h>  // IWYU pragma: keep
 
 #if GTEST_HAS_ABSL
 #include <absl/flags/flag.h>

@@ -3,8 +3,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <cstddef>
-
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
@@ -13,13 +11,11 @@
 #include <functional>
 #include <limits>
 #include <random>
-#include <vector>
 
 #include <gtest/gtest.h>
-#include "src/xnnpack/lut.h"
-#include "src/xnnpack/lut.h"
-#include "src/xnnpack/microfnptr.h"
 #include "src/xnnpack/buffer.h"
+#include "src/xnnpack/lut.h"  // IWYU pragma: keep
+#include "src/xnnpack/microfnptr.h"
 #include "test/replicable_random_device.h"
 
 class LUTNormMicrokernelTester {
