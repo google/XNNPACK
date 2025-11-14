@@ -1,11 +1,15 @@
-// Copyright 2019 Google LLC
+// Copyright 2019-2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
 #include "src/xnnpack/datatype.h"
 
+#include <assert.h>
+#include <stddef.h>
+
 #include "include/xnnpack.h"
+#include "src/xnnpack/common.h"
 
 bool xnn_datatype_is_real(enum xnn_datatype t) {
   switch (t) {
@@ -82,6 +86,20 @@ bool xnn_datatype_is_quantized(enum xnn_datatype t) {
     case xnn_datatype_int32:
     case xnn_datatype_pfp16:
     case xnn_datatype_pfp32:
+      return false;
+  }
+  XNN_UNREACHABLE;
+  return false;
+}
+
+bool xnn_datatype_is_dynamically_quantized(enum xnn_datatype t) {
+  switch (t) {
+    case xnn_datatype_pqint8:
+    case xnn_datatype_qdint8:
+    case xnn_datatype_qduint8:
+    case xnn_datatype_qpint8:
+      return true;
+    default:
       return false;
   }
   XNN_UNREACHABLE;

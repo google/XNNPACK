@@ -15,6 +15,7 @@
 
 #include "include/experimental.h"
 #include "include/xnnpack.h"
+#include "src/subgraph/subgraph-utils.h"
 #include "src/xnnpack/allocation-type.h"
 #include "src/xnnpack/allocator.h"
 #include "src/xnnpack/common.h"
@@ -3621,6 +3622,361 @@ static enum xnn_status optimize_common_subgraphs_gemm_rhs_transpose(
   return xnn_status_success;
 }
 
+// Converts batch-matrix-multiply nodes with 2D weights to fully-connected nodes
+// for consistency.
+static enum xnn_status optimize_common_subgraphs_bmm_to_fc(
+    xnn_subgraph_t subgraph, uint32_t node_id, size_t* changes) {
+  struct xnn_node* node = &subgraph->nodes[node_id];
+  if (node->type != xnn_node_type_batch_matrix_multiply) {
+    return xnn_status_success;
+  }
+
+  const uint32_t input_a_id = node->inputs[0];
+  const uint32_t input_b_id = node->inputs[1];
+  const uint32_t output_id = node->outputs[0];
+  struct xnn_value* input_b_value = &subgraph->values[input_b_id];
+  const enum xnn_datatype packed_input_datatype = node->packed_input_datatype;
+
+  // Weights should have at least two dimensions, and batch dimensions
+  // should all be 1.
+  if (input_b_value->shape.num_dims < 2 ||
+      xnn_shape_multiply_batch_dims(&input_b_value->shape, 2) != 1) {
+    return xnn_status_success;
+  }
+
+  // If the weights are dynamic, restrict to fp32/fp16.
+  if (!xnn_value_is_static(input_b_value->allocation_type) &&
+      !(input_b_value->datatype == xnn_datatype_fp32 ||
+        input_b_value->datatype == xnn_datatype_fp16)) {
+    return xnn_status_success;
+  }
+
+  // Replace with a fully-connected node.
+  XNN_RETURN_IF_ERROR(
+      xnn_define_fully_connected(
+          subgraph,
+          /*output_min=*/-INFINITY, /*output_max=*/INFINITY, input_a_id,
+          input_b_id, /*bias_id=*/XNN_INVALID_VALUE_ID, output_id,
+          node->flags ^ XNN_FLAG_TRANSPOSE_WEIGHTS),
+      "Failed to create new `fully_connected` node.");
+  node = &subgraph->nodes[node_id];
+  *node = subgraph->nodes[--subgraph->num_nodes];
+  node->id = node_id;
+  node->packed_input_datatype = packed_input_datatype;
+
+  xnn_log_info(
+      "Converted batch_matrix_multiply[#%u](v%03u, v%03u) to "
+      "fully_connected[#%u](v%03u, v%03u).",
+      node_id, input_a_id, input_b_id, node_id, input_a_id, input_b_id);
+  (*changes)++;
+
+  return xnn_status_success;
+}
+
+static uint32_t xnn_subgraph_new_workspace_value_like(
+    struct xnn_subgraph* subgraph, uint32_t value_id) {
+  struct xnn_value* new_value = xnn_subgraph_new_internal_value(subgraph);
+  const struct xnn_value* value = &subgraph->values[value_id];
+  const uint32_t new_value_id = new_value->id;
+  *new_value = *value;
+  new_value->id = new_value_id;
+  new_value->data = NULL;
+  new_value->allocation_type = xnn_allocation_type_workspace;
+  new_value->flags = 0;
+  return new_value_id;
+}
+
+// Splits fully-connected nodes with too large `k` dimension size along said
+// dimension.
+static enum xnn_status optimize_common_subgraphs_split_fc_along_k(
+    xnn_subgraph_t subgraph, uint32_t optimization_flags, uint32_t node_id,
+    size_t* changes) {
+  struct xnn_node* node = &subgraph->nodes[node_id];
+  if (node->type != xnn_node_type_fully_connected) {
+    return xnn_status_success;
+  }
+
+  // Get the inputs/outputs.
+  uint32_t input_id = node->inputs[0];
+  const uint32_t weights_id = node->inputs[1];
+  const uint32_t bias_id = node->inputs[2];
+  const uint32_t output_id = node->outputs[0];
+  struct xnn_value* weights_value = &subgraph->values[weights_id];
+  struct xnn_value* input_value = &subgraph->values[input_id];
+  struct xnn_value* output_value = &subgraph->values[output_id];
+  const uint32_t fully_connected_flags = node->flags;
+
+  // Get the "k" dimension.
+  const uint32_t input_k_dim = input_value->shape.num_dims - 1;
+  const bool is_gio = (node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) != 0;
+  const uint32_t weights_k_dim = is_gio ? weights_value->shape.num_dims - 2
+                                        : weights_value->shape.num_dims - 1;
+  const uint32_t weights_n_dim = is_gio ? weights_value->shape.num_dims - 1
+                                        : weights_value->shape.num_dims - 2;
+  const int64_t k_dim_size = weights_value->shape.dim[weights_k_dim];
+  const int64_t n_dim_size = weights_value->shape.dim[weights_n_dim];
+
+  // Get the `gemm_config` for this GEMM.
+  const enum xnn_datatype packed_input_datatype = node->packed_input_datatype;
+  const enum xnn_datatype assumed_input_type =
+      node->flags & XNN_FLAG_INLINE_LHS_PACKING ? packed_input_datatype
+                                                : input_value->datatype;
+  bool has_non_static_weights =
+      !xnn_value_is_static(weights_value->allocation_type) ||
+      ((bias_id != XNN_INVALID_VALUE_ID)
+           ? !xnn_value_is_static(subgraph->values[bias_id].allocation_type)
+           : false);
+  const struct xnn_gemm_config* gemm_config =
+      xnn_get_gemm_config_for_fc_op_type(
+          xnn_get_fully_connected_op_type(
+              assumed_input_type, weights_value->datatype,
+              output_value->datatype, has_non_static_weights),
+          n_dim_size, optimization_flags);
+  if (gemm_config == NULL) {
+    return xnn_status_success;
+  }
+
+  // Figure out the largest split size for which the input data for a single
+  // tile still fits in the L2 cache.
+  const size_t weights_datatype_bits =
+      xnn_datatype_size_bits(weights_value->datatype);
+  const size_t assumed_input_datatype_bits =
+      xnn_datatype_size_bits(assumed_input_type);
+  const int64_t weights_k_dim_bytes =
+      divide_round_up(k_dim_size * weights_datatype_bits, 8);
+  const int64_t input_k_dim_bytes =
+      divide_round_up(k_dim_size * assumed_input_datatype_bits, 8);
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  const int64_t l2_cache_bytes = hardware_config->l2_data_cache_bytes
+                                     ? hardware_config->l2_data_cache_bytes
+                                     : 1024 * 1024;
+  uint32_t num_k_slices = divide_round_up(
+      weights_k_dim_bytes * min(n_dim_size, 2 * gemm_config->nr) +
+          input_k_dim_bytes * gemm_config->mr,
+      l2_cache_bytes * 0.9);
+  if (num_k_slices == 1) {  // || n_dim_size < gemm_config->nr) {
+    return xnn_status_success;
+  }
+
+  xnn_log_info(
+      "Splitting %sfully_connected[#%u](v%03u, v%03u, v%03i, %s) into %u "
+      "slices along k.",
+      is_gio ? "transposed " : "", node_id, input_id, weights_id,
+      bias_id == XNN_INVALID_VALUE_ID ? -1 : (int)bias_id,
+      is_gio ? "gio" : "goi", num_k_slices);
+
+  // If the input was dynamically quantized, then we need to go one step
+  // back.
+  enum xnn_datatype cvt_input_to = xnn_datatype_invalid;
+  if (xnn_datatype_is_dynamically_quantized(input_value->datatype)) {
+    if (input_value->producer == XNN_INVALID_NODE_ID ||
+        subgraph->nodes[input_value->producer].type != xnn_node_type_convert) {
+      return xnn_status_success;
+    }
+    cvt_input_to = input_value->datatype;
+    input_id = subgraph->nodes[input_value->producer].inputs[0];
+  }
+
+  // Prepare some values that we will use often.
+  const size_t input_num_dims = subgraph->values[input_id].shape.num_dims;
+  const size_t weights_channel_dim =
+      weights_value->quantization.channel_dimension;
+  uint64_t input_slice_begins[XNN_MAX_TENSOR_DIMS] = {0};
+  uint64_t input_slice_ends[XNN_MAX_TENSOR_DIMS] = {0};
+  for (int k = 0; k < input_num_dims; k++) {
+    input_slice_ends[k] = subgraph->values[input_id].shape.dim[k];
+  }
+  uint32_t prev_output_slice_id = XNN_INVALID_VALUE_ID;
+  const uintptr_t k_stride =
+      divide_round_up(weights_datatype_bits * k_dim_size, 8);
+
+  // Loop over the slices of "k".
+  for (int sid = 0; sid < num_k_slices; sid++) {
+    xnn_log_info("Creating slice %i of %u.", sid, num_k_slices);
+
+    // Refresh the pointer to the weights value since we'll be modifying
+    // the subgraph in this loop.
+    weights_value = &subgraph->values[weights_id];
+
+    // Compute the location, shape, and size of the slice.
+    const int64_t k_slice_begin =
+        round_up_po2(sid * k_dim_size / num_k_slices, 32);
+    const int64_t k_slice_end = min(
+        round_up_po2((sid + 1) * k_dim_size / num_k_slices, 32), k_dim_size);
+    const int64_t k_slice_size = k_slice_end - k_slice_begin;
+    struct xnn_shape weights_slice_shape = weights_value->shape;
+    weights_slice_shape.dim[weights_k_dim] = k_slice_size;
+    input_slice_begins[input_k_dim] = k_slice_begin;
+    input_slice_ends[input_k_dim] = k_slice_end;
+
+    // Allocate and fill the slice data.
+    const size_t slice_size_bytes =
+        divide_round_up(weights_datatype_bits *
+                            xnn_shape_multiply_all_dims(&weights_slice_shape),
+                        8);
+
+    // Allocate and populate a buffer for the weights slice.
+    void* slice_data = NULL;
+    uint32_t weights_slice_flags = 0;
+    if (is_gio) {
+      // Point to an offset in the original weight data.
+      slice_data =
+          (void*)((uintptr_t)weights_value->data +
+                  k_slice_begin *
+                      divide_round_up(n_dim_size * weights_datatype_bits, 8));
+    } else {
+      // Allocate a buffer for the sliced weights.
+      slice_data = xnn_allocate_zero_memory(slice_size_bytes);
+      weights_slice_flags |= XNN_VALUE_FLAG_NEEDS_CLEANUP;
+
+      // Populate the buffer one row at a time.
+      const uintptr_t n_stride =
+          divide_round_up(weights_datatype_bits * k_slice_size, 8);
+      const uintptr_t weights_slice_offset =
+          (uintptr_t)weights_value->data +
+          divide_round_up(k_slice_begin * weights_datatype_bits, 8);
+      for (size_t idx_n = 0; idx_n < n_dim_size; idx_n++) {
+        memcpy((void*)((uintptr_t)slice_data + idx_n * k_slice_size),
+               (const void*)(weights_slice_offset + idx_n * k_stride),
+               n_stride);
+      }
+    }
+
+    // Create the static tensors containing the sliced weights.
+    uint32_t weights_slice_id = weights_id;
+    if (xnn_datatype_is_channelwise_quantized(weights_value->datatype)) {
+      XNN_RETURN_IF_ERROR(xnn_define_channelwise_quantized_tensor_value(
+                              subgraph, weights_value->datatype,
+                              weights_value->quantization.channelwise_scale,
+                              weights_slice_shape.num_dims, weights_channel_dim,
+                              weights_slice_shape.dim,
+                              /*data=*/slice_data,
+                              /*external_id=*/XNN_INVALID_VALUE_ID,
+                              /*flags=*/weights_slice_flags, &weights_slice_id),
+                          "Failed to create temporary sliced weights tensor.");
+    } else {
+      XNN_RETURN_IF_ERROR(
+          xnn_define_tensor_value(
+              subgraph, weights_value->datatype, weights_slice_shape.num_dims,
+              weights_slice_shape.dim,
+              /*data=*/slice_data,
+              /*external_id=*/XNN_INVALID_VALUE_ID,
+              /*flags=*/weights_slice_flags, &weights_slice_id),
+          "Failed to create temporary sliced weights tensor.");
+    }
+
+    // If `cvt_input_to` is set, add a `convert` or `lhs-packing` node.
+    uint32_t input_slice_id = input_id;
+    size_t input_element_offset = k_slice_begin;
+    size_t input_element_stride = k_dim_size;
+    if (cvt_input_to != xnn_datatype_invalid) {
+      struct xnn_shape input_slice_shape = input_value->shape;
+      input_slice_shape.dim[input_slice_shape.num_dims - 1] = k_slice_size;
+
+      // Create a value that hold the sliced input (can't get the convert node
+      // to re-use original input).
+      uint32_t tmp_slice_id = XNN_INVALID_VALUE_ID;
+      XNN_RETURN_IF_ERROR(
+          xnn_define_tensor_value(subgraph, input_value->datatype,
+                                  input_slice_shape.num_dims,
+                                  input_slice_shape.dim, /*data=*/NULL,
+                                  /*external_id=*/XNN_INVALID_VALUE_ID,
+                                  /*flags=*/0, &tmp_slice_id),
+          "Failed to create tensor for input slice.");
+
+      // Add a `static_slice` node to generate the sliced input data.
+      XNN_RETURN_IF_ERROR(xnn_define_static_slice_v3(
+          subgraph, input_slice_shape.num_dims, input_slice_begins,
+          input_slice_ends, /*strides=*/NULL, input_value->id, tmp_slice_id,
+          /*flags=*/0));
+
+      // Create a value that holds the dynamically quantized input data.
+      XNN_RETURN_IF_ERROR(
+          xnn_define_dynamically_quantized_tensor_value(
+              subgraph, cvt_input_to, input_slice_shape.num_dims,
+              /*num_nonbatch_dims=*/1, input_slice_shape.dim,
+              /*external_id=*/XNN_INVALID_VALUE_ID,
+              /*flags=*/0, &input_slice_id),
+          "Failed to allocate dynamically quantized input slice tensor.");
+      weights_value = &subgraph->values[weights_id];
+      input_value = &subgraph->values[input_id];
+      output_value = &subgraph->values[output_id];
+
+      // Add a `convert` node to quantize the data.
+      XNN_RETURN_IF_ERROR(xnn_define_unary(subgraph, xnn_unary_convert,
+                                           /*params=*/NULL, tmp_slice_id,
+                                           input_slice_id, /*flags=*/0),
+                          "Failed to create `convert` node.");
+      node = &subgraph->nodes[node_id];
+      input_element_offset = 0;
+      input_element_stride = 0;
+    }
+
+    // Create a temporary output tensor.
+    uint32_t output_slice_id =
+        xnn_subgraph_new_workspace_value_like(subgraph, output_id);
+
+    // Create/update the `fully-connected` node.
+    XNN_RETURN_IF_ERROR(
+        xnn_define_fully_connected(
+            subgraph,
+            /*output_min=*/-INFINITY, /*output_max=*/INFINITY, input_slice_id,
+            weights_slice_id,
+            /*bias_id=*/sid == num_k_slices - 1 ? bias_id
+                                                : XNN_INVALID_VALUE_ID,
+            output_slice_id, fully_connected_flags),
+        "Failed to create new `fully_connected` node.");
+
+    // Set the input offset and stride. This way we avoid statically slicing the
+    // input.
+    subgraph->nodes[subgraph->num_nodes - 1]
+        .params.fully_connected.input_element_offset = input_element_offset;
+    subgraph->nodes[subgraph->num_nodes - 1]
+        .params.fully_connected.input_element_stride = input_element_stride;
+    subgraph->nodes[subgraph->num_nodes - 1].packed_input_datatype =
+        packed_input_datatype;
+
+    node = &subgraph->nodes[node_id];
+    if (sid == 0) {
+      *node = subgraph->nodes[--subgraph->num_nodes];
+      node->id = node_id;
+      subgraph->values[output_slice_id].producer = node_id;
+    } else {
+      subgraph->values[output_slice_id].producer = subgraph->num_nodes - 1;
+    }
+
+    // Add the previous output to the new output.
+    if (prev_output_slice_id == XNN_INVALID_VALUE_ID) {
+      prev_output_slice_id = output_slice_id;
+    } else {
+      uint32_t output_acc_id = XNN_INVALID_VALUE_ID;
+      if (sid == num_k_slices - 1) {
+        output_acc_id = output_id;
+      } else {
+        output_acc_id =
+            xnn_subgraph_new_workspace_value_like(subgraph, output_slice_id);
+      }
+      XNN_RETURN_IF_ERROR(
+          xnn_define_binary(subgraph, xnn_binary_add,
+                            /*params=*/NULL, prev_output_slice_id,
+                            output_slice_id, output_acc_id,
+                            /*flags=*/0),
+          "Failed to create new `binary_elementwise_add` node.");
+      node = &subgraph->nodes[node_id];
+      subgraph->values[output_acc_id].producer = subgraph->num_nodes - 1;
+      prev_output_slice_id = output_acc_id;
+    }
+  }
+
+  xnn_log_info(
+      "Converted fully_connected[#%u](v%03u, v%03u) to a sequence of %u sliced "
+      "fully-connected ops.",
+      node_id, input_id, weights_id, num_k_slices);
+  (*changes)++;
+  return xnn_status_success;
+}
+
 static enum xnn_status optimize_common_subgraphs_iter(
     xnn_subgraph_t subgraph, uint32_t optimization_flags, size_t* changes) {
   // Loop over the nodes in this subgraph.
@@ -3739,12 +4095,23 @@ static enum xnn_status optimize_common_subgraphs_iter(
         // be pushed back to the static value.
         break;
 
-      case xnn_node_type_fully_connected:
       case xnn_node_type_batch_matrix_multiply:
+        // Convert batch-matrix-multiply nodes with 2D weights to
+        // fully-connected nodes for consistency.
+        XNN_RETURN_IF_ERROR(
+            optimize_common_subgraphs_bmm_to_fc(subgraph, node_id, changes));
+        XNN_FALLTHROUGH
+
+      case xnn_node_type_fully_connected:
         // Merge or remove transposes of the RHS of a batch-matrix-multiply or
         // fully-connected op.
         XNN_RETURN_IF_ERROR(optimize_common_subgraphs_gemm_rhs_transpose(
             subgraph, node_id, changes));
+
+        // Split fully-connected nodes with too large `k` dimension size along
+        // said dimension.
+        XNN_RETURN_IF_ERROR(optimize_common_subgraphs_split_fc_along_k(
+            subgraph, optimization_flags, node_id, changes));
         break;
 
       default:
@@ -3789,6 +4156,8 @@ enum xnn_status xnn_subgraph_optimize_common_subgraphs(
     }
   }
 
+  xnn_subgraph_log_dot_info(subgraph);
+
   while (true) {
     // Count the number of changes made.
     size_t changes = 0;
@@ -3803,6 +4172,8 @@ enum xnn_status xnn_subgraph_optimize_common_subgraphs(
       break;
     }
   }
+
+  xnn_subgraph_log_dot_info(subgraph);
 
   return xnn_status_success;
 }
@@ -3832,13 +4203,13 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
         // Check if we have a packed GEMM config for the combination of
         // input/kernel/output.
         const struct xnn_gemm_config* gemm_config = NULL;
-        enum xnn_datatype assumed_datatype = xnn_datatype_invalid;
+        enum xnn_datatype packed_input_datatype = xnn_datatype_invalid;
         switch (input_datatype) {
           case xnn_datatype_fp16:
             if (input_datatype == output_datatype &&
                 kernel_datatype == xnn_datatype_fp16) {
               if ((gemm_config = xnn_init_pf16_gemm_config())) {
-                assumed_datatype = xnn_datatype_pfp16;
+                packed_input_datatype = xnn_datatype_pfp16;
               }
             }
             break;
@@ -3846,7 +4217,7 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
             if (input_datatype == output_datatype &&
                 kernel_datatype == xnn_datatype_fp32) {
               if ((gemm_config = xnn_init_pf32_gemm_config())) {
-                assumed_datatype = xnn_datatype_pfp32;
+                packed_input_datatype = xnn_datatype_pfp32;
               }
             }
             break;
@@ -3854,14 +4225,14 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
             if (input_datatype == output_datatype &&
                 kernel_datatype == xnn_datatype_qcint8) {
               if ((gemm_config = xnn_init_pqs8_qc8w_gemm_config())) {
-                assumed_datatype = xnn_datatype_pqint8;
+                packed_input_datatype = xnn_datatype_pqint8;
               }
             }
             break;
           case xnn_datatype_qdint8:
             // We may inline the `qdint8` packing regardless of whether we have
             // a specialized `qpint8` kernel or not.
-            assumed_datatype = xnn_datatype_qdint8;
+            packed_input_datatype = xnn_datatype_qdint8;
             if (output_datatype == xnn_datatype_fp32) {
               switch (kernel_datatype) {
                 case xnn_datatype_qbint4:
@@ -3869,17 +4240,17 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
                   // weights.
                   if (kernel_value->quantization.zero_point == 8 &&
                       (gemm_config = xnn_init_qp8_f32_qb4w_gemm_config())) {
-                    assumed_datatype = xnn_datatype_qpint8;
+                    packed_input_datatype = xnn_datatype_qpint8;
                   }
                   break;
                 case xnn_datatype_qcint4:
                   if ((gemm_config = xnn_init_qp8_f32_qc4w_gemm_config())) {
-                    assumed_datatype = xnn_datatype_qpint8;
+                    packed_input_datatype = xnn_datatype_qpint8;
                   }
                   break;
                 case xnn_datatype_qcint8:
                   if ((gemm_config = xnn_init_qp8_f32_qc8w_gemm_config())) {
-                    assumed_datatype = xnn_datatype_qpint8;
+                    packed_input_datatype = xnn_datatype_qpint8;
                   }
                   break;
                 default:
@@ -3892,12 +4263,12 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
             continue;
         }
 
-        if (assumed_datatype != xnn_datatype_invalid) {
+        if (packed_input_datatype != xnn_datatype_invalid) {
           if (optimization_flags & XNN_FLAG_NO_INLINED_LHS_PACKING) {
-            if (assumed_datatype == xnn_datatype_qdint8) {
+            if (packed_input_datatype == xnn_datatype_qdint8) {
               // If the input is already `qdint8`, don't do anything different.
               continue;
-            } else if (assumed_datatype == xnn_datatype_qpint8) {
+            } else if (packed_input_datatype == xnn_datatype_qpint8) {
               xnn_log_debug(
                   // `qpint8` inputs are generated by modifying the `convert` op
                   // that generated the `qdint8` input, so we only have to add a
@@ -3907,7 +4278,7 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
                   input_id, xnn_node_type_to_string(xnn_node_type_convert),
                   xnn_datatype_to_string(input_datatype),
                   xnn_datatype_to_string(xnn_datatype_qpint8));
-              subgraph->values[input_id].datatype = assumed_datatype;
+              subgraph->values[input_id].datatype = packed_input_datatype;
               subgraph->values[input_id].gemm_config = gemm_config;
             } else {
               // Insert a node to pack the LHS.
@@ -3920,15 +4291,15 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
               uint32_t new_id = XNN_INVALID_VALUE_ID;
               XNN_RETURN_IF_ERROR(
                   xnn_insert_pack_lh_node(subgraph, input_id, &new_id));
-              subgraph->nodes[node_id].inputs[0] = new_id;
+              node = &subgraph->nodes[node_id];
+              node->inputs[0] = new_id;
               changes++;
             }
             // If this is a fully-connected op, we need to coerce the shape of
             // the inputs from `[B, M, K]` to `[B * M, K]` to avoid batch-wise
             // packing.
             if (node->type == xnn_node_type_fully_connected) {
-              subgraph->values[subgraph->nodes[node_id].inputs[0]].flags |=
-                  XNN_FLAG_SQUASH_GROUPS;
+              subgraph->values[node->inputs[0]].flags |= XNN_FLAG_SQUASH_GROUPS;
             }
           } else {
             if (input_datatype == xnn_datatype_qdint8) {
@@ -3964,14 +4335,14 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
               }
               if (convert_gemm_to_qduint8(new_input->datatype, node->type,
                                           kernel_datatype)) {
-                assumed_datatype = xnn_datatype_qduint8;
+                packed_input_datatype = xnn_datatype_qduint8;
               }
               changes++;
             }
-            xnn_log_debug("Setting assumed_datatype=%s for node #%u (%s).",
+            xnn_log_debug("Setting packed_input_datatype=%s for node #%u (%s).",
                           xnn_datatype_to_string(assumed_datatype), node_id,
                           xnn_node_type_to_string(node->type));
-            node->packed_input_datatype = assumed_datatype;
+            node->packed_input_datatype = packed_input_datatype;
             node->flags |= XNN_FLAG_INLINE_LHS_PACKING;
           }
         }
@@ -3997,7 +4368,7 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
             !(optimization_flags & XNN_FLAG_NO_INLINED_LHS_PACKING)) {
           // Note that there is currently no option to not use inlining for this
           // iGEMM kernel.
-          xnn_log_debug("Setting assumed_datatype=%s for node #%u (%s).",
+          xnn_log_debug("Setting packed_inputI_datatype=%s for node #%u (%s).",
                         xnn_datatype_to_string(xnn_datatype_pqint8), node_id,
                         xnn_node_type_to_string(node->type));
           node->packed_input_datatype = xnn_datatype_pqint8;
@@ -4178,10 +4549,6 @@ enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
     return xnn_status_unsupported_hardware;
   }
 
-  // Apply some common subgraph optimizations.
-  XNN_RETURN_IF_ERROR(
-      xnn_subgraph_optimize_common_subgraphs(subgraph, optimization_flags));
-
   if ((optimization_flags & XNN_FLAG_FORCE_FP16_INFERENCE) &&
       (!xnn_is_f16_compatible_config(hardware_config))) {
     xnn_log_error(
@@ -4233,6 +4600,10 @@ enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
 
   XNN_RETURN_IF_ERROR(
       xnn_subgraph_optimize_packed_lhs(subgraph, optimization_flags));
+
+  // Apply some common subgraph optimizations.
+  XNN_RETURN_IF_ERROR(
+      xnn_subgraph_optimize_common_subgraphs(subgraph, optimization_flags));
 
   return xnn_status_success;
 }

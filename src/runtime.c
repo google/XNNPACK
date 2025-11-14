@@ -828,6 +828,8 @@ enum xnn_status xnn_create_runtime_with_threadpool(
     threadpool =
         pthreadpool_create_v2(&executor, xnn_threadpool->scheduler_context, 0);
     flags |= XNN_FLAG_RUNTIME_OWNS_THREADPOOL;
+    xnn_log_info("Created pthreadpool from scheduler with %zu threads.",
+                 pthreadpool_get_threads_count(threadpool));
 #endif  // XNN_SLINKY_ENABLED
   }
 

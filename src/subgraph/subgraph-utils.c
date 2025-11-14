@@ -10,6 +10,7 @@
 #include <string.h>
 
 #include "include/xnnpack.h"
+#include "src/xnnpack/internal.h"
 #include "src/xnnpack/log.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/mutex.h"
@@ -225,7 +226,7 @@ void xnn_subgraph_log_impl(const char* filename, size_t line_number,
           value->flags, XNN_FLAG_SQUASH_GROUPS, XNN_VALUE_FLAG_ONE_CONSUMER,
           XNN_VALUE_FLAG_FP16_COMPATIBLE, XNN_VALUE_FLAG_LAYOUT_NCHW,
           XNN_VALUE_FLAG_SHAPE_IS_STATIC, XNN_VALUE_FLAG_IS_ZERO,
-          XNN_VALUE_FLAG_IS_ONE);
+          XNN_VALUE_FLAG_IS_ONE, XNN_VALUE_FLAG_NEEDS_CLEANUP);
     }
     fprintf(out, ".\n");
   }

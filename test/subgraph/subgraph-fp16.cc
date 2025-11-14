@@ -1135,13 +1135,17 @@ TEST(SUBGRAPH_FP16_BATCH_MATRIX_MULTIPLY, with_static_value) {
   switch (tester.NumNodes()) {
     case 3:
       ASSERT_EQ(tester.Node(0)->type, xnn_node_type_convert);
-      ASSERT_EQ(tester.Node(1)->type, xnn_node_type_batch_matrix_multiply);
+      ASSERT_THAT(tester.Node(1)->type,
+                  testing::AnyOf(xnn_node_type_batch_matrix_multiply,
+                                 xnn_node_type_fully_connected));
       ASSERT_EQ(tester.Node(2)->type, xnn_node_type_convert);
       break;
     case 4:
       ASSERT_EQ(tester.Node(0)->type, xnn_node_type_convert);
       ASSERT_EQ(tester.Node(1)->type, xnn_node_type_pack_lh);
-      ASSERT_EQ(tester.Node(2)->type, xnn_node_type_batch_matrix_multiply);
+      ASSERT_THAT(tester.Node(2)->type,
+                  testing::AnyOf(xnn_node_type_batch_matrix_multiply,
+                                 xnn_node_type_fully_connected));
       ASSERT_EQ(tester.Node(3)->type, xnn_node_type_convert);
       break;
     default:
@@ -1204,14 +1208,18 @@ TEST(SUBGRAPH_FP16_BATCH_MATRIX_MULTIPLY, with_non_static_value) {
     case 4:
       ASSERT_EQ(tester.Node(0)->type, xnn_node_type_convert);
       ASSERT_EQ(tester.Node(1)->type, xnn_node_type_convert);
-      ASSERT_EQ(tester.Node(2)->type, xnn_node_type_batch_matrix_multiply);
+      ASSERT_THAT(tester.Node(2)->type,
+                  testing::AnyOf(xnn_node_type_batch_matrix_multiply,
+                                 xnn_node_type_fully_connected));
       ASSERT_EQ(tester.Node(3)->type, xnn_node_type_convert);
       break;
     case 5:
       ASSERT_EQ(tester.Node(0)->type, xnn_node_type_convert);
       ASSERT_EQ(tester.Node(1)->type, xnn_node_type_pack_lh);
       ASSERT_EQ(tester.Node(2)->type, xnn_node_type_convert);
-      ASSERT_EQ(tester.Node(3)->type, xnn_node_type_batch_matrix_multiply);
+      ASSERT_THAT(tester.Node(3)->type,
+                  testing::AnyOf(xnn_node_type_batch_matrix_multiply,
+                                 xnn_node_type_fully_connected));
       ASSERT_EQ(tester.Node(4)->type, xnn_node_type_convert);
       break;
     default:

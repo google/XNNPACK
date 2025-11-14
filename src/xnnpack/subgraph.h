@@ -354,6 +354,10 @@ struct xnn_node {
       int32_t axis;
     } even_split;
     struct {
+      uintptr_t input_element_offset;
+      uintptr_t input_element_stride;
+    } fully_connected;
+    struct {
       uint32_t padding_top;
       uint32_t padding_right;
       uint32_t padding_bottom;
