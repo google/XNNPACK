@@ -3654,8 +3654,10 @@ static enum xnn_status optimize_common_subgraphs_iter(
 
         // Replace `div(x, x)` or `sub(x, x)` with a constant `1.0` or `0.0`,
         // respectively.
-        XNN_RETURN_IF_ERROR(optimize_common_subgraphs_binary_to_const(
-            subgraph, node_id, changes));
+        // TODO(b/460807548): Disabled due to bugs, complexity, and we don't
+        // have a use case for these yet.
+        // XNN_RETURN_IF_ERROR(optimize_common_subgraphs_binary_to_const(
+        //     subgraph, node_id, changes));
 
         // Replace `mul(reduce_sum(x), 1/n)`, `div(reduce_sum(x), n)`  or
         // `mul(reduce_sum_squared(x), 1/n)`, `div(reduce_sum_squared(x), n)`
@@ -3671,13 +3673,17 @@ static enum xnn_status optimize_common_subgraphs_iter(
         // Replaces `add(a, neg(b))`, `add(neg(a), b)`, or `sub(a, neg(b))`
         // with `sub(a, b)`, `sub(b, a)`, or `add(a, b)`, respectively, and
         // `{mul,div}(neg(a), neg(b))` with `{mul,div}(a, b)`.
-        XNN_RETURN_IF_ERROR(optimize_common_subgraphs_simplify_binary_neg(
-            subgraph, node_id, changes));
+        // TODO(b/460807548): Disabled due to bugs, complexity, and we don't
+        // have a use case for these yet.
+        // XNN_RETURN_IF_ERROR(optimize_common_subgraphs_simplify_binary_neg(
+        //     subgraph, node_id, changes));
 
         // Replace `mul(x, 1.0)`, `div(div, 1.0)`, `add(x, 0.0)`, or `sub(x,
         // 0.0)` with just `x`, where possible.
-        XNN_RETURN_IF_ERROR(optimize_common_subgraphs_binary_const_noop(
-            subgraph, node_id, changes));
+        // TODO(b/460807548): Disabled due to bugs, complexity, and we don't
+        // have a use case for these yet.
+        // XNN_RETURN_IF_ERROR(optimize_common_subgraphs_binary_const_noop(
+        //     subgraph, node_id, changes));
         break;
 
       case xnn_node_type_unary_elementwise:

@@ -805,7 +805,7 @@ TEST_P(RewriteClampsTest, DoesNotRewriteSharedSequenceOfClamps) {
 
 class RewriteArithmeticTest : public ::testing::TestWithParam<int> {};
 
-TEST_P(RewriteArithmeticTest, ElidesNoOpStaticShapeMul) {
+TEST_P(RewriteArithmeticTest, DISABLED_ElidesNoOpStaticShapeMul) {
   // clang-format off
   // Before:
   // ┌───────────────────┐     ┌────────────────────┐                      ┌────────────────────────┐     ┌─────────────────┐
@@ -895,7 +895,7 @@ TEST_P(RewriteArithmeticTest, DoesNotElidesNoOpDynamicShapeMul) {
       /*expected_size_diff=*/0);
 }
 
-TEST_P(RewriteArithmeticTest, ElidesNoOpStaticShapeDiv) {
+TEST_P(RewriteArithmeticTest, DISABLED_ElidesNoOpStaticShapeDiv) {
   // clang-format off
   // Before:
   // ┌───────────────────┐     ┌────────────────────┐                      ┌────────────────────────┐     ┌─────────────────┐
@@ -983,7 +983,7 @@ TEST_P(RewriteArithmeticTest, DoesNotElidesNoOpDynamicShapeDiv) {
       /*expected_size_diff=*/0);
 }
 
-TEST_P(RewriteArithmeticTest, ElidesNoOpStaticShapeAdd) {
+TEST_P(RewriteArithmeticTest, DISABLED_ElidesNoOpStaticShapeAdd) {
   // clang-format off
   // Before:
   // ┌───────────────────┐     ┌────────────────────┐                      ┌────────────────────────┐     ┌─────────────────┐
@@ -1073,7 +1073,7 @@ TEST_P(RewriteArithmeticTest, DoesNotElidesNoOpDynamicShapeAdd) {
       /*expected_size_diff=*/0);
 }
 
-TEST_P(RewriteArithmeticTest, ElidesNoOpStaticShapeSub) {
+TEST_P(RewriteArithmeticTest, DISABLED_ElidesNoOpStaticShapeSub) {
   // clang-format off
   // Before:
   // ┌───────────────────┐     ┌────────────────────┐                      ┌────────────────────────┐     ┌─────────────────┐
@@ -1162,7 +1162,7 @@ TEST_P(RewriteArithmeticTest, DoesNotElidesNoOpDynamicShapeSub) {
       /*expected_size_diff=*/0);
 }
 
-TEST_P(RewriteArithmeticTest, RewritesZeroMinusXToNegX) {
+TEST_P(RewriteArithmeticTest, DISABLED_RewritesZeroMinusXToNegX) {
   // Before:
   // ┌───────────────────┐     ┌────────────────────────┐     ┌────────────────┐
   // │ v0: FP32[9, 4, 3] │     │ n0: Binary Elementwise │     │ v1: FP32: [??] │
@@ -1205,7 +1205,7 @@ TEST_P(RewriteArithmeticTest, RewritesZeroMinusXToNegX) {
        {xnn_node_type_unary_elementwise, 1}});
 }
 
-TEST_P(RewriteArithmeticTest, ElidesNoOpChainOfStaticShapeMulZeroAdd) {
+TEST_P(RewriteArithmeticTest, DISABLED_ElidesNoOpChainOfStaticShapeMulZeroAdd) {
   // clang-format off
   // Before:
   //                                                  v3: FP32[9, 4, 3]
@@ -1317,7 +1317,7 @@ TEST_P(RewriteArithmeticTest, DoesNotElidesNoOpChainOfDynamicShapeMulZeroAdd) {
       /*expected_size_diff=*/0);
 }
 
-TEST_P(RewriteArithmeticTest, ElidesNoOpChainOfStaticShapeDivOneMul) {
+TEST_P(RewriteArithmeticTest, DISABLED_ElidesNoOpChainOfStaticShapeDivOneMul) {
   // clang-format off
   // Before:
   //                                                                                                                                                 v6: FP32[9, 4, 3]
@@ -1394,7 +1394,7 @@ TEST_P(RewriteArithmeticTest, ElidesNoOpChainOfStaticShapeDivOneMul) {
        {xnn_node_type_unary_elementwise, 0}});
 }
 
-TEST_P(RewriteArithmeticTest, ElidesNoOpChainOfMarkedStaticShapeDivOneMul) {
+TEST_P(RewriteArithmeticTest, DISABLED_ElidesNoOpChainOfMarkedStaticShapeDivOneMul) {
   // clang-format off
   // Before:
   //                                ┌────────────────────────┐
@@ -1551,7 +1551,7 @@ TEST_P(RewriteArithmeticTest, DoesNotElidesNoOpChainOfDynamicShapeDivOneMul) {
       /*expected_size_diff=*/0);
 }
 
-TEST_P(RewriteArithmeticTest, RewritesAddOfNegValue) {
+TEST_P(RewriteArithmeticTest, DISABLED_RewritesAddOfNegValue) {
   // clang-format off
   // Before:
   //   ┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -1596,7 +1596,7 @@ TEST_P(RewriteArithmeticTest, RewritesAddOfNegValue) {
        {xnn_node_type_unary_elementwise, 1}});
 }
 
-TEST_P(RewriteArithmeticTest, RewritesSubOfNegValue) {
+TEST_P(RewriteArithmeticTest, DISABLED_RewritesSubOfNegValue) {
   // clang-format off
   // Before:
   //   ┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -1640,7 +1640,7 @@ TEST_P(RewriteArithmeticTest, RewritesSubOfNegValue) {
        {xnn_node_type_unary_elementwise, 1}});
 }
 
-TEST_P(RewriteArithmeticTest, RewritesMulOfNegValues) {
+TEST_P(RewriteArithmeticTest, DISABLED_RewritesMulOfNegValues) {
   // clang-format off
   // Before:
   // ┌───────────────────────┐                      ┌───────────────────────┐                      ┌───────────────────────┐                      ┌────────────────────────┐     ┌─────────────────┐
@@ -1695,7 +1695,7 @@ TEST_P(RewriteArithmeticTest, RewritesMulOfNegValues) {
        {xnn_node_type_unary_elementwise, 1}});
 }
 
-TEST_P(RewriteArithmeticTest, RewritesDivOfNegValues) {
+TEST_P(RewriteArithmeticTest, DISABLED_RewritesDivOfNegValues) {
   // clang-format off
   // Before:
   // ┌───────────────────────┐                      ┌───────────────────────┐                      ┌───────────────────────┐                      ┌────────────────────────┐     ┌─────────────────┐
