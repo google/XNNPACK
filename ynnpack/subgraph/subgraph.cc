@@ -122,7 +122,8 @@ std::optional<float> ynn_value::as_scalar_float() const {
       return static_cast<float>(static_scalar_value<uint8_t>());
     case ynn_type_int4:
     case ynn_type_uint4:
-      // int4 values can't be scalars.
+    case ynn_type_int2:
+      // int4 & int2 values can't be scalars.
     case ynn_type_opaque:
     case ynn_type_invalid:
       break;

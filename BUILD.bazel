@@ -786,6 +786,7 @@ xnnpack_cc_library(
         ":params",
         ":quantization",
         ":reference_ukernels",
+        ":subgraph_h",
         ":xnnpack_h",
         "//src/configs:config_hdrs",
         "//src/configs:hardware_config",

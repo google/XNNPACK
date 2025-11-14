@@ -1075,6 +1075,8 @@ ynn_type type_from_xnn(xnn_datatype type) {
       return ynn_type_int32;
     case xnn_datatype_qcint4:
       return ynn_type_int4;
+    case xnn_datatype_qcint2:
+      return ynn_type_int2;
     case xnn_datatype_qdint8:
       return ynn_type_int8;
     case xnn_datatype_int32:
@@ -1113,6 +1115,8 @@ xnn_datatype xnn_datatype_from_ynn(ynn_type type) {
       return xnn_datatype_qcint4;
     case ynn_type_uint4:
       return xnn_datatype_qcint4;
+    case ynn_type_int2:
+      return xnn_datatype_qcint2;
     case ynn_type_bf16:
       return xnn_datatype_bf16;
     case ynn_type_opaque:

@@ -4059,6 +4059,65 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
   return xnn_status_success;
 }
 
+enum xnn_status xnn_subgraph_rewrite_for_row_sum(xnn_subgraph_t subgraph) {
+  // Loop over the nodes in the subgraph.
+  for (uint32_t node_id = 0; node_id < subgraph->num_nodes; node_id++) {
+    struct xnn_node* node = &subgraph->nodes[node_id];
+
+
+    // Skip anything that is not a fully-connected node.
+    switch (node->type) {
+      case xnn_node_type_fully_connected: {
+        // Get a handle on the inputs/outputs.
+        const uint32_t input_id = node->inputs[0];
+        struct xnn_value* input_value = &subgraph->values[input_id];
+        struct xnn_value* kernel_value = &subgraph->values[node->inputs[1]];
+        struct xnn_value* output_value = &subgraph->values[node->outputs[0]];
+        const enum xnn_datatype input_datatype = input_value->datatype;
+        const enum xnn_datatype kernel_datatype = kernel_value->datatype;
+        const enum xnn_datatype output_datatype = output_value->datatype;
+
+        switch (input_datatype) {
+          case xnn_datatype_qdint8:
+            if (output_datatype == xnn_datatype_fp32) {
+              const struct xnn_gemm_config* gemm_config = NULL;
+
+              switch (kernel_datatype) {
+                case xnn_datatype_qcint2:
+                  if ((gemm_config = xnn_init_qd8_f32_qc2w_gemm_config())) {
+                    struct xnn_node* producer =
+                        &subgraph->nodes[input_value->producer];
+                    if (producer->type != xnn_node_type_convert) {
+                      xnn_log_error(
+                          "Expected producer node #%u of %s tensor #%u to be of"
+                          " type %s, but found type %s instead.",
+                          input_value->producer,
+                          xnn_datatype_to_string(input_datatype), input_id,
+                          xnn_node_type_to_string(xnn_node_type_convert),
+                          xnn_node_type_to_string(producer->type));
+                      return xnn_status_invalid_state;
+                    }
+                    producer->flags |= XNN_NODE_FLAG_REQUIRES_ROW_SUM;
+                  }
+                  break;
+                default:
+                  break;
+              }
+            }
+            break;
+          default:
+            // If none of the above happened, do nothing for this node.
+            continue;
+        }
+      } break;
+      default:
+        break;
+    }
+  }
+
+  return xnn_status_success;
+}
+
 static void replace_in_set(uint32_t* set, uint32_t size, uint32_t old_value,
                            uint32_t new_value) {
   for (uint32_t i = 0; i < size; i++) {

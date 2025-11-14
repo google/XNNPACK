@@ -447,7 +447,7 @@ xnn_status xnn_reshape_convert_nc_f32_qd8(xnn_operator_t convert_op,
 
 xnn_status xnn_setup_convert_nc_f32_qd8(
     xnn_operator_t convert_op, const float* input, int8_t* output,
-    xnn_quantization_params* quantization_params) {
+    float* row_sum, xnn_quantization_params* quantization_params) {
   YNN_LOG_FATAL() << "operator API is not supported";
   return xnn_status_deprecated;
 }

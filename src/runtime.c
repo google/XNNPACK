@@ -273,7 +273,9 @@ static enum xnn_status initialize_workspace_values(
         value->quantization.dynamic_params =
           (void*) ((uintptr_t) runtime->workspace->data + mem_alloc_tracker->usage[i].alloc_offset
                    + xnn_tensor_get_rounded_size(value));
-
+        value->quantization.row_sum =
+          (void*) ((uintptr_t) value->quantization.dynamic_params +
+                   xnn_tensor_get_rounded_dynamic_quant_param_size(value));
       }
     }
   }
@@ -312,6 +314,8 @@ static enum xnn_status initialize_workspace_values(
                 value->datatype == xnn_datatype_qduint8) {
               value->quantization.dynamic_params = (void*) ((uintptr_t) value->quantization.dynamic_params
                                                             + workspace_data_delta);
+              value->quantization.row_sum = (void*) ((uintptr_t) value->quantization.row_sum
+                                                      + workspace_data_delta);
             }
           }
         }
@@ -563,6 +567,12 @@ static enum xnn_status create_runtime_impl(
   }
 
   xnn_subgraph_rewrite_ssa(subgraph);
+
+  status = xnn_subgraph_rewrite_for_row_sum(subgraph);
+  if (status != xnn_status_success) {
+    xnn_log_error("failed to rewrite subgraph for row_sum");
+    goto error;
+  }
 
   const uint32_t optimization_flags =
 #ifdef XNN_SLINKY_ENABLED
@@ -852,6 +862,7 @@ enum xnn_status xnn_plan_memory(
       size_t tensor_size = xnn_tensor_get_rounded_size(value);
       if (value->datatype == xnn_datatype_qdint8 || value->datatype == xnn_datatype_qduint8) {
         tensor_size += xnn_tensor_get_rounded_dynamic_quant_param_size(value);
+        tensor_size += xnn_tensor_get_rounded_row_sum_size(value);
       }
       xnn_add_value_allocation_tracker(&mem_alloc_tracker, i, tensor_size);
     }
