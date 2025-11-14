@@ -64,6 +64,10 @@ static XNN_INLINE void xnn_store_s32(int32_t* ptr, xnn_simd_s32_t v) {
   _mm_store_si128((__m128i*)ptr, v);
 }
 
+static XNN_INLINE void xnn_stream_s32(int32_t* ptr, xnn_simd_s32_t v) {
+  _mm_stream_si128((__m128i*)ptr, v);
+}
+
 static XNN_INLINE xnn_simd_s32_t xnn_set1_s32(int32_t v) {
   return _mm_set1_epi32(v);
 }
