@@ -335,7 +335,7 @@ enum xnn_status xnn_create_softmax_nc_f32(
     xnn_operator_t* softmax_op_out)
 {
   const struct xnn_raddstoreexpminusmax_config* raddstoreexpminusmax_config =
-    xnn_init_f32_raddstoreexpminusmax_config();
+    xnn_init_f32_raddstoreexpminusmax_config(flags);
   if (raddstoreexpminusmax_config == NULL) {
     xnn_log_error(
       "failed to create %s operator: unsupported hardware configuration",
