@@ -83,7 +83,6 @@ static void FP32Reduce(benchmark::State& state) {
   axes.reserve(dims.size());
   for (size_t i = 0; i < dims.size(); ++i) {
     if ((norm_mask & (1 << i)) != 0) {
-      dims[i] = 1;
       axes.push_back(i);
     }
   }
