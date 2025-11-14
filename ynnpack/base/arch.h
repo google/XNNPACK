@@ -46,6 +46,9 @@ enum {
   sme = 1 << 6,
   sme2 = 1 << 7,
 #endif
+#ifdef YNN_ARCH_HEXAGON
+  hvx = 1 << 0,
+#endif
 };
 
 }  // namespace arch_flag

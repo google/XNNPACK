@@ -34,6 +34,10 @@
 #define YNN_ARCH_ARM
 #endif
 
+#if defined(__hexagon__)
+#define YNN_ARCH_HEXAGON
+#endif
+
 // We want to use _Float16 if the compiler supports it fully, but it's
 // tricky to do this detection; there are compiler versions that define the
 // type in broken ways. We're only going to bother using it if the support is
