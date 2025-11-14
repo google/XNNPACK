@@ -3621,6 +3621,57 @@ static enum xnn_status optimize_common_subgraphs_gemm_rhs_transpose(
   return xnn_status_success;
 }
 
+// Converts batch-matrix-multiply nodes with 2D weights to fully-connected nodes
+// for consistency.
+static enum xnn_status optimize_common_subgraphs_bmm_to_fc(
+    xnn_subgraph_t subgraph, uint32_t node_id, size_t* changes) {
+  struct xnn_node* node = &subgraph->nodes[node_id];
+  if (node->type != xnn_node_type_batch_matrix_multiply) {
+    return xnn_status_success;
+  }
+
+  const uint32_t input_a_id = node->inputs[0];
+  const uint32_t input_b_id = node->inputs[1];
+  const uint32_t output_id = node->outputs[0];
+  struct xnn_value* input_b_value = &subgraph->values[input_b_id];
+  const enum xnn_datatype packed_input_datatype = node->packed_input_datatype;
+
+  // Weights should have at least two dimensions, and batch dimensions
+  // should all be 1.
+  if (input_b_value->shape.num_dims != 2) {
+    return xnn_status_success;
+  }
+
+  // If the weights are dynamic, restrict to fp32/fp16.
+  if (!xnn_value_is_static(input_b_value->allocation_type) &&
+      !(input_b_value->datatype == xnn_datatype_fp32 ||
+        input_b_value->datatype == xnn_datatype_fp16)) {
+    return xnn_status_success;
+  }
+
+  // Replace with a fully-connected node.
+  XNN_RETURN_IF_ERROR(
+      xnn_define_fully_connected(
+          subgraph,
+          /*output_min=*/-INFINITY, /*output_max=*/INFINITY, input_a_id,
+          input_b_id, /*bias_id=*/XNN_INVALID_VALUE_ID, output_id,
+          node->flags ^ XNN_FLAG_TRANSPOSE_WEIGHTS),
+      "Failed to create new `fully_connected` node.");
+  node = &subgraph->nodes[node_id];
+  *node = subgraph->nodes[--subgraph->num_nodes];
+  node->id = node_id;
+  node->packed_input_datatype = packed_input_datatype;
+  subgraph->values[input_a_id].flags |= XNN_FLAG_SQUASH_GROUPS;
+
+  xnn_log_info(
+      "Converted batch_matrix_multiply[#%u](v%03u, v%03u) to "
+      "fully_connected[#%u](v%03u, v%03u).",
+      node_id, input_a_id, input_b_id, node_id, input_a_id, input_b_id);
+  (*changes)++;
+
+  return xnn_status_success;
+}
+
 static enum xnn_status optimize_common_subgraphs_iter(
     xnn_subgraph_t subgraph, uint32_t optimization_flags, size_t* changes) {
   // Loop over the nodes in this subgraph.
@@ -3739,8 +3790,14 @@ static enum xnn_status optimize_common_subgraphs_iter(
         // be pushed back to the static value.
         break;
 
-      case xnn_node_type_fully_connected:
       case xnn_node_type_batch_matrix_multiply:
+        // Convert batch-matrix-multiply nodes with 2D weights to
+        // fully-connected nodes for consistency.
+        XNN_RETURN_IF_ERROR(
+            optimize_common_subgraphs_bmm_to_fc(subgraph, node_id, changes));
+        XNN_FALLTHROUGH
+
+      case xnn_node_type_fully_connected:
         // Merge or remove transposes of the RHS of a batch-matrix-multiply or
         // fully-connected op.
         XNN_RETURN_IF_ERROR(optimize_common_subgraphs_gemm_rhs_transpose(
@@ -3907,8 +3964,8 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
                   input_id, xnn_node_type_to_string(xnn_node_type_convert),
                   xnn_datatype_to_string(input_datatype),
                   xnn_datatype_to_string(xnn_datatype_qpint8));
-              subgraph->values[input_id].datatype = assumed_datatype;
-              subgraph->values[input_id].gemm_config = gemm_config;
+              input_value->datatype = assumed_datatype;
+              input_value->gemm_config = gemm_config;
             } else {
               // Insert a node to pack the LHS.
               xnn_log_debug(
@@ -3920,15 +3977,15 @@ enum xnn_status xnn_subgraph_optimize_packed_lhs(xnn_subgraph_t subgraph,
               uint32_t new_id = XNN_INVALID_VALUE_ID;
               XNN_RETURN_IF_ERROR(
                   xnn_insert_pack_lh_node(subgraph, input_id, &new_id));
-              subgraph->nodes[node_id].inputs[0] = new_id;
+              node = &subgraph->nodes[node_id];
+              node->inputs[0] = new_id;
               changes++;
             }
             // If this is a fully-connected op, we need to coerce the shape of
             // the inputs from `[B, M, K]` to `[B * M, K]` to avoid batch-wise
             // packing.
             if (node->type == xnn_node_type_fully_connected) {
-              subgraph->values[subgraph->nodes[node_id].inputs[0]].flags |=
-                  XNN_FLAG_SQUASH_GROUPS;
+              subgraph->values[node->inputs[0]].flags |= XNN_FLAG_SQUASH_GROUPS;
             }
           } else {
             if (input_datatype == xnn_datatype_qdint8) {
@@ -4178,10 +4235,6 @@ enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
     return xnn_status_unsupported_hardware;
   }
 
-  // Apply some common subgraph optimizations.
-  XNN_RETURN_IF_ERROR(
-      xnn_subgraph_optimize_common_subgraphs(subgraph, optimization_flags));
-
   if ((optimization_flags & XNN_FLAG_FORCE_FP16_INFERENCE) &&
       (!xnn_is_f16_compatible_config(hardware_config))) {
     xnn_log_error(
@@ -4233,6 +4286,10 @@ enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph,
 
   XNN_RETURN_IF_ERROR(
       xnn_subgraph_optimize_packed_lhs(subgraph, optimization_flags));
+
+  // Apply some common subgraph optimizations.
+  XNN_RETURN_IF_ERROR(
+      xnn_subgraph_optimize_common_subgraphs(subgraph, optimization_flags));
 
   return xnn_status_success;
 }

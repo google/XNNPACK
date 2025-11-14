@@ -94,7 +94,7 @@ class ReplicableRandomDevice {
     static bool is_set = false;
     static int last_seed = 0;
     if (!is_set || last_seed != random_seed_) {
-      std::cout
+      std::cerr
           << "Creating a random device for testing, to replicate it re-run the "
              "test with  `--gtest_random_seed="
           << random_seed_ << "`." << std::endl;

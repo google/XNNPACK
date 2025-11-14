@@ -262,14 +262,17 @@ static enum xnn_status create_fully_connected_operator(
   const struct xnn_runtime_value* output_value = &values[output_id];
 
   size_t output_channels, input_channels;
+  const struct xnn_shape* filter_shape = &filter_value->shape;
   if (node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
-    input_channels = filter_value->shape.dim[0];
-    output_channels = filter_value->shape.dim[1];
+    input_channels =
+        xnn_shape_multiply_batch_dims(filter_shape, /*num_nonbatch_dims=*/1);
+    output_channels = filter_shape->dim[filter_shape->num_dims - 1];
   } else {
-    output_channels = filter_value->shape.dim[0];
+    output_channels =
+        xnn_shape_multiply_batch_dims(filter_shape, /*num_nonbatch_dims=*/1);
     // Note that for convolutions, the filter shape can be `[H, 1, 1, W]`, so we
     // need to look at the last dimension of the filter.
-    input_channels = filter_value->shape.dim[filter_value->shape.num_dims - 1];
+    input_channels = filter_shape->dim[filter_shape->num_dims - 1];
   }
 
   const void* kernel_data = filter_value->data;
@@ -765,17 +768,19 @@ enum xnn_status resize_fully_connected_output_tensor(
   const uint32_t input_id = opdata->inputs[0];
   const struct xnn_runtime_value* input = &values[input_id];
 
-  output->shape.num_dims = input->shape.num_dims;
-  // Infer output channels.
-  const uint32_t filter_output_channel_index =
-      (opdata->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) ? 1 : 0;
-  output->shape.dim[output->shape.num_dims - 1] =
-      filter->shape.dim[filter_output_channel_index];
-
   // Propagate input shape to output.
+  output->shape.num_dims = input->shape.num_dims;
   for (size_t cur_dim = 0; cur_dim < input->shape.num_dims - 1; cur_dim++) {
     output->shape.dim[cur_dim] = input->shape.dim[cur_dim];
   }
+
+  // Infer output channels.
+  const size_t filter_output_channels =
+      (opdata->flags & XNN_FLAG_TRANSPOSE_WEIGHTS)
+          ? filter->shape.dim[filter->shape.num_dims - 1]
+          : xnn_shape_multiply_batch_dims(&filter->shape,
+                                          /*num_nonbatch_dims=*/1);
+  output->shape.dim[output->shape.num_dims - 1] = filter_output_channels;
 
   const size_t new_size = xnn_runtime_tensor_get_size(output);
   if (new_size > output->size || old_workspace_size < opdata->workspace_size) {
@@ -804,21 +809,22 @@ static enum xnn_status reshape_fully_connected_operator(
   if (output_value->flags & XNN_VALUE_FLAG_LAYOUT_NCHW) {
     return reshape_convolution_operator(opdata, values, num_values, threadpool);
   }
-  const size_t num_input_elements =
-      xnn_shape_multiply_all_dims(&input_value->shape);
   size_t output_channels, input_channels;
+  const struct xnn_shape* filter_shape = &filter_value->shape;
   if (opdata->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
-    input_channels = filter_value->shape.dim[0];
-    output_channels = filter_value->shape.dim[1];
+    input_channels =
+        xnn_shape_multiply_batch_dims(filter_shape, /*num_nonbatch_dims=*/1);
+    output_channels = filter_shape->dim[filter_shape->num_dims - 1];
   } else {
-    output_channels = filter_value->shape.dim[0];
+    output_channels =
+        xnn_shape_multiply_batch_dims(filter_shape, /*num_nonbatch_dims=*/1);
     // Note that for convolutions, the filter shape can be `[H, 1, 1, W]`, so we
     // need to look at the last dimension of the filter.
-    input_channels = filter_value->shape.dim[filter_value->shape.num_dims - 1];
+    input_channels = filter_shape->dim[filter_shape->num_dims - 1];
   }
 
-  const size_t batch_size = num_input_elements / input_channels;
-  assert(batch_size * input_channels == num_input_elements);
+  const size_t batch_size = xnn_shape_multiply_batch_dims(
+      &input_value->shape, /*num_nonbatch_dims=*/1);
   const size_t old_workspace_size = opdata->workspace_size;
   enum xnn_status status = xnn_status_invalid_state;
 
@@ -1280,7 +1286,8 @@ static inline bool validate_datatypes_with_bias(
           bias_datatype == xnn_datatype_fp32 &&
           output_datatype == xnn_datatype_fp32) {
         return true;
-      } else if (input_datatype == xnn_datatype_qdint8 &&
+      } else if ((input_datatype == xnn_datatype_qdint8 ||
+                  input_datatype == xnn_datatype_qduint8) &&
                  bias_datatype == xnn_datatype_fp32 &&
                  output_datatype == xnn_datatype_fp32) {
         return true;
@@ -1288,7 +1295,8 @@ static inline bool validate_datatypes_with_bias(
                  bias_datatype == xnn_datatype_fp32 &&
                  output_datatype == xnn_datatype_fp32) {
         return true;
-      } else if (input_datatype == xnn_datatype_qdint8 &&
+      } else if ((input_datatype == xnn_datatype_qdint8 ||
+                  input_datatype == xnn_datatype_qduint8) &&
                  bias_datatype == xnn_datatype_fp32 &&
                  output_datatype == xnn_datatype_fp16) {
         return true;
@@ -1299,7 +1307,8 @@ static inline bool validate_datatypes_with_bias(
       }
       break;
     case xnn_datatype_qbint4:
-      if (input_datatype == xnn_datatype_qdint8 &&
+      if ((input_datatype == xnn_datatype_qdint8 ||
+           input_datatype == xnn_datatype_qduint8) &&
           bias_datatype == xnn_datatype_fp32 &&
           output_datatype == xnn_datatype_fp32) {
         return true;
@@ -1318,7 +1327,8 @@ static inline bool validate_datatypes_with_bias(
           bias_datatype == xnn_datatype_fp32 &&
           output_datatype == xnn_datatype_fp32) {
         return true;
-      } else if (input_datatype == xnn_datatype_qdint8 &&
+      } else if ((input_datatype == xnn_datatype_qdint8 ||
+                  input_datatype == xnn_datatype_qduint8) &&
                  bias_datatype == xnn_datatype_fp32 &&
                  output_datatype == xnn_datatype_fp32) {
         return true;
@@ -1326,7 +1336,8 @@ static inline bool validate_datatypes_with_bias(
                  bias_datatype == xnn_datatype_fp32 &&
                  output_datatype == xnn_datatype_fp32) {
         return true;
-      } else if (input_datatype == xnn_datatype_qdint8 &&
+      } else if ((input_datatype == xnn_datatype_qdint8 ||
+                  input_datatype == xnn_datatype_qduint8) &&
                  bias_datatype == xnn_datatype_fp32 &&
                  output_datatype == xnn_datatype_fp16) {
         return true;
@@ -1390,13 +1401,15 @@ static inline bool validate_datatypes_without_bias(
       if (input_datatype == xnn_datatype_fp32 &&
           output_datatype == xnn_datatype_fp32) {
         return true;
-      } else if (input_datatype == xnn_datatype_qdint8 &&
+      } else if ((input_datatype == xnn_datatype_qdint8 ||
+                  input_datatype == xnn_datatype_qduint8) &&
                  output_datatype == xnn_datatype_fp32) {
         return true;
       } else if (input_datatype == xnn_datatype_qpint8 &&
                  output_datatype == xnn_datatype_fp32) {
         return true;
-      } else if (input_datatype == xnn_datatype_qdint8 &&
+      } else if ((input_datatype == xnn_datatype_qdint8 ||
+                  input_datatype == xnn_datatype_qduint8) &&
                  output_datatype == xnn_datatype_fp16) {
         return true;
       } else if (input_datatype == xnn_datatype_qint8 &&
@@ -1405,7 +1418,8 @@ static inline bool validate_datatypes_without_bias(
       }
       break;
     case xnn_datatype_qbint4:
-      if (input_datatype == xnn_datatype_qdint8 &&
+      if ((input_datatype == xnn_datatype_qdint8 ||
+           input_datatype == xnn_datatype_qduint8) &&
           output_datatype == xnn_datatype_fp32) {
         return true;
       } else if (input_datatype == xnn_datatype_qdint8 &&
@@ -1420,13 +1434,15 @@ static inline bool validate_datatypes_without_bias(
       if (input_datatype == xnn_datatype_fp32 &&
           output_datatype == xnn_datatype_fp32) {
         return true;
-      } else if (input_datatype == xnn_datatype_qdint8 &&
+      } else if ((input_datatype == xnn_datatype_qdint8 ||
+                  input_datatype == xnn_datatype_qduint8) &&
                  output_datatype == xnn_datatype_fp32) {
         return true;
       } else if (input_datatype == xnn_datatype_qpint8 &&
                  output_datatype == xnn_datatype_fp32) {
         return true;
-      } else if (input_datatype == xnn_datatype_qdint8 &&
+      } else if ((input_datatype == xnn_datatype_qdint8 ||
+                  input_datatype == xnn_datatype_qduint8) &&
                  output_datatype == xnn_datatype_fp16) {
         return true;
       } else if (input_datatype == xnn_datatype_qint8 &&
@@ -1491,6 +1507,7 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
     case xnn_datatype_qpint8:
       break;
     case xnn_datatype_qdint8:
+    case xnn_datatype_qduint8:
       if (input_value->quantization.num_nonbatch_dims >
           input_value->shape.num_dims) {
         xnn_log_error("failed to define %s operator with input ID #%" PRIu32
