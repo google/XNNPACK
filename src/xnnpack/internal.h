@@ -8,6 +8,7 @@
 #ifndef XNNPACK_SRC_XNNPACK_INTERNAL_H_
 #define XNNPACK_SRC_XNNPACK_INTERNAL_H_
 
+#include <pthreadpool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -15,7 +16,6 @@
 #include "src/xnnpack/config-types.h"
 #include "src/xnnpack/math.h"
 #include "src/xnnpack/subgraph.h"
-#include <pthreadpool.h>
 
 // Runtime values marked with this flag should be cleaned up (i.e. deallocated)
 // by the runtime.
