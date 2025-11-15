@@ -83,12 +83,11 @@ static void load_tile_config(size_t m, size_t n, size_t ktail) {
 }
 
 template <typename TAB, typename TC, template <int, int, int> class TileOp>
-static void x86_amx_dot(size_t M, size_t N, size_t K3, size_t K2, size_t K1,
-                        size_t A_stride_m, size_t A_stride_k3,
-                        size_t A_stride_k2, const void* A, size_t B_stride_k3,
-                        size_t B_stride_k2, size_t B_stride_k1, const void* B,
-                        size_t C_in_stride_m, const void* C_in,
-                        size_t C_out_stride_m, void* C_out) {
+YNN_ALWAYS_INLINE static void x86_amx_dot(
+    size_t M, size_t N, size_t K3, size_t K2, size_t K1, size_t A_stride_m,
+    size_t A_stride_k3, size_t A_stride_k2, const void* A, size_t B_stride_k3,
+    size_t B_stride_k2, size_t B_stride_k1, const void* B, size_t C_in_stride_m,
+    const void* C_in, size_t C_out_stride_m, void* C_out) {
   // AMX is structured as 16x16x4 byte tiles. Each row is 64 bytes. This will
   // represent 64 / sizeof(T) elements.
   constexpr size_t row_bytes = 64;
