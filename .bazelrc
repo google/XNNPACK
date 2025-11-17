@@ -72,6 +72,7 @@ build --copt='-Wno-comment'
 build --copt='-Wno-sign-compare'
 build --copt='-Wno-ignored-attributes'
 build --copt='-Wno-unused-function'
+build --copt='-Wno-strict-aliasing'
 
 # Disable all warnings in external code
 build --per_file_copt=external/.*@-w
